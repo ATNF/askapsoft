@@ -230,17 +230,58 @@ casa::Vector<double> DelaySolverImpl::solve(bool useFFT) const
   // build a set of baselines (rows) to exclude
   std::set<casa::uInt> rows2exclude;
   ASKAPDEBUGASSERT(itsAnt1IDs.nelements() == itsAnt2IDs.nelements());
+  ASKAPDEBUGASSERT(itsAnt1IDs.nelements() == itsAvgCounts.nrow());
   for (casa::uInt row=0; row<itsAnt1IDs.nelements(); ++row) {
        for (casa::uInt bsln = 0; bsln < itsExcludedBaselines.nelements(); ++bsln) {
             if ((itsExcludedBaselines[bsln].first == itsAnt1IDs[row]) && 
                 (itsExcludedBaselines[bsln].second == itsAnt2IDs[row])) {
                  rows2exclude.insert(row);
+            } else {
+                const casa::Vector<casa::uInt> thisRowCounts = itsAvgCounts.row(row);
+                bool allFlagged = true;
+                for (casa::uInt chan = 0; chan < thisRowCounts.nelements(); ++chan) {
+                     if (thisRowCounts[chan] > 0) {
+                         allFlagged = false;
+                         break;
+                     }
+                }
+                if (allFlagged) {
+                    rows2exclude.insert(row);
+                }
             }
        }
   }
+  ASKAPCHECK(itsAnt1IDs.nelements() > rows2exclude.size(), "Looks like all data are flagged or excluded");
   ASKAPLOG_INFO_STR(logger, "Using "<<itsAnt1IDs.nelements() - rows2exclude.size()<<" rows(baselines) out of "<<
                              itsAnt1IDs.nelements()<<" available in the dataset");
+  // build a list of excluded (flagged) antennas to ensure their
+  // delays are set to zero
+  std::set<casa::uInt> excludedAntennas;
+  for (casa::uInt ant = 0; ant < nAnt; ++ant) {
+       bool dataPresent = false;
+       bool referencePresent = false;
+       for (casa::uInt bsln=0; bsln<itsAnt1IDs.nelements(); ++bsln) {
+            if (rows2exclude.find(bsln) == rows2exclude.end()) {
+                if ((itsAnt1IDs[bsln] == ant) || (itsAnt2IDs[bsln] == ant)) {
+                     dataPresent = true;
+                     if ((itsAnt1IDs[bsln] == itsRefAnt) || (itsAnt2IDs[bsln] == itsRefAnt)) {
+                         referencePresent = true;
+                         break;
+                     }
+                }
+            }
+       }
+       //ASKAPCHECK(dataPresent == referencePresent, "It looks like there are valid data for antenna "<<ant<<", but all baselines to reference="<<itsRefAnt<<" are flagged or missing.");
+       if (dataPresent) {
+           if (!referencePresent) {
+               ASKAPLOG_WARN_STR(logger, "Antenna "<<ant<<" has valid data, but not in baseline with the reference antenna "<<itsRefAnt<<", degeneracy possible");
+           }
+       } else {
+           excludedAntennas.insert(ant);
+       }
+  }
   
+  // build design equations
   ASKAPDEBUGASSERT(itsAnt1IDs.nelements() == itsSpcBuffer.nrow());
   casa::Vector<double> delays(itsSpcBuffer.nrow()+1,0.);
   casa::Vector<double> quality(itsSpcBuffer.nrow(),0.);
@@ -284,6 +325,26 @@ casa::Vector<double> DelaySolverImpl::solve(bool useFFT) const
   }
   ASKAPLOG_INFO_STR(logger, "Delays (ns) per baseline: "<<std::setprecision(9)<<delays*1e9);
   ASKAPLOG_INFO_STR(logger, "Quality of delay estimate: "<<std::setprecision(3)<<quality);
+  // add conditions for flagged antennas to ensure zero delay
+  if (excludedAntennas.size() == 0) {
+      ASKAPLOG_INFO_STR(logger, "All available antennas have unflagged data");
+  } else {
+
+      ASKAPCHECK(rows2exclude.size() >= excludedAntennas.size(), "Number of excluded rows ("<<rows2exclude.size()<<
+                 ") is less than the number of flagged antennas ("<<
+                 excludedAntennas.size()<<") - this shouldn't happen");
+
+      for (std::set<casa::uInt>::const_iterator rowIt = rows2exclude.begin(), antIt = excludedAntennas.begin(); antIt != excludedAntennas.end(); ++antIt) {
+           ASKAPLOG_INFO_STR(logger, "Antenna "<<*antIt<<" has no valid data - result will have zero delay");
+           ASKAPDEBUGASSERT(*rowIt < dm.nrow());
+           ASKAPDEBUGASSERT(*rowIt < delays.nelements());
+           ASKAPDEBUGASSERT(*antIt < dm.ncolumn());
+           ASKAPDEBUGASSERT(rowIt != rows2exclude.end());
+           dm(*rowIt, *antIt) = 1.; 
+           delays[*rowIt] = 0.;
+           ++rowIt;
+      }   
+  }
 
   // condition for the reference antenna (zero ref. delay is set in the last element of delays)
   ASKAPCHECK(itsRefAnt < nAnt, "Reference antenna is not present");
