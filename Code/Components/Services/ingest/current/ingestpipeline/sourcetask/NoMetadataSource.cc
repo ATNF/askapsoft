@@ -259,7 +259,6 @@ VisChunk::ShPtr NoMetadataSource::createVisChunk(const casa::uLong timestamp)
                 chunk->beam1PA()(row) = 0;
                 chunk->beam2PA()(row) = 0;
                 chunk->phaseCentre1()(row) = itsTargetDirection.getAngle();
-                chunk->phaseCentre2()(row) = itsTargetDirection.getAngle();
                 chunk->uvw()(row) = 0.0;
 
                 row++;

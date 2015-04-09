@@ -48,8 +48,10 @@
 #include "utils/PolConverter.h"
 #include "casa/Quanta/MVEpoch.h"
 #include "measures/Measures.h"
+#include "measures/Measures/MeasConvert.h"
 #include "measures/Measures/MeasFrame.h"
 #include "measures/Measures/MCEpoch.h"
+#include "measures/Measures/MCDirection.h"
 #include "measures/Measures/Stokes.h"
 
 // Local package includes
@@ -301,7 +303,6 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
                 chunk->beam1PA()(row) = 0;
                 chunk->beam2PA()(row) = 0;
                 chunk->phaseCentre1()(row) = phaseDir.getAngle();
-                chunk->phaseCentre2()(row) = phaseDir.getAngle();
                 chunk->uvw()(row) = 0.0;
 
                 row++;
@@ -314,8 +315,10 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
     for (casa::uInt i = 0; i < nAntenna; ++i) {
         const string antName = itsConfig.antennas()[i].name();
         const TosMetadataAntenna mdant = metadata.antenna(antName);
-        chunk->targetPointingCentre()[i] = metadata.targetDirection();
+        chunk->targetPointingCentre()[i] = convertToJ2000(chunk->time(), i, metadata.targetDirection());
+        chunk->actualPointingCentre()[i] = convertToJ2000(chunk->time(), i, mdant.actualRaDec());
 
+        /*
         // Actual pointing directions should in the same frame as
         // the target direction
         if (targetDirRef.getType() == casa::MDirection::J2000) {
@@ -325,10 +328,44 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
         } else {
             ASKAPTHROW(AskapError, "Target dir has unsupported direction frame");
         }
+        */
+
         chunk->actualPolAngle()[i] = mdant.actualPolAngle();
+
+        const casa::Vector<casa::Double> azEl = mdant.actualAzEl().getAngle().getValue("deg");
+        ASKAPASSERT(azEl.nelements() == 2);
+        chunk->actualAzimuth()[i] = casa::Quantity(azEl[0],"deg");
+        chunk->actualElevation()[i] = casa::Quantity(azEl[1], "deg");
+
+        chunk->onSourceFlag()[i] = mdant.onSource();
     }
 
     return chunk;
+}
+
+/// @brief convert direction to J2000
+/// @details Helper method to convert given direction to 
+/// J2000 (some columns of the MS require fixed frame for
+/// all rows, it is handy to convert AzEl directions early
+/// in the processing chain).
+/// @param[in] epoch UTC time since MJD=0
+/// @param[in] ant antenna index (to get position on the ground)
+/// @param[in] dir direction measure to convert
+/// @return direction measure in J2000
+casa::MDirection MergedSource::convertToJ2000(const casa::MVEpoch &epoch, casa::uInt ant, 
+                                              const casa::MDirection &dir) const
+{
+   if (dir.getRef().getType() == casa::MDirection::J2000) {
+       // already in J2000
+       return dir;
+   }
+   casa::MPosition pos(casa::MVPosition(itsConfig.antennas().at(ant).position()), casa::MPosition::ITRF);
+
+   // if performance is found critical (unlikely as we only do it per antenna), we could return a class
+   // caching frame as there are at least two calls to this method with the same frame information. 
+   casa::MeasFrame frame(casa::MEpoch(epoch, casa::MEpoch::UTC), pos);
+
+   return casa::MDirection::Convert(dir, casa::MDirection::Ref(casa::MDirection::J2000, frame))();
 }
 
 bool MergedSource::addVis(VisChunk::ShPtr chunk, const VisDatagram& vis,

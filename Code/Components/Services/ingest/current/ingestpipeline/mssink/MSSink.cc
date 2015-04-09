@@ -344,11 +344,11 @@ void MSSink::create(void)
     itsMs->createDefaultSubtables(Table::New);
     itsMs->flush();
 
-    // Add an POLANGLE column to the pointing table if the pointing table is written
+    // Add non-standard columns to the pointing table if the pointing table is written
     if (itsPointingTableEnabled) {
-        MSPointing& pointing = itsMs->pointing();
-        pointing.addColumn(casa::ScalarColumnDesc<casa::Float>("POLANGLE",
-                    "Actual polarisation angle (in degrees) of the third-axis"));
+        addNonStandardPointingColumn("AZIMUTH", "Actual azimuth angle (in degrees)");
+        addNonStandardPointingColumn("ELEVATION", "Actual azimuth angle (in degrees)");
+        addNonStandardPointingColumn("POLANGLE", "Actual polarisation angle (in degrees) of the third-axis");
     }
 
     // Set the TableInfo
@@ -363,6 +363,22 @@ void MSSink::create(void)
     MSColumns msc(*itsMs);
     msc.setEpochRef(casa::MEpoch::UTC);
 }
+
+/// @brief add non-standard column to POINTING table
+/// @details We use 3 non-standard columns to capture
+/// actual pointing on all three axes. This method creates one such
+/// column.
+/// @param[in] name column name
+/// @param[in] description text description
+void MSSink::addNonStandardPointingColumn(const std::string &name, 
+                  const std::string &description) 
+{
+   ASKAPASSERT(itsMs);
+   MSPointing& pointing = itsMs->pointing();
+   casa::ScalarColumnDesc<casa::Float> colDesc(name, description);
+   colDesc.rwKeywordSet().define("unit","deg");
+   pointing.addColumn(colDesc);
+}  
 
 void MSSink::initAntennas(void)
 {
@@ -433,15 +449,17 @@ void MSSink::addPointingRows(const VisChunk& chunk)
     MSColumns msc(*itsMs);
     MSPointingColumns& pointingc = msc.pointing();
     casa::ScalarColumn<casa::Float> polAngleCol(itsMs->pointing(), "POLANGLE");
+    casa::ScalarColumn<casa::Float> azimuthCol(itsMs->pointing(), "AZIMUTH");
+    casa::ScalarColumn<casa::Float> elevationCol(itsMs->pointing(), "ELEVATION");
 
     uInt row = pointingc.nrow();
 
-    // Initialise if this is the first cycle. Just take the reference frame for
-    // the first antenna. If the others don't have the same frame an exception
-    // will be thrown in the directionMeasCol().put() call.
+    // Initialise if this is the first cycle. All standard direction-type columns are
+    // always in J2000.
     if (row == 0) {
-        pointingc.setDirectionRef(casa::MDirection::castType(
-                    chunk.actualPointingCentre()(0).getRef().getType()));
+        pointingc.setDirectionRef(casa::MDirection::J2000);
+       // pointingc.setDirectionRef(casa::MDirection::castType(
+         //           chunk.actualPointingCentre()(0).getRef().getType()));
     }
 
     const casa::uInt nAntenna = chunk.nAntenna();
@@ -459,17 +477,24 @@ void MSSink::addPointingRows(const VisChunk& chunk)
         pointingc.numPoly().put(row, 0);
         pointingc.timeOrigin().put(row, 0);
 
+        ASKAPLOG_INFO_STR(logger, "Before writing actual pointing for antenna " << i<<" "<<chunk.actualPointingCentre()(i).getRefString());
         const Vector<MDirection> actual(1, chunk.actualPointingCentre()(i));
         pointingc.directionMeasCol().put(row, actual);
 
-        const Vector<MDirection> target(1, chunk.targetPointingCentre()(i));
+        ASKAPLOG_INFO_STR(logger, "Before writing target pointing for antenna " << i <<" "<<chunk.targetPointingCentre()(i).getRefString());
+        const Vector<MDirection> target(1, chunk.targetPointingCentre()(i).getValue());
         pointingc.targetMeasCol().put(row, target);
 
-        pointingc.tracking().put(row, true);
+        pointingc.tracking().put(row, chunk.onSourceFlag()(i));
 
+        ASKAPLOG_INFO_STR(logger, "Before writing non-standard columns for antenna " << i);
         // Non-standard-columns
         polAngleCol.put(row,
                 static_cast<float>(chunk.actualPolAngle()(i).getValue("deg")));
+        azimuthCol.put(row,
+                static_cast<float>(chunk.actualAzimuth()(i).getValue("deg")));
+        elevationCol.put(row,
+                static_cast<float>(chunk.actualElevation()(i).getValue("deg")));
 
         ++row;
     }

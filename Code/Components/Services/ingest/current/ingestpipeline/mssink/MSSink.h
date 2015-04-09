@@ -77,6 +77,15 @@ class MSSink : public askap::cp::ingest::ITask {
         virtual void process(askap::cp::common::VisChunk::ShPtr chunk);
 
     private:
+        /// @brief add non-standard column to POINTING table
+        /// @details We use 3 non-standard columns to capture
+        /// actual pointing on all three axes. This method creates one such
+        /// column.
+        /// @param[in] name column name
+        /// @param[in] description text description
+        void addNonStandardPointingColumn(const std::string &name, 
+                  const std::string &description);   
+
         /// @brief make substitution in the file name
         /// @details To simplify configuring the pipeline for different purposes certain
         /// expressions are recognised and substituted by this methiod

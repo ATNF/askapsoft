@@ -61,10 +61,12 @@ VisChunk::VisChunk(const casa::uInt nRow,
         itsBeam1PA(nRow),
         itsBeam2PA(nRow),
         itsPhaseCentre1(nRow),
-        itsPhaseCentre2(nRow),
         itsTargetPointingCentre(nAntenna),
         itsActualPointingCentre(nAntenna),
         itsActualPolAngle(nAntenna),
+        itsActualAzimuth(nAntenna),
+        itsActualElevation(nAntenna),
+        itsOnSourceFlag(nAntenna),
         itsVisibility(nRow, nChannel, nPol),
         itsFlag(nRow, nChannel, nPol),
         itsUVW(nRow),
@@ -179,16 +181,6 @@ const casa::Vector<casa::MVDirection>& VisChunk::phaseCentre1() const
     return itsPhaseCentre1;
 }
 
-casa::Vector<casa::MVDirection>& VisChunk::phaseCentre2()
-{
-    return itsPhaseCentre2;
-}
-
-const casa::Vector<casa::MVDirection>& VisChunk::phaseCentre2() const
-{
-    return itsPhaseCentre2;
-}
-
 casa::Vector<casa::MDirection>& VisChunk::targetPointingCentre()
 {
     return itsTargetPointingCentre;
@@ -217,6 +209,36 @@ casa::Vector<casa::Quantity>& VisChunk::actualPolAngle()
 const casa::Vector<casa::Quantity>& VisChunk::actualPolAngle() const
 {
     return itsActualPolAngle;
+}
+
+casa::Vector<casa::Quantity>& VisChunk::actualAzimuth()
+{
+    return itsActualAzimuth;
+}
+
+const casa::Vector<casa::Quantity>& VisChunk::actualAzimuth() const
+{
+    return itsActualAzimuth;
+}
+
+casa::Vector<casa::Quantity>& VisChunk::actualElevation()
+{
+    return itsActualElevation;
+}
+
+const casa::Vector<casa::Quantity>& VisChunk::actualElevation() const
+{
+    return itsActualElevation;
+}
+
+casa::Vector<bool>& VisChunk::onSourceFlag()
+{
+    return itsOnSourceFlag;
+}
+
+const casa::Vector<bool>& VisChunk::onSourceFlag() const
+{
+    return itsOnSourceFlag;
 }
 
 casa::Cube<casa::Complex>& VisChunk::visibility()

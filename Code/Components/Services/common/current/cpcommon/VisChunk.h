@@ -182,14 +182,6 @@ class VisChunk {
         /// @copydoc VisChunk::phaseCentre1()
         const casa::Vector<casa::MVDirection>& phaseCentre1() const;
 
-        /// Pointing phase centre directions of the second antenna/beam
-        /// @return a vector with direction measures
-        ///  one direction for each visibility/row
-        casa::Vector<casa::MVDirection>& phaseCentre2();
-
-        /// @copydoc VisChunk::phaseCentre2()
-        const casa::Vector<casa::MVDirection>& phaseCentre2() const;
-
         /// Returns the TARGET dish pointing centre for each antenna.
         /// The length of the vector will be of length nAntennas, and the 
         /// vector indexing matches the index returned from either the
@@ -215,10 +207,32 @@ class VisChunk {
         const casa::Vector<casa::MDirection>& actualPointingCentre() const;
 
         /// Actual polarisation axis offset for each antenna
+        /// @brief pol axis angle for each antenna
         casa::Vector<casa::Quantity>& actualPolAngle();
 
         /// @copydoc VisChunk::actualPolAngle()
         const casa::Vector<casa::Quantity>& actualPolAngle() const;
+
+        /// Actual azimuth for each antenna
+        /// @brief azimuth angle for each antenna as reported by TOS
+        casa::Vector<casa::Quantity>& actualAzimuth();
+
+        /// @copydoc VisChunk::actualAzimuth()
+        const casa::Vector<casa::Quantity>& actualAzimuth() const;
+
+        /// Actual elevation for each antenna
+        /// @brief elevation angle for each antenna as reported by TOS
+        casa::Vector<casa::Quantity>& actualElevation();
+
+        /// @copydoc VisChunk::actualElevation()
+        const casa::Vector<casa::Quantity>& actualElevation() const;
+
+        /// On-source flag for each antenna
+        /// @brief true for each antenna which was on-source according to TOS
+        casa::Vector<bool>& onSourceFlag();
+
+        /// @copydoc VisChunk::onSourceFlag()
+        const casa::Vector<bool>& onSourceFlag() const;
 
         /// VisChunk (a cube is nRow x nChannel x nPol; each element is
         /// a complex visibility)
@@ -357,9 +371,6 @@ class VisChunk {
         /// Phase centre of the first antenna/beam
         casa::Vector<casa::MVDirection> itsPhaseCentre1;
 
-        /// Phase centre of the second antenna/beam
-        casa::Vector<casa::MVDirection> itsPhaseCentre2;
-
         /// Target dish pointing direction for each antenna
         casa::Vector<casa::MDirection> itsTargetPointingCentre;
 
@@ -368,6 +379,15 @@ class VisChunk {
 
         /// Actual polarisation axis offset for each antenna
         casa::Vector<casa::Quantity> itsActualPolAngle;
+
+        /// Actual azimuth axis position for each antenna
+        casa::Vector<casa::Quantity> itsActualAzimuth;
+
+        /// Actual elevation axis position for each antenna
+        casa::Vector<casa::Quantity> itsActualElevation;
+
+        /// on-source flag for each antenna
+        casa::Vector<bool> itsOnSourceFlag;
 
         /// Visibility
         casa::Cube<casa::Complex> itsVisibility;

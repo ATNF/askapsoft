@@ -85,6 +85,20 @@ class MergedSource : public ISource {
         /// @return a shared pointer to a VisChunk.
         virtual askap::cp::common::VisChunk::ShPtr next(void);
 
+    protected:
+
+        /// @brief convert direction to J2000
+        /// @details Helper method to convert given direction to 
+        /// J2000 (some columns of the MS require fixed frame for
+        /// all rows, it is handy to convert AzEl directions early
+        /// in the processing chain).
+        /// @param[in] epoch UTC time since MJD=0
+        /// @param[in] ant antenna index (to get position on the ground)
+        /// @param[in] dir direction measure to convert
+        /// @return direction measure in J2000
+        casa::MDirection convertToJ2000(const casa::MVEpoch &epoch, casa::uInt ant, 
+                                        const casa::MDirection &dir) const;
+
     private:
 
         /// Identifies a datagram based on baselineid, sliceid & beamid.

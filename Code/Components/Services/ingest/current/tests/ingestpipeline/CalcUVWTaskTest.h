@@ -116,7 +116,6 @@ class CalcUVWTaskTest : public CppUnit::TestFixture {
             chunk->beam1PA()(row) = 0.0;
             chunk->beam2PA()(row) = 0.0;
             chunk->phaseCentre1()(row) = fieldCenter.getAngle();
-            chunk->phaseCentre2()(row) = fieldCenter.getAngle();
             chunk->frequency()(0) = 1400000;
 
             chunk->targetPointingCentre() = fieldCenter;
