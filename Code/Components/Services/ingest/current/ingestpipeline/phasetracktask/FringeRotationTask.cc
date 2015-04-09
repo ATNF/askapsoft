@@ -107,8 +107,8 @@ void FringeRotationTask::process(askap::cp::common::VisChunk::ShPtr chunk)
     const double siderealRate = casa::C::_2pi / 86400. / (1. - 1./365.25);
 
     for (casa::uInt ant = 0; ant < nAntennas(); ++ant) {
-         ASKAPASSERT(chunk->phaseCentre1().nelements() > 0);
-         const casa::MDirection dishPnt = casa::MDirection(chunk->phaseCentre1()[0],chunk->directionFrame());
+         ASKAPASSERT(chunk->phaseCentre().nelements() > 0);
+         const casa::MDirection dishPnt = casa::MDirection(chunk->phaseCentre()[0],chunk->directionFrame());
          // fixed delay in seconds
          const double fixedDelay = ant < itsFixedDelays.size() ? itsFixedDelays[ant]*1e-9 : 0.;
          for (casa::uInt beam = 0; beam < nBeams(); ++beam) {

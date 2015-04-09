@@ -157,7 +157,7 @@ void PhaseTrackTask::phaseRotateRow(askap::cp::common::VisChunk::ShPtr chunk,
 
     // Current JTRUE phase center
     casa::MeasFrame frame(casa::MEpoch(chunk->time(), casa::MEpoch::UTC));
-    const casa::MDirection fpc = casa::MDirection::Convert(phaseCentre(chunk->phaseCentre1()(row), chunk->beam1()(row)),
+    const casa::MDirection fpc = casa::MDirection::Convert(phaseCentre(chunk->phaseCentre()(row), chunk->beam1()(row)),
                                  casa::MDirection::Ref(casa::MDirection::JTRUE, frame))();
     const double ra = fpc.getAngle().getValue()(0);
     const double dec = fpc.getAngle().getValue()(1);

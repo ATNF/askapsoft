@@ -729,7 +729,7 @@ casa::Int MSSink::addPolarisation(const casa::Vector<casa::Stokes::StokesTypes>&
 casa::Int MSSink::findOrAddField(const askap::cp::common::VisChunk::ShPtr chunk)
 {
     const casa::String fieldName = chunk->targetName();
-    const casa::MDirection fieldDirection = chunk->phaseCentre1()[0];
+    const casa::MDirection fieldDirection = chunk->phaseCentre()[0];
     const casa::String& calCode = "";
 
     MSColumns msc(*itsMs);

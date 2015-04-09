@@ -173,14 +173,12 @@ class VisChunk {
         /// @copydoc VisChunk::beamsPA()
         const casa::Vector<casa::Float>& beam2PA() const;
 
-        /// Return phase centre directions of the first antenna/beam
-        /// @return a vector with direction measures (coordinate system
-        /// is set via IDataConverter), one direction for each
-        /// visibility/row
-        casa::Vector<casa::MVDirection>& phaseCentre1();
+        /// Return phase centre directions the the given row of data
+        /// @return a vector with direction measures 
+        casa::Vector<casa::MVDirection>& phaseCentre();
 
-        /// @copydoc VisChunk::phaseCentre1()
-        const casa::Vector<casa::MVDirection>& phaseCentre1() const;
+        /// @copydoc VisChunk::phaseCentre()
+        const casa::Vector<casa::MVDirection>& phaseCentre() const;
 
         /// Returns the TARGET dish pointing centre for each antenna.
         /// The length of the vector will be of length nAntennas, and the 
@@ -368,8 +366,8 @@ class VisChunk {
         /// Beam2 position angle
         casa::Vector<casa::Float> itsBeam2PA;
 
-        /// Phase centre of the first antenna/beam
-        casa::Vector<casa::MVDirection> itsPhaseCentre1;
+        /// Phase centre of for the given row (beam/baseline)
+        casa::Vector<casa::MVDirection> itsPhaseCentre;
 
         /// Target dish pointing direction for each antenna
         casa::Vector<casa::MDirection> itsTargetPointingCentre;

@@ -302,7 +302,7 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
                 chunk->beam2()(row) = beam;
                 chunk->beam1PA()(row) = 0;
                 chunk->beam2PA()(row) = 0;
-                chunk->phaseCentre1()(row) = phaseDir.getAngle();
+                chunk->phaseCentre()(row) = phaseDir.getAngle();
                 chunk->uvw()(row) = 0.0;
 
                 row++;
@@ -317,18 +317,6 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
         const TosMetadataAntenna mdant = metadata.antenna(antName);
         chunk->targetPointingCentre()[i] = convertToJ2000(chunk->time(), i, metadata.targetDirection());
         chunk->actualPointingCentre()[i] = convertToJ2000(chunk->time(), i, mdant.actualRaDec());
-
-        /*
-        // Actual pointing directions should in the same frame as
-        // the target direction
-        if (targetDirRef.getType() == casa::MDirection::J2000) {
-            chunk->actualPointingCentre()[i] = mdant.actualRaDec();
-        } else if (targetDirRef.getType() == casa::MDirection::AZEL) {
-            chunk->actualPointingCentre()[i] = mdant.actualAzEl();
-        } else {
-            ASKAPTHROW(AskapError, "Target dir has unsupported direction frame");
-        }
-        */
 
         chunk->actualPolAngle()[i] = mdant.actualPolAngle();
 

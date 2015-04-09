@@ -130,8 +130,7 @@ void CalcUVWTask::calcForRow(VisChunk::ShPtr chunk, const casa::uInt row)
     casa::MeasFrame frame(casa::MEpoch(chunk->time(), casa::MEpoch::UTC));
 
     // phase center for a given beam
-    //const casa::MDirection fpc = phaseCentre(chunk->phaseCentre1()(row),chunk->beam1()(row));
-    const casa::MDirection fpc = casa::MDirection::Convert(phaseCentre(chunk->phaseCentre1()(row),chunk->beam1()(row)),
+    const casa::MDirection fpc = casa::MDirection::Convert(phaseCentre(chunk->phaseCentre()(row),chunk->beam1()(row)),
                                     casa::MDirection::Ref(casa::MDirection::TOPO, frame))();
     const double ra = fpc.getAngle().getValue()(0);
     const double dec = fpc.getAngle().getValue()(1);

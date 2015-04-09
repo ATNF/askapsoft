@@ -60,7 +60,7 @@ VisChunk::VisChunk(const casa::uInt nRow,
         itsBeam2(nRow),
         itsBeam1PA(nRow),
         itsBeam2PA(nRow),
-        itsPhaseCentre1(nRow),
+        itsPhaseCentre(nRow),
         itsTargetPointingCentre(nAntenna),
         itsActualPointingCentre(nAntenna),
         itsActualPolAngle(nAntenna),
@@ -171,14 +171,14 @@ const casa::Vector<casa::Float>& VisChunk::beam2PA() const
     return itsBeam2PA;
 }
 
-casa::Vector<casa::MVDirection>& VisChunk::phaseCentre1()
+casa::Vector<casa::MVDirection>& VisChunk::phaseCentre()
 {
-    return itsPhaseCentre1;
+    return itsPhaseCentre;
 }
 
-const casa::Vector<casa::MVDirection>& VisChunk::phaseCentre1() const
+const casa::Vector<casa::MVDirection>& VisChunk::phaseCentre() const
 {
-    return itsPhaseCentre1;
+    return itsPhaseCentre;
 }
 
 casa::Vector<casa::MDirection>& VisChunk::targetPointingCentre()

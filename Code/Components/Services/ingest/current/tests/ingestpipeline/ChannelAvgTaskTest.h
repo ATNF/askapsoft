@@ -137,7 +137,7 @@ class ChannelAvgTaskTest : public CppUnit::TestFixture {
             chunk->beam2()(row) = 0;
             chunk->beam1PA()(row) = 0.0;
             chunk->beam2PA()(row) = 0.0;
-            chunk->phaseCentre1()(row) = fieldCenter.getAngle();
+            chunk->phaseCentre()(row) = fieldCenter.getAngle();
             chunk->channelWidth() = freqInc;
 
             chunk->targetPointingCentre() = fieldCenter;
