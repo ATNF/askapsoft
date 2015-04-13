@@ -6,6 +6,5 @@ Calibration & Imaging
 .. toctree::
    :maxdepth: 1
 
-   ccontsubtract.rst
    cdeconvolver.rst
    noiseadder.rst

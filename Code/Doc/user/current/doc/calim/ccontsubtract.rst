@@ -5,19 +5,31 @@ The purpose of this software is to subtract continuum in a parallel/distributed
 environment or on a single computer system. The software leverages MPI, however
 can be run on a simple laptop or a large supercomputer.
 
+Running the program
+-------------------
+
+It can be run with the following command, where "config.in" is a file containing
+the configuration parameters described in the next section. ::
+
+   $ <MPI wrapper> ccalibrator -c config.in
+
+
+Configuration Parameters
+------------------------
+
 Parset parameters understood by ccontsubtract are given in the following table
-(all parameters must have *CContSubtract* prefix, i.e. *CContSubtract.dataset*).
-For a number of parameters certain keywords are substituted, i.e. *%w* is
-replaced by the rank and *%n* by the number of nodes in the parallel case. In
+(all parameters must have **CContSubtract** prefix, i.e. **CContSubtract.dataset**).
+For a number of parameters certain keywords are substituted, i.e. **%w** is
+replaced by the rank and **%n** by the number of nodes in the parallel case. In
 the serial case, these special strings are substituted by 0 and 1, respectively.
 This substitution allows to reuse the same parameter file on all nodes of the
 cluster if the difference between jobs assigned to individual nodes can be coded
 by using these keywords (e.g. using specially crafted file names). If a
 parameter supports substitution, it is clearly stated in the description. 
 
-A number of other parameters allowing to narrow down the data selection are
-understood. They are given in the "Data Selection" documentation  and should
-also have the *CContSubtract* prefix.
+A number of other parameters allowing the user to narrow down the data selection are
+understood. They are given in the :doc:`data_selection` documentation  and should
+also have the **CContSubtract** prefix.
 
 +------------------------+------------+------------+----------------------------------------------------------+
 |*Parameter*             |*Type*      |*Default*   |*Description*                                             |
@@ -27,7 +39,7 @@ also have the *CContSubtract* prefix.
 |                        |            |            |images and this is the only option implemented so far.    |
 |                        |            |            |                                                          |
 +------------------------+------------+------------+----------------------------------------------------------+
-|dataset                 |string      |None        |Data set file name to work with (visibility data are      |
+|dataset                 |string      |None        |Data set file name to work with. The visibility data are  |
 |                        |            |            |overwritten with the subtraction result. Usual            |
 |                        |            |            |substitution rules apply.                                 |
 |                        |            |            |                                                          |
@@ -49,13 +61,12 @@ also have the *CContSubtract* prefix.
 |                        |            |            |parset file (name is given by this parameter).If this     |
 |                        |            |            |parameter is not defined, source description should be    |
 |                        |            |            |given in the main parset file. Usual substitution rules   |
-|                        |            |            |apply. The parameters used to define sky model are        |
-|                        |            |            |described in the [[CsimulatorDocumentation                |
+|                        |            |            |apply. The parameters used to define the sky model are    |
+|                        |            |            |described in :doc:`csimulator`.                           |
 |                        |            |            |                                                          |
 +------------------------+------------+------------+----------------------------------------------------------+
 |gridder                 |string      |None        |Name of the gridder, further parameters are given by      |
-|                        |            |            |*gridder.something*. See                                  |
-|                        |            |            |[[AS02_CalibrationAndImagingGridderDocumentation          |
+|                        |            |            |*gridder.something*. See :doc:`gridder` for information.  |
 |                        |            |            |                                                          |
 +------------------------+------------+------------+----------------------------------------------------------+
 |visweights              |string      |""          |If this parameter is set to "MFS" gridders are setup to   |
@@ -64,8 +75,8 @@ also have the *CContSubtract* prefix.
 |                        |            |            |the moment, this parameter is decoupled from the setup of |
 |                        |            |            |the model parameters.The user has to set it separately and|
 |                        |            |            |in a consistent way with the model setup (the *nterms*    |
-|                        |            |            |parameter in the model definition (see the                |
-|                        |            |            |Csimulator documentation                                  |
+|                        |            |            |parameter in the model definition (see :doc:`csimulator`  |
+|                        |            |            |documentation).                                           |
 |                        |            |            |                                                          |
 +------------------------+------------+------------+----------------------------------------------------------+
 |visweights.MFS.reffreq  |double      |1.405e9     |Reference frequency in Hz for MFS-model simulation (see   |
@@ -125,25 +136,27 @@ also have the *CContSubtract* prefix.
 Example
 -------
 
-::
+.. code-block:: bash
 
-    CContSubtract.dataset                                   = 10uJy_simtest.ms
-    CContSubtract.sources.names                             = [10uJy]
-    CContSubtract.sources.10uJy.direction                   = [12h30m00.000, -45.00.00.000, J2000]
-    CContSubtract.sources.10uJy.model                       = 10uJy.model.small
-    CContSubtract.sources.10uJy.components                  = [src1]
-    CContSubtract.sources.src1.flux.i                       = 1.0
-    CContSubtract.sources.src1.direction.ra                 = 0.00798972946469
-    CContSubtract.sources.src1.direction.dec                = 0.002
-    CContSubtract.sources.src2.flux.i                       = 1.0
-    CContSubtract.sources.src2.direction.ra                 = -0.00511171
-    CContSubtract.sources.src2.direction.dec                = 0.0
-    CContSubtract.gridder                                   = AProjectWStack
-    CContSubtract.gridder.AProjectWStack.wmax               = 15000
-    CContSubtract.gridder.AProjectWStack.nwplanes           = 1
-    CContSubtract.gridder.AProjectWStack.oversample         = 4
-    CContSubtract.gridder.AProjectWStack.diameter           = 12m
-    CContSubtract.gridder.AProjectWStack.blockage           = 2m
-    CContSubtract.gridder.AProjectWStack.maxfeeds           = 2
-    CContSubtract.gridder.AProjectWStack.maxsupport         = 1024
-    CContSubtract.gridder.AProjectWStack.frequencydependent = false
+    # The measurement set name - this will be overwritten
+    CContSubtract.dataset                             = 10uJy_simtest.ms
+    # The model definition
+    CContSubtract.sources.names                       = [10uJy]
+    CContSubtract.sources.10uJy.direction             = [12h30m00.000, -45.00.00.000, J2000]
+    CContSubtract.sources.10uJy.model                 = 10uJy.model.small
+    CContSubtract.sources.10uJy.components            = [src1]
+    # The individual components that make up the model
+    CContSubtract.sources.src1.flux.i                 = 1.0
+    CContSubtract.sources.src1.direction.ra           = 0.00798972946469
+    CContSubtract.sources.src1.direction.dec          = 0.002
+    CContSubtract.sources.src2.flux.i                 = 1.0
+    CContSubtract.sources.src2.direction.ra           = -0.00511171
+    CContSubtract.sources.src2.direction.dec          = 0.0
+    # The gridding parameters 
+    CContSubtract.gridder                             = WProject
+    CContSubtract.gridder.WProject.wmax               = 15000
+    CContSubtract.gridder.WProject.nwplanes           = 1
+    CContSubtract.gridder.WProject.oversample         = 4
+    CContSubtract.gridder.WProject.maxfeeds           = 2
+    CContSubtract.gridder.WProject.maxsupport         = 1024
+    CContSubtract.gridder.WProject.frequencydependent = false

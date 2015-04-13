@@ -15,6 +15,7 @@ data sets i.e. Hundereds of TB per hour.
    ccalibrator.rst
    cbpcalibrator.rst
    ccalapply.rst
+   ccontsubtract.rst
    gridder.rst
    solver.rst
    data_selection.rst
