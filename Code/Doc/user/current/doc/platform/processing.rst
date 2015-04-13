@@ -99,7 +99,7 @@ Submitting a job:
 
 This section describes the job execution environment on the ASKAP Central Processor. The
 system uses SLURM for Job scheduling, however the below examples use a Cray specific
-customisation to declare the resources required. An example qsub file is::
+customisation to declare the resources required. An example slurm file is::
 
     #!/usr/bin/env bash
     #SBATCH --time=01:00:00
@@ -124,7 +124,45 @@ says to execute 20 PEs per node, so this job will require 4 nodes (80/20=4)::
 
 Then to submit the job::
 
-    sbatch myjob.qsub
+    sbatch myjob.slurm
+
+
+Submitting jobs with dependencies
+---------------------------------
+
+It may often be the case that you will want to submit a job that
+depends on another job for valid input (for instance, you want to
+calibrate a measurement set that is being split from a larger
+measurement set via mssplit).
+
+The *sbatch* command allows the specification of dependencies, which
+act as prior conditions for the job you are submitting to actually run
+in the queue. The syntax is::
+
+  sbatch -d afterok:1234 myjob.slurm
+
+The *"-d"* flag indicates a dependency, and the *afterok:* option
+indicates that the job being submitted (myjob.qsub) will only be run
+after job with ID 1234 completes successfully. There are other options
+available - see the man page for sbatch for details.
+
+The ID of a job is available from running squeue. If you are running a
+script that involves submitting a string of inter-dependent programs,
+you may want to capture the ID string from sbatch's output. When you
+run sbatch, you get something like this::
+
+  > sbatch myjob.slurm
+  Submitted batch job 1234
+
+which you could parse using something like the following (this would
+run in a bash script - adapt accordingly for your scripting language
+of choice)::
+
+  JOB_ID=`sbatch myjob.slurm | awk '{print $4}'`
+
+And you would then use that environment variable in the dependency option::
+
+  sbatch -d afterok:${JOB_ID} myjob.slurm
 
 
 Other example resource specifications
