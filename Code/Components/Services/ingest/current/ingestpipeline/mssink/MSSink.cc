@@ -477,17 +477,14 @@ void MSSink::addPointingRows(const VisChunk& chunk)
         pointingc.numPoly().put(row, 0);
         pointingc.timeOrigin().put(row, 0);
 
-        ASKAPLOG_INFO_STR(logger, "Before writing actual pointing for antenna " << i<<" "<<chunk.actualPointingCentre()(i).getRefString());
         const Vector<MDirection> actual(1, chunk.actualPointingCentre()(i));
         pointingc.directionMeasCol().put(row, actual);
 
-        ASKAPLOG_INFO_STR(logger, "Before writing target pointing for antenna " << i <<" "<<chunk.targetPointingCentre()(i).getRefString());
         const Vector<MDirection> target(1, chunk.targetPointingCentre()(i).getValue());
         pointingc.targetMeasCol().put(row, target);
 
         pointingc.tracking().put(row, chunk.onSourceFlag()(i));
 
-        ASKAPLOG_INFO_STR(logger, "Before writing non-standard columns for antenna " << i);
         // Non-standard-columns
         polAngleCol.put(row,
                 static_cast<float>(chunk.actualPolAngle()(i).getValue("deg")));
