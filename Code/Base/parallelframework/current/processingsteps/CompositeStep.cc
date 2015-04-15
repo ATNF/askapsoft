@@ -53,19 +53,6 @@ CompositeStep::CompositeStep() : ProcessingStep("composite") {}
 CompositeStep::CompositeStep(const std::string &name) : ProcessingStep(name) {}
 
 
-// StepInfo helper class
-
-/// @brief default constructor - empty shared pointer and shape
-CompositeStep::StepInfo::StepInfo() {}
-      
-/// @brief constructor setting all details
-/// @details
-/// @param[in] step shared pointer to the processing step object
-/// @param[in] id step ID (determines the rank assignment details)
-/// @param[in] shape shape of the iteration domain 
-CompositeStep::StepInfo::StepInfo(const boost::shared_ptr<IProcessingStep> &step, const StepID &id, const casa::IPosition & shape) :
-    itsStepID(id), itsShape(shape), itsCode(step)  {}
-
 
 } // namespace askapparallel
 

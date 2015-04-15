@@ -36,6 +36,7 @@
 #include "processingsteps/IProcessingStep.h"
 #include "processingsteps/ProcessingStep.h"
 #include "processingsteps/StepID.h"
+#include "processingsteps/StepInfo.h"
 
 // casa includes
 #include <casa/Arrays/IPosition.h>
@@ -68,28 +69,6 @@ public:
    /// @param[in] name name to assign
    explicit CompositeStep(const std::string &name);
 private:
-   /// @brief helper type represending info for each child step
-   struct StepInfo {
-      
-      /// @brief default constructor - empty shared pointer and shape
-      StepInfo();
-      
-      /// @brief constructor setting all details
-      /// @details
-      /// @param[in] step shared pointer to the processing step object
-      /// @param[in] id step ID (determines the rank assignment details)
-      /// @param[in] shape shape of the iteration domain 
-      StepInfo(const boost::shared_ptr<IProcessingStep> &step, const StepID &id, const casa::IPosition & shape = casa::IPosition());
-   
-      /// @brief rank assignment
-      StepID itsStepID;
-      
-      /// @brief iteration domain, empty vector means no iteration required
-      casa::IPosition itsShape;
-      
-      /// @brief shared pointer to the object representing this processing step
-      boost::shared_ptr<IProcessingStep> itsCode;      
-   };
   
    /// @brief details for individual steps
    std::vector<StepInfo> itsSteps;   

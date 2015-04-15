@@ -96,6 +96,7 @@ public:
    /// when the logical allocation is translated to the physical 
    /// allocation. However, the element should always be between
    /// zero and itsNRanks-1, inclusive, and this is checked.
+   /// @return object corresponding to the extracted slice
    StepID operator()(unsigned int group, unsigned int element = 0) const;
 
    /// @brief project a flexible allocation to a given number of ranks

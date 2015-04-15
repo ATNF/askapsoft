@@ -86,6 +86,7 @@ StepID::StepID(int first, int last, unsigned int nRanks) : itsFirst(first),
 /// when the logical allocation is translated to the physical 
 /// allocation. However, the element should always be between
 /// zero and itsNRanks-1, inclusive, and this is checked.
+/// @return object corresponding to the extracted slice
 StepID StepID::operator()(unsigned int group, unsigned int element) const
 {
   ASKAPCHECK(element < itsNRanks, "Requested element "<<element<<
