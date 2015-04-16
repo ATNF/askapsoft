@@ -29,12 +29,14 @@
 // Test includes
 #include "askap_parallelframework.h"
 #include "StepIDTest.h"
+#include "StepIDProxyTest.h"
 
 int main(int argc, char *argv[])
 {
     askapdev::testutils::AskapTestRunner runner(argv[0]);
 
     runner.addTest(askap::askapparallel::StepIDTest::suite());
+    runner.addTest(askap::askapparallel::StepIDProxyTest::suite());
 
     bool wasSucessful = runner.run();
 

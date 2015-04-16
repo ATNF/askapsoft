@@ -1,7 +1,7 @@
 /// @file
 /// 
-/// @brief Tests of ComplexDiff autodifferentiation class
-/// @details See ComplexDiff for description of what this class  
+/// @brief Tests of StepID class
+/// @details See StepID  for description of what this class  
 /// is supposed to do. This file contains appropriate unit tests.
 ///
 /// @copyright (c) 2007 CSIRO
