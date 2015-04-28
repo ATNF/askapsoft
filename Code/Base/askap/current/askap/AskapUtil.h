@@ -249,6 +249,20 @@ casa::MEpoch bat2epoch(const uint64_t &bat);
 /// @return BAT as 64-bit integer
 uint64_t epoch2bat(const casa::MEpoch &epoch);
 
+/// @brief helper method to check the TAI_UTC measures table version
+/// @details casacore measures data need to be updated regularly. The TAI_UTC
+/// table seems to be the one most frequently updated. However, its version and 
+/// date, although checked by internal measures routines, are not accessible 
+/// directly using casacore methods. This method does this to allow these details
+/// to be monitored. 
+/// @note No caching has been done, but this information is expected to be
+/// accessed very infrequently (i.e. once per scheduling block). The code
+/// could, in principle, be pushed into casacore. An exception is thrown if
+/// the code is unable to access the appropriate measures database table
+/// @return a pair with table date MJD (first) and the version string (second)
+std::pair<double, std::string> measuresTableVersion(); 
+
+
 } // end namespace askap
 
 

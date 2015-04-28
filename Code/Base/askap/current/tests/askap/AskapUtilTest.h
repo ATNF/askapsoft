@@ -46,6 +46,7 @@ class AskapUtilTest : public CppUnit::TestFixture {
         CPPUNIT_TEST(testAsQuantity);
         CPPUNIT_TEST(testAsQuantityException);
         CPPUNIT_TEST(testBATConversions);
+        CPPUNIT_TEST(testMeasTabVersion);
         CPPUNIT_TEST(testPrintLon);
         CPPUNIT_TEST(testPrintLat);
         CPPUNIT_TEST_SUITE_END();
@@ -199,6 +200,14 @@ class AskapUtilTest : public CppUnit::TestFixture {
             CPPUNIT_ASSERT_EQUAL(batCompare, bat);
             casa::MVEpoch epoch2 = bat2epoch(bat).getValue();
             CPPUNIT_ASSERT_DOUBLES_EQUAL(epoch.getValue().get(), epoch2.get(), dblTolerance);
+        }
+        
+        void testMeasTabVersion() {
+            const std::pair<double, std::string> info = measuresTableVersion();
+            // the following assumes we run unit tests with a slice of measures stored in Base
+            // (for consistency of unit testing we don't test against the most up to date measures database):
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(59184.6, info.first, 0.1);
+            CPPUNIT_ASSERT_EQUAL(std::string("0075.0000"), info.second);
         }
 
         void testPrintLon() {
