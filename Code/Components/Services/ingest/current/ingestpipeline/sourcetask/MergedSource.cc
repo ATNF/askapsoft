@@ -90,6 +90,12 @@ MergedSource::MergedSource(const LOFAR::ParameterSet& params,
     casa::MEpoch::Convert(casa::MEpoch(dummyEpoch, casa::MEpoch::Ref(casa::MEpoch::TAI)),
             casa::MEpoch::Ref(casa::MEpoch::UTC))();
 
+    // log TAI_UTC casacore measures table version and date
+    const std::pair<double, std::string> measVersion = measuresTableVersion();
+    itsMonitoringPointManager.submitPoint<float>("MeasuresTableMJD", 
+            static_cast<float>(measVersion.first));
+    itsMonitoringPointManager.submitPoint<std::string>("MeasuresTableVersion", measVersion.second);
+
     parseBeamMap(params);
 
     // Setup a signal handler to catch SIGINT, SIGTERM and SIGUSR1

@@ -39,6 +39,7 @@
 #include "cpcommon/VisChunk.h"
 #include "monitoring/MonitoringSingleton.h"
 #include "measures/Measures/MDirection.h"
+#include "measures/Measures/MeasTable.h"
 
 using namespace askap::cp::ingest;
 
@@ -57,9 +58,13 @@ MonitoringPointManager::~MonitoringPointManager()
     submitPointNull("obs.StartFreq");
     submitPointNull("obs.nChan");
     submitPointNull("obs.ChanWidth");
+    submitPointNull("obs.DataRate");
 
     submitPointNull("PacketsLostCount");
     submitPointNull("PacketsLostPercent");
+
+    submitPointNull("dUTC");
+    submitPointNull("dUT1");
 }
 
 void MonitoringPointManager::submitMonitoringPoints(const askap::cp::common::VisChunk& chunk) const
@@ -74,6 +79,20 @@ void MonitoringPointManager::submitMonitoringPoints(const askap::cp::common::Vis
     submitPoint<float>("obs.StartFreq", chunk.frequency()[0]/ 1000 / 1000);
     submitPoint<int32_t>("obs.nChan", chunk.nChannel());
     submitPoint<float>("obs.ChanWidth", chunk.channelWidth() / 1000);
+    
+    if (chunk.interval() > 0) {
+        const float nVis = chunk.nChannel() * chunk.nRow() * chunk.nPol();
+        // data estimated as 8byte vis, 4byte sigma + nRow * 100 bytes (mdata)
+        const float nDataInMB = (12. * nVis + 100. * chunk.nRow()) / 1048576.;
+        submitPoint<float>("obs.DataRate", nDataInMB / chunk.interval());
+    } else {
+       submitPointNull("obs.DataRate");
+    }   
+
+    // casa measures "constants"
+    const double mjd = chunk.time().get(); // current mjd
+    submitPoint<float>("dUTC", casa::MeasTable::dUTC(mjd));
+    submitPoint<float>("dUT1", casa::MeasTable::dUT1(mjd));
 }
 
 void MonitoringPointManager::submitPointNull(const std::string& key) const
