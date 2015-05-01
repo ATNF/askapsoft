@@ -162,6 +162,8 @@ void CasdaUploadApp::generateMetadataFile(
 
     // Create the root element and add it to the document
     DOMElement* root = doc->createElement(XercescString("dataset"));
+    root->setAttributeNS(XercescString("http://www.w3.org/2000/xmlns/"),
+                         XercescString("xmlns"),XercescString("http://au.csiro/askap/observation"));
     doc->appendChild(root);
 
     // Add identity element
