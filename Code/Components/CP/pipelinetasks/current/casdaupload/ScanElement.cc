@@ -84,9 +84,11 @@ xercesc::DOMElement* ScanElement::toXmlElement(xercesc::DOMDocument& doc) const
 
     // Format the field direction like so: "1.13701, -1.112"
     stringstream ss;
+    ss << "[";
     ss << itsFieldCentre.getAngle().getValue("rad")(0);
     ss << ", ";
     ss << itsFieldCentre.getAngle().getValue("rad")(1);
+    ss << "]";
 
     DOMElement* child = XercescUtils::addTextElement(*e, "fieldcentre", ss.str());
     child->setAttribute(XercescString("units"), XercescString("rad"));
@@ -95,10 +97,12 @@ xercesc::DOMElement* ScanElement::toXmlElement(xercesc::DOMDocument& doc) const
 
     // Format the polarisaztions like so: "XX, XY, YX, YY"
     ss.str("");
+    ss << "[";
     for (size_t i = 0; i < itsPolarisations.size(); ++i) {
         if (i != 0) ss << ", ";
         ss << Stokes::name(Stokes::type(itsPolarisations(i)));
     }
+    ss << "]";
 
     XercescUtils::addTextElement(*e, "polarisations", ss.str());
 
