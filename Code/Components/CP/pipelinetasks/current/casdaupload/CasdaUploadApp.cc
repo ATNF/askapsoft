@@ -176,7 +176,7 @@ void CasdaUploadApp::generateMetadataFile(
     appendElementCollection<ImageElement>(images, "images", root);
     appendElementCollection<CatalogElement>(catalogs, "catalogs", root);
     appendElementCollection<MeasurementSetElement>(ms, "measurement_sets", root);
-    appendElementCollection<EvaluationReportElement>(reports, "evaluation", root);
+    appendElementCollection<EvaluationReportElement>(reports, "evaluations", root);
 
     // Write
     DOMLSSerializer* writer = ((DOMImplementationLS*)impl)->createLSSerializer();

@@ -79,12 +79,18 @@ xercesc::DOMElement* MeasurementSetElement::toXmlElement(xercesc::DOMDocument& d
     XercescUtils::addTextElement(*e, "format", "tar");
     XercescUtils::addTextElement(*e, "project", itsProject);
 
+    // Confirm that there is at least one scan element
+    // Throw an error if not
+    ASKAPCHECK(itsScans.size()>0,
+               "No scans are present in the measurement set " << itsFilepath);
+    
     // Create scan elements
+    DOMElement* child = doc.createElement(XercescString("scans"));
     for (vector<ScanElement>::const_iterator it = itsScans.begin();
             it != itsScans.end(); ++it) {
-        e->appendChild(it->toXmlElement(doc));
+        child->appendChild(it->toXmlElement(doc));
     }
-
+    e->appendChild(child);
     return e;
 }
 
