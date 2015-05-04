@@ -84,7 +84,7 @@ Configuration Parameters
 |                      |            |                       |or a range such as [a0..2].                  |
 +----------------------+------------+-----------------------+---------------------------------------------+
 |timebegin             |*None*      |1996/11/20/5:20        |Defines a time based filter. Any rows with   |
-|                      |            |or                     |time i*earlier than* this parameter will be  |
+|                      |            |or                     |time *earlier than* this parameter will be   |
 |                      |            |20Nov96-5h20m          |excluded during splitting (i.e. they will    |
 |                      |            |or                     |not be copied to the output measurement set. |
 |                      |            |1996-11-20T5:20        |This parameter is optional and if not present|

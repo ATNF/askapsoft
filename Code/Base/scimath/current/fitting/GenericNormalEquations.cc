@@ -207,6 +207,47 @@ void GenericNormalEquations::mergeParameter(const std::string &par,
 void GenericNormalEquations::addParameter(const std::string &par, 
            const MapOfMatrices &inNM, const casa::Vector<double>& inDV)
 {
+
+  // before processing this row, check that the columns already exist as rows
+  MapOfMatrices tmpNM = inNM;
+  for (MapOfMatrices::iterator nmColIt = tmpNM.begin();
+                      nmColIt != tmpNM.end(); ++nmColIt) {
+      if (itsNormalMatrix.find(nmColIt->first) == itsNormalMatrix.end()) {
+          // this is a new parameter. Add it to the NM
+          std::map<std::string, MapOfMatrices>::iterator
+                  newRowIt = itsNormalMatrix.insert(std::make_pair(
+                                 nmColIt->first,MapOfMatrices())).first;
+          const casa::uInt newParDimension = parameterDimension(inNM); 
+          // set all of the new parameter columns to zero
+          std::map<std::string, MapOfMatrices>::iterator newColIt;
+          for (newColIt = itsNormalMatrix.begin();
+               newColIt != itsNormalMatrix.end(); ++newColIt) {
+
+              casa::uInt thisParDimension;
+              if (newColIt->first == nmColIt->first) {
+                  // this is the new parameter. Get size from inNM
+                  thisParDimension = nmColIt->second.nrow();
+              } else {
+                  // this is an old parameter. Get size from itsNormalMatrix
+                  thisParDimension = parameterDimension(newColIt->second);
+              }
+              newRowIt->second.insert(std::make_pair(newColIt->first,
+                  casa::Matrix<double>(newParDimension, thisParDimension,0.)));
+              // fill in the symmetric term
+              newColIt->second.insert(std::make_pair(newRowIt->first,
+                  casa::Matrix<double>(thisParDimension, newParDimension,0.)));
+
+          }
+
+          // initialise this parameter in the data vector
+          ASKAPDEBUGASSERT(itsDataVector.find(nmColIt->first) ==
+                           itsDataVector.end());
+          itsDataVector.insert(std::make_pair(nmColIt->first,
+              casa::Vector<double>(inDV.shape(),0.)));
+
+      }
+  }
+
   // nmRowIt is an iterator over rows (the outer map) of the normal matrix
   // stored in this class 
   std::map<std::string, MapOfMatrices>::iterator nmRowIt = 
@@ -226,8 +267,8 @@ void GenericNormalEquations::addParameter(const std::string &par,
                ASKAPCHECK(inNMIt->second.shape() == nmColIt->second.shape(),
                         "shape mismatch for normal matrix, parameters ("<<
                         nmRowIt->first<<" , "<<nmColIt->first<<")");
-                nmColIt->second += inNMIt->second; // add up a matrix         
-           }            
+               nmColIt->second += inNMIt->second; // add up a matrix         
+           }
       }
       
       // now process the data vector
@@ -241,6 +282,13 @@ void GenericNormalEquations::addParameter(const std::string &par,
       casa::Vector<double> destVec = dvIt->second;
       destVec += inDV; // add up a vector  
   } else {
+
+     // Note: this section should be fixed or removed. It has been made
+     // redundant by the initialisation of new columns at the start of this
+     // routine, but has been left here for now in case I'm missing something.
+     // There is a logic problem when leakage terms are included that affects
+     // the d21.0-d12.2, d21.0-d12.3, d21.0-d12.4, ..., elements.
+
      // this is a brand new parameter
      // obtain iterator, which points to this parameter in inNM map.
      nmRowIt = itsNormalMatrix.insert(std::make_pair(par,MapOfMatrices())).first;
@@ -278,7 +326,6 @@ void GenericNormalEquations::addParameter(const std::string &par,
           }            
      }
      
-       
      // process data vector
      ASKAPDEBUGASSERT(itsDataVector.find(par) == itsDataVector.end());
      itsDataVector.insert(std::make_pair(par, inDV));
@@ -350,23 +397,22 @@ void GenericNormalEquations::add(const ComplexDiffMatrix &cdm, const PolXProduct
             for (casa::uInt p1 = 0; p1<nDataPoints; ++p1) {
                       
                  const ComplexDiff &cd1 = cdm(p,p1);
-                 const casa::Complex rowParDerivRe1 = cd1.derivRe(*iterRow);
-                 const casa::Complex rowParDerivIm1 = cd1.derivIm(*iterRow);
-                 const casa::Complex measProduct = pxp.getModelMeasProduct(p1,p);
+                 const casa::DComplex rowParDerivRe1 = cd1.derivRe(*iterRow);
+                 const casa::DComplex rowParDerivIm1 = cd1.derivIm(*iterRow);
+                 const casa::DComplex measProduct = pxp.getModelMeasProduct(p1,p);
                  dataVector[0] += real(conj(rowParDerivRe1) * measProduct);
                  dataVector[1] += real(conj(rowParDerivIm1) * measProduct);
                                             
                  for (casa::uInt p2 = 0; p2<nDataPoints; ++p2) {
                       const ComplexDiff &cd2 = cdm(p,p2);
-                      const casa::Complex val2 = cd2.value();
-                      const casa::Complex modelProduct = pxp.getModelProduct(p1,p2);
+                      const casa::DComplex val2 = cd2.value();
+                      const casa::DComplex modelProduct = pxp.getModelProduct(p1,p2);
                       dataVector[0] -= real(conj(rowParDerivRe1) * val2 * modelProduct);
-                      dataVector[1] -= real(conj(rowParDerivIm1) * val2 * modelProduct);                      
+                      dataVector[1] -= real(conj(rowParDerivIm1) * val2 * modelProduct);
                  }
             }
        }
-       
-       
+
        // now form the row of normal matrix
        
        // it looks unnecessary from the first glance to fill the map
@@ -398,22 +444,22 @@ void GenericNormalEquations::add(const ComplexDiffMatrix &cdm, const PolXProduct
                  for (casa::uInt p1 = 0; p1<nDataPoints; ++p1) {
                       
                       const ComplexDiff &cd1 = cdm(p,p1);
-                      const casa::Complex rowParDerivRe1 = cd1.derivRe(*iterRow);
-                      //const casa::Complex colParDerivRe1 = cd1.derivRe(*iterCol);
-                      const casa::Complex rowParDerivIm1 = cd1.derivIm(*iterRow);
-                      //const casa::Complex colParDerivIm1 = cd1.derivIm(*iterCol);
+                      const casa::DComplex rowParDerivRe1 = cd1.derivRe(*iterRow);
+                      //const casa::DComplex colParDerivRe1 = cd1.derivRe(*iterCol);
+                      const casa::DComplex rowParDerivIm1 = cd1.derivIm(*iterRow);
+                      //const casa::DComplex colParDerivIm1 = cd1.derivIm(*iterCol);
                                             
                       for (casa::uInt p2 = 0; p2<nDataPoints; ++p2) {
                            const ComplexDiff &cd2 = cdm(p,p2);
-                           //const casa::Complex rowParDerivRe2 = cd2.derivRe(*iterRow);
-                           const casa::Complex colParDerivRe2 = cd2.derivRe(*iterCol);
-                           //const casa::Complex rowParDerivIm2 = cd2.derivIm(*iterRow);
-                           const casa::Complex colParDerivIm2 = cd2.derivIm(*iterCol);
-                           const casa::Complex modelProduct = pxp.getModelProduct(p1,p2);
+                           //const casa::DComplex rowParDerivRe2 = cd2.derivRe(*iterRow);
+                           const casa::DComplex colParDerivRe2 = cd2.derivRe(*iterCol);
+                           //const casa::DComplex rowParDerivIm2 = cd2.derivIm(*iterRow);
+                           const casa::DComplex colParDerivIm2 = cd2.derivIm(*iterCol);
+                           const casa::DComplex modelProduct = pxp.getModelProduct(p1,p2);
                            nmElementBuf(0,0) += real(conj(rowParDerivRe1) * colParDerivRe2 * modelProduct);
                            nmElementBuf(0,1) += real(conj(rowParDerivRe1) * colParDerivIm2 * modelProduct);
                            nmElementBuf(1,0) += real(conj(rowParDerivIm1) * colParDerivRe2 * modelProduct);
-                           nmElementBuf(1,1) += real(conj(rowParDerivIm1) * colParDerivIm2 * modelProduct);                           
+                           nmElementBuf(1,1) += real(conj(rowParDerivIm1) * colParDerivIm2 * modelProduct);
                       }
                  }
             }
