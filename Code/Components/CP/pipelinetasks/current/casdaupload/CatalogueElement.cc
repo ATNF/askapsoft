@@ -1,4 +1,4 @@
-/// @file CatalogElement.cc
+/// @file CatalogueElement.cc
 ///
 /// @copyright (c) 2015 CSIRO
 /// Australia Telescope National Facility (ATNF)
@@ -25,7 +25,7 @@
 /// @author Ben Humphreys <ben.humphreys@csiro.au>
 
 // Include own header file first
-#include "casdaupload/CatalogElement.h"
+#include "casdaupload/CatalogueElement.h"
 
 // Include package level header file
 #include "askap_pipelinetasks.h"
@@ -46,7 +46,7 @@ using xercesc::DOMElement;
 using askap::accessors::XercescString;
 using askap::accessors::XercescUtils;
 
-CatalogElement::CatalogElement(const boost::filesystem::path& filepath,
+CatalogueElement::CatalogueElement(const boost::filesystem::path& filepath,
                                const std::string& project)
     : itsFilepath(filepath), itsProject(project)
 {
@@ -55,9 +55,9 @@ CatalogElement::CatalogElement(const boost::filesystem::path& filepath,
     }
 }
 
-xercesc::DOMElement* CatalogElement::toXmlElement(xercesc::DOMDocument& doc) const
+xercesc::DOMElement* CatalogueElement::toXmlElement(xercesc::DOMDocument& doc) const
 {
-    DOMElement* e = doc.createElement(XercescString("catalog"));
+    DOMElement* e = doc.createElement(XercescString("catalogue"));
 
     XercescUtils::addTextElement(*e, "filename", itsFilepath.filename().string());
     XercescUtils::addTextElement(*e, "format", "votable");
@@ -66,7 +66,7 @@ xercesc::DOMElement* CatalogElement::toXmlElement(xercesc::DOMDocument& doc) con
     return e;
 }
 
-boost::filesystem::path CatalogElement::getFilepath(void) const
+boost::filesystem::path CatalogueElement::getFilepath(void) const
 {
     return itsFilepath;
 }

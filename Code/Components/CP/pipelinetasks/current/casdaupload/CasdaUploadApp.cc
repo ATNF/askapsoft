@@ -51,7 +51,7 @@
 #include "casdaupload/IdentityElement.h"
 #include "casdaupload/ObservationElement.h"
 #include "casdaupload/ImageElement.h"
-#include "casdaupload/CatalogElement.h"
+#include "casdaupload/CatalogueElement.h"
 #include "casdaupload/MeasurementSetElement.h"
 #include "casdaupload/EvaluationReportElement.h"
 #include "casdaupload/CasdaChecksumFile.h"
@@ -74,14 +74,14 @@ int CasdaUploadApp::run(int argc, char* argv[])
 
     const vector<ImageElement> images(
         buildArtifactElements<ImageElement>("images.artifactlist"));
-    const vector<CatalogElement> catalogs(
-        buildArtifactElements<CatalogElement>("catalogs.artifactlist"));
+    const vector<CatalogueElement> catalogues(
+        buildArtifactElements<CatalogueElement>("catalogues.artifactlist"));
     const vector<MeasurementSetElement> ms(
         buildArtifactElements<MeasurementSetElement>("measurementsets.artifactlist"));
     const vector<EvaluationReportElement> reports(
         buildArtifactElements<EvaluationReportElement>("evaluation.artifactlist", false));
 
-    if (images.empty() && catalogs.empty() && ms.empty()) {
+    if (images.empty() && catalogues.empty() && ms.empty()) {
         ASKAPTHROW(AskapError, "No artifacts declared for upload");
     }
 
@@ -114,7 +114,7 @@ int CasdaUploadApp::run(int argc, char* argv[])
         ASKAPTHROW(AskapError, "Failed to create directory " << outdir);
     }
     const fs::path metadataFile = outdir / "observation.xml";
-    generateMetadataFile(metadataFile, identity, obs, images, catalogs, ms, reports);
+    generateMetadataFile(metadataFile, identity, obs, images, catalogues, ms, reports);
     CasdaFileUtils::checksumFile(metadataFile);
 
     // Tar up measurement sets
@@ -129,7 +129,7 @@ int CasdaUploadApp::run(int argc, char* argv[])
 
     // Copy artifacts and checksum
     copyAndChecksumElements<ImageElement>(images, outdir);
-    copyAndChecksumElements<CatalogElement>(catalogs, outdir);
+    copyAndChecksumElements<CatalogueElement>(catalogues, outdir);
     copyAndChecksumElements<EvaluationReportElement>(reports, outdir);
 
     // Finally, and specifically as the last step, write the READY file
@@ -145,7 +145,7 @@ void CasdaUploadApp::generateMetadataFile(
     const IdentityElement& identity,
     const ObservationElement& obs,
     const std::vector<ImageElement>& images,
-    const std::vector<CatalogElement>& catalogs,
+    const std::vector<CatalogueElement>& catalogues,
     const std::vector<MeasurementSetElement>& ms,
     const std::vector<EvaluationReportElement>& reports)
 {
@@ -174,7 +174,7 @@ void CasdaUploadApp::generateMetadataFile(
 
     // Create artifact elements
     appendElementCollection<ImageElement>(images, "images", root);
-    appendElementCollection<CatalogElement>(catalogs, "catalogs", root);
+    appendElementCollection<CatalogueElement>(catalogues, "catalogues", root);
     appendElementCollection<MeasurementSetElement>(ms, "measurement_sets", root);
     appendElementCollection<EvaluationReportElement>(reports, "evaluations", root);
 

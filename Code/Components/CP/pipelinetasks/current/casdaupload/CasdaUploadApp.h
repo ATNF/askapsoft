@@ -40,7 +40,7 @@
 #include "casdaupload/IdentityElement.h"
 #include "casdaupload/ObservationElement.h"
 #include "casdaupload/ImageElement.h"
-#include "casdaupload/CatalogElement.h"
+#include "casdaupload/CatalogueElement.h"
 #include "casdaupload/MeasurementSetElement.h"
 #include "casdaupload/EvaluationReportElement.h"
 
@@ -63,7 +63,7 @@ class CasdaUploadApp : public askap::Application {
                                          const IdentityElement& identity,
                                          const ObservationElement& obs,
                                          const std::vector<ImageElement>& images,
-                                         const std::vector<CatalogElement>& catalogs,
+                                         const std::vector<CatalogueElement>& catalogues,
                                          const std::vector<MeasurementSetElement>& ms,
                                          const std::vector<EvaluationReportElement>& reports);
 

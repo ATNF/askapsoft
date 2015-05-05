@@ -1,4 +1,4 @@
-/// @file CatalogElement.h
+/// @file CatalogueElement.h
 ///
 /// @copyright (c) 2015 CSIRO
 /// Australia Telescope National Facility (ATNF)
@@ -24,8 +24,8 @@
 ///
 /// @author Ben Humphreys <ben.humphreys@csiro.au>
 
-#ifndef ASKAP_CP_PIPELINETASKS_CATALOG_ELEMENT_H
-#define ASKAP_CP_PIPELINETASKS_CATALOG_ELEMENT_H
+#ifndef ASKAP_CP_PIPELINETASKS_CATALOGUE_ELEMENT_H
+#define ASKAP_CP_PIPELINETASKS_CATALOGUE_ELEMENT_H
 
 // System includes
 #include <string>
@@ -38,11 +38,11 @@ namespace askap {
 namespace cp {
 namespace pipelinetasks {
 
-/// Encapsulates a source catalog artifact (e.g. Duchamp output) for upload
+/// Encapsulates a source catalogue artifact (e.g. Duchamp output) for upload
 /// to CASDA
-class CatalogElement {
+class CatalogueElement {
     public:
-        CatalogElement(const boost::filesystem::path& filepath,
+        CatalogueElement(const boost::filesystem::path& filepath,
                        const std::string& project);
 
         xercesc::DOMElement* toXmlElement(xercesc::DOMDocument& doc) const;
