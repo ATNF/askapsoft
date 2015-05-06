@@ -22,7 +22,7 @@
 /// along with this program; if not, write to the Free Software
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
-/// @author Ben Humphreys <ben.humphreys@csiro.au>
+/// @author Matthew Whiting <Matthew.Whiting@csiro.au>
 
 #ifndef ASKAP_CP_PIPELINETASKS_IMAGE_ELEMENT_H
 #define ASKAP_CP_PIPELINETASKS_IMAGE_ELEMENT_H
@@ -31,8 +31,10 @@
 #include <string>
 
 // ASKAPsoft includes
+#include "casdaupload/ProjectElementBase.h"
 #include "xercesc/dom/DOM.hpp" // Includes all DOM
 #include "boost/filesystem.hpp"
+#include "Common/ParameterSet.h"
 
 // Local package includes
 
@@ -40,19 +42,14 @@ namespace askap {
 namespace cp {
 namespace pipelinetasks {
 
-/// Encapsulates an image artifact (e.g. a FITS image) for upload to CASDA
-class ImageElement {
+/// Encapsulates an image artifact (e.g. a FITS image) for upload to
+/// CASDA. Simply a specialisation of the ProjectElementBase class,
+/// with the constructor defining the element name ("image") and
+/// format ("fits").
+class ImageElement : public ProjectElementBase {
     public:
-        ImageElement(const boost::filesystem::path& filepath,
-                     const std::string& project);
+        ImageElement(const LOFAR::ParameterSet &parset);
 
-        xercesc::DOMElement* toXmlElement(xercesc::DOMDocument& doc) const;
-
-        boost::filesystem::path getFilepath(void) const;
-
-    private:
-        boost::filesystem::path itsFilepath;
-        std::string itsProject;
 };
 
 }

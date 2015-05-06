@@ -1,4 +1,4 @@
-/// @file ImageElement.cc
+/// @file ProjectElementBase.h
 ///
 /// @copyright (c) 2015 CSIRO
 /// Australia Telescope National Facility (ATNF)
@@ -23,41 +23,40 @@
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
 /// @author Matthew Whiting <Matthew.Whiting@csiro.au>
-
-// Include own header file first
-#include "casdaupload/ImageElement.h"
-
-// Include package level header file
-#include "askap_pipelinetasks.h"
+///
+#ifndef ASKAP_CP_PIPELINETASKS_PROJECT_ELEMENT_BASE_H
+#define ASKAP_CP_PIPELINETASKS_PROJECT_ELEMENT_BASE_H
 
 // System includes
 #include <string>
 
 // ASKAPsoft includes
-#include "casdaupload/ProjectElementBase.h"
 #include "casdaupload/ElementBase.h"
-#include "askap/AskapError.h"
 #include "xercesc/dom/DOM.hpp" // Includes all DOM
 #include "boost/filesystem.hpp"
-#include "votable/XercescString.h"
-#include "votable/XercescUtils.h"
+#include "Common/ParameterSet.h"
 
-// Using
-using namespace askap::cp::pipelinetasks;
-using xercesc::DOMElement;
-using askap::accessors::XercescString;
-using askap::accessors::XercescUtils;
+namespace askap {
+namespace cp {
+namespace pipelinetasks {
 
-ImageElement::ImageElement(const LOFAR::ParameterSet &parset)
-    : ProjectElementBase(parset)
-{
-    itsName = "image";
-    itsFormat = "fits";
-    if (itsFilepath.extension() != "." + itsFormat) {
-        ASKAPTHROW(AskapError,
-                   "Unsupported format image - Expect " << itsFormat << " file extension");
-    }
+/// A specialisation of the ElementBase base class to allow the
+/// specification of a project string. Still intended as a base class,
+/// with implemented classes derived from this (the element name is
+/// initialised to "").
+class ProjectElementBase : public ElementBase {
+    public:
+        ProjectElementBase(const LOFAR::ParameterSet &parset);
+
+        xercesc::DOMElement* toXmlElement(xercesc::DOMDocument& doc) const;
+
+    protected:
+        std::string itsProject;
+
+};
+
+}
+}
 }
 
-
-
+#endif

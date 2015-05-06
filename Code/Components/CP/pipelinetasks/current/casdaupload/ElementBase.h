@@ -1,4 +1,4 @@
-/// @file ImageElement.cc
+/// @file ElementBase.h
 ///
 /// @copyright (c) 2015 CSIRO
 /// Australia Telescope National Facility (ATNF)
@@ -23,41 +23,43 @@
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
 /// @author Matthew Whiting <Matthew.Whiting@csiro.au>
-
-// Include own header file first
-#include "casdaupload/ImageElement.h"
-
-// Include package level header file
-#include "askap_pipelinetasks.h"
+///
+#ifndef ASKAP_CP_PIPELINETASKS_ELEMENT_BASE_H
+#define ASKAP_CP_PIPELINETASKS_ELEMENT_BASE_H
 
 // System includes
 #include <string>
 
 // ASKAPsoft includes
-#include "casdaupload/ProjectElementBase.h"
-#include "casdaupload/ElementBase.h"
-#include "askap/AskapError.h"
 #include "xercesc/dom/DOM.hpp" // Includes all DOM
 #include "boost/filesystem.hpp"
-#include "votable/XercescString.h"
-#include "votable/XercescUtils.h"
+#include "Common/ParameterSet.h"
 
-// Using
-using namespace askap::cp::pipelinetasks;
-using xercesc::DOMElement;
-using askap::accessors::XercescString;
-using askap::accessors::XercescUtils;
+namespace askap {
+namespace cp {
+namespace pipelinetasks {
 
-ImageElement::ImageElement(const LOFAR::ParameterSet &parset)
-    : ProjectElementBase(parset)
-{
-    itsName = "image";
-    itsFormat = "fits";
-    if (itsFilepath.extension() != "." + itsFormat) {
-        ASKAPTHROW(AskapError,
-                   "Unsupported format image - Expect " << itsFormat << " file extension");
-    }
+/// Base class for encapsulating an artifact for upload to
+/// CASDA. Holds the filename, the format and the element name (which
+/// becomes the name of the entry in the XML file), and provides
+/// methods to produce the XML encoding and the filepath.
+class ElementBase {
+    public:
+        ElementBase(const LOFAR::ParameterSet &parset);
+
+        xercesc::DOMElement* toXmlElement(xercesc::DOMDocument& doc) const;
+
+        boost::filesystem::path getFilepath(void) const;
+
+    protected:
+        boost::filesystem::path itsFilepath;
+        std::string itsFormat;
+        std::string itsName;
+
+};
+
+}
+}
 }
 
-
-
+#endif

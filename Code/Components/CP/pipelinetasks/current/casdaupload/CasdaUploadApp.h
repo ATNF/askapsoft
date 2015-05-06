@@ -79,8 +79,7 @@ class CasdaUploadApp : public askap::Application {
                                             xercesc::DOMElement* root);
 
         template <typename T>
-        std::vector<T> buildArtifactElements(const std::string& key,
-                                             bool hasProject = true) const;
+        std::vector<T> buildArtifactElements(const std::string& key) const;
 };
 
 }

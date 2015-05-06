@@ -22,7 +22,7 @@
 /// along with this program; if not, write to the Free Software
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
-/// @author Ben Humphreys <ben.humphreys@csiro.au>
+/// @author Matthew Whiting <Matthew.Whiting@csiro.au>
 
 #ifndef ASKAP_CP_PIPELINETASKS_CATALOGUE_ELEMENT_H
 #define ASKAP_CP_PIPELINETASKS_CATALOGUE_ELEMENT_H
@@ -31,6 +31,7 @@
 #include <string>
 
 // ASKAPsoft includes
+#include "TypeElementBase.h"
 #include "xercesc/dom/DOM.hpp" // Includes all DOM
 #include "boost/filesystem.hpp"
 
@@ -38,20 +39,14 @@ namespace askap {
 namespace cp {
 namespace pipelinetasks {
 
-/// Encapsulates a source catalogue artifact (e.g. Duchamp output) for upload
-/// to CASDA
-class CatalogueElement {
+/// Encapsulates a source catalogue artifact (e.g. Duchamp output) for
+/// upload to CASDA. A specialisation of the TypeElementBase class,
+/// with the constructor defining the element name ("catalogue") and
+/// the format ("votable")
+class CatalogueElement : public TypeElementBase {
     public:
-        CatalogueElement(const boost::filesystem::path& filepath,
-                       const std::string& project);
+        CatalogueElement(const LOFAR::ParameterSet &parset);
 
-        xercesc::DOMElement* toXmlElement(xercesc::DOMDocument& doc) const;
-
-        boost::filesystem::path getFilepath(void) const;
-
-    private:
-        boost::filesystem::path itsFilepath;
-        std::string itsProject;
 };
 
 }

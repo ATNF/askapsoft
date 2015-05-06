@@ -22,7 +22,7 @@
 /// along with this program; if not, write to the Free Software
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
-/// @author Ben Humphreys <ben.humphreys@csiro.au>
+/// @author Matthew Whiting <Matthew.Whiting@csiro.au>
 
 // Include own header file first
 #include "casdaupload/EvaluationReportElement.h"
@@ -44,23 +44,10 @@ using xercesc::DOMElement;
 using askap::accessors::XercescString;
 using askap::accessors::XercescUtils;
 
-EvaluationReportElement::EvaluationReportElement(const boost::filesystem::path& filepath,
-        const std::string& /*project*/)
-    : itsFilepath(filepath)
+EvaluationReportElement::EvaluationReportElement(const LOFAR::ParameterSet &parset)
+    : ElementBase(parset)
 {
+    itsName = "evaluation";
+    itsFormat = "pdf";
 }
 
-xercesc::DOMElement* EvaluationReportElement::toXmlElement(xercesc::DOMDocument& doc) const
-{
-    DOMElement* e = doc.createElement(XercescString("evaluation"));
-
-    XercescUtils::addTextElement(*e, "filename", itsFilepath.filename().string());
-    XercescUtils::addTextElement(*e, "format", "pdf");
-
-    return e;
-}
-
-boost::filesystem::path EvaluationReportElement::getFilepath(void) const
-{
-    return itsFilepath;
-}

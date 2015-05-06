@@ -22,7 +22,7 @@
 /// along with this program; if not, write to the Free Software
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
-/// @author Ben Humphreys <ben.humphreys@csiro.au>
+/// @author Matthew Whiting <Matthew.Whiting@csiro.au>
 
 // Include own header file first
 #include "casdaupload/CasdaUploadApp.h"
@@ -79,7 +79,7 @@ int CasdaUploadApp::run(int argc, char* argv[])
     const vector<MeasurementSetElement> ms(
         buildArtifactElements<MeasurementSetElement>("measurementsets.artifactlist"));
     const vector<EvaluationReportElement> reports(
-        buildArtifactElements<EvaluationReportElement>("evaluation.artifactlist", false));
+        buildArtifactElements<EvaluationReportElement>("evaluation.artifactlist"));
 
     if (images.empty() && catalogues.empty() && ms.empty()) {
         ASKAPTHROW(AskapError, "No artifacts declared for upload");
@@ -163,7 +163,7 @@ void CasdaUploadApp::generateMetadataFile(
     // Create the root element and add it to the document
     DOMElement* root = doc->createElement(XercescString("dataset"));
     root->setAttributeNS(XercescString("http://www.w3.org/2000/xmlns/"),
-                         XercescString("xmlns"),XercescString("http://au.csiro/askap/observation"));
+                         XercescString("xmlns"), XercescString("http://au.csiro/askap/observation"));
     doc->appendChild(root);
 
     // Add identity element
@@ -198,21 +198,16 @@ void CasdaUploadApp::generateMetadataFile(
 }
 
 template <typename T>
-std::vector<T> CasdaUploadApp::buildArtifactElements(const std::string& key, bool hasProject) const
+std::vector<T> CasdaUploadApp::buildArtifactElements(const std::string& key) const
 {
     vector<T> elements;
 
     if (config().isDefined(key)) {
         const vector<string> names = config().getStringVector(key);
         for (vector<string>::const_iterator it = names.begin(); it != names.end(); ++it) {
-            const LOFAR::ParameterSet subset = config().makeSubset(*it + ".");
-            const string filename = subset.getString("filename");
-
-            if (hasProject && !subset.isDefined("project")) {
-                ASKAPTHROW(AskapError, "Project is not defined for artifact: " << *it);
-            }
-            const string project = subset.getString("project", "");
-            elements.push_back(T(filename, project));
+            LOFAR::ParameterSet subset = config().makeSubset(*it + ".");
+            subset.replace("artifactparam", *it);
+            elements.push_back(T(subset));
         }
     }
 

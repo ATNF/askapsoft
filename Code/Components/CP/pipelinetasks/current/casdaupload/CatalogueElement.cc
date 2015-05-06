@@ -22,7 +22,7 @@
 /// along with this program; if not, write to the Free Software
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
-/// @author Ben Humphreys <ben.humphreys@csiro.au>
+/// @author Matthew Whiting <Matthew.Whiting@csiro.au>
 
 // Include own header file first
 #include "casdaupload/CatalogueElement.h"
@@ -46,27 +46,18 @@ using xercesc::DOMElement;
 using askap::accessors::XercescString;
 using askap::accessors::XercescUtils;
 
-CatalogueElement::CatalogueElement(const boost::filesystem::path& filepath,
-                               const std::string& project)
-    : itsFilepath(filepath), itsProject(project)
+CatalogueElement::CatalogueElement(const LOFAR::ParameterSet &parset)
+    : TypeElementBase(parset)
 {
-    if (filepath.extension() != ".xml") {
-        ASKAPTHROW(AskapError, "Unsupported format image - Expect xml file extension");
+    itsName = "catalogue";
+    itsFormat = "votable";
+    if (itsFilepath.extension() != ".xml") {
+        ASKAPTHROW(AskapError, "Unsupported format catalogue - Expect xml file extension");
+    }
+    if ((itsType != "continuum-island") &&
+            (itsType != "continuum-component") &&
+            (itsType != "polarisation-component")) {
+        ASKAPTHROW(AskapError, "Unsupported type '" << itsType << "' for catalogue");
     }
 }
 
-xercesc::DOMElement* CatalogueElement::toXmlElement(xercesc::DOMDocument& doc) const
-{
-    DOMElement* e = doc.createElement(XercescString("catalogue"));
-
-    XercescUtils::addTextElement(*e, "filename", itsFilepath.filename().string());
-    XercescUtils::addTextElement(*e, "format", "votable");
-    XercescUtils::addTextElement(*e, "project", itsProject);
-
-    return e;
-}
-
-boost::filesystem::path CatalogueElement::getFilepath(void) const
-{
-    return itsFilepath;
-}

@@ -1,4 +1,4 @@
-/// @file ImageElement.cc
+/// @file ProjectElementBase.cc
 ///
 /// @copyright (c) 2015 CSIRO
 /// Australia Telescope National Facility (ATNF)
@@ -23,9 +23,10 @@
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
 /// @author Matthew Whiting <Matthew.Whiting@csiro.au>
-
+///
 // Include own header file first
-#include "casdaupload/ImageElement.h"
+#include "casdaupload/ProjectElementBase.h"
+#include "casdaupload/ElementBase.h"
 
 // Include package level header file
 #include "askap_pipelinetasks.h"
@@ -34,13 +35,12 @@
 #include <string>
 
 // ASKAPsoft includes
-#include "casdaupload/ProjectElementBase.h"
-#include "casdaupload/ElementBase.h"
 #include "askap/AskapError.h"
 #include "xercesc/dom/DOM.hpp" // Includes all DOM
 #include "boost/filesystem.hpp"
 #include "votable/XercescString.h"
 #include "votable/XercescUtils.h"
+#include "Common/ParameterSet.h"
 
 // Using
 using namespace askap::cp::pipelinetasks;
@@ -48,16 +48,24 @@ using xercesc::DOMElement;
 using askap::accessors::XercescString;
 using askap::accessors::XercescUtils;
 
-ImageElement::ImageElement(const LOFAR::ParameterSet &parset)
-    : ProjectElementBase(parset)
+ProjectElementBase::ProjectElementBase(const LOFAR::ParameterSet &parset)
+    : ElementBase(parset)
 {
-    itsName = "image";
-    itsFormat = "fits";
-    if (itsFilepath.extension() != "." + itsFormat) {
+    if (parset.isDefined("project")) {
+        itsProject = parset.getString("project");
+    } else {
         ASKAPTHROW(AskapError,
-                   "Unsupported format image - Expect " << itsFormat << " file extension");
+                   "Project is not defined for artifact: " <<
+                   parset.getString("artifactparam"));
     }
 }
 
+xercesc::DOMElement* ProjectElementBase::toXmlElement(xercesc::DOMDocument& doc) const
+{
+    DOMElement* e = ElementBase::toXmlElement(doc);
 
+    XercescUtils::addTextElement(*e, "project", itsProject);
+
+    return e;
+}
 

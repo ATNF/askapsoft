@@ -22,7 +22,7 @@
 /// along with this program; if not, write to the Free Software
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
-/// @author Ben Humphreys <ben.humphreys@csiro.au>
+/// @author Matthew Whiting <Matthew.Whiting@csiro.au>
 
 #ifndef ASKAP_CP_PIPELINETASKS_MEASUREMENTSET_ELEMENT_H
 #define ASKAP_CP_PIPELINETASKS_MEASUREMENTSET_ELEMENT_H
@@ -35,34 +35,35 @@
 #include "measures/Measures/MEpoch.h"
 #include "xercesc/dom/DOM.hpp" // Includes all DOM
 #include "boost/filesystem.hpp"
+#include "Common/ParameterSet.h"
 
 // Local package includes
+#include "ProjectElementBase.h"
 #include "ScanElement.h"
 
 namespace askap {
 namespace cp {
 namespace pipelinetasks {
 
-/// Encapsulates a measurement set artifct to be uploaded to CASDA
-class MeasurementSetElement {
+/// Encapsulates a measurement set artifct to be uploaded to CASDA. A
+/// specialisation of the ProjectElementBase class, with the
+/// constructor defining the element name ("measurement_set") and
+/// format ("tar"). Additional members include the start/stop time
+/// and the set of scan elements.
+class MeasurementSetElement : public ProjectElementBase {
     public:
-        MeasurementSetElement(const boost::filesystem::path& filepath,
-                              const std::string& project);
+        MeasurementSetElement(const LOFAR::ParameterSet &parset);
 
         xercesc::DOMElement* toXmlElement(xercesc::DOMDocument& doc) const;
-
-        boost::filesystem::path getFilepath(void) const;
 
         casa::MEpoch getObsStart(void) const;
 
         casa::MEpoch getObsEnd(void) const;
 
-    private:
+    protected:
 
         void extractData(void);
 
-        boost::filesystem::path itsFilepath;
-        std::string itsProject;
         casa::MEpoch itsObsStart;
         casa::MEpoch itsObsEnd;
         std::vector<ScanElement> itsScans;

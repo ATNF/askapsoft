@@ -22,7 +22,7 @@
 /// along with this program; if not, write to the Free Software
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
-/// @author Ben Humphreys <ben.humphreys@csiro.au>
+/// @author Matthew Whiting <Matthew.Whiting@csiro.au>
 
 // Include own header file first
 #include "casdaupload/MeasurementSetElement.h"
@@ -64,26 +64,24 @@ using askap::accessors::XercescUtils;
 
 ASKAP_LOGGER(logger, ".MeasurementSetElement");
 
-MeasurementSetElement::MeasurementSetElement(const boost::filesystem::path& filepath,
-        const std::string& project)
-    : itsFilepath(filepath), itsProject(project)
+MeasurementSetElement::MeasurementSetElement(const LOFAR::ParameterSet &parset)
+    : ProjectElementBase(parset)
 {
+    itsName = "measurement_set";
+    itsFormat = "tar";
+
     extractData();
 }
 
 xercesc::DOMElement* MeasurementSetElement::toXmlElement(xercesc::DOMDocument& doc) const
 {
-    DOMElement* e = doc.createElement(XercescString("measurement_set"));
-
-    XercescUtils::addTextElement(*e, "filename", itsFilepath.filename().string() + ".tar");
-    XercescUtils::addTextElement(*e, "format", "tar");
-    XercescUtils::addTextElement(*e, "project", itsProject);
+    DOMElement* e = ProjectElementBase::toXmlElement(doc);
 
     // Confirm that there is at least one scan element
     // Throw an error if not
-    ASKAPCHECK(itsScans.size()>0,
+    ASKAPCHECK(itsScans.size() > 0,
                "No scans are present in the measurement set " << itsFilepath);
-    
+
     // Create scan elements
     DOMElement* child = doc.createElement(XercescString("scans"));
     for (vector<ScanElement>::const_iterator it = itsScans.begin();
@@ -92,11 +90,6 @@ xercesc::DOMElement* MeasurementSetElement::toXmlElement(xercesc::DOMDocument& d
     }
     e->appendChild(child);
     return e;
-}
-
-boost::filesystem::path MeasurementSetElement::getFilepath(void) const
-{
-    return itsFilepath;
 }
 
 casa::MEpoch MeasurementSetElement::getObsStart(void) const
