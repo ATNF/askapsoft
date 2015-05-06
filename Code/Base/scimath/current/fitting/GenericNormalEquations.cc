@@ -209,127 +209,75 @@ void GenericNormalEquations::addParameter(const std::string &par,
 {
 
   // before processing this row, check that the columns already exist as rows
-  MapOfMatrices tmpNM = inNM;
-  for (MapOfMatrices::iterator nmColIt = tmpNM.begin();
-                      nmColIt != tmpNM.end(); ++nmColIt) {
+  for (MapOfMatrices::const_iterator nmColIt = inNM.begin();
+                      nmColIt != inNM.end(); ++nmColIt) {
       if (itsNormalMatrix.find(nmColIt->first) == itsNormalMatrix.end()) {
           // this is a new parameter. Add it to the NM
           std::map<std::string, MapOfMatrices>::iterator
                   newRowIt = itsNormalMatrix.insert(std::make_pair(
                                  nmColIt->first,MapOfMatrices())).first;
-          const casa::uInt newParDimension = parameterDimension(inNM); 
+          const casa::uInt rowParDim = nmColIt->second.ncolumn(); 
           // set all of the new parameter columns to zero
           std::map<std::string, MapOfMatrices>::iterator newColIt;
           for (newColIt = itsNormalMatrix.begin();
-               newColIt != itsNormalMatrix.end(); ++newColIt) {
-
-              casa::uInt thisParDimension;
-              if (newColIt->first == nmColIt->first) {
-                  // this is the new parameter. Get size from inNM
-                  thisParDimension = nmColIt->second.nrow();
+                     newColIt != itsNormalMatrix.end(); ++newColIt) {
+              casa::uInt colParDim;
+              if (newColIt->first == newRowIt->first) {
+                  // this is the new parameter.
+                  colParDim = rowParDim; 
               } else {
                   // this is an old parameter. Get size from itsNormalMatrix
-                  thisParDimension = parameterDimension(newColIt->second);
+                  colParDim = parameterDimension(newColIt->second);
               }
               newRowIt->second.insert(std::make_pair(newColIt->first,
-                  casa::Matrix<double>(newParDimension, thisParDimension,0.)));
+                  casa::Matrix<double>(rowParDim, colParDim, 0.)));
               // fill in the symmetric term
-              newColIt->second.insert(std::make_pair(newRowIt->first,
-                  casa::Matrix<double>(thisParDimension, newParDimension,0.)));
-
+              if (newRowIt->first != newColIt->first) {
+                  newColIt->second.insert(std::make_pair(newRowIt->first,
+                      casa::Matrix<double>(colParDim, rowParDim, 0.)));
+              }
           }
-
-          // initialise this parameter in the data vector
-          ASKAPDEBUGASSERT(itsDataVector.find(nmColIt->first) ==
-                           itsDataVector.end());
-          itsDataVector.insert(std::make_pair(nmColIt->first,
-              casa::Vector<double>(inDV.shape(),0.)));
-
       }
   }
 
+  // first, process normal matrix 
   // nmRowIt is an iterator over rows (the outer map) of the normal matrix
   // stored in this class 
   std::map<std::string, MapOfMatrices>::iterator nmRowIt = 
                          itsNormalMatrix.find(par);
-  if (nmRowIt != itsNormalMatrix.end()) {
-      // this parameter is already present in the normal matrix held by this class
-      ASKAPDEBUGASSERT(nmRowIt->second.find(par) != nmRowIt->second.end());
-       
-      // first, process normal matrix 
-      for (MapOfMatrices::iterator nmColIt = nmRowIt->second.begin();
-                          nmColIt != nmRowIt->second.end(); ++nmColIt) {
-            
-           // search for an appropriate parameter in the input matrix 
-           MapOfMatrices::const_iterator inNMIt = inNM.find(nmColIt->first);           
-           // work with cross-terms if the input matrix have them
-           if (inNMIt != inNM.end()) {
-               ASKAPCHECK(inNMIt->second.shape() == nmColIt->second.shape(),
-                        "shape mismatch for normal matrix, parameters ("<<
-                        nmRowIt->first<<" , "<<nmColIt->first<<")");
-               nmColIt->second += inNMIt->second; // add up a matrix         
-           }
-      }
-      
-      // now process the data vector
-      MapOfVectors::const_iterator dvIt = itsDataVector.find(par);
-      ASKAPDEBUGASSERT(dvIt != itsDataVector.end());
+  ASKAPDEBUGASSERT(nmRowIt != itsNormalMatrix.end());
+  ASKAPDEBUGASSERT(nmRowIt->second.find(par) != nmRowIt->second.end());
+   
+  for (MapOfMatrices::iterator nmColIt = nmRowIt->second.begin();
+                      nmColIt != nmRowIt->second.end(); ++nmColIt) {
+        
+       // search for an appropriate parameter in the input matrix 
+       MapOfMatrices::const_iterator inNMIt = inNM.find(nmColIt->first);           
+       // work with cross-terms if the input matrix have them
+       if (inNMIt != inNM.end()) {
+           ASKAPCHECK(inNMIt->second.shape() == nmColIt->second.shape(),
+                    "shape mismatch for normal matrix, parameters ("<<
+                    nmColIt->first<<" , "<<nmRowIt->first<<"). "<<
+                    nmColIt->second.shape()<<" != "<<inNMIt->second.shape());
+           nmColIt->second += inNMIt->second; // add up a matrix         
+       }
+  }
+  
+  // now process the data vector
+  MapOfVectors::const_iterator dvIt = itsDataVector.find(par);
+  if (dvIt != itsDataVector.end()) {
       ASKAPCHECK(inDV.shape() == dvIt->second.shape(),
-               "shape mismatch for data vector, parameter: "<<dvIt->first);
+               "shape mismatch for data vector, parameter: "<<dvIt->first<<
+               ". "<<inDV.shape()<<" != "<<dvIt->second.shape());
       // we have to instantiate explicitly a casa::Vector object because
       // otherwise, for some reason, the compiler can't figure out the type 
       // properly at the += operator. Exploit reference semantics - no copying!
       casa::Vector<double> destVec = dvIt->second;
       destVec += inDV; // add up a vector  
   } else {
+      itsDataVector.insert(std::make_pair(par, inDV));
+  }
 
-     // Note: this section should be fixed or removed. It has been made
-     // redundant by the initialisation of new columns at the start of this
-     // routine, but has been left here for now in case I'm missing something.
-     // There is a logic problem when leakage terms are included that affects
-     // the d21.0-d12.2, d21.0-d12.3, d21.0-d12.4, ..., elements.
-
-     // this is a brand new parameter
-     // obtain iterator, which points to this parameter in inNM map.
-     nmRowIt = itsNormalMatrix.insert(std::make_pair(par,MapOfMatrices())).first;
-     const casa::uInt newParDimension = parameterDimension(inNM); 
-       
-     // process normal matrix - add cross terms for all parameters, names are
-     // gathered from rows (it uses the fact the normal matrix is always square)
-     for (std::map<std::string, MapOfMatrices>::iterator nmOldRowIt = 
-          itsNormalMatrix.begin(); nmOldRowIt != itsNormalMatrix.end(); 
-          ++nmOldRowIt) {
-            
-          // search for an appropriate parameter in the source 
-          MapOfMatrices::const_iterator inNMIt = inNM.find(nmOldRowIt->first);           
-          if (inNMIt != inNM.end()) {
-              // insert terms only if the input matrix have them
-              nmRowIt->second.insert(*inNMIt); // assign a matrix
-              if (par != nmOldRowIt->first) {
-                  // fill in a symmetric term
-                  nmOldRowIt->second.insert(std::make_pair(par,
-                                transpose(inNMIt->second)));
-              }         
-          } else {
-              // insert zero matrix, as the parameter referred by nameIt and
-              // the new parameter are independent and, therefore, have zero 
-              // cross-terms.
-              const casa::uInt thisParDimension = 
-                               parameterDimension(nmOldRowIt->second); 
-              nmRowIt->second.insert(std::make_pair(nmOldRowIt->first,
-                  casa::Matrix<double>(newParDimension, thisParDimension,0.)));
-              if (par != nmOldRowIt->first) {
-                  // fill in a symmetric term
-                  nmOldRowIt->second.insert(std::make_pair(par,
-                      casa::Matrix<double>(thisParDimension, newParDimension,0.)));    
-              }
-          }            
-     }
-     
-     // process data vector
-     ASKAPDEBUGASSERT(itsDataVector.find(par) == itsDataVector.end());
-     itsDataVector.insert(std::make_pair(par, inDV));
-  }                       
 }           
 
 /// @brief extract dimension of a parameter from the given row
