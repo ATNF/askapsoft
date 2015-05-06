@@ -6,7 +6,7 @@ Science Data Archive (CASDA). Currently the following artifact types are
 supported:
 
 * Images (FITS format only)
-* Source Catalogs (VOTable format only)
+* Source Catalogues (VOTable format only)
 * Visibilities (CASA Measurement Set format only)
 * Evaluation Pipeline Artifacts (any file format)
 
@@ -78,7 +78,7 @@ The required parameters are:
 |                             |                |                 |artifact entries that appear in the parameter |
 |                             |                |                 |set                                           |
 +-----------------------------+----------------+-----------------+----------------------------------------------+
-|catalogs.artifactlist        |vector<string>  |None             |(Optional) A list of keys defining catalog    |
+|catalogues.artifactlist      |vector<string>  |None             |(Optional) A list of keys defining catalogue  |
 |                             |                |                 |artifact entries that appear in the parameter |
 |                             |                |                 |set                                           |
 +-----------------------------+----------------+-----------------+----------------------------------------------+
@@ -99,6 +99,12 @@ following parameter set entries must be present:
 +=============================+================+=================+==============================================+
 |<key>.filename               |string          |None             |Filename (either relative or fully qualified  |
 |                             |                |                 |with a path) for the artifact                 |
++-----------------------------+----------------+-----------------+----------------------------------------------+
+|<key>.type                   |string          |None             |This is only valid for catalogue              |
+|                             |                |                 |artifacts. This refers to the type of         |
+|                             |                |                 |catalogue being uploaded. It must be one of   |
+|                             |                |                 |'continuum-island', 'continuum-component' or  |
+|                             |                |                 |'polarisation-component'.                     |
 +-----------------------------+----------------+-----------------+----------------------------------------------+
 |<key>.project                |string          |None             |The project identifier to which this artifact |
 |                             |                |                 |is allocated for validation. For the          |
@@ -126,7 +132,7 @@ Example
 ~~~~~~~
 
 The following example declares four artifacts to be uploaded to CASDA, one for
-each of the artifact types: image, source catalog, measurement set and evaluation
+each of the artifact types: image, source catalogue, measurement set and evaluation
 report.
 
 .. code-block:: bash
@@ -143,11 +149,12 @@ report.
     image1.filename                 = image.i.dirty.restored.fits
     image1.project                  = AS007
 
-    # Source catalogs
-    catalogs.artifactlist           = [catalog1]
+    # Source catalogues
+    catalogues.artifactlist         = [catalogue1]
 
-    catalog1.filename               = duchamp-fitResults.xml
-    catalog1.project                = AS007
+    catalogue1.filename             = selavy-results.components.xml
+    catalogue1.type                 = continuum-component
+    catalogue1.project              = AS007
 
     # Measurement sets
     measurementsets.artifactlist    = [ms1]
