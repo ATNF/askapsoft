@@ -33,6 +33,7 @@
 // System includes
 #include <string>
 #include <sstream>
+#include <iomanip>
 
 // ASKAPsoft includes
 #include "askap/AskapError.h"
@@ -98,6 +99,11 @@ std::string CasdaChecksumFile::finaliseSha1(void)
 std::string CasdaChecksumFile::finaliseCrc(void)
 {
     stringstream ss;
-    ss << std::hex << std::nouppercase << itsCrcResult.checksum();
+    // In some cases, the leading zero was being dropped when printing
+    // this out, so I've added explicit statements on the width and
+    // how to fill it
+    ss << std::hex << std::nouppercase
+       << std::setfill('0') << std::setw(8)
+       << itsCrcResult.checksum();
     return ss.str();
 }
