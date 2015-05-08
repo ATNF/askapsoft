@@ -245,10 +245,12 @@ void CasdaIsland::checkCol(duchamp::Catalogues::Column &column)
 
 }
 
-void CasdaIsland::checkSpec(duchamp::Catalogues::CatalogueSpecification &spec)
+void CasdaIsland::checkSpec(duchamp::Catalogues::CatalogueSpecification &spec, bool allColumns)
 {
     for (size_t i = 0; i < spec.size(); i++) {
-        this->checkCol(spec.column(i));
+        if((spec.column(i).getDatatype()=="char") || allColumns ){
+            this->checkCol(spec.column(i));
+        }
     }
 }
 

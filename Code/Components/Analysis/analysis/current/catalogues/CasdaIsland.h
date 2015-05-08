@@ -93,8 +93,9 @@ class CasdaIsland : public CatalogueEntry {
         void checkCol(duchamp::Catalogues::Column &column);
 
         /// Perform the column check for all columns in the
-        /// specification.
-        void checkSpec(duchamp::Catalogues::CatalogueSpecification &spec);
+        /// specification. If allColumns is false, only the columns
+        /// with type=char are checked, otherwise all are.
+        void checkSpec(duchamp::Catalogues::CatalogueSpecification &spec, bool allColumns=true);
 
     protected:
         /// The unique ID for the island

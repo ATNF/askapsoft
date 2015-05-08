@@ -60,7 +60,9 @@ class IslandCatalogue {
 
         /// Check the widths of the columns based on the values within
         /// the catalogue.
-        void check();
+        /// @param allColumns If true, run the check on all columns in
+        /// the specification, else just do it for the strings.
+        void check(bool allColumns);
 
         /// Write the catalogue to the ASCII & VOTable files (acts as
         /// a front-end to the writeVOT() and writeASCII() functions)

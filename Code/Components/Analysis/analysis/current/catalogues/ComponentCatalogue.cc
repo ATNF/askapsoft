@@ -170,18 +170,20 @@ void ComponentCatalogue::defineSpec()
 
 }
 
-void ComponentCatalogue::check()
+void ComponentCatalogue::check(bool allColumns)
 {
     std::vector<CasdaComponent>::iterator comp;
     for (comp = itsComponents.begin(); comp != itsComponents.end(); comp++) {
-        comp->checkSpec(itsSpec);
+        comp->checkSpec(itsSpec, allColumns);
     }
 
 }
 
 void ComponentCatalogue::write()
 {
+    this->check(false);
     this->writeVOT();
+    this->check(true);
     this->writeASCII();
 }
 

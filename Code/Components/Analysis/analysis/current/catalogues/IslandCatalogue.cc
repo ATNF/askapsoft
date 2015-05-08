@@ -142,18 +142,20 @@ void IslandCatalogue::defineSpec()
 
 }
 
-void IslandCatalogue::check()
+void IslandCatalogue::check(bool allColumns)
 {
     std::vector<CasdaIsland>::iterator isle;
     for (isle = itsIslands.begin(); isle != itsIslands.end(); isle++) {
-        isle->checkSpec(itsSpec);
+        isle->checkSpec(itsSpec, allColumns);
     }
 
 }
 
 void IslandCatalogue::write()
 {
+    this->check(false);
     this->writeVOT();
+    this->check(true);
     this->writeASCII();
 }
 
@@ -165,7 +167,7 @@ void IslandCatalogue::writeVOT()
                        itsVotableFilename);
     vowriter.setColumnSpec(&itsSpec);
     vowriter.openCatalogue();
-    vowriter.setResourceName("Island catalogue from Selavy source-finding");
+    vowriter.setResourceName("Island catalogue from Selavy source finding");
     vowriter.setTableName("Island catalogue");
     vowriter.writeHeader();
     duchamp::VOParam version("table_version", "meta.version", "char", itsVersion, 39, "");

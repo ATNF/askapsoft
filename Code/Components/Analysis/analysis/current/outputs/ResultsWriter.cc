@@ -117,7 +117,6 @@ void ResultsWriter::writeIslandCatalogue()
     if (itsFlag2D) {
 
         IslandCatalogue cat(itsSourceList, itsParset, itsCube);
-        cat.check();
         cat.write();
 
     }
@@ -129,7 +128,6 @@ void ResultsWriter::writeComponentCatalogue()
     if (itsFitParams.doFit()) {
 
         ComponentCatalogue cat(itsSourceList, itsParset, itsCube);
-        cat.check();
         cat.write();
 
     }
