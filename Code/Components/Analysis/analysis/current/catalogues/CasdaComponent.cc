@@ -364,7 +364,7 @@ void CasdaComponent::checkCol(duchamp::Catalogues::Column &column)
 void CasdaComponent::checkSpec(duchamp::Catalogues::CatalogueSpecification &spec, bool allColumns)
 {
     for (size_t i = 0; i < spec.size(); i++) {
-        if((spec.column(i).getDatatype()=="char") || allColumns ){
+        if ((spec.column(i).getDatatype() == "char") || allColumns) {
             this->checkCol(spec.column(i));
         }
     }
