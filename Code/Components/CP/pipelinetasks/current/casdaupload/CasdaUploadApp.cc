@@ -70,7 +70,10 @@ int CasdaUploadApp::run(int argc, char* argv[])
 {
     StatReporter stats;
 
-    const IdentityElement identity(config());
+    itsParset = config();
+    checkParset();
+    
+    const IdentityElement identity(itsParset);
 
     const vector<ImageElement> images(
         buildArtifactElements<ImageElement>("images.artifactlist"));
@@ -100,12 +103,12 @@ int CasdaUploadApp::run(int argc, char* argv[])
     }
 
     // Create the output directory
-    const fs::path outbase(config().getString("outputdir"));
+    const fs::path outbase(itsParset.getString("outputdir"));
     if (!is_directory(outbase)) {
         ASKAPTHROW(AskapError, "Directory " << outbase
                    << " does not exists or is not a directory");
     }
-    const fs::path outdir = outbase / config().getString("sbid");
+    const fs::path outdir = outbase / itsParset.getString("sbid");
     ASKAPLOG_INFO_STR(logger, "Using output directory: " << outdir);
     if (!is_directory(outdir)) {
         create_directory(outdir);
@@ -133,8 +136,12 @@ int CasdaUploadApp::run(int argc, char* argv[])
     copyAndChecksumElements<EvaluationReportElement>(reports, outdir);
 
     // Finally, and specifically as the last step, write the READY file
-    const fs::path readyFilename = outdir / "READY";
-    CasdaFileUtils::writeReadyFile(readyFilename);
+    // For now, this is only done if the config file specifically
+    // requests it via the writeREADYfile parameter.
+    if(itsParset.getBool("writeREADYfile",false)){
+        const fs::path readyFilename = outdir / "READY";
+        CasdaFileUtils::writeReadyFile(readyFilename);
+    }
 
     stats.logSummary();
     return 0;
@@ -202,10 +209,10 @@ std::vector<T> CasdaUploadApp::buildArtifactElements(const std::string& key) con
 {
     vector<T> elements;
 
-    if (config().isDefined(key)) {
-        const vector<string> names = config().getStringVector(key);
+    if (itsParset.isDefined(key)) {
+        const vector<string> names = itsParset.getStringVector(key);
         for (vector<string>::const_iterator it = names.begin(); it != names.end(); ++it) {
-            LOFAR::ParameterSet subset = config().makeSubset(*it + ".");
+            LOFAR::ParameterSet subset = itsParset.makeSubset(*it + ".");
             subset.replace("artifactparam", *it);
             elements.push_back(T(subset));
         }
@@ -242,4 +249,23 @@ void CasdaUploadApp::copyAndChecksumElements(const std::vector<T>& elements,
         ASKAPLOG_INFO_STR(logger, "Copying and calculating checksum for " << in);
         CasdaFileUtils::copyAndChecksum(in, out);
     }
+}
+
+void CasdaUploadApp::checkParset()
+{
+    std::string listnames[4]={"images","catalogues","measurementsets","evaluation"};
+    for(int i=0;i<4;i++){
+        if( (itsParset.isDefined(listnames[i]+".artefactlist")) &&
+            (!itsParset.isDefined(listnames[i]+".artifactlist"))  ) {
+
+            ASKAPLOG_WARN_STR(logger, "You have defined " << listnames[i] <<
+                              ".artefactlist instead of " << listnames[i] <<
+                              ".artifactlist. Replacing for now, but CHANGE YOUR PARSET!");
+
+            itsParset.add(listnames[i]+".artifactlist",
+                          itsParset.get(listnames[i]+".artefactlist"));
+            
+        }
+    }
+
 }

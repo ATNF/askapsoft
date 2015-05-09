@@ -75,8 +75,15 @@ MeasurementSetElement::MeasurementSetElement(const LOFAR::ParameterSet &parset)
 
 xercesc::DOMElement* MeasurementSetElement::toXmlElement(xercesc::DOMDocument& doc) const
 {
-    DOMElement* e = ProjectElementBase::toXmlElement(doc);
-
+    // Have to break the inheritence pattern, as we need to append
+    // '.tar' onto the filename path so that the entry in the
+    // observation.xml file matches what is on disk.
+    DOMElement* e = doc.createElement(XercescString(itsName));
+    
+    XercescUtils::addTextElement(*e, "filename", itsFilepath.filename().string() + ".tar");
+    XercescUtils::addTextElement(*e, "format", itsFormat);
+    XercescUtils::addTextElement(*e, "project", itsProject);
+    
     // Confirm that there is at least one scan element
     // Throw an error if not
     ASKAPCHECK(itsScans.size() > 0,

@@ -35,6 +35,7 @@
 #include "askap/Application.h"
 #include "xercesc/dom/DOM.hpp" // Includes all DOM
 #include "boost/filesystem.hpp"
+#include "Common/ParameterSet.h"
 
 // Local package includes
 #include "casdaupload/IdentityElement.h"
@@ -57,6 +58,13 @@ class CasdaUploadApp : public askap::Application {
         virtual int run(int argc, char* argv[]);
 
     private:
+
+    LOFAR::ParameterSet itsParset;
+
+    /// A function to check whether the user has used "artefactlist"
+    /// instead of "artifactlist", and correct it, giving a warning at
+    /// the same time.
+    void checkParset();
 
         /// Create the metadata file
         static void generateMetadataFile(const boost::filesystem::path& file,
