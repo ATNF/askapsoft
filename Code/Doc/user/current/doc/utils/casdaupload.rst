@@ -31,10 +31,11 @@ configuration parameter set. It performs the following tasks:
 
 * Deposits all artifacts, the checksum files and the metadata file in the
   designated output directory
-* Finally, and specifically as the last step, a file named "READY" is written
-  to the output directory. This indicates no further addition or mutation of the
-  data products in the output directory will take place and the CASDA ingest
-  process can begin.
+* Finally, and specifically as the last step, a file named "READY" can
+  be written to the output directory. This indicates no further
+  addition or mutation of the data products in the output directory
+  will take place and the CASDA ingest process can begin. This is only
+  done if the *writeREADYfile* parameter is set to *true*.
 
 Running the program
 -------------------
@@ -73,6 +74,12 @@ The required parameters are:
 +-----------------------------+----------------+-----------------+----------------------------------------------+
 |obsprogram                   |string          |None             |Observation program which the scheduling block|
 |                             |                |                 |relates to                                    |
++-----------------------------+----------------+-----------------+----------------------------------------------+
+|writeREADYfile               |bool            |false            |A flag indicating whether to write the READY  |
+|                             |                |                 |file to the output directory. For now, the    |
+|                             |                |                 |default is not to write it, meaning it is up  |
+|                             |                |                 |to the user to set the READY file so that     |
+|                             |                |                 |CASDA knows to import the data.               |
 +-----------------------------+----------------+-----------------+----------------------------------------------+
 |images.artifactlist          |vector<string>  |None             |(Optional) A list of keys defining image      |
 |                             |                |                 |artifact entries that appear in the parameter |
