@@ -170,7 +170,7 @@ All parameters given in the next table **do not** have **solver.Clean** prefix (
 +------------------------+---------------+--------------+--------------------------------------------------+
 |preconditioner.Names    |vector<string> |empty vector  |List of preconditioners to be applied (in the     |
 |                        |               |              |order they are given in the list). Preconditioners|
-|                        |               |              |are ASKAPsoft equivalents of weighting            |
+|                        |               |              |are ASKAPsoft equivalents of visibility weighting |
 |                        |               |              |(i.e. uniform, robust, natural), which do not     |
 |                        |               |              |require multiple passes over the                  |
 |                        |               |              |dataset. Preconditioners can be viewed as         |
@@ -205,65 +205,75 @@ All parameters given in the next table **do not** have **solver.Clean** prefix (
 Parameters of preconditoners
 ----------------------------
 
-Normal matrix can optionally be transformed by the preconditioning operator before equations are solved.
-This step can regularise the matrix and improve the quality of the solution. It is the ASKAPsoft way to
-implement weighting in imaging (e.g. uniform, robust) which does not require an additional pass over the
-data. The following preconditioners are currently implemented: **Wiener**, **NormWiener**, **Robust** and **GaussianTaper**.
+The normal matrix can optionally be transformed by a preconditioning operator before equations are solved.
+This step can regularise the matrix and improve the quality of the solution. It is the ASKAPsoft way of
+implementing visibility weighting for the PSF (e.g. uniform, robust), and does not require an additional
+pass over the data. The following preconditioners are currently implemented: **Wiener**, **NormWiener**,
+**Robust** and **GaussianTaper**.
 
-They are described below along with the available parameters. The parameters need a **preconditioner.preconditionerName**
-prefix, but without the **solver** prefix (i.e. **Cimager.preconditioner.Wiener.noisepower**), although
-technically preconditioning step is done in solver. When defined this way, the same parameters can be reused
-in the *restore solver*. The table below contains the description of individual parameters (names starts with
-**preconditionerName**) 
+A Wiener filter, which is constructed from the PSF, is the preferred preconditioner. This preconditioner
+is somewhat analogous to robust weighting.
+
+The preconditioners are described below along with the available parameters. The parameters need a
+**preconditioner.preconditionerName** prefix, but not the **solver** prefix (e.g.
+**Cimager.preconditioner.Wiener.noisepower**), although technically preconditioning is done in the
+solver. When defined this way, the same parameters can be reused in the *restore solver* (described in
+the :doc:`cimager` documentation). The table below contains the description of individual parameters
+(names starts with **preconditionerName**).
 
 +-----------------------+--------------+--------------+----------------------------------------------------+
 |**Parameter**          |**Type**      |**Default**   |**Description**                                     |
 +=======================+==============+==============+====================================================+
-|Wiener.noisepower      |float         |none          |Wiener filter constructed from the PSF is           |
-|                       |              |              |applied. This preconditioner is somewhat analogous  |
-|                       |              |              |to robust weighting. If defined with noisepower     |
-|                       |              |              |(btw, it is incompatible with definition via        |
-|                       |              |              |robustness), this exact value of noise power will be|
-|                       |              |              |used to construct the filter. Optionally, the PSF   |
-|                       |              |              |can be normalised before the filter is constructed  |
-|                       |              |              |(see **normalise** option - this is a replacement   |
-|                       |              |              |for **NormWiener** preconditioner).                 |
+|Wiener.noisepower      |float         |none          |If the Wiener filter is defined with **noisepower**,|
+|                       |              |              |this exact value of noise power will be used to     |
+|                       |              |              |construct the filter. Optionally, the PSF can be    |
+|                       |              |              |normalised before the filter is constructed (see    |
+|                       |              |              |**normalise** option -- this is a replacement for   |
+|                       |              |              |the **NormWiener** preconditioner).                 |
+|                       |              |              |Note that the Wiener filter must be specified with  |
+|                       |              |              |either **noisepower** or **robustness**.            |
 +-----------------------+--------------+--------------+----------------------------------------------------+
-|Wiener.normalise       |bool          |false         |This is an additional option for **Wiener**         |
-|                       |              |              |preconditioner constructed from explicit value of   |
-|                       |              |              |the noise power. If set to true, the PSF will be    |
-|                       |              |              |normalised to 1.0 before the filter is constructed. |
-|                       |              |              |Therefore, interpretation of the noise power        |
-|                       |              |              |parameter is easier. Note, this option is           |
-|                       |              |              |incompatible with **robustness** because in this    |
-|                       |              |              |case PSF is always normalised).                     |
+|Wiener.normalise       |bool          |false         |This is an additional option for a **Wiener**       |
+|                       |              |              |preconditioner being constructed from an explicit   |
+|                       |              |              |value of the noise power (i.e. **noisepower**). If  |
+|                       |              |              |set to true, the PSF will be normalised to 1.0      |
+|                       |              |              |before the filter is constructed, easing            |
+|                       |              |              |interpretation. Note, this option is incompatible   |
+|                       |              |              |with **robustness**, because in that case the PSF   |
+|                       |              |              |is always normalised).                              |
 +-----------------------+--------------+--------------+----------------------------------------------------+
-|Wiener.robustness      |float         |none          |Wiener filter constructed from the PSF is           |
-|                       |              |              |applied. The noise power is derived from the given  |
-|                       |              |              |value of robustness to have roughly the same effect |
-|                       |              |              |as analogous parameter in Robust. This option is    |
-|                       |              |              |incompatible with any other parameter of the        |
-|                       |              |              |preconditioner                                      |
+|Wiener.robustness      |float         |none          |The noise power is derived from the given value of  |
+|                       |              |              |robustness to have roughly the same effect as the   |
+|                       |              |              |analogous parameter in Robust (i.e., -2.0 close to  |
+|                       |              |              |uniform weighting, +2.0 close to natural weighting).|
+|                       |              |              |Note that the Wiener filter must be specified with  |
+|                       |              |              |either **noisepower** or **robustness**.            |
 +-----------------------+--------------+--------------+----------------------------------------------------+
-|Wiener.taper           |float         |none          |If defined, Wiener filter will be tapered in the    |
-|                       |              |              |image domain with the Gaussian. The value of the    |
-|                       |              |              |parameter is FWHM of the taper in image pixels.     |
+|Wiener.taper           |float         |none          |If defined, the Wiener filter will be tapered in the|
+|                       |              |              |image domain with a Gaussian. The value of the      |
+|                       |              |              |parameter is the FWHM of the taper in image pixels. |
+|                       |              |              |Restricting the filter size to approximately that   |
+|                       |              |              |of the primary beam size is of particular           |
+|                       |              |              |importance when imaging over fields that are larger |
+|                       |              |              |than the primary beam.                              |
 +-----------------------+--------------+--------------+----------------------------------------------------+
-|NormWiener.robustness  |float         |0.0           |Roughly same effect as the same parameter in Robust |
+|NormWiener.robustness  |float         |0.0           |Roughly the same effect as the same parameter in    |
+|                       |              |              |Robust.                                             |
 +-----------------------+--------------+--------------+----------------------------------------------------+
 |Robust.robustness      |float         |0.0           |Post-gridding version of robust weighting is        |
 |                       |              |              |applied.                                            |
 +-----------------------+--------------+--------------+----------------------------------------------------+
-|GaussianTaper          |vector<string>|None          |Gaussian taper is applied. The parameter should be  |
-|                       |              |              |either a single string with the angular size for a  |
-|                       |              |              |circular gaussian or a vector of 3 strings with     |
-|                       |              |              |major and minor axes and position angle for an      |
-|                       |              |              |elliptical taper. String values may contain units,  |
-|                       |              |              |i.e. **[10arcsec,10arcsec,34deg]**. If no units are |
-|                       |              |              |given, radians are assumed. Gaussian taper currently|
-|                       |              |              |conflicts with different uv-cell sizes for different|
-|                       |              |              |images. An exception is thrown if such a condition  |
-|                       |              |              |exists.                                             |
+|GaussianTaper          |vector<string>|None          |A Gaussian taper is applied to the visibilities.    |
+|                       |              |              |The parameter should be either a single string with |
+|                       |              |              |the FWHM of a circular gaussian taper, or a vector  |
+|                       |              |              |of three strings for an elliptical taper: the major |
+|                       |              |              |and minor axis FWHM and the position angle. String  |
+|                       |              |              |values may contain units, e.g.                      |
+|                       |              |              |**[10arcsec,10arcsec,34deg]**. If no units are      |
+|                       |              |              |given, radians are assumed. **GaussianTaper**       |
+|                       |              |              |currently conflicts with different uv-cell sizes    |
+|                       |              |              |for different images. An exception is thrown if     |
+|                       |              |              |such a condition exists.                            |
 +-----------------------+--------------+--------------+----------------------------------------------------+
 
 
