@@ -144,8 +144,15 @@ struct ICalSolutionConstAccessor {
    /// valid, false otherwise
    bool jonesValid(const casa::uInt ant, const casa::uInt beam, const casa::uInt chan) const;
 
+   /// @brief set the amplitude of the gain components of a 2x2 Jones Matrix to 1.
+   /// @details set the amplitude of the gain components of a 2x2 Jones Matrix to 1,
+   /// assuming the standard [g11,0;0,g22]*[1,d12;-d21,1] matrix decomposition.
+   /// @param[in] 2x2 Jones matrix to be normalised
+   void normaliseJones(casa::SquareMatrix<casa::Complex, 2> &jones) const;
+
    /// @brief shared pointer definition
    typedef boost::shared_ptr<ICalSolutionConstAccessor> ShPtr;
+
 };
 
 } // namespace accessors
