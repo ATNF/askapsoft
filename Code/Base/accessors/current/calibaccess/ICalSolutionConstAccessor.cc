@@ -125,24 +125,6 @@ bool ICalSolutionConstAccessor::jonesValid(const casa::uInt ant, const casa::uIn
   return jonesValid(JonesIndex(ant, beam), chan);
 }
 
-/// @brief set the amplitude of the gain components of a 2x2 Jones Matrix to 1.
-/// @details set the amplitude of the gain components of a 2x2 Jones Matrix to 1,
-/// assuming the standard [g11,0;0,g22]*[1,d12;-d21,1] matrix decomposition.
-/// @param[in] 2x2 Jones matrix to be normalised
-void ICalSolutionConstAccessor::normaliseJones(casa::SquareMatrix<casa::Complex, 2> &jones) const
-{
-  casa::Float abs00 = casa::fabs(jones(0,0));
-  casa::Float abs11 = casa::fabs(jones(1,1));
-  if (abs00 > 0) {
-      jones(0,0) /= abs00;
-      jones(0,1) /= abs00;
-  }
-  if (abs11 > 0) {
-      jones(1,0) /= abs11;
-      jones(1,1) /= abs11;
-  }
-}
-
 } // namespace accessors
 } // namespace askap
 
