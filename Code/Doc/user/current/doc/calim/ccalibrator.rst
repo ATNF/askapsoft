@@ -130,7 +130,19 @@ They are given in [:doc:`data_selection`] and should also have the **Ccalibrator
 |                       |                |              |must exist, otherwise an exception will be       |
 |                       |                |              |thrown), i.e. **gain.g11.0.0**. All phases in the|
 |                       |                |              |resulting gains are rotated, so the reference    |
-|                       |                |              |gain has the zero phase.                         |
+|                       |                |              |gain has the zero phase. Note: X and Y phases    |
+|                       |                |              |are both referenced to this parameter. For       |
+|                       |                |              |separate referencing of polarisations, use       |
+|                       |                |              |*refantenna*.                                    |
++-----------------------+----------------+--------------+-------------------------------------------------+
+|refantenna             |int             |None          |If a valid antenna number is given (in the       |
+|                       |                |              |range [0,nAnt-1]), this antenna is used for      |
+|                       |                |              |phase referencing. The phases of the             |
+|                       |                |              |resulting gains are rotated by the appropriate   |
+|                       |                |              |polarisation of the reference antenna, such that |
+|                       |                |              |the reference X and Y gains are both zero phase. |
+|                       |                |              |Leakages are referenced against the XY phase     |
+|                       |                |              |difference of the reference antenna.             |
 +-----------------------+----------------+--------------+-------------------------------------------------+
 |solve                  |string          |"gains"       |String describing what to solve for              |
 |                       |                |              |(e.g. "gains,leakages" or "leakages" or          |
@@ -140,6 +152,13 @@ They are given in [:doc:`data_selection`] and should also have the **Ccalibrator
 |                       |                |              |solution. Use **calibrate.ignorebeam=true**      |
 |                       |                |              |option of cimager to apply such beam-independent |
 |                       |                |              |solution.                                        |
++-----------------------+----------------+--------------+-------------------------------------------------+
+|normalisegains         |bool            |false         |Optional parameter. If defined, and if solving   |
+|                       |                |              |for "gains", the newly found antenna gains will  |
+|                       |                |              |have their amplitdues set to unity when they are |
+|                       |                |              |written to file. This is in lieu of true         |
+|                       |                |              |phase-only gain calibration and should be used   |
+|                       |                |              |with care.                                       |
 +-----------------------+----------------+--------------+-------------------------------------------------+
 |sources.definition     |string          |None          |Optional parameter. If defined, sky model        |
 |                       |                |              |(i.e. source info given as **sources.something**)|
