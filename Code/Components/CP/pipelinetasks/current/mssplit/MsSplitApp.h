@@ -79,6 +79,18 @@ class MsSplitApp : public askap::Application {
 
         static void copyPolarization(const casa::MeasurementSet& source, casa::MeasurementSet& dest);
 
+        /// @brief add non-standard column to POINTING table
+        /// @details We use 3 non-standard columns to capture
+        /// actual pointing on all three axes. This method creates one such
+        /// column.
+        /// @throws AskapError if column already exist in destPointing
+        /// @param[in] name column name
+        /// @param[in] srcPointing source MS POINTING table
+        /// @param[in] destPointing destination MS POINTING table
+        static void addNonStandardPointingColumn(const std::string &name,
+                                                 const casa::MSPointing &srcPointing,
+                                                 casa::MSPointing &destPointing);
+
         /// @throws AskapError  if all rows in the main table don't refer to the
         ///                     same spectral window
         /// @return the spectral window id refered to by all rows in the main table,

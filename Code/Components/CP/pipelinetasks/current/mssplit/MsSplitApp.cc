@@ -283,25 +283,23 @@ void MsSplitApp::copyPointing(const casa::MeasurementSet& source, casa::Measurem
     // Add new rows to the destination and copy the data
     dest.pointing().addRow(sc.nrow());
 
-    // Create and copy the POLANGLE column, if it exists.
-    // This non-standard column captures the third (role) axis position.
-    // casabrowser row order changes when it's copy at the end, so do it here.
+    // Create and copy non-standard columns, if they exist.
+    // dest row order is different to src when copes come after required columns, so do them first.
+    if (source.pointing().actualTableDesc().isColumn("AZIMUTH")) {
+        addNonStandardPointingColumn("AZIMUTH", source.pointing(), dest.pointing());
+    }
+    if (source.pointing().actualTableDesc().isColumn("ELEVATION")) {
+        addNonStandardPointingColumn("ELEVATION", source.pointing(), dest.pointing());
+    }
     if (source.pointing().actualTableDesc().isColumn("POLANGLE")) {
-        const MSPointing& srcPointing = source.pointing();
-        const casa::ROScalarColumn<casa::Float> srcPolAngleCol(srcPointing, "POLANGLE");
-        MSPointing& destPointing = dest.pointing();
-        destPointing.addColumn(srcPointing.actualTableDesc().columnDesc("POLANGLE"));
-        casa::ScalarColumn<casa::Float> destPolAngleCol(destPointing, "POLANGLE");
-        destPolAngleCol.putColumn(srcPolAngleCol);
+        addNonStandardPointingColumn("POLANGLE", source.pointing(), dest.pointing());
     }
 
     // Copy required columns
-
-    // These two copies were disabled due to a problem with them hanging.
-    // This not longer seems to be a problem, so the copies are re-enabled.
+    // direction and target were disabled due to a problem with hanging.
+    // This no longer seems to be a problem, so the copies are re-enabled.
     dc.direction().putColumn(sc.direction());
     dc.target().putColumn(sc.target());
-
     dc.antennaId().putColumn(sc.antennaId());
     dc.interval().putColumn(sc.interval());
     dc.name().putColumn(sc.name());
@@ -327,6 +325,16 @@ void MsSplitApp::copyPolarization(const casa::MeasurementSet& source, casa::Meas
     dc.numCorr().putColumn(sc.numCorr());
     dc.corrType().putColumn(sc.corrType());
     dc.corrProduct().putColumn(sc.corrProduct());
+}
+
+void MsSplitApp::addNonStandardPointingColumn(const std::string &name,
+                                              const MSPointing &srcPointing,
+                                              MSPointing &destPointing)
+{
+    ASKAPDEBUGASSERT(!destPointing.actualTableDesc().isColumn(name));
+    destPointing.addColumn(srcPointing.actualTableDesc().columnDesc(name));
+    casa::ScalarColumn<casa::Float> destCol(destPointing, name);
+    destCol.putColumn(ROScalarColumn<casa::Float>(srcPointing, name));
 }
 
 casa::Int MsSplitApp::findSpectralWindowId(const casa::MeasurementSet& ms)
