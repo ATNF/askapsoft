@@ -26,4 +26,5 @@ data sets i.e. Hundereds of TB per hour.
    mssplit.rst
    msmerge.rst
    msconcat.rst
+   mslist.rst
    linmos.rst
