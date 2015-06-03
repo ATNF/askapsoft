@@ -5,7 +5,7 @@
 unset ASKAP_ROOT
 cd $WORKSPACE/trunk
 nice /usr/bin/python bootstrap.py -n
-if [ $? - ne 0 ]; then
+if [ $? -ne 0 ]; then
     echo "Error: Bootstrapping failed"
     exit 1
 fi
@@ -23,7 +23,7 @@ fi
 #
 RBUILD_OPTS="-n -p nompi=1"
 nice rbuild ${RBUILD_OPTS} Code/Components/Synthesis/synthesis/current
-if [ $? - ne 0 ]; then
+if [ $? -ne 0 ]; then
     echo "Error: rbuild ${RBUILD_OPTS} Code/Components/Synthesis/synthesis/current failed "
     exit 1
 fi
