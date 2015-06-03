@@ -98,3 +98,27 @@ if [ $ERROR -ne 0 ]; then
 fi
 
 
+#
+# Phase 4
+#
+# Run the main functest which requires MPI and communication with the 
+# correlator simulator
+#
+
+cd $WORKSPACE/trunk/Code/Components/Services/ingest/current/functests/test_ingestpipeline
+
+cat > tmp.simcor.sh <<EOF
+#!/bin/sh
+cd ../../../../correlatorsim/current/functests/test_playback
+sleep 10
+mpirun -np 3 ../../apps/playback.sh -c playback.in
+EOF
+
+chmod u+x tmp.simcor.sh
+
+# asynchronous launch of the correlator simulator with a delay set
+# in the script
+./tmp.simcor.sh > simcor.out &
+
+./run.sh
+
