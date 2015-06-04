@@ -121,5 +121,11 @@ chmod u+x tmp.simcor.sh
 # in the script
 ./tmp.simcor.sh > simcor.out &
 
-./run.sh
+timeout -s 9 10m ./run.sh
+
+ERROR=$?
+if [ $ERROR -ne 0 ]; then
+    echo "ingest/current/functests/test_ingestpipeline/run.sh returned errorcode $ERROR"
+    exit 1
+fi
 
