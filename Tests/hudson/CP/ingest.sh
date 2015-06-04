@@ -17,6 +17,7 @@ source initaskap.sh
 if [ $MODULESHOME ]; then
     module load openmpi
 fi
+export AIPSPATH=$ASKAP_ROOT/Code/Base/accessors/current
 
 #
 # Build Synthesis
