@@ -67,6 +67,12 @@ scons test
 cd $WORKSPACE/trunk/Code/Components/Services/ingest/current
 scons test
 
+cd $WORKSPACE/trunk/Code/Components/Services/icewrapper/current
+scons test
+
+cd $WORKSPACE/trunk/Code/Components/Services/common/current
+scons test
+
 #
 # Phase 2
 #
