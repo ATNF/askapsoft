@@ -1,0 +1,193 @@
+/// @file VisConverterBase.h
+/// @brief base class for converter of the visibility data stream
+/// @details Visibility converter class is responsible for populating
+/// VisBuffer from the datagrams received from the correlator. It takes
+/// care of integrity and the split between individual datagrams.
+/// VisConverterBase is the base class which contains common methods. 
+/// As we don't plan to use various distribution schemes in one system,
+/// there is no much reason in making the methods of this class polymorphic,
+/// nor derive from an abstract interface (although such change would be
+/// straight forward). 
+///
+/// @copyright (c) 2013 CSIRO
+/// Australia Telescope National Facility (ATNF)
+/// Commonwealth Scientific and Industrial Research Organisation (CSIRO)
+/// PO Box 76, Epping NSW 1710, Australia
+/// atnf-enquiries@csiro.au
+///
+/// This file is part of the ASKAP software distribution.
+///
+/// The ASKAP software distribution is free software: you can redistribute it
+/// and/or modify it under the terms of the GNU General Public License as
+/// published by the Free Software Foundation; either version 2 of the License,
+/// or (at your option) any later version.
+///
+/// This program is distributed in the hope that it will be useful,
+/// but WITHOUT ANY WARRANTY; without even the implied warranty of
+/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+/// GNU General Public License for more details.
+///
+/// You should have received a copy of the GNU General Public License
+/// along with this program; if not, write to the Free Software
+/// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+///
+/// @author Max Voronkov <maxim.voronkov@csiro.au>
+
+#ifndef ASKAP_CP_INGEST_VISCONVERTERBASE_H
+#define ASKAP_CP_INGEST_VISCONVERTERBASE_H
+
+// 3rd party includes
+#include "boost/shared_ptr.hpp"
+#include "boost/noncopyable.hpp"
+#include "Common/ParameterSet.h"
+#include "casa/aipstype.h"
+
+// ASKAPsoft includes
+#include "cpcommon/VisDatagram.h"
+#include "cpcommon/VisChunk.h"
+#include "askap/IndexConverter.h"
+
+// local includes
+#include "configuration/Configuration.h"
+#include "configuration/BaselineMap.h"
+
+namespace askap {
+namespace cp {
+namespace ingest {
+
+/// @brief base class for converter of the visibility data stream
+/// @details Visibility converter class is responsible for populating
+/// VisBuffer from the datagrams received from the correlator. It takes
+/// care of integrity and the split between individual datagrams.
+/// VisConverterBase is the base class which contains common methods. 
+/// As we don't plan to use various distribution schemes in one system,
+/// there is no much reason in making the methods of this class polymorphic,
+/// nor derive from an abstract interface (although such change would be
+/// straight forward). 
+class VisConverterBase : public boost::noncopyable {
+public:
+   /// @param[in] params parameters specific to the associated source task
+   ///                   used to set up mapping, etc
+   /// @param[in] config configuration
+   VisConverterBase(const LOFAR::ParameterSet& params,
+                    const Configuration& config);
+
+   /// @brief get expected number of datagrams
+   /// @return the number of datagrams required to complete VisChunk
+   /// @note it is initialised in derived classes together with VisChunk
+   inline casa::uInt datagramsExpected() const { return itsDatagramsExpected; }
+
+   /// @brief number of datagrams used
+   /// @return the number of datagrams contributing to the current VisChunk
+   inline casa::uInt datagramsCount() const { return itsDatagramsCount; }
+
+   /// @brief number of datagrams ignored
+   /// @return the number of successfully received datagrams which are
+   /// ignored for some reason (e.g. mapping) and didn't contribute to
+   /// the current VisChunk.
+   inline casa::uInt datagramsIgnored() const { return itsDatagramsIgnored; }
+
+   /// @brief current vis chunk
+   /// @return shared pointer to current vis chunk for further processing
+   /// @note An exception is thrown if one attempts to get an uninitialised
+   /// VisChunk.
+   const common::VisChunk::ShPtr& visChunk() const;
+
+protected:
+
+   // note, there is no much reason making this class polymorphic as
+   // we don't intend to use different implementations simultaneously.
+   // Therefore, derived classes will contain the actual entry point and
+   // this base class has a number of methods made protected, so they are
+   // not used directly. It can be converted to interface/factory +
+   // polymorphic behavior later on, if needed.
+   
+   /// @brief increment number of ignored datagrams
+   inline void countDatagramAsIgnored() { ++itsDatagramsIgnored; }
+
+   /// @brief increment number of useful datagrams
+   inline void countDatagramAsUseful() { ++itsDatagramsCount; }
+
+   /// @brief set the number of expected datagrams
+   /// @details This method is intended to be used in derived classes
+   /// @param[in] number number of expected datagrams
+   inline void setNumberOfExpectedDatagrams(casa::uInt number) 
+          { itsDatagramsExpected = number; }
+
+private:
+   /// @brief initialise beam maps
+   /// @details Beams can be mapped and indices can be non-contiguous. This
+   /// method sets up the mapping based in the parset and also evaluates the
+   /// actual number of beams for the sizing of buffers.
+   /// @param[in] params parset with parameters (e.g. beammap)
+   void initBeamMap(const LOFAR::ParameterSet& params);
+
+   /// @brief shared pointer to visibility chunk being filled
+   common::VisChunk::ShPtr itsVisChunk;
+
+   /// @brief expected number of datagrams
+   /// @details This field is initialised at the time a new VisChunk 
+   /// is created and contains the number of datagrams required to
+   /// complete VisChunk. Exact value is determined in derived classes.
+   casa::uInt itsDatagramsExpected;
+
+   /// @brief number of datagrams used
+   /// @details This counter is reset each time a new VisChunk is created.
+   /// It is intended to count the number of datagrams contributing to the
+   /// given chunk (i.e. excludes the datagrams which are ignored for some
+   /// reason)
+   casa::uInt itsDatagramsCount;
+
+   /// @brief This counter is reset each time a new VisChunk is created.
+   /// It is intended to count the number of successfully received datagrams
+   /// which are ignored for some reason.
+   casa::uInt itsDatagramsIgnored;
+
+   /// @brief configuration
+   const Configuration itsConfig;
+
+   // for beam configuration/selection/mapping
+
+   /// @brief beam id map
+   /// @details It is possible to filter the beams received by the source 
+   /// and map the indices. This map provides translation (by default, 
+   /// any index is passed as is)
+   utility::IndexConverter  itsBeamIDMap;
+
+   /// @brief largest supported number of beams
+   /// @details The space is reserved for the given number of beams 
+   /// (set via the parset). This value is always less than or equal 
+   /// to the number of beams specified via the configuration (the 
+   /// latter is the default). The visibility cube is resized to match
+   /// this parameter (allowing to drop unnecessary beams if used 
+   /// together with itsBeamIDMap)
+   ///
+   /// @note it is zero by default, which triggers the initBeamMap 
+   /// method called from the constructor to set it equal to the
+   /// configuration (i.e. to write everything, unless a specific mapping
+   /// is configured in the parset)
+   casa::uInt itsMaxNBeams;
+
+   /// @brief number of beams to expect in the data stream
+   /// @details A larger number of beams can be received from the 
+   /// datastream than is stored into MS. To avoid unnecessary bloat of 
+   /// the MS size, only itsMaxNBeams beams are stored. This field 
+   /// controls the data stream unpacking.
+   ///
+   /// @note it is zero by default, which triggers the initBeamMap
+   /// method called from the constructor to set it equal to the
+   /// configuration (i.e. to write everything, unless a specific mapping
+   /// is configured via the parset)
+   casa::uInt itsBeamsToReceive;
+
+};
+
+} // namespace ingest
+
+} // namespace cp
+
+} // namespace askap
+
+#endif // #ifndef ASKAP_CP_INGEST_VISCONVERTERBASE_H
+
+
