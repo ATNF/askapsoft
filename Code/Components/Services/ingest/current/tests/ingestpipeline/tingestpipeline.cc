@@ -33,6 +33,7 @@
 #include "ScanManagerTest.h"
 #include "ChannelManagerTest.h"
 #include "MergedSourceTest.h"
+#include "VisConverterBaseTest.h"
 #include "NoMetadataSourceTest.h"
 #include "CalcUVWTaskTest.h"
 #include "ChannelAvgTaskTest.h"
@@ -47,6 +48,7 @@ int main(int argc, char *argv[])
     runner.addTest(askap::cp::ingest::ChannelManagerTest::suite());
     runner.addTest(askap::cp::ingest::MergedSourceTest::suite());
     runner.addTest(askap::cp::ingest::NoMetadataSourceTest::suite());
+    runner.addTest(askap::cp::ingest::VisConverterBaseTest::suite());
     //runner.addTest(askap::cp::ingest::CalcUVWTaskTest::suite());
     runner.addTest(askap::cp::ingest::ChannelAvgTaskTest::suite());
     runner.addTest(askap::cp::ingest::CalTaskTest::suite());

@@ -42,6 +42,9 @@
 #include "Common/ParameterSet.h"
 #include "casa/aipstype.h"
 
+// standard includes
+#include <stdint.h>
+
 // ASKAPsoft includes
 #include "cpcommon/VisDatagram.h"
 #include "cpcommon/VisChunk.h"
@@ -114,6 +117,16 @@ protected:
    inline void setNumberOfExpectedDatagrams(casa::uInt number) 
           { itsDatagramsExpected = number; }
 
+   /// @brief row for given baseline and beam
+   /// @details We have a fixed layout of data in the VisChunk/measurement set.
+   /// This helper method implements an analytical function mapping antenna
+   /// indices and beam index onto the row number.
+   /// @param[in] ant1 index of the first antenna
+   /// @param[in] ant2 index of the second antenna
+   /// @param[in] beam beam index
+   /// @return row number in the VisChunk
+   uint32_t calculateRow(uint32_t ant1, uint32_t ant2, uint32_t beam) const;
+
 private:
    /// @brief initialise beam maps
    /// @details Beams can be mapped and indices can be non-contiguous. This
@@ -121,6 +134,15 @@ private:
    /// actual number of beams for the sizing of buffers.
    /// @param[in] params parset with parameters (e.g. beammap)
    void initBeamMap(const LOFAR::ParameterSet& params);
+
+   /// @brief sum of arithmetic series
+   /// @details helper method to obtain the sum of n elements of 
+   /// arithmetic series with the given first element and increment
+   /// @param[in] n number of elements in the series to sum
+   /// @param[in] a first element
+   /// @param[in] d increment
+   /// @return the sum of the series
+   static uint32_t sumOfArithmeticSeries(uint32_t n, uint32_t a, uint32_t d);
 
    /// @brief shared pointer to visibility chunk being filled
    common::VisChunk::ShPtr itsVisChunk;
@@ -180,6 +202,8 @@ private:
    /// is configured via the parset)
    casa::uInt itsBeamsToReceive;
 
+   /// For unit testing
+   friend class VisConverterBaseTest;
 };
 
 } // namespace ingest

@@ -44,6 +44,11 @@
 #include "askap/AskapLogging.h"
 #include "askap/AskapError.h"
 
+// 3rd party includes
+#include "measures/Measures.h"
+#include "measures/Measures/MeasFrame.h"
+#include "measures/Measures/MCEpoch.h"
+
 ASKAP_LOGGER(logger, ".VisConverterBase");
 
 using namespace askap;
@@ -59,6 +64,14 @@ VisConverterBase::VisConverterBase(const LOFAR::ParameterSet& params,
        itsMaxNBeams(params.getUint32("maxbeams",0)),
        itsBeamsToReceive(params.getUint32("beams2receive",0))
 {
+   // Trigger a dummy frame conversion with casa measures to ensure 
+   // all caches are setup early on
+   const casa::MVEpoch dummyEpoch(56000.);
+
+   casa::MEpoch::Convert(casa::MEpoch(dummyEpoch, casa::MEpoch::Ref(casa::MEpoch::TAI)),
+                         casa::MEpoch::Ref(casa::MEpoch::UTC))();
+
+   // initialise beam mapping
    initBeamMap(params);
 }
 
@@ -106,4 +119,37 @@ void VisConverterBase::initBeamMap(const LOFAR::ParameterSet& params)
 }
 
 
+/// @brief sum of arithmetic series
+/// @details helper method to obtain the sum of n elements of 
+/// arithmetic series with the given first element and increment
+/// @param[in] n number of elements in the series to sum
+/// @param[in] a first element
+/// @param[in] d increment
+/// @return the sum of the series
+uint32_t VisConverterBase::sumOfArithmeticSeries(uint32_t n, uint32_t a, 
+                                                 uint32_t d)
+{
+   ASKAPDEBUGASSERT(n > 0);
+   return (n / 2.0) * ((2 * a) + ((n - 1) * d));
+}
+
+/// @brief row for given baseline and beam
+/// @details We have a fixed layout of data in the VisChunk/measurement set.
+/// This helper method implements an analytical function mapping antenna
+/// indices and beam index onto the row number.
+/// @param[in] ant1 index of the first antenna
+/// @param[in] ant2 index of the second antenna
+/// @param[in] beam beam index
+/// @return row number in the VisChunk
+uint32_t VisConverterBase::calculateRow(uint32_t ant1, uint32_t ant2,
+                                    uint32_t beam) const
+{
+    ASKAPDEBUGASSERT(ant1 <= ant2);
+    const uint32_t nAntenna = itsConfig.antennas().size();
+    ASKAPDEBUGASSERT(ant2 < nAntenna);
+    ASKAPDEBUGASSERT(beam < itsMaxNBeams);
+    return (beam * (nAntenna * (nAntenna + 1) / 2))
+        + (ant1 * (nAntenna) - sumOfArithmeticSeries(ant1 + 1, 0, 1))
+        + ant2;
+}
 
