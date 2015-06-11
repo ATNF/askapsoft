@@ -58,11 +58,15 @@ using namespace askap::cp::ingest;
 /// @param[in] params parameters specific to the associated source task
 ///                   used to set up mapping, etc
 /// @param[in] config configuration
+/// @param[in] id rank of the given ingest process
 VisConverterBase::VisConverterBase(const LOFAR::ParameterSet& params,
-                    const Configuration& config) : itsDatagramsExpected(0u),
+                    const Configuration& config, int id) : 
+       itsDatagramsExpected(0u),
        itsDatagramsCount(0u), itsDatagramsIgnored(0u), itsConfig(config),
        itsMaxNBeams(params.getUint32("maxbeams",0)),
-       itsBeamsToReceive(params.getUint32("beams2receive",0))
+       itsBeamsToReceive(params.getUint32("beams2receive",0)),
+       itsChannelManager(params),
+       itsBaselineMap(config.bmap()), itsId(id)
 {
    // Trigger a dummy frame conversion with casa measures to ensure 
    // all caches are setup early on

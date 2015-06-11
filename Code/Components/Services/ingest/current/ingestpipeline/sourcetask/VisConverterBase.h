@@ -53,6 +53,7 @@
 // local includes
 #include "configuration/Configuration.h"
 #include "configuration/BaselineMap.h"
+#include "ingestpipeline/sourcetask/ChannelManager.h"
 
 namespace askap {
 namespace cp {
@@ -72,8 +73,9 @@ public:
    /// @param[in] params parameters specific to the associated source task
    ///                   used to set up mapping, etc
    /// @param[in] config configuration
+   /// @param[in] id rank of the given ingest process
    VisConverterBase(const LOFAR::ParameterSet& params,
-                    const Configuration& config);
+                    const Configuration& config, int id);
 
    /// @brief get expected number of datagrams
    /// @return the number of datagrams required to complete VisChunk
@@ -95,6 +97,10 @@ public:
    /// @note An exception is thrown if one attempts to get an uninitialised
    /// VisChunk.
    const common::VisChunk::ShPtr& visChunk() const;
+
+   /// @brief rank of this ingest process
+   /// @return identity of this process
+   inline int id() const { return itsId; }
 
 protected:
 
@@ -201,6 +207,15 @@ private:
    /// configuration (i.e. to write everything, unless a specific mapping
    /// is configured via the parset)
    casa::uInt itsBeamsToReceive;
+
+   /// @brief Channel Manager
+   ChannelManager itsChannelManager;
+
+   /// @brief Baseline Map
+   const BaselineMap itsBaselineMap;
+
+   /// @brief The rank (identity amongst all ingest processes) of this process
+   const int itsId;
 
    /// For unit testing
    friend class VisConverterBaseTest;

@@ -51,6 +51,7 @@ class VisConverterBaseTest : public CppUnit::TestFixture {
         CPPUNIT_TEST_SUITE(VisConverterBaseTest);
         CPPUNIT_TEST(testSumOfArithmeticSeries);
         CPPUNIT_TEST(testCalculateRow);
+        CPPUNIT_TEST(testConstruct);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -59,12 +60,17 @@ class VisConverterBaseTest : public CppUnit::TestFixture {
             itsVisSrc.reset(new MockVisSource);
 
             const Configuration config = ConfigurationHelper::createDummyConfig();
-            itsInstance.reset(new VisConverterBase(LOFAR::ParameterSet(), config));
+            itsInstance.reset(new VisConverterBase(LOFAR::ParameterSet(), config, 1));
         }
 
         void tearDown() {
             itsInstance.reset();
             itsVisSrc.reset();
+        }
+
+        void testConstruct() {
+            CPPUNIT_ASSERT(itsInstance);
+            CPPUNIT_ASSERT_EQUAL(1, itsInstance->id());
         }
 
         void testSumOfArithmeticSeries()
