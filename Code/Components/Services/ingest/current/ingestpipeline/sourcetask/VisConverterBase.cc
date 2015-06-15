@@ -43,6 +43,8 @@
 // ASKAPsoft includes
 #include "askap/AskapLogging.h"
 #include "askap/AskapError.h"
+#include "askap/AskapUtil.h"
+#include "utils/PolConverter.h"
 
 // 3rd party includes
 #include "measures/Measures.h"
@@ -156,4 +158,85 @@ uint32_t VisConverterBase::calculateRow(uint32_t ant1, uint32_t ant2,
         + (ant1 * (nAntenna) - sumOfArithmeticSeries(ant1 + 1, 0, 1))
         + ant2;
 }
+
+
+/// @brief create a new VisChunk
+/// @details This method initialises itsVisChunk with a new buffer.
+/// It is intended to be used when the first datagram of a new 
+/// integration is processed.
+/// @param[in] timestamp BAT corresponding to this new chunk
+/// @param[in] corrMode correlator mode parameters (determines shape, etc)
+void VisConverterBase::initVisChunk(const casa::uLong timestamp, 
+                                    const CorrelatorMode &corrMode)
+{
+    const casa::uInt nAntenna = itsConfig.antennas().size();
+    ASKAPCHECK(nAntenna > 0, "Must have at least one antenna defined");
+    const casa::uInt nChannels = itsChannelManager.localNChannels(itsId);
+    // number of polarisation products is determined by the correlator mode
+    const casa::uInt nPol = corrMode.stokes().size();
+    const casa::uInt nBaselines = nAntenna * (nAntenna + 1) / 2;
+    const casa::uInt nRow = nBaselines * itsMaxNBeams;
+    // correlator dump time is determined by the correlator mode
+    const casa::uInt period = corrMode.interval(); // in microseconds
+
+    // now shape is determined, can create a new chunk
+    itsVisChunk.reset(new VisChunk(nRow, nChannels, nPol, nAntenna));
+
+    // Convert the time from integration start in microseconds to an
+    // integration mid-point in seconds
+    const uint64_t midpointBAT = static_cast<uint64_t>(timestamp + (period / 2ull));
+    itsVisChunk->time() = bat2epoch(midpointBAT).getValue();
+    // Convert the interval from microseconds (long) to seconds (double)
+    const casa::Double interval = period / 1000.0 / 1000.0;
+    itsVisChunk->interval() = interval;
+
+    // All visibilities get flagged as bad, then as the visibility data
+    // arrives they are unflagged
+    itsVisChunk->flag() = true;
+    itsVisChunk->visibility() = 0.0;
+
+    ASKAPCHECK(nPol <= 4, "Only supporting a maximum of 4 polarisation products");
+    ASKAPCHECK(nPol > 0, "The number of polarisations need to be positive");
+
+    // this way of creating the Stokes vectors ensures the 
+    // canonical order of polarisation products
+    // the last parameter of stokesFromIndex just defines the 
+    // frame (i.e. linear, circular) and can be
+    // any product from the chosen frame. 
+    const casa::Stokes::StokesTypes stokesTemplate = corrMode.stokes()[0];
+
+    for (casa::uInt polIndex = 0; polIndex < nPol; ++polIndex) {
+         itsVisChunk->stokes()(polIndex) = scimath::PolConverter::stokesFromIndex(polIndex, stokesTemplate);
+    }
+
+    // channel width is determined by the correlator configuration
+    itsVisChunk->channelWidth() = corrMode.chanWidth().getValue("Hz");
+
+    for (casa::uInt beam = 0, row = 0; beam < itsMaxNBeams; ++beam) {
+        for (casa::uInt ant1 = 0; ant1 < nAntenna; ++ant1) {
+            for (casa::uInt ant2 = ant1; ant2 < nAntenna; ++ant2,++row) {
+                ASKAPCHECK(row < nRow, "Row index (" << row <<
+                           ") should be less than nRow (" << nRow << ")");
+
+                // nothing is done to phase centre and pointing
+                // centre here. These fields are filled by
+                // the methods of the source task
+                itsVisChunk->antenna1()(row) = ant1;
+                itsVisChunk->antenna2()(row) = ant2;
+                itsVisChunk->beam1()(row) = beam;
+                itsVisChunk->beam2()(row) = beam;
+                itsVisChunk->beam1PA()(row) = 0;
+                itsVisChunk->beam2PA()(row) = 0;
+                itsVisChunk->uvw()(row) = 0.0;
+            }
+        }
+    }
+    
+    // initialise stats, expected number of datagrams is configured
+    // in derived classes just reset it here
+    itsDatagramsExpected = 0; 
+    itsDatagramsIgnored = 0;
+    itsDatagramsCount = 0;
+}
+
 

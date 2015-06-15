@@ -53,6 +53,7 @@
 // local includes
 #include "configuration/Configuration.h"
 #include "configuration/BaselineMap.h"
+#include "configuration/CorrelatorMode.h"
 #include "ingestpipeline/sourcetask/ChannelManager.h"
 
 namespace askap {
@@ -132,6 +133,14 @@ protected:
    /// @param[in] beam beam index
    /// @return row number in the VisChunk
    uint32_t calculateRow(uint32_t ant1, uint32_t ant2, uint32_t beam) const;
+
+   /// @brief create a new VisChunk
+   /// @details This method initialises itsVisChunk with a new buffer.
+   /// It is intended to be used when the first datagram of a new 
+   /// integration is processed.
+   /// @param[in] timestamp BAT corresponding to this new chunk
+   /// @param[in] corrMode correlator mode parameters (determines shape, etc)
+   void initVisChunk(const casa::uLong timestamp, const CorrelatorMode &corrMode);
 
 private:
    /// @brief initialise beam maps

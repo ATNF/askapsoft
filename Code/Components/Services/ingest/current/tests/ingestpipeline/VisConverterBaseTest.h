@@ -52,6 +52,7 @@ class VisConverterBaseTest : public CppUnit::TestFixture {
         CPPUNIT_TEST(testSumOfArithmeticSeries);
         CPPUNIT_TEST(testCalculateRow);
         CPPUNIT_TEST(testConstruct);
+        CPPUNIT_TEST(testInitVisChunk);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -60,7 +61,12 @@ class VisConverterBaseTest : public CppUnit::TestFixture {
             itsVisSrc.reset(new MockVisSource);
 
             const Configuration config = ConfigurationHelper::createDummyConfig();
-            itsInstance.reset(new VisConverterBase(LOFAR::ParameterSet(), config, 1));
+            LOFAR::ParameterSet params;
+            params.add("n_channels.0", "0");
+            params.add("n_channels.1", "16416");
+            // input beams are one-based, MS requires zero-based:
+            params.add("beammap","1:0,2:1,3:2,4:3,5:4");
+            itsInstance.reset(new VisConverterBase(params, config, 1));
         }
 
         void tearDown() {
@@ -71,6 +77,55 @@ class VisConverterBaseTest : public CppUnit::TestFixture {
         void testConstruct() {
             CPPUNIT_ASSERT(itsInstance);
             CPPUNIT_ASSERT_EQUAL(1, itsInstance->id());
+        }
+
+        void testInitVisChunk() {
+            const unsigned long starttime = 1000000; // One second after epoch 0
+            // constants that match the numbers set by ConfigurationHelper
+            const double interval = 5.;
+            const uint32_t nAntennas = 6;
+            const uint32_t nBeams = 4;
+            const uint32_t nChannels = 16416;
+            const unsigned int nPol = 4;
+
+            CPPUNIT_ASSERT(itsInstance);
+            const CorrelatorMode corrMode = itsInstance->itsConfig.lookupCorrelatorMode("standard");
+            itsInstance->initVisChunk(starttime, corrMode);
+            VisChunk::ShPtr chunk = itsInstance->visChunk();
+            CPPUNIT_ASSERT(chunk);
+            CPPUNIT_ASSERT_EQUAL(nAntennas * (nAntennas + 1) / 2 * nBeams, chunk->nRow());
+            CPPUNIT_ASSERT_EQUAL(nChannels, chunk->nChannel());
+            CPPUNIT_ASSERT_EQUAL(nPol, chunk->nPol());
+            
+            // Ensure the timestamp represents the integration midpoint.
+            const uint64_t midpoint = 3500000;
+            uint64_t chunkMidpoint = epoch2bat(chunk->time());
+            CPPUNIT_ASSERT_EQUAL(midpoint, chunkMidpoint);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(interval, chunk->interval(), 1.0E-10);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(1e6/54, chunk->channelWidth(), 1.0E-3);
+
+            // Check stokes
+            CPPUNIT_ASSERT_EQUAL(size_t(nPol), chunk->stokes().size());
+            CPPUNIT_ASSERT(chunk->stokes()(0) == casa::Stokes::XX);
+            CPPUNIT_ASSERT(chunk->stokes()(1) == casa::Stokes::XY);
+            CPPUNIT_ASSERT(chunk->stokes()(2) == casa::Stokes::YX);
+            CPPUNIT_ASSERT(chunk->stokes()(3) == casa::Stokes::YY);
+
+            // checking individual rows
+            for (casa::uInt row=0; row < chunk->nRow(); ++row) {
+                 const casa::uInt ant1 = chunk->antenna1()(row);
+                 const casa::uInt ant2 = chunk->antenna2()(row);
+                 const casa::uInt beam = chunk->beam1()(row);
+                 // consistency check
+                 CPPUNIT_ASSERT_EQUAL(row,
+                                itsInstance->calculateRow(ant1, ant2, beam));
+                 CPPUNIT_ASSERT_EQUAL(beam, chunk->beam2()(row));
+                 CPPUNIT_ASSERT_DOUBLES_EQUAL(0., chunk->beam1PA()(row), 1.0E-10);
+                 CPPUNIT_ASSERT_DOUBLES_EQUAL(0., chunk->beam2PA()(row), 1.0E-10);
+                 for (int i=0; i<3; ++i) {
+                      CPPUNIT_ASSERT_DOUBLES_EQUAL(0., chunk->uvw()(row)(i), 1.0E-10);
+                 }
+            }
         }
 
         void testSumOfArithmeticSeries()
