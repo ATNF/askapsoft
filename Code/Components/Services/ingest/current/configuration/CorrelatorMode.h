@@ -55,7 +55,7 @@ class CorrelatorMode {
              const casa::uInt interval);
 
         /// @brief Returns the correlator mode name
-        std::string name(void) const;
+        const std::string& name(void) const;
 
         /// @brief The number of spectral channels
         casa::uInt nChan(void) const;
@@ -63,10 +63,10 @@ class CorrelatorMode {
         /// @brief The width (in Hz) of a single spectral channel.
         /// @note This may be a negative width in the case where increasing
         /// channel number corresponds to decreasing frequency.
-        casa::Quantity chanWidth(void) const;
+        const casa::Quantity& chanWidth(void) const;
 
         /// @brief The stokes types to be observed
-        std::vector<casa::Stokes::StokesTypes> stokes(void) const;
+        const std::vector<casa::Stokes::StokesTypes>& stokes(void) const;
 
         /// @brief Returns, in microseconds, correlator integration interval.
         casa::uInt interval(void) const;

@@ -57,7 +57,7 @@ CorrelatorMode::CorrelatorMode(const std::string& modeName,
     ASKAPCHECK(!stokes.empty(), "Stokes vector is empty");
 }
 
-std::string CorrelatorMode::name(void) const
+const std::string& CorrelatorMode::name(void) const
 {
     return itsModeName;
 }
@@ -67,12 +67,12 @@ casa::uInt CorrelatorMode::nChan(void) const
         return itsNChan;
 }
 
-casa::Quantity CorrelatorMode::chanWidth(void) const
+const casa::Quantity& CorrelatorMode::chanWidth(void) const
 {
         return itsChanWidth;
 }
 
-std::vector<casa::Stokes::StokesTypes> CorrelatorMode::stokes(void) const
+const std::vector<casa::Stokes::StokesTypes>& CorrelatorMode::stokes(void) const
 {
         return itsStokes;
 }
@@ -81,3 +81,4 @@ casa::uInt CorrelatorMode::interval(void) const
 {
     return itsInterval;
 }
+

@@ -204,10 +204,32 @@ void VisConverterBase::initVisChunk(const casa::uLong timestamp,
     // frame (i.e. linear, circular) and can be
     // any product from the chosen frame. 
     const casa::Stokes::StokesTypes stokesTemplate = corrMode.stokes()[0];
-
-    for (casa::uInt polIndex = 0; polIndex < nPol; ++polIndex) {
-         itsVisChunk->stokes()(polIndex) = scimath::PolConverter::stokesFromIndex(polIndex, stokesTemplate);
+    casa::uInt outPolIndex = 0;
+    for (casa::uInt polIndex = 0; polIndex < 4; ++polIndex) {
+         casa::Stokes::StokesTypes thisStokes = casa::Stokes::Undefined;
+         const casa::Stokes::StokesTypes testedStokes = 
+               scimath::PolConverter::stokesFromIndex(polIndex, stokesTemplate);
+         // search via for-loop rather than via std::find to do further checks
+         for (std::vector<casa::Stokes::StokesTypes>::const_iterator 
+                ci = corrMode.stokes().begin(); ci != corrMode.stokes().end(); 
+                ++ci) {
+              if (*ci == testedStokes) {
+                  // this product is present in the correlator output
+                  ASKAPCHECK(thisStokes == casa::Stokes::Undefined, 
+                      "Duplicate Stokes products found in the polarisation setup: "<<
+                       scimath::PolConverter::toString(corrMode.stokes()));
+                  thisStokes = testedStokes;
+              }
+         }
+         if (thisStokes != casa::Stokes::Undefined) {
+             ASKAPASSERT(outPolIndex < nPol);
+             itsVisChunk->stokes()(outPolIndex++) = thisStokes;
+         }
     }
+    ASKAPCHECK(outPolIndex == nPol, 
+     "Mixed polarisation products are not supported. Correlator output has: "<<
+      scimath::PolConverter::toString(corrMode.stokes())<<
+      ", successfully matched only "<<outPolIndex<<" products: "<<scimath::PolConverter::toString(itsVisChunk->stokes()));
 
     // channel width is determined by the correlator configuration
     itsVisChunk->channelWidth() = corrMode.chanWidth().getValue("Hz");
