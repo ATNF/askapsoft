@@ -53,6 +53,8 @@ class VisConverterBaseTest : public CppUnit::TestFixture {
         CPPUNIT_TEST(testCalculateRow);
         CPPUNIT_TEST(testConstruct);
         CPPUNIT_TEST(testInitVisChunk);
+        CPPUNIT_TEST(testMapCorrProduct);
+        CPPUNIT_TEST_EXCEPTION(testInvalidBeamProduct,AskapError);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -65,7 +67,7 @@ class VisConverterBaseTest : public CppUnit::TestFixture {
             params.add("n_channels.0", "0");
             params.add("n_channels.1", "16416");
             // input beams are one-based, MS requires zero-based:
-            params.add("beammap","1:0,2:1,3:2,4:3,5:4");
+            params.add("beammap","1:0,2:1,3:2,4:3,5:4,10:-1");
             itsInstance.reset(new VisConverterBase(params, config, 1));
         }
 
@@ -126,6 +128,69 @@ class VisConverterBaseTest : public CppUnit::TestFixture {
                       CPPUNIT_ASSERT_DOUBLES_EQUAL(0., chunk->uvw()(row)(i), 1.0E-10);
                  }
             }
+        }
+
+        void testMapCorrProduct()
+        {
+            const unsigned long starttime = 1000000; // One second after epoch 0
+            CPPUNIT_ASSERT(itsInstance);
+            const CorrelatorMode corrMode = itsInstance->itsConfig.lookupCorrelatorMode("standard");
+            itsInstance->initVisChunk(starttime, corrMode);
+            const uint32_t nBeams = 4;
+            const uint32_t nProducts = 21;
+            // expected baseline and polarisation, refer to ConfigurationHelper
+            const casa::uInt expectedAnt1[nProducts] = {0,0,0,0,0,0,0,0,0,0,0,
+                           1,1,1,1,1,1,1,2,2,2};
+            const casa::uInt expectedAnt2[nProducts] = {0,0,1,1,2,2,0,1,1,2,2,
+                           1,1,2,2,1,2,2,2,2,2};
+            const casa::uInt expectedPol[nProducts] = {0,1,0,1,0,1,3,2,3,2,3,
+                           0,1,0,1,3,2,3,0,1,3};
+            VisChunk::ShPtr chunk = itsInstance->visChunk();
+            CPPUNIT_ASSERT(chunk);
+            for (uint32_t beam = 0; beam < nBeams; ++beam) {
+                 for (uint32_t n = 0; n < nProducts; ++n) {
+                      // hardware indices are 1-based
+                      const boost::optional<std::pair<casa::uInt, casa::uInt> >  
+                          product = itsInstance->mapCorrProduct(n+1, beam +1);
+                      CPPUNIT_ASSERT(product);
+                      CPPUNIT_ASSERT_EQUAL(expectedPol[n], product->second);
+                      const casa::uInt row = product->first;
+                      CPPUNIT_ASSERT(row < chunk->nRow());
+                      CPPUNIT_ASSERT(product->second < chunk->nPol());
+                      CPPUNIT_ASSERT_EQUAL(expectedAnt1[n], chunk->antenna1()(row));
+                      CPPUNIT_ASSERT_EQUAL(expectedAnt2[n], chunk->antenna2()(row));
+                      CPPUNIT_ASSERT_EQUAL(beam, chunk->beam1()(row));
+                      CPPUNIT_ASSERT_EQUAL(beam, chunk->beam2()(row));
+                 }
+            }
+         
+            
+            for (uint32_t n = 0; n < nProducts; ++n) {
+                 // beam 10 is intentionally unmapped
+                 const bool invalidBeamProduct = 
+                       itsInstance->mapCorrProduct(n+1, 10);
+                 CPPUNIT_ASSERT(!invalidBeamProduct);
+            }
+            
+           
+            for (uint32_t beam = 0; beam < nBeams; ++beam) {
+                 const bool invalidBaselineProduct = 
+                       itsInstance->mapCorrProduct(nProducts+1, beam + 1);
+                 CPPUNIT_ASSERT(!invalidBaselineProduct);
+            }
+        }
+
+        void testInvalidBeamProduct() {
+            const unsigned long starttime = 1000000; // One second after epoch 0
+            CPPUNIT_ASSERT(itsInstance);
+            const CorrelatorMode corrMode = itsInstance->itsConfig.lookupCorrelatorMode("standard");
+
+            itsInstance->initVisChunk(starttime, corrMode);
+            // beam 5 is unmapped, and test configuration only has 4 beams,
+            // so the following line should trigger an exception
+            const bool invalidBeamProduct = 
+                       itsInstance->mapCorrProduct(1, 5);
+            CPPUNIT_ASSERT(!invalidBeamProduct);
         }
 
         void testSumOfArithmeticSeries()

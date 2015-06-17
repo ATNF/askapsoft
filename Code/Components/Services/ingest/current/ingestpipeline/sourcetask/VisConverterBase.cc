@@ -139,6 +139,104 @@ uint32_t VisConverterBase::sumOfArithmeticSeries(uint32_t n, uint32_t a,
    return (n / 2.0) * ((2 * a) + ((n - 1) * d));
 }
 
+/// @brief helper method to map polarisation product
+/// @details This method obtains polarisation dimension index
+/// for the given Stokes parameter. Undefined value means VisChunk
+/// does not contain selected product.
+/// param[in] stokes input Stokes parameter
+/// @return polarisation index. Undefined value for unmapped polarisation.
+boost::optional<casa::uInt> 
+VisConverterBase::mapStokes(casa::Stokes::StokesTypes stokes) const
+{
+   ASKAPDEBUGASSERT(itsVisChunk);
+   ASKAPDEBUGASSERT(itsVisChunk->nPol() == itsVisChunk->stokes().size());
+   for (size_t i = 0; i < itsVisChunk->nPol(); ++i) {
+        if (itsVisChunk->stokes()(i) == stokes) {
+            return i;
+        }
+   }
+   return boost::none;
+}
+
+/// @brief map correlation product to the visibility chunk
+/// @details This method maps baseline and beam ids to
+/// the VisChunk row and polarisation index. The remaining
+/// dimension of the cube (channel) has to be taken care of
+/// separately. The return of undefined value means that
+/// given IDs are not mapped (quite possibly intentionally,
+/// e.g. if we don't want to write all data received from the IOC).
+/// @param[in] baseline baseline ID to map (defubed by the IOC)
+/// @param[in] beam beam ID to map (defined by the IOC)
+/// @return a pair of row and polarisation indices (guaranteed to
+/// be within VisChunk shape). Undefined value for unmapped products.
+boost::optional<std::pair<casa::uInt, casa::uInt> > 
+VisConverterBase::mapCorrProduct(uint32_t baseline, uint32_t beam) const
+{
+   ASKAPCHECK(itsVisChunk, "VisChunk should be initialised before mapCorrProduct call");
+
+   // the logic more or less follows the original Ben's addVis in source classes
+
+   // 0) Map from baseline to antenna pair and stokes type
+   if (itsBaselineMap.idToAntenna1(baseline) == -1 ||
+       itsBaselineMap.idToAntenna2(baseline) == -1 ||
+       itsBaselineMap.idToStokes(baseline) == casa::Stokes::Undefined) {
+       // although we can dropped baselines for some antennas, 
+       // mapping information should always be present in the configuration
+       // for safety. Therefore, the warning is given.
+       ASKAPLOG_WARN_STR(logger, "Baseline id: " << baseline
+               << " has no valid mapping to antenna pair and stokes");
+       return boost::none;
+   }
+
+   const uint32_t antenna1 = static_cast<uint32_t>(itsBaselineMap.idToAntenna1(baseline));
+   const uint32_t antenna2 = static_cast<uint32_t>(itsBaselineMap.idToAntenna2(baseline));
+   const casa::Int beamid = itsBeamIDMap(beam);
+   if (beamid < 0) {
+       // this beam ID is intentionally unmapped - no warning needed
+       return boost::none;
+   }
+   ASKAPCHECK(beamid < static_cast<casa::Int>(itsMaxNBeams), 
+             "Received beam id beam="<<beam<<" mapped to beamid="<<beamid<<
+             " which is outside the beam index range, itsMaxNBeams="<<itsMaxNBeams);
+
+   // 1) Map from baseline to stokes type and find the  position on the stokes
+   // axis of the cube to insert the data into
+   const casa::Stokes::StokesTypes stokes = itsBaselineMap.idToStokes(baseline);
+   const boost::optional<casa::uInt> polIndex = mapStokes(stokes);
+   if (!polIndex) {
+       // the warning is given only once
+       if (std::find(itsIgnoredStokesWarned.begin(), itsIgnoredStokesWarned.end(), stokes) == itsIgnoredStokesWarned.end()) {
+          ASKAPLOG_WARN_STR(logger, "Stokes type " << casa::Stokes::name(stokes)
+                             << " is not configured for storage");
+          itsIgnoredStokesWarned.insert(stokes);
+       }
+       return boost::none;
+   }
+
+   // 2) Check the indexes are within the visibility chunk
+   const uint32_t nAntenna = itsConfig.antennas().size();
+   if ((antenna1 >= nAntenna) || (antenna2 >= nAntenna)) {
+       // corresponding antenna is intentionally ignored
+       // this option exists to support staged roll out of
+       // ADE antennas
+       return boost::none;
+   }
+
+   ASKAPCHECK(*polIndex < itsVisChunk->nPol(), "Polarisation index exceeds chunk's dimensions");
+
+   // 3) Find the row for the given beam and baseline and final checks
+   const uint32_t row = calculateRow(antenna1, antenna2, beamid);
+
+   const std::string errorMsg = "Indexing failed to find row";
+   ASKAPCHECK(row < itsVisChunk->nRow(), "Row number exceeds the chunk dimensions, internal inconsistency suspected");
+   ASKAPCHECK(itsVisChunk->antenna1()(row) == antenna1, errorMsg);
+   ASKAPCHECK(itsVisChunk->antenna2()(row) == antenna2, errorMsg);
+   ASKAPCHECK(itsVisChunk->beam1()(row) == static_cast<casa::uInt>(beamid), errorMsg);
+   ASKAPCHECK(itsVisChunk->beam2()(row) == static_cast<casa::uInt>(beamid), errorMsg);
+
+   return std::pair<casa::uInt, casa::uInt>(row, *polIndex);
+}
+
 /// @brief row for given baseline and beam
 /// @details We have a fixed layout of data in the VisChunk/measurement set.
 /// This helper method implements an analytical function mapping antenna
