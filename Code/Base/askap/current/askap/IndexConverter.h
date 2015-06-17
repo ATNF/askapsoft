@@ -35,7 +35,7 @@
 #ifndef ASKAP_UTILITY_INDEX_CONVERTER
 #define ASKAP_UTILITY_INDEX_CONVERTER
 
-#include <vector>
+#include <map>
 #include <string>
 
 namespace askap {
@@ -49,6 +49,11 @@ namespace utility {
 /// also one-based). This class simplifies mapping into a continuous 
 /// range of indices. Same functionality is likely to be required for
 /// beams. 
+///
+/// MV: We could've used a normal map here + helper method to fill 
+/// the rules from a string. Initially we had a vector instead of the
+/// map to make the conversion operator faster as the output space is
+/// expected to be dense. Probably to complex for what it is worth.
 class IndexConverter  {
 public:
    /// @brief default index converter - no conversion
@@ -80,7 +85,7 @@ public:
    size_t nRules() const;
    
 private:
-   std::vector<int> itsMap; 
+   std::map<int,int> itsMap; 
 };
 
 } // namespace utility

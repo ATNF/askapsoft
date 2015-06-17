@@ -43,7 +43,6 @@ namespace utility {
 /// @brief default index converter - no conversion
 IndexConverter::IndexConverter() 
 {
-  itsMap.reserve(36);
 }
    
 /// @brief setup conversion from a string
@@ -51,7 +50,6 @@ IndexConverter::IndexConverter()
 /// @param[in] indexMap string with the rules
 IndexConverter::IndexConverter(const std::string &indexMap) 
 {
-  itsMap.reserve(30);
   add(indexMap);
 }
    
@@ -60,17 +58,9 @@ IndexConverter::IndexConverter(const std::string &indexMap)
 /// @param[in] target output index
 void IndexConverter::add(const int in, const int target)
 {
-  if (target >= int(itsMap.size())) {
-      itsMap.resize(target+1,-1);
-      itsMap[target] = in;
-  } else {
-      itsMap[target] = in;
-      for (int index = 0; index<int(itsMap.size()); ++index) {
-           if (index != target) {
-               ASKAPCHECK(itsMap[index] != in, "Input index "<<in<<" is present in the map multiple times");
-           }
-      } 
-  }
+  ASKAPCHECK(in >= 0, "Input indices should be non-negative; you have "<<in);
+  const bool created = itsMap.insert(std::pair<int,int>(in,target)).second;
+  ASKAPCHECK(created, "Attempting to override map for index "<<in);
 }
    
 /// @brief add mapping from string
@@ -106,11 +96,10 @@ int IndexConverter::operator()(const int in)  const
   if (itsMap.size() == 0) {
       return in;
   } else {
-      ASKAPDEBUGASSERT(in >= 0);
-      for (int index = 0; index < int(itsMap.size()); ++index) {
-           if (itsMap[index] == in) {
-               return index;
-           }
+      ASKAPCHECK(in >= 0, "Input index in IndexConverter::operator() should be non-negative; you have "<<in);
+      std::map<int, int>::const_iterator ci = itsMap.find(in);
+      if (ci != itsMap.end()) {
+          return ci->second;
       }
   }
   return -1;

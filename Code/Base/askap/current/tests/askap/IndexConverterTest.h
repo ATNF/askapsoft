@@ -43,6 +43,7 @@ class IndexConverterTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(testVoidConversion);
   CPPUNIT_TEST(test1Elem);
   CPPUNIT_TEST(testManyElements);
+  CPPUNIT_TEST(testExplicitExclusion);
   CPPUNIT_TEST_SUITE_END();
 public:
   void testVoidConversion() {
@@ -80,6 +81,18 @@ public:
           CPPUNIT_ASSERT_EQUAL(2, ic(1));
           CPPUNIT_ASSERT_EQUAL(0, ic(3));
           CPPUNIT_ASSERT_EQUAL(1, ic(5));          
+     }          
+  }
+
+  void testExplicitExclusion() {
+     IndexConverter ic;
+     ic.add("1:0,2:1,3:2,4:3,10:-1");
+     for (int index=0; index<30; ++index) {
+          if ((index > 4) && (index != 0)) {
+              CPPUNIT_ASSERT_EQUAL(-1, ic(index));
+          } else {
+              CPPUNIT_ASSERT_EQUAL(index == 10 ? -1 : index - 1, ic(index));
+          }
      }          
   }
 
