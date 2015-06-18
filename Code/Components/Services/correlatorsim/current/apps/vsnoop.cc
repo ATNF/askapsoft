@@ -71,7 +71,7 @@ static void termination_handler(int signum)
 static void printAdditional(const VisDatagram& v)
 {
     std::cout << "\tVisibilities:" << std::endl;
-    for (unsigned int i = 0; i < N_CHANNELS_PER_SLICE; ++i) {
+    for (unsigned int i = 0; i < VisDatagramTraits<VisDatagram>::N_CHANNELS_PER_SLICE; ++i) {
         std::cout << "\t\tch" << i << ": " << "("
             << v.vis[i].real << ", "
             << v.vis[i].imag << ")";
@@ -159,8 +159,8 @@ int main(int argc, char *argv[])
             std::cout << "Error: Failed to read a full VisDatagram struct" << std::endl;
             continue;
         }
-        if (vis.version != VISPAYLOAD_VERSION) {
-            std::cout << "Version mismatch. Expected " << VISPAYLOAD_VERSION
+        if (vis.version != VisDatagramTraits<VisDatagram>::VISPAYLOAD_VERSION) {
+            std::cout << "Version mismatch. Expected " << VisDatagramTraits<VisDatagram>::VISPAYLOAD_VERSION
                 << " got " << vis.version << std::endl;
             continue;
         }

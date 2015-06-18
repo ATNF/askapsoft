@@ -145,7 +145,7 @@ bool CorrelatorSimulator::sendNext(void)
 
         // Populate the VisDatagram
         askap::cp::VisDatagram payload;
-        payload.version = VISPAYLOAD_VERSION;
+        payload.version = VisDatagramTraits<VisDatagram>::VISPAYLOAD_VERSION;
 
         // Note, the measurement set stores integration midpoint (in seconds), while the TOS
         // (and it is assumed the correlator) deal with integration start (in microseconds)
@@ -179,8 +179,8 @@ bool CorrelatorSimulator::sendNext(void)
         const unsigned int nChanActual = itsExpansionFactor * nChan;
 
         // Calculate how many slices to send to encompass all channels
-        const unsigned int nSlices = nChanActual / N_CHANNELS_PER_SLICE;
-        ASKAPCHECK(nChanActual % N_CHANNELS_PER_SLICE == 0,
+        const unsigned int nSlices = nChanActual / VisDatagramTraits<VisDatagram>::N_CHANNELS_PER_SLICE;
+        ASKAPCHECK(nChanActual % VisDatagramTraits<VisDatagram>::N_CHANNELS_PER_SLICE == 0,
                 "Number of channels must be divisible by N_CHANNELS_PER_SLICE");
 
         // TODO: Below, the slice starts at zero for each process where only
@@ -224,9 +224,9 @@ bool CorrelatorSimulator::sendNext(void)
             }
             for (unsigned int slice = 0; slice < nSlices; ++slice) {
                 payload.slice = slice + sliceOffset;
-                for (unsigned int chan = 0; chan < N_CHANNELS_PER_SLICE; ++chan) {
+                for (unsigned int chan = 0; chan < VisDatagramTraits<VisDatagram>::N_CHANNELS_PER_SLICE; ++chan) {
                     const unsigned int offset = static_cast<unsigned int>(
-                            ceil(((slice * N_CHANNELS_PER_SLICE) + chan) / itsExpansionFactor));
+                            ceil(((slice * VisDatagramTraits<VisDatagram>::N_CHANNELS_PER_SLICE) + chan) / itsExpansionFactor));
                     payload.vis[chan].real = data(corr, offset).real();
                     payload.vis[chan].imag = data(corr, offset).imag();
                 }

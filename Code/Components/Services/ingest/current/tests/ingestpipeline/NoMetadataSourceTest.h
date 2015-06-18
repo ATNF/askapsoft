@@ -58,7 +58,7 @@ class NoMetadataSourceTest : public CppUnit::TestFixture {
 
             LOFAR::ParameterSet params;
             std::ostringstream ss;
-            ss << N_CHANNELS_PER_SLICE;
+            ss << VisDatagramTraits<VisDatagram>::N_CHANNELS_PER_SLICE;
             params.add("n_channels.0", ss.str());
             Configuration config = ConfigurationHelper::createDummyConfig();
             itsInstance.reset(new NoMetadataSource(params, config, itsVisSrc, 1, 0));
@@ -87,7 +87,7 @@ class NoMetadataSourceTest : public CppUnit::TestFixture {
 
             // Populate a VisDatagram to match the metadata
             askap::cp::VisDatagram vis;
-            vis.version = VISPAYLOAD_VERSION;
+            vis.version = VisDatagramTraits<VisDatagram>::VISPAYLOAD_VERSION;
             vis.slice = 0;
             vis.baselineid = 1;
             vis.beamid = 1;
@@ -110,7 +110,7 @@ class NoMetadataSourceTest : public CppUnit::TestFixture {
             CPPUNIT_ASSERT_DOUBLES_EQUAL(midpoint, chunkMidpoint.getValue("s"), 1.0E-10);
 
             // Ensure other metadata is as expected
-            CPPUNIT_ASSERT_EQUAL(1 * N_CHANNELS_PER_SLICE, chunk->nChannel());
+            CPPUNIT_ASSERT_EQUAL(1 * VisDatagramTraits<VisDatagram>::N_CHANNELS_PER_SLICE, chunk->nChannel());
             CPPUNIT_ASSERT_EQUAL(nCorr, chunk->nPol());
             const casa::uInt nBaselines = nAntenna * (nAntenna + 1) / 2;
             CPPUNIT_ASSERT_EQUAL(nBaselines * nBeam, chunk->nRow());
@@ -119,8 +119,8 @@ class NoMetadataSourceTest : public CppUnit::TestFixture {
             // are not flagged, and that the rest are flagged
 
             // First calculate the channel range that was set
-            const unsigned int startChan = vis.slice * N_CHANNELS_PER_SLICE; //inclusive
-            const unsigned int endChan = (vis.slice + 1) * N_CHANNELS_PER_SLICE; //exclusive
+            const unsigned int startChan = vis.slice * VisDatagramTraits<VisDatagram>::N_CHANNELS_PER_SLICE; //inclusive
+            const unsigned int endChan = (vis.slice + 1) * VisDatagramTraits<VisDatagram>::N_CHANNELS_PER_SLICE; //exclusive
 
             for (unsigned int row = 0; row < chunk->nRow(); ++row) {
                 for (unsigned int chan = 0; chan < chunk->nChannel(); ++chan) {
@@ -150,7 +150,7 @@ class NoMetadataSourceTest : public CppUnit::TestFixture {
             CPPUNIT_ASSERT(chunk->stokes()(3) == casa::Stokes::YY);
 
             // Check frequency vector
-            CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(N_CHANNELS_PER_SLICE),
+            CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(VisDatagramTraits<VisDatagram>::N_CHANNELS_PER_SLICE),
                     chunk->frequency().size());
         }
 

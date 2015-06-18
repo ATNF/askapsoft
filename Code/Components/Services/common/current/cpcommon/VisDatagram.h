@@ -22,72 +22,20 @@
 /// along with this program; if not, write to the Free Software
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
-/// @author Ben Humphreys <ben.humphreys@csiro.au>
+/// @author Max Voronkov <maxim.voronkov@csiro.au>
 
 #ifndef ASKAP_CP_VISDATAGRAM_H
 #define ASKAP_CP_VISDATAGRAM_H
 
-#include <stdint.h>
+#include "cpcommon/VisDatagramTraits.h"
+#include "cpcommon/VisDatagramBETA.h"
+#include "cpcommon/VisDatagramADE.h"
 
 namespace askap {
     namespace cp {
 
-        /// @brief Encoding of a single precision complex floating point number
-        /// for the correlator to central processor interface.
-        struct FloatComplex
-        {
-            /// The real part of the complex number.
-            float real;
-
-            /// The imaginary part of the complex number.
-            float imag;
-        } __attribute__((__packed__));
-
-        /// @brief Version number for the VisDatagram.
-        static const uint32_t VISPAYLOAD_VERSION = 0x1;
-
-        /// @brief Number of channels per slice in the VisDatagram. One
-        /// VisDatagram will then contain data for N_CHANNELS_PER_SLICE channels.
-        /// This is hardcoded so fixed size UDP datagrams can be used.
-        static const uint32_t N_CHANNELS_PER_SLICE = 1026;
-
-        /// @brief This structure specifies the UDP datagram which is sent from
-        /// the correlator to the central processor. It contains a block of contiguous
-        /// channels for a single baseline and polarisation product.
-        struct VisDatagram
-        {
-            /// A version number for this structure. Also doubles as a magic
-            /// number which can be used to verify if the datagram is of this
-            /// type.
-            uint32_t version;
-
-            /// Slice number. Which slice of the channel space this packet
-            /// relates to. For example, for a spectral window configuration of
-            /// 16416 channels and N_CHANNELS_PER_SLICE of 1026 there will be
-            /// a total of 16 slices.
-            /// 
-            /// This number is zero indexed, so the slices in the above example
-            /// will be numbered 0 to 15.
-            uint32_t slice;
-
-            /// Timestamp - Binary Atomic Time (BAT). The number of microseconds
-            /// since Modified Julian Day (MJD) = 0
-            uint64_t timestamp;
-
-            /// Baseline ID
-            /// This identified which antenna pair and polarisation product this datagram
-            /// corresponds to.
-            /// This need not be contiguous and does not have to begin at zero or one.
-            uint32_t baselineid;
-
-            /// Beam ID
-            /// This identified which synthesised beam this datagram corresponds to.
-            /// This need not be contiguous and does not have to begin at zero or one.
-            uint32_t beamid;
-
-            /// Visibilities
-            FloatComplex vis[N_CHANNELS_PER_SLICE];
-        } __attribute__((__packed__));
+        // default protocol selection
+        typedef VisDatagramBETA VisDatagram;
 
     };
 };

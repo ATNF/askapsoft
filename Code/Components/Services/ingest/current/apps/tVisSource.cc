@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
         VisDatagram outvis;
         std::memset(&outvis, 0, sizeof (VisDatagram));
         outvis.timestamp = time;
-        outvis.version = VISPAYLOAD_VERSION;
+        outvis.version = VisDatagramTraits<VisDatagram>::VISPAYLOAD_VERSION;
         out.send(outvis);
 
         boost::shared_ptr<VisDatagram> recvd = source.next();
@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
         VisDatagram outvis;
         std::memset(&outvis, 0, sizeof (VisDatagram));
         outvis.timestamp = time;
-        outvis.version = VISPAYLOAD_VERSION;
+        outvis.version = VisDatagramTraits<VisDatagram>::VISPAYLOAD_VERSION;
         out.send(outvis);
         usleep(10); // Throttle the sending slightly
     }

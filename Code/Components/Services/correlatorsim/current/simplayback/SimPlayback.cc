@@ -187,4 +187,9 @@ void SimPlayback::run(void)
             now = static_cast<unsigned long>(MPI_Wtime() * 1000.0 * 1000.0);
         }
     }
+    // synchronise all processes before destructors are called
+    if (itsRank == 0) {
+        usleep(20000000ul);
+    }
+    MPI_Barrier(MPI_COMM_WORLD);
 }

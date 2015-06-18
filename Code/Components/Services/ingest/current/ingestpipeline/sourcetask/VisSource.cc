@@ -102,9 +102,9 @@ void VisSource::handle_receive(const boost::system::error_code& error,
         if (bytes != sizeof(VisDatagram)) {
             ASKAPLOG_WARN_STR(logger, "Error: Failed to read a full VisDatagram struct");
         }
-        if (itsRecvBuffer->version != VISPAYLOAD_VERSION) {
+        if (itsRecvBuffer->version != VisDatagramTraits<VisDatagram>::VISPAYLOAD_VERSION) {
             ASKAPLOG_ERROR_STR(logger, "Version mismatch. Expected "
-                    << VISPAYLOAD_VERSION
+                    << VisDatagramTraits<VisDatagram>::VISPAYLOAD_VERSION
                     << " got " << itsRecvBuffer->version);
         }
 

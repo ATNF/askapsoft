@@ -1,4 +1,4 @@
-/// @file VisDatagram.cc
+/// @file FloatComplex.h
 ///
 /// @copyright (c) 2010 CSIRO
 /// Australia Telescope National Facility (ATNF)
@@ -23,29 +23,26 @@
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
 /// @author Max Voronkov <maxim.voronkov@csiro.au>
+/// extracted from the original Ben's version of VisDatagramBETA
 
-#include "cpcommon/VisDatagram.h"
+#ifndef ASKAP_CP_FLOATCOMPLEX_H
+#define ASKAP_CP_FLOATCOMPLEX_H
 
 namespace askap {
     namespace cp {
 
-       // definition of const statics for the sake of completeness
-       // although this could've been skipped as these fields are
-       // integral types and we never access them directly rather than
-       // through type.
+        /// @brief Encoding of a single precision complex floating point number
+        /// for the correlator to central processor interface.
+        struct FloatComplex
+        {
+            /// The real part of the complex number.
+            float real;
 
-       // @brief Version number for the VisDatagramBETA.
-       const uint32_t VisDatagramTraits<VisDatagramBETA>::VISPAYLOAD_VERSION;
+            /// The imaginary part of the complex number.
+            float imag;
+        } __attribute__((__packed__));
 
-       // @brief Number of channels per slice in the VisDatagramiBETA.
-       const uint32_t VisDatagramTraits<VisDatagramBETA>::N_CHANNELS_PER_SLICE;
+    }
+}
 
-       // @brief Version number for the VisDatagramADE.
-       const uint32_t VisDatagramTraits<VisDatagramADE>::VISPAYLOAD_VERSION;
-
-       // @brief Max number of baselines in VisDatagramADE. 
-       const uint32_t VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE;
-    } // namespace cp
-
-} // namespace askap
-
+#endif // #ifndef ASKAP_CP_FLOATCOMPLEX_H

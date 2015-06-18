@@ -30,12 +30,14 @@
 // Test includes
 #include "TosMetadataTest.h"
 #include "TosMetadataAntennaTest.h"
+#include "VisDatagramTest.h"
 
 int main(int argc, char *argv[])
 {
     askapdev::testutils::AskapTestRunner runner(argv[0]);
     runner.addTest(askap::cp::TosMetadataTest::suite());
     runner.addTest(askap::cp::TosMetadataAntennaTest::suite());
+    runner.addTest(askap::cp::VisDatagramTest::suite());
     bool wasSucessful = runner.run();
 
     return wasSucessful ? 0 : 1;

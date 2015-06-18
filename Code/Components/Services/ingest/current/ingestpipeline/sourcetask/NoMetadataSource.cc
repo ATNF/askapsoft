@@ -130,9 +130,9 @@ VisChunk::ShPtr NoMetadataSource::next(void)
     // Determine how many VisDatagrams are expected for a single integration
     const casa::uInt nAntenna = itsConfig.antennas().size();
     const casa::uInt nChannels = itsChannelManager.localNChannels(itsId);
-    ASKAPCHECK(nChannels % N_CHANNELS_PER_SLICE == 0,
+    ASKAPCHECK(nChannels % VisDatagramTraits<VisDatagram>::N_CHANNELS_PER_SLICE == 0,
                "Number of channels must be divisible by N_CHANNELS_PER_SLICE");
-    const casa::uInt datagramsExpected = itsBaselineMap.size() * itsMaxNBeams * (nChannels / N_CHANNELS_PER_SLICE);
+    const casa::uInt datagramsExpected = itsBaselineMap.size() * itsMaxNBeams * (nChannels / VisDatagramTraits<VisDatagram>::N_CHANNELS_PER_SLICE);
     const casa::uInt interval = itsCorrelatorMode.interval();
     const casa::uInt timeout = interval * 2;
 
@@ -342,8 +342,8 @@ bool NoMetadataSource::addVis(VisChunk::ShPtr chunk, const VisDatagram& vis,
     ASKAPCHECK(chunk->beam2()(row) == static_cast<casa::uInt>(beamid), errorMsg);
 
     // 5) Determine the channel offset and add the visibilities
-    const casa::uInt chanOffset = (vis.slice) * N_CHANNELS_PER_SLICE;
-    for (casa::uInt chan = 0; chan < N_CHANNELS_PER_SLICE; ++chan) {
+    const casa::uInt chanOffset = (vis.slice) * VisDatagramTraits<VisDatagram>::N_CHANNELS_PER_SLICE;
+    for (casa::uInt chan = 0; chan < VisDatagramTraits<VisDatagram>::N_CHANNELS_PER_SLICE; ++chan) {
         casa::Complex sample(vis.vis[chan].real, vis.vis[chan].imag);
         ASKAPCHECK((chanOffset + chan) <= chunk->nChannel(), "Channel index overflow");
 

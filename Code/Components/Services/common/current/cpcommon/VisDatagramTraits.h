@@ -1,4 +1,4 @@
-/// @file VisDatagram.cc
+/// @file VisDatagramTraits.h
 ///
 /// @copyright (c) 2010 CSIRO
 /// Australia Telescope National Facility (ATNF)
@@ -24,28 +24,26 @@
 ///
 /// @author Max Voronkov <maxim.voronkov@csiro.au>
 
-#include "cpcommon/VisDatagram.h"
+#ifndef ASKAP_CP_VISDATAGRAM_TRAITS_H
+#define ASKAP_CP_VISDATAGRAM_TRAITS_H
+
+#include <boost/static_assert.hpp>
 
 namespace askap {
     namespace cp {
 
-       // definition of const statics for the sake of completeness
-       // although this could've been skipped as these fields are
-       // integral types and we never access them directly rather than
-       // through type.
+        /// @brief generic traits class with no properties defined
+        /// @details We use generic templated code, specialisation 
+        /// of this class for a particular protocol allows to 
+        /// pass protocol-specific traits (e.g. chunk size or number
+        /// of channels or card numbers, etc).
+        template<typename T>
+        struct VisDatagramTraits {
+           BOOST_STATIC_ASSERT_MSG(sizeof(T) == 0, 
+                "Attempted a build for protocol without defined traits");
+        };
 
-       // @brief Version number for the VisDatagramBETA.
-       const uint32_t VisDatagramTraits<VisDatagramBETA>::VISPAYLOAD_VERSION;
+    };
+};
 
-       // @brief Number of channels per slice in the VisDatagramiBETA.
-       const uint32_t VisDatagramTraits<VisDatagramBETA>::N_CHANNELS_PER_SLICE;
-
-       // @brief Version number for the VisDatagramADE.
-       const uint32_t VisDatagramTraits<VisDatagramADE>::VISPAYLOAD_VERSION;
-
-       // @brief Max number of baselines in VisDatagramADE. 
-       const uint32_t VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE;
-    } // namespace cp
-
-} // namespace askap
-
+#endif // #ifndef ASKAP_CP_VISDATAGRAM_TRAITS_H
