@@ -140,6 +140,36 @@ protected:
    /// be within VisChunk shape). Undefined value for unmapped products.
    boost::optional<std::pair<casa::uInt, casa::uInt> > mapCorrProduct(uint32_t baseline, uint32_t beam) const;
 
+   /// @brief create a new VisChunk
+   /// @details This method initialises itsVisChunk with a new buffer.
+   /// It is intended to be used when the first datagram of a new 
+   /// integration is processed.
+   /// @param[in] timestamp BAT corresponding to this new chunk
+   /// @param[in] corrMode correlator mode parameters (determines shape, etc)
+   void initVisChunk(const casa::uLong timestamp, const CorrelatorMode &corrMode);
+
+   /// @brief flag a particular antenna for the whole chunk
+   /// @details We want to avoid expensive per-channel operations
+   /// where possible. This method allows to set antenna-based flags
+   /// which remain valid until the next initVisChunk call and can
+   /// be quieried in derived classes to bypass unflagging.
+   /// By default (and after every call to initVisChunk) all antennas
+   /// are unflagged.
+   /// @param[in] antenna index for the antenna to flag as bad
+   void flagAntenna(casa::uInt antenna);
+
+   /// @brief query whether given antenna produce good data
+   /// @param[in] antenna index of antenna to check
+   /// @return true if a given antenna is unflagged
+   bool isAntennaGood(casa::uInt antenna) const;
+
+   /// @brief obtain channel manager
+   /// @return const reference to the channel manager
+   inline const ChannelManager& channelManager() const 
+           { return itsChannelManager; }
+
+private:
+
    /// @brief row for given baseline and beam
    /// @details We have a fixed layout of data in the VisChunk/measurement set.
    /// This helper method implements an analytical function mapping antenna
@@ -149,16 +179,6 @@ protected:
    /// @param[in] beam beam index
    /// @return row number in the VisChunk
    uint32_t calculateRow(uint32_t ant1, uint32_t ant2, uint32_t beam) const;
-
-   /// @brief create a new VisChunk
-   /// @details This method initialises itsVisChunk with a new buffer.
-   /// It is intended to be used when the first datagram of a new 
-   /// integration is processed.
-   /// @param[in] timestamp BAT corresponding to this new chunk
-   /// @param[in] corrMode correlator mode parameters (determines shape, etc)
-   void initVisChunk(const casa::uLong timestamp, const CorrelatorMode &corrMode);
-
-private:
   
    /// @brief helper method to map polarisation product
    /// @details This method obtains polarisation dimension index
@@ -254,6 +274,12 @@ private:
    /// @brief warning flag per unknown polarisation
    /// @details to avoid spitting out too much messages
    mutable std::set<casa::Stokes::StokesTypes> itsIgnoredStokesWarned;
+
+   /// @brief antenna-based flags
+   /// @detail Zero length means all antennas are unflagged. Otherwise,
+   /// it should always be of an appropriate size to handle all indices
+   /// available in the chunk.
+   std::vector<casa::uInt> itsAntWithValidData;
 
    /// For unit testing
    friend class VisConverterBaseTest;

@@ -79,6 +79,8 @@ VisConverterBase::VisConverterBase(const LOFAR::ParameterSet& params,
 
    // initialise beam mapping
    initBeamMap(params);
+ 
+   itsAntWithValidData.reserve(itsConfig.antennas().size());
 }
 
 
@@ -267,6 +269,7 @@ uint32_t VisConverterBase::calculateRow(uint32_t ant1, uint32_t ant2,
 void VisConverterBase::initVisChunk(const casa::uLong timestamp, 
                                     const CorrelatorMode &corrMode)
 {
+    itsAntWithValidData.resize(0);
     const casa::uInt nAntenna = itsConfig.antennas().size();
     ASKAPCHECK(nAntenna > 0, "Must have at least one antenna defined");
     const casa::uInt nChannels = itsChannelManager.localNChannels(itsId);
@@ -357,6 +360,43 @@ void VisConverterBase::initVisChunk(const casa::uLong timestamp,
     itsDatagramsExpected = 0; 
     itsDatagramsIgnored = 0;
     itsDatagramsCount = 0;
+}
+
+/// @brief flag a particular antenna for the whole chunk
+/// @details We want to avoid expensive per-channel operations
+/// where possible. This method allows to set antenna-based flags
+/// which remain valid until the next initVisChunk call and can
+/// be quieried in derived classes to bypass unflagging.
+/// By default (and after every call to initVisChunk) all antennas
+/// are unflagged.
+/// @param[in] antenna index for the antenna to flag as bad
+void VisConverterBase::flagAntenna(casa::uInt antenna) 
+{
+   // we don't care about VisChunk, but this method is not intended
+   // to be called prior to its initialisation
+   ASKAPDEBUGASSERT(itsVisChunk);
+ 
+   if (itsAntWithValidData.size() == 0) {
+       // no antenna-based flags were defined so far - initialise
+       itsAntWithValidData.assign(itsConfig.antennas().size(), true);
+   }
+
+   ASKAPCHECK(antenna < itsAntWithValidData.size(), 
+             "Antenna index "<<antenna<<" is outside bounds");
+   itsAntWithValidData[antenna] = false;
+}
+
+/// @brief query whether given antenna produce good data
+/// @param[in] antenna index of antenna to check
+/// @return true if a given antenna is unflagged
+bool VisConverterBase::isAntennaGood(casa::uInt antenna) const
+{
+   if (itsAntWithValidData.size() == 0) {
+       return true;
+   }
+   ASKAPCHECK(antenna < itsAntWithValidData.size(), 
+             "Antenna index "<<antenna<<" is outside bounds");
+   return itsAntWithValidData[antenna];
 }
 
 

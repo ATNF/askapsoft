@@ -54,6 +54,7 @@ class VisConverterBaseTest : public CppUnit::TestFixture {
         CPPUNIT_TEST(testConstruct);
         CPPUNIT_TEST(testInitVisChunk);
         CPPUNIT_TEST(testMapCorrProduct);
+        CPPUNIT_TEST(testAntennaFlagging);
         CPPUNIT_TEST_EXCEPTION(testInvalidBeamProduct,AskapError);
         CPPUNIT_TEST_SUITE_END();
 
@@ -177,6 +178,34 @@ class VisConverterBaseTest : public CppUnit::TestFixture {
                  const bool invalidBaselineProduct = 
                        itsInstance->mapCorrProduct(nProducts+1, beam + 1);
                  CPPUNIT_ASSERT(!invalidBaselineProduct);
+            }
+        }
+
+        void testAntennaFlagging() {
+            const unsigned long starttime = 1000000; // One second after epoch 0
+            CPPUNIT_ASSERT(itsInstance);
+            const CorrelatorMode corrMode = itsInstance->itsConfig.lookupCorrelatorMode("standard");
+
+            itsInstance->initVisChunk(starttime, corrMode);
+            const casa::uInt nAntennas = itsInstance->itsConfig.antennas().size();
+            CPPUNIT_ASSERT_EQUAL(6u, nAntennas);
+            // nothing should be flagged at this stage
+            for (casa::uInt ant = 0; ant<nAntennas; ++ant) {
+                 CPPUNIT_ASSERT(itsInstance->isAntennaGood(ant));
+            }
+            // progressively flag antennas one by one and check that
+            // the flag propagates as expected
+            for (casa::uInt ant = 0; ant<nAntennas; ++ant) {
+                 itsInstance->flagAntenna(ant);
+                 for (casa::uInt testAnt = 0; testAnt < nAntennas; ++testAnt) {
+                      CPPUNIT_ASSERT_EQUAL(testAnt > ant, 
+                                    itsInstance->isAntennaGood(testAnt));
+                 }
+            }
+            // moving to next chunk should reset flags
+            itsInstance->initVisChunk(starttime + 5000000ul, corrMode);
+            for (casa::uInt ant = 0; ant<nAntennas; ++ant) {
+                 CPPUNIT_ASSERT(itsInstance->isAntennaGood(ant));
             }
         }
 

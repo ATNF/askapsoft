@@ -28,6 +28,8 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 // Support classes
+#include <boost/type_traits.hpp>
+#include <boost/utility/enable_if.hpp>
 
 // Classes to test
 #include "cpcommon/VisDatagram.h"
@@ -56,6 +58,8 @@ class VisDatagramTest : public CppUnit::TestFixture {
           const uint32_t sliceSize = dt.N_CHANNELS_PER_SLICE;
           CPPUNIT_ASSERT_EQUAL(sliceSize, VisDatagramTraits<VisDatagramBETA>::N_CHANNELS_PER_SLICE);
           CPPUNIT_ASSERT(sliceSize != 0);
+
+          CPPUNIT_ASSERT_EQUAL(2014u, yearCommissioned(vd));
         }
 
         void testADE() {
@@ -67,6 +71,8 @@ class VisDatagramTest : public CppUnit::TestFixture {
 
           const uint32_t maxSliceSize = dt.MAX_BASELINES_PER_SLICE;
           CPPUNIT_ASSERT_EQUAL(maxSliceSize, VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE);
+
+          CPPUNIT_ASSERT_EQUAL(2016u, yearCommissioned(vd));
         }
 
     private:
@@ -75,6 +81,39 @@ class VisDatagramTest : public CppUnit::TestFixture {
         static uint32_t protocolVersion(const T &) {
            return VisDatagramTraits<T>::VISPAYLOAD_VERSION;
         }
+
+        // demonstration of protocol-specific actions through SFINAE
+        // (although it can also be done via specialisation)
+        // Specialisation makes sense if we have 
+
+        // the following method is compiled only for datagram protocols
+        // which have BETA trait defined 
+        // NB: second template argument of enable_if is the return type
+        template<typename T>
+        static typename boost::enable_if<boost::is_class<typename
+           VisDatagramTraits<T>::BETA>, uint32_t>::type 
+                  yearCommissioned(const T&) {
+
+            // it is safe to access BETA-specific fields in
+            // VisDatagramTraits<T> here.
+
+            return 2014;
+        }
+
+        // the following method is compiled only for datagram protocols
+        // which have ADE trait defined 
+        // NB: second template argument of enable_if is the return type
+        template<typename T>
+        static typename boost::enable_if<boost::is_class<typename
+           VisDatagramTraits<T>::ADE>, uint32_t>::type 
+                  yearCommissioned(const T&) {
+
+            // it is safe to access ADE-specific fields in
+            // VisDatagramTraits<T> here.
+
+            return 2016;
+        }
+ 
 };
 
 }   // End namespace cp
