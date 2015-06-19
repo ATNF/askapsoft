@@ -69,7 +69,7 @@ void VisConverter<VisDatagramBETA>::initVisChunk(const casa::uLong timestamp,
    ASKAPCHECK(nChannels % VisDatagramTraits<VisDatagramBETA>::N_CHANNELS_PER_SLICE == 0,
         "Number of channels must be divisible by N_CHANNELS_PER_SLICE");
    const casa::uInt datagramsExpected = nCorrProducts() * maxNumberOfBeams() * 
-          (nChannels / VisDatagramTraits<VisDatagram>::N_CHANNELS_PER_SLICE);
+          (nChannels / VisDatagramTraits<VisDatagramBETA>::N_CHANNELS_PER_SLICE);
    setNumberOfExpectedDatagrams(datagramsExpected);
 }
 
