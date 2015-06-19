@@ -30,6 +30,7 @@
 
 #include "ingestpipeline/sourcetask/VisConverterDef.h"
 #include "ingestpipeline/sourcetask/VisConverterBETA.h"
+#include "ingestpipeline/sourcetask/VisConverterADE.h"
 
 #endif // #ifndef ASKAP_CP_VISCONVERTER_H
 

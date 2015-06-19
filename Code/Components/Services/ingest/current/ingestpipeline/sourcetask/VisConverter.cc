@@ -32,13 +32,22 @@
 
 #include "ingestpipeline/sourcetask/VisConverter.h"
 #include "cpcommon/VisDatagram.h"
+
+// ASKAPsoft includes
+#include "askap/AskapLogging.h"
+
+ASKAP_LOGGER(logger, ".VisConverter");
+
 #include "ingestpipeline/sourcetask/VisConverterBETA.tcc"
+#include "ingestpipeline/sourcetask/VisConverterADE.tcc"
 
 namespace askap {
 namespace cp {
 namespace ingest {
 
-class VisConverter<VisDatagram>;
+class VisConverter<VisDatagramBETA>;
+
+class VisConverter<VisDatagramADE>;
 
 } // namespace ingest
 } // namespace cp

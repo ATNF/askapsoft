@@ -35,10 +35,8 @@
 #include "boost/tuple/tuple_comparison.hpp"
 
 // ASKAPsoft includes
-#include "askap/AskapLogging.h"
 #include "askap/AskapError.h"
 
-ASKAP_LOGGER(logger, ".VisConverterBETA");
 
 namespace askap {
 namespace cp {
@@ -145,7 +143,8 @@ void VisConverter<VisDatagramBETA>::add(const VisDatagramBETA &vis)
             }
         }
    }
-
+  
+   countDatagramAsUseful();
 }
 
 } // namespace ingest
