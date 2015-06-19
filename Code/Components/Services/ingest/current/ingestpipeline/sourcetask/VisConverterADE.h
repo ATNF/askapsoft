@@ -76,9 +76,9 @@ public:
    void add(const VisDatagramADE &vis);
 
 private:
-   /// Identifies a datagram based on block, card, channel
+   /// Identifies a datagram based on block, card, channel, slice
    /// This is used for duplicate detection
-   typedef boost::tuple<int32_t, int32_t, int32_t> DatagramIdentity;
+   typedef boost::tuple<uint32_t, uint32_t, uint32_t, uint32_t> DatagramIdentity;
 
    std::set<DatagramIdentity> itsReceivedDatagrams;
 };

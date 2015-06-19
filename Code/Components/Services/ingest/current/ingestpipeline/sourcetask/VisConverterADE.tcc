@@ -88,17 +88,20 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
    ASKAPCHECK(vis.channel < 216, "vis.channel = "<<vis.channel<<" exceeds the limit of 216");
    ASKAPCHECK((vis.block > 0) && (vis.block <= 8), "vis.block = "<<vis.block<<" is outside [1,8] range");
    ASKAPCHECK((vis.card > 0) && (vis.card <= 12), "vis.card = "<<vis.card<<" is outside [1,12] range");
+   ASKAPCHECK(vis.slice < 4, "Slice index is invalid");
 
+   
    // Detect duplicate datagrams
-   const DatagramIdentity identity(vis.block, vis.card, vis.channel);
+   const DatagramIdentity identity(vis.block, vis.card, vis.channel, vis.slice);
    if (itsReceivedDatagrams.find(identity) != itsReceivedDatagrams.end()) {
        ASKAPLOG_WARN_STR(logger, "Duplicate VisDatagram - Block: " << 
             vis.block << ", Card: " << vis.card << ", Channel: " << 
-            vis.channel);
+            vis.channel<<", Slice: "<<vis.slice);
        countDatagramAsIgnored();
        return;
    }
    itsReceivedDatagrams.insert(identity);
+   
 
    bool atLeastOneUseful = false;
    for (uint32_t product = vis.baseline1, item = 0; product <= vis.baseline2; ++product, ++item) {
@@ -125,7 +128,6 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
             continue;
         }
 
-        ASKAPCHECK(vis.slice < 4, "Slice index is invalid");
 
         const casa::uInt row = mp->first;
         const casa::uInt polidx = mp->second;
