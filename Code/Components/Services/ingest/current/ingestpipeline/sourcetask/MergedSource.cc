@@ -82,7 +82,7 @@ MergedSource::MergedSource(const LOFAR::ParameterSet& params,
      itsInterrupted(false),
      itsSignals(itsIOService, SIGINT, SIGTERM, SIGUSR1),
      itsNBeams(0),
-     itsLastTimestamp(-1)
+     itsLastTimestamp(-1), itsVisConverter(params, config, id)
 {
     // Trigger a dummy frame conversion with casa measures to ensure all caches are setup
     const casa::MVEpoch dummyEpoch(56000.);

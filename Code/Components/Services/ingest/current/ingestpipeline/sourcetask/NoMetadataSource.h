@@ -48,6 +48,7 @@
 #include "ingestpipeline/sourcetask/MonitoringPointManager.h"
 #include "configuration/Configuration.h"
 #include "configuration/BaselineMap.h"
+#include "ingestpipeline/sourcetask/VisConverter.h"
 
 namespace askap {
 namespace cp {
@@ -187,6 +188,9 @@ class NoMetadataSource : public ISource {
         /// @brief The last timestamp processed. This is stored to avoid the situation
         /// where we may produce two consecutive VisChunks with the same timestamp
         casa::uLong itsLastTimestamp;
+
+        /// @brief visibility converter
+        VisConverter<VisDatagram> itsVisConverter;
 };
 
 }

@@ -85,7 +85,7 @@ NoMetadataSource::NoMetadataSource(const LOFAR::ParameterSet& params,
         itsCentreFreq(asQuantity(params.getString("centre_freq"))),
         itsTargetName(params.getString("target_name")),
         itsTargetDirection(asMDirection(params.getStringVector("target_direction"))),
-        itsLastTimestamp(-1)
+        itsLastTimestamp(-1), itsVisConverter(params, config, id)
 {
     // Trigger a dummy frame conversion with casa measures to ensure all caches are setup
     const casa::MVEpoch dummyEpoch(56000.);

@@ -52,6 +52,7 @@
 #include "ingestpipeline/sourcetask/MonitoringPointManager.h"
 #include "configuration/Configuration.h"
 #include "configuration/BaselineMap.h"
+#include "ingestpipeline/sourcetask/VisConverter.h"
 
 namespace askap {
 namespace cp {
@@ -214,6 +215,9 @@ class MergedSource : public ISource {
 
         // No support for copy constructor
         MergedSource(const MergedSource& src);
+
+        /// @brief visibility converter
+        VisConverter<VisDatagram> itsVisConverter;
 
         /// For unit testing
         friend class MergedSourceTest;
