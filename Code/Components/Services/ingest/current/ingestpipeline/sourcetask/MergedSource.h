@@ -33,11 +33,10 @@
 #include <stdint.h>
 
 // ASKAPsoft includes
-#include "askap/IndexConverter.h"
 #include "boost/shared_ptr.hpp"
 #include "boost/system/error_code.hpp"
 #include "boost/asio.hpp"
-#include "boost/tuple/tuple.hpp"
+#include "boost/noncopyable.hpp"
 #include "Common/ParameterSet.h"
 #include "cpcommon/TosMetadata.h"
 #include "cpcommon/VisDatagram.h"
@@ -48,10 +47,8 @@
 #include "ingestpipeline/sourcetask/IVisSource.h"
 #include "ingestpipeline/sourcetask/IMetadataSource.h"
 #include "ingestpipeline/sourcetask/ScanManager.h"
-#include "ingestpipeline/sourcetask/ChannelManager.h"
 #include "ingestpipeline/sourcetask/MonitoringPointManager.h"
 #include "configuration/Configuration.h"
-#include "configuration/BaselineMap.h"
 #include "ingestpipeline/sourcetask/VisConverter.h"
 
 namespace askap {
@@ -61,7 +58,8 @@ namespace ingest {
 /// @brief Ingest pipeline source tasks. The MergedSource task merges the TOS
 /// metadata stream and the visibility stream creating a VISChunk object for
 /// each correlator integration.
-class MergedSource : public ISource {
+class MergedSource : public ISource,
+                     public boost::noncopyable {
     public:
         /// @brief Constructor.
         ///
@@ -102,76 +100,23 @@ class MergedSource : public ISource {
 
     private:
 
-        /// Identifies a datagram based on baselineid, sliceid & beamid.
-        /// This is used for duplicate detection
-        typedef boost::tuple<int32_t, int32_t, int32_t> DatagramIdentity;
 
-
-        /// Calculates the sum of an arithmetic series
-        /// @param[in] n    the number of terms to sum
-        /// @param[in] a    the first term
-        /// @param[in] d    the common difference between the terms
-        /// @return the sum of an arithmetic series
-        static uint32_t sumOfArithmeticSeries(uint32_t n, uint32_t a, uint32_t d);
-
-        /// Given a baseline id and beam id, calulate the row number where
-        /// the data show be stored.
-        ///
-        /// If the antenna indicies are not within the range [0, nAntenna - 1]
-        /// the return value is undefined (i.e. not valid). It is up to the
-        /// caller to ensure these input indicies are valid!
-        ///
-        /// @param[in] ant1 first antenna index number. This must be in the
-        ///                 range [0, nAntenna - 1]
-        /// @param[in] ant2 second antenna index number. This must be in the
-        ///                 range [0, nAntenna - 1]
-        /// @param[in] beam beam index, zero based
-        /// @return the row number
-        static uint32_t calculateRow(uint32_t ant1, uint32_t ant2,
-                                     uint32_t beam, uint32_t nAntenna);
-
-        /// Creates an "empty" VisChunk
+        /// Initialises an "empty" VisChunk
         askap::cp::common::VisChunk::ShPtr createVisChunk(const TosMetadata& metadata);
-
-        /// @brief process one datagram
-        /// @param[in] chunk visibility chunk to fill
-        /// @param[in] vis datagram to get the data from
-        /// @param[in] nAntenna number of antennas (to verify that all are present)
-        /// @param[inout] rowsRecieved a vector for tracking the rows received.
-        ///                            this method is responsible for setting
-        ///                            rowsRecieved[row] when a new row is received.
-        ///
-        /// @return false if the datagram is ignored, e.g. because of the beam selection,
-        ///         or a duplicate datagram is received.
-        bool addVis(askap::cp::common::VisChunk::ShPtr chunk, const VisDatagram& vis,
-                    const TosMetadata& metadata,
-                    std::set<DatagramIdentity>& receivedDatagrams);
 
         /// Handled the receipt of signals to "interrupt" the process
         void signalHandler(const boost::system::error_code& error,
                            int signalNumber);
 
-        void parseBeamMap(const LOFAR::ParameterSet& params);
-
         // Checks if a signal has been received requesting an interrupt.
         // If such a signal has been received, thorows an InterruptedException.
         void checkInterruptSignal();
-
-        // Configuration
-        const Configuration itsConfig;
 
         // The object that is the source of telescope metadata
         IMetadataSource::ShPtr itsMetadataSrc;
         
         // The object that is the source of visibilities
         IVisSource::ShPtr itsVisSrc;
-
-        // The total number of ingest pipeline tasks. Used to determine how many
-        // visibilities this instance is responsible for receiving.
-        int itsNumTasks;
-
-        // The rank (identity amongst all ingest processes) of this process
-        int itsId;
 
         // Pointers to the two constituent datatypes
         boost::shared_ptr<TosMetadata> itsMetadata;
@@ -183,12 +128,6 @@ class MergedSource : public ISource {
         // Monitor point Manager
         const MonitoringPointManager itsMonitoringPointManager;
 
-        // Channel Manager
-        ChannelManager itsChannelManager;
-
-        // Baseline Map
-        const BaselineMap itsBaselineMap;
-
         // Interrupted by SIGTERM, SIGINT or SIGUSR1?
         bool itsInterrupted;
 
@@ -198,35 +137,15 @@ class MergedSource : public ISource {
         // Interrupt signals
         boost::asio::signal_set itsSignals;
 
-        /// @brief beam id map
-        /// @details It is possible to filter the beams received by this source and map the
-        /// indices. This map provides translation (by default, any index is passed as is)
-        utility::IndexConverter itsBeamIDMap;
-
-        /// @brief Number of beams to handle
-        casa::uInt itsNBeams;
-
         /// @brief The last timestamp processed. This is stored to avoid the situation
         /// where we may produce two consecutive VisChunks with the same timestamp
         casa::uLong itsLastTimestamp;
-
-        // No support for assignment
-        MergedSource& operator=(const MergedSource& rhs);
-
-        // No support for copy constructor
-        MergedSource(const MergedSource& src);
 
         /// @brief visibility converter
         VisConverter<VisDatagram> itsVisConverter;
 
         /// For unit testing
         friend class MergedSourceTest;
-
-        /// This allows the Nometadata source to use some of the private functions
-        /// in the MergedSource. This class (NometadataSource) is very temporary
-        /// and is meant to be removed soon. If this doesn't happen then some
-        /// refactoring will be necessary.
-        friend class NoMetadataSource;
 };
 
 }

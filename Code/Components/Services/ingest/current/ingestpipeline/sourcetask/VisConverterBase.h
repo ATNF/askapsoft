@@ -96,6 +96,11 @@ public:
    /// the current VisChunk.
    inline casa::uInt datagramsIgnored() const { return itsDatagramsIgnored; }
 
+   /// @brief check that all expected datagrams received
+   /// @return true, if datagramsCount() == datagramsExpected()
+   inline bool gotAllExpectedDatagrams() const
+         { return datagramsCount() == datagramsExpected(); }
+
    /// @brief current vis chunk
    /// @return shared pointer to current vis chunk for further processing
    /// @note An exception is thrown if one attempts to get an uninitialised
@@ -106,7 +111,37 @@ public:
    /// @return identity of this process
    inline int id() const { return itsId; }
 
+   /// @brief access to configuration
+   /// @return const reference to configuration class
+   inline const Configuration& config() const { return itsConfig;}
+
+   /// @return maximum number of beams
+   inline casa::uInt maxNumberOfBeams() const { return itsMaxNBeams; } 
+
+   /// @brief obtain channel manager
+   /// @return const reference to the channel manager
+   inline const ChannelManager& channelManager() const 
+           { return itsChannelManager; }
+
+   /// @brief flag a particular antenna for the whole chunk
+   /// @details We want to avoid expensive per-channel operations
+   /// where possible. This method allows to set antenna-based flags
+   /// which remain valid until the next initVisChunk call and can
+   /// be quieried in derived classes to bypass unflagging.
+   /// By default (and after every call to initVisChunk) all antennas
+   /// are unflagged.
+   /// @param[in] antenna index for the antenna to flag as bad
+   void flagAntenna(casa::uInt antenna);
+
+   /// @brief query whether given antenna produce good data
+   /// @param[in] antenna index of antenna to check
+   /// @return true if a given antenna is unflagged
+   bool isAntennaGood(casa::uInt antenna) const;
+
 protected:
+
+   /// @return number of correlator products in the map
+   inline uint32_t nCorrProducts() const { return itsBaselineMap.size(); }
 
    // note, there is no much reason making this class polymorphic as
    // we don't intend to use different implementations simultaneously.
@@ -147,26 +182,6 @@ protected:
    /// @param[in] timestamp BAT corresponding to this new chunk
    /// @param[in] corrMode correlator mode parameters (determines shape, etc)
    void initVisChunk(const casa::uLong timestamp, const CorrelatorMode &corrMode);
-
-   /// @brief flag a particular antenna for the whole chunk
-   /// @details We want to avoid expensive per-channel operations
-   /// where possible. This method allows to set antenna-based flags
-   /// which remain valid until the next initVisChunk call and can
-   /// be quieried in derived classes to bypass unflagging.
-   /// By default (and after every call to initVisChunk) all antennas
-   /// are unflagged.
-   /// @param[in] antenna index for the antenna to flag as bad
-   void flagAntenna(casa::uInt antenna);
-
-   /// @brief query whether given antenna produce good data
-   /// @param[in] antenna index of antenna to check
-   /// @return true if a given antenna is unflagged
-   bool isAntennaGood(casa::uInt antenna) const;
-
-   /// @brief obtain channel manager
-   /// @return const reference to the channel manager
-   inline const ChannelManager& channelManager() const 
-           { return itsChannelManager; }
 
 private:
 

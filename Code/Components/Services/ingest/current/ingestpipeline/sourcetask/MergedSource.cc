@@ -73,30 +73,18 @@ using namespace askap::cp::ingest;
 MergedSource::MergedSource(const LOFAR::ParameterSet& params,
         const Configuration& config,
         IMetadataSource::ShPtr metadataSrc,
-        IVisSource::ShPtr visSrc, int numTasks, int id) :
-     itsConfig(config),
+        IVisSource::ShPtr visSrc, int /*numTasks*/, int id) :
      itsMetadataSrc(metadataSrc), itsVisSrc(visSrc),
-     itsNumTasks(numTasks), itsId(id),
-     itsChannelManager(params),
-     itsBaselineMap(config.bmap()),
      itsInterrupted(false),
      itsSignals(itsIOService, SIGINT, SIGTERM, SIGUSR1),
-     itsNBeams(0),
      itsLastTimestamp(-1), itsVisConverter(params, config, id)
 {
-    // Trigger a dummy frame conversion with casa measures to ensure all caches are setup
-    const casa::MVEpoch dummyEpoch(56000.);
-
-    casa::MEpoch::Convert(casa::MEpoch(dummyEpoch, casa::MEpoch::Ref(casa::MEpoch::TAI)),
-            casa::MEpoch::Ref(casa::MEpoch::UTC))();
 
     // log TAI_UTC casacore measures table version and date
     const std::pair<double, std::string> measVersion = measuresTableVersion();
     itsMonitoringPointManager.submitPoint<float>("MeasuresTableMJD", 
             static_cast<float>(measVersion.first));
     itsMonitoringPointManager.submitPoint<std::string>("MeasuresTableVersion", measVersion.second);
-
-    parseBeamMap(params);
 
     // Setup a signal handler to catch SIGINT, SIGTERM and SIGUSR1
     itsSignals.async_wait(boost::bind(&MergedSource::signalHandler, this, _1, _2));
@@ -183,23 +171,15 @@ VisChunk::ShPtr MergedSource::next(void)
 
     // Now the streams are synced, start building a VisChunk
     VisChunk::ShPtr chunk = createVisChunk(*itsMetadata);
+    ASKAPDEBUGASSERT(chunk);
 
-    // Determine how many VisDatagrams are expected for a single integration
-    const casa::uInt nChannels = itsChannelManager.localNChannels(itsId);
-    ASKAPCHECK(nChannels % VisDatagramTraits<VisDatagram>::N_CHANNELS_PER_SLICE == 0,
-            "Number of channels must be divisible by N_CHANNELS_PER_SLICE");
-    const casa::uInt datagramsExpected = itsBaselineMap.size() * itsNBeams * (nChannels / VisDatagramTraits<VisDatagram>::N_CHANNELS_PER_SLICE);
-    const CorrelatorMode& mode = itsConfig.lookupCorrelatorMode(itsMetadata->corrMode());
-    const casa::uInt interval = mode.interval();
-    const casa::uInt timeout = interval * 2;
+    const CorrelatorMode& mode = itsVisConverter.config().lookupCorrelatorMode(itsMetadata->corrMode());
+    const casa::uInt timeout = mode.interval() * 2;
 
     // Read VisDatagrams and add them to the VisChunk. If itsVisSrc->next()
     // returns a null pointer this indicates the timeout has been reached.
     // In this case assume no more VisDatagrams for this integration will
     // be recieved and move on
-    casa::uInt datagramCount = 0; 
-    casa::uInt datagramsIgnored = 0;
-    std::set<DatagramIdentity> receivedDatagrams;
     while (itsVis && itsMetadata->time() >= itsVis->timestamp) {
         checkInterruptSignal();
 
@@ -210,31 +190,27 @@ VisChunk::ShPtr MergedSource::next(void)
             continue;
         }
 
-        if (addVis(chunk, *itsVis, *itsMetadata, receivedDatagrams)) {
-            ++datagramCount;
-        } else {
-            ++datagramsIgnored;
-        }
+        itsVisConverter.add(*itsVis);
         itsVis.reset();
 
-        if (datagramCount == datagramsExpected) {
+        if (itsVisConverter.gotAllExpectedDatagrams()) {
             // This integration is finished
             break;
         }
         itsVis = itsVisSrc->next(timeout);
     }
 
-    ASKAPLOG_DEBUG_STR(logger, "VisChunk built with " << datagramCount <<
-            " of expected " << datagramsExpected << " visibility datagrams");
-    ASKAPLOG_DEBUG_STR(logger, "     - ignored " << datagramsIgnored
+    ASKAPLOG_DEBUG_STR(logger, "VisChunk built with " << itsVisConverter.datagramsCount() <<
+            " of expected " << itsVisConverter.datagramsExpected() << " visibility datagrams");
+    ASKAPLOG_DEBUG_STR(logger, "     - ignored " << itsVisConverter.datagramsIgnored()
         << " successfully received datagrams");
 
     // Submit monitoring data
     itsMonitoringPointManager.submitPoint<int32_t>("PacketsLostCount",
-            datagramsExpected - datagramCount);
-    if (datagramsExpected != 0) {
+            itsVisConverter.datagramsExpected() - itsVisConverter.datagramsCount());
+    if (itsVisConverter.datagramsExpected() != 0) {
         itsMonitoringPointManager.submitPoint<float>("PacketsLostPercent",
-            (datagramsExpected - datagramCount) / static_cast<float>(datagramsExpected) * 100.);
+            (itsVisConverter.datagramsExpected() - itsVisConverter.datagramsCount()) / static_cast<float>(itsVisConverter.datagramsExpected()) * 100.);
     }
     itsMonitoringPointManager.submitMonitoringPoints(*chunk);
 
@@ -244,39 +220,14 @@ VisChunk::ShPtr MergedSource::next(void)
 
 VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
 {
-    const CorrelatorMode& corrMode = itsConfig.lookupCorrelatorMode(metadata.corrMode());
-    const casa::uInt nAntenna = itsConfig.antennas().size();
+    const CorrelatorMode& corrMode = itsVisConverter.config().lookupCorrelatorMode(metadata.corrMode());
+
+    itsVisConverter.initVisChunk(metadata.time(), corrMode);
+    VisChunk::ShPtr chunk = itsVisConverter.visChunk();
+    ASKAPDEBUGASSERT(chunk);
+
+    const casa::uInt nAntenna = itsVisConverter.config().antennas().size();
     ASKAPCHECK(nAntenna > 0, "Must have at least one antenna defined");
-    const casa::uInt nChannels = itsChannelManager.localNChannels(itsId);
-    const casa::uInt nPol = corrMode.stokes().size();
-    const casa::uInt nBaselines = nAntenna * (nAntenna + 1) / 2;
-    const casa::uInt nRow = nBaselines * itsNBeams;
-    const casa::uInt period = corrMode.interval(); // in microseconds
-
-    VisChunk::ShPtr chunk(new VisChunk(nRow, nChannels, nPol, nAntenna));
-
-    // Convert the time from integration start in microseconds to an
-    // integration mid-point in seconds
-    const uint64_t midpointBAT = static_cast<uint64_t>(metadata.time()) + (period / 2ull);
-    chunk->time() = bat2epoch(midpointBAT).getValue();
-  
-    // Convert the interval from microseconds (long) to seconds (double)
-    const casa::Double interval = period / 1000.0 / 1000.0;
-    chunk->interval() = interval;
-
-    // All visibilities get flagged as bad, then as the visibility data 
-    // arrives they are unflagged
-    chunk->flag() = true;
-    chunk->visibility() = 0.0;
-
-    // For now polarisation data is hardcoded.
-    ASKAPCHECK(nPol == 4, "Only supporting 4 polarisation products");
-    for (casa::uInt polIndex = 0; polIndex < nPol; ++polIndex) {
-         // this way of creating the Stokes vectors ensures the canonical order of polarisation products
-         // the last parameter of stokesFromIndex just defines the frame (i.e. linear, circular) and can be
-         // any product from the chosen frame. We may want to specify the frame via the parset eventually.
-         chunk->stokes()(polIndex) = scimath::PolConverter::stokesFromIndex(polIndex, casa::Stokes::XX);
-    }
 
     // Add the scan index
     chunk->scan() = itsScanManager.scanIndex();
@@ -289,37 +240,20 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
 
     // Build frequencies vector
     // Frequency vector is not of length nRows, but instead nChannels
-    chunk->frequency() = itsChannelManager.localFrequencies(itsId,
+    chunk->frequency() = itsVisConverter.channelManager().localFrequencies(
+            itsVisConverter.id(),
             metadata.centreFreq().getValue("Hz"),
             corrMode.chanWidth().getValue("Hz"),
             corrMode.nChan());
 
-    casa::uInt row = 0;
+    // at this stage do not support variable phase centre
     const casa::MDirection phaseDir = metadata.phaseDirection();
-    for (casa::uInt beam = 0; beam < itsNBeams; ++beam) {
-        for (casa::uInt ant1 = 0; ant1 < nAntenna; ++ant1) {
-            for (casa::uInt ant2 = ant1; ant2 < nAntenna; ++ant2) {
-                ASKAPCHECK(row <= nRow, "Row index (" << row <<
-                        ") should not exceed nRow (" << nRow <<")");
-
-                chunk->antenna1()(row) = ant1;
-                chunk->antenna2()(row) = ant2;
-                chunk->beam1()(row) = beam;
-                chunk->beam2()(row) = beam;
-                chunk->beam1PA()(row) = 0;
-                chunk->beam2PA()(row) = 0;
-                chunk->phaseCentre()(row) = phaseDir.getAngle();
-                chunk->uvw()(row) = 0.0;
-
-                row++;
-            }
-        }
-    }
+    chunk->phaseCentre().set(phaseDir.getAngle());
 
     // Populate the per-antenna vectors
     const casa::MDirection::Ref targetDirRef = metadata.targetDirection().getRef();
     for (casa::uInt i = 0; i < nAntenna; ++i) {
-        const string antName = itsConfig.antennas()[i].name();
+        const string antName = itsVisConverter.config().antennas()[i].name();
         const TosMetadataAntenna mdant = metadata.antenna(antName);
         chunk->targetPointingCentre()[i] = convertToJ2000(chunk->time(), i, metadata.targetDirection());
         chunk->actualPointingCentre()[i] = convertToJ2000(chunk->time(), i, mdant.actualRaDec());
@@ -332,6 +266,12 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
         chunk->actualElevation()[i] = casa::Quantity(azEl[1], "deg");
 
         chunk->onSourceFlag()[i] = mdant.onSource();
+        // flagging (previously was done when datagram was processed)
+        const bool flagged = metadata.flagged() || mdant.flagged() ||
+                             !mdant.onSource();
+        if (flagged) {
+            itsVisConverter.flagAntenna(i);
+        }
     }
 
     return chunk;
@@ -353,111 +293,13 @@ casa::MDirection MergedSource::convertToJ2000(const casa::MVEpoch &epoch, casa::
        // already in J2000
        return dir;
    }
-   casa::MPosition pos(casa::MVPosition(itsConfig.antennas().at(ant).position()), casa::MPosition::ITRF);
+   casa::MPosition pos(casa::MVPosition(itsVisConverter.config().antennas().at(ant).position()), casa::MPosition::ITRF);
 
    // if performance is found critical (unlikely as we only do it per antenna), we could return a class
    // caching frame as there are at least two calls to this method with the same frame information. 
    casa::MeasFrame frame(casa::MEpoch(epoch, casa::MEpoch::UTC), pos);
 
    return casa::MDirection::Convert(dir, casa::MDirection::Ref(casa::MDirection::J2000, frame))();
-}
-
-bool MergedSource::addVis(VisChunk::ShPtr chunk, const VisDatagram& vis,
-        const TosMetadata& metadata,
-        std::set<DatagramIdentity>& receivedDatagrams)
-{
-    // 0) Map from baseline to antenna pair and stokes type
-    if (itsBaselineMap.idToAntenna1(vis.baselineid) == -1 ||
-        itsBaselineMap.idToAntenna2(vis.baselineid) == -1 ||
-        itsBaselineMap.idToStokes(vis.baselineid) == casa::Stokes::Undefined) {
-            ASKAPLOG_WARN_STR(logger, "Baseline id: " << vis.baselineid
-                    << " has no valid mapping to antenna pair and stokes");
-        return false;
-    }
-    const casa::uInt antenna1 = itsBaselineMap.idToAntenna1(vis.baselineid);
-    const casa::uInt antenna2 = itsBaselineMap.idToAntenna2(vis.baselineid);
-    const casa::Int beamid = itsBeamIDMap(vis.beamid);
-    if (beamid < 0) {
-        // this beam ID is intentionally unmapped
-        return false;
-    }
-    ASKAPCHECK(beamid < static_cast<casa::Int>(itsNBeams),
-        "Received beam id vis.beamid=" << vis.beamid << " mapped to beamid=" << beamid
-        << " which is outside the beam index range, itsNBeams=" << itsNBeams);
-
-    // 1) Map from baseline to stokes type and find the  position on the stokes
-    // axis of the cube to insert the data into
-    const casa::Stokes::StokesTypes stokestype = itsBaselineMap.idToStokes(vis.baselineid);
-    // we could use scimath::PolConverter::getIndex here, but the following code allows more checks
-    int polidx = -1;
-    for (size_t i = 0; i < chunk->stokes().size(); ++i) {
-        if (chunk->stokes()(i) == stokestype) {
-            polidx = i;
-        }
-    }
-    if (polidx < 0) {
-            ASKAPLOG_WARN_STR(logger, "Stokes type " << casa::Stokes::name(stokestype)
-                    << " is not configured for storage");
-        return false;
-    }
-
-
-    // 2) Check the indexes in the VisDatagram are valid
-    const casa::uInt nAntenna = itsConfig.antennas().size();
-    ASKAPCHECK(antenna1 < nAntenna, "Antenna 1 index is invalid");
-    ASKAPCHECK(antenna2 < nAntenna, "Antenna 2 index is invalid");
-    ASKAPCHECK(static_cast<casa::uInt>(beamid) < itsNBeams,
-        "Beam index " << beamid << " is invalid");
-    ASKAPCHECK(polidx < 4, "Only 4 polarisation products are supported");
-
-    // 3) Detect duplicate datagrams
-    const DatagramIdentity identity(vis.baselineid, vis.slice, vis.beamid);
-    if (receivedDatagrams.find(identity) != receivedDatagrams.end()) {
-        ASKAPLOG_WARN_STR(logger, "Duplicate VisDatagram - BaselineID: " << vis.baselineid
-                << ", Slice: " << vis.slice << ", Beam: " << vis.beamid);
-        return false;
-    }
-    receivedDatagrams.insert(identity);
-
-    // 4) Find the row for the given beam and baseline
-    const casa::uInt row = calculateRow(antenna1, antenna2, beamid, nAntenna);
-
-    static const std::string errorMsg = "Indexing failed to find row";
-    ASKAPCHECK(chunk->antenna1()(row) == antenna1, errorMsg);
-    ASKAPCHECK(chunk->antenna2()(row) == antenna2, errorMsg);
-    ASKAPCHECK(chunk->beam1()(row) == static_cast<casa::uInt>(beamid), errorMsg);
-    ASKAPCHECK(chunk->beam2()(row) == static_cast<casa::uInt>(beamid), errorMsg);
-
-    // 5) Does the TOS say this antenna should be flagged?
-    const string antName1 = itsConfig.antennas()[antenna1].name();
-    const string antName2 = itsConfig.antennas()[antenna2].name();
-    const TosMetadataAntenna mdant1 = metadata.antenna(antName1);
-    const TosMetadataAntenna mdant2 = metadata.antenna(antName2);
-    const bool flagged = metadata.flagged()
-        || mdant1.flagged() || !mdant1.onSource()
-        || mdant2.flagged() || !mdant2.onSource();
-
-    // 6) Determine the channel offset and add the visibilities
-    ASKAPCHECK(vis.slice < 16, "Slice index is invalid");
-    const casa::uInt chanOffset = (vis.slice) * VisDatagramTraits<VisDatagram>::N_CHANNELS_PER_SLICE;
-    for (casa::uInt chan = 0; chan < VisDatagramTraits<VisDatagram>::N_CHANNELS_PER_SLICE; ++chan) {
-        ASKAPCHECK((chanOffset + chan) <= chunk->nChannel(), "Channel index overflow");
-        const casa::Complex sample(vis.vis[chan].real, vis.vis[chan].imag);
-        chunk->visibility()(row, chanOffset + chan, polidx) = sample;
-
-        // Unflag the sample if TOS metadata indicates it is ok
-        if (!flagged) chunk->flag()(row, chanOffset + chan, polidx) = false;
-
-        if (antenna1 == antenna2) {
-            // for auto-correlations we duplicate cross-pols as index 2 should always be missing
-            ASKAPDEBUGASSERT(polidx != 2);
-            if (polidx == 1) {
-                chunk->visibility()(row, chanOffset + chan, 2) = conj(sample);
-                if (!flagged) chunk->flag()(row, chanOffset + chan, 2) = false;
-            }
-        }
-    }
-    return true;
 }
 
 void MergedSource::signalHandler(const boost::system::error_code& error,
@@ -468,19 +310,6 @@ void MergedSource::signalHandler(const boost::system::error_code& error,
     }
 }
 
-void MergedSource::parseBeamMap(const LOFAR::ParameterSet& params)
-{
-    const std::string beamidmap = params.getString("beammap","");
-    if (beamidmap != "") {
-        ASKAPLOG_INFO_STR(logger, "Beam indices will be mapped according to [" <<beamidmap << "]");
-        itsBeamIDMap.add(beamidmap);
-    }
-
-    // The below implies the beams being received must be a subset (though not
-    // necessarily a proper subset) of the beams in the config
-    itsNBeams = itsConfig.feed().nFeeds();
-}
-
 void MergedSource::checkInterruptSignal()
 {
     itsIOService.poll();
@@ -489,15 +318,3 @@ void MergedSource::checkInterruptSignal()
     }
 }
 
-uint32_t MergedSource::sumOfArithmeticSeries(uint32_t n, uint32_t a, uint32_t d)
-{
-    return (n / 2.0) * ((2 * a) + ((n - 1) * d));
-}
-
-uint32_t MergedSource::calculateRow(uint32_t ant1, uint32_t ant2,
-                                    uint32_t beam, uint32_t nAntenna)
-{
-    return (beam * (nAntenna * (nAntenna + 1) / 2))
-        + (ant1 * (nAntenna) - sumOfArithmeticSeries(ant1 + 1, 0, 1))
-        + ant2;
-}

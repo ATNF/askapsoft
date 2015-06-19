@@ -50,7 +50,10 @@ namespace ingest {
 /// @param[in] id rank of the given ingest process
 VisConverter<VisDatagramBETA>::VisConverter(const LOFAR::ParameterSet& params,
        const Configuration& config, int id) : 
-       VisConverterBase(params, config, id) {}
+       VisConverterBase(params, config, id) 
+{
+   ASKAPLOG_INFO_STR(logger, "Initialised BETA-style visibility stream converter, id="<<id);
+}
 
 /// @brief create a new VisChunk
 /// @details This method initialises itsVisChunk with a new buffer.
@@ -63,6 +66,13 @@ void VisConverter<VisDatagramBETA>::initVisChunk(const casa::uLong timestamp,
 {
    itsReceivedDatagrams.clear();
    VisConverterBase::initVisChunk(timestamp, corrMode);
+   const casa::uInt nChannels = channelManager().localNChannels(id());
+    
+   ASKAPCHECK(nChannels % VisDatagramTraits<VisDatagramBETA>::N_CHANNELS_PER_SLICE == 0,
+        "Number of channels must be divisible by N_CHANNELS_PER_SLICE");
+   const casa::uInt datagramsExpected = nCorrProducts() * maxNumberOfBeams() * 
+          (nChannels / VisDatagramTraits<VisDatagram>::N_CHANNELS_PER_SLICE);
+   setNumberOfExpectedDatagrams(datagramsExpected);
 }
 
 /// @brief main method add datagram to the current chunk
@@ -71,7 +81,26 @@ void VisConverter<VisDatagramBETA>::initVisChunk(const casa::uLong timestamp,
 /// @param[in] vis datagram to process
 void VisConverter<VisDatagramBETA>::add(const VisDatagramBETA &vis)
 {
+   common::VisChunk::ShPtr chunk = visChunk();
+   ASKAPASSERT(chunk);
+
+   // map correlator product to the row and polarisation index
+   const boost::optional<std::pair<casa::uInt, casa::uInt> > prod = 
+          mapCorrProduct(vis.baselineid, vis.beamid);
+
+   if (!prod) {
+       // warning has already been given inside mapCorrProduct
+       countDatagramAsIgnored();
+       return;
+   }
+
    ASKAPCHECK(vis.slice < 16, "Slice index is invalid");
+
+   const casa::uInt row = prod->first;
+   const casa::uInt polidx = prod->second;
+   ASKAPDEBUGASSERT(row < chunk->nRow());
+   ASKAPDEBUGASSERT(polidx < chunk->nPol());
+   ASKAPCHECK(chunk->nPol() == 4, "Currently only support full polarisation case");
 
    // Detect duplicate datagrams
    const DatagramIdentity identity(vis.baselineid, vis.slice, vis.beamid);
@@ -79,10 +108,44 @@ void VisConverter<VisDatagramBETA>::add(const VisDatagramBETA &vis)
        ASKAPLOG_WARN_STR(logger, "Duplicate VisDatagram - BaselineID: " << 
             vis.baselineid << ", Slice: " << vis.slice << ", Beam: " << 
             vis.beamid);
-      
+       countDatagramAsIgnored();
        return;
    }
    itsReceivedDatagrams.insert(identity);
+
+   // insert data into accessor, unflag if good
+   const casa::uInt antenna1 = chunk->antenna1()(row);
+   const casa::uInt antenna2 = chunk->antenna2()(row);
+   const bool rowIsValid = isAntennaGood(antenna1) && isAntennaGood(antenna2);
+   const bool isAutoCorr = antenna1 == antenna2;
+   const casa::uInt chanOffset = (vis.slice) * VisDatagramTraits<VisDatagramBETA>::N_CHANNELS_PER_SLICE;
+   for (casa::uInt chan = 0; chan < VisDatagramTraits<VisDatagramBETA>::N_CHANNELS_PER_SLICE; ++chan) {
+        casa::Complex sample(vis.vis[chan].real, vis.vis[chan].imag);
+        ASKAPCHECK((chanOffset + chan) <= chunk->nChannel(), "Channel index overflow");
+
+        // note, always copy the data even if the row is flagged -
+        // data could still be of interest
+        chunk->visibility()(row, chanOffset + chan, polidx) = sample;
+
+        // Unflag the sample 
+        if (rowIsValid) {
+            chunk->flag()(row, chanOffset + chan, polidx) = false;
+        }
+
+        if (isAutoCorr) {
+            // For auto-correlations we duplicate cross-pols as index 2 should always be missing
+            ASKAPDEBUGASSERT(polidx != 2);
+
+            if (polidx == 1) {
+                chunk->visibility()(row, chanOffset + chan, 2) = conj(sample);
+                // Unflag the sample
+                if (rowIsValid) {
+                    chunk->flag()(row, chanOffset + chan, 2) = false;
+                }
+            }
+        }
+   }
+
 }
 
 } // namespace ingest

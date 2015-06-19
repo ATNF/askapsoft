@@ -35,19 +35,17 @@
 #include "boost/shared_ptr.hpp"
 #include "boost/system/error_code.hpp"
 #include "boost/asio.hpp"
+#include "boost/noncopyable.hpp"
 #include "boost/tuple/tuple.hpp"
 #include "Common/ParameterSet.h"
 #include "cpcommon/VisDatagram.h"
 #include "cpcommon/VisChunk.h"
-#include "askap/IndexConverter.h"
 
 // Local package includes
 #include "ingestpipeline/sourcetask/ISource.h"
 #include "ingestpipeline/sourcetask/IVisSource.h"
-#include "ingestpipeline/sourcetask/ChannelManager.h"
 #include "ingestpipeline/sourcetask/MonitoringPointManager.h"
 #include "configuration/Configuration.h"
-#include "configuration/BaselineMap.h"
 #include "ingestpipeline/sourcetask/VisConverter.h"
 
 namespace askap {
@@ -56,7 +54,8 @@ namespace ingest {
 
 /// @brief Ingest pipeline source tasks. The NoMetadataSource task builds a VisChunk from
 /// visibilities and configuration (in the parset) only, no TOs metadata is needed.
-class NoMetadataSource : public ISource {
+class NoMetadataSource : public ISource,
+                         public boost::noncopyable {
     public:
         /// @brief Constructor.
         ///
@@ -82,60 +81,18 @@ class NoMetadataSource : public ISource {
 
     private:
 
-        /// Identifies a datagram based on baselineid, sliceid & beamid.
-        /// This is used for duplicate detection
-        typedef boost::tuple<int32_t, int32_t, int32_t> DatagramIdentity;
-
-        /// Creates an "empty" VisChunk
+        /// Initialises an "empty" VisChunk (inside the converter)
         askap::cp::common::VisChunk::ShPtr createVisChunk(const casa::uLong timestamp);
-
-        /// @brief process one datagram
-        /// @param[in] chunk visibility chunk to fill
-        /// @param[in] vis datagram to get the data from
-        /// @param[in] nAntenna number of antennas (to verify that all are present)
-        /// @param[inout] rowsRecieved a vector for tracking the rows received.
-        ///                            this method is responsible for setting
-        ///                            rowsRecieved[row] when a new row is received.
-        ///
-        /// @return false if the datagram is ignored, e.g. because of the beam selection,
-        ///         or a duplicate datagram is received.
-        bool addVis(askap::cp::common::VisChunk::ShPtr chunk, const VisDatagram& vis,
-                    const casa::uInt nAntenna,
-                    std::set<DatagramIdentity>& receivedDatagrams);
 
         /// Handled the receipt of signals to "interrupt" the process
         void signalHandler(const boost::system::error_code& error,
                            int signalNumber);
 
-        void parseBeamMap(const LOFAR::ParameterSet& params);
-
-        // No support for assignment
-        NoMetadataSource& operator=(const NoMetadataSource& rhs);
-
-        // No support for copy constructor
-        NoMetadataSource(const NoMetadataSource& src);
-
-        // Configuration
-        const Configuration itsConfig;
-
         // The object that is the source of visibilities
         IVisSource::ShPtr itsVisSrc;
 
-        // The total number of ingest pipeline tasks. Used to determine how many
-        // visibilities this instance is responsible for receiving.
-        int itsNumTasks;
-
-        // The rank (identity amongst all ingest processes) of this process
-        int itsId;
-
         // Pointers to the two constituent datatypes
         boost::shared_ptr<VisDatagram> itsVis;
-
-        // Channel Manager
-        ChannelManager itsChannelManager;
-
-        // Baseline Map
-        const BaselineMap itsBaselineMap;
 
         // Interrupted by SIGTERM, SIGINT or SIGUSR1?
         bool itsInterrupted;
@@ -145,30 +102,6 @@ class NoMetadataSource : public ISource {
 
         // Interrupt signals
         boost::asio::signal_set itsSignals;
-
-        /// @brief beam id map
-        /// @details It is possible to filter the beams received by this source and map the
-        /// indices. This map provides translation (by default, any index is passed as is)
-        utility::IndexConverter  itsBeamIDMap;
-
-        /// @brief largest supported number of beams
-        /// @details The space is reserved for the given number of beams (set via the parset).
-        /// This value is always less than or equal to the number of beams specified via the
-        /// configuration (the latter is the default). The visibility cube is resized to match
-        /// this parameter (allowing to drop unnecessary beams if used together with itsBeamIDMap)
-        ///
-        /// @note it is 0 by default, which triggers the constructor to set it equal to the
-        /// configuration (i.e. to write everything)
-        casa::uInt itsMaxNBeams;
-
-        /// @brief number of beams to expect in the data stream
-        /// @details A larger number of beams can be received from the datastream than
-        /// stored into MS. To avoid unnecessary bloat of the MS size, only itsMaxNBeams
-        /// beams are stored. This field controls the data stream unpacking.
-        ///
-        /// @note it is 0 by default, which triggers the constructor to set it equal to the
-        /// configuration /// (i.e. to write everything)
-        casa::uInt itsBeamsToReceive;
 
         /// @brief Centre frequency
         const casa::Quantity itsCentreFreq;
