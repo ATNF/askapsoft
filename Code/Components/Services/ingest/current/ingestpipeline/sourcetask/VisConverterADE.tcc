@@ -89,14 +89,15 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
    ASKAPCHECK((vis.block > 0) && (vis.block <= 8), "vis.block = "<<vis.block<<" is outside [1,8] range");
    ASKAPCHECK((vis.card > 0) && (vis.card <= 12), "vis.card = "<<vis.card<<" is outside [1,12] range");
    ASKAPCHECK(vis.slice < 4, "Slice index is invalid");
+   ASKAPCHECK(vis.beamid <= 36, "Currently support only up to 36 beams");
 
    
    // Detect duplicate datagrams
-   const DatagramIdentity identity(vis.block, vis.card, vis.channel, vis.slice);
+   const DatagramIdentity identity(vis.beamid, vis.block, vis.card, vis.channel, vis.slice);
    if (itsReceivedDatagrams.find(identity) != itsReceivedDatagrams.end()) {
        ASKAPLOG_WARN_STR(logger, "Duplicate VisDatagram - Block: " << 
             vis.block << ", Card: " << vis.card << ", Channel: " << 
-            vis.channel<<", Slice: "<<vis.slice);
+            vis.channel<<", Beam: "<<vis.beamid << ", Slice: "<<vis.slice);
        countDatagramAsIgnored();
        return;
    }

@@ -45,9 +45,9 @@ namespace askap {
 namespace cp {
 namespace ingest {
 
-class VisConverter<VisDatagramBETA>;
+template class VisConverter<VisDatagramBETA>;
 
-class VisConverter<VisDatagramADE>;
+template class VisConverter<VisDatagramADE>;
 
 } // namespace ingest
 } // namespace cp
