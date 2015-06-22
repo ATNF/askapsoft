@@ -73,7 +73,7 @@ NoMetadataSource::NoMetadataSource(const LOFAR::ParameterSet& params,
         itsCentreFreq(asQuantity(params.getString("centre_freq"))),
         itsTargetName(params.getString("target_name")),
         itsTargetDirection(asMDirection(params.getStringVector("target_direction"))),
-        itsLastTimestamp(-1), itsVisConverter(params, config, id)
+        itsLastTimestamp(0u), itsVisConverter(params, config, id)
 {
     itsCorrelatorMode = config.lookupCorrelatorMode(params.getString("correlator_mode"));
 
@@ -88,18 +88,37 @@ NoMetadataSource::~NoMetadataSource()
 
 VisChunk::ShPtr NoMetadataSource::next(void)
 {
+    const long ONESECOND = 1000000; // 1 second timeout
     // Get the next VisDatagram if there isn't already one in the buffer
     while (!itsVis) {
-        itsVis = itsVisSrc->next(10000000); // 1 second timeout
+        itsVis = itsVisSrc->next(ONESECOND); 
 
         itsIOService.poll();
         if (itsInterrupted) throw InterruptedException();
     }
 
+    // catch up if necessary; all datagrams should be processed below this 
+    // method is only called once per integration (hence <= in the while-statement)
+    // Using timestamp of 0 as initial value as it is way in the past.
+    uint32_t nIgnoredOldDatagrams = 0;
+    while (itsVis->timestamp <= itsLastTimestamp) {
+           ++nIgnoredOldDatagrams;
+           itsVis.reset();
+           while (!itsVis) {
+                 itsVis = itsVisSrc->next(ONESECOND); 
+
+                 itsIOService.poll();
+                 if (itsInterrupted) throw InterruptedException();
+           }
+    }
     // This is the BAT timestamp for the current integration being processed
     const casa::uLong currentTimestamp = itsVis->timestamp;
 
-    // Protect against producing VisChunks with the same timestamp
+    if (nIgnoredOldDatagrams > 0) {
+        ASKAPLOG_DEBUG_STR(logger, "Catching up to time: "<<bat2epoch(currentTimestamp)<<
+                  ", ignored "<<nIgnoredOldDatagrams<<" successfully received datagrams.");
+    }
+
     ASKAPCHECK(currentTimestamp != itsLastTimestamp,
             "Consecutive VisChunks have the same timestamp");
     itsLastTimestamp = currentTimestamp;
@@ -135,6 +154,10 @@ VisChunk::ShPtr NoMetadataSource::next(void)
         }
 
         itsVis = itsVisSrc->next(timeout);
+        if (!itsVis) {
+            ASKAPLOG_DEBUG_STR(logger, "finishing ingesting chunk at "<<bat2epoch(currentTimestamp)<<
+                      " due to timeout");
+        }
     }
 
     ASKAPLOG_DEBUG_STR(logger, "VisChunk built with " << itsVisConverter.datagramsCount() <<

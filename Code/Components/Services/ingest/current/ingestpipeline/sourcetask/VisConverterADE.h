@@ -81,6 +81,9 @@ private:
    typedef boost::tuple<uint32_t, uint32_t, uint32_t, uint32_t, uint32_t> DatagramIdentity;
 
    std::set<DatagramIdentity> itsReceivedDatagrams;
+
+   // temporary
+   uint32_t itsNDuplicates;
 };
 
 } // namespace ingest

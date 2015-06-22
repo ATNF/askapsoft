@@ -47,7 +47,7 @@ namespace ingest {
 /// @param[in] id rank of the given ingest process
 VisConverter<VisDatagramADE>::VisConverter(const LOFAR::ParameterSet& params,
        const Configuration& config, int id) : 
-       VisConverterBase(params, config, id) 
+       VisConverterBase(params, config, id), itsNDuplicates(0u)
 {
    ASKAPLOG_INFO_STR(logger, "Initialised ADE-style visibility stream converter, id="<<id);
 }
@@ -62,6 +62,10 @@ void VisConverter<VisDatagramADE>::initVisChunk(const casa::uLong timestamp,
                const CorrelatorMode &corrMode)
 {
    itsReceivedDatagrams.clear();
+   if (itsNDuplicates > 0) {
+       ASKAPLOG_DEBUG_STR(logger, "Received "<<itsNDuplicates<<" duplicate datagram in the previous VisChunk");
+       itsNDuplicates = 0u;
+   }
    VisConverterBase::initVisChunk(timestamp, corrMode);
    const casa::uInt nChannels = channelManager().localNChannels(id());
 
@@ -69,7 +73,10 @@ void VisConverter<VisDatagramADE>::initVisChunk(const casa::uLong timestamp,
 
    ASKAPCHECK(nChannels % 216 == 0, "Bandwidth should be multiple of 4-MHz");
     
-   const casa::uInt datagramsExpected = 4 * 36 * nChannels;
+   //const casa::uInt nSlices = 4;
+   const casa::uInt nSlices = 1;
+   const casa::uInt nBeams = 36;
+   const casa::uInt datagramsExpected = nSlices * nBeams * nChannels;
    setNumberOfExpectedDatagrams(datagramsExpected);
 }
 
@@ -95,9 +102,12 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
    // Detect duplicate datagrams
    const DatagramIdentity identity(vis.beamid, vis.block, vis.card, vis.channel, vis.slice);
    if (itsReceivedDatagrams.find(identity) != itsReceivedDatagrams.end()) {
+       /*
        ASKAPLOG_WARN_STR(logger, "Duplicate VisDatagram - Block: " << 
             vis.block << ", Card: " << vis.card << ", Channel: " << 
             vis.channel<<", Beam: "<<vis.beamid << ", Slice: "<<vis.slice);
+       */
+       ++itsNDuplicates;
        countDatagramAsIgnored();
        return;
    }
