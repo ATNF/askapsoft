@@ -36,6 +36,8 @@
 #include "boost/scoped_ptr.hpp"
 #include "boost/thread.hpp"
 
+#include <iomanip>
+
 // Using
 using namespace askap;
 using namespace askap::cp;
@@ -45,14 +47,20 @@ using boost::asio::ip::udp;
 ASKAP_LOGGER(logger, ".VisSource");
 
 VisSource::VisSource(const unsigned int port, const unsigned int bufSize) :
-    itsBuffer(bufSize), itsStopRequested(false)
+    itsBuffer(bufSize), itsStopRequested(false), itsOldTimestamp(0ul)
 {
+    ASKAPLOG_INFO_STR(logger, "Setting up VisSource to listen up port "<<port<<" and buffer "<<bufSize<<" datagrams");    
+    bat2epoch(0ul);
+
     // Create socket
     itsSocket.reset(new udp::socket(itsIOService, udp::endpoint(udp::v4(), port)));
 
     // Set an 16MB receive buffer to help deal with the bursty nature of the
     // communication
     boost::asio::socket_base::receive_buffer_size option(1024 * 1024 * 16);
+    // current value for ADE
+    //boost::asio::socket_base::receive_buffer_size option(1024 * 1024 * 64);
+    //
     boost::system::error_code soerror;
     itsSocket->set_option(option, soerror);
     if (soerror) {
@@ -108,8 +116,17 @@ void VisSource::handle_receive(const boost::system::error_code& error,
                     << " got " << itsRecvBuffer->version);
         }
 
+        // hack for debugging
+        if (itsOldTimestamp != itsRecvBuffer->timestamp) {
+            itsOldTimestamp = itsRecvBuffer->timestamp;
+            ASKAPLOG_INFO_STR(logger, "VisSource: queuing new timestamp :"<<bat2epoch(itsOldTimestamp)<<" BAT=0x"<<std::hex<<itsOldTimestamp);
+        }
+        //
+
         // TODO: Remove this for ADE - For BETA only beams 1-9 are valid/used.
         if (itsRecvBuffer->beamid <= 9) {
+        //if (itsRecvBuffer->beamid <= 36) {
+        //if (itsRecvBuffer->slice == 0) {
             // Add a pointer to the message to the back of the circular buffer.
             // Waiters are notified.
             itsBuffer.add(itsRecvBuffer);

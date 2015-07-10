@@ -76,6 +76,15 @@ public:
    void add(const VisDatagramADE &vis);
 
 private:
+   /// @brief helper (and probably temporary) method to remap channels
+   /// @details Maps [0..215] channel index into [0..215] channel number, per card.
+   /// We can expose this function via parset reusing index mapper (as for beams), but
+   /// for now just use hard-coded logic
+   /// @param[in] channelId input channel ID
+   /// @return physical channel number
+   static uint32_t mapChannel(uint32_t channelId);
+
+
    /// Identifies a datagram based on beam, block, card, channel, slice
    /// This is used for duplicate detection
    typedef boost::tuple<uint32_t, uint32_t, uint32_t, uint32_t, uint32_t> DatagramIdentity;

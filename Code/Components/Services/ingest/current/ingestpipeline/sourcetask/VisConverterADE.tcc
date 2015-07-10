@@ -52,6 +52,23 @@ VisConverter<VisDatagramADE>::VisConverter(const LOFAR::ParameterSet& params,
    ASKAPLOG_INFO_STR(logger, "Initialised ADE-style visibility stream converter, id="<<id);
 }
 
+/// @brief helper (and probably temporary) method to remap channels
+/// @details Maps [0..215] channel index into [0..215] channel number, per card.
+/// We can expose this function via parset reusing index mapper (as for beams), but
+/// for now just use hard-coded logic
+/// @param[in] channelId input channel ID
+/// @return physical channel number
+uint32_t VisConverter<VisDatagramADE>::mapChannel(uint32_t channelId)
+{
+  ASKAPDEBUGASSERT(channelId < 216);
+  const uint32_t fineOffset = channelId % 9;
+  const uint32_t group = channelId / 9;
+  ASKAPDEBUGASSERT(group < 24);
+  const uint32_t chip = group / 4; 
+  const uint32_t coarseChannel = group % 4;
+  return fineOffset + chip * 9 + coarseChannel * 54;
+}
+
 /// @brief create a new VisChunk
 /// @details This method initialises itsVisChunk with a new buffer.
 /// It is intended to be used when the first datagram of a new 
@@ -96,17 +113,18 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
    ASKAPCHECK((vis.block > 0) && (vis.block <= 8), "vis.block = "<<vis.block<<" is outside [1,8] range");
    ASKAPCHECK((vis.card > 0) && (vis.card <= 12), "vis.card = "<<vis.card<<" is outside [1,12] range");
    ASKAPCHECK(vis.slice < 4, "Slice index is invalid");
-   ASKAPCHECK(vis.beamid <= 36, "Currently support only up to 36 beams");
+   ASKAPCHECK((vis.beamid > 0) && (vis.beamid <= 36), "vis.beamid = "<<vis.beamid<<" is outside [1,36] range");
 
    
    // Detect duplicate datagrams
    const DatagramIdentity identity(vis.beamid, vis.block, vis.card, vis.channel, vis.slice);
    if (itsReceivedDatagrams.find(identity) != itsReceivedDatagrams.end()) {
-       /*
-       ASKAPLOG_WARN_STR(logger, "Duplicate VisDatagram - Block: " << 
-            vis.block << ", Card: " << vis.card << ", Channel: " << 
-            vis.channel<<", Beam: "<<vis.beamid << ", Slice: "<<vis.slice);
-       */
+       if (!itsNDuplicates) {
+           ASKAPLOG_WARN_STR(logger, "Duplicate VisDatagram - Block: " << 
+               vis.block << ", Card: " << vis.card << ", Channel: " << 
+               vis.channel<<", Beam: "<<vis.beamid << ", Slice: "<<vis.slice);
+           ASKAPLOG_WARN_STR(logger, "Futher messages about duplicated datagrams suspended till the end of the cycle");
+       }
        ++itsNDuplicates;
        countDatagramAsIgnored();
        return;
@@ -126,7 +144,14 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
               VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE);
 
         // can skip products here to avoid unnecessary warnings
+        // this needs to be removed for the production system
         if (product > 78) { 
+            if (!atLeastOneUseful) {
+                ASKAPLOG_WARN_STR(logger, "Rejecting the whole datagram, slice="<<vis.slice<<
+                          " block="<<vis.block << ", card=" << vis.card << ", channel=" << 
+                          vis.channel<<", baseline1="<<vis.baseline1<<
+                          " and baseline2="<<vis.baseline2<<", product=" <<product); 
+            }
             break;
         }
 
@@ -151,7 +176,12 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
             ASKAPLOG_WARN_STR(logger, "Got channel outside bounds: "<<vis.channel);
             break;
         }
-        const casa::uInt channel = vis.channel;
+        // channel id to physical channel mapping is dependent on hardware configuration
+        // it is not clear yet what modes we want to expose to end user via parset
+        // for now have some mapping hard-coded
+        //const casa::uInt channel = vis.channel;
+        const casa::uInt channel = mapChannel(vis.channel);
+
         ASKAPASSERT(channel < chunk->nChannel())
         //
         atLeastOneUseful = true;
@@ -187,6 +217,10 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
                 }
             }
         }
+
+        // temporary - debugging frequency mapping/values received from the ioc
+        //chunk->visibility().yzPlane(row).row(channel).set(casa::Complex(vis.freq,0.));
+        //
    }
 
    if (atLeastOneUseful) {

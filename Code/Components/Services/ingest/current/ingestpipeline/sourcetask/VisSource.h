@@ -86,6 +86,9 @@ class VisSource : public IVisSource {
         // No support for copy constructor
         VisSource(const VisSource& src);
 
+        // temporary
+        uint64_t itsOldTimestamp;
+
 };
 
 }
