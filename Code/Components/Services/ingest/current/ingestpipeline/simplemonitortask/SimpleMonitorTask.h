@@ -120,6 +120,9 @@ class SimpleMonitorTask : public askap::cp::ingest::ITask {
         /// @brief output file name
         std::string itsFileName;
 
+        /// @brief rank of this ingest process
+        int itsRank;       
+
 }; // PhaseTrackTask class
 
 } // ingest

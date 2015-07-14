@@ -45,7 +45,8 @@ using namespace askap::cp::ingest;
 SimpleMonitorTask::SimpleMonitorTask(const LOFAR::ParameterSet& parset,
                                      const Configuration& config)
     : itsCurrentTime(-1.), itsStartTime(-1.), itsBaselineMap(parset),
-      itsDelayEstimator(1.), itsFileName(parset.getString("prefix", ""))
+      itsDelayEstimator(1.), itsFileName(parset.getString("prefix", "")),
+      itsRank(config.rank())
 {
     ASKAPLOG_DEBUG_STR(logger, "Constructor");
     ASKAPCHECK(itsBaselineMap.size() == static_cast<size_t>(itsBaselineMap.maxID() + 1),
@@ -55,7 +56,7 @@ SimpleMonitorTask::SimpleMonitorTask(const LOFAR::ParameterSet& parset,
     itsDelayBuffer.resize(itsBaselineMap.size(), nBeam);
     itsVisBuffer.set(casa::Complex(0., 0.));
     itsDelayBuffer.set(0.);
-    itsFileName += "visplot_" + utility::toString(config.rank()) + ".dat";
+    itsFileName += "visplot_" + utility::toString(itsRank) + ".dat";
     ASKAPLOG_INFO_STR(logger, "Average visibilities and delays for " << itsBaselineMap.size()
                       << " baseline/polarisation products and " << nBeam
                       << " beams will be written into " << itsFileName);
@@ -181,8 +182,8 @@ void SimpleMonitorTask::processRow(const casa::Vector<casa::Complex> &vis,
     // temporary code to export the spectrum for debugging of the hw correlator.
     // the expectation is that it would be hard to keep up if we export everything. If
     // something like this is necessary then we probably need to write a separate task.
-    if (hasData && (beam == 0)) {
-        // we don't need to cater for the full MPI case
+    if (hasData && (beam == 0) && (itsRank == 0)) {
+        // we don't need to cater for the full MPI case - export for single rank only
         ASKAPDEBUGASSERT(itsFileName.find("_0") != std::string::npos);
         const std::string fname = "spectra" + utility::toString(baseline) + ".dat";
         std::ofstream os(fname.c_str());
