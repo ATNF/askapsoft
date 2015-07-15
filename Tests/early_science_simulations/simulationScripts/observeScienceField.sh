@@ -54,7 +54,7 @@ while [ $GRP -lt ${NGROUPS_CSIM} ]; do
     sbatchfile=${slurms}/csimScience_GRP${GRP}.sbatch
     cat > $sbatchfile <<EOF
 #!/bin/bash -l
-#SBATCH --time=06:00:00
+#SBATCH --time=12:00:00
 #SBATCH --ntasks=${NCPU_CSIM}
 #SBATCH --ntasks-per-node=${NPPN_CSIM}
 #SBATCH --job-name ${slurmtag}
@@ -67,8 +67,8 @@ csim=${csim}
 
 rm -rf $ms
 
-mkVisParset=${parsetdir}/csimScience-GRP${GRP}.in
-mkVisLog=${logdir}/csimScience-GRP${GRP}.log
+mkVisParset=${parsetdir}/csimScience-GRP${GRP}-\${SLURM_JOB_ID}.in
+mkVisLog=${logdir}/csimScience-GRP${GRP}-\${SLURM_JOB_ID}.log
 
 cat > \${mkVisParset} << EOF_INNER
 Csimulator.dataset                              =       ${ms}

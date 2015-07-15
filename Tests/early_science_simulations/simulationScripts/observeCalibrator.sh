@@ -25,7 +25,7 @@ while [ $POINTING -le $MAXPOINTING ]; do
     sbatchfile=${slurms}/csimCalibrator_${beamName}.sbatch
     cat > $sbatchfile <<EOF
 #!/bin/bash -l
-#SBATCH --time=06:00:00
+#SBATCH --time=12:00:00
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name csimCal${POINTING}

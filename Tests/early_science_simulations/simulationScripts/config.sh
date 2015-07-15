@@ -70,11 +70,11 @@ msbaseSci=sciencefield_SKADS_${inttime}_${now}
 feeds=${askapconfig}/ASKAP${nfeeds}feeds.in
 antennaParset=${askapconfig}/${antennaConfig}.in
 
-NGROUPS_CSIM=27
-NWORKERS_CSIM=152
+NGROUPS_CSIM=32
+NWORKERS_CSIM=171
 NCPU_CSIM=`echo $NWORKERS_CSIM | awk '{print $1+1}'`
-NPPN_CSIM=20
-chanPerMSchunk=4
+NPPN_CSIM=3
+chanPerMSchunk=3
 
 catdir=/scratch/askap/whi550/Simulations/BETA/InputCatalogue
 sourcelist=master_possum_catalogue_trim10x10deg.dat
@@ -86,8 +86,8 @@ writeByNode=true
 createTT_CR=true
 
 npixModel=4096
-nsubxCR=7
-nsubyCR=12
+nsubxCR=9
+nsubyCR=11
 CREATORTASKS=`echo $nsubxCR $nsubyCR | awk '{print $1*$2+1}'`
 CREATORWORKERPERNODE=1
 CREATORNODES=`echo $CREATORTASKS ${CREATORWORKERPERNODE} | awk '{print int($1/$2)}'`
