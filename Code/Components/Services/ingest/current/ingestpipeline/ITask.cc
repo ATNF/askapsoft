@@ -40,3 +40,20 @@ void askap::cp::ingest::ITask::setName(const std::string& name)
 {
     itsName = name;
 }
+
+/// @brief should this task be executed for inactive ranks?
+/// @details If a particular rank is inactive, process method is
+/// not called unless this method returns true. Possible use cases:
+///   - Splitting the datastream expanding parallelism, i.e
+///     inactive rank(s) become active after this task.
+///   - Need for collective operations
+/// @return true, if process method should be called even if
+/// this rank is inactive (i.e. uninitialised chunk pointer
+/// will be passed to process method).
+/// @note default action is to return false, i.e. process method
+/// is not called for inactive tasks.
+bool askap::cp::ingest::ITask::isAlwaysActive() const
+{
+  return false;
+}
+        

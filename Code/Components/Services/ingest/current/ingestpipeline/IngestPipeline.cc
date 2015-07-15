@@ -96,6 +96,11 @@ void IngestPipeline::ingest(void)
         ASKAPTHROW(AskapError, "No pipeline tasks specified");
     }
 
+    // at this stage we do not support the situation when
+    // some ranks may be inactive up front. This may be necessary
+    // if more parallelism is required for post-processing than
+    // for receiving. But currently, source task is instantiated
+    // for all ranks.
     if (tasks[0].type() == TaskDesc::MergedSource) {
         itsSource = factory.createMergedSource();
     } else if (tasks[0].type() == TaskDesc::NoMetadataSource) {
@@ -135,6 +140,8 @@ bool IngestPipeline::ingestOne(void)
     casa::Timer timer;
     ASKAPLOG_DEBUG_STR(logger, "Waiting for data");
     timer.mark();
+    // all ranks are active up front
+    ASKAPDEBUGASSERT(itsSource);
     VisChunk::ShPtr chunk(itsSource->next());
     ASKAPLOG_DEBUG_STR(logger, "Source task execution time " << timer.real() << "s");
     if (chunk.get() == 0) {
@@ -143,12 +150,14 @@ bool IngestPipeline::ingestOne(void)
 
     ASKAPLOG_INFO_STR(logger, "Received one VisChunk. Timestamp: " << chunk->time());
 
-    // For each task call process on the VisChunk
+    // For each task call process on the VisChunk as long as this rank stays active
     for (unsigned int i = 0; i < itsTasks.size(); ++i) {
-        timer.mark();
-        itsTasks[i]->process(chunk);
-        ASKAPLOG_DEBUG_STR(logger, itsTasks[i]->getName() << " execution time "
-                << timer.real() << "s");
+         if (chunk || itsTasks[i]->isAlwaysActive()) {
+             timer.mark();
+             itsTasks[i]->process(chunk);
+             ASKAPLOG_DEBUG_STR(logger, itsTasks[i]->getName() << " execution time "
+                   << timer.real() << "s");
+         }
     }
 
     return false; // Not finished
