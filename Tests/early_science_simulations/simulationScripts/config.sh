@@ -19,16 +19,22 @@ logdir=logs
 slurms=slurmFiles
 slurmOut=slurmOutput
 msdir=MS
-chunkdir=Images/Chunks
-slicedir=Images/Slices
+chunkdir=../ModelImages/Chunks
+slicedir=../ModelImages/Slices
 
-doCreateModel=true
-# Whether to slice up the model prior to simulating - set to false
-# if we've already done this
-doSlice=true
+## doCreateModel=true
+## # Whether to slice up the model prior to simulating - set to false
+## # if we've already done this
+## doSlice=true
 
-doCorrupt=true
+doCreateModel=false
+doSlice=false
+
+doCalibrator=false
+
+doCorrupt=false
 randomgainsparset=${parsetdir}/randomgains.in
+
 doNoise=true
 Tsys=50
 

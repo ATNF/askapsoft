@@ -1,29 +1,31 @@
 #!/bin/bash -l
 
-echo "In observeCalibrator.sh : this creates 1934 MS from pointings ${firstPointingID} to ${lastPointingID}"
+if [ $doCalibrator == true ]; then
 
-spw="[${nchan}, ${freqChanZeroMHz} MHz, ${chanw} Hz, \"${pol}\"]"
+    echo "In observeCalibrator.sh : this creates 1934 MS from pointings ${firstPointingID} to ${lastPointingID}"
 
-echo "Creating a random gains parset for ${nfeeds} feeds, ${nant} antennas and ${nstokes} polarisations"
-if [ $doCorrupt == true ]; then
-    $rndgains -f ${nfeeds} -a ${nant} -p ${nstokes} $randomgainsparset
-fi
+    spw="[${nchan}, ${freqChanZeroMHz} MHz, ${chanw} Hz, \"${pol}\"]"
 
-POINTING=${firstPointingID}
-MAXPOINTING=${lastPointingID}
-calMSlist=""
-mergeCalDep="-d afterok"
-while [ $POINTING -le $MAXPOINTING ]; do
+    echo "Creating a random gains parset for ${nfeeds} feeds, ${nant} antennas and ${nstokes} polarisations"
+    if [ $doCorrupt == true ]; then
+        $rndgains -f ${nfeeds} -a ${nant} -p ${nstokes} $randomgainsparset
+    fi
 
-    beamName=`echo $POINTING | awk '{printf "BEAM%02d",$1}'`
+    POINTING=${firstPointingID}
+    MAXPOINTING=${lastPointingID}
+    calMSlist=""
+    mergeCalDep="-d afterok"
+    while [ $POINTING -le $MAXPOINTING ]; do
 
-    . ${simScripts}/makeFeedParset.sh
+        beamName=`echo $POINTING | awk '{printf "BEAM%02d",$1}'`
 
-    ms=${msdir}/${msbaseCal}_${beamName}.ms
-    calMSlist="$calMSlist $ms"
+        . ${simScripts}/makeFeedParset.sh
 
-    sbatchfile=${slurms}/csimCalibrator_${beamName}.sbatch
-    cat > $sbatchfile <<EOF
+        ms=${msdir}/${msbaseCal}_${beamName}.ms
+        calMSlist="$calMSlist $ms"
+
+        sbatchfile=${slurms}/csimCalibrator_${beamName}.sbatch
+        cat > $sbatchfile <<EOF
 #!/bin/bash -l
 #SBATCH --time=12:00:00
 #SBATCH --ntasks=1
@@ -99,22 +101,22 @@ aprun \${csim} -c \${mkVisParset} > \${mkVisLog}
 
 EOF
 
-    if [ $doSubmit == true ]; then
-	latestID=`sbatch ${sbatchfile} | awk '{print $4}'`
-	echo "Running csimulator for pointing ${POINTING} with 1934-638 component, producing measurement set ${ms}: ID=${latestID}"
-	mergeCalDep="${mergeCalDep}:${latestID}"
-    fi
+        if [ $doSubmit == true ]; then
+	    latestID=`sbatch ${sbatchfile} | awk '{print $4}'`
+	    echo "Running csimulator for pointing ${POINTING} with 1934-638 component, producing measurement set ${ms}: ID=${latestID}"
+	    mergeCalDep="${mergeCalDep}:${latestID}"
+        fi
 
-    POINTING=`expr $POINTING + 1`
+        POINTING=`expr $POINTING + 1`
 
-done
+    done
 
-##################
-# Merge all calibrator MSs into one.
+    ##################
+    # Merge all calibrator MSs into one.
 
-mergeCalsbatch=${slurms}/mergeCalVis.sbatch
-	
-cat > $mergeCalsbatch <<EOF
+    mergeCalsbatch=${slurms}/mergeCalVis.sbatch
+    
+    cat > $mergeCalsbatch <<EOF
 #!/bin/bash
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
@@ -139,13 +141,14 @@ echo "Processing files: " > \${logfile}
 aprun -n 1 -N 1 \${msmerge} -o ${msdir}/${msbaseCal}.ms \$FILES >> \${logfile}
 EOF
 
-if [ $doSubmit == true ]; then
+    if [ $doSubmit == true ]; then
 	
-    merge2ID=`sbatch ${mergeCalDep} $mergeCalsbatch | awk '{print $4}'`
-    echo "Running merging for full science field: ID=${merge2ID} and dependency $merge2dep"
+        merge2ID=`sbatch ${mergeCalDep} $mergeCalsbatch | awk '{print $4}'`
+        echo "Running merging for full science field: ID=${merge2ID} and dependency $merge2dep"
+
+    fi
 
 fi
-
 
 
 
