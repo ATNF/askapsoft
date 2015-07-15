@@ -16,6 +16,8 @@ now=`date +%F-%H%M`
 
 parsetdir=parsets
 logdir=logs
+slurms=slurmFiles
+slurmOut=slurmOutput
 msdir=MS
 chunkdir=Images/Chunks
 slicedir=Images/Slices

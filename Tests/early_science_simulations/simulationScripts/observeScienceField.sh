@@ -51,7 +51,7 @@ while [ $GRP -lt ${NGROUPS_CSIM} ]; do
     done
 
     slurmtag="csimSci${GRP}"
-    sbatchfile=csimScience_GRP${GRP}.sbatch
+    sbatchfile=${slurms}/csimScience_GRP${GRP}.sbatch
     cat > $sbatchfile <<EOF
 #!/bin/bash -l
 #SBATCH --time=06:00:00
@@ -61,6 +61,7 @@ while [ $GRP -lt ${NGROUPS_CSIM} ]; do
 #SBATCH --mail-user=matthew.whiting@csiro.au
 #SBATCH --mail-type=ALL
 #SBATCH --export=ASKAP_ROOT,AIPSPATH
+#SBATCH --output=${slurmOutput}/slurm-csimScience-%j.out
 
 csim=${csim}
 
@@ -138,7 +139,7 @@ EOF
     fi
 
 
-    merge1sbatch=mergeVisStage1_GRP${GRP}.sbatch
+    merge1sbatch=${slurms}/mergeVisStage1_GRP${GRP}.sbatch
     
     cat > $merge1sbatch <<EOF
 #!/bin/bash
@@ -149,6 +150,7 @@ EOF
 #SBATCH --job-name visMerge1_${GRP}
 #SBATCH --mail-type=ALL
 #SBATCH --export=ASKAP_ROOT,AIPSPATH
+#SBATCH --output=${slurmOutput}/slurm-mergeSciVis1-%j.out
 
 #######
 # AUTOMATICALLY CREATED
@@ -188,7 +190,7 @@ done
 
 
 
-merge2sbatch=mergeVisStage2.sbatch
+merge2sbatch=${slurms}/mergeVisStage2.sbatch
 	
 cat > $merge2sbatch <<EOF
 #!/bin/bash
@@ -199,6 +201,7 @@ cat > $merge2sbatch <<EOF
 #SBATCH --job-name visMerge2
 #SBATCH --mail-type=ALL
 #SBATCH --export=ASKAP_ROOT,AIPSPATH
+#SBATCH --output=${slurmOutput}/slurm-mergeSciVis2-%j.out
 
 ulimit -n 8192
 export APRUN_XFER_LIMITS=1

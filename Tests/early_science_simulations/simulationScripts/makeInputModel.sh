@@ -9,7 +9,7 @@ if [ $doCreateModel == true ]; then
 
     echo "In makeInputModel.sh : this runs a job to create the large input model."
 
-    crSbatch=createModel.sbatch
+    crSbatch=${slurms}/createModel.sbatch
     cat > $crSbatch <<EOF
 #!/bin/bash -l
 #SBATCH --time=12:00:00
@@ -19,6 +19,7 @@ if [ $doCreateModel == true ]; then
 #SBATCH --job-name DCmodelCF
 #SBATCH --mail-type=ALL
 #SBATCH --no-requeue
+#SBATCH --output=${slurmOutput}/slurm-createInput-%j.out
 
 ####################
 # AUTOMATICALLY GENERATED - DO NOT EDIT

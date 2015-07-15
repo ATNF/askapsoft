@@ -11,6 +11,8 @@ mkdir -p ${workdir}
 cd ${workdir}
 mkdir -p ${parsetdir}
 mkdir -p ${logdir}
+mkdir -p ${slurms}
+mkdir -p ${slurmOutput}
 mkdir -p ${msdir}
 mkdir -p ${chunkdir}
 mkdir -p ${slicedir}

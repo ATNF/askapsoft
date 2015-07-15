@@ -8,7 +8,7 @@ mkdir -p ${slicedir}
 
 echo "In makeSlices.sh : making the spectral slices for group ${GRP}"
 
-slQsub=makeslices-GRP${GRP}.sbatch
+slQsub=${slurms}/makeslices-GRP${GRP}.sbatch
 
 if [ ${writeByNode} == true ]; then
 
@@ -42,6 +42,7 @@ cat > $slQsub <<EOF
 #SBATCH --mail-type=ALL
 #SBATCH --no-requeue
 #SBATCH --export=ASKAP_ROOT,AIPSPATH
+#SBATCH --output=${slurmOutput}/slurm-makeslices-%j.out
 
 ####################
 # AUTOMATICALLY GENERATED - DO NOT EDIT

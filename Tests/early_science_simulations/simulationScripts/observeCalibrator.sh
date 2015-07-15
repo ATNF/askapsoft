@@ -22,7 +22,7 @@ while [ $POINTING -le $MAXPOINTING ]; do
     ms=${msdir}/${msbaseCal}_${beamName}.ms
     calMSlist="$calMSlist $ms"
 
-    sbatchfile=csimCalibrator_${beamName}.sbatch
+    sbatchfile=${slurms}/csimCalibrator_${beamName}.sbatch
     cat > $sbatchfile <<EOF
 #!/bin/bash -l
 #SBATCH --time=06:00:00
@@ -32,6 +32,7 @@ while [ $POINTING -le $MAXPOINTING ]; do
 #SBATCH --mail-user=matthew.whiting@csiro.au
 #SBATCH --mail-type=ALL
 #SBATCH --export=ASKAP_ROOT,AIPSPATH
+#SBATCH --output=${slurmOutput}/slurm-csimCal-%j.out
 
 csim=${csim}
 
@@ -111,7 +112,7 @@ done
 ##################
 # Merge all calibrator MSs into one.
 
-mergeCalsbatch=mergeCalVis.sbatch
+mergeCalsbatch=${slurms}/mergeCalVis.sbatch
 	
 cat > $mergeCalsbatch <<EOF
 #!/bin/bash
@@ -122,6 +123,7 @@ cat > $mergeCalsbatch <<EOF
 #SBATCH --job-name visMergeCal
 #SBATCH --mail-type=ALL
 #SBATCH --export=ASKAP_ROOT,AIPSPATH
+#SBATCH --output=${slurmOutput}/slurm-mergeCalVis-%j.out
 
 ulimit -n 8192
 export APRUN_XFER_LIMITS=1
