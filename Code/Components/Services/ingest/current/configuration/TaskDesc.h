@@ -52,6 +52,7 @@ class TaskDesc {
             CalcUVWTask,
             ChannelAvgTask,
             ChannelSelTask,
+            ChannelMergeTask,
             CalTask,
             MSSink,
             PhaseTrackTask,

@@ -44,6 +44,7 @@
 #include "ingestpipeline/caltask/CalTask.h"
 #include "ingestpipeline/chanavgtask/ChannelAvgTask.h"
 #include "ingestpipeline/chanseltask/ChannelSelTask.h"
+#include "ingestpipeline/chanmergetask/ChannelMergeTask.h"
 #include "ingestpipeline/phasetracktask/PhaseTrackTask.h"
 #include "ingestpipeline/simplemonitortask/SimpleMonitorTask.h"
 #include "ingestpipeline/flagtask/FlagTask.h"
@@ -89,6 +90,9 @@ ITask::ShPtr TaskFactory::createTask(const TaskDesc& taskDescription)
             break;
         case TaskDesc::ChannelSelTask :
             task.reset(new ChannelSelTask(params, itsConfig));
+            break;
+        case TaskDesc::ChannelMergeTask :
+            task.reset(new ChannelMergeTask(params, itsConfig));
             break;
         case TaskDesc::MSSink :
             task.reset(new MSSink(params, itsConfig));

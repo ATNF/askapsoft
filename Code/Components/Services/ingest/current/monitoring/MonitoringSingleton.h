@@ -32,6 +32,7 @@
 
 // ASKAPsoft includes
 #include "boost/scoped_ptr.hpp"
+#include "boost/noncopyable.hpp"
 #include "Ice/Ice.h"
 #include "iceutils/ServiceManager.h"
 
@@ -47,7 +48,7 @@ namespace askap {
 namespace cp {
 namespace ingest {
 
-class MonitoringSingleton {
+class MonitoringSingleton : public boost::noncopyable {
     public:
         /// @brief Destructor.
         ~MonitoringSingleton();
@@ -111,11 +112,6 @@ class MonitoringSingleton {
         /// @brief Constructor.
         MonitoringSingleton();
 
-        // No support for assignment
-        MonitoringSingleton& operator=(const MonitoringSingleton& rhs);
-
-        // No support for copy constructor
-        MonitoringSingleton(const MonitoringSingleton& src);
 };
 
 }

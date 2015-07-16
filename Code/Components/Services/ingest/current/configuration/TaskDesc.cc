@@ -80,6 +80,9 @@ TaskDesc::Type TaskDesc::toType(const std::string& type)
     if (type == "ChannelSelTask") {
         return TaskDesc::ChannelSelTask;
     }
+    if (type == "ChannelMergeTask") {
+        return TaskDesc::ChannelMergeTask;
+    }
     if (type == "CalTask") {
         return TaskDesc::CalTask;
     }
