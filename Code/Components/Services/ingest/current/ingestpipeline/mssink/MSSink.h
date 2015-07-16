@@ -29,6 +29,7 @@
 
 // ASKAPsoft includes
 #include "boost/scoped_ptr.hpp"
+#include "boost/noncopyable.hpp"
 #include "Common/ParameterSet.h"
 #include "ms/MeasurementSets/MeasurementSet.h"
 #include "casa/aips.h"
@@ -57,7 +58,8 @@ namespace ingest {
 /// the VisChunk passed to process() is the first chunk for a new scan then rows
 /// are added to the SPECTRAL WINDOW, POLARIZATION and DATA DESCRIPTION tables.
 /// The visibilities and related data are also written into the main table.
-class MSSink : public askap::cp::ingest::ITask {
+class MSSink : public askap::cp::ingest::ITask,
+               virtual public boost::noncopyable {
     public:
         /// @brief Constructor.
         /// @param[in] parset   the parameter set used to configure this task.
@@ -76,7 +78,30 @@ class MSSink : public askap::cp::ingest::ITask {
         ///                         itself are modified by this function.
         virtual void process(askap::cp::common::VisChunk::ShPtr chunk);
 
+        /// @brief should this task be executed for inactive ranks?
+        /// @details If a particular rank is inactive, process method is
+        /// not called unless this method returns true. This class has the
+        /// following behavior.
+        ///   - Returns true initially to allow collective operations if
+        ///     number of ranks is more than 1.
+        ///   - After the first call to process method, inactive ranks are
+        ///     identified and false is returned for them.
+        /// @return true, if process method should be called even if
+        /// this rank is inactive (i.e. uninitialised chunk pointer
+        /// will be passed to process method).
+        virtual bool isAlwaysActive() const;
+
     private:
+        /// @brief initialise the measurement set
+        /// @details In the serial mode we run initialisation in the constructor.
+        /// However, in the parallel mode it is handy to initialise the measurement set
+        /// upon the first call to process method (as this is the only way to automatically
+        /// deduce which ranks are active and which are not; the alternative design would be
+        /// to specify this information in parset, but this seems to be unnecessary). 
+        /// This method encapsulates all required initialisation actions.
+        void initialise();
+
+
         /// @brief add non-standard column to POINTING table
         /// @details We use 3 non-standard columns to capture
         /// actual pointing on all three axes. This method creates one such
@@ -180,6 +205,16 @@ class MSSink : public askap::cp::ingest::ITask {
         // Helper function to compare MDirections
         static bool equal(const casa::MDirection &dir1, const casa::MDirection &dir2);
 
+
+        /// @brief helper method to obtain stream sequence number
+        /// @details It does counting of active ranks across the whole rank space.
+        /// @param[in] isActive true if this rank is active, false otherwise
+        /// @return sequence number of the stream handled by this rank or -1 if it is
+        /// not active.
+        /// @note The method uses MPI collective calls and should be executed by all ranks,
+        /// including inactive ones.
+        int countActiveRanks(bool isActive) const;
+
         // Parameter set
         const LOFAR::ParameterSet itsParset;
 
@@ -205,11 +240,17 @@ class MSSink : public askap::cp::ingest::ITask {
         // Measurement set
         boost::scoped_ptr<casa::MeasurementSet> itsMs;
 
-        // No support for assignment
-        MSSink& operator=(const MSSink& rhs);
+        /// @brief sequence number of the stream
+        /// @details We may have more MPI ranks available than the number of
+        /// parallel streams (need more receiving processes than number crunchers)
+        /// This field is filled inside countActiveRanks method based on whether it got
+        /// an empty shared pointer or not. This field is not used in the serial mode and
+        /// is always intialised with 0. It is set to -1 for ranks which are not active.
+        int itsStreamNumber;
 
-        // No support for copy constructor
-        MSSink(const MSSink& src);
+        /// @brief name of the MS to write
+        /// @details Each active rank writes file under unique name which is stored here
+        std::string itsFileName;
 };
 
 }

@@ -80,14 +80,18 @@ using namespace casa;
 
 MSSink::MSSink(const LOFAR::ParameterSet& parset,
         const Configuration& config) :
-    itsParset(parset), itsConfig(config), itsPreviousScanIndex(-1),
-    itsFieldRow(-1), itsDataDescRow(-1)
+    itsParset(parset), itsConfig(config), 
+    itsPointingTableEnabled(parset.getBool("pointingtable.enable", false)),
+    itsPreviousScanIndex(-1),
+    itsFieldRow(-1), itsDataDescRow(-1), itsStreamNumber(0)
 {
-    ASKAPLOG_DEBUG_STR(logger, "Constructor");
-    itsPointingTableEnabled = parset.getBool("pointingtable.enable", false);
-    create();
-    initAntennas(); // Includes FEED table
-    initObs();
+    if (itsConfig.nprocs() == 1) {
+        ASKAPLOG_DEBUG_STR(logger, "Constructor - serial mode, initialising");
+        itsFileName = substituteFileName(itsParset.getString("filename"));
+        initialise();
+    } else {
+        ASKAPLOG_DEBUG_STR(logger, "Constructor - parallel mode, initialisation postponed until data arrive");
+    }
 }
 
 MSSink::~MSSink()
@@ -96,8 +100,54 @@ MSSink::~MSSink()
     itsMs.reset();
 }
 
+/// @brief should this task be executed for inactive ranks?
+/// @details If a particular rank is inactive, process method is
+/// not called unless this method returns true. This class has the
+/// following behavior.
+///   - Returns true initially to allow collective operations if
+///     number of ranks is more than 1.
+///   - After the first call to process method, inactive ranks are
+///     identified and false is returned for them.
+/// @return true, if process method should be called even if
+/// this rank is inactive (i.e. uninitialised chunk pointer
+/// will be passed to process method).
+bool MSSink::isAlwaysActive() const
+{
+   // initially: itsStreamNumber is 0, itsMs is empty for all ranks -> make them always active
+   // after first call to process:
+   //          -  inactive ranks have itsStreamNumber of -1 and empty itsMs (don't want to create
+   //             junk files). 
+   //          -  active ranks have non-empty itsMs and non-negative itsStreamNumber
+
+   return !itsMs && (itsStreamNumber >= 0);
+}
+
+
 void MSSink::process(VisChunk::ShPtr chunk)
 {
+    if (!itsMs) {
+        // this is delayed initialisation in the parallel mode
+        ASKAPDEBUGASSERT(itsConfig.nprocs() > 1);
+        // active ranks receive non-zero shared pointer, can cast it to bool
+        itsStreamNumber = countActiveRanks(chunk);
+
+        // collective MPI calls are still possible here (required for substitution)
+        // this is the reason the file name is initialised outside initialise
+        // We could also achieve the same by setting up a specialised MPI group here
+        // instead of using MPI_WORLD.
+        itsFileName = substituteFileName(itsParset.getString("filename"));
+        ASKAPCHECK(itsFileName.size() > 0, "Substituted file name appears to be an empty string");
+
+        if (itsStreamNumber < 0) {
+            ASKAPLOG_DEBUG_STR(logger, "This rank is not active");
+            return;
+        }
+
+        // no collective MPI calls are possible below this point
+        ASKAPLOG_DEBUG_STR(logger, "Initialising MS, stream number "<<itsStreamNumber);
+        initialise();
+    }
+    ASKAPASSERT(chunk);
     // Calculate monitoring points and submit them
     submitMonitoringPoints(chunk);
 
@@ -241,7 +291,9 @@ std::string MSSink::substituteFileName(const std::string &in) const
            result += in[pos-1];
            break;
        }
-       if (in[pos] == 'w') {
+       if ((in[pos] == 's') && (itsStreamNumber >= 0)) {
+           result += utility::toString(itsStreamNumber);
+       } else if (in[pos] == 'w') {
           result += utility::toString(itsConfig.rank());
        } else if (in[pos] == 'd') {
           result += utility::toString(tbuf.year)+"-"+makeTwoElementString(tbuf.month)+"-"+makeTwoElementString(tbuf.day);
@@ -255,6 +307,51 @@ std::string MSSink::substituteFileName(const std::string &in) const
        cursor = pos;
    }
    return result;
+}
+
+/// @brief helper method to obtain stream sequence number
+/// @details It does counting of active ranks across the whole rank space.
+/// @param[in] isActive true if this rank is active, false otherwise
+/// @return sequence number of the stream handled by this rank or -1 if it is
+/// not active.
+/// @note The method uses MPI collective calls and should be executed by all ranks,
+/// including inactive ones.
+int MSSink::countActiveRanks(const bool isActive) const
+{
+   ASKAPDEBUGASSERT(itsConfig.rank() < itsConfig.nprocs());
+   std::vector<int> activityFlags(itsConfig.nprocs(), 0);
+   if (isActive) {
+       activityFlags[itsConfig.rank()] = 1;
+   }
+   const int response = MPI_Allreduce(MPI_IN_PLACE, (void*)activityFlags.data(),
+        activityFlags.size(), MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+   ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Allreduce = "<<response);
+
+   // integrate
+   int totalNumber = 0, streamNumber = 0;
+   for (size_t rank = 0; rank < activityFlags.size(); ++rank) {
+        const int currentFlag = activityFlags[rank];
+        // could be either 0 or 1
+        ASKAPASSERT(currentFlag < 2);
+        ASKAPASSERT(currentFlag >= 0);
+        if (static_cast<int>(rank) < itsConfig.rank()) {
+            streamNumber += currentFlag;
+        } else {
+            totalNumber += currentFlag;
+        }
+   }
+   totalNumber += streamNumber;
+   ASKAPCHECK(totalNumber > 0, "MSSink has no active ranks!");
+   if (!isActive) {
+       return -1;
+   }
+   // consistency checks
+   ASKAPDEBUGASSERT(streamNumber < totalNumber);
+   ASKAPDEBUGASSERT(totalNumber <= itsConfig.nprocs());
+   if (totalNumber == itsConfig.nprocs()) {
+       ASKAPASSERT(streamNumber == itsConfig.rank());
+   }
+   return streamNumber;
 }
 
 /// @brief make two-character string
@@ -279,7 +376,6 @@ void MSSink::create(void)
     casa::uInt bucketSize = itsParset.getUint32("stman.bucketsize", 128 * 1024);
     casa::uInt tileNcorr = itsParset.getUint32("stman.tilencorr", 4);
     casa::uInt tileNchan = itsParset.getUint32("stman.tilenchan", 1);
-    const casa::String filename = substituteFileName(itsParset.getString("filename"));
 
     if (bucketSize < 8192) {
         bucketSize = 8192;
@@ -291,7 +387,7 @@ void MSSink::create(void)
         tileNchan = 1;
     }
 
-    ASKAPLOG_DEBUG_STR(logger, "Creating dataset " << filename);
+    ASKAPLOG_DEBUG_STR(logger, "Creating dataset " << itsFileName);
 
     // Make MS with standard columns
     TableDesc msDesc(MS::requiredTableDesc());
@@ -299,7 +395,7 @@ void MSSink::create(void)
     // Add the DATA column.
     MS::addColumnToDesc(msDesc, MS::DATA, 2);
 
-    SetupNewTable newMS(filename, msDesc, Table::New);
+    SetupNewTable newMS(itsFileName, msDesc, Table::New);
 
     // Set the default Storage Manager to be the Incr one
     {
@@ -901,4 +997,19 @@ bool MSSink::equal(const casa::MDirection &dir1, const casa::MDirection &dir2)
         return false;
     }
     return dir1.getValue().separation(dir2.getValue()) < std::numeric_limits<double>::epsilon();
+}
+
+
+/// @brief initialise the measurement set
+/// @details In the serial mode we run initialisation in the constructor.
+/// However, in the parallel mode it is handy to initialise the measurement set
+/// upon the first call to process method (as this is the only way to automatically
+/// deduce which ranks are active and which are not; the alternative design would be
+/// to specify this information in parset, but this seems to be unnecessary). 
+/// This method encapsulates all required initialisation actions.
+void MSSink::initialise()
+{
+    create();
+    initAntennas(); // Includes FEED table
+    initObs();
 }
