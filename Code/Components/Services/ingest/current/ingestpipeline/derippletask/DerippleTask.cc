@@ -70,7 +70,7 @@ const float DerippleTask::theirCoeffs[54] = {
 ///
 /// @param[in,out] chunk  the instance of VisChunk for which the
 ///                       scaling factors will be applied.
-void DerippleTask::process(askap::cp::common::VisChunk::ShPtr chunk)
+void DerippleTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
 {
     ASKAPDEBUGASSERT(chunk);
     ASKAPCHECK(chunk->nChannel() % 54 == 0,

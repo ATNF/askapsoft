@@ -70,7 +70,7 @@ class ChannelSelTask : public askap::cp::ingest::ITask {
         ///             be selected. This method manipulates the VisChunk
         ///             instance which is passed in, hence the value of the
         ///             pointer will be unchanged.
-        virtual void process(askap::cp::common::VisChunk::ShPtr chunk);
+        virtual void process(askap::cp::common::VisChunk::ShPtr& chunk);
 
     private:
 

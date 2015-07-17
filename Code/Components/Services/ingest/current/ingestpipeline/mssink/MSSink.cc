@@ -123,7 +123,7 @@ bool MSSink::isAlwaysActive() const
 }
 
 
-void MSSink::process(VisChunk::ShPtr chunk)
+void MSSink::process(VisChunk::ShPtr& chunk)
 {
     if (!itsMs) {
         // this is delayed initialisation in the parallel mode

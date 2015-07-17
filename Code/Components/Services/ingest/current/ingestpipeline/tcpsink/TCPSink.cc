@@ -79,7 +79,7 @@ TCPSink::~TCPSink()
     }
 }
 
-void TCPSink::process(VisChunk::ShPtr chunk)
+void TCPSink::process(VisChunk::ShPtr& chunk)
 {
     // 1: Try to acquire the mutex protecting the buffer. Don't wait because we
     // don't want to block the main thread

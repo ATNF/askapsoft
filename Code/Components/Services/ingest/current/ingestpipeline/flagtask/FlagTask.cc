@@ -78,7 +78,7 @@ FlagTask::~FlagTask()
 {
 }
 
-void FlagTask::process(askap::cp::common::VisChunk::ShPtr chunk)
+void FlagTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
 {
     if (!itsCrossCorrThresholdSet && !itsAutoCorrThresholdSet) {
         return;

@@ -69,7 +69,7 @@ class TCPSink : public askap::cp::ingest::ITask {
         /// @param[in,out] chunk    the instance of VisChunk to send. Note
         ///                         the VisChunk pointed to by "chunk" nor the pointer
         ///                         itself are modified by this function.
-        virtual void process(askap::cp::common::VisChunk::ShPtr chunk);
+        virtual void process(askap::cp::common::VisChunk::ShPtr& chunk);
 
     private:
 

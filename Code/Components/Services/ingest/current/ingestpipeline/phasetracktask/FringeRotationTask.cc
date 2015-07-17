@@ -90,7 +90,7 @@ FringeRotationTask::FringeRotationTask(const LOFAR::ParameterSet& parset,
 ///
 /// @param[in,out] chunk  the instance of VisChunk for which the
 ///                       phase factors will be applied.
-void FringeRotationTask::process(askap::cp::common::VisChunk::ShPtr chunk)
+void FringeRotationTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
 {
     ASKAPDEBUGASSERT(itsFrtMethod);
     ASKAPDEBUGASSERT(chunk);

@@ -70,7 +70,7 @@ class CalcUVWTask : public askap::cp::ingest::ITask {
         ///
         /// @param[in,out] chunk  the instance of VisChunk for which UVW
         ///                       coordinates are to be calculated.
-        virtual void process(askap::cp::common::VisChunk::ShPtr chunk);
+        virtual void process(askap::cp::common::VisChunk::ShPtr& chunk);
   
     protected:
 

@@ -72,7 +72,7 @@ SimpleMonitorTask::~SimpleMonitorTask()
 ///
 /// @param[in,out] chunk  the instance of VisChunk for which the
 ///                       phase factors will be applied.
-void SimpleMonitorTask::process(askap::cp::common::VisChunk::ShPtr chunk)
+void SimpleMonitorTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
 {
     ASKAPDEBUGASSERT(chunk);
     // first check whether we have a new integration

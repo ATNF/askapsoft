@@ -40,6 +40,9 @@
 #include "casa/Arrays/Cube.h"
 #include "cpcommon/VisChunk.h"
 
+// boost includes
+#include "boost/shared_array.hpp"
+
 // Local package includes
 #include "configuration/Configuration.h"
 
@@ -62,10 +65,12 @@ ChannelMergeTask::ChannelMergeTask(const LOFAR::ParameterSet& parset,
     ASKAPCHECK(config.nprocs() % itsRanksToMerge == 0, "Total number of MPI ranks ("<<config.nprocs()<<
                ") should be an integral multiple of selected number of ranks to merge ("<<
                itsRanksToMerge<<")");
-    //const int response = MPI_Bcast((void*)&tbuf, sizeof(tbuf), MPI_INTEGER, 0, MPI_COMM_WORLD);
+    // just do ascending order in original ranks for local group ranks
     const int response = MPI_Comm_split(MPI_COMM_WORLD, config.rank() / itsRanksToMerge, 
                config.rank(), &itsCommunicator);
     ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Comm_split = "<<response);
+    // consistency check
+    checkRanksToMerge();
 }
 
 ChannelMergeTask::~ChannelMergeTask()
@@ -73,42 +78,75 @@ ChannelMergeTask::~ChannelMergeTask()
     ASKAPLOG_DEBUG_STR(logger, "Destructor");
 }
 
-void ChannelMergeTask::process(VisChunk::ShPtr chunk)
+void ChannelMergeTask::process(VisChunk::ShPtr& chunk)
+{
+    checkChunkForConsistency(chunk);
+    if (localRank() > 0) {
+        // these ranks just send VisChunks they handle to the master (rank 0)
+        sendVisChunk(chunk);
+        // reset chunk as this rank now becomes inactive
+        chunk.reset();
+    } else {
+        // this is the master process which receives the data
+        receiveVisChunks(chunk);
+    }
+}
+
+/// @brief receive chunks in the rank 0 process
+/// @details This method implements the part of the process method
+/// which is intended to be executed in rank 0 (the master process)
+/// @param[in] chunk the instance of VisChunk to work with
+void ChannelMergeTask::receiveVisChunks(askap::cp::common::VisChunk::ShPtr chunk) const
+{
+    const casa::uInt nChanOriginal = chunk->nChannel();
+    // new frequency vector, visibilities and flags
+    casa::Vector<casa::Double> newFreq(nChanOriginal);
+    casa::Cube<casa::Complex> newVis(chunk->nRow(), nChanOriginal * itsRanksToMerge, 
+                                     chunk->nPol(), casa::Complex(0.,0.));
+    casa::Cube<casa::Bool> newFlag(chunk->nRow(), nChanOriginal * itsRanksToMerge, 
+                                     chunk->nPol(), true);
+    // receive times from all ranks to ensure consistency
+    // (older data will not be copied and therefore will be flagged)
+    
+    // update the chunk
+    chunk->resize(newVis, newFlag, newFreq);
+}
+
+/// @brief send chunks to the rank 0 process
+/// @details This method implements the part of the process method
+/// which is intended to be executed in ranks [1..itsRanksToMerge-1].
+/// @param[in] chunk the instance of VisChunk to work with
+void ChannelMergeTask::sendVisChunk(askap::cp::common::VisChunk::ShPtr chunk) const
+{
+}
+
+/// @brief checks chunks presented to different ranks for consistency
+/// @details To limit complexity, only a limited number of merging
+/// options is supported. This method checks chunks for the basic consistency
+/// like matching dimensions. It is intended to be executed on all ranks and
+/// use collective MPI calls.
+/// @param[in] chunk the instance of VisChunk to work with
+void ChannelMergeTask::checkChunkForConsistency(askap::cp::common::VisChunk::ShPtr chunk) const
 {
     ASKAPCHECK(chunk, "ChannelMergeTask currently does not support idle input streams (inactive ranks)");
-    //const casa::uInt nChanOriginal = chunk->nChannel();
+    int sendBuf[3];
+    sendBuf[0] = static_cast<int>(chunk->nRow());
+    sendBuf[1] = static_cast<int>(chunk->nChannel());
+    sendBuf[2] = static_cast<int>(chunk->nPol());
+    boost::shared_array<int> receiveBuf(new int[3 * itsRanksToMerge]);
 
-    /*
-    if (itsStart + itsNChan > nChanOriginal) {
-        ASKAPLOG_WARN_STR(logger, "Channel selection task got chunk with " << nChanOriginal
-                 << " channels, unable to select " << itsNChan
-                 << " channels starting from " << itsStart);
-        chunk->flag().set(true);
-        return;
+    const int response = MPI_Allgather((void*)&sendBuf, 3, MPI_INTEGER, (void*)receiveBuf.get(),
+             3 * itsRanksToMerge, MPI_INTEGER, itsCommunicator);
+    ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Allgather = "<<response);
+
+    for (int rank = 0; rank < itsRanksToMerge; ++rank) {
+         ASKAPCHECK(sendBuf[0] == receiveBuf[3 * rank], "Number of rows "<<chunk->nRow()<<
+                " is different from that of rank "<<rank<<" ("<<receiveBuf[3 * rank]<<")");
+         ASKAPCHECK(sendBuf[1] == receiveBuf[3 * rank + 1], "Number of channels "<<chunk->nChannel()<<
+                " is different from that of rank "<<rank<<" ("<<receiveBuf[3 * rank + 1]<<")");
+         ASKAPCHECK(sendBuf[2] == receiveBuf[3 * rank + 2], "Number of polarisations  "<<chunk->nPol()<<
+                " is different from that of rank "<<rank<<" ("<<receiveBuf[3 * rank + 2]<<")");
     }
-
-    // extract required frequencies - don't take const reference to be able to
-    // take slice (although we don't change the chunk yet)
-    casa::Vector<casa::Double>& origFreq = chunk->frequency();
-    casa::Vector<casa::Double> newFreq = origFreq(casa::Slice(itsStart,itsNChan));
-    ASKAPDEBUGASSERT(newFreq.nelements() == itsNChan);
-
-    // Extract slices from vis and flag cubes
-    const casa::uInt nRow = chunk->nRow();
-    const casa::uInt nPol = chunk->nPol();
-    casa::Cube<casa::Complex>& origVis = chunk->visibility();
-    casa::Cube<casa::Bool>& origFlag = chunk->flag();
-    const casa::IPosition start(3, 0, itsStart, 0);
-    const casa::IPosition length(3, nRow, itsNChan, nPol);
-    const casa::Slicer slicer(start,length);
-
-    casa::Cube<casa::Complex> newVis = origVis(slicer);
-    casa::Cube<casa::Bool> newFlag = origFlag(slicer);
-    ASKAPDEBUGASSERT(newVis.shape() == length);
-    ASKAPDEBUGASSERT(newFlag.shape() == length);
-
-    chunk->resize(newVis, newFlag, newFreq);
-    */
 }
 
 /// @brief should this task be executed for inactive ranks?
@@ -126,6 +164,36 @@ void ChannelMergeTask::process(VisChunk::ShPtr chunk)
 bool ChannelMergeTask::isAlwaysActive() const
 {
    return true;
+}
+
+
+/// @brief local rank in the group
+/// @details Returns the rank against the local communicator, i.e.
+/// the process number in the group of processes contributing to the
+/// single output stream.
+/// @return rank against itsCommunicator
+int ChannelMergeTask::localRank() const
+{
+   int rank;
+   const int response = MPI_Comm_rank(itsCommunicator, &rank);
+   
+   ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Comm_rank = "<<response);
+   return rank;
+}
+
+/// @brief checks the number of ranks to merge against number of ranks
+/// @details This method obtains the number of available ranks against
+/// the local communicator, i.e. the number of streams to merge and checks
+/// that it is the same as itsRanksToMerge.
+void ChannelMergeTask::checkRanksToMerge() const
+{
+   int nprocs;
+   const int response = MPI_Comm_size(itsCommunicator, &nprocs);
+   
+   ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Comm_size = "<<response);
+   ASKAPASSERT(nprocs > 0);
+   ASKAPCHECK(nprocs == itsRanksToMerge, "Number of ranks available through local communicator ("<<
+          nprocs<<" doesn't match the chosen number of ranks to merge ("<<itsRanksToMerge<<")");
 }
 
 

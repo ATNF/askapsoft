@@ -76,7 +76,7 @@ CalcUVWTask::~CalcUVWTask()
     ASKAPLOG_DEBUG_STR(logger, "Destructor");
 }
 
-void CalcUVWTask::process(VisChunk::ShPtr chunk)
+void CalcUVWTask::process(VisChunk::ShPtr& chunk)
 {
     for (casa::uInt row = 0; row < chunk->nRow(); ++row) {
         calcForRow(chunk, row);

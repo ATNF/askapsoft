@@ -76,7 +76,7 @@ class MSSink : public askap::cp::ingest::ITask,
         /// @param[in,out] chunk    the instance of VisChunk to write out. Note
         ///                         the VisChunk pointed to by "chunk" nor the pointer
         ///                         itself are modified by this function.
-        virtual void process(askap::cp::common::VisChunk::ShPtr chunk);
+        virtual void process(askap::cp::common::VisChunk::ShPtr& chunk);
 
         /// @brief should this task be executed for inactive ranks?
         /// @details If a particular rank is inactive, process method is

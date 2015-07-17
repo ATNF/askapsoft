@@ -60,7 +60,7 @@ ChannelAvgTask::~ChannelAvgTask()
     ASKAPLOG_DEBUG_STR(logger, "Destructor");
 }
 
-void ChannelAvgTask::process(VisChunk::ShPtr chunk)
+void ChannelAvgTask::process(VisChunk::ShPtr& chunk)
 {
     if (itsAveraging < 2) {
         // No averaging required for 0 or 1

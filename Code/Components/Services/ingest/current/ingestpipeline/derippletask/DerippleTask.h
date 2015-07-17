@@ -60,7 +60,7 @@ class DerippleTask : public askap::cp::ingest::ITask {
         ///
         /// @param[in,out] chunk  the instance of VisChunk for which the
         ///                       scaling factors will be applied.
-        virtual void process(askap::cp::common::VisChunk::ShPtr chunk);
+        virtual void process(askap::cp::common::VisChunk::ShPtr& chunk);
 
     private:
 

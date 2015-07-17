@@ -98,7 +98,7 @@ FileFlagTask::~FileFlagTask()
 ///
 /// @param[in,out] chunk  the instance of VisChunk for which the
 ///                       flags will be applied.
-void FileFlagTask::process(askap::cp::common::VisChunk::ShPtr chunk)
+void FileFlagTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
 {
     ASKAPDEBUGASSERT(chunk);
     //

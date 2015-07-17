@@ -68,7 +68,7 @@ class FringeRotationTask : public askap::cp::ingest::CalcUVWTask {
         ///
         /// @param[in,out] chunk  the instance of VisChunk for which the
         ///                       phase factors will be applied.
-        virtual void process(askap::cp::common::VisChunk::ShPtr chunk);
+        virtual void process(askap::cp::common::VisChunk::ShPtr& chunk);
 
     protected:
         /// @brief factory method for the fringe rotation approach classes

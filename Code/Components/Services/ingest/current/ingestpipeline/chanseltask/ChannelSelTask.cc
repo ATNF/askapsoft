@@ -65,7 +65,7 @@ ChannelSelTask::~ChannelSelTask()
     ASKAPLOG_DEBUG_STR(logger, "Destructor");
 }
 
-void ChannelSelTask::process(VisChunk::ShPtr chunk)
+void ChannelSelTask::process(VisChunk::ShPtr& chunk)
 {
     ASKAPDEBUGASSERT(chunk);
     const casa::uInt nChanOriginal = chunk->nChannel();

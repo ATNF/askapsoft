@@ -103,7 +103,7 @@ CalTask::~CalTask()
 /// @details It modifies the visibility chunk in situ by applying
 /// current calibration
 /// @param[in] chunk shared pointer to visibility chunk
-void CalTask::process(VisChunk::ShPtr chunk)
+void CalTask::process(VisChunk::ShPtr& chunk)
 {
     ASKAPDEBUGASSERT(chunk);
     const casa::Vector<casa::Stokes::StokesTypes> &stokes = chunk->stokes();

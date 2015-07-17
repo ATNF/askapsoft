@@ -67,7 +67,7 @@ class ITask {
         ///             isAlwaysActive method returns true. In the latter case,
         ///             this method is called with an empty pointer.
         ///             
-        virtual void process(askap::cp::common::VisChunk::ShPtr chunk) = 0;
+        virtual void process(askap::cp::common::VisChunk::ShPtr& chunk) = 0;
 
         /// @brief should this task be executed for inactive ranks?
         /// @details If a particular rank is inactive, process method is

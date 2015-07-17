@@ -73,7 +73,7 @@ class FileFlagTask : public askap::cp::ingest::ITask {
         ///
         /// @param[in,out] chunk  the instance of VisChunk for which the
         ///                       flags will be applied.
-        virtual void process(askap::cp::common::VisChunk::ShPtr chunk);
+        virtual void process(askap::cp::common::VisChunk::ShPtr& chunk);
 
     protected:
         /// @details Flag  one row of data.

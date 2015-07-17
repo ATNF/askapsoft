@@ -79,7 +79,7 @@ class ChannelMergeTask : public askap::cp::ingest::ITask {
         ///             pointer will be unchanged for the rank which continues
         ///             to handle the data (merged stream). The shared pointer
         ///             is reset for other ranks.
-        virtual void process(askap::cp::common::VisChunk::ShPtr chunk);
+        virtual void process(askap::cp::common::VisChunk::ShPtr& chunk);
 
         /// @brief should this task be executed for inactive ranks?
         /// @details If a particular rank is inactive, process method is
@@ -96,6 +96,39 @@ class ChannelMergeTask : public askap::cp::ingest::ITask {
         virtual bool isAlwaysActive() const;
 
     private:
+
+        /// @brief send chunks to the rank 0 process
+        /// @details This method implements the part of the process method
+        /// which is intended to be executed in ranks [1..itsRanksToMerge-1].
+        /// @param[in] chunk the instance of VisChunk to work with
+        void sendVisChunk(askap::cp::common::VisChunk::ShPtr chunk) const;
+
+        /// @brief receive chunks in the rank 0 process
+        /// @details This method implements the part of the process method
+        /// which is intended to be executed in rank 0 (the master process)
+        /// @param[in,out] chunk the instance of VisChunk to work with
+        void receiveVisChunks(askap::cp::common::VisChunk::ShPtr chunk) const;
+
+        /// @brief checks chunks presented to different ranks for consistency
+        /// @details To limit complexity, only a limited number of merging
+        /// options is supported. This method checks chunks for the basic consistency
+        /// like matching dimensions. It is intended to be executed on all ranks and
+        /// use collective MPI calls.
+        /// @param[in] chunk the instance of VisChunk to work with
+        void checkChunkForConsistency(askap::cp::common::VisChunk::ShPtr chunk) const;
+         
+        /// @brief local rank in the group
+        /// @details Returns the rank against the local communicator, i.e.
+        /// the process number in the group of processes contributing to the
+        /// single output stream.
+        /// @return rank against itsCommunicator
+        int localRank() const;
+
+        /// @brief checks the number of ranks to merge against number of ranks
+        /// @details This method obtains the number of available ranks against
+        /// the local communicator, i.e. the number of streams to merge and checks
+        /// that it is the same as itsRanksToMerge.
+        void checkRanksToMerge() const;
 
         /// @brief First channel to select
         int itsRanksToMerge;
