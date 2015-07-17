@@ -96,6 +96,17 @@ class ChannelMergeTask : public askap::cp::ingest::ITask {
         virtual bool isAlwaysActive() const;
 
     private:
+        /// @brief helper method to copy data from flat buffer
+        /// @details MPI routines work with raw pointers. This method encasulates
+        /// all ugliness of marrying this with casa cubes.
+        /// @param[in] buf contiguous memory buffer with stacked individual slices side to side
+        /// @param[in,out]  out output cube, number of channels is itsRanksToMerge times the number
+        ///                 of channels in each slice (same number of rows and polarisations)
+        /// @param[in] invalidFlags if this vector has non-zero length, slices corresponding to 
+        ///                 'true' are not copied
+        template<typename T>
+        void fillCube(const T* buf, casa::Cube<T> &out, const std::vector<bool> &invalidFlags) const;
+
 
         /// @brief send chunks to the rank 0 process
         /// @details This method implements the part of the process method

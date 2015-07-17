@@ -98,18 +98,164 @@ void ChannelMergeTask::process(VisChunk::ShPtr& chunk)
 /// @param[in] chunk the instance of VisChunk to work with
 void ChannelMergeTask::receiveVisChunks(askap::cp::common::VisChunk::ShPtr chunk) const
 {
-    const casa::uInt nChanOriginal = chunk->nChannel();
-    // new frequency vector, visibilities and flags
-    casa::Vector<casa::Double> newFreq(nChanOriginal);
-    casa::Cube<casa::Complex> newVis(chunk->nRow(), nChanOriginal * itsRanksToMerge, 
-                                     chunk->nPol(), casa::Complex(0.,0.));
-    casa::Cube<casa::Bool> newFlag(chunk->nRow(), nChanOriginal * itsRanksToMerge, 
-                                     chunk->nPol(), true);
-    // receive times from all ranks to ensure consistency
-    // (older data will not be copied and therefore will be flagged)
+   // 1) create new frequency vector, visibilities and flags
+
+   const casa::uInt nChanOriginal = chunk->nChannel();
+   casa::Vector<casa::Double> newFreq(nChanOriginal);
+   casa::Cube<casa::Complex> newVis(chunk->nRow(), nChanOriginal * itsRanksToMerge, 
+                                    chunk->nPol(), casa::Complex(0.,0.));
+   casa::Cube<casa::Bool> newFlag(chunk->nRow(), nChanOriginal * itsRanksToMerge, 
+                                    chunk->nPol(), true);
+
+   // 2) receive times from all ranks to ensure consistency
+   // (older data will not be copied and therefore will be flagged)
+   
+   // MVEpoch is basically two doubles
+   ASKAPDEBUGASSERT(itsRanksToMerge > 1);
+   boost::shared_array<double> timeRecvBuf(new double[2 * itsRanksToMerge]);
+   // not really necessary to set values for the master rank, but handy for consistency
+   timeRecvBuf[0] = chunk->time().getDay();
+   timeRecvBuf[1] = chunk->time().getDayFraction();
+   const int response = MPI_Gather(MPI_IN_PLACE, 2, MPI_DOUBLE, (void*)timeRecvBuf.get(),
+            2 * itsRanksToMerge, MPI_DOUBLE, 0, itsCommunicator);
+   ASKAPCHECK(response == MPI_SUCCESS, "Error gathering times, response from MPI_Gather = "<<response);
+
+   // 3) find the latest time - we ignore all chunks which are from the past
+   // (could, in principle, find time corresponding to the largest portion of valid data,
+   // but probably not worth it as we don't normally expect to loose any packets).
+
+   casa::MVEpoch latestTime(chunk->time());
+
+   // invalid chunk flag per rank, zero length array means that all chunks are valid
+   // (could've stored validity flags as opposed to invalidity flags, but it makes the
+   //  code a bit less readable).
+   std::vector<bool> invalidFlags;
+
+   for (int rank = 1; rank < itsRanksToMerge; ++rank) {
+        const casa::MVEpoch currentTime(timeRecvBuf[2 * rank], timeRecvBuf[2 *  rank + 1]);
+        if ((latestTime - currentTime).get() < 0.) {
+             latestTime = currentTime;
+             // this also means that there is at least one bad chunk to exclude
+             invalidFlags.resize(itsRanksToMerge, true);
+        }
+   }
+   if (invalidFlags.size() > 0) {
+       ASKAPLOG_DEBUG_STR(logger, "VisChunks being merged correspond to different times, keep only the latest = "<<latestTime);
+       int counter = 0;
+       for (size_t rank = 0; rank < invalidFlags.size(); ++rank) {
+            const casa::MVEpoch currentTime(timeRecvBuf[2 * rank], timeRecvBuf[2 *  rank + 1]);
+            if (latestTime.nearAbs(currentTime)) {
+                invalidFlags[rank] = false;
+                ++counter;
+            }
+       }
+       ASKAPCHECK(counter != 0, "It looks like comparison of time stamps failed due to floating point precision, this shouldn't have happened!");
+       // case of counter == itsRanksToMerge is not supposed to be inside this if-statement
+       ASKAPDEBUGASSERT(counter < itsRanksToMerge);
+       ASKAPLOG_DEBUG_STR(logger, "      - keeping "<<counter<<" chunks out of "<<itsRanksToMerge<<
+                                  " merged");
+   }
+
+   // 4) receive and merge frequency axis
+   {
+      boost::shared_array<double> freqRecvBuf(new double[nChanOriginal * itsRanksToMerge]);
+      const int response = MPI_Gather((void*)chunk->frequency().data(), nChanOriginal, MPI_DOUBLE, 
+                (void*)freqRecvBuf.get(), nChanOriginal * itsRanksToMerge, MPI_DOUBLE, 
+                0, itsCommunicator);
+      ASKAPCHECK(response == MPI_SUCCESS, "Error gathering frequencies, response from MPI_Gather = "<<response);
+      
+      for (int rank = 0; rank < itsRanksToMerge; ++rank) {
+           // always merge frequencies, even if the data are not valid
+           casa::Vector<double> thisFreq;
+           thisFreq.takeStorage(casa::IPosition(1,nChanOriginal), freqRecvBuf.get() + rank * nChanOriginal, casa::SHARE);
+           newFreq(casa::Slice(rank * nChanOriginal, nChanOriginal)) = thisFreq;
+      }
+   }
+
+   // 5) receive and merge visibilities (each is two floats)
+   {
+      boost::shared_array<float> visRecvBuf(new float[2 * chunk->visibility().nelements() * itsRanksToMerge]);
+      ASKAPASSERT(chunk->visibility().contiguousStorage());
+      const int response = MPI_Gather((void*)chunk->visibility().data(), chunk->visibility().nelements() * 2, 
+            MPI_FLOAT, (void*)visRecvBuf.get(), chunk->visibility().nelements() * 2 * itsRanksToMerge,
+            MPI_FLOAT, 0, itsCommunicator);
+      ASKAPCHECK(response == MPI_SUCCESS, "Error gathering visibilities, response from MPI_Gather = "<<response);
+     
+      // it is a bit ugly to rely on actual representation of casa::Complex, but this is done
+      // to benefit from optimised MPI routines
+      fillCube((casa::Complex*)visRecvBuf.get(), newVis, invalidFlags);
+   }
     
-    // update the chunk
-    chunk->resize(newVis, newFlag, newFreq);
+   // 6) receive flags (each is casa::Bool)
+   {
+      ASKAPASSERT(chunk->flag().contiguousStorage());
+      ASKAPDEBUGASSERT(sizeof(casa::Bool) == sizeof(int));
+      boost::shared_array<int> flagRecvBuf(new int[chunk->flag().nelements() * itsRanksToMerge]);
+      const int response = MPI_Gather((void*)chunk->flag().data(), chunk->flag().nelements(), 
+            MPI_INTEGER, (void*)flagRecvBuf.get(), chunk->flag().nelements() * itsRanksToMerge,
+            MPI_INTEGER, 0, itsCommunicator);
+      ASKAPCHECK(response == MPI_SUCCESS, "Error gathering flags, response from MPI_Gather = "<<response);
+
+      // it is a bit ugly to rely on actual representation of casa::Bool, but this is done
+      // to benefit from optimised MPI routines
+      fillCube((casa::Bool*)flagRecvBuf.get(), newFlag, invalidFlags);
+   }
+
+   // 7) update the chunk
+   chunk->resize(newVis, newFlag, newFreq);
+
+   // 8) check that the resulting frequency axis is contiguous
+   if (newFreq.nelements() > 1) {
+       const double resolution = (newFreq[newFreq.nelements() - 1] - newFreq[0]) / (newFreq.nelements() - 1);
+       for (casa::uInt chan = 0; chan < newFreq.nelements(); ++chan) {
+            const double expected = newFreq[0] + resolution * chan;
+            // 1 kHz tolerance should be sufficient for practical purposes
+            if (fabs(expected - newFreq[chan]) > 1e3) {
+                ASKAPLOG_WARN_STR(logger, "Frequencies in the merged chunks seem to be non-contiguous, "<<
+                "for resulting channel = "<<chan<<" got "<<newFreq[chan]/1e6<<" MHz, expected "<<
+                expected / 1e6<<" MHz, estimated resolution "<<resolution / 1e3<<" kHz");
+                break;
+            }
+       }
+   }
+}
+
+/// @brief helper method to copy data from flat buffer
+/// @details MPI routines work with raw pointers. This method encasulates
+/// all ugliness of marrying this with casa cubes.
+/// @param[in] buf contiguous memory buffer with stacked individual slices side to side
+/// @param[in,out]  out output cube, number of channels is itsRanksToMerge times the number
+///                 of channels in each slice (same number of rows and polarisations)
+/// @param[in] invalidFlags if this vector has non-zero length, slices corresponding to 
+///                 'true' are not copied
+template<typename T>
+void ChannelMergeTask::fillCube(const T* buf, casa::Cube<T> &out, 
+                       const std::vector<bool> &invalidFlags) const
+{
+   ASKAPDEBUGASSERT(out.ncolumn() % itsRanksToMerge == 0);
+   const casa::IPosition sliceShape(3, out.nrow(), out.ncolumn() / itsRanksToMerge, out.nplane());
+
+   for (int rank = 0; rank < itsRanksToMerge; ++rank) {
+        if (invalidFlags.size() > 0) {
+            if (invalidFlags[rank]) {
+                continue;
+            }
+        }
+        casa::Cube<T> currentSlice;
+
+        // it is a bit ugly to rely on exact representation of the casa::Cube, but
+        // this is the only way to benefit from optimised MPI routines
+        // const_cast is required due to the generic interface,
+        // we don't actually change data using the cast pointer
+        currentSlice.takeStorage(sliceShape, const_cast<T*>(buf) + 
+                                 rank * sliceShape.product(), casa::SHARE);
+
+        const casa::IPosition start(3, 0, rank * sliceShape(1), 0);
+        const casa::Slicer slicer(start,sliceShape);
+        ASKAPDEBUGASSERT(start(1) < out.ncolumn());
+              
+        out(slicer) = currentSlice;
+   }
 }
 
 /// @brief send chunks to the rank 0 process
@@ -118,6 +264,36 @@ void ChannelMergeTask::receiveVisChunks(askap::cp::common::VisChunk::ShPtr chunk
 /// @param[in] chunk the instance of VisChunk to work with
 void ChannelMergeTask::sendVisChunk(askap::cp::common::VisChunk::ShPtr chunk) const
 {
+   // 1) send times corresponding to the current chunk 
+
+   const double timeSendBuf[2] = {chunk->time().getDay(), chunk->time().getDayFraction()};
+   int response = MPI_Gather((void*)timeSendBuf, 2, MPI_DOUBLE, NULL,
+            2 * itsRanksToMerge, MPI_DOUBLE, 0, itsCommunicator);
+   ASKAPCHECK(response == MPI_SUCCESS, "Error gathering times, response from MPI_Gather = "<<response);
+
+   // 2) send frequencies corresponding to the current chunk
+
+   ASKAPASSERT(chunk->frequency().contiguousStorage());
+   response = MPI_Gather((void*)chunk->frequency().data(), chunk->nChannel(), MPI_DOUBLE, NULL,
+            chunk->nChannel() * itsRanksToMerge, MPI_DOUBLE, 0, itsCommunicator);
+   ASKAPCHECK(response == MPI_SUCCESS, "Error gathering frequencies, response from MPI_Gather = "<<response);
+   
+   // 3) send visibilities (each is two floats)
+
+   ASKAPASSERT(chunk->visibility().contiguousStorage());
+   response = MPI_Gather((void*)chunk->visibility().data(), chunk->visibility().nelements() * 2, 
+            MPI_FLOAT, NULL, chunk->visibility().nelements() * 2 * itsRanksToMerge,
+            MPI_FLOAT, 0, itsCommunicator);
+   ASKAPCHECK(response == MPI_SUCCESS, "Error gathering visibilities, response from MPI_Gather = "<<response);
+
+   // 4) send flags (each is Bool)
+
+   ASKAPASSERT(chunk->flag().contiguousStorage());
+   ASKAPDEBUGASSERT(sizeof(casa::Bool) == sizeof(int));
+   response = MPI_Gather((void*)chunk->flag().data(), chunk->flag().nelements(), 
+            MPI_INTEGER, NULL, chunk->flag().nelements() * itsRanksToMerge,
+            MPI_INTEGER, 0, itsCommunicator);
+   ASKAPCHECK(response == MPI_SUCCESS, "Error gathering flags, response from MPI_Gather = "<<response);
 }
 
 /// @brief checks chunks presented to different ranks for consistency
@@ -135,7 +311,7 @@ void ChannelMergeTask::checkChunkForConsistency(askap::cp::common::VisChunk::ShP
     sendBuf[2] = static_cast<int>(chunk->nPol());
     boost::shared_array<int> receiveBuf(new int[3 * itsRanksToMerge]);
 
-    const int response = MPI_Allgather((void*)&sendBuf, 3, MPI_INTEGER, (void*)receiveBuf.get(),
+    const int response = MPI_Allgather((void*)sendBuf, 3, MPI_INTEGER, (void*)receiveBuf.get(),
              3 * itsRanksToMerge, MPI_INTEGER, itsCommunicator);
     ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Allgather = "<<response);
 
@@ -147,6 +323,8 @@ void ChannelMergeTask::checkChunkForConsistency(askap::cp::common::VisChunk::ShP
          ASKAPCHECK(sendBuf[2] == receiveBuf[3 * rank + 2], "Number of polarisations  "<<chunk->nPol()<<
                 " is different from that of rank "<<rank<<" ("<<receiveBuf[3 * rank + 2]<<")");
     }
+    // could in principle check that antenna1, antenna2, etc are consistent but it will waste
+    // the resourses
 }
 
 /// @brief should this task be executed for inactive ranks?
