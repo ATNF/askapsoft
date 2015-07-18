@@ -63,6 +63,9 @@ MonitoringPointManager::~MonitoringPointManager()
     submitPointNull("PacketsLostCount");
     submitPointNull("PacketsLostPercent");
 
+    submitPointNull("PacketsBuffered");
+    submitPointNull("BufferUsagePercent");
+
     submitPointNull("dUTC");
     submitPointNull("dUT1");
 }

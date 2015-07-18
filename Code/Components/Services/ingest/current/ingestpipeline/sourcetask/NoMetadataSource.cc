@@ -171,7 +171,15 @@ VisChunk::ShPtr NoMetadataSource::next(void)
     ASKAPLOG_DEBUG_STR(logger, "     - ignored " << itsVisConverter.datagramsIgnored()
             << " successfully received datagrams");
 
+    const std::pair<uint32_t, uint32_t> bufferUsage = itsVisSrc->bufferUsage();
+    const float bufferUsagePercent = bufferUsage.second != 0 ? static_cast<float>(bufferUsage.first) / bufferUsage.second * 100. : 100.;
+
+    ASKAPLOG_DEBUG_STR(logger, "VisSource buffer has "<<bufferUsage.first<<" datagrams ("<<bufferUsagePercent<<"% full)"); 
+
     // Submit monitoring data
+    itsMonitoringPointManager.submitPoint<uint32_t>("PacketsBuffered", bufferUsage.first);
+    itsMonitoringPointManager.submitPoint<float>("BufferUsagePercent", bufferUsagePercent);
+
     itsMonitoringPointManager.submitPoint<int32_t>("PacketsLostCount",
             itsVisConverter.datagramsExpected() - itsVisConverter.datagramsCount());
     if (itsVisConverter.datagramsExpected() != 0) {

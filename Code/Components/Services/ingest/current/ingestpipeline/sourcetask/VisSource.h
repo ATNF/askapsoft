@@ -61,6 +61,13 @@ class VisSource : public IVisSource, public boost::noncopyable {
         /// @see IVisSource::next
         boost::shared_ptr<VisDatagram> next(const long timeout = -1);
 
+        /// @brief query buffer status
+        /// @details Typical implementation involves buffering of data. 
+        /// Exceeding the buffer capacity will cause data loss. This method
+        /// is intended for monitoring the usage of the buffer.
+        /// @return a pair with number of datagrams in the queue and the buffer size
+        virtual std::pair<uint32_t, uint32_t> bufferUsage() const;
+
     private:
         void start_receive(void);
 
