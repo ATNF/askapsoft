@@ -132,7 +132,7 @@ double VisMessageBuilder::calcDelay(const std::vector< std::complex<float> >& vi
 
     askap::scimath::DelayEstimator de(chanWidth * NCHAN_TO_AVG);
     const std::vector< std::complex<float> > avg = averageChannels(vis, flag, NCHAN_TO_AVG);
-    return de.getDelay(avg);
+    return avg.size() < 2 ? 0. : de.getDelay(avg);
 }
 
 std::vector< std::complex<float> > VisMessageBuilder::averageChannels(
@@ -144,7 +144,7 @@ std::vector< std::complex<float> > VisMessageBuilder::averageChannels(
     std::vector< std::complex<float> > avg;
     const size_t outputVectorSize = vis.size() / numberToAverage;
     avg.reserve(outputVectorSize);
-    for (size_t i = 0; i < outputVectorSize; i += numberToAverage) {
+    for (size_t i = 0; i < outputVectorSize; ++i) {
         std::complex<float> a(0.0, 0.0);
         size_t count = 0;
         for (size_t j = 0; j < numberToAverage; ++j) {
@@ -154,7 +154,7 @@ std::vector< std::complex<float> > VisMessageBuilder::averageChannels(
             }
         }
         if (count > 0) {
-            avg.push_back(a /= count);
+            avg.push_back(a / static_cast<float>(count));
         } else {
             // If the whole block of NCHAN_TO_AVG channels is flagged we try to
             // use the value from the neighbouring channel, or zero if this is the
