@@ -112,6 +112,12 @@ class CircularBuffer {
             return itsBuffer.size();
         }
 
+        /// @brief Returns the capacity of the circular buffer
+        size_t capacity(void) const {
+            boost::mutex::scoped_lock lock(itsMutex);
+            return itsBuffer.capacity();
+        }
+
     private:
         /// The circular buffer this class wraps
         boost::circular_buffer< boost::shared_ptr<T> > itsBuffer;

@@ -146,12 +146,9 @@ boost::shared_ptr< ISource > TaskFactory::createMergedSource(void)
 
     // 2) Configure and create the visibility source
     const LOFAR::ParameterSet params = itsConfig.tasks().at(0).params();
-    const unsigned int visPort = params.getUint32("vis_source.port");
-    const unsigned int defaultBufSz = 78 * 36 * 16 * 2; // Tuned for BETA
-    const unsigned int visBufSz = params.getUint32("buffer_size", defaultBufSz);
     const int rank = itsConfig.rank();
     const int numProcs = itsConfig.nprocs();
-    VisSource::ShPtr visSrc(new VisSource(visPort + rank, visBufSz));
+    VisSource::ShPtr visSrc(new VisSource(params, rank));
 
     // 3) Create and configure the merged source
     boost::shared_ptr< MergedSource > source(new MergedSource(params, itsConfig, metadataSrc, visSrc, numProcs, rank));
@@ -166,12 +163,9 @@ boost::shared_ptr< ISource > TaskFactory::createNoMetadataSource(void)
 
     //  Configure and create the visibility source
     const LOFAR::ParameterSet params = itsConfig.tasks().at(0).params();
-    const unsigned int visPort = params.getUint32("vis_source.port");
-    const unsigned int defaultBufSz = 78 * 36 * 16 * 2; // Tuned for BETA
-    const unsigned int visBufSz = params.getUint32("buffer_size", defaultBufSz);
     const int rank = itsConfig.rank();
     const int numProcs = itsConfig.nprocs();
-    VisSource::ShPtr visSrc(new VisSource(visPort + rank, visBufSz));
+    VisSource::ShPtr visSrc(new VisSource(params, rank));
 
     // Create and configure the merged source
     boost::shared_ptr< NoMetadataSource > source(new NoMetadataSource(params, itsConfig, visSrc, numProcs, rank));

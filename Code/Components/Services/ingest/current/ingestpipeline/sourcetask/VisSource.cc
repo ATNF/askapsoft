@@ -46,27 +46,44 @@ using boost::asio::ip::udp;
 
 ASKAP_LOGGER(logger, ".VisSource");
 
-VisSource::VisSource(const unsigned int port, const unsigned int bufSize) :
-    itsBuffer(bufSize), itsStopRequested(false), itsOldTimestamp(0ul)
+/// @brief constructor
+/// @param[in] parset parameters (such as port, buffer_size, etc)
+/// @param[in] portOffset this number is added to the port number
+///            given in the parset (to allow parallel processes
+///            to listen different ports)
+VisSource::VisSource(const LOFAR::ParameterSet &parset, const unsigned int portOffset) :
+    itsBuffer(parset.getUint32("buffer_size", 78 * 36 * 16 * 2)),  // default is tuned for BETA
+    itsStopRequested(false), 
+    itsMaxBeamId(parset.getUint32("vis_source.max_beamid", 9)), // BETA value is currently the default
+    itsMaxSlice(parset.getUint32("vis_source.max_slice", 15)), // this will not drop datagrams for either BETA or ADE
+    itsOldTimestamp(0ul)
 {
-    ASKAPLOG_INFO_STR(logger, "Setting up VisSource to listen up port "<<port<<" and buffer "<<bufSize<<" datagrams");    
-    bat2epoch(0ul);
+    const uint32_t recvBufferSize = parset.getUint32("vis_source.receive_buffer_size", 
+                                                     1024 * 1024 * 16); // BETA value is the default
+    const unsigned int port = parset.getUint32("vis_source.port") + portOffset;
+
+    ASKAPLOG_INFO_STR(logger, "Setting up VisSource to listen up port "<<port);
+    ASKAPLOG_INFO_STR(logger, "     - receive  buffer size: "<<recvBufferSize / 1024 / 1024 <<" Mb");
+    ASKAPLOG_INFO_STR(logger, "     - circular buffer size: "<<itsBuffer.capacity()<<" datagrams");    
+    ASKAPLOG_INFO_STR(logger, "     - beams with Id > "<<itsMaxBeamId<<" will be ignored"); 
+    ASKAPLOG_INFO_STR(logger, "     - slices > "<<itsMaxSlice<<" will be ignored"); 
+
+    bat2epoch(4943907678000000ul);
 
     // Create socket
     itsSocket.reset(new udp::socket(itsIOService, udp::endpoint(udp::v4(), port)));
 
-    // Set an 16MB receive buffer to help deal with the bursty nature of the
-    // communication
-    boost::asio::socket_base::receive_buffer_size option(1024 * 1024 * 16);
-    // current value for ADE
-    //boost::asio::socket_base::receive_buffer_size option(1024 * 1024 * 64);
-    //
+
+    // set up receive buffer to help deal with the bursty nature of the communication
+    boost::asio::socket_base::receive_buffer_size option(recvBufferSize);
+
     boost::system::error_code soerror;
     itsSocket->set_option(option, soerror);
     if (soerror) {
         ASKAPLOG_WARN_STR(logger, "Setting UDP receive buffer size failed. " <<
                 "This may result in dropped datagrams");
     }
+    //
 
     start_receive();
 
@@ -116,20 +133,19 @@ void VisSource::handle_receive(const boost::system::error_code& error,
                     << " got " << itsRecvBuffer->version);
         }
 
-        // hack for debugging
+        // message for debugging
         if (itsOldTimestamp != itsRecvBuffer->timestamp) {
             itsOldTimestamp = itsRecvBuffer->timestamp;
-            ASKAPLOG_INFO_STR(logger, "VisSource: queuing new timestamp :"<<bat2epoch(itsOldTimestamp)<<" BAT=0x"<<std::hex<<itsOldTimestamp);
+            ASKAPLOG_DEBUG_STR(logger, "VisSource: queuing new timestamp :"<<bat2epoch(itsOldTimestamp)<<" BAT=0x"<<std::hex<<itsOldTimestamp);
         }
         //
 
-        // TODO: Remove this for ADE - For BETA only beams 1-9 are valid/used.
-        if (itsRecvBuffer->beamid <= 9) {
-        //if (itsRecvBuffer->beamid <= 36) {
-        //if (itsRecvBuffer->slice == 0) {
-            // Add a pointer to the message to the back of the circular buffer.
-            // Waiters are notified.
-            itsBuffer.add(itsRecvBuffer);
+        if (itsRecvBuffer->beamid <= itsMaxBeamId) {
+            if (itsRecvBuffer->slice <= itsMaxSlice) {
+                // Add a pointer to the message to the back of the circular buffer.
+                // Waiters are notified.
+                itsBuffer.add(itsRecvBuffer);
+            }
         }
         itsRecvBuffer.reset();
     } else {

@@ -255,7 +255,7 @@ std::string MSSink::substituteFileName(const std::string &in) const
    };
    // first just a sanity check
    if (itsConfig.nprocs() > 1) {
-       ASKAPCHECK(in.find("%w") != std::string::npos, "File name should contain %w in the MPI case to provide different names for different ranks");
+       ASKAPCHECK((in.find("%w") != std::string::npos) || (in.find("%s") != std::string::npos), "File name should contain %w or %s in the MPI case to provide different names for different ranks");
    }
 
    // this instance is used only if a date or time substitution is required

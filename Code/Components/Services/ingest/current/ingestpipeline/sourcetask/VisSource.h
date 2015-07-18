@@ -23,6 +23,7 @@
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
 /// @author Ben Humphreys <ben.humphreys@csiro.au>
+/// modified by Max Voronkov as part of the ADE work
 
 #ifndef ASKAP_CP_INGEST_VISSOURCE_H
 #define ASKAP_CP_INGEST_VISSOURCE_H
@@ -32,7 +33,10 @@
 #include "boost/scoped_ptr.hpp"
 #include "boost/thread.hpp"
 #include "boost/asio.hpp"
+#include "boost/noncopyable.hpp"
 #include "cpcommon/VisDatagram.h"
+#include "Common/ParameterSet.h"
+
 
 // Local package includes
 #include "ingestpipeline/sourcetask/IVisSource.h"
@@ -42,10 +46,14 @@ namespace askap {
 namespace cp {
 namespace ingest {
 
-class VisSource : public IVisSource {
+class VisSource : public IVisSource, public boost::noncopyable {
     public:
-        /// Constructor
-        VisSource(const unsigned int port, const unsigned int bufSize);
+        /// @brief constructor
+        /// @param[in] parset parameters (such as port, buffer_size, etc)
+        /// @param[in] portOffset this number is added to the port number
+        ///            given in the parset (to allow parallel processes
+        ///            to listen different ports)
+        explicit VisSource(const LOFAR::ParameterSet &parset, const unsigned int portOffset = 0);
         
         /// Destructor
         ~VisSource();
@@ -80,13 +88,19 @@ class VisSource : public IVisSource {
 
         boost::shared_ptr<VisDatagram> itsRecvBuffer;
 
-        // No support for assignment
-        VisSource& operator=(const VisSource& rhs);
+        /// @brief maximum beam number
+        /// @details datagrams with beamid greater than this number 
+        /// are not buffered (improves performance to allow testing
+        /// on site)
+        uint32_t itsMaxBeamId;
 
-        // No support for copy constructor
-        VisSource(const VisSource& src);
+        /// @brief maximum slice number
+        /// @details datagrams with slice greater than this number
+        /// are not buffered (improves performance to allow testing
+        /// on site)
+        uint32_t itsMaxSlice;
 
-        // temporary
+        /// @brief previously sighted timestamp (for debugging only)
         uint64_t itsOldTimestamp;
 
 };

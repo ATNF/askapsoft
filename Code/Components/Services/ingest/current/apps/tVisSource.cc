@@ -33,6 +33,7 @@
 // ASKAPsoft includes
 #include "askap/AskapLogging.h"
 #include "askap/AskapError.h"
+#include "askap/AskapUtil.h"
 #include "boost/shared_ptr.hpp"
 #include "boost/asio.hpp"
 
@@ -41,6 +42,7 @@
 
 // Using
 using namespace askap::cp;
+using namespace askap::utility;
 using namespace askap::cp::ingest;
 using boost::asio::ip::udp;
 
@@ -113,12 +115,14 @@ int main(int argc, char *argv[])
     ASKAPLOG_INIT("tVisSource.log_cfg");
 
     const std::string hostname = "localhost";
-    const unsigned int port = 3000;
     const std::string portStr = "3000";
     const unsigned int bufSize = 15 * 304 * 36; // Enough for one BETA sized integration
 
+    LOFAR::ParameterSet parset;
+    parset.add("vis_source.port", portStr);
+    parset.add("buffer_size", toString(bufSize));
     VisOutPort out(hostname, portStr);
-    VisSource source(port, bufSize);
+    VisSource source(parset);
     sleep(1);
 
     // Test simple send, recv, send, recv case
