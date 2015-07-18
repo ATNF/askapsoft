@@ -77,6 +77,12 @@ NoMetadataSource::NoMetadataSource(const LOFAR::ParameterSet& params,
 {
     itsCorrelatorMode = config.lookupCorrelatorMode(params.getString("correlator_mode"));
 
+    // log TAI_UTC casacore measures table version and date
+    const std::pair<double, std::string> measVersion = measuresTableVersion();
+    itsMonitoringPointManager.submitPoint<float>("MeasuresTableMJD", 
+            static_cast<float>(measVersion.first));
+    itsMonitoringPointManager.submitPoint<std::string>("MeasuresTableVersion", measVersion.second);
+
     // Setup a signal handler to catch SIGINT, SIGTERM and SIGUSR1
     itsSignals.async_wait(boost::bind(&NoMetadataSource::signalHandler, this, _1, _2));
 }
