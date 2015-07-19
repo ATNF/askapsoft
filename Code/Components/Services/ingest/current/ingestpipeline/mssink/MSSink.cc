@@ -254,7 +254,7 @@ std::string MSSink::substituteFileName(const std::string &in) const
      TimeBuf() : year(0), month(0), day(0), hour(0), min(0), sec(0) {}
    };
    // first just a sanity check
-   if (itsConfig.nprocs() > 1) {
+   if (itsStreamNumber > 0) {
        ASKAPCHECK((in.find("%w") != std::string::npos) || (in.find("%s") != std::string::npos), "File name should contain %w or %s in the MPI case to provide different names for different ranks");
    }
 
