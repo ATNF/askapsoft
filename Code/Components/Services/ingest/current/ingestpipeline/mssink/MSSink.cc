@@ -969,6 +969,7 @@ bool MSSink::isPolarisationRowEqual(askap::cp::common::VisChunk::ShPtr chunk,
 
 void MSSink::submitMonitoringPoints(askap::cp::common::VisChunk::ShPtr chunk)
 {
+    ASKAPDEBUGASSERT(chunk);
     // Calculate flagged visibility counts
     int32_t flagCount = 0;
     const casa::Cube<casa::Bool>& flags = chunk->flag();
@@ -989,6 +990,18 @@ void MSSink::submitMonitoringPoints(askap::cp::common::VisChunk::ShPtr chunk)
     } else {
         MonitoringSingleton::invalidatePoint("VisFlagPercent");
     }
+
+    // note, this has been moved from source task. We can have separate monitoring
+    // points here and there with different names
+    if (chunk->interval() > 0) {
+        const float nVis = chunk->nChannel() * chunk->nRow() * chunk->nPol();
+        // data estimated as 8byte vis, 4byte sigma + nRow * 100 bytes (mdata)
+        const float nDataInMB = (12. * nVis + 100. * chunk->nRow()) / 1048576.;
+        MonitoringSingleton::update("obs.DataRate", nDataInMB / chunk->interval(),
+               MonitorPointStatus::OK);
+    } else {
+       MonitoringSingleton::invalidatePoint("obs.DataRate");
+    }   
 }
 
 bool MSSink::equal(const casa::MDirection &dir1, const casa::MDirection &dir2)

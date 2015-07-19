@@ -83,6 +83,9 @@ void MonitoringPointManager::submitMonitoringPoints(const askap::cp::common::Vis
     submitPoint<int32_t>("obs.nChan", chunk.nChannel());
     submitPoint<float>("obs.ChanWidth", chunk.channelWidth() / 1000);
     
+    /*
+    // we can add another monitoring point if desired, but obs.DataRate
+    // has been moved to sink as it is more appropriate for the full MPI case
     if (chunk.interval() > 0) {
         const float nVis = chunk.nChannel() * chunk.nRow() * chunk.nPol();
         // data estimated as 8byte vis, 4byte sigma + nRow * 100 bytes (mdata)
@@ -91,6 +94,7 @@ void MonitoringPointManager::submitMonitoringPoints(const askap::cp::common::Vis
     } else {
        submitPointNull("obs.DataRate");
     }   
+    */
 
     // casa measures "constants"
     const double mjd = chunk.time().get(); // current mjd
