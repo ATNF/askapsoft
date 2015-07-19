@@ -101,7 +101,7 @@ void ChannelMergeTask::receiveVisChunks(askap::cp::common::VisChunk::ShPtr chunk
    // 1) create new frequency vector, visibilities and flags
 
    const casa::uInt nChanOriginal = chunk->nChannel();
-   casa::Vector<casa::Double> newFreq(nChanOriginal);
+   casa::Vector<casa::Double> newFreq(nChanOriginal * itsRanksToMerge);
    casa::Cube<casa::Complex> newVis(chunk->nRow(), nChanOriginal * itsRanksToMerge, 
                                     chunk->nPol(), casa::Complex(0.,0.));
    casa::Cube<casa::Bool> newFlag(chunk->nRow(), nChanOriginal * itsRanksToMerge, 
@@ -116,8 +116,8 @@ void ChannelMergeTask::receiveVisChunks(askap::cp::common::VisChunk::ShPtr chunk
    // not really necessary to set values for the master rank, but handy for consistency
    timeRecvBuf[0] = chunk->time().getDay();
    timeRecvBuf[1] = chunk->time().getDayFraction();
-   const int response = MPI_Gather(MPI_IN_PLACE, 2, MPI_DOUBLE, (void*)timeRecvBuf.get(),
-            2 * itsRanksToMerge, MPI_DOUBLE, 0, itsCommunicator);
+   const int response = MPI_Gather(MPI_IN_PLACE, 2, MPI_DOUBLE, timeRecvBuf.get(),
+                2, MPI_DOUBLE, 0, itsCommunicator);
    ASKAPCHECK(response == MPI_SUCCESS, "Error gathering times, response from MPI_Gather = "<<response);
 
    // 3) find the latest time - we ignore all chunks which are from the past
@@ -155,13 +155,12 @@ void ChannelMergeTask::receiveVisChunks(askap::cp::common::VisChunk::ShPtr chunk
        ASKAPLOG_DEBUG_STR(logger, "      - keeping "<<counter<<" chunks out of "<<itsRanksToMerge<<
                                   " merged");
    }
-
+   
    // 4) receive and merge frequency axis
    {
       boost::shared_array<double> freqRecvBuf(new double[nChanOriginal * itsRanksToMerge]);
-      const int response = MPI_Gather((void*)chunk->frequency().data(), nChanOriginal, MPI_DOUBLE, 
-                (void*)freqRecvBuf.get(), nChanOriginal * itsRanksToMerge, MPI_DOUBLE, 
-                0, itsCommunicator);
+      const int response = MPI_Gather(chunk->frequency().data(), nChanOriginal, MPI_DOUBLE, 
+                freqRecvBuf.get(), nChanOriginal, MPI_DOUBLE, 0, itsCommunicator);
       ASKAPCHECK(response == MPI_SUCCESS, "Error gathering frequencies, response from MPI_Gather = "<<response);
       
       for (int rank = 0; rank < itsRanksToMerge; ++rank) {
@@ -171,14 +170,13 @@ void ChannelMergeTask::receiveVisChunks(askap::cp::common::VisChunk::ShPtr chunk
            newFreq(casa::Slice(rank * nChanOriginal, nChanOriginal)) = thisFreq;
       }
    }
-
+  
    // 5) receive and merge visibilities (each is two floats)
    {
       boost::shared_array<float> visRecvBuf(new float[2 * chunk->visibility().nelements() * itsRanksToMerge]);
       ASKAPASSERT(chunk->visibility().contiguousStorage());
-      const int response = MPI_Gather((void*)chunk->visibility().data(), chunk->visibility().nelements() * 2, 
-            MPI_FLOAT, (void*)visRecvBuf.get(), chunk->visibility().nelements() * 2 * itsRanksToMerge,
-            MPI_FLOAT, 0, itsCommunicator);
+      const int response = MPI_Gather((float*)chunk->visibility().data(), chunk->visibility().nelements() * 2, 
+            MPI_FLOAT, visRecvBuf.get(), chunk->visibility().nelements() * 2, MPI_FLOAT, 0, itsCommunicator);
       ASKAPCHECK(response == MPI_SUCCESS, "Error gathering visibilities, response from MPI_Gather = "<<response);
      
       // it is a bit ugly to rely on actual representation of casa::Complex, but this is done
@@ -189,18 +187,17 @@ void ChannelMergeTask::receiveVisChunks(askap::cp::common::VisChunk::ShPtr chunk
    // 6) receive flags (each is casa::Bool)
    {
       ASKAPASSERT(chunk->flag().contiguousStorage());
-      ASKAPDEBUGASSERT(sizeof(casa::Bool) == sizeof(int));
-      boost::shared_array<int> flagRecvBuf(new int[chunk->flag().nelements() * itsRanksToMerge]);
-      const int response = MPI_Gather((void*)chunk->flag().data(), chunk->flag().nelements(), 
-            MPI_INTEGER, (void*)flagRecvBuf.get(), chunk->flag().nelements() * itsRanksToMerge,
-            MPI_INTEGER, 0, itsCommunicator);
+      ASKAPDEBUGASSERT(sizeof(casa::Bool) == sizeof(char));
+      boost::shared_array<casa::Bool> flagRecvBuf(new casa::Bool[chunk->flag().nelements() * itsRanksToMerge]);
+      const int response = MPI_Gather((char*)chunk->flag().data(), chunk->flag().nelements(), 
+            MPI_CHAR, (char*)flagRecvBuf.get(), chunk->flag().nelements(), MPI_CHAR, 0, itsCommunicator);
       ASKAPCHECK(response == MPI_SUCCESS, "Error gathering flags, response from MPI_Gather = "<<response);
 
       // it is a bit ugly to rely on actual representation of casa::Bool, but this is done
       // to benefit from optimised MPI routines
-      fillCube((casa::Bool*)flagRecvBuf.get(), newFlag, invalidFlags);
+      fillCube(flagRecvBuf.get(), newFlag, invalidFlags);
    }
-
+   
    // 7) update the chunk
    chunk->resize(newVis, newFlag, newFreq);
 
@@ -267,33 +264,32 @@ void ChannelMergeTask::sendVisChunk(askap::cp::common::VisChunk::ShPtr chunk) co
    // 1) send times corresponding to the current chunk 
 
    const double timeSendBuf[2] = {chunk->time().getDay(), chunk->time().getDayFraction()};
-   int response = MPI_Gather((void*)timeSendBuf, 2, MPI_DOUBLE, NULL,
-            2 * itsRanksToMerge, MPI_DOUBLE, 0, itsCommunicator);
+   int response = MPI_Gather(const_cast<double*>(timeSendBuf), 2, MPI_DOUBLE, NULL, 2, MPI_DOUBLE, 0, itsCommunicator);
    ASKAPCHECK(response == MPI_SUCCESS, "Error gathering times, response from MPI_Gather = "<<response);
 
    // 2) send frequencies corresponding to the current chunk
 
    ASKAPASSERT(chunk->frequency().contiguousStorage());
-   response = MPI_Gather((void*)chunk->frequency().data(), chunk->nChannel(), MPI_DOUBLE, NULL,
-            chunk->nChannel() * itsRanksToMerge, MPI_DOUBLE, 0, itsCommunicator);
+   response = MPI_Gather(chunk->frequency().data(), chunk->nChannel(), MPI_DOUBLE, NULL,
+            chunk->nChannel(), MPI_DOUBLE, 0, itsCommunicator);
    ASKAPCHECK(response == MPI_SUCCESS, "Error gathering frequencies, response from MPI_Gather = "<<response);
    
    // 3) send visibilities (each is two floats)
 
    ASKAPASSERT(chunk->visibility().contiguousStorage());
-   response = MPI_Gather((void*)chunk->visibility().data(), chunk->visibility().nelements() * 2, 
-            MPI_FLOAT, NULL, chunk->visibility().nelements() * 2 * itsRanksToMerge,
-            MPI_FLOAT, 0, itsCommunicator);
+   response = MPI_Gather((float*)chunk->visibility().data(), chunk->visibility().nelements() * 2, 
+            MPI_FLOAT, NULL, chunk->visibility().nelements() * 2, MPI_FLOAT, 0, itsCommunicator);
    ASKAPCHECK(response == MPI_SUCCESS, "Error gathering visibilities, response from MPI_Gather = "<<response);
 
    // 4) send flags (each is Bool)
 
    ASKAPASSERT(chunk->flag().contiguousStorage());
-   ASKAPDEBUGASSERT(sizeof(casa::Bool) == sizeof(int));
-   response = MPI_Gather((void*)chunk->flag().data(), chunk->flag().nelements(), 
-            MPI_INTEGER, NULL, chunk->flag().nelements() * itsRanksToMerge,
-            MPI_INTEGER, 0, itsCommunicator);
+   
+   ASKAPDEBUGASSERT(sizeof(casa::Bool) == sizeof(char));
+   response = MPI_Gather((char*)chunk->flag().data(), chunk->flag().nelements(), 
+            MPI_CHAR, NULL, chunk->flag().nelements(), MPI_CHAR, 0, itsCommunicator);
    ASKAPCHECK(response == MPI_SUCCESS, "Error gathering flags, response from MPI_Gather = "<<response);
+  
 }
 
 /// @brief checks chunks presented to different ranks for consistency
@@ -311,8 +307,8 @@ void ChannelMergeTask::checkChunkForConsistency(askap::cp::common::VisChunk::ShP
     sendBuf[2] = static_cast<int>(chunk->nPol());
     boost::shared_array<int> receiveBuf(new int[3 * itsRanksToMerge]);
 
-    const int response = MPI_Allgather((void*)sendBuf, 3, MPI_INTEGER, (void*)receiveBuf.get(),
-             3 * itsRanksToMerge, MPI_INTEGER, itsCommunicator);
+    const int response = MPI_Allgather(sendBuf, 3, MPI_INT, receiveBuf.get(),
+             3, MPI_INT, itsCommunicator);
     ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Allgather = "<<response);
 
     for (int rank = 0; rank < itsRanksToMerge; ++rank) {
