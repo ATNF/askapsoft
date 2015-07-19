@@ -144,7 +144,7 @@ std::vector< std::complex<float> > VisMessageBuilder::averageChannels(
     std::vector< std::complex<float> > avg;
     const size_t outputVectorSize = vis.size() / numberToAverage;
     avg.reserve(outputVectorSize);
-    for (size_t i = 0; i < outputVectorSize; ++i) {
+    for (size_t i = 0; i < outputVectorSize * numberToAverage; i+=numberToAverage) {
         std::complex<float> a(0.0, 0.0);
         size_t count = 0;
         for (size_t j = 0; j < numberToAverage; ++j) {
