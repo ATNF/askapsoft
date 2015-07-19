@@ -61,3 +61,14 @@ MockVisSource::next(const long timeout)
     // you wish to get out of it, you must have added to it with the add() call
     return itsBuffer.next();
 }
+
+/// @brief query buffer status
+/// @details Typical implementation involves buffering of data. 
+/// Exceeding the buffer capacity will cause data loss. This method
+/// is intended for monitoring the usage of the buffer.
+/// @return a pair with number of datagrams in the queue and the buffer size
+std::pair<uint32_t, uint32_t> MockVisSource::bufferUsage() const
+{
+   return std::pair<uint32_t, uint32_t>(0u, 1u);
+}
+
