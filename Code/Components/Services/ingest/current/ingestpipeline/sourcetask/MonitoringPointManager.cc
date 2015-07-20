@@ -55,9 +55,9 @@ MonitoringPointManager::~MonitoringPointManager()
     submitPointNull("obs.dir2");
     submitPointNull("obs.CoordSys");
     submitPointNull("obs.Interval");
-    submitPointNull("obs.StartFreq");
-    submitPointNull("obs.nChan");
-    submitPointNull("obs.ChanWidth");
+    submitPointNull("obs.SourceStartFreq");
+    submitPointNull("obs.SourceNChan");
+    submitPointNull("obs.SourceChanWidth");
     submitPointNull("obs.DataRate");
 
     submitPointNull("PacketsLostCount");
@@ -79,9 +79,9 @@ void MonitoringPointManager::submitMonitoringPoints(const askap::cp::common::Vis
     submitPoint<string>("obs.dir2", askap::printLat(target));
     submitPoint<string>("obs.CoordSys", casa::MDirection::showType(target.type()));
     submitPoint<int32_t>("obs.Interval", chunk.interval() * 1000);
-    submitPoint<float>("obs.StartFreq", chunk.frequency()[0]/ 1000 / 1000);
-    submitPoint<int32_t>("obs.nChan", chunk.nChannel());
-    submitPoint<float>("obs.ChanWidth", chunk.channelWidth() / 1000);
+    submitPoint<float>("obs.SourceStartFreq", chunk.frequency()[0]/ 1000 / 1000);
+    submitPoint<int32_t>("obs.SourceNChan", chunk.nChannel());
+    submitPoint<float>("obs.SourceChanWidth", chunk.channelWidth() / 1000);
     
     /*
     // we can add another monitoring point if desired, but obs.DataRate

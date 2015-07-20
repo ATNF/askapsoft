@@ -982,11 +982,10 @@ void MSSink::submitMonitoringPoints(askap::cp::common::VisChunk::ShPtr chunk)
             << " visibilities flagged");
 
     // Submit monitoring data
-    MonitoringSingleton::update("VisFlagCount", flagCount, MonitorPointStatus::OK);
+    MonitoringSingleton::update("VisFlagCount", flagCount);
     if (flags.size()) {
         MonitoringSingleton::update("VisFlagPercent",
-                flagCount / static_cast<float>(flags.size()) * 100.0,
-                MonitorPointStatus::OK);
+                flagCount / static_cast<float>(flags.size()) * 100.0);
     } else {
         MonitoringSingleton::invalidatePoint("VisFlagPercent");
     }
@@ -997,11 +996,14 @@ void MSSink::submitMonitoringPoints(askap::cp::common::VisChunk::ShPtr chunk)
         const float nVis = chunk->nChannel() * chunk->nRow() * chunk->nPol();
         // data estimated as 8byte vis, 4byte sigma + nRow * 100 bytes (mdata)
         const float nDataInMB = (12. * nVis + 100. * chunk->nRow()) / 1048576.;
-        MonitoringSingleton::update("obs.DataRate", nDataInMB / chunk->interval(),
-               MonitorPointStatus::OK);
+        MonitoringSingleton::update("obs.DataRate", nDataInMB / chunk->interval());
     } else {
        MonitoringSingleton::invalidatePoint("obs.DataRate");
     }   
+
+    MonitoringSingleton::update<float>("obs.StartFreq", chunk->frequency()[0]/ 1000 / 1000);
+    MonitoringSingleton::update<int32_t>("obs.nChan", chunk->nChannel());
+    MonitoringSingleton::update<float>("obs.ChanWidth", chunk->channelWidth() / 1000);
 }
 
 bool MSSink::equal(const casa::MDirection &dir1, const casa::MDirection &dir2)

@@ -88,7 +88,7 @@ class MonitoringSingleton : public boost::noncopyable {
         /// Submit an update to a monitoring point (without a unit)
         template <typename T>
         static void update(const std::string& name, const T value,
-                           const MonitorPointStatus_t status)
+                           const MonitorPointStatus_t status = MonitorPointStatus::OK)
         {
             update(name, value, status, "");
         }
