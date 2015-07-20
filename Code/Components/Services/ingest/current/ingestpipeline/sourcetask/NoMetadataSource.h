@@ -81,6 +81,16 @@ class NoMetadataSource : public ISource,
 
     private:
 
+        /// @brief synchronise itsLastTimestamp across all ranks
+        /// @details This method is probably only temporary. If
+        /// ingest pipeline is used in parallel mode, this method
+        /// ensures that all ranks have the same itsLastTimestamp
+        /// corresponding to the latest value received. This 
+        /// will help ingest pipeline to catch up if one of the
+        /// cards missed an integration.
+        /// @note Does nothing in the serial mode
+        void syncrhoniseLastTimestamp();
+
         /// Initialises an "empty" VisChunk (inside the converter)
         askap::cp::common::VisChunk::ShPtr createVisChunk(const casa::uLong timestamp);
 

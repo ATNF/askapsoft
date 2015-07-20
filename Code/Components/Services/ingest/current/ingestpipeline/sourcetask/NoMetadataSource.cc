@@ -43,6 +43,7 @@
 #include "boost/bind.hpp"
 #include "boost/tuple/tuple.hpp"
 #include "boost/tuple/tuple_comparison.hpp"
+#include "boost/shared_array.hpp"
 #include "Common/ParameterSet.h"
 #include "cpcommon/VisDatagram.h"
 #include "casa/Quanta/MVEpoch.h"
@@ -56,6 +57,9 @@
 #include "ingestpipeline/sourcetask/ChannelManager.h"
 #include "ingestpipeline/sourcetask/InterruptedException.h"
 #include "ingestpipeline/sourcetask/MergedSource.h"
+
+// mpi for basic synchronisation 
+#include <mpi.h>
 
 ASKAP_LOGGER(logger, ".NoMetadataSource");
 
@@ -103,9 +107,12 @@ VisChunk::ShPtr NoMetadataSource::next(void)
         if (itsInterrupted) throw InterruptedException();
     }
 
+    syncrhoniseLastTimestamp();
+
     // catch up if necessary; all datagrams should be processed below this 
     // method is only called once per integration (hence <= in the while-statement)
     // Using timestamp of 0 as initial value as it is way in the past.
+
     uint32_t nIgnoredOldDatagrams = 0;
     while (itsVis->timestamp <= itsLastTimestamp) {
            ++nIgnoredOldDatagrams;
@@ -243,4 +250,39 @@ void NoMetadataSource::signalHandler(const boost::system::error_code& error,
         itsInterrupted = true;
     }
 }
+
+/// @brief synchronise itsLastTimestamp across all ranks
+/// @details This method is probably only temporary. If
+/// ingest pipeline is used in parallel mode, this method
+/// ensures that all ranks have the same itsLastTimestamp
+/// corresponding to the latest value received. This 
+/// will help ingest pipeline to catch up if one of the
+/// cards missed an integration.
+/// @note Does nothing in the serial mode
+void NoMetadataSource::syncrhoniseLastTimestamp()
+{
+   const size_t nRanks = itsVisConverter.config().nprocs();
+   if (nRanks > 1) {
+       ASKAPLOG_DEBUG_STR(logger, "synchronising last seen timestamp across all ranks");
+       boost::shared_array<uint64_t> buf(new uint64_t[nRanks]);
+       const int result = MPI_Allgather(&itsLastTimestamp, 1, MPI_LONG_LONG, buf.get(), 1, MPI_LONG_LONG, MPI_COMM_WORLD);
+       ASKAPCHECK(result == MPI_SUCCESS, "Error gathering last time stamps, error="<<result);
+       
+       // iterate through all timestamps received from other ranks to find the maximum
+       uint64_t curVal = itsLastTimestamp;
+       for (size_t rank = 0; rank < nRanks; ++rank) {
+            if (buf[rank] > curVal) {
+                curVal = buf[rank];
+            }
+       }
+       if (curVal > itsLastTimestamp) {
+           ASKAPLOG_DEBUG_STR(logger, "Adjusting last seen timestamp forward for "<<
+                           double(curVal - itsLastTimestamp)/1e6<<" seconds to match other ranks - need to catch up");
+           itsLastTimestamp = curVal;
+       } else {
+           ASKAPLOG_DEBUG_STR(logger, "Last seen timestamp matches the latest across all ranks - already in sync");
+       }
+   }
+}
+
 
