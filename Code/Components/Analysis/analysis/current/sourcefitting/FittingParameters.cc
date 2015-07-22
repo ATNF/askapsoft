@@ -132,9 +132,9 @@ FittingParameters::FittingParameters(const LOFAR::ParameterSet& parset)
         itsFlagDoFit = false;
     }
 
-    if (itsFlagUseCurvature && 
-        itsCurvatureImage == ""){
-        ASKAPLOG_ERROR_STR(logger, 
+    if (itsFlagUseCurvature &&
+            itsCurvatureImage == "") {
+        ASKAPLOG_ERROR_STR(logger,
                            "No curvature image has been set via the curvatureImage parameter. " <<
                            " Setting useCurvature=false.");
         itsFlagUseCurvature = false;

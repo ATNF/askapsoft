@@ -53,14 +53,14 @@ class Recon2D1D {
         void setFlagPositivity(bool f) {itsFlagPositivity = f;};
         void setFlagDuchampStats(bool f) {itsFlagDuchampStats = f;};
 
-    /// @details This is Lars Floer's <lfloeer@astro.uni-bonn.de>
-    /// implementation of the "2D1D reconstruction" algorithm. This uses
-    /// the three-dimensional 'a trous' method used in Duchamp to do
-    /// wavelet reconstruction, but treats the spatial directions
-    /// separately to the spectral direction. Thresholding of the
-    /// wavelet coefficients is done, using the same snrrecon parameter
-    /// (in the Duchamp Param set) as for the regular Duchamp
-    /// reconstruction.
+        /// @details This is Lars Floer's <lfloeer@astro.uni-bonn.de>
+        /// implementation of the "2D1D reconstruction" algorithm. This uses
+        /// the three-dimensional 'a trous' method used in Duchamp to do
+        /// wavelet reconstruction, but treats the spatial directions
+        /// separately to the spectral direction. Thresholding of the
+        /// wavelet coefficients is done, using the same snrrecon parameter
+        /// (in the Duchamp Param set) as for the regular Duchamp
+        /// reconstruction.
         void reconstruct();
 
     protected:

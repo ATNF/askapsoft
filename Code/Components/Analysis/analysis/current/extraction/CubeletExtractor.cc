@@ -193,7 +193,7 @@ void CubeletExtractor::writeImage()
         casa::StokesCoordinate stkcoo(stkvec);
         newcoo.replaceCoordinate(dircoo, newcoo.findCoordinate(casa::Coordinate::DIRECTION));
         newcoo.replaceCoordinate(spcoo, newcoo.findCoordinate(casa::Coordinate::SPECTRAL));
-        if(stkCoNum >= 0){
+        if (stkCoNum >= 0) {
             newcoo.replaceCoordinate(stkcoo, newcoo.findCoordinate(casa::Coordinate::STOKES));
         }
 
@@ -233,7 +233,7 @@ void CubeletExtractor::writeImage()
 
         casa::LogicalArray
         mask(itsInputCubePtr->pixelMask().getSlice(itsSlicer).reform(outshape));
-        
+
         casa::PagedImage<float> img(itsOutputFilename);
         img.makeMask("mask");
         img.pixelMask().put(mask);

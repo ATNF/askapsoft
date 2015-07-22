@@ -146,7 +146,7 @@ void SpectralBoxExtractor::defineSlicer()
         if (itsStkAxis > -1) {
             casa::Stokes stk;
             blc(itsStkAxis) = trc(itsStkAxis) =
-                itsInputCoords.stokesPixelNumber(stk.name(itsCurrentStokes));
+                                  itsInputCoords.stokesPixelNumber(stk.name(itsCurrentStokes));
         }
         ASKAPLOG_DEBUG_STR(logger, "Defining slicer for " << itsInputCubePtr->name() <<
                            " based on blc=" << blc << ", trc=" << trc);
@@ -182,7 +182,7 @@ void SpectralBoxExtractor::writeImage()
 
         newcoo.replaceCoordinate(dircoo, newcoo.findCoordinate(casa::Coordinate::DIRECTION));
         newcoo.replaceCoordinate(spcoo, newcoo.findCoordinate(casa::Coordinate::SPECTRAL));
-        if (stkCoNum >= 0){
+        if (stkCoNum >= 0) {
             newcoo.replaceCoordinate(stkcoo, newcoo.findCoordinate(casa::Coordinate::STOKES));
         }
 

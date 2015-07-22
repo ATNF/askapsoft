@@ -173,11 +173,11 @@ void SourceDataExtractor::checkPol(std::string image,
         int stokeCooNum = itsInputCubePtr->coordinates().polarizationCoordinateNumber();
         if (stokeCooNum == -1) {
             ASKAPLOG_DEBUG_STR(logger, "No polarisation axis exists");
-        } else{
-       
+        } else {
+
             int stokeAxis = itsInputCubePtr->coordinates().polarizationAxisNumber();
             const casa::StokesCoordinate
-                stokeCoo = itsInputCubePtr->coordinates().stokesCoordinate(stokeCooNum);
+            stokeCoo = itsInputCubePtr->coordinates().stokesCoordinate(stokeCooNum);
             if (stokeCooNum == -1 || stokeAxis == -1) {
                 ASKAPCHECK(polstring == "I", "Extraction: Input cube " << image <<
                            " has no polarisation axis, but you requested " << polstring);

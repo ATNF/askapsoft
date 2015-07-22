@@ -171,14 +171,14 @@ void Matcher::readLists()
         }
 
         itsSrcPixList = getSrcPixList(fsrc, itsFITShead,
-                                            itsRA, itsDec,
-                                            itsSrcPosType, itsRadius,
-                                            itsFluxMethod, itsFluxUseFit);
+                                      itsRA, itsDec,
+                                      itsSrcPosType, itsRadius,
+                                      itsFluxMethod, itsFluxUseFit);
         ASKAPLOG_INFO_STR(logger, "Size of source pixel list = " << itsSrcPixList.size());
 
         itsRefPixList = getPixList(fref, itsFITShead,
-                                         itsRA, itsDec,
-                                         itsRefPosType, itsRadius);
+                                   itsRA, itsDec,
+                                   itsRefPosType, itsRadius);
         ASKAPLOG_INFO_STR(logger, "Size of reference pixel list = " << itsRefPixList.size());
     } else {
         ASKAPLOG_WARN_STR(logger, "Not reading any pixel lists!");
@@ -260,8 +260,8 @@ void Matcher::setTriangleLists()
     //                itsRefTriList = getTriList(reflist);
     itsRefTriList = getTriList(newreflist);
     itsMatchingTriList = matchLists(itsSrcTriList,
-                                          itsRefTriList,
-                                          itsEpsilon);
+                                    itsRefTriList,
+                                    itsEpsilon);
     trimTriList(itsMatchingTriList);
     ASKAPLOG_INFO_STR(logger, "Found " << itsMatchingTriList.size() << " matches\n");
 }
@@ -279,7 +279,7 @@ void Matcher::findMatches()
                           itsMatchingPixList.size() << " matching points\n");
 
         itsSenseMatch = (itsMatchingTriList[0].first.isClockwise() ==
-                               itsMatchingTriList[0].second.isClockwise());
+                         itsMatchingTriList[0].second.isClockwise());
 
         if (itsSenseMatch) {
             ASKAPLOG_INFO_STR(logger, "The two lists have the same sense.");

@@ -164,9 +164,9 @@ void OptimisedGrower::findEllipse()
     for (int y = itsObj->getYmin(); y <= itsObj->getYmax(); y++) {
         for (int x = itsObj->getXmin(); x <= itsObj->getXmax(); x++) {
             for (int z = itsObj->getZmin(); z <= itsObj->getZmax(); z++) {
-                if (itsObj->isInObject(x, y, z)){
-                    int pos=x + y * itsArrayDim[0] +
-                        z * itsArrayDim[0] * itsArrayDim[1];
+                if (itsObj->isInObject(x, y, z)) {
+                    int pos = x + y * itsArrayDim[0] +
+                              z * itsArrayDim[0] * itsArrayDim[1];
                     mom0map[mapPos] += itsFluxArray[pos];
                 }
             }
@@ -192,9 +192,9 @@ void OptimisedGrower::findEllipse()
     // find ellipse parameters
     this->ell_theta = 0.5 * atan2(2.0 * mom_xy, mom_x - mom_y);
     this->ell_a = sqrt(2.0 * (mom_x + mom_y + sqrt(((mom_x - mom_y) * (mom_x - mom_y)) +
-                                                   (4.0 * mom_xy * mom_xy))));
+                              (4.0 * mom_xy * mom_xy))));
     this->ell_b = sqrt(2.0 * (mom_x + mom_y - sqrt(((mom_x - mom_y) * (mom_x - mom_y)) +
-                                                   (4.0 * mom_xy * mom_xy))));
+                              (4.0 * mom_xy * mom_xy))));
 
     this->ell_b = std::max(this->ell_b, 0.1);
 

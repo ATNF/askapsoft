@@ -62,7 +62,7 @@ SubThresholder::~SubThresholder()
 // SubThresholder::SubThresholder(const SubThresholder &s) {
 //     operator=(s);
 // }
-		  
+
 // SubThresholder& SubThresholder::operator=(const SubThresholder &s) {
 //     if(this == &s) return *this;
 //     this->itsFirstGuess = s.itsFirstGuess;
@@ -128,14 +128,14 @@ void SubThresholder::define(RadioSource &src)
 
     if (itsFitParams.flagLogarithmicIncrements()) {
         itsBaseThreshold = src.detectionThreshold() > 0 ?
-                                 log10(src.detectionThreshold()) : -6.;
+                           log10(src.detectionThreshold()) : -6.;
         itsThreshIncrement = (log10(itsPeakFlux) - itsBaseThreshold) /
-                                   float(itsFitParams.numSubThresholds() + 1);
+                             float(itsFitParams.numSubThresholds() + 1);
         itsCurrentThreshold = pow(10., itsBaseThreshold + itsThreshIncrement);
     } else {
         itsBaseThreshold = src.detectionThreshold();
         itsThreshIncrement = (itsPeakFlux - itsBaseThreshold) /
-                                   float(itsFitParams.numSubThresholds() + 1);
+                             float(itsFitParams.numSubThresholds() + 1);
         itsCurrentThreshold = itsBaseThreshold + itsThreshIncrement;
     }
 

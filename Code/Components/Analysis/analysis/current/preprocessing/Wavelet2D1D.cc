@@ -57,7 +57,7 @@ namespace analysis {
 // Convenience function for reflective boundary conditions
 long inline reflectIndex(long index, size_t &dim)
 {
-    while((index < 0) || (index >= long(dim))) {
+    while ((index < 0) || (index >= long(dim))) {
         if (index < 0)
             index = -index;
 
@@ -105,25 +105,25 @@ void Recon2D1D::setCube(duchamp::Cube *cube)
     uint xyScaleLimit = int(floor(log(std::min(itsXdim, itsYdim)) / M_LN2));
     uint zScaleLimit = int(floor(log(itsZdim) / M_LN2));
 
-    if (itsMaxXYScale > 0){
+    if (itsMaxXYScale > 0) {
         //parset provided a value
         itsMaxXYScale = std::min(xyScaleLimit, itsMaxXYScale);
-    }else{
+    } else {
         itsMaxXYScale = xyScaleLimit;
     }
-    
+
     if (itsMinXYScale > xyScaleLimit) {
         ASKAPLOG_WARN_STR(logger, "2D1D Recon: Requested minXYScale=" << itsMinXYScale << " exceeds maximum possible (" << xyScaleLimit << "). Setting minXYScale=" << xyScaleLimit);
         itsMinXYScale = xyScaleLimit;
     }
-    
-    if (itsMaxZScale > 0){
+
+    if (itsMaxZScale > 0) {
         //parset provided a value
         itsMaxZScale = std::min(zScaleLimit, itsMaxZScale);
-    } else{
+    } else {
         itsMaxZScale = zScaleLimit;
     }
-    
+
     if (itsMinZScale > zScaleLimit) {
         ASKAPLOG_WARN_STR(logger, "2D1D Recon: Requested minZScale=" << itsMinZScale << " exceeds maximum possible (" << zScaleLimit << "). Setting minZScale=" << zScaleLimit);
         itsMinZScale = zScaleLimit;
@@ -138,7 +138,7 @@ void Recon2D1D::reconstruct()
     // use pointers to the arrays in itsCube so we write directly there.
     float *input = itsCube->getArray();
     float *output = itsCube->getRecon();
-    
+
     // Wavelet mother function stuff
     float waveletMotherFunction[5] = {1. / 16., 4. / 16., 6. / 16., 4. / 16., 1. / 16.};
     size_t motherFunctionSize = 5;
@@ -162,7 +162,7 @@ void Recon2D1D::reconstruct()
     // Allocate the three work arrays
     float *work[3];
     float *origwork[3];  // this is used to track the original
-                         // pointers for easy deletion at the end.
+    // pointers for easy deletion at the end.
     for (int i = 0; i < 3; i++) {
         work[i] = new float[size];
         origwork[i] = work[i];
@@ -171,7 +171,7 @@ void Recon2D1D::reconstruct()
     // Check for bad values and initialize the output to 0.
     // Use the makeBlankMask function of the duchamp::Cube class
     std::vector<bool> isGood = itsCube->makeBlankMask();
-    for (size_t i = 0; i < size; i++){
+    for (size_t i = 0; i < size; i++) {
         output[i] = 0.;
     }
 
@@ -182,7 +182,7 @@ void Recon2D1D::reconstruct()
         XYScaleFactor = 1;
 
         // Initialize the first work array to the input data or residual from the previous iteration
-        for (ulong i = 0; i < size; i++){
+        for (ulong i = 0; i < size; i++) {
             work[0][i] = isGood[i] ? input[i] - output[i] : 0.;
         }
 
@@ -203,7 +203,7 @@ void Recon2D1D::reconstruct()
                     if (isGood[i]) {
                         for (size_t j = 0; j < motherFunctionSize; j++) {
                             size_t loc = offset + reflectIndex(filterPos, itsXdim) * 1;
-                            if (isGood[loc]){
+                            if (isGood[loc]) {
                                 work[2][i] += work[readFromXY][loc] * waveletMotherFunction[j];
                             }
                             filterPos += XYScaleFactor;
@@ -224,7 +224,7 @@ void Recon2D1D::reconstruct()
                     if (isGood[i]) {
                         for (size_t j = 0; j < motherFunctionSize; j++) {
                             size_t loc = offset + reflectIndex(filterPos, itsYdim) * itsXdim;
-                            if (isGood[loc]){
+                            if (isGood[loc]) {
                                 work[writeToXY][i] += work[2][loc] * waveletMotherFunction[j];
                             }
                             filterPos += XYScaleFactor;
@@ -237,7 +237,7 @@ void Recon2D1D::reconstruct()
                 writeToXY = (writeToXY + 1) % 2;
 
                 // Calculate the spatial wavelet coefficients
-                for (size_t i = 0; i < size; i++){
+                for (size_t i = 0; i < size; i++) {
                     work[writeToXY][i] -= work[readFromXY][i];
                 }
 
@@ -267,7 +267,7 @@ void Recon2D1D::reconstruct()
                     if (isGood[i]) {
                         for (size_t j = 0; j < motherFunctionSize; j++) {
                             size_t loc = offset + reflectIndex(filterPos, itsZdim) * xydim;
-                            if (isGood[loc]){
+                            if (isGood[loc]) {
                                 work[writeToZ][i] += (work[readFromZ][loc] *
                                                       waveletMotherFunction[j]);
                             }
@@ -288,7 +288,7 @@ void Recon2D1D::reconstruct()
                 // Only treat coefficients if the desired minimal scale is reached
                 if ((XYScale >= itsMinXYScale) && (ZScale >= itsMinZScale)) {
                     // Calculate the spectral wavelet coefficients
-                    for (size_t i = 0; i < size; i++){
+                    for (size_t i = 0; i < size; i++) {
                         work[writeToZ][i] -= work[readFromZ][i];
                     }
 
@@ -308,7 +308,7 @@ void Recon2D1D::reconstruct()
                     if (itsCube->pars().getFlagRobustStats()) {
                         findMedianStats<float>(work[writeToZ], size, isGood, middle, spread);
                         spread = Statistics::madfmToSigma(spread);
-                    } else{
+                    } else {
                         findNormalStats<float>(work[writeToZ], size, isGood, middle, spread);
                     }
 
@@ -318,8 +318,7 @@ void Recon2D1D::reconstruct()
                         if (itsFlagDuchampStats) {
                             checkFlux = (fabs(work[writeToZ][i] - middle) >
                                          itsReconThreshold * spread);
-                        }
-                        else {
+                        } else {
                             checkFlux = (fabs(work[writeToZ][i]) > itsReconThreshold * std);
                         }
                         if (checkFlux && isGood[i]) {
@@ -350,7 +349,7 @@ void Recon2D1D::reconstruct()
 
     } while (iteration < itsNumIterations);
 
-    for (int i = 2; i >= 0; i--){
+    for (int i = 2; i >= 0; i--) {
         delete [] origwork[i];
     }
 

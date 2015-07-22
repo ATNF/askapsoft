@@ -178,7 +178,7 @@ void Triangle::defineTolerances(double epsilon)
     double factor = 1. / (r3 * r3) - itsAngle / (r3 * r2) + 1. / (r2 * r2);
     itsRatioTolerance = 2. * itsRatio * itsRatio * epsilon * epsilon * factor;
     itsAngleTolerance = 2. * sinthetaSqd * epsilon * epsilon * factor +
-                              3. * angleSqd * pow(epsilon, 4) * factor * factor;
+                        3. * angleSqd * pow(epsilon, 4) * factor * factor;
 }
 
 //**************************************************************//

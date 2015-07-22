@@ -60,7 +60,7 @@ class CurvatureMapCreator {
         /// image names can be set with fixName() (if they have
         /// not been defined via the parset).
         void initialise(duchamp::Cube &cube, analysisutilities::SubimageDef &subdef);
-    
+
         void calculate();
         void maskBorders();
         void write();

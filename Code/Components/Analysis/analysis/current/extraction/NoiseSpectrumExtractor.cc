@@ -153,20 +153,20 @@ void NoiseSpectrumExtractor::extract()
 
         ASKAPLOG_DEBUG_STR(logger, "Constructing subimage from slicer " << itsSlicer);
         const boost::shared_ptr<SubImage<Float> >
-            sub(new SubImage<Float>(*itsInputCubePtr, itsSlicer));
+        sub(new SubImage<Float>(*itsInputCubePtr, itsSlicer));
         casa::Array<Float> subarray = sub->get();
-        
+
         casa::IPosition outBLC(subarray.ndim(), 0);
         casa::IPosition outTRC(itsArray.shape() - 1);
 
         casa::Array<Float> noisearray;
         if (itsRobustFlag) {
             noisearray = partialMadfms(subarray, IPosition(2, 0, 1)).
-                reform(itsArray(outBLC, outTRC).shape()) /
-                Statistics::correctionFactor;
+                         reform(itsArray(outBLC, outTRC).shape()) /
+                         Statistics::correctionFactor;
         } else {
             noisearray = partialRmss(subarray, IPosition(2, 0, 1)).
-                reform(itsArray(outBLC, outTRC).shape());
+                         reform(itsArray(outBLC, outTRC).shape());
         }
 
         itsArray(outBLC, outTRC) = noisearray;

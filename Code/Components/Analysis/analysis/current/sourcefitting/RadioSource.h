@@ -342,11 +342,7 @@ class RadioSource : public duchamp::Detection {
         ///  output table. Columns are printed according to the
         ///  tableType string, using the Column::doCol() function as a
         ///  determinant.  \param stream Where the output is written
-        ///  \param columns The vector list of Column objects \param
-        ///  tableType A Catalogues::DESTINATION label saying what
-        ///  format to use: one of FILE, LOG, SCREEN or VOTABLE
-        ///  (although the latter shouldn't be used with this
-        ///  function).
+        ///  \param columns The vector list of Column objects
         void printTableRow(std::ostream &stream,
                            duchamp::Catalogues::CatalogueSpecification columns,
                            size_t fitNum = 0,

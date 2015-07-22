@@ -144,7 +144,9 @@ bool PointCatalogue::read()
                     if (itsRadius < 0. || radius < itsRadius) {
                         itsFullPointList.push_back(newpoint);
                     }
-                } else itsFullPointList.push_back(newpoint);
+                } else{
+                    itsFullPointList.push_back(newpoint);
+                }
                 if (itsFullPointList.size() > listSize && itsReferenceImage != "") {
                     casa::Vector<double> pix(ndim, 0), world(ndim, 0);
                     casa::Quantity ra(spec->raD(), "deg"), dec(spec->decD(), "deg");

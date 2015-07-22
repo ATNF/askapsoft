@@ -942,7 +942,7 @@ void DuchampParallel::fitSource(sourcefitting::RadioSource &src)
 {
 
     src.fitGauss(itsCube);
-    
+
     for (int t = 1; t <= 2; t++) {
         src.findSpectralTerm(itsSpectralTermImages[t - 1], t, itsFlagFindSpectralTerms[t - 1]);
     }
@@ -1094,7 +1094,7 @@ void DuchampParallel::cleanup()
                     src < itsEdgeSourceList.end();
                     src++) {
                 //               itsCube.addObject(*src);
-                mergeIntoList(*src, itsCube.ObjectList(),itsCube.pars());
+                mergeIntoList(*src, itsCube.ObjectList(), itsCube.pars());
             }
 
             ASKAPLOG_INFO_STR(logger, "num edge sources in cube = " << itsCube.getNumObj());
