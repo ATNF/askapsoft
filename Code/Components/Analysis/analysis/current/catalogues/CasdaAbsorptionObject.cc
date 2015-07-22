@@ -40,9 +40,14 @@
 #include <outputs/CataloguePreparation.h>
 #include <mathsutils/MathsUtils.h>
 #include <coordutils/SpectralUtilities.h>
+#include <imageaccess/CasaImageAccess.h>
+#include <casainterface/CasaInterface.h>
 
 #include <Common/ParameterSet.h>
 #include <casa/Quanta/Quantum.h>
+#include <casa/Quanta/MVTime.h>
+#include <images/Images/ImageInterface.h>
+#include <boost/shared_ptr.hpp>
 #include <duchamp/Outputs/CatalogueSpecification.hh>
 #include <duchamp/Outputs/columns.hh>
 #include <vector>
@@ -74,7 +79,10 @@ CasdaAbsorptionObject::CasdaAbsorptionObject(CasdaComponent &component,
 {
 
     itsImageID = parset.getString("image");
-    itsDate = "DATE-GOES-HERE";
+
+    boost::shared_ptr<casa::ImageInterface<Float> > imagePtr = analysisutilities::openImage(itsImageID);
+    Quantity mjd = imagePtr->coordinates().obsInfo().obsDate().get("d");
+    itsDate = casa::MVTime(mjd.getValue()).string(MVTime::FITS);
     itsComponentID = component.componentID();
     itsContinuumFlux = component.intFlux();
 
@@ -112,10 +120,10 @@ CasdaAbsorptionObject::CasdaAbsorptionObject(CasdaComponent &component,
     //     itsFluxInt /= obj.header().beam().area(); // Convert from mJy/beam to mJy
     // }
 
-    float nuPeak = 1.; // need to transform from zpeak with header/WCS
 
     itsFreqUW = obj.getVel();
-    itsFreqW = 1.;
+    itsFreqW = itsFreqUW + (random() / (RAND_MAX + 1.0) - 0.5) * 0.1 * obj.getW50();
+    float nuPeak = itsFreqUW + (random() / (RAND_MAX + 1.0) - 0.5) * 0.1 * obj.getW50(); // need to transform from zpeak with header/WCS
     itsZHI_UW = analysisutilities::nu0_HI / itsFreqUW - 1.;
     itsZHI_W = analysisutilities::nu0_HI / itsFreqW - 1.;
     itsZHI_peak = analysisutilities::nu0_HI / nuPeak - 1.;

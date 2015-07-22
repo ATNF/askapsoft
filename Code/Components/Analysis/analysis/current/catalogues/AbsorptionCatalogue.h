@@ -35,7 +35,6 @@
 #include <Common/ParameterSet.h>
 #include <duchamp/Outputs/CatalogueSpecification.hh>
 #include <vector>
-#include <map>
 
 namespace askap {
 
@@ -53,7 +52,7 @@ class AbsorptionCatalogue {
         /// catalogue from a set of RadioSource object, and defineSpec
         /// to set the column specification. The filenames are set
         /// based on the output file given in the parset.
-        AbsorptionCatalogue(std::multimap<CasdaComponent, sourcefitting::RadioSource> &srclist,
+        AbsorptionCatalogue(std::vector< std::pair<CasdaComponent, sourcefitting::RadioSource> > &srclist,
                             const LOFAR::ParameterSet &parset,
                             duchamp::Cube &cube);
 
@@ -75,7 +74,7 @@ class AbsorptionCatalogue {
         /// of RadioSource objects and the parset. One component is
         /// created for each fitted Gaussian component from each
         /// RadioSource, then added to its Components.
-        void defineObjects(std::multimap<CasdaComponent, sourcefitting::RadioSource> &srclist,
+        void defineObjects(std::vector< std::pair<CasdaComponent, sourcefitting::RadioSource> > &srclist,
                            const LOFAR::ParameterSet &parset);
 
         /// Define the catalogue specification. This function

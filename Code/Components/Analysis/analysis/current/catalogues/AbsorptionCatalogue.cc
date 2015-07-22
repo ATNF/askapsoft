@@ -52,7 +52,7 @@ namespace askap {
 
 namespace analysis {
 
-AbsorptionCatalogue::AbsorptionCatalogue(std::multimap<CasdaComponent, sourcefitting::RadioSource> &srclist,
+AbsorptionCatalogue::AbsorptionCatalogue(std::vector< std::pair<CasdaComponent, sourcefitting::RadioSource> > &srclist,
         const LOFAR::ParameterSet &parset,
         duchamp::Cube &cube):
     itsObjects(),
@@ -72,10 +72,10 @@ AbsorptionCatalogue::AbsorptionCatalogue(std::multimap<CasdaComponent, sourcefit
 
 }
 
-void AbsorptionCatalogue::defineObjects(std::multimap<CasdaComponent, sourcefitting::RadioSource> &srclist,
+void AbsorptionCatalogue::defineObjects(std::vector< std::pair<CasdaComponent, sourcefitting::RadioSource> > &srclist,
                                         const LOFAR::ParameterSet &parset)
 {
-    std::multimap<CasdaComponent, sourcefitting::RadioSource>::iterator src;
+    std::vector< std::pair<CasdaComponent, sourcefitting::RadioSource> >::iterator src;
     for (src = srclist.begin(); src != srclist.end(); src++) {
         CasdaComponent comp = src->first;
         sourcefitting::RadioSource obj = src->second;
