@@ -41,7 +41,7 @@ namespace askap {
 namespace analysis {
 
 CatalogueEntry::CatalogueEntry(const LOFAR::ParameterSet &parset):
-    itsSBid(parset.getString("SBid", "null"))
+    itsSBid(parset.getString("sbid", "null"))
 {
     std::string imageName = parset.getString("image");
     if (imageName.substr(imageName.rfind("."), std::string::npos) == ".fits") {

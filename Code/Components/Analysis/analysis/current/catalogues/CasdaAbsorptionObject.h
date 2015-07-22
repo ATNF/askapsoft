@@ -1,6 +1,6 @@
 /// @file
 ///
-/// Class for specifying an entry in the Component catalogue
+/// Class for specifying an entry in the Absorption Object catalogue
 ///
 /// @copyright (c) 2014 CSIRO
 /// Australia Telescope National Facility (ATNF)
@@ -26,11 +26,12 @@
 ///
 /// @author Matthew Whiting <Matthew.Whiting@csiro.au>
 ///
-#ifndef ASKAP_ANALYSIS_CASDA_COMPONENT_H_
-#define ASKAP_ANALYSIS_CASDA_COMPONENT_H_
+#ifndef ASKAP_ANALYSIS_CASDA_ABSORPTION_H_
+#define ASKAP_ANALYSIS_CASDA_ABSORPTION_H_
 
 #include <catalogues/casda.h>
 #include <catalogues/CatalogueEntry.h>
+#include <catalogues/CasdaComponent.h>
 #include <sourcefitting/RadioSource.h>
 #include <Common/ParameterSet.h>
 #include <duchamp/Outputs/CatalogueSpecification.hh>
@@ -47,33 +48,30 @@ namespace analysis {
 /// allows extraction from a RadioSource object and provides methods
 /// to write out the Component to a VOTable or other type of catalogue
 /// file.
-class CasdaComponent : public CatalogueEntry {
+class CasdaAbsorptionObject : public CatalogueEntry {
     public:
-        /// Constructor that builds the Component object from a
-        /// RadioSource. It takes a single fitted component, indicated
+        /// Constructor that builds the Absorption object from a
+        /// RadioSource.
+        /// **THE INTERFACE IS STILL TO BE WORKED OUT FULLY**
+        /// It takes a single fitted component, indicated
         /// by the parameter fitNumber, from the fit results given by
         /// the fitType parameter. The parset is used to make the
         /// corresponding Island, to get the Island ID, and is passed
         /// to the CatalogueEntry constructor to get the SB and base
         /// ID.
-        CasdaComponent(sourcefitting::RadioSource &obj,
-                       const LOFAR::ParameterSet &parset,
-                       const unsigned int fitNumber,
-                       const std::string fitType = casda::componentFitType);
+        CasdaAbsorptionObject(CasdaComponent &component,
+                              sourcefitting::RadioSource &obj,
+                              const LOFAR::ParameterSet &parset);
 
         /// Default destructor
-        virtual ~CasdaComponent() {};
+        virtual ~CasdaAbsorptionObject() {};
 
         /// Return the RA (in decimal degrees)
         const float ra();
         /// Return the Declination (in decimal degrees)
         const float dec();
-        /// Return the component ID
-        const std::string componentID();
-        /// Return the integrated flux
-        const double intFlux();
 
-        ///  Print a row of values for the Component into an
+        ///  Print a row of values for the objet into an
         ///  output table. Each column from the catalogue
         ///  specification is sent to printTableEntry for output.
         ///  \param stream Where the output is written
@@ -90,7 +88,7 @@ class CasdaComponent : public CatalogueEntry {
                              duchamp::Catalogues::Column &column);
 
         /// Allow the Column provided to check its width against that
-        /// required by the value for this Component, and increase its
+        /// required by the value for this object, and increase its
         /// width if need be. The correct value is chose according to
         /// the COLNAME key. If a key is given that was not expected,
         /// an Askap Error is thrown. Column must be non-const as it
@@ -102,16 +100,18 @@ class CasdaComponent : public CatalogueEntry {
         /// with type=char are checked, otherwise all are.
         void checkSpec(duchamp::Catalogues::CatalogueSpecification &spec, bool allColumns = true);
 
-        /// Write the ellipse showing the component shape to the given
-        /// Annotation file. This allows writing to Karma, DS9 or CASA
-        /// annotation/region file.
-        void writeAnnotation(boost::shared_ptr<duchamp::AnnotationWriter> &writer);
 
     protected:
-        /// The ID of the island that this component came from.
-        std::string itsIslandID;
-        /// The unique ID for this component
+        /// The ID of the image cube in which this object was found
+        std::string itsImageID;
+        /// The date/time of the observation
+        std::string itsDate;
+        /// The ID of the component that this object comes from
         std::string itsComponentID;
+        /// The flux of the continuum at this object
+        double itsContinuumFlux;
+        /// The unique ID for this object
+        std::string itsObjectID;
         /// The J2000 IAU-format name
         std::string itsName;
         /// The RA in string format: 12:34:56.7
@@ -126,82 +126,59 @@ class CasdaComponent : public CatalogueEntry {
         double itsRA_err;
         /// The error in the Declination value
         double itsDEC_err;
-        /// The frequency of the image
-        double itsFreq;
-        /// The fitted peak flux of the component
-        double itsFluxPeak;
-        /// The error on the peak flux
-        double itsFluxPeak_err;
-        /// The integrated flux (fitted) of the component
-        double itsFluxInt;
-        /// The error on the integrated flux
-        double itsFluxInt_err;
-        /// The fitted major axis (FWHM)
-        double itsMaj;
-        /// The fitted minor axis (FWHM)
-        double itsMin;
-        /// The position angle of the fitted major axis
-        double itsPA;
-        /// The error on the fitted major axis
-        double itsMaj_err;
-        /// The error on the fitted minor axis
-        double itsMin_err;
-        /// The error on the fitted position angle
-        double itsPA_err;
-        /// The major axis after deconvolution
-        double itsMaj_deconv;
-        /// The minor axis after deconvolution
-        double itsMin_deconv;
-        /// The position angle of the major axis after deconvolution
-        double itsPA_deconv;
-        /// The chi-squared value from the fit
-        double itsChisq;
-        /// The RMS of the residual from the fit
-        double itsRMSfit;
-        /// The fitted spectral index of the component
-        double itsAlpha;
-        /// The fitted spectral curvature of the component
-        double itsBeta;
-        /// The local RMS noise of the image surrounding the component
-        double itsRMSimage;
-        /// A flag indicating whether more than one component was
-        /// fitted to the island
-        unsigned int itsFlagSiblings;
-        /// A flag indicating the parameters of the component are from
-        /// the initial estimate, and not the result of the fit
-        unsigned int itsFlagGuess;
+        /// The frequency of the object, unweighted average
+        double itsFreqUW;
+        /// The error in the frequency of the object, unweighted average
+        double itsFreqUW_err;
+        /// The frequency of the object, weighted average
+        double itsFreqW;
+        /// The error in the frequency of the object, weighted average
+        double itsFreqW_err;
+        /// The HI redshift for the unweighted average frequency of the object
+        double itsZHI_UW;
+        /// The error in the HI redshift for the unweighted average
+        /// frequency of the object
+        double itsZHI_UW_err;
+        /// The HI redshift for the weighted average frequency of the object
+        double itsZHI_W;
+        /// The error in the HI redshift for the weighted average
+        /// frequency of the object
+        double itsZHI_W_err;
+        /// The HI redshift for the frequency of the peak optical depth
+        double itsZHI_peak;
+        /// The error in the HI redshift for the frequency of the peak
+        /// optical depth
+        double itsZHI_peak_err;
+        /// The velocity width of the object at 50% of the peak optical depth
+        double itsW50;
+        /// The error in the velocity width of the object at 50% of the
+        /// peak optical depth
+        double itsW50_err;
+        /// The velocity width of the object at 20% of the peak optical depth
+        double itsW20;
+        /// The error in the velocity width of the object at 20% of the
+        /// peak optical depth
+        double itsW20_err;
+        /// The local RMS noise of the image cube surrounding the object
+        double itsRMSimagecube;
+        /// The peak optical depth of the object
+        double itsOpticalDepth_peak;
+        /// The error in the peak optical depth of the object
+        double itsOpticalDepth_peak_err;
+        /// The integrated optical depth of the object
+        double itsOpticalDepth_int;
+        /// The error in the integrated optical depth of the object
+        double itsOpticalDepth_int_err;
+
+        /// A flag indicating whether the object's continuum component is resolved spatially
+        unsigned int itsFlagResolved;
+        /// A yet-to-be-identified quality flag
+        unsigned int itsFlag2;
         /// A yet-to-be-identified quality flag
         unsigned int itsFlag3;
-        /// A yet-to-be-identified quality flag
-        unsigned int itsFlag4;
         /// A comment string, not used as yet.
         std::string itsComment;
 
-        /// The following are not in the CASDA component catalogue at
-        /// v1.7, but are reported in the fit catalogues of Selavy
-        /// {
-        /// The ID of the component, without the SB and image
-        /// identifiers.
-        std::string itsLocalID;
-        /// The x-pixel location of the centre of the component
-        double itsXpos;
-        /// The y-pixel location of the centre of the component
-        double itsYpos;
-        /// The integrated flux of the island from which this
-        /// component was derived
-        double itsFluxInt_island;
-        /// The peak flux of the island from which this component was
-        /// derived
-        double itsFluxPeak_island;
-        /// The number of free parameters in the fit
-        unsigned int itsNfree_fit;
-        /// The number of degrees of freedom in the fit
-        unsigned int itsNDoF_fit;
-        /// The number of pixels used in the fit
-        unsigned int itsNpix_fit;
-        /// The number of pixels in the parent island.
-        unsigned int itsNpix_island;
-        /// }
 };
 
 }

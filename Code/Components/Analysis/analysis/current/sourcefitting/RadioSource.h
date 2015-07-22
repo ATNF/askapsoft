@@ -285,7 +285,7 @@ class RadioSource : public duchamp::Detection {
 
         /// @brief Set the noise level
         void setNoiseLevel(float noise) {itsNoiseLevel = noise;};
-        float noiseLevel() {return itsNoiseLevel;};
+        const float noiseLevel() {return itsNoiseLevel;};
         /// @}
 
         /// @brief Set the detection threshold for a particular Cube

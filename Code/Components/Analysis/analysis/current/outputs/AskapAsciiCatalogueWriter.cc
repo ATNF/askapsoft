@@ -32,6 +32,8 @@
 #include <sourcefitting/FitResults.h>
 #include <catalogues/CasdaIsland.h>
 #include <catalogues/CasdaComponent.h>
+#include <catalogues/CasdaAbsorptionObject.h>
+#include <catalogues/CasdaPolarisationEntry.h>
 
 #include <duchamp/Outputs/ASCIICatalogueWriter.hh>
 #include <duchamp/Outputs/columns.hh>
@@ -95,6 +97,8 @@ template void
 AskapAsciiCatalogueWriter::writeEntries<CasdaIsland>(std::vector<CasdaIsland> &objlist);
 template void
 AskapAsciiCatalogueWriter::writeEntries<CasdaComponent>(std::vector<CasdaComponent> &objlist);
+template void AskapAsciiCatalogueWriter::writeEntries<CasdaAbsorptionObject>(std::vector<CasdaAbsorptionObject> &obj);
+template void AskapAsciiCatalogueWriter::writeEntries<CasdaPolarisationEntry>(std::vector<CasdaPolarisationEntry> &obj);
 
 template <class T>
 void AskapAsciiCatalogueWriter::writeEntry(T &obj)
@@ -112,6 +116,8 @@ void AskapAsciiCatalogueWriter::writeEntry(T &obj)
 }
 template void AskapAsciiCatalogueWriter::writeEntry<CasdaIsland>(CasdaIsland &obj);
 template void AskapAsciiCatalogueWriter::writeEntry<CasdaComponent>(CasdaComponent &obj);
+template void AskapAsciiCatalogueWriter::writeEntry<CasdaAbsorptionObject>(CasdaAbsorptionObject &obj);
+template void AskapAsciiCatalogueWriter::writeEntry<CasdaPolarisationEntry>(CasdaPolarisationEntry &obj);
 
 
 }

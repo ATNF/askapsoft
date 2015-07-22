@@ -162,6 +162,16 @@ const float CasdaComponent::dec()
     return itsDEC;
 }
 
+const std::string CasdaComponent::componentID()
+{
+    return itsComponentID;
+}
+
+const double CasdaComponent::intFlux()
+{
+    return itsFluxInt;
+}
+
 void CasdaComponent::printTableRow(std::ostream &stream,
                                    duchamp::Catalogues::CatalogueSpecification &columns)
 {

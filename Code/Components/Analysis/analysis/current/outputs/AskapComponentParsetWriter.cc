@@ -148,7 +148,7 @@ void AskapComponentParsetWriter::writeEntries()
         cmpnt.setReference(itsRefRA, itsRefDec);
         cmpnt.setSizeFlag(itsFlagReportSize);
 
-        // First iterate over all components, storing them in a multimap indexed by their flux.    
+        // First iterate over all components, storing them in a multimap indexed by their flux.
         std::vector<sourcefitting::RadioSource>::iterator src;
         for (src = itsSourceList->begin(); src < itsSourceList->end(); src++) {
             std::vector<casa::Gaussian2D<Double> > fitset = src->gaussFitSet(itsFitType);
@@ -174,7 +174,7 @@ void AskapComponentParsetWriter::writeEntries()
 
             *itsStream << cmpntIter->second;
             // update source ID list
-            if (itsSourceIDlist.size() > 0){
+            if (itsSourceIDlist.size() > 0) {
                 idlist << ",";
             }
             idlist << "src" << cmpntIter->second.ID();
