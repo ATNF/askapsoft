@@ -123,12 +123,34 @@ class BaselineMap {
         ///         the selected baseline/polarisation does not exist in the map.
         int32_t getID(const int32_t ant1, const int32_t ant2, const casa::Stokes::StokesTypes pol) const;
 
+
+        /// @brief correlator produces lower triangle?
+        /// @return true if ant2<=ant1 for all ids
+        bool isLowerTriangle() const;
+
+        /// @brief correlator produces upper triangle?
+        /// @return true if ant1<=ant2 for all ids
+        bool isUpperTriangle() const;
+
     private:
 
         size_t itsSize;
         std::map<int32_t, int32_t> itsAntenna1Map;
         std::map<int32_t, int32_t> itsAntenna2Map;
         std::map<int32_t, casa::Stokes::StokesTypes> itsStokesMap;
+
+        /// @brief flag that antenna1 index is not greater than antenna2 index for all products
+        /// @return true, if ant1<=ant2 for all defined "baseline tuples", i.e. if the correlator
+        /// produces upper triangle of products (considering products as mathematical matrix)
+        /// @note this method is used to set up optimal row layout to avoid the need to conjugate data
+        bool itsUpperTriangle;
+
+        /// @brief flag that antenna2 index is not greater than antenna1 index for all products
+        /// @return true, if ant2<=ant1 for all defined "baseline tuples", i.e. if the correlator
+        /// produces lower triangle of products (considering products as mathematical matrix)
+        /// @note this method is used to set up optimal row layout to avoid the need to conjugate data
+        bool itsLowerTriangle;
+        
 };
 
 

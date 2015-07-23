@@ -63,6 +63,8 @@ using namespace std;
 using namespace askap;
 using namespace askap::cp::ingest;
 
+ASKAP_LOGGER(logger, ".Configuration");
+
 Configuration::Configuration(const LOFAR::ParameterSet& parset, int rank, int nprocs)
     : itsParset(parset), itsRank(rank), itsNProcs(nprocs)
 {
@@ -210,8 +212,10 @@ void Configuration::buildAntennas(void)
         if (antit == antennaMap.end()) {
             ASKAPTHROW(AskapError, "Antenna " << *it << " is not configured");
         }
+        ASKAPLOG_DEBUG_STR(logger, "Adding "<<antit->first<<": "<<antit->second.position()<<" as "<<antit->second.name());
         itsAntennas.push_back(antit->second);
     }
+    ASKAPLOG_DEBUG_STR(logger, "Defined "<<itsAntennas.size()<<" antennas in the configuration");
 }
 
 void Configuration::buildBaselineMap(void)

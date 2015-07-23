@@ -51,7 +51,7 @@ BaselineMap::BaselineMap()
 {
 }
 
-BaselineMap::BaselineMap(const LOFAR::ParameterSet& parset)
+BaselineMap::BaselineMap(const LOFAR::ParameterSet& parset) : itsUpperTriangle(true), itsLowerTriangle(true)
 {
     const vector<int32_t> ids = parset.getInt32Vector("baselineids", true);
     itsSize = ids.size();
@@ -68,8 +68,18 @@ BaselineMap::BaselineMap(const LOFAR::ParameterSet& parset)
             ASKAPTHROW(AskapError, "Baseline mapping for id " << id << " is malformed");
         }
 
-        itsAntenna1Map[id] = fromString<int32_t>(tuple[0]); 
-        itsAntenna2Map[id] = fromString<int32_t>(tuple[1]); 
+        const int32_t ant1 = fromString<int32_t>(tuple[0]); 
+        const int32_t ant2 = fromString<int32_t>(tuple[1]); 
+
+        if (ant1 > ant2) {
+            itsUpperTriangle = false;
+        }
+        if (ant2 > ant1) {
+            itsLowerTriangle = false;
+        }
+ 
+        itsAntenna1Map[id] = ant1; 
+        itsAntenna2Map[id] = ant2; 
         itsStokesMap[id] = Stokes::type(tuple[2]);
     }
     ASKAPCHECK(itsAntenna1Map.size() == itsSize, "Antenna 1 Map is of invalid size");
@@ -152,4 +162,18 @@ int32_t BaselineMap::getID(const int32_t ant1, const int32_t ant2, const casa::S
        }
   }
   return -1;
+}
+
+/// @brief correlator produces lower triangle?
+/// @return true if ant2<=ant1 for all ids
+bool BaselineMap::isLowerTriangle() const
+{
+   return itsLowerTriangle && (itsSize != 0); 
+}
+
+/// @brief correlator produces upper triangle?
+/// @return true if ant1<=ant2 for all ids
+bool BaselineMap::isUpperTriangle() const
+{
+   return itsUpperTriangle && (itsSize != 0);
 }
