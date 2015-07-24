@@ -77,6 +77,12 @@ VisConverterBase::VisConverterBase(const LOFAR::ParameterSet& params,
    casa::MEpoch::Convert(casa::MEpoch(dummyEpoch, casa::MEpoch::Ref(casa::MEpoch::TAI)),
                          casa::MEpoch::Ref(casa::MEpoch::UTC))();
 
+   ASKAPCHECK(itsBaselineMap.isLowerTriangle() != itsBaselineMap.isUpperTriangle(),
+          "We currently support either upper or lower triangle of correlation products, not mixed cases");
+
+   const std::string triangleStr = itsBaselineMap.isLowerTriangle() ? "lower" : "upper";
+   ASKAPLOG_DEBUG_STR(logger, "Correlation product configuration is consistent with an "<<triangleStr<<" triangle");
+
    // initialise beam mapping
    initBeamMap(params);
  
@@ -179,8 +185,9 @@ VisConverterBase::mapCorrProduct(uint32_t baseline, uint32_t beam) const
    // the logic more or less follows the original Ben's addVis in source classes
 
    // 0) Map from baseline to antenna pair and stokes type
-   if (itsBaselineMap.idToAntenna1(baseline) == -1 ||
-       itsBaselineMap.idToAntenna2(baseline) == -1 ||
+   const int mappedAnt1 = itsBaselineMap.idToAntenna1(baseline);
+   const int mappedAnt2 = itsBaselineMap.idToAntenna2(baseline);
+   if (mappedAnt1 == -1 || mappedAnt2 == -1 ||
        itsBaselineMap.idToStokes(baseline) == casa::Stokes::Undefined) {
        // although we can dropped baselines for some antennas, 
        // mapping information should always be present in the configuration
@@ -190,8 +197,10 @@ VisConverterBase::mapCorrProduct(uint32_t baseline, uint32_t beam) const
        return boost::none;
    }
 
-   const uint32_t antenna1 = static_cast<uint32_t>(itsBaselineMap.idToAntenna1(baseline));
-   const uint32_t antenna2 = static_cast<uint32_t>(itsBaselineMap.idToAntenna2(baseline));
+   const uint32_t antenna1 = itsBaselineMap.isUpperTriangle() ? static_cast<uint32_t>(mappedAnt1) : static_cast<uint32_t>(mappedAnt2);
+   const uint32_t antenna2 = itsBaselineMap.isUpperTriangle() ? static_cast<uint32_t>(mappedAnt2) : static_cast<uint32_t>(mappedAnt1);
+   ASKAPDEBUGASSERT(antenna1 <= antenna2);
+
    const casa::Int beamid = itsBeamIDMap(beam);
    if (beamid < 0) {
        // this beam ID is intentionally unmapped - no warning needed
@@ -229,10 +238,15 @@ VisConverterBase::mapCorrProduct(uint32_t baseline, uint32_t beam) const
    // 3) Find the row for the given beam and baseline and final checks
    const uint32_t row = calculateRow(antenna1, antenna2, beamid);
 
-   const std::string errorMsg = "Indexing failed to find row";
+   const std::string errorMsg = "Indexing failed to find row ";
    ASKAPCHECK(row < itsVisChunk->nRow(), "Row number exceeds the chunk dimensions, internal inconsistency suspected");
-   ASKAPCHECK(itsVisChunk->antenna1()(row) == antenna1, errorMsg);
-   ASKAPCHECK(itsVisChunk->antenna2()(row) == antenna2, errorMsg);
+   ASKAPCHECK(itsVisChunk->antenna1()(row) == static_cast<casa::uInt>(mappedAnt1), errorMsg); 
+   ASKAPCHECK(itsVisChunk->antenna2()(row) == static_cast<casa::uInt>(mappedAnt2), errorMsg);
+
+   // temporary hack for ADE
+   //ASKAPCHECK(itsVisChunk->antenna1()(row) == antenna2, errorMsg); 
+   //ASKAPCHECK(itsVisChunk->antenna2()(row) == antenna1, errorMsg);
+
    ASKAPCHECK(itsVisChunk->beam1()(row) == static_cast<casa::uInt>(beamid), errorMsg);
    ASKAPCHECK(itsVisChunk->beam2()(row) == static_cast<casa::uInt>(beamid), errorMsg);
 
@@ -250,7 +264,8 @@ VisConverterBase::mapCorrProduct(uint32_t baseline, uint32_t beam) const
 uint32_t VisConverterBase::calculateRow(uint32_t ant1, uint32_t ant2,
                                     uint32_t beam) const
 {
-    ASKAPDEBUGASSERT(ant1 <= ant2);
+    //ASKAPDEBUGASSERT(ant1 <= ant2);
+    ASKAPCHECK(ant1 <= ant2, "Unexpected antenna order in baseline: ant1="<<ant1<<" ant2="<<ant2);
     const uint32_t nAntenna = itsConfig.antennas().size();
     ASKAPDEBUGASSERT(ant2 < nAntenna);
     ASKAPDEBUGASSERT(beam < itsMaxNBeams);
@@ -344,8 +359,13 @@ void VisConverterBase::initVisChunk(const casa::uLong timestamp,
                 // nothing is done to phase centre and pointing
                 // centre here. These fields are filled by
                 // the methods of the source task
-                itsVisChunk->antenna1()(row) = ant1;
-                itsVisChunk->antenna2()(row) = ant2;
+                if (itsBaselineMap.isUpperTriangle()) {
+                    itsVisChunk->antenna1()(row) = ant1;
+                    itsVisChunk->antenna2()(row) = ant2;
+                } else {
+                    itsVisChunk->antenna1()(row) = ant2;
+                    itsVisChunk->antenna2()(row) = ant1;
+                }
                 itsVisChunk->beam1()(row) = beam;
                 itsVisChunk->beam2()(row) = beam;
                 itsVisChunk->beam1PA()(row) = 0;

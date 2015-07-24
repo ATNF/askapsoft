@@ -203,23 +203,22 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
 
         if (isAutoCorr) {
             // For auto-correlations we duplicate cross-pols as 
-            // index 2 should always be missing
-            ASKAPDEBUGASSERT(polidx != 2);
+            // index 1 should always be missing
+            ASKAPDEBUGASSERT(polidx != 1);
             ASKAPASSERT(chunk->nPol() == 4);
 
-            if (polidx == 1) {
-                // don't really need conjugation here as the sample should
-                // be real
-                chunk->visibility()(row, channel, 2) = conj(sample);
+            if (polidx == 2) {
+                chunk->visibility()(row, channel, 1) = conj(sample);
                 // Unflag the sample
                 if (rowIsValid) {
-                    chunk->flag()(row, channel, 2) = false;
+                    chunk->flag()(row, channel, 1) = false;
                 }
             }
         }
 
         // temporary - debugging frequency mapping/values received from the ioc
         //chunk->visibility().yzPlane(row).row(channel).set(casa::Complex(vis.freq,0.));
+        //chunk->visibility().yzPlane(row).row(channel).set(casa::Complex(antenna1 + 10.*config().rank(),0.));
         //
    }
 
