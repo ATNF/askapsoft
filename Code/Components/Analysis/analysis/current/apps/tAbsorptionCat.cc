@@ -51,9 +51,9 @@ int main(int argc, const char *argv[])
         CasdaComponent comp(obj,parset,0);
         std::vector< std::pair<CasdaComponent,sourcefitting::RadioSource> > objlist;
         objlist.push_back(std::pair<CasdaComponent,sourcefitting::RadioSource>(comp,obj));
-        duchamp::Cube cube;
+        duchamp::Cube *cube = finder.pCube();
         
-        AbsorptionCatalogue cat(objlist, parset, cube);
+        AbsorptionCatalogue cat(objlist, parset, *cube);
         cat.write();
 
 

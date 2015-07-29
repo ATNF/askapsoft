@@ -128,7 +128,7 @@ void AbsorptionCatalogue::defineSpec()
                       "float", "col_z_hi_uw_err", "");
     itsSpec.addColumn("Z_HI_W", "z_hi_w", "", 11, casda::precFreq,
                       "src.redshift;em.line.HI", "float", "col_z_hi_w", "");
-    itsSpec.addColumn("Z_HI_W_ERR", "z_hi_uw_err", "", 11, casda::precFreq,
+    itsSpec.addColumn("Z_HI_W_ERR", "z_hi_w_err", "", 11, casda::precFreq,
                       "stat.error;src.redshift;em.line.HI",
                       "float", "col_z_hi_w_err", "");
     itsSpec.addColumn("Z_HI_PEAK", "z_hi_peak", "", 11, casda::precFreq,
@@ -158,10 +158,10 @@ void AbsorptionCatalogue::defineSpec()
                       "float", "col_opt_depth_peak");
     itsSpec.addColumn("OPT_DEPTH_PEAK_ERR", "opt_depth_peak_err", "", 10, casda::precFlux,
                       "stat.error;phys.absorption.opticalDepth;stat.max",
-                      "float", "col_opt_depth_int_err");
+                      "float", "col_opt_depth_peak_err");
     itsSpec.addColumn("OPT_DEPTH_INT", "opt_depth_int", "", 10, casda::precFlux,
                       "phys.absorption.opticalDepth;askap:arith.integrated",
-                      "float", "col_opt_depth_peak");
+                      "float", "col_opt_depth_int");
     itsSpec.addColumn("OPT_DEPTH_INT_ERR", "opt_depth_int_err",
                       "[" + casda::velocityUnit + "]", 10, casda::precFlux,
                       "stat.error;phys.absorption.opticalDepth;askap:arith.integrated",
