@@ -296,10 +296,11 @@ void MsSplitApp::copyPointing(const casa::MeasurementSet& source, casa::Measurem
     }
 
     // Copy required columns
-    // direction and target were disabled due to a problem with hanging.
-    // This no longer seems to be a problem, so the copies are re-enabled.
-    dc.direction().putColumn(sc.direction());
-    dc.target().putColumn(sc.target());
+
+    // Improved way of copying the target and direction arrays
+    dc.target().put(0,sc.target().get(0));
+    dc.direction().put(0,sc.direction().get(0));
+
     dc.antennaId().putColumn(sc.antennaId());
     dc.interval().putColumn(sc.interval());
     dc.name().putColumn(sc.name());
