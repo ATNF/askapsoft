@@ -92,7 +92,7 @@ void AbsorptionCatalogue::defineSpec()
                       "time.start", "char", "col_date_time_ut", "");
     itsSpec.addColumn("COMP_ID", "cont_component_id", "--", 6, 0,
                       "meta.id.parent", "char", "col_cont_component_id", "");
-    itsSpec.addColumn("CONTFLUX", "cont_flux", "[" + casda::intFluxUnit + "]",
+    itsSpec.addColumn("CONTFLUX", "cont_flux", "[" + casda::intFluxUnitContinuum + "]",
                       9, casda::precFlux, "phot.flux.density;em.radio;spect.continuum",
                       "float", "col_fint", "");
     itsSpec.addColumn("ID", "object_id", "--", 6, 0,
@@ -111,43 +111,47 @@ void AbsorptionCatalogue::defineSpec()
                       "stat.error;pos.eq.ra", "float", "col_raerr", "J2000");
     itsSpec.addColumn("DECERR", "dec_err", "[arcsec]", 11, casda::precSize,
                       "stat.error;pos.eq.dec", "float", "col_decerr", "J2000");
-    itsSpec.addColumn("FREQ_UW", "freq_uw", "[" + casda::freqUnit + "]", 11, casda::precFreq,
-                      "em.freq;meta.main", "float", "col_freq_uw", "");
+    itsSpec.addColumn("FREQ_UW", "freq_uw", "[" + casda::freqUnit + "]",
+                      11, casda::precFreqSpectral, "em.freq;meta.main",
+                      "float", "col_freq_uw", "");
     itsSpec.addColumn("FREQ_UW_ERR", "freq_uw_err", "[" + casda::freqUnit + "]",
-                      11, casda::precFreq, "stat.error;em.freq;meta.main",
+                      11, casda::precFreqSpectral, "stat.error;em.freq;meta.main",
                       "float", "col_freq_uw_err", "");
-    itsSpec.addColumn("FREQ_W", "freq_w", "[" + casda::freqUnit + "]", 11, casda::precFreq,
-                      "em.freq", "float", "col_freq_w", "");
+    itsSpec.addColumn("FREQ_W", "freq_w", "[" + casda::freqUnit + "]",
+                      11, casda::precFreqSpectral, "em.freq",
+                      "float", "col_freq_w", "");
     itsSpec.addColumn("FREQ_W_ERR", "freq_w_err", "[" + casda::freqUnit + "]",
-                      11, casda::precFreq, "stat.error;em.freq",
+                      11, casda::precFreqSpectral, "stat.error;em.freq",
                       "float", "col_freq_w_err", "");
-    itsSpec.addColumn("Z_HI_UW", "z_hi_uw", "", 11, casda::precFreq,
+    itsSpec.addColumn("Z_HI_UW", "z_hi_uw", "", 11, casda::precZ,
                       "src.redshift;em.line.HI;meta.main", "float", "col_z_hi_uw", "");
-    itsSpec.addColumn("Z_HI_UW_ERR", "z_hi_uw_err", "", 11, casda::precFreq,
+    itsSpec.addColumn("Z_HI_UW_ERR", "z_hi_uw_err", "", 11, casda::precZ,
                       "stat.error;src.redshift;em.line.HI;meta.main",
                       "float", "col_z_hi_uw_err", "");
-    itsSpec.addColumn("Z_HI_W", "z_hi_w", "", 11, casda::precFreq,
+    itsSpec.addColumn("Z_HI_W", "z_hi_w", "", 11, casda::precZ,
                       "src.redshift;em.line.HI", "float", "col_z_hi_w", "");
-    itsSpec.addColumn("Z_HI_W_ERR", "z_hi_w_err", "", 11, casda::precFreq,
+    itsSpec.addColumn("Z_HI_W_ERR", "z_hi_w_err", "", 11, casda::precZ,
                       "stat.error;src.redshift;em.line.HI",
                       "float", "col_z_hi_w_err", "");
-    itsSpec.addColumn("Z_HI_PEAK", "z_hi_peak", "", 11, casda::precFreq,
+    itsSpec.addColumn("Z_HI_PEAK", "z_hi_peak", "", 11, casda::precZ,
                       "src.redshift;em.line.HI;phys.absorption.opticalDepth;stat.max",
                       "float", "col_z_hi_peak", "");
-    itsSpec.addColumn("Z_HI_PEAK_ERR", "z_hi_peak_err", "", 11, casda::precFreq,
+    itsSpec.addColumn("Z_HI_PEAK_ERR", "z_hi_peak_err", "", 11, casda::precZ,
                       "stat.error;src.redshift;em.line.HI;phys.absorption.opticalDepth;stat.max",
                       "float", "col_z_hi_peak_err", "");
-    itsSpec.addColumn("W50", "w50", "[" + casda::freqWidthUnit + "]", 11, casda::precFreq,
+    itsSpec.addColumn("W50", "w50", "[" + casda::freqWidthUnit + "]",
+                      11, casda::precSpecWidth,
                       "phys.absorption;spect.line.width;em.freq", "float", "col_w50", "");
     itsSpec.addColumn("W50_ERR", "w50_err", "[" + casda::freqWidthUnit + "]",
-                      11, casda::precFreq,
+                      11, casda::precSpecWidth,
                       "stat.error;phys.absorption;spect.line.width;em.freq",
                       "float", "col_w50_err", "");
-    itsSpec.addColumn("W20", "w20", "[" + casda::freqWidthUnit + "]", 11, casda::precFreq,
+    itsSpec.addColumn("W20", "w20", "[" + casda::freqWidthUnit + "]",
+                      11, casda::precSpecWidth,
                       "phys.absorption;askap:spect.line.width20;em.freq",
                       "float", "col_w20", "");
     itsSpec.addColumn("W20_ERR", "w20_err", "[" + casda::freqWidthUnit + "]",
-                      11, casda::precFreq,
+                      11, casda::precSpecWidth,
                       "stat.error;phys.absorption;askap:spect.line.width20;em.freq",
                       "float", "col_w20_err", "");
     itsSpec.addColumn("RMS_IMAGECUBE", "rms_imagecube", "[" + casda::fluxUnit + "]", 10,

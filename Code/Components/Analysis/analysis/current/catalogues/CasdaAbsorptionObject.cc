@@ -112,9 +112,9 @@ CasdaAbsorptionObject::CasdaAbsorptionObject(CasdaComponent &component,
     double peakFluxscale = casa::Quantity(1., imageFluxUnits).getValue(fluxUnits);
 //    itsFluxPeak = gauss.height() * peakFluxscale;
 
-    casa::Unit imageIntFluxUnits(obj.header().getIntFluxUnits());
-    casa::Unit intFluxUnits(casda::intFluxUnit);
-    double intFluxscale = casa::Quantity(1., imageIntFluxUnits).getValue(intFluxUnits);
+    // casa::Unit imageIntFluxUnits(obj.header().getIntFluxUnits());
+    // casa::Unit intFluxUnits(casda::intFluxUnit);
+    // double intFluxscale = casa::Quantity(1., imageIntFluxUnits).getValue(intFluxUnits);
     //  itsFluxInt = gauss.flux() * intFluxscale;
     // if (obj.header().needBeamSize()) {
     //     itsFluxInt /= obj.header().beam().area(); // Convert from mJy/beam to mJy

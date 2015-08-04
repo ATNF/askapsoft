@@ -47,15 +47,18 @@ const float freqScale = 1.0e6;
 /// Units for reporting frequency width.
 const std::string freqWidthUnit = "kHz";
 
-/// Units for reporting fluxes from image (peak flux, noise, rms
-/// residual).
+/// Units for reporting fluxes from image/image cube (peak flux, noise, rms
+/// residual)
 const std::string fluxUnit = "mJy/beam";
 
-/// Units for reporting integrated flux.
-const std::string intFluxUnit = "mJy";
+/// Units for reporting integrated flux in continuum catalogues
+const std::string intFluxUnitContinuum = "mJy";
 
 /// Units for reporting velocity
 const std::string velocityUnit = "km/s";
+
+/// Units for reporting integrated flux in spectral-line catalogues
+const std::string intFluxUnitSpectral = "Jy km/s";
 
 /// Units for lambda-squared
 const std::string lamsqUnit = "m2";
@@ -68,12 +71,18 @@ const std::string angleUnit = "deg";
 
 /// Precision for reporting fluxes
 const int precFlux = 3;
-/// Precision for reporting frequency
-const int precFreq = 1;
+/// Precision for reporting frequency in continuum catalogues
+const int precFreqContinuum = 1;
+/// Precision for reporting frequency in spectral-line catalogues
+const int precFreqSpectral = 6;
+/// Precision for reporting redshift in spectral-line catalogues
+const int precZ = 6;
+/// Precision for reporting spectral widths
+const int precSpecWidth = 4;
 /// Precision for reporting sizes (maj/min/pa etc).
 const int precSize = 2;
 /// Precision for reporting alpha & beta values
-const int precSpec = 2;
+const int precSpecShape = 2;
 /// Precision for reporting RA/DEC positions
 const int precPos = 6;
 /// Precision for reporting pixel locations

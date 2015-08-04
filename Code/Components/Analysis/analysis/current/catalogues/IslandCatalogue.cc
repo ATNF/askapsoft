@@ -95,7 +95,7 @@ void IslandCatalogue::defineSpec()
                       "pos.eq.ra;meta.main", "double", "col_rajd", "J2000");
     itsSpec.addColumn("DECJD", "dec_deg_cont", "[deg]", 11, casda::precPos,
                       "pos.eq.dec;meta.main", "double", "col_decjd", "J2000");
-    itsSpec.addColumn("FREQ", "freq", "[MHz]", 11, casda::precFreq,
+    itsSpec.addColumn("FREQ", "freq", "[MHz]", 11, casda::precFreqContinuum,
                       "em.freq", "float", "col_freq", "");
     itsSpec.addColumn("MAJ", "maj_axis", "[arcsec]", 6, casda::precSize,
                       "phys.angSize.smajAxis;em.radio", "float", "col_maj", "");

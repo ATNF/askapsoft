@@ -109,7 +109,7 @@ void FitCatalogue::defineSpec()
                       "pos.cartesian.x", "float", "col_xpos", "");
     itsSpec.addColumn("YPOS", "Y", "[pix]", 6, casda::precPix,
                       "pos.cartesian.y", "float", "col_ypos", "");
-    itsSpec.addColumn("FINTISLAND", "F_int", "[" + casda::intFluxUnit + "]",
+    itsSpec.addColumn("FINTISLAND", "F_int", "[" + casda::intFluxUnitContinuum + "]",
                       9, casda::precFlux,
                       "phot.flux.density;em.radio;meta.id.parent",
                       "float", "col_fint_island", "");
@@ -117,7 +117,7 @@ void FitCatalogue::defineSpec()
                       9, casda::precFlux,
                       "phot.flux.density;stat.max;em.radio;meta.id.parent",
                       "float", "col_fpeak_island", "");
-    itsSpec.addColumn("FINT", "F_int(fit)", "[" + casda::intFluxUnit + "]",
+    itsSpec.addColumn("FINT", "F_int(fit)", "[" + casda::intFluxUnitContinuum + "]",
                       9, casda::precFlux,
                       "phot.flux.density;em.radio;stat.fit",
                       "float", "col_fint", "");
@@ -143,9 +143,9 @@ void FitCatalogue::defineSpec()
     itsSpec.addColumn("PADECONV", "PA(fit_deconv)", "[deg]", 7, casda::precSize,
                       "phys.angSize;pos.posAng;em.radio;askap:meta.deconvolved",
                       "float", "col_pa_deconv", "");
-    itsSpec.addColumn("ALPHA", "Alpha", "--", 8, casda::precSpec,
+    itsSpec.addColumn("ALPHA", "Alpha", "--", 8, casda::precSpecShape,
                       "spect.index;em.radio", "float", "col_alpha", "");
-    itsSpec.addColumn("BETA", "Beta", "--", 8, casda::precSpec,
+    itsSpec.addColumn("BETA", "Beta", "--", 8, casda::precSpecShape,
                       "askap:spect.curvature;em.radio", "float", "col_beta", "");
     itsSpec.addColumn("CHISQ", "Chisq(fit)", "--", 10, casda::precFlux,
                       "stat.fit.chi2", "float", "col_chisqfit", "");

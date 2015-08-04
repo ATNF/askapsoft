@@ -108,7 +108,7 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
     itsFluxPeak = gauss.height() * peakFluxscale;
 
     casa::Unit imageIntFluxUnits(obj.header().getIntFluxUnits());
-    casa::Unit intFluxUnits(casda::intFluxUnit);
+    casa::Unit intFluxUnits(casda::intFluxUnitContinuum);
     double intFluxscale = casa::Quantity(1., imageIntFluxUnits).getValue(intFluxUnits);
     itsFluxInt = gauss.flux() * intFluxscale;
     if (obj.header().needBeamSize()) {

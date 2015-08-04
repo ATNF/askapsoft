@@ -102,7 +102,8 @@ void ComponentCatalogue::defineSpec()
                       "stat.error;pos.eq.ra", "float", "col_raerr", "J2000");
     itsSpec.addColumn("DECERR", "dec_err", "[arcsec]", 11, casda::precSize,
                       "stat.error;pos.eq.dec", "float", "col_decerr", "J2000");
-    itsSpec.addColumn("FREQ", "freq", "[" + casda::freqUnit + "]", 11, casda::precFreq,
+    itsSpec.addColumn("FREQ", "freq", "[" + casda::freqUnit + "]",
+                      11, casda::precFreqContinuum,
                       "em.freq", "float", "col_freq", "");
     itsSpec.addColumn("FPEAK", "flux_peak", "[" + casda::fluxUnit + "]",
                       9, casda::precFlux,
@@ -112,11 +113,11 @@ void ComponentCatalogue::defineSpec()
                       9, casda::precFlux,
                       "stat.error;phot.flux.density;stat.max;em.radio;stat.fit",
                       "float", "col_fpeak_err", "");
-    itsSpec.addColumn("FINT", "flux_int", "[" + casda::intFluxUnit + "]",
+    itsSpec.addColumn("FINT", "flux_int", "[" + casda::intFluxUnitContinuum + "]",
                       9, casda::precFlux,
                       "phot.flux.density;em.radio;stat.fit",
                       "float", "col_fint", "");
-    itsSpec.addColumn("FINTERR", "flux_int_err", "[" + casda::intFluxUnit + "]",
+    itsSpec.addColumn("FINTERR", "flux_int_err", "[" + casda::intFluxUnitContinuum + "]",
                       9, casda::precFlux,
                       "stat.error;phot.flux.density;em.radio;stat.fit",
                       "float", "col_fint_err", "");
@@ -151,9 +152,9 @@ void ComponentCatalogue::defineSpec()
                       "stat.fit.chi2", "float", "col_chisqfit", "");
     itsSpec.addColumn("RMSFIT", "rms_fit_gauss", "[" + casda::fluxUnit + "]", 10, casda::precFlux,
                       "stat.stdev;stat.fit", "float", "col_rmsfit", "");
-    itsSpec.addColumn("ALPHA", "spectral_index", "--", 8, casda::precSpec,
+    itsSpec.addColumn("ALPHA", "spectral_index", "--", 8, casda::precSpecShape,
                       "spect.index;em.radio", "float", "col_alpha", "");
-    itsSpec.addColumn("BETA", "spectral_curvature", "--", 8, casda::precSpec,
+    itsSpec.addColumn("BETA", "spectral_curvature", "--", 8, casda::precSpecShape,
                       "askap:spect.curvature;em.radio", "float", "col_beta", "");
     itsSpec.addColumn("RMSIMAGE", "rms_image", "[" + casda::fluxUnit + "]", 10, casda::precFlux,
                       "stat.stdev;phot.flux.density", "float", "col_rmsimage", "");
