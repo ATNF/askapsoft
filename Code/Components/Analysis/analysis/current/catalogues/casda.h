@@ -42,6 +42,7 @@ const std::string componentFitType = "best";
 
 /// Units for reporting frequency.
 const std::string freqUnit = "MHz";
+const float freqScale = 1.0e6;
 
 /// Units for reporting frequency width.
 const std::string freqWidthUnit = "kHz";

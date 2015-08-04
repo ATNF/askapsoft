@@ -121,12 +121,18 @@ CasdaAbsorptionObject::CasdaAbsorptionObject(CasdaComponent &component,
     // }
 
 
-    itsFreqUW = obj.getVel();
-    itsFreqW = itsFreqUW + (random() / (RAND_MAX + 1.0) - 0.5) * 0.1 * obj.getW50();
-    float nuPeak = itsFreqUW + (random() / (RAND_MAX + 1.0) - 0.5) * 0.1 * obj.getW50(); // need to transform from zpeak with header/WCS
-    itsZHI_UW = analysisutilities::nu0_HI / itsFreqUW - 1.;
-    itsZHI_W = analysisutilities::nu0_HI / itsFreqW - 1.;
-    itsZHI_peak = analysisutilities::nu0_HI / nuPeak - 1.;
+    itsFreqUW = obj.getVel() * freqScale;
+    itsFreqW = itsFreqUW + (random() / (RAND_MAX + 1.0) - 0.5) * 0.1 * obj.getW50() * freqScale;
+
+    // need to transform from zpeak with header/WCS
+    float nuPeak = itsFreqUW +
+        (random() / (RAND_MAX + 1.0) - 0.5) * 0.1 * obj.getW50() * freqScale;
+
+    // Rest-frame HI frequency in our CASDA units
+    const float HI=analysisutilities::nu0_HI / casda::freqScale;
+    itsZHI_UW = HI / itsFreqUW - 1.;
+    itsZHI_W = HI / itsFreqW - 1.;
+    itsZHI_peak = HI / nuPeak - 1.;
 
     itsW50 = obj.getW50();
     itsW20 = obj.getW20();
