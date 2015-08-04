@@ -139,11 +139,11 @@ CasdaAbsorptionObject::CasdaAbsorptionObject(CasdaComponent &component,
 
     itsRMSimagecube = obj.noiseLevel() * peakFluxscale;
 
-    // Optical depth calculations - rough & ready at present - assume constant component flux
+    // @todo Optical depth calculations - rough & ready at present - assume constant component flux
     itsOpticalDepth_peak = -1. * log(obj.getPeakFlux() / itsContinuumFlux);
     itsOpticalDepth_int = -1. * log(obj.getIntegFlux() / itsContinuumFlux);
 
-    // Need to add logic to measure resolvedness.
+    // @todo - Need to add logic to measure resolvedness.
     itsFlagResolved = 1;
 
 }

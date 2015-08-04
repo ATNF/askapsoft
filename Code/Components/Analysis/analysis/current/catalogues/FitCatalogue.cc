@@ -102,9 +102,9 @@ void FitCatalogue::defineSpec()
     itsSpec.addColumn("NAME", "Name", "--", 8, 0,
                       "meta.id", "char", "col_component_name", "");
     itsSpec.addColumn("RAJD", "RA", "[deg]", 11, casda::precPos,
-                      "pos.eq.ra;meta.main", "float", "col_rajd", "J2000");
+                      "pos.eq.ra;meta.main", "double", "col_rajd", "J2000");
     itsSpec.addColumn("DECJD", "DEC", "[deg]", 11, casda::precPos,
-                      "pos.eq.dec;meta.main", "float", "col_decjd", "J2000");
+                      "pos.eq.dec;meta.main", "double", "col_decjd", "J2000");
     itsSpec.addColumn("XPOS", "X", "[pix]", 6, casda::precPix,
                       "pos.cartesian.x", "float", "col_xpos", "");
     itsSpec.addColumn("YPOS", "Y", "[pix]", 6, casda::precPix,

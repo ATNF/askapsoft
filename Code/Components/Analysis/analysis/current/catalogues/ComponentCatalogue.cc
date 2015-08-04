@@ -95,9 +95,9 @@ void ComponentCatalogue::defineSpec()
     itsSpec.addColumn("DEC", "dec_dms_cont", "", 11, 0,
                       "pos.eq.dec", "char", "col_dec", "J2000");
     itsSpec.addColumn("RAJD", "ra_deg_cont", "[deg]", 11, casda::precPos,
-                      "pos.eq.ra;meta.main", "float", "col_rajd", "J2000");
+                      "pos.eq.ra;meta.main", "double", "col_rajd", "J2000");
     itsSpec.addColumn("DECJD", "dec_deg_cont", "[deg]", 11, casda::precPos,
-                      "pos.eq.dec;meta.main", "float", "col_decjd", "J2000");
+                      "pos.eq.dec;meta.main", "double", "col_decjd", "J2000");
     itsSpec.addColumn("RAERR", "ra_err", "[arcsec]", 11, casda::precSize,
                       "stat.error;pos.eq.ra", "float", "col_raerr", "J2000");
     itsSpec.addColumn("DECERR", "dec_err", "[arcsec]", 11, casda::precSize,
