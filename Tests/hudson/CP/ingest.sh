@@ -120,7 +120,7 @@ cat > tmp.simcor.sh <<EOF
 #!/bin/sh
 cd ../../../../correlatorsim/current/functests/test_playback
 sleep 10
-mpirun -np 3 ../../apps/playback.sh -c playback.in
+timeout -s 9 10m mpirun -np 3 ../../apps/playback.sh -c playback.in
 EOF
 
 chmod u+x tmp.simcor.sh
