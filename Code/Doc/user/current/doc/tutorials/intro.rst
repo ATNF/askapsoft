@@ -93,7 +93,7 @@ for cimager, lets call it **dirty.in**::
     Cimager.restore                                 = true
     Cimager.restore.beam                            = fit
 
-Next create a file called **dirty.qsub**, this is a description of the batch job that
+Next create a file called **dirty.sbatch**, this is a description of the batch job that
 the system will execute::
 
     #!/usr/bin/env bash
@@ -142,11 +142,11 @@ track progress::
     aprun -n 305 -N 20 -ss cimager.sh -c dirty.in > dirty_${SLURM_JOB_ID}.log
 
 Now this job can be submitted to the SLURM scheduling system for execution with the
-qsub command like so::
+sbatch command like so::
 
-    sbatch dirty.qsub
+    sbatch dirty.sbatch
 
-The qsub program returns the Job ID of the created job (e.g. 1234) which you can
+The sbatch program returns the Job ID of the created job (e.g. 1234) which you can
 then use to monitor the status of your job::
 
     squeue -j 1234

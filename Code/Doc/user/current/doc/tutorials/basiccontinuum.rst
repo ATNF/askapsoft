@@ -84,7 +84,9 @@ Retrieving the tutorial dataset
 There are 10 measurement sets associated with this tutorial. There are nine for the
 calibration observations (one per beam), named *calibrator_J1934m638_forSKADS_BEAM0.ms*
 through *calibrator_J1934m638_forSKADS_BEAM8.ms* (these are 2.6GB each). The science field
-has one measurement set, at full spectral resolution, named *sciencefield_SKADS.ms* (291GB).
+has one measurement set, at full spectral resolution, named
+*sciencefield_SKADS.ms* (290GB), along with an averaged version of
+this (channels averaged to 1MHz), named *sciencefield_SKADS_coarse.ms* (8GB).
 
 The measurement sets reside on the "Commissioning Archive" and can be retrieved using the
 following commands::
@@ -97,7 +99,9 @@ following commands::
 
 You may notice the **get** may stall. This is likely due to the fact the data has not been
 fetched (staged) from tape to disk. This is quite normal, and the length of the stall
-depends upon the load on the system (e.g. other users).
+depends upon the load on the system (e.g. other users). Untarring the
+file will create a new directory *BasicContinuum* that contains the
+measurement sets.
 
 Calibration
 -----------
@@ -108,10 +112,10 @@ observation.
 
 Here is a basic parameter set for use with ccalibrator. It has the same sort of structure
 as the imaging one you would have seen in the intro tutorial, with a few
-calibration-specific parameters. As ususal, refer to the documentation pages on
+calibration-specific parameters. As usual, refer to the documentation pages on
 calibration, gridding and so forth for more details.::
 
-    Ccalibrator.dataset                         = calibrator_J1934m638_forSKADS_BEAM0.ms
+    Ccalibrator.dataset                         = BasicContinuum/calibrator_J1934m638_forSKADS_BEAM0.ms
     Ccalibrator.nAnt                            = 6
     Ccalibrator.nBeam                           = 9
     Ccalibrator.solve                           = gains
@@ -139,7 +143,7 @@ position indicated, which happens to be the direction of the observation. *Note 
 particular format of the direction string, especially the declination!*
 
 Save the above parset into a file named **calibrator-BEAM0.in**. To run this, we need to create
-a qsub file, say, **calibrator-BEAM0.qsub**::
+an sbatch file, say, **calibrator-BEAM0.sbatch**::
 
     #!/usr/bin/env bash
     #SBATCH --time=01:00:00
@@ -152,7 +156,7 @@ a qsub file, say, **calibrator-BEAM0.qsub**::
 
 This runs as a serial job, and can be submitted in the usual fashion via::
 
-    sbatch calibrator-BEAM0.qsub
+    sbatch calibrator-BEAM0.sbatch
 
 Gains Parameters
 ................
@@ -190,7 +194,7 @@ Gains for each beam
 The above finds the correct gains for beam 0. To solve them for all other beams, we need
 to do the same for beams 1-8. To do this for beam 1, we copy the parset to
 **calibrator-BEAM1.in** and change "BEAM0" in the dataset name to "BEAM1". Similarly, copy
-the qsub file to **calibrator-BEAM1.qsub** and replace "BEAM0" in the filenames with
+the sbatch file to **calibrator-BEAM1.sbatch** and replace "BEAM0" in the filenames with
 "BEAM1", then submit.
 
 All other parameters (for now) can remain the same. The direction, importantly, is the
@@ -200,7 +204,13 @@ is in the centre of the beam of interest for each measurement set.
 This is something that could easily be scripted in one of a variety of ways - this is left
 as an exercise for the reader! By the end, you should have a set of calibration parsets
 *caldata-BEAM0.dat* through *caldata-BEAM8.dat*. These will be used to calibrate the
-individual beam images that will be made next. 
+individual beam images that will be made next.
+
+Note that something you can not do is run this as an MPI job trying to
+get each processor to process a separate beam -- **ccalibrator** does
+not work this way. The bandpass calibrator **cbpcalibrator** has more
+flexibility in distributed processing, but we don't need it here as
+the simulated data has no bandpass structure in the corruption.
 
 Channel averaging
 -----------------
@@ -212,11 +222,11 @@ yourself, here are the instructions. The averaging is done with the **mssplit** 
 
     # Input measurement set
     # Default: <no default>
-    vis         = sciencefield_SKADS.ms
+    vis         = BasicContinuum/sciencefield_SKADS.ms
 
     # Output measurement set
     # Default: <no default>
-    outputvis   = sciencefield_SKADS_coarse.ms
+    outputvis   = my_sciencefield_SKADS_coarse.ms
 
     # The channel range to split out into its own measurement set
     # Can be either a single integer (e.g. 1) or a range (e.g. 1-300). The range
@@ -228,8 +238,11 @@ yourself, here are the instructions. The averaging is done with the **mssplit** 
     # Default: 1
     width       = 54
 
-Save this parset into a file named **mssplit.in**. To run this, we need to create a qsub
-file, say, **mssplit.qsub**::
+Note that the output MS has a slightly different filename to the
+averaged MS provided, and is not in the *BasicContinuum* directory.
+
+Save this parset into a file named **mssplit.in**. To run this, we need to create a sbatch
+file, say, **mssplit.sbatch**::
 
     #!/usr/bin/env bash
     #SBATCH --time=02:00:00
@@ -242,9 +255,9 @@ file, say, **mssplit.qsub**::
 
 This runs as a serial job, using only a single processor. Run this in the usual fashion via::
 
-    sbatch mssplit.qsub
+    sbatch mssplit.sbatch
 
-Make a note of the ID that qsub returns - you may need this to set up dependencies later
+Make a note of the ID that sbatch returns - you may need this to set up dependencies later
 on (see the imaging section below).
 
 Imaging
@@ -261,7 +274,7 @@ cleaning. Here is an example parset:
 
 .. code-block:: bash
 
-    Cimager.dataset                                 = sciencefield_SKADS_coarse.ms
+    Cimager.dataset                                 = BasicContinuum/sciencefield_SKADS_coarse.ms
     Cimager.Feed                                    = 0
     #
     # Each worker will read a single channel selection
@@ -298,6 +311,7 @@ cleaning. Here is an example parset:
     Cimager.gridder.WProject.offsetsupport          = true
     Cimager.gridder.WProject.frequencydependent     = true
     #
+    # This defines the cleaning/deconvolution setup
     Cimager.solver                                  = Clean
     Cimager.solver.Clean.algorithm                  = BasisfunctionMFS
     Cimager.solver.Clean.niter                      = 5000
@@ -314,15 +328,17 @@ cleaning. Here is an example parset:
     Cimager.ncycles                                 = 4
     Cimager.Images.writeAtMajorCycle                = false
     #
+    # This section is for the preconditioning (weighting)
     Cimager.preconditioner.Names                    = [Wiener, GaussianTaper]
     Cimager.preconditioner.GaussianTaper            = [30arcsec, 30arcsec, 0deg]
     Cimager.preconditioner.Wiener.robustness        = 0.0
     Cimager.preconditioner.Wiener.taper             = 64
     #
+    # Whether to restore the final image and what beam to use
     Cimager.restore                                 = true
     Cimager.restore.beam                            = fit
     #
-    # Apply calibration
+    # Apply calibration, and from where
     Cimager.calibrate                               = true
     Cimager.calibaccess                             = parset
     Cimager.calibaccess.parset                      = caldata-BEAM0.dat
@@ -334,7 +350,10 @@ let's look at a few key features of this parset. First is this::
 
     Cimager.Feed                                    = 0
 
-This does the selection-by-beam, where we only use data for *feed=0* in the measurement set. 
+This does the selection-by-beam, where we only use data for *feed=0*
+in the measurement set. Note that the above example uses the averaged
+measurement set provided in the tarball you downloaded. If you ran the
+averaging with mssplit yourself you can change the MS name to match. 
 
 The calibration is applied by the following::
 
@@ -395,7 +414,7 @@ Setting this to true can be useful if you want to look at the intermediate major
 the cleaning, but it does produce a lot more images. To save clutter we'll keep it at
 *false* for now.
 
-To run the imaging, we need a qsub file - call it **clean-BEAM0.qsub**::
+To run the imaging, we need an sbatch file - call it **clean-BEAM0.sbatch**::
 
     #!/usr/bin/env bash
     #SBATCH --time=02:00:00
@@ -420,7 +439,7 @@ be going, and it needs that to finish first. You can still submit the imaging jo
 make it depend on the successful completion of the mssplit job. If the ID of the mssplit
 job is 1234, then you can submit the imaging job via::
 
-    sbatch -d afterok:1234 clean-BEAM0.qsub
+    sbatch -d afterok:1234 clean-BEAM0.sbatch
 
 Once this completes, you will have a larger set of image products than was produced for
 the dirty imaging in the intro tutorial:
@@ -517,8 +536,8 @@ for different images (due to the effect of different calibration).
 The *nterms* parameter tells *linmos* to look for taylor term images, and make multiple
 output images, one for each taylor term present.
 
-Save this parset into a file, say **linmos_image.in**, and then create a qsub file as
-before, say, **linmos_image.qsub**::
+Save this parset into a file, say **linmos_image.in**, and then create an sbatch file as
+before, say, **linmos_image.sbatch**::
 
     #!/usr/bin/env bash
     #SBATCH --time=01:00:00
@@ -531,7 +550,7 @@ before, say, **linmos_image.qsub**::
 
 (again, this is using only a single processor, as **linmos** is a serial application) and run via::
 
-    sbatch linmos_image.qsub
+    sbatch linmos_image.sbatch
 
 This job will produce model, restored, weights, residual and sensitivity images for each
 of the taylor terms. See :doc:`intro` for details on visualisation of your images. The
@@ -555,7 +574,7 @@ the top and top-right, for instance, as well as radial features near the bright 
 the left. Some examples of alternative tests to try:
 
 * Does it just require deeper cleaning? You can change the number of major cycles using the
-  *Cimager.ncycles* parameter (you may need to increase the time requested in the qsub file.)
+  *Cimager.ncycles* parameter (you may need to increase the time requested in the sbatch file.)
   You can also change the threshold levels for both the minor and major cycles
   (*Cimager.threshold.minorcycle* and *Cimager.threshold.majorcycle*).
 
@@ -573,7 +592,7 @@ the left. Some examples of alternative tests to try:
 * The fidelity of the image can also be improved by tweaking the gridding parameters,
   although this can be fiddly. Increasing the oversampling, for instance, can improve the
   image quality at the expense of greater memory usage. If your job fails due to running
-  out of memory, you can decrease the number of processors per node - change the *mppnppn*
+  out of memory, you can decrease the number of processors per node - change the *ntasks-per-node*
   to 16, say, from 20, as well as the *-N* flag for the aprun call. You will likely have to
   increase the maxsupport parameter as well - try going up in factors of 2. See
   :doc:`../calim/gridder` for explanations of the gridding parameters.
