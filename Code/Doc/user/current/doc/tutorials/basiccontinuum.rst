@@ -85,18 +85,21 @@ There are 10 measurement sets associated with this tutorial. There are nine for 
 calibration observations (one per beam), named *calibrator_J1934m638_forSKADS_BEAM0.ms*
 through *calibrator_J1934m638_forSKADS_BEAM8.ms* (these are 2.6GB each). The science field
 has one measurement set, at full spectral resolution, named
-*sciencefield_SKADS.ms* (290GB), along with an averaged version of
-this (channels averaged to 1MHz), named *sciencefield_SKADS_coarse.ms* (8GB).
+*sciencefield_SKADS.ms* (290.1GB), along with an averaged version of
+this (channels averaged to 1MHz), named *sciencefield_SKADS_coarse.ms* (8.1GB).
 
 The measurement sets reside on the "Commissioning Archive" and can be retrieved using the
 following commands::
 
     ashell.py
     <ivec.offline>login
-    <ivec.online>get /projects/ASKAP Commissioning Data/tutorials/basic_continuum.tar
+    <ivec.online>get /projects/ASKAP Commissioning Data/tutorials/BasicContinuum.tar
     <ivec.online>quit
-    tar xvf basic_continuum.tar
+    tar xvf BasicContinuum.tar
 
+You need to login with your pawsey/ivec password. Further information
+on ashell is available on the :doc:`../platform/comm_archive` page.
+    
 You may notice the **get** may stall. This is likely due to the fact the data has not been
 fetched (staged) from tape to disk. This is quite normal, and the length of the stall
 depends upon the load on the system (e.g. other users). Untarring the
