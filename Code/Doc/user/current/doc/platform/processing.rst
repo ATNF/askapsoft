@@ -222,6 +222,17 @@ can be used::
 
     sacct
 
+Cancelling a job
+----------------
+
+If you wish to cancel a job that is running, or still in the queue,
+you use the *scancel*  command together with the job ID::
+
+  scancel 1234
+
+Any jobs that depend on this one (see above) should also get cancelled
+at the same time.
+
 Additional Information
 ----------------------
 

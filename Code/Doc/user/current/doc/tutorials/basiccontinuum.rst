@@ -248,7 +248,7 @@ Save this parset into a file named **mssplit.in**. To run this, we need to creat
 file, say, **mssplit.sbatch**::
 
     #!/usr/bin/env bash
-    #SBATCH --time=02:00:00
+    #SBATCH --time=04:00:00
     #SBATCH --ntasks=1
     #SBATCH --ntasks-per-node=1
     #SBATCH --job-name=mssplit
@@ -420,7 +420,7 @@ the cleaning, but it does produce a lot more images. To save clutter we'll keep 
 To run the imaging, we need an sbatch file - call it **clean-BEAM0.sbatch**::
 
     #!/usr/bin/env bash
-    #SBATCH --time=02:00:00
+    #SBATCH --time=03:00:00
     #SBATCH --ntasks=913
     #SBATCH --ntasks-per-node=20
     #SBATCH --job-name=clean0
