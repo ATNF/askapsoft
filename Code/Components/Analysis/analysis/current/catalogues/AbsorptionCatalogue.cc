@@ -163,8 +163,8 @@ void AbsorptionCatalogue::defineSpec()
     itsSpec.addColumn("OPT_DEPTH_PEAK_ERR", "opt_depth_peak_err", "", 10, casda::precFlux,
                       "stat.error;phys.absorption.opticalDepth;stat.max",
                       "float", "col_opt_depth_peak_err");
-    itsSpec.addColumn("OPT_DEPTH_INT", "opt_depth_int", "", 10, casda::precFlux,
-                      "phys.absorption.opticalDepth;askap:arith.integrated",
+    itsSpec.addColumn("OPT_DEPTH_INT", "opt_depth_int", "[" + casda::velocityUnit + "]", 10,
+                      casda::precFlux, "phys.absorption.opticalDepth;askap:arith.integrated",
                       "float", "col_opt_depth_int");
     itsSpec.addColumn("OPT_DEPTH_INT_ERR", "opt_depth_int_err",
                       "[" + casda::velocityUnit + "]", 10, casda::precFlux,
