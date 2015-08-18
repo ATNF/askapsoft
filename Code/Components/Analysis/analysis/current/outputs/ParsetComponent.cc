@@ -81,9 +81,9 @@ void ParsetComponent::defineComponent(sourcefitting::RadioSource *src,
     if (itsFlagReportSize) {
         std::vector<Double> deconv =
             analysisutilities::deconvolveGaussian(gauss, itsHead->getBeam());
-        itsBmaj = deconv[0] * itsHead->getAvPixScale() * 3600.;
-        itsBmin = deconv[1] * itsHead->getAvPixScale() * 3600.;
-        itsBpa  = deconv[2] * 180. / M_PI;
+        itsBmaj = deconv[0] * itsHead->getAvPixScale() * M_PI / 180.;
+        itsBmin = deconv[1] * itsHead->getAvPixScale() * M_PI / 180.;
+        itsBpa  = deconv[2];
     } else {
         itsBmaj = itsBmin = itsBpa = 0.;
     }
