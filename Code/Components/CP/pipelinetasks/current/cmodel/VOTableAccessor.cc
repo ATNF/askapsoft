@@ -172,7 +172,8 @@ void VOTableAccessor::initFieldInfo(const std::vector<askap::accessors::VOTableF
 
         // Flux
         key = FLUX;
-        if (hasUCD(field, "phot.flux.density") || hasUCD(field, "phot.flux.density.integrated")) {
+        if ((hasUCD(field, "phot.flux.density") || hasUCD(field, "phot.flux.density.integrated")) &&
+            !hasUCD(field, "meta.id.parent")){
             if (posMap.find(key) == posMap.end() || hasUCD(field, "phot.flux.density.integrated")) {
                 posMap[key] = i;
                 unitMap[key] = Unit(field.getUnit());
@@ -222,7 +223,7 @@ void VOTableAccessor::initFieldInfo(const std::vector<askap::accessors::VOTableF
 
         // Spectral curvature
         key = SPECTRAL_CURVATURE;
-        if (hasUCD(field, "spect.curvature")) {
+        if (hasUCD(field, "askap:spect.curvature")) {
             if (posMap.find(key) == posMap.end() || hasUCD(field, "meta.main")) {
                 posMap[key] = i;
                 // No units
