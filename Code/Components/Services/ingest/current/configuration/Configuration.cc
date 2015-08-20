@@ -185,6 +185,8 @@ void Configuration::buildAntennas(void)
     for (vector<string>::const_iterator it = antId.begin(); it != antId.end(); ++it) {
         const string keyBase = "antenna." + *it + ".";
         const string name = itsParset.getString(keyBase + "name");
+        ASKAPCHECK(name.find(" ") == std::string::npos, 
+              "Antenna names are expected to be single words. For "<<*it<<", you have: "<<name);
         const vector<double> location = itsParset.getDoubleVector(keyBase + "location.itrf");
 
         casa::Quantity diameter;
