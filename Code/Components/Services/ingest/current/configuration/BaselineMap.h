@@ -71,6 +71,11 @@ namespace ingest {
 /// baselinemap.20                     = [2, 2, XY]
 /// baselinemap.21                     = [2, 2, YY]
 /// </PRE>
+///
+/// @note (MV): I think this class needs to be redesigned when we have
+/// ASKAP going with a decent number of antennas. It seems better to
+/// keep it as it is for now and it helps with sparse arrays during the
+/// ADE roll out
 class BaselineMap {
     public:
 
@@ -131,6 +136,17 @@ class BaselineMap {
         /// @brief correlator produces upper triangle?
         /// @return true if ant1<=ant2 for all ids
         bool isUpperTriangle() const;
+
+        /// @brief take slice for a subset of indices
+        /// @details This method is probably temporary as it is primarily intended for ADE
+        /// commissioning. When we have a decent number of ASKAP antennas ready, this
+        /// additional layer of mapping needs to be removed as it is a complication. 
+        /// This method produces a sparse map which include only selected antenna indices.
+        /// @param[in] ids vector with antenna ids to keep
+        /// @note For simplicity, indices should always be given in increasing order. This
+        /// ensures that no need for data conjugation arises at the user side (i.e. upper
+        /// and lower triangles will remain such). 
+        void sliceMap(const std::vector<int32_t> &ids);
 
     private:
 

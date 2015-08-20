@@ -173,7 +173,7 @@ VisConverterBase::mapStokes(casa::Stokes::StokesTypes stokes) const
 /// separately. The return of undefined value means that
 /// given IDs are not mapped (quite possibly intentionally,
 /// e.g. if we don't want to write all data received from the IOC).
-/// @param[in] baseline baseline ID to map (defubed by the IOC)
+/// @param[in] baseline baseline ID to map (defined by the IOC)
 /// @param[in] beam beam ID to map (defined by the IOC)
 /// @return a pair of row and polarisation indices (guaranteed to
 /// be within VisChunk shape). Undefined value for unmapped products.
@@ -243,9 +243,6 @@ VisConverterBase::mapCorrProduct(uint32_t baseline, uint32_t beam) const
    ASKAPCHECK(itsVisChunk->antenna1()(row) == static_cast<casa::uInt>(mappedAnt1), errorMsg); 
    ASKAPCHECK(itsVisChunk->antenna2()(row) == static_cast<casa::uInt>(mappedAnt2), errorMsg);
 
-   // temporary hack for ADE
-   //ASKAPCHECK(itsVisChunk->antenna1()(row) == antenna2, errorMsg); 
-   //ASKAPCHECK(itsVisChunk->antenna2()(row) == antenna1, errorMsg);
 
    ASKAPCHECK(itsVisChunk->beam1()(row) == static_cast<casa::uInt>(beamid), errorMsg);
    ASKAPCHECK(itsVisChunk->beam2()(row) == static_cast<casa::uInt>(beamid), errorMsg);
@@ -264,7 +261,6 @@ VisConverterBase::mapCorrProduct(uint32_t baseline, uint32_t beam) const
 uint32_t VisConverterBase::calculateRow(uint32_t ant1, uint32_t ant2,
                                     uint32_t beam) const
 {
-    //ASKAPDEBUGASSERT(ant1 <= ant2);
     ASKAPCHECK(ant1 <= ant2, "Unexpected antenna order in baseline: ant1="<<ant1<<" ant2="<<ant2);
     const uint32_t nAntenna = itsConfig.antennas().size();
     ASKAPDEBUGASSERT(ant2 < nAntenna);

@@ -71,6 +71,9 @@ BaselineMap::BaselineMap(const LOFAR::ParameterSet& parset) : itsUpperTriangle(t
         const int32_t ant1 = fromString<int32_t>(tuple[0]); 
         const int32_t ant2 = fromString<int32_t>(tuple[1]); 
 
+        ASKAPCHECK(ant1 >= 0, "Antenna 1 index is supposed to be non-negative");
+        ASKAPCHECK(ant2 >= 0, "Antenna 2 index is supposed to be non-negative");
+
         if (ant1 > ant2) {
             itsUpperTriangle = false;
         }
@@ -177,3 +180,92 @@ bool BaselineMap::isUpperTriangle() const
 {
    return itsUpperTriangle && (itsSize != 0);
 }
+
+/// @brief take slice for a subset of indices
+/// @details This method is probably temporary as it is primarily intended for ADE
+/// commissioning. When we have a decent number of ASKAP antennas ready, this
+/// additional layer of mapping needs to be removed as it is a complication. 
+/// This method produces a sparse map which include only selected antenna indices.
+/// @param[in] ids vector with antenna ids to keep
+/// @note For simplicity, indices should always be given in increasing order. This
+/// ensures that no need for data conjugation arises at the user side (i.e. upper
+/// and lower triangles will remain such). 
+void BaselineMap::sliceMap(const std::vector<int32_t> &ids)
+{
+   // sanity check on supplied indices
+   int32_t largestAntID = -1;
+   std::map<int32_t, int32_t>::const_iterator ciAnt1 = itsAntenna1Map.begin();
+   std::map<int32_t, int32_t>::const_iterator ciAnt2 = itsAntenna2Map.begin();
+  
+   for (; ciAnt1 != itsAntenna1Map.end(); ++ciAnt1, ++ciAnt2) {
+        ASKAPDEBUGASSERT(ciAnt2 != itsAntenna2Map.end());
+        if (largestAntID < ciAnt1->second) {
+            largestAntID = ciAnt1->second;
+        }
+        if (largestAntID < ciAnt2->second) {
+            largestAntID = ciAnt2->second;
+        }
+   } 
+   ASKAPCHECK(largestAntID >= 0, "Attempting to slice an empty map");
+
+
+   int32_t previousID = -1;
+   for (std::vector<int32_t>::const_iterator ci = ids.begin(); ci != ids.end(); ++ci) {
+        ASKAPCHECK(*ci <= largestAntID, "sliceMap received antenna ID="<<*ci<<
+                   " which exceeds the largest antenna index encountered in the map = "<<largestAntID);
+        ASKAPCHECK(*ci >= 0, "Negative antenna ID encountered in sliceMap call");
+        ASKAPCHECK(*ci > previousID, 
+            "Antenna indices passed to sliceMap are expected to be in increasing order; you have = "<<ids);
+        previousID = *ci;
+   }
+    
+   // taking the slice
+   std::map<int32_t, int32_t> newAnt1Map;
+   std::map<int32_t, int32_t> newAnt2Map;
+   std::map<int32_t, Stokes::StokesTypes> newStokesMap;
+
+   size_t newSize = 0;  
+   
+   ciAnt1 = itsAntenna1Map.begin();
+   ciAnt2 = itsAntenna2Map.begin();
+   std::map<int32_t, Stokes::StokesTypes>::const_iterator ciPol = itsStokesMap.begin();
+  
+   for (; ciAnt1 != itsAntenna1Map.end(); ++ciAnt1, ++ciAnt2, ++ciPol) {
+        ASKAPDEBUGASSERT(ciAnt2 != itsAntenna2Map.end());
+        ASKAPDEBUGASSERT(ciPol != itsStokesMap.end());
+        // indices should match
+        const int32_t productID = ciAnt1->first;
+        ASKAPDEBUGASSERT(productID == ciAnt2->first);
+        ASKAPDEBUGASSERT(productID == ciPol->first);
+
+        int32_t newIndex1 = -1;
+        int32_t newIndex2 = -1;
+        for (size_t i = 0; i < ids.size(); ++i) {
+             if (ids[i] == ciAnt1->second) {
+                 ASKAPDEBUGASSERT(newIndex1 < 0);
+                 newIndex1 = static_cast<int32_t>(i);
+             }
+             if (ids[i] == ciAnt2->second) {
+                 ASKAPDEBUGASSERT(newIndex2 < 0);
+                 newIndex2 = static_cast<int32_t>(i);
+             }
+        }
+        
+        if ((newIndex1 >= 0) && (newIndex2 >= 0)) {
+             newAnt1Map[productID] = newIndex1;       
+             newAnt2Map[productID] = newIndex2;       
+             newStokesMap[productID] = ciPol->second; 
+             ++newSize;
+        }
+   }
+   
+   ASKAPCHECK(newSize > 0, "Taking slice rejected all correlation products in the map from "<<
+                           itsSize<<" products available in the map");  
+
+   // assign new maps to this class' data members
+   itsAntenna1Map = newAnt1Map;
+   itsAntenna2Map = newAnt2Map;
+   itsStokesMap = newStokesMap;
+   itsSize = newSize;
+}
+

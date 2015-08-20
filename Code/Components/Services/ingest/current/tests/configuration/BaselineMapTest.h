@@ -45,6 +45,7 @@ class BaselineMapTest : public CppUnit::TestFixture {
         CPPUNIT_TEST(testNoMatchAnt1);
         CPPUNIT_TEST(testNoMatchAnt2);
         CPPUNIT_TEST(testNoMatchPol);
+        CPPUNIT_TEST(testSliceMap);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -97,6 +98,56 @@ class BaselineMapTest : public CppUnit::TestFixture {
             CPPUNIT_ASSERT_EQUAL(-1, testNoMatch(3, 1, casa::Stokes::XY));
             CPPUNIT_ASSERT_EQUAL(-1, testNoMatch(3, 1, casa::Stokes::YY));
             CPPUNIT_ASSERT_EQUAL(-1, testNoMatch(3, 1, casa::Stokes::XY));
+        }
+        void testSliceMap() {
+            LOFAR::ParameterSet params;
+            // actual BETA3 configuration of correlation products
+            params.add("baselineids","[1..21]");
+            params.add("1","[0, 0, XX]");
+            params.add("2","[0, 0, XY]");
+            params.add("3","[0, 1, XX]");
+            params.add("4","[0, 1, XY]");
+            params.add("5","[0, 2, XX]");
+            params.add("6","[0, 2, XY]");
+            params.add("7","[0, 0, YY]");
+            params.add("8","[0, 1, YX]");
+            params.add("9","[0, 1, YY]");
+            params.add("10","[0, 2, YX]");
+            params.add("11","[0, 2, YY]");
+
+            params.add("12","[1, 1, XX]");
+            params.add("13","[1, 1, XY]");
+            params.add("14","[1, 2, XX]");
+            params.add("15","[1, 2, XY]");
+            params.add("16","[1, 1, YY]");
+            params.add("17","[1, 2, YX]");
+            params.add("18","[1, 2, YY]");
+
+            params.add("19","[2, 2, XX]");
+            params.add("20","[2, 2, XY]");
+            params.add("21","[2, 2, YY]");
+
+            BaselineMap bm(params);
+
+            CPPUNIT_ASSERT_EQUAL(size_t(21u), bm.size());
+            CPPUNIT_ASSERT(!bm.isLowerTriangle());
+            CPPUNIT_ASSERT(bm.isUpperTriangle());
+
+            std::vector<int> ids(2);
+            ids[0] = 0;
+            ids[1] = 2;
+            bm.sliceMap(ids);
+            
+            CPPUNIT_ASSERT_EQUAL(size_t(10u), bm.size());
+            CPPUNIT_ASSERT(!bm.isLowerTriangle());
+            CPPUNIT_ASSERT(bm.isUpperTriangle());
+           
+            CPPUNIT_ASSERT_EQUAL(21, bm.maxID());
+            // check the first antenna
+            int ants[21] = {0, 0, -1, -1, 0, 0, 0, -1, -1, 0, 0, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1};
+            for (int product = 0; product < 21; ++product) {
+                 CPPUNIT_ASSERT_EQUAL(ants[product], bm.idToAntenna1(product + 1));
+            }
         }
 };
 

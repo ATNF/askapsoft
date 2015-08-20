@@ -169,7 +169,7 @@ protected:
    /// separately. The return of undefined value means that
    /// given IDs are not mapped (quite possibly intentionally,
    /// e.g. if we don't want to write all data received from the IOC).
-   /// @param[in] baseline baseline ID to map (defubed by the IOC)
+   /// @param[in] baseline baseline ID to map (defined by the IOC)
    /// @param[in] beam beam ID to map (defined by the IOC)
    /// @return a pair of row and polarisation indices (guaranteed to
    /// be within VisChunk shape). Undefined value for unmapped products.
