@@ -46,6 +46,7 @@ class BaselineMapTest : public CppUnit::TestFixture {
         CPPUNIT_TEST(testNoMatchAnt2);
         CPPUNIT_TEST(testNoMatchPol);
         CPPUNIT_TEST(testSliceMap);
+        CPPUNIT_TEST(testLowerTriangle);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -144,10 +145,57 @@ class BaselineMapTest : public CppUnit::TestFixture {
            
             CPPUNIT_ASSERT_EQUAL(21, bm.maxID());
             // check the first antenna
-            int ants[21] = {0, 0, -1, -1, 0, 0, 0, -1, -1, 0, 0, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1};
+            const int ant1[21] = {0, 0, -1, -1, 0, 0, 0, -1, -1, 0, 0, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1};
+            const int ant2[21] = {0, 0, -1, -1, 1, 1, 0, -1, -1, 1, 1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1};
+            const casa::Stokes::StokesTypes stokes[21] = {casa::Stokes::XX, casa::Stokes::XY, 
+                      casa::Stokes::Undefined, casa::Stokes::Undefined, casa::Stokes::XX, casa::Stokes::XY, 
+                      casa::Stokes::YY, casa::Stokes::Undefined, casa::Stokes::Undefined, casa::Stokes::YX,
+                      casa::Stokes::YY,  casa::Stokes::Undefined, casa::Stokes::Undefined,  
+                      casa::Stokes::Undefined, casa::Stokes::Undefined, casa::Stokes::Undefined, 
+                      casa::Stokes::Undefined, casa::Stokes::Undefined, casa::Stokes::XX, 
+                      casa::Stokes::XY, casa::Stokes::YY};
             for (int product = 0; product < 21; ++product) {
-                 CPPUNIT_ASSERT_EQUAL(ants[product], bm.idToAntenna1(product + 1));
+                 CPPUNIT_ASSERT_EQUAL(ant1[product], bm.idToAntenna1(product + 1));
+                 CPPUNIT_ASSERT_EQUAL(ant2[product], bm.idToAntenna2(product + 1));
+                 CPPUNIT_ASSERT_EQUAL(stokes[product], bm.idToStokes(product + 1));
             }
+        }
+     
+        void testLowerTriangle() {
+            // test of ADE-style of correlator product arrangement
+            
+            LOFAR::ParameterSet params;
+            // the first 21 products of the ADE correlator
+            params.add("baselineids","[1..21]");
+            params.add("1","[0, 0, XX]");
+            params.add("2","[0, 0, YX]");
+            params.add("3","[0, 0, YY]");
+            params.add("4","[1, 0, XX]");
+            params.add("5","[1, 0, XY]");
+            params.add("6","[1, 1, XX]");
+            params.add("7","[1, 0, YX]");
+            params.add("8","[1, 0, YY]");
+            params.add("9","[1, 1, YX]");
+            params.add("10","[1, 1, YY]");
+            params.add("11","[2, 0, XX]");
+
+            params.add("12","[2, 0, XY]");
+            params.add("13","[2, 1, XX]");
+            params.add("14","[2, 1, XY]");
+            params.add("15","[2, 2, XX]");
+            params.add("16","[2, 0, YX]");
+            params.add("17","[2, 0, YY]");
+            params.add("18","[2, 1, YX]");
+
+            params.add("19","[2, 1, YY]");
+            params.add("20","[2, 2, YX]");
+            params.add("21","[2, 2, YY]");
+
+            BaselineMap bm(params);
+
+            CPPUNIT_ASSERT_EQUAL(size_t(21u), bm.size());
+            CPPUNIT_ASSERT(bm.isLowerTriangle());
+            CPPUNIT_ASSERT(!bm.isUpperTriangle());
         }
 };
 

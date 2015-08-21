@@ -189,11 +189,20 @@ VisConverterBase::mapCorrProduct(uint32_t baseline, uint32_t beam) const
    const int mappedAnt2 = itsBaselineMap.idToAntenna2(baseline);
    if (mappedAnt1 == -1 || mappedAnt2 == -1 ||
        itsBaselineMap.idToStokes(baseline) == casa::Stokes::Undefined) {
+       /*
+          // this warning is temporary commented out to allow
+          // using the sparse array hack. Should be re-enabled
+          // in the production system (or if we ever have to
+          // re-deploy ingest pipeline on BETA)      
+ 
        // although we can dropped baselines for some antennas, 
        // mapping information should always be present in the configuration
        // for safety. Therefore, the warning is given.
        ASKAPLOG_WARN_STR(logger, "Baseline id: " << baseline
                << " has no valid mapping to antenna pair and stokes");
+
+       */
+
        return boost::none;
    }
 

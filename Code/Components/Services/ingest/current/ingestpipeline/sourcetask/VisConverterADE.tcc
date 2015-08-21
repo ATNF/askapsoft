@@ -131,6 +131,7 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
    }
    itsReceivedDatagrams.insert(identity);
    
+   if ((vis.channel == 0) && (vis.beamid == 1)) ASKAPLOG_DEBUG_STR(logger, "Processing products from "<<vis.baseline1<<" to "<<vis.baseline2);
 
    bool atLeastOneUseful = false;
    for (uint32_t product = vis.baseline1, item = 0; product <= vis.baseline2; ++product, ++item) {
@@ -143,9 +144,12 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
               " and baseline2="<<vis.baseline2<<" exceeds buffer size of "<<
               VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE);
 
+        /*
+        // this is a commissioning hack. To be removed in production system
+
         // can skip products here to avoid unnecessary warnings
         // this needs to be removed for the production system
-        if (product > 78) { 
+        if (product > 300) { 
             if (!atLeastOneUseful) {
                 ASKAPLOG_WARN_STR(logger, "Rejecting the whole datagram, slice="<<vis.slice<<
                           " block="<<vis.block << ", card=" << vis.card << ", channel=" << 
@@ -154,6 +158,7 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
             }
             break;
         }
+        */
 
         // map correlator product to the row and polarisation index
         const boost::optional<std::pair<casa::uInt, casa::uInt> > mp = 

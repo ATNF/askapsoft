@@ -110,7 +110,7 @@ const std::vector<Antenna>& Configuration::antennas(void) const
 
 const BaselineMap& Configuration::bmap(void) const
 {
-    if (itsBaselineMap.get() == 0) {
+    if (!itsBaselineMap) {
         ASKAPTHROW(AskapError, "BaselineMap not initialised");
     }
     return *itsBaselineMap;
@@ -223,6 +223,28 @@ void Configuration::buildAntennas(void)
 void Configuration::buildBaselineMap(void)
 {
     itsBaselineMap.reset(new BaselineMap(itsParset.makeSubset("baselinemap.")));
+    ASKAPDEBUGASSERT(itsBaselineMap);
+
+    // the following code exist to assist early commissioning with sparse arrays
+    // it introduces an additional mapping and probably should be removed when we 
+    // transition to proper operations
+    if (itsParset.isDefined("baselinemap.antennaindices")) {
+        ASKAPLOG_INFO_STR(logger, "A subset of antenna indices will be selected from the defined correlator product configuration");
+        const vector<int32_t> validAntIndices = itsParset.getInt32Vector("baselinemap.antennaindices");
+        const vector<string> antOrdering = itsParset.getStringVector("baselinemap.antennaidx");
+        ASKAPCHECK(validAntIndices.size() == antOrdering.size(),
+                 "Number of antenna indices should match baselinemap.antennaidx; valid indices = "<<validAntIndices);
+        for (size_t ant=0; ant<validAntIndices.size(); ++ant) {
+             ASKAPLOG_DEBUG_STR(logger, "Re-mapping antenna "<<validAntIndices[ant]<<" ("<<antOrdering[ant]<<
+                           ") to the new antenna index of "<<ant);
+        }
+        const size_t nMappedProductsBefore = itsBaselineMap->size();
+        itsBaselineMap->sliceMap(validAntIndices);
+        const size_t nMappedProductsAfter = itsBaselineMap->size();
+        ASKAPLOG_DEBUG_STR(logger, "Reduced number of accepted correlation products from "<<nMappedProductsBefore<<
+                      " to "<<nMappedProductsAfter);
+    }
+    //
 }
 
 void Configuration::buildCorrelatorModes(void)
