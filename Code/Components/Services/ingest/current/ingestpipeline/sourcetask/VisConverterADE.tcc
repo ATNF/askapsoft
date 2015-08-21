@@ -130,15 +130,13 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
        return;
    }
    itsReceivedDatagrams.insert(identity);
-   
-   if ((vis.channel == 0) && (vis.beamid == 1)) ASKAPLOG_DEBUG_STR(logger, "Processing products from "<<vis.baseline1<<" to "<<vis.baseline2);
 
    bool atLeastOneUseful = false;
    for (uint32_t product = vis.baseline1, item = 0; product <= vis.baseline2; ++product, ++item) {
 
         // check that sensible data received from hardware
         ASKAPCHECK(product > 0, "Expect product (baseline) number to be positive");
-        ASKAPCHECK(product <= 2592, "Expect product (baseline) number to be 2592 or less, you have "<<product);
+        ASKAPCHECK(product <= 2628, "Expect product (baseline) number to be 2628 or less, you have "<<product);
         ASKAPCHECK(item < VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE, 
               "Product "<<product<<" between baseline1="<<vis.baseline1<<
               " and baseline2="<<vis.baseline2<<" exceeds buffer size of "<<
