@@ -63,18 +63,25 @@ Configuration Parameters
 |                      |            |                       |written when width>1.                        |
 +----------------------+------------+-----------------------+---------------------------------------------+
 |beams                 |*None*      |[0]                    |Defines the beam numbers that will be        |
-|                      |            |or                     |exported to the output files. If this        |
-|                      |            |[0, 1, 2]              |parameter is not set all beams are exported. |
-|                      |            |or                     |The value may be a single integer (e.g. 0 or |
-|                      |            |[0..8]                 |[0]), an array of integers such as [0,1,2]   |
-|                      |            |                       |or a range such as [0..8].                   |
+|                      |            |or                     |exported to the output files. Rows are       |
+|                      |            |[0, 1, 2]              |selected by matching their feed ID column    |
+|                      |            |or                     |with the provided beam number(s), so the     |
+|                      |            |[0..8]                 |numbers given here should be taken from the  |
+|                      |            |                       |list of IDs in the FEED table of the         |
+|                      |            |                       |measurement set. If this parameter is not set|
+|                      |            |                       |all beams are exported.  The value may be a  |
+|                      |            |                       |single integer (e.g. 0 or [0]), an array of  |
+|                      |            |                       |integers such as [0,1,2] or a range such as  |
+|                      |            |                       |[0..8].                                      |
 +----------------------+------------+-----------------------+---------------------------------------------+
 |scans                 |*None*      |[0]                    |Defines the scan numbers that will be        |
-|                      |            |or                     |exported to the output files. If this        |
-|                      |            |[0, 1, 2]              |parameter is not set all scans are exported. |
-|                      |            |or                     |The value may be a single integer (e.g. 0 or |
-|                      |            |[0..2]                 |[0]), an array of integers such as [0,1,2]   |
-|                      |            |                       |or a range such as [0..2].                   |
+|                      |            |or                     |exported to the output files. Rows are       |
+|                      |            |[0, 1, 2]              |selected by matching their scan_number column|
+|                      |            |or                     |with the provided scan number(s). If this    |
+|                      |            |[0..2]                 |parameter is not set all scans are exported. |
+|                      |            |                       |The value may be a single integer (e.g. 0 or |
+|                      |            |                       |[0]), an array of integers such as [0,1,2] or|
+|                      |            |                       |a range such as [0..2].                      |
 +----------------------+------------+-----------------------+---------------------------------------------+
 |fieldnames            |*None*      |[offset1]              |Defines the field names that will be         |
 |                      |            |or                     |exported to the output files. If this        |
