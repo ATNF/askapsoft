@@ -35,6 +35,7 @@ ASKAP_LOGGER(logger, "");
 
 #include <dataaccess/TableManager.h>
 #include <dataaccess/IDataConverterImpl.h>
+#include <utils/DelayEstimator.h>
 #include <swcorrelator/BasicMonitor.h>
 
 // casa
@@ -62,8 +63,8 @@ using namespace askap::accessors;
 void process(const IConstDataSource &ds, const int ctrl = -1) {
   IDataSelectorPtr sel=ds.createSelector();
   sel->chooseFeed(0);
-  //sel->chooseCrossCorrelations();
-  sel->chooseAutoCorrelations();
+  sel->chooseCrossCorrelations();
+  //sel->chooseAutoCorrelations();
   if (ctrl >=0 ) {
       //sel->chooseUserDefinedIndex("CONTROL",casa::uInt(ctrl));
       sel->chooseUserDefinedIndex("SCAN_NUMBER",casa::uInt(ctrl));
@@ -86,9 +87,19 @@ void process(const IConstDataSource &ds, const int ctrl = -1) {
   double timeIntervalInMin = 0.;
   
   casa::Vector<casa::uInt> ant1ids, ant2ids;
+
+  scimath::DelayEstimator de(1e6);
     
   std::ofstream os2("avgts.dat");  
-  for (IConstDataSharedIter it=ds.createConstIterator(sel,conv);it!=it.end();++it) {  
+  std::ofstream os3("delayts.dat");
+  bool firstTimeStamp = true;
+  for (IConstDataSharedIter it=ds.createConstIterator(sel,conv);it!=it.end();++it, ++counter) {  
+       if (firstTimeStamp) {
+           startTime = it->time();
+           firstTimeStamp = false;
+       }
+       stopTime = it->time() + 5; // 1s integration time is hardcoded
+
        if (nChan == 0) {
            nChan = it->nChannel();
            nRow = it->nRow();
@@ -122,20 +133,21 @@ void process(const IConstDataSource &ds, const int ctrl = -1) {
             ASKAPCHECK(it->antenna2()[row] == ant2ids[row], "Inconsistent antenna 2 ids at row = "<<row);             
        }
        
-       /*
-       // we require that 3 baselines come in certain order for sw-correlator, just to be sure
-       for (casa::uInt row = 0; row<nRow; row+=3) {
-            ASKAPCHECK(it->antenna2()[row] == it->antenna1()[row+1], "Expect baselines in the order 1-2,2-3 and 1-3");
-            ASKAPCHECK(it->antenna1()[row] == it->antenna1()[row+2], "Expect baselines in the order 1-2,2-3 and 1-3");
-            ASKAPCHECK(it->antenna2()[row+1] == it->antenna2()[row+2], "Expect baselines in the order 1-2,2-3 and 1-3");
-       }
-       //
-       */
-       
        // add new spectrum to the buffer
        const casa::uInt pol2use = 0;
        ASKAPDEBUGASSERT(pol2use < it->nPol());
+
+       if (counter == 0) {
+           os3<<"0.0 ";
+       } else {
+           os3<< (it->time() - startTime)/60.;
+       }
+
+       bool somethingFlaggedThisTimestamp = false;
+
        for (casa::uInt row=0; row<nRow; ++row) {
+            
+          
             casa::Vector<casa::Bool> flags = it->flag().xyPlane(pol2use).row(row);
             bool flagged = false;
             bool allFlagged = true;
@@ -146,6 +158,40 @@ void process(const IConstDataSource &ds, const int ctrl = -1) {
             
             casa::Vector<casa::Complex> measuredRow = it->visibility().xyPlane(pol2use).row(row);
             
+
+            // delay estimate for the given row
+            
+            de.setResolution(1e6/54.);
+            const double coarseDelay = de.getDelayWithFFT(measuredRow);
+            de.setResolution(1e6);
+            
+            casa::Vector<casa::Complex> reducedResVis(measuredRow.nelements() / 54, casa::Complex(0.,0.));
+            for (casa::uInt ch=0; ch < reducedResVis.nelements(); ++ch) {
+                 casa::Complex sum(0.,0.);
+                 for (casa::uInt fineCh = 0; fineCh < 54; ++fineCh) {
+                      const casa::uInt chan = ch * 54 + fineCh;
+                      ASKAPDEBUGASSERT(chan < measuredRow.nelements());
+                      const float phase =  -casa::C::_2pi * (float(chan) / 54. * 1e6) * coarseDelay;
+                      const casa::Complex phasor(cos(phase), sin(phase));
+                      sum += measuredRow[chan] * phasor;
+                 }
+                 reducedResVis[ch] = sum / float(54.);
+            }
+            const double curDelay  = (coarseDelay + de.getDelay(reducedResVis)) * 1e9;
+            
+            if (row >= 12) {
+                os3<<" "<<curDelay;
+            }
+
+
+            /*
+            if ((counter == 10) && (row==12)) {
+                std::ofstream os4("testsp.dat");
+                for (casa::uInt ch=0; ch<measuredRow.nelements(); ++ch) {
+                     os4<<ch<<" "<<arg(measuredRow[ch])/casa::C::pi*180.<<" "<<arg(reducedResVis[ch/54])/casa::C::pi*180.<<std::endl;
+                }
+            }
+            */
             
             // flagging based on the amplitude (to remove extreme outliers)
             //casa::Complex currentAvgVis = casa::sum(measuredRow) / float(it->nChannel());
@@ -179,6 +225,7 @@ void process(const IConstDataSource &ds, const int ctrl = -1) {
 
             if (flagged) {
                ++nBadRows;
+               somethingFlaggedThisTimestamp = true;
             } else {
                 casa::Vector<casa::Complex> thisRow = buf.row(row);
                 for (casa::uInt ch = 0; ch<thisRow.nelements(); ++ch) {
@@ -188,6 +235,8 @@ void process(const IConstDataSource &ds, const int ctrl = -1) {
                      }
                 }
                 ++nGoodRows;
+
+
                 // uncomment to store averaged time-series
                 if ((counter>1) && (row % 15 == 0) && (it->feed1()[row] == 0)) {
                     timeIntervalInMin += 1./12.;
@@ -202,11 +251,17 @@ void process(const IConstDataSource &ds, const int ctrl = -1) {
                     const float varImag = casa::imag(avgSqr) - casa::square(casa::imag(avgVis)); 
                      
                     const double intervalInMin = (it->time() - startTime)/60.;
+
+
                     os2<<counter<<" "<<intervalInMin<<" "<<1/sqrt(timeIntervalInMin)<<" "<<casa::real(avgVis)<<" "<<
                          sqrt(varReal)<<" "<<casa::imag(avgVis)<<" "<<sqrt(varImag)<<std::endl;
                 }               
             }
        }
+       if (somethingFlaggedThisTimestamp) {
+           os3<<" flagged";
+       }
+       os3<<std::endl;
        if ((counter == 0) && (nGoodRows == 0)) {
            // all data are flagged, completely ignoring this iteration and consider the next one to be first
            nChan = 0;
@@ -221,10 +276,6 @@ void process(const IConstDataSource &ds, const int ctrl = -1) {
        //
        */
       
-       if (++counter == 1) {
-           startTime = it->time();
-       }
-       stopTime = it->time() + 1; // 1s integration time is hardcoded
   }
   if (counter>1) {
       ASKAPCHECK(nGoodRows % nRow == 0, "Number of good rows="<<nGoodRows<<" is supposed to be integral multiple of number of rows in a cycle="<<nRow);
@@ -246,7 +297,7 @@ void process(const IConstDataSource &ds, const int ctrl = -1) {
         }
       }
       // delay estimate
-      casa::Vector<casa::Float> delays = swcorrelator::BasicMonitor::estimateDelays(buf);
+      casa::Vector<casa::Float> delays =  swcorrelator::BasicMonitor::estimateDelays(buf);
       for (casa::uInt row = 0; row<delays.nelements(); ++row) {
            std::cout<<"row="<<row<<" delay = "<<delays[row]*1e9<<" ns or "<<delays[row]*1e9/1.3<<" DRx samples"<<std::endl;
       }
