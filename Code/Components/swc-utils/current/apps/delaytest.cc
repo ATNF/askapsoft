@@ -180,7 +180,17 @@ void process(const IConstDataSource &ds, const int ctrl = -1) {
             const double curDelay  = (coarseDelay + de.getDelay(reducedResVis)) * 1e9;
             
             if (row >= 12) {
-                os3<<" "<<curDelay;
+                casa::Complex sum(0.,0.);
+                size_t nGoodCh = 0;
+                for (casa::uInt ch=0; ch < measuredRow.nelements(); ++ch) {
+                     ASKAPDEBUGASSERT(ch < flags.nelements());
+                     if (!flags[ch]) {
+                         ++nGoodCh;
+                         sum += measuredRow[ch];
+                     }
+                }
+                const float curPhase  = nGoodCh == 0 ? 0. : arg(sum / float(nGoodCh)) / casa::C::pi *180.;
+                os3<<" "<<curDelay<<" "<<curPhase;
             }
 
 

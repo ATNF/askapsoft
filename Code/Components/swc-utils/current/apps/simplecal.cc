@@ -96,6 +96,7 @@ void process(const IConstDataSource &ds, const float flux, const int ctrl = -1) 
     
   // the assumed baseline order depends on this parameter
   const bool useSWCorrelator = false;
+  const bool useADECorrelator = true;
 
   casa::uInt cPol = 3;
   for (IConstDataSharedIter it=ds.createConstIterator(sel,conv);it!=it.end();++it) {  
@@ -106,19 +107,20 @@ void process(const IConstDataSource &ds, const float flux, const int ctrl = -1) 
        for (casa::uInt row = 0; row<it->nRow(); ++row) {
             casa::Vector<casa::Bool> flags = it->flag().xyPlane(cPol).row(row);
       
-            /*
+            
             // this code ensures that all channels are unflagged
             bool flagged = false;
             for (casa::uInt ch = 0; ch < flags.nelements(); ++ch) {
                  flagged |= flags[ch];
             }
-            */
-
+            
+            /*
             // this code ensures that at least one channel is unflagged
             bool flagged = true;
             for (casa::uInt ch = 0; ch < flags.nelements(); ++ch) {
                  flagged &= flags[ch];
             }
+            */
 
             if (!flagged) {
                 rowIndex.push_back(row);
@@ -132,6 +134,7 @@ void process(const IConstDataSource &ds, const float flux, const int ctrl = -1) 
            freq = it->frequency();
            ant1IDs = it->antenna1().copy();
            ant2IDs = it->antenna2().copy();
+           //std::cout<<ant1IDs<<" "<<ant2IDs<<" "<<rowIndex<<std::endl;
        } else { 
            ASKAPCHECK(nChan == it->nChannel(), 
                   "Number of channels seem to have been changed, previously "<<nChan<<" now "<<it->nChannel());
@@ -173,9 +176,15 @@ void process(const IConstDataSource &ds, const float flux, const int ctrl = -1) 
                 ASKAPCHECK(it->antenna1()[row] == it->antenna1()[row+2], "Expect baselines in the order 1-2,2-3 and 1-3");
                 ASKAPCHECK(it->antenna2()[row+1] == it->antenna2()[row+2], "Expect baselines in the order 1-2,2-3 and 1-3");
              } else {
-                ASKAPCHECK(it->antenna2()[row] == it->antenna1()[row+2], "Expect baselines in the order 1-2,1-3 and 2-3");
-                ASKAPCHECK(it->antenna1()[row] == it->antenna1()[row+1], "Expect baselines in the order 1-2,1-3 and 2-3");
-                ASKAPCHECK(it->antenna2()[row+1] == it->antenna2()[row+2], "Expect baselines in the order 1-2,1-3 and 2-3");
+                if (useADECorrelator) {
+                   ASKAPCHECK(it->antenna2()[row] == it->antenna2()[row+1], "Expect baselines in the order 5-4,12-4 and 12-5");
+                   ASKAPCHECK(it->antenna1()[row] == it->antenna2()[row+2], "Expect baselines in the order 5-4,12-4 and 12-5");
+                   ASKAPCHECK(it->antenna1()[row+1] == it->antenna1()[row+2], "Expect baselines in the order 5-4,12-4 and 12-5");
+                } else {
+                   ASKAPCHECK(it->antenna2()[row] == it->antenna1()[row+2], "Expect baselines in the order 1-2,1-3 and 2-3");
+                   ASKAPCHECK(it->antenna1()[row] == it->antenna1()[row+1], "Expect baselines in the order 1-2,1-3 and 2-3");
+                   ASKAPCHECK(it->antenna2()[row+1] == it->antenna2()[row+2], "Expect baselines in the order 1-2,1-3 and 2-3");
+                }
              }
        }
        //
@@ -254,10 +263,16 @@ void process(const IConstDataSource &ds, const float flux, const int ctrl = -1) 
                 spAvg[baseline] /= float(buf.ncolumn());
            }
            if (!useSWCorrelator) {
-              // the hw-correlator has a different baseline order: 0-1, 0-2 and 1-2, we need to swap last two baselines to get 0-1,1-2,0-2 everywhere 
-              const casa::Complex tempBuf = spAvg[2];
-              spAvg[2] = spAvg[1];
-              spAvg[1] = tempBuf;
+               // the hw-correlator has a different baseline order: 0-1, 0-2 and 1-2, we need to swap last two baselines to get 0-1,1-2,0-2 everywhere 
+               const casa::Complex tempBuf = spAvg[2];
+               spAvg[2] = spAvg[1];
+               spAvg[1] = tempBuf;
+               if (useADECorrelator) {
+                   // for ADE need to conjugate all; antenna order 4,5,12
+                   for (casa::uInt i=0; i<spAvg.nelements();++i) {
+                        spAvg[i] = conj(spAvg[i]);
+                   }
+               }
            }
            const float ph1 = -arg(spAvg[0]);
            const float ph2 = -arg(spAvg[2]);
@@ -265,8 +280,13 @@ void process(const IConstDataSource &ds, const float flux, const int ctrl = -1) 
            
            const casa::uInt beam = row/3;
            os<<"# Beam "<<beam<<" closure phase: "<<closurePh/casa::C::pi*180.<<" deg"<<std::endl;
-           os<<"# measured phases              (0-1,1-2,0-2): "<<arg(spAvg[0])/casa::C::pi*180.<<" "<<arg(spAvg[1])/casa::C::pi*180.<<" "<<arg(spAvg[2])/casa::C::pi*180.<<std::endl;
-           os<<"# measured amplitudes          (0-1,1-2,0-2): "<<casa::abs(spAvg[0])<<" "<<casa::abs(spAvg[1])<<" "<<casa::abs(spAvg[2])<<std::endl;
+           std::string blStr = "(0-1,1-2,0-2)";
+           if (useADECorrelator) {
+               blStr = "(4-5,12-5,12-4)";
+           }
+               
+           os<<"# measured phases              "<<blStr<<": "<<arg(spAvg[0])/casa::C::pi*180.<<" "<<arg(spAvg[1])/casa::C::pi*180.<<" "<<arg(spAvg[2])/casa::C::pi*180.<<std::endl;
+           os<<"# measured amplitudes          "<<blStr<<": "<<casa::abs(spAvg[0])<<" "<<casa::abs(spAvg[1])<<" "<<casa::abs(spAvg[2])<<std::endl;
            float amp0 = 1.;
            float amp1 = 1.;
            float amp2 = 1.;
@@ -280,15 +300,19 @@ void process(const IConstDataSource &ds, const float flux, const int ctrl = -1) 
            const casa::Complex g1 = casa::Complex(cos(ph1),sin(ph1)) * amp1;
            const casa::Complex g2 = casa::Complex(cos(ph2),sin(ph2)) * amp2;
 
-           os<<"# phases after calibration     (0-1,1-2,0-2): "<<arg(spAvg[0]/g0/conj(g1))/casa::C::pi*180.<<" "<<arg(spAvg[1]/g1/conj(g2))/casa::C::pi*180.<<" "<<arg(spAvg[2]/g0/conj(g2))/casa::C::pi*180.<<std::endl;
-           os<<"# amplitudes after calibration (0-1,1-2,0-2): "<<casa::abs(spAvg[0]/g0/conj(g1))<<" "<<casa::abs(spAvg[1]/g1/conj(g2))<<" "<<casa::abs(spAvg[2]/g0/conj(g2))<<std::endl;
+           os<<"# phases after calibration     "<<blStr<<": "<<arg(spAvg[0]/g0/conj(g1))/casa::C::pi*180.<<" "<<arg(spAvg[1]/g1/conj(g2))/casa::C::pi*180.<<" "<<arg(spAvg[2]/g0/conj(g2))/casa::C::pi*180.<<std::endl;
+           os<<"# amplitudes after calibration "<<blStr<<": "<<casa::abs(spAvg[0]/g0/conj(g1))<<" "<<casa::abs(spAvg[1]/g1/conj(g2))<<" "<<casa::abs(spAvg[2]/g0/conj(g2))<<std::endl;
 
-           os<<"gain.g11.0."<<beam<<" = "<<printComplex(g0)<<std::endl;
-           os<<"gain.g22.0."<<beam<<" = "<<printComplex(g0)<<std::endl;
-           os<<"gain.g11.1."<<beam<<" = "<<printComplex(g1)<<std::endl;
-           os<<"gain.g22.1."<<beam<<" = "<<printComplex(g1)<<std::endl;
-           os<<"gain.g11.2."<<beam<<" = "<<printComplex(g2)<<std::endl;
-           os<<"gain.g22.2."<<beam<<" = "<<printComplex(g2)<<std::endl;
+           int baseAnt = 0;
+           if (useADECorrelator) {
+               baseAnt = 4;
+           }
+           os<<"gain.g11."<<baseAnt<<"."<<beam<<" = "<<printComplex(g0)<<std::endl;
+           os<<"gain.g22."<<baseAnt<<"."<<beam<<" = "<<printComplex(g0)<<std::endl;
+           os<<"gain.g11."<<baseAnt+1<<"."<<beam<<" = "<<printComplex(g1)<<std::endl;
+           os<<"gain.g22."<<baseAnt+1<<"."<<beam<<" = "<<printComplex(g1)<<std::endl;
+           os<<"gain.g11."<<baseAnt+2<<"."<<beam<<" = "<<printComplex(g2)<<std::endl;
+           os<<"gain.g22."<<baseAnt+2<<"."<<beam<<" = "<<printComplex(g2)<<std::endl;
       }
   } else {
      std::cout<<"No data found!"<<std::endl;

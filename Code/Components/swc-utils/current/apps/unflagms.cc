@@ -96,11 +96,20 @@ void process(const std::string &fname)
        //buf.set(false);
 
        
+      
+       /*
        // to flag certain rows
        if (row > 2814) {
            buf.set(true);
        }
        //
+       */
+   
+       // to flag based on antenna indices
+       if ((ant1.get(row) < 3) || (ant2.get(row) < 3)) {
+           buf.set(true);
+       }
+       
       
        
        /*
