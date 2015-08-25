@@ -28,6 +28,7 @@
 #include "ingestpipeline/phasetracktask/PhaseTrackTask.h"
 #include "ingestpipeline/phasetracktask/FrtDrxDelays.h"
 #include "ingestpipeline/phasetracktask/FrtHWAndDrx.h"
+#include "ingestpipeline/phasetracktask/FrtSwDelays.h"
 
 // Include package level header file
 #include "askap_cpingest.h"
@@ -154,6 +155,8 @@ IFrtApproach::ShPtr FringeRotationTask::fringeRotationMethod(const LOFAR::Parame
       result.reset(new FrtDrxDelays(parset,config));
   } else if (name == "hwanddrx") {
       result.reset(new FrtHWAndDrx(parset,config));
+  } else if (name == "swdelays") {
+      result.reset(new FrtSwDelays(parset,config));
   }
   ASKAPCHECK(result, "Method "<<name<<" is unknown");
   return result;
