@@ -90,7 +90,9 @@ CasdaHiEmissionObject::CasdaHiEmissionObject(sourcefitting::RadioSource &obj,
 
 //    itsImageID = parset.getString("image");
 
-    itsObjectID = obj.getID();
+    std::stringstream id;
+    id << itsIDbase << obj.getID();
+    itsObjectID = id.str();
 
     itsRA_w.value() = obj.getRA();
     itsDEC_w.value() = obj.getDec();
@@ -121,6 +123,22 @@ CasdaHiEmissionObject::CasdaHiEmissionObject(sourcefitting::RadioSource &obj,
     //     itsFluxInt /= obj.header().beam().area(); // Convert from mJy/beam to mJy
     // }
 
+
+    // Initial version of getting parameters - assuming we are in velocity units
+    itsVelHI_uw.value() = obj.getVel();
+    itsMajorAxis = obj.getMajorAxis() * 3600.;
+    itsMinorAxis = obj.getMinorAxis() * 3600.;
+    itsPositionAngle = obj.getPositionAngle();
+    itsSizeX = obj.getXmax() - obj.getXmin() + 1;
+    itsSizeY = obj.getYmax() - obj.getYmin() + 1;
+    itsSizeZ = obj.getZmax() - obj.getZmin() + 1;
+    itsNumVoxels = obj.getSize();
+    itsW50_vel.value() = obj.getW50();
+    itsW20_vel.value() = obj.getW20();
+    itsIntegFlux.value() = obj.getIntegFlux();
+    itsIntegFlux.error() = obj.getIntegFluxError();
+    itsFluxMax = obj.getPeakFlux() * peakFluxscale;
+    
 
     // itsFreqUW = obj.getVel() * freqScale;
     // itsFreqW = itsFreqUW + (random() / (RAND_MAX + 1.0) - 0.5) * 0.1 * obj.getW50() * freqScale;
