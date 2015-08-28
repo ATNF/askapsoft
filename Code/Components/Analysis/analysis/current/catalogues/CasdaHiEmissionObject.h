@@ -128,11 +128,11 @@ class CasdaHiEmissionObject : public CatalogueEntry {
     /// The postion angle of the major axis as determined from the principle axes
     double itsPositionAngle;
     /// The major axis of the moment-0 map, determined from a 2D Gaussian fit
-    double itsMajorAxis_fit;
+    casda::ValueError<double> itsMajorAxis_fit;
     /// The minor axis of the moment-0 map, determined from a 2D Gaussian fit
-    double itsMinorAxis_fit;
+    casda::ValueError<double> itsMinorAxis_fit;
     /// The postion angle of the major axis as determined from a 2D Gaussian fit
-    double itsPositionAngle_fit;
+    casda::ValueError<double> itsPositionAngle_fit;
     /// The size of the bounding box of detected voxels, in the x-direction
     int itsSizeX;
     /// The size of the bounding box of detected voxels, in the y-direction

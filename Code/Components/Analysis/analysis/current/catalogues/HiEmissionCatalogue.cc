@@ -58,7 +58,7 @@ HiEmissionCatalogue::HiEmissionCatalogue(std::vector<sourcefitting::RadioSource>
     itsObjects(),
     itsSpec(),
     itsCube(cube),
-    itsVersion("casda.sl_hi_emission_object_v0.7a")
+    itsVersion("casda.sl_hi_emission_object_v0.8")
 {
     this->defineObjects(srclist, parset);
     this->defineSpec();
@@ -125,21 +125,30 @@ void HiEmissionCatalogue::defineSpec()
     itsSpec.addColumn("GLAT_UW_ERR", "glat_deg_uw_err", "[arcsec]", 11, casda::precSize,
                       "stat.error;pos.galactic.lat;meta.main", "float", "col_glat_deg_uw_err", "J2000");
     itsSpec.addColumn("MAJ", "maj_axis", "[arcsec]", 6, casda::precSize,
-                      "phys.angSize.smajAxis;em.radio", "float", "col_maj", "");
+                      "askap:src.smajAxis;em.radio", "float", "col_maj_axis", "");
     itsSpec.addColumn("MIN", "min_axis", "[arcsec]", 6, casda::precSize,
-                      "phys.angSize.sminAxis;em.radio", "float", "col_min", "");
+                      "askap:src.sminAxis;em.radio", "float", "col_min_axis", "");
     itsSpec.addColumn("PA", "pos_ang", "[deg]", 7, casda::precSize,
-                      "phys.angSize;pos.posAng;em.radio", "float", "col_pa", "");
+                      "askap:src.posAng;em.radio", "float", "col_posang", "");
     itsSpec.addColumn("MAJFIT", "maj_axis_fit", "[arcsec]", 6, casda::precSize,
-                      "phys.angSize.smajAxis;em.radio;stat.fit", "float", "col_maj_fit", "");
+                      "askap:src.smajAxis;em.radio;stat.fit", "float", "col_maj_axis_fit", "");
+    itsSpec.addColumn("MAJFIT_ERR", "maj_axis_fit_err", "[arcsec]", 6, casda::precSize,
+                      "stat.error;askap:src.smajAxis;em.radio;stat.fit",
+                      "float", "col_maj_axis_fit_err", "");
     itsSpec.addColumn("MINFIT", "min_axis_fit", "[arcsec]", 6, casda::precSize,
-                      "phys.angSize.sminAxis;em.radio;stat.fit", "float", "col_min_fit", "");
+                      "askap:src.sminAxis;em.radio;stat.fit", "float", "col_min_axis_fit", "");
+    itsSpec.addColumn("MINFIT_ERR", "min_axis_fit_err", "[arcsec]", 6, casda::precSize,
+                      "stat.error;askap:src.sminAxis;em.radio;stat.fit",
+                      "float", "col_min_axis_fit_err", "");
     itsSpec.addColumn("PAFIT", "pos_ang_fit", "[deg]", 7, casda::precSize,
-                      "phys.angSize;pos.posAng;em.radio;stat.fit", "float", "col_pa_fit", "");
+                      "askap:src.posAng;em.radio;stat.fit", "float", "col_pos_ang_fit", "");
+    itsSpec.addColumn("PAFIT_ERR", "pos_ang_fit_err", "[deg]", 7, casda::precSize,
+                      "stat.error;askap:src.posAng;em.radio;stat.fit",
+                      "float", "col_pos_ang_fit_err", "");
     itsSpec.addColumn("SIZEX", "size_x", "", 4, 0,
-                      "askap:src.size;phys.angSize;instr.pixel", "int", "col_size_x", "");
+                      "askap:src.size;instr.pixel", "int", "col_size_x", "");
     itsSpec.addColumn("SIZEY", "size_y", "", 4, 0,
-                      "askap:src.size;phys.angSize;instr.pixel", "int", "col_size_y", "");
+                      "askap:src.size;instr.pixel", "int", "col_size_y", "");
     itsSpec.addColumn("SIZEZ", "size_z", "", 4, 0,
                       "askap:src.size;spect.binSize", "int", "col_size_z", "");
     itsSpec.addColumn("NVOX", "n_vox", "", 9, 0,
@@ -205,7 +214,7 @@ void HiEmissionCatalogue::defineSpec()
                       "askap:phot.flux.density.voxel;stat.mean;em.radio",
                       "float", "col_flux_voxel_mean","");
     itsSpec.addColumn("FLUXSTDDEV", "flux_voxel_stddev", "["+casda::fluxUnit+"]",10, casda::precFlux,
-                      "askap:phot.flux.density.voxel;stat.stddev;em.radio",
+                      "askap:phot.flux.density.voxel;stat.stdev;em.radio",
                       "float", "col_flux_voxel_stddev","");
     itsSpec.addColumn("FLUXRMS", "flux_voxel_rms", "["+casda::fluxUnit+"]",10, casda::precFlux,
                       "askap:phot.flux.density.voxel;askap:stat.rms;em.radio",
@@ -222,9 +231,9 @@ void HiEmissionCatalogue::defineSpec()
     itsSpec.addColumn("CW50_FREQ", "cw50_freq", "[" + casda::freqWidthUnit + "]", 11,
                       casda::precSpecWidth, "askap:em.freq.width",
                       "float", "col_cw50_freq", "");
-    itsSpec.addColumn("CW20_FREQ_ERR", "cw20_freq_err", "[" + casda::freqWidthUnit + "]", 11,
+    itsSpec.addColumn("CW50_FREQ_ERR", "cw50_freq_err", "[" + casda::freqWidthUnit + "]", 11,
                       casda::precSpecWidth, "stat.error;askap:em.freq.width",
-                      "float", "col_cw20_freq_err", "");
+                      "float", "col_cw50_freq_err", "");
     itsSpec.addColumn("W20_FREQ", "w20_freq", "[" + casda::freqWidthUnit + "]", 11,
                       casda::precSpecWidth, "askap:em.freq.width",
                       "float", "col_w20_freq", "");
@@ -246,9 +255,9 @@ void HiEmissionCatalogue::defineSpec()
     itsSpec.addColumn("CW50_VEL", "cw50_vel", "[" + casda::velocityUnit + "]", 11,
                       casda::precSpecWidth, "askap:spect.dopplerVeloc.width",
                       "float", "col_cw50_vel", "");
-    itsSpec.addColumn("CW20_VEL_ERR", "cw20_vel_err", "[" + casda::velocityUnit + "]", 11,
+    itsSpec.addColumn("CW50_VEL_ERR", "cw50_vel_err", "[" + casda::velocityUnit + "]", 11,
                       casda::precSpecWidth, "stat.error;askap:spect.dopplerVeloc.width",
-                      "float", "col_cw20_vel_err", "");
+                      "float", "col_cw50_vel_err", "");
     itsSpec.addColumn("W20_VEL", "w20_vel", "[" + casda::velocityUnit + "]", 11,
                       casda::precSpecWidth, "askap:askap:spect.dopplerVeloc.width",
                       "float", "col_w20_vel", "");
@@ -425,12 +434,12 @@ void HiEmissionCatalogue::defineSpec()
                       "stat.fit.param", "float", "col_bf_n", "");
     itsSpec.addColumn("BF_N_ERR", "bf_n_err", "", 10, casda::precFlux,
                       "stat.error;stat.fit.param", "float", "col_bf_n_err", "");
-    itsSpec.addColumn("FLAG1", "flag_a1", "", 5, 0,
-                      "meta.code", "int", "col_flag_a1", "");
-    itsSpec.addColumn("FLAG2", "flag_a2", "", 5, 0,
-                      "meta.code", "int", "col_flag_a2", "");
-    itsSpec.addColumn("FLAG3", "flag_a3", "", 5, 0,
-                      "meta.code", "int", "col_flag_a3", "");
+    itsSpec.addColumn("FLAG1", "flag_s1", "", 5, 0,
+                      "meta.code", "int", "col_flag_s1", "");
+    itsSpec.addColumn("FLAG2", "flag_s2", "", 5, 0,
+                      "meta.code", "int", "col_flag_s2", "");
+    itsSpec.addColumn("FLAG3", "flag_s3", "", 5, 0,
+                      "meta.code", "int", "col_flag_s3", "");
 //    itsSpec.addColumn("COMMENT", "comment", "", 100, 0,
 //                      "meta.note", "char", "col_comment", "");
 

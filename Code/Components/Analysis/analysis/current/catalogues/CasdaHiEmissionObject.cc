@@ -67,9 +67,6 @@ CasdaHiEmissionObject::CasdaHiEmissionObject(sourcefitting::RadioSource &obj,
     itsMajorAxis(0.),
     itsMinorAxis(0.),
     itsPositionAngle(0.),
-    itsMajorAxis_fit(0.),
-    itsMinorAxis_fit(0.),
-    itsPositionAngle_fit(0.),
     itsSizeX(0),
     itsSizeY(0),
     itsSizeZ(0),
@@ -232,11 +229,17 @@ void CasdaHiEmissionObject::printTableEntry(std::ostream &stream,
     } else if (type == "PA") {
         column.printEntry(stream, itsPositionAngle);
     } else if (type == "MAJFIT") {
-        column.printEntry(stream, itsMajorAxis_fit);
+        column.printEntry(stream, itsMajorAxis_fit.value());
+    } else if (type == "MAJFIT_ERR") {
+        column.printEntry(stream, itsMajorAxis_fit.error());
     } else if (type == "MINFIT") {
-        column.printEntry(stream, itsMinorAxis_fit);
+        column.printEntry(stream, itsMinorAxis_fit.value());
+    } else if (type == "MINFIT_ERR") {
+        column.printEntry(stream, itsMinorAxis_fit.error());
     } else if (type == "PAFIT") {
-        column.printEntry(stream, itsPositionAngle_fit);
+        column.printEntry(stream, itsPositionAngle_fit.value());
+    } else if (type == "PAFIT_ERR") {
+        column.printEntry(stream, itsPositionAngle_fit.error());
     } else if (type == "SIZEX") {
         column.printEntry(stream, itsSizeX);
     } else if (type == "SIZEY") {
@@ -295,7 +298,7 @@ void CasdaHiEmissionObject::printTableEntry(std::ostream &stream,
         column.printEntry(stream, itsW50_freq.error());
     } else if (type == "CW50_FREQ") {
         column.printEntry(stream, itsCW50_freq.value());
-    } else if (type == "CW20_FREQ_ERR") {
+    } else if (type == "CW50_FREQ_ERR") {
         column.printEntry(stream, itsCW50_freq.error());
     } else if (type == "W20_FREQ") {
         column.printEntry(stream, itsW20_freq.value());
@@ -311,7 +314,7 @@ void CasdaHiEmissionObject::printTableEntry(std::ostream &stream,
         column.printEntry(stream, itsW50_vel.error());
     } else if (type == "CW50_VEL") {
         column.printEntry(stream, itsCW50_vel.value());
-    } else if (type == "CW20_VEL_ERR") {
+    } else if (type == "CW50_VEL_ERR") {
         column.printEntry(stream, itsCW50_vel.error());
     } else if (type == "W20_VEL") {
         column.printEntry(stream, itsW20_vel.value());
@@ -496,11 +499,17 @@ void CasdaHiEmissionObject::checkCol(duchamp::Catalogues::Column &column)
     } else if (type == "PA") {
         column.check(itsPositionAngle);
     } else if (type == "MAJFIT") {
-        column.check(itsMajorAxis_fit);
+        column.check(itsMajorAxis_fit.value());
+    } else if (type == "MAJFIT_ERR") {
+        column.check(itsMajorAxis_fit.error());
     } else if (type == "MINFIT") {
-        column.check(itsMinorAxis_fit);
+        column.check(itsMinorAxis_fit.value());
+    } else if (type == "MINFIT_ERR") {
+        column.check(itsMinorAxis_fit.error());
     } else if (type == "PAFIT") {
-        column.check(itsPositionAngle_fit);
+        column.check(itsPositionAngle_fit.value());
+    } else if (type == "PAFIT_ERR") {
+        column.check(itsPositionAngle_fit.error());
     } else if (type == "SIZEX") {
         column.check(itsSizeX);
     } else if (type == "SIZEY") {
@@ -559,7 +568,7 @@ void CasdaHiEmissionObject::checkCol(duchamp::Catalogues::Column &column)
         column.check(itsW50_freq.error());
     } else if (type == "CW50_FREQ") {
         column.check(itsCW50_freq.value());
-    } else if (type == "CW20_FREQ_ERR") {
+    } else if (type == "CW50_FREQ_ERR") {
         column.check(itsCW50_freq.error());
     } else if (type == "W20_FREQ") {
         column.check(itsW20_freq.value());
@@ -575,7 +584,7 @@ void CasdaHiEmissionObject::checkCol(duchamp::Catalogues::Column &column)
         column.check(itsW50_vel.error());
     } else if (type == "CW50_VEL") {
         column.check(itsCW50_vel.value());
-    } else if (type == "CW20_VEL_ERR") {
+    } else if (type == "CW50_VEL_ERR") {
         column.check(itsCW50_vel.error());
     } else if (type == "W20_VEL") {
         column.check(itsW20_vel.value());
