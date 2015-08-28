@@ -75,6 +75,8 @@ const int precFlux = 3;
 const int precFreqContinuum = 1;
 /// Precision for reporting frequency in spectral-line catalogues
 const int precFreqSpectral = 6;
+/// Precision for reporting frequency in spectral-line catalogues
+const int precVelSpectral = 6;
 /// Precision for reporting redshift in spectral-line catalogues
 const int precZ = 6;
 /// Precision for reporting spectral widths
@@ -97,6 +99,24 @@ const int precAngle = 3;
 const int precPfrac = 2;
 /// Precision for polarisation statistics
 const int precStats = 2;
+
+template <class T>
+class ValueError
+{
+public:
+    ValueError(){itsValue=T(0); itsError=T(0);};
+    ValueError(T val, T err):itsValue(val),itsError(err){};
+    ~ValueError(){};
+    
+    T& value(){return itsValue;}
+    T& error(){return itsError;}
+    
+protected:
+    T itsValue;
+    T itsError;
+
+};
+
 
 }
 

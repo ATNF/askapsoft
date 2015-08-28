@@ -31,6 +31,7 @@
 #include <catalogues/CasdaIsland.h>
 #include <catalogues/CasdaComponent.h>
 #include <catalogues/CasdaAbsorptionObject.h>
+#include <catalogues/CasdaHiEmissionObject.h>
 #include <catalogues/CasdaPolarisationEntry.h>
 
 #include <duchamp/Outputs/VOTableCatalogueWriter.hh>
@@ -148,6 +149,7 @@ template void
 AskapVOTableCatalogueWriter::writeEntries<CasdaComponent>(std::vector<CasdaComponent>
         &objlist);
 template void AskapVOTableCatalogueWriter::writeEntries<CasdaAbsorptionObject>(std::vector<CasdaAbsorptionObject> &obj);
+template void AskapVOTableCatalogueWriter::writeEntries<CasdaHiEmissionObject>(std::vector<CasdaHiEmissionObject> &obj);
 template void AskapVOTableCatalogueWriter::writeEntries<CasdaPolarisationEntry>(std::vector<CasdaPolarisationEntry> &obj);
 
 template <class T>
@@ -171,6 +173,7 @@ void AskapVOTableCatalogueWriter::writeEntry(T &obj)
 template void AskapVOTableCatalogueWriter::writeEntry<CasdaIsland>(CasdaIsland &obj);
 template void AskapVOTableCatalogueWriter::writeEntry<CasdaComponent>(CasdaComponent &obj);
 template void AskapVOTableCatalogueWriter::writeEntry<CasdaAbsorptionObject>(CasdaAbsorptionObject &obj);
+template void AskapVOTableCatalogueWriter::writeEntry<CasdaHiEmissionObject>(CasdaHiEmissionObject &obj);
 template void AskapVOTableCatalogueWriter::writeEntry<CasdaPolarisationEntry>(CasdaPolarisationEntry &obj);
 
 
