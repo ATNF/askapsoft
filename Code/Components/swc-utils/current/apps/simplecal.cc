@@ -104,9 +104,11 @@ void process(const IConstDataSource &ds, const float flux, const int ctrl = -1) 
        std::vector<casa::uInt> rowIndex;
        rowIndex.reserve(it->nRow());
        ASKAPASSERT(cPol<it->nPol());
+
+       if (counter >= 5800) break;
+
        for (casa::uInt row = 0; row<it->nRow(); ++row) {
             casa::Vector<casa::Bool> flags = it->flag().xyPlane(cPol).row(row);
-      
             
             // this code ensures that all channels are unflagged
             bool flagged = false;
@@ -175,16 +177,16 @@ void process(const IConstDataSource &ds, const float flux, const int ctrl = -1) 
                 ASKAPCHECK(it->antenna2()[row] == it->antenna1()[row+1], "Expect baselines in the order 1-2,2-3 and 1-3");
                 ASKAPCHECK(it->antenna1()[row] == it->antenna1()[row+2], "Expect baselines in the order 1-2,2-3 and 1-3");
                 ASKAPCHECK(it->antenna2()[row+1] == it->antenna2()[row+2], "Expect baselines in the order 1-2,2-3 and 1-3");
-             } else {
+             } else { /*
                 if (useADECorrelator) {
-                   ASKAPCHECK(it->antenna2()[row] == it->antenna2()[row+1], "Expect baselines in the order 5-4,12-4 and 12-5");
-                   ASKAPCHECK(it->antenna1()[row] == it->antenna2()[row+2], "Expect baselines in the order 5-4,12-4 and 12-5");
-                   ASKAPCHECK(it->antenna1()[row+1] == it->antenna1()[row+2], "Expect baselines in the order 5-4,12-4 and 12-5");
-                } else {
+                   ASKAPCHECK(it->antenna2()[row] == it->antenna2()[row+1], "Expect baselines in the order 4-5,4-12 and 5-12");
+                   ASKAPCHECK(it->antenna1()[row] == it->antenna2()[row+2], "Expect baselines in the order 4-5,4-12 and 5-12");
+                   ASKAPCHECK(it->antenna1()[row+1] == it->antenna1()[row+2], "Expect baselines in the order 4-5,4-12 and 5-12");
+                } else { */
                    ASKAPCHECK(it->antenna2()[row] == it->antenna1()[row+2], "Expect baselines in the order 1-2,1-3 and 2-3");
                    ASKAPCHECK(it->antenna1()[row] == it->antenna1()[row+1], "Expect baselines in the order 1-2,1-3 and 2-3");
                    ASKAPCHECK(it->antenna2()[row+1] == it->antenna2()[row+2], "Expect baselines in the order 1-2,1-3 and 2-3");
-                }
+                //}
              }
        }
        //
@@ -267,12 +269,14 @@ void process(const IConstDataSource &ds, const float flux, const int ctrl = -1) 
                const casa::Complex tempBuf = spAvg[2];
                spAvg[2] = spAvg[1];
                spAvg[1] = tempBuf;
+               /*
                if (useADECorrelator) {
                    // for ADE need to conjugate all; antenna order 4,5,12
                    for (casa::uInt i=0; i<spAvg.nelements();++i) {
                         spAvg[i] = conj(spAvg[i]);
                    }
                }
+               */
            }
            const float ph1 = -arg(spAvg[0]);
            const float ph2 = -arg(spAvg[2]);
@@ -282,7 +286,7 @@ void process(const IConstDataSource &ds, const float flux, const int ctrl = -1) 
            os<<"# Beam "<<beam<<" closure phase: "<<closurePh/casa::C::pi*180.<<" deg"<<std::endl;
            std::string blStr = "(0-1,1-2,0-2)";
            if (useADECorrelator) {
-               blStr = "(4-5,12-5,12-4)";
+               blStr = "(5-4,5-12,5-12)";
            }
                
            os<<"# measured phases              "<<blStr<<": "<<arg(spAvg[0])/casa::C::pi*180.<<" "<<arg(spAvg[1])/casa::C::pi*180.<<" "<<arg(spAvg[2])/casa::C::pi*180.<<std::endl;
@@ -305,7 +309,7 @@ void process(const IConstDataSource &ds, const float flux, const int ctrl = -1) 
 
            int baseAnt = 0;
            if (useADECorrelator) {
-               baseAnt = 4;
+               baseAnt = 3;
            }
            os<<"gain.g11."<<baseAnt<<"."<<beam<<" = "<<printComplex(g0)<<std::endl;
            os<<"gain.g22."<<baseAnt<<"."<<beam<<" = "<<printComplex(g0)<<std::endl;

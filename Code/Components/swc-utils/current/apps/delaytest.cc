@@ -190,7 +190,8 @@ void process(const IConstDataSource &ds, const int ctrl = -1) {
                      }
                 }
                 const float curPhase  = nGoodCh == 0 ? 0. : arg(sum / float(nGoodCh)) / casa::C::pi *180.;
-                os3<<" "<<curDelay<<" "<<curPhase;
+                const float curAmp  = nGoodCh == 0 ? 0. : abs(sum / float(nGoodCh));
+                os3<<" "<<curAmp<<" "<<curPhase<<" "<<curDelay;
             }
 
 
