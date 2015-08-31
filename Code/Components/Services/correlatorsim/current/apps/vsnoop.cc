@@ -39,13 +39,13 @@
 #include <unistd.h>
 
 // ASKAPsoft includes
-#include "cpcommon/VisDatagram.h"
+#include "cpcommon/VisDatagramBETA.h"
 #include "boost/asio.hpp"
 #include "boost/array.hpp"
 #include "CommandLineParser.h"
 
 using boost::asio::ip::udp;
-using askap::cp::VisDatagram;
+using askap::cp::VisDatagramBETA;
 using namespace askap::cp;
 
 // Globals
@@ -68,10 +68,10 @@ static void termination_handler(int signum)
 //     ch1: (0.789, 0.012)
 //     ..
 //     ..
-static void printAdditional(const VisDatagram& v)
+static void printAdditional(const VisDatagramBETA& v)
 {
     std::cout << "\tVisibilities:" << std::endl;
-    for (unsigned int i = 0; i < VisDatagramTraits<VisDatagram>::N_CHANNELS_PER_SLICE; ++i) {
+    for (unsigned int i = 0; i < VisDatagramTraits<VisDatagramBETA>::N_CHANNELS_PER_SLICE; ++i) {
         std::cout << "\t\tch" << i << ": " << "("
             << v.vis[i].real << ", "
             << v.vis[i].imag << ")";
@@ -88,7 +88,7 @@ static void printAdditional(const VisDatagram& v)
 //    BeamID:     0
 //    ..
 //    ..
-static void printPayload(const VisDatagram& v)
+static void printPayload(const VisDatagramBETA& v)
 {
     std::cout << "Timestamp:\t" << v.timestamp << std::endl;
     std::cout << "\tSlice:\t\t" << v.slice << std::endl;
@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
     }
 
     // Create receive buffer
-    VisDatagram vis;
+    VisDatagramBETA vis;
 
     // Receive a buffer
     std::cout << "Listening on UDP port " << portPar << 
@@ -151,17 +151,16 @@ int main(int argc, char *argv[])
     while (true) {
         udp::endpoint remote_endpoint;
         boost::system::error_code error;
-        const size_t len = socket.receive_from(boost::asio::buffer(&vis, sizeof(VisDatagram)), remote_endpoint, 0, error);
+        const size_t len = socket.receive_from(boost::asio::buffer(&vis, sizeof(VisDatagramBETA)), remote_endpoint, 0, error);
         if (error) {
             throw boost::system::system_error(error);
         }
-        if (len != sizeof(VisDatagram)) {
-            std::cout << "Error: Failed to read a full VisDatagram struct" << std::endl;
+        if (len != sizeof(VisDatagramBETA)) {
+            std::cout << "Error: Failed to read a full VisDatagramBETA struct" << std::endl;
             continue;
         }
-        if (vis.version != VisDatagramTraits<VisDatagram>::VISPAYLOAD_VERSION) {
-            std::cout << "Version mismatch. Expected " << VisDatagramTraits<VisDatagram>::VISPAYLOAD_VERSION
-                << " got " << vis.version << std::endl;
+        if (vis.version != VisDatagramTraits<VisDatagramBETA>::VISPAYLOAD_VERSION) {
+            std::cout << "Version mismatch. Expected " << VisDatagramTraits<VisDatagramBETA>::VISPAYLOAD_VERSION << " got " << vis.version << std::endl;
             continue;
         }
         if (verbose) {

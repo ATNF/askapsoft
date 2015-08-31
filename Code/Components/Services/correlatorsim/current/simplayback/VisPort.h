@@ -32,7 +32,7 @@
 
 // ASKAPsoft includes
 #include "boost/asio.hpp"
-#include "cpcommon/VisDatagram.h"
+#include "cpcommon/VisDatagramBETA.h"
 
 // Local package includes
 
@@ -41,7 +41,7 @@ namespace cp {
 
 /// @brief This class acts as a port to the visibility reciever. This class
 /// encapsulates a UDP port which is related to a specific host & port as is
-/// specified in the constructor. VisDatagram objects can be "sent" using this
+/// specified in the constructor. VisDatagramBETA objects can be "sent" using this
 /// port.
 class VisPort {
     public:
@@ -60,14 +60,14 @@ class VisPort {
         /// @brief Sends all payload objects in the vector to the host/port
         /// that was specified when the object was instantiated.
         ///
-        /// @param[in] payload  vector of VisDatagram objects to send.
-        void send(const std::vector<askap::cp::VisDatagram>& payload);
+        /// @param[in] payload  vector of VisDatagramBETA objects to send.
+        void send(const std::vector<askap::cp::VisDatagramBETA>& payload);
 
         /// @brief Sends the payload object to the host/port that was specified
         /// when the object was instantiated.
         ///
-        /// @param[in] payload  VisDatagram object to send.
-        void send(const askap::cp::VisDatagram& payload);
+        /// @param[in] payload  VisDatagramBETA object to send.
+        void send(const askap::cp::VisDatagramBETA& payload);
 
     private:
         // io_service
