@@ -274,6 +274,12 @@ askap::scimath::Params::ShPtr SpectralLineWorker::processChannel(askap::accessor
         solverCore.addNE(ne_p);
     } // end cycling block
 
+
+    model_p->add("model.slice",model_p->value("image.slice"));
+    if(itsParset.getBool("restore", false)){
+        solverCore.restoreImage();
+    }
+    
     return model_p;
 }
 

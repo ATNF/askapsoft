@@ -61,10 +61,15 @@ CubeBuilder::CubeBuilder(const LOFAR::ParameterSet& parset, const casa::uInt nch
     string filename = parset.getString("Images.name");
 
     // If necessary, replace "image" with _name_ (e.g. "psf", "weights")
+    // unless name='restored', in which case we append ".restored"
     if (!name.empty()) {
-        const string orig = "image";
-        const size_t f = filename.find(orig);
-        filename.replace(f, orig.length(), name);
+        if(name=="restored"){
+            filename=filename+".restored";
+        }else{
+            const string orig = "image";
+            const size_t f = filename.find(orig);
+            filename.replace(f, orig.length(), name);
+        }
     }
 
     // Get the image shape
@@ -83,7 +88,7 @@ CubeBuilder::CubeBuilder(const LOFAR::ParameterSet& parset, const casa::uInt nch
 
     ASKAPLOG_DEBUG_STR(logger, "Creating Cube " << filename << " with shape [xsize:"
             << nx << " ysize:" << ny << " npol:" << npol << " nchan:" << nchan << "], f0: "
-            << f0.getValue("MHz") << " Mhz, finc: " << inc.getValue("Hz") << " Hz");
+            << f0.getValue("MHz") << " MHz, finc: " << inc.getValue("kHz") << " kHz");
     itsCube.reset(new casa::PagedImage<float>(casa::TiledShape(cubeShape, tileShape), csys, filename));
 }
 

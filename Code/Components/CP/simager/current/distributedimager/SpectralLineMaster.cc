@@ -90,6 +90,9 @@ void SpectralLineMaster::run(void)
     itsPSFCube.reset(new CubeBuilder(itsParset, nChan, f0, freqinc, "psf"));
     itsResidualCube.reset(new CubeBuilder(itsParset, nChan, f0, freqinc, "residual"));
     itsWeightsCube.reset(new CubeBuilder(itsParset, nChan, f0, freqinc, "weights"));
+    itsPSFimageCube.reset(new CubeBuilder(itsParset, nChan, f0, freqinc, "psf.image"));
+    itsRestoredCube.reset(new CubeBuilder(itsParset, nChan, f0, freqinc, "restored"));
+
     Tracing::exit(Tracing::WriteImage);
 
     // Send work orders to the worker processes, handling out
@@ -206,14 +209,16 @@ void SpectralLineMaster::handleImageParams(askap::scimath::Params::ShPtr params,
     Tracing::entry(Tracing::WriteImage);
 
     // Pre-conditions
+    ASKAPCHECK(params->has("model.slice"), "Params are missing model parameter");
     ASKAPCHECK(params->has("image.slice"), "Params are missing image parameter");
     ASKAPCHECK(params->has("psf.slice"), "Params are missing psf parameter");
+    ASKAPCHECK(params->has("psf.image.slice"), "Params are missing psf.image parameter");
     ASKAPCHECK(params->has("residual.slice"), "Params are missing residual parameter");
     ASKAPCHECK(params->has("weights.slice"), "Params are missing weights parameter");
 
     // Write image
     {
-        const casa::Array<double> imagePixels(params->value("image.slice"));
+        const casa::Array<double> imagePixels(params->value("model.slice"));
         casa::Array<float> floatImagePixels(imagePixels.shape());
         casa::convertArray<float, double>(floatImagePixels, imagePixels);
         itsImageCube->writeSlice(floatImagePixels, chan);
@@ -242,5 +247,22 @@ void SpectralLineMaster::handleImageParams(askap::scimath::Params::ShPtr params,
         casa::convertArray<float, double>(floatImagePixels, imagePixels);
         itsWeightsCube->writeSlice(floatImagePixels, chan);
     }
+
+    // Write PSF image
+    {
+        const casa::Array<double> imagePixels(params->value("psf.image.slice"));
+        casa::Array<float> floatImagePixels(imagePixels.shape());
+        casa::convertArray<float, double>(floatImagePixels, imagePixels);
+        itsPSFimageCube->writeSlice(floatImagePixels, chan);
+    }
+
+    // Write Restored image
+    {
+        const casa::Array<double> imagePixels(params->value("image.slice"));
+        casa::Array<float> floatImagePixels(imagePixels.shape());
+        casa::convertArray<float, double>(floatImagePixels, imagePixels);
+        itsRestoredCube->writeSlice(floatImagePixels, chan);
+    }
+    
     Tracing::exit(Tracing::WriteImage);
 }

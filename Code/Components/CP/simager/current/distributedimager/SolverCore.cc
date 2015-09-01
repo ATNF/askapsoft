@@ -163,6 +163,28 @@ double SolverCore::getPeakResidual(askap::scimath::INormalEquations::ShPtr ne_p)
     return peak;
 }
 
+void SolverCore::restoreImage()
+{
+    ASKAPDEBUGASSERT(itsModel);
+    boost::shared_ptr<ImageRestoreSolver> ir = ImageRestoreSolver::createSolver(itsParset.makeSubset("restore."));
+    ASKAPDEBUGASSERT(ir);
+    ASKAPDEBUGASSERT(itsSolver);
+    // configure restore solver the same way as normal imaging solver
+    boost::shared_ptr<ImageSolver> template_solver = boost::dynamic_pointer_cast<ImageSolver>(itsSolver);
+    ASKAPDEBUGASSERT(template_solver);
+    ImageSolverFactory::configurePreconditioners(itsParset,ir);
+    ir->configureSolver(*template_solver);
+    ir->copyNormalEquations(*template_solver);
+
+    Quality q;
+    //itsModel->add("model",itsModel->value("image"));
+    ir->solveNormalEquations(*itsModel, q);
+    ASKAPDEBUGASSERT(itsModel);
+
+
+}
+
+
 void SolverCore::writeModel(const std::string &postfix)
 {
     ASKAPCHECK(itsModel, "itsModel is not correctly initialized");
@@ -186,22 +208,9 @@ void SolverCore::writeModel(const std::string &postfix)
 
     bool restore = itsParset.getBool("restore", false);
     if (restore && postfix == "") {
-        ASKAPLOG_INFO_STR(logger, "Writing out restored images as CASA images");
 
-        ASKAPDEBUGASSERT(itsModel);
-        boost::shared_ptr<ImageRestoreSolver> ir = ImageRestoreSolver::createSolver(itsParset.makeSubset("restore."));
-        ASKAPDEBUGASSERT(ir);
-        ASKAPDEBUGASSERT(itsSolver);
-        // configure restore solver the same way as normal imaging solver
-        boost::shared_ptr<ImageSolver> template_solver = boost::dynamic_pointer_cast<ImageSolver>(itsSolver);
-        ASKAPDEBUGASSERT(template_solver);
-        ImageSolverFactory::configurePreconditioners(itsParset,ir);
-        ir->configureSolver(*template_solver);
-        ir->copyNormalEquations(*template_solver);
-
-        Quality q;
-        ir->solveNormalEquations(*itsModel, q);
-        ASKAPDEBUGASSERT(itsModel);
+        restoreImage();
+        
         // merged image should be a fixed parameter without facet suffixes
         resultimages=itsModel->fixedNames();
         for (vector<string>::const_iterator ci=resultimages.begin(); ci!=resultimages.end(); ++ci) {

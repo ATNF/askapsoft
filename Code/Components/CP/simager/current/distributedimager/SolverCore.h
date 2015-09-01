@@ -60,6 +60,9 @@ namespace askap {
 
                 virtual void addNE(askap::scimath::INormalEquations::ShPtr);
 
+                /// @brief Restore the image
+                virtual void restoreImage();
+            
                 /// @brief Write the results
                 virtual void writeModel(const std::string& postfix);
 

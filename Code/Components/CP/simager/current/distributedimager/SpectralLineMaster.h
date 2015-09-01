@@ -83,6 +83,7 @@ namespace askap {
                 std::vector<std::string> getDatasets(const LOFAR::ParameterSet& itsParset);
 
                 void handleImageParams(askap::scimath::Params::ShPtr params, unsigned int chan);
+                void handleRestoredImageParams(askap::scimath::Params::ShPtr params, unsigned int chan);
 
                 /// Parameter set
                 LOFAR::ParameterSet& itsParset;
@@ -96,6 +97,8 @@ namespace askap {
                 boost::scoped_ptr<CubeBuilder> itsPSFCube;
                 boost::scoped_ptr<CubeBuilder> itsResidualCube;
                 boost::scoped_ptr<CubeBuilder> itsWeightsCube;
+                boost::scoped_ptr<CubeBuilder> itsPSFimageCube;
+                boost::scoped_ptr<CubeBuilder> itsRestoredCube;
 
                 // No support for assignment
                 SpectralLineMaster& operator=(const SpectralLineMaster& rhs);
