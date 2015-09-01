@@ -58,7 +58,7 @@ HiEmissionCatalogue::HiEmissionCatalogue(std::vector<sourcefitting::RadioSource>
     itsObjects(),
     itsSpec(),
     itsCube(cube),
-    itsVersion("casda.sl_hi_emission_object_v0.8")
+    itsVersion("casda.sl_hi_emission_object_v0.10")
 {
     this->defineObjects(srclist, parset);
     this->defineSpec();
@@ -84,46 +84,46 @@ void HiEmissionCatalogue::defineObjects(std::vector<sourcefitting::RadioSource> 
 
 void HiEmissionCatalogue::defineSpec()
 {
-    itsSpec.addColumn("ID", "object_id", "--", 6, 0,
+    itsSpec.addColumn("ID", "object_id", "", 6, 0,
                       "meta.id;meta.main", "char", "col_object_id", "");
     itsSpec.addColumn("NAME", "object_name", "", 8, 0,
                       "meta.id", "char", "col_object_name", "");
-    itsSpec.addColumn("RA", "ra_hms_w", "", 11, 0,
+    itsSpec.addColumn("RA", "ra_hms_w", "["+casda::stringRAUnit+"]", 11, 0,
                       "pos.eq.ra", "char", "col_ra_hms_w", "J2000");
-    itsSpec.addColumn("DEC", "dec_dms_w", "", 11, 0,
+    itsSpec.addColumn("DEC", "dec_dms_w", "["+casda::stringDECUnit+"]", 11, 0,
                       "pos.eq.dec", "char", "col_dec_hms_w", "J2000");
-    itsSpec.addColumn("RA_W", "ra_deg_w", "[deg]", 11, casda::precPos,
+    itsSpec.addColumn("RA_W", "ra_deg_w", "["+casda::positionUnit+"]", 11, casda::precPos,
                       "pos.eq.ra;meta.main", "double", "col_ra_deg_w", "J2000");
     itsSpec.addColumn("RA_W_ERR", "ra_deg_w_err", "[arcsec]", 11, casda::precSize,
                       "stat.error;pos.eq.ra;meta.main", "float", "col_ra_deg_w_err", "J2000");
-    itsSpec.addColumn("DEC_W", "dec_deg_w", "[deg]", 11, casda::precPos,
+    itsSpec.addColumn("DEC_W", "dec_deg_w", "["+casda::positionUnit+"]", 11, casda::precPos,
                       "pos.eq.dec;meta.main", "double", "col_dec_deg_w", "J2000");
     itsSpec.addColumn("DEC_W_ERR", "dec_deg_w_err", "[arcsec]", 11, casda::precSize,
                       "stat.error;pos.eq.dec;meta.main", "float", "col_dec_deg_w_err", "J2000");
-    itsSpec.addColumn("RA_UW", "ra_deg_uw", "[deg]", 11, casda::precPos,
+    itsSpec.addColumn("RA_UW", "ra_deg_uw", "["+casda::positionUnit+"]", 11, casda::precPos,
                       "pos.eq.ra", "double", "col_ra_deg_uw", "J2000");
     itsSpec.addColumn("RA_UW_ERR", "ra_deg_uw_err", "[arcsec]", 11, casda::precSize,
                       "stat.error;pos.eq.ra", "float", "col_ra_deg_uw_err", "J2000");
-    itsSpec.addColumn("DEC_UW", "dec_deg_uw", "[deg]", 11, casda::precPos,
+    itsSpec.addColumn("DEC_UW", "dec_deg_uw", "["+casda::positionUnit+"]", 11, casda::precPos,
                       "pos.eq.dec", "double", "col_dec_deg_uw", "J2000");
     itsSpec.addColumn("DEC_UW_ERR", "dec_deg_uw_err", "[arcsec]", 11, casda::precSize,
                       "stat.error;pos.eq.dec", "float", "col_dec_deg_uw_err", "J2000");
-    itsSpec.addColumn("GLONG_W", "glong_deg_w", "[deg]", 11, casda::precPos,
-                      "pos.galactic.lon;meta.main", "double", "col_glong_deg_w", "J2000");
-    itsSpec.addColumn("GLONG_W_ERR", "glong_deg_w_err", "[arcsec]", 11, casda::precSize,
-                      "stat.error;pos.galactic.lon;meta.main", "float", "col_glong_deg_w_err", "J2000");
-    itsSpec.addColumn("GLAT_W", "glat_deg_w", "[deg]", 11, casda::precPos,
-                      "pos.galactic.lat;meta.main", "double", "col_glat_deg_w", "J2000");
-    itsSpec.addColumn("GLAT_W_ERR", "glat_deg_w_err", "[arcsec]", 11, casda::precSize,
-                      "stat.error;pos.galactic.lat;meta.main", "float", "col_glat_deg_w_err", "J2000");
-    itsSpec.addColumn("GLONG_UW", "glong_deg_uw", "[deg]", 11, casda::precPos,
-                      "pos.galactic.lon;meta.main", "double", "col_glong_deg_uw", "J2000");
-    itsSpec.addColumn("GLONG_UW_ERR", "glong_deg_uw_err", "[arcsec]", 11, casda::precSize,
-                      "stat.error;pos.galactic.lon;meta.main", "float", "col_glong_deg_uw_err", "J2000");
-    itsSpec.addColumn("GLAT_UW", "glat_deg_uw", "[deg]", 11, casda::precPos,
-                      "pos.galactic.lat;meta.main", "double", "col_glat_deg_uw", "J2000");
-    itsSpec.addColumn("GLAT_UW_ERR", "glat_deg_uw_err", "[arcsec]", 11, casda::precSize,
-                      "stat.error;pos.galactic.lat;meta.main", "float", "col_glat_deg_uw_err", "J2000");
+    itsSpec.addColumn("GLONG_W", "glong_w", "["+casda::positionUnit+"]", 11, casda::precPos,
+                      "pos.galactic.lon;meta.main", "double", "col_glong_w", "J2000");
+    itsSpec.addColumn("GLONG_W_ERR", "glong_w_err", "[arcsec]", 11, casda::precSize,
+                      "stat.error;pos.galactic.lon;meta.main", "float", "col_glong_w_err", "J2000");
+    itsSpec.addColumn("GLAT_W", "glat_w", "["+casda::positionUnit+"]", 11, casda::precPos,
+                      "pos.galactic.lat;meta.main", "double", "col_glat_w", "J2000");
+    itsSpec.addColumn("GLAT_W_ERR", "glat_w_err", "[arcsec]", 11, casda::precSize,
+                      "stat.error;pos.galactic.lat;meta.main", "float", "col_glat_w_err", "J2000");
+    itsSpec.addColumn("GLONG_UW", "glong_uw", "["+casda::positionUnit+"]", 11, casda::precPos,
+                      "pos.galactic.lon;meta.main", "double", "col_glong_uw", "J2000");
+    itsSpec.addColumn("GLONG_UW_ERR", "glong_uw_err", "[arcsec]", 11, casda::precSize,
+                      "stat.error;pos.galactic.lon;meta.main", "float", "col_glong_uw_err", "J2000");
+    itsSpec.addColumn("GLAT_UW", "glat_uw", "["+casda::positionUnit+"]", 11, casda::precPos,
+                      "pos.galactic.lat;meta.main", "double", "col_glat_uw", "J2000");
+    itsSpec.addColumn("GLAT_UW_ERR", "glat_uw_err", "[arcsec]", 11, casda::precSize,
+                      "stat.error;pos.galactic.lat;meta.main", "float", "col_glat_uw_err", "J2000");
     itsSpec.addColumn("MAJ", "maj_axis", "[arcsec]", 6, casda::precSize,
                       "askap:src.smajAxis;em.radio", "float", "col_maj_axis", "");
     itsSpec.addColumn("MIN", "min_axis", "[arcsec]", 6, casda::precSize,
@@ -176,23 +176,23 @@ void HiEmissionCatalogue::defineSpec()
     itsSpec.addColumn("FREQ_PEAK", "freq_peak", "[" + casda::freqUnit + "]",
                       11, casda::precFreqSpectral, "em.freq;phot.flux.density;stat.max",
                       "float", "col_freq_peak", "");
-    itsSpec.addColumn("VEL_UW", "vel_uw", "[" + casda::freqUnit + "]",
+    itsSpec.addColumn("VEL_UW", "vel_uw", "[" + casda::velocityUnit + "]",
                       11, casda::precFreqSpectral,
                       "spect.dopplerVeloc.opt;em.line.HI",
                       "float", "col_vel_uw", "");
-    itsSpec.addColumn("VEL_UW_ERR", "vel_uw_err", "[" + casda::freqUnit + "]",
+    itsSpec.addColumn("VEL_UW_ERR", "vel_uw_err", "[" + casda::velocityUnit + "]",
                       11, casda::precFreqSpectral,
                       "stat.error;spect.dopplerVeloc.opt;em.line.HI",
                       "float", "col_vel_uw_err", "");
-    itsSpec.addColumn("VEL_W", "vel_w", "[" + casda::freqUnit + "]",
+    itsSpec.addColumn("VEL_W", "vel_w", "[" + casda::velocityUnit + "]",
                       11, casda::precFreqSpectral,
                       "spect.dopplerVeloc.opt;em.line.HI;meta.main",
                       "float", "col_vel_w", "");
-    itsSpec.addColumn("VEL_W_ERR", "vel_w_err", "[" + casda::freqUnit + "]",
+    itsSpec.addColumn("VEL_W_ERR", "vel_w_err", "[" + casda::velocityUnit + "]",
                       11, casda::precFreqSpectral,
                       "stat.error;spect.dopplerVeloc.opt;em.line.HI;meta.main",
                       "float", "col_vel_w_err", "");
-    itsSpec.addColumn("VEL_PEAK", "vel_peak", "[" + casda::freqUnit + "]",
+    itsSpec.addColumn("VEL_PEAK", "vel_peak", "[" + casda::velocityUnit + "]",
                       11, casda::precFreqSpectral,
                       "spect.dopplerVeloc.opt;em.line.HI;phot.flux.density;stat.max",
                       "float", "col_vel_peak", "");

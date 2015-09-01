@@ -40,6 +40,13 @@ namespace casda {
 /// Which type of fit to use for the CASDA components.
 const std::string componentFitType = "best";
 
+/// Units for giving the position
+const std::string positionUnit = "deg";
+/// Units for giving the RA as a string
+const std::string stringRAUnit = "h:m:s";
+/// Units for giving the DEC as a string
+const std::string stringDECUnit = "deg:arcmin:arcsec";
+
 /// Units for reporting frequency.
 const std::string freqUnit = "MHz";
 const float freqScale = 1.0e6;
