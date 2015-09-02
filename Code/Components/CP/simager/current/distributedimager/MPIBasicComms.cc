@@ -61,7 +61,7 @@ MPIBasicComms::MPIBasicComms(int argc, char *argv[])
     int rc = MPI_Init(&argc, &argv);
 
     if (rc != MPI_SUCCESS) {
-        ASKAPTHROW (std::runtime_error, "Error starting MPI. Terminating.");
+        ASKAPTHROW(std::runtime_error, "Error starting MPI. Terminating.");
         MPI_Abort(MPI_COMM_WORLD, rc);
     }
 
@@ -146,13 +146,13 @@ void MPIBasicComms::send(const void* buf, size_t size, int dest, int tag)
         if (remaining >= c_maxint) {
             Tracing::entry(Tracing::Send);
             result = MPI_Send(addr, c_maxint, MPI_BYTE,
-                    dest, tag, itsCommunicator);
+                              dest, tag, itsCommunicator);
             Tracing::exit(Tracing::Send);
             remaining -= c_maxint;
         } else {
             Tracing::entry(Tracing::Send);
             result = MPI_Send(addr, remaining, MPI_BYTE,
-                    dest, tag, itsCommunicator);
+                              dest, tag, itsCommunicator);
             Tracing::exit(Tracing::Send);
             remaining = 0;
         }
@@ -173,7 +173,7 @@ void MPIBasicComms::receive(void* buf, size_t size, int source, int tag, MPI_Sta
     unsigned long payloadSize;
     Tracing::entry(Tracing::Receive);
     int result = MPI_Recv(&payloadSize, 1, MPI_UNSIGNED_LONG,
-            source, tag, itsCommunicator, &status);
+                          source, tag, itsCommunicator, &status);
     Tracing::exit(Tracing::Receive);
     checkError(result, "MPI_Recv");
 
@@ -190,13 +190,13 @@ void MPIBasicComms::receive(void* buf, size_t size, int source, int tag, MPI_Sta
         if (remaining >= c_maxint) {
             Tracing::entry(Tracing::Receive);
             result = MPI_Recv(addr, c_maxint, MPI_BYTE,
-                    actualSource, tag, itsCommunicator, &status);
+                              actualSource, tag, itsCommunicator, &status);
             Tracing::exit(Tracing::Receive);
             remaining -= c_maxint;
         } else {
             Tracing::entry(Tracing::Receive);
             result = MPI_Recv(addr, remaining, MPI_BYTE,
-                    actualSource, tag, itsCommunicator, &status);
+                              actualSource, tag, itsCommunicator, &status);
             Tracing::exit(Tracing::Receive);
             remaining = 0;
         }
@@ -244,8 +244,8 @@ void MPIBasicComms::checkError(const int error, const std::string location)
 
     MPI_Error_class(error, &eclass);
     MPI_Error_string(error, estring, &len);
-    ASKAPTHROW (std::runtime_error, "" << location << " failed. Error  "
-            << eclass << ": " << estring);
+    ASKAPTHROW(std::runtime_error, "" << location << " failed. Error  "
+               << eclass << ": " << estring);
 }
 
 void* MPIBasicComms::addOffset(const void *ptr, size_t offset)
@@ -281,8 +281,8 @@ void MPIBasicComms::sendMessage(const IMessage& msg, int dest)
     send(&buf[0], size * sizeof(int8_t), dest, messageType);
 
     ASKAPLOG_DEBUG_STR(logger, "Sent Message of type " << messageType
-            << " to rank " << dest << " via MPI in " << timer.real()
-            << " seconds ");
+                       << " to rank " << dest << " via MPI in " << timer.real()
+                       << " seconds ");
 }
 
 void MPIBasicComms::receiveMessage(IMessage& msg, int source)
@@ -298,7 +298,7 @@ void MPIBasicComms::receiveMessage(IMessage& msg, int source)
     buf.resize(size);
 
     ASKAPCHECK(buf.size() == size,
-            "MPIBasicComms::receiveMessage() buf is too small");
+               "MPIBasicComms::receiveMessage() buf is too small");
 
     receive(&buf[0], size * sizeof(char), source, type, status);
 
@@ -327,7 +327,7 @@ void MPIBasicComms::receiveMessageAnySrc(IMessage& msg, int& actualSource)
     buf.resize(size);
 
     ASKAPCHECK(buf.size() == size,
-            "MPIBasicComms::MPIBasicComms::receiveMessageAnySrc() buf is too small");
+               "MPIBasicComms::MPIBasicComms::receiveMessageAnySrc() buf is too small");
 
     receive(&buf[0], size * sizeof(char), actualSource, type, status);
 
@@ -343,7 +343,7 @@ void MPIBasicComms::receiveMessageAnySrc(IMessage& msg, int& actualSource)
 void MPIBasicComms::receiveMessageAnySrc(IMessage& msg)
 {
     int id;
-    receiveMessageAnySrc(msg, id); 
+    receiveMessageAnySrc(msg, id);
     return;
 }
 
@@ -370,7 +370,7 @@ void MPIBasicComms::sendMessageBroadcast(const IMessage& msg)
     broadcast(&buf[0], size * sizeof(int8_t), root);
 
     ASKAPLOG_DEBUG_STR(logger, "Broadcast model to all ranks via MPI in "
-            << timer.real() << " seconds ");
+                       << timer.real() << " seconds ");
 }
 
 void MPIBasicComms::receiveMessageBroadcast(IMessage& msg, int root)
@@ -384,7 +384,7 @@ void MPIBasicComms::receiveMessageBroadcast(IMessage& msg, int root)
     buf.resize(size);
 
     ASKAPCHECK(buf.size() == size,
-            "MPIBasicComms::receiveMessageBroadcast() buf is too small");
+               "MPIBasicComms::receiveMessageBroadcast() buf is too small");
 
     // Now participate in the broadcast of the message itself
     broadcast(&buf[0], size * sizeof(int8_t), root);

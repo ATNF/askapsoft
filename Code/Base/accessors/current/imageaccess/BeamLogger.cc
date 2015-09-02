@@ -47,22 +47,20 @@ namespace askap {
 namespace accessors {
 
 BeamLogger::BeamLogger():
-        itsFilename("")
+    itsFilename("")
 {
 }
 
 BeamLogger::BeamLogger(const LOFAR::ParameterSet &parset):
-        itsFilename(parset.getString("beamLog", ""))
+    itsFilename(parset.getString("beamLog", ""))
 {
 }
 
 BeamLogger::BeamLogger(const std::string &filename):
-        itsFilename(filename)
+    itsFilename(filename)
 {
 }
 
-/// @details The beam information is extracted from each
-/// channel image and stored in a vector.
 void BeamLogger::extractBeams(const std::vector<std::string>& imageList)
 {
     itsBeamList.clear();
@@ -74,14 +72,6 @@ void BeamLogger::extractBeams(const std::vector<std::string>& imageList)
     }
 }
 
-
-/// @details The beam information for each channel image is
-/// written to the beam log. The log is in ASCII format, with
-/// each line having columns: number | image name | major axis
-/// [arcsec] | minor axis [arcsec] | position angle
-/// [deg]. Each column is separated by a single space. The
-/// first line is a comment line (starting with a '#') that
-/// indicates what each column contains.
 void BeamLogger::write()
 {
     if (itsFilename != "") {
@@ -90,22 +80,18 @@ void BeamLogger::write()
         fout << "#Channel BMAJ[arcsec] BMIN[arcsec] BPA[deg]\n";
 
         for (size_t i = 0; i < itsBeamList.size(); i++) {
-            fout << i << " " 
-                << itsBeamList[i][0].getValue("arcsec") << " "
-                << itsBeamList[i][1].getValue("arcsec") << " "
-                << itsBeamList[i][2].getValue("deg") << "\n";
+            fout << i << " "
+                 << itsBeamList[i][0].getValue("arcsec") << " "
+                 << itsBeamList[i][1].getValue("arcsec") << " "
+                 << itsBeamList[i][2].getValue("deg") << "\n";
         }
 
-    } else
-        ASKAPLOG_ERROR_STR(logger, "BeamLogger cannot write the log, as no filename has been specified");
-
+    } else {
+        ASKAPLOG_WARN_STR(logger,
+                          "BeamLogger cannot write the log, as no filename has been specified");
+    }
 }
 
-/// @details The beam log file is opened and each channel
-/// image's beam information is read and stored in the vector
-/// of beam values. The list of channel image names is also
-/// filled. If the beam log can not be opened, both vectors
-/// are cleared and an error message is written to the log.
 void BeamLogger::read()
 {
     itsBeamList.clear();
@@ -132,7 +118,8 @@ void BeamLogger::read()
             }
 
         } else {
-            ASKAPLOG_ERROR_STR(logger, "Beam log file " << itsFilename << " could not be opened.");
+            ASKAPLOG_ERROR_STR(logger,
+                               "Beam log file " << itsFilename << " could not be opened.");
         }
 
     }

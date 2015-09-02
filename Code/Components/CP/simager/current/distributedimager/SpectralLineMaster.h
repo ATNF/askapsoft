@@ -42,80 +42,78 @@
 #include "distributedimager/MSGroupInfo.h"
 
 namespace askap {
-    namespace cp {
+namespace cp {
 
-        class SpectralLineMaster
-        {
-            public:
-                SpectralLineMaster(LOFAR::ParameterSet& parset,
-                        askap::cp::IBasicComms& comms);
-                ~SpectralLineMaster();
+class SpectralLineMaster {
+    public:
+        SpectralLineMaster(LOFAR::ParameterSet& parset,
+                           askap::cp::IBasicComms& comms);
+        ~SpectralLineMaster();
 
-                void run(void);
+        void run(void);
 
 
-            private:
+    private:
 
-                struct MSInfo
-                {
-                    casa::uInt nChan;
-                    std::vector<casa::Quantity> freqs;
-                };
-
-                /// @brief Utility function to get dataset names from parset.
-                ///     
-                /// Given a ParameterSet, return a vector containing all the datasets
-                /// specified. This function will look for datasets in the Cimager manner:
-                /// @code
-                /// Cimager.dataset        = [10uJy_stdtest_0.ms,10uJy_stdtest_1.ms]
-                /// @endcode
-                ///     
-                /// It also supports another method which is necessary for the specification
-                /// of large numbers of datasets:
-                /// @code           
-                /// Cimager.dataset0                             = 10uJy_stdtest_0.ms
-                /// Cimager.dataset1                             = 10uJy_stdtest_1.ms
-                /// <and so on>
-                /// @endcode
-                ///     
-                /// @param[in] parset   the parameterset to use as input.
-                /// @return a vector containing in each element one dataset.
-                std::vector<std::string> getDatasets(const LOFAR::ParameterSet& itsParset);
-
-                void handleImageParams(askap::scimath::Params::ShPtr params, unsigned int chan);
-                void handleRestoredImageParams(askap::scimath::Params::ShPtr params, unsigned int chan);
-
-                /// Parameter set
-                LOFAR::ParameterSet& itsParset;
-
-                /// Communications class
-                askap::cp::IBasicComms& itsComms;
-
-                MSGroupInfo isMSGroupInfo;
-
-                boost::scoped_ptr<CubeBuilder> itsImageCube;
-                boost::scoped_ptr<CubeBuilder> itsPSFCube;
-                boost::scoped_ptr<CubeBuilder> itsResidualCube;
-                boost::scoped_ptr<CubeBuilder> itsWeightsCube;
-                boost::scoped_ptr<CubeBuilder> itsPSFimageCube;
-                boost::scoped_ptr<CubeBuilder> itsRestoredCube;
-
-                // No support for assignment
-                SpectralLineMaster& operator=(const SpectralLineMaster& rhs);
-
-                // No support for copy constructor
-                SpectralLineMaster(const SpectralLineMaster& src);
-
-            std::map<unsigned int, casa::Vector<casa::Quantum<double> > > itsBeamList;
-
-            void recordBeam(const askap::scimath::Axes &axes, const unsigned int globalChannel);
-            void storeBeam(const unsigned int globalChannel);
-            unsigned int itsBeamReferenceChannel;
-            void logBeamInfo();
-                
+        struct MSInfo {
+            casa::uInt nChan;
+            std::vector<casa::Quantity> freqs;
         };
 
-    };
+        /// @brief Utility function to get dataset names from parset.
+        ///
+        /// Given a ParameterSet, return a vector containing all the datasets
+        /// specified. This function will look for datasets in the Cimager manner:
+        /// @code
+        /// Cimager.dataset        = [10uJy_stdtest_0.ms,10uJy_stdtest_1.ms]
+        /// @endcode
+        ///
+        /// It also supports another method which is necessary for the specification
+        /// of large numbers of datasets:
+        /// @code
+        /// Cimager.dataset0                             = 10uJy_stdtest_0.ms
+        /// Cimager.dataset1                             = 10uJy_stdtest_1.ms
+        /// <and so on>
+        /// @endcode
+        ///
+        /// @param[in] parset   the parameterset to use as input.
+        /// @return a vector containing in each element one dataset.
+        std::vector<std::string> getDatasets(const LOFAR::ParameterSet& itsParset);
+
+        void handleImageParams(askap::scimath::Params::ShPtr params, unsigned int chan);
+        void handleRestoredImageParams(askap::scimath::Params::ShPtr params, unsigned int chan);
+
+        /// Parameter set
+        LOFAR::ParameterSet& itsParset;
+
+        /// Communications class
+        askap::cp::IBasicComms& itsComms;
+
+        MSGroupInfo isMSGroupInfo;
+
+        boost::scoped_ptr<CubeBuilder> itsImageCube;
+        boost::scoped_ptr<CubeBuilder> itsPSFCube;
+        boost::scoped_ptr<CubeBuilder> itsResidualCube;
+        boost::scoped_ptr<CubeBuilder> itsWeightsCube;
+        boost::scoped_ptr<CubeBuilder> itsPSFimageCube;
+        boost::scoped_ptr<CubeBuilder> itsRestoredCube;
+
+        // No support for assignment
+        SpectralLineMaster& operator=(const SpectralLineMaster& rhs);
+
+        // No support for copy constructor
+        SpectralLineMaster(const SpectralLineMaster& src);
+
+        std::map<unsigned int, casa::Vector<casa::Quantum<double> > > itsBeamList;
+
+        void recordBeam(const askap::scimath::Axes &axes, const unsigned int globalChannel);
+        void storeBeam(const unsigned int globalChannel);
+        unsigned int itsBeamReferenceChannel;
+        void logBeamInfo();
+
+};
+
+};
 };
 
 #endif

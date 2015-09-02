@@ -34,49 +34,48 @@
 #include "distributedimager/MPIBasicComms.h"
 
 namespace askap {
-    namespace cp {
+namespace cp {
 
-        /// @brief Main class for the Distributed imager.
-        class SpectralLineImager
-        {
-            public:
-                /// @brief Construct a Distributed Imager.
-                /// 
-                /// @param[in]  parset  the parameter set containing
-                ///                     the configuration.
-                /// @param[in]  comms   an instance of IBasicComms.
-                SpectralLineImager(LOFAR::ParameterSet& parset,
-                        askap::cp::MPIBasicComms& comms);
+/// @brief Main class for the Distributed imager.
+class SpectralLineImager {
+    public:
+        /// @brief Construct a Distributed Imager.
+        ///
+        /// @param[in]  parset  the parameter set containing
+        ///                     the configuration.
+        /// @param[in]  comms   an instance of IBasicComms.
+        SpectralLineImager(LOFAR::ParameterSet& parset,
+                           askap::cp::MPIBasicComms& comms);
 
-                /// @brief Destructor.
-                ~SpectralLineImager();
+        /// @brief Destructor.
+        ~SpectralLineImager();
 
-                /// @brief Run the distrbuted imager.
-                void run(void);
+        /// @brief Run the distrbuted imager.
+        void run(void);
 
-            private:
+    private:
 
-                // Returns true if the caller is the master process,
-                // else false.
-                bool isMaster(void);
+        // Returns true if the caller is the master process,
+        // else false.
+        bool isMaster(void);
 
-                // Id of the master process
-                static const int itsMaster = 0;
+        // Id of the master process
+        static const int itsMaster = 0;
 
-                // Parameter set
-                LOFAR::ParameterSet& itsParset;
+        // Parameter set
+        LOFAR::ParameterSet& itsParset;
 
-                // Communications class
-                askap::cp::MPIBasicComms& itsComms;
+        // Communications class
+        askap::cp::MPIBasicComms& itsComms;
 
-                // No support for assignment
-                SpectralLineImager& operator=(const SpectralLineImager& rhs);
+        // No support for assignment
+        SpectralLineImager& operator=(const SpectralLineImager& rhs);
 
-                // No support for copy constructor
-                SpectralLineImager(const SpectralLineImager& src);
-        };
+        // No support for copy constructor
+        SpectralLineImager(const SpectralLineImager& src);
+};
 
-    };
+};
 };
 
 #endif

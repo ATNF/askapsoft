@@ -43,52 +43,51 @@
 #include "distributedimager/IBasicComms.h"
 
 namespace askap {
-    namespace cp {
+namespace cp {
 
-        /// @brief Core solver functionality required by the imager.
-        class SolverCore
-        {
-            public:
-                /// @brief Constructor
-                SolverCore(LOFAR::ParameterSet& parset,
-                        askap::cp::IBasicComms& comms,
-                        askap::scimath::Params::ShPtr model_p);
-                virtual ~SolverCore();
+/// @brief Core solver functionality required by the imager.
+class SolverCore {
+    public:
+        /// @brief Constructor
+        SolverCore(LOFAR::ParameterSet& parset,
+                   askap::cp::IBasicComms& comms,
+                   askap::scimath::Params::ShPtr model_p);
+        virtual ~SolverCore();
 
-                /// @brief Solve the normal equations (runs in the solver)
-                virtual void solveNE(askap::scimath::INormalEquations::ShPtr);
+        /// @brief Solve the normal equations (runs in the solver)
+        virtual void solveNE(askap::scimath::INormalEquations::ShPtr);
 
-                virtual void addNE(askap::scimath::INormalEquations::ShPtr);
+        virtual void addNE(askap::scimath::INormalEquations::ShPtr);
 
-                /// @brief Restore the image
-                virtual void restoreImage();
-            
-                /// @brief Write the results
-                virtual void writeModel(const std::string& postfix);
+        /// @brief Restore the image
+        virtual void restoreImage();
 
-            private:
-                // A helper method to extract peak residual
-                double getPeakResidual(askap::scimath::INormalEquations::ShPtr ne_p);
+        /// @brief Write the results
+        virtual void writeModel(const std::string& postfix);
 
-                // Solver
-                askap::scimath::Solver::ShPtr itsSolver;
+    private:
+        // A helper method to extract peak residual
+        double getPeakResidual(askap::scimath::INormalEquations::ShPtr ne_p);
 
-                // Parameter set
-                LOFAR::ParameterSet& itsParset;
-   
-                // Communications class
-                askap::cp::IBasicComms& itsComms;
+        // Solver
+        askap::scimath::Solver::ShPtr itsSolver;
 
-                // Model
-                askap::scimath::Params::ShPtr itsModel;
+        // Parameter set
+        LOFAR::ParameterSet& itsParset;
 
-                // No support for assignment
-                SolverCore& operator=(const SolverCore& rhs);
+        // Communications class
+        askap::cp::IBasicComms& itsComms;
 
-                // No support for copy constructor
-                SolverCore(const SolverCore& src);
-        };
-    };
+        // Model
+        askap::scimath::Params::ShPtr itsModel;
+
+        // No support for assignment
+        SolverCore& operator=(const SolverCore& rhs);
+
+        // No support for copy constructor
+        SolverCore(const SolverCore& src);
+};
+};
 };
 
 #endif

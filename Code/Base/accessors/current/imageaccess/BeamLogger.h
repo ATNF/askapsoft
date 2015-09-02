@@ -61,24 +61,44 @@ class BeamLogger {
         /// Set the name of the beam log file
         void setFilename(const std::string& filename) {itsFilename = filename;};
 
-    std::string filename(){return itsFilename;};
+        std::string filename() {return itsFilename;};
 
         /// @brief Extract the beam information for each channel image
+        /// provided in the the imageList
+        /// @param imageList A vector list of image names
         void extractBeams(const std::vector<std::string>& imageList);
 
         /// @brief Write the beam information to the beam log
+        /// @details The beam information for each channel is written
+        /// to the beam log. The log is in ASCII format, with each
+        /// line having columns: number | major axis [arcsec] | minor
+        /// axis [arcsec] | position angle [deg]. Each column is
+        /// separated by a single space. The first line is a comment
+        /// line (starting with a '#') that indicates what each column
+        /// contains.
         void write();
 
         /// @brief Read the beam information from a beam log
+        /// @details The beam log file is opened and each channel's
+        /// beam information is read and stored in the vector of beam
+        /// values. The list of channel image names is also filled. If
+        /// the beam log can not be opened, both vectors are cleared
+        /// and an error message is written to the log.
         void read();
 
-        /// Return the beam information
+        /// @brief Return the beam information
         std::vector< casa::Vector<casa::Quantum<double> > > beamlist() const {return itsBeamList;};
 
-    std::vector< casa::Vector<casa::Quantum<double> > > &beamlist() {return itsBeamList;};
+        /// @brief Return the beam information
+        std::vector< casa::Vector<casa::Quantum<double> > > &beamlist() {return itsBeamList;};
 
     protected:
+        /// @brief The disk file to be read from / written to
         std::string itsFilename;
+
+        /// @brief The list of beam information. Each element of the outer
+        /// vector is a 3-point casa::Vector containing the major axis,
+        /// minor axis and position angle of a beam.
         std::vector< casa::Vector<casa::Quantum<double> > > itsBeamList;
 
 };

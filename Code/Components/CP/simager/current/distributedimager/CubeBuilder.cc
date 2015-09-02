@@ -56,29 +56,33 @@ ASKAP_LOGGER(logger, ".CubeBuilder");
 using namespace askap::cp;
 using namespace casa;
 using namespace std;
+using namespace askap::synthesis;
 
-CubeBuilder::CubeBuilder(const LOFAR::ParameterSet& parset, const casa::uInt nchan,
-                         const casa::Quantity& f0, const casa::Quantity& inc, const std::string& name)
+CubeBuilder::CubeBuilder(const LOFAR::ParameterSet& parset,
+                         const casa::uInt nchan,
+                         const casa::Quantity& f0,
+                         const casa::Quantity& inc,
+                         const std::string& name)
 {
     itsFilename = parset.getString("Images.name");
 
     // If necessary, replace "image" with _name_ (e.g. "psf", "weights")
     // unless name='restored', in which case we append ".restored"
     if (!name.empty()) {
-        if(name=="restored"){
-            itsFilename=itsFilename+".restored";
-        }else{
+        if (name == "restored") {
+            itsFilename = itsFilename + ".restored";
+        } else {
             const string orig = "image";
             const size_t f = itsFilename.find(orig);
             itsFilename.replace(f, orig.length(), name);
         }
     }
-    
+
     const std::string restFreqString = parset.getString("Images.restFrequency", "-1.");
     if (restFreqString == "HI") {
         itsRestFrequency = casa::QC::HI;
     } else {
-        itsRestFrequency = synthesis::SynthesisParamsHelper::convertQuantity(restFreqString, "Hz");
+        itsRestFrequency = SynthesisParamsHelper::convertQuantity(restFreqString, "Hz");
     }
 
     // Get the image shape
@@ -95,12 +99,16 @@ CubeBuilder::CubeBuilder(const LOFAR::ParameterSet& parset, const casa::uInt nch
 
     const casa::CoordinateSystem csys = createCoordinateSystem(parset, nx, ny, f0, inc);
 
-    ASKAPLOG_DEBUG_STR(logger, "Creating Cube " << itsFilename << " with shape [xsize:"
-            << nx << " ysize:" << ny << " npol:" << npol << " nchan:" << nchan << "], f0: "
-            << f0.getValue("MHz") << " MHz, finc: " << inc.getValue("kHz") << " kHz");
-    itsCube.reset(new casa::PagedImage<float>(casa::TiledShape(cubeShape, tileShape), csys, itsFilename));
+    ASKAPLOG_DEBUG_STR(logger, "Creating Cube " << itsFilename <<
+                       " with shape [xsize:" << nx << " ysize:" << ny <<
+                       " npol:" << npol << " nchan:" << nchan <<
+                       "], f0: " << f0.getValue("MHz") << " MHz, finc: " <<
+                       inc.getValue("kHz") << " kHz");
+    itsCube.reset(new casa::PagedImage<float>(casa::TiledShape(cubeShape, tileShape),
+                  csys, itsFilename));
 
-    // default flux units are Jy/pixel. If we set the restoring beam later on, can set to Jy/beam
+    // default flux units are Jy/pixel. If we set the restoring beam
+    // later on, can set to Jy/beam
     setUnits("Jy/pixel");
 }
 
@@ -114,8 +122,12 @@ void CubeBuilder::writeSlice(const casa::Array<float>& arr, const casa::uInt cha
     itsCube->putSlice(arr, where);
 }
 
-casa::CoordinateSystem CubeBuilder::createCoordinateSystem(const LOFAR::ParameterSet& parset,
-        const casa::uInt nx, const casa::uInt ny, const casa::Quantity& f0, const casa::Quantity& inc)
+casa::CoordinateSystem
+CubeBuilder::createCoordinateSystem(const LOFAR::ParameterSet& parset,
+                                    const casa::uInt nx,
+                                    const casa::uInt ny,
+                                    const casa::Quantity& f0,
+                                    const casa::Quantity& inc)
 {
     CoordinateSystem coordsys;
     const vector<string> dirVector = parset.getStringVector("Images.direction");
@@ -129,17 +141,18 @@ casa::CoordinateSystem CubeBuilder::createCoordinateSystem(const LOFAR::Paramete
         const Quantum<Double> ra = asQuantity(dirVector.at(0), "deg");
         const Quantum<Double> dec = asQuantity(dirVector.at(1), "deg");
         ASKAPLOG_DEBUG_STR(logger, "Direction: " << ra.getValue() << " degrees, "
-                               << dec.getValue() << " degrees");
+                           << dec.getValue() << " degrees");
 
         const Quantum<Double> xcellsize = asQuantity(cellSizeVector.at(0), "arcsec") * -1.0;
         const Quantum<Double> ycellsize = asQuantity(cellSizeVector.at(1), "arcsec");
         ASKAPLOG_DEBUG_STR(logger, "Cellsize: " << xcellsize.getValue()
-                               << " arcsec, " << ycellsize.getValue() << " arcsec");
+                           << " arcsec, " << ycellsize.getValue() << " arcsec");
 
         casa::MDirection::Types type;
         casa::MDirection::getType(type, dirVector.at(2));
         const DirectionCoordinate radec(type, Projection(Projection::SIN),
-                                        ra, dec, xcellsize, ycellsize, xform, nx / 2, ny / 2);
+                                        ra, dec, xcellsize, ycellsize,
+                                        xform, nx / 2, ny / 2);
 
         coordsys.addCoordinate(radec);
     }
@@ -162,19 +175,19 @@ casa::CoordinateSystem CubeBuilder::createCoordinateSystem(const LOFAR::Paramete
         const Double refPix = 0.0;  // is the reference pixel
         SpectralCoordinate sc(MFrequency::TOPO, f0, inc, refPix);
 
-        // add rest frequency, but only if requested, and only for image.blah, residual.blah, image.blah.restored
+        // add rest frequency, but only if requested, and only for
+        // image.blah, residual.blah, image.blah.restored
         if (itsRestFrequency.getValue("Hz") > 0.) {
-            if ( itsFilename.find("image.") != string::npos ||
-                 itsFilename.find("residual.") != string::npos) {
+            if ((itsFilename.find("image.") != string::npos) ||
+                    (itsFilename.find("residual.") != string::npos)) {
 
-                if(!sc.setRestFrequency(itsRestFrequency.getValue("Hz")))
-                {
+                if (!sc.setRestFrequency(itsRestFrequency.getValue("Hz"))) {
                     ASKAPLOG_ERROR_STR(logger, "Could not set the rest frequency to " <<
                                        itsRestFrequency.getValue("Hz") << "Hz");
                 }
             }
         }
-        
+
         coordsys.addCoordinate(sc);
     }
 

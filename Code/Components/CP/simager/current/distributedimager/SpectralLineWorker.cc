@@ -75,8 +75,8 @@ using namespace askap::accessors;
 ASKAP_LOGGER(logger, ".SpectralLineWorker");
 
 SpectralLineWorker::SpectralLineWorker(LOFAR::ParameterSet& parset,
-        askap::cp::IBasicComms& comms)
-: itsParset(parset), itsComms(comms)
+                                       askap::cp::IBasicComms& comms)
+    : itsParset(parset), itsComms(comms)
 {
     itsGridder_p = VisGridderFactory::make(itsParset);
 }
@@ -92,7 +92,7 @@ void SpectralLineWorker::run(void)
     SpectralLineWorkRequest wrequest;
     itsComms.sendMessage(wrequest, itsMaster);
 
-    while(1) {
+    while (1) {
 
         // Get a workunit
         SpectralLineWorkUnit wu;
@@ -105,9 +105,9 @@ void SpectralLineWorker::run(void)
         }
 
         const string ms = wu.get_dataset();
-        ASKAPLOG_DEBUG_STR(logger, "Received Work Unit for dataset " << ms 
-                << ", local channel " << wu.get_localChannel()
-                << ", global channel " << wu.get_globalChannel());
+        ASKAPLOG_DEBUG_STR(logger, "Received Work Unit for dataset " << ms
+                           << ", local channel " << wu.get_localChannel()
+                           << ", global channel " << wu.get_globalChannel());
         askap::scimath::Params::ShPtr params;
         try {
             params = processWorkUnit(wu);
@@ -117,7 +117,7 @@ void SpectralLineWorker::run(void)
         }
 
         // Send the params to the master, which also implicitly requests
-        // more work 
+        // more work
         wrequest.set_globalChannel(wu.get_globalChannel());
         wrequest.set_params(params);
         itsComms.sendMessage(wrequest, itsMaster);
@@ -130,15 +130,18 @@ askap::scimath::Params::ShPtr SpectralLineWorker::processWorkUnit(const Spectral
     const string colName = itsParset.getString("datacolumn", "DATA");
     const string ms = wu.get_dataset();
 
-    const int uvwMachineCacheSize = itsParset.getInt32("nUVWMachines",1);
-    ASKAPCHECK(uvwMachineCacheSize > 0 , "Cache size is supposed to be a positive number, you have " << uvwMachineCacheSize);
+    const int uvwMachineCacheSize = itsParset.getInt32("nUVWMachines", 1);
+    ASKAPCHECK(uvwMachineCacheSize > 0 ,
+               "Cache size is supposed to be a positive number, you have "
+               << uvwMachineCacheSize);
 
     const double uvwMachineCacheTolerance = SynthesisParamsHelper::convertQuantity(
             itsParset.getString("uvwMachineDirTolerance", "1e-6rad"), "rad");
 
-    ASKAPLOG_DEBUG_STR(logger, "UVWMachine cache will store " << uvwMachineCacheSize << " machines");
+    ASKAPLOG_DEBUG_STR(logger,
+                       "UVWMachine cache will store " << uvwMachineCacheSize << " machines");
     ASKAPLOG_DEBUG_STR(logger, "Tolerance on the directions is "
-            << uvwMachineCacheTolerance/casa::C::pi *180. * 3600. << " arcsec");
+                       << uvwMachineCacheTolerance / casa::C::pi * 180. * 3600. << " arcsec");
 
     TableDataSource ds(ms, TableDataSource::DEFAULT, colName);
     ds.configureUVWMachineCache(uvwMachineCacheSize, uvwMachineCacheTolerance);
@@ -164,8 +167,11 @@ askap::scimath::Params::ShPtr SpectralLineWorker::processWorkUnit(const Spectral
     return processChannel(ds, imagename, localChannel, globalChannel);
 }
 
-askap::scimath::Params::ShPtr SpectralLineWorker::processChannel(askap::accessors::TableDataSource& ds,
-        const std::string& imagename, unsigned int localChannel, unsigned int globalChannel)
+askap::scimath::Params::ShPtr
+SpectralLineWorker::processChannel(askap::accessors::TableDataSource& ds,
+                                   const std::string& imagename,
+                                   unsigned int localChannel,
+                                   unsigned int globalChannel)
 {
     askap::scimath::Params::ShPtr model_p(new Params());
     setupImage(model_p);
@@ -188,8 +194,8 @@ askap::scimath::Params::ShPtr SpectralLineWorker::processChannel(askap::accessor
     // Setup measurement equations
     equation_p = askap::scimath::Equation::ShPtr(new ImageFFTEquation(*model_p, it, itsGridder_p));
 
-    const double targetPeakResidual = SynthesisParamsHelper::convertQuantity(
-            itsParset.getString("threshold.majorcycle","-1Jy"),"Jy");
+    std::string majorcycle = itsParset.getString("threshold.majorcycle", "-1Jy");
+    const double targetPeakResidual = SynthesisParamsHelper::convertQuantity(majorcycle, "Jy");
     const bool writeAtMajorCycle = itsParset.getBool("Images.writeAtMajorCycle", false);
     const int nCycles = itsParset.getInt32("ncycles", 0);
     SolverCore solverCore(itsParset, itsComms, model_p);
@@ -198,7 +204,7 @@ askap::scimath::Params::ShPtr SpectralLineWorker::processChannel(askap::accessor
         timer.mark();
 
         // Setup normal equations
-         ne_p = ImagingNormalEquations::ShPtr(new ImagingNormalEquations(*model_p));
+        ne_p = ImagingNormalEquations::ShPtr(new ImagingNormalEquations(*model_p));
         ASKAPCHECK(ne_p, "ne_p is not correctly initialized");
 
         ASKAPCHECK(equation_p, "equation_p is not correctly initialized");
@@ -207,14 +213,14 @@ askap::scimath::Params::ShPtr SpectralLineWorker::processChannel(askap::accessor
         Tracing::exit(Tracing::CalcNE);
 
         ASKAPLOG_DEBUG_STR(logger, "Calculated normal equations for channel "
-                << globalChannel << " in "
-                << timer.real() << " seconds ");
+                           << globalChannel << " in "
+                           << timer.real() << " seconds ");
 
         // Solve NE
         solverCore.solveNE(ne_p);
     } else {
         for (int cycle = 0; cycle < nCycles; ++cycle) {
-            ASKAPLOG_INFO_STR(logger, "*** Starting major cycle " << cycle << " ***" );
+            ASKAPLOG_INFO_STR(logger, "*** Starting major cycle " << cycle << " ***");
 
             // Calc NE
             timer.mark();
@@ -234,8 +240,8 @@ askap::scimath::Params::ShPtr SpectralLineWorker::processChannel(askap::accessor
             Tracing::exit(Tracing::CalcNE);
 
             ASKAPLOG_DEBUG_STR(logger, "Calculated normal equations for channel "
-                    << globalChannel << " in "
-                    << timer.real() << " seconds ");
+                               << globalChannel << " in "
+                               << timer.real() << " seconds ");
 
             // Solve NE
             solverCore.solveNE(ne_p);
@@ -244,28 +250,31 @@ askap::scimath::Params::ShPtr SpectralLineWorker::processChannel(askap::accessor
                 const double peak_residual = model_p->scalarValue("peak_residual");
                 ASKAPLOG_INFO_STR(logger, "Reached peak residual of " << peak_residual);
                 if (peak_residual < targetPeakResidual) {
-                    ASKAPLOG_INFO_STR(logger, "It is below the major cycle threshold of "<<targetPeakResidual<<" Jy. Stopping.");
+                    ASKAPLOG_INFO_STR(logger, "It is below the major cycle threshold of "
+                                      << targetPeakResidual << " Jy. Stopping.");
                     break;
                 } else {
                     if (targetPeakResidual < 0) {
                         ASKAPLOG_INFO_STR(logger, "Major cycle flux threshold is not used.");
                     } else {
-                        ASKAPLOG_INFO_STR(logger, "It is above the major cycle threshold of "<<targetPeakResidual<<" Jy. Continuing.");
+                        ASKAPLOG_INFO_STR(logger, "It is above the major cycle threshold of "
+                                          << targetPeakResidual << " Jy. Continuing.");
                     }
                 }
             }
             if (cycle + 1 >= nCycles) {
-                ASKAPLOG_INFO_STR(logger, "Reached "<<nCycles<<" cycle(s), the maximum number of major cycles. Stopping.");
+                ASKAPLOG_INFO_STR(logger, "Reached " << nCycles
+                                  << " cycle(s), the maximum number of major cycles. Stopping.");
             }
 
             if (writeAtMajorCycle) {
                 stringstream ss;
-                ss << ".ch." << globalChannel << ".majorcycle." << cycle+1;
+                ss << ".ch." << globalChannel << ".majorcycle." << cycle + 1;
                 solverCore.writeModel(ss.str());
             }
 
         }
-        ASKAPLOG_INFO_STR(logger, "*** Finished major cycles ***" );
+        ASKAPLOG_INFO_STR(logger, "*** Finished major cycles ***");
         ne_p = ImagingNormalEquations::ShPtr(new ImagingNormalEquations(*model_p));
         equation_p->setParameters(*model_p);
         Tracing::entry(Tracing::CalcNE);
@@ -275,11 +284,11 @@ askap::scimath::Params::ShPtr SpectralLineWorker::processChannel(askap::accessor
     } // end cycling block
 
 
-    model_p->add("model.slice",model_p->value("image.slice"));
-    if(itsParset.getBool("restore", false)){
+    model_p->add("model.slice", model_p->value("image.slice"));
+    if (itsParset.getBool("restore", false)) {
         solverCore.restoreImage();
     }
-    
+
     return model_p;
 }
 
@@ -298,19 +307,20 @@ void SpectralLineWorker::setupImage(const askap::scimath::Params::ShPtr& params)
 
         if (!parset.isDefined("polarisation")) {
             ASKAPLOG_INFO_STR(logger, "Polarisation frame is not defined, "
-                   << "only stokes I will be generated");
+                              << "only stokes I will be generated");
         }
         const vector<string> stokesVec = parset.getStringVector("polarisation",
-                vector<string>(1,"I"));
+                                         vector<string>(1, "I"));
 
         // there could be many ways to define stokes, e.g. ["XX YY"] or ["XX","YY"] or "XX,YY"
-        // to allow some flexibility we have to concatenate all elements first and then 
-        // allow the parser from PolConverter to take care of extracting the products.                                            
+        // to allow some flexibility we have to concatenate all elements first and then
+        // allow the parser from PolConverter to take care of extracting the products.
         string stokesStr;
-        for (size_t i=0; i<stokesVec.size(); ++i) {
+        for (size_t i = 0; i < stokesVec.size(); ++i) {
             stokesStr += stokesVec[i];
         }
-        const casa::Vector<casa::Stokes::StokesTypes> stokes = scimath::PolConverter::fromString(stokesStr);
+        const casa::Vector<casa::Stokes::StokesTypes>
+        stokes = scimath::PolConverter::fromString(stokesStr);
 
         const bool ewProj = parset.getBool("ewprojection", false);
         if (ewProj) {
@@ -319,20 +329,24 @@ void SpectralLineWorker::setupImage(const askap::scimath::Params::ShPtr& params)
             ASKAPLOG_INFO_STR(logger, "Image will have plain SIN projection");
         }
 
-        ASKAPCHECK(nfacets > 0, "Number of facets is supposed to be a positive number, you gave "<<nfacets);
-        ASKAPCHECK(shape.size() >= 2, "Image is supposed to be at least two dimensional. "<<
-                "check shape parameter, you gave " << shape);
+        ASKAPCHECK(nfacets > 0,
+                   "Number of facets is supposed to be a positive number, you gave " << nfacets);
+        ASKAPCHECK(shape.size() >= 2,
+                   "Image is supposed to be at least two dimensional. " <<
+                   "check shape parameter, you gave " << shape);
 
         if (nfacets == 1) {
             SynthesisParamsHelper::add(*params, name, direction, cellsize, shape, ewProj,
                                        freq[0], freq[1], nchan, stokes);
         } else {
             // this is a multi-facet case
-            const int facetstep = parset.getInt32("facetstep",casa::min(shape[0], shape[1]));
-            ASKAPCHECK(facetstep > 0, "facetstep parameter is supposed to be positive, you have "<<facetstep);
-            ASKAPLOG_INFO_STR(logger, "Facet centers will be "<< facetstep <<
-                    " pixels apart, each facet size will be "<< shape[0] << " x " << shape[1]);
-            SynthesisParamsHelper::add(*params, name, direction, cellsize, shape, ewProj, 
+            const int facetstep = parset.getInt32("facetstep", casa::min(shape[0], shape[1]));
+            ASKAPCHECK(facetstep > 0,
+                       "facetstep parameter is supposed to be positive, you have " << facetstep);
+            ASKAPLOG_INFO_STR(logger, "Facet centers will be " << facetstep <<
+                              " pixels apart, each facet size will be "
+                              << shape[0] << " x " << shape[1]);
+            SynthesisParamsHelper::add(*params, name, direction, cellsize, shape, ewProj,
                                        freq[0], freq[1], nchan, stokes, nfacets, facetstep);
         }
 

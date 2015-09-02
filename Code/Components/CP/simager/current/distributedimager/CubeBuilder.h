@@ -47,8 +47,10 @@ namespace cp {
 class CubeBuilder {
     public:
         /// Constructor
-        CubeBuilder(const LOFAR::ParameterSet& parset, const casa::uInt nchan,
-                    const casa::Quantity& f0, const casa::Quantity& inc,
+        CubeBuilder(const LOFAR::ParameterSet& parset,
+                    const casa::uInt nchan,
+                    const casa::Quantity& f0,
+                    const casa::Quantity& inc,
                     const std::string& name = "");
 
         /// Destructor
@@ -56,17 +58,20 @@ class CubeBuilder {
 
         void writeSlice(const casa::Array<float>& arr, const casa::uInt chan);
 
-        casa::CoordinateSystem createCoordinateSystem(const LOFAR::ParameterSet& parset,
-                const casa::uInt nx, const casa::uInt ny,
-                const casa::Quantity& f0, const casa::Quantity& inc);
+        casa::CoordinateSystem
+        createCoordinateSystem(const LOFAR::ParameterSet& parset,
+                               const casa::uInt nx,
+                               const casa::uInt ny,
+                               const casa::Quantity& f0,
+                               const casa::Quantity& inc);
 
-    void addBeam(casa::Vector<casa::Quantum<double> > &beam);
-    void setUnits(const std::string &units);
+        void addBeam(casa::Vector<casa::Quantum<double> > &beam);
+        void setUnits(const std::string &units);
 
     private:
         boost::scoped_ptr< casa::PagedImage<float> > itsCube;
-    std::string itsFilename;
-    casa::Quantum<double> itsRestFrequency;
+        std::string itsFilename;
+        casa::Quantum<double> itsRestFrequency;
 };
 
 }

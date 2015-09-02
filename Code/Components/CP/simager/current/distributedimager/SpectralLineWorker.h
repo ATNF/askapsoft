@@ -42,50 +42,50 @@
 #include "messages/SpectralLineWorkUnit.h"
 
 namespace askap {
-    namespace cp {
+namespace cp {
 
-        class SpectralLineWorker
-        {
-            public:
-                SpectralLineWorker(LOFAR::ParameterSet& parset,
-                        askap::cp::IBasicComms& comms);
-                ~SpectralLineWorker();
+class SpectralLineWorker {
+    public:
+        SpectralLineWorker(LOFAR::ParameterSet& parset,
+                           askap::cp::IBasicComms& comms);
+        ~SpectralLineWorker();
 
-                void run(void);
+        void run(void);
 
 
-            private:
-                // Process a workunit
-                askap::scimath::Params::ShPtr processWorkUnit(const SpectralLineWorkUnit& wu);
+    private:
+        // Process a workunit
+        askap::scimath::Params::ShPtr processWorkUnit(const SpectralLineWorkUnit& wu);
 
-                // For a given workunit, just process a single channel
-                askap::scimath::Params::ShPtr processChannel(askap::accessors::TableDataSource& ds,
-                        const std::string& imagename, unsigned int localChannel,
-                        unsigned int globalChannel);
+        // For a given workunit, just process a single channel
+        askap::scimath::Params::ShPtr processChannel(askap::accessors::TableDataSource& ds,
+                const std::string& imagename,
+                unsigned int localChannel,
+                unsigned int globalChannel);
 
-                // Setup the image specified in itsParset and add it to the Params instance.
-                void setupImage(const askap::scimath::Params::ShPtr& params);
+        // Setup the image specified in itsParset and add it to the Params instance.
+        void setupImage(const askap::scimath::Params::ShPtr& params);
 
-                // Parameter set
-                LOFAR::ParameterSet& itsParset;
+        // Parameter set
+        LOFAR::ParameterSet& itsParset;
 
-                // Communications class
-                askap::cp::IBasicComms& itsComms;
+        // Communications class
+        askap::cp::IBasicComms& itsComms;
 
-                // Pointer to the gridder
-                askap::synthesis::IVisGridder::ShPtr itsGridder_p;
+        // Pointer to the gridder
+        askap::synthesis::IVisGridder::ShPtr itsGridder_p;
 
-                // No support for assignment
-                SpectralLineWorker& operator=(const SpectralLineWorker& rhs);
+        // No support for assignment
+        SpectralLineWorker& operator=(const SpectralLineWorker& rhs);
 
-                // No support for copy constructor
-                SpectralLineWorker(const SpectralLineWorker& src);
+        // No support for copy constructor
+        SpectralLineWorker(const SpectralLineWorker& src);
 
-                // ID of the master process
-                static const int itsMaster = 0;
-        };
+        // ID of the master process
+        static const int itsMaster = 0;
+};
 
-    };
+};
 };
 
 #endif

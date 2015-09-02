@@ -62,7 +62,7 @@ using namespace askap;
 ASKAP_LOGGER(logger, ".SpectralLineMaster");
 
 SpectralLineMaster::SpectralLineMaster(LOFAR::ParameterSet& parset,
-        askap::cp::IBasicComms& comms)
+                                       askap::cp::IBasicComms& comms)
     : itsParset(parset), itsComms(comms), itsBeamList()
 {
 }
@@ -76,7 +76,7 @@ void SpectralLineMaster::run(void)
     // Read from the configruation the list of datasets to process
     const vector<string> ms = getDatasets(itsParset);
     if (ms.size() == 0) {
-        ASKAPTHROW (std::runtime_error, "No datasets specified in the parameter set file");
+        ASKAPTHROW(std::runtime_error, "No datasets specified in the parameter set file");
     }
 
     // Get info from each measurement set so we know how many channels, what channels, etc.
@@ -87,7 +87,7 @@ void SpectralLineMaster::run(void)
     const casa::Quantity freqinc = isMSGroupInfo.getFreqInc();
 
     // Define reference channel for giving restoring beam
-    std::string reference = itsParset.getString("restore.beamReference","mid");
+    std::string reference = itsParset.getString("restore.beamReference", "mid");
     if (reference == "mid") {
         itsBeamReferenceChannel = nChan / 2;
     } else if (reference == "first") {
@@ -105,14 +105,14 @@ void SpectralLineMaster::run(void)
         }
     }
 
-   
+
     // Create an image cube builder
     Tracing::entry(Tracing::WriteImage);
     itsImageCube.reset(new CubeBuilder(itsParset, nChan, f0, freqinc));
     itsPSFCube.reset(new CubeBuilder(itsParset, nChan, f0, freqinc, "psf"));
     itsResidualCube.reset(new CubeBuilder(itsParset, nChan, f0, freqinc, "residual"));
     itsWeightsCube.reset(new CubeBuilder(itsParset, nChan, f0, freqinc, "weights"));
-    if(itsParset.getBool("restore", false)){
+    if (itsParset.getBool("restore", false)) {
         // Only create these if we are restoring, as that is when they get made
         itsPSFimageCube.reset(new CubeBuilder(itsParset, nChan, f0, freqinc, "psf.image"));
         itsRestoredCube.reset(new CubeBuilder(itsParset, nChan, f0, freqinc, "restored"));
@@ -136,7 +136,7 @@ void SpectralLineMaster::run(void)
     for (unsigned int n = 0; n < ms.size(); ++n) {
         const unsigned int msChannels = isMSGroupInfo.getNumChannels(n);
         ASKAPLOG_DEBUG_STR(logger, "Creating work orders for measurement set "
-                << ms[n] << " with " << msChannels << " channels");
+                           << ms[n] << " with " << msChannels << " channels");
 
         // Iterate over all channels in the measurement set
         for (unsigned int localChan = 0; localChan < msChannels; ++localChan) {
@@ -160,8 +160,8 @@ void SpectralLineMaster::run(void)
 
             // Send the workunit to the worker
             ASKAPLOG_INFO_STR(logger, "Master is allocating workunit " << ms[n]
-                    << ", local channel " <<  localChan << ", global channel "
-                    << globalChannel << " to worker " << id);
+                              << ", local channel " <<  localChan << ", global channel "
+                              << globalChannel << " to worker " << id);
             SpectralLineWorkUnit wu;
             wu.set_payloadType(SpectralLineWorkUnit::WORK);
             wu.set_dataset(ms[n]);
@@ -181,7 +181,7 @@ void SpectralLineMaster::run(void)
         itsComms.receiveMessageAnySrc(wrequest, id);
         if (wrequest.get_globalChannel() != SpectralLineWorkRequest::CHANNEL_UNINITIALISED) {
             if (wrequest.get_params().get() != 0) {
-                handleImageParams(wrequest.get_params(), wrequest.get_globalChannel());                
+                handleImageParams(wrequest.get_params(), wrequest.get_globalChannel());
             }
             --outstanding;
         }
@@ -198,7 +198,7 @@ void SpectralLineMaster::run(void)
     }
 
     logBeamInfo();
-    
+
     itsImageCube.reset();
 }
 
@@ -206,7 +206,8 @@ void SpectralLineMaster::run(void)
 std::vector<std::string> SpectralLineMaster::getDatasets(const LOFAR::ParameterSet& parset)
 {
     if (parset.isDefined("dataset") && parset.isDefined("dataset0")) {
-        ASKAPTHROW(std::runtime_error, "Both dataset and dataset0 are specified in the parset");
+        ASKAPTHROW(std::runtime_error,
+                   "Both dataset and dataset0 are specified in the parset");
     }
 
     // First look for "dataset" and if that does not exist try "dataset0"
@@ -221,7 +222,7 @@ std::vector<std::string> SpectralLineMaster::getDatasets(const LOFAR::ParameterS
             ms.push_back(value);
 
             ostringstream ss;
-            ss << "dataset" << idx+1;
+            ss << "dataset" << idx + 1;
             key = ss.str();
             ++idx;
         }
@@ -230,7 +231,8 @@ std::vector<std::string> SpectralLineMaster::getDatasets(const LOFAR::ParameterS
     return ms;
 }
 
-void SpectralLineMaster::handleImageParams(askap::scimath::Params::ShPtr params, unsigned int chan)
+void SpectralLineMaster::handleImageParams(askap::scimath::Params::ShPtr params,
+                                           unsigned int chan)
 {
     Tracing::entry(Tracing::WriteImage);
 
@@ -239,16 +241,16 @@ void SpectralLineMaster::handleImageParams(askap::scimath::Params::ShPtr params,
     ASKAPCHECK(params->has("image.slice"), "Params are missing image parameter");
     ASKAPCHECK(params->has("psf.slice"), "Params are missing psf parameter");
     ASKAPCHECK(params->has("psf.image.slice"), "Params are missing psf.image parameter");
-    if(itsParset.getBool("restore", false)){
+    if (itsParset.getBool("restore", false)) {
         ASKAPCHECK(params->has("residual.slice"), "Params are missing residual parameter");
         ASKAPCHECK(params->has("weights.slice"), "Params are missing weights parameter");
     }
-    
+
     // Record the restoring beam
     const askap::scimath::Axes &axes = params->axes("image.slice");
     recordBeam(axes, chan);
     storeBeam(chan);
-    
+
     // Write image
     {
         const casa::Array<double> imagePixels(params->value("model.slice"));
@@ -281,7 +283,7 @@ void SpectralLineMaster::handleImageParams(askap::scimath::Params::ShPtr params,
         itsWeightsCube->writeSlice(floatImagePixels, chan);
     }
 
-    if(itsParset.getBool("restore", false)){
+    if (itsParset.getBool("restore", false)) {
         // Write PSF image
         {
             const casa::Array<double> imagePixels(params->value("psf.image.slice"));
@@ -289,7 +291,7 @@ void SpectralLineMaster::handleImageParams(askap::scimath::Params::ShPtr params,
             casa::convertArray<float, double>(floatImagePixels, imagePixels);
             itsPSFimageCube->writeSlice(floatImagePixels, chan);
         }
-        
+
         // Write Restored image
         {
             const casa::Array<double> imagePixels(params->value("image.slice"));
@@ -298,30 +300,31 @@ void SpectralLineMaster::handleImageParams(askap::scimath::Params::ShPtr params,
             itsRestoredCube->writeSlice(floatImagePixels, chan);
         }
     }
-    
+
     Tracing::exit(Tracing::WriteImage);
 }
 
 
-void SpectralLineMaster::recordBeam(const askap::scimath::Axes &axes, const unsigned int globalChannel)
+void SpectralLineMaster::recordBeam(const askap::scimath::Axes &axes,
+                                    const unsigned int globalChannel)
 {
 
     if (axes.has("MAJMIN")) {
         // this is a restored image with beam parameters set
-        ASKAPCHECK(axes.has("PA"),"PA axis should always accompany MAJMIN");
+        ASKAPCHECK(axes.has("PA"), "PA axis should always accompany MAJMIN");
         ASKAPLOG_INFO_STR(logger, "Found beam for image.slice, channel " <<
-                          globalChannel << ", with shape "<<
-                          axes.start("MAJMIN")*180./M_PI*3600. << "x" <<
-                          axes.end("MAJMIN")*180./M_PI*3600. << ", " <<
-                          axes.start("PA")*180./M_PI);
+                          globalChannel << ", with shape " <<
+                          axes.start("MAJMIN") * 180. / M_PI * 3600. << "x" <<
+                          axes.end("MAJMIN") * 180. / M_PI * 3600. << ", " <<
+                          axes.start("PA") * 180. / M_PI);
 
-        casa::Vector<casa::Quantum<double> > beamVec(3,0.);
-        beamVec[0] = casa::Quantum<double>(axes.start("MAJMIN"),"rad");
-        beamVec[1] = casa::Quantum<double>(axes.end("MAJMIN"),"rad");
-        beamVec[2] = casa::Quantum<double>(axes.start("PA"),"rad");
+        casa::Vector<casa::Quantum<double> > beamVec(3, 0.);
+        beamVec[0] = casa::Quantum<double>(axes.start("MAJMIN"), "rad");
+        beamVec[1] = casa::Quantum<double>(axes.end("MAJMIN"), "rad");
+        beamVec[2] = casa::Quantum<double>(axes.start("PA"), "rad");
 
         itsBeamList[globalChannel] = beamVec;
-        
+
     }
 
 }
@@ -331,7 +334,7 @@ void SpectralLineMaster::storeBeam(const unsigned int globalChannel)
 {
     if (globalChannel == itsBeamReferenceChannel) {
         itsRestoredCube->addBeam(itsBeamList[globalChannel]);
-    }  
+    }
 }
 
 void SpectralLineMaster::logBeamInfo()
@@ -339,12 +342,12 @@ void SpectralLineMaster::logBeamInfo()
 
     askap::accessors::BeamLogger beamlog(itsParset);
     if (beamlog.filename() != "") {
-        ASKAPCHECK(itsBeamList.begin()->first==0,"Beam list doesn't start at channel 0");
-        ASKAPCHECK((itsBeamList.size() == (itsBeamList.rbegin()->first+1)),
-                   "Beam list doesn't finish at channel " << itsBeamList.size()-1);
+        ASKAPCHECK(itsBeamList.begin()->first == 0, "Beam list doesn't start at channel 0");
+        ASKAPCHECK((itsBeamList.size() == (itsBeamList.rbegin()->first + 1)),
+                   "Beam list doesn't finish at channel " << itsBeamList.size() - 1);
         std::vector<casa::Vector<casa::Quantum<double> > > beams;
-        for(std::map<unsigned int, casa::Vector<casa::Quantum<double> > >::iterator beam=itsBeamList.begin();
-            beam != itsBeamList.end(); beam++){
+        std::map<unsigned int, casa::Vector<casa::Quantum<double> > >::iterator beam;
+        for (beam = itsBeamList.begin(); beam != itsBeamList.end(); beam++) {
             beams.push_back(beam->second);
         }
         beamlog.beamlist() = beams;

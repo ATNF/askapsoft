@@ -81,7 +81,7 @@ MSGroupInfo::MSGroupInfo(const std::vector<std::string>& ms)
         askap::accessors::IDataConverterPtr conv = ds.createConverter();
         conv->setFrequencyFrame(casa::MFrequency::Ref(casa::MFrequency::TOPO), frequnit);
         conv->setDirectionFrame(casa::MDirection::Ref(casa::MDirection::J2000));
-        const askap::accessors::IConstDataSharedIter it = ds.createConstIterator(sel,conv);
+        const askap::accessors::IConstDataSharedIter it = ds.createConstIterator(sel, conv);
 
         // Extract # of channels
         itsNumChannels.push_back(it->nChannel());
@@ -95,7 +95,7 @@ MSGroupInfo::MSGroupInfo(const std::vector<std::string>& ms)
     // Calculate aggregate number of channels
     itsTotalNumChannels = std::accumulate(itsNumChannels.begin(), itsNumChannels.end(), 0);
     ASKAPCHECK(itsTotalNumChannels > 1,
-            "Only one channel, need at least two to calculate frequency increment");
+               "Only one channel, need at least two to calculate frequency increment");
 
     // Calcuate first freq and freq increment
     itsFirstFreq = freqinfo[0];
@@ -109,7 +109,9 @@ MSGroupInfo::MSGroupInfo(const std::vector<std::string>& ms)
         const double actual = freqinfo[i].getValue(frequnit);
         const double tolerance = 1; // i.e. one Hz
         if (abs(expected - actual) > tolerance) {
-            ASKAPLOG_ERROR_STR(logger, "Expected: " << setprecision(16) << expected << ", Actual: " << actual);
+            ASKAPLOG_ERROR_STR(logger,
+                               "Expected: " << setprecision(16) << expected <<
+                               ", Actual: " << actual);
             ASKAPTHROW(AskapError, "Non-constant frequency increment is not supported");
         }
         fi += itsFreqInc;

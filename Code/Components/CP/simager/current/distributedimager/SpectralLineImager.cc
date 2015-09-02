@@ -49,10 +49,12 @@ using namespace askap::cp;
 using namespace askap;
 
 SpectralLineImager::SpectralLineImager(LOFAR::ParameterSet& parset,
-        askap::cp::MPIBasicComms& comms) : itsParset(parset), itsComms(comms)
+                                       askap::cp::MPIBasicComms& comms) :
+    itsParset(parset), itsComms(comms)
 {
     if (isMaster()) {
-        ASKAPLOG_INFO_STR(logger, "ASKAP Distributed Spectral Line Imager - " << ASKAP_PACKAGE_VERSION);
+        ASKAPLOG_INFO_STR(logger,
+                          "ASKAP Distributed Spectral Line Imager - " << ASKAP_PACKAGE_VERSION);
     }
 }
 

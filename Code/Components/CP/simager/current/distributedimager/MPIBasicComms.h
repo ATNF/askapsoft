@@ -43,92 +43,91 @@ namespace cp {
 
 /// @brief An an instance of IBasicComms providing MPI based communications
 /// functionality.
-class MPIBasicComms : public IBasicComms
-{
-public:
-    /// @brief Constructor
-    ///
-    /// @param[in] argc argc as passed to main().
-    /// @param[in] argv argv as passed to main().
-    MPIBasicComms(int argc, char *argv[]);
+class MPIBasicComms : public IBasicComms {
+    public:
+        /// @brief Constructor
+        ///
+        /// @param[in] argc argc as passed to main().
+        /// @param[in] argv argv as passed to main().
+        MPIBasicComms(int argc, char *argv[]);
 
-    /// @brief Destructor
-    virtual ~MPIBasicComms();
+        /// @brief Destructor
+        virtual ~MPIBasicComms();
 
-    /// @copydoc IBasicComms::getId()
-    virtual int getId(void);
+        /// @copydoc IBasicComms::getId()
+        virtual int getId(void);
 
-    /// @copydoc IBasicComms::getNumNodes()
-    virtual int getNumNodes(void);
+        /// @copydoc IBasicComms::getNumNodes()
+        virtual int getNumNodes(void);
 
-    /// @copydoc IBasicComms::abort()
-    virtual void abort(void);
+        /// @copydoc IBasicComms::abort()
+        virtual void abort(void);
 
-    /// @copydoc IBasicComms::sendMessage()
-    void sendMessage(const IMessage& msg, int dest);
+        /// @copydoc IBasicComms::sendMessage()
+        void sendMessage(const IMessage& msg, int dest);
 
-    /// @copydoc IBasicComms::receiveMessage()
-    void receiveMessage(IMessage& msg, int source);
+        /// @copydoc IBasicComms::receiveMessage()
+        void receiveMessage(IMessage& msg, int source);
 
-    /// @copydoc IBasicComms::receiveMessageAnySrc(IMessage&)
-    void receiveMessageAnySrc(IMessage& msg);
+        /// @copydoc IBasicComms::receiveMessageAnySrc(IMessage&)
+        void receiveMessageAnySrc(IMessage& msg);
 
-    /// @copydoc IBasicComms::receiveMessageAnySrc(IMessage&,int&)
-    void receiveMessageAnySrc(IMessage& msg, int& actualSource);
+        /// @copydoc IBasicComms::receiveMessageAnySrc(IMessage&,int&)
+        void receiveMessageAnySrc(IMessage& msg, int& actualSource);
 
-    /// @copydoc IBasicComms::sendMessageBroadcast()
-    void sendMessageBroadcast(const IMessage& msg);
+        /// @copydoc IBasicComms::sendMessageBroadcast()
+        void sendMessageBroadcast(const IMessage& msg);
 
-    /// @copydoc IBasicComms::receiveMessageBroadcast()
-    void receiveMessageBroadcast(IMessage& msg, int root);
+        /// @copydoc IBasicComms::receiveMessageBroadcast()
+        void receiveMessageBroadcast(IMessage& msg, int root);
 
-private:
-    /// @brief MPI_Send a raw buffer to the specified destination
-    /// process.
-    ///
-    /// @param[in] buf a pointer to the buffer to send.
-    /// @param[in] size    the number of bytes to send.
-    /// @param[in] dest    the id of the process to send to.
-    /// @param[in] tag the MPI tag to be used in the communication.
-    void send(const void* buf, size_t size, int dest, int tag);
+    private:
+        /// @brief MPI_Send a raw buffer to the specified destination
+        /// process.
+        ///
+        /// @param[in] buf a pointer to the buffer to send.
+        /// @param[in] size    the number of bytes to send.
+        /// @param[in] dest    the id of the process to send to.
+        /// @param[in] tag the MPI tag to be used in the communication.
+        void send(const void* buf, size_t size, int dest, int tag);
 
-    /// @brief MPI_Recv a raw buffer from the specified source process.
-    ///
-    /// @param[out] buf a pointer to the buffer to receive data into.
-    /// @param[in] size    the number of bytes to receive.
-    /// @param[in] source  the id of the process to receive from.
-    /// @param[in] tag the MPI tag to be used in the communication.
-    /// @param[out] status MPI_Status structure returned by the call to
-    ///                     MPI_Recv()
-    void receive(void* buf, size_t size, int source, int tag, MPI_Status& status);
+        /// @brief MPI_Recv a raw buffer from the specified source process.
+        ///
+        /// @param[out] buf a pointer to the buffer to receive data into.
+        /// @param[in] size    the number of bytes to receive.
+        /// @param[in] source  the id of the process to receive from.
+        /// @param[in] tag the MPI tag to be used in the communication.
+        /// @param[out] status MPI_Status structure returned by the call to
+        ///                     MPI_Recv()
+        void receive(void* buf, size_t size, int source, int tag, MPI_Status& status);
 
-    /// @brief MPI_Bcast a raw buffer.
-    ///
-    /// @param[in,out] buf    data buffer.
-    /// @param[in] size       number of bytes to broadcast.
-    /// @param[in] root       id of the root process.
-    void broadcast(void* buf, size_t size, int root);
+        /// @brief MPI_Bcast a raw buffer.
+        ///
+        /// @param[in,out] buf    data buffer.
+        /// @param[in] size       number of bytes to broadcast.
+        /// @param[in] root       id of the root process.
+        void broadcast(void* buf, size_t size, int root);
 
-    // Check for error status and handle accordingly
-    void checkError(const int error, const std::string location);
+        // Check for error status and handle accordingly
+        void checkError(const int error, const std::string location);
 
-    // Add a byte offset to the  specified pointer, returning the result
-    void* addOffset(const void *ptr, size_t offset);
+        // Add a byte offset to the  specified pointer, returning the result
+        void* addOffset(const void *ptr, size_t offset);
 
-    // Root for broadcasts
-    static const int itsRoot = 0;
+        // Root for broadcasts
+        static const int itsRoot = 0;
 
-    // Specific MPI Communicator for this class
-    MPI_Comm itsCommunicator;
+        // Specific MPI Communicator for this class
+        MPI_Comm itsCommunicator;
 
-    // MPE event types
-    std::vector<int> itsMpeEvents;
+        // MPE event types
+        std::vector<int> itsMpeEvents;
 
-    // No support for assignment
-    MPIBasicComms& operator=(const MPIBasicComms& rhs);
+        // No support for assignment
+        MPIBasicComms& operator=(const MPIBasicComms& rhs);
 
-    // No support for copy constructor
-    MPIBasicComms(const MPIBasicComms& src);
+        // No support for copy constructor
+        MPIBasicComms(const MPIBasicComms& src);
 };
 
 }
