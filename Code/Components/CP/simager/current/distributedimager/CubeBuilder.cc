@@ -155,3 +155,10 @@ casa::CoordinateSystem CubeBuilder::createCoordinateSystem(const LOFAR::Paramete
 
     return coordsys;
 }
+
+void CubeBuilder::addBeam(casa::Vector<casa::Quantum<double> > &beam)
+{
+    casa::ImageInfo ii = itsCube->imageInfo();
+    ii.setRestoringBeam(beam);
+    itsCube->setImageInfo(ii);
+}

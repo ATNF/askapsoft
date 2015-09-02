@@ -60,6 +60,8 @@ class CubeBuilder {
                 const casa::uInt nx, const casa::uInt ny,
                 const casa::Quantity& f0, const casa::Quantity& inc);
 
+    void addBeam(casa::Vector<casa::Quantum<double> > &beam);
+
     private:
         boost::scoped_ptr< casa::PagedImage<float> > itsCube;
 };

@@ -38,6 +38,7 @@
 #include <askap/AskapError.h>
 #include <Common/ParameterSet.h>
 #include <fitting/Params.h>
+#include <fitting/Axes.h>
 #include <dataaccess/IConstDataSource.h>
 #include <dataaccess/TableConstDataSource.h>
 #include <dataaccess/IConstDataIterator.h>
@@ -61,7 +62,7 @@ ASKAP_LOGGER(logger, ".SpectralLineMaster");
 
 SpectralLineMaster::SpectralLineMaster(LOFAR::ParameterSet& parset,
         askap::cp::IBasicComms& comms)
-: itsParset(parset), itsComms(comms)
+    : itsParset(parset), itsComms(comms), itsBeamList()
 {
 }
 
@@ -84,6 +85,26 @@ void SpectralLineMaster::run(void)
     const casa::Quantity f0 = isMSGroupInfo.getFirstFreq();
     const casa::Quantity freqinc = isMSGroupInfo.getFreqInc();
 
+    // Define reference channel for giving restoring beam
+    std::string reference = itsParset.getString("beamReference","mid");
+    if (reference == "mid") {
+        itsBeamReferenceChannel = nChan / 2;
+    } else if (reference == "first") {
+        itsBeamReferenceChannel = 0;
+    } else if (reference == "last") {
+        itsBeamReferenceChannel = nChan - 1;
+    } else { // interpret reference as a 0-based channel nuumber
+        unsigned int num = atoi(reference.c_str());
+        if (num < nChan) {
+            itsBeamReferenceChannel = num;
+        } else {
+            ASKAPLOG_WARN_STR(logger, "beamReference value (" << reference
+                              << ") not valid. Using middle value of " << nChan / 2);
+            itsBeamReferenceChannel = nChan / 2;
+        }
+    }
+
+   
     // Create an image cube builder
     Tracing::entry(Tracing::WriteImage);
     itsImageCube.reset(new CubeBuilder(itsParset, nChan, f0, freqinc));
@@ -157,7 +178,7 @@ void SpectralLineMaster::run(void)
         itsComms.receiveMessageAnySrc(wrequest, id);
         if (wrequest.get_globalChannel() != SpectralLineWorkRequest::CHANNEL_UNINITIALISED) {
             if (wrequest.get_params().get() != 0) {
-                handleImageParams(wrequest.get_params(), wrequest.get_globalChannel());
+                handleImageParams(wrequest.get_params(), wrequest.get_globalChannel());                
             }
             --outstanding;
         }
@@ -216,6 +237,11 @@ void SpectralLineMaster::handleImageParams(askap::scimath::Params::ShPtr params,
     ASKAPCHECK(params->has("residual.slice"), "Params are missing residual parameter");
     ASKAPCHECK(params->has("weights.slice"), "Params are missing weights parameter");
 
+    // Record the restoring beam
+    const askap::scimath::Axes &axes = params->axes("image.slice");
+    recordBeam(axes, chan);
+    storeBeam(chan);
+    
     // Write image
     {
         const casa::Array<double> imagePixels(params->value("model.slice"));
@@ -265,4 +291,36 @@ void SpectralLineMaster::handleImageParams(askap::scimath::Params::ShPtr params,
     }
     
     Tracing::exit(Tracing::WriteImage);
+}
+
+
+void SpectralLineMaster::recordBeam(const askap::scimath::Axes &axes, const unsigned int globalChannel)
+{
+
+    if (axes.has("MAJMIN")) {
+        // this is a restored image with beam parameters set
+        ASKAPCHECK(axes.has("PA"),"PA axis should always accompany MAJMIN");
+        ASKAPLOG_INFO_STR(logger, "Found beam for image.slice, channel " <<
+                          globalChannel << ", with shape "<<
+                          axes.start("MAJMIN")*180./M_PI*3600. << "x" <<
+                          axes.end("MAJMIN")*180./M_PI*3600. << ", " <<
+                          axes.start("PA")*180./M_PI);
+
+        casa::Vector<casa::Quantum<double> > beamVec(3,0.);
+        beamVec[0] = casa::Quantum<double>(axes.start("MAJMIN"),"rad");
+        beamVec[1] = casa::Quantum<double>(axes.end("MAJMIN"),"rad");
+        beamVec[2] = casa::Quantum<double>(axes.start("PA"),"rad");
+
+        itsBeamList[globalChannel] = beamVec;
+        
+    }
+
+}
+
+
+void SpectralLineMaster::storeBeam(const unsigned int globalChannel)
+{
+    if (globalChannel == itsBeamReferenceChannel) {
+        itsRestoredCube->addBeam(itsBeamList[globalChannel]);
+    }  
 }

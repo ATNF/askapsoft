@@ -177,10 +177,8 @@ void SolverCore::restoreImage()
     ir->copyNormalEquations(*template_solver);
 
     Quality q;
-    //itsModel->add("model",itsModel->value("image"));
     ir->solveNormalEquations(*itsModel, q);
     ASKAPDEBUGASSERT(itsModel);
-
 
 }
 

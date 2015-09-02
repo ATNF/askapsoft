@@ -105,6 +105,12 @@ namespace askap {
 
                 // No support for copy constructor
                 SpectralLineMaster(const SpectralLineMaster& src);
+
+            std::map<int, casa::Vector<casa::Quantum<double> > > itsBeamList;
+
+            void recordBeam(const askap::scimath::Axes &axes, const unsigned int globalChannel);
+            void storeBeam(const unsigned int globalChannel);
+            unsigned int itsBeamReferenceChannel;
         };
 
     };
