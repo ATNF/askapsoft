@@ -39,6 +39,7 @@
 // ASKAPsoft includes
 #include <askap/AskapError.h>
 #include <askap/AskapLogging.h>
+#include <measurementequation/SynthesisParamsHelper.h>
 #include <Common/ParameterSet.h>
 #include <casa/Arrays/IPosition.h>
 #include <coordinates/Coordinates/SpectralCoordinate.h>
@@ -48,6 +49,7 @@
 #include <measures/Measures/Stokes.h>
 #include <images/Images/PagedImage.h>
 #include <casa/Quanta/Unit.h>
+#include <casa/Quanta/QC.h>
 
 ASKAP_LOGGER(logger, ".CubeBuilder");
 
@@ -58,18 +60,25 @@ using namespace std;
 CubeBuilder::CubeBuilder(const LOFAR::ParameterSet& parset, const casa::uInt nchan,
                          const casa::Quantity& f0, const casa::Quantity& inc, const std::string& name)
 {
-    string filename = parset.getString("Images.name");
+    itsFilename = parset.getString("Images.name");
 
     // If necessary, replace "image" with _name_ (e.g. "psf", "weights")
     // unless name='restored', in which case we append ".restored"
     if (!name.empty()) {
         if(name=="restored"){
-            filename=filename+".restored";
+            itsFilename=itsFilename+".restored";
         }else{
             const string orig = "image";
-            const size_t f = filename.find(orig);
-            filename.replace(f, orig.length(), name);
+            const size_t f = itsFilename.find(orig);
+            itsFilename.replace(f, orig.length(), name);
         }
+    }
+    
+    const std::string restFreqString = parset.getString("restFrequency", "-1.");
+    if (restFreqString == "HI") {
+        itsRestFrequency = casa::QC::HI;
+    } else {
+        itsRestFrequency = synthesis::SynthesisParamsHelper::convertQuantity(restFreqString, "Hz");
     }
 
     // Get the image shape
@@ -86,10 +95,13 @@ CubeBuilder::CubeBuilder(const LOFAR::ParameterSet& parset, const casa::uInt nch
 
     const casa::CoordinateSystem csys = createCoordinateSystem(parset, nx, ny, f0, inc);
 
-    ASKAPLOG_DEBUG_STR(logger, "Creating Cube " << filename << " with shape [xsize:"
+    ASKAPLOG_DEBUG_STR(logger, "Creating Cube " << itsFilename << " with shape [xsize:"
             << nx << " ysize:" << ny << " npol:" << npol << " nchan:" << nchan << "], f0: "
             << f0.getValue("MHz") << " MHz, finc: " << inc.getValue("kHz") << " kHz");
-    itsCube.reset(new casa::PagedImage<float>(casa::TiledShape(cubeShape, tileShape), csys, filename));
+    itsCube.reset(new casa::PagedImage<float>(casa::TiledShape(cubeShape, tileShape), csys, itsFilename));
+
+    // default flux units are Jy/pixel. If we set the restoring beam later on, can set to Jy/beam
+    setUnits("Jy/pixel");
 }
 
 CubeBuilder::~CubeBuilder()
@@ -148,8 +160,21 @@ casa::CoordinateSystem CubeBuilder::createCoordinateSystem(const LOFAR::Paramete
     // Spectral Coordinate
     {
         const Double refPix = 0.0;  // is the reference pixel
-        const SpectralCoordinate sc(MFrequency::TOPO, f0, inc, refPix);
+        SpectralCoordinate sc(MFrequency::TOPO, f0, inc, refPix);
 
+        // add rest frequency, but only if requested, and only for image.blah, residual.blah, image.blah.restored
+        if (itsRestFrequency.getValue("Hz") > 0.) {
+            if ( itsFilename.find("image.") != string::npos ||
+                 itsFilename.find("residual.") != string::npos) {
+
+                if(!sc.setRestFrequency(itsRestFrequency.getValue("Hz")))
+                {
+                    ASKAPLOG_ERROR_STR(logger, "Could not set the rest frequency to " <<
+                                       itsRestFrequency.getValue("Hz") << "Hz");
+                }
+            }
+        }
+        
         coordsys.addCoordinate(sc);
     }
 
@@ -161,4 +186,11 @@ void CubeBuilder::addBeam(casa::Vector<casa::Quantum<double> > &beam)
     casa::ImageInfo ii = itsCube->imageInfo();
     ii.setRestoringBeam(beam);
     itsCube->setImageInfo(ii);
+    setUnits("Jy/beam");
 }
+
+void CubeBuilder::setUnits(const std::string &units)
+{
+    itsCube->setUnits(casa::Unit(units));
+}
+
