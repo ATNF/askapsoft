@@ -47,6 +47,7 @@
 #include <dataaccess/IDataIterator.h>
 #include <dataaccess/SharedIter.h>
 #include <casa/Quanta.h>
+#include <imageaccess/BeamLogger.h>
 
 // Local includes
 #include "distributedimager/IBasicComms.h"
@@ -111,9 +112,11 @@ void SpectralLineMaster::run(void)
     itsPSFCube.reset(new CubeBuilder(itsParset, nChan, f0, freqinc, "psf"));
     itsResidualCube.reset(new CubeBuilder(itsParset, nChan, f0, freqinc, "residual"));
     itsWeightsCube.reset(new CubeBuilder(itsParset, nChan, f0, freqinc, "weights"));
-    itsPSFimageCube.reset(new CubeBuilder(itsParset, nChan, f0, freqinc, "psf.image"));
-    itsRestoredCube.reset(new CubeBuilder(itsParset, nChan, f0, freqinc, "restored"));
-
+    if(itsParset.getBool("restore", false)){
+        // Only create these if we are restoring, as that is when they get made
+        itsPSFimageCube.reset(new CubeBuilder(itsParset, nChan, f0, freqinc, "psf.image"));
+        itsRestoredCube.reset(new CubeBuilder(itsParset, nChan, f0, freqinc, "restored"));
+    }
     Tracing::exit(Tracing::WriteImage);
 
     // Send work orders to the worker processes, handling out
@@ -194,6 +197,8 @@ void SpectralLineMaster::run(void)
         itsComms.sendMessage(wu, id);
     }
 
+    logBeamInfo();
+    
     itsImageCube.reset();
 }
 
@@ -234,9 +239,11 @@ void SpectralLineMaster::handleImageParams(askap::scimath::Params::ShPtr params,
     ASKAPCHECK(params->has("image.slice"), "Params are missing image parameter");
     ASKAPCHECK(params->has("psf.slice"), "Params are missing psf parameter");
     ASKAPCHECK(params->has("psf.image.slice"), "Params are missing psf.image parameter");
-    ASKAPCHECK(params->has("residual.slice"), "Params are missing residual parameter");
-    ASKAPCHECK(params->has("weights.slice"), "Params are missing weights parameter");
-
+    if(itsParset.getBool("restore", false)){
+        ASKAPCHECK(params->has("residual.slice"), "Params are missing residual parameter");
+        ASKAPCHECK(params->has("weights.slice"), "Params are missing weights parameter");
+    }
+    
     // Record the restoring beam
     const askap::scimath::Axes &axes = params->axes("image.slice");
     recordBeam(axes, chan);
@@ -274,20 +281,22 @@ void SpectralLineMaster::handleImageParams(askap::scimath::Params::ShPtr params,
         itsWeightsCube->writeSlice(floatImagePixels, chan);
     }
 
-    // Write PSF image
-    {
-        const casa::Array<double> imagePixels(params->value("psf.image.slice"));
-        casa::Array<float> floatImagePixels(imagePixels.shape());
-        casa::convertArray<float, double>(floatImagePixels, imagePixels);
-        itsPSFimageCube->writeSlice(floatImagePixels, chan);
-    }
-
-    // Write Restored image
-    {
-        const casa::Array<double> imagePixels(params->value("image.slice"));
-        casa::Array<float> floatImagePixels(imagePixels.shape());
-        casa::convertArray<float, double>(floatImagePixels, imagePixels);
-        itsRestoredCube->writeSlice(floatImagePixels, chan);
+    if(itsParset.getBool("restore", false)){
+        // Write PSF image
+        {
+            const casa::Array<double> imagePixels(params->value("psf.image.slice"));
+            casa::Array<float> floatImagePixels(imagePixels.shape());
+            casa::convertArray<float, double>(floatImagePixels, imagePixels);
+            itsPSFimageCube->writeSlice(floatImagePixels, chan);
+        }
+        
+        // Write Restored image
+        {
+            const casa::Array<double> imagePixels(params->value("image.slice"));
+            casa::Array<float> floatImagePixels(imagePixels.shape());
+            casa::convertArray<float, double>(floatImagePixels, imagePixels);
+            itsRestoredCube->writeSlice(floatImagePixels, chan);
+        }
     }
     
     Tracing::exit(Tracing::WriteImage);
@@ -323,4 +332,22 @@ void SpectralLineMaster::storeBeam(const unsigned int globalChannel)
     if (globalChannel == itsBeamReferenceChannel) {
         itsRestoredCube->addBeam(itsBeamList[globalChannel]);
     }  
+}
+
+void SpectralLineMaster::logBeamInfo()
+{
+    ASKAPCHECK(itsBeamList.begin()->first==0,"Beam list doesn't start at channel 0");
+    ASKAPCHECK((itsBeamList.size() == (itsBeamList.rbegin()->first+1)),
+               "Beam list doesn't finish at channel " << itsBeamList.size()-1);
+
+    askap::accessors::BeamLogger beamlog(itsParset);
+    std::vector<casa::Vector<casa::Quantum<double> > > beams;
+    for(std::map<unsigned int, casa::Vector<casa::Quantum<double> > >::iterator beam=itsBeamList.begin();
+        beam != itsBeamList.end(); beam++){
+        beams.push_back(beam->second);
+    }
+    beamlog.beamlist() = beams;
+    ASKAPLOG_INFO_STR(logger, "Writing list of individual channel beams to beam log "
+                      << beamlog.filename());
+    beamlog.write();
 }

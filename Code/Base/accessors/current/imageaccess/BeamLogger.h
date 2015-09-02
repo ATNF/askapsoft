@@ -56,12 +56,12 @@ class BeamLogger {
         BeamLogger();
         BeamLogger(const LOFAR::ParameterSet &parset);
         BeamLogger(const std::string &filename);
-        BeamLogger(const BeamLogger& other);
-        BeamLogger& operator= (const BeamLogger& other);
         virtual ~BeamLogger() {};
 
         /// Set the name of the beam log file
         void setFilename(const std::string& filename) {itsFilename = filename;};
+
+    std::string filename(){return itsFilename;};
 
         /// @brief Extract the beam information for each channel image
         void extractBeams(const std::vector<std::string>& imageList);
@@ -75,12 +75,10 @@ class BeamLogger {
         /// Return the beam information
         std::vector< casa::Vector<casa::Quantum<double> > > beamlist() const {return itsBeamList;};
 
-        /// Return the list of channel images
-        std::vector<std::string> imageList() const {return itsImageList;};
+    std::vector< casa::Vector<casa::Quantum<double> > > &beamlist() {return itsBeamList;};
 
     protected:
         std::string itsFilename;
-        std::vector<std::string> itsImageList;
         std::vector< casa::Vector<casa::Quantum<double> > > itsBeamList;
 
 };

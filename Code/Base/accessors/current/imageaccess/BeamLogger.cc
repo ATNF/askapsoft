@@ -61,31 +61,14 @@ BeamLogger::BeamLogger(const std::string &filename):
 {
 }
 
-BeamLogger::BeamLogger(const BeamLogger& other)
-{
-    operator=(other);
-}
-
-BeamLogger& BeamLogger::operator= (const BeamLogger& other)
-{
-    if (this == &other) return *this;
-
-    itsFilename = other.itsFilename;
-    itsImageList = other.itsImageList;
-    itsBeamList = other.itsBeamList;
-    return *this;
-}
-
-
 /// @details The beam information is extracted from each
 /// channel image and stored in a vector.
 void BeamLogger::extractBeams(const std::vector<std::string>& imageList)
 {
-    itsImageList = imageList;
     itsBeamList.clear();
-    std::vector<std::string>::iterator image = itsImageList.begin();
+    std::vector<std::string>::const_iterator image = imageList.begin();
 
-    for (; image != itsImageList.end(); image++) {
+    for (; image != imageList.end(); image++) {
         CasaImageAccess ia;
         itsBeamList.push_back(ia.beamInfo(*image));
     }
@@ -104,10 +87,10 @@ void BeamLogger::write()
     if (itsFilename != "") {
 
         std::ofstream fout(itsFilename.c_str());
-        fout << "#Channel Image_name BMAJ[arcsec] BMIN[arcsec] BPA[deg]\n";
+        fout << "#Channel BMAJ[arcsec] BMIN[arcsec] BPA[deg]\n";
 
         for (size_t i = 0; i < itsBeamList.size(); i++) {
-            fout << i << " " << itsImageList[i] << " "
+            fout << i << " " 
                 << itsBeamList[i][0].getValue("arcsec") << " "
                 << itsBeamList[i][1].getValue("arcsec") << " "
                 << itsBeamList[i][2].getValue("deg") << "\n";
@@ -125,7 +108,6 @@ void BeamLogger::write()
 /// are cleared and an error message is written to the log.
 void BeamLogger::read()
 {
-    itsImageList.clear();
     itsBeamList.clear();
 
     if (itsFilename != "") {
@@ -141,8 +123,7 @@ void BeamLogger::read()
             while (getline(fin, line),
                     !fin.eof()) {
                 std::stringstream ss(line);
-                ss >> chan >> name >> bmaj >> bmin >> bpa;
-                itsImageList.push_back(name);
+                ss >> chan >> bmaj >> bmin >> bpa;
                 casa::Vector<casa::Quantum<double> > currentbeam(3);
                 currentbeam[0] = casa::Quantum<double>(bmaj, "arcsec");
                 currentbeam[1] = casa::Quantum<double>(bmin, "arcsec");
