@@ -87,7 +87,7 @@ void SpectralLineMaster::run(void)
     const casa::Quantity freqinc = isMSGroupInfo.getFreqInc();
 
     // Define reference channel for giving restoring beam
-    std::string reference = itsParset.getString("beamReference","mid");
+    std::string reference = itsParset.getString("restore.beamReference","mid");
     if (reference == "mid") {
         itsBeamReferenceChannel = nChan / 2;
     } else if (reference == "first") {
@@ -336,18 +336,20 @@ void SpectralLineMaster::storeBeam(const unsigned int globalChannel)
 
 void SpectralLineMaster::logBeamInfo()
 {
-    ASKAPCHECK(itsBeamList.begin()->first==0,"Beam list doesn't start at channel 0");
-    ASKAPCHECK((itsBeamList.size() == (itsBeamList.rbegin()->first+1)),
-               "Beam list doesn't finish at channel " << itsBeamList.size()-1);
 
     askap::accessors::BeamLogger beamlog(itsParset);
-    std::vector<casa::Vector<casa::Quantum<double> > > beams;
-    for(std::map<unsigned int, casa::Vector<casa::Quantum<double> > >::iterator beam=itsBeamList.begin();
-        beam != itsBeamList.end(); beam++){
-        beams.push_back(beam->second);
+    if (beamlog.filename() != "") {
+        ASKAPCHECK(itsBeamList.begin()->first==0,"Beam list doesn't start at channel 0");
+        ASKAPCHECK((itsBeamList.size() == (itsBeamList.rbegin()->first+1)),
+                   "Beam list doesn't finish at channel " << itsBeamList.size()-1);
+        std::vector<casa::Vector<casa::Quantum<double> > > beams;
+        for(std::map<unsigned int, casa::Vector<casa::Quantum<double> > >::iterator beam=itsBeamList.begin();
+            beam != itsBeamList.end(); beam++){
+            beams.push_back(beam->second);
+        }
+        beamlog.beamlist() = beams;
+        ASKAPLOG_INFO_STR(logger, "Writing list of individual channel beams to beam log "
+                          << beamlog.filename());
+        beamlog.write();
     }
-    beamlog.beamlist() = beams;
-    ASKAPLOG_INFO_STR(logger, "Writing list of individual channel beams to beam log "
-                      << beamlog.filename());
-    beamlog.write();
 }

@@ -74,7 +74,7 @@ CubeBuilder::CubeBuilder(const LOFAR::ParameterSet& parset, const casa::uInt nch
         }
     }
     
-    const std::string restFreqString = parset.getString("restFrequency", "-1.");
+    const std::string restFreqString = parset.getString("Images.restFrequency", "-1.");
     if (restFreqString == "HI") {
         itsRestFrequency = casa::QC::HI;
     } else {
