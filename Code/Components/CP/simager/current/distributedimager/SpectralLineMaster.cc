@@ -341,7 +341,7 @@ void SpectralLineMaster::storeBeam(const unsigned int globalChannel)
 void SpectralLineMaster::logBeamInfo()
 {
 
-    askap::accessors::BeamLogger beamlog(itsParset);
+    askap::accessors::BeamLogger beamlog(itsParset.makeSubset("restore."));
     if (beamlog.filename() != "") {
         ASKAPCHECK(itsBeamList.begin()->first == 0, "Beam list doesn't start at channel 0");
         ASKAPCHECK((itsBeamList.size() == (itsBeamList.rbegin()->first + 1)),
