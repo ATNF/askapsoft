@@ -66,6 +66,9 @@ CubeBuilder::CubeBuilder(const LOFAR::ParameterSet& parset,
 {
     itsFilename = parset.getString("Images.name");
 
+    ASKAPCHECK(itsFilename.substr(0,5)=="image",
+               "Simager.Images.name must start with 'image'");
+
     // If necessary, replace "image" with _name_ (e.g. "psf", "weights")
     // unless name='restored', in which case we append ".restored"
     if (!name.empty()) {
