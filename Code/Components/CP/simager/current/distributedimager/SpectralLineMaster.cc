@@ -167,6 +167,7 @@ void SpectralLineMaster::run(void)
             wu.set_dataset(ms[n]);
             wu.set_globalChannel(globalChannel);
             wu.set_localChannel(localChan);
+            wu.set_channelFrequency(f0.getValue("Hz") + globalChannel*freqinc.getValue("Hz"));
             itsComms.sendMessage(wu, id);
             ++outstanding;
 

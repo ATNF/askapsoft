@@ -107,7 +107,8 @@ void SpectralLineWorker::run(void)
         const string ms = wu.get_dataset();
         ASKAPLOG_DEBUG_STR(logger, "Received Work Unit for dataset " << ms
                            << ", local channel " << wu.get_localChannel()
-                           << ", global channel " << wu.get_globalChannel());
+                           << ", global channel " << wu.get_globalChannel()
+                           << ", frequency " << wu.get_channelFrequency()/1.e6 << "MHz");
         askap::scimath::Params::ShPtr params;
         try {
             params = processWorkUnit(wu);
@@ -162,19 +163,21 @@ askap::scimath::Params::ShPtr SpectralLineWorker::processWorkUnit(const Spectral
 
     const unsigned int localChannel = wu.get_localChannel();
     const unsigned int globalChannel = wu.get_globalChannel();
+    double channelFrequency = wu.get_channelFrequency();
     ASKAPCHECK(localChannel < it->nChannel(), "Invalid local channel number");
     ASKAPCHECK(localChannel <= globalChannel, "Local channel > global channel");
-    return processChannel(ds, imagename, localChannel, globalChannel);
+    return processChannel(ds, imagename, localChannel, globalChannel,channelFrequency);
 }
 
 askap::scimath::Params::ShPtr
 SpectralLineWorker::processChannel(askap::accessors::TableDataSource& ds,
                                    const std::string& imagename,
                                    unsigned int localChannel,
-                                   unsigned int globalChannel)
+                                   unsigned int globalChannel,
+                                   double channelFrequency)
 {
     askap::scimath::Params::ShPtr model_p(new Params());
-    setupImage(model_p);
+    setupImage(model_p,channelFrequency);
 
     casa::Timer timer;
 
@@ -292,7 +295,8 @@ SpectralLineWorker::processChannel(askap::accessors::TableDataSource& ds,
     return model_p;
 }
 
-void SpectralLineWorker::setupImage(const askap::scimath::Params::ShPtr& params)
+void SpectralLineWorker::setupImage(const askap::scimath::Params::ShPtr& params,
+                                    double channelFrequency)
 {
     try {
         const LOFAR::ParameterSet parset = itsParset.makeSubset("Images.");
@@ -302,7 +306,7 @@ void SpectralLineWorker::setupImage(const askap::scimath::Params::ShPtr& params)
         const vector<string> direction = parset.getStringVector("direction");
         const vector<string> cellsize = parset.getStringVector("cellsize");
         const vector<int> shape = parset.getInt32Vector("shape");
-        const vector<double> freq = parset.getDoubleVector("frequency");
+        //const vector<double> freq = parset.getDoubleVector("frequency");
         const int nchan = 1;
 
         if (!parset.isDefined("polarisation")) {
@@ -337,7 +341,9 @@ void SpectralLineWorker::setupImage(const askap::scimath::Params::ShPtr& params)
 
         if (nfacets == 1) {
             SynthesisParamsHelper::add(*params, name, direction, cellsize, shape, ewProj,
-                                       freq[0], freq[1], nchan, stokes);
+                                       channelFrequency, channelFrequency, nchan, stokes);
+            // SynthesisParamsHelper::add(*params, name, direction, cellsize, shape, ewProj,
+            //                            freq[0], freq[1], nchan, stokes);
         } else {
             // this is a multi-facet case
             const int facetstep = parset.getInt32("facetstep", casa::min(shape[0], shape[1]));
@@ -346,8 +352,11 @@ void SpectralLineWorker::setupImage(const askap::scimath::Params::ShPtr& params)
             ASKAPLOG_INFO_STR(logger, "Facet centers will be " << facetstep <<
                               " pixels apart, each facet size will be "
                               << shape[0] << " x " << shape[1]);
+            // SynthesisParamsHelper::add(*params, name, direction, cellsize, shape, ewProj,
+            //                            freq[0], freq[1], nchan, stokes, nfacets, facetstep);
             SynthesisParamsHelper::add(*params, name, direction, cellsize, shape, ewProj,
-                                       freq[0], freq[1], nchan, stokes, nfacets, facetstep);
+                                       channelFrequency, channelFrequency,
+                                       nchan, stokes, nfacets, facetstep);
         }
 
     } catch (const LOFAR::APSException &ex) {

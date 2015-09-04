@@ -59,12 +59,14 @@ class SpectralLineWorker {
 
         // For a given workunit, just process a single channel
         askap::scimath::Params::ShPtr processChannel(askap::accessors::TableDataSource& ds,
-                const std::string& imagename,
-                unsigned int localChannel,
-                unsigned int globalChannel);
+                                                     const std::string& imagename,
+                                                     unsigned int localChannel,
+                                                     unsigned int globalChannel,
+                                                     double channelFrequency);
 
         // Setup the image specified in itsParset and add it to the Params instance.
-        void setupImage(const askap::scimath::Params::ShPtr& params);
+    void setupImage(const askap::scimath::Params::ShPtr& params,
+                    double channelFrequency);
 
         // Parameter set
         LOFAR::ParameterSet& itsParset;

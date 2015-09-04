@@ -38,7 +38,7 @@
 using namespace askap::cp;
 
 SpectralLineWorkUnit::SpectralLineWorkUnit()
-    : itsGlobalChannel(-1), itsLocalChannel(-1)
+    : itsGlobalChannel(-1), itsLocalChannel(-1), itsChannelFrequency(0.)
 {
 }
 
@@ -74,6 +74,11 @@ void SpectralLineWorkUnit::set_localChannel(unsigned int chan)
     itsLocalChannel = chan;
 }
 
+void SpectralLineWorkUnit::set_channelFrequency(double freq)
+{
+    itsChannelFrequency = freq;
+}
+
 /////////////////////////////////////////////////////////////////////
 // Getters
 /////////////////////////////////////////////////////////////////////
@@ -97,6 +102,11 @@ unsigned int SpectralLineWorkUnit::get_localChannel(void) const
     return itsLocalChannel;
 }
 
+double SpectralLineWorkUnit::get_channelFrequency(void) const
+{
+    return itsChannelFrequency;
+}
+
 /////////////////////////////////////////////////////////////////////
 // Serializers
 /////////////////////////////////////////////////////////////////////
@@ -105,6 +115,7 @@ void SpectralLineWorkUnit::writeToBlob(LOFAR::BlobOStream& os) const
     os << static_cast<int>(itsPayloadType);
     os << itsDataset;
     os << itsGlobalChannel;
+    os << itsChannelFrequency;
     os << itsLocalChannel;
 }
 
@@ -115,6 +126,7 @@ void SpectralLineWorkUnit::readFromBlob(LOFAR::BlobIStream& is)
     is >> payloadType;
     is >> itsDataset;
     is >> itsGlobalChannel;
+    is >> itsChannelFrequency;
     is >> itsLocalChannel;
 
     itsPayloadType = static_cast<PayloadType>(payloadType);
