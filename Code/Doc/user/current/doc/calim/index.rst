@@ -11,6 +11,7 @@ data sets i.e. Hundereds of TB per hour.
    :maxdepth: 1
 
    cimager.rst
+   simager.rst
    csimulator.rst
    ccalibrator.rst
    cbpcalibrator.rst

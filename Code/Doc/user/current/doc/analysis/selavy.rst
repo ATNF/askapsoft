@@ -324,17 +324,20 @@ implemented in the ASKAP source finder:
   (CSIRO ASKAP Science Data Archive), catalogues of islands and
   components (fitted 2D Gaussians) are written in both ASCII (.txt)
   and VOTable (.xml) formats. These take their names from the
-  **resultsFile** detailed above: where that is *selavy-results.txt*,
-  the islands catalogue will be *selavy-results.islands.txt* and the
-  components catalogue will be *selavy-results.components.txt*, with a
-  *.xml* extension for the VOTables. An example of the components
-  catalogue can be found at :doc:`postprocessing`, while an example
-  island catalogue follows.
+  **resultsFile** detailed above: replacing the *.txt* extension with
+  *islands.txt* and *components.txt* (so if the **resultsFile**
+  parameter is *selavy-results.txt*, the islands catalogue will be
+  *selavy-results.islands.txt* and the components catalogue will be
+  *selavy-results.components.txt*). The VOTable equivalents will have
+  a *.xml* extension. An example of the components catalogue can be
+  found at :doc:`postprocessing`, while an example island catalogue
+  is shown below.
 * Fitting results - when Gaussian fitting is done for the continuum
   sources, several files are produced: a catalogue in ASCII & VOTable
   format (differing from the CASDA-format components catalogue), and
-  annotation files showing the location of fitted components. See
-  :doc:`postprocessing` for details of the content of these files.
+  annotation files showing the location of fitted components. These
+  will be called *selavy-results.fitResults.txt* etc
+  See :doc:`postprocessing` for details of the content of these files.
 * Images: when the variable-threshold option is used, the user can opt
   to write out relevant maps to CASA images. These include the noise
   map, detection threshold, and signal-to-noise ratio. These are
@@ -357,10 +360,10 @@ The island catalogue will look something like the following:
 
  #         island_id    island_name n_components ra_hms_cont dec_dms_cont ra_deg_cont dec_deg_cont       freq maj_axis min_axis pos_ang    flux_int   flux_peak x_min x_max y_min y_max    n_pix   x_ave   y_ave   x_cen   y_cen x_peak y_peak flag_i1 flag_i2 flag_i3 flag_i4                                                                                             comment
  #                --                                                            [deg]        [deg]      [MHz] [arcsec] [arcsec]   [deg]       [mJy]  [mJy/beam]
-      SBnull_image_1 J222645-623530            1  22:26:45.4    -62:35:30  336.689117   -62.591704      864.0     1.24     0.74  157.31     1.43677      1.2909  2350  2361   290   308      178 2355.71  299.10 2355.36  300.08   2355    300       0       0       0       0
-      SBnull_image_2 J231717-613700            1  23:17:17.7    -61:37:00  349.323782   -61.616938      864.0     1.20     0.75  163.07     1.25480      1.1303   580   592   603   619      180  585.72  611.03  585.53  611.04    586    611       0       0       0       0
-      SBnull_image_3 J231447-621212            1  23:14:47.5    -62:12:12  348.698019   -62.203388      864.0     1.16     0.84  151.38     0.91437      0.8587   682   696   434   451      197  688.52  442.41  688.01  442.62    688    443       0       0       0       0
-      SBnull_image_4 J231034-633000            1  23:10:34.1    -63:30:00  347.642163   -63.499988      864.0     1.18     0.88  157.61     1.07729      0.8547   851   866    56    71      190  858.75   63.37  858.93   63.64    859     64       0       0       0       0
+      SB9999_image_1 J222645-623530            1  22:26:45.4    -62:35:30  336.689117   -62.591704      864.0     1.24     0.74  157.31     1.43677      1.2909  2350  2361   290   308      178 2355.71  299.10 2355.36  300.08   2355    300       0       0       0       0
+      SB9999_image_2 J231717-613700            1  23:17:17.7    -61:37:00  349.323782   -61.616938      864.0     1.20     0.75  163.07     1.25480      1.1303   580   592   603   619      180  585.72  611.03  585.53  611.04    586    611       0       0       0       0
+      SB9999_image_3 J231447-621212            1  23:14:47.5    -62:12:12  348.698019   -62.203388      864.0     1.16     0.84  151.38     0.91437      0.8587   682   696   434   451      197  688.52  442.41  688.01  442.62    688    443       0       0       0       0
+      SB9999_image_4 J231034-633000            1  23:10:34.1    -63:30:00  347.642163   -63.499988      864.0     1.18     0.88  157.61     1.07729      0.8547   851   866    56    71      190  858.75   63.37  858.93   63.64    859     64       0       0       0       0
 
 The columns used are:
 
@@ -395,7 +398,7 @@ Output-related parameters
 +-------------------------+--------------+----------------------------+------------------------------------------------------------------------------------------------+
 |*Parameter*              |*Type*        |*Default*                   |*Description*                                                                                   |
 +=========================+==============+============================+================================================================================================+
-|SBid                     |string        |null                        |The Scheduling block ID. Currently this is only used for the ID strings for the islands and     |
+|sbid                     |string        |None                        |The Scheduling block ID. Currently this is only used for the ID strings for the islands and     |
 |                         |              |                            |components.                                                                                     |
 +-------------------------+--------------+----------------------------+------------------------------------------------------------------------------------------------+
 |verbose                  |bool          |false                       |Controls the verbosity for the Duchamp-specific code. **verbose=true** means more information   |

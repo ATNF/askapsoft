@@ -600,5 +600,5 @@ the left. Some examples of alternative tests to try:
   increase the maxsupport parameter as well - try going up in factors of 2. See
   :doc:`../calim/gridder` for explanations of the gridding parameters.
 
-.. _PSF simulations: http://www.atnf.csiro.au/people/Matthew.Whiting/ASKAP/psf/weighted/view.html
+.. _PSF simulations: http://www.atnf.csiro.au/people/Matthew.Whiting/ASKAP/psf/view.html
 

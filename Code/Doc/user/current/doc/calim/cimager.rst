@@ -18,7 +18,7 @@ Parallel/Distributed Execution
 ------------------------------
 
 The program is distributed and used a master/worker pattern to distribute and manage work.
-The program requires at least to processes to execute, and failure to either execute
+The program requires at least two processes to execute, and failure to either execute
 *cimager* as an MPI process or specifying only one MPI process will result in an error.
 
 On the Cray XC30 platform executing with the MPI wrapper takes the form::
@@ -177,9 +177,9 @@ default to "cross".
 |                          |                  |              |40deg]. Otherwise an exception is thrown. This      |
 |                          |                  |              |parameter is only used if *restore* is set to       |
 |                          |                  |              |True. If restore.beam=fit, the code will fit a 2D   |
-|                          |                  |              |gaussian into PSF image (first encountered if       |
-|                          |                  |              |multiple images are solved for) and use this fit    |
-|                          |                  |              |results.                                            |
+|                          |                  |              |gaussian to the PSF image (first encountered if     |
+|                          |                  |              |multiple images are solved for) and use the results |
+|                          |                  |              |of this fit.                                        |
 +--------------------------+------------------+--------------+----------------------------------------------------+
 |restore.beam.cutoff       |double            |0.05          |Cutoff for the support search prior to beam         |
 |                          |                  |              |fitting. This parameter is only used if             |
