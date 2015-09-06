@@ -474,9 +474,9 @@ Output-related parameters
 +-------------------------+--------------+----------------------------+------------------------------------------------------------------------------------------------+
 |precSNR                  |int           |2                           |Precision for the SNR values in the output files                                                |
 +-------------------------+--------------+----------------------------+------------------------------------------------------------------------------------------------+
-|sortingParam             |string        |vel                         |The parameter with which to sort the output list: x-value, y-value, z-value, ra, dec, vel, w50, |
-|                         |              |                            |iflux, pflux, snr. A - prepended to the parameter reverses the order of the sort.               |
-|                         |              |                            |                                                                                                |
+|sortingParam             |string        |vel                         |The parameter with which to sort the output list: xvalue, yvalue, zvalue, ra, dec, vel, w50,    |
+|                         |              |                            |iflux, pflux, snr. A - prepended to the parameter reverses the order of the sort (so giving     |
+|                         |              |                            |-iflux means the source with the largest integrated flux is listed first).                      |
 +-------------------------+--------------+----------------------------+------------------------------------------------------------------------------------------------+
 
 .. _`Extraction`: extraction.html
