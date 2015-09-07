@@ -46,16 +46,16 @@ from a designated input image. This is, by default, the middle image of the rang
 (number of images) / 2, with integer division), but this can be changed by setting *beamReference*
 to 'first', 'last', or a number in the range. The individual beam sizes for each of the input
 images (assuming they are defined) can be written to an ascii text file for future reference.
-The file has columns: index | image name | major axis [arcsec] | minor axis [arcsec] | position angle [deg]
+The file has columns: channel number | major axis [arcsec] | minor axis [arcsec] | position angle [deg]
 
 Here is an example of the start of a beam log::
 
-  #Channel Image_name BMAJ[arcsec] BMIN[arcsec] BPA[deg]
-  0 image.i.cube.clean_ch0.restored 65.7623 36.4139 -54.7139
-  1 image.i.cube.clean_ch1.restored 65.7981 36.4222 -54.7605
-  2 image.i.cube.clean_ch2.restored 65.8365 36.4324 -54.7985
-  3 image.i.cube.clean_ch3.restored 65.8733 36.4413 -54.845
-  4 image.i.cube.clean_ch4.restored 65.9082 36.4512 -54.8919
+  #Channel BMAJ[arcsec] BMIN[arcsec] BPA[deg]
+  0 65.7623 36.4139 -54.7139
+  1 65.7981 36.4222 -54.7605
+  2 65.8365 36.4324 -54.7985
+  3 65.8733 36.4413 -54.845
+  4 65.9082 36.4512 -54.8919
 
 The following table describes the possible parameters.
 
