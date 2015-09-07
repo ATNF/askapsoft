@@ -154,6 +154,8 @@ void SpectralLineMaster::run(void)
             if (wrequest.get_globalChannel() != SpectralLineWorkRequest::CHANNEL_UNINITIALISED) {
                 if (wrequest.get_params().get() != 0) {
                     handleImageParams(wrequest.get_params(), wrequest.get_globalChannel());
+                } else {
+                    recordBeamFailure(wrequest.get_globalChannel());
                 }
                 --outstanding;
             }
@@ -183,6 +185,8 @@ void SpectralLineMaster::run(void)
         if (wrequest.get_globalChannel() != SpectralLineWorkRequest::CHANNEL_UNINITIALISED) {
             if (wrequest.get_params().get() != 0) {
                 handleImageParams(wrequest.get_params(), wrequest.get_globalChannel());
+            } else {
+                recordBeamFailure(wrequest.get_globalChannel());
             }
             --outstanding;
         }
@@ -327,6 +331,14 @@ void SpectralLineMaster::recordBeam(const askap::scimath::Axes &axes,
         itsBeamList[globalChannel] = beamVec;
 
     }
+
+}
+
+void SpectralLineMaster::recordBeamFailure(const unsigned int globalChannel)
+{
+
+    casa::Vector<casa::Quantum<double> > beamVec(3, 0.);
+    itsBeamList[globalChannel] = beamVec;
 
 }
 

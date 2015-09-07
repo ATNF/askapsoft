@@ -107,6 +107,7 @@ class SpectralLineMaster {
         std::map<unsigned int, casa::Vector<casa::Quantum<double> > > itsBeamList;
 
         void recordBeam(const askap::scimath::Axes &axes, const unsigned int globalChannel);
+        void recordBeamFailure(const unsigned int globalChannel);
         void storeBeam(const unsigned int globalChannel);
         unsigned int itsBeamReferenceChannel;
         void logBeamInfo();

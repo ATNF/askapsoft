@@ -88,7 +88,10 @@ introduced to *simager*.
 * To record the individual channel beams, the user can set
   **Simager.restore.beamLog**, which will produce an ascii text file
   listing the beam parameters for each channel. The file has columns:
-  index | major axis [arcsec] | minor axis [arcsec] | position angle [deg] 
+  index | major axis [arcsec] | minor axis [arcsec] | position angle [deg]
+  Should the imaging of a channel fail for some reason, the beam for
+  that channel will be recorded as having zero for all three
+  parameters. 
 
 Here is an example of the start of a beam log::
   
