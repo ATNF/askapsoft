@@ -58,7 +58,7 @@ HiEmissionCatalogue::HiEmissionCatalogue(std::vector<sourcefitting::RadioSource>
     itsObjects(),
     itsSpec(),
     itsCube(cube),
-    itsVersion("casda.sl_hi_emission_object_v0.10")
+    itsVersion("casda.sl_hi_emission_object_v0.11")
 {
     this->defineObjects(srclist, parset);
     this->defineSpec();
@@ -163,37 +163,37 @@ void HiEmissionCatalogue::defineSpec()
                       "stat.error;askap:src.asymmetry.3d", "float", "col_asymmetry_3d_err", "");
     itsSpec.addColumn("FREQ_UW", "freq_uw", "[" + casda::freqUnit + "]",
                       11, casda::precFreqSpectral, "em.freq",
-                      "float", "col_freq_uw", "");
+                      "double", "col_freq_uw", "");
     itsSpec.addColumn("FREQ_UW_ERR", "freq_uw_err", "[" + casda::freqUnit + "]",
                       11, casda::precFreqSpectral, "stat.error;em.freq",
-                      "float", "col_freq_uw_err", "");
+                      "double", "col_freq_uw_err", "");
     itsSpec.addColumn("FREQ_W", "freq_w", "[" + casda::freqUnit + "]",
                       11, casda::precFreqSpectral, "em.freq;meta.main",
-                      "float", "col_freq_w", "");
+                      "double", "col_freq_w", "");
     itsSpec.addColumn("FREQ_W_ERR", "freq_w_err", "[" + casda::freqUnit + "]",
                       11, casda::precFreqSpectral, "stat.error;em.freq;meta.main",
-                      "float", "col_freq_w_err", "");
+                      "double", "col_freq_w_err", "");
     itsSpec.addColumn("FREQ_PEAK", "freq_peak", "[" + casda::freqUnit + "]",
                       11, casda::precFreqSpectral, "em.freq;phot.flux.density;stat.max",
-                      "float", "col_freq_peak", "");
+                      "double", "col_freq_peak", "");
     itsSpec.addColumn("VEL_UW", "vel_uw", "[" + casda::velocityUnit + "]",
-                      11, casda::precFreqSpectral,
+                      11, casda::precVelSpectral,
                       "spect.dopplerVeloc.opt;em.line.HI",
                       "float", "col_vel_uw", "");
     itsSpec.addColumn("VEL_UW_ERR", "vel_uw_err", "[" + casda::velocityUnit + "]",
-                      11, casda::precFreqSpectral,
+                      11, casda::precVelSpectral,
                       "stat.error;spect.dopplerVeloc.opt;em.line.HI",
                       "float", "col_vel_uw_err", "");
     itsSpec.addColumn("VEL_W", "vel_w", "[" + casda::velocityUnit + "]",
-                      11, casda::precFreqSpectral,
+                      11, casda::precVelSpectral,
                       "spect.dopplerVeloc.opt;em.line.HI;meta.main",
                       "float", "col_vel_w", "");
     itsSpec.addColumn("VEL_W_ERR", "vel_w_err", "[" + casda::velocityUnit + "]",
-                      11, casda::precFreqSpectral,
+                      11, casda::precVelSpectral,
                       "stat.error;spect.dopplerVeloc.opt;em.line.HI;meta.main",
                       "float", "col_vel_w_err", "");
     itsSpec.addColumn("VEL_PEAK", "vel_peak", "[" + casda::velocityUnit + "]",
-                      11, casda::precFreqSpectral,
+                      11, casda::precVelSpectral,
                       "spect.dopplerVeloc.opt;em.line.HI;phot.flux.density;stat.max",
                       "float", "col_vel_peak", "");
     itsSpec.addColumn("FINT", "integ_flux", "["+casda::intFluxUnitSpectral+"]",
@@ -272,28 +272,28 @@ void HiEmissionCatalogue::defineSpec()
                       "float", "col_cw20_vel_err", "");
     itsSpec.addColumn("FREQ_W50_UW", "freq_w50_clip_uw", "[" + casda::freqUnit + "]",
                       11, casda::precFreqSpectral, "em.freq",
-                      "float", "col_freq_w50_clip_uw", "");
+                      "double", "col_freq_w50_clip_uw", "");
     itsSpec.addColumn("FREQ_W50_UW_ERR", "freq_w50_clip_uw_err", "[" + casda::freqUnit + "]",
                       11, casda::precFreqSpectral, "stat.error;em.freq",
-                      "float", "col_freq_w50_clip_uw_err", "");
+                      "double", "col_freq_w50_clip_uw_err", "");
     itsSpec.addColumn("FREQ_CW50_UW", "freq_cw50_clip_uw", "[" + casda::freqUnit + "]",
                       11, casda::precFreqSpectral, "em.freq",
-                      "float", "col_freq_cw50_clip_uw", "");
+                      "double", "col_freq_cw50_clip_uw", "");
     itsSpec.addColumn("FREQ_CW50_UW_ERR", "freq_cw50_clip_uw_err", "[" + casda::freqUnit + "]",
                       11, casda::precFreqSpectral, "stat.error;em.freq",
-                      "float", "col_freq_cw50_clip_uw_err", "");
+                      "double", "col_freq_cw50_clip_uw_err", "");
     itsSpec.addColumn("FREQ_W20_UW", "freq_w20_clip_uw", "[" + casda::freqUnit + "]",
                       11, casda::precFreqSpectral, "em.freq",
-                      "float", "col_freq_w20_clip_uw", "");
+                      "double", "col_freq_w20_clip_uw", "");
     itsSpec.addColumn("FREQ_W20_UW_ERR", "freq_w20_clip_uw_err", "[" + casda::freqUnit + "]",
                       11, casda::precFreqSpectral, "stat.error;em.freq",
-                      "float", "col_freq_w20_clip_uw_err", "");
+                      "double", "col_freq_w20_clip_uw_err", "");
     itsSpec.addColumn("FREQ_CW20_UW", "freq_cw20_clip_uw", "[" + casda::freqUnit + "]",
                       11, casda::precFreqSpectral, "em.freq",
-                      "float", "col_freq_cw20_clip_uw", "");
+                      "double", "col_freq_cw20_clip_uw", "");
     itsSpec.addColumn("FREQ_CW20_UW_ERR", "freq_cw20_clip_uw_err", "[" + casda::freqUnit + "]",
                       11, casda::precFreqSpectral, "stat.error;em.freq",
-                      "float", "col_freq_cw20_clip_uw_err", "");
+                      "double", "col_freq_cw20_clip_uw_err", "");
     itsSpec.addColumn("VEL_W50_UW", "vel_w50_clip_uw", "[" + casda::velocityUnit + "]",
                       11, casda::precVelSpectral, "spect.dopplerVeloc.opt;em.line.HI",
                       "float", "col_vel_w50_clip_uw", "");
@@ -320,28 +320,28 @@ void HiEmissionCatalogue::defineSpec()
                       "float", "col_vel_cw20_clip_uw_err", "");
     itsSpec.addColumn("FREQ_W50_W", "freq_w50_clip_w", "[" + casda::freqUnit + "]",
                       11, casda::precFreqSpectral, "em.freq",
-                      "float", "col_freq_w50_clip_w", "");
+                      "double", "col_freq_w50_clip_w", "");
     itsSpec.addColumn("FREQ_W50_W_ERR", "freq_w50_clip_w_err", "[" + casda::freqUnit + "]",
                       11, casda::precFreqSpectral, "stat.error;em.freq",
-                      "float", "col_freq_w50_clip_w_err", "");
+                      "double", "col_freq_w50_clip_w_err", "");
     itsSpec.addColumn("FREQ_CW50_W", "freq_cw50_clip_w", "[" + casda::freqUnit + "]",
                       11, casda::precFreqSpectral, "em.freq",
-                      "float", "col_freq_cw50_clip_w", "");
+                      "double", "col_freq_cw50_clip_w", "");
     itsSpec.addColumn("FREQ_CW50_W_ERR", "freq_cw50_clip_w_err", "[" + casda::freqUnit + "]",
                       11, casda::precFreqSpectral, "stat.error;em.freq",
-                      "float", "col_freq_cw50_clip_w_err", "");
+                      "double", "col_freq_cw50_clip_w_err", "");
     itsSpec.addColumn("FREQ_W20_W", "freq_w20_clip_w", "[" + casda::freqUnit + "]",
                       11, casda::precFreqSpectral, "em.freq",
-                      "float", "col_freq_w20_clip_w", "");
+                      "double", "col_freq_w20_clip_w", "");
     itsSpec.addColumn("FREQ_W20_W_ERR", "freq_w20_clip_w_err", "[" + casda::freqUnit + "]",
                       11, casda::precFreqSpectral, "stat.error;em.freq",
-                      "float", "col_freq_w20_clip_w_err", "");
+                      "double", "col_freq_w20_clip_w_err", "");
     itsSpec.addColumn("FREQ_CW20_W", "freq_cw20_clip_w", "[" + casda::freqUnit + "]",
                       11, casda::precFreqSpectral, "em.freq",
-                      "float", "col_freq_cw20_clip_w", "");
+                      "double", "col_freq_cw20_clip_w", "");
     itsSpec.addColumn("FREQ_CW20_W_ERR", "freq_cw20_clip_w_err", "[" + casda::freqUnit + "]",
                       11, casda::precFreqSpectral, "stat.error;em.freq",
-                      "float", "col_freq_cw20_clip_w_err", "");
+                      "double", "col_freq_cw20_clip_w_err", "");
     itsSpec.addColumn("VEL_W50_W", "vel_w50_clip_w", "[" + casda::velocityUnit + "]",
                       11, casda::precVelSpectral, "spect.dopplerVeloc.opt;em.line.HI",
                       "float", "col_vel_w50_clip_w", "");
@@ -404,10 +404,10 @@ void HiEmissionCatalogue::defineSpec()
                       10, casda::precFlux, "stat.error;stat.fit.param",
                       "float", "col_bf_a_err", "");
     itsSpec.addColumn("BF_W", "bf_w", "["+casda::freqUnit+"]",10, casda::precFreqSpectral,
-                      "stat.fit.param", "float", "col_bf_w", "");
+                      "stat.fit.param", "double", "col_bf_w", "");
     itsSpec.addColumn("BF_W_ERR", "bf_w_err", "["+casda::freqUnit+"]",
                       10, casda::precFreqSpectral, "stat.error;stat.fit.param",
-                      "float", "col_bf_w_err", "");
+                      "double", "col_bf_w_err", "");
     itsSpec.addColumn("BF_B1", "bf_b1", "", 10, casda::precFlux,
                       "stat.fit.param", "float", "col_bf_b1", "");
     itsSpec.addColumn("BF_B1_ERR", "bf_b1_err", "", 10, casda::precFlux,
@@ -417,15 +417,15 @@ void HiEmissionCatalogue::defineSpec()
     itsSpec.addColumn("BF_B2_ERR", "bf_b2_err", "", 10, casda::precFlux,
                       "stat.error;stat.fit.param", "float", "col_bf_b2_err", "");
     itsSpec.addColumn("BF_XE", "bf_xe", "["+casda::freqUnit+"]",10, casda::precFreqSpectral,
-                      "stat.fit.param", "float", "col_bf_xe", "");
+                      "stat.fit.param", "double", "col_bf_xe", "");
     itsSpec.addColumn("BF_XE_ERR", "bf_xe_err", "["+casda::freqUnit+"]",
                       10, casda::precFreqSpectral, "stat.error;stat.fit.param",
-                      "float", "col_bf_xe_err", "");
+                      "double", "col_bf_xe_err", "");
     itsSpec.addColumn("BF_XP", "bf_xp", "["+casda::freqUnit+"]",10, casda::precFreqSpectral,
-                      "stat.fit.param", "float", "col_bf_xp", "");
+                      "stat.fit.param", "double", "col_bf_xp", "");
     itsSpec.addColumn("BF_XP_ERR", "bf_xp_err", "["+casda::freqUnit+"]",
                       10, casda::precFreqSpectral, "stat.error;stat.fit.param",
-                      "float", "col_bf_xp_err", "");
+                      "double", "col_bf_xp_err", "");
     itsSpec.addColumn("BF_C", "bf_c", "", 10, casda::precFlux,
                       "stat.fit.param", "float", "col_bf_c", "");
     itsSpec.addColumn("BF_C_ERR", "bf_c_err", "", 10, casda::precFlux,

@@ -83,7 +83,7 @@ const int precFreqContinuum = 1;
 /// Precision for reporting frequency in spectral-line catalogues
 const int precFreqSpectral = 6;
 /// Precision for reporting frequency in spectral-line catalogues
-const int precVelSpectral = 6;
+const int precVelSpectral = 3;
 /// Precision for reporting redshift in spectral-line catalogues
 const int precZ = 6;
 /// Precision for reporting spectral widths
