@@ -15,6 +15,11 @@ It can be run with the following command ::
 
 The *mslist* program is not parallel/distributed, it runs in a single process.
 
+Casacore tasks *MSSummary* and *MSLister* write to stderr, so to redirect output to a
+pipe or a file, first redirect stderr to stdout. For example, in bash: ::
+
+   $ mslist.sh [options] MS_filename > MS_summary.txt 2>&1
+
 Configuration Parameters
 ------------------------
 
