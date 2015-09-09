@@ -145,21 +145,21 @@ void HiEmissionCatalogue::defineSpec()
     itsSpec.addColumn("PAFIT_ERR", "pos_ang_fit_err", "[deg]", 7, casda::precSize,
                       "stat.error;askap:src.posAng;em.radio;stat.fit",
                       "float", "col_pos_ang_fit_err", "");
-    itsSpec.addColumn("SIZEX", "size_x", "", 4, 0,
+    itsSpec.addColumn("SIZEX", "size_x", "", 6, 0,
                       "askap:src.size;instr.pixel", "int", "col_size_x", "");
-    itsSpec.addColumn("SIZEY", "size_y", "", 4, 0,
+    itsSpec.addColumn("SIZEY", "size_y", "", 6, 0,
                       "askap:src.size;instr.pixel", "int", "col_size_y", "");
-    itsSpec.addColumn("SIZEZ", "size_z", "", 4, 0,
+    itsSpec.addColumn("SIZEZ", "size_z", "", 6, 0,
                       "askap:src.size;spect.binSize", "int", "col_size_z", "");
     itsSpec.addColumn("NVOX", "n_vox", "", 9, 0,
                       "askap:src.size;askap:instr.voxel", "int", "col_nvox", "");
-    itsSpec.addColumn("ASYMM2D", "asymmetry_2d", "", 4, 3,
+    itsSpec.addColumn("ASYMM2D", "asymmetry_2d", "", 6, 3,
                       "askap:src.asymmetry.2d", "float", "col_asymmetry_2d", "");
-    itsSpec.addColumn("ASYMM2D_ERR", "asymmetry_2d_err", "", 4, 3,
+    itsSpec.addColumn("ASYMM2D_ERR", "asymmetry_2d_err", "", 6, 3,
                       "stat.error;askap:src.asymmetry.2d", "float", "col_asymmetry_2d_err", "");
-    itsSpec.addColumn("ASYMM3D", "asymmetry_3d", "", 4, 3,
+    itsSpec.addColumn("ASYMM3D", "asymmetry_3d", "", 6, 3,
                       "askap:src.asymmetry.3d", "float", "col_asymmetry_3d", "");
-    itsSpec.addColumn("ASYMM3D_ERR", "asymmetry_3d_err", "", 4, 3,
+    itsSpec.addColumn("ASYMM3D_ERR", "asymmetry_3d_err", "", 6, 3,
                       "stat.error;askap:src.asymmetry.3d", "float", "col_asymmetry_3d_err", "");
     itsSpec.addColumn("FREQ_UW", "freq_uw", "[" + casda::freqUnit + "]",
                       11, casda::precFreqSpectral, "em.freq",
