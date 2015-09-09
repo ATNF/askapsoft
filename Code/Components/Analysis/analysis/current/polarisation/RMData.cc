@@ -26,7 +26,7 @@
 ///
 /// @author Matthew Whiting <Matthew.Whiting@csiro.au>
 ///
-#include <polarisation/RMdata.h>
+#include <polarisation/RMData.h>
 #include <askap_analysis.h>
 #include <polarisation/RMSynthesis.h>
 
