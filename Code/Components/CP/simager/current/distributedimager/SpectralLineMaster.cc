@@ -155,6 +155,8 @@ void SpectralLineMaster::run(void)
                 if (wrequest.get_params().get() != 0) {
                     handleImageParams(wrequest.get_params(), wrequest.get_globalChannel());
                 } else {
+                    ASKAPLOG_WARN_STR(logger, "Global channel " << wrequest.get_globalChannel()
+                                      << " has failed - will be set to zero in the cube.");
                     recordBeamFailure(wrequest.get_globalChannel());
                 }
                 --outstanding;
@@ -186,6 +188,8 @@ void SpectralLineMaster::run(void)
             if (wrequest.get_params().get() != 0) {
                 handleImageParams(wrequest.get_params(), wrequest.get_globalChannel());
             } else {
+                ASKAPLOG_WARN_STR(logger, "Global channel " << wrequest.get_globalChannel()
+                                  << " has failed - will be set to zero in the cube.");
                 recordBeamFailure(wrequest.get_globalChannel());
             }
             --outstanding;
@@ -339,7 +343,11 @@ void SpectralLineMaster::recordBeamFailure(const unsigned int globalChannel)
 
     casa::Vector<casa::Quantum<double> > beamVec(3, 0.);
     itsBeamList[globalChannel] = beamVec;
-
+    if (globalChannel == itsBeamReferenceChannel) {
+        ASKAPLOG_WARN_STR(logger, "Beam reference channel " << itsBeamReferenceChannel
+                          << " has failed - output cubes have no restoring beam.");
+    }
+    
 }
 
 
