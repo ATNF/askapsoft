@@ -5,8 +5,10 @@ Introduction
 ------------
 
 The makecube program merges multiple images into a cube. This is intended
-to take individual image planes output from the spectral line imaging pipeline
-and merge them into a cube.
+to take individual image planes (as were produced by the old CPimager
+spectral-line imaging program) and merge them into a cube. The
+CPimager has been replaced by :doc:`simager`, but this utility is kept
+for now.
 
 Important notes:
 

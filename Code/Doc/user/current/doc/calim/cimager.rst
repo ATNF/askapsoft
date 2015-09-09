@@ -81,14 +81,14 @@ default to "cross".
 |                          |                  |              |the disk). The default is to create casa images and |
 |                          |                  |              |this is the only option implemented so far.         |
 +--------------------------+------------------+--------------+----------------------------------------------------+
-|dataset                   |string or         |None          |Data set file name to produce. Usual substitution   |
-|                          |vector<string>    |              |rules apply if the parameter is a single string. If |
-|                          |                  |              |the parameter is given as a vector of strings all   |
-|                          |                  |              |measurement sets given by this vector are           |
-|                          |                  |              |effectively concatenated together on-the-fly in the |
-|                          |                  |              |serial case. In the parallel case, the size of the  |
-|                          |                  |              |vector is required to be either 1 or the number of  |
-|                          |                  |              |nodes - 1, and therefore there is one measurement   |
+|dataset                   |string or         |None          |Measurement set file name to read from. Usual       |
+|                          |vector<string>    |              |substitution rules apply if the parameter is a      |
+|                          |                  |              |single string. If the parameter is given as a vector|
+|                          |                  |              |of strings all measurement sets given by this vector|
+|                          |                  |              |are effectively concatenated together on-the-fly in |
+|                          |                  |              |the serial case. In the parallel case, the size of  |
+|                          |                  |              |the vector is required to be either 1 or the number |
+|                          |                  |              |of nodes - 1, and therefore there is one measurement|
 |                          |                  |              |set per worker node.                                |
 +--------------------------+------------------+--------------+----------------------------------------------------+
 |nworkergroups             |int               |1             |Number of worker groups. This option can only be    |
@@ -181,15 +181,15 @@ default to "cross".
 |                          |                  |              |multiple images are solved for) and use the results |
 |                          |                  |              |of this fit.                                        |
 +--------------------------+------------------+--------------+----------------------------------------------------+
-|restore.beam.cutoff       |double            |0.05          |Cutoff for the support search prior to beam         |
-|                          |                  |              |fitting. This parameter is only used if             |
-|                          |                  |              |*restore.beam=fit*. The code does fitting on a      |
-|                          |                  |              |limited support (to speed things up and to avoid    |
-|                          |                  |              |sidelobes influencing the fit). The extent of this  |
-|                          |                  |              |support is controlled by this parameter representing|
-|                          |                  |              |the level of the PSF which should be included into  |
-|                          |                  |              |support. This value should be above the first       |
-|                          |                  |              |sidelobe level for meaningful results.              |
+|restore.beam.cutoff       |double            |0.05          |Cutoff for the support search prior to beam fitting,|
+|                          |                  |              |as a fraction of the PSF peak. This parameter is    |
+|                          |                  |              |only used if *restore.beam=fit*. The code does      |
+|                          |                  |              |fitting on a limited support (to speed things up and|
+|                          |                  |              |to avoid sidelobes influencing the fit). The extent |
+|                          |                  |              |of this support is controlled by this parameter     |
+|                          |                  |              |representing the level of the PSF which should be   |
+|                          |                  |              |included into support. This value should be above   |
+|                          |                  |              |the first sidelobe level for meaningful results.    |
 +--------------------------+------------------+--------------+----------------------------------------------------+
 |restore.equalise          |bool              |false         |If true, the final residual is multiplied by the    |
 |                          |                  |              |square root of the truncated normalised weight      |

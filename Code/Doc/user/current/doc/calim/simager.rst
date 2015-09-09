@@ -14,36 +14,38 @@ software framework is made available.
 Running the program
 -------------------
 
-It can be run with the following command, where "config.in" is a file containing the
-configuration parameters described in the next section. ::
+It can be run with the following command, where "config.in" is a file
+containing the configuration parameters described in the next
+section. ::
  
    $ <MPI wrapper> simager -c config.in
 
 Parallel/Distributed Execution
 ------------------------------
 
-The program is distributed and used a master/worker pattern to
-distribute and manage work.  The worker processes get assigned
-individual channels by the master process, and these channels are
-processed independently. Once all the imaging is completed on a
-channel, the worker sends the various arrays back to the master
-process.
+The program is distributed and uses a master/worker pattern to
+distribute and manage work. The master process (note that only one of
+the processes is designated the master) is responsible for creating
+and writing the output image cubes. It does no imaging itself. 
 
-The master process (note that only one of the processes is designated
-the master) is responsible for creating and writing the output image
-cubes. It does no imaging itself.
+The worker processes get assigned individual channels by the master,
+and these channels are imaged independently. Once all the imaging
+is completed on a channel, the worker sends the various arrays back to
+the master for writing to the cube.
 
 Any number of processes can be allocated to an simager job. The
 available channels are allocated to workers as the workers become
 available, until all channels have been imaged.
 
-On the Cray XC30 platform executing with the MPI wrapper takes the form::
+On the Cray XC30 (*galaxy*) platform executing with the MPI wrapper
+takes the form::
 
     $ aprun -n 4000 -N 20 simager -c config.in
 
-The *-n* and *-N* parameters to the *aprun* application launcher specify 4000 MPI processes
-will be used (3999 workers and one master) and each node will host 20 MPI processes. This
-job then requires 200 compute nodes.
+The *-n* and *-N* parameters to the *aprun* application launcher
+specify 4000 MPI processes will be used (3999 workers and one master)
+and each node will host 20 MPI processes. This job then requires 200
+compute nodes.
 
 Configuration parameters
 ------------------------
@@ -86,12 +88,14 @@ introduced to *simager*.
   parameter. This can be a channel number (0-based), or one of
   'first', 'last' or 'mid'.
 * To record the individual channel beams, the user can set
-  **Simager.restore.beamLog**, which will produce an ascii text file
+  **Simager.restore.beamLog**, which will produce an ASCII text file
   listing the beam parameters for each channel. The file has columns:
   index | major axis [arcsec] | minor axis [arcsec] | position angle [deg]
   Should the imaging of a channel fail for some reason, the beam for
   that channel will be recorded as having zero for all three
-  parameters. 
+  parameters. This beam log is compatible with other askapsoft tasks,
+  specfically the spectral extraction in Selavy (see
+  :doc:`../analysis/extraction`). 
 
 Here is an example of the start of a beam log::
   
@@ -103,83 +107,78 @@ Here is an example of the start of a beam log::
   4 64.4349 59.2982 -70.9108
 
 
-
-
-+--------------------------+------------------+--------------+------------------------------------------------------+
-|**Parameter**             |**Type**          |**Default**   |**Description**                                       |
-+--------------------------+------------------+--------------+------------------------------------------------------+
-|dataset                   |string or         |None          |Data set file name to produce. Usual substitution     |
-|                          |vector<string>    |              |rules apply if the parameter is a single string. If   |
-|                          |                  |              |the parameter is given as a vector of strings all     |
-|                          |                  |              |measurement sets given by this vector are             |
-|                          |                  |              |effectively concatenated together on-the-fly in the   |
-|                          |                  |              |serial case. In the parallel case, the size of the    |
-|                          |                  |              |vector is required to be either 1 or the number of    |
-|                          |                  |              |nodes - 1, and therefore there is one measurement     |
-|                          |                  |              |set per worker node.                                  |
-+--------------------------+------------------+--------------+------------------------------------------------------+
-|Images.name               |string            |None          |The base name of the image cubes to be                |
-|                          |                  |              |produced. Only a single name is accepted, and it      |
-|                          |                  |              |must (as for *cimager*) start with 'image'.           |
-+--------------------------+------------------+--------------+------------------------------------------------------+
-|Images.direction          |vector<string>    |None          |Direction to the centre of the required image (or     |
-|                          |                  |              |tangent point for facets). This vector should         |
-|                          |                  |              |contain a 3-element direction quantity containing     |
-|                          |                  |              |right ascension, declination and epoch,               |
-|                          |                  |              |e.g. [12h30m00.00, -45.00.00.00, J2000]. Note that a  |
-|                          |                  |              |casa style of declination delimiters (dots rather     |
-|                          |                  |              |than colons) is essential. Only *J2000* directions    |
-|                          |                  |              |are currently supported. Note also that this must be  |
-|                          |                  |              |provided, as the advise capability is not enabled.    |
-+--------------------------+------------------+--------------+------------------------------------------------------+
-|Images.shape              |vector<int>       |None          |Shape in pixels of the image cube's spatial axes.     |
-+--------------------------+------------------+--------------+------------------------------------------------------+
-|Images.cellsize           |vector<string>    |None          |A two-element vector of quantity strings, indicating  |
-|                          |                  |              |the size of pixels in the spatial axes,               |
-|                          |                  |              |e.g. [6.0arcsec, 6.0arcsec]                           |
-+--------------------------+------------------+--------------+------------------------------------------------------+
-|Images.restFrequency      |string            |None          |A string indicating the rest frequency to be written  |
-|                          |                  |              |to the image cube header (for the restored, model and |
-|                          |                  |              |residual cubes only). The string can be a quantity    |
-|                          |                  |              |string (e.g. 1234.567MHz) or the special string 'HI', |
-|                          |                  |              |which resovles to 1420.405751786 MHz. If not given, no|
-|                          |                  |              |rest frequency is written to the cubes.               |
-+--------------------------+------------------+--------------+------------------------------------------------------+
-|restore                   |bool              |false         |If true, the image will be restored (by convolving    |
-|                          |                  |              |with the given 2D gaussian), in the same manner as for|
-|                          |                  |              |:doc:`cimager`. The restoration is done separately for|
-|                          |                  |              |each channel.                                         |
-+--------------------------+------------------+--------------+------------------------------------------------------+
-|restore.beam              |vector<string>    |None          |Either a single word 'fit' or a quantity string       |
-|                          |                  |              |describing the shape of the clean beam (to convolve   |
-|                          |                  |              |the model image with). If quantity is given it must   |
-|                          |                  |              |have exactly 3 elements, e.g. [30arcsec, 10arcsec,    |
-|                          |                  |              |40deg]. Otherwise an exception is thrown. This        |
-|                          |                  |              |parameter is only used if restore is set to True. If  |
-|                          |                  |              |restore.beam=fit, the code will fit a 2D gaussian to  |
-|                          |                  |              |PSF image and use the results of this fit. If 'fit' is|
-|                          |                  |              |used, each channel with have an independetly-fit beam.|
-+--------------------------+------------------+--------------+------------------------------------------------------+
-|restore.beamReference     |string            |mid           |The channel to use as the reference for the beam -    |
-|                          |                  |              |this channel's beam is written to the cube            |
-|                          |                  |              |header. Values can be an integer indicating the       |
-|                          |                  |              |channel number (0-based), or one of 'mid', 'first', or|
-|                          |                  |              |'last'.                                               |
-+--------------------------+------------------+--------------+------------------------------------------------------+
-|restore.beamLog           |string            |None          |The filename to which the list of restoring beams for |
-|                          |                  |              |each channel is written. See text for format of this  |
-|                          |                  |              |file.                                                 |
-+--------------------------+------------------+--------------+------------------------------------------------------+
-|restore.beam.cutoff       |double            |0.05          |Cutoff for the support search prior to beam           |
-|                          |                  |              |fitting. This parameter is only used if               |
-|                          |                  |              |restore.beam=fit. The code does fitting on a limited  |
-|                          |                  |              |support (to speed things up and to avoid sidelobes    |
-|                          |                  |              |influencing the fit). The extent of this support is   |
-|                          |                  |              |controlled by this parameter representing the level of|
-|                          |                  |              |the PSF which should be included into support. This   |
-|                          |                  |              |value should be above the first sidelobe level for    |
-|                          |                  |              |meaningful results.                                   |
-+--------------------------+------------------+--------------+------------------------------------------------------+
++--------------------------+------------------+--------------+--------------------------------------------------------+
+|**Parameter**             |**Type**          |**Default**   |**Description**                                         |
++==========================+==================+==============+========================================================+
+|dataset                   |string or         |None          |Measurement set file name(s) to read. If the parameter  |
+|                          |vector<string>    |              |is given as a vector of strings all measurement sets    |
+|                          |                  |              |given by this vector are treated as being concatenated  |
+|                          |                  |              |together (each worker will only get a single frequency  |
+|                          |                  |              |channel at a time anyway).                              |
++--------------------------+------------------+--------------+--------------------------------------------------------+
+|Images.name               |string            |None          |The base name of the image cubes to be produced. Only a |
+|                          |                  |              |single name is accepted, and it must (as for *cimager*) |
+|                          |                  |              |start with 'image'.                                     |
++--------------------------+------------------+--------------+--------------------------------------------------------+
+|Images.direction          |vector<string>    |None          |Direction to the centre of the required image (or       |
+|                          |                  |              |tangent point for facets). This vector should contain a |
+|                          |                  |              |3-element direction quantity containing right ascension,|
+|                          |                  |              |declination and epoch, e.g. [12h30m00.00, -45.00.00.00, |
+|                          |                  |              |J2000]. Note that a casa style of declination delimiters|
+|                          |                  |              |(dots rather than colons) is essential. Only *J2000*    |
+|                          |                  |              |directions are currently supported. Note also that this |
+|                          |                  |              |must be provided, as the advise capability is not       |
+|                          |                  |              |enabled.                                                |
++--------------------------+------------------+--------------+--------------------------------------------------------+
+|Images.shape              |vector<int>       |None          |Shape in pixels of the image cube's spatial axes.       |
++--------------------------+------------------+--------------+--------------------------------------------------------+
+|Images.cellsize           |vector<string>    |None          |A two-element vector of quantity strings, indicating the|
+|                          |                  |              |size of pixels in the spatial axes, e.g. [6.0arcsec,    |
+|                          |                  |              |6.0arcsec]                                              |
++--------------------------+------------------+--------------+--------------------------------------------------------+
+|Images.restFrequency      |string            |None          |A string indicating the rest frequency to be written to |
+|                          |                  |              |the image cube header (for the restored, model and      |
+|                          |                  |              |residual cubes only). The string can be a quantity      |
+|                          |                  |              |string (e.g. 1234.567MHz) or the special string 'HI',   |
+|                          |                  |              |which resovles to 1420.405751786 MHz. If not given, no  |
+|                          |                  |              |rest frequency is written to the cubes.                 |
++--------------------------+------------------+--------------+--------------------------------------------------------+
+|restore                   |bool              |false         |If true, the image will be restored (by convolving with |
+|                          |                  |              |the given 2D gaussian), in the same manner as for       |
+|                          |                  |              |:doc:`cimager`. The restoration is done separately for  |
+|                          |                  |              |each channel.                                           |
++--------------------------+------------------+--------------+--------------------------------------------------------+
+|restore.beam              |vector<string>    |None          |Either a single word 'fit' or a quantity string         |
+|                          |                  |              |describing the shape of the clean beam (to convolve the |
+|                          |                  |              |model image with). If quantity is given it must have    |
+|                          |                  |              |exactly 3 elements, e.g. [30arcsec, 10arcsec,           |
+|                          |                  |              |40deg]. Otherwise an exception is thrown. This parameter|
+|                          |                  |              |is only used if *restore* is set to True. If            |
+|                          |                  |              |*restore.beam=fit*, the code will fit a 2D gaussian to  |
+|                          |                  |              |the PSF image and use the results of this fit. In this  |
+|                          |                  |              |case, each channel with have an independently-fitted    |
+|                          |                  |              |beam.                                                   |
++--------------------------+------------------+--------------+--------------------------------------------------------+
+|restore.beamReference     |string            |mid           |The channel to use as the reference for the beam - this |
+|                          |                  |              |channel's beam is written to the cube header. Values can|
+|                          |                  |              |be an integer indicating the channel number (0-based),  |
+|                          |                  |              |or one of 'mid', 'first', or 'last'.                    |
+|                          |                  |              |                                                        |
++--------------------------+------------------+--------------+--------------------------------------------------------+
+|restore.beamLog           |string            |None          |The filename to which the list of restoring beams for   |
+|                          |                  |              |each channel is written. See text for format of this    |
+|                          |                  |              |file.                                                   |
++--------------------------+------------------+--------------+--------------------------------------------------------+
+|restore.beam.cutoff       |double            |0.05          |Cutoff for the support search prior to beam fitting, as |
+|                          |                  |              |a fraction of the PSF peak. This parameter is only used |
+|                          |                  |              |if *restore.beam=fit*. The code does fitting on a       |
+|                          |                  |              |limited support (to speed things up and to avoid        |
+|                          |                  |              |sidelobes influencing the fit). The extent of this      |
+|                          |                  |              |support is controlled by this parameter representing the|
+|                          |                  |              |level of the PSF which should be included into          |
+|                          |                  |              |support. This value should be above the first sidelobe  |
+|                          |                  |              |level for meaningful results.                           |
++--------------------------+------------------+--------------+--------------------------------------------------------+
                     
 Example parset
 --------------
