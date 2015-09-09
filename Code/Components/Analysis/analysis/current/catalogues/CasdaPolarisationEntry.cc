@@ -71,26 +71,26 @@ CasdaPolarisationEntry::CasdaPolarisationEntry(const CasdaComponent &comp,
     casa::IPosition locMin, locMax;
     casa::minMax<float>(minFDF, maxFDF, locMin, locMax, fdf_p);
 
-    itsPintFitSNR = maxFDF / noise;
-    itsFlagDetection = (itsPintFitSNR > itsDetectionThreshold);
+    itsPintFitSNR.value() = maxFDF / noise;
+    itsFlagDetection = (itsPintFitSNR.value() > itsDetectionThreshold);
 
     if (itsFlagDetection) {
 
-        itsPintPeak = maxFDF;
-        itsPintPeak_err = M_SQRT2 * fabs(itsPintPeak) / noise;
+        itsPintPeak.value() = maxFDF;
+        itsPintPeak.error() = M_SQRT2 * fabs(itsPintPeak.value()) / noise;
         itsPintPeakDebias = sqrt(maxFDF * maxFDF - 2.3 * noise);
 
-        itsPhiPeak = phi_rmsynth(locMax);
-        itsPhiPeak_err = RMSF_FWHM * noise / (2. * itsPintPeak);
+        itsPhiPeak.value() = phi_rmsynth(locMax);
+        itsPhiPeak.error() = RMSF_FWHM * noise / (2. * itsPintPeak.value());
 
 
-//      itsPolAngleRef = 0.5 * casa::phase(fdf(locMax));  // THIS MAY NOT WORK - NEED TO CHECK
-        itsPolAngleRef_err = 0.5 * noise / fabs(itsPintPeak);
+//      itsPolAngleRef.value() = 0.5 * casa::phase(fdf(locMax));  // THIS MAY NOT WORK - NEED TO CHECK
+        itsPolAngleRef.error() = 0.5 * noise / fabs(itsPintPeak.value());
 
-        itsPolAngleZero = itsPolAngleRef - itsPhiPeak * lsqzero;
-        itsPolAngleZero_err = (1. / (4.*(numChan - 2) * itsPintPeak * itsPintPeak)) *
-                              (float((numChan - 1) / numChan) + pow(lsqzero, 4) /
-                               rmsynth.lsqVariance());
+        itsPolAngleZero.value() = itsPolAngleRef.value() - itsPhiPeak.value() * lsqzero;
+        itsPolAngleZero.error() = (1. / (4.*(numChan - 2) * itsPintPeak.value() * itsPintPeak.value())) *
+                                  (float((numChan - 1) / numChan) + pow(lsqzero, 4) /
+                                   rmsynth.lsqVariance());
 
 //      itsFracPol
         // Need to get the Imodel into the RMSynth object somehow.
@@ -98,7 +98,7 @@ CasdaPolarisationEntry::CasdaPolarisationEntry(const CasdaComponent &comp,
     } else {
 
         //itsPintPeak = maxFDF * itsDetectionThreshold;
-        itsPintPeak = noise * itsDetectionThreshold;
+        itsPintPeak.value() = noise * itsDetectionThreshold;
         itsPintPeakDebias = -1.;
 
 
@@ -110,12 +110,12 @@ CasdaPolarisationEntry::CasdaPolarisationEntry(const CasdaComponent &comp,
 
 const float CasdaPolarisationEntry::ra()
 {
-    return itsRA;
+    return itsRA.value();
 }
 
 const float CasdaPolarisationEntry::dec()
 {
-    return itsDEC;
+    return itsDEC.value();
 }
 
 
@@ -139,9 +139,9 @@ void CasdaPolarisationEntry::printTableEntry(std::ostream &stream,
     } else if (type == "NAME") {
         column.printEntry(stream, itsName);
     } else if (type == "RAJD") {
-        column.printEntry(stream, itsRA);
+        column.printEntry(stream, itsRA.value());
     } else if (type == "DECJD") {
-        column.printEntry(stream, itsDEC);
+        column.printEntry(stream, itsDEC.value());
     } else if (type == "IFLUX") {
         column.printEntry(stream, itsFluxImedian);
     } else if (type == "QFLUX") {
@@ -173,41 +173,41 @@ void CasdaPolarisationEntry::printTableEntry(std::ostream &stream,
     } else if (type == "RMSF") {
         column.printEntry(stream, itsRmsfFwhm);
     } else if (type == "POLPEAK") {
-        column.printEntry(stream, itsPintPeak);
+        column.printEntry(stream, itsPintPeak.value());
     } else if (type == "POLPEAKDB") {
         column.printEntry(stream, itsPintPeakDebias);
     } else if (type == "POLPEAKERR") {
-        column.printEntry(stream, itsPintPeak_err);
+        column.printEntry(stream, itsPintPeak.error());
     } else if (type == "POLPEAKFIT") {
-        column.printEntry(stream, itsPintPeakFit);
+        column.printEntry(stream, itsPintPeakFit.value());
     } else if (type == "POLPEAKFITDB") {
         column.printEntry(stream, itsPintPeakFitDebias);
     } else if (type == "POLPEAKFITERR") {
-        column.printEntry(stream, itsPintPeakFit_err);
+        column.printEntry(stream, itsPintPeakFit.error());
     } else if (type == "POLPEAKFITSNR") {
-        column.printEntry(stream, itsPintFitSNR);
+        column.printEntry(stream, itsPintFitSNR.value());
     } else if (type == "POLPEAKFITSNRERR") {
-        column.printEntry(stream, itsPintFitSNR_err);
+        column.printEntry(stream, itsPintFitSNR.error());
     } else if (type == "FDPEAK") {
-        column.printEntry(stream, itsPhiPeak);
+        column.printEntry(stream, itsPhiPeak.value());
     } else if (type == "FDPEAKERR") {
-        column.printEntry(stream, itsPhiPeak_err);
+        column.printEntry(stream, itsPhiPeak.error());
     } else if (type == "FDPEAKFIT") {
-        column.printEntry(stream, itsPhiPeakFit);
+        column.printEntry(stream, itsPhiPeakFit.value());
     } else if (type == "FDPEAKFITERR") {
-        column.printEntry(stream, itsPhiPeakFit_err);
+        column.printEntry(stream, itsPhiPeakFit.error());
     } else if (type == "POLANG") {
-        column.printEntry(stream, itsPolAngleRef);
+        column.printEntry(stream, itsPolAngleRef.value());
     } else if (type == "POLANGERR") {
-        column.printEntry(stream, itsPolAngleRef_err);
+        column.printEntry(stream, itsPolAngleRef.error());
     } else if (type == "POLANG0") {
-        column.printEntry(stream, itsPolAngleZero);
+        column.printEntry(stream, itsPolAngleZero.value());
     } else if (type == "POLANG0ERR") {
-        column.printEntry(stream, itsPolAngleZero_err);
+        column.printEntry(stream, itsPolAngleZero.error());
     } else if (type == "POLFRAC") {
-        column.printEntry(stream, itsFracPol);
+        column.printEntry(stream, itsFracPol.value());
     } else if (type == "POLFRACERR") {
-        column.printEntry(stream, itsFracPol_err);
+        column.printEntry(stream, itsFracPol.error());
     } else if (type == "COMPLEX1") {
         column.printEntry(stream, itsComplexity);
     } else if (type == "COMPLEX2") {
@@ -234,9 +234,9 @@ void CasdaPolarisationEntry::checkCol(duchamp::Catalogues::Column &column)
     } else if (type == "NAME") {
         column.check(itsName);
     } else if (type == "RAJD") {
-        column.check(itsRA);
+        column.check(itsRA.value());
     } else if (type == "DECJD") {
-        column.check(itsDEC);
+        column.check(itsDEC.value());
     } else if (type == "IFLUX") {
         column.check(itsFluxImedian);
     } else if (type == "QFLUX") {
@@ -268,41 +268,41 @@ void CasdaPolarisationEntry::checkCol(duchamp::Catalogues::Column &column)
     } else if (type == "RMSF") {
         column.check(itsRmsfFwhm);
     } else if (type == "POLPEAK") {
-        column.check(itsPintPeak);
+        column.check(itsPintPeak.value());
     } else if (type == "POLPEAKDB") {
         column.check(itsPintPeakDebias);
     } else if (type == "POLPEAKERR") {
-        column.check(itsPintPeak_err);
+        column.check(itsPintPeak.error());
     } else if (type == "POLPEAKFIT") {
-        column.check(itsPintPeakFit);
+        column.check(itsPintPeakFit.value());
     } else if (type == "POLPEAKFITDB") {
         column.check(itsPintPeakFitDebias);
     } else if (type == "POLPEAKFITERR") {
-        column.check(itsPintPeakFit_err);
+        column.check(itsPintPeakFit.error());
     } else if (type == "POLPEAKFITSNR") {
-        column.check(itsPintFitSNR);
+        column.check(itsPintFitSNR.value());
     } else if (type == "POLPEAKFITSNRERR") {
-        column.check(itsPintFitSNR_err);
+        column.check(itsPintFitSNR.error());
     } else if (type == "FDPEAK") {
-        column.check(itsPhiPeak);
+        column.check(itsPhiPeak.value());
     } else if (type == "FDPEAKERR") {
-        column.check(itsPhiPeak_err);
+        column.check(itsPhiPeak.error());
     } else if (type == "FDPEAKFIT") {
-        column.check(itsPhiPeakFit);
+        column.check(itsPhiPeakFit.value());
     } else if (type == "FDPEAKFITERR") {
-        column.check(itsPhiPeakFit_err);
+        column.check(itsPhiPeakFit.error());
     } else if (type == "POLANG") {
-        column.check(itsPolAngleRef);
+        column.check(itsPolAngleRef.value());
     } else if (type == "POLANGERR") {
-        column.check(itsPolAngleRef_err);
+        column.check(itsPolAngleRef.error());
     } else if (type == "POLANG0") {
-        column.check(itsPolAngleZero);
+        column.check(itsPolAngleZero.value());
     } else if (type == "POLANG0ERR") {
-        column.check(itsPolAngleZero_err);
+        column.check(itsPolAngleZero.error());
     } else if (type == "POLFRAC") {
-        column.check(itsFracPol);
+        column.check(itsFracPol.value());
     } else if (type == "POLFRACERR") {
-        column.check(itsFracPol_err);
+        column.check(itsFracPol.error());
     } else if (type == "COMPLEX1") {
         column.check(itsComplexity);
     } else if (type == "COMPLEX2") {

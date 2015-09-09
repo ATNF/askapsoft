@@ -119,35 +119,21 @@ class CasdaComponent : public CatalogueEntry {
         /// The Declination in string format: 12:34:56.7
         std::string itsDECs;
         /// The RA in decimal degrees
-        double itsRA;
+        casda::ValueError<double> itsRA;
         /// The Declination in decimal degrees
-        double itsDEC;
-        /// The error in the RA value
-        double itsRA_err;
-        /// The error in the Declination value
-        double itsDEC_err;
+        casda::ValueError<double> itsDEC;
         /// The frequency of the image
         double itsFreq;
         /// The fitted peak flux of the component
-        double itsFluxPeak;
-        /// The error on the peak flux
-        double itsFluxPeak_err;
+        casda::ValueError<double> itsFluxPeak;
         /// The integrated flux (fitted) of the component
-        double itsFluxInt;
-        /// The error on the integrated flux
-        double itsFluxInt_err;
+        casda::ValueError<double> itsFluxInt;
         /// The fitted major axis (FWHM)
-        double itsMaj;
+        casda::ValueError<double> itsMaj;
         /// The fitted minor axis (FWHM)
-        double itsMin;
+        casda::ValueError<double> itsMin;
         /// The position angle of the fitted major axis
-        double itsPA;
-        /// The error on the fitted major axis
-        double itsMaj_err;
-        /// The error on the fitted minor axis
-        double itsMin_err;
-        /// The error on the fitted position angle
-        double itsPA_err;
+        casda::ValueError<double> itsPA;
         /// The major axis after deconvolution
         double itsMaj_deconv;
         /// The minor axis after deconvolution

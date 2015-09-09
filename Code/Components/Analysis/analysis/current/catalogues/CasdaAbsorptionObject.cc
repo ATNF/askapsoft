@@ -62,17 +62,6 @@ CasdaAbsorptionObject::CasdaAbsorptionObject(CasdaComponent &component,
         sourcefitting::RadioSource &obj,
         const LOFAR::ParameterSet &parset):
     CatalogueEntry(parset),
-    itsRA_err(0.),
-    itsDEC_err(0.),
-    itsFreqUW_err(0.),
-    itsFreqW_err(0.),
-    itsZHI_UW_err(0.),
-    itsZHI_W_err(0.),
-    itsZHI_peak_err(0.),
-    itsW50_err(0.),
-    itsW20_err(0.),
-    itsOpticalDepth_peak_err(0.),
-    itsOpticalDepth_int_err(0.),
     itsFlag2(0),
     itsFlag3(0),
     itsComment("")
@@ -91,8 +80,8 @@ CasdaAbsorptionObject::CasdaAbsorptionObject(CasdaComponent &component,
     id << itsComponentID << "_" << obj.getID();
     itsObjectID = id.str();
 
-    itsRA = component.ra();
-    itsDEC = component.dec();
+    itsRA.value() = component.ra();
+    itsDEC.value() = component.dec();
 
 //    casa::Unit imageFreqUnits(obj.header().getSpectralUnits());
     casa::Unit imageFreqUnits(obj.header().WCS().cunit[obj.header().WCS().spec]);
@@ -103,9 +92,9 @@ CasdaAbsorptionObject::CasdaAbsorptionObject(CasdaComponent &component,
     int lng = obj.header().WCS().lng;
     int precision = -int(log10(fabs(obj.header().WCS().cdelt[lng] * 3600. / 10.)));
     float pixscale = obj.header().getAvPixScale() * 3600.; // convert from pixels to arcsec
-    itsRAs  = decToDMS(itsRA, obj.header().lngtype(), precision);
-    itsDECs = decToDMS(itsDEC, obj.header().lattype(), precision);
-    itsName = obj.header().getIAUName(itsRA, itsDEC);
+    itsRAs  = decToDMS(itsRA.value(), obj.header().lngtype(), precision);
+    itsDECs = decToDMS(itsDEC.value(), obj.header().lattype(), precision);
+    itsName = obj.header().getIAUName(itsRA.value(), itsDEC.value());
 
     casa::Unit imageFluxUnits(obj.header().getFluxUnits());
     casa::Unit fluxUnits(casda::fluxUnit);
@@ -121,27 +110,29 @@ CasdaAbsorptionObject::CasdaAbsorptionObject(CasdaComponent &component,
     // }
 
 
-    itsFreqUW = obj.getVel() * freqScale;
-    itsFreqW = itsFreqUW + (random() / (RAND_MAX + 1.0) - 0.5) * 0.1 * obj.getW50() * freqScale;
+    itsFreqUW.value() = obj.getVel() * freqScale;
+    itsFreqW.value() = itsFreqUW.value() + (random() / (RAND_MAX + 1.0) - 0.5) * 0.1 * obj.getW50() * freqScale;
 
     // need to transform from zpeak with header/WCS
-    float nuPeak = itsFreqUW +
-        (random() / (RAND_MAX + 1.0) - 0.5) * 0.1 * obj.getW50() * freqScale;
+    float nuPeak = itsFreqUW.value() +
+                   (random() / (RAND_MAX + 1.0) - 0.5) * 0.1 * obj.getW50() * freqScale;
 
     // Rest-frame HI frequency in our CASDA units
-    const float HI=analysisutilities::nu0_HI / casda::freqScale;
-    itsZHI_UW = HI / itsFreqUW - 1.;
-    itsZHI_W = HI / itsFreqW - 1.;
-    itsZHI_peak = HI / nuPeak - 1.;
+    const float HI = analysisutilities::nu0_HI / casda::freqScale;
+    itsZHI_UW.value() = HI / itsFreqUW.value() - 1.;
+    itsZHI_W.value() = HI / itsFreqW.value() - 1.;
+    itsZHI_peak.value() = HI / nuPeak - 1.;
 
-    itsW50 = obj.getW50();
-    itsW20 = obj.getW20();
+    itsW50.value() = obj.getW50();
+    itsW20.value() = obj.getW20();
 
     itsRMSimagecube = obj.noiseLevel() * peakFluxscale;
 
     // @todo Optical depth calculations - rough & ready at present - assume constant component flux
-    itsOpticalDepth_peak = -1. * log(obj.getPeakFlux() / itsContinuumFlux);
-    itsOpticalDepth_int = -1. * log(obj.getIntegFlux() / itsContinuumFlux);
+//    itsOpticalDepth_peak = -1. * log(obj.getPeakFlux() / itsContinuumFlux);
+    itsOpticalDepth_peak.value() = -1. * log(obj.getPeakFlux() / itsContinuumFlux);
+    itsOpticalDepth_peak.error() = 0.;
+    itsOpticalDepth_int.value() = -1. * log(obj.getIntegFlux() / itsContinuumFlux);
 
     // @todo - Need to add logic to measure resolvedness.
     itsFlagResolved = 1;
@@ -150,12 +141,12 @@ CasdaAbsorptionObject::CasdaAbsorptionObject(CasdaComponent &component,
 
 const float CasdaAbsorptionObject::ra()
 {
-    return itsRA;
+    return itsRA.value();
 }
 
 const float CasdaAbsorptionObject::dec()
 {
-    return itsDEC;
+    return itsDEC.value();
 }
 
 void CasdaAbsorptionObject::printTableRow(std::ostream &stream,
@@ -189,51 +180,51 @@ void CasdaAbsorptionObject::printTableEntry(std::ostream &stream,
     } else if (type == "DEC") {
         column.printEntry(stream, itsDECs);
     } else if (type == "RAJD") {
-        column.printEntry(stream, itsRA);
-    } else if (type == "DECJD") {
-        column.printEntry(stream, itsDEC);
+        column.printEntry(stream, itsRA.value());
     } else if (type == "RAERR") {
-        column.printEntry(stream, itsRA_err);
+        column.printEntry(stream, itsRA.error());
+    } else if (type == "DECJD") {
+        column.printEntry(stream, itsDEC.value());
     } else if (type == "DECERR") {
-        column.printEntry(stream, itsDEC_err);
+        column.printEntry(stream, itsDEC.error());
     } else if (type == "FREQ_UW") {
-        column.printEntry(stream, itsFreqUW);
+        column.printEntry(stream, itsFreqUW.value());
     } else if (type == "FREQ_UW_ERR") {
-        column.printEntry(stream, itsFreqUW_err);
+        column.printEntry(stream, itsFreqUW.error());
     } else if (type == "FREQ_W") {
-        column.printEntry(stream, itsFreqW);
+        column.printEntry(stream, itsFreqW.value());
     } else if (type == "FREQ_W_ERR") {
-        column.printEntry(stream, itsFreqW_err);
+        column.printEntry(stream, itsFreqW.error());
     } else if (type == "Z_HI_UW") {
-        column.printEntry(stream, itsZHI_UW);
+        column.printEntry(stream, itsZHI_UW.value());
     } else if (type == "Z_HI_UW_ERR") {
-        column.printEntry(stream, itsZHI_UW_err);
+        column.printEntry(stream, itsZHI_UW.error());
     } else if (type == "Z_HI_W") {
-        column.printEntry(stream, itsZHI_W);
+        column.printEntry(stream, itsZHI_W.value());
     } else if (type == "Z_HI_W_ERR") {
-        column.printEntry(stream, itsZHI_W_err);
+        column.printEntry(stream, itsZHI_W.error());
     } else if (type == "Z_HI_PEAK") {
-        column.printEntry(stream, itsZHI_peak);
+        column.printEntry(stream, itsZHI_peak.value());
     } else if (type == "Z_HI_PEAK_ERR") {
-        column.printEntry(stream, itsZHI_peak_err);
+        column.printEntry(stream, itsZHI_peak.error());
     } else if (type == "W50") {
-        column.printEntry(stream, itsW50);
+        column.printEntry(stream, itsW50.value());
     } else if (type == "W50_ERR") {
-        column.printEntry(stream, itsW50_err);
+        column.printEntry(stream, itsW50.error());
     } else if (type == "W20") {
-        column.printEntry(stream, itsW20);
+        column.printEntry(stream, itsW20.value());
     } else if (type == "W20_ERR") {
-        column.printEntry(stream, itsW20_err);
+        column.printEntry(stream, itsW20.error());
     } else if (type == "RMS_IMAGECUBE") {
         column.printEntry(stream, itsRMSimagecube);
     } else if (type == "OPT_DEPTH_PEAK") {
-        column.printEntry(stream, itsOpticalDepth_peak);
+        column.printEntry(stream, itsOpticalDepth_peak.value());
     } else if (type == "OPT_DEPTH_PEAK_ERR") {
-        column.printEntry(stream, itsOpticalDepth_peak_err);
+        column.printEntry(stream, itsOpticalDepth_peak.error());
     } else if (type == "OPT_DEPTH_INT") {
-        column.printEntry(stream, itsOpticalDepth_int);
+        column.printEntry(stream, itsOpticalDepth_int.value());
     } else if (type == "OPT_DEPTH_INT_ERR") {
-        column.printEntry(stream, itsOpticalDepth_int_err);
+        column.printEntry(stream, itsOpticalDepth_int.error());
     } else if (type == "FLAG1") {
         column.printEntry(stream, itsFlagResolved);
     } else if (type == "FLAG2") {
@@ -269,51 +260,51 @@ void CasdaAbsorptionObject::checkCol(duchamp::Catalogues::Column &column)
     } else if (type == "DEC") {
         column.check(itsDECs);
     } else if (type == "RAJD") {
-        column.check(itsRA);
-    } else if (type == "DECJD") {
-        column.check(itsDEC);
+        column.check(itsRA.value());
     } else if (type == "RAERR") {
-        column.check(itsRA_err);
+        column.check(itsRA.error());
+    } else if (type == "DECJD") {
+        column.check(itsDEC.value());
     } else if (type == "DECERR") {
-        column.check(itsDEC_err);
+        column.check(itsDEC.error());
     } else if (type == "FREQ_UW") {
-        column.check(itsFreqUW);
+        column.check(itsFreqUW.value());
     } else if (type == "FREQ_UW_ERR") {
-        column.check(itsFreqUW_err);
+        column.check(itsFreqUW.error());
     } else if (type == "FREQ_W") {
-        column.check(itsFreqW);
+        column.check(itsFreqW.value());
     } else if (type == "FREQ_W_ERR") {
-        column.check(itsFreqW_err);
+        column.check(itsFreqW.error());
     } else if (type == "Z_HI_UW") {
-        column.check(itsZHI_UW);
+        column.check(itsZHI_UW.value());
     } else if (type == "Z_HI_UW_ERR") {
-        column.check(itsZHI_UW_err);
+        column.check(itsZHI_UW.error());
     } else if (type == "Z_HI_W") {
-        column.check(itsZHI_W);
+        column.check(itsZHI_W.value());
     } else if (type == "Z_HI_W_ERR") {
-        column.check(itsZHI_W_err);
+        column.check(itsZHI_W.error());
     } else if (type == "Z_HI_PEAK") {
-        column.check(itsZHI_peak);
+        column.check(itsZHI_peak.value());
     } else if (type == "Z_HI_PEAK_ERR") {
-        column.check(itsZHI_peak_err);
+        column.check(itsZHI_peak.error());
     } else if (type == "W50") {
-        column.check(itsW50);
+        column.check(itsW50.value());
     } else if (type == "W50_ERR") {
-        column.check(itsW50_err);
+        column.check(itsW50.error());
     } else if (type == "W20") {
-        column.check(itsW20);
+        column.check(itsW20.value());
     } else if (type == "W20_ERR") {
-        column.check(itsW20_err);
+        column.check(itsW20.error());
     } else if (type == "RMS_IMAGECUBE") {
         column.check(itsRMSimagecube);
     } else if (type == "OPT_DEPTH_PEAK") {
-        column.check(itsOpticalDepth_peak);
+        column.check(itsOpticalDepth_peak.value());
     } else if (type == "OPT_DEPTH_PEAK_ERR") {
-        column.check(itsOpticalDepth_peak_err);
+        column.check(itsOpticalDepth_peak.error());
     } else if (type == "OPT_DEPTH_INT") {
-        column.check(itsOpticalDepth_int);
+        column.check(itsOpticalDepth_int.value());
     } else if (type == "OPT_DEPTH_INT_ERR") {
-        column.check(itsOpticalDepth_int_err);
+        column.check(itsOpticalDepth_int.error());
     } else if (type == "FLAG1") {
         column.check(itsFlagResolved);
     } else if (type == "FLAG2") {

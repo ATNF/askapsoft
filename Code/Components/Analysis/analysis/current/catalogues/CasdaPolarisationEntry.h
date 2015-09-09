@@ -102,9 +102,9 @@ class CasdaPolarisationEntry : public CatalogueEntry {
         /// The J2000 IAU-format name for the component
         std::string itsName;
         /// The RA in decimal degrees
-        double itsRA;
+        casda::ValueError<double>  itsRA;
         /// The Declination in decimal degrees
-        double itsDEC;
+        casda::ValueError<double>  itsDEC;
 
         /// The band-median flux for the Stokes I spectrum
         double itsFluxImedian;
@@ -152,52 +152,32 @@ class CasdaPolarisationEntry : public CatalogueEntry {
         float itsDebiasThreshold;
 
         /// The peak polarised intensity in the FDF
-        double itsPintPeak;
+        casda::ValueError<double>  itsPintPeak;
         /// The peak polarised intensity in the FDF, corrected for
         /// polarisation bias
         double itsPintPeakDebias;
-        /// The uncertainty in the peak polarised intensity in the FDF
-        double itsPintPeak_err;
         /// The fitted peak polarised intensity in the FDF
-        double itsPintPeakFit;
+        casda::ValueError<double>  itsPintPeakFit;
         /// The fitted peak polarised intensity in the FDF, corrected for
         /// polarisation bias
         double itsPintPeakFitDebias;
-        /// The uncertainty in the fitted peak polarised intensity in the
-        /// FDF
-        double itsPintPeakFit_err;
 
         /// The signal-to-noise ratio of the fitted peak polarised
         /// intensity
-        double itsPintFitSNR;
-        /// The uncertainty on the signal-to-noise ratio of the fitted
-        /// peak polarised intensity
-        double itsPintFitSNR_err;
+        casda::ValueError<double>  itsPintFitSNR;
 
         /// The Faraday Depth at the peak of the FDF
-        double itsPhiPeak;
-        /// The uncertainty on the Faraday Depth at the peak of the FDF
-        double itsPhiPeak_err;
+        casda::ValueError<double>  itsPhiPeak;
         /// The Faraday Depth from a fit to the peak of the FDF
-        double itsPhiPeakFit;
-        /// The uncertainty on the Faraday Depth from a fit to the peak of
-        /// the FDF
-        double itsPhiPeakFit_err;
+        casda::ValueError<double>  itsPhiPeakFit;
 
         /// The polarisation angle at the reference wavelength
-        double itsPolAngleRef;
-        /// The uncertainty in the polarisation angle at the reference
-        /// wavelength
-        double itsPolAngleRef_err;
+        casda::ValueError<double>  itsPolAngleRef;
         /// The polarisation angle at zero wavelength
-        double itsPolAngleZero;
-        /// The uncertainty on the polarisation angle at zero wavelength
-        double itsPolAngleZero_err;
+        casda::ValueError<double>  itsPolAngleZero;
 
         /// The fractional polarisation
-        double itsFracPol;
-        /// The uncertainty in the fractional polarisation
-        double itsFracPol_err;
+        casda::ValueError<double>  itsFracPol;
 
         /// The first Faraday Complexity metric - deviation from constant
         /// P(nu)

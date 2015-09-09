@@ -57,13 +57,6 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
                                const unsigned int fitNumber,
                                const std::string fitType):
     CatalogueEntry(parset),
-    itsRA_err(0.),
-    itsDEC_err(0.),
-    itsFluxPeak_err(0.),
-    itsFluxInt_err(0.),
-    itsMaj_err(0.),
-    itsMin_err(0.),
-    itsPA_err(0.),
     itsFlag3(0),
     itsFlag4(0),
     itsComment("")
@@ -86,8 +79,8 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
     double thisRA, thisDec, zworld;
     obj.header().pixToWCS(gauss.xCenter(), gauss.yCenter(), obj.getZcentre(),
                           thisRA, thisDec, zworld);
-    itsRA = thisRA;
-    itsDEC = thisDec;
+    itsRA.value() = thisRA;
+    itsDEC.value() = thisDec;
 
 //    casa::Unit imageFreqUnits(obj.header().getSpectralUnits());
     casa::Unit imageFreqUnits(obj.header().WCS().cunit[obj.header().WCS().spec]);
@@ -100,24 +93,24 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
     float pixscale = obj.header().getAvPixScale() * 3600.; // convert from pixels to arcsec
     itsRAs  = decToDMS(thisRA, obj.header().lngtype(), precision);
     itsDECs = decToDMS(thisDec, obj.header().lattype(), precision);
-    itsName = obj.header().getIAUName(itsRA, itsDEC);
+    itsName = obj.header().getIAUName(itsRA.value(), itsDEC.value());
 
     casa::Unit imageFluxUnits(obj.header().getFluxUnits());
     casa::Unit fluxUnits(casda::fluxUnit);
     double peakFluxscale = casa::Quantity(1., imageFluxUnits).getValue(fluxUnits);
-    itsFluxPeak = gauss.height() * peakFluxscale;
+    itsFluxPeak.value() = gauss.height() * peakFluxscale;
 
     casa::Unit imageIntFluxUnits(obj.header().getIntFluxUnits());
     casa::Unit intFluxUnits(casda::intFluxUnitContinuum);
     double intFluxscale = casa::Quantity(1., imageIntFluxUnits).getValue(intFluxUnits);
-    itsFluxInt = gauss.flux() * intFluxscale;
+    itsFluxInt.value() = gauss.flux() * intFluxscale;
     if (obj.header().needBeamSize()) {
-        itsFluxInt /= obj.header().beam().area(); // Convert from mJy/beam to mJy
+        itsFluxInt.value() /= obj.header().beam().area(); // Convert from mJy/beam to mJy
     }
 
-    itsMaj = gauss.majorAxis() * pixscale;
-    itsMin = gauss.minorAxis() * pixscale;
-    itsPA = gauss.PA() * 180. / M_PI;
+    itsMaj.value() = gauss.majorAxis() * pixscale;
+    itsMin.value() = gauss.minorAxis() * pixscale;
+    itsPA.value() = gauss.PA() * 180. / M_PI;
 
     std::vector<Double> deconv = analysisutilities::deconvolveGaussian(gauss,
                                  obj.header().getBeam());
@@ -154,12 +147,12 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
 
 const float CasdaComponent::ra()
 {
-    return itsRA;
+    return itsRA.value();
 }
 
 const float CasdaComponent::dec()
 {
-    return itsDEC;
+    return itsDEC.value();
 }
 
 const std::string CasdaComponent::componentID()
@@ -169,7 +162,7 @@ const std::string CasdaComponent::componentID()
 
 const double CasdaComponent::intFlux()
 {
-    return itsFluxInt;
+    return itsFluxInt.value();
 }
 
 void CasdaComponent::printTableRow(std::ostream &stream,
@@ -197,35 +190,35 @@ void CasdaComponent::printTableEntry(std::ostream &stream,
     } else if (type == "DEC") {
         column.printEntry(stream, itsDECs);
     } else if (type == "RAJD") {
-        column.printEntry(stream, itsRA);
+        column.printEntry(stream, itsRA.value());
     } else if (type == "DECJD") {
-        column.printEntry(stream, itsDEC);
+        column.printEntry(stream, itsDEC.value());
     } else if (type == "RAERR") {
-        column.printEntry(stream, itsRA_err);
+        column.printEntry(stream, itsRA.error());
     } else if (type == "DECERR") {
-        column.printEntry(stream, itsDEC_err);
+        column.printEntry(stream, itsDEC.error());
     } else if (type == "FREQ") {
         column.printEntry(stream, itsFreq);
     } else if (type == "FPEAK") {
-        column.printEntry(stream, itsFluxPeak);
+        column.printEntry(stream, itsFluxPeak.value());
     } else if (type == "FPEAKERR") {
-        column.printEntry(stream, itsFluxPeak_err);
+        column.printEntry(stream, itsFluxPeak.error());
     } else if (type == "FINT") {
-        column.printEntry(stream, itsFluxInt);
+        column.printEntry(stream, itsFluxInt.value());
     } else if (type == "FINTERR") {
-        column.printEntry(stream, itsFluxInt_err);
+        column.printEntry(stream, itsFluxInt.error());
     } else if (type == "MAJ") {
-        column.printEntry(stream, itsMaj);
+        column.printEntry(stream, itsMaj.value());
     } else if (type == "MIN") {
-        column.printEntry(stream, itsMin);
+        column.printEntry(stream, itsMin.value());
     } else if (type == "PA") {
-        column.printEntry(stream, itsPA);
+        column.printEntry(stream, itsPA.value());
     } else if (type == "MAJERR") {
-        column.printEntry(stream, itsMaj_err);
+        column.printEntry(stream, itsMaj.error());
     } else if (type == "MINERR") {
-        column.printEntry(stream, itsMin_err);
+        column.printEntry(stream, itsMin.error());
     } else if (type == "PAERR") {
-        column.printEntry(stream, itsPA_err);
+        column.printEntry(stream, itsPA.error());
     } else if (type == "MAJDECONV") {
         column.printEntry(stream, itsMaj_deconv);
     } else if (type == "MINDECONV") {
@@ -291,35 +284,35 @@ void CasdaComponent::checkCol(duchamp::Catalogues::Column &column)
     } else if (type == "DEC") {
         column.check(itsDECs);
     } else if (type == "RAJD") {
-        column.check(itsRA);
+        column.check(itsRA.value());
     } else if (type == "DECJD") {
-        column.check(itsDEC);
+        column.check(itsDEC.value());
     } else if (type == "RAERR") {
-        column.check(itsRA_err);
+        column.check(itsRA.error());
     } else if (type == "DECERR") {
-        column.check(itsDEC_err);
+        column.check(itsDEC.error());
     } else if (type == "FREQ") {
         column.check(itsFreq);
     } else if (type == "FPEAK") {
-        column.check(itsFluxPeak);
+        column.check(itsFluxPeak.value());
     } else if (type == "FPEAKERR") {
-        column.check(itsFluxPeak_err);
+        column.check(itsFluxPeak.error());
     } else if (type == "FINT") {
-        column.check(itsFluxInt);
+        column.check(itsFluxInt.value());
     } else if (type == "FINTERR") {
-        column.check(itsFluxInt_err);
+        column.check(itsFluxInt.error());
     } else if (type == "MAJ") {
-        column.check(itsMaj);
+        column.check(itsMaj.value());
     } else if (type == "MIN") {
-        column.check(itsMin);
+        column.check(itsMin.value());
     } else if (type == "PA") {
-        column.check(itsPA);
+        column.check(itsPA.value());
     } else if (type == "MAJERR") {
-        column.check(itsMaj_err);
+        column.check(itsMaj.error());
     } else if (type == "MINERR") {
-        column.check(itsMin_err);
+        column.check(itsMin.error());
     } else if (type == "PAERR") {
-        column.check(itsPA_err);
+        column.check(itsPA.error());
     } else if (type == "MAJDECONV") {
         column.check(itsMaj_deconv);
     } else if (type == "MINDECONV") {
@@ -388,7 +381,8 @@ void CasdaComponent::writeAnnotation(boost::shared_ptr<duchamp::AnnotationWriter
     writer->writeCommentString(ss.str());
     // Have maj/min in arcsec, so need to convert to deg, and then
     // halve so that we give the semi-major axis
-    writer->ellipse(itsRA, itsDEC, itsMaj / 3600. / 2., itsMin / 3600. / 2., itsPA);
+    writer->ellipse(itsRA.value(), itsDEC.value(),
+                    itsMaj.value() / 3600. / 2., itsMin.value() / 3600. / 2., itsPA.value());
 
 }
 
