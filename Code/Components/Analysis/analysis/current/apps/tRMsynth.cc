@@ -27,6 +27,7 @@
 /// @author Matthew Whiting <Matthew.Whiting@csiro.au>
 ///
 #include <polarisation/RMSynthesis.h>
+#include <polarisation/RMData.h>
 #include <askap_analysis.h>
 
 #include <askap/AskapLogging.h>
@@ -123,6 +124,11 @@ int main(int argc, const char *argv[])
                  << rmsf_p[i + numPhiChan / 2] << std::endl;
         }
         fout.close();
+
+
+        RMData rmdata(parset);
+        rmdata.calculate(&rmsynth);
+        rmdata.printSummary();
 
 
     } catch (askap::AskapError& x) {

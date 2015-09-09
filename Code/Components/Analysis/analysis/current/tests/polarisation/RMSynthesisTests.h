@@ -27,6 +27,7 @@
 /// @author Matthew Whiting <Matthew.Whiting@csiro.au>
 ///
 #include <polarisation/RMSynthesis.h>
+#include <polarisation/RMData.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <askap/AskapLogging.h>
 #include <askap/AskapError.h>
@@ -43,7 +44,8 @@ const float psiZero = 0.;
 const unsigned int numPhiChan = 2500;
 const float deltaPhi = 25.;
 const float phiZero = 0.;
-
+const float threshSNR=8.6;
+const float threshDB=6.1;
 class RMSynthesisTest : public CppUnit::TestFixture {
         CPPUNIT_TEST_SUITE(RMSynthesisTest);
         CPPUNIT_TEST(testParsets);
@@ -70,11 +72,15 @@ class RMSynthesisTest : public CppUnit::TestFixture {
             parset_uniform.replace(LOFAR::KVpair("deltaPhi", deltaPhi));
             parset_uniform.replace(LOFAR::KVpair("phiZero", phiZero));
             parset_uniform.replace("weightType", "uniform");
+            parset_uniform.replace(LOFAR::KVpair("polThresholdSNR",threshSNR));
+            parset_uniform.replace(LOFAR::KVpair("polDebiasSNR",threshDB));
 
             parset_variance.replace(LOFAR::KVpair("numPhiChan", int(numPhiChan)));
             parset_variance.replace(LOFAR::KVpair("deltaPhi", deltaPhi));
             parset_variance.replace(LOFAR::KVpair("phiZero", phiZero));
             parset_variance.replace("weightType", "variance");
+            parset_variance.replace(LOFAR::KVpair("polThresholdSNR",threshSNR));
+            parset_variance.replace(LOFAR::KVpair("polDebiasSNR",threshDB));
 
             freq = casa::Vector<float>(nchan);
             casa::indgen<float>(freq, 1150.e6, 1.e6);
@@ -101,6 +107,13 @@ class RMSynthesisTest : public CppUnit::TestFixture {
             CPPUNIT_ASSERT(rmsynthV.weightType() == "variance");
             CPPUNIT_ASSERT_EQUAL(numPhiChan, rmsynthV.numPhiChan());
             CPPUNIT_ASSERT_DOUBLES_EQUAL(deltaPhi, rmsynthV.deltaPhi(), 1.e-5);
+
+            RMData rmdataU(parset_uniform);
+            CPPUNIT_ASSERT_EQUAL(threshSNR,rmdataU.detectionThreshold());
+            CPPUNIT_ASSERT_EQUAL(threshDB,rmdataU.debiasThreshold());
+            RMData rmdataV(parset_variance);
+            CPPUNIT_ASSERT_EQUAL(threshSNR,rmdataV.detectionThreshold());
+            CPPUNIT_ASSERT_EQUAL(threshDB,rmdataV.debiasThreshold());
 
         }
 
