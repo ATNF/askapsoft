@@ -37,6 +37,7 @@
 #include <cstdlib>
 #include <csignal>
 #include <unistd.h>
+#include <complex>
 
 // ASKAPsoft includes
 #include "cpcommon/VisDatagramADE.h"
@@ -105,15 +106,75 @@ static void printPayload(const VisDatagramADE& v)
     std::cout << std::endl;
 }
 
+// Print product ranges with non-zero data
+// Note, only first beam and first channel are considered.
+//
+// Timestamp:  4679919826828364
+//    Slice:      0
+//    Non-zero products: 1 ~ 657
+static void printNonZeroProducts(const VisDatagramADE &v)
+{
+  if ((v.beamid == 1) && (v.channel == 1)) {
+       std::cout << "Timestamp:\t" << v.timestamp << std::endl;
+       std::cout << "\tSlice:\t\t" << v.slice << std::endl;
+
+       // obtain a list of product ranges with non-zero data
+       // pair has first and last product in the range (could be the same)
+       std::vector<std::pair<uint32_t, uint32_t> > productRanges;
+       productRanges.reserve(VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE / 2);
+
+       uint32_t count = 0;
+       for (uint32_t product = v.baseline1, offset = 0; product <= v.baseline2; ++product, ++offset) {
+            if (offset >= VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE) {
+                std::cout<<"\tCorrupted baseline range" << std::endl;
+                return;
+            }
+            const float threshold = 1e-10;
+            const bool isNonZero = (std::abs(std::complex<float>(v.vis[offset].real, v.vis[offset].imag)) > threshold);
+            if (isNonZero) {
+                ++count;
+                if (productRanges.size()) {
+                    if (productRanges.back().second + 1 == product) {
+                        productRanges.back().second = product;
+                        continue;
+                    }
+                }
+                productRanges.push_back(std::pair<uint32_t, uint32_t>(product, product));
+            }
+       }
+
+       // print the list of non-zero products
+       std::cout<<"\tNon-zero products:\t\t";
+       if (productRanges.size() == 0) {
+           std::cout<<"none"<<std::endl;
+       } else {
+           for (size_t i=0; i < productRanges.size(); ++i) {
+                if (i>0) {
+                    std::cout<<", ";
+                }
+                const std::pair<uint32_t, uint32_t> range = productRanges[i];
+                if (range.first == range.second) {
+                    std::cout<< range.first;
+                } else {
+                    std::cout<< range.first << " ~ " << range.second;
+                }
+           }
+           std::cout<<" ("<<count<<" in total)"<<std::endl;
+       }
+  }
+}
+
 int main(int argc, char *argv[])
 {
     // Parse additional command line parameters
     cmdlineparser::Parser parser;
     cmdlineparser::FlagParameter verbosePar("-v");
     cmdlineparser::FlagParameter veryVerbosePar("-vv");
+    cmdlineparser::FlagParameter printNonZeroPar("-nz");
     cmdlineparser::FlaggedParameter<int> portPar("-p", 3000);
     parser.add(verbosePar, cmdlineparser::Parser::return_default);
     parser.add(veryVerbosePar, cmdlineparser::Parser::return_default);
+    parser.add(printNonZeroPar, cmdlineparser::Parser::return_default);
     parser.add(portPar, cmdlineparser::Parser::return_default);
 
     try {
@@ -121,9 +182,10 @@ int main(int argc, char *argv[])
         if (verbosePar.defined()) verbose = 1;
         if (veryVerbosePar.defined()) verbose = 2;
     } catch (const cmdlineparser::XParserExtra&) {
-        std::cerr << "usage: " << argv[0] << " [-v] [-vv] [-p <udp port#>]" << std::endl;
+        std::cerr << "usage: " << argv[0] << " [-v] [-vv] [-nz] [-p <udp port#>]" << std::endl;
         std::cerr << "  -v            \t Verbose, partially display payload" << std::endl;
-        std::cerr << "  -vv           \t Very vebose, display netire payload" << std::endl;
+        std::cerr << "  -vv           \t Very vebose, display entire payload" << std::endl;
+        std::cerr << "  -nz           \t List products with non-zero data for first beam and channel"<<std::endl;
         std::cerr << "  -p <udp port#>\t UDP Port number to listen on" << std::endl;
         return 1;
     }
@@ -165,6 +227,9 @@ int main(int argc, char *argv[])
         if (vis.version != VisDatagramTraits<VisDatagramADE>::VISPAYLOAD_VERSION) {
             std::cout << "Version mismatch. Expected " << VisDatagramTraits<VisDatagramADE>::VISPAYLOAD_VERSION << " got " << vis.version << std::endl;
             continue;
+        }
+        if (printNonZeroPar.defined()) {
+            printNonZeroProducts(vis);
         }
         if (verbose) {
             printPayload(vis);

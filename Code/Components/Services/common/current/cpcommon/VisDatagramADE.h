@@ -102,7 +102,7 @@ namespace askap {
             /// This identified which antenna pairs and polarisation products this datagram
             /// corresponds to.
             /// These are contiguous and baseline1 is the first baseline in this datagram
-            /// and baseline2 is the last. #visibilities = baseline2 - baseline1
+            /// and baseline2 is the last. #visibilities = baseline2 - baseline1 + 1
             uint32_t baseline1;
             uint32_t baseline2;
 
