@@ -42,6 +42,9 @@
 
 #include <Common/ParameterSet.h>
 #include <duchamp/Outputs/CatalogueSpecification.hh>
+#include <duchamp/Outputs/KarmaAnnotationWriter.hh>
+#include <duchamp/Outputs/CasaAnnotationWriter.hh>
+#include <duchamp/Outputs/DS9AnnotationWriter.hh>
 #include <vector>
 
 ASKAP_LOGGER(logger, ".componentcatalogue");
@@ -52,10 +55,15 @@ namespace analysis {
 
 ComponentCatalogue::ComponentCatalogue(std::vector<sourcefitting::RadioSource> &srclist,
                                        const LOFAR::ParameterSet &parset,
-                                       duchamp::Cube &cube):
+                                       duchamp::Cube &cube,
+                                       const std::string fitType):
+    itsFitType(casda::componentFitType),
     itsComponents(),
     itsSpec(),
     itsCube(cube),
+    itsKarmaFilename(""),
+    itsCASAFilename(""),
+    itsDS9Filename(""),
     itsVersion("casda.continuum_component_description_v1.7")
 {
     this->defineComponents(srclist, parset);
@@ -67,6 +75,15 @@ ComponentCatalogue::ComponentCatalogue(std::vector<sourcefitting::RadioSource> &
                          std::string::npos, ".components");
     itsVotableFilename = filenameBase + ".xml";
     itsAsciiFilename = filenameBase + ".txt";
+    if (parset.getBool("flagKarma", false)) {
+        itsKarmaFilename = filenameBase + ".ann";
+    }
+    if (parset.getBool("flagCasa", false)) {
+        itsCASAFilename = filenameBase + ".crf";
+    }
+    if (parset.getBool("flagDS9", false)) {
+        itsDS9Filename = filenameBase + ".reg";
+    }
 
 }
 
@@ -76,7 +93,7 @@ void ComponentCatalogue::defineComponents(std::vector<sourcefitting::RadioSource
     std::vector<sourcefitting::RadioSource>::iterator src;
     for (src = srclist.begin(); src != srclist.end(); src++) {
         for (size_t i = 0; i < src->numFits(); i++) {
-            CasdaComponent component(*src, parset, i);
+            CasdaComponent component(*src, parset, i, itsFitType);
             itsComponents.push_back(component);
         }
     }
@@ -186,6 +203,7 @@ void ComponentCatalogue::write()
     this->writeVOT();
     this->check(true);
     this->writeASCII();
+    this->writeAnnotations();
 }
 
 void ComponentCatalogue::writeVOT()
@@ -196,8 +214,7 @@ void ComponentCatalogue::writeVOT()
                        itsVotableFilename);
     vowriter.setColumnSpec(&itsSpec);
     vowriter.openCatalogue();
-    vowriter.setResourceName("Component catalogue from Selavy source-finding");
-    vowriter.setTableName("Component catalogue");
+    writeVOTinformation(vowriter);
     vowriter.writeHeader();
     duchamp::VOParam version("table_version", "meta.version", "char", itsVersion, 39, "");
     vowriter.writeParameter(version);
@@ -208,6 +225,12 @@ void ComponentCatalogue::writeVOT()
     vowriter.writeEntries<CasdaComponent>(itsComponents);
     vowriter.writeFooter();
     vowriter.closeCatalogue();
+}
+
+void ComponentCatalogue::writeVOTinformation(AskapVOTableCatalogueWriter &vowriter)
+{
+    vowriter.setResourceName("Component catalogue from Selavy source-finding");
+    vowriter.setTableName("Component catalogue");
 }
 
 void ComponentCatalogue::writeASCII()
@@ -225,6 +248,60 @@ void ComponentCatalogue::writeASCII()
 
 }
 
+void ComponentCatalogue::writeAnnotations()
+{
+
+    // still to draw boxes
+
+    for (int loop = 0; loop < 3; loop++) {
+        boost::shared_ptr<duchamp::AnnotationWriter> writer;
+
+        if (loop == 0) { // Karma
+            if (itsKarmaFilename != "") {
+                writer = boost::shared_ptr<duchamp::KarmaAnnotationWriter>(
+                             new duchamp::KarmaAnnotationWriter(itsKarmaFilename));
+                ASKAPLOG_INFO_STR(logger, "Writing fit results to karma annotation file: " <<
+                                  itsKarmaFilename);
+            }
+        } else if (loop == 1) { // DS9
+            if (itsDS9Filename != "") {
+                writer = boost::shared_ptr<duchamp::DS9AnnotationWriter>(
+                             new duchamp::DS9AnnotationWriter(itsDS9Filename));
+                ASKAPLOG_INFO_STR(logger, "Writing fit results to DS9 region file: " <<
+                                  itsDS9Filename);
+            }
+        } else { // CASA
+            if (itsCASAFilename != "") {
+                writer = boost::shared_ptr<duchamp::CasaAnnotationWriter>(
+                             new duchamp::CasaAnnotationWriter(itsCASAFilename));
+                ASKAPLOG_INFO_STR(logger, "Writing fit results to CASA region file: " <<
+                                  itsCASAFilename);
+            }
+        }
+
+        if (writer.get() != 0) {
+            writer->setup(&itsCube);
+            writer->openCatalogue();
+            writer->setColourString("BLUE");
+            writer->writeHeader();
+            writer->writeParameters();
+            writer->writeStats();
+            writer->writeTableHeader();
+
+            std::vector<CasdaComponent>::iterator comp;
+            for (comp = itsComponents.begin(); comp != itsComponents.end(); comp++) {
+                comp->writeAnnotation(writer);
+            }
+
+            writer->writeFooter();
+            writer->closeCatalogue();
+
+            writer.reset();
+        }
+
+    }
+
+}
 
 
 }

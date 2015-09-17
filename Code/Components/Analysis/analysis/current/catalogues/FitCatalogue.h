@@ -31,6 +31,7 @@
 #define ASKAP_ANALYSIS_FIT_CAT_H_
 
 #include <catalogues/CasdaComponent.h>
+#include <catalogues/ComponentCatalogue.h>
 #include <sourcefitting/RadioSource.h>
 #include <Common/ParameterSet.h>
 #include <duchamp/Outputs/CatalogueSpecification.hh>
@@ -53,7 +54,7 @@ namespace analysis {
 /// traditionally produce in the "fit results" file. This class also
 /// provides methods to produce annotation files showing the location
 /// of fitted components.
-class FitCatalogue {
+class FitCatalogue : public ComponentCatalogue {
     public:
         /// Constructor, that calls defineComponents to define the
         /// catalogue from a set of RadioSource object, and defineSpec
@@ -67,82 +68,18 @@ class FitCatalogue {
         /// Default destructor
         virtual ~FitCatalogue() {};
 
-        /// Check the widths of the columns based on the values within
-        /// the catalogue.
-        void check();
-
-        /// Write the catalogue to the ASCII & VOTable files (acts as
-        /// a front-end to the writeVOT() and writeASCII() functions),
-        /// and produce the annotations files (via the
-        /// writeAnnotations() function)
-        void write();
-
     protected:
-        /// Define the vector list of Components using the input list
-        /// of RadioSource objects and the parset. One component is
-        /// created for each fitted Gaussian component from each
-        /// RadioSource, then added to its Components.
-        void defineComponents(std::vector<sourcefitting::RadioSource> &srclist,
-                              const LOFAR::ParameterSet &parset);
 
         /// Define the catalogue specification. This function
         /// individually defines the columns used in describing the
-        /// catalogue, using the Duchamp interface.
+        /// catalogue, using the Duchamp interface. This is
+        /// reimplemented from that in ComponentCatalogue.
         void defineSpec();
 
-        /// Writes the catalogue to a VOTable. It has the necessary
-        /// header information and a table entry for each Component in
-        /// the catalogue.
-        void writeVOT();
+        /// Writes the table-specific resource and table name fields to
+        /// the VOTable. This will change for each derived class.
+        void writeVOTinformation(AskapVOTableCatalogueWriter &vowriter);
 
-        /// Writes the catalogue to an ASCII text file that is
-        /// human-readable (with space-separated and aligned
-        /// columns). It has a commented line (ie. starting with '#')
-        /// with the column titles, another with the units, then one
-        /// line for each Component.
-        void writeASCII();
-
-        /// Write annotation files for use with Karma, DS9 and CASA
-        /// viewers. The annotations show the location and size of the
-        /// components, drawing them as ellipses where appropriate. The
-        /// filenames have the same form as the votable and ascii files,
-        /// but with .ann/.reg/.crf suffixes.
-        void writeAnnotations();
-
-        /// The fit type that is used. This variable is used to refer to
-        /// the correct set of fit results in the RadioSource objects. It
-        /// takes one of the following values: best, full, psf, height,
-        /// shape. It is passed to the CasdaComponent constructor.
-        std::string itsFitType;
-
-        /// The list of catalogued Components.
-        std::vector<CasdaComponent> itsComponents;
-
-        /// The specification for the individual columns
-        duchamp::Catalogues::CatalogueSpecification itsSpec;
-
-        /// The duchamp::Cube, used to help instantiate the classes to
-        /// write out the ASCII and VOTable files.
-        duchamp::Cube &itsCube;
-
-        /// The filename of the VOTable output file
-        std::string itsVotableFilename;
-
-        /// The filename of the ASCII text output file.
-        std::string itsAsciiFilename;
-
-        /// The filename of the Karma annotation file
-        std::string itsKarmaFilename;
-
-        /// The filename of the CASA region file
-        std::string itsCASAFilename;
-
-        /// The filename of the DS9 region file
-        std::string itsDS9Filename;
-
-        /// The version of the catalogue - in this case, the software
-        /// version given by ASKAP_PACKAGE_VERSION
-        std::string itsVersion;
 
 };
 

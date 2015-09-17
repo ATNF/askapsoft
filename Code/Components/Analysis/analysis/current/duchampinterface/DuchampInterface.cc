@@ -185,11 +185,11 @@ duchamp::Param parseParset(const LOFAR::ParameterSet& parset)
     par.setFileOutputResid(parset.getString("fileOutputResid", par.getFileOutputResid()));
     par.setFlagVOT(parset.getBool("flagVOT", true));
     par.setVOTFile(parset.getString("votFile", par.getVOTFile()));
-    par.setFlagKarma(parset.getBool("flagKarma", true)); // different from Duchamp default
+    par.setFlagKarma(parset.getBool("flagKarma", false)); 
     par.setKarmaFile(parset.getString("karmaFile", par.getKarmaFile()));
-    par.setFlagDS9(parset.getBool("flagDS9", true)); // different from Duchamp default
+    par.setFlagDS9(parset.getBool("flagDS9", false)); 
     par.setDS9File(parset.getString("ds9File", par.getDS9File()));
-    par.setFlagCasa(parset.getBool("flagCasa", true)); // different from Duchamp default
+    par.setFlagCasa(parset.getBool("flagCasa", false)); 
     par.setCasaFile(parset.getString("casaFile", par.getCasaFile()));
     //
     par.setFlagMaps(false); // flagMaps

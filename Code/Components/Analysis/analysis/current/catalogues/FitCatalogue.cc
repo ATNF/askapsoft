@@ -42,9 +42,6 @@
 
 #include <Common/ParameterSet.h>
 #include <duchamp/Outputs/CatalogueSpecification.hh>
-#include <duchamp/Outputs/KarmaAnnotationWriter.hh>
-#include <duchamp/Outputs/CasaAnnotationWriter.hh>
-#include <duchamp/Outputs/DS9AnnotationWriter.hh>
 #include <vector>
 
 ASKAP_LOGGER(logger, ".fitcatalogue");
@@ -57,12 +54,9 @@ FitCatalogue::FitCatalogue(std::vector<sourcefitting::RadioSource> &srclist,
                            const LOFAR::ParameterSet &parset,
                            duchamp::Cube &cube,
                            const std::string fitType):
-    itsFitType(fitType),
-    itsComponents(),
-    itsSpec(),
-    itsCube(cube),
-    itsVersion(ASKAP_PACKAGE_VERSION)
+    ComponentCatalogue(srclist, parset, cube, fitType)
 {
+    itsVersion = ASKAP_PACKAGE_VERSION;
     this->defineComponents(srclist, parset);
     this->defineSpec();
 
@@ -77,22 +71,7 @@ FitCatalogue::FitCatalogue(std::vector<sourcefitting::RadioSource> &srclist,
     }
     itsVotableFilename = filenameBase + ".xml";
     itsAsciiFilename = filenameBase + ".txt";
-    itsKarmaFilename = filenameBase + ".ann";
-    itsCASAFilename = filenameBase + ".crf";
-    itsDS9Filename = filenameBase + ".reg";
 
-}
-
-void FitCatalogue::defineComponents(std::vector<sourcefitting::RadioSource> &srclist,
-                                    const LOFAR::ParameterSet &parset)
-{
-    std::vector<sourcefitting::RadioSource>::iterator src;
-    for (src = srclist.begin(); src != srclist.end(); src++) {
-        for (size_t i = 0; i < src->numFits(); i++) {
-            CasdaComponent component(*src, parset, i, itsFitType);
-            itsComponents.push_back(component);
-        }
-    }
 }
 
 void FitCatalogue::defineSpec()
@@ -166,107 +145,13 @@ void FitCatalogue::defineSpec()
 
 }
 
-void FitCatalogue::check()
+void FitCatalogue::writeVOTinformation(AskapVOTableCatalogueWriter &vowriter)
 {
-    std::vector<CasdaComponent>::iterator comp;
-    for (comp = itsComponents.begin(); comp != itsComponents.end(); comp++) {
-        comp->checkSpec(itsSpec);
-    }
-
-}
-
-void FitCatalogue::write()
-{
-    this->writeVOT();
-    this->writeASCII();
-    this->writeAnnotations();
-}
-
-void FitCatalogue::writeVOT()
-{
-    AskapVOTableCatalogueWriter vowriter(itsVotableFilename);
-    vowriter.setup(&itsCube);
-    ASKAPLOG_DEBUG_STR(logger, "Writing Fit results to the VOTable " <<
-                       itsVotableFilename);
-    vowriter.setColumnSpec(&itsSpec);
-    vowriter.openCatalogue();
     vowriter.setResourceName("Catalogue of component fitting results from Selavy source-finding");
     vowriter.setTableName("Fitted component catalogue");
-    vowriter.writeHeader();
-    duchamp::VOParam version("table_version", "meta.version", "char", itsVersion, 39, "");
-    vowriter.writeParameter(version);
-    vowriter.writeParameters();
-    vowriter.writeFrequencyParam();
-    vowriter.writeStats();
-    vowriter.writeTableHeader();
-    vowriter.writeEntries<CasdaComponent>(itsComponents);
-    vowriter.writeFooter();
-    vowriter.closeCatalogue();
-}
-
-void FitCatalogue::writeASCII()
-{
-
-    AskapAsciiCatalogueWriter writer(itsAsciiFilename);
-    ASKAPLOG_DEBUG_STR(logger, "Writing Fit results to " << itsAsciiFilename);
-    writer.setup(&itsCube);
-    writer.setColumnSpec(&itsSpec);
-    writer.openCatalogue();
-    writer.writeTableHeader();
-    writer.writeEntries<CasdaComponent>(itsComponents);
-    writer.writeFooter();
-    writer.closeCatalogue();
 
 }
 
-void FitCatalogue::writeAnnotations()
-{
-
-    // still to draw boxes
-
-    for (int loop = 0; loop < 3; loop++) {
-        boost::shared_ptr<duchamp::AnnotationWriter> writer;
-
-        if (loop == 0) { // Karma
-            writer = boost::shared_ptr<duchamp::KarmaAnnotationWriter>(
-                         new duchamp::KarmaAnnotationWriter(itsKarmaFilename));
-            ASKAPLOG_INFO_STR(logger, "Writing fit results to karma annotation file: " <<
-                              itsKarmaFilename);
-        } else if (loop == 1) {
-            writer = boost::shared_ptr<duchamp::DS9AnnotationWriter>(
-                         new duchamp::DS9AnnotationWriter(itsDS9Filename));
-            ASKAPLOG_INFO_STR(logger, "Writing fit results to DS9 region file: " <<
-                              itsDS9Filename);
-        } else {
-            writer = boost::shared_ptr<duchamp::CasaAnnotationWriter>(
-                         new duchamp::CasaAnnotationWriter(itsCASAFilename));
-            ASKAPLOG_INFO_STR(logger, "Writing fit results to CASA region file: " <<
-                              itsCASAFilename);
-        }
-
-        if (writer.get() != 0) {
-            writer->setup(&itsCube);
-            writer->openCatalogue();
-            writer->setColourString("BLUE");
-            writer->writeHeader();
-            writer->writeParameters();
-            writer->writeStats();
-            writer->writeTableHeader();
-
-            std::vector<CasdaComponent>::iterator comp;
-            for (comp = itsComponents.begin(); comp != itsComponents.end(); comp++) {
-                comp->writeAnnotation(writer);
-            }
-
-            writer->writeFooter();
-            writer->closeCatalogue();
-
-            writer.reset();
-        }
-
-    }
-
-}
 
 }
 

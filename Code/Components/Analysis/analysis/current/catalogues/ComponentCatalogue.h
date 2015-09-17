@@ -30,6 +30,7 @@
 #define ASKAP_ANALYSIS_COMPONENT_CAT_H_
 
 #include <catalogues/CasdaComponent.h>
+#include <outputs/AskapVOTableCatalogueWriter.h>
 #include <sourcefitting/RadioSource.h>
 #include <Common/ParameterSet.h>
 #include <duchamp/Outputs/CatalogueSpecification.hh>
@@ -53,7 +54,8 @@ class ComponentCatalogue {
         /// based on the output file given in the parset.
         ComponentCatalogue(std::vector<sourcefitting::RadioSource> &srclist,
                            const LOFAR::ParameterSet &parset,
-                           duchamp::Cube &cube);
+                           duchamp::Cube &cube,
+                           const std::string fitType = casda::componentFitType);
 
         /// Default destructor
         virtual ~ComponentCatalogue() {};
@@ -62,11 +64,11 @@ class ComponentCatalogue {
         /// the catalogue.
         /// @param allColumns If true, run the check on all columns in
         /// the specification, else just do it for the strings.
-        void check(bool allColumns);
+        virtual void check(bool allColumns);
 
         /// Write the catalogue to the ASCII & VOTable files (acts as
         /// a front-end to the writeVOT() and writeASCII() functions)
-        void write();
+        virtual void write();
 
     protected:
         /// Define the vector list of Components using the input list
@@ -79,7 +81,7 @@ class ComponentCatalogue {
         /// Define the catalogue specification. This function
         /// individually defines the columns used in describing the
         /// catalogue, using the Duchamp interface.
-        void defineSpec();
+        virtual void defineSpec();
 
         /// Writes the catalogue to a VOTable that conforms to the
         /// CASDA requirements. It has the necessary header
@@ -87,12 +89,29 @@ class ComponentCatalogue {
         /// entry for each Component in the catalogue.
         void writeVOT();
 
+        /// Writes the table-specific resource and table name fields to
+        /// the VOTable. This will change for each derived class.
+        virtual void writeVOTinformation(AskapVOTableCatalogueWriter &vowriter);
+
         /// Writes the catalogue to an ASCII text file that is
         /// human-readable (with space-separated and aligned
         /// columns). It has a commented line (ie. starting with '#')
         /// with the column titles, another with the units, then one
         /// line for each Component.
         void writeASCII();
+
+        /// Write annotation files for use with Karma, DS9 and CASA
+        /// viewers. The annotations show the location and size of the
+        /// components, drawing them as ellipses where appropriate. The
+        /// filenames have the same form as the votable and ascii files,
+        /// but with .ann/.reg/.crf suffixes.
+        void writeAnnotations();
+
+        /// The fit type that is used. This variable is used to refer to
+        /// the correct set of fit results in the RadioSource objects. It
+        /// takes one of the following values: best, full, psf, height,
+        /// shape. It is passed to the CasdaComponent constructor.
+        std::string itsFitType;
 
         /// The list of catalogued Components.
         std::vector<CasdaComponent> itsComponents;
@@ -109,6 +128,15 @@ class ComponentCatalogue {
 
         /// The filename of the ASCII text output file.
         std::string itsAsciiFilename;
+
+        /// The filename of the Karma annotation file
+        std::string itsKarmaFilename;
+
+        /// The filename of the CASA region file
+        std::string itsCASAFilename;
+
+        /// The filename of the DS9 region file
+        std::string itsDS9Filename;
 
         /// The version of the catalogue specification, from CASDA.
         std::string itsVersion;

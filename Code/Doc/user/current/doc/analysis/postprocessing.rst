@@ -385,9 +385,19 @@ The columns are:
   further flags that are not yet defined (they are left as
   placeholders for now).
 
-A similar output file is the fit Results catalogue. This shows the fit
-results with a different emphasis (this is the original method of
-showing the fit results in Selavy). This too takes its name from the
+Along with the components catalogue, a matching Karma/CASA/DS9
+annotation (region) file will be produced showing the location & size
+of the components (each Gaussian component is indicated by an ellipse
+given by the major & minor axes and position angle of the
+component). These are named in the same way as the catalogue file,
+but with a .ann/.crf/.reg extension respectively. Whether these are
+produced is governed by the flagKarma/flagCasa/flagDS9 parameters (see
+:doc:`selavy` for details).
+
+A similar output file is the fit Results catalogue. This is only
+produced when **writeFitResults=true**. This shows the fit results
+with a different emphasis (this is the original method of showing the
+fit results in Selavy). This too takes its name from the
 **Selavy.resultsFile** parameter, replacing the *.txt* extension with
 *.fitResults.txt*. An example start for the file is as follows below.
 
@@ -453,7 +463,9 @@ Two types of annotation files will also be produced:
   the fitting results (each Gaussian component is indicated by an
   ellipse given by the major & minor axes and position angle of the
   component). These are named in the same way as the fit results file,
-  but with a .ann/.crf/.reg extension respectively.
+  but with a .ann/.crf/.reg extension respectively. Whether these are
+  produced is governed by the flagKarma/flagCasa/flagDS9 parameters
+  (see :doc:`selavy` for details).
 * **fitBoxAnnotationFile** [selavy-fitResults.boxes.ann] - an
   annotation file showing the boxes used for the Gaussian fitting (if
   boxes were not used, ie. **fitJustDetection=true**, this file is not
@@ -561,6 +573,8 @@ Parameters for fitting
 |                                              |               |                            |the fitting).                                                                            |
 +----------------------------------------------+---------------+----------------------------+-----------------------------------------------------------------------------------------+
 |**Output files**                              |               |                            |                                                                                         |
++----------------------------------------------+---------------+----------------------------+-----------------------------------------------------------------------------------------+
+|Selavy.writeFitResults                        |bool           |false                       |Whether to write out the fitResults files (catalogues and annotations).                  |
 +----------------------------------------------+---------------+----------------------------+-----------------------------------------------------------------------------------------+
 |Selavy.fitBoxAnnotationFile                   |string         |selavy-fitResults.boxes.ann |A Karma annoation file showing the location and size of boxes used in the Gaussian       |
 |                                              |               |                            |fitting (only produced if Fitter.fitJustDetection = false).                              |

@@ -267,9 +267,12 @@ Output files
 Standard Duchamp output
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Standard Duchamp provides for flexibility in naming the output files
-it generates. They are summarised here, listed by the parameter name
-with the default value in square brackets.:
+Selavy builds on the Duchamp library, and provides the ability to
+write standard Duchamp output files. Whether these are written is
+governed by the **writeDuchampFiles** parameter, which defaults to
+**true**. Standard Duchamp provides for flexibility in naming the
+output files it generates. They are summarised here, listed by the
+parameter name with the default value in square brackets.:
 
 * **resultsFile** [*selavy-results.txt*] - the list of detected
   sources and their parameters. Also includes (if
@@ -280,16 +283,13 @@ with the default value in square brackets.:
   summary from the results file.
 * **karmaFile** [*selavy-results.ann*] - a Karma annotation file,
   showing the location of detected sources. This is produced when
-  **flagKarma=true**, which is the default (contrary to standard
-  Duchamp behaviour)
+  **flagKarma=true**.
 * **ds9File** [*selavy-results.reg*] - a DS9 region file, showing the
   location of detected sources. This is produced when
-  **flagDS9=true**, which is the default (contrary to standard Duchamp
-  behaviour)
+  **flagDS9=true**.
 * **casaFile** [*selavy-results.crf*] - a CASA region file, showing
   the location of detected sources. This is produced when
-  **flagCASA=true**, which is the default (contrary to standard
-  Duchamp behaviour)
+  **flagCASA=true**.
 * **logFile** [*selavy-Logfile.txt* / selavy-Logfile-Master.txt /
   selavy-Logfile-?.txt] - the logfiles, showing lists of intermediate
   detections (before the final merging), as well as pixel-level
@@ -333,10 +333,11 @@ implemented in the ASKAP source finder:
   found at :doc:`postprocessing`, while an example island catalogue
   is shown below.
 * Fitting results - when Gaussian fitting is done for the continuum
-  sources, several files are produced: a catalogue in ASCII & VOTable
+  sources, several files can be written: a catalogue in ASCII & VOTable
   format (differing from the CASDA-format components catalogue), and
   annotation files showing the location of fitted components. These
-  will be called *selavy-results.fitResults.txt* etc
+  will be called *selavy-results.fitResults.txt* etc. To produce these
+  files, set **writeFitResults=true** (default is **false**).
   See :doc:`postprocessing` for details of the content of these files.
 * Images: when the variable-threshold option is used, the user can opt
   to write out relevant maps to CASA images. These include the noise
@@ -418,6 +419,8 @@ Output-related parameters
 |                         |              |                            |(see description below). If empty, no such file is created.                                     |
 |                         |              |                            |                                                                                                |
 +-------------------------+--------------+----------------------------+------------------------------------------------------------------------------------------------+
+|writeDuchampFiles        |bool          |true                        |Whether to write out the standard Duchamp output files.                                         |
++-------------------------+--------------+----------------------------+------------------------------------------------------------------------------------------------+
 |flagLog                  |bool          |false                       |Produce a Duchamp-style log file, recording intermediate detections (see above). The workers    |
 |                         |              |                            |will produce selavy-Logfile.%w.txt, (where %w is the worker number, in the usual fashion) and   |
 |                         |              |                            |the master will produce selavy-Logfile.Master.txt.                                              |
@@ -445,16 +448,15 @@ Output-related parameters
 |                         |              |                            |spectraTextFile and spectral extraction options (see the :doc:`extraction` page for details on  |
 |                         |              |                            |the latter).                                                                                    |
 +-------------------------+--------------+----------------------------+------------------------------------------------------------------------------------------------+
-|flagKarma                |bool          |true                        |Produce a Karma annotation plot. *Note the different default from standard Duchamp.*            |
-|                         |              |                            |                                                                                                |
+|flagKarma                |bool          |false                       |Produce a Karma annotation plot.                                                                |
 +-------------------------+--------------+----------------------------+------------------------------------------------------------------------------------------------+
 |karmaFile                |string        |selavy-results.ann          |The Karma annoation file showing the location of detected objects.                              |
 +-------------------------+--------------+----------------------------+------------------------------------------------------------------------------------------------+
-|flagDS9                  |bool          |true                        |Produce a DS9 region file.  *Note the different default from standard Duchamp.*                 |
+|flagDS9                  |bool          |false                       |Produce a DS9 region file.                                                                      |
 +-------------------------+--------------+----------------------------+------------------------------------------------------------------------------------------------+
 |ds9File                  |string        |selavy-results.reg          |The DS9 region file showing the location of detected objects.                                   |
 +-------------------------+--------------+----------------------------+------------------------------------------------------------------------------------------------+
-|flagCasa                 |bool          |true                        |Produce a CASA region file.  *Note the different default from standard Duchamp.*                |
+|flagCasa                 |bool          |false                       |Produce a CASA region file.                                                                     |
 +-------------------------+--------------+----------------------------+------------------------------------------------------------------------------------------------+
 |casaFile                 |string        |selavy-results.crf          |The CASA region format file showing the location of detected objects.                           |
 +-------------------------+--------------+----------------------------+------------------------------------------------------------------------------------------------+

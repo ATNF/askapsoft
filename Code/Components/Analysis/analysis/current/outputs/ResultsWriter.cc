@@ -75,39 +75,45 @@ void ResultsWriter::setFlag2D(bool flag2D)
 
 void ResultsWriter::duchampOutput()
 {
+    
+    if (itsParset.getBool("writeDuchampFiles", true)) {
 
-    // Write standard Duchamp results file
-    ASKAPLOG_INFO_STR(logger, "Writing to output catalogue " << itsCube.pars().getOutFile());
-    itsCube.outputCatalogue();
-
-    if (itsCube.pars().getFlagLog() && (itsCube.getNumObj() > 0)) {
-        // Write the log summary only if required
-        itsCube.logSummary();
-    }
-
-    // Write all Duchamp annotation files
-    itsCube.outputAnnotations();
-
-    if (itsCube.pars().getFlagVOT()) {
-        ASKAPLOG_INFO_STR(logger, "Writing to output VOTable " << itsCube.pars().getVOTFile());
-        // Write the standard Duchamp VOTable (not the CASDA islands table!)
-        itsCube.outputDetectionsVOTable();
-    }
-
-    if (itsCube.pars().getFlagTextSpectra()) {
-        ASKAPLOG_INFO_STR(logger, "Saving spectra to text file " <<
-                          itsCube.pars().getSpectraTextFile());
-        // Write a text file containing identified spectra
-        itsCube.writeSpectralData();
-    }
-
-    if (itsCube.pars().getFlagWriteBinaryCatalogue() &&
-            (itsCube.getNumObj() > 0)) {
+        // Write standard Duchamp results file
         ASKAPLOG_INFO_STR(logger,
-                          "Creating binary catalogue of detections, called " <<
-                          itsCube.pars().getBinaryCatalogue());
-        // Write the standard Duchamp-format binary catalogue.
-        itsCube.writeBinaryCatalogue();
+                          "Writing to output catalogue " << itsCube.pars().getOutFile());
+        itsCube.outputCatalogue();
+
+        if (itsCube.pars().getFlagLog() && (itsCube.getNumObj() > 0)) {
+            // Write the log summary only if required
+            itsCube.logSummary();
+        }
+
+        // Write all Duchamp annotation files
+        itsCube.outputAnnotations();
+
+        if (itsCube.pars().getFlagVOT()) {
+            ASKAPLOG_INFO_STR(logger,
+                              "Writing to output VOTable " << itsCube.pars().getVOTFile());
+            // Write the standard Duchamp VOTable (not the CASDA islands table!)
+            itsCube.outputDetectionsVOTable();
+        }
+
+        if (itsCube.pars().getFlagTextSpectra()) {
+            ASKAPLOG_INFO_STR(logger, "Saving spectra to text file " <<
+                              itsCube.pars().getSpectraTextFile());
+            // Write a text file containing identified spectra
+            itsCube.writeSpectralData();
+        }
+
+        if (itsCube.pars().getFlagWriteBinaryCatalogue() &&
+            (itsCube.getNumObj() > 0)) {
+            ASKAPLOG_INFO_STR(logger,
+                              "Creating binary catalogue of detections, called " <<
+                              itsCube.pars().getBinaryCatalogue());
+            // Write the standard Duchamp-format binary catalogue.
+            itsCube.writeBinaryCatalogue();
+        }
+
     }
 
 }
@@ -138,15 +144,17 @@ void ResultsWriter::writeFitResults()
 {
     if (itsFitParams.doFit()) {
 
-        std::vector<std::string> outtypes = itsFitParams.fitTypes();
-        outtypes.push_back("best");
+        if (itsParset.getBool("writeFitResults", false)) {
 
-        for (size_t t = 0; t < outtypes.size(); t++) {
+            std::vector<std::string> outtypes = itsFitParams.fitTypes();
+            outtypes.push_back("best");
 
-            FitCatalogue cat(itsSourceList, itsParset, itsCube, outtypes[t]);
-            cat.check();
-            cat.write();
+            for (size_t t = 0; t < outtypes.size(); t++) {
 
+                FitCatalogue cat(itsSourceList, itsParset, itsCube, outtypes[t]);
+                cat.write();
+
+            }
 
         }
 
