@@ -36,9 +36,12 @@
 
 #include <sourcefitting/RadioSource.h>
 #include <outputs/AskapVOTableCatalogueWriter.h>
+#include <duchampinterface/DuchampInterface.h>
+
 #include <Common/ParameterSet.h>
 #include <duchamp/Outputs/CatalogueSpecification.hh>
 #include <duchamp/Outputs/columns.hh>
+#include <wcslib/wcs.h>
 #include <vector>
 
 ASKAP_LOGGER(logger, ".casdaisland");
@@ -83,23 +86,27 @@ CasdaIsland::CasdaIsland(sourcefitting::RadioSource &obj,
     id << itsIDbase << obj.getID();
     itsIslandID = id.str();
 
-    // NB - use the getSpectralUnits function, as this better matches what Duchamp has done in calculating the frequency.
-//    casa::Unit imageFreqUnits(obj.header().WCS().cunit[obj.header().WCS().spec]);
-    casa::Unit imageFreqUnits(obj.header().getSpectralUnits());
+    // Convert the header class to use FREQ type and the appropriate unit
+    duchamp::FitsHeader newHead_freq = changeSpectralAxis(obj.header(),"FREQ-???",casda::freqUnit);
+    
+    casa::Unit wcsFreqUnits(newHead_freq.getSpectralUnits());
     casa::Unit freqUnits(casda::freqUnit);
-    double freqScale = casa::Quantity(1., imageFreqUnits).getValue(freqUnits);
-    itsFreq *= freqScale;
+    double freqScale = casa::Quantity(1., wcsFreqUnits).getValue(freqUnits);
 
-    casa::Unit imageFluxUnits(obj.header().getFluxUnits());
+    casa::Unit imageFluxUnits(newHead_freq.getFluxUnits());
     casa::Unit fluxUnits(casda::fluxUnit);
     double peakFluxscale = casa::Quantity(1., imageFluxUnits).getValue(fluxUnits);
     itsFluxPeak *= peakFluxscale;
 
-    casa::Unit imageIntFluxUnits(obj.header().getIntFluxUnits());
+    casa::Unit imageIntFluxUnits(newHead_freq.getIntFluxUnits());
     casa::Unit intFluxUnits(casda::intFluxUnitContinuum);
     double intFluxscale = casa::Quantity(1., imageIntFluxUnits).getValue(intFluxUnits);
     itsFluxInt *= intFluxscale;
 
+    // Re-calculate WCS parameters
+    obj.calcWCSparams(newHead_freq);
+    itsFreq = obj.getVel()*freqScale;
+    
 }
 
 const float CasdaIsland::ra()

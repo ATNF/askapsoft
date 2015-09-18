@@ -64,7 +64,7 @@ duchamp::Param parseParset(const LOFAR::ParameterSet& parset);
 std::string objectToSubsection(duchamp::Detection *object, long padding,
                                std::string imageName, duchamp::FitsHeader &header);
 
-// @brief An analogue of the duchamp::SortDetections function
+/// @brief An analogue of the duchamp::SortDetections function
 /// @details This function sorts a vector list of
 /// RadioSource objects, using the same functionality as
 /// the duchamp library's SortDetections function. The
@@ -74,6 +74,16 @@ std::string objectToSubsection(duchamp::Detection *object, long padding,
 /// afterwards.
 void SortDetections(std::vector<sourcefitting::RadioSource> &sourcelist,
                     std::string parameter);
+
+/// @brief Convert the spectral axis of a WCS to a new type
+/// @details Returns a FitsHeader object that has the WCS changed to
+/// use a new spectral type, and has the spectral units updated as
+/// well
+duchamp::FitsHeader changeSpectralAxis(duchamp::FitsHeader &inputHead,
+                                       std::string newType,
+                                       std::string newUnits);
+
+
 
 /// @}
 

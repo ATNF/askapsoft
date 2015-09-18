@@ -377,6 +377,25 @@ void SortDetections(std::vector<sourcefitting::RadioSource> &sourcelist,
 
 }
 
+duchamp::FitsHeader changeSpectralAxis(duchamp::FitsHeader &inputHead,
+                                       std::string newType,
+                                       std::string newUnits)
+{
+    duchamp::FitsHeader newHead(inputHead);
+    int specAxis=inputHead.WCS().spec;
+    std::string origSpecType(inputHead.WCS().ctype[specAxis]);
+    int status=wcssptr(newHead.getWCS(), &specAxis, (char *)newType.c_str());
+    if(status){
+        ASKAPLOG_ERROR_STR(logger, "Spectral axis conversion from " <<
+                           origSpecType << " to " <<
+                           newType << " failed: status=" << status <<
+                           " - " << wcs_errmsg[status]);
+    }
+    newHead.fixSpectralUnits(newUnits);
+
+    return newHead;
+}
+
 
 }
 }

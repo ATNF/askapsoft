@@ -39,6 +39,7 @@
 #include <sourcefitting/FitResults.h>
 #include <outputs/CataloguePreparation.h>
 #include <mathsutils/MathsUtils.h>
+#include <duchampinterface/DuchampInterface.h>
 
 #include <Common/ParameterSet.h>
 #include <casa/Quanta/Quantum.h>
@@ -76,36 +77,38 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
     id << itsIDbase << obj.getID() << getSuffix(fitNumber);
     itsComponentID = id.str();
 
+    duchamp::FitsHeader newHead_freq = changeSpectralAxis(obj.header(),"FREQ-???",casda::freqUnit);
+
     double thisRA, thisDec, zworld;
-    obj.header().pixToWCS(gauss.xCenter(), gauss.yCenter(), obj.getZcentre(),
+    newHead_freq.pixToWCS(gauss.xCenter(), gauss.yCenter(), obj.getZcentre(),
                           thisRA, thisDec, zworld);
     itsRA.value() = thisRA;
     itsDEC.value() = thisDec;
 
-//    casa::Unit imageFreqUnits(obj.header().getSpectralUnits());
-    casa::Unit imageFreqUnits(obj.header().WCS().cunit[obj.header().WCS().spec]);
+//    casa::Unit imageFreqUnits(newHead_freq.getSpectralUnits());
+    casa::Unit imageFreqUnits(newHead_freq.WCS().cunit[newHead_freq.WCS().spec]);
     casa::Unit freqUnits(casda::freqUnit);
     double freqScale = casa::Quantity(1., imageFreqUnits).getValue(freqUnits);
     itsFreq = zworld * freqScale;
 
-    int lng = obj.header().WCS().lng;
-    int precision = -int(log10(fabs(obj.header().WCS().cdelt[lng] * 3600. / 10.)));
-    float pixscale = obj.header().getAvPixScale() * 3600.; // convert from pixels to arcsec
-    itsRAs  = decToDMS(thisRA, obj.header().lngtype(), precision);
-    itsDECs = decToDMS(thisDec, obj.header().lattype(), precision);
-    itsName = obj.header().getIAUName(itsRA.value(), itsDEC.value());
+    int lng = newHead_freq.WCS().lng;
+    int precision = -int(log10(fabs(newHead_freq.WCS().cdelt[lng] * 3600. / 10.)));
+    float pixscale = newHead_freq.getAvPixScale() * 3600.; // convert from pixels to arcsec
+    itsRAs  = decToDMS(thisRA, newHead_freq.lngtype(), precision);
+    itsDECs = decToDMS(thisDec, newHead_freq.lattype(), precision);
+    itsName = newHead_freq.getIAUName(itsRA.value(), itsDEC.value());
 
-    casa::Unit imageFluxUnits(obj.header().getFluxUnits());
+    casa::Unit imageFluxUnits(newHead_freq.getFluxUnits());
     casa::Unit fluxUnits(casda::fluxUnit);
     double peakFluxscale = casa::Quantity(1., imageFluxUnits).getValue(fluxUnits);
     itsFluxPeak.value() = gauss.height() * peakFluxscale;
 
-    casa::Unit imageIntFluxUnits(obj.header().getIntFluxUnits());
+    casa::Unit imageIntFluxUnits(newHead_freq.getIntFluxUnits());
     casa::Unit intFluxUnits(casda::intFluxUnitContinuum);
     double intFluxscale = casa::Quantity(1., imageIntFluxUnits).getValue(intFluxUnits);
     itsFluxInt.value() = gauss.flux() * intFluxscale;
-    if (obj.header().needBeamSize()) {
-        itsFluxInt.value() /= obj.header().beam().area(); // Convert from mJy/beam to mJy
+    if (newHead_freq.needBeamSize()) {
+        itsFluxInt.value() /= newHead_freq.beam().area(); // Convert from mJy/beam to mJy
     }
 
     itsMaj.value() = gauss.majorAxis() * pixscale;
@@ -113,7 +116,7 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
     itsPA.value() = gauss.PA() * 180. / M_PI;
 
     std::vector<Double> deconv = analysisutilities::deconvolveGaussian(gauss,
-                                 obj.header().getBeam());
+                                 newHead_freq.getBeam());
     itsMaj_deconv = deconv[0] * pixscale;
     itsMin_deconv = deconv[1] * pixscale;
     itsPA_deconv = deconv[2] * 180. / M_PI;
