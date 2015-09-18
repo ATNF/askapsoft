@@ -93,6 +93,8 @@ void VisConverter<VisDatagramADE>::initVisChunk(const casa::uLong timestamp,
    //const casa::uInt nSlices = 4;
    const casa::uInt nSlices = 1;
    const casa::uInt nBeams = 36;
+   //const casa::uInt nBeams = 1;
+   //const casa::uInt nBeams = 9;
    const casa::uInt datagramsExpected = nSlices * nBeams * nChannels;
    setNumberOfExpectedDatagrams(datagramsExpected);
 }
@@ -158,6 +160,7 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
         }
         */
 
+
         // map correlator product to the row and polarisation index
         const boost::optional<std::pair<casa::uInt, casa::uInt> > mp = 
              mapCorrProduct(product, vis.beamid);
@@ -166,7 +169,6 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
             // warning has already been given inside mapCorrProduct
             continue;
         }
-
 
         const casa::uInt row = mp->first;
         const casa::uInt polidx = mp->second;
@@ -188,7 +190,7 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
         ASKAPASSERT(channel < chunk->nChannel())
         //
         atLeastOneUseful = true;
-        casa::Complex sample(vis.vis[product].real, vis.vis[product].imag);
+        casa::Complex sample(vis.vis[item].real, vis.vis[item].imag);
 
         const casa::uInt antenna1 = chunk->antenna1()(row);
         const casa::uInt antenna2 = chunk->antenna2()(row);
@@ -206,15 +208,15 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
 
         if (isAutoCorr) {
             // For auto-correlations we duplicate cross-pols as 
-            // index 1 should always be missing
-            ASKAPDEBUGASSERT(polidx != 1);
+            // index 2 should always be missing
+            ASKAPDEBUGASSERT(polidx != 2);
             ASKAPASSERT(chunk->nPol() == 4);
 
-            if (polidx == 2) {
-                chunk->visibility()(row, channel, 1) = conj(sample);
+            if (polidx == 1) {
+                chunk->visibility()(row, channel, 2) = conj(sample);
                 // Unflag the sample
                 if (rowIsValid) {
-                    chunk->flag()(row, channel, 1) = false;
+                    chunk->flag()(row, channel, 2) = false;
                 }
             }
         }
