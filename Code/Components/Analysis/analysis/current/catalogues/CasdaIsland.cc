@@ -27,8 +27,9 @@
 /// @author Matthew Whiting <Matthew.Whiting@csiro.au>
 ///
 #include <catalogues/CasdaIsland.h>
-#include <catalogues/CatalogueEntry.h>
 #include <askap_analysis.h>
+#include <catalogues/CatalogueEntry.h>
+#include <catalogues/casda.h>
 
 #include <askap/AskapLogging.h>
 #include <askap/AskapError.h>
@@ -81,6 +82,24 @@ CasdaIsland::CasdaIsland(sourcefitting::RadioSource &obj,
     std::stringstream id;
     id << itsIDbase << obj.getID();
     itsIslandID = id.str();
+
+    // NB - use the getSpectralUnits function, as this better matches what Duchamp has done in calculating the frequency.
+//    casa::Unit imageFreqUnits(obj.header().WCS().cunit[obj.header().WCS().spec]);
+    casa::Unit imageFreqUnits(obj.header().getSpectralUnits());
+    casa::Unit freqUnits(casda::freqUnit);
+    double freqScale = casa::Quantity(1., imageFreqUnits).getValue(freqUnits);
+    itsFreq *= freqScale;
+
+    casa::Unit imageFluxUnits(obj.header().getFluxUnits());
+    casa::Unit fluxUnits(casda::fluxUnit);
+    double peakFluxscale = casa::Quantity(1., imageFluxUnits).getValue(fluxUnits);
+    itsFluxPeak *= peakFluxscale;
+
+    casa::Unit imageIntFluxUnits(obj.header().getIntFluxUnits());
+    casa::Unit intFluxUnits(casda::intFluxUnitContinuum);
+    double intFluxscale = casa::Quantity(1., imageIntFluxUnits).getValue(intFluxUnits);
+    itsFluxInt *= intFluxscale;
+
 }
 
 const float CasdaIsland::ra()
