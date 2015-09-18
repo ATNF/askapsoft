@@ -116,6 +116,12 @@ decreases memory use and run time by approximately the ratio of pixels in the pa
 |                   |              |              |padding. At this stage this option is understood by     |
 |                   |              |              |**MultiScale** cleaner only                             |
 +-------------------+--------------+--------------+--------------------------------------------------------+
+|logevery           |int           |1             |How frequently to log progress in the minor cycle. Every|
+|                   |              |              |nth iteration is reported (ie. if **logevery=100**,     |
+|                   |              |              |every 100th iteration is reported), providing the       |
+|                   |              |              |iteration number, the peak residual, the objective      |
+|                   |              |              |function and the total flux.                            |
++-------------------+--------------+--------------+--------------------------------------------------------+
 |saveintermediate   |bool          |true          |Save intermediate images (residuals and preconditioned  |
 |                   |              |              |PSF) at the end of each majorcycle.                     |
 +-------------------+--------------+--------------+--------------------------------------------------------+
