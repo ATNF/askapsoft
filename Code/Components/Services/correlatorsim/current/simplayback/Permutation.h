@@ -44,7 +44,7 @@
 
 //#define PERMUTATION_DEBUG
 
-#include <cstdint>
+#include <stdint.h>
 
 #ifndef PERMUTATION_DEBUG
 namespace askap {

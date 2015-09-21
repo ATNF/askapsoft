@@ -32,7 +32,7 @@
 
 // System includes
 #include <iostream>
-#include <cstdint>
+#include <stdint.h>
 #include <cmath>
 
 using namespace std;
@@ -41,7 +41,7 @@ using namespace std;
 using namespace askap;
 using namespace askap::cp;
 
-ASKAP_LOGGER(logger, ".Permutation");
+//ASKAP_LOGGER(logger, ".Permutation");
 #endif
 
 Permutation::Permutation () {;}

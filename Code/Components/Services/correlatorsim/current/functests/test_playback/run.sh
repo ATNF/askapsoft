@@ -22,7 +22,7 @@ sleep 1
 MDPID=$!
 
 # Start the visibilities receiver (don't use the script so this script can kill it)
-../../apps/vsnoop -v -p 3000 > vsnoop1.log 2>&1 &
+../../apps/vsnoop -v -p 3001 > vsnoop1.log 2>&1 &
 VISPID1=$!
 
 # Run the test
@@ -31,9 +31,9 @@ STATUS=$?
 
 # Give the subscriber a moment to get the last messages then exit
 sleep 5
-kill $MDPID $VISPID1 $VISPID2
+kill $MDPID $VISPID1 
 sleep 1
-kill -9 $MDPID $VISPID $VISPID2 > /dev/null 2>&1
+kill -9 $MDPID $VISPID > /dev/null 2>&1
 
 # Stop the Ice Services
 ../stop_ice.sh ../icegridadmin.cfg
