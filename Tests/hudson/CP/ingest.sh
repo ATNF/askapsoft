@@ -139,7 +139,7 @@ chmod u+x tmp.simcor.sh
 # in the script
 ./tmp.simcor.sh > simcor.out &
 
-timeout -s 9 10m ./run.sh
+timeout -s 9 15m ./run.sh
 
 ERROR=$?
 if [ $ERROR -ne 0 ]; then
