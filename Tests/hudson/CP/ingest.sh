@@ -139,9 +139,17 @@ chmod u+x tmp.simcor.sh
 # in the script
 ./tmp.simcor.sh > simcor.out &
 
-timeout -s 9 15m ./run.sh
+echo "Starting ingest pipeline: "`date`
 
+timeout -s 9 15m ./run.sh
 ERROR=$?
+
+echo "Ingest finished: "`date`
+
+echo "-------------- output of the correlator simulator:"
+cat simcor.out
+echo "--------------------------------------------------"
+
 if [ $ERROR -ne 0 ]; then
     echo "ingest/current/functests/test_ingestpipeline/run.sh returned errorcode $ERROR"
     echo "Failing the test on this condition has been disabled"
