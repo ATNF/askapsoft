@@ -2,6 +2,9 @@
 #
 # Phase 1
 #
+
+echo "------------- Phase 1 ------------"
+
 unset ASKAP_ROOT
 cd $WORKSPACE/trunk
 nice /usr/bin/python bootstrap.py -n
@@ -80,6 +83,9 @@ scons test
 # Simulate dataset for streaming - this is the only function we use from
 # synthesis
 #
+
+echo "------------- Phase 2 ------------"
+
 cd $WORKSPACE/trunk/Code/Components/Services/correlatorsim/current/dataset
 ./sim.sh
 ERROR=$?
@@ -96,8 +102,10 @@ fi
 # and MPI
 #
 
+echo "------------- Phase 3 ------------"
+
 cd $WORKSPACE/trunk/Code/Components/Services/ingest/current/functests
-./run.sh
+timeout -s 9 10m ./run.sh
 ERROR=$?
 if [ $ERROR -ne 0 ]; then
     echo "ingest/current/functests/run.sh returned errorcode $ERROR"
@@ -111,6 +119,8 @@ fi
 # Run the main functest which requires MPI and communication with the 
 # correlator simulator
 #
+
+echo "------------- Phase 4 ------------"
 
 cd $WORKSPACE/trunk/Code/Components/Services/ingest/current/functests/test_ingestpipeline
 
