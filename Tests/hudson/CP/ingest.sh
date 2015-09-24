@@ -141,7 +141,7 @@ chmod u+x tmp.simcor.sh
 
 echo "Starting ingest pipeline: "`date`
 
-timeout -s 9 25m ./run.sh
+./run.sh
 ERROR=$?
 
 echo "Ingest finished: "`date`
