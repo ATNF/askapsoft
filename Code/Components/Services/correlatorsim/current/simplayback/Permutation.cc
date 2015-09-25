@@ -25,7 +25,7 @@
 /// @author Paulus Lahur <paulus.lahur@csiro.au>
 ///
 
-//#define PERMUTATION_DEBUG
+//#define OUTSIDEASKAP
 
 // Include own header file first
 #include "Permutation.h"
@@ -37,71 +37,109 @@
 
 using namespace std;
 
-#ifndef PERMUTATION_DEBUG
+#ifndef OUTSIDEASKAP
 using namespace askap;
 using namespace askap::cp;
-
-//ASKAP_LOGGER(logger, ".Permutation");
 #endif
+
+
+// forward declaration of internal functions
+void alertValueOutsideRange (uint32_t value, uint32_t minValue, 
+        uint32_t maxValue);
+void alertWrongItemOrder (uint32_t item1, uint32_t item2);
+void alertWrongItemOrder (std::pair<uint32_t,uint32_t> items);
+
 
 Permutation::Permutation () {;}
 
-Permutation::~Permutation () {;}
+
+Permutation::~Permutation() {;}
 
 
 /// Return the total number of permutation.
-
-uint32_t Permutation::total (uint32_t n) {
+uint32_t Permutation::total (const uint32_t n) {
 	return ((n*n + n)/2);
 }
 
 
-/// Given the members, return the permutation index.
+/// Given the items, return the permutation index. With no input check.
+uint32_t Permutation::indexNoCheck (const uint32_t item1, const uint32_t item2) {
+	return (item1 + total(item2));
+}
 
-uint32_t Permutation::index (uint32_t a, uint32_t b) {
-	return (a + total(b));
+uint32_t Permutation::indexNoCheck (const std::pair<uint32_t,uint32_t> items) {
+	return (items.first + total(items.second));
 }
 
 
-/// Given the permutation index, return the members.
+/// Given the items, return the permutation index. Input is checked.
+/// The correct input ordering is enforced.
 
-void Permutation::getMembers (uint32_t index, uint32_t& a, uint32_t& b) {
-	b = int((sqrt(1+8*index) - 1)/2);
-	a = index - total(b);
+uint32_t Permutation::index (const uint32_t item1, const uint32_t item2,
+		const uint32_t nItem) {
+	
+	alertValueOutsideRange (item1, 0, nItem-1);
+	alertValueOutsideRange (item2, 0, nItem-1);
+	alertWrongItemOrder (item1, item2);
+    return (item1 + total(item2));
+}
+
+uint32_t Permutation::index (const std::pair<uint32_t,uint32_t> items, 
+		const uint32_t nItem) {
+	
+	alertValueOutsideRange (items.first, 0, nItem-1);
+	alertValueOutsideRange (items.second, 0, nItem-1);
+	alertWrongItemOrder (items);
+	return (items.first + total(items.second));
 }
 
 
-#ifdef PERMUTATION_DEBUG
+/// Given the permutation index, return the items. With no input check.
+std::pair<uint32_t,uint32_t> Permutation::itemsNoCheck (const uint32_t index) {
+	
+	std::pair<uint32_t,uint32_t> items;
+	items.second = int((sqrt(1+8*index) - 1)/2);
+	items.first = index - total(items.second);
+	return items;
+}
 
-// Test permutation for a given item number.
-// Check whether the 2-way mapping between index and members work.
 
-int main () {
+/// Given the permutation index, return the items.
+std::pair<uint32_t,uint32_t> Permutation::items (const uint32_t index, 
+		const uint32_t nItem) {
 	
-	#include "Permutation.h"
+	alertValueOutsideRange (index, 0, total(nItem)-1);
+	std::pair<uint32_t,uint32_t> items;
+	items.second = int((sqrt(1+8*index) - 1)/2);
+	items.first = index - total(items.second);
+	return items;
+}
 
-	const uint32_t n = 7200;
-	
-	uint32_t a, b;
-	uint32_t icheck;
-	uint32_t nerror = 0;
-	
-	Permutation perm;
-	
-	uint32_t nperm = perm.total(n);
-	cout << "Total permutations of " << n << " items is " << nperm << '\n';
-	
-	for (int i=0; i<nperm; i++) {
-		perm.getMembers (i, a, b);
-		icheck = perm.index (a,b);
-		//cout << i << ": " << a << ", " << b << ": " << icheck << '\n';
-		if (icheck != i) {
-			cout << "ERROR in Permutation: " << i << " != " << 
-                    icheck << '\n';
-			nerror++;
-		}
+
+// Internal functions
+
+
+// Alert when a value goes out of range.
+void alertValueOutsideRange (uint32_t value, uint32_t minValue, 
+        uint32_t maxValue) {
+	if ((value < minValue) || (value > maxValue)) {
+		cerr << "ERROR in Permutation: value is outside range: " << value << 
+            endl;
 	}
-	cout << "nerror: " << nerror << '\n';
 }
 
-#endif
+
+// Alert when the order of items is wrong (item1 > item2)
+void alertWrongItemOrder (uint32_t item1, uint32_t item2) {
+	if (item1 > item2) {
+		cerr << "ERROR in Permutation: wrong item order: " << item1 << 
+				" > " << item2 << endl;
+	}
+}
+
+void alertWrongItemOrder (std::pair<uint32_t,uint32_t> items) {
+	if (items.first > items.second) {
+		cerr << "ERROR in Permutation: wrong item order: " << 
+            items.first << " > " << items.second << endl;
+	}
+}

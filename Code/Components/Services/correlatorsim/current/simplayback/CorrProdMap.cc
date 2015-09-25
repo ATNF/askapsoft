@@ -26,41 +26,40 @@
 
 
 // Allow coding & testing outside ASKAP before deployment
-#define ASKAP_DEPLOY
+//#define OUTSIDEASKAP
 
 // Include own header file first
 #include "CorrProdMap.h"
 
-// Include package level header file
-#include "askap_correlatorsim.h"
-
 // System includes
 #include <stdint.h>
 #include <cmath>
+#include <iostream>
 
 #include "Permutation.h"
 
 
-#ifdef ASKAP_DEPLOY
+#ifndef OUTSIDEASKAP
 
+// Include package level header file
+#include "askap_correlatorsim.h"
 #include "askap/AskapError.h"
 #include "askap/AskapUtil.h"
+
 using namespace askap;
 using namespace askap::utility;
 using namespace askap::cp;
-
-#else
-
-#include <iostream>
-using namespace std;
-
 #endif
 
+using namespace std;
 
-CorrProdMap::CorrProdMap () {
-	// base numbers for antenna and index
-	ANTBASE = 0;
-	INDEXBASE = 0;
+
+CorrProdMap::CorrProdMap (uint32_t nAntIn) {
+	antBase = 0;	// default base number. Usual value is either 0 or 1
+	indexBase = 0;	// default base number. Usual value is either 0 or 1
+	nAnt = nAntIn;	// number of antennas
+	Permutation perm;
+	nTotal = perm.total (nAnt*2);	// number of correlation products
 }
 	
 	
@@ -75,105 +74,112 @@ CorrProdMap::~CorrProdMap () {;}
 /// Values for coupled polarization: 0:XX, 1:XY, 2:YX, 3:YY.
 
 
-/// Set antenna base number (default = 0).
+/// Set antenna base number (default = 0). Usual value is either 0 or 1
 
-void CorrProdMap::setAntennaBase (uint32_t antBase) {ANTBASE = antBase;}
+void CorrProdMap::setAntennaBase (uint32_t antBaseIn) {
+	antBase = antBaseIn;
+}
 
-uint32_t CorrProdMap::antennaBase () {return (ANTBASE);}
+uint32_t CorrProdMap::getAntennaBase () {
+	return antBase;
+}
 
 
 /// Set the base number of correlation product index (default = 0).
+/// Usual value is either 0 or 1
 
-void CorrProdMap::setIndexBase (uint32_t indexBase) {INDEXBASE = indexBase;}
+void CorrProdMap::setIndexBase (uint32_t indexBaseIn) {
+	indexBase = indexBaseIn;
+}
 
-uint32_t CorrProdMap::indexBase () {return (INDEXBASE);}
+uint32_t CorrProdMap::getIndexBase () {
+	return indexBase;
+}
 
 
 /// Given the number of antennas, return the number of correlator products.
 
-uint32_t CorrProdMap::total (uint32_t nantenna) {
-	Permutation perm;
-	return (perm.total (nantenna * 2));
+uint32_t CorrProdMap::totalCount () {
+	return nTotal;
 }
 
 
 /// Given the indices of antennas and coupled polarization, 
 /// return correlator product index.
 
-int CorrProdMap::getIndex (uint32_t ant1, uint32_t ant2, uint32_t coupledPol, 
-        uint32_t& index) {
-			
-	if ((ant1 < ANTBASE) || (ant2 < ANTBASE)) {
-#ifdef ASKAP_DEPLOY
-        ASKAPTHROW (AskapError, 
-                "Illegal antenna: " << ant1 << ", " << ant2);
-#else
-		cout << "ERROR in corrProd::getIndex: illegal antenna: " <<
-				ant1 << ", " << ant2 << '\n';
-#endif
-        return -1;
-	}
-	if (ant1 > ant2) {
-#ifdef ASKAP_DEPLOY
-        ASKAPTHROW (AskapError, 
-		        "antenna1 > antenna2: " << ant1 << " > " << ant2);
-#else
-		cout << "ERROR in corrProd::getIndex: antenna1 > antenna2: " <<
-				ant1 << " > " << ant2 << '\n';
-#endif
-        return -1;
-	}
-	if ((coupledPol < 0) || (coupledPol > 3)) {
-#ifdef ASKAP_DEPLOY
-        ASKAPTHROW (AskapError, 
-		        "Illegal coupled polarization: " << coupledPol);
-#else
-		cout << "ERROR in corrProd::getIndex: illegal coupled polarization: " 
-				<< coupledPol << '\n';
-#endif
-        return -2;
-	}
+uint32_t CorrProdMap::getIndex (uint32_t ant1, uint32_t ant2, 
+        uint32_t coupledPol) {
+
+	alertAntennaValue (ant1);
+	alertAntennaValue (ant2);
+	alertWrongAntennaOrder (ant1, ant2);
+	alertCoupledPolarisationValue (coupledPol);
 	
-	uint32_t pol1, pol2;
-	uint32_t comp1, comp2;
+	// Rearrange the index format of antennas and coupled polarisation into 
+	// composite indices
+	std::pair<uint32_t,uint32_t> pols = polarDecouple (coupledPol);
+	std::pair<uint32_t,uint32_t> comps;
+	comps.first = compositeIndex (ant1-antBase, pols.first);
+	comps.second = compositeIndex (ant2-antBase, pols.second);
 	
-	// form a composite index from antenna and coupled polarization 
-	polarDecouple (coupledPol, pol1, pol2);
-	comp1 = compositeIndex (ant1-ANTBASE, pol1);
-	comp2 = compositeIndex (ant2-ANTBASE, pol2);
-	
+	// Perform permutation on the composite indices.
 	Permutation perm;
-	index = perm.index (comp1, comp2) + INDEXBASE;
+	return (perm.indexNoCheck (comps) + indexBase);
+}
+
+
+/// Given correlator product, return antennas.
+
+std::pair<uint32_t,uint32_t> CorrProdMap::getAntennas (uint32_t index) {
+
+	alertIndexValue (index);
 	
-	return 0;
+	// Inverse permutation to get composite indices containing antennas and 
+	// coupled polarisation.
+	Permutation perm;
+	std::pair<uint32_t,uint32_t> comps = perm.itemsNoCheck (index-indexBase);
+
+	// Rearrange the composite indices to get the antennas.
+	std::pair<uint32_t,uint32_t> ants;
+	ants.first = antenna (comps.first) + antBase;
+	ants.second = antenna (comps.second) + antBase;
+	return ants;
+}
+
+
+/// Given correlator product, return the coupled polarization: 
+/// 0:XX, 1:XY, 2:YX, 3:YY
+
+uint32_t CorrProdMap::getCoupledPolarisation (uint32_t index) {
+			
+	alertIndexValue (index);
+	
+	// Inverse permutation to get composite indices containing antennas and 
+	// coupled polarisation.
+	Permutation perm;
+	std::pair<uint32_t,uint32_t> comps = perm.itemsNoCheck (index-indexBase);
+	
+	// Rearrange the composite indices to get the coupled polarisation.
+	return (polarCouple (polar(comps.first),polar(comps.second)));
 }
 
 
 /// Given correlator product, return the indices of antennas & coupled 
 /// polarization. Values for coupled polarization: 0:XX, 1:XY, 2:YX, 3:YY
+/// TO BE DEPRECATED
 
-int CorrProdMap::getAntennaAndCoupledPolar (uint32_t index, 
+int CorrProdMap::getAntennaAndCoupledPol (uint32_t index, 
 		uint32_t& ant1, uint32_t& ant2, uint32_t& coupledPol) {
-			
-	if (index < INDEXBASE) {
-#ifdef ASKAP_DEPLOY
-        ASKAPTHROW (AskapError, 
-                "Illegal index: " << index);
-#else
-		cout << "ERROR in corrProd::getIndex: illegal index: " << index << 
-                '\n';
-#endif
-        return -1;
-	}
 	
-	uint32_t comp1, comp2;
+	alertIndexValue (index);
+
 	Permutation perm;
-	perm.getMembers (index-INDEXBASE, comp1, comp2);
+	std::pair<uint32_t,uint32_t> comps = perm.itemsNoCheck (index-indexBase);
 	
-	// convert composite index to antenna and coupled polarization 
-	ant1 = antenna (comp1) + ANTBASE;
-	ant2 = antenna (comp2) + ANTBASE;
-	coupledPol = polarCouple (polar(comp1),polar(comp2));
+	// convert composite index to antenna
+	ant1 = antenna (comps.first) + antBase;
+	ant2 = antenna (comps.second) + antBase;
+	coupledPol = polarCouple (polar(comps.first),polar(comps.second));
 	return 0;
 }
 
@@ -217,8 +223,53 @@ uint32_t CorrProdMap::polarCouple (uint32_t pol1, uint32_t pol2) {
 
 // Return the polarization indices from their coupled index.
  
-void CorrProdMap::polarDecouple (uint32_t couple, 
-        uint32_t& pol1, uint32_t& pol2) {
-	pol1 = int(couple/2);
-	pol2 = couple % 2;
+std::pair<uint32_t,uint32_t> CorrProdMap::polarDecouple (uint32_t couple) {
+	std::pair<uint32_t,uint32_t> pols;
+	pols.first = int(couple/2);
+	pols.second = couple % 2;
+	return pols;
+}
+
+
+// Alert when antenna index value goes out of range.
+void CorrProdMap::alertAntennaValue (uint32_t ant) {
+	if ((ant < antBase) || (ant > antBase + nAnt - 1)) {
+		cerr << "ERROR in CorrProdMap: illegal antenna: " << ant << endl;
+	}
+}
+
+
+// Alert when index value goes out of range.
+void CorrProdMap::alertIndexValue (uint32_t index) {
+	if ((index < indexBase) || (index > indexBase + nTotal - 1)) {
+		cerr << "ERROR in CorrProdMap: illegal index: " << index << endl;
+	}
+}
+
+
+// Alert when coupled polarisation value goes out of range.
+void CorrProdMap::alertCoupledPolarisationValue (uint32_t coupledPol) {
+	if ((coupledPol < 0) || (coupledPol > 3)) {
+		cerr << "ERROR in CorrProdMap: illegal coupled polarisation value: " << 
+				coupledPol << endl;
+	}
+}
+
+
+// Alert when a value goes out of range.
+void CorrProdMap::alertValueOutsideRange (uint32_t value, uint32_t minValue, 
+		uint32_t maxValue) {
+	if ((value < minValue) || (value > maxValue)) {
+		cerr << "ERROR in CorrProdMap: value is outside range: " << 
+            value << endl;
+	}
+}
+
+
+// Alert when antenna order is wrong
+void CorrProdMap::alertWrongAntennaOrder (uint32_t ant1, uint32_t ant2) {
+	if (ant1 > ant2) {
+		cerr << "ERROR in CorrProdMap: wrong antenna order: " << 
+            ant1 << " > " << ant2 << endl;
+	}
 }

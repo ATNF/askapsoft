@@ -24,10 +24,8 @@
 ///
 /// @author Paulus Lahur <paulus.lahur@csiro.au>
 ///
-/// Contains generic functions to map index for 2-permutation of n items:
+/// Contains a collection of permutation functions to map:
 ///   permutation index <-> component indices
-/// The permutation is posed as the lower triangle of a table.
-///
 ///      0     1     2
 ///   +-------------------
 /// 0 | 00=0   .     .
@@ -35,40 +33,60 @@
 /// 2 | 02=3  12=4  22=5 
 ///
 /// Note:
-/// - The numbering for members and permutation index are 0-based.
-/// - The functions would become more complex for upper triangle, because
-///   it is necessary to take into account the total number of items in advance.
+/// - The permutation is posed as the lower triangle of a table, as shown above.
+///   The functions would become more complex for upper triangle, 
+///   as it would be necessary to count total number of items in advance.
+/// - This class contains no data.
+/// - The numbering for items and permutation index are 0-based.
+/// - The paired items is always in order where item1 <= item2.
 
 #ifndef ASKAP_CP_PERMUTATION_H
 #define ASKAP_CP_PERMUTATION_H
 
-//#define PERMUTATION_DEBUG
+//#define OUTSIDEASKAP
 
 #include <stdint.h>
+#include <utility>
 
-#ifndef PERMUTATION_DEBUG
+#ifndef OUTSIDEASKAP
 namespace askap {
 namespace cp {
 #endif
 
 class Permutation {
 	
-	public:
+	public :
+	
+		// Constructor
 		Permutation ();
 		
-		~Permutation();
+		// Destructor
+		virtual ~Permutation();
 		
 		/// Return the total number of permutation.
-		uint32_t total (uint32_t n);
+		uint32_t total (uint32_t nItem);
 
-		/// Given the members, return the permutation index.
-		uint32_t index (uint32_t a, uint32_t b);
+		/// Given the items, return the permutation index. With no input check.
+		uint32_t indexNoCheck (const uint32_t item1, const uint32_t item2);
+		uint32_t indexNoCheck (const std::pair<uint32_t,uint32_t> items);
 
-		/// Given the permutation index, return the members.
-		void getMembers (uint32_t index, uint32_t& a, uint32_t& b);
+		/// Given the items, return the permutation index. 
+		/// The correct input ordering is enforced.
+		uint32_t index (const uint32_t item1, const uint32_t item2, 
+                const uint32_t nItem);
+		uint32_t index (const std::pair<uint32_t,uint32_t> items, 
+                const uint32_t nItem);
+
+		/// Given the permutation index, return the items in pair. 
+        /// With no input check.
+		std::pair<uint32_t,uint32_t> itemsNoCheck (const uint32_t index);
+		
+		/// Given the permutation index, return the items in pair.
+		std::pair<uint32_t,uint32_t> items (const uint32_t index, 
+                const uint32_t nItem);
 };
-
-#ifndef PERMUTATION_DEBUG
+ 
+#ifndef OUTSIDEASKAP
 };
 };
 #endif

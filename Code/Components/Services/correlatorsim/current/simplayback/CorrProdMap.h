@@ -35,12 +35,14 @@
 #ifndef ASKAP_CP_CORRPRODMAP_H
 #define ASKAP_CP_CORRPRODMAP_H
 
-#define ASKAP_DEPLOY
+//#define OUTSIDEASKAP
+
+#include "Permutation.h"
 
 // System include
 #include <stdint.h>
 
-#ifdef ASKAP_DEPLOY
+#ifndef OUTSIDEASKAP
 // ASKAPsoft includes
 #include "Common/ParameterSet.h"
 #include "measures/Measures/Stokes.h"
@@ -55,37 +57,51 @@ class CorrProdMap {
 
     public:
 		
-		CorrProdMap ();
+		CorrProdMap (uint32_t nAntenna);
 		
-		~CorrProdMap ();
+		virtual ~CorrProdMap ();
 
-		/// Set antenna base number (default = 0).
+		/// Set antenna base number. Usual value is either 0 (default) or 1.
 		void setAntennaBase (uint32_t antBase);
 
-		uint32_t antennaBase ();
+		/// Get antenna base number.
+		uint32_t getAntennaBase ();
 
-		/// Set the base number of correlation product index (default = 0).
+		/// Set the base number of correlation product index.
+		/// Usual value is either 0 (default) or 1.
 		void setIndexBase (uint32_t indexBase);
 
-		uint32_t indexBase ();
+		/// Get index base number.
+		uint32_t getIndexBase ();
 
-		/// Given the number of antennas, return the number of correlator products.
-		uint32_t total (uint32_t nantenna);
+		/// Return the total number of correlation products.
+		uint32_t totalCount ();
 
-		/// Given the indices of antennas and coupled polarization, 
-		/// return correlator product index.
-		int getIndex (uint32_t ant1, uint32_t ant2, uint32_t coupledPol, 
-				uint32_t& index);
+		/// Given the antennas and coupled polarization, 
+		/// return correlation product index.
+		uint32_t getIndex (uint32_t ant1, uint32_t ant2, uint32_t coupledPol);
 
-		/// Given correlator product, return the indices of antennas & coupled 
-		/// polarization. Values for coupled polarization: 0:XX, 1:XY, 2:YX, 3:YY
-		int getAntennaAndCoupledPolar (uint32_t index, 
+		/// Given correlation product index, return the antennas 
+		std::pair<uint32_t,uint32_t> getAntennas (uint32_t index);
+		
+		/// Given correlation product index, return the coupled polarization
+		/// (values are 0:XX, 1:XY, 2:YX, 3:YY).
+		uint32_t getCoupledPolarisation (uint32_t index);
+		
+		/// Given correlation product, return the indices of antennas & coupled 
+		/// polarization. Values for coupled polarization: 
+        /// 0:XX, 1:XY, 2:YX, 3:YY
+		/// TO BE DEPRECATED
+		int getAntennaAndCoupledPol (uint32_t index, 
 				uint32_t& ant1, uint32_t& ant2, uint32_t& coupledPol);
-				
+			
 	private:
 	
-		uint32_t ANTBASE;
-		uint32_t INDEXBASE;
+		uint32_t antBase;
+		uint32_t indexBase;
+		uint32_t nAnt;
+		uint32_t nTotal;
+		//Permutation perm;
 		
 		// Given antenna and polarity indices, return composite index
 		// Antenna index is 0-based
@@ -106,10 +122,21 @@ class CorrProdMap {
 		uint32_t polarCouple (uint32_t pol1, uint32_t pol2);
 
 		// Return the polarization indices from their coupled index.
-		void polarDecouple (uint32_t couple, uint32_t& pol1, uint32_t& pol2);
+		std::pair<uint32_t,uint32_t> polarDecouple (uint32_t couple);
+		
+		void alertAntennaValue (uint32_t ant);
+		
+		void alertIndexValue (uint32_t index);
+
+		void alertCoupledPolarisationValue (uint32_t coupledPol);
+
+		void alertValueOutsideRange (uint32_t value, uint32_t minValue, 
+                uint32_t maxValue);
+		
+		void alertWrongAntennaOrder (uint32_t ant1, uint32_t ant2);
 };
 
-#ifdef ASKAP_DEPLOY
+#ifndef OUTSIDEASKAP
 };
 };
 #endif
