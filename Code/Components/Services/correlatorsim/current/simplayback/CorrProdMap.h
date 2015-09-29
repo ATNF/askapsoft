@@ -26,10 +26,10 @@
 ///
 /// The file contains functions to map correlation products
 /// (also known as "baselines"):
-///   correlation product index <-> antenna1, antenna2, coupled polarization
+///   correlation product index <-> antenna1, antenna2, polarization product
 /// The base number of correlation product and antenna indices are changeable
 /// (default = 0).
-/// Values for coupled polarization: 0:XX, 1:XY, 2:YX, 3:YY.
+/// Values for polarization product: 0:XX, 1:XY, 2:YX, 3:YY.
 /// The index numbering is according to "revtriangle.txt"
 
 #ifndef ASKAP_CP_CORRPRODMAP_H
@@ -53,55 +53,60 @@ namespace cp {
 
 /// @brief Class for correlation product map.
 
-class CorrProdMap {
-
+class CorrProdMap 
+{
     public:
-		
-		CorrProdMap (uint32_t nAntenna);
+	
+		CorrProdMap ();
 		
 		virtual ~CorrProdMap ();
 
-		/// Set antenna base number. Usual value is either 0 (default) or 1.
+		/// Set antenna base number.
+		/// @param[in] Antenna base number: 0 (default) or 1
 		void setAntennaBase (uint32_t antBase);
 
-		/// Get antenna base number.
+		/// @return Antenna base number.
 		uint32_t getAntennaBase ();
 
 		/// Set the base number of correlation product index.
-		/// Usual value is either 0 (default) or 1.
+		/// @param[in] Antenna base number: 0 (default) or 1
 		void setIndexBase (uint32_t indexBase);
 
-		/// Get index base number.
+		/// @return Index base number.
 		uint32_t getIndexBase ();
 
-		/// Return the total number of correlation products.
-		uint32_t totalCount ();
+		/// @param[in] Antenna count
+		/// @return Total number of correlation products
+		uint32_t totalCount (uint32_t nAntenna);
 
-		/// Given the antennas and coupled polarization, 
-		/// return correlation product index.
-		uint32_t getIndex (uint32_t ant1, uint32_t ant2, uint32_t coupledPol);
+		/// @param[in] Antenna 1 (<= antenna 2)
+		/// @param[in] Antenna 2 
+		/// @param[in] Polarisation product: 0:XX, 1:XY, 2:YX, 3:YY
+		/// @return Correlation product index
+		uint32_t getIndex (uint32_t ant1, uint32_t ant2, uint32_t polProd);
 
-		/// Given correlation product index, return the antennas 
+		/// @param[in] Correlation product index
+		/// @return Antenna 1 and 2 
 		std::pair<uint32_t,uint32_t> getAntennas (uint32_t index);
 		
-		/// Given correlation product index, return the coupled polarization
-		/// (values are 0:XX, 1:XY, 2:YX, 3:YY).
-		uint32_t getCoupledPolarisation (uint32_t index);
+		/// @param[in] Correlation product index
+		/// @return Polarisation product: 0:XX, 1:XY, 2:YX, 3:YY
+		uint32_t getPolarisationProduct (uint32_t index);
 		
-		/// Given correlation product, return the indices of antennas & coupled 
-		/// polarization. Values for coupled polarization: 
-        /// 0:XX, 1:XY, 2:YX, 3:YY
+		/// @param[in] Correlation product
+		/// @param[out] Antenna 1
+		/// @param[out] Antenna 2
+		/// @param[out] Polarization product: 0:XX, 1:XY, 2:YX, 3:YY
 		/// TO BE DEPRECATED
-		int getAntennaAndCoupledPol (uint32_t index, 
-				uint32_t& ant1, uint32_t& ant2, uint32_t& coupledPol);
+		int getAntennaAndPolarisationProduct (uint32_t index, 
+				uint32_t& ant1, uint32_t& ant2, uint32_t& polProd);
 			
 	private:
 	
 		uint32_t antBase;
 		uint32_t indexBase;
-		uint32_t nAnt;
-		uint32_t nTotal;
-		//Permutation perm;
+		//uint32_t nAnt;
+		//uint32_t nTotal;
 		
 		// Given antenna and polarity indices, return composite index
 		// Antenna index is 0-based
@@ -114,21 +119,21 @@ class CorrProdMap {
 
 		// Given composite index, return polarization index.
 		// Both are 0-based.
-		uint32_t polar (uint32_t comp);
+		uint32_t polarisation (uint32_t comp);
 
-		// Return the coupled index of 2 polarization.
-		// Polarization: 0=X, Y=1
-		// Coupled polarization: 0=XX, 1=XY, 2=YX, 3=YY
-		uint32_t polarCouple (uint32_t pol1, uint32_t pol2);
+		// Return the product of 2 polarization.
+		// Polarisation: 0=X, Y=1
+		// Polarisation product: 0=XX, 1=XY, 2=YX, 3=YY
+		uint32_t polarisationProduct (uint32_t pol1, uint32_t pol2);
 
-		// Return the polarization indices from their coupled index.
-		std::pair<uint32_t,uint32_t> polarDecouple (uint32_t couple);
+		// Return the polarization elements from their product.
+		std::pair<uint32_t,uint32_t> polarisationElement (uint32_t polProd);
 		
 		void alertAntennaValue (uint32_t ant);
 		
 		void alertIndexValue (uint32_t index);
 
-		void alertCoupledPolarisationValue (uint32_t coupledPol);
+		void alertPolarisationProductValue (uint32_t polProd);
 
 		void alertValueOutsideRange (uint32_t value, uint32_t minValue, 
                 uint32_t maxValue);

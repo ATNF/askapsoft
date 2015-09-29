@@ -163,8 +163,9 @@ bool CorrelatorSimulator::sendNext(void)
         const uint64_t microsecondsPerDay = 86400000000ull;
         const uint64_t startOfDayBAT = uint64_t(epochTAI.getDay()*microsecondsPerDay);
         const long Tint = static_cast<long>(msc.interval()(itsCurrentRow) * 1000 * 1000);
-        const uint64_t startBAT = startOfDayBAT + uint64_t(epochTAI.getDayFraction()*microsecondsPerDay) -
-                                  uint64_t(Tint / 2);
+        const uint64_t startBAT = startOfDayBAT + 
+				uint64_t(epochTAI.getDayFraction() * microsecondsPerDay) -
+				uint64_t(Tint / 2);
 
         // ideally we need to carry 64-bit BAT in the payload explicitly
         payload.timestamp = static_cast<long>(startBAT);

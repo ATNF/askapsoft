@@ -53,8 +53,8 @@ namespace askap {
 namespace cp {
 #endif
 
-class Permutation {
-	
+class Permutation 
+{
 	public :
 	
 		// Constructor
@@ -63,25 +63,47 @@ class Permutation {
 		// Destructor
 		virtual ~Permutation();
 		
-		/// Return the total number of permutation.
+		/// @param[in] The number of items to permutate
+		/// @return The total number of permutation
 		uint32_t total (uint32_t nItem);
 
 		/// Given the items, return the permutation index. With no input check.
+		/// @param[in] Item 1 <= item 2
+		/// @param[in] Item 2
+		/// @return Permutation index
 		uint32_t indexNoCheck (const uint32_t item1, const uint32_t item2);
+		
+		/// Given the items, return the permutation index. With no input check.
+		/// @param[in] Item 1 <= item 2
+		/// @param[in] Item 2
+		/// @return Permutation index		
 		uint32_t indexNoCheck (const std::pair<uint32_t,uint32_t> items);
 
 		/// Given the items, return the permutation index. 
 		/// The correct input ordering is enforced.
+		/// @param[in] Item 1 <= item 2
+		/// @param[in] Item 2
+		/// @return Permutation index		
 		uint32_t index (const uint32_t item1, const uint32_t item2, 
                 const uint32_t nItem);
+
+		/// Given the items, return the permutation index. 
+		/// The correct input ordering is enforced.
+		/// @param[in] Item 1 <= item 2
+		/// @param[in] Item 2
+		/// @return Permutation index		
 		uint32_t index (const std::pair<uint32_t,uint32_t> items, 
                 const uint32_t nItem);
 
 		/// Given the permutation index, return the items in pair. 
         /// With no input check.
+		/// @param[in] Permutation index
+		/// @return Items in pair
 		std::pair<uint32_t,uint32_t> itemsNoCheck (const uint32_t index);
 		
 		/// Given the permutation index, return the items in pair.
+		/// @param[in] Permutation index
+		/// @return Items in pair
 		std::pair<uint32_t,uint32_t> items (const uint32_t index, 
                 const uint32_t nItem);
 };

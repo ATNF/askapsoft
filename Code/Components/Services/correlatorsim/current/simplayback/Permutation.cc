@@ -50,24 +50,31 @@ void alertWrongItemOrder (uint32_t item1, uint32_t item2);
 void alertWrongItemOrder (std::pair<uint32_t,uint32_t> items);
 
 
-Permutation::Permutation () {;}
+Permutation::Permutation () 
+{
+}
 
 
-Permutation::~Permutation() {;}
+Permutation::~Permutation() 
+{
+}
 
 
 /// Return the total number of permutation.
-uint32_t Permutation::total (const uint32_t n) {
+uint32_t Permutation::total (const uint32_t n) 
+{
 	return ((n*n + n)/2);
 }
 
 
 /// Given the items, return the permutation index. With no input check.
-uint32_t Permutation::indexNoCheck (const uint32_t item1, const uint32_t item2) {
+uint32_t Permutation::indexNoCheck (const uint32_t item1, const uint32_t item2) 
+{
 	return (item1 + total(item2));
 }
 
-uint32_t Permutation::indexNoCheck (const std::pair<uint32_t,uint32_t> items) {
+uint32_t Permutation::indexNoCheck (const std::pair<uint32_t,uint32_t> items) 
+{
 	return (items.first + total(items.second));
 }
 
@@ -76,8 +83,8 @@ uint32_t Permutation::indexNoCheck (const std::pair<uint32_t,uint32_t> items) {
 /// The correct input ordering is enforced.
 
 uint32_t Permutation::index (const uint32_t item1, const uint32_t item2,
-		const uint32_t nItem) {
-	
+		const uint32_t nItem) 
+{	
 	alertValueOutsideRange (item1, 0, nItem-1);
 	alertValueOutsideRange (item2, 0, nItem-1);
 	alertWrongItemOrder (item1, item2);
@@ -85,8 +92,8 @@ uint32_t Permutation::index (const uint32_t item1, const uint32_t item2,
 }
 
 uint32_t Permutation::index (const std::pair<uint32_t,uint32_t> items, 
-		const uint32_t nItem) {
-	
+		const uint32_t nItem) 
+{
 	alertValueOutsideRange (items.first, 0, nItem-1);
 	alertValueOutsideRange (items.second, 0, nItem-1);
 	alertWrongItemOrder (items);
@@ -95,8 +102,8 @@ uint32_t Permutation::index (const std::pair<uint32_t,uint32_t> items,
 
 
 /// Given the permutation index, return the items. With no input check.
-std::pair<uint32_t,uint32_t> Permutation::itemsNoCheck (const uint32_t index) {
-	
+std::pair<uint32_t,uint32_t> Permutation::itemsNoCheck (const uint32_t index) 
+{	
 	std::pair<uint32_t,uint32_t> items;
 	items.second = int((sqrt(1+8*index) - 1)/2);
 	items.first = index - total(items.second);
@@ -106,8 +113,8 @@ std::pair<uint32_t,uint32_t> Permutation::itemsNoCheck (const uint32_t index) {
 
 /// Given the permutation index, return the items.
 std::pair<uint32_t,uint32_t> Permutation::items (const uint32_t index, 
-		const uint32_t nItem) {
-	
+		const uint32_t nItem) 
+{	
 	alertValueOutsideRange (index, 0, total(nItem)-1);
 	std::pair<uint32_t,uint32_t> items;
 	items.second = int((sqrt(1+8*index) - 1)/2);
@@ -121,7 +128,8 @@ std::pair<uint32_t,uint32_t> Permutation::items (const uint32_t index,
 
 // Alert when a value goes out of range.
 void alertValueOutsideRange (uint32_t value, uint32_t minValue, 
-        uint32_t maxValue) {
+        uint32_t maxValue) 
+{
 	if ((value < minValue) || (value > maxValue)) {
 		cerr << "ERROR in Permutation: value is outside range: " << value << 
             endl;
@@ -130,14 +138,16 @@ void alertValueOutsideRange (uint32_t value, uint32_t minValue,
 
 
 // Alert when the order of items is wrong (item1 > item2)
-void alertWrongItemOrder (uint32_t item1, uint32_t item2) {
+void alertWrongItemOrder (uint32_t item1, uint32_t item2) 
+{
 	if (item1 > item2) {
 		cerr << "ERROR in Permutation: wrong item order: " << item1 << 
 				" > " << item2 << endl;
 	}
 }
 
-void alertWrongItemOrder (std::pair<uint32_t,uint32_t> items) {
+void alertWrongItemOrder (std::pair<uint32_t,uint32_t> items) 
+{
 	if (items.first > items.second) {
 		cerr << "ERROR in Permutation: wrong item order: " << 
             items.first << " > " << items.second << endl;
