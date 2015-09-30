@@ -35,6 +35,7 @@
 #ifndef ASKAP_CP_CORRPRODMAP_H
 #define ASKAP_CP_CORRPRODMAP_H
 
+// Allow coding & testing outside ASKAP before deployment
 //#define OUTSIDEASKAP
 
 #include "Permutation.h"
@@ -77,7 +78,7 @@ class CorrProdMap
 
 		/// @param[in] Antenna count
 		/// @return Total number of correlation products
-		uint32_t totalCount (uint32_t nAntenna);
+		uint32_t getTotal (uint32_t nAntenna);
 
 		/// @param[in] Antenna 1 (<= antenna 2)
 		/// @param[in] Antenna 2 
@@ -105,30 +106,29 @@ class CorrProdMap
 	
 		uint32_t antBase;
 		uint32_t indexBase;
-		//uint32_t nAnt;
-		//uint32_t nTotal;
 		
 		// Given antenna and polarity indices, return composite index
 		// Antenna index is 0-based
 		// Polarity index: 0 = X, 1 = Y
-		uint32_t compositeIndex (uint32_t ant, uint32_t pol);
+		uint32_t getCompositeIndex (uint32_t ant, uint32_t pol);
 
 		// Given composite index, return antenna index.
 		// Both are 0-based.
-		uint32_t antenna (uint32_t comp);
+		uint32_t getAntenna (uint32_t comp);
 
 		// Given composite index, return polarization index.
 		// Both are 0-based.
-		uint32_t polarisation (uint32_t comp);
+		uint32_t getPolarisation (uint32_t comp);
 
 		// Return the product of 2 polarization.
 		// Polarisation: 0=X, Y=1
 		// Polarisation product: 0=XX, 1=XY, 2=YX, 3=YY
-		uint32_t polarisationProduct (uint32_t pol1, uint32_t pol2);
+		uint32_t convertPolarisationToProduct (uint32_t pol1, uint32_t pol2);
 
 		// Return the polarization elements from their product.
-		std::pair<uint32_t,uint32_t> polarisationElement (uint32_t polProd);
+		std::pair<uint32_t,uint32_t> convertPolarisationToElements (uint32_t polProd);
 		
+#ifdef OUTSIDEASKAP
 		void alertAntennaValue (uint32_t ant);
 		
 		void alertIndexValue (uint32_t index);
@@ -139,6 +139,8 @@ class CorrProdMap
                 uint32_t maxValue);
 		
 		void alertWrongAntennaOrder (uint32_t ant1, uint32_t ant2);
+#endif
+
 };
 
 #ifndef OUTSIDEASKAP

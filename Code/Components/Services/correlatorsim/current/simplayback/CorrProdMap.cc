@@ -40,11 +40,11 @@
 
 
 #ifndef OUTSIDEASKAP
-
 // Include package level header file
 #include "askap_correlatorsim.h"
 #include "askap/AskapError.h"
 #include "askap/AskapUtil.h"
+#include "askap/AskapError.h"
 
 using namespace askap;
 using namespace askap::utility;
@@ -58,9 +58,6 @@ CorrProdMap::CorrProdMap ()
 {
 	antBase = 0;	// default base number. Usual value is either 0 or 1
 	indexBase = 0;	// default base number. Usual value is either 0 or 1
-	//nAnt = nAntIn;	// number of antennas
-	//Permutation perm;
-	//nTotal = perm.total (nAnt*2);	// number of correlation products
 }
 	
 	
@@ -69,20 +66,17 @@ CorrProdMap::~CorrProdMap ()
 }
 
 
-/// The namespace "corrProd" contains functions to map correlation products
-/// (also known as "baselines"):
-///   correlation product index <-> antenna1, antenna2, polarization product
-/// The base number of correlation product and antenna indices are changeable
-/// (default = 0).
-/// Values for polarization product: 0:XX, 1:XY, 2:YX, 3:YY.
-
-
-/// Set antenna base number (default = 0). Usual value is either 0 or 1
+// Set antenna base number (default = 0). Usual value is either 0 or 1
 
 void CorrProdMap::setAntennaBase (uint32_t antBaseIn) 
 {
+#ifndef OUTSIDEASKAP
+	ASKAPCHECK ((antBaseIn == 0) || (antBaseIn == 1), 
+			"Illegal antenna base number: " << antBaseIn);
+#endif
 	antBase = antBaseIn;
 }
+
 
 uint32_t CorrProdMap::getAntennaBase () 
 {
@@ -90,13 +84,18 @@ uint32_t CorrProdMap::getAntennaBase ()
 }
 
 
-/// Set the base number of correlation product index (default = 0).
-/// Usual value is either 0 or 1
+// Set the base number of correlation product index (default = 0).
+// Usual value is either 0 or 1
 
 void CorrProdMap::setIndexBase (uint32_t indexBaseIn) 
 {
+#ifndef OUTSIDEASKAP
+	ASKAPCHECK ((indexBaseIn == 0) || (indexBaseIn == 1), 
+			"Illegal index base number: " << indexBaseIn);
+#endif
 	indexBase = indexBaseIn;
 }
+
 
 uint32_t CorrProdMap::getIndexBase () 
 {
@@ -104,72 +103,88 @@ uint32_t CorrProdMap::getIndexBase ()
 }
 
 
-/// Given the number of antennas, return the number of correlator products.
+// Given the number of antennas, return the number of correlator products.
 
-uint32_t CorrProdMap::totalCount (uint32_t nAntenna) 
+uint32_t CorrProdMap::getTotal (uint32_t nAntenna) 
 {
 	Permutation perm;
-	return perm.total (nAntenna * 2);	// number of correlation products
+	return perm.getTotal (nAntenna * 2);	// number of correlation products
 }
 
 
-/// Given the indices of antennas and polarization product, 
-/// return correlation product index.
+// Given the indices of antennas and polarization product, 
+// return correlation product index.
 
-uint32_t CorrProdMap::getIndex (uint32_t ant1, uint32_t ant2, 
-        uint32_t polProd) 
+uint32_t CorrProdMap::getIndex (uint32_t ant1, uint32_t ant2, uint32_t polProd) 
 {
+#ifdef OUTSIDEASKAP
 	alertAntennaValue (ant1);
 	alertAntennaValue (ant2);
 	alertWrongAntennaOrder (ant1, ant2);
 	alertPolarisationProductValue (polProd);
+#else
+	ASKAPCHECK (ant1 >= antBase, "Illegal antenna 1 index: " << ant1);
+	ASKAPCHECK (ant2 >= antBase, "Illegal antenna 2 index: " << ant2);
+	ASKAPCHECK (ant1 <= ant2, "Antenna are in the wrong order: " << ant1 << ", " << ant2);
+	ASKAPCHECK ((polProd >= 0) && (polProd <= 3)), 
+			"Illegal polarisation product: " << polProd);
+#endif
 	
 	// Rearrange the index format of antennas and polarisation product into 
 	// composite indices
-	std::pair<uint32_t,uint32_t> pols = polarisationElement (polProd);
+	std::pair<uint32_t,uint32_t> pols = convertPolarisationToElements (polProd);
 	std::pair<uint32_t,uint32_t> comps;
-	comps.first = compositeIndex (ant1-antBase, pols.first);
-	comps.second = compositeIndex (ant2-antBase, pols.second);
+	comps.first = getCompositeIndex (ant1-antBase, pols.first);
+	comps.second = getCompositeIndex (ant2-antBase, pols.second);
 	
 	// Perform permutation on the composite indices.
 	Permutation perm;
-	return (perm.indexNoCheck (comps) + indexBase);
+	return (perm.getIndex (comps) + indexBase);
 }
 
 
-/// Given correlator product, return antennas.
+// Given correlator product, return antennas.
 
 std::pair<uint32_t,uint32_t> CorrProdMap::getAntennas (uint32_t index) 
 {
+#ifdef OUTSIDEASKAP
 	alertIndexValue (index);
-	
+#else
+	ASKAPCHECK (index >= indexBase, "Illegal index value: " << index);
+#endif
+
 	// Inverse permutation to get composite indices containing antennas and 
 	// polarisation product.
 	Permutation perm;
-	std::pair<uint32_t,uint32_t> comps = perm.itemsNoCheck (index-indexBase);
+	std::pair<uint32_t,uint32_t> comps = perm.getItems (index-indexBase);
 
 	// Rearrange the composite indices to get the antennas.
 	std::pair<uint32_t,uint32_t> ants;
-	ants.first = antenna (comps.first) + antBase;
-	ants.second = antenna (comps.second) + antBase;
+	ants.first = getAntenna (comps.first) + antBase;
+	ants.second = getAntenna (comps.second) + antBase;
 	return ants;
 }
 
 
-/// Given correlator product, return the polarization product: 
-/// 0:XX, 1:XY, 2:YX, 3:YY
+// Given correlator product, return the polarization product: 
+// 0:XX, 1:XY, 2:YX, 3:YY
 
 uint32_t CorrProdMap::getPolarisationProduct (uint32_t index) 
 {
+#ifdef OUTSIDEASKAP
 	alertIndexValue (index);
+#else
+	ASKAPCHECK (index >= indexBase, "Illegal index value: " << index);
+#endif
 	
 	// Inverse permutation to get composite indices containing antennas and 
 	// polarisation product.
 	Permutation perm;
-	std::pair<uint32_t,uint32_t> comps = perm.itemsNoCheck (index-indexBase);
+	std::pair<uint32_t,uint32_t> comps = perm.getItems (index-indexBase);
 	
 	// Rearrange the composite indices to get the polarisation product.
-	return (polarisationProduct (polarisation(comps.first), polarisation(comps.second)));
+	return (convertPolarisationToProduct (getPolarisation(comps.first), 
+			getPolarisation(comps.second)));
 }
 
 
@@ -180,15 +195,20 @@ uint32_t CorrProdMap::getPolarisationProduct (uint32_t index)
 int CorrProdMap::getAntennaAndPolarisationProduct (uint32_t index, 
 		uint32_t& ant1, uint32_t& ant2, uint32_t& polProd) 
 {
+#ifdef OUTSIDEASKAP
 	alertIndexValue (index);
+#else
+	ASKAPCHECK (index >= indexBase, "Illegal index value: " << index);
+#endif
 
 	Permutation perm;
-	std::pair<uint32_t,uint32_t> comps = perm.itemsNoCheck (index-indexBase);
+	std::pair<uint32_t,uint32_t> comps = perm.getItems (index-indexBase);
 	
 	// convert composite index to antenna
-	ant1 = antenna (comps.first) + antBase;
-	ant2 = antenna (comps.second) + antBase;
-	polProd = polarisationProduct (polarisation(comps.first), polarisation(comps.second));
+	ant1 = getAntenna (comps.first) + antBase;
+	ant2 = getAntenna (comps.second) + antBase;
+	polProd = convertPolarisationToProduct (getPolarisation(comps.first), 
+			getPolarisation(comps.second));
 	return 0;
 }
 
@@ -200,7 +220,7 @@ int CorrProdMap::getAntennaAndPolarisationProduct (uint32_t index,
 // Antenna index is 0-based
 // Polarity index: 0 = X, 1 = Y
 
-uint32_t CorrProdMap::compositeIndex (uint32_t ant, uint32_t pol) 
+uint32_t CorrProdMap::getCompositeIndex (uint32_t ant, uint32_t pol) 
 {
 	return (2*ant + pol);
 }
@@ -209,7 +229,7 @@ uint32_t CorrProdMap::compositeIndex (uint32_t ant, uint32_t pol)
 // Given composite index, return antenna index.
 // Both are 0-based.
 
-uint32_t CorrProdMap::antenna (uint32_t comp) 
+uint32_t CorrProdMap::getAntenna (uint32_t comp) 
 {
 	return (int(comp/2));
 }
@@ -218,7 +238,7 @@ uint32_t CorrProdMap::antenna (uint32_t comp)
 // Given composite index, return polarization index.
 // Both are 0-based.
 
-uint32_t CorrProdMap::polarisation (uint32_t comp) 
+uint32_t CorrProdMap::getPolarisation (uint32_t comp) 
 {
 	return (comp % 2);
 }
@@ -228,7 +248,7 @@ uint32_t CorrProdMap::polarisation (uint32_t comp)
 // Polarization: 0=X, Y=1
 // Polarization product: 0=XX, 1=XY, 2=YX, 3=YY
 
-uint32_t CorrProdMap::polarisationProduct (uint32_t pol1, uint32_t pol2) 
+uint32_t CorrProdMap::convertPolarisationToProduct (uint32_t pol1, uint32_t pol2) 
 {
 	return (2*pol1 + pol2);
 }
@@ -236,7 +256,7 @@ uint32_t CorrProdMap::polarisationProduct (uint32_t pol1, uint32_t pol2)
 
 // Return the polarization elements from their product.
  
-std::pair<uint32_t,uint32_t> CorrProdMap::polarisationElement (uint32_t polProd) 
+std::pair<uint32_t,uint32_t> CorrProdMap::convertPolarisationToElements (uint32_t polProd) 
 {
 	std::pair<uint32_t,uint32_t> pols;
 	pols.first = int(polProd/2);
@@ -244,6 +264,8 @@ std::pair<uint32_t,uint32_t> CorrProdMap::polarisationElement (uint32_t polProd)
 	return pols;
 }
 
+
+#ifdef OUTSIDEASKAP
 
 // Alert when antenna index value goes out of range.
 void CorrProdMap::alertAntennaValue (uint32_t ant) 
@@ -294,3 +316,5 @@ void CorrProdMap::alertWrongAntennaOrder (uint32_t ant1, uint32_t ant2)
             ant1 << " > " << ant2 << endl;
 	}
 }
+
+#endif

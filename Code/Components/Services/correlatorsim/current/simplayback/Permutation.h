@@ -43,6 +43,7 @@
 #ifndef ASKAP_CP_PERMUTATION_H
 #define ASKAP_CP_PERMUTATION_H
 
+// Allow coding & testing outside ASKAP before deployment
 //#define OUTSIDEASKAP
 
 #include <stdint.h>
@@ -57,55 +58,46 @@ class Permutation
 {
 	public :
 	
-		// Constructor
+		/// Constructor
 		Permutation ();
 		
-		// Destructor
+		/// Destructor
 		virtual ~Permutation();
 		
 		/// @param[in] The number of items to permutate
 		/// @return The total number of permutation
-		uint32_t total (uint32_t nItem);
+		uint32_t getTotal (uint32_t nItem);
 
-		/// Given the items, return the permutation index. With no input check.
+		/// Given the items, return the permutation index. 
 		/// @param[in] Item 1 <= item 2
 		/// @param[in] Item 2
 		/// @return Permutation index
-		uint32_t indexNoCheck (const uint32_t item1, const uint32_t item2);
+		uint32_t getIndex (const uint32_t item1, const uint32_t item2);
 		
-		/// Given the items, return the permutation index. With no input check.
-		/// @param[in] Item 1 <= item 2
-		/// @param[in] Item 2
+		/// Given the items, return the permutation index. 
+		/// @param[in] Item pair, where element 1 <= element 2
 		/// @return Permutation index		
-		uint32_t indexNoCheck (const std::pair<uint32_t,uint32_t> items);
+		uint32_t getIndex (const std::pair<uint32_t,uint32_t> items);
 
 		/// Given the items, return the permutation index. 
-		/// The correct input ordering is enforced.
 		/// @param[in] Item 1 <= item 2
 		/// @param[in] Item 2
+		/// @param[in] Total number of items
 		/// @return Permutation index		
-		uint32_t index (const uint32_t item1, const uint32_t item2, 
+		uint32_t getIndex (const uint32_t item1, const uint32_t item2, 
                 const uint32_t nItem);
 
 		/// Given the items, return the permutation index. 
-		/// The correct input ordering is enforced.
-		/// @param[in] Item 1 <= item 2
-		/// @param[in] Item 2
+		/// @param[in] Item pair, where element 1 <= element 2
+		/// @param[in] Total number of items
 		/// @return Permutation index		
-		uint32_t index (const std::pair<uint32_t,uint32_t> items, 
+		uint32_t getIndex (const std::pair<uint32_t,uint32_t> items, 
                 const uint32_t nItem);
 
 		/// Given the permutation index, return the items in pair. 
-        /// With no input check.
 		/// @param[in] Permutation index
-		/// @return Items in pair
-		std::pair<uint32_t,uint32_t> itemsNoCheck (const uint32_t index);
-		
-		/// Given the permutation index, return the items in pair.
-		/// @param[in] Permutation index
-		/// @return Items in pair
-		std::pair<uint32_t,uint32_t> items (const uint32_t index, 
-                const uint32_t nItem);
+		/// @return Items in pair, where element 1 <= element 2
+		std::pair<uint32_t,uint32_t> getItems (const uint32_t index);
 };
  
 #ifndef OUTSIDEASKAP

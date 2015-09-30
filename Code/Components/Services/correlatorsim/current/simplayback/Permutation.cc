@@ -25,6 +25,7 @@
 /// @author Paulus Lahur <paulus.lahur@csiro.au>
 ///
 
+// Allow coding & testing outside ASKAP before deployment
 //#define OUTSIDEASKAP
 
 // Include own header file first
@@ -35,19 +36,23 @@
 #include <stdint.h>
 #include <cmath>
 
-using namespace std;
-
 #ifndef OUTSIDEASKAP
+#include "askap/AskapError.h"
+
 using namespace askap;
 using namespace askap::cp;
 #endif
 
+using namespace std;
 
+#ifdef OUTSIDEASKAP
 // forward declaration of internal functions
+void alertValueTooBig (uint32_t value, uint32_t maxValue);
 void alertValueOutsideRange (uint32_t value, uint32_t minValue, 
         uint32_t maxValue);
 void alertWrongItemOrder (uint32_t item1, uint32_t item2);
 void alertWrongItemOrder (std::pair<uint32_t,uint32_t> items);
+#endif
 
 
 Permutation::Permutation () 
@@ -60,70 +65,100 @@ Permutation::~Permutation()
 }
 
 
-/// Return the total number of permutation.
-uint32_t Permutation::total (const uint32_t n) 
+// Return the total number of permutation.
+
+uint32_t Permutation::getTotal (const uint32_t n) 
 {
 	return ((n*n + n)/2);
 }
 
 
-/// Given the items, return the permutation index. With no input check.
-uint32_t Permutation::indexNoCheck (const uint32_t item1, const uint32_t item2) 
+// Given the items, return the permutation index.
+
+uint32_t Permutation::getIndex (const uint32_t item1, const uint32_t item2) 
 {
-	return (item1 + total(item2));
-}
-
-uint32_t Permutation::indexNoCheck (const std::pair<uint32_t,uint32_t> items) 
-{
-	return (items.first + total(items.second));
-}
-
-
-/// Given the items, return the permutation index. Input is checked.
-/// The correct input ordering is enforced.
-
-uint32_t Permutation::index (const uint32_t item1, const uint32_t item2,
-		const uint32_t nItem) 
-{	
-	alertValueOutsideRange (item1, 0, nItem-1);
-	alertValueOutsideRange (item2, 0, nItem-1);
+#ifdef OUTSIDEASKAP
 	alertWrongItemOrder (item1, item2);
-    return (item1 + total(item2));
+#else
+	ASKAPCHECK (item1 <= item2, "Illegal item order: " << item1 << ", " << item2);
+#endif
+	return (item1 + getTotal(item2));
 }
 
-uint32_t Permutation::index (const std::pair<uint32_t,uint32_t> items, 
+
+// Given the items, return the permutation index.
+
+uint32_t Permutation::getIndex (const std::pair<uint32_t,uint32_t> items) 
+{
+#ifdef OUTSIDEASKAP
+	alertWrongItemOrder (items);
+#else
+	ASKAPCHECK (items.first <= items.second, 
+			"Illegal item order: " << items.first << ", " << items.second);
+#endif
+	return (items.first + getTotal(items.second));
+}
+
+
+// Given the items, return the permutation index. 
+
+uint32_t Permutation::getIndex (const uint32_t item1, const uint32_t item2,
+		const uint32_t nItem) 
+{	
+#ifdef OUTSIDEASKAP
+	alertValueTooBig (item1, nItem-1);
+	alertValueTooBig (item2, nItem-1);
+	alertWrongItemOrder (item1, item2);
+#else
+	ASKAPCHECK (item1 <= nItem-1, "Illegal item 1 value: " << item1);
+	ASKAPCHECK (item2 <= nItem-1, "Illegal item 2 value: " << item2);
+	ASKAPCHECK (item1 <= item2, "Illegal item order: " << item1 << ", " << item2);
+#endif
+    return (item1 + getTotal(item2));
+}
+
+
+// Given the items, return the permutation index. 
+
+uint32_t Permutation::getIndex (const std::pair<uint32_t,uint32_t> items, 
 		const uint32_t nItem) 
 {
-	alertValueOutsideRange (items.first, 0, nItem-1);
-	alertValueOutsideRange (items.second, 0, nItem-1);
+#ifdef OUTSIDEASKAP
+	alertValueTooBig (items.first, nItem-1);
+	alertValueTooBig (items.second, nItem-1);
 	alertWrongItemOrder (items);
-	return (items.first + total(items.second));
+#else
+	ASKAPCHECK (items.first <= nItem-1, "Illegal item 1 value: " << items.first);
+	ASKAPCHECK (items.second <= nItem-1, "Illegal item 2 value: " << items.second);
+	ASKAPCHECK (items.first <= items.second, 
+			"Illegal item order: " << items.first << ", " << items.second);
+#endif
+	return (items.first + getTotal(items.second));
 }
 
 
-/// Given the permutation index, return the items. With no input check.
-std::pair<uint32_t,uint32_t> Permutation::itemsNoCheck (const uint32_t index) 
+// Given the permutation index, return the items. 
+
+std::pair<uint32_t,uint32_t> Permutation::getItems (const uint32_t index) 
 {	
 	std::pair<uint32_t,uint32_t> items;
 	items.second = int((sqrt(1+8*index) - 1)/2);
-	items.first = index - total(items.second);
-	return items;
-}
-
-
-/// Given the permutation index, return the items.
-std::pair<uint32_t,uint32_t> Permutation::items (const uint32_t index, 
-		const uint32_t nItem) 
-{	
-	alertValueOutsideRange (index, 0, total(nItem)-1);
-	std::pair<uint32_t,uint32_t> items;
-	items.second = int((sqrt(1+8*index) - 1)/2);
-	items.first = index - total(items.second);
+	items.first = index - getTotal(items.second);
 	return items;
 }
 
 
 // Internal functions
+
+#ifdef OUTSIDEASKAP
+
+// Alert when a value is too big.
+void alertValueTooBig (uint32_t value, uint32_t maxValue) 
+{
+	if (value > maxValue) {
+		cerr << "ERROR in Permutation: value is too big: " << value << endl;
+	}
+}
 
 
 // Alert when a value goes out of range.
@@ -146,6 +181,7 @@ void alertWrongItemOrder (uint32_t item1, uint32_t item2)
 	}
 }
 
+
 void alertWrongItemOrder (std::pair<uint32_t,uint32_t> items) 
 {
 	if (items.first > items.second) {
@@ -153,3 +189,5 @@ void alertWrongItemOrder (std::pair<uint32_t,uint32_t> items)
             items.first << " > " << items.second << endl;
 	}
 }
+
+#endif
