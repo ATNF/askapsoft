@@ -125,14 +125,15 @@ uint32_t CorrProdMap::getIndex (uint32_t ant1, uint32_t ant2, uint32_t polProd)
 #else
 	ASKAPCHECK (ant1 >= antBase, "Illegal antenna 1 index: " << ant1);
 	ASKAPCHECK (ant2 >= antBase, "Illegal antenna 2 index: " << ant2);
-	ASKAPCHECK (ant1 <= ant2, "Antenna are in the wrong order: " << ant1 << ", " << ant2);
-	ASKAPCHECK ((polProd >= 0) && (polProd <= 3)), 
+	ASKAPCHECK (ant1 <= ant2, 
+            "Antenna are in the wrong order: " << ant1 << ", " << ant2);
+	ASKAPCHECK ((polProd >= 0) && (polProd <= 3), 
 			"Illegal polarisation product: " << polProd);
 #endif
 	
 	// Rearrange the index format of antennas and polarisation product into 
 	// composite indices
-	std::pair<uint32_t,uint32_t> pols = convertPolarisationToElements (polProd);
+	std::pair<uint32_t,uint32_t> pols = convertPolarisationToElements(polProd);
 	std::pair<uint32_t,uint32_t> comps;
 	comps.first = getCompositeIndex (ant1-antBase, pols.first);
 	comps.second = getCompositeIndex (ant2-antBase, pols.second);
@@ -248,7 +249,8 @@ uint32_t CorrProdMap::getPolarisation (uint32_t comp)
 // Polarization: 0=X, Y=1
 // Polarization product: 0=XX, 1=XY, 2=YX, 3=YY
 
-uint32_t CorrProdMap::convertPolarisationToProduct (uint32_t pol1, uint32_t pol2) 
+uint32_t CorrProdMap::convertPolarisationToProduct (uint32_t pol1, 
+        uint32_t pol2) 
 {
 	return (2*pol1 + pol2);
 }
@@ -256,7 +258,8 @@ uint32_t CorrProdMap::convertPolarisationToProduct (uint32_t pol1, uint32_t pol2
 
 // Return the polarization elements from their product.
  
-std::pair<uint32_t,uint32_t> CorrProdMap::convertPolarisationToElements (uint32_t polProd) 
+std::pair<uint32_t,uint32_t> CorrProdMap::convertPolarisationToElements 
+        (uint32_t polProd) 
 {
 	std::pair<uint32_t,uint32_t> pols;
 	pols.first = int(polProd/2);
