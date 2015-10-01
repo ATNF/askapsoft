@@ -14,7 +14,8 @@ if [ $doCreateModel == true ]; then
 #!/bin/bash -l
 #SBATCH --time=12:00:00
 #SBATCH --ntasks=${CREATORTASKS}
-#SBATCH --nodes=${CREATORNODES}
+#SBATCH --ntasks-per-node=${CREATORWORKERPERNODE}
+#SBATCH --mem=64gb
 #SBATCH --mail-user matthew.whiting@csiro.au
 #SBATCH --job-name DCmodelCF
 #SBATCH --mail-type=ALL
@@ -75,7 +76,7 @@ EOF_INNER
 
 crLog=${logdir}/createModel-\${SLURM_JOB_ID}.log
 
-aprun -n ${CREATORTASKS} \$createFITS -c \$parset > \$crLog
+aprun -m 64G -n ${CREATORTASKS} -N ${CREATORWORKERPERNODE} \$createFITS -c \$parset > \$crLog
 
 EOF
 

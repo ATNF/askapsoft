@@ -22,15 +22,13 @@ msdir=MS
 chunkdir=../ModelImages/Chunks
 slicedir=../ModelImages/Slices
 
-## doCreateModel=true
-## # Whether to slice up the model prior to simulating - set to false
-## # if we've already done this
-## doSlice=true
-
 doCreateModel=false
+# Whether to slice up the model prior to simulating - set to false
+# if we've already done this
 doSlice=false
 
 doCalibrator=false
+doScience=true
 
 doCorrupt=false
 randomgainsparset=${parsetdir}/randomgains.in
@@ -76,18 +74,35 @@ msbaseSci=sciencefield_SKADS_${inttime}_${now}
 feeds=${askapconfig}/ASKAP${nfeeds}feeds.in
 antennaParset=${askapconfig}/${antennaConfig}.in
 
+# Time required for the csimulator jobs
+TIME_CSIM_JOB=2:30:00
+
 NGROUPS_CSIM=32
 NWORKERS_CSIM=171
 NCPU_CSIM=`echo $NWORKERS_CSIM | awk '{print $1+1}'`
 NPPN_CSIM=3
 chanPerMSchunk=3
 
-catdir=/scratch/askap/whi550/Simulations/BETA/InputCatalogue
+# Number of MSs to end up with after 2nd stage of merging
+NUM_FINAL_MS=8
+
+if [ `echo $NGROUPS_CSIM $NUM_FINAL_MS | awk '{print $1 % $2 }'` -ne 0 ]; then
+    echo "Number of groups (${NGROUPS_CSIM}) not a multiple of number of final MSs (${NUM_FINAL_MS})."
+    echo "Not running."
+    doSubmit=false
+else
+    NUM_GROUPS_PER_FINAL=`echo $NGROUPS_CSIM $NUM_FINAL_MS | awk '{print $1/$2}'`
+fi
+
+# Whether to remove the intermediate MSs once the merging step has
+# completed successfully
+CLOBBER_INTERMEDIATE_MS=true
+
+catdir=/scratch2/askap/whi550/Simulations/BETA/InputCatalogue
 sourcelist=master_possum_catalogue_trim10x10deg.dat
 
 doFlatSpectrum=false
 baseimage=ASKAP12_ES_SKADS_model
-modelimage=${chunkdir}/${baseimage}
 writeByNode=true
 createTT_CR=true
 
@@ -100,8 +115,10 @@ CREATORNODES=`echo $CREATORTASKS ${CREATORWORKERPERNODE} | awk '{print int($1/$2
 SLICERWIDTH=100
 SLICERNPPN=1
 
-databaseCR=POSSUM
+#databaseCR=POSSUM
 #databaseCR=POSSUMHI
+databaseCR=joint
+
 posType=deg
 PAunits=rad
 useGaussianComponents=true
@@ -111,7 +128,12 @@ if [ $databaseCR == "POSSUM" ]; then
 elif [ $databaseCR == "POSSUMHI" ]; then
     listtypeCR=spectralline
     baseimage="${baseimage}_HI"
+elif [ $databaseCR == "joint" ]; then
+    # This is the case for when we've combined the continuum and HI
+    # models into "_joint" models
+    baseimage="${baseimage}_joint"
 fi
+modelimage=${chunkdir}/${baseimage}
 
 # Size and pixel scale of spatial axes
 npix=4096
@@ -149,7 +171,7 @@ dstokes=1
 
 spwbaseSci=${parsetdir}/spws_sciencefield
 
-observationLengthHours=12
+observationLengthHours=8
 # duration for csimulator parset - have observation evenly split over
 # transit, so give hour angle start/stop times
 dur=`echo $observationLengthHours | awk '{print $1/2.}'`

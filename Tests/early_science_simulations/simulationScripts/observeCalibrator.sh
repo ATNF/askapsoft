@@ -139,6 +139,16 @@ FILES="${calMSlist}"
 logfile=${logdir}/merge_cal_output_\${SLURM_JOB_ID}.log
 echo "Processing files: " > \${logfile}
 aprun -n 1 -N 1 \${msmerge} -o ${msdir}/${msbaseCal}.ms \$FILES >> \${logfile}
+err=\$?
+if [ \$err != 0 ]; then
+    echo "Error: msmerge returned error code \${err}"
+    exit \$err
+fi
+clobber=${CLOBBER_INTERMEDIATE_MS}
+if [ \${clobber} == true ]; then
+    aprun -n 1 -N 1 rm -rf \$FILES
+fi
+
 EOF
 
     if [ $doSubmit == true ]; then

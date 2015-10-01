@@ -34,27 +34,29 @@ while [ $GRP -lt ${NGROUPS_CSIM} ]; do
 	fi
     fi
 
-    # Need to create an spws file for this group with the
-    # appropriate channel settings, so we can reference with %w in
-    # the parset
-    spwsInput="${spwbaseSci}_GRP${GRP}.in"
-    echo "spws.names  =  [GRP${GRP}_0" > $spwsInput
-    I=1; while [ $I -lt ${NWORKERS_CSIM} ]; do echo ", GRP${GRP}_${I}" >> $spwsInput; I=`expr $I + 1`; done
-    perl -pi -e 's/\n//g' $spwsInput
-    echo "]" >> $spwsInput
-    I=0
-    while [ $I -lt ${NWORKERS_CSIM} ]; do 
-	nurefMHz=`echo ${freqChanZeroMHz} ${GRP} ${NWORKERS_CSIM} ${I} ${chanPerMSchunk} ${rchan} ${chanw} | awk '{printf "%13.8f",($1*1.e6+(($2*$3+$4)*$5-$6)*$7)/1.e6}'`
-	spw="[${chanPerMSchunk}, ${nurefMHz} MHz, ${chanw} Hz, \"${pol}\"]"
-	echo "spws.GRP${GRP}_${I}  =  ${spw}" >> $spwsInput
-	I=`expr $I + 1`
-    done
+    if [ $doScience == true ]; then
 
-    slurmtag="csimSci${GRP}"
-    sbatchfile=${slurms}/csimScience_GRP${GRP}.sbatch
-    cat > $sbatchfile <<EOF
+        # Need to create an spws file for this group with the
+        # appropriate channel settings, so we can reference with %w in
+        # the parset
+        spwsInput="${spwbaseSci}_GRP${GRP}.in"
+        echo "spws.names  =  [GRP${GRP}_0" > $spwsInput
+        I=1; while [ $I -lt ${NWORKERS_CSIM} ]; do echo ", GRP${GRP}_${I}" >> $spwsInput; I=`expr $I + 1`; done
+        perl -pi -e 's/\n//g' $spwsInput
+        echo "]" >> $spwsInput
+        I=0
+        while [ $I -lt ${NWORKERS_CSIM} ]; do 
+	    nurefMHz=`echo ${freqChanZeroMHz} ${GRP} ${NWORKERS_CSIM} ${I} ${chanPerMSchunk} ${rchan} ${chanw} | awk '{printf "%13.8f",($1*1.e6+(($2*$3+$4)*$5-$6)*$7)/1.e6}'`
+	    spw="[${chanPerMSchunk}, ${nurefMHz} MHz, ${chanw} Hz, \"${pol}\"]"
+	    echo "spws.GRP${GRP}_${I}  =  ${spw}" >> $spwsInput
+	    I=`expr $I + 1`
+        done
+
+        slurmtag="csimSci${GRP}"
+        sbatchfile=${slurms}/csimScience_GRP${GRP}.sbatch
+        cat > $sbatchfile <<EOF
 #!/bin/bash -l
-#SBATCH --time=12:00:00
+#SBATCH --time=${TIME_CSIM_JOB}
 #SBATCH --ntasks=${NCPU_CSIM}
 #SBATCH --ntasks-per-node=${NPPN_CSIM}
 #SBATCH --job-name ${slurmtag}
@@ -127,21 +129,21 @@ aprun -n ${NCPU_CSIM} -N ${NPPN_CSIM}  \${csim} -c \${mkVisParset} > \${mkVisLog
 
 EOF
 
-    if [ $doSubmit == true ]; then
-	csimID=`sbatch ${grpDepend} ${sbatchfile} | awk '{print $4}'`
-	echo "Running csimulator for science field, group $GRP, producing measurement set ${ms}: ID=${csimID} and dependency $grpDepend"
-	if [ "$depend" == "" ]; then
-	    grpDepend="-d afterok:${csimID}"
-	else
-	    grpDepend="${grpDepend}:${csimID}"
-	fi
-	merge2dep="${merge2dep}:${csimID}"
-    fi
+        if [ $doSubmit == true ]; then
+	    csimID=`sbatch ${grpDepend} ${sbatchfile} | awk '{print $4}'`
+	    echo "Running csimulator for science field, group $GRP, producing measurement set ${ms}: ID=${csimID} and dependency $grpDepend"
+	    if [ "$depend" == "" ]; then
+	        grpDepend="-d afterok:${csimID}"
+	    else
+	        grpDepend="${grpDepend}:${csimID}"
+	    fi
+	    merge2dep="${merge2dep}:${csimID}"
+        fi
 
 
-    merge1sbatch=${slurms}/mergeVisStage1_GRP${GRP}.sbatch
-    
-    cat > $merge1sbatch <<EOF
+        merge1sbatch=${slurms}/mergeVisStage1_GRP${GRP}.sbatch
+        
+        cat > $merge1sbatch <<EOF
 #!/bin/bash
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
@@ -175,55 +177,91 @@ logfile=${logdir}/merge_s1_output_GRP${GRP}_\${SLURM_JOB_ID}.log
 echo "Start = \$START, End = \$END" > \${logfile}
 echo "Processing files: \$FILES" >> \${logfile}
 aprun -n 1 -N 1 \${msmerge} -o ${msdir}/${msbaseSci}_GRP${GRP}.ms \$FILES >> \${logfile}
+err=\$?
+if [ \$err != 0 ]; then
+    echo "Error: msmerge returned error code \${err}"
+    exit \$err
+fi
+clobber=${CLOBBER_INTERMEDIATE_MS}
+if [ \${clobber} == true ]; then
+    aprun -n 1 -N 1 rm -rf \$FILES
+fi
 
 EOF
 
-    if [ $doSubmit == true ]; then
-	merge1ID=`sbatch ${grpDepend} $merge1sbatch | awk '{print $4}'`
-	echo "Running merging for science field, group ${GRP}: ID=${merge1ID} and dependency $grpDepend"
-	merge2dep="${merge2dep}:${merge1ID}"
-    fi
+        if [ $doSubmit == true ]; then
+	    merge1ID=`sbatch ${grpDepend} $merge1sbatch | awk '{print $4}'`
+	    echo "Running merging for science field, group ${GRP}: ID=${merge1ID} and dependency $grpDepend"
+	    merge2dep="${merge2dep}:${merge1ID}"
+        fi
 
+    fi
+    
     GRP=`expr $GRP + 1`
     
 done
 
+# Second stage of merging - reduce to the final number of MSs (given
+# by NUM_FINAL_MS
+if [ $doScience == true ]; then
 
+    for((i=0;i<${NUM_FINAL_MS};i++)); do
+    
+        START=`echo $i $NUM_FINAL_MS | awk '{print $1*$2}'`
+        END=`echo $i $NUM_FINAL_MS | awk '{print ($1+1)*$2}'`
+        merge2sbatch=${slurms}/mergeVisStage2_${i}.sbatch
 
-merge2sbatch=${slurms}/mergeVisStage2.sbatch
-	
-cat > $merge2sbatch <<EOF
+        if [ ${NUM_FINAL_MS} -eq 1 ]; then
+            outputname="${msdir}/${msbaseSci}.ms"
+        else
+            outputname="${msdir}/${msbaseSci}_${i}.ms"
+        fi
+
+        cat > $merge2sbatch <<EOF
 #!/bin/bash
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --time=12:00:00
 #SBATCH --mail-user matthew.whiting@csiro.au
-#SBATCH --job-name visMerge2
+#SBATCH --job-name visMerge2_${i}
 #SBATCH --mail-type=ALL
 #SBATCH --export=ASKAP_ROOT,AIPSPATH
-#SBATCH --output=${slurmOutput}/slurm-mergeSciVis2-%j.out
+#SBATCH --output=${slurmOutput}/slurm-mergeSciVis2-$i-%j.out
 
 ulimit -n 8192
 export APRUN_XFER_LIMITS=1
 
 msmerge=${msmerge}
 
-IDX=0
+START=$START
+END=$END
 unset FILES
-while [ \$IDX -lt ${NGROUPS_CSIM} ]; do
-    FILES="\$FILES ${msdir}/${msbaseSci}_GRP\${IDX}.ms" 
-    IDX=\`expr \$IDX + 1\`
+for((i=\$START;i<\$END;i++)); do
+    FILES="\$FILES ${msdir}/${msbaseSci}_GRP\${i}.ms" 
 done
 
-logfile=${logdir}/merge_s2_output_\${SLURM_JOB_ID}.log
+logfile=${logdir}/merge_s2_output_$i_\${SLURM_JOB_ID}.log
 echo "Processing files: \$FILES" > \${logfile}
-aprun -n 1 -N 1 \${msmerge} -o ${msdir}/${msbaseSci}.ms \$FILES >> \${logfile}
-EOF
-
-if [ $doSubmit == true ]; then
-	
-    merge2ID=`sbatch ${merge2dep} $merge2sbatch | awk '{print $4}'`
-    echo "Running merging for full science field: ID=${merge2ID} and dependency $merge2dep"
-
+aprun -n 1 -N 1 \${msmerge} -o ${outputname} \$FILES >> \${logfile}
+err=\$?
+if [ \$err != 0 ]; then
+    echo "Error: msmerge returned error code \${err}"
+    exit \$err
+fi
+clobber=${CLOBBER_INTERMEDIATE_MS}
+if [ \${clobber} == true ]; then
+    aprun -n 1 -N 1 rm -rf \$FILES
 fi
 
+EOF
+
+        if [ $doSubmit == true ]; then
+            
+            merge2ID=`sbatch ${merge2dep} $merge2sbatch | awk '{print $4}'`
+            echo "Running merging for full science field, file $i: ID=${merge2ID} and dependency $merge2dep"
+            
+        fi
+
+    done
+        
+fi

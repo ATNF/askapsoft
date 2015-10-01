@@ -9,6 +9,8 @@ workdir="run_${now}"
 echo "Making working directory $workdir"
 mkdir -p ${workdir}
 cd ${workdir}
+lfs setstripe -c 8 .
+
 mkdir -p ${parsetdir}
 mkdir -p ${logdir}
 mkdir -p ${slurms}
