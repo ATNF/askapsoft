@@ -38,6 +38,7 @@
 #include <scimath/Functionals/Gaussian2D.h>
 #include <scimath/Functionals/Gaussian3D.h>
 #include <casa/namespace.h>
+#include <boost/shared_ptr.hpp>
 
 #include <wcslib/wcs.h>
 #include <wcslib/wcsunits.h>
@@ -222,7 +223,8 @@ bool doAddDisc(std::vector<unsigned int> axes, Disc &disc)
 
 
 
-bool addGaussian(std::vector<float>array, std::vector<unsigned int> axes, casa::Gaussian2D<casa::Double> gauss, FluxGenerator &fluxGen, bool integrate, bool verbose)
+// bool addGaussian(std::vector<float>array, std::vector<unsigned int> axes, casa::Gaussian2D<casa::Double> gauss, FluxGenerator &fluxGen, bool integrate, bool verbose)
+bool addGaussian(boost::shared_ptr<float[]>array, std::vector<unsigned int> axes, casa::Gaussian2D<casa::Double> gauss, FluxGenerator &fluxGen, bool integrate, bool verbose)
 {
 
     float majorSigma = FWHMtoSIGMA(gauss.majorAxis()) ;
@@ -432,7 +434,12 @@ bool addGaussian(std::vector<float>array, std::vector<unsigned int> axes, casa::
     return addSource;
 }
 
-void add1DGaussian(std::vector<float>array,
+// void add1DGaussian(std::vector<float>array,
+//                    std::vector<unsigned int> axes,
+//                    casa::Gaussian2D<casa::Double> gauss,
+//                    FluxGenerator &fluxGen,
+//                    bool verbose)
+void add1DGaussian(boost::shared_ptr<float[]>array,
                    std::vector<unsigned int> axes,
                    casa::Gaussian2D<casa::Double> gauss,
                    FluxGenerator &fluxGen,
@@ -533,7 +540,12 @@ void add1DGaussian(std::vector<float>array,
     }
 }
 
-bool addPointSource(std::vector<float>array,
+// bool addPointSource(std::vector<float>array,
+//                     std::vector<unsigned int> axes,
+//                     std::vector<double> pix,
+//                     FluxGenerator &fluxGen,
+//                     bool verbose)
+bool addPointSource(boost::shared_ptr<float[]>array,
                     std::vector<unsigned int> axes,
                     std::vector<double> pix,
                     FluxGenerator &fluxGen,
@@ -571,7 +583,12 @@ bool addPointSource(std::vector<float>array,
 
 }
 
-bool addDisc(std::vector<float>array,
+// bool addDisc(std::vector<float>array,
+//              std::vector<unsigned int> axes,
+//              Disc &disc,
+//              FluxGenerator &fluxGen,
+//              bool verbose)
+bool addDisc(boost::shared_ptr<float[]>array,
              std::vector<unsigned int> axes,
              Disc &disc,
              FluxGenerator &fluxGen,

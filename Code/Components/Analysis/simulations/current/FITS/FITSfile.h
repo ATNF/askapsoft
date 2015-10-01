@@ -39,7 +39,7 @@
 #include <casa/Arrays/Slice.h>
 #include <coordinates/Coordinates/CoordinateSystem.h>
 #include <images/Images/ImageInfo.h>
-
+#include <boost/shared_ptr.hpp>
 
 #include <askap/AskapLogging.h>
 #include <askap/AskapError.h>
@@ -127,7 +127,7 @@ class FITSfile {
 
         /// @brief Get and set individual values in the flux array
         /// @{
-        float array(int pos) {return itsArray[pos];};
+    float array(int pos) {return itsArray[pos];};
         float array(unsigned int x, unsigned int y)
         {
             size_t pos = x + itsAxes[0] * y; return itsArray[pos];
@@ -282,7 +282,8 @@ class FITSfile {
         bool itsFlagIntegrateGaussians;
 
         /// @brief The array of pixel fluxes
-        std::vector<float> itsArray;
+        //std::vector<float> itsArray;
+    boost::shared_ptr<float[]> itsArray;
         /// @brief The arrays holding the Taylor term maps
         std::vector<casa::Array<float> > itsTTmaps;
         /// @brief The RMS of the noise distribution

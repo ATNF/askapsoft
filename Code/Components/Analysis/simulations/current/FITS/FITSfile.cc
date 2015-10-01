@@ -354,14 +354,17 @@ FITSfile::FITSfile(const LOFAR::ParameterSet& parset, bool allocateMemory)
     }
 
     std::stringstream ss;
-    itsNumPix = itsAxes[0];
-    ss << itsAxes[0];
-
-    for (uint i = 1; i < itsDim; i++) {
-        itsNumPix *= itsAxes[i];
-        ss << "x" << itsAxes[i];
+    if (allocateMemory){
+        itsNumPix = itsAxes[0];
+        ss << itsAxes[0];
+        
+        for (uint i = 1; i < itsDim; i++) {
+            itsNumPix *= itsAxes[i];
+            ss << "x" << itsAxes[i];
+        }
+    } else {
+        itsNumPix = 0;
     }
-
 
     itsHaveBeam = parset.isDefined("beam");
     if (itsHaveBeam) {
@@ -424,7 +427,11 @@ FITSfile::FITSfile(const LOFAR::ParameterSet& parset, bool allocateMemory)
                            " with " << itsNumPix << " pixels, each of size " <<
                            sizeof(float) << " bytes, for total size of " <<
                            itsNumPix * sizeof(float) / 1024. / 1024. / 1024. << "GB");
-        itsArray = std::vector<float>(itsNumPix, 0.);
+//        itsArray = std::vector<float>(itsNumPix, 0.);
+        itsArray = boost::shared_ptr<float[]>(new float[itsNumPix]);
+        for (size_t i = 0; i < itsNumPix; i++){
+            itsArray.get()[i] = 0.;
+        }
         ASKAPLOG_DEBUG_STR(logger, "Allocation done.");
 
     }
@@ -528,7 +535,7 @@ void FITSfile::setWCS(bool isImage, const LOFAR::ParameterSet& parset)
 
 void FITSfile::makeNoiseArray()
 {
-    if (itsArray.size() > 0) {
+    if (itsNumPix > 0) {
         ASKAPLOG_DEBUG_STR(logger, "Making the noise array");
 
         for (size_t i = 0; i < itsNumPix; i++) {
@@ -541,7 +548,7 @@ void FITSfile::makeNoiseArray()
 
 void FITSfile::addNoise()
 {
-    if (itsArray.size() > 0) {
+    if (itsNumPix > 0) {
         ASKAPLOG_DEBUG_STR(logger, "Adding noise");
 
         for (size_t i = 0; i < itsNumPix; i++) {
@@ -651,7 +658,7 @@ void FITSfile::processSources()
                     }
                 }
 
-                bool lookAtSource = (itsArray.size() > 0 && itsAddSources) || itsDryRun;
+                bool lookAtSource = (itsNumPix > 0 && itsAddSources) || itsDryRun;
 
                 ComponentType sourceType = src->type();
 
@@ -1068,8 +1075,10 @@ void FITSfile::writeFITSimage(bool createFile, bool saveData, bool useOffset)
 
             status = 0;
 
+            // if (fits_write_subset(fptr, TFLOAT, fpixel.data(),
+            //                       lpixel.data(), itsArray.data(), &status)) {
             if (fits_write_subset(fptr, TFLOAT, fpixel.data(),
-                                  lpixel.data(), itsArray.data(), &status)) {
+                                  lpixel.data(), itsArray.get(), &status)) {
                 fits_report_error(stderr, status);
             }
 
@@ -1176,7 +1185,7 @@ void FITSfile::writeCASAimage(bool createFile, bool saveData, bool useOffset)
 
         if (saveData) {
 
-            if (itsArray.size() > 0) {
+            if (itsNumPix > 0) {
 
                 casa::IPosition location(itsDim, 0);
                 if (useOffset) {
@@ -1194,7 +1203,8 @@ void FITSfile::writeCASAimage(bool createFile, bool saveData, bool useOffset)
                         for (size_t z = 0; z < itsAxes[itsWCS->spec]; z++) {
                             size_t spatsize = itsAxes[itsWCS->lat] *
                                               itsAxes[itsWCS->lng];
-                            Array<Float> arr(shape, itsArray.data() + z * spatsize, casa::SHARE);
+                            // Array<Float> arr(shape, itsArray.data() + z * spatsize, casa::SHARE);
+                            Array<Float> arr(shape, itsArray.get() + z * spatsize, casa::SHARE);
                             img.putSlice(arr, location);
                             location(itsWCS->spec)++;
 
@@ -1203,7 +1213,8 @@ void FITSfile::writeCASAimage(bool createFile, bool saveData, bool useOffset)
                         // make the casa::Array, sharing the memory
                         // storage so there is minimal additional
                         // impact
-                        Array<Float> arr(shape, itsArray.data(), casa::SHARE);
+                        // Array<Float> arr(shape, itsArray.data(), casa::SHARE);
+                        Array<Float> arr(shape, itsArray.get(), casa::SHARE);
 
                         casa::IPosition location(itsDim, 0);
 
@@ -1281,7 +1292,7 @@ void FITSfile::createTaylorTermImages(std::string nameBase,
 void FITSfile::defineTaylorTerms()
 {
 
-    if (itsArray.size() > 0) {
+    if (itsNumPix > 0) {
 
         ASKAPLOG_INFO_STR(logger, "Calculating taylor term arrays, for terms " <<
                           "up to and including .taylor." << itsMaxTaylorTerm);

@@ -41,6 +41,7 @@
 #include <scimath/Functionals/Gaussian2D.h>
 #include <scimath/Functionals/Gaussian3D.h>
 #include <casa/namespace.h>
+#include <boost/shared_ptr.hpp>
 
 #include <Common/ParameterSet.h>
 
@@ -115,7 +116,13 @@ struct wcsprm *parsetToWCS(const LOFAR::ParameterSet& theParset,
 /// @param integrate A bool flag that, if true, does the integral over
 /// the pixel to find the flux within the pixel. A false value means
 /// we just evaluate the Gaussian at the pixel location.
-bool addGaussian(std::vector<float>array,
+// bool addGaussian(std::vector<float>array,
+//                  std::vector<unsigned int> axes,
+//                  casa::Gaussian2D<casa::Double> gauss,
+//                  FluxGenerator &fluxG,
+//                  bool integrate,
+//                  bool verbose);
+bool addGaussian(boost::shared_ptr<float[]>array,
                  std::vector<unsigned int> axes,
                  casa::Gaussian2D<casa::Double> gauss,
                  FluxGenerator &fluxG,
@@ -139,13 +146,23 @@ bool addGaussian(std::vector<float>array,
 /// angle is required, but the minor axis is not used.
 /// @param fluxGen The FluxGenerator object that defines the
 /// fluxes at each channel.
-void add1DGaussian(std::vector<float>array,
+// void add1DGaussian(std::vector<float>array,
+//                    std::vector<unsigned int> axes,
+//                    casa::Gaussian2D<casa::Double> gauss,
+//                    FluxGenerator &fluxGen,
+//                    bool verbose);
+void add1DGaussian(boost::shared_ptr<float[]>array,
                    std::vector<unsigned int> axes,
                    casa::Gaussian2D<casa::Double> gauss,
                    FluxGenerator &fluxGen,
                    bool verbose);
 
-bool addDisc(std::vector<float>array,
+// bool addDisc(std::vector<float>array,
+//              std::vector<unsigned int> axes,
+//              Disc &disc,
+//              FluxGenerator &fluxGen,
+//              bool verbose);
+bool addDisc(boost::shared_ptr<float[]>array,
              std::vector<unsigned int> axes,
              Disc &disc,
              FluxGenerator &fluxGen,
@@ -162,7 +179,12 @@ bool addDisc(std::vector<float>array,
 /// @param pix The coordinates of the point source
 /// @param fluxGen The FluxGenerator object that defines the flux at
 /// each channel
-bool addPointSource(std::vector<float>array,
+// bool addPointSource(std::vector<float>array,
+//                     std::vector<unsigned int> axes,
+//                     std::vector<double> pix,
+//                     FluxGenerator &fluxGen,
+//                     bool verbose);
+bool addPointSource(boost::shared_ptr<float[]>array,
                     std::vector<unsigned int> axes,
                     std::vector<double> pix,
                     FluxGenerator &fluxGen,
