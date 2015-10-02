@@ -70,7 +70,7 @@ os=8
 # For science field observation
 #
 
-msbaseSci=sciencefield_SKADS_${inttime}_${now}
+msbaseSci=sciencefield_${antennaConfig}_SKADS_${inttime}_${now}
 feeds=${askapconfig}/ASKAP${nfeeds}feeds.in
 antennaParset=${askapconfig}/${antennaConfig}.in
 

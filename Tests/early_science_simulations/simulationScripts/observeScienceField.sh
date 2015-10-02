@@ -207,8 +207,8 @@ if [ $doScience == true ]; then
 
     for((i=0;i<${NUM_FINAL_MS};i++)); do
     
-        START=`echo $i $NUM_FINAL_MS | awk '{print $1*$2}'`
-        END=`echo $i $NUM_FINAL_MS | awk '{print ($1+1)*$2}'`
+        START=`echo $i $NUM_GROUPS_PER_FINAL | awk '{print $1*$2}'`
+        END=`echo $i $NUM_GROUPS_PER_FINAL | awk '{print ($1+1)*$2}'`
         merge2sbatch=${slurms}/mergeVisStage2_${i}.sbatch
 
         if [ ${NUM_FINAL_MS} -eq 1 ]; then
