@@ -94,23 +94,23 @@ void AbsorptionCatalogue::defineSpec()
                       "meta.id.parent", "char", "col_cont_component_id", "");
     itsSpec.addColumn("CONTFLUX", "cont_flux", "[" + casda::intFluxUnitContinuum + "]",
                       9, casda::precFlux, "phot.flux.density;em.radio;spect.continuum",
-                      "float", "col_fint", "");
+                      "float", "col_cont_flux", "");
     itsSpec.addColumn("ID", "object_id", "--", 6, 0,
                       "meta.id;meta.main", "char", "col_object_id", "");
     itsSpec.addColumn("NAME", "object_name", "", 8, 0,
                       "meta.id", "char", "col_object_name", "");
     itsSpec.addColumn("RA", "ra_hms_cont", "", 11, 0,
-                      "pos.eq.ra", "char", "col_ra", "J2000");
+                      "pos.eq.ra", "char", "col_ra_hms_cont", "J2000");
     itsSpec.addColumn("DEC", "dec_dms_cont", "", 11, 0,
-                      "pos.eq.dec", "char", "col_dec", "J2000");
+                      "pos.eq.dec", "char", "col_dec_dms_cont", "J2000");
     itsSpec.addColumn("RAJD", "ra_deg_cont", "[deg]", 11, casda::precPos,
-                      "pos.eq.ra;meta.main", "double", "col_rajd", "J2000");
+                      "pos.eq.ra;meta.main", "double", "col_ra_deg_cont", "J2000");
     itsSpec.addColumn("DECJD", "dec_deg_cont", "[deg]", 11, casda::precPos,
-                      "pos.eq.dec;meta.main", "double", "col_decjd", "J2000");
+                      "pos.eq.dec;meta.main", "double", "col_dec_deg_cont", "J2000");
     itsSpec.addColumn("RAERR", "ra_err", "[arcsec]", 11, casda::precSize,
-                      "stat.error;pos.eq.ra", "float", "col_raerr", "J2000");
+                      "stat.error;pos.eq.ra", "float", "col_ra_err", "J2000");
     itsSpec.addColumn("DECERR", "dec_err", "[arcsec]", 11, casda::precSize,
-                      "stat.error;pos.eq.dec", "float", "col_decerr", "J2000");
+                      "stat.error;pos.eq.dec", "float", "col_dec_err", "J2000");
     itsSpec.addColumn("FREQ_UW", "freq_uw", "[" + casda::freqUnit + "]",
                       11, casda::precFreqSpectral, "em.freq;meta.main",
                       "float", "col_freq_uw", "");

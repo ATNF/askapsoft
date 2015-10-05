@@ -91,7 +91,7 @@ void HiEmissionCatalogue::defineSpec()
     itsSpec.addColumn("RA", "ra_hms_w", "["+casda::stringRAUnit+"]", 11, 0,
                       "pos.eq.ra", "char", "col_ra_hms_w", "J2000");
     itsSpec.addColumn("DEC", "dec_dms_w", "["+casda::stringDECUnit+"]", 11, 0,
-                      "pos.eq.dec", "char", "col_dec_hms_w", "J2000");
+                      "pos.eq.dec", "char", "col_dec_dms_w", "J2000");
     itsSpec.addColumn("RA_W", "ra_deg_w", "["+casda::positionUnit+"]", 11, casda::precPos,
                       "pos.eq.ra;meta.main", "double", "col_ra_deg_w", "J2000");
     itsSpec.addColumn("RA_W_ERR", "ra_deg_w_err", "[arcsec]", 11, casda::precSize,
@@ -129,7 +129,7 @@ void HiEmissionCatalogue::defineSpec()
     itsSpec.addColumn("MIN", "min_axis", "[arcsec]", 6, casda::precSize,
                       "askap:src.sminAxis;em.radio", "float", "col_min_axis", "");
     itsSpec.addColumn("PA", "pos_ang", "[deg]", 7, casda::precSize,
-                      "askap:src.posAng;em.radio", "float", "col_posang", "");
+                      "askap:src.posAng;em.radio", "float", "col_pos_ang", "");
     itsSpec.addColumn("MAJFIT", "maj_axis_fit", "[arcsec]", 6, casda::precSize,
                       "askap:src.smajAxis;em.radio;stat.fit", "float", "col_maj_axis_fit", "");
     itsSpec.addColumn("MAJFIT_ERR", "maj_axis_fit_err", "[arcsec]", 6, casda::precSize,
@@ -152,7 +152,7 @@ void HiEmissionCatalogue::defineSpec()
     itsSpec.addColumn("SIZEZ", "size_z", "", 6, 0,
                       "askap:src.size;spect.binSize", "int", "col_size_z", "");
     itsSpec.addColumn("NVOX", "n_vox", "", 9, 0,
-                      "askap:src.size;askap:instr.voxel", "int", "col_nvox", "");
+                      "askap:src.size;askap:instr.voxel", "int", "col_n_vox", "");
     itsSpec.addColumn("ASYMM2D", "asymmetry_2d", "", 6, 3,
                       "askap:src.asymmetry.2d", "float", "col_asymmetry_2d", "");
     itsSpec.addColumn("ASYMM2D_ERR", "asymmetry_2d_err", "", 6, 3,
