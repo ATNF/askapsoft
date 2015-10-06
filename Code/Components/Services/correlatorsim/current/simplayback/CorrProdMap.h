@@ -58,87 +58,100 @@ class CorrProdMap
 {
     public:
 	
+		/// Constructor using default values: 
+		/// - antenna base number = 0
+		/// - index base number = 0
 		CorrProdMap ();
+		
+		/// Constructor using input values.
+		/// @param[in] Antenna base number: 0 (default) or 1
+		/// @param[in] Correlation product index base number: 0 (default) or 1
+		CorrProdMap (const uint32_t antBaseIn, const uint32_t indexBaseIn);
 		
 		virtual ~CorrProdMap ();
 
-		/// Set antenna base number.
-		/// @param[in] Antenna base number: 0 (default) or 1
-		void setAntennaBase (uint32_t antBase);
+		// Set antenna base number.
+		// @param[in] Antenna base number: 0 (default) or 1
+		//void setAntennaBase (const uint32_t antBase);
 
-		/// @return Antenna base number.
+		/// @return Antenna base number: 0 (default) or 1
 		uint32_t getAntennaBase ();
 
-		/// Set the base number of correlation product index.
-		/// @param[in] Antenna base number: 0 (default) or 1
-		void setIndexBase (uint32_t indexBase);
+		// Set the base number of correlation product index.
+		// @param[in] Correlation product index base number: 0 (default) or 1
+		//void setIndexBase (const uint32_t indexBase);
 
-		/// @return Index base number.
+		/// @return Correlation product index base number: 0 (default) or 1
 		uint32_t getIndexBase ();
 
 		/// @param[in] Antenna count
 		/// @return Total number of correlation products
-		uint32_t getTotal (uint32_t nAntenna);
+		uint32_t getTotal (const uint32_t nAntenna);
 
+		/// Get correlation product index
 		/// @param[in] Antenna 1 (<= antenna 2)
 		/// @param[in] Antenna 2 
 		/// @param[in] Polarisation product: 0:XX, 1:XY, 2:YX, 3:YY
 		/// @return Correlation product index
-		uint32_t getIndex (uint32_t ant1, uint32_t ant2, uint32_t polProd);
+		uint32_t getIndex (const uint32_t ant1, const uint32_t ant2, 
+				const uint32_t polProd);
 
 		/// @param[in] Correlation product index
-		/// @return Antenna 1 and 2 
-		std::pair<uint32_t,uint32_t> getAntennas (uint32_t index);
+		/// @return Antenna 1 and 2 (antenna 1 <= antenna 2)
+		std::pair<uint32_t,uint32_t> getAntennas (const uint32_t index);
 		
 		/// @param[in] Correlation product index
 		/// @return Polarisation product: 0:XX, 1:XY, 2:YX, 3:YY
-		uint32_t getPolarisationProduct (uint32_t index);
+		uint32_t getPolarisationProduct (const uint32_t index);
 		
 		/// @param[in] Correlation product
-		/// @param[out] Antenna 1
+		/// @param[out] Antenna 1 (<= antenna 2)
 		/// @param[out] Antenna 2
 		/// @param[out] Polarization product: 0:XX, 1:XY, 2:YX, 3:YY
 		/// TO BE DEPRECATED
-		int getAntennaAndPolarisationProduct (uint32_t index, 
+		int getAntennaAndPolarisationProduct (const uint32_t index, 
 				uint32_t& ant1, uint32_t& ant2, uint32_t& polProd);
 			
 	private:
 	
-		uint32_t antBase;
-		uint32_t indexBase;
+		const uint32_t antBase;		// Antenna base number: 0 (default) or 1
+		const uint32_t indexBase;	// Index base number: 0 (default) or 1
+		Permutation perm;
 		
 		// Given antenna and polarity indices, return composite index
 		// Antenna index is 0-based
 		// Polarity index: 0 = X, 1 = Y
-		uint32_t getCompositeIndex (uint32_t ant, uint32_t pol);
+		uint32_t getCompositeIndex (const uint32_t ant, const uint32_t pol);
 
 		// Given composite index, return antenna index.
 		// Both are 0-based.
-		uint32_t getAntenna (uint32_t comp);
+		uint32_t getAntenna (const uint32_t comp);
 
-		// Given composite index, return polarization index.
+		// Given composite index, return polarisation index.
 		// Both are 0-based.
-		uint32_t getPolarisation (uint32_t comp);
+		uint32_t getPolarisation (const uint32_t comp);
 
-		// Return the product of 2 polarization.
+		// Return the product of 2 polarisation.
 		// Polarisation: 0=X, Y=1
 		// Polarisation product: 0=XX, 1=XY, 2=YX, 3=YY
-		uint32_t convertPolarisationToProduct (uint32_t pol1, uint32_t pol2);
+		uint32_t convertPolarisationToProduct (const uint32_t pol1, 
+				const uint32_t pol2);
 
-		// Return the polarization elements from their product.
-		std::pair<uint32_t,uint32_t> convertPolarisationToElements (uint32_t polProd);
+		// Return the polarisation elements from their product.
+		std::pair<uint32_t,uint32_t> convertPolarisationToElements 
+				(const uint32_t polProd);
 		
 #ifdef OUTSIDEASKAP
-		void alertAntennaValue (uint32_t ant);
+		void alertAntennaValue (const uint32_t ant);
 		
-		void alertIndexValue (uint32_t index);
+		void alertIndexValue (const uint32_t index);
 
-		void alertPolarisationProductValue (uint32_t polProd);
+		void alertPolarisationProductValue (const uint32_t polProd);
 
-		void alertValueOutsideRange (uint32_t value, uint32_t minValue, 
-                uint32_t maxValue);
+		void alertValueOutsideRange (const uint32_t value, const uint32_t minValue, 
+                const uint32_t maxValue);
 		
-		void alertWrongAntennaOrder (uint32_t ant1, uint32_t ant2);
+		void alertWrongAntennaOrder (const uint32_t ant1, const uint32_t ant2);
 #endif
 
 };
