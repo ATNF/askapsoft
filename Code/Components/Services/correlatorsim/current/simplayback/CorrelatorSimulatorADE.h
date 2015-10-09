@@ -76,7 +76,8 @@ class CorrelatorSimulatorADE : public ISimulator {
                 const unsigned int nCoarseChannel = 0,
                 const unsigned int nChannelSub = 0,
                 const double coarseBandwidth = 0.0,
-                const std::string& visSource = "");
+                const std::string& visSource = "",
+                const unsigned int delay = 0);
 
         /// Destructor
         virtual ~CorrelatorSimulatorADE();
@@ -132,8 +133,8 @@ class CorrelatorSimulatorADE : public ISimulator {
         // Visibility data source
         const std::string& itsVisSource;
 
-        // Frequency order (ascend / descend)
-        //const std::string& itsFreqOrder;
+        // Delay in microseconds
+        unsigned int itsDelay;
 
         // Cursor (index) for the main table of the measurement set
         unsigned int itsCurrentRow;

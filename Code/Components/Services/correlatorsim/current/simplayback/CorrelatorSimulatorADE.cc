@@ -1,6 +1,6 @@
 /// @file CorrelatorSimulatorADE.cc
 ///
-/// @copyright (c) 2010 CSIRO
+/// @copyright (c) 2015 CSIRO
 /// Australia Telescope National Facility (ATNF)
 /// Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 /// PO Box 76, Epping NSW 1710, Australia
@@ -82,13 +82,14 @@ CorrelatorSimulatorADE::CorrelatorSimulatorADE(const std::string& dataset,
         const unsigned int nCoarseChannel,
         const unsigned int nChannelSub,
         const double coarseBandwidth,
-        const std::string& visSource)
+        const std::string& visSource,
+        const unsigned int delay)
         : itsShelf(shelf),
         itsNAntenna(nAntenna), itsNCorrProd(0), itsNSlice(0),
         itsNCoarseChannel(nCoarseChannel),
         itsNChannelSub(nChannelSub), itsCoarseBandwidth(coarseBandwidth),
         itsFineBandwidth(0.0), itsVisSource(visSource), 
-        itsCurrentRow(0)  
+        itsDelay(delay), itsCurrentRow(0)  
 {
 /*
     if (expansionFactor > 1) {
@@ -101,6 +102,8 @@ CorrelatorSimulatorADE::CorrelatorSimulatorADE(const std::string& dataset,
     itsMS.reset(new casa::MeasurementSet(dataset, casa::Table::Old));
     itsPort.reset(new askap::cp::VisPortADE(hostname, port));
 
+    ASKAPCHECK (itsVisSource == "zero",
+            "At the moment only visibility_source = zero is accepted");
     // Compute the total number of correlation products
     CorrProdMap itsCorrProd;
     itsNCorrProd = itsCorrProd.getTotal (nAntenna);
@@ -144,12 +147,14 @@ bool CorrelatorSimulatorADE::sendNext(void)
 
         // subdividing coarse channel into fine channel
         for (unsigned int subDiv = 0; subDiv < itsNChannelSub; ++subDiv) {
+
             unsigned int fChannel = cChannel * itsNChannelSub + subDiv;
             payload.channel = fChannel;
             payload.freq = itsFineBandwidth * fChannel; // part of freq index
 
             // payload slice
             for (unsigned int slice = 0; slice < itsNSlice; ++slice) {
+
                 payload.slice = slice;
                 payload.baseline1 = slice * 
                 VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE;
@@ -181,7 +186,7 @@ bool CorrelatorSimulatorADE::sendNext(void)
                     }
                 }
                 */
-                //usleep (100);
+                usleep (itsDelay);
             }   // slice
         }   // channel subdivision
     }   // coarse channel

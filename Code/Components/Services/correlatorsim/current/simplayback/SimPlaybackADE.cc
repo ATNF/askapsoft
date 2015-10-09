@@ -48,7 +48,7 @@
 #include "simplayback/ISimulator.h"
 #include "simplayback/CorrelatorSimulatorADE.h"
 #include "simplayback/TosSimulator.h"
-#include "simplayback/BaselineMap.h"
+//#include "simplayback/BaselineMap.h"
 
 #define VERBOSE
 
@@ -64,8 +64,14 @@ SimPlaybackADE::SimPlaybackADE(const LOFAR::ParameterSet& parset)
     MPI_Comm_rank(MPI_COMM_WORLD, &itsRank);
     MPI_Comm_size(MPI_COMM_WORLD, &itsNumProcs);
     if (itsRank == 0) {
+        cout << "MPI rank " << itsRank << 
+                " is validating configuration" << endl;
         validateConfig();
     }
+    else {
+        cout << "MPI rank " << itsRank << " is waiting" << endl;
+    }
+    //MPI_Barrier(MPI_COMM_WORLD);
 }
 
 
@@ -169,12 +175,12 @@ boost::shared_ptr<CorrelatorSimulatorADE>
             itsParset.getDouble("corrsim.coarse_channel_bandwidth", 1000000);
     const std::string visSource = 
             itsParset.getString("corrsim.visibility_source");
-    //const std::string freqOrder = 
-    //        itsParset.getString("corrsim.freq_order"); 
+    const unsigned int delay =
+            itsParset.getUint32("corrsim.delay", 0);
     return boost::shared_ptr<CorrelatorSimulatorADE>(
             new CorrelatorSimulatorADE(dataset, hostname, port, 
             itsRank, nAntenna, nCoarseChannel, nChannelSub,
-            coarseBandwidth, visSource));
+            coarseBandwidth, visSource, delay));
 }
 
 
@@ -184,7 +190,7 @@ void SimPlaybackADE::run(void)
     // file so this barrier ensures the configuration has been validated
     // before all processes go and use it. If the master finds a problem
     // an MPI_Abort is called.
-    MPI_Barrier(MPI_COMM_WORLD);
+    //MPI_Barrier(MPI_COMM_WORLD);
 
     boost::shared_ptr<ISimulator> sim;
     if (itsRank == 0) {
@@ -194,8 +200,8 @@ void SimPlaybackADE::run(void)
     }
 
     // In units of micro-second the "period" constant is the integration time
-    const unsigned long periodPar = itsParset.getUint32("period", 5);
-    const unsigned long period = periodPar * 1000L * 1000L;
+    //const unsigned long periodPar = itsParset.getUint32("period", 5);
+    //const unsigned long period = periodPar * 1000L * 1000L;
 
     // Simulate until the simulators advise there is no longer any data
     bool moreData = true;
@@ -207,9 +213,9 @@ void SimPlaybackADE::run(void)
 
         moreData = sim->sendNext();
 
-        MPI_Barrier(MPI_COMM_WORLD);
+        //MPI_Barrier(MPI_COMM_WORLD);
 
-        cout << "itsRank: " << itsRank << endl;
+        //cout << "itsRank: " << itsRank << endl;
 /*
         // Wait before sending the next integration
         unsigned long now = static_cast<unsigned long>(MPI_Wtime() * TIMEMULTIPLIER);
