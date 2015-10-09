@@ -4,11 +4,10 @@ cd `dirname $0`
 
 # Setup the environment
 if [ ! -f ../../init_package_env.sh ]; then
-    echo "Error: init_package_env.sh does not exist, please run rbuild in package dir"
+    echo "Error: init_package_env.sh dos not exist, please run rbuild in package dir"
     exit 1
 fi
 source ../../init_package_env.sh
-export AIPSPATH=$ASKAP_ROOT/Code/Base/accessors/current
 
 # Start the Ice Services
 ../start_ice.sh ../iceregistry.cfg ../icegridadmin.cfg ../icestorm.cfg
@@ -23,12 +22,11 @@ sleep 1
 MDPID=$!
 
 # Start the visibilities receiver (don't use the script so this script can kill it)
-../../apps/vsnoopADE -v -p 3001 > vsnoop1.log 2>&1 &
+../../apps/vsnoop -v -p 3001 > vsnoop1.log 2>&1 &
 VISPID1=$!
 
 # Run the test
-# For the moment, keep to 2 processes
-mpirun -np 2 ../../apps/playbackADE.sh -c playback.in
+mpirun -np 3 ../../apps/playback.sh -c playback.in
 STATUS=$?
 
 # Give the subscriber a moment to get the last messages then exit
@@ -41,3 +39,4 @@ kill -9 $MDPID $VISPID > /dev/null 2>&1
 ../stop_ice.sh ../icegridadmin.cfg
 
 exit $STATUS
+
