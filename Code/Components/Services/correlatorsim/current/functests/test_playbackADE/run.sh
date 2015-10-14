@@ -25,19 +25,23 @@ MDPID=$!
 
 # Start the visibilities receiver 
 # (don't use the script so this script can kill it)
-../../apps/vsnoopADE -v -p 3001 > vsnoop1.log 2>&1 &
-VISPID1=$!
+../../apps/vsnoopADE -v -p 3001 > vsnoop.log 2>&1 &
+VISPID=$!
 
 # Run the test
 # For the moment, keep to 2 processes:
 # process 0 for configuration validation
 # process 1 for streaming
-mpirun -np 2 ../../apps/playbackADE.sh -c playback.in
+mpirun -np 3 ../../apps/playbackADE.sh -c playback.in
 STATUS=$?
+echo "playbackADE status: " $STATUS
 
 # Give the subscriber a moment to get the last messages then exit
 sleep 5
-kill $MDPID $VISPID1 
+kill $MDPID
+echo "Killed msnoop"
+kill $VISPID 
+echo "Killed vsnoop"
 sleep 1
 kill -9 $MDPID $VISPID > /dev/null 2>&1
 

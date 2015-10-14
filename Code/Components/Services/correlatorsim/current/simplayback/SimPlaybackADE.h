@@ -82,6 +82,13 @@ class SimPlaybackADE {
 
         // Total number of processes
         int itsNumProcs;
+		
+		// Input mode: 
+		// zero (default): no input is needed, visibility is zero
+		// To add later:
+		// expand        : generated from actual data in Central Processor,
+		//                 expanded to fill all channels
+		std::string itsInputMode;
 };
 };
 

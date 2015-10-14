@@ -71,7 +71,12 @@ TosSimulator::TosSimulator(const std::string& dataset,
     : itsMetadataSendFailChance(metadataSendFail), itsCurrentRow(0),
         itsRandom(0.0, 1.0)
 {
-    itsMS.reset(new casa::MeasurementSet(dataset, casa::Table::Old));
+	if (dataset == "") {
+		itsMS.reset ();
+	}
+    else {
+		itsMS.reset(new casa::MeasurementSet(dataset, casa::Table::Old));
+	}
     itsPort.reset(new askap::cp::icewrapper::MetadataOutputPort(locatorHost,
                 locatorPort, topicManager, topic));
 }
@@ -84,6 +89,8 @@ TosSimulator::~TosSimulator()
 
 bool TosSimulator::sendNext(void)
 {
+	cout << "TosSimulator::sendNext ..." << endl;
+	
     ROMSColumns msc(*itsMS);
 
     // Get a reference to the columns of interest
@@ -141,8 +148,7 @@ bool TosSimulator::sendNext(void)
     metadata.time(static_cast<long>(startBAT));
     metadata.scanId(msc.scanNumber()(itsCurrentRow));
     metadata.flagged(false);
-
-
+	
     // Calculate and set the centre frequency
     const casa::Vector<casa::Double> frequencies = spwc.chanFreq()(descSpwId);
     const casa::uInt nChan = frequencies.size();
@@ -169,6 +175,8 @@ bool TosSimulator::sendNext(void)
     // Correlator Mode
     metadata.corrMode("standard");
 
+	//cout << "before antenna" << endl;
+	
     ////////////////////////////////////////
     // Metadata - per antenna
     ////////////////////////////////////////
@@ -203,6 +211,8 @@ bool TosSimulator::sendNext(void)
         metadata.addAntenna(antMetadata);
     }
 
+	//cout << "after antenna" << endl;
+
     // Find the end of the current integration (i.e. find the next timestamp)
     // or the end of the table
     while (itsCurrentRow != nRow && (currentIntegration == msc.time()(itsCurrentRow))) {
@@ -216,16 +226,22 @@ bool TosSimulator::sendNext(void)
         ASKAPLOG_DEBUG_STR(logger, "Simulating metadata send failure this cycle");
     }
 
-    // If this is the final payload send another with scan == -1, indicating the observation has ended
+	//return false;	// test
+	
+    // If this is the final payload send another with scan == -1, 
+	// indicating the observation has ended
     if (itsCurrentRow == nRow) {
         ASKAPLOG_INFO_STR(logger,
-                "Sending additional metadata message indicating end-of-observation");
-        metadata.scanId(-2);
+                "Sending additional metadata message indicating end-of-observation"
+				);
+        metadata.scanId(-2);	// -2
 
         itsPort->send(metadata);
 
+		//cout << "TosSimulator::sendNext: no more data" << endl;
         return false; // Indicate there is no more data after this payload
     } else {
+		//cout << "TosSimulator::sendNext: more data" << endl;
         return true;
     }
 }

@@ -48,9 +48,8 @@
 #include "simplayback/ISimulator.h"
 #include "simplayback/CorrelatorSimulatorADE.h"
 #include "simplayback/TosSimulator.h"
-//#include "simplayback/BaselineMap.h"
 
-#define VERBOSE
+//#define VERBOSE
 
 // Using
 using namespace askap::cp;
@@ -64,14 +63,17 @@ SimPlaybackADE::SimPlaybackADE(const LOFAR::ParameterSet& parset)
     MPI_Comm_rank(MPI_COMM_WORLD, &itsRank);
     MPI_Comm_size(MPI_COMM_WORLD, &itsNumProcs);
     if (itsRank == 0) {
+#ifdef VERBOSE
         cout << "MPI rank " << itsRank << 
                 " is validating configuration" << endl;
+#endif
         validateConfig();
     }
+#ifdef VERBOSE
     else {
         cout << "MPI rank " << itsRank << " is waiting" << endl;
     }
-    //MPI_Barrier(MPI_COMM_WORLD);
+#endif
 }
 
 
@@ -83,88 +85,99 @@ SimPlaybackADE::~SimPlaybackADE()
 void SimPlaybackADE::validateConfig(void)
 {
 #ifdef VERBOSE
-    cout << "SimPlaybackADE::validateConfig..." << endl;
+	cout << "SimPlaybackADE::validateConfig..." << endl;
+#endif
+	const std::string nShelvesKey = "corrsim.n_shelves";
+
+	const int nShelves = itsParset.getInt32(nShelvesKey);
+	ASKAPCHECK(itsNumProcs == (nShelves+1),
+			"Incorrect number of ranks for the requested configuration");
+#ifdef VERBOSE
+	cout << "nShelves: " << nShelves << endl;
 #endif
 
-    if (itsRank == 0) {
-        const std::string nShelvesKey = "corrsim.n_shelves";
+	const std::string inputMode = itsParset.getString("input_mode");
+	ASKAPCHECK(inputMode == "zero","Illegal input mode");
+	
+	// Build a list of required keys    
+	std::vector<std::string> requiredKeys;
+	requiredKeys.push_back(nShelvesKey);
+	requiredKeys.push_back("tossim.ice.locator_host");
+	requiredKeys.push_back("tossim.ice.locator_port");
+	requiredKeys.push_back("tossim.icestorm.topicmanager");
+	requiredKeys.push_back("tossim.icestorm.topic");
+	
+	for (int i = 0; i < nShelves; ++i) {
+		std::ostringstream ss;
+		ss << "corrsim.shelf" << i+1 << ".";
 
-        const int nShelves = itsParset.getInt32(nShelvesKey);
-        ASKAPCHECK(itsNumProcs == (nShelves+1),
-                "Incorrect number of ranks for the requested configuration");
+		if (inputMode == "expand") {
+			std::string dataset = ss.str();
+			dataset.append("dataset");
+			requiredKeys.push_back(dataset);
+		}
+
+		std::string hostname = ss.str();
+		hostname.append("out.hostname");
+		requiredKeys.push_back(hostname);
+
+		std::string port = ss.str();
+		port.append("out.port");
+		requiredKeys.push_back(port);
+	}
+
+	// Now check the required keys are present
+	std::vector<std::string>::const_iterator it;
+	it = requiredKeys.begin();
+
+	while (it != requiredKeys.end()) {
+		if (!itsParset.isDefined(*it)) {
+			ASKAPTHROW(AskapError, 
+					"Required key not present in parset: " << *it);
+		}
+		++it;
+	}
 #ifdef VERBOSE
-        cout << "nShelves: " << nShelves << endl;
-#endif
-
-        // Build a list of required keys    
-        std::vector<std::string> requiredKeys;
-        requiredKeys.push_back(nShelvesKey);
-        requiredKeys.push_back("tossim.ice.locator_host");
-        requiredKeys.push_back("tossim.ice.locator_port");
-        requiredKeys.push_back("tossim.icestorm.topicmanager");
-        requiredKeys.push_back("tossim.icestorm.topic");
-        for (int i = 0; i < nShelves; ++i) {
-            std::ostringstream ss;
-            ss << "corrsim.shelf" << i+1 << ".";
-
-            std::string dataset = ss.str();
-            dataset.append("dataset");
-            requiredKeys.push_back(dataset);
-
-            std::string hostname = ss.str();
-            hostname.append("out.hostname");
-            requiredKeys.push_back(hostname);
-
-            std::string port = ss.str();
-            port.append("out.port");
-            requiredKeys.push_back(port);
-        }
-
-        // Now check the required keys are present
-        std::vector<std::string>::const_iterator it;
-        it = requiredKeys.begin();
-
-        while (it != requiredKeys.end()) {
-            if (!itsParset.isDefined(*it)) {
-                ASKAPTHROW(AskapError, 
-                        "Required key not present in parset: " << *it);
-            }
-            ++it;
-        }
-    }
-#ifdef VERBOSE
-    cout << "SimPlaybackADE::validateConfig: done" << endl; 
+	cout << "SimPlaybackADE::validateConfig: done" << endl; 
 #endif
 }
 
 
 boost::shared_ptr<TosSimulator> SimPlaybackADE::makeTosSim(void)
 {
-    const std::string filename = itsParset.getString("corrsim.shelf1.dataset");
+#ifdef VERBOSE
+	std::cout << "makeTosSim ... " << std::endl;
+#endif
+    const std::string filename = itsParset.getString("corrsim.shelf1.dataset","");
     const std::string locatorHost = itsParset.getString("tossim.ice.locator_host");
     const std::string locatorPort = itsParset.getString("tossim.ice.locator_port");
-    const std::string topicManager = itsParset.getString("tossim.icestorm.topicmanager");
+    const std::string topicManager = itsParset.getString(
+			"tossim.icestorm.topicmanager");
     const std::string topic = itsParset.getString("tossim.icestorm.topic");
-    const double failureChance = itsParset.getDouble("tossim.random_metadata_send_fail", 0.0);
+    const double failureChance = itsParset.getDouble(
+			"tossim.random_metadata_send_fail", 0.0);
 
     return boost::shared_ptr<TosSimulator>(new TosSimulator(filename,
             locatorHost, locatorPort, topicManager, topic, failureChance));
+#ifdef VERBOSE
+	std::cout << "makeTosSim: done" << std::endl;
+#endif
 }
 
 
 boost::shared_ptr<CorrelatorSimulatorADE> 
         SimPlaybackADE::makeCorrelatorSim(void)
 {
-    std::ostringstream ss;
-    ss << "corrsim.shelf" << itsRank << ".";
-    const LOFAR::ParameterSet subset = itsParset.makeSubset(ss.str());
-    const std::string dataset = subset.getString("dataset");
-    const std::string hostname = subset.getString("out.hostname");
-    const std::string port = subset.getString("out.port");
-    //const unsigned int expansion = 
-    //        itsParset.getUint32("corrsim.expansion_factor", 1);
-    //const double failureChance = 
-    //        itsParset.getDouble("corrsim.random_vis_send_fail", 0.0);
+#ifdef VERBOSE
+	std::cout << "makeCorrelatorSim ... " << std::endl;
+#endif
+	std::ostringstream ss;
+	ss << "corrsim.shelf" << itsRank << ".";
+	const LOFAR::ParameterSet subset = itsParset.makeSubset(ss.str());
+	std::string dataset = subset.getString("dataset", "");
+	std::string hostname = subset.getString("out.hostname");
+	std::string port = subset.getString("out.port");
+	
     const unsigned int nAntenna = 
             itsParset.getUint32("corrsim.n_antennas", 1);
     const unsigned int nCoarseChannel =
@@ -173,14 +186,15 @@ boost::shared_ptr<CorrelatorSimulatorADE>
             itsParset.getUint32("corrsim.n_channel_subdivision", 54);
     const double coarseBandwidth =
             itsParset.getDouble("corrsim.coarse_channel_bandwidth", 1000000);
-    const std::string visSource = 
-            itsParset.getString("corrsim.visibility_source");
     const unsigned int delay =
             itsParset.getUint32("corrsim.delay", 0);
     return boost::shared_ptr<CorrelatorSimulatorADE>(
             new CorrelatorSimulatorADE(dataset, hostname, port, 
             itsRank, nAntenna, nCoarseChannel, nChannelSub,
-            coarseBandwidth, visSource, delay));
+            coarseBandwidth, itsInputMode, delay));
+#ifdef VERBOSE
+	std::cout << "makeCorrelatorSim: done" << std::endl;
+#endif
 }
 
 
@@ -190,57 +204,37 @@ void SimPlaybackADE::run(void)
     // file so this barrier ensures the configuration has been validated
     // before all processes go and use it. If the master finds a problem
     // an MPI_Abort is called.
-    //MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);
 
-    boost::shared_ptr<ISimulator> sim;
+	itsInputMode = itsParset.getString ("input_mode","zero");
+#ifdef VERBOSE
+	std::cout << "itsInputMode: " << itsInputMode << std::endl;
+#endif
+	
     if (itsRank == 0) {
-        sim = makeTosSim();
+		if (itsInputMode == "expand") {
+			boost::shared_ptr<ISimulator> sim = makeTosSim();
+			bool moreData = true;
+			while (moreData) {
+				moreData = sim->sendNext();
+			}
+		}
     } else {
-        sim = makeCorrelatorSim();
+        boost::shared_ptr<ISimulator> sim = makeCorrelatorSim();
+		bool moreData = true;
+		while (moreData) {
+			moreData = sim->sendNext();
+		}
     }
+	
+    MPI_Barrier(MPI_COMM_WORLD);
+	
+#ifdef VERBOSE
+	cout << "SimPlaybackADE::run: done" << endl;
+#endif
 
-    // In units of micro-second the "period" constant is the integration time
-    //const unsigned long periodPar = itsParset.getUint32("period", 5);
-    //const unsigned long period = periodPar * 1000L * 1000L;
-
-    // Simulate until the simulators advise there is no longer any data
-    bool moreData = true;
-    while (moreData) {
-        //const unsigned long nextTime =
-        //    static_cast<unsigned long>(MPI_Wtime() * TIMEMULTIPLIER) + period;
-
-        //MPI_Barrier(MPI_COMM_WORLD);
-
-        moreData = sim->sendNext();
-
-        //MPI_Barrier(MPI_COMM_WORLD);
-
-        //cout << "itsRank: " << itsRank << endl;
-/*
-        // Wait before sending the next integration
-        unsigned long now = static_cast<unsigned long>(MPI_Wtime() * TIMEMULTIPLIER);
-
-        // But first check and report if we are behind schedule
-        if (itsRank == 0) {
-            if (now > nextTime) {
-                ASKAPLOG_WARN_STR(logger, "Running slower than integration cycle period");
-            }
-        }
-
-        while (now < nextTime) {
-            const unsigned long sleepTime = nextTime - now;
-            usleep(sleepTime);
-            now = static_cast<unsigned long>(MPI_Wtime() * TIMEMULTIPLIER);
-        }
-*/
-    }
-    //MPI_Barrier(MPI_COMM_WORLD);
-    // synchronise all processes before destructors are called
-    //if (itsRank == 0) {
-    //    usleep(20000000ul);
-    //}
-    //MPI_Barrier(MPI_COMM_WORLD);
 }
 
+#ifdef VERBOSE
 #undef VERBOSE
-
+#endif

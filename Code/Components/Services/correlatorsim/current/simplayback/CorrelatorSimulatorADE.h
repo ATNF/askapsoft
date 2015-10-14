@@ -76,7 +76,7 @@ class CorrelatorSimulatorADE : public ISimulator {
                 const unsigned int nCoarseChannel = 0,
                 const unsigned int nChannelSub = 0,
                 const double coarseBandwidth = 0.0,
-                const std::string& visSource = "",
+                const std::string& inputMode = "",
                 const unsigned int delay = 0);
 
         /// Destructor
@@ -130,8 +130,8 @@ class CorrelatorSimulatorADE : public ISimulator {
         // Fine channel bandwidth
         double itsFineBandwidth;
 
-        // Visibility data source
-        const std::string& itsVisSource;
+        // Data input mode 
+        const std::string itsInputMode;
 
         // Delay in microseconds
         unsigned int itsDelay;

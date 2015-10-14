@@ -57,10 +57,9 @@
 
 
 // Local package includes
-//#include "simplayback/BaselineMap.h"
 #include "simplayback/CorrProdMap.h"
 
-#define VERBOSE
+//#define VERBOSE
 
 using namespace askap;
 using namespace askap::cp;
@@ -82,13 +81,13 @@ CorrelatorSimulatorADE::CorrelatorSimulatorADE(const std::string& dataset,
         const unsigned int nCoarseChannel,
         const unsigned int nChannelSub,
         const double coarseBandwidth,
-        const std::string& visSource,
+        const std::string& inputMode,
         const unsigned int delay)
         : itsShelf(shelf),
         itsNAntenna(nAntenna), itsNCorrProd(0), itsNSlice(0),
         itsNCoarseChannel(nCoarseChannel),
         itsNChannelSub(nChannelSub), itsCoarseBandwidth(coarseBandwidth),
-        itsFineBandwidth(0.0), itsVisSource(visSource), 
+        itsFineBandwidth(0.0), itsInputMode(inputMode), 
         itsDelay(delay), itsCurrentRow(0)  
 {
 /*
@@ -99,11 +98,15 @@ CorrelatorSimulatorADE::CorrelatorSimulatorADE(const std::string& dataset,
         ASKAPLOG_DEBUG_STR(logger, "No expansion factor");
     }
 */
-    itsMS.reset(new casa::MeasurementSet(dataset, casa::Table::Old));
-    itsPort.reset(new askap::cp::VisPortADE(hostname, port));
 
-    ASKAPCHECK (itsVisSource == "zero",
-            "At the moment only visibility_source = zero is accepted");
+	if (itsInputMode == "expand") {
+		itsMS.reset(new casa::MeasurementSet(dataset, casa::Table::Old));
+	}
+	else {
+		itsMS.reset ();
+	}
+	itsPort.reset(new askap::cp::VisPortADE(hostname, port));
+	
     // Compute the total number of correlation products
     CorrProdMap itsCorrProd;
     itsNCorrProd = itsCorrProd.getTotal (nAntenna);
@@ -136,24 +139,19 @@ bool CorrelatorSimulatorADE::sendNext(void)
     payload.block = 1;      // part of freq index
     payload.card = 1;       // part of freq index
     payload.beamid = 1;
-/*
-    cout << "Antenna count: " << itsNAntenna << endl;
-    cout << "Correlation product count: " << itsNCorrProd << endl;
-    cout << "Slice count: " << itsNSlice << endl;
-    return false;
-*/
+
     // coarse channel
-    for (unsigned int cChannel = 0; cChannel < itsNCoarseChannel; ++cChannel) { 
+    for (uint32_t cChannel = 0; cChannel < itsNCoarseChannel; ++cChannel) { 
 
         // subdividing coarse channel into fine channel
-        for (unsigned int subDiv = 0; subDiv < itsNChannelSub; ++subDiv) {
+        for (uint32_t subDiv = 0; subDiv < itsNChannelSub; ++subDiv) {
 
-            unsigned int fChannel = cChannel * itsNChannelSub + subDiv;
+            uint32_t fChannel = cChannel * itsNChannelSub + subDiv;
             payload.channel = fChannel;
             payload.freq = itsFineBandwidth * fChannel; // part of freq index
 
             // payload slice
-            for (unsigned int slice = 0; slice < itsNSlice; ++slice) {
+            for (uint32_t slice = 0; slice < itsNSlice; ++slice) {
 
                 payload.slice = slice;
                 payload.baseline1 = slice * 
@@ -163,30 +161,32 @@ bool CorrelatorSimulatorADE::sendNext(void)
 
                 // gather all visibility of baselines in this slice 
                 // (= correlation product: antenna & polarisation product)
-                for (unsigned int baseline = payload.baseline1; 
-                        baseline <= payload.baseline2; ++baseline) { 
-                    payload.vis[baseline].real = 0.0;
-                    payload.vis[baseline].imag = 0.0;
+                for (uint32_t baseInSlice = 0; 
+                        baseInSlice < VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE; ++baseInSlice) { 
+					//cout << "baseline: " << baseline << endl;
+                    payload.vis[baseInSlice].real = 0.0;
+                    payload.vis[baseInSlice].imag = 0.0;
                 }
+
                 // send data in this slice 
-                // shelf 1 send even numbered slices, shelf 2 the odd ones
                 cout << "shelf " << itsShelf << 
                         " send payload channel " << cChannel << 
                         ", sub " << subDiv << ", slice " << slice << endl; 
-                itsPort->send(payload);
-                /*
-                if (slice % 2 == 0) {   // slice is even number
-                    if (itsShelf == 1) {
-                        itsPort->send(payload);
-                    }
-                }
-                else {                  // slice is odd number
-                    if (itsShelf == 2) {
-                        itsPort->send(payload);
-                    }
-                }
-                */
+
+				if (slice % 2 == 0) {   // shelf 1 sends even number slice
+					if (itsShelf == 1) {
+						itsPort->send(payload);
+					}
+				}
+				else {                  // slice 2 sends odd number slice
+					if (itsShelf == 2) {
+						itsPort->send(payload);
+					}
+				}
+				//itsPort->send(payload);
+				
                 usleep (itsDelay);
+				
             }   // slice
         }   // channel subdivision
     }   // coarse channel
@@ -232,5 +232,6 @@ void checkStokesType (const Stokes::StokesTypes stokesType)
 			"Unsupported stokes type");
 }
 
+#ifdef VERBOSE
 #undef VERBOSE
-
+#endif

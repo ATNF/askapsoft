@@ -59,6 +59,8 @@ uint32_t ChannelMap::fromCorrelator (uint32_t channelID) {
 }
 
 
+// The reverse mapping
+
 uint32_t ChannelMap::toCorrelator (uint32_t channelID) {
 	ASKAPDEBUGASSERT(channelID < 216);
 	const uint32_t fineOffset = channelID % 9;
