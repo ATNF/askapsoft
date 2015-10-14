@@ -192,7 +192,7 @@ void process(const IConstDataSource &ds, const int ctrl = -1) {
             casa::Vector<casa::Complex> measuredRowX = it->visibility().xyPlane(0).row(row);
             casa::Vector<casa::Complex> measuredRowY = it->visibility().xyPlane(3).row(row);
             
-            if (ant1ids[row] >= 3) {
+            if ((ant1ids[row] >= 3) || (ant1ids[row] == 1)) {
                 casa::Complex sumX(0.,0.);
                 casa::Complex sumY(0.,0.);
                 size_t nGoodChX = 0;
@@ -213,16 +213,16 @@ void process(const IConstDataSource &ds, const int ctrl = -1) {
                 const float curAmpX  = nGoodChX == 0 ? 0. : abs(sumX / float(nGoodChX));
                 const float curAmpY  = nGoodChY == 0 ? 0. : abs(sumY / float(nGoodChY));
                 os3<<" "<<curAmpX<<" "<<curAmpY;
-                if (ant1ids[row] < 6) {
+                if ((ant1ids[row] < 6) && (ant1ids[row] >= 3)) {
                     const size_t index = ant1ids[row] - 3;
                     ASKAPDEBUGASSERT(index < dbl.size());
                     DeadBeamsList& curDBL = *(dbl[index]);
                     // sequential numeration of polarisations, to match the hardware numbering scheme
                     const double threshold = 50;
-                    if (curAmpX < threshold) {
+                    if ((curAmpX < threshold) && (nGoodChX == measuredRowX.nelements())) {
                         curDBL.add(beamids[row]  * 2);
                     }
-                    if (curAmpY < threshold) {
+                    if ((curAmpY < threshold) && (nGoodChY == measuredRowY.nelements())) {
                         curDBL.add(beamids[row]  * 2 + 1);
                     }
                 }
@@ -278,6 +278,9 @@ void process(const IConstDataSource &ds, const int ctrl = -1) {
       std::cout<<"Each integration has "<<nRow<<" rows"<<std::endl;
       casa::uInt nGoodCycles = nGoodRows / nRow;
       std::cout<<"Processed "<<nGoodCycles<<" integration cycles, "<<nGoodRows<<" good and "<<nBadRows<<" bad rows, time span "<<(stopTime-startTime)/60.<<" minutues, cycles="<<counter<<std::endl;
+      casa::MVEpoch startEpoch(casa::Quantity(55913.0,"d"));
+      startEpoch += casa::MVEpoch(casa::Quantity(startTime, "s"));
+      std::cout<<"Start time "<<startEpoch<<std::endl;
   } else {
      std::cout<<"No data found!"<<std::endl;
   }
