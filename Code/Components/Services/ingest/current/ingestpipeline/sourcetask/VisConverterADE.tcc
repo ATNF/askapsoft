@@ -37,6 +37,9 @@
 // ASKAPsoft includes
 #include "askap/AskapError.h"
 
+// std includes
+#include <iomanip>
+
 namespace askap {
 namespace cp {
 namespace ingest {
@@ -133,6 +136,30 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
    }
    itsReceivedDatagrams.insert(identity);
 
+   // for now
+   if (vis.channel >= chunk->nChannel()) {
+       ASKAPLOG_WARN_STR(logger, "Got channel outside bounds: "<<vis.channel);
+       countDatagramAsIgnored();
+       return;
+   }
+   // channel id to physical channel mapping is dependent on hardware configuration
+   // it is not clear yet what modes we want to expose to end user via parset
+   // for now have some mapping hard-coded
+   //const casa::uInt channel = vis.channel;
+   const casa::uInt channel = mapChannel(vis.channel);
+
+   ASKAPASSERT(channel < chunk->nChannel())
+   //
+
+   /*
+   // this is a commissioning hack
+   if ((channel == 108) && (vis.beamid == 1)) {
+       ASKAPLOG_DEBUG_STR(logger, "Channel "<<channel<<" frequency in MHz: metadata/parset="<<std::setprecision(15)<<
+             chunk->frequency()[channel]/1e6<<" datagram="<<std::setprecision(15)<<vis.freq);
+   }
+   //
+   */
+
    bool atLeastOneUseful = false;
    for (uint32_t product = vis.baseline1, item = 0; product <= vis.baseline2; ++product, ++item) {
 
@@ -176,19 +203,6 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
         ASKAPDEBUGASSERT(row < chunk->nRow());
         ASKAPDEBUGASSERT(polidx < chunk->nPol());
 
-        // for now
-        if (vis.channel >= chunk->nChannel()) {
-            ASKAPLOG_WARN_STR(logger, "Got channel outside bounds: "<<vis.channel);
-            break;
-        }
-        // channel id to physical channel mapping is dependent on hardware configuration
-        // it is not clear yet what modes we want to expose to end user via parset
-        // for now have some mapping hard-coded
-        //const casa::uInt channel = vis.channel;
-        const casa::uInt channel = mapChannel(vis.channel);
-
-        ASKAPASSERT(channel < chunk->nChannel())
-        //
         atLeastOneUseful = true;
         casa::Complex sample(vis.vis[item].real, vis.vis[item].imag);
 
@@ -223,6 +237,7 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
 
         // temporary - debugging frequency mapping/values received from the ioc
         //chunk->visibility().yzPlane(row).row(channel).set(casa::Complex(vis.freq,0.));
+        //chunk->visibility().yzPlane(row).row(channel).set(casa::Complex(vis.freq - chunk->frequency()[channel]/1e6,0.));
         //chunk->visibility().yzPlane(row).row(channel).set(casa::Complex(antenna1 + 10.*config().rank(),0.));
         //
    }

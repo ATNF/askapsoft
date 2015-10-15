@@ -250,8 +250,8 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
     // Frequency vector is not of length nRows, but instead nChannels
     chunk->frequency() = itsVisConverter.channelManager().localFrequencies(
             itsVisConverter.id(),
-            metadata.centreFreq().getValue("Hz"),
-            corrMode.chanWidth().getValue("Hz"),
+            metadata.centreFreq().getValue("Hz") - chunk->channelWidth() / 2.,
+            chunk->channelWidth(),
             corrMode.nChan());
 
     // at this stage do not support variable phase centre
