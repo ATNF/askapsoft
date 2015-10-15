@@ -89,7 +89,7 @@ TosSimulator::~TosSimulator()
 
 bool TosSimulator::sendNext(void)
 {
-	cout << "TosSimulator::sendNext ..." << endl;
+	//cout << "TosSimulator::sendNext ..." << endl;
 	
     ROMSColumns msc(*itsMS);
 

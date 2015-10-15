@@ -76,7 +76,7 @@ VisPortADE::VisPortADE(const std::string& hostname, const std::string& port)
     // Get the remote endpoint
     udp::endpoint destination = *resolver.resolve(query);
 
-    // Connect - remembing this is a UDP socket, so connect does not really
+    // Connect - remembering this is a UDP socket, so connect does not really
     // connect. It just means the call to send doesn't need to specify the
     // destination each time.
     boost::system::error_code coerror;

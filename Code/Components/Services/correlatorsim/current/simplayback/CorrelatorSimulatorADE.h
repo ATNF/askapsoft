@@ -88,24 +88,12 @@ class CorrelatorSimulatorADE : public ISimulator {
         ///         otherwise false. If false is returned, sendNext()
         ///         should not be called again.
         bool sendNext(void);
-
+		
     private:
 
-		/// Total number of baselines
-		//static const uint32_t NBASELINE = 2628;
-		
-		/// = 2628 / 657
-		//static const uint32_t NSLICE = 4;	
-		   
 		// Correlation product map (this replaces baseline map)
 		CorrProdMap itsCorrProdMap;
 		
-        // Channel multiplication factor
-        //const unsigned int itsExpansionFactor;
-
-        // The chance a VisChunk will not be sent.
-        //const double itsVisSendFailChance;
-
         // Shelf number [1..]
         const int itsShelf;
 
@@ -139,8 +127,7 @@ class CorrelatorSimulatorADE : public ISimulator {
         // Cursor (index) for the main table of the measurement set
         unsigned int itsCurrentRow;
 
-        // Source of randomness (for simulating random failures)
-        //RandomReal<double> itsRandom;
+		const static unsigned int rowIncrement = 36;
 
         // Measurement set
         boost::scoped_ptr<casa::MeasurementSet> itsMS;
@@ -154,6 +141,10 @@ class CorrelatorSimulatorADE : public ISimulator {
         uint32_t getCorrProdIndex
                 (const uint32_t ant1, const uint32_t ant2,
                 const casa::Stokes::StokesTypes stokesType);
+
+		bool sendNextZero(void);
+		
+		bool sendNextExpand(void);
 
 };
 

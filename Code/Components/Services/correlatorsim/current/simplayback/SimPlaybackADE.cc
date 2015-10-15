@@ -97,7 +97,7 @@ void SimPlaybackADE::validateConfig(void)
 #endif
 
 	const std::string inputMode = itsParset.getString("input_mode");
-	ASKAPCHECK(inputMode == "zero","Illegal input mode");
+	//ASKAPCHECK(inputMode == "zero","Illegal input mode");
 	
 	// Build a list of required keys    
 	std::vector<std::string> requiredKeys;
