@@ -83,15 +83,15 @@ namespace LOFAR {
 
         LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::MVDirection& obj)
         {
-            os << obj.get();
+            os << obj.getLong() << obj.getLat();
             return os;
         }
 
         LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::MVDirection& obj)
         {
-            casa::Vector<casa::Double> vec;
-            is >> vec;
-            casa::MVDirection md(vec);
+            double longitude, latitude;
+            is >> longitude >> latitude;
+            casa::MVDirection md(longitude, latitude);
             obj = md;
             return is;
         }
@@ -141,6 +141,22 @@ namespace LOFAR {
             is >> type;
             casa::MDirection::Ref ref(type);
             obj = ref;
+            return is;
+        }
+
+        // casa::Quantity
+        LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::Quantity& obj)
+        {
+            os << obj.getValue()<< obj.getFullUnit().getName();
+            return os;
+        }
+
+        LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::Quantity& obj)
+        {
+            double value;
+            casa::String unit;
+            is >> value >> unit;
+            obj = casa::Quantity(value, unit);
             return is;
         }
 

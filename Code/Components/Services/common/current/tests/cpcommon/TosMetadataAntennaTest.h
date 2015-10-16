@@ -33,12 +33,17 @@
 #include "measures/Measures/MDirection.h"
 #include "askap/AskapError.h"
 #include "casa/Quanta/Quantum.h"
+#include "Blob/BlobIStream.h"
+#include "Blob/BlobIBufVector.h"
+#include "Blob/BlobOStream.h"
+#include "Blob/BlobOBufVector.h"
 
 // Classes to test
 #include "cpcommon/TosMetadataAntenna.h"
 
 // Using
 using namespace casa;
+using namespace LOFAR;
 
 namespace askap {
 namespace cp {
@@ -51,6 +56,7 @@ class TosMetadataAntennaTest : public CppUnit::TestFixture {
         CPPUNIT_TEST(testPolAngle);
         CPPUNIT_TEST(testOnSource);
         CPPUNIT_TEST(testHwError);
+        CPPUNIT_TEST(testSerialise);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -73,8 +79,7 @@ class TosMetadataAntennaTest : public CppUnit::TestFixture {
                                MDirection::Ref(MDirection::J2000));
 
             instance->actualRaDec(testDir); // Set
-            CPPUNIT_ASSERT(directionsEqual(testDir,
-                                           instance->actualRaDec()));
+            directionsEqual(testDir, instance->actualRaDec());
         }
 
         void testActualAzEl() {
@@ -83,14 +88,13 @@ class TosMetadataAntennaTest : public CppUnit::TestFixture {
                                MDirection::Ref(MDirection::AZEL));
 
             instance->actualAzEl(testDir); // Set
-            CPPUNIT_ASSERT(directionsEqual(testDir,
-                                           instance->actualAzEl()));
+            directionsEqual(testDir, instance->actualAzEl());
         }
 
         void testPolAngle() {
             const Quantity testVal = Quantity(1.123456, "rad");
             instance->actualPolAngle(testVal);
-            CPPUNIT_ASSERT(testVal.getValue("rad") == instance->actualPolAngle().getValue("rad"));
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(testVal.getValue("rad"), instance->actualPolAngle().getValue("rad"),1e-6);
         }
 
         void testOnSource() {
@@ -101,31 +105,69 @@ class TosMetadataAntennaTest : public CppUnit::TestFixture {
         }
 
         void testHwError() {
+            instance->flagged(true);
+            CPPUNIT_ASSERT_EQUAL(true, instance->flagged());
+            instance->flagged(false);
+            CPPUNIT_ASSERT_EQUAL(false, instance->flagged());
+        }
+
+        void testSerialise() {
+            // call test cases above as they fill 'instance' with some numbers
+            CPPUNIT_ASSERT(instance);
+            testActualRaDec();
+            testActualAzEl();
+            testPolAngle();
             instance->onSource(true);
-            CPPUNIT_ASSERT_EQUAL(true, instance->onSource());
-            instance->onSource(false);
-            CPPUNIT_ASSERT_EQUAL(false, instance->onSource());
+            instance->flagged(false);
+            
+            TosMetadataAntenna received("none");
+            //received = *instance;
+
+            // Encode
+            std::vector<int8_t> buf;
+            LOFAR::BlobOBufVector<int8_t> obv(buf, expandSize);
+            LOFAR::BlobOStream out(obv);
+            out.putStart("TosMetadataAntennaTest", 1);
+            out << *instance;
+            out.putEnd();
+
+            // Decode
+            LOFAR::BlobIBufVector<int8_t> ibv(buf);
+            LOFAR::BlobIStream in(ibv);
+            int version = in.getStart("TosMetadataAntennaTest");
+            ASKAPASSERT(version == 1);
+            in >> received;
+            in.getEnd();
+
+            
+            // check the result
+            CPPUNIT_ASSERT_EQUAL(false, received.flagged());
+            CPPUNIT_ASSERT_EQUAL(true, received.onSource());
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(received.actualPolAngle().getValue("rad"), 
+                    instance->actualPolAngle().getValue("rad"),1e-6);
+            directionsEqual(received.actualAzEl(), instance->actualAzEl());
+            directionsEqual(received.actualRaDec(), instance->actualRaDec());
+            CPPUNIT_ASSERT_EQUAL(instance->name(),received.name());
         }
 
     private:
 
         // Compare two MDirection instances, returning true if they are
         // equal, otherwise false
-        bool directionsEqual(const MDirection& dir1, const MDirection& dir2) {
-            bool equal = true;
-
+        void directionsEqual(const MDirection& dir1, const MDirection& dir2) {
             for (int i = 0; i < 2; ++i) {
-                if (dir1.getAngle().getValue()(i) !=
-                        dir2.getAngle().getValue()(i)) {
-                    equal = false;
-                }
+                 CPPUNIT_ASSERT_DOUBLES_EQUAL(dir1.getAngle().getValue()(i),
+                        dir2.getAngle().getValue()(i), 1e-6);
             }
-
-            return equal;
+            CPPUNIT_ASSERT_EQUAL(dir1.getRef().getType(), dir2.getRef().getType());
         }
 
         // Instance of class under test
         boost::scoped_ptr<TosMetadataAntenna> instance;
+
+        // Expand size. Size of increment for Blob BufVector storage.
+        // Too small and there is lots of overhead in expanding the vector.
+        static const unsigned int expandSize = 4 * 1024 * 1024;
 };
 
 }   // End namespace cp

@@ -33,6 +33,8 @@
 #include "measures/Measures/MDirection.h"
 #include "casa/Quanta/Quantum.h"
 
+#include "cpcommon/CasaBlobUtils.h"
+
 // Using
 using namespace askap::cp;
 
@@ -95,3 +97,44 @@ void TosMetadataAntenna::flagged(const casa::Bool& val)
 {
     itsFlagged = val;
 }
+
+/// serialise TosMetadataAntenna
+/// @param[in] os output stream
+/// @param[in] obj object to serialise
+/// @return output stream
+LOFAR::BlobOStream& LOFAR::operator<<(LOFAR::BlobOStream& os, const askap::cp::TosMetadataAntenna& obj)
+{
+   os.putStart("TosMetadataAntenna", 1);
+   os << obj.name() << obj.flagged() << obj.onSource() << obj.actualPolAngle() << 
+         obj.actualAzEl() << obj.actualRaDec();
+   os.putEnd();
+   return os;
+}
+
+/// deserialise TosMetadataAntenna
+/// @param[in] is input stream
+/// @param[out] obj object to deserialise
+/// @return input stream
+LOFAR::BlobIStream& LOFAR::operator>>(LOFAR::BlobIStream& is, askap::cp::TosMetadataAntenna& obj)
+{
+   using namespace askap;
+   const int version = is.getStart("TosMetadataAntenna");
+   ASKAPASSERT(version == 1);
+   casa::String name;
+   is >> name;
+   obj = TosMetadataAntenna(name);
+   casa::Bool flag, onSource;
+   is >> flag >> onSource;
+   obj.flagged(flag);
+   obj.onSource(onSource);
+   casa::Quantity q;
+   is >> q;
+   obj.actualPolAngle(q);
+   casa::MDirection dir;
+   is >> dir;
+   obj.actualAzEl(dir);
+   is >> dir;
+   obj.actualRaDec(dir);
+   return is;
+}
+

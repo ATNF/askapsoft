@@ -65,6 +65,10 @@ namespace LOFAR {
         LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::MDirection::Ref& obj);
         LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::MDirection::Ref& obj);
 
+        // casa::Quantity
+        LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::Quantity& obj);
+        LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::Quantity& obj);
+
 } // end of namespace LOFAR
 
 #include "CasaBlobUtils.tcc"

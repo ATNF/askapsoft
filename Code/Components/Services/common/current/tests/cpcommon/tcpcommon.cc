@@ -31,6 +31,7 @@
 #include "TosMetadataTest.h"
 #include "TosMetadataAntennaTest.h"
 #include "VisDatagramTest.h"
+#include "CasaBlobUtilsTest.h"
 
 int main(int argc, char *argv[])
 {
@@ -38,6 +39,7 @@ int main(int argc, char *argv[])
     runner.addTest(askap::cp::TosMetadataTest::suite());
     runner.addTest(askap::cp::TosMetadataAntennaTest::suite());
     runner.addTest(askap::cp::VisDatagramTest::suite());
+    runner.addTest(askap::cp::CasaBlobUtilsTest::suite());
     bool wasSucessful = runner.run();
 
     return wasSucessful ? 0 : 1;
