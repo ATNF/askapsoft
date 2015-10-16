@@ -54,7 +54,7 @@ using namespace askap::cp::ingest;
 
 ChannelMergeTask::ChannelMergeTask(const LOFAR::ParameterSet& parset,
         const Configuration& config) :
-    itsRanksToMerge(static_cast<int>(parset.getUint32("ranks2merge")))
+    itsRanksToMerge(static_cast<int>(parset.getUint32("ranks2merge", config.nprocs())))
 {
     ASKAPLOG_DEBUG_STR(logger, "Constructor");
     ASKAPCHECK(config.nprocs() > 1,
@@ -76,6 +76,8 @@ ChannelMergeTask::ChannelMergeTask(const LOFAR::ParameterSet& parset,
 ChannelMergeTask::~ChannelMergeTask()
 {
     ASKAPLOG_DEBUG_STR(logger, "Destructor");
+    const int response = MPI_Comm_free(&itsCommunicator);
+    ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Comm_free = "<<response);
 }
 
 void ChannelMergeTask::process(VisChunk::ShPtr& chunk)

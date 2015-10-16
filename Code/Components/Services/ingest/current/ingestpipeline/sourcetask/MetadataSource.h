@@ -32,6 +32,7 @@
 
 // ASKAPsoft includes
 #include "boost/shared_ptr.hpp"
+#include "boost/noncopyable.hpp"
 #include "tosmetadata/MetadataReceiver.h"
 #include "cpcommon/TosMetadata.h"
 
@@ -45,7 +46,8 @@ namespace ingest {
 
 class MetadataSource :
         virtual public askap::cp::icewrapper::MetadataReceiver,
-            public askap::cp::ingest::IMetadataSource {
+            virtual public askap::cp::ingest::IMetadataSource,
+            public boost::noncopyable {
     public:
         /// @brief Constructor.
         ///
@@ -87,12 +89,6 @@ class MetadataSource :
     private:
         // Circular buffer of metadata objects
         askap::cp::ingest::CircularBuffer< askap::cp::TosMetadata > itsBuffer;
-
-        // No support for assignment
-        MetadataSource& operator=(const MetadataSource& rhs);
-
-        // No support for copy constructor
-        MetadataSource(const MetadataSource& src);
 
 };
 

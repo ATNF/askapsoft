@@ -81,3 +81,4 @@ boost::shared_ptr<TosMetadata> MetadataSource::next(const long timeout)
 {
     return itsBuffer.next(timeout);
 }
+
