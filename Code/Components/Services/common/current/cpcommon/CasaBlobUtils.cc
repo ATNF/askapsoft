@@ -1,4 +1,4 @@
-/// @file CasaBlobUtils.tcc
+/// @file CasaBlobUtils.cc
 ///
 /// @copyright (c) 2010 CSIRO
 /// Australia Telescope National Facility (ATNF)
@@ -25,9 +25,7 @@
 /// @author Ben Humphreys <ben.humphreys@csiro.au>
 ///
 
-#ifndef ASKAP_CP_COMMON_CASABLOBUTILS_H
-#error "Don't include this file directly, include CasaBlobUtils.h instead"
-#endif
+#include "cpcommon/CasaBlobUtils.h"
 
 // ASKAPsoft includes
 #include "casa/aips.h"

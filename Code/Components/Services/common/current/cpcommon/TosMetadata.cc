@@ -36,6 +36,7 @@
 #include "askap/AskapError.h"
 #include "casa/aips.h"
 #include "casa/Quanta.h"
+#include "cpcommon/CasaBlobUtils.h"
 
 // Using
 using namespace std;
@@ -159,4 +160,72 @@ const TosMetadataAntenna& TosMetadata::antenna(const std::string& name) const
         ASKAPTHROW(AskapError, "Antenna " << name << " not found in metadata");
     }
     return it->second;
+}
+
+/// serialise TosMetadata
+/// @param[in] os output stream
+/// @param[in] obj object to serialise
+/// @return output stream
+LOFAR::BlobOStream& LOFAR::operator<<(LOFAR::BlobOStream& os, const askap::cp::TosMetadata& obj)
+{
+   os.putStart("TosMetadata", 1);
+   os << static_cast<uint64>(obj.time()) << obj.scanId() << obj.flagged() << obj.centreFreq() << obj.targetName() << 
+         obj.targetDirection() << obj.phaseDirection() << obj.corrMode();
+   const std::vector<std::string> antNames = obj.antennaNames();
+   os << static_cast<uint64>(antNames.size());
+   for (std::vector<std::string>::const_iterator ci = antNames.begin(); ci != antNames.end(); ++ci) {
+        os << *ci<< obj.antenna(*ci);
+   }
+   os.putEnd();
+   return os;
+}
+
+/// deserialise TosMetadata
+/// @param[in] is input stream
+/// @param[out] obj object to deserialise
+/// @return input stream
+LOFAR::BlobIStream& LOFAR::operator>>(LOFAR::BlobIStream& is, askap::cp::TosMetadata& obj)
+{
+   using namespace askap;
+   const int version = is.getStart("TosMetadata");
+   ASKAPASSERT(version == 1);
+   obj = TosMetadata();
+   uint64 time;
+   is >> time;
+   obj.time(static_cast<casa::uLong>(time));
+   int scanId;
+   is >> scanId;
+   obj.scanId(scanId);
+   bool flag;
+   is >> flag;
+   obj.flagged(flag);
+   
+   casa::Quantity q;
+   is >> q;
+   obj.centreFreq(q);
+   std::string bufStr;
+   is >> bufStr;
+   obj.targetName(bufStr);
+
+   casa::MDirection dir;
+   is >> dir;
+   obj.targetDirection(dir);
+   is >> dir;
+   obj.phaseDirection(dir);
+   is >> bufStr;
+   obj.corrMode(bufStr);
+   // now load antenna metadata
+   uint64 nAntennas = 0;
+   is >> nAntennas;
+   TosMetadataAntenna mdataBuf("buffer");
+   for (uint64 ant = 0; ant<nAntennas; ++ant) {
+        is >> bufStr >> mdataBuf;
+        ASKAPCHECK(bufStr == std::string(mdataBuf.name()), "Inconsistency in the serialised antenna metadata: name key = "<<
+              bufStr<<" antenna name = "<<mdataBuf.name());
+        obj.addAntenna(mdataBuf);
+   }
+ 
+   is.getEnd();
+   
+   return is;
 }

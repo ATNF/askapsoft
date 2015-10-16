@@ -71,6 +71,4 @@ namespace LOFAR {
 
 } // end of namespace LOFAR
 
-#include "CasaBlobUtils.tcc"
-
 #endif

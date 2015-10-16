@@ -135,6 +135,7 @@ LOFAR::BlobIStream& LOFAR::operator>>(LOFAR::BlobIStream& is, askap::cp::TosMeta
    obj.actualAzEl(dir);
    is >> dir;
    obj.actualRaDec(dir);
+   is.getEnd();
    return is;
 }
 

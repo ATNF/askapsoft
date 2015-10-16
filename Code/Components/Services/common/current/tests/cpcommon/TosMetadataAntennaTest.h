@@ -121,7 +121,6 @@ class TosMetadataAntennaTest : public CppUnit::TestFixture {
             instance->flagged(false);
             
             TosMetadataAntenna received("none");
-            //received = *instance;
 
             // Encode
             std::vector<int8_t> buf;

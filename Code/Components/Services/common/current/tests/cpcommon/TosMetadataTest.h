@@ -32,6 +32,11 @@
 #include "askap/AskapError.h"
 #include "askap/AskapUtil.h"
 
+#include "Blob/BlobIStream.h"
+#include "Blob/BlobIBufVector.h"
+#include "Blob/BlobOStream.h"
+#include "Blob/BlobOBufVector.h"
+
 // Classes to test
 #include "cpcommon/TosMetadata.h"
 
@@ -55,6 +60,7 @@ class TosMetadataTest : public CppUnit::TestFixture {
         CPPUNIT_TEST(testCorrMode);
         CPPUNIT_TEST(testAntennaAccess);
         CPPUNIT_TEST(testAntennaInvalid);
+        CPPUNIT_TEST(testSerialisation);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -164,6 +170,49 @@ class TosMetadataTest : public CppUnit::TestFixture {
             // Request an invalid antenna id (wrong name)
             CPPUNIT_ASSERT_THROW(instance->antenna(""), askap::AskapError);
             CPPUNIT_ASSERT_THROW(instance->antenna("ak2"), askap::AskapError);
+        }
+    
+        void testSerialisation() {
+            // use test methods defined above as they populate the "instance"
+            CPPUNIT_ASSERT(instance);
+            testAntennaAccess();
+            testCorrMode();
+            testPhaseDirection();
+            testTargetDirection();
+            testTargetName();
+            testTime();
+            instance->flagged(true);
+            instance->scanId(30);
+
+            TosMetadata received;
+            //received = *instance;
+
+            // Encode
+            std::vector<int8_t> buf;
+            LOFAR::BlobOBufVector<int8_t> obv(buf);
+            LOFAR::BlobOStream out(obv);
+            out.putStart("TosMetadataTest", 1);
+            out << *instance;
+            out.putEnd();
+
+            // Decode
+            LOFAR::BlobIBufVector<int8_t> ibv(buf);
+            LOFAR::BlobIStream in(ibv);
+            int version = in.getStart("TosMetadataTest");
+            ASKAPASSERT(version == 1);
+            in >> received;
+            in.getEnd();
+
+            // test content
+            CPPUNIT_ASSERT_EQUAL(casa::String("ak01"), received.antenna("ak01").name());
+            CPPUNIT_ASSERT_EQUAL(casa::String("ak02"), received.antenna("ak02").name());
+            CPPUNIT_ASSERT_EQUAL(2u, received.nAntenna());
+            CPPUNIT_ASSERT_EQUAL(std::string("standard"), received.corrMode());
+            CPPUNIT_ASSERT_EQUAL(true, received.flagged());
+            CPPUNIT_ASSERT_EQUAL(std::string("1934-638"), received.targetName());
+            CPPUNIT_ASSERT_EQUAL(1234ul, received.time());
+            CPPUNIT_ASSERT_EQUAL(30, received.scanId());
+            // add check of direction fields here when time permits
         }
 
     private:

@@ -40,6 +40,10 @@
 // Local package includes
 #include "cpcommon/TosMetadataAntenna.h"
 
+// for serialisation
+#include "Blob/BlobOStream.h"
+#include "Blob/BlobIStream.h"
+
 namespace askap {
 namespace cp {
 
@@ -183,5 +187,22 @@ class TosMetadata {
 
 }
 }
+
+// serialisation
+namespace LOFAR {
+
+        /// serialise TosMetadata
+        /// @param[in] os output stream
+        /// @param[in] obj object to serialise
+        /// @return output stream
+        LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const askap::cp::TosMetadata& obj);
+
+        /// deserialise TosMetadata
+        /// @param[in] is input stream
+        /// @param[out] obj object to deserialise
+        /// @return input stream
+        LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, askap::cp::TosMetadata& obj);
+}
+
 
 #endif
