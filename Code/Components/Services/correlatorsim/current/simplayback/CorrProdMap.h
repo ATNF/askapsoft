@@ -1,6 +1,6 @@
 /// @file CorrProdMap.h
 ///
-/// @copyright (c) 2012 CSIRO
+/// @copyright (c) 2015 CSIRO
 /// Australia Telescope National Facility (ATNF)
 /// Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 /// PO Box 76, Epping NSW 1710, Australia
@@ -35,22 +35,17 @@
 #ifndef ASKAP_CP_CORRPRODMAP_H
 #define ASKAP_CP_CORRPRODMAP_H
 
-// Allow coding & testing outside ASKAP before deployment
-//#define OUTSIDEASKAP
-
 #include "Permutation.h"
 
 // System include
 #include <stdint.h>
 
-#ifndef OUTSIDEASKAP
 // ASKAPsoft includes
 #include "Common/ParameterSet.h"
 #include "measures/Measures/Stokes.h"
 
 namespace askap {
 namespace cp {
-#endif
 
 /// @brief Class for correlation product map.
 
@@ -156,9 +151,7 @@ class CorrProdMap
 
 };
 
-#ifndef OUTSIDEASKAP
 };
 };
-#endif
 
 #endif

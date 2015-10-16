@@ -1,6 +1,6 @@
 /// @file CorrelatorSimulatorADE.h
 ///
-/// @copyright (c) 2010 CSIRO
+/// @copyright (c) 2015 CSIRO
 /// Australia Telescope National Facility (ATNF)
 /// Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 /// PO Box 76, Epping NSW 1710, Australia
@@ -39,7 +39,6 @@
 // Local package includes
 #include "simplayback/ISimulator.h"
 #include "simplayback/VisPortADE.h"
-//#include "simplayback/BaselineMap.h"
 #include "simplayback/RandomReal.h"
 #include "simplayback/CorrProdMap.h"
 
@@ -83,6 +82,7 @@ class CorrelatorSimulatorADE : public ISimulator {
         virtual ~CorrelatorSimulatorADE();
 
         /// @brief Send the next correlator integration.
+		/// The actual functionality is either in sendNextZero or sendNextExpand.
         ///
         /// @return true if there are more integrations in the dataset,
         ///         otherwise false. If false is returned, sendNext()
@@ -142,8 +142,12 @@ class CorrelatorSimulatorADE : public ISimulator {
                 (const uint32_t ant1, const uint32_t ant2,
                 const casa::Stokes::StokesTypes stokesType);
 
+		// Send data of zero visibility for the whole baselines and channels 
+		// for only 1 time period.
 		bool sendNextZero(void);
 		
+		// Extract one data point from measurement set and send the data for all 
+		// baselines and channels for the time period given in the measurement set.
 		bool sendNextExpand(void);
 
 };

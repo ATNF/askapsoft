@@ -1,6 +1,6 @@
 /// @file SimPlaybackADE.h
 ///
-/// @copyright (c) 2009 CSIRO
+/// @copyright (c) 2015 CSIRO
 /// Australia Telescope National Facility (ATNF)
 /// Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 /// PO Box 76, Epping NSW 1710, Australia
@@ -85,7 +85,6 @@ class SimPlaybackADE {
 		
 		// Input mode: 
 		// zero (default): no input is needed, visibility is zero
-		// To add later:
 		// expand        : generated from actual data in Central Processor,
 		//                 expanded to fill all channels
 		std::string itsInputMode;

@@ -1,6 +1,6 @@
 /// @file CorrProdMap.cc
 ///
-/// @copyright (c) 2010 CSIRO
+/// @copyright (c) 2015 CSIRO
 /// Australia Telescope National Facility (ATNF)
 /// Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 /// PO Box 76, Epping NSW 1710, Australia
@@ -25,9 +25,6 @@
 /// @author Paulus Lahur <paulus.lahur@csiro.au>
 
 
-// Allow coding & testing outside ASKAP before deployment
-//#define OUTSIDEASKAP
-
 // Include own header file first
 #include "CorrProdMap.h"
 
@@ -38,8 +35,6 @@
 
 #include "Permutation.h"
 
-
-#ifndef OUTSIDEASKAP
 // Include package level header file
 #include "askap_correlatorsim.h"
 #include "askap/AskapError.h"
@@ -49,7 +44,6 @@
 using namespace askap;
 using namespace askap::utility;
 using namespace askap::cp;
-#endif
 
 using namespace std;
 

@@ -139,6 +139,8 @@ bool CorrelatorSimulatorADE::sendNext(void)
 }
 
 
+// Send data of zero visibility for the whole baselines and channels 
+// for only 1 time period.
 bool CorrelatorSimulatorADE::sendNextZero(void)
 {
 #ifdef VERBOSE
@@ -213,6 +215,8 @@ bool CorrelatorSimulatorADE::sendNextZero(void)
 }
     
 
+// Extract one data point from measurement set and send the data for all 
+// baselines and channels for the time period given in the measurement set.
 bool CorrelatorSimulatorADE::sendNextExpand(void)
 {
 #ifdef VERBOSE
@@ -226,10 +230,8 @@ bool CorrelatorSimulatorADE::sendNextExpand(void)
     const casa::ROMSDataDescColumns& ddc = msc.dataDescription();
     const casa::ROMSPolarizationColumns& polc = msc.polarization();
     const unsigned int nRow = msc.nrow(); 
-	// In the whole table, not just for this integration
  
-    // Record the timestamp for the current integration that is
-    // being processed
+    // Record the current timestamp 
     const casa::Double currentIntegration = msc.time()(itsCurrentRow);
     ASKAPLOG_DEBUG_STR(logger, "Processing integration with timestamp "
             << msc.timeMeas()(itsCurrentRow));
@@ -241,20 +243,14 @@ bool CorrelatorSimulatorADE::sendNextExpand(void)
     askap::cp::VisDatagramADE payload;
     payload.version = VisDatagramTraits<VisDatagramADE>::VISPAYLOAD_VERSION;
 
-    // Process rows until none are left or the timestamp
-    // changes, indicating the end of this integration
+	casa::Matrix<casa::Complex> data;
+	
+	// Get visibility data for this time period, but only use one data point.
+	// WARNING: Floating point comparison for time identification!
     while (itsCurrentRow < nRow && 
 			(currentIntegration == msc.time()(itsCurrentRow))) {
 
-		cout << "shelf " << itsShelf << " sends data in row " << itsCurrentRow 
-				<< " / " << nRow << endl;
-		
-        // Define some useful variables
         const int dataDescId = msc.dataDescId()(itsCurrentRow);
-        //const unsigned int descPolId = ddc.polarizationId()(dataDescId);
-        //const unsigned int descSpwId = ddc.spectralWindowId()(dataDescId);
-        //const unsigned int nCorr = polc.numCorr()(descPolId);
-        //const unsigned int nChan = spwc.numChan()(descSpwId);
 
         // Some per row constraints
         // This code needs the dataDescId to remain constant for all rows
@@ -292,80 +288,80 @@ bool CorrelatorSimulatorADE::sendNextExpand(void)
         // one to the zero-based indexes from the measurement set.
         payload.beamid = msc.feed1()(itsCurrentRow) + 1;
 	
-        const casa::Matrix<casa::Complex> data = msc.data()(itsCurrentRow);
-
-		// coarse channel
-		for (uint32_t cChannel = 0; cChannel < itsNCoarseChannel; ++cChannel) { 
-
-			// subdividing coarse channel into fine channel
-			for (uint32_t subDiv = 0; subDiv < itsNChannelSub; ++subDiv) {
-
-				uint32_t fChannel = cChannel * itsNChannelSub + subDiv;
-				payload.channel = fChannel;
-				payload.freq = itsFineBandwidth * fChannel; // part of freq index
-				payload.block = 1;      // part of freq index
-				payload.card = 1;       // part of freq index
-
-				// payload slice
-				for (uint32_t slice = 0; slice < itsNSlice; ++slice) {
-
-					payload.slice = slice;
-					payload.baseline1 = slice * 
-					VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE;
-					payload.baseline2 = payload.baseline1 +
-					VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE - 1;
-
-					// gather all visibility of baselines in this slice 
-					// (= correlation product: antenna & polarisation product)
-					for (uint32_t baseInSlice = 0; 
-							baseInSlice < VisDatagramTraits<VisDatagramADE>::
-							MAX_BASELINES_PER_SLICE; ++baseInSlice) { 
-						//cout << "baseline: " << baseline << endl;
-						payload.vis[baseInSlice].real = data(0,0).real();
-						payload.vis[baseInSlice].imag = data(0,0).imag();
-					}
-
-					// send data in this slice 
-#ifdef VERBOSE
-					cout << "shelf " << itsShelf << 
-							" send payload channel " << cChannel << 
-							", sub " << subDiv << ", slice " << slice << endl; 
-#endif
-					if (slice % 2 == 0) {   // shelf 1 sends even number slice
-						if (itsShelf == 1) {
-							itsPort->send(payload);
-						}
-					}
-					else {                  // slice 2 sends odd number slice
-						if (itsShelf == 2) {
-							itsPort->send(payload);
-						}
-					}
-					//itsPort->send(payload);
-					
-					usleep (itsDelay);
-					
-				}   // slice
-			}   // channel subdivision
-		}   // coarse channel
+		// get visibility data in this row
+        data = msc.data()(itsCurrentRow);
 		
-        itsCurrentRow = itsCurrentRow + rowIncrement;
-		//cout << "itsCurrentRow: " << itsCurrentRow << endl;
-	}	
+		++itsCurrentRow;
+	}
+
+	cout << "shelf " << itsShelf << 
+			" send payload for time period ending in row " << itsCurrentRow-1 << 
+			endl; 
+	
+	// Send a data point acquired above for the whole slice ...
+	// for all coarse channel
+	for (uint32_t cChannel = 0; cChannel < itsNCoarseChannel; ++cChannel) { 
+
+		// subdividing coarse channel into fine channel
+		for (uint32_t subDiv = 0; subDiv < itsNChannelSub; ++subDiv) {
+
+			uint32_t fChannel = cChannel * itsNChannelSub + subDiv;
+			payload.channel = fChannel;
+			payload.freq = itsFineBandwidth * fChannel; // part of freq index
+			payload.block = 1;      // part of freq index
+			payload.card = 1;       // part of freq index
+
+			// for all payload slice in this fine channel
+			for (uint32_t slice = 0; slice < itsNSlice; ++slice) {
+
+				payload.slice = slice;
+				payload.baseline1 = slice * 
+				VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE;
+				payload.baseline2 = payload.baseline1 +
+				VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE - 1;
+
+				// for all baselines in this slice 
+				// (= correlation product: antenna & polarisation product)
+				for (uint32_t baseInSlice = 0; 
+						baseInSlice < VisDatagramTraits<VisDatagramADE>::
+						MAX_BASELINES_PER_SLICE; ++baseInSlice) { 
+
+					// Use one visibility data for all baselines
+					payload.vis[baseInSlice].real = data(0,0).real();
+					payload.vis[baseInSlice].imag = data(0,0).imag();
+				}
+
+				// send data in this slice using 2 MPI processes in an
+				// interleaved fashion
+				if (slice % 2 == 0) {   // shelf 1 sends even number slice
+					if (itsShelf == 1) {
+						itsPort->send(payload);
+					}
+				}
+				else {                  // slice 2 sends odd number slice
+					if (itsShelf == 2) {
+						itsPort->send(payload);
+					}
+				}
+
+				// User-defined delay
+				usleep (itsDelay);
+				
+			}   // slice
+		}   // channel subdivision
+	}   // coarse channel
+		
 #ifdef VERBOSE
     cout << "CorrelatorSimulatorADE::sendNextExpand: shelf " <<
             itsShelf << ": done" << endl;
 #endif
 
     if (itsCurrentRow >= nRow) {
-		cout << "No more data" << endl;
-        return false; // Indicate there is no more data after this payload
+		cout << "Shelf " << itsShelf << " has no more data" << endl;
+        return false;
     } else {
-		cout << "time: " << currentIntegration << " / " << 
-				msc.time()(itsCurrentRow) << endl;
-        return true;
+        return true;	// Have more data (next time period)
     }
-    //return false;   // to stop calling this function
 }
 
 
