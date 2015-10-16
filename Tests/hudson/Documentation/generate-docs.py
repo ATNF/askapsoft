@@ -33,7 +33,7 @@ TOPDIR    = os.path.join(WORKSPACE, 'trunk')
 C_DIRS    = [os.path.join('Code', d) for d in ['Base', 'Interfaces',
                                               'Components', 'Systems']]
 T_DIRS    = [os.path.join('Tools', d) for d in ['Dev']]
-TARGET    = '/var/www/vhosts/pm.atnf.csiro.au/htdocs/askap-docs/askaptos'
+TARGET    = '/var/www/vhosts/pm.atnf.csiro.au/htdocs/askap-docs/askapsdp'
 RHOST     = 'phoenix'
 TAB       = ' '*4
 PRE_SSH   = 'eval `ssh-agent` && ssh-add ${HOME}/.ssh/id_dsa-nokeys'
