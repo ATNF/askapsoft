@@ -42,6 +42,14 @@
 // boost includes
 #include "boost/shared_array.hpp"
 
+// LOFAR for communications
+#include <Blob/BlobString.h>
+#include <Blob/BlobIBufString.h>
+#include <Blob/BlobOBufString.h>
+#include <Blob/BlobIStream.h>
+#include <Blob/BlobOStream.h>
+
+
 // I am not very happy to have MPI includes here, we may abstract this interaction
 // eventually. This task is specific for the parallel case, so there is no reason to
 // hide MPI. Leave it here for now.
@@ -112,13 +120,74 @@ ParallelMetadataSource::ParallelMetadataSource(const boost::shared_ptr<IMetadata
 /// @return a shared pointer to a TosMetadata object.
 boost::shared_ptr<askap::cp::TosMetadata> ParallelMetadataSource::next(const long timeout)
 {
+  const int formatId = 1;
+  // buffer used to broadcast timeout (for consistency checks), non-zero pointer flag and the buffer size
+  long buffer[3];
+  buffer[0] = timeout;
+  buffer[1] = 0; // by default assume result is a void shared pointer (e.g. request timed out)
+  buffer[2] = 0; // by default assume the size is zero - this field is overwritten anyway
+
   boost::shared_ptr<askap::cp::TosMetadata> result;
   if (itsMetadataSource) {
       // this is the master rank - obtain metadata
       result = itsMetadataSource->next(timeout);
       // broadcast the result
+
+      // 1) encode it into blob
+      LOFAR::BlobString bs;
+      bs.resize(0);
+      LOFAR::BlobOBufString bob(bs);
+      LOFAR::BlobOStream out(bob);
+      out.putStart("TosMetadata", formatId);
+      if (result) {
+          out << *result;
+          buffer[1] = 1; // non-void pointer flag - signals to slave there will be a second message
+      }
+      out.putEnd();
+      buffer[2] = bs.size();
+
+      // 2) broadcast buffer to slave ranks
+      const int response = MPI_Bcast(&buffer, 3, MPI_LONG, itsMasterRank, MPI_COMM_WORLD);
+      ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Bcast = "<<response);
+ 
+      // 3) broadcast blob string to slave ranks, if there is some metadata object to broadcast
+      // (null pointer is taken care of by the first broadcast)
+      if (result) {
+          const int response = MPI_Bcast(bs.data(), bs.size(), MPI_BYTE, itsMasterRank, MPI_COMM_WORLD);
+          ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Bcast = "<<response);
+      }
+
   } else {
       // this is the slave rank - receive metadata
+
+      // 1) receive buffer from the master rank
+      const int response = MPI_Bcast(&buffer, 3, MPI_LONG, itsMasterRank, MPI_COMM_WORLD);
+      ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Bcast = "<<response);
+
+      // 2) consistency check for the argument of the method
+      ASKAPCHECK(timeout == buffer[0], "Master rank got timeout = "<<buffer[0]<<
+              " while this slave got "<<timeout<<" in ParallelMetadataSource::next, mismatched calls suspected");
+
+      // 3) receive message with actual payload if it exists. Otherwise, return zero shared pointer
+      if (buffer[1] != 0) {
+          ASKAPDEBUGASSERT(buffer[1] == 1);
+
+          LOFAR::BlobString bs;
+          bs.resize(buffer[2]);
+
+          const int response = MPI_Bcast(bs.data(), bs.size(), MPI_BYTE, itsMasterRank, MPI_COMM_WORLD);
+          ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Bcast = "<<response);
+          
+          // 4) decode the payload
+          result.reset(new askap::cp::TosMetadata());
+
+          LOFAR::BlobIBufString bib(bs);
+          LOFAR::BlobIStream in(bib);
+          const int version=in.getStart("model");
+          ASKAPASSERT(version == formatId);
+          in >> *result;
+          in.getEnd();
+      }
   }
   return result;
 }

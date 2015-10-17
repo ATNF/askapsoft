@@ -54,6 +54,7 @@
 #include "ingestpipeline/sourcetask/VisSource.h"
 #include "ingestpipeline/sourcetask/ISource.h"
 #include "ingestpipeline/sourcetask/MergedSource.h"
+#include "ingestpipeline/sourcetask/ParallelMetadataSource.h"
 #include "ingestpipeline/sourcetask/NoMetadataSource.h"
 #include "ingestpipeline/derippletask/DerippleTask.h"
 #include "ingestpipeline/tcpsink/TCPSink.h"
@@ -135,19 +136,29 @@ boost::shared_ptr< ISource > TaskFactory::createMergedSource(void)
             "First defined task is not the Merged Source");
 
     // 1) Configure and create the metadata source
-    const std::string mdLocatorHost = itsConfig.metadataTopic().registryHost();
-    const std::string mdLocatorPort = itsConfig.metadataTopic().registryPort();
-    const std::string mdTopicManager = itsConfig.metadataTopic().topicManager();
-    const std::string mdTopic = itsConfig.metadataTopic().topic();
-    const unsigned int mdBufSz = 12; // TODO: Make this a tunable
-    const std::string mdAdapterName = "IngestPipeline";
-    IMetadataSource::ShPtr metadataSrc(new MetadataSource(mdLocatorHost,
-                mdLocatorPort, mdTopicManager, mdTopic, mdAdapterName, mdBufSz));
+    IMetadataSource::ShPtr metadataSrc; // void shared pointer by default
+    const int rank = itsConfig.rank();
+    const int numProcs = itsConfig.nprocs();
+
+    if ((numProcs == 1) || (rank == 0)) {
+        ASKAPLOG_DEBUG_STR(logger, "Rank zero or serial case - creating metadata source");
+        const std::string mdLocatorHost = itsConfig.metadataTopic().registryHost();
+        const std::string mdLocatorPort = itsConfig.metadataTopic().registryPort();
+        const std::string mdTopicManager = itsConfig.metadataTopic().topicManager();
+        const std::string mdTopic = itsConfig.metadataTopic().topic();
+        const unsigned int mdBufSz = 12; // TODO: Make this a tunable
+        const std::string mdAdapterName = "IngestPipeline";
+        metadataSrc.reset(new MetadataSource(mdLocatorHost,
+                 mdLocatorPort, mdTopicManager, mdTopic, mdAdapterName, mdBufSz));
+    }
+    if (numProcs > 1) {
+        // parallel case - wrap metadata source in an adapter
+        // non-zero ranks will get an empty pointer as input
+        metadataSrc.reset(new ParallelMetadataSource(metadataSrc));
+    }
 
     // 2) Configure and create the visibility source
     const LOFAR::ParameterSet params = itsConfig.tasks().at(0).params();
-    const int rank = itsConfig.rank();
-    const int numProcs = itsConfig.nprocs();
     VisSource::ShPtr visSrc(new VisSource(params, rank));
 
     // 3) Create and configure the merged source
