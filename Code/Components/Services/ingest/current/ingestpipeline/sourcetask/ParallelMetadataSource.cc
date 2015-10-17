@@ -183,7 +183,7 @@ boost::shared_ptr<askap::cp::TosMetadata> ParallelMetadataSource::next(const lon
 
           LOFAR::BlobIBufString bib(bs);
           LOFAR::BlobIStream in(bib);
-          const int version=in.getStart("model");
+          const int version=in.getStart("TosMetadata");
           ASKAPASSERT(version == formatId);
           in >> *result;
           in.getEnd();
