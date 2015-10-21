@@ -119,6 +119,9 @@ void SpectralLineWorker::run(void)
 
         // Send the params to the master, which also implicitly requests
         // more work
+        ASKAPLOG_DEBUG_STR(logger, "Sending params back to master for local channel " << wu.get_localChannel()
+                           << ", global channel " << wu.get_globalChannel()
+                           << ", frequency " << wu.get_channelFrequency()/1.e6 << "MHz");
         wrequest.set_globalChannel(wu.get_globalChannel());
         wrequest.set_params(params);
         itsComms.sendMessage(wrequest, itsMaster);
