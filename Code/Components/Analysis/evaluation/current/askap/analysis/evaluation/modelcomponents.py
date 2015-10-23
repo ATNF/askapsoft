@@ -11,37 +11,44 @@ from utils import *
 #  will be referenced by the evaluation plots.
 
 class SelavyObject:
+    # This class is now meant to be equivalent to the CASDA component catalogue that Selavy creates
     def __init__(self,line):
         self.line = line
         if(line[0]!='#'):
             cols = line.split()
             self.type = 'Selavy'
-            self.id = cols[0]
-            self.name = cols[1]
-            self.ra = float(cols[2])
-            self.dec = float(cols[3])
-            self.x = float(cols[4])
-            self.y = float(cols[5])
-            self.Fint = float(cols[6])
-            self.Fpeak = float(cols[7])
-            self.FintFIT = float(cols[8])
-            self.FpeakFIT = float(cols[9])
-            self.maj = float(cols[10])
-            self.min = float(cols[11])
-            self.pa = float(cols[12])
-            self.majDECONV = float(cols[13])
-            self.minDECONV = float(cols[14])
-            self.paDECONV = float(cols[15])
-            self.alpha = float(cols[16])
-            self.beta = float(cols[17])
-            self.chisqFIT = float(cols[18])
-            self.RMSimage = float(cols[19])
-            self.rmsFIT = float(cols[20])
-            self.nfreeFIT = int(cols[21])
-            self.ndofFIT = int(cols[22])
-            self.npixFIT = int(cols[23])
-            self.npixObj = int(cols[24])
-            self.guess = int(cols[25])
+            self.islandID = cols[0]
+            self.id = cols[1]
+            self.name = cols[2]
+            self.raStr = cols[3]
+            self.decStr = cols[4]
+            self.ra = float(cols[5])
+            self.dec = float(cols[6])
+            self.raErr = float(cols[7])
+            self.decErr = float(cols[8])
+            self.freq = float(cols[9])
+            self.Fpeak = float(cols[10])
+            self.FpeakErr = float(cols[11])
+            self.Fint = float(cols[12])
+            self.FintErr = float(cols[13])
+            self.maj = float(cols[14])
+            self.min = float(cols[15])
+            self.pa = float(cols[16])
+            self.majErr = float(cols[17])
+            self.minErr = float(cols[18])
+            self.paErr = float(cols[19])
+            self.majDECONV = float(cols[20])
+            self.minDECONV = float(cols[21])
+            self.paDECONV = float(cols[22])
+            self.chisqFIT = float(cols[23])
+            self.rmsFIT = float(cols[24])
+            self.alpha = float(cols[25])
+            self.beta = float(cols[26])
+            self.RMSimage = float(cols[27])
+            self.flag1 = int(cols[26])
+            self.flag2 = int(cols[27])
+            self.flag3 = int(cols[28])
+            self.flag4 = int(cols[29])
 
     def flux(self):
         return self.FintFIT
@@ -170,6 +177,62 @@ class SUMSSObject:
 
     def peak(self):
         return self.Fpeak
+
+def tofloat(str):
+    if str.strip()=='':
+        return 0.
+    else:
+        return float(str)
+    
+def toint(str):
+    if str.strip()=='':
+        return 0
+    else:
+        return int(str)
+    
+class NVSSObject:
+
+    def __init__(self,line):
+        self.line = line
+        if(line[0]!='#'):
+            self.type = 'NVSS'
+            self.radius=tofloat(line[0:9])
+            self.xoff = tofloat(line[9:19])
+            self.yoff = tofloat(line[19:29])
+            self.recno = toint(line[30:38])
+            self.field = line[38:46]
+            self.fieldxpos = tofloat(line[47:54])
+            self.fieldypos = tofloat(line[55:62])
+            self.name = line[63:77].strip()
+            self.id = self.name
+            self.rastring = line[78:89].replace(' ',':')
+            self.ra = posToDec(self.rastring)*15.
+            self.raerr = tofloat(line[90:95])
+            self.decstring = line[96:107].replace(' ',':')
+            self.dec = posToDec(self.decstring)
+            self.decerr = tofloat(line[108:112])
+            self.S1400 = tofloat(line[113:121])
+            self.S1400err = tofloat(line[122:129])
+            self.majorAxisLimit = line[130]
+            self.maj = tofloat(line[132:137])
+            self.majErr = tofloat(line[138:142])
+            self.minorAxisLimit = line[143]
+            self.min = tofloat(line[145:150])
+            self.minErr = tofloat(line[151:155])
+            self.pa =tofloat(line[156:161])
+            self.paErr =  tofloat(line[162:166])
+            self.flagResidual = line[167:169]
+            self.residualFlux = toint(line[170:174])
+            self.polFlux = tofloat(line[175:181])
+            self.polPA = tofloat(line[182:187])
+            self.polFluxErr = tofloat(line[188:193])
+            self.polPAerr = tofloat(line[194:198])
+
+    def flux(self):
+        return self.S1400
+
+    def peak(self):
+        self.flux()* pi * self.maj * self.min / (4.*log(2))
     
 class Match:
     def __init__(self,line,srcCat,refCat):

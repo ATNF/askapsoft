@@ -30,7 +30,15 @@ def readMatches(matchfile,srcDict,refDict):
     matchlist=[]
     for line in fin:
         cols=line.split()
-        matchlist.append(Match(line,srcDict,refDict))
+        srcID=cols[1]
+        refID=cols[2]
+        if srcDict.has_key(srcID) and refDict.has_key(refID):
+            matchlist.append(Match(line,srcDict,refDict))
+        else:
+            if not srcDict.has_key(srcID):
+                logging.error("Src key %s is missing from src dictionary"%srcID)
+            if not refDict.has_key(refID):
+                logging.error("Ref key %s is missing from ref dictionary"%refID)
 
     return matchlist
 
@@ -39,8 +47,12 @@ def readMisses(missfile,catalogue,key):
     misslist=[]
     for line in fin:
         cols=line.split()
-        if(cols[0]==key):
-            misslist.append(catalogue[cols[1]])
+        if cols[0]==key:
+            id = cols[1]
+            if catalogue.has_key(id):
+                misslist.append(catalogue[id])
+            else:
+                logging.error("Key %s is missing from dictionary"%id)
 
     return misslist
 
@@ -49,9 +61,13 @@ def readMisses(missfile,catalogue,key):
 # Reads a catalogue of objects
 def readCat(filename,catalogueType):
 
-    if(catalogueType == "Selavy" or catalogueType=="Continuum" or catalogueType=="ContinuumID" or catalogueType=="SUMSS"):
+    catDict={}
+    if(catalogueType == "Selavy" or
+       catalogueType=="Continuum" or
+       catalogueType=="ContinuumID" or
+       catalogueType=="SUMSS" or
+       catalogueType=="NVSS"):
 
-        catDict={}
         fin=open(filename)
         for line in fin:
             if(line[0]!='#'):
@@ -63,6 +79,8 @@ def readCat(filename,catalogueType):
                     obj=ContinuumIDObject(line)
                 elif catalogueType=="SUMSS":
                     obj=SUMSSObject(line)
+                elif catalogueType=="NVSS":
+                    obj=NVSSObject(line)
                 catDict[obj.id] = obj
         fin.close()
 

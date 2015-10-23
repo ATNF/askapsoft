@@ -16,6 +16,7 @@ import pywcs
 import os
 from optparse import OptionParser
 import askap.parset as parset
+import askap.logging as logging
 
 def labelPlot(xlab, ylab, title,textsize):
     plt.tick_params(labelsize=textsize)
@@ -45,10 +46,12 @@ if __name__ == '__main__':
     snrImageName=inputPars.get_value('snrImage','snr.i.clean.fits')
     skymodelCatalogue=inputPars.get_value('refCatalogue','skyModel-catalogue.txt')
     skymodelCatType = inputPars.get_value('refCatalogueType','Selavy')
+    refFluxScale = inputPars.get_value('refFluxScale',1.0)
     skymodelOrigCat=inputPars.get_value('origCatalogue','')
     skymodelOrigCatIsPrecessed=inputPars.get_value('origCatalogueIsPrecessed','false')
     sourceCatalogue=inputPars.get_value('sourceCatalogue','selavy-fitResults.txt')
     sourceCatType = inputPars.get_value('sourceCatalogueType','Selavy')
+    sourceFluxScale = inputPars.get_value('sourceFluxScale',1.0)
     matchfile = inputPars.get_value('matchfile','matches.txt')
 
     
@@ -198,8 +201,10 @@ if __name__ == '__main__':
     matchedSources=np.array(matchedSources)
 
     for source in sourcelist:
-        flux=source.flux()
+        flux=source.flux()*sourceFluxScale
+        print flux
         loc=int((math.log10(flux)+4+0.1)*5)
+        print loc,fluxpts.size
         if loc>=0 and loc<fluxpts.size:
             counts[loc] = counts[loc]+1
             sourceDetArea = pixelarea * threshmap[threshmap<source.peak()].size
@@ -224,7 +229,7 @@ if __name__ == '__main__':
     selector.setFluxType("peak")
     for source in skymodellist:
         if selector.isGood(source):
-            flux=source.flux()
+            flux=source.flux()*refFluxScale
             loc=int((math.log10(flux)+4+0.1)*5)
             sourceDetArea = pixelarea * threshmap[threshmap<source.peak()].size
             #sourceDetArea = fullFieldArea
@@ -246,7 +251,7 @@ if __name__ == '__main__':
         selector.setFluxType("int")
         for source in origskymodellist:
             if (skymodelOrigCatIsPrecessed and selectorUnprecessed.isgood(source)) or (not skymodelOrigCatIsPrecessed and selector.isGood(source)):
-                flux=source.flux()
+                flux=source.flux()*refFluxScale
                 loc=int((math.log10(flux)+4+0.1)*5)
                 #sourceDetArea = fullFieldArea
                 sourceDetArea = pixelarea * threshmap[threshmap<source.flux()].size
@@ -264,20 +269,30 @@ if __name__ == '__main__':
         plt.plot(fluxpts*shift,n,'g-',label='_nolegend_')
         plt.plot(fluxpts*shift,n,'go',label='Original Sky model')
         plt.errorbar(fluxpts*shift,n,yerr=np.sqrt(countsSMorig)*fluxpts**2.5/fullFieldArea,xerr=None,fmt='g-',label='_nolegend_')
+
     n=countsPerAreaSM * fluxpts**2.5 / fluxbinwidths
-    #    for i in range(len(fluxpts)):
-    #        print "%d: %f %6d %f %f %d"%(i,fluxpts[i],countsSM[i],countsPerAreaSM[i],n[i],threshmap[threshmap<fluxpts[i]].size)
-    plt.plot(fluxpts/shift,n,'r-',label='_nolegend_')
-    plt.plot(fluxpts/shift,n,'ro',label='Sky model')
-    plt.errorbar(fluxpts/shift,n,yerr=np.sqrt(countsSM)*fluxpts**2.5/fullFieldArea,xerr=None,fmt='r-',label='_nolegend_')
+    if (n!=0).any():
+        plt.plot(fluxpts/shift,n,'r-',label='_nolegend_')
+        plt.plot(fluxpts/shift,n,'ro',label='Sky model')
+        plt.errorbar(fluxpts/shift,n,yerr=np.sqrt(countsSM)*fluxpts**2.5/fullFieldArea,xerr=None,fmt='r-',label='_nolegend_')
+    else:
+        logging.warning('No value source counts for the Skymodel')
+        
     n=countsPerArea * fluxpts**2.5 / fluxbinwidths
-    plt.plot(fluxpts,n,'b-',label='_nolegend_')
-    plt.plot(fluxpts,n,'bo',label='Detected Components')
-    plt.errorbar(fluxpts,n,yerr=np.sqrt(counts)*fluxpts**2.5/fullFieldArea,xerr=None,fmt='b-',label='_nolegend_')
+    if (n!=0).any():
+        plt.plot(fluxpts,n,'b-',label='_nolegend_')
+        plt.plot(fluxpts,n,'bo',label='Detected Components')
+        plt.errorbar(fluxpts,n,yerr=np.sqrt(counts)*fluxpts**2.5/fullFieldArea,xerr=None,fmt='b-',label='_nolegend_')
+    else:
+        logging.warning('No value source counts for the catalogue')
+        
     n=countsMatchPerArea * fluxpts**2.5 / fluxbinwidths
-    plt.plot(fluxpts,n,'g-',label='_nolegend_')
-    plt.plot(fluxpts,n,'go',label='Detected & Matched Components')
-    plt.errorbar(fluxpts,n,yerr=np.sqrt(countsMatch)*fluxpts**2.5/fullFieldArea,xerr=None,fmt='g-',label='_nolegend_')
+    if (n!=0).any():
+        plt.plot(fluxpts,n,'g-',label='_nolegend_')
+        plt.plot(fluxpts,n,'go',label='Detected & Matched Components')
+        plt.errorbar(fluxpts,n,yerr=np.sqrt(countsMatch)*fluxpts**2.5/fullFieldArea,xerr=None,fmt='g-',label='_nolegend_')
+    else:
+        logging.warning('No value source counts for the matched catalogue')
 
     # This will plot the analytic polynomial fit to the 1.4GHz source
     # counts from Hopkins et al (2003) (AJ 125, 465)

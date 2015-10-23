@@ -51,6 +51,8 @@ if __name__ == '__main__':
         exit(0)
     refCatType = inputPars.get_value('refCatalogueType','Selavy')
     refCat = readCat(refCatFile,refCatType)
+    if len(refCat)==0:
+        logging.error('Zero length reference catalogue from file %s!'%refCatFile)
     print refCatFile
 
     matchfile = inputPars.get_value('matchfile','matches.txt')
