@@ -45,10 +45,10 @@ class SelavyObject:
             self.alpha = float(cols[25])
             self.beta = float(cols[26])
             self.RMSimage = float(cols[27])
-            self.flag1 = int(cols[26])
-            self.flag2 = int(cols[27])
-            self.flag3 = int(cols[28])
-            self.flag4 = int(cols[29])
+            self.flag1 = int(cols[28])
+            self.flag2 = int(cols[29])
+            self.flag3 = int(cols[30])
+            self.flag4 = int(cols[31])
 
     def flux(self):
         return self.FintFIT
