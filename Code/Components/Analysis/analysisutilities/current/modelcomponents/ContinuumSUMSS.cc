@@ -92,7 +92,8 @@ void ContinuumSUMSS::define(const std::string &line)
     sID << "J" << itsRAh << itsRAm << itsDECd << itsDECm;
     itsID = sID.str();
 
-    itsFlux = itsTotalFlux / 1.e3;  //convert to Jy
+//    itsFlux = itsTotalFlux / 1.e3;  //convert to Jy
+    itsFlux = itsTotalFlux;
     itsMaj = itsDeconvMajorAxis;
     itsMin = itsDeconvMinorAxis;
     itsPA = (itsDeconvPositionAngleString == "---") ? 0. :

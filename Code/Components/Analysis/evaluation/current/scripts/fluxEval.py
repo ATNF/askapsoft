@@ -115,10 +115,10 @@ if __name__ == '__main__':
         bS=append(bS,m.src.min)
         pS=append(pS,m.src.pa)
         if sourceCatType=="Selavy" :
-            npf=append(npf,m.src.npixFIT)
-            npo=append(npf,m.src.npixObj)
-            ndof=append(ndof,m.src.ndofFIT)
-            nfree=append(nfree,m.src.nfreeFIT)
+#            npf=append(npf,m.src.npixFIT)
+#            npo=append(npf,m.src.npixObj)
+#            ndof=append(ndof,m.src.ndofFIT)
+#            nfree=append(nfree,m.src.nfreeFIT)
             rms=append(rms,m.src.rmsFIT)
             chisq=append(chisq,m.src.chisqFIT)
         offset=append(offset,m.sep)
@@ -133,14 +133,14 @@ if __name__ == '__main__':
         y=append(y,m.dec)
         missType=append(missType,'S')
         if sourceCatType=="Selavy" :
-            npo2=append(npo2,sourceCat[m.id].npixObj)
+#            npo2=append(npo2,sourceCat[m.id].npixObj)
             imagerms2=append(imagerms2,sourceCat[m.id].RMSimage)
     for m in refmisslist:
         x=append(x,m.ra)
         y=append(y,m.dec)
         missType=append(missType,'R')
         if refCatType=="Selavy" :
-            npo2=append(npo2,refCat[m.id].npixObj)
+#            npo2=append(npo2,refCat[m.id].npixObj)
             imagerms2=append(imagerms2,refCat[m.id].RMSimage)
                          
     #    fluxScaling = 1.e6
@@ -175,9 +175,9 @@ if __name__ == '__main__':
                 azimuth[i] = 360. - azimuth[i]
     azimuth = azimuth % 360.
     area = math.pi * aS * bS / 4.
-    numComp=ones(npf.size)
-    if sourceCatType=="Selavy" :
-        numComp[nfree>0] = (npf[nfree>0]-ndof[nfree>0]-1)/nfree[nfree>0]
+#    numComp=ones(npf.size)
+#    if sourceCatType=="Selavy" :
+#        numComp[nfree>0] = (npf[nfree>0]-ndof[nfree>0]-1)/nfree[nfree>0]
     numNeighbours = zeros(len(xS))
     for i in range(len(xS)):
         for j in range(len(x)):
@@ -194,10 +194,11 @@ if __name__ == '__main__':
     print "Fraction with dS/S>30%%   = %5.2f%%"%(100.*size(rdF[rdF>30])/float(size(rdF)))
     print ""
 
-    if sourceCatType=="Selavy" :
-        dFgood = dF[npf>0]
-    else:
-        dFgood = dF
+#    if sourceCatType=="Selavy" :
+#        dFgood = dF[npf>0]
+#    else:
+#        dFgood = dF
+    dFgood = dF
     print "Mean of dS   = %10.6f"%(mean(dFgood))
     print "Median of dS = %10.6f"%(median(dFgood))
     print "RMS of dS    = %10.6f"%(std(dFgood))
@@ -207,10 +208,11 @@ if __name__ == '__main__':
         print "Average of the ImageRMS values = %10.6f"%(mean(imagerms[npf>0]))
         print "Weighted average of the ImageRMS values = %10.6f"%(sum(imagerms[npf>0]*npf[npf>0])/(sum(npf[npf>0])*1.))
 
-    if sourceCatType=="Selavy" :
-        goodfit = npf>0
-    else:
-        goodfit = array(ones(fS.size),dtype=bool)
+#    if sourceCatType=="Selavy" :
+#        goodfit = npf>0
+#    else:
+#        goodfit = array(ones(fS.size),dtype=bool)
+    goodfit = array(ones(fS.size),dtype=bool)
 #    ind = argsort(rdF)[goodfit[argsort(rdF)]]
     ind = array(range(len(rdF)))[goodfit]
 
@@ -444,8 +446,8 @@ if __name__ == '__main__':
         ylabel('Number',font)
 
         plotcount = nextplot(plotcount)
-        if sourceCatType=="Selavy" :
-            n, bins, patches = hist(chisq[ind]/ndof[ind], 20)
+#        if sourceCatType=="Selavy" :
+#            n, bins, patches = hist(chisq[ind]/ndof[ind], 20)
         xlabel(r'$\chi^2/\nu$ of fit',font)
         ylabel('Number',font)
 
@@ -456,16 +458,16 @@ if __name__ == '__main__':
         ylabel('Number',font)
 
         plotcount = nextplot(plotcount)
-        if sourceCatType=="Selavy" :
-            for i in ind:
-                plot([npf[i]],[arr[i]],'o')
+#        if sourceCatType=="Selavy" :
+#            for i in ind:
+#                plot([npf[i]],[arr[i]],'o')
         xlabel(r'Number of pixels in fit',font)
         ylabel(lab,font)
 
         plotcount = nextplot(plotcount)
-        if sourceCatType=="Selavy" :
-            for i in ind:
-                plot([npo[i]],[arr[i]],'o')
+#        if sourceCatType=="Selavy" :
+#            for i in ind:
+#                plot([npo[i]],[arr[i]],'o')
         xlabel(r'Number of pixels in object',font)
         ylabel(lab,font)
 
@@ -477,9 +479,9 @@ if __name__ == '__main__':
         ylabel(lab,font)
 
         plotcount = nextplot(plotcount)
-        if sourceCatType=="Selavy" :
-            for i in ind:
-                plot([chisq[i]/ndof[i]],[arr[i]],'o')
+#        if sourceCatType=="Selavy" :
+#            for i in ind:
+#                plot([chisq[i]/ndof[i]],[arr[i]],'o')
         xlabel(r'$\chi^2/\nu$ of fit',font)
         ylabel(lab,font)
 
@@ -491,11 +493,11 @@ if __name__ == '__main__':
         ylabel(lab,font)
 
         plotcount = nextplot(plotcount)
-        if sourceCatType=="Selavy" :
-            for i in ind:
-                plot([numComp[i]],[arr[i]],'o')
-            axisrange = axis()
-            axis([0,max(numComp)+1,axisrange[2],axisrange[3]])
+#        if sourceCatType=="Selavy" :
+#            for i in ind:
+#                plot([numComp[i]],[arr[i]],'o')
+#            axisrange = axis()
+#            axis([0,max(numComp)+1,axisrange[2],axisrange[3]])
         xlabel(r'Number of fitted components',font)
         ylabel(lab,font)
 

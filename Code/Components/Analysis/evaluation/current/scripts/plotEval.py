@@ -121,14 +121,14 @@ if __name__ == '__main__':
         y=append(y,m.dec)
         missType=append(missType,'S')
         if(sourceCatType=="Selavy"):
-            npo2=append(npo2,sourceCat[m.id].npixObj)
+#            npo2=append(npo2,sourceCat[m.id].npixObj)
             imagerms2=append(imagerms2,sourceCat[m.id].RMSimage)
     for m in refmisslist:
         x=append(x,m.ra)
         y=append(y,m.dec)
         missType=append(missType,'R')
         if(refCatType=="Selavy"):
-            npo2=append(npo2,refCat[m.id].npixObj)
+#            npo2=append(npo2,refCat[m.id].npixObj)
             imagerms2=append(imagerms2,refCat[m.id].RMSimage)
                          
     axisrange=spatPosPlot(xS,yS,xR,yR,matchType,x,y,missType,minRelVal=2.,plotRefMisses=plotRefMisses)

@@ -49,9 +49,10 @@ class SelavyObject:
             self.flag2 = int(cols[29])
             self.flag3 = int(cols[30])
             self.flag4 = int(cols[31])
+#            print "Read component %s with flux %8.6f"%(self.id,self.Fint)
 
     def flux(self):
-        return self.FintFIT
+        return self.Fint
 
     def peak(self):
         return self.Fpeak
@@ -154,10 +155,10 @@ class SUMSSObject:
             self.id = "J"+cols[0]+cols[1]+cols[3]+cols[4]
             self.raErr = float(cols[6])
             self.decErr = float(cols[7])
-            self.Fpeak = float(cols[8])/1000.
-            self.FpeakErr = float(cols[9])/1000.
-            self.Fint = float(cols[10])/1000.
-            self.FintErr = float(cols[11])/1000.
+            self.Fpeak = float(cols[8])
+            self.FpeakErr = float(cols[9])
+            self.Fint = float(cols[10])
+            self.FintErr = float(cols[11])
             self.maj = float(cols[12])
             self.min = float(cols[13])
             self.pa = float(cols[14])
