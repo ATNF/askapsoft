@@ -1,0 +1,11 @@
+antennas.telescope = ASKAP
+antennas.ASKAP.coordinates = global
+antennas.ASKAP.names = [ak02, ak04 ,ak05, ak12]
+antennas.ASKAP.diameter = 12m
+antennas.ASKAP.scale = 1.0
+antennas.ASKAP..mount = equatorial
+
+antennas.ASKAP.ak02 = [-2556109.976515, 5097388.699862, -2848440.12097248]
+antennas.ASKAP.ak04 = [-2556087.396082, 5097423.589662, -2848396.867933]
+antennas.ASKAP.ak05 = [-2556028.607336, 5097451.468188, -2848399.83113161]
+antennas.ASKAP.ak12 = [-2556496.237175, 5097333.724901, -2848187.33832738]
