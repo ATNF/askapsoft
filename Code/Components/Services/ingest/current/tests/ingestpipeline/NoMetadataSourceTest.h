@@ -23,6 +23,7 @@
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
 /// @author Ben Humphreys <ben.humphreys@csiro.au>
+/// Seriously modified during ADE transition by Max Voronkov
 
 // CPPUnit includes
 #include <cppunit/extensions/HelperMacros.h>
@@ -35,6 +36,8 @@
 #include "cpcommon/VisDatagram.h"
 #include "cpcommon/VisChunk.h"
 #include "ConfigurationHelper.h"
+#include "VisDatagramTestHelper.h"
+#include "askap/AskapUtil.h"
 
 // Classes to test
 #include "ingestpipeline/sourcetask/NoMetadataSource.h"
@@ -45,7 +48,8 @@ namespace askap {
 namespace cp {
 namespace ingest {
 
-class NoMetadataSourceTest : public CppUnit::TestFixture {
+class NoMetadataSourceTest : public CppUnit::TestFixture,
+                      protected VisDatagramTestHelper<VisDatagram> {
         CPPUNIT_TEST_SUITE(NoMetadataSourceTest);
         //CPPUNIT_TEST(testMockVisSource);
         //CPPUNIT_TEST(testSingle);
@@ -57,9 +61,7 @@ class NoMetadataSourceTest : public CppUnit::TestFixture {
             itsVisSrc.reset(new MockVisSource);
 
             LOFAR::ParameterSet params;
-            std::ostringstream ss;
-            ss << VisDatagramTraits<VisDatagram>::N_CHANNELS_PER_SLICE;
-            params.add("n_channels.0", ss.str());
+            params.add("n_channels.0", utility::toString(nChannelsForTest()));
             Configuration config = ConfigurationHelper::createDummyConfig();
             itsInstance.reset(new NoMetadataSource(params, config, itsVisSrc, 1, 0));
         }
@@ -78,6 +80,7 @@ class NoMetadataSourceTest : public CppUnit::TestFixture {
             CPPUNIT_ASSERT(itsVisSrc->next() == vis);
         };
 
+        /*
         void testSingle() {
             const unsigned long starttime = 1000000; // One second after epoch
             const unsigned long period = 5 * 1000 * 1000;
@@ -153,7 +156,7 @@ class NoMetadataSourceTest : public CppUnit::TestFixture {
             CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(VisDatagramTraits<VisDatagram>::N_CHANNELS_PER_SLICE),
                     chunk->frequency().size());
         }
-
+        */
     private:
 
         boost::shared_ptr< NoMetadataSource > itsInstance;

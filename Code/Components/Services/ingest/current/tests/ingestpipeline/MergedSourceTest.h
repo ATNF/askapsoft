@@ -23,6 +23,7 @@
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
 /// @author Ben Humphreys <ben.humphreys@csiro.au>
+/// Seriously modified during ADE transition by Max Voronkov
 
 // CPPUnit includes
 #include <cppunit/extensions/HelperMacros.h>
@@ -40,6 +41,9 @@
 #include "cpcommon/VisChunk.h"
 #include "measures/Measures.h"
 #include "ConfigurationHelper.h"
+#include "VisDatagramTestHelper.h"
+#include "askap/AskapUtil.h"
+#include "askap/AskapError.h"
 
 // Classes to test
 #include "ingestpipeline/sourcetask/MergedSource.h"
@@ -50,10 +54,9 @@ namespace askap {
 namespace cp {
 namespace ingest {
 
-class MergedSourceTest : public CppUnit::TestFixture {
+class MergedSourceTest : public CppUnit::TestFixture,
+                         protected VisDatagramTestHelper<VisDatagram> {
         CPPUNIT_TEST_SUITE(MergedSourceTest);
-        //CPPUNIT_TEST(testSumOfArithmeticSeries);
-        //CPPUNIT_TEST(testCalculateRow);
         CPPUNIT_TEST(testMockMetadataSource);
         CPPUNIT_TEST(testMockVisSource);
         CPPUNIT_TEST(testSingle);
@@ -66,9 +69,7 @@ class MergedSourceTest : public CppUnit::TestFixture {
             itsVisSrc.reset(new MockVisSource);
 
             LOFAR::ParameterSet params;
-            std::ostringstream ss;
-            ss << VisDatagramTraits<VisDatagram>::N_CHANNELS_PER_SLICE;
-            params.add("n_channels.0", ss.str());
+            params.add("n_channels.0", utility::toString(nChannelsForTest()));
             const Configuration config = ConfigurationHelper::createDummyConfig();
             itsInstance.reset(new MergedSource(params, config, itsMetadataSrc, itsVisSrc, 1, 0));
         }
@@ -128,7 +129,7 @@ class MergedSourceTest : public CppUnit::TestFixture {
             askap::cp::VisDatagram vis;
             vis.version = VisDatagramTraits<VisDatagram>::VISPAYLOAD_VERSION;
             vis.slice = 0;
-            vis.baselineid = 1;
+            fillProtocolSpecificInfo(vis);
             vis.beamid = 1;
             vis.timestamp = starttime;
 
@@ -154,7 +155,7 @@ class MergedSourceTest : public CppUnit::TestFixture {
             //CPPUNIT_ASSERT_DOUBLES_EQUAL(midpoint, chunkMidpoint.getValue("s"), 1.0E-10);
 
             // Ensure other metadata is as expected
-            CPPUNIT_ASSERT_EQUAL(1 * VisDatagramTraits<VisDatagram>::N_CHANNELS_PER_SLICE, chunk->nChannel());
+            CPPUNIT_ASSERT_EQUAL(nChannelsForTest(), chunk->nChannel());
             CPPUNIT_ASSERT_EQUAL(nCorr, chunk->nPol());
             const uint32_t nBaselines = config.bmap().size();
             // without any conversion rules set up number of beams
@@ -162,70 +163,63 @@ class MergedSourceTest : public CppUnit::TestFixture {
             const uint32_t nBeam = config.feed().nFeeds() + 1;
             CPPUNIT_ASSERT_EQUAL(nBaselines * nBeam, chunk->nRow());
 
-            // Ensure the visibilities that were supplied (most were not)
-            // are not flagged, and that the rest are flagged
-
-            // First calculate the channel range that was set and the antenna pair
-            const uint32_t startChan = vis.slice * VisDatagramTraits<VisDatagram>::N_CHANNELS_PER_SLICE; //inclusive
-            const uint32_t endChan = (vis.slice + 1) * VisDatagramTraits<VisDatagram>::N_CHANNELS_PER_SLICE; //exclusive
-            const int32_t ant1 = config.bmap().idToAntenna1(vis.baselineid);
-            CPPUNIT_ASSERT(ant1 != -1); // -1 represents an invalid mapping
-            const int32_t ant2 = config.bmap().idToAntenna2(vis.baselineid);
-            CPPUNIT_ASSERT(ant2 != -1);
-
-            for (uint32_t row = 0; row < chunk->nRow(); ++row) {
-                for (uint32_t chan = 0; chan < chunk->nChannel(); ++chan) {
-                    for (uint32_t pol = 0; pol < chunk->nPol(); ++pol) {
-                        if (chan >= startChan &&
-                                chan < endChan &&
-                                chunk->antenna1()(row) == static_cast<uint32_t>(ant1) &&
-                                chunk->antenna2()(row) == static_cast<uint32_t>(ant2) &&
-                                chunk->beam1()(row) == vis.beamid &&
-                                chunk->beam2()(row) == vis.beamid &&
-                                pol == 0) {
-                            // If this is one of the visibilities that were added above
-                            CPPUNIT_ASSERT_EQUAL(false, chunk->flag()(row, chan, pol));
-                        } else {
-                            CPPUNIT_ASSERT_EQUAL(true, chunk->flag()(row, chan, pol));
-                        }
-                    }
-                }
-            }
-
-            // Check scan index
-            CPPUNIT_ASSERT_EQUAL(0u, chunk->scan());
-
             // Check stokes
+            CPPUNIT_ASSERT(chunk->nPol() >= 4);
             CPPUNIT_ASSERT(chunk->stokes()(0) == casa::Stokes::XX);
             CPPUNIT_ASSERT(chunk->stokes()(1) == casa::Stokes::XY);
             CPPUNIT_ASSERT(chunk->stokes()(2) == casa::Stokes::YX);
             CPPUNIT_ASSERT(chunk->stokes()(3) == casa::Stokes::YY);
 
+            // Ensure the visibilities that were supplied (most were not)
+            // are not flagged, and that the rest are flagged
+
+            for (uint32_t row = 0; row < chunk->nRow(); ++row) {
+                 for (uint32_t pol = 0; pol < chunk->nPol(); ++pol) {
+                      
+                      const int32_t product = config.bmap().getID(chunk->antenna1()(row),
+                                      chunk->antenna2()(row), chunk->stokes()(pol));
+                      if (product < 0) {
+                          if ((chunk->antenna1()(row) == chunk->antenna2()(row)) && (pol == 2)) {
+                              // for autos pol==2 is obtained from pol==1
+                              for (uint32_t chan = 0; chan < chunk->nChannel(); ++chan) {
+                                   CPPUNIT_ASSERT_EQUAL(chunk->flag()(row, chan, 1), chunk->flag()(row, chan, pol));
+                              }
+                          } else {
+
+                            // products are defined for the first 3 antennas only
+                            CPPUNIT_ASSERT((chunk->antenna1()(row) > 2) || (chunk->antenna2()(row) > 2));
+
+                            // appropriate visibilities should be flagged
+                            for (uint32_t chan = 0; chan < chunk->nChannel(); ++chan) {
+                                 CPPUNIT_ASSERT_EQUAL(true, chunk->flag()(row, chan, pol));
+                            }
+                          }
+                          continue;
+                      }
+                      
+                      // product is 1-based
+                      CPPUNIT_ASSERT(product > 0);
+
+                      for (uint32_t chan = 0; chan < chunk->nChannel(); ++chan) {
+                           if (validChannelAndProduct(chan, static_cast<uint32_t>(product)) &&
+                                chunk->beam1()(row) == vis.beamid && chunk->beam2()(row) == vis.beamid) {
+                               // If this is one of the visibilities that were added above
+                               CPPUNIT_ASSERT_EQUAL(false, chunk->flag()(row, chan, pol));
+                           } else {
+                               CPPUNIT_ASSERT_EQUAL(true, chunk->flag()(row, chan, pol));
+                           }
+                      }
+                 }
+            }
+
+            // Check scan index
+            CPPUNIT_ASSERT_EQUAL(0u, chunk->scan());
+
             // Check frequency vector
-            CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(VisDatagramTraits<VisDatagram>::N_CHANNELS_PER_SLICE),
+            CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(nChannelsForTest()),
                     chunk->frequency().size());
         }
-        /*
-        void testCalculateRow()
-        {
-            const uint32_t NANTENNAS = 36;
-            const uint32_t NBEAMS = 36;
 
-            // This ensures the row mapping sees the second antenna index changing
-            // the fastest, then the first antenna index, and finally the beam id 
-            // changing the slowest
-            uint32_t idx = 0;
-            for (uint32_t beam = 0; beam < NBEAMS; ++beam) {
-                for (uint32_t ant1 = 0; ant1 < NANTENNAS; ++ant1) {
-                    for (uint32_t ant2 = ant1; ant2 < NANTENNAS; ++ant2) {
-                        CPPUNIT_ASSERT_EQUAL(idx,
-                                MergedSource::calculateRow(ant1, ant2, beam, NANTENNAS));
-                        idx++;
-                    }
-                }
-            }
-        }
-        */
     private:
 
         boost::shared_ptr< MergedSource > itsInstance;
