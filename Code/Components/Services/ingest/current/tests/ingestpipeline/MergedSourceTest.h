@@ -150,9 +150,9 @@ class MergedSourceTest : public CppUnit::TestFixture,
             // midpoint (in seconds). The later is that way because the
             // measurement set specification used integration midpoint in
             // seconds.
-            //const double midpoint = 3.5;
-            //casa::Quantity chunkMidpoint = chunk->time().getTime();
-            //CPPUNIT_ASSERT_DOUBLES_EQUAL(midpoint, chunkMidpoint.getValue("s"), 1.0E-10);
+            const double midpoint = bat2epoch(3500000ul).getValue().getTime().getValue("s");
+            const casa::Quantity chunkMidpoint = chunk->time().getTime();
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(midpoint, chunkMidpoint.getValue("s"), 1.0E-10);
 
             // Ensure other metadata is as expected
             CPPUNIT_ASSERT_EQUAL(nChannelsForTest(), chunk->nChannel());

@@ -182,7 +182,7 @@ void SimpleMonitorTask::processRow(const casa::Vector<casa::Complex> &vis,
     // temporary code to export the spectrum for debugging of the hw correlator.
     // the expectation is that it would be hard to keep up if we export everything. If
     // something like this is necessary then we probably need to write a separate task.
-    if (hasData && (beam == 0) && (itsRank == 0)) {
+    if (hasData && (beam == 0) && (itsRank < 1)) {
         // we don't need to cater for the full MPI case - export for single rank only
         ASKAPDEBUGASSERT(itsFileName.find("_0") != std::string::npos);
         const std::string fname = "spectra" + utility::toString(baseline) + ".dat";

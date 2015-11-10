@@ -51,8 +51,8 @@ namespace ingest {
 class NoMetadataSourceTest : public CppUnit::TestFixture,
                       protected VisDatagramTestHelper<VisDatagram> {
         CPPUNIT_TEST_SUITE(NoMetadataSourceTest);
-        //CPPUNIT_TEST(testMockVisSource);
-        //CPPUNIT_TEST(testSingle);
+        CPPUNIT_TEST(testMockVisSource);
+        CPPUNIT_TEST(testSingle);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -62,6 +62,10 @@ class NoMetadataSourceTest : public CppUnit::TestFixture,
 
             LOFAR::ParameterSet params;
             params.add("n_channels.0", utility::toString(nChannelsForTest()));
+            params.add("centre_freq", "0.9175GHz");
+            params.add("target_name", "test-field");
+            params.add("target_direction","[12h30m49.43, +12d23m28.100, J2000]");
+            params.add("correlator_mode", "standard");
             Configuration config = ConfigurationHelper::createDummyConfig();
             itsInstance.reset(new NoMetadataSource(params, config, itsVisSrc, 1, 0));
         }
@@ -80,19 +84,18 @@ class NoMetadataSourceTest : public CppUnit::TestFixture,
             CPPUNIT_ASSERT(itsVisSrc->next() == vis);
         };
 
-        /*
+        
         void testSingle() {
             const unsigned long starttime = 1000000; // One second after epoch
             const unsigned long period = 5 * 1000 * 1000;
-            const unsigned int nAntenna = 2;
-            const unsigned int nBeam = 1;
             const unsigned int nCorr = 4;
+            const Configuration config = ConfigurationHelper::createDummyConfig();
 
             // Populate a VisDatagram to match the metadata
             askap::cp::VisDatagram vis;
             vis.version = VisDatagramTraits<VisDatagram>::VISPAYLOAD_VERSION;
             vis.slice = 0;
-            vis.baselineid = 1;
+            fillProtocolSpecificInfo(vis);
             vis.beamid = 1;
             vis.timestamp = starttime;
 
@@ -108,55 +111,74 @@ class NoMetadataSourceTest : public CppUnit::TestFixture,
             CPPUNIT_ASSERT(chunk.get());
 
             // Ensure the timestamp represents the integration midpoint.
-            const double midpoint = 3.5;
-            casa::Quantity chunkMidpoint = chunk->time().getTime();
+            const double midpoint = bat2epoch(3500000ul).getValue().getTime().getValue("s");
+            const casa::Quantity chunkMidpoint = chunk->time().getTime();
             CPPUNIT_ASSERT_DOUBLES_EQUAL(midpoint, chunkMidpoint.getValue("s"), 1.0E-10);
 
             // Ensure other metadata is as expected
-            CPPUNIT_ASSERT_EQUAL(1 * VisDatagramTraits<VisDatagram>::N_CHANNELS_PER_SLICE, chunk->nChannel());
+            CPPUNIT_ASSERT_EQUAL(nChannelsForTest(), chunk->nChannel());
             CPPUNIT_ASSERT_EQUAL(nCorr, chunk->nPol());
-            const casa::uInt nBaselines = nAntenna * (nAntenna + 1) / 2;
+            const casa::uInt nBaselines = config.bmap().size();
+            // without any conversion rules set up number of beams
+            // will be 1 more than needed (h/w indices are 1-based)
+            const uint32_t nBeam = config.feed().nFeeds() + 1;
             CPPUNIT_ASSERT_EQUAL(nBaselines * nBeam, chunk->nRow());
 
-            // Ensure the visibilities that were supplied (most were not)
-            // are not flagged, and that the rest are flagged
-
-            // First calculate the channel range that was set
-            const unsigned int startChan = vis.slice * VisDatagramTraits<VisDatagram>::N_CHANNELS_PER_SLICE; //inclusive
-            const unsigned int endChan = (vis.slice + 1) * VisDatagramTraits<VisDatagram>::N_CHANNELS_PER_SLICE; //exclusive
-
-            for (unsigned int row = 0; row < chunk->nRow(); ++row) {
-                for (unsigned int chan = 0; chan < chunk->nChannel(); ++chan) {
-                    for (unsigned int pol = 0; pol < chunk->nPol(); ++pol) {
-                        if (chan >= startChan &&
-                                chan < endChan &&
-                                chunk->antenna1()(row) == 0 &&
-                                chunk->antenna2()(row) == 0 &&
-                                chunk->beam1()(row) == vis.beamid &&
-                                chunk->beam2()(row) == vis.beamid) {
-                            // If this is one of the visibilities that were added above
-                            CPPUNIT_ASSERT_EQUAL(false, chunk->flag()(row, chan, pol));
-                        } else {
-                            CPPUNIT_ASSERT_EQUAL(true, chunk->flag()(row, chan, pol));
-                        }
-                    }
-                }
-            }
-
-            // Check scan index
-            CPPUNIT_ASSERT_EQUAL(0u, chunk->scan());
-
             // Check stokes
+            CPPUNIT_ASSERT(chunk->nPol() >= 4);
             CPPUNIT_ASSERT(chunk->stokes()(0) == casa::Stokes::XX);
             CPPUNIT_ASSERT(chunk->stokes()(1) == casa::Stokes::XY);
             CPPUNIT_ASSERT(chunk->stokes()(2) == casa::Stokes::YX);
             CPPUNIT_ASSERT(chunk->stokes()(3) == casa::Stokes::YY);
 
+            // Ensure the visibilities that were supplied (most were not)
+            // are not flagged, and that the rest are flagged
+
+            for (unsigned int row = 0; row < chunk->nRow(); ++row) {
+                 for (unsigned int pol = 0; pol < chunk->nPol(); ++pol) {
+                      const int32_t product = config.bmap().getID(chunk->antenna1()(row),
+                                      chunk->antenna2()(row), chunk->stokes()(pol));
+                      if (product < 0) {
+                          if ((chunk->antenna1()(row) == chunk->antenna2()(row)) && (pol == 2)) {
+                              // for autos pol==2 is obtained from pol==1
+                              for (uint32_t chan = 0; chan < chunk->nChannel(); ++chan) {
+                                   CPPUNIT_ASSERT_EQUAL(chunk->flag()(row, chan, 1), chunk->flag()(row, chan, pol));
+                              }
+                          } else {
+                              // products are defined for the first 3 antennas only
+                              CPPUNIT_ASSERT((chunk->antenna1()(row) > 2) || (chunk->antenna2()(row) > 2));
+
+                              // appropriate visibilities should be flagged
+                              for (uint32_t chan = 0; chan < chunk->nChannel(); ++chan) {
+                                   CPPUNIT_ASSERT_EQUAL(true, chunk->flag()(row, chan, pol));
+                              }   
+                          } 
+                          continue;
+                      }
+                     
+                      // product is 1-based
+                      CPPUNIT_ASSERT(product > 0);
+
+                      for (uint32_t chan = 0; chan < chunk->nChannel(); ++chan) {
+                           if (validChannelAndProduct(chan, static_cast<uint32_t>(product)) &&
+                                chunk->beam1()(row) == vis.beamid && chunk->beam2()(row) == vis.beamid) {
+                               // If this is one of the visibilities that were added above
+                               CPPUNIT_ASSERT_EQUAL(false, chunk->flag()(row, chan, pol));
+                           } else {
+                               CPPUNIT_ASSERT_EQUAL(true, chunk->flag()(row, chan, pol));
+                           }
+                      }
+                 }
+            }
+
+            // Check scan index
+            CPPUNIT_ASSERT_EQUAL(0u, chunk->scan());
+
             // Check frequency vector
-            CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(VisDatagramTraits<VisDatagram>::N_CHANNELS_PER_SLICE),
+            CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(nChannelsForTest()),
                     chunk->frequency().size());
         }
-        */
+        
     private:
 
         boost::shared_ptr< NoMetadataSource > itsInstance;
