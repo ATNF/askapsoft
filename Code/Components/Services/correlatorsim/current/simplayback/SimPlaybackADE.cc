@@ -49,7 +49,7 @@
 #include "simplayback/CorrelatorSimulatorADE.h"
 #include "simplayback/TosSimulator.h"
 
-//#define VERBOSE
+#define VERBOSE
 
 // Using
 using namespace askap::cp;
@@ -188,6 +188,12 @@ boost::shared_ptr<CorrelatorSimulatorADE>
             itsParset.getDouble("corrsim.coarse_channel_bandwidth", 1000000);
     const unsigned int delay =
             itsParset.getUint32("corrsim.delay", 0);
+    //CorrelatorSimulatorADE* corrSim = 
+    //        new CorrelatorSimulatorADE (dataset, hostname, port, 
+    //        itsRank, nAntenna, nCoarseChannel, nChannelSub,
+    //        coarseBandwidth, itsInputMode, delay);
+    //return boost::shared_ptr<CorrelatorSimulatorADE>(corrSim);
+
     return boost::shared_ptr<CorrelatorSimulatorADE>(
             new CorrelatorSimulatorADE(dataset, hostname, port, 
             itsRank, nAntenna, nCoarseChannel, nChannelSub,
@@ -210,14 +216,28 @@ void SimPlaybackADE::run(void)
 #ifdef VERBOSE
 	std::cout << "itsInputMode: " << itsInputMode << std::endl;
 #endif
-	
+
+    // Preparation stage
+    /*
     if (itsRank == 0) {
-		if (itsInputMode == "expand") {
-			boost::shared_ptr<ISimulator> sim = makeTosSim();
-			bool moreData = true;
-			while (moreData) {
-				moreData = sim->sendNext();
-			}
+        boost::shared_ptr<ISimulator> sim = makeTosSim();
+    }
+    else {
+        boost::shared_ptr<ISimulator> sim = makeCorrelatorSim();
+        if (itsRank == 1) {
+            //sim->initBuffer();
+        }
+    }
+
+    MPI_Barrier(MPI_COMM_WORLD);
+    */
+    // Transmission stage
+
+    if (itsRank == 0) {
+		boost::shared_ptr<ISimulator> sim = makeTosSim();
+		bool moreData = true;
+		while (moreData) {
+			moreData = sim->sendNext();
 		}
     } else {
         boost::shared_ptr<ISimulator> sim = makeCorrelatorSim();

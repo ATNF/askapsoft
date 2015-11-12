@@ -101,9 +101,12 @@ CorrelatorSimulatorADE::CorrelatorSimulatorADE(const std::string& dataset,
         cout << "Antenna count: " << itsNAntenna << endl;
     }
     else if (itsInputMode == "expand") {
+        cout << "Input mode: expand" << endl;
+        
 		itsMS.reset(new casa::MeasurementSet(dataset, casa::Table::Old));
         ROMSColumns msc(*itsMS);
-
+        
+        /*
         cout << "Getting antennas from measurement set" << endl;
         const casa::ROMSAntennaColumns& antc = msc.antenna();
         itsNAntenna = antc.nrow();
@@ -121,6 +124,7 @@ CorrelatorSimulatorADE::CorrelatorSimulatorADE(const std::string& dataset,
         //        SIZEOF_ARRAY( data[0] ) << endl;
         //cout << "Data size: " << sizeof(data) << ", " << 
         //        sizeof(data[0]) << endl;
+        */
 
         initBuffer();
 
@@ -381,6 +385,8 @@ void CorrelatorSimulatorADE::initBuffer ()
     //uint32_t channelMax = 0;
     int antMin = 9999;
     int antMax = 0;
+    int beamMin = 9999;
+    int beamMax = 0;
     int nTime = 0;
     int nRowOfConstTime;
     for (int row = 0; row < nRow; ++row) {
@@ -410,7 +416,10 @@ void CorrelatorSimulatorADE::initBuffer ()
         
         antMin = min(antMin,msc.antenna1()(row));
         antMax = max(antMax,msc.antenna1()(row));
-        //baselineMin = min(baselineMin,
+
+        beamMin = min(beamMin,msc.feed1()(row));
+        beamMax = max(beamMax,msc.feed1()(row));
+
         //channelMin = min(channelMin,
     }
     cout << "  Checking all rows: done" << endl;
@@ -420,6 +429,7 @@ void CorrelatorSimulatorADE::initBuffer ()
     cout << "  Antenna range: " << antMin << " ~ " << antMax << endl;
     // verify number of antenna here
     int nAnt = antMax - antMin + 1;
+    cout << "  Beam range: " << beamMin << " ~ " << beamMax << endl;
     cout << "  Data matrix (corr,channel): " << nCorr << ", " <<
             nChan << endl;
     //cout << "  Baseline range: " << baselineMin << " ~ " <<
