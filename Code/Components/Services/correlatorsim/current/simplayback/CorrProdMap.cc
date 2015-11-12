@@ -48,7 +48,7 @@ using namespace askap::cp;
 using namespace std;
 
 
-CorrProdMap::CorrProdMap () : antBase(0), indexBase(0) 
+CorrProdMap::CorrProdMap () : antBase(0), indexBase(1) 
 {
 }
 

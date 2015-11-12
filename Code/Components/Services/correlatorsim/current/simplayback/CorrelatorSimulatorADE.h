@@ -41,6 +41,7 @@
 #include "simplayback/VisPortADE.h"
 #include "simplayback/RandomReal.h"
 #include "simplayback/CorrProdMap.h"
+#include "simplayback/CorrBuffer.h"
 
 namespace askap {
 namespace cp {
@@ -93,12 +94,12 @@ class CorrelatorSimulatorADE : public ISimulator {
 
 		// Correlation product map (this replaces baseline map)
 		CorrProdMap itsCorrProdMap;
-		
+
         // Shelf number [1..]
         const int itsShelf;
 
         // Number of antennas
-        const unsigned int itsNAntenna;
+        unsigned int itsNAntenna;
 
         // Number of correlation products (= baselines)
         unsigned int itsNCorrProd;
@@ -135,8 +136,12 @@ class CorrelatorSimulatorADE : public ISimulator {
         // Port for output of metadata
         boost::scoped_ptr<askap::cp::VisPortADE> itsPort;
 
+        // Buffer data
+        CorrBuffer itsBuffer;
+
+
         // Internal functions
-        //
+        
         // Given antenna pair and Stokes type, get correlation product
         uint32_t getCorrProdIndex
                 (const uint32_t ant1, const uint32_t ant2,
@@ -144,11 +149,20 @@ class CorrelatorSimulatorADE : public ISimulator {
 
 		// Send data of zero visibility for the whole baselines and channels 
 		// for only 1 time period.
-		bool sendNextZero(void);
+		bool sendNextZero();
 		
+        // Using buffer for intermediate storage
+        void initBuffer ();
+
+        // return true if successful
+        bool getBufferData ();
+        
+        // (return true if successful)
+        bool sendBufferData ();
+
 		// Extract one data point from measurement set and send the data for all 
 		// baselines and channels for the time period given in the measurement set.
-		bool sendNextExpand(void);
+		bool sendNextExpand ();
 
 };
 

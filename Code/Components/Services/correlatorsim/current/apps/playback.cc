@@ -37,7 +37,8 @@
 // ASKAPsoft includes
 #include "askap/AskapLogging.h"
 #include "askap/AskapError.h"
-#include "askap/Application.h"
+#include "cpcommon/ParallelCPApplication.h"
+//#include "askap/Application.h"
 #include "Common/ParameterSet.h"
 
 // Local package includes
@@ -47,6 +48,26 @@ using namespace askap;
 
 ASKAP_LOGGER(logger, ".main");
 
+class PlaybackApp : public askap::cp::common::ParallelCPApplication
+{
+public:
+    virtual void run()
+    {
+        askap::cp::SimPlayback pb(config());
+        pb.run();
+    }
+};
+
+int main(int argc, char *argv[])
+{
+    PlaybackApp app;
+    app.addParameter("standalone", "s",
+            "Run in standalone/single-process mode (no MPI)", false);
+    return app.main(argc, argv);
+}
+
+
+/*
 static std::string getNodeName(void)
 {
     char name[MPI_MAX_PROCESSOR_NAME];
@@ -115,3 +136,5 @@ int main(int argc, char* argv[])
     PlaybackApp app;
     return app.main(argc, argv);
 }
+*/
+
