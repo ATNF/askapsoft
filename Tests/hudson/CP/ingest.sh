@@ -112,15 +112,29 @@ if [ $ERROR -ne 0 ]; then
     exit 1
 fi
 
-
 #
 # Phase 4
+#
+# Run parallel metadata test, it requires MPI
+#
+
+echo "------------ Phase 4 ------------"
+cd $WORKSPACE/Code/Components/Services/ingest/current
+timeout -s 9 10m mpirun -np 12 apps/tParallelMetadata.sh -c apps/tParallelMetadata.in
+ERROR=$?
+if [ $ERROR -ne 0 ]; then
+    echo "ingest/current/apps/tParallelMetadata.sh returned errorcode $ERROR"
+    exit 1
+fi
+
+#
+# Phase 5
 #
 # Run the main functest which requires MPI and communication with the 
 # correlator simulator
 #
 
-echo "------------- Phase 4 ------------"
+echo "------------- Phase 5 ------------"
 
 cd $WORKSPACE/trunk/Code/Components/Services/ingest/current/functests/test_ingestpipeline
 
