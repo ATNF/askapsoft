@@ -119,7 +119,7 @@ fi
 #
 
 echo "------------ Phase 4 ------------"
-cd $WORKSPACE/Code/Components/Services/ingest/current
+cd $WORKSPACE/trunk/Code/Components/Services/ingest/current
 timeout -s 9 10m mpirun -np 12 apps/tParallelMetadata.sh -c apps/tParallelMetadata.in
 ERROR=$?
 if [ $ERROR -ne 0 ]; then
