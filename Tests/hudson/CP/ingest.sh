@@ -119,8 +119,12 @@ fi
 #
 
 echo "------------ Phase 4 ------------"
-cd $WORKSPACE/trunk/Code/Components/Services/ingest/current
-timeout -s 9 10m mpirun -np 12 apps/tParallelMetadata.sh -c apps/tParallelMetadata.in
+# uncomment to run the code explicitly
+#cd $WORKSPACE/trunk/Code/Components/Services/ingest/current
+#timeout -s 9 10m mpirun -np 12 apps/ParallelMetadata.sh -c apps/tParallelMetadata.in
+# uncomment to run the code via func test
+cd $WORKSPACE/trunk/Code/Components/Services/ingest/current/functests/test_parallelmetadata
+timeout -s 9 10m ./run.sh
 ERROR=$?
 if [ $ERROR -ne 0 ]; then
     echo "ingest/current/apps/tParallelMetadata.sh returned errorcode $ERROR"
