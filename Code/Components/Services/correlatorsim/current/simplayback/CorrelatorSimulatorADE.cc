@@ -125,9 +125,9 @@ CorrelatorSimulatorADE::CorrelatorSimulatorADE(const std::string& dataset,
         //cout << "Data size: " << sizeof(data) << ", " << 
         //        sizeof(data[0]) << endl;
         */
-
+#ifdef CORRBUFFER
         initBuffer();
-
+#endif
  	}
 	else {
 		cout << "ERROR in CorrelatorSimulatorADE: illegal input mode: " <<
@@ -155,12 +155,6 @@ CorrelatorSimulatorADE::CorrelatorSimulatorADE(const std::string& dataset,
         cout << "Baselines fit partially into " << itsNSlice + 1 <<
            " slices" << endl; 
     }
-    //if (itsNCorrProd > 
-    //        VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE) {
-    //    ASKAPCHECK (itsNCorrProd % 
-    //        VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE == 0,
-    //        "The number of baselines is not divisible by slice");
-    //}
 
     itsFineBandwidth = itsCoarseBandwidth / itsNChannelSub;
 }
@@ -183,6 +177,9 @@ bool CorrelatorSimulatorADE::sendNext(void)
         if (getBufferData()) {
             return sendBufferData();
         }
+        else {
+            return false;
+        }
 #else
 		return sendNextExpand();
 #endif
@@ -190,7 +187,7 @@ bool CorrelatorSimulatorADE::sendNext(void)
 	return 1;
 }
 
-
+/*
 #ifdef HARDWARELIKE
 
 // Send data of zero visibility for the whole baselines and channels 
@@ -269,6 +266,7 @@ bool CorrelatorSimulatorADE::sendNextZero(void)
 }
     
 #else   // NOT hardware-like
+*/
 
 // Send data of zero visibility for the whole baselines and channels 
 // for only 1 time period.
@@ -345,10 +343,10 @@ bool CorrelatorSimulatorADE::sendNextZero(void)
     return false;   // to stop calling this function
 }
 
-#endif  // hardware-like
+//#endif  // hardware-like
 
 
-#ifdef CORRBUFFER
+//#ifdef CORRBUFFER
 
 // Steps: 
 // 1) Initialize the buffer
@@ -359,7 +357,6 @@ bool CorrelatorSimulatorADE::sendNextZero(void)
 // Initialize the buffer
 void CorrelatorSimulatorADE::initBuffer ()
 {
-    
     cout << "Initializing buffer ..." << endl;
     ROMSColumns msc(*itsMS);
 
@@ -380,15 +377,14 @@ void CorrelatorSimulatorADE::initBuffer ()
     int dataDescId;
     unsigned int descSpwId, descPolId;
     unsigned int nChan, nCorr;
-    //uint32_t row = 0;
-    //uint32_t channelMin = 999999999999;
-    //uint32_t channelMax = 0;
+    int currentBeam = 0;
     int antMin = 9999;
     int antMax = 0;
     int beamMin = 9999;
     int beamMax = 0;
     int nTime = 0;
     int nRowOfConstTime;
+    int nRowOfConstBeam;
     for (int row = 0; row < nRow; ++row) {
 
         if (msc.time()(row) > currentTime) {
@@ -404,6 +400,14 @@ void CorrelatorSimulatorADE::initBuffer ()
             ++nRowOfConstTime;
         }
 
+        if (msc.feed1()(row) != currentBeam) {
+            currentBeam = msc.feed1()(row);
+            nRowOfConstBeam = 1;
+        }
+        else {
+            ++nRowOfConstBeam;
+        }
+            
         dataDescId = msc.dataDescId()(row);
         descSpwId = ddc.spectralWindowId()(dataDescId);
         nChan = spwc.numChan()(descSpwId);
@@ -419,28 +423,44 @@ void CorrelatorSimulatorADE::initBuffer ()
 
         beamMin = min(beamMin,msc.feed1()(row));
         beamMax = max(beamMax,msc.feed1()(row));
-
-        //channelMin = min(channelMin,
     }
     cout << "  Checking all rows: done" << endl;
     
-    cout << "  Time interval count (= buffer count): " << nTime << endl;
-    cout << "  Rows of constant time: " << nRowOfConstTime << endl;
-    cout << "  Antenna range: " << antMin << " ~ " << antMax << endl;
+    cout << "  Time interval count  : " << nTime << endl;
+    //cout << "  Rows of constant time: " << nRowOfConstTime << endl;
+    cout << "  Beam range           : " << beamMin << " ~ " << beamMax << endl;
+    //cout << "  Rows of constant beam: " << nRowOfConstBeam << endl;
+
+    // Antennas
+    cout << "  Antenna range        : " << antMin << " ~ " << antMax << endl;
     // verify number of antenna here
-    int nAnt = antMax - antMin + 1;
-    cout << "  Beam range: " << beamMin << " ~ " << beamMax << endl;
-    cout << "  Data matrix (corr,channel): " << nCorr << ", " <<
+    int nAntMeas = antMax - antMin + 1; // from measurement data
+    int nAntCorr = itsNAntenna;         // from parameter file
+    cout << "  Antenna count in measurement set: " << nAntMeas << endl;
+    cout << "  Antenna count in correlator sim : " << nAntCorr << endl;
+    
+    // Correlation products, calculated from parameter file
+    // Note that correlator may send more data than available antenna
+    // (which means empty data will get sent too).
+    itsNCorrProd = itsCorrProdMap.getTotal (nAntCorr);
+    cout << "  Correlation product count       : " << itsNCorrProd << endl;
+
+    // Data matrix
+    cout << "  Data matrix (corr,channel)      : " << nCorr << ", " <<
             nChan << endl;
-    //cout << "  Baseline range: " << baselineMin << " ~ " <<
-    //        baselineMax << endl;
-    //cout << "  Channel range: " << channelMin << " ~ " << channelMax << endl;
 
+    // Creating buffer
     cout << "  Creating buffer ..." << endl;
-    int nBufferUnit = nRowOfConstTime * nCorr * nChan;
-    cout << "    Size = row of constant time x corr x channel = " << 
-            nBufferUnit << endl;
-
+    //int nBufferUnit = itsNCorrProd * nChan;
+    //cout << "    Size = corr products x channels = " << 
+    //        nBufferUnit << endl;
+    //int nBufferRow = nRowOfConstBeam * itsNCorrProd;
+    int nBufferRow = itsNCorrProd;
+    buffer.data.resize(nBufferRow);
+    for (int corrProd = 0; corrProd < nBufferRow; ++corrProd) {
+        buffer.data[corrProd].resize(nChan);
+    }
+    cout << "    row x column : " << nBufferRow << " x " << nChan << endl; 
     cout << "  Creating buffer: done" << endl;
 
     cout << "Initializing buffer: done" << endl;
@@ -449,174 +469,191 @@ void CorrelatorSimulatorADE::initBuffer ()
 
 
 
-// Gather data in 1 time interval into buffer
-bool CorrelatorSimulatorADE::getBufferData (void)
+// Put data for 1 beam (a full set of correlation products) into buffer
+bool CorrelatorSimulatorADE::getBufferData ()
 {
-/*
 #ifdef VERBOSE
-    cout << "CorrelatorSimulatorADE::getBufferData ..." << endl;
+    cout << "Getting buffer data ..." << endl;
 #endif
     ROMSColumns msc(*itsMS);
 
-    // Get a reference to the columns of interest
-    const casa::ROMSFieldColumns& fieldc = msc.field();
+    // Get reference to columns of interest
     const casa::ROMSSpWindowColumns& spwc = msc.spectralWindow();
+    //const casa::ROMSAntennaColumns& antc = msc.antenna();
     const casa::ROMSDataDescColumns& ddc = msc.dataDescription();
     const casa::ROMSPolarizationColumns& polc = msc.polarization();
-    const unsigned int nRow = msc.nrow(); 
 
-    const uint32_t indexBase = itsCorrProdMap.getIndexBase();
-    //cout << "Index base for correlation product: " << indexBase << endl;
+    //const uint32_t nAntenna = antc.nrow();
+    //cout << "  Antenna count: " << nAntenna << endl;
+    const unsigned int nRow = msc.nrow();
+    if (itsCurrentRow >= nRow) {
+        cout << "  No more data available" << endl;
+        cout << "Getting buffer data: done" << endl;
+        return false;
+    }
+    int dataDescId;
+    unsigned int descSpwId, descPolId;
+    unsigned int nChan;     // number of channel
+    unsigned int nCorr;     // number of correlation
+    unsigned int ant1, ant2;
+    //unsigned int corr;      // linear correlation (XX, XY, YX, YY)
+    unsigned int corrProd;  // correlation product, aka. baseline
+    casa::Vector<casa::Int> stokesTypesInt;
+    Stokes::StokesTypes stokesType;
+    casa::Matrix<casa::Complex> data;
 
-    // Record the current timestamp 
-    const casa::Double currentIntegration = msc.time()(itsCurrentRow);
-    ASKAPLOG_DEBUG_STR(logger, "Processing integration with timestamp "
-            << msc.timeMeas()(itsCurrentRow));
+    // Note, the measurement set stores integration midpoint (in seconds), 
+    // while the TOS (and it is assumed the correlator) deal with 
+    // integration start (in microseconds).
+    // In addition, TOS time is BAT and the measurement set normally has 
+    // UTC time (the latter is not checked here as we work with the column 
+    // as a column of doubles rather than column of measures)
+    // Precision of a single double may not be enough in general, 
+    // but should be fine for this emulator (ideally need to represent 
+    // time as two doubles)
+    const casa::Double currentTime = msc.time()(itsCurrentRow);
+    const casa::MEpoch epoch(
+            casa::MVEpoch(casa::Quantity(currentTime,"s")),
+            casa::MEpoch::Ref(casa::MEpoch::UTC));
+    const casa::MVEpoch epochTAI = casa::MEpoch::Convert(epoch,
+            casa::MEpoch::Ref(casa::MEpoch::TAI))().getValue();
+    const uint64_t microsecondsPerDay = 86400000000ull;
+    const uint64_t startOfDayBAT = 
+            uint64_t(epochTAI.getDay()*microsecondsPerDay);
+    const long Tint = static_cast<long>(msc.interval()(itsCurrentRow) 
+            * 1000000);
+    const uint64_t startBAT = startOfDayBAT +
+            uint64_t(epochTAI.getDayFraction() * microsecondsPerDay) -
+            uint64_t(Tint / 2);
 
-    // Some general constraints
-    ASKAPCHECK(fieldc.nrow() == 1, "Currently only support a single field");
+    // ideally we need to carry 64-bit BAT in the payload explicitly
+    buffer.timeStamp = static_cast<long>(startBAT);
+    buffer.beam = static_cast<uint32_t>(msc.feed1()(itsCurrentRow));
+    cout << "  Time " << buffer.timeStamp << ", beam " << buffer.beam << endl;
 
-    // construct payload
+    while ((itsCurrentRow < nRow) &&
+        (static_cast<uint32_t>(msc.feed1()(itsCurrentRow)) == buffer.beam)) {
+
+        dataDescId = msc.dataDescId()(itsCurrentRow);
+        descSpwId = ddc.spectralWindowId()(dataDescId);
+        nChan = spwc.numChan()(descSpwId);
+        descPolId = ddc.polarizationId()(dataDescId);
+        nCorr = polc.numCorr()(descPolId);
+        data = msc.data()(itsCurrentRow);
+
+        ant1 = msc.antenna1()(itsCurrentRow);
+        ant2 = msc.antenna2()(itsCurrentRow);
+        stokesTypesInt = polc.corrType()(descPolId);
+        //cout << "    antenna " << ant1 << ", " << ant2 << endl;
+        for (unsigned int corr = 0; corr < nCorr; ++corr) {
+            stokesType = Stokes::type(stokesTypesInt(corr));
+            if (stokesType == Stokes::XX) {
+                corr = 0;
+            }
+            else if (stokesType == Stokes::XY) {
+                corr = 1;
+            }
+            else if (stokesType == Stokes::YX) {
+                corr = 2;
+            }
+            else if (stokesType == Stokes::YY) {
+                corr = 3;
+            }
+            else {
+                checkStokesType (stokesType);
+            }
+
+            // put visibility data into buffer, 
+            // except when the Stokes type is YX for the same antenna
+            if ((ant1 != ant2) || (stokesType != Stokes::YX)) {
+                //cout << ant1 << ", " << ant2 << ", " << corr << endl;
+                corrProd = itsCorrProdMap.getIndex (ant1, ant2, corr);
+                for (unsigned int chan = 0; chan < nChan; ++chan) {
+                    buffer.data[corrProd][chan].block = 1;
+                    buffer.data[corrProd][chan].card = 1;
+                    buffer.data[corrProd][chan].channel = 1;
+                    buffer.data[corrProd][chan].freq = 
+                        static_cast<float>(spwc.refFrequency()(dataDescId));
+                    buffer.data[corrProd][chan].vis.real = 
+                            data(corr,chan).real();
+                    buffer.data[corrProd][chan].vis.imag = 
+                            data(corr,chan).imag();
+                    buffer.data[corrProd][chan].ready = true;
+                }
+            }
+        }
+        ++itsCurrentRow;
+    }
+    buffer.ready = true;
+#ifdef VERBOSE
+    cout << "Getting buffer data: done" << endl;
+#endif
+    return (buffer.ready);
+}
+
+
+// Send buffer data
+bool CorrelatorSimulatorADE::sendBufferData ()
+{
+#ifdef VERBOSE
+    cout << "Sending buffer data ..." << endl;
+#endif
     askap::cp::VisDatagramADE payload;
     payload.version = VisDatagramTraits<VisDatagramADE>::VISPAYLOAD_VERSION;
+    payload.timestamp = buffer.timeStamp;
+    payload.beamid = buffer.beam;
 
-	casa::Matrix<casa::Complex> data;
-	
-	// Get visibility data for this time period, but only use one data point.
-	// WARNING: Floating point comparison for time identification!
-    while (itsCurrentRow < nRow && 
-			(currentIntegration == msc.time()(itsCurrentRow))) {
+    const unsigned int nChan = buffer.data[0].size();
+    const unsigned int nCorrProd = buffer.data.size();
+    unsigned int corrProd;
+    unsigned int nCorrProdPerSlice = 
+            VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE;
+    const unsigned int nSlice = nCorrProd / nCorrProdPerSlice;
 
-        const int dataDescId = msc.dataDescId()(itsCurrentRow);
-        const double refFreq = spwc.refFrequency()(dataDescId);
-        payload.freq = refFreq;
+    //cout << "  Size: " << nCorrProd << " x " << nChan << endl;
+    //cout << "  Number of slices: " << nSlice << endl;
 
-        // Some per row constraints
-        // This code needs the dataDescId to remain constant for all rows
-        // in the integration being processed
-        ASKAPCHECK(msc.dataDescId()(itsCurrentRow) == dataDescId,
-                "Data description ID must remain constant for a given integration");
-		
-        // Note, the measurement set stores integration midpoint (in seconds), 
-		// while the TOS ()and it is assumed the correlator) deal with integration 
-		// start (in microseconds).
-        // In addition, TOS time is BAT and the measurement set normally has 
-		// UTC time (the latter is not checked here as we work with the column as 
-		// a column of doubles rather than column of measures).
-        // precision of a single double may not be enough in general, but should 
-		// be fine for this emulator (ideally need to represent time as two doubles)
-        const casa::MEpoch epoch(casa::MVEpoch(casa::Quantity
-				(currentIntegration,"s")), casa::MEpoch::Ref(casa::MEpoch::UTC));
-        const casa::MVEpoch epochTAI = casa::MEpoch::Convert(epoch,
-                casa::MEpoch::Ref(casa::MEpoch::TAI))().getValue();
-        const uint64_t microsecondsPerDay = 86400000000ull;
-        const uint64_t startOfDayBAT = uint64_t(epochTAI.getDay()*
-				microsecondsPerDay);
-        const long Tint = static_cast<long>(msc.interval()(itsCurrentRow) * 
-				1000000);
-        const uint64_t startBAT = startOfDayBAT + 
-				uint64_t(epochTAI.getDayFraction() * microsecondsPerDay) -
-				uint64_t(Tint / 2);
+    for (unsigned int chan = 0; chan < nChan; ++chan) {
 
-        // ideally we need to carry 64-bit BAT in the payload explicitly
-        payload.timestamp = static_cast<long>(startBAT);
-        ASKAPCHECK(msc.feed1()(itsCurrentRow) == msc.feed2()(itsCurrentRow),
-                "feed1 and feed2 must be equal");
+        // put loop for channel expansion here
+    
+        payload.block = buffer.data[0][chan].block;
+        payload.card = buffer.data[0][chan].card;
+        payload.channel = chan;     //buffer.data[0][chan].channel;
+        payload.freq = buffer.data[0][chan].freq;
 
-        // NOTE: The Correlator IOC uses one-based beam indexing, so need to add
-        // one to the zero-based indexes from the measurement set.
-        payload.beamid = msc.feed1()(itsCurrentRow) + 1;
-        std::cout<<payload.beamid<<std::endl;
-	
-		// get visibility data in this row
-        data = msc.data()(itsCurrentRow);
-		
-		++itsCurrentRow;
-	}
-*/
-}
+        for (unsigned int slice = 0; slice < nSlice; ++slice) {
+            payload.slice = slice;
+            payload.baseline1 = slice * nCorrProdPerSlice;
+            payload.baseline2 = payload.baseline1 +
+                    nCorrProdPerSlice - 1;
 
-
-bool CorrelatorSimulatorADE::sendBufferData (void)
-{
-/*
-	cout << "shelf " << itsShelf << 
-			" send payload for time period ending in row " << itsCurrentRow-1 << 
-			endl; 
-	
-	// Send a data point acquired above for the whole slice ...
-	// for all coarse channel
-	for (uint32_t cChannel = 0; cChannel < itsNCoarseChannel; ++cChannel) { 
-
-		// subdividing coarse channel into fine channel
-		for (uint32_t subDiv = 0; subDiv < itsNChannelSub; ++subDiv) {
-
-			uint32_t fChannel = cChannel * itsNChannelSub + subDiv;
-			payload.channel = fChannel;
-			//payload.freq = itsFineBandwidth * fChannel; // part of freq index
-			payload.block = 1;      // part of freq index
-			payload.card = 1;       // part of freq index
-
-			// for all payload slice in this fine channel
-			for (uint32_t slice = 0; slice < itsNSlice; ++slice) {
-
-				payload.slice = slice;
-				payload.baseline1 = indexBase + slice * 
-				VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE;
-				payload.baseline2 = payload.baseline1 +
-				VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE - 1;
-
-				// for all baselines in this slice 
-				// (= correlation product: antenna & polarisation product)
-				for (uint32_t baseInSlice = 0; 
-						baseInSlice < VisDatagramTraits<VisDatagramADE>::
-						MAX_BASELINES_PER_SLICE; ++baseInSlice) { 
-
-					// Use one visibility data for all baselines
-					payload.vis[baseInSlice].real = data(0,0).real();
-					payload.vis[baseInSlice].imag = data(0,0).imag();
-				}
-
-                // TODO
-                // Make the interleave changes automatically with
-                // the number of MPI processes.
-                //
-				// send data in this slice using 2 MPI processes in an
-				// interleaved fashion
-				//if (slice % 2 == 0) {   // shelf 1 sends even number slice
-				//	if (itsShelf == 1) {
-				//		itsPort->send(payload);
-				//	}
-				//}
-				//else {                  // slice 2 sends odd number slice
-				//	if (itsShelf == 2) {
-				//		itsPort->send(payload);
-				//	}
-				//}
-                itsPort->send(payload);
-
-				// User-defined delay
-				usleep (itsDelay);
-				
-			}   // slice
-		}   // channel subdivision
-	}   // coarse channel
-		
+            for (unsigned int corrProdInSlice = 0; 
+                    corrProdInSlice < nCorrProdPerSlice; 
+                    ++corrProdInSlice) {
+                corrProd = corrProdInSlice + slice * nCorrProdPerSlice;
+                payload.vis[corrProdInSlice].real = 
+                        buffer.data[corrProd][chan].vis.real;
+                payload.vis[corrProdInSlice].imag = 
+                        buffer.data[corrProd][chan].vis.imag;
+                //payload.freq = buffer.data[corrProd][chan].freq;
+                buffer.data[corrProd][chan].ready = false;
+            }
+            // send the slice
+            itsPort->send(payload);
+            //cout << "  Channel " << chan << ", slice " << slice << 
+            //    ", baselines " << payload.baseline1 << " ~ " << 
+            //    payload.baseline2 << endl;
+        }   // next slice
+    }   // next channel
 #ifdef VERBOSE
-    cout << "CorrelatorSimulatorADE::sendNextExpand: shelf " <<
-            itsShelf << ": done" << endl;
+    cout << "Sending buffer data: done" << endl;
 #endif
-
-    if (itsCurrentRow >= nRow) {
-		cout << "Shelf " << itsShelf << " has no more data" << endl;
-        return false;
-    } else {
-        return true;	// Have more data (next time period)
-    }
-*/
+    return true;
 }
 
-#else   // NOT CORRBUFFER
+
+//#else   // NOT CORRBUFFER
 
 // Extract one data point from measurement set and send the data for all 
 // baselines and channels for the time period given in the measurement set.
@@ -630,8 +667,8 @@ bool CorrelatorSimulatorADE::sendNextExpand(void)
     // Get a reference to the columns of interest
     const casa::ROMSFieldColumns& fieldc = msc.field();
     const casa::ROMSSpWindowColumns& spwc = msc.spectralWindow();
-    const casa::ROMSDataDescColumns& ddc = msc.dataDescription();
-    const casa::ROMSPolarizationColumns& polc = msc.polarization();
+    //const casa::ROMSDataDescColumns& ddc = msc.dataDescription();
+    //const casa::ROMSPolarizationColumns& polc = msc.polarization();
     const unsigned int nRow = msc.nrow(); 
 
     const uint32_t indexBase = itsCorrProdMap.getIndexBase();
@@ -706,8 +743,8 @@ bool CorrelatorSimulatorADE::sendNextExpand(void)
 	}
 
 	cout << "shelf " << itsShelf << 
-			" send payload for time period ending in row " << itsCurrentRow-1 << 
-			endl; 
+		" send payload for time period ending in row " << 
+        itsCurrentRow-1 << endl;
 	
 	// Send a data point acquired above for the whole slice ...
 	// for all coarse channel
@@ -780,7 +817,7 @@ bool CorrelatorSimulatorADE::sendNextExpand(void)
     }
 }
 
-#endif  // CORRBUFFER
+//#endif  // CORRBUFFER
 
 
 uint32_t CorrelatorSimulatorADE::getCorrProdIndex 
@@ -804,6 +841,7 @@ uint32_t CorrelatorSimulatorADE::getCorrProdIndex
 		checkStokesType (stokesType);
         return 0;
 	}
+    cout << ant1 << ", " << ant2 << ", " << stokesValue << endl;
 	return itsCorrProdMap.getIndex (ant1, ant2, stokesValue);
 }
 

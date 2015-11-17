@@ -35,7 +35,7 @@ using namespace askap::cp;
 using namespace std;
 
 
-CorrBuffer::CorrBuffer () : timestamp(0), ready(false)
+CorrBuffer::CorrBuffer () : timeStamp(0), ready(false)
 {
 }
 
@@ -59,7 +59,7 @@ void CorrBuffer::init (uint32_t nCorrProd, uint32_t nChannel)
 
 void CorrBuffer::print ()
 {
-    cout << "Buffer timestamp: " << timestamp << endl;
+    cout << "Buffer timestamp: " << timeStamp << endl;
     cout << "Buffer ready    : " << ready << endl;
     cout << "Buffer content  : " << endl;
     cout << endl;

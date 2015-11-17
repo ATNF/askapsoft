@@ -32,7 +32,7 @@ VISPID=$!
 # For the moment, keep to 2 processes:
 # process 0 for configuration validation
 # process 1 for streaming
-mpirun -np 3 ../../apps/playbackADE.sh -c playback.in
+mpirun -np 2 ../../apps/playbackADE.sh -c playback.in
 STATUS=$?
 echo "playbackADE status: " $STATUS
 

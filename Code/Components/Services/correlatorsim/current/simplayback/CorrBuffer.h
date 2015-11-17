@@ -59,7 +59,9 @@ class CorrBuffer
 
         // data
         
-        uint64_t timestamp;
+        uint64_t timeStamp;
+
+        uint32_t beam;
 
         // True if the data is ready to use
         bool ready;

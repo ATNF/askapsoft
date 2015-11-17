@@ -36,7 +36,7 @@ using namespace std;
 
 
 CorrBufferUnit::CorrBufferUnit () : block(0), card(0), channel(0), freq(0.0),
-        beamId(0), ready(false)
+        ready(false)
 {
 }
 
@@ -51,7 +51,7 @@ CorrBufferUnit::~CorrBufferUnit ()
 void CorrBufferUnit::print ()
 {
     cout << block << ", " << card << ", " << channel << ", " << freq << ", "
-            << beamId << ", [" << vis.real << ", " << vis.imag << "], "
+            << ", [" << vis.real << ", " << vis.imag << "], "
             << ready << endl;
 }
 

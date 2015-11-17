@@ -60,8 +60,6 @@ class CorrBufferUnit
 
         float freq;
 
-        uint32_t beamId;
-
         FloatComplex vis;
 
         // True if the data is ready to use

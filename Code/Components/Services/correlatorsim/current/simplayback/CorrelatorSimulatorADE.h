@@ -90,15 +90,6 @@ class CorrelatorSimulatorADE : public ISimulator {
         ///         should not be called again.
         bool sendNext(void);
 		
-        // Using buffer for intermediate storage
-        //void initBuffer ();
-
-        // return true if successful
-        //bool getBufferData ();
-        
-        // (return true if successful)
-        //bool sendBufferData ();
-
     private:
 
 		// Correlation product map (this replaces baseline map)
@@ -146,7 +137,7 @@ class CorrelatorSimulatorADE : public ISimulator {
         boost::scoped_ptr<askap::cp::VisPortADE> itsPort;
 
         // Buffer data
-        CorrBuffer itsBuffer;
+        CorrBuffer buffer;
 
 
         // Internal functions

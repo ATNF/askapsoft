@@ -244,6 +244,7 @@ void SimPlaybackADE::run(void)
 		bool moreData = true;
 		while (moreData) {
 			moreData = sim->sendNext();
+            //cout << "  more data: " << moreData << endl;
 		}
     }
 	
