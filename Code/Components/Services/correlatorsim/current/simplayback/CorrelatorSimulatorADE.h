@@ -139,6 +139,8 @@ class CorrelatorSimulatorADE : public ISimulator {
         // Buffer data
         CorrBuffer buffer;
 
+        // Antenna indices
+        vector<unsigned int> antIndices;
 
         // Internal functions
         

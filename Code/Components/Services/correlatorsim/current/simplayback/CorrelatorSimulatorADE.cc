@@ -39,6 +39,7 @@
 #include <cmath>
 #include <unistd.h>
 #include <inttypes.h>
+#include <algorithm>
 
 // ASKAPsoft includes
 #include "askap/AskapError.h"
@@ -105,25 +106,20 @@ CorrelatorSimulatorADE::CorrelatorSimulatorADE(const std::string& dataset,
         
 		itsMS.reset(new casa::MeasurementSet(dataset, casa::Table::Old));
         ROMSColumns msc(*itsMS);
-        
         /*
         cout << "Getting antennas from measurement set" << endl;
         const casa::ROMSAntennaColumns& antc = msc.antenna();
         itsNAntenna = antc.nrow();
         cout << "Antenna count: " << itsNAntenna << endl;
-        vector<string> antennaNames;
+        //vector<string> antennaNames;
+        int antIndex;
         for (unsigned int ant = 0; ant < itsNAntenna; ++ant) {
             string antName = antc.name()(ant);
-            antennaNames.push_back (antName);
-            cout << "  antenna " << ant << ": " << antennaNames[ant] << endl;
+            string antNameNumber = antName.substr(2,2);
+            cout << "  antenna: " << antName << ": " << antNameNumber << endl;
+            //antennaNames.push_back (antName);
+            //cout << "  antenna " << ant << ": " << antennaNames[ant] << endl;
         }
-
-        //cout << "Querying the size of data in measurement set" << endl;
-	    //casa::Matrix<casa::Complex> data = msc.data()(0);
-        //cout << "Data size: " << SIZEOF_ARRAY( data ) << ", " << 
-        //        SIZEOF_ARRAY( data[0] ) << endl;
-        //cout << "Data size: " << sizeof(data) << ", " << 
-        //        sizeof(data[0]) << endl;
         */
 #ifdef CORRBUFFER
         initBuffer();
@@ -368,7 +364,21 @@ void CorrelatorSimulatorADE::initBuffer ()
 
     const uint32_t nAntenna = antc.nrow();
     cout << "  Antenna count: " << nAntenna << endl;
-
+    //vector<string> antennaNames;
+    unsigned int antIndex;
+    //vector<unsigned int> antIndices;
+    for (unsigned int ant = 0; ant < nAntenna; ++ant) {
+        string antName = antc.name()(ant);
+        string antNameNumber = antName.substr(2,2);
+        stringstream convert(antNameNumber);
+        convert >> antIndex;
+        antIndices.push_back(antIndex);
+        cout << "  antenna: " << antName << ": " << antNameNumber << 
+                ": " << antIndex << endl;
+        //antennaNames.push_back (antName);
+        //cout << "  antenna " << ant << ": " << antennaNames[ant] << endl;
+    }
+    
     const int nRow = msc.nrow();
     cout << "  Total rows in measurement set: " << nRow << endl;
     cout << "  Checking all rows ..." << endl;
@@ -495,7 +505,6 @@ bool CorrelatorSimulatorADE::getBufferData ()
     unsigned int descSpwId, descPolId;
     unsigned int nChan;     // number of channel
     unsigned int nCorr;     // number of correlation
-    unsigned int ant1, ant2;
     //unsigned int corr;      // linear correlation (XX, XY, YX, YY)
     unsigned int corrProd;  // correlation product, aka. baseline
     casa::Vector<casa::Int> stokesTypesInt;
@@ -541,8 +550,12 @@ bool CorrelatorSimulatorADE::getBufferData ()
         nCorr = polc.numCorr()(descPolId);
         data = msc.data()(itsCurrentRow);
 
-        ant1 = msc.antenna1()(itsCurrentRow);
-        ant2 = msc.antenna2()(itsCurrentRow);
+        unsigned int ant1 = antIndices[msc.antenna1()(itsCurrentRow)];
+        unsigned int ant2 = antIndices[msc.antenna2()(itsCurrentRow)];
+        if (ant1 > ant2) {
+            std::swap(ant1,ant2);
+        }
+
         stokesTypesInt = polc.corrType()(descPolId);
         //cout << "    antenna " << ant1 << ", " << ant2 << endl;
         for (unsigned int corr = 0; corr < nCorr; ++corr) {
