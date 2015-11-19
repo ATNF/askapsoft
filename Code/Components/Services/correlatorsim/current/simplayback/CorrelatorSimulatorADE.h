@@ -122,6 +122,9 @@ class CorrelatorSimulatorADE : public ISimulator {
         // Data input mode 
         const std::string itsInputMode;
 
+        // Current time stamp
+        uint64_t itsCurrentTime;
+
         // Delay in microseconds
         unsigned int itsDelay;
 

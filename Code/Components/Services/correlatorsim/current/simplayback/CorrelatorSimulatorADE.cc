@@ -94,7 +94,7 @@ CorrelatorSimulatorADE::CorrelatorSimulatorADE(const std::string& dataset,
         itsNCoarseChannel(nCoarseChannel),
         itsNChannelSub(nChannelSub), itsCoarseBandwidth(coarseBandwidth),
         itsFineBandwidth(0.0), itsInputMode(inputMode), 
-        itsDelay(delay), itsCurrentRow(0)  
+        itsCurrentTime(0), itsDelay(delay), itsCurrentRow(0)  
 {
     itsMS.reset(new casa::MeasurementSet(dataset, casa::Table::Old));
 	itsPort.reset(new askap::cp::VisPortADE(hostname, port));
@@ -113,10 +113,20 @@ CorrelatorSimulatorADE::~CorrelatorSimulatorADE()
 
 bool CorrelatorSimulatorADE::sendNext(void)
 {
+    uint64_t previousTime = itsCurrentTime;
     if (getBufferData()) {
+        if (itsCurrentTime > previousTime) {
+            cout << "New time stamp: " << itsCurrentTime << endl;
+            double delay = static_cast<double>(itsDelay) / 1000000.0;
+            cout << "Delaying transmission for " << delay << 
+                    " seconds ..." << endl;
+            usleep(itsDelay);
+            cout << "Resuming transmission" << endl;
+        }
         return sendBufferData();
     }
     else {
+        cout << "No more data available" << endl;
         return false;
     }
 	return true;
@@ -344,8 +354,10 @@ bool CorrelatorSimulatorADE::getBufferData ()
 
     const uint32_t nRow = msc.nrow();
     if (itsCurrentRow >= nRow) {
+#ifdef VERBOSE
         cout << "  No more data available" << endl;
-        //cout << "Getting buffer data: done" << endl;
+        cout << "Getting buffer data: done" << endl;
+#endif
         return false;
     }
 
@@ -375,8 +387,11 @@ bool CorrelatorSimulatorADE::getBufferData ()
 
     // ideally we need to carry 64-bit BAT in the payload explicitly
     buffer.timeStamp = static_cast<long>(startBAT);
+    itsCurrentTime = buffer.timeStamp;
     buffer.beam = static_cast<uint32_t>(msc.feed1()(itsCurrentRow));
+#ifdef VERBOSE
     cout << "  Time " << buffer.timeStamp << ", beam " << buffer.beam << endl;
+#endif
 
     while ((itsCurrentRow < nRow) &&
         (static_cast<uint32_t>(msc.feed1()(itsCurrentRow)) == buffer.beam)) {

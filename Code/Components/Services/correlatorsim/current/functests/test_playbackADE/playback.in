@@ -55,8 +55,8 @@ playback.corrsim.shelf2.dataset             = ../../dataset/beta2.ms
 playback.corrsim.shelf2.out.hostname        = localhost
 playback.corrsim.shelf2.out.port            = 3001
 
-# Delay in sending datagram (microsecond)
-playback.corrsim.delay                      = 0
+# Delay in transmission between different time groups (microsecond)
+playback.corrsim.delay                      = 5000000
 
 # TO ADD LATER: Failure pattern (make sure repeatable, ie. not random)
 #
