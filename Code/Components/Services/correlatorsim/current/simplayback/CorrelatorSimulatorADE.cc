@@ -96,64 +96,11 @@ CorrelatorSimulatorADE::CorrelatorSimulatorADE(const std::string& dataset,
         itsFineBandwidth(0.0), itsInputMode(inputMode), 
         itsDelay(delay), itsCurrentRow(0)  
 {
-	if (itsInputMode == "zero") {
-        itsMS.reset();
-        ROMSColumns msc(*itsMS);
-        cout << "Antenna count: " << itsNAntenna << endl;
-    }
-    else if (itsInputMode == "expand") {
-        cout << "Input mode: expand" << endl;
-        
-		itsMS.reset(new casa::MeasurementSet(dataset, casa::Table::Old));
-        ROMSColumns msc(*itsMS);
-        /*
-        cout << "Getting antennas from measurement set" << endl;
-        const casa::ROMSAntennaColumns& antc = msc.antenna();
-        itsNAntenna = antc.nrow();
-        cout << "Antenna count: " << itsNAntenna << endl;
-        //vector<string> antennaNames;
-        int antIndex;
-        for (unsigned int ant = 0; ant < itsNAntenna; ++ant) {
-            string antName = antc.name()(ant);
-            string antNameNumber = antName.substr(2,2);
-            cout << "  antenna: " << antName << ": " << antNameNumber << endl;
-            //antennaNames.push_back (antName);
-            //cout << "  antenna " << ant << ": " << antennaNames[ant] << endl;
-        }
-        */
-#ifdef CORRBUFFER
-        initBuffer();
-#endif
- 	}
-	else {
-		cout << "ERROR in CorrelatorSimulatorADE: illegal input mode: " <<
-                itsInputMode << endl;
-	}
-
-    // Port
+    itsMS.reset(new casa::MeasurementSet(dataset, casa::Table::Old));
 	itsPort.reset(new askap::cp::VisPortADE(hostname, port));
-	
-    // Compute the total number of correlation products
-    //CorrProdMap itsCorrProd(0,1);
-    itsNCorrProd = itsCorrProdMap.getTotal (itsNAntenna);
-    cout << "Total correlation products (baselines): " << itsNCorrProd << endl;
-    cout << "Max baselines per slice               : " <<
-            VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE << endl;
-    itsNSlice = itsNCorrProd / 
-            VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE;
-    int remainder = itsNCorrProd %
-            VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE;
-    if (remainder == 0) {
-        cout << "Baselines fit exactly into " << itsNSlice << " slices" <<
-            endl;
-    }
-    else {
-        cout << "Baselines fit partially into " << itsNSlice + 1 <<
-           " slices" << endl; 
-    }
-
-    itsFineBandwidth = itsCoarseBandwidth / itsNChannelSub;
+    initBuffer();
 }
+
 
 
 CorrelatorSimulatorADE::~CorrelatorSimulatorADE()
@@ -163,106 +110,19 @@ CorrelatorSimulatorADE::~CorrelatorSimulatorADE()
 }
 
 
+
 bool CorrelatorSimulatorADE::sendNext(void)
 {
-	if (itsInputMode == "zero") {
-		return sendNextZero();
-	}
-	else if (itsInputMode == "expand") {
-#ifdef CORRBUFFER
-        if (getBufferData()) {
-            return sendBufferData();
-        }
-        else {
-            return false;
-        }
-#else
-		return sendNextExpand();
-#endif
-	}
-	return 1;
+    if (getBufferData()) {
+        return sendBufferData();
+    }
+    else {
+        return false;
+    }
+	return true;
 }
 
-/*
-#ifdef HARDWARELIKE
 
-// Send data of zero visibility for the whole baselines and channels 
-// for only 1 time period.
-bool CorrelatorSimulatorADE::sendNextZero(void)
-{
-#ifdef VERBOSE
-    cout << "CorrelatorSimulatorADE::sendNextZero..." << endl;
-#endif
-    // construct payload
-    askap::cp::VisDatagramADE payload;
-    payload.version = VisDatagramTraits<VisDatagramADE>::VISPAYLOAD_VERSION;
-    payload.timestamp = 0;
-    payload.block = 1;      // part of freq index
-    payload.card = 1;       // part of freq index
-    payload.beamid = 1;
-
-    // block
-    for (uint32_t block = 0; block < 8; ++block) { 
-
-        // card
-        for (uint32_t card = 0; card < MAXCARD; ++card) {
-
-            uint32_t fChannel = cChannel * itsNChannelSub + subDiv;
-            payload.channel = fChannel;
-            payload.freq = itsFineBandwidth * fChannel; // part of freq index
-
-            // payload slice
-            for (uint32_t slice = 0; slice < itsNSlice; ++slice) {
-
-                payload.slice = slice;
-                payload.baseline1 = slice * 
-                VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE;
-                payload.baseline2 = payload.baseline1 +
-                VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE - 1;
-
-                // gather all visibility of baselines in this slice 
-                // (= correlation product: antenna & polarisation product)
-                for (uint32_t baseInSlice = 0; 
-                        baseInSlice < VisDatagramTraits<VisDatagramADE>::
-						MAX_BASELINES_PER_SLICE; ++baseInSlice) { 
-					//cout << "baseline: " << baseline << endl;
-                    payload.vis[baseInSlice].real = 0.0;
-                    payload.vis[baseInSlice].imag = 0.0;
-                }
-
-                // send data in this slice 
-                cout << "shelf " << itsShelf << 
-                        " send payload channel " << cChannel << 
-                        ", sub " << subDiv << ", slice " << slice << endl; 
-
-				if (slice % 2 == 0) {   // shelf 1 sends even number slice
-					if (itsShelf == 1) {
-						itsPort->send(payload);
-					}
-				}
-				else {                  // slice 2 sends odd number slice
-					if (itsShelf == 2) {
-						itsPort->send(payload);
-					}
-				}
-				//itsPort->send(payload);
-				
-                usleep (itsDelay);
-				
-            }   // slice
-        }   // channel subdivision
-    }   // coarse channel
-
-#ifdef VERBOSE
-    cout << "CorrelatorSimulatorADE::sendNextZero: shelf " <<
-            itsShelf << ": done" << endl;
-#endif
-
-    return false;   // to stop calling this function
-}
-    
-#else   // NOT hardware-like
-*/
 
 // Send data of zero visibility for the whole baselines and channels 
 // for only 1 time period.
@@ -339,18 +199,15 @@ bool CorrelatorSimulatorADE::sendNextZero(void)
     return false;   // to stop calling this function
 }
 
-//#endif  // hardware-like
 
-
-//#ifdef CORRBUFFER
 
 // Steps: 
-// 1) Initialize the buffer
-// 2) Gather data in 1 time interval into buffer
-// 3) Send the data in the buffer, slice by slice, until all data has been sent
+// 1) Initialize the buffer (size: 1 beam x all channels in measurement set)
+// 2) Get data into buffer
+// 3) Send buffer data, in slices.
+//    1 slice contains a portion of beam at a particular channel
 // Repeat 2 & 3 until all data has been sent
 //
-// Initialize the buffer
 void CorrelatorSimulatorADE::initBuffer ()
 {
     cout << "Initializing buffer ..." << endl;
@@ -361,41 +218,23 @@ void CorrelatorSimulatorADE::initBuffer ()
     const casa::ROMSAntennaColumns& antc = msc.antenna();
     const casa::ROMSDataDescColumns& ddc = msc.dataDescription();
     const casa::ROMSPolarizationColumns& polc = msc.polarization();
-
-    const uint32_t nAntenna = antc.nrow();
-    cout << "  Antenna count: " << nAntenna << endl;
-    //vector<string> antennaNames;
-    unsigned int antIndex;
-    //vector<unsigned int> antIndices;
-    for (unsigned int ant = 0; ant < nAntenna; ++ant) {
-        string antName = antc.name()(ant);
-        string antNameNumber = antName.substr(2,2);
-        stringstream convert(antNameNumber);
-        convert >> antIndex;
-        antIndices.push_back(antIndex);
-        cout << "  antenna: " << antName << ": " << antNameNumber << 
-                ": " << antIndex << endl;
-        //antennaNames.push_back (antName);
-        //cout << "  antenna " << ant << ": " << antennaNames[ant] << endl;
-    }
-    
-    const int nRow = msc.nrow();
+    const uint32_t nRow = msc.nrow();
     cout << "  Total rows in measurement set: " << nRow << endl;
     cout << "  Checking all rows ..." << endl;
     casa::Double currentTime = 0.0;
 
-    int dataDescId;
-    unsigned int descSpwId, descPolId;
-    unsigned int nChan, nCorr;
-    int currentBeam = 0;
-    int antMin = 9999;
-    int antMax = 0;
-    int beamMin = 9999;
-    int beamMax = 0;
-    int nTime = 0;
-    int nRowOfConstTime;
-    int nRowOfConstBeam;
-    for (int row = 0; row < nRow; ++row) {
+    uint32_t dataDescId;
+    uint32_t descSpwId, descPolId;
+    uint32_t nChan, nCorr;
+    int32_t currentBeam = 0;
+    int32_t antMin = 9999;
+    int32_t antMax = 0;
+    int32_t beamMin = 9999;
+    int32_t beamMax = 0;
+    uint32_t nTime = 0;
+    uint32_t nRowOfConstTime;
+    uint32_t nRowOfConstBeam;
+    for (uint32_t row = 0; row < nRow; ++row) {
 
         if (msc.time()(row) > currentTime) {
             currentTime = msc.time()(row);
@@ -442,11 +281,25 @@ void CorrelatorSimulatorADE::initBuffer ()
     //cout << "  Rows of constant beam: " << nRowOfConstBeam << endl;
 
     // Antennas
-    cout << "  Antenna range        : " << antMin << " ~ " << antMax << endl;
-    // verify number of antenna here
-    int nAntMeas = antMax - antMin + 1; // from measurement data
-    int nAntCorr = itsNAntenna;         // from parameter file
+    const uint32_t nAntMeas = antc.nrow();
+    const uint32_t nAntMeasCheck = antMax - antMin + 1;
+    ASKAPCHECK(nAntMeas == nAntMeasCheck, 
+            "Disagreement in antenna count in measurement set");
     cout << "  Antenna count in measurement set: " << nAntMeas << endl;
+    for (uint32_t ant = 0; ant < nAntMeas; ++ant) {
+        string antName = antc.name()(ant);
+        string antNameNumber = antName.substr(2,2);
+        stringstream convert(antNameNumber);
+        uint32_t antIndex;
+        convert >> antIndex;
+        antIndices.push_back(antIndex-1);   // antenna name is 1-based
+        cout << "  antenna name: " << antName << " -> index: " << 
+               antIndices[ant] << endl;
+    }
+    
+    //int nAntMeas = antMax - antMin + 1; // from measurement data
+    uint32_t nAntCorr = itsNAntenna;         // from parameter file
+    //cout << "  Antenna count in measurement set: " << nAntMeas << endl;
     cout << "  Antenna count in correlator sim : " << nAntCorr << endl;
     
     // Correlation products, calculated from parameter file
@@ -456,21 +309,18 @@ void CorrelatorSimulatorADE::initBuffer ()
     cout << "  Correlation product count       : " << itsNCorrProd << endl;
 
     // Data matrix
-    cout << "  Data matrix (corr,channel)      : " << nCorr << ", " <<
-            nChan << endl;
+    cout << "  Measurement set data matrix (corr,channel): " << nCorr << 
+            ", " << nChan << endl;
 
     // Creating buffer
     cout << "  Creating buffer ..." << endl;
-    //int nBufferUnit = itsNCorrProd * nChan;
-    //cout << "    Size = corr products x channels = " << 
-    //        nBufferUnit << endl;
-    //int nBufferRow = nRowOfConstBeam * itsNCorrProd;
-    int nBufferRow = itsNCorrProd;
+    uint32_t nBufferRow = itsNCorrProd;
     buffer.data.resize(nBufferRow);
-    for (int corrProd = 0; corrProd < nBufferRow; ++corrProd) {
+    for (uint32_t corrProd = 0; corrProd < nBufferRow; ++corrProd) {
         buffer.data[corrProd].resize(nChan);
     }
-    cout << "    row x column : " << nBufferRow << " x " << nChan << endl; 
+    cout << "    correlation product x channel: " << nBufferRow << 
+            " x " << nChan << endl; 
     cout << "  Creating buffer: done" << endl;
 
     cout << "Initializing buffer: done" << endl;
@@ -489,27 +339,15 @@ bool CorrelatorSimulatorADE::getBufferData ()
 
     // Get reference to columns of interest
     const casa::ROMSSpWindowColumns& spwc = msc.spectralWindow();
-    //const casa::ROMSAntennaColumns& antc = msc.antenna();
     const casa::ROMSDataDescColumns& ddc = msc.dataDescription();
     const casa::ROMSPolarizationColumns& polc = msc.polarization();
 
-    //const uint32_t nAntenna = antc.nrow();
-    //cout << "  Antenna count: " << nAntenna << endl;
-    const unsigned int nRow = msc.nrow();
+    const uint32_t nRow = msc.nrow();
     if (itsCurrentRow >= nRow) {
         cout << "  No more data available" << endl;
-        cout << "Getting buffer data: done" << endl;
+        //cout << "Getting buffer data: done" << endl;
         return false;
     }
-    int dataDescId;
-    unsigned int descSpwId, descPolId;
-    unsigned int nChan;     // number of channel
-    unsigned int nCorr;     // number of correlation
-    //unsigned int corr;      // linear correlation (XX, XY, YX, YY)
-    unsigned int corrProd;  // correlation product, aka. baseline
-    casa::Vector<casa::Int> stokesTypesInt;
-    Stokes::StokesTypes stokesType;
-    casa::Matrix<casa::Complex> data;
 
     // Note, the measurement set stores integration midpoint (in seconds), 
     // while the TOS (and it is assumed the correlator) deal with 
@@ -543,23 +381,23 @@ bool CorrelatorSimulatorADE::getBufferData ()
     while ((itsCurrentRow < nRow) &&
         (static_cast<uint32_t>(msc.feed1()(itsCurrentRow)) == buffer.beam)) {
 
-        dataDescId = msc.dataDescId()(itsCurrentRow);
-        descSpwId = ddc.spectralWindowId()(dataDescId);
-        nChan = spwc.numChan()(descSpwId);
-        descPolId = ddc.polarizationId()(dataDescId);
-        nCorr = polc.numCorr()(descPolId);
-        data = msc.data()(itsCurrentRow);
+        uint32_t dataDescId = msc.dataDescId()(itsCurrentRow);
+        uint32_t descSpwId = ddc.spectralWindowId()(dataDescId);
+        uint32_t nChan = spwc.numChan()(descSpwId);
+        uint32_t descPolId = ddc.polarizationId()(dataDescId);
+        uint32_t nCorr = polc.numCorr()(descPolId);
+        casa::Matrix<casa::Complex> data = msc.data()(itsCurrentRow);
 
-        unsigned int ant1 = antIndices[msc.antenna1()(itsCurrentRow)];
-        unsigned int ant2 = antIndices[msc.antenna2()(itsCurrentRow)];
+        uint32_t ant1 = antIndices[msc.antenna1()(itsCurrentRow)];
+        uint32_t ant2 = antIndices[msc.antenna2()(itsCurrentRow)];
         if (ant1 > ant2) {
             std::swap(ant1,ant2);
         }
 
-        stokesTypesInt = polc.corrType()(descPolId);
+        casa::Vector<casa::Int> stokesTypesInt = polc.corrType()(descPolId);
         //cout << "    antenna " << ant1 << ", " << ant2 << endl;
-        for (unsigned int corr = 0; corr < nCorr; ++corr) {
-            stokesType = Stokes::type(stokesTypesInt(corr));
+        for (uint32_t corr = 0; corr < nCorr; ++corr) {
+            Stokes::StokesTypes stokesType = Stokes::type(stokesTypesInt(corr));
             if (stokesType == Stokes::XX) {
                 corr = 0;
             }
@@ -580,8 +418,8 @@ bool CorrelatorSimulatorADE::getBufferData ()
             // except when the Stokes type is YX for the same antenna
             if ((ant1 != ant2) || (stokesType != Stokes::YX)) {
                 //cout << ant1 << ", " << ant2 << ", " << corr << endl;
-                corrProd = itsCorrProdMap.getIndex (ant1, ant2, corr);
-                for (unsigned int chan = 0; chan < nChan; ++chan) {
+                uint32_t corrProd = itsCorrProdMap.getIndex (ant1, ant2, corr);
+                for (uint32_t chan = 0; chan < nChan; ++chan) {
                     buffer.data[corrProd][chan].block = 1;
                     buffer.data[corrProd][chan].card = 1;
                     buffer.data[corrProd][chan].channel = 1;
@@ -592,12 +430,14 @@ bool CorrelatorSimulatorADE::getBufferData ()
                     buffer.data[corrProd][chan].vis.imag = 
                             data(corr,chan).imag();
                     buffer.data[corrProd][chan].ready = true;
-                }
+                }   // channel
             }
-        }
+        }   // correlation
         ++itsCurrentRow;
-    }
+    }   // row
+
     buffer.ready = true;
+
 #ifdef VERBOSE
     cout << "Getting buffer data: done" << endl;
 #endif
@@ -616,17 +456,17 @@ bool CorrelatorSimulatorADE::sendBufferData ()
     payload.timestamp = buffer.timeStamp;
     payload.beamid = buffer.beam;
 
-    const unsigned int nChan = buffer.data[0].size();
-    const unsigned int nCorrProd = buffer.data.size();
-    unsigned int corrProd;
-    unsigned int nCorrProdPerSlice = 
+    const uint32_t nChan = buffer.data[0].size();
+    const uint32_t nCorrProd = buffer.data.size();
+    //uint32_t corrProd;
+    const uint32_t nCorrProdPerSlice = 
             VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE;
-    const unsigned int nSlice = nCorrProd / nCorrProdPerSlice;
+    const uint32_t nSlice = nCorrProd / nCorrProdPerSlice;
 
     //cout << "  Size: " << nCorrProd << " x " << nChan << endl;
     //cout << "  Number of slices: " << nSlice << endl;
 
-    for (unsigned int chan = 0; chan < nChan; ++chan) {
+    for (uint32_t chan = 0; chan < nChan; ++chan) {
 
         // put loop for channel expansion here
     
@@ -635,30 +475,35 @@ bool CorrelatorSimulatorADE::sendBufferData ()
         payload.channel = chan;     //buffer.data[0][chan].channel;
         payload.freq = buffer.data[0][chan].freq;
 
-        for (unsigned int slice = 0; slice < nSlice; ++slice) {
+        for (uint32_t slice = 0; slice < nSlice; ++slice) {
             payload.slice = slice;
             payload.baseline1 = slice * nCorrProdPerSlice;
             payload.baseline2 = payload.baseline1 +
                     nCorrProdPerSlice - 1;
 
-            for (unsigned int corrProdInSlice = 0; 
+            for (uint32_t corrProdInSlice = 0; 
                     corrProdInSlice < nCorrProdPerSlice; 
                     ++corrProdInSlice) {
-                corrProd = corrProdInSlice + slice * nCorrProdPerSlice;
+                uint32_t corrProd = corrProdInSlice + 
+                        slice * nCorrProdPerSlice;
                 payload.vis[corrProdInSlice].real = 
                         buffer.data[corrProd][chan].vis.real;
                 payload.vis[corrProdInSlice].imag = 
                         buffer.data[corrProd][chan].vis.imag;
-                //payload.freq = buffer.data[corrProd][chan].freq;
                 buffer.data[corrProd][chan].ready = false;
-            }
+            }   // correlation product in slice
+
             // send the slice
             itsPort->send(payload);
+
             //cout << "  Channel " << chan << ", slice " << slice << 
             //    ", baselines " << payload.baseline1 << " ~ " << 
             //    payload.baseline2 << endl;
-        }   // next slice
-    }   // next channel
+        }   // slice
+    }   // channel
+
+    buffer.ready = false;
+
 #ifdef VERBOSE
     cout << "Sending buffer data: done" << endl;
 #endif

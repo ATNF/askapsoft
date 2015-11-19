@@ -111,11 +111,11 @@ void SimPlaybackADE::validateConfig(void)
 		std::ostringstream ss;
 		ss << "corrsim.shelf" << i+1 << ".";
 
-		if (inputMode == "expand") {
+		//if (inputMode == "expand") {
 			std::string dataset = ss.str();
 			dataset.append("dataset");
 			requiredKeys.push_back(dataset);
-		}
+		//}
 
 		std::string hostname = ss.str();
 		hostname.append("out.hostname");
@@ -143,14 +143,18 @@ void SimPlaybackADE::validateConfig(void)
 }
 
 
+
 boost::shared_ptr<TosSimulator> SimPlaybackADE::makeTosSim(void)
 {
 #ifdef VERBOSE
-	std::cout << "makeTosSim ... " << std::endl;
+	std::cout << "makeTosSim" << std::endl;
 #endif
-    const std::string filename = itsParset.getString("corrsim.shelf1.dataset","");
-    const std::string locatorHost = itsParset.getString("tossim.ice.locator_host");
-    const std::string locatorPort = itsParset.getString("tossim.ice.locator_port");
+    const std::string filename = 
+            itsParset.getString("corrsim.shelf1.dataset","");
+    const std::string locatorHost = 
+            itsParset.getString("tossim.ice.locator_host");
+    const std::string locatorPort = 
+            itsParset.getString("tossim.ice.locator_port");
     const std::string topicManager = itsParset.getString(
 			"tossim.icestorm.topicmanager");
     const std::string topic = itsParset.getString("tossim.icestorm.topic");
@@ -159,17 +163,18 @@ boost::shared_ptr<TosSimulator> SimPlaybackADE::makeTosSim(void)
 
     return boost::shared_ptr<TosSimulator>(new TosSimulator(filename,
             locatorHost, locatorPort, topicManager, topic, failureChance));
-#ifdef VERBOSE
-	std::cout << "makeTosSim: done" << std::endl;
-#endif
+//#ifdef VERBOSE
+//	std::cout << "makeTosSim: done" << std::endl;
+//#endif
 }
+
 
 
 boost::shared_ptr<CorrelatorSimulatorADE> 
         SimPlaybackADE::makeCorrelatorSim(void)
 {
 #ifdef VERBOSE
-	std::cout << "makeCorrelatorSim ... " << std::endl;
+	std::cout << "makeCorrelatorSim" << std::endl;
 #endif
 	std::ostringstream ss;
 	ss << "corrsim.shelf" << itsRank << ".";
@@ -188,20 +193,16 @@ boost::shared_ptr<CorrelatorSimulatorADE>
             itsParset.getDouble("corrsim.coarse_channel_bandwidth", 1000000);
     const unsigned int delay =
             itsParset.getUint32("corrsim.delay", 0);
-    //CorrelatorSimulatorADE* corrSim = 
-    //        new CorrelatorSimulatorADE (dataset, hostname, port, 
-    //        itsRank, nAntenna, nCoarseChannel, nChannelSub,
-    //        coarseBandwidth, itsInputMode, delay);
-    //return boost::shared_ptr<CorrelatorSimulatorADE>(corrSim);
 
     return boost::shared_ptr<CorrelatorSimulatorADE>(
             new CorrelatorSimulatorADE(dataset, hostname, port, 
             itsRank, nAntenna, nCoarseChannel, nChannelSub,
             coarseBandwidth, itsInputMode, delay));
-#ifdef VERBOSE
-	std::cout << "makeCorrelatorSim: done" << std::endl;
-#endif
+//#ifdef VERBOSE
+//	std::cout << "makeCorrelatorSim: done" << std::endl;
+//#endif
 }
+
 
 
 void SimPlaybackADE::run(void)
@@ -213,47 +214,30 @@ void SimPlaybackADE::run(void)
     MPI_Barrier(MPI_COMM_WORLD);
 
 	itsInputMode = itsParset.getString ("input_mode","zero");
-#ifdef VERBOSE
-	std::cout << "itsInputMode: " << itsInputMode << std::endl;
-#endif
-
-    // Preparation stage
-    /*
-    if (itsRank == 0) {
-        boost::shared_ptr<ISimulator> sim = makeTosSim();
-    }
-    else {
-        boost::shared_ptr<ISimulator> sim = makeCorrelatorSim();
-        if (itsRank == 1) {
-            //sim->initBuffer();
-        }
-    }
-
-    MPI_Barrier(MPI_COMM_WORLD);
-    */
-    // Transmission stage
+//#ifdef VERBOSE
+//	std::cout << "itsInputMode: " << itsInputMode << std::endl;
+//#endif
 
     if (itsRank == 0) {
 		boost::shared_ptr<ISimulator> sim = makeTosSim();
 		bool moreData = true;
+        cout << "Sending TOS data ..." << endl;
 		while (moreData) {
 			moreData = sim->sendNext();
 		}
-    } else {
+        cout << "Sending TOS data: done" << endl;
+    }
+    else {
         boost::shared_ptr<ISimulator> sim = makeCorrelatorSim();
 		bool moreData = true;
+        cout << "Sending Correlator data ..." << endl;
 		while (moreData) {
 			moreData = sim->sendNext();
-            //cout << "  more data: " << moreData << endl;
 		}
+        cout << "Sending Correlator data: done" << endl;
     }
 	
     MPI_Barrier(MPI_COMM_WORLD);
-	
-#ifdef VERBOSE
-	cout << "SimPlaybackADE::run: done" << endl;
-#endif
-
 }
 
 #ifdef VERBOSE
