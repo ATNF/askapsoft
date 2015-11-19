@@ -129,34 +129,47 @@ int main(int argc, char *argv[])
     unsigned long time = 1234;
     const unsigned int count = 10;
     for (unsigned int i = 0; i < count; ++i) {
+        ASKAPLOG_INFO_STR(logger, "Sending message number "<<i + 1);
         VisDatagram outvis;
         std::memset(&outvis, 0, sizeof (VisDatagram));
-        outvis.timestamp = time;
+        outvis.timestamp = time + i;
         outvis.version = VisDatagramTraits<VisDatagram>::VISPAYLOAD_VERSION;
         out.send(outvis);
 
         boost::shared_ptr<VisDatagram> recvd = source.next();
-        if (recvd->timestamp != time) {
-            std::cerr << "Messages do not match" << std::endl;
+        ASKAPLOG_INFO_STR(logger, "Received message number "<<i + 1);
+        if (recvd->timestamp != time + i) {
+            ASKAPLOG_ERROR_STR(logger, "Messages do not match, received time=" <<recvd->timestamp<<" expected="<<time + i);
             return 1;
         }
     }
-
-
+  
+    ASKAPLOG_INFO_STR(logger, "Test the buffering abilities of MetadataSource");
+    
     // Test the buffering abilities of MetadataSource
     time = 9876;
     for (unsigned int i = 0; i < bufSize; ++i) {
+        if (i % 10000 == 9999) {
+            ASKAPLOG_INFO_STR(logger, "Sending message number "<<i + 1);
+        }
         VisDatagram outvis;
         std::memset(&outvis, 0, sizeof (VisDatagram));
-        outvis.timestamp = time;
+        outvis.timestamp = time + i / 10000;
         outvis.version = VisDatagramTraits<VisDatagram>::VISPAYLOAD_VERSION;
         out.send(outvis);
-        usleep(10); // Throttle the sending slightly
+        usleep(50); // Throttle the sending slightly
     }
     for (unsigned int i = 0; i < bufSize; ++i) {
-        boost::shared_ptr<VisDatagram> recvd = source.next();
-        if (recvd->timestamp != time) {
-            std::cerr << "Messages do not match" << std::endl;
+        boost::shared_ptr<VisDatagram> recvd = source.next(1000000u);
+        if (!recvd) {
+            ASKAPLOG_ERROR_STR(logger, "Timeout waiting for message number "<<i + 1);
+            return 1;
+        }
+        if (i % 10000 == 9999) {
+            ASKAPLOG_INFO_STR(logger, "Received message number "<<i + 1);
+        }
+        if (recvd->timestamp != time + i / 10000) {
+            ASKAPLOG_ERROR_STR(logger, "Messages do not match, received time="<<recvd->timestamp<<" expected="<<time + i / 10000);
             return 1;
         }
     }
