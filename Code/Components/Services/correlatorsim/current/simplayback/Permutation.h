@@ -69,33 +69,33 @@ class Permutation
 		uint32_t const getTotal (const uint32_t nItem);
 
 		/// Given the items, return the permutation index. 
-		/// @param[in] Item 1 <= item 2
-		/// @param[in] Item 2
+		/// @param[in] item1    Must be less or equal item2
+		/// @param[in] item2    Must be greater of equal item1
 		/// @return Permutation index
 		uint32_t const getIndex (const uint32_t item1, const uint32_t item2);
 		
 		/// Given the items, return the permutation index. 
-		/// @param[in] Item pair, where element 1 <= element 2
+		/// @param[in] items    Item pair, where element 1 <= element 2
 		/// @return Permutation index		
 		uint32_t const getIndex (const std::pair<uint32_t,uint32_t> items);
 
 		/// Given the items, return the permutation index. 
-		/// @param[in] Item 1 <= item 2
-		/// @param[in] Item 2
-		/// @param[in] Total number of items
+		/// @param[in] item1    Must be less or equal item2
+		/// @param[in] item2    Must be greater of equal item1
+		/// @param[in] nItem    Total number of items
 		/// @return Permutation index		
 		uint32_t const getIndex (const uint32_t item1, const uint32_t item2, 
                 const uint32_t nItem);
 
 		/// Given the items, return the permutation index. 
-		/// @param[in] Item pair, where element 1 <= element 2
-		/// @param[in] Total number of items
+		/// @param[in] items    Item pair, where element 1 <= element 2
+		/// @param[in] nItem    Total number of items
 		/// @return Permutation index		
 		uint32_t const getIndex (const std::pair<uint32_t,uint32_t> items, 
                 const uint32_t nItem);
 
 		/// Given the permutation index, return the items in pair. 
-		/// @param[in] Permutation index
+		/// @param[in] index    Permutation index
 		/// @return Items in pair, where element 1 <= element 2
 		std::pair<uint32_t,uint32_t> const getItems (const uint32_t index);
 };

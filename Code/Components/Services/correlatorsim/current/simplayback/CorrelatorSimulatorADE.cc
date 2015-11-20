@@ -79,6 +79,7 @@ uint32_t getCorrProdIndex (const uint32_t ant1, const uint32_t ant2,
 
 ASKAP_LOGGER(logger, ".CorrelatorSimulatorADE");
 
+
 CorrelatorSimulatorADE::CorrelatorSimulatorADE(const std::string& dataset,
         const std::string& hostname,
         const std::string& port,
@@ -115,6 +116,7 @@ bool CorrelatorSimulatorADE::sendNext(void)
 {
     uint64_t previousTime = itsCurrentTime;
     if (getBufferData()) {
+        fillBufferData();
         if (itsCurrentTime > previousTime) {
             cout << "New time stamp: " << itsCurrentTime << endl;
             double delay = static_cast<double>(itsDelay) / 1000000.0;
@@ -218,7 +220,7 @@ bool CorrelatorSimulatorADE::sendNextZero(void)
 //    1 slice contains a portion of beam at a particular channel
 // Repeat 2 & 3 until all data has been sent
 //
-void CorrelatorSimulatorADE::initBuffer ()
+void CorrelatorSimulatorADE::initBuffer()
 {
     cout << "Initializing buffer ..." << endl;
     ROMSColumns msc(*itsMS);
@@ -235,7 +237,8 @@ void CorrelatorSimulatorADE::initBuffer ()
 
     uint32_t dataDescId;
     uint32_t descSpwId, descPolId;
-    uint32_t nChan, nCorr;
+    uint32_t nChan = 0;
+    uint32_t nCorr = 0;
     int32_t currentBeam = 0;
     int32_t antMin = 9999;
     int32_t antMax = 0;
@@ -324,23 +327,23 @@ void CorrelatorSimulatorADE::initBuffer ()
 
     // Creating buffer
     cout << "  Creating buffer ..." << endl;
-    uint32_t nBufferRow = itsNCorrProd;
-    buffer.data.resize(nBufferRow);
-    for (uint32_t corrProd = 0; corrProd < nBufferRow; ++corrProd) {
-        buffer.data[corrProd].resize(nChan);
-    }
-    cout << "    correlation product x channel: " << nBufferRow << 
+    buffer.init(itsNCorrProd, nChan);
+    //uint32_t nBufferRow = itsNCorrProd;
+    //buffer.data.resize(nBufferRow);
+    //for (uint32_t corrProd = 0; corrProd < nBufferRow; ++corrProd) {
+    //    buffer.data[corrProd].resize(nChan);
+    //}
+    cout << "    correlation product x channel: " << itsNCorrProd << 
             " x " << nChan << endl; 
     cout << "  Creating buffer: done" << endl;
 
     cout << "Initializing buffer: done" << endl;
     cout << endl;
-}
+}   // initBuffer
 
 
 
-// Put data for 1 beam (a full set of correlation products) into buffer
-bool CorrelatorSimulatorADE::getBufferData ()
+bool CorrelatorSimulatorADE::getBufferData()
 {
 #ifdef VERBOSE
     cout << "Getting buffer data ..." << endl;
@@ -433,7 +436,14 @@ bool CorrelatorSimulatorADE::getBufferData ()
             // except when the Stokes type is YX for the same antenna
             if ((ant1 != ant2) || (stokesType != Stokes::YX)) {
                 //cout << ant1 << ", " << ant2 << ", " << corr << endl;
-                uint32_t corrProd = itsCorrProdMap.getIndex (ant1, ant2, corr);
+                uint32_t corrProd = itsCorrProdMap.getIndex(ant1, ant2, corr);
+                //cout << "  corrProd: " << corrProd << endl;
+                //cout << "  size: " << buffer.corrProdIsFilled.size() << endl;
+                ASKAPCHECK(!buffer.corrProdIsFilled[corrProd],
+                        "Correlator product " << corrProd << 
+                        " is already filled");
+                //cout << "here" << endl;
+
                 for (uint32_t chan = 0; chan < nChan; ++chan) {
                     buffer.data[corrProd][chan].block = 1;
                     buffer.data[corrProd][chan].card = 1;
@@ -446,6 +456,9 @@ bool CorrelatorSimulatorADE::getBufferData ()
                             data(corr,chan).imag();
                     buffer.data[corrProd][chan].ready = true;
                 }   // channel
+
+                buffer.corrProdIsFilled[corrProd] = true;
+                buffer.corrProdIsOriginal[corrProd] = true;
             }
         }   // correlation
         ++itsCurrentRow;
@@ -457,11 +470,57 @@ bool CorrelatorSimulatorADE::getBufferData ()
     cout << "Getting buffer data: done" << endl;
 #endif
     return (buffer.ready);
-}
+}   // getBuffer
 
 
-// Send buffer data
-bool CorrelatorSimulatorADE::sendBufferData ()
+
+// Copy empty correlation product data from original ones (from 
+// measurement set)
+void CorrelatorSimulatorADE::fillBufferData()
+{
+#ifdef VERBOSE
+    cout << "Filling buffer ..." << endl;
+#endif
+
+    // set initial correlation product index to force search from beginning
+    int32_t originalCP = -1; 
+    for (uint32_t cp = 0; cp < buffer.data.size(); ++cp) {
+        // if the correlation product has no data
+        if (!buffer.corrProdIsFilled[cp]) {
+            // find the next available original data
+            originalCP = buffer.findNextOriginalCorrProd(originalCP);
+
+            // if found
+            if (originalCP >= 0) {
+                // fill in the empty correlation product with original data
+                buffer.copyCorrProd(originalCP, cp);
+            }
+            // if none can be found
+            else {
+                // search from the beginning
+                originalCP = buffer.findNextOriginalCorrProd(-1);
+                ASKAPCHECK(originalCP >= 0, 
+                        "Still cannot find original data");
+                buffer.copyCorrProd(originalCP, cp);
+            }
+        }
+    }   // correlation product
+
+    // check
+    for (uint32_t cp = 0; cp < buffer.data.size(); ++cp) {
+        ASKAPCHECK(buffer.corrProdIsFilled[cp], "Correlation product " <<
+                cp << " is still empty");
+    }
+
+#ifdef VERBOSE
+    cout << "Filling buffer: done" << endl;
+#endif
+
+}   // fillBuffer
+
+
+
+bool CorrelatorSimulatorADE::sendBufferData()
 {
 #ifdef VERBOSE
     cout << "Sending buffer data ..." << endl;
@@ -517,7 +576,8 @@ bool CorrelatorSimulatorADE::sendBufferData ()
         }   // slice
     }   // channel
 
-    buffer.ready = false;
+    buffer.reset();
+    //buffer.ready = false;
 
 #ifdef VERBOSE
     cout << "Sending buffer data: done" << endl;

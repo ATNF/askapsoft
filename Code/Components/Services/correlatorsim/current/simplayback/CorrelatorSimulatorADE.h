@@ -55,19 +55,15 @@ class CorrelatorSimulatorADE : public ISimulator {
         ///                     used to source the visibilities.
         /// @param[in] hostname hostname or IP address of the host to which the
         ///                     UDP data stream will be sent.
-        /// @param[in] port     UDP port number to which the UDP data stream will
-        ///                     be sent.
-        /// @param[in] expansionFactor  the channel multiplication factor. A
-        ///     non-unity expansion factor allows a small input dataset to be
-        ///     used to produce a larger output data stream. For example
-        ///     simulating a small 304 channel (1MHz channels) dataset and using
-        ///     an expansion factor of 54 to get to a 16416 (18.5KHz channels)
-        ///     data stream.
-        /// @param[in] visSendFail  the chance a VisChunk will not be sent. A failure
-        ///                         is simulated by simple not attempting the send.
-        ///                         A value of of 0.0 results in no failures, while
-        ///                         1.0 results in all sends failing.
+        /// @param[in] port     UDP port number to which the UDP data stream 
+        ///                     will be sent.
 		/// @param[in] shelf	MPI rank
+        /// @param[in] nAntenna The number of antenna set by user
+        /// @param[in] nCoarseChannel   The number of coarse channels
+        /// @param[in] nChannelSub      The number of channel subdivision
+        /// @param[in] coarseBandwidth  The bandwidth of coarse channel
+        /// @param[in] inputMode        Input mode of the simulator
+        /// @param[in] delay            Transmission delay in microsecond
         CorrelatorSimulatorADE(const std::string& dataset,
 				const std::string& hostname = "",
                 const std::string& port = "",
@@ -83,9 +79,7 @@ class CorrelatorSimulatorADE : public ISimulator {
         virtual ~CorrelatorSimulatorADE();
 
         /// @brief Send the next correlator integration.
-		/// The actual functionality is either in sendNextZero or sendNextExpand.
-        ///
-        /// @return true if there are more integrations in the dataset,
+        /// @return True if there are more integrations in the dataset,
         ///         otherwise false. If false is returned, sendNext()
         ///         should not be called again.
         bool sendNext(void);
@@ -145,29 +139,50 @@ class CorrelatorSimulatorADE : public ISimulator {
         // Antenna indices
         vector<unsigned int> antIndices;
 
+
         // Internal functions
         
-        // Given antenna pair and Stokes type, get correlation product
+        /// Given antenna pair and Stokes type, get correlation product
+        /// @param[in] ant1 Antenna 1
+        /// @param[in] ant2 Antenna 2
+        /// @param[in] stokesType   Stokes type (XX, XY, YX, YY)
         uint32_t getCorrProdIndex
                 (const uint32_t ant1, const uint32_t ant2,
                 const casa::Stokes::StokesTypes stokesType);
 
+        // To be deprecated
 		// Send data of zero visibility for the whole baselines and channels 
 		// for only 1 time period.
 		bool sendNextZero();
 		
-        // Using buffer for intermediate storage
-        void initBuffer ();
+        /// Initialize buffer for intermediate storage
+        void initBuffer();
 
-        // return true if successful
-        bool getBufferData ();
+        // Reset the buffer
+        //void resetBuffer();
+
+        /// Get buffer data, which is a matrix of a beam (full set of
+        /// correlation products, as set by user) and channels
+        /// (from measurement set) 
+        /// @return True if successful, false if not 
+        /// (eg. no more data in measurement set)
+        bool getBufferData();
         
-        // (return true if successful)
-        bool sendBufferData ();
+        /// Fill empty correlation products with by copying data from
+        /// those originally filled with measurement set data
+        void fillBufferData();
 
-		// Extract one data point from measurement set and send the data for all 
-		// baselines and channels for the time period given in the measurement set.
-		bool sendNextExpand ();
+        /// Send buffer data 
+        /// @return True if successful, false if not 
+        /// (eg. no more data in buffer to send)
+        bool sendBufferData();
+
+        // To be deprecated
+		// Extract one data point from measurement set and send the data 
+		// for all baselines and channels for the time period given in 
+        // the measurement set.
+        // @return True if successful
+		bool sendNextExpand();
 
 };
 

@@ -45,16 +45,37 @@ class CorrBuffer
     public :
 
         /// Constructor
-        CorrBuffer ();
+        CorrBuffer();
 
         /// Destructor
-        virtual ~CorrBuffer ();
+        virtual ~CorrBuffer();
 
         /// Initialize
-        void init (uint32_t nCorrProd, uint32_t nChannel);
+        /// @param[in] Total number of correlation products
+        /// @param[in] Total number of channels
+        void init(uint32_t nCorrProd, uint32_t nChannel);
+
+        /// Reset the buffer
+        void reset();
+
+        /// Find the next correlation product that has no data
+        /// @param[in] Starting point for search (-1 to search from beginning)
+        /// @return The next empty correlation product (-1 if none found)
+        int32_t findNextEmptyCorrProd(int32_t startCP);
+
+        /// Find the next correlation product with original data (not copy)
+        /// @param[in] Starting point for search (-1 to search from beginning)
+        /// @return The next correlation product with original data
+        /// (-1 if none found)
+        int32_t findNextOriginalCorrProd(int32_t startCP);
+
+        /// Copy one correlation product to another
+        /// @param[in] Correlation product index used as source
+        /// @param[in] Correlation product index used as destination
+        void copyCorrProd(int32_t source, int32_t destination);
 
         /// Print the buffer
-        void print ();
+        void print();
 
 
         // data
@@ -68,6 +89,14 @@ class CorrBuffer
 
         // 2D array of data [correlation products, channels]
         vector<vector<CorrBufferUnit> > data;
+
+        // Array of correlation product status
+        // True if correlation product is filled with data
+        vector<bool> corrProdIsFilled;
+
+        // Array of correlation product status
+        // True if correlation product is original data (not copy) 
+        vector<bool> corrProdIsOriginal;
 };
 
 };

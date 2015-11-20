@@ -29,44 +29,98 @@
 
 #include <iostream>
 #include "CorrBuffer.h"
+#include "askap/AskapError.h"
 
 using namespace askap;
 using namespace askap::cp;
 using namespace std;
 
 
-CorrBuffer::CorrBuffer () : timeStamp(0), ready(false)
+CorrBuffer::CorrBuffer() : timeStamp(0), ready(false)
 {
 }
 
 
 
-CorrBuffer::~CorrBuffer ()
+CorrBuffer::~CorrBuffer()
 {
 }
 
 
 
-void CorrBuffer::init (uint32_t nCorrProd, uint32_t nChannel)
+void CorrBuffer::init(uint32_t nCorrProd, uint32_t nChannel)
 {
+    ASKAPCHECK(nCorrProd > 0, "Illegal correlation product count " <<
+            nCorrProd);
+    ASKAPCHECK(nChannel > 0, "Illegal channel count " << nChannel);
+
     data.resize(nCorrProd);
-    for (uint32_t i = 0; i < nCorrProd; ++i) {
-        data[i].resize(nChannel);
+    for (uint32_t cp = 0; cp < nCorrProd; ++cp) {
+        data[cp].resize(nChannel);
     }
+    corrProdIsOriginal.resize(nCorrProd);
+    corrProdIsFilled.resize(nCorrProd);
+    reset();
+    //cout << "check size: " << corrProdIsFilled.size() << endl;
+}
+
+
+
+void CorrBuffer::reset()
+{
+    ready = false;
+    for (uint32_t cp = 0; cp < corrProdIsFilled.size(); ++cp) {
+        corrProdIsOriginal[cp] = false;
+        corrProdIsFilled[cp] = false;
+    }
+}
+
+
+
+int32_t CorrBuffer::findNextEmptyCorrProd(int32_t startCP)
+{
+    for (uint32_t cp = startCP+1; cp < data.size(); ++cp) {
+        if (!corrProdIsFilled[cp]) {
+            return cp;
+        }
+    }
+    return (-1); // cannot find the next empty correlation product
+}
+
+
+
+int32_t CorrBuffer::findNextOriginalCorrProd(int32_t startCP)
+{
+    for (uint32_t cp = startCP+1; cp < data.size(); ++cp) {
+        if (corrProdIsOriginal[cp]) {
+            return cp;
+        }
+    }
+    return (-1); // cannot find the next original correlation product
+}
+
+
+
+void CorrBuffer::copyCorrProd(int32_t source, int32_t destination) 
+{
+    for (uint32_t chan = 0; chan < data[0].size(); ++chan) {
+        data[destination][chan] = data[source][chan];
+    }
+    corrProdIsFilled[destination] = true;
 }
 
 
 
 void CorrBuffer::print ()
 {
-    cout << "Buffer timestamp: " << timeStamp << endl;
-    cout << "Buffer ready    : " << ready << endl;
-    cout << "Buffer content  : " << endl;
+    cout << "Buffer time stamp: " << timeStamp << endl;
+    cout << "Buffer ready     : " << ready << endl;
+    cout << "Buffer content   : " << endl;
     cout << endl;
-    for (int corrProd = 0; corrProd < data.size(); ++corrProd) {
+    for (uint32_t corrProd = 0; corrProd < data.size(); ++corrProd) {
         cout << "----------------------------------------------------" << endl;
         cout << "corr product " << corrProd << endl;
-        for (int channel = 0; channel < data[corrProd].size(); ++channel) {
+        for (uint32_t channel = 0; channel < data[corrProd].size(); ++channel) {
             cout << "corr product " << corrProd << 
                     ", channel " << channel << endl;
             data[corrProd][channel].print();
