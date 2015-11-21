@@ -179,7 +179,9 @@ void process(const IConstDataSource &ds, const int ctrl = -1) {
             }
             const double curDelay  = (coarseDelay + de.getDelay(reducedResVis)) * 1e9;
             
-            if (row >= 12) {
+            //if (row >= 3) {
+            //if (row >= 12) {
+            {
                 casa::Complex sum(0.,0.);
                 size_t nGoodCh = 0;
                 for (casa::uInt ch=0; ch < measuredRow.nelements(); ++ch) {
@@ -294,6 +296,10 @@ void process(const IConstDataSource &ds, const int ctrl = -1) {
       buf /= float(nGoodCycles);
       buf2 /= float(nGoodCycles);
       std::cout<<"Averaged "<<nGoodCycles<<" integration cycles, "<<nGoodRows<<" good and "<<nBadRows<<" bad rows, time span "<<(stopTime-startTime)/60.<<" minutues, cycles="<<counter<<std::endl;
+      casa::MVEpoch startEpoch(casa::Quantity(55913.0,"d"));
+      startEpoch += casa::MVEpoch(casa::Quantity(startTime, "s"));
+      std::cout<<"Start time "<<startEpoch<<std::endl;
+
       { // export averaged spectrum
         ASKAPDEBUGASSERT(freq.nelements() == nChan);
         std::ofstream os("avgspectrum.dat");
