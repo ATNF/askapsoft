@@ -232,23 +232,26 @@ casa::Vector<double> DelaySolverImpl::solve(bool useFFT) const
   ASKAPDEBUGASSERT(itsAnt1IDs.nelements() == itsAnt2IDs.nelements());
   ASKAPDEBUGASSERT(itsAnt1IDs.nelements() == itsAvgCounts.nrow());
   for (casa::uInt row=0; row<itsAnt1IDs.nelements(); ++row) {
+       // first, exclude explicitly listed baselines
        for (casa::uInt bsln = 0; bsln < itsExcludedBaselines.nelements(); ++bsln) {
             if ((itsExcludedBaselines[bsln].first == itsAnt1IDs[row]) && 
                 (itsExcludedBaselines[bsln].second == itsAnt2IDs[row])) {
                  rows2exclude.insert(row);
-            } else {
-                const casa::Vector<casa::uInt> thisRowCounts = itsAvgCounts.row(row);
-                bool allFlagged = true;
-                for (casa::uInt chan = 0; chan < thisRowCounts.nelements(); ++chan) {
-                     if (thisRowCounts[chan] > 0) {
-                         allFlagged = false;
-                         break;
-                     }
+            } 
+       }
+       // if this row is not excluded, do additional checks based on data
+       if (rows2exclude.find(row) == rows2exclude.end()) {
+           const casa::Vector<casa::uInt> thisRowCounts = itsAvgCounts.row(row);
+           bool allFlagged = true;
+           for (casa::uInt chan = 0; chan < thisRowCounts.nelements(); ++chan) {
+                if (thisRowCounts[chan] > 0) {
+                    allFlagged = false;
+                    break;
                 }
-                if (allFlagged) {
-                    rows2exclude.insert(row);
-                }
-            }
+           }
+           if (allFlagged) {
+               rows2exclude.insert(row);
+           }
        }
   }
   ASKAPCHECK(itsAnt1IDs.nelements() > rows2exclude.size(), "Looks like all data are flagged or excluded");
