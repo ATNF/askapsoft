@@ -36,6 +36,8 @@
 
 // ASKAPsoft includes
 #include "askap/AskapError.h"
+// just to access static methods
+#include "ingestpipeline/sourcetask/VisSource.h"
 
 // std includes
 #include <iomanip>
@@ -50,9 +52,16 @@ namespace ingest {
 /// @param[in] id rank of the given ingest process
 VisConverter<VisDatagramADE>::VisConverter(const LOFAR::ParameterSet& params,
        const Configuration& config, int id) : 
-       VisConverterBase(params, config, id), itsNDuplicates(0u)
+       VisConverterBase(params, config, id), itsNSlices(4u), itsNDuplicates(0u)
 {
    ASKAPLOG_INFO_STR(logger, "Initialised ADE-style visibility stream converter, id="<<id);
+   // by default, we have 4 data slices. This number can be reduced by rejecting some
+   // datagrams before they are even put in the buffer
+   const uint32_t maxNSlices = VisSource::getMaxSlice(params) + 1;
+   if (maxNSlices < itsNSlices) {
+       itsNSlices = maxNSlices;
+   }
+   ASKAPLOG_INFO_STR(logger, "Expecting "<<itsNSlices<<" slices of the correlator product space");
 }
 
 /// @brief helper (and probably temporary) method to remap channels
@@ -89,16 +98,10 @@ void VisConverter<VisDatagramADE>::initVisChunk(const casa::uLong timestamp,
    VisConverterBase::initVisChunk(timestamp, corrMode);
    const casa::uInt nChannels = channelManager().localNChannels(id());
 
-   // the code below is experimental
-
    ASKAPCHECK(nChannels % 216 == 0, "Bandwidth should be multiple of 4-MHz");
     
-   //const casa::uInt nSlices = 4;
-   const casa::uInt nSlices = 1;
-   const casa::uInt nBeams = 36;
-   //const casa::uInt nBeams = 1;
-   //const casa::uInt nBeams = 9;
-   const casa::uInt datagramsExpected = nSlices * nBeams * nChannels;
+   // by default, we have 4 data slices
+   const casa::uInt datagramsExpected = itsNSlices * nBeamsToReceive() * nChannels;
    setNumberOfExpectedDatagrams(datagramsExpected);
 }
 

@@ -91,6 +91,9 @@ private:
 
    std::set<DatagramIdentity> itsReceivedDatagrams;
 
+   /// @brief expected number of data slices
+   uint32_t itsNSlices;
+
    // temporary
    uint32_t itsNDuplicates;
 };

@@ -46,6 +46,9 @@
 #include "askap/AskapUtil.h"
 #include "utils/PolConverter.h"
 
+// just for static members to access parameters
+#include "ingestpipeline/sourcetask/VisSource.h"
+
 // 3rd party includes
 #include "measures/Measures.h"
 #include "measures/Measures/MeasFrame.h"
@@ -66,7 +69,7 @@ VisConverterBase::VisConverterBase(const LOFAR::ParameterSet& params,
        itsDatagramsExpected(0u),
        itsDatagramsCount(0u), itsDatagramsIgnored(0u), itsConfig(config),
        itsMaxNBeams(params.getUint32("maxbeams",0)),
-       itsBeamsToReceive(params.getUint32("beams2receive",0)),
+       itsBeamsToReceive(0), // initialised in the initBeamMap call
        itsChannelManager(params),
        itsBaselineMap(config.bmap()), itsId(id)
 {
@@ -102,7 +105,7 @@ const VisChunk::ShPtr& VisConverterBase::visChunk() const
 
 /// @brief initialise beam maps
 /// @details Beams can be mapped and indices can be non-contiguous. This
-/// method sets up the mapping based in the parset and also evaluates the
+/// method sets up the mapping based on the parset and also evaluates the
 /// actual number of beams for the sizing of buffers.
 /// @param[in] params parset with parameters (e.g. beammap)
 void VisConverterBase::initBeamMap(const LOFAR::ParameterSet& params)
@@ -113,23 +116,60 @@ void VisConverterBase::initBeamMap(const LOFAR::ParameterSet& params)
         itsBeamIDMap.add(beamidmap);
     }   
     const casa::uInt nBeamsInConfig = itsConfig.feed().nFeeds();
-    if (itsMaxNBeams == 0) {
-        for (int beam = 0; beam < static_cast<int>(nBeamsInConfig) + 1; ++beam) {
-             const int processedBeamIndex = itsBeamIDMap(beam);
-             if (processedBeamIndex > static_cast<int>(itsMaxNBeams)) {
-                 // negative values are automatically excluded by this condition
-                 itsMaxNBeams = static_cast<casa::uInt>(processedBeamIndex);
-             }
+
+    // by default receive the same number of beams as defined in the config
+    itsBeamsToReceive = nBeamsInConfig;
+
+    // the following is a bit ugly, because we access here a parameter of another class
+    // however, dropping data at source (i.e. in the receiving thread) is only used
+    // for early testing or when performance is limited but limited functionality is sufficient
+    // so the following code is not expected to alter itsBeamsToReceive in production system
+    const casa::uInt beamCutoffAtSource = VisSource::getMaxBeamId(params);
+    if (beamCutoffAtSource < itsBeamsToReceive) {
+        itsBeamsToReceive = beamCutoffAtSource;
+    }
+    //   
+
+    // now, figure out the dimensions of the measurement set in terms of the number of beams
+    // itsMaxNBeams can be initialised through parset if, for some reason, a space for more
+    // beams need to be allocated in the MS. Otherwise (and this is the default behaviour), 
+    // it is derived either from the beam map or, if it is not set up, from the configuration
+    // adjusted by the beam rejection criterion at vis source
+
+    if (itsBeamIDMap.nRules() == 0) {
+        // default map is 1- to 0-based conversion for beams up to itsBeamsToReceive, inclusive
+        for (int beam = 1; beam <= static_cast<int>(itsBeamsToReceive); ++beam) {
+             itsBeamIDMap.add(beam, beam - 1);
         }
-        ++itsMaxNBeams;
-    }   
-    if (itsBeamsToReceive == 0) {
-        itsBeamsToReceive = nBeamsInConfig;
-    }        
+    }
+
+    // determine the number of beams required, given the map 
+    // (to check itsMaxNBeams for consistency or to initialise it)
+    // the map can be sparse, but the MS requires contiguous index space
+    casa::uInt maxNBeamsRequired = 0;
+    for (int beam = 0; beam < static_cast<int>(itsBeamsToReceive) + 1; ++beam) {
+         const int processedBeamIndex = itsBeamIDMap(beam);
+         if (processedBeamIndex > static_cast<int>(maxNBeamsRequired)) {
+             // negative values are automatically excluded by this condition
+             maxNBeamsRequired = static_cast<casa::uInt>(processedBeamIndex);
+         }
+    }
+    // increment, because indices are zero-based in the MS
+    ++maxNBeamsRequired;
+    if (itsMaxNBeams == 0) {
+        itsMaxNBeams = maxNBeamsRequired;
+    } else {
+        ASKAPCHECK(itsMaxNBeams >= maxNBeamsRequired, "Number of beams for the MS ("<<itsMaxNBeams<<
+              ") is less than the number of beams required ("<<maxNBeamsRequired<<
+              "), given default or user-selected beam map");
+    }
+
     ASKAPLOG_INFO_STR(logger, "Number of beams: " << nBeamsInConfig << " (defined in configuration), "
-            << itsBeamsToReceive << " (to be received), " << itsMaxNBeams << " (to be written into MS)");
-    ASKAPDEBUGASSERT(itsMaxNBeams > 0);
-    ASKAPDEBUGASSERT(itsBeamsToReceive > 0);
+            << itsBeamsToReceive << " (to be received), " << itsMaxNBeams << " (to be written into MS), "
+            << maxNBeamsRequired <<" (minimum required for the given configuration)");
+
+    ASKAPASSERT(itsMaxNBeams > 0);
+    ASKAPASSERT(itsBeamsToReceive > 0);
 }
 
 

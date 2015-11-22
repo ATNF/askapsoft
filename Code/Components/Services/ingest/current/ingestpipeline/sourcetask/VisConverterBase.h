@@ -118,6 +118,9 @@ public:
    /// @return maximum number of beams
    inline casa::uInt maxNumberOfBeams() const { return itsMaxNBeams; } 
 
+   /// @return number of beams to receive
+   inline casa::uInt nBeamsToReceive() const { return itsBeamsToReceive; }
+
    /// @brief obtain channel manager
    /// @return const reference to the channel manager
    inline const ChannelManager& channelManager() const 
@@ -205,7 +208,7 @@ private:
 
    /// @brief initialise beam maps
    /// @details Beams can be mapped and indices can be non-contiguous. This
-   /// method sets up the mapping based in the parset and also evaluates the
+   /// method sets up the mapping based on the parset and also evaluates the
    /// actual number of beams for the sizing of buffers.
    /// @param[in] params parset with parameters (e.g. beammap)
    void initBeamMap(const LOFAR::ParameterSet& params);
@@ -271,8 +274,8 @@ private:
    /// the MS size, only itsMaxNBeams beams are stored. This field 
    /// controls the data stream unpacking.
    ///
-   /// @note it is zero by default, which triggers the initBeamMap
-   /// method called from the constructor to set it equal to the
+   /// @note it is zero by default, which triggers initBeamMap
+   /// method called from the constructor to set it from
    /// configuration (i.e. to write everything, unless a specific mapping
    /// is configured via the parset)
    casa::uInt itsBeamsToReceive;

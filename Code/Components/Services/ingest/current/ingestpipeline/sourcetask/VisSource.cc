@@ -46,6 +46,31 @@ using boost::asio::ip::udp;
 
 ASKAP_LOGGER(logger, ".VisSource");
 
+/// @brief access to beam rejection criterion
+/// @details This method encapsulates access to parset parameter defining 
+/// beam rejection at the receiver side (i.e. before the datagram is even 
+/// put in the buffer).
+/// @param[in] parset parameter set to work with
+/// @return maximum beam Id to be kept
+uint32_t VisSource::getMaxBeamId(const LOFAR::ParameterSet &parset)
+{
+   // BETA value is currently the default
+   return parset.getUint32("vis_source.max_beamid", 9); 
+}
+
+/// @brief access to slice rejection criterion
+/// @details This method encapsulates access to parset parameter defining 
+/// slice rejection at the receiver side (i.e. before the datagram is even 
+/// put in the buffer).
+/// @param[in] parset parameter set to work with
+/// @return maximum beam Id to be kept
+uint32_t VisSource::getMaxSlice(const LOFAR::ParameterSet &parset)
+{
+   // this will not drop datagrams for either BETA or ADE
+   return parset.getUint32("vis_source.max_slice", 15); 
+}
+       
+
 /// @brief constructor
 /// @param[in] parset parameters (such as port, buffer_size, etc)
 /// @param[in] portOffset this number is added to the port number
@@ -54,8 +79,7 @@ ASKAP_LOGGER(logger, ".VisSource");
 VisSource::VisSource(const LOFAR::ParameterSet &parset, const unsigned int portOffset) :
     itsBuffer(parset.getUint32("buffer_size", 78 * 36 * 16 * 2)),  // default is tuned for BETA
     itsStopRequested(false), 
-    itsMaxBeamId(parset.getUint32("vis_source.max_beamid", 9)), // BETA value is currently the default
-    itsMaxSlice(parset.getUint32("vis_source.max_slice", 15)), // this will not drop datagrams for either BETA or ADE
+    itsMaxBeamId(getMaxBeamId(parset)), itsMaxSlice(getMaxSlice(parset)), 
     itsOldTimestamp(0ul)
 {
     const uint32_t recvBufferSize = parset.getUint32("vis_source.receive_buffer_size", 

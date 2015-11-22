@@ -68,6 +68,23 @@ class VisSource : public IVisSource, public boost::noncopyable {
         /// @return a pair with number of datagrams in the queue and the buffer size
         virtual std::pair<uint32_t, uint32_t> bufferUsage() const;
 
+        /// @brief access to beam rejection criterion
+        /// @details This method encapsulates access to parset parameter defining 
+        /// beam rejection at the receiver side (i.e. before the datagram is even 
+        /// put in the buffer).
+        /// @param[in] parset parameter set to work with
+        /// @return maximum beam Id to be kept
+        static uint32_t getMaxBeamId(const LOFAR::ParameterSet &parset);
+
+        /// @brief access to slice rejection criterion
+        /// @details This method encapsulates access to parset parameter defining 
+        /// slice rejection at the receiver side (i.e. before the datagram is even 
+        /// put in the buffer).
+        /// @param[in] parset parameter set to work with
+        /// @return maximum beam Id to be kept
+        static uint32_t getMaxSlice(const LOFAR::ParameterSet &parset);
+       
+
     private:
         void start_receive(void);
 
