@@ -214,11 +214,13 @@ VisChunk::ShPtr MergedSource::next(void)
     itsMonitoringPointManager.submitPoint<uint32_t>("PacketsBuffered", bufferUsage.first);
     itsMonitoringPointManager.submitPoint<float>("BufferUsagePercent", bufferUsagePercent);
 
-    itsMonitoringPointManager.submitPoint<int32_t>("PacketsLostCount",
-            itsVisConverter.datagramsExpected() - itsVisConverter.datagramsCount());
+    const int32_t datagramsLost =  itsVisConverter.datagramsExpected() - 
+           itsVisConverter.datagramsCount() - itsVisConverter.datagramsIgnored();
+    ASKAPDEBUGASSERT(datagramsLost >= 0);
+    itsMonitoringPointManager.submitPoint<int32_t>("PacketsLostCount", datagramsLost);
     if (itsVisConverter.datagramsExpected() != 0) {
         itsMonitoringPointManager.submitPoint<float>("PacketsLostPercent",
-            (itsVisConverter.datagramsExpected() - itsVisConverter.datagramsCount()) / static_cast<float>(itsVisConverter.datagramsExpected()) * 100.);
+            static_cast<float>(datagramsLost) / itsVisConverter.datagramsExpected() * 100.);
     }
     itsMonitoringPointManager.submitMonitoringPoints(*chunk);
 
