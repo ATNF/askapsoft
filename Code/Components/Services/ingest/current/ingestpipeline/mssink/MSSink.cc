@@ -49,6 +49,7 @@
 #include "casa/Arrays/Cube.h"
 #include "casa/Arrays/MatrixMath.h"
 #include "casa/OS/Time.h"
+#include "casa/OS/Timer.h"
 #include "tables/Tables/TableDesc.h"
 #include "tables/Tables/SetupNewTab.h"
 #include "tables/Tables/IncrementalStMan.h"
@@ -125,6 +126,8 @@ bool MSSink::isAlwaysActive() const
 
 void MSSink::process(VisChunk::ShPtr& chunk)
 {
+    casa::Timer timer;
+    timer.mark();
     if (!itsMs) {
         // this is delayed initialisation in the parallel mode
         ASKAPDEBUGASSERT(itsConfig.nprocs() > 1);
@@ -224,6 +227,8 @@ void MSSink::process(VisChunk::ShPtr& chunk)
     addPointingRows(*chunk);
 
     itsMs->flush();
+    // update monitoring point showing required time to write this chunk
+    MonitoringSingleton::update<float>("MSWritingDuration", timer.real());
 }
 
 //////////////////////////////////
