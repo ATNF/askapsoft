@@ -137,8 +137,9 @@ void VisConverterBase::initBeamMap(const LOFAR::ParameterSet& params)
     // adjusted by the beam rejection criterion at vis source
 
     if (itsBeamIDMap.nRules() == 0) {
-        // default map is 1- to 0-based conversion for beams up to itsBeamsToReceive, inclusive
-        for (int beam = 1; beam <= static_cast<int>(itsBeamsToReceive); ++beam) {
+        const int defaultNumberOfBeams = static_cast<int>(itsMaxNBeams == 0 ? itsBeamsToReceive : itsMaxNBeams);
+        // default map is 1- to 0-based conversion for beams up to defaultNumberOfBeams, inclusive
+        for (int beam = 1; beam <= defaultNumberOfBeams; ++beam) {
              itsBeamIDMap.add(beam, beam - 1);
         }
     }
