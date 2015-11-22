@@ -45,6 +45,7 @@
 
 // Local package includes
 #include "configuration/Configuration.h"
+#include "monitoring/MonitoringSingleton.h"
 
 ASKAP_LOGGER(logger, ".ChannelMergeTask");
 
@@ -138,7 +139,9 @@ void ChannelMergeTask::receiveVisChunks(askap::cp::common::VisChunk::ShPtr chunk
         if ((latestTime - currentTime).get() < 0.) {
              latestTime = currentTime;
              // this also means that there is at least one bad chunk to exclude
-             invalidFlags.resize(itsRanksToMerge, true);
+             if (invalidFlags.size() == 0) {
+                 invalidFlags.resize(itsRanksToMerge, true);
+             }
         }
    }
    if (invalidFlags.size() > 0) {
@@ -156,6 +159,12 @@ void ChannelMergeTask::receiveVisChunks(askap::cp::common::VisChunk::ShPtr chunk
        ASKAPDEBUGASSERT(counter < itsRanksToMerge);
        ASKAPLOG_DEBUG_STR(logger, "      - keeping "<<counter<<" chunks out of "<<itsRanksToMerge<<
                                   " merged");
+       MonitoringSingleton::update<int32_t>("MisalignedStreamsCount", counter);
+       ASKAPDEBUGASSERT(itsRanksToMerge > 0);
+       MonitoringSingleton::update<float>("MisalignedStreamsPercent", static_cast<float>(counter) / itsRanksToMerge * 100.);
+   } else {
+       MonitoringSingleton::update<int32_t>("MisalignedStreamsCount", 0);
+       MonitoringSingleton::update<float>("MisalignedStreamsPercent", 0.);
    }
    
    // 4) receive and merge frequency axis

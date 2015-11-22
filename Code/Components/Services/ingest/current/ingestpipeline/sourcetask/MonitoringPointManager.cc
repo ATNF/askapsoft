@@ -68,6 +68,9 @@ MonitoringPointManager::~MonitoringPointManager()
 
     submitPointNull("dUTC");
     submitPointNull("dUT1");
+
+    submitPointNull("MisalignedStreamsCount");
+    submitPointNull("MisalignedStreamsPercent");
 }
 
 void MonitoringPointManager::submitMonitoringPoints(const askap::cp::common::VisChunk& chunk) const
