@@ -81,6 +81,10 @@ VisSource::VisSource(const LOFAR::ParameterSet &parset, const unsigned int portO
     itsStopRequested(false), 
     itsMaxBeamId(getMaxBeamId(parset)), itsMaxSlice(getMaxSlice(parset)), 
     itsOldTimestamp(0ul)
+#ifdef ASKAP_DEBUG
+    ,
+    itsCard(portOffset + 1)
+#endif
 {
     const uint32_t recvBufferSize = parset.getUint32("vis_source.receive_buffer_size", 
                                                      1024 * 1024 * 16); // BETA value is the default
@@ -170,7 +174,11 @@ void VisSource::handle_receive(const boost::system::error_code& error,
         // message for debugging
         if (itsOldTimestamp != itsRecvBuffer->timestamp) {
             itsOldTimestamp = itsRecvBuffer->timestamp;
+#ifdef ASKAP_DEBUG
+            ASKAPLOG_DEBUG_STR(logger, "VisSource("<<itsCard<<"): queuing new timestamp :"<<bat2epoch(itsOldTimestamp)<<" BAT=0x"<<std::hex<<itsOldTimestamp);
+#else
             ASKAPLOG_DEBUG_STR(logger, "VisSource: queuing new timestamp :"<<bat2epoch(itsOldTimestamp)<<" BAT=0x"<<std::hex<<itsOldTimestamp);
+#endif
         }
         //
 

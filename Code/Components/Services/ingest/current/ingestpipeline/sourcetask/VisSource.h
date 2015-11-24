@@ -127,6 +127,10 @@ class VisSource : public IVisSource, public boost::noncopyable {
         /// @brief previously sighted timestamp (for debugging only)
         uint64_t itsOldTimestamp;
 
+#ifdef ASKAP_DEBUG
+        /// @brief temporary buffer to show card number with messages
+        uint32_t itsCard;
+#endif
 };
 
 }

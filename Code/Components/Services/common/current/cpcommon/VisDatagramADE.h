@@ -86,12 +86,12 @@ namespace askap {
             
             /// @brief channel
             /// @details frequency channel index. 
-            /// Allowed values are from 0 to 215
+            /// Allowed values are from 1 to 216
             /// Part of frequency index
             uint32_t channel;
             
             /// Frequency - sky frequency in MHz (originated in firmware)
-            float freq;
+            double freq;
 
             /// Beam ID
             /// This identified which synthesised beam this datagram corresponds to.

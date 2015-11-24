@@ -117,7 +117,7 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
    // the code below is experimental
 
    // check that the hardware sents sensible data
-   ASKAPCHECK(vis.channel < 216, "vis.channel = "<<vis.channel<<" exceeds the limit of 216");
+   ASKAPCHECK((vis.channel > 0) && (vis.channel <= 216), "vis.channel = "<<vis.channel<<" is outside [1,216] range");
    ASKAPCHECK((vis.block > 0) && (vis.block <= 8), "vis.block = "<<vis.block<<" is outside [1,8] range");
    ASKAPCHECK((vis.card > 0) && (vis.card <= 12), "vis.card = "<<vis.card<<" is outside [1,12] range");
    ASKAPCHECK(vis.slice < 4, "Slice index is invalid");
@@ -140,7 +140,7 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
    itsReceivedDatagrams.insert(identity);
 
    // for now
-   if (vis.channel >= chunk->nChannel()) {
+   if (vis.channel > chunk->nChannel()) {
        ASKAPLOG_WARN_STR(logger, "Got channel outside bounds: "<<vis.channel);
        countDatagramAsIgnored();
        return;
@@ -149,7 +149,7 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
    // it is not clear yet what modes we want to expose to end user via parset
    // for now have some mapping hard-coded
    //const casa::uInt channel = vis.channel;
-   const casa::uInt channel = mapChannel(vis.channel);
+   const casa::uInt channel = mapChannel(vis.channel - 1);
 
    ASKAPASSERT(channel < chunk->nChannel())
    //
