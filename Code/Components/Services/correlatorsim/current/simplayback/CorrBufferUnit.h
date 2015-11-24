@@ -52,14 +52,6 @@ class CorrBufferUnit
 
         // data
         
-        //uint32_t block;
-
-        //uint32_t card;
-
-        //uint32_t channel;
-
-        //double freq;
-
         FloatComplex vis;
 
         // True if the data is ready to use

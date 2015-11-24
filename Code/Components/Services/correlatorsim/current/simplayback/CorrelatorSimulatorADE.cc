@@ -150,6 +150,7 @@ bool CorrelatorSimulatorADE::sendNext(void)
 
 
 
+// To be deprecated
 // Send data of zero visibility for the whole baselines and channels 
 // for only 1 time period.
 bool CorrelatorSimulatorADE::sendNextZero(void)
@@ -411,9 +412,9 @@ bool CorrelatorSimulatorADE::getBufferData()
         const casa::Vector<casa::Double> frequencies = 
                 spwc.chanFreq()(descSpwId);
         for (uint32_t chan = 0; chan < frequencies.size(); ++chan) {
-            buffer.freqId[chan].block = 1;
-            buffer.freqId[chan].card = 1;
-            buffer.freqId[chan].channel = chan;
+            buffer.freqId[chan].block = 1;          // dummy value
+            buffer.freqId[chan].card = 1;           // dummy value
+            buffer.freqId[chan].channel = chan + 1; // 1-based
             buffer.freqId[chan].freq = frequencies[chan];
         }
         //cout << "number of channels: " << frequencies.size() << endl;

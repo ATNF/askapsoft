@@ -54,7 +54,7 @@ class FreqIndex
 
         uint32_t channel;
 
-        float freq;
+        double freq;
 };
 
 };
