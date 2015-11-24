@@ -52,13 +52,13 @@ class CorrBufferUnit
 
         // data
         
-        uint32_t block;
+        //uint32_t block;
 
-        uint32_t card;
+        //uint32_t card;
 
-        uint32_t channel;
+        //uint32_t channel;
 
-        float freq;
+        //double freq;
 
         FloatComplex vis;
 

@@ -60,6 +60,7 @@ void CorrBuffer::init(uint32_t nCorrProd, uint32_t nChannel)
     }
     corrProdIsOriginal.resize(nCorrProd);
     corrProdIsFilled.resize(nCorrProd);
+    freqId.resize(nChannel);
     reset();
     //cout << "check size: " << corrProdIsFilled.size() << endl;
 }
@@ -107,6 +108,17 @@ void CorrBuffer::copyCorrProd(int32_t source, int32_t destination)
         data[destination][chan] = data[source][chan];
     }
     corrProdIsFilled[destination] = true;
+}
+
+
+
+void CorrBuffer::copyChannel(int32_t source, int32_t destination) 
+{
+    for (uint32_t cp = 0; cp < data.size(); ++cp) {
+        data[cp][destination] = data[cp][source];
+    }
+    freqId[destination].block = freqId[source].block;
+    freqId[destination].card = freqId[source].card;
 }
 
 

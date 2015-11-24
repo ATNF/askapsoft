@@ -25,7 +25,8 @@
 /// @author Paulus Lahur <paulus.lahur@csiro.au>
 ///
 /// Map channel ID from and to correlator.
-/// Note that the channels are not contiguous in the correlator.
+/// Note that the channels are contiguous in ingest pipeline, but 
+/// not contiguous in the correlator.
 
 #ifndef ASKAP_CP_CHANNELMAP_H
 #define ASKAP_CP_CHANNELMAP_H
@@ -39,13 +40,20 @@ class ChannelMap {
 	
 	public :
 	
-		ChannelMap ();
+		ChannelMap();
 		
-		virtual ~ChannelMap ();
+		virtual ~ChannelMap();
 
-		uint32_t fromCorrelator (uint32_t channelID);
+        /// Convert channel ordering from correlator. 
+        /// The resulting channels are contiguous.
+        /// @param[in] channelID     channel ID in correlator
+        /// @return channel ID in ingest (contiguous)
+		uint32_t fromCorrelator(uint32_t channelID);
 		
-		uint32_t toCorrelator (uint32_t channelID);
+        /// Convert channel ordering to correlator.
+        /// @param[in] channel ID   channel ID in ingest (contiguous)
+        /// @return channel ID in correlator
+		uint32_t toCorrelator(uint32_t channelID);
 };
  
 };

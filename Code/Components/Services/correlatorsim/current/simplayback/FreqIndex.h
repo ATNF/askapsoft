@@ -1,4 +1,4 @@
-/// @file CorrBufferUnit.cc
+/// @file FreqIndex.h
 ///
 /// @copyright (c) 2015 CSIRO
 /// Australia Telescope National Facility (ATNF)
@@ -24,34 +24,40 @@
 ///
 /// @author Paulus Lahur <paulus.lahur@csiro.au>
 ///
-/// Buffer unit that provides convenient intermediate data format during
-/// conversion from measurement set to datagram
+/// Frequency index class containing block, card, channel and frequency,
+/// following the definition in VisDatagramADE.
 
-#include <iostream>
-#include "CorrBufferUnit.h"
+#ifndef ASKAP_CP_FREQINDEX_H
+#define ASKAP_CP_FREQINDEX_H
 
-using namespace askap;
-using namespace askap::cp;
-using namespace std;
+#include <stdint.h>
 
+namespace askap {
+namespace cp {
 
-CorrBufferUnit::CorrBufferUnit() : ready(false)
-//CorrBufferUnit::CorrBufferUnit() : block(0), card(0), channel(0), freq(0.0),
-//        ready(false)
+class FreqIndex
 {
-}
+    public :
+
+        /// Constructor
+        FreqIndex();
+
+        /// Destructor
+        virtual ~FreqIndex();
 
 
+        // data
+        
+        uint32_t block;
 
-CorrBufferUnit::~CorrBufferUnit()
-{
-}
+        uint32_t card;
 
+        uint32_t channel;
 
+        float freq;
+};
 
-void CorrBufferUnit::print()
-{
-    cout << "vis: [" << vis.real << ", " << vis.imag << "], ready: "
-            << ready << endl;
-}
+};
+};
 
+#endif

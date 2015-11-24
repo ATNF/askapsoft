@@ -34,6 +34,7 @@
 #include <vector>
 #include "cpcommon/FloatComplex.h"
 #include "CorrBufferUnit.h"
+#include "FreqIndex.h"
 
 using std::vector;
 
@@ -74,6 +75,11 @@ class CorrBuffer
         /// @param[in] Correlation product index used as destination
         void copyCorrProd(int32_t source, int32_t destination);
 
+        /// Copy one channel to another
+        /// @param[in] Channel index used as source
+        /// @param[in] Channel index used as destination
+        void copyChannel(int32_t source, int32_t destination);
+
         /// Print the buffer
         void print();
 
@@ -97,6 +103,10 @@ class CorrBuffer
         // Array of correlation product status
         // True if correlation product is original data (not copy) 
         vector<bool> corrProdIsOriginal;
+
+        // Array of frequency index, which includes block, card, channel
+        // and frequency itself
+        vector<FreqIndex> freqId;
 };
 
 };

@@ -61,9 +61,10 @@
 #include "simplayback/CorrProdMap.h"
 #include "simplayback/CorrBuffer.h"
 
-//#define VERBOSE
+#define VERBOSE
 //#define HARDWARELIKE
 #define CORRBUFFER
+//#define CHANNEL_REORDER
 
 #define SIZEOF_ARRAY(a) (sizeof( a ) / sizeof( a[ 0 ] ))
 
@@ -115,8 +116,19 @@ CorrelatorSimulatorADE::~CorrelatorSimulatorADE()
 bool CorrelatorSimulatorADE::sendNext(void)
 {
     uint64_t previousTime = itsCurrentTime;
-    if (getBufferData()) {
-        fillBufferData();
+
+    // Get buffer data from measurement set
+    if (getBufferData()) {  // if successful ...
+
+        // The data from measurement set does not fill the whole buffer,
+        // so fill in the missing data by copying from existing one.
+        // Fill in the data for missing antennas (hence correlation products)
+        fillCorrProdInBuffer();
+
+        // Fill in the data for missing channels
+        fillChannelInBuffer();
+
+        // Delay transmission for every new time stamp in measurement
         if (itsCurrentTime > previousTime) {
             cout << "New time stamp: " << itsCurrentTime << endl;
             double delay = static_cast<double>(itsDelay) / 1000000.0;
@@ -125,10 +137,12 @@ bool CorrelatorSimulatorADE::sendNext(void)
             usleep(itsDelay);
             cout << "Resuming transmission" << endl;
         }
+
+        // Finally, send the buffer data
         return sendBufferData();
     }
-    else {
-        cout << "No more data available" << endl;
+    else {  // No more data in measurement set
+        cout << "No more data in measurement set" << endl;
         return false;
     }
 	return true;
@@ -213,13 +227,6 @@ bool CorrelatorSimulatorADE::sendNextZero(void)
 
 
 
-// Steps: 
-// 1) Initialize the buffer (size: 1 beam x all channels in measurement set)
-// 2) Get data into buffer
-// 3) Send buffer data, in slices.
-//    1 slice contains a portion of beam at a particular channel
-// Repeat 2 & 3 until all data has been sent
-//
 void CorrelatorSimulatorADE::initBuffer()
 {
     cout << "Initializing buffer ..." << endl;
@@ -327,14 +334,10 @@ void CorrelatorSimulatorADE::initBuffer()
 
     // Creating buffer
     cout << "  Creating buffer ..." << endl;
-    buffer.init(itsNCorrProd, nChan);
-    //uint32_t nBufferRow = itsNCorrProd;
-    //buffer.data.resize(nBufferRow);
-    //for (uint32_t corrProd = 0; corrProd < nBufferRow; ++corrProd) {
-    //    buffer.data[corrProd].resize(nChan);
-    //}
+    buffer.init(itsNCorrProd, itsNCoarseChannel);
+    //buffer.init(itsNCorrProd, nChan);
     cout << "    correlation product x channel: " << itsNCorrProd << 
-            " x " << nChan << endl; 
+            " x " << itsNCoarseChannel << endl; 
     cout << "  Creating buffer: done" << endl;
 
     cout << "Initializing buffer: done" << endl;
@@ -405,6 +408,20 @@ bool CorrelatorSimulatorADE::getBufferData()
         uint32_t descPolId = ddc.polarizationId()(dataDescId);
         uint32_t nCorr = polc.numCorr()(descPolId);
         casa::Matrix<casa::Complex> data = msc.data()(itsCurrentRow);
+        const casa::Vector<casa::Double> frequencies = 
+                spwc.chanFreq()(descSpwId);
+        for (uint32_t chan = 0; chan < frequencies.size(); ++chan) {
+            buffer.freqId[chan].block = 1;
+            buffer.freqId[chan].card = 1;
+            buffer.freqId[chan].channel = chan;
+            buffer.freqId[chan].freq = frequencies[chan];
+        }
+        //cout << "number of channels: " << frequencies.size() << endl;
+        //for (uint32_t i = 0; i < frequencies.size(); ++i) {
+        //        cout << "channel " << i << ": freq " << 
+        //        frequencies[i] / 1000000.0 << endl;
+        //}
+        //return false;
 
         uint32_t ant1 = antIndices[msc.antenna1()(itsCurrentRow)];
         uint32_t ant2 = antIndices[msc.antenna2()(itsCurrentRow)];
@@ -443,13 +460,18 @@ bool CorrelatorSimulatorADE::getBufferData()
                         "Correlator product " << corrProd << 
                         " is already filled");
                 //cout << "here" << endl;
+               
+#ifdef CHANNEL_REORDER 
+                for (uint32_t chanMeas = 0; chanMeas < nChan; ++chanMeas) {
+                    // Reorder the channels from measurement set to match
+                    // the ordering in correlator's datagram
+                    chan = channelMap.toCorrelator(chanMeas);
 
-                for (uint32_t chan = 0; chan < nChan; ++chan) {
-                    buffer.data[corrProd][chan].block = 1;
-                    buffer.data[corrProd][chan].card = 1;
-                    buffer.data[corrProd][chan].channel = 1;
-                    buffer.data[corrProd][chan].freq = 
-                        static_cast<float>(spwc.refFrequency()(dataDescId));
+                    //buffer.data[corrProd][chan].block = 1;
+                    //buffer.data[corrProd][chan].card = 1;
+                    //buffer.data[corrProd][chan].channel = 1;
+                    //buffer.data[corrProd][chan].freq = 
+                    //    static_cast<float>(spwc.chanFreq()(dataDescId));
                     buffer.data[corrProd][chan].vis.real = 
                             data(corr,chan).real();
                     buffer.data[corrProd][chan].vis.imag = 
@@ -457,6 +479,24 @@ bool CorrelatorSimulatorADE::getBufferData()
                     buffer.data[corrProd][chan].ready = true;
                 }   // channel
 
+#else           // Use the channel order from measurement set as is
+                for (uint32_t chan = 0; chan < nChan; ++chan) {
+                    //buffer.data[corrProd][chan].block = 1;
+                    //buffer.data[corrProd][chan].card = 1;
+                    //buffer.data[corrProd][chan].channel = 1;
+                    //buffer.data[corrProd][chan].freq = 
+                    //        spwc.chanFreq()(dataDescId);
+                    //cout << chan << ": " << 
+                    //        buffer.data[corrProd][chan].freq / 1000000.0
+                    //        << endl;
+                    buffer.data[corrProd][chan].vis.real = 
+                            data(corr,chan).real();
+                    buffer.data[corrProd][chan].vis.imag = 
+                            data(corr,chan).imag();
+                    buffer.data[corrProd][chan].ready = true;
+                }   // channel
+                //return false;
+#endif
                 buffer.corrProdIsFilled[corrProd] = true;
                 buffer.corrProdIsOriginal[corrProd] = true;
             }
@@ -476,10 +516,10 @@ bool CorrelatorSimulatorADE::getBufferData()
 
 // Copy empty correlation product data from original ones (from 
 // measurement set)
-void CorrelatorSimulatorADE::fillBufferData()
+void CorrelatorSimulatorADE::fillCorrProdInBuffer()
 {
 #ifdef VERBOSE
-    cout << "Filling buffer ..." << endl;
+    cout << "Filling empty correlation products in buffer ..." << endl;
 #endif
 
     // set initial correlation product index to force search from beginning
@@ -513,10 +553,34 @@ void CorrelatorSimulatorADE::fillBufferData()
     }
 
 #ifdef VERBOSE
-    cout << "Filling buffer: done" << endl;
+    cout << "Filling empty correlation products in buffer: done" << endl;
 #endif
 
-}   // fillBuffer
+}   // fillCorrProdInBuffer
+
+
+
+// Copy empty channel data from original ones (from measurement set)
+void CorrelatorSimulatorADE::fillChannelInBuffer()
+{
+#ifdef VERBOSE
+    cout << "Filling empty channels in buffer ..." << endl;
+#endif
+    
+    // The original data is the last channel from measurement set
+    uint32_t lastOriginalChannel = itsNCoarseChannel - 1;
+    for (uint32_t chan = itsNCoarseChannel; 
+            chan < buffer.data[0].size(); ++chan) {
+
+        buffer.copyChannel(lastOriginalChannel, chan);
+        buffer.freqId[chan].channel = chan;
+    }
+
+#ifdef VERBOSE
+    cout << "Filling empty channels in buffer: done" << endl;
+#endif
+
+}   // fillChannelInBuffer
 
 
 
@@ -544,10 +608,10 @@ bool CorrelatorSimulatorADE::sendBufferData()
 
         // put loop for channel expansion here
     
-        payload.block = buffer.data[0][chan].block;
-        payload.card = buffer.data[0][chan].card;
-        payload.channel = chan;     //buffer.data[0][chan].channel;
-        payload.freq = buffer.data[0][chan].freq;
+        payload.block = buffer.freqId[chan].block;
+        payload.card = buffer.freqId[chan].card;
+        payload.channel = buffer.freqId[chan].channel;
+        payload.freq = buffer.freqId[chan].freq;
 
         for (uint32_t slice = 0; slice < nSlice; ++slice) {
             payload.slice = slice;

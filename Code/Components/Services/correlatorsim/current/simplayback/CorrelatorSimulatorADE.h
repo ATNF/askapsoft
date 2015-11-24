@@ -158,9 +158,6 @@ class CorrelatorSimulatorADE : public ISimulator {
         /// Initialize buffer for intermediate storage
         void initBuffer();
 
-        // Reset the buffer
-        //void resetBuffer();
-
         /// Get buffer data, which is a matrix of a beam (full set of
         /// correlation products, as set by user) and channels
         /// (from measurement set) 
@@ -168,9 +165,13 @@ class CorrelatorSimulatorADE : public ISimulator {
         /// (eg. no more data in measurement set)
         bool getBufferData();
         
-        /// Fill empty correlation products with by copying data from
+        /// Fill empty correlation products by copying data from
         /// those originally filled with measurement set data
-        void fillBufferData();
+        void fillCorrProdInBuffer();
+
+        /// Fill empty channels by copying data from
+        /// those originally filled with measurement set data
+        void fillChannelInBuffer();
 
         /// Send buffer data 
         /// @return True if successful, false if not 

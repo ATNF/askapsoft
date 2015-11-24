@@ -1,4 +1,4 @@
-/// @file CorrBufferUnit.cc
+/// @file FreqIndex.cc
 ///
 /// @copyright (c) 2015 CSIRO
 /// Australia Telescope National Facility (ATNF)
@@ -24,34 +24,21 @@
 ///
 /// @author Paulus Lahur <paulus.lahur@csiro.au>
 ///
-/// Buffer unit that provides convenient intermediate data format during
-/// conversion from measurement set to datagram
 
-#include <iostream>
-#include "CorrBufferUnit.h"
+#include "FreqIndex.h"
 
 using namespace askap;
 using namespace askap::cp;
 using namespace std;
 
 
-CorrBufferUnit::CorrBufferUnit() : ready(false)
-//CorrBufferUnit::CorrBufferUnit() : block(0), card(0), channel(0), freq(0.0),
-//        ready(false)
+FreqIndex::FreqIndex() : block(0), card(0), channel(0), freq(0.0)
 {
 }
 
 
 
-CorrBufferUnit::~CorrBufferUnit()
+FreqIndex::~FreqIndex()
 {
-}
-
-
-
-void CorrBufferUnit::print()
-{
-    cout << "vis: [" << vis.real << ", " << vis.imag << "], ready: "
-            << ready << endl;
 }
 
