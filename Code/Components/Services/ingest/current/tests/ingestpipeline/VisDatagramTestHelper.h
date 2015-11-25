@@ -111,7 +111,7 @@ struct VisDatagramTestHelper<T, typename boost::enable_if<boost::is_class<typena
        vis.baseline2 = 21;
        vis.block = 1;
        vis.card = 1;
-       vis.channel = 10;
+       vis.channel = 11;
        vis.freq = 1e9;
    }     
         
@@ -120,7 +120,7 @@ struct VisDatagramTestHelper<T, typename boost::enable_if<boost::is_class<typena
    /// @param[in] product 1-based correlator product
    /// @return true, if channel and product are expected to be valid
    static bool validChannelAndProduct(uint32_t chan, uint32_t product) {
-        // 0-based channel 10 in the datagram translates to zero-based channel 55 in the accessor
+        // 1-based channel 11 in the datagram translates to zero-based channel 55 in the accessor
         // (see VisConverterADE).
         const uint32_t expectedChan = 55;
 
