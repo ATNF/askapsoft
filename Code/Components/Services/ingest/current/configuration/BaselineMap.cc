@@ -71,24 +71,37 @@ BaselineMap::BaselineMap(const LOFAR::ParameterSet& parset) : itsUpperTriangle(t
         const int32_t ant1 = fromString<int32_t>(tuple[0]); 
         const int32_t ant2 = fromString<int32_t>(tuple[1]); 
 
-        ASKAPCHECK(ant1 >= 0, "Antenna 1 index is supposed to be non-negative");
-        ASKAPCHECK(ant2 >= 0, "Antenna 2 index is supposed to be non-negative");
-
-        if (ant1 > ant2) {
-            itsUpperTriangle = false;
-        }
-        if (ant2 > ant1) {
-            itsLowerTriangle = false;
-        }
- 
-        itsAntenna1Map[id] = ant1; 
-        itsAntenna2Map[id] = ant2; 
-        itsStokesMap[id] = Stokes::type(tuple[2]);
+        add(id, ant1, ant2, Stokes::type(tuple[2]));
     }
     ASKAPCHECK(itsAntenna1Map.size() == itsSize, "Antenna 1 Map is of invalid size");
     ASKAPCHECK(itsAntenna2Map.size() == itsSize, "Antenna 2 Map is of invalid size");
     ASKAPCHECK(itsStokesMap.size() == itsSize, "Stokes type map is of invalid size");
 }
+
+/// @brief add one product to the map
+/// @param[in] id product number to add the mapping for
+/// @param[in] ant1 first antenna index
+/// @param[in] ant2 second antenna index
+/// @param[in] pol stokes parameter
+void BaselineMap::add(int32_t id, int32_t ant1, int32_t ant2, casa::Stokes::StokesTypes pol)
+{
+   ASKAPCHECK(ant1 >= 0, "Antenna 1 index is supposed to be non-negative");
+   ASKAPCHECK(ant2 >= 0, "Antenna 2 index is supposed to be non-negative");
+   ASKAPCHECK(id >= 0, "Product id is supposed to be non-negative");
+
+   if (ant1 > ant2) {
+       itsUpperTriangle = false;
+   }
+
+   if (ant2 > ant1) {
+       itsLowerTriangle = false;
+   }
+
+   itsAntenna1Map[id] = ant1; 
+   itsAntenna2Map[id] = ant2; 
+   itsStokesMap[id] = pol;
+}
+
 
 int32_t BaselineMap::idToAntenna1(const int32_t id) const
 {

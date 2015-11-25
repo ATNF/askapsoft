@@ -148,6 +148,15 @@ class BaselineMap {
         /// and lower triangles will remain such). 
         void sliceMap(const std::vector<int32_t> &ids);
 
+    protected:
+
+        /// @brief add one product to the map
+        /// @param[in] id product number to add the mapping for
+        /// @param[in] ant1 first antenna index
+        /// @param[in] ant2 second antenna index
+        /// @param[in] pol stokes parameter
+        void add(int32_t id, int32_t ant1, int32_t ant2, casa::Stokes::StokesTypes pol);
+
     private:
 
         size_t itsSize;
