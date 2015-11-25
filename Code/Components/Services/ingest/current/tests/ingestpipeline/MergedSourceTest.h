@@ -157,10 +157,9 @@ class MergedSourceTest : public CppUnit::TestFixture,
             // Ensure other metadata is as expected
             CPPUNIT_ASSERT_EQUAL(nChannelsForTest(), chunk->nChannel());
             CPPUNIT_ASSERT_EQUAL(nCorr, chunk->nPol());
-            const uint32_t nBaselines = config.bmap().size();
-            // without any conversion rules set up number of beams
-            // will be 1 more than needed (h/w indices are 1-based)
-            const uint32_t nBeam = config.feed().nFeeds() + 1;
+            const casa::uInt nAntennas = config.antennas().size();
+            const casa::uInt nBaselines = nAntennas * (nAntennas + 1) / 2;
+            const uint32_t nBeam = config.feed().nFeeds();
             CPPUNIT_ASSERT_EQUAL(nBaselines * nBeam, chunk->nRow());
 
             // Check stokes
@@ -201,8 +200,9 @@ class MergedSourceTest : public CppUnit::TestFixture,
                       CPPUNIT_ASSERT(product > 0);
 
                       for (uint32_t chan = 0; chan < chunk->nChannel(); ++chan) {
+                           // by default, beams in the datagrams are 1-based and in the chunk are zero-based
                            if (validChannelAndProduct(chan, static_cast<uint32_t>(product)) &&
-                                chunk->beam1()(row) == vis.beamid && chunk->beam2()(row) == vis.beamid) {
+                                chunk->beam1()(row) + 1 == vis.beamid && chunk->beam2()(row) + 1 == vis.beamid) {
                                // If this is one of the visibilities that were added above
                                CPPUNIT_ASSERT_EQUAL(false, chunk->flag()(row, chan, pol));
                            } else {
