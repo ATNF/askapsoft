@@ -1,8 +1,8 @@
 import os, shutil
-from askapdev.rbuild.builders import Data as Builder
-#from askapdev.rbuild.builders import Builder
-#import askapdev.rbuild.utils as utils
+from askapdev.rbuild.builders import Data as DataBuilder
+from askapdev.rbuild.builders import Builder
 
-builder = Builder("scripts")
+builder = Builder(".")
 builder.build()
-#utils.copy_tree('scripts','install/bin')
+databuilder = DataBuilder("scripts")
+databuilder.build()
