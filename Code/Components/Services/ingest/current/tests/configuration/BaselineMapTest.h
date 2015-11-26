@@ -27,6 +27,9 @@
 // CPPUnit includes
 #include <cppunit/extensions/HelperMacros.h>
 
+// casa stuff
+#include "casa/OS/Path.h"
+
 // Support classes
 #include <string>
 
@@ -47,6 +50,9 @@ class BaselineMapTest : public CppUnit::TestFixture {
         CPPUNIT_TEST(testNoMatchPol);
         CPPUNIT_TEST(testSliceMap);
         CPPUNIT_TEST(testLowerTriangle);
+        CPPUNIT_TEST(testDefaultMap);
+        CPPUNIT_TEST_EXCEPTION(testUnknownMap, askap::CheckError);
+        CPPUNIT_TEST_EXCEPTION(testMixedParam, askap::CheckError);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -196,6 +202,66 @@ class BaselineMapTest : public CppUnit::TestFixture {
             CPPUNIT_ASSERT_EQUAL(size_t(21u), bm.size());
             CPPUNIT_ASSERT(bm.isLowerTriangle());
             CPPUNIT_ASSERT(!bm.isUpperTriangle());
+        }
+        void testDefaultMap() {
+            // we store the test map in the same directory this file is
+            const casa::Path thisFile(__FILE__);
+            casa::Path path2map(thisFile.dirName());
+            path2map.append("TestBaselineMap.parset");
+            CPPUNIT_ASSERT(path2map.isValid());
+            LOFAR::ParameterSet templateConfig(path2map.expandedName());
+            BaselineMap bmTemplate(templateConfig.makeSubset("baselinemap."));
+            CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2628u), bmTemplate.size());
+            CPPUNIT_ASSERT_EQUAL(2628, bmTemplate.maxID());
+
+            // set up default map
+            LOFAR::ParameterSet params;
+            params.add("name","standard");
+            BaselineMap bm(params);
+            
+            // first test the number of elements
+            CPPUNIT_ASSERT_EQUAL(bmTemplate.size(), bm.size());
+            CPPUNIT_ASSERT_EQUAL(bmTemplate.maxID(), bm.maxID());
+            
+            // iterate over all products and check that they're the same
+            // product 0 should be undefined, but access methods should just
+            // return -1 or Stokes::Undefined for both the tested and template map
+            for (int32_t id = 0; id <= bm.maxID(); ++id) {
+                 CPPUNIT_ASSERT_EQUAL(bmTemplate.idToAntenna1(id), bm.idToAntenna1(id));
+                 CPPUNIT_ASSERT_EQUAL(bmTemplate.idToAntenna2(id), bm.idToAntenna2(id));
+                 CPPUNIT_ASSERT_EQUAL(bmTemplate.idToStokes(id), bm.idToStokes(id));
+            }
+        }
+       
+        void testUnknownMap() {
+            // set up default map; only 'standard' name is defined, so
+            // beta should throw an exception
+            LOFAR::ParameterSet params;
+            params.add("name","beta");
+            BaselineMap bm(params);
+        }
+ 
+        void testMixedParam() {
+            LOFAR::ParameterSet params;
+            // the first 7 products of the ADE correlator
+            params.add("baselineids","[1..7]");
+            params.add("1","[0, 0, XX]");
+            params.add("2","[0, 0, YX]");
+            params.add("3","[0, 0, YY]");
+            params.add("4","[1, 0, XX]");
+            params.add("5","[1, 0, XY]");
+            params.add("6","[1, 1, XX]");
+            params.add("7","[1, 0, YX]");
+        
+            // this map should be alright
+            BaselineMap bm1(params);
+            CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(7u), bm1.size());
+            CPPUNIT_ASSERT_EQUAL(7, bm1.maxID());
+ 
+            // now add the default map which conflicts with explicit map
+            params.add("name","standard");
+            // the following should throw an exception
+            BaselineMap bm(params);
         }
 };
 

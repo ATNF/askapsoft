@@ -83,7 +83,7 @@ class BaselineMap {
         /// @param[in] parset   a parset (i.e. a map from string to string)
         ///     describing the range of entries and the contents of the entries.
         ///     An example is shown in the class comments.
-        BaselineMap(const LOFAR::ParameterSet& parset);
+        explicit BaselineMap(const LOFAR::ParameterSet& parset);
 
         /// @brief Empty Constructor
         BaselineMap();
@@ -156,6 +156,16 @@ class BaselineMap {
         /// @param[in] ant2 second antenna index
         /// @param[in] pol stokes parameter
         void add(int32_t id, int32_t ant1, int32_t ant2, casa::Stokes::StokesTypes pol);
+
+        /// @brief populate map for ADE correlator
+        /// @details To avoid carrying the map for 2628 products explicitly in fcm, 
+        /// we use this method to define the full map analytically. In the future,
+        /// we might even have a polymorphic class which does mapping analytically.
+        /// This could even speed things up. However, at this stage, an option to
+        /// support sparse arrays is more useful, so we keep the full map functionality
+        /// in and just generate the map algorithmically.
+        /// @param[in] nAnt number of antennas to generate the map for
+        void defaultMapADE(uint32_t nAnt = 36);
 
     private:
 

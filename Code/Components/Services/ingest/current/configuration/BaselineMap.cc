@@ -53,29 +53,67 @@ BaselineMap::BaselineMap()
 
 BaselineMap::BaselineMap(const LOFAR::ParameterSet& parset) : itsUpperTriangle(true), itsLowerTriangle(true)
 {
-    const vector<int32_t> ids = parset.getInt32Vector("baselineids", true);
-    itsSize = ids.size();
+    const std::string configName = parset.getString("name", "");
+    if (configName == "standard") {
+        ASKAPCHECK(!parset.isDefined("baselineids"), 
+              "The baseline map has to be either defined explicitly via baselineids keyword or via name, you have both");
+        defaultMapADE();
+    } else {
+        ASKAPCHECK(configName == "", "Only 'standard' implicit baseline map is currently supported; you have="<<configName);
+       
+        const vector<int32_t> ids = parset.getInt32Vector("baselineids", true);
+        itsSize = ids.size();
 
-    for (vector<int32_t>::const_iterator it = ids.begin();
-            it != ids.end(); ++it) {
-        const int32_t id = *it;
-        if (!parset.isDefined(toString(id))) {
-            ASKAPTHROW(AskapError, "Baseline mapping for id " << id << " not present");
+        for (vector<int32_t>::const_iterator it = ids.begin();
+                it != ids.end(); ++it) {
+            const int32_t id = *it;
+            if (!parset.isDefined(toString(id))) {
+                ASKAPTHROW(AskapError, "Baseline mapping for id " << id << " not present");
+            } 
+
+            const vector<string> tuple = parset.getStringVector(toString(id));
+            if (tuple.size() != 3) {
+                ASKAPTHROW(AskapError, "Baseline mapping for id " << id << " is malformed");
+            }
+
+            const int32_t ant1 = fromString<int32_t>(tuple[0]); 
+            const int32_t ant2 = fromString<int32_t>(tuple[1]); 
+
+            add(id, ant1, ant2, Stokes::type(tuple[2]));
         }
-
-        const vector<string> tuple = parset.getStringVector(toString(id));
-        if (tuple.size() != 3) {
-            ASKAPTHROW(AskapError, "Baseline mapping for id " << id << " is malformed");
-        }
-
-        const int32_t ant1 = fromString<int32_t>(tuple[0]); 
-        const int32_t ant2 = fromString<int32_t>(tuple[1]); 
-
-        add(id, ant1, ant2, Stokes::type(tuple[2]));
-    }
+    } 
     ASKAPCHECK(itsAntenna1Map.size() == itsSize, "Antenna 1 Map is of invalid size");
     ASKAPCHECK(itsAntenna2Map.size() == itsSize, "Antenna 2 Map is of invalid size");
     ASKAPCHECK(itsStokesMap.size() == itsSize, "Stokes type map is of invalid size");
+}
+
+/// @brief populate map for ADE correlator
+/// @details To avoid carrying the map for 2628 products explicitly in fcm, 
+/// we use this method to define the full map analytically. In the future,
+/// we might even have a polymorphic class which does mapping analytically.
+/// This could even speed things up. However, at this stage, an option to
+/// support sparse arrays is more useful, so we keep the full map functionality
+/// in and just generate the map algorithmically.
+/// @param[in] nAnt number of antennas to generate the map for
+void BaselineMap::defaultMapADE(uint32_t nAnt) 
+{
+   ASKAPASSERT(itsAntenna1Map.size() == 0 && itsAntenna2Map.size() == 0 && 
+               itsStokesMap.size() == 0);
+   ASKAPDEBUGASSERT(nAnt > 0);
+   // we have 1-based product indices, so use prefix increment
+   itsSize = 0;
+   for (int32_t ant2 = 0; ant2 < static_cast<int32_t>(nAnt); ++ant2) {
+        for (int32_t ant1 = 0; ant1 < ant2; ++ant1) {
+             add(++itsSize, ant1, ant2, casa::Stokes::XX);
+             add(++itsSize, ant1, ant2, casa::Stokes::YX);
+        }
+        add(++itsSize, ant2, ant2, casa::Stokes::XX);
+        for (int32_t ant1 = 0; ant1 <= ant2; ++ant1) {
+             add(++itsSize, ant1, ant2, casa::Stokes::XY);
+             add(++itsSize, ant1, ant2, casa::Stokes::YY);
+        }
+   }
+   // itsSize should be set to the number of products here
 }
 
 /// @brief add one product to the map
