@@ -144,7 +144,7 @@ function findScienceMSnames()
         if [ "`echo ${GAINS_CAL_TABLE} | grep %b`" != "" ]; then
             # We have a %b that needs replacing
             sedstr="s|%b|${BEAM}|g"
-            gainscaltab=`echo ${GAINS_CAL_TAB} | sed -e $sedstr`
+            gainscaltab=`echo ${GAINS_CAL_TABLE} | sed -e $sedstr`
         else
             # just use filename as provided
             gainscaltab=${GAINS_CAL_TABLE}

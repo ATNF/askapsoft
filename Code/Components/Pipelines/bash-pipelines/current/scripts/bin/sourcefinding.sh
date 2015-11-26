@@ -119,7 +119,11 @@ EOFOUTER
     if [ $BEAM == "all" ]; then
         DEP=`addDep "$DEP" "$ID_LINMOS_SCI"`
     else
-        DEP=`addDep "$DEP" "$ID_CONTIMG_SCI"`
+        if [ $DO_SELFCAL == true ]; then
+            DEP=`addDep "$DEP" "$ID_CONTIMG_SCI_SC"`
+        else
+            DEP=`addDep "$DEP" "$ID_CONTIMG_SCI"`
+        fi
     fi
     
     if [ $SUBMIT_JOBS == true ]; then

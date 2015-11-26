@@ -35,7 +35,7 @@
 # Define the Cimager parset and associated parameters
 . ${PIPELINEDIR}/getContinuumCimagerParams.sh
 
-ID_CONTIMG_SCI=""
+ID_CONTIMG_SCI_SC=""
 
 DO_IT=$DO_CONT_IMAGING
 
@@ -270,9 +270,9 @@ EOFOUTER
         DEP=`addDep "$DEP" "$ID_FLAG_SCI"`
         DEP=`addDep "$DEP" "$ID_CCALAPPLY_SCI"`
         DEP=`addDep "$DEP" "$ID_AVERAGE_SCI"`
-	ID_CONTIMG_SCI=`sbatch $DEP $sbatchfile | awk '{print $4}'`
-	recordJob ${ID_CONTIMG_SCI} "Make a self-calibrated continuum image for beam $BEAM of the science observation, with flags \"$DEP\""
-        FLAG_IMAGING_DEP=`addDep "$FLAG_IMAGING_DEP" "$ID_CONTIMG_SCI"`
+	ID_CONTIMG_SCI_SC=`sbatch $DEP $sbatchfile | awk '{print $4}'`
+	recordJob ${ID_CONTIMG_SCI_SC} "Make a self-calibrated continuum image for beam $BEAM of the science observation, with flags \"$DEP\""
+        FLAG_IMAGING_DEP=`addDep "$FLAG_IMAGING_DEP" "$ID_CONTIMG_SCI_SC"`
     else
 	echo "Would make a self-calibrated continuum image for beam $BEAM of the science observation with slurm file $sbatchfile"
     fi
