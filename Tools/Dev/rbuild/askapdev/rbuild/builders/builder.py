@@ -468,14 +468,15 @@ class Builder:
         pysite = os.path.join(self._stagedir, "lib",
                               "python%s" % sys.version[0:3], "site-packages")
         pthfile = os.path.join(pysite, "easy-install.pth")
-        os.chdir(pysite)
-        eggs = ["%s\n" % egg for egg in glob.glob("./*.egg")]
-        with open(pthfile, "r+") as pth:
-            contents = pth.readlines()
-            contents = ''.join(contents[0:1] + eggs + contents[-1:])
-            pth.seek(0)
-            pth.write(contents)
-        os.chdir(curdir)
+        if os.access(pthfile,os.F_OK):
+            os.chdir(pysite)
+            eggs = ["%s\n" % egg for egg in glob.glob("./*.egg")]
+            with open(pthfile, "r+") as pth:
+                contents = pth.readlines()
+                contents = ''.join(contents[0:1] + eggs + contents[-1:])
+                pth.seek(0)
+                pth.write(contents)
+            os.chdir(curdir)
 
 
     def doc_stage(self, stage_dir):
