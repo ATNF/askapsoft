@@ -26,6 +26,7 @@
 ///
 
 #include "FreqIndex.h"
+#include <iostream>
 
 using namespace askap;
 using namespace askap::cp;
@@ -41,4 +42,12 @@ FreqIndex::FreqIndex() : block(0), card(0), channel(0), freq(0.0)
 FreqIndex::~FreqIndex()
 {
 }
+
+
+
+void FreqIndex::print() {
+    cout << "block " << block << ", card " << card << ", channel " <<
+            channel << ", freq " << freq << endl;
+}
+
 

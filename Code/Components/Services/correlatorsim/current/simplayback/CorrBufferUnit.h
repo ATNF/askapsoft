@@ -55,6 +55,7 @@ class CorrBufferUnit
         FloatComplex vis;
 
         // True if the data is ready to use
+        // Is this really needed?
         bool ready;
 };
 

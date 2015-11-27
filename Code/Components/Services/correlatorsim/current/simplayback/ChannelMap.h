@@ -46,11 +46,13 @@ class ChannelMap {
 
         /// Convert channel ordering from correlator. 
         /// The resulting channels are contiguous.
+        /// Note that the channels are 0-based
         /// @param[in] channelID     channel ID in correlator
         /// @return channel ID in ingest (contiguous)
 		uint32_t fromCorrelator(uint32_t channelID);
 		
         /// Convert channel ordering to correlator.
+        /// Note that the channels are 0-based
         /// @param[in] channel ID   channel ID in ingest (contiguous)
         /// @return channel ID in correlator
 		uint32_t toCorrelator(uint32_t channelID);

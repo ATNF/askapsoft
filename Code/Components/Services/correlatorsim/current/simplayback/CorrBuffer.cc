@@ -36,7 +36,8 @@ using namespace askap::cp;
 using namespace std;
 
 
-CorrBuffer::CorrBuffer() : timeStamp(0), ready(false)
+CorrBuffer::CorrBuffer() : timeStamp(0), beam(0), ready(false), nChanMeas(0),
+        nCard(0)
 {
 }
 
@@ -111,7 +112,7 @@ void CorrBuffer::copyCorrProd(int32_t source, int32_t destination)
 }
 
 
-
+/*
 void CorrBuffer::copyChannel(int32_t source, int32_t destination) 
 {
     for (uint32_t cp = 0; cp < data.size(); ++cp) {
@@ -120,9 +121,10 @@ void CorrBuffer::copyChannel(int32_t source, int32_t destination)
     freqId[destination].block = freqId[source].block;
     freqId[destination].card = freqId[source].card;
 }
+*/
 
 
-
+// TODO: update this
 void CorrBuffer::print ()
 {
     cout << "Buffer time stamp: " << timeStamp << endl;

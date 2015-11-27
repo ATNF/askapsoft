@@ -42,6 +42,7 @@
 #include "simplayback/RandomReal.h"
 #include "simplayback/CorrProdMap.h"
 #include "simplayback/CorrBuffer.h"
+#include "simplayback/ChannelMap.h"
 
 namespace askap {
 namespace cp {
@@ -88,6 +89,9 @@ class CorrelatorSimulatorADE : public ISimulator {
 
 		// Correlation product map (this replaces baseline map)
 		CorrProdMap itsCorrProdMap;
+
+        // Channel mapping
+        ChannelMap itsChannelMap;
 
         // Shelf number [1..]
         const int itsShelf;
@@ -172,6 +176,9 @@ class CorrelatorSimulatorADE : public ISimulator {
         /// Fill empty channels by copying data from
         /// those originally filled with measurement set data
         void fillChannelInBuffer();
+
+        /// Renumber channels and cards to conform with datagram specification
+        void renumberChannelAndCard();
 
         /// Send buffer data 
         /// @return True if successful, false if not 

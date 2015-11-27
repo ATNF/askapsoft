@@ -75,10 +75,10 @@ class CorrBuffer
         /// @param[in] Correlation product index used as destination
         void copyCorrProd(int32_t source, int32_t destination);
 
-        /// Copy one channel to another
-        /// @param[in] Channel index used as source
-        /// @param[in] Channel index used as destination
-        void copyChannel(int32_t source, int32_t destination);
+        // Copy one channel to another
+        // @param[in] Channel index used as source
+        // @param[in] Channel index used as destination
+        //void copyChannel(int32_t source, int32_t destination);
 
         /// Print the buffer
         void print();
@@ -86,26 +86,37 @@ class CorrBuffer
 
         // data
         
+        /// Time stamp of this buffer
         uint64_t timeStamp;
 
+        /// Beam index of this buffer
         uint32_t beam;
 
-        // True if the data is ready to use
+        /// True if the data is ready to use
         bool ready;
 
-        // 2D array of data [correlation products, channels]
+        /// Channel count in measurement set (original data)
+        uint32_t nChanMeas;
+
+        /// Card count (each card contains a limited number of channels)
+        uint32_t nCard;
+
+        /// 2D array of data containing original data from measurement set
+        /// and dummy data (derived from measurement set)
+        /// Row   : correlation products as specified in parset
+        /// Column: channels as specified in parset
         vector<vector<CorrBufferUnit> > data;
 
-        // Array of correlation product status
-        // True if correlation product is filled with data
+        /// Array of correlation product status
+        /// True if correlation product is filled with data
         vector<bool> corrProdIsFilled;
 
-        // Array of correlation product status
-        // True if correlation product is original data (not copy) 
+        /// Array of correlation product status
+        /// True if correlation product is original data (not copy) 
         vector<bool> corrProdIsOriginal;
 
-        // Array of frequency index, which includes block, card, channel
-        // and frequency itself
+        /// Array of frequency index, which includes block, card, channel
+        /// and frequency itself
         vector<FreqIndex> freqId;
 };
 

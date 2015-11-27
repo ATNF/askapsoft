@@ -1,4 +1,4 @@
-/// @file FreqIndex.h
+/// @file DatagramLimit.h
 ///
 /// @copyright (c) 2015 CSIRO
 /// Australia Telescope National Facility (ATNF)
@@ -22,44 +22,32 @@
 /// along with this program; if not, write to the Free Software
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
-/// @author Paulus Lahur <paulus.lahur@csiro.au>
-///
-/// Frequency index class containing block, card, channel and frequency,
-/// following the definition in VisDatagramADE.
+/// @author Paulus Lahur <Paulus.Lahur@csiro.au>
 
-#ifndef ASKAP_CP_FREQINDEX_H
-#define ASKAP_CP_FREQINDEX_H
+#ifndef ASKAP_CP_DATAGRAMLIMIT_H
+#define ASKAP_CP_DATAGRAMLIMIT_H
 
 #include <stdint.h>
 
 namespace askap {
 namespace cp {
 
-class FreqIndex
-{
-    public :
+    const uint32_t DATAGRAM_NBLOCK = 8;
+    const uint32_t DATAGRAM_BLOCKMIN = 1;
+    const uint32_t DATAGRAM_BLOCKMAX = 8;
 
-        /// Constructor
-        FreqIndex();
+    const uint32_t DATAGRAM_NCARD = 12;
+    const uint32_t DATAGRAM_CARDMIN = 1;
+    const uint32_t DATAGRAM_CARDMAX = 12;
 
-        /// Destructor
-        virtual ~FreqIndex();
+    const uint32_t DATAGRAM_NCHANNEL = 216;
+    const uint32_t DATAGRAM_CHANNELMIN = 1;
+    const uint32_t DATAGRAM_CHANNELMAX = 216;
 
-        /// Print the content
-        void print();
+    const uint32_t DATAGRAM_BEAMMIN = 0;
 
-        // data
-        
-        uint32_t block;
-
-        uint32_t card;
-
-        uint32_t channel;
-
-        double freq;
-};
-
+    const uint32_t DATAGRAM_BASELINEMIN = 0;
 };
 };
 
-#endif
+#endif 
