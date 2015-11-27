@@ -6,3 +6,14 @@ builder = Builder(".")
 builder.build()
 databuilder = DataBuilder("scripts")
 databuilder.build()
+
+if os.access(builder._initscript_name,os.F_OK):
+    bindir=os.getcwd()+'/install/bin'
+    initfile=open(builder._initscript_name,'a+')
+    initfile.write("""
+#The following is required by the pipeline scripts.
+PIPELINEDIR=%s
+export PIPELINEDIR
+"""%bindir)    
+    initfile.close()
+
