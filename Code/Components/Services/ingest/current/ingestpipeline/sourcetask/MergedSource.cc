@@ -101,7 +101,9 @@ VisChunk::ShPtr MergedSource::next(void)
     const long ONE_SECOND = 10000000;
 
     // Get metadata for a real (i.e. scan id >= 0) scan
-    do {
+    const uint32_t maxNoMetadataRetries = 3;
+    for (int32_t count = 0; (!itsMetadata ||  itsMetadata->scanId() == ScanManager::SCANID_IDLE) && 
+                             count < static_cast<int32_t>(maxNoMetadataRetries); ++count) {
         itsMetadata = itsMetadataSrc->next(ONE_SECOND);
         checkInterruptSignal();
         if (itsMetadata && itsMetadata->scanId() < 0
@@ -113,8 +115,12 @@ VisChunk::ShPtr MergedSource::next(void)
         if (itsMetadata && itsMetadata->scanId() == ScanManager::SCANID_IDLE) {
             ASKAPLOG_INFO_STR(logger,
                     "Skipping this cycle, metadata indicates SCANID_IDLE");
+            count = -1;
         }
-    } while (!itsMetadata || itsMetadata->scanId() == ScanManager::SCANID_IDLE);
+    } 
+    ASKAPCHECK(itsMetadata, "Metadata streaming ceased, unable to recover after "<<
+                            maxNoMetadataRetries<<" attempts");
+    ASKAPASSERT(itsMetadata->scanId() != ScanManager::SCANID_IDLE);
 
     // Update the Scan Manager
     itsScanManager.update(itsMetadata->scanId());
