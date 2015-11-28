@@ -118,6 +118,8 @@ VisChunk::ShPtr MergedSource::next(void)
 
     // Update the Scan Manager
     itsScanManager.update(itsMetadata->scanId());
+    ASKAPLOG_DEBUG_STR(logger, "Processing scanId="<<itsMetadata->scanId()<<" mdata time="<<
+             bat2epoch(itsMetadata->time()).getValue());
 
     // Check if the TOS/TOM has indicated the observation is complete
     if (itsScanManager.observationComplete()) {
@@ -131,10 +133,21 @@ VisChunk::ShPtr MergedSource::next(void)
     itsLastTimestamp = itsMetadata->time();
 
     // Get the next VisDatagram if there isn't already one in the buffer
-    while (!itsVis) {
+    const uint32_t maxNoDataRetries = 10;
+    for (uint32_t count = 0; !itsVis && count < maxNoDataRetries; ++count) {
         itsVis = itsVisSrc->next(ONE_SECOND);
         checkInterruptSignal();
+        if (itsVis) { 
+            ASKAPLOG_DEBUG_STR(logger, "Received non-zero itsVis; time="<<bat2epoch(itsVis->timestamp));
+        } else {
+            ASKAPLOG_DEBUG_STR(logger, "Received zero itsVis, retrying");
+        }
     }
+    ASKAPCHECK(itsVis, "Reached maximum number of retries for id="<<itsVisConverter.id()<<
+            ", the correlator ioc does not seem to send data to this rank. Reached the limit of "<<
+            maxNoDataRetries<<" retry attempts");
+
+    ASKAPLOG_DEBUG_STR(logger, "Before aligning metadata and visibility");
 
     // Find data with matching timestamps
     bool logCatchup = true;
@@ -151,6 +164,7 @@ VisChunk::ShPtr MergedSource::next(void)
 
             checkInterruptSignal();
         }
+        checkInterruptSignal();
 
         // But if the timestamp in the VisDatagram is in the future (with
         // respect to the TosMetadata) then it is time to fetch new TosMetadata
@@ -160,14 +174,17 @@ VisChunk::ShPtr MergedSource::next(void)
                 logCatchup = false;
             }
             itsMetadata = itsMetadataSrc->next(ONE_SECOND);
-            itsScanManager.update(itsMetadata->scanId());
             checkInterruptSignal();
-            if (itsScanManager.observationComplete()) {
-                ASKAPLOG_INFO_STR(logger, "End-of-observation condition met");
-                return VisChunk::ShPtr();
+            if (itsMetadata) {
+                itsScanManager.update(itsMetadata->scanId());
+                if (itsScanManager.observationComplete()) {
+                    ASKAPLOG_INFO_STR(logger, "End-of-observation condition met");
+                    return VisChunk::ShPtr();
+                }
             }
         }
     }
+    ASKAPLOG_DEBUG_STR(logger, "Aligned datagram time and metadata time: "<<bat2epoch(itsVis->timestamp).getValue());
 
     // Now the streams are synced, start building a VisChunk
     VisChunk::ShPtr chunk = createVisChunk(*itsMetadata);
