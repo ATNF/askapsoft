@@ -54,8 +54,9 @@ ChannelSelTask::ChannelSelTask(const LOFAR::ParameterSet& parset,
     itsParset(parset)
 {
     ASKAPLOG_DEBUG_STR(logger, "Constructor");
-    ASKAPCHECK(config.nprocs() == 1,
-            "The current implementation of channel selection task works in the standalone mode only");
+    if (config.nprocs() != 1) {
+        ASKAPLOG_WARN_STR(logger, "Parallel mode detected - task will apply selection for each stream independently");
+    }
     itsStart = parset.getUint32("start");
     itsNChan = parset.getUint32("nchan");
 }
