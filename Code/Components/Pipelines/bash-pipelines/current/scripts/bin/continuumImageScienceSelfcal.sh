@@ -227,6 +227,7 @@ EOFINNER
         echo "--- Source finding with $selavy ---" >> \$log
         aprun -n ${NPROCS_SELAVY} -N ${CPUS_PER_CORE_SELFCAL} $selavy -c \$parset >> \$log
         err=\$?
+        NUM_CPUS=${NPROCS_SELAVY}
         extractStats \${log} \${SLURM_JOB_ID} \${err} selavySC_L\${LOOP}_B${BEAM} "txt,csv"
 
         if [ \$err != 0 ]; then
@@ -236,6 +237,7 @@ EOFINNER
         echo "--- Calibration with $ccalibrator ---" >> \$log
         aprun -n 1 -N 1 $ccalibrator -c \$parset >> \$log
         err=\$?
+        NUM_CPUS=1
         extractStats \${log} \${SLURM_JOB_ID} \${err} ccalSC_L\${LOOP}_B${BEAM} "txt,csv"
         if [ \$err != 0 ]; then
             exit \$err
@@ -254,6 +256,7 @@ EOFINNER
     echo "--- Imaging with $cimager ---" >> \$log
     aprun -n ${NUM_CPUS_CONTIMG_SCI} -N ${CPUS_PER_CORE_CONT_IMAGING} $cimager -c \$parset >> \$log
     err=\$?
+    NUM_CPUS=${NUM_CPUS_CONTIMG_SCI}
     extractStats \${log} \${SLURM_JOB_ID} \${err} contImagingSC_L\${LOOP}_B${BEAM} "txt,csv"
     if [ \$err != 0 ]; then
         exit \$err

@@ -203,19 +203,4 @@ if [ $PROCESS_HAS_RUN == false ]; then
     fi
 
 
-    ######################
-    # Maximum number of worker nodes over all the jobs
-    # This is used by the stats functions to find the mean over the workers
-    MAX_NUM_CPUS=$NUM_CPUS_CONTIMG_SCI
-    if [ $NUM_CPUS_CBPCAL -gt $MAX_NUM_CPUS ]; then
-        MAX_NUM_CPUS=$NUM_CPUS_CBPCAL
-    fi
-    if [ $NUM_CPUS_SPECIMG_SCI -gt $MAX_NUM_CPUS ]; then
-        MAX_NUM_CPUS=$NUM_CPUS_SPECIMG_SCI
-    fi
-    if [ $NUM_CPUS_SELAVY -gt $MAX_NUM_CPUS ]; then
-        MAX_NUM_CPUS=$NUM_CPUS_SELAVY
-    fi
-
-
 fi

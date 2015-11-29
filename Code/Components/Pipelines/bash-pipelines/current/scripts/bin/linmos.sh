@@ -93,6 +93,7 @@ EOFINNER
 
     aprun -n 1 -N 1 $linmos -c \$parset > \$log
     err=\$?
+    NUM_CPUS=1
     extractStats \${log} \${SLURM_JOB_ID} \${err} linmos "txt,csv"
     if [ \$err != 0 ]; then
         exit \$err

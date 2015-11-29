@@ -109,6 +109,7 @@ log=${logs}/split_spectralline_science_beam${BEAM}_\${SLURM_JOB_ID}.log
 
 aprun -n 1 -N 1 ${mssplit} -c \${parset} > \${log}
 err=\$?
+NUM_CPUS=1
 extractStats \${log} \${SLURM_JOB_ID} \${err} splitScience_B${BEAM} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
@@ -184,6 +185,7 @@ EOFINNER
 
 aprun -n 1 -N 1 ${ccalapply} -c \${parset} > \${log}
 err=\$?
+NUM_CPUS=1
 extractStats \${log} \${SLURM_JOB_ID} \${err} calapply_spectral_B${BEAM} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
@@ -294,6 +296,7 @@ EOFINNER
 
 aprun -n 1 -N 1 ${ccontsubtract} -c \${parset} > \${log}
 err=\$?
+NUM_CPUS=1
 extractStats \${log} \${SLURM_JOB_ID} \${err} contsub_spectral_B${BEAM} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err

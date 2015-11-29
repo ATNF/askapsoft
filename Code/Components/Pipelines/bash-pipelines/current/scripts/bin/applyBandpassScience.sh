@@ -76,6 +76,7 @@ log=${logs}/ccalapply_bp_\${SLURM_JOB_ID}.log
 
 aprun -n 1 -N 1 ${ccalapply} -c \$parset > \$log
 err=\$?
+NUM_CPUS=1
 extractStats \${log} \${SLURM_JOB_ID} \${err} calapply_B${BEAM} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err

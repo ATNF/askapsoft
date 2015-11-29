@@ -64,6 +64,9 @@ else
 	    esac
 	done
 
+	. ${PIPELINEDIR}/utils.sh	
+        reportVersion | tee -a $JOBLIST
+
 	if [ "$userConfig" != "" ]; then
             if [ -e ${userConfig} ]; then
 	        echo "Getting extra config from file $userConfig"
@@ -75,13 +78,12 @@ else
             fi
 	fi
 
-	. ${PIPELINEDIR}/utils.sh	
 	. ${PIPELINEDIR}/processDefaults.sh
 	
         if [ "`which lfs`" == "" ]; then
-            echo "WARNING: You don't appear to be running this on galaxy, as 'lfs' is not available."
+            echo "WARNING: You don't appear to be running this on /scratch2 on galaxy, as 'lfs' is not available."
             if [ $SUBMIT_JOBS == true ]; then
-                echo "Setting SUBMIT_JOBS=false, as you won't be able to submit"
+                echo "Setting SUBMIT_JOBS=false, as you won't be able to submit (or you shouldn't submit here)"
                 SUBMIT_JOBS=false
             fi
         else

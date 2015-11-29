@@ -131,6 +131,7 @@ log=${logs}/split_science_beam${BEAM}_\${SLURM_JOB_ID}.log
 
 aprun -n 1 -N 1 ${mssplit} -c \${parset} > \${log}
 err=\$?
+NUM_CPUS=1
 extractStats \${log} \${SLURM_JOB_ID} \${err} splitScience_B${BEAM} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
@@ -212,6 +213,7 @@ log=${logs}/cflag_dynamic_science_beam${BEAM}_\${SLURM_JOB_ID}.log
 
 aprun -n 1 -N 1 ${cflag} -c \${parset} > \${log}
 err=\$?
+NUM_CPUS=1
 extractStats \${log} \${SLURM_JOB_ID} \${err} flagScienceDynamic_B${BEAM} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err

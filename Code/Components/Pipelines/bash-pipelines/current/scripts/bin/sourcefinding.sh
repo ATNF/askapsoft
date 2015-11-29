@@ -108,6 +108,7 @@ EOFINNER
 
 aprun -n ${NUM_CPUS_SELAVY} -N ${CPUS_PER_CORE_SELAVY} $selavy -c \$parset >> \$log
 err=\$?
+NUM_CPUS=${NUM_CPUS_SELAVY}
 extractStats \${log} \${SLURM_JOB_ID} \${err} selavy_B${BEAM} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err

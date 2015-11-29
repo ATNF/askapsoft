@@ -101,6 +101,7 @@ log=${logs}/science_average_beam${BEAM}_\${SLURM_JOB_ID}.log
 
 aprun -n 1 -N 1 $mssplit -c \${parset} > \${log}
 err=\$?
+NUM_CPUS=1
 extractStats \${log} \${SLURM_JOB_ID} \${err} avScience_B${BEAM} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err

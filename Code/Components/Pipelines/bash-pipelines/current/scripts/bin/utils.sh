@@ -30,6 +30,17 @@
 
 
 ##############################
+# PIPELINE VERSION REPORTING
+
+function reportVersion()
+{
+
+    echo "Running ASKAPsoft pipeline processing, version ${PIPELINE_VERSION}"
+
+}
+
+
+##############################
 # JOB ID MANAGEMENT
 
 # This string records the full list of submitted jobs as a
@@ -208,6 +219,9 @@ function extractStats()
     #   if provided, it is assumed to be a list of suffixes - these can be either txt or csv.
     #      If txt - output is written to $stats/stats-ID-DESCRIPTION.txt as space-separated ascii
     #      If csv - output is written to $stats/stats-ID-DESCRIPTION.csv as comma-separated values
+    #
+    # Must also have defined the variable NUM_CPUS. If not defined, it will be set to 1
+    # (this is used for the findWorkerStats() function)
 
     STATS_LOGFILE=$1
     STATS_ID=$2
@@ -335,7 +349,10 @@ EOF
 
         tmpfile2="$tmpfile.2"
         rm -f $tmpfile2
-        for((i=1;i<${MAX_NUM_CPUS};i++)); do
+        if [ "${NUM_CPUS}" == "" ]; then
+            NUM_CPUS=2
+        fi
+        for((i=1;i<${NUM_CPUS};i++)); do
 
 	    grep "($i, " $tmpfile | tail -1 >> $tmpfile2
 	    
