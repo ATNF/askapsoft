@@ -93,8 +93,8 @@ FringeRotationTask::FringeRotationTask(const LOFAR::ParameterSet& parset,
 ///                       phase factors will be applied.
 void FringeRotationTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
 {
-    ASKAPDEBUGASSERT(itsFrtMethod);
-    ASKAPDEBUGASSERT(chunk);
+    ASKAPCHECK(itsFrtMethod && chunk, 
+           "Parallel data streams are not supported; use fringe rotation task after Merge");
 
     casa::Matrix<double> delays(nAntennas(), nBeams(),0.);
     casa::Matrix<double> rates(nAntennas(),nBeams(),0.);
@@ -150,6 +150,19 @@ IFrtApproach::ShPtr FringeRotationTask::fringeRotationMethod(const LOFAR::Parame
 {
   const std::string name = parset.getString("method");
   ASKAPLOG_INFO_STR(logger, "Selected fringe rotation method: "<<name);
+
+  // most methods talk to hardware, therefore only one data stream is
+  // supported. Technically, we could exclude 'swdelays' because it
+  // doesn't care. However, we're not using it on independent chunks
+  // anyway and it is better to have the same guard applied to avoid
+  // relying on untested case.
+  if (config.nprocs() > 1 && config.rank() != 0) {
+      ASKAPLOG_INFO_STR(logger, 
+         "Parallel streams are not supported, this task is not supposed to be used for rank="<<
+         config.rank());
+      return IFrtApproach::ShPtr();
+  }
+
   IFrtApproach::ShPtr result;
   if (name == "drxdelays") {
       result.reset(new FrtDrxDelays(parset,config));
