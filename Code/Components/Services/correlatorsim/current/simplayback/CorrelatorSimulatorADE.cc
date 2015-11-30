@@ -132,7 +132,7 @@ bool CorrelatorSimulatorADE::sendNext(void)
         fillChannelInBuffer();
 
         // Renumber channels to conform with datagram specification
-        renumberChannelAndCard();
+        //renumberChannelAndCard();
 
         // Delay transmission for every new time stamp in measurement
         if (itsCurrentTime > previousTime) {
@@ -349,8 +349,7 @@ void CorrelatorSimulatorADE::initBuffer()
     // all channels (as requested in parset)
     cout << "  Creating buffer according to parset ..." << endl;
     buffer.init(itsNCorrProd, itsNCoarseChannel);
-    //buffer.init(itsNCorrProd, nChan);
-    cout << "    correlation product x channel: " << itsNCorrProd << 
+    cout << "    correlation products x coarse channels: " << itsNCorrProd << 
             " x " << itsNCoarseChannel << endl; 
     cout << "  Creating buffer: done" << endl;
 
@@ -495,7 +494,7 @@ bool CorrelatorSimulatorADE::getBufferData()
                             data(corr,chan).real();
                     buffer.data[corrProd][chan].vis.imag = 
                             data(corr,chan).imag();
-                    buffer.data[corrProd][chan].ready = true;
+                    //buffer.data[corrProd][chan].ready = true;
                 }   // channel
                 //return false;
 //#endif
@@ -639,18 +638,18 @@ bool CorrelatorSimulatorADE::sendBufferData()
     payload.timestamp = buffer.timeStamp;
     payload.beamid = buffer.beam;
 
-    const uint32_t nChan = buffer.freqId.size();
+    //const uint32_t nChan = buffer.freqId.size();
     const uint32_t nCorrProd = buffer.data.size();
     const uint32_t nCorrProdPerSlice = 
             VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE;
     const uint32_t nSlice = nCorrProd / nCorrProdPerSlice;
-    const uint32_t channelRange = DATAGRAM_CHANNELMAX - 
-            DATAGRAM_CHANNELMIN + 1;
+    //const uint32_t channelRange = DATAGRAM_CHANNELMAX - 
+    //        DATAGRAM_CHANNELMIN + 1;
     //cout << "  Size: " << nCorrProd << " x " << nChan << endl;
     //cout << "  Number of slices: " << nSlice << endl;
 
-    // The total number of simulated channels in correlator
-    const uint32_t nCorrChan = itsNCoarseChannel * itsNChannelSub;
+    // The total number of simulated fine channels in correlator
+    const uint32_t nFineCorrChan = itsNCoarseChannel * itsNChannelSub;
 
     const double freqMin = buffer.freqId[0].freq;
     const double freqInc = (buffer.freqId[1].freq - freqMin) / itsNChannelSub;
@@ -658,28 +657,34 @@ bool CorrelatorSimulatorADE::sendBufferData()
     cout << "Frequency increment: " << freqInc << endl;
 #endif
 
-    // for all simulated channels in correlator 
+    // for all simulated fine channels in correlator 
     // note:
     // - in the ordering of correlator's transmission
     // - this is NOT buffer channels
-    for (uint32_t corrChan = 0; corrChan < nCorrChan; ++corrChan) {
-
-        // get the channel in measurement set (mapping)
-        uint32_t chanOfCard = corrChan % DATAGRAM_NCHANNEL;
-        uint32_t measChan = itsChannelMap.toCorrelator(chanOfCard);
-        payload.channel = measChan + DATAGRAM_CHANNELMIN;
-        payload.freq = freqMin + freqInc * measChan;
+    for (uint32_t fineCorrChan = 0; fineCorrChan < nFineCorrChan; 
+            ++fineCorrChan) {
 
         // compute the card of this channel
-        uint32_t card = (measChan / DATAGRAM_NCHANNEL) % DATAGRAM_NCARD;
+        uint32_t card = (fineCorrChan / DATAGRAM_NCHANNEL) % DATAGRAM_NCARD;
         payload.card = card + DATAGRAM_CARDMIN;
 
         // compute the block of this channel
-        uint32_t block = measChan / DATAGRAM_NCHANNEL / DATAGRAM_NCARD;
+        uint32_t block = fineCorrChan / DATAGRAM_NCHANNEL / DATAGRAM_NCARD;
         payload.block = block + DATAGRAM_BLOCKMIN;
 
-        // compute coarse channel number (correspond to channel in buffer)
-        uint32_t coarseChan = measChan / itsNChannelSub;
+        // get the channel in measurement set (mapping)
+        uint32_t cardCorrChan = fineCorrChan % DATAGRAM_NCHANNEL;
+        uint32_t cardMeasChan = itsChannelMap.toCorrelator(cardCorrChan);
+        payload.channel = cardMeasChan + DATAGRAM_CHANNELMIN;
+
+        // calculate frequency
+        uint32_t fineMeasChan = ((block * DATAGRAM_NCARD) + card) * 
+                DATAGRAM_NCHANNEL + cardMeasChan;
+        payload.freq = freqMin + freqInc * fineMeasChan;
+
+        // compute coarse channel number in measurement set
+        // (correspond to channel in buffer)
+        uint32_t coarseMeasChan = fineMeasChan / itsNChannelSub;
 
 #ifdef VERBOSE
         cout << "corrChan " << corrChan << ", measChan " << measChan <<
@@ -699,9 +704,9 @@ bool CorrelatorSimulatorADE::sendBufferData()
                 uint32_t corrProd = corrProdInSlice + 
                         slice * nCorrProdPerSlice;
                 payload.vis[corrProdInSlice].real = 
-                        buffer.data[corrProd][coarseChan].vis.real;
+                        buffer.data[corrProd][coarseMeasChan].vis.real;
                 payload.vis[corrProdInSlice].imag = 
-                        buffer.data[corrProd][coarseChan].vis.imag;
+                        buffer.data[corrProd][coarseMeasChan].vis.imag;
                 //buffer.data[corrProd][chan].ready = false;
             }   // correlation product in slice
 

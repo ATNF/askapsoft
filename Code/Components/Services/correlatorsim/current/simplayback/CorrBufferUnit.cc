@@ -35,9 +35,7 @@ using namespace askap::cp;
 using namespace std;
 
 
-CorrBufferUnit::CorrBufferUnit() : ready(false)
-//CorrBufferUnit::CorrBufferUnit() : block(0), card(0), channel(0), freq(0.0),
-//        ready(false)
+CorrBufferUnit::CorrBufferUnit()
 {
 }
 
@@ -51,7 +49,6 @@ CorrBufferUnit::~CorrBufferUnit()
 
 void CorrBufferUnit::print()
 {
-    cout << "vis: [" << vis.real << ", " << vis.imag << "], ready: "
-            << ready << endl;
+    cout << "vis: [" << vis.real << ", " << vis.imag << "] " << endl;
 }
 

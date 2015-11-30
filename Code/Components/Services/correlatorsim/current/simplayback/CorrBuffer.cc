@@ -112,17 +112,6 @@ void CorrBuffer::copyCorrProd(int32_t source, int32_t destination)
 }
 
 
-/*
-void CorrBuffer::copyChannel(int32_t source, int32_t destination) 
-{
-    for (uint32_t cp = 0; cp < data.size(); ++cp) {
-        data[cp][destination] = data[cp][source];
-    }
-    freqId[destination].block = freqId[source].block;
-    freqId[destination].card = freqId[source].card;
-}
-*/
-
 
 // TODO: update this
 void CorrBuffer::print ()

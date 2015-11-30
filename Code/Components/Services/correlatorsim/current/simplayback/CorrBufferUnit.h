@@ -56,7 +56,7 @@ class CorrBufferUnit
 
         // True if the data is ready to use
         // Is this really needed?
-        bool ready;
+        //bool ready;
 };
 
 };
