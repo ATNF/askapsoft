@@ -159,13 +159,15 @@ VisChunk::ShPtr MergedSource::next(void)
     // different correlator cards, eventually we should remove this code 
     // (and probably rework the logic of this method which has too much BETA legacy
     //  and also fudged 10s timouts which were probably put there by Ben during early BETA debugging)
-    const casa::uLong timeMismatch = itsVis->timestamp > itsMetadata->time() ? 
-           itsVis->timestamp -  itsMetadata->time() : itsMetadata->time() - itsVis->timestamp;
-    if (timeMismatch < 2500000ul) {
-        ASKAPLOG_DEBUG_STR(logger, "Detected BAT glitch between metadata and visibility stream on card "<<
+    if (itsMetadata->time() != itsVis->timestamp) {
+        const casa::uLong timeMismatch = itsVis->timestamp > itsMetadata->time() ? 
+              itsVis->timestamp -  itsMetadata->time() : itsMetadata->time() - itsVis->timestamp;
+        if (timeMismatch < 2500000ul) {
+            ASKAPLOG_DEBUG_STR(logger, "Detected BAT glitch between metadata and visibility stream on card "<<
                  itsVisConverter.id() + 1<<" mismatch = "<<float(timeMismatch)/1e3<<" ms");
-        ASKAPLOG_DEBUG_STR(logger, "    faking metadata timestamp to read "<<bat2epoch(itsVis->timestamp).getValue());
-        itsMetadata->time(itsVis->timestamp);
+            ASKAPLOG_DEBUG_STR(logger, "    faking metadata timestamp to read "<<bat2epoch(itsVis->timestamp).getValue());
+            itsMetadata->time(itsVis->timestamp);
+        }
     }
     //
 
