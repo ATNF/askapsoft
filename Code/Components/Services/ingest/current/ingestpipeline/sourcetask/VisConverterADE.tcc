@@ -162,6 +162,9 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
    }
    //
    */
+   ASKAPCHECK(fabs(chunk->frequency()[channel] / 1e6 - vis.freq) < 1e-6, "Detected frequency mismatch for channel="<<
+            vis.channel<<" card="<<vis.card<<" block="<<vis.block<<" slice="<<vis.slice<<" beam="<<vis.beamid<<
+            " hardware reports "<<vis.freq<<" MHz, expected "<<chunk->frequency()[channel]/1e6<<" MHz");
 
    bool atLeastOneUseful = false;
    for (uint32_t product = vis.baseline1, item = 0; product <= vis.baseline2; ++product, ++item) {
