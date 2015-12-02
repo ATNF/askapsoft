@@ -136,7 +136,7 @@ void FrtHWAde::process(const askap::cp::common::VisChunk::ShPtr& chunk,
        ASKAPLOG_INFO_STR(logger, "delays between "<<ant<<" and ref="<<itsRefAntIndex<<" are "
                <<diffDelay*delayUnit*1e9<<" ns");
 
-       casa::Int hwDelay = static_cast<casa::Int>(diffDelay);
+       casa::Int hwDelay = -static_cast<casa::Int>(diffDelay);
 
        // differential rate, negate the sign because we want to compensate here
        casa::Int diffRate = static_cast<casa::Int>((rates(itsRefAntIndex,0) - rates(ant,0))/phaseRateUnit);
@@ -164,6 +164,7 @@ void FrtHWAde::process(const askap::cp::common::VisChunk::ShPtr& chunk,
            ASKAPLOG_INFO_STR(logger, "Set delays for antenna "<<ant<<" to "<<hwDelay * delayUnit *1e9<<" ns  and phase rate to "<<diffRate * phaseRateUnit * 180. / casa::C::pi<<" deg/s");
 
            ASKAPLOG_INFO_STR(logger, "Set phase rate for antenna "<<ant<<" to "<<diffRate);
+           ASKAPLOG_DEBUG_STR(logger, "   in hw units: rate="<<diffRate<<" delay="<<hwDelay);
            itsFrtComm.setFRParameters(ant,diffRate,hwDelay,0);
            itsPhases[ant] = 0.;
        } 
@@ -209,7 +210,7 @@ void FrtHWAde::process(const askap::cp::common::VisChunk::ShPtr& chunk,
        if (itsFrtComm.isValid(ant1) && itsFrtComm.isValid(ant2)) {
            // desired delays are set and applied, do phase rotation
            casa::Matrix<casa::Complex> thisRow = chunk->visibility().yzPlane(row);
-           const double appliedDelay = delayUnit * (itsFrtComm.requestedFRPhaseSlope(ant2)-itsFrtComm.requestedFRPhaseSlope(ant1));
+           const double appliedDelay = delayUnit * (itsFrtComm.requestedFRPhaseSlope(ant1)-itsFrtComm.requestedFRPhaseSlope(ant2));
 
            // attempt to correct for residual delays in software
            const casa::uInt beam1 = chunk->beam1()[row];
@@ -219,13 +220,16 @@ void FrtHWAde::process(const askap::cp::common::VisChunk::ShPtr& chunk,
            // actual delay, note the sign is flipped because we're correcting the delay here
            const double thisRowDelay = delays(ant1,beam1) - delays(ant2,beam2);
            const double residualDelay = thisRowDelay - appliedDelay;
+           ASKAPLOG_DEBUG_STR(logger, "Residual delay for ant1="<<ant1<<" ant2="<<ant2<<
+                  " is "<<residualDelay*1e9<<" ns thisRowDelay="<<thisRowDelay*1e9<<
+                  " appliedDelay="<<appliedDelay*1e9);
 
            // actual rate
            //const double thisRowRate = rates(ant1,beam1) - rates(ant2,beam2);
               
            
            //const double phaseDueToAppliedDelay = 2. * casa::C::pi * effLO * appliedDelay;
-           const double phaseDueToAppliedDelay = 2. * casa::C::pi * 24e6 * appliedDelay;
+           const double phaseDueToAppliedDelay = 0.;//2. * casa::C::pi * 24e6 * appliedDelay;
            const double phaseDueToAppliedRate = itsPhases[ant1] - itsPhases[ant2];
            const casa::Vector<casa::Double>& freq = chunk->frequency();
            ASKAPDEBUGASSERT(freq.nelements() == thisRow.nrow());
