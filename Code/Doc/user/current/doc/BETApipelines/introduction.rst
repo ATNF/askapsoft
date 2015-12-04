@@ -9,17 +9,20 @@ computing team to handle the pipeline processing of ASKAP
 observations. It has been primarily designed for full-scale ASKAP
 processing on a high-performance computing environment. The design
 philosophy and background is detailed in the ASKAP Science Processing
-document (ASKAP-SW-0020), which was produced in 2011 to detail the
+document (`ASKAP-SW-0020`_), which was produced in 2011 to detail the
 entire ASKAP pipeline processing environment. BETA processing uses a
 slightly different approach, particularly in the calibration method,
 and the set of scripts detailed here are designed to demonstrate a
 BETA reduction approach with ASKAPsoft.
 
-This set of scripts handles all BETA continuum reduction, from the
-splitting and flagging of 1934-638 and science datasets, obtaining and
-applying the bandpass calibration, averaging of the science
-visibilities, imaging (with or without self-calibration), and linear
-mosaicking.
+ .. _ASKAP-SW-0020: http://www.atnf.csiro.au/projects/askap/ASKAP-SW-0020.pdf
+
+This set of scripts handles all BETA reduction, from the splitting and
+flagging of 1934-638 and science datasets, obtaining and applying the
+bandpass calibration, averaging of the science visibilities, continuum
+imaging (with or without self-calibration) and linear mosaicking,
+source-finding, and spectral-line imaging (including continuum
+subtraction and gains calibration).
 
 The scripts are bash shell scripts, which create parsets and slurm
 files that are submitted to the queue on galaxy. The jobs have their
@@ -31,10 +34,10 @@ input, wherein most parameters can be set. The following tables detail
 the parameters that are available to be set by the user. It is also
 possible to manually alter the slurm scripts to change parameters that
 have not been defined for user input (the slurm files can be seen in
-the slurmFiles/ directory - if you set SUBMIT_JOBS=false, they will be
-created but not submitted). If there are parameters that you would
-like defined for user input that are currently hardcoded, please let
-me know.
+the slurmFiles/ directory - if you set ``SUBMIT_JOBS=false``, they
+will be created but not submitted). If there are parameters that you
+would like defined for user input that are currently hardcoded, please
+let me know.
 
 Finally, note that the processing **needs to be run on the /scratch2
 filesystem on galaxy**. The /home filesystem is not suitable for
