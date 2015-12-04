@@ -81,7 +81,8 @@ if [ $DO_SCIENCE_FIELD == true ] && [ $DO_MOSAIC == true ]; then
 		else
 		  
 		    # Something went wrong.
-		    echo "The command 'footprint.py $footprintArgs' failed."
+		    echo "The command 'footprint.py $footprintArgs' failed. Seeting DO_MOSAIC=false."
+                    DO_MOSAIC=false
 		
 		fi
 
