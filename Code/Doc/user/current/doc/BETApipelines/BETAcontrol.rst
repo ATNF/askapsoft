@@ -1,0 +1,112 @@
+User Parameters - Pipeline & job control
+========================================
+
+Here we detail the input parameters that cover the overall process
+control, and the switches to turn on & off different parts of the
+pipeline.
+
+Values for parameters that act as flags (ie. those that accept
+true/false values) should be given in *lower case only*, to ensure
+comparisons work properly.
+
+Slurm control
+-------------
+
+These parameters affect how the slurm jobs are set up and where the
+output data products go. To run the jobs, you need to set
+``SUBMIT_JOBS=true``.
+
++--------------------+---------+------------------------------------------------------------+
+| Variable           | Default | Description                                                |
++====================+=========+============================================================+
+| ``SUBMIT_JOBS``    | false   |The ultimate switch controlling whether things are run on   |
+|                    |         |the galaxy queue or not. If false, the slurm files etc will |
+|                    |         |be created but nothing will run (useful for checking if     |
+|                    |         |things are to your liking).                                 |
++--------------------+---------+------------------------------------------------------------+
+| ``QUEUE``          | workq   |This should be left as is unless you know better.           |
++--------------------+---------+------------------------------------------------------------+
+| ``RESERVATION``    | ""      |If there is a reservation you specify the name of it here.  |
+|                    |         |If you don't have a reservation, leave this alone and it    |
+|                    |         |will be submitted as a regular job.                         |
++--------------------+---------+------------------------------------------------------------+
+| ``OUTPUT``         | .       |The sub-directory in which to put the images, tables,       |
+|                    |         |catalogues, MSs etc. The name should be relative to the     |
+|                    |         |directory in which the script was run, with the default     |
+|                    |         |being that directory.                                       |
++--------------------+---------+------------------------------------------------------------+
+| ``EMAIL``          | ""      |An email address to which you want slurm notifications sent |
+|                    |         |(this will be passed to the ``--mail-user`` option of       |
+|                    |         |sbatch).  Leaving it blank will mean no notifications are   |
+|                    |         |sent.                                                       |
++--------------------+---------+------------------------------------------------------------+
+| ``EMAIL_TYPE``     | ALL     |The types of notifications that are sent (this is passed to |
+|                    |         |the ``--mail-type`` option of sbatch, and only if ``EMAIL`` |
+|                    |         |is set to something). Options include: BEGIN, END, FAIL,    |
+|                    |         |REQUEUE, ALL, TIME_LIMIT, TIME_LIMIT_90, TIME_LIMIT_80, &   |
+|                    |         |TIME_LIMIT_50 (taken from the sbatch man page on galaxy).   |
++--------------------+---------+------------------------------------------------------------+
+
+Calibrator switches
+-------------------
+
+These parameters control the different types of processing done on the
+calibrator observation. The three aspects are splitting by beam/scan,
+flagging, and finding the bandpass. The ``DO_1934_CAL`` acts as the
+"master switch" for the calibrator processing.
+
++----------------------+---------+------------------------------------------------------------+
+| Variable             | Default | Description                                                |
++======================+=========+============================================================+
+| ``DO_1934_CAL``      | true    | Whether to process the 1934-638 calibrator observations    |
++----------------------+---------+------------------------------------------------------------+
+| ``DO_SPLIT_1934``    | true    | Whether to split a given beam/scan from the input 1934 MS  |
++----------------------+---------+------------------------------------------------------------+
+| ``DO_FLAG_1934``     | true    | Whether to flag the splitted-out 1934 MS                   |
++----------------------+---------+------------------------------------------------------------+
+| ``DO_FIND_BANDPASS`` | true    | Whether to fit for the bandpass using all 1934-638 MSs     |
++----------------------+---------+------------------------------------------------------------+
+
+
+Science field switches
+----------------------
+
+These parameter control the different types of processing done on the
+science field, with ``DO_SCIENCE_FIELD`` acting as a master switch for
+the science field processing.
+
++-------------------------+---------+------------------------------------------------------------+
+| Variable                | Default | Description                                                |
++=========================+=========+============================================================+
+| ``DO_SCIENCE_FIELD``    | true    | Whether to process the science field observations          |
++-------------------------+---------+------------------------------------------------------------+
+| ``DO_SPLIT_SCIENCE``    | true    | Whether to split out the given beam from the science MS    |
++-------------------------+---------+------------------------------------------------------------+
+| ``DO_FLAG_SCIENCE``     | true    | Whether to flag the (splitted) science MS                  |
++-------------------------+---------+------------------------------------------------------------+
+| ``DO_APPLY_BANDPASS``   | true    | Whether to apply the bandpass calibration to the science   |
+|                         |         | observation                                                |
++-------------------------+---------+------------------------------------------------------------+
+| ``DO_AVERAGE_CHANNELS`` | true    | Whether to average the science MS to continuum resolution  |
++-------------------------+---------+------------------------------------------------------------+
+| ``DO_CONT_IMAGING``     | true    | Whether to image the science MS                            |
++-------------------------+---------+------------------------------------------------------------+
+| ``DO_SELFCAL``          | false   | Whether to self-calibrate the science data when imaging    |
++-------------------------+---------+------------------------------------------------------------+
+| ``DO_SOURCE_FINDING``   | false   | Whether to do the source-finding with Selavy on the        |
+|                         |         | individual beam images and the final mosaic.               |
++-------------------------+---------+------------------------------------------------------------+
+| ``DO_MOSAIC``           | true    | Whether to mosaic the individual beam images, forming a    |
+|                         |         | single, primary-beam-corrected image.                      |
++-------------------------+---------+------------------------------------------------------------+
+| ``DO_COPY_SL``          | false   | Whether to copy a channel range of the original            |
+|                         |         | full-spectral- resolution measurement set into a new MS.   |
++-------------------------+---------+------------------------------------------------------------+
+| ``DO_APPLY_CAL_SL``     | false   | Whether to apply the gains calibration determined from the |
+|                         |         | continuum self-calibration.                                |
++-------------------------+---------+------------------------------------------------------------+
+| ``DO_CONT_SUB_SL``      | false   | Whether to subtract a continuum model from the             |
+|                         |         | spectral-line dataset.                                     |
++-------------------------+---------+------------------------------------------------------------+
+| ``DO_SPECTRAL_IMAGING`` | false   | Whether to do the spectral-line imaging                    |
++-------------------------+---------+------------------------------------------------------------+
