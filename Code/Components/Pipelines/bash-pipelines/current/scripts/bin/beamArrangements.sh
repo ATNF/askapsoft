@@ -81,7 +81,8 @@ if [ $DO_SCIENCE_FIELD == true ] && [ $DO_MOSAIC == true ]; then
 		else
 		  
 		    # Something went wrong.
-		    echo "The command 'footprint.py $footprintArgs' failed. Seeting DO_MOSAIC=false."
+		    echo "ERROR - The command 'footprint.py $footprintArgs' failed. Setting DO_MOSAIC=false."
+                    echo " "
                     DO_MOSAIC=false
 		
 		fi
@@ -89,7 +90,7 @@ if [ $DO_SCIENCE_FIELD == true ] && [ $DO_MOSAIC == true ]; then
 	    else
 
 		# The footprint name is not one of the allowed values.
-		echo "Beam arrangement for ${BEAM_FOOTPRINT_NAME} footprint not defined. Setting DO_MOSAIC=false."
+		echo "WARNING - Beam arrangement for ${BEAM_FOOTPRINT_NAME} footprint not defined. Setting DO_MOSAIC=false."
 		DO_MOSAIC=false
 
 	    fi
