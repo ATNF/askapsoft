@@ -25,8 +25,10 @@ MDPID=$!
 
 # Start the visibilities receiver 
 # (don't use the script so this script can kill it)
-../../apps/vsnoopADE -v -p 3001 > vsnoop.log 2>&1 &
-VISPID=$!
+../../apps/vsnoopADE -v -p 3001 > vsnoop1.log 2>&1 &
+VISPID1=$!
+../../apps/vsnoopADE -v -p 3002 > vsnoop2.log 2>&1 &
+VISPID2=$!
 
 # Set the number of cards (shelves)
 # No need to set this in playback.in
@@ -46,10 +48,11 @@ echo "playbackADE status: " $STATUS
 sleep 5
 kill $MDPID
 echo "Killed msnoop"
-kill $VISPID
+kill $VISPID1
+kill $VISPID2
 echo "Killed vsnoop"
 sleep 1
-kill -9 $MDPID $VISPID > /dev/null 2>&1
+kill -9 $MDPID $VISPID1 $VISPID2 > /dev/null 2>&1
 
 # Stop the Ice Services
 ../stop_ice.sh ../icegridadmin.cfg

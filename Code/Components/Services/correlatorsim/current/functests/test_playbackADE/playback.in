@@ -26,7 +26,9 @@ playback.tossim.icestorm.topic              = metadata
 #
 # Number of shelves from which data is streamed from
 # Note that the number of MPI processes = n_shelves + 1
-playback.corrsim.n_shelves                  = 1
+# TODO Set this to follow the number of MPI processes automatically
+# TO BE DEPRECATED
+playback.corrsim.n_shelves                  = 2
 
 # Correlator antenna count:
 # 1 (default) to 36 (max for ASKAP)
@@ -46,6 +48,13 @@ playback.corrsim.coarse_channel_bandwidth   = 1000000
 
 # Correlator shelves associated with MPI process 1 & 2
 # Note that if input mode = zero, dataset is ignored.
+# TODO Set port numbers to follow the number of MPI processes automatically
+# Correlator Shelf 1
+playback.corrsim.dataset             = ../../dataset/beta1.ms
+playback.corrsim.out.hostname        = localhost
+playback.corrsim.out.port            = 3001
+# TO BE DEPRECATED: individual setting for each card 
+# for the sake of practicality
 # Correlator Shelf 1
 playback.corrsim.shelf1.dataset             = ../../dataset/beta1.ms
 playback.corrsim.shelf1.out.hostname        = localhost

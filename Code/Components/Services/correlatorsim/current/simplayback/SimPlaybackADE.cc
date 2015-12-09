@@ -50,6 +50,7 @@
 #include "simplayback/TosSimulator.h"
 
 #define VERBOSE
+#define ONEDATASET
 
 // Using
 using namespace askap::cp;
@@ -77,9 +78,11 @@ SimPlaybackADE::SimPlaybackADE(const LOFAR::ParameterSet& parset)
 }
 
 
+
 SimPlaybackADE::~SimPlaybackADE()
 {
 }
+
 
 
 void SimPlaybackADE::validateConfig(void)
@@ -170,6 +173,53 @@ boost::shared_ptr<TosSimulator> SimPlaybackADE::makeTosSim(void)
 
 
 
+#ifdef ONEDATASET
+
+boost::shared_ptr<CorrelatorSimulatorADE> 
+        SimPlaybackADE::makeCorrelatorSim(void)
+{
+#ifdef VERBOSE
+	std::cout << "makeCorrelatorSim" << std::endl;
+#endif
+	std::ostringstream ss;
+	ss << "corrsim.";
+	const LOFAR::ParameterSet subset = itsParset.makeSubset(ss.str());
+	std::string dataset = subset.getString("dataset");
+	std::string hostname = subset.getString("out.hostname");
+
+    // calculate port number, based on reference port and MPI rank
+    // (each MPI process has its own port number)
+	int intRefPort = subset.getInt("out.port");
+    int intPort = intRefPort + itsRank - 1;
+    std::stringstream ssPort;
+    ssPort << intPort;
+    string port = ssPort.str();
+	//cout << dataset << ", " << hostname << ", " << port << endl;
+    cout << "Shelf " << itsRank << " sends to port " << port << endl;
+
+    const unsigned int nAntenna = 
+            itsParset.getUint32("corrsim.n_antennas", 1);
+    const unsigned int nCoarseChannel =
+            itsParset.getUint32("corrsim.n_coarse_channels", 304);
+    const unsigned int nChannelSub =
+            itsParset.getUint32("corrsim.n_channel_subdivision", 54);
+    const double coarseBandwidth =
+            itsParset.getDouble("corrsim.coarse_channel_bandwidth", 1000000);
+    const unsigned int delay =
+            itsParset.getUint32("corrsim.delay", 0);
+
+    return boost::shared_ptr<CorrelatorSimulatorADE>(
+            new CorrelatorSimulatorADE(dataset, hostname, port, 
+            itsRank, nAntenna, nCoarseChannel, nChannelSub,
+            coarseBandwidth, itsInputMode, delay));
+#ifdef VERBOSE
+//	std::cout << "makeCorrelatorSim: done" << std::endl;
+#endif
+}
+
+
+#else   // NOT ONEDATASET
+
 boost::shared_ptr<CorrelatorSimulatorADE> 
         SimPlaybackADE::makeCorrelatorSim(void)
 {
@@ -198,10 +248,12 @@ boost::shared_ptr<CorrelatorSimulatorADE>
             new CorrelatorSimulatorADE(dataset, hostname, port, 
             itsRank, nAntenna, nCoarseChannel, nChannelSub,
             coarseBandwidth, itsInputMode, delay));
-//#ifdef VERBOSE
+#ifdef VERBOSE
 //	std::cout << "makeCorrelatorSim: done" << std::endl;
-//#endif
+#endif
 }
+
+#endif  // ONEDATASET
 
 
 
@@ -224,15 +276,19 @@ void SimPlaybackADE::run(void)
         cout << "Sending TOS data ..." << endl;
 		while (moreData) {
 			moreData = sim->sendNext();
+            //MPI_Barrier(MPI_COMM_WORLD);
 		}
         cout << "Sending TOS data: done" << endl;
     }
     else {
+        // The rest of MPI processes simulate correlator
+
         boost::shared_ptr<ISimulator> sim = makeCorrelatorSim();
 		bool moreData = true;
         cout << "Sending Correlator data ..." << endl;
 		while (moreData) {
 			moreData = sim->sendNext();
+            //MPI_Barrier(MPI_COMM_WORLD);
 		}
         cout << "Sending Correlator data: done" << endl;
     }

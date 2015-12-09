@@ -17,6 +17,8 @@ if [ $? -ne 0 ]; then
 fi
 sleep 1
 
+export AIPSPATH=$ASKAP_ROOT/Code/Base/accessors/current
+
 # Start the metadata subscriber (don't use the script so this script can kill it)
 ../../apps/msnoop -c msnoop.in -v > msnoop.log 2>&1 &
 MDPID=$!

@@ -35,12 +35,12 @@ playback.corrsim.expansion_factor           = 54
 # Correlator Shelf 1
 playback.corrsim.shelf1.dataset             = ../../dataset/beta1.ms
 playback.corrsim.shelf1.out.hostname        = localhost
-playback.corrsim.shelf1.out.port            = 3000
+playback.corrsim.shelf1.out.port            = 3001
 
 # Correlator Shelf 2
 playback.corrsim.shelf2.dataset             = ../../dataset/beta2.ms
 playback.corrsim.shelf2.out.hostname        = localhost
-playback.corrsim.shelf2.out.port            = 3000
+playback.corrsim.shelf2.out.port            = 3001
 
 # Mapping from antenna1/antenna2/polarisation product to baselineid
 # Mapping is from baselineid to (ant1, ant2,  product)

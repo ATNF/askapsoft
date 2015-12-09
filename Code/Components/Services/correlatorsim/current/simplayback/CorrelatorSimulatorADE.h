@@ -131,6 +131,8 @@ class CorrelatorSimulatorADE : public ISimulator {
 
 		const static unsigned int rowIncrement = 36;
 
+        bool firstPayloadSent;
+
         // Measurement set
         boost::scoped_ptr<casa::MeasurementSet> itsMS;
 
@@ -154,11 +156,6 @@ class CorrelatorSimulatorADE : public ISimulator {
                 (const uint32_t ant1, const uint32_t ant2,
                 const casa::Stokes::StokesTypes stokesType);
 
-        // To be deprecated
-		// Send data of zero visibility for the whole baselines and channels 
-		// for only 1 time period.
-		bool sendNextZero();
-		
         /// Initialize buffer for intermediate storage
         void initBuffer();
 
@@ -180,11 +177,21 @@ class CorrelatorSimulatorADE : public ISimulator {
         /// Renumber channels and cards to conform with datagram specification
         void renumberChannelAndCard();
 
+        /// Send the first payload
+        /// @return True if successful, false if not 
+        /// (eg. no more data in buffer to send)
+        bool sendFirstPayload();
+
         /// Send buffer data 
         /// @return True if successful, false if not 
         /// (eg. no more data in buffer to send)
         bool sendBufferData();
 
+        // To be deprecated
+		// Send data of zero visibility for the whole baselines and channels 
+		// for only 1 time period.
+		bool sendNextZero();
+	
         // To be deprecated
 		// Extract one data point from measurement set and send the data 
 		// for all baselines and channels for the time period given in 
