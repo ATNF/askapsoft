@@ -65,6 +65,9 @@ Add the following to your ~/.bashrc
     # Load the ASKAPsoft module
     module load askapsoft
 
+    # Load the ASKAP pipeline scripts module
+    module load askappipeline
+
     # Load the measures data
     module load askapdata
 
