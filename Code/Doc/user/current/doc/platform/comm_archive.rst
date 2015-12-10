@@ -23,12 +23,12 @@ in the :doc:`processing` documentation page. Once loaded you can start the inter
 	
 After starting ashell you should be presented with the the following prompt::
 
-	<ivec.offline>
+	pawsey:offline>
 	
 To download the scheduling block 50 data to your current folder use the following commands::
 
-	<ivec.offline>login
-	<ivec.online>get /projects/ASKAP Commissioning Data/beta-scheduling-blocks/50.tar
+	pawsey:offline>login
+	pawsey:online>get /projects/ASKAP Commissioning Data/beta-scheduling-blocks/50.tar
 	
 Ashell uses the concept of remote and local folders, the remote folder is the directory
 where the files are located in the archive, this is set by the 'cf <path>' (Change Folder)
