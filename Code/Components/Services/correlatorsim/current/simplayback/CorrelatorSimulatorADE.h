@@ -69,6 +69,7 @@ class CorrelatorSimulatorADE : public ISimulator {
 				const std::string& hostname = "",
                 const std::string& port = "",
                 const int shelf = 0,
+                const int nShelves = 0,
                 const unsigned int nAntenna = 0,
                 const unsigned int nCoarseChannel = 0,
                 const unsigned int nChannelSub = 0,
@@ -95,6 +96,9 @@ class CorrelatorSimulatorADE : public ISimulator {
 
         // Shelf number [1..]
         const int itsShelf;
+
+        // The number of shelves (= the number of MPI processes - 1)
+        const int itsNShelves;
 
         // Number of antennas
         unsigned int itsNAntenna;

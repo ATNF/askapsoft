@@ -11,10 +11,10 @@ playback.input_mode = expand
 #
 # Telescope Operating Simulator Configuration
 #
-playback.tossim.ice.locator_host            = localhost
-playback.tossim.ice.locator_port            = 4061
-playback.tossim.icestorm.topicmanager       = IceStorm/TopicManager@IceStorm.TopicManager
-playback.tossim.icestorm.topic              = metadata
+playback.tossim.ice.locator_host      = localhost
+playback.tossim.ice.locator_port      = 4061
+playback.tossim.icestorm.topicmanager = IceStorm/TopicManager@IceStorm.TopicManager
+playback.tossim.icestorm.topic        = metadata
 
 # Simulate random failures to send metadata message. A value of of 0.0
 # results in no failures, while 1.0 results in all sends failing.
@@ -24,11 +24,9 @@ playback.tossim.icestorm.topic              = metadata
 #
 # Correlator Simulator
 #
-# Number of shelves from which data is streamed from
-# Note that the number of MPI processes = n_shelves + 1
-# TODO Set this to follow the number of MPI processes automatically
 # TO BE DEPRECATED
-playback.corrsim.n_shelves                  = 2
+# The number of shelves is now computed automatically in run.sh
+#playback.corrsim.n_shelves                  = 3
 
 # Correlator antenna count:
 # 1 (default) to 36 (max for ASKAP)
@@ -46,23 +44,26 @@ playback.corrsim.n_channel_subdivision      = 54
 # Default: 1 MHz
 playback.corrsim.coarse_channel_bandwidth   = 1000000
 
-# Correlator shelves associated with MPI process 1 & 2
-# Note that if input mode = zero, dataset is ignored.
-# TODO Set port numbers to follow the number of MPI processes automatically
-# Correlator Shelf 1
+# Correlator data set (measurement set)
+# Now only 1 source data is used
 playback.corrsim.dataset             = ../../dataset/beta1.ms
+
+# Correlator local host for transmission
 playback.corrsim.out.hostname        = localhost
+
+# Correlator reference port for transmission
+# If multiple ports are used, this port is used as the first port
 playback.corrsim.out.port            = 3001
+
 # TO BE DEPRECATED: individual setting for each card 
-# for the sake of practicality
 # Correlator Shelf 1
-playback.corrsim.shelf1.dataset             = ../../dataset/beta1.ms
-playback.corrsim.shelf1.out.hostname        = localhost
-playback.corrsim.shelf1.out.port            = 3001
+#playback.corrsim.shelf1.dataset             = ../../dataset/beta1.ms
+#playback.corrsim.shelf1.out.hostname        = localhost
+#playback.corrsim.shelf1.out.port            = 3001
 # Correlator Shelf 2
-playback.corrsim.shelf2.dataset             = ../../dataset/beta2.ms
-playback.corrsim.shelf2.out.hostname        = localhost
-playback.corrsim.shelf2.out.port            = 3001
+#playback.corrsim.shelf2.dataset             = ../../dataset/beta2.ms
+#playback.corrsim.shelf2.out.hostname        = localhost
+#playback.corrsim.shelf2.out.port            = 3001
 
 # Delay in transmission between different time groups (microsecond)
 playback.corrsim.delay                      = 5000000

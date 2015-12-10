@@ -67,7 +67,7 @@
 // Expand coarse channels into fine channels
 #define CHANNEL_EXPAND
 // Cases for shelf count: 1, 2, N (N>0)
-#define SHELFCASE 2
+#define SHELFCASE N
 
 
 #define SIZEOF_ARRAY(a) (sizeof( a ) / sizeof( a[ 0 ] ))
@@ -85,17 +85,19 @@ uint32_t getCorrProdIndex (const uint32_t ant1, const uint32_t ant2,
 ASKAP_LOGGER(logger, ".CorrelatorSimulatorADE");
 
 
-CorrelatorSimulatorADE::CorrelatorSimulatorADE(const std::string& dataset,
+CorrelatorSimulatorADE::CorrelatorSimulatorADE(
+        const std::string& dataset,
         const std::string& hostname,
         const std::string& port,
         const int shelf,
+        const int nShelves,
         const unsigned int nAntennaIn,
         const unsigned int nCoarseChannel,
         const unsigned int nChannelSub,
         const double coarseBandwidth,
         const std::string& inputMode,
         const unsigned int delay)
-        : itsShelf(shelf),
+        : itsShelf(shelf), itsNShelves(nShelves),
         itsNAntenna(nAntennaIn), itsNCorrProd(0), itsNSlice(0),
         itsNCoarseChannel(nCoarseChannel),
         itsNChannelSub(nChannelSub), itsCoarseBandwidth(coarseBandwidth),
@@ -138,19 +140,22 @@ bool CorrelatorSimulatorADE::sendNext(void)
 
         // Delay transmission for every new time stamp in measurement
         if (itsCurrentTime > previousTime) {
-            cout << "Shelf " << itsShelf;
-            cout << " detects new time stamp: " << itsCurrentTime << endl;
+            //cout << "Shelf " << itsShelf <<
+            //        ": time stamp " << itsCurrentTime << endl;
             double delay = static_cast<double>(itsDelay) / 1000000.0;
-            cout << "Shelf " << itsShelf << " pauses transmission for" << 
-                    delay << " seconds" << endl;
+            cout << "Shelf " << itsShelf << 
+                    ": new time stamp " << itsCurrentTime << 
+                    ", pausing " << delay << " seconds" << endl;
             usleep(itsDelay);
-            cout << "Shelf " << itsShelf << " resumes transmission" << endl;
+            cout << "Shelf " << itsShelf << ": transmitting ..." << endl;
         }
 
+        // TO BE DEPRECATED
         // Shelf 1 must send the first payload.
         // Other shelves must wait for this.
         //cout << "Initial: Shelf " << itsShelf << ": firstPayloadSent? ";
         //cout << firstPayloadSent << endl;
+        /*
         while (!firstPayloadSent) {
             if (itsShelf == 1) {
                 firstPayloadSent = sendFirstPayload();
@@ -166,17 +171,19 @@ bool CorrelatorSimulatorADE::sendNext(void)
                 MPI_Bcast(&firstPayloadSent,1,MPI_LOGICAL,1,MPI_COMM_WORLD);
             }
         }
+        */
         //cout << "After: Shelf " << itsShelf << ": firstPayloadSent? ";
         //cout << firstPayloadSent << endl;
 
         return sendBufferData();
     }
     else {
-        cout << "No more data in measurement set" << endl;
+        cout << "Shelf " << itsShelf << 
+                ": no more data in measurement set" << endl;
         return false;
     }
 	return true;
-}
+}   // sendNext
 
 
 
@@ -186,7 +193,7 @@ bool CorrelatorSimulatorADE::sendNext(void)
 //
 void CorrelatorSimulatorADE::initBuffer()
 {
-    cout << "Initializing buffer ..." << endl;
+    cout << "Shelf " << itsShelf << ": initializing buffer ..." << endl;
     ROMSColumns msc(*itsMS);
 
     // Get reference to columns of interest
@@ -196,7 +203,7 @@ void CorrelatorSimulatorADE::initBuffer()
     const casa::ROMSPolarizationColumns& polc = msc.polarization();
     const uint32_t nRow = msc.nrow();
     cout << "  Total rows in measurement set: " << nRow << endl;
-    cout << "  Checking all rows ..." << endl;
+    //cout << "  Checking all rows ..." << endl;
     casa::Double currentTime = 0.0;
 
     uint32_t dataDescId;
@@ -250,12 +257,10 @@ void CorrelatorSimulatorADE::initBuffer()
         beamMin = min(beamMin,msc.feed1()(row));
         beamMax = max(beamMax,msc.feed1()(row));
     }
-    cout << "  Checking all rows: done" << endl;
+    //cout << "  Checking all rows: done" << endl;
     
     cout << "  Time interval count  : " << nTime << endl;
-    //cout << "  Rows of constant time: " << nRowOfConstTime << endl;
     cout << "  Beam range           : " << beamMin << " ~ " << beamMax << endl;
-    //cout << "  Rows of constant beam: " << nRowOfConstBeam << endl;
 
     // Antennas
     const uint32_t nAntMeas = antc.nrow();
@@ -307,7 +312,7 @@ void CorrelatorSimulatorADE::initBuffer()
     buffer.nCard = itsNCoarseChannel / DATAGRAM_CHANNELMAX + 1;
     cout << "  Card count computed from parset: " << buffer.nCard << endl;
 
-    cout << "Initializing buffer: done" << endl;
+    cout << "Shelf " << itsShelf << ": initializing buffer: done" << endl;
     cout << endl;
 }   // initBuffer
 
@@ -328,8 +333,8 @@ bool CorrelatorSimulatorADE::getBufferData()
     const uint32_t nRow = msc.nrow();
     if (itsCurrentRow >= nRow) {
 #ifdef VERBOSE
-        cout << "  No more data available" << endl;
-        cout << "Getting buffer data: done" << endl;
+        //cout << "  No more data available" << endl;
+        //cout << "Getting buffer data: done" << endl;
 #endif
         return false;
     }
@@ -544,6 +549,7 @@ void CorrelatorSimulatorADE::renumberChannelAndCard() {
 
 #ifdef CHANNEL_EXPAND
 
+// TO BE DEPRECATED
 bool CorrelatorSimulatorADE::sendFirstPayload()
 {
 #ifdef VERBOSE
@@ -629,7 +635,7 @@ bool CorrelatorSimulatorADE::sendFirstPayload()
 bool CorrelatorSimulatorADE::sendBufferData()
 {
 #ifdef VERBOSE
-    cout << "  Shelf " << itsShelf << " sends beam " << buffer.beam << endl;
+    //cout << "  Shelf " << itsShelf << " sends beam " << buffer.beam << endl;
 #endif
     askap::cp::VisDatagramADE payload;
 
@@ -710,6 +716,16 @@ bool CorrelatorSimulatorADE::sendBufferData()
 #elif SHELFCASE == 2
             // test for 2 cards
             if (card % 2 == itsShelf - 1) {
+                itsPort->send(payload);
+            }
+#elif SHELFCASE == 3
+            // test for 3 cards
+            if (card % 3 == itsShelf - 1) {
+                itsPort->send(payload);
+            }
+#elif SHELFCASE == N
+            // test for any number of cards
+            if (card % itsNShelves == itsShelf - 1) {
                 itsPort->send(payload);
             }
 #else

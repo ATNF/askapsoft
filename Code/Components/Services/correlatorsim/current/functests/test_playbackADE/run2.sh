@@ -32,14 +32,12 @@ VISPID2=$!
 
 # Set the number of cards (shelves)
 # No need to set this in playback.in
-# The number of MPI processes is adjusted accordingly
+
 NCARD=2
+
+# The number of MPI processes is adjusted accordingly
 let NMPI=$NCARD+1
 
-# Run the test
-# For the moment, keep to 2 processes:
-# process 0 for configuration validation
-# process 1 for streaming
 mpirun -np $NMPI ../../apps/playbackADE.sh -c playback.in
 STATUS=$?
 echo "playbackADE status: " $STATUS
