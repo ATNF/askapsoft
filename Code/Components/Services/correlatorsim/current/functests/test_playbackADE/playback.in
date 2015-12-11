@@ -53,6 +53,10 @@ playback.corrsim.out.hostname        = localhost
 
 # Correlator reference port for transmission
 # If multiple ports are used, this port is used as the first port
+# TO CONSIDER
+# What about setting this number using a shell script that calls
+# both correlator simulator and the receiving program (ingest, vsnoop)?
+# This will avoid the possibility of port mismatch. 
 playback.corrsim.out.port            = 3001
 
 # TO BE DEPRECATED: individual setting for each card 

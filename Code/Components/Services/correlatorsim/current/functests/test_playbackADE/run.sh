@@ -1,14 +1,25 @@
 #!/bin/bash
 
-###############################################################
+###########################################################################
 # Set the number of shelves (cards) in correlator simulator.
 # A shelf has its own UDP port number.
+# No need to set this anywhere else (eg. in playback.in).
+# This number is used to automatically set the number of MPI processes
+# for correlator simulator and instances vsnoopADE.
 # Range: 1 ~ 12
-# No need to set this anywhere else (eg. in playback.in)
 
 NCARD=12
 
-###############################################################
+# Reference port number of vsnoopADE.
+# The first instance of vsnoopADE uses this port number.
+
+REFPORT=3001
+
+# TO CONSIDER
+# What about using this number to automatically set the port of both
+# the sender (correlator simulator) and the receiver (ingest, vsnoop)?
+# This will avoid the possibility of port mismatch.
+###########################################################################
 
 cd `dirname $0`
 
@@ -34,34 +45,19 @@ sleep 1
 MDPID=$!
 
 # Start the visibilities receiver 
-# (don't use the script so this script can kill it)
-../../apps/vsnoopADE -v -p 3001 > vsnoop1.log 2>&1 &
-VISPID1=$!
-../../apps/vsnoopADE -v -p 3002 > vsnoop2.log 2>&1 &
-VISPID2=$!
-../../apps/vsnoopADE -v -p 3003 > vsnoop3.log 2>&1 &
-VISPID3=$!
-../../apps/vsnoopADE -v -p 3004 > vsnoop4.log 2>&1 &
-VISPID4=$!
-../../apps/vsnoopADE -v -p 3005 > vsnoop5.log 2>&1 &
-VISPID5=$!
-../../apps/vsnoopADE -v -p 3006 > vsnoop6.log 2>&1 &
-VISPID6=$!
-../../apps/vsnoopADE -v -p 3007 > vsnoop7.log 2>&1 &
-VISPID7=$!
-../../apps/vsnoopADE -v -p 3008 > vsnoop8.log 2>&1 &
-VISPID8=$!
-../../apps/vsnoopADE -v -p 3009 > vsnoop9.log 2>&1 &
-VISPID9=$!
-../../apps/vsnoopADE -v -p 3010 > vsnoop10.log 2>&1 &
-VISPID10=$!
-../../apps/vsnoopADE -v -p 3011 > vsnoop11.log 2>&1 &
-VISPID11=$!
-../../apps/vsnoopADE -v -p 3012 > vsnoop12.log 2>&1 &
-VISPID12=$!
+COUNTER=1
+while [ $COUNTER -le $NCARD ]; do
+    let PORT=REFPORT+COUNTER-1
+    LOGFILE="vsnoop$COUNTER.log"
 
-# The number of MPI processes is adjusted automatically
-let NMPI=$NCARD+1
+    ../../apps/vsnoopADE -v -p $PORT > $LOGFILE 2>&1 &
+    VISPID[$COUNTER]=$!
+
+    let COUNTER=COUNTER+1
+done
+
+# The number of MPI processes is set automatically
+let NMPI=NCARD+1
 
 mpirun -np $NMPI ../../apps/playbackADE.sh -c playback.in
 STATUS=$?
@@ -71,14 +67,11 @@ echo "playbackADE status: " $STATUS
 sleep 5
 kill $MDPID
 echo "Killed msnoop"
-kill $VISPID1 $VISPID2 $VISPID3 $VISPID4 $VISPID5 $VISPID6
-kill $VISPID7 $VISPID8 $VISPID9 $VISPID10 $VISPID11 $VISPID12
+kill ${VISPID[*]}
 echo "Killed all vsnoops"
 sleep 1
 kill -9 $MDPID > /dev/null 2>&1
-kill -9 $VISPID1 $VISPID2 $VISPID3 $VISPID4 > /dev/null 2>&1
-kill -9 $VISPID5 $VISPID6 $VISPID7 $VISPID8 > /dev/null 2>&1
-kill -9 $VISPID9 $VISPID10 $VISPID11 $VISPID12 > /dev/null 2>&1
+kill -9 ${VISPID[*]} > /dev/null 2>&1
 
 # Stop the Ice Services
 ../stop_ice.sh ../icegridadmin.cfg
