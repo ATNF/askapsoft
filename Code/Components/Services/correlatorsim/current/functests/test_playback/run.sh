@@ -24,7 +24,7 @@ export AIPSPATH=$ASKAP_ROOT/Code/Base/accessors/current
 MDPID=$!
 
 # Start the visibilities receiver (don't use the script so this script can kill it)
-../../apps/vsnoop -v -p 3001 > vsnoop1.log 2>&1 &
+../../apps/vsnoop -v -p 3000 > vsnoop1.log 2>&1 &
 VISPID1=$!
 
 # Run the test
