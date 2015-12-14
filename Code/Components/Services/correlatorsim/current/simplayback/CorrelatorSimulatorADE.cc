@@ -202,8 +202,9 @@ void CorrelatorSimulatorADE::initBuffer()
     const casa::ROMSDataDescColumns& ddc = msc.dataDescription();
     const casa::ROMSPolarizationColumns& polc = msc.polarization();
     const uint32_t nRow = msc.nrow();
-    cout << "  Total rows in measurement set: " << nRow << endl;
-    //cout << "  Checking all rows ..." << endl;
+    if (itsShelf == 1) {
+        cout << "  Total rows in measurement set: " << nRow << endl;
+    }
     casa::Double currentTime = 0.0;
 
     uint32_t dataDescId;
@@ -223,10 +224,6 @@ void CorrelatorSimulatorADE::initBuffer()
         if (msc.time()(row) > currentTime) {
             currentTime = msc.time()(row);
             ++nTime;
-            //cout << "    Time changed in row " << row << ": " 
-            //        << currentTime << endl;
-            //cout << "    Rows of constant time: " << 
-            //        nRowOfConstTime << endl;
             nRowOfConstTime = 1;
         }
         else {
@@ -257,17 +254,22 @@ void CorrelatorSimulatorADE::initBuffer()
         beamMin = min(beamMin,msc.feed1()(row));
         beamMax = max(beamMax,msc.feed1()(row));
     }
-    //cout << "  Checking all rows: done" << endl;
     
-    cout << "  Time interval count  : " << nTime << endl;
-    cout << "  Beam range           : " << beamMin << " ~ " << beamMax << endl;
+    if (itsShelf == 1) {
+        cout << "  Time interval count  : " << nTime << endl;
+        cout << "  Beam range           : " << beamMin << " ~ " << 
+                beamMax << endl;
+    }
 
     // Antennas
     const uint32_t nAntMeas = antc.nrow();
     const uint32_t nAntMeasCheck = antMax - antMin + 1;
     ASKAPCHECK(nAntMeas == nAntMeasCheck, 
             "Disagreement in antenna count in measurement set");
-    cout << "  Antenna count in measurement set: " << nAntMeas << endl;
+
+    if (itsShelf == 1) {
+        cout << "  Antenna count in measurement set: " << nAntMeas << endl;
+    }
     for (uint32_t ant = 0; ant < nAntMeas; ++ant) {
         string antName = antc.name()(ant);
         string antNameNumber = antName.substr(2,2);
@@ -275,43 +277,54 @@ void CorrelatorSimulatorADE::initBuffer()
         uint32_t antIndex;
         convert >> antIndex;
         antIndices.push_back(antIndex-1);   // antenna name is 1-based
-        cout << "  antenna name: " << antName << " -> index: " << 
-               antIndices[ant] << endl;
+        if (itsShelf == 1) {
+            cout << "  antenna name: " << antName << " -> index: " << 
+                    antIndices[ant] << endl;
+        }
     }
     
-    //int nAntMeas = antMax - antMin + 1; // from measurement data
     uint32_t nAntCorr = itsNAntenna;         // from parameter file
-    //cout << "  Antenna count in measurement set: " << nAntMeas << endl;
-    cout << "  Antenna count in correlator sim : " << nAntCorr << endl;
+    if (itsShelf == 1) {
+        cout << "  Antenna count in correlator sim : " << nAntCorr << endl;
+    }
     
     // Correlation products, calculated from parameter file
     // Note that correlator may send more data than available antenna
     // (which means empty data will get sent too).
     itsNCorrProd = itsCorrProdMap.getTotal (nAntCorr);
-    cout << "  Correlation product count       : " << itsNCorrProd << endl;
+    if (itsShelf == 1) {
+        cout << "  Correlation product count       : " << itsNCorrProd << endl;
+    }
 
     // channel count
     buffer.nChanMeas = nChan;
-    cout << "  Channel count: " << nChan << endl;
+    if (itsShelf == 1) {
+        cout << "  Channel count: " << nChan << endl;
 
-    // Data matrix
-    cout << "  Measurement set data matrix (corr,channel): " << nCorr << 
-            ", " << nChan << endl;
+        // Data matrix
+        cout << "  Measurement set data matrix (corr,channel): " << nCorr << 
+                ", " << nChan << endl;
+    }
 
     // Creating buffer
     // Note that buffer contains all correlation products (as requested in
     // parset, which is usually more than available in measurement set) and
     // all channels (as requested in parset)
-    cout << "  Creating buffer according to parset ..." << endl;
+    if (itsShelf == 1) {
+        cout << "  Creating buffer according to parset ..." << endl;
+    }
     buffer.init(itsNCorrProd, itsNCoarseChannel);
-    cout << "    correlation products x coarse channels: " << itsNCorrProd << 
-            " x " << itsNCoarseChannel << endl; 
-    cout << "  Creating buffer: done" << endl;
+    if (itsShelf == 1) {
+        cout << "    correlation products x coarse channels: " << 
+                itsNCorrProd << " x " << itsNCoarseChannel << endl; 
+        cout << "  Creating buffer: done" << endl;
+    }
 
     // card count
     buffer.nCard = itsNCoarseChannel / DATAGRAM_CHANNELMAX + 1;
-    cout << "  Card count computed from parset: " << buffer.nCard << endl;
-
+    if (itsShelf == 1) {
+        cout << "  Card count computed from parset: " << buffer.nCard << endl;
+    }
     cout << "Shelf " << itsShelf << ": initializing buffer: done" << endl;
     cout << endl;
 }   // initBuffer

@@ -1,29 +1,47 @@
 #!/bin/bash
 
 ###########################################################################
-# Set the number of shelves (cards) in correlator simulator.
-# A shelf has its own UDP port number.
+# This script runs all programs for simulated data transmission
+# in ADE format:
+# - Receiver   : msnoop (metadata) and vsnoopADE (visibility)
+# - Sender     : playbackADE (correlator simulator)
+# - Facilitator: ICE
+# Data is transmitted in parallel in separate UDP ports.
+# playbackADE sends data using MPI processes, and vsnoopADE receives it
+# using multiple instances of the program.
+#
+echo "===================================================================="
+echo "Functional test for correlator simulator using msnoop and vsnoopADE"
+echo "===================================================================="
+
+# USER SETTING
+#
+# The number of shelves (cards) in correlator simulator.
+# Each shelf has its own UDP port number.
 # No need to set this anywhere else (eg. in playback.in).
 # This number is used to automatically set the number of MPI processes
-# for correlator simulator and instances vsnoopADE.
+# for correlator simulator and instances for vsnoopADE.
 # Range: 1 ~ 12
 
 NCARD=12
+echo "The number of cards (data streams): $NCARD"
 
-# Reference port number of vsnoopADE.
-# The first instance of vsnoopADE uses this port number.
+# The first port number for visibility transmission 
+# (receiver: vsnoopADE)
 
-REFPORT=3001
+VPORT1=3001
+echo "The first port for visibility data: $VPORT1"
 
-# TO CONSIDER
-# What about using this number to automatically set the port of both
-# the sender (correlator simulator) and the receiver (ingest, vsnoop)?
-# This will avoid the possibility of port mismatch.
+# The port number for metadata transmission
+
+MPORT=4061
+echo "The port for metadata             : $MPORT"
+echo
 ###########################################################################
 
 cd `dirname $0`
 
-# Setup the environment
+echo "Setting up the environment"
 if [ ! -f ../../init_package_env.sh ]; then
     echo "Error: init_package_env.sh does not exist, please run rbuild in package dir"
     exit 1
@@ -31,7 +49,7 @@ fi
 source ../../init_package_env.sh
 export AIPSPATH=$ASKAP_ROOT/Code/Base/accessors/current
 
-# Start the Ice Services
+echo "Starting the Ice Services"
 ../start_ice.sh ../iceregistry.cfg ../icegridadmin.cfg ../icestorm.cfg
 if [ $? -ne 0 ]; then
     echo "Error: Failed to start Ice Services"
@@ -39,41 +57,48 @@ if [ $? -ne 0 ]; then
 fi
 sleep 1
 
-# Start the metadata subscriber 
-# (don't use the script so this script can kill it)
+echo "Starting the metadata subscriber msnoop" 
+# Set the metadata port
+sed -i "s/playback.tossim.ice.locator_port.*/playback.tossim.ice.locator_port = $MPORT/" playback.in
+sed -i "s/ice.locator_port.*/ice.locator_port = $MPORT/" msnoop.in
 ../../apps/msnoop -c msnoop.in -v > msnoop.log 2>&1 &
 MDPID=$!
 
-# Start the visibilities receiver 
+echo "Starting the visibility receiver vsnoop" 
 COUNTER=1
 while [ $COUNTER -le $NCARD ]; do
-    let PORT=REFPORT+COUNTER-1
+
+    # Set visibility port & log file for each data stream
+    let VPORT=VPORT1+COUNTER-1
     LOGFILE="vsnoop$COUNTER.log"
 
-    ../../apps/vsnoopADE -v -p $PORT > $LOGFILE 2>&1 &
+    # Execute instances of vsnoop
+    ../../apps/vsnoopADE -v -p $VPORT > $LOGFILE 2>&1 &
     VISPID[$COUNTER]=$!
 
     let COUNTER=COUNTER+1
 done
 
-# The number of MPI processes is set automatically
+echo "Starting correlator simulator"
+# Set its number of MPI processes 
 let NMPI=NCARD+1
-
+# Set the reference port in its parameter file
+sed -i "s/playback.corrsim.out.port.*/playback.corrsim.out.port = $VPORT1/" playback.in
 mpirun -np $NMPI ../../apps/playbackADE.sh -c playback.in
 STATUS=$?
 echo "playbackADE status: " $STATUS
 
-# Give the subscriber a moment to get the last messages then exit
+echo "Giving the subscriber a moment to get the last messages then exit"
 sleep 5
 kill $MDPID
 echo "Killed msnoop"
 kill ${VISPID[*]}
-echo "Killed all vsnoops"
+echo "Killed all vsnoop instances"
 sleep 1
 kill -9 $MDPID > /dev/null 2>&1
 kill -9 ${VISPID[*]} > /dev/null 2>&1
 
-# Stop the Ice Services
+echo "Stopping the Ice Services"
 ../stop_ice.sh ../icegridadmin.cfg
 
 exit $STATUS

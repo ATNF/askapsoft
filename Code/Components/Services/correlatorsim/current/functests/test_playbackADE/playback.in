@@ -3,6 +3,7 @@
 #
 playback.period = 5
 
+# TO BE DEPRECATED
 # Data input mode
 # For the time being, use "expand" only.
 #playback.input_mode = zero
@@ -12,7 +13,7 @@ playback.input_mode = expand
 # Telescope Operating Simulator Configuration
 #
 playback.tossim.ice.locator_host      = localhost
-playback.tossim.ice.locator_port      = 4061
+playback.tossim.ice.locator_port = 4061
 playback.tossim.icestorm.topicmanager = IceStorm/TopicManager@IceStorm.TopicManager
 playback.tossim.icestorm.topic        = metadata
 
@@ -24,7 +25,7 @@ playback.tossim.icestorm.topic        = metadata
 #
 # Correlator Simulator
 #
-# TO BE DEPRECATED
+# DEPRECATED
 # The number of shelves is now computed automatically in run.sh
 #playback.corrsim.n_shelves                  = 3
 
@@ -57,9 +58,9 @@ playback.corrsim.out.hostname        = localhost
 # What about setting this number using a shell script that calls
 # both correlator simulator and the receiving program (ingest, vsnoop)?
 # This will avoid the possibility of port mismatch. 
-playback.corrsim.out.port            = 3001
+playback.corrsim.out.port = 3001
 
-# TO BE DEPRECATED: individual setting for each card 
+# DEPRECATED: individual setting for each card 
 # Correlator Shelf 1
 #playback.corrsim.shelf1.dataset             = ../../dataset/beta1.ms
 #playback.corrsim.shelf1.out.hostname        = localhost

@@ -38,7 +38,6 @@
 #include "askap/AskapLogging.h"
 #include "askap/AskapError.h"
 #include "cpcommon/ParallelCPApplication.h"
-//#include "askap/Application.h"
 #include "Common/ParameterSet.h"
 
 // Local package includes
@@ -66,88 +65,3 @@ int main(int argc, char *argv[])
     return app.main(argc, argv);
 }
 
-
-/*
-static std::string getNodeName(void)
-{
-    char name[MPI_MAX_PROCESSOR_NAME];
-    int resultlen;
-    MPI_Get_processor_name(name, &resultlen);
-    std::string nodename(name);
-    std::string::size_type idx = nodename.find_first_of('.');
-    if (idx != std::string::npos) {
-        // Extract just the hostname part
-        nodename = nodename.substr(0, idx);
-    }
-    return nodename;
-}
-
-static std::string getRank(void)
-{
-    int rank;
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    std::ostringstream ss;
-    ss << rank;
-    return ss.str();
-}
-
-
-class PlaybackApp : public askap::Application
-{
-    public:
-        virtual int run(int argc, char* argv[])
-        {
-            MPI_Init(&argc, &argv);
-
-            // To aid in debugging, the logger needs to know the
-            // MPI rank and nodename
-            ASKAPLOG_REMOVECONTEXT("mpirank");
-            ASKAPLOG_PUTCONTEXT("mpirank", getRank().c_str());
-            ASKAPLOG_REMOVECONTEXT("hostname");
-            ASKAPLOG_PUTCONTEXT("hostname", getNodeName().c_str());
-
-            ASKAPLOG_INFO_STR(logger, "ASKAP Correlator Simulator (Playback) - " << 
-					ASKAP_PACKAGE_VERSION);
-
-            int error = 0;
-            try {
-                askap::cp::SimPlaybackADE pb(config());
-                pb.run();
-				//std::cout << "pb.run is done" << std::endl;
-				
-            } catch (const askap::AskapError& e) {
-                ASKAPLOG_FATAL_STR(logger, "Askap error in " << argv[0] << ": " << 
-						e.what());
-                std::cerr << "Askap error in " << argv[0] << ": " << e.what() << 
-						std::endl;
-                error = 1;
-            } catch (const std::exception& e) {
-                ASKAPLOG_FATAL_STR(logger, "Unexpected exception in " << argv[0] << 
-						": " << e.what());
-                std::cerr << "Unexpected exception in " << argv[0] << ": " << 
-						e.what() << std::endl;
-                error = 1;
-            }
-
-			//std::cout << "PlaybackApp: error: " << error << std::endl;
-			
-            if (error) {
-                MPI_Abort(MPI_COMM_WORLD, error);
-            } else {
-				//std::cout << "MPI_Finalize ..." << std::endl;
-				//MPI_Barrier(MPI_COMM_WORLD);
-                int status = MPI_Finalize();
-				std::cout << "MPI_Finalize: status: " << status << std::endl;
-            }
-
-            return error;
-        }
-};
-
-
-int main(int argc, char* argv[])
-{
-    PlaybackApp app;
-    return app.main(argc, argv);
-}
-*/

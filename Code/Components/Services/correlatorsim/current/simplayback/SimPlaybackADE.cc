@@ -64,20 +64,22 @@ SimPlaybackADE::SimPlaybackADE(const LOFAR::ParameterSet& parset)
 {
     MPI_Comm_rank(MPI_COMM_WORLD, &itsRank);
     MPI_Comm_size(MPI_COMM_WORLD, &itsNumProcs);
+#ifdef VERBOSE
     cout << "Number of MPI processes: " << itsNumProcs << endl;
+#endif
 
     if (itsRank == 0) {
-//#ifdef VERBOSE
+#ifdef VERBOSE
         cout << "Rank " << itsRank << 
                 ": validating configuration" << endl;
-//#endif
+#endif
         validateConfig();
     }
-//#ifdef VERBOSE
+#ifdef VERBOSE
     else {
         cout << "Rank " << itsRank << ": waiting" << endl;
     }
-//#endif
+#endif
 }
 
 
@@ -92,45 +94,32 @@ void SimPlaybackADE::validateConfig(void)
 {
 #ifdef VERBOSE
 	cout << "SimPlaybackADE::validateConfig..." << endl;
-#endif
-	//const std::string nShelvesKey = "corrsim.n_shelves";
-
-	//const int nShelves = itsParset.getInt32(nShelvesKey);
-	//ASKAPCHECK(itsNumProcs == (nShelves+1),
-	//		"Incorrect number of ranks for the requested configuration");
-#ifdef VERBOSE
-	//cout << "nShelves: " << nShelves << endl;
+	cout << "nShelves: " << nShelves << endl;
 #endif
 
 	const std::string inputMode = itsParset.getString("input_mode");
 	
 	// Build a list of required keys    
 	std::vector<std::string> requiredKeys;
-	//requiredKeys.push_back(nShelvesKey);
 	requiredKeys.push_back("tossim.ice.locator_host");
 	requiredKeys.push_back("tossim.ice.locator_port");
 	requiredKeys.push_back("tossim.icestorm.topicmanager");
 	requiredKeys.push_back("tossim.icestorm.topic");
 	
-	//for (int i = 0; i < nShelves; ++i) {
-		std::ostringstream ss;
-		ss << "corrsim.";
-		//ss << "corrsim.shelf" << i+1 << ".";
+	std::ostringstream ss;
+	ss << "corrsim.";
 
-		//if (inputMode == "expand") {
-			std::string dataset = ss.str();
-			dataset.append("dataset");
-			requiredKeys.push_back(dataset);
-		//}
+	std::string dataset = ss.str();
+	dataset.append("dataset");
+	requiredKeys.push_back(dataset);
 
-		std::string hostname = ss.str();
-		hostname.append("out.hostname");
-		requiredKeys.push_back(hostname);
+	std::string hostname = ss.str();
+	hostname.append("out.hostname");
+	requiredKeys.push_back(hostname);
 
-		std::string port = ss.str();
-		port.append("out.port");
-		requiredKeys.push_back(port);
-	//}
+	std::string port = ss.str();
+	port.append("out.port");
+	requiredKeys.push_back(port);
     
 	// Now check the required keys are present
 	std::vector<std::string>::const_iterator it;
@@ -155,8 +144,6 @@ boost::shared_ptr<TosSimulator> SimPlaybackADE::makeTosSim(void)
 #ifdef VERBOSE
 	std::cout << "makeTosSim" << std::endl;
 #endif
-    //const std::string filename = 
-    //        itsParset.getString("corrsim.shelf1.dataset","");
     const std::string filename = 
             itsParset.getString("corrsim.dataset","");
     const std::string locatorHost = 
@@ -171,9 +158,9 @@ boost::shared_ptr<TosSimulator> SimPlaybackADE::makeTosSim(void)
 
     return boost::shared_ptr<TosSimulator>(new TosSimulator(filename,
             locatorHost, locatorPort, topicManager, topic, failureChance));
-//#ifdef VERBOSE
-//	std::cout << "makeTosSim: done" << std::endl;
-//#endif
+#ifdef VERBOSE
+	std::cout << "makeTosSim: done" << std::endl;
+#endif
 }
 
 
@@ -199,7 +186,6 @@ boost::shared_ptr<CorrelatorSimulatorADE>
     std::stringstream ssPort;
     ssPort << intPort;
     string port = ssPort.str();
-	//cout << dataset << ", " << hostname << ", " << port << endl;
     cout << "Shelf " << itsRank << " sends to port " << port << endl;
 
     const unsigned int nAntenna = 
@@ -218,7 +204,7 @@ boost::shared_ptr<CorrelatorSimulatorADE>
             itsRank, itsNumProcs-1, nAntenna, nCoarseChannel, nChannelSub,
             coarseBandwidth, itsInputMode, delay));
 #ifdef VERBOSE
-//	std::cout << "makeCorrelatorSim: done" << std::endl;
+	std::cout << "makeCorrelatorSim: done" << std::endl;
 #endif
 }
 
@@ -254,7 +240,7 @@ boost::shared_ptr<CorrelatorSimulatorADE>
             itsRank, nAntenna, nCoarseChannel, nChannelSub,
             coarseBandwidth, itsInputMode, delay));
 #ifdef VERBOSE
-//	std::cout << "makeCorrelatorSim: done" << std::endl;
+	std::cout << "makeCorrelatorSim: done" << std::endl;
 #endif
 }
 
@@ -271,9 +257,9 @@ void SimPlaybackADE::run(void)
     MPI_Barrier(MPI_COMM_WORLD);
 
 	itsInputMode = itsParset.getString ("input_mode","zero");
-//#ifdef VERBOSE
-//	std::cout << "itsInputMode: " << itsInputMode << std::endl;
-//#endif
+#ifdef VERBOSE
+	std::cout << "itsInputMode: " << itsInputMode << std::endl;
+#endif
 
     if (itsRank == 0) {
 		boost::shared_ptr<ISimulator> sim = makeTosSim();
