@@ -694,7 +694,7 @@ bool CorrelatorSimulatorADE::sendBufferData()
         // calculate frequency
         uint32_t fineMeasChan = ((block * DATAGRAM_NCARD) + card) * 
                 DATAGRAM_NCHANNEL + cardMeasChan;
-        payload.freq = freqMin + freqInc * fineMeasChan;
+        payload.freq = (freqMin + freqInc * fineMeasChan) / 1000000.0;
 
         // compute coarse channel number in measurement set
         // (correspond to channel in buffer)
