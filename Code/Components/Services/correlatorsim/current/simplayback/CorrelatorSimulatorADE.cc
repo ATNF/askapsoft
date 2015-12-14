@@ -574,7 +574,7 @@ bool CorrelatorSimulatorADE::sendFirstPayload()
 
     payload.version = VisDatagramTraits<VisDatagramADE>::VISPAYLOAD_VERSION;
     payload.timestamp = buffer.timeStamp;
-    payload.beamid = buffer.beam;
+    payload.beamid = buffer.beam + 1;
 
     const uint32_t nCorrProd = buffer.data.size();
     const uint32_t nCorrProdPerSlice = 
@@ -655,7 +655,7 @@ bool CorrelatorSimulatorADE::sendBufferData()
     // Data that is constant for the whole buffer
     payload.version = VisDatagramTraits<VisDatagramADE>::VISPAYLOAD_VERSION;
     payload.timestamp = buffer.timeStamp;
-    payload.beamid = buffer.beam;
+    payload.beamid = buffer.beam + 1;
 
     const uint32_t nCorrProd = buffer.data.size();
     const uint32_t nCorrProdPerSlice = 
@@ -709,7 +709,7 @@ bool CorrelatorSimulatorADE::sendBufferData()
         // for each slice of correlation products
         for (uint32_t slice = 0; slice < nSlice; ++slice) {
             payload.slice = slice;
-            payload.baseline1 = slice * nCorrProdPerSlice;
+            payload.baseline1 = slice * nCorrProdPerSlice + 1;
             payload.baseline2 = payload.baseline1 + nCorrProdPerSlice - 1;
 
             for (uint32_t corrProdInSlice = 0; 
