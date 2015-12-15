@@ -68,7 +68,10 @@
 #define CHANNEL_EXPAND
 // Cases for shelf count: 1, 2, N (N>0)
 #define SHELFCASE N
-
+// Test mode
+//#define TEST
+// Reorder loops for buffer send
+//#define REORDER_LOOP
 
 #define SIZEOF_ARRAY(a) (sizeof( a ) / sizeof( a[ 0 ] ))
 
@@ -138,6 +141,10 @@ bool CorrelatorSimulatorADE::sendNext(void)
         // measurement set.
         fillChannelInBuffer();
 
+        // test
+        //buffer.print();
+        //return true;
+
         // Delay transmission for every new time stamp in measurement
         if (itsCurrentTime > previousTime) {
             //cout << "Shelf " << itsShelf <<
@@ -149,31 +156,6 @@ bool CorrelatorSimulatorADE::sendNext(void)
             usleep(itsDelay);
             cout << "Shelf " << itsShelf << ": transmitting ..." << endl;
         }
-
-        // TO BE DEPRECATED
-        // Shelf 1 must send the first payload.
-        // Other shelves must wait for this.
-        //cout << "Initial: Shelf " << itsShelf << ": firstPayloadSent? ";
-        //cout << firstPayloadSent << endl;
-        /*
-        while (!firstPayloadSent) {
-            if (itsShelf == 1) {
-                firstPayloadSent = sendFirstPayload();
-                MPI_Bcast(&firstPayloadSent,1,MPI_LOGICAL,1,MPI_COMM_WORLD);
-                if (!firstPayloadSent) {
-                    cout << "Shelf " << itsShelf;
-                    cout << " cannot send the first payload" << endl;
-                    return false;
-                }
-            }
-            else {  // other shelves
-                //usleep(1);
-                MPI_Bcast(&firstPayloadSent,1,MPI_LOGICAL,1,MPI_COMM_WORLD);
-            }
-        }
-        */
-        //cout << "After: Shelf " << itsShelf << ": firstPayloadSent? ";
-        //cout << firstPayloadSent << endl;
 
         return sendBufferData();
     }
@@ -393,17 +375,26 @@ bool CorrelatorSimulatorADE::getBufferData()
         uint32_t descPolId = ddc.polarizationId()(dataDescId);
         uint32_t nCorr = polc.numCorr()(descPolId);
         casa::Matrix<casa::Complex> data = msc.data()(itsCurrentRow);
+#ifdef TEST
+        //cout << "Ref freq: " << spwc.refFrequency()(descSpwId) << endl;
+        //const casa::Vector<casa::Double> chanWidth = 
+        //        spwc.chanWidth()(descSpwId);
+#endif
         const casa::Vector<casa::Double> frequencies = 
                 spwc.chanFreq()(descSpwId);
         ASKAPCHECK(nChan == frequencies.size(), 
                 "Disagreement in the number of channels in measurement set");
-        //buffer.nChanMeas = nChan;
         for (uint32_t chan = 0; chan < nChan; ++chan) {
             buffer.freqId[chan].block = 1;          // dummy value
             buffer.freqId[chan].card = 1;           // dummy value
             buffer.freqId[chan].channel = chan + 1; // 1-based
             buffer.freqId[chan].freq = frequencies[chan];
+#ifdef TEST
+            //cout << chan << ": " << frequencies[chan] << ", " << 
+            //        chanWidth[chan] << endl;
+#endif
         }
+        //return false;
 
         uint32_t ant1 = antIndices[msc.antenna1()(itsCurrentRow)];
         uint32_t ant2 = antIndices[msc.antenna2()(itsCurrentRow)];
@@ -645,6 +636,8 @@ bool CorrelatorSimulatorADE::sendFirstPayload()
 
 
 
+#ifdef REORDER_LOOP
+
 bool CorrelatorSimulatorADE::sendBufferData()
 {
 #ifdef VERBOSE
@@ -671,6 +664,124 @@ bool CorrelatorSimulatorADE::sendBufferData()
 //    cout << "Frequency increment: " << freqInc << endl;
 #endif
 
+    // for each slice of correlation products
+    for (uint32_t slice = 0; slice < nSlice; ++slice) {
+        payload.slice = slice;
+        payload.baseline1 = slice * nCorrProdPerSlice + 1;
+        payload.baseline2 = payload.baseline1 + nCorrProdPerSlice - 1;
+
+        for (uint32_t corrProdInSlice = 0; 
+                corrProdInSlice < nCorrProdPerSlice; ++corrProdInSlice) {
+
+            // for all simulated fine channels in correlator 
+            // note:
+            // - in the ordering of correlator's transmission
+            // - this is NOT buffer channels
+            for (uint32_t fineCorrChan = 0; fineCorrChan < nFineCorrChan; 
+                    ++fineCorrChan) {
+
+                // compute the card of this channel
+                uint32_t card = (fineCorrChan / DATAGRAM_NCHANNEL) % 
+                        DATAGRAM_NCARD;
+                payload.card = card + DATAGRAM_CARDMIN;
+
+                // compute the block of this channel
+                uint32_t block = fineCorrChan / DATAGRAM_NCHANNEL / 
+                        DATAGRAM_NCARD;
+                payload.block = block + DATAGRAM_BLOCKMIN;
+
+                // get the channel in measurement set (mapping)
+                uint32_t cardCorrChan = fineCorrChan % DATAGRAM_NCHANNEL;
+                uint32_t cardMeasChan = 
+                        itsChannelMap.toCorrelator(cardCorrChan);
+                payload.channel = cardMeasChan + DATAGRAM_CHANNELMIN;
+
+                // calculate frequency
+                uint32_t fineMeasChan = ((block * DATAGRAM_NCARD) + card) * 
+                        DATAGRAM_NCHANNEL + cardMeasChan;
+                payload.freq = (freqMin + freqInc * fineMeasChan) / 1000000.0;
+
+                // test
+                cout << fineCorrChan << ": " << payload.freq << endl;
+
+                // compute coarse channel number in measurement set
+                // (correspond to channel in buffer)
+                uint32_t coarseMeasChan = fineMeasChan / itsNChannelSub;
+
+                uint32_t corrProd = corrProdInSlice + 
+                        slice * nCorrProdPerSlice;
+                payload.vis[corrProdInSlice].real = 
+                        buffer.data[corrProd][coarseMeasChan].vis.real;
+                payload.vis[corrProdInSlice].imag = 
+                        buffer.data[corrProd][coarseMeasChan].vis.imag;
+            }   // correlation product in slice
+
+            return false;
+
+            // send the slice
+            /*
+#if SHELFCASE == 1
+            itsPort->send(payload);
+#elif SHELFCASE == 2
+            // test for 2 cards
+            if (card % 2 == itsShelf - 1) {
+                itsPort->send(payload);
+            }
+#elif SHELFCASE == 3
+            // test for 3 cards
+            if (card % 3 == itsShelf - 1) {
+                itsPort->send(payload);
+            }
+#elif SHELFCASE == N
+            // test for any number of cards
+            if (card % itsNShelves == itsShelf - 1) {
+                itsPort->send(payload);
+            }
+#else
+            cout << "Illegal preprocessor case" << endl;
+#endif
+            */
+        }   // slice
+    }   // simulated channel in correlator
+
+    buffer.reset();
+
+#ifdef VERBOSE
+    //cout << "Shelf " << itsShelf << " finished Sending buffer data" << endl;
+#endif
+    return true;
+}
+
+#else   // NOT REORDER_LOOP
+
+bool CorrelatorSimulatorADE::sendBufferData()
+{
+#ifdef VERBOSE
+    //cout << "  Shelf " << itsShelf << " sends beam " << buffer.beam << endl;
+#endif
+    askap::cp::VisDatagramADE payload;
+
+    // Data that is constant for the whole buffer
+    payload.version = VisDatagramTraits<VisDatagramADE>::VISPAYLOAD_VERSION;
+    payload.timestamp = buffer.timeStamp;
+    payload.beamid = buffer.beam + 1;
+
+    const uint32_t nCorrProd = buffer.data.size();
+    const uint32_t nCorrProdPerSlice = 
+            VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE;
+    const uint32_t nSlice = nCorrProd / nCorrProdPerSlice;
+
+    // The total number of simulated fine channels in correlator
+    const uint32_t nFineCorrChan = itsNCoarseChannel * itsNChannelSub;
+
+    const double coarseFreqInc = buffer.freqId[1].freq - buffer.freqId[0].freq;
+    const double freqMin = buffer.freqId[0].freq - coarseFreqInc * 0.5;
+    const double freqInc = coarseFreqInc / itsNChannelSub;
+    
+#ifdef VERBOSE
+//    cout << "Frequency increment: " << freqInc << endl;
+#endif
+
     // for all simulated fine channels in correlator 
     // note:
     // - in the ordering of correlator's transmission
@@ -688,13 +799,21 @@ bool CorrelatorSimulatorADE::sendBufferData()
 
         // get the channel in measurement set (mapping)
         uint32_t cardCorrChan = fineCorrChan % DATAGRAM_NCHANNEL;
-        uint32_t cardMeasChan = itsChannelMap.toCorrelator(cardCorrChan);
+        uint32_t cardMeasChan = itsChannelMap.fromCorrelator(cardCorrChan);
         payload.channel = cardMeasChan + DATAGRAM_CHANNELMIN;
 
         // calculate frequency
         uint32_t fineMeasChan = ((block * DATAGRAM_NCARD) + card) * 
                 DATAGRAM_NCHANNEL + cardMeasChan;
         payload.freq = (freqMin + freqInc * fineMeasChan) / 1000000.0;
+
+#ifdef TEST
+        cout << cardCorrChan << ": " << cardMeasChan << ": " <<
+                payload.freq << endl;
+        uint32_t checkChan = itsChannelMap.toCorrelator(cardMeasChan);
+        ASKAPCHECK(checkChan == cardCorrChan, "Error in channel mapping");
+        //if (fineCorrChan >= 216) return false;
+#endif
 
         // compute coarse channel number in measurement set
         // (correspond to channel in buffer)
@@ -744,6 +863,11 @@ bool CorrelatorSimulatorADE::sendBufferData()
 #else
             cout << "Illegal preprocessor case" << endl;
 #endif
+
+#ifdef TEST
+            //checkPayload(payload);
+#endif
+
         }   // slice
     }   // simulated channel in correlator
 
@@ -754,6 +878,8 @@ bool CorrelatorSimulatorADE::sendBufferData()
 #endif
     return true;
 }
+
+#endif  // REORDER_LOOP
 
 
 #else   // NOT CHANNEL_EXPAND
@@ -832,9 +958,17 @@ bool CorrelatorSimulatorADE::sendBufferData()
 
 
 
+// Check payload
+//void CorrelatorSimulatorADE::checkPayload(
+//        const askap::cp::VisDatagramADE &payload) {
+//}
+
+
+
 // TO BE DEPRECATED
 // Send data of zero visibility for the whole baselines and channels 
 // for only 1 time period.
+/*
 bool CorrelatorSimulatorADE::sendNextZero(void)
 {
 #ifdef VERBOSE
@@ -1068,7 +1202,7 @@ bool CorrelatorSimulatorADE::sendNextExpand(void)
         return true;	// Have more data (next time period)
     }
 }
-
+*/
 
 
 uint32_t CorrelatorSimulatorADE::getCorrProdIndex 
@@ -1106,5 +1240,9 @@ void checkStokesType (const Stokes::StokesTypes stokesType)
 
 #ifdef VERBOSE
 #undef VERBOSE
+#endif
+
+#ifdef TEST
+#undef TEST
 #endif
 

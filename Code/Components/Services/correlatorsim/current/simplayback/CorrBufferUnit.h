@@ -41,22 +41,18 @@ class CorrBufferUnit
     public :
 
         /// Constructor
-        CorrBufferUnit ();
+        CorrBufferUnit();
 
         /// Destructor
-        virtual ~CorrBufferUnit ();
+        virtual ~CorrBufferUnit();
 
         /// Print out data
-        void print ();
+        void print();
 
 
-        // data
-        
+        /// Visibility data
         FloatComplex vis;
 
-        // True if the data is ready to use
-        // Is this really needed?
-        //bool ready;
 };
 
 };

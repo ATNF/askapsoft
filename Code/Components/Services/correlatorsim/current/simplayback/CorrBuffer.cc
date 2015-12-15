@@ -116,10 +116,17 @@ void CorrBuffer::copyCorrProd(int32_t source, int32_t destination)
 // TODO: update this
 void CorrBuffer::print ()
 {
-    cout << "Buffer time stamp: " << timeStamp << endl;
-    cout << "Buffer ready     : " << ready << endl;
-    cout << "Buffer content   : " << endl;
+    cout << "Buffer contents" << endl;
+    cout << "Time stamp                      : " << timeStamp << endl;
+    cout << "Beam                            : " << beam << endl;
+    cout << "Ready                           : " << ready << endl;
+    cout << "Channel count in measurement set: " << nChanMeas << endl;
+    cout << "Card count                      : " << nCard << endl;
+    for (uint32_t count = 0; count < freqId.size(); ++count) {
+        cout << count << ": " << freqId[count].freq << endl;
+    }
     cout << endl;
+    /*
     for (uint32_t corrProd = 0; corrProd < data.size(); ++corrProd) {
         cout << "----------------------------------------------------" << endl;
         cout << "corr product " << corrProd << endl;
@@ -130,6 +137,7 @@ void CorrBuffer::print ()
         }
     }
     cout << "=====================================================" << endl;
+    */
 }
 
 
