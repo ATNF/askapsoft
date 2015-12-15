@@ -7,3 +7,4 @@ Services Documentation
    :maxdepth: 1
 
    manager/index.rst
+   ingest/index.rst
