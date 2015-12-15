@@ -46,8 +46,29 @@ The CP manager accepts the following command line parameters:
 General overview
 ----------------
 
+The *ingest pipeline* can be viewed as a collection of tasks executed on the data sequentially. The processing
+always starts at the **Source** task, which is responsible for receiving data and apppropriate formatting and 
+tagging. The presence of a source task in the task chain is the requirement. However, the rest of the task chain
+could in principle be empty (although in this case the ingest pipeline will not store or process the data, it will
+only ingest it). The data writing task is called **MS Sink**. There is no requirement that the sink task is the last
+in the chain. Moreover, any task (except the source task) can be executed more than once. For example, one could
+write the full resolution data to one file, then average to a lower resolution and write the result to a 
+different file. We plan to use this approach for on-the-fly calibration eventually. 
+
 .. image:: figures/ingest_overview.png
 
+If used in the parallel (MPI) mode, the same task chain is replicated for each MPI rank to enable parallel processing.
+Source tasks are rank aware and increment the UDP port number they listen to get visiblity data. This allows us
+to have a separate data stream processed by a different rank of ingest pipeline. By default, each rank does
+exactly the same operation in the task chain on a different portion of data. Therefore, the number of measurement
+sets written is equal to the number of available ranks. The file name to create can have a suffix added to distinguish
+between files written by different ranks. More than one file is usually required to increase the writing throughput.
+Each rank can be activated and deactivated by special type tasks which rearrange the data flow and parallelisation.
+If the given rank is not active, data are not passed through the task chain. This can be used to inhibit data
+writing for a subset of ranks. In particular, this is used to aggregade more bandwidth per file than the natural
+distribution determined by the hardware allows (one stream is normally 4 MHz of bandwidth). In the future, we envisage
+also to have tasks which would fork the data streams to allow more parallel processing (e.g. a separate measurement 
+set for calibration can be prepared in parallel). 
 
 Configuration Parameters
 ------------------------
