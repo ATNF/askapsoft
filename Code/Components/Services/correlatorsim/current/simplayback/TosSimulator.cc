@@ -67,9 +67,10 @@ TosSimulator::TosSimulator(const std::string& dataset,
         const std::string& locatorPort,
         const std::string& topicManager,                
         const std::string& topic,
-        const double metadataSendFail)
+        const double metadataSendFail,
+        const unsigned int delay)
     : itsMetadataSendFailChance(metadataSendFail), itsCurrentRow(0),
-        itsRandom(0.0, 1.0)
+        itsRandom(0.0, 1.0), itsDelay(delay)
 {
 	if (dataset == "") {
 		itsMS.reset ();
@@ -81,11 +82,15 @@ TosSimulator::TosSimulator(const std::string& dataset,
                 locatorPort, topicManager, topic));
 }
 
+
+
 TosSimulator::~TosSimulator()
 {
     itsMS.reset();
     itsPort.reset();
 }
+
+
 
 bool TosSimulator::sendNext(void)
 {
@@ -221,6 +226,9 @@ bool TosSimulator::sendNext(void)
 
     // Send the payload, however we use a RNG to simulate random send failure
     if (itsRandom.gen() > itsMetadataSendFailChance) {
+        cout << "TOSSim: pausing " << itsDelay / 1000000 << " seconds" << endl;
+        usleep(itsDelay);
+        cout << "TOSSim: transmitting ..." << endl;
         itsPort->send(metadata);
     } else {
         ASKAPLOG_DEBUG_STR(logger, "Simulating metadata send failure this cycle");
@@ -236,6 +244,9 @@ bool TosSimulator::sendNext(void)
 				);
         metadata.scanId(-2);	// -2
 
+        cout << "TOSSim: pausing " << itsDelay / 1000000 << " seconds" << endl;
+        usleep(itsDelay);
+        cout << "TOSSim: transmitting ..." << endl;
         itsPort->send(metadata);
 
 		//cout << "TosSimulator::sendNext: no more data" << endl;

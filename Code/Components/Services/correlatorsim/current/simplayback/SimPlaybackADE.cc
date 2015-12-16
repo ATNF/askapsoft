@@ -155,9 +155,12 @@ boost::shared_ptr<TosSimulator> SimPlaybackADE::makeTosSim(void)
     const std::string topic = itsParset.getString("tossim.icestorm.topic");
     const double failureChance = itsParset.getDouble(
 			"tossim.random_metadata_send_fail", 0.0);
+    const unsigned int delay =
+            itsParset.getUint32("tossim.delay", 0);
 
     return boost::shared_ptr<TosSimulator>(new TosSimulator(filename,
-            locatorHost, locatorPort, topicManager, topic, failureChance));
+            locatorHost, locatorPort, topicManager, topic, failureChance,
+            delay));
 #ifdef VERBOSE
 	std::cout << "makeTosSim: done" << std::endl;
 #endif
