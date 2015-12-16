@@ -47,42 +47,128 @@ General overview
 ----------------
 
 The *ingest pipeline* can be viewed as a collection of tasks executed on the data sequentially. The processing
-always starts at the **Source** task, which is responsible for receiving data and apppropriate formatting and 
+always starts at the **Source** task, which is responsible for receiving data and for apppropriate formatting and 
 tagging. The presence of a source task in the task chain is the requirement. However, the rest of the task chain
-could in principle be empty (although in this case the ingest pipeline will not store or process the data, it will
-only ingest it). The data writing task is called **MS Sink**. There is no requirement that the sink task is the last
-in the chain. Moreover, any task (except the source task) can be executed more than once. For example, one could
-write the full resolution data to one file, then average to a lower resolution and write the result to a 
-different file. We plan to use this approach for on-the-fly calibration eventually. 
+can in principle be empty (although in this case the ingest pipeline will not store or process the data, it will
+only ingest it). The data writing task is called **MS Sink**. There is no requirement that the sink task should be 
+the last in the chain. In fact, any task (except the source task) can be executed more than once with the same or
+different parameters. For example, one could write a full resolution data to one measurement set, then average to 
+a lower resolution and write the result to a different measurement set. We plan to use this feature eventually
+for the on-the-fly calibration. 
 
 .. image:: figures/ingest_overview.png
 
 If used in the parallel (MPI) mode, the same task chain is replicated for each MPI rank to enable parallel processing.
-Source tasks are rank aware and increment the UDP port number they listen to get visiblity data. This allows us
-to have a separate data stream processed by a different rank of ingest pipeline. By default, each rank does
-exactly the same operation in the task chain on a different portion of data. Therefore, the number of measurement
-sets written is equal to the number of available ranks. The file name to create can have a suffix added to distinguish
-between files written by different ranks. More than one file is usually required to increase the writing throughput.
-Each rank can be activated and deactivated by special type tasks which rearrange the data flow and parallelisation.
-If the given rank is not active, data are not passed through the task chain. This can be used to inhibit data
-writing for a subset of ranks. In particular, this is used to aggregade more bandwidth per file than the natural
-distribution determined by the hardware allows (one stream is normally 4 MHz of bandwidth). In the future, we envisage
-also to have tasks which would fork the data streams to allow more parallel processing (e.g. a separate measurement 
-set for calibration can be prepared in parallel). 
+Source tasks are rank aware and increment accordingly the UDP port number which they listen to get the visiblity data. 
+This allows us to have separate data streams processed by different ranks of ingest pipeline. By default, each rank does
+exactly the same operations according to the task chain but acts on a different portion of data. 
+Therefore, the number of measurement
+sets written by the *ingest pipeline* is tied down to the number of ranks running the  **MS Sink** task. The file 
+name of the created measurement set can have a suffix added to distinguish between measurement sets written by different 
+ranks. More than one file is usually required to increase the writing throughput. At the moment, all ranks always receive
+data (i.e. execute an appropriate **Source** task). However, later down the processing chain, each
+rank can be activated and deactivated by special type tasks which rearrange the data flow and parallelisation.
+If the given rank is not active, data are not passed through the task chain for this rank. This can be used to inhibit data
+writing for a subset of ranks. In particular, we use this feature of the task interface (see *Merge* task for details)
+to aggregade more bandwidth than is defined by the natural hardware-based distribution (one stream normally 
+covers 4 MHz of bandwidth produced by a single correlator card). In the future, we envisage also to have 
+tasks which would fork data streams to allow more parallel processing (e.g. a separate measurement set for 
+calibration can be prepared in parallel). 
 
 Configuration Parameters
 ------------------------
-The text below is still to be done (currently a copy of another page)
 
 The program requires a configuration file be provided on the command line. This
-section describes the valid parameters. In addition to the CP manager specific
-parameters, any parameters that begin with *ice_properties* are passed directly
-to the ICE Communicator during initialisation.
+section describes the valid parameters. In addition to mandatory parameters which are
+always required, individual tasks often have specific parameters which need to be
+defined only if a particular task is used.
+
+General parameters
+~~~~~~~~~~~~~~~~~~
+
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|**Parameter**               |**Type**           |**Default** |**Description**                                               |
+|                            |                   |            |                                                              |
++============================+===================+============+==============================================================+
+|array.name                  |string             |None        |Name of the telescope. It is only used to populate the        |
+|                            |                   |            |appropriate field in the measurement set. But must be defined |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|sbid                        |uint               |0           |Scheduling block number.                                      |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+
+
+Beam arrangement
+~~~~~~~~~~~~~~~~
+
+Parameters describing the beam arrangement are similar to the *feeds* configuration of :doc:`../../calim/csimulator`.
+It is mainly used to initialise **FEED** table of the measurement set, but also used by calculation of the phase centres and
+projected baseline coordinates (uvw's) if appropriate tasks are included in the chain. All beams are dual polarisation and
+linearly polarised (hard coded). Note, the term *feed* in the context of measurement sets really means *beam*.
+
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|**Parameter**               |**Type**           |**Default** |**Description**                                               |
+|                            |                   |            |                                                              |
++============================+===================+============+==============================================================+
+|feeds.n_feeds               |uint               |None        |Number of beams defined in the configuration. Note, only beams|
+|                            |                   |            |which are actually written to the measurement set need to be  |
+|                            |                   |            |defined.                                                      |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|feeds.feed\ **N**           |vector<double>     |None        |Dimensionless offset of the given beam from the boresight     |
+|                            |                   |            |direction (given as [x,y]). Values are multiplied by          |
+|                            |                   |            |*feeds.spacing* before being used. This also defined the      |
+|                            |                   |            |units (assumed the same for all beams) to get a correct       |
+|                            |                   |            |angular quantity.If *feeds.spacing* is not defined, the values|
+|                            |                   |            |in this parameter are treated as angular offsets in radians.  |
+|                            |                   |            |The offsets should be defined for every **N** from 0 to       |
+|                            |                   |            |**feeds.n_feeds - 1**                                         |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|feeds.spacing               |quantity string    |None        |Optional parameter. If present, it determines the dimension   |
+|                            |                   |            |and scaling of the beam layout (see above). If not defined,   |
+|                            |                   |            |all beam offsets are assumed to be in radians.                |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+
+Correlator modes
+~~~~~~~~~~~~~~~~
+
+This section describes the data expected from the correlator. It is largely inherited from BETA and some future changes
+are expected in this area to support different frequency tunings of ASKAP. For the parallel environment, the description 
+applies to single card only. Different configurations of the input data could change in run time, but all possible
+configurations should be defined up front (so the appropriate **SPECTRAL_WINDOW** table can be created).
+
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|**Parameter**               |**Type**           |**Default** |**Description**                                               |
+|                            |                   |            |                                                              |
++============================+===================+============+==============================================================+
+|correlator.modes            |vector<string>     |None        |List of supported modes. An exception will be raised if       |
+|                            |                   |            |received metadata request a correlator mode which has not     |
+|                            |                   |            |been defined in the configuration file. Each mode listed here |
+|                            |                   |            |should have the following parameters defined. Modes not listed|
+|                            |                   |            |are ignored, even if their parameters are defined.            |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+| All following parameters have correlator.mode.\ **name**\  prefix, where **name** is a mode listed in **correlator.modes** |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|<prefix>.chan_width         |quantity string    |None        |Separation of the channels in frequency, which is always      |
+|                            |                   |            |assumed to be equal to the channel width. Full quantity string|
+|                            |                   |            |with sign (for inverted spectra) and units.                   |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|<prefix>.interval           |uint               |None        |Correlator cycle time in microseconds.                        |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|<prefix>.n_chan             |uint               |None        |Number of spectral channels handled by a single source task.  |
+|                            |                   |            |In parallel environment, this is the number of channels       |
+|                            |                   |            |in the single data stream (normally - single card).           |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|<prefix>.stokes             |vector<string>     |None        |List of products in the polarisation vector in the order as   |
+|                            |                   |            |they are to be stored in the measurement set. Although, in    |
+|                            |                   |            |principle, all polarisation frames, including incomplete and  |
+|                            |                   |            |mixed frames, are supported here and in the definition of     |
+|                            |                   |            |correlation products, other frames than full linear are       |
+|                            |                   |            |likely to cause problems elsewhere.                           |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+
+
+The text below is still to be done (currently a copy of another page)
 
 +----------------------------+----------+------------+--------------------------------------------------------------+
-|**Parameter**               |**Type**  |**Default** |**Description**                                               |
-|                            |          |            |                                                              |
-+============================+==========+============+==============================================================+
 | ice.servicename            | string   | *None*     |The service name (i.e. Ice object identity) for the CP manager|
 |                            |          |            |service interface.                                            |
 +----------------------------+----------+------------+--------------------------------------------------------------+
