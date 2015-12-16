@@ -53,6 +53,10 @@
 #include "CommonTypes.h"
 #include "TypedValues.h"
 
+//#define TEST
+//#define VERBOSE
+#define CARDFREQ
+
 // Using
 using namespace askap;
 using namespace askap::cp;
@@ -158,12 +162,30 @@ bool TosSimulator::sendNext(void)
     const casa::Vector<casa::Double> frequencies = spwc.chanFreq()(descSpwId);
     const casa::uInt nChan = frequencies.size();
     casa::Double centreFreq = 0.0;
+
+#ifdef CARDFREQ
+    centreFreq = (frequencies[0] + frequencies[3]) * 0.5;
+#else
     if (nChan % 2 == 0) {
         centreFreq = (frequencies(nChan / 2) + frequencies((nChan / 2) + 1) ) / 2.0;
     } else {
         centreFreq = frequencies(nChan / 2);
     }
+#endif
+
     metadata.centreFreq(casa::Quantity(centreFreq, "Hz"));
+#ifdef VERBOSE
+    cout << "TOSSim: centre frequency of 4 coarse channels: " << 
+            centreFreq << endl;
+#endif
+
+#ifdef TEST
+    cout << "channel count: " << nChan << endl;
+    for (casa::uInt i = 0; i < nChan; ++i) {
+        cout << i << ": " << frequencies[i] << endl;
+    }
+    cout << "centre frequency: " << centreFreq << endl;
+#endif
 
     // Target Name
     const casa::Int fieldId = msc.fieldId()(itsCurrentRow);
@@ -246,7 +268,7 @@ bool TosSimulator::sendNext(void)
 
         cout << "TOSSim: pausing " << itsDelay / 1000000 << " seconds" << endl;
         usleep(itsDelay);
-        cout << "TOSSim: transmitting ..." << endl;
+        cout << "TOSSim: transmitting the final data" << endl;
         itsPort->send(metadata);
 
 		//cout << "TosSimulator::sendNext: no more data" << endl;

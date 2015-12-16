@@ -23,7 +23,7 @@ echo "===================================================================="
 # for correlator simulator and instances for vsnoopADE.
 # Range: 1 ~ 12
 
-NCARD=12
+NCARD=1
 echo "The number of cards (data streams): $NCARD"
 
 # The first port number for visibility transmission 

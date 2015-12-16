@@ -30,7 +30,7 @@ playback.tossim.icestorm.topicmanager = IceStorm/TopicManager@IceStorm.TopicMana
 playback.tossim.icestorm.topic        = metadata
 
 # Delay in transmission between different time groups (microsecond)
-playback.tossim.delay                      = 5000000
+playback.tossim.delay                      = 10000000
 
 # Simulate random failures to send metadata message. A value of of 0.0
 # results in no failures, while 1.0 results in all sends failing.

@@ -376,9 +376,9 @@ bool CorrelatorSimulatorADE::getBufferData()
         uint32_t nCorr = polc.numCorr()(descPolId);
         casa::Matrix<casa::Complex> data = msc.data()(itsCurrentRow);
 #ifdef TEST
-        //cout << "Ref freq: " << spwc.refFrequency()(descSpwId) << endl;
-        //const casa::Vector<casa::Double> chanWidth = 
-        //        spwc.chanWidth()(descSpwId);
+        cout << "Ref freq: " << spwc.refFrequency()(descSpwId) << endl;
+        const casa::Vector<casa::Double> chanWidth = 
+                spwc.chanWidth()(descSpwId);
 #endif
         const casa::Vector<casa::Double> frequencies = 
                 spwc.chanFreq()(descSpwId);
@@ -390,11 +390,13 @@ bool CorrelatorSimulatorADE::getBufferData()
             buffer.freqId[chan].channel = chan + 1; // 1-based
             buffer.freqId[chan].freq = frequencies[chan];
 #ifdef TEST
-            //cout << chan << ": " << frequencies[chan] << ", " << 
-            //        chanWidth[chan] << endl;
+            cout << chan << ": " << frequencies[chan] << ", " << 
+                    chanWidth[chan] << endl;
 #endif
         }
-        //return false;
+#ifdef TEST
+        return false;
+#endif
 
         uint32_t ant1 = antIndices[msc.antenna1()(itsCurrentRow)];
         uint32_t ant2 = antIndices[msc.antenna2()(itsCurrentRow)];
@@ -637,7 +639,7 @@ bool CorrelatorSimulatorADE::sendFirstPayload()
 
 
 #ifdef REORDER_LOOP
-
+/*
 bool CorrelatorSimulatorADE::sendBufferData()
 {
 #ifdef VERBOSE
@@ -719,7 +721,6 @@ bool CorrelatorSimulatorADE::sendBufferData()
             return false;
 
             // send the slice
-            /*
 #if SHELFCASE == 1
             itsPort->send(payload);
 #elif SHELFCASE == 2
@@ -740,7 +741,6 @@ bool CorrelatorSimulatorADE::sendBufferData()
 #else
             cout << "Illegal preprocessor case" << endl;
 #endif
-            */
         }   // slice
     }   // simulated channel in correlator
 
@@ -751,6 +751,7 @@ bool CorrelatorSimulatorADE::sendBufferData()
 #endif
     return true;
 }
+*/
 
 #else   // NOT REORDER_LOOP
 
@@ -775,7 +776,8 @@ bool CorrelatorSimulatorADE::sendBufferData()
     const uint32_t nFineCorrChan = itsNCoarseChannel * itsNChannelSub;
 
     const double coarseFreqInc = buffer.freqId[1].freq - buffer.freqId[0].freq;
-    const double freqMin = buffer.freqId[0].freq - coarseFreqInc * 0.5;
+    const double freqMin = buffer.freqId[0].freq;
+    //const double freqMin = buffer.freqId[0].freq - coarseFreqInc * 0.5;
     const double freqInc = coarseFreqInc / itsNChannelSub;
     
 #ifdef VERBOSE
