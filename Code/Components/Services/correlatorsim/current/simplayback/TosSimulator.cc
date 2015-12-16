@@ -164,7 +164,8 @@ bool TosSimulator::sendNext(void)
     casa::Double centreFreq = 0.0;
 
 #ifdef CARDFREQ
-    centreFreq = (frequencies[0] + frequencies[3]) * 0.5;
+    centreFreq = frequencies[2];
+    //centreFreq = (frequencies[0] + frequencies[3]) * 0.5;
 #else
     if (nChan % 2 == 0) {
         centreFreq = (frequencies(nChan / 2) + frequencies((nChan / 2) + 1) ) / 2.0;
@@ -174,6 +175,7 @@ bool TosSimulator::sendNext(void)
 #endif
 
     metadata.centreFreq(casa::Quantity(centreFreq, "Hz"));
+
 #ifdef VERBOSE
     cout << "TOSSim: centre frequency of 4 coarse channels: " << 
             centreFreq << endl;
