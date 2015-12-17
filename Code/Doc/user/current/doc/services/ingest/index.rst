@@ -208,6 +208,14 @@ stored by Facility Configuration Manager (FCM) and often contains parameters whi
 |                            |                   |            |**antenna.ant.mount** parameter (see above) will be used.     |
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
 
+Baseline map
+~~~~~~~~~~~~
+
+This section of parameters describes mapping between the output of the correlator and physical correlations stored in the
+measurement set. Technically, it should've been called correlator product map as it maps not only baselines but different
+polarisation products and even cross-pol products of auto-correlations. 
+
+
 Correlator modes
 ~~~~~~~~~~~~~~~~
 
