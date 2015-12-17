@@ -239,6 +239,7 @@ at the same time.
 Additional Information
 ----------------------
 
+* `Galaxy User Guide (Pawsey User Portal) <https://portal.pawsey.org.au/docs/Supercomputers/Galaxy_User_Guide>`_
 * `Cray XC30 System Documentation <http://docs.cray.com/cgi-bin/craydoc.cgi?mode=SiteMap;f=xc_sitemap>`_
 * `SLURM Homepage <http://computing.llnl.gov/linux/slurm>`_
 * `Migrating from PBS to SLURM <https://portal.ivec.org/docs/Supercomputers/Migrating_from_PBS_Pro_to_SLURM>`_
