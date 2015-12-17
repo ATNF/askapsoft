@@ -212,9 +212,82 @@ Baseline map
 ~~~~~~~~~~~~
 
 This section of parameters describes mapping between the output of the correlator and physical correlations stored in the
-measurement set. Technically, it should've been called correlator product map as it maps not only baselines but different
+measurement set. Technically, it should've been called correlation product map as it maps not only baselines but different
 polarisation products and even cross-pol products of auto-correlations. 
 
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|**Parameter**               |**Type**           |**Default** |**Description**                                               |
+|                            |                   |            |                                                              |
++============================+===================+============+==============================================================+
+|baselinemap.antennaidx      |vector<string>     |None        |Correspondence  between  antenna  names and antenna indices in|
+|                            |                   |            |the measurement set (assumed also to be equal to the indices  |
+|                            |                   |            |implied by the hardware unless **baseline.antennaindices**    |
+|                            |                   |            |keyword is given). Indices are assigned in the order antenna  |
+|                            |                   |            |names are given in this list starting from zero. Note, check  |
+|                            |                   |            |the section on the antenna layout for futher information on   |
+|                            |                   |            |how the antenna names are defined. All antennas listed here   |
+|                            |                   |            |should be defined in that section. Defined antennas which are |
+|                            |                   |            |not listed here are ignored by the ingest pipeline.           |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|baselinemap.antennaindices  |vector<int>        |None        |Optional parameter which allows a sparse map of hardware      |
+|                            |                   |            |indices. This is helpful as antennas become available in a    |
+|                            |                   |            |non-sequential order and we don't want to waste disk space    |
+|                            |                   |            |by for example always writing flagged data for ak01 antenna   |
+|                            |                   |            |despite not having it in the array, or reconfigure/repatch    |
+|                            |                   |            |the hardware every time we have a new antenna added. However, |
+|                            |                   |            |this slicing of the baseline map relies on implementation     |
+|                            |                   |            |which is fundamentally inefficient. At this stage, it wasn't  |
+|                            |                   |            |found to be a bottle neck, but we may have to remove this     |
+|                            |                   |            |in the future if we encounter performance problems when we    |
+|                            |                   |            |grow the array size.                                          |
+|                            |                   |            |                                                              |
+|                            |                   |            |If this keyword is not defined, antenna indices as assumed by |
+|                            |                   |            |the correlator are defined in the natural order starting with |
+|                            |                   |            |zero for each antenna listed in **baselinemap.antennaidx**\ . |
+|                            |                   |            |If this parameter is defined, then each element of the vector |
+|                            |                   |            |gives the corresponding hardware index for each antenna in the|
+|                            |                   |            |**baselinemap.antennaidx**\. The number of elements in these  |
+|                            |                   |            |two vectors should be the same. Note, there is the requirement|
+|                            |                   |            |that the resulting slice of the map should remain a lower or  |
+|                            |                   |            |upper baseline triangle as in the original map. Listing       |
+|                            |                   |            |antennas in the increasing order of their hardware indices is |
+|                            |                   |            |the way to ensure it (i.e. 6,1,3,15,8,9 for BETA and the      |
+|                            |                   |            |natural antenna order for ADE).                               |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|baselinemap.baselineids     |vector<int>        |None        |List of the correlation product indices to be mapped. This    |
+|                            |                   |            |way to define the mapping   is incompatible with the default  |
+|                            |                   |            |map which can be set up via **baselinemap.name**\ , only one  |
+|                            |                   |            |method should be used. This list should contain all product   |
+|                            |                   |            |indices understood by the ingest pipeline. It will ignore any |
+|                            |                   |            |data sent by the hardware which correspond to  an unsupported |
+|                            |                   |            |correlation product. All product index listed in here should  |
+|                            |                   |            |be described via baselinemap.\ **N**\ parameter which must be |
+|                            |                   |            |defined (\ **N** is the index.                                |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|baselinemap.\ **N**         |[int,int,string]   |None        |Description of the correlation product **N**\ . This parameter|
+|                            |                   |            |should be present for all product indices listed in the       | 
+|                            |                   |            |**baselinemap.baselineids** parameter. If the latter is not   |
+|                            |                   |            |defined (i.e. the pre-defined map is used), this parameer will|
+|                            |                   |            |be ignored. The value should be a 3-element tuple with antenna|
+|                            |                   |            |indices (matching **baselinemap.antennaidx**\ ) for the first |
+|                            |                   |            |and the second antenna of the given baseline, and the         |
+|                            |                   |            |polarisation product. For example, [0,1,XX] defines baseline  |
+|                            |                   |            |between the first and the second antennas (note, indices are  |
+|                            |                   |            |the same as in the measurement set and, therefore, 0-based)   |
+|                            |                   |            |and XX polarisation, i.e. parallel-hand X polarisation.       |
+|                            |                   |            |It is assumed that the signal from the second antenna is      |
+|                            |                   |            |conjugated. The map itself supports arbitrary and even sparse |
+|                            |                   |            |mapping, but other parts of ingest pipeline require either    |
+|                            |                   |            |upper or lower baseline triangle for performance reasons.     |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|baselinemap.name            |string             |None        |An alternative way to specify baseline map using a pre-defined|
+|                            |                   |            |(analytical) description. The only currently supported setting|
+|                            |                   |            |is '\ *standard*\ ' which produces the map for the ASKAP      |
+|                            |                   |            |correlator (as of December 2015). This correlator produces    |
+|                            |                   |            |2628 different products which description would bloat the     |
+|                            |                   |            |configuration file otherwise. This option is incompatible with|
+|                            |                   |            |the **baselinemap.baselineids** keyword.                      |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
 
 Correlator modes
 ~~~~~~~~~~~~~~~~
