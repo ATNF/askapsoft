@@ -93,7 +93,34 @@ General parameters
 |array.name                  |string             |None        |Name of the telescope. It is only used to populate the        |
 |                            |                   |            |appropriate field in the measurement set. But must be defined |
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
-|sbid                        |uint               |0           |Scheduling block number.                                      |
+|sbid                        |uint               |0           |Scheduling block number. This parameter is unused at the      |
+|                            |                   |            |moment.                                                       |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|tasks.tasklist              |vector<string>     |None        |List of tasks to be executed in the same order as they are    |
+|                            |                   |            |given here. The first task listed is required to be a source  |
+|                            |                   |            |task (e.g. MergedSource). Task names in this list can be      |
+|                            |                   |            |chosen freely. The exact functionality is defined by the      |
+|                            |                   |            |**type** keyword (see below). This is done to be able to      |
+|                            |                   |            |reuse same tasks with different parameters throughout the     |
+|                            |                   |            |task chain. We will refer to tasks by their type in this      |
+|                            |                   |            |documentation, as they can be named arbitrarily in this list  |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|tasks.\ **name**\ .type     |string             |None        |Type of the task with the given **name**\ . The same operation|
+|                            |                   |            |can be performed more than once in the processing chain.      |
+|                            |                   |            |For example, the same data can be written into multiple files |
+|                            |                   |            |with different spectral resolutions. To achieve this, the list|
+|                            |                   |            |of tasks contains names which are only references and can be  |
+|                            |                   |            |named arbitrarily by the user. Actual physical operations are |
+|                            |                   |            |defined by the *type* keyword which is required for each      |
+|                            |                   |            |**name** present in the task list. Each **name** can have     |
+|                            |                   |            |separate parameters defined (see below). If each task is only |
+|                            |                   |            |used once, there is no reason why **name** and **type** could |
+|                            |                   |            |not be the same.                                              |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|tasks.\ **name**\ .params.  |varies             |varies      |This is the prefix to define task-specific parameters. Each   |
+|                            |                   |            |task **name** listed in the **tasklist** parameter can have   |
+|                            |                   |            |a separate set of paramters defined, even if there is more    |
+|                            |                   |            |than one task of the same physical **type**\ .                |  
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
 
 
@@ -125,6 +152,60 @@ linearly polarised (hard coded). Note, the term *feed* in the context of measure
 |feeds.spacing               |quantity string    |None        |Optional parameter. If present, it determines the dimension   |
 |                            |                   |            |and scaling of the beam layout (see above). If not defined,   |
 |                            |                   |            |all beam offsets are assumed to be in radians.                |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+
+
+Antenna layout
+~~~~~~~~~~~~~~
+
+
+Parameters describing antenna array configuration are similar to *antennas* section 
+of :doc:`../../calim/csimulator` configuration.
+It is used as a source of data to initialise **ANTENNA** table of the measurement set, but also used by calculation of 
+the projected baseline coordinates (uvw's) if appropriate tasks are included in the chain. Only antennas referred to
+from the *baselinemap* end up listed in the **ANTENNA** table (and therefore get an index in the measurement set), other
+antennas are simply ignored (as they don't participate in the particular measurement and don't contribute to the data 
+written or processed past the source task). This section of the configuration is a slice of the antenna information
+stored by Facility Configuration Manager (FCM) and often contains parameters which are ignored by the ingest pipeline
+(e.g. the aboriginal name or pointing parameters) in addition to antennas unused in the particular experiment.
+
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|**Parameter**               |**Type**           |**Default** |**Description**                                               |
+|                            |                   |            |                                                              |
++============================+===================+============+==============================================================+
+|antennas                    |vector<string>     |None        |List of antennas for which this section defines information.  |
+|                            |                   |            |Names given here are just logical references used only in the |
+|                            |                   |            |names of appropriate configuration parameters. See baselinemap|
+|                            |                   |            |for the list of the actually used antennas.                   |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|antenna.ant.diameter        |quantity string    |None        |Default diameter of antennas, used unless a specific value    |
+|                            |                   |            |is defined explicitly for a given antenna.                    |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|antenna.ant.mount           |string             |None        |Default mount of antennas, used unless the mount parameter is |
+|                            |                   |            |defined for a given antenna. Supported values are 'equatorial'|
+|                            |                   |            |and 'altaz'. We use 'equatorial' for ASKAP to avoid confusion |
+|                            |                   |            |of general purpose packages like *casa* which can be used in  |
+|                            |                   |            |the short to medium term and for debugging.                   |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+| the following parameters all have antenna.\ **name** prefix where **name** is an item in of the **antennas** list. Note,   |
+| each element of this list should have all compulsory parameters defined.                                                   |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|<prefix>.name               |string             |None        |Name of the given antenna to be written into **ANTENNA**      |
+|                            |                   |            |subtable, use this name in **baselinemap.antennaidx** to tie  |
+|                            |                   |            |physical antenna with logical index used by the hardware.     |
+|                            |                   |            |The names given in the **antennas** keyword are only used to  |
+|                            |                   |            |form the prefix.                                              |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|<prefix>.location.itrf      |vector<double>     |None        |Vector with antenna coordinates in the ITRF frame in metres,  |
+|                            |                   |            |i.e. X, Y, Z geocentric coordinates.                          |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|<prefix>.diameter           |quantity string    |see above   |Optional parameter for diameter of the particular antenna. If |
+|                            |                   |            |not defined, the default value defined by the                 |
+|                            |                   |            |**antenna.ant.diameter** parameter (see above) will be used.  |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|<prefix>.mount              |string             |see above   |Optional mount type for the particular antenna. If not        |
+|                            |                   |            |defined, the default value defined by the                     |
+|                            |                   |            |**antenna.ant.mount** parameter (see above) will be used.     |
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
 
 Correlator modes
