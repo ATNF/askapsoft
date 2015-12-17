@@ -21,6 +21,9 @@ builder.nowarnings = True
 platform =  utils.get_platform()
 if platform['system'] == 'Darwin' and os.environ.has_key("JAVA_HOME"):
     javahome = os.environ.get('JAVA_HOME')
+#    builder.add_option('JAVACFLAGS="-source 1.7 -target 1.7" CPPFLAGS="-I%s/include -I%s/include/darwin"' %(javahome,javahome))
+    if '1.8' in javahome:
+        builder.add_option('JAVACFLAGS="-source 1.7 -target 1.7"')
     builder.add_option('CPPFLAGS="-I%s/include -I%s/include/darwin"' %(javahome,javahome))
 
 # The Cray cc and c++ compilers wrappers break here, so go directly to gcc and g++
