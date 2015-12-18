@@ -1,9 +1,7 @@
 /// @file LinmosAccumulator.h
 ///
 /// @brief combine a number of images as a linear mosaic
-/// @details This is a standalone utility to merge images into
-///     a mosaic. Some code/functionality can later be moved into cimager,
-///     but for now it is handy to have it separate. 
+/// @details 
 ///
 /// @copyright (c) 2012,2014,2015 CSIRO
 /// Australia Telescope National Facility (ATNF)
@@ -39,13 +37,12 @@
 
 // ASKAPsoft includes
 #include <utils/MultiDimArrayPlaneIter.h>
-#include <imageaccess/IImageAccess.h>
 
 using namespace casa;
 
 namespace askap {
 
-    namespace scimath {
+    namespace imagemath {
 
         /// @brief Base class supporting linear mosaics (linmos)
 
@@ -62,16 +59,6 @@ namespace askap {
                 /// @param[in] const LOFAR::ParameterSet &parset: linmos parset
                 /// @return bool true=success, false=fail
                 bool loadParset(const LOFAR::ParameterSet &parset);
-
-                /// @brief get beam centres from parset and/or image metadata
-                /// @details separate from loadParset to allow metadata to be read from input images
-                /// @param[in] const LOFAR::ParameterSet &parset: linmos parset
-                /// @param[in] const accessors::IImageAccess &iacc: image accessor
-                /// @param[in] const string outImgName: current mosaic name
-                /// @return bool true=success, false=fail
-                bool loadBeamCentres(const LOFAR::ParameterSet &parset,
-                                     const accessors::IImageAccess &iacc,
-                                     const string outImgName);
 
                 /// @brief set up a single mosaic
                 /// @param[in] const vector<string> &inImgNames : vector of images to mosaic
@@ -104,22 +91,21 @@ namespace askap {
                 bool outputBufferSetupRequired(void);
 
                 /// @brief set the input coordinate system and shape
-                /// @param[in] const string& inImgName: name of the input image
-                /// @param[in] const accessors::IImageAccess& iac
-                /// @param[in] const int n: input order of the input file
-                void setInputParameters(const string& inImgName,
-                                        const accessors::IImageAccess& iacc,
+                /// @param[in] const IPosition&: shapes of inputs to be merged
+                /// @param[in] const CoordinateSystem&: coord systems of inputs
+                /// @param[in] const int: input order of the input file
+                void setInputParameters(const IPosition& inShape,
+                                        const CoordinateSystem& inCoordSys,
                                         const int n=0);
 
                 /// @brief set the output coordinate system and shape, based on the overlap of input images
                 /// @details This method is based on the SynthesisParamsHelper::add and
                 ///     SynthesisParamsHelper::facetSlicer. It has been reimplemented here
                 ///     so that images can be read into memory separately.
-                /// @param[in] const vector<string>& inImgNames: names of the input images
-                ///     (those given for parset key 'names')
-                /// @param[in] const accessors::IImageAccess& iac
-                void setOutputParameters(const vector<string>& inImgNames,
-                                         const accessors::IImageAccess& iacc);
+                /// @param[in] const vector<IPosition>&: shapes of inputs to be merged
+                /// @param[in] const vector<CoordinateSystem>&: coord systems of inputs
+                void setOutputParameters(const vector<IPosition>& inShapeVec,
+                                         const vector<CoordinateSystem>& inCoordSysVec);
 
                 /// @brief set up any 2D temporary output image buffers required for regridding
                 void initialiseOutputBuffers(void);
@@ -178,6 +164,11 @@ namespace askap {
                 /// @return bool: true if they are equal
                 bool coordinatesAreEqual(void);
 
+                /// @brief check to see if two coordinate grids are equal
+                /// @return bool: true if they are equal
+                bool coordinatesAreEqual(const CoordinateSystem& coordSys1,
+                                         const CoordinateSystem& coordSys2);
+
                 // return metadata for the current input image
                 IPosition inShape(void) {return itsInShape;}
                 CoordinateSystem inCoordSys(void) {return itsInCoordSys;}
@@ -195,6 +186,8 @@ namespace askap {
                 void doSensitivity(bool value) {itsDoSensitivity = value;}
                 string taylorTag(void) {return itsTaylorTag;}
 
+                void beamCentres(Vector<MVDirection> centres) {itsCentres = centres;}
+
                 map<string,string> outWgtNames(void) {return itsOutWgtNames;}
                 map<string,string> outSenNames(void) {return itsOutSenNames;}
                 map<string,vector<string> > inImgNameVecs(void) {return itsInImgNameVecs;}
@@ -207,13 +200,16 @@ namespace askap {
 
                 /// @brief convert the current input shape and coordinate system to the reference (output) system
                 /// @param[in] const DirectionCoordinate& refDC: reference direction coordinate
-                /// @return IPosition vector containing BLC and TRC of the current input image, relative to another coord. system
+                /// @return IPosition vector containing BLC and TRC of the current input image,
+                ///         relative to another coord. system
                 Vector<IPosition> convertImageCornersToRef(const DirectionCoordinate& refDC);
 
-                /// @brief check to see if the input coordinate system is consistent enough with the reference system to merge
-                /// @param[in] const CoordinateSystem& refCoordSys: reference coordinate system
+                /// @brief check to see if two coordinate systems are consistent enough to merge
+                /// @param[in] const CoordinateSystem& coordSys1
+                /// @param[in] const CoordinateSystem& coordSys2
                 /// @return bool: true if they are consistent
-                bool coordinatesAreConsistent(const CoordinateSystem& refCoordSys);
+                bool coordinatesAreConsistent(const CoordinateSystem& coordSys1,
+                                              const CoordinateSystem& coordSys2);
 
                 // regridding options
                 ImageRegrid<float> itsRegridder;
@@ -257,11 +253,11 @@ namespace askap {
 
         };
 
-    } // namespace scimath
+    } // namespace imagemath
 
 } // namespace askap
 
-#include <utils/LinmosAccumulator.tcc>
+#include <linmos/LinmosAccumulator.tcc>
 
 #endif
 

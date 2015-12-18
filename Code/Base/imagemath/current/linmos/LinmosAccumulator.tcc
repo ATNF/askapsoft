@@ -1,9 +1,7 @@
 /// @file LinmosAccumulator.tcc
 ///
 /// @brief combine a number of images as a linear mosaic
-/// @details This is a standalone utility to merge images into
-///     a mosaic. Some code/functionality can later be moved into cimager,
-///     but for now it is handy to have it separate. 
+/// @details 
 ///
 /// @copyright (c) 2012,2014,2015 CSIRO
 /// Australia Telescope National Facility (ATNF)
@@ -43,7 +41,6 @@
 #include <askap/AskapUtil.h>
 #include <askap/StatReporter.h>
 #include <utils/MultiDimArrayPlaneIter.h>
-#include <imageaccess/IImageAccess.h>
 
 ASKAP_LOGGER(linmoslogger, ".linmosaccumulator");
 
@@ -71,40 +68,9 @@ MVDirection convertDir(const std::string &ra, const std::string &dec) {
     return MVDirection(tmpra,tmpdec);  
 }
 
-/// @brief helper method to load beam offsets from the parset file
-/// @details shares the same format as csimulator feed definition. This is needed to support ASKAP BETA,
-///    which initially uses the same image centre for all beams, leaving beam offsets unspecified.
-///    Therefore, this information has to be supplied by other means. Copied from testlinmos.
-/// @param[in] const LOFAR::ParameterSet &parset : parset containing spacing and offset parameters
-/// @param[in] const Vector<std::string> beamNames : which offsets to get from the parset
-/// @param[in] MVDirection centre : the pointing centre, which all offsets are relative to
-/// @return Vector<MVDirection> : a MVDirection for each name in beamNames
-Vector<MVDirection> loadBeamOffsets(const LOFAR::ParameterSet &parset, const Vector<std::string> beamNames,
-                                                  MVDirection centre) {
-
-    Vector<MVDirection> centres (beamNames.size(), centre);
-
-    ASKAPLOG_INFO_STR(linmoslogger, " -> looking for the feed spacing");
-    Quantity qspacing = askap::asQuantity(parset.getString("feeds.spacing"));
-    double spacing = qspacing.getValue("rad");
-    ASKAPLOG_INFO_STR(linmoslogger, "    beam spacing set to " << qspacing);       
-
-    ASKAPLOG_INFO_STR(linmoslogger, " -> looking for a feed offset for each image");
-    for (uint beam = 0; beam < beamNames.size(); ++beam) {
-         const string parName = "feeds." + beamNames[beam];
-         const Vector<double> xy(parset.getDoubleVector(parName));
-         //ASKAPCHECK(xy.size() == 2, "Expect two elements for each offset");
-         // the shift appears to be positive in HA, so multiply by -1. Simulator.cc states:
-         // "x direction is flipped to convert az-el type frame to ra-dec"
-         centres[beam].shift(-xy[0]*spacing, xy[1]*spacing, casa::True);
-         ASKAPLOG_INFO_STR(linmoslogger, " -> " << parName << " centre: " << centres[beam] );
-    }
-    return centres;
-}
-
 namespace askap {
 
-    namespace scimath {
+    namespace imagemath {
 
         /// @brief Base class supporting linear mosaics (linmos)
 
@@ -124,9 +90,6 @@ namespace askap {
         // functions in the linmos accumulator class
 
         bool LinmosAccumulator::loadParset(const LOFAR::ParameterSet &parset) {
-
-            ASKAPLOG_INFO_STR(linmoslogger, "ASKAP linear mosaic task " << ASKAP_PACKAGE_VERSION);
-            ASKAPLOG_INFO_STR(linmoslogger, "Parset parameters:\n" << parset);
 
             const vector<string> inImgNames = parset.getStringVector("names", true);
             const vector<string> inWgtNames = parset.getStringVector("weights", vector<string>(), true);
@@ -248,93 +211,10 @@ namespace askap {
 
         }
 
-        bool LinmosAccumulator::loadBeamCentres(const LOFAR::ParameterSet &parset,
-                                                const accessors::IImageAccess &iacc,
-                                                const string outImgName) {
-
-            const vector<string> inImgNames = itsInImgNameVecs[outImgName];
-
-            if (itsWeightType == FROM_BP_MODEL) {
-
-                // if setting weights using beam models, check the input for extra information
-
-                ASKAPLOG_INFO_STR(linmoslogger, "Looking for parset options associated with primary-beam models");
-
-                MVDirection centre;
-                bool centreDefined = false;
-
-                // set the centre of the "feeds" offset parameters (e.g. the boresight of the PAF)
-                if (parset.isDefined("feeds.centre")) {
-                    ASKAPLOG_INFO_STR(linmoslogger, "Found centre of the feeds to use in beam models:");
-                    const vector<string> feedsCentre(parset.getStringVector("feeds.centre"));
-                    ASKAPCHECK(feedsCentre.size()==2, " -> the feeds.centre vector should have 2 elements");
-                    centre = convertDir(feedsCentre[0], feedsCentre[1]);
-                    ASKAPLOG_INFO_STR(linmoslogger, " -> "<<feedsCentre<<", = "<<centre);
-                    centreDefined = true;
-                }
-                else if (parset.isDefined("feeds.centreref")) {
-                    uint centreref = parset.getInt("feeds.centreref");
-                    if (centreref<inImgNames.size()) {
-                        ASKAPLOG_INFO_STR(linmoslogger, "Using the reference pixel of input image "<<centreref<<
-                            " as the centre of the feeds to use in beam models");
-                        const CoordinateSystem coordSys = iacc.coordSys(inImgNames[centreref]);
-                        const int DCpos = coordSys.findCoordinate(Coordinate::DIRECTION,-1);
-                        const DirectionCoordinate DC = coordSys.directionCoordinate(DCpos);
-                        DC.toWorld(centre,DC.referencePixel());
-                        ASKAPLOG_INFO_STR(linmoslogger, " -> "<<centre);
-                        centreDefined = true;
-                    }
-                    else {
-                        ASKAPLOG_WARN_STR(linmoslogger, "Found unsuitable centreref parameter: "<<centreref);
-                    }
-                }
-
-                // centres for each beam
-                if (centreDefined) {
-
-                    if (parset.isDefined("feeds.offsetsfile")) {
-
-                        ASKAPLOG_INFO_STR(linmoslogger,  "Loading beam offsets from " << parset.getString("feeds.offsetsfile"));
-                        LOFAR::ParameterSet feed_parset(parset.getString("feeds.offsetsfile"));
-
-                        vector<string> beamNames;
-                        ASKAPLOG_INFO_STR(linmoslogger, " -> looking for feed names");
-                        if (parset.isDefined("feeds.names")) {
-                            beamNames = parset.getStringVector("feeds.names", true);
-                            ASKAPLOG_INFO_STR(linmoslogger,  "    using names given in the main parset");
-                        } else if (feed_parset.isDefined("feeds.names")) {
-                            beamNames = feed_parset.getStringVector("feeds.names", true);
-                            ASKAPLOG_INFO_STR(linmoslogger,  "    using names given in the feed-offset parset");
-                        }
-                        ASKAPCHECK(beamNames.size() > 0, "No beams specified");
-                        ASKAPCHECK(beamNames.size() == inImgNames.size(),
-                           "Number of beams does not match number of input files");
-
-                        itsCentres = loadBeamOffsets(feed_parset, beamNames, centre);
-
-                        if (parset.isDefined("feeds.spacing")) {
-                            ASKAPLOG_WARN_STR(linmoslogger, "Feed info specified in parset but ignored. Using offset file");
-                        }
-
-                    } else {
-
-                        ASKAPCHECK(parset.isDefined("names"), "No names specified in parset");
-                        itsCentres = loadBeamOffsets(parset, parset.getStringVector("names", true), centre);
-
-                    }
-
-                } else {
-                    ASKAPLOG_WARN_STR(linmoslogger, "Centre of the feeds not found. Setting beam centres to input ref. pixels");
-                }
-
-            }
-
-            return true;
-
-        }
-
-        void LinmosAccumulator::setSingleMosaic(const vector<string> &inImgNames, const vector<string> &inWgtNames,
-                                                const string &outImgName, const string &outWgtName) {
+        void LinmosAccumulator::setSingleMosaic(const vector<string> &inImgNames,
+                                                const vector<string> &inWgtNames,
+                                                const string &outImgName,
+                                                const string &outWgtName) {
 
             // set some variables for the sensitivity image searches
             string image_tag = "image", restored_tag = ".restored", tmpName;
@@ -399,8 +279,10 @@ namespace askap {
 
         } // LinmosAccumulator::setSingleMosaic()
 
-        void LinmosAccumulator::findAndSetTaylorTerms(const vector<string> &inImgNames, const vector<string> &inWgtNames,
-                                                      const string &outImgNameOrig, const string &outWgtNameOrig) {
+        void LinmosAccumulator::findAndSetTaylorTerms(const vector<string> &inImgNames,
+                                                      const vector<string> &inWgtNames,
+                                                      const string &outImgNameOrig,
+                                                      const string &outWgtNameOrig) {
 
             ASKAPLOG_INFO_STR(linmoslogger, "Looking for "<<itsNumTaylorTerms<<" taylor terms");
             ASKAPCHECK(itsNumTaylorTerms>=0, "Number of taylor terms should be greater than or equal to 0");
@@ -721,10 +603,12 @@ namespace askap {
             return ( itsOutBuffer.shape().nelements() == 0 );
         }
 
-        void LinmosAccumulator::setInputParameters(const string& inImgName, const accessors::IImageAccess& iacc, const int n) {
+        void LinmosAccumulator::setInputParameters(const IPosition& inShape,
+                                                   const CoordinateSystem& inCoordSys,
+                                                   const int n) {
             // set the input coordinate system and shape
-            itsInCoordSys = iacc.coordSys(inImgName);
-            itsInShape = iacc.shape(inImgName);
+            itsInShape = inShape;
+            itsInCoordSys = inCoordSys;
 
             if (itsWeightType == FROM_BP_MODEL) {
                 // set the centre of the beam
@@ -739,14 +623,16 @@ namespace askap {
             }
         }
 
-        void LinmosAccumulator::setOutputParameters(const vector<string>& inImgNames, const accessors::IImageAccess& iacc) {
+        void LinmosAccumulator::setOutputParameters(const vector<IPosition>& inShapeVec,
+                                                    const vector<CoordinateSystem>& inCoordSysVec) {
+                                                 
+            ASKAPLOG_INFO_STR(linmoslogger, "Determining output image based on the overlap of input images");
+            ASKAPCHECK(inShapeVec.size()==inCoordSysVec.size(), "Input vectors are inconsistent");
+            ASKAPCHECK(inShapeVec.size()>0, "Number of input vectors should be greater that 0");
 
-            ASKAPLOG_INFO_STR(linmoslogger, "Determining output image properties based on the overlap of input images");
-            ASKAPCHECK(inImgNames.size()>0, "Number of input images should be greater that 0");
-
-            const IPosition refShape = iacc.shape(inImgNames[0]);
+            const IPosition refShape = inShapeVec[0];
             ASKAPDEBUGASSERT(refShape.nelements() >= 2);
-            const CoordinateSystem refCS = iacc.coordSys(inImgNames[0]);
+            const CoordinateSystem refCS = inCoordSysVec[0];
             const int dcPos = refCS.findCoordinate(Coordinate::DIRECTION,-1);
             const DirectionCoordinate refDC = refCS.directionCoordinate(dcPos);
             IPosition refBLC(refShape.nelements(),0);
@@ -760,19 +646,16 @@ namespace askap {
             IPosition tempBLC = refBLC;
             IPosition tempTRC = refTRC;
 
-            // Loop over input images, converting their image bounds to the ref system 
+            // Loop over input vectors, converting their image bounds to the ref system 
             // and expanding the new overlapping image bounds where appropriate.
-            for (uint img = 1; img < inImgNames.size(); ++img ) {
+            for (uint img = 1; img < inShapeVec.size(); ++img ) {
 
-                // short cuts
-                const string inImgName = inImgNames[img];
-
-                // 
-                itsInShape = iacc.shape(inImgName);
-                itsInCoordSys = iacc.coordSys(inImgName);
+                itsInShape = inShapeVec[img];
+                itsInCoordSys = inCoordSysVec[img];
 
                 // test to see if the loaded coordinate system is close enough to the reference system for merging
-                ASKAPCHECK(coordinatesAreConsistent(refCS), "Input images have inconsistent coordinate systems");
+                ASKAPCHECK(coordinatesAreConsistent(itsInCoordSys, refCS),
+                    "Input images have inconsistent coordinate systems");
                 // could also test whether they are equal and set a regrid tag to false if all of them are
 
                 Vector<IPosition> corners = convertImageCornersToRef(refDC);
@@ -880,7 +763,9 @@ namespace askap {
         }
 
         void LinmosAccumulator::loadInputBuffers(const scimath::MultiDimArrayPlaneIter& planeIter,
-                                                 Array<float>& inPix, Array<float>& inWgtPix, Array<float>& inSenPix) {
+                                                 Array<float>& inPix,
+                                                 Array<float>& inWgtPix,
+                                                 Array<float>& inSenPix) {
             itsInBuffer.put(planeIter.getPlane(inPix));
             if (itsWeightType == FROM_WEIGHT_IMAGES) {
                 itsInWgtBuffer.put(planeIter.getPlane(inWgtPix));
@@ -921,8 +806,10 @@ namespace askap {
 
         }
 
-        void LinmosAccumulator::accumulatePlane(Array<float>& outPix, Array<float>& outWgtPix,
-                                                Array<float>& outSenPix, const IPosition& curpos) {
+        void LinmosAccumulator::accumulatePlane(Array<float>& outPix,
+                                                Array<float>& outWgtPix,
+                                                Array<float>& outSenPix,
+                                                const IPosition& curpos) {
 
             // copy the pixel iterator containing all dimensions
             IPosition fullpos(curpos);
@@ -1051,9 +938,13 @@ namespace askap {
 
         }
 
-        void LinmosAccumulator::accumulatePlane(Array<float>& outPix, Array<float>& outWgtPix, Array<float>& outSenPix,
-                                                const Array<float>& inPix, const Array<float>& inWgtPix,
-                                                const Array<float>& inSenPix, const IPosition& curpos) {
+        void LinmosAccumulator::accumulatePlane(Array<float>& outPix,
+                                                Array<float>& outWgtPix,
+                                                Array<float>& outSenPix,
+                                                const Array<float>& inPix,
+                                                const Array<float>& inWgtPix,
+                                                const Array<float>& inSenPix,
+                                                const IPosition& curpos) {
 
             ASKAPASSERT(inPix.shape() == outPix.shape());
 
@@ -1177,8 +1068,10 @@ namespace askap {
 
         }
 
-        void LinmosAccumulator::deweightPlane(Array<float>& outPix, const Array<float>& outWgtPix,
-                                              Array<float>& outSenPix, const IPosition& curpos) {
+        void LinmosAccumulator::deweightPlane(Array<float>& outPix,
+                                              const Array<float>& outWgtPix,
+                                              Array<float>& outSenPix,
+                                              const IPosition& curpos) {
 
             float minVal, maxVal;
             IPosition minPos, maxPos;
@@ -1261,47 +1154,52 @@ namespace askap {
 
         }
 
-        bool LinmosAccumulator::coordinatesAreConsistent(const CoordinateSystem& refCoordSys) {
+        bool LinmosAccumulator::coordinatesAreConsistent(const CoordinateSystem& coordSys1,
+                                                         const CoordinateSystem& coordSys2) {
             // Check to see if it makes sense to combine images with these coordinate systems.
             // Could get more tricky, but right now make sure any extra dimensions, such as frequency
             // and polarisation, are equal in the two systems.
-            if ( itsInCoordSys.nCoordinates() != refCoordSys.nCoordinates() ) {
+            if ( coordSys1.nCoordinates() != coordSys2.nCoordinates() ) {
                 //ASKAPLOG_INFO_STR(linmoslogger, "Coordinates are not consistent: shape mismatch");
                 return false;
             }
-            if (!allEQ(itsInCoordSys.worldAxisNames(), refCoordSys.worldAxisNames())) {
+            if (!allEQ(coordSys1.worldAxisNames(), coordSys2.worldAxisNames())) {
                 //ASKAPLOG_INFO_STR(linmoslogger, "Coordinates are not consistent: axis name mismatch");
                 return false;
             }
-            if (!allEQ(itsInCoordSys.worldAxisUnits(), refCoordSys.worldAxisUnits())) {
+            if (!allEQ(coordSys1.worldAxisUnits(), coordSys2.worldAxisUnits())) {
                 //ASKAPLOG_INFO_STR(linmoslogger, "Coordinates are not consistent: axis unit mismatch");
                 return false;
             }
             return true;
         }
 
+        // Check that the input coordinate system is the same as the output
         bool LinmosAccumulator::coordinatesAreEqual(void) {
-            // Check to see if regridding is required. If they are equal there is no need.
+            return coordinatesAreEqual(itsInCoordSys, itsOutCoordSys);
+        }
 
-            // Test the these things are set up...
+        // Check that two coordinate systems are the same
+        bool LinmosAccumulator::coordinatesAreEqual(const CoordinateSystem& coordSys1,
+                                                    const CoordinateSystem& coordSys2) {
 
-            // Does something better already exist?
+            // Set threshold for allowed small numerical differences
             double thresh = 1.0e-12;
 
-            // Check that the input dimensionality is the same as that of the output
-            if ( !coordinatesAreConsistent(itsOutCoordSys) ) return false;
+            // Check that the dimensionality of the systems is consistent.
+            if ( !coordinatesAreConsistent(coordSys1, coordSys2) ) return false;
 
-            // Also check that the size and centre of each dimension is the same.
+            // Check that the size and centre of each dimension is the same.
             if ( itsInShape != itsOutShape ) {
                 //ASKAPLOG_INFO_STR(linmoslogger, "Input and output coordinates are not equal: shape mismatch");
                 return false;
             }
             // test that the grid properties of each dimension are equal
-            for (casa::uInt dim=0; dim<itsInCoordSys.nCoordinates(); ++dim) {
+            for (casa::uInt dim=0; dim<coordSys1.nCoordinates(); ++dim) {
 
-                if ( (itsInCoordSys.referencePixel()[dim] != itsOutCoordSys.referencePixel()[dim]) ||
-                     (fabs(itsInCoordSys.increment()[dim] - itsOutCoordSys.increment()[dim]) > thresh) ||
-                     (fabs(itsInCoordSys.referenceValue()[dim] - itsOutCoordSys.referenceValue()[dim]) > thresh) ) {
+                if ( (coordSys1.referencePixel()[dim] != coordSys2.referencePixel()[dim]) ||
+                     (fabs(coordSys1.increment()[dim] - coordSys2.increment()[dim]) > thresh) ||
+                     (fabs(coordSys1.referenceValue()[dim] - coordSys2.referenceValue()[dim]) > thresh) ) {
                     //ASKAPLOG_INFO_STR(linmoslogger, "Coordinates are not equal: coord system mismatch for dim " << dim);
                     return false;
                 }
@@ -1309,6 +1207,6 @@ namespace askap {
             return true;
         }
 
-    } // namespace scimath
+    } // namespace imagemath
 
 } // namespace askap
