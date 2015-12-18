@@ -45,7 +45,7 @@ const unsigned int numPhiChan = 2500;
 const float deltaPhi = 25.;
 const float phiZero = 0.;
 const float threshSNR=8.6;
-const float threshDB=6.1;
+const float threshDB=5.0;
 class RMSynthesisTest : public CppUnit::TestFixture {
         CPPUNIT_TEST_SUITE(RMSynthesisTest);
         CPPUNIT_TEST(testParsets);
