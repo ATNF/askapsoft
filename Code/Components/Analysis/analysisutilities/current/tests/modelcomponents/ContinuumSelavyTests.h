@@ -38,25 +38,24 @@ namespace askap {
 
   namespace analysisutilities {
 
-//Original input was as follows - just the header of a selavy-fitResults.txt file, with a single line
+//Original input was as follows - just the header of a selavy-results.components.txt file, with a single line
 /* 
-#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 
-#      ID           Name         RA        DEC      X      Y       F_int      F_peak   F_int(fit)   F_pk(fit)  Maj(fit)  Min(fit) P.A.(fit)  Maj(fit_deconv.)   Min(fit_deconv.) P.A.(fit_deconv.)                          Alpha    Beta Chisq(fit)   RMS(image)  RMS(fit) Nfree(fit) NDoF(fit) NPix(fit) NPix(obj) Guess? 
-#                             [deg]      [deg]                      [Jy]   [Jy/beam]         [Jy]   [Jy/beam]  [arcsec]  [arcsec]     [deg]          [arcsec]           [arcsec]             [deg]                                                      [Jy/beam]                                                           
-#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 
-      70a J034439-362734  56.159180 -36.463321 1362.0 4235.7     0.08043     0.03443      0.04286     0.03440    25.425    17.936      4.97            9.9803            6.93991              7.84                       -1.06685   0.000    787.936     0.000258     1.195          6       533       552       552      0
+#                                                island_id                                              component_id component_name ra_hms_cont dec_dms_cont ra_deg_cont dec_deg_cont     ra_err    dec_err       freq  flux_peak flux_peak_err flux_int flux_int_err maj_axis min_axis pos_ang maj_axis_err min_axis_err pos_ang_err   maj_axis_deconv min_axis_deconv pos_ang_deconv  chi_squared_fit rms_fit_gauss spectral_index spectral_curvature  rms_image has_siblings fit_is_estimate flag_c3 flag_c4                                                                                             comment
+#                                                       --                                                        --                                               [deg]        [deg]   [arcsec]   [arcsec]      [MHz] [mJy/beam]    [mJy/beam]    [mJy]        [mJy] [arcsec] [arcsec]   [deg]     [arcsec]     [arcsec]       [deg]          [arcsec]        [arcsec]          [deg]               --    [mJy/beam]             --                 -- [mJy/beam]
+
+  SBnull_SB_609_617_639_643_659_no617b6_withBeam_Freq_1578 SBnull_SB_609_617_639_643_659_no617b6_withBeam_Freq_1578a J225711-614024  22:57:11.5    -61:40:24  344.298050   -61.673410       0.00       0.00      864.0      1.858         0.000    1.823        0.000    78.48    44.34  144.81         0.00         0.00        0.00           30.0609            0.00         -69.26           0.0200        40.848           0.00               0.00      0.296            0               0       0       0
 */ 
 
-      const std::string ContinuumSelavyInput="      70a J034439-362734  56.159180 -36.463321 1362.0 4235.7     0.08043     0.03443      0.04286     0.03440    25.425    17.936      4.97            9.9803            6.93991              7.84                       -1.06685   0.000    787.936     0.000258     1.195          6       533       552       552      0";
+  const std::string ContinuumSelavyInput="  SBnull_SB_609_617_639_643_659_no617b6_withBeam_Freq_1578 SBnull_SB_609_617_639_643_659_no617b6_withBeam_Freq_1578a J225711-614024  22:57:11.5    -61:40:24  344.298050   -61.673410       0.00       0.00      864.0      1.858         0.000    1.823        0.000    78.48    44.34  144.81         0.00         0.00        0.00           30.0609            0.00         -69.26           0.0200        40.848           0.00               0.00      0.296            0               0       0       0";
 
-      const std::string RA = ContinuumSelavyInput.substr(26,9);
-      const std::string Dec = ContinuumSelavyInput.substr(36,10);
-      const double flux = atof(ContinuumSelavyInput.substr(90,7).c_str());
-      const double alpha = atof(ContinuumSelavyInput.substr(217,8).c_str());
-      const double maj = atof(ContinuumSelavyInput.substr(113,6).c_str());
-      const double min = atof(ContinuumSelavyInput.substr(123,6).c_str());
-      const double pa = atof(ContinuumSelavyInput.substr(135,4).c_str());
-
+      const std::string RA = ContinuumSelavyInput.substr(133,10);
+      const std::string Dec = ContinuumSelavyInput.substr(147,9);
+      const double flux = atof(ContinuumSelavyInput.substr(243,7).c_str());
+      const double alpha = atof(ContinuumSelavyInput.substr(416,8).c_str());
+      const double maj = atof(ContinuumSelavyInput.substr(265,6).c_str());
+      const double min = atof(ContinuumSelavyInput.substr(274,6).c_str());
+      const double pa = atof(ContinuumSelavyInput.substr(281,6).c_str());
+  const double EPSILON=1.e-5;
 
       class ContinuumSelavyTest : public CppUnit::TestFixture {
 	  CPPUNIT_TEST_SUITE(ContinuumSelavyTest);
@@ -82,13 +81,18 @@ namespace askap {
 
 /*****************************************/
 	  void testParameters() {
+              // ASKAPLOG_DEBUG_STR(logger, "ra() = " << itsComponent.ra());
+              // ASKAPLOG_DEBUG_STR(logger, "RA = " << RA);
+              std::cout << "pa() = " << itsComponent.pa() << "\n";
+              std::cout << "pa = " << pa << "\n";
+              std::cout << itsComponent.pa() - pa << "\n";
 	      CPPUNIT_ASSERT(itsComponent.ra()==RA);
 	      CPPUNIT_ASSERT(itsComponent.dec()==Dec);
-	      CPPUNIT_ASSERT(fabs(itsComponent.fluxZero()-flux)<1.e-6);
-	      CPPUNIT_ASSERT(fabs(itsComponent.alpha()-alpha)<1.e-6);
-	      CPPUNIT_ASSERT(fabs(itsComponent.maj()-maj)<1.e-6);
-	      CPPUNIT_ASSERT(fabs(itsComponent.min()-min)<1.e-6);
-	      CPPUNIT_ASSERT(fabs(itsComponent.pa()-pa)<1.e-6);
+	      CPPUNIT_ASSERT(fabs(itsComponent.fluxZero()-flux)<EPSILON);
+	      CPPUNIT_ASSERT(fabs(itsComponent.alpha()-alpha)<EPSILON);
+	      CPPUNIT_ASSERT(fabs(itsComponent.maj()-maj)<EPSILON);
+	      CPPUNIT_ASSERT(fabs(itsComponent.min()-min)<EPSILON);
+	      CPPUNIT_ASSERT(fabs(itsComponent.pa()-pa)<EPSILON);
 	      CPPUNIT_ASSERT(!itsComponent.isGuess());
 	  }
 
@@ -97,10 +101,10 @@ namespace askap {
 	      const double f1000 = flux * pow(1000./itsComponent.nuZero(), alpha);
 	      const double f2000 = flux * pow(2000./itsComponent.nuZero(), alpha);
 
-	      CPPUNIT_ASSERT(fabs(itsComponent.fluxZero()-flux)<1.e-6);
-	      CPPUNIT_ASSERT(fabs(itsComponent.flux(1400.)-f1400)<1.e-6);
-	      CPPUNIT_ASSERT(fabs(itsComponent.flux(1000.)-f1000)<1.e-6);
-	      CPPUNIT_ASSERT(fabs(itsComponent.flux(2000.)-f2000)<1.e-6);
+	      CPPUNIT_ASSERT(fabs(itsComponent.fluxZero()-flux)<EPSILON);
+	      CPPUNIT_ASSERT(fabs(itsComponent.flux(1400.)-f1400)<EPSILON);
+	      CPPUNIT_ASSERT(fabs(itsComponent.flux(1000.)-f1000)<EPSILON);
+	      CPPUNIT_ASSERT(fabs(itsComponent.flux(2000.)-f2000)<EPSILON);
 	  }
 
       };
