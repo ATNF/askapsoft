@@ -327,119 +327,206 @@ configurations should be defined up front (so the appropriate **SPECTRAL_WINDOW*
 |                            |                   |            |likely to cause problems elsewhere.                           |
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
 
+Monitoring via Ice
+~~~~~~~~~~~~~~~~~~
+
+A number of tasks and the ingest pipeline itself are able to publish monitoring information via Ice. Parameters in this
+section control the details.
+
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|**Parameter**               |**Type**           |**Default** |**Description**                                               |
+|                            |                   |            |                                                              |
++============================+===================+============+==============================================================+
+|monitoring.enabled          |boolean            |false       |If true, then monitoring information is published via Ice.    |
+|                            |                   |            |Otherwise, the code does not attempt talk to Ice at all.      |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|monitoring.servicename      |string             |None        |If monitoring is enabled, this parameter must be specified.   |
+|                            |                   |            |This parameter provides the name of the monitoring service    |
+|                            |                   |            |interface that will be registered in the Ice locator service. |
+|                            |                   |            |An example would be "MonitoringService".                      |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|monitoring.adaptername      |string             |None        |If monitoring is enabled, this parameter must be specified.   |
+|                            |                   |            |This parameter provides the name of the adapter on which the  |
+|                            |                   |            |monitoring service proxy object will be hosted. This adapeter |
+|                            |                   |            |must be configured in the Ice properties section (see example |
+|                            |                   |            |below).                                                       |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|monitoring.ice.locator_host |string             |None        |If monitoring is enabled, this parameter must be specified.   |
+|                            |                   |            |Host name for the Ice locator service                         |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|monitoring.ice.locator_port |string             |None        |If monitoring is enabled, this parameter must be specified.   |
+|                            |                   |            |Port number for the Ice locator service.                      |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+
+
+Metadata access via Ice
+~~~~~~~~~~~~~~~~~~~~~~~
+
+The metadata are distributed by the Telescope Operating System (TOS) via Ice. This section contains Ice-related parameters
+to set up metadata source (subscriber to Ice messages). These parameters are not required if **NoMetadataSource** is used as
+the **Source** task.
+
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|**Parameter**               |**Type**           |**Default** |**Description**                                               |
+|                            |                   |            |                                                              |
++============================+===================+============+==============================================================+
+|metadata_source.ice.locator\|string             |None        |Host name for the Ice locator service                         |
+|\_host                      |                   |            |                                                              |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|metadata_source.ice.locator\|string             |None        |Port number for the Ice locator service                       |
+|\_port                      |                   |            |                                                              |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|metadata_source.icestorm.to\|string             |None        |Topic manager string, e.g. **IceStorm/TopicManager@IceStorm.T\|
+|picmanager                  |                   |            |opicManager**                                                 |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|metadata.topic              |string             |None        |The name of the Ice topic used to distribute metadata         |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+
+
 
 The text below is still to be done (currently a copy of another page)
-
-+----------------------------+----------+------------+--------------------------------------------------------------+
-| ice.servicename            | string   | *None*     |The service name (i.e. Ice object identity) for the CP manager|
-|                            |          |            |service interface.                                            |
-+----------------------------+----------+------------+--------------------------------------------------------------+
-| ice.adaptername            | string   | *None*     |The object adapter identity                                   |
-+----------------------------+----------+------------+--------------------------------------------------------------+
-| monitoring.enabled         | boolean  | false      |Controls the availability of the Ice monitoring provider      |
-|                            |          |            |interface. If enabled an Ice interface permits tools such as  |
-|                            |          |            |user interfaces and the monitoring archiver to collect        |
-|                            |          |            |monitoring data from the service.                             |
-+----------------------------+----------+------------+--------------------------------------------------------------+
-| monitoring.ice.servicename | string   | *None*     |If monitoring is enabled, this parameter must be specified.   |
-|                            |          |            |This parameter provides the name of the monitoring service    |
-|                            |          |            |interface that will be registered in the Ice locator service. |
-|                            |          |            |An example would be "CentralProcessoMonitoringService".       |
-+----------------------------+----------+------------+--------------------------------------------------------------+
-| monitoring.ice.adaptername | string   | *None*     |If monitoring is enabled, this parameter must be specified.   |
-|                            |          |            |This parameter provides the name of the adapter on which the  |
-|                            |          |            |monitoring service proxy object will be hosted. This adapeter |
-|                            |          |            |must be configured in the Ice properties section (see example |
-|                            |          |            |below).                                                       |
-+----------------------------+----------+------------+--------------------------------------------------------------+
-| fcm.ice.identity           | string   | *None*     |The Ice object identity of the Facility Configuration Manager |
-|                            |          |            |(FCM). This should be qualified with an adapter name if the   |
-|                            |          |            |FCM object is not registered as a "well known object".        |
-+----------------------------+----------+------------+--------------------------------------------------------------+
-| dataservice.ice.identity   | string   | *None*     |The Ice object identity of the Telescope Operating System     |
-|                            |          |            |(TOS) Dataservice. This should be qualified with an adapter   |
-|                            |          |            |name if the TOS Dataservice is not registeed as w "well known |
-|                            |          |            |object."                                                      |
-+----------------------------+----------+------------+--------------------------------------------------------------+
-| ingest.workdir             | string   | *None*     |The working directory for the ingest pipeline instance. Within|
-|                            |          |            |this directory a sub-directory will be created (one for each  |
-|                            |          |            |scheduling block executed) for any output files such as       |
-|                            |          |            |observation logs and datasets.                                |
-+----------------------------+----------+------------+--------------------------------------------------------------+
-| ingest.command             | string   | *None*     |The command required to execute the ingest pipeline.          |
-+----------------------------+----------+------------+--------------------------------------------------------------+
-| ingest.args                | string   | *None*     |The command line arguments to be passed to the ingest         |
-|                            |          |            |pipeline.                                                     |
-+----------------------------+----------+------------+--------------------------------------------------------------+
-
-Below are the required ICE parameters:
-
-+---------------------------------------+---------+-----------+-----------------------------------------------------+
-|**Parameter**                          |**Type** |**Default**|**Description**                                      |
-+=======================================+=========+===========+=====================================================+
-|ice_properties.Ice.Default.Locator     | string  | *None*    |Identifies the Ice Locator. This will be of the form:|
-|                                       |         |           |*IceGrid/Locator:tcp -h <hostname> -p 4061*          |
-+---------------------------------------+---------+-----------+-----------------------------------------------------+
-|ice_properties.CentralProcessorAdapter\| string  | *None*    |Configures the adapter endpoint that will host the   |
-|.Endpoints                             |         |           |actual manager service. Typically this will be: *tcp*|
-+---------------------------------------+---------+-----------+-----------------------------------------------------+
-|ice_properties.CentralProcessorAdapter\| string  | *None*    |This is the name of the adapter as it is registered  |
-|.AdapterId                             |         |           |in the Ice locator service. This will typically be:  |
-|                                       |         |           |*CentralProcessorAdapter*                            |
-+---------------------------------------+---------+-----------+-----------------------------------------------------+
-|ice_properties.CentralProcessorMonitor\| string  | *None*    |Configures the adapter endpoint that will host the   |
-|ingAdapter.Endpoints                   |         |           |monitoring provider interface. Typically this will   |
-|                                       |         |           |be: *tcp*                                            |
-+---------------------------------------+---------+-----------+-----------------------------------------------------+
-|ice_properties.CentralProcessorMonitor\| string  | *None*    |This is the name of the adapter (for the monitoring  |
-|ingAdapter.AdapterId                   |         |           |provider interface) as it will be registered in the  |
-|                                       |         |           |Ice locator service. This will typically be:         |
-|                                       |         |           |*CentralProcessorMonitoringAdapter*                  |
-+---------------------------------------+---------+-----------+-----------------------------------------------------+
 
 Example
 ~~~~~~~
 
 .. code-block:: bash
 
+
+    ########################## Array configuration #########################
+
+    # Antennas
+    antenna.ant.diameter = 12m
+    antenna.ant.mount = equatorial
+    antenna.ant12.location.itrf = [-2556496.23395074, 5097333.71443976, -2848187.33832738]
+    antenna.ant12.name = ak12
+    antenna.ant13.location.itrf = [-2556407.33285999, 5097064.98559973, -2848756.02202956]
+    antenna.ant13.name = ak13
+    antenna.ant14.location.itrf = [-2555972.78569203, 5097233.67554548, -2848839.90236005]
+    antenna.ant14.name = ak14
+    antenna.ant2.location.itrf = [-2556109.976515, 5097388.699862, -2848440.12097248]
+    antenna.ant2.name = ak02
+    antenna.ant4.location.itrf = [-2556087.396082, 5097423.589662, -2848396.867933]
+    antenna.ant4.name = ak04
+    antenna.ant5.location.itrf = [-2556028.60799091, 5097451.46862483, -2848399.83113161]
+    antenna.ant5.name = ak05
+    antennas = [ant2,ant4,ant5,ant12,ant13,ant14]
+
+    array.name = ASKAP
+    sbid = 335
+
+    # Correlation product map
+    baselinemap.antennaidx = [ak02, ak04, ak05, ak12, ak13, ak14]
+    baselinemap.antennaindices = [1, 3, 4, 11, 12, 13]
+    baselinemap.name = standard
+
+    # Correlator mode
+    correlator.mode.standard.chan_width = 18.518518kHz
+    correlator.mode.standard.interval = 5000000
+    correlator.mode.standard.n_chan = 216
+    correlator.mode.standard.stokes = [XX, XY, YX, YY]
+    correlator.modes = [standard]
+
+    # Beam configuration
+    feeds.n_feeds = 36
+    feeds.names = [PAF36]
+    feeds.spacing = 1deg
+    feeds.feed0 = [0., 0.]
+    feeds.feed1 = [0., 0.]
+    feeds.feed10 = [0., 0.]
+    feeds.feed11 = [0., 0.]
+    feeds.feed12 = [0., 0.]
+    feeds.feed13 = [0., 0.]
+    feeds.feed14 = [0., 0.]
+    feeds.feed15 = [0., 0.]
+    feeds.feed16 = [0., 0.]
+    feeds.feed17 = [0., 0.]
+    feeds.feed18 = [0., 0.]
+    feeds.feed19 = [0., 0.]
+    feeds.feed2 = [0., 0.]
+    feeds.feed20 = [0., 0.]
+    feeds.feed21 = [0., 0.]
+    feeds.feed22 = [0., 0.]
+    feeds.feed23 = [0., 0.]
+    feeds.feed24 = [0., 0.]
+    feeds.feed25 = [0., 0.]
+    feeds.feed26 = [0., 0.]
+    feeds.feed27 = [0., 0.]
+    feeds.feed28 = [0., 0.]
+    feeds.feed29 = [0., 0.]
+    feeds.feed3 = [0., 0.]
+    feeds.feed30 = [0., 0.]
+    feeds.feed31 = [0., 0.]
+    feeds.feed32 = [0., 0.]
+    feeds.feed33 = [0., 0.]
+    feeds.feed34 = [0., 0.]
+    feeds.feed35 = [0., 0.]
+    feeds.feed4 = [0., 0.]
+    feeds.feed5 = [0., 0.]
+    feeds.feed6 = [0., 0.]
+    feeds.feed7 = [0., 0.]
+    feeds.feed8 = [0., 0.]
+    feeds.feed9 = [0., 0.]
+
     ########################## Ice Properties ##############################
 
-    # Registry location
-    ice_properties.Ice.Default.Locator                  = IceGrid/Locator:tcp -h aktos01 -p 4061
+    metadata.topic = metadata
+    metadata_source.ice.locator_host = aktos10
+    metadata_source.ice.locator_port = 4061
+    metadata_source.icestorm.topicmanager = IceStorm/TopicManager@IceStorm.TopicManager
+    monitoring.adaptername = IngestPipelineMonitoringAdapter
+    monitoring.enabled = true
+    monitoring.ice.locator_host = aktos10
+    monitoring.ice.locator_port = 4061
+    monitoring.servicename = MonitoringService
 
-    # Primary object adapter
-    ice_properties.CentralProcessorAdapter.Endpoints    = tcp
-    ice_properties.CentralProcessorAdapter.AdapterId    = CentralProcessorAdapter
 
-    # Monitoring object adapter
-    ice_properties.CentralProcessorMonitorAdapter.Endpoints    = tcp
-    ice_properties.CentralProcessorMonitorAdapter.AdapterId    = CentralProcessorMonitorAdapter
+    ########################## Tasks ##############################
 
-    # Other misc parameters
-    ice_properties.Ice.MessageSizeMax                   = 131072
-    ice_properties.Ice.ThreadPool.Server.Size           = 4
-    ice_properties.Ice.ThreadPool.Server.SizeMax        = 16
+    tasks.tasklist = [MergedSource, Merge, CalcUVWTask, FringeRotationTask, MSSink, TCPSink]
 
-    ################## CP Manager Specific Properties ######################
+    tasks.CalcUVWTask.type = CalcUVWTask
+    tasks.ChannelAvgTask.params.averaging = 54
+    tasks.ChannelAvgTask.type = ChannelAvgTask
+    tasks.FringeRotationTask.params.cycles2skip = 0
+    tasks.FringeRotationTask.params.delaystep = 500
+    tasks.FringeRotationTask.params.fixeddelays = [-198.004385, 0, 275.287053, -1018.02295, -1077.35682, 2759.82581]
+    tasks.FringeRotationTask.params.frratestep = 50
+    tasks.FringeRotationTask.params.ice.locator_host = aktos10
+    tasks.FringeRotationTask.params.ice.locator_port = 4061
+    tasks.FringeRotationTask.params.icestorm.intopic = frt2ingest
+    tasks.FringeRotationTask.params.icestorm.outtopic = ingest2frt
+    tasks.FringeRotationTask.params.icestorm.topicmanager = IceStorm/TopicManager@IceStorm.TopicManager
+    tasks.FringeRotationTask.params.method = swdelays
+    tasks.FringeRotationTask.params.refant = AK04
+    tasks.FringeRotationTask.params.updatetimeoffset = 0
+    tasks.FringeRotationTask.type = FringeRotationTask
+    tasks.MSSink.params.filename = %d_%t.ms
+    tasks.MSSink.params.pointingtable.enable = true
+    tasks.MSSink.params.stman.bucketsize = 131072
+    tasks.MSSink.params.stman.tilenchan = 216
+    tasks.MSSink.params.stman.tilencorr = 4
+    tasks.MSSink.type = MSSink
+    tasks.Merge.params.ranks2merge = 12
+    tasks.Merge.type = ChannelMergeTask
+    tasks.MergedSource.params.maxbeams = 19
+    tasks.MergedSource.params.n_channels.0 = 216
+    tasks.MergedSource.params.n_channels.1 = 216
+    tasks.MergedSource.params.n_channels.10 = 216
+    tasks.MergedSource.params.n_channels.11 = 216
+    tasks.MergedSource.params.n_channels.2 = 216
+    tasks.MergedSource.params.n_channels.3 = 216
+    tasks.MergedSource.params.n_channels.4 = 216
+    tasks.MergedSource.params.n_channels.5 = 216
+    tasks.MergedSource.params.n_channels.6 = 216
+    tasks.MergedSource.params.n_channels.7 = 216
+    tasks.MergedSource.params.n_channels.8 = 216
+    tasks.MergedSource.params.n_channels.9 = 216
+    tasks.MergedSource.params.vis_source.max_beamid = 36
+    tasks.MergedSource.params.vis_source.max_slice = 0
+    tasks.MergedSource.params.vis_source.port = 16384
+    tasks.MergedSource.params.vis_source.receive_buffer_size = 67108864
+    tasks.MergedSource.type = MergedSource
+    tasks.TCPSink.params.dest.hostname = aktos11.atnf.csiro.au
+    tasks.TCPSink.params.dest.port = 9001
+    tasks.TCPSink.type = TCPSink
 
-    # Object identity and proxy to use for the CP manager ICE object
-    ice.servicename                 = CentralProcessorService
-    ice.adaptername                 = CentralProcessorAdapter
-
-    # Monitoring provider configuration
-    monitoring.enabled              = true
-    monitoring.ice.servicename      = CentralProcessorMonitorService
-    monitoring.ice.adaptername      = CentralProcessorMonitorAdapter
-
-    # FCM config
-    fcm.ice.identity                = FCMService@FCMAdapter
-
-    # Scheduling block service
-    dataservice.ice.identity        = SchedulingBlockService@DataServiceAdapter
-
-    # Ingest working directory
-    ingest.workdir                  = /scratch2/datasets
-
-    # Ingest pipeline command and arguments
-    ingest.command                  = /askap/cp/cpingest.sh
-    ingest.args                     = -s -c cpingest.in -l /askap/cp/config/cpingest.log_cfg
