@@ -53,7 +53,13 @@ if [ $DO_SCIENCE_FIELD == true ] && [ $DO_MOSAIC == true ]; then
                    [ "$BEAM_FOOTPRINT_NAME" == "trapezoid3" ]\
 		   || [ "$BEAM_FOOTPRINT_NAME" == "octagon" ] ||\
                    [ "$BEAM_FOOTPRINT_NAME" == "3x3" ] ||\
-                   [ "$BEAM_FOOTPRINT_NAME" == "square" ]; then
+                   [ "$BEAM_FOOTPRINT_NAME" == "square" ]||\
+                   [ "$BEAM_FOOTPRINT_NAME" == "square_3x3_4x4" ] ||\
+                   [ "$BEAM_FOOTPRINT_NAME" == "square_5x5" ]||\
+                   [ "$BEAM_FOOTPRINT_NAME" == "square_4x4" ]||\
+                   [ "$BEAM_FOOTPRINT_NAME" == "hexagon19" ] ||\
+                   [ "$BEAM_FOOTPRINT_NAME" == "closepack12" ] ||\
+                   [ "$BEAM_FOOTPRINT_NAME" == "closepack30" ]; then
 
                 # If we have an allowed footprint name, then run
                 # footprint.py and extract the beam offsets
