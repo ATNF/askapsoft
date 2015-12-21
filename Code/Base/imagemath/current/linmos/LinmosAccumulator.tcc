@@ -1160,7 +1160,7 @@ namespace askap {
             // Could get more tricky, but right now make sure any extra dimensions, such as frequency
             // and polarisation, are equal in the two systems.
             if ( coordSys1.nCoordinates() != coordSys2.nCoordinates() ) {
-                //ASKAPLOG_INFO_STR(linmoslogger, "Coordinates are not consistent: shape mismatch");
+                //ASKAPLOG_INFO_STR(linmoslogger, "Coordinates are not consistent: dimension mismatch");
                 return false;
             }
             if (!allEQ(coordSys1.worldAxisNames(), coordSys2.worldAxisNames())) {
@@ -1176,31 +1176,36 @@ namespace askap {
 
         // Check that the input coordinate system is the same as the output
         bool LinmosAccumulator::coordinatesAreEqual(void) {
-            return coordinatesAreEqual(itsInCoordSys, itsOutCoordSys);
+            return coordinatesAreEqual(itsInCoordSys, itsOutCoordSys, itsInShape, itsOutShape);
         }
 
         // Check that two coordinate systems are the same
         bool LinmosAccumulator::coordinatesAreEqual(const CoordinateSystem& coordSys1,
-                                                    const CoordinateSystem& coordSys2) {
+                                                    const CoordinateSystem& coordSys2,
+                                                    const IPosition& shape1,
+                                                    const IPosition& shape2) {
 
             // Set threshold for allowed small numerical differences
             double thresh = 1.0e-12;
 
-            // Check that the dimensionality of the systems is consistent.
-            if ( !coordinatesAreConsistent(coordSys1, coordSys2) ) return false;
-
-            // Check that the size and centre of each dimension is the same.
-            if ( itsInShape != itsOutShape ) {
-                //ASKAPLOG_INFO_STR(linmoslogger, "Input and output coordinates are not equal: shape mismatch");
+            // Check that the shape is the same.
+            if ( shape1 != shape2 ) {
+                //ASKAPLOG_INFO_STR(linmoslogger, "Coordinates are not equal: shape mismatch");
                 return false;
             }
-            // test that the grid properties of each dimension are equal
-            for (casa::uInt dim=0; dim<coordSys1.nCoordinates(); ++dim) {
 
+            // Check that the systems have consistent axes.
+            if ( !coordinatesAreConsistent(coordSys1, coordSys2) ) {
+                return false;
+            }
+
+            // test that the axes are equal
+            for (casa::uInt dim=0; dim<coordSys1.nCoordinates(); ++dim) {
                 if ( (coordSys1.referencePixel()[dim] != coordSys2.referencePixel()[dim]) ||
-                     (fabs(coordSys1.increment()[dim] - coordSys2.increment()[dim]) > thresh) ||
-                     (fabs(coordSys1.referenceValue()[dim] - coordSys2.referenceValue()[dim]) > thresh) ) {
-                    //ASKAPLOG_INFO_STR(linmoslogger, "Coordinates are not equal: coord system mismatch for dim " << dim);
+                     (fabs(coordSys1.referenceValue()[dim] - coordSys2.referenceValue()[dim]) > thresh) ||
+                     (fabs(coordSys1.increment()[dim] - coordSys2.increment()[dim]) > thresh) ) {
+                    //ASKAPLOG_INFO_STR(linmoslogger,
+                    //    "Coordinates are not equal: coord system mismatch for dim " << dim);
                     return false;
                 }
             }

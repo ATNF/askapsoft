@@ -167,7 +167,9 @@ namespace askap {
                 /// @brief check to see if two coordinate grids are equal
                 /// @return bool: true if they are equal
                 bool coordinatesAreEqual(const CoordinateSystem& coordSys1,
-                                         const CoordinateSystem& coordSys2);
+                                         const CoordinateSystem& coordSys2,
+                                         const IPosition& shape1,
+                                         const IPosition& shape2);
 
                 // return metadata for the current input image
                 IPosition inShape(void) {return itsInShape;}
