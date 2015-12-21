@@ -123,6 +123,70 @@ General parameters
 |                            |                   |            |than one task of the same physical **type**\ .                |  
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
 
+Available tasks
+~~~~~~~~~~~~~~~~
+Below is the list of tasks available. Note, although the intention is to document tasks which are intended as permanent,
+some temporary tasks are also documented. They can be taken out in the future.
+
++-----------------------+-------------------------------------------------------------------------+
+|**Task**               |**Description**                                                          |
+|                       |                                                                         |
++=======================+=========================================================================+
+|MergedSource           |Source task, merging visibility data streams and TOS metadata.This is the|
+|                       |main source task intended for production operations.                     |
++-----------------------+-------------------------------------------------------------------------+
+|NoMetadataSource       |Source task faking metadata from parset. It is handy for some debugging  |
++-----------------------+-------------------------------------------------------------------------+
+|ChannelMergeTask       |Task to merge together parallel streams distributed in frequency         |
++-----------------------+-------------------------------------------------------------------------+
+|CalcUVWTask            |Calculation of baseline projections (UVW). Temporary task, should be     |
+|                       |replaced by proper mechanism of distributing UVW with TOS metadata from  |
+|                       |the appropriate service.                                                 |
++-----------------------+-------------------------------------------------------------------------+
+|MSSink                 |Sink task writing the  measurement set.                                  |
++-----------------------+-------------------------------------------------------------------------+
+|TCPSink                |Sink task publishing visibilities to **vispublisher**. This allows to    |
+|                       |monitor data on the fly via vis and spd. Temporary task, we will not be  |
+|                       |able to use the same approach for full ASKAP, but keep it as long as we  |
+|                       |can as it is handy for debugging.                                        |
++-----------------------+-------------------------------------------------------------------------+
+|FringeRotationTask     |Task controlling on the fly fringe rotation in the ingest pipeline. A    |
+|                       |number of algorithms are available to apply the actual delay model, i.e. |
+|                       |pure s/w-based, BETA specific DRx and hardware fringe rotator, ADE h/w   |
+|                       |fringe rotator, etc. This is a temporary task, as fringe rotation is     |
+|                       |expected to be done outside of SDP.                                      |
++-----------------------+-------------------------------------------------------------------------+
+|CalTask                |Calibration task, part of implementation of predict forward approach.    |
+|                       |This task has never been tested or used, but some skeleton implementation|
+|                       |exists. It will be worked on past early science.                         |
++-----------------------+-------------------------------------------------------------------------+
+|ChannelAvgTask         |Task to average adjacent channels reducing the spectral resolution       |
++-----------------------+-------------------------------------------------------------------------+
+|ChannelSelTask         |Task to select a contiguous subset of spectral channels and discard the  |
+|                       |rest. This task is largely used for debugging and is not intended as     |
+|                       |permanent.                                                               |
++-----------------------+-------------------------------------------------------------------------+
+|DerippleTask           |BETA-specific task to remove the ripple caused by polyphase filters. It  |
+|                       |does not require any parameters, but needs the channel space to be       |
+|                       |aligned with coarse channels as it uses the absolute channel number to   |
+|                       |figure out of its place in the coarse channel.                           |
++-----------------------+-------------------------------------------------------------------------+
+|FlagTask               |Basic on the fly flagging task. Currently, this task implements basic    |
+|                       |thresholding. The plan is to have special service delivering information |
+|                       |about known RFI which has to be flagged. It is yet to be implemented and |
+|                       |will be worked on past early science. On the fly flagging is essential   |
+|                       |for full ASKAP due to I/O limitations and data volume.                   |
++-----------------------+-------------------------------------------------------------------------+
+|ChannelFlagTask        |Early BETA task of temporary nature. It flags data based on static lists |
+|                       |of channels supplied as ascii files per baseline. It was written to      |
+|                       |enable commissioning at the time significant memory errors were present. |
+|                       |It shouldn't be used in operations.                                      |
++-----------------------+-------------------------------------------------------------------------+
+|PhaseTrackTask         |Early BETA task for unsynchronised phase tracking matching delay tracking|
+|                       |done via the OSL script. The functionality is largely superseded by      |
+|                       |FringeRotationTask, but the code left in because parts of it are reused. |
+|                       |Not to be used in operations.                                            |
++-----------------------+-------------------------------------------------------------------------+
 
 Beam arrangement
 ~~~~~~~~~~~~~~~~
@@ -469,10 +533,13 @@ Example
 
     ########################## Ice Properties ##############################
 
+    # TOS metadata 
     metadata.topic = metadata
     metadata_source.ice.locator_host = aktos10
     metadata_source.ice.locator_port = 4061
     metadata_source.icestorm.topicmanager = IceStorm/TopicManager@IceStorm.TopicManager
+
+    # monitoring
     monitoring.adaptername = IngestPipelineMonitoringAdapter
     monitoring.enabled = true
     monitoring.ice.locator_host = aktos10
@@ -484,31 +551,29 @@ Example
 
     tasks.tasklist = [MergedSource, Merge, CalcUVWTask, FringeRotationTask, MSSink, TCPSink]
 
+    # uvw calculation task
     tasks.CalcUVWTask.type = CalcUVWTask
-    tasks.ChannelAvgTask.params.averaging = 54
-    tasks.ChannelAvgTask.type = ChannelAvgTask
-    tasks.FringeRotationTask.params.cycles2skip = 0
-    tasks.FringeRotationTask.params.delaystep = 500
+
+    # s/w-based fringe rotation
     tasks.FringeRotationTask.params.fixeddelays = [-198.004385, 0, 275.287053, -1018.02295, -1077.35682, 2759.82581]
-    tasks.FringeRotationTask.params.frratestep = 50
-    tasks.FringeRotationTask.params.ice.locator_host = aktos10
-    tasks.FringeRotationTask.params.ice.locator_port = 4061
-    tasks.FringeRotationTask.params.icestorm.intopic = frt2ingest
-    tasks.FringeRotationTask.params.icestorm.outtopic = ingest2frt
-    tasks.FringeRotationTask.params.icestorm.topicmanager = IceStorm/TopicManager@IceStorm.TopicManager
     tasks.FringeRotationTask.params.method = swdelays
     tasks.FringeRotationTask.params.refant = AK04
-    tasks.FringeRotationTask.params.updatetimeoffset = 0
     tasks.FringeRotationTask.type = FringeRotationTask
+
+    # sink task writing the measurement set
     tasks.MSSink.params.filename = %d_%t.ms
     tasks.MSSink.params.pointingtable.enable = true
     tasks.MSSink.params.stman.bucketsize = 131072
     tasks.MSSink.params.stman.tilenchan = 216
     tasks.MSSink.params.stman.tilencorr = 4
     tasks.MSSink.type = MSSink
+
+    # merging of parallel streams
     tasks.Merge.params.ranks2merge = 12
     tasks.Merge.type = ChannelMergeTask
-    tasks.MergedSource.params.maxbeams = 19
+
+    # visibility source joining visibilities and metadata
+    tasks.MergedSource.params.maxbeams = 36
     tasks.MergedSource.params.n_channels.0 = 216
     tasks.MergedSource.params.n_channels.1 = 216
     tasks.MergedSource.params.n_channels.10 = 216
@@ -526,6 +591,8 @@ Example
     tasks.MergedSource.params.vis_source.port = 16384
     tasks.MergedSource.params.vis_source.receive_buffer_size = 67108864
     tasks.MergedSource.type = MergedSource
+
+    # sink task sending the data for monitoring via vis and spd
     tasks.TCPSink.params.dest.hostname = aktos11.atnf.csiro.au
     tasks.TCPSink.params.dest.port = 9001
     tasks.TCPSink.type = TCPSink
