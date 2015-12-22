@@ -46,6 +46,7 @@ namespace askap {
 
         /// @brief Base class supporting linear mosaics (linmos)
 
+        template<typename T>
         class LinmosAccumulator {
 
             public:
@@ -91,12 +92,19 @@ namespace askap {
                 bool outputBufferSetupRequired(void);
 
                 /// @brief set the input coordinate system and shape
-                /// @param[in] const IPosition&: shapes of inputs to be merged
-                /// @param[in] const CoordinateSystem&: coord systems of inputs
+                /// @param[in] const IPosition&: shape of input to be merged
+                /// @param[in] const CoordinateSystem&: coord system of input
                 /// @param[in] const int: input order of the input file
                 void setInputParameters(const IPosition& inShape,
                                         const CoordinateSystem& inCoordSys,
                                         const int n=0);
+
+                /// @brief set the output coordinate system and shape
+                /// @param[in] const IPosition&: shape of output
+                /// @param[in] const CoordinateSystem&: coord system of output
+                /// @param[in] const int: input order of the input file
+                void setOutputParameters(const IPosition& outShape,
+                                         const CoordinateSystem& outCoordSys);
 
                 /// @brief set the output coordinate system and shape, based on the overlap of input images
                 /// @details This method is based on the SynthesisParamsHelper::add and
@@ -118,47 +126,49 @@ namespace askap {
 
                 /// @brief load the temporary image buffers with the current plane of the current input image
                 /// @param[in] const scimath::MultiDimArrayPlaneIter& planeIter: current plane id
-                /// @param[in] Array<float>& inPix: image buffer
-                /// @param[in] Array<float>& inWgtPix: weight image buffer
+                /// @param[in] Array<T>& inPix: image buffer
+                /// @param[in] Array<T>& inWgtPix: weight image buffer
                 void loadInputBuffers(const scimath::MultiDimArrayPlaneIter& planeIter,
-                                      Array<float>& inPix,
-                                      Array<float>& inWgtPix,
-                                      Array<float>& inSenPix);
+                                      Array<T>& inPix,
+                                      Array<T>& inWgtPix,
+                                      Array<T>& inSenPix);
 
                 /// @brief call the regridder for the buffered plane
                 void regrid(void);
 
                 /// @brief add the current plane to the accumulation arrays
                 /// @details This method adds from the regridded buffers
-                /// @param[out] Array<float>& outPix: accumulated weighted image pixels
-                /// @param[out] Array<float>& outWgtPix: accumulated weight pixels
+                /// @param[out] Array<T>& outPix: accumulated weighted image pixels
+                /// @param[out] Array<T>& outWgtPix: accumulated weight pixels
                 /// @param[in] const IPosition& curpos: indices of the current plane
-                void accumulatePlane(Array<float>& outPix,
-                                     Array<float>& outWgtPix,
-                                     Array<float>& outSenPix,
+                void accumulatePlane(Array<T>& outPix,
+                                     Array<T>& outWgtPix,
+                                     Array<T>& outSenPix,
                                      const IPosition& curpos);
 
                 /// @brief add the current plane to the accumulation arrays
                 /// @details This method adds directly from the input arrays
-                /// @param[out] Array<float>& outPix: accumulated weighted image pixels
-                /// @param[out] Array<float>& outWgtPix: accumulated weight pixels
-                /// @param[in] const Array<float>& inPix: input image pixels
-                /// @param[in] const Array<float>& inWgtPix: input weight pixels
+                /// @param[out] Array<T>& outPix: accumulated weighted image pixels
+                /// @param[out] Array<T>& outWgtPix: accumulated weight pixels
+                /// @param[in] const Array<T>& inPix: input image pixels
+                /// @param[in] const Array<T>& inWgtPix: input weight pixels
                 /// @param[in] const IPosition& curpos: indices of the current plane
-                void accumulatePlane(Array<float>& outPix,
-                                     Array<float>& outWgtPix,
-                                     Array<float>& outSenPix,
-                                     const Array<float>& inPix,
-                                     const Array<float>& inWgtPix,
-                                     const Array<float>& inSenPix,
+                void accumulatePlane(Array<T>& outPix,
+                                     Array<T>& outWgtPix,
+                                     Array<T>& outSenPix,
+                                     const Array<T>& inPix,
+                                     const Array<T>& inWgtPix,
+                                     const Array<T>& inSenPix,
                                      const IPosition& curpos);
 
                 /// @brief divide the weighted pixels by the weights for the current plane
-                /// @param[in,out] Array<float>& outPix: accumulated deweighted image pixels
-                /// @param[in] const Array<float>& outWgtPix: accumulated weight pixels
+                /// @param[in,out] Array<T>& outPix: accumulated deweighted image pixels
+                /// @param[in] const Array<T>& outWgtPix: accumulated weight pixels
                 /// @param[in] const IPosition& curpos: indices of the current plane
-                void deweightPlane(Array<float>& outPix, const Array<float>& outWgtPix,
-                                   Array<float>& outSenPix, const IPosition& curpos);
+                void deweightPlane(Array<T>& outPix,
+                                   const Array<T>& outWgtPix,
+                                   Array<T>& outSenPix,
+                                   const IPosition& curpos);
 
                 /// @brief check to see if the input and output coordinate grids are equal
                 /// @return bool: true if they are equal
@@ -214,7 +224,7 @@ namespace askap {
                                               const CoordinateSystem& coordSys2);
 
                 // regridding options
-                ImageRegrid<float> itsRegridder;
+                ImageRegrid<T> itsRegridder;
                 IPosition itsAxes;
                 String itsMethod;
                 Int itsDecimate;
@@ -222,8 +232,8 @@ namespace askap {
                 Bool itsForce;
                 Interpolate2D::Method itsEmethod;
                 // regridding buffers
-                TempImage<float> itsInBuffer, itsInWgtBuffer, itsInSenBuffer, itsInSnrBuffer;
-                TempImage<float> itsOutBuffer, itsOutWgtBuffer, itsOutSnrBuffer;
+                TempImage<T> itsInBuffer, itsInWgtBuffer, itsInSenBuffer, itsInSnrBuffer;
+                TempImage<T> itsOutBuffer, itsOutWgtBuffer, itsOutSnrBuffer;
                 // metadata objects
                 IPosition itsInShape;
                 CoordinateSystem itsInCoordSys;
@@ -235,7 +245,7 @@ namespace askap {
                 int itsNumTaylorTerms;
                 bool itsDoSensitivity;
 
-                float itsCutoff;
+                T itsCutoff;
 
                 // 
                 Vector<MVDirection> itsCentres;

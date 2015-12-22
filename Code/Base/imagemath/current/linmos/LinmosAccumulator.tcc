@@ -74,22 +74,22 @@ namespace askap {
 
         /// @brief Base class supporting linear mosaics (linmos)
 
-        LinmosAccumulator::LinmosAccumulator() : itsMethod("linear"),
-                                                 itsDecimate(3),
-                                                 itsReplicate(false),
-                                                 itsForce(false),
-                                                 itsWeightType(-1),
-                                                 itsWeightState(-1),
-                                                 itsNumTaylorTerms(-1),
-                                                 itsCutoff(0.01),
-                                                 itsMosaicTag("linmos"),
-                                                 itsTaylorTag("taylor.0") {}
-
-
+        template<typename T>
+        LinmosAccumulator<T>::LinmosAccumulator() : itsMethod("linear"),
+                                                    itsDecimate(3),
+                                                    itsReplicate(false),
+                                                    itsForce(false),
+                                                    itsWeightType(-1),
+                                                    itsWeightState(-1),
+                                                    itsNumTaylorTerms(-1),
+                                                    itsCutoff(0.01),
+                                                    itsMosaicTag("linmos"),
+                                                    itsTaylorTag("taylor.0") {}
 
         // functions in the linmos accumulator class
 
-        bool LinmosAccumulator::loadParset(const LOFAR::ParameterSet &parset) {
+        template<typename T>
+        bool LinmosAccumulator<T>::loadParset(const LOFAR::ParameterSet &parset) {
 
             const vector<string> inImgNames = parset.getStringVector("names", true);
             const vector<string> inWgtNames = parset.getStringVector("weights", vector<string>(), true);
@@ -168,14 +168,16 @@ namespace askap {
                     parset.isDefined("feeds.offsetsfile") ||
                     parset.isDefined("feeds.names") ||
                     parset.isDefined("feeds.spacing") ) {
-                    ASKAPLOG_WARN_STR(linmoslogger, "Beam information specified in parset but ignored. Using weight images");
+                    ASKAPLOG_WARN_STR(linmoslogger,
+                        "Beam information specified in parset but ignored. Using weight images");
                 }
  
             } else if (itsWeightType == FROM_BP_MODEL) {
 
                 // check for inputs associated with other kinds of weighting
                 if (inWgtNames.size()>0) {
-                    ASKAPLOG_WARN_STR(linmoslogger, "Weight images specified in parset but ignored. Using a primary-beam model");
+                    ASKAPLOG_WARN_STR(linmoslogger,
+                        "Weight images specified in parset but ignored. Using a primary-beam model");
                 }
 
             }
@@ -183,16 +185,20 @@ namespace askap {
             // Check the initial weighting state of the input images
 
             if (boost::iequals(weightStateName, "Corrected")) {
-                ASKAPLOG_INFO_STR(linmoslogger, "Input image state: Direction-dependent beams/weights have been divided out");
+                ASKAPLOG_INFO_STR(linmoslogger,
+                        "Input image state: Direction-dependent beams/weights have been divided out");
                 itsWeightState = CORRECTED;
             } else if (boost::iequals(weightStateName, "Inherent")) {
-                ASKAPLOG_INFO_STR(linmoslogger, "Input image state: natural primary-beam weighting of the visibilities is retained");
+                ASKAPLOG_INFO_STR(linmoslogger,
+                        "Input image state: natural primary-beam weighting of the visibilities is retained");
                 itsWeightState = INHERENT;
             } else if (boost::iequals(weightStateName, "Weighted")) {
-                ASKAPLOG_INFO_STR(linmoslogger, "Input image state: full primary-beam-squared weighting");
+                ASKAPLOG_INFO_STR(linmoslogger,
+                        "Input image state: full primary-beam-squared weighting");
                 itsWeightState = WEIGHTED;
             } else {
-                ASKAPLOG_ERROR_STR(linmoslogger, "Unknown weightstyle " << weightStateName);
+                ASKAPLOG_ERROR_STR(linmoslogger,
+                        "Unknown weightstyle " << weightStateName);
                 return false;
             }
 
@@ -211,20 +217,23 @@ namespace askap {
 
         }
 
-        void LinmosAccumulator::setSingleMosaic(const vector<string> &inImgNames,
-                                                const vector<string> &inWgtNames,
-                                                const string &outImgName,
-                                                const string &outWgtName) {
+        template<typename T>
+        void LinmosAccumulator<T>::setSingleMosaic(const vector<string> &inImgNames,
+                                                   const vector<string> &inWgtNames,
+                                                   const string &outImgName,
+                                                   const string &outWgtName) {
 
             // set some variables for the sensitivity image searches
             string image_tag = "image", restored_tag = ".restored", tmpName;
-            itsDoSensitivity = true; // set false if any sensitivity images are missing or if not an image* mosaic
+            // set false if any sensitivity images are missing or if not an image* mosaic
+            itsDoSensitivity = true;
 
             // Check the input images
             for (size_t img = 0; img < inImgNames.size(); ++img) {
 
                 // make sure the output image will not be overwritten
-                ASKAPCHECK(inImgNames[img]!=outImgName, "Output image, "<<outImgName<<", is present among the inputs");
+                ASKAPCHECK(inImgNames[img]!=outImgName,
+                    "Output image, "<<outImgName<<", is present among the inputs");
 
                 // if this is an "image*" file, see if there is an appropriate sensitivity image 
                 if (itsDoSensitivity) {
@@ -241,11 +250,13 @@ namespace askap {
                         if (boost::filesystem::exists(tmpName)) {
                             itsInSenNameVecs[outImgName].push_back(tmpName);
                         } else {
-                            ASKAPLOG_WARN_STR(linmoslogger, "Cannot find file "<<tmpName<<" . Ignoring sensitivities.");
+                            ASKAPLOG_WARN_STR(linmoslogger,
+                                "Cannot find file "<<tmpName<<" . Ignoring sensitivities.");
                             itsDoSensitivity = false;
                         }
                     } else {
-                        ASKAPLOG_WARN_STR(linmoslogger, "Input not an image* file. Ignoring sensitivities.");
+                        ASKAPLOG_WARN_STR(linmoslogger,
+                            "Input not an image* file. Ignoring sensitivities.");
                         itsDoSensitivity = false;
                     }
                 }
@@ -277,12 +288,13 @@ namespace askap {
                 }
             }
 
-        } // LinmosAccumulator::setSingleMosaic()
+        } // LinmosAccumulator<T>::setSingleMosaic()
 
-        void LinmosAccumulator::findAndSetTaylorTerms(const vector<string> &inImgNames,
-                                                      const vector<string> &inWgtNames,
-                                                      const string &outImgNameOrig,
-                                                      const string &outWgtNameOrig) {
+        template<typename T>
+        void LinmosAccumulator<T>::findAndSetTaylorTerms(const vector<string> &inImgNames,
+                                                         const vector<string> &inWgtNames,
+                                                         const string &outImgNameOrig,
+                                                         const string &outWgtNameOrig) {
 
             ASKAPLOG_INFO_STR(linmoslogger, "Looking for "<<itsNumTaylorTerms<<" taylor terms");
             ASKAPCHECK(itsNumTaylorTerms>=0, "Number of taylor terms should be greater than or equal to 0");
@@ -291,7 +303,8 @@ namespace askap {
             pos0 = outImgNameOrig.find(itsTaylorTag);
             ASKAPCHECK(pos0!=string::npos, "Cannot find "<<itsTaylorTag<<" in output file "<<outImgNameOrig);
             pos1 = outImgNameOrig.find(itsTaylorTag, pos0+1); // make sure there aren't multiple entries.
-            ASKAPCHECK(pos1==string::npos, "There are multiple  "<<itsTaylorTag<<" strings in output file "<<outImgNameOrig);
+            ASKAPCHECK(pos1==string::npos,
+                "There are multiple  "<<itsTaylorTag<<" strings in output file "<<outImgNameOrig);
 
             // set some variables for the sensitivity image searches
             string image_tag = "image", restored_tag = ".restored", tmpName;
@@ -315,20 +328,23 @@ namespace askap {
                     pos0 = inImgName.find(itsTaylorTag);
                     ASKAPCHECK(pos0!=string::npos, "Cannot find "<<itsTaylorTag<<" in input file "<<inImgName);
                     pos1 = inImgName.find(itsTaylorTag, pos0+1); // make sure there aren't multiple entries.
-                    ASKAPCHECK(pos1==string::npos, "There are multiple "<<itsTaylorTag<<" strings in input file "<<inImgName);
+                    ASKAPCHECK(pos1==string::npos,
+                        "There are multiple "<<itsTaylorTag<<" strings in input file "<<inImgName);
 
                     // set a new key for the input file-name-vector map
                     inImgName.replace(pos0, itsTaylorTag.length(), taylorN);
                     itsInImgNameVecs[outImgName].push_back(inImgName);
 
                     // Check the input image
-                    ASKAPCHECK(inImgName!=outImgName, "Output image, "<<outImgName<<", is present among the inputs");
+                    ASKAPCHECK(inImgName!=outImgName,
+                        "Output image, "<<outImgName<<", is present among the inputs");
 
                     if (itsWeightType == FROM_WEIGHT_IMAGES) {
                         // do some tests
                         string inWgtName = inWgtNames[img]; // short cut
                         pos0 = inWgtName.find(itsTaylorTag);
-                        ASKAPCHECK(pos0!=string::npos, "Cannot find "<<itsTaylorTag<< " in input weight file "<<inWgtName);
+                        ASKAPCHECK(pos0!=string::npos,
+                        "Cannot find "<<itsTaylorTag<< " in input weight file "<<inWgtName);
                         pos1 = inWgtName.find(itsTaylorTag, pos0+1); // make sure there aren't multiple entries.
                         ASKAPCHECK(pos1==string::npos, "There are multiple " << itsTaylorTag <<
                                                        " strings in input file "<<inWgtName);
@@ -338,7 +354,8 @@ namespace askap {
                         itsInWgtNameVecs[outImgName].push_back(inWgtName);
 
                         // Check the input weights image
-                        ASKAPCHECK(inWgtName!=outWgtName, "Output wgt image, "<<outWgtName<<", is among the inputs");
+                        ASKAPCHECK(inWgtName!=outWgtName,
+                            "Output wgt image, "<<outWgtName<<", is among the inputs");
                     }
 
                     // if this is an "image*" file, see if there is an appropriate sensitivity image 
@@ -356,11 +373,13 @@ namespace askap {
                             if (boost::filesystem::exists(tmpName)) {
                                 itsInSenNameVecs[outImgName].push_back(tmpName);
                             } else {
-                                ASKAPLOG_WARN_STR(linmoslogger, "Cannot find file "<<tmpName<<" . Ignoring sensitivities.");
+                                ASKAPLOG_WARN_STR(linmoslogger,
+                                    "Cannot find file "<<tmpName<<" . Ignoring sensitivities.");
                                 itsDoSensitivity = false;
                             }
                         } else {
-                            ASKAPLOG_WARN_STR(linmoslogger, "Input not an image* file. Ignoring sensitivities.");
+                            ASKAPLOG_WARN_STR(linmoslogger,
+                                "Input not an image* file. Ignoring sensitivities.");
                             itsDoSensitivity = false;
                         }
                     }
@@ -381,7 +400,7 @@ namespace askap {
                     itsOutSenNames[outImgName] = tmpName;
                 } else {
                     itsGenSensitivityImage[outImgName] = false;
-                    // if some but not all sensitivity images were found, remove this key from itsInSenNameVecs
+                    // if some but not all sensitivity images were found, remove this key
                     if (itsInSenNameVecs.find(outImgName)!=itsInSenNameVecs.end()) {
                         itsInSenNameVecs.erase(outImgName);
                     }
@@ -389,9 +408,10 @@ namespace askap {
 
             } // n loop (taylor term)
 
-        } // void LinmosAccumulator::findAndSetTaylorTerms()
+        } // void LinmosAccumulator<T>::findAndSetTaylorTerms()
 
-        void LinmosAccumulator::findAndSetMosaics(const vector<string> &imageTags) {
+        template<typename T>
+        void LinmosAccumulator<T>::findAndSetMosaics(const vector<string> &imageTags) {
 
             vector<string> prefixes;
             prefixes.push_back("image");
@@ -406,9 +426,11 @@ namespace askap {
             typedef vector<boost::filesystem::path> path_vec;
             path_vec v;
 
-            copy(boost::filesystem::directory_iterator(p), boost::filesystem::directory_iterator(), back_inserter(v));
+            copy(boost::filesystem::directory_iterator(p),
+                 boost::filesystem::directory_iterator(), back_inserter(v));
 
-            // find mosaics by looking for images that contain one of the tags. Then see which of those contain all tags.
+            // find mosaics by looking for images that contain one of the tags.
+            // Then see which of those contain all tags.
             const string searchTag = imageTags[0];
 
             for (path_vec::const_iterator it (v.begin()); it != v.end(); ++it) {
@@ -477,7 +499,8 @@ namespace askap {
                                 itsInSenNameVecs[mosaicName].push_back(tmpName);
                             }
 
-                            // look for weights image if required (weights are not needed when combining sensitivity images)
+                            // look for weights image if required (weights are
+                            // not needed when combining sensitivity images)
                             if (itsWeightType == FROM_WEIGHT_IMAGES) {
                                 // replace the prefix with "weights"
                                 nextName.replace(0, (*pre).length(), "weights");
@@ -546,32 +569,45 @@ namespace askap {
                     }
 
                     // if any of these were started for the current failed key, clean up and move on
-                    if (itsOutWgtNames.find(mosaicName)!=itsOutWgtNames.end()) itsOutWgtNames.erase(mosaicName);
-                    if (itsOutSenNames.find(mosaicName)!=itsOutSenNames.end()) itsOutSenNames.erase(mosaicName);
-                    if (itsInImgNameVecs.find(mosaicName)!=itsInImgNameVecs.end()) itsInImgNameVecs.erase(mosaicName);
-                    if (itsInWgtNameVecs.find(mosaicName)!=itsInWgtNameVecs.end()) itsInWgtNameVecs.erase(mosaicName);
-                    if (itsInSenNameVecs.find(mosaicName)!=itsInSenNameVecs.end()) itsInSenNameVecs.erase(mosaicName);
+                    if (itsOutWgtNames.find(mosaicName)!=itsOutWgtNames.end()) {
+                        itsOutWgtNames.erase(mosaicName);
+                    }
+                    if (itsOutSenNames.find(mosaicName)!=itsOutSenNames.end()) {
+                        itsOutSenNames.erase(mosaicName);
+                    }
+                    if (itsInImgNameVecs.find(mosaicName)!=itsInImgNameVecs.end()) {
+                        itsInImgNameVecs.erase(mosaicName);
+                    }
+                    if (itsInWgtNameVecs.find(mosaicName)!=itsInWgtNameVecs.end()) {
+                        itsInWgtNameVecs.erase(mosaicName);
+                    }
+                    if (itsInSenNameVecs.find(mosaicName)!=itsInSenNameVecs.end()) {
+                        itsInSenNameVecs.erase(mosaicName);
+                    }
 
                     continue;
                 }
 
                 // double check the size of the various maps and vectors. These should have been caught already
-                ASKAPCHECK(itsInImgNameVecs.size()==itsOutWgtNames.size(), mosaicName << "Inconsistent name maps.");
+                ASKAPCHECK(itsInImgNameVecs.size()==itsOutWgtNames.size(),
+                    mosaicName << ": inconsistent name maps.");
                 if (itsWeightType == FROM_WEIGHT_IMAGES) {
-                    ASKAPCHECK(itsInImgNameVecs.size()==itsInWgtNameVecs.size(), mosaicName <<
-                               "Something has gone wrong with automatic mosaic search. Inconsistent name maps.");
-                    ASKAPCHECK(itsInImgNameVecs[mosaicName].size()==itsInWgtNameVecs[mosaicName].size(), mosaicName <<
-                               "Something has gone wrong with automatic mosaic search. Inconsistent name vectors.");
+                    ASKAPCHECK(itsInImgNameVecs.size()==itsInWgtNameVecs.size(),
+                        mosaicName << ": mosaic search error. Inconsistent name maps.");
+                    ASKAPCHECK(itsInImgNameVecs[mosaicName].size()==itsInWgtNameVecs[mosaicName].size(),
+                        mosaicName << ": mosaic search error. Inconsistent name vectors.");
                 }
 
                 ASKAPLOG_INFO_STR(linmoslogger, mosaicName << " seems complete. Mosaicking.");
 
-                // it is possible that there may be duplicate itsOutWgtNames/itsOutSenNames (e.g. for image.* and residual.*)
-                // check that the input is the same for these duplicates, and then only write once
-                // if this is common, we should be avoiding more that just duplicate output
+                // It is possible that there may be duplicate itsOutWgtNames/itsOutSenNames
+                // (e.g. for image.* and residual.*).
+                // Check that the input is the same for these duplicates, and then only write once
+                // if this is common, we should be avoiding more that just duplicate output.
                 string mosaicOrig;
                 itsOutWgtDuplicates[mosaicName] = false;
-                for(map<string,string>::iterator ii=itsOutWgtNames.begin(); ii!=itsOutWgtNames.find(mosaicName); ++ii) {
+                for(map<string,string>::iterator ii=itsOutWgtNames.begin();
+                    ii!=itsOutWgtNames.find(mosaicName); ++ii) {
                     if (itsOutWgtNames[mosaicName].compare((*ii).second) == 0) {
                         itsOutWgtDuplicates[mosaicName] = true;
                         mosaicOrig = (*ii).first;
@@ -581,9 +617,11 @@ namespace askap {
 
                 // if this is a duplicate, just remove it. Can't with weights because we need them unaveraged
                 if (itsOutSenNames.find(mosaicName)!=itsOutSenNames.end()) {
-                    for(map<string,string>::iterator ii=itsOutSenNames.begin(); ii!=itsOutSenNames.find(mosaicName); ++ii) {
+                    for(map<string,string>::iterator ii=itsOutSenNames.begin();
+                        ii!=itsOutSenNames.find(mosaicName); ++ii) {
                         if (itsOutSenNames[mosaicName].compare((*ii).second) == 0) {
-                            ASKAPLOG_INFO_STR(linmoslogger, "  - sensitivity image done in an earlier mosaic. Will not redo here.");
+                            ASKAPLOG_INFO_STR(linmoslogger,
+                                "  - sensitivity image done in an earlier mosaic. Will not redo here.");
                             itsGenSensitivityImage[mosaicName] = false;
                             itsOutSenNames.erase(mosaicName);
                             itsInSenNameVecs.erase(mosaicName);
@@ -592,20 +630,23 @@ namespace askap {
                     }
                 }
                 if (itsOutSenNames.find(mosaicName)!=itsOutSenNames.end()) {
-                    ASKAPLOG_INFO_STR(linmoslogger, "  - sensitivity images found. Generating mosaic sens. image.");
+                    ASKAPLOG_INFO_STR(linmoslogger,
+                        "  - sensitivity images found. Generating mosaic sens. image.");
                 }
 
             } // it loop (over potential images in this directory)
 
-        } // void LinmosAccumulator::findAndSetMosaics()
+        } // void LinmosAccumulator<T>::findAndSetMosaics()
 
-        bool LinmosAccumulator::outputBufferSetupRequired(void) {
+        template<typename T>
+        bool LinmosAccumulator<T>::outputBufferSetupRequired(void) {
             return ( itsOutBuffer.shape().nelements() == 0 );
         }
 
-        void LinmosAccumulator::setInputParameters(const IPosition& inShape,
-                                                   const CoordinateSystem& inCoordSys,
-                                                   const int n) {
+        template<typename T>
+        void LinmosAccumulator<T>::setInputParameters(const IPosition& inShape,
+                                                      const CoordinateSystem& inCoordSys,
+                                                      const int n) {
             // set the input coordinate system and shape
             itsInShape = inShape;
             itsInCoordSys = inCoordSys;
@@ -623,8 +664,16 @@ namespace askap {
             }
         }
 
-        void LinmosAccumulator::setOutputParameters(const vector<IPosition>& inShapeVec,
-                                                    const vector<CoordinateSystem>& inCoordSysVec) {
+        template<typename T>
+        void LinmosAccumulator<T>::setOutputParameters(const IPosition& outShape,
+                                                       const CoordinateSystem& outCoordSys) {
+            itsOutShape = outShape;
+            itsOutCoordSys = outCoordSys;
+        }
+
+        template<typename T>
+        void LinmosAccumulator<T>::setOutputParameters(const vector<IPosition>& inShapeVec,
+                                                       const vector<CoordinateSystem>& inCoordSysVec) {
                                                  
             ASKAPLOG_INFO_STR(linmoslogger, "Determining output image based on the overlap of input images");
             ASKAPCHECK(inShapeVec.size()==inCoordSysVec.size(), "Input vectors are inconsistent");
@@ -692,8 +741,10 @@ namespace askap {
 
         }
 
-        void LinmosAccumulator::initialiseOutputBuffers(void) {
-            // set up temporary images needed for regridding (which is done on a plane-by-plane basis so ignore other dims)
+        template<typename T>
+        void LinmosAccumulator<T>::initialiseOutputBuffers(void) {
+            // set up temporary images needed for regridding (which is
+            // done on a plane-by-plane basis so ignore other dims)
 
             // set up the coord. sys.
             int dcPos = itsOutCoordSys.findCoordinate(Coordinate::DIRECTION,-1);
@@ -712,21 +763,25 @@ namespace askap {
             IPosition shape = IPosition(2,itsOutShape(shapePos[0]),itsOutShape(shapePos[1]));
 
             // apparently the +100 forces it to use the memory
-            double maxMemoryInMB = double(shape.product()*sizeof(float))/1024./1024.+100;
-            itsOutBuffer = TempImage<float>(shape, cSysTmp, maxMemoryInMB);
+            double maxMemoryInMB = double(shape.product()*sizeof(T))/1024./1024.+100;
+            itsOutBuffer = TempImage<T>(shape, cSysTmp, maxMemoryInMB);
             ASKAPCHECK(itsOutBuffer.shape().nelements()>0, "Output buffer does not appear to be set");
             if (itsWeightType == FROM_WEIGHT_IMAGES) {
-                itsOutWgtBuffer = TempImage<float>(shape, cSysTmp, maxMemoryInMB);
-                ASKAPCHECK(itsOutWgtBuffer.shape().nelements()>0, "Output weights buffer does not appear to be set");
+                itsOutWgtBuffer = TempImage<T>(shape, cSysTmp, maxMemoryInMB);
+                ASKAPCHECK(itsOutWgtBuffer.shape().nelements()>0,
+                    "Output weights buffer does not appear to be set");
             }
             if (itsDoSensitivity) {
-                itsOutSnrBuffer = TempImage<float>(shape, cSysTmp, maxMemoryInMB);
-                ASKAPCHECK(itsOutSnrBuffer.shape().nelements()>0, "Output sensitivity buffer does not appear to be set");
+                itsOutSnrBuffer = TempImage<T>(shape, cSysTmp, maxMemoryInMB);
+                ASKAPCHECK(itsOutSnrBuffer.shape().nelements()>0,
+                    "Output sensitivity buffer does not appear to be set");
             }
         }
 
-        void LinmosAccumulator::initialiseInputBuffers() {
-            // set up temporary images needed for regridding (which is done on a plane-by-plane basis so ignore other dims)
+        template<typename T>
+        void LinmosAccumulator<T>::initialiseInputBuffers() {
+            // set up temporary images needed for regridding (which is
+            // done on a plane-by-plane basis so ignore other dims)
 
             // set up a coord. sys. the planes
             int dcPos = itsInCoordSys.findCoordinate(Coordinate::DIRECTION,-1);
@@ -741,39 +796,44 @@ namespace askap {
 
             IPosition shape = IPosition(2,itsInShape(shapePos[0]),itsInShape(shapePos[1]));
 
-            double maxMemoryInMB = double(shape.product()*sizeof(float))/1024./1024.+100;
-            itsInBuffer = TempImage<float>(shape,cSys,maxMemoryInMB);
+            double maxMemoryInMB = double(shape.product()*sizeof(T))/1024./1024.+100;
+            itsInBuffer = TempImage<T>(shape,cSys,maxMemoryInMB);
             ASKAPCHECK(itsInBuffer.shape().nelements()>0, "Input buffer does not appear to be set");
             if (itsWeightType == FROM_WEIGHT_IMAGES) {
-                itsInWgtBuffer = TempImage<float>(shape,cSys,maxMemoryInMB);       
-                ASKAPCHECK(itsInWgtBuffer.shape().nelements()>0, "Input weights buffer does not appear to be set");
+                itsInWgtBuffer = TempImage<T>(shape,cSys,maxMemoryInMB);       
+                ASKAPCHECK(itsInWgtBuffer.shape().nelements()>0,
+                    "Input weights buffer does not appear to be set");
             }
             if (itsDoSensitivity) {
-                itsInSenBuffer = TempImage<float>(shape,cSys,maxMemoryInMB);       
-                itsInSnrBuffer = TempImage<float>(shape,cSys,maxMemoryInMB);       
-                ASKAPCHECK(itsInSnrBuffer.shape().nelements()>0, "Input sensitivity buffer does not appear to be set");
+                itsInSenBuffer = TempImage<T>(shape,cSys,maxMemoryInMB);       
+                itsInSnrBuffer = TempImage<T>(shape,cSys,maxMemoryInMB);       
+                ASKAPCHECK(itsInSnrBuffer.shape().nelements()>0,
+                    "Input sensitivity buffer does not appear to be set");
             }
 
         }
 
-        void LinmosAccumulator::initialiseRegridder() {
+        template<typename T>
+        void LinmosAccumulator<T>::initialiseRegridder() {
             ASKAPLOG_INFO_STR(linmoslogger, "Initialising regridder for " << itsMethod << " interpolation");
             itsAxes = IPosition::makeAxisPath(itsOutBuffer.shape().nelements());
             itsEmethod = Interpolate2D::stringToMethod(itsMethod);
         }
 
-        void LinmosAccumulator::loadInputBuffers(const scimath::MultiDimArrayPlaneIter& planeIter,
-                                                 Array<float>& inPix,
-                                                 Array<float>& inWgtPix,
-                                                 Array<float>& inSenPix) {
+        template<typename T>
+        void LinmosAccumulator<T>::loadInputBuffers(const scimath::MultiDimArrayPlaneIter& planeIter,
+                                                    Array<T>& inPix,
+                                                    Array<T>& inWgtPix,
+                                                    Array<T>& inSenPix) {
             itsInBuffer.put(planeIter.getPlane(inPix));
             if (itsWeightType == FROM_WEIGHT_IMAGES) {
                 itsInWgtBuffer.put(planeIter.getPlane(inWgtPix));
             }
             if (itsDoSensitivity) {
-                // invert sensitivities before regridding to avoid artefacts at sharp edges in the sensitivity image
+                // invert sensitivities before regridding to avoid
+                // artefacts at sharp edges in the sensitivity image
                 itsInSenBuffer.put(planeIter.getPlane(inSenPix));
-                float sensitivity;
+                T sensitivity;
 
                 IPosition pos(2);
                 for (int x=0; x<inSenPix.shape()[0];++x) {
@@ -791,25 +851,30 @@ namespace askap {
             }
         }
 
-        void LinmosAccumulator::regrid() {
-            ASKAPLOG_INFO_STR(linmoslogger, " - regridding with dec="<<itsDecimate<<" rep="<<itsReplicate<<" force="<<itsForce);
-            ASKAPCHECK(itsOutBuffer.shape().nelements()>0, "Output buffer does not appear to be set");
-            itsRegridder.regrid(itsOutBuffer, itsEmethod, itsAxes, itsInBuffer, itsReplicate, itsDecimate, false, itsForce);
+        template<typename T>
+        void LinmosAccumulator<T>::regrid() {
+            ASKAPLOG_INFO_STR(linmoslogger, " - regridding with dec="<<
+                itsDecimate<<" rep="<<itsReplicate<<" force="<<itsForce);
+            ASKAPCHECK(itsOutBuffer.shape().nelements()>0,
+                "Output buffer does not appear to be set");
+            itsRegridder.regrid(itsOutBuffer, itsEmethod, itsAxes, itsInBuffer,
+                                itsReplicate, itsDecimate, false, itsForce);
             if (itsWeightType == FROM_WEIGHT_IMAGES) {
-                itsRegridder.regrid(itsOutWgtBuffer, itsEmethod, itsAxes, itsInWgtBuffer, itsReplicate, itsDecimate, false,
-                                    itsForce);
+                itsRegridder.regrid(itsOutWgtBuffer, itsEmethod, itsAxes,
+                    itsInWgtBuffer, itsReplicate, itsDecimate, false, itsForce);
             }
             if (itsDoSensitivity) {
-                itsRegridder.regrid(itsOutSnrBuffer, itsEmethod, itsAxes, itsInSnrBuffer, itsReplicate, itsDecimate, false,
-                                    itsForce);
+                itsRegridder.regrid(itsOutSnrBuffer, itsEmethod, itsAxes,
+                    itsInSnrBuffer, itsReplicate, itsDecimate, false, itsForce);
             }
 
         }
 
-        void LinmosAccumulator::accumulatePlane(Array<float>& outPix,
-                                                Array<float>& outWgtPix,
-                                                Array<float>& outSenPix,
-                                                const IPosition& curpos) {
+        template<typename T>
+        void LinmosAccumulator<T>::accumulatePlane(Array<T>& outPix,
+                                                   Array<T>& outWgtPix,
+                                                   Array<T>& outSenPix,
+                                                   const IPosition& curpos) {
 
             // copy the pixel iterator containing all dimensions
             IPosition fullpos(curpos);
@@ -817,25 +882,26 @@ namespace askap {
             IPosition pos(2);
 
             // set the weights, either to those read in or using the primary-beam model
-            TempImage<float> wgtBuffer;
+            TempImage<T> wgtBuffer;
             if (itsWeightType == FROM_WEIGHT_IMAGES) {
                 wgtBuffer = itsOutWgtBuffer;
             } else {
 
                 Vector<double> pixel(2,0.);
                 MVDirection world0, world1;
-                float offsetBeam, pb;
+                T offsetBeam, pb;
 
                 // get coordinates of the spectral axis and the current frequency
                 const int scPos = itsInCoordSys.findCoordinate(Coordinate::SPECTRAL,-1);
                 const SpectralCoordinate inSC = itsInCoordSys.spectralCoordinate(scPos);
                 int chPos = itsInCoordSys.pixelAxes(scPos)[0];
-                const float freq = inSC.referenceValue()[0] + (curpos[chPos] - inSC.referencePixel()[0]) * inSC.increment()[0];
+                const T freq = inSC.referenceValue()[0] +
+                    (curpos[chPos] - inSC.referencePixel()[0]) * inSC.increment()[0];
 
                 // set FWHM for the current beam
                 // Removing the factor of 1.22 gives a good match to the simultation weight images
-                //const float fwhm = 1.22*3e8/freq/12;
-                const float fwhm = 3e8/freq/12;
+                //const T fwhm = 1.22*3e8/freq/12;
+                const T fwhm = 3e8/freq/12;
 
                 // get coordinates of the direction axes
                 const int dcPos = itsInCoordSys.findCoordinate(Coordinate::DIRECTION,-1);
@@ -846,8 +912,8 @@ namespace askap {
                 inDC.toWorld(world0,inDC.referencePixel());
 
                 // apparently the +100 forces it to use the memory
-                double maxMemoryInMB = double(itsOutBuffer.shape().product()*sizeof(float))/1024./1024.+100;
-                wgtBuffer = TempImage<float>(itsOutBuffer.shape(), itsOutBuffer.coordinates(), maxMemoryInMB);
+                double maxMemoryInMB = double(itsOutBuffer.shape().product()*sizeof(T))/1024./1024.+100;
+                wgtBuffer = TempImage<T>(itsOutBuffer.shape(), itsOutBuffer.coordinates(), maxMemoryInMB);
 
                 // step through the pixels, setting the weights (power primary beam squared)
                 for (int x=0; x<outPix.shape()[0];++x) {
@@ -870,10 +936,10 @@ namespace askap {
 
             }
 
-            float minVal, maxVal;
+            T minVal, maxVal;
             IPosition minPos, maxPos;
             minMax(minVal,maxVal,minPos,maxPos,wgtBuffer);
-            float wgtCutoff = itsCutoff * itsCutoff * maxVal; // wgtBuffer is prop. to image (gain/sigma)^2
+            T wgtCutoff = itsCutoff * itsCutoff * maxVal; // wgtBuffer is prop. to image (gain/sigma)^2
 
             // Accumulate the pixels of this slice.
             // Could restrict it (and the regrid) to a smaller region of interest.
@@ -885,7 +951,7 @@ namespace askap {
                         pos[0] = x;
                         pos[1] = y;
                         if (wgtBuffer.getAt(pos)>=wgtCutoff) {
-                            outPix(fullpos)    = outPix(fullpos)    + itsOutBuffer.getAt(pos) * wgtBuffer.getAt(pos);
+                            outPix(fullpos) = outPix(fullpos) + itsOutBuffer.getAt(pos) * wgtBuffer.getAt(pos);
                             outWgtPix(fullpos) = outWgtPix(fullpos) + wgtBuffer.getAt(pos);
                         }
                     }
@@ -898,7 +964,7 @@ namespace askap {
                         pos[0] = x;
                         pos[1] = y;
                         if (wgtBuffer.getAt(pos)>=wgtCutoff) {
-                            outPix(fullpos)    = outPix(fullpos)    + itsOutBuffer.getAt(pos) * sqrt(wgtBuffer.getAt(pos));
+                            outPix(fullpos) = outPix(fullpos) + itsOutBuffer.getAt(pos) * sqrt(wgtBuffer.getAt(pos));
                             outWgtPix(fullpos) = outWgtPix(fullpos) + wgtBuffer.getAt(pos);
                         }
                     }
@@ -911,7 +977,7 @@ namespace askap {
                         pos[0] = x;
                         pos[1] = y;
                         if (wgtBuffer.getAt(pos)>=wgtCutoff) {
-                            outPix(fullpos)    = outPix(fullpos)    + itsOutBuffer.getAt(pos);
+                            outPix(fullpos) = outPix(fullpos) + itsOutBuffer.getAt(pos);
                             outWgtPix(fullpos) = outWgtPix(fullpos) + wgtBuffer.getAt(pos);
                         }
                     }
@@ -919,9 +985,9 @@ namespace askap {
             }
             // Accumulate sensitivity for this slice.
             if (itsDoSensitivity) {
-                float invVariance;
+                T invVariance;
                 minMax(minVal,maxVal,minPos,maxPos,itsOutSnrBuffer);
-                float snrCutoff = itsCutoff * itsCutoff * maxVal;
+                T snrCutoff = itsCutoff * itsCutoff * maxVal;
                 for (int x=0; x<outPix.shape()[0];++x) {
                     for (int y=0; y<outPix.shape()[1];++y) {
                         fullpos[0] = x;
@@ -938,13 +1004,14 @@ namespace askap {
 
         }
 
-        void LinmosAccumulator::accumulatePlane(Array<float>& outPix,
-                                                Array<float>& outWgtPix,
-                                                Array<float>& outSenPix,
-                                                const Array<float>& inPix,
-                                                const Array<float>& inWgtPix,
-                                                const Array<float>& inSenPix,
-                                                const IPosition& curpos) {
+        template<typename T>
+        void LinmosAccumulator<T>::accumulatePlane(Array<T>& outPix,
+                                                   Array<T>& outWgtPix,
+                                                   Array<T>& outSenPix,
+                                                   const Array<T>& inPix,
+                                                   const Array<T>& inWgtPix,
+                                                   const Array<T>& inSenPix,
+                                                   const IPosition& curpos) {
 
             ASKAPASSERT(inPix.shape() == outPix.shape());
 
@@ -953,7 +1020,7 @@ namespace askap {
             // set up an indexing vector for the weights. If weight images are used, these are as in the image.
             IPosition wgtpos(curpos);
 
-            Array<float> wgtPix;
+            Array<T> wgtPix;
 
             // set the weights, either to those read in or using the primary-beam model
             if (itsWeightType == FROM_WEIGHT_IMAGES) {
@@ -962,18 +1029,19 @@ namespace askap {
 
                 Vector<double> pixel(2,0.);
                 MVDirection world;
-                float offsetBeam, pb;
+                T offsetBeam, pb;
 
                 // get coordinates of the spectral axis and the current frequency
                 const int scPos = itsInCoordSys.findCoordinate(Coordinate::SPECTRAL,-1);
                 const SpectralCoordinate inSC = itsInCoordSys.spectralCoordinate(scPos);
                 int chPos = itsInCoordSys.pixelAxes(scPos)[0];
-                const float freq = inSC.referenceValue()[0] + (curpos[chPos] - inSC.referencePixel()[0]) * inSC.increment()[0];
+                const T freq = inSC.referenceValue()[0] +
+                    (curpos[chPos] - inSC.referencePixel()[0]) * inSC.increment()[0];
 
                 // set FWHM for the current beam
                 // Removing the factor of 1.22 gives a good match to the simultation weight images
-                //const float fwhm = 1.22*3e8/freq/12;
-                const float fwhm = 3e8/freq/12;
+                //const T fwhm = 1.22*3e8/freq/12;
+                const T fwhm = 3e8/freq/12;
 
                 // get coordinates of the direction axes
                 const int dcPos = itsInCoordSys.findCoordinate(Coordinate::DIRECTION,-1);
@@ -984,7 +1052,7 @@ namespace askap {
                     wgtpos[dim] = 0;
                 }
                 // set the array
-                wgtPix = Array<float>(itsInShape);
+                wgtPix = Array<T>(itsInShape);
 
                 for (int x=0; x<outPix.shape()[0];++x) {
                     for (int y=0; y<outPix.shape()[1];++y) {
@@ -1005,10 +1073,10 @@ namespace askap {
                 }
             }
 
-            float minVal, maxVal;
+            T minVal, maxVal;
             IPosition minPos, maxPos;
             minMax(minVal,maxVal,minPos,maxPos,wgtPix);
-            float wgtCutoff = itsCutoff * itsCutoff * maxVal; // wgtPix is prop. to image (gain/sigma)^2
+            T wgtCutoff = itsCutoff * itsCutoff * maxVal; // wgtPix is prop. to image (gain/sigma)^2
 
             if (itsWeightState == CORRECTED) {
                 for (int x=0; x<outPix.shape()[0];++x) {
@@ -1068,12 +1136,13 @@ namespace askap {
 
         }
 
-        void LinmosAccumulator::deweightPlane(Array<float>& outPix,
-                                              const Array<float>& outWgtPix,
-                                              Array<float>& outSenPix,
-                                              const IPosition& curpos) {
+        template<typename T>
+        void LinmosAccumulator<T>::deweightPlane(Array<T>& outPix,
+                                                 const Array<T>& outWgtPix,
+                                                 Array<T>& outSenPix,
+                                                 const IPosition& curpos) {
 
-            float minVal, maxVal;
+            T minVal, maxVal;
             IPosition minPos, maxPos;
             minMax(minVal,maxVal,minPos,maxPos,outWgtPix);
 
@@ -1108,8 +1177,10 @@ namespace askap {
 
         }
 
-        Vector<IPosition> LinmosAccumulator::convertImageCornersToRef(const DirectionCoordinate& refDC) {
-            // based on SynthesisParamsHelper::facetSlicer, but don't want to load every input image into a scimath::Param
+        template<typename T>
+        Vector<IPosition> LinmosAccumulator<T>::convertImageCornersToRef(const DirectionCoordinate& refDC) {
+            // based on SynthesisParamsHelper::facetSlicer, but don't want
+            // to load every input image into a scimath::Param
 
             ASKAPDEBUGASSERT(itsInShape.nelements() >= 2);
             // add more checks
@@ -1130,9 +1201,13 @@ namespace askap {
             pix[1] = Double(blc[1]);
             MDirection tempDir;
             Bool success = inDC.toWorld(tempDir, pix);
-            ASKAPCHECK(success, "Pixel to world coordinate conversion failed for input BLC: "<<inDC.errorMessage());
+            ASKAPCHECK(success,
+                "Pixel to world coordinate conversion failed for input BLC: "
+                << inDC.errorMessage());
             success = refDC.toPixel(pix,tempDir);
-            ASKAPCHECK(success, "World to pixel coordinate conversion failed for output BLC: "<<refDC.errorMessage());
+            ASKAPCHECK(success,
+                "World to pixel coordinate conversion failed for output BLC: "
+                << refDC.errorMessage());
             blc[0] = casa::Int(round(pix[0]));
             blc[1] = casa::Int(round(pix[1]));
  
@@ -1140,9 +1215,13 @@ namespace askap {
             pix[0] = Double(trc[0]);
             pix[1] = Double(trc[1]);
             success = inDC.toWorld(tempDir, pix);
-            ASKAPCHECK(success, "Pixel to world coordinate conversion failed for input TRC: "<<inDC.errorMessage());
+            ASKAPCHECK(success,
+                "Pixel to world coordinate conversion failed for input TRC: "
+                << inDC.errorMessage());
             success = refDC.toPixel(pix,tempDir);
-            ASKAPCHECK(success, "World to pixel coordinate conversion failed for output TRC: "<<refDC.errorMessage());
+            ASKAPCHECK(success,
+                "World to pixel coordinate conversion failed for output TRC: "
+                << refDC.errorMessage());
             trc[0] = casa::Int(round(pix[0]));
             trc[1] = casa::Int(round(pix[1]));
 
@@ -1154,43 +1233,51 @@ namespace askap {
 
         }
 
-        bool LinmosAccumulator::coordinatesAreConsistent(const CoordinateSystem& coordSys1,
-                                                         const CoordinateSystem& coordSys2) {
+        template<typename T>
+        bool LinmosAccumulator<T>::coordinatesAreConsistent(const CoordinateSystem& coordSys1,
+                                                            const CoordinateSystem& coordSys2) {
             // Check to see if it makes sense to combine images with these coordinate systems.
             // Could get more tricky, but right now make sure any extra dimensions, such as frequency
             // and polarisation, are equal in the two systems.
             if ( coordSys1.nCoordinates() != coordSys2.nCoordinates() ) {
-                //ASKAPLOG_INFO_STR(linmoslogger, "Coordinates are not consistent: dimension mismatch");
+                //ASKAPLOG_INFO_STR(linmoslogger,
+                //    "Coordinates are not consistent: dimension mismatch");
                 return false;
             }
             if (!allEQ(coordSys1.worldAxisNames(), coordSys2.worldAxisNames())) {
-                //ASKAPLOG_INFO_STR(linmoslogger, "Coordinates are not consistent: axis name mismatch");
+                //ASKAPLOG_INFO_STR(linmoslogger,
+                //    "Coordinates are not consistent: axis name mismatch");
                 return false;
             }
             if (!allEQ(coordSys1.worldAxisUnits(), coordSys2.worldAxisUnits())) {
-                //ASKAPLOG_INFO_STR(linmoslogger, "Coordinates are not consistent: axis unit mismatch");
+                //ASKAPLOG_INFO_STR(linmoslogger,
+                //    "Coordinates are not consistent: axis unit mismatch");
                 return false;
             }
             return true;
         }
 
         // Check that the input coordinate system is the same as the output
-        bool LinmosAccumulator::coordinatesAreEqual(void) {
-            return coordinatesAreEqual(itsInCoordSys, itsOutCoordSys, itsInShape, itsOutShape);
+        template<typename T>
+        bool LinmosAccumulator<T>::coordinatesAreEqual(void) {
+            return coordinatesAreEqual(itsInCoordSys, itsOutCoordSys,
+                                       itsInShape, itsOutShape);
         }
 
         // Check that two coordinate systems are the same
-        bool LinmosAccumulator::coordinatesAreEqual(const CoordinateSystem& coordSys1,
-                                                    const CoordinateSystem& coordSys2,
-                                                    const IPosition& shape1,
-                                                    const IPosition& shape2) {
+        template<typename T>
+        bool LinmosAccumulator<T>::coordinatesAreEqual(const CoordinateSystem& coordSys1,
+                                                       const CoordinateSystem& coordSys2,
+                                                       const IPosition& shape1,
+                                                       const IPosition& shape2) {
 
             // Set threshold for allowed small numerical differences
             double thresh = 1.0e-12;
 
             // Check that the shape is the same.
             if ( shape1 != shape2 ) {
-                //ASKAPLOG_INFO_STR(linmoslogger, "Coordinates are not equal: shape mismatch");
+                //ASKAPLOG_INFO_STR(linmoslogger,
+                //    "Coordinates not equal: shape mismatch");
                 return false;
             }
 
@@ -1205,7 +1292,7 @@ namespace askap {
                      (fabs(coordSys1.referenceValue()[dim] - coordSys2.referenceValue()[dim]) > thresh) ||
                      (fabs(coordSys1.increment()[dim] - coordSys2.increment()[dim]) > thresh) ) {
                     //ASKAPLOG_INFO_STR(linmoslogger,
-                    //    "Coordinates are not equal: coord system mismatch for dim " << dim);
+                    //    "Coordinates not equal: mismatch for dim " << dim);
                     return false;
                 }
             }
