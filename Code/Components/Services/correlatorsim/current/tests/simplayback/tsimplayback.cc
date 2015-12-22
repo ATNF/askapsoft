@@ -22,6 +22,7 @@
 /// along with this program; if not, write to the Free Software
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
+/// @author Paulus Lahur <paulus.lahur@csiro.au>
 /// @author Ben Humphreys <ben.humphreys@csiro.au>
 
 // ASKAPsoft includes
@@ -30,12 +31,14 @@
 // Test includes
 #include "BaselineMapTest.h"
 #include "RandomRealTest.h"
+#include "ChannelMapTest.h"
 
 int main(int argc, char *argv[])
 {
     askapdev::testutils::AskapTestRunner runner(argv[0]);
     runner.addTest(askap::cp::BaselineMapTest::suite());
     runner.addTest(askap::cp::RandomRealTest::suite());
+    runner.addTest(askap::cp::ChannelMapTest::suite());
     const bool wasSucessful = runner.run();
 
     return wasSucessful ? 0 : 1;
