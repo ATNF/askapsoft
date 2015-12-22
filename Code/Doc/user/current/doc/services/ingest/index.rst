@@ -143,7 +143,7 @@ some temporary tasks are also documented. They can be taken out in the future.
 |                       |replaced by proper mechanism of distributing UVW with TOS metadata from  |
 |                       |the appropriate service.                                                 |
 +-----------------------+-------------------------------------------------------------------------+
-|MSSink                 |Sink task writing the  measurement set.                                  |
+|:doc:`mssink`          |Sink task writing the  measurement set.                                  |
 +-----------------------+-------------------------------------------------------------------------+
 |TCPSink                |Sink task publishing visibilities to **vispublisher**. This allows to    |
 |                       |monitor data on the fly via vis and spd. Temporary task, we will not be  |
@@ -446,9 +446,6 @@ the **Source** task.
 |metadata.topic              |string             |None        |The name of the Ice topic used to distribute metadata         |
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
 
-
-
-The text below is still to be done (currently a copy of another page)
 
 Example
 ~~~~~~~
