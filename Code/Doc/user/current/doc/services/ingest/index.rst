@@ -102,7 +102,8 @@ General parameters
 |                            |                   |            |chosen freely. The exact functionality is defined by the      |
 |                            |                   |            |**type** keyword (see below). This is done to be able to      |
 |                            |                   |            |reuse same tasks with different parameters throughout the     |
-|                            |                   |            |task chain. We will refer to tasks by their type in this      |
+|                            |                   |            |task chain. See the example in the :doc:`channelavgtask`      |
+|                            |                   |            |description. We will refer to tasks by their type in this     |
 |                            |                   |            |documentation, as they can be named arbitrarily in this list  |
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
 |tasks.\ **name**\ .type     |string             |None        |Type of the task with the given **name**\ . The same operation|
@@ -141,11 +142,11 @@ some temporary tasks are also documented. They can be taken out in the future.
 +-----------------------+-------------------------------------------------------------------------+
 |CalcUVWTask            |Calculation of baseline projections (UVW). Temporary task, should be     |
 |                       |replaced by proper mechanism of distributing UVW with TOS metadata from  |
-|                       |the appropriate service.                                                 |
+|                       |the appropriate service. It doesn't require any parameters.              |
 +-----------------------+-------------------------------------------------------------------------+
 |:doc:`mssink`          |Sink task writing the  measurement set.                                  |
 +-----------------------+-------------------------------------------------------------------------+
-|TCPSink                |Sink task publishing visibilities to **vispublisher**. This allows to    |
+|:doc:`tcpsink`         |Sink task publishing visibilities to **vispublisher**. This allows to    |
 |                       |monitor data on the fly via vis and spd. Temporary task, we will not be  |
 |                       |able to use the same approach for full ASKAP, but keep it as long as we  |
 |                       |can as it is handy for debugging.                                        |
@@ -160,7 +161,7 @@ some temporary tasks are also documented. They can be taken out in the future.
 |                       |This task has never been tested or used, but some skeleton implementation|
 |                       |exists. It will be worked on past early science.                         |
 +-----------------------+-------------------------------------------------------------------------+
-|ChannelAvgTask         |Task to average adjacent channels reducing the spectral resolution       |
+|:doc:`channelavgtask`  |Task to average adjacent channels reducing the spectral resolution       |
 +-----------------------+-------------------------------------------------------------------------+
 |ChannelSelTask         |Task to select a contiguous subset of spectral channels and discard the  |
 |                       |rest. This task is largely used for debugging and is not intended as     |
@@ -169,9 +170,10 @@ some temporary tasks are also documented. They can be taken out in the future.
 |DerippleTask           |BETA-specific task to remove the ripple caused by polyphase filters. It  |
 |                       |does not require any parameters, but needs the channel space to be       |
 |                       |aligned with coarse channels as it uses the absolute channel number to   |
-|                       |figure out of its place in the coarse channel.                           |
+|                       |figure out of its place in the coarse channel. This task does not require|
+|                       |any parameters.                                                          |
 +-----------------------+-------------------------------------------------------------------------+
-|FlagTask               |Basic on the fly flagging task. Currently, this task implements basic    |
+|:doc:`flagtask`        |Basic on the fly flagging task. Currently, this task implements basic    |
 |                       |thresholding. The plan is to have special service delivering information |
 |                       |about known RFI which has to be flagged. It is yet to be implemented and |
 |                       |will be worked on past early science. On the fly flagging is essential   |
@@ -548,7 +550,7 @@ Example
 
     tasks.tasklist = [MergedSource, Merge, CalcUVWTask, FringeRotationTask, MSSink, TCPSink]
 
-    # uvw calculation task
+    # uvw calculation task; no parameters required
     tasks.CalcUVWTask.type = CalcUVWTask
 
     # s/w-based fringe rotation
