@@ -45,12 +45,16 @@
 #include <casa/Arrays/MatrixMath.h>
 #include <casa/Arrays/Vector.h>
 
+#include <coordinates/Coordinates/CoordinateUtil.h>
+
 #include <Blob/BlobArray.h>
 #include <Blob/BlobSTL.h>
 
 #include <askap/AskapError.h>
 
 #include <utils/DeepCopyUtils.h>
+
+#include <linmos/LinmosAccumulator.h>
 
 #include <stdexcept>
 #include <string>
@@ -83,6 +87,7 @@ namespace askap
         itsDataVector[*iterRow]=casa::Vector<double>(0);
         itsShape[*iterRow]=casa::IPosition();
         itsReference[*iterRow]=casa::IPosition();
+        itsCoordSys[*iterRow]=casa::CoordinateSystem();
         itsNormalMatrixSlice[*iterRow]=casa::Vector<double>(0);
         itsNormalMatrixDiagonal[*iterRow]=casa::Vector<double>(0);
       }
@@ -95,7 +100,8 @@ namespace askap
     /// therefore, need this copy constructor to achieve proper copying.
     /// @param[in] src input measurement equations to copy from
     ImagingNormalEquations::ImagingNormalEquations(const ImagingNormalEquations &src) :
-         INormalEquations(src),itsShape(src.itsShape), itsReference(src.itsReference)
+         INormalEquations(src),itsShape(src.itsShape), itsReference(src.itsReference),
+         itsCoordSys(src.itsCoordSys)
     {
       deepCopyOfSTDMap(src.itsNormalMatrixSlice, itsNormalMatrixSlice);
       deepCopyOfSTDMap(src.itsNormalMatrixDiagonal, itsNormalMatrixDiagonal);
@@ -111,11 +117,12 @@ namespace askap
     ImagingNormalEquations& ImagingNormalEquations::operator=(const ImagingNormalEquations &src)
     {
       if (&src != this) {
-          itsShape = src.itsShape;
-          itsReference = src.itsReference;
-          deepCopyOfSTDMap(src.itsNormalMatrixSlice, itsNormalMatrixSlice);
-          deepCopyOfSTDMap(src.itsNormalMatrixDiagonal, itsNormalMatrixDiagonal);
-          deepCopyOfSTDMap(src.itsDataVector, itsDataVector);      
+        itsShape = src.itsShape;
+        itsReference = src.itsReference;
+        itsCoordSys = src.itsCoordSys;
+        deepCopyOfSTDMap(src.itsNormalMatrixSlice, itsNormalMatrixSlice);
+        deepCopyOfSTDMap(src.itsNormalMatrixDiagonal, itsNormalMatrixDiagonal);
+        deepCopyOfSTDMap(src.itsDataVector, itsDataVector);      
       }
       return *this;
     }
@@ -126,97 +133,237 @@ namespace askap
     {
       reset();
     }
-  
-  /// @brief Merge these normal equations with another
-  /// @details Combining two normal equations depends on the actual class type
-  /// (different work is required for a full matrix and for an approximation).
-  /// This method must be overriden in the derived classes for correct 
-  /// implementation. 
-  /// This means that we just add
-  /// @param[in] src an object to get the normal equations from
-  void ImagingNormalEquations::merge(const INormalEquations& src)
-  {
-    ASKAPTRACE("ImagingNormalEquations::merge");
-    try {
-      const ImagingNormalEquations &other = 
-                         dynamic_cast<const ImagingNormalEquations&>(src); 
 
-      // list of parameters covered by input normal equations
-      const std::vector<std::string> otherParams = other.unknowns();
-      if (!otherParams.size()) {
+    /// @brief Merge these normal equations with another
+    /// @details Combining two normal equations depends on the actual class type
+    /// (different work is required for a full matrix and for an approximation).
+    /// This method must be overriden in the derived classes for correct 
+    /// implementation. 
+    /// This means that we just add
+    /// @param[in] src an object to get the normal equations from
+    void ImagingNormalEquations::merge(const INormalEquations& src)
+    {
+      ASKAPTRACE("ImagingNormalEquations::merge");
+      try {
+        const ImagingNormalEquations &other = 
+                           dynamic_cast<const ImagingNormalEquations&>(src); 
+ 
+        // list of parameters covered by input normal equations
+        const std::vector<std::string> otherParams = other.unknowns();
+        if (!otherParams.size()) {
           // do nothing, src is empty
           return;
-      }
-
-      vector<string> names = unknowns();
-
-      if (!names.size()) {
+        }
+ 
+        // initialise an image accumulator
+        imagemath::LinmosAccumulator<double> accumulator;
+ 
+        vector<string> names = unknowns();
+ 
+        if (!names.size()) {
           // this object is empty, just do an assignment
           operator=(other);
           return;
-      }
-      // merge in parameters of input normal equations
-      vector<string>::const_iterator iterCol = otherParams.begin();
-      for (; iterCol != otherParams.end(); ++iterCol) {
-           if (std::find(names.begin(),names.end(),*iterCol) == names.end()) {
-               names.push_back(*iterCol);
-           }
-      }      
-      //
-      
-      for (iterCol = names.begin(); iterCol != names.end(); ++iterCol)
-      {
-        if (other.itsDataVector.find(*iterCol) == other.itsDataVector.end()) {
-            continue;
-        }
-        ASKAPDEBUGASSERT(other.itsDataVector.find(*iterCol) != other.itsDataVector.end()); 
-        if(itsDataVector[*iterCol].size()!=other.itsDataVector.find(*iterCol)->second.size())
-        {
-          itsDataVector[*iterCol].assign(other.itsDataVector.find(*iterCol)->second);
-        }
-        else
-        {
-          itsDataVector[*iterCol]+=other.itsDataVector.find(*iterCol)->second;
-        }
-            
-        itsShape[*iterCol].resize(0);
-        ASKAPDEBUGASSERT(other.itsShape.find(*iterCol) != other.itsShape.end());
-        itsShape[*iterCol]=other.itsShape.find(*iterCol)->second;
-        
-        itsReference[*iterCol].resize(0);
-        ASKAPDEBUGASSERT(other.itsReference.find(*iterCol) != other.itsReference.end());
-        itsReference[*iterCol] = other.itsReference.find(*iterCol)->second;
-        
-        ASKAPDEBUGASSERT(other.itsNormalMatrixSlice.find(*iterCol) != other.itsNormalMatrixSlice.end());
-        if(itsNormalMatrixSlice[*iterCol].shape()!=other.itsNormalMatrixSlice.find(*iterCol)->second.shape())
-        {
-          itsNormalMatrixSlice[*iterCol].assign(other.itsNormalMatrixSlice.find(*iterCol)->second);
-        }
-        else
-        {
-          itsNormalMatrixSlice[*iterCol]+=other.itsNormalMatrixSlice.find(*iterCol)->second;
         }
  
-        ASKAPDEBUGASSERT(other.itsNormalMatrixDiagonal.find(*iterCol) != other.itsNormalMatrixDiagonal.end());
-        if(itsNormalMatrixDiagonal[*iterCol].shape()!=other.itsNormalMatrixDiagonal.find(*iterCol)->second.shape())
+        // concatenate unique parameter names
+        vector<string>::const_iterator iterCol = otherParams.begin();
+        for (; iterCol != otherParams.end(); ++iterCol) {
+          if (std::find(names.begin(),names.end(),*iterCol) == names.end()) {
+            names.push_back(*iterCol);
+          }
+        }      
+ 
+        // step through parameter names and add/merge new ones
+        for (iterCol = names.begin(); iterCol != names.end(); ++iterCol)
         {
-          itsNormalMatrixDiagonal[*iterCol].assign(other.itsNormalMatrixDiagonal.find(*iterCol)->second);
-        }
-        else
-        {
-          itsNormalMatrixDiagonal[*iterCol]+=other.itsNormalMatrixDiagonal.find(*iterCol)->second;
-        }       
-      }     
-    }
-    catch (const std::bad_cast &bc) {
+ 
+          // check dataVector
+          if (other.itsDataVector.find(*iterCol) == other.itsDataVector.end()) {
+            // no new data for this parameter
+            continue;
+          }
+ 
+          // record how data are updated
+          enum updateType_t{ overwrite, add, linmos };
+          int updateType;
+ 
+          // check coordinate systems and record how data are updated
+
+          ASKAPDEBUGASSERT(other.itsDataVector.find(*iterCol) != other.itsDataVector.end()); 
+ 
+          const casa::Vector<double> &newDataVec = other.itsDataVector.find(*iterCol)->second;
+          const casa::CoordinateSystem &newCoordSys = other.itsCoordSys.find(*iterCol)->second;
+          const casa::IPosition &newShape = other.itsShape.find(*iterCol)->second;
+ 
+          if(itsDataVector[*iterCol].size()==0)
+          {
+            // no old data for this parameter
+            itsDataVector[*iterCol].assign(newDataVec);
+            updateType = overwrite;
+          }
+          else if(accumulator.coordinatesAreEqual(itsCoordSys[*iterCol],newCoordSys,
+                                                  itsShape[*iterCol],newShape))
+          {
+            // new and old data can be added directly for this parameter
+            itsDataVector[*iterCol] += newDataVec;
+            updateType = add;
+          }
+          else
+          {
+            // new and old data cannot be added directly for this parameter
+            if (itsCoordSys[*iterCol].nCoordinates() == 0) {
+              // no coordinate information, so just use the new data
+              itsDataVector[*iterCol].assign(newDataVec);
+              updateType = overwrite;
+            } else if (itsCoordSys[*iterCol].nCoordinates() != newCoordSys.nCoordinates()) {
+              // different dimensions, so just use the new data
+              itsDataVector[*iterCol].assign(newDataVec);
+              updateType = overwrite;
+            } else {
+              // regrid then add (using weights)
+              linmosMerge(other, *iterCol);
+              updateType = linmos;
+            }
+          }
+              
+          // update shape and reference.
+          if (updateType == overwrite)
+          {
+            itsShape[*iterCol].resize(0);
+            ASKAPDEBUGASSERT(other.itsShape.find(*iterCol) != other.itsShape.end());
+            itsShape[*iterCol] = other.itsShape.find(*iterCol)->second;
+            
+            itsReference[*iterCol].resize(0);
+            ASKAPDEBUGASSERT(other.itsReference.find(*iterCol) != other.itsReference.end());
+            itsReference[*iterCol] = other.itsReference.find(*iterCol)->second;
+            
+            ASKAPDEBUGASSERT(other.itsCoordSys.find(*iterCol) != other.itsCoordSys.end());
+            // leave "keep" and "replace" axis vectors empty, so they are all removed.
+            Vector<Int> worldAxes;
+            Vector<Double> worldRep;
+            CoordinateUtil::removeAxes(itsCoordSys[*iterCol], worldRep, worldAxes, False);
+            itsCoordSys[*iterCol] = other.itsCoordSys.find(*iterCol)->second;
+          }
+ 
+          // linmos uses itsNormalMatrixDiagonal to store weights. Otherwise, leave this as it was.
+          if (updateType != linmos)
+          {
+            // check NormalMatrixSlice
+            ASKAPDEBUGASSERT(other.itsNormalMatrixSlice.find(*iterCol) != other.itsNormalMatrixSlice.end());
+            if(itsNormalMatrixSlice[*iterCol].shape()==0)
+            {
+              itsNormalMatrixSlice[*iterCol].assign(other.itsNormalMatrixSlice.find(*iterCol)->second);
+            }
+            else if(itsNormalMatrixSlice[*iterCol].shape() !=
+                    other.itsNormalMatrixSlice.find(*iterCol)->second.shape())
+            {
+              itsNormalMatrixSlice[*iterCol].assign(other.itsNormalMatrixSlice.find(*iterCol)->second);
+            }
+            else
+            {
+              itsNormalMatrixSlice[*iterCol] += other.itsNormalMatrixSlice.find(*iterCol)->second;
+            }
+            // check NormalMatrixDiagonal
+            ASKAPDEBUGASSERT(other.itsNormalMatrixDiagonal.find(*iterCol) !=
+                             other.itsNormalMatrixDiagonal.end());
+            if(itsNormalMatrixDiagonal[*iterCol].shape()==0)
+            {
+                itsNormalMatrixDiagonal[*iterCol].assign(other.itsNormalMatrixDiagonal.find(*iterCol)->second);
+            }
+            else if(itsNormalMatrixDiagonal[*iterCol].shape() !=
+                    other.itsNormalMatrixDiagonal.find(*iterCol)->second.shape())
+            {
+              itsNormalMatrixDiagonal[*iterCol].assign(other.itsNormalMatrixDiagonal.find(*iterCol)->second);
+            }
+            else
+            {
+              itsNormalMatrixDiagonal[*iterCol] += other.itsNormalMatrixDiagonal.find(*iterCol)->second;
+            }       
+          }     
+        }     
+      }
+      catch (const std::bad_cast &bc) {
         ASKAPTHROW(AskapError, "An attempt to merge NormalEquations with an "
-                    "equation of incompatible type");
+                   "equation of incompatible type");
+      }
     }
-  }
+
+
+    /// @brief Regrid and add new parameter
+    /// @details Regrid new image parameter, which is assume to be and image,
+    /// onto the current image grid, which is assumed to be of an appropriate
+    /// extent. 
+    /// @param[in] other normal equations
+    /// @param[in] name of parameter under consideration
+    void ImagingNormalEquations::linmosMerge(const ImagingNormalEquations &other, const string col)
+    {
+
+      ASKAPASSERT(itsShape[col].nelements() >= 2);
+      ASKAPASSERT(itsShape[col].nelements() == other.itsShape.find(col)->second.nelements());
+
+      // initialise an image accumulator
+      imagemath::LinmosAccumulator<double> accumulator;
+      accumulator.weightType(FROM_BP_MODEL);
+      accumulator.weightState(INHERENT);
+ 
+      // these inputs should be set up to take the full mosaic.
+      accumulator.setOutputParameters(itsShape[col], itsCoordSys[col]);
+
+      casa::Array<double> outPix(itsDataVector[col].reform(accumulator.outShape()));
+      casa::Array<double> outWgtPix(itsNormalMatrixDiagonal[col].reform(accumulator.outShape()));
+      casa::Array<double> outSenPix(accumulator.outShape(),0.);
+
+      accumulator.setInputParameters(other.itsShape.find(col)->second,
+                                     other.itsCoordSys.find(col)->second);
+
+      casa::Array<double> inPix(other.itsDataVector.find(col)->second.reform(accumulator.inShape()));
+      casa::Array<double> inWgtPix(other.itsNormalMatrixDiagonal.find(col)->second.reform(accumulator.inShape()));
+      casa::Array<double> inSenPix(accumulator.inShape(),1.);
+
+      if ( accumulator.outputBufferSetupRequired() ) {
+        accumulator.initialiseRegridder();
+      }
+      accumulator.initialiseOutputBuffers();
+      accumulator.initialiseInputBuffers();
+ 
+      // loop over non-direction axes (e.g. spectral and/or polarisation)
+      IPosition curpos(accumulator.inShape());
+      for (uInt dim=0; dim<curpos.nelements(); ++dim) {
+        curpos[dim] = 0;
+      }
+      scimath::MultiDimArrayPlaneIter planeIter(accumulator.inShape());
+      for (; planeIter.hasMore(); planeIter.next()) {
+        curpos = planeIter.position();
+        // load input buffer for the current plane
+        accumulator.loadInputBuffers(planeIter, inPix, inWgtPix, inSenPix);
+        // call regrid for any buffered images
+        accumulator.regrid();
+        // update the accululation arrays for this plane
+        accumulator.accumulatePlane(outPix, outWgtPix, outSenPix, curpos);
+      }
+
+    }
+
+    const casa::Vector<double>& ImagingNormalEquations::normalMatrixDiagonal(const std::string &par) const
+    {
+      std::map<string, casa::Vector<double> >::const_iterator cIt = 
+                                        itsNormalMatrixDiagonal.find(par);
+      ASKAPASSERT(cIt != itsNormalMatrixDiagonal.end());                                  
+      return cIt->second;
+    }
 
     const std::map<string, casa::Vector<double> >& ImagingNormalEquations::normalMatrixDiagonal() const
     {
       return itsNormalMatrixDiagonal;
+    }
+
+    const casa::Vector<double>& ImagingNormalEquations::normalMatrixSlice(const std::string &par) const
+    {
+      std::map<string, casa::Vector<double> >::const_iterator cIt = 
+                                        itsNormalMatrixSlice.find(par);
+      ASKAPASSERT(cIt != itsNormalMatrixSlice.end());                                  
+      return cIt->second;
     }
 
     const std::map<string, casa::Vector<double> >& ImagingNormalEquations::normalMatrixSlice() const
@@ -276,6 +423,12 @@ const std::map<std::string, casa::Vector<double> >& ImagingNormalEquations::data
       return itsReference;
     }
 
+/// Return coordinate system
+    const std::map<string, casa::CoordinateSystem >& ImagingNormalEquations::coordSys() const
+    {
+      return itsCoordSys;
+    }
+
     void ImagingNormalEquations::reset()
     {
       map<string, casa::Vector<double> >::iterator iterRow;
@@ -287,6 +440,11 @@ const std::map<std::string, casa::Vector<double> >& ImagingNormalEquations::data
         itsShape[iterRow->first]=casa::IPosition();
         itsReference[iterRow->first].resize(0);
         itsReference[iterRow->first]=casa::IPosition();
+        // leave "keep" and "replace" axis vectors empty, so they are all removed.
+        Vector<Int> worldAxes;
+        Vector<Double> worldRep;
+        CoordinateUtil::removeAxes(itsCoordSys[iterRow->first], worldRep, worldAxes, False);
+        itsCoordSys[iterRow->first] = casa::CoordinateSystem();
         itsNormalMatrixSlice[iterRow->first].resize();
         itsNormalMatrixSlice[iterRow->first]=casa::Vector<double>(0);
         itsNormalMatrixDiagonal[iterRow->first].resize();
@@ -294,16 +452,25 @@ const std::map<std::string, casa::Vector<double> >& ImagingNormalEquations::data
       }
     }
 
- 
-
     void ImagingNormalEquations::addSlice(const string& name,
       const casa::Vector<double>& normalmatrixslice,
       const casa::Vector<double>& normalmatrixdiagonal,
       const casa::Vector<double>& datavector,
       const casa::IPosition& shape,
-      const casa::IPosition& reference)
+      const casa::IPosition& reference,
+      const casa::CoordinateSystem& coordSys)
     {
       ASKAPTRACE("ImagingNormalEquations::addSlice");
+
+      // if coordinate systems exist, make sure they're equal
+      if(itsCoordSys[name].nCoordinates()>0)
+      {
+        // initialise an image accumulator
+        imagemath::LinmosAccumulator<double> accumulator;
+        ASKAPCHECK(accumulator.coordinatesAreEqual(itsCoordSys[name], coordSys,
+                                                   itsShape[name], shape),
+            "Cannot combine slices with different coord systems using addSlice. Use merge.");
+      }
 
       if(datavector.size()!=itsDataVector[name].size())
       {
@@ -335,6 +502,10 @@ const std::map<std::string, casa::Vector<double> >& ImagingNormalEquations::data
       itsShape[name]=shape;
       itsReference[name].resize(0);
       itsReference[name]=reference;
+      if(itsCoordSys[name].nCoordinates()==0)
+      {
+          itsCoordSys[name]=coordSys;
+      }
     }
     
     /// @brief Store slice of the normal matrix for a given parameter. 
