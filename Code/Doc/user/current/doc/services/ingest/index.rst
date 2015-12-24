@@ -133,12 +133,12 @@ some temporary tasks are also documented. They can be taken out in the future.
 |**Task**               |**Description**                                                          |
 |                       |                                                                         |
 +=======================+=========================================================================+
-|MergedSource           |Source task, merging visibility data streams and TOS metadata.This is the|
+|:doc:`mergedsource`    |Source task, merging visibility data streams and TOS metadata.This is the|
 |                       |main source task intended for production operations.                     |
 +-----------------------+-------------------------------------------------------------------------+
 |NoMetadataSource       |Source task faking metadata from parset. It is handy for some debugging  |
 +-----------------------+-------------------------------------------------------------------------+
-|ChannelMergeTask       |Task to merge together parallel streams distributed in frequency         |
+|:doc:`channelmergetask`|Task to merge together parallel streams distributed in frequency         |
 +-----------------------+-------------------------------------------------------------------------+
 |CalcUVWTask            |Calculation of baseline projections (UVW). Temporary task, should be     |
 |                       |replaced by proper mechanism of distributing UVW with TOS metadata from  |
@@ -163,7 +163,7 @@ some temporary tasks are also documented. They can be taken out in the future.
 +-----------------------+-------------------------------------------------------------------------+
 |:doc:`channelavgtask`  |Task to average adjacent channels reducing the spectral resolution       |
 +-----------------------+-------------------------------------------------------------------------+
-|ChannelSelTask         |Task to select a contiguous subset of spectral channels and discard the  |
+|:doc:`channelseltask`  |Task to select a contiguous subset of spectral channels and discard the  |
 |                       |rest. This task is largely used for debugging and is not intended as     |
 |                       |permanent.                                                               |
 +-----------------------+-------------------------------------------------------------------------+
@@ -182,12 +182,12 @@ some temporary tasks are also documented. They can be taken out in the future.
 |ChannelFlagTask        |Early BETA task of temporary nature. It flags data based on static lists |
 |                       |of channels supplied as ascii files per baseline. It was written to      |
 |                       |enable commissioning at the time significant memory errors were present. |
-|                       |It shouldn't be used in operations.                                      |
+|                       |It shouldn't be used in production system.                               |
 +-----------------------+-------------------------------------------------------------------------+
 |PhaseTrackTask         |Early BETA task for unsynchronised phase tracking matching delay tracking|
 |                       |done via the OSL script. The functionality is largely superseded by      |
 |                       |FringeRotationTask, but the code left in because parts of it are reused. |
-|                       |Not to be used in operations.                                            |
+|                       |Not to be used in production system.                                     |
 +-----------------------+-------------------------------------------------------------------------+
 
 Beam arrangement
