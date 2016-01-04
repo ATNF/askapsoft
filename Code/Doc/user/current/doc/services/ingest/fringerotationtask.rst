@@ -219,7 +219,7 @@ The table below describes configuration parameters specific to the **hwanddrx** 
 |                            |                   |            |the hardware fringe rotator parameters. The hardware fringe   |
 |                            |                   |            |rotation is done in the beamformer which has a different time |
 |                            |                   |            |domain to the correlator. This parameter captures these       |
-|                            |                   |            |differences.
+|                            |                   |            |differences.                                                  |
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
 
 Example
