@@ -97,7 +97,7 @@ Example
 
 .. code-block:: bash
 
-    ########################## FlagTask ##############################
+    ########################## MergedSource ##############################
 
     tasks.tasklist = [MergedSource, CalcUVWTask, TCPSink]
 

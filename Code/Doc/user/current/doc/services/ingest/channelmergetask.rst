@@ -56,7 +56,7 @@ Example
 
 .. code-block:: bash
 
-    ########################## FlagTask ##############################
+    ########################## ChannelMergeTask ##############################
 
     tasks.tasklist = [MergedSource, Merge, CalcUVWTask, MSSink]
 

@@ -136,7 +136,7 @@ some temporary tasks are also documented. They can be taken out in the future.
 |:doc:`mergedsource`    |Source task, merging visibility data streams and TOS metadata.This is the|
 |                       |main source task intended for production operations.                     |
 +-----------------------+-------------------------------------------------------------------------+
-|NoMetadataSource       |Source task faking metadata from parset. It is handy for some debugging  |
+|:doc:`nometadatasource`|Source task faking metadata from parset. It is handy for some debugging  |
 +-----------------------+-------------------------------------------------------------------------+
 |:doc:`channelmergetask`|Task to merge together parallel streams distributed in frequency         |
 +-----------------------+-------------------------------------------------------------------------+
@@ -151,8 +151,8 @@ some temporary tasks are also documented. They can be taken out in the future.
 |                       |able to use the same approach for full ASKAP, but keep it as long as we  |
 |                       |can as it is handy for debugging.                                        |
 +-----------------------+-------------------------------------------------------------------------+
-|FringeRotationTask     |Task controlling on the fly fringe rotation in the ingest pipeline. A    |
-|                       |number of algorithms are available to apply the actual delay model, i.e. |
+|:doc:`fringerotationta\|Task controlling on the fly fringe rotation in the ingest pipeline. A    |
+|sk`                    |number of algorithms are available to apply the actual delay model, i.e. |
 |                       |pure s/w-based, BETA specific DRx and hardware fringe rotator, ADE h/w   |
 |                       |fringe rotator, etc. This is a temporary task, as fringe rotation is     |
 |                       |expected to be done outside of SDP.                                      |
