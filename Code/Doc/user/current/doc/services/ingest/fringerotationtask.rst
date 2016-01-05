@@ -197,7 +197,7 @@ The table below describes configuration parameters specific to the **hwanddrx** 
 |                            |                   |            |time the delay correction changes by 1.3 ns.                  |
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
 |frratestep                  |unsigned int       |20          |Tolerance in phase rate (in the hardware units). When the     |
-|                            |                   |            |desired rate diverges more than this value from the currnet   |
+|                            |                   |            |desired rate diverges more than this value from the current   |
 |                            |                   |            |a fringe rotator update is initiated for a particular antenna.|
 |                            |                   |            |Descreasing the value will lead to more aggressive flagging ( |
 |                            |                   |            |due to more frequent updates), but less decorrelation in the  |
@@ -215,11 +215,55 @@ The table below describes configuration parameters specific to the **hwanddrx** 
 |                            |                   |            |flagged. Otherwise, the software will apply as large as (or as|
 |                            |                   |            |small as) the value which is supported by the hardware.       |
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
-|updatetimeoffset            |int                |None        |A fudge factor subtracted from the timestamp of the update of |
-|                            |                   |            |the hardware fringe rotator parameters. The hardware fringe   |
-|                            |                   |            |rotation is done in the beamformer which has a different time |
-|                            |                   |            |domain to the correlator. This parameter captures these       |
-|                            |                   |            |differences.                                                  |
+|updatetimeoffset            |int                |None        |A fudge factor subtracted from the timestamp when the hardware|
+|                            |                   |            |fringe parameters were updated. The hardware fringe rotation  |
+|                            |                   |            |is done in the beamformer which has a different clock domain  |
+|                            |                   |            |to the correlator. This parameter allows to adjust update time|
+|                            |                   |            |for possible differences. The value can be both positive and  |
+|                            |                   |            |negative with the units of microseconds.                      |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+
+Additional parameters for *hwade*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The table below describes configuration parameters specific to the **hwade** fringe rotation method. It is very similar to 
+**hwanddrx** method but adapted to ADE hardware with the following differences:
+
+ * Delay tracking via hardware fringe rotator (as DRx no longer has this functionality)
+ * No out of range flagging as the library works with floating point and should support all settings which could arise in operations
+
+The minimum increments of fringe rotator parameters are exactly the same for ADE and BETA. These hardware units are used in the
+interface between ingest receiver and the task (so the code can be reused) and define the meaning of the tolerance parameters
+(as for BETA). 
+
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|**Parameter**               |**Type**           |**Default** |**Description**                                               |
+|                            |                   |            |                                                              |
++============================+===================+============+==============================================================+
+|delaystep                   |unsigned int       |0           |Tolerance in delay steps, one step is approximately 0.206ns.  |
+|                            |                   |            |The fringe rotator setting is updated if desired delay is off |
+|                            |                   |            |by more than this tolerance from the actual setting. Zero     |
+|                            |                   |            |means update delay every time it changes by a minimal step.   |
+|                            |                   |            |The residual delay is always tracked in software. Reducing    |
+|                            |                   |            |this tolerance might be little bit more accurate, but more    |
+|                            |                   |            |data will be flagged. This is a similar parameter to          |
+|                            |                   |            |**drxdelaystep** understood by the previous method, but it has|
+|                            |                   |            |different units (as it applies to fringe rotator as opposed to|
+|                            |                   |            |digital receiver.                                             |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|frratestep                  |unsigned int       |20          |Tolerance in phase rate (in about 0.0248 deg/s steps). When   |
+|                            |                   |            |the desired rate diverges more than this value from the set   |
+|                            |                   |            |value the update is initiated for a particular antenna.       |
+|                            |                   |            |Descreasing the value will lead to more aggressive flagging ( |
+|                            |                   |            |due to more frequent updates), but less decorrelation in the  |
+|                            |                   |            |visibility data due to wrong rate applied).                   |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|updatetimeoffset            |int                |None        |A fudge factor subtracted from the timestamp when the hardware|
+|                            |                   |            |fringe parameters were updated. The hardware fringe rotation  |
+|                            |                   |            |is done in the beamformer which has a different clock domain  |
+|                            |                   |            |to the correlator. This parameter allows to adjust update time|
+|                            |                   |            |for possible differences. The value can be both positive and  |
+|                            |                   |            |negative with the units of microseconds.                      |
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
 
 Example
