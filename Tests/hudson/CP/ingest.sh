@@ -1,4 +1,5 @@
 #!/bin/bash
+
 #
 # Phase 1
 #
@@ -146,9 +147,9 @@ rm -rf ingest_test0.ms
 
 cat > tmp.simcor.sh <<EOF
 #!/bin/sh
-cd ../../../../correlatorsim/current/functests/test_playback
+cd ../../../../correlatorsim/current/functests/test_playbackADE
 sleep 10
-timeout -s 9 10m mpirun -np 3 ../../apps/playback.sh -c playback.in
+timeout -s 9 10m mpirun -np 2 ../../apps/playbackADE.sh -c playback.in
 EOF
 
 chmod u+x tmp.simcor.sh
@@ -181,7 +182,7 @@ fi
 
 SZ=$(set -- `du -sh ingest_test0.ms` ; echo $1)
 
-if [ "$SZ" != "87M" ]; then
+if [ "$SZ" != "118M" ]; then
    echo "The size of the output MS ("$SZ") seems to be different from 87M"
    exit 1
 fi

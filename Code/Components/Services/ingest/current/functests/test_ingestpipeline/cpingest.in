@@ -8,224 +8,184 @@
 sbid                          = 0
 
 # Array Name
-array.name                  = ASKAP
-
-# TOS metadata topic
-metadata.topic              = metadata
+#
+array.name = ASKAP
 
 #
 # Feed Configurations
 #
-feeds.n_feeds               = 9
+feeds.names                 = [PAF36]
+feeds.n_feeds         = 36
+feeds.spacing         = 1deg
 
-feeds.spacing               = 1deg
+feeds.feed0           = [0., 0.]
+feeds.feed1           = [0., 0.]
+feeds.feed2           = [0., 0.]
+feeds.feed3           = [0., 0.]
+feeds.feed4           = [0., 0.]
+feeds.feed5           = [0., 0.]
+feeds.feed6           = [0., 0.]
+feeds.feed7           = [0., 0.]
+feeds.feed8           = [0., 0.]
+feeds.feed9           = [0., 0.]
+feeds.feed10          = [0., 0.]
+feeds.feed11          = [0., 0.]
+feeds.feed12          = [0., 0.]
+feeds.feed13          = [0., 0.]
+feeds.feed14          = [0., 0.]
+feeds.feed15          = [0., 0.]
+feeds.feed16          = [0., 0.]
+feeds.feed17          = [0., 0.]
+feeds.feed18          = [0., 0.]
+feeds.feed19          = [0., 0.]
+feeds.feed20          = [0., 0.]
+feeds.feed21          = [0., 0.]
+feeds.feed22          = [0., 0.]
+feeds.feed23          = [0., 0.]
+feeds.feed24          = [0., 0.]
+feeds.feed25          = [0., 0.]
+feeds.feed26          = [0., 0.]
+feeds.feed27          = [0., 0.]
+feeds.feed28          = [0., 0.]
+feeds.feed29          = [0., 0.]
+feeds.feed30          = [0., 0.]
+feeds.feed31          = [0., 0.]
+feeds.feed32          = [0., 0.]
+feeds.feed33          = [0., 0.]
+feeds.feed34          = [0., 0.]
+feeds.feed35          = [0., 0.]
 
-feeds.feed0                 = [0.0, 0.0]
-feeds.feed1                 = [0.0, 0.0]
-feeds.feed2                 = [0.0, 0.0]
-feeds.feed3                 = [0.0, 0.0]
-feeds.feed4                 = [0.0, 0.0]
-feeds.feed5                 = [0.0, 0.0]
-feeds.feed6                 = [0.0, 0.0]
-feeds.feed7                 = [0.0, 0.0]
-feeds.feed8                 = [0.0, 0.0]
 
 #
 # Antennas
 #
-antennas                    = [ant1, ant3, ant6, ant8, ant9, ant15]
 
-# Common to all antennas
-antenna.ant.diameter        = 12m
-antenna.ant.mount           = equatorial
+antenna.ant.diameter = 12m
+antenna.ant.mount = equatorial
+antenna.ant.pointing_parameters = [9 * 0.0]
 
-# Per antenna config
-antenna.ant1.name           = ak01
-antenna.ant1.location.itrf  = [-2556084.669, 5097398.337, -2848424.133]
+# ADE antennas - only necessary info
+antenna.ant2.location.itrf = [-2556109.976515, 5097388.699862, -2848440.12097248]
+antenna.ant2.name = ak02
+antenna.ant4.location.itrf = [-2556087.396082, 5097423.589662, -2848396.867933]
+antenna.ant4.name = ak04
+antenna.ant5.location.itrf =  [-2556028.607336, 5097451.468188, -2848399.83113161]
+antenna.ant5.name = ak05
+antenna.ant10.location.itrf = [-2556059.228687, 5097560.766055, -2848178.119367]
+antenna.ant10.name = ak10
+antenna.ant12.location.itrf =   [-2556496.237175, 5097333.724901, -2848187.33832738]
+antenna.ant12.name = ak12
 
-antenna.ant3.name           = ak03
-antenna.ant3.location.itrf  = [-2556118.102, 5097384.726, -2848417.280]
+# other to get 12-antennas
 
-antenna.ant6.name           = ak06
-antenna.ant6.location.itrf  = [-2556227.863, 5097380.399, -2848323.367]
+antenna.ant7.location.itrf = [-2556282.880670, 5097252.290820, -2848527.104272]
+antenna.ant7.name = ak07
+antenna.ant11.location.itrf = [-2556397.233607, 5097421.429903, -2848124.497319]
+antenna.ant11.name = ak11
 
-antenna.ant8.name           = ak08
-antenna.ant8.location.itrf  = [-2556002.713742, 5097320.608027, -2848637.727970]
+# old BETA antennas
+antenna.ant1.location.itrf = [-2556084.669, 5097398.337, -2848424.133]
+antenna.ant1.name = ak01
+antenna.ant15.location.itrf = [-2555389.850372, 5097664.627578, -2848561.95991566]
+antenna.ant15.name = ak15
+antenna.ant3.location.itrf = [-2556118.109261, 5097384.719695, -2848417.19642608]
+antenna.ant3.name = ak03
+antenna.ant6.location.itrf = [-2556227.878593, 5097380.442223, -2848323.44598377]
+antenna.ant6.name = ak06
+antenna.ant8.location.itrf = [-2556002.509816,5097320.293832,-2848637.482106]
+antenna.ant8.name = ak08
+antenna.ant9.location.itrf = [-2555888.891875,5097552.280516,-2848324.679547]
+antenna.ant9.name = ak09
+antennas = [ant1, ant2, ant3, ant4, ant5, ant6, ant7, ant8, ant9, ant10, ant11, ant12]
 
-antenna.ant9.name           = ak09
-antenna.ant9.location.itrf  = [-2555888.9789, 5097552.500315, -2848324.911449]
+# Baseline mapping
+baselinemap.name = standard
 
-antenna.ant15.name          = ak15
-antenna.ant15.location.itrf = [-2555389.70943903, 5097664.08452923, -2848561.871727]
+# minimal MS with 4 antennas
+baselinemap.antennaidx = [ak02, ak04, ak05, ak12]
+baselinemap.antennaindices = [1, 3, 4, 11]
 
-#
-# Baseline mapping:
-# Used for mapping from baselineid to antenna1/antenna2/polarisation product
-# Mapping is from baselineid to (ant1, ant2,  product)
-#
-baselinemap.baselineids            = [0..77]
+correlator.mode.standard.chan_width = 18.518518kHz
+correlator.mode.standard.interval = 5000000
+correlator.mode.standard.n_chan = 216
+correlator.mode.standard.stokes = [XX, XY, YX, YY]
+correlator.modes = [standard]
 
-# This maps the antenna indexes (used below) to antenna names
-baselinemap.antennaidx = [ak06, ak01, ak03, ak15, ak08, ak09]
-
-baselinemap.0                      = [0, 0, XX]
-baselinemap.1                      = [0, 0, XY]
-baselinemap.2                      = [0, 0, YY]
-
-baselinemap.3                      = [0, 1, XX]
-baselinemap.4                      = [0, 1, XY]
-baselinemap.5                      = [0, 1, YX]
-baselinemap.6                      = [0, 1, YY]
-
-baselinemap.7                      = [0, 2, XX]
-baselinemap.8                      = [0, 2, XY]
-baselinemap.9                      = [0, 2, YX]
-baselinemap.10                     = [0, 2, YY]
-
-baselinemap.11                     = [0, 3, XX]
-baselinemap.12                     = [0, 3, XY]
-baselinemap.13                     = [0, 3, YX]
-baselinemap.14                     = [0, 3, YY]
-
-baselinemap.15                     = [0, 4, XX]
-baselinemap.16                     = [0, 4, XY]
-baselinemap.17                     = [0, 4, YX]
-baselinemap.18                     = [0, 4, YY]
-
-baselinemap.19                     = [0, 5, XX]
-baselinemap.20                     = [0, 5, XY]
-baselinemap.21                     = [0, 5, YX]
-baselinemap.22                     = [0, 5, YY]
-
-baselinemap.23                     = [1, 1, XX]
-baselinemap.24                     = [1, 1, XY]
-baselinemap.25                     = [1, 1, YY]
-
-baselinemap.26                     = [1, 2, XX]
-baselinemap.27                     = [1, 2, XY]
-baselinemap.28                     = [1, 2, YX]
-baselinemap.29                     = [1, 2, YY]
-
-baselinemap.30                     = [1, 3, XX]
-baselinemap.31                     = [1, 3, XY]
-baselinemap.32                     = [1, 3, YX]
-baselinemap.33                     = [1, 3, YY]
-
-baselinemap.34                     = [1, 4, XX]
-baselinemap.35                     = [1, 4, XY]
-baselinemap.36                     = [1, 4, YX]
-baselinemap.37                     = [1, 4, YY]
-
-baselinemap.38                     = [1, 5, XX]
-baselinemap.39                     = [1, 5, XY]
-baselinemap.40                     = [1, 5, YX]
-baselinemap.41                     = [1, 5, YY]
-
-baselinemap.42                     = [2, 2, XX]
-baselinemap.43                     = [2, 2, XY]
-baselinemap.44                     = [2, 2, YY]
-
-baselinemap.45                     = [2, 3, XX]
-baselinemap.46                     = [2, 3, XY]
-baselinemap.47                     = [2, 3, YX]
-baselinemap.48                     = [2, 3, YY]
-
-baselinemap.49                     = [2, 4, XX]
-baselinemap.50                     = [2, 4, XY]
-baselinemap.51                     = [2, 4, YX]
-baselinemap.52                     = [2, 4, YY]
-
-baselinemap.53                     = [2, 5, XX]
-baselinemap.54                     = [2, 5, XY]
-baselinemap.55                     = [2, 5, YX]
-baselinemap.56                     = [2, 5, YY]
-
-baselinemap.57                     = [3, 3, XX]
-baselinemap.58                     = [3, 3, XY]
-baselinemap.59                     = [3, 3, YY]
-
-baselinemap.60                     = [3, 4, XX]
-baselinemap.61                     = [3, 4, XY]
-baselinemap.62                     = [3, 4, YX]
-baselinemap.63                     = [3, 4, YY]
-
-baselinemap.64                     = [3, 5, XX]
-baselinemap.65                     = [3, 5, XY]
-baselinemap.66                     = [3, 5, YX]
-baselinemap.67                     = [3, 5, YY]
-
-baselinemap.68                     = [4, 4, XX]
-baselinemap.69                     = [4, 4, XY]
-baselinemap.70                     = [4, 4, YY]
-
-baselinemap.71                     = [4, 5, XX]
-baselinemap.72                     = [4, 5, XY]
-baselinemap.73                     = [4, 5, YX]
-baselinemap.74                     = [4, 5, YY]
-
-baselinemap.75                     = [5, 5, XX]
-baselinemap.76                     = [5, 5, XY]
-baselinemap.77                     = [5, 5, YY]
-
-#
-# Correlator mode(s)
-#
-correlator.modes                        = [standard]
-
-correlator.mode.standard.chan_width     = 18.518518kHz
-correlator.mode.standard.interval       = 5000000
-correlator.mode.standard.n_chan         = 16416
-correlator.mode.standard.stokes         = [XX, XY, YX, YY]
-
-
-#
-# Metadata topic config
-#
-metadata_source.ice.locator_host        = localhost
-metadata_source.ice.locator_port        = 4061
-metadata_source.icestorm.topicmanager   = IceStorm/TopicManager@IceStorm.TopicManager
-
-#
-# Monitoring Data Publisher Configuration
-#
-monitoring.enabled                      = false
-monitoring.ice.locator_host             = localhost
-monitoring.ice.locator_port             = 4061
-monitoring.servicename                  = MonitoringService
-monitoring.adaptername                  = IngestPipelineMonitoringAdapter
 
 #
 # Task List
 #
-tasks.tasklist                          = [MergedSource, CalcUVWTask, ChannelAvgTask, MSSink]
+tasks.tasklist                          = [MergedSource, CalcUVWTask, Monitor, MSSink]
 
 #
 # MergedSource
 #
 tasks.MergedSource.type                             = MergedSource
-tasks.MergedSource.params.beammap                   = "1:0,2:1,3:2,4:3,5:4,6:5,7:6,8:7,9:8" 
+tasks.MergedSource.params.vis_source.receive_buffer_size = 67108864
 tasks.MergedSource.params.vis_source.port           = 3000
-tasks.MergedSource.params.vis_source.buffer_size    = 44928
+tasks.MergedSource.params.vis_source.max_beamid     = 36
+tasks.MergedSource.params.vis_source.max_slice      = 0
 
 # Number of channels a given ingest process is meant to receive/process
-tasks.MergedSource.params.n_channels.0              = 16416
+tasks.MergedSource.params.n_channels.0              = 216
+tasks.MergedSource.params.n_channels.1              = 216
+tasks.MergedSource.params.n_channels.2              = 216
+tasks.MergedSource.params.n_channels.3              = 216
+tasks.MergedSource.params.n_channels.4              = 216
+tasks.MergedSource.params.n_channels.5              = 216
+tasks.MergedSource.params.n_channels.6              = 216
+tasks.MergedSource.params.n_channels.7              = 216
+tasks.MergedSource.params.n_channels.8              = 216
+tasks.MergedSource.params.n_channels.9              = 216
+tasks.MergedSource.params.n_channels.10             = 216
+tasks.MergedSource.params.n_channels.11             = 216
+
+tasks.MergedSource.params.maxbeams = 36
+
+# metadata-specific 
+metadata_source.ice.locator_host = localhost
+metadata_source.ice.locator_port = 4061
+metadata_source.icestorm.topicmanager = IceStorm/TopicManager@IceStorm.TopicManager
+# next one is in common
+metadata.topic = metadata
 
 #
 # CalcUVWTask
 #
 tasks.CalcUVWTask.type                  = CalcUVWTask
 
-#
-# ChannelAvgTask
-#
-tasks.ChannelAvgTask.type               = ChannelAvgTask
-tasks.ChannelAvgTask.params.averaging   = 54
+# SimpleMonitor
+tasks.Monitor.type  = SimpleMonitorTask
+tasks.Monitor.params.baselineids = [0,1,2]
+
+tasks.Monitor.params.0 = [0,0,XX]
+tasks.Monitor.params.1 = [1,1,XX]
+tasks.Monitor.params.2 = [2,2,XX]
+
+tasks.Monitor.params.nbeam = 9
 
 #
 # MSSink
 #
 tasks.MSSink.type                       = MSSink
 tasks.MSSink.params.filename            = ingest_test%w.ms
-tasks.MSSink.params.stman.bucketsize    = 65536
+#tasks.MSSink.params.filename            = %d_%t.ms
+tasks.MSSink.params.stman.bucketsize    = 131072
 tasks.MSSink.params.stman.tilencorr     = 4
-tasks.MSSink.params.stman.tilenchan     = 1026
+tasks.MSSink.params.stman.tilenchan     = 216
+tasks.MSSink.params.pointingtable.enable   = true
+
+
+# 
+# Monitoring Data Publisher Configuration
+#
+monitoring.enabled = false
+monitoring.ice.locator_host = localhost
+monitoring.ice.locator_port = 4061
+monitoring.servicename = MonitoringService
+monitoring.adaptername = IngestPipelineMonitoringAdapter
+
+#
+# Merge
+tasks.Merge.type                     = ChannelMergeTask
+tasks.Merge.params.ranks2merge       = 12

@@ -35,7 +35,7 @@ namespace askap {
     namespace cp {
 
         // default protocol selection
-        typedef VisDatagramBETA VisDatagram;
+        typedef VisDatagramADE VisDatagram;
 
     };
 };

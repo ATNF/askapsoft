@@ -1,89 +1,82 @@
-# This file contains parameters for these simulators:
-# - Telescope Operating System (sends metadata)
-# - Correlator (sends visibility data)
-# These simulators run in parallel.
-#
-# Parameters for both simulators
 #
 # Correlator cycle time in seconds
+#
 playback.period = 5
 
-# Measurement set containing input data for the simulators
-# TO DO
-# Change the parameter name to: playback.dataset
-playback.corrsim.dataset             = ../../dataset/beta1.ms
-
-# TO DO
-# Use the same amount of delay in both simulators
-#
-# TO BE DEPRECATED
 # Data input mode
 # For the time being, use "expand" only.
+#playback.input_mode = zero
 playback.input_mode = expand
 
-# -------------------------------------------------------------------------
-# Parameters for Telescope Operating System Simulator
+#
+# Telescope Operating Simulator Configuration
 #
 playback.tossim.ice.locator_host      = localhost
-playback.tossim.ice.locator_port = 4061
+playback.tossim.ice.locator_port      = 4061
 playback.tossim.icestorm.topicmanager = IceStorm/TopicManager@IceStorm.TopicManager
 playback.tossim.icestorm.topic        = metadata
 
-# Delay in transmission between different time groups (microsecond)
-playback.tossim.delay                      = 10000000
+playback.tossim.delay                      = 5000000
+
 
 # Simulate random failures to send metadata message. A value of of 0.0
 # results in no failures, while 1.0 results in all sends failing.
 # (Default: 0.0)
 #playback.tossim.random_metadata_send_fail   = 0.1
 
-# -------------------------------------------------------------------------
-# Parameters for Correlator Simulator
 #
-# DEPRECATED
+# Correlator Simulator
+#
+# TO BE DEPRECATED
 # The number of shelves is now computed automatically in run.sh
 #playback.corrsim.n_shelves                  = 3
 
 # Correlator antenna count:
 # 1 (default) to 36 (max for ASKAP)
-# Note that this number may not be the same as that in measurement set
 playback.corrsim.n_antennas                 = 36
 
 # Correlator coarse channel count
 # Ideally 304 (default), but current hardware is limited at 300
-# Note that this number may not be the same as that in measurement set
-playback.corrsim.n_coarse_channels          = 300
+#playback.corrsim.n_coarse_channels          = 300
+playback.corrsim.n_coarse_channels          = 4
 
 # Correlator division of coarse channel into fine channel
 # Default: 54
 playback.corrsim.n_channel_subdivision      = 54
 
 # Correlator coarse channel bandwidth (Hertz)
-# Default: 1000000 Hz = 1 MHz
+# Default: 1 MHz
 playback.corrsim.coarse_channel_bandwidth   = 1000000
+
+# Correlator data set (measurement set)
+# Now only 1 source data is used
+playback.corrsim.dataset             = ../../dataset/ade1card.ms
 
 # Correlator local host for transmission
 playback.corrsim.out.hostname        = localhost
 
 # Correlator reference port for transmission
 # If multiple ports are used, this port is used as the first port
-playback.corrsim.out.port = 3001
+# TO CONSIDER
+# What about setting this number using a shell script that calls
+# both correlator simulator and the receiving program (ingest, vsnoop)?
+# This will avoid the possibility of port mismatch. 
+playback.corrsim.out.port            = 3000
 
-# DEPRECATED: individual setting for each card 
+# TO BE DEPRECATED: individual setting for each card 
 # Correlator Shelf 1
 #playback.corrsim.shelf1.dataset             = ../../dataset/beta1.ms
 #playback.corrsim.shelf1.out.hostname        = localhost
-#playback.corrsim.shelf1.out.port            = 3001
+#playback.corrsim.shelf1.out.port            = 3000
 # Correlator Shelf 2
 #playback.corrsim.shelf2.dataset             = ../../dataset/beta2.ms
 #playback.corrsim.shelf2.out.hostname        = localhost
-#playback.corrsim.shelf2.out.port            = 3001
+#playback.corrsim.shelf2.out.port            = 3000
 
 # Delay in transmission between different time groups (microsecond)
 playback.corrsim.delay                      = 5000000
 
-# TO DO
-# - Add failure pattern (make sure repeatable, ie. not random)
+# TO ADD LATER: Failure pattern (make sure repeatable, ie. not random)
 #
 # NOTE
 # - Unlike the BETA version, ADE version does not need explicit baseline 
