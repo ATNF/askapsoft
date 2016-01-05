@@ -111,6 +111,11 @@ class MergedSourceTest : public CppUnit::TestFixture,
             metadata.scanId(0);
             metadata.flagged(false);
             metadata.corrMode("standard");
+            // need to specify the middle of the band for the first card 
+            // want to get hardware channel 11 (accessor channel 55) to map to 1 GHz exactly
+            // config helper sets up the full ASKAP band without inversion
+            // start is 8208 fine channels lower, channel 55 is 1 GHz:
+            metadata.centreFreq(casa::Quantity(1000. + double(8208 - 55) / 54, "MHz"));
 
             // antenna_names
             for (uint32_t i = 0; i < config.antennas().size(); ++i) {

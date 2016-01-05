@@ -62,7 +62,10 @@ class NoMetadataSourceTest : public CppUnit::TestFixture,
 
             LOFAR::ParameterSet params;
             params.add("n_channels.0", utility::toString(nChannelsForTest()));
-            params.add("centre_freq", "0.9175GHz");
+            // config is setup with full ASKAP band, we test channel 55 which should
+            // map to 1 GHz, i.e. centre frequency is (8208-55)/54 MHz above 1 GHz:
+            //params.add("centre_freq", "0.9175GHz");
+            params.add("centre_freq", "1.1509814814814815GHz");
             params.add("target_name", "test-field");
             params.add("target_direction","[12h30m49.43, +12d23m28.100, J2000]");
             params.add("correlator_mode", "standard");

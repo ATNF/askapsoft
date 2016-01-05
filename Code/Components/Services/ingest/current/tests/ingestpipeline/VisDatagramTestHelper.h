@@ -112,7 +112,7 @@ struct VisDatagramTestHelper<T, typename boost::enable_if<boost::is_class<typena
        vis.block = 1;
        vis.card = 1;
        vis.channel = 11;
-       vis.freq = 1e9;
+       vis.freq = 1e3;
    }     
         
    /// @brief test whether given accessor channel and baseline product are expected to be defined
