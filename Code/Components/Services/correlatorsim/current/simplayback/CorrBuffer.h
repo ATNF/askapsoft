@@ -80,6 +80,9 @@ class CorrBuffer
         // @param[in] Channel index used as destination
         //void copyChannel(int32_t source, int32_t destination);
 
+        // TODO
+        // Check buffer for contiguous channel numbering
+
         /// Print the buffer
         void print();
 

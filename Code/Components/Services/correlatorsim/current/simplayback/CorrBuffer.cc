@@ -113,7 +113,6 @@ void CorrBuffer::copyCorrProd(int32_t source, int32_t destination)
 
 
 
-// TODO: update this
 void CorrBuffer::print ()
 {
     cout << "Buffer contents" << endl;
@@ -123,7 +122,8 @@ void CorrBuffer::print ()
     cout << "Channel count in measurement set: " << nChanMeas << endl;
     cout << "Card count                      : " << nCard << endl;
     for (uint32_t count = 0; count < freqId.size(); ++count) {
-        cout << count << ": " << freqId[count].freq << endl;
+        cout << count << ": ";
+        freqId[count].print();
     }
     cout << endl;
     /*

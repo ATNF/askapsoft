@@ -68,10 +68,8 @@
 #define CHANNEL_EXPAND
 // Cases for shelf count: 1, 2, N (N>0)
 #define SHELFCASE N
-// Test mode
-//#define TEST
-// Reorder loops for buffer send
-//#define REORDER_LOOP
+// Test channel mapping function
+//#define NO_MAPPING
 
 #define SIZEOF_ARRAY(a) (sizeof( a ) / sizeof( a[ 0 ] ))
 
@@ -83,6 +81,10 @@ using namespace casa;
 void checkStokesType (const Stokes::StokesTypes stokestype);
 uint32_t getCorrProdIndex (const uint32_t ant1, const uint32_t ant2, 
 		const Stokes::StokesTypes stokestype);
+
+#ifdef TEST
+CorrBuffer testBuffer;
+#endif
 
 
 ASKAP_LOGGER(logger, ".CorrelatorSimulatorADE");
@@ -141,9 +143,10 @@ bool CorrelatorSimulatorADE::sendNext(void)
         // measurement set.
         fillChannelInBuffer();
 
-        // test
+#ifdef TEST
         //buffer.print();
         //return true;
+#endif
 
         // Delay transmission for every new time stamp in measurement
         if (itsCurrentTime > previousTime) {
@@ -302,6 +305,14 @@ void CorrelatorSimulatorADE::initBuffer()
         cout << "  Creating buffer: done" << endl;
     }
 
+#ifdef TEST
+    cout << "  Creating test buffer ..." << endl;
+    testBuffer.init(itsNCorrProd, itsNCoarseChannel*itsNChannelSub);
+    cout << "    Correlation products x fine channels: " <<
+            itsNCorrProd << " x " << itsNCoarseChannel*itsNChannelSub << endl;
+    cout << "  Creating test buffer: done" << endl;
+#endif
+
     // card count
     buffer.nCard = itsNCoarseChannel / DATAGRAM_CHANNELMAX + 1;
     if (itsShelf == 1) {
@@ -376,9 +387,9 @@ bool CorrelatorSimulatorADE::getBufferData()
         uint32_t nCorr = polc.numCorr()(descPolId);
         casa::Matrix<casa::Complex> data = msc.data()(itsCurrentRow);
 #ifdef TEST
-        cout << "Ref freq: " << spwc.refFrequency()(descSpwId) << endl;
-        const casa::Vector<casa::Double> chanWidth = 
-                spwc.chanWidth()(descSpwId);
+        //cout << "Ref freq: " << spwc.refFrequency()(descSpwId) << endl;
+        //const casa::Vector<casa::Double> chanWidth = 
+        //        spwc.chanWidth()(descSpwId);
 #endif
         const casa::Vector<casa::Double> frequencies = 
                 spwc.chanFreq()(descSpwId);
@@ -390,12 +401,12 @@ bool CorrelatorSimulatorADE::getBufferData()
             buffer.freqId[chan].channel = chan + 1; // 1-based
             buffer.freqId[chan].freq = frequencies[chan];
 #ifdef TEST
-            cout << chan << ": " << frequencies[chan] << ", " << 
-                    chanWidth[chan] << endl;
+            //cout << chan << ": " << frequencies[chan] << ", " << 
+            //        chanWidth[chan] << endl;
 #endif
         }
 #ifdef TEST
-        return false;
+        //return false;
 #endif
 
         uint32_t ant1 = antIndices[msc.antenna1()(itsCurrentRow)];
@@ -531,6 +542,71 @@ void CorrelatorSimulatorADE::fillChannelInBuffer()
 
 
 
+#ifdef TEST
+
+void CorrelatorSimulatorADE::fillTestBuffer
+        (askap::cp::VisDatagramADE &payload) {
+
+    testBuffer.timeStamp = payload.timestamp;
+    testBuffer.beam = payload.beamid;
+    uint32_t corrChan = payload.channel - DATAGRAM_CHANNELMIN;
+#ifdef NO_MAPPING
+    uint32_t measChan = corrChan;
+#else
+    uint32_t measChan = itsChannelMap.fromCorrelator(corrChan);
+#endif
+    uint32_t card = payload.card - DATAGRAM_CARDMIN;
+    uint32_t block = payload.block - DATAGRAM_BLOCKMIN;
+    // total contiguous channel
+    uint32_t chan = ((block * DATAGRAM_NCARD) + card) * DATAGRAM_NCHANNEL
+            + measChan;
+    testBuffer.freqId[chan].block = payload.block;
+    testBuffer.freqId[chan].card = payload.card;
+    testBuffer.freqId[chan].channel = measChan + DATAGRAM_CHANNELMIN;
+    testBuffer.freqId[chan].freq = payload.freq;
+    for (uint32_t corrProd = 0;
+            corrProd < payload.baseline2 - payload.baseline1 + 1; 
+            ++corrProd) {
+        testBuffer.data[payload.baseline1 + corrProd - 1][chan].vis.real = 
+                payload.vis[corrProd].real;
+        testBuffer.data[payload.baseline1 + corrProd - 1][chan].vis.imag = 
+                payload.vis[corrProd].imag;
+    }
+}
+
+
+void CorrelatorSimulatorADE::checkTestBuffer() {
+
+    cout << "Checking test buffer ..." << endl;
+    const double coarseFreqInc = buffer.freqId[1].freq - buffer.freqId[0].freq;
+    const double freqMin = buffer.freqId[0].freq;
+    const double freqInc = coarseFreqInc / itsNChannelSub;
+    const double small = 0.00001;
+    cout << "  Channel count: " << testBuffer.freqId.size() << endl;
+    for (uint32_t chan = 0; chan < testBuffer.freqId.size(); ++chan) {
+
+        //ASKAPCHECK(chan == testBuffer.freqId[chan].channel - 1,
+        //        "Expected channel " << chan << " <> received channel " <<
+        //        testBuffer.freqId[chan].channel - 1);
+
+        double freqExpected = (freqMin + freqInc * chan) / 1000000.0;
+
+        ASKAPCHECK((freqExpected + small >= testBuffer.freqId[chan].freq) &&
+                (freqExpected - small <= testBuffer.freqId[chan].freq),
+                "Expected frequency " << freqExpected <<
+                " <> received frequency " << testBuffer.freqId[chan].freq);
+
+        cout << chan + 1 << ": " << testBuffer.freqId[chan].card << ", " << 
+                testBuffer.freqId[chan].channel << ", " <<
+                freqExpected << ", " << testBuffer.freqId[chan].freq << endl;
+    }
+    cout << "Checking test buffer: done" << endl;
+}
+
+#endif  // TEST
+
+
+
 // TO BE DEPRECATED
 //
 void CorrelatorSimulatorADE::renumberChannelAndCard() {
@@ -589,11 +665,13 @@ bool CorrelatorSimulatorADE::sendFirstPayload()
 
         // compute the card of this channel
         uint32_t card = (fineCorrChan / DATAGRAM_NCHANNEL) % DATAGRAM_NCARD;
-        payload.card = card + DATAGRAM_CARDMIN;
+        //payload.card = card + DATAGRAM_CARDMIN;
+        payload.card = card + 1;
 
         // compute the block of this channel
         uint32_t block = fineCorrChan / DATAGRAM_NCHANNEL / DATAGRAM_NCARD;
-        payload.block = block + DATAGRAM_BLOCKMIN;
+        //payload.block = block + DATAGRAM_BLOCKMIN;
+        payload.block = block + 1;
 
         // get the channel in measurement set (mapping)
         uint32_t cardCorrChan = fineCorrChan % DATAGRAM_NCHANNEL;
@@ -638,123 +716,6 @@ bool CorrelatorSimulatorADE::sendFirstPayload()
 
 
 
-#ifdef REORDER_LOOP
-/*
-bool CorrelatorSimulatorADE::sendBufferData()
-{
-#ifdef VERBOSE
-    //cout << "  Shelf " << itsShelf << " sends beam " << buffer.beam << endl;
-#endif
-    askap::cp::VisDatagramADE payload;
-
-    // Data that is constant for the whole buffer
-    payload.version = VisDatagramTraits<VisDatagramADE>::VISPAYLOAD_VERSION;
-    payload.timestamp = buffer.timeStamp;
-    payload.beamid = buffer.beam + 1;
-
-    const uint32_t nCorrProd = buffer.data.size();
-    const uint32_t nCorrProdPerSlice = 
-            VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE;
-    const uint32_t nSlice = nCorrProd / nCorrProdPerSlice;
-
-    // The total number of simulated fine channels in correlator
-    const uint32_t nFineCorrChan = itsNCoarseChannel * itsNChannelSub;
-
-    const double freqMin = buffer.freqId[0].freq;
-    const double freqInc = (buffer.freqId[1].freq - freqMin) / itsNChannelSub;
-#ifdef VERBOSE
-//    cout << "Frequency increment: " << freqInc << endl;
-#endif
-
-    // for each slice of correlation products
-    for (uint32_t slice = 0; slice < nSlice; ++slice) {
-        payload.slice = slice;
-        payload.baseline1 = slice * nCorrProdPerSlice + 1;
-        payload.baseline2 = payload.baseline1 + nCorrProdPerSlice - 1;
-
-        for (uint32_t corrProdInSlice = 0; 
-                corrProdInSlice < nCorrProdPerSlice; ++corrProdInSlice) {
-
-            // for all simulated fine channels in correlator 
-            // note:
-            // - in the ordering of correlator's transmission
-            // - this is NOT buffer channels
-            for (uint32_t fineCorrChan = 0; fineCorrChan < nFineCorrChan; 
-                    ++fineCorrChan) {
-
-                // compute the card of this channel
-                uint32_t card = (fineCorrChan / DATAGRAM_NCHANNEL) % 
-                        DATAGRAM_NCARD;
-                payload.card = card + DATAGRAM_CARDMIN;
-
-                // compute the block of this channel
-                uint32_t block = fineCorrChan / DATAGRAM_NCHANNEL / 
-                        DATAGRAM_NCARD;
-                payload.block = block + DATAGRAM_BLOCKMIN;
-
-                // get the channel in measurement set (mapping)
-                uint32_t cardCorrChan = fineCorrChan % DATAGRAM_NCHANNEL;
-                uint32_t cardMeasChan = 
-                        itsChannelMap.toCorrelator(cardCorrChan);
-                payload.channel = cardMeasChan + DATAGRAM_CHANNELMIN;
-
-                // calculate frequency
-                uint32_t fineMeasChan = ((block * DATAGRAM_NCARD) + card) * 
-                        DATAGRAM_NCHANNEL + cardMeasChan;
-                payload.freq = (freqMin + freqInc * fineMeasChan) / 1000000.0;
-
-                // test
-                cout << fineCorrChan << ": " << payload.freq << endl;
-
-                // compute coarse channel number in measurement set
-                // (correspond to channel in buffer)
-                uint32_t coarseMeasChan = fineMeasChan / itsNChannelSub;
-
-                uint32_t corrProd = corrProdInSlice + 
-                        slice * nCorrProdPerSlice;
-                payload.vis[corrProdInSlice].real = 
-                        buffer.data[corrProd][coarseMeasChan].vis.real;
-                payload.vis[corrProdInSlice].imag = 
-                        buffer.data[corrProd][coarseMeasChan].vis.imag;
-            }   // correlation product in slice
-
-            return false;
-
-            // send the slice
-#if SHELFCASE == 1
-            itsPort->send(payload);
-#elif SHELFCASE == 2
-            // test for 2 cards
-            if (card % 2 == itsShelf - 1) {
-                itsPort->send(payload);
-            }
-#elif SHELFCASE == 3
-            // test for 3 cards
-            if (card % 3 == itsShelf - 1) {
-                itsPort->send(payload);
-            }
-#elif SHELFCASE == N
-            // test for any number of cards
-            if (card % itsNShelves == itsShelf - 1) {
-                itsPort->send(payload);
-            }
-#else
-            cout << "Illegal preprocessor case" << endl;
-#endif
-        }   // slice
-    }   // simulated channel in correlator
-
-    buffer.reset();
-
-#ifdef VERBOSE
-    //cout << "Shelf " << itsShelf << " finished Sending buffer data" << endl;
-#endif
-    return true;
-}
-*/
-
-#else   // NOT REORDER_LOOP
-
 bool CorrelatorSimulatorADE::sendBufferData()
 {
 #ifdef VERBOSE
@@ -777,11 +738,17 @@ bool CorrelatorSimulatorADE::sendBufferData()
 
     const double coarseFreqInc = buffer.freqId[1].freq - buffer.freqId[0].freq;
     const double freqMin = buffer.freqId[0].freq;
-    //const double freqMin = buffer.freqId[0].freq - coarseFreqInc * 0.5;
     const double freqInc = coarseFreqInc / itsNChannelSub;
     
 #ifdef VERBOSE
 //    cout << "Frequency increment: " << freqInc << endl;
+#endif
+
+#ifdef TEST
+    vector<uint32_t> testChannel;
+    testChannel.resize(DATAGRAM_NCHANNEL);
+    vector<double> testFreq;
+    testFreq.resize(DATAGRAM_NCHANNEL);
 #endif
 
     // for all simulated fine channels in correlator 
@@ -791,30 +758,58 @@ bool CorrelatorSimulatorADE::sendBufferData()
     for (uint32_t fineCorrChan = 0; fineCorrChan < nFineCorrChan; 
             ++fineCorrChan) {
 
-        // compute the card of this channel
-        uint32_t card = (fineCorrChan / DATAGRAM_NCHANNEL) % DATAGRAM_NCARD;
+        const uint32_t totalCard = fineCorrChan / DATAGRAM_NCHANNEL;
+        const uint32_t cardCorrChan = fineCorrChan % DATAGRAM_NCHANNEL;
+
+        const uint32_t block = totalCard / DATAGRAM_NCARD;
+        const uint32_t card = totalCard % DATAGRAM_NCARD;
+
+        payload.channel = cardCorrChan + DATAGRAM_CHANNELMIN;
+        ASKAPCHECK((payload.channel >= DATAGRAM_CHANNELMIN) &&
+                (payload.channel <= DATAGRAM_CHANNELMAX),
+                "Payload channel is out of range");
+
         payload.card = card + DATAGRAM_CARDMIN;
+        ASKAPCHECK((payload.card >= DATAGRAM_CARDMIN) &&
+                (payload.card <= DATAGRAM_CARDMAX),
+                "Payload card is out of range");
 
-        // compute the block of this channel
-        uint32_t block = fineCorrChan / DATAGRAM_NCHANNEL / DATAGRAM_NCARD;
         payload.block = block + DATAGRAM_BLOCKMIN;
+        ASKAPCHECK((payload.block >= DATAGRAM_BLOCKMIN) &&
+                (payload.block <= DATAGRAM_BLOCKMAX),
+                "Payload block is out of range");
 
-        // get the channel in measurement set (mapping)
-        uint32_t cardCorrChan = fineCorrChan % DATAGRAM_NCHANNEL;
-        uint32_t cardMeasChan = itsChannelMap.fromCorrelator(cardCorrChan);
-        payload.channel = cardMeasChan + DATAGRAM_CHANNELMIN;
-
-        // calculate frequency
-        uint32_t fineMeasChan = ((block * DATAGRAM_NCARD) + card) * 
+        // calculate frequency by first converting channel number 
+        // according to the numbering in measurement set 
+#ifdef NO_MAPPING
+        const uint32_t cardMeasChan = cardCorrChan;
+#else
+        const uint32_t cardMeasChan = 
+                itsChannelMap.fromCorrelator(cardCorrChan);
+#endif
+        const uint32_t fineMeasChan = ((block * DATAGRAM_NCARD) + card) * 
                 DATAGRAM_NCHANNEL + cardMeasChan;
         payload.freq = (freqMin + freqInc * fineMeasChan) / 1000000.0;
 
 #ifdef TEST
-        cout << cardCorrChan << ": " << cardMeasChan << ": " <<
-                payload.freq << endl;
+        /*
+        //cout << cardCorrChan << ": " << cardMeasChan << ": " <<
+        //        payload.freq << endl;
         uint32_t checkChan = itsChannelMap.toCorrelator(cardMeasChan);
         ASKAPCHECK(checkChan == cardCorrChan, "Error in channel mapping");
-        //if (fineCorrChan >= 216) return false;
+        if (fineCorrChan < nTestChannel) {
+            testChannel[cardMeasChan] = payload.channel;
+            testFreq[cardMeasChan] = payload.freq;
+        }
+        else {
+            cout << "Frequency in measurement set" << endl;
+            for (uint32_t i = 0; i < nTestChannel; ++i) {
+                cout << i << ": " << testChannel[i] << ": " << 
+                        testFreq[i] << endl;
+            }   
+            return false;
+        }
+        */
 #endif
 
         // compute coarse channel number in measurement set
@@ -857,14 +852,15 @@ bool CorrelatorSimulatorADE::sendBufferData()
             if (card % 3 == itsShelf - 1) {
                 itsPort->send(payload);
             }
-#elif SHELFCASE == N
+#else   // OTHER SHELFCASE
             // test for any number of cards
             if (card % itsNShelves == itsShelf - 1) {
                 itsPort->send(payload);
-            }
-#else
-            cout << "Illegal preprocessor case" << endl;
+#ifdef TEST
+                fillTestBuffer(payload);
 #endif
+            }
+#endif  // SHELFCASE
 
 #ifdef TEST
             //checkPayload(payload);
@@ -878,10 +874,19 @@ bool CorrelatorSimulatorADE::sendBufferData()
 #ifdef VERBOSE
     //cout << "Shelf " << itsShelf << " finished Sending buffer data" << endl;
 #endif
-    return true;
-}
 
-#endif  // REORDER_LOOP
+#ifdef TEST
+    checkTestBuffer();
+
+    cout << "Shelf " << itsShelf << 
+            " finished Sending buffer data for testing" << endl;
+    return false;
+#else   // NOT TEST
+    return true;
+#endif  // TEST
+
+}   // sendBufferData
+
 
 
 #else   // NOT CHANNEL_EXPAND
@@ -957,13 +962,6 @@ bool CorrelatorSimulatorADE::sendBufferData()
 }
 
 #endif  // CHANNEL_EXPAND
-
-
-
-// Check payload
-//void CorrelatorSimulatorADE::checkPayload(
-//        const askap::cp::VisDatagramADE &payload) {
-//}
 
 
 

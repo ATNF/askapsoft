@@ -164,6 +164,8 @@ bool TosSimulator::sendNext(void)
     casa::Double centreFreq = 0.0;
 
 #ifdef CARDFREQ
+    // Each card contains 4 (coarse) channels: (0, 1, 2, 3).
+    // Frequency of channel 2 is used as the centre frequency.
     centreFreq = frequencies[2];
     //centreFreq = (frequencies[0] + frequencies[3]) * 0.5;
 #else

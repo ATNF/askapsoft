@@ -44,6 +44,8 @@
 #include "simplayback/CorrBuffer.h"
 #include "simplayback/ChannelMap.h"
 
+//#define TEST
+
 namespace askap {
 namespace cp {
 
@@ -203,6 +205,11 @@ class CorrelatorSimulatorADE : public ISimulator {
         // @return True if successful
 		bool sendNextExpand();
 
+#ifdef TEST
+        void fillTestBuffer(askap::cp::VisDatagramADE &payload);
+
+        void checkTestBuffer();
+#endif
 };
 
 };

@@ -32,14 +32,17 @@
 namespace askap {
 namespace cp {
 
+    // The total number of blocks for the whole spectrum
     const uint32_t DATAGRAM_NBLOCK = 8;
     const uint32_t DATAGRAM_BLOCKMIN = 1;
     const uint32_t DATAGRAM_BLOCKMAX = 8;
 
+    // Each block contains these cards
     const uint32_t DATAGRAM_NCARD = 12;
     const uint32_t DATAGRAM_CARDMIN = 1;
     const uint32_t DATAGRAM_CARDMAX = 12;
 
+    // Each card contains these channels, associated with certain frequencies
     const uint32_t DATAGRAM_NCHANNEL = 216;
     const uint32_t DATAGRAM_CHANNELMIN = 1;
     const uint32_t DATAGRAM_CHANNELMAX = 216;
