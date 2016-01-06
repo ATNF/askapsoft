@@ -568,12 +568,117 @@ const std::map<std::string, casa::Vector<double> >& ImagingNormalEquations::data
       return INormalEquations::ShPtr(new ImagingNormalEquations(*this));
     }
 
+/// @brief increment this if there is any change to the stuff written into blob
+#define BLOBVERSION 2
+
+    /// @brief blob support for std::map<std::string, casa::CoordinateSystem>
+    LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os,
+        const std::map<std::string, casa::CoordinateSystem>& cSysMap)
+    {   
+        os.putStart("CoordinateSystem",BLOBVERSION);
+
+        os << static_cast<uint64>(cSysMap.size());
+
+        map<string, casa::CoordinateSystem>::const_iterator it;
+        for (it=cSysMap.begin();it!=cSysMap.end();it++)
+        {
+          int nCoordinates = it->second.nCoordinates();
+          int dcPos = it->second.findCoordinate(Coordinate::DIRECTION,-1);
+          int fcPos = it->second.findCoordinate(Coordinate::SPECTRAL,-1);
+          int pcPos = it->second.findCoordinate(Coordinate::STOKES,-1);
+          os << it->first;
+          os << nCoordinates;
+          os << dcPos << fcPos << pcPos;
+          if (dcPos >= 0) {
+            const casa::DirectionCoordinate& dc = it->second.directionCoordinate(dcPos);
+            os << dc.referenceValue() << dc.increment() << dc.linearTransform() <<
+                  dc.referencePixel() << dc.worldAxisUnits();
+          }
+          if (fcPos >= 0) {
+            const casa::SpectralCoordinate& fc = it->second.spectralCoordinate(fcPos);
+            os << MFrequency::showType(fc.frequencySystem()) <<
+                  fc.referenceValue() << fc.increment() << fc.referencePixel() <<
+                  fc.restFrequency() << fc.worldAxisUnits();
+          }
+          if (pcPos >= 0) {
+            const casa::StokesCoordinate& pc = it->second.stokesCoordinate(pcPos);
+            os << pc.stokes();
+          }
+        }
+
+        os.putEnd();
+        return os;
+    }
+
+    /// @brief blob support for std::map<std::string, casa::CoordinateSystem>
+    LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is,
+        std::map<std::string, casa::CoordinateSystem>& cSysMap)
+    {
+        const int version = is.getStart("CoordinateSystem");
+        ASKAPCHECK(version == BLOBVERSION, 
+            "Attempting to read from a blob stream a CoordinateSystem object of the wrong version, expect "<<
+            BLOBVERSION<<" got "<<version);
+
+        cSysMap.clear();
+        uint64 size;
+        is >> size;
+        std::string name;
+        int nCoordinates;
+        int dcPos, fcPos, pcPos;
+        for (uint64 i=0; i<size; ++i) {
+          is >> name;
+          cSysMap[name] = casa::CoordinateSystem();
+
+          is >> nCoordinates;
+          is >> dcPos >> fcPos >> pcPos;
+          if (dcPos >= 0) {
+            casa::Vector<casa::Double> increment, refPix, refVal;
+            casa::Matrix<casa::Double> xform;
+            is >> refVal >> increment >> xform >> refPix;
+            ASKAPCHECK(increment.nelements() == 2, "Direction axis increment should be a vector of size 2");
+            ASKAPCHECK(refPix.nelements() == 2, "Direction axis reference pixel should be a vector of size 2");
+            ASKAPCHECK(refVal.nelements() == 2, "Direction axis reference value should be a vector of size 2");
+            ASKAPCHECK(xform.shape() == casa::IPosition(2,2,2), "Direction axis transform matrix should be 2x2");
+            casa::DirectionCoordinate dc(casa::MDirection::J2000,casa::Projection(casa::Projection::SIN),
+                     refVal[0],refVal[1], increment[0],increment[1],xform, refPix[0],refPix[1]);
+            casa::Vector<casa::String> worldAxisUnits;
+            is >> worldAxisUnits;
+            dc.setWorldAxisUnits(worldAxisUnits);
+            cSysMap[name].addCoordinate(dc);
+          }
+          if (fcPos >= 0) {
+            casa::String freqTypeStr;
+            casa::Double restFreq;
+            casa::Vector<casa::Double> increment, refPix, refVal;
+            is >> freqTypeStr >> refVal >> increment >> refPix >> restFreq;
+            ASKAPCHECK(increment.nelements() == 1, "Spectral axis increment should be a vector of size 1");
+            ASKAPCHECK(refPix.nelements() == 1, "Spectral axis reference pixel should be a vector of size 1");
+            ASKAPCHECK(refVal.nelements() == 1, "Spectral axis reference value should be a vector of size 1");
+            MFrequency::Types freqType;
+            MFrequency::getType(freqType, freqTypeStr);
+            casa::SpectralCoordinate fc(freqType, refVal[0], increment[0], refPix[0], restFreq);
+            casa::Vector<casa::String> worldAxisUnits;
+            is >> worldAxisUnits;
+            fc.setWorldAxisUnits(worldAxisUnits);
+            cSysMap[name].addCoordinate(fc);
+          }
+          if (pcPos >= 0) {
+            casa::Vector<casa::Int> whichStokes;
+            is >> whichStokes;
+            casa::StokesCoordinate pc(whichStokes);
+          }
+        }
+
+        is.getEnd();
+        return is;
+    }
+
     /// @brief write the object to a blob stream
     /// @param[in] os the output stream
     void ImagingNormalEquations::writeToBlob(LOFAR::BlobOStream& os) const
     {
       os << itsNormalMatrixSlice 
-        << itsNormalMatrixDiagonal << itsShape << itsReference << itsDataVector; 
+         << itsNormalMatrixDiagonal << itsShape << itsReference << itsCoordSys << itsDataVector; 
     }
     
     /// @brief read the object from a blob stream
@@ -583,7 +688,7 @@ const std::map<std::string, casa::Vector<double> >& ImagingNormalEquations::data
     {
       is >> itsNormalMatrixSlice 
          >> itsNormalMatrixDiagonal >> itsShape >> itsReference 
-         >> itsDataVector;
+         >> itsCoordSys >> itsDataVector;
     }
     
     /// @brief obtain all parameters dealt with by these normal equations
