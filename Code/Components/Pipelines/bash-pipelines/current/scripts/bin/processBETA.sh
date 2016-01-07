@@ -87,7 +87,7 @@ else
                 SUBMIT_JOBS=false
             fi
         else
-	    lfs setstripe -c 8 .
+	    lfs setstripe -c ${LUSTRE_STRIPING} .
         fi
         
 	if [ $DO_1934_CAL == true ]; then

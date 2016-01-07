@@ -56,6 +56,9 @@ OUTPUT=.
 # Options are true or false
 CLOBBER=false
 
+# Lustre filesystem striping to use within the current directory
+LUSTRE_STRIPING=4
+
 ####################
 # Locations of the executables. 
 # If you have a local version of the ASKAPsoft codebase, and have
