@@ -38,7 +38,7 @@
 #include <Blob/BlobSTL.h>
 
 /// @brief increment this if there is any change to the stuff written into blob
-const int coordSysBlobVersion = 1;
+const int coordSysBlobVersion = 2;
 
 using namespace askap;
 
@@ -60,7 +60,9 @@ namespace LOFAR
         os << dcPos << fcPos << pcPos;
         if (dcPos >= 0) {
           const casa::DirectionCoordinate& dc = cSys.directionCoordinate(dcPos);
-          os << dc.referenceValue() << dc.increment() << dc.linearTransform() <<
+          os << casa::MDirection::showType(dc.directionType()) <<
+                dc.projection().name() << dc.referenceValue() <<
+                dc.increment() << dc.linearTransform() <<
                 dc.referencePixel() << dc.worldAxisUnits();
         }
         if (fcPos >= 0) {
@@ -95,6 +97,12 @@ namespace LOFAR
         cSys = casa::CoordinateSystem();
 
         if (dcPos >= 0) {
+          casa::String dirTypeStr;
+          is >> dirTypeStr;
+          casa::MDirection::Types dirType;
+          casa::MDirection::getType(dirType, dirTypeStr);
+          casa::String projectionName;
+          is >> projectionName;
           casa::Vector<casa::Double> increment, refPix, refVal;
           casa::Matrix<casa::Double> xform;
           is >> refVal >> increment >> xform >> refPix;
@@ -106,9 +114,9 @@ namespace LOFAR
               "Direction axis reference value should be a vector of size 2");
           ASKAPCHECK(xform.shape() == casa::IPosition(2,2,2),
               "Direction axis transform matrix should be 2x2");
-          casa::DirectionCoordinate dc(casa::MDirection::J2000,
-              casa::Projection(casa::Projection::SIN), refVal[0],refVal[1],
-              increment[0],increment[1],xform, refPix[0],refPix[1]);
+          casa::DirectionCoordinate dc(dirType,
+              casa::Projection::type(projectionName), refVal[0],refVal[1],
+              increment[0],increment[1], xform, refPix[0],refPix[1]);
           casa::Vector<casa::String> worldAxisUnits;
           is >> worldAxisUnits;
           dc.setWorldAxisUnits(worldAxisUnits);
@@ -116,17 +124,18 @@ namespace LOFAR
         }
         if (fcPos >= 0) {
           casa::String freqTypeStr;
+          is >> freqTypeStr;
+          casa::MFrequency::Types freqType;
+          casa::MFrequency::getType(freqType, freqTypeStr);
           casa::Double restFreq;
           casa::Vector<casa::Double> increment, refPix, refVal;
-          is >> freqTypeStr >> refVal >> increment >> refPix >> restFreq;
+          is >> refVal >> increment >> refPix >> restFreq;
           ASKAPCHECK(increment.nelements() == 1,
               "Spectral axis increment should be a vector of size 1");
           ASKAPCHECK(refPix.nelements() == 1,
               "Spectral axis reference pixel should be a vector of size 1");
           ASKAPCHECK(refVal.nelements() == 1,
               "Spectral axis reference value should be a vector of size 1");
-          casa::MFrequency::Types freqType;
-          casa::MFrequency::getType(freqType, freqTypeStr);
           casa::SpectralCoordinate fc(freqType, refVal[0], increment[0],
               refPix[0], restFreq);
           casa::Vector<casa::String> worldAxisUnits;
