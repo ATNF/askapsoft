@@ -57,15 +57,14 @@ playback.corrsim.n_channel_subdivision = 54
 playback.corrsim.coarse_channel_bandwidth = 1000000
 
 # Measurement set used as input for simulation
-#playback.corrsim.dataset = ../../dataset/ade1card.ms
-playback.corrsim.dataset = ../../dataset/ade_single_card.ms
+playback.corrsim.dataset = ../../dataset/ade1card.ms
 
 # Local host for transmission
 playback.corrsim.out.hostname = localhost
 
 # Reference port for transmission.
 # If multiple ports are used, this is the first port
-playback.corrsim.out.port = 3001
+playback.corrsim.out.port = 3000
 
 # Delay in transmission between different time groups (microsecond)
 playback.corrsim.delay = 5000000
