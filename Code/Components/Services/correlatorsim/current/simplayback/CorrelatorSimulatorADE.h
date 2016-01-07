@@ -44,6 +44,7 @@
 #include "simplayback/CorrBuffer.h"
 #include "simplayback/ChannelMap.h"
 
+// Test the correlator simulator using a buffer that acts as ingest
 //#define TEST
 
 namespace askap {
@@ -70,14 +71,14 @@ class CorrelatorSimulatorADE : public ISimulator {
         CorrelatorSimulatorADE(const std::string& dataset,
 				const std::string& hostname = "",
                 const std::string& port = "",
-                const int shelf = 0,
-                const int nShelves = 0,
-                const unsigned int nAntenna = 0,
-                const unsigned int nCoarseChannel = 0,
-                const unsigned int nChannelSub = 0,
+                const uint32_t shelf = 0,
+                const uint32_t nShelves = 0,
+                const uint32_t nAntenna = 0,
+                const uint32_t nCoarseChannel = 0,
+                const uint32_t nChannelSub = 0,
                 const double coarseBandwidth = 0.0,
                 const std::string& inputMode = "",
-                const unsigned int delay = 0);
+                const uint32_t delay = 0);
 
         /// Destructor
         virtual ~CorrelatorSimulatorADE();
@@ -93,29 +94,30 @@ class CorrelatorSimulatorADE : public ISimulator {
 		// Correlation product map (this replaces baseline map)
 		CorrProdMap itsCorrProdMap;
 
-        // Channel mapping
+        // Channel mapping between measurement set (contiguous numbering)
+        // and correlator simulator (non-contiguous numbering)
         ChannelMap itsChannelMap;
 
         // Shelf number [1..]
-        const int itsShelf;
+        const uint32_t itsShelf;
 
         // The number of shelves (= the number of MPI processes - 1)
-        const int itsNShelves;
+        const uint32_t itsNShelves;
 
         // Number of antennas
-        unsigned int itsNAntenna;
+        uint32_t itsNAntenna;
 
         // Number of correlation products (= baselines)
-        unsigned int itsNCorrProd;
+        uint32_t itsNCorrProd;
 
         // Number of slice
-        unsigned int itsNSlice;
+        uint32_t itsNSlice;
 
         // Number of coarse channels
-        const unsigned int itsNCoarseChannel;
+        const uint32_t itsNCoarseChannel;
 
         // Number of channel subdivision (coarse to fine)
-        const unsigned int itsNChannelSub;
+        const uint32_t itsNChannelSub;
 
         // Coarse channel bandwidth
         const double itsCoarseBandwidth;
@@ -130,14 +132,13 @@ class CorrelatorSimulatorADE : public ISimulator {
         uint64_t itsCurrentTime;
 
         // Delay in microseconds
-        unsigned int itsDelay;
+        uint32_t itsDelay;
 
         // Cursor (index) for the main table of the measurement set
-        unsigned int itsCurrentRow;
+        uint32_t itsCurrentRow;
 
-		const static unsigned int rowIncrement = 36;
-
-        bool firstPayloadSent;
+        // To be deprecated
+        //bool firstPayloadSent;
 
         // Measurement set
         boost::scoped_ptr<casa::MeasurementSet> itsMS;
@@ -149,7 +150,7 @@ class CorrelatorSimulatorADE : public ISimulator {
         CorrBuffer buffer;
 
         // Antenna indices
-        vector<unsigned int> antIndices;
+        vector<uint32_t> antIndices;
 
 
         // Internal functions
@@ -183,31 +184,37 @@ class CorrelatorSimulatorADE : public ISimulator {
         /// Renumber channels and cards to conform with datagram specification
         void renumberChannelAndCard();
 
-        /// Send the first payload
-        /// @return True if successful, false if not 
-        /// (eg. no more data in buffer to send)
-        bool sendFirstPayload();
-
         /// Send buffer data 
         /// @return True if successful, false if not 
         /// (eg. no more data in buffer to send)
         bool sendBufferData();
 
         // To be deprecated
+        // Send the first payload
+        // @return True if successful, false if not 
+        // (eg. no more data in buffer to send)
+        //bool sendFirstPayload();
+
+        // To be deprecated
 		// Send data of zero visibility for the whole baselines and channels 
 		// for only 1 time period.
-		bool sendNextZero();
+		//bool sendNextZero();
 	
         // To be deprecated
 		// Extract one data point from measurement set and send the data 
 		// for all baselines and channels for the time period given in 
         // the measurement set.
         // @return True if successful
-		bool sendNextExpand();
+		//bool sendNextExpand();
 
 #ifdef TEST
+        // Fill test buffer with data from payload.
+        // The test buffer simulates ingest.
         void fillTestBuffer(askap::cp::VisDatagramADE &payload);
 
+        // Check the test buffer for bad data.
+        // At this moment it is used to check the correct association 
+        // between channel number and frequency.
         void checkTestBuffer();
 #endif
 };

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ###########################################################################
-# This script runs all programs for simulated data transmission
+# This script runs the programs for simulating data transmission
 # in ADE format:
 # - Receiver   : msnoop (metadata) and vsnoopADE (visibility)
 # - Sender     : playbackADE (correlator simulator)
@@ -64,7 +64,9 @@ sed -i "s/ice.locator_port.*/ice.locator_port = $MPORT/" msnoop.in
 ../../apps/msnoop -c msnoop.in -v > msnoop.log 2>&1 &
 MDPID=$!
 
-echo "Starting the visibility receiver vsnoop" 
+# Starting instances of vsnoop.
+# The number of instances = the number of cards.
+echo "Starting the visibility receiver vsnoop: $NCARD instances" 
 COUNTER=1
 while [ $COUNTER -le $NCARD ]; do
 

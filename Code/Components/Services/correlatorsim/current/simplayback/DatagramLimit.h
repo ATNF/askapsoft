@@ -23,7 +23,13 @@
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
 /// @author Paulus Lahur <Paulus.Lahur@csiro.au>
-
+///
+/// This file contains the constants that define the number of members,
+/// minimum number (base number, usually 0 or 1), and maximum number
+/// in datagram arrays.
+/// Note that frequency channels are grouped in a card,
+/// and cards are grouped in a block.
+//
 #ifndef ASKAP_CP_DATAGRAMLIMIT_H
 #define ASKAP_CP_DATAGRAMLIMIT_H
 
@@ -32,23 +38,26 @@
 namespace askap {
 namespace cp {
 
-    // The total number of blocks for the whole spectrum
-    const uint32_t DATAGRAM_NBLOCK = 8;
-    const uint32_t DATAGRAM_BLOCKMIN = 1;
-    const uint32_t DATAGRAM_BLOCKMAX = 8;
+    // For the blocks 
+    const uint32_t DATAGRAM_NBLOCK = 8;     // total count
+    const uint32_t DATAGRAM_BLOCKMIN = 1;   // base number
+    const uint32_t DATAGRAM_BLOCKMAX = 8;   // largest number
 
-    // Each block contains these cards
-    const uint32_t DATAGRAM_NCARD = 12;
-    const uint32_t DATAGRAM_CARDMIN = 1;
-    const uint32_t DATAGRAM_CARDMAX = 12;
+    // Cards in a block
+    const uint32_t DATAGRAM_NCARD = 12;     // total count
+    const uint32_t DATAGRAM_CARDMIN = 1;    // base number
+    const uint32_t DATAGRAM_CARDMAX = 12;   // largest number
 
-    // Each card contains these channels, associated with certain frequencies
-    const uint32_t DATAGRAM_NCHANNEL = 216;
-    const uint32_t DATAGRAM_CHANNELMIN = 1;
-    const uint32_t DATAGRAM_CHANNELMAX = 216;
+    // Channels in a card
+    // Each channel is associated with a certain frequency
+    const uint32_t DATAGRAM_NCHANNEL = 216;     // total count
+    const uint32_t DATAGRAM_CHANNELMIN = 1;     // base number
+    const uint32_t DATAGRAM_CHANNELMAX = 216;   // largest number
 
+    // Beam's base number
     const uint32_t DATAGRAM_BEAMMIN = 0;
 
+    // Baseline's base number
     const uint32_t DATAGRAM_BASELINEMIN = 0;
 };
 };

@@ -51,7 +51,7 @@
 
 //#define VERBOSE
 // Just use 1 dataset. From now on, use only this option
-#define ONEDATASET
+//#define ONEDATASET
 
 // Using
 using namespace askap::cp;
@@ -168,7 +168,7 @@ boost::shared_ptr<TosSimulator> SimPlaybackADE::makeTosSim(void)
 
 
 
-#ifdef ONEDATASET
+//#ifdef ONEDATASET
 
 boost::shared_ptr<CorrelatorSimulatorADE> 
         SimPlaybackADE::makeCorrelatorSim(void)
@@ -189,7 +189,7 @@ boost::shared_ptr<CorrelatorSimulatorADE>
     std::stringstream ssPort;
     ssPort << intPort;
     string port = ssPort.str();
-    cout << "Shelf " << itsRank << " sends to port " << port << endl;
+    cout << "Shelf " << itsRank << ": using port " << port << endl;
 
     const unsigned int nAntenna = 
             itsParset.getUint32("corrsim.n_antennas", 1);
@@ -210,44 +210,6 @@ boost::shared_ptr<CorrelatorSimulatorADE>
 	std::cout << "makeCorrelatorSim: done" << std::endl;
 #endif
 }
-
-
-#else   // NOT ONEDATASET
-
-boost::shared_ptr<CorrelatorSimulatorADE> 
-        SimPlaybackADE::makeCorrelatorSim(void)
-{
-#ifdef VERBOSE
-	std::cout << "makeCorrelatorSim" << std::endl;
-#endif
-	std::ostringstream ss;
-	ss << "corrsim.shelf" << itsRank << ".";
-	const LOFAR::ParameterSet subset = itsParset.makeSubset(ss.str());
-	std::string dataset = subset.getString("dataset", "");
-	std::string hostname = subset.getString("out.hostname");
-	std::string port = subset.getString("out.port");
-	
-    const unsigned int nAntenna = 
-            itsParset.getUint32("corrsim.n_antennas", 1);
-    const unsigned int nCoarseChannel =
-            itsParset.getUint32("corrsim.n_coarse_channels", 304);
-    const unsigned int nChannelSub =
-            itsParset.getUint32("corrsim.n_channel_subdivision", 54);
-    const double coarseBandwidth =
-            itsParset.getDouble("corrsim.coarse_channel_bandwidth", 1000000);
-    const unsigned int delay =
-            itsParset.getUint32("corrsim.delay", 0);
-
-    return boost::shared_ptr<CorrelatorSimulatorADE>(
-            new CorrelatorSimulatorADE(dataset, hostname, port, 
-            itsRank, nAntenna, nCoarseChannel, nChannelSub,
-            coarseBandwidth, itsInputMode, delay));
-#ifdef VERBOSE
-	std::cout << "makeCorrelatorSim: done" << std::endl;
-#endif
-}
-
-#endif  // ONEDATASET
 
 
 
