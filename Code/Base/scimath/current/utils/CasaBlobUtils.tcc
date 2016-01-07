@@ -52,6 +52,7 @@ namespace LOFAR
         os.putStart("CoordinateSystem",coordSysBlobVersion);
 
         int nCoordinates = cSys.nCoordinates();
+        int coordinateCount = 0;
         int dcPos = cSys.findCoordinate(casa::Coordinate::DIRECTION,-1);
         int fcPos = cSys.findCoordinate(casa::Coordinate::SPECTRAL,-1);
         int pcPos = cSys.findCoordinate(casa::Coordinate::STOKES,-1);
@@ -64,17 +65,23 @@ namespace LOFAR
                 dc.projection().name() << dc.referenceValue() <<
                 dc.increment() << dc.linearTransform() <<
                 dc.referencePixel() << dc.worldAxisUnits();
+          coordinateCount++;
         }
         if (fcPos >= 0) {
           const casa::SpectralCoordinate& fc = cSys.spectralCoordinate(fcPos);
           os << casa::MFrequency::showType(fc.frequencySystem()) <<
                 fc.referenceValue() << fc.increment() << fc.referencePixel() <<
                 fc.restFrequency() << fc.worldAxisUnits();
+          coordinateCount++;
         }
         if (pcPos >= 0) {
           const casa::StokesCoordinate& pc = cSys.stokesCoordinate(pcPos);
           os << pc.stokes();
+          coordinateCount++;
         }
+
+        ASKAPCHECK(coordinateCount == nCoordinates,
+            "BlobOStream currently only supports DIRECTION, SPECTRAL and STOKES coordinates");
 
         os.putEnd();
         return os;
