@@ -5,10 +5,16 @@ Welcome to the user documentation for the ASKAP Central Processor. These pages c
 documentation for the commissioning scientists and early-science users interested in
 carrying out calibration, imaging, and analysis of ASKAP data products.
 
-The tools documented here are not intended to provide end-to-end data analysis capabilities,
-instead they are components of the ASKAP processing pipeline exposed such that users can
-invoke them directly. For more information on (including the scope of) the ASKAP processing
-pipelines please refer to the document entitled *ASKAP Science Processing (ASKAP-SW-0020)*.
+The bulk of the tools documented here are not intended to provide
+end-to-end data analysis capabilities, instead they are components of
+the ASKAP processing pipeline exposed such that users can invoke them
+directly.  In addition, a processing pipeline for BETA has been
+developed that makes use of these tools, and is described here.  For
+more information on (including the scope of) the ASKAP processing
+pipelines please refer to the document entitled *ASKAP Science
+Processing* (`ASKAP-SW-0020`_).
+
+  .. _ASKAP-SW-0020: http://www.atnf.csiro.au/projects/askap/ASKAP-SW-0020.pdf
 
 Rather than read the documentation set from start to finish, it is suggested users first
 read the :doc:`../platform/index` to setup their environment and gain an understanding of

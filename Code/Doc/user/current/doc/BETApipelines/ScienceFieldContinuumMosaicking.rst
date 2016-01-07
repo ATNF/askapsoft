@@ -17,7 +17,7 @@ It may be that you are using a non-standard arrangement that
 footprint.py doesn’t cover. In this case you need to directly specify
 the ``LINMOS_BEAM_OFFSETS`` variable (this is normally set by the
 beamArrangements.sh script). Here is an example of how you would do
-this (this is for the “diamond” footprint, band 1, PA=0::
+this (this is for the “diamond” footprint, band 1, PA=0)::
   
   LINMOS_BEAM_OFFSETS="linmos.feeds.beam0 = [-0.000,  0.000]
   linmos.feeds.beam1 = [-0.000,  1.244]
