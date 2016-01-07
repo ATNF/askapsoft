@@ -1,4 +1,4 @@
-from askapdev.rbuild.builders import Builder
+from askapdev.rbuild.builders import Data as Builder
 
-builder = Builder(".")
+builder = Builder("scripts")
 builder.build()
