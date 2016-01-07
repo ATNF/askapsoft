@@ -10,7 +10,7 @@ the ``MS_INPUT`` variables give the filename for the relevant MS.
 +----------------------+---------------------------------------------------------+------------------------------------------------------------+
 | Variable             | Default                                                 | Description                                                |
 +======================+=========================================================+============================================================+
-| ``DIR_SB``           |/scratch2/askap/askapops/archive/beta-scheduling-blocks  |Location (on galaxy) of the scheduling blocks. This is used |
+| ``DIR_SB``           |/scratch2/askap/askapops/beta-scheduling-blocks          |Location (on galaxy) of the scheduling blocks. This is used |
 |                      |                                                         |when specifying SB numbers - the default is the standard    |
 |                      |                                                         |location for BETA operation.                                |
 +----------------------+---------------------------------------------------------+------------------------------------------------------------+

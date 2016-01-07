@@ -119,7 +119,7 @@ DO_SOURCE_FINDING_MOSAIC=SETME
 ####################
 # Input Scheduling Blocks (SBs)
 # Location of the SBs
-DIR_SB=/scratch2/askap/askapops/archive/beta-scheduling-blocks
+DIR_SB=/scratch2/askap/askapops/beta-scheduling-blocks
 # SB with 1934-638 observation
 SB_1934="SET_THIS"
 MS_INPUT_1934=""
