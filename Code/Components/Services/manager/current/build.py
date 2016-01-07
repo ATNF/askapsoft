@@ -8,4 +8,5 @@ builder.build()
 
 # deployment-specific files, i.e. start scripts
 databuilder = DataBuilder("scripts")
+databuilder.do_clean = False
 databuilder.build()
