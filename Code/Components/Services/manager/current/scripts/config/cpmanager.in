@@ -1,0 +1,41 @@
+########################## Ice Properties ##############################
+
+# Registry location
+ice_properties.Ice.Default.Locator                  = IceGrid/Locator:tcp -h aktos10 -p 4061
+
+# Object adapter
+ice_properties.CentralProcessorAdapter.Endpoints    = tcp
+ice_properties.CentralProcessorAdapter.AdapterId    = CentralProcessorAdapter
+
+ice_properties.CentralProcessorMonitoringAdapter.Endpoints    = tcp
+ice_properties.CentralProcessorMonitoringAdapter.AdapterId    = CentralProcessorMonitoringAdapter
+
+ice_properties.Ice.MessageSizeMax                   = 131072
+ice_properties.Ice.ThreadPool.Server.Size           = 4
+ice_properties.Ice.ThreadPool.Server.SizeMax        = 10
+
+ice_properties.Ice.IPv6                             = 0
+
+################## CP Manager Specific Properties ######################
+
+# Object identity and proxy to use for the CP manager ICE object
+ice.servicename                 = CentralProcessorService
+ice.adaptername                 = CentralProcessorAdapter
+
+# Monitoring provider config
+monitoring.enabled              = true
+monitoring.ice.servicename      = MonitoringService
+monitoring.ice.adaptername      = CentralProcessorMonitoringAdapter
+
+# FCM config
+fcm.ice.identity		= FCMService@FCMAdapter
+
+# Scheduling block service
+dataservice.ice.identity	= SchedulingBlockService@DataServiceAdapter
+
+# Ingest working directory
+ingest.workdir                  =  /work/datasets
+
+# Ingest pipeline command and arguments
+ingest.command                  = /askap/cp/cpsvcs/default/bin/cpingest.sh
+ingest.args                     = -c cpingest.in -l /askap/cp/cpsvcs/default/config/cpingest.log_cfg
