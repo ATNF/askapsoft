@@ -83,7 +83,7 @@ decreases memory use and run time by approximately the ratio of pixels in the pa
 |**Parameter**      |**Type**      |**Default**   |**Description**                                         |
 +===================+==============+==============+========================================================+
 |algorithm          |string        |"MultiScale"  |Valid choices are "MultiScale", "Basisfunction",        |
-|                   |              |              |"Hogbom", "MultScaleMFS" and "BasisfunctionMFS". Use    |
+|                   |              |              |"Hogbom", "MultiScaleMFS" and "BasisfunctionMFS". Use   |
 |                   |              |              |"Hogbom" for a single scale, non-MFS case. For the Clean|
 |                   |              |              |solver, the casacore's *LatticeCleaner* used to do the  |
 |                   |              |              |actual work in non-MSMFS case will be set up with       |

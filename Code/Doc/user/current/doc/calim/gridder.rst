@@ -231,6 +231,22 @@ to find, e.g. how the support of the convolution function is searched. These par
 the following section.
 
 
+Parameters related to anti-aliasing function (specific to SphFunc and WProject)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The following parameters are applicable to gridders that use the SphFunc prolate spheroid as part
+of the gridding kernel (i.e., SphFunc and WProject).
+
++--------------+--------------+--------------+------------------------------------------------------+
+|*Parameter*   |*Type*        |*Default*     |*Description*                                         |
++==============+==============+==============+======================================================+
+|alpha         |float         |1             |The prolate spheroidal alpha function. Setting alpha  |
+|              |              |              |to zero leads to great alias rejection at the edge of |
+|              |              |              |image, and may help to reduce preconditioning         |
+|              |              |              |artefacts when the robustness parameter is negative.  |
++--------------+--------------+--------------+------------------------------------------------------+
+
+
 Non-linear sampling in w-space (specific to WProject,WStack, AWProject and AProjectWStack)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
