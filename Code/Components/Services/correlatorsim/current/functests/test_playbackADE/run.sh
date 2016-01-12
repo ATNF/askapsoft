@@ -23,13 +23,15 @@ echo "===================================================================="
 # for correlator simulator and instances for vsnoopADE.
 # Range: 1 ~ 12
 
-NCARD=1
+NCARD=12
 echo "The number of cards (data streams): $NCARD"
+
+###########################################################################
 
 # The first port number for visibility transmission 
 # (receiver: vsnoopADE)
 
-VPORT1=3001
+VPORT1=3000
 echo "The first port for visibility data: $VPORT1"
 
 # The port number for metadata transmission
@@ -37,7 +39,6 @@ echo "The first port for visibility data: $VPORT1"
 MPORT=4061
 echo "The port for metadata             : $MPORT"
 echo
-###########################################################################
 
 cd `dirname $0`
 

@@ -533,9 +533,10 @@ void CorrelatorSimulatorADE::fillChannelInBuffer()
 void CorrelatorSimulatorADE::fillTestBuffer
         (askap::cp::VisDatagramADE &payload) {
 
+#ifdef VERBOSE
     cout << "Shelf " << itsShelf << 
             ": filling test buffer ..." << endl;
-
+#endif
     testBuffer.timeStamp = payload.timestamp;
     testBuffer.beam = payload.beamid;
     uint32_t corrChan = payload.channel - DATAGRAM_CHANNELMIN;
@@ -557,33 +558,67 @@ void CorrelatorSimulatorADE::fillTestBuffer
         testBuffer.data[payload.baseline1 + corrProd - 1][chan].vis.imag = 
                 payload.vis[corrProd].imag;
     }
+#ifdef VERBOSE
     cout << "Shelf " << itsShelf << 
             ": filling test buffer: done" << endl;
+#endif
 }
 
 
 void CorrelatorSimulatorADE::checkTestBuffer() {
 
+#ifdef VERBOSE
     cout << "Shelf " << itsShelf << 
             ": checking test buffer ..." << endl;
-    
+#endif
     const double coarseFreqInc = buffer.freqId[1].freq - buffer.freqId[0].freq;
     const double freqMin = buffer.freqId[0].freq;
     const double freqInc = coarseFreqInc / itsNChannelSub;
     const double small = 0.00001;
+#ifdef VERBOSE
     cout << "  Channel count: " << testBuffer.freqId.size() << endl;
+#endif
     for (uint32_t chan = 0; chan < testBuffer.freqId.size(); ++chan) {
 
-        //ASKAPCHECK(chan == testBuffer.freqId[chan].channel - 1,
-        //        "Expected channel " << chan << " <> received channel " <<
-        //        testBuffer.freqId[chan].channel - 1);
+        // Check for channel, card, block that should be in the buffer
+        // and those that are not supposed to be in the buffer
+        uint32_t totalCardExpected = chan / DATAGRAM_NCHANNEL;
+        uint32_t channelExpected = chan % DATAGRAM_NCHANNEL + 
+                DATAGRAM_CHANNELMIN;
+        uint32_t blockExpected = totalCardExpected / DATAGRAM_NCARD +
+                DATAGRAM_BLOCKMIN;
+        uint32_t cardExpected = totalCardExpected % DATAGRAM_NCARD +
+                DATAGRAM_CARDMIN;
 
-        double freqExpected = (freqMin + freqInc * chan) / 1000000.0;
-
-        ASKAPCHECK((freqExpected + small >= testBuffer.freqId[chan].freq) &&
-                (freqExpected - small <= testBuffer.freqId[chan].freq),
-                "Expected frequency " << freqExpected <<
-                " <> received frequency " << testBuffer.freqId[chan].freq);
+        // If the data belongs to this shelf
+        if (cardExpected == itsShelf) {
+            // Check for data validity
+            ASKAPCHECK(channelExpected == testBuffer.freqId[chan].channel,
+                    "Expected channel " << channelExpected << 
+                    " <> received " << testBuffer.freqId[chan].channel);
+            ASKAPCHECK(cardExpected == testBuffer.freqId[chan].card,
+                    "Expected card " << cardExpected << 
+                    " <> received " << testBuffer.freqId[chan].card);
+            ASKAPCHECK(blockExpected == testBuffer.freqId[chan].block,
+                    "Expected block " << blockExpected << 
+                    " <> received " << testBuffer.freqId[chan].block);
+            double freqExpected = (freqMin + freqInc * chan) / 1000000.0;
+            ASKAPCHECK((freqExpected + small >= testBuffer.freqId[chan].freq)
+                    && (freqExpected - small <= testBuffer.freqId[chan].freq),
+                    "Expected frequency " << freqExpected <<
+                    " <> received " << testBuffer.freqId[chan].freq);
+        }
+        else {  // If the data does not belong to this shelf
+            // All data must be zero
+            ASKAPCHECK(testBuffer.freqId[chan].channel == 0,
+                    "Non zero channel " << testBuffer.freqId[chan].channel);
+            ASKAPCHECK(testBuffer.freqId[chan].card == 0,
+                    "Non zero card " << testBuffer.freqId[chan].card);
+            ASKAPCHECK(testBuffer.freqId[chan].block == 0,
+                    "Non zero block " << testBuffer.freqId[chan].block);
+            ASKAPCHECK(testBuffer.freqId[chan].freq == 0.0,
+                    "Non zero frequency " << testBuffer.freqId[chan].freq);
+        }
 #ifdef VERBOSE
         cout << chan + 1 << ": " << testBuffer.freqId[chan].card << ", " << 
                 testBuffer.freqId[chan].channel << ", " <<
@@ -591,7 +626,7 @@ void CorrelatorSimulatorADE::checkTestBuffer() {
 #endif
     }
     cout << "Shelf " << itsShelf << 
-            ": checking test buffer: done" << endl;
+            ": checking test buffer: PASS" << endl;
 }
 
 #endif  // TEST
