@@ -70,7 +70,7 @@ public:
    explicit CompositeStep(const std::string &name);
 private:
   
-   /// @brief details for individual steps
+   /// @brief details for individual child steps
    std::vector<StepInfo> itsSteps;   
 };
 

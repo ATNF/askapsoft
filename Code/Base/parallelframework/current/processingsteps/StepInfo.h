@@ -1,7 +1,8 @@
 /// @file 
 /// @brief helper type represending info for each child step
-/// @details The structure gathering all info describing child processing steps.
-/// It is used by implementation of CompositeStep storing this info in a container.
+/// @details The structure gathering all info describing child processing steps 
+/// (or substeps of a CompositeStep, in other words). It is used by implementation 
+/// of CompositeStep to store this info in a single container.
 ///
 /// @copyright (c) 2007 CSIRO
 /// Australia Telescope National Facility (ATNF)
@@ -47,8 +48,9 @@ namespace askapparallel {
 
 
 /// @brief helper type represending info for each child step
-/// @details The structure gathering all info describing child processing steps.
-/// It is used by implementation of CompositeStep storing this info in a container.
+/// @details The structure gathering all info describing child processing steps 
+/// (or substeps of a CompositeStep, in other words). It is used by implementation 
+/// of CompositeStep to store this info in a single container.
 struct StepInfo {
       
    /// @brief default constructor - empty shared pointer and shape
