@@ -48,18 +48,23 @@
 using boost::asio::ip::udp;
 using askap::cp::VisDatagramADE;
 using namespace askap::cp;
+using namespace std;
 
 // Globals
 static unsigned int verbose = 0;
-static unsigned long count = 0;
+static unsigned long nDatagramReceived = 0;
+
+
 
 // When a SIGTERM is sent to the process this signal handler is called
 // in order to report the number of UDP datagrams received
 static void termination_handler(int signum)
 {
-    std::cout << "Received " << count << " datagrams" << std::endl;
+    cout << "Received " << nDatagramReceived << " datagrams" << endl;
     exit(0);
 }
+
+
 
 // Print the visibilities. Only called when verbose == 2
 // The format of the output is:
@@ -71,13 +76,16 @@ static void termination_handler(int signum)
 //     ..
 static void printAdditional(const VisDatagramADE& v)
 {
-    std::cout << "\tVisibilities:" << std::endl;
-    for (unsigned int i = 0; i < VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE; 
-	++i) {
-        std::cout << "\t\tbaseline" << v.baseline1+i << ": " << "("
+    cout << "\tVisibilities:" << endl;
+    for (unsigned int i = 0; 
+            i < VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE; 
+            ++i) {
+        cout << "\t\tbaseline" << v.baseline1+i << ": " << "("
             << v.vis[i].real << ", " << v.vis[i].imag << ")";
     }
 }
+
+
 
 // Print the contents of the payload (except the visibilities). This is only
 // called when verbose == 2.
@@ -91,20 +99,23 @@ static void printAdditional(const VisDatagramADE& v)
 //    ..
 static void printPayload(const VisDatagramADE& v)
 {
-    std::cout << "Timestamp:\t" << v.timestamp << std::endl;
-    std::cout << "\tSlice:\t\t" << v.slice << std::endl;
-    std::cout << "\tBlock:\t" << v.block << std::endl;
-    std::cout << "\tCard:\t" << v.card << std::endl;
-    std::cout << "\tChannel:\t" << v.channel << std::endl;
-    std::cout << "\tFreq:\t" << v.freq << std::endl;
-    std::cout << "\tBeamID:\t" << v.beamid << std::endl;
-    std::cout << "\tBaseline range:\t" << v.baseline1 << " ~ " << v.baseline2 << std::endl;
+    cout << "Timestamp:\t" << v.timestamp << endl;
+    cout << "\tSlice:\t\t" << v.slice << endl;
+    cout << "\tBlock:\t" << v.block << endl;
+    cout << "\tCard:\t" << v.card << endl;
+    cout << "\tChannel:\t" << v.channel << endl;
+    cout << "\tFreq:\t" << v.freq << endl;
+    cout << "\tBeamID:\t" << v.beamid << endl;
+    cout << "\tBaseline range:\t" << v.baseline1 << " ~ " << 
+            v.baseline2 << endl;
 
     if (verbose == 2) {
         printAdditional(v);
     }
-    std::cout << std::endl;
+    cout << endl;
 }
+
+
 
 // Print product ranges with non-zero data
 // Note, only first beam and first channel are considered.
@@ -115,54 +126,63 @@ static void printPayload(const VisDatagramADE& v)
 static void printNonZeroProducts(const VisDatagramADE &v)
 {
   if ((v.beamid == 1) && (v.channel == 1)) {
-       std::cout << "Timestamp:\t" << v.timestamp << std::endl;
-       std::cout << "\tSlice:\t\t" << v.slice << std::endl;
+       cout << "Timestamp:\t" << v.timestamp << endl;
+       cout << "\tSlice:\t\t" << v.slice << endl;
 
        // obtain a list of product ranges with non-zero data
        // pair has first and last product in the range (could be the same)
-       std::vector<std::pair<uint32_t, uint32_t> > productRanges;
-       productRanges.reserve(VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE / 2);
+       vector<pair<uint32_t, uint32_t> > productRanges;
+       productRanges.reserve(
+               VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE / 2);
 
-       uint32_t count = 0;
-       for (uint32_t product = v.baseline1, offset = 0; product <= v.baseline2; ++product, ++offset) {
-            if (offset >= VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE) {
-                std::cout<<"\tCorrupted baseline range" << std::endl;
+       uint32_t nNonZero = 0;
+       for (uint32_t product = v.baseline1, offset = 0; 
+               product <= v.baseline2; ++product, ++offset) {
+            if (offset >= 
+                    VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE)
+            {
+                cout<<"\tCorrupted baseline range" << endl;
                 return;
             }
             const float threshold = 1e-10;
-            const bool isNonZero = (std::abs(std::complex<float>(v.vis[offset].real, v.vis[offset].imag)) > threshold);
+            const bool isNonZero = (abs(complex<float>(
+                    v.vis[offset].real, v.vis[offset].imag)) > 
+                    threshold);
             if (isNonZero) {
-                ++count;
+                ++nNonZero;
                 if (productRanges.size()) {
                     if (productRanges.back().second + 1 == product) {
                         productRanges.back().second = product;
                         continue;
                     }
                 }
-                productRanges.push_back(std::pair<uint32_t, uint32_t>(product, product));
+                productRanges.push_back(pair<uint32_t, uint32_t>(
+                            product, product));
             }
        }
 
        // print the list of non-zero products
-       std::cout<<"\tNon-zero products:\t\t";
+       cout << "\tNon-zero products:\t\t";
        if (productRanges.size() == 0) {
-           std::cout<<"none"<<std::endl;
+           cout << "none" << endl;
        } else {
            for (size_t i=0; i < productRanges.size(); ++i) {
-                if (i>0) {
-                    std::cout<<", ";
+                if (i > 0) {
+                    cout << ", ";
                 }
-                const std::pair<uint32_t, uint32_t> range = productRanges[i];
+                const pair<uint32_t, uint32_t> range = productRanges[i];
                 if (range.first == range.second) {
-                    std::cout<< range.first;
+                    cout << range.first;
                 } else {
-                    std::cout<< range.first << " ~ " << range.second;
+                    cout << range.first << " ~ " << range.second;
                 }
            }
-           std::cout<<" ("<<count<<" in total)"<<std::endl;
+           cout << " (" << nNonZero << " in total)" << endl;
        }
   }
 }
+
+
 
 int main(int argc, char *argv[])
 {
@@ -182,11 +202,14 @@ int main(int argc, char *argv[])
         if (verbosePar.defined()) verbose = 1;
         if (veryVerbosePar.defined()) verbose = 2;
     } catch (const cmdlineparser::XParserExtra&) {
-        std::cerr << "usage: " << argv[0] << " [-v] [-vv] [-nz] [-p <udp port#>]" << std::endl;
-        std::cerr << "  -v            \t Verbose, partially display payload" << std::endl;
-        std::cerr << "  -vv           \t Very vebose, display entire payload" << std::endl;
-        std::cerr << "  -nz           \t List products with non-zero data for first beam and channel"<<std::endl;
-        std::cerr << "  -p <udp port#>\t UDP Port number to listen on" << std::endl;
+        cerr << "usage: " << argv[0] << 
+                " [-v] [-vv] [-nz] [-p <udp port#>]" << endl;
+        cerr << "  -v\t Verbose, partially display payload" << endl;
+        cerr << "  -vv\t Very vebose, display entire payload" << endl;
+        cerr << "  -nz\t List products with non-zero data for " <<
+                "the first beam and channel" << endl;
+        cerr << "  -p <udp port#>\t UDP Port number to listen on" << 
+                endl;
         return 1;
     }
 
@@ -203,29 +226,34 @@ int main(int argc, char *argv[])
     boost::system::error_code soerror;
     socket.set_option(option, soerror);
     if (soerror) {
-        std::cerr << "Warning: Could not set socket option. "
-            << " This may result in dropped packets" << std::endl;
+        cerr << "Warning: Could not set socket option. "
+            << " This may result in dropped packets" << endl;
     }
 
     // Create receive buffer
     VisDatagramADE vis;
 
     // Receive a buffer
-    std::cout << "Listening on UDP port " << portPar << 
-        " (press CTRL-C to exit)..." <<  std::endl;
+    cout << "Listening on UDP port " << portPar << 
+        " (press CTRL-C to exit)..." << endl;
     while (true) {
         udp::endpoint remote_endpoint;
         boost::system::error_code error;
-        const size_t len = socket.receive_from(boost::asio::buffer(&vis, sizeof(VisDatagramADE)), remote_endpoint, 0, error);
+        const size_t len = socket.receive_from(boost::asio::buffer(
+                    &vis, sizeof(VisDatagramADE)), remote_endpoint, 0, error);
         if (error) {
             throw boost::system::system_error(error);
         }
         if (len != sizeof(VisDatagramADE)) {
-            std::cout << "Error: Failed to read a full VisDatagramADE struct" << std::endl;
+            cout << "Error: Failed to read a full VisDatagramADE struct" 
+                    << endl;
             continue;
         }
-        if (vis.version != VisDatagramTraits<VisDatagramADE>::VISPAYLOAD_VERSION) {
-            std::cout << "Version mismatch. Expected " << VisDatagramTraits<VisDatagramADE>::VISPAYLOAD_VERSION << " got " << vis.version << std::endl;
+        if (vis.version != 
+                VisDatagramTraits<VisDatagramADE>::VISPAYLOAD_VERSION) {
+            cout << "Version mismatch. Expected " << 
+                    VisDatagramTraits<VisDatagramADE>::VISPAYLOAD_VERSION << 
+                    " got " << vis.version << endl;
             continue;
         }
         if (printNonZeroPar.defined()) {
@@ -234,12 +262,13 @@ int main(int argc, char *argv[])
         if (verbose) {
             printPayload(vis);
         } else {
-            if (count % 10000 == 0) {
-                std::cout << "Received " << count << " datagrams" << std::endl;
+            if (nDatagramReceived % 10000 == 0) {
+                cout << "Received " << nDatagramReceived << 
+                        " datagrams" << endl;
             }
         }
-        count++;
+        nDatagramReceived++;
     }
-
     return 0;
-}
+}   // main
+

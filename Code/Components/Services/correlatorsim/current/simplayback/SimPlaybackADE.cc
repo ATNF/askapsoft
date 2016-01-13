@@ -50,10 +50,7 @@
 #include "simplayback/TosSimulator.h"
 
 //#define VERBOSE
-// Just use 1 dataset. From now on, use only this option
-//#define ONEDATASET
 
-// Using
 using namespace askap::cp;
 using namespace std;
 
@@ -96,9 +93,6 @@ void SimPlaybackADE::validateConfig(void)
 	cout << "SimPlaybackADE::validateConfig..." << endl;
 	cout << "nShelves: " << nShelves << endl;
 #endif
-
-	const std::string inputMode = itsParset.getString("input_mode");
-	
 	// Build a list of required keys    
 	std::vector<std::string> requiredKeys;
 	requiredKeys.push_back("tossim.ice.locator_host");
@@ -168,14 +162,14 @@ boost::shared_ptr<TosSimulator> SimPlaybackADE::makeTosSim(void)
 
 
 
-//#ifdef ONEDATASET
-
 boost::shared_ptr<CorrelatorSimulatorADE> 
         SimPlaybackADE::makeCorrelatorSim(void)
 {
 #ifdef VERBOSE
 	std::cout << "makeCorrelatorSim" << std::endl;
 #endif
+    const string mode = itsParset.getString("mode", "normal");
+
 	std::ostringstream ss;
 	ss << "corrsim.";
 	const LOFAR::ParameterSet subset = itsParset.makeSubset(ss.str());
@@ -189,7 +183,8 @@ boost::shared_ptr<CorrelatorSimulatorADE>
     std::stringstream ssPort;
     ssPort << intPort;
     string port = ssPort.str();
-    cout << "Shelf " << itsRank << ": using port " << port << endl;
+    cout << "Shelf " << itsRank << ", mode " << mode << 
+            ": using port " << port << endl;
 
     const unsigned int nAntenna = 
             itsParset.getUint32("corrsim.n_antennas", 1);
@@ -203,9 +198,9 @@ boost::shared_ptr<CorrelatorSimulatorADE>
             itsParset.getUint32("corrsim.delay", 0);
 
     return boost::shared_ptr<CorrelatorSimulatorADE>(
-            new CorrelatorSimulatorADE(dataset, hostname, port, 
+            new CorrelatorSimulatorADE(mode, dataset, hostname, port, 
             itsRank, itsNumProcs-1, nAntenna, nCoarseChannel, nChannelSub,
-            coarseBandwidth, itsInputMode, delay));
+            coarseBandwidth, delay));
 #ifdef VERBOSE
 	std::cout << "makeCorrelatorSim: done" << std::endl;
 #endif
@@ -221,10 +216,10 @@ void SimPlaybackADE::run(void)
     // an MPI_Abort is called.
     MPI_Barrier(MPI_COMM_WORLD);
 
-	itsInputMode = itsParset.getString ("input_mode","zero");
-#ifdef VERBOSE
-	std::cout << "itsInputMode: " << itsInputMode << std::endl;
-#endif
+	//itsInputMode = itsParset.getString ("input_mode","zero");
+//#ifdef VERBOSE
+//	std::cout << "itsInputMode: " << itsInputMode << std::endl;
+//#endif
 
     if (itsRank == 0) {
 		boost::shared_ptr<ISimulator> sim = makeTosSim();

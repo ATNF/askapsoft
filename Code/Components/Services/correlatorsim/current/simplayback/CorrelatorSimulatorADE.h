@@ -55,20 +55,22 @@ class CorrelatorSimulatorADE : public ISimulator {
     public:
         /// Constructor
         ///
-        /// @param[in] dataset  filename for the measurement set which will be
+        /// @param[in] mode     Playback mode: normal or test
+        /// @param[in] dataset  Filename for the measurement set which will be
         ///                     used to source the visibilities.
-        /// @param[in] hostname hostname or IP address of the host to which the
+        /// @param[in] hostname Hostname or IP address of the host to which the
         ///                     UDP data stream will be sent.
         /// @param[in] port     UDP port number to which the UDP data stream 
         ///                     will be sent.
 		/// @param[in] shelf	MPI rank
-        /// @param[in] nAntenna The number of antenna set by user
+        /// @param[in] nAntenna         The number of antenna set by user
         /// @param[in] nCoarseChannel   The number of coarse channels
         /// @param[in] nChannelSub      The number of channel subdivision
         /// @param[in] coarseBandwidth  The bandwidth of coarse channel
-        /// @param[in] inputMode        Input mode of the simulator
         /// @param[in] delay            Transmission delay in microsecond
-        CorrelatorSimulatorADE(const std::string& dataset,
+        CorrelatorSimulatorADE(
+                const std::string& mode = "",
+                const std::string& dataset ="",
 				const std::string& hostname = "",
                 const std::string& port = "",
                 const uint32_t shelf = 0,
@@ -77,7 +79,6 @@ class CorrelatorSimulatorADE : public ISimulator {
                 const uint32_t nCoarseChannel = 0,
                 const uint32_t nChannelSub = 0,
                 const double coarseBandwidth = 0.0,
-                const std::string& inputMode = "",
                 const uint32_t delay = 0);
 
         /// Destructor
@@ -90,6 +91,8 @@ class CorrelatorSimulatorADE : public ISimulator {
         bool sendNext(void);
 		
     private:
+
+        string itsMode;
 
 		// Correlation product map (this replaces baseline map)
 		CorrProdMap itsCorrProdMap;
@@ -125,9 +128,6 @@ class CorrelatorSimulatorADE : public ISimulator {
         // Fine channel bandwidth
         double itsFineBandwidth;
 
-        // Data input mode 
-        const std::string itsInputMode;
-
         // Current time stamp
         uint64_t itsCurrentTime;
 
@@ -137,9 +137,6 @@ class CorrelatorSimulatorADE : public ISimulator {
         // Cursor (index) for the main table of the measurement set
         uint32_t itsCurrentRow;
 
-        // To be deprecated
-        //bool firstPayloadSent;
-
         // Measurement set
         boost::scoped_ptr<casa::MeasurementSet> itsMS;
 
@@ -148,6 +145,9 @@ class CorrelatorSimulatorADE : public ISimulator {
 
         // Buffer data
         CorrBuffer buffer;
+
+        // Test buffer
+        CorrBuffer testBuffer;
 
         // Antenna indices
         vector<uint32_t> antIndices;
@@ -189,34 +189,15 @@ class CorrelatorSimulatorADE : public ISimulator {
         /// (eg. no more data in buffer to send)
         bool sendBufferData();
 
-        // To be deprecated
-        // Send the first payload
-        // @return True if successful, false if not 
-        // (eg. no more data in buffer to send)
-        //bool sendFirstPayload();
-
-        // To be deprecated
-		// Send data of zero visibility for the whole baselines and channels 
-		// for only 1 time period.
-		//bool sendNextZero();
-	
-        // To be deprecated
-		// Extract one data point from measurement set and send the data 
-		// for all baselines and channels for the time period given in 
-        // the measurement set.
-        // @return True if successful
-		//bool sendNextExpand();
-
-#ifdef TEST
-        // Fill test buffer with data from payload.
-        // The test buffer simulates ingest.
+        /// Fill test buffer with data from payload.
+        /// The test buffer simulates ingest.
+        /// @param[in] payload Datagram containing visibility data
         void fillTestBuffer(askap::cp::VisDatagramADE &payload);
 
-        // Check the test buffer for bad data.
-        // At this moment it is used to check the correct association 
-        // between channel number and frequency.
+        /// Check the test buffer for bad data.
+        /// At this moment it is used to check the correct association 
+        /// between channel number and frequency.
         void checkTestBuffer();
-#endif
 };
 
 };

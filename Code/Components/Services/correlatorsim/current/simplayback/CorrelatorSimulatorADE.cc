@@ -76,16 +76,11 @@ void checkStokesType (const Stokes::StokesTypes stokestype);
 uint32_t getCorrProdIndex (const uint32_t ant1, const uint32_t ant2, 
 		const Stokes::StokesTypes stokestype);
 
-#ifdef TEST
-// Test buffer used to receive the data transmitted by correlator simulator.
-CorrBuffer testBuffer;
-#endif
-
-
 ASKAP_LOGGER(logger, ".CorrelatorSimulatorADE");
 
 
 CorrelatorSimulatorADE::CorrelatorSimulatorADE(
+        const std::string& mode,
         const std::string& dataset,
         const std::string& hostname,
         const std::string& port,
@@ -95,13 +90,12 @@ CorrelatorSimulatorADE::CorrelatorSimulatorADE(
         const uint32_t nCoarseChannel,
         const uint32_t nChannelSub,
         const double coarseBandwidth,
-        const std::string& inputMode,
         const uint32_t delay)
-        : itsShelf(shelf), itsNShelves(nShelves),
+        : itsMode(mode), itsShelf(shelf), itsNShelves(nShelves),
         itsNAntenna(nAntennaIn), itsNCorrProd(0), itsNSlice(0),
         itsNCoarseChannel(nCoarseChannel),
         itsNChannelSub(nChannelSub), itsCoarseBandwidth(coarseBandwidth),
-        itsFineBandwidth(0.0), itsInputMode(inputMode), 
+        itsFineBandwidth(0.0), 
         itsCurrentTime(0), itsDelay(delay), itsCurrentRow(0)
 {
     itsMS.reset(new casa::MeasurementSet(dataset, casa::Table::Old));
@@ -298,15 +292,6 @@ void CorrelatorSimulatorADE::initBuffer()
                 itsNCorrProd << " x " << itsNCoarseChannel << endl; 
         cout << "  Creating buffer for simulation data: done" << endl;
     }
-
-#ifdef TEST
-    cout << "  Creating test buffer ..." << endl;
-    testBuffer.init(itsNCorrProd, itsNCoarseChannel*itsNChannelSub);
-    cout << "    Correlation products x fine channels: " <<
-            itsNCorrProd << " x " << itsNCoarseChannel*itsNChannelSub << endl;
-    cout << "  Creating test buffer: done" << endl;
-#endif
-
     // card count
     buffer.nCard = itsNCoarseChannel / DATAGRAM_CHANNELMAX + 1;
     if (itsShelf == DISPLAY_SHELF) {
@@ -528,8 +513,6 @@ void CorrelatorSimulatorADE::fillChannelInBuffer()
 
 
 
-#ifdef TEST
-
 void CorrelatorSimulatorADE::fillTestBuffer
         (askap::cp::VisDatagramADE &payload) {
 
@@ -563,6 +546,7 @@ void CorrelatorSimulatorADE::fillTestBuffer
             ": filling test buffer: done" << endl;
 #endif
 }
+
 
 
 void CorrelatorSimulatorADE::checkTestBuffer() {
@@ -629,8 +613,6 @@ void CorrelatorSimulatorADE::checkTestBuffer() {
             ": checking test buffer: PASS" << endl;
 }
 
-#endif  // TEST
-
 
 
 bool CorrelatorSimulatorADE::sendBufferData()
@@ -661,12 +643,23 @@ bool CorrelatorSimulatorADE::sendBufferData()
     cout << "Frequency increment: " << freqInc << endl;
 #endif
 
-#ifdef TEST
-    vector<uint32_t> testChannel;
-    testChannel.resize(DATAGRAM_NCHANNEL);
-    vector<double> testFreq;
-    testFreq.resize(DATAGRAM_NCHANNEL);
+    if (itsMode == "test") {
+        // Test buffer used to check the transmitted data
+#ifdef VERBOSE
+        cout << "  Creating test buffer ..." << endl;
 #endif
+        testBuffer.init(itsNCorrProd, itsNCoarseChannel*itsNChannelSub);
+#ifdef VERBOSE
+        cout << "    Correlation products x fine channels: " <<
+                itsNCorrProd << " x " << itsNCoarseChannel*itsNChannelSub << 
+                endl;
+        cout << "  Creating test buffer: done" << endl;
+#endif
+        vector<uint32_t> testChannel;
+        testChannel.resize(DATAGRAM_NCHANNEL);
+        vector<double> testFreq;
+        testFreq.resize(DATAGRAM_NCHANNEL);
+    }
 
     // for all simulated fine channels in correlator 
     // note:
@@ -728,9 +721,10 @@ bool CorrelatorSimulatorADE::sendBufferData()
             // Card is sending its payload
             if (card % itsNShelves == itsShelf - 1) {
                 itsPort->send(payload);
-#ifdef TEST
-                fillTestBuffer(payload);
-#endif
+
+                if (itsMode == "test") {
+                    fillTestBuffer(payload);
+                }
             }
         }   // slice
     }   // simulated channel in correlator
@@ -741,12 +735,10 @@ bool CorrelatorSimulatorADE::sendBufferData()
     cout << "Shelf " << itsShelf << " finished Sending buffer data" << endl;
 #endif
 
-#ifdef TEST
-    checkTestBuffer();
-    return false;
-#else   // NOT TEST
+    if (itsMode == "test") {
+        checkTestBuffer();
+    }
     return true;
-#endif  // TEST
 
 }   // sendBufferData
 
@@ -787,9 +779,5 @@ void checkStokesType (const Stokes::StokesTypes stokesType)
 
 #ifdef VERBOSE
 #undef VERBOSE
-#endif
-
-#ifdef TEST
-#undef TEST
 #endif
 
