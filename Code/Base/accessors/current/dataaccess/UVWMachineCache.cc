@@ -96,9 +96,10 @@ const UVWMachineCache::machineType& UVWMachineCache::machine(const casa::MDirect
        ASKAPDEBUGASSERT(!machinePtr);
 #endif
        // need to set up a new machine here
-       machinePtr.reset(new machineType(tangent, phaseCentre, false, true));
+       machinePtr.reset(new machineType(tangent, phaseCentre, false, false));
        // swap the arguments in the uvw machine call. It gives the correct result on real data
        // although the casacore manual clearly says that the first argument is "out" and the second is "in".
+       // also set the fourth parameter, project, to false, as we do not want to reproject to the input frame.
        // machinePtr.reset(new machineType(phaseCentre, tangent, false, true));
    }
    return *machinePtr;
