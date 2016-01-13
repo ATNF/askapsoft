@@ -59,30 +59,6 @@ class CompositeStep;
 /// the details stored in StepID (which may change if new processing steps are added).
 class StepIDProxy {
 public:
-   /// @brief construct an unsliced object 
-   /// @details This variant of the constructor creates an object in the state 
-   /// prior to operator() call
-   /// @param[in] index index of the step to deal with (processing steps are stored in a vector)
-   /// @param[in] composite shared pointer to the CompositeStep containing the processing step 
-   /// described by this object. This is used to identify rank space with a particular composite as,
-   /// in principle, we could have a nested case. No access is done using this shared pointer inside 
-   /// this class. It can safely be empty, if the user wishes so. However, in the future we might 
-   /// extend the framework to more complex connections between independent composite steps. Then
-   /// the actual shared pointer should be important.
-   /// @param[in] singleRank single rank flag (true, if the step is single rank)
-   StepIDProxy(size_t index, const boost::shared_ptr<CompositeStep> &composite, bool singleRank);
-   
-   /// @brief construct a sliced object
-   /// @details This variant of the constructor creates an object in the state 
-   /// after the call to operator()
-   /// @param[in] index index of the step to deal with (processing steps are stored in a vector)
-   /// @param[in] composite shared pointer to the CompositeStep containing the processing step 
-   /// described by this object. This is used to identify rank space with a particular composite as,
-   /// in principle, we could have a nested case
-   /// @param[in] group group index passed to operator()
-   /// @param[in] element element index passed to operator()   
-   StepIDProxy(size_t index, const boost::shared_ptr<CompositeStep> &composite, unsigned int group, unsigned int element);
-
    /// @brief extract single rank slice
    /// @details The whole rank space can be represented as a 
    /// number of groups each containing a number of elements.
@@ -116,7 +92,37 @@ public:
    StepID process(const StepID &id) const;
       
 private:
+   // constructors are private as the user is not supposed to create these proxy objects explicitly
     
+   /// @brief construct an unsliced object 
+   /// @details This variant of the constructor creates an object in the state 
+   /// prior to operator() call
+   /// @param[in] index index of the step to deal with (processing steps are stored in a vector)
+   /// @param[in] composite shared pointer to the CompositeStep containing the processing step 
+   /// described by this object. This is used to identify rank space with a particular composite as,
+   /// in principle, we could have a nested case. No access is done using this shared pointer inside 
+   /// this class. It can safely be empty, if the user wishes so. However, in the future we might 
+   /// extend the framework to more complex connections between independent composite steps. Then
+   /// the actual shared pointer should be important.
+   /// @param[in] singleRank single rank flag (true, if the step is single rank)
+   StepIDProxy(size_t index, const boost::shared_ptr<CompositeStep> &composite, bool singleRank);
+   
+   /// @brief construct a sliced object
+   /// @details This variant of the constructor creates an object in the state 
+   /// after the call to operator()
+   /// @param[in] index index of the step to deal with (processing steps are stored in a vector)
+   /// @param[in] composite shared pointer to the CompositeStep containing the processing step 
+   /// described by this object. This is used to identify rank space with a particular composite as,
+   /// in principle, we could have a nested case
+   /// @param[in] group group index passed to operator()
+   /// @param[in] element element index passed to operator()   
+   StepIDProxy(size_t index, const boost::shared_ptr<CompositeStep> &composite, unsigned int group, unsigned int element);
+
+   // CompositeStep can create proxy objects via constructors defined above
+   friend CompositeStep;
+
+   // data members
+
    /// @brief index of the step to deal with (processing steps are stored in a vector)
    size_t itsIndex;
    
