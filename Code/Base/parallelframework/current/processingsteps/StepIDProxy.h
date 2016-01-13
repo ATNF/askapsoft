@@ -48,6 +48,7 @@ namespace askapparallel {
 
 // forward declaration
 class CompositeStep;
+class StepIDProxyTest;
 
 /// @brief Proxy class for an unfilled StepID object
 /// @details The framework sets up relations between different parallel steps
@@ -120,6 +121,8 @@ private:
 
    // CompositeStep can create proxy objects via constructors defined above
    friend CompositeStep;
+   // for unit-testing
+   friend StepIDProxyTest;
 
    // data members
 
