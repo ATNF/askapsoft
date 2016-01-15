@@ -91,7 +91,8 @@ explanations can be found on the `Duchamp Exclusions`_ page.
 +-----------------------+--------------+---------------------+----------------------------------------------------------------------------------------+
 |snrCut                 |float         |4.0                  |Threshold value, in multiples of the rms above the mean noise level                     |
 +-----------------------+--------------+---------------------+----------------------------------------------------------------------------------------+
-|threshold              |float         |*no default*         |Threshold value in units of the image (default value means snrCut will be used instead) |
+|threshold              |float         |*no default*         |Threshold value in units of the image (if not given, the signal-to-noise threshold given|
+|                       |              |                     |by **snrCut** will be used instead.)                                                    |
 +-----------------------+--------------+---------------------+----------------------------------------------------------------------------------------+
 |flagGrowth             |bool          |false                |Whether to grow detections to a lower threshold                                         |
 +-----------------------+--------------+---------------------+----------------------------------------------------------------------------------------+
