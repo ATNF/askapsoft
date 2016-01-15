@@ -134,15 +134,17 @@ They are given in [:doc:`data_selection`] and should also have the **Cbpcalibrat
 |                       |                |              |antenna has zero phase for all beams and all     |
 |                       |                |              |channels                                         |
 +-----------------------+----------------+--------------+-------------------------------------------------+
-|sources.definition     |string          |None          |Optional parameter. If defined, sky model (i.e.  |
-|                       |                |              |source info given as **sources.something**)      |
-|                       |                |              |is read from a separate parset file (name is     |
-|                       |                |              |given by this parameter). If this parameter is   |
-|                       |                |              |not defined, source description should be given  |
-|                       |                |              |in the main parset file. Usual substitution rules|
-|                       |                |              |apply. The parameters to define sky model are    |
-|                       |                |              |described in :doc:`csimulator`(with Cbpcalibrator|
-|                       |                |              |prefix instead of Csimulator)                    |
+|sources.definition     |string          |None          |Optional parameter. If defined, the sky model    |
+|                       |                |              |(i.e. source info given with                     |
+|                       |                |              |**sources.something** parameters) is read from a |
+|                       |                |              |separate parset file (name is given by this      |
+|                       |                |              |parameter). If this parameter is not defined,    |
+|                       |                |              |source description should be given in the main   |
+|                       |                |              |parset file. Usual substitution rules apply. The |
+|                       |                |              |parameters to define sky model are described in  |
+|                       |                |              |:doc:`csimulator` (with Cbpcalibrator prefix     |
+|                       |                |              |instead of Csimulator)                           |
+|                       |                |              |                                                 |
 +-----------------------+----------------+--------------+-------------------------------------------------+
 |gridder                |string          |None          |Name of the gridder, further parameters are given|
 |                       |                |              |by **gridder.something**. See :doc:`gridder` for |

@@ -71,15 +71,20 @@ They are given in [:doc:`data_selection`] and should also have the **Ccalibrator
 |                       |                |              |negative value, a single solution is made for the|
 |                       |                |              |whole dataset                                    |
 +-----------------------+----------------+--------------+-------------------------------------------------+
-|dataset                |string or       |None          |Data set file name to produce. Usual substitution|
-|                       |vector<string>  |              |rules apply if the parameter is a single         |
-|                       |                |              |string. If the parameter is given as a vector of |
-|                       |                |              |strings all measurement sets given by this vector|
-|                       |                |              |are effectively concatenated together on-the-fly |
-|                       |                |              |in the serial case. In the parallel case, the    |
-|                       |                |              |size of the vector is required to be either 1 or |
-|                       |                |              |the number of nodes - 1, and therefore there is  |
+|dataset                |string or       |None          |File name of the measurement set that is to be   |
+|                       |vector<string>  |              |calibrated. Ccalibrator will not write to the    |
+|                       |                |              |file - use **ccalapply** to apply calibration    |
+|                       |                |              |solutions.                                       |
+|                       |                |              |The usual substitution rules apply if            |
+|                       |                |              |the parameter is a single string. If the         |
+|                       |                |              |parameter is given as a vector of strings all    |
+|                       |                |              |measurement sets given by this vector are        |
+|                       |                |              |effectively concatenated together on-the-fly in  |
+|                       |                |              |the serial case. In the parallel case, the size  |
+|                       |                |              |of the vector is required to be either 1 or the  |
+|                       |                |              |number of nodes - 1, which which case there is   |
 |                       |                |              |one measurement set per worker node.             |
+|                       |                |              |                                                 |
 +-----------------------+----------------+--------------+-------------------------------------------------+
 |datacolumn             |string          |"DATA"        |The name of the data column in the measurement   |
 |                       |                |              |set which will be the source of visibilities.This|

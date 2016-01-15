@@ -1,5 +1,5 @@
-TCPSink     
-======
+TCPSink
+=======
 
 TCPSink task sends data via socket to vispublisher which further distributes a selection of data to user clients 
 such as vis and spd. Two-stage data distribution approach allows us to decouple of real time application such as
