@@ -30,6 +30,7 @@
 #include "askap_parallelframework.h"
 #include "StepIDTest.h"
 #include "StepIDProxyTest.h"
+#include "CompositeStepTest.h"
 
 int main(int argc, char *argv[])
 {
@@ -37,6 +38,7 @@ int main(int argc, char *argv[])
 
     runner.addTest(askap::askapparallel::StepIDTest::suite());
     runner.addTest(askap::askapparallel::StepIDProxyTest::suite());
+    runner.addTest(askap::askapparallel::CompositeStepTest::suite());
 
     bool wasSucessful = runner.run();
 

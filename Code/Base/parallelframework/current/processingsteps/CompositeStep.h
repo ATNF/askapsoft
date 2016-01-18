@@ -37,9 +37,14 @@
 #include "processingsteps/ProcessingStep.h"
 #include "processingsteps/StepID.h"
 #include "processingsteps/StepInfo.h"
+#include "processingsteps/StepIDProxy.h"
 
 // casa includes
 #include <casa/Arrays/IPosition.h>
+
+// boost includes
+#include <boost/shared_ptr.hpp>
+
 
 // std includes
 #include <string>
@@ -49,6 +54,9 @@ namespace askap {
 
 namespace askapparallel {
 
+// forward declaration for unit testing
+class CompositeStepTest;
+
 /// @brief Composite processing step
 /// @details This is a composite constructed with a number of processing steps
 /// executed in parallel. Individual jobs are represented by objects implementing
@@ -57,6 +65,10 @@ class CompositeStep : public ProcessingStep,
                       virtual public IProcessingStep
 {
 public:
+   // flag to use all ranks available for the given processing step
+   enum {
+       USE_ALL_AVAILABLE = -1
+   };
 	
    /// @brief an empty constructor to create unnamed composite object
    /// @details  Upon creation, no parallel jobs are associated with this composite. 
@@ -68,10 +80,83 @@ public:
    /// So if used before any add methods are called, it would effectively be an empty operation.
    /// @param[in] name name to assign
    explicit CompositeStep(const std::string &name);
+
+   // methods to add substeps
+
+
+   /// @brief add a substep without an associated iterator
+   /// @details This method adds a given number of copies (by default to fill all the rank space) of the 
+   /// given substep allocating a group of nRanks ranks for each one
+   /// @param[in] substep shared pointer to the processing step to run
+   /// @param[in] nRanks number of ranks in the group to allocate for the given processing step. Default is 1, but
+   ///            multirank processing steps are allowed (e.g. MFS working with Taylor terms in parallel)
+   /// @param[in] count number of processing steps to instantiate (in parallel). By default, instantiate as many as
+   ///            one could fit in the available rank space
+   /// @return proxy object for the given processing step or steps. This is used to setup connections between 
+   /// steps via communicators. For multi-rank steps "local" communicator is created automatically.
+   StepIDProxy addSubStep(const boost::shared_ptr<IProcessingStep> &substep, int nRanks = 1, int count = USE_ALL_AVAILABLE);
+
+   /// @brief add a substep with an associated iterator
+   /// @details This method adds a given number of copies (by default to fill all the rank space) of the 
+   /// given substep allocating a group of nRanks ranks for each one
+   /// @param[in] substep shared pointer to the processing step to run
+   /// @param[in] shape dimensions for the associated iterator to traverse. If more than one rank allocated 
+   ///                  (see count parameter), the iteration is split between available ranks. However, groups
+   ///                  of nRanks ranks will receive the same iteration subspace.
+   /// @param[in] nRanks number of ranks in the group to allocate for the given processing step. Default is 1, but
+   ///            multirank processing steps are allowed (e.g. MFS working with Taylor terms in parallel)
+   /// @param[in] count number of processing steps to instantiate (in parallel). By default, instantiate as many as
+   ///            one could fit in the available rank space
+   /// @return proxy object for the given processing step or steps. This is used to setup connections between 
+   /// steps via communicators. For multi-rank steps "local" communicator is created automatically.
+   StepIDProxy addSubStep(const boost::shared_ptr<IProcessingStep> &substep, const casa::IPosition &shape, 
+                   int nRanks = 1, int count = USE_ALL_AVAILABLE);
+
+   // optional communicators - calls to these methods just register the request, actual communicators
+   // are created when execution starts
+  
+   /// @brief set up communicator between same element of all groups
+   /// @details A call to this method enables creation of a custom communicator between the same
+   /// element of all groups (i.e. 0th element of group 0, 1,... nGroup-1 if accessed from  
+   /// rank which belongs to  the 0th element of any group). This is handy for collective operations, e.g.
+   /// those used to add visibilities together in the MFS case. By default, the communicator is created
+   /// for all elements. However, it is possible to restrict operation to only chosen element. In this case,
+   /// the call will result in no operation for the ranks which do not correspond to the chosen element
+   /// @param[in] name chosen name for the communicator. Note, global and local are reserved names.
+   /// @param[in] step proxy for the child processing step to create the communicator for
+   /// @param[in] element chosen element to create the communicator for. By default (negative value), 
+   /// communicator between the same elements of all groups is created for all elements, but it is possible
+   /// to restrict the operation to only chosen element.
+   void createInterGroupCommunicator(const std::string &name, const StepIDProxy &step, int element = USE_ALL_AVAILABLE);
+
+   /// @brief set up custom communicator
+   /// @details A call to this method enables creation of a custom communicator between ranks listed
+   /// explicitly. Unsliced step ID proxy class covers all groups and elements together.
+   /// @param[in] name chosen name for the communicator. Note, global and local are reserved names.
+   /// @param[in] steps vector of ID proxies to create the communicator for
+   void createCommunicator(const std::string &name, const std::vector<StepIDProxy> &steps);
+
+protected:
+
+   /// @brief reserve part of rank space
+   /// @details This call reserves some part of rank space (exact allocation is only known after initialisation)
+   /// and returns an instance of StepID describing that rank space
+   /// @param[in] nRanks number of ranks in the group to allocate for the given processing step. Default is 1, but
+   ///            multirank processing steps are allowed (e.g. MFS working with Taylor terms in parallel)
+   /// @param[in] count number of processing steps to instantiate (in parallel). By default, instantiate as many as
+   ///            one could fit in the available rank space
+   /// @return an instance of StepID describing the allocation
+   /// @note this method may change StepID details already stored in itsSteps
+   StepID reserveRankSpace(int nRanks = 1, int count = USE_ALL_AVAILABLE);
+  
+
 private:
   
    /// @brief details for individual child steps
    std::vector<StepInfo> itsSteps;   
+
+friend CompositeStepTest;
+
 };
 
 } // namespace askapparallel
