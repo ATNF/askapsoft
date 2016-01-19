@@ -92,9 +92,6 @@ public:
    /// @return sliced or original StepID
    StepID process(const StepID &id) const;
       
-private:
-   // constructors are private as the user is not supposed to create these proxy objects explicitly
-    
    /// @brief construct an unsliced object 
    /// @details This variant of the constructor creates an object in the state 
    /// prior to operator() call
@@ -119,8 +116,11 @@ private:
    /// @param[in] element element index passed to operator()   
    StepIDProxy(size_t index, const boost::shared_ptr<CompositeStep> &composite, unsigned int group, unsigned int element);
 
-   // CompositeStep can create proxy objects via constructors defined above
-   friend CompositeStep;
+   /// @brief default constructor
+   /// @details needed to store this proxy object in containers
+   StepIDProxy();
+ 
+private:
    // for unit-testing
    friend StepIDProxyTest;
 

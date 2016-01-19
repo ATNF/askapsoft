@@ -33,9 +33,12 @@
 /// @author Max Voronkov <maxim.voronkov@csiro.au>
 ///
 // own includes
+
 #include "processingsteps/StepIDProxy.h"
 #include "processingsteps/CompositeStep.h"
 
+// ASKAP includes
+#include "askap/AskapError.h"
 
 namespace askap {
 
@@ -73,6 +76,12 @@ StepIDProxy::StepIDProxy(size_t index, const boost::shared_ptr<CompositeStep> &c
 {
 }     
 
+/// @brief default constructor
+/// @details needed to store this proxy object in containers
+StepIDProxy::StepIDProxy() : itsIndex(0u), itsSingleRank(true), itsHasBeenSliced(false) 
+{
+}
+
 /// @brief extract single rank slice
 /// @details The whole rank space can be represented as a 
 /// number of groups each containing a number of elements.
@@ -83,6 +92,7 @@ StepIDProxy::StepIDProxy(size_t index, const boost::shared_ptr<CompositeStep> &c
 /// @return object describing single rank slice
 StepIDProxy StepIDProxy::operator()(unsigned int group, unsigned int element) const
 {
+  ASKAPASSERT(itsComposite);
   return StepIDProxy(itsIndex, itsComposite, group, element);
 }
    
@@ -90,6 +100,7 @@ StepIDProxy StepIDProxy::operator()(unsigned int group, unsigned int element) co
 /// @return true, if this object represents a single rank slice
 bool StepIDProxy::isSingleRank() const
 {
+  ASKAPASSERT(itsComposite);
   return itsSingleRank;
 }
    
@@ -97,6 +108,7 @@ bool StepIDProxy::isSingleRank() const
 /// @return index of the step
 size_t StepIDProxy::index() const
 {
+  ASKAPASSERT(itsComposite);
   return itsIndex;
 }
    
@@ -117,10 +129,11 @@ const boost::shared_ptr<CompositeStep>& StepIDProxy::composite() const
 /// @return sliced or original StepID
 StepID StepIDProxy::process(const StepID &id) const
 {
-   if (itsHasBeenSliced) {
-       return id(itsGroup, itsElement);
-   }
-   return id;
+  ASKAPASSERT(itsComposite);
+  if (itsHasBeenSliced) {
+      return id(itsGroup, itsElement);
+  }
+  return id;
 }
 
 

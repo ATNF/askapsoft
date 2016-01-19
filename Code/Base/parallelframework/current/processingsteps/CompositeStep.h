@@ -49,6 +49,7 @@
 // std includes
 #include <string>
 #include <vector>
+#include <map>
 
 namespace askap {
 
@@ -136,6 +137,16 @@ public:
    /// @param[in] steps vector of ID proxies to create the communicator for
    void createCommunicator(const std::string &name, const std::vector<StepIDProxy> &steps);
 
+   // optional rank tagging for point to point communication (as opposed to collective operations 
+   // via custom communicators). It may be required for some collective operations too.
+
+   /// @brief associate rank with name
+   /// @details A call to this method tags a chosen single rank (either a single rank step or 
+   /// a single rank selected out of a multi-rank processing step). 
+   /// @param[in] name chosen name for the rank to be tagged.
+   /// @param[in] step processing step ID proxy to tag, it should correspond to single rank.
+   void tagRank(const std::string &name, const StepIDProxy &step);
+   
 protected:
 
    /// @brief reserve part of rank space
@@ -154,6 +165,11 @@ private:
   
    /// @brief details for individual child steps
    std::vector<StepInfo> itsSteps;   
+
+   /// @brief rank tags
+   /// @details Actual ranks are only known at run time (not at setup). This map
+   /// stores all rank tags to create in the initialise method.
+   std::map<std::string, StepIDProxy> itsTaggedRanks;
 
 friend CompositeStepTest;
 

@@ -71,14 +71,15 @@ void StepIDProxyTest::testConstruction()
    
    StepIDProxy proxy3(5u, boost::shared_ptr<CompositeStep>(), true);
    CPPUNIT_ASSERT(!proxy3.composite());
-   CPPUNIT_ASSERT_EQUAL(size_t(5u), proxy3.index());
-   CPPUNIT_ASSERT(proxy3.isSingleRank());      
+   // access to any methods would've raised an exception because we passed
+   // null pointer to the composite
 }
 
 void StepIDProxyTest::testProcess()
 {
-   StepIDProxy proxy1(0u, boost::shared_ptr<CompositeStep>(), false);
-   CPPUNIT_ASSERT(!proxy1.composite());
+   boost::shared_ptr<CompositeStep> csPtr(new CompositeStep);
+   StepIDProxy proxy1(0u, csPtr, false);
+   CPPUNIT_ASSERT(proxy1.composite());
    CPPUNIT_ASSERT_EQUAL(size_t(0u), proxy1.index());
 
    StepID mrGroup(0,5,2);
@@ -88,8 +89,8 @@ void StepIDProxyTest::testProcess()
    CPPUNIT_ASSERT_EQUAL(5, test1.last());
    CPPUNIT_ASSERT_EQUAL(2u, test1.nRanks());
 
-   StepIDProxy proxy2(0u, boost::shared_ptr<CompositeStep>(), 2, 1);
-   CPPUNIT_ASSERT(!proxy2.composite());
+   StepIDProxy proxy2(0u, csPtr, 2, 1);
+   CPPUNIT_ASSERT(proxy2.composite());
    CPPUNIT_ASSERT_EQUAL(size_t(0u), proxy2.index());
 
    const StepID test2 = proxy2.process(mrGroup);
@@ -99,7 +100,7 @@ void StepIDProxyTest::testProcess()
    CPPUNIT_ASSERT_EQUAL(1u, test2.nRanks());
    
    StepIDProxy proxy3 = proxy1(2, 1);
-   CPPUNIT_ASSERT(!proxy3.composite());
+   CPPUNIT_ASSERT(proxy3.composite());
    CPPUNIT_ASSERT_EQUAL(size_t(0u), proxy3.index());
    CPPUNIT_ASSERT(proxy3.isSingleRank());
    

@@ -195,6 +195,22 @@ StepID CompositeStep::reserveRankSpace(int nRanks, int count)
   return StepID(firstAvailableRank, firstAvailableRank + count * nRanks - 1, nRanks);
 }
 
+/// @brief associate rank with name
+/// @details A call to this method tags a chosen single rank (either a single rank step or 
+/// a single rank selected out of a multi-rank processing step). 
+/// @param[in] name chosen name for the rank to be tagged.
+/// @param[in] step processing step ID proxy to tag, it should correspond to single rank.
+void CompositeStep::tagRank(const std::string &name, const StepIDProxy &step)
+{
+  ASKAPCHECK(step.isSingleRank(), "Tagging "<<name<<
+             ": CompositeStep::tagRank cannot be used with multi-rank processing steps");
+  ASKAPCHECK(itsTaggedRanks.find(name) == itsTaggedRanks.end(), "There is already a rank tagged as "<<name<<
+             ", name tags should be unique");
+  itsTaggedRanks[name] = step;
+}
+  
+   
+
 } // namespace askapparallel
 
 } // namespace askap

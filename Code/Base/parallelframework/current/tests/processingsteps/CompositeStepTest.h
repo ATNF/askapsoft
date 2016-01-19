@@ -33,6 +33,7 @@
 
 #include "processingsteps/CompositeStep.h"
 #include <askap/AskapError.h>
+#include <askap/AskapUtil.h>
 
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -46,11 +47,15 @@ class CompositeStepTest : public CppUnit::TestFixture
    CPPUNIT_TEST(testAddSubStep);
    CPPUNIT_TEST(testAddSubStepFlexMultiRank);
    CPPUNIT_TEST_EXCEPTION(testAddSubStepTwoFlex, AskapError);
+   CPPUNIT_TEST_EXCEPTION(testTagMultiRank, AskapError);
+   CPPUNIT_TEST(testTagRank);
    CPPUNIT_TEST_SUITE_END();
 public:
    void testAddSubStep();   
    void testAddSubStepFlexMultiRank();   
    void testAddSubStepTwoFlex();   
+   void testTagMultiRank();
+   void testTagRank();
 };
 
 void CompositeStepTest::testAddSubStep() {
@@ -151,6 +156,53 @@ void CompositeStepTest::testAddSubStepTwoFlex() {
    // attempting to have another flexible allocation - this should
    // throw an exception
    cs.addSubStep(ps, 1);
+}
+
+void CompositeStepTest::testTagMultiRank() {
+   CompositeStep cs;
+   // empty processing step to add to the composite
+   boost::shared_ptr<ProcessingStep> ps(new ProcessingStep);
+   CPPUNIT_ASSERT(ps);
+   
+   // add a substep with multi-rank groups, flexible allocation (although it doesn't matter)
+   const StepIDProxy idp = cs.addSubStep(ps, 10);
+   CPPUNIT_ASSERT_EQUAL(size_t(1u), cs.itsSteps.size());
+   CPPUNIT_ASSERT_EQUAL(0, cs.itsSteps[0].id().first());
+   CPPUNIT_ASSERT_EQUAL(-1, cs.itsSteps[0].id().last());
+   CPPUNIT_ASSERT_EQUAL(10u, cs.itsSteps[0].id().nRanks());
+
+   CPPUNIT_ASSERT(!idp.isSingleRank());
+
+   // the following should throw an exception as we attempt to
+   // tag a multi-rank processing step
+   cs.tagRank("flex", idp);
+};
+
+void CompositeStepTest::testTagRank() {
+   CompositeStep cs;
+   // empty processing step to add to the composite
+   boost::shared_ptr<ProcessingStep> ps(new ProcessingStep);
+   CPPUNIT_ASSERT(ps);
+   
+   // add a step, flexible allocation
+   const StepIDProxy idp = cs.addSubStep(ps, 5);
+   CPPUNIT_ASSERT_EQUAL(size_t(1u), cs.itsSteps.size());
+   CPPUNIT_ASSERT_EQUAL(0, cs.itsSteps[0].id().first());
+   CPPUNIT_ASSERT_EQUAL(-1, cs.itsSteps[0].id().last());
+   CPPUNIT_ASSERT_EQUAL(5u, cs.itsSteps[0].id().nRanks());
+   
+   CPPUNIT_ASSERT(!idp.isSingleRank());
+   // take a slice - second group, first element
+   const StepIDProxy idpSliced = idp(2, 1);
+   CPPUNIT_ASSERT(idpSliced.isSingleRank());
+
+   CPPUNIT_ASSERT(cs.itsTaggedRanks.begin() == cs.itsTaggedRanks.end());
+   cs.tagRank("example", idpSliced);
+   const std::map<std::string, StepIDProxy>::const_iterator ci = cs.itsTaggedRanks.find("example");
+   CPPUNIT_ASSERT(ci != cs.itsTaggedRanks.end());
+   CPPUNIT_ASSERT(ci->second.isSingleRank());
+   CPPUNIT_ASSERT(boost::shared_ptr<CompositeStep>(&cs, utility::NullDeleter()) == ci->second.composite());
+   CPPUNIT_ASSERT_EQUAL(size_t(0u), ci->second.index());
 }
 
 } // end of namespace askapparallel
