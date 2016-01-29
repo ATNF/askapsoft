@@ -174,7 +174,7 @@ void VOTableAccessor::initFieldInfo(const std::vector<askap::accessors::VOTableF
         key = FLUX;
         if ((hasUCD(field, "phot.flux.density") || hasUCD(field, "phot.flux.density.integrated")) &&
             !hasUCD(field, "meta.id.parent")){
-            if (posMap.find(key) == posMap.end() || hasUCD(field, "phot.flux.density.integrated")) {
+            if (posMap.find(key) == posMap.end() || hasUCD(field, "phot.flux.density.integrated") || field.getName()=="flux_int") {
                 posMap[key] = i;
                 unitMap[key] = Unit(field.getUnit());
                 continue;
