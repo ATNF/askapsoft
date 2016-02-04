@@ -91,6 +91,7 @@ namespace askap
         itsCoordSys[*iterRow]=casa::CoordinateSystem();
         itsNormalMatrixSlice[*iterRow]=casa::Vector<double>(0);
         itsNormalMatrixDiagonal[*iterRow]=casa::Vector<double>(0);
+        itsPreconditionerSlice[*iterRow]=casa::Vector<double>(0);
       }
     }
 
@@ -106,6 +107,7 @@ namespace askap
     {
       deepCopyOfSTDMap(src.itsNormalMatrixSlice, itsNormalMatrixSlice);
       deepCopyOfSTDMap(src.itsNormalMatrixDiagonal, itsNormalMatrixDiagonal);
+      deepCopyOfSTDMap(src.itsPreconditionerSlice, itsPreconditionerSlice);
       deepCopyOfSTDMap(src.itsDataVector, itsDataVector);      
     }
     
@@ -123,6 +125,7 @@ namespace askap
         itsCoordSys = src.itsCoordSys;
         deepCopyOfSTDMap(src.itsNormalMatrixSlice, itsNormalMatrixSlice);
         deepCopyOfSTDMap(src.itsNormalMatrixDiagonal, itsNormalMatrixDiagonal);
+        deepCopyOfSTDMap(src.itsPreconditionerSlice, itsPreconditionerSlice);
         deepCopyOfSTDMap(src.itsDataVector, itsDataVector);      
       }
       return *this;
@@ -281,6 +284,21 @@ namespace askap
             {
               itsNormalMatrixDiagonal[*iterCol] += other.itsNormalMatrixDiagonal.find(*iterCol)->second;
             }       
+            // check PreconditionerSlice
+            ASKAPDEBUGASSERT(other.itsPreconditionerSlice.find(*iterCol) != other.itsPreconditionerSlice.end());
+            if(itsPreconditionerSlice[*iterCol].shape()==0)
+            {
+              itsPreconditionerSlice[*iterCol].assign(other.itsPreconditionerSlice.find(*iterCol)->second);
+            }
+            else if(itsPreconditionerSlice[*iterCol].shape() !=
+                    other.itsPreconditionerSlice.find(*iterCol)->second.shape())
+            {
+              itsPreconditionerSlice[*iterCol].assign(other.itsPreconditionerSlice.find(*iterCol)->second);
+            }
+            else
+            {
+              itsPreconditionerSlice[*iterCol] += other.itsPreconditionerSlice.find(*iterCol)->second;
+            }
           }     
         }     
       }
@@ -346,6 +364,7 @@ namespace askap
 
     }
 
+    // normalMatrixDiagonal
     const casa::Vector<double>& ImagingNormalEquations::normalMatrixDiagonal(const std::string &par) const
     {
       std::map<string, casa::Vector<double> >::const_iterator cIt = 
@@ -359,6 +378,7 @@ namespace askap
       return itsNormalMatrixDiagonal;
     }
 
+    // normalMatrixSlice
     const casa::Vector<double>& ImagingNormalEquations::normalMatrixSlice(const std::string &par) const
     {
       std::map<string, casa::Vector<double> >::const_iterator cIt = 
@@ -370,6 +390,20 @@ namespace askap
     const std::map<string, casa::Vector<double> >& ImagingNormalEquations::normalMatrixSlice() const
     {
       return itsNormalMatrixSlice;
+    }
+
+    // preconditionerSlice
+    const casa::Vector<double>& ImagingNormalEquations::preconditionerSlice(const std::string &par) const
+    {
+      std::map<string, casa::Vector<double> >::const_iterator cIt = 
+                                        itsPreconditionerSlice.find(par);
+      ASKAPASSERT(cIt != itsPreconditionerSlice.end());                                  
+      return cIt->second;
+    }
+
+    const std::map<string, casa::Vector<double> >& ImagingNormalEquations::preconditionerSlice() const
+    {
+      return itsPreconditionerSlice;
     }
  
 /// @brief normal equations for given parameters
@@ -450,12 +484,15 @@ const std::map<std::string, casa::Vector<double> >& ImagingNormalEquations::data
         itsNormalMatrixSlice[iterRow->first]=casa::Vector<double>(0);
         itsNormalMatrixDiagonal[iterRow->first].resize();
         itsNormalMatrixDiagonal[iterRow->first]=casa::Vector<double>(0);
+        itsPreconditionerSlice[iterRow->first].resize();
+        itsPreconditionerSlice[iterRow->first]=casa::Vector<double>(0);
       }
     }
 
     void ImagingNormalEquations::addSlice(const string& name,
       const casa::Vector<double>& normalmatrixslice,
       const casa::Vector<double>& normalmatrixdiagonal,
+      const casa::Vector<double>& preconditionerslice,
       const casa::Vector<double>& datavector,
       const casa::IPosition& shape,
       const casa::IPosition& reference,
@@ -493,11 +530,20 @@ const std::map<std::string, casa::Vector<double> >& ImagingNormalEquations::data
       }
       if(normalmatrixslice.shape()!=itsNormalMatrixSlice[name].shape()) 
       { 
-         itsNormalMatrixSlice[name]=normalmatrixslice; 
+        itsNormalMatrixSlice[name]=normalmatrixslice; 
       } 
       else 
       { 
-         itsNormalMatrixSlice[name]+=normalmatrixslice; 
+        itsNormalMatrixSlice[name]+=normalmatrixslice; 
+      }
+      if(preconditionerslice.shape()!=itsPreconditionerSlice[name].shape()) 
+      { 
+        ASKAPDEBUGASSERT(itsPreconditionerSlice[name].size() == 0);
+        itsPreconditionerSlice[name]=preconditionerslice; 
+      } 
+      else 
+      { 
+        itsPreconditionerSlice[name]+=preconditionerslice; 
       }
       itsShape[name].resize(0);
       itsShape[name]=shape;
@@ -523,11 +569,12 @@ const std::map<std::string, casa::Vector<double> >& ImagingNormalEquations::data
     void ImagingNormalEquations::addSlice(const string& name,
                     const casa::Vector<double>& normalmatrixslice,
                     const casa::Vector<double>& normalmatrixdiagonal,
+                    const casa::Vector<double>& preconditionerslice,
                     const casa::Vector<double>& datavector,
                     const casa::IPosition& reference)
     {
-      addSlice(name,normalmatrixslice,normalmatrixdiagonal,datavector,
-               casa::IPosition(1, datavector.nelements()), reference);
+      addSlice(name,normalmatrixslice,normalmatrixdiagonal,preconditionerslice,
+               datavector,casa::IPosition(1,datavector.nelements()),reference);
     }
 
     void ImagingNormalEquations::addDiagonal(const string& name, const casa::Vector<double>& normalmatrixdiagonal,
@@ -573,7 +620,8 @@ const std::map<std::string, casa::Vector<double> >& ImagingNormalEquations::data
     /// @param[in] os the output stream
     void ImagingNormalEquations::writeToBlob(LOFAR::BlobOStream& os) const
     {
-      os << itsNormalMatrixSlice << itsNormalMatrixDiagonal << itsShape
+      os << itsNormalMatrixSlice << itsNormalMatrixDiagonal
+         << itsPreconditionerSlice << itsShape
          << itsReference << itsCoordSys << itsDataVector; 
     }
     
@@ -582,7 +630,8 @@ const std::map<std::string, casa::Vector<double> >& ImagingNormalEquations::data
     /// @note Not sure whether the parameter should be made const or not 
     void ImagingNormalEquations::readFromBlob(LOFAR::BlobIStream& is) 
     {
-      is >> itsNormalMatrixSlice >> itsNormalMatrixDiagonal >> itsShape
+      is >> itsNormalMatrixSlice >> itsNormalMatrixDiagonal
+         >> itsPreconditionerSlice >> itsShape
          >> itsReference >> itsCoordSys >> itsDataVector;
     }
     

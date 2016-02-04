@@ -107,16 +107,18 @@ namespace askap
           testCopy();
           CPPUNIT_ASSERT(p2);
           p2->addSlice("Value1", casa::Vector<double>(5,0.1), 
-                  casa::Vector<double>(5, 1.), casa::Vector<double>(5,-40.),
-                  casa::IPosition(1,0));
+                  casa::Vector<double>(5, 1.), casa::Vector<double>(5,0.5),
+                  casa::Vector<double>(5,-40.), casa::IPosition(1,0));
           testAllElements(extractVector(p2->normalMatrixDiagonal(), "Value1"),5,1.);
           testAllElements(extractVector(p2->normalMatrixSlice(), "Value1"),5,0.1);
+          testAllElements(extractVector(p2->preconditionerSlice(), "Value1"),5,0.5);
           testAllElements(extractVector(p2->dataVector(), "Value1"),5,-40.);
           testAllElements(p2->dataVector("Value1"),5,-40.);
           
           p2->addDiagonal("Value2", casa::Vector<double>(3, 1.), casa::Vector<double>(3, 10.));
           testAllElements(extractVector(p2->normalMatrixDiagonal(), "Value2"),3,1.);
           testAllElements(extractVector(p2->normalMatrixSlice(), "Value2"),0,0.);
+          testAllElements(extractVector(p2->preconditionerSlice(), "Value2"),0,0.);
           testAllElements(extractVector(p2->dataVector(), "Value2"),3,10.);
           testAllElements(p2->dataVector("Value2"),3,10.);
           
@@ -137,46 +139,54 @@ namespace askap
           // test that values are as expected after testFillMatrix
           testAllElements(extractVector(p2->normalMatrixDiagonal(), "Value1"),5,1.);
           testAllElements(extractVector(p2->normalMatrixSlice(), "Value1"),5,0.1);
+          testAllElements(extractVector(p2->preconditionerSlice(), "Value1"),5,0.5);
           testAllElements(extractVector(p2->dataVector(), "Value1"),5,-40.);
           testAllElements(p2->dataVector("Value1"),5,-40.);
           testAllElements(extractVector(p2->normalMatrixDiagonal(), "Value2"),3,1.);
           testAllElements(extractVector(p2->normalMatrixSlice(), "Value2"),0,0.);
+          testAllElements(extractVector(p2->preconditionerSlice(), "Value2"),0,0.);
           testAllElements(extractVector(p2->dataVector(), "Value2"),3,10.);
           testAllElements(p2->dataVector("Value2"),3,10.);
 
           // test that copy worked
           testAllElements(extractVector(p3->normalMatrixDiagonal(), "Value1"),5,1.);
           testAllElements(extractVector(p3->normalMatrixSlice(), "Value1"),5,0.1);
+          testAllElements(extractVector(p3->preconditionerSlice(), "Value1"),5,0.5);
           testAllElements(extractVector(p3->dataVector(), "Value1"),5,-40.);
           testAllElements(p3->dataVector("Value1"),5,-40.);
           testAllElements(extractVector(p3->normalMatrixDiagonal(), "Value2"),3,1.);
           testAllElements(extractVector(p3->normalMatrixSlice(), "Value2"),0,0.);
+          testAllElements(extractVector(p3->preconditionerSlice(), "Value2"),0,0.);
           testAllElements(extractVector(p3->dataVector(), "Value2"),3,10.);
           testAllElements(p3->dataVector("Value2"),3,10.);
           
           // change original values
           p2->addSlice("Value1", casa::Vector<double>(5,0.1), 
-                  casa::Vector<double>(5, 1.), casa::Vector<double>(5,-40.),
-                  casa::IPosition(1,0));
+                  casa::Vector<double>(5, 1.), casa::Vector<double>(5,0.5),
+                  casa::Vector<double>(5,-40.), casa::IPosition(1,0));
           p2->addDiagonal("Value2", casa::Vector<double>(3, 1.), casa::Vector<double>(3, 10.));
           
           // test that they were indeed changed
           testAllElements(extractVector(p2->normalMatrixDiagonal(), "Value1"),5,2.);
           testAllElements(extractVector(p2->normalMatrixSlice(), "Value1"),5,0.2);
+          testAllElements(extractVector(p2->preconditionerSlice(), "Value1"),5,1.0);
           testAllElements(extractVector(p2->dataVector(), "Value1"),5,-80.);
           testAllElements(p2->dataVector("Value1"),5,-80.);
           testAllElements(extractVector(p2->normalMatrixDiagonal(), "Value2"),3,2.);
           testAllElements(extractVector(p2->normalMatrixSlice(), "Value2"),0,0.);
+          testAllElements(extractVector(p2->preconditionerSlice(), "Value2"),0,0.);
           testAllElements(extractVector(p2->dataVector(), "Value2"),3,20.);
           testAllElements(p2->dataVector("Value2"),3,20.);
           
           // test that the cloned equations have the old values
           testAllElements(extractVector(p3->normalMatrixDiagonal(), "Value1"),5,1.);
           testAllElements(extractVector(p3->normalMatrixSlice(), "Value1"),5,0.1);
+          testAllElements(extractVector(p3->preconditionerSlice(), "Value1"),5,0.5);
           testAllElements(extractVector(p3->dataVector(), "Value1"),5,-40.);
           testAllElements(p3->dataVector("Value1"),5,-40.);
           testAllElements(extractVector(p3->normalMatrixDiagonal(), "Value2"),3,1.);
           testAllElements(extractVector(p3->normalMatrixSlice(), "Value2"),0,0.);
+          testAllElements(extractVector(p3->preconditionerSlice(), "Value2"),0,0.);
           testAllElements(extractVector(p3->dataVector(), "Value2"),3,10.);
           testAllElements(p3->dataVector("Value2"),3,10.);          
         }
@@ -192,46 +202,54 @@ namespace askap
           // test that values are as expected after testFillMatrix
           testAllElements(extractVector(p2->normalMatrixDiagonal(), "Value1"),5,1.);
           testAllElements(extractVector(p2->normalMatrixSlice(), "Value1"),5,0.1);
+          testAllElements(extractVector(p2->preconditionerSlice(), "Value1"),5,0.5);
           testAllElements(extractVector(p2->dataVector(), "Value1"),5,-40.);
           testAllElements(p2->dataVector("Value1"),5,-40.);
           testAllElements(extractVector(p2->normalMatrixDiagonal(), "Value2"),3,1.);
           testAllElements(extractVector(p2->normalMatrixSlice(), "Value2"),0,0.);
+          testAllElements(extractVector(p2->preconditionerSlice(), "Value2"),0,0.);
           testAllElements(extractVector(p2->dataVector(), "Value2"),3,10.);
           testAllElements(p2->dataVector("Value2"),3,10.);
 
           // test that copy worked
           testAllElements(extractVector(p3->normalMatrixDiagonal(), "Value1"),5,1.);
           testAllElements(extractVector(p3->normalMatrixSlice(), "Value1"),5,0.1);
+          testAllElements(extractVector(p3->preconditionerSlice(), "Value1"),5,0.5);
           testAllElements(extractVector(p3->dataVector(), "Value1"),5,-40.);
           testAllElements(p3->dataVector("Value1"),5,-40.);
           testAllElements(extractVector(p3->normalMatrixDiagonal(), "Value2"),3,1.);
           testAllElements(extractVector(p3->normalMatrixSlice(), "Value2"),0,0.);
+          testAllElements(extractVector(p3->preconditionerSlice(), "Value2"),0,0.);
           testAllElements(extractVector(p3->dataVector(), "Value2"),3,10.);
           testAllElements(p3->dataVector("Value2"),3,10.);
           
           // change original values
           p2->addSlice("Value1", casa::Vector<double>(5,0.1), 
-                  casa::Vector<double>(5, 1.), casa::Vector<double>(5,-40.),
-                  casa::IPosition(1,0));
+                  casa::Vector<double>(5, 1.), casa::Vector<double>(5,0.5),
+                  casa::Vector<double>(5,-40.), casa::IPosition(1,0));
           p2->addDiagonal("Value2", casa::Vector<double>(3, 1.), casa::Vector<double>(3, 10.));
           
           // test that they were indeed changed
           testAllElements(extractVector(p2->normalMatrixDiagonal(), "Value1"),5,2.);
           testAllElements(extractVector(p2->normalMatrixSlice(), "Value1"),5,0.2);
+          testAllElements(extractVector(p2->preconditionerSlice(), "Value1"),5,1.0);
           testAllElements(extractVector(p2->dataVector(), "Value1"),5,-80.);
           testAllElements(p2->dataVector("Value1"),5,-80.);
           testAllElements(extractVector(p2->normalMatrixDiagonal(), "Value2"),3,2.);
           testAllElements(extractVector(p2->normalMatrixSlice(), "Value2"),0,0.);
+          testAllElements(extractVector(p2->preconditionerSlice(), "Value2"),0,0.);
           testAllElements(extractVector(p2->dataVector(), "Value2"),3,20.);
           testAllElements(p2->dataVector("Value2"),3,20.);
           
           // test that the cloned equations have the old values
           testAllElements(extractVector(p3->normalMatrixDiagonal(), "Value1"),5,1.);
           testAllElements(extractVector(p3->normalMatrixSlice(), "Value1"),5,0.1);
+          testAllElements(extractVector(p3->preconditionerSlice(), "Value1"),5,0.5);
           testAllElements(extractVector(p3->dataVector(), "Value1"),5,-40.);
           testAllElements(p3->dataVector("Value1"),5,-40.);
           testAllElements(extractVector(p3->normalMatrixDiagonal(), "Value2"),3,1.);
           testAllElements(extractVector(p3->normalMatrixSlice(), "Value2"),0,0.);
+          testAllElements(extractVector(p3->preconditionerSlice(), "Value2"),0,0.);
           testAllElements(extractVector(p3->dataVector(), "Value2"),3,10.);
           testAllElements(p3->dataVector("Value2"),3,10.);          
         }
@@ -250,16 +268,19 @@ namespace askap
           CPPUNIT_ASSERT(std::find(params.begin(),params.end(),"Value2") != params.end());                    
           testAllElements(extractVector(p3->normalMatrixDiagonal(), "Value1"),5,1.);
           testAllElements(extractVector(p3->normalMatrixSlice(), "Value1"),5,0.1);
+          testAllElements(extractVector(p3->preconditionerSlice(), "Value1"),5,0.5);
           testAllElements(p3->dataVector("Value1"),5,-40.);          
 
           CPPUNIT_ASSERT(pempty);
           p3->merge(*pempty);
           testAllElements(extractVector(p3->normalMatrixDiagonal(), "Value1"),5,1.);
           testAllElements(extractVector(p3->normalMatrixSlice(), "Value1"),5,0.1);
+          testAllElements(extractVector(p3->preconditionerSlice(), "Value1"),5,0.5);
           testAllElements(p3->dataVector("Value1"),5,-40.);
           
           testAllElements(extractVector(p3->normalMatrixDiagonal(), "Value2"),3,1.);
           testAllElements(extractVector(p3->normalMatrixSlice(), "Value2"),0,0.);
+          testAllElements(extractVector(p3->preconditionerSlice(), "Value2"),0,0.);
           testAllElements(p3->dataVector("Value2"),3,10.);
                                    
           Params ip;
@@ -268,8 +289,8 @@ namespace askap
           p1.reset(new ImagingNormalEquations(ip));
           CPPUNIT_ASSERT(p1);
           p1->addSlice("Value1", casa::Vector<double>(5,0.), 
-                  casa::Vector<double>(5, 1.), casa::Vector<double>(5,10.),
-                  casa::IPosition(1,0));
+                  casa::Vector<double>(5, 1.), casa::Vector<double>(5,0.1),
+                  casa::Vector<double>(5,10.), casa::IPosition(1,0));
         
           p3->merge(*p1);
         
@@ -282,11 +303,13 @@ namespace askap
           
           testAllElements(extractVector(p3->normalMatrixDiagonal(), "Value1"),5,2.);
           testAllElements(extractVector(p3->normalMatrixSlice(), "Value1"),5,0.1);
+          testAllElements(extractVector(p3->preconditionerSlice(), "Value1"),5,0.6);
           testAllElements(p3->dataVector("Value1"),5,-30.);                    
            
           // Value2 should not change
           testAllElements(extractVector(p3->normalMatrixDiagonal(), "Value2"),3,1.);
           testAllElements(extractVector(p3->normalMatrixSlice(), "Value2"),0,0.);
+          testAllElements(extractVector(p3->preconditionerSlice(), "Value2"),0,0.);
           testAllElements(p3->dataVector("Value2"),3,10.);
 
           Params ip2;
@@ -294,8 +317,8 @@ namespace askap
           p2.reset(new ImagingNormalEquations(ip2));
           CPPUNIT_ASSERT(p2);
           p2->addSlice("Value2", casa::Vector<double>(7,-0.1), 
-                  casa::Vector<double>(7, 1.), casa::Vector<double>(7,-10.),
-                  casa::IPosition(1,0));
+                  casa::Vector<double>(7, 1.), casa::Vector<double>(7,0.2),
+                  casa::Vector<double>(7,-10.), casa::IPosition(1,0));
           
           //now Value2 is expected to be overwritten, because the shape has been changed
           p3->merge(*p2);
@@ -309,11 +332,13 @@ namespace askap
 
           testAllElements(extractVector(p3->normalMatrixDiagonal(), "Value1"),5,2.);
           testAllElements(extractVector(p3->normalMatrixSlice(), "Value1"),5,0.1);
+          testAllElements(extractVector(p3->preconditionerSlice(), "Value1"),5,0.6);
           testAllElements(p3->dataVector("Value1"),5,-30.);                    
 
           // test for new Value2    
           testAllElements(extractVector(p3->normalMatrixDiagonal(), "Value2"),7,1.);
           testAllElements(extractVector(p3->normalMatrixSlice(), "Value2"),7,-0.1);
+          testAllElements(extractVector(p3->preconditionerSlice(), "Value2"),7,0.2);
           testAllElements(p3->dataVector("Value2"),7,-10.);
         }
 
@@ -324,16 +349,18 @@ namespace askap
           
           // add a slice with the same dimension
           p2->addSlice("Value1", casa::Vector<double>(5,0.2), 
-                  casa::Vector<double>(5, 1.1), casa::Vector<double>(5,30.),
-                  casa::IPosition(1,0));
+                  casa::Vector<double>(5, 1.1), casa::Vector<double>(5,0.5),
+                  casa::Vector<double>(5,30.), casa::IPosition(1,0));
           testAllElements(extractVector(p2->normalMatrixDiagonal(), "Value1"),5,2.1);
           testAllElements(extractVector(p2->normalMatrixSlice(), "Value1"),5,0.3);
+          testAllElements(extractVector(p2->preconditionerSlice(), "Value1"),5,1.0);
           testAllElements(p2->dataVector("Value1"),5,-10.);
           
           // add diagonal with the same dimension
           p2->addDiagonal("Value2", casa::Vector<double>(3, 0.9), casa::Vector<double>(3, 1.));
           testAllElements(extractVector(p2->normalMatrixDiagonal(), "Value2"),3,1.9);
           testAllElements(extractVector(p2->normalMatrixSlice(), "Value2"),0,0.);
+          testAllElements(extractVector(p2->preconditionerSlice(), "Value2"),0,0.);
           testAllElements(p2->dataVector("Value2"),3,11.);          
          
           std::vector<std::string> params = p2->unknowns();
@@ -352,8 +379,8 @@ namespace askap
           
           // now add slice with the different dimension to check that it generates an exception
           p2->addSlice("Value1", casa::Vector<double>(7,0.2), 
-                  casa::Vector<double>(5, 1.1), casa::Vector<double>(7,30.),
-                  casa::IPosition(1,0));
+                  casa::Vector<double>(5, 1.1), casa::Vector<double>(5,0.2),
+                  casa::Vector<double>(7,30.), casa::IPosition(1,0));
         }
         
         void testBlobStream() {

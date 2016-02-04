@@ -106,6 +106,7 @@ namespace askap
       void addSlice(const std::string& name,
                     const casa::Vector<double>& normalmatrixslice,
                     const casa::Vector<double>& normalmatrixdiagonal,
+                    const casa::Vector<double>& preconditionerslice,
                     const casa::Vector<double>& datavector,
                     const casa::IPosition& shape,
                     const casa::IPosition& reference,
@@ -125,6 +126,7 @@ namespace askap
       void addSlice(const std::string& name,
                     const casa::Vector<double>& normalmatrixslice,
                     const casa::Vector<double>& normalmatrixdiagonal,
+                    const casa::Vector<double>& preconditionerslice,
                     const casa::Vector<double>& datavector,
                     const casa::IPosition& reference);
       
@@ -184,6 +186,9 @@ namespace askap
       /// @brief Return normal equations diagonal
       virtual const casa::Vector<double>& normalMatrixDiagonal(const std::string &par) const;
   
+      /// @brief Return preconditioner slice (otherwise normalMatrixSlice is used for preconditioning)
+      virtual const casa::Vector<double>& preconditionerSlice(const std::string &par) const;
+ 
       /// @brief data vector for a given parameter
       /// @details In the current framework, parameters are essentially 
       /// vectors, not scalars. Each element of such vector is treated
@@ -210,6 +215,9 @@ namespace askap
       
       /// Return normal equations diagonal map
       const std::map<std::string, casa::Vector<double> >& normalMatrixDiagonal() const;
+      
+      /// Return preconditioner slice map
+      const std::map<std::string, casa::Vector<double> >& preconditionerSlice() const;
       
       /// Return data vector map
       const std::map<std::string, casa::Vector<double> >& dataVector() const;
@@ -246,6 +254,8 @@ namespace askap
       std::map<std::string, casa::Vector<double> > itsNormalMatrixSlice;
       /// The diagonal 
       std::map<std::string, casa::Vector<double> > itsNormalMatrixDiagonal;
+      /// A slice through a specified plane
+      std::map<std::string, casa::Vector<double> > itsPreconditionerSlice;
       /// The shape
       std::map<std::string, casa::IPosition> itsShape;
       /// The Reference point for the slice
