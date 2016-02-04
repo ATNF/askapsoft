@@ -93,14 +93,10 @@ CasdaIsland::CasdaIsland(sourcefitting::RadioSource &obj,
     casa::Unit freqUnits(casda::freqUnit);
     double freqScale = casa::Quantity(1., wcsFreqUnits).getValue(freqUnits);
 
-    casa::Unit imageFluxUnits(newHead_freq.getFluxUnits());
-    casa::Unit fluxUnits(casda::fluxUnit);
-    double peakFluxscale = casa::Quantity(1., imageFluxUnits).getValue(fluxUnits);
+    double peakFluxscale = getPeakFluxConversionScale(newHead_freq, casda::fluxUnit);
     itsFluxPeak *= peakFluxscale;
 
-    casa::Unit imageIntFluxUnits(newHead_freq.getIntFluxUnits());
-    casa::Unit intFluxUnits(casda::intFluxUnitContinuum);
-    double intFluxscale = casa::Quantity(1., imageIntFluxUnits).getValue(intFluxUnits);
+    double intFluxscale = getIntFluxConversionScale(newHead_freq, casda::intFluxUnitContinuum);
     itsFluxInt *= intFluxscale;
 
     // Re-calculate WCS parameters

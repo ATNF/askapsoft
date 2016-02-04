@@ -42,6 +42,7 @@
 #include <coordutils/SpectralUtilities.h>
 #include <imageaccess/CasaImageAccess.h>
 #include <casainterface/CasaInterface.h>
+#include <duchampinterface/DuchampInterface.h>
 
 #include <Common/ParameterSet.h>
 #include <casa/Quanta/Quantum.h>
@@ -96,19 +97,8 @@ CasdaAbsorptionObject::CasdaAbsorptionObject(CasdaComponent &component,
     itsDECs = decToDMS(itsDEC.value(), obj.header().lattype(), precision);
     itsName = obj.header().getIAUName(itsRA.value(), itsDEC.value());
 
-    casa::Unit imageFluxUnits(obj.header().getFluxUnits());
-    casa::Unit fluxUnits(casda::fluxUnit);
-    double peakFluxscale = casa::Quantity(1., imageFluxUnits).getValue(fluxUnits);
-//    itsFluxPeak = gauss.height() * peakFluxscale;
-
-    // casa::Unit imageIntFluxUnits(obj.header().getIntFluxUnits());
-    // casa::Unit intFluxUnits(casda::intFluxUnit);
-    // double intFluxscale = casa::Quantity(1., imageIntFluxUnits).getValue(intFluxUnits);
-    //  itsFluxInt = gauss.flux() * intFluxscale;
-    // if (obj.header().needBeamSize()) {
-    //     itsFluxInt /= obj.header().beam().area(); // Convert from mJy/beam to mJy
-    // }
-
+    double peakFluxscale = getPeakFluxConversionScale(obj.header(), casda::fluxUnit);
+    double intFluxscale = getIntFluxConversionScale(obj.header(), casda::intFluxUnitSpectral);
 
     itsFreqUW.value() = obj.getVel() * freqScale;
     itsFreqW.value() = itsFreqUW.value() + (random() / (RAND_MAX + 1.0) - 0.5) * 0.1 * obj.getW50() * freqScale;

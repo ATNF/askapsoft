@@ -42,6 +42,7 @@
 #include <coordutils/SpectralUtilities.h>
 #include <imageaccess/CasaImageAccess.h>
 #include <casainterface/CasaInterface.h>
+#include <duchampinterface/DuchampInterface.h>
 
 #include <Common/ParameterSet.h>
 #include <casa/Quanta/Quantum.h>
@@ -107,19 +108,8 @@ CasdaHiEmissionObject::CasdaHiEmissionObject(sourcefitting::RadioSource &obj,
     itsDECs_w = decToDMS(itsDEC_w.value(), obj.header().lattype(), precision);
     itsName = obj.header().getIAUName(itsRA_w.value(), itsDEC_w.value());
 
-    casa::Unit imageFluxUnits(obj.header().getFluxUnits());
-    casa::Unit fluxUnits(casda::fluxUnit);
-    double peakFluxscale = casa::Quantity(1., imageFluxUnits).getValue(fluxUnits);
-//    itsFluxPeak = gauss.height() * peakFluxscale;
-
-    // casa::Unit imageIntFluxUnits(obj.header().getIntFluxUnits());
-    // casa::Unit intFluxUnits(casda::intFluxUnit);
-    // double intFluxscale = casa::Quantity(1., imageIntFluxUnits).getValue(intFluxUnits);
-    //  itsFluxInt = gauss.flux() * intFluxscale;
-    // if (obj.header().needBeamSize()) {
-    //     itsFluxInt /= obj.header().beam().area(); // Convert from mJy/beam to mJy
-    // }
-
+    double peakFluxscale = getPeakFluxConversionScale(obj.header(), casda::fluxUnit);
+    double intFluxscale = getIntFluxConversionScale(obj.header(), casda::intFluxUnitSpectral);
 
     // Initial version of getting parameters - assuming we are in velocity units
     itsVelHI_uw.value() = obj.getVel();

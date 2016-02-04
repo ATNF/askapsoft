@@ -41,6 +41,9 @@
 #include <sourcefitting/RadioSource.h>
 #include <casainterface/CasaInterface.h>
 
+#include <casa/Quanta/Quantum.h>
+#include <casa/Quanta/Unit.h>
+
 #include <iostream>
 #include <iomanip>
 #include <fstream>
@@ -383,17 +386,61 @@ duchamp::FitsHeader changeSpectralAxis(duchamp::FitsHeader &inputHead,
 {
     duchamp::FitsHeader newHead(inputHead);
     int specAxis=inputHead.WCS().spec;
-    std::string origSpecType(inputHead.WCS().ctype[specAxis]);
-    int status=wcssptr(newHead.getWCS(), &specAxis, (char *)newType.c_str());
-    if(status){
-        ASKAPLOG_ERROR_STR(logger, "Spectral axis conversion from " <<
-                           origSpecType << " to " <<
-                           newType << " failed: status=" << status <<
-                           " - " << wcs_errmsg[status]);
+    if (specAxis >= 0) {
+        std::string origSpecType(inputHead.WCS().ctype[specAxis]);
+        int status=wcssptr(newHead.getWCS(), &specAxis, (char *)newType.c_str());
+        if(status){
+            ASKAPLOG_ERROR_STR(logger, "Spectral axis conversion from " <<
+                               origSpecType << " to " <<
+                               newType << " failed: status=" << status <<
+                               " - " << wcs_errmsg[status]);
+        }
+        newHead.fixSpectralUnits(newUnits);
     }
-    newHead.fixSpectralUnits(newUnits);
-
     return newHead;
+}
+
+double getPeakFluxConversionScale(duchamp::FitsHeader &inputHead, std::string newUnits)
+{
+    casa::Unit inputFluxUnits(inputHead.getFluxUnits());
+    casa::Unit fluxUnits(newUnits);
+    double peakFluxscale = 1.;
+    if (inputFluxUnits.getName()!=""){
+        // Cannot do the conversion if the units string is blank. If
+        // this is the case, leave the conversion factor as 1.
+        casa::Quantity unity(1., inputFluxUnits);
+        if (unity.isConform(fluxUnits)){
+            // Can we do a conversion between the requested units?
+            peakFluxscale = casa::Quantity(1., inputFluxUnits).getValue(fluxUnits);
+        }
+        else{
+            ASKAPLOG_WARN_STR(logger, "Cannot convert between peak flux units " <<
+                              inputHead.getFluxUnits() << " and " << newUnits);
+        }
+    }
+    return peakFluxscale;
+
+}
+
+double getIntFluxConversionScale(duchamp::FitsHeader &inputHead, std::string newUnits)
+{
+    casa::Unit inputIntFluxUnits(inputHead.getIntFluxUnits());
+    casa::Unit intFluxUnits(newUnits);
+    double intFluxscale = 1.;
+    if (inputIntFluxUnits.getName() != ""){
+        casa::Quantity unity(1., inputIntFluxUnits);
+        if (unity.isConform(intFluxUnits)){
+            intFluxscale = casa::Quantity(1., inputIntFluxUnits).getValue(intFluxUnits);
+            if (inputHead.needBeamSize()) {
+                intFluxscale /= inputHead.beam().area(); // Convert from mJy/beam to mJy
+            }
+        }
+        else{
+            ASKAPLOG_WARN_STR(logger, "Cannot convert between integrated flux units " <<
+                              inputHead.getIntFluxUnits() << " and " << newUnits);
+        }            
+    }
+    return intFluxscale;
 }
 
 

@@ -83,6 +83,13 @@ duchamp::FitsHeader changeSpectralAxis(duchamp::FitsHeader &inputHead,
                                        std::string newType,
                                        std::string newUnits);
 
+/// @brief Return conversion scale for flux units to new unit string
+/// (e.g. Jy/beam to mJy/beam)
+double getPeakFluxConversionScale(duchamp::FitsHeader &inputHead, std::string newUnits);
+
+/// @brief Return conversion scale for integrated flux units to new unit string
+/// (e.g. Jy to mJy)
+double getIntFluxConversionScale(duchamp::FitsHeader &inputHead, std::string newUnits);
 
 
 /// @}

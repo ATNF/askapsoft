@@ -77,7 +77,7 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
     id << itsIDbase << obj.getID() << getSuffix(fitNumber);
     itsComponentID = id.str();
 
-    duchamp::FitsHeader newHead_freq = changeSpectralAxis(obj.header(),"FREQ-???",casda::freqUnit);
+    duchamp::FitsHeader newHead_freq = changeSpectralAxis(obj.header(),"FREQ",casda::freqUnit);
 
     double thisRA, thisDec, zworld;
     newHead_freq.pixToWCS(gauss.xCenter(), gauss.yCenter(), obj.getZcentre(),
@@ -86,9 +86,12 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
     itsDEC.value() = thisDec;
 
 //    casa::Unit imageFreqUnits(newHead_freq.getSpectralUnits());
-    casa::Unit imageFreqUnits(newHead_freq.WCS().cunit[newHead_freq.WCS().spec]);
-    casa::Unit freqUnits(casda::freqUnit);
-    double freqScale = casa::Quantity(1., imageFreqUnits).getValue(freqUnits);
+    double freqScale=0.;
+    if (newHead_freq.WCS().spec >= 0 ){
+        casa::Unit imageFreqUnits(newHead_freq.WCS().cunit[newHead_freq.WCS().spec]);
+        casa::Unit freqUnits(casda::freqUnit);
+        freqScale = casa::Quantity(1., imageFreqUnits).getValue(freqUnits);
+    }
     itsFreq = zworld * freqScale;
 
     int lng = newHead_freq.WCS().lng;
@@ -98,18 +101,26 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
     itsDECs = decToDMS(thisDec, newHead_freq.lattype(), precision);
     itsName = newHead_freq.getIAUName(itsRA.value(), itsDEC.value());
 
-    casa::Unit imageFluxUnits(newHead_freq.getFluxUnits());
-    casa::Unit fluxUnits(casda::fluxUnit);
-    double peakFluxscale = casa::Quantity(1., imageFluxUnits).getValue(fluxUnits);
+    // casa::Unit imageFluxUnits(newHead_freq.getFluxUnits());
+    // casa::Unit fluxUnits(casda::fluxUnit);
+    // double peakFluxscale = 1.;
+    // if (imageFluxUnits.getName()!=""){
+    //     peakFluxscale = casa::Quantity(1., imageFluxUnits).getValue(fluxUnits);
+    // }
+    double peakFluxscale = getPeakFluxConversionScale(newHead_freq, casda::fluxUnit);
     itsFluxPeak.value() = gauss.height() * peakFluxscale;
 
-    casa::Unit imageIntFluxUnits(newHead_freq.getIntFluxUnits());
-    casa::Unit intFluxUnits(casda::intFluxUnitContinuum);
-    double intFluxscale = casa::Quantity(1., imageIntFluxUnits).getValue(intFluxUnits);
+    // casa::Unit imageIntFluxUnits(newHead_freq.getIntFluxUnits());
+    // casa::Unit intFluxUnits(casda::intFluxUnitContinuum);
+    // double intFluxscale = 1.;
+    // if (imageIntFluxUnits != ""){
+    //     intFluxscale = casa::Quantity(1., imageIntFluxUnits).getValue(intFluxUnits);
+    //     if (newHead_freq.needBeamSize()) {
+    //         intFluxscale /= newHead_freq.beam().area(); // Convert from mJy/beam to mJy
+    //     }
+    // }
+    double intFluxscale = getIntFluxConversionScale(newHead_freq, casda::intFluxUnitContinuum);
     itsFluxInt.value() = gauss.flux() * intFluxscale;
-    if (newHead_freq.needBeamSize()) {
-        itsFluxInt.value() /= newHead_freq.beam().area(); // Convert from mJy/beam to mJy
-    }
 
     itsMaj.value() = gauss.majorAxis() * pixscale;
     itsMin.value() = gauss.minorAxis() * pixscale;
