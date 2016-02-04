@@ -561,6 +561,8 @@ void CorrelatorSimulatorADE::checkTestBuffer() {
     const double small = 0.00001;
 #ifdef VERBOSE
     cout << "  Channel count: " << testBuffer.freqId.size() << endl;
+    const double freqMax = buffer.freqId[buffer.freqId.size()-1].freq;
+    cout << "  Freq min ~ max: " << freqMin << " ~ " << freqMax << endl;
 #endif
     for (uint32_t chan = 0; chan < testBuffer.freqId.size(); ++chan) {
 
@@ -719,7 +721,8 @@ bool CorrelatorSimulatorADE::sendBufferData()
             }   // correlation product in slice
 
             // Card is sending its payload
-            if (card % itsNShelves == itsShelf - 1) {
+            //if (card % itsNShelves == itsShelf - 1) {
+            if (totalCard % itsNShelves == itsShelf - 1) {
                 itsPort->send(payload);
 
                 if (itsMode == "test") {

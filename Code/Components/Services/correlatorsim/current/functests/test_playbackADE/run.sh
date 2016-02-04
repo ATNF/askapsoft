@@ -88,8 +88,11 @@ let NMPI=NCARD+1
 # Set the reference port in its parameter file
 sed -i "s/playback.corrsim.out.port.*/playback.corrsim.out.port = $VPORT1/" playback.in
 mpirun -np $NMPI ../../apps/playbackADE.sh -c playback.in
-STATUS=$?
-echo "playbackADE status: " $STATUS
+if [ $? -ne 0 ]; then
+    echo "ERROR: mpirun failed, trying mpiexec"
+    sbatch -n 3 ../../apps/playbackADE.sh -c playback.in
+fi
+echo "playbackADE status: " $?
 
 echo "Giving the subscriber a moment to get the last messages then exit"
 sleep 5

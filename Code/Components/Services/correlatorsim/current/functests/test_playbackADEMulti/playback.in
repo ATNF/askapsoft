@@ -8,7 +8,7 @@ playback.period = 5
 
 # Default playback mode is "normal".
 # "test" will invoke test procedure, which takes more time & memory.
-playback.mode = test
+#playback.mode = test
 
 #----------------------------------------------------------------------
 # Telescope Operating System Simulator Configuration
@@ -42,7 +42,7 @@ playback.corrsim.n_antennas = 36
 # Ideally 304 (default), but current hardware is limited at 300.
 # If the number is greater than that in measurement set, data will be 
 # copied from existing coarse channels.
-playback.corrsim.n_coarse_channels = 300
+playback.corrsim.n_coarse_channels = 96
 
 # Division of coarse channel into fine channels
 # Default: 54
@@ -53,7 +53,7 @@ playback.corrsim.n_channel_subdivision = 54
 playback.corrsim.coarse_channel_bandwidth = 1000000
 
 # Measurement set used as input for simulation
-playback.corrsim.dataset = ../../dataset/ade1card.ms
+playback.corrsim.dataset = ../../dataset/ade4ant4chan.ms
 
 # Local host for transmission
 playback.corrsim.out.hostname = localhost

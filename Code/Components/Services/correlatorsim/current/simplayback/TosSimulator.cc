@@ -160,7 +160,6 @@ bool TosSimulator::sendNext(void)
 	
     // Calculate and set the centre frequency
     const casa::Vector<casa::Double> frequencies = spwc.chanFreq()(descSpwId);
-    const casa::uInt nChan = frequencies.size();
     casa::Double centreFreq = 0.0;
 
 #ifdef CARDFREQ
@@ -169,6 +168,7 @@ bool TosSimulator::sendNext(void)
     centreFreq = frequencies[2];
     //centreFreq = (frequencies[0] + frequencies[3]) * 0.5;
 #else
+    const casa::uInt nChan = frequencies.size();
     if (nChan % 2 == 0) {
         centreFreq = (frequencies(nChan / 2) + frequencies((nChan / 2) + 1) ) / 2.0;
     } else {

@@ -65,6 +65,9 @@ fi
 source `dirname $0`/../init_package_env.sh
 
 # Cleanup/create directories for IceGrid and IceStorm
+cd $CORRSIM_HOME/functests
+echo "Current directory: "
+pwd
 rm -rf ice_data
 mkdir -p ice_data/registry
 mkdir -p ice_data/db
