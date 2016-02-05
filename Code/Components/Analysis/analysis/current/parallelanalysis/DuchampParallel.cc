@@ -399,11 +399,12 @@ void DuchampParallel::checkSpectralTermImages()
                 size_t pos = itsCube.pars().getImageFile().rfind(".taylor.0");
                 if (pos == std::string::npos) {
                     // image provided is not a Taylor series term -
-                    // notify and do nothing
-                    ASKAPLOG_WARN_STR(logger, "Image name provided (" <<
-                                      itsCube.pars().getImageFile() <<
-                                      ") is not a Taylor term. Cannot find spectral information.");
-
+                    // notify (only on master node) and do nothing
+                    if (itsComms.isMaster()){
+                        ASKAPLOG_WARN_STR(logger, "Image name provided (" <<
+                                          itsCube.pars().getImageFile() <<
+                                          ") is not a Taylor term. Cannot find spectral information.");
+                    }
                     // set flag for this and higher terms to false
                     for (size_t j = i; j < 2; j++) {
                         itsFlagFindSpectralTerms[j] = false;
@@ -1490,8 +1491,11 @@ DuchampParallel::getCasaMetadata(const boost::shared_ptr<ImageInterface<Float> >
                        itsCube.pars().getSpectralType() << "\"");
     itsCube.header().defineWCS(wcs, 1, dim.data(), itsCube.pars());
     itsCube.pars().setOffsets(wcs);
-    readBeamInfo(imagePtr, itsCube.header(), itsCube.pars());
+    readBeamInfo(imagePtr, itsCube.header(), itsCube.pars(), itsComms.isMaster());
     itsCube.header().setFluxUnits(imagePtr->units().getName());
+    if (itsCube.header().getFluxUnits()=="" && itsComms.isMaster()){
+        ASKAPLOG_WARN_STR(logger, "Brightness units in image are undefined.");
+    }
 
     // check the true dimensionality and set the 2D flag in the cube header.
     itsCube.header().set2D(imagePtr->shape().nonDegenerate().size() <= 2);

@@ -81,7 +81,8 @@ std::vector<size_t> getCASAdimensions(std::string filename);
 /// @ingroup analysisutilities
 /// @brief Read the beam information from a casa image
 void readBeamInfo(const boost::shared_ptr<ImageInterface<Float> > imagePtr,
-                  duchamp::FitsHeader &head, duchamp::Param &par);
+                  duchamp::FitsHeader &head, duchamp::Param &par,
+                  bool doLogging);
 
 /// @ingroup analysisutilities
 /// @brief Extract the WCS information from a casa image

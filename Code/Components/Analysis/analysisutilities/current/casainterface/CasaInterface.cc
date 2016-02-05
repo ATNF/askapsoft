@@ -345,7 +345,7 @@ casa::Array<casa::Float> getPixelsInBox(std::string imageName, casa::Slicer box,
 //**************************************************************//
 
 void readBeamInfo(const boost::shared_ptr<ImageInterface<Float> > imagePtr,
-                  duchamp::FitsHeader &head, duchamp::Param &par)
+                  duchamp::FitsHeader &head, duchamp::Param &par, bool doLogging)
 {
     /// @details Reads the beam information (major axis, minor axis,
     /// position angle) from an already opened casa image and stores
@@ -357,12 +357,16 @@ void readBeamInfo(const boost::shared_ptr<ImageInterface<Float> > imagePtr,
     /// pixels) if there is.
 
     casa::Vector<casa::Quantum<Double> > beam = imagePtr->imageInfo().restoringBeam();
-    ASKAPLOG_INFO_STR(logger, "Read beam from casa image: " << beam);
+    if (doLogging){
+        ASKAPLOG_INFO_STR(logger, "Read beam from casa image: " << beam);
+    }
 
     if (beam.size() == 0) {
         std::stringstream errmsg;
-        ASKAPLOG_WARN_STR(logger, "Beam information not present. \
+        if (doLogging) {
+            ASKAPLOG_WARN_STR(logger, "Beam information not present. \
 Using parameter set to determine size of beam.");
+        }
         if (par.getBeamFWHM() > 0.) head.beam().setFWHM(par.getBeamFWHM(), PARAM);
         else if (par.getBeamSize() > 0.) head.beam().setArea(par.getBeamSize(), PARAM);
         else head.beam().empty();
@@ -375,10 +379,11 @@ Using parameter set to determine size of beam.");
     }
     par.setBeamAsUsed(head.beam());
 
-    ASKAPLOG_INFO_STR(logger, "Beam to be used, in pixel units: (bmaj,bmin,bpa)=(" <<
-                      head.beam().maj() << "," << head.beam().min() << "," <<
-                      head.beam().pa() << ")");
-
+    if (doLogging){
+        ASKAPLOG_DEBUG_STR(logger, "Beam to be used, in pixel units: (bmaj,bmin,bpa)=(" <<
+                          head.beam().maj() << "," << head.beam().min() << "," <<
+                          head.beam().pa() << ")");
+    }
 }
 
 //**************************************************************//
