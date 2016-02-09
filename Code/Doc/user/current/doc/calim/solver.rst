@@ -141,71 +141,83 @@ The following parameters are available for the Basisfunction and BasisfunctionMF
 
 All parameters given in the next table **do not** have **solver.Clean** prefix (i.e. Cimager.threshold.minorcycle)
 
-+------------------------+---------------+--------------+--------------------------------------------------+
-|**Parameter**           |**Type**       |**Default**   |**Description**                                   |
-+========================+===============+==============+==================================================+
-|threshold.minorcycle    |vector<string> |no threshold  |If defined, the parameter can be either a single  |
-|                        |               |              |string or a vector of two strings. A number       |
-|                        |               |              |without units is interpreted as a fractional      |
-|                        |               |              |stopping threshold (with respect to the peak      |
-|                        |               |              |residual) as well as the number with the          |
-|                        |               |              |percentage sign. An absolute flux given in Jy or  |
-|                        |               |              |related units is interpreted as an absolute       |
-|                        |               |              |threshold. Either one or both of these thresholds |
-|                        |               |              |can be given in the same time. Undefined parameter|
-|                        |               |              |means no minor cycle thresholding is done         |
-+------------------------+---------------+--------------+--------------------------------------------------+
-|threshold.majorcycle    |string         |-1Jy          |The target peak residual. Use negative value to   |
-|                        |               |              |ensure all requested major cycles are done.       |
-+------------------------+---------------+--------------+--------------------------------------------------+
-|threshold.masking       |float          |-1            |If the value is negative (default), a             |
-|                        |               |              |signal-to-noise based cleaning is done. In other  |
-|                        |               |              |words, a peak of S/N is searched at every minor   |
-|                        |               |              |cycle, rather than a flux peak. A positive value  |
-|                        |               |              |reverts the algorithm back to the traditional     |
-|                        |               |              |absolute flux peak-based clean. In this case, the |
-|                        |               |              |value is the threshold used for masking on the    |
-|                        |               |              |basis of the weight. For example, a value of 0.9  |
-|                        |               |              |(btw, this is the default in the casacore's       |
-|                        |               |              |*LatticeCleaner*, and, therefore, could be        |
-|                        |               |              |implicitly adopted in casa imager) means that all |
-|                        |               |              |pixels with less than 90% weight (defined as      |
-|                        |               |              |square root from the ratio of matrix diagonal to  |
-|                        |               |              |the maximum diagonal element) will be masked out  |
-|                        |               |              |for cleaning purposes.                            |
-+------------------------+---------------+--------------+--------------------------------------------------+
-|preconditioner.Names    |vector<string> |empty vector  |List of preconditioners to be applied (in the     |
-|                        |               |              |order they are given in the list). Preconditioners|
-|                        |               |              |are ASKAPsoft equivalents of visibility weighting |
-|                        |               |              |(i.e. uniform, robust, natural), which do not     |
-|                        |               |              |require multiple passes over the                  |
-|                        |               |              |dataset. Preconditioners can be viewed as         |
-|                        |               |              |operators applied to equation matrix before it is |
-|                        |               |              |solved. Having the normal matrix as close to the  |
-|                        |               |              |diagonal as possible (a diagonal form is actually |
-|                        |               |              |assumed during the inversion process) makes the   |
-|                        |               |              |inversion more accurate. By default, no           |
-|                        |               |              |transformation to the normal matrix is done. This |
-|                        |               |              |is equivalent to the natural weighting. The       |
-|                        |               |              |following preconditioners are currently           |
-|                        |               |              |implemented: **Wiener**, **NormWiener**,          |
-|                        |               |              |**Robust** and **GaussianTaper**. In addition, the|
-|                        |               |              |word **None** is understood as an empty           |
-|                        |               |              |preconditioner which does nothing. Each           |
-|                        |               |              |preconditioner requires a specific set of         |
-|                        |               |              |parameters described in a separate section. These |
-|                        |               |              |parameters are given after the name of the        |
-|                        |               |              |preconditioner,                                   |
-|                        |               |              |e.g. **preconditioner.Wiener.noisepower** (see    |
-|                        |               |              |below)                                            |
-+------------------------+---------------+--------------+--------------------------------------------------+
-|preconditioner.name.xxx |               |              |Use this form to define parameter **xxx** for     |
-|                        |               |              |preconditioner **name**. Note, this preconditioner|
-|                        |               |              |will only be instantiated and used if its name    |
-|                        |               |              |appears in the list given in                      |
-|                        |               |              |preconditioner.Names. Description of individual   |
-|                        |               |              |parameters are given in a separate section.       |
-+------------------------+---------------+--------------+--------------------------------------------------+
++-------------------------+---------------+--------------+--------------------------------------------------+
+|**Parameter**            |**Type**       |**Default**   |**Description**                                   |
++=========================+===============+==============+==================================================+
+|threshold.minorcycle     |vector<string> |no threshold  |If defined, the parameter can be either a single  |
+|                         |               |              |string or a vector of two strings. A number       |
+|                         |               |              |without units is interpreted as a fractional      |
+|                         |               |              |stopping threshold (with respect to the peak      |
+|                         |               |              |residual) as well as the number with the          |
+|                         |               |              |percentage sign. An absolute flux given in Jy or  |
+|                         |               |              |related units is interpreted as an absolute       |
+|                         |               |              |threshold. Either one or both of these thresholds |
+|                         |               |              |can be given in the same time. Undefined parameter|
+|                         |               |              |means no minor cycle thresholding is done         |
++-------------------------+---------------+--------------+--------------------------------------------------+
+|threshold.majorcycle     |string         |-1Jy          |The target peak residual. Use negative value to   |
+|                         |               |              |ensure all requested major cycles are done.       |
++-------------------------+---------------+--------------+--------------------------------------------------+
+|threshold.masking        |float          |-1            |If the value is negative (default), a             |
+|                         |               |              |signal-to-noise based cleaning is done. In other  |
+|                         |               |              |words, a peak of S/N is searched at every minor   |
+|                         |               |              |cycle, rather than a flux peak. A positive value  |
+|                         |               |              |reverts the algorithm back to the traditional     |
+|                         |               |              |absolute flux peak-based clean. In this case, the |
+|                         |               |              |value is the threshold used for masking on the    |
+|                         |               |              |basis of the weight. For example, a value of 0.9  |
+|                         |               |              |(btw, this is the default in the casacore's       |
+|                         |               |              |*LatticeCleaner*, and, therefore, could be        |
+|                         |               |              |implicitly adopted in casa imager) means that all |
+|                         |               |              |pixels with less than 90% weight (defined as      |
+|                         |               |              |square root from the ratio of matrix diagonal to  |
+|                         |               |              |the maximum diagonal element) will be masked out  |
+|                         |               |              |for cleaning purposes.                            |
++-------------------------+---------------+--------------+--------------------------------------------------+
+|preconditioner.Names     |vector<string> |empty vector  |List of preconditioners to be applied (in the     |
+|                         |               |              |order they are given in the list). Preconditioners|
+|                         |               |              |are ASKAPsoft equivalents of visibility weighting |
+|                         |               |              |(i.e. uniform, robust, natural), which do not     |
+|                         |               |              |require multiple passes over the                  |
+|                         |               |              |dataset. Preconditioners can be viewed as         |
+|                         |               |              |operators applied to equation matrix before it is |
+|                         |               |              |solved. Having the normal matrix as close to the  |
+|                         |               |              |diagonal as possible (a diagonal form is actually |
+|                         |               |              |assumed during the inversion process) makes the   |
+|                         |               |              |inversion more accurate. By default, no           |
+|                         |               |              |transformation to the normal matrix is done. This |
+|                         |               |              |is equivalent to the natural weighting. The       |
+|                         |               |              |following preconditioners are currently           |
+|                         |               |              |implemented: **Wiener**, **NormWiener**,          |
+|                         |               |              |**Robust** and **GaussianTaper**. In addition, the|
+|                         |               |              |word **None** is understood as an empty           |
+|                         |               |              |preconditioner which does nothing. Each           |
+|                         |               |              |preconditioner requires a specific set of         |
+|                         |               |              |parameters described in a separate section. These |
+|                         |               |              |parameters are given after the name of the        |
+|                         |               |              |preconditioner,                                   |
+|                         |               |              |e.g. **preconditioner.Wiener.noisepower** (see    |
+|                         |               |              |below)                                            |
++-------------------------+---------------+--------------+--------------------------------------------------+
+|preconditioner.name.xxx  |               |              |Use this form to define parameter **xxx** for     |
+|                         |               |              |preconditioner **name**. Note, this preconditioner|
+|                         |               |              |will only be instantiated and used if its name    |
+|                         |               |              |appears in the list given in                      |
+|                         |               |              |preconditioner.Names. Description of individual   |
+|                         |               |              |parameters are given in a separate section.       |
++-------------------------+---------------+--------------+--------------------------------------------------+
+|preconditioner.preservecf|bool           |false         |Use a modified PSF to generate any preconditioner |
+|                         |               |              |that is derived from the uv sampling function     |
+|                         |               |              |(e.g. Wiener and Robust). This option             |
+|                         |               |              |takes a running mean over an approximate          |
+|                         |               |              |nearest-neighbour sampling function               |
+|                         |               |              |with a box width that is proportional to the      |
+|                         |               |              |support size of the gridding kernels. This enables|
+|                         |               |              |post-gridding density weighting while preserving  |
+|                         |               |              |the gridding convolutions.                        |
+|                         |               |              |Note that this is currently only used with the    |
+|                         |               |              |Wiener preconditioner and the WProject gridder.   |
++-------------------------+---------------+--------------+--------------------------------------------------+
    
 
 Parameters of preconditoners
