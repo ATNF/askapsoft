@@ -242,7 +242,7 @@ fi
 EOFOUTER
 
 else
-    # If we're here, then BUILD_CONT_SUB_MODEL=false
+    # If we're here, then BUILD_MODEL_FOR_CONTSUB=false
     # In this bit, we use the clean model from the continuum imaging
     # as the input to ccontsubtract
     

@@ -240,26 +240,7 @@ fi
 if [ ${DO_CONT_SUB_SL} == "true" ]; then
 
     . ${PIPELINEDIR}/spectralContinuumSubtraction.sh
-    
-##   
-##       if [ $SUBMIT_JOBS == true ]; then
-##           DEP=""
-##           DEP=`addDep "$DEP" "$DEP_START"`
-##           DEP=`addDep "$DEP" "$ID_SPLIT_SCI"`
-##           DEP=`addDep "$DEP" "$ID_FLAG_SCI"`
-##           DEP=`addDep "$DEP" "$ID_CCALAPPLY_SCI"`
-##           DEP=`addDep "$DEP" "$ID_SPLIT_SL_SCI"`
-##           DEP=`addDep "$DEP" "$ID_CAL_APPLY_SL_SCI"`
-##           DEP=`addDep "$DEP" "$ID_CONTIMG_SCI"`
-##           DEP=`addDep "$DEP" "$ID_CONTIMG_SCI_SC"`
-##           ID_CONT_SUB_SL_SCI=`sbatch $DEP $sbatchfile | awk '{print $4}'`
-##           recordJob ${ID_CONT_SUB_SL_SCI} "Subtract the continuum model from the spectral-line dataset for imaging beam $BEAM of the science observation, with flags \"$DEP\""
-##       else
-##           echo "Would subtract the continuum model from the spectral-line dataset for imaging beam $BEAM of the science observation with slurm file $sbatchfile"
-##       fi
-##   
-##       echo " "
-    
+        
 fi
 
 
