@@ -72,6 +72,10 @@ if [ "`echo ${PRECONDITIONER_LIST} | grep GaussianTaper`" != "" ]; then
 Cimager.preconditioner.GaussianTaper            = ${PRECONDITIONER_GAUSS_TAPER}"
 fi
 if [ "`echo ${PRECONDITIONER_LIST} | grep Wiener`" != "" ]; then
+    # Use the new preservecf preconditioner option, but only for the
+    # Wiener filter
+    preconditioning="$preconditioning
+Cimager.preconditioner.preservecf               = true"
     if [ "${PRECONDITIONER_WIENER_ROBUSTNESS}" != "" ]; then
 	preconditioning="$preconditioning
 Cimager.preconditioner.Wiener.robustness        = ${PRECONDITIONER_WIENER_ROBUSTNESS}"

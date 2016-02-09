@@ -57,6 +57,10 @@ if [ $DO_IT == true ]; then
 Simager.preconditioner.GaussianTaper            = ${PRECONDITIONER_SPECTRAL_GAUSS_TAPER}"
     fi
     if [ "`echo ${PRECONDITIONER_LIST_SPECTRAL} | grep Wiener`" != "" ]; then
+        # Use the new preservecf preconditioner option, but only for the
+        # Wiener filter
+        preconditioning="$preconditioning
+Simager.preconditioner.preservecf               = true"
         if [ "${PRECONDITIONER_SPECTRAL_WIENER_ROBUSTNESS}" != "" ]; then
 	    preconditioning="$preconditioning
 Simager.preconditioner.Wiener.robustness        = ${PRECONDITIONER_SPECTRAL_WIENER_ROBUSTNESS}"
