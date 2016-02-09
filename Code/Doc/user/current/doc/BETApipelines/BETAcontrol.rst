@@ -24,6 +24,10 @@ output data products go. To run the jobs, you need to set
 |                    |         |be created but nothing will run (useful for checking if     |
 |                    |         |things are to your liking).                                 |
 +--------------------+---------+------------------------------------------------------------+
+| ``CLUSTER``        | galaxy  |The cluster to which jobs should be submitted. This allows  |
+|                    |         |you to submit to the galaxy queue from machines such as     |
+|                    |         |galaxy-data. Leave as is unless you konw better.            |
++--------------------+---------+------------------------------------------------------------+
 | ``QUEUE``          | workq   |This should be left as is unless you know better.           |
 +--------------------+---------+------------------------------------------------------------+
 | ``RESERVATION``    | ""      |If there is a reservation you specify the name of it here.  |
