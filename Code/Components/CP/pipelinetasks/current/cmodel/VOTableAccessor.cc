@@ -184,7 +184,7 @@ void VOTableAccessor::initFieldInfo(const std::vector<askap::accessors::VOTableF
         // Major Axis
         key = MAJOR_AXIS;
         if (hasUCD(field, "phys.angSize.smajAxis")) {
-            if (posMap.find(key) == posMap.end() || hasUCD(field, "meta.deconvolved")) {
+            if (posMap.find(key) == posMap.end() || hasUCD(field, "askap:meta.deconvolved")) {
                 posMap[key] = i;
                 unitMap[key] = Unit(field.getUnit());
                 continue;
@@ -194,7 +194,7 @@ void VOTableAccessor::initFieldInfo(const std::vector<askap::accessors::VOTableF
         // Minor Axis
         key = MINOR_AXIS;
         if (hasUCD(field, "phys.angSize.sminAxis")) {
-            if (posMap.find(key) == posMap.end() || hasUCD(field, "meta.deconvolved")) {
+            if (posMap.find(key) == posMap.end() || hasUCD(field, "askap:meta.deconvolved")) {
                 posMap[key] = i;
                 unitMap[key] = Unit(field.getUnit());
                 continue;
@@ -204,7 +204,7 @@ void VOTableAccessor::initFieldInfo(const std::vector<askap::accessors::VOTableF
         // Position angle
         key = POSITION_ANGLE;
         if (hasUCD(field, "phys.angSize") && hasUCD(field, "pos.posAng")) {
-            if (posMap.find(key) == posMap.end() || hasUCD(field, "meta.deconvolved")) {
+            if (posMap.find(key) == posMap.end() || hasUCD(field, "askap:meta.deconvolved")) {
                 posMap[key] = i;
                 unitMap[key] = Unit(field.getUnit());
                 continue;
