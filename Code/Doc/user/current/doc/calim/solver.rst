@@ -208,7 +208,7 @@ All parameters given in the next table **do not** have **solver.Clean** prefix (
 +-------------------------+---------------+--------------+--------------------------------------------------+
 |preconditioner.preservecf|bool           |false         |Use a modified PSF to generate any preconditioner |
 |                         |               |              |that is derived from the uv sampling function     |
-|                         |               |              |(e.g. Wiener and Robust). This option             |
+|                         |               |              |(e.g. **Wiener** and **Robust**). This option     |
 |                         |               |              |takes a running mean over an approximate          |
 |                         |               |              |nearest-neighbour sampling function               |
 |                         |               |              |with a box width that is proportional to the      |
@@ -216,7 +216,8 @@ All parameters given in the next table **do not** have **solver.Clean** prefix (
 |                         |               |              |post-gridding density weighting while preserving  |
 |                         |               |              |the gridding convolutions.                        |
 |                         |               |              |Note that this is currently only used with the    |
-|                         |               |              |Wiener preconditioner and the WProject gridder.   |
+|                         |               |              |**Wiener** preconditioner and the **WProject**    |
+|                         |               |              |gridder.                                          |
 +-------------------------+---------------+--------------+--------------------------------------------------+
    
 
@@ -249,7 +250,8 @@ the :doc:`cimager` documentation). The table below contains the description of i
 |                       |              |              |**normalise** option -- this is a replacement for   |
 |                       |              |              |the **NormWiener** preconditioner).                 |
 |                       |              |              |Note that the Wiener filter must be specified with  |
-|                       |              |              |either **noisepower** or **robustness**.            |
+|                       |              |              |either **noisepower** or **robustness**, and it is  |
+|                       |              |              |recommended that **preservecf** is set to true.     |
 +-----------------------+--------------+--------------+----------------------------------------------------+
 |Wiener.normalise       |bool          |false         |This is an additional option for a **Wiener**       |
 |                       |              |              |preconditioner being constructed from an explicit   |
@@ -279,7 +281,8 @@ the :doc:`cimager` documentation). The table below contains the description of i
 |                       |              |              |Robust.                                             |
 +-----------------------+--------------+--------------+----------------------------------------------------+
 |Robust.robustness      |float         |0.0           |Post-gridding version of robust weighting is        |
-|                       |              |              |applied.                                            |
+|                       |              |              |applied. It is recommended that **preservecf**      |
+|                       |              |              |is set to true.                                     |
 +-----------------------+--------------+--------------+----------------------------------------------------+
 |GaussianTaper          |vector<string>|None          |A Gaussian taper is applied to the visibilities.    |
 |                       |              |              |The parameter should be either a single string with |
