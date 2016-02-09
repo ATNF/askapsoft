@@ -246,6 +246,13 @@ void SpectralLineMaster::handleImageParams(askap::scimath::Params::ShPtr params,
                                            unsigned int chan)
 {
     Tracing::entry(Tracing::WriteImage);
+    bool doingPreconditioning=false;
+    const vector<string> preconditioners=itsParset.getStringVector("preconditioner.Names",std::vector<std::string>());
+    for (vector<string>::const_iterator pc = preconditioners.begin(); pc != preconditioners.end(); ++pc) {
+        if( (*pc)=="Wiener" || (*pc)=="NormWiener" || (*pc)=="Robust" || (*pc) == "GaussianTaper") {
+            doingPreconditioning=true;
+        }
+    }
 
     // Pre-conditions
     ASKAPCHECK(params->has("model.slice"), "Params are missing model parameter");
@@ -254,7 +261,7 @@ void SpectralLineMaster::handleImageParams(askap::scimath::Params::ShPtr params,
     ASKAPCHECK(params->has("weights.slice"), "Params are missing weights parameter");
     if (itsParset.getBool("restore", false) ) {
         ASKAPCHECK(params->has("image.slice"), "Params are missing image parameter");
-        if (itsParset.getString("preconditioner.Names")!="None") {
+        if (doingPreconditioning) {
             ASKAPCHECK(params->has("psf.image.slice"), "Params are missing psf.image parameter");
         }
     }
@@ -301,7 +308,7 @@ void SpectralLineMaster::handleImageParams(askap::scimath::Params::ShPtr params,
 
     if (itsParset.getBool("restore", false)){
 
-        if(itsParset.getString("preconditioner.Names")!="None") {
+        if(doingPreconditioning) {
             // Write preconditioned PSF image
             {
                 const casa::Array<double> imagePixels(params->value("psf.image.slice"));
