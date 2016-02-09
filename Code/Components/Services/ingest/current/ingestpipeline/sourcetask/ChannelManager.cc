@@ -41,6 +41,7 @@
 #include "casa/aips.h"
 #include "Common/ParameterSet.h"
 #include "casa/Arrays/Vector.h"
+#include "askap/AskapUtil.h"
 
 ASKAP_LOGGER(logger, ".ChannelManager");
 
@@ -50,17 +51,30 @@ using namespace askap::cp::ingest;
 
 ChannelManager::ChannelManager(const LOFAR::ParameterSet& params)
 {
-    for (int i = 0; i < numeric_limits<int>::max(); ++i) {
-        ostringstream ss;
-        ss << "n_channels." << i;
+    const LOFAR::ParameterSet subset = params.makeSubset("n_channels.");
 
-        if (!params.isDefined(ss.str())) {
-            break;
-        }
+    for (LOFAR::ParameterSet::const_iterator ci = subset.begin(); ci != subset.end(); ++ci) {
+         const std::string& key = ci->first;
+         const size_t pos = key.find("..");
+         if (pos == std::string::npos) {
+             const int rank = utility::fromString<int>(key);
+             ASKAPCHECK(itsChannelMap.find(rank) == itsChannelMap.end(), "Number of channels has already been defined for rank="<<rank);
 
-        itsChannelMap[i] = params.getUint32(ss.str());
-        ASKAPLOG_DEBUG_STR(logger, "Channel Mappings - Rank " << i
-                               << " will handle " << itsChannelMap[i] << " channels");
+             itsChannelMap[rank] = subset.getUint32(key);
+             ASKAPLOG_DEBUG_STR(logger, "Channel Mappings - Rank " << rank
+                               << " will handle " << itsChannelMap[rank] << " channels");
+         } else {
+             ASKAPCHECK(key.size() > pos + 2, "Unable to parse rank space "<<key<<" in channel manager");
+             const int startRank = utility::fromString<int>(key.substr(0,pos));
+             const int endRank = utility::fromString<int>(key.substr(pos+2));
+             const unsigned int nchan = subset.getUint32(key);
+             ASKAPLOG_DEBUG_STR(logger, "Channel Mappings - Ranks from " << startRank<<" to "<<endRank<<", inclusive,"
+                               << " will handle " << nchan << " channels");
+             for (int rank = startRank; rank <= endRank; ++rank) {
+                  ASKAPCHECK(itsChannelMap.find(rank) == itsChannelMap.end(), "Number of channels has already been defined for rank="<<rank);
+                  itsChannelMap[rank] = subset.getUint32(key);
+             }
+         }
     }
 }
 

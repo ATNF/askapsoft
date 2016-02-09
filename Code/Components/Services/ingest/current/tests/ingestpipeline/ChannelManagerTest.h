@@ -46,6 +46,7 @@ class ChannelManagerTest : public CppUnit::TestFixture {
         CPPUNIT_TEST(testLocalNChannels);
         CPPUNIT_TEST(testLocalFrequencies);
         CPPUNIT_TEST(testLocalFrequenciesBETA);
+        CPPUNIT_TEST(testMultiRank);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -65,6 +66,19 @@ class ChannelManagerTest : public CppUnit::TestFixture {
             CPPUNIT_ASSERT_EQUAL(512u, cman.localNChannels(1));
 
             CPPUNIT_ASSERT_THROW(cman.localNChannels(2), askap::AskapError);
+        };
+
+        void testMultiRank() {
+            LOFAR::ParameterSet params;
+            params.add("n_channels.0..96", "256");
+            params.add("n_channels.97", "512");
+
+            ChannelManager cman(params);
+            for (int rank = 0; rank <= 96; ++rank) {
+                 CPPUNIT_ASSERT_EQUAL(256u, cman.localNChannels(rank));
+            }
+            CPPUNIT_ASSERT_EQUAL(512u, cman.localNChannels(97));
+            CPPUNIT_ASSERT_THROW(cman.localNChannels(98), askap::AskapError);
         };
 
         void testLocalFrequencies() {
