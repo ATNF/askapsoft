@@ -162,7 +162,7 @@ void CModelMaster::run(void)
         // Create an image and sum all workers images to the master
         std::string filename = parset.getString("filename");
         if (nterms > 1) {
-            filename += ".";
+            filename += ".taylor.";
             filename += askap::utility::toString(term);
         }
 
