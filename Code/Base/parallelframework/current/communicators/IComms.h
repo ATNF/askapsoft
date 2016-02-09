@@ -55,7 +55,16 @@ public:
 
    // usual communication methods for broadcast, point2point, etc
 
-   /// @brief obtain rank in this communicator
+   /// @brief obtain rank via a tag
+   /// @details Ranks can be tagged, but physical number may be different
+   /// for different communicators. This method translate the logical name to the
+   /// rank number against this communicator. Use overloaded rank method to
+   /// get the rank of the current process
+   /// @param[in] name string tag of the process
+   /// @return rank of the referred process
+   virtual unsigned int rank(const std::string &name) const = 0;
+
+   /// @brief obtain rank of this process in this communicator
    /// @return rank
    virtual unsigned int rank() const = 0;
 
