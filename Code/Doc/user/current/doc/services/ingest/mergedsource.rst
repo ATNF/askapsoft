@@ -27,7 +27,10 @@ The type of the task defined by tasks.\ **name**\ .type should be set to *Merged
 |                            |                   |            |equal chunks for parallel processing. These keywords define   |
 |                            |                   |            |the number of channels handled by each rank. This is the      |
 |                            |                   |            |number of spectral channels the source task is expected to    |
-|                            |                   |            |receive for each integration.                                 |
+|                            |                   |            |receive for each integration. Note, **N** may not only be a   |
+|                            |                   |            |number, but also a string in the form **start..end**, in this |
+|                            |                   |            |case ranks from **start** to **end** inclusive will be set up |
+|                            |                   |            |the same number of channels                                   |
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
 |maxbeams                    |unsigned int       |0           |Number of beams to allocate for the data chunk passed through |
 |                            |                   |            |the task chain. If data are written to the disk, this is the  |
