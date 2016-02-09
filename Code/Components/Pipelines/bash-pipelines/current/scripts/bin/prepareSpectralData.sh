@@ -67,6 +67,7 @@ if [ $DO_IT == true ]; then
     cat > $sbatchfile <<EOFOUTER
 #!/usr/bin/env bash
 #SBATCH --partition=${QUEUE}
+#SBATCH --clusters=${CLUSTER}
 ${RESERVATION_REQUEST}
 #SBATCH --time=12:00:00
 #SBATCH --ntasks=1
@@ -152,6 +153,7 @@ if [ $DO_IT == true ]; then
     cat > $sbatchfile <<EOFOUTER
 #!/usr/bin/env bash
 #SBATCH --partition=${QUEUE}
+#SBATCH --clusters=${CLUSTER}
 ${RESERVATION_REQUEST}
 #SBATCH --time=12:00:00
 #SBATCH --ntasks=1
@@ -237,92 +239,26 @@ fi
 
 if [ ${DO_CONT_SUB_SL} == "true" ]; then
 
-    modelImage=image.${imageBase}
-
-    sbatchfile=$slurms/contsub_spectralline_beam${BEAM}.sbatch
-    cat > $sbatchfile <<EOFOUTER
-#!/usr/bin/env bash
-#SBATCH --partition=${QUEUE}
-${RESERVATION_REQUEST}
-#SBATCH --time=12:00:00
-#SBATCH --ntasks=1
-#SBATCH --ntasks-per-node=1
-#SBATCH --job-name=contsubSLsci${BEAM}
-${EMAIL_REQUEST}
-#SBATCH --export=ASKAP_ROOT,AIPSPATH
-#SBATCH --output=$slurmOut/slurm-contsubSLsci-%j.out
-
-cd $OUTPUT
-. ${PIPELINEDIR}/utils.sh	
-
-# Make a copy of this sbatch file for posterity
-sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
-
-if [ "${DIRECTION_SCI}" != "" ]; then
-    modelDirection="${DIRECTION_SCI}"
-else
-    log=${logs}/mslist_for_ccontsub_\${SLURM_JOB_ID}.log
-    aprun -n 1 -N 1 $mslist --full ${msSciSL} 1>& \${log}
-    ra=\`grep -A1 RA \$log | tail -1 | awk '{print \$7}'\`
-    dec=\`grep -A1 RA \$log | tail -1 | awk '{print \$8}'\`
-    eq=\`grep -A1 RA \$log | tail -1 | awk '{print \$9}'\`
-    modelDirection="[\${ra}, \${dec}, \${eq}]"
-fi
-
-parset=${parsets}/contsub_spectralline_beam${BEAM}_\${SLURM_JOB_ID}.in
-log=${logs}/contsub_spectralline_beam${BEAM}_\${SLURM_JOB_ID}.log
-cat > \$parset <<EOFINNER
-# The measurement set name - this will be overwritten
-CContSubtract.dataset                             = ${msSciSL}
-# The model definition
-CContSubtract.sources.names                       = [lsm]
-CContSubtract.sources.lsm.direction               = \${modelDirection}
-CContSubtract.sources.lsm.model                   = ${modelImage}
-CContSubtract.sources.lsm.nterms                  = ${NUM_TAYLOR_TERMS}
-# The gridding parameters
-CContSubtract.gridder.snapshotimaging             = ${GRIDDER_SNAPSHOT_IMAGING}
-CContSubtract.gridder.snapshotimaging.wtolerance  = ${GRIDDER_SNAPSHOT_WTOL}
-CContSubtract.gridder                             = WProject
-CContSubtract.gridder.WProject.wmax               = ${GRIDDER_WMAX}
-CContSubtract.gridder.WProject.nwplanes           = ${GRIDDER_NWPLANES}
-CContSubtract.gridder.WProject.oversample         = ${GRIDDER_OVERSAMPLE}
-CContSubtract.gridder.WProject.maxfeeds           = 1
-CContSubtract.gridder.WProject.maxsupport         = ${GRIDDER_MAXSUPPORT}
-CContSubtract.gridder.WProject.frequencydependent = true
-CContSubtract.gridder.WProject.variablesupport    = true
-CContSubtract.gridder.WProject.offsetsupport      = true
-EOFINNER
-
-aprun -n 1 -N 1 ${ccontsubtract} -c \${parset} > \${log}
-err=\$?
-NUM_CPUS=1
-extractStats \${log} \${SLURM_JOB_ID} \${err} contsub_spectral_B${BEAM} "txt,csv"
-if [ \$err != 0 ]; then
-    exit \$err
-else
-    touch $CONT_SUB_CHECK_FILE
-fi
-
-EOFOUTER
-
-    if [ $SUBMIT_JOBS == true ]; then
-        DEP=""
-        DEP=`addDep "$DEP" "$DEP_START"`
-        DEP=`addDep "$DEP" "$ID_SPLIT_SCI"`
-        DEP=`addDep "$DEP" "$ID_FLAG_SCI"`
-        DEP=`addDep "$DEP" "$ID_CCALAPPLY_SCI"`
-        DEP=`addDep "$DEP" "$ID_SPLIT_SL_SCI"`
-        DEP=`addDep "$DEP" "$ID_CAL_APPLY_SL_SCI"`
-        DEP=`addDep "$DEP" "$ID_CONTIMG_SCI"`
-        DEP=`addDep "$DEP" "$ID_CONTIMG_SCI_SC"`
-        ID_CONT_SUB_SL_SCI=`sbatch $DEP $sbatchfile | awk '{print $4}'`
-        recordJob ${ID_CONT_SUB_SL_SCI} "Subtract the continuum model from the spectral-line dataset for imaging beam $BEAM of the science observation, with flags \"$DEP\""
-    else
-        echo "Would subtract the continuum model from the spectral-line dataset for imaging beam $BEAM of the science observation with slurm file $sbatchfile"
-    fi
-
-    echo " "
+    . ${PIPELINEDIR}/spectralContinuumSubtraction.sh
+    
+##   
+##       if [ $SUBMIT_JOBS == true ]; then
+##           DEP=""
+##           DEP=`addDep "$DEP" "$DEP_START"`
+##           DEP=`addDep "$DEP" "$ID_SPLIT_SCI"`
+##           DEP=`addDep "$DEP" "$ID_FLAG_SCI"`
+##           DEP=`addDep "$DEP" "$ID_CCALAPPLY_SCI"`
+##           DEP=`addDep "$DEP" "$ID_SPLIT_SL_SCI"`
+##           DEP=`addDep "$DEP" "$ID_CAL_APPLY_SL_SCI"`
+##           DEP=`addDep "$DEP" "$ID_CONTIMG_SCI"`
+##           DEP=`addDep "$DEP" "$ID_CONTIMG_SCI_SC"`
+##           ID_CONT_SUB_SL_SCI=`sbatch $DEP $sbatchfile | awk '{print $4}'`
+##           recordJob ${ID_CONT_SUB_SL_SCI} "Subtract the continuum model from the spectral-line dataset for imaging beam $BEAM of the science observation, with flags \"$DEP\""
+##       else
+##           echo "Would subtract the continuum model from the spectral-line dataset for imaging beam $BEAM of the science observation with slurm file $sbatchfile"
+##       fi
+##   
+##       echo " "
     
 fi
 

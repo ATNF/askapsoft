@@ -37,6 +37,7 @@ if [ $DO_MOSAIC == true ]; then
     cat > $sbatchfile <<EOFOUTER
 #!/usr/bin/env bash
 #SBATCH --partition=${QUEUE}
+#SBATCH --clusters=${CLUSTER}
 ${RESERVATION_REQUEST}
 #SBATCH --time=01:00:00
 #SBATCH --ntasks=1

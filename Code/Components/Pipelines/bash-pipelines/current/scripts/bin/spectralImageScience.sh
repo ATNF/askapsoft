@@ -120,6 +120,7 @@ Simager.restore.beamLog                         = ${RESTORING_BEAM_LOG}"
     cat > $sbatchfile <<EOFOUTER
 #!/usr/bin/env bash
 #SBATCH --partition=${QUEUE}
+#SBATCH --clusters=${CLUSTER}
 ${RESERVATION_REQUEST}
 #SBATCH --time=12:00:00
 #SBATCH --ntasks=${NUM_CPUS_SPECIMG_SCI}

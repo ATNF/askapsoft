@@ -76,6 +76,7 @@ Cflag.selection_flagger.rule1.antenna   = ${ANTENNA_FLAG_1934}"
     cat > $sbatchfile <<EOFOUTER
 #!/usr/bin/env bash
 #SBATCH --partition=${QUEUE}
+#SBATCH --clusters=${CLUSTER}
 ${RESERVATION_REQUEST}
 #SBATCH --time=12:00:00
 #SBATCH --ntasks=1
@@ -167,6 +168,7 @@ Cflag.selection_flagger.rule1.antenna   = ${ANTENNA_FLAG_1934}"
     cat > $sbatchfile <<EOFOUTER
 #!/usr/bin/env bash
 #SBATCH --partition=${QUEUE}
+#SBATCH --clusters=${CLUSTER}
 ${RESERVATION_REQUEST}
 #SBATCH --time=12:00:00
 #SBATCH --ntasks=1

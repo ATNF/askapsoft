@@ -35,6 +35,8 @@
 SUBMIT_JOBS=false
 
 ####################
+# Cluster to submit to
+CLUSTER=galaxy
 # Queue to submit to
 QUEUE=workq
 # Reservation to use. If no reservation available, leave as blank
@@ -71,6 +73,7 @@ if [ "$ASKAP_ROOT" != "" ]; then
     AIPSPATH=$ASKAP_ROOT/Code/Base/accessors/current
     mssplit=$ASKAP_ROOT/Code/Components/CP/pipelinetasks/current/apps/mssplit.sh
     cflag=$ASKAP_ROOT/Code/Components/CP/pipelinetasks/current/apps/cflag.sh
+    cmodel=$ASKAP_ROOT/Code/Components/CP/pipelinetasks/current/apps/cmodel.sh
     cbpcalibrator=$ASKAP_ROOT/Code/Components/Synthesis/synthesis/current/apps/cbpcalibrator.sh
     ccalapply=$ASKAP_ROOT/Code/Components/Synthesis/synthesis/current/apps/ccalapply.sh
     cimager=${ASKAP_ROOT}/Code/Components/Synthesis/synthesis/current/apps/cimager.sh
@@ -79,10 +82,11 @@ if [ "$ASKAP_ROOT" != "" ]; then
     simager=${ASKAP_ROOT}/Code/Components/CP/simager/current/apps/simager.sh
     linmos=${ASKAP_ROOT}/Code/Components/Synthesis/synthesis/current/apps/linmos.sh
     selavy=${ASKAP_ROOT}/Code/Components/Analysis/analysis/current/apps/selavy.sh
-    mslist=${ASKAP_RROT}/Code/Components/Synthesis/synthesis/current/apps/mslist.sh
+    mslist=${ASKAP_ROOT}/Code/Components/Synthesis/synthesis/current/apps/mslist.sh
 else
     mssplit=mssplit
     cflag=cflag
+    cmodel=cmodel
     cbpcalibrator=cbpcalibrator
     ccalapply=ccalapply
     cimager=cimager
@@ -278,6 +282,16 @@ DO_APPLY_CAL_SL=false
 # Whether to subtract a continuum model
 DO_CONT_SUB_SL=false
 
+# Whether to contruct the continuum model via selavy & cmodel
+BUILD_MODEL_FOR_CONTSUB=true
+# Division of image for source-finding in continuum-subtraction
+CONTSUB_SELAVY_NSUBX=6
+CONTSUB_SELAVY_NSUBY=3
+# Detection threshold for Selavy in building continuum model
+CONTSUB_SELAVY_THRESHOLD=6
+
+# Flux limit for cmodel
+CONTSUB_MODEL_FLUX_LIMIT=10mJy
 
 # Number of processors allocated to the spectral-line imaging
 NUM_CPUS_SPECIMG_SCI=2000

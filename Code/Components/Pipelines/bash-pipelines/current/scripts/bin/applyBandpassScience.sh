@@ -41,6 +41,7 @@ if [ $DO_IT == true ]; then
     cat > $sbatchfile <<EOFOUTER
 #!/usr/bin/env bash
 #SBATCH --partition=${QUEUE}
+#SBATCH --clusters=${CLUSTER}
 ${RESERVATION_REQUEST}
 #SBATCH --time=12:00:00
 #SBATCH --ntasks=1
