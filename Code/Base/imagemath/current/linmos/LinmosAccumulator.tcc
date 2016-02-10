@@ -653,7 +653,7 @@ namespace askap {
 
             if (itsWeightType == FROM_BP_MODEL) {
                 // set the centre of the beam
-                if ( itsCentres.size() > 0 ) {
+                if ( itsCentres.size() > n ) {
                     itsInCentre = itsCentres[n];
                 } else {
                     // no other information, so set the centre of the beam to be the reference pixel
