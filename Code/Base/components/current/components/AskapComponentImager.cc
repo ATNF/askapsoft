@@ -1,6 +1,6 @@
 /// @file AskapComponentImager.cc
 ///
-/// @copyright (c) 2011 CSIRO
+/// @copyright (c) 2016 CSIRO
 /// Australia Telescope National Facility (ATNF)
 /// Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 /// PO Box 76, Epping NSW 1710, Australia
@@ -23,7 +23,9 @@
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
 /// @author Ben Humphreys <ben.humphreys@csiro.au>
-/// This implementation is based on the Casacore Component Imager.
+/// @author Matthew Whiting <Matthew.Whiting@csiro.au>
+/// This implementation is based on the Casacore Component Imager,
+/// although the evaluateGaussian functions are original.
 
 // Include own header file first
 #include "AskapComponentImager.h"
@@ -47,6 +49,7 @@
 #include "casa/Quanta/MVDirection.h"
 #include "casa/Quanta/MVFrequency.h"
 #include "scimath/Functionals/Gaussian2D.h"
+#include "scimath/Functionals/Gaussian1D.h"
 #include "images/Images/ImageInterface.h"
 #include "measures/Measures/Stokes.h"
 #include "measures/Measures/MDirection.h"
@@ -76,7 +79,7 @@ using namespace casa;
 
 template <class T>
 void AskapComponentImager::project(casa::ImageInterface<T>& image,
-        const casa::ComponentList& list, const unsigned int term)
+                                   const casa::ComponentList& list, const unsigned int term)
 {
     if (list.nelements() == 0) {
         return;
@@ -89,17 +92,17 @@ void AskapComponentImager::project(casa::ImageInterface<T>& image,
     // supplied coordinate system
     const Vector<Int> dirAxes = CoordinateUtil::findDirectionAxes(coords);
     ASKAPCHECK(dirAxes.nelements() == 2,
-            "Coordinate system has unsupported number of direction axes");
+               "Coordinate system has unsupported number of direction axes");
     const uInt latAxis = dirAxes(0);
     const uInt longAxis = dirAxes(1);
 
     // Find the Direction coordinate and check the right number of axes exists
     DirectionCoordinate dirCoord = coords.directionCoordinate(
-            coords.findCoordinate(Coordinate::DIRECTION));
+                                       coords.findCoordinate(Coordinate::DIRECTION));
     ASKAPCHECK(dirCoord.nPixelAxes() == 2,
-            "DirectionCoordinate has unsupported number of pixel axes");
+               "DirectionCoordinate has unsupported number of pixel axes");
     ASKAPCHECK(dirCoord.nWorldAxes() == 2,
-            "DirectionCoordinate has unsupported number of world axes");
+               "DirectionCoordinate has unsupported number of world axes");
     dirCoord.setWorldAxisUnits(Vector<String>(2, "rad"));
 
     // Check if there is a Stokes Axes and if so which polarizations.
@@ -115,8 +118,8 @@ void AskapComponentImager::project(casa::ImageInterface<T>& image,
         // If there is a Stokes axis it can only contain Stokes::I,Q,U,V pols.
         for (uInt p = 0; p < nStokes; ++p) {
             ASKAPCHECK(stokes(p) == Stokes::I || stokes(p) == Stokes::Q ||
-                    stokes(p) == Stokes::U || stokes(p) == Stokes::V,
-                    "Stokes axis can only contain I, Q, U or V pols");
+                       stokes(p) == Stokes::U || stokes(p) == Stokes::V,
+                       "Stokes axis can only contain I, Q, U or V pols");
         }
     } else {
         ASKAPLOG_DEBUG_STR(logger, "No polarisation axis, assuming Stokes I");
@@ -165,14 +168,14 @@ void AskapComponentImager::project(casa::ImageInterface<T>& image,
                 switch (c.shape().type()) {
                     case ComponentType::POINT:
                         projectPointShape(image, c, latAxis, longAxis, dirCoord,
-                                freqAxis, freqIdx, flux,
-                                polAxis, polIdx, stokes(polIdx));
+                                          freqAxis, freqIdx, flux,
+                                          polAxis, polIdx, stokes(polIdx));
                         break;
 
                     case ComponentType::GAUSSIAN:
                         projectGaussianShape(image, c, latAxis, longAxis, dirCoord,
-                                freqAxis, freqIdx, flux,
-                                polAxis, polIdx, stokes(polIdx));
+                                             freqAxis, freqIdx, flux,
+                                             polAxis, polIdx, stokes(polIdx));
                         break;
 
                     default:
@@ -213,9 +216,9 @@ void AskapComponentImager::projectPointShape(casa::ImageInterface<T>& image,
 
     // Add to image
     const IPosition pos = makePosition(latAxis, longAxis, freqAxis, polAxis,
-            static_cast<size_t>(latPosition),
-            static_cast<size_t>(lonPosition),
-            freqIdx, polIdx);
+                                       static_cast<size_t>(latPosition),
+                                       static_cast<size_t>(lonPosition),
+                                       freqIdx, polIdx);
     image.putAt(image(pos) + (flux.copy().value(stokes, true).getValue("Jy")), pos);
 }
 
@@ -278,16 +281,16 @@ void AskapComponentImager::projectGaussianShape(casa::ImageInterface<T>& image,
                                 static_cast<int>(pixelPosition(1)) + cutoff);
 
     IPosition pos = makePosition(latAxis, longAxis, freqAxis, polAxis,
-            static_cast<size_t>(nearbyint(pixelPosition[0])),
-            static_cast<size_t>(nearbyint(pixelPosition[1])),
-            freqIdx, polIdx);
+                                 static_cast<size_t>(nearbyint(pixelPosition[0])),
+                                 static_cast<size_t>(nearbyint(pixelPosition[1])),
+                                 freqIdx, polIdx);
 
     // For each pixel in the region bounded by the source centre + cutoff
     for (int lat = startLat; lat <= endLat; ++lat) {
         for (int lon = startLon; lon <= endLon; ++lon) {
             pos(latAxis) = lat;
             pos(longAxis) = lon;
-            image.putAt(image(pos) + gauss(lat, lon), pos);
+            image.putAt(image(pos) + evaluateGaussian(gauss, lat, lon), pos);
         }
     }
 }
@@ -336,7 +339,7 @@ casa::Flux<casa::Double> AskapComponentImager::makeFlux(const casa::SkyComponent
 
     // Now transform flux for the given taylor term
     if (term == 0) {
-        // Taylor Term 0 
+        // Taylor Term 0
         // I0 = I(v0)
     } else if (term == 1) {
         // Taylor Term 1
@@ -369,7 +372,7 @@ casa::Flux<casa::Double> AskapComponentImager::makeFlux(const casa::SkyComponent
 
 template <class T>
 int AskapComponentImager::findCutoff(const Gaussian2D<T>& gauss, const int spatialLimit,
-        const double fluxLimit)
+                                     const double fluxLimit)
 {
     // Make a copy of the gaussian and set the PA to zero so this function can
     // walk the major axis easily, to determine the cutoff. The major axis is
@@ -384,6 +387,177 @@ int AskapComponentImager::findCutoff(const Gaussian2D<T>& gauss, const int spati
     }
     return cutoff;
 }
+
+template <class T>
+double AskapComponentImager::evaluateGaussian(const Gaussian2D<T> &gauss,
+        const int xpix, const int ypix)
+{
+    // If we have a very narrow Gaussian, calculate the pixel flux
+    // using the 1D approach. Otherwise, we need to do a 2D integral.
+    if (gauss.minorAxis() < 1.e-10) {
+        return evaluateGaussian1D<T>(gauss, xpix, ypix);
+    } else {
+        return evaluateGaussian2D<T>(gauss, xpix, ypix);
+    }
+
+}
+
+template <class T>
+double AskapComponentImager::evaluateGaussian2D(const Gaussian2D<T> &gauss,
+        const int xpix, const int ypix)
+{
+    // Performs a spatial integration over the pixel extent to
+    // evaluate the contained flux. 
+    
+    double pixelVal = 0.;
+
+    double minSigma = std::min(gauss.majorAxis(), gauss.minorAxis()) /
+                      (2. * M_SQRT2 * sqrt(M_LN2));
+    /// @todo We could do a lot better here in getting the right
+    /// sampling in an adaptive manner. This approach is a little bit
+    /// of a kludge, but works reasonably well.
+    double delta = std::min(1. / 32.,
+                            pow(10., floor(log10(minSigma / 5.) / log10(2.)) * log10(2.)));
+    int nstep = int(1. / delta);
+
+    double xpos, ypos;
+    xpos = xpix - 0.5 - delta;
+    double xScaleFactor, yScaleFactor;
+
+    for (int dx = 0; dx <= nstep; dx++) {
+        xpos += delta;
+        ypos = ypix - 0.5 - delta;
+
+        for (int dy = 0; dy <= nstep; dy++) {
+            ypos += delta;
+
+            // This is integration using Simpson's rule. In each direction, the
+            // end points get a factor of 1, then odd steps get a factor of 4, and
+            // even steps 2. The whole sum then gets scaled by delta/3. for each
+            // dimension.
+
+            if (dx == 0 || dx == nstep) xScaleFactor = 1;
+            else xScaleFactor = (dx % 2 == 1) ? 4. : 2.;
+
+            if (dy == 0 || dy == nstep) yScaleFactor = 1;
+            else yScaleFactor = (dy % 2 == 1) ? 4. : 2.;
+
+            pixelVal += gauss(xpos, ypos) * (xScaleFactor * yScaleFactor);
+
+        }
+    }
+
+    pixelVal *= (delta * delta / 9.);
+
+    return pixelVal;
+}
+
+template <class T>
+double AskapComponentImager::evaluateGaussian1D(const Gaussian2D<T> &gauss,
+        const int xpix, const int ypix)
+{
+    // This approach represents the Gaussian as a one-dimensional
+    // line, and finds the points where that line intercepts the
+    // borders of the given pixel. Note that the provided (integral)
+    // position is assumed to be at the centre of the pixel. If the
+    // line does not intercept the pixel, the flux for the pixel is
+    // zero.
+
+    // boundaries of the pixel
+    double ypixmax = ypix + 0.5;
+    double ypixmin = ypix - 0.5;
+    double xpixmin = xpix - 0.5;
+    double xpixmax = xpix + 0.5;
+
+    // properties of the (2D) gaussian
+    double x0gauss = gauss.xCenter();
+    double y0gauss = gauss.yCenter();
+    double sigma = gauss.majorAxis() / (2. * M_SQRT2 * sqrt(M_LN2));
+
+    // Find where the line intersectes the pixel boundaries
+    std::vector<std::pair<double, double> > interceptList;
+
+    if (fabs(gauss.PA()) < 1.e-6) {
+        // vertical line - simplifies things
+        if ((x0gauss >= xpixmin) && (x0gauss < xpixmax)) {
+            // if we are in the pixel
+            interceptList.push_back(std::pair<double, double>(x0gauss, ypixmin));
+            interceptList.push_back(std::pair<double, double>(x0gauss, ypixmax));
+        }
+    } else if (fabs(gauss.PA() - M_PI / 2.) < 1.e-6) {
+        // horizontal line
+        if ((y0gauss >= ypixmin) && (y0gauss < ypixmax)) {
+            // if we are in the pixel
+            interceptList.push_back(std::pair<double, double>(xpixmin, y0gauss));
+            interceptList.push_back(std::pair<double, double>(xpixmax, y0gauss));
+        }
+
+    } else {
+        // general case of angled line. Need to find (up to) two points where
+        // the line intersects the pixel boundaries
+        // xminInt = x-value where line intersects bottom pixel boundary
+        // xmaxInt = x-value where line intersects top pixel boundary
+        // yminInt = y-value where line intersects left pixel boundary
+        // ymaxInt = y-value where line intersects right pixel boundary
+        
+        double gaussianSlope = tan(gauss.PA() - M_PI / 2.);
+        ASKAPLOG_DEBUG_STR(logger, "slope = " << gaussianSlope);
+        double xminInt = x0gauss + (ypixmin - y0gauss) / gaussianSlope;
+        double xmaxInt = x0gauss + (ypixmax - y0gauss) / gaussianSlope;
+        double yminInt = y0gauss + (xpixmin - x0gauss) * gaussianSlope;
+        double ymaxInt = y0gauss + (xpixmax - x0gauss) * gaussianSlope;
+
+        if ((xminInt >= xpixmin) && (xminInt < xpixmax)) {
+            interceptList.push_back(std::pair<double, double>(xminInt, ypixmin));
+        }
+        if ((xmaxInt >= xpixmin) && (xmaxInt < xpixmax)) {
+            interceptList.push_back(std::pair<double, double>(xmaxInt, ypixmax));
+        }
+        if ((yminInt >= ypixmin) && (yminInt < ypixmax)) {
+            interceptList.push_back(std::pair<double, double>(xpixmin, yminInt));
+        }
+        if ((ymaxInt >= ypixmin) && (ymaxInt < ypixmax)) {
+            interceptList.push_back(std::pair<double, double>(xpixmax, ymaxInt));
+        }
+
+    }
+
+    double pixelVal = 0.;
+    if (interceptList.size() == 2) {
+
+        // Find the locations of the two intercept points in the
+        // coordinates *along* the line, in units of the sigma value
+        // (ie. standard 'z-score' values)
+        std::vector<double> z(2);
+        for (int i = 0; i < 2; i++) {
+            z[i] = hypot(x0gauss - interceptList[i].first,
+                         y0gauss - interceptList[i].second) / sigma;
+            if (y0gauss > interceptList[i].second) {
+                // Make displacement negative for points below the centre
+                z[i] *= -1.;
+            }
+        }
+
+        // Make a 1D gaussian to get the height correct, since if the
+        // 2D gaussian's minor axis is really small, then the height
+        // will be massive for a reasonable (integrated) flux. We
+        // define with the height, but set the flux directly (which
+        // will implicitly reset the height value).
+        
+        casa::Gaussian1D<T> gauss1d(gauss.height(), 0., gauss.majorAxis());
+        gauss1d.setFlux(gauss.flux());
+
+        // Find the flux via a different in error-function values for the two intercept points
+        pixelVal = gauss1d.height() * fabs(0.5 * (erf(z[0] / (M_SQRT2 * sigma)) - erf(z[1] / (M_SQRT2 * sigma))));
+
+    } else {
+        // Line does not intersect this pixel. Flux = 0.
+        pixelVal = 0.;
+    }
+
+    return pixelVal;
+}
+
 
 // Explicit instantiation
 template void AskapComponentImager::project(casa::ImageInterface<float>&,

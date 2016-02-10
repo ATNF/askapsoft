@@ -1,6 +1,6 @@
 /// @file AskapComponentImager.h
 ///
-/// @copyright (c) 2011 CSIRO
+/// @copyright (c) 2016 CSIRO
 /// Australia Telescope National Facility (ATNF)
 /// Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 /// PO Box 76, Epping NSW 1710, Australia
@@ -23,6 +23,7 @@
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
 /// @author Ben Humphreys <ben.humphreys@csiro.au>
+/// @author Matthew Whiting <Matthew.Whiting@csiro.au>
 
 #ifndef ASKAP_COMPONENTS_ASKAPCOMPONENTIMAGER_H
 #define ASKAP_COMPONENTS_ASKAPCOMPONENTIMAGER_H
@@ -109,13 +110,13 @@ class AskapComponentImager {
         ///            not present.
         ///
         /// @param[in] latIdx   the index value on the latitude axis in the
-        ///                     returned IPosition instance. 
+        ///                     returned IPosition instance.
         /// @param[in] longIdx the index value on the longitude axis in the
-        ///                     returned IPosition instance. 
+        ///                     returned IPosition instance.
         /// @param[in] spectralIdx  the index value on the latitude axis in the
-        ///                         returned IPosition instance. 
+        ///                         returned IPosition instance.
         /// @param[in] polIdx   the index value on the polarisation axis in the
-        ///                     returned IPosition instance. 
+        ///                     returned IPosition instance.
         ///
         /// @return an IPosition object which represents all in the input parameters.
         static casa::IPosition makePosition(const casa::Int latAxis, const casa::Int longAxis,
@@ -132,8 +133,8 @@ class AskapComponentImager {
         ///                             is to be calculated.
         /// @param[in] term the taylor term to calculate the value for.
         static casa::Flux<casa::Double> makeFlux(const casa::SkyComponent& c,
-                                                 const casa::MFrequency& chanFrequency,
-                                                 const unsigned int term);
+                const casa::MFrequency& chanFrequency,
+                const unsigned int term);
 
         /// Determine the number of pixels to sample before the gaussian tapers
         /// off to below the flux limit.
@@ -152,8 +153,47 @@ class AskapComponentImager {
         /// @return the number of pixels from the centre of the gaussian at which point
         ///         the power is < flux limit.
         template <class T>
-            static int findCutoff(const casa::Gaussian2D<T>& gauss, const int spatialLimit,
-                                  const double fluxLimit);
+        static int findCutoff(const casa::Gaussian2D<T>& gauss, const int spatialLimit,
+                              const double fluxLimit);
+
+        /// @brief Front-end to the different functions for calculating
+        /// the flux due to a Gaussian component in a single pixel.
+        /// @param[in] gauss       the gaussian function to be evaluated
+        /// @param[in] xpix        the x-coordinate of the pixel
+        /// @param[in] ypix        the y-coordinate of the pixel
+        template <class T>
+        static double evaluateGaussian(const casa::Gaussian2D<T> &gauss,
+                                       const int xpix, const int ypix);
+
+        /// @brief Calculate the flux in a single pixel due to a 2D
+        /// Gaussian component. This integrates over the pixel to
+        /// accurately measure the flux going in, thereby taking into
+        /// account Gaussians that are comparable to or smaller in
+        /// size than the pixel extent. The pixel location given
+        /// (integer numbers) is assumed to be at the centre of the
+        /// pixel.
+        /// @param[in] gauss       the gaussian function to be evaluated
+        /// @param[in] xpix        the x-coordinate of the pixel
+        /// @param[in] ypix        the y-coordinate of the pixel
+        template <class T>
+        static double evaluateGaussian2D(const casa::Gaussian2D<T> &gauss,
+                                         const int xpix, const int ypix);
+
+        /// @brief Calculate the flux in a single pixel due to a
+        /// one-dimensional Gaussian component - that is, a 2D
+        /// Gaussian component with zero minor axis size. This allows
+        /// the calculations to be simplified and the flux in the
+        /// pixel directly calculated from the error function. The
+        /// pixel location given (integer numbers) is assumed to be at
+        /// the centre of the pixel.
+        /// @param[in] gauss       the gaussian function to be evaluated
+        /// @param[in] xpix        the x-coordinate of the pixel
+        /// @param[in] ypix        the y-coordinate of the pixel
+        template <class T>
+        static double evaluateGaussian1D(const casa::Gaussian2D<T> &gauss,
+                                         const int xpix, const int ypix);
+
+
 };
 
 // Explicit instantiations exist for float and double types only
