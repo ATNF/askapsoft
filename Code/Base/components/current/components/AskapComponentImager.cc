@@ -463,16 +463,21 @@ double AskapComponentImager::evaluateGaussian1D(const Gaussian2D<T> &gauss,
     // line does not intercept the pixel, the flux for the pixel is
     // zero.
 
+    // ASKAPLOG_DEBUG_STR(logger, "1d Gaussian evalution, at " << xpix << "," << ypix);
+
     // boundaries of the pixel
     double ypixmax = ypix + 0.5;
     double ypixmin = ypix - 0.5;
     double xpixmin = xpix - 0.5;
     double xpixmax = xpix + 0.5;
+    // ASKAPLOG_DEBUG_STR(logger, "Pixel ranges: xpixmin="<<xpixmin<<", xpixmax="<<xpixmax<<
+    //                    ",  ypixmin="<<ypixmin<<", ypixmax="<<ypixmax);
 
     // properties of the (2D) gaussian
     double x0gauss = gauss.xCenter();
     double y0gauss = gauss.yCenter();
     double sigma = gauss.majorAxis() / (2. * M_SQRT2 * sqrt(M_LN2));
+    // ASKAPLOG_DEBUG_STR(logger, "Centre of Gaussian = ("<<x0gauss << "," << y0gauss << ", pa="<<gauss.PA()*180./M_PI);
 
     // Find where the line intersectes the pixel boundaries
     std::vector<std::pair<double, double> > interceptList;
@@ -501,11 +506,12 @@ double AskapComponentImager::evaluateGaussian1D(const Gaussian2D<T> &gauss,
         // ymaxInt = y-value where line intersects right pixel boundary
         
         double gaussianSlope = tan(gauss.PA() - M_PI / 2.);
-        ASKAPLOG_DEBUG_STR(logger, "slope = " << gaussianSlope);
         double xminInt = x0gauss + (ypixmin - y0gauss) / gaussianSlope;
         double xmaxInt = x0gauss + (ypixmax - y0gauss) / gaussianSlope;
         double yminInt = y0gauss + (xpixmin - x0gauss) * gaussianSlope;
         double ymaxInt = y0gauss + (xpixmax - x0gauss) * gaussianSlope;
+
+       // ASKAPLOG_DEBUG_STR(logger, "intercepts: " << xminInt << " " << yminInt << " " << xmaxInt << " " << ymaxInt);
 
         if ((xminInt >= xpixmin) && (xminInt < xpixmax)) {
             interceptList.push_back(std::pair<double, double>(xminInt, ypixmin));
@@ -546,10 +552,16 @@ double AskapComponentImager::evaluateGaussian1D(const Gaussian2D<T> &gauss,
         
         casa::Gaussian1D<T> gauss1d(gauss.height(), 0., gauss.majorAxis());
         gauss1d.setFlux(gauss.flux());
+        // ASKAPLOG_DEBUG_STR(logger, "Defined a 1D Gaussian with height=" << gauss1d.height() << ", flux="<<
+        //                    gauss1d.flux() << " and FWHM="<<gauss1d.width());
 
         // Find the flux via a different in error-function values for the two intercept points
-        pixelVal = gauss1d.height() * fabs(0.5 * (erf(z[0] / (M_SQRT2 * sigma)) - erf(z[1] / (M_SQRT2 * sigma))));
+        pixelVal = gauss1d.flux() * fabs(0.5 * (erf(z[0] / (M_SQRT2 * sigma)) - erf(z[1] / (M_SQRT2 * sigma))));
 
+        // ASKAPLOG_DEBUG_STR(logger, "Flux of " << pixelVal << " between z=["<<z[0]<<","<<z[1] <<
+        //                    "] or pixel locations ("<<interceptList[0].first<<","<<interceptList[0].second <<
+        //                    ") & ("<<interceptList[1].first<<","<<interceptList[1].second <<")");
+        
     } else {
         // Line does not intersect this pixel. Flux = 0.
         pixelVal = 0.;
