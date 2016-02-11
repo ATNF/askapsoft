@@ -35,9 +35,10 @@ imageBase=${IMAGE_BASE_SPECTRAL}.beam${BEAM}
 
 DO_IT=$DO_SPECTRAL_IMAGING
 
-if [ $CLOBBER == false ] && [ -e ${OUTPUT}/${imageBase}.restored ]; then
+if [ $CLOBBER == false ] && [ -e ${OUTPUT}/image.${imageBase}.restored ]; then
     if [ $DO_IT == true ]; then
         echo "Image ${imageBase}.restored exists, so not running spectral-line imaging for beam ${BEAM}"
+        echo " "
     fi
     DO_IT=false
 fi
