@@ -237,7 +237,7 @@ if [ -e $CONT_SUB_CHECK_FILE ]; then
     DO_IT=false
 fi
 
-if [ ${DO_CONT_SUB_SL} == "true" ]; then
+if [ ${DO_IT} == "true" ]; then
 
     . ${PIPELINEDIR}/spectralContinuumSubtraction.sh
         
