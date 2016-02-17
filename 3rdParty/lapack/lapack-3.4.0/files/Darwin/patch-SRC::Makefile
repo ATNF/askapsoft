@@ -16,7 +16,7 @@
  	$(RANLIB) ../$(LAPACKLIB)
  
 +../liblapack.dylib: $(ALLOBJ)
-+	$(FORTRAN) -dynamiclib -undefined dynamic_lookup -compatibility_version 1 -current_version 3.4.0 -Wl,-dylib_install_name,liblapack.dylib -o $@ $(ALLOBJ)
++	$(FORTRAN) $(LLVMFLAGS)  -dynamiclib -undefined dynamic_lookup -compatibility_version 1 -current_version 3.4.0 -Wl,-dylib_install_name,liblapack.dylib -o $@ $(ALLOBJ)
 +
  $(ALLAUX): $(FRC)
  $(SCLAUX): $(FRC)

@@ -19,12 +19,13 @@ SHELL = /bin/sh
 #  selected.  Define LOADER and LOADOPTS to refer to the loader
 #  and desired load options for your machine.
 #
+#
 FORTRAN  = gfortran
-OPTS     = -O2 -fPIC
+OPTS     = -O2 -fPIC $(LLVMFLAGS)
 DRVOPTS  = $(OPTS)
-NOOPT    = -O0 -fPIC
+NOOPT    = -O0 -fPIC $(LLVMFLAGS)
 LOADER   = gfortran
-LOADOPTS = -fPIC
+LOADOPTS = -fPIC $(LLVMFLAGS)
 #
 # Timer for the SECOND and DSECND routines
 #

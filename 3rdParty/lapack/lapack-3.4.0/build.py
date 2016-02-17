@@ -1,8 +1,11 @@
 import glob
 import os
 import shutil
+import sys
+
 
 from askapdev.rbuild.builders import Autotools as _Builder
+import askapdev.rbuild.utils as utils
 
 class Builder(_Builder):
     def _install(self):
@@ -19,7 +22,13 @@ builder.remote_archive = "lapack-3.4.0.tgz"
 
 blas = builder.dep.get_dep_path("blas")
 
-builder.add_option('-fPIC')
+platform = utils.get_platform()
+
+if platform['system'] == 'Darwin':
+    if (int(platform['tversion'][1]) >= 10):
+        builder.add_env("LLVMFLAGS","-Wa,-q")
+
+builder.add_option("-fPIC")
 builder.add_file("files/make.inc")
 builder.replace("make.inc", "@@@blas@@@", blas)
 builder.parallel = False
