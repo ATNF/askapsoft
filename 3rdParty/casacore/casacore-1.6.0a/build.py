@@ -43,4 +43,9 @@ builder.nowarnings = True
 builder.add_option("-DCMAKE_C_COMPILER=gcc")
 builder.add_option("-DCMAKE_CXX_COMPILER=g++")
 
+if platform['system'] == 'Darwin':
+   
+    if (int(platform['tversion'][1]) >= 10):
+        builder.add_option("-DCMAKE_Fortran_FLAGS=-Wa,-q")
+
 builder.build()
