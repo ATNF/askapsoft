@@ -47,7 +47,7 @@ class CorrBufferUnit
         virtual ~CorrBufferUnit();
 
         /// Print out data
-        void print();
+        void print() const;
 
 
         /// Visibility data

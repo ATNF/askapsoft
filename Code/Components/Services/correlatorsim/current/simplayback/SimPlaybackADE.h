@@ -62,7 +62,7 @@ class SimPlaybackADE {
 
     private:
 	
-		const static double TIMEMULTIPLIER = 1000000.0;
+		//const static double TIMEMULTIPLIER = 1000000.0;
 		
         // Validates the configuration parameter set, throwing an
         // exception if it is not suitable.
@@ -73,6 +73,7 @@ class SimPlaybackADE {
 
         // Factory method of sorts, creates the Correlator Simulator instance.
         boost::shared_ptr<CorrelatorSimulatorADE> makeCorrelatorSim(void);
+
 
         // ParameterSet (configuration)
         const LOFAR::ParameterSet itsParset;

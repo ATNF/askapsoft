@@ -246,15 +246,15 @@ void CorrelatorSimulatorADE::initBuffer()
         stringstream convert(antNameNumber);
         uint32_t antIndex;
         convert >> antIndex;
-        antIndices.push_back(antIndex-1);   // antenna name is 1-based
+        itsAntIndices.push_back(antIndex-1);   // antenna name is 1-based
         if (itsShelf == DISPLAY_SHELF) {
             cout << "      antenna name: " << antName << " -> index: " << 
-                    antIndices[ant] << endl;
+                    itsAntIndices[ant] << endl;
         }
     }
 
     // channel count
-    buffer.nChanMeas = nChan;
+    itsBuffer.nChanMeas = nChan;
     uint32_t nCorrProdMeas = itsCorrProdMap.getTotal(nAntMeas);
     if (itsShelf == DISPLAY_SHELF) {
         cout << "    Correlation product count: " << nCorrProdMeas << endl;
@@ -285,7 +285,7 @@ void CorrelatorSimulatorADE::initBuffer()
     // Note that buffer contains all correlation products (as requested in
     // parset, which is usually more than available in measurement set) and
     // all channels (as requested in parset)
-    buffer.init(itsNCorrProd, itsNCoarseChannel);
+    itsBuffer.init(itsNCorrProd, itsNCoarseChannel);
     if (itsShelf == DISPLAY_SHELF) {
         cout << "    Channels to be simulated: " << itsNCoarseChannel << endl;
         cout << "    Buffer data: correlation products x channels: " << 
@@ -293,9 +293,9 @@ void CorrelatorSimulatorADE::initBuffer()
         cout << "  Creating buffer for simulation data: done" << endl;
     }
     // card count
-    buffer.nCard = itsNCoarseChannel / DATAGRAM_CHANNELMAX + 1;
+    itsBuffer.nCard = itsNCoarseChannel / DATAGRAM_CHANNELMAX + 1;
     if (itsShelf == DISPLAY_SHELF) {
-        cout << "  Total cards: " << buffer.nCard << endl;
+        cout << "  Total cards: " << itsBuffer.nCard << endl;
     }
     cout << "Shelf " << itsShelf << ": initializing buffer: done" << endl;
     cout << endl;
@@ -349,15 +349,17 @@ bool CorrelatorSimulatorADE::getBufferData()
             uint64_t(Tint / 2);
 
     // ideally we need to carry 64-bit BAT in the payload explicitly
-    buffer.timeStamp = static_cast<long>(startBAT);
-    itsCurrentTime = buffer.timeStamp;
-    buffer.beam = static_cast<uint32_t>(msc.feed1()(itsCurrentRow));
+    itsBuffer.timeStamp = static_cast<long>(startBAT);
+    itsCurrentTime = itsBuffer.timeStamp;
+    itsBuffer.beam = static_cast<uint32_t>(msc.feed1()(itsCurrentRow));
 #ifdef VERBOSE
-    cout << "  Time " << buffer.timeStamp << ", beam " << buffer.beam << endl;
+    cout << "  Time " << itsBuffer.timeStamp << ", beam " << 
+		itsBuffer.beam << endl;
 #endif
 
     while ((itsCurrentRow < nRow) &&
-        (static_cast<uint32_t>(msc.feed1()(itsCurrentRow)) == buffer.beam)) {
+        (static_cast<uint32_t>(msc.feed1()(itsCurrentRow)) == 
+			itsBuffer.beam)) {
 
         uint32_t dataDescId = msc.dataDescId()(itsCurrentRow);
         uint32_t descSpwId = ddc.spectralWindowId()(dataDescId);
@@ -370,14 +372,14 @@ bool CorrelatorSimulatorADE::getBufferData()
         ASKAPCHECK(nChan == frequencies.size(), 
                 "Disagreement in the number of channels in measurement set");
         for (uint32_t chan = 0; chan < nChan; ++chan) {
-            buffer.freqId[chan].block = 1;          // dummy value
-            buffer.freqId[chan].card = 1;           // dummy value
-            buffer.freqId[chan].channel = chan + 1; // 1-based
-            buffer.freqId[chan].freq = frequencies[chan];
+            itsBuffer.freqId[chan].block = 1;          // dummy value
+            itsBuffer.freqId[chan].card = 1;           // dummy value
+            itsBuffer.freqId[chan].channel = chan + 1; // 1-based
+            itsBuffer.freqId[chan].freq = frequencies[chan];
         }
 
-        uint32_t ant1 = antIndices[msc.antenna1()(itsCurrentRow)];
-        uint32_t ant2 = antIndices[msc.antenna2()(itsCurrentRow)];
+        uint32_t ant1 = itsAntIndices[msc.antenna1()(itsCurrentRow)];
+        uint32_t ant2 = itsAntIndices[msc.antenna2()(itsCurrentRow)];
         if (ant1 > ant2) {
             std::swap(ant1,ant2);
         }
@@ -409,28 +411,28 @@ bool CorrelatorSimulatorADE::getBufferData()
                 uint32_t corrProd = itsCorrProdMap.getIndex(ant1, ant2, corr);
                 //cout << "  corrProd: " << corrProd << endl;
                 //cout << "  size: " << buffer.corrProdIsFilled.size() << endl;
-                ASKAPCHECK(!buffer.corrProdIsFilled[corrProd],
+                ASKAPCHECK(!itsBuffer.corrProdIsFilled[corrProd],
                         "Correlator product " << corrProd << 
                         " is already filled");
                 for (uint32_t chan = 0; chan < nChan; ++chan) {
-                    buffer.data[corrProd][chan].vis.real = 
+                    itsBuffer.data[corrProd][chan].vis.real = 
                             data(corr,chan).real();
-                    buffer.data[corrProd][chan].vis.imag = 
+                    itsBuffer.data[corrProd][chan].vis.imag = 
                             data(corr,chan).imag();
                 }   // channel
-                buffer.corrProdIsFilled[corrProd] = true;
-                buffer.corrProdIsOriginal[corrProd] = true;
+                itsBuffer.corrProdIsFilled[corrProd] = true;
+                itsBuffer.corrProdIsOriginal[corrProd] = true;
             }
         }   // correlation
         ++itsCurrentRow;
     }   // row
 
-    buffer.ready = true;
+    itsBuffer.ready = true;
 
 #ifdef VERBOSE
     cout << "Shelf " << itsShelf << ": getting buffer data: done" << endl;
 #endif
-    return (buffer.ready);
+    return (itsBuffer.ready);
 }   // getBuffer
 
 
@@ -446,31 +448,31 @@ void CorrelatorSimulatorADE::fillCorrProdInBuffer()
 
     // set initial correlation product index to force search from beginning
     int32_t originalCP = -1; 
-    for (uint32_t cp = 0; cp < buffer.data.size(); ++cp) {
+    for (uint32_t cp = 0; cp < itsBuffer.data.size(); ++cp) {
         // if the correlation product has no data
-        if (!buffer.corrProdIsFilled[cp]) {
+        if (!itsBuffer.corrProdIsFilled[cp]) {
             // find the next available original data
-            originalCP = buffer.findNextOriginalCorrProd(originalCP);
+            originalCP = itsBuffer.findNextOriginalCorrProd(originalCP);
 
             // if found
             if (originalCP >= 0) {
                 // fill in the empty correlation product with original data
-                buffer.copyCorrProd(originalCP, cp);
+                itsBuffer.copyCorrProd(originalCP, cp);
             }
             // if none can be found
             else {
                 // search from the beginning
-                originalCP = buffer.findNextOriginalCorrProd(-1);
+                originalCP = itsBuffer.findNextOriginalCorrProd(-1);
                 ASKAPCHECK(originalCP >= 0, 
                         "Still cannot find original data");
-                buffer.copyCorrProd(originalCP, cp);
+                itsBuffer.copyCorrProd(originalCP, cp);
             }
         }
     }   // correlation product
 
     // check
-    for (uint32_t cp = 0; cp < buffer.data.size(); ++cp) {
-        ASKAPCHECK(buffer.corrProdIsFilled[cp], "Correlation product " <<
+    for (uint32_t cp = 0; cp < itsBuffer.data.size(); ++cp) {
+        ASKAPCHECK( itsBuffer.corrProdIsFilled[cp], "Correlation product " <<
                 cp << " is still empty");
     }
 
@@ -491,18 +493,18 @@ void CorrelatorSimulatorADE::fillChannelInBuffer()
     cout << "Shelf " << itsShelf << 
             ": filling empty channels in buffer ..." << endl;
 #endif
-    uint32_t sourceChan = buffer.nChanMeas - 1;
+    uint32_t sourceChan = itsBuffer.nChanMeas - 1;
 
     // Frequency increment
-    const double freqInc = buffer.freqId[1].freq - buffer.freqId[0].freq;
+    const double freqInc = itsBuffer.freqId[1].freq - itsBuffer.freqId[0].freq;
 
-    for (uint32_t chan = buffer.nChanMeas; 
+    for (uint32_t chan = itsBuffer.nChanMeas; 
             chan < itsNCoarseChannel; ++chan) {
 
-        buffer.freqId[chan].block = buffer.freqId[sourceChan].block;
-        buffer.freqId[chan].card = buffer.freqId[sourceChan].card;
-        buffer.freqId[chan].channel = chan + 1; // 1-based
-        buffer.freqId[chan].freq = buffer.freqId[0].freq + freqInc * chan;
+        itsBuffer.freqId[chan].block = itsBuffer.freqId[sourceChan].block;
+        itsBuffer.freqId[chan].card = itsBuffer.freqId[sourceChan].card;
+        itsBuffer.freqId[chan].channel = chan + 1; // 1-based
+        itsBuffer.freqId[chan].freq = itsBuffer.freqId[0].freq + freqInc * chan;
     }
 #ifdef VERBOSE
     cout << "Shelf " << itsShelf << 
@@ -520,8 +522,8 @@ void CorrelatorSimulatorADE::fillTestBuffer
     cout << "Shelf " << itsShelf << 
             ": filling test buffer ..." << endl;
 #endif
-    testBuffer.timeStamp = payload.timestamp;
-    testBuffer.beam = payload.beamid;
+    itsTestBuffer.timeStamp = payload.timestamp;
+    itsTestBuffer.beam = payload.beamid;
     uint32_t corrChan = payload.channel - DATAGRAM_CHANNELMIN;
     uint32_t measChan = itsChannelMap.fromCorrelator(corrChan);
     uint32_t card = payload.card - DATAGRAM_CARDMIN;
@@ -529,17 +531,17 @@ void CorrelatorSimulatorADE::fillTestBuffer
     // total contiguous channel
     uint32_t chan = ((block * DATAGRAM_NCARD) + card) * DATAGRAM_NCHANNEL
             + measChan;
-    testBuffer.freqId[chan].block = payload.block;
-    testBuffer.freqId[chan].card = payload.card;
-    testBuffer.freqId[chan].channel = measChan + DATAGRAM_CHANNELMIN;
-    testBuffer.freqId[chan].freq = payload.freq;
+    itsTestBuffer.freqId[chan].block = payload.block;
+    itsTestBuffer.freqId[chan].card = payload.card;
+    itsTestBuffer.freqId[chan].channel = measChan + DATAGRAM_CHANNELMIN;
+    itsTestBuffer.freqId[chan].freq = payload.freq;
     for (uint32_t corrProd = 0;
             corrProd < payload.baseline2 - payload.baseline1 + 1; 
             ++corrProd) {
-        testBuffer.data[payload.baseline1 + corrProd - 1][chan].vis.real = 
-                payload.vis[corrProd].real;
-        testBuffer.data[payload.baseline1 + corrProd - 1][chan].vis.imag = 
-                payload.vis[corrProd].imag;
+        itsTestBuffer.data[payload.baseline1 + corrProd - 1][chan].vis.real
+                = payload.vis[corrProd].real;
+        itsTestBuffer.data[payload.baseline1 + corrProd - 1][chan].vis.imag
+                = payload.vis[corrProd].imag;
     }
 #ifdef VERBOSE
     cout << "Shelf " << itsShelf << 
@@ -555,16 +557,17 @@ void CorrelatorSimulatorADE::checkTestBuffer() {
     cout << "Shelf " << itsShelf << 
             ": checking test buffer ..." << endl;
 #endif
-    const double coarseFreqInc = buffer.freqId[1].freq - buffer.freqId[0].freq;
-    const double freqMin = buffer.freqId[0].freq;
+    const double coarseFreqInc = itsBuffer.freqId[1].freq - 
+		itsBuffer.freqId[0].freq;
+    const double freqMin = itsBuffer.freqId[0].freq;
     const double freqInc = coarseFreqInc / itsNChannelSub;
     const double small = 0.00001;
 #ifdef VERBOSE
-    cout << "  Channel count: " << testBuffer.freqId.size() << endl;
-    const double freqMax = buffer.freqId[buffer.freqId.size()-1].freq;
+    cout << "  Channel count: " << itsTestBuffer.freqId.size() << endl;
+    const double freqMax = itsBuffer.freqId[itsBuffer.freqId.size()-1].freq;
     cout << "  Freq min ~ max: " << freqMin << " ~ " << freqMax << endl;
 #endif
-    for (uint32_t chan = 0; chan < testBuffer.freqId.size(); ++chan) {
+    for (uint32_t chan = 0; chan < itsTestBuffer.freqId.size(); ++chan) {
 
         // Check for channel, card, block that should be in the buffer
         // and those that are not supposed to be in the buffer
@@ -579,36 +582,36 @@ void CorrelatorSimulatorADE::checkTestBuffer() {
         // If the data belongs to this shelf
         if (cardExpected == itsShelf) {
             // Check for data validity
-            ASKAPCHECK(channelExpected == testBuffer.freqId[chan].channel,
+            ASKAPCHECK(channelExpected == itsTestBuffer.freqId[chan].channel,
                     "Expected channel " << channelExpected << 
-                    " <> received " << testBuffer.freqId[chan].channel);
-            ASKAPCHECK(cardExpected == testBuffer.freqId[chan].card,
+                    " <> received " << itsTestBuffer.freqId[chan].channel);
+            ASKAPCHECK(cardExpected == itsTestBuffer.freqId[chan].card,
                     "Expected card " << cardExpected << 
-                    " <> received " << testBuffer.freqId[chan].card);
-            ASKAPCHECK(blockExpected == testBuffer.freqId[chan].block,
+                    " <> received " << itsTestBuffer.freqId[chan].card);
+            ASKAPCHECK(blockExpected == itsTestBuffer.freqId[chan].block,
                     "Expected block " << blockExpected << 
-                    " <> received " << testBuffer.freqId[chan].block);
+                    " <> received " << itsTestBuffer.freqId[chan].block);
             double freqExpected = (freqMin + freqInc * chan) / 1000000.0;
-            ASKAPCHECK((freqExpected + small >= testBuffer.freqId[chan].freq)
-                    && (freqExpected - small <= testBuffer.freqId[chan].freq),
+            ASKAPCHECK((freqExpected + small >= itsTestBuffer.freqId[chan].freq)
+                    && (freqExpected - small <= itsTestBuffer.freqId[chan].freq),
                     "Expected frequency " << freqExpected <<
-                    " <> received " << testBuffer.freqId[chan].freq);
+                    " <> received " << itsTestBuffer.freqId[chan].freq);
         }
         else {  // If the data does not belong to this shelf
             // All data must be zero
-            ASKAPCHECK(testBuffer.freqId[chan].channel == 0,
-                    "Non zero channel " << testBuffer.freqId[chan].channel);
-            ASKAPCHECK(testBuffer.freqId[chan].card == 0,
-                    "Non zero card " << testBuffer.freqId[chan].card);
-            ASKAPCHECK(testBuffer.freqId[chan].block == 0,
-                    "Non zero block " << testBuffer.freqId[chan].block);
-            ASKAPCHECK(testBuffer.freqId[chan].freq == 0.0,
-                    "Non zero frequency " << testBuffer.freqId[chan].freq);
+            ASKAPCHECK(itsTestBuffer.freqId[chan].channel == 0,
+                    "Non zero channel " << itsTestBuffer.freqId[chan].channel);
+            ASKAPCHECK(itsTestBuffer.freqId[chan].card == 0,
+                    "Non zero card " << itsTestBuffer.freqId[chan].card);
+            ASKAPCHECK(itsTestBuffer.freqId[chan].block == 0,
+                    "Non zero block " << itsTestBuffer.freqId[chan].block);
+            ASKAPCHECK(itsTestBuffer.freqId[chan].freq == 0.0,
+                    "Non zero frequency " << itsTestBuffer.freqId[chan].freq);
         }
 #ifdef VERBOSE
-        cout << chan + 1 << ": " << testBuffer.freqId[chan].card << ", " << 
-                testBuffer.freqId[chan].channel << ", " <<
-                freqExpected << ", " << testBuffer.freqId[chan].freq << endl;
+        cout << chan + 1 << ": " << itsTestBuffer.freqId[chan].card << ", " << 
+                itsTestBuffer.freqId[chan].channel << ", " <<
+                freqExpected << ", " << itsTestBuffer.freqId[chan].freq << endl;
 #endif
     }
     cout << "Shelf " << itsShelf << 
@@ -620,16 +623,16 @@ void CorrelatorSimulatorADE::checkTestBuffer() {
 bool CorrelatorSimulatorADE::sendBufferData()
 {
 #ifdef VERBOSE
-    cout << "  Shelf " << itsShelf << " sends beam " << buffer.beam << endl;
+    cout << "  Shelf " << itsShelf << " sends beam " << itsBuffer.beam << endl;
 #endif
     askap::cp::VisDatagramADE payload;
 
     // Data that is constant for the whole buffer
     payload.version = VisDatagramTraits<VisDatagramADE>::VISPAYLOAD_VERSION;
-    payload.timestamp = buffer.timeStamp;
-    payload.beamid = buffer.beam + 1;
+    payload.timestamp = itsBuffer.timeStamp;
+    payload.beamid = itsBuffer.beam + 1;
 
-    const uint32_t nCorrProd = buffer.data.size();
+    const uint32_t nCorrProd = itsBuffer.data.size();
     const uint32_t nCorrProdPerSlice = 
             VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE;
     const uint32_t nSlice = nCorrProd / nCorrProdPerSlice;
@@ -637,8 +640,9 @@ bool CorrelatorSimulatorADE::sendBufferData()
     // The total number of simulated fine channels in correlator
     const uint32_t nFineCorrChan = itsNCoarseChannel * itsNChannelSub;
 
-    const double coarseFreqInc = buffer.freqId[1].freq - buffer.freqId[0].freq;
-    const double freqMin = buffer.freqId[0].freq;
+    const double coarseFreqInc = itsBuffer.freqId[1].freq - 
+		itsBuffer.freqId[0].freq;
+    const double freqMin = itsBuffer.freqId[0].freq;
     const double freqInc = coarseFreqInc / itsNChannelSub;
     
 #ifdef VERBOSE
@@ -650,7 +654,7 @@ bool CorrelatorSimulatorADE::sendBufferData()
 #ifdef VERBOSE
         cout << "  Creating test buffer ..." << endl;
 #endif
-        testBuffer.init(itsNCorrProd, itsNCoarseChannel*itsNChannelSub);
+        itsTestBuffer.init(itsNCorrProd, itsNCoarseChannel*itsNChannelSub);
 #ifdef VERBOSE
         cout << "    Correlation products x fine channels: " <<
                 itsNCorrProd << " x " << itsNCoarseChannel*itsNChannelSub << 
@@ -715,9 +719,9 @@ bool CorrelatorSimulatorADE::sendBufferData()
                 uint32_t corrProd = corrProdInSlice + 
                         slice * nCorrProdPerSlice;
                 payload.vis[corrProdInSlice].real = 
-                        buffer.data[corrProd][coarseMeasChan].vis.real;
+                        itsBuffer.data[corrProd][coarseMeasChan].vis.real;
                 payload.vis[corrProdInSlice].imag = 
-                        buffer.data[corrProd][coarseMeasChan].vis.imag;
+                        itsBuffer.data[corrProd][coarseMeasChan].vis.imag;
             }   // correlation product in slice
 
             // Card is sending its payload
@@ -732,7 +736,7 @@ bool CorrelatorSimulatorADE::sendBufferData()
         }   // slice
     }   // simulated channel in correlator
 
-    buffer.reset();
+    itsBuffer.reset();
 
 #ifdef VERBOSE
     cout << "Shelf " << itsShelf << " finished Sending buffer data" << endl;

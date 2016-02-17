@@ -79,7 +79,7 @@ void CorrBuffer::reset()
 
 
 
-int32_t CorrBuffer::findNextEmptyCorrProd(int32_t startCP)
+int32_t CorrBuffer::findNextEmptyCorrProd(int32_t startCP) const
 {
     for (uint32_t cp = startCP+1; cp < data.size(); ++cp) {
         if (!corrProdIsFilled[cp]) {
@@ -91,7 +91,7 @@ int32_t CorrBuffer::findNextEmptyCorrProd(int32_t startCP)
 
 
 
-int32_t CorrBuffer::findNextOriginalCorrProd(int32_t startCP)
+int32_t CorrBuffer::findNextOriginalCorrProd(int32_t startCP) const
 {
     for (uint32_t cp = startCP+1; cp < data.size(); ++cp) {
         if (corrProdIsOriginal[cp]) {
@@ -113,7 +113,7 @@ void CorrBuffer::copyCorrProd(int32_t source, int32_t destination)
 
 
 
-void CorrBuffer::print ()
+void CorrBuffer::print () const
 {
     cout << "Buffer contents" << endl;
     cout << "Time stamp                      : " << timeStamp << endl;

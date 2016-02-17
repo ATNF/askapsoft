@@ -46,7 +46,7 @@ class FreqIndex
         virtual ~FreqIndex();
 
         /// Print the content
-        void print();
+        void print() const;
 
         // data
         

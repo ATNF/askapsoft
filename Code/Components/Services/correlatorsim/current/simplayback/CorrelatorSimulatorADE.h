@@ -44,8 +44,6 @@
 #include "simplayback/CorrBuffer.h"
 #include "simplayback/ChannelMap.h"
 
-// Test the correlator simulator using a buffer that acts as ingest
-//#define TEST
 
 namespace askap {
 namespace cp {
@@ -144,13 +142,13 @@ class CorrelatorSimulatorADE : public ISimulator {
         boost::scoped_ptr<askap::cp::VisPortADE> itsPort;
 
         // Buffer data
-        CorrBuffer buffer;
+        CorrBuffer itsBuffer;
 
         // Test buffer
-        CorrBuffer testBuffer;
+        CorrBuffer itsTestBuffer;
 
         // Antenna indices
-        vector<uint32_t> antIndices;
+        vector<uint32_t> itsAntIndices;
 
 
         // Internal functions

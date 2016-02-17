@@ -62,13 +62,13 @@ class CorrBuffer
         /// Find the next correlation product that has no data
         /// @param[in] Starting point for search (-1 to search from beginning)
         /// @return The next empty correlation product (-1 if none found)
-        int32_t findNextEmptyCorrProd(int32_t startCP);
+        int32_t findNextEmptyCorrProd(int32_t startCP) const;
 
         /// Find the next correlation product with original data (not copy)
         /// @param[in] Starting point for search (-1 to search from beginning)
         /// @return The next correlation product with original data
         /// (-1 if none found)
-        int32_t findNextOriginalCorrProd(int32_t startCP);
+        int32_t findNextOriginalCorrProd(int32_t startCP) const;
 
         /// Copy one correlation product to another
         /// @param[in] Correlation product index used as source
@@ -80,11 +80,8 @@ class CorrBuffer
         // @param[in] Channel index used as destination
         //void copyChannel(int32_t source, int32_t destination);
 
-        // TODO
-        // Check buffer for contiguous channel numbering
-
         /// Print the buffer
-        void print();
+        void print() const;
 
 
         // data

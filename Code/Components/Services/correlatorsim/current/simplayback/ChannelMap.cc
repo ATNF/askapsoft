@@ -43,12 +43,12 @@ using namespace askap::cp;
 ChannelMap::ChannelMap () {;}
 
 
-ChannelMap::~ChannelMap() {;}
+//ChannelMap::~ChannelMap() {;}
 
 
 // Copied from Max
 
-uint32_t ChannelMap::fromCorrelator(uint32_t channelID) {
+uint32_t ChannelMap::fromCorrelator(uint32_t channelID) const {
 	ASKAPDEBUGASSERT(channelID < 216);
 	const uint32_t fineOffset = channelID % 9;
 	const uint32_t group = channelID / 9;
@@ -61,7 +61,7 @@ uint32_t ChannelMap::fromCorrelator(uint32_t channelID) {
 
 // The reverse mapping
 
-uint32_t ChannelMap::toCorrelator(uint32_t channelID) {
+uint32_t ChannelMap::toCorrelator(uint32_t channelID) const {
 	ASKAPDEBUGASSERT(channelID < 216);
 	const uint32_t fineOffset = channelID % 9;
 	const uint32_t group = channelID / 9;
@@ -69,3 +69,4 @@ uint32_t ChannelMap::toCorrelator(uint32_t channelID) {
 	const uint32_t coarseChannel = group / 6;
 	return fineOffset + 9 * (coarseChannel + chip * 4);
 }
+

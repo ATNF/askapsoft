@@ -47,7 +47,7 @@ CorrBufferUnit::~CorrBufferUnit()
 
 
 
-void CorrBufferUnit::print()
+void CorrBufferUnit::print() const
 {
     cout << "vis: [" << vis.real << ", " << vis.imag << "] " << endl;
 }

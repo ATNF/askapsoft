@@ -60,14 +60,14 @@ Permutation::Permutation()
 }
 
 
-Permutation::~Permutation() 
-{
-}
+//Permutation::~Permutation() 
+//{
+//}
 
 
 // Return the total number of permutation.
 
-uint32_t const Permutation::getTotal(const uint32_t n) 
+uint32_t const Permutation::getTotal(const uint32_t n) const
 {
 	return ((n*n + n)/2);
 }
@@ -75,7 +75,8 @@ uint32_t const Permutation::getTotal(const uint32_t n)
 
 // Given the items, return the permutation index.
 
-uint32_t const Permutation::getIndex(const uint32_t item1, const uint32_t item2) 
+uint32_t const Permutation::getIndex(const uint32_t item1, 
+		const uint32_t item2) const
 {
 #ifdef OUTSIDEASKAP
 	alertWrongItemOrder(item1, item2);
@@ -89,7 +90,8 @@ uint32_t const Permutation::getIndex(const uint32_t item1, const uint32_t item2)
 
 // Given the items, return the permutation index.
 
-uint32_t const Permutation::getIndex(const std::pair<uint32_t,uint32_t> items) 
+uint32_t const Permutation::getIndex
+		(const std::pair<uint32_t,uint32_t> items) const
 {
 #ifdef OUTSIDEASKAP
 	alertWrongItemOrder(items);
@@ -103,8 +105,8 @@ uint32_t const Permutation::getIndex(const std::pair<uint32_t,uint32_t> items)
 
 // Given the items, return the permutation index. 
 
-uint32_t const Permutation::getIndex(const uint32_t item1, const uint32_t item2,
-		const uint32_t nItem) 
+uint32_t const Permutation::getIndex(const uint32_t item1, 
+		const uint32_t item2, const uint32_t nItem) const
 {	
 #ifdef OUTSIDEASKAP
 	alertValueTooBig(item1, nItem-1);
@@ -122,7 +124,7 @@ uint32_t const Permutation::getIndex(const uint32_t item1, const uint32_t item2,
 // Given the items, return the permutation index. 
 
 uint32_t const Permutation::getIndex(const std::pair<uint32_t,uint32_t> items, 
-		const uint32_t nItem) 
+		const uint32_t nItem) const
 {
 #ifdef OUTSIDEASKAP
 	alertValueTooBig(items.first, nItem-1);
@@ -140,7 +142,8 @@ uint32_t const Permutation::getIndex(const std::pair<uint32_t,uint32_t> items,
 
 // Given the permutation index, return the items. 
 
-std::pair<uint32_t,uint32_t> const Permutation::getItems(const uint32_t index) 
+std::pair<uint32_t,uint32_t> const 
+		Permutation::getItems(const uint32_t index) const
 {	
 	std::pair<uint32_t,uint32_t> items;
 	items.second = int((sqrt(1+8*index) - 1)/2);
@@ -154,7 +157,7 @@ std::pair<uint32_t,uint32_t> const Permutation::getItems(const uint32_t index)
 #ifdef OUTSIDEASKAP
 
 // Alert when a value is too big.
-void alertValueTooBig(const uint32_t value, const uint32_t maxValue) 
+void alertValueTooBig(const uint32_t value, const uint32_t maxValue) const
 {
 	if (value > maxValue) {
 		cerr << "ERROR in Permutation: value is too big: " << value << endl;
@@ -164,7 +167,7 @@ void alertValueTooBig(const uint32_t value, const uint32_t maxValue)
 
 // Alert when a value goes out of range.
 void alertValueOutsideRange(const uint32_t value, const uint32_t minValue, 
-        const uint32_t maxValue) 
+		const uint32_t maxValue) const
 {
 	if ((value < minValue) || (value > maxValue)) {
 		cerr << "ERROR in Permutation: value is outside range: " << value << 
@@ -174,7 +177,7 @@ void alertValueOutsideRange(const uint32_t value, const uint32_t minValue,
 
 
 // Alert when the order of items is wrong (item1 > item2)
-void alertWrongItemOrder(const uint32_t item1, const uint32_t item2) 
+void alertWrongItemOrder(const uint32_t item1, const uint32_t item2) const
 {
 	if (item1 > item2) {
 		cerr << "ERROR in Permutation: wrong item order: " << item1 << 
@@ -183,7 +186,7 @@ void alertWrongItemOrder(const uint32_t item1, const uint32_t item2)
 }
 
 
-void alertWrongItemOrder(const std::pair<uint32_t,uint32_t> items) 
+void alertWrongItemOrder(const std::pair<uint32_t,uint32_t> items) const
 {
 	if (items.first > items.second) {
 		cerr << "ERROR in Permutation: wrong item order: " << 

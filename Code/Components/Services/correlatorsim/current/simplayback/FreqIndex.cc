@@ -45,7 +45,7 @@ FreqIndex::~FreqIndex()
 
 
 
-void FreqIndex::print() {
+void FreqIndex::print() const {
     cout << "block " << block << ", card " << card << ", channel " <<
             channel << ", freq " << freq << endl;
 }
