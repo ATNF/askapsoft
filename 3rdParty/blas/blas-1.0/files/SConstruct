@@ -34,6 +34,8 @@ if platform['architecture'] == '64bit':
 conf.env.Append(FORTRANFLAGS=["-w", "-O2"])
 
 if platform['system'] == 'Darwin':
+    if (int(platform['tversion'][1]) >= 10):
+        conf.env.Append(FORTRANFLAGS=["-Wa,-q"])
     conf.env.Append(LINKFLAGS='-compatibility_version 1')
     conf.env.Append(LINKFLAGS='-current_version 1')
 
