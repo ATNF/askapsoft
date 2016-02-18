@@ -39,7 +39,7 @@ fi
 
 # Setup the environment
 source `dirname $0`/../init_package_env.sh
-cd $CORRSIM_HOME/functests
+#cd $CORRSIM_HOME/functests
 
 # Stop IceStorm
 kill_service icestorm

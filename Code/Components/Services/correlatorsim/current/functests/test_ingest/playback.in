@@ -1,0 +1,75 @@
+# Configuration file for playing back Telescope Operating System Simulator
+# (tossim) and Correlator Simulator (corrsim).
+#
+# Parameters for both
+#
+# Correlator cycle time in seconds
+playback.period = 5
+
+# Default playback mode is "normal".
+# "test" will invoke test procedure, which takes a lot more time & memory.
+# Not recommended for many data streams.
+#playback.mode = test
+
+#----------------------------------------------------------------------
+# Telescope Operating System Simulator Configuration
+#
+# For transmission (using ICE)
+playback.tossim.ice.locator_host = localhost
+playback.tossim.ice.locator_port = 4061
+playback.tossim.icestorm.topicmanager = IceStorm/TopicManager@IceStorm.TopicManager
+playback.tossim.icestorm.topic = metadata
+
+# Transmission delay in microsecond
+playback.tossim.delay = 5000000
+#playback.tossim.delay = 0
+
+# Simulate random failures to send metadata message. A value of of 0.0
+# results in no failures, while 1.0 results in all sends failing.
+# (Default: 0.0)
+#playback.tossim.random_metadata_send_fail = 0.1
+
+
+#----------------------------------------------------------------------
+# Correlator Simulator configuration
+#
+# Total number of antennas to be simulated.
+# If the number is greater than that in measurement set, data will be 
+# copied from existing antennas.
+# Range: 1 (default) to 36 (max for ASKAP)
+playback.corrsim.n_antennas = 36
+
+# Total number of coarse channels to be simulated.
+# Ideally 304 (default), but current hardware is limited at 300.
+# If the number is greater than that in measurement set, data will be 
+# copied from existing coarse channels.
+playback.corrsim.n_coarse_channels = 8
+
+# Division of coarse channel into fine channels
+# Default: 54
+playback.corrsim.n_channel_subdivision = 54
+
+# Coarse channel bandwidth (Hertz)
+# Default: 1 MHz
+playback.corrsim.coarse_channel_bandwidth = 1000000
+
+# Measurement set used as input for simulation
+playback.corrsim.dataset = ../../dataset/ade4ant4chan.ms
+
+# Local host for transmission
+playback.corrsim.out.hostname = localhost
+
+# Reference port for transmission.
+# If multiple ports are used, this is the first port
+playback.corrsim.out.port = 3000
+
+# Delay in transmission between different time groups (microsecond)
+playback.corrsim.delay = 5000000
+
+# TO ADD LATER: Failure pattern (make sure repeatable, ie. not random)
+#
+# NOTE
+# - In this version (ADE version), baseline map is computed automatically.
+#   In previous version (BETA version), such map must be provided 
+#   explicitly in this file.
+#
