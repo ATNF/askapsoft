@@ -1,8 +1,12 @@
 #!/bin/bash
 #
-# This script runs both correlator simulator and ingest.
+# This script streams data from Correlator Simulator to Ingest.
 # Adapted from Tests/hudson/CP/ingest.sh
+# 
+# Author: Paulus Lahur <paulus.lahur@csiro.au>
 #
+echo "This script coordinates data streaming from Correlator Simulator to Ingest."
+
 # Max number of blocks, cards and frequency channels
 MAX_BLOCK=8
 MAX_CARD_IN_BLOCK=12
@@ -12,21 +16,27 @@ MAX_FINE_CHANNEL_IN_CARD=216
 let MAX_CARD=$MAX_BLOCK*$MAX_CARD_IN_BLOCK
 
 # Get total number of cards from argument
+# If argument does not exist
 if [ -z "$1" ]; then
-  #echo "no argument supplied"
-  NCARD=1
+  	echo "The number of cards used in streaming the data must be specified."
+  	echo "Usage: ./run.sh <number of cards: 1~96>"
+  	exit -1
 else
-  #echo "argument exists: $1"
-  if [ $1 -lt 1 ]; then
-    NCARD=1
-  elif [ $1 -le $MAX_CARD ]; then
-    NCARD=$1
-  else
-    echo "Too many cards ($1 > $MAX_CARD)"
-    exit -1
-  fi
+  	#echo "argument exists: $1"
+  	if [ $1 -lt 1 ]; then
+    	echo "The number of cards must be at least 1"
+    	exit -2
+  	elif [ $1 -le $MAX_CARD ]; then
+    	NCARD=$1
+    	echo "The number of cards: $NCARD"
+  	elif [ $1 -gt $MAX_CARD ]; then
+    	echo "Too many cards. Maximum is $MAX_CARD"
+    	exit -2
+  	else
+    	echo "Illegal argument"
+    	exit -2
+  	fi
 fi
-echo "The number of cards: $NCARD"
 
 # Compute the number of coarse channels
 let NCHANNEL=$NCARD*$MAX_CHANNEL_IN_CARD
@@ -83,12 +93,21 @@ INGEST_PARSET=cpingest.in
 
 echo "Modifying its parset"
 
-if [ $NVSTREAM -lt $MAX_CARD_IN_BLOCK ]; then
-  NFILE=$NVSTREAM
+echo "Setting ingest parameter: task list"
+if [ $NVSTREAM -eq 1 ]; then
+    # single process
+	sed -i "s/tasks.tasklist.*/tasks.tasklist = [MergedSource, CalcUVWTask, Monitor, MSSink]/" $INGEST_PARSET
 else
-  NFILE=$MAX_CARD_IN_BLOCK
+	# parallel
+	sed -i "s/tasks.tasklist.*/tasks.tasklist = [MergedSource, Merge, CalcUVWTask, Monitor, MSSink]/" $INGEST_PARSET
 fi
+
 echo "Setting ingest parameter: ranks to merge: $NFILE"
+if [ $NVSTREAM -lt $MAX_CARD_IN_BLOCK ]; then
+  	NFILE=$NVSTREAM
+else
+  	NFILE=$MAX_CARD_IN_BLOCK
+fi
 sed -i "s/tasks.Merge.params.ranks2merge.*/tasks.Merge.params.ranks2merge = $NFILE/" $INGEST_PARSET
 
 echo "Removing ingest parameter: channel list"

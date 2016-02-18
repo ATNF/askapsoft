@@ -2,31 +2,43 @@
 #
 # This script runs correlator simulator
 #
-# Get the number of visibility streams
+# Author: Paulus Lahur <paulus.lahur@csiro.au>
+#
+echo "Correlator Simulator script"
+
+# Get the number of data streams
 if [ -z "$1" ]; then
-  NVSTREAM=1
+    echo "This script streams data from Correlator Simulator."
+    echo "The number of data streams must be specified."
+    echo "Usage: ./run_corrsim.sh <number of streams>"
+    exit -1
 else
-  NVSTREAM=$1
+    if [ $1 -lt 1 ]; then
+        echo "The number of data streams must be at least 1"
+        exit -1
+    else
+  		NVSTREAM=$1
+    fi
 fi
-echo "Visibility stream in correlator simulator: "$NVSTREAM
+echo "The number of data streams: "$NVSTREAM
 
 # Get the amount of time delay in starting (in seconds)
 if [ -z "$2" ]; then
-  # By default there is no delay
-  DELAY_START=0
+  	# By default there is no delay
+  	DELAY_START=0
 else
-  DELAY_START=$2
+  	DELAY_START=$2
 fi
-echo "Delay: "$DELAY_START
+echo "Delay before data stream starts: "$DELAY_START" seconds"
 
 # Get the duration (in minutes)
 if [ -z "$3" ]; then
-  # Default duration is 5 minutes
-  DURATION=5m
+  	# Default duration is 5 minutes
+  	DURATION=5m
 else
-  DURATION=$3
+  	DURATION=$3
 fi
-echo "Duration: "$DURATION
+echo "Duration of data streams: "$DURATION" minutes"
 
 # Set environment
 export AIPSPATH=$ASKAP_ROOT/Code/Base/accessors/current

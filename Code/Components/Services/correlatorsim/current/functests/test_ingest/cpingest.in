@@ -117,7 +117,6 @@ correlator.modes = [standard]
 # Task List
 #
 tasks.tasklist = [MergedSource, Merge, CalcUVWTask, Monitor, MSSink]
-#tasks.tasklist = [MergedSource, CalcUVWTask, Monitor, MSSink]
 
 #
 # MergedSource
@@ -176,10 +175,10 @@ monitoring.adaptername = IngestPipelineMonitoringAdapter
 #
 # Merge
 tasks.Merge.type                     = ChannelMergeTask
-tasks.Merge.params.ranks2merge = 2
+tasks.Merge.params.ranks2merge = 12
 
 
 # Number of channels a given ingest process is meant to receive/process
 
 # Automatically generated channel list
-tasks.MergedSource.params.n_channels.0..1 = 216
+tasks.MergedSource.params.n_channels.0..95 = 216
