@@ -98,13 +98,13 @@ MergedSource::~MergedSource()
 VisChunk::ShPtr MergedSource::next(void)
 {
     // Used for a timeout
-    const long ONE_SECOND = 10000000;
+    const long ONE_SECOND = 1000000;
 
     // Get metadata for a real (i.e. scan id >= 0) scan
     const uint32_t maxNoMetadataRetries = 3;
     for (int32_t count = 0; (!itsMetadata ||  itsMetadata->scanId() == ScanManager::SCANID_IDLE) && 
                              count < static_cast<int32_t>(maxNoMetadataRetries); ++count) {
-        itsMetadata = itsMetadataSrc->next(ONE_SECOND);
+        itsMetadata = itsMetadataSrc->next(ONE_SECOND * 10);
         checkInterruptSignal();
         if (itsMetadata && itsMetadata->scanId() < 0
                 && itsMetadata->scanId() != ScanManager::SCANID_OBS_COMPLETE
@@ -188,6 +188,25 @@ VisChunk::ShPtr MergedSource::next(void)
         }
         checkInterruptSignal();
 
+        if (itsMetadata->time() < itsVis->timestamp) {
+            ASKAPLOG_WARN_STR(logger, "Visibility data stream is ahead ("<<bat2epoch(itsVis->timestamp).getValue()<<
+                     ") of metadata stream ("<<bat2epoch(itsMetadata->time()).getValue()<<"), skipping the cycle for this card");
+            VisChunk::ShPtr chunk = createVisChunk(*itsMetadata);
+            ASKAPDEBUGASSERT(chunk);
+            // invalidate metadata to force reading new record
+            itsMetadata.reset();
+            return chunk;
+        }
+
+        /*
+            // this original Ben's code seem to conflict with 
+            // parallel synchronisation in the ADE case
+            // instead of trying to align metadata and visibilities
+            // if metadata are lagging, just return flagged chunk.
+            // This may cause problems if the metadata take longer to 
+            // reach Pawsey centre. In that case, all logic has to be
+            // re-worked as there is too much BETA legacy anyway.
+ 
         // But if the timestamp in the VisDatagram is in the future (with
         // respect to the TosMetadata) then it is time to fetch new TosMetadata
         if (!itsMetadata || itsMetadata->time() < itsVis->timestamp) {
@@ -207,6 +226,7 @@ VisChunk::ShPtr MergedSource::next(void)
                 ASKAPLOG_DEBUG_STR(logger, "Received empty metadata - timeout waiting");
             }
         }
+        */
     }
     ASKAPLOG_DEBUG_STR(logger, "Aligned datagram time and metadata time: "<<bat2epoch(itsVis->timestamp).getValue());
 
