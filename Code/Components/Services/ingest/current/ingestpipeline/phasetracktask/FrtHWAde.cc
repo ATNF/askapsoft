@@ -114,6 +114,13 @@ void FrtHWAde::process(const askap::cp::common::VisChunk::ShPtr& chunk,
   ASKAPDEBUGASSERT(itsRefAntIndex < delays.nrow());
   ASKAPDEBUGASSERT(delays.ncolumn() == rates.ncolumn());
   ASKAPDEBUGASSERT(delays.nrow() == rates.nrow());
+ 
+  // additional flags when to treat antenna as invalid if the update time is in the future 
+  // (in principle, delay in cycles covers it and we lived with this state of things for BETA, but
+  // it is interesting to know whether any additional cycles need to be flagged on top of what is
+  // indicated by FR update BAT.
+  std::vector<bool> antennaValid(itsPhases.size(), true);
+
   // signal about new timestamp (there is no much point to mess around with threads
   // as actions are tide down to correlator cycles
   itsFrtComm.newTimeStamp(chunk->time());
@@ -129,36 +136,68 @@ void FrtHWAde::process(const askap::cp::common::VisChunk::ShPtr& chunk,
   const double integrationTime = chunk->interval();
   ASKAPASSERT(integrationTime > 0);
 
+  const casa::Vector<casa::Double>& freq = chunk->frequency();
+  // we could've, in principle, work with start frequencies and remove the offset of 24 channels from
+  // the osl script (but may need to deal with inversion in this case).
+  // 
+  // the offset of 5 fine channels is a mystery - figured out in experiments
+  const double centreFreq = (freq.nelements() > 0 ? freq[freq.nelements()/2] : 0.) - 5e6/54;
+  //ASKAPLOG_DEBUG_STR(logger, "centreFreq = "<<centreFreq/1e6<<" MHz");
+  ASKAPCHECK(effLO != 0., "Unexpected zero effLO frequency, this shouldn't happen!");
+           
+
   for (casa::uInt ant = 0; ant < delays.nrow(); ++ant) {
-       // negate the sign here because we want to compensate the delay
-       const double diffDelay = (delays(itsRefAntIndex,0) - delays(ant,0))/delayUnit;
        // ideal delay
+       const double diffDelay = (delays(ant,0) - delays(itsRefAntIndex,0))/delayUnit;
+
+       // differential rate - task class assumes BETA and uses effective LO frequency to estimate rate, correcting
+       const double idealRate = (rates(ant,0) - rates(itsRefAntIndex,0))/effLO*centreFreq;
+
        ASKAPLOG_INFO_STR(logger, "delays between "<<ant<<" and ref="<<itsRefAntIndex<<" are "
-               <<diffDelay*delayUnit*1e9<<" ns");
+               <<diffDelay*delayUnit*1e9<<" ns, rate "<<idealRate / casa::C::pi * 180.<< "deg/s");
 
-       casa::Int hwDelay = -static_cast<casa::Int>(diffDelay);
+       casa::Int hwDelay = static_cast<casa::Int>(diffDelay);
 
-       // differential rate, negate the sign because we want to compensate here
-       casa::Int diffRate = static_cast<casa::Int>((rates(itsRefAntIndex,0) - rates(ant,0))/phaseRateUnit);
-       
+       // differential rate in hw units, quantised
+       casa::Int diffRate = static_cast<casa::Int>(idealRate/phaseRateUnit);
+
        /*
-       if (ant == 0) {
+       // experiments with rates
+       if (ant == 3) {
            const double interval = itsTm[ant]>0 ? (chunk->time().getTime("s").getValue() - itsTm[ant]) : 0;
            //diffRate = (int(interval/240) % 2 == 0 ? +1. : -1) * static_cast<casa::Int>(casa::C::pi / 100. / phaseRateUnit);
            const casa::Int rates[11] = {-10, -8, -6, -4, -2, 0, 2, 4, 6, 8,10}; 
-           const double addRate = rates[int(interval/180) % 11];
-           diffRate = addRate;
-           if (int((interval - 5.)/180) % 11 != int(interval/180) % 11) {
+           const double addRate = rates[int(interval/120) % 11]*100.;
+           //diffRate = addRate;
+           diffRate += addRate;
+           if (int((interval - 5.)/120) % 11 != int(interval/120) % 11) {
                ASKAPLOG_DEBUG_STR(logger,"Invalidating ant="<<ant);
                itsFrtComm.invalidate(ant);
            }
            
            ASKAPLOG_DEBUG_STR(logger, "Interval = "<<interval<<" seconds, rate = "<<diffRate<<" for ant = "<<ant<<" addRate="<<addRate);
        }  else { diffRate = 0.;}
+       */
+       /*
+           // experiments with delays
+       if (ant == 0) {
+           const double interval = itsTm[ant]>0 ? (chunk->time().getTime("s").getValue() - itsTm[ant]) : 0;
+           const int intervalMin = static_cast<int>(interval/60);
+           const int delayIncrement = intervalMin*500;
+           hwDelay += delayIncrement;
+           if (static_cast<int>((interval - 5.)/60.) != intervalMin) {
+               ASKAPLOG_DEBUG_STR(logger, "Interval = "<<interval/60<<" min, addDelay = "<<delayIncrement * delayUnit*1e9<<" ns for ant = "<<ant<<" hwDelay="<<hwDelay<<" diffDelay="<<diffDelay);
+               itsFrtComm.invalidate(ant);
+           }
+       }
+       */
+       /*
+       // used for experiments with either delays or rates
        if (itsTm[ant]<=0) {
            itsTm[ant] = chunk->time().getTime("s").getValue();
        }
        */
+       
            
        if ((abs(diffRate - itsFrtComm.requestedFRPhaseRate(ant)) > itsFRPhaseRateTolerance) || (abs(hwDelay - itsFrtComm.requestedFRPhaseSlope(ant)) > itsDelayTolerance) || itsFrtComm.isUninitialised(ant)) {
            ASKAPLOG_INFO_STR(logger, "Set delays for antenna "<<ant<<" to "<<hwDelay * delayUnit *1e9<<" ns  and phase rate to "<<diffRate * phaseRateUnit * 180. / casa::C::pi<<" deg/s");
@@ -169,11 +208,7 @@ void FrtHWAde::process(const askap::cp::common::VisChunk::ShPtr& chunk,
            itsPhases[ant] = 0.;
        } 
        ASKAPDEBUGASSERT(ant < itsTm.size())
-       /*
-       if (itsTm[ant] > 0) {
-           itsPhases[ant] += (chunk->time().getTime("s").getValue() - itsTm[ant]) * phaseRateUnit * itsFrtComm.requestedFRPhaseRate(ant);
-       }
-       */
+
        if (itsFrtComm.hadFRUpdate(ant)) {
            // 25000 microseconds is the offset before event trigger and the application of phase rates/accumulator reset (specified in the osl script)
            // on top of this we have a user defined fudge offset (see #5736)
@@ -196,6 +231,8 @@ void FrtHWAde::process(const askap::cp::common::VisChunk::ShPtr& chunk,
                itsPhases[ant] = double(elapsedTime) * 1e-6 * phaseRateUnit * itsFrtComm.requestedFRPhaseRate(ant);
            } else {
               ASKAPLOG_DEBUG_STR(logger, "Still processing old data before FR update event trigger for antenna "<<ant);
+              // timing is managed here, not by the communicator class (it just waits given number of cycles)
+              antennaValid[ant] = false;
            }
        } // if FR had an update for a given antenna
   } // loop over antennas
@@ -207,7 +244,7 @@ void FrtHWAde::process(const askap::cp::common::VisChunk::ShPtr& chunk,
        ASKAPDEBUGASSERT(ant1 < delays.nrow());
        ASKAPDEBUGASSERT(ant2 < delays.nrow());
 
-       if (itsFrtComm.isValid(ant1) && itsFrtComm.isValid(ant2)) {
+       if (itsFrtComm.isValid(ant1) && itsFrtComm.isValid(ant2) && antennaValid[ant1] && antennaValid[ant2]) {
            // desired delays are set and applied, do phase rotation
            casa::Matrix<casa::Complex> thisRow = chunk->visibility().yzPlane(row);
            const double appliedDelay = delayUnit * (itsFrtComm.requestedFRPhaseSlope(ant1)-itsFrtComm.requestedFRPhaseSlope(ant2));
@@ -217,25 +254,31 @@ void FrtHWAde::process(const askap::cp::common::VisChunk::ShPtr& chunk,
            const casa::uInt beam2 = chunk->beam2()[row];
            ASKAPDEBUGASSERT(beam1 < delays.ncolumn());
            ASKAPDEBUGASSERT(beam2 < delays.ncolumn());
-           // actual delay, note the sign is flipped because we're correcting the delay here
+           // actual delay
            const double thisRowDelay = delays(ant1,beam1) - delays(ant2,beam2);
            const double residualDelay = thisRowDelay - appliedDelay;
+
+           /*
            ASKAPLOG_DEBUG_STR(logger, "Residual delay for ant1="<<ant1<<" ant2="<<ant2<<
                   " is "<<residualDelay*1e9<<" ns thisRowDelay="<<thisRowDelay*1e9<<
                   " appliedDelay="<<appliedDelay*1e9);
+           */
 
            // actual rate
            //const double thisRowRate = rates(ant1,beam1) - rates(ant2,beam2);
               
-           
-           //const double phaseDueToAppliedDelay = 2. * casa::C::pi * effLO * appliedDelay;
-           const double phaseDueToAppliedDelay = 0.;//2. * casa::C::pi * 24e6 * appliedDelay;
+           // ADE doesn't have an LO, so we have sky frequency instead of the effective LO here.
+           // there is a bit of redundancy what is taken by the hardware fringe rotator and what is 
+           // taken in software. We could probably just do the sky frequency in the osl script, although
+           // it might be harder to debug.
+
+           const double phaseDueToAppliedDelay = 2. * casa::C::pi * centreFreq * appliedDelay;
+
            const double phaseDueToAppliedRate = itsPhases[ant1] - itsPhases[ant2];
-           const casa::Vector<casa::Double>& freq = chunk->frequency();
            ASKAPDEBUGASSERT(freq.nelements() == thisRow.nrow());
            for (casa::uInt chan = 0; chan < thisRow.nrow(); ++chan) {
                 //casa::Vector<casa::Complex> thisChan = thisRow.row(chan);
-                const float phase = static_cast<float>(phaseDueToAppliedDelay + phaseDueToAppliedRate +
+                const float phase = static_cast<float>(phaseDueToAppliedDelay - phaseDueToAppliedRate +
                              2. * casa::C::pi * freq[chan] * residualDelay);
                 const casa::Complex phasor(cos(phase), sin(phase));
 
@@ -243,7 +286,6 @@ void FrtHWAde::process(const askap::cp::common::VisChunk::ShPtr& chunk,
                 for (casa::uInt pol = 0; pol < thisRow.ncolumn(); ++pol) {
                      thisRow(chan,pol) *= phasor;
                 }
-                //thisChan *= phasor;
            }
            
        } else {
