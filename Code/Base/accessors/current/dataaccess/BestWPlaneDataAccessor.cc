@@ -40,9 +40,13 @@
 #include <dataaccess/BestWPlaneDataAccessor.h>
 // we use just a static method to track changes of the tangent point
 #include <dataaccess/UVWMachineCache.h>
+// just for now adding the logger so I can see what is going on
+#include <askap/AskapLogging.h>
 
 using namespace askap;
 using namespace askap::accessors;
+
+ASKAP_LOGGER(logger,".casaAccessors")
 
 /// @brief constructor
 /// @details The only parameter is the w-term tolerance in wavelengths
@@ -55,8 +59,9 @@ using namespace askap::accessors;
 /// in the constructor call itself.
 BestWPlaneDataAccessor::BestWPlaneDataAccessor(const double tolerance, const bool checkResidual) : itsCheckResidual(checkResidual), 
        itsWTolerance(tolerance),
-       itsCoeffA(0.), itsCoeffB(0.), itsUVWChangeMonitor(changeMonitor())
+       itsCoeffA(0.), itsCoeffB(0.), itsUVWChangeMonitor(changeMonitor()), itsPredictWPlane(false)
 {
+   
 }
 
 /// @brief copy constructor
@@ -65,7 +70,8 @@ BestWPlaneDataAccessor::BestWPlaneDataAccessor(const double tolerance, const boo
 BestWPlaneDataAccessor::BestWPlaneDataAccessor(const BestWPlaneDataAccessor &other) : 
     itsCheckResidual(other.itsCheckResidual), itsWTolerance(other.itsWTolerance), itsCoeffA(other.itsCoeffA),
     itsCoeffB(other.itsCoeffB), itsUVWChangeMonitor(changeMonitor()), itsPlaneChangeMonitor(changeMonitor()),
-    itsRotatedUVW(other.itsRotatedUVW.copy()), itsLastTangentPoint(other.itsLastTangentPoint) {}
+    itsRotatedUVW(other.itsRotatedUVW.copy()), itsLastTangentPoint(other.itsLastTangentPoint),
+    itsPredictWPlane(other.itsPredictWPlane), itsPredictTimeInterval(other.itsPredictTimeInterval) {}
 
 /// @brief assignment operator
 /// @details We need it because we have data members of non-trivial types
@@ -81,6 +87,8 @@ BestWPlaneDataAccessor& BestWPlaneDataAccessor::operator=(const BestWPlaneDataAc
       itsPlaneChangeMonitor.notifyOfChanges();
       itsRotatedUVW.assign(other.itsRotatedUVW.copy());
       itsLastTangentPoint = other.itsLastTangentPoint;
+      itsPredictWPlane = other.itsPredictWPlane;
+      itsPredictTimeInterval = other.itsPredictTimeInterval;
   }
   return *this;
 }
@@ -110,6 +118,11 @@ const casa::Vector<casa::RigidVector<casa::Double, 3> >&
    }
    // need to compute uvw's
    itsLastTangentPoint = tangentPoint;
+   
+   // rotate UVW and get deviations for advanced times
+   //
+   // the current type is in the apparent frame (APP) and in geocentric.
+ 
    const casa::Vector<casa::RigidVector<casa::Double, 3> >& originalUVW = acc.rotatedUVW(tangentPoint);
    if (itsRotatedUVW.nelements() != originalUVW.nelements()) {
        itsRotatedUVW.resize(originalUVW.nelements());
@@ -124,13 +137,21 @@ const casa::Vector<casa::RigidVector<casa::Double, 3> >&
    ASKAPDEBUGASSERT(maxFreq > 0.); 
    const double tolInMetres = itsWTolerance * casa::C::c / maxFreq;
    
-   const double maxDeviation = updatePlaneIfNecessary(originalUVW, tolInMetres);
+   double maxDeviation = 0.;
    
+   if (itsPredictWPlane == false) {
+       maxDeviation = updatePlaneIfNecessary(originalUVW, tolInMetres);
+   }
+   else {
+       maxDeviation = updateAdvancedTimePlaneIfNecessary(tolInMetres, tangentPoint);
+   }
    if (itsCheckResidual) {
        ASKAPCHECK(maxDeviation < tolInMetres, "The antenna layout is significantly non-coplanar. "
              "The largest w-term deviation after the fit of "<<maxDeviation<<" metres exceedes the w-term tolerance of "<<
               itsWTolerance<<" wavelengths equivalent to "<<tolInMetres<<" metres.");
    }
+
+    
    for (casa::uInt row=0; row<originalUVW.nelements(); ++row) {
         const casa::RigidVector<casa::Double, 3> currentUVW = originalUVW[row];
         itsRotatedUVW[row] = currentUVW;
@@ -138,6 +159,7 @@ const casa::Vector<casa::RigidVector<casa::Double, 3> >&
         itsRotatedUVW[row](2) -= coeffA()*currentUVW(0) + coeffB()*currentUVW(1);
    }
    
+
    return itsRotatedUVW;
 }	         
 
@@ -163,8 +185,166 @@ double BestWPlaneDataAccessor::maxWDeviation(const casa::Vector<casa::RigidVecto
    return maxDeviation;
 }
 
+/// @brief Fit a new plane assuming this is a continuous track and update coefficients if neccessary.
+/// @details A best fit plane for the current time can be found with UpdatePlaneIfNecessary ... which minimises the maxW now
+/// But this method instead minimises sometime in the future - so that we are currently at tolerance
+/// we trend to 0 deviation then drift away to tolerance again. This should reduce the number of W fits and regrids by a factor
+/// of two for long tracks
+/// @param[in] the tolerance (same units as uvw's)
+/// @param[in] the tangent point
+/// @return the largest w-term deviation from the fitted plane (same units as uvw's)
+
+
+double BestWPlaneDataAccessor::updateAdvancedTimePlaneIfNecessary(double tolerance, const casa::MDirection &tangentPoint) const
+{
+   
+    const bool verbose = false; // verbosity flag for checking
+   // we need the accessor becuase I want to spin the uvw's
+   const IConstDataAccessor &acc = getROAccessor();
+   
+
+   const casa::Vector<casa::RigidVector<casa::Double, 3> >& uvw = acc.rotatedUVW(tangentPoint);
+   // these are local coefficients of planes - need these before we are sure which
+   // plane we are going to use.
+   double tmpCoeffA = 0.0;
+   double tmpCoeffB = 0.0;
+
+   double AdvancedDeviation = maxWDeviation(uvw); // using current plane
+   
+   if (verbose) {
+       ASKAPLOG_INFO_STR(logger, "BestWPlaneDataAccessor::Current deviation (using the current plane) " << AdvancedDeviation << " tolerance " << tolerance);
+   }
+    
+   if (AdvancedDeviation < tolerance) {
+       return AdvancedDeviation;
+   }
+    
+   // we are out of our tolerance range - get a new plane
+   // First thing we should do is use the existing update plane to get a plane that minimises W-deviation
+   // This fragment breaks the rules of code-reuse - but means I dont have to worry about the changemonitor picking this up
+   // we fit w=Au+Bv, the following lines accumulate the necessary sums of the LSF problem
+       
+   double su2 = 0.; // sum of u-squared
+   double sv2 = 0.; // sum of v-squared
+   double suv = 0.; // sum of uv-products
+   double suw = 0.; // sum of uw-products
+   double svw = 0.; // sum of vw-products
+       
+   for (casa::uInt row=0; row<uvw.nelements(); ++row) {
+       const casa::RigidVector<casa::Double, 3> currentUVW = uvw[row];
+           
+       su2 += casa::square(currentUVW(0));
+       sv2 += casa::square(currentUVW(1));
+       suv += currentUVW(0) * currentUVW(1);
+       suw += currentUVW(0) * currentUVW(2);
+       svw += currentUVW(1) * currentUVW(2);
+   }
+       
+   // we need a non-zero determinant for a successful fitting
+   // some tolerance has to be put on the determinant to avoid unconstrained fits
+   // we just accept the current fit results if the new fit is not possible
+   double D = su2 * sv2 - casa::square(suv);
+       
+   if (fabs(D) < 1e-7) {
+       return AdvancedDeviation;
+   }
+       
+   // make an update to the coefficients
+   tmpCoeffA = (sv2 * suw - suv * svw) / D;
+   tmpCoeffB = (su2 * svw - suv * suw) / D;
+       
+       
+   // this fragment basically replicates the maxDeviation functionality
+     
+   AdvancedDeviation = 0.;
+       // we fit w=Au+Bv, the following lines compute the largest deviation from the current plane.
+       
+   for (casa::uInt row=0; row<uvw.nelements(); ++row) {
+       const casa::RigidVector<casa::Double, 3> currentUVW = uvw[row];
+       const double deviation = fabs(tmpCoeffA*currentUVW(0) + tmpCoeffB*currentUVW(1) - currentUVW(2));
+       if (deviation > AdvancedDeviation) {
+           AdvancedDeviation = deviation;
+       }
+   }
+   if (AdvancedDeviation > tolerance) {
+       return AdvancedDeviation; // we cannot get below tolerance at all - let alone in the future - the calling function will pick this up
+   }
+   if (verbose) {
+       ASKAPLOG_INFO_STR(logger, "BestWPlaneDataAccessor::Current deviation (after next plane fit) " << AdvancedDeviation);
+   }
+    
+   casa::Quantity angle(-1*(360./86400.0),"deg");       // 1 second of rotation
+
+   double TimeShift = itsPredictTimeInterval; // number of seconds
+   double TotalShift = 0.0;
+
+   casa::MDirection newTangentPoint = tangentPoint;
+
+   while (AdvancedDeviation < tolerance) {
+       // lets advance the uvw in time until we are out of tolerance again.
+       newTangentPoint.shiftLongitude(TimeShift*angle.getValue("rad"),true);
+       TotalShift = TotalShift+TimeShift;
+    
+       const casa::Vector<casa::RigidVector<casa::Double, 3> >& test_uvw = acc.rotatedUVW(newTangentPoint);
+           
+       AdvancedDeviation = 0.; //reset
+           // we fit w=Au+Bv, the following lines compute the largest deviation from the current plane.
+           
+       for (casa::uInt row=0; row<uvw.nelements(); ++row) {
+           const casa::RigidVector<casa::Double, 3> currentUVW = test_uvw[row];
+           const double deviation = fabs(tmpCoeffA*currentUVW(0) + tmpCoeffB*currentUVW(1) - currentUVW(2));
+           if (deviation > AdvancedDeviation) {
+               AdvancedDeviation = deviation;
+           }
+       }
+       if (verbose) {
+          ASKAPLOG_INFO_STR(logger, "BestWPlaneDataAccessor::Current deviation (after  " << TotalShift << " seconds) " << AdvancedDeviation);
+       }
+   }
+   // We now have advanced time sufficiently that we will be out of tolerance
+   // Lets pull back one time step then evaluate the plane for then.
+   newTangentPoint.shiftLongitude(-1.0*TimeShift*angle.getValue("rad"),true);
+   const casa::Vector<casa::RigidVector<casa::Double, 3> >&advanced_uvw = acc.rotatedUVW(newTangentPoint);
+       
+   // we fit w=Au+Bv, the following lines accumulate the necessary sums of the LSF problem
+       
+   su2 = 0.; // sum of u-squared
+   sv2 = 0.; // sum of v-squared
+   suv = 0.; // sum of uv-products
+   suw = 0.; // sum of uw-products
+   svw = 0.; // sum of vw-products
+       
+   for (casa::uInt row=0; row<uvw.nelements(); ++row) {
+       const casa::RigidVector<casa::Double, 3> currentUVW = advanced_uvw[row];
+           
+       su2 += casa::square(currentUVW(0));
+       sv2 += casa::square(currentUVW(1));
+       suv += currentUVW(0) * currentUVW(1);
+       suw += currentUVW(0) * currentUVW(2);
+       svw += currentUVW(1) * currentUVW(2);
+   }
+       
+   // we need a non-zero determinant for a successful fitting
+   // some tolerance has to be put on the determinant to avoid unconstrained fits
+   // we just accept the current fit results if the new fit is not possible
+   D = su2 * sv2 - casa::square(suv);
+       
+   if (fabs(D) < 1e-7) {
+       return AdvancedDeviation;
+   }
+       
+   // make an update to the coefficients
+   itsCoeffA = (sv2 * suw - suv * svw) / D;
+   itsCoeffB = (su2 * svw - suv * suw) / D;
+   itsPlaneChangeMonitor.notifyOfChanges();
+       
+   return maxWDeviation(uvw);
+
+
+}
+    
 /// @brief fit a new plane and update coefficients if necessary
-/// @details This method iterates over given uvw's, checks whether the 
+/// @details This method iterates over given uvw's, checks whether the
 /// largest deviation of the w-term from the current plane is above the 
 /// tolerance and updates the fit coefficients if it is. 
 /// planeChangeMonitor() can be used to detect the change in the fit plane.
@@ -180,8 +360,9 @@ double BestWPlaneDataAccessor::maxWDeviation(const casa::Vector<casa::RigidVecto
 double BestWPlaneDataAccessor::updatePlaneIfNecessary(const casa::Vector<casa::RigidVector<casa::Double, 3> >& uvw,
                  double tolerance) const
 {
+
    const double maxDeviation = maxWDeviation(uvw);
-      
+    
    // we need at least two rows for a successful fitting, don't bother doing anything if the
    // number of rows is too small or the deviation is below the tolerance
    if ((uvw.nelements() < 2) || (maxDeviation < tolerance)) {
@@ -219,6 +400,7 @@ double BestWPlaneDataAccessor::updatePlaneIfNecessary(const casa::Vector<casa::R
    itsCoeffA = (sv2 * suw - suv * svw) / D;
    itsCoeffB = (su2 * svw - suv * suw) / D;
    itsPlaneChangeMonitor.notifyOfChanges();
+  
    return maxWDeviation(uvw);
 }
 

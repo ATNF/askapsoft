@@ -113,7 +113,13 @@ public:
    /// @brief obtain tolerance
    /// @return w-tolerance in wavelengths
    inline double tolerance() const { return itsWTolerance;}
-   
+
+   /// @brief set the mode to predict
+   /// @details allow the bestfit Wplane to be predicted
+   /// @param[in] the interval to step when determining the residuals from the plane
+   inline void setPredictWPlaneMode(const double timeinterval=10.0) {
+       itsPredictWPlane = true; itsPredictTimeInterval = timeinterval;}
+
 protected:
 
    /// @brief fit a new plane and update coefficients if necessary
@@ -133,13 +139,35 @@ protected:
    double updatePlaneIfNecessary(const casa::Vector<casa::RigidVector<casa::Double, 3> >& uvw,
                  double tolerance) const;
 
+   /// @brief fit a new plane assuming a long track at constant RA and declination and
+   ///  update coefficients if necessary.
+   /// @details This method iterates over given uvw's, checks whether the
+   /// largest deviation of the w-term from the current plane is above the
+   /// tolerance and updates the fit coefficients if it is.
+   /// The logic for determining the best fit plane is as follows.
+   /// The best fit for the current time is found. Then the visibilities are advanced until the deviation from
+   /// this fit is greater than tolerance. Which provides as indication of how quickly the W deviation grows.
+   /// We then find the coefficents of the best fit plane at that time in the future. Reasoning that the current
+   /// deviation from that plane will be within tolerance - trend to 0 with time and then increase to beyond
+   /// tolerence.
+   /// @param[in] uvw a vector with uvw's
+   /// @param[in] tolerance tolerance in the same units as uvw's
+   /// @return the largest w-term deviation from the fitted plane (same units as uvw's)
+   /// @note If a new fit is performed, the devitation is reported with respect to the
+   /// new fit (it takes place if the deviation from initial plane exceeds the given tolerance).
+   /// Therefore, if the returned deviation exceeds the tolerance, the layout is significantly
+   /// non-coplanar, so the required tolerance cannot be achieved.
+   /// This method has a conceptual constness as it doesn't change the original accessor.
+   double updateAdvancedTimePlaneIfNecessary(double tolerance, const casa::MDirection &tangentPoint) const;
+    
    /// @brief calculate the largest deviation from the current fitted plane
    /// @details This helper method iterates through the given uvw's and returns
    /// the largest deviation of the w-term from the current best fit plane.
    /// @param[in] uvw a vector with uvw's
    /// @return the largest w-term deviation from the current plane (same units as uvw's)
    double maxWDeviation(const casa::Vector<casa::RigidVector<casa::Double, 3> >& uvw) const;
-            
+   
+  
 private:
    /// @brief if true, the residual w-term is checked against w-tolerance
    bool itsCheckResidual;
@@ -179,6 +207,12 @@ private:
    /// change, we would need a more intelligent caching of itsRotatedUVW
    /// because uvw-rotation is tangent point-dependent.
    mutable casa::MDirection itsLastTangentPoint;    
+
+   /// @brief Use the predeicted W-plane instead of the current best fit
+   bool itsPredictWPlane;
+    
+   /// @brief The time interval between assesments of the predicted W Plane
+   double itsPredictTimeInterval;
 };
 
 } // namespace accessors
