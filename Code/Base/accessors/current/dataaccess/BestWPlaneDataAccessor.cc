@@ -198,7 +198,7 @@ double BestWPlaneDataAccessor::maxWDeviation(const casa::Vector<casa::RigidVecto
 double BestWPlaneDataAccessor::updateAdvancedTimePlaneIfNecessary(double tolerance, const casa::MDirection &tangentPoint) const
 {
    
-    const bool verbose = false; // verbosity flag for checking
+    const bool verbose = true; // verbosity flag for checking
    // we need the accessor becuase I want to spin the uvw's
    const IConstDataAccessor &acc = getROAccessor();
    
@@ -212,7 +212,8 @@ double BestWPlaneDataAccessor::updateAdvancedTimePlaneIfNecessary(double toleran
    double AdvancedDeviation = maxWDeviation(uvw); // using current plane
    
    if (verbose) {
-       ASKAPLOG_INFO_STR(logger, "BestWPlaneDataAccessor::Current deviation (using the current plane) " << AdvancedDeviation << " tolerance " << tolerance);
+       ASKAPLOG_INFO_STR(logger, "BestWPlaneDataAccessor::On entry current deviation (using the current plane) " << AdvancedDeviation << " tolerance " << tolerance);
+       ASKAPLOG_INFO_STR(logger, "BestWPlaneDataAccessor:: w = u * " << coeffA() << " + v * " << coeffB());
    }
     
    if (AdvancedDeviation < tolerance) {
@@ -246,6 +247,7 @@ double BestWPlaneDataAccessor::updateAdvancedTimePlaneIfNecessary(double toleran
    double D = su2 * sv2 - casa::square(suv);
        
    if (fabs(D) < 1e-7) {
+       ASKAPLOG_INFO_STR(logger, "BestWPlaneDataAccessor::updateAdvancedTimePlaneIfNecessary::Matrix has almost 0 determinant fit not likely to be valid");
        return AdvancedDeviation;
    }
        
@@ -267,6 +269,7 @@ double BestWPlaneDataAccessor::updateAdvancedTimePlaneIfNecessary(double toleran
        }
    }
    if (AdvancedDeviation > tolerance) {
+       ASKAPLOG_INFO_STR(logger, "BestWPlaneDataAccessor::updateAdvancedTimePlaneIfNecessary Current deviation (after next plane fit) " << AdvancedDeviation);
        return AdvancedDeviation; // we cannot get below tolerance at all - let alone in the future - the calling function will pick this up
    }
    if (verbose) {
@@ -337,7 +340,12 @@ double BestWPlaneDataAccessor::updateAdvancedTimePlaneIfNecessary(double toleran
    itsCoeffA = (sv2 * suw - suv * svw) / D;
    itsCoeffB = (su2 * svw - suv * suw) / D;
    itsPlaneChangeMonitor.notifyOfChanges();
-       
+   
+   const casa::Vector<casa::RigidVector<casa::Double, 3> >& on_exit_uvw = acc.rotatedUVW(tangentPoint);
+   if (verbose) {
+        ASKAPLOG_INFO_STR(logger, "BestWPlaneDataAccessor::On exit: Current deviation " << maxWDeviation(on_exit_uvw));
+        ASKAPLOG_INFO_STR(logger, "BestWPlaneDataAccessor:: w = u * " << coeffA() << " + v * " << coeffB());
+   }
    return maxWDeviation(uvw);
 
 
