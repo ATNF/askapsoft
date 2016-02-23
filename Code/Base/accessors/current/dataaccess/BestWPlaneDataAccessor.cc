@@ -198,7 +198,7 @@ double BestWPlaneDataAccessor::maxWDeviation(const casa::Vector<casa::RigidVecto
 double BestWPlaneDataAccessor::updateAdvancedTimePlaneIfNecessary(double tolerance, const casa::MDirection &tangentPoint) const
 {
    
-    const bool verbose = true; // verbosity flag for checking
+    const bool verbose = false; // verbosity flag for checking
    // we need the accessor becuase I want to spin the uvw's
    const IConstDataAccessor &acc = getROAccessor();
    
@@ -306,46 +306,53 @@ double BestWPlaneDataAccessor::updateAdvancedTimePlaneIfNecessary(double toleran
    }
    // We now have advanced time sufficiently that we will be out of tolerance
    // Lets pull back one time step then evaluate the plane for then.
-   newTangentPoint.shiftLongitude(-1.0*TimeShift*angle.getValue("rad"),true);
-   const casa::Vector<casa::RigidVector<casa::Double, 3> >&advanced_uvw = acc.rotatedUVW(newTangentPoint);
+   double on_exit_deviation = 0.;
+   do {
+       const casa::Vector<casa::RigidVector<casa::Double, 3> >& on_exit_uvw = acc.rotatedUVW(tangentPoint);
+       on_exit_deviation = maxWDeviation(on_exit_uvw);
+    
+       newTangentPoint.shiftLongitude(-1.0*TimeShift*angle.getValue("rad"),true);
+       const casa::Vector<casa::RigidVector<casa::Double, 3> >&advanced_uvw = acc.rotatedUVW(newTangentPoint);
        
-   // we fit w=Au+Bv, the following lines accumulate the necessary sums of the LSF problem
+     // we fit w=Au+Bv, the following lines accumulate the necessary sums of the LSF problem
        
-   su2 = 0.; // sum of u-squared
-   sv2 = 0.; // sum of v-squared
-   suv = 0.; // sum of uv-products
-   suw = 0.; // sum of uw-products
-   svw = 0.; // sum of vw-products
+       su2 = 0.; // sum of u-squared
+       sv2 = 0.; // sum of v-squared
+       suv = 0.; // sum of uv-products
+       suw = 0.; // sum of uw-products
+       svw = 0.; // sum of vw-products
        
-   for (casa::uInt row=0; row<uvw.nelements(); ++row) {
-       const casa::RigidVector<casa::Double, 3> currentUVW = advanced_uvw[row];
+       for (casa::uInt row=0; row<uvw.nelements(); ++row) {
+           const casa::RigidVector<casa::Double, 3> currentUVW = advanced_uvw[row];
            
-       su2 += casa::square(currentUVW(0));
-       sv2 += casa::square(currentUVW(1));
-       suv += currentUVW(0) * currentUVW(1);
-       suw += currentUVW(0) * currentUVW(2);
-       svw += currentUVW(1) * currentUVW(2);
-   }
+           su2 += casa::square(currentUVW(0));
+           sv2 += casa::square(currentUVW(1));
+           suv += currentUVW(0) * currentUVW(1);
+           suw += currentUVW(0) * currentUVW(2);
+           svw += currentUVW(1) * currentUVW(2);
+       }
        
-   // we need a non-zero determinant for a successful fitting
-   // some tolerance has to be put on the determinant to avoid unconstrained fits
-   // we just accept the current fit results if the new fit is not possible
-   D = su2 * sv2 - casa::square(suv);
+       // we need a non-zero determinant for a successful fitting
+       // some tolerance has to be put on the determinant to avoid unconstrained fits
+       // we just accept the current fit results if the new fit is not possible
+       D = su2 * sv2 - casa::square(suv);
        
-   if (fabs(D) < 1e-7) {
-       return AdvancedDeviation;
-   }
+       if (fabs(D) < 1e-7) {
+           return on_exit_deviation;
+       }
        
-   // make an update to the coefficients
-   itsCoeffA = (sv2 * suw - suv * svw) / D;
-   itsCoeffB = (su2 * svw - suv * suw) / D;
-   itsPlaneChangeMonitor.notifyOfChanges();
+       // make an update to the coefficients
+       itsCoeffA = (sv2 * suw - suv * svw) / D;
+       itsCoeffB = (su2 * svw - suv * suw) / D;
+       itsPlaneChangeMonitor.notifyOfChanges();
    
-   const casa::Vector<casa::RigidVector<casa::Double, 3> >& on_exit_uvw = acc.rotatedUVW(tangentPoint);
+   } while (on_exit_deviation > tolerance);
+       
    if (verbose) {
-        ASKAPLOG_INFO_STR(logger, "BestWPlaneDataAccessor::On exit: Current deviation " << maxWDeviation(on_exit_uvw));
-        ASKAPLOG_INFO_STR(logger, "BestWPlaneDataAccessor:: w = u * " << coeffA() << " + v * " << coeffB());
+           ASKAPLOG_INFO_STR(logger, "BestWPlaneDataAccessor::On exit deviation " << on_exit_deviation);
+           ASKAPLOG_INFO_STR(logger, "BestWPlaneDataAccessor:: w = u * " << coeffA() << " + v * " << coeffB());
    }
+   
    return maxWDeviation(uvw);
 
 

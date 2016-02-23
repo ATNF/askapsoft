@@ -34,7 +34,7 @@ the sensitivity pattern. The non-mosaicing gridders effectively assume an infini
 beam (illumination pattern is a delta function). They will produce incorrect result if dataset
 contains multiple pointings (either physical pointings of the dish or multiple offset beams). The
 output image is not corrected for primary beam, if non-mosaicing gridder is used. The weights image
-is constant across the whole field of view in this case. 
+is constant across the whole field of view in this case.
 
 
 Available gridders
@@ -164,6 +164,16 @@ The following are common to all gridders:
 |snapshotimaging.interpmethod   |string        |"cubic"       |Interpolation method for image reprojection, i.e  |
 |                               |              |              |cubic, lanczos, linear.                           |
 +-------------------------------+--------------+--------------+--------------------------------------------------+
+|snapshotimaging.PredictWPlane  |bool          |false         |If true the best fit W plane for the snapshot     |
+|                               |              |              |is predicted by advancing the uvw in time and     |
+|                               |              |              |finding that plane which minimises the deviation  |
+|                               |              |              |in the future. Some minutes from the current      |
+|                               |              |              |time. This allows the max deviation to remain     |
+|                               |              |              |within tolerance for almost twice as long as the  |
+|                               |              |              |default scheme. This can have a substantial effect|
+|                               |              |              |on processing time for long tracks. It should be  |
+|                               |              |              |a factor of two faster.                           |
++-------------------------------+--------------+--------------+--------------------------------------------------+
 |bwsmearing                     |bool          |false         |If true, the effect of bandwidth smearing is      |
 |                               |              |              |predicted.                                        |
 +-------------------------------+--------------+--------------+--------------------------------------------------+
@@ -176,7 +186,7 @@ The following are common to all gridders:
 |                               |              |              |more accurate result at the price of performance. |
 +-------------------------------+--------------+--------------+--------------------------------------------------+
 
- 
+
 Note, SphFunc and Box gridders don't have any additional parameters to those listed above.
 Oversampling factor which is a configurable parameter for some other gridders is hard coded to be
 128 for the SphFunc gridder and 1 for the Box gridder.
@@ -254,7 +264,7 @@ These parameters apply to all gridders which take w-term into account. By defaul
 stacking grids or projection planes) are spaced linearly (or equidistantly) in w. The following
 parameters allow the user to enable and control non-linear sampling. Regardless of the parameters,
 the first and last w-planes always correspond to -wmax and +wmax, respectively, and the
-(nwplanes-1)/2 plane corresponds to w=0. 
+(nwplanes-1)/2 plane corresponds to w=0.
 
 +--------------------+--------------+--------------+-------------------------------------------------+
 |*Parameter*         |*Type*        |*Default*     |*Description*                                    |
@@ -303,7 +313,7 @@ the first and last w-planes always correspond to -wmax and +wmax, respectively, 
 |                    |              |              |reverse conversion of the w-term into plane      |
 |                    |              |              |number)                                          |
 +--------------------+--------------+--------------+-------------------------------------------------+
-  
+
 
 An example of the power-law distribution of the w-planes with exponent=0.5 is given below
 
