@@ -164,7 +164,7 @@ The following are common to all gridders:
 |snapshotimaging.interpmethod   |string        |"cubic"       |Interpolation method for image reprojection, i.e  |
 |                               |              |              |cubic, lanczos, linear.                           |
 +-------------------------------+--------------+--------------+--------------------------------------------------+
-|snapshotimaging.PredictWPlane  |bool          |false         |If true the best fit W plane for the snapshot     |
+|snapshotimaging.longtrack      |bool          |false         |If true the best fit W plane for the snapshot     |
 |                               |              |              |is predicted by advancing the uvw in time and     |
 |                               |              |              |finding that plane which minimises the deviation  |
 |                               |              |              |in the future. Some minutes from the current      |
