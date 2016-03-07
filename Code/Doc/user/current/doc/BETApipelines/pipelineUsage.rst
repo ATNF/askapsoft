@@ -17,7 +17,12 @@ tool *footprint.py*), you will need to load the ACES module (to get
 the correct python packages) and have an up-to-date version of the
 ACES subversion repository. If you have not loaded the ACES module, it
 is likely the *footprint.py* task will fail, and mosaicking will be
-disabled. 
+disabled.
+
+Once loaded, the module will set an environment variable
+**PIPELINEDIR**, pointing to the directory containing the scripts. It
+also defines **PIPELINE_VERSION** to be the version number of the
+currently-used module.
 
 Configuration file
 ------------------
