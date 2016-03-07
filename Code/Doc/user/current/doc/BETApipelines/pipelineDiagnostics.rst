@@ -32,11 +32,16 @@ written to a file jobList (which is a symbolic link, linking to
 created in the top level directory (where the script is run) and in
 the output directory.
 
+For future reference, the configuration file is also archived in the
+*slurmOutput* directory, with the timestamp added to the filename.
+This will allow you to go back and see exactly what you submitted
+each time.
+
 Each of the individual askapsoft tasks produces a log file that
 includes a report of the time taken and the memory used. The
 processing scripts extract this information and place them in both
 ascii table and csv formatted files in the stats/ directory. These
-files are named with the job ID and a description of the task, along
+files are named with the job ID, the number of cores used, a description of the task, along
 with an indication of whether the job succeeded ('OK') or failed
 ('FAIL'). For distributed jobs, a distinction is made between the
 master process (rank 0) and the worker processes, and for the workers
@@ -49,25 +54,25 @@ into single tables, placed in the top-level directory and labelled
 with the same time-stamp as above. Here is an example of the data
 provided::
 
-    JobID                              Description   Result      Real      User    System    PeakVM   PeakRSS
-    917171                            split1934_B0       OK     41.57      5.16      9.54       314        64
-    917172                          flag1934Amp_B0       OK     20.13      7.75      8.07       291        42
-    917172                      flag1934Dynamic_B0       OK     68.51     50.21     11.14       308        59
-    917376                     findBandpass_master       OK   27056.7    481.87    1353.8       434        95
-    917376                 findBandpass_workerPeak       OK   27056.7    481.87    1353.8       402        53
-    917376                  findBandpass_workerAve       OK   27056.7    481.87    1353.8     395.5      50.3
-    917190                         splitScience_B0       OK    1119.3    186.33    291.66       409       154
-    917191                       flagScienceAmp_B0       OK    729.76    327.66    294.16       297        48
-    917191                   flagScienceDynamic_B0       OK   2799.16   2265.68    463.73       314        65
-    919873              contImagingSC_L0_B0_master       OK    598.83    583.32      5.62      1853       954
-    919873          contImagingSC_L0_B0_workerPeak       OK    598.83    583.32      5.62      1877       601
-    919873           contImagingSC_L0_B0_workerAve       OK    598.83    583.32      5.62     846.1     444.2
-    919873              contImagingSC_L1_B0_master       OK    587.22     563.9      5.48      1961       954
-    919873          contImagingSC_L1_B0_workerPeak       OK    587.22     563.9      5.48      1769       601
-    919873           contImagingSC_L1_B0_workerAve       OK    587.22     563.9      5.48     846.6     444.6
-    919874                    calapply_spectral_B0       OK   9685.59    8667.7    411.48       299        73
-    919875                     contsub_spectral_B0       OK   10775.2   9494.77    363.58       588       363
-    919876               spectralImaging_B0_master       OK   10011.8   2429.51    5606.5      8367       355
-    919876           spectralImaging_B0_workerPeak       OK   10011.8   2429.51    5606.5      1271       929
-    919876            spectralImaging_B0_workerAve       OK   10011.8   2429.51    5606.5    1258.7     919.6
+    JobID     nCores                             Description   Result      Real      User    System    PeakVM   PeakRSS
+    917171         1                            split1934_B0       OK     41.57      5.16      9.54       314        64
+    917172         1                          flag1934Amp_B0       OK     20.13      7.75      8.07       291        42
+    917172         1                      flag1934Dynamic_B0       OK     68.51     50.21     11.14       308        59
+    917376         1                     findBandpass_master       OK   27056.7    481.87    1353.8       434        95
+    917376       800                 findBandpass_workerPeak       OK   27056.7    481.87    1353.8       402        53
+    917376       800                  findBandpass_workerAve       OK   27056.7    481.87    1353.8     395.5      50.3
+    917190         1                         splitScience_B0       OK    1119.3    186.33    291.66       409       154
+    917191         1                       flagScienceAmp_B0       OK    729.76    327.66    294.16       297        48
+    917191         1                   flagScienceDynamic_B0       OK   2799.16   2265.68    463.73       314        65
+    919873        20              contImagingSC_L0_B0_master       OK    598.83    583.32      5.62      1853       954
+    919873        20          contImagingSC_L0_B0_workerPeak       OK    598.83    583.32      5.62      1877       601
+    919873        20           contImagingSC_L0_B0_workerAve       OK    598.83    583.32      5.62     846.1     444.2
+    919873        20              contImagingSC_L1_B0_master       OK    587.22     563.9      5.48      1961       954
+    919873        20          contImagingSC_L1_B0_workerPeak       OK    587.22     563.9      5.48      1769       601
+    919873        20           contImagingSC_L1_B0_workerAve       OK    587.22     563.9      5.48     846.6     444.6
+    919874         1                    calapply_spectral_B0       OK   9685.59    8667.7    411.48       299        73
+    919875         1                     contsub_spectral_B0       OK   10775.2   9494.77    363.58       588       363
+    919876      1040               spectralImaging_B0_master       OK   10011.8   2429.51    5606.5      8367       355
+    919876      1040           spectralImaging_B0_workerPeak       OK   10011.8   2429.51    5606.5      1271       929
+    919876      1040            spectralImaging_B0_workerAve       OK   10011.8   2429.51    5606.5    1258.7     919.6
     

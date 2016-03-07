@@ -59,6 +59,10 @@ to run successfully. Mandatory ones, if you are starting from scratch,
 are the locations of either the SBs for the observations or the
 specific MSs.
 
+When run, this file will be archived in the *slurmOutputs* directory
+(see below), marked with an appropriate timestamp so that you'll be
+able to keep a record of exactly what you have run.
+
 **Important Note: The input file is a bash script, so formatting
 matters. Most importantly in this case, you can not have spaces either
 side of the equals sign when defining a variable.**
