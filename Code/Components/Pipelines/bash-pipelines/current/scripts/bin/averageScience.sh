@@ -33,8 +33,7 @@ ID_AVERAGE_SCI=""
 
 DO_IT=$DO_AVERAGE_CHANNELS
 
-cd $OUTPUT
-if [ $DO_IT == true ] && [ -e ${msSciAv} ]; then
+if [ $DO_IT == true ] && [ -e ${OUTPUT}/${msSciAv} ]; then
     if [ $CLOBBER == false ]; then
         # If we aren't clobbering files, don't run anything
         if [ $DO_IT == true ]; then
@@ -45,11 +44,10 @@ if [ $DO_IT == true ] && [ -e ${msSciAv} ]; then
         # If we are clobbering files, removing the existing one, but
         # only if we are going to be running the job
         if [ $DO_IT == true ]; then
-            rm -rf ${msSciAv}
+            rm -rf ${OUTPUT}/${msSciAv}
         fi
     fi
 fi
-cd $CWD
 
 if [ $DO_IT == true ]; then
 
@@ -67,6 +65,7 @@ ${EMAIL_REQUEST}
 #SBATCH --export=ASKAP_ROOT,AIPSPATH
 #SBATCH --output=$slurmOut/slurm-averageSci-%j.out
 
+BASEDIR=${BASEDIR}
 cd $OUTPUT
 . ${PIPELINEDIR}/utils.sh	
 
@@ -100,10 +99,11 @@ EOFINNER
 
 log=${logs}/science_average_beam${BEAM}_\${SLURM_JOB_ID}.log
 
-aprun -n 1 -N 1 $mssplit -c \${parset} > \${log}
+NCORES=1
+NPPN=1
+aprun -n \${NCORES} -N \${NPPN} $mssplit -c \${parset} > \${log}
 err=\$?
-NUM_CPUS=1
-extractStats \${log} \${SLURM_JOB_ID} \${err} avScience_B${BEAM} "txt,csv"
+extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} avScience_B${BEAM} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
 fi

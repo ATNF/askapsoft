@@ -81,6 +81,7 @@ ${EMAIL_REQUEST}
 #SBATCH --export=ASKAP_ROOT,AIPSPATH
 #SBATCH --output=$slurmOut/slurm-contImagingSelfcal-%j.out
 
+BASEDIR=${BASEDIR}
 cd $OUTPUT
 . ${PIPELINEDIR}/utils.sh	
 
@@ -228,18 +229,18 @@ EOFINNER
         echo "--- Source finding with $selavy ---" >> \$log
         aprun -n ${NPROCS_SELAVY} -N ${CPUS_PER_CORE_SELFCAL} $selavy -c \$parset >> \$log
         err=\$?
-        NUM_CPUS=${NPROCS_SELAVY}
-        extractStats \${log} \${SLURM_JOB_ID} \${err} selavySC_L\${LOOP}_B${BEAM} "txt,csv"
+        extractStats \${log} ${NPROCS_SELAVY} \${SLURM_JOB_ID} \${err} selavySC_L\${LOOP}_B${BEAM} "txt,csv"
 
         if [ \$err != 0 ]; then
             exit \$err
         fi
 
         echo "--- Calibration with $ccalibrator ---" >> \$log
-        aprun -n 1 -N 1 $ccalibrator -c \$parset >> \$log
+        NCORES=1
+        NPPN=1
+        aprun -n \${NCORES} -N \${NPPN} $ccalibrator -c \$parset >> \$log
         err=\$?
-        NUM_CPUS=1
-        extractStats \${log} \${SLURM_JOB_ID} \${err} ccalSC_L\${LOOP}_B${BEAM} "txt,csv"
+        extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ccalSC_L\${LOOP}_B${BEAM} "txt,csv"
         if [ \$err != 0 ]; then
             exit \$err
         fi
@@ -250,15 +251,15 @@ EOFINNER
             mv ${OUTPUT}/*${imageBase}* .
         fi
 
-        cd $OUTPUT
+        BASEDIR=${BASEDIR}
+cd $OUTPUT
     fi
 
     # Run the imager, calibrating if not the first time.
     echo "--- Imaging with $cimager ---" >> \$log
     aprun -n ${NUM_CPUS_CONTIMG_SCI} -N ${CPUS_PER_CORE_CONT_IMAGING} $cimager -c \$parset >> \$log
     err=\$?
-    NUM_CPUS=${NUM_CPUS_CONTIMG_SCI}
-    extractStats \${log} \${SLURM_JOB_ID} \${err} contImagingSC_L\${LOOP}_B${BEAM} "txt,csv"
+    extractStats \${log} ${NUM_CPUS_CONTIMG_SCI} \${SLURM_JOB_ID} \${err} contImagingSC_L\${LOOP}_B${BEAM} "txt,csv"
     if [ \$err != 0 ]; then
         exit \$err
     fi

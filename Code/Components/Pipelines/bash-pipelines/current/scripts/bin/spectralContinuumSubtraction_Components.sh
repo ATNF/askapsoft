@@ -66,6 +66,7 @@ ${EMAIL_REQUEST}
 #SBATCH --export=ASKAP_ROOT,AIPSPATH
 #SBATCH --output=$slurmOut/slurm-contsubSLsci-%j.out
 
+BASEDIR=${BASEDIR}
 cd $OUTPUT
 . ${PIPELINEDIR}/utils.sh	
 
@@ -143,8 +144,7 @@ EOFINNER
 
 aprun -n ${NPROCS_SELAVY} -N ${CPUS_PER_CORE_CONTSUB} ${selavy} -c \${parset} > \${log}
 err=\$?
-NUM_CPUS=1
-extractStats \${log} \${SLURM_JOB_ID} \${err} selavy_contsub_spectral_B${BEAM} "txt,csv"
+extractStats \${log} \${NPROCS_SELAVY} \${SLURM_JOB_ID} \${err} selavy_contsub_spectral_B${BEAM} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
 fi
@@ -175,10 +175,11 @@ CContSubtract.gridder.WProject.variablesupport    = true
 CContSubtract.gridder.WProject.offsetsupport      = true
 EOFINNER
 
-aprun -n 1 -N 1 ${ccontsubtract} -c \${parset} > \${log}
+NCORES=1
+NPPN=1
+aprun -n \${NCORES} -N \${NPPN} ${ccontsubtract} -c \${parset} > \${log}
 err=\$?
-NUM_CPUS=1
-extractStats \${log} \${SLURM_JOB_ID} \${err} contsub_spectral_B${BEAM} "txt,csv"
+extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} contsub_spectral_B${BEAM} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
 else

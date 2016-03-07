@@ -57,6 +57,7 @@ ${EMAIL_REQUEST}
 #SBATCH --export=ASKAP_ROOT,AIPSPATH
 #SBATCH --output=$slurmOut/slurm-findBandpass-%j.out
 
+BASEDIR=${BASEDIR}
 cd $OUTPUT
 . ${PIPELINEDIR}/utils.sh	
 
@@ -93,8 +94,7 @@ log=${logs}/cbpcalibrator_1934_\${SLURM_JOB_ID}.log
 
 aprun -n ${NUM_CPUS_CBPCAL} -N 20 ${cbpcalibrator} -c \${parset} > \${log}
 err=\$?
-NUM_CPUS=${NUM_CPUS_CBPCAL}
-extractStats \${log} \${SLURM_JOB_ID} \${err} findBandpass "txt,csv"
+extractStats \${log} ${NUM_CPUS_CBPCAL} \${SLURM_JOB_ID} \${err} findBandpass "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
 fi

@@ -198,19 +198,22 @@ function find1934MSnames()
 
 # Need to declare the stats directory variable here, so it is seen
 # from within the various slurm jobs
-stats=stats
+if [ "${BASEDIR}" == "" ]; then
+    stats=stats
+else
+    stats=${BASEDIR}/stats
+fi
 mkdir -p $stats
 
 function writeStats()
 {
-    # usage: writeStats ID DESC RESULT REAL USER SYS VM RSS format
+    # usage: writeStats ID DESC RESULT NCORES REAL USER SYS VM RSS format
     #   where format is either txt or csv. Anything else defaults to txt
-    if [ $# -ge 7 ]; then
-	if [ $# -ge 8 ] && [ "$9" == "csv" ]; then
-	    echo $@ | awk '{printf "%s,%s,%s,%s,%s,%s,%s,%s\n",$1,$2,$3,$4,$5,$6,$7,$8}'
-	else
-	    echo $@ | awk '{printf "%10s%40s%9s%10s%10s%10s%10s%10s\n",$1,$2,$3,$4,$5,$6,$7,$8}'
-	fi
+    format=${10}
+    if [ $# -ge 9 ] && [ "$format" == "csv" ]; then
+	echo $@ | awk '{printf "%s,%s,%s,%s,%s,%s,%s,%s,%s\n",$1,$2,$3,$4,$5,$6,$7,$8,$9}'
+    else
+	echo $@ | awk '{printf "%10s%10s%40s%9s%10s%10s%10s%10s%10s\n",$1,$2,$3,$4,$5,$6,$7,$8,$9}'
     fi
 }
 
@@ -223,7 +226,7 @@ function writeStatsHeader()
     else
 	format="txt"
     fi
-    writeStats "JobID" "Description" "Result" "Real" "User" "System" "PeakVM" "PeakRSS" $format
+    writeStats "JobID" "nCores" "Description" "Result" "Real" "User" "System" "PeakVM" "PeakRSS" $format
 }
 
 function extractStats()
@@ -238,11 +241,12 @@ function extractStats()
     # (this is used for the findWorkerStats() function)
 
     STATS_LOGFILE=$1
-    STATS_ID=$2
-    RESULT=$3
-    STATS_DESC=$4
+    NUM_CORES=$2
+    STATS_ID=$3
+    RESULT=$4
+    STATS_DESC=$5
 
-    if [ "$RESULT" == "0" ]; then
+    if [ "$RESULT" -eq 0 ]; then
         RESULT_TXT="OK"
     else
         RESULT_TXT="FAIL"
@@ -250,10 +254,10 @@ function extractStats()
     
     parseLog $STATS_LOGFILE    
 
-    if [ $# -lt 5 ]; then
+    if [ $# -lt 6 ]; then
 	formatlist="stdout"
     else
-	formatlist=$5
+	formatlist=$6
     fi
     
     for format in `echo $formatlist | sed -e 's/,/ /g'`; do
@@ -268,11 +272,11 @@ function extractStats()
 
 	writeStatsHeader $format > $output
 	if [ `grep "(1, " $1 | wc -l` -gt 0 ]; then
-	    writeStats $STATS_ID "${STATS_DESC}_master" $RESULT_TXT $TIME_JOB_REAL $TIME_JOB_USER $TIME_JOB_SYS $PEAK_VM_MASTER $PEAK_RSS_MASTER $format >> $output
-	    writeStats $STATS_ID "${STATS_DESC}_workerPeak" $RESULT_TXT $TIME_JOB_REAL $TIME_JOB_USER $TIME_JOB_SYS $PEAK_VM_WORKERS $PEAK_RSS_WORKERS $format >> $output
-	    writeStats $STATS_ID "${STATS_DESC}_workerAve" $RESULT_TXT $TIME_JOB_REAL $TIME_JOB_USER $TIME_JOB_SYS $AVE_VM_WORKERS $AVE_RSS_WORKERS $format >> $output
-	else
-	    writeStats $STATS_ID $STATS_DESC $RESULT_TXT $TIME_JOB_REAL $TIME_JOB_USER $TIME_JOB_SYS $PEAK_VM_MASTER $PEAK_RSS_MASTER $format >> $output
+	    writeStats $STATS_ID $NUM_CORES "${STATS_DESC}_master"     $RESULT_TXT $TIME_JOB_REAL $TIME_JOB_USER $TIME_JOB_SYS $PEAK_VM_MASTER  $PEAK_RSS_MASTER  $format >> $output
+	    writeStats $STATS_ID $NUM_CORES "${STATS_DESC}_workerPeak" $RESULT_TXT $TIME_JOB_REAL $TIME_JOB_USER $TIME_JOB_SYS $PEAK_VM_WORKERS $PEAK_RSS_WORKERS $format >> $output
+	    writeStats $STATS_ID $NUM_CORES "${STATS_DESC}_workerAve"  $RESULT_TXT $TIME_JOB_REAL $TIME_JOB_USER $TIME_JOB_SYS $AVE_VM_WORKERS  $AVE_RSS_WORKERS  $format >> $output
+	else                                                                      
+	    writeStats $STATS_ID $NUM_CORES $STATS_DESC                $RESULT_TXT $TIME_JOB_REAL $TIME_JOB_USER $TIME_JOB_SYS $PEAK_VM_MASTER  $PEAK_RSS_MASTER  $format >> $output
 	fi
 
     done
@@ -288,7 +292,7 @@ function parseLog()
     PEAK_VM_MASTER="---"
     PEAK_RSS_MASTER="---"
 
-    if [ `grep "(1, " $1 | wc -l` -gt 0 ]; then
+    if [ ${NUM_CORES} -ge 2 ] && [ `grep "(1, " $1 | wc -l` -gt 0 ]; then
         # if here, job was a distributed job
         if [ `grep "(0, " $1 | grep "Total times" | wc -l` -gt 0 ]; then
             TIME_JOB_REAL=`grep "(0, " $1 | grep "Total times" | tail -1 | awk '{print $16}'`
@@ -363,10 +367,10 @@ EOF
 
         tmpfile2="$tmpfile.2"
         rm -f $tmpfile2
-        if [ "${NUM_CPUS}" == "" ]; then
-            NUM_CPUS=2
+        if [ "${NUM_CORES}" == "" ]; then
+            NUM_CORES=2
         fi
-        for((i=1;i<${NUM_CPUS};i++)); do
+        for((i=1;i<${NUM_CORES};i++)); do
 
 	    grep "($i, " $tmpfile | tail -1 >> $tmpfile2
 	    

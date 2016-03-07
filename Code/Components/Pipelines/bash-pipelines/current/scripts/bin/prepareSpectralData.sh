@@ -77,6 +77,7 @@ ${EMAIL_REQUEST}
 #SBATCH --export=ASKAP_ROOT,AIPSPATH
 #SBATCH --output=$slurmOut/slurm-splitSLsci-%j.out
 
+BASEDIR=${BASEDIR}
 cd $OUTPUT
 . ${PIPELINEDIR}/utils.sh	
 
@@ -108,10 +109,11 @@ EOFINNER
 
 log=${logs}/split_spectralline_science_beam${BEAM}_\${SLURM_JOB_ID}.log
 
-aprun -n 1 -N 1 ${mssplit} -c \${parset} > \${log}
+NCORES=1
+NPPN=1
+aprun -n \${NCORES} -N \${NPPN} ${mssplit} -c \${parset} > \${log}
 err=\$?
-NUM_CPUS=1
-extractStats \${log} \${SLURM_JOB_ID} \${err} splitScience_B${BEAM} "txt,csv"
+extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} splitScience_B${BEAM} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
 fi
@@ -163,6 +165,7 @@ ${EMAIL_REQUEST}
 #SBATCH --export=ASKAP_ROOT,AIPSPATH
 #SBATCH --output=$slurmOut/slurm-calappSLsci-%j.out
 
+BASEDIR=${BASEDIR}
 cd $OUTPUT
 . ${PIPELINEDIR}/utils.sh	
 
@@ -185,10 +188,11 @@ Ccalapply.calibaccess.table.maxchan       = ${nchanContSci}
 Ccalapply.calibaccess.table               = ${gainscaltab}
 EOFINNER
 
-aprun -n 1 -N 1 ${ccalapply} -c \${parset} > \${log}
+NCORES=1
+NPPN=1
+aprun -n \${NCORES} -N \${NPPN} ${ccalapply} -c \${parset} > \${log}
 err=\$?
-NUM_CPUS=1
-extractStats \${log} \${SLURM_JOB_ID} \${err} calapply_spectral_B${BEAM} "txt,csv"
+extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} calapply_spectral_B${BEAM} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
 else

@@ -47,6 +47,7 @@ ${EMAIL_REQUEST}
 #SBATCH --export=ASKAP_ROOT,AIPSPATH
 #SBATCH --output=$slurmOut/slurm-linmos-%j.out
 
+BASEDIR=${BASEDIR}
 cd $OUTPUT
 . ${PIPELINEDIR}/utils.sh	
 
@@ -92,10 +93,11 @@ linmos.nterms           = ${NUM_TAYLOR_TERMS}
 linmos.cutoff           = ${LINMOS_CUTOFF}
 EOFINNER
 
-    aprun -n 1 -N 1 $linmos -c \$parset > \$log
+    NCORES=1
+    NPPN=1
+    aprun -n \${NCORES} -N \${NPPN} $linmos -c \$parset > \$log
     err=\$?
-    NUM_CPUS=1
-    extractStats \${log} \${SLURM_JOB_ID} \${err} linmos "txt,csv"
+    extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} linmos "txt,csv"
     if [ \$err != 0 ]; then
         exit \$err
     fi

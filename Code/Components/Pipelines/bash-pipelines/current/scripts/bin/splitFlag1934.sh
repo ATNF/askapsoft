@@ -86,6 +86,7 @@ ${EMAIL_REQUEST}
 #SBATCH --export=ASKAP_ROOT,AIPSPATH
 #SBATCH --output=$slurmOut/slurm-split1934-b${BEAM}-%j.out
 
+BASEDIR=${BASEDIR}
 cd $OUTPUT
 . ${PIPELINEDIR}/utils.sh	
 
@@ -123,10 +124,11 @@ EOFINNER
 
 log=${logs}/split_1934_beam${BEAM}_\${SLURM_JOB_ID}.log
 
-aprun -n 1 -N 1 ${mssplit} -c \${parset} > \${log}
+NCORES=1
+NPPN=1
+aprun -n \${NCORES} -N \${NPPN} ${mssplit} -c \${parset} > \${log}
 err=\$?
-NUM_CPUS=1
-extractStats \${log} \${SLURM_JOB_ID} \${err} split1934_B${BEAM} "txt,csv"
+extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} split1934_B${BEAM} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
 fi
@@ -178,6 +180,7 @@ ${EMAIL_REQUEST}
 #SBATCH --export=ASKAP_ROOT,AIPSPATH
 #SBATCH --output=$slurmOut/slurm-flag1934-b${BEAM}-%j.out
 
+BASEDIR=${BASEDIR}
 cd $OUTPUT
 . ${PIPELINEDIR}/utils.sh	
 
@@ -202,10 +205,11 @@ EOFINNER
 
 log=${logs}/cflag_dynamic_1934_beam${BEAM}_\${SLURM_JOB_ID}.log
 
-aprun -n 1 -N 1 ${cflag} -c \${parset} > \${log}
+NCORES=1
+NPPN=1
+aprun -n \${NCORES} -N \${NPPN} ${cflag} -c \${parset} > \${log}
 err=\$?
-NUM_CPUS=1
-extractStats \${log} \${SLURM_JOB_ID} \${err} flag1934Dynamic_B${BEAM} "txt,csv"
+extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} flag1934Dynamic_B${BEAM} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
 else
@@ -226,9 +230,11 @@ EOFINNER
 
 log=${logs}/cflag_amp_1934_beam${BEAM}_\${SLURM_JOB_ID}.log
 
-aprun -n 1 -N 1 ${cflag} -c \${parset} > \${log}
+NCORES=1
+NPPN=1
+aprun -n \${NCORES} -N \${NPPN} ${cflag} -c \${parset} > \${log}
 err=\$?
-extractStats \${log} \${SLURM_JOB_ID} \${err} flag1934Amp_B${BEAM} "txt,csv"
+extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} flag1934Amp_B${BEAM} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
 fi

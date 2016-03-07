@@ -31,12 +31,12 @@
 
 ####################
 # Define & create directories
-CWD=`pwd`
-parsets=${CWD}/parsets
-logs=${CWD}/logs
-slurms=${CWD}/slurmFiles
-slurmOut=${CWD}/slurmOutput
-tools=${CWD}/tools
+BASEDIR=`pwd`
+parsets=${BASEDIR}/parsets
+logs=${BASEDIR}/logs
+slurms=${BASEDIR}/slurmFiles
+slurmOut=${BASEDIR}/slurmOutput
+tools=${BASEDIR}/tools
 
 mkdir -p $parsets
 mkdir -p $logs

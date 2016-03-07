@@ -37,15 +37,16 @@ if [ $PROCESS_HAS_RUN == false ]; then
 
     ####################
     # Define the full path of output directory
-    OUTPUT="${CWD}/${OUTPUT}"
+    OUTPUT="${BASEDIR}/${OUTPUT}"
     mkdir -p $OUTPUT
     . ${PIPELINEDIR}/utils.sh
-    cd $OUTPUT
+    BASEDIR=${BASEDIR}
+cd $OUTPUT
     echo $NOW >> PROCESSED_ON
     if [ ! -e ${stats} ]; then
-        ln -s ${CWD}/${stats} .
+        ln -s ${BASEDIR}/${stats} .
     fi
-    cd $CWD
+    cd $BASEDIR
     
     ####################
     # Slurm file headers

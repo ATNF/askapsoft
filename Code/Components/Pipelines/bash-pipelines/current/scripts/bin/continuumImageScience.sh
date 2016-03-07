@@ -58,6 +58,7 @@ ${EMAIL_REQUEST}
 #SBATCH --export=ASKAP_ROOT,AIPSPATH
 #SBATCH --output=$slurmOut/slurm-contImaging-%j.out
 
+BASEDIR=${BASEDIR}
 cd $OUTPUT
 . ${PIPELINEDIR}/utils.sh	
 
@@ -77,8 +78,7 @@ log=${logs}/science_imaging_beam${BEAM}_\${SLURM_JOB_ID}.log
 
 aprun -n ${NUM_CPUS_CONTIMG_SCI} -N ${CPUS_PER_CORE_CONT_IMAGING} $cimager -c \$parset > \$log
 err=\$?
-NUM_CPUS=${NUM_CPUS_CONTIMG_SCI}
-extractStats \${log} \${SLURM_JOB_ID} \${err} contImaging_B${BEAM} "txt,csv"
+extractStats \${log} ${NUM_CPUS_CONTIMG_SCI} \${SLURM_JOB_ID} \${err} contImaging_B${BEAM} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
 fi

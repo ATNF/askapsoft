@@ -135,6 +135,7 @@ ${EMAIL_REQUEST}
 #SBATCH --export=ASKAP_ROOT,AIPSPATH
 #SBATCH --output=$slurmOut/slurm-spectralImaging-%j.out
 
+BASEDIR=${BASEDIR}
 cd $OUTPUT
 . ${PIPELINEDIR}/utils.sh	
 
@@ -186,9 +187,7 @@ log=${logs}/science_spectral_imager_beam${BEAM}_\${SLURM_JOB_ID}.log
 # Now run the simager
 aprun -n ${NUM_CPUS_SPECIMG_SCI} -N ${CPUS_PER_CORE_SPEC_IMAGING} ${simager} -c \$parset > \$log
 err=\$?
-
-NUM_CPUS=${NUM_CPUS_SPECIMG_SCI}
-extractStats \${log} \${SLURM_JOB_ID} \${err} spectralImaging_B${BEAM} "txt,csv"
+extractStats \${log} ${NUM_CPUS_SPECIMG_SCI} \${SLURM_JOB_ID} \${err} spectralImaging_B${BEAM} "txt,csv"
 
 if [ \${err} -ne 0 ]; then
     echo "Error: simager returned error code \${err}"

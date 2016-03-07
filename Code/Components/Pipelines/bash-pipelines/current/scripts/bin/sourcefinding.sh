@@ -58,6 +58,7 @@ ${EMAIL_REQUEST}
 #SBATCH --export=ASKAP_ROOT,AIPSPATH
 #SBATCH --output=$slurmOut/slurm-selavy-%j.out
 
+BASEDIR=${BASEDIR}
 cd $OUTPUT
 . ${PIPELINEDIR}/utils.sh	
 
@@ -109,8 +110,7 @@ EOFINNER
 
 aprun -n ${NUM_CPUS_SELAVY} -N ${CPUS_PER_CORE_SELAVY} $selavy -c \$parset >> \$log
 err=\$?
-NUM_CPUS=${NUM_CPUS_SELAVY}
-extractStats \${log} \${SLURM_JOB_ID} \${err} selavy_B${BEAM} "txt,csv"
+extractStats \${log} ${NUM_CPUS_SELAVY} \${SLURM_JOB_ID} \${err} selavy_B${BEAM} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
 fi
