@@ -37,7 +37,7 @@
 
 ##############################
 
-if [ $SUBMIT_JOBS == true ]; then
+if [ $SUBMIT_JOBS == true ] && [ "${ALL_JOB_IDS}" != "" ]; then
 
     # Gather stats on all running jobs
 
