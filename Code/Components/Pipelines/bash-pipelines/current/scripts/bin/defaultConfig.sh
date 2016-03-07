@@ -282,8 +282,9 @@ DO_APPLY_CAL_SL=false
 # Whether to subtract a continuum model
 DO_CONT_SUB_SL=false
 
-# Whether to contruct the continuum model via selavy & cmodel
-BUILD_MODEL_FOR_CONTSUB=true
+## Whether to contruct the continuum model via selavy & cmodel
+#BUILD_MODEL_FOR_CONTSUB=true
+CONTSUB_METHOD="Cmodel"
 # Division of image for source-finding in continuum-subtraction
 CONTSUB_SELAVY_NSUBX=6
 CONTSUB_SELAVY_NSUBY=3
