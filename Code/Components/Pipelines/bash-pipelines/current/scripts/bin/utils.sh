@@ -39,6 +39,20 @@ function reportVersion()
 
 }
 
+##############################
+# ARCHIVING A CONFIG FILE
+
+# Takes one argument, the config file
+function archiveConfig()
+{
+    
+    filename=$(basename "$1")
+    extension="${filename##*.}"
+    filename="${filename%.*}"
+    cp $1 $slurmOut/${filename}__${NOW}.${extension}
+    
+}
+
 
 ##############################
 # JOB ID MANAGEMENT

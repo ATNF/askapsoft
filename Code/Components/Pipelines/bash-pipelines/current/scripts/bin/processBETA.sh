@@ -72,6 +72,7 @@ else
 	        echo "Getting extra config from file $userConfig"
 	        echo " "
 	        . ${userConfig}
+                archiveConfig $userConfig
             else
                 echo "ERROR: Configuration file $userConfig not found"
                 exit 1
