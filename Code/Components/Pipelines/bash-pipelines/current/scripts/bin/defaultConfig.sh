@@ -136,6 +136,9 @@ MS_INPUT_SCIENCE=""
 BEAM_MIN=0
 BEAM_MAX=8
 
+# How many antennas
+NUM_ANT=6
+
 ####################
 ##  BANDPASS CAL
 

@@ -29,7 +29,7 @@
 # @author Matthew Whiting <Matthew.Whiting@csiro.au>
 #
 
-# If we're here, then BUILD_MODEL_FOR_CONTSUB=false
+# If we're here, then CONTSUB_METHOD=CleanModel
 # In this bit, we use the clean model from the continuum imaging
 # as the input to ccontsubtract
 

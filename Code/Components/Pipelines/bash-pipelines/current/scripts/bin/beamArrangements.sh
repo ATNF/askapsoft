@@ -81,7 +81,7 @@ if [ $DO_SCIENCE_FIELD == true ] && [ $DO_MOSAIC == true ]; then
 		# with the RA offset flipped in sign.
 
 		    beamsOut="$parsets/beamOffsets.txt"
-		    grep -A9 Beam ${footprintOut} | tail -n 9 | sed -e 's/(//g' | sed -e 's/)//g' | awk '{printf "linmos.feeds.beam%d = [%6.3f, %6.3f]\n",$1,-$4,$5}' > ${beamsOut}
+		    grep -A$[BEAM_MAX+1] Beam ${footprintOut} | tail -n $[BEAM_MAX+1] | sed -e 's/(//g' | sed -e 's/)//g' | awk '{printf "linmos.feeds.beam%d = [%6.3f, %6.3f]\n",$1,-$4,$5}' > ${beamsOut}
 		    LINMOS_BEAM_OFFSETS=`cat ${beamsOut}`
 
 		else

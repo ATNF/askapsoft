@@ -182,7 +182,7 @@ Ccalapply.dataset                             = ${msSciSL}
 Ccalapply.calibrate.allowflag                 = true
 #
 Ccalapply.calibaccess                     = table
-Ccalapply.calibaccess.table.maxant        = 6
+Ccalapply.calibaccess.table.maxant        = ${NUM_ANT}
 Ccalapply.calibaccess.table.maxbeam       = ${nbeam}
 Ccalapply.calibaccess.table.maxchan       = ${nchanContSci}
 Ccalapply.calibaccess.table               = ${gainscaltab}

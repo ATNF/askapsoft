@@ -106,7 +106,7 @@ for((LOOP=0;LOOP<=${SELFCAL_NUM_LOOPS};LOOP++)); do
 Cimager.calibrate                           = true
 Cimager.calibaccess                         = table
 Cimager.calibaccess.table                   = \${loopdir}/\${caldata}
-Cimager.calibaccess.table.maxant            = 6
+Cimager.calibaccess.table.maxant            = ${NUM_ANT}
 Cimager.calibaccess.table.maxbeam           = ${nbeam}
 Cimager.calibaccess.table.maxchan           = ${nchanContSci}
 Cimager.calibaccess.table.reuse             = false
@@ -194,14 +194,14 @@ Selavy.sortingParam                             = -iflux
 ##
 # parameters for calibrator
 Ccalibrator.dataset                             = ${OUTPUT}/${msSciAv}
-Ccalibrator.nAnt                                = 6
+Ccalibrator.nAnt                                = ${NUM_ANT}
 Ccalibrator.nBeam                               = 1
 Ccalibrator.solve                               = antennagains
 Ccalibrator.interval                            = ${SELFCAL_INTERVAL}
 #
 Ccalibrator.calibaccess                         = table
 Ccalibrator.calibaccess.table                   = \${caldata}
-Ccalibrator.calibaccess.table.maxant            = 6
+Ccalibrator.calibaccess.table.maxant            = ${NUM_ANT}
 Ccalibrator.calibaccess.table.maxbeam           = ${nbeam}
 Ccalibrator.calibaccess.table.maxchan           = ${nchanContSci}
 Ccalibrator.calibaccess.table.reuse             = false

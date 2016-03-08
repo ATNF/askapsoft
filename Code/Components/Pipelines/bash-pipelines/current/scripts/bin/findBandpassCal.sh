@@ -68,13 +68,13 @@ cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 parset=${parsets}/cbpcalibrator_1934_\${SLURM_JOB_ID}.in
 cat > \$parset <<EOFINNER
 Cbpcalibrator.dataset                         = [${ms1934list}]
-Cbpcalibrator.nAnt                            = 6
+Cbpcalibrator.nAnt                            = ${NUM_ANT}
 Cbpcalibrator.nBeam                           = ${nbeam}
 Cbpcalibrator.nChan                           = ${NUM_CHAN_1934}
 Cbpcalibrator.refantenna                      = 1
 #
 Cbpcalibrator.calibaccess                     = table
-Cbpcalibrator.calibaccess.table.maxant        = 6
+Cbpcalibrator.calibaccess.table.maxant        = ${NUM_ANT}
 Cbpcalibrator.calibaccess.table.maxbeam       = ${nbeam}
 Cbpcalibrator.calibaccess.table.maxchan       = ${NUM_CHAN_1934}
 Cbpcalibrator.calibaccess.table               = ${TABLE_BANDPASS}
