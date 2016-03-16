@@ -179,7 +179,7 @@ void FrtCommunicator::invalidate(const casa::uInt ant)
 void FrtCommunicator::newTimeStamp(const casa::MVEpoch &epoch)
 {
   // first check any requests waiting for completion
-  const double timeOut = 5.* itsCyclesToWait;
+  const double timeOut = 5.* (0.5 + itsCyclesToWait);
   //const uint64_t currentBAT = epoch2bat(casa::MEpoch(epoch, casa::MEpoch::UTC));
   for (size_t ant = 0; ant < itsAntennaStatuses.size(); ++ant) {
        if (itsAntennaStatuses[ant] == ANT_BEING_UPDATED) {
