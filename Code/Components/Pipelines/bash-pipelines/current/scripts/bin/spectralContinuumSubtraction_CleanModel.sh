@@ -60,7 +60,9 @@ if [ "${DIRECTION_SCI}" != "" ]; then
     modelDirection="${DIRECTION_SCI}"
 else
     log=${logs}/mslist_for_ccontsub_\${SLURM_JOB_ID}.log
-    aprun -n 1 -N 1 $mslist --full ${msSciSL} 1>& \${log}
+    NCORES=1
+    NPPN=1
+    aprun -n \${NCORES} -N \${NPPN} $mslist --full ${msSciSL} 1>& \${log}
     ra=\`grep -A1 RA \$log | tail -1 | awk '{print \$7}'\`
     dec=\`grep -A1 RA \$log | tail -1 | awk '{print \$8}'\`
     eq=\`grep -A1 RA \$log | tail -1 | awk '{print \$9}'\`

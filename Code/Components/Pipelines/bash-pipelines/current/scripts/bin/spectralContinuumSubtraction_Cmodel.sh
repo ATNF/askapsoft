@@ -78,7 +78,9 @@ if [ "${DIRECTION_SCI}" != "" ]; then
     modelDirection="${DIRECTION_SCI}"
 else
     log=${logs}/mslist_for_ccontsub_\${SLURM_JOB_ID}.log
-    aprun -n 1 -N 1 $mslist --full ${msSciSL} 1>& \${log}
+    NCORES=1
+    NPPN=1
+    aprun -n \${NCORES} -N \${NPPN} $mslist --full ${msSciSL} 1>& \${log}
     ra=\`grep -A1 RA \$log | tail -1 | awk '{print \$7}'\`
     dec=\`grep -A1 RA \$log | tail -1 | awk '{print \$8}'\`
     eq=\`grep -A1 RA \$log | tail -1 | awk '{print \$9}'\`
@@ -150,9 +152,11 @@ Selavy.minChannels                              = 1
 Selavy.sortingParam                             = -iflux
 EOFINNER
 
-aprun -n ${NPROCS_SELAVY} -N ${CPUS_PER_CORE_CONTSUB} ${selavy} -c \${parset} > \${log}
+NCORES=${NPROCS_SELAVY}
+NPPN=${CPUS_PER_CORE_CONTSUB}
+aprun -n \${NCORES} -N \${NPPN} ${selavy} -c \${parset} > \${log}
 err=\$?
-extractStats \${log} \${NPROCS_SELAVY} \${SLURM_JOB_ID} \${err} selavy_contsub_spectral_B${BEAM} "txt,csv"
+extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} selavy_contsub_spectral_B${BEAM} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
 fi

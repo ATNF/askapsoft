@@ -92,9 +92,11 @@ EOFINNER
 
 log=${logs}/cbpcalibrator_1934_\${SLURM_JOB_ID}.log
 
-aprun -n ${NUM_CPUS_CBPCAL} -N 20 ${cbpcalibrator} -c \${parset} > \${log}
+NCORES=${NUM_CPUS_CBPCAL}
+NPPN=20
+aprun -n \${NCORES} -N \${NPPN} $cbpcalibrator -c \$parset > \$log
 err=\$?
-extractStats \${log} ${NUM_CPUS_CBPCAL} \${SLURM_JOB_ID} \${err} findBandpass "txt,csv"
+extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} findBandpass "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
 fi

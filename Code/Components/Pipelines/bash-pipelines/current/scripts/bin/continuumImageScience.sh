@@ -76,9 +76,11 @@ EOFINNER
 
 log=${logs}/science_imaging_beam${BEAM}_\${SLURM_JOB_ID}.log
 
-aprun -n ${NUM_CPUS_CONTIMG_SCI} -N ${CPUS_PER_CORE_CONT_IMAGING} $cimager -c \$parset > \$log
+NCORES=${NUM_CPUS_CONTIMG_SCI}
+NPPN=${CPUS_PER_CORE_CONT_IMAGING}
+aprun -n \${NCORES} -N \${NPPN} $cimager -c \$parset > \$log
 err=\$?
-extractStats \${log} ${NUM_CPUS_CONTIMG_SCI} \${SLURM_JOB_ID} \${err} contImaging_B${BEAM} "txt,csv"
+extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} contImaging_B${BEAM} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
 fi

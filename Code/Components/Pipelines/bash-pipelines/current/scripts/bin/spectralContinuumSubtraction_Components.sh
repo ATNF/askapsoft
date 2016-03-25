@@ -142,9 +142,11 @@ Selavy.minChannels                              = 1
 Selavy.sortingParam                             = -iflux
 EOFINNER
 
-aprun -n ${NPROCS_SELAVY} -N ${CPUS_PER_CORE_CONTSUB} ${selavy} -c \${parset} > \${log}
+NCORES=${NPROCS_SELAVY}
+NPPN=${CPUS_PER_CORE_CONTSUB}
+aprun -n \${NCORES} -N \${NPPN} ${selavy} -c \${parset} > \${log}
 err=\$?
-extractStats \${log} \${NPROCS_SELAVY} \${SLURM_JOB_ID} \${err} selavy_contsub_spectral_B${BEAM} "txt,csv"
+extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} selavy_contsub_spectral_B${BEAM} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
 fi

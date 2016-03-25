@@ -147,7 +147,9 @@ if [ "${DIRECTION_SCI}" != "" ]; then
     directionDefinition="Simager.Images.image.${imageBase}.direction    = ${DIRECTION_SCI}"
 else
     log=${logs}/mslist_for_simager_\${SLURM_JOB_ID}.log
-    aprun -n 1 -N 1 $mslist --full ${msSciSL} 1>& \${log}
+    NCORES=1
+    NPPN=1
+    aprun -n \${NCORES} -N \${NPPN} $mslist --full ${msSciSL} 1>& \${log}
     ra=\`grep -A1 RA \$log | tail -1 | awk '{print \$7}'\`
     dec=\`grep -A1 RA \$log | tail -1 | awk '{print \$8}'\`
     eq=\`grep -A1 RA \$log | tail -1 | awk '{print \$9}'\`
@@ -185,9 +187,11 @@ EOF
 log=${logs}/science_spectral_imager_beam${BEAM}_\${SLURM_JOB_ID}.log
 
 # Now run the simager
-aprun -n ${NUM_CPUS_SPECIMG_SCI} -N ${CPUS_PER_CORE_SPEC_IMAGING} ${simager} -c \$parset > \$log
+NCORES=${NUM_CPUS_SPECIMG_SCI}
+NPPN=${CPUS_PER_CORE_SPEC_IMAGING}
+aprun -n \${NCORES} -N \${NPPN} ${simager} -c \$parset > \$log
 err=\$?
-extractStats \${log} ${NUM_CPUS_SPECIMG_SCI} \${SLURM_JOB_ID} \${err} spectralImaging_B${BEAM} "txt,csv"
+extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} spectralImaging_B${BEAM} "txt,csv"
 
 if [ \${err} -ne 0 ]; then
     echo "Error: simager returned error code \${err}"

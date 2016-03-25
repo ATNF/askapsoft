@@ -227,9 +227,11 @@ EOFINNER
         ln -s ${parsets} .
 
         echo "--- Source finding with $selavy ---" >> \$log
-        aprun -n ${NPROCS_SELAVY} -N ${CPUS_PER_CORE_SELFCAL} $selavy -c \$parset >> \$log
+        NCORES=${NPROCS_SELAVY}
+        NPPN=${CPUS_PER_CORE_SELFCAL}
+        aprun -n \${NCORES} -N \${NPPN} $selavy -c \$parset >> \$log
         err=\$?
-        extractStats \${log} ${NPROCS_SELAVY} \${SLURM_JOB_ID} \${err} selavySC_L\${LOOP}_B${BEAM} "txt,csv"
+        extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} selavySC_L\${LOOP}_B${BEAM} "txt,csv"
 
         if [ \$err != 0 ]; then
             exit \$err
@@ -252,14 +254,16 @@ EOFINNER
         fi
 
         BASEDIR=${BASEDIR}
-cd $OUTPUT
+        cd $OUTPUT
     fi
 
     # Run the imager, calibrating if not the first time.
     echo "--- Imaging with $cimager ---" >> \$log
-    aprun -n ${NUM_CPUS_CONTIMG_SCI} -N ${CPUS_PER_CORE_CONT_IMAGING} $cimager -c \$parset >> \$log
+    NCORES=${NUM_CPUS_CONTIMG_SCI}
+    NPPN=${CPUS_PER_CORE_CONT_IMAGING}
+    aprun -n \${NCORES} -N \${NPPN} $cimager -c \$parset >> \$log
     err=\$?
-    extractStats \${log} ${NUM_CPUS_CONTIMG_SCI} \${SLURM_JOB_ID} \${err} contImagingSC_L\${LOOP}_B${BEAM} "txt,csv"
+    extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} contImagingSC_L\${LOOP}_B${BEAM} "txt,csv"
     if [ \$err != 0 ]; then
         exit \$err
     fi

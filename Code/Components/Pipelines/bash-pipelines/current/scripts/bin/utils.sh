@@ -231,7 +231,7 @@ function writeStatsHeader()
 
 function extractStats()
 {
-    # usage: extractStats logfile ID ResultCode Description [format]
+    # usage: extractStats logfile nCores ID ResultCode Description [format]
     # format is optional. If not provided, output is written to stdout
     #   if provided, it is assumed to be a list of suffixes - these can be either txt or csv.
     #      If txt - output is written to $stats/stats-ID-DESCRIPTION.txt as space-separated ascii
