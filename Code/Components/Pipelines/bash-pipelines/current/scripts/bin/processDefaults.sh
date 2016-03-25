@@ -118,7 +118,7 @@ cd $OUTPUT
 
     # science observation
     # If we are splitting/flagging, check MS_INPUT_SCIENCE is OK:
-    if [ ${DO_FLAG_SCIENCE} == true ]; then
+    if [ ${DO_SPLIT_SCIENCE} == true ] || [ ${DO_FLAG_SCIENCE} == true ]; then
         if [ "$MS_INPUT_SCIENCE" == "" ]; then
             if [ $SB_SCIENCE != "SET_THIS" ]; then
 	        sbScienceDir=$DIR_SB/$SB_SCIENCE
