@@ -217,7 +217,7 @@ boost::shared_ptr<CorrelatorSimulatorADE>
 			// for each card that fails
 			for (uint32_t i = 0; i < missCards.size(); ++i) {
 				// if it's this card, get the parameter
-				if (missCards[i] == itsRank) {
+				if (static_cast<int>(missCards[i]) == itsRank) {
 					cardFailModes.fail = true;
 					cardFailModes.miss = missCycles[i];
 				}
