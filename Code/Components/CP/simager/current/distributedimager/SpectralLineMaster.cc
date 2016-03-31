@@ -65,6 +65,14 @@ SpectralLineMaster::SpectralLineMaster(LOFAR::ParameterSet& parset,
                                        askap::cp::IBasicComms& comms)
     : itsParset(parset), itsComms(comms), itsBeamList()
 {
+    itsDoingPreconditioning = false;
+    const vector<string> preconditioners = itsParset.getStringVector("preconditioner.Names", std::vector<std::string>());
+    for (vector<string>::const_iterator pc = preconditioners.begin(); pc != preconditioners.end(); ++pc) {
+        if ((*pc) == "Wiener" || (*pc) == "NormWiener" || (*pc) == "Robust" || (*pc) == "GaussianTaper") {
+            itsDoingPreconditioning = true;
+        }
+    }
+
 }
 
 SpectralLineMaster::~SpectralLineMaster()
@@ -114,7 +122,7 @@ void SpectralLineMaster::run(void)
     itsWeightsCube.reset(new CubeBuilder(itsParset, nChan, f0, freqinc, "weights"));
     if (itsParset.getBool("restore", false)) {
         // Only create these if we are restoring, as that is when they get made
-        if(itsParset.getString("preconditioner.Names")!="None") {
+        if (itsDoingPreconditioning) {
             itsPSFimageCube.reset(new CubeBuilder(itsParset, nChan, f0, freqinc, "psf.image"));
         }
         itsRestoredCube.reset(new CubeBuilder(itsParset, nChan, f0, freqinc, "restored"));
@@ -173,7 +181,7 @@ void SpectralLineMaster::run(void)
             wu.set_dataset(ms[n]);
             wu.set_globalChannel(globalChannel);
             wu.set_localChannel(localChan);
-            wu.set_channelFrequency(f0.getValue("Hz") + globalChannel*freqinc.getValue("Hz"));
+            wu.set_channelFrequency(f0.getValue("Hz") + globalChannel * freqinc.getValue("Hz"));
             itsComms.sendMessage(wu, id);
             ++outstanding;
 
@@ -243,25 +251,18 @@ std::vector<std::string> SpectralLineMaster::getDatasets(const LOFAR::ParameterS
 }
 
 void SpectralLineMaster::handleImageParams(askap::scimath::Params::ShPtr params,
-                                           unsigned int chan)
+        unsigned int chan)
 {
     Tracing::entry(Tracing::WriteImage);
-    bool doingPreconditioning=false;
-    const vector<string> preconditioners=itsParset.getStringVector("preconditioner.Names",std::vector<std::string>());
-    for (vector<string>::const_iterator pc = preconditioners.begin(); pc != preconditioners.end(); ++pc) {
-        if( (*pc)=="Wiener" || (*pc)=="NormWiener" || (*pc)=="Robust" || (*pc) == "GaussianTaper") {
-            doingPreconditioning=true;
-        }
-    }
 
     // Pre-conditions
     ASKAPCHECK(params->has("model.slice"), "Params are missing model parameter");
     ASKAPCHECK(params->has("psf.slice"), "Params are missing psf parameter");
     ASKAPCHECK(params->has("residual.slice"), "Params are missing residual parameter");
     ASKAPCHECK(params->has("weights.slice"), "Params are missing weights parameter");
-    if (itsParset.getBool("restore", false) ) {
+    if (itsParset.getBool("restore", false)) {
         ASKAPCHECK(params->has("image.slice"), "Params are missing image parameter");
-        if (doingPreconditioning) {
+        if (itsDoingPreconditioning) {
             ASKAPCHECK(params->has("psf.image.slice"), "Params are missing psf.image parameter");
         }
     }
@@ -306,9 +307,9 @@ void SpectralLineMaster::handleImageParams(askap::scimath::Params::ShPtr params,
     }
 
 
-    if (itsParset.getBool("restore", false)){
+    if (itsParset.getBool("restore", false)) {
 
-        if(doingPreconditioning) {
+        if (itsDoingPreconditioning) {
             // Write preconditioned PSF image
             {
                 const casa::Array<double> imagePixels(params->value("psf.image.slice"));
@@ -364,7 +365,7 @@ void SpectralLineMaster::recordBeamFailure(const unsigned int globalChannel)
         ASKAPLOG_WARN_STR(logger, "Beam reference channel " << itsBeamReferenceChannel
                           << " has failed - output cubes have no restoring beam.");
     }
-    
+
 }
 
 
@@ -378,7 +379,7 @@ void SpectralLineMaster::storeBeam(const unsigned int globalChannel)
 void SpectralLineMaster::logBeamInfo()
 {
 
-    if (itsParset.getBool("restore", false)){
+    if (itsParset.getBool("restore", false)) {
         askap::accessors::BeamLogger beamlog(itsParset.makeSubset("restore."));
         if (beamlog.filename() != "") {
             ASKAPCHECK(itsBeamList.begin()->first == 0, "Beam list doesn't start at channel 0");

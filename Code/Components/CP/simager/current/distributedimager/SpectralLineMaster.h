@@ -98,6 +98,9 @@ class SpectralLineMaster {
         boost::scoped_ptr<CubeBuilder> itsPSFimageCube;
         boost::scoped_ptr<CubeBuilder> itsRestoredCube;
 
+        // Whether preconditioning has been requested
+        bool itsDoingPreconditioning;
+
         // No support for assignment
         SpectralLineMaster& operator=(const SpectralLineMaster& rhs);
 
