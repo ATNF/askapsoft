@@ -66,6 +66,7 @@ class TosSimulator : public ISimulator {
                      const std::string& locatorPort,
                      const std::string& topicManager,
                      const std::string& topic,
+					 const unsigned int nAntenna = 0,
                      const double metadataSendFail = 0.0,
                      const unsigned int delay = 0);
 
@@ -95,6 +96,8 @@ class TosSimulator : public ISimulator {
 
         // Port for output of metadata
         boost::scoped_ptr<askap::cp::icewrapper::MetadataOutputPort> itsPort;
+
+		const unsigned int itsNAntenna;
 
         const unsigned int itsDelay;
 };

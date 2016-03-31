@@ -43,6 +43,7 @@
 #include "simplayback/CorrProdMap.h"
 #include "simplayback/CorrBuffer.h"
 #include "simplayback/ChannelMap.h"
+#include "simplayback/CardFailMode.h"
 
 
 namespace askap {
@@ -77,7 +78,8 @@ class CorrelatorSimulatorADE : public ISimulator {
                 const uint32_t nCoarseChannel = 0,
                 const uint32_t nChannelSub = 0,
                 const double coarseBandwidth = 0.0,
-                const uint32_t delay = 0);
+                const uint32_t delay = 0,
+				const CardFailMode& failMode = CardFailMode());
 
         /// Destructor
         virtual ~CorrelatorSimulatorADE();
@@ -87,6 +89,9 @@ class CorrelatorSimulatorADE : public ISimulator {
         ///         otherwise false. If false is returned, sendNext()
         ///         should not be called again.
         bool sendNext(void);
+
+		// @brief Report the status of correlator simulator
+		//void report(void);
 		
     private:
 
@@ -132,8 +137,17 @@ class CorrelatorSimulatorADE : public ISimulator {
         // Delay in microseconds
         uint32_t itsDelay;
 
+		// Failure modes
+		CardFailMode itsFailMode;
+
         // Cursor (index) for the main table of the measurement set
         uint32_t itsCurrentRow;
+
+		// Count how many times data has been read from measurement set
+		uint32_t itsDataReadCounter;
+
+		// Count how many times data has been sent
+		uint32_t itsDataSentCounter;
 
         // Measurement set
         boost::scoped_ptr<casa::MeasurementSet> itsMS;
@@ -196,6 +210,9 @@ class CorrelatorSimulatorADE : public ISimulator {
         /// At this moment it is used to check the correct association 
         /// between channel number and frequency.
         void checkTestBuffer();
+
+		//
+		//void getFailMode();
 };
 
 };

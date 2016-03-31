@@ -56,6 +56,7 @@
 //#define TEST
 //#define VERBOSE
 #define CARDFREQ
+#define EXPAND_ANTENNA
 
 // Using
 using namespace askap;
@@ -71,10 +72,11 @@ TosSimulator::TosSimulator(const std::string& dataset,
         const std::string& locatorPort,
         const std::string& topicManager,                
         const std::string& topic,
+		const unsigned int nAntenna,
         const double metadataSendFail,
         const unsigned int delay)
     : itsMetadataSendFailChance(metadataSendFail), itsCurrentRow(0),
-        itsRandom(0.0, 1.0), itsDelay(delay)
+        itsRandom(0.0, 1.0), itsNAntenna(nAntenna), itsDelay(delay)
 {
 	if (dataset == "") {
 		itsMS.reset ();
@@ -117,7 +119,10 @@ bool TosSimulator::sendNext(void)
     const casa::uInt descSpwId = ddc.spectralWindowId()(dataDescId);
     const casa::uInt nRow = msc.nrow(); // In the whole table, not just for this integration
     //const casa::uInt nCorr = polc.numCorr()(descPolId);
-    const casa::uInt nAntenna = antc.nrow();
+    const casa::uInt nAntennaMS = antc.nrow();
+
+	cout << "The number of antennas in measurement set is " << nAntennaMS << 
+			", and that requested in parset is " << itsNAntenna << endl;
 
     // Record the timestamp for the current integration that is
     // being processed
@@ -144,16 +149,17 @@ bool TosSimulator::sendNext(void)
     // precision of a single double may not be enough in general, but should be fine for 
     // this emulator (ideally need to represent time as two doubles)
     const casa::MEpoch epoch(casa::MVEpoch(casa::Quantity(currentIntegration,"s")), 
-                             casa::MEpoch::Ref(casa::MEpoch::UTC));
+    		casa::MEpoch::Ref(casa::MEpoch::UTC));
     const casa::MVEpoch epochTAI = casa::MEpoch::Convert(epoch,
-                           casa::MEpoch::Ref(casa::MEpoch::TAI))().getValue();
+    		casa::MEpoch::Ref(casa::MEpoch::TAI))().getValue();
     const uint64_t microsecondsPerDay = 86400000000ull;
     const uint64_t startOfDayBAT = uint64_t(epochTAI.getDay()*microsecondsPerDay);
     const long Tint = static_cast<long>(msc.interval()(itsCurrentRow) * 1000 * 1000);
-    const uint64_t startBAT = startOfDayBAT + uint64_t(epochTAI.getDayFraction()*microsecondsPerDay) -
-                                  uint64_t(Tint / 2);
+    const uint64_t startBAT = startOfDayBAT + 
+			uint64_t(epochTAI.getDayFraction()*microsecondsPerDay) - uint64_t(Tint / 2);
 
-    // ideally we want to carry BAT explicitly as 64-bit unsigned integer, leave it as it is for now
+    // ideally we want to carry BAT explicitly as 64-bit unsigned integer, 
+	// leave it as it is for now
     metadata.time(static_cast<long>(startBAT));
     metadata.scanId(msc.scanNumber()(itsCurrentRow));
     metadata.flagged(false);
@@ -211,8 +217,26 @@ bool TosSimulator::sendNext(void)
     ////////////////////////////////////////
     // Metadata - per antenna
     ////////////////////////////////////////
-    for (casa::uInt i = 0; i < nAntenna; ++i) {
-        const std::string name = antc.name().getColumn()(i);
+	// Note the number of antennas is as requested in parset instead of 
+	// that is actually available in measurement set.
+    //for (casa::uInt i = 0; i < nAntenna; ++i) {
+    //for (casa::uInt i = 0; i < nAntennaMS; ++i) {
+	std::string name;
+#ifdef EXPAND_ANTENNA
+    for (casa::uInt i = 0; i < itsNAntenna; ++i) {
+		stringstream ss;
+		ss << i+1;
+		if (i < 9) {
+			name = "ak0" + ss.str();
+		}
+		else {
+			name = "ak" + ss.str();
+		}
+#else
+    for (casa::uInt i = 0; i < nAntennaMS; ++i) {
+        //const std::string name = antc.name().getColumn()(i);
+        name = antc.name().getColumn()(i);
+#endif
 
         TosMetadataAntenna antMetadata(name);
 
@@ -221,7 +245,11 @@ bool TosSimulator::sendNext(void)
 
         // <antenna name>.actual_azel
         MDirection::Ref targetFrame = MDirection::Ref(MDirection::AZEL);
+#ifdef EXPAND_ANTENNA
+        targetFrame.set(MeasFrame(antc.positionMeas()(0), epoch));
+#else
         targetFrame.set(MeasFrame(antc.positionMeas()(i), epoch));
+#endif
         const MDirection azel = MDirection::Convert(direction.getRef(),
                 targetFrame)(direction);
         antMetadata.actualAzEl(azel);

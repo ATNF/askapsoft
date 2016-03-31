@@ -1,6 +1,6 @@
 /// @file ChannelMap.cc
 ///
-/// @copyright (c) 2010 CSIRO
+/// @copyright (c) 2015 CSIRO
 /// Australia Telescope National Facility (ATNF)
 /// Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 /// PO Box 76, Epping NSW 1710, Australia
@@ -40,10 +40,8 @@ using namespace askap;
 using namespace askap::cp;
 
 
-ChannelMap::ChannelMap () {;}
+ChannelMap::ChannelMap() {;}
 
-
-//ChannelMap::~ChannelMap() {;}
 
 
 // Copied from Max

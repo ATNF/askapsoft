@@ -90,13 +90,15 @@ CorrelatorSimulatorADE::CorrelatorSimulatorADE(
         const uint32_t nCoarseChannel,
         const uint32_t nChannelSub,
         const double coarseBandwidth,
-        const uint32_t delay)
+        const uint32_t delay,
+		const CardFailMode& failMode)
         : itsMode(mode), itsShelf(shelf), itsNShelves(nShelves),
         itsNAntenna(nAntennaIn), itsNCorrProd(0), itsNSlice(0),
         itsNCoarseChannel(nCoarseChannel),
         itsNChannelSub(nChannelSub), itsCoarseBandwidth(coarseBandwidth),
-        itsFineBandwidth(0.0), 
-        itsCurrentTime(0), itsDelay(delay), itsCurrentRow(0)
+        itsFineBandwidth(0.0), itsCurrentTime(0),
+        itsDelay(delay), itsFailMode(failMode), 
+		itsCurrentRow(0), itsDataReadCounter(0), itsDataSentCounter(0)
 {
     itsMS.reset(new casa::MeasurementSet(dataset, casa::Table::Old));
 	itsPort.reset(new askap::cp::VisPortADE(hostname, port));
@@ -142,17 +144,34 @@ bool CorrelatorSimulatorADE::sendNext(void)
             usleep(itsDelay);
             cout << "Shelf " << itsShelf << ": transmitting ..." << endl;
         }
-
-        return sendBufferData();
+		if (itsFailMode.miss == itsDataSentCounter) {
+			cout << "Shelf " << itsShelf << 
+					": is simulating missing transmission" << endl;
+			return true;
+		}
+		else {
+        	return sendBufferData();
+		}
     }
     else {
         cout << "Shelf " << itsShelf << 
                 ": no more data in measurement set" << endl;
+		cout << "Shelf " << itsShelf << ": read " << itsDataReadCounter <<
+				"x & sent " << itsDataSentCounter << "x" << endl;
         return false;
     }
 	return true;
 }   // sendNext
 
+
+/*
+void CorrelatorSimulatorADE::report(void) {
+	cout << "Rank " << itsShelf << " has read data " << itsDataReadCounter <<
+			"x and sent " << itsDataSentCounter << "x" << endl;
+}
+*/
+
+// Internal functions
 
 
 // Initialize buffer.
@@ -285,7 +304,9 @@ void CorrelatorSimulatorADE::initBuffer()
     // Note that buffer contains all correlation products (as requested in
     // parset, which is usually more than available in measurement set) and
     // all channels (as requested in parset)
-    itsBuffer.init(itsNCorrProd, itsNCoarseChannel);
+	// Make the buffer to be the maximum size in terms of correlation products (antennas)
+    itsBuffer.init(itsCorrProdMap.getTotal(36), itsNCoarseChannel);
+    //itsBuffer.init(itsNCorrProd, itsNCoarseChannel);
     if (itsShelf == DISPLAY_SHELF) {
         cout << "    Channels to be simulated: " << itsNCoarseChannel << endl;
         cout << "    Buffer data: correlation products x channels: " << 
@@ -411,9 +432,16 @@ bool CorrelatorSimulatorADE::getBufferData()
                 uint32_t corrProd = itsCorrProdMap.getIndex(ant1, ant2, corr);
                 //cout << "  corrProd: " << corrProd << endl;
                 //cout << "  size: " << buffer.corrProdIsFilled.size() << endl;
+				//if (corrProd == 39) {
+				//	cout << endl;
+				//	cout << "corrProd, ant1, ant2, corr: " << corrProd << ", " << 
+				//			ant1 << ", " << ant2 << ", " << corr << endl;
+				//	cout << endl;
+				//}
                 ASKAPCHECK(!itsBuffer.corrProdIsFilled[corrProd],
                         "Correlator product " << corrProd << 
-                        " is already filled");
+                        " is already filled. ant1, ant2, corr: " << ant1 << ", " <<
+						ant2 << ", " << corr);
                 for (uint32_t chan = 0; chan < nChan; ++chan) {
                     itsBuffer.data[corrProd][chan].vis.real = 
                             data(corr,chan).real();
@@ -432,6 +460,9 @@ bool CorrelatorSimulatorADE::getBufferData()
 #ifdef VERBOSE
     cout << "Shelf " << itsShelf << ": getting buffer data: done" << endl;
 #endif
+	if (itsBuffer.ready) {
+		++itsDataReadCounter;
+	}
     return (itsBuffer.ready);
 }   // getBuffer
 
@@ -745,6 +776,7 @@ bool CorrelatorSimulatorADE::sendBufferData()
     if (itsMode == "test") {
         checkTestBuffer();
     }
+	++itsDataSentCounter;
     return true;
 
 }   // sendBufferData
@@ -775,6 +807,13 @@ uint32_t CorrelatorSimulatorADE::getCorrProdIndex
     cout << ant1 << ", " << ant2 << ", " << stokesValue << endl;
 	return itsCorrProdMap.getIndex (ant1, ant2, stokesValue);
 }
+
+
+
+//void CorrelatorSimulatorADE::getFailMode()
+//{
+//}
+
 
 
 void checkStokesType (const Stokes::StokesTypes stokesType)

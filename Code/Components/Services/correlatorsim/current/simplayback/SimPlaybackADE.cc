@@ -48,6 +48,7 @@
 #include "simplayback/ISimulator.h"
 #include "simplayback/CorrelatorSimulatorADE.h"
 #include "simplayback/TosSimulator.h"
+#include "simplayback/CardFailMode.h"
 
 //#define VERBOSE
 
@@ -95,6 +96,7 @@ void SimPlaybackADE::validateConfig(void)
 #endif
 	// Build a list of required keys    
 	std::vector<std::string> requiredKeys;
+	requiredKeys.push_back("dataset");
 	requiredKeys.push_back("tossim.ice.locator_host");
 	requiredKeys.push_back("tossim.ice.locator_port");
 	requiredKeys.push_back("tossim.icestorm.topicmanager");
@@ -102,10 +104,6 @@ void SimPlaybackADE::validateConfig(void)
 	
 	std::ostringstream ss;
 	ss << "corrsim.";
-
-	std::string dataset = ss.str();
-	dataset.append("dataset");
-	requiredKeys.push_back(dataset);
 
 	std::string hostname = ss.str();
 	hostname.append("out.hostname");
@@ -138,8 +136,7 @@ boost::shared_ptr<TosSimulator> SimPlaybackADE::makeTosSim(void)
 #ifdef VERBOSE
 	std::cout << "makeTosSim" << std::endl;
 #endif
-    const std::string filename = 
-            itsParset.getString("corrsim.dataset","");
+    const std::string filename = itsParset.getString("dataset","");
     const std::string locatorHost = 
             itsParset.getString("tossim.ice.locator_host");
     const std::string locatorPort = 
@@ -147,14 +144,15 @@ boost::shared_ptr<TosSimulator> SimPlaybackADE::makeTosSim(void)
     const std::string topicManager = itsParset.getString(
 			"tossim.icestorm.topicmanager");
     const std::string topic = itsParset.getString("tossim.icestorm.topic");
+	const unsigned int nAntenna = itsParset.getUint32("n_antennas", 1);
     const double failureChance = itsParset.getDouble(
 			"tossim.random_metadata_send_fail", 0.0);
     const unsigned int delay =
             itsParset.getUint32("tossim.delay", 0);
 
     return boost::shared_ptr<TosSimulator>(new TosSimulator(filename,
-            locatorHost, locatorPort, topicManager, topic, failureChance,
-            delay));
+            locatorHost, locatorPort, topicManager, topic, 
+			nAntenna, failureChance, delay));
 #ifdef VERBOSE
 	std::cout << "makeTosSim: done" << std::endl;
 #endif
@@ -169,11 +167,13 @@ boost::shared_ptr<CorrelatorSimulatorADE>
 	std::cout << "makeCorrelatorSim" << std::endl;
 #endif
     const string mode = itsParset.getString("mode", "normal");
+	const string dataset = itsParset.getString("dataset", "");
+    const unsigned int nAntenna =
+            itsParset.getUint32("n_antennas", 1);
 
 	std::ostringstream ss;
 	ss << "corrsim.";
 	const LOFAR::ParameterSet subset = itsParset.makeSubset(ss.str());
-	std::string dataset = subset.getString("dataset");
 	std::string hostname = subset.getString("out.hostname");
 
     // calculate port number, based on reference port and MPI rank
@@ -186,8 +186,6 @@ boost::shared_ptr<CorrelatorSimulatorADE>
     cout << "Shelf " << itsRank << ", mode " << mode << 
             ": using port " << port << endl;
 
-    const unsigned int nAntenna = 
-            itsParset.getUint32("corrsim.n_antennas", 1);
     const unsigned int nCoarseChannel =
             itsParset.getUint32("corrsim.n_coarse_channels", 304);
     const unsigned int nChannelSub =
@@ -197,14 +195,46 @@ boost::shared_ptr<CorrelatorSimulatorADE>
     const unsigned int delay =
             itsParset.getUint32("corrsim.delay", 0);
 
+	// Get failure modes
+	const vector<string> failModes = itsParset.getStringVector("fail", "");
+	//cout << "Total fail modes: " << failModes.size() << endl;
+    // Init failure mode for this card
+	CardFailMode cardFailModes;
+	for (uint32_t nMode = 0; nMode < failModes.size(); ++nMode) {
+		//cout << nMode << " " << failModes[nMode] << endl;
+		// fail mode "miss": card misses transmission for a given cycle
+		if (failModes[nMode] == "miss") {
+			// get all cards that fail in this mode and the parameters
+			const vector<uint32_t> missCards = 
+					itsParset.getUint32Vector("fail.miss.cards");
+			const vector<uint32_t> missCycles = 
+					itsParset.getUint32Vector("fail.miss.at");
+			// sanity check
+			ASKAPCHECK(missCards.size() == missCycles.size(),
+			"Disagreement in the number of cards that fail in mode 'miss'");
+			//cout << "The number of cards that fail: " << 
+			//		missCards.size() << endl;
+			// for each card that fails
+			for (uint32_t i = 0; i < missCards.size(); ++i) {
+				// if it's this card, get the parameter
+				if (missCards[i] == itsRank) {
+					cardFailModes.fail = true;
+					cardFailModes.miss = missCycles[i];
+				}
+			}
+		}
+	}
+	cout << "Failure mode of card " << itsRank << ": ";
+	cardFailModes.print();
+
     return boost::shared_ptr<CorrelatorSimulatorADE>(
             new CorrelatorSimulatorADE(mode, dataset, hostname, port, 
             itsRank, itsNumProcs-1, nAntenna, nCoarseChannel, nChannelSub,
-            coarseBandwidth, delay));
+            coarseBandwidth, delay, cardFailModes));
 #ifdef VERBOSE
 	std::cout << "makeCorrelatorSim: done" << std::endl;
 #endif
-}
+}	// makeCorrelatorSim
 
 
 
@@ -215,11 +245,6 @@ void SimPlaybackADE::run(void)
     // before all processes go and use it. If the master finds a problem
     // an MPI_Abort is called.
     MPI_Barrier(MPI_COMM_WORLD);
-
-	//itsInputMode = itsParset.getString ("input_mode","zero");
-//#ifdef VERBOSE
-//	std::cout << "itsInputMode: " << itsInputMode << std::endl;
-//#endif
 
     if (itsRank == 0) {
 		boost::shared_ptr<ISimulator> sim = makeTosSim();
@@ -244,7 +269,8 @@ void SimPlaybackADE::run(void)
     }
 	
     MPI_Barrier(MPI_COMM_WORLD);
-}
+}	// run
+
 
 #ifdef VERBOSE
 #undef VERBOSE
