@@ -136,6 +136,20 @@ Here is an example of the start of a beam log::
 |                          |                  |              |size of pixels in the spatial axes, e.g. [6.0arcsec,    |
 |                          |                  |              |6.0arcsec]                                              |
 +--------------------------+------------------+--------------+--------------------------------------------------------+
+|Images.polarisation       |vector<string>    |["I"]         |Polarisation planes to be produced for the image (should|
+|                          |                  |              |have at least one). Polarisation conversion is done     |
+|                          |                  |              |on-the-fly, so the output polarisation frame may differ |
+|                          |                  |              |from that of the dataset. An exception is thrown if     |
+|                          |                  |              |there is insufficient information to obtain the         |
+|                          |                  |              |requested polarisation (e.g. there are no cross-pols and|
+|                          |                  |              |full stokes cube is requested). Note, ASKAPsoft uses the|
+|                          |                  |              |correct definition of stokes parameters, i.e. I=XX+YY,  |
+|                          |                  |              |which is different from casa and miriad (which imply    |
+|                          |                  |              |I=(XX+YY)/2).The code parsing the value of this         |
+|                          |                  |              |parameter is quite flexible and allows many ways to     |
+|                          |                  |              |define stokes axis, e.g. [“XX YY”] or [“XX”,”YY”] or    |
+|                          |                  |              |“XX,YY” are all acceptable                              |
++--------------------------+------------------+--------------+--------------------------------------------------------+
 |Images.restFrequency      |string            |None          |A string indicating the rest frequency to be written to |
 |                          |                  |              |the image cube header (for the restored, model and      |
 |                          |                  |              |residual cubes only). The string can be a quantity      |
