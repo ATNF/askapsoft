@@ -3,6 +3,9 @@
 #
 # Parameters for both
 #
+# Measurement set used as input for simulation.
+playback.dataset = ../../dataset/ade4ant4chan.ms
+
 # Correlator cycle time in seconds
 playback.period = 5
 
@@ -10,6 +13,33 @@ playback.period = 5
 # "test" will invoke test procedure, which takes a lot more time & memory.
 # Not recommended for many data streams.
 #playback.mode = test
+playback.mode = normal
+
+# Total number of antennas to be simulated.
+# If the number is greater than that in measurement set, data will be
+# copied from existing antennas.
+# Range: 1 (default) to 36 (max for ASKAP)
+playback.n_antennas = 18
+
+# Card failure types (default: []):
+# - miss        : a card misses transmission at a cycle, for 1 cycle
+# FUTURE
+# - bat_mismatch: a card has different BAT (offset value is defined)
+# If this parameter is not found or the value is empty, no card will fail
+# and all lower level parameters (playback.fail.*) will be ignored.
+playback.fail = [miss]
+
+# Type of failure: missing transmission
+# Specify missing transmission in which cards, at which cycle
+playback.fail.miss.cards = [1]
+playback.fail.miss.at = [1]
+
+# FUTURE
+# Type of failure: BAT mismatch 
+#playback.fail.bat_mismatch.cards = [1]
+# Mismatch offset in which card by how much
+#playback.fail.bat_mismatch.by = [-100]
+
 
 #----------------------------------------------------------------------
 # Telescope Operating System Simulator Configuration
@@ -33,17 +63,11 @@ playback.tossim.delay = 5000000
 #----------------------------------------------------------------------
 # Correlator Simulator configuration
 #
-# Total number of antennas to be simulated.
-# If the number is greater than that in measurement set, data will be 
-# copied from existing antennas.
-# Range: 1 (default) to 36 (max for ASKAP)
-playback.corrsim.n_antennas = 36
-
 # Total number of coarse channels to be simulated.
 # Ideally 304 (default), but current hardware is limited at 300.
 # If the number is greater than that in measurement set, data will be 
 # copied from existing coarse channels.
-playback.corrsim.n_coarse_channels = 384
+playback.corrsim.n_coarse_channels = 8
 
 # Division of coarse channel into fine channels
 # Default: 54
@@ -52,9 +76,6 @@ playback.corrsim.n_channel_subdivision = 54
 # Coarse channel bandwidth (Hertz)
 # Default: 1 MHz
 playback.corrsim.coarse_channel_bandwidth = 1000000
-
-# Measurement set used as input for simulation
-playback.corrsim.dataset = ../../dataset/ade4ant4chan.ms
 
 # Local host for transmission
 playback.corrsim.out.hostname = localhost
@@ -66,8 +87,6 @@ playback.corrsim.out.port = 3000
 # Delay in transmission between different time groups (microsecond)
 playback.corrsim.delay = 5000000
 
-# TO ADD LATER: Failure pattern (make sure repeatable, ie. not random)
-#
 # NOTE
 # - In this version (ADE version), baseline map is computed automatically.
 #   In previous version (BETA version), such map must be provided 

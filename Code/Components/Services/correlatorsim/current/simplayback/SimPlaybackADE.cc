@@ -96,7 +96,18 @@ void SimPlaybackADE::validateConfig(void)
 #endif
 	// Build a list of required keys    
 	std::vector<std::string> requiredKeys;
-	requiredKeys.push_back("dataset");
+
+	if (itsParset.isDefined("dataset")) {
+		requiredKeys.push_back("dataset");
+	}
+	else {
+		if (itsParset.isDefined("corrsim.dataset")) {
+			requiredKeys.push_back("corrsim.dataset");
+		}
+		else {
+			ASKAPTHROW(AskapError, "Cannot find parameter key for dataset");
+		}
+	}
 	requiredKeys.push_back("tossim.ice.locator_host");
 	requiredKeys.push_back("tossim.ice.locator_port");
 	requiredKeys.push_back("tossim.icestorm.topicmanager");
@@ -130,6 +141,23 @@ void SimPlaybackADE::validateConfig(void)
 }
 
 
+uint32_t SimPlaybackADE::getNAntenna () {
+	uint32_t nAntenna;
+	if (itsParset.isDefined("n_antennas")) {
+		nAntenna = itsParset.getUint32("n_antennas", 1);
+	}
+	else {
+		if (itsParset.isDefined("corrsim.n_antennas")) {
+        	nAntenna = itsParset.getUint32("corrsim.n_antennas", 1);
+		}
+		else {
+			ASKAPTHROW(AskapError, "Cannot find n_antennas");
+		}
+    }
+	return nAntenna;
+}	// getnAntenna
+
+
 
 boost::shared_ptr<TosSimulator> SimPlaybackADE::makeTosSim(void)
 {
@@ -144,7 +172,8 @@ boost::shared_ptr<TosSimulator> SimPlaybackADE::makeTosSim(void)
     const std::string topicManager = itsParset.getString(
 			"tossim.icestorm.topicmanager");
     const std::string topic = itsParset.getString("tossim.icestorm.topic");
-	const unsigned int nAntenna = itsParset.getUint32("n_antennas", 1);
+	const uint32_t nAntenna = getNAntenna();
+	//const unsigned int nAntenna = itsParset.getUint32("n_antennas", 1);
     const double failureChance = itsParset.getDouble(
 			"tossim.random_metadata_send_fail", 0.0);
     const unsigned int delay =
@@ -168,8 +197,9 @@ boost::shared_ptr<CorrelatorSimulatorADE>
 #endif
     const string mode = itsParset.getString("mode", "normal");
 	const string dataset = itsParset.getString("dataset", "");
-    const unsigned int nAntenna =
-            itsParset.getUint32("n_antennas", 1);
+	const uint32_t nAntenna = getNAntenna();
+    //const unsigned int nAntenna =
+    //        itsParset.getUint32("n_antennas", 1);
 
 	std::ostringstream ss;
 	ss << "corrsim.";

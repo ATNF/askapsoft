@@ -74,6 +74,7 @@ class SimPlaybackADE {
         // Factory method of sorts, creates the Correlator Simulator instance.
         boost::shared_ptr<CorrelatorSimulatorADE> makeCorrelatorSim(void);
 
+		uint32_t getNAntenna();
 
         // ParameterSet (configuration)
         const LOFAR::ParameterSet itsParset;
