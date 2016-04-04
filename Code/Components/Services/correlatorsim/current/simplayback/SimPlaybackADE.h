@@ -74,7 +74,26 @@ class SimPlaybackADE {
         // Factory method of sorts, creates the Correlator Simulator instance.
         boost::shared_ptr<CorrelatorSimulatorADE> makeCorrelatorSim(void);
 
-		uint32_t getNAntenna();
+		// Get the number of antennas from parset
+		//uint32_t getNAntenna();
+
+		// Set parameter prefixes that are possibly used for key names.
+		// Each call accumulates to a list of prefixes.
+		// Note: do not forget that no prefix (ie. "") is also a prefix!
+		void setParPrefixes(const string& prefix);
+
+		// Check whether a parameter key exists.
+		// The key might have a numbe of possible prefixes
+		bool isParDefined(const string& key);
+
+		// Get key name with its prefix
+		string getPrefixAndKey(const string& key);
+
+		// Get the values of parameter.
+		// The key might have a number of possible prefixes
+		uint32_t getPar(const string& key, const uint32_t defValue);
+        string getPar(const string& key, const string& defValue);
+
 
         // ParameterSet (configuration)
         const LOFAR::ParameterSet itsParset;
@@ -87,6 +106,9 @@ class SimPlaybackADE {
 
         // Playback mode
         string itsMode;
+
+		// A set of parameter fixes
+		vector<string> itsParPrefixes;
 };
 };
 

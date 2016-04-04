@@ -66,6 +66,11 @@ SimPlaybackADE::SimPlaybackADE(const LOFAR::ParameterSet& parset)
     cout << "Number of MPI processes: " << itsNumProcs << endl;
 #endif
 
+	// Set possible prefixes for names of parameter key
+	setParPrefixes("");
+	setParPrefixes("corrsim.");
+	setParPrefixes("tossim.");
+
     if (itsRank == 0) {
 #ifdef VERBOSE
         cout << "Rank " << itsRank << 
@@ -97,6 +102,11 @@ void SimPlaybackADE::validateConfig(void)
 	// Build a list of required keys    
 	std::vector<std::string> requiredKeys;
 
+	const string datasetKey = getPrefixAndKey("dataset");
+	if (datasetKey != "") {
+		requiredKeys.push_back(datasetKey);
+	}
+	/*
 	if (itsParset.isDefined("dataset")) {
 		requiredKeys.push_back("dataset");
 	}
@@ -108,6 +118,7 @@ void SimPlaybackADE::validateConfig(void)
 			ASKAPTHROW(AskapError, "Cannot find parameter key for dataset");
 		}
 	}
+	*/
 	requiredKeys.push_back("tossim.ice.locator_host");
 	requiredKeys.push_back("tossim.ice.locator_port");
 	requiredKeys.push_back("tossim.icestorm.topicmanager");
@@ -141,7 +152,8 @@ void SimPlaybackADE::validateConfig(void)
 }
 
 
-uint32_t SimPlaybackADE::getNAntenna () {
+/*
+uint32_t SimPlaybackADE::getNAntenna() {
 	uint32_t nAntenna;
 	if (itsParset.isDefined("n_antennas")) {
 		nAntenna = itsParset.getUint32("n_antennas", 1);
@@ -156,6 +168,65 @@ uint32_t SimPlaybackADE::getNAntenna () {
     }
 	return nAntenna;
 }	// getnAntenna
+*/
+
+
+void SimPlaybackADE::setParPrefixes(const string& prefix) {
+	itsParPrefixes.push_back(prefix);
+}
+
+
+bool SimPlaybackADE::isParDefined(const string& key) {
+    for (uint32_t i = 0; i < itsParPrefixes.size(); ++i) {
+        string fullKey = itsParPrefixes[i] + key;
+        if (itsParset.isDefined(fullKey)) {
+            return true;
+        }
+    }
+    return false;
+}   // isParDefined
+
+
+string SimPlaybackADE::getPrefixAndKey(const string& key) {
+    for (uint32_t i = 0; i < itsParPrefixes.size(); ++i) {
+        string fullKey = itsParPrefixes[i] + key;
+        if (itsParset.isDefined(fullKey)) {
+            return fullKey;
+        }
+    }
+    return "";
+}	// getPrefixAndKey
+
+
+uint32_t SimPlaybackADE::getPar(const string& key, 
+		const uint32_t defValue) {
+	for (uint32_t i = 0; i < itsParPrefixes.size(); ++i) {
+		string fullKey = itsParPrefixes[i] + key;
+    	if (itsParset.isDefined(fullKey)) {
+        	uint32_t value = itsParset.getUint32(fullKey, defValue);
+			return value;
+		}
+    }
+    ASKAPTHROW(AskapError, "Cannot find " + key);
+    return 0;
+}   // getPar
+
+
+string SimPlaybackADE::getPar(const string& key,
+        const string& defValue) {
+    vector<string> prefixes;
+    prefixes.push_back("");
+    prefixes.push_back("corrsim.");
+    for (uint32_t i = 0; i < itsParPrefixes.size(); ++i) {
+        string fullKey = itsParPrefixes[i] + key;
+        if (itsParset.isDefined(fullKey)) {
+            string value = itsParset.getString(fullKey, defValue);
+            return value;
+        }
+    }
+    ASKAPTHROW(AskapError, "Cannot find " + key);
+    return "";
+}   // getPar
 
 
 
@@ -164,7 +235,8 @@ boost::shared_ptr<TosSimulator> SimPlaybackADE::makeTosSim(void)
 #ifdef VERBOSE
 	std::cout << "makeTosSim" << std::endl;
 #endif
-    const std::string filename = itsParset.getString("dataset","");
+	const std::string filename = getPar("dataset", "");
+    //const std::string filename = itsParset.getString("dataset","");
     const std::string locatorHost = 
             itsParset.getString("tossim.ice.locator_host");
     const std::string locatorPort = 
@@ -172,7 +244,8 @@ boost::shared_ptr<TosSimulator> SimPlaybackADE::makeTosSim(void)
     const std::string topicManager = itsParset.getString(
 			"tossim.icestorm.topicmanager");
     const std::string topic = itsParset.getString("tossim.icestorm.topic");
-	const uint32_t nAntenna = getNAntenna();
+	const uint32_t nAntenna = getPar("n_antennas", 1);
+	//const uint32_t nAntenna = getNAntenna();
 	//const unsigned int nAntenna = itsParset.getUint32("n_antennas", 1);
     const double failureChance = itsParset.getDouble(
 			"tossim.random_metadata_send_fail", 0.0);
@@ -196,8 +269,10 @@ boost::shared_ptr<CorrelatorSimulatorADE>
 	std::cout << "makeCorrelatorSim" << std::endl;
 #endif
     const string mode = itsParset.getString("mode", "normal");
-	const string dataset = itsParset.getString("dataset", "");
-	const uint32_t nAntenna = getNAntenna();
+    const std::string dataset = getPar("dataset", "");
+	//const string dataset = itsParset.getString("dataset", "");
+    const uint32_t nAntenna = getPar("n_antennas", 1);
+	//const uint32_t nAntenna = getNAntenna();
     //const unsigned int nAntenna =
     //        itsParset.getUint32("n_antennas", 1);
 
@@ -226,36 +301,39 @@ boost::shared_ptr<CorrelatorSimulatorADE>
             itsParset.getUint32("corrsim.delay", 0);
 
 	// Get failure modes
-	const vector<string> failModes = itsParset.getStringVector("fail", "");
-	//cout << "Total fail modes: " << failModes.size() << endl;
-    // Init failure mode for this card
 	CardFailMode cardFailModes;
-	for (uint32_t nMode = 0; nMode < failModes.size(); ++nMode) {
-		//cout << nMode << " " << failModes[nMode] << endl;
-		// fail mode "miss": card misses transmission for a given cycle
-		if (failModes[nMode] == "miss") {
-			// get all cards that fail in this mode and the parameters
-			const vector<uint32_t> missCards = 
-					itsParset.getUint32Vector("fail.miss.cards");
-			const vector<uint32_t> missCycles = 
-					itsParset.getUint32Vector("fail.miss.at");
-			// sanity check
-			ASKAPCHECK(missCards.size() == missCycles.size(),
-			"Disagreement in the number of cards that fail in mode 'miss'");
-			//cout << "The number of cards that fail: " << 
-			//		missCards.size() << endl;
-			// for each card that fails
-			for (uint32_t i = 0; i < missCards.size(); ++i) {
-				// if it's this card, get the parameter
-				if (static_cast<int>(missCards[i]) == itsRank) {
-					cardFailModes.fail = true;
-					cardFailModes.miss = missCycles[i];
+	if (itsParset.isDefined("fail")) {
+		const vector<string> failModes = itsParset.getStringVector("fail", "");
+		//cout << "Total fail modes: " << failModes.size() << endl;
+    	// Init failure mode for this card
+		//CardFailMode cardFailModes;
+		for (uint32_t nMode = 0; nMode < failModes.size(); ++nMode) {
+			//cout << nMode << " " << failModes[nMode] << endl;
+			// fail mode "miss": card misses transmission for a given cycle
+			if (failModes[nMode] == "miss") {
+				// get all cards that fail in this mode and the parameters
+				const vector<uint32_t> missCards = 
+						itsParset.getUint32Vector("fail.miss.cards");
+				const vector<uint32_t> missCycles = 
+						itsParset.getUint32Vector("fail.miss.at");
+				// sanity check
+				ASKAPCHECK(missCards.size() == missCycles.size(),
+				"Disagreement in the number of cards that fail in mode 'miss'");
+				//cout << "The number of cards that fail: " << 
+				//		missCards.size() << endl;
+				// for each card that fails
+				for (uint32_t i = 0; i < missCards.size(); ++i) {
+					// if it's this card, get the parameter
+					if (static_cast<int>(missCards[i]) == itsRank) {
+						cardFailModes.fail = true;
+						cardFailModes.miss = missCycles[i];
+					}
 				}
 			}
 		}
+		cout << "Failure mode of card " << itsRank << ": ";
+		cardFailModes.print();
 	}
-	cout << "Failure mode of card " << itsRank << ": ";
-	cardFailModes.print();
 
     return boost::shared_ptr<CorrelatorSimulatorADE>(
             new CorrelatorSimulatorADE(mode, dataset, hostname, port, 

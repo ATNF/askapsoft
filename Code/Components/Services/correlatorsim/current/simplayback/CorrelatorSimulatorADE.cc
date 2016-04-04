@@ -144,7 +144,8 @@ bool CorrelatorSimulatorADE::sendNext(void)
             usleep(itsDelay);
             cout << "Shelf " << itsShelf << ": transmitting ..." << endl;
         }
-		if (itsFailMode.miss == itsDataSentCounter) {
+		if ((itsDataSentCounter > 0) && 
+				(itsFailMode.miss == itsDataSentCounter)) {
 			cout << "Shelf " << itsShelf << 
 					": is simulating missing transmission" << endl;
 			return true;
