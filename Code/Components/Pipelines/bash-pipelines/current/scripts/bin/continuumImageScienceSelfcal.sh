@@ -197,6 +197,7 @@ Ccalibrator.dataset                             = ${OUTPUT}/${msSciAv}
 Ccalibrator.nAnt                                = ${NUM_ANT}
 Ccalibrator.nBeam                               = 1
 Ccalibrator.solve                               = antennagains
+Ccalibrator.normalisegains                      = ${SELFCAL_NORMALISE_GAINS}
 Ccalibrator.interval                            = ${SELFCAL_INTERVAL}
 #
 Ccalibrator.calibaccess                         = table

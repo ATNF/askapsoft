@@ -253,6 +253,9 @@ SELFCAL_SELAVY_THRESHOLD=15
 # Division of image for source-finding in selfcal
 SELFCAL_SELAVY_NSUBX=6
 SELFCAL_SELAVY_NSUBY=3
+# Option to pass to the "Ccalibrator.normalisegains" parameter,
+# indicating we want to approximate phase-only self-cal
+SELFCAL_NORMALISE_GAINS=true
 
 # name of the final gains calibration table
 GAINS_CAL_TABLE=cont_gains_cal_beam%b.tab
