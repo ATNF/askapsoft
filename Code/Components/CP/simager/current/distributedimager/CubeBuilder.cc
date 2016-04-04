@@ -41,6 +41,7 @@
 #include <askap/AskapLogging.h>
 #include <measurementequation/SynthesisParamsHelper.h>
 #include <Common/ParameterSet.h>
+#include <utils/PolConverter.h>
 #include <casa/Arrays/IPosition.h>
 #include <coordinates/Coordinates/SpectralCoordinate.h>
 #include <coordinates/Coordinates/DirectionCoordinate.h>
@@ -88,11 +89,23 @@ CubeBuilder::CubeBuilder(const LOFAR::ParameterSet& parset,
         itsRestFrequency = SynthesisParamsHelper::convertQuantity(restFreqString, "Hz");
     }
 
+    // Polarisation
+    const std::vector<std::string>
+        stokesVec = parset.getStringVector("Images.polarisation", std::vector<std::string>(1,"I"));
+    // there could be many ways to define stokes, e.g. ["XX YY"] or ["XX","YY"] or "XX,YY"
+    // to allow some flexibility we have to concatenate all elements first and then 
+    // allow the parser from PolConverter to take care of extracting the products.                                            
+    std::string stokesStr;
+    for (size_t i=0; i<stokesVec.size(); ++i) {
+        stokesStr += stokesVec[i];
+    }
+    itsStokes = scimath::PolConverter::fromString(stokesStr);
+    const casa::uInt npol=itsStokes.size();
+    
     // Get the image shape
     const vector<casa::uInt> imageShapeVector = parset.getUintVector("Images.shape");
     const casa::uInt nx = imageShapeVector[0];
     const casa::uInt ny = imageShapeVector[1];
-    const casa::uInt npol = 1;
     const casa::IPosition cubeShape(4, nx, ny, npol, nchan);
 
     // Use a tile shape appropriate for plane-by-plane access
@@ -162,16 +175,16 @@ CubeBuilder::createCoordinateSystem(const LOFAR::ParameterSet& parset,
 
     // Stokes Coordinate
     {
-        Vector<Int> stokes;
-        //if (parset.isDefined("stokes")) {
-        //    stokes = parseStokes(parset.getStringVector("stokes"));
-        //} else {
-        stokes.resize(1);
-        stokes(0) = Stokes::I;
-        //}
 
+        // To make a StokesCoordinate, need to convert the StokesTypes
+        // into integers explicitly
+        casa::Vector<casa::Int> stokes(itsStokes.size());
+        for(unsigned int i=0;i<stokes.size();i++){
+            stokes[i] = itsStokes[i];
+        }
         const StokesCoordinate stokescoord(stokes);
         coordsys.addCoordinate(stokescoord);
+        
     }
     // Spectral Coordinate
     {

@@ -39,6 +39,7 @@
 #include <lattices/Lattices/PagedArray.h>
 #include <casa/Arrays/Array.h>
 #include <coordinates/Coordinates/CoordinateSystem.h>
+#include <measures/Measures/Stokes.h>
 #include <casa/Quanta.h>
 
 namespace askap {
@@ -70,8 +71,15 @@ class CubeBuilder {
 
     private:
         boost::scoped_ptr< casa::PagedImage<float> > itsCube;
+
+    /// Image name from parset - must start with "image."
         std::string itsFilename;
+
+    /// Rest frequency to be written to the cubes
         casa::Quantum<double> itsRestFrequency;
+
+    /// Description of the polarisation properties of the output cubes
+    casa::Vector<casa::Stokes::StokesTypes> itsStokes;
 };
 
 }

@@ -312,12 +312,8 @@ void SpectralLineWorker::setupImage(const askap::scimath::Params::ShPtr& params,
         //const vector<double> freq = parset.getDoubleVector("frequency");
         const int nchan = 1;
 
-        if (!parset.isDefined("polarisation")) {
-            ASKAPLOG_INFO_STR(logger, "Polarisation frame is not defined, "
-                              << "only stokes I will be generated");
-        }
-        const vector<string> stokesVec = parset.getStringVector("polarisation",
-                                         vector<string>(1, "I"));
+        const std::vector<std::string>
+            stokesVec = parset.getStringVector("polarisation", std::vector<std::string>(1,"I"));
 
         // there could be many ways to define stokes, e.g. ["XX YY"] or ["XX","YY"] or "XX,YY"
         // to allow some flexibility we have to concatenate all elements first and then
@@ -327,7 +323,7 @@ void SpectralLineWorker::setupImage(const askap::scimath::Params::ShPtr& params,
             stokesStr += stokesVec[i];
         }
         const casa::Vector<casa::Stokes::StokesTypes>
-        stokes = scimath::PolConverter::fromString(stokesStr);
+            stokes = scimath::PolConverter::fromString(stokesStr);
 
         const bool ewProj = parset.getBool("ewprojection", false);
         if (ewProj) {
