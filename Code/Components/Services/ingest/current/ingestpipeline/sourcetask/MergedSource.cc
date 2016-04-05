@@ -53,6 +53,7 @@
 #include "measures/Measures/MCEpoch.h"
 #include "measures/Measures/MCDirection.h"
 #include "measures/Measures/Stokes.h"
+#include "casa/OS/Timer.h"
 
 // Local package includes
 #include "ingestpipeline/sourcetask/IVisSource.h"
@@ -97,6 +98,7 @@ MergedSource::~MergedSource()
 
 VisChunk::ShPtr MergedSource::next(void)
 {
+    casa::Timer timer;
     // Used for a timeout
     const long ONE_SECOND = 1000000;
 
@@ -237,6 +239,8 @@ VisChunk::ShPtr MergedSource::next(void)
     const CorrelatorMode& mode = itsVisConverter.config().lookupCorrelatorMode(itsMetadata->corrMode());
     const casa::uInt timeout = mode.interval() * 2;
 
+    double decodingTime = 0.;
+
     // Read VisDatagrams and add them to the VisChunk. If itsVisSrc->next()
     // returns a null pointer this indicates the timeout has been reached.
     // In this case assume no more VisDatagrams for this integration will
@@ -251,7 +255,9 @@ VisChunk::ShPtr MergedSource::next(void)
             continue;
         }
 
+        timer.mark();
         itsVisConverter.add(*itsVis);
+        decodingTime += timer.real();
         itsVis.reset();
 
         if (itsVisConverter.gotAllExpectedDatagrams()) {
@@ -270,10 +276,13 @@ VisChunk::ShPtr MergedSource::next(void)
     const float bufferUsagePercent = bufferUsage.second != 0 ? static_cast<float>(bufferUsage.first) / bufferUsage.second * 100. : 100.;
 
     ASKAPLOG_DEBUG_STR(logger, "VisSource buffer has "<<bufferUsage.first<<" datagrams ("<<bufferUsagePercent<<"% full)"); 
+    ASKAPLOG_DEBUG_STR(logger, "Time it takes to unpack visibilities: "<<decodingTime<<" s");
 
     // Submit monitoring data
     itsMonitoringPointManager.submitPoint<uint32_t>("PacketsBuffered", bufferUsage.first);
     itsMonitoringPointManager.submitPoint<float>("BufferUsagePercent", bufferUsagePercent);
+
+    itsMonitoringPointManager.submitPoint<float>("VisCornerTurnDuration", decodingTime);
 
     const int32_t datagramsLost =  itsVisConverter.datagramsExpected() - 
            itsVisConverter.datagramsCount() - itsVisConverter.datagramsIgnored();

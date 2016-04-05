@@ -63,6 +63,8 @@ MonitoringPointManager::~MonitoringPointManager()
     submitPointNull("PacketsLostCount");
     submitPointNull("PacketsLostPercent");
 
+    submitPointNull("VisCornerTurnDuration");
+
     submitPointNull("PacketsBuffered");
     submitPointNull("BufferUsagePercent");
 
