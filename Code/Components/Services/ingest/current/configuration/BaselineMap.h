@@ -22,7 +22,8 @@
 /// along with this program; if not, write to the Free Software
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
-/// @author Ben Humphreys <ben.humphreys@csiro.au>
+/// @author Max Voronkov <maxim.voronkov@csiro.au>
+/// Original code by Ben Humphreys
 
 #ifndef ASKAP_CP_INGEST_BASELINEMAP_H
 #define ASKAP_CP_INGEST_BASELINEMAP_H
@@ -30,6 +31,10 @@
 // System include
 #include <map>
 #include <stdint.h>
+
+// boost includes
+#include "boost/tuple/tuple.hpp"
+#include "boost/optional.hpp"
 
 // ASKAPsoft includes
 #include "Common/ParameterSet.h"
@@ -170,9 +175,21 @@ class BaselineMap {
     private:
 
         size_t itsSize;
-        std::map<int32_t, int32_t> itsAntenna1Map;
-        std::map<int32_t, int32_t> itsAntenna2Map;
-        std::map<int32_t, casa::Stokes::StokesTypes> itsStokesMap;
+
+        // correlator product descriptor, i.e. ant1, ant2 and polarisation type
+        typedef boost::tuple<int32_t, int32_t, casa::Stokes::StokesTypes> ProductDesc;
+
+        /// @brief mao of correlator product (baselineid) to descriptor
+        std::map<int32_t, ProductDesc> itsMap;
+ 
+        /// @brief cached iterator for a faster access
+        mutable boost::optional<std::map<int32_t, ProductDesc>::const_iterator> itsCachedProduct;
+
+        /// @brief caching method for itsCachedProduct
+        /// @detail Calling this method sets itsCachedProduct
+        /// @param[in] id   the product (baseline) id
+        void syncProductCache(int32_t id) const;
+
 
         /// @brief flag that antenna1 index is not greater than antenna2 index for all products
         /// @return true, if ant1<=ant2 for all defined "baseline tuples", i.e. if the correlator

@@ -22,7 +22,8 @@
 /// along with this program; if not, write to the Free Software
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
-/// @author Ben Humphreys <ben.humphreys@csiro.au>
+/// @author Max Voronkov <maxim.voronkov@csiro.au>
+/// Original code by Ben Humphreys
 
 // Include own header file first
 #include "BaselineMap.h"
@@ -33,6 +34,9 @@
 // System includes
 #include <map>
 #include <stdint.h>
+
+// boost include
+#include <boost/tuple/tuple_comparison.hpp>
 
 // ASKAPsoft includes
 #include "askap/AskapError.h"
@@ -82,9 +86,7 @@ BaselineMap::BaselineMap(const LOFAR::ParameterSet& parset) : itsUpperTriangle(t
             add(id, ant1, ant2, Stokes::type(tuple[2]));
         }
     } 
-    ASKAPCHECK(itsAntenna1Map.size() == itsSize, "Antenna 1 Map is of invalid size");
-    ASKAPCHECK(itsAntenna2Map.size() == itsSize, "Antenna 2 Map is of invalid size");
-    ASKAPCHECK(itsStokesMap.size() == itsSize, "Stokes type map is of invalid size");
+    ASKAPCHECK(itsMap.size() == itsSize, "Failed to initialise baseline map");
 }
 
 /// @brief populate map for ADE correlator
@@ -97,8 +99,7 @@ BaselineMap::BaselineMap(const LOFAR::ParameterSet& parset) : itsUpperTriangle(t
 /// @param[in] nAnt number of antennas to generate the map for
 void BaselineMap::defaultMapADE(uint32_t nAnt) 
 {
-   ASKAPASSERT(itsAntenna1Map.size() == 0 && itsAntenna2Map.size() == 0 && 
-               itsStokesMap.size() == 0);
+   ASKAPASSERT(itsMap.size() == 0); 
    ASKAPDEBUGASSERT(nAnt > 0);
    // we have 1-based product indices, so use prefix increment
    itsSize = 0;
@@ -135,40 +136,41 @@ void BaselineMap::add(int32_t id, int32_t ant1, int32_t ant2, casa::Stokes::Stok
        itsLowerTriangle = false;
    }
 
-   itsAntenna1Map[id] = ant1; 
-   itsAntenna2Map[id] = ant2; 
-   itsStokesMap[id] = pol;
+   itsMap[id] = boost::make_tuple(ant1,ant2,pol);
 }
 
+/// @brief caching method for itsCachedProduct
+/// @detail Calling this method sets itsCachedProduct
+/// @param[in] id   the product (baseline) id
+void BaselineMap::syncProductCache(int32_t id) const 
+{
+    if (itsCachedProduct && ((*itsCachedProduct)->first == id)) {
+        return;
+    }
+        
+    itsCachedProduct = itsMap.find(id);
+    
+    if ((*itsCachedProduct) == itsMap.end()) {
+        itsCachedProduct = boost::none;
+    } 
+}
 
 int32_t BaselineMap::idToAntenna1(const int32_t id) const
 {
-    std::map<int32_t, int32_t>::const_iterator it = itsAntenna1Map.find(id);
-    if (it != itsAntenna1Map.end()) {
-        return it->second;
-    } else {
-        return -1;
-    }
+    syncProductCache(id);
+    return itsCachedProduct ? (*itsCachedProduct)->second.get<0>() : -1;
 }
 
 int32_t BaselineMap::idToAntenna2(const int32_t id) const
 {
-    std::map<int32_t, int32_t>::const_iterator it = itsAntenna2Map.find(id);
-    if (it != itsAntenna2Map.end()) {
-        return it->second;
-    } else {
-        return -1;
-    }
+    syncProductCache(id);
+    return itsCachedProduct ? (*itsCachedProduct)->second.get<1>() : -1;
 }
 
 casa::Stokes::StokesTypes BaselineMap::idToStokes(const int32_t id) const
 {
-    std::map<int32_t, Stokes::StokesTypes>::const_iterator it = itsStokesMap.find(id);
-    if (it != itsStokesMap.end()) {
-        return it->second;
-    } else {
-        return Stokes::Undefined;
-    }
+    syncProductCache(id);
+    return itsCachedProduct ? (*itsCachedProduct)->second.get<2>() : Stokes::Undefined;
 }
 
 size_t BaselineMap::size() const
@@ -184,8 +186,8 @@ size_t BaselineMap::size() const
 int32_t BaselineMap::maxID() const
 {
   int32_t result = 0;
-  for (std::map<int32_t, int32_t>::const_iterator ci = itsAntenna1Map.begin(); 
-       ci != itsAntenna1Map.end(); ++ci) {
+  for (std::map<int32_t, ProductDesc>::const_iterator ci = itsMap.begin(); 
+       ci != itsMap.end(); ++ci) {
        ASKAPCHECK(ci->first >= 0, "Encountered negative id="<<ci->first);
        result = max(result, ci->first);
   }
@@ -201,18 +203,10 @@ int32_t BaselineMap::maxID() const
 /// @note an exception is thrown if there is no match
 int32_t BaselineMap::getID(const int32_t ant1, const int32_t ant2, const casa::Stokes::StokesTypes pol) const
 {
-  std::map<int32_t, int32_t>::const_iterator ciAnt1 = itsAntenna1Map.begin();
-  std::map<int32_t, int32_t>::const_iterator ciAnt2 = itsAntenna2Map.begin();
-  std::map<int32_t, Stokes::StokesTypes>::const_iterator ciPol = itsStokesMap.begin();
-  
-  for (; ciAnt1 != itsAntenna1Map.end(); ++ciAnt1, ++ciAnt2, ++ciPol) {
-       ASKAPDEBUGASSERT(ciAnt2 != itsAntenna2Map.end());
-       ASKAPDEBUGASSERT(ciPol != itsStokesMap.end());
-       // indices should match
-       ASKAPDEBUGASSERT(ciAnt1->first == ciAnt2->first);
-       ASKAPDEBUGASSERT(ciAnt1->first == ciPol->first);
-       if ((ciAnt1->second == ant1) && (ciAnt2->second == ant2) && (ciPol->second == pol)) {
-           return ciAnt1->first;
+  const ProductDesc product(ant1, ant2, pol);
+  for (std::map<int32_t, ProductDesc>::const_iterator ci = itsMap.begin(); ci!=itsMap.end(); ++ci) {
+       if (ci->second == product) {
+           return ci->first;
        }
   }
   return -1;
@@ -245,18 +239,18 @@ void BaselineMap::sliceMap(const std::vector<int32_t> &ids)
 {
    // sanity check on supplied indices
    int32_t largestAntID = -1;
-   std::map<int32_t, int32_t>::const_iterator ciAnt1 = itsAntenna1Map.begin();
-   std::map<int32_t, int32_t>::const_iterator ciAnt2 = itsAntenna2Map.begin();
-  
-   for (; ciAnt1 != itsAntenna1Map.end(); ++ciAnt1, ++ciAnt2) {
-        ASKAPDEBUGASSERT(ciAnt2 != itsAntenna2Map.end());
-        if (largestAntID < ciAnt1->second) {
-            largestAntID = ciAnt1->second;
+
+   for (std::map<int32_t, ProductDesc>::const_iterator ci = itsMap.begin(); 
+        ci != itsMap.end(); ++ci) {
+        
+        if (largestAntID < ci->second.get<0>()) {
+            largestAntID = ci->second.get<0>();
         }
-        if (largestAntID < ciAnt2->second) {
-            largestAntID = ciAnt2->second;
+        if (largestAntID < ci->second.get<1>()) {
+            largestAntID = ci->second.get<1>();
         }
-   } 
+        
+   }
    ASKAPCHECK(largestAntID >= 0, "Attempting to slice an empty map");
 
 
@@ -271,41 +265,37 @@ void BaselineMap::sliceMap(const std::vector<int32_t> &ids)
    }
     
    // taking the slice
-   std::map<int32_t, int32_t> newAnt1Map;
-   std::map<int32_t, int32_t> newAnt2Map;
-   std::map<int32_t, Stokes::StokesTypes> newStokesMap;
+   std::map<int32_t, ProductDesc> newMap;
 
    size_t newSize = 0;  
    
-   ciAnt1 = itsAntenna1Map.begin();
-   ciAnt2 = itsAntenna2Map.begin();
-   std::map<int32_t, Stokes::StokesTypes>::const_iterator ciPol = itsStokesMap.begin();
-  
-   for (; ciAnt1 != itsAntenna1Map.end(); ++ciAnt1, ++ciAnt2, ++ciPol) {
-        ASKAPDEBUGASSERT(ciAnt2 != itsAntenna2Map.end());
-        ASKAPDEBUGASSERT(ciPol != itsStokesMap.end());
+   for (std::map<int32_t, ProductDesc>::const_iterator ci = itsMap.begin(); ci != itsMap.end(); ++ci) {
+
+        //ASKAPDEBUGASSERT(ciAnt2 != itsAntenna2Map.end());
+        //ASKAPDEBUGASSERT(ciPol != itsStokesMap.end());
+
         // indices should match
-        const int32_t productID = ciAnt1->first;
-        ASKAPDEBUGASSERT(productID == ciAnt2->first);
-        ASKAPDEBUGASSERT(productID == ciPol->first);
+        const int32_t productID = ci->first;
+
+        ProductDesc newProduct = ci->second;
 
         int32_t newIndex1 = -1;
         int32_t newIndex2 = -1;
         for (size_t i = 0; i < ids.size(); ++i) {
-             if (ids[i] == ciAnt1->second) {
+             if (ids[i] == newProduct.get<0>()) {
                  ASKAPDEBUGASSERT(newIndex1 < 0);
                  newIndex1 = static_cast<int32_t>(i);
              }
-             if (ids[i] == ciAnt2->second) {
+             if (ids[i] == newProduct.get<1>()) {
                  ASKAPDEBUGASSERT(newIndex2 < 0);
                  newIndex2 = static_cast<int32_t>(i);
              }
         }
         
         if ((newIndex1 >= 0) && (newIndex2 >= 0)) {
-             newAnt1Map[productID] = newIndex1;       
-             newAnt2Map[productID] = newIndex2;       
-             newStokesMap[productID] = ciPol->second; 
+             newProduct.get<0>() = newIndex1;
+             newProduct.get<1>() = newIndex2;
+             newMap[productID] = newProduct;
              ++newSize;
         }
    }
@@ -314,9 +304,7 @@ void BaselineMap::sliceMap(const std::vector<int32_t> &ids)
                            itsSize<<" products available in the map");  
 
    // assign new maps to this class' data members
-   itsAntenna1Map = newAnt1Map;
-   itsAntenna2Map = newAnt2Map;
-   itsStokesMap = newStokesMap;
+   itsMap = newMap;
    itsSize = newSize;
 }
 
