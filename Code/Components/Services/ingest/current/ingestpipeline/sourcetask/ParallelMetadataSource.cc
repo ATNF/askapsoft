@@ -130,7 +130,7 @@ boost::shared_ptr<askap::cp::TosMetadata> ParallelMetadataSource::next(const lon
   boost::shared_ptr<askap::cp::TosMetadata> result;
   if (itsMetadataSource) {
       // this is the master rank - obtain metadata
-      ASKAPLOG_DEBUG_STR(logger, "Receiving metadata with timeout="<<timeout);
+      //ASKAPLOG_DEBUG_STR(logger, "Receiving metadata with timeout="<<timeout);
       result = itsMetadataSource->next(timeout);
       // broadcast the result
 
@@ -148,14 +148,14 @@ boost::shared_ptr<askap::cp::TosMetadata> ParallelMetadataSource::next(const lon
       buffer[2] = bs.size();
 
       // 2) broadcast buffer to slave ranks
-      ASKAPLOG_DEBUG_STR(logger, "About to broadcast ("<<buffer[0]<<" "<<buffer[1]<<" "<<buffer[2]<<")");
+      //ASKAPLOG_DEBUG_STR(logger, "About to broadcast ("<<buffer[0]<<" "<<buffer[1]<<" "<<buffer[2]<<")");
       const int response = MPI_Bcast(&buffer, 3, MPI_LONG, itsMasterRank, MPI_COMM_WORLD);
       ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Bcast = "<<response);
  
       // 3) broadcast blob string to slave ranks, if there is some metadata object to broadcast
       // (null pointer is taken care of by the first broadcast)
       if (result) {
-          ASKAPLOG_DEBUG_STR(logger, "About to broadcast TOS metadata");
+          //ASKAPLOG_DEBUG_STR(logger, "About to broadcast TOS metadata");
           const int response = MPI_Bcast(bs.data(), bs.size(), MPI_BYTE, itsMasterRank, MPI_COMM_WORLD);
           ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Bcast = "<<response);
       }
@@ -164,10 +164,10 @@ boost::shared_ptr<askap::cp::TosMetadata> ParallelMetadataSource::next(const lon
       // this is the slave rank - receive metadata
 
       // 1) receive buffer from the master rank
-      ASKAPLOG_DEBUG_STR(logger, "Receive details on the TOS metadata to be received later");
+      //ASKAPLOG_DEBUG_STR(logger, "Receive details on the TOS metadata to be received later");
       const int response = MPI_Bcast(&buffer, 3, MPI_LONG, itsMasterRank, MPI_COMM_WORLD);
       ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Bcast = "<<response);
-      ASKAPLOG_DEBUG_STR(logger, "Received message ("<<buffer[0]<<" "<<buffer[1]<<" "<<buffer[2]<<")");
+      //ASKAPLOG_DEBUG_STR(logger, "Received message ("<<buffer[0]<<" "<<buffer[1]<<" "<<buffer[2]<<")");
 
       // 2) consistency check for the argument of the method
       ASKAPCHECK(timeout == buffer[0], "Master rank got timeout = "<<buffer[0]<<
@@ -180,7 +180,7 @@ boost::shared_ptr<askap::cp::TosMetadata> ParallelMetadataSource::next(const lon
           LOFAR::BlobString bs;
           bs.resize(buffer[2]);
 
-          ASKAPLOG_DEBUG_STR(logger, "About to receive TOS metadata");
+          //ASKAPLOG_DEBUG_STR(logger, "About to receive TOS metadata");
           const int response = MPI_Bcast(bs.data(), bs.size(), MPI_BYTE, itsMasterRank, MPI_COMM_WORLD);
           ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Bcast = "<<response);
           
@@ -193,7 +193,7 @@ boost::shared_ptr<askap::cp::TosMetadata> ParallelMetadataSource::next(const lon
           ASKAPASSERT(version == formatId);
           in >> *result;
           in.getEnd();
-          ASKAPLOG_DEBUG_STR(logger, "Decoded received TOS metadata message");
+          //ASKAPLOG_DEBUG_STR(logger, "Decoded received TOS metadata message");
       }
   }
   return result;
