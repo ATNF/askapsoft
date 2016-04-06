@@ -52,7 +52,11 @@ namespace ingest {
 /// @param[in] id rank of the given ingest process
 VisConverter<VisDatagramADE>::VisConverter(const LOFAR::ParameterSet& params,
        const Configuration& config, int id) : 
-       VisConverterBase(params, config, id), itsNSlices(4u), itsNDuplicates(0u)
+       VisConverterBase(params, config, id), itsNSlices(4u), itsNDuplicates(0u),
+       // unmapped products will be cached and ignored in the future processing
+       // if product number falls beyond the bounds of this vector, full processing is done
+       // This type of caching buys us about 0.3 seconds 
+       itsInvalidProducts(2628u, false)
 {
    ASKAPLOG_INFO_STR(logger, "Initialised ADE-style visibility stream converter, id="<<id);
    // by default, we have 4 data slices. This number can be reduced by rejecting some
@@ -177,6 +181,10 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
               " and baseline2="<<vis.baseline2<<" exceeds buffer size of "<<
               VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE);
 
+        if ((product < itsInvalidProducts.size()) && itsInvalidProducts[product]) {
+            continue;
+        }
+
         /*
         // this is a commissioning hack. To be removed in production system
 
@@ -199,7 +207,11 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
              mapCorrProduct(product, vis.beamid);
 
         if (!mp) {
-            // warning has already been given inside mapCorrProduct
+            // kind of a hack to cache invalid products - beamid of 1 should always be present
+            // mapping is static and is not expected to change from datagram to datagram, so can cache
+            if ((vis.beamid == 1) && (product < itsInvalidProducts.size())) {
+                itsInvalidProducts[product] = true;
+            }
             continue;
         }
 

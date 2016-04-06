@@ -31,6 +31,7 @@
 // standard includes
 #include <stdint.h>
 #include <set>
+#include <vector>
 
 // 3rd party
 #include "Common/ParameterSet.h"
@@ -96,6 +97,11 @@ private:
 
    // temporary
    uint32_t itsNDuplicates;
+
+   /// @brief temporary - list of invalid correlator products
+   /// @details Although is a hack, it allows to win about 0.3 seconds for the visibility corner turn.
+   /// When we stop working with sparse arrays, product mapping approach probably needs to be redesigned.
+   std::vector<bool> itsInvalidProducts;
 };
 
 } // namespace ingest
