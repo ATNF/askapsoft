@@ -180,6 +180,7 @@ void Configuration::buildAntennas(void)
     const vector<string> antId = itsParset.getStringVector("antennas");
     const casa::Quantity defaultDiameter = asQuantity(itsParset.getString("antenna.ant.diameter"));
     const string defaultMount = itsParset.getString("antenna.ant.mount");
+    const casa::Quantity defaultDelay = asQuantity(itsParset.getString("antenna.ant.delay", "0s"));
     map<string, Antenna> antennaMap;
 
     for (vector<string>::const_iterator it = antId.begin(); it != antId.end(); ++it) {
@@ -203,7 +204,14 @@ void Configuration::buildAntennas(void)
             mount = defaultMount;
         }
 
-        antennaMap.insert(make_pair(name, Antenna(name, mount, location, diameter)));
+        casa::Quantity delay;
+        if (itsParset.isDefined(keyBase + "delay")) {
+            delay = asQuantity(itsParset.getString(keyBase + "delay"));
+        } else {
+            delay = defaultDelay;
+        }
+
+        antennaMap.insert(make_pair(name, Antenna(name, mount, location, diameter, delay)));
     }
     
     // Now read "baselinemap.antennaidx" and build the antenna vector with the

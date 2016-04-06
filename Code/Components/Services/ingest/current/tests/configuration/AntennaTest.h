@@ -65,9 +65,10 @@ class AntennaTest : public CppUnit::TestFixture {
             position(1) = 5097398.337;
             position(2) = -2848424.133;
             const casa::Quantity diameter(12, "m");
+            const casa::Quantity delay(-2.2, "ns");
 
             // Create instance
-            Antenna instance(name, mount, position, diameter);
+            Antenna instance(name, mount, position, diameter, delay);
 
             // Test instance
             CPPUNIT_ASSERT(name == instance.name());
@@ -77,13 +78,17 @@ class AntennaTest : public CppUnit::TestFixture {
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(position(i), instance.position()(i), dblTolerance);
             }
             CPPUNIT_ASSERT(diameter == instance.diameter());
+            CPPUNIT_ASSERT(delay == instance.delay());
 
             // Check exceptional inputs
             const casa::Quantity badDiameter(12, "rad");
-            CPPUNIT_ASSERT_THROW(Antenna(name, mount, position, badDiameter), 
+            CPPUNIT_ASSERT_THROW(Antenna(name, mount, position, badDiameter, delay), 
                     askap::AskapError);
             casa::Vector<casa::Double> badPosition(2);
-            CPPUNIT_ASSERT_THROW(Antenna(name, mount, badPosition, diameter),
+            CPPUNIT_ASSERT_THROW(Antenna(name, mount, badPosition, diameter, delay),
+                    askap::AskapError);
+            const casa::Quantity badDelay(12, "rad");
+            CPPUNIT_ASSERT_THROW(Antenna(name, mount, position, diameter, badDelay), 
                     askap::AskapError);
         }
 };

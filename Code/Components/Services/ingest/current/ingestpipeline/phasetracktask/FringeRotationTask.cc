@@ -83,7 +83,7 @@ FringeRotationTask::FringeRotationTask(const LOFAR::ParameterSet& parset,
         const size_t nAnt = antennas.size();
         for (size_t id = 0; id < casa::min(casa::uInt(nAnt),casa::uInt(itsFixedDelays.size())); ++id) {
              ASKAPLOG_INFO_STR(logger, "    antenna: " << antennas.at(id).name()<<" (id="<<id << ") delay: "
-                     << itsFixedDelays[id] << " ns");
+                     << itsFixedDelays[id] << " ns (temp: fcm has "<<antennas.at(id).delay().getValue("ns")<<")");
         }
         if (nAnt < itsFixedDelays.size()) {
             ASKAPLOG_INFO_STR(logger,  "    other fixed delays are ignored");

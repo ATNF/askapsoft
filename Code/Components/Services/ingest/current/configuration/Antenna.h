@@ -48,7 +48,8 @@ class Antenna {
         Antenna(const casa::String& name,
                 const casa::String& mount,
                 const casa::Vector<casa::Double>& position,
-                const casa::Quantity& diameter);
+                const casa::Quantity& diameter,
+                const casa::Quantity& delay);
 
         /// @brief Antenna name (e.g. "ak01")
         casa::String name(void) const;
@@ -63,11 +64,15 @@ class Antenna {
         /// @brief Nominal diameter of the dish.
         casa::Quantity diameter(void) const;
 
+        /// @brief Additional delay component for this antenna
+        casa::Quantity delay(void) const;
+
     private:
         casa::String itsName;
         casa::String itsMount;
         casa::Vector<casa::Double> itsPosition;
         casa::Quantity itsDiameter;
+        casa::Quantity itsDelay;
 };
 
 }

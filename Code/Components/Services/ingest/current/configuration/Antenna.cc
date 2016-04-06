@@ -50,14 +50,17 @@ using namespace casa;
 Antenna::Antenna(const casa::String& name,
                  const casa::String& mount,
                  const casa::Vector<casa::Double>& position,
-                 const casa::Quantity& diameter)
+                 const casa::Quantity& diameter, 
+                 const casa::Quantity& delay)
         : itsName(name), itsMount(mount), itsPosition(position),
-        itsDiameter(diameter)
+        itsDiameter(diameter), itsDelay(delay)
 {
     ASKAPCHECK(itsDiameter.isConform("m"),
                "Diameter must conform to meters");
     ASKAPCHECK(position.nelements() == 3,
                "Position vector must have three elements");
+    ASKAPCHECK(itsDelay.isConform("s"),
+               "Antenna delay must conform to seconds");
 }
 
 casa::String Antenna::name(void) const
@@ -78,4 +81,9 @@ casa::Vector<casa::Double> Antenna::position(void) const
 casa::Quantity Antenna::diameter(void) const
 {
     return itsDiameter;
+}
+
+casa::Quantity Antenna::delay(void) const
+{
+    return itsDelay;
 }
