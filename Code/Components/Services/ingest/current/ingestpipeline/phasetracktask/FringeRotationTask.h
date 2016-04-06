@@ -94,6 +94,9 @@ class FringeRotationTask : public askap::cp::ingest::CalcUVWTask {
 
         /// @details actual class applying calculated delays and rates
         IFrtApproach::ShPtr   itsFrtMethod;
+
+        /// @brief flag to control that this method should do uvw calculation as well
+        bool itsCalcUVW;
 }; // FringeRotationTask class
 
 } // ingest

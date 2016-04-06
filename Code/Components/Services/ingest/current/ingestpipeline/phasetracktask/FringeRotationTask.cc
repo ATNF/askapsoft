@@ -38,6 +38,9 @@
 #include "askap/AskapLogging.h"
 #include "askap/AskapError.h"
 
+// boost include
+#include <boost/shared_ptr.hpp>
+
 // casa includes
 #include <measures/Measures/MeasFrame.h>
 #include <measures/Measures/MEpoch.h>
@@ -47,6 +50,7 @@
 #include <measures/Measures/MeasConvert.h>
 #include <casa/Arrays/Matrix.h>
 #include <casa/Arrays/MatrixMath.h>
+#include "measures/Measures/UVWMachine.h"
 
 ASKAP_LOGGER(logger, ".FringeRotationTask");
 
@@ -63,10 +67,13 @@ FringeRotationTask::FringeRotationTask(const LOFAR::ParameterSet& parset,
                                const Configuration& config)
     : CalcUVWTask(parset, config), itsConfig(config),
       itsFixedDelays(parset.getDoubleVector("fixeddelays", std::vector<double>())),
-      itsFrtMethod(fringeRotationMethod(parset,config)) 
+      itsFrtMethod(fringeRotationMethod(parset,config)), itsCalcUVW(parset.getBool("calcuvw", true))
 {
     ASKAPLOG_DEBUG_STR(logger, "constructor of the generalised fringe rotation task");
     ASKAPLOG_INFO_STR(logger, "This is a specialised version of fringe rotation tasks used for debugging; use data on your own risk");
+    if (itsCalcUVW) {
+        ASKAPLOG_INFO_STR(logger, "This task will also calculate UVW, replacing any pre-existing value");
+    }
 
     if (itsFixedDelays.size() != 0) {
         ASKAPLOG_INFO_STR(logger, "The phase tracking task will apply fixed delays in addition to phase rotation");
@@ -99,6 +106,15 @@ void FringeRotationTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
 
     casa::Matrix<double> delays(nAntennas(), nBeams(),0.);
     casa::Matrix<double> rates(nAntennas(),nBeams(),0.);
+
+    // geocentric U and V per antenna/beam; we need those only if
+    // itsCalcUVW is true, so in principle we could've added more logic to 
+    // avoid allocating unnecessary memory. But it looks like premature optimisation. 
+    casa::Matrix<double> antUs(nAntennas(), nBeams(), 0.);
+    casa::Matrix<double> antVs(nAntennas(), nBeams(), 0.);
+    casa::Matrix<double> antWs(nAntennas(), nBeams(), 0.);
+    std::vector<boost::shared_ptr<casa::UVWMachine> > uvwMachines(nBeams());
+
     // calculate delays (in seconds) and rates (in radians per seconds) for each antenna
     // and beam the values are absolute per antenna w.r.t the Earth centre
 
@@ -114,9 +130,13 @@ void FringeRotationTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
          // fixed delay in seconds
          const double fixedDelay = ant < itsFixedDelays.size() ? itsFixedDelays[ant]*1e-9 : 0.;
          for (casa::uInt beam = 0; beam < nBeams(); ++beam) {
-              // Current JTRUE phase center
+              // Current APP phase center
               const casa::MDirection fpc = casa::MDirection::Convert(phaseCentre(dishPnt, beam),
                                     casa::MDirection::Ref(casa::MDirection::TOPO, frame))();
+              if (itsCalcUVW && (ant == 0)) {
+                  // for optional uvw rotation
+                  uvwMachines[beam].reset(new casa::UVWMachine(casa::MDirection::Ref(casa::MDirection::J2000), fpc));
+              }
               const double ra = fpc.getAngle().getValue()(0);
               const double dec = fpc.getAngle().getValue()(1);
 
@@ -125,15 +145,55 @@ void FringeRotationTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
               const double sH0 = sin(H0);
               const double cH0 = cos(H0);
               const double cd = cos(dec);
-              // JTRUE delay is a scalar, so transformation matrix is just a vector
+              const double sd = sin(dec);
+
+              // APP delay is a scalar, so transformation matrix is just a vector
               // we could probably use the matrix math to process all antennas at once, however
               // do it explicitly for now for simplicity
               const casa::Vector<double> xyz = antXYZ(ant);
               ASKAPDEBUGASSERT(xyz.nelements() == 3);
-              const double delayInMetres = -cd * cH0 * xyz(0) + cd * sH0 * xyz(1) - sin(dec) * xyz(2);
+              const double delayInMetres = -cd * cH0 * xyz(0) + cd * sH0 * xyz(1) - sd * xyz(2);
               delays(ant,beam) = fixedDelay + delayInMetres / casa::C::c;
               rates(ant,beam) = (cd * sH0 * xyz(0) + cd * cH0 * xyz(1)) * siderealRate * casa::C::_2pi / casa::C::c * effLOFreq;
+
+              // optional uvw calculation
+              if (itsCalcUVW) {
+                  antUs(ant, beam) = -sH0 * xyz(0) - cH0 * xyz(1);
+                  antVs(ant, beam) = sd * cH0 * xyz(0) - sd * sH0 * xyz(1) - cd * xyz(2);
+                  antWs(ant, beam) = delayInMetres;
+              }
          }
+    }
+
+    if (itsCalcUVW) {
+        casa::Vector<double> uvwvec(3);
+        for (casa::uInt row = 0; row<chunk->nRow(); ++row) {
+             const casa::uInt ant1 = chunk->antenna1()(row);
+             const casa::uInt ant2 = chunk->antenna2()(row);
+             const casa::uInt beam = chunk->beam1()(row);
+             ASKAPASSERT(ant1 < nAntennas());
+             ASKAPASSERT(ant2 < nAntennas());
+             ASKAPASSERT(beam < nBeams());
+
+             uvwvec(0) = antUs(ant2, beam) - antUs(ant1, beam);
+             uvwvec(1) = antVs(ant2, beam) - antVs(ant1, beam);
+             uvwvec(2) = antWs(ant2, beam) - antWs(ant1, beam);
+
+             ASKAPASSERT(beam < uvwMachines.size());
+             ASKAPDEBUGASSERT(uvwMachines[beam]);
+             uvwMachines[beam]->convertUVW(uvwvec);
+             ASKAPDEBUGASSERT(uvwvec.nelements() == 3);
+             chunk->uvw()(row) = uvwvec;
+             /* 
+                // code for cross-check with calcUVWTask
+             casa::Vector<double> diff = uvwvec.copy();
+             diff(0) -= chunk->uvw()(row)(0);
+             diff(1) -= chunk->uvw()(row)(1);
+             diff(2) -= chunk->uvw()(row)(2);
+             ASKAPCHECK(sqrt(diff[0]*diff[0]+diff[1]*diff[1]+diff[2]*diff[2]) < 1e-6, 
+                 "Mismatch in UVW for row="<<row<<": uvwvec="<<uvwvec<<" chunk: "<<chunk->uvw()(row));
+             */
+        }
     }
 
     itsFrtMethod->process(chunk, delays, rates, effLOFreq);
