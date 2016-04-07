@@ -5,8 +5,9 @@ The *cmodel* pipeline task is responsible for extracting a local sky model (LSM)
 from the global sky model (GSM) and building an image from the components and/or
 images resulting from the request.
 
-The *cmodel* program only supports the construction of continuum images, however
-it does support taylor terms allowing the modeling of spectral index and curvature.
+The *cmodel* program only supports the construction of continuum (i.e.
+single-channel) images, however it does support taylor terms allowing
+the modeling of spectral index and curvature.
 
 Running the program
 -------------------
@@ -43,47 +44,50 @@ job then requires two compute nodes.
 Configuration Parameters
 ------------------------
 
-+----------------------+------------+-----------------------+---------------------------------------------+
-|*Parameter*           |*Default*   |*Example*              |*Description*                                |
-+======================+============+=======================+=============================================+
-|Cmodel.gsm.database   |*None*      |dataservice            |Either "dataservice", "votable" or           |
-|                      |            |                       |"asciitable".See below for additional related|
-|                      |            |                       |options                                      |
-+----------------------+------------+-----------------------+---------------------------------------------+
-|Cmodel.gsm.ref_freq   |*None*      |1.4GHz                 |The reference frequency for the base flux    |
-|                      |            |                       |quantity stored in the GSM. Note: Eventually |
-|                      |            |                       |this will just be obtained from the Sky Model|
-|                      |            |                       |Service.                                     |
-+----------------------+------------+-----------------------+---------------------------------------------+
-|Cmodel.bunit          |*None*      |Jy/pixel               |                                             |
-+----------------------+------------+-----------------------+---------------------------------------------+
-|Cmodel.frequency      |*None*      |1.420GHz               |Frequency                                    |
-+----------------------+------------+-----------------------+---------------------------------------------+
-|Cmodel.increment      |*None*      |304MHz                 |Bandwidth                                    |
-+----------------------+------------+-----------------------+---------------------------------------------+
-|Cmodel.flux_limit     |*None*      |10uJy                  |Lower limit on flux. Only sources of equal of|
-|                      |            |                       |greater flux will be imaged.                 |
-+----------------------+------------+-----------------------+---------------------------------------------+
-|Cmodel.shape          |*None*      |[5120, 5120]           |Output image dimensions                      |
-+----------------------+------------+-----------------------+---------------------------------------------+
-|Cmodel.cellsize       |*None*      |[5arcsec, 5arcsec]     |Cell size (angular size for each pixel)      |
-+----------------------+------------+-----------------------+---------------------------------------------+
-|Cmodel.direction      |*None*      |[12h30m00.00,          |Image center. Must be J2000                  |
-|                      |            |-45.00.00.00, J2000]   |                                             |
-|                      |            |                       |                                             |
-+----------------------+------------+-----------------------+---------------------------------------------+
-|Cmodel.stokes         |[I]         |[I,Q,U,V]              |Stokes parameters in the output image.       |
-+----------------------+------------+-----------------------+---------------------------------------------+
-|Cmodel.output         |casa        |casa                   |Currently only support casa output           |
-+----------------------+------------+-----------------------+---------------------------------------------+
-|Cmodel.filename       |*None*      |image_10uJy.skymodel   |Name of image file created                   |
-+----------------------+------------+-----------------------+---------------------------------------------+
-|Cmodel.batchsize      |100         |100                    |Number of components to send worker when     |
-|                      |            |                       |worker requests more work.                   |
-+----------------------+------------+-----------------------+---------------------------------------------+
-|Cmodel.nterms         |1           |1                      |Number of taylor term images to              |
-|                      |            |                       |produce. Valid inputs are 1, 2 and 3.        |
-+----------------------+------------+-----------------------+---------------------------------------------+
++----------------------+------------+-----------------------+----------------------------------------------+
+|*Parameter*           |*Default*   |*Example*              |*Description*                                 |
++======================+============+=======================+==============================================+
+|Cmodel.gsm.database   |*None*      |dataservice            |Either "dataservice", "votable" or            |
+|                      |            |                       |"asciitable".See below for additional related |
+|                      |            |                       |options                                       |
++----------------------+------------+-----------------------+----------------------------------------------+
+|Cmodel.gsm.ref_freq   |*None*      |1.4GHz                 |The reference frequency for the base flux     |
+|                      |            |                       |quantity stored in the GSM. Note: Eventually  |
+|                      |            |                       |this will just be obtained from the Sky Model |
+|                      |            |                       |Service.                                      |
++----------------------+------------+-----------------------+----------------------------------------------+
+|Cmodel.bunit          |*None*      |Jy/pixel               |Brightness unit                               |
++----------------------+------------+-----------------------+----------------------------------------------+
+|Cmodel.frequency      |*None*      |1.420GHz               |Reference frequency for the spectral          |
+|                      |            |                       |coordinate system.                            |
++----------------------+------------+-----------------------+----------------------------------------------+
+|Cmodel.increment      |*None*      |304MHz                 |Channel increment for the spectral coordinate |
+|                      |            |                       |system (the example shows an image covering   |
+|                      |            |                       |304MHz with 1 channel).                       |
++----------------------+------------+-----------------------+----------------------------------------------+
+|Cmodel.flux_limit     |*None*      |10uJy                  |Lower limit on flux. Only sources of equal of |
+|                      |            |                       |greater flux will be imaged.                  |
++----------------------+------------+-----------------------+----------------------------------------------+
+|Cmodel.shape          |*None*      |[5120, 5120]           |Output image dimensions                       |
++----------------------+------------+-----------------------+----------------------------------------------+
+|Cmodel.cellsize       |*None*      |[5arcsec, 5arcsec]     |Cell size (angular size for each pixel)       |
++----------------------+------------+-----------------------+----------------------------------------------+
+|Cmodel.direction      |*None*      |[12h30m00.00,          |Image center. Must be J2000                   |
+|                      |            |-45.00.00.00, J2000]   |                                              |
+|                      |            |                       |                                              |
++----------------------+------------+-----------------------+----------------------------------------------+
+|Cmodel.stokes         |[I]         |[I,Q,U,V]              |Stokes parameters in the output image.        |
++----------------------+------------+-----------------------+----------------------------------------------+
+|Cmodel.output         |casa        |casa                   |Currently only support casa output            |
++----------------------+------------+-----------------------+----------------------------------------------+
+|Cmodel.filename       |*None*      |image_10uJy.skymodel   |Name of image file created                    |
++----------------------+------------+-----------------------+----------------------------------------------+
+|Cmodel.batchsize      |100         |100                    |Number of components to send worker when      |
+|                      |            |                       |worker requests more work.                    |
++----------------------+------------+-----------------------+----------------------------------------------+
+|Cmodel.nterms         |1           |1                      |Number of taylor term images to produce. Valid|
+|                      |            |                       |inputs are 1, 2 and 3.                        |
++----------------------+------------+-----------------------+----------------------------------------------+
 
 
 If *Cmodel.gsm.database* is set to *dataservice* then the *Sky Model Data Service*
