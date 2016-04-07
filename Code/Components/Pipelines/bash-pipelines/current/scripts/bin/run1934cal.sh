@@ -38,7 +38,8 @@ for((BEAM=${BEAM_MIN}; BEAM<=${BEAM_MAX}; BEAM++)); do
     # an empty file that will indicate that the flagging has been done
     FLAG_1934_CHECK_FILE="${OUTPUT}/Checkfiles/FLAGGING_DONE_1934_BEAM${BEAM}"
     
-   . ${PIPELINEDIR}/splitFlag1934.sh
+   . ${PIPELINEDIR}/split1934.sh
+   . ${PIPELINEDIR}/flag1934.sh
 
 done
 

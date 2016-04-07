@@ -50,7 +50,8 @@ for((BEAM=${BEAM_MIN}; BEAM<=${BEAM_MAX}; BEAM++)); do
     
     findScienceMSnames
 
-    . ${PIPELINEDIR}/splitFlagScience.sh
+    . ${PIPELINEDIR}/splitScience.sh
+    . ${PIPELINEDIR}/flagScience.sh
     
     . ${PIPELINEDIR}/applyBandpassScience.sh
 

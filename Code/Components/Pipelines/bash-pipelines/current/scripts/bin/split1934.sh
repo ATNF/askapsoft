@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 #
-# Launches a job to extract the appropriate beam from the 1934-638
-# observation, then flag the data in two passes, one with a dynamic
-# threshold and the second with a flat amplitude cut to remove any
-# remaining spikes.
+# Launches a job to extract the appropriate beam & scan combination
+# from the 1934-638 observation
 #
 # @copyright (c) 2015 CSIRO
 # Australia Telescope National Facility (ATNF)
@@ -31,7 +29,6 @@
 #
 
 ID_SPLIT_1934=""
-ID_FLAG_1934=""
 
 # Get the name of the 1934 dataset, replacing any %b with the beam
 # number if necessary
@@ -64,14 +61,6 @@ fi
 
 if [ $DO_IT == true ]; then
 
-    if [ "$ANTENNA_FLAG_1934" == "" ]; then
-        antennaFlagging="# Not flagging any antennas"
-    else
-        antennaFlagging="# The following flags out the requested antennas:
-Cflag.selection_flagger.rules           = [rule1]
-Cflag.selection_flagger.rule1.antenna   = ${ANTENNA_FLAG_1934}"
-    fi
-    
     sbatchfile=$slurms/split_1934_beam$BEAM.sbatch
     cat > $sbatchfile <<EOFOUTER
 #!/usr/bin/env bash
@@ -146,112 +135,4 @@ EOFOUTER
 
 fi
 
-###########################################
 
-DO_IT=$DO_FLAG_1934
-if [ -e $FLAG_1934_CHECK_FILE ]; then
-    if [ $DO_IT == true ]; then
-        echo "Flagging for beam $BEAM of calibrator observation has already been done - not re-doing."
-    fi
-    DO_IT=false
-fi
-
-if [ $DO_IT == true ]; then
-
-    if [ "$ANTENNA_FLAG_1934" == "" ]; then
-        antennaFlagging="# Not flagging any antennas"
-    else
-        antennaFlagging="# The following flags out the requested antennas:
-Cflag.selection_flagger.rules           = [rule1]
-Cflag.selection_flagger.rule1.antenna   = ${ANTENNA_FLAG_1934}"
-    fi
-    
-    sbatchfile=$slurms/flag_1934_beam$BEAM.sbatch
-    cat > $sbatchfile <<EOFOUTER
-#!/usr/bin/env bash
-#SBATCH --partition=${QUEUE}
-#SBATCH --clusters=${CLUSTER}
-${RESERVATION_REQUEST}
-#SBATCH --time=12:00:00
-#SBATCH --ntasks=1
-#SBATCH --ntasks-per-node=1
-#SBATCH --job-name=flagCal${BEAM}
-${EMAIL_REQUEST}
-#SBATCH --export=ASKAP_ROOT,AIPSPATH
-#SBATCH --output=$slurmOut/slurm-flag1934-b${BEAM}-%j.out
-
-BASEDIR=${BASEDIR}
-cd $OUTPUT
-. ${PIPELINEDIR}/utils.sh	
-
-# Make a copy of this sbatch file for posterity
-sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
-
-parset=${parsets}/cflag_dynamic_1934_beam${BEAM}_\${SLURM_JOB_ID}.in
-cat > \$parset <<EOFINNER
-# The path/filename for the measurement set
-Cflag.dataset                           = ${msCal}
-
-# Amplitude based flagging
-Cflag.amplitude_flagger.enable           = true
-Cflag.amplitude_flagger.dynamicBounds    = true
-Cflag.amplitude_flagger.threshold        = ${FLAG_THRESHOLD_DYNAMIC_1934}
-Cflag.amplitude_flagger.integrateSpectra = true
-Cflag.amplitude_flagger.integrateSpectra.threshold = ${FLAG_THRESHOLD_DYNAMIC_1934}
-
-${antennaFlagging}
-EOFINNER
-
-log=${logs}/cflag_dynamic_1934_beam${BEAM}_\${SLURM_JOB_ID}.log
-
-NCORES=1
-NPPN=1
-aprun -n \${NCORES} -N \${NPPN} ${cflag} -c \${parset} > \${log}
-err=\$?
-extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} flag1934Dynamic_B${BEAM} "txt,csv"
-if [ \$err != 0 ]; then
-    exit \$err
-else
-    touch $FLAG_1934_CHECK_FILE
-fi
-
-parset=${parsets}/cflag_amp_1934_\${SLURM_JOB_ID}.in
-cat > \$parset <<EOFINNER
-# The path/filename for the measurement set
-Cflag.dataset                           = ${msCal}
-
-# Amplitude based flagging
-Cflag.amplitude_flagger.enable          = true
-Cflag.amplitude_flagger.high            = ${FLAG_THRESHOLD_AMPLITUDE_1934}
-Cflag.amplitude_flagger.low             = 0.
-EOFINNER
-
-
-log=${logs}/cflag_amp_1934_beam${BEAM}_\${SLURM_JOB_ID}.log
-
-NCORES=1
-NPPN=1
-aprun -n \${NCORES} -N \${NPPN} ${cflag} -c \${parset} > \${log}
-err=\$?
-extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} flag1934Amp_B${BEAM} "txt,csv"
-if [ \$err != 0 ]; then
-    exit \$err
-fi
-
-EOFOUTER
-
-    if [ $SUBMIT_JOBS == true ]; then
-        DEP=""
-        DEP=`addDep "$DEP" "$DEP_START"`
-        DEP=`addDep "$DEP" "$ID_SPLIT_1934"`
-        ID_FLAG_1934=`sbatch $DEP $sbatchfile | awk '{print $4}'`
-        recordJob ${ID_FLAG_1934} "Splitting and flagging 1934-638, beam $BEAM"
-        FLAG_CBPCAL_DEP=`addDep "$FLAG_CBPCAL_DEP" "$ID_FLAG_1934"`
-    else
-        echo "Would run splitting & flagging of 1934-638, beam $BEAM, with slurm file $sbatchfile"
-    fi
-
-    echo " "
-
-fi
