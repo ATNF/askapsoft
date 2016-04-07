@@ -192,7 +192,7 @@ substitution, it is clearly stated in the description.
 Parameters of the sources (or fields)
 -------------------------------------
 
-This section describes how the sky model. The parameters can be given either in the main parset file or in a separate
+This section describes how the sky model is specified. The parameters can be given either in the main parset file or in a separate
 one pointed by *sources.definition* (see above). All parameters below have *Csimulator* prefix, if given in the main parset file.
 
 +------------------------+--------------+--------------+---------------------------------------------------------+
