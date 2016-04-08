@@ -121,8 +121,8 @@ bool TosSimulator::sendNext(void)
     //const casa::uInt nCorr = polc.numCorr()(descPolId);
     const casa::uInt nAntennaMS = antc.nrow();
 
-	cout << "The number of antennas in measurement set is " << nAntennaMS << 
-			", and that requested in parset is " << itsNAntenna << endl;
+	cout << "The antenna count in measurement set is " << nAntennaMS << 
+			", requested in parset is " << itsNAntenna << endl;
 
     // Record the timestamp for the current integration that is
     // being processed

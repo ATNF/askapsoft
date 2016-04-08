@@ -1,0 +1,13 @@
+# The path/filename for the measurement set
+Cflag.dataset                           = ingest_test0.ms
+
+# The measurement set stays as it is (unchanged): true
+Cflag.dryrun							= true
+
+# Show summary of data (including existing flags): true
+Cflag.summary							= true
+
+# Some dummy flagging (note that flagging is not the purpose here)
+# Amplitude based flagging
+Cflag.amplitude_flagger.enable          = true
+Cflag.amplitude_flagger.low             = 1e-5

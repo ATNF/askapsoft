@@ -119,6 +119,7 @@ CorrelatorSimulatorADE::~CorrelatorSimulatorADE()
 bool CorrelatorSimulatorADE::sendNext(void)
 {
     uint64_t previousTime = itsCurrentTime;
+	bool continueStatus;
 
     // Get buffer data from measurement set
     if (getBufferData()) {  // if successful in getting data ...
@@ -135,8 +136,6 @@ bool CorrelatorSimulatorADE::sendNext(void)
 
         // Delay transmission for every new time stamp in measurement
         if (itsCurrentTime > previousTime) {
-            //cout << "Shelf " << itsShelf <<
-            //        ": time stamp " << itsCurrentTime << endl;
             double delay = static_cast<double>(itsDelay) / 1000000.0;
             cout << "Shelf " << itsShelf << 
                     ": new time stamp " << itsCurrentTime << 
@@ -144,33 +143,34 @@ bool CorrelatorSimulatorADE::sendNext(void)
             usleep(itsDelay);
             cout << "Shelf " << itsShelf << ": transmitting ..." << endl;
         }
-		if ((itsDataSentCounter > 0) && 
-				(itsFailMode.miss == itsDataSentCounter)) {
+		// Either simulate failure in sending the data ...
+		if ((itsDataReadCounter > 0) && 
+				(itsFailMode.miss == itsDataReadCounter)) {
 			cout << "Shelf " << itsShelf << 
-					": is simulating missing transmission" << endl;
-			return true;
+					": is simulating missing transmission at cycle " << 
+					itsDataReadCounter << endl;
+			itsBuffer.reset();
+			continueStatus = true;
 		}
-		else {
-        	return sendBufferData();
+		else {	// ... or send the data as usual
+        	continueStatus = sendBufferData();
 		}
     }
-    else {
+    else {	// not successful in getting the data
         cout << "Shelf " << itsShelf << 
                 ": no more data in measurement set" << endl;
 		cout << "Shelf " << itsShelf << ": read " << itsDataReadCounter <<
 				"x & sent " << itsDataSentCounter << "x" << endl;
-        return false;
+		continueStatus = false;
     }
-	return true;
+#ifdef VERBOSE
+    cout << "Shelf " << itsShelf <<
+    		": data read: " << itsDataReadCounter <<
+    		", data sent: " << itsDataSentCounter << endl;
+#endif
+	return continueStatus;
 }   // sendNext
 
-
-/*
-void CorrelatorSimulatorADE::report(void) {
-	cout << "Rank " << itsShelf << " has read data " << itsDataReadCounter <<
-			"x and sent " << itsDataSentCounter << "x" << endl;
-}
-*/
 
 // Internal functions
 
@@ -429,20 +429,11 @@ bool CorrelatorSimulatorADE::getBufferData()
             // put visibility data into buffer, 
             // except when the Stokes type is YX for the same antenna
             if ((ant1 != ant2) || (stokesType != Stokes::YX)) {
-                //cout << ant1 << ", " << ant2 << ", " << corr << endl;
                 uint32_t corrProd = itsCorrProdMap.getIndex(ant1, ant2, corr);
-                //cout << "  corrProd: " << corrProd << endl;
-                //cout << "  size: " << buffer.corrProdIsFilled.size() << endl;
-				//if (corrProd == 39) {
-				//	cout << endl;
-				//	cout << "corrProd, ant1, ant2, corr: " << corrProd << ", " << 
-				//			ant1 << ", " << ant2 << ", " << corr << endl;
-				//	cout << endl;
-				//}
                 ASKAPCHECK(!itsBuffer.corrProdIsFilled[corrProd],
                         "Correlator product " << corrProd << 
-                        " is already filled. ant1, ant2, corr: " << ant1 << ", " <<
-						ant2 << ", " << corr);
+                        " is already filled. ant1, ant2, corr: " << ant1 << 
+						", " << ant2 << ", " << corr);
                 for (uint32_t chan = 0; chan < nChan; ++chan) {
                     itsBuffer.data[corrProd][chan].vis.real = 
                             data(corr,chan).real();

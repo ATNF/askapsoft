@@ -46,7 +46,7 @@ CardFailMode::CardFailMode()
 void CardFailMode::print() 
 {
 	if (fail) {
-		cout << "Failure: " << ", miss at: " << miss << endl;
+		cout << "Failure mode: miss at: " << miss << endl;
 	}
 	else {
 		cout << "No failure" << endl;

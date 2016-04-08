@@ -106,19 +106,6 @@ void SimPlaybackADE::validateConfig(void)
 	if (datasetKey != "") {
 		requiredKeys.push_back(datasetKey);
 	}
-	/*
-	if (itsParset.isDefined("dataset")) {
-		requiredKeys.push_back("dataset");
-	}
-	else {
-		if (itsParset.isDefined("corrsim.dataset")) {
-			requiredKeys.push_back("corrsim.dataset");
-		}
-		else {
-			ASKAPTHROW(AskapError, "Cannot find parameter key for dataset");
-		}
-	}
-	*/
 	requiredKeys.push_back("tossim.ice.locator_host");
 	requiredKeys.push_back("tossim.ice.locator_port");
 	requiredKeys.push_back("tossim.icestorm.topicmanager");
@@ -152,24 +139,6 @@ void SimPlaybackADE::validateConfig(void)
 }
 
 
-/*
-uint32_t SimPlaybackADE::getNAntenna() {
-	uint32_t nAntenna;
-	if (itsParset.isDefined("n_antennas")) {
-		nAntenna = itsParset.getUint32("n_antennas", 1);
-	}
-	else {
-		if (itsParset.isDefined("corrsim.n_antennas")) {
-        	nAntenna = itsParset.getUint32("corrsim.n_antennas", 1);
-		}
-		else {
-			ASKAPTHROW(AskapError, "Cannot find n_antennas");
-		}
-    }
-	return nAntenna;
-}	// getnAntenna
-*/
-
 
 void SimPlaybackADE::setParPrefixes(const string& prefix) {
 	itsParPrefixes.push_back(prefix);
@@ -194,6 +163,7 @@ string SimPlaybackADE::getPrefixAndKey(const string& key) {
             return fullKey;
         }
     }
+    ASKAPTHROW(AskapError, "Cannot find " + key);
     return "";
 }	// getPrefixAndKey
 
@@ -208,15 +178,12 @@ uint32_t SimPlaybackADE::getPar(const string& key,
 		}
     }
     ASKAPTHROW(AskapError, "Cannot find " + key);
-    return 0;
+    return defValue;
 }   // getPar
 
 
 string SimPlaybackADE::getPar(const string& key,
         const string& defValue) {
-    vector<string> prefixes;
-    prefixes.push_back("");
-    prefixes.push_back("corrsim.");
     for (uint32_t i = 0; i < itsParPrefixes.size(); ++i) {
         string fullKey = itsParPrefixes[i] + key;
         if (itsParset.isDefined(fullKey)) {
@@ -225,7 +192,7 @@ string SimPlaybackADE::getPar(const string& key,
         }
     }
     ASKAPTHROW(AskapError, "Cannot find " + key);
-    return "";
+    return defValue;
 }   // getPar
 
 
@@ -288,7 +255,7 @@ boost::shared_ptr<CorrelatorSimulatorADE>
     std::stringstream ssPort;
     ssPort << intPort;
     string port = ssPort.str();
-    cout << "Shelf " << itsRank << ", mode " << mode << 
+    cout << "Shelf " << itsRank << ": mode " << mode << 
             ": using port " << port << endl;
 
     const unsigned int nCoarseChannel =
@@ -331,7 +298,7 @@ boost::shared_ptr<CorrelatorSimulatorADE>
 				}
 			}
 		}
-		cout << "Failure mode of card " << itsRank << ": ";
+		cout << "Shelf " << itsRank << ": ";
 		cardFailModes.print();
 	}
 

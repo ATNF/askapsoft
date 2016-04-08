@@ -27,12 +27,12 @@ playback.n_antennas = 18
 # - bat_mismatch: a card has different BAT (offset value is defined)
 # If this parameter is not found or the value is empty, no card will fail
 # and all lower level parameters (playback.fail.*) will be ignored.
-playback.fail = [miss]
+#playback.fail = [miss]
 
 # Type of failure: missing transmission
 # Specify missing transmission in which cards, at which cycle
-playback.fail.miss.cards = [1]
-playback.fail.miss.at = [1]
+#playback.fail.miss.cards = [1]
+#playback.fail.miss.at = [1]
 
 # FUTURE
 # Type of failure: BAT mismatch 
@@ -67,7 +67,7 @@ playback.tossim.delay = 5000000
 # Ideally 304 (default), but current hardware is limited at 300.
 # If the number is greater than that in measurement set, data will be 
 # copied from existing coarse channels.
-playback.corrsim.n_coarse_channels = 8
+playback.corrsim.n_coarse_channels = 4
 
 # Division of coarse channel into fine channels
 # Default: 54
