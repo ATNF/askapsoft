@@ -72,6 +72,8 @@ const size_t arraySize = arrayDim*arrayDim;
 const double gaussNorm = 10.;
 const double gaussXFWHM = 4.;
 const double gaussYFWHM = 2.;
+const double gauss2FWHM = 3.;
+const double gauss2offset = 3.;
 const double gaussX0 = 5.;
 const double gaussY0 = 5.;
 const double gaussPA = M_PI / 2.;
@@ -92,6 +94,7 @@ class RadioSourceTest : public CppUnit::TestFixture {
         CPPUNIT_TEST(subthreshold);
         CPPUNIT_TEST(fitSource);
         CPPUNIT_TEST(componentDeconvolution);
+        CPPUNIT_TEST(fitDouble);
         CPPUNIT_TEST(suffixGeneration);
         CPPUNIT_TEST_SUITE_END();
 
@@ -105,9 +108,12 @@ class RadioSourceTest : public CppUnit::TestFixture {
         FittingParameters                itsFitparams;
         duchamp::Section                 itsSection;
 
-        std::vector<float>              itsGaussArray;
+        std::vector<float>               itsGaussArray;
         std::vector<PixelInfo::Object2D> itsGaussObjlist;
         RadioSource                      itsGaussSource;
+        std::vector<float>               itsGauss2Array;
+        std::vector<PixelInfo::Object2D> itsGauss2Objlist;
+        RadioSource                      itsGauss2Source;
 
     public:
 
@@ -139,6 +145,24 @@ class RadioSourceTest : public CppUnit::TestFixture {
                 }
             }
 
+            float gauss2src[arraySize];
+            for (size_t i = 0; i < arraySize; i++) gauss2src[i] = 0.;
+            float gauss2Sigma = gauss2FWHM / SIGMAtoFWHM;
+            for (size_t y = 0; y < arrayDim; y++) {
+                for (size_t x = 0; x < arrayDim; x++) {
+                    float xterm,yterm;
+                    float off=gauss2offset/2.;
+                    xterm = (x - (gaussX0-off)) / gauss2Sigma;
+                    yterm = (y - gaussY0) / gauss2Sigma;
+                    gauss2src[x + y * arrayDim] += gaussNorm * exp(-(0.5 * xterm * xterm +
+                                                                     0.5 * yterm * yterm));
+                    xterm = (x - (gaussX0+off)) / gauss2Sigma;
+                    yterm = (y - gaussY0) / gauss2Sigma;
+                    gauss2src[x + y * arrayDim] += 0.5 * gaussNorm * exp(-(0.5 * xterm * xterm +
+                                                  0.5 * yterm * yterm));
+                }
+            }
+
             itsDim = std::vector<size_t>(2,arrayDim);
 
             std::string secstring = duchamp::nullSection(2);
@@ -148,7 +172,8 @@ class RadioSourceTest : public CppUnit::TestFixture {
             itsFitparams = FittingParameters(LOFAR::ParameterSet());
             itsFitparams.setFitTypes(std::vector<std::string>(1, "full"));
             itsFitparams.setMaxNumGauss(1);
-            /*      fitparams.setNumSubThresholds(10); */
+            itsFitparams.setNumSubThresholds(100);
+            itsFitparams.setMaxRMS(5.);
 
             float thresh = 5.;
             itsArray = casa::Vector<float>(casa::IPosition(1, arraySize), src);
@@ -189,6 +214,24 @@ class RadioSourceTest : public CppUnit::TestFixture {
             itsGaussSource.defineBox(itsSection, 2);
             itsGaussSource.setDetectionThreshold(gaussThresh);
             itsGaussSource.setNoiseLevel(1.);
+            delete itsImage;
+
+            itsGauss2Array = std::vector<float>(gauss2src, gauss2src + arraySize);
+            itsImage = new duchamp::Image(itsDim.data());
+            itsImage->saveArray(itsGauss2Array.data(), arraySize);
+            itsImage->stats().setThreshold(gaussThresh);
+            itsImage->setMinSize(1);
+            itsImage->pars().setFlagBlankPix(false);
+            itsGauss2Objlist = itsImage->findSources2D();
+            CPPUNIT_ASSERT(itsGauss2Objlist.size() == 1);
+            duchamp::Detection detg2;
+            detg2.addChannel(0, itsGauss2Objlist[0]);
+            detg2.calcFluxes(itsGauss2Array.data(), itsDim.data());
+            itsGauss2Source = RadioSource(detg2);
+            itsGauss2Source.setFitParams(itsFitparams);
+            itsGauss2Source.defineBox(itsSection, 2);
+            itsGauss2Source.setDetectionThreshold(gaussThresh);
+            itsGauss2Source.setNoiseLevel(1.);
             delete itsImage;
 
         }
@@ -308,7 +351,7 @@ class RadioSourceTest : public CppUnit::TestFixture {
             CPPUNIT_ASSERT(fabs(fits[0].yCenter() - gaussY0) < 1.e-6);
         }
 
-
+        /*****************************************/
         void componentDeconvolution()
         {
 
@@ -333,6 +376,23 @@ class RadioSourceTest : public CppUnit::TestFixture {
 
         }
 
+        /*****************************************/
+    void fitDouble()
+        {
+            CPPUNIT_ASSERT(itsGauss2Objlist.size() == 1);
+            duchamp::FitsHeader head;
+            head.beam().define(1, 1, 0, duchamp::PARAM);
+            itsGauss2Source.setHeader(head);
+            itsGauss2Source.setFitParams(itsFitparams);
+            itsGauss2Source.setNoiseLevel(0.1);
+            itsGauss2Source.fitGauss(itsGauss2Array, itsDim);
+
+            std::vector<casa::Gaussian2D<Double> > fits = itsGauss2Source.gaussFitSet();
+            ASKAPLOG_DEBUG_STR(logger, "Have fit " << fits[0]);
+            CPPUNIT_ASSERT(fits.size() == 2);
+        }
+
+        /*****************************************/
         void suffixGeneration()
         {
             // A simple test to make sure we get the correct suffix for various component numbers.
