@@ -176,14 +176,17 @@ cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 parset=${parsets}/apply_cal_spectralline_beam${BEAM}_\${SLURM_JOB_ID}.in
 log=${logs}/apply_cal_spectralline_beam${BEAM}_\${SLURM_JOB_ID}.log
 cat > \$parset <<EOFINNER
-Ccalapply.dataset                             = ${msSciSL}
+Ccalapply.dataset                         = ${msSciSL}
 #
 # Allow flagging of vis if inversion of Mueller matrix fails
-Ccalapply.calibrate.allowflag                 = true
+Ccalapply.calibrate.allowflag             = true
+#
+# Ignore the beam, since we calibrate with antennagains
+Ccalapply.calibrate.ignorebeam            = true
 #
 Ccalapply.calibaccess                     = table
 Ccalapply.calibaccess.table.maxant        = ${NUM_ANT}
-Ccalapply.calibaccess.table.maxbeam       = ${nbeam}
+Ccalapply.calibaccess.table.maxbeam       = ${maxbeam}
 Ccalapply.calibaccess.table.maxchan       = ${nchanContSci}
 Ccalapply.calibaccess.table               = ${gainscaltab}
 EOFINNER

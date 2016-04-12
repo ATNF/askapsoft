@@ -104,10 +104,11 @@ for((LOOP=0;LOOP<=${SELFCAL_NUM_LOOPS};LOOP++)); do
         mkdir -p \${loopdir}
         calparams="# Self-calibration using the recently-generated cal table
 Cimager.calibrate                           = true
+Cimager.calibrate.ignorebeam                = true
 Cimager.calibaccess                         = table
 Cimager.calibaccess.table                   = \${loopdir}/\${caldata}
 Cimager.calibaccess.table.maxant            = ${NUM_ANT}
-Cimager.calibaccess.table.maxbeam           = ${nbeam}
+Cimager.calibaccess.table.maxbeam           = ${maxbeam}
 Cimager.calibaccess.table.maxchan           = ${nchanContSci}
 Cimager.calibaccess.table.reuse             = false
 "
@@ -203,7 +204,7 @@ Ccalibrator.interval                            = ${SELFCAL_INTERVAL}
 Ccalibrator.calibaccess                         = table
 Ccalibrator.calibaccess.table                   = \${caldata}
 Ccalibrator.calibaccess.table.maxant            = ${NUM_ANT}
-Ccalibrator.calibaccess.table.maxbeam           = ${nbeam}
+Ccalibrator.calibaccess.table.maxbeam           = ${maxbeam}
 Ccalibrator.calibaccess.table.maxchan           = ${nchanContSci}
 Ccalibrator.calibaccess.table.reuse             = false
 #
@@ -251,7 +252,9 @@ EOFINNER
 
         # Keep a backup of the intermediate images, prior to re-imaging.
         if [ \${copyImages} == true ]; then
-            mv ${OUTPUT}/*${imageBase}* .
+            # Use the . with imageBase to get images only, so we don't
+            #  move the selfCal directory itself
+            mv ${OUTPUT}/*.${imageBase}* .
         fi
 
         BASEDIR=${BASEDIR}

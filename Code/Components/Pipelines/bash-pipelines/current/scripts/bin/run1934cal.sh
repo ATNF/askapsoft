@@ -32,7 +32,7 @@ ms1934list=""
 FLAG_CBPCAL_DEP=""
 FLAG_CBPCAL_DEP=`addDep "$FLAG_CBPCAL_DEP" "$DEP_START"`
 
-for((BEAM=${BEAM_MIN}; BEAM<=${BEAM_MAX}; BEAM++)); do
+for BEAM in ${BEAMS_TO_USE}; do
 
     mkdir -p ${OUTPUT}/Checkfiles
     # an empty file that will indicate that the flagging has been done

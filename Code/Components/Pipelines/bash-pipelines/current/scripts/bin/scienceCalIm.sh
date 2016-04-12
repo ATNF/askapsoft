@@ -34,8 +34,8 @@ echo "Setting up and calibrating the science observation"
 
 FLAG_IMAGING_DEP=""
 
-for((BEAM=${BEAM_MIN}; BEAM<=${BEAM_MAX}; BEAM++)); do
-
+for BEAM in ${BEAMS_TO_USE}; do
+    
     mkdir -p ${OUTPUT}/Checkfiles
     # an empty file that will indicate that the flagging has been done
     FLAG_CHECK_FILE="${OUTPUT}/Checkfiles/FLAGGING_DONE_BEAM${BEAM}"

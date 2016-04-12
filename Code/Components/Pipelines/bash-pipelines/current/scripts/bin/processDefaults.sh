@@ -41,7 +41,7 @@ if [ $PROCESS_HAS_RUN == false ]; then
     mkdir -p $OUTPUT
     . ${PIPELINEDIR}/utils.sh
     BASEDIR=${BASEDIR}
-cd $OUTPUT
+    cd $OUTPUT
     echo $NOW >> PROCESSED_ON
     if [ ! -e ${stats} ]; then
         ln -s ${BASEDIR}/${stats} .
@@ -66,6 +66,47 @@ cd $OUTPUT
         EMAIL_REQUEST="# No email notifications sent"
     fi
 
+    ####################
+    # Configure the list of beams to be processed
+    # Lists each beam in ${BEAMS_TO_USE}
+
+#    if [ "${BEAMLIST}" == "" ]; then
+        # just use BEAM_MIN & BEAM_MAX
+        BEAMS_TO_USE=""
+        for((b=${BEAM_MIN};b<=${BEAM_MAX};b++)); do
+            thisbeam=`echo $b | awk '{printf "%02d",$1}'`
+            BEAMS_TO_USE="${BEAMS_TO_USE} $thisbeam"
+        done
+#    else
+#        # re-print out the provided beam list with 0-leading integers
+#        BEAMS_TO_USE=""
+#        for b in $BEAMLIST; do
+#            thisbeam=`echo $b | awk '{printf "%02d",$1}'`
+#            BEAMS_TO_USE="${BEAMS_TO_USE} $thisbeam"
+#        done
+#    fi
+
+    # Check the number of beams, and the maximum beam number (need the
+    # latter for calibration tasks)
+    maxbeam=-1
+    nbeams=0
+    for b in ${BEAMS_TO_USE}; do
+        if [ $b -gt $maxbeam ]; then
+            maxbeam=$b
+        fi
+        nbeams=`expr $nbeams + 1`
+    done
+    maxbeam=`expr $maxbeam + 1`
+
+    # Turn off mosaicking if there is just a single beam
+    if [ $nbeams -eq 1 ]; then
+        if [ $DO_MOSAIC == true ]; then
+	    echo "Only have a single beam to process, so setting DO_MOSAIC=false"
+        fi
+        DO_MOSAIC=false
+    fi
+
+    
     ####################
     # Set the number of channels, and make sure they are the same for 1934
     # & science observations
@@ -137,19 +178,6 @@ cd $OUTPUT
             fi
             DO_SCIENCE_FIELD=false
         fi
-    fi
-
-    ####################
-    # Check the number of beams
-
-    nbeam=`echo $BEAM_MAX $BEAM_MIN | awk '{print $1-$2+1}'`
-
-    # Turn off mosaicking if there is just a single beam
-    if [ $nbeam -eq 1 ]; then
-        if [ $DO_MOSAIC == true ]; then
-	    echo "Only have a single beam to process, so setting DO_MOSAIC=false"
-        fi
-        DO_MOSAIC=false
     fi
 
     ####################

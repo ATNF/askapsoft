@@ -135,6 +135,7 @@ MS_INPUT_SCIENCE=""
 # Which beams to use.
 BEAM_MIN=0
 BEAM_MAX=8
+BEAMLIST=""
 
 # How many antennas
 NUM_ANT=6

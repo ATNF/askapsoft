@@ -68,7 +68,7 @@ Ccalapply.calibrate.allowflag                 = true
 #
 Ccalapply.calibaccess                     = table
 Ccalapply.calibaccess.table.maxant        = ${NUM_ANT}
-Ccalapply.calibaccess.table.maxbeam       = ${nbeam}
+Ccalapply.calibaccess.table.maxbeam       = ${maxbeam}
 Ccalapply.calibaccess.table.maxchan       = ${NUM_CHAN_SCIENCE}
 Ccalapply.calibaccess.table               = ${TABLE_BANDPASS}
 
