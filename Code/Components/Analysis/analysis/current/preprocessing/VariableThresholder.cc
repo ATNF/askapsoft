@@ -89,10 +89,10 @@ VariableThresholder::VariableThresholder(askap::askapparallel::AskapParallel& co
                           "Turning reuse off.");
         itsFlagReuse = false;
     }
-    // If so, does that image exist?
-    if (! analysisutilities::imageExists(itsSNRimageName)) {
+    else if (! analysisutilities::imageExists(itsSNRimageName)) {
+        // If so, does that image exist?
         ASKAPLOG_WARN_STR(logger,
-                          "Variable Thresholder: reuse=tru, but SNR image " << itsSNRimageName <<
+                          "Variable Thresholder: reuse=true, but SNR image " << itsSNRimageName <<
                           " can not be opened. Turning reuse off.");
         itsFlagReuse = false;
     }
