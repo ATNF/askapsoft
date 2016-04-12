@@ -33,7 +33,7 @@
 
 #include <sourcefitting/FittingParameters.h>
 #include <sourcefitting/FitResults.h>
-#include <sourcefitting/Component.h>
+#include <sourcefitting/SubComponent.h>
 #include <analysisparallel/SubimageDef.h>
 
 #include <Blob/BlobIStream.h>
@@ -248,7 +248,20 @@ class RadioSource : public duchamp::Detection {
         bool fitGauss(casa::Matrix<casa::Double> &pos,
                       casa::Vector<casa::Double> &f,
                       casa::Vector<casa::Double> &sigma);
-        ///@}
+
+        /// @brief Function to run just the fitting.
+        /// @details This function actually calls the fitting routines. It
+        /// requires the number of Gaussians to be fit, the initial
+        /// estimates, plus the data to fit to.
+        /// @return It returns the Fitter object that contains the fit
+        /// results.
+        Fitter fitGauss(int nGauss,
+                        std::vector<SubComponent> &estimateList,
+                        casa::Matrix<casa::Double> &pos,
+                        casa::Vector<casa::Double> &f,
+                        casa::Vector<casa::Double> &sigma);
+
+///@}
 
         /// @brief Store the FITS header information
         void setHeader(const duchamp::FitsHeader &head) {itsHeader = head;};

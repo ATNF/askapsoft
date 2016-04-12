@@ -407,8 +407,8 @@ double AskapComponentImager::evaluateGaussian2D(const Gaussian2D<T> &gauss,
         const int xpix, const int ypix)
 {
     // Performs a spatial integration over the pixel extent to
-    // evaluate the contained flux. 
-    
+    // evaluate the contained flux.
+
     double pixelVal = 0.;
 
     double minSigma = std::min(gauss.majorAxis(), gauss.minorAxis()) /
@@ -504,14 +504,14 @@ double AskapComponentImager::evaluateGaussian1D(const Gaussian2D<T> &gauss,
         // xmaxInt = x-value where line intersects top pixel boundary
         // yminInt = y-value where line intersects left pixel boundary
         // ymaxInt = y-value where line intersects right pixel boundary
-        
+
         double gaussianSlope = tan(gauss.PA() - M_PI / 2.);
         double xminInt = x0gauss + (ypixmin - y0gauss) / gaussianSlope;
         double xmaxInt = x0gauss + (ypixmax - y0gauss) / gaussianSlope;
         double yminInt = y0gauss + (xpixmin - x0gauss) * gaussianSlope;
         double ymaxInt = y0gauss + (xpixmax - x0gauss) * gaussianSlope;
 
-       // ASKAPLOG_DEBUG_STR(logger, "intercepts: " << xminInt << " " << yminInt << " " << xmaxInt << " " << ymaxInt);
+        // ASKAPLOG_DEBUG_STR(logger, "intercepts: " << xminInt << " " << yminInt << " " << xmaxInt << " " << ymaxInt);
 
         if ((xminInt >= xpixmin) && (xminInt < xpixmax)) {
             interceptList.push_back(std::pair<double, double>(xminInt, ypixmin));
@@ -549,7 +549,7 @@ double AskapComponentImager::evaluateGaussian1D(const Gaussian2D<T> &gauss,
         // will be massive for a reasonable (integrated) flux. We
         // define with the height, but set the flux directly (which
         // will implicitly reset the height value).
-        
+
         casa::Gaussian1D<T> gauss1d(gauss.height(), 0., gauss.majorAxis());
         gauss1d.setFlux(gauss.flux());
         // ASKAPLOG_DEBUG_STR(logger, "Defined a 1D Gaussian with height=" << gauss1d.height() << ", flux="<<
@@ -561,7 +561,7 @@ double AskapComponentImager::evaluateGaussian1D(const Gaussian2D<T> &gauss,
         // ASKAPLOG_DEBUG_STR(logger, "Flux of " << pixelVal << " between z=["<<z[0]<<","<<z[1] <<
         //                    "] or pixel locations ("<<interceptList[0].first<<","<<interceptList[0].second <<
         //                    ") & ("<<interceptList[1].first<<","<<interceptList[1].second <<")");
-        
+
     } else {
         // Line does not intersect this pixel. Flux = 0.
         pixelVal = 0.;
@@ -576,3 +576,7 @@ template void AskapComponentImager::project(casa::ImageInterface<float>&,
         const casa::ComponentList&, const unsigned int);
 template void AskapComponentImager::project(casa::ImageInterface<double>&,
         const casa::ComponentList&, const unsigned int);
+template double AskapComponentImager::evaluateGaussian(const casa::Gaussian2D<float> &gauss,
+        const int xpix, const int ypix);
+template double AskapComponentImager::evaluateGaussian(const casa::Gaussian2D<double> &gauss,
+        const int xpix, const int ypix);

@@ -32,7 +32,7 @@
 #define ASKAP_ANALYSIS_FITRESULTS_H_
 
 #include <sourcefitting/Fitter.h>
-#include <sourcefitting/Component.h>
+#include <sourcefitting/SubComponent.h>
 
 #include <scimath/Fitting/FitGaussian.h>
 #include <scimath/Functionals/Gaussian2D.h>

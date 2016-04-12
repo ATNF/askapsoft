@@ -31,7 +31,7 @@
 #define ASKAP_ANALYSIS_FITTER_H_
 
 #include <sourcefitting/FittingParameters.h>
-#include <sourcefitting/Component.h>
+#include <sourcefitting/SubComponent.h>
 
 #include <scimath/Fitting/FitGaussian.h>
 #include <scimath/Functionals/Gaussian2D.h>
@@ -70,9 +70,12 @@ void logparameters(Matrix<Double> &m, std::string loc = "DEBUG");
 class Fitter {
     public:
         /// @brief Default constructor
-        Fitter() {};
+        Fitter(FittingParameters &fitParams);
         /// @brief Default destructor
         virtual ~Fitter() {};
+
+        /// @brief Does a fit (good or otherwise) exist for this Fitter instance?
+        bool fitExists() {return itsFitExists;};
 
         /// @brief Set and return the set of fitting parameters
         /// @{
@@ -97,18 +100,19 @@ class Fitter {
         int ndof() {return itsNDoF;};
 
         /// @brief Set the intial estimates for the Gaussian components.
-        void setEstimates(std::vector<SubComponent> cmpntList,
-                          duchamp::FitsHeader &head);
+        void setEstimates(std::vector<SubComponent> cmpntList);
+
         /// @brief Set the retry factors
         void setRetries();
         /// @brief Set the mask values
         void setMasks();
-        /// @brief Fit components to the data
-        /// Fits the required number of Gaussians to the data.
-        /// Returns the result of testing whether the number of
-        /// degrees of freedom is positive. The fits are only
-        /// performed if this is the case.
-        bool fit(casa::Matrix<casa::Double> pos,
+
+        /// @brief Fit components to the data.
+        /// @details Fits the required number of Gaussians to the
+        /// data.  The fit(s) are only performed if itsFitExists is
+        /// true, which is determined by whether the number of degrees
+        /// of freedom for the fitting is positive.
+        void fit(casa::Matrix<casa::Double> pos,
                  casa::Vector<casa::Double> f,
                  casa::Vector<casa::Double> sigma);
 
@@ -152,11 +156,17 @@ class Fitter {
         /// @brief Return a casa::Gaussian2D version of a particular component.
         casa::Gaussian2D<casa::Double> gaussian(int num);
 
+        /// @brief Subtract fit from the flux values
+        casa::Vector<casa::Double> subtractFit(casa::Matrix<casa::Double> pos,
+                                               casa::Vector<casa::Double> f);
+
 
     protected:
         /// @brief The set of parameters defining the fits
         FittingParameters itsParams;
 
+        /// @brief Whether a fit has been made
+        bool itsFitExists;
         /// @brief The number of Gaussian functions to fit.
         unsigned int itsNumGauss;
         /// @brief The casa Gaussian Fitter

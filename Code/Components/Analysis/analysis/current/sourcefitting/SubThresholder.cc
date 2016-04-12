@@ -34,7 +34,7 @@
 
 #include <sourcefitting/SubThresholder.h>
 #include <sourcefitting/RadioSource.h>
-#include <sourcefitting/Component.h>
+#include <sourcefitting/SubComponent.h>
 
 #include <duchamp/Cubes/cubes.hh>
 #include <casa/Arrays/Slicer.h>

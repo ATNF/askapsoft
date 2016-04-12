@@ -33,7 +33,7 @@
 #include <askap/AskapError.h>
 
 #include <sourcefitting/RadioSource.h>
-#include <sourcefitting/Component.h>
+#include <sourcefitting/SubComponent.h>
 #include <sourcefitting/FittingParameters.h>
 #include <outputs/CataloguePreparation.h>
 #include <mathsutils/MathsUtils.h>
@@ -101,7 +101,7 @@ class RadioSourceTest : public CppUnit::TestFixture {
     private:
 
         casa::Vector<float>              itsArray;
-    std::vector<size_t>             itsDim;
+        std::vector<size_t>             itsDim;
         std::vector<PixelInfo::Object2D> itsObjlist;
         std::vector<SubComponent>        itsSublist;
         RadioSource                      itsSource;
@@ -140,8 +140,8 @@ class RadioSourceTest : public CppUnit::TestFixture {
                 for (size_t x = 0; x < arrayDim; x++) {
                     float xterm = (x - gaussX0) / gaussXSigma;
                     float yterm = (y - gaussY0) / gaussYSigma;
-                    gaussSrc[x + y * arrayDim] += gaussNorm * exp(-(0.5 * xterm * xterm +
-                                                  0.5 * yterm * yterm));
+                    gaussSrc[x + y * arrayDim] +=
+                        gaussNorm * exp(-(0.5 * xterm * xterm + 0.5 * yterm * yterm));
                 }
             }
 
@@ -150,20 +150,20 @@ class RadioSourceTest : public CppUnit::TestFixture {
             float gauss2Sigma = gauss2FWHM / SIGMAtoFWHM;
             for (size_t y = 0; y < arrayDim; y++) {
                 for (size_t x = 0; x < arrayDim; x++) {
-                    float xterm,yterm;
-                    float off=gauss2offset/2.;
-                    xterm = (x - (gaussX0-off)) / gauss2Sigma;
+                    float xterm, yterm;
+                    float off = gauss2offset / 2.;
+                    xterm = (x - (gaussX0 - off)) / gauss2Sigma;
                     yterm = (y - gaussY0) / gauss2Sigma;
-                    gauss2src[x + y * arrayDim] += gaussNorm * exp(-(0.5 * xterm * xterm +
-                                                                     0.5 * yterm * yterm));
-                    xterm = (x - (gaussX0+off)) / gauss2Sigma;
+                    gauss2src[x + y * arrayDim] +=
+                        gaussNorm * exp(-(0.5 * xterm * xterm + 0.5 * yterm * yterm));
+                    xterm = (x - (gaussX0 + off)) / gauss2Sigma;
                     yterm = (y - gaussY0) / gauss2Sigma;
-                    gauss2src[x + y * arrayDim] += 0.5 * gaussNorm * exp(-(0.5 * xterm * xterm +
-                                                  0.5 * yterm * yterm));
+                    gauss2src[x + y * arrayDim] +=
+                        0.5 * gaussNorm * exp(-(0.5 * xterm * xterm + 0.5 * yterm * yterm));
                 }
             }
 
-            itsDim = std::vector<size_t>(2,arrayDim);
+            itsDim = std::vector<size_t>(2, arrayDim);
 
             std::string secstring = duchamp::nullSection(2);
             itsSection = duchamp::Section(secstring);
@@ -315,23 +315,12 @@ class RadioSourceTest : public CppUnit::TestFixture {
             }
             itsSublist = itsSource.getSubComponentList(itsPos, itsF);
 
-            /* ASKAPLOG_DEBUG_STR(logger, "Number of subcomponents = " << itsSublist.size()); */
-            /* for(size_t i=0;i<itsSublist.size();i++){ */
-            /*   ASKAPLOG_DEBUG_STR(logger, "Component " << i << ": " << itsSublist[i]); */
-            /* } */
-
             CPPUNIT_ASSERT(itsSublist.size() == 5);
         }
 
         /*****************************************/
         void fitSource()
         {
-            /* for(size_t y=0; y<arrayDim; y++){ */
-            /*   for(size_t x=0; x<arrayDim; x++) { */
-            /*     std::cerr << std::setw(12) << itsGaussArray[x+y*arrayDim] << " "; */
-            /*   } */
-            /*   std::cerr << '\n'; */
-            /* } */
             CPPUNIT_ASSERT(itsGaussObjlist.size() == 1);
             duchamp::FitsHeader head;
             head.beam().define(1, 1, 0, duchamp::PARAM);
@@ -377,7 +366,7 @@ class RadioSourceTest : public CppUnit::TestFixture {
         }
 
         /*****************************************/
-    void fitDouble()
+        void fitDouble()
         {
             CPPUNIT_ASSERT(itsGauss2Objlist.size() == 1);
             duchamp::FitsHeader head;
@@ -395,7 +384,8 @@ class RadioSourceTest : public CppUnit::TestFixture {
         /*****************************************/
         void suffixGeneration()
         {
-            // A simple test to make sure we get the correct suffix for various component numbers.
+            // A simple test to make sure we get the correct suffix
+            // for various component numbers.
             unsigned int number[16] = {0, 1, 2, 3, 25,
                                        26, 27, 51, 52, 53, 701,
                                        702, 703, 18277, 18278, 18279

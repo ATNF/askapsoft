@@ -32,7 +32,7 @@
 
 #include <sourcefitting/FitResults.h>
 #include <sourcefitting/Fitter.h>
-#include <sourcefitting/Component.h>
+#include <sourcefitting/SubComponent.h>
 
 #include <scimath/Fitting/FitGaussian.h>
 #include <scimath/Functionals/Gaussian1D.h>

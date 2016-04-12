@@ -28,8 +28,8 @@
 /// @author Matthew Whiting <matthew.whiting@csiro.au>
 ///
 
-#ifndef ASKAP_ANALYSIS_COMPONENT_H_
-#define ASKAP_ANALYSIS_COMPONENT_H_
+#ifndef ASKAP_ANALYSIS_SUBCOMPONENT_H_
+#define ASKAP_ANALYSIS_SUBCOMPONENT_H_
 
 #include <askap_analysis.h>
 
@@ -39,6 +39,7 @@
 #include <iostream>
 #include <iomanip>
 #include <scimath/Functionals/Gaussian2D.h>
+#include <duchamp/fitsHeader.hh>
 
 namespace askap {
 
@@ -92,6 +93,11 @@ class SubComponent {
         void setMinor(double d) {itsMinorAxis = d;};
         /// @brief Set the position angle
         void setPA(double d) {itsPositionAngle = d;};
+
+        /// @brief Adjust size according to the beam for certain fit types.
+        /// @details For 'psf' fit types, we fix the size of the component
+        /// to be at least the size of the PSF
+        void fixSize(std::string fitType, duchamp::FitsHeader &header);
 
         /// @brief Less-than function, that compares peak fluxes
         /// @details Comparison of SubComponents is done on the basis of

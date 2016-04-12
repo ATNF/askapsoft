@@ -198,13 +198,6 @@ within an island):
 * When you reach the final threshold, add the initial set of
   parameters to the vector list and return the vector list.
 
-If the Gaussian fitting fails to provide a good fit, these initial
-estimates can be returned as the results, with a flag indicating they
-are only estimates. Whether this is done is governed by the parameter
-**useGuessIfBad**, which defaults to **true**. If an estimate is
-reported in the results output, the final column *Guess?* will take
-the value 1, else it will be 0.
-
 The second approach attempts to replicate the algorithm described in
 `Hancock et al. (2012), MNRAS 422, 1812`_ (which is used in Paul's
 'Aegean' source-finder). This creates a curvature map using a discrete
@@ -221,6 +214,12 @@ estimate of components. To use this mode, set
 **useCurvature=true**. The curvature map can be saved to a CASA image
 by setting the **curvatureImage** parameter.
 
+If the Gaussian fitting fails to provide a good fit, these initial
+estimates can be returned as the results, with a flag indicating they
+are only estimates. Whether this is done is governed by the parameter
+**useGuessIfBad**, which defaults to **true**. If an estimate is
+reported in the results output, the final column *Guess?* will take
+the value 1, else it will be 0.
 
 
 Fitting
@@ -259,6 +258,15 @@ best result (judged by the reduced chi-squared value) is chosen as the
 best fit. This means that if the best fit for the "full" case is a
 beam-sized Gaussian, the fit from the "psf" case will be chosen as it
 has more degrees of freedom and so a lower reduced chi-squared.
+
+When **numGaussFromGuess=true** and the fit converges but is poor, we
+test to see if an additional, confused component is present (that was
+not picked up by the original initial estimate). The fitted Gaussian
+is subtracted from the pixels, then the initial estimation algorithm
+is re-run. The brightest component found is added to the initial
+estimates provided to the fitting routine, and the fit is re-run with
+one extra Gaussian. This process continues until the fit does not
+converge. 
 
 
 Accepting the fit

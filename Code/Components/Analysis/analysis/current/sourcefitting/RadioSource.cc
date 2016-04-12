@@ -34,7 +34,7 @@
 #include <sourcefitting/Fitter.h>
 #include <sourcefitting/FittingParameters.h>
 #include <sourcefitting/FitResults.h>
-#include <sourcefitting/Component.h>
+#include <sourcefitting/SubComponent.h>
 #include <sourcefitting/SubThresholder.h>
 #include <analysisparallel/SubimageDef.h>
 #include <casainterface/CasaInterface.h>
@@ -62,6 +62,7 @@
 #include <casa/namespace.h>
 #include <casa/Arrays/IPosition.h>
 #include <casa/Arrays/Slicer.h>
+#include <casa/Arrays/ArrayMath.h>
 #include <casa/Quanta/Quantum.h>
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
@@ -937,6 +938,22 @@ bool RadioSource::fitGauss(std::vector<float> &fluxArray,
 
 //**************************************************************//
 
+Fitter RadioSource::fitGauss(int nGauss,
+                             std::vector<SubComponent> &estimateList,
+                             casa::Matrix<casa::Double> &pos,
+                             casa::Vector<casa::Double> &f,
+                             casa::Vector<casa::Double> &sigma)
+{
+    Fitter newfit(itsFitParams);
+    newfit.setNumGauss(nGauss);
+    newfit.setEstimates(estimateList);
+    newfit.setRetries();
+    newfit.setMasks();
+    newfit.fit(pos, f, sigma);
+    return newfit;
+}
+
+
 bool RadioSource::fitGauss(casa::Matrix<casa::Double> &pos,
                            casa::Vector<casa::Double> &f,
                            casa::Vector<casa::Double> &sigma)
@@ -958,6 +975,12 @@ bool RadioSource::fitGauss(casa::Matrix<casa::Double> &pos,
     itsFitParams.saveBox(itsBox);
     itsFitParams.setPeakFlux(this->peakFlux);
     itsFitParams.setDetectThresh(itsDetectionThreshold);
+    if (itsHeader.beam().min() > 0) {
+        itsFitParams.setBeamSize(itsHeader.beam().min());
+    } else {
+        itsFitParams.setBeamSize(1.);
+    }
+
     ASKAPLOG_DEBUG_STR(logger, "numSubThresh=" << itsFitParams.numSubThresholds());
 
     ASKAPLOG_INFO_STR(logger, "detect threshold = " << itsDetectionThreshold <<
@@ -983,39 +1006,35 @@ bool RadioSource::fitGauss(casa::Matrix<casa::Double> &pos,
             itsFitParams.setFlagFitThisParam(*type);
 
             std::vector<SubComponent> cmpntListCopy(cmpntList);
-            if (*type == "psf") {
-                for (size_t i = 0; i < cmpntList.size(); i++) {
-                    //cmpntList[i].setMajor(itsHeader.beam().area());
-                    //cmpntList[i].setMinor(itsHeader.beam().area());
-                    //cmpntList[i].setPA(0.);
-                    cmpntListCopy[i].setMajor(itsHeader.beam().maj());
-                    cmpntListCopy[i].setMinor(itsHeader.beam().min());
-                    cmpntListCopy[i].setPA(itsHeader.beam().pa()*M_PI / 180.);
-                }
+
+            // For any subcomponent that is smaller than the beam
+            // (when comparing major axes), set its size to the beam
+            // size. Always do this when fitting "psf" type.
+            for (size_t i = 0; i < cmpntList.size(); i++) {
+                cmpntListCopy[i].fixSize(*type, itsHeader);
             }
 
             int ctr = 0;
-            std::vector<Fitter> fit(itsFitParams.maxNumGauss());
+            std::vector<Fitter> fit;
             bool fitIsGood = false;
             int bestFit = 0;
             float bestRChisq = 9999.;
 
-            unsigned int minGauss = itsFitParams.numGaussFromGuess() ? cmpntListCopy.size() : 1;
-            unsigned int maxGauss = itsFitParams.numGaussFromGuess() ?
-                                    cmpntListCopy.size() :
-                                    std::min(size_t(itsFitParams.maxNumGauss()), f.size());
+            unsigned int minGauss, maxGauss;
+            if (itsFitParams.numGaussFromGuess()) {
+                minGauss = maxGauss = cmpntListCopy.size();
+            } else {
+                minGauss = 1;
+                maxGauss = std::min(size_t(itsFitParams.maxNumGauss()), f.size());
+            }
 
             bool fitPossible = true;
             bool stopNow = false;
             for (unsigned int g = minGauss; g <= maxGauss && fitPossible && !stopNow; g++) {
                 ASKAPLOG_DEBUG_STR(logger, "Number of Gaussian components = " << g);
 
-                fit[ctr].setParams(itsFitParams);
-                fit[ctr].setNumGauss(g);
-                fit[ctr].setEstimates(cmpntListCopy, itsHeader);
-                fit[ctr].setRetries();
-                fit[ctr].setMasks();
-                fitPossible = fit[ctr].fit(pos, f, sigma);
+                fit.push_back(fitGauss(g, cmpntListCopy, pos, f, sigma));
+                fitPossible = fit[ctr].fitExists();
                 bool acceptable = fit[ctr].acceptable();
 
                 if (fitPossible && acceptable) {
@@ -1024,17 +1043,48 @@ bool RadioSource::fitGauss(casa::Matrix<casa::Double> &pos,
                         bestFit = ctr;
                         bestRChisq = fit[ctr].redChisq();
                     }
+                } else {
+
+                    if (itsFitParams.numGaussFromGuess() &&
+                            (fit[ctr].ndof() > 0) && (fit[ctr].passConverged())) {
+                        // If we are just going on the number of
+                        // Gaussians from the initial estimate, and
+                        // the fit failed, we subtract the fit result
+                        // and search again for an estimate, adding
+                        // the brightest component to the list and
+                        // re-doing. But only if that brightest
+                        // component is brighter than the noise.
+
+                        ASKAPLOG_DEBUG_STR(logger, "Removing fitted Gaussian from array");
+                        casa::Vector<casa::Double> newf = fit[ctr].subtractFit(pos, f);
+                        ASKAPLOG_DEBUG_STR(logger, "Finding new subcomponents");
+                        std::vector<SubComponent> newGuessList =
+                            this->getSubComponentList(pos, newf);
+
+                        if (newGuessList[0].peak() > itsDetectionThreshold) {
+                            newGuessList[0].fixSize(*type, itsHeader);
+                            cmpntListCopy.push_back(newGuessList[0]);
+                            ASKAPLOG_DEBUG_STR(logger, "Adding new subcomponent " <<
+                                               newGuessList[0]);
+                            maxGauss++;
+                        }
+                    }
+
                 }
+
                 stopNow = itsFitParams.stopAfterFirstGoodFit() && acceptable;
                 ctr++;
+
             } // end of 'g' for-loop
+            ASKAPLOG_DEBUG_STR(logger, "Finished loop over Gaussians");
 
             if (fitIsGood) {
                 itsFlagHasFit = true;
 
                 itsBestFitMap[*type].saveResults(fit[bestFit]);
 
-                bestChisqMap.insert(std::pair<float, std::string>(fit[bestFit].redChisq(), *type));
+                bestChisqMap.insert(std::pair<float,
+                                    std::string>(fit[bestFit].redChisq(), *type));
             }
         }
     } // end of type for-loop
@@ -1161,7 +1211,6 @@ void RadioSource::findSpectralTerm(std::string imageName, int term, bool doCalc)
             }
         }
         casa::Vector<casa::Double> f(fluxvec);
-        ASKAPLOG_DEBUG_STR(logger, "About to use a flux array with " << f.size() << " pixels");
 
         // Set up fit with same parameters and do the fit
         std::vector<std::string>::iterator type;
@@ -1176,19 +1225,14 @@ void RadioSource::findSpectralTerm(std::string imageName, int term, bool doCalc)
                                    " values for fit type \"" << *type <<
                                    "\", with " << itsBestFitMap[*type].numGauss() <<
                                    " components ");
-                Fitter fit;
-                fit.setParams(itsFitParams);
-                fit.rparams().setFlagFitThisParam("height");
-                fit.rparams().setNegativeFluxPossible(true);
-                fit.setNumGauss(itsBestFitMap[*type].numGauss());
-                fit.setEstimates(itsBestFitMap[*type].getCmpntList(), itsHeader);
-                fit.setRetries();
-                fit.setMasks();
-                bool fitPossible = fit.fit(pos, f, sigma);
+
+                std::vector<SubComponent> cmpnts = itsBestFitMap[*type].getCmpntList();
+                Fitter fit = fitGauss(itsBestFitMap[*type].numGauss(),
+                                      cmpnts, pos, f, sigma);
 
                 // Calculate taylor term value
 
-                if (fitPossible && fit.passConverged() && fit.passChisq()) {
+                if (fit.fitExists() && fit.passConverged() && fit.passChisq()) {
                     // the fit is OK
                     ASKAPLOG_DEBUG_STR(logger,
                                        "Values for " << termtype[term] << " follow " <<

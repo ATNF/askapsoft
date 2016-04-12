@@ -68,6 +68,16 @@ class AskapComponentImager {
                             const casa::ComponentList& list,
                             const unsigned int term = 0);
 
+
+        /// @brief Front-end to the different functions for calculating
+        /// the flux due to a Gaussian component in a single pixel.
+        /// @param[in] gauss       the gaussian function to be evaluated
+        /// @param[in] xpix        the x-coordinate of the pixel
+        /// @param[in] ypix        the y-coordinate of the pixel
+        template <class T>
+        static double evaluateGaussian(const casa::Gaussian2D<T> &gauss,
+                                       const int xpix, const int ypix);
+
     private:
         /// Project a point shape on to the image
         template <class T>
@@ -156,15 +166,6 @@ class AskapComponentImager {
         static int findCutoff(const casa::Gaussian2D<T>& gauss, const int spatialLimit,
                               const double fluxLimit);
 
-        /// @brief Front-end to the different functions for calculating
-        /// the flux due to a Gaussian component in a single pixel.
-        /// @param[in] gauss       the gaussian function to be evaluated
-        /// @param[in] xpix        the x-coordinate of the pixel
-        /// @param[in] ypix        the y-coordinate of the pixel
-        template <class T>
-        static double evaluateGaussian(const casa::Gaussian2D<T> &gauss,
-                                       const int xpix, const int ypix);
-
         /// @brief Calculate the flux in a single pixel due to a 2D
         /// Gaussian component. This integrates over the pixel to
         /// accurately measure the flux going in, thereby taking into
@@ -193,14 +194,22 @@ class AskapComponentImager {
         static double evaluateGaussian1D(const casa::Gaussian2D<T> &gauss,
                                          const int xpix, const int ypix);
 
-
 };
 
 // Explicit instantiations exist for float and double types only
-extern template void AskapComponentImager::project(casa::ImageInterface<float>&,
-        const casa::ComponentList&, const unsigned int);
-extern template void AskapComponentImager::project(casa::ImageInterface<double>&,
-        const casa::ComponentList&, const unsigned int);
+extern template void
+AskapComponentImager::project(casa::ImageInterface<float>&,
+                              const casa::ComponentList&, const unsigned int);
+extern template void
+AskapComponentImager::project(casa::ImageInterface<double>&,
+                              const casa::ComponentList&, const unsigned int);
+extern template double
+AskapComponentImager::evaluateGaussian(const casa::Gaussian2D<float> &gauss,
+                                       const int xpix, const int ypix);
+extern template double
+AskapComponentImager::evaluateGaussian(const casa::Gaussian2D<double> &gauss,
+                                       const int xpix, const int ypix);
+
 }
 }
 

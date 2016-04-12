@@ -31,7 +31,7 @@
 
 #include <askap_analysis.h>
 #include <sourcefitting/RadioSource.h>
-#include <sourcefitting/Component.h>
+#include <sourcefitting/SubComponent.h>
 
 #include <duchamp/Cubes/cubes.hh>
 #include <duchamp/PixelMap/Object2D.hh>

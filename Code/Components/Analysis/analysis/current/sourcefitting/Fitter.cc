@@ -31,8 +31,11 @@
 #include <askap/AskapError.h>
 
 #include <sourcefitting/Fitter.h>
-#include <sourcefitting/Component.h>
+#include <sourcefitting/FittingParameters.h>
+#include <sourcefitting/SubComponent.h>
 #include <mathsutils/MathsUtils.h>
+
+#include <components/AskapComponentImager.h>
 
 #include <scimath/Fitting/FitGaussian.h>
 #include <scimath/Functionals/Gaussian1D.h>
@@ -61,8 +64,12 @@ namespace analysis {
 
 namespace sourcefitting {
 
-void Fitter::setEstimates(std::vector<SubComponent> cmpntList,
-                          duchamp::FitsHeader &head)
+Fitter::Fitter(FittingParameters &fitParams):
+    itsParams(fitParams), itsFitExists(false)
+{
+}
+
+void Fitter::setEstimates(std::vector<SubComponent> cmpntList)
 {
 
     itsFitter.setDimensions(2);
@@ -82,47 +89,13 @@ void Fitter::setEstimates(std::vector<SubComponent> cmpntList,
         estimate(g, 4) = cmpntList[cmpnt].min() / cmpntList[cmpnt].maj();
         estimate(g, 5) = cmpntList[cmpnt].pa();
 
-        if (head.beam().originString() != "EMPTY") { // if the beam is known,
-            bool size = (head.beam().maj() > cmpntList[cmpnt].maj());
-
-            // if the subcomponent is smaller than the beam, or if we
-            // don't want to fit the size parameters, change the
-            // estimates of the parameters to the beam size
-
-            // WTF??? WE MAY WANT TO KEEP THE SHAPE CONSTANT AT SOMETHING OTHER THAN THE BEAM. REMOVING CHECKS ON THE FIT FLAGS
-            //                        if (size || !itsParams.flagFitThisParam(3))
-            if (size)
-                estimate(g, 3) = head.beam().maj();
-
-            //                        if (size || !itsParams.flagFitThisParam(4))
-            if (size)
-                estimate(g, 4) = head.beam().min() / head.beam().maj();
-
-            //                        if (size || !itsParams.flagFitThisParam(5))
-            if (size)
-                estimate(g, 5) = head.beam().pa() * M_PI / 180.;
-        }
-
     }
-
 
     itsFitter.setFirstEstimate(estimate);
-
-    if (head.beam().min() > 0) {
-        itsParams.setBeamSize(head.beam().min());
-    } else {
-        itsParams.setBeamSize(1.);
-    }
 
     ASKAPLOG_DEBUG_STR(logger, "Initial estimates of parameters follow: ");
     logparameters(estimate);
 
-    if (nCmpnt == 1) {
-        casa::Gaussian2D<casa::Double>
-        gauss(estimate(0, 0),
-              estimate(0, 1), estimate(0, 2),
-              estimate(0, 3), estimate(0, 4), estimate(0, 5));
-    }
 }
 
 //**************************************************************//
@@ -193,7 +166,7 @@ void logparameters(Matrix<Double> &m, std::string loc)
 
 //**************************************************************//
 
-bool Fitter::fit(casa::Matrix<casa::Double> pos,
+void Fitter::fit(casa::Matrix<casa::Double> pos,
                  casa::Vector<casa::Double> f,
                  casa::Vector<casa::Double> sigma)
 {
@@ -205,9 +178,9 @@ bool Fitter::fit(casa::Matrix<casa::Double> pos,
 
     itsNDoF = f.size() - itsNumGauss * itsParams.numFreeParam() - 1;
 
-    bool doFit = itsNDoF > 0;
+    itsFitExists = itsNDoF > 0;
 
-    if (doFit) {
+    if (itsFitExists) {
 
         for (int fitloop = 0; fitloop < numLoops; fitloop++) {
             try {
@@ -225,11 +198,6 @@ bool Fitter::fit(casa::Matrix<casa::Double> pos,
                 itsSolution(i, 5) = remainder(itsSolution(i, 5), 2.*M_PI);
             }
 
-//                         ASKAPLOG_INFO_STR(logger,  "Int. Solution #" << fitloop + 1
-//                                               << ": chisq=" << itsFitter.chisquared()
-//                                               << ": Parameters are:");
-//                         logparameters(itsSolution);
-
             if (!itsFitter.converged()) {
                 fitloop = numLoops;
             } else {
@@ -238,7 +206,6 @@ bool Fitter::fit(casa::Matrix<casa::Double> pos,
                     for (uint i = 0; i < itsNumGauss; i++) {
                         if (itsSolution(i, 0) < 0) {
                             itsSolution(i, 0) = 0.;
-//                                         ASKAPLOG_INFO_STR(logger, "Setting negative component #" << i + 1 << " to zero flux.");
                         }
                     }
                 }
@@ -285,8 +252,6 @@ bool Fitter::fit(casa::Matrix<casa::Double> pos,
                           ", nfreeParam per Gaussian=" <<  itsParams.numFreeParam() <<
                           ") - not doing fit.");
     }
-
-    return doFit;
 
 }
 //**************************************************************//
@@ -511,6 +476,25 @@ casa::Gaussian2D<casa::Double> Fitter::gaussian(int num)
 }
 
 //**************************************************************//
+
+casa::Vector<casa::Double> Fitter::subtractFit(casa::Matrix<casa::Double> pos,
+        casa::Vector<casa::Double> f)
+{
+
+    casa::Vector<casa::Double> newflux(f.size());
+    for (size_t i = 0; i < f.size(); i++) {
+        newflux(i) = f(i);
+        const int x = pos.row(i)(0);
+        const int y = pos.row(i)(1);
+        for (size_t ng = 0; ng < itsNumGauss; ng++) {
+            casa::Gaussian2D<casa::Double> gauss = gaussian(ng);
+            double gaussFlux = askap::components::AskapComponentImager::evaluateGaussian(gauss, x, y);
+            newflux(i) -= gaussFlux;
+        }
+    }
+    return newflux;
+
+}
 
 }
 

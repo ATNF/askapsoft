@@ -33,7 +33,8 @@
 #include <askap/AskapLogging.h>
 #include <askap/AskapError.h>
 
-#include <sourcefitting/Component.h>
+#include <sourcefitting/SubComponent.h>
+#include <duchamp/fitsHeader.hh>
 #include <iostream>
 #include <iomanip>
 #include <scimath/Functionals/Gaussian2D.h>
@@ -88,6 +89,27 @@ casa::Gaussian2D<casa::Double> SubComponent::asGauss()
     casa::Gaussian2D<casa::Double> gauss(itsPeakFlux, itsXpos, itsYpos,
                                          axis, axialRatio, itsPositionAngle);
     return gauss;
+
+}
+
+void SubComponent::fixSize(std::string fitType, duchamp::FitsHeader &header)
+{
+
+    // For any subcomponent that is smaller than the beam
+    // (when comparing major axes), set its size to the beam
+    // size. Always do this when fitting "psf" type.
+    bool knowBeam = (header.beam().originString() != "EMPTY");
+    bool smallBeam = (itsMajorAxis < header.beam().maj());
+
+    if ((fitType == "psf") || (knowBeam && smallBeam)) {
+        itsMajorAxis = header.beam().maj();
+    }
+    if ((fitType == "psf") || (knowBeam && smallBeam)) {
+        itsMinorAxis = header.beam().min();
+    }
+    if ((fitType == "psf") || (knowBeam && smallBeam)) {
+        itsPositionAngle = header.beam().pa() * M_PI / 180.;
+    }
 
 }
 
