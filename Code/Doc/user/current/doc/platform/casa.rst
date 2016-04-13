@@ -1,11 +1,11 @@
-Using CASA
-==========
+Visualisation and using CASA
+============================
 
 While the ASKAP Central Processor was not specifically designed to run CASA, there are a
 number of approaches to using CASA. It can be run on the compute nodes, however there is
 no X-Windows system there, so GUI tools such as casaviewer, casabrowser & casaplotms will
 not work. We do have a number of (temporarily) "spare" nodes which we can temporarily
-dedicate to CASA usage. These are Dell servers with 64GB RAM. However these nodes are part
+dedicate to visualisation and CASA usage. These are Dell servers with 64GB RAM. However these nodes are part
 of the ingest pipeline infrastructure and will be dedicated to that purpose as more
 antennas come online.
 
@@ -14,7 +14,7 @@ The two nodes that have been earmarked for temporary CASA usage are *galaxy-vis1
 X11-Forwarding.
 
 .. warning:: Neither casapy nor any of the CASA GUI tools (casaviewer, casabrowser, casaplotms)
-             should be executed on the login nodes (eslogin-rt000 or eslogin-rt001). Using
+             should be executed on the login nodes (galaxy-1 or galaxy-2). Using
              these tools often results in memory exhaustion and will hang the login nodes,
              preventing all users from accessing the system.
 
@@ -25,7 +25,7 @@ A remote desktop environment can be accessed via VNC. Either of the two visulisa
 can be used to host a VNC server. First you must login to one of the visulisation servers
 and start the VNC server::
 
-    ssh galaxy-vis1.pawsey.ivec.org
+    ssh galaxy-vis1.pawsey.org.au
     vncserver -geometry 1024x768 -depth 24
 
 Note, you may choose any geometry you want, 1024x768 is just an example. You may wish to
@@ -47,7 +47,7 @@ connecting via an SSH tunnel (the VNC port is blocked at the iVEC firewall) you 
 with SSH tunnelling support. On Mac OSX the VNC client "Chicken" works well.
 
 Below is a screen shot of the VNC configuration. The settings you will need to enter are:
-  * **Host:** - This is either *galaxy-vis1.pawsey.ivec.org* or *galaxy-vis2* depending on which
+  * **Host:** - This is either *galaxy-vis1.pawsey.org.au* or *galaxy-vis2* depending on which
     host you logged in to
   * **Display or port** - This is the number returned when executing the VNC server
   * **Password** - This is the password you entered when you started the VNC server
@@ -96,7 +96,7 @@ is better suited to local machines, and you will notice it is not particularly f
 
 The following commands will launch CASA::
 
-    ssh -Y galaxy-vis1.pawsey.ivec.org
+    ssh -Y galaxy-vis1.pawsey.org.au
     module load casa
     casa
 

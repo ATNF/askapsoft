@@ -44,13 +44,13 @@ Login
 ------
 To login to the ASKAP Central Processor::
 
-   ssh abc123@galaxy.ivec.org
+   ssh abc123@galaxy.pawsey.org.au
 
-Where abc123 is the login name iVec gave you. In that case that your CSIRO login differers
-from your iVec login, and to avoid having to specify the username each time, you can add
+Where abc123 is the login name Pawsey gave you. In that case that your CSIRO login differers
+from your Pawsey login, and to avoid having to specify the username each time, you can add
 the following to your ~/.ssh/config file::
 
-   Host *.ivec.org
+   Host *.pawsey.org.au
      User abc123
 
 Setting up your account

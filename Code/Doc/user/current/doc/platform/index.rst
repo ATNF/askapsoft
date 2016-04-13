@@ -3,7 +3,7 @@ Platform Documentation
 
 The platform documentation describes the ASKAP Central Processor platform upon which
 the ASKSPsoft science data processing software executes. The platform is hosted by
-iVEC in the Pawsey Centre in Perth, WA.
+the Pawsey Centre for Supercomputing in Perth, WA.
 
 **Contents:**
 

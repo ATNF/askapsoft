@@ -16,7 +16,7 @@ be loaded manually using::
 	
 	module load ashell
 	
-You can add this to .bashrc for automatic loading; see the section "Setting up your account"
+You can add this to your ~/.bashrc file for automatic loading; see the section "Setting up your account"
 in the :doc:`processing` documentation page. Once loaded you can start the interface with::
 
 	ashell.py
@@ -25,11 +25,14 @@ After starting ashell you should be presented with the the following prompt::
 
 	pawsey:offline>
 	
-To download the scheduling block 50 data to your current folder use the following commands::
+To download the BETA scheduling block 50 data to your current folder use the following commands::
 
 	pawsey:offline>login
 	pawsey:online>get /projects/ASKAP Commissioning Data/beta-scheduling-blocks/50.tar
-	
+
+You will then have a local copy of the file 50.tar, and you will need
+to un-tar it before you can use the measurement set therein.
+        
 Ashell uses the concept of remote and local folders, the remote folder is the directory
 where the files are located in the archive, this is set by the 'cf <path>' (Change Folder)
 command, you can check the current remote folder with the 'pwf' (Print Working Folder)
@@ -40,4 +43,4 @@ Quick help is also available via 'help' and 'help <command>'
 Additional Information
 ----------------------
 
-* `Data@iVEC Help <https://data.ivec.org/help>`_
+* `PawseyData Help <https://portal.pawsey.org.au/docs/Data_Services>`_

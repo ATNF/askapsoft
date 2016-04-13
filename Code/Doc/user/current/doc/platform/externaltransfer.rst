@@ -6,20 +6,22 @@ at your home institution. For example, upon completion of imaging you may want t
 those images on your desktop computer.
 
 You may use the secure copy program (scp) to copy data to/from either your home directory or
-the scratch filesysyem. A special node has been setup, with hostname *galaxydata.ivec.org*,
+the scratch filesysyem. A special data-mover node exists, with hostname *hpc-data.pawsey.org.au*,
 for this purpose. It is possible to copy data through the login nodes, however this should
-be avoided if possible so as to reduce the load on the login nodes.
+be avoided if possible so as to reduce the load on the login
+nodes. This data-mover node is actually a front-end to one of four
+nodes, and these can see both /scratch2 (on galaxy) and /scratch (on magnus).
 
 Here is an example of copying a file from both the home directory and the scratch filesystem.
 Note these commands are executed on your local host (e.g. your desktop or laptop)::
 
-    scp -r galaxydata.ivec.org:/scratch2/askap/user123/image.fits .
-    scp -r galaxydata.ivec.org:~/1934-638.ms .
+    scp -r hpc-data.pawsey.org.au:/scratch2/askap/user123/image.fits .
+    scp -r hpc-data.pawsey.org.au:~/1934-638.ms .
 
 or to copy from your laptop/desktop to the Central Processor::
 
-    scp -r image.fits galaxydata.ivec.org:/scratch2/askap/user123
-    scp -r 1934-638.ms galaxydata.ivec.org:~
+    scp -r image.fits hpc-data.pawsey.org.au:/scratch2/askap/user123
+    scp -r 1934-638.ms hpc-data.pawsey.org.au:~
 
 Note the "-r" performs a recursive copy so can be used to copy files or directories.
 
@@ -35,14 +37,14 @@ Using *scp* can be quite slow and a program called *bbcp* is suggested for large
 The ASKAP software team can supply Debian packages. Usage is similar to scp, but with
 a few extra parameters. To copy a file from the /scratch2 filesystem::
 
-    bbcp -z -P 10 -s 32 -w 2M -r galaxy-data1.pawsey.ivec.org:/scratch2/askap/user123/image.fits .
+    bbcp -z -P 10 -s 32 -w 2M -r galaxy-data1.pawsey.org.au:/scratch2/askap/user123/image.fits .
 
 and to copy a file to the /scratch2 filesystem::
 
-    bbcp -P 10 -s 32 -w 2M -r image.fits galaxy-data1.pawsey.ivec.org:/scratch2/askap/user123
+    bbcp -P 10 -s 32 -w 2M -r image.fits galaxy-data1.pawsey.org.au:/scratch2/askap/user123
 
-.. note:: The hostname necessary to use bbcp is *galaxy-data1.pawsey.ivec.org*. This is one of the
-          two hosts to which the *galaxydata* DNS alias points to (the other is *galaxy-data2*).
+.. note:: The hostname necessary to use bbcp is *galaxy-data1.pawsey.org.au*. This is one of the
+          two hosts to which the *hpc-data* DNS alias points to (the other is *galaxy-data2*).
           This is necessary as bbcp doesn't reliably establish connections via the galaxydata
           alias due to the fact connections are round-robined between the two nodes.
 

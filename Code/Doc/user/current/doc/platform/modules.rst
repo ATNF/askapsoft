@@ -4,7 +4,7 @@ Environment Modules
 The `Environment Modules`_ software is used to manage the user's environment, dynamically
 modifying the user's environment to allow the execution of various software packages.
 Both the Cray software and the ASKAP specific software uses this approach. Typically,
-modules will alter the user's PATH and/or LD_LIBRARY_PATH, and other environment variables
+modules will alter the user's *PATH* and/or *LD_LIBRARY_PATH*, and other environment variables
 that may be necessary to execute some software package.
 
 .. _Environment Modules: http://modules.sourceforge.net/
@@ -80,7 +80,7 @@ Often it is useful to understand exactly how a module will modify your environme
     -------------------------------------------------------------------
 
 The above shows that the askapsoft module will prepend the ASKAPsoft *bin* directory to
-you *PATH* environment variable, and the *lib64* directory to your *LD_LIBRARY_PATH*.
+your *PATH* environment variable, and the *lib64* directory to your *LD_LIBRARY_PATH*.
 Likewise the askapdata module can be inspected::
 
     $ module display askapdata
@@ -91,5 +91,5 @@ Likewise the askapdata module can be inspected::
     setenv          AIPSPATH /group/askap/askapdata/current
     -------------------------------------------------------------------
 
-This shows that the AIPSPATH will be set to point to the directory containing measures
+This shows that the *AIPSPATH* will be set to point to the directory containing measures
 data.
