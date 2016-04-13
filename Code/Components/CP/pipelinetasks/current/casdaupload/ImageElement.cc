@@ -49,7 +49,7 @@ using askap::accessors::XercescString;
 using askap::accessors::XercescUtils;
 
 ImageElement::ImageElement(const LOFAR::ParameterSet &parset)
-    : ProjectElementBase(parset)
+    : TypeElementBase(parset)
 {
     itsName = "image";
     itsFormat = "fits";

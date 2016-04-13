@@ -31,7 +31,7 @@
 #include <string>
 
 // ASKAPsoft includes
-#include "casdaupload/ProjectElementBase.h"
+#include "casdaupload/TypeElementBase.h"
 #include "xercesc/dom/DOM.hpp" // Includes all DOM
 #include "boost/filesystem.hpp"
 #include "Common/ParameterSet.h"
@@ -46,7 +46,7 @@ namespace pipelinetasks {
 /// CASDA. Simply a specialisation of the ProjectElementBase class,
 /// with the constructor defining the element name ("image") and
 /// format ("fits").
-class ImageElement : public ProjectElementBase {
+class ImageElement : public TypeElementBase {
     public:
         ImageElement(const LOFAR::ParameterSet &parset);
 
