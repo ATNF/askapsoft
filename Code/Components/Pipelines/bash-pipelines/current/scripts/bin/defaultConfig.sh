@@ -155,6 +155,9 @@ TABLE_BANDPASS=calparameters_1934_bp.tab
 NCYCLES_BANDPASS_CAL=25
 # Number of CPUs used for the cbpcalibrator job
 NUM_CPUS_CBPCAL=400
+# Value for the calibrate.scalenoise parameter for applying the
+# bandpass solution
+BANDPASS_SCALENOISE=false
 
 # Whether to do dynamic flagging
 FLAG_DO_DYNAMIC_AMPLITUDE_1934=true
@@ -273,6 +276,9 @@ SELFCAL_SELAVY_NSUBY=3
 # Option to pass to the "Ccalibrator.normalisegains" parameter,
 # indicating we want to approximate phase-only self-cal
 SELFCAL_NORMALISE_GAINS=true
+# Value for the calibrate.scalenoise parameter for applying the
+# self-cal solution
+SELFCAL_SCALENOISE=false
 
 # name of the final gains calibration table
 GAINS_CAL_TABLE=cont_gains_cal_beam%b.tab

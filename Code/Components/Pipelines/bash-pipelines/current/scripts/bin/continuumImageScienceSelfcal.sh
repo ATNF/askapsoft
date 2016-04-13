@@ -105,6 +105,11 @@ for((LOOP=0;LOOP<=${SELFCAL_NUM_LOOPS};LOOP++)); do
         calparams="# Self-calibration using the recently-generated cal table
 Cimager.calibrate                           = true
 Cimager.calibrate.ignorebeam                = true
+# Allow flagging of vis if inversion of Mueller matrix fails
+Cimager.calibrate.allowflag                 = true
+# Scale the noise to get correct weighting
+Cimager.calibrate.scalenoise                = ${SELFCAL_SCALENOISE}
+#
 Cimager.calibaccess                         = table
 Cimager.calibaccess.table                   = \${loopdir}/\${caldata}
 Cimager.calibaccess.table.maxant            = ${NUM_ANT}
