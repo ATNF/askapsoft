@@ -60,6 +60,16 @@ xercesc::DOMElement* IdentityElement::toXmlElement(xercesc::DOMDocument& doc) co
 
     XercescUtils::addTextElement(*e, "telescope", itsParset.getString("telescope", ""));
     XercescUtils::addTextElement(*e, "sbid", itsParset.getString("sbid", ""));
+
+    std::vector<std::string> sbids=itsParset.getStringVector("sbids");
+    if(sbids.size()>0){
+        DOMElement *sbidEl = doc.createElement(XercescString("sbids"));
+        for(std::vector<std::string>::iterator sb=sbids.begin(); sb<sbids.end(); sb++){
+            XercescUtils::addTextElement(*sbidEl, "sbid", *sb);
+        }
+        e->appendChild(sbidEl);
+    }
+
     XercescUtils::addTextElement(*e, "obsprogram", itsParset.getString("obsprogram", ""));
 
     return e;
