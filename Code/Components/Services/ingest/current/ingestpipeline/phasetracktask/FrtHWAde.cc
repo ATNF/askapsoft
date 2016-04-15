@@ -168,14 +168,15 @@ void FrtHWAde::process(const askap::cp::common::VisChunk::ShPtr& chunk,
            //diffRate = (int(interval/240) % 2 == 0 ? +1. : -1) * static_cast<casa::Int>(casa::C::pi / 100. / phaseRateUnit);
            const casa::Int rates[11] = {-10, -8, -6, -4, -2, 0, 2, 4, 6, 8,10}; 
            const double addRate = rates[int(interval/120) % 11]*100.;
+           diffRate = 120+addRate; // adding rough rate at the time of the experiment, although it is not quite required
            //diffRate = addRate;
-           diffRate += addRate;
+           //diffRate += addRate;
            if (int((interval - 5.)/120) % 11 != int(interval/120) % 11) {
                ASKAPLOG_DEBUG_STR(logger,"Invalidating ant="<<ant);
                itsFrtComm.invalidate(ant);
            }
            
-           ASKAPLOG_DEBUG_STR(logger, "Interval = "<<interval<<" seconds, rate = "<<diffRate<<" for ant = "<<ant<<" addRate="<<addRate);
+           ASKAPLOG_DEBUG_STR(logger, "Interval = "<<interval<<" seconds, rate = "<<diffRate<<" for ant = "<<ant<<" addRate="<<addRate<<" rate in deg/s = "<<diffRate*phaseRateUnit/casa::C::pi*180.);
        }  else { diffRate = 0.;}
        */
        /*
