@@ -131,6 +131,8 @@ void IngestPipeline::ingest(void)
 
     // 7) Clean up
     itsSource.reset();
+    MonitoringSingleton::invalidatePoint("SourceTaskDuration");
+    MonitoringSingleton::invalidatePoint("ProcessingDuration");
     // Destroying this is safe even if the object was not initialised
     MonitoringSingleton::destroy();
 }
@@ -144,6 +146,7 @@ bool IngestPipeline::ingestOne(void)
     ASKAPDEBUGASSERT(itsSource);
     VisChunk::ShPtr chunk(itsSource->next());
     ASKAPLOG_DEBUG_STR(logger, "Source task execution time " << timer.real() << "s");
+    MonitoringSingleton::update<double>("SourceTaskDuration",timer.real(), MonitorPointStatus::OK, "s");
     if (chunk.get() == 0) {
         return true; // Finished
     }
@@ -151,14 +154,18 @@ bool IngestPipeline::ingestOne(void)
     ASKAPLOG_INFO_STR(logger, "Received one VisChunk. Timestamp: " << chunk->time());
 
     // For each task call process on the VisChunk as long as this rank stays active
+    double processingTime = 0.;
     for (unsigned int i = 0; i < itsTasks.size(); ++i) {
          if (chunk || itsTasks[i]->isAlwaysActive()) {
              timer.mark();
              itsTasks[i]->process(chunk);
              ASKAPLOG_DEBUG_STR(logger, itsTasks[i]->getName() << " execution time "
                    << timer.real() << "s");
+             processingTime += timer.real();
          }
     }
+    
+    MonitoringSingleton::update<double>("ProcessingDuration",processingTime, MonitorPointStatus::OK, "s");
 
     return false; // Not finished
 }
