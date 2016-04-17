@@ -319,8 +319,11 @@ void process(const IConstDataSource &ds, const LOFAR::ParameterSet &parset) {
   }
   
   
-  // exporting first row into a dat file
+  // exporting first (or given) row into a dat file
   if ((currentStep>0) || (counter!=0)) {
+      const casa::uInt row2export = parset.getUint32("row2export",0u); // choose row to export first row
+      ASKAPCHECK((row2export < currentStep) && (row2export < imgBuf.ncolumn()), 
+                 "Row "<<row2export<<" selected for exporting into a dat file does not exist");
       std::ofstream os("fringe.dat");
       for (casa::uInt chan=0; chan<imgBuf.nrow(); ++chan) {
            os<<chan<<" ";
