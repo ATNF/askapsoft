@@ -163,8 +163,8 @@ void FrtHWAde::process(const askap::cp::common::VisChunk::ShPtr& chunk,
 
        /*
        // experiments with rates
-       if (ant != 0) {
-       //if (ant == 3) {
+       //if (ant != 0) {
+       if (ant == 5) {
            const double interval = itsTm[ant]>0 ? (chunk->time().getTime("s").getValue() - itsTm[ant]) : 0;
            //diffRate = (int(interval/240) % 2 == 0 ? +1. : -1) * static_cast<casa::Int>(casa::C::pi / 100. / phaseRateUnit);
            const casa::Int rates[11] = {-10, -8, -6, -4, -2, 0, 2, 4, 6, 8,10}; 
