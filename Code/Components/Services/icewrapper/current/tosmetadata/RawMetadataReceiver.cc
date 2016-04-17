@@ -86,7 +86,7 @@ RawMetadataReceiver::RawMetadataReceiver(const std::string& locatorHost,
     }
 
     IceStorm::QoS qos;
-    qos["reliability"] = "ordered";
+    //qos["reliability"] = "ordered";
     itsTopicPrx->subscribeAndGetPublisher(qos, itsProxy);
 
     adapter->activate();
