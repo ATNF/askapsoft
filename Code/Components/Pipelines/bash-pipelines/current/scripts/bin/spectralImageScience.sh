@@ -132,7 +132,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_SPEC_IMAGING}
 #SBATCH --job-name specimg${BEAM}
 ${EMAIL_REQUEST}
-#SBATCH --export=ASKAP_ROOT,AIPSPATH
+${exportDirective}
 #SBATCH --output=$slurmOut/slurm-spectralImaging-%j.out
 
 BASEDIR=${BASEDIR}

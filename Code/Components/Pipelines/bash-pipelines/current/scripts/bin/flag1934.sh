@@ -103,7 +103,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=flagCal${BEAM}
 ${EMAIL_REQUEST}
-#SBATCH --export=ASKAP_ROOT,AIPSPATH
+${exportDirective}
 #SBATCH --output=$slurmOut/slurm-flag1934-b${BEAM}-%j.out
 
 BASEDIR=${BASEDIR}

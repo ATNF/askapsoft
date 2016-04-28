@@ -55,7 +55,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_SELAVY}
 #SBATCH --job-name=selavyB${BEAM}
 ${EMAIL_REQUEST}
-#SBATCH --export=ASKAP_ROOT,AIPSPATH
+${exportDirective}
 #SBATCH --output=$slurmOut/slurm-selavy-%j.out
 
 BASEDIR=${BASEDIR}

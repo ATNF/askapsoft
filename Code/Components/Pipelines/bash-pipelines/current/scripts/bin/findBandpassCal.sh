@@ -54,7 +54,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --ntasks-per-node=20
 #SBATCH --job-name=cbpcal
 ${EMAIL_REQUEST}
-#SBATCH --export=ASKAP_ROOT,AIPSPATH
+${exportDirective}
 #SBATCH --output=$slurmOut/slurm-findBandpass-%j.out
 
 BASEDIR=${BASEDIR}

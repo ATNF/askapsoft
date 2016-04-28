@@ -55,7 +55,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_CONT_IMAGING}
 #SBATCH --job-name=clean${BEAM}
 ${EMAIL_REQUEST}
-#SBATCH --export=ASKAP_ROOT,AIPSPATH
+${exportDirective}
 #SBATCH --output=$slurmOut/slurm-contImaging-%j.out
 
 BASEDIR=${BASEDIR}

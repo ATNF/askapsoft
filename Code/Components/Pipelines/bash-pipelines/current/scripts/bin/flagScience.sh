@@ -104,7 +104,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=flagSci${BEAM}
 ${EMAIL_REQUEST}
-#SBATCH --export=ASKAP_ROOT,AIPSPATH
+${exportDirective}
 #SBATCH --output=$slurmOut/slurm-flagSci-b${BEAM}-%j.out
 
 BASEDIR=${BASEDIR}

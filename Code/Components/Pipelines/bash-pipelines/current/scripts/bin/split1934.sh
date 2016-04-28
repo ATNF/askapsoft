@@ -72,7 +72,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=splitCal${BEAM}
 ${EMAIL_REQUEST}
-#SBATCH --export=ASKAP_ROOT,AIPSPATH
+${exportDirective}
 #SBATCH --output=$slurmOut/slurm-split1934-b${BEAM}-%j.out
 
 BASEDIR=${BASEDIR}

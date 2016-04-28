@@ -44,7 +44,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=linmos
 ${EMAIL_REQUEST}
-#SBATCH --export=ASKAP_ROOT,AIPSPATH
+${exportDirective}
 #SBATCH --output=$slurmOut/slurm-linmos-%j.out
 
 BASEDIR=${BASEDIR}

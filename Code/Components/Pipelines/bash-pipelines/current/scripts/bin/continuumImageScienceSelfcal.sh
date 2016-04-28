@@ -78,7 +78,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_CONT_IMAGING}
 #SBATCH --job-name=cleanSC${BEAM}
 ${EMAIL_REQUEST}
-#SBATCH --export=ASKAP_ROOT,AIPSPATH
+${exportDirective}
 #SBATCH --output=$slurmOut/slurm-contImagingSelfcal-%j.out
 
 BASEDIR=${BASEDIR}

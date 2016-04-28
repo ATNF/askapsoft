@@ -63,7 +63,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_CONTSUB}
 #SBATCH --job-name=contsubSLsci${BEAM}
 ${EMAIL_REQUEST}
-#SBATCH --export=ASKAP_ROOT,AIPSPATH
+${exportDirective}
 #SBATCH --output=$slurmOut/slurm-contsubSLsci-%j.out
 
 BASEDIR=${BASEDIR}

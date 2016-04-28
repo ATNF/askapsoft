@@ -74,7 +74,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=splitSLsci${BEAM}
 ${EMAIL_REQUEST}
-#SBATCH --export=ASKAP_ROOT,AIPSPATH
+${exportDirective}
 #SBATCH --output=$slurmOut/slurm-splitSLsci-%j.out
 
 BASEDIR=${BASEDIR}
@@ -162,7 +162,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=calappSLsci${BEAM}
 ${EMAIL_REQUEST}
-#SBATCH --export=ASKAP_ROOT,AIPSPATH
+${exportDirective}
 #SBATCH --output=$slurmOut/slurm-calappSLsci-%j.out
 
 BASEDIR=${BASEDIR}

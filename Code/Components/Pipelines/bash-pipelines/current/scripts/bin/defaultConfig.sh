@@ -83,6 +83,8 @@ if [ "$ASKAP_ROOT" != "" ]; then
     linmos=${ASKAP_ROOT}/Code/Components/Synthesis/synthesis/current/apps/linmos.sh
     selavy=${ASKAP_ROOT}/Code/Components/Analysis/analysis/current/apps/selavy.sh
     mslist=${ASKAP_ROOT}/Code/Components/Synthesis/synthesis/current/apps/mslist.sh
+    # export directives for slurm job files:
+    exportDirective="#SBATCH --export=ASKAP_ROOT,AIPSPATH"
 else
     mssplit=mssplit
     cflag=cflag
@@ -96,6 +98,8 @@ else
     linmos=linmos
     selavy=selavy
     mslist=mslist
+    # export directives for slurm job files:
+    exportDirective="#SBATCH --export=NONE"
 fi
 
 ####################
