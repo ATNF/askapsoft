@@ -455,7 +455,7 @@ namespace askap
 			return names;
 		}
 
-		vector<string> Params::completions(const std::string& pattern) const
+		vector<string> Params::completions(const std::string& pattern, const bool useAll) const
 		{
 			casa::Regex regex(casa::Regex::fromPattern(pattern+"*"));
 			casa::Regex sub(casa::Regex::fromPattern(pattern));
@@ -465,7 +465,7 @@ namespace askap
 			{
 				if(casa::String(iter->first).matches(regex))
 				{
-                                   if (iter->second) {
+                                   if (useAll || iter->second) {
 				       casa::String complete(iter->first);
 				       complete.gsub(sub, "");
 				       completions.push_back(complete);

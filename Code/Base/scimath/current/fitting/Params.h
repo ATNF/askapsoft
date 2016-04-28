@@ -229,7 +229,8 @@ casa::Vector<casa::Complex> complexVectorValue(const std::string &name) const;
 
 /// Return all the completions for this name
 /// @param match Match e.g. "flux.i.*"
-        std::vector<std::string> completions(const std::string& match) const;
+        std::vector<std::string> completions(const std::string& match,
+                                             const bool useAll=false) const;
 
 /// Return the key names
         std::vector<std::string> names() const;
