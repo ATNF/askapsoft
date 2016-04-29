@@ -59,7 +59,10 @@ this (this is for the “diamond” footprint, band 1, PA=0)::
 |                         |             |                         | footprint from footprint.py (ie. with                       |
 |                         |             |                         | ``BEAM_FOOTPRINT_NAME``).                                   |
 +-------------------------+-------------+-------------------------+-------------------------------------------------------------+
-| ``LINMOS_PSF_REF``      |0            | psfref                  | Reference beam for PSF (0-based) - which beam to take the   |
+| ``LINMOS_CUTOFF``       | 0.2         | linmos.cutoff           | The primary beam cutoff, as a fraction of the peak          |
+|                         |             | (:doc:`../calim/linmos`)|                                                             |
++-------------------------+-------------+-------------------------+-------------------------------------------------------------+
+| ``LINMOS_PSF_REF``      | 0           | psfref                  | Reference beam for PSF (0-based) - which beam to take the   |
 |                         |             | (:doc:`../calim/linmos`)| PSF information from.                                       |
 +-------------------------+-------------+-------------------------+-------------------------------------------------------------+
  
