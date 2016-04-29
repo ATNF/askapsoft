@@ -40,7 +40,11 @@ pipeline).
 |                              |                           | (:doc:`../analysis/selavy`)    | selfcal.                                                 |
 +------------------------------+---------------------------+--------------------------------+----------------------------------------------------------+
 | ``SELFCAL_NORMALISE_GAINS``  | true                      | normalisegains                 | Whether to normalise the amplitudes of the gains to 1,   |
-|                              |                           |(:doc:`../analysis/ccalibrator`)| approximating the phase-only self-calibration approach.  |
+|                              |                           | (:doc:`../calim/ccalibrator`)  | approximating the phase-only self-calibration approach.  |
++------------------------------+---------------------------+--------------------------------+----------------------------------------------------------+
+| ``SELFCAL_SCALENOISE``       | false                     | calibrate.scalenoise           | Whether the noise estimate will be scaled in accordance  |
+|                              |                           | (:doc:`../calim/cimager`)      | with the applied calibrator factor to achieve proper     |
+|                              |                           |                                | weighting.                                               |
 +------------------------------+---------------------------+--------------------------------+----------------------------------------------------------+
 | ``GAINS_CAL_TABLE``          | cont_gains_cal_beam%b.tab | none (directly)                | The table name to hold the final gains solution. Once    |
 |                              |                           |                                | the self-cal loops have completed, the cal table in the  |

@@ -70,6 +70,10 @@ through ``NUM_CPUS_CBPCAL``.
 |                                       |                                       | (:doc:`../calim/cbpcalibrator` and                 | parameters.                                               |
 |                                       |                                       | :doc:`../calim/ccalapply`)                         |                                                           |
 +---------------------------------------+---------------------------------------+----------------------------------------------------+-----------------------------------------------------------+
+| ``BANDPASS_SCALENOISE``               | false                                 | calibrate.scalenoise (:doc:`../calim/ccalapply`)   | Whether the noise estimate will be scaled in accordance   |
+|                                       |                                       |                                                    | with the applied calibrator factor to achieve proper      |
+|                                       |                                       |                                                    | weighting.                                                |
++---------------------------------------+---------------------------------------+----------------------------------------------------+-----------------------------------------------------------+
 | ``NCYCLES_BANDPASS_CAL``              | 25                                    | ncycles (:doc:`../calim/cbpcalibrator`)            | Number of cycles used in cbpcalibrator.                   |
 +---------------------------------------+---------------------------------------+----------------------------------------------------+-----------------------------------------------------------+
 | ``NUM_CPUS_CBPCAL``                   | 400                                   | none                                               | The number of cpus allocated to the cbpcalibrator job. The|
