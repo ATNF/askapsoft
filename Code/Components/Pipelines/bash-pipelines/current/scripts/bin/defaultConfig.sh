@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -l
 #
 # The complete set of user-defined parameters, along with their
 # default values. All parameters defined herein can be set in the

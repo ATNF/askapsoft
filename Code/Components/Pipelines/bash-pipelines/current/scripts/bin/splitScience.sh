@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -l
 #
 # Launches a job to extract the science observation from the
 # appropriate measurement set, selecting the required beam and,
@@ -75,7 +75,7 @@ if [ $DO_IT == true ]; then
 
     sbatchfile=$slurms/split_science_beam${BEAM}.sbatch
     cat > $sbatchfile <<EOFOUTER
-#!/usr/bin/env bash
+#!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
 ${RESERVATION_REQUEST}

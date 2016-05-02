@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -l
 #
 # Subtracts the continuum emission from the spectral-line dataset in
 # one of two ways: one by finding & fitting components in the restored

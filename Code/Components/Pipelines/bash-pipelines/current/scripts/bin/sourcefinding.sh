@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -l
 #
 # Launches a job to create a catalogue of sources in the continuum image.
 #
@@ -46,7 +46,7 @@ Selavy.Weights.weightsCutoff = ${LINMOS_CUTOFF}"
 
     sbatchfile=$slurms/science_selavy_B${BEAM}.sbatch
     cat > $sbatchfile <<EOFOUTER
-#!/usr/bin/env bash
+#!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
 ${RESERVATION_REQUEST}

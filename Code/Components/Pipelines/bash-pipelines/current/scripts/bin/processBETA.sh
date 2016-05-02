@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -l
 #
 # Front-end script to run BETA processing.
 # This handles the bandpass calibration from individual-beam

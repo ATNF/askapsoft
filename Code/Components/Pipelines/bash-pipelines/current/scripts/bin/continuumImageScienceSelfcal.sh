@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -l
 #
 # Launches a job to image the current beam of the science
 # observation, using the BasisfunctionMFS solver. This imaging
@@ -69,7 +69,7 @@ if [ $DO_IT == true ] && [ $DO_SELFCAL == true ]; then
 
     sbatchfile=$slurms/science_continuumImageSelfcal_beam$BEAM.sbatch
     cat > $sbatchfile <<EOFOUTER
-#!/usr/bin/env bash
+#!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
 ${RESERVATION_REQUEST}

@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -l
 #
 # Launches a job to image the current beam of the science
 # observation, at full spectral resolution, using the spectral-line
@@ -123,7 +123,7 @@ Simager.restore.beamLog                         = ${RESTORING_BEAM_LOG}"
     
     sbatchfile=$slurms/science_spectral_imager_beam$BEAM.sbatch
     cat > $sbatchfile <<EOFOUTER
-#!/usr/bin/env bash
+#!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
 ${RESERVATION_REQUEST}

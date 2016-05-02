@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -l
 #
 # Launches a job to average the measurement set for the current beam
 # of the science observation so that it can be imaged by the continuum
@@ -53,7 +53,7 @@ if [ $DO_IT == true ]; then
 
     sbatchfile=$slurms/science_average_beam${BEAM}.sbatch
     cat > $sbatchfile <<EOFOUTER
-#!/usr/bin/env bash
+#!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
 ${RESERVATION_REQUEST}

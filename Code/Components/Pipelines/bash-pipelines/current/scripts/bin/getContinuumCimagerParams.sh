@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -l
 #
 # Defines the majority of the parameter set used by Cimager, based on
 # the user-defined parameters. This script is called by the two

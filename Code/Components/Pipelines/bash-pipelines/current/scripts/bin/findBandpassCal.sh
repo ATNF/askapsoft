@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -l
 #
 # Launches a job to solve for the bandpass calibration. This uses all
 # 1934-638 measurement sets after the splitFlag1934.sh jobs have
@@ -45,7 +45,7 @@ if [ $DO_IT == true ]; then
 
     sbatchfile=$slurms/cbpcalibrator_1934.sbatch
     cat > $sbatchfile <<EOF
-#!/usr/bin/env bash
+#!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
 ${RESERVATION_REQUEST}

@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -l
 #
 # This file takes the default values, after any modification by a
 # user's config file, and creates other variables that depend upon

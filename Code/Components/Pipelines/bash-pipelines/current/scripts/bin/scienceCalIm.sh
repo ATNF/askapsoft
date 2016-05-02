@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -l
 #
 # Process the science field observations: split out per beam, flag,
 # apply the bandpass solution, average spectrally, image the continuum

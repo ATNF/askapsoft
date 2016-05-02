@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -l
 #
 # Sets up the continuum-subtraction job for the case where the
 # continuum is represented by a model image created by cmodel from a
@@ -54,7 +54,7 @@ fi
 modelImage=contmodel.${imageBase}
 
 cat > $sbatchfile <<EOFOUTER
-#!/usr/bin/env bash
+#!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
 ${RESERVATION_REQUEST}

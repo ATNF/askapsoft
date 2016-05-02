@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -l
 #
 # Test program to trial the parsing of measurement sets via mslist to
 # extract the list of fields and spectral windows

@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -l
 #
 # This file holds various utility functions and environment variables
 # that allow the scripts to do various things in a uniform manner.

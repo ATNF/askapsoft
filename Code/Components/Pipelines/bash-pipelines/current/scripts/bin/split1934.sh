@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -l
 #
 # Launches a job to extract the appropriate beam & scan combination
 # from the 1934-638 observation
@@ -63,7 +63,7 @@ if [ $DO_IT == true ]; then
 
     sbatchfile=$slurms/split_1934_beam$BEAM.sbatch
     cat > $sbatchfile <<EOFOUTER
-#!/usr/bin/env bash
+#!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
 ${RESERVATION_REQUEST}

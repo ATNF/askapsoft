@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -l
 #
 # Launches a job to mosaic all individual beam images to a single
 # image. After completion, runs the source-finder on the mosaicked
@@ -35,7 +35,7 @@ if [ $DO_MOSAIC == true ]; then
 
     sbatchfile=$slurms/science_linmos.sbatch
     cat > $sbatchfile <<EOFOUTER
-#!/usr/bin/env bash
+#!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
 ${RESERVATION_REQUEST}

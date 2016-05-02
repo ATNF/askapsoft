@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -l
 #
 # A script to set up the working directory prior to starting the job
 # submission. This defines all necessary subdirectories and sets the

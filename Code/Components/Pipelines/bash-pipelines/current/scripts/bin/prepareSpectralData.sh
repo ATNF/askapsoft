@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -l
 #
 # Prepares the dataset to be used for spectral-line imaging. Includes
 # copying, allowing a selection of a subset of channels, application
@@ -65,7 +65,7 @@ if [ $DO_IT == true ]; then
 
     sbatchfile=$slurms/split_spectralline_science_beam${BEAM}.sbatch
     cat > $sbatchfile <<EOFOUTER
-#!/usr/bin/env bash
+#!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
 ${RESERVATION_REQUEST}
@@ -153,7 +153,7 @@ if [ $DO_IT == true ]; then
 
     sbatchfile=$slurms/apply_cal_spectralline_beam${BEAM}.sbatch
     cat > $sbatchfile <<EOFOUTER
-#!/usr/bin/env bash
+#!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
 ${RESERVATION_REQUEST}

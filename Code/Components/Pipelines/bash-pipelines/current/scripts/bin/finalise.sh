@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -l
 #
 # This script takes care of tasks that need to be run either upon
 # completion of all jobs from a single processBETA.sh call, or can be
@@ -43,7 +43,7 @@ if [ $SUBMIT_JOBS == true ] && [ "${ALL_JOB_IDS}" != "" ]; then
 
     sbatchfile=$slurms/gatherAll.sbatch
     cat > $sbatchfile <<EOF
-#!/usr/bin/env bash
+#!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
 ${RESERVATION_REQUEST}
@@ -91,7 +91,7 @@ EOF
 
     reportscript=${tools}/reportProgress-${NOW}.sh
     cat > $reportscript <<EOF
-#!/usr/bin/env bash
+#!/bin/bash -l
 #
 # A script to report progress on all jobs associated with a given call of processBETA.sh.
 # It will run squeue just on the appropriate job IDs, showing those that have not yet completed.
@@ -129,7 +129,7 @@ EOF
     # Create tool to kill all jobs with this datestamp
     killscript=${tools}/killAll-${NOW}.sh
     cat > $killscript <<EOF
-#!/usr/bin/env bash
+#!/bin/bash -l
 #
 # A simple script to run scancel on all jobs associated with a 
 # given call of processBETA.sh

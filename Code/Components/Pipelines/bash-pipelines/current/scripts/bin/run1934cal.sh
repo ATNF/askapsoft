@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -l
 #
 # Process the 1934-638 calibration observations: split out per beam,
 # flag, then find the bandpass solution

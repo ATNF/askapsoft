@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -l
 #
 # Defines the beam arrangements for predetermined named sets. This makes use
 # of the ACES footprint.py tool to extract the beam offsets for a named beam
