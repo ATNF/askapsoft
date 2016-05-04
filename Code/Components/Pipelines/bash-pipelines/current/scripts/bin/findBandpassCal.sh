@@ -57,6 +57,8 @@ ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-findBandpass-%j.out
 
+${askapsoftModuleCommands}
+
 BASEDIR=${BASEDIR}
 cd $OUTPUT
 . ${PIPELINEDIR}/utils.sh	

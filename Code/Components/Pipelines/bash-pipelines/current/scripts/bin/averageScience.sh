@@ -65,6 +65,8 @@ ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-averageSci-%j.out
 
+${askapsoftModuleCommands}
+
 BASEDIR=${BASEDIR}
 cd $OUTPUT
 . ${PIPELINEDIR}/utils.sh	

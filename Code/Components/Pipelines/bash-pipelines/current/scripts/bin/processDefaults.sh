@@ -49,6 +49,63 @@ if [ $PROCESS_HAS_RUN == false ]; then
     cd $BASEDIR
     
     ####################
+    # ASKAPsoft module usage
+
+    moduleDir="/group/askap/modulefiles"
+    module use $moduleDir
+    if [ "${ASKAP_ROOT}" == "" ]; then
+        # Has the user asked for a specific askapsoft module?
+        if [ "$ASKAPSOFT_VERSION" != "" ]; then
+            # If so, ensure it exists
+            if [ "`module avail -t askapsoft/${ASKAPSOFT_VERSION} 2>&1 | grep askapsoft`" == "" ]; then
+                echo "WARNING - Requested askapsoft version ${ASKAPSOFT_VERSION} not available"
+                echo "        - Using the default"
+                ASKAPSOFT_VERSION=""
+            else
+                # It exists. Add a leading slash so we can append to 'askapsoft' in the module call
+                ASKAPSOFT_VERSION="/${ASKAPSOFT_VERSION}"
+            fi
+        fi
+        # load the modules correctly
+        if [ "`module list -t 2>&1 | grep askapsoft`" == "" ]; then
+            # askapsoft is not loaded by the .bashrc - need to specify for
+            # slurm jobfiles. Use the requested one if necessary.
+            if [ "${ASKAPSOFT_VERSION}" == "" ]; then
+                askapsoftModuleCommands="# Loading the default askapsoft module"
+                echo "Will use the default askapsoft module"
+            else
+                askapsoftModuleCommands="# Loading the requested askapsoft module"
+                echo "Will use the askapsoft module askapsoft${ASKAPSOFT_VERSION}"
+            fi
+            askapsoftModuleCommands="${askapsoftModuleCommands}
+module use $moduleDir
+module load askapsoft${ASKAPSOFT_VERSION}"
+        else
+            # askapsoft is already available.
+            #  If a specific version has been requested, swap to that
+            #  Otherwise, do nothing
+            if [ "${ASKAPSOFT_VERSION}" != "" ]; then
+                askapsoftModuleCommands="# Swapping to the requested askapsoft module
+module swap askapsoft askapsoft${ASKAPSOFT_VERSION}"
+                echo "Will use the askapsoft module askapsoft${ASKAPSOFT_VERSION}"
+            else
+                askapsoftModuleCommands="# Using user-defined askapsoft module"
+                echo "Will use the askapsoft module defined by your environment (`module list -t 2>&1 | grep askapsoft`)"
+            fi
+        fi
+        echo " "
+
+        # Ensure the askapdata module is loaded
+        if [ "`module list -t 2>&1 | grep askapdata`" == "" ]; then
+            askapsoftModuleCommands="${askapsoftModuleCommands}
+module load askapdata"
+        fi
+        
+    else
+        askapsoftModuleCommands="# Using ASKAPsoft code tree directly, so no need to load modules"
+    fi
+
+    ####################
     # Slurm file headers
 
     # Reservation string

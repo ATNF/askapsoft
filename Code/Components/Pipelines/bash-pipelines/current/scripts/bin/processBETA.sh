@@ -70,7 +70,6 @@ else
 	if [ "$userConfig" != "" ]; then
             if [ -e ${userConfig} ]; then
 	        echo "Getting extra config from file $userConfig"
-	        echo " "
 	        . ${userConfig}
                 archiveConfig $userConfig
             else

@@ -81,6 +81,8 @@ ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-contImagingSelfcal-%j.out
 
+${askapsoftModuleCommands}
+
 BASEDIR=${BASEDIR}
 cd $OUTPUT
 . ${PIPELINEDIR}/utils.sh	
@@ -262,7 +264,6 @@ EOFINNER
             mv ${OUTPUT}/*.${imageBase}* .
         fi
 
-        BASEDIR=${BASEDIR}
         cd $OUTPUT
     fi
 

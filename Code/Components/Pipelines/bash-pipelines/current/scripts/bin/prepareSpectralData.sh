@@ -77,6 +77,8 @@ ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-splitSLsci-%j.out
 
+${askapsoftModuleCommands}
+
 BASEDIR=${BASEDIR}
 cd $OUTPUT
 . ${PIPELINEDIR}/utils.sh	
@@ -164,6 +166,8 @@ ${RESERVATION_REQUEST}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-calappSLsci-%j.out
+
+${askapsoftModuleCommands}
 
 BASEDIR=${BASEDIR}
 cd $OUTPUT

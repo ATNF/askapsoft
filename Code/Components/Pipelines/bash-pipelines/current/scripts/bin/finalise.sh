@@ -55,6 +55,8 @@ ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-gatherAll-%j.out
 
+${askapsoftModuleCommands}
+
 BASEDIR=${BASEDIR}
 cd $OUTPUT
 . ${PIPELINEDIR}/utils.sh	
@@ -175,11 +177,9 @@ EOF
     makeLink $reportscript 
     makeLink $killscript
 
-    # make links to the current job list, both at the top level *and*
-    # in the output directory
+    # make links to the current job list, both at the top level *and* in the output directory
     makeLink $JOBLIST
-    BASEDIR=${BASEDIR}
-cd $OUTPUT
+    cd $OUTPUT
     makeLink $JOBLIST
     cd ..
 

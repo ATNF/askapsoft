@@ -102,6 +102,8 @@ else
     exportDirective="#SBATCH --export=NONE"
 fi
 
+ASKAPSOFT_VERSION=""
+
 ####################
 # Control flags
 

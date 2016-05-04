@@ -31,6 +31,8 @@
 
 ####################
 # Define & create directories
+${askapsoftModuleCommands}
+
 BASEDIR=`pwd`
 parsets=${BASEDIR}/parsets
 logs=${BASEDIR}/logs
