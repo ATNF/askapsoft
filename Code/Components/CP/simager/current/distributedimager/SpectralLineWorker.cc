@@ -198,7 +198,7 @@ SpectralLineWorker::processChannel(askap::accessors::TableDataSource& ds,
     askap::scimath::Equation::ShPtr equation_p;
 
     // Setup measurement equations
-    equation_p = askap::scimath::Equation::ShPtr(new ImageFFTEquation(*model_p, it, itsGridder_p));
+    equation_p = askap::scimath::Equation::ShPtr(new ImageFFTEquation(*model_p, it, itsGridder_p, itsParset));
 
     std::string majorcycle = itsParset.getString("threshold.majorcycle", "-1Jy");
     const double targetPeakResidual = SynthesisParamsHelper::convertQuantity(majorcycle, "Jy");
