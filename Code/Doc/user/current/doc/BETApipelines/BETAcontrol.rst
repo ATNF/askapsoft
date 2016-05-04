@@ -9,6 +9,22 @@ Values for parameters that act as flags (ie. those that accept
 true/false values) should be given in *lower case only*, to ensure
 comparisons work properly.
 
+ASKAPsoft versions
+------------------
+
+The default behaviour of the slurm jobs is to use the askapsoft module
+that is loaded in your ~/.bashrc file. However, it is possible to run
+the pipeline using a different askapsoft module, by setting
+``ASKAPSOFT_VERSION`` to the module version (0.11.2, for instance). If
+the requested version is not available, the default version is used
+instead. 
+
+This behaviour is also robust against there not being an askapsoft
+module defined in the ~/.bashrc - in this case the default module is
+used, unless ``ASKAPSOFT_VERSION`` is given in the configuration
+file. 
+
+
 Slurm control
 -------------
 
@@ -16,40 +32,46 @@ These parameters affect how the slurm jobs are set up and where the
 output data products go. To run the jobs, you need to set
 ``SUBMIT_JOBS=true``.
 
-+--------------------+---------+------------------------------------------------------------+
-| Variable           | Default | Description                                                |
-+====================+=========+============================================================+
-| ``SUBMIT_JOBS``    | false   |The ultimate switch controlling whether things are run on   |
-|                    |         |the galaxy queue or not. If false, the slurm files etc will |
-|                    |         |be created but nothing will run (useful for checking if     |
-|                    |         |things are to your liking).                                 |
-+--------------------+---------+------------------------------------------------------------+
-| ``CLUSTER``        | galaxy  |The cluster to which jobs should be submitted. This allows  |
-|                    |         |you to submit to the galaxy queue from machines such as     |
-|                    |         |galaxy-data. Leave as is unless you konw better.            |
-+--------------------+---------+------------------------------------------------------------+
-| ``QUEUE``          | workq   |This should be left as is unless you know better.           |
-+--------------------+---------+------------------------------------------------------------+
-| ``RESERVATION``    | ""      |If there is a reservation you specify the name of it here.  |
-|                    |         |If you don't have a reservation, leave this alone and it    |
-|                    |         |will be submitted as a regular job.                         |
-+--------------------+---------+------------------------------------------------------------+
-| ``OUTPUT``         | .       |The sub-directory in which to put the images, tables,       |
-|                    |         |catalogues, MSs etc. The name should be relative to the     |
-|                    |         |directory in which the script was run, with the default     |
-|                    |         |being that directory.                                       |
-+--------------------+---------+------------------------------------------------------------+
-| ``EMAIL``          | ""      |An email address to which you want slurm notifications sent |
-|                    |         |(this will be passed to the ``--mail-user`` option of       |
-|                    |         |sbatch).  Leaving it blank will mean no notifications are   |
-|                    |         |sent.                                                       |
-+--------------------+---------+------------------------------------------------------------+
-| ``EMAIL_TYPE``     | ALL     |The types of notifications that are sent (this is passed to |
-|                    |         |the ``--mail-type`` option of sbatch, and only if ``EMAIL`` |
-|                    |         |is set to something). Options include: BEGIN, END, FAIL,    |
-|                    |         |REQUEUE, ALL, TIME_LIMIT, TIME_LIMIT_90, TIME_LIMIT_80, &   |
-|                    |         |TIME_LIMIT_50 (taken from the sbatch man page on galaxy).   |
-+--------------------+---------+------------------------------------------------------------+
++-----------------------+---------+---------------------------------------------------------------------------------+
+| Variable              | Default | Description                                                                     |
++=======================+=========+=================================================================================+
+| ``SUBMIT_JOBS``       | false   |The ultimate switch controlling whether things are run on the galaxy queue or    |
+|                       |         |not. If false, the slurm files etc will be created but nothing will run (useful  |
+|                       |         |for checking if things are to your liking).                                      |
+|                       |         |                                                                                 |
++-----------------------+---------+---------------------------------------------------------------------------------+
+| ``ASKAPSOFT_VERSION`` | ""      |The version number of the askapsoft module to use for the processing. If not     |
+|                       |         |given, or if the requested version is not valid, the version defined in the      |
+|                       |         |~/.bashrc file is used, or the default version should none be defined by the     |
+|                       |         |~/.bashrc file.                                                                  |
+|                       |         |                                                                                 |
++-----------------------+---------+---------------------------------------------------------------------------------+
+| ``CLUSTER``           | galaxy  |The cluster to which jobs should be submitted. This allows you to submit to the  |
+|                       |         |galaxy queue from machines such as galaxy-data. Leave as is unless you know      |
+|                       |         |better.                                                                          |
++-----------------------+---------+---------------------------------------------------------------------------------+
+| ``QUEUE``             | workq   |This should be left as is unless you know better.                                |
++-----------------------+---------+---------------------------------------------------------------------------------+
+| ``RESERVATION``       | ""      |If there is a reservation you specify the name of it here.  If you don't have a  |
+|                       |         |reservation, leave this alone and it will be submitted as a regular job.         |
+|                       |         |                                                                                 |
++-----------------------+---------+---------------------------------------------------------------------------------+
+| ``OUTPUT``            | .       |The sub-directory in which to put the images, tables, catalogues, MSs etc. The   |
+|                       |         |name should be relative to the directory in which the script was run, with the   |
+|                       |         |default being that directory.                                                    |
+|                       |         |                                                                                 |
++-----------------------+---------+---------------------------------------------------------------------------------+
+| ``EMAIL``             | ""      |An email address to which you want slurm notifications sent (this will be passed |
+|                       |         |to the ``--mail-user`` option of sbatch).  Leaving it blank will mean no         |
+|                       |         |notifications are sent.                                                          |
+|                       |         |                                                                                 |
++-----------------------+---------+---------------------------------------------------------------------------------+
+| ``EMAIL_TYPE``        | ALL     |The types of notifications that are sent (this is passed to the ``--mail-type``  |
+|                       |         |option of sbatch, and only if ``EMAIL`` is set to something). Options include:   |
+|                       |         |BEGIN, END, FAIL, REQUEUE, ALL, TIME_LIMIT, TIME_LIMIT_90, TIME_LIMIT_80, &      |
+|                       |         |TIME_LIMIT_50 (taken from the sbatch man page on galaxy).                        |
+|                       |         |                                                                                 |
++-----------------------+---------+---------------------------------------------------------------------------------+
 
 Calibrator switches
 -------------------
