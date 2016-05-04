@@ -59,7 +59,6 @@ if [ $PROCESS_HAS_RUN == false ]; then
             # If so, ensure it exists
             if [ "`module avail -t askapsoft/${ASKAPSOFT_VERSION} 2>&1 | grep askapsoft`" == "" ]; then
                 echo "WARNING - Requested askapsoft version ${ASKAPSOFT_VERSION} not available"
-                echo "        - Using the default"
                 ASKAPSOFT_VERSION=""
             else
                 # It exists. Add a leading slash so we can append to 'askapsoft' in the module call
