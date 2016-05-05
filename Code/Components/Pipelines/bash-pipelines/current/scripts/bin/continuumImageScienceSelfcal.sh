@@ -217,8 +217,9 @@ Ccalibrator.calibaccess.table.reuse             = false
 #
 Ccalibrator.sources.definition                  = \${sources}
 #
-Ccalibrator.gridder.snapshotimaging             = true
-Ccalibrator.gridder.snapshotimaging.wtolerance  = 2600
+Ccalibrator.gridder.snapshotimaging             = ${GRIDDER_SNAPSHOT_IMAGING}
+Ccalibrator.gridder.snapshotimaging.wtolerance  = ${GRIDDER_SNAPSHOT_WTOL}
+Cimager.gridder.snapshotimaging.longtrack       = ${GRIDDER_SNAPSHOT_LONGTRACK}
 Ccalibrator.gridder                             = WProject
 #
 Ccalibrator.ncycles                             = 25

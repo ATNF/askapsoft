@@ -217,6 +217,7 @@ CContSubtract.sources.lsm.nterms                  = ${NUM_TAYLOR_TERMS}
 # The gridding parameters
 CContSubtract.gridder.snapshotimaging             = ${GRIDDER_SNAPSHOT_IMAGING}
 CContSubtract.gridder.snapshotimaging.wtolerance  = ${GRIDDER_SNAPSHOT_WTOL}
+CContSubtract.gridder.snapshotimaging.longtrack   = ${GRIDDER_SNAPSHOT_LONGTRACK}
 CContSubtract.gridder                             = WProject
 CContSubtract.gridder.WProject.wmax               = ${GRIDDER_WMAX}
 CContSubtract.gridder.WProject.nwplanes           = ${GRIDDER_NWPLANES}
