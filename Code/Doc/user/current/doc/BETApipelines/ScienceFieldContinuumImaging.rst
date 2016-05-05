@@ -74,13 +74,16 @@ without submission, then edit and manually submit).
 | ``GRIDDER_SNAPSHOT_WTOL``            | 2600                         | snapshotimaging.wtolerance                             | The wtolerance parameter controlling how frequently to       |
 |                                      |                              | (:doc:`../calim/gridder`)                              | snapshot.                                                    |
 +--------------------------------------+------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
+| ``GRIDDER_SNAPSHOT_LONGTRACK``       | true                         | snapshotimaging.longtrack                              | The longtrack parameter controlling how the best-fit W plane |
+|                                      |                              | (:doc:`../calim/gridder`)                              | is determined when using snapshots.                          |
++--------------------------------------+------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``GRIDDER_WMAX``                     | 2600                         | WProject.wmax                                          | The wmax parameter for the gridder.                          |
 |                                      |                              | (:doc:`../calim/gridder`)                              |                                                              |
 +--------------------------------------+------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``GRIDDER_NWPLANES``                 | 99                           | WProject.nwplanes                                      | The nwplanes parameter for the gridder.                      |
+| ``GRIDDER_NWPLANES``                 | 99                           | WProject.nwplanes                                      | The nwplanes parameter for the gridder.                      | 
 |                                      |                              | (:doc:`../calim/gridder`)                              |                                                              |
 +--------------------------------------+------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``GRIDDER_OVERSAMPLE``               | 4                            | WProject.oversample                                    | The oversampling factor for the gridder.                     | 
+| ``GRIDDER_OVERSAMPLE``               | 4                            | WProject.oversample                                    | The oversampling factor for the gridder.                     |
 |                                      |                              | (:doc:`../calim/gridder`)                              |                                                              |
 +--------------------------------------+------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``GRIDDER_MAXSUPPORT``               | 512                          | WProject.maxsupport                                    | The maxsupport parameter for the gridder.                    |
@@ -101,10 +104,10 @@ without submission, then edit and manually submit).
 | ``CLEAN_GAIN``                       | 0.5                          | Clean.gain                                             | The loop gain (fraction of peak subtracted per minor cycle). |
 |                                      |                              | (:doc:`../calim/solver`)                               |                                                              |
 +--------------------------------------+------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``CLEAN_SCALES``                     | "[0,3,10]"                   | Clean.scales                                           | Set of scales (in pixels) to use with the multi-scale clean. |
+| ``CLEAN_SCALES``                     | "[0,3,10]"                   | Clean.scales                                           | Set of scales (in pixels) to use with the multi-scale clean. | 
 |                                      |                              | (:doc:`../calim/solver`)                               |                                                              |
 +--------------------------------------+------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``CLEAN_THRESHOLD_MINORCYCLE``       | "[30%, 0.9mJy]"              | threshold.minorcycle                                   | Threshold for the minor cycle loop.                          | 
+| ``CLEAN_THRESHOLD_MINORCYCLE``       | "[30%, 0.9mJy]"              | threshold.minorcycle                                   | Threshold for the minor cycle loop.                          |
 |                                      |                              | (:doc:`../calim/cimager`)                              |                                                              |
 |                                      |                              | (:doc:`../calim/solver`)                               |                                                              |
 +--------------------------------------+------------------------------+--------------------------------------------------------+--------------------------------------------------------------+

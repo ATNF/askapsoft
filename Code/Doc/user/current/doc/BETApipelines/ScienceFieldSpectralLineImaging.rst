@@ -108,8 +108,11 @@ spectral-imaging.
 | ``GRIDDER_SPECTRAL_SNAPSHOT_IMAGING``         | true                          | snapshotimaging                    | Whether to use snapshot imaging when gridding.                    |
 |                                               |                               | (:doc:`../calim/gridder`)          |                                                                   |
 +-----------------------------------------------+-------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``GRIDDER_SPECTRAL_SNAPSHOT_WTOL``            | 2600                          | snapshotimaging.wtolerance         |  The wtolerance parameter controlling how frequently to snapshot. |
+| ``GRIDDER_SPECTRAL_SNAPSHOT_WTOL``            | 2600                          | snapshotimaging.wtolerance         | The wtolerance parameter controlling how frequently to snapshot.  |
 |                                               |                               | (:doc:`../calim/gridder`)          |                                                                   |
++-----------------------------------------------+-------------------------------+------------------------------------+-------------------------------------------------------------------+
+| ``GRIDDER_SPECTRAL_SNAPSHOT_LONGTRACK``       | true                          | snapshotimaging.longtrack          | The longtrack parameter controlling how the best-fit W plane is   |
+|                                               |                               | (:doc:`../calim/gridder`)          | determined when using snapshots.                                  |
 +-----------------------------------------------+-------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``GRIDDER_SPECTRAL_WMAX``                     | 2600                          | WProject.wmax                      | The wmax parameter for the gridder.                               |
 |                                               |                               | (:doc:`../calim/gridder`)          |                                                                   |
