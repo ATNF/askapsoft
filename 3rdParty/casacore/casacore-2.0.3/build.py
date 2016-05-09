@@ -27,16 +27,16 @@ cfitsio = builder.dep.get_install_path("cfitsio")
 wcslib  = builder.dep.get_install_path("wcslib")
 fftw3   = builder.dep.get_install_path("fftw3")
 
-#if platform['system'] != 'Darwin':
+if platform['system'] != 'Darwin':
 
-#    blas    = builder.dep.get_install_path("blas")
-#    lapack  = builder.dep.get_install_path("lapack")
+    blas    = builder.dep.get_install_path("blas")
+    lapack  = builder.dep.get_install_path("lapack")
 
-#    libblas   = os.path.join(blas,   'lib', 'libblas.a')
-#    liblapack = os.path.join(lapack, 'lib', 'liblapack.a')
+    libblas   = os.path.join(blas,   'lib', 'libblas.a')
+    liblapack = os.path.join(lapack, 'lib', 'liblapack.a')
     # CMake doesn't know about ROOT_DIR for these packages, so be explicit
-#    builder.add_option("-DBLAS_LIBRARIES=%s" % os.path.join(blas, 'lib', libblas))
-#    builder.add_option("-DLAPACK_LIBRARIES=%s" % os.path.join(lapack, 'lib', liblapack))
+    builder.add_option("-DBLAS_LIBRARIES=%s" % os.path.join(blas, 'lib', libblas))
+    builder.add_option("-DLAPACK_LIBRARIES=%s" % os.path.join(lapack, 'lib', liblapack))
 
 # these work
 builder.add_option("-DCFITSIO_ROOT_DIR=%s" % cfitsio)
