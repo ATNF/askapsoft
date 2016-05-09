@@ -14,6 +14,7 @@ f.write("cfitsio=3rdParty/cfitsio/cfitsio-3.35\n")
 f.write("wcslib=3rdParty/wcslib/wcslib-4.18\n")
 f.write("fftw3=3rdParty/fftw/fftw-3.3.3\n")
 if platform['system'] != 'Darwin':
+    f.write("blas=3rdParty/blas/blas-1.0\n")
     f.write("lapack=3rdParty/lapack/lapack-3.4.0\n")
 
 f.close()
@@ -31,6 +32,8 @@ if platform['system'] != 'Darwin':
     blas    = builder.dep.get_install_path("blas")
     lapack  = builder.dep.get_install_path("lapack")
 
+    libblas   = os.path.join(blas,   'lib', 'libblas.a')
+    liblapack = os.path.join(lapack, 'lib', 'liblapack.a')
     # CMake doesn't know about ROOT_DIR for these packages, so be explicit
     builder.add_option("-DBLAS_LIBRARIES=%s" % os.path.join(blas, 'lib', libblas))
     builder.add_option("-DLAPACK_LIBRARIES=%s" % os.path.join(lapack, 'lib', liblapack))
