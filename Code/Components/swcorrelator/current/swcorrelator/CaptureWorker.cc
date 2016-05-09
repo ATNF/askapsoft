@@ -38,8 +38,8 @@
 #include <boost/thread.hpp>
 #include <askap/AskapUtil.h>
 
-#include <scimath/Mathematics/StatAcc.h>
-#include <scimath/Mathematics/HistAcc.h>
+#include <casacore/scimath/Mathematics/StatAcc.h>
+#include <casacore/scimath/Mathematics/HistAcc.h>
 
 ASKAP_LOGGER(logger, ".captureworker");
 

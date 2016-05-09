@@ -33,8 +33,8 @@
 #define ASKAP_ACCESSORS_MEM_TABLE_POLARISATION_HOLDER_H
 
 // casa includes
-#include <casa/Arrays/Vector.h>
-#include <tables/Tables/Table.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/tables/Tables/Table.h>
 
 
 // own includes

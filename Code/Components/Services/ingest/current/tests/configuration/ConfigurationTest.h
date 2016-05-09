@@ -30,8 +30,8 @@
 // Support classes
 #include <string>
 #include "Common/ParameterSet.h"
-#include "casa/BasicSL.h"
-#include "casa/Quanta.h"
+#include "casacore/casa/BasicSL.h"
+#include "casacore/casa/Quanta.h"
 
 // Classes to test
 #include "configuration/Configuration.h"

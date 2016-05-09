@@ -34,8 +34,8 @@
 #include "boost/shared_ptr.hpp"
 #include "boost/thread/mutex.hpp"
 #include "boost/thread.hpp"
-#include "casa/aipstype.h"
-#include "casa/BasicSL/Complex.h"
+#include "casacore/casa/aipstype.h"
+#include "casacore/casa/BasicSL/Complex.h"
 #include "calibrationclient/CalibrationDataServiceClient.h"
 #include "calibrationclient/GenericSolution.h"
 

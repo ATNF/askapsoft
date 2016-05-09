@@ -33,7 +33,7 @@
 // System includes
 
 // ASKAPsoft includes
-#include "casa/aipstype.h"
+#include "casacore/casa/aipstype.h"
 
 // Using
 using namespace askap::cp::caldataservice;

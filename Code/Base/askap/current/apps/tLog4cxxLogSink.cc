@@ -29,7 +29,7 @@
 #include <askap_askap.h>
 #include <askap/AskapLogging.h>
 #include <askap/Log4cxxLogSink.h>
-#include <casa/Logging/LogIO.h>
+#include <casacore/casa/Logging/LogIO.h>
 
 using namespace askap;
 

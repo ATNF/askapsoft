@@ -38,7 +38,7 @@
 #include <dataaccess/TableHolder.h>
 
 // casa includes
-#include <tables/Tables/Table.h>
+#include <casacore/tables/Tables/Table.h>
 
 // boost includes
 #include <boost/shared_ptr.hpp>

@@ -36,15 +36,15 @@ ASKAP_LOGGER(logger, "");
 #include <dataaccess/IDataConverterImpl.h>
 
 // casa
-#include <measures/Measures/MFrequency.h>
-#include <measures/Measures/MEpoch.h>
-#include <measures/Measures/MCEpoch.h>
-#include <measures/Measures/MCDirection.h>
-#include <measures/Measures/MeasConvert.h>
-#include <measures/Measures/MeasFrame.h>
-#include <tables/Tables/Table.h>
-#include <casa/OS/Timer.h>
-#include <casa/Arrays/ArrayMath.h>
+#include <casacore/measures/Measures/MFrequency.h>
+#include <casacore/measures/Measures/MEpoch.h>
+#include <casacore/measures/Measures/MCEpoch.h>
+#include <casacore/measures/Measures/MCDirection.h>
+#include <casacore/measures/Measures/MeasConvert.h>
+#include <casacore/measures/Measures/MeasFrame.h>
+#include <casacore/tables/Tables/Table.h>
+#include <casacore/casa/OS/Timer.h>
+#include <casacore/casa/Arrays/ArrayMath.h>
 
 #include <utils/DelayEstimator.h>
 #include <fitting/GenericNormalEquations.h>

@@ -38,11 +38,11 @@
 ///
 
 // casa includes
-#include <tables/Tables/SetupNewTab.h>
-#include <tables/Tables/TableDesc.h>
-#include <tables/Tables/TableRecord.h>
-#include <tables/Tables/MemoryTable.h>
-#include <tables/Tables/TableError.h>
+#include <casacore/tables/Tables/SetupNewTab.h>
+#include <casacore/tables/Tables/TableDesc.h>
+#include <casacore/tables/Tables/TableRecord.h>
+#include <casacore/tables/Tables/MemoryTable.h>
+#include <casacore/tables/Tables/TableError.h>
 
 // own includes
 #include <dataaccess/SubtableInfoHolder.h>

@@ -28,8 +28,8 @@
 #define ASKAP_ACCESSORS_JONESDTERM_H
 
 // ASKAPsoft includes
-#include "casa/aipstype.h"
-#include "casa/BasicSL/Complex.h"
+#include "casacore/casa/aipstype.h"
+#include "casacore/casa/BasicSL/Complex.h"
 
 namespace askap {
 namespace accessors {

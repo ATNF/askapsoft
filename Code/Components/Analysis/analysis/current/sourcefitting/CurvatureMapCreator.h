@@ -31,8 +31,8 @@
 #include <askapparallel/AskapParallel.h>
 #include <Common/ParameterSet.h>
 #include <string>
-#include <casa/Arrays/Array.h>
-#include <casa/Arrays/IPosition.h>
+#include <casacore/casa/Arrays/Array.h>
+#include <casacore/casa/Arrays/IPosition.h>
 #include <outputs/ImageWriter.h>
 #include <analysisparallel/SubimageDef.h>
 

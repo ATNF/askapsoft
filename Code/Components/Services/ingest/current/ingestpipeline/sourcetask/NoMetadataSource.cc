@@ -46,10 +46,10 @@
 #include "boost/shared_array.hpp"
 #include "Common/ParameterSet.h"
 #include "cpcommon/VisDatagram.h"
-#include "casa/Quanta/MVEpoch.h"
-#include "casa/Quanta.h"
-#include "casa/Arrays/Matrix.h"
-#include "measures/Measures.h"
+#include "casacore/casa/Quanta/MVEpoch.h"
+#include "casacore/casa/Quanta.h"
+#include "casacore/casa/Arrays/Matrix.h"
+#include "casacore/measures/Measures.h"
 
 // Local package includes
 #include "ingestpipeline/sourcetask/IVisSource.h"

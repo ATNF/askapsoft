@@ -32,7 +32,7 @@
 
 // ASKAPsoft includes
 #include "askap/AskapError.h"
-#include "casa/Quanta/Quantum.h"
+#include "casacore/casa/Quanta/Quantum.h"
 
 // Using
 using namespace askap::cp::skymodelservice;

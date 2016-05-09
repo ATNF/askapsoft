@@ -46,7 +46,7 @@
 #include <dataaccess/IDataSelector.h>
 #include <dataaccess/IDataIterator.h>
 #include <dataaccess/SharedIter.h>
-#include <casa/Quanta.h>
+#include <casacore/casa/Quanta.h>
 #include <imageaccess/BeamLogger.h>
 
 // Local includes

@@ -32,7 +32,7 @@
 #include <vector>
 
 // ASKAPsoft includes
-#include "casa/Quanta/Quantum.h"
+#include "casacore/casa/Quanta/Quantum.h"
 #include "skymodelclient/Component.h"
 #include "skymodelclient/SkyModelServiceClient.h"
 

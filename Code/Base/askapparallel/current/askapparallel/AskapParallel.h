@@ -75,10 +75,10 @@ class AskapParallel : public MPIComms {
         virtual bool isWorker() const;
 
         /// Rank
-        virtual int rank() const;
+        //virtual int rank() const;
 
         /// Number of processes
-        virtual int nProcs() const;
+        //virtual int nProcs() const;
 
         /// @brief Send a BlobString to the specified destination
         /// process.

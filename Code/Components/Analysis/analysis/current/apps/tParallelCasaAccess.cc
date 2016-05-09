@@ -45,21 +45,21 @@ using namespace LOFAR::TYPES;
 #include <Blob/BlobIStream.h>
 #include <Blob/BlobOStream.h>
 
-#include <casa/aipstype.h>
-#include <ms/MeasurementSets/MeasurementSet.h>
-#include <images/Images/ImageOpener.h>
-#include <lattices/Lattices/LatticeLocker.h>
-#include <images/Images/FITSImage.h>
-#include <images/Images/SubImage.h>
-#include <coordinates/Coordinates/CoordinateSystem.h>
-#include <casa/Arrays/IPosition.h>
-#include <casa/Arrays/Slicer.h>
-#include <casa/Containers/RecordInterface.h>
-#include <tables/Tables/Table.h>
-#include <tables/Tables/TableDesc.h>
-#include <lattices/Lattices/LatticeBase.h>
-#include <images/Images/ImageOpener.h>
-#include <casa/Utilities/Assert.h>
+#include <casacore/casa/aipstype.h>
+#include <casacore/ms/MeasurementSets/MeasurementSet.h>
+#include <casacore/images/Images/ImageOpener.h>
+#include <casacore/lattices/Lattices/LatticeLocker.h>
+#include <casacore/images/Images/FITSImage.h>
+#include <casacore/images/Images/SubImage.h>
+#include <casacore/coordinates/Coordinates/CoordinateSystem.h>
+#include <casacore/casa/Arrays/IPosition.h>
+#include <casacore/casa/Arrays/Slicer.h>
+#include <casacore/casa/Containers/RecordInterface.h>
+#include <casacore/tables/Tables/Table.h>
+#include <casacore/tables/Tables/TableDesc.h>
+#include <casacore/lattices/Lattices/LatticeBase.h>
+#include <casacore/images/Images/ImageOpener.h>
+#include <casacore/casa/Utilities/Assert.h>
 
 #include <string>
 #include <iostream>

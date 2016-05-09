@@ -38,7 +38,7 @@
 
 // ASKAPsoft includes
 #include "Common/ParameterSet.h"
-#include "measures/Measures/Stokes.h"
+#include "casacore/measures/Measures/Stokes.h"
 #include "askap/AskapError.h"
 
 namespace askap {

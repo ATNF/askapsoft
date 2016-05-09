@@ -28,8 +28,8 @@
 #define ASKAP_CP_PIPELINETASKS_IFLAGGER_H
 
 // ASKAPsoft includes
-#include "ms/MeasurementSets/MSColumns.h"
-#include "casa/aipstype.h"
+#include "casacore/ms/MeasurementSets/MSColumns.h"
+#include "casacore/casa/aipstype.h"
 #include "boost/tuple/tuple.hpp"
 #include "boost/tuple/tuple_comparison.hpp"
 

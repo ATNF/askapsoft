@@ -34,8 +34,8 @@
 #define ASKAP_ACCESSORS_I_TABLE_MEASURE_FIELD_SELECTOR_H
 
 // casa includes
-#include <tables/Tables/ExprNode.h>
-#include <tables/Tables/Table.h>
+#include <casacore/tables/TaQL/ExprNode.h>
+#include <casacore/tables/Tables/Table.h>
 
 // own includes
 #include <dataaccess/IDataConverterImpl.h>

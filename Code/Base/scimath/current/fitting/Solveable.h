@@ -30,9 +30,9 @@
 #define SCIMATHSOLVEABLE_H_
 
 #include <string>
-#include <casa/aips.h>
-#include <casa/BasicSL/Constants.h>
-#include <casa/Quanta.h>
+#include <casacore/casa/aips.h>
+#include <casacore/casa/BasicSL/Constants.h>
+#include <casacore/casa/Quanta.h>
 
 namespace askap
 {

@@ -34,11 +34,11 @@
 #include <wcslib/wcs.h>
 
 #include <Common/ParameterSet.h>
-#include <casa/aipstype.h>
-#include <casa/Quanta/Unit.h>
-#include <casa/Arrays/Slice.h>
-#include <coordinates/Coordinates/CoordinateSystem.h>
-#include <images/Images/ImageInfo.h>
+#include <casacore/casa/aipstype.h>
+#include <casacore/casa/Quanta/Unit.h>
+#include <casacore/casa/Arrays/Slice.h>
+#include <casacore/coordinates/Coordinates/CoordinateSystem.h>
+#include <casacore/images/Images/ImageInfo.h>
 #include <boost/shared_ptr.hpp>
 
 #include <askap/AskapLogging.h>

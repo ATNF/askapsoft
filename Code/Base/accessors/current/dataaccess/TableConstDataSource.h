@@ -36,7 +36,7 @@
 #include <boost/shared_ptr.hpp>
 
 // casa includes
-#include <tables/Tables/Table.h>
+#include <casacore/tables/Tables/Table.h>
 
 // own includes
 #include <dataaccess/IConstDataSource.h>

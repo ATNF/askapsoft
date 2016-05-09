@@ -24,7 +24,7 @@
 #include <fitting/Params.h>
 #include <fitting/ParamsCasaTable.h>
 
-#include <tables/Tables/TableError.h>
+#include <casacore/tables/Tables/TableError.h>
 
 #include <askap/AskapError.h>
 

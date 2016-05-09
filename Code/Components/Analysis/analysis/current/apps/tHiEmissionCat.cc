@@ -11,8 +11,8 @@
 #include <parallelanalysis/DuchampParallel.h>
 
 #include <Common/ParameterSet.h>
-#include <images/Images/ImageOpener.h>
-#include <images/Images/FITSImage.h>
+#include <casacore/images/Images/ImageOpener.h>
+#include <casacore/images/Images/FITSImage.h>
 #include <duchamp/Cubes/cubes.hh>
 #include <vector>
 

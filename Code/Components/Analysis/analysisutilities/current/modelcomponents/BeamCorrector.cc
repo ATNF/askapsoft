@@ -41,15 +41,15 @@
 #include <Common/ParameterSet.h>
 #include <boost/shared_ptr.hpp>
 
-#include <casa/aipstype.h>
-#include <images/Images/FITSImage.h>
-#include <images/Images/MIRIADImage.h>
-#include <images/Images/ImageOpener.h>
-#include <coordinates/Coordinates/Coordinate.h>
-#include <coordinates/Coordinates/CoordinateSystem.h>
-#include <coordinates/Coordinates/DirectionCoordinate.h>
-#include <casa/Quanta/Quantum.h>
-#include <casa/Quanta/Unit.h>
+#include <casacore/casa/aipstype.h>
+#include <casacore/images/Images/FITSImage.h>
+#include <casacore/images/Images/MIRIADImage.h>
+#include <casacore/images/Images/ImageOpener.h>
+#include <casacore/coordinates/Coordinates/Coordinate.h>
+#include <casacore/coordinates/Coordinates/CoordinateSystem.h>
+#include <casacore/coordinates/Coordinates/DirectionCoordinate.h>
+#include <casacore/casa/Quanta/Quantum.h>
+#include <casacore/casa/Quanta/Unit.h>
 
 #include <string>
 #include <vector>
@@ -107,7 +107,7 @@ void BeamCorrector::findBeam()
 {
     const boost::shared_ptr<ImageInterface<Float> > imagePtr = openImage(itsFilename);
 
-    casa::Vector<casa::Quantum<casa::Double> > beam = imagePtr->imageInfo().restoringBeam();
+    casa::Vector<casa::Quantum<casa::Double> > beam = imagePtr->imageInfo().restoringBeam().toVector();
     ASKAPLOG_DEBUG_STR(logger, "Read beam from " << itsFilename << " of " << beam);
     casa::CoordinateSystem csys = imagePtr->coordinates();
     int dirCoord = csys.findCoordinate(casa::Coordinate::DIRECTION);

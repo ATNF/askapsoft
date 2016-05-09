@@ -42,11 +42,11 @@
 #include <imageaccess/BeamLogger.h>
 #include <boost/scoped_ptr.hpp>
 #include <Common/ParameterSet.h>
-#include <casa/Arrays/IPosition.h>
-#include <coordinates/Coordinates/CoordinateSystem.h>
-#include <coordinates/Coordinates/SpectralCoordinate.h>
-#include <images/Images/PagedImage.h>
-#include <casa/Quanta/Unit.h>
+#include <casacore/casa/Arrays/IPosition.h>
+#include <casacore/coordinates/Coordinates/CoordinateSystem.h>
+#include <casacore/coordinates/Coordinates/SpectralCoordinate.h>
+#include <casacore/images/Images/PagedImage.h>
+#include <casacore/casa/Quanta/Unit.h>
 
 // Local package includes
 #include <makecube/CubeMakerHelperFunctions.h>
@@ -257,7 +257,7 @@ void CubeMaker::recordBeams()
 {
     if (itsBeamLog != "") {
 	const casa::PagedImage<float> firstimg(itsInputNames[0]);
-	const casa::Vector<Quantum<Double> > firstbeam = firstimg.imageInfo().restoringBeam();
+	const casa::Vector<casa::Quantum<casa::Double> > firstbeam = firstimg.imageInfo().restoringBeam().toVector();
 
         if (firstbeam.size() == 0) {
             ASKAPLOG_WARN_STR(logger, "The first input image " << itsInputNames[0]

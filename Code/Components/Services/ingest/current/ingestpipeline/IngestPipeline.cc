@@ -38,7 +38,7 @@
 // ASKAPsoft includes
 #include "askap/AskapLogging.h"
 #include "askap/AskapError.h"
-#include "casa/OS/Timer.h"
+#include "casacore/casa/OS/Timer.h"
 #include "Common/ParameterSet.h"
 #include "cpcommon/VisChunk.h"
 

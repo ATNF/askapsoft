@@ -33,7 +33,7 @@
 // ASKAPsoft includes
 #include "askap/AskapLogging.h"
 #include "askap/AskapError.h"
-#include "casa/aips.h"
+#include "casacore/casa/aips.h"
 
 ASKAP_LOGGER(logger, ".ScanManager");
 

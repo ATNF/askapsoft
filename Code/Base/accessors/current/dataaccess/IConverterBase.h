@@ -35,7 +35,7 @@
 #define ASKAP_ACCESSORS_I_CONVERTER_BASE_H
 
 // CASA includes
-#include <measures/Measures/MeasFrame.h>
+#include <casacore/measures/Measures/MeasFrame.h>
 
 namespace askap {
 

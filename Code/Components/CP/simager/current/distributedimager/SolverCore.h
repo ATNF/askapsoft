@@ -36,8 +36,8 @@
 #include <fitting/Params.h>
 #include <fitting/Solver.h>
 #include <fitting/Quality.h>
-#include <casa/Quanta/Quantum.h>
-#include <casa/Arrays/Vector.h>
+#include <casacore/casa/Quanta/Quantum.h>
+#include <casacore/casa/Arrays/Vector.h>
 
 // Local includes
 #include "distributedimager/IBasicComms.h"

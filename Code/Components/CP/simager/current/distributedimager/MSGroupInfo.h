@@ -34,7 +34,7 @@
 #include <vector>
 
 // ASKAPsoft includes
-#include <casa/Quanta.h>
+#include <casacore/casa/Quanta.h>
 
 namespace askap {
 namespace cp {

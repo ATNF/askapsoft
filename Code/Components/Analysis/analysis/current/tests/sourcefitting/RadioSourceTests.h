@@ -49,8 +49,8 @@
 #include <duchamp/Detection/finders.hh>
 #include <duchamp/FitsIO/DuchampBeam.hh>
 
-#include <casa/Arrays/Array.h>
-#include <casa/Arrays/Vector.h>
+#include <casacore/casa/Arrays/Array.h>
+#include <casacore/casa/Arrays/Vector.h>
 #include <Common/ParameterSet.h>
 
 #include <string>

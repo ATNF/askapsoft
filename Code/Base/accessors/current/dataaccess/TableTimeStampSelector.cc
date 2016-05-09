@@ -34,11 +34,11 @@
 ///
 
 // casa includes
-#include <casa/Exceptions/Error.h>
-#include <tables/Tables/TableRecord.h>
-#include <tables/Tables/ColumnDesc.h>
-#include <measures/Measures/MCEpoch.h>
-#include <measures/Measures/MeasConvert.h>
+#include <casacore/casa/Exceptions/Error.h>
+#include <casacore/tables/Tables/TableRecord.h>
+#include <casacore/tables/Tables/ColumnDesc.h>
+#include <casacore/measures/Measures/MCEpoch.h>
+#include <casacore/measures/Measures/MeasConvert.h>
 
 // own includes
 #include <dataaccess/TableTimeStampSelector.h>

@@ -28,7 +28,7 @@
 #define ASKAP_COMPONENTS_SPECTRALINDEX_H
 
 // ASKAPsoft includes
-#include "measures/Measures/MFrequency.h"
+#include "casacore/measures/Measures/MFrequency.h"
 
 // Local package includes
 #include "SpectralModel.h"

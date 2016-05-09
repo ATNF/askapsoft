@@ -46,8 +46,8 @@
 #include "log4cxx/consoleappender.h"
 #include "log4cxx/patternlayout.h"
 #include "boost/program_options.hpp"
-#include "casa/Logging/LogIO.h"
-#include "casa/Logging/LogSinkInterface.h"
+#include "casacore/casa/Logging/LogIO.h"
+#include "casacore/casa/Logging/LogSinkInterface.h"
 
 ASKAP_LOGGER(logger, ".Application");
 

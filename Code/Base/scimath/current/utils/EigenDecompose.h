@@ -31,8 +31,8 @@
 #ifndef EIGEN_DECOMPOSE_H
 #define EIGEN_DECOMPOSE_H
 
-#include <casa/Arrays/Vector.h>
-#include <casa/Arrays/Matrix.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/casa/Arrays/Matrix.h>
 
 namespace askap {
 

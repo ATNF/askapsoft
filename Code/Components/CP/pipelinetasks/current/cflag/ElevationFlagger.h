@@ -33,10 +33,10 @@
 // ASKAPsoft includes
 #include "Common/ParameterSet.h"
 #include "boost/shared_ptr.hpp"
-#include "casa/aipstype.h"
-#include "ms/MeasurementSets/MeasurementSet.h"
-#include "ms/MeasurementSets/MSColumns.h"
-#include "casa/Quanta/Quantum.h"
+#include "casacore/casa/aipstype.h"
+#include "casacore/ms/MeasurementSets/MeasurementSet.h"
+#include "casacore/ms/MeasurementSets/MSColumns.h"
+#include "casacore/casa/Quanta/Quantum.h"
 
 // Local package includes
 #include "cflag/IFlagger.h"

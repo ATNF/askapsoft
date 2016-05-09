@@ -37,9 +37,9 @@
 #include "Common/ParameterSet.h"
 
 // Casacore includes
-#include "casa/aipstype.h"
-#include "images/Images/TempImage.h"
-#include "images/Images/PagedImage.h"
+#include "casacore/casa/aipstype.h"
+#include "casacore/images/Images/TempImage.h"
+#include "casacore/images/Images/PagedImage.h"
 
 // Local package includes
 #include "cmodel/MPIBasicComms.h"

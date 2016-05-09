@@ -31,12 +31,12 @@
 #include <askap_analysis.h>
 #include <string>
 #include <sourcefitting/RadioSource.h>
-#include <casa/Arrays/Array.h>
-#include <casa/Arrays/Slicer.h>
-#include <images/Images/ImageInterface.h>
-#include <lattices/Lattices/LatticeBase.h>
+#include <casacore/casa/Arrays/Array.h>
+#include <casacore/casa/Arrays/Slicer.h>
+#include <casacore/images/Images/ImageInterface.h>
+#include <casacore/lattices/Lattices/LatticeBase.h>
 #include <Common/ParameterSet.h>
-#include <measures/Measures/Stokes.h>
+#include <casacore/measures/Measures/Stokes.h>
 #include <utils/PolConverter.h>
 #include <boost/shared_ptr.hpp>
 

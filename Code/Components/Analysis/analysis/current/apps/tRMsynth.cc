@@ -34,11 +34,11 @@
 #include <askap/AskapError.h>
 #include <askapparallel/AskapParallel.h>
 
-#include <casa/Arrays/Vector.h>
-#include <casa/Arrays/ArrayMath.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/casa/Arrays/ArrayMath.h>
 #include <complex.h>
-#include <casa/BasicSL/Complex.h>
-#include <casa/BasicSL/Constants.h>
+#include <casacore/casa/BasicSL/Complex.h>
+#include <casacore/casa/BasicSL/Constants.h>
 
 #include <Common/ParameterSet.h>
 

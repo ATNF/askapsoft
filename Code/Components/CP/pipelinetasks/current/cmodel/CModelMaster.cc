@@ -46,9 +46,9 @@
 #include "skymodelclient/Component.h"
 
 // Casacore includes
-#include "casa/aipstype.h"
-#include "casa/Quanta/Quantum.h"
-#include "images/Images/PagedImage.h"
+#include "casacore/casa/aipstype.h"
+#include "casacore/casa/Quanta/Quantum.h"
+#include "casacore/images/Images/PagedImage.h"
 
 // Local package includes
 #include "cmodel/VOTableAccessor.h"

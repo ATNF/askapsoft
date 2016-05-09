@@ -28,7 +28,7 @@
 #define ASKAP_CP_PIPELINETASKS_MSFLAGGINGSUMMARY_H
 
 // ASKAPsoft includes
-#include "ms/MeasurementSets/MSColumns.h"
+#include "casacore/ms/MeasurementSets/MSColumns.h"
 
 namespace askap {
 namespace cp {

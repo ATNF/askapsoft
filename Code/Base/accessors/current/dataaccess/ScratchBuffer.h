@@ -36,8 +36,8 @@
 #ifndef ASKAP_ACCESSORS_SCRATCH_BUFFER_H
 #define ASKAP_ACCESSORS_SCRATCH_BUFFER_H
 
-#include <casa/Arrays/Cube.h>
-#include <casa/BasicSL/Complex.h>
+#include <casacore/casa/Arrays/Cube.h>
+#include <casacore/casa/BasicSL/Complex.h>
 
 namespace askap {
 

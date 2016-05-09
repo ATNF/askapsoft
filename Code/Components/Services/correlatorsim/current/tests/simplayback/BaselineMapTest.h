@@ -32,7 +32,7 @@
 #include <stdint.h>
 #include "askap/AskapError.h"
 #include "Common/ParameterSet.h"
-#include "measures/Measures/Stokes.h"
+#include "casacore/measures/Measures/Stokes.h"
 
 // Classes to test
 #include "simplayback/BaselineMap.h"

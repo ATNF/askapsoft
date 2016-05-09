@@ -48,12 +48,12 @@
 #include <dataaccess/DataAccessError.h>
 
 // casa includes
-#include <tables/Tables/TableRecord.h>
-#include <tables/Tables/ExprNode.h>
-#include <tables/Tables/ScalarColumn.h>
-#include <tables/Tables/ArrayColumn.h>
-#include <casa/Arrays/Array.h>
-#include <casa/BasicSL/String.h>
+#include <casacore/tables/Tables/TableRecord.h>
+#include <casacore/tables/Tables/ExprNode.h>
+#include <casacore/tables/Tables/ScalarColumn.h>
+#include <casacore/tables/Tables/ArrayColumn.h>
+#include <casacore/casa/Arrays/Array.h>
+#include <casacore/casa/BasicSL/String.h>
 
 // enable logger here, when it is used in the code
 //#include <askap/AskapLogging.h>

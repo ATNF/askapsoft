@@ -35,14 +35,14 @@
 
 #include <askap/AskapLogging.h>
 #include <askap/AskapError.h>
-#include <casa/Logging/LogIO.h>
+#include <casacore/casa/Logging/LogIO.h>
 #include <askap/Log4cxxLogSink.h>
 
 #include <FITS/FITSparallel.h>
 #include <FITS/FITSfile.h>
 
 #include <Common/ParameterSet.h>
-#include <casa/OS/Timer.h>
+#include <casacore/casa/OS/Timer.h>
 
 #include <iostream>
 #include <fstream>

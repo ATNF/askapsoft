@@ -40,8 +40,8 @@
 // ASKAPsoft includes
 #include <askap/AskapError.h>
 #include <askap/AskapLogging.h>
-#include <casa/Quanta/Unit.h>
-#include <measures/Measures/MFrequency.h>
+#include <casacore/casa/Quanta/Unit.h>
+#include <casacore/measures/Measures/MFrequency.h>
 #include <dataaccess/IConstDataSource.h>
 #include <dataaccess/TableConstDataSource.h>
 #include <dataaccess/IConstDataIterator.h>

@@ -30,9 +30,9 @@
 ///
 
 // casa includes
-#include <tables/Tables/ArrayColumn.h>
-#include <tables/Tables/ScalarColumn.h>
-#include <tables/Tables/TableRecord.h>
+#include <casacore/tables/Tables/ArrayColumn.h>
+#include <casacore/tables/Tables/ScalarColumn.h>
+#include <casacore/tables/Tables/TableRecord.h>
 
 // own includes
 #include <dataaccess/MemTablePolarisationHolder.h>

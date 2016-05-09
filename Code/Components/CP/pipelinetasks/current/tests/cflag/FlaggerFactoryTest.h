@@ -30,7 +30,7 @@
 // Support classes
 #include <string>
 #include <vector>
-#include "ms/MeasurementSets/MeasurementSet.h"
+#include "casacore/ms/MeasurementSets/MeasurementSet.h"
 #include "askap/AskapError.h"
 
 // Classes to test

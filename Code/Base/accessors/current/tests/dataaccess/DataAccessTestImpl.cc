@@ -31,11 +31,11 @@
 #include <stdexcept>
 
 
-#include <casa/aips.h>
-#include <casa/Exceptions.h>
-#include <casa/Utilities/Assert.h>
-#include <casa/BasicSL/Complex.h>
-#include <casa/Arrays/Slice.h>
+#include <casacore/casa/aips.h>
+#include <casacore/casa/Exceptions.h>
+#include <casacore/casa/Utilities/Assert.h>
+#include <casacore/casa/BasicSL/Complex.h>
+#include <casacore/casa/Arrays/Slice.h>
 
 #include "DataAccessTestImpl.h"
 

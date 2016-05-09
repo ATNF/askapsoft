@@ -33,7 +33,7 @@
 #include <stdint.h>
 
 // ASKAPsoft includes
-#include "casa/BasicSL.h"
+#include "casacore/casa/BasicSL.h"
 #include "Common/ParameterSet.h"
 
 // Local package includes

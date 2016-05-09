@@ -33,7 +33,7 @@
 // ASKAPsoft includes
 #include <Blob/BlobOStream.h>
 #include <Blob/BlobIStream.h>
-#include <casa/Arrays/Array.h>
+#include <casacore/casa/Arrays/Array.h>
 #include <Blob/BlobArray.h>
 #include <Blob/BlobSTL.h>
 #include <fitting/Params.h>

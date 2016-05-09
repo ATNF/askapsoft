@@ -32,7 +32,7 @@
 #include <vector>
 
 // ASKAPsoft includes
-#include "casa/aipstype.h"
+#include "casacore/casa/aipstype.h"
 
 // Local package includes
 #include "calibrationclient/JonesJTerm.h"

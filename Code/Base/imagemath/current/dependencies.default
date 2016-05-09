@@ -1,3 +1,3 @@
 askap=Code/Base/askap/current
 blob=3rdParty/LOFAR/Blob/Blob-1.2;blob
-casacore=3rdParty/casacore/casacore-1.6.0a; casa_components casa_mirlib casa_images casa_coordinates casa_fits casa_lattices casa_measures casa_scimath casa_scimath_f casa_tables casa_casa casa_msfits casa_derivedmscal casa_ms casa_meas
+casacore=3rdParty/casacore/casacore-2.0.3; casa_images casa_coordinates casa_fits casa_lattices casa_measures casa_scimath casa_scimath_f casa_tables casa_casa

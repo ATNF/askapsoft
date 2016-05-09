@@ -29,9 +29,9 @@
 
  #include <fitting/Params.h>
 #include <fitting/Axes.h>
-#include <casa/aips.h>
-#include <casa/Utilities/Regex.h>
-#include <casa/BasicSL/String.h>
+#include <casacore/casa/aips.h>
+#include <casacore/casa/Utilities/Regex.h>
+#include <casacore/casa/BasicSL/String.h>
 
 #include <Blob/BlobOStream.h>
 #include <Blob/BlobIStream.h>

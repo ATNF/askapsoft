@@ -42,15 +42,15 @@
 #include <boost/shared_ptr.hpp>
 
 // casa includes
-#include <measures/Measures/MeasFrame.h>
-#include <measures/Measures/MEpoch.h>
-#include <measures/Measures/MCEpoch.h>
-#include <measures/Measures/MDirection.h>
-#include <measures/Measures/MCDirection.h>
-#include <measures/Measures/MeasConvert.h>
-#include <casa/Arrays/Matrix.h>
-#include <casa/Arrays/MatrixMath.h>
-#include "measures/Measures/UVWMachine.h"
+#include <casacore/measures/Measures/MeasFrame.h>
+#include <casacore/measures/Measures/MEpoch.h>
+#include <casacore/measures/Measures/MCEpoch.h>
+#include <casacore/measures/Measures/MDirection.h>
+#include <casacore/measures/Measures/MCDirection.h>
+#include <casacore/measures/Measures/MeasConvert.h>
+#include <casacore/casa/Arrays/Matrix.h>
+#include <casacore/casa/Arrays/MatrixMath.h>
+#include <casacore/measures/Measures/UVWMachine.h>
 
 ASKAP_LOGGER(logger, ".FringeRotationTask");
 

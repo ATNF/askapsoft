@@ -32,10 +32,10 @@
 #define ASKAP_DATAFORMATS_SWIN_READER
 
 // casa includes
-#include <casa/Arrays/Vector.h>
-#include <casa/BasicSL.h>
-#include <measures/Measures/Stokes.h>
-#include <measures/Measures/MEpoch.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/casa/BasicSL.h>
+#include <casacore/measures/Measures/Stokes.h>
+#include <casacore/measures/Measures/MEpoch.h>
 
 // std includes
 #include <string>

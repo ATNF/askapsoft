@@ -39,9 +39,9 @@
 
 
 // casa includes
-#include <casa/Arrays/Vector.h>
-#include <casa/Arrays/Matrix.h>
-#include <measures/Measures/Stokes.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/casa/Arrays/Matrix.h>
+#include <casacore/measures/Measures/Stokes.h>
 
 namespace askap {
 

@@ -29,8 +29,8 @@
 
 // Support classes
 #include "askap/AskapError.h"
-#include "casa/Arrays/Vector.h"
-#include "casa/Arrays/Cube.h"
+#include "casacore/casa/Arrays/Vector.h"
+#include "casacore/casa/Arrays/Cube.h"
 
 // Classes to test
 #include "cpcommon/VisChunk.h"
@@ -59,19 +59,19 @@ class VisChunkTest : public CppUnit::TestFixture {
 
         void testConstructor() {
             VisChunk::ShPtr chunk(new VisChunk(nRows, nChans, nPols, nAntennas));
-            CPPUNIT_ASSERT_EQUAL(nRows, chunk->nRow());
-            CPPUNIT_ASSERT_EQUAL(nChans, chunk->nChannel());
-            CPPUNIT_ASSERT_EQUAL(nPols, chunk->nPol());
+            CPPUNIT_ASSERT_EQUAL(size_t(nRows), size_t(chunk->nRow()));
+            CPPUNIT_ASSERT_EQUAL(size_t(nChans), size_t(chunk->nChannel()));
+            CPPUNIT_ASSERT_EQUAL(size_t(nPols), size_t(chunk->nPol()));
 
             // Verify visibility cube
-            CPPUNIT_ASSERT_EQUAL(nRows, chunk->visibility().nrow());
-            CPPUNIT_ASSERT_EQUAL(nChans, chunk->visibility().ncolumn());
-            CPPUNIT_ASSERT_EQUAL(nPols, chunk->visibility().nplane());
+            CPPUNIT_ASSERT_EQUAL(size_t(nRows), size_t(chunk->visibility().nrow()));
+            CPPUNIT_ASSERT_EQUAL(size_t(nChans), size_t(chunk->visibility().ncolumn()));
+            CPPUNIT_ASSERT_EQUAL(size_t(nPols), size_t(chunk->visibility().nplane()));
 
             // Verify flag cube
-            CPPUNIT_ASSERT_EQUAL(nRows, chunk->flag().nrow());
-            CPPUNIT_ASSERT_EQUAL(nChans, chunk->flag().ncolumn());
-            CPPUNIT_ASSERT_EQUAL(nPols, chunk->flag().nplane());
+            CPPUNIT_ASSERT_EQUAL(size_t(nRows), size_t(chunk->flag().nrow()));
+            CPPUNIT_ASSERT_EQUAL(size_t(nChans), size_t(chunk->flag().ncolumn()));
+            CPPUNIT_ASSERT_EQUAL(size_t(nPols), size_t(chunk->flag().nplane()));
 
             // Verify frequency vector
             CPPUNIT_ASSERT_EQUAL(nChans,
@@ -113,19 +113,19 @@ class VisChunkTest : public CppUnit::TestFixture {
             chunk->resize(vis, flag, frequency);
 
             // Verify the result
-            CPPUNIT_ASSERT_EQUAL(newRows, chunk->nRow());
-            CPPUNIT_ASSERT_EQUAL(newChans, chunk->nChannel());
-            CPPUNIT_ASSERT_EQUAL(newPols, chunk->nPol());
+            CPPUNIT_ASSERT_EQUAL(size_t(newRows), size_t(chunk->nRow()));
+            CPPUNIT_ASSERT_EQUAL(size_t(newChans), size_t(chunk->nChannel()));
+            CPPUNIT_ASSERT_EQUAL(size_t(newPols), size_t(chunk->nPol()));
 
             // Verify visibility cube
-            CPPUNIT_ASSERT_EQUAL(newRows, chunk->visibility().nrow());
-            CPPUNIT_ASSERT_EQUAL(newChans, chunk->visibility().ncolumn());
-            CPPUNIT_ASSERT_EQUAL(newPols, chunk->visibility().nplane());
+            CPPUNIT_ASSERT_EQUAL(size_t(newRows), size_t(chunk->visibility().nrow()));
+            CPPUNIT_ASSERT_EQUAL(size_t(newChans), size_t(chunk->visibility().ncolumn()));
+            CPPUNIT_ASSERT_EQUAL(size_t(newPols), size_t(chunk->visibility().nplane()));
 
             // Verify flag cube
-            CPPUNIT_ASSERT_EQUAL(newRows, chunk->flag().nrow());
-            CPPUNIT_ASSERT_EQUAL(newChans, chunk->flag().ncolumn());
-            CPPUNIT_ASSERT_EQUAL(newPols, chunk->flag().nplane());
+            CPPUNIT_ASSERT_EQUAL(size_t(newRows), size_t(chunk->flag().nrow()));
+            CPPUNIT_ASSERT_EQUAL(size_t(newChans), size_t(chunk->flag().ncolumn()));
+            CPPUNIT_ASSERT_EQUAL(size_t(newPols), size_t(chunk->flag().nplane()));
 
             // Verify frequency vector
             CPPUNIT_ASSERT_EQUAL(newChans,

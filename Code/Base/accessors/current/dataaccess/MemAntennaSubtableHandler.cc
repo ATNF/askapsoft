@@ -41,10 +41,10 @@
 #include <dataaccess/DataAccessError.h>
 
 // casa includes
-#include <tables/Tables/ScalarColumn.h>
-#include <tables/Tables/TableRecord.h>
-#include <measures/TableMeasures/ScalarMeasColumn.h>
-#include <casa/Arrays/Array.h>
+#include <casacore/tables/Tables/ScalarColumn.h>
+#include <casacore/tables/Tables/TableRecord.h>
+#include <casacore/measures/TableMeasures/ScalarMeasColumn.h>
+#include <casacore/casa/Arrays/Array.h>
 
 using namespace askap;
 using namespace askap::accessors;

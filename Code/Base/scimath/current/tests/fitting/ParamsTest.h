@@ -30,7 +30,7 @@
 #include <Blob/BlobOStream.h>
 #include <Blob/BlobIStream.h>
 
-#include <casa/Arrays/Matrix.h>
+#include <casacore/casa/Arrays/Matrix.h>
 
 #include <askap/AskapError.h>
 

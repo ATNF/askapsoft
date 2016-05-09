@@ -28,8 +28,8 @@
 #define SCIMATH_CASABLOBUTILS_H
 
 // ASKAPsoft includes
-#include <casa/aips.h>
-#include <coordinates/Coordinates/CoordinateSystem.h>
+#include <casacore/casa/aips.h>
+#include <casacore/coordinates/Coordinates/CoordinateSystem.h>
 #include <Blob/BlobOStream.h>
 
 namespace LOFAR

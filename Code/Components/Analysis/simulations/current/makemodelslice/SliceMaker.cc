@@ -42,12 +42,12 @@
 #include <simulationutilities/SimulationUtilities.h>
 #include <analysisparallel/SubimageDef.h>
 
-#include <coordinates/Coordinates/CoordinateSystem.h>
-#include <casa/Quanta/Unit.h>
-#include <casa/Arrays/IPosition.h>
-#include <casa/Arrays/Array.h>
-#include <casa/Arrays/Vector.h>
-#include <images/Images/PagedImage.h>
+#include <casacore/coordinates/Coordinates/CoordinateSystem.h>
+#include <casacore/casa/Quanta/Unit.h>
+#include <casacore/casa/Arrays/IPosition.h>
+#include <casacore/casa/Arrays/Array.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/images/Images/PagedImage.h>
 #include <boost/scoped_ptr.hpp>
 #include <Common/ParameterSet.h>
 

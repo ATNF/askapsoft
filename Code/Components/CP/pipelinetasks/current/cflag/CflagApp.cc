@@ -40,9 +40,9 @@
 #include "askap/AskapUtil.h"
 #include "Common/ParameterSet.h"
 #include "askap/StatReporter.h"
-#include "casa/aipstype.h"
-#include "ms/MeasurementSets/MeasurementSet.h"
-#include "ms/MeasurementSets/MSColumns.h"
+#include "casacore/casa/aipstype.h"
+#include "casacore/ms/MeasurementSets/MeasurementSet.h"
+#include "casacore/ms/MeasurementSets/MSColumns.h"
 
 // Local package includes
 #include "cflag/FlaggerFactory.h"

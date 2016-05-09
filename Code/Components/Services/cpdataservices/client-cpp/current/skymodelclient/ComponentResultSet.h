@@ -31,7 +31,7 @@
 #include <deque>
 
 // ASKAPsoft includes
-#include "casa/aips.h"
+#include "casacore/casa/aips.h"
 #include "SkyModelService.h" // Ice generated interface
 #include "boost/shared_ptr.hpp"
 

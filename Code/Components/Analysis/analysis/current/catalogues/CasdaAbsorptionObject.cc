@@ -45,9 +45,9 @@
 #include <duchampinterface/DuchampInterface.h>
 
 #include <Common/ParameterSet.h>
-#include <casa/Quanta/Quantum.h>
-#include <casa/Quanta/MVTime.h>
-#include <images/Images/ImageInterface.h>
+#include <casacore/casa/Quanta/Quantum.h>
+#include <casacore/casa/Quanta/MVTime.h>
+#include <casacore/images/Images/ImageInterface.h>
 #include <boost/shared_ptr.hpp>
 #include <duchamp/Outputs/CatalogueSpecification.hh>
 #include <duchamp/Outputs/columns.hh>

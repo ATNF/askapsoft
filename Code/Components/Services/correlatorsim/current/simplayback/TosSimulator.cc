@@ -39,15 +39,15 @@
 // ASKAPsoft and casa includes
 #include "askap/AskapError.h"
 #include "askap/AskapLogging.h"
-#include "ms/MeasurementSets/MeasurementSet.h"
-#include "ms/MeasurementSets/MSColumns.h"
-#include "casa/Arrays/Vector.h"
-#include "casa/Quanta.h"
-#include "measures/Measures/MDirection.h"
+#include "casacore/ms/MeasurementSets/MeasurementSet.h"
+#include "casacore/ms/MeasurementSets/MSColumns.h"
+#include "casacore/casa/Arrays/Vector.h"
+#include "casacore/casa/Quanta.h"
+#include "casacore/measures/Measures/MDirection.h"
 #include "tosmetadata/MetadataOutputPort.h"
-#include <measures/Measures/MEpoch.h>
-#include <measures/Measures/MeasConvert.h>
-#include <measures/Measures/MCEpoch.h>
+#include <casacore/measures/Measures/MEpoch.h>
+#include <casacore/measures/Measures/MeasConvert.h>
+#include <casacore/measures/Measures/MCEpoch.h>
 
 // ICE interface includes
 #include "CommonTypes.h"

@@ -31,8 +31,8 @@
 #define ASKAP_SCIMATH_UTILS_COMPLEX_GAUSSIAN_NOISE_H
 
 // casa includes
-#include <casa/BasicMath/Random.h>
-#include <casa/BasicSL/Complex.h>
+#include <casacore/casa/BasicMath/Random.h>
+#include <casacore/casa/BasicSL/Complex.h>
 
 namespace askap {
 

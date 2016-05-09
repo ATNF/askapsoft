@@ -28,11 +28,11 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 // Support classes
-#include "casa/aips.h"
+#include "casacore/casa/aips.h"
 #include "boost/scoped_ptr.hpp"
-#include "measures/Measures/MDirection.h"
+#include "casacore/measures/Measures/MDirection.h"
 #include "askap/AskapError.h"
-#include "casa/Quanta/Quantum.h"
+#include "casacore/casa/Quanta/Quantum.h"
 #include "Blob/BlobIStream.h"
 #include "Blob/BlobIBufVector.h"
 #include "Blob/BlobOStream.h"

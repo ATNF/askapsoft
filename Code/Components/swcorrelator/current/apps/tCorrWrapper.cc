@@ -33,7 +33,7 @@
 #include <corrinterfaces/CorrRunner.h>
 
 // casa includes
-#include <casa/OS/Timer.h>
+#include <casacore/casa/OS/Timer.h>
 
 // other 3rd party
 #include <askapparallel/AskapParallel.h>

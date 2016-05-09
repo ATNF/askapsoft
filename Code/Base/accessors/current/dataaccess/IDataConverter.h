@@ -41,11 +41,11 @@
 #define ASKAP_ACCESSORS_I_DATA_CONVERTER_H
 
 // CASA includes
-#include <measures/Measures/MEpoch.h>
-#include <measures/Measures/MDirection.h>
-#include <measures/Measures/MFrequency.h>
-#include <measures/Measures/MRadialVelocity.h>
-#include <casa/Quanta/MVFrequency.h>
+#include <casacore/measures/Measures/MEpoch.h>
+#include <casacore/measures/Measures/MDirection.h>
+#include <casacore/measures/Measures/MFrequency.h>
+#include <casacore/measures/Measures/MRadialVelocity.h>
+#include <casacore/casa/Quanta/MVFrequency.h>
 
 // own includes
 #include <dataaccess/IConverterBase.h>

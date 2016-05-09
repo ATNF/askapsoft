@@ -45,8 +45,8 @@
 #include <duchamp/Cubes/cubes.hh>
 #include <duchamp/PixelMap/Voxel.hh>
 
-#include <casa/aipstype.h>
-#include <images/Images/SubImage.h>
+#include <casacore/casa/aipstype.h>
+#include <casacore/images/Images/SubImage.h>
 
 #include <vector>
 #include <string>

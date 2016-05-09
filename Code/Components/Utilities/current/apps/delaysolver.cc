@@ -39,10 +39,10 @@ ASKAP_LOGGER(logger, "");
 #include <utils/PolConverter.h>
 
 
-#include <measures/Measures/MFrequency.h>
-#include <casa/Arrays/Vector.h>
-#include <casa/OS/Timer.h>
-#include <casa/OS/Directory.h>
+#include <casacore/measures/Measures/MFrequency.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/casa/OS/Timer.h>
+#include <casacore/casa/OS/Directory.h>
 
 #include <delaysolver/DelaySolverImpl.h>
 

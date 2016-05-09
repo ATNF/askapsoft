@@ -41,8 +41,8 @@
 #include "skymodelclient/Component.h"
 
 // Casacore includes
-#include "casa/aipstype.h"
-#include "casa/Quanta/Quantum.h"
+#include "casacore/casa/aipstype.h"
+#include "casacore/casa/Quanta/Quantum.h"
 
 // Using
 using namespace casa;

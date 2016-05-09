@@ -37,14 +37,14 @@ using namespace std;
 #include <boost/shared_ptr.hpp>
 
 // CASA includes
-#include <measures/Measures/MEpoch.h>
-#include <measures/Measures/MDirection.h>
-#include <measures/Measures/MPosition.h>
-#include <measures/Measures/MeasConvert.h>
-#include <measures/Measures/MeasFrame.h>
-#include <measures/Measures/MCEpoch.h>
-#include <measures/Measures/MCDirection.h>
-#include <casa/Quanta/MVPosition.h>
+#include <casacore/measures/Measures/MEpoch.h>
+#include <casacore/measures/Measures/MDirection.h>
+#include <casacore/measures/Measures/MPosition.h>
+#include <casacore/measures/Measures/MeasConvert.h>
+#include <casacore/measures/Measures/MeasFrame.h>
+#include <casacore/measures/Measures/MCEpoch.h>
+#include <casacore/measures/Measures/MCDirection.h>
+#include <casacore/casa/Quanta/MVPosition.h>
 
 // own includes
 #include <dataaccess/BasicDataConverter.h>

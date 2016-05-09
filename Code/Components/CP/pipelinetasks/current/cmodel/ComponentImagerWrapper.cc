@@ -44,9 +44,9 @@
 #include "components/AskapComponentImager.h"
 
 // Casacore includes
-#include "casa/aipstype.h"
-#include "casa/Quanta/Quantum.h"
-#include "measures/Measures/MDirection.h"
+#include "casacore/casa/aipstype.h"
+#include "casacore/casa/Quanta/Quantum.h"
+#include "casacore/measures/Measures/MDirection.h"
 #include "components/ComponentModels/ComponentList.h"
 #include "components/ComponentModels/SkyComponent.h"
 #include "components/ComponentModels/GaussianShape.h"
@@ -54,7 +54,7 @@
 #include "components/ComponentModels/ConstantSpectrum.h"
 #include "components/ComponentModels/SpectralIndex.h"
 #include "components/ComponentModels/Flux.h"
-#include "images/Images/ImageInterface.h"
+#include "casacore/images/Images/ImageInterface.h"
 
 // Using
 using namespace askap::cp::pipelinetasks;

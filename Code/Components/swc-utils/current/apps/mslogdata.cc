@@ -45,8 +45,8 @@ ASKAP_LOGGER(logger, "");
 #include <swcorrelator/DataMonitors.h>
 #include <swcorrelator/CorrProducts.h>
 
-#include <casa/OS/Timer.h>
-#include <casa/Arrays/ArrayMath.h>
+#include <casacore/casa/OS/Timer.h>
+#include <casacore/casa/Arrays/ArrayMath.h>
 
 #include <Common/ParameterSet.h>
 

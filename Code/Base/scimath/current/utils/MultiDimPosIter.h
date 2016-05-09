@@ -34,7 +34,7 @@
 #ifndef ASKAP_SCIMATH_MULTI_DIM_POS_ITER_H
 #define ASKAP_SCIMATH_MULTI_DIM_POS_ITER_H
 
-#include <casa/Arrays/IPosition.h>
+#include <casacore/casa/Arrays/IPosition.h>
 
 namespace askap {
 

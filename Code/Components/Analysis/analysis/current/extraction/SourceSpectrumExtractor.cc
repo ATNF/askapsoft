@@ -41,19 +41,19 @@
 
 #include <duchamp/PixelMap/Object2D.hh>
 
-#include <casa/Arrays/IPosition.h>
-#include <casa/Arrays/Array.h>
-#include <casa/Arrays/MaskedArray.h>
-#include <casa/Arrays/Slicer.h>
-#include <casa/Arrays/Vector.h>
-#include <images/Images/ImageInterface.h>
-#include <images/Images/ImageOpener.h>
-#include <images/Images/FITSImage.h>
-#include <images/Images/MIRIADImage.h>
-#include <images/Images/SubImage.h>
-#include <coordinates/Coordinates/CoordinateSystem.h>
-#include <coordinates/Coordinates/DirectionCoordinate.h>
-#include <measures/Measures/Stokes.h>
+#include <casacore/casa/Arrays/IPosition.h>
+#include <casacore/casa/Arrays/Array.h>
+#include <casacore/casa/Arrays/MaskedArray.h>
+#include <casacore/casa/Arrays/Slicer.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/images/Images/ImageInterface.h>
+#include <casacore/images/Images/ImageOpener.h>
+#include <casacore/images/Images/FITSImage.h>
+#include <casacore/images/Images/MIRIADImage.h>
+#include <casacore/images/Images/SubImage.h>
+#include <casacore/coordinates/Coordinates/CoordinateSystem.h>
+#include <casacore/coordinates/Coordinates/DirectionCoordinate.h>
+#include <casacore/measures/Measures/Stokes.h>
 
 #include <Common/ParameterSet.h>
 
@@ -114,7 +114,7 @@ void SourceSpectrumExtractor::setBeamScale()
             std::vector< casa::Vector<Quantum<Double> > > beamvec;
 
             casa::Vector<Quantum<Double> >
-            inputBeam = itsInputCubePtr->imageInfo().restoringBeam();
+            inputBeam = itsInputCubePtr->imageInfo().restoringBeam().toVector();
 
             ASKAPLOG_DEBUG_STR(logger, "Setting beam scaling factor. BeamLog=" <<
                                itsBeamLog << ", image beam = " << inputBeam);

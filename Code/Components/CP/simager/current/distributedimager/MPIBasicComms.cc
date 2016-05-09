@@ -42,7 +42,7 @@
 // ASKAPsoft includes
 #include "askap/AskapLogging.h"
 #include "askap/AskapError.h"
-#include "casa/OS/Timer.h"
+#include "casacore/casa/OS/Timer.h"
 #include "Blob/BlobIStream.h"
 #include "Blob/BlobIBufVector.h"
 #include "Blob/BlobOStream.h"

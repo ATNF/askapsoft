@@ -36,8 +36,8 @@
 #define ASKAP_ACCESSORS_I_ANTENNA_SUBTABLE_HANLDER_H
 
 // casa includes
-#include <measures/Measures/MPosition.h>
-#include <casa/BasicSL/String.h>
+#include <casacore/measures/Measures/MPosition.h>
+#include <casacore/casa/BasicSL/String.h>
 
 // own includes
 #include <dataaccess/IHolder.h>

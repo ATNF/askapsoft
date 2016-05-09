@@ -42,19 +42,19 @@
 // ASKAPsoft includes
 #include "askap/AskapError.h"
 #include "askap/AskapLogging.h"
-#include "ms/MeasurementSets/MeasurementSet.h"
-#include "ms/MeasurementSets/MSColumns.h"
-#include "casa/Arrays/Matrix.h"
-#include "casa/Arrays/Vector.h"
-#include "measures/Measures/MDirection.h"
-#include "measures/Measures/Stokes.h"
+#include "casacore/ms/MeasurementSets/MeasurementSet.h"
+#include "casacore/ms/MeasurementSets/MSColumns.h"
+#include "casacore/casa/Arrays/Matrix.h"
+#include "casacore/casa/Arrays/Vector.h"
+#include "casacore/measures/Measures/MDirection.h"
+#include "casacore/measures/Measures/Stokes.h"
 // Now using BETA directly - Paulus, 31/8/2015
 #include "cpcommon/VisDatagramBETA.h"
 
 // casa
-#include <measures/Measures/MEpoch.h>
-#include <measures/Measures/MeasConvert.h>
-#include <measures/Measures/MCEpoch.h>
+#include <casacore/measures/Measures/MEpoch.h>
+#include <casacore/measures/Measures/MeasConvert.h>
+#include <casacore/measures/Measures/MCEpoch.h>
 
 
 // Local package includes

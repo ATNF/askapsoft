@@ -33,28 +33,28 @@
 #include <string>
 #include <iostream>
 
-#include <casa/aips.h>
-#include <tables/Tables/TableLocker.h>
-#include <tables/Tables/TableDesc.h>
-#include <tables/Tables/ColumnDesc.h>
-#include <tables/Tables/ScaColDesc.h>
-#include <tables/Tables/ArrColDesc.h>
-#include <tables/Tables/SetupNewTab.h>
-#include <tables/Tables/ExprNode.h>
-#include <tables/Tables/ExprNodeSet.h>
-#include <tables/Tables/ScalarColumn.h>
-#include <tables/Tables/ArrayColumn.h>
-#include <tables/Tables/TableRecord.h>
-#include <casa/Arrays/Matrix.h>
-#include <casa/Arrays/Vector.h>
-#include <casa/Arrays/ArrayUtil.h>
+#include <casacore/casa/aips.h>
+#include <casacore/tables/Tables/TableLocker.h>
+#include <casacore/tables/Tables/TableDesc.h>
+#include <casacore/tables/Tables/ColumnDesc.h>
+#include <casacore/tables/Tables/ScaColDesc.h>
+#include <casacore/tables/Tables/ArrColDesc.h>
+#include <casacore/tables/Tables/SetupNewTab.h>
+#include <casacore/tables/Tables/ExprNode.h>
+#include <casacore/tables/Tables/ExprNodeSet.h>
+#include <casacore/tables/Tables/ScalarColumn.h>
+#include <casacore/tables/Tables/ArrayColumn.h>
+#include <casacore/tables/Tables/TableRecord.h>
+#include <casacore/casa/Arrays/Matrix.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/casa/Arrays/ArrayUtil.h>
 
-#include <casa/Arrays/Slice.h>
+#include <casacore/casa/Arrays/Slice.h>
 
 
-#include <casa/Utilities/Regex.h>
-#include <casa/Utilities/GenSort.h>
-#include <casa/BasicMath/Math.h>
+#include <casacore/casa/Utilities/Regex.h>
+#include <casacore/casa/Utilities/GenSort.h>
+#include <casacore/casa/BasicMath/Math.h>
 
 #include <askap/AskapError.h>
 

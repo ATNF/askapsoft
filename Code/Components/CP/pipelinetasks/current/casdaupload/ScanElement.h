@@ -32,12 +32,12 @@
 #include <vector>
 
 // ASKAPsoft includes
-#include "casa/Quanta/MVTime.h"
-#include "casa/Quanta/Quantum.h"
-#include "measures/Measures/MDirection.h"
-#include "measures/Measures/Stokes.h"
-#include "measures/Measures/MEpoch.h"
-#include "casa/Arrays/Vector.h"
+#include "casacore/casa/Quanta/MVTime.h"
+#include "casacore/casa/Quanta/Quantum.h"
+#include "casacore/measures/Measures/MDirection.h"
+#include "casacore/measures/Measures/Stokes.h"
+#include "casacore/measures/Measures/MEpoch.h"
+#include "casacore/casa/Arrays/Vector.h"
 #include "xercesc/dom/DOM.hpp" // Includes all DOM
 
 // Local package includes

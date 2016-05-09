@@ -37,9 +37,9 @@
 ///
 
 /// CASA include
-#include <casa/Quanta/MVDoppler.h>
+#include <casacore/casa/Quanta/MVDoppler.h>
 // temporary
-#include <casa/Exceptions/Error.h>
+#include <casacore/casa/Exceptions/Error.h>
 
 /// own includes
 #include <dataaccess/DopplerConverter.h>

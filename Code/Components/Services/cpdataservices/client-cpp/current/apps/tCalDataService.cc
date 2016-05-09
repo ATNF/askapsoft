@@ -34,7 +34,7 @@
 #include <stdexcept>
 
 // ASKAPsoft includes
-#include "casa/aipstype.h"
+#include "casacore/casa/aipstype.h"
 #include "Common/ParameterSet.h"
 #include "CommandLineParser.h"
 

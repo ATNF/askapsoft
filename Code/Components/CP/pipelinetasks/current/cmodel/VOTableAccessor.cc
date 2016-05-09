@@ -49,9 +49,9 @@
 #include "boost/lexical_cast.hpp"
 
 // Casacore includes
-#include "casa/aipstype.h"
-#include "casa/Quanta/Quantum.h"
-#include "casa/Quanta/MVDirection.h"
+#include "casacore/casa/aipstype.h"
+#include "casacore/casa/Quanta/Quantum.h"
+#include "casacore/casa/Quanta/MVDirection.h"
 
 // Using
 using namespace casa;

@@ -34,8 +34,8 @@
 
 // ASKAPsoft includes
 #include "askap/AskapError.h"
-#include "casa/aips.h"
-#include "casa/Quanta.h"
+#include "casacore/casa/aips.h"
+#include "casacore/casa/Quanta.h"
 #include "cpcommon/CasaBlobUtils.h"
 
 // Using

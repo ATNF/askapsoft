@@ -24,12 +24,12 @@
 
 #include <preprocessing/VariableThresholdingHelpers.h>
 
-#include <casa/aipstype.h>
-#include <casa/Arrays/Array.h>
-#include <casa/Arrays/IPosition.h>
-#include <casa/Arrays/ArrayPartMath.h>
-#include <casa/Arrays/MaskArrMath.h>
-#include <casa/namespace.h>
+#include <casacore/casa/aipstype.h>
+#include <casacore/casa/Arrays/Array.h>
+#include <casacore/casa/Arrays/IPosition.h>
+#include <casacore/casa/Arrays/ArrayPartMath.h>
+#include <casacore/casa/Arrays/MaskArrMath.h>
+#include <casacore/casa/namespace.h>
 
 #include <duchamp/Utils/Statistics.hh>
 

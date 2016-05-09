@@ -33,7 +33,7 @@
 ASKAP_LOGGER(logger, ".delaysolver.DelaySolverImpl");
 
 #include <askap/AskapError.h>
-#include <casa/Arrays/MatrixMath.h>
+#include <casacore/casa/Arrays/MatrixMath.h>
 
 // std
 #include <set>

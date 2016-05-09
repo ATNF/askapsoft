@@ -32,7 +32,7 @@
 // ASKAPsoft includes
 #include "boost/program_options.hpp"
 #include "askap/AskapError.h"
-#include "casa/aipstype.h"
+#include "casacore/casa/aipstype.h"
 #include "Common/ParameterSet.h"
 #include "boost/algorithm/string.hpp"
 #include "boost/lexical_cast.hpp"

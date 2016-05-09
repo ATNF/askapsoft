@@ -30,8 +30,8 @@
 ///
 
 // CASA includes
-#include <tables/Tables/ArrayColumn.h>
-#include <tables/Tables/ArrColDesc.h>
+#include <casacore/tables/Tables/ArrayColumn.h>
+#include <casacore/tables/Tables/ArrColDesc.h>
 
 // own includes
 #include <dataaccess/DataAccessError.h>

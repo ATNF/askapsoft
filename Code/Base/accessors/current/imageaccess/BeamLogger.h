@@ -34,8 +34,8 @@
 #include <vector>
 
 // ASKAPsoft includes
-#include <casa/Arrays/Vector.h>
-#include <casa/Quanta/Quantum.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/casa/Quanta/Quantum.h>
 #include <Common/ParameterSet.h>
 
 namespace askap {

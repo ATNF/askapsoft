@@ -34,8 +34,8 @@
 #define ASKAP_ACCESSORS_I_TABLE_POLARISATION_HOLDER_H
 
 // casa includes
-#include <casa/Arrays/Vector.h>
-#include <measures/Measures/Stokes.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/measures/Measures/Stokes.h>
 
 // own includes
 #include <dataaccess/IHolder.h>

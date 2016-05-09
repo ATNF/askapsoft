@@ -34,9 +34,9 @@
 #include <askapparallel/AskapParallel.h>
 #include <string>
 #include <duchamp/Cubes/cubes.hh>
-#include <casa/aipstype.h>
-#include <casa/Arrays/Array.h>
-#include <casa/Arrays/IPosition.h>
+#include <casacore/casa/aipstype.h>
+#include <casacore/casa/Arrays/Array.h>
+#include <casacore/casa/Arrays/IPosition.h>
 
 
 namespace askap {

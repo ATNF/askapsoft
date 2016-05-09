@@ -34,7 +34,7 @@
 // ASKAPsoft includes
 #include "Ice/Ice.h"
 #include "SkyModelService.h" // Ice generated interface
-#include "casa/Quanta/Quantum.h"
+#include "casacore/casa/Quanta/Quantum.h"
 
 // Local package includes
 #include "skymodelclient/Component.h"

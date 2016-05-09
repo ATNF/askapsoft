@@ -42,7 +42,7 @@
 #include "askap/AskapLogging.h"
 #include "askap/AskapError.h"
 #include "boost/lexical_cast.hpp"
-#include "casa/Quanta/Quantum.h"
+#include "casacore/casa/Quanta/Quantum.h"
 #include "votable/VOTable.h" // includes VOTable*.h
 
 using namespace std;

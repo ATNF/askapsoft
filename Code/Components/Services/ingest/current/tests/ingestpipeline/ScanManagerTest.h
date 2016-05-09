@@ -28,7 +28,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 // Support classes
-#include "casa/aips.h"
+#include "casacore/casa/aips.h"
 #include "configuration/Configuration.h"
 #include "ConfigurationHelper.h"
 

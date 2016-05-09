@@ -34,9 +34,9 @@
 // ASKAPsoft includes
 #include "askap/AskapError.h"
 #include "profile/AskapProfiler.h"
-#include "casa/Arrays/Vector.h"
-#include "casa/Arrays/Matrix.h"
-#include "casa/Arrays/ArrayIter.h"
+#include "casacore/casa/Arrays/Vector.h"
+#include "casacore/casa/Arrays/Matrix.h"
+#include "casacore/casa/Arrays/ArrayIter.h"
 #include "fftw3.h"
 
 #ifdef _OPENMP

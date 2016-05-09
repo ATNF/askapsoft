@@ -40,7 +40,7 @@
 #include <dataaccess/IConstDataAccessor.h>
 
 // casa includes
-#include <casa/Arrays/Vector.h>
+#include <casacore/casa/Arrays/Vector.h>
 
 namespace askap {
 	

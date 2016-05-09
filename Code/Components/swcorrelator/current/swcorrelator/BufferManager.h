@@ -50,7 +50,7 @@
 #include <stdexcept>
 
 // casa includes
-#include <casa/Arrays/Cube.h>
+#include <casacore/casa/Arrays/Cube.h>
 
 namespace askap {
 

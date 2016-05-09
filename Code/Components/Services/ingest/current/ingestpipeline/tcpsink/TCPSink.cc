@@ -45,7 +45,7 @@
 #include "cpcommon/VisChunk.h"
 
 // Casecore includes
-#include "casa/aips.h"
+#include "casacore/casa/aips.h"
 
 // Local package includes
 #include "configuration/Configuration.h" // Includes all configuration attributes too

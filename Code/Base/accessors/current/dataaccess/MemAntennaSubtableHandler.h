@@ -33,8 +33,8 @@
 #define ASKAP_ACCESSORS_MEM_ANTENNA_SUBTABLE_HANLDER_H
 
 // casa includes
-#include <tables/Tables/Table.h>
-#include <casa/Arrays/Vector.h>
+#include <casacore/tables/Tables/Table.h>
+#include <casacore/casa/Arrays/Vector.h>
 
 // own includes
 #include <dataaccess/IAntennaSubtableHandler.h>

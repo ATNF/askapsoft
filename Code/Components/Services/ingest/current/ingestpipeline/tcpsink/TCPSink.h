@@ -40,7 +40,7 @@
 #include "boost/asio.hpp"
 #include "Common/ParameterSet.h"
 #include "cpcommon/VisChunk.h"
-#include "measures/Measures/Stokes.h"
+#include "casacore/measures/Measures/Stokes.h"
 
 // Local package includes
 #include "ingestpipeline/ITask.h"

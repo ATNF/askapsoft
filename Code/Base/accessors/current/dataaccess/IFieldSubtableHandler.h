@@ -34,8 +34,8 @@
 #define ASKAP_ACCESSORS_I_FIELD_SUBTABLE_HANLDER_H
 
 // casa includes
-#include <measures/Measures/MEpoch.h>
-#include <measures/Measures/MDirection.h>
+#include <casacore/measures/Measures/MEpoch.h>
+#include <casacore/measures/Measures/MDirection.h>
 
 // own includes
 #include <dataaccess/IHolder.h>

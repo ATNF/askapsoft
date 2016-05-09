@@ -36,7 +36,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 #include <utils/PaddingUtils.h>
-#include <casa/Arrays/Matrix.h>
+#include <casacore/casa/Arrays/Matrix.h>
 
 
 namespace askap {

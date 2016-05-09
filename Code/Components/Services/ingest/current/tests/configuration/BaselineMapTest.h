@@ -28,7 +28,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 // casa stuff
-#include "casa/OS/Path.h"
+#include "casacore/casa/OS/Path.h"
 
 // Support classes
 #include <string>

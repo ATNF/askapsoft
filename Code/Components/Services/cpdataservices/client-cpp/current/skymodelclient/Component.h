@@ -28,8 +28,8 @@
 #define ASKAP_CP_SKYMODELSERVICE_COMPONENT_H
 
 /// ASKAPsoft includes
-#include "casa/aipstype.h"
-#include "casa/Quanta/Quantum.h"
+#include "casacore/casa/aipstype.h"
+#include "casacore/casa/Quanta/Quantum.h"
 
 namespace askap {
 namespace cp {

@@ -40,7 +40,7 @@
 #include <map>
 
 // casa includes
-#include <casa/BasicSL/String.h>
+#include <casacore/casa/BasicSL/String.h>
 
 ASKAP_LOGGER(logger, ".FrtCommunicator");
 

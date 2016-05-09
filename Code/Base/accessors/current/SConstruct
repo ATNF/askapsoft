@@ -8,12 +8,16 @@
 # Always import this
 from askapenv import env
 import os
+import sys
 
 if 'AIPSPATH' not in os.environ:
    os.environ['AIPSPATH']=os.environ['ASKAP_ROOT']+'/Code/Base/accessors/current'
 env["ENV"]["AIPSPATH"] = os.environ['AIPSPATH']
 
 env.AppendUnique(CCFLAGS=['-O3'])
+
+if sys.platform == 'darwin':
+    env.AppendUnique(CCFLAGS=['-Wno-unused-local-typedef'])
 
 # create build object with library name
 pkg = env.AskapPackage("accessors")

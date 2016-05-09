@@ -16,10 +16,10 @@
 #ifndef ASKAP_CASA_SYNC_HELPER_H
 #define ASKAP_CASA_SYNC_HELPER_H
 
-#include <casa/Arrays/Vector.h>
-#include <casa/Arrays/Cube.h>
-#include <coordinates/Coordinates/DirectionCoordinate.h>
-#include <measures/Measures/MDirection.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/casa/Arrays/Cube.h>
+#include <casacore/coordinates/Coordinates/DirectionCoordinate.h>
+#include <casacore/measures/Measures/MDirection.h>
 
 #ifdef _OPENMP
 #include <boost/thread/mutex.hpp>

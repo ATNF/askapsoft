@@ -32,8 +32,8 @@
 #define GENERIC_NORMAL_EQUATION_TEST_H
 
 
-#include <casa/Arrays/ArrayMath.h>
-#include <casa/Arrays/MatrixMath.h>
+#include <casacore/casa/Arrays/ArrayMath.h>
+#include <casacore/casa/Arrays/MatrixMath.h>
 
 
 #include <fitting/GenericNormalEquations.h>

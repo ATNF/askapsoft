@@ -39,7 +39,7 @@
 #define ASKAP_ACCESSORS_TABLE_CAL_SOLUTION_FILLER_H
 
 // CASA includes
-#include <tables/Tables/Table.h>
+#include <casacore/tables/Tables/Table.h>
 
 // own includes
 #include <calibaccess/ICalSolutionFiller.h>

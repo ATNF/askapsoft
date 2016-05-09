@@ -32,8 +32,11 @@
 #include <vector>
 #include <list>
 
+#include <casacore/casa/BasicSL/STLIO.h>
+
 using namespace askap;
 using namespace std;
+using namespace casacore;
 
 void testCase()
 {

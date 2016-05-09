@@ -37,16 +37,16 @@
 #include <casainterface/CasaInterface.h>
 #include <imageaccess/CasaImageAccess.h>
 
-#include <casa/Arrays/Array.h>
-#include <casa/Arrays/Slicer.h>
-#include <casa/BasicSL/String.h>
-#include <images/Images/ImageInterface.h>
-#include <images/Images/ImageOpener.h>
-#include <images/Images/FITSImage.h>
-#include <images/Images/MIRIADImage.h>
-#include <lattices/Lattices/LatticeBase.h>
+#include <casacore/casa/Arrays/Array.h>
+#include <casacore/casa/Arrays/Slicer.h>
+#include <casacore/casa/BasicSL/String.h>
+#include <casacore/images/Images/ImageInterface.h>
+#include <casacore/images/Images/ImageOpener.h>
+#include <casacore/images/Images/FITSImage.h>
+#include <casacore/images/Images/MIRIADImage.h>
+#include <casacore/lattices/Lattices/LatticeBase.h>
 #include <Common/ParameterSet.h>
-#include <measures/Measures/Stokes.h>
+#include <casacore/measures/Measures/Stokes.h>
 #include <boost/shared_ptr.hpp>
 
 #include <utils/PolConverter.h>
@@ -274,7 +274,7 @@ void SourceDataExtractor::verifyInputs()
 void SourceDataExtractor::writeBeam(std::string &filename)
 {
     casa::Vector<Quantum<Double> >
-    inputBeam = itsInputCubePtr->imageInfo().restoringBeam();
+    inputBeam = itsInputCubePtr->imageInfo().restoringBeam().toVector();
 
     if (inputBeam.size() > 0) {
         accessors::CasaImageAccess ia;

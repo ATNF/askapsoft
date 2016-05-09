@@ -30,7 +30,7 @@
 ///
 
 // casa includes
-#include <tables/Tables/TableRecord.h>
+#include <casacore/tables/Tables/TableRecord.h>
 
 // own includes
 #include <dataaccess/TableDataSource.h>

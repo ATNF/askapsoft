@@ -46,8 +46,8 @@
 // ASKAPsoft includes
 #include "askap/AskapLogging.h"
 #include "askap/AskapError.h"
-#include "casa/Utilities/Regex.h"
-#include "casa/BasicSL/String.h"
+#include "casacore/casa/Utilities/Regex.h"
+#include "casacore/casa/BasicSL/String.h"
 
 // Local package includes
 #include "askapparallel/MPIComms.h"
@@ -148,16 +148,16 @@ bool AskapParallel::isWorker() const
 }
 
 /// Rank
-int AskapParallel::rank() const
-{
-    return itsRank;
-}
+//int AskapParallel::rank() const
+//{
+//    return itsRank;
+//}
 
 /// Number of nodes
-int AskapParallel::nProcs() const
-{
-    return itsNProcs;
-}
+//int AskapParallel::nProcs() const
+//{
+//    return itsNProcs;
+//}
 
 /// @brief configure to communicate with all workers
 /// @details This method selects the default communicator allowing

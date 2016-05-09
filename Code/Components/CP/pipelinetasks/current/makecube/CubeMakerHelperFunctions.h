@@ -34,7 +34,7 @@
 #include <string>
 
 // ASKAPsoft includes
-#include <coordinates/Coordinates/CoordinateSystem.h>
+#include <casacore/coordinates/Coordinates/CoordinateSystem.h>
 
 namespace askap {
 namespace cp {

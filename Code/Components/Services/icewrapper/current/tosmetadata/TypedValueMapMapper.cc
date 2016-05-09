@@ -32,7 +32,7 @@
 
 // ASKAPsoft includes
 #include "askap/AskapError.h"
-#include "measures/Measures/MDirection.h"
+#include "casacore/measures/Measures/MDirection.h"
 
 // CP Ice interfaces
 #include "TypedValues.h"

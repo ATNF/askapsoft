@@ -39,19 +39,19 @@
 #include <utils/PolConverter.h>
 
 // casa includes
-#include <casa/OS/File.h>
-#include <casa/OS/Path.h>
-#include <ms/MeasurementSets/MSColumns.h>
-#include "tables/Tables/TableDesc.h"
-#include "tables/Tables/ScaColDesc.h"
-#include "tables/Tables/ScalarColumn.h"
-#include "tables/Tables/SetupNewTab.h"
-#include "tables/Tables/IncrementalStMan.h"
-#include "tables/Tables/StandardStMan.h"
-#include "tables/Tables/TiledShapeStMan.h"
-#include <casa/Arrays/MatrixMath.h>
-#include <casa/Arrays/ArrayMath.h>
-#include <measures/Measures/MeasFrame.h>
+#include <casacore/casa/OS/File.h>
+#include <casacore/casa/OS/Path.h>
+#include <casacore/ms/MeasurementSets/MSColumns.h>
+#include "casacore/tables/Tables/TableDesc.h"
+#include "casacore/tables/Tables/ScaColDesc.h"
+#include "casacore/tables/Tables/ScalarColumn.h"
+#include "casacore/tables/Tables/SetupNewTab.h"
+#include "casacore/tables/Tables/IncrementalStMan.h"
+#include "casacore/tables/Tables/StandardStMan.h"
+#include "casacore/tables/Tables/TiledShapeStMan.h"
+#include <casacore/casa/Arrays/MatrixMath.h>
+#include <casacore/casa/Arrays/ArrayMath.h>
+#include <casacore/measures/Measures/MeasFrame.h>
 
 // std includes
 #include <sstream>

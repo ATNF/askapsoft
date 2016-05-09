@@ -40,7 +40,7 @@
 #include "iceutils/CommunicatorConfig.h"
 #include "iceutils/CommunicatorFactory.h"
 #include "SkyModelService.h" // Ice generated interface
-#include "casa/Quanta/Quantum.h"
+#include "casacore/casa/Quanta/Quantum.h"
 
 // Local package includes
 #include "skymodelclient/ComponentResultSet.h"

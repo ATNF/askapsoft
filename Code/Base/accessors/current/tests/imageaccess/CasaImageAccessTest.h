@@ -30,9 +30,9 @@
 #include <imageaccess/ImageAccessFactory.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include <casa/Arrays/Vector.h>
-#include <casa/Arrays/IPosition.h>
-#include <coordinates/Coordinates/LinearCoordinate.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/casa/Arrays/IPosition.h>
+#include <casacore/coordinates/Coordinates/LinearCoordinate.h>
 
 
 #include <boost/shared_ptr.hpp>

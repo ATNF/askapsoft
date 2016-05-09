@@ -30,7 +30,7 @@
 
 #include <dataformats/SwinReader.h>
 #include <askap/AskapError.h>
-#include <casa/OS/File.h>
+#include <casacore/casa/OS/File.h>
 #include <inttypes.h>
 #include <utils/PolConverter.h>
 

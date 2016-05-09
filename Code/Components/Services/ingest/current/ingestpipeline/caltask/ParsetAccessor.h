@@ -28,8 +28,8 @@
 #define ASKAP_CP_INGEST_PARSETACCESSOR_H
 
 // ASKAPsoft includes
-#include "casa/aipstype.h"
-#include "casa/BasicSL/Complex.h"
+#include "casacore/casa/aipstype.h"
+#include "casacore/casa/BasicSL/Complex.h"
 #include "Common/ParameterSet.h"
 
 // Local package includes

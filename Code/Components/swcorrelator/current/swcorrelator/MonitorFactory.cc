@@ -40,7 +40,7 @@
 #include <swcorrelator/BasicMonitor.h>
 #include <swcorrelator/SimpleVisMonitor.h>
 
-#include <casa/OS/DynLib.h>        // for dynamic library loading
+#include <casacore/casa/OS/DynLib.h>        // for dynamic library loading
 
 
 ASKAP_LOGGER(logger, ".monitorfactory");

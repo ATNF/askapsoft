@@ -36,7 +36,7 @@
 
 // Casacore includes
 #include "components/ComponentModels/ComponentList.h"
-#include "images/Images/ImageInterface.h"
+#include "casacore/images/Images/ImageInterface.h"
 
 namespace askap {
 namespace cp {

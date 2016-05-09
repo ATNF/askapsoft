@@ -29,7 +29,7 @@
 
 // ASKAPsoft includes
 #include "Common/ParameterSet.h"
-#include "casa/aips.h"
+#include "casacore/casa/aips.h"
 #include "cpcommon/VisChunk.h"
 
 // Local package includes

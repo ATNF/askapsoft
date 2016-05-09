@@ -31,7 +31,7 @@
 ///
 
 #include <dataaccess/TempUVWMachine.h>
-#include <casa/Quanta/Euler.h>
+#include <casacore/casa/Quanta/Euler.h>
 
 namespace askap {
 

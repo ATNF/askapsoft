@@ -28,12 +28,12 @@
 ///
 /// @author Max Voronkov <maxim.voronkov@csiro.au>
 
-#include <casa/aipstype.h>
+#include <casacore/casa/aipstype.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <calibaccess/TableCalSolutionSource.h>
 #include <calibaccess/ParsetCalSolutionAccessor.h>
 #include <calibaccess/JonesIndex.h>
-#include <tables/Tables/Table.h>
+#include <casacore/tables/Tables/Table.h>
 
 
 

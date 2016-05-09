@@ -32,8 +32,8 @@
 #include <vector>
 
 // ASKAPsoft includes
-#include "ms/MeasurementSets/MeasurementSet.h"
-#include "measures/Measures/Stokes.h"
+#include "casacore/ms/MeasurementSets/MeasurementSet.h"
+#include "casacore/measures/Measures/Stokes.h"
 #include "boost/scoped_ptr.hpp"
 
 // Local package includes

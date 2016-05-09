@@ -28,14 +28,14 @@
 #ifndef ASKAP_ACCESSORS_I_CONST_DATA_ACCESSOR_H
 #define ASKAP_ACCESSORS_I_CONST_DATA_ACCESSOR_H
 
-#include <casa/aips.h>
-#include <casa/Arrays/Vector.h>
-#include <casa/Arrays/Matrix.h>
-#include <casa/Arrays/Cube.h>
-#include <casa/Quanta/MVDirection.h>
-#include <measures/Measures/MDirection.h>
-#include <scimath/Mathematics/RigidVector.h>
-#include <measures/Measures/Stokes.h>
+#include <casacore/casa/aips.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/casa/Arrays/Matrix.h>
+#include <casacore/casa/Arrays/Cube.h>
+#include <casacore/casa/Quanta/MVDirection.h>
+#include <casacore/measures/Measures/MDirection.h>
+#include <casacore/scimath/Mathematics/RigidVector.h>
+#include <casacore/measures/Measures/Stokes.h>
 
 
 namespace askap {

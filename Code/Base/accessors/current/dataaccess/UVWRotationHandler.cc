@@ -34,8 +34,8 @@
 #include <dataaccess/UVWRotationHandler.h>
 #include <askap/AskapError.h>
 
-#include <measures/Measures/MeasFrame.h>
-#include <measures/Measures/MEpoch.h>
+#include <casacore/measures/Measures/MeasFrame.h>
+#include <casacore/measures/Measures/MEpoch.h>
 #include <askap/AskapUtil.h>
 
 

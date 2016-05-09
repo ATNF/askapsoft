@@ -55,7 +55,7 @@
 #include <utils/PolConverter.h>
 #include <Common/ParameterSet.h>
 #include <Common/Exceptions.h>
-#include <casa/OS/Timer.h>
+#include <casacore/casa/OS/Timer.h>
 
 
 // Local includes

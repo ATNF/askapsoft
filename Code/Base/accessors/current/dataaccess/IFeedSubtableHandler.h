@@ -37,8 +37,8 @@
 #define ASKAP_ACCESSORS_I_FEED_SUBTABLE_HANDLER_H
 
 // casa includes
-#include <measures/Measures/MEpoch.h>
-#include <scimath/Mathematics/RigidVector.h>
+#include <casacore/measures/Measures/MEpoch.h>
+#include <casacore/scimath/Mathematics/RigidVector.h>
 
 // own includes
 #include <dataaccess/IHolder.h>

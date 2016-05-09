@@ -34,11 +34,11 @@
 #include <Common/ParameterSet.h>
 #include <duchamp/Cubes/cubes.hh>
 #include <string>
-#include <casa/Arrays/Array.h>
-#include <casa/Arrays/IPosition.h>
-#include <casa/Arrays/Slicer.h>
-#include <coordinates/Coordinates/CoordinateSystem.h>
-#include <casa/aipstype.h>
+#include <casacore/casa/Arrays/Array.h>
+#include <casacore/casa/Arrays/IPosition.h>
+#include <casacore/casa/Arrays/Slicer.h>
+#include <casacore/coordinates/Coordinates/CoordinateSystem.h>
+#include <casacore/casa/aipstype.h>
 #include <parallelanalysis/Weighter.h>
 #include <boost/shared_ptr.hpp>
 

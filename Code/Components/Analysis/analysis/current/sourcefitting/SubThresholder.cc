@@ -37,9 +37,9 @@
 #include <sourcefitting/SubComponent.h>
 
 #include <duchamp/Cubes/cubes.hh>
-#include <casa/Arrays/Slicer.h>
-#include <casa/Arrays/Vector.h>
-#include <casa/Arrays/Matrix.h>
+#include <casacore/casa/Arrays/Slicer.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/casa/Arrays/Matrix.h>
 
 #include <boost/scoped_ptr.hpp>
 

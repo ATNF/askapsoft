@@ -41,7 +41,7 @@
 #include "configuration/Configuration.h" // Includes all configuration attributes too
 
 // casa includes
-#include <casa/Arrays/Matrix.h>
+#include <casacore/casa/Arrays/Matrix.h>
 
 // boost
 #include <boost/shared_ptr.hpp>

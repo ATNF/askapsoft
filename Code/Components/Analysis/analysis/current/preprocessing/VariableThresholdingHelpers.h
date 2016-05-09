@@ -25,10 +25,10 @@
 #ifndef ASKAP_ANALYSIS_VAR_THRESH_HELP_H_
 #define ASKAP_ANALYSIS_VAR_THRESH_HELP_H_
 
-#include <casa/aipstype.h>
-#include <casa/Arrays/Array.h>
-#include <casa/Arrays/IPosition.h>
-#include <casa/namespace.h>
+#include <casacore/casa/aipstype.h>
+#include <casacore/casa/Arrays/Array.h>
+#include <casacore/casa/Arrays/IPosition.h>
+#include <casacore/casa/namespace.h>
 
 namespace askap {
 

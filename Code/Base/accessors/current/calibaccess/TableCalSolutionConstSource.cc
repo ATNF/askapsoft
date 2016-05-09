@@ -33,11 +33,11 @@
 #include <calibaccess/TableCalSolutionConstSource.h>
 #include <calibaccess/TableCalSolutionFiller.h>
 #include <calibaccess/MemCalSolutionAccessor.h>
-#include <measures/TableMeasures/ScalarMeasColumn.h>
-#include <measures/Measures/MEpoch.h>
-#include <measures/Measures/MCEpoch.h>
-#include <tables/Tables/Table.h>
-#include <tables/Tables/TableError.h>
+#include <casacore/measures/TableMeasures/ScalarMeasColumn.h>
+#include <casacore/measures/Measures/MEpoch.h>
+#include <casacore/measures/Measures/MCEpoch.h>
+#include <casacore/tables/Tables/Table.h>
+#include <casacore/tables/Tables/TableError.h>
 
 
 namespace askap {

@@ -35,7 +35,7 @@
 
 #include <corrinterfaces/MonitoringData.h>
 #include <askap/AskapError.h>
-#include <casa/Quanta/MVEpoch.h>
+#include <casacore/casa/Quanta/MVEpoch.h>
 
 #include <sstream>
 

@@ -41,9 +41,9 @@
 #include <askap/AskapError.h>
 #include <askap/AskapLogging.h>
 #include <askap/AskapUtil.h>
-#include <coordinates/Coordinates/CoordinateSystem.h>
-#include <coordinates/Coordinates/SpectralCoordinate.h>
-#include <casa/Arrays/Vector.h>
+#include <casacore/coordinates/Coordinates/CoordinateSystem.h>
+#include <casacore/coordinates/Coordinates/SpectralCoordinate.h>
+#include <casacore/casa/Arrays/Vector.h>
 #include <boost/regex.hpp>
 
 ASKAP_LOGGER(logger, ".CubeMakerHelper");

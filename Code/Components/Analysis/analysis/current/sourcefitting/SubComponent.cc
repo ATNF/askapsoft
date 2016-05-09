@@ -37,7 +37,7 @@
 #include <duchamp/fitsHeader.hh>
 #include <iostream>
 #include <iomanip>
-#include <scimath/Functionals/Gaussian2D.h>
+#include <casacore/scimath/Functionals/Gaussian2D.h>
 
 ///@brief Where the log messages go.
 ASKAP_LOGGER(logger, ".component");

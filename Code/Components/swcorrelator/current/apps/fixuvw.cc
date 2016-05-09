@@ -34,18 +34,18 @@
 #include <askap/AskapLogging.h>
 
 // casa includes
-#include <casa/OS/Timer.h>
-#include <measures/Measures/MEpoch.h>
-#include <measures/Measures/MeasConvert.h>
-#include <measures/Measures/MCEpoch.h>
-#include <measures/Measures/MDirection.h>
-#include <tables/Tables/Table.h>
-#include <tables/Tables/TableError.h>
-#include <tables/Tables/TableRecord.h>
-#include <tables/Tables/ArrayColumn.h>
-#include <measures/TableMeasures/ScalarMeasColumn.h>
-#include <casa/Arrays/Matrix.h>
-#include <casa/Arrays/MatrixMath.h>
+#include <casacore/casa/OS/Timer.h>
+#include <casacore/measures/Measures/MEpoch.h>
+#include <casacore/measures/Measures/MeasConvert.h>
+#include <casacore/measures/Measures/MCEpoch.h>
+#include <casacore/measures/Measures/MDirection.h>
+#include <casacore/tables/Tables/Table.h>
+#include <casacore/tables/Tables/TableError.h>
+#include <casacore/tables/Tables/TableRecord.h>
+#include <casacore/tables/Tables/ArrayColumn.h>
+#include <casacore/measures/TableMeasures/ScalarMeasColumn.h>
+#include <casacore/casa/Arrays/Matrix.h>
+#include <casacore/casa/Arrays/MatrixMath.h>
 
 
 

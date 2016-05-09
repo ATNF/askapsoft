@@ -34,12 +34,12 @@
 #define ASKAP_ACCESSORS_ASKAP_ACCESSORS_TEMP_UVW_MACHINE_H
 
 // casa includes
-#include <measures/Measures.h>
-#include <measures/Measures/MDirection.h>
-#include <casa/Arrays/Vector.h>
-#include <measures/Measures/MCDirection.h>
-#include <casa/Quanta/MVPosition.h>
-#include <casa/Quanta/RotMatrix.h>
+#include <casacore/measures/Measures.h>
+#include <casacore/measures/Measures/MDirection.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/measures/Measures/MCDirection.h>
+#include <casacore/casa/Quanta/MVPosition.h>
+#include <casacore/casa/Quanta/RotMatrix.h>
 
 
 // boost includes

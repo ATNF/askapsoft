@@ -59,16 +59,16 @@
 
 #include <duchamp/Utils/Section.hh>
 
-#include <scimath/Functionals/Gaussian1D.h>
-#include <scimath/Functionals/Gaussian2D.h>
-#include <scimath/Functionals/Gaussian3D.h>
-#include <casa/namespace.h>
-#include <casa/Quanta/Quantum.h>
-#include <casa/Quanta/Unit.h>
-#include <coordinates/Coordinates/CoordinateSystem.h>
-#include <images/Images/PagedImage.h>
-#include <images/Images/ImageInfo.h>
-#include <casa/Arrays/ArrayBase.h>
+#include <casacore/scimath/Functionals/Gaussian1D.h>
+#include <casacore/scimath/Functionals/Gaussian2D.h>
+#include <casacore/scimath/Functionals/Gaussian3D.h>
+#include <casacore/casa/namespace.h>
+#include <casacore/casa/Quanta/Quantum.h>
+#include <casacore/casa/Quanta/Unit.h>
+#include <casacore/coordinates/Coordinates/CoordinateSystem.h>
+#include <casacore/images/Images/PagedImage.h>
+#include <casacore/images/Images/ImageInfo.h>
+#include <casacore/casa/Arrays/ArrayBase.h>
 
 #include <gsl/gsl_multifit.h>
 

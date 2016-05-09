@@ -41,8 +41,8 @@
 #include <boost/shared_ptr.hpp>
 
 // casa includes
-#include <measures/Measures/MEpoch.h>
-#include <casa/BasicSL/String.h>
+#include <casacore/measures/Measures/MEpoch.h>
+#include <casacore/casa/BasicSL/String.h>
 
 // own includes
 #include <dataaccess/ITimeDependentSubtable.h>

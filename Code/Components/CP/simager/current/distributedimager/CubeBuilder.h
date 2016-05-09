@@ -35,12 +35,11 @@
 // ASKAPsoft includes
 #include <boost/scoped_ptr.hpp>
 #include <Common/ParameterSet.h>
-#include <images/Images/PagedImage.h>
-#include <lattices/Lattices/PagedArray.h>
-#include <casa/Arrays/Array.h>
-#include <coordinates/Coordinates/CoordinateSystem.h>
-#include <measures/Measures/Stokes.h>
-#include <casa/Quanta.h>
+#include <casacore/images/Images/PagedImage.h>
+#include <casacore/lattices/Lattices/PagedArray.h>
+#include <casacore/casa/Arrays/Array.h>
+#include <casacore/coordinates/Coordinates/CoordinateSystem.h>
+#include <casacore/casa/Quanta.h>
 
 namespace askap {
 namespace cp {

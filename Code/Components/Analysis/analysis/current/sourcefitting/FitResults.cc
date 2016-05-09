@@ -34,11 +34,11 @@
 #include <sourcefitting/Fitter.h>
 #include <sourcefitting/SubComponent.h>
 
-#include <scimath/Fitting/FitGaussian.h>
-#include <scimath/Functionals/Gaussian1D.h>
-#include <scimath/Functionals/Gaussian2D.h>
-#include <scimath/Functionals/Gaussian3D.h>
-#include <casa/namespace.h>
+#include <casacore/scimath/Fitting/FitGaussian.h>
+#include <casacore/scimath/Functionals/Gaussian1D.h>
+#include <casacore/scimath/Functionals/Gaussian2D.h>
+#include <casacore/scimath/Functionals/Gaussian3D.h>
+#include <casacore/casa/namespace.h>
 
 #include <Common/LofarTypedefs.h>
 using namespace LOFAR::TYPES;

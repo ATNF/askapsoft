@@ -44,8 +44,8 @@
 #include "boost/shared_ptr.hpp"
 #include "boost/optional.hpp"
 #include "Common/ParameterSet.h"
-#include "casa/aips.h"
-#include "ms/MeasurementSets/MeasurementSet.h"
+#include "casacore/casa/aips.h"
+#include "casacore/ms/MeasurementSets/MeasurementSet.h"
 
 namespace askap {
 namespace cp {

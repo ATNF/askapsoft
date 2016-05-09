@@ -36,13 +36,13 @@
 /// ASKAPsoft includes
 #include <askap/AskapLogging.h>
 #include <askap/AskapError.h>
-#include <tables/Tables/ArrayColumn.h>
-#include <tables/Tables/ScalarColumn.h>
-#include <measures/TableMeasures/ScalarMeasColumn.h>
-#include <scimath/Mathematics/SquareMatrix.h>
-#include <measures/Measures/MeasFrame.h>
-#include <casa/Arrays/Slicer.h>
-#include <casa/Arrays/IPosition.h>
+#include <casacore/tables/Tables/ArrayColumn.h>
+#include <casacore/tables/Tables/ScalarColumn.h>
+#include <casacore/measures/TableMeasures/ScalarMeasColumn.h>
+#include <casacore/scimath/Mathematics/SquareMatrix.h>
+#include <casacore/measures/Measures/MeasFrame.h>
+#include <casacore/casa/Arrays/Slicer.h>
+#include <casacore/casa/Arrays/IPosition.h>
 
 /// Local package
 #include <dataaccess/TableConstDataIterator.h>

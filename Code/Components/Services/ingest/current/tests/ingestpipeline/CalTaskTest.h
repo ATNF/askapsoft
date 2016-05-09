@@ -30,8 +30,8 @@
 // Support classes
 #include "cpcommon/VisChunk.h"
 #include "Common/ParameterSet.h"
-#include "measures/Measures.h"
-#include "casa/Quanta/MVEpoch.h"
+#include "casacore/measures/Measures.h"
+#include "casacore/casa/Quanta/MVEpoch.h"
 #include "utils/PolConverter.h"
 #include "configuration/Configuration.h"
 #include "ConfigurationHelper.h"

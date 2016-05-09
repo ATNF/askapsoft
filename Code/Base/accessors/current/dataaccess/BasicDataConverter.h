@@ -34,12 +34,12 @@
 #include <boost/shared_ptr.hpp>
 
 // CASA includes
-#include <measures/Measures/MFrequency.h>
-#include <measures/Measures/MRadialVelocity.h>
+#include <casacore/measures/Measures/MFrequency.h>
+#include <casacore/measures/Measures/MRadialVelocity.h>
 // following includes are required to instantiate a generic converter
 // for MRadialVelocity and MFrequency
-#include <measures/Measures/MCRadialVelocity.h>
-#include <measures/Measures/MCFrequency.h>
+#include <casacore/measures/Measures/MCRadialVelocity.h>
+#include <casacore/measures/Measures/MCFrequency.h>
 
 // own includes
 #include <dataaccess/IDataConverter.h>

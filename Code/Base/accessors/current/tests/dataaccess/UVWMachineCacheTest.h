@@ -33,12 +33,12 @@
 #include <dataaccess/UVWMachineCache.h>
 
 #include <cppunit/extensions/HelperMacros.h>
-#include <casa/Quanta/MVDirection.h>
-#include <measures/Measures/MDirection.h>
-#include <measures/Measures/UVWMachine.h>
-#include <casa/BasicSL/Constants.h>
-#include <casa/Quanta.h>
-#include <scimath/Mathematics/RigidVector.h>
+#include <casacore/casa/Quanta/MVDirection.h>
+#include <casacore/measures/Measures/MDirection.h>
+#include <casacore/measures/Measures/UVWMachine.h>
+#include <casacore/casa/BasicSL/Constants.h>
+#include <casacore/casa/Quanta.h>
+#include <casacore/scimath/Mathematics/RigidVector.h>
 
 
 #include <boost/shared_ptr.hpp>

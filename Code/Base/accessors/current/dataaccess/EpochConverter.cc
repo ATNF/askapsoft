@@ -31,9 +31,9 @@
 ///
 
 /// CASA includes
-#include <measures/Measures/MCEpoch.h>
-#include <casa/Quanta/MVTime.h>
-#include <measures/Measures/MeasConvert.h>
+#include <casacore/measures/Measures/MCEpoch.h>
+#include <casacore/casa/Quanta/MVTime.h>
+#include <casacore/measures/Measures/MeasConvert.h>
 
 /// own includes
 #include <dataaccess/EpochConverter.h>

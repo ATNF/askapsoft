@@ -32,8 +32,8 @@
 #include <vector>
 
 // ASKAPsoft includes
-#include "casa/aips.h"
-#include "measures/Measures/MDirection.h"
+#include "casacore/casa/aips.h"
+#include "casacore/measures/Measures/MDirection.h"
 
 // CP ice interfaces
 #include "TypedValues.h"

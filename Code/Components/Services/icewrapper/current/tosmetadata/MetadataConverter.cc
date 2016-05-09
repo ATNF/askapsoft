@@ -35,8 +35,8 @@
 #include "askap/AskapError.h"
 #include "boost/shared_ptr.hpp"
 #include "cpcommon/TosMetadata.h"
-#include "casa/aips.h"
-#include "casa/Quanta.h"
+#include "casacore/casa/aips.h"
+#include "casacore/casa/Quanta.h"
 
 // CP Ice interfaces
 #include "TypedValues.h"

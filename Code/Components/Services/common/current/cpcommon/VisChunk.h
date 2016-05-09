@@ -31,15 +31,15 @@
 #include <string>
 
 // ASKAPsoft includes
-#include "casa/aips.h"
-#include "casa/Quanta/MVEpoch.h"
-#include "casa/Quanta/MVDirection.h"
-#include "casa/Arrays/Vector.h"
-#include "casa/Arrays/Matrix.h"
-#include "casa/Arrays/Cube.h"
-#include "scimath/Mathematics/RigidVector.h"
-#include "measures/Measures/Stokes.h"
-#include "measures/Measures/MDirection.h"
+#include "casacore/casa/aips.h"
+#include "casacore/casa/Quanta/MVEpoch.h"
+#include "casacore/casa/Quanta/MVDirection.h"
+#include "casacore/casa/Arrays/Vector.h"
+#include "casacore/casa/Arrays/Matrix.h"
+#include "casacore/casa/Arrays/Cube.h"
+#include "casacore/scimath/Mathematics/RigidVector.h"
+#include "casacore/measures/Measures/Stokes.h"
+#include "casacore/measures/Measures/MDirection.h"
 #include "boost/shared_ptr.hpp"
 
 namespace askap {

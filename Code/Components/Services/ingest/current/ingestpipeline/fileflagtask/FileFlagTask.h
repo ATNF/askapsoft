@@ -33,7 +33,7 @@
 // ASKAPsoft includes
 #include "Common/ParameterSet.h"
 #include "cpcommon/VisChunk.h"
-#include <casa/Arrays/Vector.h>
+#include <casacore/casa/Arrays/Vector.h>
 
 // Local package includes
 #include "ingestpipeline/ITask.h"

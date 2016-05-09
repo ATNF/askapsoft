@@ -33,8 +33,8 @@
 #define ASKAP_SCIMATH_IMAGE_UTILS_H
 
 // casa includes
-#include <casa/aips.h>
-#include <casa/Arrays/Array.h>
+#include <casacore/casa/aips.h>
+#include <casacore/casa/Arrays/Array.h>
 
 
 namespace askap {

@@ -34,7 +34,7 @@
 #define ASKAP_ACCESSORS_TABLE_INFO_ACCESSOR_H
 
 // casa includes
-#include <tables/Tables/Table.h>
+#include <casacore/tables/Tables/Table.h>
 
 // boost includes
 #include <boost/shared_ptr.hpp>

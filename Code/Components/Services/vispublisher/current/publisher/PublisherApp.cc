@@ -44,7 +44,7 @@
 #include "askap/StatReporter.h"
 #include <zmq.hpp>
 #include <boost/asio.hpp>
-#include <casa/OS/Timer.h>
+#include <casacore/casa/OS/Timer.h>
 
 // Local package includes
 #include "publisher/SpdOutputMessage.h"

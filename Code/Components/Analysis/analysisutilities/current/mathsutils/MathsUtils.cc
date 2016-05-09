@@ -36,8 +36,8 @@
 #include <duchamp/FitsIO/Beam.hh>
 #include <duchamp/Utils/Statistics.hh>
 #include <gsl/gsl_sf_gamma.h>
-#include <casa/namespace.h>
-#include <scimath/Functionals/Gaussian2D.h>
+#include <casacore/casa/namespace.h>
+#include <casacore/scimath/Functionals/Gaussian2D.h>
 
 #include <iostream>
 #include <iomanip>

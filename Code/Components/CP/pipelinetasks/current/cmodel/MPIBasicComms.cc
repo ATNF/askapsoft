@@ -45,7 +45,7 @@
 // ASKAPsoft includes
 #include "askap/AskapLogging.h"
 #include "askap/AskapError.h"
-#include "casa/OS/Timer.h"
+#include "casacore/casa/OS/Timer.h"
 #include "skymodelclient/Component.h"
 
 using namespace askap::cp::pipelinetasks;

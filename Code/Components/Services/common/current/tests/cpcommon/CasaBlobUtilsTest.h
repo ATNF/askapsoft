@@ -29,8 +29,8 @@
 
 // Support classes
 #include "askap/AskapError.h"
-#include "casa/Arrays/Vector.h"
-#include "casa/Arrays/Cube.h"
+#include "casacore/casa/Arrays/Vector.h"
+#include "casacore/casa/Arrays/Cube.h"
 #include "Blob/BlobIStream.h"
 #include "Blob/BlobIBufVector.h"
 #include "Blob/BlobOStream.h"

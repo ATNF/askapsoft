@@ -36,7 +36,7 @@
 #include <vector>
 
 // casa includes
-#include <tables/Tables/Table.h>
+#include <casacore/tables/Tables/Table.h>
 
 // own includes
 #include <dataaccess/ITableDataDescHolder.h>

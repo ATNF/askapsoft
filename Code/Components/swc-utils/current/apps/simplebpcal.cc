@@ -47,11 +47,11 @@ ASKAP_LOGGER(logger, "");
 #include <swcorrelator/BasicMonitor.h>
 
 // casa
-#include <measures/Measures/MFrequency.h>
-#include <tables/Tables/Table.h>
-#include <casa/OS/Timer.h>
-#include <casa/Arrays/ArrayMath.h>
-#include <casa/Arrays/MatrixMath.h>
+#include <casacore/measures/Measures/MFrequency.h>
+#include <casacore/tables/Tables/Table.h>
+#include <casacore/casa/OS/Timer.h>
+#include <casacore/casa/Arrays/ArrayMath.h>
+#include <casacore/casa/Arrays/MatrixMath.h>
 
 
 

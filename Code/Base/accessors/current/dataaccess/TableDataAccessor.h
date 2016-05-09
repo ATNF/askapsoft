@@ -34,7 +34,7 @@
 #define ASKAP_ACCESSORS_TABLE_DATA_ACCESSOR_H
 
 // casa includes
-#include <casa/Arrays/IPosition.h>
+#include <casacore/casa/Arrays/IPosition.h>
 
 // own includes
 #include <dataaccess/TableDataIterator.h>

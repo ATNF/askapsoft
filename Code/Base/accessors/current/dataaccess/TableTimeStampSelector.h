@@ -36,8 +36,8 @@
 #define ASKAP_ACCESSORS_TABLE_TIME_STAMP_SELECTOR_H
 
 // casa
-#include <tables/Tables/Table.h>
-#include <measures/Measures/MEpoch.h>
+#include <casacore/tables/Tables/Table.h>
+#include <casacore/measures/Measures/MEpoch.h>
 
 // std includes
 #include <utility>

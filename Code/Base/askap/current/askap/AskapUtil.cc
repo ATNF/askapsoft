@@ -36,21 +36,20 @@
 
 // ASKAPsoft includes
 #include "askap/AskapError.h"
-#include "casa/aips.h"
-#include "casa/Quanta.h"
-#include "casa/Quanta/MVDirection.h"
-#include "casa/Quanta/MVAngle.h"
-#include "casa/Quanta/MVEpoch.h"
-#include "casa/Quanta/MVTime.h"
-#include "measures/Measures/MDirection.h"
-#include "measures/Measures/MPosition.h"
-#include "measures/Measures/MEpoch.h"
-#include "measures/Measures/MCEpoch.h"
-#include "measures/Measures/MeasConvert.h"
-#include "measures/Measures/MeasIERS.h"
-#include "tables/Tables/Table.h"
-#include "tables/Tables/TableRecord.h"
-
+#include "casacore/casa/aips.h"
+#include "casacore/casa/Quanta.h"
+#include "casacore/casa/Quanta/MVDirection.h"
+#include "casacore/casa/Quanta/MVAngle.h"
+#include "casacore/casa/Quanta/MVEpoch.h"
+#include "casacore/casa/Quanta/MVTime.h"
+#include "casacore/measures/Measures/MDirection.h"
+#include "casacore/measures/Measures/MPosition.h"
+#include "casacore/measures/Measures/MEpoch.h"
+#include "casacore/measures/Measures/MCEpoch.h"
+#include "casacore/measures/Measures/MeasConvert.h"
+#include "casacore/measures/Measures/MeasIERS.h"
+#include "casacore/tables/Tables/Table.h"
+#include "casacore/tables/Tables/TableRecord.h"
 
 namespace askap {
 

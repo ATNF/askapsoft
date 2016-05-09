@@ -28,7 +28,7 @@
 ///
 /// @author Max Voronkov <maxim.voronkov@csiro.au>
 
-#include <casa/aipstype.h>
+#include <casacore/casa/aipstype.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include <calibaccess/CachedCalSolutionAccessor.h>
 #include <calibaccess/JonesIndex.h>

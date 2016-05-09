@@ -35,7 +35,7 @@
 
 // 3rd party
 #include "Common/ParameterSet.h"
-#include "casa/aipstype.h"
+#include "casacore/casa/aipstype.h"
 #include "boost/tuple/tuple.hpp"
 
 // local includes

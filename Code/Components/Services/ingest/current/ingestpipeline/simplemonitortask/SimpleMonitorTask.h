@@ -33,7 +33,7 @@
 #include "utils/DelayEstimator.h"
 
 // casa includes
-#include <casa/Arrays/Matrix.h>
+#include <casacore/casa/Arrays/Matrix.h>
 
 // Local package includes
 #include "ingestpipeline/ITask.h"

@@ -50,9 +50,9 @@
 #include "ingestpipeline/sourcetask/VisSource.h"
 
 // 3rd party includes
-#include "measures/Measures.h"
-#include "measures/Measures/MeasFrame.h"
-#include "measures/Measures/MCEpoch.h"
+#include "casacore/measures/Measures.h"
+#include "casacore/measures/Measures/MeasFrame.h"
+#include "casacore/measures/Measures/MCEpoch.h"
 
 ASKAP_LOGGER(logger, ".VisConverterBase");
 

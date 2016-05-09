@@ -39,14 +39,14 @@
 #include <askap/AskapError.h>
 
 // casa includes
-#include <casa/BasicSL.h>
-#include <casa/Arrays/Vector.h>
-#include <casa/Arrays/Matrix.h>
-#include <casa/Quanta.h>
-#include <measures/Measures/MEpoch.h>
-#include <measures/Measures/MeasConvert.h>
-#include <measures/Measures/MCEpoch.h>
-#include <measures/Measures/MeasFrame.h>
+#include <casacore/casa/BasicSL.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/casa/Arrays/Matrix.h>
+#include <casacore/casa/Quanta.h>
+#include <casacore/measures/Measures/MEpoch.h>
+#include <casacore/measures/Measures/MeasConvert.h>
+#include <casacore/measures/Measures/MCEpoch.h>
+#include <casacore/measures/Measures/MeasFrame.h>
 
 
 // boost include

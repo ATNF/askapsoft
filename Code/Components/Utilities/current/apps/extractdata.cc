@@ -37,17 +37,17 @@ ASKAP_LOGGER(logger, "");
 #include <dataaccess/IDataConverterImpl.h>
 #include <dataaccess/ParsetInterface.h>
 #include <fft/FFTWrapper.h>
-#include <images/Images/ImageFITSConverter.h>
-#include <images/Images/PagedImage.h>
+#include <casacore/images/Images/ImageFITSConverter.h>
+#include <casacore/images/Images/PagedImage.h>
 
 // casa
-#include <measures/Measures/MFrequency.h>
-#include <tables/Tables/Table.h>
-#include <casa/OS/Timer.h>
-#include <casa/Arrays/ArrayMath.h>
-#include <casa/Arrays/MatrixMath.h>
+#include <casacore/measures/Measures/MFrequency.h>
+#include <casacore/tables/Tables/Table.h>
+#include <casacore/casa/OS/Timer.h>
+#include <casacore/casa/Arrays/ArrayMath.h>
+#include <casacore/casa/Arrays/MatrixMath.h>
 #include <utils/ImageUtils.h>
-#include <casa/Arrays/Cube.h>
+#include <casacore/casa/Arrays/Cube.h>
 
 #include <Common/ParameterSet.h>
 #include <CommandLineParser.h>

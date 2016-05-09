@@ -47,10 +47,10 @@
 #include <duchamp/param.hh>
 #include <duchamp/Cubes/cubes.hh>
 
-#include <casa/aipstype.h>
-#include <casa/Arrays/Slicer.h>
-#include <images/Images/ImageInterface.h>
-#include <images/Images/SubImage.h>
+#include <casacore/casa/aipstype.h>
+#include <casacore/casa/Arrays/Slicer.h>
+#include <casacore/images/Images/ImageInterface.h>
+#include <casacore/images/Images/SubImage.h>
 using namespace casa;
 
 namespace askap {

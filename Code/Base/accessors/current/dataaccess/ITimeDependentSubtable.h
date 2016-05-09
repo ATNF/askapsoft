@@ -37,7 +37,7 @@
 #define ASKAP_ACCESSORS_I_TIME_DEPENDENT_SUBTABLE_H
 
 // casa includes
-#include <measures/Measures/MEpoch.h>
+#include <casacore/measures/Measures/MEpoch.h>
 
 // own includes
 #include <dataaccess/ITableHolder.h>

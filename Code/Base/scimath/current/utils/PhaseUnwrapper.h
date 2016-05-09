@@ -31,7 +31,7 @@
 #ifndef ASKAP_SCIMATH_UTILS_PHASE_UNWRAPPER_H
 #define ASKAP_SCIMATH_UTILS_PHASE_UNWRAPPER_H
 
-#include <casa/BasicSL/Constants.h>
+#include <casacore/casa/BasicSL/Constants.h>
 
 
 namespace askap {

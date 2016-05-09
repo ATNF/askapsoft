@@ -34,8 +34,8 @@
 #define ASKAP_ACCESSORS_I_TABLE_SP_WINDOW_HOLDER_H
 
 // casa includes
-#include <measures/Measures/MFrequency.h>
-#include <casa/Arrays/Vector.h>
+#include <casacore/measures/Measures/MFrequency.h>
+#include <casacore/casa/Arrays/Vector.h>
 
 // own includes
 #include <dataaccess/IHolder.h>

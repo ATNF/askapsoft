@@ -34,7 +34,7 @@
 #include <patternmatching/PointCatalogue.h>
 
 #include <Common/ParameterSet.h>
-#include <casa/Quanta.h>
+#include <casacore/casa/Quanta.h>
 
 #include <vector>
 #include <utility>

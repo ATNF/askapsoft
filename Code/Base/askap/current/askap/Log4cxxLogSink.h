@@ -29,8 +29,8 @@
 #define ASKAP_LOG4CXXLOGSINK_H
 
 //#Includes
-#include <casa/Logging/LogSink.h>
-#include <casa/Logging/LogFilter.h>
+#include <casacore/casa/Logging/LogSink.h>
+#include <casacore/casa/Logging/LogFilter.h>
 #include <stdexcept>
 
 namespace askap {

@@ -47,7 +47,7 @@
 #include <measurementequation/GaussianTaperPreconditioner.h>
 #include <measurementequation/ImageMultiScaleSolver.h>
 #include <measurementequation/ImageParamsHelper.h>
-#include <casa/OS/Timer.h>
+#include <casacore/casa/OS/Timer.h>
 
 // Local includes
 #include "distributedimager/IBasicComms.h"

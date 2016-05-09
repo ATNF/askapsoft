@@ -43,10 +43,10 @@
 #define ASKAP_ACCESSORS_FEED_SUBTABLE_HANDLER_H
 
 // casa includes
-#include <tables/Tables/Table.h>
-#include <casa/Arrays/Vector.h>
-#include <casa/Arrays/Matrix.h>
-#include <casa/Quanta/Quantum.h>
+#include <casacore/tables/Tables/Table.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/casa/Arrays/Matrix.h>
+#include <casacore/casa/Quanta/Quantum.h>
 
 
 

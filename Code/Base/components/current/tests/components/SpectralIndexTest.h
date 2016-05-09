@@ -31,7 +31,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 // Support classes
-#include "measures/Measures/MFrequency.h"
+#include "casacore/measures/Measures/MFrequency.h"
 
 // Classes to test
 #include "components/SpectralIndex.h"

@@ -31,8 +31,8 @@
 #ifndef PADDING_UTILS_H
 #define PADDING_UTILS_H
 
-#include <lattices/Lattices/Lattice.h>
-#include <casa/Arrays/Array.h>
+#include <casacore/lattices/Lattices/Lattice.h>
+#include <casacore/casa/Arrays/Array.h>
 
 namespace askap {
 

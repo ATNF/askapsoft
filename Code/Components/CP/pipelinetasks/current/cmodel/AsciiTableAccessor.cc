@@ -48,10 +48,10 @@
 #include "skymodelclient/Component.h"
 
 // Casacore includes
-#include "casa/aipstype.h"
-#include "casa/Quanta/Quantum.h"
-#include "casa/Quanta/Unit.h"
-#include "casa/Quanta/MVDirection.h"
+#include "casacore/casa/aipstype.h"
+#include "casacore/casa/Quanta/Quantum.h"
+#include "casacore/casa/Quanta/Unit.h"
+#include "casacore/casa/Quanta/MVDirection.h"
 
 // Using
 using namespace casa;

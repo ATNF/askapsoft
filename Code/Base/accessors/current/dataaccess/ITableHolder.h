@@ -38,7 +38,7 @@
 #define ASKAP_ACCESSORS_I_TABLE_HOLDER_H
 
 // casa includes
-#include <tables/Tables/Table.h>
+#include <casacore/tables/Tables/Table.h>
 
 // own includes
 #include <dataaccess/IHolder.h>

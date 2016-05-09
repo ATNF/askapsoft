@@ -38,16 +38,16 @@ ASKAP_LOGGER(logger, "");
 #include <swcorrelator/BasicMonitor.h>
 
 // casa
-#include <measures/Measures/MFrequency.h>
-#include <tables/Tables/Table.h>
-#include <casa/OS/Timer.h>
-#include <casa/Arrays/ArrayMath.h>
-#include <casa/Arrays/MatrixMath.h>
-#include <images/Images/PagedImage.h>
-#include <lattices/Lattices/ArrayLattice.h>
-#include <coordinates/Coordinates/CoordinateSystem.h>
-#include <coordinates/Coordinates/LinearCoordinate.h>
-#include <coordinates/Coordinates/DirectionCoordinate.h>
+#include <casacore/measures/Measures/MFrequency.h>
+#include <casacore/tables/Tables/Table.h>
+#include <casacore/casa/OS/Timer.h>
+#include <casacore/casa/Arrays/ArrayMath.h>
+#include <casacore/casa/Arrays/MatrixMath.h>
+#include <casacore/images/Images/PagedImage.h>
+#include <casacore/lattices/Lattices/ArrayLattice.h>
+#include <casacore/coordinates/Coordinates/CoordinateSystem.h>
+#include <casacore/coordinates/Coordinates/LinearCoordinate.h>
+#include <casacore/coordinates/Coordinates/DirectionCoordinate.h>
 
 
 

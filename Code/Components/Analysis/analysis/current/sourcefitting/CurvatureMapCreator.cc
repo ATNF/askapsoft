@@ -35,19 +35,19 @@
 #include <askapparallel/AskapParallel.h>
 #include <Common/ParameterSet.h>
 #include <string>
-#include <casa/Arrays/Array.h>
-#include <casa/Arrays/ArrayMath.h>
+#include <casacore/casa/Arrays/Array.h>
+#include <casacore/casa/Arrays/ArrayMath.h>
 #include <outputs/DistributedImageWriter.h>
 #include <casainterface/CasaInterface.h>
 #include <analysisparallel/SubimageDef.h>
-#include <scimath/Mathematics/Convolver.h>
+#include <casacore/scimath/Mathematics/Convolver.h>
 #include <duchamp/Cubes/cubes.hh>
 
-#include <images/Images/PagedImage.h>
-#include <images/Images/SubImage.h>
-#include <images/Images/ImageOpener.h>
-#include <images/Images/FITSImage.h>
-#include <images/Images/MIRIADImage.h>
+#include <casacore/images/Images/PagedImage.h>
+#include <casacore/images/Images/SubImage.h>
+#include <casacore/images/Images/ImageOpener.h>
+#include <casacore/images/Images/FITSImage.h>
+#include <casacore/images/Images/MIRIADImage.h>
 #include <casainterface/CasaInterface.h>
 
 ///@brief Where the log messages go.

@@ -28,7 +28,7 @@
 #define ASKAP_CP_CALDATASERVICE_ICEMAPPER_H
 
 // ASKAPsoft includes
-#include "casa/aipstype.h"
+#include "casacore/casa/aipstype.h"
 #include "CalibrationDataService.h" // Ice generated interface
 
 // Local package includes

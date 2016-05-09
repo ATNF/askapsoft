@@ -28,7 +28,7 @@
 #define ASKAP_ACCESSORS_JONES_INDEX_H
 
 // ASKAPsoft includes
-#include "casa/aipstype.h"
+#include "casacore/casa/aipstype.h"
 
 namespace askap {
 namespace accessors {

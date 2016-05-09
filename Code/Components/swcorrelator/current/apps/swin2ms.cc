@@ -39,10 +39,10 @@
 #include <swcorrelator/FillerMSSink.h>
 
 // casa includes
-#include <casa/OS/Timer.h>
-#include <measures/Measures/MEpoch.h>
-#include <measures/Measures/MeasConvert.h>
-#include <measures/Measures/MCEpoch.h>
+#include <casacore/casa/OS/Timer.h>
+#include <casacore/measures/Measures/MEpoch.h>
+#include <casacore/measures/Measures/MeasConvert.h>
+#include <casacore/measures/Measures/MCEpoch.h>
 
 
 // other 3rd party

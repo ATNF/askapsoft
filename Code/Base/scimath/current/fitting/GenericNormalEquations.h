@@ -37,9 +37,9 @@
 #define GENERIC_NORMAL_EQUATIONS_H
 
 // casa includes
-#include <casa/Arrays/Matrix.h>
-#include <casa/Arrays/Vector.h>
-#include <casa/Arrays/Array.h>
+#include <casacore/casa/Arrays/Matrix.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/casa/Arrays/Array.h>
 
 // own includes
 #include <fitting/INormalEquations.h>

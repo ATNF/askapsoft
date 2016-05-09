@@ -47,7 +47,7 @@
 #include <dataaccess/DataAccessError.h>
 
 // casa includes
-#include <tables/Tables/ArrayColumn.h>
+#include <casacore/tables/Tables/ArrayColumn.h>
 
 namespace askap {
 

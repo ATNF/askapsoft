@@ -28,13 +28,13 @@
 #include <Blob/BlobOStream.h>
 #include <Blob/BlobIStream.h>
 
-#include <casa/Arrays/Matrix.h>
+#include <casacore/casa/Arrays/Matrix.h>
 
 #include <cppunit/extensions/HelperMacros.h>
 
 #include <askap/AskapError.h>
-#include <coordinates/Coordinates/Projection.h>
-#include <coordinates/Coordinates/DirectionCoordinate.h>
+#include <casacore/coordinates/Coordinates/Projection.h>
+#include <casacore/coordinates/Coordinates/DirectionCoordinate.h>
 
 #include <vector>
 

@@ -34,7 +34,7 @@
 #define DEEP_COPY_UTILS_H
 
 #include <map>
-#include <casa/Arrays/Array.h>
+#include <casacore/casa/Arrays/Array.h>
 
 
 namespace askap {

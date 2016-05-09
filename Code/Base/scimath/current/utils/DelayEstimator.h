@@ -35,8 +35,8 @@
 #define ASKAP_SCIMATH_UTILS_DELAY_ESTIMATOR_H
 
 // casa includes
-#include <casa/Arrays/Vector.h>
-#include <casa/BasicSL/Complex.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/casa/BasicSL/Complex.h>
 
 
 namespace askap {

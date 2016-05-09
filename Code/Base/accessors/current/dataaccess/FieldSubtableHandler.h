@@ -38,9 +38,9 @@
 #define ASKAP_ACCESSORS_FIELD_SUBTABLE_HANDLER_H
 
 // casa includes
-#include <tables/Tables/Table.h>
-#include <tables/Tables/TableIter.h>
-#include <casa/Quanta/Quantum.h>
+#include <casacore/tables/Tables/Table.h>
+#include <casacore/tables/Tables/TableIter.h>
+#include <casacore/casa/Quanta/Quantum.h>
 
 // own includes
 #include <dataaccess/IFieldSubtableHandler.h>

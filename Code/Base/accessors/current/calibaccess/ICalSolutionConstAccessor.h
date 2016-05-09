@@ -34,10 +34,10 @@
 #define ASKAP_ACCESSORS_I_CAL_SOLUTION_CONST_ACCESSOR_H
 
 // casa includes
-#include <casa/aipstype.h>
-#include <casa/BasicSL/Complex.h>
-#include <casa/Arrays/Matrix.h>
-#include <scimath/Mathematics/SquareMatrix.h>
+#include <casacore/casa/aipstype.h>
+#include <casacore/casa/BasicSL/Complex.h>
+#include <casacore/casa/Arrays/Matrix.h>
+#include <casacore/scimath/Mathematics/SquareMatrix.h>
 
 // boost includes
 #include "boost/shared_ptr.hpp"

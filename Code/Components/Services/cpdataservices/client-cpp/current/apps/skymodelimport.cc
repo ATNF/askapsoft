@@ -33,7 +33,7 @@
 // ASKAPsoft includes
 #include "boost/program_options.hpp"
 #include "askap/AskapError.h"
-#include "casa/aipstype.h"
+#include "casacore/casa/aipstype.h"
 
 // Local package includes
 #include "skymodelclient/SkyModelServiceClient.h"

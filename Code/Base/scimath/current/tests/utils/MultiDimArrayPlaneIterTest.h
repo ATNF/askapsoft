@@ -32,8 +32,8 @@
 #ifndef MULTI_DIM_ARRAY_PLANE_ITER_TEST_H
 #define MULTI_DIM_ARRAY_PLANE_ITER_TEST_H
 
-#include <casa/Arrays/Array.h>
-#include <casa/Arrays/Matrix.h>
+#include <casacore/casa/Arrays/Array.h>
+#include <casacore/casa/Arrays/Matrix.h>
 
 #include <cppunit/extensions/HelperMacros.h>
 

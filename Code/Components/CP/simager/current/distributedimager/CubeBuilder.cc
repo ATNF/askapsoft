@@ -42,15 +42,15 @@
 #include <measurementequation/SynthesisParamsHelper.h>
 #include <Common/ParameterSet.h>
 #include <utils/PolConverter.h>
-#include <casa/Arrays/IPosition.h>
-#include <coordinates/Coordinates/SpectralCoordinate.h>
-#include <coordinates/Coordinates/DirectionCoordinate.h>
-#include <coordinates/Coordinates/StokesCoordinate.h>
-#include <coordinates/Coordinates/CoordinateSystem.h>
-#include <measures/Measures/Stokes.h>
-#include <images/Images/PagedImage.h>
-#include <casa/Quanta/Unit.h>
-#include <casa/Quanta/QC.h>
+#include <casacore/casa/Arrays/IPosition.h>
+#include <casacore/coordinates/Coordinates/SpectralCoordinate.h>
+#include <casacore/coordinates/Coordinates/DirectionCoordinate.h>
+#include <casacore/coordinates/Coordinates/StokesCoordinate.h>
+#include <casacore/coordinates/Coordinates/CoordinateSystem.h>
+#include <casacore/measures/Measures/Stokes.h>
+#include <casacore/images/Images/PagedImage.h>
+#include <casacore/casa/Quanta/Unit.h>
+#include <casacore/casa/Quanta/QC.h>
 
 ASKAP_LOGGER(logger, ".CubeBuilder");
 

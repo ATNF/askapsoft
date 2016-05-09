@@ -31,7 +31,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
-#include "casa/Quanta/Quantum.h"
+#include "casacore/casa/Quanta/Quantum.h"
 #include "skymodelclient/Component.h"
 #include "Common/ParameterSet.h"
 

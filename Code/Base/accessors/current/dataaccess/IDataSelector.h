@@ -30,11 +30,11 @@
 #ifndef ASKAP_ACCESSORS_I_DATA_SELECTOR_H
 #define ASKAP_ACCESSORS_I_DATA_SELECTOR_H
 
-#include <casa/aips.h>
-#include <casa/Quanta/MVFrequency.h>
-#include <casa/Quanta/MVRadialVelocity.h>
-#include <casa/Quanta/MVEpoch.h>
-#include <casa/BasicSL/String.h>
+#include <casacore/casa/aips.h>
+#include <casacore/casa/Quanta/MVFrequency.h>
+#include <casacore/casa/Quanta/MVRadialVelocity.h>
+#include <casacore/casa/Quanta/MVEpoch.h>
+#include <casacore/casa/BasicSL/String.h>
 
 namespace askap {
 

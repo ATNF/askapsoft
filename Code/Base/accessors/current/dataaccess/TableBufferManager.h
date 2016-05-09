@@ -34,8 +34,8 @@
 
 #include <dataaccess/IBufferManager.h>
 #include <dataaccess/TableHolder.h>
-#include <casa/BasicSL/Complex.h>
-#include <casa/Arrays/Cube.h>
+#include <casacore/casa/BasicSL/Complex.h>
+#include <casacore/casa/Arrays/Cube.h>
 
 
 namespace askap {

@@ -32,7 +32,7 @@
 #define ASKAP_ACCESSORS_TABLE_TIME_STAMP_SELECTOR_IMPL_H
 
 // casa includes
-#include <tables/Tables/Table.h>
+#include <casacore/tables/Tables/Table.h>
 
 // own includes
 #include <dataaccess/TableTimeStampSelector.h>

@@ -39,9 +39,9 @@
 #include "askap/AskapError.h"
 #include "askap/AskapUtil.h"
 #include "Ice/Ice.h"
-#include "measures/Measures/MEpoch.h"
-#include "casa/OS/Time.h"
-#include "casa/Quanta/MVEpoch.h"
+#include "casacore/measures/Measures/MEpoch.h"
+#include "casacore/casa/OS/Time.h"
+#include "casacore/casa/Quanta/MVEpoch.h"
 
 // Ice interfaces includes
 #include "TypedValues.h"

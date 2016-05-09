@@ -31,7 +31,7 @@
 #include "cpcommon/VisChunk.h"
 
 // casa includes
-#include <casa/Arrays/Matrix.h>
+#include <casacore/casa/Arrays/Matrix.h>
 
 namespace askap {
 namespace cp {

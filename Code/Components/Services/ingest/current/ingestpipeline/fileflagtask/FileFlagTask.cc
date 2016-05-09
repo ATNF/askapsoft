@@ -36,7 +36,7 @@
 #include "askap/AskapLogging.h"
 #include "askap/AskapError.h"
 #include "askap/AskapUtil.h"
-#include <casa/Arrays/Matrix.h>
+#include <casacore/casa/Arrays/Matrix.h>
 
 // Local package includes
 #include "ingestpipeline/fileflagtask/FileFlagTask.h"

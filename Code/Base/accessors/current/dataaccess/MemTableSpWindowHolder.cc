@@ -42,11 +42,11 @@
 #include <dataaccess/DataAccessError.h>
 
 // casa includes
-#include <tables/Tables/ScalarColumn.h>
-#include <tables/Tables/ArrayColumn.h>
-#include <tables/Tables/TableRecord.h>
-#include <casa/Quanta/Quantum.h>
-#include <casa/Quanta/MVFrequency.h>
+#include <casacore/tables/Tables/ScalarColumn.h>
+#include <casacore/tables/Tables/ArrayColumn.h>
+#include <casacore/tables/Tables/TableRecord.h>
+#include <casacore/casa/Quanta/Quantum.h>
+#include <casacore/casa/Quanta/MVFrequency.h>
 
 
 using namespace askap;

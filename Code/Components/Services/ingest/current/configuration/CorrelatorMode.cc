@@ -32,10 +32,10 @@
 
 // ASKAPsoft includes
 #include "askap/AskapError.h"
-#include "casa/BasicSL.h"
-#include "casa/Quanta.h"
-#include "measures/Measures/MDirection.h"
-#include "measures/Measures/Stokes.h"
+#include "casacore/casa/BasicSL.h"
+#include "casacore/casa/Quanta.h"
+#include "casacore/measures/Measures/MDirection.h"
+#include "casacore/measures/Measures/Stokes.h"
 
 using namespace askap;
 using namespace askap::cp::ingest;

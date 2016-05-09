@@ -49,11 +49,11 @@
 #include <duchamp/Utils/Section.hh>
 #include <duchamp/Outputs/CatalogueSpecification.hh>
 
-#include <scimath/Functionals/Gaussian2D.h>
+#include <casacore/scimath/Functionals/Gaussian2D.h>
 
-#include <casa/namespace.h>
-#include <casa/Arrays/IPosition.h>
-#include <casa/Arrays/Slicer.h>
+#include <casacore/casa/namespace.h>
+#include <casacore/casa/Arrays/IPosition.h>
+#include <casacore/casa/Arrays/Slicer.h>
 #include <boost/shared_ptr.hpp>
 
 #include <map>

@@ -34,8 +34,8 @@
 #ifndef MULTI_DIM_ARRAY_PLANE_ITER_H
 #define MULTI_DIM_ARRAY_PLANE_ITER_H
 
-#include <casa/Arrays/ArrayPosIter.h>
-#include <casa/Arrays/Array.h>
+#include <casacore/casa/Arrays/ArrayPosIter.h>
+#include <casacore/casa/Arrays/Array.h>
 
 #include <string>
 

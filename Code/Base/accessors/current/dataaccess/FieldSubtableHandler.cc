@@ -42,11 +42,11 @@
 #include <dataaccess/DataAccessError.h>
 
 // casa includes
-#include <tables/Tables/TableRecord.h>
-#include <tables/Tables/ScalarColumn.h>
-#include <measures/TableMeasures/ScalarMeasColumn.h>
-#include <casa/Arrays/Array.h>
-#include <casa/BasicSL/String.h>
+#include <casacore/tables/Tables/TableRecord.h>
+#include <casacore/tables/Tables/ScalarColumn.h>
+#include <casacore/measures/TableMeasures/ScalarMeasColumn.h>
+#include <casacore/casa/Arrays/Array.h>
+#include <casacore/casa/BasicSL/String.h>
 
 // uncomment logger when it is actually used
 //#include <askap/AskapLogging.h>

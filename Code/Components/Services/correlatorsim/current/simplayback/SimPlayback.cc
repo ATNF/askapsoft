@@ -41,7 +41,7 @@
 #include "askap/AskapLogging.h"
 #include "Common/ParameterSet.h"
 #include "boost/shared_ptr.hpp"
-#include "casa/OS/Timer.h"
+#include "casacore/casa/OS/Timer.h"
 
 // Local package includes
 #include "simplayback/ISimulator.h"

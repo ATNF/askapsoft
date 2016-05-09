@@ -31,10 +31,10 @@
 #include <vector>
 
 // ASKAPsoft includes
-#include "casa/aips.h"
-#include "casa/Quanta.h"
-#include "casa/BasicSL.h"
-#include "casa/Arrays/Vector.h"
+#include "casacore/casa/aips.h"
+#include "casacore/casa/Quanta.h"
+#include "casacore/casa/BasicSL.h"
+#include "casacore/casa/Arrays/Vector.h"
 
 namespace askap {
 namespace cp {

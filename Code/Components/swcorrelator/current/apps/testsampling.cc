@@ -27,9 +27,9 @@
 
 #include <askap/AskapError.h>
 #include <fft/FFTWrapper.h>
-#include <casa/Arrays/Vector.h>
-#include <casa/BasicSL/Constants.h>
-#include <casa/OS/Timer.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/casa/BasicSL/Constants.h>
+#include <casacore/casa/OS/Timer.h>
 
 
 // for debugging

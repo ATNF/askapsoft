@@ -32,8 +32,8 @@
 #include <askap/AskapLogging.h>
 #include <askap/AskapError.h>
 
-#include <casa/namespace.h>
-#include <scimath/Functionals/Gaussian2D.h>
+#include <casacore/casa/namespace.h>
+#include <casacore/scimath/Functionals/Gaussian2D.h>
 #include <duchamp/FitsIO/Beam.hh>
 
 #include <vector>

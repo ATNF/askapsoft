@@ -31,8 +31,9 @@
 // other 3rd party
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
-#include <casa/Arrays/Array.h>
-#include <images/Images/ImageRegrid.h>
+#include <casacore/casa/Arrays/Array.h>
+#include <casacore/images/Images/ImageRegrid.h>
+#include <casacore/lattices/LatticeMath/LatticeMathUtil.h>
 
 // ASKAPsoft includes
 #include <askap/Application.h>

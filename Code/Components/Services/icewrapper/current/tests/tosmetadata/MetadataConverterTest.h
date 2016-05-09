@@ -38,8 +38,8 @@
 #include "boost/scoped_ptr.hpp"
 #include "TypedValues.h"
 #include "cpcommon/TosMetadata.h"
-#include "casa/aips.h"
-#include "measures/Measures/MDirection.h"
+#include "casacore/casa/aips.h"
+#include "casacore/measures/Measures/MDirection.h"
 
 // Classes to test
 #include "tosmetadata/MetadataConverter.h"

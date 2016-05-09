@@ -38,7 +38,7 @@
 // ASKAPsoft includes
 #include "askap/AskapError.h"
 #include "askap/AskapUtil.h"
-#include "casa/Quanta/MVTime.h"
+#include "casacore/casa/Quanta/MVTime.h"
 #include "boost/filesystem.hpp"
 
 // Local package includes

@@ -41,8 +41,8 @@
 #include <sourcefitting/RadioSource.h>
 #include <casainterface/CasaInterface.h>
 
-#include <casa/Quanta/Quantum.h>
-#include <casa/Quanta/Unit.h>
+#include <casacore/casa/Quanta/Quantum.h>
+#include <casacore/casa/Quanta/Unit.h>
 
 #include <iostream>
 #include <iomanip>

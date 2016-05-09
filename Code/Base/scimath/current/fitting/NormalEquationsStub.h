@@ -36,7 +36,7 @@
 
 // own includes
 #include <fitting/INormalEquations.h>
-#include <casa/Arrays/Matrix.h>
+#include <casacore/casa/Arrays/Matrix.h>
 
 // boost includes
 #include <boost/shared_ptr.hpp>

@@ -32,9 +32,9 @@
 #include <boost/shared_ptr.hpp>
 
 // casa includes
-#include <tables/Tables/Table.h>
-#include <tables/Tables/TableError.h>
-#include <casa/OS/EnvVar.h>
+#include <casacore/tables/Tables/Table.h>
+#include <casacore/tables/Tables/TableError.h>
+#include <casacore/casa/OS/EnvVar.h>
 
 // std includes
 #include <string>

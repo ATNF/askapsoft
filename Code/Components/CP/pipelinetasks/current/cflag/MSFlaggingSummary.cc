@@ -41,11 +41,11 @@
 #include "askap/AskapLogging.h"
 #include "askap/AskapError.h"
 #include "askap/AskapUtil.h"
-#include "casa/aipstype.h"
-#include "ms/MeasurementSets/MeasurementSet.h"
-#include "ms/MeasurementSets/MSColumns.h"
-#include "measures/Measures/Stokes.h"
-#include "casa/Arrays/Matrix.h"
+#include "casacore/casa/aipstype.h"
+#include "casacore/ms/MeasurementSets/MeasurementSet.h"
+#include "casacore/ms/MeasurementSets/MSColumns.h"
+#include "casacore/measures/Measures/Stokes.h"
+#include "casacore/casa/Arrays/Matrix.h"
 
 // Using
 using namespace std;

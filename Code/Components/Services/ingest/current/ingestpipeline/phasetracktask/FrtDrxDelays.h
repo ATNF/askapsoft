@@ -38,8 +38,8 @@
 #include "configuration/Configuration.h" // Includes all configuration attributes too
 
 // casa includes
-#include <casa/Arrays/Matrix.h>
-#include <casa/Arrays/Vector.h>
+#include <casacore/casa/Arrays/Matrix.h>
+#include <casacore/casa/Arrays/Vector.h>
 
 // boost
 #include <boost/shared_ptr.hpp>

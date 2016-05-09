@@ -23,8 +23,8 @@
 
 #include <cstdlib>
 #include <fftw3.h>
-#include <casa/Arrays/Vector.h>
-#include <casa/Arrays/Matrix.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/casa/Arrays/Matrix.h>
 #include <fft/FFTWrapper.h>
 
 #include <askap/AskapError.h>

@@ -36,9 +36,9 @@
 #include "ingestpipeline/phasetracktask/FrtMetadataSource.h"
 
 // casa includes
-#include "casa/aips.h"
-#include "casa/Quanta/MVEpoch.h"
-#include <casa/Arrays/Vector.h>
+#include "casacore/casa/aips.h"
+#include "casacore/casa/Quanta/MVEpoch.h"
+#include <casacore/casa/Arrays/Vector.h>
 
 // std includes
 #include <vector>

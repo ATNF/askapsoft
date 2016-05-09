@@ -48,14 +48,14 @@
 #include <map>
 #include <string>
 
-#include <measures/Measures/Stokes.h>
-#include <casa/Arrays/Vector.h>
+#include <casacore/measures/Measures/Stokes.h>
+#include <casacore/casa/Arrays/Vector.h>
 
 
 #include <Blob/BlobOStream.h>
 #include <Blob/BlobIStream.h>
 
-#include <coordinates/Coordinates/DirectionCoordinate.h>
+#include <casacore/coordinates/Coordinates/DirectionCoordinate.h>
 #include <boost/shared_ptr.hpp>
 
 namespace askap

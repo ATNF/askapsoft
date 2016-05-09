@@ -28,9 +28,9 @@
 #define ASKAP_CP_TOSMETADATAANTENNA_H
 
 // ASKAPsoft includes
-#include "casa/aips.h"
-#include "measures/Measures/MDirection.h"
-#include "casa/Quanta/Quantum.h"
+#include "casacore/casa/aips.h"
+#include "casacore/measures/Measures/MDirection.h"
+#include "casacore/casa/Quanta/Quantum.h"
 
 // for serialisation
 #include "Blob/BlobOStream.h"

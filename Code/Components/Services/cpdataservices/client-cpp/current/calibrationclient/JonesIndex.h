@@ -28,7 +28,7 @@
 #define ASKAP_CP_CALDATASERVICE_JONESINDEX_H
 
 // ASKAPsoft includes
-#include "casa/aipstype.h"
+#include "casacore/casa/aipstype.h"
 
 namespace askap {
 namespace cp {

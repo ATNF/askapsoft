@@ -29,11 +29,11 @@
 
 // Support classes
 #include "askap/AskapError.h"
-#include "casa/aips.h"
-#include "casa/BasicSL.h"
-#include "casa/Quanta.h"
-#include "casa/Arrays/Matrix.h"
-#include "casa/Arrays/Vector.h"
+#include "casacore/casa/aips.h"
+#include "casacore/casa/BasicSL.h"
+#include "casacore/casa/Quanta.h"
+#include "casacore/casa/Arrays/Matrix.h"
+#include "casacore/casa/Arrays/Vector.h"
 #include "boost/scoped_ptr.hpp"
 
 // Classes to test

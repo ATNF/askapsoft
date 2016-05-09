@@ -44,8 +44,8 @@
 #endif
 
 // casa includes
-#include <measures/Measures/MDirection.h>
-#include <measures/Measures/UVWMachine.h>
+#include <casacore/measures/Measures/MDirection.h>
+#include <casacore/measures/Measures/UVWMachine.h>
 
 #include <dataaccess/TempUVWMachine.h>
 

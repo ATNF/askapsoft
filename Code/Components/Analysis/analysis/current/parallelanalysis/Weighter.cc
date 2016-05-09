@@ -35,8 +35,8 @@
 #include <askap/AskapLogging.h>
 #include <askap/AskapError.h>
 
-#include <casa/aipstype.h>
-#include <casa/Arrays/Vector.h>
+#include <casacore/casa/aipstype.h>
+#include <casacore/casa/Arrays/Vector.h>
 #define AIPS_ARRAY_INDEX_CHECK
 
 #include <Blob/BlobString.h>

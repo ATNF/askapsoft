@@ -35,13 +35,13 @@
 #include <sourcefitting/SubComponent.h>
 #include <mathsutils/MathsUtils.h>
 
+#include <casacore/scimath/Fitting/FitGaussian.h>
+#include <casacore/scimath/Functionals/Gaussian1D.h>
+#include <casacore/scimath/Functionals/Gaussian2D.h>
+#include <casacore/scimath/Functionals/Gaussian3D.h>
+#include <casacore/casa/namespace.h>
 #include <components/AskapComponentImager.h>
 
-#include <scimath/Fitting/FitGaussian.h>
-#include <scimath/Functionals/Gaussian1D.h>
-#include <scimath/Functionals/Gaussian2D.h>
-#include <scimath/Functionals/Gaussian3D.h>
-#include <casa/namespace.h>
 
 #include <iostream>
 #include <fstream>

@@ -31,8 +31,8 @@
 #include "askap_cpingest.h"
 
 // CASA includes
-#include "casa/Arrays/MatrixMath.h"
-#include "casa/Arrays/Vector.h"
+#include "casacore/casa/Arrays/MatrixMath.h"
+#include "casacore/casa/Arrays/Vector.h"
 
 // ASKAPsoft includes
 #include "askap/AskapLogging.h"

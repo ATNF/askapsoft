@@ -33,7 +33,7 @@
 // ASKAPsoft includes
 #include "Common/ParameterSet.h"
 #include "boost/shared_ptr.hpp"
-#include "ms/MeasurementSets/MeasurementSet.h"
+#include "casacore/ms/MeasurementSets/MeasurementSet.h"
 
 // Local package includes
 #include "cflag/IFlagger.h"

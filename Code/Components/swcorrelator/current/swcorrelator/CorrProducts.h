@@ -31,8 +31,8 @@
 #ifndef ASKAP_SWCORRELATOR_CORR_PRODUCTS
 #define ASKAP_SWCORRELATOR_CORR_PRODUCTS
 
-#include <casa/Arrays/Matrix.h>
-#include <casa/BasicSL/Constants.h>
+#include <casacore/casa/Arrays/Matrix.h>
+#include <casacore/casa/BasicSL/Constants.h>
 #include <inttypes.h>
 
 #include <boost/utility.hpp>

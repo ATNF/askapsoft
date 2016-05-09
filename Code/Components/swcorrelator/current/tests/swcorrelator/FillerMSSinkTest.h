@@ -31,9 +31,9 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 #include <Common/ParameterSet.h>
-#include <casa/OS/RegularFile.h>
-#include <casa/OS/Directory.h>
-#include <casa/OS/File.h>
+#include <casacore/casa/OS/RegularFile.h>
+#include <casacore/casa/OS/Directory.h>
+#include <casacore/casa/OS/File.h>
 #include <askap/AskapError.h>
 
 // Class under test

@@ -32,8 +32,8 @@
 #define GENERAL_FITTING_TEST_H
 
 
-#include <casa/Arrays/Cube.h>
-#include <casa/Arrays/Matrix.h>
+#include <casacore/casa/Arrays/Cube.h>
+#include <casacore/casa/Arrays/Matrix.h>
 
 #include <fitting/LinearSolver.h>
 #include <fitting/GenericNormalEquations.h>

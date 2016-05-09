@@ -44,9 +44,9 @@
 #include <string>
 #include <set>
 
-#include <casa/aipstype.h>
-#include <images/Images/FITSImage.h>
-#include <images/Images/ImageOpener.h>
+#include <casacore/casa/aipstype.h>
+#include <casacore/images/Images/FITSImage.h>
+#include <casacore/images/Images/ImageOpener.h>
 
 #include <duchamp/fitsHeader.hh>
 #include <duchamp/Utils/Statistics.hh>

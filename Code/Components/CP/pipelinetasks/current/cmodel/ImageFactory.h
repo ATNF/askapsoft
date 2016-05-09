@@ -35,11 +35,11 @@
 #include "Common/ParameterSet.h"
 
 // Casacore includes
-#include "casa/aipstype.h"
-#include "casa/Arrays/Vector.h"
-#include "coordinates/Coordinates/CoordinateSystem.h"
-#include "images/Images/TempImage.h"
-#include "images/Images/PagedImage.h"
+#include "casacore/casa/aipstype.h"
+#include "casacore/casa/Arrays/Vector.h"
+#include "casacore/coordinates/Coordinates/CoordinateSystem.h"
+#include "casacore/images/Images/TempImage.h"
+#include "casacore/images/Images/PagedImage.h"
 
 namespace askap {
 namespace cp {

@@ -28,7 +28,7 @@
 ///
 /// @author Max Voronkov <maxim.voronkov@csiro.au>
 
-#include <casa/aipstype.h>
+#include <casacore/casa/aipstype.h>
 #include <cppunit/extensions/HelperMacros.h>
 
 // own includes
@@ -148,9 +148,9 @@ public:
   /// @param[in] gains pair of cubes with gains and validity flags (should be 2 x nAnt x nBeam)
   virtual void writeGains(const std::pair<casa::Cube<casa::Complex>, casa::Cube<casa::Bool> > &gains) const  {
      CPPUNIT_ASSERT(gains.first.shape() == gains.second.shape());
-     CPPUNIT_ASSERT_EQUAL(2u,gains.first.nrow());
-     CPPUNIT_ASSERT_EQUAL(itsNAnt,gains.first.ncolumn());
-     CPPUNIT_ASSERT_EQUAL(itsNBeam,gains.first.nplane());      
+     CPPUNIT_ASSERT_EQUAL(size_t(2u),gains.first.nrow());
+     CPPUNIT_ASSERT_EQUAL(size_t(itsNAnt),gains.first.ncolumn());
+     CPPUNIT_ASSERT_EQUAL(size_t(itsNBeam),gains.first.nplane());      
      itsGainsWritten = true;
   }
   
@@ -159,9 +159,9 @@ public:
   /// @param[in] leakages pair of cubes with leakages and validity flags (should be 2 x nAnt x nBeam)
   virtual void writeLeakages(const std::pair<casa::Cube<casa::Complex>, casa::Cube<casa::Bool> > &leakages) const {
      CPPUNIT_ASSERT(leakages.first.shape() == leakages.second.shape());
-     CPPUNIT_ASSERT_EQUAL(2u,leakages.first.nrow());
-     CPPUNIT_ASSERT_EQUAL(itsNAnt,leakages.first.ncolumn());
-     CPPUNIT_ASSERT_EQUAL(itsNBeam,leakages.first.nplane());      
+     CPPUNIT_ASSERT_EQUAL(size_t(2u),leakages.first.nrow());
+     CPPUNIT_ASSERT_EQUAL(size_t(itsNAnt),leakages.first.ncolumn());
+     CPPUNIT_ASSERT_EQUAL(size_t(itsNBeam),leakages.first.nplane());      
      itsLeakagesWritten = true;  
   }
 
@@ -170,9 +170,9 @@ public:
   /// @param[in] bp pair of cubes with bandpasses and validity flags (should be (2*nChan) x nAnt x nBeam)
   virtual void writeBandpasses(const std::pair<casa::Cube<casa::Complex>, casa::Cube<casa::Bool> > &bp) const {
      CPPUNIT_ASSERT(bp.first.shape() == bp.second.shape());
-     CPPUNIT_ASSERT_EQUAL(2*itsNChan,bp.first.nrow());
-     CPPUNIT_ASSERT_EQUAL(itsNAnt,bp.first.ncolumn());
-     CPPUNIT_ASSERT_EQUAL(itsNBeam,bp.first.nplane());      
+     CPPUNIT_ASSERT_EQUAL(size_t(2*itsNChan),bp.first.nrow());
+     CPPUNIT_ASSERT_EQUAL(size_t(itsNAnt),bp.first.ncolumn());
+     CPPUNIT_ASSERT_EQUAL(size_t(itsNBeam),bp.first.nplane());      
      itsBandpassesWritten = true;    
   }
    

@@ -44,9 +44,9 @@
 #define SCIMATH_UTILS_SPEROIDAL_FUNCTION_H
 
 // casa includes
-#include <casa/BasicSL/Constants.h>
-#include <casa/Arrays/Vector.h>
-#include <casa/Arrays/Matrix.h>
+#include <casacore/casa/BasicSL/Constants.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/casa/Arrays/Matrix.h>
 
 
 namespace askap {

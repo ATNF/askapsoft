@@ -38,8 +38,8 @@
 #include "askap/AskapUtil.h"
 #include "cpcommon/VisChunk.h"
 #include "monitoring/MonitoringSingleton.h"
-#include "measures/Measures/MDirection.h"
-#include "measures/Measures/MeasTable.h"
+#include "casacore/measures/Measures/MDirection.h"
+#include "casacore/measures/Measures/MeasTable.h"
 
 using namespace askap::cp::ingest;
 

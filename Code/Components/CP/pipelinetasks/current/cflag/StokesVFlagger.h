@@ -36,11 +36,11 @@
 #include "boost/shared_ptr.hpp"
 #include "boost/tuple/tuple.hpp"
 #include "boost/tuple/tuple_comparison.hpp"
-#include "casa/aipstype.h"
-#include "ms/MeasurementSets/MeasurementSet.h"
-#include "ms/MeasurementSets/MSColumns.h"
-#include "ms/MeasurementSets/MSPolColumns.h"
-#include "ms/MeasurementSets/StokesConverter.h"
+#include "casacore/casa/aipstype.h"
+#include "casacore/ms/MeasurementSets/MeasurementSet.h"
+#include "casacore/ms/MeasurementSets/MSColumns.h"
+#include "casacore/ms/MeasurementSets/MSPolColumns.h"
+#include "casacore/ms/MeasurementSets/StokesConverter.h"
 
 // Local package includes
 #include "cflag/IFlagger.h"

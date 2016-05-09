@@ -36,9 +36,9 @@
 
 #include <string>
 
-#include <casa/Arrays/Array.h>
-#include <coordinates/Coordinates/CoordinateSystem.h>
-#include <casa/Quanta/Quantum.h>
+#include <casacore/casa/Arrays/Array.h>
+#include <casacore/coordinates/Coordinates/CoordinateSystem.h>
+#include <casacore/casa/Quanta/Quantum.h>
 
 
 namespace askap {

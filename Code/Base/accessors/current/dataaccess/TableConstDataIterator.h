@@ -42,9 +42,9 @@
 #include <boost/shared_ptr.hpp>
 
 // casa includes
-#include <tables/Tables/Table.h>
-#include <tables/Tables/TableIter.h>
-#include <measures/Measures/Stokes.h>
+#include <casacore/tables/Tables/Table.h>
+#include <casacore/tables/Tables/TableIter.h>
+#include <casacore/measures/Measures/Stokes.h>
 
 
 // own includes

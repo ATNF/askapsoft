@@ -28,7 +28,7 @@
 #define ASKAP_CP_INGEST_SCANMANAGER_H
 
 // ASKAPsoft includes
-#include "casa/aips.h"
+#include "casacore/casa/aips.h"
 
 namespace askap {
 namespace cp {

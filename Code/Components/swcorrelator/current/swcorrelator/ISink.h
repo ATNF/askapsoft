@@ -34,7 +34,7 @@
 #include <swcorrelator/CorrProducts.h>
 
 // casa includes
-#include <measures/Measures/MEpoch.h>
+#include <casacore/measures/Measures/MEpoch.h>
 
 // boost includes
 #include <boost/utility.hpp>

@@ -16,6 +16,7 @@ pkg.AddSubPackage("ingestpipeline")
 
 env.AppendUnique(CCFLAGS=['-O3'])
 env.AppendUnique(CCFLAGS=['-DASKAP_DEBUG'])
+env.AppendUnique(CCFLAGS=['-Wno-unused-local-typedef'])
 
 # Needed for Unit Tests
 if 'AIPSPATH' not in os.environ:

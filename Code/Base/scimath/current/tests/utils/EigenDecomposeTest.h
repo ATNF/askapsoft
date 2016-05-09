@@ -28,8 +28,8 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
-#include <casa/Arrays/Vector.h>
-#include <casa/Arrays/Matrix.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/casa/Arrays/Matrix.h>
 
 #include <utils/EigenDecompose.h>
 

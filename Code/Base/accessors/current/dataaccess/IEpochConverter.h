@@ -34,8 +34,8 @@
 #define ASKAP_ACCESSORS_I_EPOCH_CONVERTER_H
 
 // CASA includes
-#include <measures/Measures/MEpoch.h>
-#include <measures/Measures/MeasFrame.h>
+#include <casacore/measures/Measures/MEpoch.h>
+#include <casacore/measures/Measures/MeasFrame.h>
 
 // own includes
 #include <dataaccess/IConverterBase.h>

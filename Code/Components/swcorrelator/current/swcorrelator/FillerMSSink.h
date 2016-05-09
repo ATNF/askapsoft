@@ -40,14 +40,14 @@
 #include <askap/IndexConverter.h>
 
 // casa includes
-#include "ms/MeasurementSets/MeasurementSet.h"
-#include <casa/BasicSL.h>
-#include <casa/Arrays/Vector.h>
-#include <casa/Arrays/Matrix.h>
-#include <casa/Quanta.h>
-#include <measures/Measures/Stokes.h>
-#include <measures/Measures/MDirection.h>
-#include <measures/Measures/MEpoch.h>
+#include "casacore/ms/MeasurementSets/MeasurementSet.h"
+#include <casacore/casa/BasicSL.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/casa/Arrays/Matrix.h>
+#include <casacore/casa/Quanta.h>
+#include <casacore/measures/Measures/Stokes.h>
+#include <casacore/measures/Measures/MDirection.h>
+#include <casacore/measures/Measures/MEpoch.h>
 
 
 // other 3rd party

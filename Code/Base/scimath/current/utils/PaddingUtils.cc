@@ -32,15 +32,15 @@
 
 #include <askap/AskapError.h>
 
-#include <casa/aips.h>
-#include <casa/Arrays/Array.h>
-#include <casa/Arrays/ArrayMath.h>
-#include <lattices/Lattices/ArrayLattice.h>
-#include <lattices/Lattices/LatticeExpr.h>
-#include <lattices/Lattices/SubLattice.h>
+#include <casacore/casa/aips.h>
+#include <casacore/casa/Arrays/Array.h>
+#include <casacore/casa/Arrays/ArrayMath.h>
+#include <casacore/lattices/Lattices/ArrayLattice.h>
+#include <casacore/lattices/LEL/LatticeExpr.h>
+#include <casacore/lattices/Lattices/SubLattice.h>
 
 #include <fft/FFTWrapper.h>
-#include <casa/Arrays/ArrayIter.h>
+#include <casacore/casa/Arrays/ArrayIter.h>
 
 
 using namespace askap;

@@ -30,9 +30,9 @@
 ///
 
 // CASA includes
-#include <measures/Measures/MCDirection.h>
-#include <measures/Measures/MeasConvert.h>
-#include <casa/Quanta/MVDirection.h>
+#include <casacore/measures/Measures/MCDirection.h>
+#include <casacore/measures/Measures/MeasConvert.h>
+#include <casacore/casa/Quanta/MVDirection.h>
 
 // own includes
 #include <dataaccess/DirectionConverter.h>

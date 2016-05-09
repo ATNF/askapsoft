@@ -30,7 +30,7 @@
 #define ASKAP_SIMS_GAUSS_PROFILE_H_
 
 #include <modelcomponents/Spectrum.h>
-#include <scimath/Functionals/Gaussian1D.h>
+#include <casacore/scimath/Functionals/Gaussian1D.h>
 #include <coordutils/SpectralUtilities.h>
 #include <iostream>
 

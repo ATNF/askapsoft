@@ -28,8 +28,8 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 // Support classes
-#include "casa/aipstype.h"
-#include "casa/BasicSL/Complex.h"
+#include "casacore/casa/aipstype.h"
+#include "casacore/casa/BasicSL/Complex.h"
 #include "CalibrationDataService.h" // Ice generated interface
 #include "calibrationclient/JonesJTerm.h"
 #include "calibrationclient/JonesIndex.h"

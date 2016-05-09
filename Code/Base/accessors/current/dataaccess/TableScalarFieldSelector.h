@@ -38,8 +38,8 @@
 #define ASKAP_ACCESSORS_TABLE_SCALAR_FIELD_SELECTOR_H
 
 // casa includes
-#include <tables/Tables/ExprNode.h>
-#include <tables/Tables/Table.h>
+#include <casacore/tables/TaQL/ExprNode.h>
+#include <casacore/tables/Tables/Table.h>
 
 // own includes
 #include <dataaccess/ITableDataSelectorImpl.h>

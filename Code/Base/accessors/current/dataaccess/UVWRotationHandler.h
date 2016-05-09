@@ -36,7 +36,7 @@
 
 #include <dataaccess/UVWMachineCache.h>
 #include <dataaccess/IConstDataAccessor.h>
-#include <measures/Measures/MDirection.h>
+#include <casacore/measures/Measures/MDirection.h>
 
 #ifdef _OPENMP
 // boost includes

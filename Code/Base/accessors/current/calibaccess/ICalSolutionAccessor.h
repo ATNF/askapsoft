@@ -36,7 +36,7 @@
 #include <calibaccess/ICalSolutionConstAccessor.h>
 
 // casa includes
-#include <measures/Measures/Stokes.h>
+#include <casacore/measures/Measures/Stokes.h>
 
 namespace askap {
 namespace accessors {

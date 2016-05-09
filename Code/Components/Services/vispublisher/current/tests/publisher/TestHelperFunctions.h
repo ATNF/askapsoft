@@ -34,7 +34,7 @@
 #include <algorithm>
 #include <vector>
 #include <cstring>
-#include "casa/Arrays/Cube.h"
+#include "casacore/casa/Arrays/Cube.h"
 #include "askap/AskapError.h"
 #include "publisher/InputMessage.h"
 

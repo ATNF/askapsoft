@@ -30,17 +30,17 @@
 
 #include <string>
 #include <duchamp/Cubes/cubes.hh>
-#include <casa/Arrays/Array.h>
-#include <casa/Arrays/IPosition.h>
-#include <coordinates/Coordinates/CoordinateSystem.h>
-#include <images/Images/PagedImage.h>
-#include <images/Images/ImageInfo.h>
-#include <images/Images/ImageOpener.h>
-#include <images/Images/FITSImage.h>
-#include <images/Images/MIRIADImage.h>
+#include <casacore/casa/Arrays/Array.h>
+#include <casacore/casa/Arrays/IPosition.h>
+#include <casacore/coordinates/Coordinates/CoordinateSystem.h>
+#include <casacore/images/Images/PagedImage.h>
+#include <casacore/images/Images/ImageInfo.h>
+#include <casacore/images/Images/ImageOpener.h>
+#include <casacore/images/Images/FITSImage.h>
+#include <casacore/images/Images/MIRIADImage.h>
 
 #include <casainterface/CasaInterface.h>
-#include <casa/aipstype.h>
+#include <casacore/casa/aipstype.h>
 
 ///@brief Where the log messages go.
 ASKAP_LOGGER(logger, ".imagewriter");

@@ -49,9 +49,9 @@
 #include <vector>
 #include <set>
 
-#include <casa/aips.h>
-#include <casa/Arrays/Vector.h>
-#include <casa/Arrays/Matrix.h>
+#include <casacore/casa/aips.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/casa/Arrays/Matrix.h>
 
 #include <fitting/Params.h>
 #include <fitting/ComplexDiff.h>

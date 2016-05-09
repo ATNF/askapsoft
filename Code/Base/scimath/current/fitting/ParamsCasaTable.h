@@ -29,9 +29,9 @@
 #ifndef SCIMATHPARAMSCasaTABLE_H_
 #define SCIMATHPARAMSCasaTABLE_H_
 
-#include <casa/aips.h>
-#include <tables/Tables/Table.h>
-#include <tables/Tables/TableDesc.h>
+#include <casacore/casa/aips.h>
+#include <casacore/tables/Tables/Table.h>
+#include <casacore/tables/Tables/TableDesc.h>
 
 #include <fitting/ParamsTable.h>
 

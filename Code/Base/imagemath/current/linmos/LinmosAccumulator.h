@@ -32,8 +32,8 @@
 #define ASKAP_LINMOS_H
 
 // other 3rd party
-#include <casa/Arrays/Array.h>
-#include <images/Images/ImageRegrid.h>
+#include <casacore/casa/Arrays/Array.h>
+#include <casacore/images/Images/ImageRegrid.h>
 
 // ASKAPsoft includes
 #include <utils/MultiDimArrayPlaneIter.h>

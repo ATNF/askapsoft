@@ -38,18 +38,18 @@
 
 #include <imageaccess/CasaImageAccess.h>
 
-#include <casa/Arrays/IPosition.h>
-#include <casa/Arrays/Array.h>
-#include <casa/Arrays/Slicer.h>
-#include <casa/Arrays/ArrayPartMath.h>
-#include <images/Images/ImageInterface.h>
-#include <images/Images/ImageOpener.h>
-#include <images/Images/FITSImage.h>
-#include <images/Images/MIRIADImage.h>
-#include <images/Images/SubImage.h>
-#include <coordinates/Coordinates/CoordinateSystem.h>
-#include <coordinates/Coordinates/DirectionCoordinate.h>
-#include <measures/Measures/Stokes.h>
+#include <casacore/casa/Arrays/IPosition.h>
+#include <casacore/casa/Arrays/Array.h>
+#include <casacore/casa/Arrays/Slicer.h>
+#include <casacore/casa/Arrays/ArrayPartMath.h>
+#include <casacore/images/Images/ImageInterface.h>
+#include <casacore/images/Images/ImageOpener.h>
+#include <casacore/images/Images/FITSImage.h>
+#include <casacore/images/Images/MIRIADImage.h>
+#include <casacore/images/Images/SubImage.h>
+#include <casacore/coordinates/Coordinates/CoordinateSystem.h>
+#include <casacore/coordinates/Coordinates/DirectionCoordinate.h>
+#include <casacore/measures/Measures/Stokes.h>
 
 #include <Common/ParameterSet.h>
 
@@ -111,7 +111,7 @@ void NoiseSpectrumExtractor::setBoxWidth()
 
     if (this->openInput()) {
         Vector<Quantum<Double> >
-        inputBeam = itsInputCubePtr->imageInfo().restoringBeam();
+        inputBeam = itsInputCubePtr->imageInfo().restoringBeam().toVector();
         ASKAPLOG_DEBUG_STR(logger, "Beam for input cube = " << inputBeam);
         if (inputBeam.size() == 0) {
             ASKAPLOG_WARN_STR(logger, "Input image \"" << itsInputCube <<

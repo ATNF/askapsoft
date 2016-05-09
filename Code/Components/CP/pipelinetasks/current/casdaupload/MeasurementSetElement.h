@@ -32,7 +32,7 @@
 #include <vector>
 
 // ASKAPsoft includes
-#include "measures/Measures/MEpoch.h"
+#include "casacore/measures/Measures/MEpoch.h"
 #include "xercesc/dom/DOM.hpp" // Includes all DOM
 #include "boost/filesystem.hpp"
 #include "Common/ParameterSet.h"

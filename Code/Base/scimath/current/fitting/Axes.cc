@@ -27,10 +27,10 @@
 /// @author Tim Cornwell <tim.cornwell@csiro.au>
 ///
 #include <fitting/Axes.h>
-#include <casa/aips.h>
-#include <casa/Exceptions/Error.h>
+#include <casacore/casa/aips.h>
+#include <casacore/casa/Exceptions/Error.h>
 
-#include <coordinates/Coordinates/Projection.h>
+#include <casacore/coordinates/Coordinates/Projection.h>
 
 
 #include <askap/AskapError.h>

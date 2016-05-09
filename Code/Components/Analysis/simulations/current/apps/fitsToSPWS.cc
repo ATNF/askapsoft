@@ -35,25 +35,25 @@
 #include <iomanip>
 
 #include <casainterface/CasaInterface.h>
-#include <casa/aipstype.h>
-#include <images/Images/FITSImage.h>
-#include <images/Images/ImageOpener.h>
-#include <images/Images/SubImage.h>
-#include <lattices/Lattices/LatticeLocker.h>
-#include <coordinates/Coordinates/Coordinate.h>
-#include <coordinates/Coordinates/CoordinateSystem.h>
-#include <coordinates/Coordinates/DirectionCoordinate.h>
-#include <coordinates/Coordinates/SpectralCoordinate.h>
-#include <measures/Measures/MDirection.h>
-#include <measures/Measures/MFrequency.h>
-#include <casa/Arrays/Vector.h>
-#include <casa/Arrays/IPosition.h>
-#include <casa/Arrays/Slicer.h>
-#include <casa/Containers/RecordInterface.h>
-#include <casa/Containers/RecordField.h>
-#include <casa/Containers/RecordFieldId.h>
-#include <casa/Quanta.h>
-#include <casa/Quanta/Unit.h>
+#include <casacore/casa/aipstype.h>
+#include <casacore/images/Images/FITSImage.h>
+#include <casacore/images/Images/ImageOpener.h>
+#include <casacore/images/Images/SubImage.h>
+#include <casacore/lattices/Lattices/LatticeLocker.h>
+#include <casacore/coordinates/Coordinates/Coordinate.h>
+#include <casacore/coordinates/Coordinates/CoordinateSystem.h>
+#include <casacore/coordinates/Coordinates/DirectionCoordinate.h>
+#include <casacore/coordinates/Coordinates/SpectralCoordinate.h>
+#include <casacore/measures/Measures/MDirection.h>
+#include <casacore/measures/Measures/MFrequency.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/casa/Arrays/IPosition.h>
+#include <casacore/casa/Arrays/Slicer.h>
+#include <casacore/casa/Containers/RecordInterface.h>
+#include <casacore/casa/Containers/RecordField.h>
+#include <casacore/casa/Containers/RecordFieldId.h>
+#include <casacore/casa/Quanta.h>
+#include <casacore/casa/Quanta/Unit.h>
 #include <boost/shared_ptr.hpp>
 
 using namespace askap;

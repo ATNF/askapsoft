@@ -37,7 +37,7 @@
 #include <profile/ProfileSingleton.h>
 
 // casa includes
-#include "casa/OS/Timer.h"
+#include "casacore/casa/OS/Timer.h"
 
 // std includes
 #include <string>

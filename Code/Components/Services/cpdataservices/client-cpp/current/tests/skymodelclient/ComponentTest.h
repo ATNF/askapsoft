@@ -29,9 +29,9 @@
 
 // Support classes
 #include <limits>
-#include "casa/aipstype.h"
+#include "casacore/casa/aipstype.h"
 #include "askap/AskapError.h"
-#include "casa/Quanta/Quantum.h"
+#include "casacore/casa/Quanta/Quantum.h"
 
 // Classes to test
 #include "skymodelclient/Component.h"

@@ -40,8 +40,8 @@
 #define ASKAP_ACCESSORS_I_DOPPLER_CONVERTER_H
 
 // CASA includes
-#include <measures/Measures/MFrequency.h>
-#include <measures/Measures/MRadialVelocity.h>
+#include <casacore/measures/Measures/MFrequency.h>
+#include <casacore/measures/Measures/MRadialVelocity.h>
 
 // own includes
 #include <dataaccess/IConverterBase.h>

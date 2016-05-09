@@ -35,8 +35,8 @@
 
 #include <extraction/SourceDataExtractor.h>
 #include <Common/ParameterSet.h>
-#include <casa/Arrays/Array.h>
-#include <casa/Arrays/IPosition.h>
+#include <casacore/casa/Arrays/Array.h>
+#include <casacore/casa/Arrays/IPosition.h>
 
 namespace askap {
 

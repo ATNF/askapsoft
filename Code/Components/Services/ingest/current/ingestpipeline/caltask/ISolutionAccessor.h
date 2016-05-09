@@ -29,8 +29,8 @@
 
 // ASKAPsoft includes
 #include "boost/shared_ptr.hpp"
-#include "casa/aipstype.h"
-#include "casa/BasicSL/Complex.h"
+#include "casacore/casa/aipstype.h"
+#include "casacore/casa/BasicSL/Complex.h"
 
 namespace askap {
 namespace cp {

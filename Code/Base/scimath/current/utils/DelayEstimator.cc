@@ -34,7 +34,7 @@
 #include "utils/DelayEstimator.h"
 #include "utils/PhaseUnwrapper.h"
 #include "fft/FFTWrapper.h"
-#include <casa/BasicSL/Constants.h>
+#include <casacore/casa/BasicSL/Constants.h>
 #include <askap/AskapError.h>
 
 #include <vector>

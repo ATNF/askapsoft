@@ -31,9 +31,9 @@
 #include <map>
 
 // ASKAPsoft includes
-#include "casa/aips.h"
+#include "casacore/casa/aips.h"
 #include "Common/ParameterSet.h"
-#include "casa/Arrays/Vector.h"
+#include "casacore/casa/Arrays/Vector.h"
 
 namespace askap {
 namespace cp {

@@ -42,12 +42,12 @@
 #include "askap/AskapError.h"
 #include "boost/shared_ptr.hpp"
 #include "Common/ParameterSet.h"
-#include "casa/aipstype.h"
-#include "ms/MeasurementSets/MeasurementSet.h"
-#include "ms/MeasurementSets/MSColumns.h"
-#include "ms/MeasurementSets/MSSelection.h"
-#include "casa/Arrays/Vector.h"
-#include "casa/Arrays/Matrix.h"
+#include "casacore/casa/aipstype.h"
+#include "casacore/ms/MeasurementSets/MeasurementSet.h"
+#include "casacore/ms/MeasurementSets/MSColumns.h"
+#include "casacore/ms/MSSel/MSSelection.h"
+#include "casacore/casa/Arrays/Vector.h"
+#include "casacore/casa/Arrays/Matrix.h"
 
 // Local package includes
 #include "cflag/FlaggingStats.h"

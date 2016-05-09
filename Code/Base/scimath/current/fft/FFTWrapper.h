@@ -32,8 +32,8 @@
 #define ASKAP_SCIMATH_FFTWRAPPER_H
 
 // ASKAPsoft includes
-#include <casa/Arrays/Vector.h>
-#include <casa/Arrays/Array.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/casa/Arrays/Array.h>
 
 namespace askap
 {

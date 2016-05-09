@@ -32,7 +32,7 @@
 
 // ASKAPsoft includes
 #include "askap/AskapError.h"
-#include "casa/aipstype.h"
+#include "casacore/casa/aipstype.h"
 
 // Local package includes
 #include "calibrationclient/JonesJTerm.h"

@@ -29,12 +29,12 @@
 #include <vector>
 #include <complex>
 
-#include <casa/Arrays/Vector.h>
-#include <casa/Arrays/ArrayMath.h>
-#include <casa/BasicSL.h>
-#include <scimath/Mathematics/FFTServer.h>
-#include <scimath/Mathematics/StatAcc.h>
-#include <scimath/Mathematics/HistAcc.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/casa/Arrays/ArrayMath.h>
+#include <casacore/casa/BasicSL.h>
+#include <casacore/scimath/Mathematics/FFTServer.h>
+#include <casacore/scimath/Mathematics/StatAcc.h>
+#include <casacore/scimath/Mathematics/HistAcc.h>
 #include <askap/AskapError.h>
 
 

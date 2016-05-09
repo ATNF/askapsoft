@@ -7,7 +7,7 @@
 /// @author Max Voronkov <maxim.voronkov@csiro.au>
 ///
 
-#include <casa/Quanta/MVEpoch.h>
+#include <casacore/casa/Quanta/MVEpoch.h>
 #include <dataaccess/IDataConverterImpl.h>
 
 namespace askap {

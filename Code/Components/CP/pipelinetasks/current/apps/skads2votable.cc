@@ -46,12 +46,12 @@
 #include "askap/AskapError.h"
 #include "askap/AskapLogging.h"
 #include "boost/lexical_cast.hpp"
-#include "casa/Quanta/Quantum.h"
-#include "scimath/Fitting/LinearFit.h"
-#include "scimath/Functionals/Polynomial.h"
-#include "scimath/Mathematics/AutoDiff.h"
-#include "casa/BasicMath/Math.h"
-#include "casa/Arrays/Vector.h"
+#include "casacore/casa/Quanta/Quantum.h"
+#include "casacore/scimath/Fitting/LinearFit.h"
+#include "casacore/scimath/Functionals/Polynomial.h"
+#include "casacore/scimath/Mathematics/AutoDiff.h"
+#include "casacore/casa/BasicMath/Math.h"
+#include "casacore/casa/Arrays/Vector.h"
 #include "votable/VOTable.h" // includes VOTable*.h
 
 using namespace std;

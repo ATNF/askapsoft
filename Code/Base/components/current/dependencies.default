@@ -1,2 +1,3 @@
 askap=Code/Base/askap/current
-casacore=3rdParty/casacore/casacore-1.6.0a
+casacore=3rdParty/casacore/casacore-2.0.3
+casa_components=3rdParty/casa-components/casa-components-1.6.0

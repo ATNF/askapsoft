@@ -28,12 +28,12 @@
 #include "cpcommon/CasaBlobUtils.h"
 
 // ASKAPsoft includes
-#include "casa/aips.h"
-#include "casa/Quanta/MVEpoch.h"
-#include "casa/Quanta/MVDirection.h"
-#include "measures/Measures/MDirection.h"
-#include "measures/Measures/Stokes.h"
-#include "scimath/Mathematics/RigidVector.h"
+#include "casacore/casa/aips.h"
+#include "casacore/casa/Quanta/MVEpoch.h"
+#include "casacore/casa/Quanta/MVDirection.h"
+#include "casacore/measures/Measures/MDirection.h"
+#include "casacore/measures/Measures/Stokes.h"
+#include "casacore/scimath/Mathematics/RigidVector.h"
 #include "Blob/BlobOStream.h"
 #include "Blob/BlobIStream.h"
 

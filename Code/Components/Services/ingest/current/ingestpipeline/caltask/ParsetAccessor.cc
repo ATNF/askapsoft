@@ -37,9 +37,9 @@
 #include "askap/AskapError.h"
 #include "askap/AskapUtil.h"
 #include "Common/ParameterSet.h"
-#include "casa/aipstype.h"
-#include "casa/BasicSL/Complex.h"
-#include "casa/Arrays/Vector.h"
+#include "casacore/casa/aipstype.h"
+#include "casacore/casa/BasicSL/Complex.h"
+#include "casacore/casa/Arrays/Vector.h"
 
 using namespace askap::cp::ingest;
 

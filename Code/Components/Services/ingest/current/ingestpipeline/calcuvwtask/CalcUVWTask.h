@@ -30,8 +30,8 @@
 // ASKAPsoft includes
 #include "boost/scoped_ptr.hpp"
 #include "Common/ParameterSet.h"
-#include "scimath/Mathematics/RigidVector.h"
-#include "casa/Arrays/Vector.h"
+#include "casacore/scimath/Mathematics/RigidVector.h"
+#include "casacore/casa/Arrays/Vector.h"
 #include "cpcommon/VisChunk.h"
 
 // Local package includes

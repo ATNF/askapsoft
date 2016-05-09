@@ -32,8 +32,8 @@
 #include "cpcommon/VisChunk.h"
 
 // CASA includes
-#include "casa/complex.h"
-#include "casa/Arrays/Matrix.h"
+#include "casacore/casa/complex.h"
+#include "casacore/casa/Arrays/Matrix.h"
 
 // Local package includes
 #include "ingestpipeline/ITask.h"

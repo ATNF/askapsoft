@@ -34,13 +34,13 @@
 #include <askap/AskapLogging.h>
 #include <askap/AskapError.h>
 
-#include <casa/Arrays/Vector.h>
-#include <casa/Arrays/Matrix.h>
-#include <casa/Arrays/ArrayMath.h>
-#include <casa/Arrays/MaskArrMath.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/casa/Arrays/Matrix.h>
+#include <casacore/casa/Arrays/ArrayMath.h>
+#include <casacore/casa/Arrays/MaskArrMath.h>
 #include <complex>
-#include <casa/BasicSL/Complex.h>
-#include <scimath/Fitting/FitGaussian.h>
+#include <casacore/casa/BasicSL/Complex.h>
+#include <casacore/scimath/Fitting/FitGaussian.h>
 
 #include <Common/ParameterSet.h>
 

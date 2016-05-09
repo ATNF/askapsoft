@@ -35,8 +35,8 @@
 
 #include <duchamp/Cubes/cubes.hh>
 #include <duchamp/PixelMap/Object2D.hh>
-#include <casa/Arrays/Slicer.h>
-#include <casa/Arrays/Vector.h>
+#include <casacore/casa/Arrays/Slicer.h>
+#include <casacore/casa/Arrays/Vector.h>
 
 #include <vector>
 

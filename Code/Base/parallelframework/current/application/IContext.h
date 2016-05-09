@@ -44,7 +44,7 @@
 #include <boost/shared_ptr.hpp>
 
 // CASA includes
-#include <casa/Arrays/IPosition.h>
+#include <casacore/casa/Arrays/IPosition.h>
 
 // own includes
 #include "communicators/IComms.h"

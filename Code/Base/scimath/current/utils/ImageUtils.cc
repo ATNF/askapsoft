@@ -37,11 +37,11 @@
 
 
 // casa includes
-#include <casa/Arrays/Array.h>
-#include <images/Images/PagedImage.h>
-#include <lattices/Lattices/ArrayLattice.h>
-#include <coordinates/Coordinates/CoordinateSystem.h>
-#include <coordinates/Coordinates/LinearCoordinate.h>
+#include <casacore/casa/Arrays/Array.h>
+#include <casacore/images/Images/PagedImage.h>
+#include <casacore/lattices/Lattices/ArrayLattice.h>
+#include <casacore/coordinates/Coordinates/CoordinateSystem.h>
+#include <casacore/coordinates/Coordinates/LinearCoordinate.h>
 
 
 namespace askap {

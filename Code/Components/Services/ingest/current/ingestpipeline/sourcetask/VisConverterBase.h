@@ -41,7 +41,7 @@
 #include "boost/noncopyable.hpp"
 #include "boost/optional.hpp"
 #include "Common/ParameterSet.h"
-#include "casa/aipstype.h"
+#include "casacore/casa/aipstype.h"
 
 // standard includes
 #include <stdint.h>

@@ -32,9 +32,9 @@
 
 #include <string>
 #include <duchamp/Cubes/cubes.hh>
-#include <casa/Arrays/Array.h>
-#include <casa/Arrays/IPosition.h>
-#include <casa/aipstype.h>
+#include <casacore/casa/Arrays/Array.h>
+#include <casacore/casa/Arrays/IPosition.h>
+#include <casacore/casa/aipstype.h>
 
 #include <Blob/BlobString.h>
 #include <Blob/BlobIBufString.h>

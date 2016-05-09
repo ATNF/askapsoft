@@ -34,11 +34,11 @@
 #define ASKAP_ACCESSORS_MEM_TABLE_SP_WINDOW_HOLDER_H
 
 // casa includes
-#include <measures/Measures/MFrequency.h>
-#include <casa/Arrays/Vector.h>
-#include <casa/Arrays/Array.h>
-#include <tables/Tables/Table.h>
-#include <casa/Quanta/Unit.h>
+#include <casacore/measures/Measures/MFrequency.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/casa/Arrays/Array.h>
+#include <casacore/tables/Tables/Table.h>
+#include <casacore/casa/Quanta/Unit.h>
 
 // own includes
 #include <dataaccess/ITableSpWindowHolder.h>

@@ -40,7 +40,7 @@
 #include "processingsteps/StepIDProxy.h"
 
 // casa includes
-#include <casa/Arrays/IPosition.h>
+#include <casacore/casa/Arrays/IPosition.h>
 
 // boost includes
 #include <boost/shared_ptr.hpp>

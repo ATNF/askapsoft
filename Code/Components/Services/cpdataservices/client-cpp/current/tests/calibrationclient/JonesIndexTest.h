@@ -28,7 +28,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 // Support classes
-#include "casa/aipstype.h"
+#include "casacore/casa/aipstype.h"
 
 // Classes to test
 #include "calibrationclient/JonesIndex.h"

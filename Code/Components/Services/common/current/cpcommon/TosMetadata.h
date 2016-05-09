@@ -33,9 +33,9 @@
 #include <map>
 
 // ASKAPsoft includes
-#include "casa/aips.h"
-#include "casa/Quanta.h"
-#include "measures/Measures/MDirection.h"
+#include "casacore/casa/aips.h"
+#include "casacore/casa/Quanta.h"
+#include "casacore/measures/Measures/MDirection.h"
 
 // Local package includes
 #include "cpcommon/TosMetadataAntenna.h"

@@ -36,8 +36,8 @@
 #define ASKAP_ACCESSORS_GENERIC_CONVERTER_H
 
 // CASA includes
-#include <measures/Measures/MEpoch.h>
-#include <measures/Measures/MeasConvert.h>
+#include <casacore/measures/Measures/MEpoch.h>
+#include <casacore/measures/Measures/MeasConvert.h>
 
 // own includes
 #include <dataaccess/IConverterBase.h>

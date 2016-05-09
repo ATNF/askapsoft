@@ -42,9 +42,9 @@
 #include <dataaccess/DataAccessError.h>
 
 // casa includes
-#include <casa/Arrays/Array.h>
-#include <casa/BasicSL/String.h>
-#include <tables/Tables/TableRecord.h>
+#include <casacore/casa/Arrays/Array.h>
+#include <casacore/casa/BasicSL/String.h>
+#include <casacore/tables/Tables/TableRecord.h>
 
 // uncomment to use the logger, if it is really used somewhere.
 //#include <askap_accessors.h>

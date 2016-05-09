@@ -35,9 +35,9 @@
 #include <boost/shared_ptr.hpp>
 
 // CASA includes
-#include <measures/Measures/MEpoch.h>
-#include <measures/Measures/MFrequency.h>
-#include <measures/Measures/MRadialVelocity.h>
+#include <casacore/measures/Measures/MEpoch.h>
+#include <casacore/measures/Measures/MFrequency.h>
+#include <casacore/measures/Measures/MRadialVelocity.h>
 
 // own includes
 #include <dataaccess/IConstDataIterator.h>

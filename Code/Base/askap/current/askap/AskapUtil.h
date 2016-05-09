@@ -39,12 +39,13 @@
 
 // ASKAPsoft includes
 #include "askap/AskapError.h"
-#include "casa/aips.h"
-#include "casa/Quanta.h"
-#include "casa/Quanta/MVDirection.h"
-#include "measures/Measures/MDirection.h"
-#include "measures/Measures/MPosition.h"
-#include "measures/Measures/MEpoch.h"
+#include "casacore/casa/aips.h"
+#include "casacore/casa/Quanta.h"
+#include "casacore/casa/Quanta/MVDirection.h"
+#include "casacore/measures/Measures/MDirection.h"
+#include "casacore/measures/Measures/MPosition.h"
+#include "casacore/measures/Measures/MEpoch.h"
+#include "casacore/casa/BasicSL/STLIO.h"
 
 namespace askap {
 
@@ -265,27 +266,27 @@ std::pair<double, std::string> measuresTableVersion();
 
 } // end namespace askap
 
-
-namespace std {
+// Now defined in the casa package
+//namespace std {
 /// @name operator<< Extensions
 /// Print the contents of a vector or list.
 ///
 /// Enclose it in square brackets, using a comma as separator.
 /// \note operator<<() must be defined for type \c T.
 //@{
-template<typename T>
-inline ostream& operator<<(ostream& os, const vector<T>& c)
-{
-    askap::printContainer(os, c, ",", "[", "]", size_t(20));
-    return os;
-}
-template<typename T>
-inline ostream& operator<<(ostream& os, const list<T>& c)
-{
-    askap::printContainer(os, c, ",", "[", "]", size_t(20));
-    return os;
-}
+//template<typename T>
+//inline ostream& operator<<(ostream& os, const vector<T>& c)
+//{
+//    askap::printContainer(os, c, ",", "[", "]", size_t(20));
+//    return os;
+//}
+//template<typename T>
+//inline ostream& operator<<(ostream& os, const list<T>& c)
+//{
+//    askap::printContainer(os, c, ",", "[", "]", size_t(20));
+//    return os;
+//}
 //@}
-} // end namespace std
+//} // end namespace std
 
 #endif

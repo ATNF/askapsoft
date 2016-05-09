@@ -39,12 +39,12 @@
 #include "askap/AskapError.h"
 #include "boost/shared_ptr.hpp"
 #include "Common/ParameterSet.h"
-#include "casa/aipstype.h"
-#include "measures/Measures/MDirection.h"
-#include "ms/MeasurementSets/MeasurementSet.h"
-#include "ms/MeasurementSets/MSColumns.h"
-#include "ms/MeasurementSets/MSDerivedValues.h"
-#include "casa/Arrays/ArrayMath.h" // for near()
+#include "casacore/casa/aipstype.h"
+#include "casacore/measures/Measures/MDirection.h"
+#include "casacore/ms/MeasurementSets/MeasurementSet.h"
+#include "casacore/ms/MeasurementSets/MSColumns.h"
+#include "casacore/ms/MSOper/MSDerivedValues.h"
+#include "casacore/casa/Arrays/ArrayMath.h" // for near()
 
 // Local package includes
 #include "cflag/FlaggingStats.h"

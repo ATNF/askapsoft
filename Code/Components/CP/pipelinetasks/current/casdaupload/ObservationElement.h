@@ -31,7 +31,7 @@
 #include <string>
 
 // ASKAPsoft includes
-#include "measures/Measures/MEpoch.h"
+#include "casacore/measures/Measures/MEpoch.h"
 #include "xercesc/dom/DOM.hpp" // Includes all DOM
 
 namespace askap {

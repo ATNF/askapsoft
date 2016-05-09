@@ -37,10 +37,10 @@
 
 #include <duchamp/Utils/Section.hh>
 
-#include <scimath/Functionals/Gaussian1D.h>
-#include <scimath/Functionals/Gaussian2D.h>
-#include <scimath/Functionals/Gaussian3D.h>
-#include <casa/namespace.h>
+#include <casacore/scimath/Functionals/Gaussian1D.h>
+#include <casacore/scimath/Functionals/Gaussian2D.h>
+#include <casacore/scimath/Functionals/Gaussian3D.h>
+#include <casacore/casa/namespace.h>
 #include <boost/shared_ptr.hpp>
 
 #include <Common/ParameterSet.h>

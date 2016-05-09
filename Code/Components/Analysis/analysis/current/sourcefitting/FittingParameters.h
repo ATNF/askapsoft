@@ -30,15 +30,15 @@
 #ifndef ASKAP_ANALYSIS_FITTINGPARAMS_H_
 #define ASKAP_ANALYSIS_FITTINGPARAMS_H_
 
-#include <scimath/Fitting/FitGaussian.h>
-#include <scimath/Functionals/Gaussian2D.h>
+#include <casacore/scimath/Fitting/FitGaussian.h>
+#include <casacore/scimath/Functionals/Gaussian2D.h>
 
 #include <Blob/BlobIStream.h>
 #include <Blob/BlobOStream.h>
 
 #include <duchamp/fitsHeader.hh>
 
-#include <casa/namespace.h>
+#include <casacore/casa/namespace.h>
 
 #include <Common/ParameterSet.h>
 

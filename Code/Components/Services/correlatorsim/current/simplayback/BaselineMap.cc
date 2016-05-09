@@ -38,7 +38,7 @@
 #include "askap/AskapError.h"
 #include "askap/AskapUtil.h"
 #include "Common/ParameterSet.h"
-#include "measures/Measures/Stokes.h"
+#include "casacore/measures/Measures/Stokes.h"
 
 // Using
 using namespace askap;

@@ -34,7 +34,7 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include <scimath/Functionals/Gaussian1D.h>
+#include <casacore/scimath/Functionals/Gaussian1D.h>
 
 #include <askap/AskapLogging.h>
 #include <askap/AskapError.h>

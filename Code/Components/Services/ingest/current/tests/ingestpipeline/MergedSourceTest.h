@@ -39,7 +39,7 @@
 #include "cpcommon/TosMetadata.h"
 #include "cpcommon/TosMetadataAntenna.h"
 #include "cpcommon/VisChunk.h"
-#include "measures/Measures.h"
+#include "casacore/measures/Measures.h"
 #include "ConfigurationHelper.h"
 #include "VisDatagramTestHelper.h"
 #include "askap/AskapUtil.h"

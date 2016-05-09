@@ -33,7 +33,7 @@
 #include <fstream>
 
 // ASKAPSoft includes
-#include "casa/OS/Timer.h"
+#include "casacore/casa/OS/Timer.h"
 
 namespace askap {
 

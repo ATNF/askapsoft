@@ -35,7 +35,7 @@
 #define ASKAP_ACCESSORS_DIRECTION_CONVERTER_H
 
 // CASA includes
-#include <measures/Measures/MDirection.h>
+#include <casacore/measures/Measures/MDirection.h>
 
 // own includes
 #include <dataaccess/IDirectionConverter.h>

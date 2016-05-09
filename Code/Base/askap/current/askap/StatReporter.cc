@@ -43,7 +43,7 @@
 #include "askap/AskapLogging.h"
 #include "askap/AskapError.h"
 #include "askap/AskapUtil.h"
-#include "casa/OS/Timer.h"
+#include "casacore/casa/OS/Timer.h"
 
 // Using
 using namespace askap;

@@ -34,8 +34,8 @@
 
 // ASKAPsoft includes
 #include "askap/AskapUtil.h"
-#include "measures/Measures/MEpoch.h"
-#include "casa/Quanta/MVTime.h"
+#include "casacore/measures/Measures/MEpoch.h"
+#include "casacore/casa/Quanta/MVTime.h"
 #include "xercesc/dom/DOM.hpp" // Includes all DOM
 #include "votable/XercescString.h"
 #include "votable/XercescUtils.h"

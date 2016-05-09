@@ -30,7 +30,7 @@
 
 #include <askap/AskapLogging.h>
 #include <askap/AskapError.h>
-#include <casa/Logging/LogIO.h>
+#include <casacore/casa/Logging/LogIO.h>
 #include <askap/Log4cxxLogSink.h>
 #include <askap/Application.h>
 #include <askapparallel/AskapParallel.h>
@@ -48,20 +48,20 @@ using namespace LOFAR::TYPES;
 #include <Common/Exceptions.h>
 
 #include <Common/ParameterSet.h>
-#include <casa/OS/Timer.h>
-#include <casa/namespace.h>
-#include <casa/Quanta/Quantum.h>
-#include <casa/Quanta/Unit.h>
-#include <coordinates/Coordinates/Coordinate.h>
-#include <coordinates/Coordinates/SpectralCoordinate.h>
-#include <coordinates/Coordinates/CoordinateSystem.h>
-#include <images/Images/PagedImage.h>
-#include <images/Images/ImageInfo.h>
-#include <images/Images/ImageOpener.h>
-#include <images/Images/FITSImage.h>
-#include <images/Images/MIRIADImage.h>
-#include <casa/Arrays/IPosition.h>
-#include <casa/Arrays/Array.h>
+#include <casacore/casa/OS/Timer.h>
+#include <casacore/casa/namespace.h>
+#include <casacore/casa/Quanta/Quantum.h>
+#include <casacore/casa/Quanta/Unit.h>
+#include <casacore/coordinates/Coordinates/Coordinate.h>
+#include <casacore/coordinates/Coordinates/SpectralCoordinate.h>
+#include <casacore/coordinates/Coordinates/CoordinateSystem.h>
+#include <casacore/images/Images/PagedImage.h>
+#include <casacore/images/Images/ImageInfo.h>
+#include <casacore/images/Images/ImageOpener.h>
+#include <casacore/images/Images/FITSImage.h>
+#include <casacore/images/Images/MIRIADImage.h>
+#include <casacore/casa/Arrays/IPosition.h>
+#include <casacore/casa/Arrays/Array.h>
 #include <gsl/gsl_multifit.h>
 #include <wcslib/wcs.h>
 
@@ -119,7 +119,7 @@ class Model2TTApp : public askap::Application {
                                    " and the spectral axis is #" << specAxis);
 
                 Unit bunit = img.units();
-                casa::Vector<casa::Quantum<Double> > beam = img.imageInfo().restoringBeam();
+                casa::Vector<casa::Quantum<Double> > beam = img.imageInfo().restoringBeam().toVector();
                 casa::ImageInfo ii = img.imageInfo();
                 ii.setRestoringBeam(beam);
 

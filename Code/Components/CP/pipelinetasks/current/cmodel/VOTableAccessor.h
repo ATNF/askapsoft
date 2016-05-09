@@ -37,9 +37,9 @@
 
 // ASKAPsoft includes
 #include "boost/scoped_ptr.hpp"
-#include "casa/aipstype.h"
-#include "casa/Quanta/Quantum.h"
-#include "casa/Quanta/Unit.h"
+#include "casacore/casa/aipstype.h"
+#include "casacore/casa/Quanta/Quantum.h"
+#include "casacore/casa/Quanta/Unit.h"
 #include "skymodelclient/Component.h"
 #include "votable/VOTableField.h"
 #include "votable/VOTableRow.h"

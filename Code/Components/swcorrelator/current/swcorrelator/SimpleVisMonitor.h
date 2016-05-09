@@ -38,9 +38,9 @@
 #include <swcorrelator/IMonitor.h>
 
 // casa includes
-#include <casa/Arrays/Matrix.h>
-#include <casa/Arrays/Cube.h>
-#include <casa/Arrays/Vector.h>
+#include <casacore/casa/Arrays/Matrix.h>
+#include <casacore/casa/Arrays/Cube.h>
+#include <casacore/casa/Arrays/Vector.h>
 
 // std includes
 #include <fstream>

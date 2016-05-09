@@ -40,19 +40,19 @@
 #include "Common/ParameterSet.h"
 
 // Casacore includes
-#include "casa/aipstype.h"
-#include "casa/Quanta.h"
-#include "casa/Quanta/Quantum.h"
-#include "casa/Arrays/Matrix.h"
-#include "casa/Arrays/Vector.h"
-#include "measures/Measures/MDirection.h"
-#include "measures/Measures/Stokes.h"
-#include "casa/Arrays/IPosition.h"
-#include "lattices/Lattices/TiledShape.h"
-#include "coordinates/Coordinates/CoordinateSystem.h"
-#include "coordinates/Coordinates/DirectionCoordinate.h"
-#include "coordinates/Coordinates/SpectralCoordinate.h"
-#include "coordinates/Coordinates/CoordinateUtil.h"
+#include "casacore/casa/aipstype.h"
+#include "casacore/casa/Quanta.h"
+#include "casacore/casa/Quanta/Quantum.h"
+#include "casacore/casa/Arrays/Matrix.h"
+#include "casacore/casa/Arrays/Vector.h"
+#include "casacore/measures/Measures/MDirection.h"
+#include "casacore/measures/Measures/Stokes.h"
+#include "casacore/casa/Arrays/IPosition.h"
+#include "casacore/lattices/Lattices/TiledShape.h"
+#include "casacore/coordinates/Coordinates/CoordinateSystem.h"
+#include "casacore/coordinates/Coordinates/DirectionCoordinate.h"
+#include "casacore/coordinates/Coordinates/SpectralCoordinate.h"
+#include "casacore/coordinates/Coordinates/CoordinateUtil.h"
 
 // Using
 using namespace askap;

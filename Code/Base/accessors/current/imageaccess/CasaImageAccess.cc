@@ -32,7 +32,7 @@
 #include <imageaccess/CasaImageAccess.h>
 
 #include <askap/AskapLogging.h>
-#include <images/Images/PagedImage.h>
+#include <casacore/images/Images/PagedImage.h>
 
 ASKAP_LOGGER(logger, ".casaImageAccessor");
 
@@ -89,7 +89,7 @@ casa::Vector<casa::Quantum<double> > CasaImageAccess::beamInfo(const std::string
 {
     casa::PagedImage<float> img(name);
     casa::ImageInfo ii = img.imageInfo();
-    return ii.restoringBeam();
+    return ii.restoringBeam().toVector();
 }
 
 // writing methods

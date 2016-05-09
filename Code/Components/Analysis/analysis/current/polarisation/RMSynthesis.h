@@ -31,8 +31,8 @@
 
 // #include <polarisation/PolarisationData.h>
 
-#include <casa/Arrays/Vector.h>
-#include <casa/BasicSL/Complex.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/casa/BasicSL/Complex.h>
 
 #include <Common/ParameterSet.h>
 

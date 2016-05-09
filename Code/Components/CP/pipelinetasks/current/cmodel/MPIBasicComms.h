@@ -34,8 +34,8 @@
 
 // ASKAPsoft includes
 #include "Common/ParameterSet.h"
-#include "casa/aipstype.h"
-#include "images/Images/ImageInterface.h"
+#include "casacore/casa/aipstype.h"
+#include "casacore/images/Images/ImageInterface.h"
 #include "skymodelclient/Component.h"
 
 namespace askap {

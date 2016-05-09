@@ -37,7 +37,7 @@
 #ifndef ASKAP_ACCESSORS_I_DATA_ADAPTER_H
 #define ASKAP_ACCESSORS_I_DATA_ADAPTER_H
 
-#include <casa/Arrays/Cube.h>
+#include <casacore/casa/Arrays/Cube.h>
 #include <string>
 
 namespace askap {

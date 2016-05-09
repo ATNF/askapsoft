@@ -38,7 +38,7 @@
 
 #include <iostream>
 #include <iomanip>
-#include <scimath/Functionals/Gaussian2D.h>
+#include <casacore/scimath/Functionals/Gaussian2D.h>
 #include <duchamp/fitsHeader.hh>
 
 namespace askap {

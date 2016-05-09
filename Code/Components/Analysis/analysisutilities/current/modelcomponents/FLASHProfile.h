@@ -30,7 +30,7 @@
 #define ASKAP_SIMS_FLASH_PROFILE_H_
 
 #include <modelcomponents/GaussianProfile.h>
-#include <scimath/Functionals/Gaussian1D.h>
+#include <casacore/scimath/Functionals/Gaussian1D.h>
 #include <iostream>
 
 namespace askap {
