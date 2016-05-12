@@ -31,6 +31,7 @@
 #include <string>
 #include <map>
 #include <unistd.h>
+#include <netdb.h>
 
 // ASKAPsoft includes
 #include "askap/AskapError.h"
@@ -129,5 +130,15 @@ std::string CommunicatorConfig::nodeName(void)
     if (error) {
         ASKAPTHROW(AskapError, "gethostname() returned error: " << error);
     }
-    return name;
+    std::cerr<<"nodeName returns: "<<name<<std::endl;
+    //return name;
+    //return "146.118.80.214";
+    //return "galaxy-ingest14.pawsey.org.au";
+    struct hostent* h;
+    h = gethostbyname(name);
+    if (h == NULL) {
+        return name;
+    }
+
+    return h->h_name;
 }
