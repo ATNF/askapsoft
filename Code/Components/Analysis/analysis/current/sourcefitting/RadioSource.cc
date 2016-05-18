@@ -1227,6 +1227,8 @@ void RadioSource::findSpectralTerm(std::string imageName, int term, bool doCalc)
                                    " components ");
 
                 std::vector<SubComponent> cmpnts = itsBestFitMap[*type].getCmpntList();
+                itsFitParams.setFlagFitThisParam("height");
+                itsFitParams.setNegativeFluxPossible(true);
                 Fitter fit = fitGauss(itsBestFitMap[*type].numGauss(),
                                       cmpnts, pos, f, sigma);
 
