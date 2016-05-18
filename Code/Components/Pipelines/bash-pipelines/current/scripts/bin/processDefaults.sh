@@ -240,6 +240,15 @@ module load askapdata"
     # Parameters required for continuum imaging
     ####
 
+    # Total number of channels must be exact multiple of averaging
+    # width.
+    # If it isn't, report an error and exit without running anything.
+    averageWidthOK=`echo $NUM_CHAN_SCIENCE $NUM_CHAN_TO_AVERAGE | awk '{if (($1 % $2)==0) print "yes"; else print "no"}'`
+    if [ ${averageWidthOK} == "no" ]; then
+        echo "ERROR! Number of channels (${NUM_CHAN_SCIENCE}) must be an exact multiple of NUM_CHAN_TO_AVERAGE (${NUM_CHAN_TO_AVERAGE}). Exiting."
+        exit 1
+    fi
+
     # nchanContSci = number of channels after averaging
     nchanContSci=`echo $NUM_CHAN_SCIENCE $NUM_CHAN_TO_AVERAGE | awk '{print $1/$2}'`
 
