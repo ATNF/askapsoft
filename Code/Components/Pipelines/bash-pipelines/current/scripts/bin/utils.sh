@@ -95,6 +95,28 @@ function addDep()
 ##############################
 # FILENAME PARSING
 
+# function to return the imageBase for continuum images for a beam, or
+# for the linmos case if $BEAM=all
+function setImageBaseCont()
+{
+    if [ ${BEAM} == "all" ]; then
+        imageBase=${IMAGE_BASE_CONT}.linmos
+    else
+        imageBase=${IMAGE_BASE_CONT}.beam${BEAM}
+    fi
+}
+
+# function to return the imageBase for spectral cubes for a beam, or
+# for the linmos case if $BEAM=all
+function setImageBaseSpectral()
+{
+    if [ ${BEAM} == "all" ]; then
+        imageBase=${IMAGE_BASE_SPECTRAL}.linmos
+    else
+        imageBase=${IMAGE_BASE_SPECTRAL}.beam${BEAM}
+    fi
+}
+
 # A function to work out the measurement set names for the
 # full-resolution, spectral-line and channel-averaged cases, given the
 # current BEAM.

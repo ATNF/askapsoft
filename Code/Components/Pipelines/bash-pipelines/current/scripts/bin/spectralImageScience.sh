@@ -31,7 +31,8 @@
 
 ID_SPECIMG_SCI=""
 
-imageBase=${IMAGE_BASE_SPECTRAL}.beam${BEAM}
+# set the $imageBase variable
+setImageBaseSpectral
 
 DO_IT=$DO_SPECTRAL_IMAGING
 

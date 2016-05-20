@@ -125,13 +125,13 @@ EOFOUTER
 
 fi
 
-# Run the sourcefinder on the mosaicked image.
-sedstr="s/beam${BEAM_MAX}/linmos/g"
-imageBase=`echo $imageBase | sed -e $sedstr`
 
 if [ ${DO_SOURCE_FINDING_MOSAIC} == true ]; then
+    # Run the sourcefinder on the mosaicked image.
 
+    # set the $imageBase variable to have 'linmos' in it
     BEAM="all"
+    setImageBaseCont
 
     . ${PIPELINEDIR}/sourcefinding.sh
 

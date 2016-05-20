@@ -40,7 +40,9 @@
 # @author Matthew Whiting <Matthew.Whiting@csiro.au>
 #
 
-imageBase=${IMAGE_BASE_CONT}.beam${BEAM}
+# set the $imageBase variable
+setImageBaseCont
+
 if [ ${NUM_TAYLOR_TERMS} -gt 1 ]; then
     outputImage="image.${imageBase}.taylor.0.restored"
 else
