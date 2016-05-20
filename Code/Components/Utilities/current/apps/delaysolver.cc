@@ -94,6 +94,33 @@ private:
 /// (obtained via the SB number) and populates itsAntennaNames in the order of ingest indices.
 void DelaySolverApp::fillAntennaNames(const LOFAR::ParameterSet &parset)
 {
+   if (!parset.isDefined("baselinemap.antennaidx") || !parset.isDefined("antennas")) {
+       itsAntennaNames.resize(0);
+       return;
+   }
+
+   // this is the name of antennas as specified in antenna.antXX.name keyword, we have to find
+   // the name how it is called in the parset/fcm. In the ingest parset there is no cp.ingest prefix
+   const std::vector<std::string> antennas = parset.getStringVector("baselinemap.antennaidx");
+
+   // this is the list of all "parset/fcm" names of antennas, including those which may be unused at the moment
+   // in the ingest parset there is no "common" prefix
+   const std::vector<std::string> parsetNames = parset.getStringVector("antennas");
+
+   std::map<std::string, std::string> ingestName2ParsetNameMap;
+   for (size_t ant=0; ant<parsetNames.size(); ++ant) {
+        const std::string curName = parset.getString("antenna." + parsetNames[ant] + ".name");
+        ASKAPCHECK(ingestName2ParsetNameMap.find(curName) == ingestName2ParsetNameMap.end(), "Detected duplicated antenna name: "<<curName);
+        ingestName2ParsetNameMap[curName] = parsetNames[ant];
+   }
+
+   
+   itsAntennaNames.resize(antennas.size());
+   for (size_t ant = 0; ant < itsAntennaNames.size(); ++ant) {
+        const std::map<std::string, std::string>::const_iterator ci = ingestName2ParsetNameMap.find(antennas[ant]);
+        ASKAPCHECK(ci != ingestName2ParsetNameMap.end(), "Antenna "<<antennas[ant]<<" is not defined, there is no antenna.XX.name keyword equal to "<<antennas[ant]);
+        itsAntennaNames[ant] = ci->second;
+   }
 }
 
 /// @brief helper method to extract current delays from the ingest's parset
@@ -102,8 +129,28 @@ void DelaySolverApp::fillAntennaNames(const LOFAR::ParameterSet &parset)
 /// @return vector with delays in ns
 std::vector<double> DelaySolverApp::getCurrentDelays(const LOFAR::ParameterSet &parset)
 {
-   // for now - the old behaviour
-   return parset.getDoubleVector("tasks.FringeRotationTask.params.fixeddelays");                                
+   const std::string ingestSpecificFixedDelayKey = "tasks.FringeRotationTask.params.fixeddelays";
+   if (parset.isDefined(ingestSpecificFixedDelayKey)) {
+       ASKAPLOG_WARN_STR(logger, "Old-style fixed delay key ("<<ingestSpecificFixedDelayKey<<") is present in the ingest parset - ignoring");
+       // uncomment the following line to use old-style fixed delay key instead of the new way to specify fixed delays
+       // (may be handy for some commissioning experiments)
+       //return parset.getDoubleVector("tasks.FringeRotationTask.params.fixeddelays");                                
+   } 
+   ASKAPCHECK(itsAntennaNames.size() > 0, "No antennas seem to be defined in the ingest parset, unable to load initial delays");
+   // default delay - we use this value if antenna-specific keyword is not defined
+   const std::string defaultDelay = parset.getString("antenna.ant.delay", "0s");
+  
+   std::vector<double> delays(itsAntennaNames.size(),0.);
+   for (size_t ant=0; ant < delays.size(); ++ant) {
+        const std::string delayKey = "antenna." + itsAntennaNames[ant] + ".delay";
+        if (!parset.isDefined(delayKey)) {
+            ASKAPLOG_WARN_STR(logger, "Antenna specific delay key ("<<delayKey<<") is not found in the ingest's parset, using the default: "<<defaultDelay);
+        }
+        const double delay = asQuantity(parset.getString(delayKey, defaultDelay)).getValue("ns");
+        ASKAPLOG_INFO_STR(logger, "Initial delay for "<<itsAntennaNames[ant]<<" is "<<std::setprecision(9)<<delay<<" ns");
+        delays[ant] = delay;
+   }
+   return delays;
 }
 
 void DelaySolverApp::process(const IConstDataSource &ds, const std::vector<double>& currentDelays) {
@@ -182,7 +229,7 @@ void DelaySolverApp::process(const IConstDataSource &ds, const std::vector<doubl
                     "Number of antennas defined in the ingest parset is different from the number of antennas delays are solved for");
               for (casa::uInt ant = 0; ant < delays.nelements(); ++ant) {
                    os << "common.antenna."<<itsAntennaNames[ant]<<".delay = " << std::setprecision(9)<<delays[ant] << "ns"<<std::endl;
-                   ASKAPLOG_INFO_STR(logger, "      "<<itsAntennaNames[ant]<< " (index "<<ant<<") ->  "<<std::setprecision(9)<<delays[ant]<<" ns");
+                   ASKAPLOG_INFO_STR(logger, "      "<<std::setw(5)<<itsAntennaNames[ant]<< " (index "<<ant<<") ->  "<<std::setprecision(9)<<delays[ant]<<" ns");
               }
           }
       }
