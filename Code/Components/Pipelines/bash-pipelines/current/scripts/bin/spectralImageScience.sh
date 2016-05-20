@@ -129,7 +129,7 @@ Simager.restore.beamLog                         = ${RESTORING_BEAM_LOG}"
 #SBATCH --clusters=${CLUSTER}
 ${ACCOUNT_REQUEST}
 ${RESERVATION_REQUEST}
-#SBATCH --time=12:00:00
+#SBATCH --time=${JOB_TIME_SPECTRAL_IMAGE}
 #SBATCH --ntasks=${NUM_CPUS_SPECIMG_SCI}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_SPEC_IMAGING}
 #SBATCH --job-name specimg${BEAM}

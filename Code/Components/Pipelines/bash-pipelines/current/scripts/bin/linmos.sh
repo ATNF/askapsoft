@@ -40,7 +40,7 @@ if [ $DO_MOSAIC == true ]; then
 #SBATCH --clusters=${CLUSTER}
 ${ACCOUNT_REQUEST}
 ${RESERVATION_REQUEST}
-#SBATCH --time=01:00:00
+#SBATCH --time=${JOB_TIME_LINMOS}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=linmos

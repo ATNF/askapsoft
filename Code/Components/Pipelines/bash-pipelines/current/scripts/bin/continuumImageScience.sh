@@ -51,7 +51,7 @@ if [ $DO_IT == true ]; then
 #SBATCH --clusters=${CLUSTER}
 ${ACCOUNT_REQUEST}
 ${RESERVATION_REQUEST}
-#SBATCH --time=12:00:00
+#SBATCH --time=${JOB_TIME_CONT_IMAGE}
 #SBATCH --ntasks=${NUM_CPUS_CONTIMG_SCI}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_CONT_IMAGING}
 #SBATCH --job-name=clean${BEAM}

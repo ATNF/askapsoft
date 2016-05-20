@@ -41,7 +41,7 @@ cat > $sbatchfile <<EOFOUTER
 #SBATCH --clusters=${CLUSTER}
 ${ACCOUNT_REQUEST}
 ${RESERVATION_REQUEST}
-#SBATCH --time=12:00:00
+#SBATCH --time=${JOB_TIME_SPECTRAL_CONTSUB}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=contsubSLsci${BEAM}

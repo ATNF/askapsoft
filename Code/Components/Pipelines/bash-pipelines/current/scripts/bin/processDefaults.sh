@@ -130,24 +130,69 @@ module load askapdata"
     fi
 
     ####################
+    # Set the times for each job
+    if [ $JOB_TIME_SPLIT_1934 == "" ]; then
+        JOB_TIME_SPLIT_1934=${JOB_TIME_DEFAULT}
+    fi
+    if [ $JOB_TIME_SPLIT_SCIENCE == "" ]; then
+        JOB_TIME_SPLIT_SCIENCE=${JOB_TIME_DEFAULT}
+    fi
+    if [ $JOB_TIME_FLAG_1934 == "" ]; then
+        JOB_TIME_FLAG_1934=${JOB_TIME_DEFAULT}
+    fi
+    if [ $JOB_TIME_FLAG_SCIENCE == "" ]; then
+        JOB_TIME_FLAG_SCIENCE=${JOB_TIME_DEFAULT}
+    fi
+    if [ $JOB_TIME_FIND_BANDPASS == "" ]; then
+        JOB_TIME_FIND_BANDPASS=${JOB_TIME_DEFAULT}
+    fi
+    if [ $JOB_TIME_APPLY_BANDPASS == "" ]; then
+        JOB_TIME_APPLY_BANDPASS=${JOB_TIME_DEFAULT}
+    fi
+    if [ $JOB_TIME_AVERAGE_MS == "" ]; then
+        JOB_TIME_AVERAGE_MS=${JOB_TIME_DEFAULT}
+    fi
+    if [ $JOB_TIME_CONT_IMAGE == "" ]; then
+        JOB_TIME_CONT_IMAGE=${JOB_TIME_DEFAULT}
+    fi
+    if [ $JOB_TIME_SPECTRAL_SPLIT == "" ]; then
+        JOB_TIME_SPECTRAL_SPLIT=${JOB_TIME_DEFAULT}
+    fi
+    if [ $JOB_TIME_SPECTRAL_APPLYCAL == "" ]; then
+        JOB_TIME_SPECTRAL_APPLYCAL=${JOB_TIME_DEFAULT}
+    fi
+    if [ $JOB_TIME_SPECTRAL_CONTSUB == "" ]; then
+        JOB_TIME_SPECTRAL_CONTSUB=${JOB_TIME_DEFAULT}
+    fi
+    if [ $JOB_TIME_SPECTRAL_IMAGE == "" ]; then
+        JOB_TIME_SPECTRAL_IMAGE=${JOB_TIME_DEFAULT}
+    fi
+    if [ $JOB_TIME_LINMOS == "" ]; then
+        JOB_TIME_LINMOS=${JOB_TIME_DEFAULT}
+    fi
+    if [ $JOB_TIME_SOURCEFINDING == "" ]; then
+        JOB_TIME_SOURCEFINDING=${JOB_TIME_DEFAULT}
+    fi
+    
+    ####################
     # Configure the list of beams to be processed
     # Lists each beam in ${BEAMS_TO_USE}
 
-#    if [ "${BEAMLIST}" == "" ]; then
-        # just use BEAM_MIN & BEAM_MAX
-        BEAMS_TO_USE=""
-        for((b=${BEAM_MIN};b<=${BEAM_MAX};b++)); do
-            thisbeam=`echo $b | awk '{printf "%02d",$1}'`
-            BEAMS_TO_USE="${BEAMS_TO_USE} $thisbeam"
-        done
-#    else
-#        # re-print out the provided beam list with 0-leading integers
-#        BEAMS_TO_USE=""
-#        for b in $BEAMLIST; do
-#            thisbeam=`echo $b | awk '{printf "%02d",$1}'`
-#            BEAMS_TO_USE="${BEAMS_TO_USE} $thisbeam"
-#        done
-#    fi
+    #    if [ "${BEAMLIST}" == "" ]; then
+    # just use BEAM_MIN & BEAM_MAX
+    BEAMS_TO_USE=""
+    for((b=${BEAM_MIN};b<=${BEAM_MAX};b++)); do
+        thisbeam=`echo $b | awk '{printf "%02d",$1}'`
+        BEAMS_TO_USE="${BEAMS_TO_USE} $thisbeam"
+    done
+    #    else
+    #        # re-print out the provided beam list with 0-leading integers
+    #        BEAMS_TO_USE=""
+    #        for b in $BEAMLIST; do
+    #            thisbeam=`echo $b | awk '{printf "%02d",$1}'`
+    #            BEAMS_TO_USE="${BEAMS_TO_USE} $thisbeam"
+    #        done
+    #    fi
 
     # Check the number of beams, and the maximum beam number (need the
     # latter for calibration tasks)

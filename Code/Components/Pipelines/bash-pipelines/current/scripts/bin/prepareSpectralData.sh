@@ -70,7 +70,7 @@ if [ $DO_IT == true ]; then
 #SBATCH --clusters=${CLUSTER}
 ${ACCOUNT_REQUEST}
 ${RESERVATION_REQUEST}
-#SBATCH --time=12:00:00
+#SBATCH --time=${JOB_TIME_SPECTRAL_SPLIT}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=splitSLsci${BEAM}
@@ -161,7 +161,7 @@ if [ $DO_IT == true ]; then
 #SBATCH --clusters=${CLUSTER}
 ${ACCOUNT_REQUEST}
 ${RESERVATION_REQUEST}
-#SBATCH --time=12:00:00
+#SBATCH --time=${JOB_TIME_SPECTRAL_APPLYCAL}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=calappSLsci${BEAM}
