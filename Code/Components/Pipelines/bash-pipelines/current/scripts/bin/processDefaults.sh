@@ -122,6 +122,13 @@ module load askapdata"
         EMAIL_REQUEST="# No email notifications sent"
     fi
 
+    # Account to be used
+    if [ "$ACCOUNT" != "" ]; then
+        ACCOUNT_REQUEST="#SBATCH --account=${ACCOUNT}"
+    else
+        ACCOUNT_REQUEST="# Using the default account"
+    fi
+
     ####################
     # Configure the list of beams to be processed
     # Lists each beam in ${BEAMS_TO_USE}

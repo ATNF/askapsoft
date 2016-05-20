@@ -41,6 +41,9 @@ CLUSTER=galaxy
 QUEUE=workq
 # Reservation to use. If no reservation available, leave as blank
 RESERVATION=""
+# Account to use for the jobs. If left blank, the user's default
+# account is used
+ACCOUNT=""
 # Email address to send notifications to. No notifications sent if
 # blank
 EMAIL=""

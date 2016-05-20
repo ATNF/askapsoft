@@ -52,6 +52,9 @@ output data products go. To run the jobs, you need to set
 +-----------------------+---------+---------------------------------------------------------------------------------+
 | ``QUEUE``             | workq   |This should be left as is unless you know better.                                |
 +-----------------------+---------+---------------------------------------------------------------------------------+
+| ``ACCOUNT``           | ""      |This is the account that the jobs should be charged to. If left blank, then the  |
+|                       |         |user's default account will be used.                                             |
++-----------------------+---------+---------------------------------------------------------------------------------+
 | ``RESERVATION``       | ""      |If there is a reservation you specify the name of it here.  If you don't have a  |
 |                       |         |reservation, leave this alone and it will be submitted as a regular job.         |
 |                       |         |                                                                                 |

@@ -72,6 +72,7 @@ if [ $DO_IT == true ] && [ $DO_SELFCAL == true ]; then
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
+${ACCOUNT_REQUEST}
 ${RESERVATION_REQUEST}
 #SBATCH --time=12:00:00
 #SBATCH --ntasks=${NUM_CPUS_SELFCAL}
