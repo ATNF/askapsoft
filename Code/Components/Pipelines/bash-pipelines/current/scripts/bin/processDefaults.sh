@@ -131,46 +131,46 @@ module load askapdata"
 
     ####################
     # Set the times for each job
-    if [ $JOB_TIME_SPLIT_1934 == "" ]; then
+    if [ "$JOB_TIME_SPLIT_1934" == "" ]; then
         JOB_TIME_SPLIT_1934=${JOB_TIME_DEFAULT}
     fi
-    if [ $JOB_TIME_SPLIT_SCIENCE == "" ]; then
+    if [ "$JOB_TIME_SPLIT_SCIENCE" == "" ]; then
         JOB_TIME_SPLIT_SCIENCE=${JOB_TIME_DEFAULT}
     fi
-    if [ $JOB_TIME_FLAG_1934 == "" ]; then
+    if [ "$JOB_TIME_FLAG_1934" == "" ]; then
         JOB_TIME_FLAG_1934=${JOB_TIME_DEFAULT}
     fi
-    if [ $JOB_TIME_FLAG_SCIENCE == "" ]; then
+    if [ "$JOB_TIME_FLAG_SCIENCE" == "" ]; then
         JOB_TIME_FLAG_SCIENCE=${JOB_TIME_DEFAULT}
     fi
-    if [ $JOB_TIME_FIND_BANDPASS == "" ]; then
+    if [ "$JOB_TIME_FIND_BANDPASS" == "" ]; then
         JOB_TIME_FIND_BANDPASS=${JOB_TIME_DEFAULT}
     fi
-    if [ $JOB_TIME_APPLY_BANDPASS == "" ]; then
+    if [ "$JOB_TIME_APPLY_BANDPASS" == "" ]; then
         JOB_TIME_APPLY_BANDPASS=${JOB_TIME_DEFAULT}
     fi
-    if [ $JOB_TIME_AVERAGE_MS == "" ]; then
+    if [ "$JOB_TIME_AVERAGE_MS" == "" ]; then
         JOB_TIME_AVERAGE_MS=${JOB_TIME_DEFAULT}
     fi
-    if [ $JOB_TIME_CONT_IMAGE == "" ]; then
+    if [ "$JOB_TIME_CONT_IMAGE" == "" ]; then
         JOB_TIME_CONT_IMAGE=${JOB_TIME_DEFAULT}
     fi
-    if [ $JOB_TIME_SPECTRAL_SPLIT == "" ]; then
+    if [ "$JOB_TIME_SPECTRAL_SPLIT" == "" ]; then
         JOB_TIME_SPECTRAL_SPLIT=${JOB_TIME_DEFAULT}
     fi
-    if [ $JOB_TIME_SPECTRAL_APPLYCAL == "" ]; then
+    if [ "$JOB_TIME_SPECTRAL_APPLYCAL" == "" ]; then
         JOB_TIME_SPECTRAL_APPLYCAL=${JOB_TIME_DEFAULT}
     fi
-    if [ $JOB_TIME_SPECTRAL_CONTSUB == "" ]; then
+    if [ "$JOB_TIME_SPECTRAL_CONTSUB" == "" ]; then
         JOB_TIME_SPECTRAL_CONTSUB=${JOB_TIME_DEFAULT}
     fi
-    if [ $JOB_TIME_SPECTRAL_IMAGE == "" ]; then
+    if [ "$JOB_TIME_SPECTRAL_IMAGE" == "" ]; then
         JOB_TIME_SPECTRAL_IMAGE=${JOB_TIME_DEFAULT}
     fi
-    if [ $JOB_TIME_LINMOS == "" ]; then
+    if [ "$JOB_TIME_LINMOS" == "" ]; then
         JOB_TIME_LINMOS=${JOB_TIME_DEFAULT}
     fi
-    if [ $JOB_TIME_SOURCEFINDING == "" ]; then
+    if [ "$JOB_TIME_SOURCEFINDING" == "" ]; then
         JOB_TIME_SOURCEFINDING=${JOB_TIME_DEFAULT}
     fi
     
