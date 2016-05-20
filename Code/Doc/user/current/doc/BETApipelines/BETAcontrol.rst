@@ -30,51 +30,57 @@ Slurm control
 
 These parameters affect how the slurm jobs are set up and where the
 output data products go. To run the jobs, you need to set
-``SUBMIT_JOBS=true``.
+``SUBMIT_JOBS=true``. Each job has a time request associated with it -
+see the *Slurm time requests* section below for details.
 
-+-----------------------+---------+---------------------------------------------------------------------------------+
-| Variable              | Default | Description                                                                     |
-+=======================+=========+=================================================================================+
-| ``SUBMIT_JOBS``       | false   |The ultimate switch controlling whether things are run on the galaxy queue or    |
-|                       |         |not. If false, the slurm files etc will be created but nothing will run (useful  |
-|                       |         |for checking if things are to your liking).                                      |
-|                       |         |                                                                                 |
-+-----------------------+---------+---------------------------------------------------------------------------------+
-| ``ASKAPSOFT_VERSION`` | ""      |The version number of the askapsoft module to use for the processing. If not     |
-|                       |         |given, or if the requested version is not valid, the version defined in the      |
-|                       |         |~/.bashrc file is used, or the default version should none be defined by the     |
-|                       |         |~/.bashrc file.                                                                  |
-|                       |         |                                                                                 |
-+-----------------------+---------+---------------------------------------------------------------------------------+
-| ``CLUSTER``           | galaxy  |The cluster to which jobs should be submitted. This allows you to submit to the  |
-|                       |         |galaxy queue from machines such as galaxy-data. Leave as is unless you know      |
-|                       |         |better.                                                                          |
-+-----------------------+---------+---------------------------------------------------------------------------------+
-| ``QUEUE``             | workq   |This should be left as is unless you know better.                                |
-+-----------------------+---------+---------------------------------------------------------------------------------+
-| ``ACCOUNT``           | ""      |This is the account that the jobs should be charged to. If left blank, then the  |
-|                       |         |user's default account will be used.                                             |
-+-----------------------+---------+---------------------------------------------------------------------------------+
-| ``RESERVATION``       | ""      |If there is a reservation you specify the name of it here.  If you don't have a  |
-|                       |         |reservation, leave this alone and it will be submitted as a regular job.         |
-|                       |         |                                                                                 |
-+-----------------------+---------+---------------------------------------------------------------------------------+
-| ``OUTPUT``            | .       |The sub-directory in which to put the images, tables, catalogues, MSs etc. The   |
-|                       |         |name should be relative to the directory in which the script was run, with the   |
-|                       |         |default being that directory.                                                    |
-|                       |         |                                                                                 |
-+-----------------------+---------+---------------------------------------------------------------------------------+
-| ``EMAIL``             | ""      |An email address to which you want slurm notifications sent (this will be passed |
-|                       |         |to the ``--mail-user`` option of sbatch).  Leaving it blank will mean no         |
-|                       |         |notifications are sent.                                                          |
-|                       |         |                                                                                 |
-+-----------------------+---------+---------------------------------------------------------------------------------+
-| ``EMAIL_TYPE``        | ALL     |The types of notifications that are sent (this is passed to the ``--mail-type``  |
-|                       |         |option of sbatch, and only if ``EMAIL`` is set to something). Options include:   |
-|                       |         |BEGIN, END, FAIL, REQUEUE, ALL, TIME_LIMIT, TIME_LIMIT_90, TIME_LIMIT_80, &      |
-|                       |         |TIME_LIMIT_50 (taken from the sbatch man page on galaxy).                        |
-|                       |         |                                                                                 |
-+-----------------------+---------+---------------------------------------------------------------------------------+
++-------------------------------------+---------+---------------------------------------------------------------------------------+
+| Variable                            | Default | Description                                                                     |
++=====================================+=========+=================================================================================+
+| ``SUBMIT_JOBS``                     | false   |The ultimate switch controlling whether things are run on the galaxy queue or    |
+|                                     |         |not. If false, the slurm files etc will be created but nothing will run (useful  |
+|                                     |         |for checking if things are to your liking).                                      |
+|                                     |         |                                                                                 |
++-------------------------------------+---------+---------------------------------------------------------------------------------+
+| ``ASKAPSOFT_VERSION``               | ""      |The version number of the askapsoft module to use for the processing. If not     |
+|                                     |         |given, or if the requested version is not valid, the version defined in the      |
+|                                     |         |~/.bashrc file is used, or the default version should none be defined by the     |
+|                                     |         |~/.bashrc file.                                                                  |
+|                                     |         |                                                                                 |
++-------------------------------------+---------+---------------------------------------------------------------------------------+
+| ``CLUSTER``                         | galaxy  |The cluster to which jobs should be submitted. This allows you to submit to the  |
+|                                     |         |galaxy queue from machines such as galaxy-data. Leave as is unless you know      |
+|                                     |         |better.                                                                          |
++-------------------------------------+---------+---------------------------------------------------------------------------------+
+| ``QUEUE``                           | workq   |This should be left as is unless you know better.                                |
++-------------------------------------+---------+---------------------------------------------------------------------------------+
+| ``ACCOUNT``                         | ""      |This is the account that the jobs should be charged to. If left blank, then the  |
+|                                     |         |user's default account will be used.                                             |
++-------------------------------------+---------+---------------------------------------------------------------------------------+
+| ``RESERVATION``                     | ""      |If there is a reservation you specify the name of it here.  If you don't have a  |
+|                                     |         |reservation, leave this alone and it will be submitted as a regular job.         |
+|                                     |         |                                                                                 |
++-------------------------------------+---------+---------------------------------------------------------------------------------+
+| ``JOB_TIME_DEFAULT``                |12:00:00 |The default time request for the slurm jobs. It is possible to specify a         |
+|                                     |         |different time for individual jobs - see the list below and on the individual    |
+|                                     |         |pages describing the jobs. If those parameters are not given, the time requested |
+|                                     |         |is the value of ``JOB_TIME_DEFAULT``.                                            |
++-------------------------------------+---------+---------------------------------------------------------------------------------+
+| ``OUTPUT``                          | .       |The sub-directory in which to put the images, tables, catalogues, MSs etc. The   |
+|                                     |         |name should be relative to the directory in which the script was run, with the   |
+|                                     |         |default being that directory.                                                    |
+|                                     |         |                                                                                 |
++-------------------------------------+---------+---------------------------------------------------------------------------------+
+| ``EMAIL``                           | ""      |An email address to which you want slurm notifications sent (this will be passed |
+|                                     |         |to the ``--mail-user`` option of sbatch).  Leaving it blank will mean no         |
+|                                     |         |notifications are sent.                                                          |
+|                                     |         |                                                                                 |
++-------------------------------------+---------+---------------------------------------------------------------------------------+
+| ``EMAIL_TYPE``                      | ALL     |The types of notifications that are sent (this is passed to the ``--mail-type``  |
+|                                     |         |option of sbatch, and only if ``EMAIL`` is set to something). Options include:   |
+|                                     |         |BEGIN, END, FAIL, REQUEUE, ALL, TIME_LIMIT, TIME_LIMIT_90, TIME_LIMIT_80, &      |
+|                                     |         |TIME_LIMIT_50 (taken from the sbatch man page on galaxy).                        |
+|                                     |         |                                                                                 |
++-------------------------------------+---------+---------------------------------------------------------------------------------+
 
 Calibrator switches
 -------------------
@@ -139,3 +145,52 @@ the science field processing.
 +-------------------------+---------+------------------------------------------------------------+
 | ``DO_SPECTRAL_IMAGING`` | false   | Whether to do the spectral-line imaging                    |
 +-------------------------+---------+------------------------------------------------------------+
+
+
+Slurm time requests
+-------------------
+
+Each slurm job has a time request associated with it. These default to
+12 hours (12:00:00), given by the user parameter
+``JOB_TIME_DEFAULT``. You can use this parameter to set a different
+default. Additionally, you can set a different time to the default for
+individual jobs, by using the following set of parameters. Acceptable
+time formats include (taken from the sbatch man page): "minutes",
+"minutes:seconds", "hours:minutes:seconds", "days-hours",
+"days-hours:minutes" and "days-hours:minutes:seconds"
+
+
++---------------------------------+--------------------------------------------------------------+
+| Variable                        | Description                                                  |
++=================================+==============================================================+
+| ``JOB_TIME_SPLIT_1934``         | Time request for splitting the calibrator MS                 |
++---------------------------------+--------------------------------------------------------------+
+| ``JOB_TIME_SPLIT_SCIENCE``      | Time request for splitting the science MS                    |
++---------------------------------+--------------------------------------------------------------+
+| ``JOB_TIME_FLAG_1934``          | Time request for flagging the calibrator data                |
++---------------------------------+--------------------------------------------------------------+
+| ``JOB_TIME_FLAG_SCIENCE``       | Time request for flagging the science data                   |
++---------------------------------+--------------------------------------------------------------+
+| ``JOB_TIME_FIND_BANDPASS``      | Time request for finding the bandpass solution               |
++---------------------------------+--------------------------------------------------------------+
+| ``JOB_TIME_APPLY_BANDPASS``     | Time request for applying the bandpass to the science data   |
++---------------------------------+--------------------------------------------------------------+
+| ``JOB_TIME_AVERAGE_MS``         | Time request for averaging the channels of the science data  |
++---------------------------------+--------------------------------------------------------------+
+| ``JOB_TIME_CONT_IMAGE``         | Time request for imaging the continuum (both types - with and|
+|                                 | without self-calibration)                                    |
++---------------------------------+--------------------------------------------------------------+
+| ``JOB_TIME_SPECTRAL_SPLIT``     | Time request for splitting out a subset of the spectral data |
++---------------------------------+--------------------------------------------------------------+
+| ``JOB_TIME_SPECTRAL_APPLYCAL``  | Time request for applying the gains calibration to the       |
+|                                 | spectral data                                                |
++---------------------------------+--------------------------------------------------------------+
+| ``JOB_TIME_SPECTRAL_CONTSUB``   | Time request for subtracting the continuum from the spectral |
+|                                 | data                                                         |
++---------------------------------+--------------------------------------------------------------+
+| ``JOB_TIME_SPECTRAL_IMAGE``     | Time request for imaging the spectral-line data              |
++---------------------------------+--------------------------------------------------------------+
+| ``JOB_TIME_LINMOS``             | Time request for mosaicking                                  |
++---------------------------------+--------------------------------------------------------------+
+| ``JOB_TIME_SOURCEFINDING``      | Time request for source-finding jobs                         |
++---------------------------------+--------------------------------------------------------------+

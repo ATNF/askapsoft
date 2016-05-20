@@ -29,40 +29,42 @@ this (this is for the “diamond” footprint, band 1, PA=0)::
   linmos.feeds.beam7 = [-2.154,  0.000]
   linmos.feeds.beam8 = [ 2.154, -0.000]"
 
-+-------------------------+-------------+-------------------------+-------------------------------------------------------------+
-| Variable                | Default     | Parset equivalent       | Description                                                 |
-+=========================+=============+=========================+=============================================================+
-| ``DO_MOSAIC``           | true        | none                    | Whether to mosaic the individual beam images, forming a     |
-|                         |             |                         | single, primary-beam-corrected image.                       |
-+-------------------------+-------------+-------------------------+-------------------------------------------------------------+
-| ``BEAM_FOOTPRINT_NAME`` | diamond     | none                    | The name of the beam footprint. This needs to be recognised |
-|                         |             |                         | by the ACES tool *footprint.py*, which generates the offsets|
-|                         |             |                         | required by the linmos application.                         |
-+-------------------------+-------------+-------------------------+-------------------------------------------------------------+
-| ``BEAM_FOOTPRINT_PA``   | 0           | none                    | The position angle of the beam footprint pattern. Passed to |
-|                         |             |                         | footprint.py.                                               |
-+-------------------------+-------------+-------------------------+-------------------------------------------------------------+
-| ``BEAM_PITCH``          | 1.24        | none                    | The pitch, or beam spacing, in degrees. Passed to           |
-|                         |             |                         | footprint.py.                                               |
-+-------------------------+-------------+-------------------------+-------------------------------------------------------------+
-| ``FREQ_BAND_NUMBER``    | 1           | none                    | Which frequency band are we in - determines beam arrangement|
-|                         |             |                         | (1,2,3,4). Passed to footprint.py.                          |
-+-------------------------+-------------+-------------------------+-------------------------------------------------------------+
-| ``LINMOS_BEAM_OFFSETS`` | no default  | feeds.beam{i}           | Parset entries that specify the beam offsets for use by     |
-|                         |             | (:doc:`../calim/linmos`)| linmos. Needs to have one entry for each beam being         |
-|                         |             |                         | mosaicked. See above for an example. Only provide this if   |
-|                         |             |                         | running footprint.py is not going to give you what you want |
-|                         |             |                         | (eg. non-standard beam locations).                          |
-+-------------------------+-------------+-------------------------+-------------------------------------------------------------+
-| ``LINMOS_BEAM_SPACING`` | "1deg"      | feeds.spacing           | Scale factor for beam arrangement, in format like ‘1deg’.   |
-|                         |             | (:doc:`../calim/linmos`)| This should not be altered if you are using a standard      |
-|                         |             |                         | footprint from footprint.py (ie. with                       |
-|                         |             |                         | ``BEAM_FOOTPRINT_NAME``).                                   |
-+-------------------------+-------------+-------------------------+-------------------------------------------------------------+
-| ``LINMOS_CUTOFF``       | 0.2         | linmos.cutoff           | The primary beam cutoff, as a fraction of the peak          |
-|                         |             | (:doc:`../calim/linmos`)|                                                             |
-+-------------------------+-------------+-------------------------+-------------------------------------------------------------+
-| ``LINMOS_PSF_REF``      | 0           | psfref                  | Reference beam for PSF (0-based) - which beam to take the   |
-|                         |             | (:doc:`../calim/linmos`)| PSF information from.                                       |
-+-------------------------+-------------+-------------------------+-------------------------------------------------------------+
++-------------------------+------------------------------------+-------------------------+-------------------------------------------------------------+
+| Variable                | Default                            | Parset equivalent       | Description                                                 |
++=========================+====================================+=========================+=============================================================+
+| ``DO_MOSAIC``           | true                               | none                    | Whether to mosaic the individual beam images, forming a     |
+|                         |                                    |                         | single, primary-beam-corrected image.                       |
++-------------------------+------------------------------------+-------------------------+-------------------------------------------------------------+
+| ``JOB_TIME_LINMOS``     | ``JOB_TIME_DEFAULT`` (12:00:00)    | none                    | Time request for mosaicking                                 |
++-------------------------+------------------------------------+-------------------------+-------------------------------------------------------------+
+| ``BEAM_FOOTPRINT_NAME`` | diamond                            | none                    | The name of the beam footprint. This needs to be recognised |
+|                         |                                    |                         | by the ACES tool *footprint.py*, which generates the offsets|
+|                         |                                    |                         | required by the linmos application.                         |
++-------------------------+------------------------------------+-------------------------+-------------------------------------------------------------+
+| ``BEAM_FOOTPRINT_PA``   | 0                                  | none                    | The position angle of the beam footprint pattern. Passed to |
+|                         |                                    |                         | footprint.py.                                               |
++-------------------------+------------------------------------+-------------------------+-------------------------------------------------------------+
+| ``BEAM_PITCH``          | 1.24                               | none                    | The pitch, or beam spacing, in degrees. Passed to           |
+|                         |                                    |                         | footprint.py.                                               |
++-------------------------+------------------------------------+-------------------------+-------------------------------------------------------------+
+| ``FREQ_BAND_NUMBER``    | 1                                  | none                    | Which frequency band are we in - determines beam arrangement|
+|                         |                                    |                         | (1,2,3,4). Passed to footprint.py.                          |
++-------------------------+------------------------------------+-------------------------+-------------------------------------------------------------+
+| ``LINMOS_BEAM_OFFSETS`` | no default                         | feeds.beam{i}           | Parset entries that specify the beam offsets for use by     |
+|                         |                                    | (:doc:`../calim/linmos`)| linmos. Needs to have one entry for each beam being         |
+|                         |                                    |                         | mosaicked. See above for an example. Only provide this if   |
+|                         |                                    |                         | running footprint.py is not going to give you what you want |
+|                         |                                    |                         | (eg. non-standard beam locations).                          |
++-------------------------+------------------------------------+-------------------------+-------------------------------------------------------------+
+| ``LINMOS_BEAM_SPACING`` | "1deg"                             | feeds.spacing           | Scale factor for beam arrangement, in format like ‘1deg’.   |
+|                         |                                    | (:doc:`../calim/linmos`)| This should not be altered if you are using a standard      |
+|                         |                                    |                         | footprint from footprint.py (ie. with                       |
+|                         |                                    |                         | ``BEAM_FOOTPRINT_NAME``).                                   |
++-------------------------+------------------------------------+-------------------------+-------------------------------------------------------------+
+| ``LINMOS_CUTOFF``       | 0.2                                | linmos.cutoff           | The primary beam cutoff, as a fraction of the peak          |
+|                         |                                    | (:doc:`../calim/linmos`)|                                                             |
++-------------------------+------------------------------------+-------------------------+-------------------------------------------------------------+
+| ``LINMOS_PSF_REF``      | 0                                  | psfref                  | Reference beam for PSF (0-based) - which beam to take the   |
+|                         |                                    | (:doc:`../calim/linmos`)| PSF information from.                                       |
++-------------------------+------------------------------------+-------------------------+-------------------------------------------------------------+
  
