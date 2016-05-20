@@ -74,22 +74,26 @@ FringeRotationTask::FringeRotationTask(const LOFAR::ParameterSet& parset,
     if (itsCalcUVW) {
         ASKAPLOG_INFO_STR(logger, "This task will also calculate UVW, replacing any pre-existing value");
     }
+    if (parset.isDefined("fixeddelays")) {
+        ASKAPLOG_WARN_STR(logger, "Parset has old-style fixeddelay keyword defined - ignored (delays are taken from antenna records)");
+    }
 
-    if (itsFixedDelays.size() != 0) {
-        ASKAPLOG_INFO_STR(logger, "The phase tracking task will apply fixed delays in addition to phase rotation");
-        ASKAPLOG_INFO_STR(logger, "Fixed delays specified for " << itsFixedDelays.size() << " antennas:");
+    const std::vector<Antenna> antennas = config.antennas();
+    const size_t nAnt = antennas.size();
+    // comment the following code to use the old-style parset definition of fixed delays
+    itsFixedDelays.resize(nAnt);
+    for (size_t id = 0; id < nAnt; ++id) {
+         itsFixedDelays[id] = antennas.at(id).delay().getValue("ns");
+    }
+    // end of the code treating the new parset definition of fixed delays
 
-        const std::vector<Antenna> antennas = config.antennas();
-        const size_t nAnt = antennas.size();
-        for (size_t id = 0; id < casa::min(casa::uInt(nAnt),casa::uInt(itsFixedDelays.size())); ++id) {
-             ASKAPLOG_INFO_STR(logger, "    antenna: " << antennas.at(id).name()<<" (id="<<id << ") delay: "
-                     << itsFixedDelays[id] << " ns (temp: fcm has "<<antennas.at(id).delay().getValue("ns")<<")");
-        }
-        if (nAnt < itsFixedDelays.size()) {
-            ASKAPLOG_INFO_STR(logger,  "    other fixed delays are ignored");
-        }
-    } else {
-            ASKAPLOG_INFO_STR(logger, "No fixed delay specified");
+    ASKAPLOG_INFO_STR(logger, "The fringe rotation will apply fixed delays in addition to phase rotation");
+    ASKAPLOG_INFO_STR(logger, "The following fixed delays are specified:");
+    ASKAPCHECK(itsFixedDelays.size() == nAnt, "Fixed delays do not seem to be specified for all configured antennas");
+
+    for (size_t id = 0; id < casa::min(casa::uInt(nAnt),casa::uInt(itsFixedDelays.size())); ++id) {
+         ASKAPLOG_INFO_STR(logger, "    antenna: " << antennas.at(id).name()<<" (id="<<id << ") delay: "
+                 << itsFixedDelays[id] << " ns");
     }
 }
 
