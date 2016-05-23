@@ -45,7 +45,6 @@
 #include "ingestpipeline/chanavgtask/ChannelAvgTask.h"
 #include "ingestpipeline/chanseltask/ChannelSelTask.h"
 #include "ingestpipeline/chanmergetask/ChannelMergeTask.h"
-#include "ingestpipeline/phasetracktask/PhaseTrackTask.h"
 #include "ingestpipeline/simplemonitortask/SimpleMonitorTask.h"
 #include "ingestpipeline/flagtask/FlagTask.h"
 #include "ingestpipeline/fileflagtask/FileFlagTask.h"
@@ -97,9 +96,6 @@ ITask::ShPtr TaskFactory::createTask(const TaskDesc& taskDescription)
             break;
         case TaskDesc::MSSink :
             task.reset(new MSSink(params, itsConfig));
-            break;
-        case TaskDesc::PhaseTrackTask :
-            task.reset(new PhaseTrackTask(params, itsConfig));
             break;
         case TaskDesc::FringeRotationTask :
             task.reset(new FringeRotationTask(params, itsConfig));

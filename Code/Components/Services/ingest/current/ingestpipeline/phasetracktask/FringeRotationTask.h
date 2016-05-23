@@ -47,7 +47,7 @@ namespace ingest {
 
 /// @brief this is a generalised task for fringe rotation
 /// @details There are a number of approaches to fringe rotation with different limitations.
-/// Unlike PhaseTrackTask which does essentially only phase tracking (with limited experiments
+/// Unlike the former PhaseTrackTask which does essentially only phase tracking (with limited experiments
 /// on delay tracking), this task is intended for more accurate approaches which talk to hardware
 /// (indirectly) and synchronise application of delays and rates with residual corrections in software.
 /// The actual work takes place in the implementations of the IFrtApproach interface. This class
@@ -79,6 +79,24 @@ class FringeRotationTask : public askap::cp::ingest::CalcUVWTask {
         /// @param[in] config configuration
         static IFrtApproach::ShPtr fringeRotationMethod(const LOFAR::ParameterSet& parset,
                 const Configuration &config);
+
+        /// @brief helper method to obtain effective LO frequency
+        /// @details This was a BETA-specific method by design. The result is not
+        /// used for ADE-specific fringe rotation code. However, while we experiment with
+        /// fringe rotation for different frequency setups, it is handy to keep the associated
+        /// interface. It may be removed later. The code was moved into this class to be able
+        /// to retire PhaseTrackTask which becomes harder to maintain as the interfaces are 
+        /// changing for ADE.
+        /// ------------------------
+        /// The effective LO frequency is deduced from the sky frequency as
+        /// BETA has a simple conversion chain (the effective LO and the sky frequency of
+        /// the first channel always have a fixed offset which is hard coded).
+        /// It is handy to encapsulate the formula in one method as it is used by more
+        /// than one class.
+        /// @param[in] chunk the visibility chunk for this integration cycle
+        /// @return Effective LO frequency in Hz
+        double getEffectiveLOFreq(const askap::cp::common::VisChunk& chunk);
+
 
     private:
         /// @brief configuration (need scan information)

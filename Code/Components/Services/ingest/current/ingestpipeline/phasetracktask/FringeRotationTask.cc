@@ -25,7 +25,6 @@
 /// @author Max Voronkov <maxim.voronkov@csiro.au>
 
 #include "ingestpipeline/phasetracktask/FringeRotationTask.h"
-#include "ingestpipeline/phasetracktask/PhaseTrackTask.h"
 #include "ingestpipeline/phasetracktask/FrtDrxDelays.h"
 #include "ingestpipeline/phasetracktask/FrtHWAndDrx.h"
 #include "ingestpipeline/phasetracktask/FrtSwDelays.h"
@@ -241,3 +240,51 @@ IFrtApproach::ShPtr FringeRotationTask::fringeRotationMethod(const LOFAR::Parame
   ASKAPCHECK(result, "Method "<<name<<" is unknown");
   return result;
 }
+
+/// @brief helper method to obtain effective LO frequency
+/// @details This was a BETA-specific method by design. The result is not
+/// used for ADE-specific fringe rotation code. However, while we experiment with
+/// fringe rotation for different frequency setups, it is handy to keep the associated
+/// interface. It may be removed later. The code was moved into this class to be able
+/// to retire PhaseTrackTask which becomes harder to maintain as the interfaces are 
+/// changing for ADE.
+/// ------------------------
+/// The effective LO frequency is deduced from the sky frequency as
+/// BETA has a simple conversion chain (the effective LO and the sky frequency of
+/// the first channel always have a fixed offset which is hard coded).
+/// It is handy to encapsulate the formula in one method as it is used by more
+/// than one class.
+/// @param[in] chunk the visibility chunk for this integration cycle
+/// @return Effective LO frequency in Hz
+double FringeRotationTask::getEffectiveLOFreq(const askap::cp::common::VisChunk& chunk)
+{
+   // the following code is BETA specific. Leave it here for now, it is unused for ADE
+ 
+   // here we need the effective LO frequency, we can deduce it from the start frequency of the very first
+   // channel (global, not local for this rank)
+   // Below we hardcoded the formula derived from the BETA simple conversion chain (note, it may change
+   // for ADE - need to check)
+   //
+   // BETA has 3 frequency conversions with effective LO being TunableLO - 4432 MHz - 768 MHz
+   // (the last one is because digitisation acts like another LO). As a result, the spectrum is always inverted.
+   // The start frequency corresponds to the top of the band and is a fixed offset from TunableLO which we need
+   // to calculate the effective LO frequency. Assuming that the software correlator got the bottom of the band,
+   // i.e. the last 16 of 304 channels, the effective LO is expected to be 40 MHz below the bottom of the band or
+   // 344 MHz below the top of the band. This number needs to be checked when we get the actual system observing
+   // an astronomical source. 
+   //
+   // Investigations in January 2014 revealed that the effective LO is 343.5 MHz below the top of the band which
+   // is the centre of the first fine channel. The correct frequency mapping is realised if 0.5 MHz is added to
+   // the centre the top coarse channel (the tunable LO corresponds to the centre of the coarse channel in the
+   // middle of the band, we probably wrongfully assumed the adjacent channel initially therefore there is a 
+   // correction of 1 MHz one way and 0.5 MHz the other). The tunable LO of 5872 MHz corresponds to 
+   // the top fine channel frequency of 1015.5 MHz. The 343.5 MHz offset for the effective LO has been verified
+   // with the 3h track on the Galactic centre and DRx delay update tolerance of 51 steps (the phase didn't jump
+   // within the uncertainty of the measurement when DRx delay was updated). Note the accuracy of the measurement
+   // is equivalent to a few fine channels, but there doesn't seem to be any reason why such small offset might be
+   // present.
+   return chunk.frequency()(0) - 343.5e6;
+}
+
+
+
