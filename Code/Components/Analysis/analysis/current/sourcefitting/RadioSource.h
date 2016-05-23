@@ -317,7 +317,7 @@ class RadioSource : public duchamp::Detection {
         float detectionThreshold() {return itsDetectionThreshold;};
 
         /// @brief Return the set of fits
-        FitResults fitResults(std::string type)
+        FitResults &fitResults(std::string type)
         {
             return itsBestFitMap[type];
         };

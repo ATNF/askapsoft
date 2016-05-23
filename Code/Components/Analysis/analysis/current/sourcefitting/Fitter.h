@@ -154,7 +154,10 @@ class Fitter {
         std::multimap<double, int> peakFluxList();
 
         /// @brief Return a casa::Gaussian2D version of a particular component.
-        casa::Gaussian2D<casa::Double> gaussian(int num);
+        casa::Gaussian2D<casa::Double> gaussian(unsigned int num);
+
+    /// @brief Return a vector of errors for the given component
+    casa::Vector<casa::Double> error(unsigned int num);
 
         /// @brief Subtract fit from the flux values
         casa::Vector<casa::Double> subtractFit(casa::Matrix<casa::Double> pos,
@@ -178,6 +181,8 @@ class Fitter {
 
         /// @brief The fitted components
         casa::Matrix<casa::Double> itsSolution;
+        /// @brief The errors on the fitted components
+        casa::Matrix<casa::Double> itsErrors;
 
 };
 

@@ -66,6 +66,7 @@ ComponentCatalogue::ComponentCatalogue(std::vector<sourcefitting::RadioSource> &
     itsDS9Filename(""),
     itsVersion("casda.continuum_component_description_v1.7")
 {
+
     this->defineComponents(srclist, parset);
     this->defineSpec();
 
@@ -237,7 +238,7 @@ void ComponentCatalogue::writeASCII()
 {
 
     AskapAsciiCatalogueWriter writer(itsAsciiFilename);
-    ASKAPLOG_DEBUG_STR(logger, "Writing Fit results to " << itsAsciiFilename);
+    ASKAPLOG_DEBUG_STR(logger, "Writing Fitted components to " << itsAsciiFilename);
     writer.setup(&itsCube);
     writer.setColumnSpec(&itsSpec);
     writer.openCatalogue();

@@ -126,6 +126,8 @@ class FitResults {
 
         /// @brief Return a given Gaussian from the FitSet
         casa::Gaussian2D<Double> gaussian(unsigned int num) {return itsGaussFitSet[num];};
+        /// @brief Return the set of errors for a given Gaussian
+        casa::Vector<Double> errors(unsigned int num) {return itsGaussFitErrorSet[num];};
 
         /// @brief The number of fitted components
         unsigned int numFits() {return itsGaussFitSet.size();};
@@ -174,6 +176,8 @@ class FitResults {
         bool itsFlagFitIsGuess;
         /// @brief A two-dimensional Gaussian fit to the object.
         std::vector<casa::Gaussian2D<Double> > itsGaussFitSet;
+        /// @brief The set of errors to go with the Gaussian fits
+        std::vector<casa::Vector<Double> > itsGaussFitErrorSet;
 
 };
 

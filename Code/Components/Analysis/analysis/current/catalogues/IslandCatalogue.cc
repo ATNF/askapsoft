@@ -184,7 +184,7 @@ void IslandCatalogue::writeASCII()
 {
 
     AskapAsciiCatalogueWriter writer(itsAsciiFilename);
-    ASKAPLOG_DEBUG_STR(logger, "Writing Fit results to " << itsAsciiFilename);
+    ASKAPLOG_DEBUG_STR(logger, "Writing islands results to " << itsAsciiFilename);
     writer.setup(&itsCube);
     writer.setColumnSpec(&itsSpec);
     writer.openCatalogue();

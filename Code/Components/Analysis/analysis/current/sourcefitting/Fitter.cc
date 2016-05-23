@@ -188,6 +188,7 @@ void Fitter::fit(casa::Matrix<casa::Double> pos,
                                             itsParams.itsMaxRMS,
                                             itsParams.itsMaxIter,
                                             itsParams.itsCriterium);
+                itsErrors = itsFitter.errors();
             } catch (AipsError err) {
                 std::string message = err.getMesg().chars();
                 message = "FIT ERROR: " + message;
@@ -225,8 +226,7 @@ void Fitter::fit(casa::Matrix<casa::Double> pos,
             ASKAPLOG_DEBUG_STR(logger, "Fit converged. Solution Parameters follow: ");
             logparameters(itsSolution);
             ASKAPLOG_DEBUG_STR(logger, "Errors on solution parameters follow: ");
-            casa::Matrix<casa::Double> paramErrors = itsFitter.errors();
-            logparameters(paramErrors);
+            logparameters(itsErrors);
         } else {
             ASKAPLOG_DEBUG_STR(logger, "Fit did not converge");
         }
@@ -466,7 +466,7 @@ std::multimap<double, int> Fitter::peakFluxList()
 
 //**************************************************************//
 
-casa::Gaussian2D<casa::Double> Fitter::gaussian(int num)
+casa::Gaussian2D<casa::Double> Fitter::gaussian(unsigned int num)
 {
     casa::Gaussian2D<casa::Double>
     gauss(itsSolution(num, 0),
@@ -474,6 +474,14 @@ casa::Gaussian2D<casa::Double> Fitter::gaussian(int num)
           itsSolution(num, 3), itsSolution(num, 4), itsSolution(num, 5));
     return gauss;
 }
+
+casa::Vector<casa::Double> Fitter::error(unsigned int num)
+{
+    casa::Vector<casa::Double>  row=itsErrors.row(num);
+    ASKAPASSERT(row.size()==6);
+    return row;
+}
+
 
 //**************************************************************//
 
