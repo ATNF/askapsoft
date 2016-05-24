@@ -71,7 +71,8 @@ else
     imageSuffix=restored
 fi
 beamList=""
-for((beam=${BEAM_MIN};beam<=${BEAM_MAX};beam++)); do
+BEAMS_TO_USE=${BEAMS_TO_USE}
+for beam in \${BEAMS_TO_USE}; do
     if [ -e \${imagePrefix}.beam\${beam}.\${imageSuffix} ]; then
         beamList="\${beamList}beam\${beam} "
     else
