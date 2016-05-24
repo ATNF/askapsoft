@@ -417,34 +417,22 @@ void RadioSource::setNoiseLevel(std::vector<float> &array,
 //**************************************************************//
 
 void RadioSource::setDetectionThreshold(duchamp::Cube &cube,
-                                        bool flagMedianSearch,
-                                        std::string snrImage)
+                                        bool flagVariableThreshold)
 {
 
-    if (flagMedianSearch) {
+    if (flagVariableThreshold) {
 
+        // Use the fact that the SNR array has been stored in the
+        // Cube's recon array. So just need the max value from that
+        // array to get peakSNR, and the minimum flux value of all
+        // detected pixels to get the detection threshold.
+        
         std::vector<PixelInfo::Voxel> voxSet = this->getPixelSet();
-
-        casa::IPosition globalOffset(itsBox.start().size(), 0);
-        globalOffset[0] = cube.pars().getXOffset();
-        globalOffset[1] = cube.pars().getYOffset();
-        casa::Slicer fullImageBox(itsBox.start() + globalOffset,
-                                  itsBox.length(), Slicer::endIsLength);
-        casa::Array<float> snrArray = analysisutilities::getPixelsInBox(snrImage,
-                                      fullImageBox,
-                                      false);
 
         std::vector<PixelInfo::Voxel>::iterator vox = voxSet.begin();
         itsDetectionThreshold = cube.getPixValue(vox->getX(), vox->getY(), vox->getZ());
 
-        int loc = (vox->getX() - this->boxXmin()) +
-                  this->boxXsize() * (vox->getY() - this->boxYmin());
-        this->peakSNR = snrArray.data()[loc];
-
         for (; vox < voxSet.end(); vox++) {
-            loc = (vox->getX() - this->boxXmin()) +
-                  this->boxXsize() * (vox->getY() - this->boxYmin());
-            this->peakSNR = std::max(this->peakSNR, snrArray.data()[loc]);
             float pixval = cube.getPixValue(vox->getX(), vox->getY(), vox->getZ());
             itsDetectionThreshold = std::min(itsDetectionThreshold, pixval);
         }

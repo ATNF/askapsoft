@@ -254,8 +254,7 @@ void ObjectParameteriser::parameterise()
                     src.defineBox(tempDP.cube().pars().section(),
                                   tempDP.cube().header().getWCS()->spec);
                     src.setDetectionThreshold(tempDP.cube(),
-                                              tempDP.getFlagVariableThreshold(),
-                                              tempDP.varThresher()->snrImage());
+                                              tempDP.getFlagVariableThreshold());
 
                     src.prepareForFit(tempDP.cube(), true);
                     src.setAtEdge(false);

@@ -918,8 +918,7 @@ void DuchampParallel::fitSources()
             src.defineBox(itsCube.pars().section(),
                           itsCube.header().getWCS()->spec);
             src.setDetectionThreshold(itsCube,
-                                      itsFlagVariableThreshold,
-                                      itsVarThresher->snrImage());
+                                      itsFlagVariableThreshold);
             src.prepareForFit(itsCube, true);
             // Only do fit if object is not next to boundary
             src.setAtEdge(itsCube, itsSubimageDef, itsComms.rank() - 1);
