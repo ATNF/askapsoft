@@ -147,7 +147,7 @@ void FitResults::logIt(std::string loc)
     unsigned int i=0;
     for (gauss = itsGaussFitSet.begin(); gauss < itsGaussFitSet.end(); gauss++) {
         std::stringstream outmsg;
-        outmsg << "Component Flux,X0,Y0,MAJ,MIN,PA = ";
+        outmsg << "Component FluxPeak,X0,Y0,MAJ,MIN,PA = ";
         outmsg.precision(8);
         outmsg.setf(ios::fixed);
         outmsg << gauss->height()    << " (" << itsGaussFitErrorSet[i][0] <<"), ";

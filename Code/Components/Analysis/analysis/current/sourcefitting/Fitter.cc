@@ -143,7 +143,7 @@ void logparameters(Matrix<Double> &m, std::string loc)
 
     for (g = 0; g < m.nrow(); g++) {
         std::stringstream outmsg;
-        outmsg << "Component Flux,X0,Y0,MAJ,MIN/MAJ,PA = ";
+        outmsg << "Component FluxPeak,X0,Y0,MAJ,MIN/MAJ,PA = ";
         outmsg.precision(8);
         outmsg.setf(ios::fixed);
         outmsg << m(g, 0) << ", ";
