@@ -191,6 +191,11 @@ LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream &blob, FitResults& result)
         blob << fit->axialRatio();
         blob << fit->PA();
     }
+    for (size_t i=0;i<result.itsGaussFitErrorSet.size();i++){
+        for (size_t j=0;j<6;j++){
+            blob << result.itsGaussFitErrorSet[i][j];
+        }
+    }
 
     return blob;
 }
@@ -221,6 +226,17 @@ LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream &blob, FitResults& result)
         blob >> d6;
         casa::Gaussian2D<Double> fit(d1, d2, d3, d4, d5, d6);
         result.itsGaussFitSet.push_back(fit);
+    }
+
+    result.itsGaussFitErrorSet.clear();
+    for(i=0;i<size;i++){
+        casa::Vector<casa::Double> err(6);
+        for(size_t j=0;j<6;j++){
+            Double val;
+            blob >> val;
+            err[j]=val;
+        }
+        result.itsGaussFitErrorSet.push_back(err);
     }
 
     return blob;
