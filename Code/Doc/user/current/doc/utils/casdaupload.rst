@@ -54,72 +54,84 @@ artifacts to be archived. See the
 
 The required parameters are:
 
-+-----------------------------+----------------+-----------------+----------------------------------------------+
-|**Parameter**                |**Type**        |**Default**      |**Description**                               |
-+=============================+================+=================+==============================================+
-|outputdir                    |string          |None             |Base directory where artifacts will be        |
-|                             |                |                 |deposited. A directory will be created within |
-|                             |                |                 |the "outputdir" named per the "sbid" parameter|
-|                             |                |                 |described below. For example, if the          |
-|                             |                |                 |"outputdir" is /foo/bar and the "sbid" is 1234|
-|                             |                |                 |then the directory /foo/bar/1234 will be      |
-|                             |                |                 |created and all artifacts, plus the metadata  |
-|                             |                |                 |file, will be copied there.                   |
-+-----------------------------+----------------+-----------------+----------------------------------------------+
-|telescope                    |string          |None             |Name of the telescope that produced the       |
-|                             |                |                 |artifacts                                     |
-+-----------------------------+----------------+-----------------+----------------------------------------------+
-|sbid                         |string          |None             |Scheduling block id for the observation that  |
-|                             |                |                 |these artifacts relate to                     |
-+-----------------------------+----------------+-----------------+----------------------------------------------+
-|obsprogram                   |string          |None             |Observation program which the scheduling block|
-|                             |                |                 |relates to                                    |
-+-----------------------------+----------------+-----------------+----------------------------------------------+
-|writeREADYfile               |bool            |false            |A flag indicating whether to write the READY  |
-|                             |                |                 |file to the output directory. For now, the    |
-|                             |                |                 |default is not to write it, meaning it is up  |
-|                             |                |                 |to the user to set the READY file so that     |
-|                             |                |                 |CASDA knows to import the data.               |
-+-----------------------------+----------------+-----------------+----------------------------------------------+
-|images.artifactlist          |vector<string>  |None             |(Optional) A list of keys defining image      |
-|                             |                |                 |artifact entries that appear in the parameter |
-|                             |                |                 |set                                           |
-+-----------------------------+----------------+-----------------+----------------------------------------------+
-|catalogues.artifactlist      |vector<string>  |None             |(Optional) A list of keys defining catalogue  |
-|                             |                |                 |artifact entries that appear in the parameter |
-|                             |                |                 |set                                           |
-+-----------------------------+----------------+-----------------+----------------------------------------------+
-|measurementsets.artifactlist |vector<string>  |None             |(Optional) A list of keys defining measurement|
-|                             |                |                 |set artifact entries that appear in the       |
-|                             |                |                 |parameter set                                 |
-+-----------------------------+----------------+-----------------+----------------------------------------------+
-|evalation.artifactlist       |vector<string>  |None             |(Optional) A list of keys defining evalation  |
-|                             |                |                 |artifact entries that appear in the parameter |
-|                             |                |                 |set                                           |
-+-----------------------------+----------------+-----------------+----------------------------------------------+
++-----------------------------+----------------+-----------------+------------------------------------------------+
+|**Parameter**                |**Type**        |**Default**      |**Description**                                 |
++=============================+================+=================+================================================+
+|outputdir                    |string          |None             |Base directory where artifacts will be          |
+|                             |                |                 |deposited. A directory will be created within   |
+|                             |                |                 |the "outputdir" named per the "sbid" parameter  |
+|                             |                |                 |described below. For example, if the "outputdir"|
+|                             |                |                 |is /foo/bar and the "sbid" is 1234 then the     |
+|                             |                |                 |directory /foo/bar/1234 will be created and all |
+|                             |                |                 |artifacts, plus the metadata file, will be      |
+|                             |                |                 |copied there.                                   |
++-----------------------------+----------------+-----------------+------------------------------------------------+
+|telescope                    |string          |None             |Name of the telescope that produced the         |
+|                             |                |                 |artifacts                                       |
++-----------------------------+----------------+-----------------+------------------------------------------------+
+|sbid                         |string          |None             |Primary scheduling block id for the observation |
+|                             |                |                 |that these artifacts relate to                  |
++-----------------------------+----------------+-----------------+------------------------------------------------+
+|sbids                        |vector of       |None             |List of all scheduling block ids that contribute|
+|                             |strings         |                 |to the observation. The primary sbid, given by  |
+|                             |                |                 |sbid (above) is *not* listed in this list, and  |
+|                             |                |                 |the primary must be the lowest-number SBID.     |
++-----------------------------+----------------+-----------------+------------------------------------------------+
+|obsprogram                   |string          |None             |Observation program which the scheduling block  |
+|                             |                |                 |relates to                                      |
++-----------------------------+----------------+-----------------+------------------------------------------------+
+|obsStart                     |string          |None             |Start time of the observation. This needs to be |
+|                             |                |                 |in 'FITS' format YYYY-MM-DDThh:mm:ss (note the  |
+|                             |                |                 |'T' in the middle), where the time is in        |
+|                             |                |                 |UTC. This parameter needs to be given if there  |
+|                             |                |                 |are no measurement sets provided, but if there  |
+|                             |                |                 |are, it is ignored.                             |
++-----------------------------+----------------+-----------------+------------------------------------------------+
+|obsEnd                       |string          |None             |End time of the observation, with formatting as |
+|                             |                |                 |for obsStart.                                   |
++-----------------------------+----------------+-----------------+------------------------------------------------+
+|writeREADYfile               |bool            |false            |A flag indicating whether to write the READY    |
+|                             |                |                 |file to the output directory. For now, the      |
+|                             |                |                 |default is not to write it, meaning it is up to |
+|                             |                |                 |the user to set the READY file so that CASDA    |
+|                             |                |                 |knows to import the data.                       |
++-----------------------------+----------------+-----------------+------------------------------------------------+
+|images.artifactlist          |vector<string>  |None             |(Optional) A list of keys defining image        |
+|                             |                |                 |artifact entries that appear in the parameter   |
+|                             |                |                 |set                                             |
++-----------------------------+----------------+-----------------+------------------------------------------------+
+|catalogues.artifactlist      |vector<string>  |None             |(Optional) A list of keys defining catalogue    |
+|                             |                |                 |artifact entries that appear in the parameter   |
+|                             |                |                 |set                                             |
++-----------------------------+----------------+-----------------+------------------------------------------------+
+|measurementsets.artifactlist |vector<string>  |None             |(Optional) A list of keys defining measurement  |
+|                             |                |                 |set artifact entries that appear in the         |
+|                             |                |                 |parameter set                                   |
++-----------------------------+----------------+-----------------+------------------------------------------------+
+|evalation.artifactlist       |vector<string>  |None             |(Optional) A list of keys defining evalation    |
+|                             |                |                 |artifact entries that appear in the parameter   |
+|                             |                |                 |set                                             |
++-----------------------------+----------------+-----------------+------------------------------------------------+
 
 Then for each artifact declared within any of the "artifactlists" the
 following parameter set entries must be present:
 
-+-----------------------------+----------------+-----------------+----------------------------------------------+
-|**Parameter**                |**Type**        |**Default**      |**Description**                               |
-+=============================+================+=================+==============================================+
-|<key>.filename               |string          |None             |Filename (either relative or fully qualified  |
-|                             |                |                 |with a path) for the artifact                 |
-+-----------------------------+----------------+-----------------+----------------------------------------------+
-|<key>.type                   |string          |None             |This is only valid for catalogue              |
-|                             |                |                 |artifacts. This refers to the type of         |
-|                             |                |                 |catalogue being uploaded. It must be one of   |
-|                             |                |                 |'continuum-island', 'continuum-component' or  |
-|                             |                |                 |'polarisation-component'.                     |
-+-----------------------------+----------------+-----------------+----------------------------------------------+
-|<key>.project                |string          |None             |The project identifier to which this artifact |
-|                             |                |                 |is allocated for validation. For the          |
-|                             |                |                 |evaluation artifacts this parameter may be    |
-|                             |                |                 |present, however it is ignored since          |
-|                             |                |                 |evaluation reports are not subject to         |
-|                             |                |                 |validation.                                   |
-+-----------------------------+----------------+-----------------+----------------------------------------------+
++-----------------------------+----------------+-----------------+------------------------------------------------------------------------------+
+|**Parameter**                |**Type**        |**Default**      |**Description**                                                               |
++=============================+================+=================+==============================================================================+
+|<key>.filename               |string          |None             |Filename (either relative or fully qualified with a path) for the artifact    |
+|                             |                |                 |                                                                              |
++-----------------------------+----------------+-----------------+------------------------------------------------------------------------------+
+|<key>.type                   |string          |None             |This is only valid for catalogue or image artifacts. This refers to the type  |
+|                             |                |                 |of catalogue or image being uploaded. For catalogues, it must be one of       |
+|                             |                |                 |'continuum-island', 'continuum-component' or 'polarisation-component'. The    |
+|                             |                |                 |full list of image types can be found at                                      |
+|                             |                |                 |https://confluence.csiro.au/display/CASDA/Stage+1.5+Analaysis+of+Image+Types  |
++-----------------------------+----------------+-----------------+------------------------------------------------------------------------------+
+|<key>.project                |string          |None             |The project identifier (OPAL code) to which this artifact is allocated for    |
+|                             |                |                 |validation. For the evaluation artifacts this parameter may be present,       |
+|                             |                |                 |however it is ignored since evaluation reports are not subject to validation. |
++-----------------------------+----------------+-----------------+------------------------------------------------------------------------------+
 
 As an example of declaring artifacts, the below defines two image artifacts, a
 deconvolved (Cleaned) image and a PSF image:
@@ -148,12 +160,14 @@ report.
     outputdir   = /scratch2/casda
     telescope   = ASKAP
     sbid        = 1234
+    sbids       = [1235,1236]
     obsprogram  = test
 
     # Images
     images.artifactlist             = [image1]
 
     image1.filename                 = image.i.dirty.restored.fits
+    image1.type                     = cont_restored_2d
     image1.project                  = AS007
 
     # Source catalogues

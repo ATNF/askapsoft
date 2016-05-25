@@ -100,8 +100,28 @@ int CasdaUploadApp::run(int argc, char* argv[])
         }
         const MeasurementSetElement& firstMs = ms[0];
         obs.setObsTimeRange(firstMs.getObsStart(), firstMs.getObsEnd());
+    } else {
+        casa::MEpoch start,end;
+        
+        if (itsParset.isDefined("obsStart")){
+            std::string obsStart = itsParset.getString("obsStart");
+            casa::Quantity qStart;
+            casa::MVTime::read(qStart, obsStart);
+            start=casa::MEpoch(qStart);
+        }else {
+            ASKAPLOG_WARN_STR(logger, "Unknown start time - using MJD=0");
+        }
+        if (itsParset.isDefined("obsStart")){
+            std::string obsEnd = itsParset.getString("obsEnd");
+            casa::Quantity qEnd;
+            casa::MVTime::read(qEnd, obsEnd);
+            end=casa::MEpoch(qEnd);
+        }else {
+            ASKAPLOG_WARN_STR(logger, "Unknown end time - using MJD=0");
+        }
+        obs.setObsTimeRange(start,end);
     }
-
+    
     // Create the output directory
     const fs::path outbase(itsParset.getString("outputdir"));
     if (!is_directory(outbase)) {
