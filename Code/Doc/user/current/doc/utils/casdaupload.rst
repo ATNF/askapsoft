@@ -108,7 +108,7 @@ The required parameters are:
 |                             |                |                 |set artifact entries that appear in the         |
 |                             |                |                 |parameter set                                   |
 +-----------------------------+----------------+-----------------+------------------------------------------------+
-|evalation.artifactlist       |vector<string>  |None             |(Optional) A list of keys defining evalation    |
+|evaluation.artifactlist      |vector<string>  |None             |(Optional) A list of keys defining evaluation   |
 |                             |                |                 |artifact entries that appear in the parameter   |
 |                             |                |                 |set                                             |
 +-----------------------------+----------------+-----------------+------------------------------------------------+
