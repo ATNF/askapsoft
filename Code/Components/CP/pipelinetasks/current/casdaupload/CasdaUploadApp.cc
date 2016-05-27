@@ -72,7 +72,7 @@ int CasdaUploadApp::run(int argc, char* argv[])
 
     itsParset = config();
     checkParset();
-    
+
     const IdentityElement identity(itsParset);
 
     const vector<ImageElement> images(
@@ -101,27 +101,27 @@ int CasdaUploadApp::run(int argc, char* argv[])
         const MeasurementSetElement& firstMs = ms[0];
         obs.setObsTimeRange(firstMs.getObsStart(), firstMs.getObsEnd());
     } else {
-        casa::MEpoch start,end;
-        
-        if (itsParset.isDefined("obsStart")){
+        casa::MEpoch start, end;
+
+        if (itsParset.isDefined("obsStart")) {
             std::string obsStart = itsParset.getString("obsStart");
             casa::Quantity qStart;
             casa::MVTime::read(qStart, obsStart);
-            start=casa::MEpoch(qStart);
-        }else {
-            ASKAPLOG_WARN_STR(logger, "Unknown start time - using MJD=0");
+            start = casa::MEpoch(qStart);
+        } else {
+            ASKAPTHROW(AskapError, "Unknown observation start time - please use \"obsStart\" to specify the start time in the absence of measurement sets.");
         }
-        if (itsParset.isDefined("obsStart")){
+        if (itsParset.isDefined("obsEnd")) {
             std::string obsEnd = itsParset.getString("obsEnd");
             casa::Quantity qEnd;
             casa::MVTime::read(qEnd, obsEnd);
-            end=casa::MEpoch(qEnd);
-        }else {
-            ASKAPLOG_WARN_STR(logger, "Unknown end time - using MJD=0");
+            end = casa::MEpoch(qEnd);
+        } else {
+            ASKAPTHROW(AskapError, "Unknown observation end time - please use \"obsStart\" to specify the end time in the absence of measurement sets.");
         }
-        obs.setObsTimeRange(start,end);
+        obs.setObsTimeRange(start, end);
     }
-    
+
     // Create the output directory
     const fs::path outbase(itsParset.getString("outputdir"));
     if (!is_directory(outbase)) {
@@ -158,7 +158,7 @@ int CasdaUploadApp::run(int argc, char* argv[])
     // Finally, and specifically as the last step, write the READY file
     // For now, this is only done if the config file specifically
     // requests it via the writeREADYfile parameter.
-    if(itsParset.getBool("writeREADYfile",false)){
+    if (itsParset.getBool("writeREADYfile", false)) {
         const fs::path readyFilename = outdir / "READY";
         CasdaFileUtils::writeReadyFile(readyFilename);
     }
@@ -273,18 +273,18 @@ void CasdaUploadApp::copyAndChecksumElements(const std::vector<T>& elements,
 
 void CasdaUploadApp::checkParset()
 {
-    std::string listnames[4]={"images","catalogues","measurementsets","evaluation"};
-    for(int i=0;i<4;i++){
-        if( (itsParset.isDefined(listnames[i]+".artefactlist")) &&
-            (!itsParset.isDefined(listnames[i]+".artifactlist"))  ) {
+    std::string listnames[4] = {"images", "catalogues", "measurementsets", "evaluation"};
+    for (int i = 0; i < 4; i++) {
+        if ((itsParset.isDefined(listnames[i] + ".artefactlist")) &&
+                (!itsParset.isDefined(listnames[i] + ".artifactlist"))) {
 
             ASKAPLOG_WARN_STR(logger, "You have defined " << listnames[i] <<
                               ".artefactlist instead of " << listnames[i] <<
                               ".artifactlist. Replacing for now, but CHANGE YOUR PARSET!");
 
-            itsParset.add(listnames[i]+".artifactlist",
-                          itsParset.get(listnames[i]+".artefactlist"));
-            
+            itsParset.add(listnames[i] + ".artifactlist",
+                          itsParset.get(listnames[i] + ".artefactlist"));
+
         }
     }
 
