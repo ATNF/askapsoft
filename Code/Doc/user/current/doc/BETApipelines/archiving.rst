@@ -4,6 +4,7 @@ User parameters - Archiving
 The final stage of the pipeline involves preparing data for storage in
 CASDA, the CSIRO ASKAP Science Data Archive. This involves three
 steps:
+
 * All images are converted to FITS format. FITS is the format required
   for storage in CASDA - the ASKAPsoft tasks will ultimately write
   directly to FITS, but for now an additional step is required.
@@ -48,15 +49,15 @@ scripts, and they are detailed here.
 | **General**                    |                                 |                                 |                                                                 |
 +--------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | ``IMAGE_LIST``                 | "image psf psf.image residual   | none                            | The list of image prefixes that will be used for generating FITS|
-|                                |sensitivity"                     |                                 | files and determining the list of images to be uploaded to      |
+|                                | sensitivity"                    |                                 | files and determining the list of images to be uploaded to      |
 |                                |                                 |                                 | CASDA.                                                          |
 +--------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | ``ARCHIVE_BEAM_IMAGES``        | false                           | none                            | Whether the individual beam images should be included in the    |
 |                                |                                 |                                 | archiving (true) or if only the mosaicked image should be       |
 |                                |                                 |                                 | uploaded.                                                       |
 +--------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
-| ``PROJECT_ID``                 | "AS031"                         | <key>.project                   | The project ID that is written to the FITS header, and used by  |
-|                                |                                 |(:doc:`../utils/casdaupload`)    | the casdaupload script to describe each data product.           |
+| ``PROJECT_ID``                 | "AS031"                         | *<key>*.project                 | The project ID that is written to the FITS header, and used by  |
+|                                |                                 | (:doc:`../utils/casdaupload`)   | the casdaupload script to describe each data product.           |
 +--------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | **Thumbnails**                 |                                 |                                 |                                                                 |
 +--------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
@@ -77,14 +78,14 @@ scripts, and they are detailed here.
 | **CASDA upload**               |                                 |                                 |                                                                 |
 +--------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | ``OBS_PROGRAM``                | "Commissioning"                 | obsprogram                      | The name of the observational program to be associated with this|
-|                                |                                 |(:doc:`../utils/casdaupload`)    | data set.                                                       |
+|                                |                                 | (:doc:`../utils/casdaupload`)   | data set.                                                       |
 +--------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | ``WRITE_CASDA_READY``          | false                           | writeREADYfile                  | Whether to write the READY file in the staging directory,       |
-|                                |                                 |(:doc:`../utils/casdaupload`)    | indicating that no further changes are to be made and the data  |
+|                                |                                 | (:doc:`../utils/casdaupload`)   | indicating that no further changes are to be made and the data  |
 |                                |                                 |                                 | is ready to go into CASDA.                                      |
 +--------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | ``CASDA_OUTPUT_DIR``           | /scratch2/casda/prd             | outputdir                       | The output directory to put the staged data. It may be that some|
-|                                |                                 |(:doc:`../utils/casdaupload`)    | users will not have write access to this directory - in this    |
+|                                |                                 | (:doc:`../utils/casdaupload`)   | users will not have write access to this directory - in this    |
 |                                |                                 |                                 | case the data is written to a local directory and the user must |
 |                                |                                 |                                 | then contact CASDA staff.                                       |
 +--------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
