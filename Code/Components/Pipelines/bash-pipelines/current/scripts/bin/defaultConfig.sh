@@ -69,6 +69,9 @@ JOB_TIME_SPECTRAL_CONTSUB=""
 JOB_TIME_SPECTRAL_IMAGE=""
 JOB_TIME_LINMOS=""
 JOB_TIME_SOURCEFINDING=""
+JOB_TIME_FITS_CONVERT=""
+JOB_TIME_THUMBNAILS=""
+JOB_TIME_CASDA_UPLOAD=""
 
 ####################
 # Output directory for images, catalogues, tables, etc
@@ -103,7 +106,10 @@ if [ "$ASKAP_ROOT" != "" ]; then
     simager=${ASKAP_ROOT}/Code/Components/CP/simager/current/apps/simager.sh
     linmos=${ASKAP_ROOT}/Code/Components/Synthesis/synthesis/current/apps/linmos.sh
     selavy=${ASKAP_ROOT}/Code/Components/Analysis/analysis/current/apps/selavy.sh
+    cimstat=${ASKAP_ROOT}/Code/Components/Analysis/analysis/current/apps/cimstat.sh
     mslist=${ASKAP_ROOT}/Code/Components/Synthesis/synthesis/current/apps/mslist.sh
+    image2fits=${ASKAP_ROOT}/3rdParty/casacore/casacore-2.0.3/install/bin/image2fits
+    casdaupload=$ASKAP_ROOT/Code/Components/CP/pipelinetasks/current/apps/casdaupload.sh
     # export directives for slurm job files:
     exportDirective="#SBATCH --export=ASKAP_ROOT,AIPSPATH"
 else
@@ -118,7 +124,10 @@ else
     simager=simager
     linmos=linmos
     selavy=selavy
+    cimstat=cimstat
     mslist=mslist
+    image2fits=image2fits
+    casdaupload=casdaupload
     # export directives for slurm job files:
     exportDirective="#SBATCH --export=NONE"
 fi
@@ -146,6 +155,10 @@ DO_SPECTRAL_IMAGING=false
 DO_MOSAIC=true
 DO_SOURCE_FINDING=false
 DO_SOURCE_FINDING_MOSAIC=SETME
+#
+DO_CONVERT_TO_FITS=false
+DO_MAKE_THUMBNAILS=false
+DO_STAGE_FOR_CASDA=false
 
 ####################
 # Input Scheduling Blocks (SBs)
@@ -447,3 +460,32 @@ SELAVY_BOX_SIZE=50
 # How the processors subdivide the image
 SELAVY_NSUBX=6
 SELAVY_NSUBY=3
+
+
+###############################
+# Archiving-related parameters
+
+# The image prefixes to be archived
+IMAGE_LIST="image psf psf.image residual sensitivity"
+
+# Whether to archive individual beam images 
+ARCHIVE_BEAM_IMAGES=false
+
+# OPAL project ID, for CASDA use
+PROJECT_ID="AS031"
+
+# For making thumbnails, this is the python dictionary linking the
+# size text to the figsize (in inches)
+THUMBNAIL_SIZES_INCHES="{'big':16, 'sml':5}"
+# Suffix for thumnail images - determines the image type
+THUMBNAIL_SUFFIX="png"
+# Grey-scale ranges for the thumbnails, in units of the overall image
+# rms noise level
+THUMBNAIL_GREYSCALE_MIN="-10"
+THUMBNAIL_GREYSCALE_MAX="40"
+
+# Write the READY file after casdaupload has finished?
+WRITE_CASDA_READY=false
+
+# Base directory for casdaupload output
+CASDA_OUTPUT_DIR=/scratch2/casda/prd

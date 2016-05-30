@@ -101,9 +101,13 @@ else
 	    . ${PIPELINEDIR}/scienceCalIm.sh
 	    
 	fi
+
+        . ${PIPELINEDIR}/gatherStats.sh
+        
+        . ${PIPELINEDIR}/archive.sh
 	
 	. ${PIPELINEDIR}/finalise.sh
-	
+
     fi
 
 fi

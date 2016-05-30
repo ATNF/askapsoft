@@ -49,7 +49,8 @@ function archiveConfig()
     filename=$(basename "$1")
     extension="${filename##*.}"
     filename="${filename%.*}"
-    cp $1 $slurmOut/${filename}__${NOW}.${extension}
+    archivedConfig=$slurmOut/${filename}__${NOW}.${extension}
+    cp $1 $archivedConfig
     
 }
 
