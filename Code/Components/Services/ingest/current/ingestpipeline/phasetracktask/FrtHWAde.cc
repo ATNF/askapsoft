@@ -136,12 +136,17 @@ void FrtHWAde::process(const askap::cp::common::VisChunk::ShPtr& chunk,
   const double integrationTime = chunk->interval();
   ASKAPASSERT(integrationTime > 0);
 
+  // half of the correlator cycle interval in microseconds
+  const uint64_t halfCycleTime = static_cast<uint64_t>(integrationTime * 5e5);
+
   const casa::Vector<casa::Double>& freq = chunk->frequency();
   // we could've, in principle, work with start frequencies and remove the offset of 24 channels from
   // the osl script (but may need to deal with inversion in this case).
   // 
   // the offset of 5 fine channels is a mystery - figured out in experiments
-  const double centreFreq = (freq.nelements() > 0 ? freq[freq.nelements()/2] : 0.) - 5e6/54;
+  // 1 MHz offset is a bit of the mystery (appeared after the fringe rotator script was changed to use
+  // the sky frequency (to be more flexible)
+  const double centreFreq = (freq.nelements() > 0 ? freq[freq.nelements()/2] : 0.) - 5e6/54 - 1e6;
   //ASKAPLOG_DEBUG_STR(logger, "centreFreq = "<<centreFreq/1e6<<" MHz");
   ASKAPCHECK(effLO != 0., "Unexpected zero effLO frequency, this shouldn't happen!");
            
@@ -224,7 +229,7 @@ void FrtHWAde::process(const askap::cp::common::VisChunk::ShPtr& chunk,
            const uint64_t lastFRUpdateBAT = lastReportedFRUpdateBAT + triggerOffset;
            const uint64_t currentBAT = epoch2bat(casa::MEpoch(chunk->time(),casa::MEpoch::UTC));
 
-           if (currentBAT > lastFRUpdateBAT) {
+           if (currentBAT > lastFRUpdateBAT + halfCycleTime) {
                const uint64_t elapsedTime = currentBAT - lastFRUpdateBAT; 
                const double etInCycles = double(elapsedTime + itsUpdateTimeOffset) / integrationTime / 1e6;
            
