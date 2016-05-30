@@ -1,0 +1,465 @@
+0.12.2 (24 May 2016)
+--------------------
+
+A bug fix release for the processing pipeline.
+This fixes a problem where the mosaicking task was still assuming beam
+IDs that had a single integer - ie. it was looking for
+image.beam0.restored instead of image.beam00.restored.
+
+
+0.12.1 (18 May 2016)
+--------------------
+
+This is a simple patch release that fixes a couple of bugs, one of
+which affected the performance of both the source-finder and the
+pipelines.
+
+The measurement of spectral indices for fitted components to continuum
+Taylor-term images was being done incorrectly, leading to erroneous
+values for spectral-index and spectral-curvature. This, in turn, could
+lead to inaccuracies or even failures in the continuum-subtraction
+task of the pipeline (when the CONTSUB_METHOD=Cmodel option was used).
+This only affected version 0.12.0 (released on 8 May 2016), and is
+fully corrected in 0.12.1.
+
+The other bug enforces the total number of channels processed by the
+pipelines to be an exact multiple of the averaging width
+(NUM_CHAN_TO_AVERAGE). In previous versions, the pipeline scripts
+would press on, but this would potentially result in errors in the
+slurm files and jobs not executing. Now, should NUM_CHAN_TO_AVERAGE
+not divide evenly into the number of channels requested, the script
+will exit with an error message before submitting any jobs.
+
+0.12.0 (8 May 2016)
+-------------------
+
+This version has a number of changes to the processing applications
+and the pipeline scripts.
+
+Bugs that have been fixed in the processing applications include:
+* The deconvolution major cycles were using out-of-date residual
+ values when logging and testing against the threshold.majorcycle
+ parameter. This is now fixed.  
+* The initialisation of calibrator input now depends more closely on
+the input parameters nAnt, nBeam & the calibrator model, rather than
+the first chunk of the data - this allows the shape of the data cube
+to change throughout the dataset (which will help with data imported
+from MIRIAD/CASA). 
+* Simager was showing a cross-shaped artefact when Wiener
+preconditioning was used, even with the preservecf parameter set to
+true. This parameter is now recognised, and the artefact is no longer
+seen. 
+* Full polarisation handling is now possible with simager (in the same
+manner as for cimager). 
+* Simager was crashing when no preconditioner was given - this has
+been fixed. 
+* The casdaupload task now conforms to the current CASDA requirements
+of allowing multiple SBIDs, and of reporting the image type. 
+* Selavy's Gaussian fitting is now more able to fit confused
+components that are not immediately identified from the initial
+estimates. 
+* Selavy was also failing when given images of a particular name
+(short, without a full-stop). This has been fixed. 
+
+The pipeline scripts have had a number of improvements:
+* They are more robust for processing ADE data, with >9 beams and >6
+antennas. 
+* The flagging tasks have been improved, with:
+ - Flagging of autocorrelations an option
+ - The selection flagger (that does antenna-based & autocorrelations)
+ is done first, along with (an optional) flat amplitude threshold. 
+ - The dynamic flagging is done as the second pass
+ - There is more user control over these individual elements
+* New parameters are available in the scripts, to make use of the
+snapshotimaging.longtrack parameter in the gridding, and
+normalisegains option in the self-calibration. The latter improves the
+performance of the self-calibration, approximating phase-only
+self-calibration. 
+* The slurm jobfiles are now more robust to the user's environment -
+if the askapsoft module has not been loaded, it will be in the
+jobfile, and the user can request a different version. 
+
+
+0.11.2 (28 March 2016)
+----------------------
+
+This release is a relatively small bug-fix update, primarily fixing a
+bug in cimager.
+
+This bug would prevent a parallel job completing in the case of the
+major cycle threshold being reached prior to the requested maximum
+number of major cycles.
+
+Other changes include:
+* The pipeline scripts have a few minor fixes to the code to improve
+reliability, and ensure the correct number of cores used for jobs is
+reported in the statistics files. 
+* The only change to the ingest pipeline (within askapservices)
+incorporates an extra half-cycle wait following fringe-rotator
+update. 
+
+
+0.11.1 (8 March 2016)
+---------------------
+
+The imaging software now incorporates the preservecf option (released
+in 0.11.0) into the SphFunc gridder, and introduces a new option to
+the gridding - snapshotimaging.longtrack - that predicts the best fit
+W plane used for the snapshot imaging, finding the plane that
+minimises the future deviation in W. This can have substantial savings
+in processing time for long tracks. 
+
+The pipeline scripts have seen a number of minor improvements and
+fixes, with improved alternative methods for continuum subtraction,
+and improved reporting of resource usage (including a record of the
+number of cores used for each job). The user configuration file is now
+also copied to a timestamped version for future reference. 
+
+The ingest pipeline code has incorporated changes resulting from the
+recent commissioning activities. 
+
+
+0.11.0 (15 February 2016)
+-------------------------
+
+A key change made in the processing software relates the
+preconditioning. There is a new parameter preconditioning.preservecf
+that should be set to true for the case of using WProject and the
+Wiener preconditioner. This has fixed a couple of issues - at low
+(negative) robustness values, the cross-shaped artefact that was
+sometimes seen has now gone, and the performance should now more
+closely match that expected from robust weighting for the full range
+of robustness values. 
+
+Several other bugs were fixed:
+* Linmos had a bug (that was introduced in version 0.10) where
+automatically-generated primary beams were being set to the position
+of the first image.  
+* The multiscale-MFS solver had a small bug that would lead to
+higher-order terms being preconditioned multiple times 
+* Cmodel had bugs related to the reading of Selavy catalogues, and
+correctly representing deconvolved Gaussians. It now works correctly
+with such data 
+* Simager would fail were no preconditioners supplied.
+* Selavy now better handles images that do not have spectral axes (an
+issue when dealing with images made by packages other than
+ASKAPsoft). 
+
+Additionally, the regridding has been sped up through a patch to the
+casacore library. 
+
+The pipeline scripts also have a new feature, making use of Selavy +
+Cmodel to better perform the continuum subtraction from spectral-line
+data. The old approach is still available, but is not the default. 
+
+
+0.10.1 (18 January 2016)
+------------------------
+
+Much of this release relates to updates to the ingest pipeline and
+related tasks, in preparation for getting it running at Pawsey. These
+are now deployed as their own module, although it is not expected that
+ACES members will need to use this. 
+
+In the science processing area, an important fix was made to the code
+responsible for uvw rotations. A fault was identified where these were
+being projected into the wrong frame, which could lead to positional
+offsets in images made away from the initial phase centre. This fault
+has been fixed. 
+
+Some initial fixes to the preconditioner have been made that may
+improve images when Wiener filtering with a low or negative robustness
+parameter. Improvements are only expected when snapshot imaging is not
+being used. A full fix is being tested and is planned for the next
+release. 
+
+This release also sees the BETA pipeline scripts move into an
+askapsoft-derived module (although this had previously been
+announced). 
+
+
+0.9.0 (12 October 2015)
+-----------------------
+
+There are only a small number of changes to the core processing part
+of the software that would affect ACES work on galaxy, and these are
+almost all to do with the source-finder Selavy. The default values of
+some parameters governing output files have changed, with the
+preference now to minimise the number of output files. A few
+corrections have been made to the units of parameters in some of the
+output catalogues. 
+
+
+0.8.1 (10 September 2015)
+-------------------------
+
+This release introduces simager, the prototype spectral-line imager -
+this allows imaging of large spectral cubes through distributed
+processing, and is capable of creating much larger cubes than
+cimager. While this is not the final version of the spectral-line
+imager - the software framework that underpins the imaging code is
+going through a re-design prior to early science - it does demonstrate
+the distributed-processing approach that enables large numbers of
+spectral channels to be processed. 
+
+For those wanting to make use of the ACES scripts under subversion,
+these will be updated shortly to include use of simager. 
+
+Other changes to the askapsoft module include minor updates to the
+CASDA HI catalogue interface from the Selavy sourcefinder, and
+ADE-related updates to the ingest pipeline and associated tools (which
+won’t affect work on galaxy). 
+
+
+0.7.3 (21 August 2015)
+----------------------
+
+This release has a few relatively small bug fixes that have been
+resolved in the past week: 
+* a minor fix to cimager that solves a rare problem with the
+visibility metadata statistics calculations, that would result in
+cimager failing (this had been seen in processing the basic continuum
+tutorial data). 
+* correcting the shape (BMAJ/BMIN/BPA) parameters in the
+Selavy-generated component parset output (that might be used as input
+to ccalibrator in self-calibration) - they were previously given in
+arcsec/degrees rather than radians (as required by
+ccalibrator/csimulator). 
+* aligning the cmodel VOTable inputs with the new Selavy output
+formats 
+* a fix to the units in one of the Selavy VOTable outputs 
+
+
+0.7.2 (9 August 2015)
+---------------------
+
+This release is a bug-fix release aimed at fixing a problem identified
+in running the basic continuum imaging tutorial. There was an issue
+with the way the simulated data had been created, which meant that
+mssplit would fail on those measurement sets. This has been fixed
+(fixing both mssplit and msmerge), and the tutorial dataset and
+description have been updated. 
+
+If you use mssplit on real BETA data, you will not notice any
+difference, save for potentially a small performance improvement. 
+
+The only other change has been implementation of the CASDA format for
+absorption-line catalogues, although the implementation of actual
+absorption-line searching is not complete in Selavy, so this will
+probably not affect any of you (it has been more to provide early
+examples for use by the CASDA team). 
+
+
+0.7.0 (3 July 2015)
+-------------------
+
+The key features of the release are:
+ * Mk-II compatible ingest (although not applicable for galaxy processing) 
+ * A new task mslist that provides basic information for a measurement
+ set 
+ * Phase-only calibration
+ 
+Bug:
+[ASKAPSDP-1657] - mssplit corrupts POINTING table
+[ASKAPSDP-1658] - change actual_pol to expect degrees as the unit
+[ASKAPSDP-1660] - Driving to an AzEl position throws an exception in the ingest pipeline.
+
+Feature:
+[ASKAPSDP-1635] - SupportSearcher performance patch
+[ASKAPSDP-1650] - Develop utility to extract and print information from a measurement set
+[ASKAPSDP-1670] - Develop phase-only calibration option for CImager
+
+Task:
+[ASKAPSDP-1663] - Modify ingest pipeline source task to conform with the ADE correlator ioc changes
+
+
+
+0.6.3 (11 May 2015)
+-------------------
+
+Changes for this release include bug fixes and improvements to assist
+the casdaupload tool, and a calibration bug that affected leakage
+terms. The release notes follow. 
+Bug
+[ASKAPSDP-1665] - Data format bug in casdaupload 
+Feature
+[ASKAPSDP-1659] - Update casdaupload utility to conform to new spec
+Task
+[ASKAPSDP-1633] - Test ASKAPsoft leakage calibration using BETA observation 619
+[ASKAPSDP-1668] - Fix width and precision in CASDA catalogues
+
+
+0.6.1 (12 March 2015)
+---------------------
+
+A bug-fix release adding a couple of elements to 0.6.0:
+
+Bug
+[ASKAPSDP-1657] - mssplit corrupts POINTING table
+[ASKAPSDP-1658] - change actual_pol to expect degrees as the unit
+
+
+
+0.6.0 (6 March 2015)
+--------------------
+
+Some highlight features and bugfixes are:
+
+[ASKAPSDP-1652] - Gridding failing with concatenated MS
+[ASKAPSDP-1654] - Selavy's component parset output gets positions wrong
+[ASKAPSDP-1646] - Develop CASDA upload utility
+[ASKAPSDP-1649] - Add selection by field name to mssplit
+[ASKAPSDP-1653] - Add parset parameter to change the weight cutoff used in linmos
+
+
+Bug
+[ASKAPSDP-1628] - ASKAPsoft fails to build on Ubuntu 14.04
+[ASKAPSDP-1632] - Spurious message: Observation has been aborted before first scan was started
+[ASKAPSDP-1642] - Intermittant functest failure in java-logappenders
+[ASKAPSDP-1651] - Program version string shows "Unknown" branch name
+[ASKAPSDP-1652] - Gridding failing with concatenated MS
+[ASKAPSDP-1654] - Selavy's component parset output gets positions wrong
+
+Feature
+[ASKAPSDP-1615] - Implement Ice monitoring interface in Ingest Pipeline
+[ASKAPSDP-1637] - Flag antennas with out-of-range delays
+[ASKAPSDP-1638] - Adapt VOTable output of Selavy to match recent CASDA table descriptions
+[ASKAPSDP-1646] - Develop CASDA upload utility
+[ASKAPSDP-1649] - Add selection by field name to mssplit
+[ASKAPSDP-1653] - Add parset parameter to change the weight cutoff used in linmos
+
+Task
+[ASKAPSDP-1624] - Document ASKAPsoft SDP platform dependencies
+[ASKAPSDP-1640] - Update user documentation to use /scratch2 filesystem
+[ASKAPSDP-1641] - Update Scons dependency to 2.3.4
+
+
+
+0.5.1 (9 January 2015)
+----------------------
+
+A bug fix release, providing an option to flag antennas with
+out-of-range delays in the DRx or FR hardware setting.
+
+
+0.5.0 (15 December 2014)
+------------------------
+
+The list of features & bugfixes is below:
+
+Bug
+[ASKAPSDP-1606] - Segmentation fault when using cflag dynamic threshold
+[ASKAPSDP-1608] - Calibration fails when flagged visibilities have values of NaN or Inf
+[ASKAPSDP-1616] - Row index calculation in Ingest Pipelines MergedSource::addVis() is too slow
+[ASKAPSDP-1622] - CP Manager should gracefully handle unavailability of the FCM
+
+Feature
+[ASKAPSDP-1607] - Change the default for data accessor parameter "CorrelationType"
+[ASKAPSDP-1610] - Account for averaging when setting noise sigma values in mssplit
+[ASKAPSDP-1612] - Add support for SIGMA_SPECTRUM column to Data Accessor
+[ASKAPSDP-1623] - Ingest Pipeline: Add support for pausing an observation with scanid -1
+
+Task
+[ASKAPSDP-1603] - Improve scalability of (spectral-line) source-finding
+[ASKAPSDP-1611] - Remove 3rdParty/mysql dependency
+[ASKAPSDP-1613] - Document cpmanager
+[ASKAPSDP-1630] - Update Apache Ant dependency to 1.9.4
+
+
+0.4.1 (13 November 2014)
+------------------------
+
+A minor update, with the following features added:
+
+[ASKAPSDP-1610] - Account for averaging when setting noise sigma values in mssplit
+[ASKAPSDP-1612] - Add support for SIGMA_SPECTRUM column to Data Accessor
+
+
+0.4.0 (22 October 2014)
+-----------------------
+
+The list of features & bugfixes is below:
+
+Bug
+[ASKAPSDP-1567] - ccalapply running slow
+[ASKAPSDP-1570] - AdviseParallel fails when run in parallel with the tangent parameter unset
+[ASKAPSDP-1578] - Ingest pipeline fails with exception in FrtHWAndDrx
+[ASKAPSDP-1581] - CP manager occasionally fails to mkdir
+[ASKAPSDP-1587] - Selavy - remove limits on component ID suffix
+[ASKAPSDP-1589] - cimager fails when direction not specified
+[ASKAPSDP-1594] - Thresholds in Selavy get too low near the edge caused by low weights
+[ASKAPSDP-1596] - cbpcalibrator crashes in parallel mode
+[ASKAPSDP-1598] - Typo in VOTable PARAM headers
+
+Feature
+[ASKAPSDP-1390] - Develop ASKAP imaging advise functionality
+[ASKAPSDP-1551] - Add time based selection to MSSplit
+[ASKAPSDP-1569] - AdviseParallel should distribute statistics back to the workers
+[ASKAPSDP-1573] - Add dynamic threshold flagging to cflag
+[ASKAPSDP-1580] - Support AZEL coordinate system in ingest pipeline
+[ASKAPSDP-1582] - Add timing metrics in ingest pipeline
+[ASKAPSDP-1588] - Add ability for Selavy to write out a component parset
+[ASKAPSDP-1592] - Obtain linmos feed centres from a reference image
+[ASKAPSDP-1599] - Implement Ice monitoring interface in CP Manager
+[ASKAPSDP-1600] - Add scan id to vispublisher
+
+Task
+[ASKAPSDP-1583] - Improve performance of Ingest FlagTask
+[ASKAPSDP-1584] - FringeRotationTask needs some performance improvements
+
+
+0.3.0 (28 July 2014)
+------------------
+
+The version 0.3 release of the ASKAPsoft Science Data Processor has
+been installed as a module to Galaxy. The included features/bugfixes
+are listed below, and are also listed on Redmine:
+https://pm.atnf.csiro.au/askap/projects/cmpt/versions/197 
+
+Bug #6029: Ingest pipeline zeros flagged visibilities
+Bug #6107: Fix the curvature-map option in Selavy's Gaussian fitting
+Bug #6112: Ingest pipeline flags incorrect antenna
+Bug #6113: RA & Dec swapped in Ingest Pipeline Monitoring data
+Bug #6121: openssl-1.0.1c fails to build on XUbuntu 14.04
+Bug #6125: Superfluous loop over w in WProjectVisGridder::initConvolutionFunction
+Bug #6126: gridder parameter snapshotimaging.coorddecimation is ignored
+Bug #6154: Ingest pipeline should not write SBID in observation column
+Bug #6179: SVN 1.7 breaks rbuilds get_svn_revision function
+Bug #6183: Selavy - component catalogues for individual fit types are incomplete
+Feature #6073: Support of different phase and pointing centres via scheduling blocks
+Feature #6075: MSSink should populate POINTING table
+Feature #6120: Ingest Pipeline: Get obs data from TOS metadata
+Feature #6164: Tool to assist delay calibration
+Feature #6180: Add --version cmdline parameter to askap::Application
+Task #6176: SDP codebase restructure
+Documentation #6106: Create an analysis tutorial
+
+
+0.2.0 (4 June 2014)
+-------------------
+
+Bug
+[ASKAPSDP-1522] - Inappropriate default level of logging in CP applications
+[ASKAPSDP-1523] - cpingest: NaNs in visibilities
+[ASKAPSDP-1526] - Selavy: source lists differ between serial & distributed processing
+[ASKAPSDP-1529] - Problems when running Selavy on FITS file
+[ASKAPSDP-1533] - ccalibrator ignores the data for other than the first beam in the antennagain mode
+
+Feature
+[ASKAPSDP-1261] - Integrate CP ingest pipeline with TOS
+[ASKAPSDP-1540] - Handle scan id of -2 in ingest pipeline
+
+Task
+[ASKAPSDP-1525] - Update Duchamp to 1.6
+[ASKAPSDP-1537] - ASKAPsoft SDP - Cleanup HPC build environment
+
+
+0.1.0 (31 March 2014)
+---------------------
+
+Feature
+[ASKAPSDP-1459] - Develop linmos utility
+[ASKAPSDP-1460] - ccalibrator enhancements
+
+Task
+[ASKAPSDP-1521] - Create CP-0.1 release
