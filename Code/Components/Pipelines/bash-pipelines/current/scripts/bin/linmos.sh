@@ -37,7 +37,7 @@ BEAM=all
 setImageBaseCont
 mosImage=image.${imageBase}
 if [ $NUM_TAYLOR_TERMS -gt 1 ]; then
-    mosImage="${imageBase}.taylor.0"
+    mosImage="${mosImage}.taylor.0"
 fi
 mosImage="${mosImage}.restored"
 
@@ -88,8 +88,7 @@ else
     imageSuffix=restored
 fi
 beamList=""
-BEAMS_TO_USE="${BEAMS_TO_USE}"
-for beam in \${BEAMS_TO_USE}; do
+for((beam=${BEAM_MIN};beam<=${BEAM_MAX};beam++)); do
     if [ -e \${imagePrefix}.beam\${beam}.\${imageSuffix} ]; then
         beamList="\${beamList}beam\${beam} "
     else
