@@ -54,6 +54,16 @@ function archiveConfig()
     
 }
 
+##############################
+# Rejuvenation
+
+# Takes one argument, a file or directory
+function rejuvenate()
+{
+    if [ "$1" != "" ]; then
+        find $1 -exec touch {} \;
+    fi
+}
 
 ##############################
 # JOB ID MANAGEMENT
