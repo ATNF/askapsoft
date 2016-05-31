@@ -1,3 +1,36 @@
+0.13.0 (31 May 2016)
+--------------------
+
+This version fixes a few issues with the processing pipelines, fixes
+some bugs with the source-finder and casda upload utility, and moves
+the underlying code to use version 2 of the casacore package.
+
+The pipeline scripts have seen the following changes:
+ * The requested times for the slurm jobs are now individually
+ configurable via parameters in the processBETA config file.
+ * The Pawsey account can be explicitly given, allowing the use of the
+ scripts under other accounts on magnus.
+ * The linmos job now properly checks the CLOBBER parameter, and will
+ avoid over-writing mosaicked images if CLOBBER=false.
+ * There is now an archiving option to the pipeline, which includes:
+   - conversion of images to FITS format
+   - creation of PNG 'thumbnail' versions of the 2D images
+   - staging of data to a directory for ingest into CASDA
+
+The processing software had the following changes:
+ * The casacore package has been updated to version 2.0.3, with
+ corresponding changes throughout the ASKAPsoft code tree.
+ * NOTE that this has resulted in the code not building on OS X
+ Mavericks (10.9).
+ * The Selavy sourcefinder had two changes:
+   - Errors on the fitted parameters are now reported in the component
+   catalogue.
+   - A bug that stopped Selavy running the variable-threshold option
+   when the SNR image name was not specified has been fixed.
+ * The casdaupload utility now requires the observation start and end
+ times to be specified if no measurement set is provided.
+
+
 0.12.2 (24 May 2016)
 --------------------
 
