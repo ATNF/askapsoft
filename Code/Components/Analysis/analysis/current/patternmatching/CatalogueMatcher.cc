@@ -487,23 +487,26 @@ void CatalogueMatcher::outputSummary()
 {
 
     if (itsSourceSummaryFile != "") {
-        this->outputSummary(itsSrcCatalogue, itsSourceSummaryFile);
+        this->outputSummary(itsSrcCatalogue, "src", itsSourceSummaryFile);
     }
 
     if (itsReferenceSummaryFile != "") {
-        this->outputSummary(itsRefCatalogue, itsReferenceSummaryFile);
+        this->outputSummary(itsRefCatalogue, "ref", itsReferenceSummaryFile);
     }
 
 }
 
-void CatalogueMatcher::outputSummary(PointCatalogue &cat, std::string filename)
+void CatalogueMatcher::outputSummary(PointCatalogue &cat, std::string whichOne, std::string filename)
 {
     size_t width = 0;
-    std::string matchID;
     std::vector<Point>::iterator pt;
     std::vector<std::pair<Point, Point> >::iterator mpair;
     std::vector<std::pair<Point, Point> >::iterator match;
 
+    if ( (whichOne!="src") && (whichOne!="ref") ){
+        ASKAPTHROW(AskapError, "Incorrect value for 'whichOne' in CatalogueMatcher::outputSummary");
+    }
+    
     for (match = itsMatchingPixList.begin();
             match < itsMatchingPixList.end();
             match++) {
@@ -517,12 +520,17 @@ void CatalogueMatcher::outputSummary(PointCatalogue &cat, std::string filename)
                 pt < cat.fullPointList().end();
                 pt++) {
 
-            bool isMatch = false;
+            std::string noMatch = "---";
+            std::string matchID = noMatch;
             for (mpair = itsMatchingPixList.begin();
-                    mpair < itsMatchingPixList.end() && !isMatch;
-                    mpair++) {
-                isMatch = (pt->ID() == mpair->second.ID());
-                matchID = isMatch ? mpair->first.ID() : "---";
+                 (mpair < itsMatchingPixList.end()) && (matchID==noMatch);
+                 mpair++) {
+                if ( (whichOne == "src") && (pt->ID() == mpair->first.ID()) ) {
+                    matchID = mpair->second.ID();
+                }
+                else if ( (whichOne == "ref") && (pt->ID() == mpair->second.ID()) ){
+                    matchID = mpair->first.ID();
+                }
             }
             fout << std::setw(width) << pt->ID() << " "
                  << std::setw(width) << matchID << " "

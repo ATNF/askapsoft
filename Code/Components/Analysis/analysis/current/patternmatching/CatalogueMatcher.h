@@ -130,7 +130,10 @@ class CatalogueMatcher {
         /// @brief Output the list of sources with any matches from the other list
         void outputSummary();
         /// @brief Output a single catalogue showing matches from the other list
-        void outputSummary(PointCatalogue &cat, std::string filename);
+        /// @param cat - List of points to output
+        /// @param whichOne - Is the list of points the source list ("src") or the reference list ("ref")
+        /// @param filename - File to write the results to
+    void outputSummary(PointCatalogue &cat, std::string whichOne, std::string filename);
 
         unsigned int srcListSize() {return itsSrcCatalogue.pointList().size();}
         unsigned int refListSize() {return itsRefCatalogue.pointList().size();}
@@ -145,7 +148,7 @@ class CatalogueMatcher {
         std::string itsReferenceImage;
         /// @brief The list of matching triangles
         std::vector<std::pair<Triangle, Triangle> > itsMatchingTriList;
-        /// @brief The list of matching points
+        /// @brief The list of matching points: pairs of <src,ref> matches
         std::vector<std::pair<Point, Point> > itsMatchingPixList;
         /// @brief The epsilon error parameter for matching
         double itsEpsilon;
