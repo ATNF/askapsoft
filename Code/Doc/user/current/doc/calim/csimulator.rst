@@ -194,6 +194,8 @@ Parameters of the sources (or fields)
 
 This section describes how the sky model is specified. The parameters can be given either in the main parset file or in a separate
 one pointed by *sources.definition* (see above). All parameters below have *Csimulator* prefix, if given in the main parset file.
+The sky model is specified by either a model image (using *sources.nameOfSource.model*) or components
+(using *sources.nameOfSource.components*), but not both. If both options are provided in the parset, the task will abort.
 
 +------------------------+--------------+--------------+---------------------------------------------------------+
 |**Parameter**           |**Type**      |**Default**   |**Description**                                          |
