@@ -57,11 +57,11 @@ module schedblock
         SUBMITTED,
         SCHEDULED,
         EXECUTING,
-        POSTPROCESSING,
+        PROCESSING,
         PENDINGARCHIVE,
         COMPLETED,
         ERRORED,
-        RETIRED
+	RETIRED
     };
 
     /**
@@ -113,8 +113,8 @@ module schedblock
          *
          **/
         void transition(long sbid, ObsState newstate) throws
-            TransitionException,
-            NoSuchSchedulingBlockException;
+		TransitionException,
+		NoSuchSchedulingBlockException;
 
         /**
          * Get all Scheduling Block ids matching the given state.
@@ -148,17 +148,19 @@ module schedblock
         idempotent askap::interfaces::LongSeq getByTemplate(string name,
                                                             int majorversion);
 
-        /**
-         * Get Scheduling Block (id) for the ObsProgram "name"
-         *
+	    /**
+	     * Get Scheduling Block (id) for the ObsProgram "name"
+
          * @param name the name of the ObsProgram
          * @param changedsince get Scheduling Blocks changed since given
          *                     ISO8061 UTC date/time
-         * @return a sequence of Scheduling Block ids
-        *
-        **/
-        idempotent askap::interfaces::LongSeq getByObsProgram(string name,
-                string changedsince) throws NoSuchObsProgramException;
+	     * @return a sequence of Scheduling Block ids
+	     *
+	     **/
+	     idempotent askap::interfaces::LongSeq getByObsProgram(
+	                                                     string name,
+	                                                     string changedsince)
+	         throws NoSuchObsProgramException;
 
         /**
          * Create a new Scheduling Block with the given initial configuration.
@@ -173,7 +175,7 @@ module schedblock
          **/
         long create(string program, string templname, string alias)
              throws NoSuchSBTemplateException,
-                    NoSuchObsProgramException;
+	            NoSuchObsProgramException;
 
         /**
          * Remove and existing Scheduling Block. This will only work with
@@ -302,7 +304,8 @@ module schedblock
          * @param obsvarkeys The Obs Variables to remove
          *
          **/
-        void removeObsVariables(long sbid, askap::interfaces::StringSeq obsvarkeys)
+        void removeObsVariables(long sbid,
+                                 askap::interfaces::StringSeq obsvarkeys)
                 throws ParameterException,
                        NoSuchSchedulingBlockException;
 
@@ -329,7 +332,7 @@ module schedblock
          *
          **/
         void updateTemplateVersion(long sbid, int majorversion,
-                askap::interfaces::ParameterMap userparams)
+				   askap::interfaces::ParameterMap userparams)
                 throws NoSuchSchedulingBlockException,
                        NoSuchSBTemplateException;
 
@@ -341,7 +344,7 @@ module schedblock
          *
          **/
         idempotent ObsState getState(long sbid)
-            throws NoSuchSchedulingBlockException;
+	      throws NoSuchSchedulingBlockException;
 
         /**
          * Get the ObsProgram which owns the given Scheduling Block.
@@ -351,7 +354,7 @@ module schedblock
          *
          **/
         idempotent string getOwner(long sbid)
-            throws NoSuchSchedulingBlockException;
+	      throws NoSuchSchedulingBlockException;
 
         /**
          * Get a list of all ObsPrograms associated  with the given Scheduling
@@ -362,7 +365,7 @@ module schedblock
          *
          **/
         idempotent askap::interfaces::StringSeq getObsPrograms(long sbid)
-            throws NoSuchSchedulingBlockException;
+	      throws NoSuchSchedulingBlockException;
 
         /**
          * Associate the given ObsProgram with the given Scheduling Block.
@@ -372,8 +375,8 @@ module schedblock
          *
          **/
         void addObsProgram(long sbid, string program)
-            throws NoSuchSchedulingBlockException,
-                   NoSuchObsProgramException;
+	  throws NoSuchSchedulingBlockException,
+	         NoSuchObsProgramException;
 
         /**
          * Disassociate an ObsProgram from the given Scheduling Block.
@@ -383,9 +386,28 @@ module schedblock
          *
          **/
         void removeObsProgram(long sbid, string program)
-            throws NoSuchSchedulingBlockException,
-                   NoSuchObsProgramException;
+	  throws NoSuchSchedulingBlockException,
+	         NoSuchObsProgramException;
+
     };
+
+    /**
+     * Publisher of Scheduling Block state change events.
+     **/
+    interface ISBStateMonitor {
+        /**
+         * Notify when a state has changed has changed
+         * The topic name shall be "sbstatechange"
+         *
+         * @param sbid the id of the SchedulingBlock which changed state
+         * @param newState the new state of the SchedulingBlock
+         *
+         **/
+        idempotent void changed(long sbid, ObsState newState,
+                                string updateTime);
+
+    };
+
 };
 };
 };

@@ -49,7 +49,7 @@ module logging
      * in the logging system specific implementations.
      * These are the only valid levels.
      **/
-    enum LogLevel { TRACE, DEBUG, INFO, WARN, ERROR, FATAL};
+    enum LogLevel { TRACE, DEBUG, INFO, WARN, ERROR, FATAL };
 
 
     /**
@@ -94,31 +94,41 @@ module logging
     struct IQueryObject
     {
         // The log origin/logger name , e.g. 'askap.test'
-	// SQL like match
+	    // SQL like match
+	    // Specify an empty string as default
+
         string origin;
 
         // The minimum date/time  as POSIX time double
+        // Specify the default as 0.0
         double datemin;
 
         // The minimum date/time  as POSIX time double
+        // Specify the default as now.
         double datemax;
 
         // The log levels to query on
+        // An empty list will set all LogLevels
         LogLevelSeq levels;
 
         // query by tag
-	// SQL like match
+	    // SQL like match
+	    // Specify an empty string as default
         string tag;
 
         // query by hostname
-	// SQL like match
+	    // SQL like match
+	    // Specify an empty string as default
         string hostname;
 
         // The maximum number of ILogEvents (rows) to return
+        // Specify a number greater 0, use max with care and instead use multiple
+        // queries with offsets.
         int limit;
 
-	// The row number offset at
-	int offset;
+	    // The row number offset at
+	    // The default should be 0
+	    int offset;
     };
 
     /**
@@ -127,7 +137,7 @@ module logging
     interface ILogQuery extends askap::interfaces::services::IService
     {
         // Query the logarchive database returning the list of matches
-	// ordered by ascending date
+	    // ordered by ascending date
         idempotent EventSeq query(IQueryObject q) throws LogQueryException;
 
         // Get the logger names (origin) with an optional name to match

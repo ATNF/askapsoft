@@ -97,13 +97,20 @@ module interfaces
      **/
     sequence<DoubleComplex> DoubleComplexSeq;
 
+    /** Coordinate frame type */
+    enum CoordSys {
+        J2000,
+        AZEL
+    };
     /**
-     * Astronomical direction (a measure)
-     */
-    enum CoordSys { J2000, AZEL };
+     * Astronomical direction (e.g. a casacore measure)
+     **/
     struct Direction {
+        /** RA/azimuth (in degrees) **/
         double coord1;
+        /** Dec/elevation (in degrees) **/
         double coord2;
+        /** coordinate frame **/
         CoordSys sys;
     };
 

@@ -72,11 +72,26 @@ module schedblock
         DISABLED
     };
 
+    /**
+     * A Scheduling block summary
+     * See ISchedulingBlockService for details on the attributes
+     **/
+    struct SBTemplateSummary
+    {
+      string name;
+      askap::interfaces::LongSeq versionIds;
+      Version currentVersion;
+      SBTemplateStatus status;
+      string description;
+    };
+
+    ["java:type:java.util.ArrayList<askap.interfaces.schedblock.SBTemplateSummary>"]
+    sequence<SBTemplateSummary> SBTemplateSummarySeq;
 
     /**
      * The interface to create/access and maintain Scheduling Block Templates.
      * These describe the Observation Parameters and Procedure which are
-     * versioned for tracebility. These templates have a name associated with
+     * versioned for traceability. These templates have a name associated with
      * them. When accessing the interface by name the latest version of the
      * SBTemplate is returned. Template and procedure can't be separated as the
      * template describes the parameters used in the procedure.
@@ -169,6 +184,16 @@ module schedblock
                             string obsproc)
             throws NoSuchSBTemplateException,
                    VersionException;
+
+        /**
+         * Get a summary of all available SBTemplates.
+         **/
+        idempotent SBTemplateSummarySeq getSummaries();
+
+        /**
+         * Get a summary of all teh named SBTemplate.
+         **/
+        idempotent SBTemplateSummary getSummary(string name);
 
         /**
          * Get a sequence of all available SBTemplate names.
