@@ -86,11 +86,17 @@ Local Filesystems
 You have two filesystems available to you:
 
 * Your home directory
-* The *scratch* filesystem, where you have a directory /scratch2/askap/$USER
+* The *scratch* filesystem, where you have a directory ``/scratch2/askap/$USER``
+* The *group* filesystem, where you have a directory ``/group/astronomy856/$USER``
 
 The scratch filesystem should be used for executing your processing jobs. Specifically
 bulk data (measurement sets, images, etc) to be read from the job, and all output written,
-should be from/to the scratch filesystem.
+should be from/to the scratch filesystem. The scratch filesystem is subject to a purge policy and
+so you should move any data you need to retain from this filesystem to another area. 
+See :doc:`purgepolicy` for advice. 
+
+The group filesystem is a smaller filesystem where you can store data sets or data products, however,
+this has quotas applied at the group level. e.g. ``astronomy856`` group has a quota of 10TB.
 
 Note that your home directory, while it can be read from the compute nodes, cannot be
 written to from the compute nodes. It is mounted read-only on the compute nodes to prevent

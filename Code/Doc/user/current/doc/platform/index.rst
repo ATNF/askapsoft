@@ -13,5 +13,6 @@ the Pawsey Centre for Supercomputing in Perth, WA.
    processing.rst
    modules.rst
    externaltransfer.rst
+   purgepolicy.rst
    comm_archive.rst
    casa.rst
