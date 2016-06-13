@@ -52,6 +52,8 @@ Commissioning archive
 Measurement sets residing on ``scratch2`` will be purged according to the Commissioning Archive policy which is independent. Once this data has been archived it will be removed, however, there
 will be a mechanism to retrieve data from the archive should there be a need to process it again and this retrieval can be initiated via a ticket to ASKAPSUP.
 
+See :doc:`comm_archive` for more information.
+
 CASDA
 `````
 For Early Science program, CASDA should be used to store raw measurement sets, calibration results and science products.
