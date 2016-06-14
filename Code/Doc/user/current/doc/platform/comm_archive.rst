@@ -44,3 +44,4 @@ Additional Information
 ----------------------
 
 * `PawseyData Help <https://portal.pawsey.org.au/docs/Data_Services>`_
+* `Pawsey Data Services Command Line Client <https://portal.pawsey.org.au/docs/Data_Services/Command_Line>`_

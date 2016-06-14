@@ -11,10 +11,10 @@ scratch2 Purge Policy
 The ``scratch2`` 1.4PB Lustre file system at the Pawsey Centre is allocated to the ASKAP project (1 PB) and the MWA (0.4 PB). Hard quotas are not in place, as a certain amount of 
 flexibility between ASKAP and MWA usage benefits both projects so long as total usage is managed. Manually managing free space on ``scratch2`` is not practicable. Due to the configuration and characteristics 
 of the Lustre file system, file writes can fail even if the total free space is greater than the file size required. This is primarily due to individual Lustre Object Storage Targets (OSTs) running out of space. 
-To maintain operational stability of the ``scratch2`` filesystem, and the ASKAP telescope, and science objectives, free space must be maintained at a reasonable level.
+To maintain operational stability of the ``scratch2`` filesystem, and ASKAP, free space must be maintained at a reasonable level.
 
-To address this, an automated file purging policy is in place on ``scratch2``. This automatically removes files with a **most recent access time older than a set value**. Analysis shows that a most recent 
-access time of 30 to 45 days gives reasonable benefits. It should be noted that the term *scratch* means temporary and it should never be intended to be a location for data on a long term basis. However, 
+To address this, an automated file purging policy is in place on ``scratch2``. This automatically removes files with an **access time older than a set value**. Analysis shows that a most recent 
+access time of 30 to 45 days gives reasonable benefits. It should be noted that the term *scratch* means temporary and not intended for long term data archiving. However, 
 alternative locations for your data are available and you are urged to regularly examine your data usage on ``scratch2`` and **selectively** attend to the data you wish to keep.
 
 * `Pawsey file systems`_
@@ -49,14 +49,14 @@ See the Pawsey documentation for `transferring large files`_ for more informatio
 
 Commissioning archive
 `````````````````````
-Measurement sets residing on ``scratch2`` will be purged according to the Commissioning Archive policy which is independent. Once this data has been archived it will be removed, however, there
-will be a mechanism to retrieve data from the archive should there be a need to process it again and this retrieval can be initiated via a ticket to ASKAPSUP.
+Ingested measurement sets owned by ``askapops`` residing on ``scratch2`` will be purged according to the Commissioning Archive policy which is independent. Once this data has been archived it will be removed, however, 
+measurement sets can be retrieved from the archive by ASKAP Science Operations staff. Requests should be submitted to ASKAP Support, specifying the scheduling block ID (email askap-datasup@csiro.au).
 
 See :doc:`comm_archive` for more information.
 
 CASDA
 `````
-For Early Science program, CASDA should be used to store raw measurement sets, calibration results and science products.
+For the Early Science program, CASDA should be used to store science products and the associated raw measurement sets and calibration results.
 
 Removing Your scratch2 Files
 ----------------------------
