@@ -57,6 +57,22 @@ ImageElement::ImageElement(const LOFAR::ParameterSet &parset)
         ASKAPTHROW(AskapError,
                    "Unsupported format image - Expect " << itsFormat << " file extension");
     }
+    itsThumbnailLarge = parset.getString("thumbnail_large", "");
+    itsThumbnailSmall = parset.getString("thumbnail_small", "");
+}
+
+xercesc::DOMElement* ImageElement::toXmlElement(xercesc::DOMDocument& doc) const
+{
+    DOMElement* e = TypeElementBase::toXmlElement(doc);
+
+    if (itsThumbnailLarge != "") {
+        XercescUtils::addTextElement(*e, "thumbnail_large", itsThumbnailLarge.filename().string());
+    }
+    if (itsThumbnailSmall != "") {
+        XercescUtils::addTextElement(*e, "thumbnail_small", itsThumbnailSmall.filename().string());
+    }
+
+    return e;
 }
 
 

@@ -45,10 +45,19 @@ namespace pipelinetasks {
 /// Encapsulates an image artifact (e.g. a FITS image) for upload to
 /// CASDA. Simply a specialisation of the ProjectElementBase class,
 /// with the constructor defining the element name ("image") and
-/// format ("fits").
+/// format ("fits"), as well as (optionally) the filenames of large
+/// and small thumbnail images,
 class ImageElement : public TypeElementBase {
     public:
         ImageElement(const LOFAR::ParameterSet &parset);
+
+        xercesc::DOMElement* toXmlElement(xercesc::DOMDocument& doc) const;
+
+    protected:
+        /// The large PNG/JPG thumbnail image
+        boost::filesystem::path itsThumbnailLarge;
+        /// The small PNG/JPG thumbnail image
+        boost::filesystem::path itsThumbnailSmall;
 
 };
 
