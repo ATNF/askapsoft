@@ -474,6 +474,9 @@ ARCHIVE_BEAM_IMAGES=false
 # OPAL project ID, for CASDA use
 PROJECT_ID="AS031"
 
+# Observation program description
+OBS_PROGRAM="Commissioning"
+
 # For making thumbnails, this is the python dictionary linking the
 # size text to the figsize (in inches)
 THUMBNAIL_SIZES_INCHES="{'big':16, 'sml':5}"

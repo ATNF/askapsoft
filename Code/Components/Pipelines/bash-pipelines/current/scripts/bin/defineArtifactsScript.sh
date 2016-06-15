@@ -83,11 +83,16 @@ cat > ${getArtifacts} <<EOF
 # @author Matthew Whiting <Matthew.Whiting@csiro.au>
 #
 
+BASEDIR=${BASEDIR}
+parsets=$parsets
+logs=$logs
+
 # Run the config file
+CWD=\`pwd\`
 . ${PIPELINEDIR}/defaultConfig.sh
 . ${archivedConfig}
 . ${PIPELINEDIR}/processDefaults.sh
-
+cd \$CWD
 
 # List of images and their types
 
@@ -276,7 +281,7 @@ evalNames=()
 
 # Stats summary files
 for file in \`\ls ${OUTPUT}/stats-all*.txt\`; do
-    evalNames+=(\${file})
+    evalNames+=(\${file##*/})
 done
 
 # Thumbnail images

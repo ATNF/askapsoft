@@ -36,10 +36,14 @@ if [ $DO_STAGE_FOR_CASDA == true ]; then
         sbids="# No other sbids provided."
     fi
 
+    # Make the directory - will only do anything if it is a new local one
+    mkdir -p $CASDA_OUTPUT_DIR
     if [ ! -w ${CASDA_OUTPUT_DIR} ]; then
+        # can't write to the destination - make a new one locally.
         echo "WARNING - desired CASDA output directory ${CASDA_OUTPUT_DIR} is not writeable."
         echo "        - changing output directory to ${OUTPUT}/For-CASDA"
         CASDA_OUTPUT_DIR="${OUTPUT}/For-CASDA"
+        mkdir -p $CASDA_OUTPUT_DIR
     fi
     
     sbatchfile=$slurms/casda_upload.sbatch
@@ -76,7 +80,7 @@ imageParams="# Individual image details"
 for((i=0;i<\${#casdaImageNames[@]};i++)); do
     imageArtifacts+=(image\${i})
     imageParams="\${imageParams}
-image\${i}.filename  = \${casdaImageNames[i]}
+image\${i}.filename  = \${OUTPUT}/\${casdaImageNames[i]}
 image\${i}.type      = \${casdaImageTypes[i]}
 image\${i}.project   = ${PROJECT_ID}"
 done
@@ -87,9 +91,9 @@ catParams="# Individual catalogue details"
 for((i=0;i<\${#catNames[@]};i++)); do
     catArtifacts+=(cat\${i})
     catParams="\${catParams}
-catalogue\${i}.filename = \${catNames[i]}
-catalogue\${i}.type     = \${catTypes[i]}
-catalogue\${i}.project  = ${PROJECT_ID}"
+cat\${i}.filename = \${OUTPUT}/\${catNames[i]}
+cat\${i}.type     = \${catTypes[i]}
+cat\${i}.project  = ${PROJECT_ID}"
 done
 catArtifacts=\`echo \${catArtifacts[@]} | sed -e 's/ /,/g'\`
 
@@ -98,7 +102,7 @@ msParams="# Individual catalogue details"
 for((i=0;i<\${#msNames[@]};i++)); do
     msArtifacts+=(ms\${i})
     msParams="\${msParams}
-ms\${i}.filename = \${msNames[i]}
+ms\${i}.filename = \${OUTPUT}/\${msNames[i]}
 ms\${i}.project  = ${PROJECT_ID}"
 done
 msArtifacts=\`echo \${msArtifacts[@]} | sed -e 's/ /,/g'\`
@@ -108,7 +112,7 @@ evalParams="# Evaluation file details"
 for((i=0;i<\${#evalNames[@]};i++)); do
     evalArtifacts+=(eval\${i})
     evalParams="\${evalParams}
-eval\${i}.filename = \${evalNames[i]}
+eval\${i}.filename = \${OUTPUT}/\${evalNames[i]}
 eval\${i}.project  = ${PROJECT_ID}"
 done
 evalArtifacts=\`echo \${evalArtifacts[@]} | sed -e 's/ /,/g'\`
