@@ -34,7 +34,9 @@
 #include <string>
 
 // ASKAPsoft includes
+#include "askap/AskapLogging.h"
 #include "askap/AskapError.h"
+#include "casdaupload/CasdaFileUtils.h"
 #include "xercesc/dom/DOM.hpp" // Includes all DOM
 #include "boost/filesystem.hpp"
 #include "votable/XercescString.h"
@@ -46,6 +48,8 @@ using namespace askap::cp::pipelinetasks;
 using xercesc::DOMElement;
 using askap::accessors::XercescString;
 using askap::accessors::XercescUtils;
+
+ASKAP_LOGGER(logger, ".elementbase");
 
 ElementBase::ElementBase(const LOFAR::ParameterSet &parset)
     : itsFilepath(parset.getString("filename")), itsFormat(""), itsName("")
@@ -65,4 +69,14 @@ xercesc::DOMElement* ElementBase::toXmlElement(xercesc::DOMDocument& doc) const
 boost::filesystem::path ElementBase::getFilepath(void) const
 {
     return itsFilepath;
+}
+
+void ElementBase::copyAndChecksum(const boost::filesystem::path& outdir) const
+{
+
+    const boost::filesystem::path in(itsFilepath);
+    const boost::filesystem::path out(outdir / in.filename());
+    ASKAPLOG_INFO_STR(logger, "Copying and calculating checksum for " << in);
+    CasdaFileUtils::copyAndChecksum(in, out);
+
 }

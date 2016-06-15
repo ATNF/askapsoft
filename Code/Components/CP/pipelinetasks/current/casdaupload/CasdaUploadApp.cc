@@ -264,10 +264,7 @@ void CasdaUploadApp::copyAndChecksumElements(const std::vector<T>& elements,
 {
     for (typename vector<T>::const_iterator it = elements.begin();
             it != elements.end(); ++it) {
-        const fs::path in(it->getFilepath());
-        const fs::path out(outdir / in.filename());
-        ASKAPLOG_INFO_STR(logger, "Copying and calculating checksum for " << in);
-        CasdaFileUtils::copyAndChecksum(in, out);
+        it->copyAndChecksum(outdir);
     }
 }
 

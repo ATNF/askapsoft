@@ -51,6 +51,8 @@ class ElementBase {
 
         boost::filesystem::path getFilepath(void) const;
 
+        void copyAndChecksum(const boost::filesystem::path& outdir) const;
+
     protected:
         boost::filesystem::path itsFilepath;
         std::string itsFormat;

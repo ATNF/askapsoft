@@ -53,6 +53,8 @@ class ImageElement : public TypeElementBase {
 
         xercesc::DOMElement* toXmlElement(xercesc::DOMDocument& doc) const;
 
+        void copyAndChecksum(const boost::filesystem::path& outdir) const;
+
     protected:
         /// The large PNG/JPG thumbnail image
         boost::filesystem::path itsThumbnailLarge;
