@@ -477,9 +477,11 @@ PROJECT_ID="AS031"
 # Observation program description
 OBS_PROGRAM="Commissioning"
 
-# For making thumbnails, this is the python dictionary linking the
-# size text to the figsize (in inches)
-THUMBNAIL_SIZES_INCHES="{'big':16, 'sml':5}"
+# For making thumbnails, this is the size value given to figsize (in inches)
+THUMBNAIL_SIZE_INCHES=(16 5)
+# For making thumbnails, this is the corresponding string for the sizes
+THUMBNAIL_SIZE_TEXT=(large small)
+
 # Suffix for thumnail images - determines the image type
 THUMBNAIL_SUFFIX="png"
 # Grey-scale ranges for the thumbnails, in units of the overall image

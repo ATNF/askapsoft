@@ -61,10 +61,10 @@ cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 # Define the lists of image names, types, 
 . ${getArtifacts}
 
-for((i=0;i<\${#imageNamesTwoDim[@]};i++)); do
+for((i=0;i<\${#casdaTwoDimImageNames[@]};i++)); do
 
-    im=\${imageNamesTwoDim[i]}
-    title=\${thumbnailTitles[i]}
+    im=\${casdaTwoDimImageNames[i]}
+    title=\${casdaTwoDimThumbTitles[i]}
 
     StatParset=$parsets/cimstat-\${im}_\${SLURM_JOB_ID}.in
     StatLog=$logs/cimstat-\${im}_\${SLURM_JOB_ID}.log
@@ -92,7 +92,7 @@ suffix='${THUMBNAIL_SUFFIX}'
 fitsim='\${im}'
 thumbim=fitsim.replace('.fits','.%s'%suffix)
 figtitle='\${title}'
-figsizes=${THUMBNAIL_SIZES_INCHES}
+figsizes={'${THUMBNAIL_SIZE_TEXT[0]}':${THUMBNAIL_SIZE_INCHES[0]}, '${THUMBNAIL_SIZE_TEXT[1]}':${THUMBNAIL_SIZE_INCHES[1]}}
 for size in figsizes:
     gc=aplpy.FITSFigure(fitsim,figsize=(figsizes[size],figsizes[size]))
     gc.show_colorscale(vmin=\$zmin,vmax=\$zmax)

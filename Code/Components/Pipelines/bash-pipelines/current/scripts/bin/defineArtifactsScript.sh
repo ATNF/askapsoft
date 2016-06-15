@@ -47,12 +47,12 @@ cat > ${getArtifacts} <<EOF
 # Defines the lists of images, catalogues and measurement sets that
 # are present and need to be archived. Upon return, the following
 # environment variables are defined:
-#   * casdaImageNames - list of FITS files to be archived
-#   * casdaImageTypes - their corresponding image types
-#   * imageNames - list of all CASA-format images
-#   * imageNamesTwoDim - list of only the 2D CASA-format images
-#   * thumbnailTitles - the titles used in the thumbnail images of the
-#     2D images
+#   * casdaTwoDimImageNames - list of 2D FITS files to be archived
+#   * casdaTwoDimImageTypes - their corresponding image types
+#   * casdaTwoDimThumbTitles - the titles used in the thumbnail images
+       of the 2D images
+#   * casdaOtherDimImageNames - list of non-2D FITS files to be archived
+#   * casdaOtherDimImageTypes - their corresponding image types
 #   * catNames - names of catalogue files to archived
 #   * catTypes - their corresponding catalogue types
 #   * msNames - names of measurement sets to be archived
@@ -98,11 +98,11 @@ cd \$CWD
 
 ##############################
 # First, search for continuum images
-casdaImageNames=()
-casdaImageTypes=()
-imageNames=()
-imageNamesTwoDim=()
-thumbnailTitles=()
+casdaTwoDimImageNames=()
+casdaTwoDimImageTypes=()
+casdaTwoDimThumbTitles=()
+casdaOtherDimImageNames=()
+casdaOtherDimImageTypes=()
 
 # Variables defined from configuration file
 NOW="${NOW}"
@@ -115,7 +115,6 @@ LOCAL_BEAM_LIST="all"
 if [ "\${doBeams}" == true ]; then
     LOCAL_BEAM_LIST="\$LOCAL_BEAM_LIST \${beams}"
 fi
-
 
 for BEAM in \${LOCAL_BEAM_LIST}; do
 
@@ -141,55 +140,35 @@ for BEAM in \${LOCAL_BEAM_LIST}; do
 
         # The following makes lists of the FITS images suitable for CASDA, and their associated image types
         if [ -e image.\${imBase}.restored.fits ]; then
-            casdaImageNames+=(image.\${imBase}.restored.fits)
-            casdaImageTypes+=(cont_restored_\${typeSuffix})
-            imageNamesTwoDim+=(image.\${imBase}.restored.fits)
-            thumbnailTitles+=("Restored image, \${beamSuffix}")
+            casdaTwoDimImageNames+=(image.\${imBase}.restored.fits)
+            casdaTwoDimImageTypes+=(cont_restored_\${typeSuffix})
+            casdaTwoDimThumbTitles+=("Restored image, \${beamSuffix}")
         fi
         if [ -e psf.\${imBase}.fits ]; then
-            casdaImageNames+=(psf.\${imBase}.fits)
-            imageNamesTwoDim+=(psf.\${imBase}.fits)
-            casdaImageTypes+=(cont_psfnat_\${typeSuffix})
-            thumbnailTitles+=("PSF, \${beamSuffix}")
+            casdaTwoDimImageNames+=(psf.\${imBase}.fits)
+            casdaTwoDimImageTypes+=(cont_psfnat_\${typeSuffix})
+            casdaTwoDimThumbTitles+=("PSF, \${beamSuffix}")
         fi
         if [ -e psf.image.\${imBase}.fits ]; then
-            casdaImageNames+=(psf.image.\${imBase}.fits)
-            imageNamesTwoDim+=(psf.image.\${imBase}.fits)
-            casdaImageTypes+=(cont_psfprecon_\${typeSuffix})
-            thumbnailTitles+=("Preconditioned PSF, \${beamSuffix}")
+            casdaTwoDimImageNames+=(psf.image.\${imBase}.fits)
+            casdaTwoDimImageTypes+=(cont_psfprecon_\${typeSuffix})
+            casdaTwoDimThumbTitles+=("Preconditioned PSF, \${beamSuffix}")
         fi
         if [ -e image.\${imBase}.fits ]; then
-            casdaImageNames+=(image.\${imBase}.fits)
-            imageNamesTwoDim+=(image.\${imBase}.fits)
-            casdaImageTypes+=(cont_cleanmodel_\${typeSuffix})
-            thumbnailTitles+=("Clean model, \${beamSuffix}")
+            casdaTwoDimImageNames+=(image.\${imBase}.fits)
+            casdaTwoDimImageTypes+=(cont_cleanmodel_\${typeSuffix})
+            casdaTwoDimThumbTitles+=("Clean model, \${beamSuffix}")
         fi
         if [ -e residual.\${imBase}.fits ]; then
-            casdaImageNames+=(residual.\${imBase}.fits)
-            imageNamesTwoDim+=(residual.\${imBase}.fits)
-            casdaImageTypes+=(cont_residual_\${typeSuffix})
-            thumbnailTitles+=("Residual image, \${beamSuffix}")
+            casdaTwoDimImageNames+=(residual.\${imBase}.fits)
+            casdaTwoDimImageTypes+=(cont_residual_\${typeSuffix})
+            casdaTwoDimThumbTitles+=("Residual image, \${beamSuffix}")
         fi
         if [ -e sensitivity.\${imBase}.fits ]; then
-            casdaImageNames+=(sensitivity.\${imBase}.fits)
-            imageNamesTwoDim+=(sensitivity.\${imBase}.fits)
-            casdaImageTypes+=(cont_sensitivity_\${typeSuffix})
-            thumbnailTitles+=("Sensitivity, \${beamSuffix}")
+            casdaTwoDimImageNames+=(sensitivity.\${imBase}.fits)
+            casdaTwoDimImageTypes+=(cont_sensitivity_\${typeSuffix})
+            casdaTwoDimThumbTitles+=("Sensitivity, \${beamSuffix}")
         fi
-
-        # The following makes a list of CASA images
-        for im in \${list_of_images}; do
-
-            for imagename in "\${im}.\${imBase}" "\${im}.\${imBase}.restored"; do
-            
-                if [ -e \${imagename} ]; then
-                echo \${imagename}
-                    imageNames+=(\${imagename})
-                fi
-
-            done
-
-        done                
         
     done
 
@@ -199,43 +178,29 @@ for BEAM in \${LOCAL_BEAM_LIST}; do
     setImageBaseSpectral
     # The following makes lists of the FITS images suitable for CASDA, and their associated image types
     if [ -e image.\${imageBase}.restored.fits ]; then
-        casdaImageNames+=(image.\${imageBase}.restored.fits)
-        casdaImageTypes+=(spectral_restored_3d)
+        casdaOtherDimImageNames+=(image.\${imageBase}.restored.fits)
+        casdaOtherDimImageTypes+=(spectral_restored_3d)
     fi
     if [ -e psf.\${imageBase}.fits ]; then
-        casdaImageNames+=(psf.\${imageBase}.fits)
-        casdaImageTypes+=(spectral_psfnat_3d)
+        casdaOtherDimImageNames+=(psf.\${imageBase}.fits)
+        casdaOtherDimImageTypes+=(spectral_psfnat_3d)
     fi
     if [ -e psf.image.\${imageBase}.fits ]; then
-        casdaImageNames+=(psf.image.\${imageBase}.fits)
-        casdaImageTypes+=(spectral_psfprecon_3d)
+        casdaOtherDimImageNames+=(psf.image.\${imageBase}.fits)
+        casdaOtherDimImageTypes+=(spectral_psfprecon_3d)
     fi
     if [ -e image.\${imageBase}.fits ]; then
-        casdaImageNames+=(image.\${imageBase}.fits)
-        casdaImageTypes+=(spectral_cleanmodel_3d)
+        casdaOtherDimImageNames+=(image.\${imageBase}.fits)
+        casdaOtherDimImageTypes+=(spectral_cleanmodel_3d)
     fi
     if [ -e residual.\${imageBase}.fits ]; then
-        casdaImageNames+=(residual.\${imageBase}.fits)
-        casdaImageTypes+=(spectral_residual_3d)
+        casdaOtherDimImageNames+=(residual.\${imageBase}.fits)
+        casdaOtherDimImageTypes+=(spectral_residual_3d)
     fi
     if [ -e sensitivity.\${imageBase}.fits ]; then
-        casdaImageNames+=(sensitivity.\${imageBase}.fits)
-        casdaImageTypes+=(spectral_sensitivity_3d)
+        casdaOtherDimImageNames+=(sensitivity.\${imageBase}.fits)
+        casdaOtherDimImageTypes+=(spectral_sensitivity_3d)
     fi
-    
-    # The following makes lists of CASA images
-    for im in \${list_of_images}; do
-        
-        for imagename in "\${im}.\${imBase}" "\${im}.\${imBase}.restored"; do
-            
-            if [ -e \${imagename} ]; then
-                imageNames+=(\${imagename})
-            fi
-
-        done
-        
-    done                
-
 
 done
 
@@ -282,20 +247,6 @@ evalNames=()
 # Stats summary files
 for file in \`\ls ${OUTPUT}/stats-all*.txt\`; do
     evalNames+=(\${file##*/})
-done
-
-# Thumbnail images
-suffix=${THUMBNAIL_SUFFIX}
-sizelist="${THUMBNAIL_SIZES_INCHES}"
-for size in \`echo \$sizelist | sed -e "s/[{}\,\']//g"\`; do 
-    sizeStr=\`echo \$size | awk -F':' '{print \$1}'\`
-    sedStr="s/\.fits/_\${sizeStr}\.\${suffix}/g"
-    for((i=0;i<\${#imageNamesTwoDim[@]};i++)); do
-        thumb=\`echo \${imageNamesTwoDim[i]} | sed -e \$sedStr\`
-        if [ -e \$thumb ]; then
-            evalNames+=(\${thumb})
-        fi
-    done
 done
 
 EOF

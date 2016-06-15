@@ -76,13 +76,35 @@ cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 
 # Set image-related parameters
 imageArtifacts=()
-imageParams="# Individual image details"
-for((i=0;i<\${#casdaImageNames[@]};i++)); do
-    imageArtifacts+=(image\${i})
+imageParams="# Individual image details
+#  First the two-dimensional images"
+count=0
+for((i=0;i<\${#casdaTwoDimImageNames[@]};i++)); do
+    imageArtifacts+=(image\${count})
     imageParams="\${imageParams}
-image\${i}.filename  = \${OUTPUT}/\${casdaImageNames[i]}
-image\${i}.type      = \${casdaImageTypes[i]}
-image\${i}.project   = ${PROJECT_ID}"
+image\${count}.filename  = \${OUTPUT}/\${casdaTwoDimImageNames[i]}
+image\${count}.type      = \${casdaTwoDimImageTypes[i]}
+image\${count}.project   = ${PROJECT_ID}"
+    for size in ${THUMBNAIL_SIZE_TEXT[@]}; do
+        sedstr="s/\.fits/_\${size}.${THUMBNAIL_SUFFIX}/g"
+        thumb=\`echo \${casdaTwoDimImageNames[i]} | sed -e \$sedstr\`
+        if [ -e \${OUTPUT}/\$thumb ]; then
+            imageParams="\${imageParams}
+image\${count}.thumbnail_\${size} = \${OUTPUT}/\${thumb}"
+        fi
+    done
+    count=\`expr \$count + 1\`
+done
+
+imageParams="\${imageParams}
+#  Next the other images (cubes, spectra)"
+for((i=0;i<\${#casdaOtherDimImageNames[@]};i++)); do
+    imageArtifacts+=(image\${count})
+    imageParams="\${imageParams}
+image\${count}.filename  = \${OUTPUT}/\${casdaOtherDimImageNames[i]}
+image\${count}.type      = \${casdaOtherDimImageTypes[i]}
+image\${count}.project   = ${PROJECT_ID}"
+    count=\`expr \$count + 1\`
 done
 imageArtifacts=\`echo \${imageArtifacts[@]} | sed -e 's/ /,/g'\`
 
