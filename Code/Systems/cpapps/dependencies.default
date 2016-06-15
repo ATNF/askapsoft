@@ -3,3 +3,4 @@ analysis=Code/Components/Analysis/analysis/current
 pipelinetasks=Code/Components/CP/pipelinetasks/current
 simager=Code/Components/CP/simager/current
 utilities=Code/Components/Utilities/current
+aplpy=3rdParty/APLpy/APLpy-0.9.5
