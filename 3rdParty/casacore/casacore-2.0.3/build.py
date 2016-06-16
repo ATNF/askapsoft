@@ -17,8 +17,8 @@ lapack  = builder.dep.get_install_path("lapack")
 fftw3   = builder.dep.get_install_path("fftw3")
 
 # CMake doesn't know about ROOT_DIR for these packages, so be explicit
-builder.add_option("-DBLAS_LIBRARIES=%s" % os.path.join(blas, 'lib', libblas))
-builder.add_option("-DLAPACK_LIBRARIES=%s" % os.path.join(lapack, 'lib', liblapack))
+builder.add_option("-DBLAS_LIBRARIES=%s" % os.path.join(blas, 'lib', 'libblas.a'))
+builder.add_option("-DLAPACK_LIBRARIES=%s" % os.path.join(lapack, 'lib', 'liblapack.a'))
 # these work
 builder.add_option("-DCFITSIO_ROOT_DIR=%s" % cfitsio)
 builder.add_option("-DWCSLIB_ROOT_DIR=%s" % wcslib)
