@@ -1,0 +1,3 @@
+FATAL askap.Application (-1, prospero) [2016-05-06 07:07:58,133] - Error: Unable to open file imager.in
+FATAL askap.Application (-1, prospero) [2016-05-06 07:07:58,133] - Error: Unable to open file imager.in
+FATAL askap.Application (-1, prospero) [2016-05-06 07:07:58,137] - Error: Unable to open file imager.in
