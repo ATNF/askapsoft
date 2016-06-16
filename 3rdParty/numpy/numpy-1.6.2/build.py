@@ -17,6 +17,8 @@ platform =  utils.get_platform()
 builder = Builder()
 builder.remote_archive = "numpy-1.6.2.tar.gz"
 
+print "Build System is ",platform['system']
+
 if platform['system'] == 'Darwin':
     builder.add_option('CFLAGS="-framework Accelerate"')
 else:
@@ -27,6 +29,7 @@ else:
 
     builder.add_env("BLAS", blaslib)
     builder.add_env("LAPACK", lapacklib)
+    builder.add_file("files/site.cfg")
 
 builder.add_postcallback(callback)
 builder.nowarnings = True

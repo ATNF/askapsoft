@@ -16,7 +16,8 @@ if platform['system'] != 'Darwin':
 
     builder.add_env("BLAS", blaslib)
     builder.add_env("LAPACK", lapacklib)
-
+    builder.add_file("files/site.cfg")
+    
 if platform['system'] == 'Darwin':
     if (int(platform['tversion'][1]) >= 10):
         builder.add_env("FFLAGS",'-Wa,-q')
