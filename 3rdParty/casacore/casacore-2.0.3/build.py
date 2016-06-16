@@ -53,12 +53,15 @@ builder.nowarnings = True
 # Force use of raw GNU compilers. This is due to bug #5798 soon on the Cray XC30.
 # Builds using the newer cmake (2.8.12) fail when cmake uses the Cray compiler
 # wrappers
-builder.add_option("-DCMAKE_C_COMPILER=gcc")
-builder.add_option("-DCMAKE_CXX_COMPILER=g++")
-
 if platform['system'] == 'Darwin':
    
     if (int(platform['tversion'][1]) >= 10):
         builder.add_option("-DCMAKE_Fortran_FLAGS=-Wa,-q")
+else:
+    builder.add_option("-DCMAKE_C_COMPILER=gcc")
+    builder.add_option("-DCMAKE_CXX_COMPILER=g++")
+
+#builder.add_option("-DCXX11=ON")
+
 
 builder.build()
