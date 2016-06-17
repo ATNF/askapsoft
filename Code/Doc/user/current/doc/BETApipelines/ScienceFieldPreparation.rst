@@ -90,5 +90,5 @@ averaging scale can be changed by the user.
 |                                           |                                 |                                                 | the quote marks). See documentation for further details on            |
 |                                           |                                 |                                                 | format.                                                               |
 +-------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
-| ``FLAG_AUTOCORRELATION_1934``             | false                           | selection_flagger.<rule>.autocorr               | If true, then autocorrelations will be flagged.                       |
+| ``FLAG_AUTOCORRELATION_SCIENCE``          | false                           | selection_flagger.<rule>.autocorr               | If true, then autocorrelations will be flagged.                       |
 +-------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
