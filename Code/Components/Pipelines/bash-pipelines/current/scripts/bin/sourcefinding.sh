@@ -28,22 +28,38 @@
 #
 
 if [ $DO_SOURCE_FINDING == true ]; then
-    
+
+    # List of images to convert to FITS in the Selavy job
+    imlist=""
+
     if [ $NUM_TAYLOR_TERMS == 1 ]; then
         image=${OUTPUT}/image.${imageBase}.restored
         weights=${OUTPUT}/weights.${imageBase}
+        imlist="${imlist} ${image}"
     else
         image=${OUTPUT}/image.${imageBase}.taylor.0.restored
         weights=${OUTPUT}/weights.${imageBase}.taylor.0
+        imlist="${imlist} ${image}"
+        if [ -e ${OUTPUT}/image.${imageBase}.taylor.1.restored ]; then
+            imlist="${imlist} ${OUTPUT}/image.${imageBase}.taylor.1.restored"
+        fi
+        if [ -e ${OUTPUT}/image.${imageBase}.taylor.2.restored ]; then
+            imlist="${imlist} ${OUTPUT}/image.${imageBase}.taylor.2.restored"
+        fi
+            
     fi
 
     if [ $BEAM == "all" ]; then
-        weightpars="Selavy.Weights.weightsImage = $weights
+        weightpars="Selavy.Weights.weightsImage = ${weights##*/}.fits
 Selavy.Weights.weightsCutoff = ${LINMOS_CUTOFF}"
+        imlist="${imlist} ${weights}"
     else
         weightpars="#"
     fi
 
+    # get the text that does the FITS conversion - put in $fitsConvertText
+    convertToFITStext
+    
     sbatchfile=$slurms/science_selavy_B${BEAM}.sbatch
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
@@ -76,12 +92,20 @@ cd \${seldir}
 ln -s ${logs} .
 ln -s ${parsets} .
 
+for im in ${imlist}; do 
+    casaim="../\${im##*/}"
+    fitsim="../\${im##*/}.fits"
+    ${fitsConvertText}
+    # make a link so we point to a file in the current directory for Selavy
+    ln -s \${im}.fits .
+done
+
 parset=${parsets}/science_selavy_B${BEAM}_\${SLURM_JOB_ID}.in
 log=${logs}/science_selavy_B${BEAM}_\${SLURM_JOB_ID}.log
 
 cat > \$parset <<EOFINNER
-Selavy.image = ${image}
-Selavy.SBid = 1248
+Selavy.image = ${image##*/}.fits
+Selavy.SBid = ${SB_SCIENCE}
 Selavy.nsubx = ${SELAVY_NSUBX}
 Selavy.nsuby = ${SELAVY_NSUBY}
 #

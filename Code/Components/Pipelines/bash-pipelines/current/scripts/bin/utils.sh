@@ -225,6 +225,38 @@ function find1934MSnames()
 
 }
 
+#############################
+# CONVERSION TO FITS FORMAT
+
+# This function returns a bunch of text in $fitsConvertText that can
+# be pasted into an external slurm job file 
+
+function convertToFITStext()
+{
+
+    fitsConvertText="# The following converts the file in \$casaim to a FITS file, then fixes headers.
+if [ -e \${casaim} ] && [ ! -e \${fitsim} ]; then
+    # The FITS version of this image doesn't exist
+
+    aprun -n 1 $image2fits in=\${casaim} out=\${fitsim}
+
+    script=$parsets/fixheader_\${casaim##*/}_\${SLURM_JOB_ID}.py
+    log=$logs/fixheader_\${casaim##*/}_\${SLURM_JOB_ID}.log
+    cat > \$script << EOFSCRIPT
+#!/usr/bin/env python
+import pyfits as fits
+image='\${fitsim}'
+project='${PROJECT_ID}'
+hdulist = fits.open(image,'update')
+hdulist[0].header.update('PROJECT',project)
+hdulist.flush()
+EOFSCRIPT
+
+    aprun -n 1 python \$script > \$log
+
+fi"
+
+}
 
 #############################
 # JOB STATISTIC MANAGEMENT

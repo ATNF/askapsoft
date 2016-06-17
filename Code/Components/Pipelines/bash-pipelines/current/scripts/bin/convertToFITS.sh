@@ -66,6 +66,9 @@ if [ ${DO_CONVERT_TO_FITS} == true ]; then
         done
 
     done
+
+    # get the text that does the FITS conversion - put in $fitsConvertText
+    convertToFITStext
     
     sbatchfile="$slurms/convert_to_FITS.sbatch"
     cat > $sbatchfile <<EOFOUTER
@@ -96,26 +99,7 @@ imageList=(${expectedImageNames[@]})
 casaim="\${imageList[\${SLURM_ARRAY_TASK_ID}]}"
 fitsim="\${imageList[\${SLURM_ARRAY_TASK_ID}]}.fits"
 
-if [ -e \${casaim} ] && [ ! -e \${fitsim} ]; then
-    # The FITS version of this image doesn't exist
-
-    aprun -n 1 $image2fits in=\${casaim} out=\${fitsim}
-
-    script=$parsets/fixheader_\${casaim}_\${SLURM_JOB_ID}.py
-    log=$logs/fixheader_\${casaim}_\${SLURM_JOB_ID}.log
-    cat > \$script << EOFSCRIPT
-#!/usr/bin/env python
-import astropy.io.fits as fits
-image='\${fitsim}'
-project='${PROJECT_ID}'
-hdulist = fits.open(image,'update')
-hdulist[0].header.set('PROJECT',project)
-hdulist.flush()
-EOFSCRIPT
-
-    aprun -n 1 python \$script > \$log
-
-fi
+${fitsConvertText}
 
 EOFOUTER
     
