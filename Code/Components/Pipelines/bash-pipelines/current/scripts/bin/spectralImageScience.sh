@@ -44,52 +44,49 @@ if [ $CLOBBER == false ] && [ -e ${OUTPUT}/image.${imageBase}.restored ]; then
     DO_IT=false
 fi
 
-if [ $DO_IT == true ]; then
-
-    echo "Imaging the spectral-line science observation"
-
-    # Define the direction parameter, or leave to "advise"
-    #  -- NB- this is now worked out in the slurm file, as we need the
-    #  MS to exist
-    
-    # Define the preconditioning
-    preconditioning="Simager.preconditioner.Names                    = ${PRECONDITIONER_LIST_SPECTRAL}"
-    if [ "`echo ${PRECONDITIONER_LIST_SPECTRAL} | grep GaussianTaper`" != "" ]; then
-        preconditioning="$preconditioning
+# Define the preconditioning
+preconditioning="Simager.preconditioner.Names                    = ${PRECONDITIONER_LIST_SPECTRAL}"
+if [ "`echo ${PRECONDITIONER_LIST_SPECTRAL} | grep GaussianTaper`" != "" ]; then
+    preconditioning="$preconditioning
 Simager.preconditioner.GaussianTaper            = ${PRECONDITIONER_SPECTRAL_GAUSS_TAPER}"
-    fi
-    if [ "`echo ${PRECONDITIONER_LIST_SPECTRAL} | grep Wiener`" != "" ]; then
-        # Use the new preservecf preconditioner option, but only for the
-        # Wiener filter
-        preconditioning="$preconditioning
+fi
+if [ "`echo ${PRECONDITIONER_LIST_SPECTRAL} | grep Wiener`" != "" ]; then
+    # Use the new preservecf preconditioner option, but only for the
+    # Wiener filter
+    preconditioning="$preconditioning
 Simager.preconditioner.preservecf               = true"
-        if [ "${PRECONDITIONER_SPECTRAL_WIENER_ROBUSTNESS}" != "" ]; then
-	    preconditioning="$preconditioning
+    if [ "${PRECONDITIONER_SPECTRAL_WIENER_ROBUSTNESS}" != "" ]; then
+	preconditioning="$preconditioning
 Simager.preconditioner.Wiener.robustness        = ${PRECONDITIONER_SPECTRAL_WIENER_ROBUSTNESS}"
-        fi
-        if [ "${PRECONDITIONER_SPECTRAL_WIENER_TAPER}" != "" ]; then
-	    preconditioning="$preconditioning
+    fi
+    if [ "${PRECONDITIONER_SPECTRAL_WIENER_TAPER}" != "" ]; then
+	preconditioning="$preconditioning
 Simager.preconditioner.Wiener.taper             = ${PRECONDITIONER_SPECTRAL_WIENER_TAPER}"
-        fi
     fi
-    shapeDefinition="# Leave shape definition to advise"
-    if [ "${NUM_PIXELS_SPECTRAL}" != "" ] && [ $NUM_PIXELS_SPECTRAL -gt 0 ]; then
-	shapeDefinition="Simager.Images.shape                            = [${NUM_PIXELS_SPECTRAL}, ${NUM_PIXELS_SPECTRAL}]"
-    fi
-    cellsizeDefinition="# Leave cellsize definition to advise"
-    if [ "${CELLSIZE_SPECTRAL}" != "" ] && [ $CELLSIZE_SPECTRAL -gt 0 ]; then
-	cellsizeDefinition="Simager.Images.cellsize                         = [${CELLSIZE_SPECTRAL}arcsec, ${CELLSIZE_SPECTRAL}arcsec]"
-    fi
-    restFrequency="# No rest frequency specified"
-    if [ "${REST_FREQUENCY_SPECTRAL}" != "" ]; then
-        restFrequency="Simager.Images.restFrequency                    = ${REST_FREQUENCY_SPECTRAL}"
-    fi
+fi
+shapeDefinition="# Leave shape definition to advise"
+if [ "${NUM_PIXELS_SPECTRAL}" != "" ] && [ $NUM_PIXELS_SPECTRAL -gt 0 ]; then
+    shapeDefinition="Simager.Images.shape                            = [${NUM_PIXELS_SPECTRAL}, ${NUM_PIXELS_SPECTRAL}]"
+else
+    echo "WARNING - No valid NUM_PIXELS_SPECTRAL parameter given.  Not running spectral imaging."
+    DO_IT=false
+fi
+cellsizeGood=`echo ${CELLSIZE_SPECTRAL} | awk '{if($1>0.) print "true"; else print "false";}'`
+if [ "${CELLSIZE_SPECTRAL}" != "" ] && [ $cellsizeGood == true ]; then
+    cellsizeDefinition="Simager.Images.cellsize                         = [${CELLSIZE_SPECTRAL}arcsec, ${CELLSIZE_SPECTRAL}arcsec]"
+else
+    echo "WARNING - No valid CELLSIZE_SPECTRAL parameter given.  Not running spectral imaging."
+    DO_IT=false
+fi
+restFrequency="# No rest frequency specified"
+if [ "${REST_FREQUENCY_SPECTRAL}" != "" ]; then
+    restFrequency="Simager.Images.restFrequency                    = ${REST_FREQUENCY_SPECTRAL}"
+fi
 
-    
-    cleaningPars="# These parameters define the clean algorithm 
+cleaningPars="# These parameters define the clean algorithm 
 Simager.solver                                  = ${SOLVER_SPECTRAL}"
-    if [ ${SOLVER_SPECTRAL} == "Clean" ]; then
-        cleaningPars="${cleaningPars}
+if [ ${SOLVER_SPECTRAL} == "Clean" ]; then
+    cleaningPars="${cleaningPars}
 Simager.solver.Clean.algorithm                  = ${CLEAN_SPECTRAL_ALGORITHM}
 Simager.solver.Clean.niter                      = ${CLEAN_SPECTRAL_MINORCYCLE_NITER}
 Simager.solver.Clean.gain                       = ${CLEAN_SPECTRAL_GAIN}
@@ -105,23 +102,27 @@ Simager.threshold.majorcycle                    = ${CLEAN_SPECTRAL_THRESHOLD_MAJ
 Simager.ncycles                                 = ${CLEAN_SPECTRAL_NUM_MAJORCYCLES}
 Simager.Images.writeAtMajorCycle                = ${CLEAN_SPECTRAL_WRITE_AT_MAJOR_CYCLE}
 "
-    fi
-    if [ ${SOLVER_SPECTRAL} == "Dirty" ]; then
-        cleaningPars="${cleaningPars}
+fi
+if [ ${SOLVER_SPECTRAL} == "Dirty" ]; then
+    cleaningPars="${cleaningPars}
 Simager.solver.Dirty.tolerance                  = 0.01
 Simager.solver.Dirty.verbose                    = False
 Simager.ncycles                                 = 0"
-    fi
+fi
 
-    restorePars="# These parameter govern the restoring of the image and the recording of the beam
+restorePars="# These parameter govern the restoring of the image and the recording of the beam
 Simager.restore                                 = ${RESTORE_SPECTRAL}"
-    if [ ${RESTORE_SPECTRAL} == "true" ]; then
-        restorePars="${restorePars}
+if [ ${RESTORE_SPECTRAL} == "true" ]; then
+    restorePars="${restorePars}
 Simager.restore.beam                            = ${RESTORING_BEAM_SPECTRAL}
 Simager.restore.beamReference                   = ${RESTORING_BEAM_REFERENCE}
 Simager.restore.beamLog                         = ${RESTORING_BEAM_LOG}"
-    fi
-    
+fi
+
+if [ $DO_IT == true ]; then
+
+    echo "Imaging the spectral-line science observation"
+
     sbatchfile=$slurms/science_spectral_imager_beam$BEAM.sbatch
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l

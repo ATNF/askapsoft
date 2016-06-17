@@ -57,7 +57,8 @@ fi
 
 # Define the cellsize parameter, or leave to "advise"
 cellsizeDefinition="# Leave cellsize definition to Cimager to determine from the data"
-if [ "${CELLSIZE_CONT}" != "" ] && [ $CELLSIZE_CONT -gt 0 ]; then
+cellsizeGood=`echo ${CELLSIZE_CONT} | awk '{if($1>0.) print "true"; else print "false";}'`
+if [ "${CELLSIZE_CONT}" != "" ] && [ $cellsizeGood == true ]; then
     cellsizeDefinition="Cimager.Images.cellsize                         = [${CELLSIZE_CONT}arcsec, ${CELLSIZE_CONT}arcsec]"
 fi
 
