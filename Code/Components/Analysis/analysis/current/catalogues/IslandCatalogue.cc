@@ -107,27 +107,27 @@ void IslandCatalogue::defineSpec()
                       "phot.flux.density.integrated;em.radio", "float", "col_flux_int", "");
     itsSpec.addColumn("FPEAK", "flux_peak", "[mJy/beam]", 9, casda::precFlux,
                       "phot.flux.density;stat.max;em.radio", "float", "col_flux_peak", "");
-    itsSpec.addColumn("XMIN", "x_min", "", 4, 0,
+    itsSpec.addColumn("XMIN", "x_min", "", 5, 0,
                       "pos.cartesian.x;stat.min", "int", "col_x_min", "");
-    itsSpec.addColumn("XMAX", "x_max", "", 4, 0,
+    itsSpec.addColumn("XMAX", "x_max", "", 5, 0,
                       "pos.cartesian.x;stat.max", "int", "col_x_max", "");
-    itsSpec.addColumn("YMIN", "y_min", "", 4, 0,
+    itsSpec.addColumn("YMIN", "y_min", "", 5, 0,
                       "pos.cartesian.y;stat.min", "int", "col_y_min", "");
-    itsSpec.addColumn("YMAX", "y_max", "", 4, 0,
+    itsSpec.addColumn("YMAX", "y_max", "", 5, 0,
                       "pos.cartesian.y;stat.max", "int", "col_y_max", "");
     itsSpec.addColumn("NPIX", "n_pix", "", 9, 0,
                       "phys.angArea;instr.pixel;meta.number", "int", "col_n_pix", "");
-    itsSpec.addColumn("XAV", "x_ave", "", 6, casda::precPix,
+    itsSpec.addColumn("XAV", "x_ave", "", 8, casda::precPix,
                       "pos.cartesian.x;stat.mean", "float", "col_x_ave", "");
-    itsSpec.addColumn("YAV", "y_ave", "", 6, casda::precPix,
+    itsSpec.addColumn("YAV", "y_ave", "", 8, casda::precPix,
                       "pos.cartesian.y;stat.mean", "float", "col_y_ave", "");
-    itsSpec.addColumn("XCENT", "x_cen", "", 7, casda::precPix,
+    itsSpec.addColumn("XCENT", "x_cen", "", 8, casda::precPix,
                       "pos.cartesian.x;askap:stat.centroid", "float", "col_x_cen", "");
-    itsSpec.addColumn("YCENT", "y_cen", "", 7, casda::precPix,
+    itsSpec.addColumn("YCENT", "y_cen", "", 8, casda::precPix,
                       "pos.cartesian.y;askap:stat.centroid", "float", "col_y_cen", "");
-    itsSpec.addColumn("XPEAK", "x_peak", "", 7, casda::precPix,
+    itsSpec.addColumn("XPEAK", "x_peak", "", 8, casda::precPix,
                       "pos.cartesian.x;phot.flux;stat.max", "int", "col_x_peak", "");
-    itsSpec.addColumn("YPEAK", "y_peak", "", 7, casda::precPix,
+    itsSpec.addColumn("YPEAK", "y_peak", "", 8, casda::precPix,
                       "pos.cartesian.y;phot.flux;stat.max", "int", "col_y_peak", "");
     itsSpec.addColumn("FLAG1", "flag_i1", "", 5, 0,
                       "meta.code", "int", "col_flag_i1", "");
@@ -170,7 +170,7 @@ void IslandCatalogue::writeVOT()
     vowriter.setResourceName("Island catalogue from Selavy source finding");
     vowriter.setTableName("Island catalogue");
     vowriter.writeHeader();
-    duchamp::VOParam version("table_version", "meta.version", "char", itsVersion, 39, "");
+    duchamp::VOParam version("table_version", "meta.version", "char", itsVersion, itsVersion.size()+1, "");
     vowriter.writeParameter(version);
     vowriter.writeParameters();
     vowriter.writeStats();

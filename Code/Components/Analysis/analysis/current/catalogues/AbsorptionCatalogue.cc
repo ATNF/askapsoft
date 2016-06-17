@@ -209,7 +209,7 @@ void AbsorptionCatalogue::writeVOT()
     vowriter.setResourceName("Absorption object catalogue from Selavy source-finding");
     vowriter.setTableName("Absorption object catalogue");
     vowriter.writeHeader();
-    duchamp::VOParam version("table_version", "meta.version", "char", itsVersion, 39, "");
+    duchamp::VOParam version("table_version", "meta.version", "char", itsVersion, itsVersion.size()+1, "");
     vowriter.writeParameter(version);
     vowriter.writeParameters();
     vowriter.writeFrequencyParam();
