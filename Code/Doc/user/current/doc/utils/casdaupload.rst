@@ -116,22 +116,28 @@ The required parameters are:
 Then for each artifact declared within any of the "artifactlists" the
 following parameter set entries must be present:
 
-+-----------------------------+----------------+-----------------+------------------------------------------------------------------------------+
-|**Parameter**                |**Type**        |**Default**      |**Description**                                                               |
-+=============================+================+=================+==============================================================================+
-|<key>.filename               |string          |None             |Filename (either relative or fully qualified with a path) for the artifact    |
-|                             |                |                 |                                                                              |
-+-----------------------------+----------------+-----------------+------------------------------------------------------------------------------+
-|<key>.type                   |string          |None             |This is only valid for catalogue or image artifacts. This refers to the type  |
-|                             |                |                 |of catalogue or image being uploaded. For catalogues, it must be one of       |
-|                             |                |                 |'continuum-island', 'continuum-component' or 'polarisation-component'. The    |
-|                             |                |                 |full list of image types can be found at                                      |
-|                             |                |                 |https://confluence.csiro.au/display/CASDA/Stage+1.5+Analaysis+of+Image+Types  |
-+-----------------------------+----------------+-----------------+------------------------------------------------------------------------------+
-|<key>.project                |string          |None             |The project identifier (OPAL code) to which this artifact is allocated for    |
-|                             |                |                 |validation. For the evaluation artifacts this parameter may be present,       |
-|                             |                |                 |however it is ignored since evaluation reports are not subject to validation. |
-+-----------------------------+----------------+-----------------+------------------------------------------------------------------------------+
++-----------------------------+----------------+-----------------+--------------------------------------------------------------------------------+
+|**Parameter**                |**Type**        |**Default**      |**Description**                                                                 |
++=============================+================+=================+================================================================================+
+|<key>.filename               |string          |None             |Filename (either relative or fully qualified with a path) for the artifact      |
+|                             |                |                 |                                                                                |
++-----------------------------+----------------+-----------------+--------------------------------------------------------------------------------+
+|<key>.type                   |string          |None             |This is only valid for catalogue or image artifacts. This refers to the type of |
+|                             |                |                 |catalogue or image being uploaded. For catalogues, it must be one of            |
+|                             |                |                 |'continuum-island', 'continuum-component' or 'polarisation-component'. The full |
+|                             |                |                 |list of image types can be found at                                             |
+|                             |                |                 |https://confluence.csiro.au/display/CASDA/Stage+1.5+Analaysis+of+Image+Types    |
++-----------------------------+----------------+-----------------+--------------------------------------------------------------------------------+
+|<key>.project                |string          |None             |The project identifier (OPAL code) to which this artifact is allocated for      |
+|                             |                |                 |validation. For the evaluation artifacts this parameter may be present, however |
+|                             |                |                 |it is ignored since evaluation reports are not subject to validation.           |
++-----------------------------+----------------+-----------------+--------------------------------------------------------------------------------+
+|<imagekey>.thumbnail_large   |string          |None             |(Optional) This parameter, only used for images, indicates the filename of the  |
+|                             |                |                 |large thumbnail image. This parameter is not mandatory.                         |
++-----------------------------+----------------+-----------------+--------------------------------------------------------------------------------+
+|<imagekey>.thumbnail_small   |string          |None             |(Optional) This parameter, only used for images, indicates the filename of the  |
+|                             |                |                 |small thumbnail image. This parameter is not mandatory.                         |
++-----------------------------+----------------+-----------------+--------------------------------------------------------------------------------+
 
 As an example of declaring artifacts, the below defines two image artifacts, a
 deconvolved (Cleaned) image and a PSF image:
@@ -169,6 +175,7 @@ report.
     image1.filename                 = image.i.dirty.restored.fits
     image1.type                     = cont_restored_2d
     image1.project                  = AS007
+    image1.thumbnail_small          = image.i.dirty.restored_small.png
 
     # Source catalogues
     catalogues.artifactlist         = [catalogue1]

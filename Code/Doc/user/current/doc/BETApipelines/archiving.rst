@@ -70,10 +70,15 @@ scripts, and they are detailed here.
 | ``THUMBNAIL_GREYSCALE_MAX``    | 40                              | none                            | Maximum greyscale level fro the thumbnail image colourmap. In   |
 |                                |                                 |                                 | units of the overall image rms noise.                           |
 +--------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
-| ``THUMBNAIL_SIZES_INCHES``     | "{'big':16, 'sml':5}"           | none                            | The sizes (in inches) of the thumbnail images. These numbers are|
-|                                |                                 |                                 | passed as the *figsize* parameter in creating the image in      |
-|                                |                                 |                                 | python, and hence are given as a python dictionary format       |
-|                                |                                 |                                 | (i.e. the big images are 16in in size, and the small are 5in).  |
+| ``THUMBNAIL_SIZE_INCHES``      | (16 5)                          | none                            | The sizes (in inches) of the thumbnail images. This parameter is|
+|                                |                                 |                                 | passed as a bash array, so is surrounded by () with just spaces |
+|                                |                                 |                                 | between the entries. The sizes correspond to the size names     |
+|                                |                                 |                                 | given below. Don't change unless you know what you are doing.   |
++--------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
+| ``THUMBNAIL_SIZE_TEXT``        | (large small)                   | none                            | The labels that go with the thumbnail sizes. These are          |
+|                                |                                 |                                 | incorporated into the thumbnail name, so that image.fits gets a |
+|                                |                                 |                                 | thumbnail image_large.png etc. Don't change unless you know what|
+|                                |                                 |                                 | you are doing.                                                  |
 +--------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | **CASDA upload**               |                                 |                                 |                                                                 |
 +--------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
