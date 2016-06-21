@@ -19,8 +19,6 @@ builder.remote_archive = "numpy-1.6.2.tar.gz"
 
 if platform['system'] == 'Darwin':
     builder.add_option('CFLAGS="-framework Accelerate"')
-    builder.dep.delete_dependency("blas")
-    builder.dep.delete_dependency("lapack")
 else:
     blas      = builder.dep.get_install_path("blas")
     lapack    = builder.dep.get_install_path("lapack")
