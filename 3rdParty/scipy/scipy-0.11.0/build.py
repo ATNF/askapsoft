@@ -19,6 +19,10 @@ if platform['system'] != 'Darwin':
     builder.add_file("files/site.cfg")
     
 if platform['system'] == 'Darwin':
+
+    builder.dep.delete_dependency("blas")
+    builder.dep.delete_dependency("lapack")
+
     if (int(platform['tversion'][1]) >= 10):
         builder.add_env("FFLAGS",'-Wa,-q')
 builder.nowarnings = True

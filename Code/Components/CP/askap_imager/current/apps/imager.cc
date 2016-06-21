@@ -64,13 +64,13 @@ class ImagerApp : public askap::Application
             StatReporter stats;
 
             try {
-                
-                
+
+
                 // Create a subset
 
-                LOFAR::ParameterSet subset(config().makeSubset("Imager."));
+                LOFAR::ParameterSet subset(config().makeSubset("Cimager."));
 
-                
+
                 ASKAPCHECK(comms_p.isParallel(), "This imager can only be run as a parallel MPI job");
                 // imager-specific configuration of the master/worker to allow groups of workers
                 const int nWorkerGroups = subset.getInt32("nworkergroups", 1);
@@ -85,7 +85,7 @@ class ImagerApp : public askap::Application
                 }
                 // Instantiate the Distributed Imager
                 ContinuumImager imager(subset, comms_p);
-                
+
                 // runit
                 imager.run();
             } catch (const askap::AskapError& e) {

@@ -126,6 +126,9 @@ class Dependency:
         full_path = os.path.join(self.ASKAPROOT, rel_path, self.INSTALL_SUBDIR)
         return os.path.abspath(full_path)
 
+    def delete_dependency(self,key):
+        self._remove_dependency(key)
+
     def get_path(self):
         return os.path.pathsep.join(self._bindirs)
 
@@ -295,6 +298,11 @@ class Dependency:
             f.close()
         return info
 
+    def _remove_dependency(self,key):
+        if self._deps.has_key(key):
+            self._deps[key]["libs"] = None
+            self._deps[key]["path"] = None
+            self.q_print("info: Set package dependency '%s' to None" % key)
 
     def _add_dependency(self, key, value, libs, overwrite=False):
         if self._deps.has_key(key):
@@ -446,7 +454,7 @@ class Dependency:
 
         libs = libs or info["libs"]
         addlibs = True
-        
+
         if isinstance(libs, list) and len(libs) == 0:
             addlibs = False
 
@@ -459,7 +467,7 @@ class Dependency:
             nlibs = []
             for lib in libs:
                 instdir = idir
-                if not glob.glob("{0}/lib{1}*".format(os.path.join(idir, 
+                if not glob.glob("{0}/lib{1}*".format(os.path.join(idir,
                                                                    libdir),
                                                       lib)):
                     instdir = ""
@@ -482,7 +490,7 @@ class Dependency:
             pth = os.path.join(idir, libdir, utils.get_site_dir())
             if self._pypath.find(pth) < 1:
                 self._pypath = os.path.pathsep.join([pth, self._pypath])
-        
+
         if info["jars"]:
             pth = os.path.join(idir, libdir)
             if not os.path.exists(pth):
