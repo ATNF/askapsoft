@@ -89,7 +89,7 @@ beam is split out but it can be any one and is determined by the first entry int
 vector
 
     Cimager.beams       =[0]
-    
+
 
 **Note: The Local Merge**
 
@@ -156,7 +156,7 @@ default to "cross".
 |                          |                  |              |cases.                                              |
 +--------------------------+------------------+--------------+----------------------------------------------------+
 |nchanpercore              |int               |1             |Number of channels allocated to each worker core    |
-|
+|                          |                  |              |                                                    |
 +--------------------------+------------------+--------------+----------------------------------------------------+
 |beams                     |vector<int>       |[0]           |Beam number to be selected from the measurement set |
 |                          |                  |              |                                                    |
