@@ -1,5 +1,5 @@
-imager
-=======
+imager (smaller memory / processing footprint to cimager *under test*)
+======================================================================
 
 This page provides some details about the imager program. The purpose of this
 software is to perform imaging in a parallel/distributed environment or on a single
