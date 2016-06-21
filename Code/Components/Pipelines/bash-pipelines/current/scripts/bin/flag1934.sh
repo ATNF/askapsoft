@@ -141,6 +141,7 @@ EOFINNER
     NPPN=1
     aprun -n \${NCORES} -N \${NPPN} ${cflag} -c \${parset} > \${log}
     err=\$?
+    rejuvenate ${msCal}
     extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} flag1934Amp_B${BEAM} "txt,csv"
     if [ \$err != 0 ]; then
         exit \$err
@@ -173,6 +174,7 @@ EOFINNER
     NPPN=1
     aprun -n \${NCORES} -N \${NPPN} ${cflag} -c \${parset} > \${log}
     err=\$?
+    rejuvenate ${msCal}
     extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} flag1934Dynamic_B${BEAM} "txt,csv"
     if [ \$err != 0 ]; then
         exit \$err

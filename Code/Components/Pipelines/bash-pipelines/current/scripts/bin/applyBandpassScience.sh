@@ -84,6 +84,8 @@ NCORES=1
 NPPN=1
 aprun -n \${NCORES} -N \${NPPN} ${ccalapply} -c \$parset > \$log
 err=\$?
+rejuvenate ${msSci}
+rejuvenate ${TABLE_BANDPASS}
 extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} calapply_B${BEAM} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err

@@ -98,6 +98,7 @@ for im in ${imlist}; do
     ${fitsConvertText}
     # make a link so we point to a file in the current directory for Selavy
     ln -s \${im}.fits .
+    rejuvenate \${casaim}
 done
 
 parset=${parsets}/science_selavy_B${BEAM}_\${SLURM_JOB_ID}.in

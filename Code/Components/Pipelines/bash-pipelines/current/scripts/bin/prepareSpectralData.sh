@@ -116,6 +116,7 @@ NCORES=1
 NPPN=1
 aprun -n \${NCORES} -N \${NPPN} ${mssplit} -c \${parset} > \${log}
 err=\$?
+rejuvenate ${msSciSL}
 extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} splitScience_B${BEAM} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
@@ -201,6 +202,8 @@ NCORES=1
 NPPN=1
 aprun -n \${NCORES} -N \${NPPN} ${ccalapply} -c \${parset} > \${log}
 err=\$?
+rejuvenate ${msSciSL}
+rejuvenate ${gainscaltab}
 extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} calapply_spectral_B${BEAM} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err

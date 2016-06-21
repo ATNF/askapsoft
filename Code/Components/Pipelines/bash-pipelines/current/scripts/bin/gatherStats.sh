@@ -72,7 +72,6 @@ for i in `echo $ALL_JOB_IDS | sed -e 's/,/ /g'`; do
         grep -v JobID \$file >> \$statsCSV
     done
 done
-rejuvenate $BASEDIR
 EOF
 
     if [ $SUBMIT_JOBS == true ]; then    

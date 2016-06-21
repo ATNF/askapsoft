@@ -197,6 +197,8 @@ NCORES=${NUM_CPUS_SPECIMG_SCI}
 NPPN=${CPUS_PER_CORE_SPEC_IMAGING}
 aprun -n \${NCORES} -N \${NPPN} ${simager} -c \$parset > \$log
 err=\$?
+rejuvenate ${msSciSL}
+rejuvenate *.${imageBase}*
 extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} spectralImaging_B${BEAM} "txt,csv"
 
 if [ \${err} -ne 0 ]; then

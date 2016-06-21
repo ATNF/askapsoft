@@ -106,6 +106,7 @@ NCORES=1
 NPPN=1
 aprun -n \${NCORES} -N \${NPPN} $mssplit -c \${parset} > \${log}
 err=\$?
+rejuvenate ${msSci}
 extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} avScience_B${BEAM} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err

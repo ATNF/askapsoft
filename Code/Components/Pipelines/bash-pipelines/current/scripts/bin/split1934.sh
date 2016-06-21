@@ -120,6 +120,7 @@ NCORES=1
 NPPN=1
 aprun -n \${NCORES} -N \${NPPN} ${mssplit} -c \${parset} > \${log}
 err=\$?
+rejuvenate ${msCal}
 extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} split1934_B${BEAM} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err

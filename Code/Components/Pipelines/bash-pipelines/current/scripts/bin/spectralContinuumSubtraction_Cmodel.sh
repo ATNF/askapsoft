@@ -234,6 +234,7 @@ NCORES=1
 NPPN=1
 aprun -n \${NCORES} -N \${NPPN} ${ccontsubtract} -c \${parset} > \${log}
 err=\$?
+rejuvenate ${msSciSL}
 extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} contsub_spectral_B${BEAM} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
