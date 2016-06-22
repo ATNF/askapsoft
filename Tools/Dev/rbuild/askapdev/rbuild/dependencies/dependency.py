@@ -215,9 +215,10 @@ class Dependency:
 
     def _get_dependencies(self, package):
         codename = utils.get_platform()['codename']
+        system = utils.get_platform()['system'].lower()
         hostname = socket.gethostname().split(".")[0]
 
-        for ext in ['default', codename, hostname]:
+        for ext in [hostname, system, codename, 'default']:
             if ext:
                 depfile = '%s.%s' % (self.DEPFILE, ext)
                 if package:
@@ -227,7 +228,11 @@ class Dependency:
                     basedir = os.path.split(depfile)[0] or "."
                     if not os.path.exists(basedir):
                         utils.update_tree(basedir)
-                self._get_depfile(depfile)
+		if os.path.exists(depfile):
+		    self.q_print("info: processing %s" % depfile)
+                    self._get_depfile(depfile)
+		    break
+
 
 
     def _get_depfile(self, depfile, overwrite=False):

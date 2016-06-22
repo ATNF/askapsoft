@@ -20,9 +20,13 @@ env["ENV"]["AIPSPATH"] = os.environ['AIPSPATH']
 # Optimization for complex arithmetic. The functionality this flag enables
 # was default behaviour prior to GCC 4.3. However this option is not supported
 # by clang, so don't use it on Mac
+# On Mac use the inbuilt Accelerate framework so no longer get the linker flag from
+# dependency analysis so need to make it explict here.
 if sys.platform != 'darwin':
     env.AppendUnique(CCFLAGS=['-fcx-limited-range'])
-
+else:
+    env.AppendUnique(LINKFLAGS=['-llapack'])
+     
 # create build object with library name
 pkg = env.AskapPackage("utilities")
 env["ENV"]["AIPSPATH"] = os.environ['AIPSPATH']

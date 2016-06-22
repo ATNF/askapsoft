@@ -7,8 +7,14 @@
 
 # Always import this
 from askapenv import env
+import sys
 
 env.AppendUnique(CCFLAGS=['-O3'])
+
+# On Mac use the inbuilt Accelerate framework so no longer get the linker flag from
+# dependency analysis so need to make it explict here.
+if sys.platform == 'darwin':
+    env.AppendUnique(LINKFLAGS=['-llapack'])
 
 # create build object with library name
 pkg = env.AskapPackage("scimath")
