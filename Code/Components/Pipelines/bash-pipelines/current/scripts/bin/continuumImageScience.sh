@@ -84,6 +84,7 @@ NPPN=${CPUS_PER_CORE_CONT_IMAGING}
 aprun -n \${NCORES} -N \${NPPN} $cimager -c \$parset > \$log
 err=\$?
 rejuvenate *.${imageBase}*
+rejuvenate ${OUTPUT}/${msSciAv}
 extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} contImaging_B${BEAM} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err

@@ -277,6 +277,7 @@ EOFINNER
     err=\$?
     rejuvenate *.${imageBase}*
     rejuvenate ${OUTPUT}/${gainscaltab}
+    rejuvenate ${OUTPUT}/${msSciAv}
     extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} contImagingSC_L\${LOOP}_B${BEAM} "txt,csv"
     if [ \$err != 0 ]; then
         exit \$err
