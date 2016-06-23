@@ -88,7 +88,7 @@ else
     dec=\`grep -A1 RA \$log | tail -1 | awk '{print \$8}'\`
     eq=\`grep -A1 RA \$log | tail -1 | awk '{print \$9}'\`
     modelDirection="[\${ra}, \${dec}, \${eq}]"
-    freq=\`grep -A1 Ch1 \$log | tail -n 1 | awk '{print \$8 + \$9*\$6/2./1000.}'\`
+    freq=\`grep -A1 Ch0 \$log | tail -n 1 | awk '{print $12}'\`
 fi
 
 contsubdir=ContSubBeam${BEAM}
