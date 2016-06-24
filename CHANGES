@@ -1,3 +1,38 @@
+0.13.1 (24 June 2016)
+---------------------
+
+This bug-fix version primarily addresses issues with the processing
+pipelines. The following bugs have been fixed:
+ * Non-integer image cell sizes were not being interpreted
+   correctly. These values can now be any decimal value.
+ * A change in the mslist output format with casacore v2 meant that
+   the Cmodel continuum subtraction script was not reading the correct
+   reference frequency. This caused the cmodel job to fail for the
+   case of nterms>1. The parsing code has been fixed.
+ * The archiving scripts had a few changes:
+   - The resolution of filenames & paths has been fixed.
+   - The source-finding is now run on FITS versions of the images
+   - The catalogue keys in the observation.xml are now internally
+     consistent.
+   - The way thumbnail sizes are specified in the pipeline
+     configuration file has changed slightly. 
+
+Related to the above changes, the C++ code has had a couple of
+changes:
+ * casdaupload now correctly puts the thumbnail information in the
+ <image> group in the observation.xml file.
+ * Fixes were made to the Selavy VOTable output to fix formatting
+ errors that were preventing it passing validation upon CASDA ingest.
+
+Other C++ code changes include:
+ * Fixes to the output files from the crossmatch utility.
+ * Updates to the slice interfaces for compatibility with the TOS.
+
+The documentation has also been updated, with updated descriptions of
+parameters that have changed as a result of the above, a few typos
+fixed, and new information about the management of data on Pawsey's
+scratch2 filesystem. 
+
 0.13.0 (31 May 2016)
 --------------------
 
