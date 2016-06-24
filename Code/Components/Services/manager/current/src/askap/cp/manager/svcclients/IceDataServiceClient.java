@@ -87,4 +87,6 @@ public class IceDataServiceClient implements IDataServiceClient {
             throws NoSuchSchedulingBlockException {
         return new ParameterSet(itsProxy.getObsParameters(sbid));
     }
+
+    // TODO: Implement getState and transition on ISchedulingBlockServicePrx
 }

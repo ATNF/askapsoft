@@ -22,13 +22,15 @@ ic = None
 try:
     ic = Ice.initialize(sys.argv)
 
-    # Execute a batch job
+    # Get the CP Manager Proxy
     base = ic.stringToProxy("CentralProcessorService@CentralProcessorAdapter")
     if not base:
         raise RuntimeError("CentralProcessorService proxy not found")
     svc = askap.interfaces.cp.ICPObsServicePrx.checkedCast(base)
     if not svc:
-        raise RuntimeError("Invalid CPObsService proxy")
+        raise RuntimeError("Invalid IService proxy")
+    print "Getting service version..."
+    print "getServiceVersion() returned: " + svc.getServiceVersion()
 
     print "Starting observation...",
     svc.startObs(0)

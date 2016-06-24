@@ -176,6 +176,7 @@ public class ObsService extends _ICPObsServiceDisp {
     @Override
     public boolean waitObs(long timeout, Current curr) throws Ice.UnknownException {
         try {
+            // TODO: This is the point at which cpman should switch to active mode
             return itsIngestManager.waitIngest(timeout);
         } catch (Exception e) {
             logger.error("waitObs() - Unexpected exception: " + e.getMessage());

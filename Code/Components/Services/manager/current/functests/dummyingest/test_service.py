@@ -21,7 +21,7 @@ ic = None
 try:
     ic = Ice.initialize(sys.argv)
 
-    # Make a getServiceVersion() call on the service
+    # Get the CP Manager Proxy
     base = ic.stringToProxy("CentralProcessorService@CentralProcessorAdapter")
     if not base:
         raise RuntimeError("CentralProcessorService proxy not found")
@@ -39,7 +39,7 @@ try:
     svc.abortObs()
     print "DONE"
 
-    print "Waiting for observation to complete/abort...",
+    print "Waiting for observation to abort...",
     svc.waitObs(-1)
     print "DONE"
 

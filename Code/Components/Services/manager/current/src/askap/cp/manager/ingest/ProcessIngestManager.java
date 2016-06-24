@@ -75,6 +75,10 @@ public class ProcessIngestManager extends AbstractIngestManager {
         String args = parset().getString("ingest.args");
         String logfile = parset().getString("ingest.logfile", "cpingest.log");
 
+        logger.debug("ingest.command: " + command);
+        logger.debug("ingest.args: " + args);
+        logger.debug("ingest.logfile: " + logfile);
+
         List<String> cmdLine = buildCommandLine(command, args, logfile);
 
         try {
