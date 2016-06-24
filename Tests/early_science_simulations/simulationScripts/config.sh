@@ -22,13 +22,13 @@ msdir=MS
 chunkdir=../ModelImages/Chunks
 slicedir=../ModelImages/Slices
 
-doCreateModel=false
+doCreateModel=true
 # Whether to slice up the model prior to simulating - set to false
 # if we've already done this
-doSlice=false
+doSlice=true
 
 doCalibrator=false
-doScience=true
+doScience=false
 
 doCorrupt=false
 randomgainsparset=${parsetdir}/randomgains.in
@@ -36,9 +36,11 @@ randomgainsparset=${parsetdir}/randomgains.in
 doNoise=true
 Tsys=50
 
-antennaConfig=ADE12
 nfeeds=36
+antennaConfig=ADE12
 nant=12
+#antennaConfig=ADE6
+#nant=6
 
 pol="XX XY YX YY"
 
@@ -77,15 +79,26 @@ antennaParset=${askapconfig}/${antennaConfig}.in
 # Time required for the csimulator jobs
 TIME_CSIM_JOB=2:30:00
 
-NGROUPS_CSIM=32
-NWORKERS_CSIM=171
-NCPU_CSIM=`echo $NWORKERS_CSIM | awk '{print $1+1}'`
-NPPN_CSIM=3
-chanPerMSchunk=3
-
+# Set this to true if we want to mimic the correlator layout (48MHz blocks, each producing its own MS)
+matchCorrelatorLayout=true
+if [ $matchCorrelatorLayout == true ]; then
 # Number of MSs to end up with after 2nd stage of merging
-NUM_FINAL_MS=8
+    NUM_FINAL_MS=7
+    msbaseSci=sciencefield_${antennaConfig}_by${NUM_FINAL_MS}_SKADS_${inttime}_${now}
+    NGROUPS_CSIM=28
+    NWORKERS_CSIM=216
+    chanPerMSchunk=3
+    NPPN_CSIM=3
+else
+# Number of MSs to end up with after 2nd stage of merging
+    NUM_FINAL_MS=8
+    NGROUPS_CSIM=32
+    NWORKERS_CSIM=171
+    chanPerMSchunk=3
+    NPPN_CSIM=3
+fi
 
+NCPU_CSIM=`echo $NWORKERS_CSIM | awk '{print $1+1}'`
 if [ `echo $NGROUPS_CSIM $NUM_FINAL_MS | awk '{print $1 % $2 }'` -ne 0 ]; then
     echo "Number of groups (${NGROUPS_CSIM}) not a multiple of number of final MSs (${NUM_FINAL_MS})."
     echo "Not running."
@@ -98,11 +111,12 @@ fi
 # completed successfully
 CLOBBER_INTERMEDIATE_MS=true
 
-catdir=/scratch2/askap/whi550/Simulations/BETA/InputCatalogue
+#catdir=/scratch2/askap/whi550/Simulations/BETA/InputCatalogue
+catdir=/scratch2/askap/whi550/Simulations/InputCatalogue
 sourcelist=master_possum_catalogue_trim10x10deg.dat
 
 doFlatSpectrum=false
-baseimage=ASKAP12_ES_SKADS_model
+baseimage=SKADS_model_matchADE
 writeByNode=true
 createTT_CR=true
 
@@ -113,11 +127,11 @@ CREATORTASKS=`echo $nsubxCR $nsubyCR | awk '{print $1*$2+1}'`
 CREATORWORKERPERNODE=1
 CREATORNODES=`echo $CREATORTASKS ${CREATORWORKERPERNODE} | awk '{print int($1/$2)}'`
 SLICERWIDTH=100
-SLICERNPPN=1
+SLICERNPPN=20
 
 #databaseCR=POSSUM
-#databaseCR=POSSUMHI
-databaseCR=joint
+databaseCR=POSSUMHI
+#databaseCR=joint
 
 posType=deg
 PAunits=rad
@@ -156,7 +170,8 @@ decCat=0.
 
 # Spectral axis - full spectral range & resolution
 freqChanZeroMHz=1421
-nchan=16416
+#nchan=16416
+nchan=18144
 rchan=0
 chanw=-18.5185185e3
 rfreq=`echo ${freqChanZeroMHz} | awk '{printf "%8.6e",$1*1.e6}'`
