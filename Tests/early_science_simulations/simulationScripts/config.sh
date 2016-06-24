@@ -111,8 +111,7 @@ fi
 # completed successfully
 CLOBBER_INTERMEDIATE_MS=true
 
-#catdir=/scratch2/askap/whi550/Simulations/BETA/InputCatalogue
-catdir=/scratch2/askap/whi550/Simulations/InputCatalogue
+catdir=/group/astronomy856/whi550/Simulations/InputCatalogue
 sourcelist=master_possum_catalogue_trim10x10deg.dat
 
 doFlatSpectrum=false
