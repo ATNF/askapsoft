@@ -28,7 +28,6 @@ function terminate_process {
 cd `dirname $0`
 
 # Setup the environment
-source ../../init_package_env.sh
 source ../common.sh
 
 # Remove the log files

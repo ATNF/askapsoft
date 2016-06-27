@@ -33,6 +33,7 @@ import org.apache.log4j.Logger;
 
 import askap.interfaces.cp.PipelineStartException;
 import askap.util.ParameterSet;
+import askap.util.Path;
 
 /**
  *
@@ -71,9 +72,9 @@ public class ProcessIngestManager extends AbstractIngestManager {
         // if the ingest pipeline is running
         assert (!isRunning());
 
-        String command = parset().getString("ingest.command");
-        String args = parset().getString("ingest.args");
-        String logfile = parset().getString("ingest.logfile", "cpingest.log");
+        String command = Path.expandvars(parset().getString("ingest.command"));
+        String args = Path.expandvars(parset().getString("ingest.args"));
+        String logfile = Path.expandvars(parset().getString("ingest.logfile", "cpingest.log"));
 
         logger.debug("ingest.command: " + command);
         logger.debug("ingest.args: " + args);

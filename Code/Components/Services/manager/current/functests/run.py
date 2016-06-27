@@ -21,17 +21,19 @@ if __name__ == "__main__":
     # execute all tests
     print("Running {0} tests ...\n".format(len(tests)))
     for key, value in tests.iteritems():
-        print("{0} ...\n----------".format(key))
+        print("{0}\n----------------------------------------------".format(key))
         command = value + "/run.sh"
         status = subprocess.call(command)
-        results[key] = "PASS" if status else "FAIL"
+        results[key] = "{0} ({1})".format(
+            "PASS" if status == 0 else "FAIL",
+            status)
         if status != 0:
             failure_count+=1
         print("\n")
 
     # display results
     print("Result Summary:")
-    print("============================")
+    print("======================================")
     for key, value in results.iteritems():
         print("{0}\t\t{1}".format(key, value))
 

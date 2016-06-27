@@ -28,7 +28,6 @@ function terminate_process {
 cd `dirname $0`
 
 # Setup the environment
-source ../../init_package_env.sh
 source ../common.sh
 
 # Remove the log files
@@ -47,7 +46,7 @@ waitIceRegistry icegridadmin.cfg
 
 # Start the cpmanager
 echo "Starting the CP Manager..."
-java askap/cp/manager/CpManager -c cpmanager.in -l askap.log_cfg > ${CPMAN_LOG} 2>&1 &
+nohup java askap/cp/manager/CpManager -c cpmanager.in -l cpmanager.log_cfg > ${CPMAN_LOG} 2>&1 &
 PID=$!
 waitIceAdapter icegridadmin.cfg CentralProcessorAdapter
 waitIceAdapter icegridadmin.cfg CentralProcessorMonitoringAdapter
