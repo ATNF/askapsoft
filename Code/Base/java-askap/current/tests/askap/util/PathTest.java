@@ -85,15 +85,6 @@ public class PathTest {
 		String expectedOutput = "blah ${missing} blah blah ok";
 		assertEquals(expectedOutput, Path.expandvars(input));
 	}
-
-	@Test
-	public void testExpandVars_args_string() {
-		env.put("ASKAP_ROOT", "/home/dc/askap");
-		setEnv(env);
-		String input = "-s -c cpingest.in -l $ASKAP_ROOT/Code/Components/Services/manager/current/functests/processingest/cpingest.log_cfg";
-		String expectedOutput = "-s -c cpingest.in -l /home/dc/askap/Code/Components/Services/manager/current/functests/processingest/cpingest.log_cfg";
-		assertEquals(expectedOutput, Path.expandvars(input));
-	}
 	
 	/**
 	 * For portability reasons, Java does not provide methods to alter
