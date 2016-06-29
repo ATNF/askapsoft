@@ -31,87 +31,94 @@ import askap.cp.manager.monitoring.MonitoringSingleton;
 import askap.util.ServiceApplication;
 import askap.util.ServiceManager;
 
-public class CpManager extends ServiceApplication {
-    /**
-     * Logger
-     */
-    private static final Logger logger = Logger.getLogger(CpManager.class.getName());
+public final class CpManager extends ServiceApplication {
 
-    /**
-     * @see askap.cp.manager.ServiceApplication#run(java.lang.String[])
-     */
-    @Override
-    public int run(String[] args) {
-        try {
-            logger.info("ASKAP Central Processor Manager");
+	/**
+	 * Logger
+	 */
+	private static final Logger logger = Logger.getLogger(CpManager.class.getName());
 
-            final String serviceName = config().getString("ice.servicename");
-            if (serviceName == null) {
-                logger.error("Parameter 'ice.servicename' not found");
-                return 1;
-            }
-            final String adapterName = config().getString("ice.adaptername");
-            if (adapterName == null) {
-                logger.error("Parameter 'ice.adaptername' not found");
-                return 1;
-            }
+	/**
+	 * @see askap.cp.manager.ServiceApplication#run(java.lang.String[])
+	 */
+	@Override
+	public int run(String[] args) {
+		try {
+			logger.info("ASKAP Central Processor Manager");
 
-            // Create and register the ObsService object
-            ObsService svc = new ObsService(communicator(), config());
+			final String serviceName = config().getString("ice.servicename");
+			if (serviceName == null) {
+				logger.error("Parameter 'ice.servicename' not found");
+				return 1;
+			}
+			final String adapterName = config().getString("ice.adaptername");
+			if (adapterName == null) {
+				logger.error("Parameter 'ice.adaptername' not found");
+				return 1;
+			}
 
-            // Initialise monitoring interface if configured
-            boolean monitoring = config().getBoolean("monitoring.enabled", false);
-            if (monitoring) {
-                boolean status = initMonitoring();
-                if (!status) {
-                    logger.error("Monitoring sub-system failed to initialise correctly");
-                }
-            }
+			// Create and register the ObsService object
+			ObsService svc = new ObsService(communicator(), config());
 
-            // Blocks until shutdown
-            ServiceManager.runService(communicator(), svc, serviceName, adapterName);
-            if (monitoring) {
-                MonitoringSingleton.destroy();
-            }
-        } catch (Exception e) {
-            logger.error("Unexpected exception: " + e);
-        }
+			// Initialise monitoring interface if configured
+			boolean monitoring = config().getBoolean("monitoring.enabled", false);
+			if (monitoring) {
+				boolean status = initMonitoring();
+				if (!status) {
+					logger.error("Monitoring sub-system failed to initialise correctly");
+				}
+			}
 
-        return 0;
-    }
+			// Blocks until shutdown
+			ServiceManager.runService(communicator(), svc, serviceName, adapterName);
+			if (monitoring) {
+				MonitoringSingleton.destroy();
+			}
+		} catch (Exception e) {
+			logger.error("Unexpected exception: " + e);
+		}
 
-    /**
-     * Main
-     *
-     * @param args command line arguments
-     */
-    public static void main(String[] args) {
-        CpManager svr = new CpManager();
-        int status = svr.servicemain(args);
-        System.exit(status);
-    }
+		return 0;
+	}
 
-    /**
-     * Initialise the monitoring singleton.
-     *
-     * @return true if the monitoring sub-system was correctly initialised,
-     * otherwise false.
-     */
-    private boolean initMonitoring() {
-        final String key1 = "monitoring.ice.servicename";
-        final String key2 = "monitoring.ice.adaptername";
-        String serviceName = config().getString(key1);
-        if (serviceName == null) {
-            logger.error("Parameter '" + key1 + "' not found");
-            return false;
-        }
-        String adapterName = config().getString(key2);
-        if (adapterName == null) {
-            logger.error("Parameter '" + key2 + "' not found");
-            return false;
-        }
-        MonitoringSingleton.init(communicator(),
-                serviceName, adapterName);
-        return true;
-    }
+	/**
+	 * Main
+	 *
+	 * @param args command line arguments
+	 */
+	public static void main(String[] args) {
+		CpManager svr = new CpManager();
+		int status = svr.servicemain(args);
+		System.exit(status);
+	}
+
+	/**
+	 * Initialise the monitoring singleton.
+	 *
+	 * @return true if the monitoring sub-system was correctly initialised,
+	 * otherwise false.
+	 */
+	private boolean initMonitoring() {
+		final String key1 = "monitoring.ice.servicename";
+		final String key2 = "monitoring.ice.adaptername";
+		String serviceName = config().getString(key1);
+		if (serviceName == null) {
+			logger.error("Parameter '" + key1 + "' not found");
+			return false;
+		}
+		String adapterName = config().getString(key2);
+		if (adapterName == null) {
+			logger.error("Parameter '" + key2 + "' not found");
+			return false;
+		}
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("monitoring.ice.servicename: " + serviceName);
+			logger.debug("monitoring.ice.adaptername: " + adapterName);
+		}
+
+		MonitoringSingleton.init(communicator(),
+				serviceName, adapterName);
+		return true;
+	}
 }

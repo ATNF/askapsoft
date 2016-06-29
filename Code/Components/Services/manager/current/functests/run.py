@@ -22,7 +22,7 @@ if __name__ == "__main__":
     print("Running {0} tests ...\n".format(len(tests)))
     for key, value in tests.iteritems():
         print("{0}\n----------------------------------------------".format(key))
-        command = value + "/run.sh"
+        command = ["./testharness.sh", value]
         status = subprocess.call(command)
         results[key] = "{0} ({1})".format(
             "PASS" if status == 0 else "FAIL",

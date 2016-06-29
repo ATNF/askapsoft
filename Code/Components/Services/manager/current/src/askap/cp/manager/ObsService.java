@@ -111,6 +111,9 @@ public class ObsService extends _ICPObsServiceDisp {
 
     /**
      * See slice interface for API documentation
+	 * @throws askap.interfaces.cp.NoSuchSchedulingBlockException
+	 * @throws askap.interfaces.cp.AlreadyRunningException
+	 * @throws askap.interfaces.cp.PipelineStartException
      */
     @Override
     public void startObs(long sbid, Current curr)
@@ -177,6 +180,7 @@ public class ObsService extends _ICPObsServiceDisp {
     public boolean waitObs(long timeout, Current curr) throws Ice.UnknownException {
         try {
             // TODO: This is the point at which cpman should switch to active mode
+			logger.debug("timeout = " + timeout);
             return itsIngestManager.waitIngest(timeout);
         } catch (Exception e) {
             logger.error("waitObs() - Unexpected exception: " + e.getMessage());

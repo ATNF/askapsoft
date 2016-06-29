@@ -46,7 +46,7 @@ import askap.util.TypedValueUtils;
  *
  * @author Ben Humphreys
  */
-public class MonitoringSingleton {
+public final class MonitoringSingleton {
 
     /**
      * Singleton instance of the MonitoringSingleton
@@ -57,7 +57,7 @@ public class MonitoringSingleton {
      * Contains current values for monitoring data. The key is the monitoring
      * point name, while the value is the point data.
      */
-    private final Map<String, MonitorPoint> pointdata = new HashMap<String, MonitorPoint>();
+    private final Map<String, MonitorPoint> pointdata = new HashMap<>();
 
     /**
      * Encapsulates management of the MonitoringProvider Ice Service
@@ -93,6 +93,7 @@ public class MonitoringSingleton {
      * @return the singleton instance of the MonitoringSingleton
      * or null if the singleton is not initialised (likely indicating
      * monitoring is not enabled)
+	 * TODO: does this accessor need to be synchronised? It doesn't modify memory
      */
     public static synchronized MonitoringSingleton getInstance() {
         return instance;
@@ -121,7 +122,7 @@ public class MonitoringSingleton {
      * to or less than the "pointnames" array.
      */
     public Vector<MonitorPoint> get(String[] pointnames) {
-        Vector<MonitorPoint> out = new Vector<MonitorPoint>();
+        Vector<MonitorPoint> out = new Vector<>();
 
         // Take the "pointdata" map lock to ensure a consistent
         // view of all points (even if we used a thread-safe map, we still

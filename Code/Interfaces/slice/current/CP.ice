@@ -76,7 +76,7 @@ module cp
          * prepare for an observation (on the order of a few seconds), hence the
          * need to indicate when it is ready by blocking.
          *
-         * @throws NoSuchSchedulingBlockException   if the schheduling block id
+         * @throws NoSuchSchedulingBlockException   if the scheduling block id
          *              is not valid (i.e. not known to the data service)
          * @throws AlreadyRunningException  if an observation is already in
          *              in progress. This observation must either be aborted or

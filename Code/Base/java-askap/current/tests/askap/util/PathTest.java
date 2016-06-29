@@ -57,7 +57,6 @@ public class PathTest {
 		String testPath = "~/code";
 		String expectedPath = homeDir + "/code";
 		System.setProperty("user.home", homeDir);
-
 		assertEquals(expectedPath, Path.expanduser(testPath));
 	}
 
@@ -65,7 +64,6 @@ public class PathTest {
 	public void testExpandUser_noTilde() {
 		String testPath = "/home/somewhere/somewhereelse";
 		String expectedPath = testPath;
-
 		assertEquals(expectedPath, Path.expanduser(testPath));
 	}
 
@@ -74,10 +72,8 @@ public class PathTest {
 		env.put("key_one", "one");
 		env.put("key_two", "two");
 		setEnv(env);
-
 		String input = "blah ${key_one} blah blah ${key_two}";
 		String expectedOutput = "blah one blah blah two";
-
 		assertEquals(expectedOutput, Path.expandvars(input));
 	}
 
@@ -85,13 +81,20 @@ public class PathTest {
 	public void testExpandVars_missingVars() {
 		env.put("not_missing", "ok");
 		setEnv(env);
-
 		String input = "blah ${missing} blah blah ${not_missing}";
 		String expectedOutput = "blah ${missing} blah blah ok";
-
 		assertEquals(expectedOutput, Path.expandvars(input));
 	}
 
+	@Test
+	public void testExpandVars_args_string() {
+		env.put("ASKAP_ROOT", "/home/dc/askap");
+		setEnv(env);
+		String input = "-s -c cpingest.in -l $ASKAP_ROOT/Code/Components/Services/manager/current/functests/processingest/cpingest.log_cfg";
+		String expectedOutput = "-s -c cpingest.in -l /home/dc/askap/Code/Components/Services/manager/current/functests/processingest/cpingest.log_cfg";
+		assertEquals(expectedOutput, Path.expandvars(input));
+	}
+	
 	/**
 	 * For portability reasons, Java does not provide methods to alter
 	 * environment variables. This function modifies the in-memory cached Map of

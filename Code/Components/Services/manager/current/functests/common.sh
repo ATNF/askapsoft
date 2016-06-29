@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Common environment settings
-source ../../init_package_env.sh
+source ../init_package_env.sh
 export AIPSPATH=$ASKAP_ROOT/Code/Base/accessors/current
 
 # Arg1: icegrid admin config file name

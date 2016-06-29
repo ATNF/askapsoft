@@ -40,8 +40,8 @@ public class IngestMonitorThread implements Runnable {
      * Constructor
      *
      * @param manager a AbstractIngestManager instance that this class
-     *                calls to get the status oof the ingest pipeline.
-     * @throws NullPointerException if the "manger" parameter is null
+     *                calls to get the status of the ingest pipeline.
+     * @throws NullPointerException if the "manager" parameter is null
      */
     public IngestMonitorThread(AbstractIngestManager manager) {
         if (manager == null) {
