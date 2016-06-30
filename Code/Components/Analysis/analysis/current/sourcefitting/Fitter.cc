@@ -313,10 +313,16 @@ bool Fitter::passComponentSize()
     bool passSize = true;
 
     for (unsigned int i = 0; i < itsNumGauss; i++) {
-        passSize = passSize && (itsSolution(i, 3) > 0.6 * itsParams.beamSize());
-        passSize = passSize &&
-                   ((itsSolution(i, 4) * itsSolution(i, 3)) > 0.6 * itsParams.beamSize());
-        passSize = passSize && (itsSolution(i, 3) < 1.e30);
+
+        // 20160630 - Removing the minimum-size limit, as not sure it
+        // is well justified. This check now just fails for very large
+        // components
+
+        // passSize = passSize && (itsSolution(i, 3) > 0.6 * itsParams.beamSize());
+        // passSize = passSize &&
+        //            ((itsSolution(i, 4) * itsSolution(i, 3)) > 0.6 * itsParams.beamSize());
+
+        passSize = passSize && (itsSolution(i, 3) < 1.e8);
     }
 
     return passSize;
@@ -434,7 +440,9 @@ bool Fitter::acceptable()
         if (!passSep) {
             msg << (ct++ > 0 ? "| " : "") << "Separation ";
         }
-        // REMOVE SIZE CHECK //if(!passSize) msg << (ct++>0?"| ":"") << "Size ";
+        if (!passSize) {
+            msg << (ct++ > 0 ? "| " : "") << "Size ";
+        }
         if (!passPeak) {
             msg << (ct++ > 0 ? "| " : "") << "Peak ";
         }
@@ -442,8 +450,7 @@ bool Fitter::acceptable()
             msg << (ct++ > 0 ? "| " : "") << "Integ.Flux ";
         }
     }
-//    bool thisFitGood = passConv && passChisq && passLoc && passSep && passSize && passFlux && passPeak && passIntFlux;
-    bool thisFitGood = passConv && passChisq && passLoc &&
+    bool thisFitGood = passConv && passChisq && passLoc && passSize &&
                        passSep && passFlux && passPeak && passIntFlux;
     if (!thisFitGood) {
         ASKAPLOG_INFO_STR(logger, msg.str());
@@ -477,8 +484,8 @@ casa::Gaussian2D<casa::Double> Fitter::gaussian(unsigned int num)
 
 casa::Vector<casa::Double> Fitter::error(unsigned int num)
 {
-    casa::Vector<casa::Double>  row=itsErrors.row(num);
-    ASKAPASSERT(row.size()==6);
+    casa::Vector<casa::Double>  row = itsErrors.row(num);
+    ASKAPASSERT(row.size() == 6);
     return row;
 }
 

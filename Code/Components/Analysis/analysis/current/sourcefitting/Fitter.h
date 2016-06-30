@@ -147,6 +147,9 @@ class Fitter {
         /// pixel in the box
         /// @li The sum of the integrated fluxes of all components
         /// must not be more than twice the total flux in the box.
+        /// @li No component can have a major axis bigger that 100,000,000
+        /// pixels (the fit can occasionally converge to a
+        /// near-infinite-size component.
         bool acceptable();
         /// @}
 
@@ -156,8 +159,8 @@ class Fitter {
         /// @brief Return a casa::Gaussian2D version of a particular component.
         casa::Gaussian2D<casa::Double> gaussian(unsigned int num);
 
-    /// @brief Return a vector of errors for the given component
-    casa::Vector<casa::Double> error(unsigned int num);
+        /// @brief Return a vector of errors for the given component
+        casa::Vector<casa::Double> error(unsigned int num);
 
         /// @brief Subtract fit from the flux values
         casa::Vector<casa::Double> subtractFit(casa::Matrix<casa::Double> pos,
