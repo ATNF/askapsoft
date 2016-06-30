@@ -33,6 +33,9 @@ import askap.interfaces.fcm
 from askap.parset import parset_to_dict
 
 from askap import logging
+
+from .monitoringprovider import MonitoringProviderImpl
+
 logger = logging.getLogger(__name__)
 
 class TimeoutError(Exception):
@@ -45,10 +48,12 @@ class Server(object):
         self.parameters = None
         self._comm = comm
         self._adapter = None
+        self._mon_adapter = None
         self._services = []
         self._retries = retries
         self.service_key = fcmkey
         self.logger = logger
+        self.monitoring = False
         
     def set_retries(self, retries):
         self._retries = retries
@@ -65,7 +70,6 @@ class Server(object):
         self._config_from_fcm()
 
     def _config_from_fcm(self):
-        pmap = {}
         prxy = self._comm.stringToProxy("FCMService@FCMAdapter")
         if not prxy:
             raise RuntimeError("Invalid Proxy for FCMService")
@@ -112,7 +116,15 @@ class Server(object):
     def run(self):
         adname = self.__class__.__name__+"Adapter"
         self._adapter = self._comm.createObjectAdapter(adname)
+            
         self.get_config()
+
+        if self.monitoring:
+            adname = self.__class__.__name__+"MonitoringAdapter"
+            self._mon_adapter = self._comm.createObjectAdapter(adname)
+            self._mon_adapter.add(MonitoringProviderImpl(),
+                                  self._comm.stringToIdentity("MonitoringService"))
+            self.wait_for_service("registry", self._mon_adapter.activate)
 
         ## implement this method in derived class
         self.initialize_services()
@@ -122,8 +134,7 @@ class Server(object):
                               self._comm.stringToIdentity(service['name']))
 
         self.wait_for_service("registry", self._adapter.activate)
-            
-        
+                    
         self._comm.waitForShutdown()
 
     def add_service(self, name, value):

@@ -23,12 +23,13 @@
 """Utilities to simplify ZeroC Ice application creation and deployment in the 
 ASKAPsoft environment"""
 __all__ = ["Server", "IceSession", "get_service_object", "get_communicator",
-           "IceService"]
+           "IceService", "add_monitoring"]
 import sys
 import os
 import time
 import Ice
 from .icesession import IceSession
+from .monitoringprovider import MonitoringProviderImpl
 
 
 class IceService(object):
@@ -87,6 +88,14 @@ def get_communicator(host, port):
     init.properties.setProperty('Ice.Default.Locator', loc)
     init.properties.setProperty('Ice.IPv6', '0')
     return Ice.initialize(init)
+
+
+def add_monitoring(comm, adapter_prefix):
+    name = adapter_prefix+"MonitoringAdapter"
+    mon_adapter = comm.createObjectAdapter(name)
+    mon_adapter.add(MonitoringProviderImpl(),
+                    comm.stringToIdentity("MonitoringService"))
+    mon_adapter.activate()
 
 # prevent circular imports
 from .server import Server

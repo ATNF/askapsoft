@@ -1,4 +1,4 @@
-# Copyright (c) 2009 CSIRO
+# Copyright (c) 2009,2016 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -30,20 +30,19 @@ dep.add_package()
 ROOTPKG = "askap"
 PKGNAME = "iceutils"
 
-setup(name = "%s.%s" % (ROOTPKG, PKGNAME),
-      version = 'current',
-      description = 'ASKAP utilities to interact with Ice',
-      author = 'Malte Marquarding',
-      author_email = 'Malte.Marquarding@csiro.au',
-      url = 'http://svn.atnf.csiro.au/askap',
-      keywords = ['ASKAP', 'Base', 'Ice'],
-      long_description = '''Various helper function/classes to use with ZeroC Ice''',
-      packages = find_packages(),
-      namespace_packages = [ROOTPKG],
-      license = 'GPL',
-      zip_safe = 0,
-      dependency = dep,
-      scripts = ["scripts/igsession.py", "scripts/ice-session.py"],
-
-      #test_suite = "nose.collector",
-)
+setup(name="%s.%s" % (ROOTPKG, PKGNAME),
+      version='current',
+      description='ASKAP utilities to interact with Ice',
+      author='Malte Marquarding',
+      author_email='Malte.Marquarding@csiro.au',
+      url='http://svn.atnf.csiro.au/askap',
+      keywords=['ASKAP', 'Base', 'Ice'],
+      long_description='Various helper function/classes to use with ZeroC Ice',
+      packages=find_packages(),
+      namespace_packages=[ROOTPKG],
+      license='GPL',
+      zip_safe=0,
+      dependency=dep,
+      scripts=["scripts/igsession.py", "scripts/ice-session.py",
+               "scripts/metadata-subscriber.py"],
+      )

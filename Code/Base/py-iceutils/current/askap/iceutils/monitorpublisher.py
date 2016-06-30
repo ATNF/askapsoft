@@ -57,7 +57,7 @@ def get_monitor(topic=None, icecomm=None):
 
 class MonitorData(dict):
     """ :class:`dict` class adding :meth:`send` to send the dictionary
-    to :class:`Monitoring` singelton.
+    to :class:`Monitoring` singleton.
     """
     def __init__(self, *args, **kwargs):
         dict.__init__(self, *args, **kwargs)
@@ -108,7 +108,7 @@ class Monitoring(object):
             self._buffer.append((points, timestamp))
         self.notify.set()
         self.notify.clear()
-        
+
     def sender(self):
         while not self._stop.is_set():
             retries = 0
@@ -134,7 +134,3 @@ class Monitoring(object):
                     retries += 1
                     with self._mutex:
                         self._buffer.append((point, t))
-                    
-
-
-        

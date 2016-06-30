@@ -2,3 +2,4 @@ py-askap=Code/Base/py-askap/current
 py-parset=Code/Base/py-parset/current
 ice=3rdParty/Ice/Ice-3.5.0
 pyiceinterfaces=Code/Interfaces/python/current
+dogpile.core=3rdParty/dogpile/dogpile.core/dogpile.core-0.4.1
