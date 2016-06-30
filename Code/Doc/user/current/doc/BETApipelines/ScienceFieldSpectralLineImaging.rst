@@ -123,6 +123,10 @@ spectral-imaging.
 | ``GRIDDER_SPECTRAL_SNAPSHOT_LONGTRACK``       | true                            | snapshotimaging.longtrack          | The longtrack parameter controlling how the best-fit W plane is   |
 |                                               |                                 | (:doc:`../calim/gridder`)          | determined when using snapshots.                                  |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
+| ``GRIDDER_SPECTRAL_SNAPSHOT_CLIPPING``        | 0                               | snapshotimaging.clipping           | If greater than zero, this fraction of the full image width       |
+|                                               |                                 | (:doc:`../calim/gridder`)          | is set to zero. Useful when imaging at high declination as        |
+|                                               |                                 |                                    | the edges can generate artefacts.                                 | 
++-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``GRIDDER_SPECTRAL_WMAX``                     | 2600                            | WProject.wmax                      | The wmax parameter for the gridder.                               |
 |                                               |                                 | (:doc:`../calim/gridder`)          |                                                                   |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+

@@ -17,40 +17,45 @@ end, the final gains calibration table is kept in the main output
 directory (as this can then be used by the spectral-line imaging
 pipeline). 
 
-+------------------------------+---------------------------+--------------------------------+----------------------------------------------------------+
-| Variable                     | Default                   | Parset equivalent              | Description                                              |
-+==============================+===========================+================================+==========================================================+
-| ``DO_SELFCAL``               | false                     |                                | Whether to self-calibrate the science data when imaging. |
-+------------------------------+---------------------------+--------------------------------+----------------------------------------------------------+
-| ``SELFCAL_INTERVAL``         | 10                        | interval                       | Interval [sec] over which to solve for self-calibration. |
-|                              |                           | (:doc:`../calim/ccalibrator`)  |                                                          |
-+------------------------------+---------------------------+--------------------------------+----------------------------------------------------------+
-| ``SELFCAL_NUM_LOOPS``        | 5                         | none                           | Number of loops of self-calibration.                     |
-+------------------------------+---------------------------+--------------------------------+----------------------------------------------------------+
-| ``SELFCAL_KEEP_IMAGES``      | true                      | none                           | Should we keep the images from the intermediate selfcal  |
-|                              |                           |                                | loops?                                                   |
-+------------------------------+---------------------------+--------------------------------+----------------------------------------------------------+
-| ``SELFCAL_SELAVY_THRESHOLD`` | 15                        | snrCut                         | SNR threshold for detection with Selavy in determining   |
-|                              |                           | (:doc:`../analysis/selavy`)    | selfcal sources.                                         |
-+------------------------------+---------------------------+--------------------------------+----------------------------------------------------------+
-| ``SELFCAL_SELAVY_NSUBX``     | 6                         | nsubx                          | Division of image in x-direction for source-finding in   |
-|                              |                           | (:doc:`../analysis/selavy`)    | selfcal.                                                 |
-+------------------------------+---------------------------+--------------------------------+----------------------------------------------------------+
-| ``SELFCAL_SELAVY_NSUBY``     | 3                         | nsuby                          | Division of image in y-direction for source-finding in   |
-|                              |                           | (:doc:`../analysis/selavy`)    | selfcal.                                                 |
-+------------------------------+---------------------------+--------------------------------+----------------------------------------------------------+
-| ``SELFCAL_NORMALISE_GAINS``  | true                      | normalisegains                 | Whether to normalise the amplitudes of the gains to 1,   |
-|                              |                           | (:doc:`../calim/ccalibrator`)  | approximating the phase-only self-calibration approach.  |
-+------------------------------+---------------------------+--------------------------------+----------------------------------------------------------+
-| ``SELFCAL_SCALENOISE``       | false                     | calibrate.scalenoise           | Whether the noise estimate will be scaled in accordance  |
-|                              |                           | (:doc:`../calim/cimager`)      | with the applied calibrator factor to achieve proper     |
-|                              |                           |                                | weighting.                                               |
-+------------------------------+---------------------------+--------------------------------+----------------------------------------------------------+
-| ``GAINS_CAL_TABLE``          | cont_gains_cal_beam%b.tab | none (directly)                | The table name to hold the final gains solution. Once    |
-|                              |                           |                                | the self-cal loops have completed, the cal table in the  |
-|                              |                           |                                | final loop is copied to a table of this name in the base |
-|                              |                           |                                | directory. This can then be used for the spectral-line   |
-|                              |                           |                                | imaging if need be. If this is blank, both ``DO_SELFCAL``|
-|                              |                           |                                | and ``DO_APPLY_CAL_SL`` will be set to false.            |
-|                              |                           |                                |                                                          |
-+------------------------------+---------------------------+--------------------------------+----------------------------------------------------------+
++-------------------------------+---------------------------+--------------------------------+----------------------------------------------------------+
+| Variable                      | Default                   | Parset equivalent              | Description                                              |
++===============================+===========================+================================+==========================================================+
+| ``DO_SELFCAL``                | false                     |                                | Whether to self-calibrate the science data when imaging. |
++-------------------------------+---------------------------+--------------------------------+----------------------------------------------------------+
+| ``SELFCAL_INTERVAL``          | 10                        | interval                       | Interval [sec] over which to solve for self-calibration. |
+|                               |                           | (:doc:`../calim/ccalibrator`)  |                                                          |
++-------------------------------+---------------------------+--------------------------------+----------------------------------------------------------+
+| ``SELFCAL_NUM_LOOPS``         | 5                         | none                           | Number of loops of self-calibration.                     |
++-------------------------------+---------------------------+--------------------------------+----------------------------------------------------------+
+| ``SELFCAL_KEEP_IMAGES``       | true                      | none                           | Should we keep the images from the intermediate selfcal  |
+|                               |                           |                                | loops?                                                   |
++-------------------------------+---------------------------+--------------------------------+----------------------------------------------------------+
+| ``SELFCAL_SELAVY_THRESHOLD``  | 15                        | snrCut                         | SNR threshold for detection with Selavy in determining   |
+|                               |                           | (:doc:`../analysis/selavy`)    | selfcal sources.                                         |
++-------------------------------+---------------------------+--------------------------------+----------------------------------------------------------+
+| ``SELFCAL_SELAVY_NSUBX``      | 6                         | nsubx                          | Division of image in x-direction for source-finding in   |
+|                               |                           | (:doc:`../analysis/selavy`)    | selfcal.                                                 |
++-------------------------------+---------------------------+--------------------------------+----------------------------------------------------------+
+| ``SELFCAL_SELAVY_WEIGHTSCUT`` | 0.95                      | Selavy.Weights.weightsCutoff   | Pixels with weight less than this fraction of the peak   |
+|                               |                           | (:doc:`../analysis/thresholds`)| weight will not be considered by the source-finding. If  |
+|                               |                           |                                | the value is negative, or more than one, no consideration|
+|                               |                           |                                | of the weight is made.                                   |
++-------------------------------+---------------------------+--------------------------------+----------------------------------------------------------+
+| ``SELFCAL_SELAVY_NSUBY``      | 3                         | nsuby                          | Division of image in y-direction for source-finding in   |
+|                               |                           | (:doc:`../analysis/selavy`)    | selfcal.                                                 |
++-------------------------------+---------------------------+--------------------------------+----------------------------------------------------------+
+|  ``SELFCAL_NORMALISE_GAINS``  | true                      | normalisegains                 | Whether to normalise the amplitudes of the gains to 1,   |
+|                               |                           | (:doc:`../calim/ccalibrator`)  | approximating the phase-only self-calibration approach.  |
++-------------------------------+---------------------------+--------------------------------+----------------------------------------------------------+
+| ``SELFCAL_SCALENOISE``        | false                     | calibrate.scalenoise           | Whether the noise estimate will be scaled in accordance  |
+|                               |                           | (:doc:`../calim/cimager`)      | with the applied calibrator factor to achieve proper     |
+|                               |                           |                                | weighting.                                               |
++-------------------------------+---------------------------+--------------------------------+----------------------------------------------------------+
+| ``GAINS_CAL_TABLE``           | cont_gains_cal_beam%b.tab | none (directly)                | The table name to hold the final gains solution. Once    |
+|                               |                           |                                | the self-cal loops have completed, the cal table in the  |
+|                               |                           |                                | final loop is copied to a table of this name in the base |
+|                               |                           |                                | directory. This can then be used for the spectral-line   |
+|                               |                           |                                | imaging if need be. If this is blank, both ``DO_SELFCAL``|
+|                               |                           |                                | and ``DO_APPLY_CAL_SL`` will be set to false.            |
+|                               |                           |                                |                                                          |
++-------------------------------+---------------------------+--------------------------------+----------------------------------------------------------+
