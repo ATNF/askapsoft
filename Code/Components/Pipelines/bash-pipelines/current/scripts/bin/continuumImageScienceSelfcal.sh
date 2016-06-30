@@ -63,8 +63,21 @@ if [ $DO_IT == true ] && [ $DO_SELFCAL == true ]; then
 
     if [ $NUM_TAYLOR_TERMS == 1 ]; then
         selavyImage=${OUTPUT}/image.${imageBase}.restored
+        selavyWeights=${OUTPUT}/weights.${imageBase}
     else
         selavyImage=${OUTPUT}/image.${imageBase}.taylor.0.restored
+        selavyWeights=${OUTPUT}/weights.${imageBase}.taylor.0
+    fi
+
+    cutWeights=`echo ${SELFCAL_SELAVY_WEIGHTSCUT} | awk '{if (($1>0.)&&($1<1.)) print "true"; else print "false";}'`
+    if [ ${cutWeights} == "true" ]; then
+        selavyWeights="# Use the weights image, with a high cutoff - since we are using
+# WProject, everything should be flat. This will reject areas where
+# the snapshot warp is reducing the weight.
+Selavy.Weights.weightsImage                     = ${selavyWeights}
+Selavy.Weights.weightsCutoff                    = ${SELFCAL_SELAVY_WEIGHTSCUT}"
+    else
+        selavyWeights="# No weights scaling applied in Selavy"
     fi
 
     sbatchfile=$slurms/science_continuumImageSelfcal_beam$BEAM.sbatch
@@ -146,8 +159,10 @@ EOFINNER
 # The image to be searched
 Selavy.image                                    = ${selavyImage}
 #
-# This is how we divide it up for distributed processing, with the
-#  number of subdivisions in each direction, and the size of the
+${selavyWeights}
+#
+# This is how we divide the image up for distributed processing, with
+# the number of subdivisions in each direction, and the size of the
 #  overlap region in pixels
 Selavy.nsubx                                    = ${SELFCAL_SELAVY_NSUBX}
 Selavy.nsuby                                    = ${SELFCAL_SELAVY_NSUBY}
@@ -220,7 +235,8 @@ Ccalibrator.sources.definition                  = \${sources}
 #
 Ccalibrator.gridder.snapshotimaging             = ${GRIDDER_SNAPSHOT_IMAGING}
 Ccalibrator.gridder.snapshotimaging.wtolerance  = ${GRIDDER_SNAPSHOT_WTOL}
-Cimager.gridder.snapshotimaging.longtrack       = ${GRIDDER_SNAPSHOT_LONGTRACK}
+Ccalibrator.gridder.snapshotimaging.longtrack   = ${GRIDDER_SNAPSHOT_LONGTRACK}
+Ccalibrator.gridder.snapshotimaging.clipping    = ${GRIDDER_SNAPSHOT_CLIPPING}
 Ccalibrator.gridder                             = WProject
 #
 Ccalibrator.ncycles                             = 25

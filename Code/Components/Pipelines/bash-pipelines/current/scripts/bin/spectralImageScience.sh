@@ -175,6 +175,7 @@ ${restFrequency}
 Simager.gridder.snapshotimaging                 = ${GRIDDER_SPECTRAL_SNAPSHOT_IMAGING}
 Simager.gridder.snapshotimaging.wtolerance      = ${GRIDDER_SPECTRAL_SNAPSHOT_WTOL}
 Simager.gridder.snapshotimaging.longtrack       = ${GRIDDER_SPECTRAL_SNAPSHOT_LONGTRACK}
+Simager.gridder.snapshotimaging.clipping        = ${GRIDDER_SPECTRAL_SNAPSHOT_CLIPPING}
 Simager.gridder                                 = WProject
 Simager.gridder.WProject.wmax                   = ${GRIDDER_SPECTRAL_WMAX}
 Simager.gridder.WProject.nwplanes               = ${GRIDDER_SPECTRAL_NWPLANES}

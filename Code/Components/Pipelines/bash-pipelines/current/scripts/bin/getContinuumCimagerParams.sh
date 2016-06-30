@@ -149,6 +149,7 @@ ${mfsParams}
 Cimager.gridder.snapshotimaging                 = ${GRIDDER_SNAPSHOT_IMAGING}
 Cimager.gridder.snapshotimaging.wtolerance      = ${GRIDDER_SNAPSHOT_WTOL}
 Cimager.gridder.snapshotimaging.longtrack       = ${GRIDDER_SNAPSHOT_LONGTRACK}
+Cimager.gridder.snapshotimaging.clipping        = ${GRIDDER_SNAPSHOT_CLIPPING}
 Cimager.gridder                                 = WProject
 Cimager.gridder.WProject.wmax                   = ${GRIDDER_WMAX}
 Cimager.gridder.WProject.nwplanes               = ${GRIDDER_NWPLANES}
