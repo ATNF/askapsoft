@@ -175,8 +175,6 @@ void MomentMapExtractor::defineSlicer()
         }
 
         itsSlicer = casa::Slicer(blc, trc, casa::Slicer::endIsLast);
-        ASKAPLOG_DEBUG_STR(logger,
-                           "Defined slicer for moment map extraction as : " << itsSlicer);
         this->closeInput();
         this->initialiseArray();
     } else {
@@ -196,9 +194,6 @@ void MomentMapExtractor::initialiseArray()
 {
     if (this->openInput()) {
         casa::IPosition shape = this->arrayShape();
-        ASKAPLOG_DEBUG_STR(logger,
-                           "Moment map extraction: Initialising array to zero with shape " <<
-                           shape);
         itsArray = casa::Array<Float>(shape, 0.0);
         this->closeInput();
     } else {
@@ -213,7 +208,7 @@ void MomentMapExtractor::extract()
 
         ASKAPLOG_INFO_STR(logger,
                           "Extracting moment map from " << itsInputCube <<
-                          " surrounding source ID " << itsSource->getID());
+                          " surrounding source ID " << itsSourceID);
 
         const boost::shared_ptr<SubImage<Float> >
         sub(new SubImage<Float>(*itsInputCubePtr, itsSlicer));
@@ -241,7 +236,6 @@ void MomentMapExtractor::extract()
 
 void MomentMapExtractor::writeImage()
 {
-    accessors::CasaImageAccess ia;
 
     itsInputCube = itsInputCubeList[0];
     if (this->openInput()) {
@@ -294,8 +288,6 @@ void MomentMapExtractor::writeImage()
                 switch (i) {
                     case 0:
                         itsArray = itsMom0map;
-                        ASKAPLOG_DEBUG_STR(logger , itsMom0map.shape() << " " <<
-                                           itsMom0mask.shape() << " " << outshape);
                         theMask = itsMom0mask.reform(outshape);
                         if (spcoo.restFrequency() > 0.) {
                             newunits = itsInputCubePtr->units().getName() + " " +
@@ -307,8 +299,6 @@ void MomentMapExtractor::writeImage()
                         break;
                     case 1:
                         itsArray = itsMom1map;
-                        ASKAPLOG_DEBUG_STR(logger , itsMom1map.shape() << " " <<
-                                           itsMom1mask.shape() << " " << outshape);
                         theMask = itsMom1mask.reform(outshape);
                         if (spcoo.restFrequency() > 0.) {
                             newunits = spcoo.velocityUnit();
@@ -318,8 +308,6 @@ void MomentMapExtractor::writeImage()
                         break;
                     case 2:
                         itsArray = itsMom2map;
-                        ASKAPLOG_DEBUG_STR(logger , itsMom2map.shape() << " " <<
-                                           itsMom2mask.shape() << " " << outshape);
                         theMask = itsMom2mask.reform(outshape);
                         if (spcoo.restFrequency() > 0.) {
                             newunits = spcoo.velocityUnit();
@@ -334,6 +322,7 @@ void MomentMapExtractor::writeImage()
                 std::string filename = this->outfile(i);
                 ASKAPLOG_INFO_STR(logger, "Writing moment-" << i << " map to '" <<
                                   filename << "'");
+                accessors::CasaImageAccess ia;
                 ia.create(filename, newarray.shape(), newcoo);
 
                 // write the array
@@ -344,7 +333,6 @@ void MomentMapExtractor::writeImage()
                 this->writeBeam(filename);
 
                 casa::PagedImage<float> img(filename);
-                ASKAPLOG_DEBUG_STR(logger, img.shape() << " " << theMask.shape());
                 img.makeMask("mask");
                 img.pixelMask().put(theMask);
 
@@ -565,7 +553,6 @@ void MomentMapExtractor::getMom2(const casa::Array<Float> &subarray)
         casa::IPosition shapeMap(shapeIn); shapeMap(itsSpcAxis) = 1;
         casa::Array<Float> nu2Array(shapeIn, 0.);
         casa::Array<Float> meanNu(itsMom1map.reform(shapeMap));
-        ASKAPLOG_DEBUG_STR(logger, meanNu.shape());
         for (int z = 0; z < subarray.shape()(itsSpcAxis); z++) {
             casa::IPosition blc(subarray.ndim(), 0), trc = subarray.shape() - 1;
             blc(itsSpcAxis) = trc(itsSpcAxis) = z;

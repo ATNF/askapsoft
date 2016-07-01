@@ -96,7 +96,9 @@ void SpectralBoxExtractor::initialiseArray()
     itsInputCube = itsInputCubeList.at(0);
     if (this->openInput()) {
         int specsize = itsInputCubePtr->shape()(itsSpcAxis);
-        casa::IPosition shape(4, 1, 1, itsStokesList.size(), specsize);
+        casa::IPosition shape(itsInputCubePtr->shape().size(), 1);
+        shape(itsSpcAxis) = specsize;
+//        casa::IPosition shape(4, 1, 1, itsStokesList.size(), specsize);
         ASKAPLOG_DEBUG_STR(logger,
                            "Extraction: Initialising array to zero with shape " << shape);
         itsArray = casa::Array<Float>(shape, 0.0);
@@ -111,6 +113,7 @@ void SpectralBoxExtractor::defineSlicer()
 
     if (this->openInput()) {
         IPosition shape = itsInputCubePtr->shape();
+        ASKAPLOG_DEBUG_STR(logger, "Shape from input cube = " << shape);
         ASKAPCHECK(itsInputCoords.hasSpectralAxis(),
                    "Input cube \"" << itsInputCube << "\" has no spectral axis");
         ASKAPCHECK(itsInputCoords.hasDirectionCoordinate(),
@@ -129,6 +132,7 @@ void SpectralBoxExtractor::defineSlicer()
             ymin = std::max(zero, yloc - hw);
             ymax = std::min(int(shape(itsLatAxis) - 1), yloc + hw);
         } else {
+            ASKAPASSERT(itsSource);
             // use the detected pixels of the source for the spectral
             // extraction, and the x/y ranges for slicer
             xmin = itsSource->getXmin();
@@ -162,7 +166,6 @@ void SpectralBoxExtractor::defineSlicer()
 void SpectralBoxExtractor::writeImage()
 {
     ASKAPLOG_INFO_STR(logger, "Writing spectrum to " << itsOutputFilename);
-    accessors::CasaImageAccess ia;
 
     itsInputCube = itsInputCubeList[0];
     if (this->openInput()) {
@@ -205,6 +208,7 @@ void SpectralBoxExtractor::writeImage()
 
         Array<Float> newarray(itsArray.reform(outshape));
 
+        accessors::CasaImageAccess ia;
         ia.create(itsOutputFilename, newarray.shape(), newcoo);
 
         /// @todo save the new units - if units were per beam, remove this factor

@@ -36,6 +36,8 @@
 #include <sourcefitting/RadioSource.h>
 #include <casainterface/CasaInterface.h>
 #include <imageaccess/CasaImageAccess.h>
+#include <catalogues/CasdaComponent.h>
+#include <catalogues/CasdaIsland.h>
 
 #include <casacore/casa/Arrays/Array.h>
 #include <casacore/casa/Arrays/Slicer.h>
@@ -45,6 +47,7 @@
 #include <casacore/images/Images/FITSImage.h>
 #include <casacore/images/Images/MIRIADImage.h>
 #include <casacore/lattices/Lattices/LatticeBase.h>
+#include <casacore/coordinates/Coordinates/DirectionCoordinate.h>
 #include <Common/ParameterSet.h>
 #include <casacore/measures/Measures/Stokes.h>
 #include <boost/shared_ptr.hpp>
@@ -66,7 +69,7 @@ SourceDataExtractor::SourceDataExtractor(const LOFAR::ParameterSet& parset)
     itsInputCubeList = parset.getStringVector("spectralCube",
                        std::vector<std::string>(0));
 
-    itsCentreType = parset.getString("pixelCentre", "peak");
+    // itsCentreType = parset.getString("pixelCentre", "peak");
 
     // Take the following from SynthesisParamsHelper.cc in Synthesis
     // there could be many ways to define stokes, e.g. ["XX YY"] or
@@ -128,6 +131,66 @@ casa::IPosition SourceDataExtractor::getShape(std::string image)
     }
     return shape;
 }
+//---------------
+template <class T> double SourceDataExtractor::getRA(T &object)
+{
+    return object.ra();
+}
+template double SourceDataExtractor::getRA<CasdaComponent>(CasdaComponent &object);
+template double SourceDataExtractor::getRA<CasdaIsland>(CasdaIsland &object);
+template <> double SourceDataExtractor::getRA<RadioSource>(RadioSource &object)
+{
+    return object.getRA();
+}
+//---------------
+template <class T> double SourceDataExtractor::getDec(T &object)
+{
+    return object.dec();
+}
+template double SourceDataExtractor::getDec<CasdaComponent>(CasdaComponent &object);
+template double SourceDataExtractor::getDec<CasdaIsland>(CasdaIsland &object);
+template <> double SourceDataExtractor::getDec<RadioSource>(RadioSource &object)
+{
+    return object.getDec();
+}
+//---------------
+template <class T> std::string SourceDataExtractor::getID(T &obj)
+{
+    int ID = obj.getID();
+    std::stringstream ss;
+    ss << ID;
+    return ss.str();
+}
+template std::string SourceDataExtractor::getID<RadioSource>(RadioSource &obj);
+template <> std::string SourceDataExtractor::getID<CasdaComponent>(CasdaComponent &obj)
+{
+    return obj.componentID();
+}
+template <> std::string SourceDataExtractor::getID<CasdaIsland>(CasdaIsland &obj)
+{
+    return obj.id();
+}
+//---------------
+template <class T>
+void SourceDataExtractor::setSourceLoc(T* src)
+{
+    itsSourceID = getID(*src);
+    std::stringstream ss;
+    ss << itsOutputFilenameBase << "_" << itsSourceID;
+    itsOutputFilename = ss.str();
+
+    casa::DirectionCoordinate dc = itsInputCoords.directionCoordinate();
+    casa::Vector<casa::Double> pix(2);
+    MDirection refDir(casa::Quantity(getRA(*src), "deg"),
+                      casa::Quantity(getDec(*src), "deg"),
+                      dc.directionType());
+    dc.toPixel(pix, refDir);
+    itsXloc = pix[0];
+    itsYloc = pix[1];
+
+}
+template void SourceDataExtractor::setSourceLoc<CasdaComponent>(CasdaComponent* src);
+template void SourceDataExtractor::setSourceLoc<RadioSource>(RadioSource* src);
 
 void SourceDataExtractor::setSource(RadioSource* src)
 {
@@ -135,30 +198,16 @@ void SourceDataExtractor::setSource(RadioSource* src)
     itsSource = src;
 
     if (itsSource) {
-        // Append the source's ID string to the output filename
-        int ID = itsSource->getID();
-        std::stringstream ss;
-        ss << itsOutputFilenameBase << "_" << ID;
-        itsOutputFilename = ss.str();
-        this->getLocation();
+        setSourceLoc(src);
     }
 }
-
-
-void SourceDataExtractor::getLocation()
+void SourceDataExtractor::setSource(CasdaComponent* src)
 {
-
-    if (itsSource) {
-
-        std::string srcCentreType = itsSource->getCentreType();
-        itsSource->setCentreType(itsCentreType);
-        itsXloc = itsSource->getXcentre();
-        itsYloc = itsSource->getYcentre();
-        itsSource->setCentreType(srcCentreType);
-
-    }
-
+    setSourceLoc(src);
 }
+//---------------
+
+
 
 void SourceDataExtractor::checkPol(std::string image,
                                    casa::Stokes::StokesTypes stokes,
@@ -171,18 +220,15 @@ void SourceDataExtractor::checkPol(std::string image,
 
     if (this->openInput()) {
         int stokeCooNum = itsInputCubePtr->coordinates().polarizationCoordinateNumber();
-        if (stokeCooNum == -1) {
-            ASKAPLOG_DEBUG_STR(logger, "No polarisation axis exists");
-        } else {
+        if (stokeCooNum > -1) {
 
-            int stokeAxis = itsInputCubePtr->coordinates().polarizationAxisNumber();
             const casa::StokesCoordinate
             stokeCoo = itsInputCubePtr->coordinates().stokesCoordinate(stokeCooNum);
-            if (stokeCooNum == -1 || stokeAxis == -1) {
+            if (stokeCooNum == -1 || itsStkAxis == -1) {
                 ASKAPCHECK(polstring == "I", "Extraction: Input cube " << image <<
                            " has no polarisation axis, but you requested " << polstring);
             } else {
-                int nstoke = itsInputCubePtr->shape()[stokeAxis];
+                int nstoke = itsInputCubePtr->shape()[itsStkAxis];
                 ASKAPCHECK(nstoke == nStokesRequest, "Extraction: input cube " << image <<
                            " has " << nstoke << " polarisations, whereas you requested " <<
                            nStokesRequest);

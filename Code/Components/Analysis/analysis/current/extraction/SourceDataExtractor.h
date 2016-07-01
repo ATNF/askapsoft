@@ -31,6 +31,7 @@
 #include <askap_analysis.h>
 #include <string>
 #include <sourcefitting/RadioSource.h>
+#include <catalogues/CasdaComponent.h>
 #include <casacore/casa/Arrays/Array.h>
 #include <casacore/casa/Arrays/Slicer.h>
 #include <casacore/images/Images/ImageInterface.h>
@@ -73,7 +74,8 @@ class SourceDataExtractor {
         /// @param src The RadioSource detection used to centre the
         /// spectrum. The central pixel will be chosen to be the peak
         /// pixel, so this needs to be defined.
-        virtual void setSource(RadioSource *src);
+        void setSource(RadioSource *src);
+        void setSource(CasdaComponent *src);
 
         virtual void extract() = 0;
 
@@ -94,14 +96,18 @@ class SourceDataExtractor {
         bool openInput();
         void closeInput();
         virtual void verifyInputs();
-        void getLocation();
         virtual void defineSlicer() = 0;
         void checkPol(std::string image, casa::Stokes::StokesTypes stokes, int nStokesRequest);
         casa::IPosition getShape(std::string image);
         virtual void initialiseArray() = 0;
+        template <class T> double getRA(T &object);
+        template <class T> double getDec(T &object);
+        template <class T> std::string getID(T &object);
+        template <class T> void setSourceLoc(T *src);
         void writeBeam(std::string &filename);
 
         RadioSource* itsSource;
+        std::string itsSourceID;
         std::string itsCentreType;
         casa::Slicer itsSlicer;
         std::string itsInputCube;

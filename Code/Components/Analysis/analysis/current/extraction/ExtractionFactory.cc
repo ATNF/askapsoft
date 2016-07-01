@@ -28,6 +28,7 @@
 ///
 #include <extraction/ExtractionFactory.h>
 #include <askap_analysis.h>
+#include <extraction/SourceDataExtractor.h>
 #include <extraction/SourceSpectrumExtractor.h>
 #include <extraction/NoiseSpectrumExtractor.h>
 #include <extraction/MomentMapExtractor.h>
@@ -42,6 +43,7 @@
 //ASKAP includes
 #include <askapparallel/AskapParallel.h>
 #include <sourcefitting/RadioSource.h>
+#include <catalogues/CasdaComponent.h>
 
 //3rd-party includes
 #include <Common/ParameterSet.h>
@@ -157,7 +159,7 @@ void ExtractionFactory::extract()
             if (flag) {
                 std::vector<sourcefitting::RadioSource>::iterator src;
                 LOFAR::ParameterSet extractSubset = itsParset.makeSubset(parameter + ".");
-                ASKAPLOG_INFO_STR(logger, "Beginnging " << parsetNames[type] <<
+                ASKAPLOG_INFO_STR(logger, "Beginning " << parsetNames[type] <<
                                   " extraction for " <<
                                   itsSourceList.size() << " sources");
 
@@ -191,10 +193,21 @@ void ExtractionFactory::extract()
                                 break;
                         }
 
-                        extractor->setSource(&*src);
-                        extractor->extract();
-                        extractor->writeImage();
-
+                        if ((type == 0) && !extractSubset.getBool("useDetectedPixels", false)) {
+                            // SpectralExtraction, and we're not using detected pixels
+                            // We extract for each component of RadioSource
+                            for (size_t i = 0; i < src->numFits(); i++) {
+                                CasdaComponent component(*src, itsParset, i, "best");
+                                extractor->setSource(&component);
+                                extractor->extract();
+                                extractor->writeImage();
+                            }
+                        } else {
+                            // All other cases, we just use the RadioSource directly
+                            extractor->setSource(&*src);
+                            extractor->extract();
+                            extractor->writeImage();
+                        }
                     }
                 }
             }

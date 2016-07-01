@@ -154,7 +154,7 @@ void CubeletExtractor::extract()
 
         ASKAPLOG_INFO_STR(logger,
                           "Extracting noise spectrum from " << itsInputCube <<
-                          " surrounding source ID " << itsSource->getID());
+                          " surrounding source ID " << itsSourceID);
 
         const boost::shared_ptr<SubImage<Float> >
         sub(new SubImage<Float>(*itsInputCubePtr, itsSlicer));
@@ -173,7 +173,6 @@ void CubeletExtractor::extract()
 void CubeletExtractor::writeImage()
 {
     ASKAPLOG_INFO_STR(logger, "Writing cube cutout to " << itsOutputFilename);
-    accessors::CasaImageAccess ia;
 
     itsInputCube = itsInputCubeList[0];
     if (this->openInput()) {
@@ -220,6 +219,7 @@ void CubeletExtractor::writeImage()
 
         Array<Float> newarray(itsArray.reform(outshape));
 
+        accessors::CasaImageAccess ia;
         ia.create(itsOutputFilename, newarray.shape(), newcoo);
 
         // write the array

@@ -220,7 +220,7 @@ void SourceSpectrumExtractor::extract()
             casa::Stokes stk;
             ASKAPLOG_INFO_STR(logger, "Extracting spectrum from " << itsInputCube <<
                               " with shape " << itsInputCubePtr->shape() <<
-                              " for source ID " << itsSource->getID() <<
+                              " for source ID " << itsSourceID <<
                               " using slicer " << itsSlicer <<
                               " and Stokes " << stk.name(itsCurrentStokes));
 
@@ -232,14 +232,18 @@ void SourceSpectrumExtractor::extract()
             casa::Array<Float> subarray(sub->shape());
             subarray = msub;
 
-            casa::IPosition outBLC(4, 0), outTRC(itsArray.shape() - 1);
-            outBLC(2) = outTRC(2) = stokes;
+            casa::IPosition outBLC(itsArray.ndim(), 0), outTRC(itsArray.shape() - 1);
+            if (itsStkAxis > -1) {
+                // If there is a Stokes axis in the input file
+                outBLC(2) = outTRC(2) = stokes;
+            }
 
             if (!itsFlagUseDetection) {
                 casa::Array<Float> sumarray = partialSums(subarray, IPosition(2, 0, 1));
                 itsArray(outBLC, outTRC) = sumarray.reform(itsArray(outBLC, outTRC).shape());
 
             } else {
+                ASKAPASSERT(itsSource);
                 ASKAPLOG_INFO_STR(logger,
                                   "Extracting integrated spectrum using " <<
                                   "all detected spatial pixels");
