@@ -45,10 +45,11 @@
 #include <imageaccess/CasaImageAccess.h>
 #include <duchamp/Detection/finders.hh>
 #include <duchamp/PixelMap/Object2D.hh>
+#include <casainterface/CasaInterface.h>
 #include <string>
 #include <math.h>
 
-ASKAP_LOGGER(logger, ".sourceSpectrumExtractionTest");
+ ASKAP_LOGGER(logger, ".extractionTest");
 namespace askap {
 
 namespace analysis {
@@ -126,7 +127,8 @@ class SourceSpectrumExtractionTest : public CppUnit::TestFixture {
                                     };
 
             casa::IPosition shape(cubeShape), shapeSml(cubeShape);
-            shapeSml(2) = shapeSml(3) = 1;
+            shapeSml(2) = 1;
+            shapeSml(3) = 1;
             casa::Array<Float> array(shape), arrSml(shapeSml), arrayPL(shape);
             for (int s = 0; s < 4; s++) {
                 for (int y = 0; y < 9; y++) {
@@ -159,6 +161,11 @@ class SourceSpectrumExtractionTest : public CppUnit::TestFixture {
             object.addChannel(0, objlist[0]);
             size_t dim[2]; dim[0] = dim[1] = 9;
             object.calcFluxes(arrSml.data(), dim); // should now have the peak position.
+            // need to calculate the RA & Dec for proper extraction
+            duchamp::FitsHeader head;
+            duchamp::Param par;
+            analysisutilities::storeWCStoHeader(head,par,analysisutilities::casaImageToWCS(tempImage));
+            object.calcWCSparams(head);
             object.setID(1);
 
             //------------------------------------
@@ -207,6 +214,7 @@ class SourceSpectrumExtractionTest : public CppUnit::TestFixture {
             CPPUNIT_ASSERT(objlist.size() == 1);
             gaussobject.addChannel(0, objlist[0]);
             gaussobject.calcFluxes(gaussarrSml.data(), dim); // should now have the peak position.
+            gaussobject.calcWCSparams(head);
             gaussobject.setID(1);
 
             parset.add("spectralCube", "[" + tempImage + "]");
@@ -348,6 +356,9 @@ class SourceSpectrumExtractionTest : public CppUnit::TestFixture {
             system(ss.str().c_str());
             ss.str();
             ss << "rm -rf " << tempImageGauss;
+            system(ss.str().c_str());
+            ss.str();
+            ss << "rm -rf " << tempBeamfile;
             system(ss.str().c_str());
             ASKAPLOG_DEBUG_STR(logger, "---------------------------------");
         }

@@ -155,10 +155,10 @@ void NoiseSpectrumExtractor::extract()
         const boost::shared_ptr<SubImage<Float> >
         sub(new SubImage<Float>(*itsInputCubePtr, itsSlicer));
         casa::Array<Float> subarray = sub->get();
-
-        casa::IPosition outBLC(subarray.ndim(), 0);
-//        casa::IPosition outTRC(itsArray.shape() - 1);
-        casa::IPosition outTRC(subarray.shape() - 1);
+        ASKAPLOG_DEBUG_STR(logger, "subarray.shape = " << subarray.shape());
+        
+        casa::IPosition outBLC(itsArray.ndim(), 0);
+        casa::IPosition outTRC(itsArray.shape() - 1);
 
         casa::Array<Float> noisearray;
         if (itsRobustFlag) {

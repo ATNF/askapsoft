@@ -193,8 +193,9 @@ void ExtractionFactory::extract()
                                 break;
                         }
 
-                        if ((type == 0) && !extractSubset.getBool("useDetectedPixels", false)) {
-                            // SpectralExtraction, and we're not using detected pixels
+                        if (((type == 0) || (type == 1)) &&
+                            !extractSubset.getBool("useDetectedPixels", false)) {
+                            // Spectral or Noise Extraction, and we're not using detected pixels
                             // We extract for each component of RadioSource
                             for (size_t i = 0; i < src->numFits(); i++) {
                                 CasdaComponent component(*src, itsParset, i, "best");

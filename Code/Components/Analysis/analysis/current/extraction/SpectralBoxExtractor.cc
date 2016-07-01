@@ -98,9 +98,9 @@ void SpectralBoxExtractor::initialiseArray()
         int specsize = itsInputCubePtr->shape()(itsSpcAxis);
         casa::IPosition shape(itsInputCubePtr->shape().size(), 1);
         shape(itsSpcAxis) = specsize;
-//        casa::IPosition shape(4, 1, 1, itsStokesList.size(), specsize);
-        ASKAPLOG_DEBUG_STR(logger,
-                           "Extraction: Initialising array to zero with shape " << shape);
+        if(itsStkAxis>-1){
+            shape(itsStkAxis) = itsStokesList.size();
+        }
         itsArray = casa::Array<Float>(shape, 0.0);
         this->closeInput();
     } else {

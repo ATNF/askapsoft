@@ -42,6 +42,7 @@
 #include <imageaccess/CasaImageAccess.h>
 #include <duchamp/Detection/finders.hh>
 #include <duchamp/PixelMap/Object2D.hh>
+#include <casainterface/CasaInterface.h>
 #include <string>
 #include <math.h>
 
@@ -71,7 +72,7 @@ class NoiseSpectrumExtractionTest : public CppUnit::TestFixture {
 
     public:
 
-        void setUp()
+    void setUp()
         {
 
             tempImage = "tempImageForNoiseExtractionTest";
@@ -151,6 +152,11 @@ class NoiseSpectrumExtractionTest : public CppUnit::TestFixture {
             object.addChannel(0, objlist[0]);
             size_t dim[2]; dim[0] = dim[1] = 9;
             object.calcFluxes(arrSml.data(), dim); // should now have the peak position.
+            // need to calculate the RA & Dec for proper extraction
+            duchamp::FitsHeader head;
+            duchamp::Param par;
+            analysisutilities::storeWCStoHeader(head,par,analysisutilities::casaImageToWCS(tempImage));
+            object.calcWCSparams(head);
             object.setID(1);
 
             parset.add("spectralCube", tempImage);
