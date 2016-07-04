@@ -1,3 +1,0 @@
-icebox --Ice.Config=config-files/ice.cfg 
-#icegridregistry --Ice.Config=ice.cfg > iceregistry.log 2>&1 &
-./manager

@@ -1,5 +1,7 @@
 clean:
-	rm -f *.log *.xml *.pyc
+	find . -type f -name '*.xml' -exec rm -f {} +
+	find . -type f -name '*.log' -exec rm -f {} +
+	find . -type f -name '*.pyc' -exec rm -f {} +
 	rm -rf data/
 
 test:

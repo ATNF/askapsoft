@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Note that although this file is in a test-specific subdirectory, 
+# the working directory when it executes is the root functests directory.
+# Thus all paths should be relative to that location.
+
+# Setup the environment
+TEST_DIR=./test_mock_ingest
+source ./manager

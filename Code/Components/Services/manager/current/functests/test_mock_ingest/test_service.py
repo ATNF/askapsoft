@@ -12,8 +12,13 @@ class TestCPManagerService(object):
         self.service = None
 
     def setUp(self):
+        # Note that the working directory is 'functests', thus paths are
+        # relative to that location.
         os.environ["ICE_CONFIG"] = "config-files/ice.cfg"
-        self.igsession = IceSession("applications.txt", cleanup=True)
+        os.environ['TEST_DIR'] = 'test_mock_ingest'
+        self.igsession = IceSession(
+            os.path.expandvars("$TEST_DIR/applications.txt"),
+            cleanup=True)
         try:
             self.igsession.start()
             self.service = get_service_object(
