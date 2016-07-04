@@ -1,7 +1,10 @@
+# Runtime dependencies
 ice=3rdParty/Ice/Ice-3.5.0
 log4j=3rdParty/apache-log4j/apache-log4j-1.2.15
-javaiceinterfaces=Code/Interfaces/java/current
 java-askap=Code/Base/java-askap/current
+javaiceinterfaces=Code/Interfaces/java/current
 java-logappenders=Code/Base/java-logappenders/current
-# The Python Slice interfaces are for the functests only
+
+# Functional test dependencies
 pyiceinterfaces=Code/Interfaces/python/current
+iceutils=Code/Base/py-iceutils/current
