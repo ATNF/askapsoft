@@ -1,3 +1,0 @@
-askap.monicalocal.externalsystem.IceStormTimeTaggedTypedValueMap localhost:4061:TimeTaggedDataPublisher.test:site.hidden.icestorm
-askap.monicalocal.externalsystem.MonitoringProviderPoller myservice:locator:MonitoringProvider@MonitoringProviderAdapter:localhost:4061
-

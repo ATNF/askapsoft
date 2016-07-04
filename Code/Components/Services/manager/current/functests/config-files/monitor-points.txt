@@ -1,9 +1,0 @@
-#A simple test point which goes into alarm when the value is <0 or >1
-test.point1 "An alarmed point" "POINT1" "" site T - - - Range-"0""1" - - -
-
-#Points that are updated from an IceStorm topic
-hidden.icestorm "All Data From IceStorm" "" "" site T -                           - -            - - - -
-test.icestorm   "A Value From IceStorm"  "" "" site T Listen-"$1.hidden.icestorm" - NV-"a_value" - - - -
-
-#Point updated by the monitoring provider
-test.monprovider     "From Monitoring Provider"   ""  "" site T Strings-"myservice""test.point0" - - - - 500000 -

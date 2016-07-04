@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+# Setup the environment
+source common
+
+# TODO: How do I specify a different config file for each functional test?
+java askap/cp/manager/CpManager -c config-files/cpmanager.cfg -l config-files/log4j.cfg &
+PID=$!
+trap "kill -15 $PID" TERM KILL INT
+wait
