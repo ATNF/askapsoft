@@ -6,7 +6,7 @@ from common import *
 import nose
 from unittest import skip
 
-class TestMockIngest(object):
+class TestRealIngest(object):
     def __init__(self):
         self.igsession = None
         self.service = None
@@ -15,7 +15,7 @@ class TestMockIngest(object):
         # Note that the working directory is 'functests', thus paths are
         # relative to that location.
         os.environ["ICE_CONFIG"] = "config-files/ice.cfg"
-        os.environ['TEST_DIR'] = 'test_mock_ingest'
+        os.environ['TEST_DIR'] = 'test_real_ingest'
         self.igsession = IceSession(
             os.path.expandvars("$TEST_DIR/applications.txt"),
             cleanup=True)

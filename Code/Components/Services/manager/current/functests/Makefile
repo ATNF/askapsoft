@@ -6,3 +6,6 @@ clean:
 	find . -type f -name '*.log' -exec rm -f {} +
 	find . -type f -name '*.pyc' -exec rm -f {} +
 	rm -rf data/
+
+rebuild:
+	cd .. && rbuild -ST && cd -

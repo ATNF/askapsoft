@@ -4,5 +4,5 @@
 # Thus all paths should be relative to that location.
 
 # Setup the environment
-export TEST_DIR=`pwd`/test_mock_ingest
+export TEST_DIR=`pwd`/test_real_ingest
 source ./manager
