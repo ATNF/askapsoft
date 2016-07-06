@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Note that although this file is in a test-specific subdirectory,
+# the working directory when it executes is the root functests directory.
+# Thus all paths should be relative to the parent functests.
+
+# Setup the environment
+source ./common
+
+java askap/cp/manager/CpManager -c $TEST_DIR/manager.cfg -l ./config-files/log4j.cfg &
+PID=$!
+trap "kill -15 $PID" TERM KILL INT
+wait
