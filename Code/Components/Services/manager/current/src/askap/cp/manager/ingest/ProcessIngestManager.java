@@ -76,16 +76,20 @@ public class ProcessIngestManager extends AbstractIngestManager {
         String args = Path.expandvars(parset().getString("ingest.args"));
         String logfile = Path.expandvars(parset().getString("ingest.logfile", "cpingest.log"));
 
-        logger.debug("ingest.command: " + command);
-        logger.debug("ingest.args: " + args);
-        logger.debug("ingest.logfile: " + logfile);
+		if (logger.isDebugEnabled()) {
+			logger.debug("ingest.command: " + command);
+			logger.debug("ingest.args: " + args);
+			logger.debug("ingest.logfile: " + logfile);
+		}
 
         List<String> cmdLine = buildCommandLine(command, args, logfile);
 
         try {
+			logger.debug("creating ProcessBuilder");
             ProcessBuilder pb = new ProcessBuilder(cmdLine)
                     .redirectErrorStream(true);
             pb.directory(workdir);
+			logger.debug("starting process");
             itsIngestProcess = pb.start();
         } catch (IOException e) {
             logger.error("Failed to execute ingest pipeline process: "

@@ -125,6 +125,7 @@ public class ObsService extends _ICPObsServiceDisp {
 
             logger.debug("Obtaining FCM parameters");
             ParameterSet fc = itsFCM.get();
+			logger.trace("parset keys: " + fc.keys());
             if (fc == null || fc.isEmpty()) {
                 logger.error("Error fetching FCM data");
                 throw new askap.interfaces.cp.PipelineStartException(
@@ -146,10 +147,10 @@ public class ObsService extends _ICPObsServiceDisp {
             // an error occurs
             itsIngestManager.startIngest(fc, sbid);
         } catch (askap.interfaces.cp.AlreadyRunningException e) {
-            logger.debug("startObs() - AlreadyRunningException: " + e.reason);
+            logger.warn("startObs() - AlreadyRunningException: " + e.reason);
             throw e;
         } catch (askap.interfaces.cp.PipelineStartException e) {
-            logger.debug("startObs() - PipelineStartException: " + e.reason);
+            logger.warn("startObs() - PipelineStartException: " + e.reason);
             throw e;
         } catch (Exception e) {
             logger.error("startObs() - Unexpected exception: " + e.getMessage());
