@@ -89,7 +89,17 @@ void ContinuumMaster::run(void)
     if (ms.size() == 0) {
         ASKAPTHROW(std::runtime_error, "No datasets specified in the parameter set file");
     }
+    // Need to break these measurement sets into groups
+    // there are three posibilties:
+    // 1 - the different measurement sets have the same epoch - but different
+    //      frequencies
+    // 2 - they have different epochs but the same TOPO centric frequencies
 
+    // Will check the epoch of the observations and sort them
+
+    // Initially we will check
+    const string msToCheck = ms[0];
+    
     vector<int> theBeams = getBeams();
 
 
@@ -122,9 +132,11 @@ void ContinuumMaster::run(void)
     for (unsigned int n = 0; n < allocation.size(); ++n) {
        allocation[n] = 0;
     }
-    // get the number of beams
+    // get the beams
     size_t beam = theBeams[0];
     // Iterate over all measurement sets
+    // Lets sort out the output frames ...
+    // iterate over the measurement sets and lets look at the
     for (unsigned int n = 0; n < ms.size(); ++n) {
 
         askap::accessors::TableConstDataSource ds(ms[n]);
@@ -335,7 +347,7 @@ void ContinuumMaster::run(void)
             }
             /// Minor Cycle
             /// Implicit receive in here
-            imager.calcNE(); // resets the itsNE
+            imager.calcNE(); // Needed here becuase it resets the itsNE
             imager.solveNE();
 
             imager.broadcastModel();
