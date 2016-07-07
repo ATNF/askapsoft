@@ -1,0 +1,7 @@
+# Configure the rootLogger
+log4j.rootLogger=DEBUG,FILE
+
+log4j.appender.FILE=org.apache.log4j.RollingFileAppender
+log4j.appender.FILE.File=ingest.log
+log4j.appender.FILE.layout=org.apache.log4j.PatternLayout
+log4j.appender.STDOUT.layout.ConversionPattern=%-5p %c{2}.%M [%d{HH:mm:ss,SSS}] - %m%n

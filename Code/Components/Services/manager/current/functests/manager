@@ -6,7 +6,7 @@
 # Setup the environment
 source ./common
 
-java askap/cp/manager/CpManager -c $TEST_DIR/manager.cfg -l ./config-files/log4j.cfg &
+java askap/cp/manager/CpManager -c $TEST_DIR/manager.cfg -l ./config-files/console.log_cfg &
 PID=$!
 trap "kill -15 $PID" TERM KILL INT
 wait

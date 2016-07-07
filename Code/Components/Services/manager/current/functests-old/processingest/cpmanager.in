@@ -35,5 +35,5 @@ ingest.workdir                  = /tmp
 
 # Ingest pipeline command and arguments
 ingest.command                  = ${ASKAP_ROOT}/Code/Components/Services/ingest/current/apps/cpingest.sh
-ingest.args                     = -s -c ${ASKAP_ROOT}/Code/Components/Services/manager/current/functests/processingest/cpingest.in -l ${ASKAP_ROOT}/Code/Components/Services/manager/current/functests/processingest/cpingest.log_cfg
-ingest.logfile                  = ${ASKAP_ROOT}/Code/Components/Services/manager/current/functests/processingest/cpingest.log
+ingest.args                     = -s -c ${ASKAP_ROOT}/Code/Components/Services/manager/current/functests-old/processingest/cpingest.in -l ${ASKAP_ROOT}/Code/Components/Services/manager/current/functests-old/processingest/cpingest.log_cfg
+ingest.logfile                  = ${ASKAP_ROOT}/Code/Components/Services/manager/current/functests-old/processingest/cpingest.log
