@@ -34,7 +34,9 @@ ID_CBPCAL=""
 
 DO_IT=$DO_FIND_BANDPASS
 
-if [ $CLOBBER == false ] && [ -e ${OUTPUT}/${TABLE_BANDPASS} ]; then
+TABLE_BANDPASS=${OUTPUT}/${TABLE_BANDPASS}
+
+if [ $CLOBBER == false ] && [ -e ${TABLE_BANDPASS} ]; then
     if [ $DO_IT == true ]; then
         echo "Bandpass table ${TABLE_BANDPASS} exists, so not running cbpcalibrator"
     fi

@@ -9,7 +9,7 @@
 #   * imageBase - the base name for the image products, incorporating
 #   the current beam
 #   * directionDefinition - the direction of the centre of the image, 
-#   as a Cimager parameter if 'DIRECTION_SCI' is defined
+#   as a Cimager parameter if 'DIRECTION' is defined
 #   * shapeDefinition - the shape of the images, as a Cimager
 #   parameter if 'NUM_PIXELS_CONT' is defined
 #   * cellsizeDefinition - the shape of the images, as a Cimager
@@ -64,8 +64,8 @@ fi
 
 # Define the direction parameter, or leave to "advise"
 directionDefinition="# Leave direction definition to Cimager to determine from the data"
-if [ "${DIRECTION_SCI}" != "" ]; then
-    directionDefinition="Cimager.Images.image.${imageBase}.direction    = ${DIRECTION_SCI}"
+if [ "${DIRECTION}" != "" ]; then
+    directionDefinition="Cimager.Images.image.${imageBase}.direction    = ${DIRECTION}"
 fi
 
 # Define the preconditioning

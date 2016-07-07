@@ -62,7 +62,7 @@ cd $OUTPUT
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 
-parset=${parsets}/ccalapply_bp_\${SLURM_JOB_ID}.in
+parset=${parsets}/ccalapply_bp_b${BEAM}_\${SLURM_JOB_ID}.in
 cat > \$parset << EOFINNER
 Ccalapply.dataset                         = ${msSci}
 #
@@ -78,7 +78,7 @@ Ccalapply.calibaccess.table               = ${TABLE_BANDPASS}
 
 EOFINNER
 
-log=${logs}/ccalapply_bp_\${SLURM_JOB_ID}.log
+log=${logs}/ccalapply_bp_b${BEAM}_\${SLURM_JOB_ID}.log
 
 NCORES=1
 NPPN=1

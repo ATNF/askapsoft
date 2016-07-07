@@ -30,10 +30,9 @@
 #
 
 # Make sure we only run this file once!
-PROCESS_HAS_RUN=false
-if [ $PROCESS_HAS_RUN == false ]; then
+if [ $PROCESS_DEFAULTS_HAS_RUN == false ]; then
 
-    PROCESS_HAS_RUN=true
+    PROCESS_DEFAULTS_HAS_RUN=true
 
     ####################
     # Define the full path of output directory
@@ -325,6 +324,12 @@ module load askapdata"
         CPUS_PER_CORE_CONT_IMAGING=${NUM_CPUS_CONTIMG_SCI}
     fi
 
+    # Method used for self-calibration - needs to be either Cmodel or Components
+    if [ ${SELFCAL_METHOD} != "Cmodel" ] &&
+           [ ${SELFCAL_METHOD} != "Components" ]; then
+        SELFCAL_METHOD="Cmodel"
+    fi
+
     ####################
     # Parameters required for spectral-line imaging
     ####
@@ -343,13 +348,13 @@ module load askapdata"
     if [ "${BUILD_MODEL_FOR_CONTSUB}" != "" ] &&
            [ "${BUILD_MODEL_FOR_CONTSUB}" != "true" ]; then
         echo "WARN - the parameter BUILD_MODEL_FOR_CONTSUB is deprecated - please use CONTSUB_METHOD instead"
-        CONTSUB_METHOD="CleanModel"
+        CONTSUB_METHOD="Cmodel"
     fi
     
 
     ####################
-    # Define the beam arrangements for linmos
-    . ${PIPELINEDIR}/beamArrangements.sh
+##    # Define the beam arrangements for linmos
+##    . ${PIPELINEDIR}/beamArrangements.sh
 
     # Fix the direction string for linmos - don't need the J2000 bit
     linmosFeedCentre=`echo $DIRECTION_SCI | awk -F',' '{printf "%s,%s]",$1,$2}'`

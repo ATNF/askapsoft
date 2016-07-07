@@ -37,12 +37,12 @@ listfile=tmplist
 for ms in $@; do
     echo "Parsing $ms"
     mslist --full $ms 1>& $listfile
-    nsp=`grep Spectral $listfile | cut -d'(' -f 2 | cut -d ' ' -f 1`
-    npol=`grep Spectral $listfile | cut -d'(' -f 2 | cut -d ' ' -f 6`
+    nsp=`grep Spectral $listfile | head -1 | cut -d'(' -f 2 | cut -d ' ' -f 1`
+    npol=`grep Spectral $listfile | head -1 | cut -d'(' -f 2 | cut -d ' ' -f 6`
     nspw=`echo $nsp $npol | awk '{print $1*$2}'`
     grep -A${nspw} SpwID $listfile | tail -n ${nspw} | cut -f 4- >> $spwList
 
-    nfields=`grep Fields $listfile | cut -f 4- | cut -d' ' -f 2`
+    nfields=`grep Fields $listfile | head -1 | cut -f 4- | cut -d' ' -f 2`
     grep -A${nfields} RA $listfile | tail -n ${nfields} | cut -f 4- >> $fieldList
     
 done
@@ -65,10 +65,25 @@ if [ $doMerge == true ]; then
     echo "   --> we will need to run msmerge to combine them"
 fi
 echo "There are $nfieldnames fields in this list:"
-sort -k2 $fieldList | uniq
-echo "List of fieldnames is:"
+#sort -k2 $fieldList | uniq
+echo "List of fieldnames and positions is:"
+
+# Set the args for footprint: summary output, name, band, PA, pitch
+. $PIPELINEDIR/defaultConfig.sh
+footprintArgs="-t"
+footprintArgs="$footprintArgs -n $BEAM_FOOTPRINT_NAME"
+footprintArgs="$footprintArgs -b $FREQ_BAND_NUMBER"
+footprintArgs="$footprintArgs -a $BEAM_FOOTPRINT_PA"
+footprintArgs="$footprintArgs -p $BEAM_PITCH"
+
 for field in $fieldnames; do
-    echo "    $field"
+    ra=`grep $field $fieldList | awk '{print $3}'`
+    dec=`grep $field $fieldList | awk '{print $4}'`
+    dec=`echo $dec | awk -F'.' '{printf "%s:%s:%s.%s",$1,$2,$3,$4}'`
+    echo "    $field  $ra $dec"
+    footprintOut="$parsets/footprintOutput-${NOW}-${field}.txt"
+    #    footprint.py $footprintArgs -r '$ra,$dec' > ${footprintOut}
+    footprint.py $footprintArgs -r "$ra,$dec"
 done
 
 rm  -f $spwList $fieldList $listfile

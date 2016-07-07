@@ -230,6 +230,9 @@ MS_BASE_SCIENCE=scienceObservation_beam%b.ms
 MS_SCIENCE_AVERAGE=""
 # Direction of the science field
 DIRECTION_SCI=""
+# Make the images at the centres of the beams, rather than the same
+# image centre for each beam
+IMAGE_AT_BEAM_CENTRES=true
 
 # Range of channels in science observation (used in splitting and averaging)
 CHAN_RANGE_SCIENCE="1-16416"
@@ -304,6 +307,10 @@ PRECONDITIONER_WIENER_TAPER=""
 
 ####################
 # Self-calibration parameters
+#
+# Method to present self-cal model: via a model image ("Cmodel") or
+# via a components parset ("Components")
+SELFCAL_METHOD="Cmodel"
 # Interval [sec] over which to solve for self-calibration
 SELFCAL_INTERVAL=10
 # Number of loops of self-calibration
@@ -325,6 +332,8 @@ SELFCAL_NORMALISE_GAINS=true
 # Value for the calibrate.scalenoise parameter for applying the
 # self-cal solution
 SELFCAL_SCALENOISE=false
+# Flux limit for cmodel
+SELFCAL_MODEL_FLUX_LIMIT=10mJy
 
 # name of the final gains calibration table
 GAINS_CAL_TABLE=cont_gains_cal_beam%b.tab
@@ -336,8 +345,6 @@ IMAGE_BASE_SPECTRAL=i.spectral
 NUM_PIXELS_SPECTRAL=2048
 # Size of the pixels in arcsec
 CELLSIZE_SPECTRAL=10
-# Frequency range for the spectral imager [Hz]
-FREQ_RANGE_SPECTRAL="713.e6,1013.e6"
 
 ##############################
 # Spectral-line imaging
@@ -357,8 +364,9 @@ DO_APPLY_CAL_SL=false
 # Whether to subtract a continuum model
 DO_CONT_SUB_SL=false
 
-## Whether to contruct the continuum model via selavy & cmodel
-#BUILD_MODEL_FOR_CONTSUB=true
+# Method to present self-cal model: via a model image ("Cmodel"),
+# via a components parset ("Components"), or using the
+# continuum-imaging clean model ("CleanModel")
 CONTSUB_METHOD="Cmodel"
 # Division of image for source-finding in continuum-subtraction
 CONTSUB_SELAVY_NSUBX=6
@@ -438,7 +446,7 @@ BEAM_FOOTPRINT_NAME="diamond"
 # The position angle of the beam footprint
 BEAM_FOOTPRINT_PA=0
 # The pitch of the beams in the footprint
-BEAM_PITCH=1.24
+BEAM_PITCH=""
 # This is the set of beam offsets used by linmos. This can be set manually instead of getting them from footprint.py
 LINMOS_BEAM_OFFSETS=""
 # Which frequency band are we in - determines beam arrangement (1,2,3,4 - 1 is lowest frequency)

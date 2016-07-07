@@ -258,7 +258,57 @@ fi"
 
 }
 
-#############################
+##############################
+# BEAM FOOTPRINTS AND CENTRES
+
+function setFootprintFile()
+{
+    # Function to define a file containing the beam locations for the
+    # requested footprint, which is created for a given run and a given
+    # field name.
+    #  Required inputs:
+    #     * NOW - date/time of current pipeline run
+    #     * FIELD - name of field
+    #  Returns: $footprintOut
+
+    footprintOut="${parsets}/footprintOutput-${NOW}-${FIELD}.txt"
+}
+
+function getBeamOffsets()
+{
+    # Function to return beam offsets (as would be used in a linmos
+    # parset) for the full set of beams for a given field.
+    #  Required inputs:
+    #     * NOW - date/time of current pipeline run
+    #     * FIELD - name of field
+    #     * BEAM_MAX - how many beams to consider
+    #  Returns: $LINMOS_BEAM_OFFSETS (in the process, setting $footprintOut)
+
+    setFootprintFile
+    LINMOS_BEAM_OFFSETS=`grep -A$[BEAM_MAX+1] Beam ${footprintOut} | tail -n $[BEAM_MAX+1] | sed -e 's/(//g' | sed -e 's/)//g' | awk '{printf "linmos.feeds.beam%02d = [%6.3f, %6.3f]\n",$1,-$4,$5}'`
+}
+
+function getBeamCentre()
+{
+    # Function to return the centre direction of a given beam
+    #  Required inputs:
+    #     * NOW - date/time of current pipeline run
+    #     * FIELD - name of field
+    #     * BEAM - the beam ID to obtain the centre for
+    #     * BEAM_MAX - how many beams to consider
+    #  Returns: $DIRECTION (in the process, setting $footprintOut, $ra, $dec)
+
+    setFootprintFile
+    awkTest="\$1==$BEAM"
+    ra=`grep -A$[BEAM_MAX+1] Beam ${footprintOut} | tail -n $[BEAM_MAX+1] | sed -e 's/,/ /g' | sed -e 's/(//g' | sed -e 's/)//g' | awk $awkTest | awk '{print $6}'`
+    ra=`echo $ra | awk -F':' '{printf "%sh%sm%s",$1,$2,$3}'` 
+    dec=`grep -A$[BEAM_MAX+1] Beam ${footprintOut} | tail -n $[BEAM_MAX+1] | sed -e 's/,/ /g' | sed -e 's/(//g' | sed -e 's/)//g' | awk $awkTest | awk '{print $7}'`
+    dec=`echo $dec | awk -F':' '{printf "%s.%s.%s",$1,$2,$3}'` 
+    DIRECTION="[$ra, $dec, J2000]"
+}
+
+
+##############################
 # JOB STATISTIC MANAGEMENT
 
 # Need to declare the stats directory variable here, so it is seen

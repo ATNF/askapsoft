@@ -49,6 +49,17 @@ if [ $CLOBBER == false ] && [ -e ${OUTPUT}/${mosImage} ]; then
 fi
 
 if [ $DO_IT == true ]; then
+
+    if [ ${IMAGE_AT_BEAM_CENTRES} == true ] && [ "$DIRECTION_SCI" == "" ]; then
+        reference="# No reference image or offsets, as we take the image centres"
+    else
+        reference="# Reference image for offsets
+linmos.feeds.centreref  = 0
+linmos.feeds.spacing    = ${LINMOS_BEAM_SPACING}
+# Beam offsets
+${LINMOS_BEAM_OFFSETS}"
+    fi
+
     
     sbatchfile=$slurms/science_linmos.sbatch
     cat > $sbatchfile <<EOFOUTER
@@ -88,11 +99,11 @@ else
     imageSuffix=restored
 fi
 beamList=""
-for((beam=${BEAM_MIN};beam<=${BEAM_MAX};beam++)); do
-    if [ -e \${imagePrefix}.beam\${beam}.\${imageSuffix} ]; then
-        beamList="\${beamList}beam\${beam} "
+for BEAM in ${BEAMS_TO_USE}; do
+    if [ -e \${imagePrefix}.beam\${BEAM}.\${imageSuffix} ]; then
+        beamList="\${beamList}beam\${BEAM} "
     else
-        echo "WARNING: Beam \${beam} image not present - not including in mosaic!"
+        echo "WARNING: Beam \${BEAM} image not present - not including in mosaic!"
     fi 
 done
 
@@ -105,9 +116,7 @@ linmos.names            = [\${beamList}]
 linmos.findmosaics      = true
 linmos.weighttype       = FromPrimaryBeamModel
 linmos.weightstate      = Inherent
-linmos.feeds.centreref  = 0
-linmos.feeds.spacing    = ${LINMOS_BEAM_SPACING}
-${LINMOS_BEAM_OFFSETS}
+${reference}
 linmos.psfref           = ${LINMOS_PSF_REF}
 linmos.nterms           = ${NUM_TAYLOR_TERMS}
 linmos.cutoff           = ${LINMOS_CUTOFF}
