@@ -1,8 +1,13 @@
-ftest: cpmanager.jar
-	rbuild -ST -t functests
+RBUILD_FLAGS=-SMTR
 
-test: cpmanager.jar
-	rbuild -ST -t test
+# Uncomment for verbose rbuild output
+#RBUILD_FLAGS+= -v
+
+ftest: cpmanager
+	rbuild $(RBUILD_FLAGS) -t functests
+
+test: cpmanager
+	rbuild $(RBUILD_FLAGS) -t test
 
 all: cpmanager test ftest
 
@@ -15,7 +20,8 @@ clean:
 	rm -rf install/
 	rm -f ./cpmanager*
 
-cpmanager: cpmanager.jar
+cpmanager: cpmanager.jar cpmanager.sh
 
+cpmanager.sh:
 cpmanager.jar:
-	rbuild -ST -t install
+	rbuild $(RBUILD_FLAGS) -t install
