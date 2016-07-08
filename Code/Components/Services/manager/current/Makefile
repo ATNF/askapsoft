@@ -1,15 +1,16 @@
 RBUILD_FLAGS=-SMTR
+CPMAN_FILES=./cpmanager ./cpmanager.jar ./cpmanager.sh
 
 # Uncomment for verbose rbuild output
 #RBUILD_FLAGS+= -v
 
-ftest: cpmanager
+all: $(CPMAN_FILES) test ftest
+
+ftest: $(CPMAN_FILES)
 	rbuild $(RBUILD_FLAGS) -t functests
 
-test: cpmanager
+test: $(CPMAN_FILES)  
 	rbuild $(RBUILD_FLAGS) -t test
-
-all: cpmanager test ftest
 
 clean:
 	find . -type f -name '*junit-results.xml' -exec rm -f {} +
@@ -20,8 +21,5 @@ clean:
 	rm -rf install/
 	rm -f ./cpmanager*
 
-cpmanager: cpmanager.jar cpmanager.sh
-
-cpmanager.sh:
-cpmanager.jar:
+$(CPMAN_FILES):
 	rbuild $(RBUILD_FLAGS) -t install
