@@ -82,7 +82,7 @@ for FIELD in ${FIELD_LIST}; do
         . ${PIPELINEDIR}/averageScience.sh
 
         if [ $DO_SELFCAL == true ]; then
-            if [ "${SELFCAL_MODEL}" == "Cmodel" ]; then
+            if [ "${SELFCAL_METHOD}" == "Cmodel" ]; then
 	        . ${PIPELINEDIR}/continuumImageScienceSelfcalCmodel.sh
             else
                 . ${PIPELINEDIR}/continuumImageScienceSelfcal.sh
