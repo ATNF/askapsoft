@@ -1,5 +1,3 @@
 # The parent directory (functests) is the working directory when the tests are 
 # run, therefore paths must be relative to that location.
-#icebox --Ice.Config=config-files/ice.cfg
-#icegridregistry --Ice.Config=config-files/ice.cfg
 ./test_real_ingest/manager
