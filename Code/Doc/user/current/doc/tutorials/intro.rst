@@ -43,6 +43,7 @@ can be retrieved and extracted using the following commands::
     <ivec.online>get /projects/ASKAP Commissioning Data/tutorials/basic1.tar
     <ivec.online>quit
     tar xvf basic1.tar
+    cd basic1
 
 You may notice the "get"  may stall. This is likely due to the fact the data has not been
 fetched (staged) from tape to disk. This is quite normal, and the length of the stall depends
