@@ -1,0 +1,5 @@
+# The parent directory (functests) is the working directory when the tests are 
+# run, therefore paths must be relative to that location.
+icebox
+dataservice.py --log-config=config-files/dataservice.pylog_cfg --config=config-files/dataservice.cfg
+./test_sb_state_change/manager

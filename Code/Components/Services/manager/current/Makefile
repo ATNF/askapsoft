@@ -1,5 +1,5 @@
 RBUILD_FLAGS=-SMTR
-CPMAN_FILES=./cpmanager ./cpmanager.jar ./cpmanager.sh
+CPMAN_FILES=./cpmanager.jar ./cpmanager.sh
 
 # Uncomment for verbose rbuild output
 #RBUILD_FLAGS+= -v

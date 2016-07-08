@@ -4,7 +4,7 @@
 # Thus all paths should be relative to that location.
 
 # Setup the environment
-export TEST_DIR=`pwd`/test_real_ingest
+export TEST_DIR=`pwd`/test_sb_state_change
 
 # Note that this is not a recursive call, as the working directory means this 
 # file is not sourcing itself.
