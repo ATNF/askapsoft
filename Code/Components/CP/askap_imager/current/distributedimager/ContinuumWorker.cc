@@ -156,6 +156,7 @@ void ContinuumWorker::run(void)
             for (unsigned int eachWu = 0; eachWu < nchanpercore; eachWu++ ) {
                 ContinuumWorkUnit thisWu;
                 thisWu.set_localChannel(wu.get_localChannel()+eachWu);
+                // this is incorrect
                 thisWu.set_channelFrequency(wu.get_channelFrequency()); // hope this is not used
 
                 thisWu.set_payloadType(ContinuumWorkUnit::WORK);
@@ -186,8 +187,6 @@ void ContinuumWorker::processWorkUnit(ContinuumWorkUnit& wu)
     char ChannelPar[64];
 
     sprintf(ChannelPar,"[1,%d]",wu.get_localChannel()+1);
-
-
 
 
     bool usetmpfs = unitParset.getBool("usetmpfs",true);

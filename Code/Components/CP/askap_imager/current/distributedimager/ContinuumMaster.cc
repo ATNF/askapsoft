@@ -95,29 +95,47 @@ void ContinuumMaster::run(void)
     //      frequencies
     // 2 - they have different epochs but the same TOPO centric frequencies
 
-    // Will check the epoch of the observations and sort them
-
-    // Initially we will check
-    const string msToCheck = ms[0];
-    
     vector<int> theBeams = getBeams();
-
-
+    int totalChannels = 0;
 
     const double targetPeakResidual = synthesis::SynthesisParamsHelper::convertQuantity(
                 itsParset.getString("threshold.majorcycle", "-1Jy"), "Jy");
     int nChanperCore = itsParset.getInt32("nchanpercore", 1);
 
+
+    char ChannelPar[64];
+
+    sprintf(ChannelPar,"[1,0]"); // we are the master
+
+    LOFAR::ParameterSet unitParset = itsParset;
+
+    unitParset.replace("Channels",ChannelPar);
+
+    synthesis::AdviseDI diadvise(itsComms,unitParset);
+
+    diadvise.addMissingParameters();
+
+    const bool writeAtMajorCycle = unitParset.getBool("Images.writeAtMajorCycle", false);
+    const int nCycles = unitParset.getInt32("ncycles", 0);
+
+    ASKAPLOG_INFO_STR(logger,"*****");
+    ASKAPLOG_INFO_STR(logger,"Parset" << diadvise.getParset());
+    ASKAPLOG_INFO_STR(logger,"*****");
+
+    totalChannels = diadvise.getBaryFrequencies().size();
+
+    ASKAPLOG_INFO_STR(logger,"AdviseDI reports " << totalChannels << " channels to process");
     // Send work orders to the worker processes, handling out
     // more work to the workers as needed.
-
-
-
 
     // Global channel is the channel offset across all measurement sets
     // For example, the first MS has 16 channels, then the global channel
     // number for the first (local) channel in the second MS is 16 (zero
     // based indexing).
+
+    // AS we now (2016-Jul)  will be dealing with measurements in both time and frequency
+    // it is not that simple.
+
     unsigned int globalChannel = 0;
 
     // Tracks all outstanding workunits, that is, those that have not
@@ -127,90 +145,81 @@ void ContinuumMaster::run(void)
     unsigned int nWorkers = itsComms.nProcs() - 1;
     unsigned int nWorkersPerGroup = nWorkers/itsComms.nGroups();
 
-    vector<unsigned int> allocation;
-    allocation.resize(itsComms.nProcs());
-    for (unsigned int n = 0; n < allocation.size(); ++n) {
-       allocation[n] = 0;
-    }
     // get the beams
     size_t beam = theBeams[0];
     // Iterate over all measurement sets
     // Lets sort out the output frames ...
     // iterate over the measurement sets and lets look at the
-    for (unsigned int n = 0; n < ms.size(); ++n) {
-
-        askap::accessors::TableConstDataSource ds(ms[n]);
-        const casa::MeasurementSet in(ms[n]);
-        const casa::ROMSColumns srcCols(in);
-        const casa::ROMSFeedColumns& fc = srcCols.feed();
-
-        const int fieldEntries = fc.nrow();
-
-        const casa::uInt firstAnt = casa::ROScalarColumn<casa::Int>(in.feed(),"ANTENNA_ID")(0);
-        unsigned int nBeams = 0;
-
-        for (int row = 0; row<fieldEntries; ++row) {
-                if (casa::ROScalarColumn<casa::Int>(in.feed(),"ANTENNA_ID")(row) == firstAnt)
-                    ++nBeams;
-                else
-                    break;
-        }
-
-        askap::accessors::IDataSelectorPtr sel = ds.createSelector();
-        askap::accessors::IDataConverterPtr conv = ds.createConverter();
-        conv->setFrequencyFrame(casa::MFrequency::Ref(casa::MFrequency::TOPO), "Hz");
-        conv->setDirectionFrame(casa::MDirection::Ref(casa::MDirection::J2000));
-        const askap::accessors::IConstDataSharedIter it = ds.createConstIterator(sel, conv);
-
-        const unsigned int msChannels = it->nChannel();
-        unsigned int workChannels = nWorkersPerGroup * nChanperCore;
-
-        if (msChannels < workChannels) {
-
-            ASKAPTHROW(std::runtime_error,
-                       "Insufficient work for resources available reduce nchanpercore");
-
-        }
-        else {
-            ASKAPLOG_WARN_STR(logger, "Too much work for resources avaiable - can deal with this though - will only process " << workChannels << " channels");
-        }
-        ASKAPLOG_INFO_STR(logger, "Creating work orders for measurement set "
-                           << ms[n] << " processing " << workChannels << " channels and " << nChanperCore
-                           << " channels per core");
+    // channels
 
 
-        if (msChannels > nWorkersPerGroup * nChanperCore) {
-           ASKAPLOG_WARN_STR(logger,"Only " << nWorkersPerGroup * nChanperCore << " of " << msChannels << " will be processed");
-        }
+    unsigned int workChannels = nWorkersPerGroup * nChanperCore;
+    if (totalChannels < workChannels) {
 
-        // ASKAPLOG_INFO_STR(logger,"There are " << nWorkersPerGroup << " workers per group and " << nBeams << " beams to process");
-        int minWorkers = msChannels * itsComms.nGroups() * nBeams/nChanperCore;
+        ASKAPTHROW(std::runtime_error,
+                   "Insufficient work for resources available reduce nchanpercore in parset");
 
-        ASKAPLOG_WARN_STR(logger,"Will currently only process beam " << beam);
+    }
+    for (size_t group = 0; group<itsComms.nGroups(); ++group) {
+        //reset globalChannel
+        globalChannel = 0;
+        for (unsigned int n = 0; n < ms.size(); ++n) { // this is over channels
+
+            askap::accessors::TableConstDataSource ds(ms[n]);
+            const casa::MeasurementSet in(ms[n]);
+            const casa::ROMSColumns srcCols(in);
+            const casa::ROMSFeedColumns& fc = srcCols.feed();
+
+            const int fieldEntries = fc.nrow();
+
+            const casa::uInt firstAnt = casa::ROScalarColumn<casa::Int>(in.feed(),"ANTENNA_ID")(0);
+            unsigned int nBeams = 0;
+
+            for (int row = 0; row<fieldEntries; ++row) {
+                    if (casa::ROScalarColumn<casa::Int>(in.feed(),"ANTENNA_ID")(row) == firstAnt)
+                        ++nBeams;
+                    else
+                        break;
+            }
+
+            unsigned int msChannels = casa::ROScalarColumn<casa::Int>(in.spectralWindow(),"NUM_CHAN")(0);
+
+            // lets build an iterator to help with the frequency allocations
+
+            if (msChannels > workChannels) {
+                msChannels = workChannels;
+            }
+
+            ASKAPLOG_INFO_STR(logger, "Creating work orders for measurement set "
+                               << ms[n] << " processing " << msChannels << " channels and " << nChanperCore
+                               << " channels per core");
+
+            if (n==0)
+            {
+                ASKAPLOG_INFO_STR(logger, "There are  "
+                              << itsComms.nGroups() << " groups from the " << nWorkers << " workers "
+                              << " with " << nWorkersPerGroup << " workers per group");
+            }
 
 
-        ASKAPLOG_INFO_STR(logger, "There are  "
-                          << itsComms.nGroups() << " groups of " << nWorkers
-                          << " with " << nWorkersPerGroup);
-
-
-
-
-
-        for (size_t group = 0; group<itsComms.nGroups(); ++group) {
 
             // Iterate over all channels in the measurement set
             // but each core just needs to ask once before it is allocated all its channels
-            for (unsigned int localChan = 0; localChan < workChannels; localChan = localChan+nChanperCore) {
+            for (unsigned int localChan = 0; localChan < msChannels; localChan = localChan+nChanperCore) {
 
                 casa::Quantity freq;
 
-                freq = casa::Quantity(it->frequency()[localChan],"Hz");
+                // build the array for the global frequency earlier in the code
+                // and get the value here.
+
+                freq = casa::Quantity((diadvise.getBaryFrequencies()[globalChannel]).getValue(),"Hz");
 
                 int id; // Id of the process the WorkRequest message is received from
 
                 // Wait for a worker to request some work
-                ASKAPLOG_INFO_STR(logger, "Master is waiting for a worker to request some work for channel " << localChan <<  " frequency " << freq);
+                ASKAPLOG_INFO_STR(logger, "Master is waiting for a worker from Group " \
+                << group << " to request some work for (local) channel " << localChan <<  \
+                " (global) frequency " << freq);
 
                 // wait for valid work request
                 ContinuumWorkRequest wrequest;
@@ -239,7 +248,7 @@ void ContinuumMaster::run(void)
                         unsigned int baseChannel = posInGroup * nChanperCore;
                         unsigned int topChannel = baseChannel + nChanperCore - 1;
 
-                        if (localChan >= baseChannel && localChan <= topChannel) {
+                        if (globalChannel >= baseChannel && globalChannel <= topChannel) {
                             inRange = 1;
                         }
 
@@ -247,7 +256,8 @@ void ContinuumMaster::run(void)
                     }
                     if (!inGroup || !inRange) {
                         ASKAPLOG_INFO_STR(logger, "Master received request from " << id
-                                          << " Worker NOT in group or already has full allocation or Channel not in allocation");
+                                          << " Worker NOT in group or already has " << \
+                                          "full allocation or Channel not in allocation");
                         ContinuumWorkUnit wu;
                         wu.set_payloadType(ContinuumWorkUnit::NA);
                         wu.sendUnit(id,itsComms);
@@ -274,7 +284,8 @@ void ContinuumMaster::run(void)
                 wu.set_channelFrequency(freq.getValue("Hz"));
                 wu.sendUnit(id,itsComms);
                 ++outstanding;
-                ++globalChannel;
+                globalChannel = globalChannel+nChanperCore;
+
 
             }
 
@@ -301,23 +312,7 @@ void ContinuumMaster::run(void)
     // this parset need to know direction and frequency for the final maps/models
     // But I dont want to run Cadvise as it is too specific to the old imaging requirements
 
-    char ChannelPar[64];
 
-    sprintf(ChannelPar,"[1,0]"); // we are the master
-
-    LOFAR::ParameterSet unitParset = itsParset;
-
-    unitParset.replace("Channels",ChannelPar);
-
-    synthesis::AdviseDI diadvise(itsComms,unitParset);
-    diadvise.addMissingParameters();
-
-    const bool writeAtMajorCycle = unitParset.getBool("Images.writeAtMajorCycle", false);
-    const int nCycles = unitParset.getInt32("ncycles", 0);
-
-    ASKAPLOG_INFO_STR(logger,"*****");
-    ASKAPLOG_INFO_STR(logger,"Parset" << diadvise.getParset());
-    ASKAPLOG_INFO_STR(logger,"*****");
 
 
     if (nCycles == 0) {
@@ -371,7 +366,8 @@ void ContinuumMaster::run(void)
             }
             if (writeAtMajorCycle) {
                 ASKAPLOG_INFO_STR(logger, "Writing out model");
-                imager.writeModel(std::string(".beam") + utility::toString(beam) + std::string(".majorcycle.") + utility::toString(cycle + 1));
+                imager.writeModel(std::string(".beam") + utility::toString(beam) + \
+                std::string(".majorcycle.") + utility::toString(cycle + 1));
             }
             else {
                 ASKAPLOG_INFO_STR(logger, "Not writing out model");

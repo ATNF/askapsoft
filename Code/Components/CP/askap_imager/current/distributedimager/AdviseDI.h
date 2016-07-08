@@ -39,6 +39,16 @@
 #include <boost/shared_ptr.hpp>
 #include <string>
 
+#include <casacore/casa/BasicSL.h>
+#include <casacore/casa/aips.h>
+#include <casacore/casa/OS/Timer.h>
+#include <casacore/ms/MeasurementSets/MeasurementSet.h>
+#include <casacore/ms/MeasurementSets/MSColumns.h>
+#include <casacore/ms/MSOper/MSReader.h>
+#include <casacore/casa/Arrays/ArrayIO.h>
+#include <casacore/casa/iostream.h>
+#include <casacore/casa/namespace.h>
+#include <casacore/casa/Quanta/MVTime.h>
 namespace askap {
 
     namespace synthesis {
@@ -77,26 +87,57 @@ namespace askap {
             /// @brief the datasets
             std::vector<std::string> getDatasets();
 
-            
+            ///
+            casa::MVDirection getTangent() {return itsTangent;};
+
+            casa::MVEpoch getEpoch() {return itsEpoch; };
+
+            casa::MPosition getPosition() {return itsPosition; };
+
+            vector<casa::MFrequency> getBaryFrequencies() {return itsBaryFrequencies;};
+
+            vector<casa::MFrequency> getTopoFrequencies() {return itsTopoFrequencies;};
+
+            void prepare();
 
         private:
 
+
+
             LOFAR::ParameterSet itsParset;
 
-            /// The parameters we need to set.
-            /// These are the output frame info
+            casa::uInt itsRef;
 
-            int channel;
+            vector<casa::MFrequency> itsBaryFrequencies;
+
+            vector<casa::MFrequency> itsTopoFrequencies;
+
+            double refFreq;
 
             double minFrequency;
 
-            vector<casa::MFrequency> itsFrequencies;
-
             double maxFrequency;
+
+            double deltaFrequency;
+
+            int numFrequencies;
+
+            bool constChanWidth;
 
             casa::MVDirection itsTangent;
 
+            casa::Vector<casa::MDirection> itsDirVec;
 
+            casa::MVEpoch itsEpoch;
+
+            casa::MPosition itsPosition;
+
+            vector<double> chanFreq;
+            vector<double> chanWidth;
+            vector<double> effectiveBW;
+            vector<double> resolution;
+            vector<double> centre;
+            
         };
 
     } // namespace synthesis
