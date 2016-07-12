@@ -30,6 +30,8 @@
 #ifndef ASKAP_IMAGER_ADVISE_DI_H
 #define ASKAP_IMAGER_ADVISE_DI_H
 
+#include <messages/ContinuumWorkUnit.h>
+
 #include <Common/ParameterSet.h>
 #include <parallel/MEParallelApp.h>
 #include <measurementequation/VisMetaDataStats.h>
@@ -49,6 +51,8 @@
 #include <casacore/casa/iostream.h>
 #include <casacore/casa/namespace.h>
 #include <casacore/casa/Quanta/MVTime.h>
+
+
 namespace askap {
 
     namespace synthesis {
@@ -100,6 +104,8 @@ namespace askap {
 
             void prepare();
 
+            bool isPrepared;
+
         private:
 
 
@@ -132,12 +138,17 @@ namespace askap {
 
             casa::MPosition itsPosition;
 
-            vector<double> chanFreq;
-            vector<double> chanWidth;
-            vector<double> effectiveBW;
-            vector<double> resolution;
-            vector<double> centre;
-            
+            std::vector<double> chanFreq;
+            std::vector<double> chanWidth;
+            std::vector<double> effectiveBW;
+            std::vector<double> resolution;
+            std::vector<double> centre;
+
+            std::vector< std::vector<double> > itsAllocatedFrequencies;
+            std::vector< std::stack<cp::ContinuumWorkUnit> > itsAllocatedWork;
+
+            int match(std::string ms,  casa::MVFrequency freq);
+
         };
 
     } // namespace synthesis

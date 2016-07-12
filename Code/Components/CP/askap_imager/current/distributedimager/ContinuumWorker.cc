@@ -146,15 +146,17 @@ void ContinuumWorker::run(void)
 
             const string ms = wu.get_dataset();
             ASKAPLOG_INFO_STR(logger, "Received Work Unit for dataset " << ms
-                              << ", local channel " << wu.get_localChannel()
-                              << ", global channel " << wu.get_globalChannel()
+                              << ", local (topo) channel " << wu.get_localChannel()
+                              << ", global (topo) channel " << wu.get_globalChannel()
                               << ", frequency " << wu.get_channelFrequency()/1.e6 << "MHz");
+
 
 
             //storeMs(wu,itsParset); // proxy for storing the dataset somehow
 
             for (unsigned int eachWu = 0; eachWu < nchanpercore; eachWu++ ) {
                 ContinuumWorkUnit thisWu;
+
                 thisWu.set_localChannel(wu.get_localChannel()+eachWu);
                 // this is incorrect
                 thisWu.set_channelFrequency(wu.get_channelFrequency()); // hope this is not used
@@ -187,6 +189,7 @@ void ContinuumWorker::processWorkUnit(ContinuumWorkUnit& wu)
     char ChannelPar[64];
 
     sprintf(ChannelPar,"[1,%d]",wu.get_localChannel()+1);
+
 
 
     bool usetmpfs = unitParset.getBool("usetmpfs",true);

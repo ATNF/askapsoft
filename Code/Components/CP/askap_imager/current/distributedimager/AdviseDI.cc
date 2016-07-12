@@ -88,7 +88,7 @@ namespace synthesis {
 AdviseDI::AdviseDI(askap::askapparallel::AskapParallel& comms, const LOFAR::ParameterSet& parset) :
     AdviseParallel(comms,parset),itsParset(parset)
 {
-
+    isPrepared = false;
 }
 
 void AdviseDI::prepare() {
@@ -96,6 +96,10 @@ void AdviseDI::prepare() {
 
     // Read from the configruation the list of datasets to process
     const vector<string> ms = getDatasets();
+
+    unsigned int nWorkers = itsComms.nProcs() - 1;
+    unsigned int nWorkersPerGroup = nWorkers/itsComms.nGroups();
+
     casa::uInt srow = 0;
 
     chanFreq.resize(0);
@@ -109,11 +113,17 @@ void AdviseDI::prepare() {
 
     // Iterate over all measurement sets
     // combine all the channels into a list...
+    // these measurement sets may now be from different epochs they should not
+    // have different channel ranges - but it is possible that the channel range
+    // may have been broken up into chunks.
+
+    // need to calculate the allocations too.
 
     casa::uInt totChanIn = 0;
 
     for (unsigned int n = 0; n < ms.size(); ++n) {
     // Open the input measurement set
+       ASKAPLOG_INFO_STR(logger, "Opening " << ms[n] << " filecount " << n );
        const casa::MeasurementSet in(ms[n]);
        const casa::ROMSColumns srcCols(in);
        const casa::ROMSSpWindowColumns& sc = srcCols.spectralWindow();
@@ -169,11 +179,11 @@ void AdviseDI::prepare() {
        else {
            ASKAPLOG_WARN_STR(logger,"Assuming subsequent measurement sets share Epoch,Position and Direction");
        }
-
+       ASKAPLOG_INFO_STR(logger, "Completed filecount " << n);
     }
 
 
-    ASKAPLOG_INFO_STR(logger, "Assumed tangent point: "<<printDirection(itsTangent)<<" (J2000)");
+    ASKAPLOG_INFO_STR(logger, "Assuming tangent point: "<<printDirection(itsTangent)<<" (J2000)");
 
 
 
@@ -189,6 +199,11 @@ void AdviseDI::prepare() {
     itsTopoFrequencies.resize(0);
     bool barycentre = itsParset.getBool("barycentre",false);
 
+    // first we need to sort and uniqify the list
+    // then resize the list to get the channel range.
+    itsAllocatedFrequencies.resize(nWorkersPerGroup);
+    itsAllocatedWork.resize(nWorkersPerGroup);
+    
     for (unsigned int ch = 0; ch < chanFreq.size(); ++ch) {
         itsBaryFrequencies.push_back(forw(chanFreq[ch]).getValue());
         itsTopoFrequencies.push_back(MFrequency(MVFrequency(chanFreq[ch]),refin));
@@ -209,17 +224,78 @@ void AdviseDI::prepare() {
         }
         ASKAPLOG_INFO_STR(logger,"Topocentric Channel " << ch << ":" << itsTopoFrequencies[ch]);
         ASKAPLOG_INFO_STR(logger,"Barycentric Channel " << ch << ":" << itsBaryFrequencies[ch]);
+        unsigned int allocation_index = ch % nWorkersPerGroup;
+        ASKAPLOG_INFO_STR(logger,"Allocating frequency "<< itsBaryFrequencies[ch].getValue() \
+        << " to worker " << allocation_index);
+
+        itsAllocatedFrequencies[allocation_index].push_back(itsBaryFrequencies[ch].getValue());
     }
 
+    // Now for each allocated workunit we need to fill in the rest of the workunit
+    // we now have a workUnit for each channel in the allocation - but not
+    // for each Epoch.
 
+    for (unsigned int work = 0; work < itsAllocatedFrequencies.size(); ++work) {
+        ASKAPLOG_INFO_STR(logger,"Allocating frequency channels for worker " << work);
+        // loop over the measurement sets and find the local channel number
+        // associated with the barycentric channel
+        vector<double>& thisAllocation = itsAllocatedFrequencies[work];
+
+        for (unsigned int frequency=0;frequency < thisAllocation.size();++frequency) {
+
+            // need to allocate the measurement sets for this channel to this allocation
+            // this may require appending new work units.
+
+            for (unsigned int set=0;set < ms.size();++set){
+                int lc = 0;
+                lc = match(ms[set],thisAllocation[frequency]);
+                if (lc >= 0) {
+                    // there is a channel of this frequency in the measurement set
+                    ASKAPLOG_INFO_STR(logger,"Matched " << thisAllocation[frequency] \
+                    << " with local channel " << lc << " of set: " << ms[set]);
+
+                    cp::ContinuumWorkUnit wu;
+                    wu.set_payloadType(cp::ContinuumWorkUnit::WORK);
+                    wu.set_channelFrequency(thisAllocation[frequency]);
+                    wu.set_localChannel(lc);
+                    wu.set_dataset(ms[set]);
+                    itsAllocatedWork[work].push(wu);
+                }
+                else {
+                    ASKAPLOG_INFO_STR(logger,"Cannot match " << thisAllocation[frequency] \
+                    << " in set: " << ms[set]);
+                    // warn it does not match ....
+                }
+            }
+        }
+
+    }
+
+    isPrepared = true;
+    ASKAPLOG_INFO_STR(logger, "Prepared the advice");
+}
+int AdviseDI::match(string mSet, casa::MVFrequency testFreq) {
+
+    // need to catch the case when the band is inverted
+
+    for (int ch=0; ch < itsBaryFrequencies.size(); ch++) {
+        if (testFreq == itsBaryFrequencies[ch].getValue())
+            return ch;
+
+    }
+
+    return -1;
 
 
 }
 void AdviseDI::addMissingParameters()
 {
+    if (isPrepared == false) {
+        ASKAPLOG_INFO_STR(logger,"Running prepare from addMissingParameters");
+        this->prepare();
+    }
 
-    this->prepare();
-
+    ASKAPLOG_INFO_STR(logger,"Adding missing params ");
 
     ASKAPCHECK(itsParset.isDefined("Channels"),"Channels keyword not supplied in parset");
 
@@ -332,6 +408,7 @@ void AdviseDI::addMissingParameters()
    } else if ( shapeNeeded && !itsParset.isDefined("Images.shape") ) {
 
    }
+
 
 }
 // Utility function to get dataset names from parset.
