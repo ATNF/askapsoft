@@ -4,7 +4,8 @@
 # Thus all paths should be relative to the parent functests.
 
 # Setup the environment
-source ./common
+source ../init_package_env.sh
+export AIPSPATH=$ASKAP_ROOT/Code/Base/accessors/current
 
 java askap/cp/manager/CpManager -c $TEST_DIR/manager.cfg -l ./config-files/console.log_cfg &
 PID=$!
