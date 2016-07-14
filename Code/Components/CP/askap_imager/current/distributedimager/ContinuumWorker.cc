@@ -88,8 +88,8 @@ ContinuumWorker::ContinuumWorker(LOFAR::ParameterSet& parset,
     itsGridder_p = VisGridderFactory::make(itsParset);
     // lets properly size the storage
     const int nchanpercore = itsParset.getInt32("nchanpercore", 1);
-    workUnits.resize(nchanpercore);
-    itsParsets.resize(nchanpercore);
+    workUnits.resize(0);
+    itsParsets.resize(0);
 
     // lets calculate a base
     unsigned int nWorkers = itsComms.nProcs() - 1;
@@ -126,14 +126,15 @@ void ContinuumWorker::run(void)
 
 
 
-    ContinuumWorkUnit wu;
+
     wrequest.sendRequest(itsMaster,itsComms);
     while (1) {
 
-
-
+        ContinuumWorkUnit wu;
+        ASKAPLOG_INFO_STR(logger,"Worker is waiting for work allocation");
         wu.receiveUnitFrom(itsMaster,itsComms);
         if (wu.get_payloadType() == ContinuumWorkUnit::DONE) {
+            ASKAPLOG_INFO_STR(logger,"Worker has received complete allocation");
             break;
         }
         else if (wu.get_payloadType() == ContinuumWorkUnit::NA) {
@@ -150,25 +151,14 @@ void ContinuumWorker::run(void)
                               << ", global (topo) channel " << wu.get_globalChannel()
                               << ", frequency " << wu.get_channelFrequency()/1.e6 << "MHz");
 
-
-
-            //storeMs(wu,itsParset); // proxy for storing the dataset somehow
-
-            for (unsigned int eachWu = 0; eachWu < nchanpercore; eachWu++ ) {
-                ContinuumWorkUnit thisWu;
-
-                thisWu.set_localChannel(wu.get_localChannel()+eachWu);
-                // this is incorrect
-                thisWu.set_channelFrequency(wu.get_channelFrequency()); // hope this is not used
-
-                thisWu.set_payloadType(ContinuumWorkUnit::WORK);
-                thisWu.set_dataset(wu.get_dataset());
-                thisWu.set_globalChannel(wu.get_globalChannel());
-                thisWu.set_beam(wu.get_beam());
-
-                processWorkUnit(thisWu);
+            processWorkUnit(wu);
+            ASKAPLOG_INFO_STR(logger,"Worker is sending request for work");
+            if (wu.get_payloadType() == ContinuumWorkUnit::LAST) {
+                break;
             }
-
+            else {
+                wrequest.sendRequest(itsMaster,itsComms);
+            }
         }
 
     }
@@ -217,15 +207,16 @@ void ContinuumWorker::processWorkUnit(ContinuumWorkUnit& wu)
         unitParset.replace(param, bstr.str().c_str());
 
         struct stat buffer;
-        if (stat (outms_flag.c_str(), &buffer) == 0) {
-            ASKAPLOG_WARN_STR(logger, "Split file already exists");
-        }
+
         while (stat (outms_flag.c_str(), &buffer) == 0) {
             // flag file exists - someone is writing
 
             sleep(1);
         }
-        if (stat (outms.c_str(), &buffer)) {
+        if (stat (outms.c_str(), &buffer) == 0) {
+            ASKAPLOG_WARN_STR(logger, "Split file already exists");
+        }
+        else if (stat (outms.c_str(), &buffer) != 0 && stat (outms_flag.c_str(), &buffer) != 0) {
             // file cannot be read
 
             // drop trigger
@@ -249,22 +240,20 @@ void ContinuumWorker::processWorkUnit(ContinuumWorkUnit& wu)
     unitParset.replace("Channels",ChannelPar);
 
 
-
+    ASKAPLOG_INFO_STR(logger,"getting advice on missing parametrs");
     synthesis::AdviseDI diadvise(itsComms,unitParset);
     diadvise.addMissingParameters();
-
+    ASKAPLOG_INFO_STR(logger,"advice received");
 
 
     // store the datatable accessor - this is not storing the data
     // i am still working on that
     // Now trying to store the parset. the ds. and an imager.
-
-
-    unsigned int location = wu.get_localChannel() - this->baseChannel;
-    workUnits[location] = wu; // this isn't needed anymore... i think
-
-
-    itsParsets[location] = diadvise.getParset();
+    ASKAPLOG_INFO_STR(logger,"storing workUnit <probably> no longer required");
+    workUnits.push_back(wu); // this isn't needed anymore... i think all the info
+    // is now in the parset ....
+    ASKAPLOG_INFO_STR(logger,"storing parset"); 
+    itsParsets.push_back(diadvise.getParset());
 
 }
 

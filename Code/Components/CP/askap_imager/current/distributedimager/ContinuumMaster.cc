@@ -100,7 +100,7 @@ void ContinuumMaster::run(void)
 
     const double targetPeakResidual = synthesis::SynthesisParamsHelper::convertQuantity(
                 itsParset.getString("threshold.majorcycle", "-1Jy"), "Jy");
-    int nChanperCore = itsParset.getInt32("nchanpercore", 1);
+
 
 
     char ChannelPar[64];
@@ -125,25 +125,6 @@ void ContinuumMaster::run(void)
     totalChannels = diadvise.getBaryFrequencies().size();
 
     ASKAPLOG_INFO_STR(logger,"AdviseDI reports " << totalChannels << " channels to process");
-    // Send work orders to the worker processes, handling out
-    // more work to the workers as needed.
-
-    // Global channel is the channel offset across all measurement sets
-    // For example, the first MS has 16 channels, then the global channel
-    // number for the first (local) channel in the second MS is 16 (zero
-    // based indexing).
-
-    // AS we now (2016-Jul)  will be dealing with measurements in both time and frequency
-    // it is not that simple.
-
-    unsigned int globalChannel = 0;
-
-    // Tracks all outstanding workunits, that is, those that have not
-    // been completed
-    unsigned int outstanding = 0;
-
-    unsigned int nWorkers = itsComms.nProcs() - 1;
-    unsigned int nWorkersPerGroup = nWorkers/itsComms.nGroups();
 
     // get the beams
     size_t beam = theBeams[0];
@@ -151,160 +132,23 @@ void ContinuumMaster::run(void)
     // Lets sort out the output frames ...
     // iterate over the measurement sets and lets look at the
     // channels
+    int id; // incoming rank ID
 
+    while(diadvise.getWorkUnitCount()) {
 
-    unsigned int workChannels = nWorkersPerGroup * nChanperCore;
-    if (totalChannels < workChannels) {
+        ContinuumWorkRequest wrequest;
+        ASKAPLOG_INFO_STR(logger,"Waiting for a request " << diadvise.getWorkUnitCount() \
+        << " units remaining");
+        wrequest.receiveRequest(id, itsComms);
+        ASKAPLOG_INFO_STR(logger,"Received a request from " << id);
+            /// Now we can just pop a workunit off the stack
 
-        ASKAPTHROW(std::runtime_error,
-                   "Insufficient work for resources available reduce nchanpercore in parset");
-
-    }
-    for (size_t group = 0; group<itsComms.nGroups(); ++group) {
-        //reset globalChannel
-        globalChannel = 0;
-        for (unsigned int n = 0; n < ms.size(); ++n) { // this is over channels
-
-            askap::accessors::TableConstDataSource ds(ms[n]);
-            const casa::MeasurementSet in(ms[n]);
-            const casa::ROMSColumns srcCols(in);
-            const casa::ROMSFeedColumns& fc = srcCols.feed();
-
-            const int fieldEntries = fc.nrow();
-
-            const casa::uInt firstAnt = casa::ROScalarColumn<casa::Int>(in.feed(),"ANTENNA_ID")(0);
-            unsigned int nBeams = 0;
-
-            for (int row = 0; row<fieldEntries; ++row) {
-                    if (casa::ROScalarColumn<casa::Int>(in.feed(),"ANTENNA_ID")(row) == firstAnt)
-                        ++nBeams;
-                    else
-                        break;
-            }
-
-            unsigned int msChannels = casa::ROScalarColumn<casa::Int>(in.spectralWindow(),"NUM_CHAN")(0);
-
-            // lets build an iterator to help with the frequency allocations
-
-            if (msChannels > workChannels) {
-                msChannels = workChannels;
-            }
-
-            ASKAPLOG_INFO_STR(logger, "Creating work orders for measurement set "
-                               << ms[n] << " processing " << msChannels << " channels and " << nChanperCore
-                               << " channels per core");
-
-            if (n==0)
-            {
-                ASKAPLOG_INFO_STR(logger, "There are  "
-                              << itsComms.nGroups() << " groups from the " << nWorkers << " workers "
-                              << " with " << nWorkersPerGroup << " workers per group");
-            }
-
-
-
-            // Iterate over all channels in the measurement set
-            // but each core just needs to ask once before it is allocated all its channels
-            for (unsigned int localChan = 0; localChan < msChannels; localChan = localChan+nChanperCore) {
-
-                casa::Quantity freq;
-
-                // build the array for the global frequency earlier in the code
-                // and get the value here.
-
-                freq = casa::Quantity((diadvise.getBaryFrequencies()[globalChannel]).getValue(),"Hz");
-
-                int id; // Id of the process the WorkRequest message is received from
-
-                // Wait for a worker to request some work
-                ASKAPLOG_INFO_STR(logger, "Master is waiting for a worker from Group " \
-                << group << " to request some work for (local) channel " << localChan <<  \
-                " (global) frequency " << freq);
-
-                // wait for valid work request
-                ContinuumWorkRequest wrequest;
-                int inGroup = 0;
-                int inRange = 0;
-                while (inGroup == 0 || inRange == 0)
-                {
-
-                    inRange = 0;
-                    wrequest.receiveRequest(id, itsComms);
-                    if (id > group*nWorkersPerGroup && id <= (group+1)*nWorkersPerGroup) {
-                        inGroup = 1;
-                        ASKAPLOG_INFO_STR(logger, "Master received request from " << id << " Worker in group "
-                                          << group);
-                        /// we need the channel to fall into the allocation for this id : the position this id holds in the group
-                        /// multiplied by the number of channels per core
-                        /// what is the position this rank holds in the group
-
-
-                        unsigned int posInGroup = (id % nWorkersPerGroup);
-                        if (posInGroup == 0) {
-                            posInGroup = nWorkersPerGroup;
-                        }
-                        posInGroup = posInGroup-1;
-
-                        unsigned int baseChannel = posInGroup * nChanperCore;
-                        unsigned int topChannel = baseChannel + nChanperCore - 1;
-
-                        if (globalChannel >= baseChannel && globalChannel <= topChannel) {
-                            inRange = 1;
-                        }
-
-
-                    }
-                    if (!inGroup || !inRange) {
-                        ASKAPLOG_INFO_STR(logger, "Master received request from " << id
-                                          << " Worker NOT in group or already has " << \
-                                          "full allocation or Channel not in allocation");
-                        ContinuumWorkUnit wu;
-                        wu.set_payloadType(ContinuumWorkUnit::NA);
-                        wu.sendUnit(id,itsComms);
-                    }
-                }
-                // If the worker is not in this group send NA (not applicable) and it will drop it
-                // If the channel number is CHANNEL_UNINITIALISED then this indicates
-                // there is no image associated with this message. If the channel
-                // number is initialised yet the params pointer is null this indicates
-                // that an an attempt was made to process this channel but an exception
-                // was thrown.
-
-
-                // Send the workunit to the worker
-                ASKAPLOG_INFO_STR(logger, "Master is allocating workunit " << ms[n]
-                                  << ", local channel " <<  localChan << ", global channel "
-                                  << globalChannel << " to worker " << id);
-                ContinuumWorkUnit wu;
-                wu.set_payloadType(ContinuumWorkUnit::WORK);
-                wu.set_dataset(ms[n]);
-                wu.set_globalChannel(globalChannel);
-                wu.set_localChannel(localChan);
-                wu.set_beam(beam);
-                wu.set_channelFrequency(freq.getValue("Hz"));
-                wu.sendUnit(id,itsComms);
-                ++outstanding;
-                globalChannel = globalChannel+nChanperCore;
-
-
-            }
-
-        }
-
-    }
-
-
-    ASKAPLOG_INFO_STR(logger, "Master all outstanding work-units are allocated");
-
-    // Send each worker a response to indicate there are
-    // no more work units. This is done separate to the above loop
-    // since we need to make sure even workers that never received
-    // a workunit are send the "DONE" message.
-    for (int id = 1; id < itsComms.nProcs(); ++id) {
-        ContinuumWorkUnit wu;
-        wu.set_payloadType(ContinuumWorkUnit::DONE);
+        ContinuumWorkUnit wu = diadvise.getAllocation(id-1);
+        ASKAPLOG_INFO_STR(logger,"Sending Allocation to  " << id);
         wu.sendUnit(id,itsComms);
+        ASKAPLOG_INFO_STR(logger,"Sent Allocation to " << id);
     }
+
 
 
     ASKAPLOG_INFO_STR(logger, "Master is about to broadcast first <empty> model");

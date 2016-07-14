@@ -46,11 +46,14 @@ namespace askap {
                 enum PayloadType {
                     NA,
                     WORK,
+                    LAST,
                     DONE
                 };
 
                 /// @brief Constructor.
                 ContinuumWorkUnit();
+
+
 
                 /// @brief Destructor.
                 virtual ~ContinuumWorkUnit();
@@ -71,7 +74,7 @@ namespace askap {
                 void set_localChannel(unsigned int chan);
                 void set_channelFrequency(double freq);
                 void set_beam(unsigned int beam);
-            
+
                 // Getters
                 PayloadType get_payloadType(void) const;
                 std::string get_dataset(void) const;
@@ -89,12 +92,12 @@ namespace askap {
                 /// @brief read the object from a blob stream
                 /// @param[in] is the input stream
                 virtual void readFromBlob(LOFAR::BlobIStream& is);
-            
+
                 /// @brief Send this unit
                 /// @param[in] master is the id of the node to which the request is sent
                 /// @param[in] comm is the communicator to be used
                 void sendUnit(int target, askap::askapparallel::AskapParallel& comm);
-            
+
                 /// @brief Receive this unit from anyone
                 /// @param[out] id becomes the id of the node sending the request
                 /// @param[in] comm is the communicator to be used

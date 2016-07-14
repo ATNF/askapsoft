@@ -68,11 +68,17 @@ ASKAP_LOGGER(logger, ".adviseDI");
 
 #include <boost/shared_ptr.hpp>
 
+
 namespace askap {
 
 namespace synthesis {
 
-
+bool custom_compare (const casa::MFrequency& X, const casa::MFrequency& Y) {
+    return (X.getValue() == Y.getValue());
+}
+bool custom_lessthan (const casa::MFrequency& X, const casa::MFrequency& Y) {
+    return (X.getValue() < Y.getValue());
+}
 // actual AdviseDI implementation
 
 /// @brief Constructor from ParameterSet
@@ -89,6 +95,8 @@ AdviseDI::AdviseDI(askap::askapparallel::AskapParallel& comms, const LOFAR::Para
     AdviseParallel(comms,parset),itsParset(parset)
 {
     isPrepared = false;
+    barycentre = false;
+    itsWorkUnitCount=0;
 }
 
 void AdviseDI::prepare() {
@@ -99,14 +107,16 @@ void AdviseDI::prepare() {
 
     unsigned int nWorkers = itsComms.nProcs() - 1;
     unsigned int nWorkersPerGroup = nWorkers/itsComms.nGroups();
+    unsigned int nGroups = itsComms.nGroups();
+    const int nchanpercore = itsParset.getInt32("nchanpercore", 1);
 
     casa::uInt srow = 0;
 
-    chanFreq.resize(0);
-    chanWidth.resize(0);
-    effectiveBW.resize(0);
-    resolution.resize(0);
-    centre.resize(0);
+    chanFreq.resize(ms.size());
+    chanWidth.resize(ms.size());
+    effectiveBW.resize(ms.size());
+    resolution.resize(ms.size());
+    centre.resize(ms.size());
 
     // Not really sure what to do for multiple ms or what that means in this
     // context... but i'm doing it any way - probably laying a trap for myself
@@ -122,64 +132,69 @@ void AdviseDI::prepare() {
     casa::uInt totChanIn = 0;
 
     for (unsigned int n = 0; n < ms.size(); ++n) {
+        chanFreq[n].resize(0);
+        chanWidth[n].resize(0);
+        effectiveBW[n].resize(0);
+        resolution[n].resize(0);
+        centre[n].resize(0);
     // Open the input measurement set
-       ASKAPLOG_INFO_STR(logger, "Opening " << ms[n] << " filecount " << n );
-       const casa::MeasurementSet in(ms[n]);
-       const casa::ROMSColumns srcCols(in);
-       const casa::ROMSSpWindowColumns& sc = srcCols.spectralWindow();
-       const casa::ROMSFieldColumns& fc = srcCols.field();
-       const casa::ROMSObservationColumns& oc = srcCols.observation();
-       const casa::ROMSAntennaColumns& ac = srcCols.antenna();
-       const casa::ROArrayColumn<casa::Double> times = casa::ROArrayColumn<casa::Double>(oc.timeRange());
-       const casa::ROArrayColumn<casa::Double> ants = casa::ROArrayColumn<casa::Double>(ac.position());
-       const casa::uInt thisRef = casa::ROScalarColumn<casa::Int>(in.spectralWindow(),"MEAS_FREQ_REF")(0);
-       const  casa::uInt thisChanIn = casa::ROScalarColumn<casa::Int>(in.spectralWindow(),"NUM_CHAN")(0);
-       srow = sc.nrow()-1;
+        ASKAPLOG_INFO_STR(logger, "Opening " << ms[n] << " filecount " << n );
+        const casa::MeasurementSet in(ms[n]);
+        const casa::ROMSColumns srcCols(in);
+        const casa::ROMSSpWindowColumns& sc = srcCols.spectralWindow();
+        const casa::ROMSFieldColumns& fc = srcCols.field();
+        const casa::ROMSObservationColumns& oc = srcCols.observation();
+        const casa::ROMSAntennaColumns& ac = srcCols.antenna();
+        const casa::ROArrayColumn<casa::Double> times = casa::ROArrayColumn<casa::Double>(oc.timeRange());
+        const casa::ROArrayColumn<casa::Double> ants = casa::ROArrayColumn<casa::Double>(ac.position());
+        const casa::uInt thisRef = casa::ROScalarColumn<casa::Int>(in.spectralWindow(),"MEAS_FREQ_REF")(0);
+        const  casa::uInt thisChanIn = casa::ROScalarColumn<casa::Int>(in.spectralWindow(),"NUM_CHAN")(0);
+        srow = sc.nrow()-1;
 
-       ASKAPCHECK(srow==0,"More than one spectral window not currently supported in adviseDI");
+        ASKAPCHECK(srow==0,"More than one spectral window not currently supported in adviseDI");
 
-       for (uint i = 0; i < thisChanIn; ++i) {
-          chanFreq.push_back(sc.chanFreq()(srow)(casa::IPosition(1, i)));
-          chanWidth.push_back(sc.chanWidth()(srow)(casa::IPosition(1, i)));
-          effectiveBW.push_back(sc.effectiveBW()(srow)(casa::IPosition(1, i)));
-          resolution.push_back(sc.resolution()(srow)(casa::IPosition(1, i)));
-       }
+        for (uint i = 0; i < thisChanIn; ++i) {
+          chanFreq[n].push_back(sc.chanFreq()(srow)(casa::IPosition(1, i)));
+          chanWidth[n].push_back(sc.chanWidth()(srow)(casa::IPosition(1, i)));
+          effectiveBW[n].push_back(sc.effectiveBW()(srow)(casa::IPosition(1, i)));
+          resolution[n].push_back(sc.resolution()(srow)(casa::IPosition(1, i)));
+        }
 
-       totChanIn = totChanIn + thisChanIn;
+        totChanIn = totChanIn + thisChanIn;
 
 
-       if (n == 0) {
-           itsDirVec = fc.phaseDirMeasCol()(0);
-           itsTangent = itsDirVec(0).getValue();
+        if (n == 0) {
+            itsDirVec = fc.phaseDirMeasCol()(0);
+            itsTangent = itsDirVec(0).getValue();
 
-           // Read the position on Antenna 0
-           Array<casa::Double> posval;
-           ants.get(0,posval,true);
-           vector<double> pval = posval.tovector();
+            // Read the position on Antenna 0
+            Array<casa::Double> posval;
+            ants.get(0,posval,true);
+            vector<double> pval = posval.tovector();
 
-           MVPosition mvobs(Quantity(pval[0], "m").getBaseValue(),
-           Quantity(pval[1], "m").getBaseValue(),
-           Quantity(pval[2], "m").getBaseValue());
+            MVPosition mvobs(Quantity(pval[0], "m").getBaseValue(),
+            Quantity(pval[1], "m").getBaseValue(),
+            Quantity(pval[2], "m").getBaseValue());
 
-           itsPosition = MPosition(mvobs,casa::MPosition::ITRF);
+            itsPosition = MPosition(mvobs,casa::MPosition::ITRF);
 
-           // Get the Epoch
-           Array<casa::Double> tval;
-           vector<double> tvals;
+            // Get the Epoch
+            Array<casa::Double> tval;
+            vector<double> tvals;
 
-           times.get(0,tval,true);
-           tvals = tval.tovector();
-           double mjd = tvals[0]/(86400.);
-           casa::MVTime dat(mjd);
+            times.get(0,tval,true);
+            tvals = tval.tovector();
+            double mjd = tvals[0]/(86400.);
+            casa::MVTime dat(mjd);
 
-           itsEpoch = MVEpoch(dat.day());
+            itsEpoch = MVEpoch(dat.day());
 
-           itsRef = thisRef;
-       }
-       else {
+            itsRef = thisRef;
+        }
+        else {
            ASKAPLOG_WARN_STR(logger,"Assuming subsequent measurement sets share Epoch,Position and Direction");
-       }
-       ASKAPLOG_INFO_STR(logger, "Completed filecount " << n);
+        }
+        ASKAPLOG_INFO_STR(logger, "Completed filecount " << n);
     }
 
 
@@ -197,43 +212,74 @@ void AdviseDI::prepare() {
 
     itsBaryFrequencies.resize(0);
     itsTopoFrequencies.resize(0);
-    bool barycentre = itsParset.getBool("barycentre",false);
+    barycentre = itsParset.getBool("barycentre",false);
 
+    // we now have each topocentric channel from each MS
+    // in a unique array.
     // first we need to sort and uniqify the list
     // then resize the list to get the channel range.
+    // This is required becuase we are trying to form a unique
+    // reference channel list from the input measurement sets
+
+    // This first loop just appends all the frequencies into 2 single arrays
+    // the list of TOPO and BARY frequencies.
+
+
     itsAllocatedFrequencies.resize(nWorkersPerGroup);
-    itsAllocatedWork.resize(nWorkersPerGroup);
-    
-    for (unsigned int ch = 0; ch < chanFreq.size(); ++ch) {
-        itsBaryFrequencies.push_back(forw(chanFreq[ch]).getValue());
-        itsTopoFrequencies.push_back(MFrequency(MVFrequency(chanFreq[ch]),refin));
+    itsAllocatedWork.resize(nWorkers);
+
+    for (unsigned int n = 0; n < ms.size(); ++n) {
+        for (unsigned int ch = 0; ch < chanFreq[n].size(); ++ch) {
+            itsBaryFrequencies.push_back(forw(chanFreq[n][ch]).getValue());
+            itsTopoFrequencies.push_back(MFrequency(MVFrequency(chanFreq[n][ch]),refin));
 
 
-        if (barycentre) {
-            // correct the internal arrays
-            const MVFrequency botThisChan = chanFreq[ch]-chanWidth[ch]/2.0;
-            const MVFrequency topThisChan = chanFreq[ch]+chanWidth[ch]/2.0;
-            casa::MFrequency botThisMF(botThisChan,refin);
-            casa::MFrequency topThisMF(topThisChan,refin);
-            casa::MFrequency botBary = forw(botThisMF).getValue();
-            casa::MFrequency topBary = forw(topThisMF).getValue();
-            casa::MFrequency centreBary = forw(chanFreq[ch]).getValue();
-            chanFreq[ch] = centreBary.getValue();
-            chanWidth[ch] = abs(topBary.getValue() - botBary.getValue());
+            if (barycentre) {
+                // correct the internal arrays
+                const MVFrequency botThisChan = chanFreq[n][ch]-chanWidth[n][ch]/2.0;
+                const MVFrequency topThisChan = chanFreq[n][ch]+chanWidth[n][ch]/2.0;
+                casa::MFrequency botThisMF(botThisChan,refin);
+                casa::MFrequency topThisMF(topThisChan,refin);
+                casa::MFrequency botBary = forw(botThisMF).getValue();
+                casa::MFrequency topBary = forw(topThisMF).getValue();
+                casa::MFrequency centreBary = forw(chanFreq[n][ch]).getValue();
+                chanFreq[n][ch] = centreBary.getValue();
+                chanWidth[n][ch] = abs(topBary.getValue() - botBary.getValue());
 
+            }
         }
+    }
+
+    ///uniquifying the lists
+
+    std::sort(itsBaryFrequencies.begin(),itsBaryFrequencies.end(), custom_lessthan);
+    std::vector<casa::MFrequency>::iterator bary_it;
+    bary_it = std::unique(itsBaryFrequencies.begin(),itsBaryFrequencies.end(),custom_compare);
+    itsBaryFrequencies.resize(std::distance(itsBaryFrequencies.begin(),bary_it));
+
+    std::sort(itsTopoFrequencies.begin(),itsTopoFrequencies.end(), custom_lessthan);
+    std::vector<casa::MFrequency>::iterator topo_it;
+    topo_it = std::unique(itsTopoFrequencies.begin(),itsTopoFrequencies.end(),custom_compare);
+    itsTopoFrequencies.resize(std::distance(itsTopoFrequencies.begin(),topo_it));
+
+    for (unsigned int ch = 0; ch < itsTopoFrequencies.size(); ++ch) {
+
         ASKAPLOG_INFO_STR(logger,"Topocentric Channel " << ch << ":" << itsTopoFrequencies[ch]);
         ASKAPLOG_INFO_STR(logger,"Barycentric Channel " << ch << ":" << itsBaryFrequencies[ch]);
-        unsigned int allocation_index = ch % nWorkersPerGroup;
+        unsigned int allocation_index = floor(ch / nchanpercore);
         ASKAPLOG_INFO_STR(logger,"Allocating frequency "<< itsBaryFrequencies[ch].getValue() \
-        << " to worker " << allocation_index);
+        << " to worker " << allocation_index+1);
 
         itsAllocatedFrequencies[allocation_index].push_back(itsBaryFrequencies[ch].getValue());
     }
 
+
     // Now for each allocated workunit we need to fill in the rest of the workunit
     // we now have a workUnit for each channel in the allocation - but not
     // for each Epoch.
+
+
+
 
     for (unsigned int work = 0; work < itsAllocatedFrequencies.size(); ++work) {
         ASKAPLOG_INFO_STR(logger,"Allocating frequency channels for worker " << work);
@@ -248,11 +294,10 @@ void AdviseDI::prepare() {
 
             for (unsigned int set=0;set < ms.size();++set){
                 int lc = 0;
-                lc = match(ms[set],thisAllocation[frequency]);
+                lc = match(set,thisAllocation[frequency]);
                 if (lc >= 0) {
                     // there is a channel of this frequency in the measurement set
-                    ASKAPLOG_INFO_STR(logger,"Matched " << thisAllocation[frequency] \
-                    << " with local channel " << lc << " of set: " << ms[set]);
+
 
                     cp::ContinuumWorkUnit wu;
                     wu.set_payloadType(cp::ContinuumWorkUnit::WORK);
@@ -260,9 +305,13 @@ void AdviseDI::prepare() {
                     wu.set_localChannel(lc);
                     wu.set_dataset(ms[set]);
                     itsAllocatedWork[work].push(wu);
+                    itsWorkUnitCount++;
+                    ASKAPLOG_INFO_STR(logger,"Allocating " << thisAllocation[frequency] \
+                    << " with local channel " << lc << " of set: " << ms[set] \
+                    << " to worker " << work << "Count " << itsWorkUnitCount );
                 }
                 else {
-                    ASKAPLOG_INFO_STR(logger,"Cannot match " << thisAllocation[frequency] \
+                    ASKAPLOG_WARN_STR(logger,"Allocating FAIL Cannot match " << thisAllocation[frequency] \
                     << " in set: " << ms[set]);
                     // warn it does not match ....
                 }
@@ -271,15 +320,47 @@ void AdviseDI::prepare() {
 
     }
 
+    // expand the channels by the number of groups - this is cheap on memory and
+    // allows easier indexing
+    // But this is only really needed by the master
+    if (itsComms.isMaster()) {
+        for (int grp = 1; grp < itsComms.nGroups(); grp++) {
+            for (int wrk = 0; wrk < nWorkersPerGroup; wrk++) {
+                itsAllocatedWork[grp*nWorkersPerGroup+wrk] = itsAllocatedWork[wrk];
+
+                itsWorkUnitCount=itsWorkUnitCount + itsAllocatedWork[wrk].size();
+
+                ASKAPLOG_INFO_STR(logger,"Allocating worker " << grp*nWorkersPerGroup+wrk \
+                << " the same units as worker " << wrk << " Count " << itsWorkUnitCount);
+            }
+        }
+    }
     isPrepared = true;
     ASKAPLOG_INFO_STR(logger, "Prepared the advice");
 }
-int AdviseDI::match(string mSet, casa::MVFrequency testFreq) {
-
-    // need to catch the case when the band is inverted
-
-    for (int ch=0; ch < itsBaryFrequencies.size(); ch++) {
-        if (testFreq == itsBaryFrequencies[ch].getValue())
+cp::ContinuumWorkUnit AdviseDI::getAllocation(int id) {
+    cp::ContinuumWorkUnit rtn;
+    if (itsAllocatedWork[id].empty() == true) {
+        ASKAPLOG_INFO_STR(logger, "Stack is empty for " << id);
+        rtn.set_payloadType(cp::ContinuumWorkUnit::DONE);
+    }
+    else {
+        rtn = itsAllocatedWork[id].top();
+        itsAllocatedWork[id].pop();
+        itsWorkUnitCount--;
+    }
+    if (itsAllocatedWork[id].empty() == true) {
+        // this is the last unitParset
+        rtn.set_payloadType(cp::ContinuumWorkUnit::LAST);
+    }
+    return rtn;
+}
+int AdviseDI::match(int ms_number, casa::MVFrequency testFreq) {
+    /// Which channel does the frequency correspond to.
+    for (int ch=0; ch < chanFreq[ms_number].size(); ch++) {
+        ASKAPLOG_INFO_STR(logger,"Checking if " << testFreq << " is the same as " \
+        << chanFreq[ms_number][ch]);
+        if (testFreq.getValue() == chanFreq[ms_number][ch])
             return ch;
 
     }
@@ -297,37 +378,20 @@ void AdviseDI::addMissingParameters()
 
     ASKAPLOG_INFO_STR(logger,"Adding missing params ");
 
-    ASKAPCHECK(itsParset.isDefined("Channels"),"Channels keyword not supplied in parset");
-
-    std::vector<LOFAR::uint32> chans = itsParset.getUint32Vector("Channels");
-
-
-    ASKAPLOG_INFO_STR(logger,"Channel selection " << chans);
-
-    ASKAPCHECK(chans[0] == 1,"More than one channel wide not supported");
-
-
-    int ChanIn = chanFreq.size();
-
-    int channel = chans[1]-1; // FIXME: check this offset - I hope ...
-
-    if (channel < 0) {
-           // this is a master - give it the average frequency
-        if (chanFreq[0] < chanFreq[ChanIn-1]) {
-            minFrequency = chanFreq[0] - (chanWidth[0]/2.);
-            maxFrequency = chanFreq[ChanIn-1] + (chanWidth[0]/2.);
-        }
-        else {
-            minFrequency = chanFreq[ChanIn-1];
-            maxFrequency = chanFreq[0];
-        }
+    std::vector<casa::MFrequency>::iterator begin_it;
+    std::vector<casa::MFrequency>::iterator end_it;
+    if (barycentre) {
+        begin_it = itsBaryFrequencies.begin();
+        end_it = itsBaryFrequencies.end();
     }
     else {
-        minFrequency = chanFreq[channel] - (chanWidth[channel]/2.);
-        maxFrequency = chanFreq[channel] + (chanWidth[channel]/2.);
-    }
+        begin_it = itsTopoFrequencies.begin();
+        end_it = itsTopoFrequencies.end();
 
-    refFreq = 0.5*(chanFreq[0] + chanFreq[ChanIn-1]);
+    }
+    minFrequency = (*begin_it).getValue();
+    maxFrequency = (*end_it).getValue();
+    refFreq = 0.5*(minFrequency + maxFrequency);
 
    // test for missing image-specific parameters:
 

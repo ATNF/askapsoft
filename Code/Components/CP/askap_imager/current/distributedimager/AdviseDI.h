@@ -102,13 +102,20 @@ namespace askap {
 
             vector<casa::MFrequency> getTopoFrequencies() {return itsTopoFrequencies;};
 
+            cp::ContinuumWorkUnit getAllocation(int id);
+
+            int getWorkUnitCount() { return itsWorkUnitCount;};
+
             void prepare();
 
             bool isPrepared;
 
+            bool barycentre;
+
+
         private:
 
-
+            int itsWorkUnitCount;
 
             LOFAR::ParameterSet itsParset;
 
@@ -138,16 +145,16 @@ namespace askap {
 
             casa::MPosition itsPosition;
 
-            std::vector<double> chanFreq;
-            std::vector<double> chanWidth;
-            std::vector<double> effectiveBW;
-            std::vector<double> resolution;
-            std::vector<double> centre;
+            std::vector< std::vector<double> > chanFreq;
+            std::vector< std::vector<double> > chanWidth;
+            std::vector< std::vector<double> > effectiveBW;
+            std::vector< std::vector<double> > resolution;
+            std::vector< std::vector<double> > centre;
 
             std::vector< std::vector<double> > itsAllocatedFrequencies;
             std::vector< std::stack<cp::ContinuumWorkUnit> > itsAllocatedWork;
 
-            int match(std::string ms,  casa::MVFrequency freq);
+            int match(int ms_number,  casa::MVFrequency freq);
 
         };
 
