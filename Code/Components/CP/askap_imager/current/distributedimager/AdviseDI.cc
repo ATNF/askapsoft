@@ -79,6 +79,23 @@ bool custom_compare (const casa::MFrequency& X, const casa::MFrequency& Y) {
 bool custom_lessthan (const casa::MFrequency& X, const casa::MFrequency& Y) {
     return (X.getValue() < Y.getValue());
 }
+bool in_range(double end1, double end2, double test) {
+
+
+    if (test >= end1 && test <= end2) {
+        ASKAPLOG_INFO_STR(logger,"Test frequency " << test \
+        << " between " << end1 << " and " << end2);
+        return true;
+    }
+    if (test <= end1 && test >= end2) {
+        ASKAPLOG_INFO_STR(logger,"Test frequency " << test \
+        << " between " << end1 << " and " << end2);
+        return true;
+    }
+    ASKAPLOG_INFO_STR(logger,"Test frequency " << test \
+    << " NOT between " << end1 << " and " << end2);
+    return false;
+}
 // actual AdviseDI implementation
 
 /// @brief Constructor from ParameterSet
@@ -291,9 +308,11 @@ void AdviseDI::prepare() {
 
             // need to allocate the measurement sets for this channel to this allocation
             // this may require appending new work units.
-
+            ASKAPLOG_INFO_STR(logger,"Allocating " << thisAllocation[frequency]);
+            bool allocated = false;
             for (unsigned int set=0;set < ms.size();++set){
                 int lc = 0;
+
                 lc = match(set,thisAllocation[frequency]);
                 if (lc >= 0) {
                     // there is a channel of this frequency in the measurement set
@@ -309,13 +328,16 @@ void AdviseDI::prepare() {
                     ASKAPLOG_INFO_STR(logger,"Allocating " << thisAllocation[frequency] \
                     << " with local channel " << lc << " of set: " << ms[set] \
                     << " to worker " << work << "Count " << itsWorkUnitCount );
-                }
-                else {
-                    ASKAPLOG_WARN_STR(logger,"Allocating FAIL Cannot match " << thisAllocation[frequency] \
-                    << " in set: " << ms[set]);
-                    // warn it does not match ....
+                    allocated = true;
                 }
             }
+            if (allocated == false)
+            {
+                ASKAPLOG_WARN_STR(logger,"Allocating FAIL Cannot match " << thisAllocation[frequency] \
+                << " in any set: ");
+                // warn it does not match ....
+            }
+
         }
 
     }
@@ -355,14 +377,29 @@ cp::ContinuumWorkUnit AdviseDI::getAllocation(int id) {
     }
     return rtn;
 }
+
 int AdviseDI::match(int ms_number, casa::MVFrequency testFreq) {
     /// Which channel does the frequency correspond to.
-    for (int ch=0; ch < chanFreq[ms_number].size(); ch++) {
-        ASKAPLOG_INFO_STR(logger,"Checking if " << testFreq << " is the same as " \
-        << chanFreq[ms_number][ch]);
-        if (testFreq.getValue() == chanFreq[ms_number][ch])
-            return ch;
+    vector<double>::iterator it_current = chanFreq[ms_number].begin();
+    vector<double>::iterator it_end = chanFreq[ms_number].end()-1;
+    double testVal = testFreq.getValue();
 
+    if (in_range(*it_current,*it_end,testVal)) {
+        int ch = 0;
+        it_current=chanFreq[ms_number].begin();
+        for (ch=0 ; ch < chanFreq[ms_number].size(); ++ch) {
+            ASKAPLOG_INFO_STR(logger, "Test frequency channel " << *it_current << \
+                " width " << chanWidth[ms_number][ch]);
+            double one_edge = (*it_current) - chanWidth[ms_number][ch]/2.;
+            double other_edge = (*it_current) + chanWidth[ms_number][ch]/2.;
+
+            if (in_range(one_edge,other_edge,testVal)) {
+
+                return ch;
+            }
+            it_current++;
+
+        }
     }
 
     return -1;
@@ -391,6 +428,11 @@ void AdviseDI::addMissingParameters()
     }
     minFrequency = (*begin_it).getValue();
     maxFrequency = (*end_it).getValue();
+
+    // FIXME problem .... this is probably the wrong refFreq. It needs to be for the whole
+    // observation not just this allocation....
+    // Currently I fix this by forcing it to be set in the Parset - not optimal
+
     refFreq = 0.5*(minFrequency + maxFrequency);
 
    // test for missing image-specific parameters:
@@ -455,12 +497,10 @@ void AdviseDI::addMissingParameters()
        }
 
        param = "visweights.MFS.reffreq"; // set to average frequency if unset and nTerms > 1
-       if ((itsParset.getString("visweights")=="MFS") && !itsParset.isDefined(param)) {
-           std::ostringstream pstr;
+       if ((itsParset.getString("visweights")=="MFS")) {
+           ASKAPCHECK(itsParset.isDefined(param),"Reference Frequency MUST be defined for MFS \
+in distributed mode");
 
-           pstr<<refFreq;
-           ASKAPLOG_INFO_STR(logger, "  Advising on parameter " << param <<": " << pstr.str().c_str());
-           itsParset.add(param, pstr.str().c_str());
        }
    }
 

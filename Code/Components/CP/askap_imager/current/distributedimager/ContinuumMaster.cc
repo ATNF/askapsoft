@@ -141,8 +141,7 @@ void ContinuumMaster::run(void)
         << " units remaining");
         wrequest.receiveRequest(id, itsComms);
         ASKAPLOG_INFO_STR(logger,"Received a request from " << id);
-            /// Now we can just pop a workunit off the stack
-
+        /// Now we can just pop a work allocation off the stack for this rank
         ContinuumWorkUnit wu = diadvise.getAllocation(id-1);
         ASKAPLOG_INFO_STR(logger,"Sending Allocation to  " << id);
         wu.sendUnit(id,itsComms);

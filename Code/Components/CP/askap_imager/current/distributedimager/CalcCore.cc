@@ -128,7 +128,8 @@ void CalcCore::doCalc()
             itsEquation = fftEquation;
         } else {
             ASKAPLOG_INFO_STR(logger, "Calibration will be performed using solution source");
-            boost::shared_ptr<ICalibrationApplicator> calME(new CalibrationApplicatorME(getSolutionSource()));
+            boost::shared_ptr<ICalibrationApplicator> calME(\
+            new CalibrationApplicatorME(getSolutionSource()));
             // fine tune parameters
             ASKAPDEBUGASSERT(calME);
             calME->scaleNoise(parset().getBool("calibrate.scalenoise",false));
@@ -136,8 +137,8 @@ void CalcCore::doCalc()
             calME->beamIndependent(parset().getBool("calibrate.ignorebeam", false));
             //
             IDataSharedIter calIter(new CalibrationIterator(it,calME));
-            boost::shared_ptr<ImageFFTEquation> fftEquation(
-                                                            new ImageFFTEquation (*itsModel, calIter, gridder()));
+            boost::shared_ptr<ImageFFTEquation> fftEquation( \
+            new ImageFFTEquation (*itsModel, calIter, gridder()));
             ASKAPDEBUGASSERT(fftEquation);
             fftEquation->useAlternativePSF(parset());
             fftEquation->setVisUpdateObject(GroupVisAggregator::create(itsComms));

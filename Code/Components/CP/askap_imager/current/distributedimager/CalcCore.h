@@ -51,7 +51,7 @@ namespace cp {
 
 /// @brief Core Normal Equation Calculation functionality required by the imager.
     class CalcCore : public synthesis::ImagerParallel
-    
+
     {
     public:
         /// @brief Constructor
@@ -65,13 +65,13 @@ namespace cp {
         void calcNE();
 
         void doCalc();
-        
+
         void reset();
-        
+
         void check();
 
     private:
-       
+
         // Parameter set
         LOFAR::ParameterSet& itsParset;
 
@@ -80,10 +80,10 @@ namespace cp {
 
         // Data: vector of the stored datasources
         accessors::TableDataSource itsData;
-        
+
         // Its channel in the dataset
         int itsChannel;
-        
+
         // No support for assignment
         CalcCore& operator=(const CalcCore& rhs);
 
