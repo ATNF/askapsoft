@@ -20,19 +20,20 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA.
 #
-import pytz
 from nose.tools import assert_equals, raises
 from askap.time import (bat2utc, utc2bat,
-                        siteID2LocTimezone, SiteError)
+                        siteID2LocTimezone, SiteError, isoUTC2datetime)
 
 
 def test_bat2utc():
-    #raise RuntimeError("to be implemented")
+    # raise RuntimeError("to be implemented")
     pass
 
+
 def test_utc2bat():
-    #raise RuntimeError("to be implemented")
+    # raise RuntimeError("to be implemented")
     pass
+
 
 @raises(SiteError)
 def test_site_raises():
@@ -44,12 +45,24 @@ def site(key, value):
     tz = siteID2LocTimezone(key)
     assert_equals(tz.zone, value)
 
+
 def test_sites():
     mapping = { 'MRO': 'Australia/Perth',
                 'MATES': 'Australia/Sydney',
                 'PKS': 'Australia/Sydney',
                 }
-    for k,v in mapping.items():
-        yield site, k,v
+    for k, v in mapping.items():
+        yield site, k, v
 
-    
+
+def isos(isostr, out):
+    isoUTC2datetime(isostr)
+
+
+def test_isoutc():
+    tests = (('2000-01-01 10:10:10', ''), ('2000-01-01 10:10:10.1', ''),
+             ('2000-01-01T10:10:10', ''), ('2000-01-01T10:10:10.1', ''),
+             ('2000-01-01T10:10:10Z', ''), ('2000-01-01T10:10:10.1Z', '')
+    )
+    for k, v in tests:
+        yield isos, k, v

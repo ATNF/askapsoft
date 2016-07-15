@@ -2,3 +2,4 @@
 # use pkgname=ASKAP_ROOT_relative_path
 
 pytz=3rdParty/pytz/pytz-2012j
+requests=3rdParty/requests/requests-2.8.1

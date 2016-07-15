@@ -18,6 +18,9 @@ Welcome to askap's documentation!
 .. automodule:: askap.event
    :members:
 
+.. automodule:: askap.jira
+   :members:
+
 .. toctree::
    :maxdepth: 1
 
