@@ -8,3 +8,9 @@ java-logappenders=Code/Base/java-logappenders/current
 # Functional test dependencies
 pyiceinterfaces=Code/Interfaces/python/current
 iceutils=Code/Base/py-iceutils/current
+
+# Junit test dependencies
+# TODO: how do I specify that these are not required outside of the test target?
+# TODO: do I need these from tools? Add a unit test with mocks and see ...
+#junit=Tools/junit/junit-4.7
+#mockito=Tools/mockito/mockito-2.0.9-beta

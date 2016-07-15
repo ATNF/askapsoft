@@ -58,7 +58,7 @@ public final class CpManager extends ServiceApplication {
 			}
 
 			// Create and register the ObsService object
-			ObsService svc = new ObsService(communicator(), config());
+			ObsService svc = ObsService.Create(communicator(), config());
 
 			// Initialise monitoring interface if configured
 			boolean monitoring = config().getBoolean("monitoring.enabled", false);

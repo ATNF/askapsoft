@@ -62,21 +62,28 @@ public class ObsService extends _ICPObsServiceDisp {
      */
     private final AbstractIngestManager itsIngestManager;
 
-    /**
-     * Constructor
+	/**
+	 * Factory method for the Observation Service. Implemented so that the 
+	 * constructor uses dependency injection for easier testing with mocks.
+	 * 
      * @param ic        the Ice Communicator that will be used for communication
      *                  with the external services (e.g. FCM)
      * @param parset    the parameter set this program was configured with
-     */
-    public ObsService(Ice.Communicator ic, ParameterSet parset) {
-        super();
-        logger.debug("Creating ObsService");
+	 * @return 			The ObsService instance.
+	 */
+	public static final ObsService Create(Ice.Communicator ic, ParameterSet parset) {
+		IFCMClient itsFCM = null;
+		AbstractIngestManager itsIngestManager = null;
+
+        logger.debug("ObsService factory");
 
         // Instantiate real or mock FCM
         boolean mockfcm = parset.getBoolean("fcm.mock", false);
         if (mockfcm) {
+			logger.debug("ObsService factory: creating mock FCM");
             itsFCM = new MockFCMClient(parset.getString("fcm.mock.filename"));
         } else {
+			logger.debug("ObsService factory: creating FCM");
             String identity = parset.getString("fcm.ice.identity");
             if (identity == null) {
                 throw new RuntimeException(
@@ -99,14 +106,31 @@ public class ObsService extends _ICPObsServiceDisp {
 
         // Create Ingest Manager
         String managertype = parset.getString("ingest.managertype", "process");
-        if (managertype.equalsIgnoreCase("process")) {
+        if (managertype.equalsIgnoreCase("process")) {  
+			logger.debug("ObsService factory: creating ingest manager");
             itsIngestManager = new ProcessIngestManager(parset);
         } else if (managertype.equalsIgnoreCase("dummy")) {
+			logger.debug("ObsService factory: creating mock ingest manager");
             itsIngestManager = new DummyIngestManager(parset);
         } else {
             throw new RuntimeException("Unknown ingest manager type: "
                     + managertype);
         }
+
+		logger.debug("ObsService factory: instantiating ObsService instance");
+		return new ObsService(itsFCM, itsIngestManager);
+	}
+
+    /**
+     * Constructor
+	 * @param itsFCM 	Facility Configuration Manager client wrapper instance
+	 * @param itsIngestManager  Ingest Pipeline Controller
+     */
+    public ObsService(IFCMClient itsFCM, AbstractIngestManager itsIngestManager) {
+        super();
+        logger.debug("ObsService constructor");
+		this.itsFCM = itsFCM;
+		this.itsIngestManager = itsIngestManager;
     }
 
     /**

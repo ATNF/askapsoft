@@ -2,7 +2,7 @@ RBUILD_FLAGS=-SMTR
 CPMAN_FILES=./cpmanager.jar ./cpmanager.sh
 
 # Uncomment for verbose rbuild output
-#RBUILD_FLAGS+= -v
+RBUILD_FLAGS+= -v
 
 .PHONY: all
 all: $(CPMAN_FILES) test ftest
@@ -22,6 +22,7 @@ clean:
 	find . -type f -name '*.pyc' -exec rm -f {} +
 	find . -type d -name '*.ms' -exec rm -rf {} +
 	rm -rf functests/data/ install/ build/askap/
+	rm -rf dist/
 	rm -f ./cpmanager*
 
 .PHONY: install
