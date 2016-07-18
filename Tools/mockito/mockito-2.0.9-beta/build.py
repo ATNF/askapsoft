@@ -33,7 +33,13 @@ class myBuilder(Builder):
             shutil.copy(file, JAR_DIR)
 
 builder = myBuilder()
-builder.remote_archive = "./mockito-core-2.0.9-beta.jar"
-builder.remote_archive = "./mockito-core-2.0.9-beta-javadoc.jar"
-builder.remote_archive = "./mockito-core-2.0.9-beta-sources.jar"
-builder.build()
+
+archives = [
+    "mockito-core-2.0.9-beta-javadoc.jar",
+    "mockito-core-2.0.9-beta-sources.jar",
+    "mockito-core-2.0.9-beta.jar",
+]
+
+for a in archives:
+    builder.remote_archive = a
+    builder.build()
