@@ -80,7 +80,7 @@ else
 
         PROCESS_DEFAULTS_HAS_RUN=false
 	. ${PIPELINEDIR}/processDefaults.sh
-        . ${PIPELINEDIR}/findBeamCentres.sh
+        . ${PIPELINEDIR}/prepareMetadata.sh
 	
         if [ "`which lfs`" == "" ]; then
             echo "WARNING: You don't appear to be running this on /scratch2 on galaxy, as 'lfs' is not available."

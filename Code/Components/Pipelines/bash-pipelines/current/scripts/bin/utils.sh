@@ -183,7 +183,6 @@ function findScienceMSnames()
                 echo "Warning! Using ${msSciAv} as averaged MS for beam ${BEAM}"
             fi
         fi
-
     fi
 
     if [ "${GAINS_CAL_TABLE}" == "" ]; then
@@ -242,13 +241,33 @@ if [ -e \${casaim} ] && [ ! -e \${fitsim} ]; then
 
     script=$parsets/fixheader_\${casaim##*/}_\${SLURM_JOB_ID}.py
     log=$logs/fixheader_\${casaim##*/}_\${SLURM_JOB_ID}.log
+    if [ \"${ASKAPSOFT_VERSION}\" == \"\" ]; then
+        ASKAPSOFT_VERSION_USED=`module list -t 2>&1 | grep askapsoft`
+    else
+        ASKAPSOFT_VERSION_USED=`echo ${ASKAPSOFT_VERSION} | sed -e 's|/||g'`
+    fi
     cat > \$script << EOFSCRIPT
 #!/usr/bin/env python
 import pyfits as fits
 image='\${fitsim}'
 project='${PROJECT_ID}'
+dateobs='${DATE_OBS}'
+duration=${DURATION}
+sbid='${SB_SCIENCE}'
+askapsoftVersion='Produced with ASKAPsoft version \${ASKAPSOFT_VERSION_USED}'
+pipelineVersion='Produced using ASKAP pipeline version ${PIPELINE_VERSION}'
+processDate='Processed with ASKAP pipelines on ${NOW_FMT}'
+
 hdulist = fits.open(image,'update')
 hdulist[0].header.update('PROJECT',project)
+hdulist[0].header.update('TELESCOP','ASKAP')
+hdulist[0].header.update('DATE-OBS',dateobs)
+hdulist[0].header.update('INTIME',duration)
+#hdulist[0].header.update('INSTRUME',instrument)
+hdulist[0].header.update('SBID',sbid)
+hdulist[0].header.add_history(askapsoftVersion)
+hdulist[0].header.add_history(pipelineVersion)
+hdulist[0].header.add_history(processDate)
 hdulist.flush()
 EOFSCRIPT
 

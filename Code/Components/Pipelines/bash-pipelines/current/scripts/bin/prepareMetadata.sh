@@ -1,10 +1,10 @@
 #!/bin/bash -l
 #
-# A script to set up the working directory prior to starting the job
-# submission. This defines all necessary subdirectories and sets the
-# date-time stamp.
+# A script to extract all necessary metadata from the input
+# measurement set, including date & time of observation, and beam
+# locations.
 #
-# @copyright (c) 2015 CSIRO
+# @copyright (c) 2016 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -21,41 +21,31 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
-# 
+#
 # @author Matthew Whiting <Matthew.Whiting@csiro.au>
-# 
+#
 
-####################
-# Define & create directories
-${askapsoftModuleCommands}
+if [ "${MS_INPUT_SCIENCE}" != "" ]; then
 
-BASEDIR=`pwd`
-parsets=${BASEDIR}/parsets
-logs=${BASEDIR}/logs
-slurms=${BASEDIR}/slurmFiles
-slurmOut=${BASEDIR}/slurmOutput
-tools=${BASEDIR}/tools
+    echo "Extracting metadata for science measurement set $MS_INPUT_SCIENCE"
+    
+    MS_METADATA=$parsets/mslist-science-${NOW}.txt
+    mslist --full $MS_INPUT_SCIENCE 1>& ${MS_METADATA}
 
-mkdir -p $parsets
-mkdir -p $logs
-mkdir -p $slurms
-mkdir -p $slurmOut
-mkdir -p $tools
+    # Get the observation time
+    obsdate=`grep "Observed from" ${MS_METADATA} | head -1 | awk '{print $7}' | sed -e 's|/| |g' | awk '{print $1}' | sed -e 's/-/ /g'`
+    obstime=`grep "Observed from" ${MS_METADATA} | head -1 | awk '{print $7}' | sed -e 's|/| |g' | awk '{print $2}'`
+    DATE_OBS=`date -d "$obsdate" +"%Y-%m-%d"`
+    DATE_OBS="${DATE_OBS}T${obstime}"
+    
+    DURATION=`grep "elapsed time" ${MS_METADATA} | head -1 | awk '{print $11}'`
+    
+    
+    . ${PIPELINEDIR}/findBeamCentres.sh
 
-####################
-# Date and time stamp
-NOW=`date +%F-%H%M`
-NOW_FMT=`date +%FT%T`
-
-# File to record list of jobs and descriptions
-JOBLIST="${slurmOut}/jobList-${NOW}.txt"
-
-####################
-# Define the default
-
-. ${PIPELINEDIR}/defaultConfig.sh
+fi
 

@@ -81,13 +81,10 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$needBeams" == "true" ]; then
         else
 
             # Find the number of fields in the MS
-            echo "Finding list of fields and locations using mslist"
-            listfile=$parsets/mslist-science-${NOW}.txt
-            mslist --full $MS_INPUT_SCIENCE 1>& $listfile
-            nfields=`grep Fields $listfile | head -1 | cut -f 4- | cut -d' ' -f 2`
+            nfields=`grep Fields ${MS_METADATA} | head -1 | cut -f 4- | cut -d' ' -f 2`
             fieldlist=$parsets/fieldlist
             rm -f $fieldlist
-            grep -A${nfields} RA $listfile | tail -n ${nfields} | cut -f 4- >> $fieldlist
+            grep -A${nfields} RA ${MS_METADATA} | tail -n ${nfields} | cut -f 4- >> $fieldlist
 
             FIELD_LIST=`sort -k2 $fieldlist | uniq | awk '{print $2}'`
 
