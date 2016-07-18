@@ -116,6 +116,9 @@ def package(pkg, outdir, force=False):
         chg = glob.glob('../*.changes')
         for c in chg:
             os.remove(c)
+    except:
+        print >>sys.stderr, "error: Packaging '{}' failed".format(pkg)
+        raise
     finally:
         os.chdir(cdir)
 
