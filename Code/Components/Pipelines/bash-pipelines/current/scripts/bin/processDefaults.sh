@@ -30,7 +30,7 @@
 #
 
 # Make sure we only run this file once!
-if [ $PROCESS_DEFAULTS_HAS_RUN == false ]; then
+if [ "$PROCESS_DEFAULTS_HAS_RUN" != "true" ]; then
 
     PROCESS_DEFAULTS_HAS_RUN=true
 
@@ -273,27 +273,24 @@ module load askapdata"
 
     fi
 
-    # science observation
-    # If we are splitting/flagging, check MS_INPUT_SCIENCE is OK:
-    if [ ${DO_SPLIT_SCIENCE} == true ] || [ ${DO_FLAG_SCIENCE} == true ]; then
-        if [ "$MS_INPUT_SCIENCE" == "" ]; then
-            if [ $SB_SCIENCE != "SET_THIS" ]; then
-	        sbScienceDir=$DIR_SB/$SB_SCIENCE
-	        if [ `\ls $sbScienceDir | grep "ms" | wc -l` == 1 ]; then
-	            MS_INPUT_SCIENCE=$sbScienceDir/`\ls $sbScienceDir | grep "ms"`
-	        else
-	            echo "SB directory $SB_SCIENCE has more than one measurement set. Please specify with parameter 'MS_INPUT_SCIENCE'."
-	        fi
-            else
-	        echo "You must set either 'SB_SCIENCE' (scheduling block number) or 'MS_INPUT_SCIENCE' (Science observation measurement set)."
-            fi
+    # science observation - check that MS_INPUT_SCIENCE is OK:
+    if [ "$MS_INPUT_SCIENCE" == "" ]; then
+        if [ $SB_SCIENCE != "SET_THIS" ]; then
+	    sbScienceDir=$DIR_SB/$SB_SCIENCE
+	    if [ `\ls $sbScienceDir | grep "ms" | wc -l` == 1 ]; then
+	        MS_INPUT_SCIENCE=$sbScienceDir/`\ls $sbScienceDir | grep "ms"`
+	    else
+	        echo "SB directory $SB_SCIENCE has more than one measurement set. Please specify with parameter 'MS_INPUT_SCIENCE'."
+	    fi
+        else
+	    echo "You must set either 'SB_SCIENCE' (scheduling block number) or 'MS_INPUT_SCIENCE' (Science observation measurement set)."
         fi
-        if [ "$MS_INPUT_SCIENCE" == "" ]; then
-            if [ $DO_SCIENCE_FIELD == true ]; then
-	        echo "Parameter 'MS_INPUT_SCIENCE' not defined. Turning off splitting/flagging with DO_FLAG_SCIENCE=false and pushing on.."
-            fi
-            DO_SCIENCE_FIELD=false
+    fi
+    if [ "$MS_INPUT_SCIENCE" == "" ]; then
+        if [ $DO_SCIENCE_FIELD == true ]; then
+	    echo "Parameter 'MS_INPUT_SCIENCE' not defined. Turning off splitting/flagging with DO_FLAG_SCIENCE=false and pushing on.."
         fi
+        DO_SCIENCE_FIELD=false
     fi
 
     ####################

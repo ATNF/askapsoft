@@ -50,7 +50,7 @@ cat > ${getArtifacts} <<EOF
 #   * casdaTwoDimImageNames - list of 2D FITS files to be archived
 #   * casdaTwoDimImageTypes - their corresponding image types
 #   * casdaTwoDimThumbTitles - the titles used in the thumbnail images
-       of the 2D images
+#       of the 2D images
 #   * casdaOtherDimImageNames - list of non-2D FITS files to be archived
 #   * casdaOtherDimImageTypes - their corresponding image types
 #   * catNames - names of catalogue files to archived
@@ -91,6 +91,7 @@ logs=$logs
 CWD=\`pwd\`
 . ${PIPELINEDIR}/defaultConfig.sh
 . ${archivedConfig}
+PROCESS_DEFAULTS_HAS_RUN=false
 . ${PIPELINEDIR}/processDefaults.sh
 cd \$CWD
 
