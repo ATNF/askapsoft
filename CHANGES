@@ -5,13 +5,15 @@ This bug-fix version addresses a few issues with the imaging &
 source-finding code, along with minor updates to the pipeline
 scripts.
 The following bugs have been fixed in the processing software:
- * Caching of the Wiener preconditioner is now done, so that it does
-   not need to be re-calculated for each scale & Taylor-term. This has
-   the effect of greatly speeding up the imaging, particularly for
-   large image sizes.
+ * Caching of the Wiener preconditioner is now done, so that the
+   weights are only calculated once for all solvers and the filters
+   are only calculated once for all major cycles, scales &
+   Taylor-terms. This has the effect of greatly speeding up the
+   imaging, particularly for large image sizes.
  * The BasisfunctionMFS solver has had the additional convolution with
    the PSF removed. This fixes a bug where central sources were being
    cleaned preferentially to sources near the edge of the image.
+   It also improves the resolution and SNR of minor-cycle dirty images.
  * From the update to casacore-2 in 0.13.0, linmos would fail when
    mosaicking images without restoring beams. This has been fixed (and
    behaves as it did prior to 0.13.0).
