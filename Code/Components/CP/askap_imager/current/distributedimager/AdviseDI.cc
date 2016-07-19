@@ -322,6 +322,7 @@ void AdviseDI::prepare() {
                     wu.set_payloadType(cp::ContinuumWorkUnit::WORK);
                     wu.set_channelFrequency(thisAllocation[frequency]);
                     wu.set_localChannel(lc);
+                    wu.set_globalChannel(work);
                     wu.set_dataset(ms[set]);
                     itsAllocatedWork[work].push(wu);
                     itsWorkUnitCount++;

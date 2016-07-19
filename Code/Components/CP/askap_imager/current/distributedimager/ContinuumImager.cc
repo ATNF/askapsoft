@@ -71,6 +71,7 @@ void ContinuumImager::run(void) {
         ContinuumWorker worker(itsParset,itsComms);
         worker.run();
     }
+    itsComms.barrier();
 }
 
 bool ContinuumImager::isMaster(void)

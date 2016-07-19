@@ -64,11 +64,15 @@ namespace cp {
         /// @detail Overrides the virtual function in the ImagerParallel base
         void calcNE();
 
+        void solveNE();
+
         void doCalc();
 
         void reset();
 
         void check();
+
+        void writeLocalModel(const std::string& postfix);
 
     private:
 
@@ -77,6 +81,12 @@ namespace cp {
 
         // Communications class
         askap::askapparallel::AskapParallel& itsComms;
+
+        // Solver
+        askap::scimath::Solver::ShPtr itsSolver;
+
+        // Restore Solver
+        bool itsRestore; 
 
         // Data: vector of the stored datasources
         accessors::TableDataSource itsData;

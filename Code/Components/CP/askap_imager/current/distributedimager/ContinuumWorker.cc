@@ -244,15 +244,9 @@ void ContinuumWorker::processWorkUnit(ContinuumWorkUnit& wu)
     synthesis::AdviseDI diadvise(itsComms,unitParset);
     diadvise.addMissingParameters();
     ASKAPLOG_INFO_STR(logger,"advice received");
-
-
-    // store the datatable accessor - this is not storing the data
-    // i am still working on that
-    // Now trying to store the parset. the ds. and an imager.
-    ASKAPLOG_INFO_STR(logger,"storing workUnit <probably> no longer required");
-    workUnits.push_back(wu); // this isn't needed anymore... i think all the info
-    // is now in the parset ....
-    ASKAPLOG_INFO_STR(logger,"storing parset"); 
+    ASKAPLOG_INFO_STR(logger,"storing workUnit");
+    workUnits.push_back(wu);
+    ASKAPLOG_INFO_STR(logger,"storing parset");
     itsParsets.push_back(diadvise.getParset());
 
 }
@@ -270,9 +264,11 @@ void ContinuumWorker::processChannels()
 
     LOFAR::ParameterSet& unitParset = itsParsets[0];
     int localChannel;
+    int globalChannel;
 
     const string colName = unitParset.getString("datacolumn", "DATA");
     const string ms = workUnits[0].get_dataset();
+    const bool writeAtMajorCycle = unitParset.getBool("Images.writeAtMajorCycle",false);
 
     std::string majorcycle = unitParset.getString("threshold.majorcycle", "-1Jy");
     const double targetPeakResidual = SynthesisParamsHelper::convertQuantity(majorcycle, "Jy");
@@ -291,6 +287,8 @@ void ContinuumWorker::processChannels()
     ASKAPLOG_INFO_STR(logger, "Tolerance on the directions is "
                       << uvwMachineCacheTolerance / casa::C::pi * 180. * 3600. << " arcsec");
 
+    const bool localSolver = unitParset.getBool("solverpercore",false);
+
     TableDataSource ds0(ms, TableDataSource::DEFAULT, colName);
 
     ds0.configureUVWMachineCache(uvwMachineCacheSize, uvwMachineCacheTolerance);
@@ -298,18 +296,21 @@ void ContinuumWorker::processChannels()
 
     bool usetmpfs = unitParset.getBool("usetmpfs",false);
     if (usetmpfs) {
+        // probably in spectral line mode
         localChannel = 0;
 
     }
     else {
         localChannel = workUnits[0].get_localChannel();
     }
+    globalChannel = workUnits[0].get_globalChannel();
 
+    CalcCore rootImager(itsParsets[0],itsComms,ds0,localChannel);
 
 
     if (nCycles == 0) {
 
-        CalcCore rootImager(itsParsets[0],itsComms,ds0,localChannel);
+
         rootImager.receiveModel();
         rootImager.calcNE();
 
@@ -345,7 +346,9 @@ void ContinuumWorker::processChannels()
 
 
         }
+
         ASKAPLOG_INFO_STR(logger,"Sending NE to master for single cycle ");
+
         rootImager.sendNE();
         rootImager.getNE()->reset();
 
@@ -353,9 +356,10 @@ void ContinuumWorker::processChannels()
 
 
 
+
     }
     else {
-        CalcCore rootImager(itsParsets[0],itsComms,ds0,localChannel);
+
 
         for (size_t n = 0; n <= nCycles; n++) {
 
@@ -422,12 +426,12 @@ void ContinuumWorker::processChannels()
 
 
             }
+
             ASKAPLOG_INFO_STR(logger,"Worker sending NE to master for cycle " << n);
             rootImager.sendNE();
-
-
-
+            
         }
+
 
     }
 

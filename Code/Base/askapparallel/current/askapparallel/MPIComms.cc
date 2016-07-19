@@ -127,6 +127,14 @@ void MPIComms::abort(size_t comm)
     int result = MPI_Abort(itsCommunicators[comm], 0);
     checkError(result, "MPI_Abort");
 }
+void MPIComms::barrier(size_t comm)
+{
+    ASKAPDEBUGASSERT(comm < itsCommunicators.size());
+    ASKAPDEBUGASSERT(itsCommunicators[comm] != MPI_COMM_NULL);
+    int result = MPI_Barrier(itsCommunicators[comm]);
+    checkError(result, "MPI_Abort");
+}
+
 
 /// @brief create a new communicator
 /// @details This method creates a new communicator and returns the index.

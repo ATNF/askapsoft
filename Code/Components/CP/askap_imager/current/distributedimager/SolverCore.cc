@@ -229,4 +229,3 @@ void SolverCore::writeModel(const std::string &postfix)
 
     Tracing::exit(Tracing::WriteImage);
 }
-

@@ -80,7 +80,10 @@ CalcCore::CalcCore(LOFAR::ParameterSet& parset,
     /// obtain the itsSolutionSource - but that is a provate member of
     /// the parent class.
     /// Not sure whether to use it directly or copy it.
-
+    const std::string solver_par = itsParset.getString("solver");
+    const std::string algorithm_par = itsParset.getString("solver.Clean.algorithm", "MultiScale");
+    itsSolver = ImageSolverFactory::make(itsParset);
+    itsRestore = itsParset.getBool("restore", false);
 }
 
 CalcCore::~CalcCore()
@@ -198,5 +201,102 @@ void CalcCore::check()
     casa::Vector<double> pcf(checkRef.preconditionerSlice(names[0]));
 
     ASKAPLOG_INFO_STR(logger, "Max data: " << max(dv) << " Max PSF: " << max(slice) << " Normalised: " << max(dv)/max(slice));
+
+}
+void CalcCore::solveNE()
+{
+
+
+    casa::Timer timer;
+    timer.mark();
+
+    itsSolver->init();
+    itsSolver->addNormalEquations(*itsNe);
+
+    ASKAPLOG_INFO_STR(logger, "Solving Normal Equations");
+    askap::scimath::Quality q;
+
+    ASKAPDEBUGASSERT(itsModel);
+    itsSolver->solveNormalEquations(*itsModel, q);
+    ASKAPLOG_DEBUG_STR(logger, "Solved normal equations in " << timer.real()
+                       << " seconds ");
+
+    // Extract the largest residual
+    const std::vector<std::string> peakParams = itsModel->completions("peak_residual.");
+
+    double peak = peakParams.size() == 0 ? getPeakResidual() : -1.;
+    for (std::vector<std::string>::const_iterator peakParIt = peakParams.begin();
+            peakParIt != peakParams.end(); ++peakParIt) {
+        const double tempval = std::abs(itsModel->scalarValue("peak_residual." + *peakParIt));
+        if (tempval > peak) {
+            peak = tempval;
+        }
+    }
+
+    if (itsModel->has("peak_residual")) {
+        itsModel->update("peak_residual", peak);
+    } else {
+        itsModel->add("peak_residual", peak);
+    }
+    itsModel->fix("peak_residual");
+
+
+}
+void CalcCore::writeLocalModel(const std::string &postfix) {
+
+    ASKAPLOG_INFO_STR(logger, "Writing out results as images");
+    ASKAPDEBUGASSERT(itsModel);
+    vector<string> resultimages=itsModel->names();
+    bool hasWeights = false;
+    for (vector<string>::const_iterator it=resultimages.begin(); it
+        !=resultimages.end(); it++) {
+        if (it->find("weights") == 0) {
+            hasWeights = true;
+        }
+    }
+    if (!hasWeights) {
+        ASKAPDEBUGASSERT(itsSolver);
+        boost::shared_ptr<ImageSolver> image_solver = boost::dynamic_pointer_cast<ImageSolver>(itsSolver);
+        ASKAPDEBUGASSERT(image_solver);
+        image_solver->saveWeights(*itsModel);
+        resultimages=itsModel->names();
+    }
+
+    if (itsRestore && postfix == "")
+    {
+        ASKAPLOG_INFO_STR(logger, "Restore images and writing them to disk");
+        boost::shared_ptr<ImageRestoreSolver> ir = ImageRestoreSolver::createSolver(parset().makeSubset("restore."));
+        ASKAPDEBUGASSERT(ir);
+        ASKAPDEBUGASSERT(itsSolver);
+        // configure restore solver the same way as normal imaging solver
+        boost::shared_ptr<ImageSolver> template_solver = boost::dynamic_pointer_cast<ImageSolver>(itsSolver);
+        ASKAPDEBUGASSERT(template_solver);
+        ImageSolverFactory::configurePreconditioners(itsParset,ir);
+        ir->configureSolver(*template_solver);
+        ir->copyNormalEquations(*template_solver);
+        Quality q;
+        ir->solveNormalEquations(*itsModel,q);
+        // merged image should be a fixed parameter without facet suffixes
+        resultimages=itsModel->fixedNames();
+        for (vector<string>::const_iterator ci=resultimages.begin(); ci!=resultimages.end(); ++ci) {
+            const ImageParamsHelper iph(*ci);
+            if (!iph.isFacet() && (ci->find("image") == 0)) {
+                ASKAPLOG_INFO_STR(logger, "Saving restored image " << *ci << " with name "
+                              << *ci+string(".restored") );
+                SynthesisParamsHelper::saveImageParameter(*itsModel, *ci,*ci+string(".restored"));
+            }
+        }
+    }
+    ASKAPLOG_INFO_STR(logger, "Writing out additional parameters made by restore solver as images");
+    vector<string> resultimages2=itsModel->names();
+    for (vector<string>::const_iterator it=resultimages2.begin(); it
+        !=resultimages2.end(); it++) {
+        ASKAPLOG_INFO_STR(logger, "Checking "<<*it);
+        if ((it->find("psf") == 0) && (std::find(resultimages.begin(),
+            resultimages.end(),*it) == resultimages.end())) {
+            ASKAPLOG_INFO_STR(logger, "Saving " << *it << " with name " << *it+postfix );
+            SynthesisParamsHelper::saveImageParameter(*itsModel, *it, *it+postfix);
+        }
+    }
 
 }
