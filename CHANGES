@@ -23,6 +23,9 @@ The following bugs have been fixed in the processing software:
    sizes to be >60% of the PSF) has been removed.
 
 And the pipeline has seen these fixes:
+ * The resolution of the input science measurement set, when not given
+   explicitly in the config file, is now done properly in all cases,
+   rather than just for the case of splitting & flagging.
  * The pipeline now allows clipping in the snapshot option of the
    gridding - this improves performance at high declinations, where
    different warping between snapshots could introduce sharp edges to
