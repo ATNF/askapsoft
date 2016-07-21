@@ -295,16 +295,43 @@ void ContinuumWorker::buildSpectralCube() {
     ASKAPLOG_INFO_STR(logger,"nchan: " << nchanpercore << " base f0: " << f0.getValue("MHz")
     << " width: " << freqinc.getValue("MHz") <<" (" << workUnits[0].get_channelWidth() << ")");
 
-    itsImageCube.reset(new CubeBuilder(itsParsets[0], nchanpercore, f0, freqinc));
-    itsPSFCube.reset(new CubeBuilder(itsParsets[0], nchanpercore, f0, freqinc, "psf"));
-    itsResidualCube.reset(new CubeBuilder(itsParsets[0], nchanpercore, f0, freqinc, "residual"));
-    itsWeightsCube.reset(new CubeBuilder(itsParsets[0], nchanpercore, f0, freqinc, "weights"));
+    std::string root = "image";
+
+    std::string img_name = root + std::string(".ch.") \
+    + utility::toString(workUnits[0].get_globalChannel());
+
+    root = "psf";
+    std::string psf_name = root + std::string(".ch.") \
+    + utility::toString(workUnits[0].get_globalChannel());
+
+    root = "residual";
+
+    std::string residual_name = root + std::string(".ch.") \
+    + utility::toString(workUnits[0].get_globalChannel());
+
+    root = "weights";
+
+    std::string weights_name = root + std::string(".ch.") \
+    + utility::toString(workUnits[0].get_globalChannel());
+
+
+    itsImageCube.reset(new CubeBuilder(itsParsets[0], nchanpercore, f0, freqinc,img_name));
+    itsPSFCube.reset(new CubeBuilder(itsParsets[0], nchanpercore, f0, freqinc, psf_name));
+    itsResidualCube.reset(new CubeBuilder(itsParsets[0], nchanpercore, f0, freqinc, residual_name));
+    itsWeightsCube.reset(new CubeBuilder(itsParsets[0], nchanpercore, f0, freqinc, weights_name));
+
     if (itsParset.getBool("restore", false)) {
+        root = "psf.image";
+        std::string psf_image_name = root + std::string(".ch.") \
+        + utility::toString(workUnits[0].get_globalChannel());
+        root = "restored";
+        std::string restored_image_name = root + std::string(".ch.") \
+        + utility::toString(workUnits[0].get_globalChannel());
         // Only create these if we are restoring, as that is when they get made
         if (itsDoingPreconditioning) {
-            itsPSFimageCube.reset(new CubeBuilder(itsParsets[0], nchanpercore, f0, freqinc, "psf.image"));
+            itsPSFimageCube.reset(new CubeBuilder(itsParsets[0], nchanpercore, f0, freqinc, psf_image_name));
         }
-        itsRestoredCube.reset(new CubeBuilder(itsParsets[0], nchanpercore, f0, freqinc, "restored"));
+        itsRestoredCube.reset(new CubeBuilder(itsParsets[0], nchanpercore, f0, freqinc, restored_image_name));
     }
 
     /// What are the plans for the deconvolution?
@@ -334,7 +361,7 @@ void ContinuumWorker::buildSpectralCube() {
     double channelFrequency = workUnits[workUnitCount].get_channelFrequency();
 
     for (int chan=0; chan < nchanpercore; ++chan) { // not all of these will have work
-
+        
         if (workUnitCount >= workUnits.size()) {
             ASKAPLOG_INFO_STR(logger, "Out of work with workUnit " << workUnitCount);
             break;
@@ -765,17 +792,6 @@ void ContinuumWorker::processChannels()
         }
 
 
-    }
-
-
-
-    for (size_t i = 0; i < workUnits.size(); ++i) { // wrap up
-        // this needs full path
-        const string myMs = workUnits[i].get_dataset();
-        struct stat buffer;
-        if (stat (myMs.c_str(), &buffer) == 0) {
-            unlink(myMs.c_str());
-        }
     }
 
 }

@@ -405,7 +405,8 @@ int AdviseDI::match(int ms_number, casa::MVFrequency testFreq) {
         int ch = 0;
         it_current=chanFreq[ms_number].begin();
         for (ch=0 ; ch < chanFreq[ms_number].size(); ++ch) {
-            ASKAPLOG_INFO_STR(logger, "Test frequency channel " << *it_current << \
+            ASKAPLOG_INFO_STR(logger, "looking for " << testVal << \
+            " in test frequency channel " << *it_current << \
                 " width " << chanWidth[ms_number][ch]);
             double one_edge = (*it_current) - chanWidth[ms_number][ch]/2.;
             double other_edge = (*it_current) + chanWidth[ms_number][ch]/2.;
