@@ -333,7 +333,12 @@ void ContinuumWorker::buildSpectralCube() {
 
     double channelFrequency = workUnits[workUnitCount].get_channelFrequency();
 
-    for (int chan=0; chan < nchanpercore; ++chan) {
+    for (int chan=0; chan < nchanpercore; ++chan) { // not all of these will have work
+
+        if (workUnitCount >= workUnits.size()) {
+            ASKAPLOG_INFO_STR(logger, "Out of work with workUnit " << workUnitCount);
+            break;
+        }
         ASKAPLOG_INFO_STR(logger, "Starting to process channel " << chan \
         << " with workUnit " << workUnitCount << " used for the root ");
 
@@ -432,7 +437,8 @@ void ContinuumWorker::buildSpectralCube() {
             rootImager.restoreImage();
         }
         ASKAPLOG_INFO_STR(logger,"writing channel into cube");
-        handleImageParams(rootImager.params(), chan);
+
+        handleImageParams(rootImager.params(), workUnits[workUnitCount-1].get_localChannel());
         /// outside the clean-loop write out the slice
 
 

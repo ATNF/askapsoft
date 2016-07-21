@@ -159,6 +159,7 @@ CubeBuilder::createCoordinateSystem(const LOFAR::ParameterSet& parset,
     const vector<string> dirVector = parset.getStringVector("Images.direction");
     const vector<string> cellSizeVector = parset.getStringVector("Images.cellsize");
 
+
     // Direction Coordinate
     {
         Matrix<Double> xform(2, 2);
@@ -199,7 +200,12 @@ CubeBuilder::createCoordinateSystem(const LOFAR::ParameterSet& parset,
     // Spectral Coordinate
     {
         const Double refPix = 0.0;  // is the reference pixel
-        SpectralCoordinate sc(MFrequency::TOPO, f0, inc, refPix);
+        const bool barycentre = parset.getBool("barycentre",false);
+        MFrequency::Types freqRef=MFrequency::TOPO;
+        if (barycentre){
+            freqRef = MFrequency::BARY;
+        }
+        SpectralCoordinate sc(freqRef, f0, inc, refPix);
 
         // add rest frequency, but only if requested, and only for
         // image.blah, residual.blah, image.blah.restored

@@ -285,10 +285,17 @@ void AdviseDI::prepare() {
         ASKAPLOG_INFO_STR(logger,"Topocentric Channel " << ch << ":" << itsTopoFrequencies[ch]);
         ASKAPLOG_INFO_STR(logger,"Barycentric Channel " << ch << ":" << itsBaryFrequencies[ch]);
         unsigned int allocation_index = floor(ch / nchanpercore);
-        ASKAPLOG_INFO_STR(logger,"Allocating frequency "<< itsBaryFrequencies[ch].getValue() \
+        /// We allocate the frequencies based upon the topocentric range.
+        /// We do this becuase it is easier for the user to understand.
+        /// Plus - all beams will have the same allocation. Which will produce cubes/images
+        /// that will easily merge.
+
+        /// Beware the syntactic confusion here - we are allocating a frequency that is from
+        /// the Topocentric list. But will match a channel based upon the barycentric frequency
+        ASKAPLOG_INFO_STR(logger,"Allocating frequency "<< itsTopoFrequencies[ch].getValue() \
         << " to worker " << allocation_index+1);
 
-        itsAllocatedFrequencies[allocation_index].push_back(itsBaryFrequencies[ch].getValue());
+        itsAllocatedFrequencies[allocation_index].push_back(itsTopoFrequencies[ch].getValue());
     }
 
 
@@ -388,6 +395,8 @@ cp::ContinuumWorkUnit AdviseDI::getAllocation(int id) {
 
 int AdviseDI::match(int ms_number, casa::MVFrequency testFreq) {
     /// Which channel does the frequency correspond to.
+    /// IF the barycentr flag has been set then this will match
+    /// the barycentred channel to it.
     vector<double>::iterator it_current = chanFreq[ms_number].begin();
     vector<double>::iterator it_end = chanFreq[ms_number].end()-1;
     double testVal = testFreq.getValue();
