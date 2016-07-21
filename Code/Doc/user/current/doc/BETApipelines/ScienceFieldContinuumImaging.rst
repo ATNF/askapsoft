@@ -25,6 +25,10 @@ without submission, then edit and manually submit).
 +--------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | **Basic variables**                  |                                 |                                                        |                                                              |
 +--------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
+| ``IMAGE_AT_BEAM_CENTRES``            | true                            | none                                                   | Whether to have each beam's image centred at the centre of   |
+|                                      |                                 |                                                        | the beam (IMAGE_AT_BEAM_CENTRES=true), or whether to use a   |
+|                                      |                                 |                                                        | single image centre for all beams.                           |
++--------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``CPUS_PER_CORE_CONT_IMAGING``       | 16                              | Not for parset                                         | Number of CPUs to use on each core in the continuum imaging. |
 +--------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``DATACOLUMN``                       | DATA                            | datacolumn (:doc:`../calim/cimager`)                   | The column in the measurement set from which to read the     |
@@ -38,16 +42,21 @@ without submission, then edit and manually submit).
 +--------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``DIRECTION_SCI``                    | none                            | Images.<imagename>.direction                           | The direction parameter for the images, i.e. the central     |
 |                                      |                                 | (:doc:`../calim/cimager`)                              | position. Can be left out, in which case Cimager will get it |
-|                                      |                                 |                                                        | from the measurement set using the "advise" functionality.   |
+|                                      |                                 |                                                        | from either the beam location (for                           |
+|                                      |                                 |                                                        | IMAGE_AT_BEAM_CENTRES=true) or from the measurement set using|
+|                                      |                                 |                                                        | the "advise" functionality (for IMAGE_AT_BEAM_CENTRES=false).|
 +--------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``NUM_PIXELS_CONT``                  | 4096                            | Images.shape                                           | The number of pixels on the side of the images to be created.|
 |                                      |                                 | (:doc:`../calim/cimager`)                              | If negative, zero, or absent (i.e. ``NUM_PIXELS_CONT=""``),  |
 |                                      |                                 |                                                        | this will be set automatically by the Cimager “advise”       |
 |                                      |                                 |                                                        | function, based on examination of the MS. Note that this     |
 |                                      |                                 |                                                        | default will be suitable for a single beam, but probably not |
-|                                      |                                 |                                                        | for an image to be large enough for the full 9 beams. The    |
-|                                      |                                 |                                                        | default value, combined with the default for the cell size,  |
-|                                      |                                 |                                                        | should be sufficient to cover a full field.                  |
+|                                      |                                 |                                                        | for an image to be large enough for the full set of beams    |
+|                                      |                                 |                                                        | (when using IMAGE_AT_BEAM_CENTRES=false). The default value, |
+|                                      |                                 |                                                        | combined with the default for the cell size, should be       |
+|                                      |                                 |                                                        | sufficient to cover a full field. If you have                |
+|                                      |                                 |                                                        | IMAGE_AT_BEAM_CENTRES=true then this needs only to be big    |
+|                                      |                                 |                                                        | enough to fit a single beam.                                 |
 +--------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``CELLSIZE_CONT``                    | 10                              | Images.cellsize                                        | Size of the pixels in arcsec. If negative, zero or absent,   |
 |                                      |                                 | (:doc:`../calim/cimager`)                              | this will be set automatically by the Cimager “advise”       |
@@ -72,7 +81,7 @@ without submission, then edit and manually submit).
 | **Gridding parameters**              |                                 |                                                        |                                                              |
 +--------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``GRIDDER_SNAPSHOT_IMAGING``         | true                            | snapshotimaging                                        | Whether to use snapshot imaging when gridding.               |
-|                                      |                                 | (:doc:`../calim/gridder`)                              |                                                              |
+|                                      |                                 | (:doc:`../calim/gridder`)                              |                                                              | 
 +--------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``GRIDDER_SNAPSHOT_WTOL``            | 2600                            | snapshotimaging.wtolerance                             | The wtolerance parameter controlling how frequently to       |
 |                                      |                                 | (:doc:`../calim/gridder`)                              | snapshot.                                                    |
@@ -82,7 +91,7 @@ without submission, then edit and manually submit).
 +--------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``GRIDDER_SNAPSHOT_CLIPPING``        | 0                               | snapshotimaging.clipping                               | If greater than zero, this fraction of the full image width  |
 |                                      |                                 | (:doc:`../calim/gridder`)                              | is set to zero. Useful when imaging at high declination as   |
-|                                      |                                 |                                                        | the edges can generate artefacts.                            | 
+|                                      |                                 |                                                        | the edges can generate artefacts.                            |
 +--------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``GRIDDER_WMAX``                     | 2600                            | WProject.wmax                                          | The wmax parameter for the gridder.                          |
 |                                      |                                 | (:doc:`../calim/gridder`)                              |                                                              |
@@ -96,7 +105,7 @@ without submission, then edit and manually submit).
 | ``GRIDDER_MAXSUPPORT``               | 512                             | WProject.maxsupport                                    | The maxsupport parameter for the gridder.                    |
 |                                      |                                 | (:doc:`../calim/gridder`)                              |                                                              |
 +--------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| **Cleaning parameters**              |                                 |                                                        |                                                              |
+| **Cleaning parameters**              |                                 |                                                        |                                                              | 
 +--------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``SOLVER``                           | Clean                           | solver                                                 | Which solver to use. You will mostly want to leave this as   |
 |                                      |                                 | (:doc:`../calim/cimager`)                              | 'Clean', but there is a 'Dirty' solver available.            |
@@ -106,7 +115,7 @@ without submission, then edit and manually submit).
 |                                      |                                 | (:doc:`../calim/solver`)                               |                                                              |
 +--------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``CLEAN_MINORCYCLE_NITER``           | 500                             | Clean.niter                                            | The number of iterations for the minor cycle clean.          |
-|                                      |                                 | (:doc:`../calim/solver`)                               |                                                              | 
+|                                      |                                 | (:doc:`../calim/solver`)                               |                                                              |
 +--------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``CLEAN_GAIN``                       | 0.5                             | Clean.gain                                             | The loop gain (fraction of peak subtracted per minor cycle). |
 |                                      |                                 | (:doc:`../calim/solver`)                               |                                                              |

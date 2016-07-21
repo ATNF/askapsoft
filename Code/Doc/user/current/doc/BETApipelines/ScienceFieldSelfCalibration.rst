@@ -6,8 +6,11 @@ time. The algorithm here is as follows:
 
 1. Image the data with cimager
 2. Run source-finding with Selavy with a relatively large threshold
-3. Create a component parset from the resulting component catalogue
-4. Use this parset in ccalibrator to calibrate the antenna-based gains
+3. Use the results to calibrate the antenna-based gains by either:
+   a. Create a component parset from the resulting component catalogue
+      and use this parset in ccalibrator, or
+   b. Create a model image from the component catalogue, and use in
+      ccalibrator
 5. Re-run imaging, applying the latest gains table
 6. Repeat steps 2-5 for a given number of loops
 
@@ -21,6 +24,12 @@ pipeline).
 | Variable                      | Default                   | Parset equivalent              | Description                                              |
 +===============================+===========================+================================+==========================================================+
 | ``DO_SELFCAL``                | false                     |                                | Whether to self-calibrate the science data when imaging. |
++-------------------------------+---------------------------+--------------------------------+----------------------------------------------------------+
+| ``SELFCAL_METHOD``            | Cmodel                    | none                           | How to do the self-calibration. There are two options:   |
+|                               |                           |                                | "Cmodel" means create a model image from the             |
+|                               |                           |                                | source-finding results; "Components" means use the       |
+|                               |                           |                                | detected components directly through a parset (created by|
+|                               |                           |                                | Selavy). Anything else will default to "Cmodel".         |
 +-------------------------------+---------------------------+--------------------------------+----------------------------------------------------------+
 | ``SELFCAL_INTERVAL``          | 10                        | interval                       | Interval [sec] over which to solve for self-calibration. |
 |                               |                           | (:doc:`../calim/ccalibrator`)  |                                                          |

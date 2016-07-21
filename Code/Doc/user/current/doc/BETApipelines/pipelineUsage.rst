@@ -11,13 +11,13 @@ use, simply run::
 
   module load askappipeline
 
-Note that for the linear mosaicking, if you want to get the beam
-centres based on the beam footprint specification (ie. using the ACES
-tool *footprint.py*), you will need to load the ACES module (to get
-the correct python packages) and have an up-to-date version of the
-ACES subversion repository. If you have not loaded the ACES module, it
-is likely the *footprint.py* task will fail, and mosaicking will be
-disabled.
+Note that for the linear mosaicking, or if you want to set the image
+centres to be the beam centres using the beam footprint specification
+(ie. using the ACES tool *footprint.py*), you will need to load the
+ACES module (to get the correct python packages) and have an
+up-to-date version of the ACES subversion repository. If you have not
+loaded the ACES module, it is likely the *footprint.py* task will
+fail, and mosaicking will be disabled.
 
 Once loaded, the module will set an environment variable
 **PIPELINEDIR**, pointing to the directory containing the scripts. It
