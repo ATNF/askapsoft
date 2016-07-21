@@ -91,6 +91,9 @@ void ContinuumWorkUnit::set_beam(unsigned int beam)
 {
     itsBeam = beam;
 }
+void ContinuumWorkUnit::set_channelWidth(double width) {
+    itsChannelWidth = width;
+}
 /////////////////////////////////////////////////////////////////////
 // Getters
 /////////////////////////////////////////////////////////////////////
@@ -122,6 +125,10 @@ unsigned int ContinuumWorkUnit::get_beam(void) const
 {
     return itsBeam;
 }
+double ContinuumWorkUnit::get_channelWidth(void) const
+{
+    return itsChannelWidth;
+}
 /////////////////////////////////////////////////////////////////////
 // Serializers
 /////////////////////////////////////////////////////////////////////
@@ -131,6 +138,7 @@ void ContinuumWorkUnit::writeToBlob(LOFAR::BlobOStream& os) const
     os << itsDataset;
     os << itsGlobalChannel;
     os << itsChannelFrequency;
+    os << itsChannelWidth;
     os << itsLocalChannel;
     os << itsBeam;
 }
@@ -143,9 +151,10 @@ void ContinuumWorkUnit::readFromBlob(LOFAR::BlobIStream& is)
     is >> itsDataset;
     is >> itsGlobalChannel;
     is >> itsChannelFrequency;
+    is >> itsChannelWidth;
     is >> itsLocalChannel;
     is >> itsBeam;
-    
+
     itsPayloadType = static_cast<PayloadType>(payloadType);
 }
 /////////////////////////////////////////////////////////////////////
@@ -161,40 +170,40 @@ void ContinuumWorkUnit::sendUnit(int target, askapparallel::AskapParallel& comm)
     out.putStart("Message", 1);
     this->writeToBlob(out);
     out.putEnd();
-    
+
     int messageType = this->getMessageType();
-    
+
     // First send the size of the buffer
     const unsigned long size = buf.size();
     comm.send(&size,sizeof(long),target,messageType,communicator);
 
     // Now send the actual byte stream
     comm.send(&buf[0], size * sizeof(int8_t), target, messageType,communicator);
-    
-    
+
+
 }
 void ContinuumWorkUnit::receiveUnit(int& id, askapparallel::AskapParallel& comm) {
-    
+
     unsigned long size = 0;
     size_t communicator = 0; //default
     id = comm.receiveAnySrc(&size, sizeof(long), this->getMessageType(), communicator);
-    
-    
+
+
     // Receive the byte stream
     std::vector<int8_t> buf;
     buf.resize(size);
-    
+
     ASKAPCHECK(buf.size() == size,
                "ContinuumWorkUnit::receiveUnit() buf is too small");
-    
+
     comm.receive(&buf[0], size * sizeof(char), id, this->getMessageType(), communicator);
-    
+
     // Decode
     LOFAR::BlobIBufVector<int8_t> bv(buf);
     LOFAR::BlobIStream in(bv);
     int version = in.getStart("Message");
     ASKAPASSERT(version == 1);
-    
+
     this->readFromBlob(in);
 }
 void ContinuumWorkUnit::receiveUnitFrom(const int sender, askapparallel::AskapParallel& comm) {
@@ -204,17 +213,17 @@ void ContinuumWorkUnit::receiveUnitFrom(const int sender, askapparallel::AskapPa
     // Receive the byte stream
     std::vector<int8_t> buf;
     buf.resize(size);
-    
+
     ASKAPCHECK(buf.size() == size,
                "ContinuumWorkUnit::receiveUnit() buf is too small");
-    
+
     comm.receive(&buf[0], size * sizeof(char), sender, this->getMessageType(), communicator);
-    
+
     // Decode
     LOFAR::BlobIBufVector<int8_t> bv(buf);
     LOFAR::BlobIStream in(bv);
     int version = in.getStart("Message");
     ASKAPASSERT(version == 1);
-    
+
     this->readFromBlob(in);
 }

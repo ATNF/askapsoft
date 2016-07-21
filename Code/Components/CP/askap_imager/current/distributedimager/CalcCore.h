@@ -72,6 +72,8 @@ namespace cp {
 
         void check();
 
+        void restoreImage();
+
         void writeLocalModel(const std::string& postfix);
 
     private:
@@ -86,7 +88,7 @@ namespace cp {
         askap::scimath::Solver::ShPtr itsSolver;
 
         // Restore Solver
-        bool itsRestore; 
+        bool itsRestore;
 
         // Data: vector of the stored datasources
         accessors::TableDataSource itsData;

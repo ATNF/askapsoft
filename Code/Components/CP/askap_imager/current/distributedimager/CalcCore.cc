@@ -300,3 +300,23 @@ void CalcCore::writeLocalModel(const std::string &postfix) {
     }
 
 }
+void CalcCore::restoreImage()
+{
+    ASKAPDEBUGASSERT(itsModel);
+    boost::shared_ptr<ImageRestoreSolver>
+    ir = ImageRestoreSolver::createSolver(itsParset.makeSubset("restore."));
+    ASKAPDEBUGASSERT(ir);
+    ASKAPDEBUGASSERT(itsSolver);
+    // configure restore solver the same way as normal imaging solver
+    boost::shared_ptr<ImageSolver>
+    template_solver = boost::dynamic_pointer_cast<ImageSolver>(itsSolver);
+    ASKAPDEBUGASSERT(template_solver);
+    ImageSolverFactory::configurePreconditioners(itsParset, ir);
+    ir->configureSolver(*template_solver);
+    ir->copyNormalEquations(*template_solver);
+
+    Quality q;
+    ir->solveNormalEquations(*itsModel, q);
+    ASKAPDEBUGASSERT(itsModel);
+
+}

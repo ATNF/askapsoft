@@ -44,12 +44,13 @@
 #include "distributedimager/MSSplitter.h"
 #include "distributedimager/CalcCore.h"
 #include "messages/ContinuumWorkUnit.h"
+#include "distributedimager/CubeBuilder.h"
 
 namespace askap {
 namespace cp {
 
 class ContinuumWorker
-    
+
     {
     public:
         ContinuumWorker(LOFAR::ParameterSet& parset,
@@ -63,18 +64,19 @@ class ContinuumWorker
          // The work units
         vector<ContinuumWorkUnit> workUnits;
 
-    
+        // Whether preconditioning has been requested
+        bool itsDoingPreconditioning;
         // Process a workunit
         void processWorkUnit(ContinuumWorkUnit& wu);
 
-        // Vector of the stored parsets
+        // Vector of the stored parsets of the work allocations
         vector<LOFAR::ParameterSet> itsParsets;
-       
-    
+
+
         //For all workunits .... process
-        
+
         void processChannels();
-        
+
         // For a given workunit, just process a single snapshot - the channel is specified
         // in the parset ...
         void processSnapshot(LOFAR::ParameterSet& parset);
@@ -84,7 +86,9 @@ class ContinuumWorker
         void setupImage(const askap::scimath::Params::ShPtr& params,
                     double channelFrequency);
 
-        // Parameter set
+        void buildSpectralCube();
+
+        // Root Parameter set good for information common to all workUnits
         LOFAR::ParameterSet& itsParset;
 
         // Communications class
@@ -101,12 +105,30 @@ class ContinuumWorker
 
         // ID of the master process
         static const int itsMaster = 0;
-    
+
         // List of measurement sets to work on
         vector<std::string> datasets;
-        
+
         // the basechannel number assigned to this worker
         unsigned int baseChannel;
+
+        boost::scoped_ptr<CubeBuilder> itsImageCube;
+        boost::scoped_ptr<CubeBuilder> itsPSFCube;
+        boost::scoped_ptr<CubeBuilder> itsResidualCube;
+        boost::scoped_ptr<CubeBuilder> itsWeightsCube;
+        boost::scoped_ptr<CubeBuilder> itsPSFimageCube;
+        boost::scoped_ptr<CubeBuilder> itsRestoredCube;
+
+        void handleImageParams(askap::scimath::Params::ShPtr params, unsigned int chan);
+        void recordBeam(const askap::scimath::Axes &axes, const unsigned int globalChannel);
+        void storeBeam(const unsigned int globalChannel);
+
+        std::map<unsigned int, casa::Vector<casa::Quantum<double> > > itsBeamList;
+        
+        unsigned int itsBeamReferenceChannel;
+        void logBeamInfo();
+
+
 };
 
 };

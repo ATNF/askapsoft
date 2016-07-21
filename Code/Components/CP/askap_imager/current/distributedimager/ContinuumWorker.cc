@@ -59,7 +59,7 @@
 #include <Common/Exceptions.h>
 #include <casacore/casa/OS/Timer.h>
 #include <parallel/ImagerParallel.h>
-
+#include <imageaccess/BeamLogger.h>
 // CASA Includes
 
 // Local includes
@@ -71,6 +71,7 @@
 #include "distributedimager/MSSplitter.h"
 #include "messages/ContinuumWorkUnit.h"
 #include "messages/ContinuumWorkRequest.h"
+#include "distributedimager/CubeBuilder.h"
 
 using namespace std;
 using namespace askap::cp;
@@ -107,6 +108,15 @@ ContinuumWorker::ContinuumWorker(LOFAR::ParameterSet& parset,
     ASKAPLOG_INFO_STR(logger,"Distribution: Id " << id << " nWorkers " << nWorkers << " nGroups " << itsComms.nGroups());
 
     ASKAPLOG_INFO_STR(logger,"Distribution: Base channel " << this->baseChannel << " PosInGrp " << posInGroup);
+
+    itsDoingPreconditioning = false;
+    const vector<string> preconditioners = itsParset.getStringVector("preconditioner.Names", std::vector<std::string>());
+    for (vector<string>::const_iterator pc = preconditioners.begin(); pc != preconditioners.end(); ++pc) {
+        if ((*pc) == "Wiener" || (*pc) == "NormWiener" || (*pc) == "Robust" || (*pc) == "GaussianTaper") {
+            itsDoingPreconditioning = true;
+        }
+    }
+
 }
 
 ContinuumWorker::~ContinuumWorker()
@@ -149,8 +159,8 @@ void ContinuumWorker::run(void)
             ASKAPLOG_INFO_STR(logger, "Received Work Unit for dataset " << ms
                               << ", local (topo) channel " << wu.get_localChannel()
                               << ", global (topo) channel " << wu.get_globalChannel()
-                              << ", frequency " << wu.get_channelFrequency()/1.e6 << "MHz");
-
+                              << ", frequency " << wu.get_channelFrequency()/1.e6 << " MHz"
+                              << ", width " << wu.get_channelWidth()/1e3 << " kHz");
             processWorkUnit(wu);
             ASKAPLOG_INFO_STR(logger,"Worker is sending request for work");
             if (wu.get_payloadType() == ContinuumWorkUnit::LAST) {
@@ -232,11 +242,11 @@ void ContinuumWorker::processWorkUnit(ContinuumWorkUnit& wu)
 
 
         wu.set_dataset(outms);
-        unitParset.replace("dataset",outms);
+
 
         sprintf(ChannelPar,"[1,1]");
     }
-
+    unitParset.replace("dataset",wu.get_dataset());
     unitParset.replace("Channels",ChannelPar);
 
 
@@ -255,6 +265,316 @@ void ContinuumWorker::processWorkUnit(ContinuumWorkUnit& wu)
 void
 ContinuumWorker::processSnapshot(LOFAR::ParameterSet& unitParset)
 {
+}
+void ContinuumWorker::buildSpectralCube() {
+
+    ASKAPLOG_INFO_STR(logger,"Processing multiple channels local solver mode");
+    /// This is the spectral cube builder
+    /// it marshalls the following tasks:
+    /// 1. building a spectral cube image
+    /// 2. local minor cycle solving of each channel
+    /// 3. Conversion to FITS and output
+    /// Note: at this stage it will generate a cube per
+    /// node.
+    /// Therefore the cube will be distributed across the
+    /// supercomputer as a function of frequency and beams
+    ///
+    /// First lets set up the cube
+
+    /// The number of channels allocated to this rank
+    const int nchanpercore = itsParsets[0].getInt32("nchanpercore", 1);
+    /// the base channel of this allocation. we know this as the channel allocations
+    /// are sorted
+    Quantity f0(workUnits[0].get_channelFrequency(),"Hz");
+    /// The width of a channel. THis does <NOT> take account of the variable width
+    /// of BArycentric channels
+    Quantity freqinc(workUnits[0].get_channelWidth(),"Hz");
+
+
+    ASKAPLOG_INFO_STR(logger,"Configuring Spectral Cube");
+    ASKAPLOG_INFO_STR(logger,"nchan: " << nchanpercore << " base f0: " << f0.getValue("MHz")
+    << " width: " << freqinc.getValue("MHz") <<" (" << workUnits[0].get_channelWidth() << ")");
+
+    itsImageCube.reset(new CubeBuilder(itsParsets[0], nchanpercore, f0, freqinc));
+    itsPSFCube.reset(new CubeBuilder(itsParsets[0], nchanpercore, f0, freqinc, "psf"));
+    itsResidualCube.reset(new CubeBuilder(itsParsets[0], nchanpercore, f0, freqinc, "residual"));
+    itsWeightsCube.reset(new CubeBuilder(itsParsets[0], nchanpercore, f0, freqinc, "weights"));
+    if (itsParset.getBool("restore", false)) {
+        // Only create these if we are restoring, as that is when they get made
+        if (itsDoingPreconditioning) {
+            itsPSFimageCube.reset(new CubeBuilder(itsParsets[0], nchanpercore, f0, freqinc, "psf.image"));
+        }
+        itsRestoredCube.reset(new CubeBuilder(itsParsets[0], nchanpercore, f0, freqinc, "restored"));
+    }
+
+    /// What are the plans for the deconvolution?
+    ASKAPLOG_INFO_STR(logger,"Ascertaining Cleaning Plan");
+    const bool writeAtMajorCycle = itsParsets[0].getBool("Images.writeAtMajorCycle",false);
+    const int nCycles = itsParsets[0].getInt32("ncycles", 0);
+    std::string majorcycle = itsParsets[0].getString("threshold.majorcycle", "-1Jy");
+    const double targetPeakResidual = SynthesisParamsHelper::convertQuantity(majorcycle, "Jy");
+
+    const int uvwMachineCacheSize = itsParsets[0].getInt32("nUVWMachines", 1);
+    ASKAPCHECK(uvwMachineCacheSize > 0 ,
+               "Cache size is supposed to be a positive number, you have "
+               << uvwMachineCacheSize);
+
+    const double uvwMachineCacheTolerance = SynthesisParamsHelper::convertQuantity(itsParsets[0].getString("uvwMachineDirTolerance", "1e-6rad"), "rad");
+
+    ASKAPLOG_INFO_STR(logger,
+                      "UVWMachine cache will store " << uvwMachineCacheSize << " machines");
+    ASKAPLOG_INFO_STR(logger, "Tolerance on the directions is "
+                      << uvwMachineCacheTolerance / casa::C::pi * 180. * 3600. << " arcsec");
+    // we need to loop over the channels
+    int workUnitCount = 0; // the workUnits include different epochs (for the same channel)
+    // the order is strictly by channel - with multiple work units per channel.
+    // so you can increment the workUnit until the frequency changes - then you know you
+    // have all the workunits
+
+    double channelFrequency = workUnits[workUnitCount].get_channelFrequency();
+
+    for (int chan=0; chan < nchanpercore; ++chan) {
+        ASKAPLOG_INFO_STR(logger, "Starting to process channel " << chan \
+        << " with workUnit " << workUnitCount << " used for the root ");
+
+        int initialChannelWorkUnit = workUnitCount+1;
+
+        double frequency=workUnits[workUnitCount].get_channelFrequency();
+        const string colName = itsParsets[workUnitCount].getString("datacolumn", "DATA");
+        const string ms = workUnits[workUnitCount].get_dataset();
+        TableDataSource ds(ms, TableDataSource::DEFAULT, colName);
+
+        /// Need to set up the rootImager here
+        CalcCore rootImager(itsParsets[workUnitCount],itsComms,ds,workUnits[workUnitCount].get_localChannel());
+
+        /// set up the image for this channel
+        setupImage(rootImager.params(), frequency);
+
+
+
+        /// need to put in the major and minor cycle loops
+        /// If we are doing more than one major cycle I need to reset
+        /// the workUnit count to permit a re-read of the input data.
+        /// LOOP:
+
+        for (int majorCycleNumber=0; majorCycleNumber < nCycles; ++majorCycleNumber) {
+
+            workUnitCount = initialChannelWorkUnit;
+
+            /// But first lets test to see how we are doing.
+            /// calcNE for the rootImager
+
+            rootImager.calcNE();
+
+            while (workUnitCount < workUnits.size() && frequency == workUnits[workUnitCount].get_channelFrequency()) {
+                /// need a working imager to allow a merge over epochs for this channel
+
+
+                const string myMs = workUnits[workUnitCount].get_dataset();
+
+                TableDataSource ds(myMs, TableDataSource::DEFAULT, colName);
+
+                ds.configureUVWMachineCache(uvwMachineCacheSize, uvwMachineCacheTolerance);
+
+                CalcCore workingImager(itsParsets[workUnitCount],itsComms,ds,workUnits[workUnitCount].get_localChannel());
+
+            /// this loop does the calcNE and the merge
+                workingImager.replaceModel(rootImager.params());
+                workingImager.calcNE();
+                rootImager.getNE()->merge(*workingImager.getNE());
+
+                workUnitCount++;
+            }
+            /// now we have a "full" set of NE we can SolveNE to update the model
+            rootImager.solveNE();
+
+            if (rootImager.params()->has("peak_residual")) {
+                const double peak_residual = rootImager.params()->scalarValue("peak_residual");
+                ASKAPLOG_INFO_STR(logger, "Reached peak residual of " << peak_residual);
+                if (peak_residual < targetPeakResidual) {
+                    ASKAPLOG_INFO_STR(logger, "It is below the major cycle threshold of "
+                                      << targetPeakResidual << " Jy. Stopping.");
+                    break;
+                } else {
+                    if (targetPeakResidual < 0) {
+                        ASKAPLOG_INFO_STR(logger, "Major cycle flux threshold is not used.");
+                    } else {
+                        ASKAPLOG_INFO_STR(logger, "It is above the major cycle threshold of "
+                                          << targetPeakResidual << " Jy. Continuing.");
+                    }
+                }
+
+            }
+            if (majorCycleNumber+1 == nCycles) {
+                ASKAPLOG_INFO_STR(logger,"Reached maximum majorcycle count");
+
+            }
+            else {
+
+                /// But we dont want to keep merging into the same NE
+                /// so lets reset
+                ASKAPLOG_INFO_STR(logger,"Reset normal equations");
+                rootImager.getNE()->reset();
+                // the model is now updated but the NE are empty ... - lets go again
+            }
+
+        }
+        ASKAPLOG_INFO_STR(logger,"Adding model.slice");
+        ASKAPCHECK(rootImager.params()->has("image.slice"), "Params are missing image.slice parameter");
+        rootImager.params()->add("model.slice", rootImager.params()->value("image.slice"));
+        ASKAPCHECK(rootImager.params()->has("model.slice"), "Params are missing model.slice parameter");
+
+        rootImager.check();
+
+
+        if (itsParsets[0].getBool("restore", false)) {
+            ASKAPLOG_INFO_STR(logger,"Running restore");
+            rootImager.restoreImage();
+        }
+        ASKAPLOG_INFO_STR(logger,"writing channel into cube");
+        handleImageParams(rootImager.params(), chan);
+        /// outside the clean-loop write out the slice
+
+
+    }
+    /// outside the channel loop    donvert the image to FIT
+
+    return;
+}
+void ContinuumWorker::handleImageParams(askap::scimath::Params::ShPtr params,
+        unsigned int chan)
+{
+
+
+    // Pre-conditions
+    ASKAPCHECK(params->has("model.slice"), "Params are missing model parameter");
+    ASKAPCHECK(params->has("psf.slice"), "Params are missing psf parameter");
+    ASKAPCHECK(params->has("residual.slice"), "Params are missing residual parameter");
+    ASKAPCHECK(params->has("weights.slice"), "Params are missing weights parameter");
+    if (itsParset.getBool("restore", false)) {
+        ASKAPCHECK(params->has("image.slice"), "Params are missing image parameter");
+        if (itsDoingPreconditioning) {
+            ASKAPCHECK(params->has("psf.image.slice"), "Params are missing psf.image parameter");
+        }
+    }
+
+    if (itsParset.getBool("restore", false)) {
+        // Record the restoring beam
+        const askap::scimath::Axes &axes = params->axes("image.slice");
+        recordBeam(axes, chan);
+        storeBeam(chan);
+    }
+
+    // Write image
+    {
+        const casa::Array<double> imagePixels(params->value("model.slice"));
+        casa::Array<float> floatImagePixels(imagePixels.shape());
+        casa::convertArray<float, double>(floatImagePixels, imagePixels);
+        itsImageCube->writeSlice(floatImagePixels, chan);
+    }
+
+    // Write PSF
+    {
+        const casa::Array<double> imagePixels(params->value("psf.slice"));
+        casa::Array<float> floatImagePixels(imagePixels.shape());
+        casa::convertArray<float, double>(floatImagePixels, imagePixels);
+        itsPSFCube->writeSlice(floatImagePixels, chan);
+    }
+
+    // Write residual
+    {
+        const casa::Array<double> imagePixels(params->value("residual.slice"));
+        casa::Array<float> floatImagePixels(imagePixels.shape());
+        casa::convertArray<float, double>(floatImagePixels, imagePixels);
+        itsResidualCube->writeSlice(floatImagePixels, chan);
+    }
+
+    // Write weights
+    {
+        const casa::Array<double> imagePixels(params->value("weights.slice"));
+        casa::Array<float> floatImagePixels(imagePixels.shape());
+        casa::convertArray<float, double>(floatImagePixels, imagePixels);
+        itsWeightsCube->writeSlice(floatImagePixels, chan);
+    }
+
+
+    if (itsParset.getBool("restore", false)) {
+
+        if (itsDoingPreconditioning) {
+            // Write preconditioned PSF image
+            {
+                const casa::Array<double> imagePixels(params->value("psf.image.slice"));
+                casa::Array<float> floatImagePixels(imagePixels.shape());
+                casa::convertArray<float, double>(floatImagePixels, imagePixels);
+                itsPSFimageCube->writeSlice(floatImagePixels, chan);
+            }
+        }
+
+        // Write Restored image
+        {
+            const casa::Array<double> imagePixels(params->value("image.slice"));
+            casa::Array<float> floatImagePixels(imagePixels.shape());
+            casa::convertArray<float, double>(floatImagePixels, imagePixels);
+            itsRestoredCube->writeSlice(floatImagePixels, chan);
+        }
+    }
+
+}
+
+
+void ContinuumWorker::recordBeam(const askap::scimath::Axes &axes,
+                                    const unsigned int globalChannel)
+{
+
+    if (axes.has("MAJMIN")) {
+        // this is a restored image with beam parameters set
+        ASKAPCHECK(axes.has("PA"), "PA axis should always accompany MAJMIN");
+        ASKAPLOG_INFO_STR(logger, "Found beam for image.slice, channel " <<
+                          globalChannel << ", with shape " <<
+                          axes.start("MAJMIN") * 180. / M_PI * 3600. << "x" <<
+                          axes.end("MAJMIN") * 180. / M_PI * 3600. << ", " <<
+                          axes.start("PA") * 180. / M_PI);
+
+        casa::Vector<casa::Quantum<double> > beamVec(3, 0.);
+        beamVec[0] = casa::Quantum<double>(axes.start("MAJMIN"), "rad");
+        beamVec[1] = casa::Quantum<double>(axes.end("MAJMIN"), "rad");
+        beamVec[2] = casa::Quantum<double>(axes.start("PA"), "rad");
+
+        itsBeamList[globalChannel] = beamVec;
+
+    }
+
+}
+
+
+void ContinuumWorker::storeBeam(const unsigned int globalChannel)
+{
+    if (globalChannel == itsBeamReferenceChannel) {
+        itsRestoredCube->addBeam(itsBeamList[globalChannel]);
+    }
+}
+
+void ContinuumWorker::logBeamInfo()
+{
+
+    if (itsParset.getBool("restore", false)) {
+        askap::accessors::BeamLogger beamlog(itsParset.makeSubset("restore."));
+        if (beamlog.filename() != "") {
+            ASKAPCHECK(itsBeamList.begin()->first == 0, "Beam list doesn't start at channel 0");
+            ASKAPCHECK((itsBeamList.size() == (itsBeamList.rbegin()->first + 1)),
+                       "Beam list doesn't finish at channel " << itsBeamList.size() - 1);
+            std::vector<casa::Vector<casa::Quantum<double> > > beams;
+            std::map<unsigned int, casa::Vector<casa::Quantum<double> > >::iterator beam;
+            for (beam = itsBeamList.begin(); beam != itsBeamList.end(); beam++) {
+                beams.push_back(beam->second);
+            }
+            beamlog.beamlist() = beams;
+            ASKAPLOG_INFO_STR(logger, "Writing list of individual channel beams to beam log "
+                              << beamlog.filename());
+            beamlog.write();
+        }
+    }
+
 }
 
 void ContinuumWorker::processChannels()
@@ -289,9 +609,15 @@ void ContinuumWorker::processChannels()
 
     const bool localSolver = unitParset.getBool("solverpercore",false);
 
+    if (localSolver) {
+        this->buildSpectralCube();
+        return;
+    }
+    ASKAPLOG_INFO_STR(logger,"Processing multiple channels central solver mode");
     TableDataSource ds0(ms, TableDataSource::DEFAULT, colName);
 
     ds0.configureUVWMachineCache(uvwMachineCacheSize, uvwMachineCacheTolerance);
+
 
 
     bool usetmpfs = unitParset.getBool("usetmpfs",false);
@@ -429,7 +755,7 @@ void ContinuumWorker::processChannels()
 
             ASKAPLOG_INFO_STR(logger,"Worker sending NE to master for cycle " << n);
             rootImager.sendNE();
-            
+
         }
 
 
@@ -453,6 +779,7 @@ void ContinuumWorker::setupImage(const askap::scimath::Params::ShPtr& params,
                                     double channelFrequency)
 {
     try {
+        ASKAPLOG_INFO_STR(logger,"Setting up image");
         const LOFAR::ParameterSet parset = itsParset.makeSubset("Images.");
 
         const int nfacets = parset.getInt32("nfacets", 1);
@@ -512,6 +839,7 @@ void ContinuumWorker::setupImage(const askap::scimath::Params::ShPtr& params,
                                        channelFrequency, channelFrequency,
                                        nchan, stokes, nfacets, facetstep);
         }
+
 
     } catch (const LOFAR::APSException &ex) {
         throw AskapError(ex.what());

@@ -117,6 +117,7 @@ void ContinuumMaster::run(void)
 
     const bool writeAtMajorCycle = unitParset.getBool("Images.writeAtMajorCycle", false);
     const int nCycles = unitParset.getInt32("ncycles", 0);
+    const bool localSolver = unitParset.getBool("solverpercore",false);
 
     ASKAPLOG_INFO_STR(logger,"*****");
     ASKAPLOG_INFO_STR(logger,"Parset" << diadvise.getParset());
@@ -149,7 +150,10 @@ void ContinuumMaster::run(void)
     }
 
 
-
+    if (localSolver) {
+        ASKAPLOG_INFO_STR(logger, "Master no longer required");
+        return;
+    }
     ASKAPLOG_INFO_STR(logger, "Master is about to broadcast first <empty> model");
 
     // this parset need to know direction and frequency for the final maps/models

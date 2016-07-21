@@ -65,10 +65,20 @@ CubeBuilder::CubeBuilder(const LOFAR::ParameterSet& parset,
                          const casa::Quantity& inc,
                          const std::string& name)
 {
-    itsFilename = parset.getString("Images.name");
 
+    vector<string> filenames;
+    if (parset.isDefined("Images.Names")) {
+        filenames = parset.getStringVector("Images.Names", true);
+        itsFilename = filenames[0];
+    }
+    else if(parset.isDefined("Images.name")) {
+        itsFilename = parset.getString("Images.name");
+    }
+    else {
+        ASKAPLOG_ERROR_STR(logger, "Could not find the image name(s) ");
+    }
     ASKAPCHECK(itsFilename.substr(0,5)=="image",
-               "Simager.Images.name must start with 'image'");
+               "Images.name (Names) must start with 'image' starts with " << itsFilename.substr(0,5));
 
     // If necessary, replace "image" with _name_ (e.g. "psf", "weights")
     // unless name='restored', in which case we append ".restored"
@@ -93,15 +103,15 @@ CubeBuilder::CubeBuilder(const LOFAR::ParameterSet& parset,
     const std::vector<std::string>
         stokesVec = parset.getStringVector("Images.polarisation", std::vector<std::string>(1,"I"));
     // there could be many ways to define stokes, e.g. ["XX YY"] or ["XX","YY"] or "XX,YY"
-    // to allow some flexibility we have to concatenate all elements first and then 
-    // allow the parser from PolConverter to take care of extracting the products.                                            
+    // to allow some flexibility we have to concatenate all elements first and then
+    // allow the parser from PolConverter to take care of extracting the products.
     std::string stokesStr;
     for (size_t i=0; i<stokesVec.size(); ++i) {
         stokesStr += stokesVec[i];
     }
     itsStokes = scimath::PolConverter::fromString(stokesStr);
     const casa::uInt npol=itsStokes.size();
-    
+
     // Get the image shape
     const vector<casa::uInt> imageShapeVector = parset.getUintVector("Images.shape");
     const casa::uInt nx = imageShapeVector[0];
@@ -115,7 +125,7 @@ CubeBuilder::CubeBuilder(const LOFAR::ParameterSet& parset,
 
     const casa::CoordinateSystem csys = createCoordinateSystem(parset, nx, ny, f0, inc);
 
-    ASKAPLOG_DEBUG_STR(logger, "Creating Cube " << itsFilename <<
+    ASKAPLOG_INFO_STR(logger, "Creating Cube " << itsFilename <<
                        " with shape [xsize:" << nx << " ysize:" << ny <<
                        " npol:" << npol << " nchan:" << nchan <<
                        "], f0: " << f0.getValue("MHz") << " MHz, finc: " <<
@@ -184,7 +194,7 @@ CubeBuilder::createCoordinateSystem(const LOFAR::ParameterSet& parset,
         }
         const StokesCoordinate stokescoord(stokes);
         coordsys.addCoordinate(stokescoord);
-        
+
     }
     // Spectral Coordinate
     {
@@ -222,4 +232,3 @@ void CubeBuilder::setUnits(const std::string &units)
 {
     itsCube->setUnits(casa::Unit(units));
 }
-

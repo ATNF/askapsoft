@@ -261,7 +261,8 @@ void AdviseDI::prepare() {
                 casa::MFrequency topBary = forw(topThisMF).getValue();
                 casa::MFrequency centreBary = forw(chanFreq[n][ch]).getValue();
                 chanFreq[n][ch] = centreBary.getValue();
-                chanWidth[n][ch] = abs(topBary.getValue() - botBary.getValue());
+                if (chanFreq[n].size() > 1)
+                    chanWidth[n][ch] = abs(topBary.getValue() - botBary.getValue());
 
             }
         }
@@ -321,13 +322,19 @@ void AdviseDI::prepare() {
                     cp::ContinuumWorkUnit wu;
                     wu.set_payloadType(cp::ContinuumWorkUnit::WORK);
                     wu.set_channelFrequency(thisAllocation[frequency]);
+
+                    if (itsTopoFrequencies.size() > 1)
+                        wu.set_channelWidth(fabs(itsTopoFrequencies[1].getValue() - itsTopoFrequencies[0].getValue()));
+                    else
+                        wu.set_channelWidth(fabs(chanWidth[0][0]));
+
                     wu.set_localChannel(lc);
                     wu.set_globalChannel(work);
                     wu.set_dataset(ms[set]);
                     itsAllocatedWork[work].push(wu);
                     itsWorkUnitCount++;
                     ASKAPLOG_INFO_STR(logger,"Allocating " << thisAllocation[frequency] \
-                    << " with local channel " << lc << " of set: " << ms[set] \
+                    << " with local channel " << lc << " of width " << wu.get_channelWidth() << " in set: " << ms[set] \
                     << " to worker " << work << "Count " << itsWorkUnitCount );
                     allocated = true;
                 }
@@ -448,11 +455,40 @@ void AdviseDI::addMissingParameters()
 
    const vector<string> imageNames = itsParset.getStringVector("Images.Names", false);
 
+   param = "Images.direction";
+   if ( !itsParset.isDefined(param) ) {
+       std::ostringstream pstr;
+       // Only J2000 is implemented at the moment.
+       pstr<<"["<<printLon(itsTangent)<<", "<<printLat(itsTangent)<<", J2000]";
+       ASKAPLOG_INFO_STR(logger, "  Advising on parameter " << param << ": " << pstr.str().c_str());
+       itsParset.add(param, pstr.str().c_str());
+   }
+   param = "Images.restFrequency";
+
+   if ( !itsParset.isDefined(param) ) {
+       std::ostringstream pstr;
+       // Only J2000 is implemented at the moment.
+       pstr<<"HI";
+       ASKAPLOG_INFO_STR(logger, "  Advising on parameter " << param << ": " << pstr.str().c_str());
+       itsParset.add(param, pstr.str().c_str());
+   }
+
    for (size_t img = 0; img < imageNames.size(); ++img) {
 
        param = "Images."+imageNames[img]+".cellsize";
-       if ( !itsParset.isDefined(param) ) cellsizeNeeded = true;
-
+       if ( !itsParset.isDefined(param) ) {
+           cellsizeNeeded = true;
+       }
+       else {
+            param = "Images.cellsize";
+            if (!itsParset.isDefined(param) ) {
+                const vector<string> cellSizeVector = itsParset.getStringVector("Images.cellsize");
+                std::ostringstream pstr;
+                pstr<<"["<< cellSizeVector[0].c_str() <<"arcsec,"<<cellSizeVector[1].c_str() <<"arcsec]";
+                ASKAPLOG_INFO_STR(logger, "  Advising on parameter " << param <<": " << pstr.str().c_str());
+                itsParset.add(param, pstr.str().c_str());
+            }
+       }
        param = "Images."+imageNames[img]+".shape";
        if ( !itsParset.isDefined(param) ) shapeNeeded = true;
 
