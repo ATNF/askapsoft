@@ -59,8 +59,8 @@ cd $OUTPUT
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 
-if [ "${DIRECTION_SCI}" != "" ]; then
-    modelDirection="${DIRECTION_SCI}"
+if [ "${DIRECTION}" != "" ]; then
+    modelDirection="${DIRECTION}"
 else
     log=${logs}/mslist_for_ccontsub_\${SLURM_JOB_ID}.log
     NCORES=1
