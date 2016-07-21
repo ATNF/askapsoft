@@ -164,84 +164,92 @@ if [ \$err != 0 ]; then
     exit \$err
 fi
 
-#################################################
-# Next, model image creation
-
-parset=${parsets}/cmodel_for_contsub_spectralline_beam${BEAM}_\${SLURM_JOB_ID}.in
-log=${logs}/cmodel_for_contsub_spectralline_beam${BEAM}_\${SLURM_JOB_ID}.log
-cat > \$parset <<EOFINNER
-# The below specifies the GSM source is a selavy output file
-Cmodel.gsm.database       = votable
-Cmodel.gsm.file           = selavy-results.components.xml
-Cmodel.gsm.ref_freq       = \${freq}MHz
-
-# General parameters
-Cmodel.bunit              = Jy/pixel
-Cmodel.frequency          = \${freq}MHz
-Cmodel.increment          = 304MHz
-Cmodel.flux_limit         = ${CONTSUB_MODEL_FLUX_LIMIT}
-Cmodel.shape              = [${NUM_PIXELS_CONT},${NUM_PIXELS_CONT}]
-Cmodel.cellsize           = [${CELLSIZE_CONT}arcsec, ${CELLSIZE_CONT}arcsec]
-Cmodel.direction          = \${modelDirection}
-Cmodel.stokes             = [I]
-Cmodel.nterms             = ${NUM_TAYLOR_TERMS}
-
-# Output specific parameters
-Cmodel.output             = casa
-Cmodel.filename           = ${modelImage}
-EOFINNER
-
-NCORES=2
-NPPN=2
-aprun -n \${NCORES} -N \${NPPN} ${cmodel} -c \${parset} > \${log}
-err=\$?
-extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} cmodel_contsub_spectral_B${BEAM} "txt,csv"
-if [ \$err != 0 ]; then
-    exit \$err
-fi
-
-cd ..
-
-#################################################
-# Then, continuum subtraction
-
-parset=${parsets}/contsub_spectralline_beam${BEAM}_\${SLURM_JOB_ID}.in
-log=${logs}/contsub_spectralline_beam${BEAM}_\${SLURM_JOB_ID}.log
-cat > \$parset <<EOFINNER
-# The measurement set name - this will be overwritten
-CContSubtract.dataset                             = ${msSciSL}
-# The model definition
-CContSubtract.sources.names                       = [lsm]
-CContSubtract.sources.lsm.direction               = \${modelDirection}
-CContSubtract.sources.lsm.model                   = \${contsubdir}/${modelImage}
-CContSubtract.sources.lsm.nterms                  = ${NUM_TAYLOR_TERMS}
-# The gridding parameters
-CContSubtract.gridder.snapshotimaging             = ${GRIDDER_SNAPSHOT_IMAGING}
-CContSubtract.gridder.snapshotimaging.wtolerance  = ${GRIDDER_SNAPSHOT_WTOL}
-CContSubtract.gridder.snapshotimaging.longtrack   = ${GRIDDER_SNAPSHOT_LONGTRACK}
-CContSubtract.gridder.snapshotimaging.clipping    = ${GRIDDER_SNAPSHOT_CLIPPING}
-CContSubtract.gridder                             = WProject
-CContSubtract.gridder.WProject.wmax               = ${GRIDDER_WMAX}
-CContSubtract.gridder.WProject.nwplanes           = ${GRIDDER_NWPLANES}
-CContSubtract.gridder.WProject.oversample         = ${GRIDDER_OVERSAMPLE}
-CContSubtract.gridder.WProject.maxfeeds           = 1
-CContSubtract.gridder.WProject.maxsupport         = ${GRIDDER_MAXSUPPORT}
-CContSubtract.gridder.WProject.frequencydependent = true
-CContSubtract.gridder.WProject.variablesupport    = true
-CContSubtract.gridder.WProject.offsetsupport      = true
-EOFINNER
-
-NCORES=1
-NPPN=1
-aprun -n \${NCORES} -N \${NPPN} ${ccontsubtract} -c \${parset} > \${log}
-err=\$?
-rejuvenate ${msSciSL}
-extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} contsub_spectral_B${BEAM} "txt,csv"
-if [ \$err != 0 ]; then
-    exit \$err
+componentsCatalogue=selavy-results.components.xml
+numComp=\`grep "<TR>" ${componentsCatalogue} | wc -l\`
+if [ \${numComp} -eq 0 ]; then
+    # Nothing detected 
+    echo "Continuum subtraction : No continuum components found!"
 else
-    touch $CONT_SUB_CHECK_FILE
+    
+    #################################################
+    # Next, model image creation
+    
+    parset=${parsets}/cmodel_for_contsub_spectralline_beam${BEAM}_\${SLURM_JOB_ID}.in
+    log=${logs}/cmodel_for_contsub_spectralline_beam${BEAM}_\${SLURM_JOB_ID}.log
+    cat > \$parset <<EOFINNER
+    # The below specifies the GSM source is a selavy output file
+    Cmodel.gsm.database       = votable
+    Cmodel.gsm.file           = \${componentsCatalogue}
+    Cmodel.gsm.ref_freq       = \${freq}MHz
+    
+    # General parameters
+    Cmodel.bunit              = Jy/pixel
+    Cmodel.frequency          = \${freq}MHz
+    Cmodel.increment          = 304MHz
+    Cmodel.flux_limit         = ${CONTSUB_MODEL_FLUX_LIMIT}
+    Cmodel.shape              = [${NUM_PIXELS_CONT},${NUM_PIXELS_CONT}]
+    Cmodel.cellsize           = [${CELLSIZE_CONT}arcsec, ${CELLSIZE_CONT}arcsec]
+    Cmodel.direction          = \${modelDirection}
+    Cmodel.stokes             = [I]
+    Cmodel.nterms             = ${NUM_TAYLOR_TERMS}
+    
+    # Output specific parameters
+    Cmodel.output             = casa
+    Cmodel.filename           = ${modelImage}
+    EOFINNER
+    
+    NCORES=2
+    NPPN=2
+    aprun -n \${NCORES} -N \${NPPN} ${cmodel} -c \${parset} > \${log}
+    err=\$?
+    extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} cmodel_contsub_spectral_B${BEAM} "txt,csv"
+    if [ \$err != 0 ]; then
+        exit \$err
+    fi
+    
+    cd ..
+    
+    #################################################
+    # Then, continuum subtraction
+    
+    parset=${parsets}/contsub_spectralline_beam${BEAM}_\${SLURM_JOB_ID}.in
+    log=${logs}/contsub_spectralline_beam${BEAM}_\${SLURM_JOB_ID}.log
+    cat > \$parset <<EOFINNER
+    # The measurement set name - this will be overwritten
+    CContSubtract.dataset                             = ${msSciSL}
+    # The model definition
+    CContSubtract.sources.names                       = [lsm]
+    CContSubtract.sources.lsm.direction               = \${modelDirection}
+    CContSubtract.sources.lsm.model                   = \${contsubdir}/${modelImage}
+    CContSubtract.sources.lsm.nterms                  = ${NUM_TAYLOR_TERMS}
+    # The gridding parameters
+    CContSubtract.gridder.snapshotimaging             = ${GRIDDER_SNAPSHOT_IMAGING}
+    CContSubtract.gridder.snapshotimaging.wtolerance  = ${GRIDDER_SNAPSHOT_WTOL}
+    CContSubtract.gridder.snapshotimaging.longtrack   = ${GRIDDER_SNAPSHOT_LONGTRACK}
+    CContSubtract.gridder.snapshotimaging.clipping    = ${GRIDDER_SNAPSHOT_CLIPPING}
+    CContSubtract.gridder                             = WProject
+    CContSubtract.gridder.WProject.wmax               = ${GRIDDER_WMAX}
+    CContSubtract.gridder.WProject.nwplanes           = ${GRIDDER_NWPLANES}
+    CContSubtract.gridder.WProject.oversample         = ${GRIDDER_OVERSAMPLE}
+    CContSubtract.gridder.WProject.maxfeeds           = 1
+    CContSubtract.gridder.WProject.maxsupport         = ${GRIDDER_MAXSUPPORT}
+    CContSubtract.gridder.WProject.frequencydependent = true
+    CContSubtract.gridder.WProject.variablesupport    = true
+    CContSubtract.gridder.WProject.offsetsupport      = true
+    EOFINNER
+    
+    NCORES=1
+    NPPN=1
+    aprun -n \${NCORES} -N \${NPPN} ${ccontsubtract} -c \${parset} > \${log}
+    err=\$?
+    rejuvenate ${msSciSL}
+    extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} contsub_spectral_B${BEAM} "txt,csv"
+    if [ \$err != 0 ]; then
+        exit \$err
+    else
+        touch $CONT_SUB_CHECK_FILE
+    fi
+    
 fi
-
 
 EOFOUTER
