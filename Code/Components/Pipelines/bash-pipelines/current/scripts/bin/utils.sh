@@ -117,6 +117,21 @@ function setImageBaseCont()
     fi
 }
 
+# function to return the imageBase for continuum cubes for a beam, or
+# for the linmos case if $BEAM=all
+function setImageBaseCont()
+{
+    sedstr="s/^i\./$pol\./g"
+    base=`echo ${IMAGE_BASE_CONTCUBE} | sed -e $sedstr`
+    sedstr="s/%p/$pol/g"
+    base=`echo ${base} | sed -e $sedstr`
+    if [ ${BEAM} == "all" ]; then
+        imageBase=${base}.linmos
+    else
+        imageBase=${base}.beam${BEAM}
+    fi
+}
+
 # function to return the imageBase for spectral cubes for a beam, or
 # for the linmos case if $BEAM=all
 function setImageBaseSpectral()
@@ -185,6 +200,16 @@ function findScienceMSnames()
         fi
     fi
 
+    # We now define the name of the calibrated averaged dataset
+    if [ "${KEEP_RAW_AV_MS}" == "true" ]; then
+        # If we are keeping the raw data, need a new MS name
+        sedstr="s/averaged/averaged_cal/g"
+        msSciAvCal=`echo $msSciAv | sed -e $sedstr`
+    else
+        # Otherwise, apply the calibration to the raw data
+        msSciAvCal=$msSciAv
+    fi
+    
     if [ "${GAINS_CAL_TABLE}" == "" ]; then
         # The name of the gains cal table is blank, so turn off
         # selfcal & cal-apply for the SL case

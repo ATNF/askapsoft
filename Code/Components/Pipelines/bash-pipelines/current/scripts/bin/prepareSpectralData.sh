@@ -155,7 +155,7 @@ fi
 
 if [ $DO_IT == true ]; then
 
-    sbatchfile=$slurms/apply_cal_spectralline_beam${BEAM}.sbatch
+    sbatchfile=$slurms/apply_gains_cal_spectralline_beam${BEAM}.sbatch
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -180,8 +180,8 @@ cd $OUTPUT
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 
-parset=${parsets}/apply_cal_spectralline_beam${BEAM}_\${SLURM_JOB_ID}.in
-log=${logs}/apply_cal_spectralline_beam${BEAM}_\${SLURM_JOB_ID}.log
+parset=${parsets}/apply_gains_cal_spectralline_beam${BEAM}_\${SLURM_JOB_ID}.in
+log=${logs}/apply_gains_cal_spectralline_beam${BEAM}_\${SLURM_JOB_ID}.log
 cat > \$parset <<EOFINNER
 Ccalapply.dataset                         = ${msSciSL}
 #

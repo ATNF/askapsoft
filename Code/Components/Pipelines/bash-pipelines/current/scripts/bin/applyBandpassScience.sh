@@ -47,7 +47,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_APPLY_BANDPASS}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --job-name=calapply${BEAM}
+#SBATCH --job-name=bpcalapply${BEAM}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-applyBandpass-%j.out

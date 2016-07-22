@@ -53,6 +53,9 @@ for FIELD in ${FIELD_LIST}; do
         # an empty file that will indicate that the bandpass has been done
         BANDPASS_CHECK_FILE="${OUTPUT}/Checkfiles/BANDPASS_APPLIED_BEAM${BEAM}"
         # an empty file that will indicate the gains have been applied to
+        # the averaged (continuum) dataset
+        CONT_GAINS_CHECK_FILE="${OUTPUT}/Checkfiles/GAINS_APPLIED_CONT_BEAM${BEAM}"
+        # an empty file that will indicate the gains have been applied to
         # the spectral-line dataset
         SL_GAINS_CHECK_FILE="${OUTPUT}/Checkfiles/GAINS_APPLIED_SL_BEAM${BEAM}"
         # an empty file that will indicate the continuum has been
@@ -91,6 +94,7 @@ for FIELD in ${FIELD_LIST}; do
 	    . ${PIPELINEDIR}/continuumImageScience.sh
         fi
 
+        . ${PIPELINEDIR}/applyCalContinuumScience.sh
         . ${PIPELINEDIR}/sourcefinding.sh
 
         . ${PIPELINEDIR}/prepareSpectralData.sh

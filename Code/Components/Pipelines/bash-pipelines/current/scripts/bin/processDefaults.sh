@@ -154,6 +154,9 @@ module load askapdata"
     if [ "$JOB_TIME_CONT_IMAGE" == "" ]; then
         JOB_TIME_CONT_IMAGE=${JOB_TIME_DEFAULT}
     fi
+    if [ "$JOB_TIME_CONT_APPLYCAL" == "" ]; then
+        JOB_TIME_CONT_APPLYCAL=${JOB_TIME_DEFAULT}
+    fi
     if [ "$JOB_TIME_SPECTRAL_SPLIT" == "" ]; then
         JOB_TIME_SPECTRAL_SPLIT=${JOB_TIME_DEFAULT}
     fi

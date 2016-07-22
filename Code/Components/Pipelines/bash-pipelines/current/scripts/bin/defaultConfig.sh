@@ -63,6 +63,7 @@ JOB_TIME_FIND_BANDPASS=""
 JOB_TIME_APPLY_BANDPASS=""
 JOB_TIME_AVERAGE_MS=""
 JOB_TIME_CONT_IMAGE=""
+JOB_TIME_CONT_APPLYCAL=""
 JOB_TIME_SPECTRAL_SPLIT=""
 JOB_TIME_SPECTRAL_APPLYCAL=""
 JOB_TIME_SPECTRAL_CONTSUB=""
@@ -151,7 +152,8 @@ DO_FLAG_SCIENCE=true
 DO_APPLY_BANDPASS=true
 DO_AVERAGE_CHANNELS=true
 DO_CONT_IMAGING=true
-DO_SELFCAL=false
+DO_SELFCAL=true
+DO_APPLY_CAL_CONT=true
 DO_SPECTRAL_IMAGING=false
 DO_SPECTRAL_IMSUB=false
 DO_MOSAIC=true
@@ -339,6 +341,7 @@ SELFCAL_MODEL_FLUX_LIMIT=10mJy
 
 # name of the final gains calibration table
 GAINS_CAL_TABLE=cont_gains_cal_beam%b.tab
+KEEP_RAW_AV_MS=true
 
 # base name for images: if IMAGE_BASE_SPECTRAL=i.blah then we'll get
 # image.i.blah, image.i.blah.restored, psf.i.blah etc

@@ -35,7 +35,11 @@
 msNameList=()
 for BEAM in ${BEAMS_TO_USE}; do
     findScienceMSnames
-    msNameList+=($msSciAv)
+    if [ $DO_APPLY_CAL_CONT == true ]; then
+        msNameList+=($msSciAvCal)
+    else
+        msNameList+=($msSciAv)
+    fi
 done
 
 
