@@ -46,7 +46,7 @@
 
 // Local Package includes
 #include "distributedimager/ContinuumImager.h"
-#include "distributedimager/MPIBasicComms.h"
+
 
 using namespace askap;
 using namespace askap::cp;

@@ -56,11 +56,10 @@
 
 // Local includes
 #include "distributedimager/AdviseDI.h"
-#include "distributedimager/IBasicComms.h"
 #include "distributedimager/CalcCore.h"
 #include "messages/ContinuumWorkUnit.h"
 #include "messages/ContinuumWorkRequest.h"
-#include "Tracing.h"
+
 
 //casacore includes
 #include "casacore/ms/MeasurementSets/MeasurementSet.h"
@@ -284,7 +283,7 @@ std::vector<int> ContinuumMaster::getBeams()
 void ContinuumMaster::handleImageParams(askap::scimath::Params::ShPtr params,
                                            unsigned int chan)
 {
-    Tracing::entry(Tracing::WriteImage);
+
     bool doingPreconditioning=false;
     const vector<string> preconditioners=itsParset.getStringVector("preconditioner.Names",std::vector<std::string>());
     for (vector<string>::const_iterator pc = preconditioners.begin(); pc != preconditioners.end(); ++pc) {
@@ -366,7 +365,7 @@ void ContinuumMaster::handleImageParams(askap::scimath::Params::ShPtr params,
         }
     }
 
-    Tracing::exit(Tracing::WriteImage);
+    
 }
 
 

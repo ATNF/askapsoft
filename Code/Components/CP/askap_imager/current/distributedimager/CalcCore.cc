@@ -58,8 +58,7 @@
 #include <utils/MultiDimArrayPlaneIter.h>
 
 // Local includes
-#include "distributedimager/IBasicComms.h"
-#include "distributedimager/Tracing.h"
+
 
 // Using
 using namespace askap;

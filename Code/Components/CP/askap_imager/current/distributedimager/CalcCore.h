@@ -44,7 +44,7 @@
 #include <dataaccess/TableDataSource.h>
 
 // Local includes
-#include "distributedimager/IBasicComms.h"
+
 
 namespace askap {
 namespace cp {

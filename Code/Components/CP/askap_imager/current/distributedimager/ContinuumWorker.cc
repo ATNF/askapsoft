@@ -64,10 +64,7 @@
 
 // Local includes
 #include "distributedimager/AdviseDI.h"
-#include "distributedimager/IBasicComms.h"
-#include "distributedimager/SolverCore.h"
 #include "distributedimager/CalcCore.h"
-#include "distributedimager/Tracing.h"
 #include "distributedimager/MSSplitter.h"
 #include "messages/ContinuumWorkUnit.h"
 #include "messages/ContinuumWorkRequest.h"
@@ -131,7 +128,7 @@ void ContinuumWorker::run(void)
     // Send the initial request for work
     ContinuumWorkRequest wrequest;
     ASKAPLOG_INFO_STR(logger,"Worker is sending request for work");
-    const int nchanpercore = itsParset.getInt32("nchanpercore", 1);
+
 
 
 
@@ -324,7 +321,7 @@ void ContinuumWorker::buildSpectralCube() {
         root = "psf.image";
         std::string psf_image_name = root + std::string(".ch.") \
         + utility::toString(workUnits[0].get_globalChannel());
-        root = "restored";
+        root = "image.restored";
         std::string restored_image_name = root + std::string(".ch.") \
         + utility::toString(workUnits[0].get_globalChannel());
         // Only create these if we are restoring, as that is when they get made
@@ -358,10 +355,10 @@ void ContinuumWorker::buildSpectralCube() {
     // so you can increment the workUnit until the frequency changes - then you know you
     // have all the workunits
 
-    double channelFrequency = workUnits[workUnitCount].get_channelFrequency();
+
 
     for (int chan=0; chan < nchanpercore; ++chan) { // not all of these will have work
-        
+
         if (workUnitCount >= workUnits.size()) {
             ASKAPLOG_INFO_STR(logger, "Out of work with workUnit " << workUnitCount);
             break;
@@ -448,6 +445,9 @@ void ContinuumWorker::buildSpectralCube() {
                 ASKAPLOG_INFO_STR(logger,"Reset normal equations");
                 rootImager.getNE()->reset();
                 // the model is now updated but the NE are empty ... - lets go again
+            }
+            if (writeAtMajorCycle) {
+                ASKAPLOG_WARN_STR(logger,"Write at major cycle not currently supported in this mode");
             }
 
         }
@@ -721,7 +721,9 @@ void ContinuumWorker::processChannels()
 
 
         for (size_t n = 0; n <= nCycles; n++) {
-
+            if (writeAtMajorCycle) {
+                ASKAPLOG_WARN_STR(logger,"Write at major cycle not currently supported in this mode");
+            }
 
             ASKAPLOG_INFO_STR(logger,"Worker waiting to receive new model");
             rootImager.receiveModel();

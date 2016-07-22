@@ -40,7 +40,7 @@
 #include <askapparallel/AskapParallel.h>
 
 // Local includes
-#include "distributedimager/IBasicComms.h"
+
 #include "distributedimager/CalcCore.h"
 #include "distributedimager/CubeBuilder.h"
 #include "distributedimager/MSGroupInfo.h"
@@ -83,7 +83,7 @@ class ContinuumMaster {
         /// @param[in] parset   the parameterset to use as input.
         /// @return a vector containing in each element one dataset.
         std::vector<std::string> getDatasets(const LOFAR::ParameterSet& itsParset);
-    
+
         std::vector<int> getBeams(void);
 
         void handleImageParams(askap::scimath::Params::ShPtr params, unsigned int chan);

@@ -40,7 +40,7 @@
 #include <gridding/IVisGridder.h>
 
 // Local includes
-#include "distributedimager/IBasicComms.h"
+
 #include "distributedimager/MSSplitter.h"
 #include "distributedimager/CalcCore.h"
 #include "messages/ContinuumWorkUnit.h"
@@ -124,7 +124,7 @@ class ContinuumWorker
         void storeBeam(const unsigned int globalChannel);
 
         std::map<unsigned int, casa::Vector<casa::Quantum<double> > > itsBeamList;
-        
+
         unsigned int itsBeamReferenceChannel;
         void logBeamInfo();
 

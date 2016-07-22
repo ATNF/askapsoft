@@ -39,7 +39,7 @@
 #include <Common/ParameterSet.h>
 
 // Local includes
-#include "distributedimager/IBasicComms.h"
+
 #include "distributedimager/ContinuumMaster.h"
 #include "distributedimager/ContinuumWorker.h"
 
