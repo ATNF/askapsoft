@@ -46,7 +46,7 @@
 
 // Local Package includes
 #include "distributedimager/ContinuumImager.h"
-
+#include "distributedimager/CubeComms.h"
 
 using namespace askap;
 using namespace askap::cp;
@@ -60,7 +60,7 @@ class ImagerApp : public askap::Application
         {
             // Instantiate the comms class
 
-            askap::askapparallel::AskapParallel comms_p(argc, const_cast<const char **>(argv));
+            askap::cp::CubeComms comms_p(argc, const_cast<const char **>(argv));
             StatReporter stats;
 
             try {
