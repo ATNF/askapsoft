@@ -95,6 +95,7 @@ for FIELD in ${FIELD_LIST}; do
 
         . ${PIPELINEDIR}/prepareSpectralData.sh
         . ${PIPELINEDIR}/spectralImageScience.sh
+        . ${PIPELINEDIR}/spectralImContSub.sh
 
     done
 

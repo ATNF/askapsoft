@@ -67,6 +67,7 @@ JOB_TIME_SPECTRAL_SPLIT=""
 JOB_TIME_SPECTRAL_APPLYCAL=""
 JOB_TIME_SPECTRAL_CONTSUB=""
 JOB_TIME_SPECTRAL_IMAGE=""
+JOB_TIME_SPECTRAL_IMCONTSUB=""
 JOB_TIME_LINMOS=""
 JOB_TIME_SOURCEFINDING=""
 JOB_TIME_FITS_CONVERT=""
@@ -152,6 +153,7 @@ DO_AVERAGE_CHANNELS=true
 DO_CONT_IMAGING=true
 DO_SELFCAL=false
 DO_SPECTRAL_IMAGING=false
+DO_SPECTRAL_IMSUB=false
 DO_MOSAIC=true
 DO_SOURCE_FINDING=false
 DO_SOURCE_FINDING_MOSAIC=SETME
@@ -435,6 +437,15 @@ RESTORING_BEAM_SPECTRAL=fit
 RESTORING_BEAM_REFERENCE=mid
 # Log file to record the restoring beam per channel
 RESTORING_BEAM_LOG=beamLog.image.${IMAGE_BASE_SPECTRAL}.txt
+
+# Image-based continuum subtraction
+# Threshold [sigma] to mask outliers prior to fitting ('threshold' parameter) 
+SPECTRAL_IMSUB_THRESHOLD=2.0
+# Order of polynomial to fit ('fit_order' parameter)
+SPECTRAL_IMSUB_FIT_ORDER=2
+# Only use every nth channel ('n_every' parameter)
+SPECTRAL_IMSUB_CHAN_SAMPLING=1
+
 
 ##############################
 # Linear Mosaicking
