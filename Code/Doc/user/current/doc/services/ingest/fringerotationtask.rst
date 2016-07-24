@@ -44,18 +44,16 @@ any additional parameters to those listed in this table.
 |                            |                   |            |apply the delay model. See subsections below for the list of  |
 |                            |                   |            |available methods.                                            |
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
-|fixeddelays                 |vector<double>     |empty vector|If defined, the elements are treated as constant additive     |
-|                            |                   |            |components of the delay model in nanoseconds (e.g. extra cable|
-|                            |                   |            |for a given antenna). The order is that of antenna indices    |
-|                            |                   |            |used in the measurement set, i.e. the order antennas are      |
-|                            |                   |            |listed in the **ANTENNA** subtable of the measurement set. The|
-|                            |                   |            |first value corresponds to antenna 0, the last to antenna     |
-|                            |                   |            |\ **N-1**\ , where **N** is the number of antennas defined.   |
-|                            |                   |            |See **antennaidx** keyword in the main :doc:`index` page for  |
-|                            |                   |            |the way to control index assignments to physical antennas.    |
-|                            |                   |            |If the task encounters antenna index greater or equal to the  |
-|                            |                   |            |size of this vector, the fixed delay is assumed to be zero.   |
-|                            |                   |            |Therefore, the default value is equivalent to no fixed delays.|
+|fixeddelays                 |vector<double>     |empty vector|This is the obsolete way of specifying fixed delays. This     |
+|                            |                   |            |parameter is understood, but not used. A warning is given in  |
+|                            |                   |            |the log if this parameter is present (but value is simply     |
+|                            |                   |            |ignored).                                                     |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|calcuvw                     |bool               |true        |If true (default), this task also calculates UVWs rendering   |
+|                            |                   |            |CalcUVWTask unnecessary. The math required to calculate UVWs  |
+|                            |                   |            |and delay model is very similar (just the reference frame is  |
+|                            |                   |            |different). Therefore, doing these calculations at the same   |
+|                            |                   |            |place allows us to improve the performance.                   |
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
 |refant                      |string             |None        |Reference antenna used in delay and rate application. This    |
 |                            |                   |            |parameter is actually defined at the *method* level, but all  |
@@ -281,10 +279,12 @@ Example
     # update delays when they diverge by more than 500 hardware units
     tasks.FringeRotationTask.params.delaystep = 500
 
+    # just to give an example, this is the obsolete way of specifying fixed delays. It is not supported any more.
+    # Use delay definition in the antenna section (see the main page of ingest pipeline documentation for details)
     # fixed delays in nanoseconds, in the order of increasing antenna indices
     # values below are fixed delays used for antennas ak02, ak04, ak05, ak12, ak13 and ak14
     # (in that order) in the November commissioning run  
-    tasks.FringeRotationTask.params.fixeddelays = [-198.004385, 0, 275.287053, -1018.02295, -1077.35682, 2759.82581]
+    #tasks.FringeRotationTask.params.fixeddelays = [-198.004385, 0, 275.287053, -1018.02295, -1077.35682, 2759.82581]
 
     # update rates when they diverge by more than 50 hardware units
     tasks.FringeRotationTask.params.frratestep = 50

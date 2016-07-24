@@ -273,6 +273,13 @@ stored by Facility Configuration Manager (FCM) and often contains parameters whi
 |                            |                   |            |defined, the default value defined by the                     |
 |                            |                   |            |**antenna.ant.mount** parameter (see above) will be used.     |
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
+|<prefix>.delay              |quantity string    |"0s"        |Optional fixed delay for the given antenna. It is used to     |
+|                            |                   |            |compensate cable delays, delay jumps due to samplers, etc.    |
+|                            |                   |            |Only required by fringe rotation tasks. This is a replacement |
+|                            |                   |            |for ingest-specific **fixeddelay** keyword used in earlier    |
+|                            |                   |            |versions. The value is a quantity string. Units should be     |
+|                            |                   |            |convertible to seconds.                                       |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
 
 Baseline map
 ~~~~~~~~~~~~
@@ -462,16 +469,22 @@ Example
     antenna.ant.mount = equatorial
     antenna.ant12.location.itrf = [-2556496.23395074, 5097333.71443976, -2848187.33832738]
     antenna.ant12.name = ak12
+    antenna.ant12.delay = -1016.9128ns
     antenna.ant13.location.itrf = [-2556407.33285999, 5097064.98559973, -2848756.02202956]
     antenna.ant13.name = ak13
+    antenna.ant13.delay = -1078.21449ns
     antenna.ant14.location.itrf = [-2555972.78569203, 5097233.67554548, -2848839.90236005]
     antenna.ant14.name = ak14
+    antenna.ant14.delay = 2761.49796ns
     antenna.ant2.location.itrf = [-2556109.976515, 5097388.699862, -2848440.12097248]
     antenna.ant2.name = ak02
+    antenna.ant2.delay = -197.211974ns
     antenna.ant4.location.itrf = [-2556087.396082, 5097423.589662, -2848396.867933]
     antenna.ant4.name = ak04
+    antenna.ant4.delay = 1.50248671ns
     antenna.ant5.location.itrf = [-2556028.60799091, 5097451.46862483, -2848399.83113161]
     antenna.ant5.name = ak05
+    antenna.ant5.delay = 275.712668ns
     antennas = [ant2,ant4,ant5,ant12,ant13,ant14]
 
     array.name = ASKAP
