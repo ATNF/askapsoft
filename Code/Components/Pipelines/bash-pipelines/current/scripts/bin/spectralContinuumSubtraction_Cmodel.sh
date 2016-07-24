@@ -165,7 +165,7 @@ if [ \$err != 0 ]; then
 fi
 
 componentsCatalogue=selavy-results.components.xml
-numComp=\`grep "<TR>" ${componentsCatalogue} | wc -l\`
+numComp=\`grep "<TR>" \${componentsCatalogue} | wc -l\`
 if [ \${numComp} -eq 0 ]; then
     # Nothing detected 
     echo "Continuum subtraction : No continuum components found!"
