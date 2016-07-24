@@ -119,7 +119,7 @@ function setImageBaseCont()
 
 # function to return the imageBase for continuum cubes for a beam, or
 # for the linmos case if $BEAM=all
-function setImageBaseCont()
+function setImageBaseContCube()
 {
     sedstr="s/^i\./$pol\./g"
     base=`echo ${IMAGE_BASE_CONTCUBE} | sed -e $sedstr`
