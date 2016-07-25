@@ -169,25 +169,25 @@ else
     parset=${parsets}/contsub_spectralline_beam${BEAM}_\${SLURM_JOB_ID}.in
     log=${logs}/contsub_spectralline_beam${BEAM}_\${SLURM_JOB_ID}.log
     cat > \$parset <<EOFINNER
-    # The measurement set name - this will be overwritten
-    CContSubtract.dataset                             = ${msSciSL}
-    # The model definition
-    CContSubtract.sources.definition                  = \${contsubdir}/${components}
-    # The gridding parameters
-    CContSubtract.gridder.snapshotimaging             = ${GRIDDER_SNAPSHOT_IMAGING}
-    CContSubtract.gridder.snapshotimaging.wtolerance  = ${GRIDDER_SNAPSHOT_WTOL}
-    CContSubtract.gridder.snapshotimaging.longtrack   = ${GRIDDER_SNAPSHOT_LONGTRACK}
-    CContSubtract.gridder.snapshotimaging.clipping    = ${GRIDDER_SNAPSHOT_CLIPPING}
-    CContSubtract.gridder                             = WProject
-    CContSubtract.gridder.WProject.wmax               = ${GRIDDER_WMAX}
-    CContSubtract.gridder.WProject.nwplanes           = ${GRIDDER_NWPLANES}
-    CContSubtract.gridder.WProject.oversample         = ${GRIDDER_OVERSAMPLE}
-    CContSubtract.gridder.WProject.maxfeeds           = 1
-    CContSubtract.gridder.WProject.maxsupport         = ${GRIDDER_MAXSUPPORT}
-    CContSubtract.gridder.WProject.frequencydependent = true
-    CContSubtract.gridder.WProject.variablesupport    = true
-    CContSubtract.gridder.WProject.offsetsupport      = true
-    EOFINNER
+# The measurement set name - this will be overwritten
+CContSubtract.dataset                             = ${msSciSL}
+# The model definition
+CContSubtract.sources.definition                  = \${contsubdir}/${components}
+# The gridding parameters
+CContSubtract.gridder.snapshotimaging             = ${GRIDDER_SNAPSHOT_IMAGING}
+CContSubtract.gridder.snapshotimaging.wtolerance  = ${GRIDDER_SNAPSHOT_WTOL}
+CContSubtract.gridder.snapshotimaging.longtrack   = ${GRIDDER_SNAPSHOT_LONGTRACK}
+CContSubtract.gridder.snapshotimaging.clipping    = ${GRIDDER_SNAPSHOT_CLIPPING}
+CContSubtract.gridder                             = WProject
+CContSubtract.gridder.WProject.wmax               = ${GRIDDER_WMAX}
+CContSubtract.gridder.WProject.nwplanes           = ${GRIDDER_NWPLANES}
+CContSubtract.gridder.WProject.oversample         = ${GRIDDER_OVERSAMPLE}
+CContSubtract.gridder.WProject.maxfeeds           = 1
+CContSubtract.gridder.WProject.maxsupport         = ${GRIDDER_MAXSUPPORT}
+CContSubtract.gridder.WProject.frequencydependent = true
+CContSubtract.gridder.WProject.variablesupport    = true
+CContSubtract.gridder.WProject.offsetsupport      = true
+EOFINNER
     
     NCORES=1
     NPPN=1
