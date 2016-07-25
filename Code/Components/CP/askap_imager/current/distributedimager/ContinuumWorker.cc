@@ -69,6 +69,7 @@
 #include "messages/ContinuumWorkUnit.h"
 #include "messages/ContinuumWorkRequest.h"
 #include "distributedimager/CubeBuilder.h"
+#include "distributedimager/CubeComms.h"
 
 using namespace std;
 using namespace askap::cp;
@@ -80,7 +81,7 @@ using namespace askap::accessors;
 ASKAP_LOGGER(logger, ".ContinuumWorker");
 
 ContinuumWorker::ContinuumWorker(LOFAR::ParameterSet& parset,
-                                       askapparallel::AskapParallel& comms)
+                                       CubeComms& comms)
     : itsParset(parset), itsComms(comms)
 {
     itsGridder_p = VisGridderFactory::make(itsParset);
@@ -311,26 +312,30 @@ void ContinuumWorker::buildSpectralCube() {
     std::string weights_name = root + std::string(".ch.") \
     + utility::toString(workUnits[0].get_globalChannel());
 
+    if (itsComms.isWriter()) {
 
-    itsImageCube.reset(new CubeBuilder(itsParsets[0], nchanpercore, f0, freqinc,img_name));
-    itsPSFCube.reset(new CubeBuilder(itsParsets[0], nchanpercore, f0, freqinc, psf_name));
-    itsResidualCube.reset(new CubeBuilder(itsParsets[0], nchanpercore, f0, freqinc, residual_name));
-    itsWeightsCube.reset(new CubeBuilder(itsParsets[0], nchanpercore, f0, freqinc, weights_name));
+        int nchanperwriter = nchanpercore;
 
-    if (itsParset.getBool("restore", false)) {
-        root = "psf.image";
-        std::string psf_image_name = root + std::string(".ch.") \
-        + utility::toString(workUnits[0].get_globalChannel());
-        root = "image.restored";
-        std::string restored_image_name = root + std::string(".ch.") \
-        + utility::toString(workUnits[0].get_globalChannel());
-        // Only create these if we are restoring, as that is when they get made
-        if (itsDoingPreconditioning) {
-            itsPSFimageCube.reset(new CubeBuilder(itsParsets[0], nchanpercore, f0, freqinc, psf_image_name));
+        itsImageCube.reset(new CubeBuilder(itsParsets[0], nchanperwriter, f0, freqinc,img_name));
+        itsPSFCube.reset(new CubeBuilder(itsParsets[0], nchanperwriter, f0, freqinc, psf_name));
+        itsResidualCube.reset(new CubeBuilder(itsParsets[0], nchanperwriter, f0, freqinc, residual_name));
+        itsWeightsCube.reset(new CubeBuilder(itsParsets[0], nchanperwriter, f0, freqinc, weights_name));
+
+
+        if (itsParset.getBool("restore", false)) {
+            root = "psf.image";
+            std::string psf_image_name = root + std::string(".ch.") \
+            + utility::toString(workUnits[0].get_globalChannel());
+            root = "image.restored";
+            std::string restored_image_name = root + std::string(".ch.") \
+            + utility::toString(workUnits[0].get_globalChannel());
+            // Only create these if we are restoring, as that is when they get made
+            if (itsDoingPreconditioning) {
+                itsPSFimageCube.reset(new CubeBuilder(itsParsets[0], nchanpercore, f0, freqinc, psf_image_name));
+            }
+            itsRestoredCube.reset(new CubeBuilder(itsParsets[0], nchanpercore, f0, freqinc, restored_image_name));
         }
-        itsRestoredCube.reset(new CubeBuilder(itsParsets[0], nchanpercore, f0, freqinc, restored_image_name));
     }
-
     /// What are the plans for the deconvolution?
     ASKAPLOG_INFO_STR(logger,"Ascertaining Cleaning Plan");
     const bool writeAtMajorCycle = itsParsets[0].getBool("Images.writeAtMajorCycle",false);
@@ -464,8 +469,12 @@ void ContinuumWorker::buildSpectralCube() {
             rootImager.restoreImage();
         }
         ASKAPLOG_INFO_STR(logger,"writing channel into cube");
-
-        handleImageParams(rootImager.params(), workUnits[workUnitCount-1].get_localChannel());
+        if (itsComms.isWriter()) {
+            handleImageParams(rootImager.params(), workUnits[workUnitCount-1].get_localChannel());
+        }
+        else {
+            /// send the unit to the writer ....
+        }
         /// outside the clean-loop write out the slice
 
 

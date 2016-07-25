@@ -46,6 +46,12 @@ namespace cp {
             /// @param argc Number of command line inputs
             /// @param argv Command line inputs
             CubeComms(int argc, const char** argv);
+
+            /// @brief isWriter
+            /// @details This bool can be tested to find out whether the current
+            /// rank is a writer
+            bool isWriter();
+            
             ~CubeComms();
 
 

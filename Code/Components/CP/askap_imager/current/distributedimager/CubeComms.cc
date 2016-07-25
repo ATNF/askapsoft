@@ -48,3 +48,7 @@ CubeComms::CubeComms(int argc, const char** argv) : AskapParallel(argc, const_ca
 CubeComms::~CubeComms() {
     ASKAPLOG_DEBUG_STR(logger,"Destructor");
 }
+bool CubeComms::isWriter() {
+    ASKAPLOG_DEBUG_STR(logger,"Providing writer status");
+    return true;
+}

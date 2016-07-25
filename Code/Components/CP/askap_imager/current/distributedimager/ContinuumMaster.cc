@@ -57,6 +57,7 @@
 // Local includes
 #include "distributedimager/AdviseDI.h"
 #include "distributedimager/CalcCore.h"
+#include "distributedimager/CubeComms.h"
 #include "messages/ContinuumWorkUnit.h"
 #include "messages/ContinuumWorkRequest.h"
 
@@ -72,7 +73,7 @@ using namespace askap;
 ASKAP_LOGGER(logger, ".ContinuumMaster");
 
 ContinuumMaster::ContinuumMaster(LOFAR::ParameterSet& parset,
-                                       askapparallel::AskapParallel& comms)
+                                       CubeComms& comms)
     : itsParset(parset), itsComms(comms), itsBeamList()
 {
 }
@@ -159,8 +160,6 @@ void ContinuumMaster::run(void)
     // But I dont want to run Cadvise as it is too specific to the old imaging requirements
 
 
-
-
     if (nCycles == 0) {
         synthesis::ImagerParallel imager(itsComms, diadvise.getParset());
         ASKAPLOG_INFO_STR(logger, "Master beginning single cycle");
@@ -169,7 +168,6 @@ void ContinuumMaster::run(void)
         imager.receiveNE();
 
         /// No Minor Cycle to mimic cimager
-
 
         /// Implicit receive in here
 
@@ -228,10 +226,6 @@ void ContinuumMaster::run(void)
         }
 
     }
-
-
-
-
 
     logBeamInfo();
 
@@ -365,7 +359,7 @@ void ContinuumMaster::handleImageParams(askap::scimath::Params::ShPtr params,
         }
     }
 
-    
+
 }
 
 

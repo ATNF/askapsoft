@@ -32,7 +32,7 @@
 #include <string>
 
 // ASKAPsoft includes
-#include <askapparallel/AskapParallel.h>
+
 #include <Common/ParameterSet.h>
 #include <fitting/INormalEquations.h>
 #include <fitting/Params.h>
@@ -45,7 +45,7 @@
 #include "distributedimager/CalcCore.h"
 #include "messages/ContinuumWorkUnit.h"
 #include "distributedimager/CubeBuilder.h"
-
+#include "distributedimager/CubeComms.h"
 namespace askap {
 namespace cp {
 
@@ -54,7 +54,7 @@ class ContinuumWorker
     {
     public:
         ContinuumWorker(LOFAR::ParameterSet& parset,
-                           askap::askapparallel::AskapParallel& comms);
+                           CubeComms& comms);
         ~ContinuumWorker();
 
         void run(void);
@@ -92,7 +92,7 @@ class ContinuumWorker
         LOFAR::ParameterSet& itsParset;
 
         // Communications class
-        askap::askapparallel::AskapParallel& itsComms;
+        CubeComms& itsComms;
 
         // Pointer to the gridder
         askap::synthesis::IVisGridder::ShPtr itsGridder_p;

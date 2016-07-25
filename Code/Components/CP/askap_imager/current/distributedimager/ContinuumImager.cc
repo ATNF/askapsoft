@@ -49,7 +49,7 @@ using namespace askap::cp;
 using namespace askap;
 
 ContinuumImager::ContinuumImager(LOFAR::ParameterSet& parset,
-                                       askap::askapparallel::AskapParallel& comms) :
+                                       CubeComms& comms) :
     itsParset(parset), itsComms(comms)
 {
     if (isMaster()) {

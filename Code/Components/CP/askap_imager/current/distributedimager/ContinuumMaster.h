@@ -37,12 +37,13 @@
 #include <boost/scoped_ptr.hpp>
 #include <Common/ParameterSet.h>
 #include <fitting/Params.h>
-#include <askapparallel/AskapParallel.h>
+
 
 // Local includes
 
 #include "distributedimager/CalcCore.h"
 #include "distributedimager/CubeBuilder.h"
+#include "distributedimager/CubeComms.h"
 #include "distributedimager/MSGroupInfo.h"
 
 namespace askap {
@@ -51,7 +52,7 @@ namespace cp {
 class ContinuumMaster {
     public:
         ContinuumMaster(LOFAR::ParameterSet& parset,
-                           askapparallel::AskapParallel& comms);
+                           CubeComms& comms);
         ~ContinuumMaster();
 
         void run(void);
@@ -93,7 +94,7 @@ class ContinuumMaster {
         LOFAR::ParameterSet& itsParset;
 
         /// Communications class
-        askapparallel::AskapParallel& itsComms;
+        CubeComms& itsComms;
 
         /// The rest of these are for the Spectral line case - which I haven't added yet Ord-6/2016
         MSGroupInfo isMSGroupInfo;

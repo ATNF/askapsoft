@@ -29,9 +29,10 @@
 
 // ASKAPsoft includes
 #include <Common/ParameterSet.h>
-#include <askapparallel/AskapParallel.h>
+
 
 // Local package includes
+#include <distributedimager/CubeComms.h>
 
 namespace askap {
 namespace cp {
@@ -39,7 +40,7 @@ namespace cp {
 /// @brief Main class for the Continuum version of the distributed imager.
 ///        It is essentially a version of the SpectralLineImager that has a minor
 ///        cycle performed centrally
-class ContinuumImager  
+class ContinuumImager
 {
     public:
         /// @brief Construct a Distributed Imager.
@@ -48,16 +49,16 @@ class ContinuumImager
         ///                     the configuration.
         /// @param[in]  comms   an instance of IBasicComms.
         ContinuumImager(LOFAR::ParameterSet& parset,
-                           askap::askapparallel::AskapParallel& comms);
+                           CubeComms& comms);
 
         /// @brief Destructor.
         ~ContinuumImager();
 
-        /// @brief Run method 
+        /// @brief Run method
         void run(void);
 
     private:
-        
+
         // Returns true if the caller is the master process,
         // else false.
         bool isMaster(void);
@@ -69,10 +70,10 @@ class ContinuumImager
         LOFAR::ParameterSet& itsParset;
 
         // Communications class
-        askap::askapparallel::AskapParallel& itsComms;
+        CubeComms& itsComms;
 }; // end class
 
-}; // end cp 
+}; // end cp
 }; // end askap
 
 #endif
