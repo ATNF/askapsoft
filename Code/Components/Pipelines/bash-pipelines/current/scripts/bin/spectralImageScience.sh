@@ -148,8 +148,9 @@ cd $OUTPUT
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 
-if [ "${DIRECTION}" != "" ]; then
-    directionDefinition="Simager.Images.image.${imageBase}.direction    = ${DIRECTION}"
+direction="${DIRECTION}"
+if [ "\${direction}" != "" ]; then
+    directionDefinition="Simager.Images.direction                       = \${direction}"
 else
     log=${logs}/mslist_for_simager_\${SLURM_JOB_ID}.log
     NCORES=1
