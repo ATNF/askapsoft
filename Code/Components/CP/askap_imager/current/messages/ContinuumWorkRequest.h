@@ -76,7 +76,7 @@ namespace askap {
                 /// @brief read the object from a blob stream
                 /// @param[in] is the input stream
                 virtual void readFromBlob(LOFAR::BlobIStream& is);
-            
+
                 /// @brief Send this request to the master
                 /// @param[in] master is the id of the node to which the request is sent
                 /// @param[in] comm is the communicator to be used
@@ -92,9 +92,9 @@ namespace askap {
 
                 unsigned int itsGlobalChannel;
                 askap::scimath::Params::ShPtr itsParams;
-                
-            
-                       };
+
+
+            };
 
     };
 };

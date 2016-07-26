@@ -41,7 +41,8 @@ namespace askap {
             public:
                 enum MessageType {
                     SPECTRALLINE_WORKUNIT,
-                    SPECTRALLINE_WORKREQUEST
+                    SPECTRALLINE_WORKREQUEST,
+                    SPECTRALLINE_WORKRESULT
                 };
 
                 /// @brief Destructor.

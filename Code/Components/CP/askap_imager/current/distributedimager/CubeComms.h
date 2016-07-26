@@ -33,6 +33,7 @@
 
 ///ASKAP includes ...
 #include <askapparallel/AskapParallel.h>
+#include "messages/IMessage.h"
 
 namespace askap {
 namespace cp {
@@ -51,11 +52,35 @@ namespace cp {
             /// @details This bool can be tested to find out whether the current
             /// rank is a writer
             bool isWriter();
-            
+            /// @brief adds a writer to the list by rank
+            /// @details This adds a rank to a vector of ranks
+            /// each is the rank of a writer
+            void addWriter(unsigned int writer_rank);
+            /// @brief increments a counter (one for each rank)
+            /// @details Takes the index of the writer.
+            /// FIXME: Change this to a map
+
+            void addChannelToWriter(unsigned int writer_index);
+
+            /// @copydoc IBasicComms::sendMessage()
+            void sendMessage(const IMessage& msg, int dest);
+
+            /// @copydoc IBasicComms::receiveMessage()
+            void receiveMessage(IMessage& msg, int source);
+
+            /// @copydoc IBasicComms::receiveMessageAnySrc(IMessage&)
+            void receiveMessageAnySrc(IMessage& msg);
+
+            /// @copydoc IBasicComms::receiveMessageAnySrc(IMessage&,int&)
+            void receiveMessageAnySrc(IMessage& msg, int& actualSource);
+
             ~CubeComms();
 
-
-
+        private:
+            // Add a byte offset to the  specified pointer, returning the result
+            void* addByteOffset(const void *ptr, size_t offset) const;
+            std::vector<unsigned int> writers;
+            std::vector<unsigned int> channelsToWrite;
     };
 }
 }

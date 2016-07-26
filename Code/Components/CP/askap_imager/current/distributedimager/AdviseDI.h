@@ -31,6 +31,7 @@
 #define ASKAP_IMAGER_ADVISE_DI_H
 
 #include <messages/ContinuumWorkUnit.h>
+#include <distributedimager/CubeComms.h>
 
 #include <Common/ParameterSet.h>
 #include <parallel/MEParallelApp.h>
@@ -75,7 +76,7 @@ namespace askap {
             /// @param comms communication object
             /// @param parset ParameterSet for inputs
 
-            AdviseDI(askap::askapparallel::AskapParallel& comms, const LOFAR::ParameterSet& parset);
+            AdviseDI(askap::cp::CubeComms& comms, const LOFAR::ParameterSet& parset);
 
             /// @brief Add the missing parameters
             /// @details Add whatever details we require for both master and

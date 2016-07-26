@@ -75,6 +75,7 @@ namespace askap {
                 void set_channelFrequency(double freq);
                 void set_channelWidth(double width);
                 void set_beam(unsigned int beam);
+                void set_writer(unsigned int writer);
 
                 // Getters
                 PayloadType get_payloadType(void) const;
@@ -84,7 +85,8 @@ namespace askap {
                 double get_channelFrequency(void) const;
                 double get_channelWidth(void) const;
                 unsigned int get_beam() const;
-
+                unsigned int get_writer() const;
+                
                 // Serializer functions
 
                 /// @brief write the object to a blob stream
@@ -118,6 +120,7 @@ namespace askap {
                 double itsChannelFrequency;
                 unsigned int itsBeam;
                 double itsChannelWidth;
+                int itsWriter;
         };
 
     };

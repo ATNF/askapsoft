@@ -94,6 +94,9 @@ void ContinuumWorkUnit::set_beam(unsigned int beam)
 void ContinuumWorkUnit::set_channelWidth(double width) {
     itsChannelWidth = width;
 }
+void ContinuumWorkUnit::set_writer(unsigned int writer) {
+    itsWriter = writer;
+}
 /////////////////////////////////////////////////////////////////////
 // Getters
 /////////////////////////////////////////////////////////////////////
@@ -129,6 +132,10 @@ double ContinuumWorkUnit::get_channelWidth(void) const
 {
     return itsChannelWidth;
 }
+unsigned int ContinuumWorkUnit::get_writer(void) const
+{
+    return itsWriter;
+}
 /////////////////////////////////////////////////////////////////////
 // Serializers
 /////////////////////////////////////////////////////////////////////
@@ -141,6 +148,7 @@ void ContinuumWorkUnit::writeToBlob(LOFAR::BlobOStream& os) const
     os << itsChannelWidth;
     os << itsLocalChannel;
     os << itsBeam;
+    os << itsWriter;
 }
 
 void ContinuumWorkUnit::readFromBlob(LOFAR::BlobIStream& is)
@@ -154,6 +162,7 @@ void ContinuumWorkUnit::readFromBlob(LOFAR::BlobIStream& is)
     is >> itsChannelWidth;
     is >> itsLocalChannel;
     is >> itsBeam;
+    is >> itsWriter;
 
     itsPayloadType = static_cast<PayloadType>(payloadType);
 }

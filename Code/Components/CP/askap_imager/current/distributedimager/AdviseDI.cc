@@ -108,7 +108,7 @@ bool in_range(double end1, double end2, double test) {
 /// application specific information is passed on the command line.
 /// @param comms communication object
 /// @param parset ParameterSet for inputs
-AdviseDI::AdviseDI(askap::askapparallel::AskapParallel& comms, const LOFAR::ParameterSet& parset) :
+AdviseDI::AdviseDI(askap::cp::CubeComms& comms, const LOFAR::ParameterSet& parset) :
     AdviseParallel(comms,parset),itsParset(parset)
 {
     isPrepared = false;
@@ -126,9 +126,14 @@ void AdviseDI::prepare() {
     unsigned int nWorkersPerGroup = nWorkers/itsComms.nGroups();
     unsigned int nGroups = itsComms.nGroups();
     const int nchanpercore = itsParset.getInt32("nchanpercore", 1);
+    const int nwriters = itsParset.getInt32("nwriters", 1);
+    unsigned int nWorkersPerWriter = floor(nWorkers / nwriters);
+
+    if (nWorkersPerWriter < 1) {
+        nWorkersPerWriter = 1;
+    }
 
     casa::uInt srow = 0;
-
     chanFreq.resize(ms.size());
     chanWidth.resize(ms.size());
     effectiveBW.resize(ms.size());
@@ -303,6 +308,12 @@ void AdviseDI::prepare() {
     // we now have a workUnit for each channel in the allocation - but not
     // for each Epoch.
 
+    cp::CubeComms& itsCubeComms = dynamic_cast<cp::CubeComms&> (itsComms);
+
+    for (int wrk = 0; wrk < nWorkersPerGroup; wrk=wrk+nWorkersPerWriter) {
+        int mywriter = floor(wrk/nWorkersPerWriter)*nWorkersPerWriter + 1;
+        itsCubeComms.addWriter(mywriter);
+    }
 
 
 
@@ -310,6 +321,7 @@ void AdviseDI::prepare() {
         ASKAPLOG_INFO_STR(logger,"Allocating frequency channels for worker " << work);
         // loop over the measurement sets and find the local channel number
         // associated with the barycentric channel
+
         vector<double>& thisAllocation = itsAllocatedFrequencies[work];
 
         for (unsigned int frequency=0;frequency < thisAllocation.size();++frequency) {
@@ -327,6 +339,12 @@ void AdviseDI::prepare() {
 
 
                     cp::ContinuumWorkUnit wu;
+
+                    int mywriter = floor(work/nWorkersPerWriter)*nWorkersPerWriter + 1;
+                    int writer_index = floor(work/nWorkersPerWriter);
+                    itsCubeComms.addChannelToWriter(writer_index);
+
+                    wu.set_writer(mywriter);
                     wu.set_payloadType(cp::ContinuumWorkUnit::WORK);
                     wu.set_channelFrequency(thisAllocation[frequency]);
 
@@ -372,6 +390,13 @@ void AdviseDI::prepare() {
             }
         }
     }
+
+    /// Now if required we need to allocate the writers for a parallel writers
+    /// The writers do not need to be dedicated cores - they can write in addition
+    /// to their other duties.
+
+
+
     isPrepared = true;
     ASKAPLOG_INFO_STR(logger, "Prepared the advice");
 }
