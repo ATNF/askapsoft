@@ -28,7 +28,10 @@
 /// @author Stephen Ord <Stephen.Ord@csiro.au>
 ///
 
+#include <limits>
 /// out own header first
+
+
 #include "distributedimager/CubeComms.h"
 #include "messages/IMessage.h"
 
