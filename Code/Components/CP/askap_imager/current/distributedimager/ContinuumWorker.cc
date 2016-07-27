@@ -471,25 +471,28 @@ void ContinuumWorker::buildSpectralCube() {
         ASKAPLOG_INFO_STR(logger,"writing channel into cube");
         if (itsComms.isWriter()) {
             /// write mine
-            handleImageParams(rootImager.params(), workUnits[workUnitCount-1].get_localChannel());
+            handleImageParams(rootImager.params(),  \
+            workUnits[workUnitCount-1].get_globalChannel()-baseChannel);
             /// write everyone elses
-            // need to loop over outstanding channels for this writer
-/* --       FIXME: I have commented out this block to help the compiler 
-            SpectralLineWorkRequest result;
-            int id;
-            int basechannel = workUnits[0].get_globalChannel();
 
-            itsComms.receiveMessageAnySrc(result,id)
-            handleImageParams(result.get_params(),results.get_globalChannel()-baseChannel);
-*/
+            while (itsComms.getOutstanding() > 0 ) {
+
+                ContinuumWorkRequest result;
+                int id;
+            
+
+                result.receiveRequest(id,itsComms);
+                handleImageParams(result.get_params(),result.get_globalChannel()-baseChannel);
+                itsComms.removeChannelFromWriter(itsComms.rank());
+            }
+
         }
         else {
-/*          FIXME: I have commented out this block to help the compiler
-            SpectralLineWorkRequest result;
+
+            ContinuumWorkRequest result;
             result.set_params(rootImager.params());
-            results.set_globalChannel(workUnits[workUnitCount-1].get_globalChannel());
-            itsComms.sendMessage(result,workUnits[workUnitCount-1].get_writer());
-*/
+            result.set_globalChannel(workUnits[workUnitCount-1].get_globalChannel());
+            result.sendRequest(workUnits[workUnitCount-1].get_writer(),itsComms);
 
         }
         /// outside the clean-loop write out the slice

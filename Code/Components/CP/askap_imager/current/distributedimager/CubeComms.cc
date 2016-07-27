@@ -29,6 +29,7 @@
 ///
 
 #include <limits>
+#include <map>
 /// out own header first
 
 
@@ -46,10 +47,6 @@
 
 #include "casacore/casa/OS/Timer.h"
 
-// MPI includes
-#ifdef HAVE_MPI
-#include <mpi.h>
-#endif
 
 ASKAP_LOGGER(logger, ".CubeComms");
 
@@ -57,11 +54,10 @@ using namespace askap;
 using namespace askap::cp;
 
 CubeComms::CubeComms(int argc, const char** argv) : AskapParallel(argc, const_cast<const char **>(argv))
-    {
+{
 
     ASKAPLOG_DEBUG_STR(logger,"Constructor");
-    this->writers.resize(0);
-    this->channelsToWrite.resize(0);
+
 
 }
 CubeComms::~CubeComms() {
@@ -70,188 +66,59 @@ CubeComms::~CubeComms() {
 bool CubeComms::isWriter() {
     ASKAPLOG_DEBUG_STR(logger,"Providing writer status");
     /// see if my rank is in the writers list
-    for (int wr = 0; wr < this->writers.size(); wr++) {
-        if (itsRank == this->writers[wr]) {
+    std::map<int,int>::iterator it = writerMap.begin();
+    for (it=writerMap.begin(); it!=writerMap.end(); ++it) {
+        if (itsRank == it->first) {
             return true;
         }
     }
     return false;
 }
 void CubeComms::addWriter(unsigned int writerRank) {
-    this->writers.push_back(writerRank);
-    unsigned int ch=0;
-    this->channelsToWrite.push_back(ch);
-}
-void CubeComms::addChannelToWriter(unsigned int writerindex) {
-    this->channelsToWrite[writerindex]++;
-}
+    int count = 0;
+    std::pair<std::map<int,int>::iterator,bool> ret;
+    ret = writerMap.insert(std::pair<int,int> (writerRank,count) );
 
-void CubeComms::sendMessage(const IMessage& msg, int dest)
-{
-    // Encode
-
-    std::vector<int8_t> buf;
-    LOFAR::BlobOBufVector<int8_t> bv(buf);
-    LOFAR::BlobOStream out(bv);
-    out.putStart("Message", 1);
-    out << msg;
-    out.putEnd();
-
-
-    int messageType = msg.getMessageType();
-
-    casa::Timer timer;
-    timer.mark();
-    /// askapparallel implements this
-    send(&buf[0], buf.size(), dest, messageType);
-
-    ASKAPLOG_DEBUG_STR(logger, "Sent Message of type " << messageType
-                       << " to rank " << dest << " via MPI in " << timer.real()
-                       << " seconds ");
-}
-#ifdef HAVE_MPI
-
-void CubeComms::receiveMessage(IMessage& msg, int source)
-{
-    // This has to be overloaded because we need to
-    // know how big the message is to size the blob
-    // this is not exposed by the askapparallel method.
-
-    const unsigned int c_maxint = std::numeric_limits<int>::max();
-    int tag = msg.getMessageType();
-    // First receive the size of the payload to be received,
-    // remembering the size parameter passed to this function is
-    // just the maximum size of the buffer, and hence the maximum
-    // number of bytes that can be received.
-    unsigned long payloadSize;
-    MPI_Status status;
-    int result = MPI_Recv(&payloadSize, 1, MPI_UNSIGNED_LONG,
-                          source, tag, MPI_COMM_WORLD, &status);
-
-
-    // The source parameter may be MPI_ANY_SOURCE, so the actual
-    // source needs to be recorded for later use.
-    const int actualSource = status.MPI_SOURCE;
-    if (source != MPI_ANY_SOURCE) {
-        ASKAPCHECK(actualSource == source,
-                "Actual source of message differs from requested source");
-    }
-    // Receive the byte stream
-    std::vector<int8_t> buf;
-    buf.resize(payloadSize);
-    unsigned long size = buf.size();
-
-    // Receive the smaller of size or payloadSize
-    size_t remaining = (payloadSize > size) ? size : payloadSize;
-    void *base_addr = &buf[0];
-    while (remaining > 0) {
-        size_t offset = size - remaining;
-        void* addr = addByteOffset(base_addr, offset);
-
-        if (remaining >= c_maxint) {
-            result = MPI_Recv(addr, c_maxint, MPI_BYTE, \
-                              actualSource, tag, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            remaining -= c_maxint;
-        }
-
-        else {
-            result = MPI_Recv(addr, remaining, MPI_BYTE, \
-                         actualSource, tag, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            remaining = 0;
-        }
+    if (ret.second==false) {
+        ASKAPLOG_WARN_STR(logger, "element '" << writerRank << "' already existed");
     }
 
-    // Decode
-
-    LOFAR::BlobIBufVector<int8_t> bv(buf);
-    LOFAR::BlobIStream in(bv);
-    int version = in.getStart("Message");
-    ASKAPASSERT(version == 1);
-    in >> msg;
-    in.getEnd();
-
 }
-void CubeComms::receiveMessageAnySrc(IMessage& msg, int& actualSource)
-{
-    // This has to be overloaded because we need to
-    // know how big the message is to size the blob
-    // this is not exposed by the askapparallel method.
+void CubeComms::addChannelToWriter(unsigned int writerRank) {
 
-    const unsigned int c_maxint = std::numeric_limits<int>::max();
-    int tag = msg.getMessageType();
-    // First receive the size of the payload to be received,
-    // remembering the size parameter passed to this function is
-    // just the maximum size of the buffer, and hence the maximum
-    // number of bytes that can be received.
-    unsigned long payloadSize;
-    MPI_Status status;
-    int result = MPI_Recv(&payloadSize, 1, MPI_UNSIGNED_LONG,
-                          MPI_ANY_SOURCE, tag, MPI_COMM_WORLD, &status);
-
-
-    // The source parameter may be MPI_ANY_SOURCE, so the actual
-    // source needs to be recorded for later use.
-    actualSource = status.MPI_SOURCE;
-
-    // Receive the byte stream
-    std::vector<int8_t> buf;
-    buf.resize(payloadSize);
-    unsigned long size = buf.size();
-    void *base_addr = &buf[0];
-    // Receive the smaller of size or payloadSize
-    size_t remaining = (payloadSize > size) ? size : payloadSize;
-
-    while (remaining > 0) {
-        size_t offset = size - remaining;
-        void* addr = addByteOffset(base_addr, offset);
-
-        if (remaining >= c_maxint) {
-            result = MPI_Recv(addr, c_maxint, MPI_BYTE, \
-                              actualSource, tag, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            remaining -= c_maxint;
-        } else {
-            result = MPI_Recv(addr, remaining, MPI_BYTE, \
-                         actualSource, tag, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            remaining = 0;
-        }
+    std::map<int,int>::iterator it;
+    it = writerMap.find(writerRank);
+    if (it != writerMap.end()) {
+        int oldcount = it->second;
+        int newcount = oldcount+1;
+        writerMap.erase (it);
+        std::pair<std::map<int,int>::iterator,bool> ret;
+        ret = writerMap.insert(std::pair<int,int> (writerRank,newcount) );
+    }
+    else {
+        ASKAPLOG_WARN_STR(logger,"Adding channel to non-existent writer");
 
     }
 
-    // Decode
+}
+void CubeComms::removeChannelFromWriter(unsigned int writerRank) {
 
-    LOFAR::BlobIBufVector<int8_t> bv(buf);
-    LOFAR::BlobIStream in(bv);
-    int version = in.getStart("Message");
-    ASKAPASSERT(version == 1);
-    in >> msg;
-    in.getEnd();
+    std::map<int,int>::iterator it;
+    it = writerMap.find(writerRank);
+    if (it != writerMap.end()) {
+        int oldcount = it->second;
+        int newcount = oldcount-1;
+        writerMap.erase (it);
+        std::pair<std::map<int,int>::iterator,bool> ret;
+        ret = writerMap.insert(std::pair<int,int> (writerRank,newcount) );
+    }
+    else {
+        ASKAPLOG_WARN_STR(logger,"Removing channel from non-existent writer");
 
+    }
 
 }
 
-void CubeComms::receiveMessageAnySrc(IMessage& msg)
-{
-
-    int id;
-    receiveMessageAnySrc(msg, id);
-    return;
-}
-
-#else
-
-/// need some stubs here
-void CubeComms::receiveMessage(IMessage& msg, int source)
-{
-}
-void CubeComms::receiveMessageAnySrc(IMessage& msg, int& actualSource)
-{
-}
-void CubeComms::receiveMessageAnySrc(IMessage& msg)
-{
-
-}
-
-#endif
 
 /// Dont like putting this here - would rather make the MPIComms version public
 void* CubeComms::addByteOffset(const void *ptr, size_t offset) const
@@ -260,4 +127,7 @@ void* CubeComms::addByteOffset(const void *ptr, size_t offset) const
     cptr += offset;
 
     return cptr;
+}
+int CubeComms::getOutstanding() {
+    return writerMap[rank()];
 }

@@ -449,7 +449,10 @@ void MPIComms::checkError(const int error, const std::string location) const
 {
     ASKAPTHROW(AskapError, "MPIComms::checkError() cannot be used - configured without MPI");
 }
-
+void MPIComms::barrier(size_t comm)
+{
+    ASKAPTHROW(AskapError, "MPIComms::barrier() cannot be used - configured without MPI");
+}
 #endif
 
 //////////////////////////////////////////////////////////////////////////

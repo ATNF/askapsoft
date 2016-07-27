@@ -341,8 +341,8 @@ void AdviseDI::prepare() {
                     cp::ContinuumWorkUnit wu;
 
                     int mywriter = floor(work/nWorkersPerWriter)*nWorkersPerWriter + 1;
-                    int writer_index = floor(work/nWorkersPerWriter);
-                    itsCubeComms.addChannelToWriter(writer_index);
+
+                    itsCubeComms.addChannelToWriter(mywriter);
 
                     wu.set_writer(mywriter);
                     wu.set_payloadType(cp::ContinuumWorkUnit::WORK);
