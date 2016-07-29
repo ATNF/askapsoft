@@ -71,10 +71,10 @@ Simager.preconditioner.Wiener.taper             = ${PRECONDITIONER_WIENER_TAPER}
         fi
     fi
     shapeDefinition="# Leave shape definition to advise"
-    if [ "${NUM_PIXELS}" != "" ] && [ $NUM_PIXELS -gt 0 ]; then
-        shapeDefinition="Simager.Images.shape                            = [${NUM_PIXELS}, ${NUM_PIXELS}]"
+    if [ "${NUM_PIXELS_CONT}" != "" ] && [ $NUM_PIXELS_CONT -gt 0 ]; then
+        shapeDefinition="Simager.Images.shape                            = [${NUM_PIXELS_CONT}, ${NUM_PIXELS_CONT}]"
     else
-        echo "WARNING - No valid NUM_PIXELS parameter given.  Not running continuum cube imaging."
+        echo "WARNING - No valid NUM_PIXELS_CONT parameter given.  Not running continuum cube imaging."
         DO_IT=false
     fi
     cellsizeGood=`echo ${CELLSIZE_CONT} | awk '{if($1>0.) print "true"; else print "false";}'`
