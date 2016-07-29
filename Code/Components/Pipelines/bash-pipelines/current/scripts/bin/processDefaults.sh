@@ -169,6 +169,9 @@ module load askapdata"
     if [ "$JOB_TIME_SPECTRAL_IMAGE" == "" ]; then
         JOB_TIME_SPECTRAL_IMAGE=${JOB_TIME_DEFAULT}
     fi
+    if [ "$JOB_TIME_SPECTRAL_IMCONTSUB" == "" ]; then
+        JOB_TIME_SPECTRAL_IMCONTSUB=${JOB_TIME_DEFAULT}
+    fi
     if [ "$JOB_TIME_LINMOS" == "" ]; then
         JOB_TIME_LINMOS=${JOB_TIME_DEFAULT}
     fi
