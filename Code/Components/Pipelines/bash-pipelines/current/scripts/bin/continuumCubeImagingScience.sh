@@ -136,7 +136,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_CONTCUBE_IMAGE}
 #SBATCH --ntasks=${NUM_CPUS_CONTCUBE_SCI}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_CONTCUBE}
-#SBATCH --job-name specimg${BEAM}
+#SBATCH --job-name contcube${BEAM}${POLN}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-contcubeImaging-%j.out
@@ -221,9 +221,9 @@ EOFOUTER
             DEP=`addDep "$DEP" "$ID_CCALAPPLY_SCI"`
             DEP=`addDep "$DEP" "$ID_CAL_APPLY_CONT_SCI"`
 	    ID_CONTCUBE_SCI=`sbatch $DEP $sbatchfile | awk '{print $4}'`
-	    recordJob ${ID_CONTCUBE_SCI} "Make a continuum cube for beam $BEAM of the science observation, with flags \"$DEP\""
+	    recordJob ${ID_CONTCUBE_SCI} "Make a continuum cube in pol $POLN for beam $BEAM of the science observation, with flags \"$DEP\""
         else
-	    echo "Would make a continuum cube for beam $BEAM of the science observation with slurm file $sbatchfile"
+	    echo "Would make a continuum cube in pol $POLN for beam $BEAM of the science observation with slurm file $sbatchfile"
         fi
 
         echo " "
