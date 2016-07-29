@@ -19,6 +19,14 @@ simager task, creating a set of spectral cubes. At this point, no
 mosaicking of these is done, but this will be added in a future
 version of the pipeline.
 
+A final task can perform image-based continuum subtraction. This uses
+the *robust_contsub.py* script in the ACES directory to fit and
+subtract a low-order polynomial to each spectrum in the cube
+separately. This task is intended as a demonstration of this
+capability - there will be an ASKAPsoft equivalent to this in a future
+release. The task assumes that the python script is in *$ACES/tools* -
+if it is not found, the task will not run.
+
 The variables presented below work in the same manner as those for the
 continuum imaging, albeit with names that clearly refer to the
 spectral-imaging. 
@@ -199,4 +207,20 @@ spectral-imaging.
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``RESTORING_BEAM_LOG``                        |  beamLog.IMAGE.txt (with IMAGE  | restore.beamLog                    | The ASCII text file to which will be written the restoring beam   |
 |                                               |  from ``IMAGE_BASE_SPECTRAL``)  | (:doc:`../calim/simager`)          | for each channel. If blank, no such file will be written.         |
++-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
+| **Image-based continuum subtraction**         |                                 |                                    |                                                                   |
++-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
+| ``DO_SPECTRAL_IMSUB``                         | false                           | none                               | Whether to run an image-based continuum-subtraction task on the   |
+|                                               |                                 |                                    | spectral cube after creation.                                     |
++-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
+| ``JOB_TIME_SPECTRAL_IMCONTSUB``               | ``JOB_TIME_DEFAULT`` (12:00:00) | none                               | Time request for image-based continuum subtraction                |
++-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
+| ``SPECTRAL_IMSUB_THRESHOLD``                  | 2.0                             | none ('threshold' parameter in     | Threshold [sigma] to mask outliers prior to fitting the continuum |
+|                                               |                                 | robust_contsub.poly)               | baseline in the iamge-based continuum-subtraction.                |
++-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
+| ``SPECTRAL_IMSUB_FIT_ORDER``                  | 2                               | none ('fit_order' parameter in     | Order of the polynomial to fit to the continuum baseline.         |
+|                                               |                                 | robust_contsub.poly                |                                                                   |
++-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
+| ``SPECTRAL_IMSUB_CHAN_SAMPLING``              | 1                               | none ('n_every' parameter in       | If set to n, we use only every nth channel in the polynomial fit  |
+|                                               |                                 | robust_contsub.poly                | (1 uses every channel).                                           |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+

@@ -236,3 +236,6 @@ Here is a summary of the workflow provided for by these scripts:
   (:doc:`../calim/simager`) is used to do the spectral-line
   imaging. This creates a cube using a large number of processors,
   each independently imaging a single channel.
+
+* There is a new task to remove the continuum from the image by
+  fitting a low-order polynomial to each spectrum independently. 
