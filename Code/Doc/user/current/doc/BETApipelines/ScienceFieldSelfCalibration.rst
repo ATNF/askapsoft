@@ -7,12 +7,12 @@ time. The algorithm here is as follows:
 1. Image the data with cimager
 2. Run source-finding with Selavy with a relatively large threshold
 3. Use the results to calibrate the antenna-based gains by either:
-   a. Create a component parset from the resulting component catalogue
-      and use this parset in ccalibrator, or
-   b. Create a model image from the component catalogue, and use in
-      ccalibrator
-5. Re-run imaging, applying the latest gains table
-6. Repeat steps 2-5 for a given number of loops
+   
+   a. Create a component parset from the resulting component catalogue and use this parset in ccalibrator, or
+   b. Create a model image from the component catalogue, and use in ccalibrator
+      
+4. Re-run imaging, applying the latest gains table
+5. Repeat steps 2-5 for a given number of loops
 
 Each loop gets its own directory, where the intermediate images,
 source-finding results, and gains calibration table are stored. At the
@@ -23,7 +23,7 @@ pipeline).
 +-------------------------------+---------------------------+--------------------------------+----------------------------------------------------------+
 | Variable                      | Default                   | Parset equivalent              | Description                                              |
 +===============================+===========================+================================+==========================================================+
-| ``DO_SELFCAL``                | false                     |                                | Whether to self-calibrate the science data when imaging. |
+| ``DO_SELFCAL``                | true                      | none                           | Whether to self-calibrate the science data when imaging. |
 +-------------------------------+---------------------------+--------------------------------+----------------------------------------------------------+
 | ``SELFCAL_METHOD``            | Cmodel                    | none                           | How to do the self-calibration. There are two options:   |
 |                               |                           |                                | "Cmodel" means create a model image from the             |
@@ -68,3 +68,25 @@ pipeline).
 |                               |                           |                                | and ``DO_APPLY_CAL_SL`` will be set to false.            |
 |                               |                           |                                |                                                          |
 +-------------------------------+---------------------------+--------------------------------+----------------------------------------------------------+
+
+Once the gains solution has been determined, it can be applied
+directly to the continuum measurement set, creating a copy in the
+process. This is necessary for continuum cube processing, and for
+archiving purposes.
+This work is done as a separate slurm job, that starts upon
+completion of the self-calibration job.
+
++-------------------------------+-----------------------------------+--------------------------------+----------------------------------------------------------+
+| Variable                      | Default                           | Parset equivalent              | Description                                              |
++===============================+===================================+================================+==========================================================+
+| ``DO_APPLY_CAL_CONT``         | true                              | none                           | Whether to apply the calibration to the averaged         |
+|                               |                                   |                                | ("continuum") dataset.                                   |
++-------------------------------+-----------------------------------+--------------------------------+----------------------------------------------------------+
+| ``JOB_TIME_CONT_APPLYCAL``    | ``JOB_TIME_DEFAULT`` (12:00:00)   | none                           | Time request for applying the calibration                |
++-------------------------------+-----------------------------------+--------------------------------+----------------------------------------------------------+
+| ``KEEP_RAW_AV_MS``            | true                              | none                           | Whether to make a copy of the averaged MS before applying|
+|                               |                                   |                                | the gains calibration (true), or to just overwrite with  |
+|                               |                                   |                                | the calibrated data (false).                             |
++-------------------------------+-----------------------------------+--------------------------------+----------------------------------------------------------+
+| ``DO_SELFCAL``                | false                             |                                | Whether to self-calibrate the science data when imaging. |
++-------------------------------+-----------------------------------+--------------------------------+----------------------------------------------------------+

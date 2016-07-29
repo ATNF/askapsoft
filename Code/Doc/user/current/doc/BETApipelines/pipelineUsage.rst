@@ -203,7 +203,10 @@ Here is a summary of the workflow provided for by these scripts:
     then used to find bright components, which are then used with
     **ccalibrator** (:doc:`../calim/ccalibrator`) to calibrate the
     gains, and we then re-image with **cimager**, using the
-    calibration solution. This process is repeated a number of times.
+    calibration solution. This process is repeated a number of
+    times. The calibration solution can then be applied directly to
+    the MS using **ccalapply**, optionally creating a copy in the
+    process. 
     
 * Once the image has been made, the source-finder **selavy** can be run on
   it to produce a deeper catalogue of sources.

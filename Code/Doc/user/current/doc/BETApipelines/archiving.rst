@@ -24,9 +24,10 @@ steps:
   data products to the staging directory, and producing an XML file
   detailing the contents of this directory.
   The files copied are all FITS files conforming to a particular
-  pattern, any Selavy catalogues, measurement sets, the thumbnail
-  images, and the stats summary file detailing how the processing
-  tasks went.
+  pattern, any Selavy catalogues, measurement sets (just the averaged
+  MSs, using the calibrated ones if they have been made), the
+  thumbnail images, and the stats summary file detailing how the
+  processing tasks went.
 
 There are a number of user parameters that govern aspects of these
 scripts, and they are detailed here.
