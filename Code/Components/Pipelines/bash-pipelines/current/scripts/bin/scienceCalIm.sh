@@ -97,6 +97,8 @@ for FIELD in ${FIELD_LIST}; do
         . ${PIPELINEDIR}/applyCalContinuumScience.sh
         . ${PIPELINEDIR}/sourcefinding.sh
 
+        . ${PIPELINEDIR}/continuumCubeImagingScience.sh
+
         . ${PIPELINEDIR}/prepareSpectralData.sh
         . ${PIPELINEDIR}/spectralImageScience.sh
         . ${PIPELINEDIR}/spectralImContSub.sh

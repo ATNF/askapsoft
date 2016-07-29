@@ -249,6 +249,20 @@ function find1934MSnames()
 
 }
 
+function getPolList()
+{
+    # Function to return a list of polarisations, separated by
+    # spaces, converted from the user-input list of comma-separated
+    # polarisations for the continuum cubes
+    #  Required inputs:
+    #     * CONTCUBE_POLARISATIONS - something like "I,Q,U,V"
+    #  Returns: $POL_LIST (would convert above to "I Q U V")
+
+    POL_LIST=`echo $CONTCUBE_POLARISATIONS | sed -e 's/,/ /g'`
+
+}
+
+
 #############################
 # CONVERSION TO FITS FORMAT
 

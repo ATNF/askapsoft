@@ -64,6 +64,7 @@ JOB_TIME_APPLY_BANDPASS=""
 JOB_TIME_AVERAGE_MS=""
 JOB_TIME_CONT_IMAGE=""
 JOB_TIME_CONT_APPLYCAL=""
+JOB_TIME_CONTCUBE_IMAGE=""
 JOB_TIME_SPECTRAL_SPLIT=""
 JOB_TIME_SPECTRAL_APPLYCAL=""
 JOB_TIME_SPECTRAL_CONTSUB=""
@@ -154,6 +155,7 @@ DO_AVERAGE_CHANNELS=true
 DO_CONT_IMAGING=true
 DO_SELFCAL=true
 DO_APPLY_CAL_CONT=true
+DO_CONTCUBE_IMAGING=false
 DO_SPECTRAL_IMAGING=false
 DO_SPECTRAL_IMSUB=false
 DO_MOSAIC=true
@@ -277,6 +279,26 @@ MFS_REF_FREQ=""
 # Restoring beam: 'fit' will fit the PSF to determine the appropriate
 # beam, else give a size
 RESTORING_BEAM_CONT=fit
+
+# base name for continuum cubes: if IMAGE_BASE_CONT=i.blah then we'll
+# get image.i.blah, image.i.blah.restored, psf.i.blah etc
+# Polarisations will replace the .i. in the image name using the list
+# in CONTCUBE_POLARISATIONS
+IMAGE_BASE_CONTCUBE=i.contcube
+
+# List of polarisations to make continuum cubes for. The lower-case
+# version of these will go in the image name.
+CONTCUBE_POLARISATIONS="I,Q,U,V"
+
+# Set if there needs to be a rest frequency recorded in the continuum cubes
+REST_FREQUENCY_CONTCUBE=""
+
+# Number of processors for continuum-cube imaging.
+# Leave blank to fit to number of channels
+NUM_CPUS_CONTCUBE_SCI=""
+# Number of processors per node for the spectral-line imaging
+CPUS_PER_CORE_CONTCUBE_IMAGING=20
+
 
 ####################
 # Gridding parameters for continuum imaging

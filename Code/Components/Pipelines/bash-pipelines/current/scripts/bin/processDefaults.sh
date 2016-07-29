@@ -157,6 +157,9 @@ module load askapdata"
     if [ "$JOB_TIME_CONT_APPLYCAL" == "" ]; then
         JOB_TIME_CONT_APPLYCAL=${JOB_TIME_DEFAULT}
     fi
+    if [ "$JOB_TIME_CONTCUBE_IMAGE" == "" ]; then
+        JOB_TIME_CONTCUBE_IMAGE=${JOB_TIME_DEFAULT}
+    fi
     if [ "$JOB_TIME_SPECTRAL_SPLIT" == "" ]; then
         JOB_TIME_SPECTRAL_SPLIT=${JOB_TIME_DEFAULT}
     fi
@@ -340,6 +343,30 @@ module load askapdata"
                [ ${SELFCAL_METHOD} != "Components" ]; then
             SELFCAL_METHOD="Cmodel"
         fi
+    fi
+
+    # Set the polarisation list for the continuum cubes
+    if [ "${CONTCUBE_POLARISATIONS}" == "" ]; then
+        if [ "$DO_CONTCUBE_IMAGING" == "true" ]; then
+            echo "WARNING - No polarisation given for continuum cube imaging. Turning off DO_CONTCUBE_IMAGING"
+            DO_CONTCUBE_IMAGING=false
+        fi
+    else
+        # set the POL_LIST parameter
+        getPolList
+    fi
+
+    # Set the number of CPUs for the continuum cube imaging. Either
+    # set to the number of averaged channels + 1, or use that given in
+    # the config file, limiting to no bigger than this number 
+    maxContCubeCores=`expr $nchanContSci + 1`
+    if [ "${NUM_CPUTS_CONTCUBE_SCI}" == "" ]; then
+        # User has not specified
+        NUM_CPUS_CONTCUBE_SCI=$maxContCubeCores
+    elif [ $NUM_CPUS_CONTCUBE_SCI -gt $maxContCubeCores ]; then
+        # Have more cores than we need - reduce number
+        echo "NOTE - Reducing NUM_CPUS_CONTCUBE_SCI to $maxContCubeCores to match the number of averaged channels"
+        NUM_CPUS_CONTCUBE_SCI=$maxContCubeCores
     fi
     
     ####################
