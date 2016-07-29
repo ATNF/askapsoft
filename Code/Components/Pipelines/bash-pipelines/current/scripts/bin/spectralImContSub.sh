@@ -45,6 +45,13 @@ if [ $CLOBBER == false ] && [ -e ${OUTPUT}/image.${imageBase}.restored.contsub ]
     DO_IT=false
 fi
 
+script_location="$ACES/tools"
+script_name=robust_contsub
+if [ ! -e ${script_location}/${script_name}.py ]; then
+    echo "WARNING - ${script_name}.py not found in $script_location - not running image-based continuum subtraction."
+    DO_IT=false
+fi
+
 if [ $DO_IT == true ]; then
 
     sbatchfile=$slurms/spectral_imcontsub_beam${BEAM}.sbatch
@@ -78,7 +85,9 @@ cat > \$pyscript << EOFINNER
 #!/usr/bin/env python
 
 # Need to import this from ACES
-from robust_contsub import robust_contsub
+import sys
+sys.path.append('${script_location}')
+from ${script_name} import robust_contsub
 
 rc=robust_contsub()
 rc.poly(infile="image.${imageBase}.restored",threshold=${SPECTRAL_IMSUB_THRESHOLD},verbose=True,fit_order=${SPECTRAL_IMSUB_FIT_ORDER},n_every=${SPECTRAL_IMSUB_CHAN_SAMPLING},log_every=10)
