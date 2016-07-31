@@ -45,6 +45,13 @@
 #include "ingestpipeline/sourcetask/VisSource.h"
 #include "ingestpipeline/sourcetask/test/MockMetadataSource.h"
 
+#define GATHER_STATS
+
+#ifdef GATHER_STATS
+// just use to gather statis
+#include <mpi.h>
+#endif
+
 // Using
 using namespace askap;
 using namespace askap::cp;
@@ -64,11 +71,25 @@ public:
       ASKAPLOG_INFO_STR(logger, "Setting up VisSource object for rank="<<rank());
       itsSrc.reset(new VisSource(config(), rank()));
       itsLastBAT=0u;
+      itsMaxBufferUsage = 0u;
 
       for (;hasMore() && (count > 0);--count) {
            ASKAPASSERT(count > 0);
            ASKAPLOG_INFO_STR(logger, "Received "<<expectedCount + 1 - count<<" integration(s) for rank="<<rank());
       }
+      ASKAPLOG_INFO_STR(logger, "Rank "<<rank()<<" peak buffer usage: "<<itsMaxBufferUsage<<" datagrams");
+
+#ifdef GATHER_STATS
+      // gather buffer usage stats and report them only for rank 0
+      int globalBufferUsage = -1;
+      const int status = MPI_Reduce(&itsMaxBufferUsage, &globalBufferUsage, 1, MPI_INT, MPI_MAX, 0, MPI_COMM_WORLD);
+      ASKAPCHECK(status == MPI_SUCCESS, "Erroneous response from MPI_Reduce = "<<status);
+      if (rank() == 0) {
+          ASKAPLOG_INFO_STR(logger, "Peak buffer usage (across all ranks): "<<globalBufferUsage<<" datagrams");
+          std::cout<<"Peak buffer usage (across all ranks): "<<globalBufferUsage<<" datagrams"<<std::endl;
+      }
+#endif
+
       ASKAPCHECK(count == 0, "Early termination detected - perhaps some card stopped streaming data; left over = "<<count);
    }
 private:
@@ -106,6 +127,9 @@ private:
        ASKAPLOG_INFO_STR(logger, "   - rank "<<rank()<<" received "<<nDgReceived<<" datagrams for "<<bat2epoch(itsLastBAT)<<" BAT = "<<std::hex<<itsLastBAT);
        const std::pair<uint32_t, uint32_t> bufferStats = itsSrc->bufferUsage();
        ASKAPLOG_INFO_STR(logger, "   - buffer stats: "<<bufferStats.first<<" datagrams queued out of "<<bufferStats.second<<" possible");
+       if (bufferStats.first > static_cast<uint32_t>(itsMaxBufferUsage)) {
+           itsMaxBufferUsage = bufferStats.first;
+       }
        ASKAPASSERT(itsDatagram);
        itsLastBAT = itsDatagram->timestamp;
        
@@ -138,6 +162,9 @@ private:
 
    /// @brief previous BAT
    uint64_t itsLastBAT;
+
+   /// @brief largest seen number of datagrams in the buffer
+   int itsMaxBufferUsage;
 };
 
 int main(int argc, char *argv[])
