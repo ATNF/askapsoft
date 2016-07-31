@@ -99,14 +99,14 @@ MetadataReceiver::~MetadataReceiver()
     if (itsTopicPrx && itsProxy) {
         itsTopicPrx->unsubscribe(itsProxy);
     }
-    ASKAPLOG_INFO_STR(logger, "destructor of ~MetadataReceiver");
+    ASKAPLOG_DEBUG_STR(logger, "destructor of ~MetadataReceiver");
 }
 
 void MetadataReceiver::publish(
         const askap::interfaces::TimeTaggedTypedValueMap& msg,
         const Ice::Current& /* c */)
 {
-    ASKAPLOG_INFO_STR(logger, "MetadataReceiver::publish");
+    ASKAPLOG_DEBUG_STR(logger, "MetadataReceiver::publish");
     try {
         MetadataConverter converter;
         receive(converter.convert(msg));

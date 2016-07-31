@@ -121,8 +121,10 @@ void IngestPipeline::ingest(void)
         try {
             timer.mark();
             bool endOfStream = ingestOne();
-            ASKAPLOG_DEBUG_STR(logger, "Total cycle execution time "
-                    << timer.real() << "s");
+            if (itsConfig.rank() == 0) {
+                ASKAPLOG_INFO_STR(logger, "Total cycle execution time "
+                       << timer.real() << "s");
+            }
             itsRunning = !endOfStream;
         } catch (InterruptedException&) {
             break;
@@ -140,18 +142,24 @@ void IngestPipeline::ingest(void)
 bool IngestPipeline::ingestOne(void)
 {
     casa::Timer timer;
-    ASKAPLOG_DEBUG_STR(logger, "Waiting for data");
+    //ASKAPLOG_DEBUG_STR(logger, "Waiting for data");
     timer.mark();
     // all ranks are active up front
     ASKAPDEBUGASSERT(itsSource);
     VisChunk::ShPtr chunk(itsSource->next());
-    ASKAPLOG_DEBUG_STR(logger, "Source task execution time " << timer.real() << "s");
+    if (itsConfig.rank() == 0) {
+        ASKAPLOG_INFO_STR(logger, "Source task execution time " << timer.real() << "s");
+    }
     MonitoringSingleton::update<double>("SourceTaskDuration",timer.real(), MonitorPointStatus::OK, "s");
     if (chunk.get() == 0) {
         return true; // Finished
     }
 
-    ASKAPLOG_INFO_STR(logger, "Received one VisChunk. Timestamp: " << chunk->time());
+    if (itsConfig.rank() == 0) {
+        ASKAPLOG_INFO_STR(logger, "Received one VisChunk. Timestamp: " << chunk->time());
+    } else {
+        ASKAPLOG_DEBUG_STR(logger, "Received one VisChunk. Timestamp: " << chunk->time());
+    }
 
     // For each task call process on the VisChunk as long as this rank stays active
     double processingTime = 0.;
@@ -159,8 +167,10 @@ bool IngestPipeline::ingestOne(void)
          if (chunk || itsTasks[i]->isAlwaysActive()) {
              timer.mark();
              itsTasks[i]->process(chunk);
-             ASKAPLOG_DEBUG_STR(logger, itsTasks[i]->getName() << " execution time "
-                   << timer.real() << "s");
+             if (itsConfig.rank() == 0) {
+                 ASKAPLOG_INFO_STR(logger, itsTasks[i]->getName() << " execution time "
+                       << timer.real() << "s");
+             }
              processingTime += timer.real();
          }
     }
