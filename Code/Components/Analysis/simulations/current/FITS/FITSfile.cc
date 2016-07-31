@@ -223,7 +223,8 @@ FITSfile& FITSfile::operator=(const FITSfile &f)
 
 //--------------------------------------------------------
 
-FITSfile::FITSfile(const LOFAR::ParameterSet& parset, bool allocateMemory)
+FITSfile::FITSfile(const LOFAR::ParameterSet& parset, bool allocateMemory):
+    itsParset(parset)
 {
 
     ASKAPLOG_DEBUG_STR(logger, "Defining the FITSfile");
@@ -590,8 +591,9 @@ void FITSfile::processSources()
 
         while (getline(srclist, line),
                 !srclist.eof()) {
-//          ASKAPLOG_DEBUG_STR(logger, "input = " << line);
-
+            if ( itsParset.getBool("echoSources",false) ){
+                ASKAPLOG_DEBUG_STR(logger, "input = " << line);
+            }
             fluxGen.zero();
 
             if (line[0] == '#') {
@@ -696,6 +698,12 @@ void FITSfile::processSources()
                         fluxGen.addSpectrumInt(src, pix[0], pix[1], itsWCS);
                     } else {
                         fluxGen.addSpectrum(src, pix[0], pix[1], itsWCS);
+                    }
+                    if (itsDatabaseOrigin == "POSSUMHI"){
+                        //For the POSSUMHI case, we have *both* the
+                        //continuum and the line emission, so have a
+                        //second flux call to do the line
+                        fluxGen.addSpectrumInt(src, pix[0], pix[1], itsWCS);
                     }
 
                     boost::shared_ptr<FullStokesContinuum> pol;

@@ -234,6 +234,8 @@ class FITSfile {
 
     protected:
 
+    LOFAR::ParameterSet itsParset;
+    
         /// @brief The name of the file to be written to
         std::string itsFileName;
         /// @brief Whether to write to a FITS-format image
