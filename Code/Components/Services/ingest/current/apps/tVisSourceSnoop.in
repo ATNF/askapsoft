@@ -1,0 +1,6 @@
+buffer_size = 124416
+vis_source.max_beamid = 36
+vis_source.max_slice = 3
+vis_source.port = 16433
+vis_source.receive_buffer_size = 67108864
+count = 10
