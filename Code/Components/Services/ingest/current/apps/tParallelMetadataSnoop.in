@@ -1,0 +1,5 @@
+topic = metadata
+ice.locator_host = aktos10.atnf.csiro.au
+ice.locator_port = 4061
+icestorm.topicmanager = IceStorm/TopicManager@IceStorm.TopicManager
+count = 10
