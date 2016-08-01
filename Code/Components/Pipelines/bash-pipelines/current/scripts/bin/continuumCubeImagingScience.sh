@@ -57,7 +57,7 @@ for POLN in $POL_LIST; do
     fi
 
     # Define the image polarisation
-    polarisation="Simager.polarisation                            = [\"${POLN}\"]"
+    polarisation="Simager.Images.polarisation                     = [\"${POLN}\"]"
 
     # Define the preconditioning
     preconditioning="Simager.preconditioner.Names                    = ${PRECONDITIONER_LIST}"
