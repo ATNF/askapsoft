@@ -174,11 +174,14 @@ void VisSource::handle_receive(const boost::system::error_code& error,
         // message for debugging
         if (itsOldTimestamp != itsRecvBuffer->timestamp) {
             itsOldTimestamp = itsRecvBuffer->timestamp;
+/*
+// for debugging, temporary commented out due to performance issues in the logger
 #ifdef ASKAP_DEBUG
             ASKAPLOG_DEBUG_STR(logger, "VisSource("<<itsCard<<"): queuing new timestamp :"<<bat2epoch(itsOldTimestamp)<<" BAT=0x"<<std::hex<<itsOldTimestamp);
 #else
             ASKAPLOG_DEBUG_STR(logger, "VisSource: queuing new timestamp :"<<bat2epoch(itsOldTimestamp)<<" BAT=0x"<<std::hex<<itsOldTimestamp);
 #endif
+*/
         }
         //
 
