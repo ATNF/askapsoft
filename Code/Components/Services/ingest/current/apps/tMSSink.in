@@ -6,9 +6,9 @@ stman.tilencorr = 4
 count = 10
 
 # put number of beams here
-maxbeams = 1
+maxbeams = 36
 # put channels per rank here
-n_channels.0..95 = 216
+n_channels.0..95 = 5184
 
 # just an extract from cpingest.in from one of the actual scheduling blocks,
 # it fills other configuration parameters (required to write a full measurement set)
