@@ -34,7 +34,7 @@ ID_CONTCUBE_SCI=""
 
 for POLN in $POL_LIST; do
 
-    # make a lower-case version of the polarisation, for image
+    # make a lower-case version of the polarisation, for image name
     pol=`echo $POLN | tr '[:upper:]' '[:lower:]'`
 
     # set the $imageBase variable
@@ -49,6 +49,15 @@ for POLN in $POL_LIST; do
         fi
         DO_IT=false
     fi
+
+    if [ ${DO_APPLY_CAL_CONT} == true ]; then
+        msToUse=$msSciAvCal
+    else
+        msToUse=$msSciAv
+    fi
+
+    # Define the image polarisation
+    polarisation="Simager.polarisation                            = [\"${POLN}\"]"
 
     # Define the preconditioning
     preconditioning="Simager.preconditioner.Names                    = ${PRECONDITIONER_LIST}"
@@ -126,7 +135,7 @@ Simager.restore.beamLog                         = ${RESTORING_BEAM_CONT_LOG}"
 
         echo "Imaging the continuum cube, polarisation $POLN, for the science observation"
 
-        sbatchfile=$slurms/science_contcube_imager_beam$BEAM.sbatch
+        sbatchfile=$slurms/science_contcube_imager_beam${BEAM}_${POLN}.sbatch
         cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -135,11 +144,11 @@ ${ACCOUNT_REQUEST}
 ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_CONTCUBE_IMAGE}
 #SBATCH --ntasks=${NUM_CPUS_CONTCUBE_SCI}
-#SBATCH --ntasks-per-node=${CPUS_PER_CORE_CONTCUBE}
+#SBATCH --ntasks-per-node=${CPUS_PER_CORE_CONTCUBE_IMAGING}
 #SBATCH --job-name contcube${BEAM}${POLN}
 ${EMAIL_REQUEST}
 ${exportDirective}
-#SBATCH --output=$slurmOut/slurm-contcubeImaging-%j.out
+#SBATCH --output=$slurmOut/slurm-contcubeImaging-${BEAM}-${POLN}-%j.out
 
 ${askapsoftModuleCommands}
 
@@ -151,24 +160,27 @@ cd $OUTPUT
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 
+ms=${msToUse}
+
 if [ "${DIRECTION}" != "" ]; then
-    directionDefinition="Simager.Images.image.${imageBase}.direction    = ${DIRECTION_SCI}"
+    directionDefinition="Simager.Images.direction                       = ${DIRECTION}"
 else
     log=${logs}/mslist_for_simager_\${SLURM_JOB_ID}.log
     NCORES=1
     NPPN=1
-    aprun -n \${NCORES} -N \${NPPN} $mslist --full ${msSciSL} 1>& \${log}
+    aprun -n \${NCORES} -N \${NPPN} $mslist --full \${ms} 1>& \${log}
     ra=\`grep -A1 RA \$log | tail -1 | awk '{print \$7}'\`
     dec=\`grep -A1 RA \$log | tail -1 | awk '{print \$8}'\`
     eq=\`grep -A1 RA \$log | tail -1 | awk '{print \$9}'\`
     directionDefinition="Simager.Images.direction                       = [\${ra}, \${dec}, \${eq}]"
 fi
 
-parset=${parsets}/science_contcube_imager_beam${BEAM}_\${SLURM_JOB_ID}.in
+parset=${parsets}/science_contcube_imager_beam${BEAM}_${POLN}_\${SLURM_JOB_ID}.in
 cat > \$parset << EOF
-Simager.dataset                                 = ${msSciAvCal}
+Simager.dataset                                 = \${ms}
 #
 Simager.Images.name                             = image.${imageBase}
+${polarisation}
 ${shapeDefinition}
 ${cellsizeDefinition}
 \${directionDefinition}
@@ -194,14 +206,14 @@ ${preconditioning}
 ${restorePars}
 EOF
 
-log=${logs}/science_contcube_imager_beam${BEAM}_\${SLURM_JOB_ID}.log
+log=${logs}/science_contcube_imager_beam${BEAM}_${POLN}_\${SLURM_JOB_ID}.log
 
 # Now run the simager
-NCORES=${NUM_CPUS_CONTCUBEIMG_SCI}
+NCORES=${NUM_CPUS_CONTCUBE_SCI}
 NPPN=${CPUS_PER_CORE_CONTCUBE_IMAGING}
 aprun -n \${NCORES} -N \${NPPN} ${simager} -c \$parset > \$log
 err=\$?
-rejuvenate ${msSciAvCal}
+rejuvenate \${ms}
 rejuvenate *.${imageBase}*
 extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} contcubeImaging_B${BEAM} "txt,csv"
 

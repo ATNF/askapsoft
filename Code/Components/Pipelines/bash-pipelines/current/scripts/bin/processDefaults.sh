@@ -360,7 +360,7 @@ module load askapdata"
     # set to the number of averaged channels + 1, or use that given in
     # the config file, limiting to no bigger than this number 
     maxContCubeCores=`expr $nchanContSci + 1`
-    if [ "${NUM_CPUTS_CONTCUBE_SCI}" == "" ]; then
+    if [ "${NUM_CPUS_CONTCUBE_SCI}" == "" ]; then
         # User has not specified
         NUM_CPUS_CONTCUBE_SCI=$maxContCubeCores
     elif [ $NUM_CPUS_CONTCUBE_SCI -gt $maxContCubeCores ]; then

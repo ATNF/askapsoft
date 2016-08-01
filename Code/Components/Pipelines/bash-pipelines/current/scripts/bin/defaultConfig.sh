@@ -292,6 +292,10 @@ CONTCUBE_POLARISATIONS="I,Q,U,V"
 
 # Set if there needs to be a rest frequency recorded in the continuum cubes
 REST_FREQUENCY_CONTCUBE=""
+RESTORING_BEAM_CONT_REFERENCE=mid
+# Log file to record the restoring beam per channel
+RESTORING_BEAM_CONT_LOG=beamLog.image.${IMAGE_BASE_CONTCUBE}.txt
+
 
 # Number of processors for continuum-cube imaging.
 # Leave blank to fit to number of channels
