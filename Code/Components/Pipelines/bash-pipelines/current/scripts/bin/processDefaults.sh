@@ -77,6 +77,7 @@ if [ "$PROCESS_DEFAULTS_HAS_RUN" != "true" ]; then
             fi
             askapsoftModuleCommands="${askapsoftModuleCommands}
 module use $moduleDir
+module load askapdata
 module load askapsoft${ASKAPSOFT_VERSION}"
         else
             # askapsoft is already available.
@@ -84,21 +85,19 @@ module load askapsoft${ASKAPSOFT_VERSION}"
             #  Otherwise, do nothing
             if [ "${ASKAPSOFT_VERSION}" != "" ]; then
                 askapsoftModuleCommands="# Swapping to the requested askapsoft module
+module use $moduleDir
+module load askapdata
 module swap askapsoft askapsoft${ASKAPSOFT_VERSION}"
                 echo "Will use the askapsoft module askapsoft${ASKAPSOFT_VERSION}"
             else
-                askapsoftModuleCommands="# Using user-defined askapsoft module"
+                askapsoftModuleCommands="# Using user-defined askapsoft module
+module use $moduleDir
+module load askapdata"
                 echo "Will use the askapsoft module defined by your environment (`module list -t 2>&1 | grep askapsoft`)"
             fi
         fi
         echo " "
 
-        # Ensure the askapdata module is loaded
-        if [ "`module list -t 2>&1 | grep askapdata`" == "" ]; then
-            askapsoftModuleCommands="${askapsoftModuleCommands}
-module load askapdata"
-        fi
-        
     else
         askapsoftModuleCommands="# Using ASKAPsoft code tree directly, so no need to load modules"
     fi
