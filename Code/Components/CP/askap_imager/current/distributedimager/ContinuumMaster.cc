@@ -111,23 +111,32 @@ void ContinuumMaster::run(void)
 
     unitParset.replace("Channels",ChannelPar);
 
-    synthesis::AdviseDI diadvise(itsComms,unitParset);
-
-    diadvise.addMissingParameters();
-
     const bool writeAtMajorCycle = unitParset.getBool("Images.writeAtMajorCycle", false);
     const int nCycles = unitParset.getInt32("ncycles", 0);
     const bool localSolver = unitParset.getBool("solverpercore",false);
+    synthesis::AdviseDI diadvise(itsComms,unitParset);
 
-    ASKAPLOG_INFO_STR(logger,"*****");
-    ASKAPLOG_INFO_STR(logger,"Parset" << diadvise.getParset());
-    ASKAPLOG_INFO_STR(logger,"*****");
+    try {
 
-    totalChannels = diadvise.getBaryFrequencies().size();
+        diadvise.addMissingParameters();
 
-    ASKAPLOG_INFO_STR(logger,"AdviseDI reports " << totalChannels << " channels to process");
+        ASKAPLOG_INFO_STR(logger,"*****");
+        ASKAPLOG_INFO_STR(logger,"Parset" << diadvise.getParset());
+        ASKAPLOG_INFO_STR(logger,"*****");
 
-    // get the beams
+        totalChannels = diadvise.getBaryFrequencies().size();
+
+        ASKAPLOG_INFO_STR(logger,"AdviseDI reports " << totalChannels << " channels to process");
+        ASKAPLOG_INFO_STR(logger,"AdviseDI reports " << diadvise.getWorkUnitCount() << " work units to allocate");
+    }
+
+    catch (AskapError& e) {
+        ASKAPLOG_WARN_STR(logger, "Failure adding extra params");
+        ASKAPLOG_WARN_STR(logger, "Exception detail: " << e.what());
+    }
+    catch (...) {
+        ASKAPLOG_WARN_STR(logger, "Unknown exeption thrown in diadvise");
+    }
     size_t beam = theBeams[0];
     // Iterate over all measurement sets
     // Lets sort out the output frames ...

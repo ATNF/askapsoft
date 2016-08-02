@@ -120,7 +120,7 @@ void ContinuumWorkRequest::readFromBlob(LOFAR::BlobIStream& is)
 
 void ContinuumWorkRequest::sendRequest(int master, askapparallel::AskapParallel& comm)
 {
-    
+
     size_t communicator = 0; //default
     std::vector<int8_t> buf;
     LOFAR::BlobOBufVector<int8_t> bv(buf);
@@ -128,20 +128,20 @@ void ContinuumWorkRequest::sendRequest(int master, askapparallel::AskapParallel&
     out.putStart("Message", 1);
     this->writeToBlob(out);
     out.putEnd();
-    
+
     int messageType = this->getMessageType();
-    
+
     // First send the size of the buffer
     const unsigned long size = buf.size();
     comm.send(&size,sizeof(long),master,messageType,communicator);
-    
+
     // Now send the actual byte stream
     comm.send(&buf[0], size * sizeof(int8_t), master, messageType,communicator);
-    
-    
+
+
 }
 void ContinuumWorkRequest::receiveRequest(int& id, askapparallel::AskapParallel& comm) {
-    
+
     unsigned long size = 0;
     size_t communicator = 0; //default
     id = comm.receiveAnySrc(&size, sizeof(long), this->getMessageType(), communicator);

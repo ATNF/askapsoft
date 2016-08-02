@@ -56,6 +56,7 @@ ContinuumImager::ContinuumImager(LOFAR::ParameterSet& parset,
         ASKAPLOG_INFO_STR(logger,
                           "ASKAP Distributed Continuum Imager - " << ASKAP_PACKAGE_VERSION);
     }
+    itsComms.buildCommIndex();
 }
 
 ContinuumImager::~ContinuumImager()
@@ -71,7 +72,7 @@ void ContinuumImager::run(void) {
         ContinuumWorker worker(itsParset,itsComms);
         worker.run();
     }
-    itsComms.barrier();
+    itsComms.barrier(0);
 }
 
 bool ContinuumImager::isMaster(void)

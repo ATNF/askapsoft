@@ -126,16 +126,15 @@ ContinuumWorker::~ContinuumWorker()
 
 void ContinuumWorker::run(void)
 {
+
     // Send the initial request for work
     ContinuumWorkRequest wrequest;
+
     ASKAPLOG_INFO_STR(logger,"Worker is sending request for work");
 
-
-
-
-
-
     wrequest.sendRequest(itsMaster,itsComms);
+
+
     while (1) {
 
         ContinuumWorkUnit wu;
@@ -146,42 +145,71 @@ void ContinuumWorker::run(void)
             break;
         }
         else if (wu.get_payloadType() == ContinuumWorkUnit::NA) {
+            ASKAPLOG_INFO_STR(logger,"Worker has received non applicable allocation");
             sleep(1);
             wrequest.sendRequest(itsMaster,itsComms);
             continue;
         }
         else {
 
-
+            ASKAPLOG_INFO_STR(logger,"Worker has received valid allocation");
             const string ms = wu.get_dataset();
             ASKAPLOG_INFO_STR(logger, "Received Work Unit for dataset " << ms
                               << ", local (topo) channel " << wu.get_localChannel()
                               << ", global (topo) channel " << wu.get_globalChannel()
                               << ", frequency " << wu.get_channelFrequency()/1.e6 << " MHz"
                               << ", width " << wu.get_channelWidth()/1e3 << " kHz");
-            processWorkUnit(wu);
-            ASKAPLOG_INFO_STR(logger,"Worker is sending request for work");
+            try {
+                processWorkUnit(wu);
+            }
+            catch (AskapError& e) {
+                ASKAPLOG_WARN_STR(logger, "Failure processing workUnit");
+                ASKAPLOG_WARN_STR(logger, "Exception detail: " << e.what());
+            }
+
             if (wu.get_payloadType() == ContinuumWorkUnit::LAST) {
+                ASKAPLOG_INFO_STR(logger,"Worker has received last job");
                 break;
             }
             else {
+                ASKAPLOG_INFO_STR(logger,"Worker is sending request for work");
                 wrequest.sendRequest(itsMaster,itsComms);
             }
         }
 
     }
 
-    if (workUnits.size()>=1)
-        processChannels();
+    itsComms.barrier(itsComms.theWorkers());
+    const int nwriters = itsParset.getInt32("nwriters", 1);
+    const int nchanpercore = itsParset.getInt32("nchanpercore", 1);
+    synthesis::AdviseDI advice(itsComms,itsParset);
+    advice.addMissingParameters();
+    advice.updateComms();
 
+
+    if (workUnits.size()>=1) {
+
+        try {
+            processChannels();
+        }
+        catch (AskapError& e) {
+            ASKAPLOG_WARN_STR(logger, "Failure processing the channel allocation");
+            ASKAPLOG_WARN_STR(logger, "Exception detail: " << e.what());
+
+        }
+    }
+    else {
+        ASKAPLOG_WARN_STR(logger,"Data allocations complete but this worker received no work");
+
+    }
 }
-
 void ContinuumWorker::processWorkUnit(ContinuumWorkUnit& wu)
 {
 
 
 
     // This also needs to set the frequencies and directions for all the images
+    ASKAPLOG_INFO_STR(logger,"In processWorkUnit");
     LOFAR::ParameterSet unitParset = itsParset;
 
     char ChannelPar[64];
@@ -214,31 +242,39 @@ void ContinuumWorker::processWorkUnit(ContinuumWorkUnit& wu)
 
         unitParset.replace(param, bstr.str().c_str());
 
-        struct stat buffer;
+        if (itsComms.inGroup(0)) {
 
-        while (stat (outms_flag.c_str(), &buffer) == 0) {
-            // flag file exists - someone is writing
+            struct stat buffer;
 
-            sleep(1);
+            while (stat (outms_flag.c_str(), &buffer) == 0) {
+                // flag file exists - someone is writing
+
+                sleep(1);
+            }
+            if (stat (outms.c_str(), &buffer) == 0) {
+                ASKAPLOG_WARN_STR(logger, "Split file already exists");
+            }
+            else if (stat (outms.c_str(), &buffer) != 0 && stat (outms_flag.c_str(), &buffer) != 0) {
+                // file cannot be read
+
+                // drop trigger
+                ofstream trigger;
+                trigger.open(outms_flag.c_str());
+                trigger.close();
+                MSSplitter mySplitter(unitParset);
+
+                mySplitter.split(ms,outms,wu.get_localChannel()+1,wu.get_localChannel()+1,1,unitParset);
+                unlink(outms_flag.c_str());
+
+            }
+
         }
-        if (stat (outms.c_str(), &buffer) == 0) {
-            ASKAPLOG_WARN_STR(logger, "Split file already exists");
+        ///wait for all groups this rank to get here
+        if (itsComms.nGroups() > 1) {
+            ASKAPLOG_INFO_STR(logger,"Rank " << itsComms.rank() << " at barrier");
+            itsComms.barrier(itsComms.interGroupCommIndex());
+            ASKAPLOG_INFO_STR(logger,"Rank " << itsComms.rank() << " passed barrier");
         }
-        else if (stat (outms.c_str(), &buffer) != 0 && stat (outms_flag.c_str(), &buffer) != 0) {
-            // file cannot be read
-
-            // drop trigger
-            ofstream trigger;
-            trigger.open(outms_flag.c_str());
-            trigger.close();
-            MSSplitter mySplitter(unitParset);
-
-            mySplitter.split(ms,outms,wu.get_localChannel()+1,wu.get_localChannel()+1,1,unitParset);
-            unlink(outms_flag.c_str());
-
-        }
-
-
         wu.set_dataset(outms);
 
 
@@ -248,7 +284,7 @@ void ContinuumWorker::processWorkUnit(ContinuumWorkUnit& wu)
     unitParset.replace("Channels",ChannelPar);
 
 
-    ASKAPLOG_INFO_STR(logger,"getting advice on missing parametrs");
+    ASKAPLOG_INFO_STR(logger,"getting advice on missing parameters");
     synthesis::AdviseDI diadvise(itsComms,unitParset);
     diadvise.addMissingParameters();
     ASKAPLOG_INFO_STR(logger,"advice received");
@@ -256,6 +292,7 @@ void ContinuumWorker::processWorkUnit(ContinuumWorkUnit& wu)
     workUnits.push_back(wu);
     ASKAPLOG_INFO_STR(logger,"storing parset");
     itsParsets.push_back(diadvise.getParset());
+    ASKAPLOG_INFO_STR(logger,"Finished processWorkUnit");
 
 }
 
@@ -283,6 +320,14 @@ void ContinuumWorker::buildSpectralCube() {
     const int nchanpercore = itsParsets[0].getInt32("nchanpercore", 1);
     /// the base channel of this allocation. we know this as the channel allocations
     /// are sorted
+    const int nwriters = itsParsets[0].getInt32("nwriters",1);
+
+    int nWorkers = itsComms.nProcs() -1;
+    int nGroups = itsComms.nGroups();
+    int nchantotal = nWorkers * nchanpercore / nGroups;
+    int nchanperwriter = nchantotal/nwriters;
+    int nworkersperwriter = nWorkers/nwriters;
+
     Quantity f0(workUnits[0].get_channelFrequency(),"Hz");
     /// The width of a channel. THis does <NOT> take account of the variable width
     /// of BArycentric channels
@@ -313,8 +358,6 @@ void ContinuumWorker::buildSpectralCube() {
     + utility::toString(workUnits[0].get_globalChannel());
 
     if (itsComms.isWriter()) {
-
-        int nchanperwriter = nchanpercore;
 
         itsImageCube.reset(new CubeBuilder(itsParsets[0], nchanperwriter, f0, freqinc,img_name));
         itsPSFCube.reset(new CubeBuilder(itsParsets[0], nchanperwriter, f0, freqinc, psf_name));
@@ -470,19 +513,34 @@ void ContinuumWorker::buildSpectralCube() {
         }
         ASKAPLOG_INFO_STR(logger,"writing channel into cube");
         if (itsComms.isWriter()) {
-            /// write mine
+            ASKAPLOG_INFO_STR(logger,"I am a writer");
+            ASKAPLOG_INFO_STR(logger,"I have (including my own) " << itsComms.getOutstanding() << " units to write");
             handleImageParams(rootImager.params(),  \
             workUnits[workUnitCount-1].get_globalChannel()-baseChannel);
+            itsComms.removeChannelFromWriter(itsComms.rank());
             /// write everyone elses
 
-            while (itsComms.getOutstanding() > 0 ) {
+            /// how many should be write out
+            /// there are some number of workers per writer but not all
+            /// may have a channel due to the barycentreing. THere is no
+            /// simple way to calculate this - so if I just wait for nWorkersperWriter
+            /// it should be relatively efficient.
+            int targetOutstanding = itsComms.getOutstanding() - (nworkersperwriter - 1);
+            if (targetOutstanding < 0){
+                targetOutstanding = 0;
+            }
+            ASKAPLOG_INFO_STR(logger,"this iteration target is " << targetOutstanding);
+
+            while (itsComms.getOutstanding()>targetOutstanding){
 
                 ContinuumWorkRequest result;
                 int id;
-            
 
                 result.receiveRequest(id,itsComms);
+                ASKAPLOG_INFO_STR(logger,"I have received a request to write from " << id);
+                ASKAPLOG_INFO_STR(logger,"I am attempting to write channel " << result.get_globalChannel()-baseChannel);
                 handleImageParams(result.get_params(),result.get_globalChannel()-baseChannel);
+                ASKAPLOG_INFO_STR(logger,"I have written the slice from " << id);
                 itsComms.removeChannelFromWriter(itsComms.rank());
             }
 
@@ -495,13 +553,24 @@ void ContinuumWorker::buildSpectralCube() {
             result.sendRequest(workUnits[workUnitCount-1].get_writer(),itsComms);
 
         }
+
         /// outside the clean-loop write out the slice
 
 
     }
-    /// outside the channel loop    donvert the image to FIT
 
-    return;
+    while (itsComms.getOutstanding()>0) {
+
+        ContinuumWorkRequest result;
+        int id;
+        result.receiveRequest(id,itsComms);
+        ASKAPLOG_INFO_STR(logger,"I have received a request to write from " << id);
+        ASKAPLOG_INFO_STR(logger,"I am attempting to write channel " << result.get_globalChannel()-baseChannel);
+        handleImageParams(result.get_params(),result.get_globalChannel()-baseChannel);
+        ASKAPLOG_INFO_STR(logger,"I have written the slice from " << id);
+        itsComms.removeChannelFromWriter(itsComms.rank());
+    }
+
 }
 void ContinuumWorker::handleImageParams(askap::scimath::Params::ShPtr params,
         unsigned int chan)

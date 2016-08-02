@@ -76,7 +76,7 @@ namespace askap {
             /// @param comms communication object
             /// @param parset ParameterSet for inputs
 
-            AdviseDI(askap::cp::CubeComms& comms, const LOFAR::ParameterSet& parset);
+            AdviseDI(askap::cp::CubeComms& comms, LOFAR::ParameterSet& parset);
 
             /// @brief Add the missing parameters
             /// @details Add whatever details we require for both master and
@@ -105,6 +105,8 @@ namespace askap {
 
             cp::ContinuumWorkUnit getAllocation(int id);
 
+            void updateComms();
+
             int getWorkUnitCount() { return itsWorkUnitCount;};
 
             void prepare();
@@ -118,7 +120,7 @@ namespace askap {
 
             int itsWorkUnitCount;
 
-            LOFAR::ParameterSet itsParset;
+            LOFAR::ParameterSet& itsParset;
 
             casa::uInt itsRef;
 
@@ -153,7 +155,7 @@ namespace askap {
             std::vector< std::vector<double> > centre;
 
             std::vector< std::vector<double> > itsAllocatedFrequencies;
-            std::vector< std::stack<cp::ContinuumWorkUnit> > itsAllocatedWork;
+            std::vector< std::vector<cp::ContinuumWorkUnit> > itsAllocatedWork;
 
             int match(int ms_number,  casa::MVFrequency freq);
 

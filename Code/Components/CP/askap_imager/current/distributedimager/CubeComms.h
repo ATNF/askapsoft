@@ -58,7 +58,11 @@ namespace cp {
             /// each is the rank of a writer
             void addWriter(unsigned int writer_rank);
 
+            /// @brief initialises the writer list
+            /// @details By evenly dividing the writing across
+            /// the ranks
 
+            void initWriters(int nwriters, int nchanpercore);
             /// @brief increments a counter (one for each rank)
             /// @details Takes the rank of the writer
             void addChannelToWriter(unsigned int writer_rank);
@@ -67,6 +71,13 @@ namespace cp {
 
             int getOutstanding();
 
+            int anyWork();
+            
+
+            size_t buildCommIndex();
+            /// @brief its communicator for its fellow workers
+            size_t theWorkers() {return itsComrades;};
+
 
             ~CubeComms();
 
@@ -74,7 +85,7 @@ namespace cp {
             // Add a byte offset to the  specified pointer, returning the result
             void* addByteOffset(const void *ptr, size_t offset) const;
             std::map<int,int> writerMap;
-
+            size_t itsComrades;
     };
 }
 }

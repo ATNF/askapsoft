@@ -48,20 +48,59 @@
 #include "casacore/casa/OS/Timer.h"
 
 
+
 ASKAP_LOGGER(logger, ".CubeComms");
 
 using namespace askap;
 using namespace askap::cp;
+
+
 
 CubeComms::CubeComms(int argc, const char** argv) : AskapParallel(argc, const_cast<const char **>(argv))
 {
 
     ASKAPLOG_DEBUG_STR(logger,"Constructor");
 
-
 }
 CubeComms::~CubeComms() {
     ASKAPLOG_DEBUG_STR(logger,"Destructor");
+}
+
+size_t CubeComms::buildCommIndex() {
+
+    const int nWorkers = nProcs() - 1;
+    std::vector<int> ranks(nWorkers, -1);
+
+    for (size_t wrk = 0; wrk < nWorkers; ++wrk) {
+          ranks[wrk] = 1 + wrk;
+     }
+     itsComrades = createComm(ranks);
+     ASKAPLOG_INFO_STR(logger, "Interworker communicator index is "<< itsComrades);
+     return itsComrades;
+}
+void CubeComms::initWriters(int nwriters, int nchanpercore) {
+
+    unsigned int nWorkers = nProcs() - 1;
+    unsigned int nWorkersPerGroup = nWorkers/nGroups();
+    unsigned int nWorkersPerWriter = floor(nWorkers / nwriters);
+
+    if (nWorkersPerWriter < 1) {
+        nWorkersPerWriter = 1;
+    }
+    int channelCount = nWorkersPerWriter * nchanpercore;
+
+    for (int wrk = 0; wrk < nWorkersPerGroup; wrk=wrk+nWorkersPerWriter) {
+        int mywriter = floor(wrk/nWorkersPerWriter)*nWorkersPerWriter + 1;
+        std::pair<std::map<int,int>::iterator,bool> ret;
+
+        ret = writerMap.insert(std::pair<int,int> (mywriter,channelCount) );
+
+        if (ret.second==false) {
+            ASKAPLOG_WARN_STR(logger, "element '" << mywriter << "' already existed");
+        }
+
+    }
+
 }
 bool CubeComms::isWriter() {
     ASKAPLOG_DEBUG_STR(logger,"Providing writer status");
