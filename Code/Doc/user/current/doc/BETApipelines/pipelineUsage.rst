@@ -97,7 +97,6 @@ parset parameter than the environment variable maps to is given.
 * :doc:`BandpassCalibrator`
 * :doc:`ScienceFieldPreparation`
 * :doc:`ScienceFieldContinuumImaging`
-* :doc:`ScienceFieldSelfCalibration`
 * :doc:`ScienceFieldContinuumMosaicking`
 * :doc:`ContinuumSourcefinding`
 * :doc:`ScienceFieldSpectralLineImaging`
@@ -206,10 +205,14 @@ Here is a summary of the workflow provided for by these scripts:
     calibration solution. This process is repeated a number of
     times. The calibration solution can then be applied directly to
     the MS using **ccalapply**, optionally creating a copy in the
-    process. 
-    
-* Once the image has been made, the source-finder **selavy** can be run on
-  it to produce a deeper catalogue of sources.
+    process.
+
+* The continuum dataset can then be optionally imaged as a "continuum
+  cube", using **simager** to preserve the full frequency
+  sampling. This mode can be run for a range of polarisations,
+  creating a cube for each polarisation requested.    
+* Once the continuum image has been made, the source-finder **selavy**
+  can be run on it to produce a deeper catalogue of sources.
 * Once all beams have been done, they are all mosaicked together using
   **linmos** (:doc:`../calim/linmos`). This applies a primary-beam
   correction — you need to provide the beam arrangement name and

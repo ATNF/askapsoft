@@ -101,9 +101,9 @@ spectral-imaging.
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``CPUS_PER_CORE_SPEC_IMAGING``                | 20                              | none                               | The number of processors per node to use (max 20).                |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``IMAGE_BASE_SPECTRAL``                       | i.cube                          | Helps form                         | The base name for image cubes: if ``IMAGE_BASE_SPECTRAL=i.blah``  |
-|                                               |                                 | Images.name                        | then we'll get image.i.blah, image.i.blah.restored, psf.i.blah etc|
-|                                               |                                 | (:doc:`../calim/simager`)          |                                                                   |
+| ``IMAGE_BASE_SPECTRAL``                       | i.cube                          | Helps form Images.name             | The base name for image cubes: if ``IMAGE_BASE_SPECTRAL=i.blah``  |
+|                                               |                                 | (:doc:`../calim/simager`)          | then we'll get image.i.blah, image.i.blah.restored, psf.i.blah etc|
+|                                               |                                 |                                    |                                                                   |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``DIRECTION_SCI``                             | none                            | Images.direction                   | The direction parameter for the image cubes, i.e. the central     |
 |                                               |                                 | (:doc:`../calim/simager`)          | position. Can be left out, in which case it will be determined    |
