@@ -280,29 +280,6 @@ MFS_REF_FREQ=""
 # beam, else give a size
 RESTORING_BEAM_CONT=fit
 
-# base name for continuum cubes: if IMAGE_BASE_CONT=i.blah then we'll
-# get image.i.blah, image.i.blah.restored, psf.i.blah etc
-# Polarisations will replace the .i. in the image name using the list
-# in CONTCUBE_POLARISATIONS
-IMAGE_BASE_CONTCUBE=i.contcube
-
-# List of polarisations to make continuum cubes for. The lower-case
-# version of these will go in the image name.
-CONTCUBE_POLARISATIONS="I,Q,U,V"
-
-# Set if there needs to be a rest frequency recorded in the continuum cubes
-REST_FREQUENCY_CONTCUBE=""
-RESTORING_BEAM_CONT_REFERENCE=mid
-# Log file to record the restoring beam per channel
-RESTORING_BEAM_CONT_LOG=beamLog.image.${IMAGE_BASE_CONTCUBE}.txt
-
-
-# Number of processors for continuum-cube imaging.
-# Leave blank to fit to number of channels
-NUM_CPUS_CONTCUBE_SCI=""
-# Number of processors per node for the spectral-line imaging
-CPUS_PER_CORE_CONTCUBE_IMAGING=20
-
 
 ####################
 # Gridding parameters for continuum imaging
@@ -334,6 +311,7 @@ PRECONDITIONER_LIST="[Wiener, GaussianTaper]"
 PRECONDITIONER_GAUSS_TAPER="[30arcsec, 30arcsec, 0deg]"
 PRECONDITIONER_WIENER_ROBUSTNESS=0.5
 PRECONDITIONER_WIENER_TAPER=""
+
 
 ####################
 # Self-calibration parameters
@@ -369,13 +347,48 @@ SELFCAL_MODEL_FLUX_LIMIT=10mJy
 GAINS_CAL_TABLE=cont_gains_cal_beam%b.tab
 KEEP_RAW_AV_MS=true
 
-# base name for images: if IMAGE_BASE_SPECTRAL=i.blah then we'll get
-# image.i.blah, image.i.blah.restored, psf.i.blah etc
-IMAGE_BASE_SPECTRAL=i.spectral
-# number of pixels on the side of the images to be created
-NUM_PIXELS_SPECTRAL=2048
-# Size of the pixels in arcsec
-CELLSIZE_SPECTRAL=10
+###################
+# Parameters for continuum cube imaging
+
+# base name for continuum cubes: if IMAGE_BASE_CONT=i.blah then we'll
+# get image.i.blah, image.i.blah.restored, psf.i.blah etc
+# Polarisations will replace the .i. in the image name using the list
+# in CONTCUBE_POLARISATIONS
+IMAGE_BASE_CONTCUBE=i.contcube
+
+# List of polarisations to make continuum cubes for. The lower-case
+# version of these will go in the image name.
+CONTCUBE_POLARISATIONS="I,Q,U,V"
+
+# Set if there needs to be a rest frequency recorded in the continuum cubes
+REST_FREQUENCY_CONTCUBE=""
+# Restoring beam for continuum cubes: 'fit' will fit the PSF to
+# determine the appropriate beam, else give a size
+RESTORING_BEAM_CONTCUBE=fit
+# Reference channel for recording the restoring beam of the cube
+RESTORING_BEAM_CONTCUBE_REFERENCE=mid
+
+# Number of processors for continuum-cube imaging.
+# Leave blank to fit to number of channels
+NUM_CPUS_CONTCUBE_SCI=""
+# Number of processors per node for the spectral-line imaging
+CPUS_PER_CORE_CONTCUBE_IMAGING=20
+
+# Cleaning parameters for spectral-line imaging
+# Which solver to use
+SOLVER_CONTCUBE=Clean
+# default clean algorithm is Basisfunction, as we don't need the
+# multi-frequency part that is used by BasisfunctionMFS
+CLEAN_CONTCUBE_ALGORITHM=Basisfunction
+CLEAN_CONTCUBE_MINORCYCLE_NITER=500
+CLEAN_CONTCUBE_GAIN=0.5
+CLEAN_CONTCUBE_SCALES="[0,3,10]"
+CLEAN_CONTCUBE_THRESHOLD_MINORCYCLE="[30%]"
+CLEAN_CONTCUBE_THRESHOLD_MAJORCYCLE=1mJy
+CLEAN_CONTCUBE_NUM_MAJORCYCLES=2
+# If true, this will write out intermediate images at the end of each
+# major cycle
+CLEAN_CONTCUBE_WRITE_AT_MAJOR_CYCLE=false
 
 ##############################
 # Spectral-line imaging
@@ -464,8 +477,6 @@ RESTORE_SPECTRAL=true
 RESTORING_BEAM_SPECTRAL=fit
 # Reference channel for recording the restoring beam of the cube
 RESTORING_BEAM_REFERENCE=mid
-# Log file to record the restoring beam per channel
-RESTORING_BEAM_LOG=beamLog.image.${IMAGE_BASE_SPECTRAL}.txt
 
 # Image-based continuum subtraction
 # Threshold [sigma] to mask outliers prior to fitting ('threshold' parameter) 

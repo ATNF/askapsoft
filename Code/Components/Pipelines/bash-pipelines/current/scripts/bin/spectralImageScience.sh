@@ -116,7 +116,7 @@ if [ ${RESTORE_SPECTRAL} == "true" ]; then
     restorePars="${restorePars}
 Simager.restore.beam                            = ${RESTORING_BEAM_SPECTRAL}
 Simager.restore.beamReference                   = ${RESTORING_BEAM_REFERENCE}
-Simager.restore.beamLog                         = ${RESTORING_BEAM_LOG}"
+Simager.restore.beamLog                         = beamlog.${imageBase}.txt"
 fi
 
 if [ $DO_IT == true ]; then

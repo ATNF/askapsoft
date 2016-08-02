@@ -385,10 +385,13 @@ module load askapdata"
     # Old way of choosing above
     if [ "${BUILD_MODEL_FOR_CONTSUB}" != "" ] &&
            [ "${BUILD_MODEL_FOR_CONTSUB}" != "true" ]; then
-        echo "WARN - the parameter BUILD_MODEL_FOR_CONTSUB is deprecated - please use CONTSUB_METHOD instead"
+        echo "WARNING - the parameter BUILD_MODEL_FOR_CONTSUB is deprecated - please use CONTSUB_METHOD instead"
         CONTSUB_METHOD="Cmodel"
     fi
-    
+
+    if [ "${RESTORING_BEAM_LOG}" != "" ]; then
+        echo "WARNING - the parameter RESTORING_BEAM_LOG is deprecated, and is constructed from the image name instead."
+    fi
 
     ####################
 ##    # Define the beam arrangements for linmos

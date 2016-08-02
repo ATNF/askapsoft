@@ -99,23 +99,23 @@ Simager.preconditioner.Wiener.taper             = ${PRECONDITIONER_WIENER_TAPER}
     fi
 
     cleaningPars="# These parameters define the clean algorithm 
-Simager.solver                                  = ${SOLVER}"
-    if [ ${SOLVER} == "Clean" ]; then
+Simager.solver                                  = ${SOLVER_CONTCUBE}"
+    if [ ${SOLVER_CONTCUBE} == "Clean" ]; then
         cleaningPars="${cleaningPars}
-Simager.solver.Clean.algorithm                  = ${CLEAN_ALGORITHM}
-Simager.solver.Clean.niter                      = ${CLEAN_MINORCYCLE_NITER}
-Simager.solver.Clean.gain                       = ${CLEAN_GAIN}
-Simager.solver.Clean.scales                     = ${CLEAN_SCALES}
+Simager.solver.Clean.algorithm                  = ${CLEAN_CONTCUBE_ALGORITHM}
+Simager.solver.Clean.niter                      = ${CLEAN_CONTCUBE_MINORCYCLE_NITER}
+Simager.solver.Clean.gain                       = ${CLEAN_CONTCUBE_GAIN}
+Simager.solver.Clean.scales                     = ${CLEAN_CONTCUBE_SCALES}
 Simager.solver.Clean.verbose                    = False
 Simager.solver.Clean.tolerance                  = 0.01
 Simager.solver.Clean.weightcutoff               = zero
 Simager.solver.Clean.weightcutoff.clean         = false
 Simager.solver.Clean.psfwidth                   = 512
 Simager.solver.Clean.logevery                   = 50
-Simager.threshold.minorcycle                    = ${CLEAN_THRESHOLD_MINORCYCLE}
-Simager.threshold.majorcycle                    = ${CLEAN_THRESHOLD_MAJORCYCLE}
-Simager.ncycles                                 = ${CLEAN_NUM_MAJORCYCLES}
-Simager.Images.writeAtMajorCycle                = ${CLEAN_WRITE_AT_MAJOR_CYCLE}
+Simager.threshold.minorcycle                    = ${CLEAN_CONTCUBE_THRESHOLD_MINORCYCLE}
+Simager.threshold.majorcycle                    = ${CLEAN_CONTCUBE_THRESHOLD_MAJORCYCLE}
+Simager.ncycles                                 = ${CLEAN_CONTCUBE_NUM_MAJORCYCLES}
+Simager.Images.writeAtMajorCycle                = ${CLEAN_CONTCUBE_WRITE_AT_MAJOR_CYCLE}
 "
     fi
     if [ ${SOLVER} == "Dirty" ]; then
@@ -127,9 +127,9 @@ Simager.ncycles                                 = 0"
 
     restorePars="# These parameter govern the restoring of the image and the recording of the beam
 Simager.restore                                 = true
-Simager.restore.beam                            = ${RESTORING_BEAM_CONT}
-Simager.restore.beamReference                   = ${RESTORING_BEAM_CONT_REFERENCE}
-Simager.restore.beamLog                         = ${RESTORING_BEAM_CONT_LOG}"
+Simager.restore.beam                            = ${RESTORING_BEAM_CONTCUBE}
+Simager.restore.beamReference                   = ${RESTORING_BEAM_CONTCUBE_REFERENCE}
+Simager.restore.beamLog                         = beamLog.${imageBase}.txt"
 
     if [ $DO_IT == true ]; then
 
