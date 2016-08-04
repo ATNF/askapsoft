@@ -216,7 +216,12 @@ void ContinuumWorker::processWorkUnit(ContinuumWorkUnit& wu)
 
     sprintf(ChannelPar,"[1,%d]",wu.get_localChannel()+1);
 
+    string param = "beams";
+    std::ostringstream bstr;
 
+    bstr<<"[" << wu.get_beam() << "]";
+
+    unitParset.replace(param, bstr.str().c_str());
 
     bool usetmpfs = unitParset.getBool("usetmpfs",true);
 
@@ -235,12 +240,7 @@ void ContinuumWorker::processWorkUnit(ContinuumWorkUnit& wu)
 
         const string outms_flag = pstr.str();
 
-        string param = "beams";
-        std::ostringstream bstr;
 
-        bstr<<"[" << wu.get_beam() << "]";
-
-        unitParset.replace(param, bstr.str().c_str());
 
         if (itsComms.inGroup(0)) {
 
@@ -335,27 +335,27 @@ void ContinuumWorker::buildSpectralCube() {
 
 
     ASKAPLOG_INFO_STR(logger,"Configuring Spectral Cube");
-    ASKAPLOG_INFO_STR(logger,"nchan: " << nchanpercore << " base f0: " << f0.getValue("MHz")
+    ASKAPLOG_INFO_STR(logger,"nchan: " << nchanperwriter << " base f0: " << f0.getValue("MHz")
     << " width: " << freqinc.getValue("MHz") <<" (" << workUnits[0].get_channelWidth() << ")");
 
     std::string root = "image";
 
-    std::string img_name = root + std::string(".ch.") \
-    + utility::toString(workUnits[0].get_globalChannel());
+    std::string img_name = root + std::string(".wr.") \
+    + utility::toString(itsComms.rank());
 
     root = "psf";
-    std::string psf_name = root + std::string(".ch.") \
-    + utility::toString(workUnits[0].get_globalChannel());
+    std::string psf_name = root + std::string(".wr.") \
+    + utility::toString(itsComms.rank());
 
     root = "residual";
 
-    std::string residual_name = root + std::string(".ch.") \
-    + utility::toString(workUnits[0].get_globalChannel());
+    std::string residual_name = root + std::string(".wr.") \
+    + utility::toString(itsComms.rank());
 
     root = "weights";
 
-    std::string weights_name = root + std::string(".ch.") \
-    + utility::toString(workUnits[0].get_globalChannel());
+    std::string weights_name = root + std::string(".wr.") \
+    + utility::toString(itsComms.rank());
 
     if (itsComms.isWriter()) {
 
@@ -367,11 +367,11 @@ void ContinuumWorker::buildSpectralCube() {
 
         if (itsParset.getBool("restore", false)) {
             root = "psf.image";
-            std::string psf_image_name = root + std::string(".ch.") \
-            + utility::toString(workUnits[0].get_globalChannel());
+            std::string psf_image_name = root + std::string(".wr.") \
+            + utility::toString(itsComms.rank());
             root = "image.restored";
-            std::string restored_image_name = root + std::string(".ch.") \
-            + utility::toString(workUnits[0].get_globalChannel());
+            std::string restored_image_name = root + std::string(".wr.") \
+            + utility::toString(itsComms.rank());
             // Only create these if we are restoring, as that is when they get made
             if (itsDoingPreconditioning) {
                 itsPSFimageCube.reset(new CubeBuilder(itsParsets[0], nchanpercore, f0, freqinc, psf_image_name));

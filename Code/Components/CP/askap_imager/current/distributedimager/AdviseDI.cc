@@ -316,7 +316,13 @@ void AdviseDI::prepare() {
     // for each Epoch.
 
     int globalChannel = 0;
+    vector<int> itsBeams = getBeams();
 
+    // initially lets just use the first beam in the list
+
+    int myBeam = itsBeams[0];
+
+    //
     for (unsigned int work = 0; work < itsAllocatedFrequencies.size(); ++work) {
         ASKAPLOG_INFO_STR(logger,"Allocating frequency channels for worker " << work);
         // loop over the measurement sets and find the local channel number
@@ -348,7 +354,8 @@ void AdviseDI::prepare() {
                     wu.set_writer(mywriter);
                     wu.set_payloadType(cp::ContinuumWorkUnit::WORK);
                     wu.set_channelFrequency(thisAllocation[frequency]);
-
+                    wu.set_beam(myBeam);
+                    
                     if (itsTopoFrequencies.size() > 1)
                         wu.set_channelWidth(fabs(itsTopoFrequencies[1].getValue() - itsTopoFrequencies[0].getValue()));
                     else
@@ -651,7 +658,19 @@ void AdviseDI::updateComms() {
         }
     }
 }
+std::vector<int> AdviseDI::getBeams()
+{
+    std::vector<int> bs;
 
+    if (itsParset.isDefined("beams")) {
+        bs = itsParset.getInt32Vector("beams",bs);
+
+    }
+    else {
+        bs.push_back(0);
+    }
+    return bs;
+}
 } // namespace synthesis
 
 } // namespace askap

@@ -159,6 +159,9 @@ namespace askap {
 
             int match(int ms_number,  casa::MVFrequency freq);
 
+            std::vector<int> getBeams();
+
+
         };
 
     } // namespace synthesis

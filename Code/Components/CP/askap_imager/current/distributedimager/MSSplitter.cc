@@ -81,14 +81,14 @@ MSSplitter::MSSplitter(LOFAR::ParameterSet& Parset)
         itsBeams.insert(v.begin(), v.end());
         ASKAPLOG_INFO_STR(logger, "Including ONLY beams: " << v);
     }
-    
+
     // Read scan id selection parameters
     if (itsParset.isDefined("scans")) {
         const vector<uint32_t> v = itsParset.getUint32Vector("scans", true);
         itsScans.insert(v.begin(), v.end());
         ASKAPLOG_INFO_STR(logger, "Including ONLY scan numbers: " << v);
     }
-    
+
     // Read field name selection parameters
     //if (itsParset.isDefined("fieldnames")) {
     //    const vector<string> names = itsParset.getStringVector("fieldnames", true);
@@ -486,7 +486,7 @@ bool MSSplitter::rowIsFiltered(uint32_t scanid, uint32_t fieldid,
             // beam not found in any element of row
             return true;
         }
-    
+
         else {
             return false;
         }
@@ -550,6 +550,7 @@ void MSSplitter::splitMainTable(const casa::MeasurementSet& source,
 
     // Set a 64MB maximum cache size for the large columns
     const casa::uInt cacheSize = 64 * 1024 * 1024;
+
     sc.data().setMaximumCacheSize(cacheSize);
     dc.data().setMaximumCacheSize(cacheSize);
     sc.flag().setMaximumCacheSize(cacheSize);
@@ -583,7 +584,7 @@ void MSSplitter::splitMainTable(const casa::MeasurementSet& source,
             ASKAPLOG_INFO_STR(logger,  "Processed row " << row + 1 << " of " << nRows);
             progressCounter = 0;
         }
-        
+
         // Debugging for chunk copying only
         if (nRowsThisIteration > 1) {
             ASKAPLOG_DEBUG_STR(logger,  "Processing " << nRowsThisIteration
@@ -600,7 +601,7 @@ void MSSplitter::splitMainTable(const casa::MeasurementSet& source,
             continue;
         }
 
-        // Rows have been pre-added if no row based filtering is done 
+        // Rows have been pre-added if no row based filtering is done
         if (rowFiltersExist()) {
             dest.addRow();
             dstrowslicer = Slicer(IPosition(1, dstRow), IPosition(1, nRowsThisIteration),
@@ -678,15 +679,15 @@ void MSSplitter::splitMainTable(const casa::MeasurementSet& source,
             casa::Cube<casa::Bool> outflag(nPol, nChanOut, nRowsThisIteration);
             // This is only needed if generating sigmaSpectra, but that should be the
             // case with width>1, and this avoids testing in the tight loops below
-            casa::Cube<casa::Float> outsigma(nPol, nChanOut, nRowsThisIteration); 
+            casa::Cube<casa::Float> outsigma(nPol, nChanOut, nRowsThisIteration);
 
             // Average data and combine flag information
             for (uInt pol = 0; pol < nPol; ++pol) {
                 for (uInt destChan = 0; destChan < nChanOut; ++destChan) {
                     for (uInt r = 0; r < nRowsThisIteration; ++r) {
                         casa::Complex sum(0.0, 0.0);
-                        casa::Float varsum = 0.0; 
-                        casa::uInt sumcount = 0; 
+                        casa::Float varsum = 0.0;
+                        casa::uInt sumcount = 0;
 
                         // Starting at the appropriate offset into the source data, average "width"
                         // channels together
@@ -700,7 +701,7 @@ void MSSplitter::splitMainTable(const casa::MeasurementSet& source,
 
                         // Now the input channels have been averaged, write the data to
                         // the output cubes
-                        if (sumcount > 0) { 
+                        if (sumcount > 0) {
                             outdata(pol, destChan, r) = casa::Complex(sum.real() / sumcount,
                                                                       sum.imag() / sumcount);
                             outflag(pol, destChan, r) = false;
@@ -825,17 +826,17 @@ int MSSplitter::split(const std::string& invis, const std::string& outvis,
 void MSSplitter::configureTimeFilter(const std::string& key, const std::string& msg,
                                  double& var)
 {
-    
+
     const string ts = itsParset.getString(key);
     casa::Quantity tq;
     if(!casa::MVTime::read(tq, ts)) {
         ASKAPTHROW(AskapError, "Unable to convert " << ts << " to MVTime");
     }
-    
+
     const casa::MVTime t(tq);
     var = t.second();
     ASKAPLOG_INFO_STR(logger, msg << ts << " (" << var << " sec)");
-    
+
 }
 
 std::vector<uint32_t> MSSplitter::configureFieldNameFilter(
@@ -871,5 +872,3 @@ std::vector<uint32_t> MSSplitter::configureFieldNameFilter(
     }
     return fieldIds;
 }
-
-
