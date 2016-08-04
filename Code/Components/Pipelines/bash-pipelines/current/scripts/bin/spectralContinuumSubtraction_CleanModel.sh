@@ -65,11 +65,11 @@ else
     log=${logs}/mslist_for_ccontsub_\${SLURM_JOB_ID}.log
     NCORES=1
     NPPN=1
-    aprun -n \${NCORES} -N \${NPPN} $mslist --full ${msSciSL} 1>& \${log}
-    ra=\`grep -A1 RA \$log | tail -1 | awk '{print \$7}'\`
-    dec=\`grep -A1 RA \$log | tail -1 | awk '{print \$8}'\`
-    eq=\`grep -A1 RA \$log | tail -1 | awk '{print \$9}'\`
-    modelDirection="[\${ra}, \${dec}, \${eq}]"
+    aprun -n \${NCORES} -N \${NPPN} $mslist --full ${msSciSL} 2>&1 1> \${log}
+    ra=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=RA\`
+    dec=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=Dec\`
+    epoch=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=Epoch\`
+    modelDirection="[\${ra}, \${dec}, \${epoch}]"
 fi
 
 parset=${parsets}/contsub_spectralline_beam${BEAM}_\${SLURM_JOB_ID}.in

@@ -34,7 +34,7 @@ if [ "${MS_INPUT_SCIENCE}" != "" ]; then
     echo "Extracting metadata for science measurement set $MS_INPUT_SCIENCE"
     
     MS_METADATA=$parsets/mslist-science-${NOW}.txt
-    mslist --full $MS_INPUT_SCIENCE 1>& ${MS_METADATA}
+    mslist --full $MS_INPUT_SCIENCE 2>&1 1> ${MS_METADATA}
 
     # Get the observation time
     obsdate=`grep "Observed from" ${MS_METADATA} | head -1 | awk '{print $7}' | sed -e 's|/| |g' | awk '{print $1}' | sed -e 's/-/ /g'`
@@ -43,7 +43,7 @@ if [ "${MS_INPUT_SCIENCE}" != "" ]; then
     DATE_OBS="${DATE_OBS}T${obstime}"
     
     DURATION=`grep "elapsed time" ${MS_METADATA} | head -1 | awk '{print $11}'`
-    
+
     
     . ${PIPELINEDIR}/findBeamCentres.sh
 

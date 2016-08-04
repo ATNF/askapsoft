@@ -80,15 +80,15 @@ cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 log=${logs}/mslist_for_ccontsub_\${SLURM_JOB_ID}.log
 NCORES=1
 NPPN=1
-aprun -n \${NCORES} -N \${NPPN} $mslist --full ${msSciSL} 1>& \${log}
-freq=\`grep -A1 Ch0 \$log | tail -n 1 | awk '{print \$12}'\`
+aprun -n \${NCORES} -N \${NPPN} $mslist --full ${msSciSL} 2>&1 1> \${log}
+freq=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=Freq\`
 if [ "${DIRECTION}" != "" ]; then
     modelDirection="${DIRECTION}"
 else
-    ra=\`grep -A1 RA \$log | tail -1 | awk '{print \$7}'\`
-    dec=\`grep -A1 RA \$log | tail -1 | awk '{print \$8}'\`
-    eq=\`grep -A1 RA \$log | tail -1 | awk '{print \$9}'\`
-    modelDirection="[\${ra}, \${dec}, \${eq}]"
+    ra=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=RA\`
+    dec=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=Dec\`
+    epoch=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=Epoch\`
+    modelDirection="[\${ra}, \${dec}, \${epoch}]"
 fi
 
 contsubdir=ContSubBeam${BEAM}
