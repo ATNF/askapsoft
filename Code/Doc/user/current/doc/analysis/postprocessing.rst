@@ -596,7 +596,9 @@ Parameters for fitting
 |                                               |               |                            |all will be written.                                                                     |
 +-----------------------------------------------+---------------+----------------------------+-----------------------------------------------------------------------------------------+
 |Selavy.outputComponentParset.referenceDirection|vector<string> |""                          |The direction that is used as the reference (tangent point), from which the positions are|
-|                                               |               |                            |calculated as l & m coordinates. If left blank, the image centre position will be used.  |
+|                                               |               |                            |calculated as l & m coordinates. If left blank, the image centre position will be        |
+|                                               |               |                            |used. This should be in the same format as given for the *direction* parameters in       |
+|                                               |               |                            |(:doc:`../calim/cimager`) (ie. a 3-element vector).                                      |
 +-----------------------------------------------+---------------+----------------------------+-----------------------------------------------------------------------------------------+
 |Selavy.outputComponentParset.reportSize        |bool           |true                        |If true, the fitted shape of the components is written to the parset. If false, they are |
 |                                               |               |                            |written as point sources.                                                                |
