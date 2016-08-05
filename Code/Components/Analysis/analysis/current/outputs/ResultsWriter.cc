@@ -75,7 +75,7 @@ void ResultsWriter::setFlag2D(bool flag2D)
 
 void ResultsWriter::duchampOutput()
 {
-    
+
     if (itsParset.getBool("writeDuchampFiles", true)) {
 
         // Write standard Duchamp results file
@@ -106,7 +106,7 @@ void ResultsWriter::duchampOutput()
         }
 
         if (itsCube.pars().getFlagWriteBinaryCatalogue() &&
-            (itsCube.getNumObj() > 0)) {
+                (itsCube.getNumObj() > 0)) {
             ASKAPLOG_INFO_STR(logger,
                               "Creating binary catalogue of detections, called " <<
                               itsCube.pars().getBinaryCatalogue());
@@ -234,18 +234,14 @@ void ResultsWriter::writeFitAnnotations()
 void ResultsWriter::writeComponentParset()
 {
     if (itsFitParams.doFit()) {
-        std::string filename = itsParset.getString("outputComponentParset", "");
-        if (filename != "") {
+        if (itsParset.getBool("outputComponentParset", true)) {
             /// @todo Instantiate the writer from a parset - then don't have to find the flags etc
-            AskapComponentParsetWriter pwriter(filename);
-            ASKAPLOG_INFO_STR(logger, "Writing Fit results to parset named " << filename);
-            pwriter.setup(&itsCube);
+            LOFAR::ParameterSet subset = itsParset.makeSubset("outputComponentParset.");
+            ASKAPLOG_INFO_STR(logger, "Writing Fit results to parset named "
+                              << subset.getString("filename"));
+            AskapComponentParsetWriter pwriter(subset, &itsCube);
             pwriter.setFitType("best");
             pwriter.setSourceList(&itsSourceList);
-            std::string param = "outputComponentParset.reportSize";
-            pwriter.setFlagReportSize(itsParset.getBool(param, true));
-            param = "outputComponentParset.maxNumComponents";
-            pwriter.setMaxNumComponents(itsParset.getInt(param, -1));
             pwriter.openCatalogue();
             pwriter.writeTableHeader();
             pwriter.writeEntries();

@@ -36,9 +36,12 @@
 #include <sourcefitting/RadioSource.h>
 #include <coordutils/PositionUtilities.h>
 
+#include <Common/ParameterSet.h>
 #include <duchamp/Outputs/ASCIICatalogueWriter.hh>
 
 #include <casacore/scimath/Functionals/Gaussian2D.h>
+#include <casacore/casa/Quanta/Unit.h>
+#include <casacore/casa/Quanta/Quantum.h>
 
 ///@brief Where the log messages go.
 ASKAP_LOGGER(logger, ".askapcomponentparsetwriter");
@@ -47,55 +50,31 @@ namespace askap {
 
 namespace analysis {
 
-AskapComponentParsetWriter::AskapComponentParsetWriter():
+AskapComponentParsetWriter::AskapComponentParsetWriter(LOFAR::ParameterSet &parset, duchamp::Cube *cube):
     duchamp::ASCIICatalogueWriter(),
     itsSourceList(0),
     itsFitType("best"),
-    itsRefRA(0.),
-    itsRefDec(0.),
-    itsFlagReportSize(false),
     itsSourceIDlist("")
 {
+    itsName = parset.getString("filename");
     itsOpenFlag = false;
     itsDestination = duchamp::Catalogues::FILE;
-}
-
-AskapComponentParsetWriter::AskapComponentParsetWriter(std::string name):
-    duchamp::ASCIICatalogueWriter(name),
-    itsSourceList(0),
-    itsFitType("best"),
-    itsRefRA(0.),
-    itsRefDec(0.),
-    itsFlagReportSize(false),
-    itsSourceIDlist("")
-{
-    itsOpenFlag = false;
-    itsDestination = duchamp::Catalogues::FILE;
-}
-
-AskapComponentParsetWriter::AskapComponentParsetWriter(duchamp::Catalogues::DESTINATION dest):
-    duchamp::ASCIICatalogueWriter(dest),
-    itsSourceList(0),
-    itsFitType("best"),
-    itsRefRA(0.),
-    itsRefDec(0.),
-    itsFlagReportSize(false),
-    itsSourceIDlist("")
-{
-    itsOpenFlag = false;
-}
-
-AskapComponentParsetWriter::AskapComponentParsetWriter(std::string name,
-        duchamp::Catalogues::DESTINATION dest):
-    duchamp::ASCIICatalogueWriter(name, dest),
-    itsSourceList(0),
-    itsFitType("best"),
-    itsRefRA(0.),
-    itsRefDec(0.),
-    itsFlagReportSize(false),
-    itsSourceIDlist("")
-{
-    itsOpenFlag = false;
+    itsFlagReportSize = parset.getBool("reportSize", true);
+    itsMaxNumComponents = parset.getInt("maxNumComponents", -1);
+    this->CatalogueWriter::setup(cube);
+    if (parset.isDefined("referenceDirection")) {
+        std::vector<std::string> refDir = parset.getStringVector("referenceDirection");
+        casa::Quantity q;
+        casa::Quantity::read(q, refDir[0]);
+        itsRefRA = q.getValue(casa::Unit("deg"));
+        ASKAPLOG_DEBUG_STR(logger, "Ref RA = " << refDir[0] << " converting to " << itsRefRA << " deg");
+        casa::Quantity::read(q, refDir[1]);
+        itsRefDec = q.getValue(casa::Unit("deg"));
+        ASKAPLOG_DEBUG_STR(logger, "Ref Dec = " << refDir[1] << " converting to " << itsRefDec << " deg");
+    } else {
+        itsRefRA =  itsHead->getWCS()->crval[0];
+        itsRefDec = itsHead->getWCS()->crval[1];
+    }
 }
 
 AskapComponentParsetWriter::AskapComponentParsetWriter(const AskapComponentParsetWriter& other)

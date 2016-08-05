@@ -34,6 +34,7 @@
 #include <duchamp/Outputs/ASCIICatalogueWriter.hh>
 #include <parallelanalysis/DuchampParallel.h>
 #include <sourcefitting/RadioSource.h>
+#include <Common/ParameterSet.h>
 
 namespace askap {
 
@@ -41,10 +42,7 @@ namespace analysis {
 
 class AskapComponentParsetWriter : public duchamp::ASCIICatalogueWriter {
     public:
-        AskapComponentParsetWriter();
-        AskapComponentParsetWriter(std::string name);
-        AskapComponentParsetWriter(duchamp::Catalogues::DESTINATION dest);
-        AskapComponentParsetWriter(std::string name, duchamp::Catalogues::DESTINATION dest);
+        AskapComponentParsetWriter(LOFAR::ParameterSet &parset, duchamp::Cube *cube);
         AskapComponentParsetWriter(const AskapComponentParsetWriter& other);
         AskapComponentParsetWriter& operator= (const AskapComponentParsetWriter& other);
         virtual ~AskapComponentParsetWriter() {};
