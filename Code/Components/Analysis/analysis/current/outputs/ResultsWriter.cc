@@ -234,7 +234,7 @@ void ResultsWriter::writeFitAnnotations()
 void ResultsWriter::writeComponentParset()
 {
     if (itsFitParams.doFit()) {
-        if (itsParset.getBool("outputComponentParset", true)) {
+        if (itsParset.getBool("outputComponentParset", false)) {
             /// @todo Instantiate the writer from a parset - then don't have to find the flags etc
             LOFAR::ParameterSet subset = itsParset.makeSubset("outputComponentParset.");
             ASKAPLOG_INFO_STR(logger, "Writing Fit results to parset named "
