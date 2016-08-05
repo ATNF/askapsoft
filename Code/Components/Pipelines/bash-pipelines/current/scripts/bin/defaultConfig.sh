@@ -183,16 +183,13 @@ BEAM_MIN=0
 BEAM_MAX=8
 BEAMLIST=""
 
-# How many antennas
-NUM_ANT=6
-
 ####################
 ##  BANDPASS CAL
 
 # Base name for the 1934 measurement sets after splitting
 MS_BASE_1934="1934_beam%b.ms"
-# Channel range for splitting
-CHAN_RANGE_1934="1-16416"
+# Channel range for splitting - defaults to full set of channels in MS
+CHAN_RANGE_1934=""
 # Location of 1934-638, formatted for use in cbpcalibrator
 DIRECTION_1934="[19h39m25.036, -63.42.45.63, J2000]"
 # Name of the table for the bandpass calibration parameters
@@ -232,16 +229,17 @@ FIELD_SELECTION_SCIENCE=""
 # Base name for the science observation measurement set
 MS_BASE_SCIENCE=scienceObservation_beam%b.ms
 # Name for the channel-averaged science measurement set (if blank, it
-# will be set using MS_BASE_SCIENCE
+# will be set using MS_BASE_SCIENCE)
 MS_SCIENCE_AVERAGE=""
-# Direction of the science field
+# Direction of the science field - defaults to centre of MS
 DIRECTION_SCI=""
 # Make the images at the centres of the beams, rather than the same
 # image centre for each beam
 IMAGE_AT_BEAM_CENTRES=true
 
-# Range of channels in science observation (used in splitting and averaging)
-CHAN_RANGE_SCIENCE="1-16416"
+# Range of channels in science observation (used in splitting and
+# averaging)  - defaults to full set of channels in MS
+CHAN_RANGE_SCIENCE=""
 # Number of channels to be averaged to create continuum measurement set
 NUM_CHAN_TO_AVERAGE=54
 

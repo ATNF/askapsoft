@@ -52,6 +52,9 @@ elif options.val == "Epoch":
 elif options.val == "Freq":
     str='CtrFreq'
     nextStr='Corrs'
+elif options.val == "nChan":
+    str='#Chans'
+    nextStr='Frame'
 else:
     print('Bad value type')
     exit(1)

@@ -201,6 +201,7 @@ module load askapdata"
         thisbeam=`echo $b | awk '{printf "%02d",$1}'`
         BEAMS_TO_USE="${BEAMS_TO_USE} $thisbeam"
     done
+    ### NOTE - CAN'T USE THIS DUE TO THE WAY CBPCALIBRATOR DEALS WITH BEAMS!
     #    else
     #        # re-print out the provided beam list with 0-leading integers
     #        BEAMS_TO_USE=""
@@ -232,22 +233,6 @@ module load askapdata"
 
     
     ####################
-    # Set the number of channels, and make sure they are the same for 1934
-    # & science observations
-
-    # Number of channels for 1934 observation
-    NUM_CHAN_1934=`echo $CHAN_RANGE_1934 | awk -F'-' '{print $2-$1+1}'`
-    # Number of channels in science observation (used in applying the bandpass solution)
-    NUM_CHAN_SCIENCE=`echo $CHAN_RANGE_SCIENCE | awk -F'-' '{print $2-$1+1}'`
-
-    if [ ${DO_1934_CAL} == true ] && [ $DO_SCIENCE_FIELD == true ]; then
-        if [ ${NUM_CHAN_1934} != ${NUM_CHAN_SCIENCE} ]; then
-            echo "ERROR! Number of channels for 1934-638 observation (${NUM_CHAN_1934}) is different to the science observation (${NUM_CHAN_SCIENCE})."
-            exit 1
-        fi
-    fi
-
-    ####################
     # Catching old parameters
 
     if [ "${NUM_CHAN}" != "" ]; then
@@ -255,50 +240,8 @@ module load askapdata"
         echo "  Please use CHAN_RANGE_1934 & CHAN_RANGE_SCIENCE to specify number and range of channels."
     fi
 
-    ####################
-    # Input Measurement Sets
-    #  We define these based on the SB number
-
-    # 1934-638 calibration
-    if [ $DO_1934_CAL == true ]; then
-
-        if [ "$MS_INPUT_1934" == "" ]; then
-            if [ $SB_1934 != "SET_THIS" ]; then
-	        sb1934dir=$DIR_SB/$SB_1934
-	        if [ `\ls $sb1934dir | grep "ms" | wc -l` == 1 ]; then
-	            MS_INPUT_1934=$sb1934dir/`\ls $sb1934dir | grep "ms"`
-	        else
-	            echo "SB directory $SB_1934 has more than one measurement set. Please specify with parameter 'MS_INPUT_1934'."
-	        fi
-            else
-	        echo "You must set either 'SB_1934' (scheduling block number) or 'MS_INPUT_1934' (1934 measurement set)."
-            fi
-        fi
-        if [ "$MS_INPUT_1934" == "" ]; then
-	    echo "Parameter 'MS_INPUT_1934' not defined. Turning off 1934-638 processing with DO_1934_CAL=false."
-            DO_1934_CAL=false
-        fi
-
-    fi
-
-    # science observation - check that MS_INPUT_SCIENCE is OK:
-    if [ "$MS_INPUT_SCIENCE" == "" ]; then
-        if [ $SB_SCIENCE != "SET_THIS" ]; then
-	    sbScienceDir=$DIR_SB/$SB_SCIENCE
-	    if [ `\ls $sbScienceDir | grep "ms" | wc -l` == 1 ]; then
-	        MS_INPUT_SCIENCE=$sbScienceDir/`\ls $sbScienceDir | grep "ms"`
-	    else
-	        echo "SB directory $SB_SCIENCE has more than one measurement set. Please specify with parameter 'MS_INPUT_SCIENCE'."
-	    fi
-        else
-	    echo "You must set either 'SB_SCIENCE' (scheduling block number) or 'MS_INPUT_SCIENCE' (Science observation measurement set)."
-        fi
-    fi
-    if [ "$MS_INPUT_SCIENCE" == "" ]; then
-        if [ $DO_SCIENCE_FIELD == true ]; then
-	    echo "Parameter 'MS_INPUT_SCIENCE' not defined. Turning off splitting/flagging with DO_FLAG_SCIENCE=false and pushing on.."
-        fi
-        DO_SCIENCE_FIELD=false
+    if [ "${NUM_ANT}" != "" ]; then
+        echo "You've entered NUM_ANT=${NUM_ANT}. This is no longer used, as we take this info from the MS."
     fi
 
     ####################
