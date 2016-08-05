@@ -75,14 +75,26 @@ if [ "$MS_INPUT_SCIENCE" == "" ]; then
     DO_SCIENCE_FIELD=false
 fi
 
-# Once we've defined the science MS name, extract metadata from it
+####################
+# Catching old parameters
 
+if [ "${NUM_CHAN}" != "" ]; then
+    echo "You've entered NUM_CHAN=${NUM_CHAN}. This is no longer used!"
+    echo "  Please use CHAN_RANGE_1934 & CHAN_RANGE_SCIENCE to specify number and range of channels."
+fi
+
+if [ "${NUM_ANT}" != "" ]; then
+    echo "You've entered NUM_ANT=${NUM_ANT}. This is no longer used, as we take this info from the MS."
+fi
+
+####################
+# Once we've defined the science MS name, extract metadata from it
 if [ "${MS_INPUT_SCIENCE}" != "" ]; then
 
     echo "Extracting metadata for science measurement set $MS_INPUT_SCIENCE"
     
     MS_METADATA=$parsets/mslist-science-${NOW}.txt
-    mslist --full $MS_INPUT_SCIENCE 2>&1 1> ${MS_METADATA}
+    mslist --full $MS_INPUT_SCIENCE 1>& ${MS_METADATA}
 
     # Get the observation time
     obsdate=`grep "Observed from" ${MS_METADATA} | head -1 | awk '{print $7}' | sed -e 's|/| |g' | awk '{print $1}' | sed -e 's/-/ /g'`
@@ -94,7 +106,7 @@ if [ "${MS_INPUT_SCIENCE}" != "" ]; then
 
     NUM_ANT=`grep Antennas ${MS_METADATA} | head -1 | awk '{print $6}'`
 
-    NUM_CHAN=`python parseMSlistOutput.py --file=${MS_METADATA} --val=nChan`
+    NUM_CHAN=`python ${PIPELINEDIR}/parseMSlistOutput.py --file=${MS_METADATA} --val=nChan`
 
     # Get the requested number of channels from the config, and make sure they are the same for 1934
     # & science observations

@@ -110,7 +110,7 @@ NCORES=1
 NPPN=1
 aprun -n \${NCORES} -N \${NPPN} $mslist --full ${msSci} 2>&1 1> \${log}
 ra=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=RA\`
-ra=\`echo \$ra | awk -F':' '{printf "%sh%sm%s",\$1,\$2,\$3}'` 
+ra=\`echo \$ra | awk -F':' '{printf "%sh%sm%s",\$1,\$2,\$3}'\` 
 dec=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=Dec\`
 dec=\`echo \$dec | awk -F':' '{printf "%s.%s.%s",\$1,\$2,\$3}'\` 
 epoch=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=Epoch\`

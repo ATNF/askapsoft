@@ -233,18 +233,6 @@ module load askapdata"
 
     
     ####################
-    # Catching old parameters
-
-    if [ "${NUM_CHAN}" != "" ]; then
-        echo "You've entered NUM_CHAN=${NUM_CHAN}. This is no longer used!"
-        echo "  Please use CHAN_RANGE_1934 & CHAN_RANGE_SCIENCE to specify number and range of channels."
-    fi
-
-    if [ "${NUM_ANT}" != "" ]; then
-        echo "You've entered NUM_ANT=${NUM_ANT}. This is no longer used, as we take this info from the MS."
-    fi
-
-    ####################
     # Parameters required for continuum imaging
     ####
 
@@ -272,20 +260,20 @@ module load askapdata"
         CPUS_PER_CORE_CONT_IMAGING=${NUM_CPUS_CONTIMG_SCI}
     fi
 
-    if [ $IMAGE_AT_BEAM_CENTRES == true ]; then
-        # when imaging at beam centres, we *must* use the Cmodel
-        # approach
-        if [ ${SELFCAL_METHOD} != "Cmodel" ]; then
-            echo "WARNING - When imaging at beam centres, must use SELFCAL_METHOD=Cmodel"
-        fi
-        SELFCAL_METHOD="Cmodel"
-    else
+##     if [ $IMAGE_AT_BEAM_CENTRES == true ]; then
+##         # when imaging at beam centres, we *must* use the Cmodel
+##         # approach
+##         if [ ${SELFCAL_METHOD} != "Cmodel" ]; then
+##             echo "WARNING - When imaging at beam centres, must use SELFCAL_METHOD=Cmodel"
+##         fi
+##         SELFCAL_METHOD="Cmodel"
+##     else
         # Method used for self-calibration - needs to be either Cmodel or Components
         if [ ${SELFCAL_METHOD} != "Cmodel" ] &&
                [ ${SELFCAL_METHOD} != "Components" ]; then
             SELFCAL_METHOD="Cmodel"
         fi
-    fi
+##     fi
 
     # Set the polarisation list for the continuum cubes
     if [ "${CONTCUBE_POLARISATIONS}" == "" ]; then
