@@ -115,6 +115,9 @@ void SpectralLineWorker::run(void)
         } catch (AskapError& e) {
             ASKAPLOG_WARN_STR(logger, "Failure processing channel " << wu.get_globalChannel());
             ASKAPLOG_WARN_STR(logger, "Exception detail: " << e.what());
+        } catch (const std::exception& e) {
+            ASKAPLOG_WARN_STR(logger, "Failure processing channel " << wu.get_globalChannel());
+            ASKAPLOG_WARN_STR(logger, "Exception detail: " << e.what());
         }
 
         // Send the params to the master, which also implicitly requests
