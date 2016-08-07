@@ -61,7 +61,8 @@ class TaskDesc {
             FlagTask,
             FileFlagTask,
             DerippleTask,
-            TCPSink
+            TCPSink,
+            BeamScatterTask,
         };
 
         /// @brief Constructor

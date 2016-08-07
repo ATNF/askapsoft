@@ -110,6 +110,9 @@ TaskDesc::Type TaskDesc::toType(const std::string& type)
     if (type == "TCPSink") {
         return TaskDesc::TCPSink;
     }
+    if (type == "BeamScatterTask") {
+        return TaskDesc::BeamScatterTask;
+    }
 
     ASKAPTHROW(AskapError, "Unknown task type");
 }
