@@ -86,7 +86,7 @@ class FullStokesContinuum : public ContinuumS3SEX {
         /// @param line A line from the ascii input file
         void define(const std::string &line);
 
-        const double flux(const double freq, const int istokes);
+        virtual const double flux(const double freq, const int istokes);
         //      double flux(double freq1, double freq2, int istokes);
 
         const double polAngle() {return itsPolAngleRef;};

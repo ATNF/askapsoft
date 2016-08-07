@@ -102,12 +102,18 @@ class FullStokesContinuumHI : public FullStokesContinuum {
 
         const double flux(const double freq, const int istokes)
         {
-            return itsHIprofile.flux(freq, istokes);
+            return FullStokesContinuum::flux(freq, istokes);
         };
+
         const double fluxInt(const double freq1, const double freq2, const int istokes)
         {
             return itsHIprofile.fluxInt(freq1, freq2, istokes);
         };
+
+        /// @brief Return minimum frequency of the line
+        const double minFreq() const {return itsHIprofile.minFreq();};
+        /// @brief Return maximum frequency of the line
+        const double maxFreq() const {return itsHIprofile.maxFreq();};
 
         using FullStokesContinuum::print;
         void print(std::ostream& theStream) const;

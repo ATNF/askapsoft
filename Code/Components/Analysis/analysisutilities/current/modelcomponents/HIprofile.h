@@ -69,6 +69,10 @@ class HIprofile : public Spectrum {
         const double redshift() const {return itsRedshift;};
         /// @brief Return the HI mass
         const double mHI() const {return itsMHI;};
+        /// @brief Return minimum frequency of the line
+        virtual const double minFreq() const {return itsMinFreq;};
+        /// @brief Return maximum frequency of the line
+        virtual const double maxFreq() const {return itsMaxFreq;};
 
         const bool freqRangeOK(const double freq1, const double freq2);
 

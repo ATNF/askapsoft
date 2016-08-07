@@ -84,6 +84,9 @@ const double HIprofile::integratedFlux(const double z, const double mhi)
     itsMHI = mhi;
     double dist = redshiftToDist(z); // in Mpc
     double intFlux = 4.24e-6 * mhi / (dist * dist);
+    // ASKAPLOG_DEBUG_STR(logger, "Galaxy at redshift " <<z<<" and HI mass of " << mhi <<
+    //                    " gives a distance of " << dist << " Mpc and integrated flux of " <<
+    //                    intFlux << " Jy.km/s");
     return intFlux;
 }
 

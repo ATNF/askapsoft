@@ -355,10 +355,10 @@ FITSfile::FITSfile(const LOFAR::ParameterSet& parset, bool allocateMemory):
     }
 
     std::stringstream ss;
-    if (allocateMemory){
+    if (allocateMemory) {
         itsNumPix = itsAxes[0];
         ss << itsAxes[0];
-        
+
         for (uint i = 1; i < itsDim; i++) {
             itsNumPix *= itsAxes[i];
             ss << "x" << itsAxes[i];
@@ -430,7 +430,7 @@ FITSfile::FITSfile(const LOFAR::ParameterSet& parset, bool allocateMemory):
                            itsNumPix * sizeof(float) / 1024. / 1024. / 1024. << "GB");
 //        itsArray = std::vector<float>(itsNumPix, 0.);
         itsArray = boost::shared_ptr<float[]>(new float[itsNumPix]);
-        for (size_t i = 0; i < itsNumPix; i++){
+        for (size_t i = 0; i < itsNumPix; i++) {
             itsArray.get()[i] = 0.;
         }
         ASKAPLOG_DEBUG_STR(logger, "Allocation done.");
@@ -589,9 +589,10 @@ void FITSfile::processSources()
             outfile.open(itsOutputSourceList.c_str(), std::ios::app);
         }
 
+        bool echoSources = itsParset.getBool("echoSources", false);
         while (getline(srclist, line),
                 !srclist.eof()) {
-            if ( itsParset.getBool("echoSources",false) ){
+            if (echoSources) {
                 ASKAPLOG_DEBUG_STR(logger, "input = " << line);
             }
             fluxGen.zero();
@@ -688,7 +689,14 @@ void FITSfile::processSources()
                 }
 
                 lookAtSource = lookAtSource &&
-                               src->freqRangeOK(this->minFreq(), this->maxFreq());
+                               (itsDatabaseOrigin == "POSSUMHI" ||
+                                src->freqRangeOK(this->minFreq(), this->maxFreq()));
+
+                if (itsDatabaseOrigin == "POSSUMHI" && echoSources) {
+                    ASKAPLOG_DEBUG_STR(logger, "Freq range is " << minFreq() << " - " << maxFreq()
+                                       << ", range for line is " << src->minFreq() << " - " << src->maxFreq()
+                                       << "  and freqRangeOK=" << src->freqRangeOK(this->minFreq(), this->maxFreq()));
+                }
 
                 if (lookAtSource) {
 
@@ -699,10 +707,12 @@ void FITSfile::processSources()
                     } else {
                         fluxGen.addSpectrum(src, pix[0], pix[1], itsWCS);
                     }
-                    if (itsDatabaseOrigin == "POSSUMHI"){
+                    if (itsDatabaseOrigin == "POSSUMHI" &&
+                            src->freqRangeOK(this->minFreq(), this->maxFreq())) {
                         //For the POSSUMHI case, we have *both* the
                         //continuum and the line emission, so have a
-                        //second flux call to do the line
+                        //second flux call to do the line. But only do
+                        //this if the frequency range necessitates it.
                         fluxGen.addSpectrumInt(src, pix[0], pix[1], itsWCS);
                     }
 
@@ -1262,14 +1272,14 @@ void FITSfile::writeCASAimage(bool createFile, bool saveData, bool useOffset)
 double FITSfile::maxFreq()
 {
     int spec = itsWCS->spec;
-    return itsWCS->crval[spec] +
-           (itsAxes[spec] / 2 + 0.5) * itsWCS->cdelt[spec];
+    return std::max(itsWCS->crval[spec] + (itsAxes[spec] - itsWCS->crpix[spec] + 0.5) * itsWCS->cdelt[spec],
+                    itsWCS->crval[spec] + (0 - itsWCS->crpix[spec] - 0.5) * itsWCS->cdelt[spec]);
 }
 double FITSfile::minFreq()
 {
     int spec = itsWCS->spec;
-    return itsWCS->crval[spec] -
-           (itsAxes[spec] / 2 + 0.5) * itsWCS->cdelt[spec];
+    return std::min(itsWCS->crval[spec] + (itsAxes[spec] - itsWCS->crpix[spec] + 0.5) * itsWCS->cdelt[spec],
+                    itsWCS->crval[spec] + (0 - itsWCS->crpix[spec] - 0.5) * itsWCS->cdelt[spec]);
 }
 
 
@@ -1393,7 +1403,7 @@ void FITSfile::defineTaylorTerms()
         gsl_vector_free(w);
         gsl_vector_free(ydat);
         gsl_matrix_free(xdat);
-        
+
     }
 }
 

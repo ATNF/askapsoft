@@ -89,6 +89,11 @@ class GaussianProfile : public Spectrum {
         /// @brief Return the flux integrated between two frequencies
         virtual const double fluxInt(const double nu1, const double nu2, const int istokes = 0);
 
+        /// @brief Return minimum frequency of the line
+        virtual const double minFreq() const {return itsMinFreq;};
+        /// @brief Return maximum frequency of the line
+        virtual const double maxFreq() const {return itsMaxFreq;};
+
         /// @brief Output the parameters for the source
         /// @details Prints a summary of the parameters to the stream
         /// @param theStream The destination stream

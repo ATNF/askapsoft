@@ -119,6 +119,11 @@ class Continuum : public Spectrum {
         /// @brief Return the flux integrated between two frequencies
         const double fluxInt(const double freq1, const double freq2, const int istokes = 0);
 
+        /// @brief Return minimum frequency of the line
+        virtual const double minFreq() const {return 0.;};
+        /// @brief Return maximum frequency of the line
+        virtual const double maxFreq() const {return 0.;};
+
         /// @brief Output the parameters for the source
         using Spectrum::print;
         void print(std::ostream& theStream);

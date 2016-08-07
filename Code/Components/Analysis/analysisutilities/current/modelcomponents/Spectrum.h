@@ -141,6 +141,11 @@ class Spectrum {
                            const std::string dec);
         virtual void print(std::ostream& theStream) const;
 
+        /// @brief Return minimum frequency of the line
+        virtual const double minFreq() const = 0;
+        /// @brief Return maximum frequency of the line
+        virtual const double maxFreq() const = 0;
+
         /// @details Prints a summary of the parameters to the stream
         /// @param theStream The destination stream
         /// @param prof The profile object

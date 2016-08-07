@@ -327,6 +327,8 @@ const double HIprofileS3SEX::fluxInt(const double nu1, const double nu2, const i
             double v[2], f[2];
             v[0] = freqToHIVel(std::max(nu1, nu2)); // lowest velocty
             v[1] = freqToHIVel(std::min(nu1, nu2)); // highest velocity
+            // ASKAPLOG_DEBUG_STR(logger, "Calculating flux from freq " << nu1 << " to " << nu2
+            //                    << ", or vels "<<v[0]<<" to " << v[1]);
             f[0] = f[1] = 0.;
 
             double minPeak = itsVelZero - itsDeltaVel;
