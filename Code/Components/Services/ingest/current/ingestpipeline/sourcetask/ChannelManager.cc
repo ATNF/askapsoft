@@ -42,6 +42,8 @@
 #include "Common/ParameterSet.h"
 #include "casacore/casa/Arrays/Vector.h"
 #include "askap/AskapUtil.h"
+#include "casacore/casa/Quanta.h"
+
 
 ASKAP_LOGGER(logger, ".ChannelManager");
 
@@ -49,7 +51,8 @@ using namespace std;
 using namespace askap;
 using namespace askap::cp::ingest;
 
-ChannelManager::ChannelManager(const LOFAR::ParameterSet& params)
+ChannelManager::ChannelManager(const LOFAR::ParameterSet& params) :
+    itsFreqOffset(asQuantity(params.getString("freq_offset","0.0Hz")).getValue("Hz"))
 {
     const LOFAR::ParameterSet subset = params.makeSubset("n_channels.");
 
@@ -76,6 +79,7 @@ ChannelManager::ChannelManager(const LOFAR::ParameterSet& params)
              }
          }
     }
+    ASKAPLOG_INFO_STR(logger, "Frequency offset of "<<itsFreqOffset/1e6<<" MHz will be applied to the whole spectral axis");
 }
 
 unsigned int ChannelManager::localNChannels(const int rank) const
@@ -98,7 +102,7 @@ casa::Vector<casa::Double> ChannelManager::localFrequencies(const int rank,
     casa::Vector<casa::Double> frequencies(localNChannels(rank));;
 
     // 1: Find the first frequency (freq of lowest channel) for this rank
-    casa::Double firstFreq = centreFreqToStartFreq(centreFreq, chanWidth, totalNChan);
+    casa::Double firstFreq = centreFreqToStartFreq(centreFreq, chanWidth, totalNChan) + itsFreqOffset;
 
     for (int i = 0; i < rank; ++i) {
         firstFreq += localNChannels(i) * chanWidth;

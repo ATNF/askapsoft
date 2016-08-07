@@ -72,7 +72,7 @@ public:
       boost::shared_ptr<common::VisChunk> chunk = conv.visChunk();
       ASKAPASSERT(chunk);
       casa::Timer timer;
-      float processingTime;
+      float processingTime = 0.;
       size_t actualCount = 0;
 
       ASKAPLOG_INFO_STR(logger, "Initialising MSSink constructor for rank="<<rank());
@@ -84,7 +84,7 @@ public:
       
       ASKAPLOG_INFO_STR(logger, "Running the test for rank="<<rank());
 
-      for (int count = 0; count < expectedCount; ++count) {
+      for (uint32_t count = 0; count < expectedCount; ++count) {
            ASKAPLOG_INFO_STR(logger, "Received "<<count + 1<<" integration(s) for rank="<<rank());
            timer.mark();
            sink.process(chunk);

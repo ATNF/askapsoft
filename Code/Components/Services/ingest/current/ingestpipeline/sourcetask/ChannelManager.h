@@ -95,6 +95,12 @@ class ChannelManager {
         // first: is the process rank, second: is the number
         // of spectral channels it handles
         std::map<int, unsigned int> itsChannelMap;
+
+        /// @brief frequency offset in Hz applied to the whole axis
+        /// @details This value is defined in the parset and can be used to 
+        /// avoid hacks when working with the partial bandwidth
+        /// (also handy for some commissioning experiments)
+        casa::Double itsFreqOffset;
 };
 
 }
