@@ -109,11 +109,34 @@ class BeamScatterTask : public askap::cp::ingest::ITask {
         /// @return rank against itsCommunicator
         int localRank() const;
 
+        /// @brief helper method to initialise communication patterns
+        /// @details It does counting of active ranks across the whole rank space,
+        /// figures out whether this rank stays active. Communicator is also setup
+        /// as required. 
+        /// @param[in] isActive true if this rank has active input, false otherwise
+        /// @return stream number handled by this rank or -1 if it is not active.
+        /// @note The method uses MPI collective calls and should be executed by all ranks,
+        /// including inactive ones. The method is non-const because it sets up
+        /// intra-group communicators
+        int countActiveRanks(bool isActive);
+
+        /// @brief set up split and cache buffer structure
+        /// @details The method uses MPI collective calls within the group each
+        /// rank belongs to. It initialises start and stop rows for each rank.
+        /// @param[in] chunk the instance of VisChunk to work with
+        void initialiseSplit(const askap::cp::common::VisChunk::ShPtr& chunk);
+
         /// @brief Number of streams to create
         int itsNStreams;
 
         /// @brief MPI communicator for the group used for collectives
         MPI_Comm itsCommunicator;
+
+        /// @brief configuration
+        Configuration itsConfig;
+
+        /// @brief Number of the stream handled by this rank or -1 if unused
+        int itsStreamNumber;
 };
 
 }
