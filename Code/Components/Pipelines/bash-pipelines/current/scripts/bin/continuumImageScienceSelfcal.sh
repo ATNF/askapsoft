@@ -80,6 +80,60 @@ Selavy.Weights.weightsCutoff                    = ${SELFCAL_SELAVY_WEIGHTSCUT}"
         selavyWeights="# No weights scaling applied in Selavy"
     fi
 
+    modelImage=contmodel.${imageBase}
+
+    if [ "${SELFCAL_METHOD}" == "Cmodel" ]; then
+
+        CmodelParset="##########
+## Creation of the model image
+##
+# The below specifies the GSM source is a selavy output file
+Cmodel.gsm.database       = votable
+Cmodel.gsm.file           = selavy-results.components.xml
+Cmodel.gsm.ref_freq       = \${freq}MHz
+
+# General parameters
+Cmodel.bunit              = Jy/pixel
+Cmodel.frequency          = \${freq}MHz
+Cmodel.increment          = 304MHz
+Cmodel.flux_limit         = ${SELFCAL_MODEL_FLUX_LIMIT}
+Cmodel.shape              = [${NUM_PIXELS_CONT},${NUM_PIXELS_CONT}]
+Cmodel.cellsize           = [${CELLSIZE_CONT}arcsec, ${CELLSIZE_CONT}arcsec]
+Cmodel.direction          = \${modelDirection}
+Cmodel.stokes             = [I]
+Cmodel.nterms             = ${NUM_TAYLOR_TERMS}
+
+# Output specific parameters
+Cmodel.output             = casa
+Cmodel.filename           = ${modelImage}"
+
+        SelavyComponentParset="# Not saving the component parset"
+
+        CalibratorModelDefinition="# The model definition
+Ccalibrator.sources.names                       = [lsm]
+Ccalibrator.sources.lsm.direction               = \${modelDirection}
+Ccalibrator.sources.lsm.model                   = ${modelImage}
+Ccalibrator.sources.lsm.nterms                  = ${NUM_TAYLOR_TERMS}"
+
+    else
+
+        CmodelParset="##########
+        ## Creation of the model image is not done here"
+
+        SelavyComponentParset="# Saving the fitted components to a parset for use by ccalibrator
+Selavy.outputComponentParset                    = true
+Selavy.outputComponentParset.filename           = \${sources}
+# Reference direction for which component positions should be measured
+#  relative to.
+Selavy.outputComponentParset.referenceDirection = \${refDirection}
+# Only use the brightest components in the parset
+Selavy.outputComponentParset.maxNumComponents   = 10"
+
+        CalibratorModelDefinition="# The model definition
+Ccalibrator.sources.definition                  = \${sources}"
+
+    fi
+
     sbatchfile=$slurms/science_continuumImageSelfcal_beam$BEAM.sbatch
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
@@ -105,15 +159,24 @@ cd $OUTPUT
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 
-log=${logs}/mslist_for_cal_\${SLURM_JOB_ID}.log
+selfcalMethod=${SELFCAL_METHOD}
+
+log=${logs}/mslist_for_selfcal_\${SLURM_JOB_ID}.log
 NCORES=1
 NPPN=1
 aprun -n \${NCORES} -N \${NPPN} $mslist --full ${msSci} 2>&1 1> \${log}
+freq=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=Freq\`
 ra=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=RA\`
-ra=\`echo \$ra | awk -F':' '{printf "%sh%sm%s",\$1,\$2,\$3}'\` 
 dec=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=Dec\`
-dec=\`echo \$dec | awk -F':' '{printf "%s.%s.%s",\$1,\$2,\$3}'\` 
 epoch=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=Epoch\`
+if [ "${DIRECTION}" != "" ]; then
+    modelDirection="${DIRECTION}"
+else
+    modelDirection="[\${ra}, \${dec}, \${epoch}]"
+fi
+# Reformat for Selavy's referenceDirection
+ra=\`echo \$ra | awk -F':' '{printf "%sh%sm%s",\$1,\$2,\$3}'\` 
+dec=\`echo \$dec | awk -F':' '{printf "%s.%s.%s",\$1,\$2,\$3}'\` 
 refDirection="[\${ra}, \${dec}, \${epoch}]"
 
 caldir=selfCal_${imageBase}
@@ -210,14 +273,7 @@ Selavy.flagAdjacent = false
 # The separation in pixels for islands to be considered 'joined'
 Selavy.threshSpatial = 7
 #
-# Saving the fitted components to a parset for use by ccalibrator
-Selavy.outputComponentParset                    = true
-Selavy.outputComponentParset.filename           = \${sources}
-# Reference direction for which component positions should be measured
-#  relative to.
-Selavy.outputComponentParset.referenceDirection = \${refDirection}
-# Only use the brightest components in the parset
-Selavy.outputComponentParset.maxNumComponents   = 10
+${SelavyComponentParset}
 #
 # Size criteria for the final list of detected islands
 Selavy.minPix                                   = 3
@@ -228,6 +284,7 @@ Selavy.minChannels                              = 1
 #  integrated flux in this case
 Selavy.sortingParam                             = -iflux
 #
+${CmodelParset}
 ##########
 ## Calibration using selavy's component parset
 ##
@@ -246,13 +303,19 @@ Ccalibrator.calibaccess.table.maxbeam           = ${maxbeam}
 Ccalibrator.calibaccess.table.maxchan           = ${nchanContSci}
 Ccalibrator.calibaccess.table.reuse             = false
 #
-Ccalibrator.sources.definition                  = \${sources}
+${CalibratorModelDefinition}
 #
 Ccalibrator.gridder.snapshotimaging             = ${GRIDDER_SNAPSHOT_IMAGING}
 Ccalibrator.gridder.snapshotimaging.wtolerance  = ${GRIDDER_SNAPSHOT_WTOL}
 Ccalibrator.gridder.snapshotimaging.longtrack   = ${GRIDDER_SNAPSHOT_LONGTRACK}
 Ccalibrator.gridder.snapshotimaging.clipping    = ${GRIDDER_SNAPSHOT_CLIPPING}
 Ccalibrator.gridder                             = WProject
+Ccalibrator.gridder.WProject.wmax               = ${GRIDDER_WMAX}
+Ccalibrator.gridder.WProject.nwplanes           = ${GRIDDER_NWPLANES}
+Ccalibrator.gridder.WProject.oversample         = ${GRIDDER_OVERSAMPLE}
+Ccalibrator.gridder.WProject.maxsupport         = ${GRIDDER_MAXSUPPORT}
+Ccalibrator.gridder.WProject.variablesupport    = true
+Ccalibrator.gridder.WProject.offsetsupport      = true
 #
 Ccalibrator.ncycles                             = 25
 
@@ -278,6 +341,20 @@ EOFINNER
         if [ \$err != 0 ]; then
             exit \$err
         fi
+
+        if [ "\${selfcalMethod}" == "Cmodel" ]; then
+            echo "--- Model creation with $cmodel ---" >> \$log
+            NCORES=2
+            NPPN=2
+            aprun -n \${NCORES} -N \${NPPN} $cmodel -c \$parset >> \$log
+            err=\$?
+            extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} cmodelSC_L\${LOOP}_B${BEAM} "txt,csv"
+            
+            if [ \$err != 0 ]; then
+                exit \$err
+            fi
+        fi
+
 
         echo "--- Calibration with $ccalibrator ---" >> \$log
         NCORES=1
