@@ -114,12 +114,14 @@ if [ "${MS_INPUT_SCIENCE}" != "" ]; then
     # Number of channels for 1934 observation
     if [ "$CHAN_RANGE_1934" == "" ]; then
         NUM_CHAN_1934=${NUM_CHAN}
+        CHAN_RANGE_1934="1-${NUM_CHAN}"
     else
         NUM_CHAN_1934=`echo $CHAN_RANGE_1934 | awk -F'-' '{print $2-$1+1}'`
     fi
     # Number of channels in science observation (used in applying the bandpass solution)
     if [ "$CHAN_RANGE_SCIENCE" == "" ]; then
         NUM_CHAN_SCIENCE=${NUM_CHAN}
+        CHAN_RANGE_SCIENCE="1-${NUM_CHAN}"
     else
         NUM_CHAN_SCIENCE=`echo $CHAN_RANGE_SCIENCE | awk -F'-' '{print $2-$1+1}'`
     fi
