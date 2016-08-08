@@ -95,7 +95,7 @@ void CalcCore::doCalc()
     casa::Timer timer;
     timer.mark();
 
-    ASKAPLOG_INFO_STR(logger, "Calculating NE .... for channel " << itsChannel);
+    ASKAPLOG_DEBUG_STR(logger, "Calculating NE .... for channel " << itsChannel);
     if (!itsEquation) {
 
         accessors::TableDataSource ds = itsData;
@@ -121,15 +121,15 @@ void CalcCore::doCalc()
         // calibration can go below if required
 
         if (!getSolutionSource()) {
-            ASKAPLOG_INFO_STR(logger,"Not applying calibration");
-            ASKAPLOG_INFO_STR(logger, "building FFT/measurement equation" );
+            ASKAPLOG_DEBUG_STR(logger,"Not applying calibration");
+            ASKAPLOG_DEBUG_STR(logger, "building FFT/measurement equation" );
             boost::shared_ptr<ImageFFTEquation> fftEquation(new ImageFFTEquation (*itsModel, it, gridder()));
             ASKAPDEBUGASSERT(fftEquation);
             fftEquation->useAlternativePSF(parset());
             fftEquation->setVisUpdateObject(GroupVisAggregator::create(itsComms));
             itsEquation = fftEquation;
         } else {
-            ASKAPLOG_INFO_STR(logger, "Calibration will be performed using solution source");
+            ASKAPLOG_DEBUG_STR(logger, "Calibration will be performed using solution source");
             boost::shared_ptr<ICalibrationApplicator> calME(\
             new CalibrationApplicatorME(getSolutionSource()));
             // fine tune parameters
@@ -150,14 +150,14 @@ void CalcCore::doCalc()
 
     }
     else {
-        ASKAPLOG_INFO_STR(logger, "Reusing measurement equation and updating with latest model images" );
+        ASKAPLOG_DEBUG_STR(logger, "Reusing measurement equation and updating with latest model images" );
         itsEquation->setParameters(*itsModel);
     }
     ASKAPCHECK(itsEquation, "Equation not defined");
     ASKAPCHECK(itsNe, "NormalEquations not defined");
     itsEquation->calcEquations(*itsNe);
 
-    ASKAPLOG_INFO_STR(logger,"Calculated normal equations in "<< timer.real()
+    ASKAPLOG_DEBUG_STR(logger,"Calculated normal equations in "<< timer.real()
                       << " seconds ");
 
 }
@@ -199,7 +199,7 @@ void CalcCore::check()
     casa::Vector<double> slice(checkRef.normalMatrixSlice(names[0]));
     casa::Vector<double> pcf(checkRef.preconditionerSlice(names[0]));
 
-    ASKAPLOG_INFO_STR(logger, "Max data: " << max(dv) << " Max PSF: " << max(slice) << " Normalised: " << max(dv)/max(slice));
+    ASKAPLOG_DEBUG_STR(logger, "Max data: " << max(dv) << " Max PSF: " << max(slice) << " Normalised: " << max(dv)/max(slice));
 
 }
 void CalcCore::solveNE()
@@ -212,7 +212,7 @@ void CalcCore::solveNE()
     itsSolver->init();
     itsSolver->addNormalEquations(*itsNe);
 
-    ASKAPLOG_INFO_STR(logger, "Solving Normal Equations");
+    ASKAPLOG_DEBUG_STR(logger, "Solving Normal Equations");
     askap::scimath::Quality q;
 
     ASKAPDEBUGASSERT(itsModel);
@@ -243,7 +243,7 @@ void CalcCore::solveNE()
 }
 void CalcCore::writeLocalModel(const std::string &postfix) {
 
-    ASKAPLOG_INFO_STR(logger, "Writing out results as images");
+    ASKAPLOG_DEBUG_STR(logger, "Writing out results as images");
     ASKAPDEBUGASSERT(itsModel);
     vector<string> resultimages=itsModel->names();
     bool hasWeights = false;
@@ -263,7 +263,7 @@ void CalcCore::writeLocalModel(const std::string &postfix) {
 
     if (itsRestore && postfix == "")
     {
-        ASKAPLOG_INFO_STR(logger, "Restore images and writing them to disk");
+        ASKAPLOG_DEBUG_STR(logger, "Restore images and writing them to disk");
         boost::shared_ptr<ImageRestoreSolver> ir = ImageRestoreSolver::createSolver(parset().makeSubset("restore."));
         ASKAPDEBUGASSERT(ir);
         ASKAPDEBUGASSERT(itsSolver);
@@ -280,20 +280,20 @@ void CalcCore::writeLocalModel(const std::string &postfix) {
         for (vector<string>::const_iterator ci=resultimages.begin(); ci!=resultimages.end(); ++ci) {
             const ImageParamsHelper iph(*ci);
             if (!iph.isFacet() && (ci->find("image") == 0)) {
-                ASKAPLOG_INFO_STR(logger, "Saving restored image " << *ci << " with name "
+                ASKAPLOG_DEBUG_STR(logger, "Saving restored image " << *ci << " with name "
                               << *ci+string(".restored") );
                 SynthesisParamsHelper::saveImageParameter(*itsModel, *ci,*ci+string(".restored"));
             }
         }
     }
-    ASKAPLOG_INFO_STR(logger, "Writing out additional parameters made by restore solver as images");
+    ASKAPLOG_DEBUG_STR(logger, "Writing out additional parameters made by restore solver as images");
     vector<string> resultimages2=itsModel->names();
     for (vector<string>::const_iterator it=resultimages2.begin(); it
         !=resultimages2.end(); it++) {
-        ASKAPLOG_INFO_STR(logger, "Checking "<<*it);
+        ASKAPLOG_DEBUG_STR(logger, "Checking "<<*it);
         if ((it->find("psf") == 0) && (std::find(resultimages.begin(),
             resultimages.end(),*it) == resultimages.end())) {
-            ASKAPLOG_INFO_STR(logger, "Saving " << *it << " with name " << *it+postfix );
+            ASKAPLOG_DEBUG_STR(logger, "Saving " << *it << " with name " << *it+postfix );
             SynthesisParamsHelper::saveImageParameter(*itsModel, *it, *it+postfix);
         }
     }

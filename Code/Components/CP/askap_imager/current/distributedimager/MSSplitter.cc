@@ -79,23 +79,23 @@ MSSplitter::MSSplitter(LOFAR::ParameterSet& Parset)
     if (itsParset.isDefined("beams")) {
         const vector<uint32_t> v = itsParset.getUint32Vector("beams", true);
         itsBeams.insert(v.begin(), v.end());
-        ASKAPLOG_INFO_STR(logger, "Including ONLY beams: " << v);
+        ASKAPLOG_DEBUG_STR(logger, "Including ONLY beams: " << v);
     }
 
     // Read scan id selection parameters
     if (itsParset.isDefined("scans")) {
         const vector<uint32_t> v = itsParset.getUint32Vector("scans", true);
         itsScans.insert(v.begin(), v.end());
-        ASKAPLOG_INFO_STR(logger, "Including ONLY scan numbers: " << v);
+        ASKAPLOG_DEBUG_STR(logger, "Including ONLY scan numbers: " << v);
     }
 
     // Read field name selection parameters
     //if (itsParset.isDefined("fieldnames")) {
     //    const vector<string> names = itsParset.getStringVector("fieldnames", true);
-    //    ASKAPLOG_INFO_STR(logger, "Including ONLY fields with names: " << names);
+    //    ASKAPLOG_DEBUG_STR(logger, "Including ONLY fields with names: " << names);
     //    const vector<uint32_t> v = configureFieldNameFilter(names,invis);
     //    itsFieldIds.insert(v.begin(), v.end());
-    //    ASKAPLOG_INFO_STR(logger, "  fields: " << v);
+    //    ASKAPLOG_DEBUG_STR(logger, "  fields: " << v);
     //}
 
 
@@ -111,7 +111,7 @@ boost::shared_ptr<casa::MeasurementSet> MSSplitter::create(
 
     if (tileNchan < 1) tileNchan = 1;
 
-    ASKAPLOG_INFO_STR(logger, "Creating dataset " << filename);
+    ASKAPLOG_DEBUG_STR(logger, "Creating dataset " << filename);
 
     // Make MS with standard columns
     TableDesc msDesc(MS::requiredTableDesc());
@@ -523,10 +523,10 @@ void MSSplitter::splitMainTable(const casa::MeasurementSet& source,
     casa::Bool haveInSigmaSpec = source.isColumn(MS::SIGMA_SPECTRUM);
     casa::Bool haveOutSigmaSpec = dest.isColumn(MS::SIGMA_SPECTRUM);
     if (haveInSigmaSpec) {
-        ASKAPLOG_INFO_STR(logger, "Reading and using the spectra of sigma values");
+        ASKAPLOG_DEBUG_STR(logger, "Reading and using the spectra of sigma values");
     }
     if (haveOutSigmaSpec) {
-        ASKAPLOG_INFO_STR(logger, "Calculating and storing spectra of sigma values");
+        ASKAPLOG_DEBUG_STR(logger, "Calculating and storing spectra of sigma values");
     }
 
     // Decide how many rows to process simultaneously. This needs to fit within
@@ -581,7 +581,7 @@ void MSSplitter::splitMainTable(const casa::MeasurementSet& source,
         progressCounter += nRowsThisIteration;
         if (progressCounter >= PROGRESS_INTERVAL_IN_ROWS ||
                 (row >= nRows - 1)) {
-            ASKAPLOG_INFO_STR(logger,  "Processed row " << row + 1 << " of " << nRows);
+            ASKAPLOG_DEBUG_STR(logger,  "Processed row " << row + 1 << " of " << nRows);
             progressCounter = 0;
         }
 
@@ -733,13 +733,13 @@ int MSSplitter::split(const std::string& invis, const std::string& outvis,
                       const uint32_t width,
                       const LOFAR::ParameterSet& parset)
 {
-    ASKAPLOG_INFO_STR(logger,  "Splitting out channel range " << startChan << " to "
+    ASKAPLOG_DEBUG_STR(logger,  "Splitting out channel range " << startChan << " to "
                           << endChan << " (inclusive)");
 
     if (width > 1) {
-        ASKAPLOG_INFO_STR(logger,  "Averaging " << width << " channels to form 1");
+        ASKAPLOG_DEBUG_STR(logger,  "Averaging " << width << " channels to form 1");
     } else {
-        ASKAPLOG_INFO_STR(logger,  "No averaging");
+        ASKAPLOG_DEBUG_STR(logger,  "No averaging");
     }
 
     // Verify split parameters
@@ -782,42 +782,42 @@ int MSSplitter::split(const std::string& invis, const std::string& outvis,
         out(create(outvis, addSigmaSpec, bucketSize, tileNcorr, tileNchan));
 
     // Copy ANTENNA
-    ASKAPLOG_INFO_STR(logger,  "Copying ANTENNA table");
+    ASKAPLOG_DEBUG_STR(logger,  "Copying ANTENNA table");
     copyAntenna(in, *out);
 
     // Copy DATA_DESCRIPTION
-    ASKAPLOG_INFO_STR(logger,  "Copying DATA_DESCRIPTION table");
+    ASKAPLOG_DEBUG_STR(logger,  "Copying DATA_DESCRIPTION table");
     copyDataDescription(in, *out);
 
     // Copy FEED
-    ASKAPLOG_INFO_STR(logger,  "Copying FEED table");
+    ASKAPLOG_DEBUG_STR(logger,  "Copying FEED table");
     copyFeed(in, *out);
 
     // Copy FIELD
-    ASKAPLOG_INFO_STR(logger,  "Copying FIELD table");
+    ASKAPLOG_DEBUG_STR(logger,  "Copying FIELD table");
     copyField(in, *out);
 
     // Copy OBSERVATION
-    ASKAPLOG_INFO_STR(logger,  "Copying OBSERVATION table");
+    ASKAPLOG_DEBUG_STR(logger,  "Copying OBSERVATION table");
     copyObservation(in, *out);
 
     // Copy POINTING
-    ASKAPLOG_INFO_STR(logger,  "Copying POINTING table");
+    ASKAPLOG_DEBUG_STR(logger,  "Copying POINTING table");
     copyPointing(in, *out);
 
     // Copy POLARIZATION
-    ASKAPLOG_INFO_STR(logger,  "Copying POLARIZATION table");
+    ASKAPLOG_DEBUG_STR(logger,  "Copying POLARIZATION table");
     copyPolarization(in, *out);
 
     // Get the spectral window id (must be common for all main table rows)
     const casa::Int spwId = findSpectralWindowId(in);
 
     // Split SPECTRAL_WINDOW
-    ASKAPLOG_INFO_STR(logger,  "Splitting SPECTRAL_WINDOW table");
+    ASKAPLOG_DEBUG_STR(logger,  "Splitting SPECTRAL_WINDOW table");
     splitSpectralWindow(in, *out, startChan, endChan, width, spwId);
 
     // Split main table
-    ASKAPLOG_INFO_STR(logger,  "Splitting main table");
+    ASKAPLOG_DEBUG_STR(logger,  "Splitting main table");
     splitMainTable(in, *out, startChan, endChan, width);
 
     return 0;
@@ -835,7 +835,7 @@ void MSSplitter::configureTimeFilter(const std::string& key, const std::string& 
 
     const casa::MVTime t(tq);
     var = t.second();
-    ASKAPLOG_INFO_STR(logger, msg << ts << " (" << var << " sec)");
+    ASKAPLOG_DEBUG_STR(logger, msg << ts << " (" << var << " sec)");
 
 }
 

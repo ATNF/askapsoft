@@ -120,14 +120,14 @@ void ContinuumMaster::run(void)
 
         diadvise.addMissingParameters();
 
-        ASKAPLOG_INFO_STR(logger,"*****");
-        ASKAPLOG_INFO_STR(logger,"Parset" << diadvise.getParset());
-        ASKAPLOG_INFO_STR(logger,"*****");
+        ASKAPLOG_DEBUG_STR(logger,"*****");
+        ASKAPLOG_DEBUG_STR(logger,"Parset" << diadvise.getParset());
+        ASKAPLOG_DEBUG_STR(logger,"*****");
 
         totalChannels = diadvise.getBaryFrequencies().size();
 
-        ASKAPLOG_INFO_STR(logger,"AdviseDI reports " << totalChannels << " channels to process");
-        ASKAPLOG_INFO_STR(logger,"AdviseDI reports " << diadvise.getWorkUnitCount() << " work units to allocate");
+        ASKAPLOG_DEBUG_STR(logger,"AdviseDI reports " << totalChannels << " channels to process");
+        ASKAPLOG_DEBUG_STR(logger,"AdviseDI reports " << diadvise.getWorkUnitCount() << " work units to allocate");
     }
 
     catch (AskapError& e) {
@@ -147,23 +147,23 @@ void ContinuumMaster::run(void)
     while(diadvise.getWorkUnitCount()) {
 
         ContinuumWorkRequest wrequest;
-        ASKAPLOG_INFO_STR(logger,"Waiting for a request " << diadvise.getWorkUnitCount() \
+        ASKAPLOG_DEBUG_STR(logger,"Waiting for a request " << diadvise.getWorkUnitCount() \
         << " units remaining");
         wrequest.receiveRequest(id, itsComms);
-        ASKAPLOG_INFO_STR(logger,"Received a request from " << id);
+        ASKAPLOG_DEBUG_STR(logger,"Received a request from " << id);
         /// Now we can just pop a work allocation off the stack for this rank
         ContinuumWorkUnit wu = diadvise.getAllocation(id-1);
-        ASKAPLOG_INFO_STR(logger,"Sending Allocation to  " << id);
+        ASKAPLOG_DEBUG_STR(logger,"Sending Allocation to  " << id);
         wu.sendUnit(id,itsComms);
-        ASKAPLOG_INFO_STR(logger,"Sent Allocation to " << id);
+        ASKAPLOG_DEBUG_STR(logger,"Sent Allocation to " << id);
     }
 
 
     if (localSolver) {
-        ASKAPLOG_INFO_STR(logger, "Master no longer required");
+        ASKAPLOG_DEBUG_STR(logger, "Master no longer required");
         return;
     }
-    ASKAPLOG_INFO_STR(logger, "Master is about to broadcast first <empty> model");
+    ASKAPLOG_DEBUG_STR(logger, "Master is about to broadcast first <empty> model");
 
     // this parset need to know direction and frequency for the final maps/models
     // But I dont want to run Cadvise as it is too specific to the old imaging requirements
@@ -171,7 +171,7 @@ void ContinuumMaster::run(void)
 
     if (nCycles == 0) {
         synthesis::ImagerParallel imager(itsComms, diadvise.getParset());
-        ASKAPLOG_INFO_STR(logger, "Master beginning single cycle");
+        ASKAPLOG_DEBUG_STR(logger, "Master beginning single cycle");
         imager.broadcastModel(); // initially empty model
 
         imager.receiveNE();
@@ -188,7 +188,7 @@ void ContinuumMaster::run(void)
     else {
         synthesis::ImagerParallel imager(itsComms, diadvise.getParset());
         for (int cycle = 0; cycle < nCycles; ++cycle) {
-            ASKAPLOG_INFO_STR(logger, "Master beginning major cycle ** " << cycle);
+            ASKAPLOG_DEBUG_STR(logger, "Master beginning major cycle ** " << cycle);
 
             if (cycle==0) {
                 imager.broadcastModel(); // initially empty model
@@ -202,28 +202,28 @@ void ContinuumMaster::run(void)
 
             if (imager.params()->has("peak_residual")) {
                 const double peak_residual = imager.params()->scalarValue("peak_residual");
-                ASKAPLOG_INFO_STR(logger, "Major Cycle " << cycle << " Reached peak residual of " << peak_residual);
+                ASKAPLOG_DEBUG_STR(logger, "Major Cycle " << cycle << " Reached peak residual of " << peak_residual);
                 if (peak_residual < targetPeakResidual) {
-                    ASKAPLOG_INFO_STR(logger, "It is below the major cycle threshold of "
+                    ASKAPLOG_DEBUG_STR(logger, "It is below the major cycle threshold of "
                                       << targetPeakResidual << " Jy. Stopping.");
                     imager.broadcastModel();
                     break;
                 } else {
                     if (targetPeakResidual < 0) {
-                        ASKAPLOG_INFO_STR(logger, "Major cycle flux threshold is not used.");
+                        ASKAPLOG_DEBUG_STR(logger, "Major cycle flux threshold is not used.");
                     } else {
-                        ASKAPLOG_INFO_STR(logger, "It is above the major cycle threshold of "
+                        ASKAPLOG_DEBUG_STR(logger, "It is above the major cycle threshold of "
                                           << targetPeakResidual << " Jy. Continuing.");
                     }
                 }
             }
             if (writeAtMajorCycle) {
-                ASKAPLOG_INFO_STR(logger, "Writing out model");
+                ASKAPLOG_DEBUG_STR(logger, "Writing out model");
                 imager.writeModel(std::string(".beam") + utility::toString(beam) + \
                 std::string(".majorcycle.") + utility::toString(cycle + 1));
             }
             else {
-                ASKAPLOG_INFO_STR(logger, "Not writing out model");
+                ASKAPLOG_DEBUG_STR(logger, "Not writing out model");
             }
             if (cycle == nCycles-1) {
                 imager.calcNE(); // resets the itsNE
@@ -379,7 +379,7 @@ void ContinuumMaster::recordBeam(const askap::scimath::Axes &axes,
     if (axes.has("MAJMIN")) {
         // this is a restored image with beam parameters set
         ASKAPCHECK(axes.has("PA"), "PA axis should always accompany MAJMIN");
-        ASKAPLOG_INFO_STR(logger, "Found beam for image.slice, channel " <<
+        ASKAPLOG_DEBUG_STR(logger, "Found beam for image.slice, channel " <<
                           globalChannel << ", with shape " <<
                           axes.start("MAJMIN") * 180. / M_PI * 3600. << "x" <<
                           axes.end("MAJMIN") * 180. / M_PI * 3600. << ", " <<
@@ -431,7 +431,7 @@ void ContinuumMaster::logBeamInfo()
                 beams.push_back(beam->second);
             }
             beamlog.beamlist() = beams;
-            ASKAPLOG_INFO_STR(logger, "Writing list of individual channel beams to beam log "
+            ASKAPLOG_DEBUG_STR(logger, "Writing list of individual channel beams to beam log "
                               << beamlog.filename());
             beamlog.write();
         }

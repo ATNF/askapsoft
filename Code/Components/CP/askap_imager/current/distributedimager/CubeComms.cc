@@ -75,7 +75,7 @@ size_t CubeComms::buildCommIndex() {
           ranks[wrk] = 1 + wrk;
      }
      itsComrades = createComm(ranks);
-     ASKAPLOG_INFO_STR(logger, "Interworker communicator index is "<< itsComrades);
+     ASKAPLOG_DEBUG_STR(logger, "Interworker communicator index is "<< itsComrades);
      return itsComrades;
 }
 void CubeComms::initWriters(int nwriters, int nchanpercore) {
