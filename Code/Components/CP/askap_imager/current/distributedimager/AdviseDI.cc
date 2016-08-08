@@ -355,7 +355,7 @@ void AdviseDI::prepare() {
                     wu.set_payloadType(cp::ContinuumWorkUnit::WORK);
                     wu.set_channelFrequency(thisAllocation[frequency]);
                     wu.set_beam(myBeam);
-                    
+
                     if (itsTopoFrequencies.size() > 1)
                         wu.set_channelWidth(fabs(itsTopoFrequencies[1].getValue() - itsTopoFrequencies[0].getValue()));
                     else
@@ -367,8 +367,9 @@ void AdviseDI::prepare() {
                     itsAllocatedWork[work].push_back(wu);
                     itsWorkUnitCount++;
                     ASKAPLOG_INFO_STR(logger,"Allocating " << thisAllocation[frequency] \
-                    << " with local channel " << lc << " of width " << wu.get_channelWidth() << " in set: " << ms[set] \
-                    << " to worker " << work << "Count " << itsWorkUnitCount );
+                    << " with local channel " << lc << " of width " << wu.get_channelWidth()  \
+                    << " in set: " << ms[set] <<  " to rank " << work+1 << " this rank has " \
+                    << itsAllocatedWork[work].size() << " of a total count " << itsWorkUnitCount );
                     allocated = true;
                 }
 
@@ -389,22 +390,22 @@ void AdviseDI::prepare() {
 
         }
 
-
+    }
         // expand the channels by the number of groups - this is cheap on memory and
         // allows easier indexing
         // But this is only really needed by the master
 
-        for (int grp = 1; grp < itsComms.nGroups(); grp++) {
-            for (int wrk = 0; wrk < nWorkersPerGroup; wrk++) {
-                itsAllocatedWork[grp*nWorkersPerGroup+wrk] = itsAllocatedWork[wrk];
+    for (int grp = 1; grp < itsComms.nGroups(); grp++) {
+        for (int wrk = 0; wrk < nWorkersPerGroup; wrk++) {
+            itsAllocatedWork[grp*nWorkersPerGroup+wrk] = itsAllocatedWork[wrk];
 
-                itsWorkUnitCount=itsWorkUnitCount + itsAllocatedWork[wrk].size();
+            itsWorkUnitCount=itsWorkUnitCount + itsAllocatedWork[wrk].size();
 
-                ASKAPLOG_INFO_STR(logger,"Allocating worker " << grp*nWorkersPerGroup+wrk \
-                << " the same units as worker " << wrk << " Count " << itsWorkUnitCount);
-            }
+            ASKAPLOG_INFO_STR(logger,"Allocating rank " << grp*nWorkersPerGroup+wrk+1 \
+            << " the same units as rank " << wrk+1 << "(" << itsAllocatedWork[wrk].size() << ")"<< " Count " << itsWorkUnitCount);
         }
     }
+
 
     /// Now if required we need to allocate the writers for a parallel writers
     /// The writers do not need to be dedicated cores - they can write in addition
