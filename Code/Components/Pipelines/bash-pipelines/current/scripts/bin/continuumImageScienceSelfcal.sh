@@ -288,6 +288,9 @@ EOFINNER
         if [ \$err != 0 ]; then
             exit \$err
         fi
+
+        # Remove the previous cal table and copy the new one in its place
+        rm -rf ${OUTPUT}/${gainscaltab}
         cp -r \${caldata} ${OUTPUT}/${gainscaltab}
 
         # Keep a backup of the intermediate images, prior to re-imaging.
