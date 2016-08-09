@@ -126,6 +126,30 @@ class BeamScatterTask : public askap::cp::ingest::ITask {
         /// @param[in] chunk the instance of VisChunk to work with
         void initialiseSplit(const askap::cp::common::VisChunk::ShPtr& chunk);
 
+        /// @brief broadcast row-independent fields
+        /// @details This method handles row-independent fields, broadcasts 
+        /// the content within the group and initialses the chunk for streams with
+        /// inactive input. 
+        /// @param[in,out] chunk the instance of VisChunk to work with
+        void broadcastRIFields(askap::cp::common::VisChunk::ShPtr& chunk) const;
+       
+
+        /// @brief helper method to scatter row-based vector
+        /// @details MPI routines work with raw pointers. This method encapsulates
+        /// all ugliness of marrying this with complex casa types.
+        /// It relies on exact physical representation of data. It is assumed that
+        /// local rank 0 is the root. 
+        /// @param[in,out] vec vector for both input (on local rank 0) and output
+        /// (on other ranks of the local communicator)
+        template<typename T>
+        void scatterVector(casa::Vector<T> &vec) const;
+
+        /// @brief trim chunk to the given number of rows
+        /// @details
+        /// @param[in,out] chunk the instance of VisChunk to work with
+        /// @param[in] newNRows new number of rows
+        static void trimChunk(askap::cp::common::VisChunk::ShPtr& chunk, casa::uInt newNRows);
+
         /// @brief Number of streams to create
         int itsNStreams;
 
@@ -137,6 +161,25 @@ class BeamScatterTask : public askap::cp::ingest::ITask {
 
         /// @brief Number of the stream handled by this rank or -1 if unused
         int itsStreamNumber;
+
+        /// @brief rows handled by this rank
+        std::pair<casa::uInt, casa::uInt> itsHandledRows;
+
+        /// @brief for row-based MPI collectives, vector of row counts
+        std::vector<int> itsRowCounts;
+
+        /// @brief for row-based MPI collectives, vector of row offsets
+        std::vector<int> itsRowOffsets;
+
+        /// @brief shape of data is not expected to change - cache it
+        casa::Vector<casa::uInt> itsAntenna1;
+
+        /// @brief shape of data is not expected to change - cache it
+        casa::Vector<casa::uInt> itsAntenna2;
+
+        /// @brief shape of data is not expected to change - cache it
+        /// only support beam1 == beam2, although MS is more flexible
+        casa::Vector<casa::uInt> itsBeam;
 };
 
 }

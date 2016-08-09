@@ -43,9 +43,12 @@
 #include "casacore/casa/Arrays/Vector.h"
 #include "casacore/casa/Arrays/Cube.h"
 #include "cpcommon/VisChunk.h"
+#include "cpcommon/CasaBlobUtils.h"
 
 // boost includes
 #include "boost/shared_array.hpp"
+#include "boost/static_assert.hpp"
+
 
 // std includes
 #include <vector>
@@ -56,11 +59,37 @@
 #include "configuration/Configuration.h"
 #include "monitoring/MonitoringSingleton.h"
 
+// LOFAR for communications
+#include <Blob/BlobString.h>
+#include <Blob/BlobIBufString.h>
+#include <Blob/BlobOBufString.h>
+#include <Blob/BlobIStream.h>
+#include <Blob/BlobOStream.h>
+
+
 ASKAP_LOGGER(logger, ".BeamScatterTask");
 
 using namespace askap;
 using namespace askap::cp::common;
 using namespace askap::cp::ingest;
+
+// helper class to encapsulate mpi-related stuff 
+template<typename T>
+struct MPITraitsHelper {
+   BOOST_STATIC_ASSERT_MSG(sizeof(T) == 0, 
+          "Attempted a build for type without traits defined");
+};
+
+template<>
+struct MPITraitsHelper<casa::uInt> {
+   static MPI_Datatype datatype() { return MPI_UNSIGNED; };
+   static const int size = 1;
+   
+   static bool equal(casa::uInt val1, casa::uInt val2) { return val1 == val2;}
+};
+
+
+// BeamScatterTask
 
 BeamScatterTask::BeamScatterTask(const LOFAR::ParameterSet& parset,
         const Configuration& config) :
@@ -93,15 +122,58 @@ void BeamScatterTask::process(VisChunk::ShPtr& chunk)
        initialiseSplit(chunk);      
    } else {
        ASKAPASSERT(itsStreamNumber >= 0);
+       // consistency check that cached values are still ok
+       if (localRank() == 0) {
+           ASKAPASSERT(chunk);
+           ASKAPCHECK(chunk->nRow() == itsBeam.nelements(), "Number of rows changed since the first iteration, this is unexpected");
+           ASKAPDEBUGASSERT(itsBeam.nelements() == itsAntenna1.nelements());
+           ASKAPDEBUGASSERT(itsBeam.nelements() == itsAntenna2.nelements());
+           for (casa::uInt row = 0; row<chunk->nRow(); ++row) {
+                ASKAPCHECK(chunk->beam1()[row] == itsBeam[row], "Beam number mismatch for row "<<row);
+                ASKAPCHECK(chunk->beam2()[row] == itsBeam[row], "Beam number mismatch for row "<<row);
+                ASKAPCHECK(chunk->antenna1()[row] == itsAntenna1[row], "Antenna 1 number mismatch for row "<<row);
+                ASKAPCHECK(chunk->antenna2()[row] == itsAntenna2[row], "Antenna 2 number mismatch for row "<<row);
+           }
+       }
    }
 
-
+   /*
    if (chunk) {
        ASKAPLOG_DEBUG_STR(logger, "This rank has an active input");
        ASKAPCHECK(itsStreamNumber == 0, "Only the first rank of the group (i.e. first stream) is expected to have an active input");
    } else {
        ASKAPLOG_DEBUG_STR(logger, "This rank has an inactive input");
        ASKAPCHECK(itsStreamNumber != 0, "First rank of the group (i.e. first stream) is expected to have an active input");
+   }
+   */
+
+   if (itsStreamNumber >= 0) {
+       // work only with the ranks involved in redistribution
+       broadcastRIFields(chunk); // this also initialises the chunk and activates the stream if necessary
+       ASKAPDEBUGASSERT(chunk);
+       if (localRank() > 0) {
+           // copy cached fields
+           chunk->antenna1().assign(itsAntenna1.copy());
+           chunk->antenna2().assign(itsAntenna2.copy());
+           chunk->beam1().assign(itsBeam.copy());
+           chunk->beam2().assign(itsBeam.copy());
+       }
+   
+       ASKAPDEBUGASSERT(chunk);
+   
+       /*
+       scatterVector(chunk->beam1PA());
+       scatterVector(chunk->beam2PA());
+       scatterVector(chunk->uvw());
+       */
+
+       // other fields and data come here
+       if (localRank() == 0) {
+           trimChunk(chunk, itsRowCounts[0]);
+       }
+   }
+   if (chunk) {
+       ASKAPLOG_DEBUG_STR(logger, "nRow="<<chunk->nRow()<<" shape: "<<chunk->visibility().shape());
    }
 }
 
@@ -285,7 +357,274 @@ void BeamScatterTask::initialiseSplit(const askap::cp::common::VisChunk::ShPtr& 
            }
       }
       ASKAPLOG_INFO_STR(logger, "Found "<<beamRowMap.size()<<" beams in this group of data streams");
+      ASKAPDEBUGASSERT(itsNStreams > 0);
+
+      // the following logic is required because there could be gaps in beam space (data container is a sparse array)
+
+      std::vector<std::pair<casa::uInt, casa::uInt> > streamRowMap(itsNStreams, std::pair<casa::uInt, casa::uInt>(0u, 0u));
+      const casa::uInt beamsPerStream = beamRowMap.size() % itsNStreams == 0 ? beamRowMap.size() / itsNStreams : beamRowMap.size() / (itsNStreams - 1);
+      std::map<casa::uInt, std::pair<casa::uInt, casa::uInt> >::const_iterator ci = beamRowMap.begin();
+
+      casa::uInt lastRow = 0;
+      for (size_t stream = 0; stream < streamRowMap.size(); ++stream) {
+           std::vector<casa::uInt> handledBeams; 
+           for (casa::uInt beamNo = 0; beamNo < beamsPerStream; ++beamNo) {
+                if (ci != beamRowMap.end()) {
+                    if (beamNo == 0) {
+                        streamRowMap[stream] = ci->second;
+                    } else {
+                        ASKAPCHECK(streamRowMap[stream].second + 1 == ci->second.first, 
+                                   "Non-contiguous set of rows detected between beams "<<beamNo - 1<<" and "<<beamNo<<" - not supported");
+                        streamRowMap[stream].second = ci->second.second;
+                        lastRow = ci->second.second;
+                    }
+                    handledBeams.push_back(ci->first);
+                    ++ci;
+                }
+           }
+           // in principle, it is possible to have this operation more flexible and deactive unused streams
+           // it would make configuration easier, but I am running out of time to implement this logic 
+           // (and especially mpi collective calls outside the group/ensure they're called from all ranks)
+           // and test it. For now, force the user to have the right config manually.
+           ASKAPCHECK(handledBeams.size() > 0, "Not enough beams in the data to populate stream "<<stream);
+
+           ASKAPLOG_INFO_STR(logger, "Stream "<<stream<<" will handle beams: "<<handledBeams<<" rows from "<<streamRowMap[stream].first<<
+                                 " to "<<streamRowMap[stream].second<<", inclusive");
+      }
+      ASKAPDEBUGASSERT(ci == beamRowMap.end());
+      ASKAPCHECK(lastRow + 1 == chunk->nRow(), "Some rows of data seem to be missing as a result of data partionion. This shouldn't happen.");
+
+      // now do collectives, matching code on slave ranks is in the else part of the if-statement
+
+      //1) scatter rows dealt with by particular stream (stream number is the local rank in the intra-group communicator) 
+      
+      ASKAPDEBUGASSERT(sizeof(std::pair<casa::uInt, casa::uInt>) == 2 * sizeof(uint32_t));
+      casa::uInt tempBuf[2] = {lastRow + 1, lastRow + 1};
+      const int response = MPI_Scatter((void*)streamRowMap.data(), 2, MPI_UNSIGNED, &tempBuf, 2, MPI_UNSIGNED, 0, itsCommunicator);
+      ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Scatter = "<<response);
+      // consistency checks - we rely on the exect structure of the data
+      ASKAPASSERT(streamRowMap.size() > 0);
+      itsHandledRows = streamRowMap[0];
+      ASKAPASSERT(tempBuf[0] == itsHandledRows.first);
+      ASKAPASSERT(tempBuf[1] == itsHandledRows.second);
+
+      // set up arrays of row counts and offsets for MPI collectives
+      itsRowCounts.resize(itsNStreams);
+      itsRowOffsets.resize(itsNStreams);
+      for (size_t stream = 0; stream < streamRowMap.size(); ++stream) {
+           const std::pair<casa::uInt, casa::uInt> rowsForThisStream = streamRowMap[stream];
+           ASKAPASSERT(rowsForThisStream.first < rowsForThisStream.second);
+           itsRowCounts[stream] = rowsForThisStream.second - rowsForThisStream.first + 1;
+           itsRowOffsets[stream] = rowsForThisStream.first;
+      }
+
+      // copy fixed row-based vectors
+      itsAntenna1.assign(chunk->antenna1().copy());
+      itsAntenna2.assign(chunk->antenna2().copy());
+      itsBeam.assign(chunk->beam1().copy());
+  } else {
+      // slave ranks of the same communicator
+      // 1) receive rows dealt with by particular stream (stream number is the local rank in the intra-group communicator) 
+      const int response = MPI_Scatter(NULL, 0, MPI_UNSIGNED, &itsHandledRows, 2, MPI_UNSIGNED, 0, itsCommunicator);
+      ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Scatter = "<<response);
+      ASKAPLOG_DEBUG_STR(logger, "   slave rank, handling rows from "<<itsHandledRows.first<<" to "<<itsHandledRows.second<<", inclusive");
+  }
+  scatterVector(itsAntenna1);
+  scatterVector(itsAntenna2);
+  scatterVector(itsBeam);
+}
+
+/// @brief helper method to scatter row-based vector
+/// @details MPI routines work with raw pointers. This method encapsulates
+/// all ugliness of marrying this with complex casa types.
+/// It relies on exact physical representation of data. It is assumed that
+/// local rank 0 is the root. 
+/// @param[in,out] vec vector for both input (on local rank 0) and output
+/// (on other ranks of the local communicator)
+template<typename T>
+void  BeamScatterTask::scatterVector(casa::Vector<T> &vec) const
+{
+  ASKAPDEBUGASSERT(itsHandledRows.second > itsHandledRows.first);
+  const casa::uInt expectedSize = itsHandledRows.second - itsHandledRows.first + 1;
+  if (localRank() == 0) {
+      ASKAPDEBUGASSERT(itsNStreams == static_cast<int>(itsRowCounts.size()));
+      ASKAPDEBUGASSERT(itsNStreams == static_cast<int>(itsRowOffsets.size()));
+      ASKAPASSERT(vec.contiguousStorage());
+      typename casa::Vector<T> tempBuf(expectedSize); // for cross-check
+      ASKAPASSERT(tempBuf.contiguousStorage());
+      ASKAPDEBUGASSERT(itsNStreams > 1);
+      ASKAPASSERT(itsRowCounts[0] == static_cast<int>(expectedSize));
+      if (MPITraitsHelper<T>::size == 1) {
+          // can be translated to array of native MPI types
+          const int response = MPI_Scatterv((void*)vec.data(), const_cast<int*>(itsRowCounts.data()), 
+                       const_cast<int*>(itsRowOffsets.data()), MPITraitsHelper<T>::datatype(), (void*)tempBuf.data(),
+               static_cast<int>(expectedSize) * MPITraitsHelper<T>::size,  MPITraitsHelper<T>::datatype(), 0, itsCommunicator);
+          ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Scatterv = "<<response);
+      } else {
+          // need to scale the number of elements and the offsets up
+          std::vector<int> tempCounts(itsRowCounts);
+          std::vector<int> tempOffsets(itsRowOffsets);
+          for (std::vector<int>::iterator ci1 = tempCounts.begin(), ci2 = tempOffsets.begin(); 
+               ci1 != tempCounts.end(); ++ci1,++ci2) {
+               ASKAPDEBUGASSERT(ci2 != tempOffsets.end());
+               (*ci1) *= MPITraitsHelper<T>::size;
+               (*ci2) *= MPITraitsHelper<T>::size;
+          }
+          const int response = MPI_Scatterv((void*)vec.data(), tempCounts.data(), tempOffsets.data(), MPITraitsHelper<T>::datatype(), (void*)tempBuf.data(),
+               static_cast<int>(expectedSize) * MPITraitsHelper<T>::size,  MPITraitsHelper<T>::datatype(), 0, itsCommunicator);
+          ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Scatterv = "<<response);
+      }
+      // consistency check
+      for (casa::uInt row = 0; row < expectedSize; ++row) {
+           ASKAPCHECK(MPITraitsHelper<T>::equal(tempBuf[row],vec[row + itsRowOffsets[0]]), "Data mismatch detected in MPI collective");
+      }
+  } else {
+      if (vec.size() != expectedSize) {
+          vec.resize(expectedSize);
+      }
+      ASKAPASSERT(vec.contiguousStorage());
+      const int response = MPI_Scatterv(NULL, NULL, NULL, MPITraitsHelper<T>::datatype(), (void*)vec.data(), 
+            static_cast<int>(expectedSize) * MPITraitsHelper<T>::size,  MPITraitsHelper<T>::datatype(), 0, itsCommunicator);
+      ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Scatterv = "<<response);
   }
 }
 
+
+/// @brief broadcast row-independent fields
+/// @details This method handles row-independent fields, broadcasts 
+/// the content within the group and initialses the chunk for streams with
+/// inactive input. 
+/// @param[in] chunk the instance of VisChunk to work with
+void BeamScatterTask::broadcastRIFields(askap::cp::common::VisChunk::ShPtr& chunk) const
+{
+  ASKAPDEBUGASSERT(itsStreamNumber >= 0);
+  const int formatId = 1;
+  if (localRank() == 0) {
+      ASKAPDEBUGASSERT(chunk);
+      // as we need to pass sizes anyway, pass also basic parameters required to initialise the chunk
+      // for slave ranks.
+      uint32_t buffer[5] = {0u, chunk->nRow(), chunk->nChannel(), chunk->nPol(), chunk->nAntenna()};
+
+      // 1) encode info into blob (some of it we could've done directly, but I am too bored to do it for
+      //    some casa types (especially as I don't have time for testing)
+      LOFAR::BlobString bs;
+      bs.resize(0);
+      LOFAR::BlobOBufString bob(bs);
+      LOFAR::BlobOStream out(bob);
+      out.putStart("RowIndependentParameters", formatId);
+      out << chunk->time() << chunk->targetName() << chunk->interval() << chunk->scan() << 
+             chunk->channelWidth();
+      
+      // todo:  chunk->targetPointingCentre() , chunk->actualPointingCentre() 
+      // todo: chunk->actualPolAngle() << chunk->actualAzimuth() << chunk->actualElevation() 
+      // todo: chunk->onSourceFlag()
+      // todo:  chunk->frequency()
+      // todo: chunk->stokes()
+      // todo: chunk->directionFrame();
+      out.putEnd();
+      // pass the size along with basic parameters
+      buffer[0] = bs.size();
+
+      // 2) broadcast size and general info
+      const int response = MPI_Bcast(&buffer, 5, MPI_UNSIGNED, 0, itsCommunicator);
+      ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Bcast = "<<response);
+   
+      // 3) send encoded message
+      const int response1 = MPI_Bcast(bs.data(), bs.size(), MPI_BYTE, 0, itsCommunicator);
+      ASKAPCHECK(response1 == MPI_SUCCESS, "Erroneous response from MPI_Bcast = "<<response1);
+ 
+  } else {
+      // this rank should have inactive input
+      ASKAPDEBUGASSERT(!chunk);
+      uint32_t buffer[5] = {0u, 0u, 0u, 0u, 0u};
+
+      // 1) receive sizes and general info
+      const int response = MPI_Bcast(&buffer, 5, MPI_UNSIGNED, 0, itsCommunicator);
+      ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Bcast = "<<response);
+ 
+      // 2) initialise chunk
+      ASKAPDEBUGASSERT(itsHandledRows.second > itsHandledRows.first);
+      ASKAPCHECK(itsHandledRows.second < buffer[1], "Selected row numbers for this stream exceed the number of rows available");
+      const casa::uInt expectedSize = itsHandledRows.second - itsHandledRows.first + 1;
+      
+      ASKAPLOG_DEBUG_STR(logger, "Initialising chunk for "<<buffer[2]<<" channels, "<<
+                         buffer[3]<<" polarisations and "<<buffer[4]<<" antennas, but for "<<expectedSize<<" rows");
+      chunk.reset(new VisChunk(expectedSize, buffer[2], buffer[3], buffer[4]));
+
+      //  3) receive encoded message
+      LOFAR::BlobString bs;
+      bs.resize(buffer[0]);
+
+      const int response1 = MPI_Bcast(bs.data(), bs.size(), MPI_BYTE, 0, itsCommunicator);
+      ASKAPCHECK(response1 == MPI_SUCCESS, "Erroneous response from MPI_Bcast = "<<response1);
+ 
+      // 4) decode the message, populate fields in chunk
+      LOFAR::BlobIBufString bib(bs);
+      LOFAR::BlobIStream in(bib);
+      const int version=in.getStart("RowIndependentParameters");
+      ASKAPASSERT(version == formatId);
+      
+      // time
+      casa::MVEpoch epoch;
+      in >> epoch;
+      chunk->time() = epoch;
+  
+      // targetName
+      std::string targetName;
+      in >> targetName;
+      chunk->targetName() = targetName;
+
+      // interval
+      casa::Double interval = -1.;
+      in >> interval;
+      chunk->interval() = interval;
+
+      // scan
+      casa::uInt scan = 0;
+      in >> scan;
+      chunk->scan() = scan;
+   
+      // channel width
+      casa::Double channelWidth = 0.;
+      in >> channelWidth;
+      chunk->channelWidth() = channelWidth;
+
+      // other fields come here, we can probably refactor this code via templates
+
+      in.getEnd();
+  }
+}
+
+/// @brief trim chunk to the given number of rows
+/// @details
+/// @param[in,out] chunk the instance of VisChunk to work with
+/// @param[in] newNRows new number of rows
+void BeamScatterTask::trimChunk(askap::cp::common::VisChunk::ShPtr& chunk, casa::uInt newNRows)
+{
+  // note - code largely untested, only used to study performance, i.e. scientific content is not preserved / dealt with correctly yet
+  ASKAPLOG_DEBUG_STR(logger, "Trimming chunk to contain "<<newNRows<<" rows");
+
+  ASKAPASSERT(chunk);
+  ASKAPASSERT(newNRows < chunk->nRow());
+  askap::cp::common::VisChunk::ShPtr newChunk(new VisChunk(newNRows, chunk->nChannel(), chunk->nPol(), chunk->nAntenna()));
+  
+  /*
+  newChunk->antenna1().resize(newNRows);
+  newChunk->antenna2().resize(newNRows);
+  newChunk->beam1().resize(newNRows);
+  newChunk->beam2().resize(newNRows);
+  newChunk->beam1PA().resize(newNRows);
+  newChunk->beam2PA().resize(newNRows);
+  newChunk->phaseCentre().resize(newNRows);
+  newChunk->uvw().resize(newNRows);
+  casa::IPosition shape = newChunk->visibility().shape();
+  ASKAPASSERT(newChunk->flag().shape() == shape);
+  ASKAPASSERT(shape.nelements() == 3);
+  shape[0] = newNRows;
+  newChunk->visibility().resize(shape);
+  newChunk->flag().resize(shape);
+  
+  */
+  chunk = newChunk;
+} 
 
