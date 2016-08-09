@@ -52,7 +52,7 @@ namespace ingest {
 /// @param[in] parset the configuration parameter set.
 /// @param[in] config configuration
 FrtCommunicator::FrtCommunicator(const LOFAR::ParameterSet& parset, const Configuration& config) :
-       itsCyclesToWait(parset.getUint32("cycles2skip",5u)), itsMsgCounter(1)
+       itsCyclesToWait(parset.getUint32("cycles2skip",5u)), itsMsgCounter(1), itsInterval(5.)
 {
    const std::vector<Antenna> antennas = config.antennas();
    const size_t nAnt = antennas.size();
@@ -84,6 +84,13 @@ FrtCommunicator::FrtCommunicator(const LOFAR::ParameterSet& parset, const Config
    itsInPort.reset(new FrtMetadataSource(locatorHost, locatorPort, topicManager, intopic, adapterName, bufSize));
    ASKAPDEBUGASSERT(itsOutPort);
    ASKAPDEBUGASSERT(itsInPort);   
+
+   // a bit of the hack for short term operation as the required metadata are not availalble here
+   const CorrelatorMode& mode = config.lookupCorrelatorMode("standard");
+   itsInterval = double(mode.interval()) / 1e6;
+   ASKAPLOG_DEBUG_STR(logger, "Assuming correlator cycle interval of "<<itsInterval<<" seconds");
+
+   ASKAPCHECK(mode.chanWidth().getValue() > 0., "This correlator mode has not been commissioned yet");
 }
 
 /// @brief get requested DRx delay
@@ -179,7 +186,7 @@ void FrtCommunicator::invalidate(const casa::uInt ant)
 void FrtCommunicator::newTimeStamp(const casa::MVEpoch &epoch)
 {
   // first check any requests waiting for completion
-  const double timeOut = 5.* (0.5 + itsCyclesToWait);
+  const double timeOut = itsInterval * (0.5 + itsCyclesToWait);
   //const uint64_t currentBAT = epoch2bat(casa::MEpoch(epoch, casa::MEpoch::UTC));
   for (size_t ant = 0; ant < itsAntennaStatuses.size(); ++ant) {
        if (itsAntennaStatuses[ant] == ANT_BEING_UPDATED) {

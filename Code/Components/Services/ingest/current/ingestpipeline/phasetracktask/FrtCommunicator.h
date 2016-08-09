@@ -223,6 +223,9 @@ class FrtCommunicator : public boost::noncopyable {
 
         /// @brief message counter
         mutable int itsMsgCounter;
+
+        /// @brief correlator cycle interval (used to assess validity of FR updates
+        double itsInterval;
 }; // class FrtCommunicator
 
 } // namespace ingest
