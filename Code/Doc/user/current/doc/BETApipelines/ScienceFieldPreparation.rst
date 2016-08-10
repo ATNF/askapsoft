@@ -56,9 +56,10 @@ averaging scale can be changed by the user.
 |                                           |                                 |                                                 | ``MS_BASE_SCIENCE``, with ".ms" replaced with                         |
 |                                           |                                 |                                                 | "_averaged.ms".                                                       |
 +-------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
-| ``CHAN_RANGE_SCIENCE``                    | "1-16416"                       | channel (:doc:`../calim/mssplit`)               | Range of channels in science observation (used in                     |
-|                                           |                                 |                                                 | splitting and averaging). This must (for now) be the same             |
-|                                           |                                 |                                                 | as ``CHAN_RANGE_1934``.                                               |
+| ``CHAN_RANGE_SCIENCE``                    | ""                              | channel (:doc:`../calim/mssplit`)               | Range of channels in science observation (used in splitting and       |
+|                                           |                                 |                                                 | averaging). This must (for now) be the same as                        |
+|                                           |                                 |                                                 | ``CHAN_RANGE_1934``. The default is to use all available channels from|
+|                                           |                                 |                                                 | the MS.                                                               |
 +-------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 | ``NUM_CHAN_TO_AVERAGE``                   | 54                              | stman.tilenchan (:doc:`../calim/mssplit`)       | Number of channels to be averaged to create continuum                 |
 |                                           |                                 |                                                 | measurement set. Also determines the tile size when                   |

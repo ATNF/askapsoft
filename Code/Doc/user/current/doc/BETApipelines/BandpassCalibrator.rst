@@ -36,9 +36,10 @@ through ``NUM_CPUS_CBPCAL``.
 | ``MS_BASE_1934``                      | 1934_beam%b.ms                        | none                                               | Base name for the 1934 measurement sets after splitting.  |
 |                                       |                                       |                                                    | The wildcard %b will be replaced with the beam number.    |
 +---------------------------------------+---------------------------------------+----------------------------------------------------+-----------------------------------------------------------+
-| ``CHAN_RANGE_1934``                   | "1-16416"                             | channel (:doc:`../calim/mssplit`)                  | Channel range for splitting (1-based!). This range also   |
+| ``CHAN_RANGE_1934``                   | ""                                    | channel (:doc:`../calim/mssplit`)                  | Channel range for splitting (1-based!). This range also   |
 |                                       |                                       |                                                    | defines the internal variable ``NUM_CHAN_1934`` (which    |
-|                                       |                                       |                                                    | replaces the previously-available parameter NUM_CHAN)     |
+|                                       |                                       |                                                    | replaces the previously-available parameter NUM_CHAN). The|
+|                                       |                                       |                                                    | default is to use all available channels in the MS.       |
 +---------------------------------------+---------------------------------------+----------------------------------------------------+-----------------------------------------------------------+
 | ``FLAG_DO_DYNAMIC_AMPLITUDE_1934``    | true                                  | none                                               | Whether to do the dynamic flagging, after the rule-based  |
 |                                       |                                       |                                                    | and simple flat-amplitude flagging is done.               |
