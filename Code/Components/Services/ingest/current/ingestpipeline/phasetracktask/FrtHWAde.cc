@@ -55,7 +55,8 @@ FrtHWAde::FrtHWAde(const LOFAR::ParameterSet& parset, const Configuration& confi
        itsFRPhaseRateTolerance(static_cast<int>(parset.getUint32("frratestep",20u))),
        itsTm(config.antennas().size(),0.),
        itsPhases(config.antennas().size(),0.),
-       itsUpdateTimeOffset(static_cast<int32_t>(parset.getInt32("updatetimeoffset")))
+       itsUpdateTimeOffset(static_cast<int32_t>(parset.getInt32("updatetimeoffset"))),
+       itsFreqOffset(asQuantity(parset.getString("freq_offset","0.0Hz")).getValue("Hz"))
 {
    if (itsDelayTolerance == 0) {
        ASKAPLOG_INFO_STR(logger, "Delays will be updated every time the delay changes by 0.206 ns");
@@ -91,6 +92,8 @@ FrtHWAde::FrtHWAde(const LOFAR::ParameterSet& parset, const Configuration& confi
    ASKAPLOG_INFO_STR(logger, "Will use "<<refName<<" (antenna index "<<itsRefAntIndex<<") as the reference antenna");
    // can set up the reference antenna now to save time later
    itsFrtComm.setFRParameters(itsRefAntIndex, 0, 0, 0);
+
+   ASKAPLOG_DEBUG_STR(logger, "Additional frequency offset for fringe rotation is "<<itsFreqOffset/1e6<<" MHz");
 }
 
 /// Process a VisChunk.
@@ -146,8 +149,16 @@ void FrtHWAde::process(const askap::cp::common::VisChunk::ShPtr& chunk,
   // the offset of 5 fine channels is a mystery - figured out in experiments
   // 1 MHz offset is a bit of the mystery (appeared after the fringe rotator script was changed to use
   // the sky frequency (to be more flexible)
-  const double centreFreq = (freq.nelements() > 0 ? freq[freq.nelements()/2] : 0.) - 5e6/54 - 1e6;
-  //ASKAPLOG_DEBUG_STR(logger, "centreFreq = "<<centreFreq/1e6<<" MHz");
+
+  // this is what we used initially
+  //const double centreFreq = (freq.nelements() > 0 ? freq[freq.nelements()/2] : 0.) - 5e6/54 - 1e6;
+  // this one assumes that the frequency offset value is exactly the same as that used in channel manager
+  // for block 4 we have offset of -22 MHz and raw central frequency needed for fringe rotation (subject to 1 MHz and 5/54 MHz
+  // fudge factors)
+  const double centreFreq = (freq.nelements() > 0 ? freq[freq.nelements()/2] : 0.) - 5e6/54 - 1e6 - itsFreqOffset - 22e6;
+  // hack with hard coded central frequency + fudge factors
+  //const double centreFreq = 939.5e6 - 5e6/54 - 1e6;
+  ASKAPLOG_DEBUG_STR(logger, "centreFreq = "<<centreFreq/1e6<<" MHz");
   ASKAPCHECK(effLO != 0., "Unexpected zero effLO frequency, this shouldn't happen!");
            
 

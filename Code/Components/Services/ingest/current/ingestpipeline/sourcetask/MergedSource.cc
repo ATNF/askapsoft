@@ -103,7 +103,7 @@ VisChunk::ShPtr MergedSource::next(void)
     const long ONE_SECOND = 1000000;
 
     // Get metadata for a real (i.e. scan id >= 0) scan
-    const uint32_t maxNoMetadataRetries = 3;
+    const uint32_t maxNoMetadataRetries = 10;
     for (int32_t count = 0; (!itsMetadata ||  itsMetadata->scanId() == ScanManager::SCANID_IDLE) && 
                              count < static_cast<int32_t>(maxNoMetadataRetries); ++count) {
         itsMetadata = itsMetadataSrc->next(ONE_SECOND * 10);

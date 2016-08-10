@@ -104,6 +104,11 @@ class FrtHWAde : virtual public IFrtApproach {
 
         /// @brief time offset fudge factor to account for the fact that FR is updated at a different time w.r.t. correlator data stream (see #5736)
         int32_t itsUpdateTimeOffset;
+
+        /// @brief frequency offset 
+        /// @details between frequency in GUI and central frequency of correlated bandwidth (in Hz)
+        double itsFreqOffset;
+        
 };
 
 } // namespace ingest
