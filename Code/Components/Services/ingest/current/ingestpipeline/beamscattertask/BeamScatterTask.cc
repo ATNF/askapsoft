@@ -157,6 +157,8 @@ void BeamScatterTask::process(VisChunk::ShPtr& chunk)
            chunk->antenna2().assign(itsAntenna2.copy());
            chunk->beam1().assign(itsBeam.copy());
            chunk->beam2().assign(itsBeam.copy());
+           // temporary to allow realistic performance measurements
+           chunk->flag().set(false);
        }
    
        ASKAPDEBUGASSERT(chunk);
@@ -608,6 +610,7 @@ void BeamScatterTask::trimChunk(askap::cp::common::VisChunk::ShPtr& chunk, casa:
   ASKAPASSERT(chunk);
   ASKAPASSERT(newNRows < chunk->nRow());
   askap::cp::common::VisChunk::ShPtr newChunk(new VisChunk(newNRows, chunk->nChannel(), chunk->nPol(), chunk->nAntenna()));
+  newChunk->flag().set(false);
   
   /*
   newChunk->antenna1().resize(newNRows);
