@@ -376,8 +376,8 @@ void BeamScatterTask::initialiseSplit(const askap::cp::common::VisChunk::ShPtr& 
                         ASKAPCHECK(streamRowMap[stream].second + 1 == ci->second.first, 
                                    "Non-contiguous set of rows detected between beams "<<beamNo - 1<<" and "<<beamNo<<" - not supported");
                         streamRowMap[stream].second = ci->second.second;
-                        lastRow = ci->second.second;
                     }
+                    lastRow = ci->second.second;
                     handledBeams.push_back(ci->first);
                     ++ci;
                 }
@@ -392,7 +392,8 @@ void BeamScatterTask::initialiseSplit(const askap::cp::common::VisChunk::ShPtr& 
                                  " to "<<streamRowMap[stream].second<<", inclusive");
       }
       ASKAPDEBUGASSERT(ci == beamRowMap.end());
-      ASKAPCHECK(lastRow + 1 == chunk->nRow(), "Some rows of data seem to be missing as a result of data partionion. This shouldn't happen.");
+      ASKAPCHECK(lastRow + 1 == chunk->nRow(), "Some rows of data seem to be missing as a result of data partioning. This shouldn't happen. lastRow="
+                                               <<lastRow<<" nRow="<<chunk->nRow());
 
       // now do collectives, matching code on slave ranks is in the else part of the if-statement
 
