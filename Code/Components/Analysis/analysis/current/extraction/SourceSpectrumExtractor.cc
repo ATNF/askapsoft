@@ -235,7 +235,7 @@ void SourceSpectrumExtractor::extract()
             casa::IPosition outBLC(itsArray.ndim(), 0), outTRC(itsArray.shape() - 1);
             if (itsStkAxis > -1) {
                 // If there is a Stokes axis in the input file
-                outBLC(2) = outTRC(2) = stokes;
+                outBLC(itsStkAxis) = outTRC(itsStkAxis) = stokes;
             }
 
             if (!itsFlagUseDetection) {
