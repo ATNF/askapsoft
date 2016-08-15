@@ -90,6 +90,8 @@ Cflag.amplitude_flagger.high            = ${FLAG_THRESHOLD_AMPLITUDE_SCIENCE}"
 Cflag.amplitude_flagger.low             = ${FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW}"
          fi
          DO_AMP_FLAG=true
+     else
+         amplitudeCut="# No flat amplitude flagging applied"
      fi
          
    
@@ -151,7 +153,7 @@ EOFINNER
 fi
 
 DO_DYNAMIC=${FLAG_DO_DYNAMIC_AMPLITUDE_SCIENCE}
-if [ \${DO_DYNAMIC} ]; then
+if [ \${DO_DYNAMIC} == true ]; then
 
     parset=${parsets}/cflag_dynamic_science_beam${BEAM}_\${SLURM_JOB_ID}.in
     cat > \$parset <<EOFINNER
