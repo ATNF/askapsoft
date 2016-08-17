@@ -159,16 +159,20 @@ default to "cross".
 |                          |                  |              |with the given 2D gaussian). This is an additional  |
 |                          |                  |              |step to normal imaging, which, by default, ends with|
 |                          |                  |              |just a model image. The restored image is written   |
-|                          |                  |              |into a separate image file (with the **.restore**   |
+|                          |                  |              |into a separate image file (with the **.restored**  |
 |                          |                  |              |suffix). The convolution is done with the restore   |
-|                          |                  |              |solver (see also :doc:`solver`) which reuses the    |
-|                          |                  |              |same parameters used to setup the image solver (and |
-|                          |                  |              |therefore ensuring the same preconditioning is      |
-|                          |                  |              |done). The only additional parameter of the restore |
+|                          |                  |              |solver (see also :doc:`solver`) which by default    |
+|                          |                  |              |reuses the same parameters used to setup the image  |
+|                          |                  |              |solver. An additional preconditioning step with     |
+|                          |                  |              |alternative parameters can be specified using       |
+|                          |                  |              |**restore.preconditioner.xxx**, which results in a  |
+|                          |                  |              |second set of restored files (with the              |
+|                          |                  |              |**.alt.restored** suffix).                          |
+|                          |                  |              |The only additional parameter of the restore        |
 |                          |                  |              |solver is the shape of the gaussian representing    |
 |                          |                  |              |clean beam (or flag to determine the shape). It is  |
 |                          |                  |              |given by the **restore.beam** parameter, which must |
-|                          |                  |              |be present if **restore** is set to True            |
+|                          |                  |              |be present if **restore** is set to True.           |
 +--------------------------+------------------+--------------+----------------------------------------------------+
 |restore.beam              |vector<string>    |None          |Either a single word *fit* or a quantity string     |
 |                          |                  |              |describing the shape of the clean beam (to convolve |
@@ -190,6 +194,14 @@ default to "cross".
 |                          |                  |              |representing the level of the PSF which should be   |
 |                          |                  |              |included into support. This value should be above   |
 |                          |                  |              |the first sidelobe level for meaningful results.    |
++--------------------------+------------------+--------------+----------------------------------------------------+
+|restore.preconditioner.xxx|vector<string>    |None          |Specify an additional preconditioner to be used     |
+|                          |                  |              |when restoring. This will result in an a second set |
+|                          |                  |              |of restored files with the **.alt.restored**        |
+|                          |                  |              |suffix. See **preconditioner** below. When using    |
+|                          |                  |              |multiple restore solvers, one should use the        |
+|                          |                  |              |**restore.beam=fit** option to allow for different  |
+|                          |                  |              |beam shapes.                                        |
 +--------------------------+------------------+--------------+----------------------------------------------------+
 |restore.equalise          |bool              |false         |If true, the final residual is multiplied by the    |
 |                          |                  |              |square root of the truncated normalised weight      |
@@ -251,7 +263,6 @@ default to "cross".
 +--------------------------+------------------+--------------+----------------------------------------------------+
 |gridder                   |string            |None          |Name of the gridder, further parameters are given by|
 |                          |                  |              |*gridder.something*. See :doc:`gridder` for details.|
-|                          |                  |              |                                                    |
 +--------------------------+------------------+--------------+----------------------------------------------------+
 |rankstoringcf             |int               |1             |In the parallel mode, only this rank will attempt to|
 |                          |                  |              |export convolution functions if this operation is   |

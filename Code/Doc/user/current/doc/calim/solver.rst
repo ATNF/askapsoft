@@ -139,7 +139,7 @@ The following parameters are available for the Basisfunction and BasisfunctionMF
 +-------------------+--------------+--------------+--------------------------------------------------------+
 
 
-All parameters given in the next table **do not** have **solver.Clean** prefix (i.e. Cimager.threshold.minorcycle)
+All parameters given in the next table **do not** have **solver.Clean** prefix (i.e. Cimager.threshold.minorcycle).
 
 +-------------------------+---------------+--------------+--------------------------------------------------+
 |**Parameter**            |**Type**       |**Default**   |**Description**                                   |
@@ -237,8 +237,12 @@ The preconditioners are described below along with the available parameters. The
 **preconditioner.preconditionerName** prefix, but not the **solver** prefix (e.g.
 **Cimager.preconditioner.Wiener.noisepower**), although technically preconditioning is done in the
 solver. When defined this way, the same parameters can be reused in the *restore solver* (described in
-the :doc:`cimager` documentation). The table below contains the description of individual parameters
-(names starts with **preconditionerName**).
+the :doc:`cimager` documentation). One exception to this is the *restore solver* itself, which can
+have an additional preconditioner specified for the final restore step (e.g.
+**Cimager.restore.preconditioner.Wiener.robustness**). The additional restored files will have the
+**.alt.restored** suffix.
+
+The table below contains the description of individual parameters (names starts with **preconditionerName**).
 
 +-----------------------+--------------+--------------+----------------------------------------------------+
 |**Parameter**          |**Type**      |**Default**   |**Description**                                     |
