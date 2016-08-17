@@ -13,7 +13,10 @@ Other updates to the imaging code include:
  * The extraction of spectra done by Selavy is now more robust and
    better able to handle multiple components and distributed
    processing. 
- * [Mitch?]
+ * The restore solver can now accept its own preconditioner
+   parameters, in addition to the general parameters used by the
+   other solvers. If specified, a second set of restored images
+   will be written with suffix ".alt.restored".
 
 The pipeline scripts have seen the following updates:
  * There is a new option to have a different image centre for each
