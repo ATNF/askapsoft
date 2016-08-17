@@ -95,22 +95,23 @@ Cimager.restore.beam                            = ${RESTORING_BEAM_CONT}"
 if [ "${RESTORE_PRECONDITIONER_LIST}" != "" ]; then
     restore="${restore}
 Cimager.restore.preconditioner.Names                    = ${RESTORE_PRECONDITIONER_LIST}"
-if [ "`echo ${RESTORE_PRECONDITIONER_LIST} | grep GaussianTaper`" != "" ]; then
-    restore="$restore
+    if [ "`echo ${RESTORE_PRECONDITIONER_LIST} | grep GaussianTaper`" != "" ]; then
+        restore="$restore
 Cimager.restore.preconditioner.GaussianTaper            = ${RESTORE_PRECONDITIONER_GAUSS_TAPER}"
-fi
-if [ "`echo ${RESTORE_PRECONDITIONER_LIST} | grep Wiener`" != "" ]; then
-    # Use the new preservecf preconditioner option, but only for the
-    # Wiener filter
-    restore="$restore
-Cimager.restore.preconditioner.preservecf               = true"
-    if [ "${RESTORE_PRECONDITIONER_WIENER_ROBUSTNESS}" != "" ]; then
-	restore="$restore
-Cimager.restore.preconditioner.Wiener.robustness        = ${RESTORE_PRECONDITIONER_WIENER_ROBUSTNESS}"
     fi
-    if [ "${RESTORE_PRECONDITIONER_WIENER_TAPER}" != "" ]; then
-	restore="$restore
+    if [ "`echo ${RESTORE_PRECONDITIONER_LIST} | grep Wiener`" != "" ]; then
+        # Use the new preservecf preconditioner option, but only for the
+        # Wiener filter
+        restore="$restore
+Cimager.restore.preconditioner.preservecf               = true"
+        if [ "${RESTORE_PRECONDITIONER_WIENER_ROBUSTNESS}" != "" ]; then
+	    restore="$restore
+Cimager.restore.preconditioner.Wiener.robustness        = ${RESTORE_PRECONDITIONER_WIENER_ROBUSTNESS}"
+        fi
+        if [ "${RESTORE_PRECONDITIONER_WIENER_TAPER}" != "" ]; then
+	    restore="$restore
 Cimager.restore.preconditioner.Wiener.taper             = ${RESTORE_PRECONDITIONER_WIENER_TAPER}"
+        fi
     fi
 fi
 
