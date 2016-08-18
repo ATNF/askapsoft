@@ -185,7 +185,7 @@ void ContinuumWorker::run(void)
     synthesis::AdviseDI advice(itsComms,itsParset);
     advice.addMissingParameters();
     advice.updateComms();
-    this->baseFrequency = getBaseFrequencyAllocation[itsComms.rank()-1];
+    this->baseFrequency = advice.getBaseFrequencyAllocation(itsComms.rank()-1);
 
     if (workUnits.size()>=1) {
 
