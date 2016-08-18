@@ -672,6 +672,9 @@ std::vector<int> AdviseDI::getBeams()
     }
     return bs;
 }
+double AdviseDI::getBaseFrequencyAllocation(int workerNumber) {
+    return itsAllocatedFrequencies[workerNumber][0];
+}
 } // namespace synthesis
 
 } // namespace askap

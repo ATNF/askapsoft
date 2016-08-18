@@ -103,9 +103,9 @@ ContinuumWorker::ContinuumWorker(LOFAR::ParameterSet& parset,
     }
     posInGroup = posInGroup - 1;
     this->baseChannel = posInGroup * nchanpercore;
-    ASKAPLOG_DEBUG_STR(logger,"Distribution: Id " << id << " nWorkers " << nWorkers << " nGroups " << itsComms.nGroups());
+    ASKAPLOG_INFO_STR(logger,"Distribution: Id " << id << " nWorkers " << nWorkers << " nGroups " << itsComms.nGroups());
 
-    ASKAPLOG_DEBUG_STR(logger,"Distribution: Base channel " << this->baseChannel << " PosInGrp " << posInGroup);
+    ASKAPLOG_INFO_STR(logger,"Distribution: Base channel " << this->baseChannel << " PosInGrp " << posInGroup);
 
     itsDoingPreconditioning = false;
     const vector<string> preconditioners = itsParset.getStringVector("preconditioner.Names", std::vector<std::string>());
@@ -185,7 +185,7 @@ void ContinuumWorker::run(void)
     synthesis::AdviseDI advice(itsComms,itsParset);
     advice.addMissingParameters();
     advice.updateComms();
-
+    this->baseFrequency = getBaseFrequencyAllocation[itsComms.rank()-1];
 
     if (workUnits.size()>=1) {
 
@@ -328,14 +328,14 @@ void ContinuumWorker::buildSpectralCube() {
     int nchanperwriter = nchantotal/nwriters;
     int nworkersperwriter = nWorkers/nwriters;
 
-    Quantity f0(workUnits[0].get_channelFrequency(),"Hz");
+    Quantity f0(this->baseFrequency,"Hz");
     /// The width of a channel. THis does <NOT> take account of the variable width
     /// of BArycentric channels
     Quantity freqinc(workUnits[0].get_channelWidth(),"Hz");
 
 
-    ASKAPLOG_DEBUG_STR(logger,"Configuring Spectral Cube");
-    ASKAPLOG_DEBUG_STR(logger,"nchan: " << nchanperwriter << " base f0: " << f0.getValue("MHz")
+    ASKAPLOG_INFO_STR(logger,"Configuring Spectral Cube");
+    ASKAPLOG_INFO_STR(logger,"nchan: " << nchanperwriter << " base f0: " << f0.getValue("MHz")
     << " width: " << freqinc.getValue("MHz") <<" (" << workUnits[0].get_channelWidth() << ")");
 
     std::string root = "image";
