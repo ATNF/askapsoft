@@ -236,116 +236,119 @@ module load askapdata"
     # Parameters required for continuum imaging
     ####
 
-    # Total number of channels must be exact multiple of averaging
-    # width.
-    # If it isn't, report an error and exit without running anything.
-    averageWidthOK=`echo $NUM_CHAN_SCIENCE $NUM_CHAN_TO_AVERAGE | awk '{if (($1 % $2)==0) print "yes"; else print "no"}'`
-    if [ ${averageWidthOK} == "no" ]; then
-        echo "ERROR! Number of channels (${NUM_CHAN_SCIENCE}) must be an exact multiple of NUM_CHAN_TO_AVERAGE (${NUM_CHAN_TO_AVERAGE}). Exiting."
-        exit 1
-    fi
+    if [ $DO_SCIENCE_FIELD == true ]; then
 
-    # nchanContSci = number of channels after averaging
-    nchanContSci=`echo $NUM_CHAN_SCIENCE $NUM_CHAN_TO_AVERAGE | awk '{print $1/$2}'`
+        # Total number of channels must be exact multiple of averaging
+        # width.
+        # If it isn't, report an error and exit without running anything.
+        averageWidthOK=`echo $NUM_CHAN_SCIENCE $NUM_CHAN_TO_AVERAGE | awk '{if (($1 % $2)==0) print "yes"; else print "no"}'`
+        if [ "${averageWidthOK}" == "no" ]; then
+            echo "ERROR! Number of channels (${NUM_CHAN_SCIENCE}) must be an exact multiple of NUM_CHAN_TO_AVERAGE (${NUM_CHAN_TO_AVERAGE}). Exiting."
+            exit 1
+        fi
 
-    # nworkergroupsSci = number of worker groups, used for MFS imaging. 
-    nworkergroupsSci=`echo $NUM_TAYLOR_TERMS | awk '{print 2*$1-1}'`
+        # nchanContSci = number of channels after averaging
+        nchanContSci=`echo $NUM_CHAN_SCIENCE $NUM_CHAN_TO_AVERAGE | awk '{print $1/$2}'`
 
-    # total number of CPUs required for MFS continuum imaging, including
-    # the master
-    NUM_CPUS_CONTIMG_SCI=`echo $nchanContSci $nworkergroupsSci | awk '{print $1*$2+1}'`
+        # nworkergroupsSci = number of worker groups, used for MFS imaging. 
+        nworkergroupsSci=`echo $NUM_TAYLOR_TERMS | awk '{print 2*$1-1}'`
 
-    # Can't have -N greater than -n in the aprun call
-    if [ ${NUM_CPUS_CONTIMG_SCI} -lt ${CPUS_PER_CORE_CONT_IMAGING} ]; then
-        CPUS_PER_CORE_CONT_IMAGING=${NUM_CPUS_CONTIMG_SCI}
-    fi
+        # total number of CPUs required for MFS continuum imaging, including
+        # the master
+        NUM_CPUS_CONTIMG_SCI=`echo $nchanContSci $nworkergroupsSci | awk '{print $1*$2+1}'`
 
-##     if [ $IMAGE_AT_BEAM_CENTRES == true ]; then
-##         # when imaging at beam centres, we *must* use the Cmodel
-##         # approach
-##         if [ ${SELFCAL_METHOD} != "Cmodel" ]; then
-##             echo "WARNING - When imaging at beam centres, must use SELFCAL_METHOD=Cmodel"
-##         fi
-##         SELFCAL_METHOD="Cmodel"
-##     else
+        # Can't have -N greater than -n in the aprun call
+        if [ ${NUM_CPUS_CONTIMG_SCI} -lt ${CPUS_PER_CORE_CONT_IMAGING} ]; then
+            CPUS_PER_CORE_CONT_IMAGING=${NUM_CPUS_CONTIMG_SCI}
+        fi
+
+        ##     if [ $IMAGE_AT_BEAM_CENTRES == true ]; then
+        ##         # when imaging at beam centres, we *must* use the Cmodel
+        ##         # approach
+        ##         if [ ${SELFCAL_METHOD} != "Cmodel" ]; then
+        ##             echo "WARNING - When imaging at beam centres, must use SELFCAL_METHOD=Cmodel"
+        ##         fi
+        ##         SELFCAL_METHOD="Cmodel"
+        ##     else
         # Method used for self-calibration - needs to be either Cmodel or Components
         if [ ${SELFCAL_METHOD} != "Cmodel" ] &&
                [ ${SELFCAL_METHOD} != "Components" ]; then
             SELFCAL_METHOD="Cmodel"
         fi
-##     fi
+        ##     fi
 
-    # Set the polarisation list for the continuum cubes
-    if [ "${CONTCUBE_POLARISATIONS}" == "" ]; then
-        if [ "$DO_CONTCUBE_IMAGING" == "true" ]; then
-            echo "WARNING - No polarisation given for continuum cube imaging. Turning off DO_CONTCUBE_IMAGING"
-            DO_CONTCUBE_IMAGING=false
+        # Set the polarisation list for the continuum cubes
+        if [ "${CONTCUBE_POLARISATIONS}" == "" ]; then
+            if [ "$DO_CONTCUBE_IMAGING" == "true" ]; then
+                echo "WARNING - No polarisation given for continuum cube imaging. Turning off DO_CONTCUBE_IMAGING"
+                DO_CONTCUBE_IMAGING=false
+            fi
+        else
+            # set the POL_LIST parameter
+            getPolList
         fi
-    else
-        # set the POL_LIST parameter
-        getPolList
-    fi
 
-    # Set the number of CPUs for the continuum cube imaging. Either
-    # set to the number of averaged channels + 1, or use that given in
-    # the config file, limiting to no bigger than this number 
-    maxContCubeCores=`expr $nchanContSci + 1`
-    if [ "${NUM_CPUS_CONTCUBE_SCI}" == "" ]; then
-        # User has not specified
-        NUM_CPUS_CONTCUBE_SCI=$maxContCubeCores
-    elif [ $NUM_CPUS_CONTCUBE_SCI -gt $maxContCubeCores ]; then
-        # Have more cores than we need - reduce number
-        echo "NOTE - Reducing NUM_CPUS_CONTCUBE_SCI to $maxContCubeCores to match the number of averaged channels"
-        NUM_CPUS_CONTCUBE_SCI=$maxContCubeCores
-    fi
-    
-    ####################
-    # Parameters required for spectral-line imaging
-    ####
-
-    if [ "${CHAN_RANGE_SL_SCIENCE}" == "" ]; then
-        CHAN_RANGE_SL_SCIENCE="1-$NUM_CHAN_SCIENCE"
-    fi
-
-    # Method used for continuum subtraction
-    if [ ${CONTSUB_METHOD} != "Cmodel" ] &&
-           [ ${CONTSUB_METHOD} != "Components" ] &&
-           [ ${CONTSUB_METHOD} != "CleanModel" ]; then
-        CONTSUB_METHOD="Cmodel"
-    fi
-    # Old way of choosing above
-    if [ "${BUILD_MODEL_FOR_CONTSUB}" != "" ] &&
-           [ "${BUILD_MODEL_FOR_CONTSUB}" != "true" ]; then
-        echo "WARNING - the parameter BUILD_MODEL_FOR_CONTSUB is deprecated - please use CONTSUB_METHOD instead"
-        CONTSUB_METHOD="Cmodel"
-    fi
-
-    if [ "${RESTORING_BEAM_LOG}" != "" ]; then
-        echo "WARNING - the parameter RESTORING_BEAM_LOG is deprecated, and is constructed from the image name instead."
-    fi
-
-    ####################
-##    # Define the beam arrangements for linmos
-##    . ${PIPELINEDIR}/beamArrangements.sh
-
-    # Fix the direction string for linmos - don't need the J2000 bit
-    linmosFeedCentre=`echo $DIRECTION_SCI | awk -F',' '{printf "%s,%s]",$1,$2}'`
-
-    ####################
-    # Source-finding - number of cores:
-    NUM_CPUS_SELAVY=`echo $SELAVY_NSUBX $SELAVY_NSUBY | awk '{print $1*$2+1}'`
-    CPUS_PER_CORE_SELAVY=${NUM_CPUS_SELAVY}
-    if [ ${CPUS_PER_CORE_SELAVY} -gt 20 ]; then
-        CPUS_PER_CORE_SELAVY=20
-    fi
-
-    # If the linmos sourcefinding flag has not been set, then set it to
-    # true only if both source-finding and linmos are requested.
-    if [ ${DO_SOURCE_FINDING_MOSAIC} == SETME ]; then
-        if [ ${DO_SOURCE_FINDING} == true ] && [ ${DO_MOSAIC} == true ]; then
-            DO_SOURCE_FINDING_MOSAIC=true
+        # Set the number of CPUs for the continuum cube imaging. Either
+        # set to the number of averaged channels + 1, or use that given in
+        # the config file, limiting to no bigger than this number 
+        maxContCubeCores=`expr $nchanContSci + 1`
+        if [ "${NUM_CPUS_CONTCUBE_SCI}" == "" ]; then
+            # User has not specified
+            NUM_CPUS_CONTCUBE_SCI=$maxContCubeCores
+        elif [ $NUM_CPUS_CONTCUBE_SCI -gt $maxContCubeCores ]; then
+            # Have more cores than we need - reduce number
+            echo "NOTE - Reducing NUM_CPUS_CONTCUBE_SCI to $maxContCubeCores to match the number of averaged channels"
+            NUM_CPUS_CONTCUBE_SCI=$maxContCubeCores
         fi
-    fi
+        
+        ####################
+        # Parameters required for spectral-line imaging
+        ####
 
+        if [ "${CHAN_RANGE_SL_SCIENCE}" == "" ]; then
+            CHAN_RANGE_SL_SCIENCE="1-$NUM_CHAN_SCIENCE"
+        fi
+
+        # Method used for continuum subtraction
+        if [ ${CONTSUB_METHOD} != "Cmodel" ] &&
+               [ ${CONTSUB_METHOD} != "Components" ] &&
+               [ ${CONTSUB_METHOD} != "CleanModel" ]; then
+            CONTSUB_METHOD="Cmodel"
+        fi
+        # Old way of choosing above
+        if [ "${BUILD_MODEL_FOR_CONTSUB}" != "" ] &&
+               [ "${BUILD_MODEL_FOR_CONTSUB}" != "true" ]; then
+            echo "WARNING - the parameter BUILD_MODEL_FOR_CONTSUB is deprecated - please use CONTSUB_METHOD instead"
+            CONTSUB_METHOD="Cmodel"
+        fi
+
+        if [ "${RESTORING_BEAM_LOG}" != "" ]; then
+            echo "WARNING - the parameter RESTORING_BEAM_LOG is deprecated, and is constructed from the image name instead."
+        fi
+
+        ####################
+        ##    # Define the beam arrangements for linmos
+        ##    . ${PIPELINEDIR}/beamArrangements.sh
+
+        # Fix the direction string for linmos - don't need the J2000 bit
+        linmosFeedCentre=`echo $DIRECTION_SCI | awk -F',' '{printf "%s,%s]",$1,$2}'`
+
+        ####################
+        # Source-finding - number of cores:
+        NUM_CPUS_SELAVY=`echo $SELAVY_NSUBX $SELAVY_NSUBY | awk '{print $1*$2+1}'`
+        CPUS_PER_CORE_SELAVY=${NUM_CPUS_SELAVY}
+        if [ ${CPUS_PER_CORE_SELAVY} -gt 20 ]; then
+            CPUS_PER_CORE_SELAVY=20
+        fi
+
+        # If the linmos sourcefinding flag has not been set, then set it to
+        # true only if both source-finding and linmos are requested.
+        if [ ${DO_SOURCE_FINDING_MOSAIC} == SETME ]; then
+            if [ ${DO_SOURCE_FINDING} == true ] && [ ${DO_MOSAIC} == true ]; then
+                DO_SOURCE_FINDING_MOSAIC=true
+            fi
+        fi
+
+    fi
 
 fi
