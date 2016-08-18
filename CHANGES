@@ -12,7 +12,10 @@ Other updates to the imaging code include:
    cube, instead of failing the simager job.
  * The extraction of spectra done by Selavy is now more robust and
    better able to handle multiple components and distributed
-   processing. 
+   processing.
+ * Selavy now accepts a reference direction when providing a
+   components parset - the l & m coordinates are calculated relative
+   to this, rather than the image centre.
  * The restore solver can now accept its own preconditioner
    parameters, in addition to the general parameters used by the
    other solvers. If specified, a second set of restored images
@@ -37,6 +40,9 @@ The pipeline scripts have seen the following updates:
     wider range of metadata, including observatory and date-obs
     keywords, as well as information about the askapsoft & pipeline
     versions.
+  * The restore preconditioner options mentioned above are available
+    through RESTORE_PRECONDITIONER_ parameters, for the continuum
+    imaging only (it is not implemented for simager).
   * Several bugs were fixed:
     - The continuum subtraction was failing when using components if
       no sources were found - it now skips the continuum subtraction
@@ -45,7 +51,9 @@ The pipeline scripts have seen the following updates:
       correctly, leading to somewhat cryptic errors in the imaging.
     - The parsing of mslist to obtain MS metadata would sometimes
       fail, depending on the content of the MS. It is now much more
-      robust. 
+      robust.
+    - The default for TILENCHAN_SL has been increased to 10, to
+      counter issues with mssplit running slow.
 
 
 0.13.2 (19 July 2016)
