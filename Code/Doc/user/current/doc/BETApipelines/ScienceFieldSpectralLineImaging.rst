@@ -49,10 +49,11 @@ spectral-imaging.
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``CHAN_RANGE_SL_SCIENCE``                     | "1-``NUM_CHAN_SCIENCE``"        | channel (:doc:`../calim/mssplit`)  | The range of channels to copy from the original dataset (1-based).|
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``TILENCHAN_SL``                              | 1                               | stman.tilenchan                    | The number of channels in the tile size used for the new MS. The  |
-|                                               |                                 | (:doc:`../calim/mssplit`)          | tile size defines the minimum amount read at a time. Since the    |
-|                                               |                                 |                                    | simager will process single channels, making this 1 (the default) |
-|                                               |                                 |                                    | means the simager workers only read what they need to .           |
+| ``TILENCHAN_SL``                              | 10                              | stman.tilenchan                    | The number of channels in the tile size used for the new MS. The  |
+|                                               |                                 | (:doc:`../calim/mssplit`)          | tile size defines the minimum amount read at a time. Although the |
+|                                               |                                 |                                    | simager will only process single channels, the default is made    |
+|                                               |                                 |                                    | larger than 1 (the default for mssplit) so that the mssplit job   |
+|                                               |                                 |                                    | completes in a reasonable length of time.                         |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``DO_APPLY_CAL_SL``                           | false                           | none                               | Whether to apply the gains calibration determined from the        |
 |                                               |                                 |                                    | continuum self-calibration (see ``GAINS_CAL_TABLE`` in            |
@@ -131,9 +132,9 @@ spectral-imaging.
 | ``GRIDDER_SPECTRAL_SNAPSHOT_LONGTRACK``       | true                            | snapshotimaging.longtrack          | The longtrack parameter controlling how the best-fit W plane is   |
 |                                               |                                 | (:doc:`../calim/gridder`)          | determined when using snapshots.                                  |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``GRIDDER_SPECTRAL_SNAPSHOT_CLIPPING``        | 0                               | snapshotimaging.clipping           | If greater than zero, this fraction of the full image width       |
+| ``GRIDDER_SPECTRAL_SNAPSHOT_CLIPPING``        | 0                               | snapshotimaging.clipping           | If greater than zero, this fraction of the full image width       | 
 |                                               |                                 | (:doc:`../calim/gridder`)          | is set to zero. Useful when imaging at high declination as        |
-|                                               |                                 |                                    | the edges can generate artefacts.                                 | 
+|                                               |                                 |                                    | the edges can generate artefacts.                                 |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``GRIDDER_SPECTRAL_WMAX``                     | 2600                            | WProject.wmax                      | The wmax parameter for the gridder.                               |
 |                                               |                                 | (:doc:`../calim/gridder`)          |                                                                   |

@@ -405,7 +405,7 @@ DO_COPY_SL=false
 # Channel range to copy
 CHAN_RANGE_SL_SCIENCE=""
 # Tile size for SL measurement set
-TILENCHAN_SL=1
+TILENCHAN_SL=10
 # Whether to apply a gains solution
 DO_APPLY_CAL_SL=false
 # Whether to subtract a continuum model
