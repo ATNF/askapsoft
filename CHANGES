@@ -4,7 +4,30 @@
 A major release, with several new features and improvements for both
 the imaging software and the pipeline scripts.
 
-There is a new imager... [Steve to fill in details]
+A new imager in under test in this release, currently just called 
+"imager" and it has the following features:
+
+ * In continuum mode it allows a core to process more than one channel.
+   This has a small cost in memory and a proportional increase in disk
+   access. But allows the continuum imaging to proceed with a much smaller
+   footprint on the cluster. This will allow simultaneous processing of all 
+   beams in a coming release. 
+ * Spectral line cubes can be made from measurement sets that are from different
+   epochs. The epochs are imaged separately but merged into the same image for
+   minor-cycle solving.
+ * The output spectral line cubes can be in the barycentric frame. This is currently
+   just nearest neighbour indexing. But the possibility of interpolation has not been
+   designed out. 
+ * The concept of "multiple writers" has been introduced to improve the disk access 
+   pattern for the spectral line mode.  This breaks up the cube into frequency bands.  
+   These can be recombined post-processing. 
+ * If you really want to increase the performance for many major cycles you can
+   also turn on a shared memory option which stores visibility sets in memory throughout 
+   processing.
+ * The imager takes the same parset as Cimager - but extra key-value pairs are required to implement
+   the features. 
+
+This new imager is still under test and we have not added the hooks into the pipeline yet. 
 
 Other updates to the imaging code include:
  * Simager is now more robust against completely-flagged
