@@ -102,7 +102,7 @@ NPPN=20
 aprun -n \${NCORES} -N \${NPPN} $cbpcalibrator -c \$parset > \$log
 err=\$?
 for ms in `echo $ms1934list | sed -e 's/,/ /g'`; do 
-    rejuvenate $ms;
+    rejuvenate \$ms;
 done
 rejuvenate ${TABLE_BANDPASS}
 extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} findBandpass "txt,csv"

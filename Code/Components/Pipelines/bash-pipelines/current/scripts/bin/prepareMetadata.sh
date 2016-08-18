@@ -89,6 +89,37 @@ if [ "${NUM_ANT}" != "" ]; then
 fi
 
 ####################
+# Once we've defined the bandpass calibrator MS name, extract metadata from it
+if [ $DO_1934_CAL == true ] && [ "${MS_INPUT_1934}" != "" ]; then
+
+    echo "Extracting metadata for calibrator measurement set $MS_INPUT_1934"
+    
+    MS_METADATA=$parsets/mslist-cal-${NOW}.txt
+    mslist --full $MS_INPUT_1934 1>& ${MS_METADATA}
+
+    # Number of antennas used in the calibration observation
+    NUM_ANT_1934=`grep Antennas ${MS_METADATA} | head -1 | awk '{print $6}'`
+    NUM_ANT=$NUM_ANT_1934
+
+    # Number of channels used in the calibration observation
+    NUM_CHAN=`python ${PIPELINEDIR}/parseMSlistOutput.py --file=${MS_METADATA} --val=nChan`
+
+    # Number of channels for 1934 observation
+    if [ "$CHAN_RANGE_1934" == "" ]; then
+        NUM_CHAN_1934=${NUM_CHAN}
+        CHAN_RANGE_1934="1-${NUM_CHAN}"
+    else
+        NUM_CHAN_1934=`echo $CHAN_RANGE_1934 | awk -F'-' '{print $2-$1+1}'`
+    fi
+
+    if [ ${NUM_CHAN} -lt ${NUM_CHAN_1934} ]; then
+        echo "ERROR! Number of channels requested for the calibration observation (${NUM_CHAN_1934}, from \"${CHAN_RANGE_1934}\") is bigger than the number in the MS (${NUM_CHAN})."
+        exit 1
+    fi
+
+
+fi
+    
 # Once we've defined the science MS name, extract metadata from it
 if [ "${MS_INPUT_SCIENCE}" != "" ]; then
 
@@ -105,20 +136,14 @@ if [ "${MS_INPUT_SCIENCE}" != "" ]; then
     
     DURATION=`grep "elapsed time" ${MS_METADATA} | head -1 | awk '{print $11}'`
 
-    NUM_ANT=`grep Antennas ${MS_METADATA} | head -1 | awk '{print $6}'`
+    NUM_ANT_SCIENCE=`grep Antennas ${MS_METADATA} | head -1 | awk '{print $6}'`
+    NUM_ANT=$NUM_ANT_SCIENCE
 
     NUM_CHAN=`python ${PIPELINEDIR}/parseMSlistOutput.py --file=${MS_METADATA} --val=nChan`
 
     # Get the requested number of channels from the config, and make sure they are the same for 1934
     # & science observations
 
-    # Number of channels for 1934 observation
-    if [ "$CHAN_RANGE_1934" == "" ]; then
-        NUM_CHAN_1934=${NUM_CHAN}
-        CHAN_RANGE_1934="1-${NUM_CHAN}"
-    else
-        NUM_CHAN_1934=`echo $CHAN_RANGE_1934 | awk -F'-' '{print $2-$1+1}'`
-    fi
     # Number of channels in science observation (used in applying the bandpass solution)
     if [ "$CHAN_RANGE_SCIENCE" == "" ]; then
         NUM_CHAN_SCIENCE=${NUM_CHAN}
@@ -126,8 +151,12 @@ if [ "${MS_INPUT_SCIENCE}" != "" ]; then
     else
         NUM_CHAN_SCIENCE=`echo $CHAN_RANGE_SCIENCE | awk -F'-' '{print $2-$1+1}'`
     fi
-    
+
     if [ ${DO_1934_CAL} == true ] && [ $DO_SCIENCE_FIELD == true ]; then
+        if [ ${NUM_ANT_1934} != ${NUM_ANT_SCIENCE} ]; then
+            echo "ERROR! Number of antennas for 1934-638 observation (${NUM_ANT_1934}) is different to the science observation (${NUM_ANT_SCIENCE})."
+            exit 1
+        fi
         if [ ${NUM_CHAN_1934} != ${NUM_CHAN_SCIENCE} ]; then
             echo "ERROR! Number of channels for 1934-638 observation (${NUM_CHAN_1934}) is different to the science observation (${NUM_CHAN_SCIENCE})."
             exit 1
@@ -143,4 +172,3 @@ if [ "${MS_INPUT_SCIENCE}" != "" ]; then
     . ${PIPELINEDIR}/findBeamCentres.sh
 
 fi
-
