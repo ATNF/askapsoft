@@ -408,10 +408,10 @@ void ContinuumWorker::buildSpectralCube() {
     for (int chan=0; chan < nchanpercore; ++chan) { // not all of these will have work
 
         if (workUnitCount >= workUnits.size()) {
-            ASKAPLOG_DEBUG_STR(logger, "Out of work with workUnit " << workUnitCount);
+            ASKAPLOG_INFO_STR(logger, "Out of work with workUnit " << workUnitCount);
             break;
         }
-        ASKAPLOG_DEBUG_STR(logger, "Starting to process channel " << chan \
+        ASKAPLOG_INFO_STR(logger, "Starting to process channel " << chan \
         << " with workUnit " << workUnitCount << " used for the root ");
 
         int initialChannelWorkUnit = workUnitCount+1;
@@ -419,6 +419,11 @@ void ContinuumWorker::buildSpectralCube() {
         double frequency=workUnits[workUnitCount].get_channelFrequency();
         const string colName = itsParsets[workUnitCount].getString("datacolumn", "DATA");
         const string ms = workUnits[workUnitCount].get_dataset();
+       
+        ASKAPLOG_INFO_STR(logger, "MS: " << ms \
+        << " pulling out local channel " << workUnits[workUnitCount].get_localChannel() \ 
+                << " which has a frequency " << frequency );
+        
         TableDataSource ds(ms, TableDataSource::DEFAULT, colName);
 
         /// Need to set up the rootImager here
@@ -499,7 +504,7 @@ void ContinuumWorker::buildSpectralCube() {
             }
 
         }
-        ASKAPLOG_DEBUG_STR(logger,"Adding model.slice");
+        ASKAPLOG_INFO_STR(logger,"Adding model.slice");
         ASKAPCHECK(rootImager.params()->has("image.slice"), "Params are missing image.slice parameter");
         rootImager.params()->add("model.slice", rootImager.params()->value("image.slice"));
         ASKAPCHECK(rootImager.params()->has("model.slice"), "Params are missing model.slice parameter");
@@ -511,10 +516,10 @@ void ContinuumWorker::buildSpectralCube() {
             ASKAPLOG_DEBUG_STR(logger,"Running restore");
             rootImager.restoreImage();
         }
-        ASKAPLOG_DEBUG_STR(logger,"writing channel into cube");
+        ASKAPLOG_INFO_STR(logger,"writing channel into cube");
         if (itsComms.isWriter()) {
-            ASKAPLOG_DEBUG_STR(logger,"I am a writer");
-            ASKAPLOG_DEBUG_STR(logger,"I have (including my own) " << itsComms.getOutstanding() << " units to write");
+            ASKAPLOG_INFO_STR(logger,"I am a writer");
+            ASKAPLOG_INFO_STR(logger,"I have (including my own) " << itsComms.getOutstanding() << " units to write");
             handleImageParams(rootImager.params(),  \
             workUnits[workUnitCount-1].get_globalChannel()-baseChannel);
             itsComms.removeChannelFromWriter(itsComms.rank());
@@ -529,7 +534,7 @@ void ContinuumWorker::buildSpectralCube() {
             if (targetOutstanding < 0){
                 targetOutstanding = 0;
             }
-            ASKAPLOG_DEBUG_STR(logger,"this iteration target is " << targetOutstanding);
+            ASKAPLOG_INFO_STR(logger,"this iteration target is " << targetOutstanding);
 
             while (itsComms.getOutstanding()>targetOutstanding){
 
@@ -537,10 +542,10 @@ void ContinuumWorker::buildSpectralCube() {
                 int id;
 
                 result.receiveRequest(id,itsComms);
-                ASKAPLOG_DEBUG_STR(logger,"I have received a request to write from " << id);
-                ASKAPLOG_DEBUG_STR(logger,"I am attempting to write channel " << result.get_globalChannel()-baseChannel);
+                ASKAPLOG_INFO_STR(logger,"I have received a request to write from " << id);
+                ASKAPLOG_INFO_STR(logger,"I am attempting to write channel " << result.get_globalChannel()-baseChannel);
                 handleImageParams(result.get_params(),result.get_globalChannel()-baseChannel);
-                ASKAPLOG_DEBUG_STR(logger,"I have written the slice from " << id);
+                ASKAPLOG_INFO_STR(logger,"I have written the slice from " << id);
                 itsComms.removeChannelFromWriter(itsComms.rank());
             }
 
@@ -558,19 +563,19 @@ void ContinuumWorker::buildSpectralCube() {
 
 
     }
+    if (itsComms.isWriter()) {
+        while (itsComms.getOutstanding()>0) {
 
-    while (itsComms.getOutstanding()>0) {
-
-        ContinuumWorkRequest result;
-        int id;
-        result.receiveRequest(id,itsComms);
-        ASKAPLOG_DEBUG_STR(logger,"I have received a request to write from " << id);
-        ASKAPLOG_DEBUG_STR(logger,"I am attempting to write channel " << result.get_globalChannel()-baseChannel);
-        handleImageParams(result.get_params(),result.get_globalChannel()-baseChannel);
-        ASKAPLOG_DEBUG_STR(logger,"I have written the slice from " << id);
-        itsComms.removeChannelFromWriter(itsComms.rank());
+            ContinuumWorkRequest result;
+            int id;
+            result.receiveRequest(id,itsComms);
+            ASKAPLOG_INFO_STR(logger,"I have received a request to write from " << id);
+            ASKAPLOG_INFO_STR(logger,"I am attempting to write channel " << result.get_globalChannel()-baseChannel);
+            handleImageParams(result.get_params(),result.get_globalChannel()-baseChannel);
+            ASKAPLOG_INFO_STR(logger,"I have written the slice from " << id);
+            itsComms.removeChannelFromWriter(itsComms.rank());
+        }
     }
-
 }
 void ContinuumWorker::handleImageParams(askap::scimath::Params::ShPtr params,
         unsigned int chan)
