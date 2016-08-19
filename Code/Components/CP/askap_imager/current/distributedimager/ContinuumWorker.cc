@@ -224,7 +224,7 @@ void ContinuumWorker::processWorkUnit(ContinuumWorkUnit& wu)
 
     unitParset.replace(param, bstr.str().c_str());
 
-    bool usetmpfs = unitParset.getBool("usetmpfs",true);
+    bool usetmpfs = unitParset.getBool("usetmpfs",false);
 
     if (usetmpfs)
     {
