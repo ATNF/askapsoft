@@ -36,13 +36,13 @@ playback.tossim.delay = 5000000
 # If the number is greater than that in measurement set, data will be 
 # copied from existing antennas.
 # Range: 1 (default) to 36 (max for ASKAP)
-playback.corrsim.n_antennas = 36
+playback.corrsim.n_antennas = 12
 
 # Total number of coarse channels to be simulated.
 # Ideally 304 (default), but current hardware is limited at 300.
 # If the number is greater than that in measurement set, data will be 
 # copied from existing coarse channels.
-playback.corrsim.n_coarse_channels = 384
+playback.corrsim.n_coarse_channels = 4
 
 # Division of coarse channel into fine channels
 # Default: 54

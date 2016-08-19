@@ -5,6 +5,7 @@
 #
 # Measurement set used as input for simulation.
 playback.dataset = ../../dataset/ade4ant4chan.ms
+#playback.dataset = source.ms
 
 # Correlator cycle time in seconds
 playback.period = 5
@@ -19,7 +20,7 @@ playback.mode = normal
 # If the number is greater than that in measurement set, data will be
 # copied from existing antennas.
 # Range: 1 (default) to 36 (max for ASKAP)
-playback.n_antennas = 18
+playback.n_antennas = 4
 
 # Card failure types (default: []):
 # - miss        : a card misses transmission at a cycle, for 1 cycle

@@ -54,17 +54,20 @@
 #include "cpcommon/VisDatagramADE.h"
 
 // casa
-#include <casacore/measures/Measures/MEpoch.h>
-#include <casacore/measures/Measures/MeasConvert.h>
-#include <casacore/measures/Measures/MCEpoch.h>
+#include "casacore/measures/Measures/MEpoch.h"
+#include "casacore/measures/Measures/MeasConvert.h"
+#include "casacore/measures/Measures/MCEpoch.h"
 
 // Local package includes
 #include "simplayback/CorrProdMap.h"
 #include "simplayback/CorrBuffer.h"
 #include "simplayback/DatagramLimit.h"
 
-//#define VERBOSE
-
+#define VERBOSE
+// Reorder antennas so that the numbering is contiguous (no jump)
+#define REORDER_ANTENNA
+// Visibility buffer with constant size
+//#define NEW_BUFFER
 #define SIZEOF_ARRAY(a) (sizeof( a ) / sizeof( a[ 0 ] ))
 
 using namespace askap;
@@ -72,9 +75,9 @@ using namespace askap::cp;
 using namespace casa;
 
 // Forward declaration
-void checkStokesType (const Stokes::StokesTypes stokestype);
+void checkStokesType (const Stokes::StokesTypes& stokestype);
 uint32_t getCorrProdIndex (const uint32_t ant1, const uint32_t ant2, 
-		const Stokes::StokesTypes stokestype);
+		const Stokes::StokesTypes& stokestype);
 
 ASKAP_LOGGER(logger, ".CorrelatorSimulatorADE");
 
@@ -88,13 +91,14 @@ CorrelatorSimulatorADE::CorrelatorSimulatorADE(
         const uint32_t nShelves,
         const uint32_t nAntennaIn,
         const uint32_t nCoarseChannel,
+        const uint32_t nFineChannel,
         const uint32_t nChannelSub,
         const double coarseBandwidth,
         const uint32_t delay,
 		const CardFailMode& failMode)
         : itsMode(mode), itsShelf(shelf), itsNShelves(nShelves),
         itsNAntenna(nAntennaIn), itsNCorrProd(0), itsNSlice(0),
-        itsNCoarseChannel(nCoarseChannel),
+        itsNCoarseChannel(nCoarseChannel), itsNFineChannel(nFineChannel),
         itsNChannelSub(nChannelSub), itsCoarseBandwidth(coarseBandwidth),
         itsFineBandwidth(0.0), itsCurrentTime(0),
         itsDelay(delay), itsFailMode(failMode), 
@@ -122,8 +126,30 @@ bool CorrelatorSimulatorADE::sendNext(void)
 	bool continueStatus;
 
     // Get buffer data from measurement set
-    if (getBufferData()) {  // if successful in getting data ...
+    bool bufferDataExist = false;
+#ifdef NEW_BUFFER
+    if (getNewBufferData()) {
+        bufferDataExist = true;
+    }
+#else
+    if (getBufferData()) {
+        bufferDataExist = true;
+    }
+#endif
 
+    if (bufferDataExist) {
+
+#ifdef NEW_BUFFER
+        // Fill each channel with data from existing correlation products
+        for (uint32_t chan = 0; chan < data[0].size(); ++chan) {
+            fillOneChannel(uint32_t chan);
+        }
+
+        // Fill each correlation product with data from existing channels
+        for (uint32_t cp = 0; cp < data.size(); ++cp) {
+            fillOneCorrProduct(uint32_t cp);
+        }
+#else
         // The data from measurement set does not fill the whole buffer,
         // so fill in the missing data by copying from existing one.
         // First, fill in the data for the missing correlation products
@@ -133,6 +159,8 @@ bool CorrelatorSimulatorADE::sendNext(void)
         // Then, fill in the data for coarse channels not present in
         // measurement set.
         fillChannelInBuffer();
+#endif
+		//itsBuffer.print("all");
 
         // Delay transmission for every new time stamp in measurement
         if (itsCurrentTime > previousTime) {
@@ -143,7 +171,15 @@ bool CorrelatorSimulatorADE::sendNext(void)
             usleep(itsDelay);
             cout << "Shelf " << itsShelf << ": transmitting ..." << endl;
         }
-		// Either simulate failure in sending the data ...
+
+		// Send the data
+#ifdef NEW_BUFFER
+        continueStatus = sendBigBufferData();     // @@@ make this @@@
+#else
+       	continueStatus = sendBufferData();
+#endif
+
+/* 		switched off for the time being
 		if ((itsDataReadCounter > 0) && 
 				(itsFailMode.miss == itsDataReadCounter)) {
 			cout << "Shelf " << itsShelf << 
@@ -155,8 +191,9 @@ bool CorrelatorSimulatorADE::sendNext(void)
 		else {	// ... or send the data as usual
         	continueStatus = sendBufferData();
 		}
+*/
     }
-    else {	// not successful in getting the data
+    else {	// buffer data does not exist
         cout << "Shelf " << itsShelf << 
                 ": no more data in measurement set" << endl;
 		cout << "Shelf " << itsShelf << ": read " << itsDataReadCounter <<
@@ -172,6 +209,7 @@ bool CorrelatorSimulatorADE::sendNext(void)
 }   // sendNext
 
 
+//------------------------------------------------------------------------
 // Internal functions
 
 
@@ -260,6 +298,14 @@ void CorrelatorSimulatorADE::initBuffer()
     if (itsShelf == DISPLAY_SHELF) {
         cout << "    Antenna count: " << nAntMeas << endl;
     }
+#ifdef REORDER_ANTENNA
+    cout << "    Antenna is reordered into a compact list" << endl;
+    for (uint32_t ant = 0; ant < nAntMeas; ++ant) {
+        itsAntIndices.push_back(ant);
+        cout << "      antenna name: " << antc.name()(ant) << " -> index: " <<
+                itsAntIndices[ant] << endl;
+    }
+#else
     for (uint32_t ant = 0; ant < nAntMeas; ++ant) {
         string antName = antc.name()(ant);
         string antNameNumber = antName.substr(2,2);
@@ -272,6 +318,7 @@ void CorrelatorSimulatorADE::initBuffer()
                     itsAntIndices[ant] << endl;
         }
     }
+#endif
 
     // channel count
     itsBuffer.nChanMeas = nChan;
@@ -305,13 +352,37 @@ void CorrelatorSimulatorADE::initBuffer()
     // Note that buffer contains all correlation products (as requested in
     // parset, which is usually more than available in measurement set) and
     // all channels (as requested in parset)
-	// Make the buffer to be the maximum size in terms of correlation products (antennas)
-    itsBuffer.init(itsCorrProdMap.getTotal(36), itsNCoarseChannel);
+
+    const uint32_t maxAntenna = 36;
+    const uint32_t maxCorrProd = itsCorrProdMap.getTotal(maxAntenna);
+
+#ifdef NEW_BUFFER
+
+	// Buffer contains max correlation products (as derived from max number
+	// of antennas) and max number of fine channels in a card 
+    const uint32_t maxFineChannelInCard = 216;  // = 4 coarse channels x 54
+    itsBuffer.init(maxCorrProd, maxFineChannelInCard);
+    if (itsShelf == DISPLAY_SHELF) {
+        cout << "    Buffer data: max correlation products x " << 
+				"max fine channels: " << maxCorrProd <<
+                " x " << maxFineChannelInCard << endl;
+    }
+
+#else
+
+	// Buffer contains max numbers of antennas (correlation products)
+	// and the number of coarse channels as required by parset
+    itsBuffer.init(maxCorrProd, itsNCoarseChannel);
     //itsBuffer.init(itsNCorrProd, itsNCoarseChannel);
     if (itsShelf == DISPLAY_SHELF) {
-        cout << "    Channels to be simulated: " << itsNCoarseChannel << endl;
-        cout << "    Buffer data: correlation products x channels: " << 
-                itsNCorrProd << " x " << itsNCoarseChannel << endl; 
+        cout << "    Buffer data: max correlation products x " <<
+				"coarse channels: " << maxCorrProd << 
+                " x " << itsNCoarseChannel << endl; 
+	}
+
+#endif
+	
+    if (itsShelf == DISPLAY_SHELF) {
         cout << "  Creating buffer for simulation data: done" << endl;
     }
     // card count
@@ -323,6 +394,151 @@ void CorrelatorSimulatorADE::initBuffer()
     cout << endl;
 }   // initBuffer
 
+
+
+#ifdef NEW_BUFFER
+
+bool CorrelatorSimulatorADE::getNewBufferData()
+{
+#ifdef VERBOSE
+    cout << "Shelf " << itsShelf << ": getting buffer data ..." << endl;
+#endif
+    ROMSColumns msc(*itsMS);
+
+    // Get reference to columns of interest
+    const casa::ROMSSpWindowColumns& spwc = msc.spectralWindow();
+    const casa::ROMSDataDescColumns& ddc = msc.dataDescription();
+    const casa::ROMSPolarizationColumns& polc = msc.polarization();
+
+    const uint32_t nRow = msc.nrow();
+    if (itsCurrentRow >= nRow) {
+#ifdef VERBOSE
+        cout << "  No more data available" << endl;
+        cout << "Getting buffer data: done" << endl;
+#endif
+        return false;
+    }
+
+    // Note, the measurement set stores integration midpoint (in seconds),
+    // while the TOS (and it is assumed the correlator) deal with
+    // integration start (in microseconds).
+    // In addition, TOS time is BAT and the measurement set normally has
+    // UTC time (the latter is not checked here as we work with the column
+    // as a column of doubles rather than column of measures)
+    // Precision of a single double may not be enough in general,
+    // but should be fine for this emulator (ideally need to represent
+    // time as two doubles)
+    const casa::Double currentTime = msc.time()(itsCurrentRow);
+    const casa::MEpoch epoch(
+            casa::MVEpoch(casa::Quantity(currentTime,"s")),
+            casa::MEpoch::Ref(casa::MEpoch::UTC));
+    const casa::MVEpoch epochTAI = casa::MEpoch::Convert(epoch,
+            casa::MEpoch::Ref(casa::MEpoch::TAI))().getValue();
+    const uint64_t microsecondsPerDay = 86400000000ull;
+    const uint64_t startOfDayBAT =
+            uint64_t(epochTAI.getDay()*microsecondsPerDay);
+    const long Tint = static_cast<long>(msc.interval()(itsCurrentRow)
+            * 1000000);
+    const uint64_t startBAT = startOfDayBAT +
+            uint64_t(epochTAI.getDayFraction() * microsecondsPerDay) -
+            uint64_t(Tint / 2);
+
+    // ideally we need to carry 64-bit BAT in the payload explicitly
+    itsBuffer.timeStamp = static_cast<long>(startBAT);
+    itsCurrentTime = itsBuffer.timeStamp;
+    itsBuffer.beam = static_cast<uint32_t>(msc.feed1()(itsCurrentRow));
+#ifdef VERBOSE
+    cout << "  Time " << itsBuffer.timeStamp << ", beam " <<
+        itsBuffer.beam << endl;
+#endif
+
+    while ((itsCurrentRow < nRow) &&
+            (static_cast<uint32_t>(msc.feed1()(itsCurrentRow)) ==
+            itsBuffer.beam)) {
+
+        uint32_t dataDescId = msc.dataDescId()(itsCurrentRow);
+        uint32_t descSpwId = ddc.spectralWindowId()(dataDescId);
+
+        uint32_t nChan = spwc.numChan()(descSpwId);
+        if (itsMode == coarseChannels) {
+            nChan = 54 * nChan;
+        }
+        //uint32_t descPolId = ddc.polarizationId()(dataDescId);
+        //uint32_t nCorr = polc.numCorr()(descPolId);
+        casa::Matrix<casa::Complex> data = msc.data()(itsCurrentRow);
+        const casa::Vector<casa::Double> frequencies =
+                spwc.chanFreq()(descSpwId);
+        ASKAPCHECK(nChan == frequencies.size(),
+                "Disagreement in the number of channels in measurement set");
+        for (uint32_t chan = 0; chan < nChan; ++chan) {
+            itsBuffer.freqId[chan].block = 1;          // dummy value
+            itsBuffer.freqId[chan].card = 1;           // dummy value
+            itsBuffer.freqId[chan].channel = chan + 1; // 1-based
+            itsBuffer.freqId[chan].freq = frequencies[chan];
+        }
+
+        uint32_t ant1 = itsAntIndices[msc.antenna1()(itsCurrentRow)];
+        uint32_t ant2 = itsAntIndices[msc.antenna2()(itsCurrentRow)];
+        if (ant1 > ant2) {
+            std::swap(ant1,ant2);
+        }
+
+        uint32_t descPolId = ddc.polarizationId()(dataDescId);
+        uint32_t nCorr = polc.numCorr()(descPolId);
+        casa::Vector<casa::Int> stokesTypesInt = polc.corrType()(descPolId);
+        //cout << "    antenna " << ant1 << ", " << ant2 << endl;
+        uint32_t corr;
+        for (uint32_t c = 0; c < nCorr; ++c) {
+            //Stokes::StokesTypes stokesType = Stokes::type(stokesTypesInt(c));
+            //corr = Stokes::type(stokesTypesInt(c)) - Stokes::XX;
+            //ASKAPCHECK((corr >= 0) && (corr <= 3), 
+            //        "Illegal value of correlation");
+            if (Stokes::type(stokesTypesInt(c)) == Stokes::XX) {
+                corr = 0;
+            }
+            else if (Stokes::type(stokesTypesInt(c)) == Stokes::XY) {
+                corr = 1;
+            }
+            else if (Stokes::type(stokesTypesInt(c)) == Stokes::YX) {
+                corr = 2;
+            }
+            else if (Stokes::type(stokesTypesInt(c)) == Stokes::YY) {
+                corr = 3;
+            }
+            else {
+                checkStokesType (stokesType);
+            }
+
+            // put visibility data into buffer,
+            // except when the Stokes type is YX for the same antenna
+            if ((ant1 != ant2) || 
+                    (Stokes::type(stokesTypesInt(c)) != Stokes::YX)) {
+                uint32_t corrProd =
+                        itsCorrProdMap.getIndex(ant1, ant2, corr) - 1;
+                // Note that this is the channel ordering as in meas. set
+                // If the 
+                // and the channels are fine channels.
+                for (uint32_t chan = 0; chan < nChan; ++chan) {
+                    itsBuffer.insert(corrProd, chan, data(corr,chan));
+                }   // channel
+            }
+        }   // correlation
+        ++itsCurrentRow;
+    }   // row
+
+    itsBuffer.ready = true;
+
+#ifdef VERBOSE
+    cout << "Shelf " << itsShelf << ": getting buffer data: done" << endl;
+#endif
+    if (itsBuffer.ready) {
+        ++itsDataReadCounter;
+    }
+    return (itsBuffer.ready);
+}   // getBuffer
+
+
+#else   // old buffer
 
 
 bool CorrelatorSimulatorADE::getBufferData()
@@ -380,7 +596,7 @@ bool CorrelatorSimulatorADE::getBufferData()
 #endif
 
     while ((itsCurrentRow < nRow) &&
-        (static_cast<uint32_t>(msc.feed1()(itsCurrentRow)) == 
+            (static_cast<uint32_t>(msc.feed1()(itsCurrentRow)) == 
 			itsBuffer.beam)) {
 
         uint32_t dataDescId = msc.dataDescId()(itsCurrentRow);
@@ -391,6 +607,7 @@ bool CorrelatorSimulatorADE::getBufferData()
         casa::Matrix<casa::Complex> data = msc.data()(itsCurrentRow);
         const casa::Vector<casa::Double> frequencies = 
                 spwc.chanFreq()(descSpwId);
+		ASKAPCHECK(nChan > 0, "nChan: " << nChan);
         ASKAPCHECK(nChan == frequencies.size(), 
                 "Disagreement in the number of channels in measurement set");
         for (uint32_t chan = 0; chan < nChan; ++chan) {
@@ -398,6 +615,10 @@ bool CorrelatorSimulatorADE::getBufferData()
             itsBuffer.freqId[chan].card = 1;           // dummy value
             itsBuffer.freqId[chan].channel = chan + 1; // 1-based
             itsBuffer.freqId[chan].freq = frequencies[chan];
+			//cout << "row " << itsCurrentRow << ", chan " << chan << 
+			//		", freq: " << frequencies[chan] << endl;
+			ASKAPCHECK(frequencies[chan] > 0.0, "frequencies[" << chan << "]: " <<
+					frequencies[chan]);
         }
 
         uint32_t ant1 = itsAntIndices[msc.antenna1()(itsCurrentRow)];
@@ -408,8 +629,9 @@ bool CorrelatorSimulatorADE::getBufferData()
 
         casa::Vector<casa::Int> stokesTypesInt = polc.corrType()(descPolId);
         //cout << "    antenna " << ant1 << ", " << ant2 << endl;
-        for (uint32_t corr = 0; corr < nCorr; ++corr) {
-            Stokes::StokesTypes stokesType = Stokes::type(stokesTypesInt(corr));
+        uint32_t corr = 0;
+        for (uint32_t c = 0; c < nCorr; ++c) {
+            Stokes::StokesTypes stokesType = Stokes::type(stokesTypesInt(c));
             if (stokesType == Stokes::XX) {
                 corr = 0;
             }
@@ -429,19 +651,33 @@ bool CorrelatorSimulatorADE::getBufferData()
             // put visibility data into buffer, 
             // except when the Stokes type is YX for the same antenna
             if ((ant1 != ant2) || (stokesType != Stokes::YX)) {
-                uint32_t corrProd = itsCorrProdMap.getIndex(ant1, ant2, corr);
+                uint32_t corrProd = 
+						itsCorrProdMap.getIndex(ant1, ant2, corr) - 1;
+                ASKAPCHECK((corrProd >= 0) && 
+						(corrProd < itsBuffer.data.size()),
+                        "Illegal corrProd: " << corrProd <<
+                        ". Range: 0~" << itsBuffer.data.size()-1);
                 ASKAPCHECK(!itsBuffer.corrProdIsFilled[corrProd],
                         "Correlator product " << corrProd << 
                         " is already filled. ant1, ant2, corr: " << ant1 << 
 						", " << ant2 << ", " << corr);
+                // Note that this is the channel ordering as in meas. set
+                // If it contains only the coarse channels, it needs to be
+                // expanded into fine channels @@@@@@@@@@
                 for (uint32_t chan = 0; chan < nChan; ++chan) {
+//#ifdef NEW_BUFFER
+//					itsBuffer.insert(corrProd, chan, data(corr,chan));
+//#else
                     itsBuffer.data[corrProd][chan].vis.real = 
                             data(corr,chan).real();
                     itsBuffer.data[corrProd][chan].vis.imag = 
                             data(corr,chan).imag();
+//#endif
                 }   // channel
+#ifndef NEW_BUFFER
                 itsBuffer.corrProdIsFilled[corrProd] = true;
                 itsBuffer.corrProdIsOriginal[corrProd] = true;
+#endif
             }
         }   // correlation
         ++itsCurrentRow;
@@ -458,6 +694,8 @@ bool CorrelatorSimulatorADE::getBufferData()
     return (itsBuffer.ready);
 }   // getBuffer
 
+#endif  // NEW_BUFFER
+
 
 
 // Fill empty correlation product data from original ones (from 
@@ -468,7 +706,34 @@ void CorrelatorSimulatorADE::fillCorrProdInBuffer()
     cout << "Shelf " << itsShelf << 
             ": filling empty correlation products in buffer ..." << endl;
 #endif
+    // Find the first original data
+    // set initial correlation product index to force search from beginning
+    //int32_t originalCP = -1;
+    int32_t firstOriginalCP = itsBuffer.findNextOriginalCorrProd(-1);
+    ASKAPCHECK(firstOriginalCP >= 0, "Cannot find the first original data");
 
+    // If the original data is not the first data in the buffer,
+    // fill in the empty section BEFORE the first original data.
+    if (firstOriginalCP > 0) {
+        for (int32_t cp = 0; cp < firstOriginalCP; ++cp) {
+            itsBuffer.copyCorrProd(firstOriginalCP, cp);
+        }
+    }
+
+    // Fill in the empty sections AFTER the first original data.
+    int32_t originalCP = firstOriginalCP;
+    for (int32_t cp = firstOriginalCP+1; cp < (int)itsBuffer.data.size(); 
+			++cp) {
+        // If this slot is filled, take this as the original data
+        if (itsBuffer.corrProdIsFilled[cp]) {
+            originalCP = cp;
+        }
+        else {  // This slot contains no data,
+            // so fill it with the the latest original data
+            itsBuffer.copyCorrProd(originalCP, cp);
+        }
+    }
+/*
     // set initial correlation product index to force search from beginning
     int32_t originalCP = -1; 
     for (uint32_t cp = 0; cp < itsBuffer.data.size(); ++cp) {
@@ -498,7 +763,7 @@ void CorrelatorSimulatorADE::fillCorrProdInBuffer()
         ASKAPCHECK( itsBuffer.corrProdIsFilled[cp], "Correlation product " <<
                 cp << " is still empty");
     }
-
+*/
 #ifdef VERBOSE
     cout << "Shelf " << itsShelf << 
             ": filling empty correlation products in buffer: done" << endl;
@@ -517,17 +782,23 @@ void CorrelatorSimulatorADE::fillChannelInBuffer()
             ": filling empty channels in buffer ..." << endl;
 #endif
     uint32_t sourceChan = itsBuffer.nChanMeas - 1;
+    //uint32_t sourceChan = 0;
 
     // Frequency increment
     const double freqInc = itsBuffer.freqId[1].freq - itsBuffer.freqId[0].freq;
+	ASKAPCHECK(freqInc > 0.0, "Illegal frequency increment: " << freqInc);
 
-    for (uint32_t chan = itsBuffer.nChanMeas; 
-            chan < itsNCoarseChannel; ++chan) {
-
+    //for (uint32_t chan = itsBuffer.nChanMeas; 
+    //        chan < itsNCoarseChannel; ++chan) {
+    //for (uint32_t chan = sourceChan+1; 
+    //        chan < itsNCoarseChannel*itsNChannelSub; ++chan) {
+	for (uint32_t chan = sourceChan+1;
+			chan < itsNCoarseChannel; ++chan) {
         itsBuffer.freqId[chan].block = itsBuffer.freqId[sourceChan].block;
         itsBuffer.freqId[chan].card = itsBuffer.freqId[sourceChan].card;
         itsBuffer.freqId[chan].channel = chan + 1; // 1-based
         itsBuffer.freqId[chan].freq = itsBuffer.freqId[0].freq + freqInc * chan;
+		itsBuffer.copyChannel(sourceChan, chan);
     }
 #ifdef VERBOSE
     cout << "Shelf " << itsShelf << 
@@ -634,7 +905,7 @@ void CorrelatorSimulatorADE::checkTestBuffer() {
 #ifdef VERBOSE
         cout << chan + 1 << ": " << itsTestBuffer.freqId[chan].card << ", " << 
                 itsTestBuffer.freqId[chan].channel << ", " <<
-                freqExpected << ", " << itsTestBuffer.freqId[chan].freq << endl;
+                ", " << itsTestBuffer.freqId[chan].freq << endl;
 #endif
     }
     cout << "Shelf " << itsShelf << 
@@ -663,14 +934,21 @@ bool CorrelatorSimulatorADE::sendBufferData()
     // The total number of simulated fine channels in correlator
     const uint32_t nFineCorrChan = itsNCoarseChannel * itsNChannelSub;
 
-    const double coarseFreqInc = itsBuffer.freqId[1].freq - 
-		itsBuffer.freqId[0].freq;
-    const double freqMin = itsBuffer.freqId[0].freq;
+    const double coarseFreqInc = (itsBuffer.freqId[1].freq - 
+		itsBuffer.freqId[0].freq) / 1000000.0;
+    const double freqMin = itsBuffer.freqId[0].freq / 1000000.0;
     const double freqInc = coarseFreqInc / itsNChannelSub;
     
 #ifdef VERBOSE
-    cout << "Frequency increment: " << freqInc << endl;
+	cout << "nCorrProd: " << nCorrProd << endl;
+	cout << "nCorrProdPerSlice: " << nCorrProdPerSlice << endl;
+	cout << "nSlice: " << nSlice << endl;
+	cout << "nFineCorrChan: " << nFineCorrChan << endl;
+	cout << "coarseFreqInc: " << coarseFreqInc << endl;
+	cout << "freqMin: " << freqMin << endl;
+    cout << "freqInc: " << freqInc << endl;
 #endif
+    ASKAPCHECK(freqInc > 0.0, "Illegal frequency increment: " << freqInc);
 
     if (itsMode == "test") {
         // Test buffer used to check the transmitted data
@@ -724,11 +1002,15 @@ bool CorrelatorSimulatorADE::sendBufferData()
                 itsChannelMap.fromCorrelator(cardCorrChan);
         const uint32_t fineMeasChan = ((block * DATAGRAM_NCARD) + card) * 
                 DATAGRAM_NCHANNEL + cardMeasChan;
-        payload.freq = (freqMin + freqInc * fineMeasChan) / 1000000.0;
+        //payload.freq = (freqMin + freqInc * fineMeasChan) / 1000000.0;
+        payload.freq = freqMin + freqInc * fineMeasChan;
 
         // compute coarse channel number in measurement set
         // (correspond to channel in buffer)
         uint32_t coarseMeasChan = fineMeasChan / itsNChannelSub;
+		//cout << "============================================" << endl;
+		//cout << "Channel fine & coarse: " << fineMeasChan << ", " <<
+		//		coarseMeasChan << endl;
 
         // for each slice of correlation products
         for (uint32_t slice = 0; slice < nSlice; ++slice) {
@@ -736,6 +1018,8 @@ bool CorrelatorSimulatorADE::sendBufferData()
             payload.baseline1 = slice * nCorrProdPerSlice + 1;
             payload.baseline2 = payload.baseline1 + nCorrProdPerSlice - 1;
 
+			//cout << "-------------------------------------------" << endl;
+			//cout << "slice: " << slice << endl;
             for (uint32_t corrProdInSlice = 0; 
                     corrProdInSlice < nCorrProdPerSlice; 
                     ++corrProdInSlice) {
@@ -745,8 +1029,18 @@ bool CorrelatorSimulatorADE::sendBufferData()
                         itsBuffer.data[corrProd][coarseMeasChan].vis.real;
                 payload.vis[corrProdInSlice].imag = 
                         itsBuffer.data[corrProd][coarseMeasChan].vis.imag;
+				//cout << "vis: [" << payload.vis[corrProdInSlice].real <<
+				//		", " << payload.vis[corrProdInSlice].imag << 
+				//		"]" << endl;
+				/*
+				if ((payload.vis[corrProdInSlice].real < 1.0e-10) &&
+					(payload.vis[corrProdInSlice].imag < 1.0e-10)) {
+					cout << "very small: " << slice << ", " << 
+						corrProdInSlice << endl;
+				}
+				*/
             }   // correlation product in slice
-
+			
             // Card is sending its payload
             //if (card % itsNShelves == itsShelf - 1) {
             if (totalCard % itsNShelves == itsShelf - 1) {
@@ -775,9 +1069,10 @@ bool CorrelatorSimulatorADE::sendBufferData()
 
 
 
+// TODO: use boost::optional for illegal return value
+//
 uint32_t CorrelatorSimulatorADE::getCorrProdIndex 
-        (const uint32_t ant1, const uint32_t ant2, 
-		const Stokes::StokesTypes stokesType)
+        (uint32_t ant1, uint32_t ant2, const Stokes::StokesTypes& stokesType)
 {
 	uint32_t stokesValue;
 	if (stokesType == Stokes::XX) {
@@ -794,7 +1089,7 @@ uint32_t CorrelatorSimulatorADE::getCorrProdIndex
 	}
 	else {
 		checkStokesType (stokesType);
-        return 0;
+        return 0;   // WARNING: this is actually a valid answer
 	}
     cout << ant1 << ", " << ant2 << ", " << stokesValue << endl;
 	return itsCorrProdMap.getIndex (ant1, ant2, stokesValue);
@@ -808,7 +1103,7 @@ uint32_t CorrelatorSimulatorADE::getCorrProdIndex
 
 
 
-void checkStokesType (const Stokes::StokesTypes stokesType)
+void checkStokesType (const Stokes::StokesTypes& stokesType)
 {
 	ASKAPCHECK (stokesType == Stokes::XX || stokesType == Stokes::XY ||
 			stokesType == Stokes::YX || stokesType == Stokes::YY,

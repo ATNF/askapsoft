@@ -56,7 +56,7 @@
 //#define TEST
 //#define VERBOSE
 #define CARDFREQ
-#define EXPAND_ANTENNA
+#define RENAME_ANTENNA
 
 // Using
 using namespace askap;
@@ -219,10 +219,8 @@ bool TosSimulator::sendNext(void)
     ////////////////////////////////////////
 	// Note the number of antennas is as requested in parset instead of 
 	// that is actually available in measurement set.
-    //for (casa::uInt i = 0; i < nAntenna; ++i) {
-    //for (casa::uInt i = 0; i < nAntennaMS; ++i) {
 	std::string name;
-#ifdef EXPAND_ANTENNA
+#ifdef RENAME_ANTENNA
     for (casa::uInt i = 0; i < itsNAntenna; ++i) {
 		stringstream ss;
 		ss << i+1;
@@ -233,9 +231,8 @@ bool TosSimulator::sendNext(void)
 			name = "ak" + ss.str();
 		}
 #else
-    for (casa::uInt i = 0; i < nAntennaMS; ++i) {
-        //const std::string name = antc.name().getColumn()(i);
-        name = antc.name().getColumn()(i);
+    //for (casa::uInt i = 0; i < nAntennaMS; ++i) {
+        //name = antc.name().getColumn()(i);
 #endif
 
         TosMetadataAntenna antMetadata(name);
@@ -245,10 +242,10 @@ bool TosSimulator::sendNext(void)
 
         // <antenna name>.actual_azel
         MDirection::Ref targetFrame = MDirection::Ref(MDirection::AZEL);
-#ifdef EXPAND_ANTENNA
+#ifdef RENAME_ANTENNA
         targetFrame.set(MeasFrame(antc.positionMeas()(0), epoch));
 #else
-        targetFrame.set(MeasFrame(antc.positionMeas()(i), epoch));
+        //targetFrame.set(MeasFrame(antc.positionMeas()(i), epoch));
 #endif
         const MDirection azel = MDirection::Convert(direction.getRef(),
                 targetFrame)(direction);

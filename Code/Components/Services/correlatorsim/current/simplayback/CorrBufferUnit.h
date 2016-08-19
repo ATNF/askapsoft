@@ -36,6 +36,22 @@
 namespace askap {
 namespace cp {
 
+#define VERBOSE
+//#define NEW_BUFFER
+
+
+#ifdef NEW_BUFFER
+
+// Enumerated constants for data status.
+// UNKNOWN: the data status is unknown
+// EMPTY  : no data inside
+// FULL   : data inside
+enum CorrBufferUnitStatus { UNKNOWN = 0, EMPTY = 1, FULL = 2 };
+
+#endif
+
+
+
 class CorrBufferUnit
 {
     public :
@@ -46,12 +62,50 @@ class CorrBufferUnit
         /// Destructor
         virtual ~CorrBufferUnit();
 
+		/// Initialize the data (also functions as delete)
+		void init();
+
+		/// Insert the data into the slot (works only if the slot is empty)
+		void insert(const FloatComplex& visIn);
+		void insert(const float& realIn, const float& imagIn);
+		void insert(const CorrBufferUnit& bufferUnitIn);
+
+		/// Return the data
+		FloatComplex query() const;
+
+#ifdef NEW_BUFFER
+
+		/// Return the data status
+		uint32_t queryStatus() const;
+
+        /// Return true if it contains data
+        bool isFull() const;
+
+        /// Return true if it contains no data
+        bool isEmpty() const;
+
+#endif
+
+		/// Remove the data from the slot, the data is returned
+		//FloatComplex remove();
+
         /// Print out data
         void print() const;
 
+		/// Return true if the data is the same
+		bool isSame(const CorrBufferUnit& unit2, const float small) const;
+
+		// TO DO: make the data structure private 
 
         /// Visibility data
         FloatComplex vis;
+
+#ifdef NEW_BUFFER
+
+		// Data status, as in CorrBufferUnitStatus
+		uint32_t status;
+
+#endif
 
 };
 

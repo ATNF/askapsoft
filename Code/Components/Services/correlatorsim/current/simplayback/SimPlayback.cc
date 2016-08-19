@@ -64,9 +64,11 @@ SimPlayback::SimPlayback(const LOFAR::ParameterSet& parset)
     }
 }
 
+
 SimPlayback::~SimPlayback()
 {
 }
+
 
 void SimPlayback::validateConfig(void)
 {
@@ -114,6 +116,7 @@ void SimPlayback::validateConfig(void)
     }
 }
 
+
 boost::shared_ptr<TosSimulator> SimPlayback::makeTosSim(void)
 {
     const std::string filename = itsParset.getString("corrsim.shelf1.dataset");
@@ -126,6 +129,7 @@ boost::shared_ptr<TosSimulator> SimPlayback::makeTosSim(void)
     return boost::shared_ptr<TosSimulator>(new TosSimulator(filename,
                 locatorHost, locatorPort, topicManager, topic, failureChance));
 }
+
 
 boost::shared_ptr<CorrelatorSimulator> SimPlayback::makeCorrelatorSim(void)
 {
@@ -142,6 +146,7 @@ boost::shared_ptr<CorrelatorSimulator> SimPlayback::makeCorrelatorSim(void)
             new CorrelatorSimulator(dataset, hostname, port, bmap, expansion,
                 failureChance, itsRank));
 }
+
 
 void SimPlayback::run(void)
 {
@@ -193,3 +198,4 @@ void SimPlayback::run(void)
     }
     MPI_Barrier(MPI_COMM_WORLD);
 }
+

@@ -11,8 +11,11 @@ echo "This script coordinates data streaming from Correlator Simulator to Ingest
 MAX_BLOCK=8
 MAX_CARD_IN_BLOCK=12
 MAX_CHANNEL_IN_CARD=4
-MAX_FINE_CHANNEL_IN_CARD=216
+#MAX_CHANNEL_IN_CARD=216
+CHANNEL_DIV=54
+#CHANNEL_DIV=1
 
+let MAX_FINE_CHANNEL_IN_CARD=$MAX_CHANNEL_IN_CARD*$CHANNEL_DIV
 let MAX_CARD=$MAX_BLOCK*$MAX_CARD_IN_BLOCK
 
 # Get total number of cards from argument
@@ -74,6 +77,9 @@ echo "Modifying its parset"
 # Set the number of channels in correlator simulator
 sed -i "s/playback.corrsim.n_coarse_channels.*/playback.corrsim.n_coarse_channels = $NCHANNEL/" $CORRSIM_PARSET
 
+# Set channel division
+sed -i "s/playback.corrsim.n_channel_subdivision.*/playback.corrsim.n_channel_subdivision = $CHANNEL_DIV/" $CORRSIM_PARSET
+
 # Delay start in seconds
 DELAY_START=10
 
@@ -96,7 +102,8 @@ echo "Modifying its parset"
 echo "Setting ingest parameter: task list"
 if [ $NVSTREAM -eq 1 ]; then
     # single process
-	sed -i "s/tasks.tasklist.*/tasks.tasklist = [MergedSource, CalcUVWTask, Monitor, MSSink]/" $INGEST_PARSET
+	#sed -i "s/tasks.tasklist.*/tasks.tasklist = [MergedSource, CalcUVWTask, Monitor, MSSink]/" $INGEST_PARSET
+	sed -i "s/tasks.tasklist.*/tasks.tasklist = [MergedSource, MSSink]/" $INGEST_PARSET
 else
 	# parallel
 	sed -i "s/tasks.tasklist.*/tasks.tasklist = [MergedSource, Merge, CalcUVWTask, Monitor, MSSink]/" $INGEST_PARSET
@@ -125,8 +132,8 @@ echo $CHANNEL_STRING$CHANMIN".."$CHANMAX" = "$MAX_FINE_CHANNEL_IN_CARD >> $INGES
 
 #timeout -s 9 10m ./run.sh
 #timeout -s 9 10m ./runparallel.sh $NCARD
-./run_ingest.sh $NVSTREAM
-#timeout -s 9 10m $SCRATCH_DIR/runparallel.sh $NCARD
+#./run_ingest.sh $NVSTREAM
+timeout -s 9 10m ./run_ingest.sh $NVSTREAM
 ERROR=$?
 
 echo "Ingest finished: "`date`

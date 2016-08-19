@@ -32,11 +32,15 @@
 
 #include <stdint.h>
 #include <vector>
+#include <string>
+#include <boost/optional.hpp>
 #include "cpcommon/FloatComplex.h"
 #include "CorrBufferUnit.h"
 #include "FreqIndex.h"
 
 using std::vector;
+using std::string;
+
 
 namespace askap {
 namespace cp {
@@ -59,30 +63,81 @@ class CorrBuffer
         /// Reset the buffer
         void reset();
 
-        /// Find the next correlation product that has no data
+		/// Insert data into buffer. Note that range is checked.
+		void insert(uint32_t cp, uint32_t chan, const FloatComplex& vis);
+
+        /// Find the next correlation product that has no data.
+#ifdef NEW_BUFFER
+        /// @param[in] Starting correlation product for search.
+		/// Note that any negative number forces search at the top.
+		/// @param[in] Search in this channel.
+        /// @return The next empty correlation product
+        boost::optional<uint32_t> findNextEmptyCorrProd(uint32_t startCP, 
+                uint32_t chan) const;
+#else
         /// @param[in] Starting point for search (-1 to search from beginning)
         /// @return The next empty correlation product (-1 if none found)
         int32_t findNextEmptyCorrProd(int32_t startCP) const;
+#endif
 
+#ifdef NEW_BUFFER
+        /// Find the next correlation product that has data.
+        /// @param[in] Starting correlation product for search.
+		/// Note that any negative number forces search at the top.
+		/// @param[in] Search in this channel.
+        /// @return The next correlation product that has data
+        boost::optional<uint32_t> findNextFullCorrProd(uint32_t startCP, 
+                uint32_t chan) const;
+#else
         /// Find the next correlation product with original data (not copy)
-        /// @param[in] Starting point for search (-1 to search from beginning)
+        /// @param[in] Starting point for search (-1 to search from beginning).
         /// @return The next correlation product with original data
         /// (-1 if none found)
         int32_t findNextOriginalCorrProd(int32_t startCP) const;
+#endif
 
-        /// Copy one correlation product to another
+#ifdef NEW_BUFFER
+		/// Find the next channel that has no data
+        boost::optional<uint32_t> findNextEmptyChannel(uint32_t cp, 
+                uint32_t startChan) const;
+
+		/// Find the next channel that has data
+        boost::optional<uint32_t> findNextFullChannel(uint32_t cp, 
+                uint32_t startChan) const;
+
+        /// Fill all empty correlation products of a given channel
+        void fillOneChannel(uint32_t chan);
+
+        /// Fill all empty channels of a given correlation product
+        void fillOneCorrProduct(uint32_t cp);
+#endif
+
+        /// Copy one correlation product to another (for all channels).
+		/// Note that range is checked.
         /// @param[in] Correlation product index used as source
         /// @param[in] Correlation product index used as destination
-        void copyCorrProd(int32_t source, int32_t destination);
+        void copyCorrProd(int32_t source, int32_t target);
 
-        // Copy one channel to another
-        // @param[in] Channel index used as source
-        // @param[in] Channel index used as destination
-        //void copyChannel(int32_t source, int32_t destination);
+        /// Copy one channel to another (for all correlation products)
+		/// Note that range is checked.
+        /// @param[in] Channel index used as source
+        /// @param[in] Channel index used as destination
+        void copyChannel(int32_t source, int32_t target);
+
+		/// Count rows of the buffer
+		uint32_t getRowCount() const;
+
+		/// Count columns of the buffer
+		uint32_t getColumnCount() const;
+
+		/// Count the same visibility data in the buffer
+		uint32_t countSameVisibility(const CorrBuffer& buffer2,
+				const float small) const;
 
         /// Print the buffer
         void print() const;
 
+		void print(const string& option) const;
 
         // data
         
@@ -107,13 +162,17 @@ class CorrBuffer
         /// Column: channels as specified in parset
         vector<vector<CorrBufferUnit> > data;
 
+#ifndef NEW_BUFFER
         /// Array of correlation product status
         /// True if correlation product is filled with data
+		// TO BE DEPRECATED
         vector<bool> corrProdIsFilled;
 
         /// Array of correlation product status
         /// True if correlation product is original data (not copy) 
+		// TO BE DEPRECATED
         vector<bool> corrProdIsOriginal;
+#endif
 
         /// Array of frequency index, which includes block, card, channel
         /// and frequency itself

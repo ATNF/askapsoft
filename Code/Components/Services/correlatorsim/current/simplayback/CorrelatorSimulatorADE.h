@@ -76,6 +76,7 @@ class CorrelatorSimulatorADE : public ISimulator {
                 const uint32_t nShelves = 0,
                 const uint32_t nAntenna = 0,
                 const uint32_t nCoarseChannel = 0,
+				const uint32_t nFineChannel = 0,
                 const uint32_t nChannelSub = 0,
                 const double coarseBandwidth = 0.0,
                 const uint32_t delay = 0,
@@ -95,6 +96,10 @@ class CorrelatorSimulatorADE : public ISimulator {
 		
     private:
 
+        // The mode of simulation. Possible values:
+        // - coarse_channels: data needs to be expanded into fine channels
+        // - fine_channels  : data is already in fine channels
+        // - test           :
         string itsMode;
 
 		// Correlation product map (this replaces baseline map)
@@ -121,6 +126,9 @@ class CorrelatorSimulatorADE : public ISimulator {
 
         // Number of coarse channels
         const uint32_t itsNCoarseChannel;
+
+		// Number of fine channels
+		const uint32_t itsNFineChannel;
 
         // Number of channel subdivision (coarse to fine)
         const uint32_t itsNChannelSub;
@@ -172,8 +180,8 @@ class CorrelatorSimulatorADE : public ISimulator {
         /// @param[in] ant2 Antenna 2
         /// @param[in] stokesType   Stokes type (XX, XY, YX, YY)
         uint32_t getCorrProdIndex
-                (const uint32_t ant1, const uint32_t ant2,
-                const casa::Stokes::StokesTypes stokesType);
+                (uint32_t ant1, uint32_t ant2,
+                const casa::Stokes::StokesTypes& stokesType);
 
         /// Initialize buffer for intermediate storage
         void initBuffer();
@@ -183,8 +191,12 @@ class CorrelatorSimulatorADE : public ISimulator {
         /// (from measurement set) 
         /// @return True if successful, false if not 
         /// (eg. no more data in measurement set)
+#ifdef NEW_BUFFER
+        bool getNewBufferData();
+#else
         bool getBufferData();
-        
+#endif
+   
         /// Fill empty correlation products by copying data from
         /// those originally filled with measurement set data
         void fillCorrProdInBuffer();
@@ -204,7 +216,7 @@ class CorrelatorSimulatorADE : public ISimulator {
         /// Fill test buffer with data from payload.
         /// The test buffer simulates ingest.
         /// @param[in] payload Datagram containing visibility data
-        void fillTestBuffer(askap::cp::VisDatagramADE &payload);
+        void fillTestBuffer(askap::cp::VisDatagramADE& payload);
 
         /// Check the test buffer for bad data.
         /// At this moment it is used to check the correct association 

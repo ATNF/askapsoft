@@ -97,7 +97,6 @@ void SimPlaybackADE::validateConfig(void)
 {
 #ifdef VERBOSE
 	cout << "SimPlaybackADE::validateConfig..." << endl;
-	cout << "nShelves: " << nShelves << endl;
 #endif
 	// Build a list of required keys    
 	std::vector<std::string> requiredKeys;
@@ -262,6 +261,7 @@ boost::shared_ptr<CorrelatorSimulatorADE>
             itsParset.getUint32("corrsim.n_coarse_channels", 304);
     const unsigned int nChannelSub =
             itsParset.getUint32("corrsim.n_channel_subdivision", 54);
+    const unsigned int nFineChannel = nCoarseChannel * nChannelSub;
     const double coarseBandwidth =
             itsParset.getDouble("corrsim.coarse_channel_bandwidth", 1000000);
     const unsigned int delay =
@@ -304,7 +304,7 @@ boost::shared_ptr<CorrelatorSimulatorADE>
 
     return boost::shared_ptr<CorrelatorSimulatorADE>(
             new CorrelatorSimulatorADE(mode, dataset, hostname, port, 
-            itsRank, itsNumProcs-1, nAntenna, nCoarseChannel, nChannelSub,
+            itsRank, itsNumProcs-1, nAntenna, nCoarseChannel, nFineChannel, nChannelSub,
             coarseBandwidth, delay, cardFailModes));
 #ifdef VERBOSE
 	std::cout << "makeCorrelatorSim: done" << std::endl;

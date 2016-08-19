@@ -147,28 +147,35 @@ antenna.ant36.location.itrf = [-2556397.233607, 5097421.429903, -2848124.497319]
 antenna.ant36.name = ak36
 
 # 4 antennas
+antennas = [ant1, ant2, ant3, ant4]
 #antennas = [ant2, ant4, ant5, ant12]
 # 12 antennas
 #antennas = [ant1, ant2, ant3, ant4, ant5, ant6, ant7, ant8, ant9, ant10, ant11, ant12]
 # 18 antennas
-antennas = [ant1, ant2, ant3, ant4, ant5, ant6, ant7, ant8, ant9, ant10, ant11, ant12, ant13, ant14, ant15, ant16, ant17, ant18]
+#antennas = [ant2, ant4, ant5, ant12, ant1, ant3, ant6, ant7, ant8, ant9, ant10, ant11, ant13, ant14, ant15, ant16, ant17, ant18]
+#antennas = [ant1, ant2, ant3, ant4, ant5, ant6, ant7, ant8, ant9, ant10, ant11, ant12, ant13, ant14, ant15, ant16, ant17, ant18]
 # Maximum number of antennas (36)
 #antennas = [ant1, ant2, ant3, ant4, ant5, ant6, ant7, ant8, ant9, ant10, ant11, ant12, ant13, ant14, ant15, ant16, ant17, ant18, ant19, ant20, ant21, ant22, ant23, ant24, ant25, ant26, ant27, ant28, ant29, ant30, ant31, ant32, ant33, ant34, ant35, ant36]
+#antennas = [ant2, ant4, ant5, ant12, ant1, ant3, ant6, ant7, ant8, ant9, ant10, ant11, ant13, ant14, ant15, ant16, ant17, ant18, ant19, ant20, ant21, ant22, ant23, ant24, ant25, ant26, ant27, ant28, ant29, ant30, ant31, ant32, ant33, ant34, ant35, ant36]
 
-# Baseline mapping
+# Baseline (correlation product) mapping
 baselinemap.name = standard
 
 # minimal MS with 4 antennas
+baselinemap.antennaidx = [ak01, ak02, ak03, ak04]
 #baselinemap.antennaidx = [ak02, ak04, ak05, ak12]
 # 12 antennas
 #baselinemap.antennaidx = [ak01, ak02, ak03, ak04, ak05, ak06, ak07, ak08, ak09, ak10, ak11, ak12]
-#baselinemap.antennaindices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 # 18 antennas
-baselinemap.antennaidx = [ak01, ak02, ak03, ak04, ak05, ak06, ak07, ak08, ak09, ak10, ak11, ak12, ak13, ak14, ak15, ak16, ak17, ak18]
-baselinemap.antennaindices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
-#baselinemap.antennaindices = [1, 3, 4, 11]
+#baselinemap.antennaidx = [ak01, ak02, ak03, ak04, ak05, ak06, ak07, ak08, ak09, ak10, ak11, ak12, ak13, ak14, ak15, ak16, ak17, ak18]
+#baselinemap.antennaidx = [ak02, ak04, ak05, ak12, ak01, ak03, ak06, ak07, ak08, ak09, ak10, ak11, ak13, ak14, ak15, ak16, ak17, ak18]
 # Maximum number of antennas (36)
-#baselinemap.antennaidx = [ak01, ak02, ak03, ak04, ak05, ak06, ak07, ak08, ak09, ak10, ak11, ak12, ak13, ak14, ak15, ak16, ak17, ak18, ak19, ak20, ak21, ak22, ak23, ak24, ak25, ak26, ak27, ak28, ak29, ak30, ak31, ak32, ak33, ak34, ak35, ak36]
+#baselinemap.antennaidx = [ak02, ak04, ak05, ak12, ak01, ak03, ak06, ak07, ak08, ak09, ak10, ak11, ak13, ak14, ak15, ak16, ak17, ak18, ak19, ak20, ak21, ak22, ak23, ak24, ak25, ak26, ak27, ak28, ak29, ak30, ak31, ak32, ak33, ak34, ak35, ak36]
+
+# Antenna indices. Must be in the increasing order
+baselinemap.antennaindices = [0, 1, 2, 3]
+#baselinemap.antennaindices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+#baselinemap.antennaindices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
 #baselinemap.antennaindices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35]
 
 # Updated channel width with more accuracy.
@@ -183,19 +190,8 @@ correlator.modes = [standard]
 
 #
 # Task List
-#
-tasks.tasklist = [MergedSource, CalcUVWTask, Monitor, MSSink]
-
-#
-# MergedSource
-#
-tasks.MergedSource.type                             = MergedSource
-tasks.MergedSource.params.vis_source.receive_buffer_size = 67108864
-tasks.MergedSource.params.vis_source.port           = 3000
-tasks.MergedSource.params.vis_source.max_beamid     = 36
-tasks.MergedSource.params.vis_source.max_slice      = 0
-
-tasks.MergedSource.params.maxbeams = 36
+# Changed outside
+tasks.tasklist = [MergedSource, MSSink]
 
 # metadata-specific 
 metadata_source.ice.locator_host = localhost
@@ -248,5 +244,14 @@ tasks.Merge.params.ranks2merge = 1
 
 # Number of channels a given ingest process is meant to receive/process
 
+#
+# MergedSource: joining visibilities and metadata
+#
+tasks.MergedSource.type                             = MergedSource
+tasks.MergedSource.params.vis_source.receive_buffer_size = 67108864
+tasks.MergedSource.params.vis_source.port           = 3000
+tasks.MergedSource.params.vis_source.max_beamid     = 36
+tasks.MergedSource.params.vis_source.max_slice      = 0
+tasks.MergedSource.params.maxbeams = 36
 # Automatically generated channel list
 tasks.MergedSource.params.n_channels.0..0 = 216
