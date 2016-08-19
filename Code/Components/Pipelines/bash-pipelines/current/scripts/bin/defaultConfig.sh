@@ -323,7 +323,7 @@ RESTORE_PRECONDITIONER_WIENER_TAPER=""
 # via a components parset ("Components")
 SELFCAL_METHOD="Cmodel"
 # Interval [sec] over which to solve for self-calibration
-SELFCAL_INTERVAL=10
+SELFCAL_INTERVAL=300
 # Number of loops of self-calibration
 SELFCAL_NUM_LOOPS=5
 # Should we keep the images from the intermediate selfcal loops?

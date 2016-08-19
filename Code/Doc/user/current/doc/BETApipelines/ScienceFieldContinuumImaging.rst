@@ -212,7 +212,7 @@ instead of BasisfunctionMFS).
 |                                            |                                 |                                                        | detected components directly through a parset (created by    |
 |                                            |                                 |                                                        | Selavy). Anything else will default to "Cmodel".             |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``SELFCAL_INTERVAL``                       | 10                              | interval                                               | Interval [sec] over which to solve for self-calibration.     |
+| ``SELFCAL_INTERVAL``                       | 300                             | interval                                               | Interval [sec] over which to solve for self-calibration.     |
 |                                            |                                 | (:doc:`../calim/ccalibrator`)                          |                                                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``SELFCAL_NUM_LOOPS``                      | 5                               | none                                                   | Number of loops of self-calibration.                         |
