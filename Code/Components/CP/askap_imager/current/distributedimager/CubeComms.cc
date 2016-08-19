@@ -96,7 +96,7 @@ void CubeComms::initWriters(int nwriters, int nchanpercore) {
         ret = writerMap.insert(std::pair<int,int> (mywriter,channelCount) );
 
         if (ret.second==false) {
-            ASKAPLOG_WARN_STR(logger, "element '" << mywriter << "' already existed");
+            ASKAPLOG_DEBUG_STR(logger, "element " << mywriter << " already existed");
         }
 
     }
@@ -119,7 +119,7 @@ void CubeComms::addWriter(unsigned int writerRank) {
     ret = writerMap.insert(std::pair<int,int> (writerRank,count) );
 
     if (ret.second==false) {
-        ASKAPLOG_WARN_STR(logger, "element '" << writerRank << "' already existed");
+        ASKAPLOG_DEBUG_STR(logger, "element " << writerRank << " already existed");
     }
 
 }

@@ -126,8 +126,8 @@ void ContinuumMaster::run(void)
 
         totalChannels = diadvise.getBaryFrequencies().size();
 
-        ASKAPLOG_DEBUG_STR(logger,"AdviseDI reports " << totalChannels << " channels to process");
-        ASKAPLOG_DEBUG_STR(logger,"AdviseDI reports " << diadvise.getWorkUnitCount() << " work units to allocate");
+        ASKAPLOG_INFO_STR(logger,"AdviseDI reports " << totalChannels << " channels to process");
+        ASKAPLOG_INFO_STR(logger,"AdviseDI reports " << diadvise.getWorkUnitCount() << " work units to allocate");
     }
 
     catch (AskapError& e) {
@@ -160,7 +160,7 @@ void ContinuumMaster::run(void)
 
 
     if (localSolver) {
-        ASKAPLOG_DEBUG_STR(logger, "Master no longer required");
+        ASKAPLOG_INFO_STR(logger, "Master no longer required");
         return;
     }
     ASKAPLOG_DEBUG_STR(logger, "Master is about to broadcast first <empty> model");

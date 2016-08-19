@@ -102,7 +102,9 @@ ContinuumWorker::ContinuumWorker(LOFAR::ParameterSet& parset,
         posInGroup = nWorkersPerGroup;
     }
     posInGroup = posInGroup - 1;
+
     this->baseChannel = posInGroup * nchanpercore;
+
     ASKAPLOG_INFO_STR(logger,"Distribution: Id " << id << " nWorkers " << nWorkers << " nGroups " << itsComms.nGroups());
 
     ASKAPLOG_INFO_STR(logger,"Distribution: Base channel " << this->baseChannel << " PosInGrp " << posInGroup);
@@ -180,8 +182,7 @@ void ContinuumWorker::run(void)
     }
 
     itsComms.barrier(itsComms.theWorkers());
-    const int nwriters = itsParset.getInt32("nwriters", 1);
-    const int nchanpercore = itsParset.getInt32("nchanpercore", 1);
+
     synthesis::AdviseDI advice(itsComms,itsParset);
     advice.addMissingParameters();
     advice.updateComms();
@@ -419,11 +420,11 @@ void ContinuumWorker::buildSpectralCube() {
         double frequency=workUnits[workUnitCount].get_channelFrequency();
         const string colName = itsParsets[workUnitCount].getString("datacolumn", "DATA");
         const string ms = workUnits[workUnitCount].get_dataset();
-       
+
         ASKAPLOG_INFO_STR(logger, "MS: " << ms \
-        << " pulling out local channel " << workUnits[workUnitCount].get_localChannel() \ 
+        << " pulling out local channel " << workUnits[workUnitCount].get_localChannel() \
                 << " which has a frequency " << frequency );
-        
+
         TableDataSource ds(ms, TableDataSource::DEFAULT, colName);
 
         /// Need to set up the rootImager here
@@ -520,8 +521,10 @@ void ContinuumWorker::buildSpectralCube() {
         if (itsComms.isWriter()) {
             ASKAPLOG_INFO_STR(logger,"I am a writer");
             ASKAPLOG_INFO_STR(logger,"I have (including my own) " << itsComms.getOutstanding() << " units to write");
-            handleImageParams(rootImager.params(),  \
-            workUnits[workUnitCount-1].get_globalChannel()-baseChannel);
+            int cubeChannel = workUnits[workUnitCount-1].get_globalChannel()-baseChannel;
+            ASKAPLOG_INFO_STR(logger,"Attempting to write channel " << cubeChannel << " of " << nchanperwriter);
+            ASKAPCHECK( cubeChannel < nchanperwriter, "cubeChannel outside range of cube slice");
+            handleImageParams(rootImager.params(),cubeChannel);
             itsComms.removeChannelFromWriter(itsComms.rank());
             /// write everyone elses
 
@@ -542,10 +545,12 @@ void ContinuumWorker::buildSpectralCube() {
                 int id;
 
                 result.receiveRequest(id,itsComms);
-                ASKAPLOG_INFO_STR(logger,"I have received a request to write from " << id);
-                ASKAPLOG_INFO_STR(logger,"I am attempting to write channel " << result.get_globalChannel()-baseChannel);
-                handleImageParams(result.get_params(),result.get_globalChannel()-baseChannel);
-                ASKAPLOG_INFO_STR(logger,"I have written the slice from " << id);
+                ASKAPLOG_INFO_STR(logger,"Received a request to write from rank " << id);
+                int cubeChannel = result.get_globalChannel()-baseChannel;
+                ASKAPLOG_INFO_STR(logger,"Attempting to write channel " << cubeChannel << " of " << nchanperwriter);
+                ASKAPCHECK( cubeChannel < nchanperwriter, "cubeChannel outside range of cube slice");
+                handleImageParams(result.get_params(),cubeChannel);
+                ASKAPLOG_INFO_STR(logger,"Written the slice from rank" << id);
                 itsComms.removeChannelFromWriter(itsComms.rank());
             }
 
@@ -563,16 +568,19 @@ void ContinuumWorker::buildSpectralCube() {
 
 
     }
+    // cleanup
     if (itsComms.isWriter()) {
         while (itsComms.getOutstanding()>0) {
 
             ContinuumWorkRequest result;
             int id;
             result.receiveRequest(id,itsComms);
-            ASKAPLOG_INFO_STR(logger,"I have received a request to write from " << id);
-            ASKAPLOG_INFO_STR(logger,"I am attempting to write channel " << result.get_globalChannel()-baseChannel);
-            handleImageParams(result.get_params(),result.get_globalChannel()-baseChannel);
-            ASKAPLOG_INFO_STR(logger,"I have written the slice from " << id);
+            ASKAPLOG_INFO_STR(logger,"Received a request to write from rank " << id);
+            int cubeChannel = result.get_globalChannel()-baseChannel;
+            ASKAPLOG_INFO_STR(logger,"Attempting to write channel " << cubeChannel << " of " << nchanperwriter);
+            ASKAPCHECK( cubeChannel < nchanperwriter, "cubeChannel outside range of cube slice");
+            handleImageParams(result.get_params(),cubeChannel);
+            ASKAPLOG_INFO_STR(logger,"Written the slice from rank" << id);
             itsComms.removeChannelFromWriter(itsComms.rank());
         }
     }
