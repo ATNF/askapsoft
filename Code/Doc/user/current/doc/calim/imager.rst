@@ -1,4 +1,4 @@
-imager (smaller memory / processing footprint to cimager *under test*)
+imager (*under test*)
 ======================================================================
 
 This page provides some details about the imager program. The purpose of this
@@ -68,25 +68,33 @@ Now you would only need to invoke::
 
 This would only require 4 nodes.
 
+**Note: The Reference Frequency**
+
+The current (beta) version of this imager cannot determine a reference frequency
+synthesis so you must add it yourself::
+
+    Cimager.visweights                              = MFS
+    Cimager.visweights.MFS.reffreq                  = 1.10697e+09
 
 **Example 2: The Temporary Storage**
 
-This is achieved by allowing the cores to store the raw visibilities from the
+This optional feature, that is only really useful for continuum imaging where the number of stored channels is low
+is achieved by allowing the cores to store the raw visibilities from the
 allocated channels. These are stored as complete measurement sets::
 
     Cimager.usetmpfs    = True
     Cimager.tmpfs       = /dev/shm
 
-In the above example (which is the defualt) each channel (and selected beam) is split out
+In the above example each channel (and selected beam) is split out
 of the original measurement set and stored as a file on the ramfs file system mounted on
 /dev/shm - this places the entire file in memory. As a result access to the visibilities
-is very efficient.
+is very efficient. It also allows imaging with only one pass through the measurement set.
 
 **Example 3: Beam Selection**
 
 This imager has built in splitting of the input measurement set. At the moment on a single
 beam is split out but it can be any one and is determined by the first entry int the following
-vector
+vector::
 
     Cimager.beams       =[0]
 
@@ -95,6 +103,32 @@ vector
 
 The minor cycle of clean is currently still performed on a single master core. But the
 individual channel allocations are merged locally to the worker core.
+
+Spectral-line processing (Replacing Simager)
+------------------------------
+
+This imager can also be used for spectral line processing - essentially mimicking the
+performance of Simager. The each channel is processed independently and written to
+an output cube. There are some differences between imager and simager. The two most notable
+being::
+
+    Cimager.solverpercore = true
+
+**Example 4: Multiple writers**
+
+This imager can write to mode than one output image cube. This has been implemented to
+remove a serious bottle neck in the spectral line processing - writing out the cube::
+
+    Cimager.nwriters = X
+
+**Example 5:barycentreing**
+
+This imager can process multiple epochs and generate output cubes in a barycentric reference
+frame::
+
+    Cimager.dataset = [epoch1.ms,epoch2.ms]
+    Cimager.barycentre = true
+
 
 
 
@@ -132,12 +166,8 @@ default to "cross".
 |dataset                   |string or         |None          |Measurement set file name to read from. Usual       |
 |                          |vector<string>    |              |substitution rules apply if the parameter is a      |
 |                          |                  |              |single string. If the parameter is given as a vector|
-|                          |                  |              |of strings all measurement sets given by this vector|
-|                          |                  |              |are effectively concatenated together on-the-fly in |
-|                          |                  |              |the serial case. In the parallel case, the size of  |
-|                          |                  |              |the vector is required to be either 1 or the number |
-|                          |                  |              |of nodes - 1, and therefore there is one measurement|
-|                          |                  |              |set per worker node.                                |
+|                          |                  |              |then the sets can be different frequencies of the   |
+|                          |                  |              |same observation or different epochs                |
 +--------------------------+------------------+--------------+----------------------------------------------------+
 |nworkergroups             |int               |1             |Number of worker groups. This option can only be    |
 |                          |                  |              |used in the parallel mode. If it is greater than 1, |
@@ -160,6 +190,14 @@ default to "cross".
 +--------------------------+------------------+--------------+----------------------------------------------------+
 |beams                     |vector<int>       |[0]           |Beam number to be selected from the measurement set |
 |                          |                  |              |                                                    |
++--------------------------+------------------+--------------+----------------------------------------------------+
+|nwriters                  |int               |1             |Number of output cubes to generate in distributed   |
+|                          |                  |              |solver (simager) mode                               |
++--------------------------+------------------+--------------+----------------------------------------------------+
+|barycentre                |bool              |false         |Generate output cubes in the barycentric frame      |
+|                          |                  |              |only applies in distributed solver (simager) mode   |
++--------------------------+------------------+--------------+----------------------------------------------------+
+|solverpercore             |bool              |false         |Turn on distributed solver (simager) mode           |
 +--------------------------+------------------+--------------+----------------------------------------------------+
 |datacolumn                |string            |"DATA"        |The name of the data column in the measurement set  |
 |                          |                  |              |which will be the source of visibilities.This can be|
