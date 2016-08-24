@@ -316,6 +316,13 @@ void CalcCore::restoreImage()
 
     Quality q;
     ir->solveNormalEquations(*itsModel, q);
+    vector<string> resultimages=itsModel->names();
+
+    for (vector<string>::const_iterator ci=resultimages.begin(); ci!=resultimages.end(); ++ci) {
+
+        ASKAPLOG_INFO_STR(logger, "Restored image " << *ci);
+
+    }
     ASKAPDEBUGASSERT(itsModel);
 
 }

@@ -375,9 +375,9 @@ void ContinuumWorker::buildSpectralCube() {
             + utility::toString(itsComms.rank());
             // Only create these if we are restoring, as that is when they get made
             if (itsDoingPreconditioning) {
-                itsPSFimageCube.reset(new CubeBuilder(itsParsets[0], nchanpercore, f0, freqinc, psf_image_name));
+                itsPSFimageCube.reset(new CubeBuilder(itsParsets[0], nchanperwriter, f0, freqinc, psf_image_name));
             }
-            itsRestoredCube.reset(new CubeBuilder(itsParsets[0], nchanpercore, f0, freqinc, restored_image_name));
+            itsRestoredCube.reset(new CubeBuilder(itsParsets[0], nchanperwriter, f0, freqinc, restored_image_name));
         }
     }
     /// What are the plans for the deconvolution?
@@ -514,7 +514,7 @@ void ContinuumWorker::buildSpectralCube() {
 
 
         if (itsParsets[0].getBool("restore", false)) {
-            ASKAPLOG_DEBUG_STR(logger,"Running restore");
+            ASKAPLOG_INFO_STR(logger,"Running restore");
             rootImager.restoreImage();
         }
         ASKAPLOG_INFO_STR(logger,"writing channel into cube");
@@ -525,6 +525,8 @@ void ContinuumWorker::buildSpectralCube() {
             ASKAPLOG_INFO_STR(logger,"Attempting to write channel " << cubeChannel << " of " << nchanperwriter);
             ASKAPCHECK( cubeChannel < nchanperwriter, "cubeChannel outside range of cube slice");
             handleImageParams(rootImager.params(),cubeChannel);
+            ASKAPLOG_INFO_STR(logger,"Written channel " << cubeChannel);
+
             itsComms.removeChannelFromWriter(itsComms.rank());
             /// write everyone elses
 
@@ -540,6 +542,8 @@ void ContinuumWorker::buildSpectralCube() {
             ASKAPLOG_INFO_STR(logger,"this iteration target is " << targetOutstanding);
 
             while (itsComms.getOutstanding()>targetOutstanding){
+
+                ASKAPLOG_INFO_STR(logger,"iteration count is " << itsComms.getOutstanding());
 
                 ContinuumWorkRequest result;
                 int id;
@@ -611,6 +615,7 @@ void ContinuumWorker::handleImageParams(askap::scimath::Params::ShPtr params,
 
     // Write image
     {
+        ASKAPLOG_INFO_STR(logger,"Writing model for (local) channel " << chan);
         const casa::Array<double> imagePixels(params->value("model.slice"));
         casa::Array<float> floatImagePixels(imagePixels.shape());
         casa::convertArray<float, double>(floatImagePixels, imagePixels);
@@ -619,6 +624,7 @@ void ContinuumWorker::handleImageParams(askap::scimath::Params::ShPtr params,
 
     // Write PSF
     {
+        ASKAPLOG_INFO_STR(logger,"Writing PSF");
         const casa::Array<double> imagePixels(params->value("psf.slice"));
         casa::Array<float> floatImagePixels(imagePixels.shape());
         casa::convertArray<float, double>(floatImagePixels, imagePixels);
@@ -627,6 +633,7 @@ void ContinuumWorker::handleImageParams(askap::scimath::Params::ShPtr params,
 
     // Write residual
     {
+        ASKAPLOG_INFO_STR(logger,"Writing Residual");
         const casa::Array<double> imagePixels(params->value("residual.slice"));
         casa::Array<float> floatImagePixels(imagePixels.shape());
         casa::convertArray<float, double>(floatImagePixels, imagePixels);
@@ -635,6 +642,7 @@ void ContinuumWorker::handleImageParams(askap::scimath::Params::ShPtr params,
 
     // Write weights
     {
+        ASKAPLOG_INFO_STR(logger,"Writing Weights");
         const casa::Array<double> imagePixels(params->value("weights.slice"));
         casa::Array<float> floatImagePixels(imagePixels.shape());
         casa::convertArray<float, double>(floatImagePixels, imagePixels);
@@ -647,6 +655,7 @@ void ContinuumWorker::handleImageParams(askap::scimath::Params::ShPtr params,
         if (itsDoingPreconditioning) {
             // Write preconditioned PSF image
             {
+                ASKAPLOG_INFO_STR(logger,"Writing preconditioned PSF");
                 const casa::Array<double> imagePixels(params->value("psf.image.slice"));
                 casa::Array<float> floatImagePixels(imagePixels.shape());
                 casa::convertArray<float, double>(floatImagePixels, imagePixels);
@@ -656,6 +665,7 @@ void ContinuumWorker::handleImageParams(askap::scimath::Params::ShPtr params,
 
         // Write Restored image
         {
+            ASKAPLOG_INFO_STR(logger,"Writing Restored Image");
             const casa::Array<double> imagePixels(params->value("image.slice"));
             casa::Array<float> floatImagePixels(imagePixels.shape());
             casa::convertArray<float, double>(floatImagePixels, imagePixels);

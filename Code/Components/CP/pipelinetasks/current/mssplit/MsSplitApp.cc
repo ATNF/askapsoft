@@ -131,6 +131,7 @@ boost::shared_ptr<casa::MeasurementSet> MsSplitApp::create(
         // Get nr of rows in a tile.
         const int bytesPerRow = sizeof(std::complex<float>) * tileNcorr * tileNchan;
         const int nrowTile = std::max(1u, bucketSize / bytesPerRow);
+
         TiledShapeStMan dataMan("TiledData",
                                 IPosition(3, tileNcorr, tileNchan, nrowTile));
         newMS.bindColumn(MeasurementSet::columnName(MeasurementSet::DATA),
@@ -489,6 +490,7 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
     const uInt nChanIn = endChan - startChan + 1;
     const uInt nChanOut = nChanIn / width;
     const uInt nPol = sc.data()(0).shape()(0);
+
     ASKAPDEBUGASSERT(nPol > 0);
 
     // Test to see whether SIGMA_SPECTRUM has been added
@@ -501,6 +503,7 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
         ASKAPLOG_INFO_STR(logger, "Calculating and storing spectra of sigma values");
     }
 
+     
     // Decide how many rows to process simultaneously. This needs to fit within
     // a reasonable amount of memory, because all visibilities will be read
     // in for possible averaging. Assumes 32MB working space.
@@ -521,7 +524,8 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
     if (rowFiltersExist()) maxSimultaneousRows = 1;
 
     // Set a 64MB maximum cache size for the large columns
-    const casa::uInt cacheSize = 64 * 1024 * 1024;
+    // const casa::uInt cacheSize = 64 * 1024 * 1024;
+    const casa::uInt cacheSize =  1024 * 1024;
     sc.data().setMaximumCacheSize(cacheSize);
     dc.data().setMaximumCacheSize(cacheSize);
     sc.flag().setMaximumCacheSize(cacheSize);
