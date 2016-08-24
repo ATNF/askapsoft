@@ -182,6 +182,17 @@ void SolverCore::restoreImage()
     ir->solveNormalEquations(*itsModel, q);
     ASKAPDEBUGASSERT(itsModel);
 
+    // remove parts of each faceted image
+    vector<string> names(itsModel->completions("image"));
+    for (vector<string>::const_iterator ci=names.begin(); ci !=names.end(); ++ci) {
+        const string name="image"+*ci;
+        ImageParamsHelper iph(name);
+        if (iph.isFacet()) {
+            ASKAPLOG_INFO_STR(logger, "Remove facet patch "<<name<<" from the parameters");
+            itsModel->remove(name);
+        }
+    }
+
 }
 
 
