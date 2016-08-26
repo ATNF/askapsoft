@@ -311,7 +311,7 @@ void ContinuumWorker::buildSpectralCube() {
     /// 2. local minor cycle solving of each channel
     /// 3. Conversion to FITS and output
     /// Note: at this stage it will generate a cube per
-    /// node.
+    /// writer.
     /// Therefore the cube will be distributed across the
     /// supercomputer as a function of frequency and beams
     ///
@@ -333,7 +333,8 @@ void ContinuumWorker::buildSpectralCube() {
     /// The width of a channel. THis does <NOT> take account of the variable width
     /// of BArycentric channels
     Quantity freqinc(workUnits[0].get_channelWidth(),"Hz");
-
+    /// nchanperwriter is an estimate - some channels, especially at the edges may not exist
+    /// these will remain blank in the output cube
 
     ASKAPLOG_INFO_STR(logger,"Configuring Spectral Cube");
     ASKAPLOG_INFO_STR(logger,"nchan: " << nchanperwriter << " base f0: " << f0.getValue("MHz")
@@ -399,10 +400,13 @@ void ContinuumWorker::buildSpectralCube() {
     ASKAPLOG_DEBUG_STR(logger, "Tolerance on the directions is "
                       << uvwMachineCacheTolerance / casa::C::pi * 180. * 3600. << " arcsec");
     // we need to loop over the channels
-    int workUnitCount = 0; // the workUnits include different epochs (for the same channel)
+    
+    int workUnitCount = 0;
+    
+    // the workUnits may include different epochs (for the same channel)
     // the order is strictly by channel - with multiple work units per channel.
     // so you can increment the workUnit until the frequency changes - then you know you
-    // have all the workunits
+    // have all the workunits for that channel
 
 
 
@@ -412,6 +416,7 @@ void ContinuumWorker::buildSpectralCube() {
             ASKAPLOG_INFO_STR(logger, "Out of work with workUnit " << workUnitCount);
             break;
         }
+        
         ASKAPLOG_INFO_STR(logger, "Starting to process channel " << chan \
         << " with workUnit " << workUnitCount << " used for the root ");
 
@@ -433,8 +438,6 @@ void ContinuumWorker::buildSpectralCube() {
         /// set up the image for this channel
         setupImage(rootImager.params(), frequency);
 
-
-
         /// need to put in the major and minor cycle loops
         /// If we are doing more than one major cycle I need to reset
         /// the workUnit count to permit a re-read of the input data.
@@ -450,8 +453,8 @@ void ContinuumWorker::buildSpectralCube() {
             rootImager.calcNE();
 
             while (workUnitCount < workUnits.size() && frequency == workUnits[workUnitCount].get_channelFrequency()) {
-                /// need a working imager to allow a merge over epochs for this channel
 
+                /// need a working imager to allow a merge over epochs for this channel
 
                 const string myMs = workUnits[workUnitCount].get_dataset();
 
@@ -461,7 +464,8 @@ void ContinuumWorker::buildSpectralCube() {
 
                 CalcCore workingImager(itsParsets[workUnitCount],itsComms,ds,workUnits[workUnitCount].get_localChannel());
 
-            /// this loop does the calcNE and the merge
+                /// this loop does the calcNE and the merge of the residual images
+                
                 workingImager.replaceModel(rootImager.params());
                 workingImager.calcNE();
                 rootImager.getNE()->merge(*workingImager.getNE());
@@ -469,6 +473,7 @@ void ContinuumWorker::buildSpectralCube() {
                 workUnitCount++;
             }
             /// now we have a "full" set of NE we can SolveNE to update the model
+            
             rootImager.solveNE();
 
             if (rootImager.params()->has("peak_residual")) {
@@ -519,7 +524,7 @@ void ContinuumWorker::buildSpectralCube() {
         }
         ASKAPLOG_INFO_STR(logger,"writing channel into cube");
         if (itsComms.isWriter()) {
-            ASKAPLOG_INFO_STR(logger,"I am a writer");
+            
             ASKAPLOG_INFO_STR(logger,"I have (including my own) " << itsComms.getOutstanding() << " units to write");
             int cubeChannel = workUnits[workUnitCount-1].get_globalChannel()-baseChannel;
             ASKAPLOG_INFO_STR(logger,"Attempting to write channel " << cubeChannel << " of " << nchanperwriter);
@@ -535,6 +540,8 @@ void ContinuumWorker::buildSpectralCube() {
             /// may have a channel due to the barycentreing. THere is no
             /// simple way to calculate this - so if I just wait for nWorkersperWriter
             /// it should be relatively efficient.
+            
+            ///
             int targetOutstanding = itsComms.getOutstanding() - (nworkersperwriter - 1);
             if (targetOutstanding < 0){
                 targetOutstanding = 0;
@@ -547,7 +554,7 @@ void ContinuumWorker::buildSpectralCube() {
 
                 ContinuumWorkRequest result;
                 int id;
-
+                /// this is a blocking receive
                 result.receiveRequest(id,itsComms);
                 ASKAPLOG_INFO_STR(logger,"Received a request to write from rank " << id);
                 int cubeChannel = result.get_globalChannel()-baseChannel;
@@ -564,6 +571,7 @@ void ContinuumWorker::buildSpectralCube() {
             ContinuumWorkRequest result;
             result.set_params(rootImager.params());
             result.set_globalChannel(workUnits[workUnitCount-1].get_globalChannel());
+            /// send the work to the writer with a blocking send
             result.sendRequest(workUnits[workUnitCount-1].get_writer(),itsComms);
 
         }

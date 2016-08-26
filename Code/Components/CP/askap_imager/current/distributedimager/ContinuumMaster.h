@@ -87,9 +87,7 @@ class ContinuumMaster {
 
         std::vector<int> getBeams(void);
 
-        void handleImageParams(askap::scimath::Params::ShPtr params, unsigned int chan);
-        void handleRestoredImageParams(askap::scimath::Params::ShPtr params, unsigned int chan);
-
+    
         /// Parameter set
         LOFAR::ParameterSet& itsParset;
 
@@ -108,10 +106,6 @@ class ContinuumMaster {
 
         std::map<unsigned int, casa::Vector<casa::Quantum<double> > > itsBeamList;
 
-        void recordBeam(const askap::scimath::Axes &axes, const unsigned int globalChannel);
-        void recordBeamFailure(const unsigned int globalChannel);
-        void storeBeam(const unsigned int globalChannel);
-        unsigned int itsBeamReferenceChannel;
         void logBeamInfo();
 
 };
