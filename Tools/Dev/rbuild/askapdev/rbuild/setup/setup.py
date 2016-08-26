@@ -1,3 +1,4 @@
+##  @file
 # askapdev.rbuild module containing tools to assist with the build process.
 #
 # @copyright (c) 2006-2011 CSIRO

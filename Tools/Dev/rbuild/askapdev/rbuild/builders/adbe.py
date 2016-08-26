@@ -1,3 +1,4 @@
+## @file
 # Builder to parse XML point definitions in adbe common library
 # and generate epics database, asyn glue code and emulator update
 # utilities.
@@ -67,15 +68,16 @@ class Adbe(Builder):
         self._adePoints = []
         self._adeParser = AdbeParser(self._appname, dbprefix, fileprefix, srcOutDir, dbOutDir, xmlOutDir, *args, **kwargs)
             
-    def add_points(self, header, library=None, epicsxml=False):
+    def add_points(self, header, library=None, epicsxml=False, epicsdb=True, asyn=True):
         '''
         add the specified header file to the list of modules
         to parse for XML point definitions
 
-        :param library: an optional library name, if header belongs to a library
-		:param epicsxml: True to output XML files for GUI/OSL
+        :param library:     an optional library name, if header belongs to a library
+		:param epicsxml:    True to output XML files for GUI/OSL
+        :param epicsdb:     True to generate EPICS DB & asyn parameter list entries
         '''
-        self._adePoints.append( (header, library, epicsxml) )
+        self._adePoints.append( (header, library, epicsxml, epicsdb, asyn) )
 
     def _build(self):
         '''
@@ -86,18 +88,20 @@ class Adbe(Builder):
         3. expanding out any nodes such as iocStructures or iocArrays
         '''
         sourceFiles = []
-        for header, library, epicsxml in self._adePoints:
+        for header, library, epicsxml, epicsdb, asyn in self._adePoints:
             if library is None:
                 filename = os.path.join(self._srcdir, header + '.h')
             else:
                 filename = os.path.join(self.dep.get_install_path(library), 'include', library, header + '.h')
+                if not os.path.exists(filename):
+                    filename = os.path.join(self.dep.get_install_path(library), 'include', header + '.h')
 
-            sourceFiles.append((filename, library, epicsxml))
+            sourceFiles.append((filename, library, epicsxml, epicsdb, asyn))
 
         if self._adeParser.rebuild_needed([x[0] for x in sourceFiles]):
             self._adeParser.reset()
-            for filename, library, epicsxml in sourceFiles:
-                self._adeParser.parse(filename, libName=library, epicsxml=epicsxml)
+            for filename, library, epicsxml, epicsdb, asyn in sourceFiles:
+                self._adeParser.parse(filename, libName=library, epicsxml=epicsxml, epicsdb=epicsdb, asyn=asyn)
 
             files = self._adeParser.generate_output()
             for file in files:
@@ -110,3 +114,6 @@ class Adbe(Builder):
 
     def _clean(self):
         Builder._clean(self)
+
+    def _functest(self):
+        pass

@@ -1,3 +1,4 @@
+## @file
 # @brief helper function to turn pkgconfig files into ASKAP package.info
 #
 # @copyright (c) 2006 CSIRO
