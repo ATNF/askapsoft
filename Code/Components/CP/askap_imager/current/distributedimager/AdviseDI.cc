@@ -651,8 +651,6 @@ void AdviseDI::updateComms() {
     for (int worker=0; worker < itsAllocatedWork.size() ; worker++) {
         for (int alloc=0; alloc < itsAllocatedWork[worker].size() ; alloc++) {
             if (itsAllocatedWork[worker][alloc].get_payloadType() != cp::ContinuumWorkUnit::NA) {
-                ASKAPLOG_DEBUG_STR(logger,"Allocating worker " << worker \
-            << " to writer " << itsAllocatedWork[worker][alloc].get_writer());
                 itsCubeComms.addWriter(itsAllocatedWork[worker][alloc].get_writer());
                 itsCubeComms.addChannelToWriter(itsAllocatedWork[worker][alloc].get_writer());
             }
