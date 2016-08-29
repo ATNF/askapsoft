@@ -476,7 +476,7 @@ void ContinuumWorker::buildSpectralCube() {
                         rootImager.getNE()->merge(*workingImager.getNE());
                     }
                     catch( const askap::AskapError& e) {
-                        ASKAPLOG_FATAL_STR(logger, "Askap error in imaging - skipping accumulation: " << e.what());
+                        ASKAPLOG_WARN_STR(logger, "Askap error in imaging - skipping accumulation: " << e.what());
                         std::cerr << "Askap error in: " << e.what() << std::endl;
                     }
 
@@ -533,6 +533,8 @@ void ContinuumWorker::buildSpectralCube() {
                 rootImager.restoreImage();
             }
 
+
+
             ASKAPLOG_INFO_STR(logger,"writing channel into cube");
 
             if (itsComms.isWriter()) {
@@ -576,36 +578,46 @@ void ContinuumWorker::buildSpectralCube() {
                     ASKAPLOG_INFO_STR(logger,"Written the slice from rank" << id);
                     itsComms.removeChannelFromWriter(itsComms.rank());
                 }
-                
+                    
             }
             else {
-                
+
                 ContinuumWorkRequest result;
                 result.set_params(rootImager.params());
                 result.set_globalChannel(workUnits[workUnitCount-1].get_globalChannel());
                 /// send the work to the writer with a blocking send
                 result.sendRequest(workUnits[workUnitCount-1].get_writer(),itsComms);
-                
+
             }
 
+            /// outside the clean-loop write out the slice
         }
-
         catch (const askap::AskapError& e) {
-            ASKAPLOG_FATAL_STR(logger, "Askap error in channel processing skipping: " << e.what());
+            ASKAPLOG_WARN_STR(logger, "Askap error in channel processing skipping: " << e.what());
             std::cerr << "Askap error in: " << e.what() << std::endl;
+
+            // Need to either send an empty map - or
+            if (itsComms.isWriter()) {
+                 itsComms.removeChannelFromWriter(itsComms.rank());
+            }
+            else {
+                askap::scimath::Params::ShPtr blankParams;
+                setupImage(blankParams, workUnits[workUnitCount].get_channelFrequency());
+                ContinuumWorkRequest result;
+                result.set_params(blankParams);
+                result.set_globalChannel(workUnits[workUnitCount].get_globalChannel());
+                /// send the work to the writer with a blocking send
+                result.sendRequest(workUnits[workUnitCount].get_writer(),itsComms);
+            }
+            workUnitCount++;
 
         }
 
         catch (const std::exception& e) {
-            ASKAPLOG_FATAL_STR(logger, "Unexpected exception in: " << e.what());
+            ASKAPLOG_WARN_STR(logger, "Unexpected exception in: " << e.what());
             std::cerr << "Unexpected exception in: " << e.what();
-
+            
         }
-
-
-
-        /// outside the clean-loop write out the slice
-
 
     }
     // cleanup
