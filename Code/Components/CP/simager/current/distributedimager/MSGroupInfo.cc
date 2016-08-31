@@ -78,6 +78,7 @@ MSGroupInfo::MSGroupInfo(const std::vector<std::string>& ms)
         // Open dataset and get access to the first row
         askap::accessors::TableConstDataSource ds(ms[i]);
         askap::accessors::IDataSelectorPtr sel = ds.createSelector();
+        sel->chooseCrossCorrelations();
         askap::accessors::IDataConverterPtr conv = ds.createConverter();
         conv->setFrequencyFrame(casa::MFrequency::Ref(casa::MFrequency::TOPO), frequnit);
         conv->setDirectionFrame(casa::MDirection::Ref(casa::MDirection::J2000));

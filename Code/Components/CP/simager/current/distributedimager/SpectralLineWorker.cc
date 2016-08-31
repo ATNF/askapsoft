@@ -153,6 +153,7 @@ askap::scimath::Params::ShPtr SpectralLineWorker::processWorkUnit(const Spectral
     TableDataSource ds(ms, TableDataSource::DEFAULT, colName);
     ds.configureUVWMachineCache(uvwMachineCacheSize, uvwMachineCacheTolerance);
     IDataSelectorPtr sel = ds.createSelector();
+    sel->chooseCrossCorrelations();
     IDataConverterPtr conv = ds.createConverter();
 
     conv->setFrequencyFrame(casa::MFrequency::Ref(casa::MFrequency::TOPO), "Hz");
@@ -189,6 +190,7 @@ SpectralLineWorker::processChannel(askap::accessors::TableDataSource& ds,
 
     // Setup data iterator
     IDataSelectorPtr sel = ds.createSelector();
+    sel->chooseCrossCorrelations();
     sel->chooseChannels(1, localChannel);
     IDataConverterPtr conv = ds.createConverter();
     conv->setFrequencyFrame(casa::MFrequency::Ref(casa::MFrequency::TOPO), "Hz");
