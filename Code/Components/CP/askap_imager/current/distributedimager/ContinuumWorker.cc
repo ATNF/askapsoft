@@ -449,30 +449,41 @@ void ContinuumWorker::buildSpectralCube() {
 
             for (int majorCycleNumber=0; majorCycleNumber < nCycles; ++majorCycleNumber) {
 
-                workUnitCount = initialChannelWorkUnit;
+                int tempWorkUnitCount = initialChannelWorkUnit; // clearer if it were called nextWorkUnit
 
                 /// But first lets test to see how we are doing.
                 /// calcNE for the rootImager
+                try {
+                    rootImager.calcNE();
+                }
+                catch (const askap::AskapError& e) {
+                    ASKAPLOG_WARN_STR(logger,"Askap error in calcNE");
+                    throw;
+                }
 
-                rootImager.calcNE();
-
-                while (workUnitCount < workUnits.size() && frequency == workUnits[workUnitCount].get_channelFrequency()) {
+                while (tempWorkUnitCount < workUnits.size() && frequency == workUnits[tempWorkUnitCount].get_channelFrequency()) {
 
                     /// need a working imager to allow a merge over epochs for this channel
 
-                    const string myMs = workUnits[workUnitCount].get_dataset();
+                    const string myMs = workUnits[tempWorkUnitCount].get_dataset();
 
                     TableDataSource ds(myMs, TableDataSource::DEFAULT, colName);
 
                     ds.configureUVWMachineCache(uvwMachineCacheSize, uvwMachineCacheTolerance);
                     try {
 
-                        CalcCore workingImager(itsParsets[workUnitCount],itsComms,ds,workUnits[workUnitCount].get_localChannel());
+                        CalcCore workingImager(itsParsets[tempWorkUnitCount],itsComms,ds,workUnits[tempWorkUnitCount].get_localChannel());
 
                     /// this loop does the calcNE and the merge of the residual images
 
                         workingImager.replaceModel(rootImager.params());
-                        workingImager.calcNE();
+                        try {
+                            workingImager.calcNE();
+                        }
+                        catch (const askap::AskapError& e) {
+                            ASKAPLOG_WARN_STR(logger,"Askap error in calcNE");
+                            throw;
+                        }
                         rootImager.getNE()->merge(*workingImager.getNE());
                     }
                     catch( const askap::AskapError& e) {
@@ -480,32 +491,38 @@ void ContinuumWorker::buildSpectralCube() {
                         std::cerr << "Askap error in: " << e.what() << std::endl;
                     }
 
-                    workUnitCount++;
+                    tempWorkUnitCount++; 
                 }
                 /// now we have a "full" set of NE we can SolveNE to update the model
-
-                rootImager.solveNE();
+                try {
+                    rootImager.solveNE();
+                }
+                catch (const askap::AskapError& e) {
+                    ASKAPLOG_WARN_STR(logger,"Askap error in solver");
+                    workUnitCount = tempWorkUnitCount; // this is to remember what was processed.
+                    throw;
+                }
 
                 if (rootImager.params()->has("peak_residual")) {
                     const double peak_residual = rootImager.params()->scalarValue("peak_residual");
-                    ASKAPLOG_DEBUG_STR(logger, "Reached peak residual of " << peak_residual);
+                    ASKAPLOG_INFO_STR(logger, "Reached peak residual of " << peak_residual);
                     if (peak_residual < targetPeakResidual) {
-                        ASKAPLOG_DEBUG_STR(logger, "It is below the major cycle threshold of "
+                        ASKAPLOG_INFO_STR(logger, "It is below the major cycle threshold of "
                                            << targetPeakResidual << " Jy. Stopping.");
                         break;
                     } else {
                         if (targetPeakResidual < 0) {
-                            ASKAPLOG_DEBUG_STR(logger, "Major cycle flux threshold is not used.");
+                            ASKAPLOG_INFO_STR(logger, "Major cycle flux threshold is not used.");
                         } else {
-                            ASKAPLOG_DEBUG_STR(logger, "It is above the major cycle threshold of "
+                            ASKAPLOG_INFO_STR(logger, "It is above the major cycle threshold of "
                                                << targetPeakResidual << " Jy. Continuing.");
                         }
                     }
 
                 }
                 if (majorCycleNumber+1 == nCycles) {
-                    ASKAPLOG_DEBUG_STR(logger,"Reached maximum majorcycle count");
-
+                    ASKAPLOG_INFO_STR(logger,"Reached maximum majorcycle count");
+                    workUnitCount = tempWorkUnitCount; // this is to remember what was processed.
                 }
                 else {
 
@@ -561,7 +578,8 @@ void ContinuumWorker::buildSpectralCube() {
                     targetOutstanding = 0;
                 }
                 ASKAPLOG_INFO_STR(logger,"this iteration target is " << targetOutstanding);
-
+                ASKAPLOG_INFO_STR(logger,"iteration count is " << itsComms.getOutstanding());
+                
                 while (itsComms.getOutstanding()>targetOutstanding){
 
                     ASKAPLOG_INFO_STR(logger,"iteration count is " << itsComms.getOutstanding());
@@ -612,7 +630,8 @@ void ContinuumWorker::buildSpectralCube() {
                 result.sendRequest(workUnits[workUnitCount].get_writer(),itsComms);
                 ASKAPLOG_INFO_STR(logger,"Sent\n");
             }
-            workUnitCount++;
+            // No need to increment workunit. Although this assumes that we are here becuase we failed the solveNE not the calcNE
+            
 
         }
 
