@@ -598,9 +598,11 @@ void ContinuumWorker::buildSpectralCube() {
 
             // Need to either send an empty map - or
             if (itsComms.isWriter()) {
+                 ASKAPLOG_INFO_STR(logger,"Marking bad channel as processed in count for writer\n");
                  itsComms.removeChannelFromWriter(itsComms.rank());
             }
             else {
+                ASKAPLOG_INFO_STR(logger,"Sending blankparams to writer " << workUnits[workUnitCount].get_writer());
                 askap::scimath::Params::ShPtr blankParams;
                 setupImage(blankParams, workUnits[workUnitCount].get_channelFrequency());
                 ContinuumWorkRequest result;
@@ -608,6 +610,7 @@ void ContinuumWorker::buildSpectralCube() {
                 result.set_globalChannel(workUnits[workUnitCount].get_globalChannel());
                 /// send the work to the writer with a blocking send
                 result.sendRequest(workUnits[workUnitCount].get_writer(),itsComms);
+                ASKAPLOG_INFO_STR(logger,"Sent\n");
             }
             workUnitCount++;
 
