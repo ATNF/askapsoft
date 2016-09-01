@@ -499,7 +499,7 @@ void ContinuumWorker::buildSpectralCube() {
                 }
                 catch (const askap::AskapError& e) {
                     ASKAPLOG_WARN_STR(logger,"Askap error in solver");
-                    workUnitCount = tempWorkUnitCount; // this is to remember what was processed.
+                    workUnitCount = tempWorkUnitCount; // this is to remember what was failed on.
                     throw;
                 }
 
@@ -590,10 +590,20 @@ void ContinuumWorker::buildSpectralCube() {
                     result.receiveRequest(id,itsComms);
                     ASKAPLOG_INFO_STR(logger,"Received a request to write from rank " << id);
                     int cubeChannel = result.get_globalChannel()-baseChannel;
-                    ASKAPLOG_INFO_STR(logger,"Attempting to write channel " << cubeChannel << " of " << nchanperwriter);
-                    ASKAPCHECK( cubeChannel < nchanperwriter, "cubeChannel outside range of cube slice");
-                    handleImageParams(result.get_params(),cubeChannel);
-                    ASKAPLOG_INFO_STR(logger,"Written the slice from rank" << id);
+                   
+                    try {
+                        ASKAPLOG_INFO_STR(logger,"Attempting to write channel " << cubeChannel << " of " << nchanperwriter);
+                        ASKAPCHECK( cubeChannel < nchanperwriter, "cubeChannel outside range of cube slice");
+                        
+                        handleImageParams(result.get_params(),cubeChannel);
+                        
+                        ASKAPLOG_INFO_STR(logger,"Written the slice from rank" << id);
+                    }
+                    
+                    catch (const askap::AskapError& e) {
+                        ASKAPLOG_WARN_STR(logger, "Failed to write a channel to the cube: " << e.what());
+                    }
+                    
                     itsComms.removeChannelFromWriter(itsComms.rank());
                 }
                     
@@ -620,14 +630,22 @@ void ContinuumWorker::buildSpectralCube() {
                  itsComms.removeChannelFromWriter(itsComms.rank());
             }
             else {
-                ASKAPLOG_INFO_STR(logger,"Sending blankparams to writer " << workUnits[workUnitCount].get_writer());
+                int goodUnitCount = workUnitCount-1; // last good one - needed for the correct freq label and writer
+                ASKAPLOG_INFO_STR(logger,"Failed on count " << goodUnitCount);
+                ASKAPLOG_INFO_STR(logger,"Sending blankparams to writer " << workUnits[goodUnitCount].get_writer());
                 askap::scimath::Params::ShPtr blankParams;
-                setupImage(blankParams, workUnits[workUnitCount].get_channelFrequency());
+                
+                blankParams.reset(new Params);
+                ASKAPCHECK(blankParams,"blank parameters (images) not initialised");
+                
+                setupImage(blankParams, workUnits[goodUnitCount].get_channelFrequency());
+                
+                
                 ContinuumWorkRequest result;
                 result.set_params(blankParams);
-                result.set_globalChannel(workUnits[workUnitCount].get_globalChannel());
+                result.set_globalChannel(workUnits[goodUnitCount].get_globalChannel());
                 /// send the work to the writer with a blocking send
-                result.sendRequest(workUnits[workUnitCount].get_writer(),itsComms);
+                result.sendRequest(workUnits[goodUnitCount].get_writer(),itsComms);
                 ASKAPLOG_INFO_STR(logger,"Sent\n");
             }
             // No need to increment workunit. Although this assumes that we are here becuase we failed the solveNE not the calcNE
@@ -651,10 +669,19 @@ void ContinuumWorker::buildSpectralCube() {
             result.receiveRequest(id,itsComms);
             ASKAPLOG_INFO_STR(logger,"Received a request to write from rank " << id);
             int cubeChannel = result.get_globalChannel()-baseChannel;
-            ASKAPLOG_INFO_STR(logger,"Attempting to write channel " << cubeChannel << " of " << nchanperwriter);
-            ASKAPCHECK( cubeChannel < nchanperwriter, "cubeChannel outside range of cube slice");
-            handleImageParams(result.get_params(),cubeChannel);
-            ASKAPLOG_INFO_STR(logger,"Written the slice from rank" << id);
+            try {
+                
+            
+                ASKAPLOG_INFO_STR(logger,"Attempting to write channel " << cubeChannel << " of " << nchanperwriter);
+                ASKAPCHECK( cubeChannel < nchanperwriter, "cubeChannel outside range of cube slice");
+                handleImageParams(result.get_params(),cubeChannel);
+                ASKAPLOG_INFO_STR(logger,"Written the slice from rank" << id);
+            
+            }
+            catch (const askap::AskapError& e) {
+                ASKAPLOG_WARN_STR(logger, "Failed to write a channel to the cube: " << e.what());
+            }
+        
             itsComms.removeChannelFromWriter(itsComms.rank());
         }
     }
