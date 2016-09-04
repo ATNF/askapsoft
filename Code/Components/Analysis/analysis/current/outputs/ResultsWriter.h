@@ -76,6 +76,11 @@ class ResultsWriter {
         /// create VOTable and ASCII text versions of the catalogue).
         void writeComponentCatalogue();
 
+        /// Writes out the CASDA HI Emission-line catalogue, using the
+        /// HiEmissionCatalogue class to handle the writing (which will
+        /// create VOTable and ASCII text versions of the catalogue).
+        void writeHiEmissionCatalogue();
+
         /// Writes out the catalogue of 2D Gaussian fits, using the
         /// FitCatalogue class to handle the writing (which will
         /// create VOTable and ASCII text versions of the catalogue,

@@ -42,6 +42,7 @@
 #include <coordutils/SpectralUtilities.h>
 #include <imageaccess/CasaImageAccess.h>
 #include <casainterface/CasaInterface.h>
+#include <coordutils/PositionUtilities.h>
 #include <duchampinterface/DuchampInterface.h>
 
 #include <Common/ParameterSet.h>
@@ -51,6 +52,7 @@
 #include <boost/shared_ptr.hpp>
 #include <duchamp/Outputs/CatalogueSpecification.hh>
 #include <duchamp/Outputs/columns.hh>
+#include <duchamp/Utils/utils.hh>
 #include <vector>
 
 ASKAP_LOGGER(logger, ".casdaabsorptionobject");
@@ -60,7 +62,7 @@ namespace askap {
 namespace analysis {
 
 CasdaHiEmissionObject::CasdaHiEmissionObject(sourcefitting::RadioSource &obj,
-                                             const LOFAR::ParameterSet &parset):
+        const LOFAR::ParameterSet &parset):
     CatalogueEntry(parset),
     itsName(""),
     itsRAs_w(""),
@@ -92,56 +94,116 @@ CasdaHiEmissionObject::CasdaHiEmissionObject(sourcefitting::RadioSource &obj,
     id << itsIDbase << obj.getID();
     itsObjectID = id.str();
 
-    itsRA_w.value() = obj.getRA();
-    itsDEC_w.value() = obj.getDec();
-
-//    casa::Unit imageFreqUnits(obj.header().getSpectralUnits());
-    casa::Unit imageFreqUnits(obj.header().WCS().cunit[obj.header().WCS().spec]);
-    casa::Unit freqUnits(casda::freqUnit);
-    double freqScale = casa::Quantity(1., imageFreqUnits).getValue(freqUnits);
-    // itsFreq = zworld * freqScale;
+    double peakFluxscale = getPeakFluxConversionScale(obj.header(), casda::fluxUnit);
 
     int lng = obj.header().WCS().lng;
     int precision = -int(log10(fabs(obj.header().WCS().cdelt[lng] * 3600. / 10.)));
     float pixscale = obj.header().getAvPixScale() * 3600.; // convert from pixels to arcsec
+
+    duchamp::FitsHeader newHead_freq = changeSpectralAxis(obj.header(), "FREQ-???", casda::freqUnit);
+    ASKAPLOG_DEBUG_STR(logger, newHead_freq.WCS().ctype[newHead_freq.WCS().spec] << " " <<
+                       strncmp(newHead_freq.WCS().ctype[newHead_freq.WCS().spec], "FREQ", 4));
+    bool doFreq = (strncmp(newHead_freq.WCS().ctype[newHead_freq.WCS().spec], "FREQ", 4) == 0);
+    duchamp::FitsHeader newHead_vel = changeSpectralAxis(obj.header(), "VOPT-???", casda::velocityUnit);
+    ASKAPLOG_DEBUG_STR(logger, newHead_vel.WCS().ctype[newHead_vel.WCS().spec] << " " <<
+                       strncmp(newHead_vel.WCS().ctype[newHead_vel.WCS().spec], "VOPT", 4));
+    bool doVel = (strncmp(newHead_vel.WCS().ctype[newHead_vel.WCS().spec], "VOPT", 4) == 0);
+    double intFluxscale = getIntFluxConversionScale(newHead_vel, casda::intFluxUnitSpectral);
+
+    casa::Unit imageFreqUnits(newHead_freq.WCS().cunit[obj.header().WCS().spec]);
+    casa::Unit freqUnits(casda::freqUnit);
+    double freqScale = casa::Quantity(1., imageFreqUnits).getValue(freqUnits);
+    casa::Unit freqWidthUnits(casda::freqWidthUnit);
+    double freqWidthScale = casa::Quantity(1., imageFreqUnits).getValue(freqWidthUnits);
+    casa::Unit imageVelUnits(newHead_vel.WCS().cunit[obj.header().WCS().spec]);
+    casa::Unit velUnits(casda::velocityUnit);
+    double velScale = casa::Quantity(1., imageVelUnits).getValue(velUnits);
+
+    double xpeak = obj.getXPeak(), ypeak = obj.getYPeak(), zpeak = obj.getZPeak();
+    double xave = obj.getXaverage(), yave = obj.getYaverage(), zave = obj.getZaverage();
+    double xcent = obj.getXCentroid(), ycent = obj.getYCentroid(), zcent = obj.getZCentroid();
+    double ra, dec, spec;
+
+    int flag;
+    // Peak location - don't care about RA/DEC
+    flag = newHead_vel.pixToWCS(xpeak, ypeak, zpeak, ra, dec, spec);
+    if (doVel) {
+        itsVelHI_peak = spec * velScale;
+    }
+    flag = newHead_freq.pixToWCS(xpeak, ypeak, zpeak, ra, dec, spec);
+    if (doFreq) {
+        itsFreq_peak = spec * freqScale;
+    }
+    // Average (unweighted) location
+    flag = newHead_vel.pixToWCS(xave, yave, zave, ra, dec, spec);
+    if (doVel) {
+        itsVelHI_uw.value() = spec * velScale;
+    }
+    itsRA_uw.value() = ra;
+    itsDEC_uw.value() = dec;
+    analysisutilities::equatorialToGalactic(ra, dec, itsGlong_uw.value(), itsGlat_uw.value());
+
+    flag = newHead_freq.pixToWCS(xave, yave, zave, ra, dec, spec);
+    if (doFreq) {
+        itsFreq_uw.value() = spec * freqScale;
+    }
+    // Centroid (flux-weighted) location
+    flag = newHead_vel.pixToWCS(xcent, ycent, zcent, ra, dec, spec);
+    if (doVel) {
+        itsVelHI_w.value() = spec * velScale;
+    }
+    itsRA_w.value() = ra;
+    itsDEC_w.value() = dec;
+    analysisutilities::equatorialToGalactic(ra, dec, itsGlong_w.value(), itsGlat_w.value());
     itsRAs_w  = decToDMS(itsRA_w.value(), obj.header().lngtype(), precision);
     itsDECs_w = decToDMS(itsDEC_w.value(), obj.header().lattype(), precision);
     itsName = obj.header().getIAUName(itsRA_w.value(), itsDEC_w.value());
+    flag = newHead_freq.pixToWCS(xcent, ycent, zcent, ra, dec, spec);
+    if (doFreq) {
+        itsFreq_w.value() = spec * freqScale;
+    }
 
-    double peakFluxscale = getPeakFluxConversionScale(obj.header(), casda::fluxUnit);
-    double intFluxscale = getIntFluxConversionScale(obj.header(), casda::intFluxUnitSpectral);
+    itsRMSimagecube = obj.noiseLevel() * peakFluxscale;
 
-    // Initial version of getting parameters - assuming we are in velocity units
-    itsVelHI_uw.value() = obj.getVel();
-    itsMajorAxis = obj.getMajorAxis() * 3600.;
-    itsMinorAxis = obj.getMinorAxis() * 3600.;
+    itsMajorAxis = obj.getMajorAxis() * 60.; // major axis from Object is in arcmin
+    itsMinorAxis = obj.getMinorAxis() * 60.;
     itsPositionAngle = obj.getPositionAngle();
     itsSizeX = obj.getXmax() - obj.getXmin() + 1;
     itsSizeY = obj.getYmax() - obj.getYmin() + 1;
     itsSizeZ = obj.getZmax() - obj.getZmin() + 1;
     itsNumVoxels = obj.getSize();
-    itsW50_vel.value() = obj.getW50();
-    itsW20_vel.value() = obj.getW20();
-    itsIntegFlux.value() = obj.getIntegFlux();
-    itsIntegFlux.error() = obj.getIntegFluxError();
+
+    double spec1, spec2;
+    // @todo - how do we calculate errors on these quantities
+    // W50 & W20 for frequency values:
+    flag = newHead_freq.pixToWCS(xcent, ycent, obj.getZ50min(), ra, dec, spec1);
+    flag = newHead_freq.pixToWCS(xcent, ycent, obj.getZ50max(), ra, dec, spec2);
+    itsW50_freq.value() = fabs(spec1 - spec2) * freqWidthScale;
+    ASKAPLOG_DEBUG_STR(logger, "W50_FREQ: " << obj.getZ50min() << " " << obj.getZ50max() << " " <<
+                       spec1 << " " << spec2 << " " << itsW50_freq.value());
+    flag = newHead_freq.pixToWCS(xcent, ycent, obj.getZ20min(), ra, dec, spec1);
+    flag = newHead_freq.pixToWCS(xcent, ycent, obj.getZ20max(), ra, dec, spec2);
+    itsW20_freq.value() = fabs(spec1 - spec2) * freqWidthScale;
+    // W50 & W20 for velocity values:
+    flag = newHead_vel.pixToWCS(xcent, ycent, obj.getZ20min(), ra, dec, spec1);
+    flag = newHead_vel.pixToWCS(xcent, ycent, obj.getZ20max(), ra, dec, spec2);
+    itsW20_vel.value() = fabs(spec1 - spec2) * velScale;
+    flag = newHead_vel.pixToWCS(xcent, ycent, obj.getZ50min(), ra, dec, spec1);
+    flag = newHead_vel.pixToWCS(xcent, ycent, obj.getZ50max(), ra, dec, spec2);
+    itsW50_vel.value() = fabs(spec1 - spec2) * velScale;
+
+
+    itsIntegFlux.value() = obj.getIntegFlux() * intFluxscale;
+    //itsIntegFlux.error() = obj.getIntegFluxError();
+    itsIntegFlux.error() = sqrt(itsNumVoxels) * itsRMSimagecube * (intFluxscale / peakFluxscale) *
+                           newHead_vel.WCS().cdelt[newHead_vel.WCS().spec] * velScale / newHead_vel.beam().area();
     itsFluxMax = obj.getPeakFlux() * peakFluxscale;
-    
 
-    // itsFreqUW = obj.getVel() * freqScale;
-    // itsFreqW = itsFreqUW + (random() / (RAND_MAX + 1.0) - 0.5) * 0.1 * obj.getW50() * freqScale;
 
-    // need to transform from zpeak with header/WCS
-    float nuPeak = itsFreq_uw.value() +
-        (random() / (RAND_MAX + 1.0) - 0.5) * 0.1 * obj.getW50() * freqScale;
+    // @todo - Make moment-0 array, then fit single Gaussian to it.
+    // Q - what if fit fails?
 
-    // Rest-frame HI frequency in our CASDA units
-    const float HI=analysisutilities::nu0_HI / casda::freqScale;
-
-    // itsW50 = obj.getW50();
-    // itsW20 = obj.getW20();
-
-    itsRMSimagecube = obj.noiseLevel() * peakFluxscale;
-
+    // @todo - Busy Function fitting
 
     // @todo - Need to add logic to measure resolvedness.
     itsFlagResolved = 1;
@@ -159,7 +221,7 @@ const float CasdaHiEmissionObject::dec()
 }
 
 void CasdaHiEmissionObject::printTableRow(std::ostream &stream,
-                                          duchamp::Catalogues::CatalogueSpecification &columns)
+        duchamp::Catalogues::CatalogueSpecification &columns)
 {
     stream.setf(std::ios::fixed);
     for (size_t i = 0; i < columns.size(); i++) {
@@ -169,7 +231,7 @@ void CasdaHiEmissionObject::printTableRow(std::ostream &stream,
 }
 
 void CasdaHiEmissionObject::printTableEntry(std::ostream &stream,
-                                            duchamp::Catalogues::Column &column)
+        duchamp::Catalogues::Column &column)
 {
     std::string type = column.type();
     if (type == "ID") {

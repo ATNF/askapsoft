@@ -400,7 +400,7 @@ void DuchampParallel::checkSpectralTermImages()
                 if (pos == std::string::npos) {
                     // image provided is not a Taylor series term -
                     // notify (only on master node) and do nothing
-                    if (itsComms.isMaster()){
+                    if (itsComms.isMaster()) {
                         ASKAPLOG_WARN_STR(logger, "Image name provided (" <<
                                           itsCube.pars().getImageFile() <<
                                           ") is not a Taylor term. Cannot find spectral information.");
@@ -1195,6 +1195,7 @@ void DuchampParallel::printResults()
         writer.duchampOutput();
         writer.writeIslandCatalogue();
         writer.writeComponentCatalogue();
+        writer.writeHiEmissionCatalogue();
         writer.writeFitResults();
         writer.writeFitAnnotations();
         writer.writeComponentParset();
@@ -1492,7 +1493,7 @@ DuchampParallel::getCasaMetadata(const boost::shared_ptr<ImageInterface<Float> >
     itsCube.pars().setOffsets(wcs);
     readBeamInfo(imagePtr, itsCube.header(), itsCube.pars(), itsComms.isMaster());
     itsCube.header().setFluxUnits(imagePtr->units().getName());
-    if (itsCube.header().getFluxUnits()=="" && itsComms.isMaster()){
+    if (itsCube.header().getFluxUnits() == "" && itsComms.isMaster()) {
         ASKAPLOG_WARN_STR(logger, "Brightness units in image are undefined.");
     }
 

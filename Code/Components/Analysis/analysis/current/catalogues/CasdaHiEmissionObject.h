@@ -100,52 +100,52 @@ class CasdaHiEmissionObject : public CatalogueEntry {
         /// The J2000 IAU-format name
         std::string itsName;
 
-    /// The RA in string format: 12:34:56.7, based on the weighted average of the voxels
+        /// The RA in string format: 12:34:56.7, based on the weighted average of the voxels
         std::string itsRAs_w;
         /// The Declination in string format: 12:34:56.7, based on the weighted average of the voxels
         std::string itsDECs_w;
         /// The RA in decimal degrees, based on the weighted average of the voxels
-    casda::ValueError<double> itsRA_w;
+        casda::ValueError<double> itsRA_w;
         /// The Declination in decimal degrees, based on the weighted average of the voxels
-    casda::ValueError<double> itsDEC_w;
+        casda::ValueError<double> itsDEC_w;
         /// The RA in decimal degrees, based on the unweighted average of the voxels
-    casda::ValueError<double> itsRA_uw;
+        casda::ValueError<double> itsRA_uw;
         /// The Declination in decimal degrees, based on the unweighted average of the voxels
-    casda::ValueError<double> itsDEC_uw;
+        casda::ValueError<double> itsDEC_uw;
         /// The Galactic longitude in decimal degrees, based on the weighted average of the voxels
-    casda::ValueError<double> itsGlong_w;
+        casda::ValueError<double> itsGlong_w;
         /// The Galactic latitude in decimal degrees, based on the weighted average of the voxels
-    casda::ValueError<double> itsGlat_w;
+        casda::ValueError<double> itsGlat_w;
         /// The Galactic longitude in decimal degrees, based on the unweighted average of the voxels
-    casda::ValueError<double> itsGlong_uw;
+        casda::ValueError<double> itsGlong_uw;
         /// The Galactic latitude in decimal degrees, based on the unweighted average of the voxels
-    casda::ValueError<double> itsGlat_uw;
+        casda::ValueError<double> itsGlat_uw;
 
-    /// The major axis of the moment-0 map, determined from the principle axes
-    double itsMajorAxis;
-    /// The minor axis of the moment-0 map, determined from the principle axes
-    double itsMinorAxis;
-    /// The postion angle of the major axis as determined from the principle axes
-    double itsPositionAngle;
-    /// The major axis of the moment-0 map, determined from a 2D Gaussian fit
-    casda::ValueError<double> itsMajorAxis_fit;
-    /// The minor axis of the moment-0 map, determined from a 2D Gaussian fit
-    casda::ValueError<double> itsMinorAxis_fit;
-    /// The postion angle of the major axis as determined from a 2D Gaussian fit
-    casda::ValueError<double> itsPositionAngle_fit;
-    /// The size of the bounding box of detected voxels, in the x-direction
-    int itsSizeX;
-    /// The size of the bounding box of detected voxels, in the y-direction
-    int itsSizeY;
-    /// The size of the bounding box of detected voxels, in the z-direction
-    int itsSizeZ;
-    /// The total number of detected voxels
-    int itsNumVoxels;
-    /// The asymmetry in the flux of the moment-0 map - ranges from 0 (=uniform) to 1
-    casda::ValueError<double> itsAsymmetry2d;
-    /// The asymmetry in the flux of the 3D distribution of voxels - ranges from 0 (=uniform) to 1
-    casda::ValueError<double> itsAsymmetry3d;
-    
+        /// The major axis of the moment-0 map, determined from the principle axes
+        double itsMajorAxis;
+        /// The minor axis of the moment-0 map, determined from the principle axes
+        double itsMinorAxis;
+        /// The postion angle of the major axis as determined from the principle axes
+        double itsPositionAngle;
+        /// The major axis of the moment-0 map, determined from a 2D Gaussian fit
+        casda::ValueError<double> itsMajorAxis_fit;
+        /// The minor axis of the moment-0 map, determined from a 2D Gaussian fit
+        casda::ValueError<double> itsMinorAxis_fit;
+        /// The postion angle of the major axis as determined from a 2D Gaussian fit
+        casda::ValueError<double> itsPositionAngle_fit;
+        /// The size of the bounding box of detected voxels, in the x-direction
+        int itsSizeX;
+        /// The size of the bounding box of detected voxels, in the y-direction
+        int itsSizeY;
+        /// The size of the bounding box of detected voxels, in the z-direction
+        int itsSizeZ;
+        /// The total number of detected voxels
+        int itsNumVoxels;
+        /// The asymmetry in the flux of the moment-0 map - ranges from 0 (=uniform) to 1
+        casda::ValueError<double> itsAsymmetry2d;
+        /// The asymmetry in the flux of the 3D distribution of voxels - ranges from 0 (=uniform) to 1
+        casda::ValueError<double> itsAsymmetry3d;
+
         /// The frequency of the object, unweighted average
         casda::ValueError<double> itsFreq_uw;
         /// The frequency of the object, weighted average
@@ -159,111 +159,111 @@ class CasdaHiEmissionObject : public CatalogueEntry {
         /// The HI velocity for the frequency of the peak flux
         double itsVelHI_peak;
 
-    /// The integrated flux, summed over all detected voxels and
-    /// corrected for the beam area
-    casda::ValueError<double> itsIntegFlux;
-    /// Maximum voxel flux value
-    double itsFluxMax;
-    /// Minimum detected voxel flux value
-    double itsFluxMin;
-    /// Mean detected flux value
-    double itsFluxMean;
-    /// Standard deviation of the flux values of the detected voxels
-    double itsFluxStddev;
-    /// The rms of the flux values of the detected voxels
-    double itsFluxRMS;
+        /// The integrated flux, summed over all detected voxels and
+        /// corrected for the beam area
+        casda::ValueError<double> itsIntegFlux;
+        /// Maximum voxel flux value
+        double itsFluxMax;
+        /// Minimum detected voxel flux value
+        double itsFluxMin;
+        /// Mean detected flux value
+        double itsFluxMean;
+        /// Standard deviation of the flux values of the detected voxels
+        double itsFluxStddev;
+        /// The rms of the flux values of the detected voxels
+        double itsFluxRMS;
         /// The local RMS noise of the image cube surrounding the object
         double itsRMSimagecube;
 
-    
-    /// The frequency width of the object at 50% of the peak optical depth
-    casda::ValueError<double> itsW50_freq;
-    /// The frequency width of the object at 20% of the peak optical depth
-    casda::ValueError<double> itsW20_freq;
-    /// The frequency width of the object measured from the integrated
-    /// spectrum's cumulative flux distribution, using bounds taken
-    /// from where a Gaussian profile is above 50% of its peak flux
-    /// density
-    casda::ValueError<double> itsCW50_freq;
-    /// The frequency width of the object measured from the integrated
-    /// spectrum's cumulative flux distribution, using bounds taken
-    /// from where a Gaussian profile is above 50% of its peak flux
-    /// density
-    casda::ValueError<double> itsCW20_freq;
-    /// The velocity width of the object at 50% of the peak optical depth
-    casda::ValueError<double> itsW50_vel;
-    /// The velocity width of the object at 20% of the peak optical depth
-    casda::ValueError<double> itsW20_vel;
-    /// The velocity width of the object measured from the integrated
-    /// spectrum's cumulative flux distribution, using bounds taken
-    /// from where a Gaussian profile is above 50% of its peak flux
-    /// density
-    casda::ValueError<double> itsCW50_vel;
-    /// The velocity width of the object measured from the integrated
-    /// spectrum's cumulative flux distribution, using bounds taken
-    /// from where a Gaussian profile is above 50% of its peak flux
-    /// density
-    casda::ValueError<double> itsCW20_vel;
 
-    /// The frequency determined from the unweighted average of voxels above 50% of the peak flux
-    casda::ValueError<double> itsFreq_W50clip_uw;
-    /// The frequency determined from the unweighted average of voxels above 20% of the peak flux
-    casda::ValueError<double> itsFreq_W20clip_uw;
-    /// The frequency determined from the unweighted average of voxels above the CW50 flux limits
-    casda::ValueError<double> itsFreq_CW50clip_uw;
-    /// The frequency determined from the unweighted average of voxels above the CW20 flux limits
-    casda::ValueError<double> itsFreq_CW20clip_uw;
-    /// The frequency determined from the weighted average of voxels above 50% of the peak flux
-    casda::ValueError<double> itsFreq_W50clip_w;
-    /// The frequency determined from the weighted average of voxels above 20% of the peak flux
-    casda::ValueError<double> itsFreq_W20clip_w;
-    /// The frequency determined from the weighted average of voxels above the CW50 flux limits
-    casda::ValueError<double> itsFreq_CW50clip_w;
-    /// The frequency determined from the weighted average of voxels above the CW20 flux limits
-    casda::ValueError<double> itsFreq_CW20clip_w;
+        /// The frequency width of the object at 50% of the peak optical depth
+        casda::ValueError<double> itsW50_freq;
+        /// The frequency width of the object at 20% of the peak optical depth
+        casda::ValueError<double> itsW20_freq;
+        /// The frequency width of the object measured from the integrated
+        /// spectrum's cumulative flux distribution, using bounds taken
+        /// from where a Gaussian profile is above 50% of its peak flux
+        /// density
+        casda::ValueError<double> itsCW50_freq;
+        /// The frequency width of the object measured from the integrated
+        /// spectrum's cumulative flux distribution, using bounds taken
+        /// from where a Gaussian profile is above 50% of its peak flux
+        /// density
+        casda::ValueError<double> itsCW20_freq;
+        /// The velocity width of the object at 50% of the peak optical depth
+        casda::ValueError<double> itsW50_vel;
+        /// The velocity width of the object at 20% of the peak optical depth
+        casda::ValueError<double> itsW20_vel;
+        /// The velocity width of the object measured from the integrated
+        /// spectrum's cumulative flux distribution, using bounds taken
+        /// from where a Gaussian profile is above 50% of its peak flux
+        /// density
+        casda::ValueError<double> itsCW50_vel;
+        /// The velocity width of the object measured from the integrated
+        /// spectrum's cumulative flux distribution, using bounds taken
+        /// from where a Gaussian profile is above 50% of its peak flux
+        /// density
+        casda::ValueError<double> itsCW20_vel;
 
-    /// The HI velocity determined from the unweighted average of voxels above 50% of the peak flux
-    casda::ValueError<double> itsVelHI_W50clip_uw;
-    /// The HI velocity determined from the unweighted average of voxels above 20% of the peak flux
-    casda::ValueError<double> itsVelHI_W20clip_uw;
-    /// The HI velocity determined from the unweighted average of voxels above the CW50 flux limits
-    casda::ValueError<double> itsVelHI_CW50clip_uw;
-    /// The HI velocity determined from the unweighted average of voxels above the CW20 flux limits
-    casda::ValueError<double> itsVelHI_CW20clip_uw;
-    /// The HI velocity determined from the weighted average of voxels above 50% of the peak flux
-    casda::ValueError<double> itsVelHI_W50clip_w;
-    /// The HI velocity determined from the weighted average of voxels above 20% of the peak flux
-    casda::ValueError<double> itsVelHI_W20clip_w;
-    /// The HI velocity determined from the weighted average of voxels above the CW50 flux limits
-    casda::ValueError<double> itsVelHI_CW50clip_w;
-    /// The HI velocity determined from the weighted average of voxels above the CW20 flux limits
-    casda::ValueError<double> itsVelHI_CW20clip_w;
-    
-    /// The integrated flux determined from the sum of the fluxes of all voxels above 50% of the peak flux
-    casda::ValueError<double> itsIntegFlux_W50clip;
-    /// The integrated flux determined from the sum of the fluxes of all voxels above 20% of the peak flux
-    casda::ValueError<double> itsIntegFlux_W20clip;
-    /// The integrated flux determined from the sum of the fluxes of all voxels above the CW50 flux limits
-    casda::ValueError<double> itsIntegFlux_CW50clip;
-    /// The integrated flux determined from the sum of the fluxes of all voxels above the CW20 flux limits
-    casda::ValueError<double> itsIntegFlux_CW20clip;
-    
-    /// The amplitude scaling factor, 'a', from a busy-function fit
-    casda::ValueError<double> itsBFfit_a;
-    /// The half-width parameter, 'w', from a busy-function fit
-    casda::ValueError<double> itsBFfit_w;
-    /// The slope of the first error function, 'b1', from a busy-function fit
-    casda::ValueError<double> itsBFfit_b1;
-    /// The slope of the first error function, 'b2', from a busy-function fit
-    casda::ValueError<double> itsBFfit_b2;
-    /// The offset parameter for the error function, 'xe', from a busy-function fit
-    casda::ValueError<double> itsBFfit_xe;
-    /// The offset parameter for the polynomial function, 'xp', from a busy-function fit
-    casda::ValueError<double> itsBFfit_xp;
-    /// The parameter governing the amplitude of the central trough, 'c', from a busy-function fit
-    casda::ValueError<double> itsBFfit_c;
-    /// The degree of the polynomial, 'n', from a busy-function fit
-    casda::ValueError<double> itsBFfit_n;
+        /// The frequency determined from the unweighted average of voxels above 50% of the peak flux
+        casda::ValueError<double> itsFreq_W50clip_uw;
+        /// The frequency determined from the unweighted average of voxels above 20% of the peak flux
+        casda::ValueError<double> itsFreq_W20clip_uw;
+        /// The frequency determined from the unweighted average of voxels above the CW50 flux limits
+        casda::ValueError<double> itsFreq_CW50clip_uw;
+        /// The frequency determined from the unweighted average of voxels above the CW20 flux limits
+        casda::ValueError<double> itsFreq_CW20clip_uw;
+        /// The frequency determined from the weighted average of voxels above 50% of the peak flux
+        casda::ValueError<double> itsFreq_W50clip_w;
+        /// The frequency determined from the weighted average of voxels above 20% of the peak flux
+        casda::ValueError<double> itsFreq_W20clip_w;
+        /// The frequency determined from the weighted average of voxels above the CW50 flux limits
+        casda::ValueError<double> itsFreq_CW50clip_w;
+        /// The frequency determined from the weighted average of voxels above the CW20 flux limits
+        casda::ValueError<double> itsFreq_CW20clip_w;
+
+        /// The HI velocity determined from the unweighted average of voxels above 50% of the peak flux
+        casda::ValueError<double> itsVelHI_W50clip_uw;
+        /// The HI velocity determined from the unweighted average of voxels above 20% of the peak flux
+        casda::ValueError<double> itsVelHI_W20clip_uw;
+        /// The HI velocity determined from the unweighted average of voxels above the CW50 flux limits
+        casda::ValueError<double> itsVelHI_CW50clip_uw;
+        /// The HI velocity determined from the unweighted average of voxels above the CW20 flux limits
+        casda::ValueError<double> itsVelHI_CW20clip_uw;
+        /// The HI velocity determined from the weighted average of voxels above 50% of the peak flux
+        casda::ValueError<double> itsVelHI_W50clip_w;
+        /// The HI velocity determined from the weighted average of voxels above 20% of the peak flux
+        casda::ValueError<double> itsVelHI_W20clip_w;
+        /// The HI velocity determined from the weighted average of voxels above the CW50 flux limits
+        casda::ValueError<double> itsVelHI_CW50clip_w;
+        /// The HI velocity determined from the weighted average of voxels above the CW20 flux limits
+        casda::ValueError<double> itsVelHI_CW20clip_w;
+
+        /// The integrated flux determined from the sum of the fluxes of all voxels above 50% of the peak flux
+        casda::ValueError<double> itsIntegFlux_W50clip;
+        /// The integrated flux determined from the sum of the fluxes of all voxels above 20% of the peak flux
+        casda::ValueError<double> itsIntegFlux_W20clip;
+        /// The integrated flux determined from the sum of the fluxes of all voxels above the CW50 flux limits
+        casda::ValueError<double> itsIntegFlux_CW50clip;
+        /// The integrated flux determined from the sum of the fluxes of all voxels above the CW20 flux limits
+        casda::ValueError<double> itsIntegFlux_CW20clip;
+
+        /// The amplitude scaling factor, 'a', from a busy-function fit
+        casda::ValueError<double> itsBFfit_a;
+        /// The half-width parameter, 'w', from a busy-function fit
+        casda::ValueError<double> itsBFfit_w;
+        /// The slope of the first error function, 'b1', from a busy-function fit
+        casda::ValueError<double> itsBFfit_b1;
+        /// The slope of the first error function, 'b2', from a busy-function fit
+        casda::ValueError<double> itsBFfit_b2;
+        /// The offset parameter for the error function, 'xe', from a busy-function fit
+        casda::ValueError<double> itsBFfit_xe;
+        /// The offset parameter for the polynomial function, 'xp', from a busy-function fit
+        casda::ValueError<double> itsBFfit_xp;
+        /// The parameter governing the amplitude of the central trough, 'c', from a busy-function fit
+        casda::ValueError<double> itsBFfit_c;
+        /// The degree of the polynomial, 'n', from a busy-function fit
+        casda::ValueError<double> itsBFfit_n;
 
         /// A flag indicating whether the object's continuum component is resolved spatially
         unsigned int itsFlagResolved;

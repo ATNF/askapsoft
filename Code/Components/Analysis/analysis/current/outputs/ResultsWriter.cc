@@ -39,6 +39,7 @@
 #include <outputs/CataloguePreparation.h>
 #include <catalogues/IslandCatalogue.h>
 #include <catalogues/ComponentCatalogue.h>
+#include <catalogues/HiEmissionCatalogue.h>
 #include <catalogues/FitCatalogue.h>
 
 #include <duchamp/Cubes/cubes.hh>
@@ -139,6 +140,19 @@ void ResultsWriter::writeComponentCatalogue()
     }
 
 }
+
+void ResultsWriter::writeHiEmissionCatalogue()
+{
+
+    if (itsParset.getBool("HiEmissionCatalogue", "false")) {
+
+        HiEmissionCatalogue cat(itsSourceList, itsParset, itsCube);
+        cat.write();
+
+    }
+
+}
+
 
 void ResultsWriter::writeFitResults()
 {
