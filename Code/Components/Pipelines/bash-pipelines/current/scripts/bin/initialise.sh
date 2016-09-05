@@ -39,12 +39,14 @@ logs=${BASEDIR}/logs
 slurms=${BASEDIR}/slurmFiles
 slurmOut=${BASEDIR}/slurmOutput
 tools=${BASEDIR}/tools
+metadata=${BASEDIR}/metadata
 
 mkdir -p $parsets
 mkdir -p $logs
 mkdir -p $slurms
 mkdir -p $slurmOut
 mkdir -p $tools
+mkdir -p $metadata
 
 ####################
 # Date and time stamp

@@ -56,15 +56,9 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$needBeams" == "true" ]; then
 
         # Check to see that the footprint provided is valid.
         invalid=false
-        if [ "${BEAM_FOOTPRINT_NAME}" == "" ]; then
+        if [ "${BEAM_FOOTPRINT_NAME}" == "" ] ||
+               [ "`footprint.py -n ${BEAM_FOOTPRINT_NAME} 2>&1 | grep invalid`" != "" ]; then
             invalid=true
-        else
-            tempfile=$parsets/fpTest
-            rm -f $tempfile
-            footprint.py -n ${BEAM_FOOTPRINT_NAME} 2>&1 > $tempfile
-            if [ "`grep invalid $tempfile`" != "" ]; then
-                invalid=true
-            fi
         fi
         
         if [ "$invalid" == "true" ]; then
@@ -82,27 +76,17 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$needBeams" == "true" ]; then
 
             # Find the number of fields in the MS
             nfields=`grep Fields ${MS_METADATA} | head -1 | cut -f 4- | cut -d' ' -f 2`
-            fieldlist=$parsets/fieldlist
-            rm -f $fieldlist
-            grep -A${nfields} RA ${MS_METADATA} | tail -n ${nfields} | cut -f 4- >> $fieldlist
+            getMSname ${MS_INPUT_SCIENCE}
+            fieldlist=${metadata}/fieldlist-${msname}.txt
+            if [ ! -e $fieldlist ]; then
+                grep -A${nfields} RA ${MS_METADATA} | tail -n ${nfields} | cut -f 4- >> $fieldlist
+            fi
 
             FIELD_LIST=`sort -k2 $fieldlist | uniq | awk '{print $2}'`
 
-            # Set the args for footprint: summary output, name, band, PA, pitch
-            footprintArgs="-t"
-            if [ "$BEAM_FOOTPRINT_NAME" != "" ]; then
-                footprintArgs="$footprintArgs -n $BEAM_FOOTPRINT_NAME"
-            fi
-            if [ "$FREQ_BAND_NUMBER" != "" ]; then
-                footprintArgs="$footprintArgs -b $FREQ_BAND_NUMBER"
-            fi
-            if [ "$BEAM_FOOTPRINT_PA" != "" ]; then
-                footprintArgs="$footprintArgs -a $BEAM_FOOTPRINT_PA"
-            fi
-            if [ "$BEAM_PITCH" != "" ]; then
-                footprintArgs="$footprintArgs -p $BEAM_PITCH"
-            fi
-
+            # Use the function defined in utils.sh to set the arguments to footprint.py
+            setFootprintArgs
+            
             echo "List of fields: $FIELD_LIST"
             
             for FIELD in ${FIELD_LIST}; do
@@ -111,8 +95,12 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$needBeams" == "true" ]; then
                 dec=`echo $dec | awk -F'.' '{printf "%s:%s:%s.%s",$1,$2,$3,$4}'`
                 # define the output file as $footprintOut
                 setFootprintFile
-                echo "Writing footprint for field $FIELD to file $footprintOut"
-                footprint.py $footprintArgs -r "$ra,$dec" 2>&1 > ${footprintOut}
+                if [ ! -e ${footprintOut} ]; then
+                    echo "Writing footprint for field $FIELD to file $footprintOut"
+                    footprint.py $footprintArgs -r "$ra,$dec" 2>&1 > ${footprintOut}
+                else
+                    echo "Reusing footprint file $footprintOut for field $FIELD"
+                fi
 
                 # error handling, in case something goes wrong.
                 if [ `wc -l $footprintOut | awk '{print $1}'` -eq 0 ]; then

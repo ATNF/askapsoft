@@ -319,17 +319,81 @@ fi"
 ##############################
 # BEAM FOOTPRINTS AND CENTRES
 
+function getMSname()
+{
+    # Returns just the filename of the science MS, stripping off the
+    # leading directories and the .ms suffix. For example, the MS
+    # /path/to/2016-01-02-0345.ms returns 2016-01-02-0345
+    # Usage:     getMSname MS
+    # Returns:   $msname
+    
+    msname=${1##*/}
+    msname=${msname%%.*}
+}
+
+function setFootprintArgs()
+{
+    # Function to set the arguments to footprint.py, based on the
+    # input parameters. They only contribute if they are not blank.
+    # The arguments that are set are for: summary output, name, band,
+    # PA, and pitch.
+    # Returns: $footprintArgs
+
+    # Start with getting the summary output
+    footprintArgs="-t"
+
+    # Specify the name of the footprint
+    if [ "$BEAM_FOOTPRINT_NAME" != "" ]; then
+        footprintArgs="$footprintArgs -n $BEAM_FOOTPRINT_NAME"
+    fi
+
+    # Specify the band number (from BETA days) to get default pitch values
+    if [ "$FREQ_BAND_NUMBER" != "" ]; then
+        footprintArgs="$footprintArgs -b $FREQ_BAND_NUMBER"
+    fi
+
+    # Specify the position angle of the footprint
+    if [ "$BEAM_FOOTPRINT_PA" != "" ]; then
+        footprintArgs="$footprintArgs -a $BEAM_FOOTPRINT_PA"
+    fi
+
+    # Specify the pitch of the footprint - separation of beams
+    if [ "$BEAM_PITCH" != "" ]; then
+        footprintArgs="$footprintArgs -p $BEAM_PITCH"
+    fi
+} 
+
 function setFootprintFile()
 {
     # Function to define a file containing the beam locations for the
     # requested footprint, which is created for a given run and a given
-    # field name.
+    # field name. Need a new one for each run of the pipeline as we
+    # may (conceivably) change footprints from run to run.
+    # Format will be
+    # footprintOutput-sbSBID-FIELDNAME-FOOTPRINTNAME-bandBAND-aPA-pPITCH.txt
+    # where blank parameters are left out.
     #  Required inputs:
-    #     * NOW - date/time of current pipeline run
     #     * FIELD - name of field
     #  Returns: $footprintOut
 
-    footprintOut="${parsets}/footprintOutput-${NOW}-${FIELD}.txt"
+    footprintOut="${metadata}/footprintOutput"
+    if [ "$SB_SCIENCE" != "" ]; then
+        footprintOut="$footprintOut-sb${SB_SCIENCE}"
+    fi
+    footprintOut="$footprintOut-${FIELD}"
+    if [ "$BEAM_FOOTPRINT_NAME" != "" ]; then
+        footprintOut="$footprintOut-${BEAM_FOOTPRINT_NAME}"
+    fi
+    if [ "$FREQ_BAND_NUMBER" != "" ]; then
+        footprintOut="$footprintOut-band${FREQ_BAND_NUMBER}"
+    fi
+    if [ "$BEAM_FOOTPRINT_PA" != "" ]; then
+        footprintOut="$footprintOut-a${BEAM_FOOTPRINT_PA}"
+    fi
+    if [ "$BEAM_PITCH" != "" ]; then
+        footprintOut="$footprintOut-p${BEAM_PITCH}"
+    fi
+    footprintOut="${footprintOut}.txt"
 }
 
 function getBeamOffsets()

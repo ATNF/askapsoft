@@ -94,8 +94,11 @@ if [ $DO_1934_CAL == true ] && [ "${MS_INPUT_1934}" != "" ]; then
 
     echo "Extracting metadata for calibrator measurement set $MS_INPUT_1934"
     
-    MS_METADATA=$parsets/mslist-cal-${NOW}.txt
-    mslist --full $MS_INPUT_1934 1>& ${MS_METADATA}
+    getMSname ${MS_INPUT_1934}
+    MS_METADATA=$metadata/mslist-cal-${msname}.txt
+    if [ ! -e ${MS_METADATA} ]; then
+        mslist --full $MS_INPUT_1934 1>& ${MS_METADATA}
+    fi
 
     # Number of antennas used in the calibration observation
     NUM_ANT_1934=`grep Antennas ${MS_METADATA} | head -1 | awk '{print $6}'`
@@ -124,9 +127,12 @@ fi
 if [ "${MS_INPUT_SCIENCE}" != "" ]; then
 
     echo "Extracting metadata for science measurement set $MS_INPUT_SCIENCE"
-    
-    MS_METADATA=$parsets/mslist-science-${NOW}.txt
-    mslist --full $MS_INPUT_SCIENCE 1>& ${MS_METADATA}
+
+    getMSname ${MS_INPUT_SCIENCE}
+    MS_METADATA=$metadata/mslist-${msname}.txt
+    if [ ! -e ${MS_METADATA} ]; then
+        mslist --full $MS_INPUT_SCIENCE 1>& ${MS_METADATA}
+    fi
 
     # Get the observation time
     obsdate=`grep "Observed from" ${MS_METADATA} | head -1 | awk '{print $7}' | sed -e 's|/| |g' | awk '{print $1}' | sed -e 's/-/ /g'`
