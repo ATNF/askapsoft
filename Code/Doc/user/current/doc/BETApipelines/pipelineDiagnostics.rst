@@ -13,7 +13,7 @@ level directory. These scripts are:
   will also first provide a list of the jobs along with a brief
   description of what that job is doing.
   
-* *killAll* – (links to tools/killAll-YYYY-MM-DD-HHMM.sh) This is a
+* *killAll* – (links to *tools/killAll-YYYY-MM-DD-HHMM.sh*) This is a
   front-end to *scancel*, providing a simple way of cancelling all jobs
   started by the most recent call of *processBETA.sh*.
   

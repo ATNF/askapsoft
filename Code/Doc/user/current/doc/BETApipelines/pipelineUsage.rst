@@ -118,6 +118,8 @@ files. These are:
 * *slurmFiles/* – the files in here are the job files that are submitted
   to the queue via the sbatch command. When a job is run, it makes a
   copy of the file that is labelled with the job ID.
+* *metadata/* - information about the measurement sets and the beam
+  footprint are written to files here.  
 * *parsets/* – any parameter sets used by the askapsoft applications
   are written here. These contain the actual parameters that are used
   by the various programs. These are labeled by the job ID.
@@ -139,8 +141,9 @@ files. These are:
   given run are placed here. See :doc:`pipelineDiagnostics` for
   details.
 * *Checkfiles/* - files that indicate progress through stages of the
-  pipeline are written here. The pipelien can see these and know to
-  skip certain stages, if required by the user.
+  pipeline are written here. The pipeline can see these and know to
+  skip certain stages, if required by the user. A version of this
+  directory is put in each field directory.
 
 Measurement sets
 ----------------
@@ -167,6 +170,7 @@ Workflow summary
 
 Here is a summary of the workflow provided for by these scripts:
 
+* Get observation metadata from the MS and the beam footprint.
 * Read in user-defined parameters from the provided configuration
   file, and define further parameters derived from them.
 * If bandpass calibration is required and a 1934-638 observation is

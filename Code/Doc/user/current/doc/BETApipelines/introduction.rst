@@ -51,8 +51,8 @@ Assumptions
 These scripts have been put together to process particular BETA
 observations. The assumed structure of your observation is that you
 have an observation of a ‘science’ field (i.e. the field for which you
-want to make a continuum image - this can actually incorporate more
-than one FIELD location, through interleaving), and an observation of
-1934-638 which will be used to determine the bandpass solution. This
-should have been done in the usual calibration way of short
-observations of 1934-638 in each beam sequentially.
+want to make images - this can actually incorporate more than one
+FIELD location, through interleaving), and an observation of 1934-638
+which will be used to determine the bandpass solution. This should
+have been done in the usual calibration way of short observations of
+1934-638 in each beam sequentially.

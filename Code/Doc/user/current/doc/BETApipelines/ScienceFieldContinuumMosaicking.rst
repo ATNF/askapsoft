@@ -47,8 +47,10 @@ this (this is for the “diamond” footprint, band 1, PA=0)::
 | ``BEAM_PITCH``          | 1.24                               | none                    | The pitch, or beam spacing, in degrees. Passed to           |
 |                         |                                    |                         | footprint.py.                                               |
 +-------------------------+------------------------------------+-------------------------+-------------------------------------------------------------+
-| ``FREQ_BAND_NUMBER``    | 1                                  | none                    | Which frequency band are we in - determines beam arrangement|
-|                         |                                    |                         | (1,2,3,4). Passed to footprint.py.                          |
+| ``FREQ_BAND_NUMBER``    | ""                                 | none                    | Which frequency band are we in - determines beam arrangement|
+|                         |                                    |                         | (1,2,3,4). Passed to footprint.py. If not given, the pitch  |
+|                         |                                    |                         | value is used to set the beam separation. The band is       |
+|                         |                                    |                         | overridden by the pitch as well.                            |
 +-------------------------+------------------------------------+-------------------------+-------------------------------------------------------------+
 | ``LINMOS_BEAM_OFFSETS`` | no default                         | feeds.beam{i}           | Parset entries that specify the beam offsets for use by     |
 |                         |                                    | (:doc:`../calim/linmos`)| linmos. Needs to have one entry for each beam being         |
