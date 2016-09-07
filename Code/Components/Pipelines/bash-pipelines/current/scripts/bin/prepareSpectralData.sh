@@ -105,7 +105,7 @@ outputvis   = ${msSciSL}
 channel     = ${CHAN_RANGE_SL_SCIENCE}
 
 # Set a larger bucketsize
-stman.bucketsize  = 65536
+stman.bucketsize  = ${BUCKET_SIZE}
 # Allow a different tile size for the spectral-line imaging
 stman.tilenchan   = ${TILENCHAN_SL}
 EOFINNER

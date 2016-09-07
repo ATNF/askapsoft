@@ -433,6 +433,7 @@ else
     stats=${BASEDIR}/stats
 fi
 mkdir -p $stats
+lfs setstripe -c 1 $stats
 
 function writeStats()
 {

@@ -85,8 +85,14 @@ OUTPUT=.
 # Options are true or false
 CLOBBER=false
 
-# Lustre filesystem striping to use within the current directory
+# Lustre filesystem stripe count to use within the current directory
 LUSTRE_STRIPING=4
+
+# Lustre filesystem stripe size - default=1MB
+LUSTRE_STRIPE_SIZE=1048576
+
+# Storage manager bucket size - I/O quantum for MS writing
+BUCKET_SIZE=1048576
 
 ####################
 # Locations of the executables. 

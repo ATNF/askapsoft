@@ -98,6 +98,9 @@ channel     = "1-${NUM_CHAN_SCIENCE}"
 # Default: 1
 width       = ${NUM_CHAN_TO_AVERAGE}
 
+# Set a larger bucketsize
+stman.bucketsize  = ${BUCKET_SIZE}
+
 EOFINNER
 
 log=${logs}/science_average_beam${BEAM}_\${SLURM_JOB_ID}.log

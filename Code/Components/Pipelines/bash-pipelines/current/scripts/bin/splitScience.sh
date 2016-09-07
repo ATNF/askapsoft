@@ -118,7 +118,7 @@ $scanParam
 $fieldParam
 
 # Set a larger bucketsize
-stman.bucketsize  = 65536
+stman.bucketsize  = ${BUCKET_SIZE}
 # Make the tile size 54 channels, as that is what we will average over
 stman.tilenchan   = ${NUM_CHAN_TO_AVERAGE}
 EOFINNER

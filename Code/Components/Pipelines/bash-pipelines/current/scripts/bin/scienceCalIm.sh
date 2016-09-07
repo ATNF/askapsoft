@@ -60,6 +60,7 @@ for FIELD in ${FIELD_LIST}; do
         for BEAM in ${BEAMS_TO_USE}; do
             
             mkdir -p ${OUTPUT}/Checkfiles
+            lfs setstripe -c 1 ${OUTPUT}/Checkfiles
             # an empty file that will indicate that the flagging has been done
             FLAG_CHECK_FILE="${OUTPUT}/Checkfiles/FLAGGING_DONE_BEAM${BEAM}"
             # an empty file that will indicate that the bandpass has been done

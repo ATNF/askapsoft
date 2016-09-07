@@ -110,7 +110,7 @@ beams        = [${BEAM}]
 scans        = [${BEAM}]
 
 # Set a larger bucketsize
-stman.bucketsize  = 65536
+stman.bucketsize  = ${BUCKET_SIZE}
 stman.tilenchan   = ${NUM_CHAN_TO_AVERAGE}
 EOFINNER
 
