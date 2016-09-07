@@ -125,11 +125,14 @@ EOF
     makeLink $reportscript 
     makeLink $killscript
 
-    # make links to the current job list, both at the top level *and* in the output directory
+    # make links to the current job list, both at the top level *and* in each output directory
     makeLink $JOBLIST
-    cd $OUTPUT
-    makeLink $JOBLIST
-    cd ..
+    for FIELD in ${FIELD_LIST}; do
+        CWD=`pwd`
+        cd ${ORIGINAL_OUTPUT}/${FIELD}
+        makeLink $JOBLIST
+        cd ${CWD}
+    done
 
 
 fi

@@ -335,16 +335,20 @@ function setFootprintArgs()
 {
     # Function to set the arguments to footprint.py, based on the
     # input parameters. They only contribute if they are not blank.
-    # The arguments that are set are for: summary output, name, band,
-    # PA, and pitch.
+    # The arguments that are set and the parameters used are:
+    #  * summary output (the -t flag)
+    #  * name (-n $FP_NAME),
+    #  * band (-b $FREQ_BAND_NUMBER)
+    #  * PA (-a $FP_PA)
+    #  * pitch (-p $FP_PITCH)
     # Returns: $footprintArgs
 
     # Start with getting the summary output
     footprintArgs="-t"
 
     # Specify the name of the footprint
-    if [ "$BEAM_FOOTPRINT_NAME" != "" ]; then
-        footprintArgs="$footprintArgs -n $BEAM_FOOTPRINT_NAME"
+    if [ "$FP_NAME" != "" ]; then
+        footprintArgs="$footprintArgs -n $FP_NAME"
     fi
 
     # Specify the band number (from BETA days) to get default pitch values
@@ -353,13 +357,13 @@ function setFootprintArgs()
     fi
 
     # Specify the position angle of the footprint
-    if [ "$BEAM_FOOTPRINT_PA" != "" ]; then
-        footprintArgs="$footprintArgs -a $BEAM_FOOTPRINT_PA"
+    if [ "$FP_PA" != "" ]; then
+        footprintArgs="$footprintArgs -a $FP_PA"
     fi
 
     # Specify the pitch of the footprint - separation of beams
-    if [ "$BEAM_PITCH" != "" ]; then
-        footprintArgs="$footprintArgs -p $BEAM_PITCH"
+    if [ "$FP_PITCH" != "" ]; then
+        footprintArgs="$footprintArgs -p $FP_PITCH"
     fi
 } 
 
@@ -372,37 +376,25 @@ function setFootprintFile()
     # Format will be
     # footprintOutput-sbSBID-FIELDNAME-FOOTPRINTNAME-bandBAND-aPA-pPITCH.txt
     # where blank parameters are left out.
-    #  Required inputs:
+    #  Required available parameters:
     #     * FIELD - name of field
+    #     * SB_SCIENCE - SBID
     #  Returns: $footprintOut
 
     footprintOut="${metadata}/footprintOutput"
     if [ "$SB_SCIENCE" != "" ]; then
         footprintOut="$footprintOut-sb${SB_SCIENCE}"
     fi
-    footprintOut="$footprintOut-${FIELD}"
-    if [ "$BEAM_FOOTPRINT_NAME" != "" ]; then
-        footprintOut="$footprintOut-${BEAM_FOOTPRINT_NAME}"
-    fi
-    if [ "$FREQ_BAND_NUMBER" != "" ]; then
-        footprintOut="$footprintOut-band${FREQ_BAND_NUMBER}"
-    fi
-    if [ "$BEAM_FOOTPRINT_PA" != "" ]; then
-        footprintOut="$footprintOut-a${BEAM_FOOTPRINT_PA}"
-    fi
-    if [ "$BEAM_PITCH" != "" ]; then
-        footprintOut="$footprintOut-p${BEAM_PITCH}"
-    fi
-    footprintOut="${footprintOut}.txt"
+    footprintOut="$footprintOut-${FIELD}.txt"
 }
 
 function getBeamOffsets()
 {
     # Function to return beam offsets (as would be used in a linmos
     # parset) for the full set of beams for a given field.
-    #  Required inputs:
-    #     * NOW - date/time of current pipeline run
+    #  Required available parameters
     #     * FIELD - name of field
+    #     * SB_SCIENCE
     #     * BEAM_MAX - how many beams to consider
     #  Returns: $LINMOS_BEAM_OFFSETS (in the process, setting $footprintOut)
 
@@ -413,8 +405,8 @@ function getBeamOffsets()
 function getBeamCentre()
 {
     # Function to return the centre direction of a given beam
-    #  Required inputs:
-    #     * NOW - date/time of current pipeline run
+    #  Required available parameters:
+    #     * SB_SCIENCE
     #     * FIELD - name of field
     #     * BEAM - the beam ID to obtain the centre for
     #     * BEAM_MAX - how many beams to consider

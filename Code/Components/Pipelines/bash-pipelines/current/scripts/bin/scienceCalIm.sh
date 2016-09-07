@@ -37,72 +37,86 @@ FLAG_IMAGING_DEP=""
 ORIGINAL_OUTPUT=${OUTPUT}
 for FIELD in ${FIELD_LIST}; do
 
-    mkdir -p ${FIELD}
-    cd ${FIELD}
-    OUTPUT="${OUTPUT}/${FIELD}"
+    doField=true
+    if [ "${FIELD_SELECTION_SCIENCE}" != "" ] &&
+           [ "${FIELD_SELECTION_SCIENCE}" != "$FIELD" ]; then
+        # If user has requested a given field, ignore all others
+        doField=false
+    fi
 
-    # Get the linmos offsets when we have a common image centre for
-    # all beams - store in $LINMOS_BEAM_OFFSETS
-    getBeamOffsets
+    if [ $doField == true ]; then
 
-    for BEAM in ${BEAMS_TO_USE}; do
+        echo "Processing field $FIELD"
+        echo "-----------------------"
         
-        mkdir -p ${OUTPUT}/Checkfiles
-        # an empty file that will indicate that the flagging has been done
-        FLAG_CHECK_FILE="${OUTPUT}/Checkfiles/FLAGGING_DONE_BEAM${BEAM}"
-        # an empty file that will indicate that the bandpass has been done
-        BANDPASS_CHECK_FILE="${OUTPUT}/Checkfiles/BANDPASS_APPLIED_BEAM${BEAM}"
-        # an empty file that will indicate the gains have been applied to
-        # the averaged (continuum) dataset
-        CONT_GAINS_CHECK_FILE="${OUTPUT}/Checkfiles/GAINS_APPLIED_CONT_BEAM${BEAM}"
-        # an empty file that will indicate the gains have been applied to
-        # the spectral-line dataset
-        SL_GAINS_CHECK_FILE="${OUTPUT}/Checkfiles/GAINS_APPLIED_SL_BEAM${BEAM}"
-        # an empty file that will indicate the continuum has been
-        # subtracted from the spectral-line dataset
-        CONT_SUB_CHECK_FILE="${OUTPUT}/Checkfiles/CONT_SUB_SL_BEAM${BEAM}"
+        mkdir -p ${FIELD}
+        cd ${FIELD}
+        OUTPUT="${ORIGINAL_OUTPUT}/${FIELD}"
 
-        if [ "${DIRECTION_SCI}" != "" ]; then
-            # User has requested a particular image direction
-            DIRECTION=${DIRECTION_SCI}
-        else
-            if [ "${IMAGE_AT_BEAM_CENTRES}" == "true" ]; then
-                # store the beam centre in $DIRECTION
-                getBeamCentre
+        # Get the linmos offsets when we have a common image centre for
+        # all beams - store in $LINMOS_BEAM_OFFSETS
+        getBeamOffsets
+
+        for BEAM in ${BEAMS_TO_USE}; do
+            
+            mkdir -p ${OUTPUT}/Checkfiles
+            # an empty file that will indicate that the flagging has been done
+            FLAG_CHECK_FILE="${OUTPUT}/Checkfiles/FLAGGING_DONE_BEAM${BEAM}"
+            # an empty file that will indicate that the bandpass has been done
+            BANDPASS_CHECK_FILE="${OUTPUT}/Checkfiles/BANDPASS_APPLIED_BEAM${BEAM}"
+            # an empty file that will indicate the gains have been applied to
+            # the averaged (continuum) dataset
+            CONT_GAINS_CHECK_FILE="${OUTPUT}/Checkfiles/GAINS_APPLIED_CONT_BEAM${BEAM}"
+            # an empty file that will indicate the gains have been applied to
+            # the spectral-line dataset
+            SL_GAINS_CHECK_FILE="${OUTPUT}/Checkfiles/GAINS_APPLIED_SL_BEAM${BEAM}"
+            # an empty file that will indicate the continuum has been
+            # subtracted from the spectral-line dataset
+            CONT_SUB_CHECK_FILE="${OUTPUT}/Checkfiles/CONT_SUB_SL_BEAM${BEAM}"
+
+            if [ "${DIRECTION_SCI}" != "" ]; then
+                # User has requested a particular image direction
+                DIRECTION=${DIRECTION_SCI}
+            else
+                if [ "${IMAGE_AT_BEAM_CENTRES}" == "true" ]; then
+                    # store the beam centre in $DIRECTION
+                    getBeamCentre
+                fi
+                # otherwise we get the phase centre from the MS via advise,
+                # and use for all beams
             fi
-            # otherwise we get the phase centre from the MS via advise,
-            # and use for all beams
-        fi
 
-        
-        findScienceMSnames
+            
+            findScienceMSnames
 
-        . ${PIPELINEDIR}/splitScience.sh
-        . ${PIPELINEDIR}/flagScience.sh
-        
-        . ${PIPELINEDIR}/applyBandpassScience.sh
+            . ${PIPELINEDIR}/splitScience.sh
+            . ${PIPELINEDIR}/flagScience.sh
+            
+            . ${PIPELINEDIR}/applyBandpassScience.sh
 
-        . ${PIPELINEDIR}/averageScience.sh
+            . ${PIPELINEDIR}/averageScience.sh
 
-        if [ $DO_SELFCAL == true ]; then
-            . ${PIPELINEDIR}/continuumImageScienceSelfcal.sh
-        else
-	    . ${PIPELINEDIR}/continuumImageScience.sh
-        fi
+            if [ $DO_SELFCAL == true ]; then
+                . ${PIPELINEDIR}/continuumImageScienceSelfcal.sh
+            else
+	        . ${PIPELINEDIR}/continuumImageScience.sh
+            fi
 
-        . ${PIPELINEDIR}/applyCalContinuumScience.sh
-        . ${PIPELINEDIR}/sourcefinding.sh
+            . ${PIPELINEDIR}/applyCalContinuumScience.sh
+            . ${PIPELINEDIR}/sourcefinding.sh
 
-        . ${PIPELINEDIR}/continuumCubeImagingScience.sh
+            . ${PIPELINEDIR}/continuumCubeImagingScience.sh
 
-        . ${PIPELINEDIR}/prepareSpectralData.sh
-        . ${PIPELINEDIR}/spectralImageScience.sh
-        . ${PIPELINEDIR}/spectralImContSub.sh
+            . ${PIPELINEDIR}/prepareSpectralData.sh
+            . ${PIPELINEDIR}/spectralImageScience.sh
+            . ${PIPELINEDIR}/spectralImContSub.sh
 
-    done
+        done
 
-    . ${PIPELINEDIR}/linmos.sh
+        . ${PIPELINEDIR}/linmos.sh
 
-    cd ..
+        cd ..
+
+    fi
 
 done

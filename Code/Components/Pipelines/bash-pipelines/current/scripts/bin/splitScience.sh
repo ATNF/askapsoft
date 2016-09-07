@@ -63,16 +63,9 @@ if [ $DO_IT == true ]; then
         fi
     fi
 
-    if [ "$FIELD_SELECTION_SCIENCE" == "" ]; then
-	fieldParam="# No field selection done"
-    else
-	if [ `echo ${FIELD_SELECTION_SCIENCE} | awk -F'[' '{print NF}'` -gt 1 ]; then
-            fieldParam="fieldnames   = ${FIELD_SELECTION_SCIENCE}"
-        else
-            fieldParam="fieldnames   = [${FIELD_SELECTION_SCIENCE}]"
-        fi
-    fi
-
+    # Select only the current field
+    fieldParam="fieldnames   = ${FIELD}"
+    
     sbatchfile=$slurms/split_science_beam${BEAM}.sbatch
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
