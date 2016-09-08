@@ -152,18 +152,18 @@ void MomentMapExtractor::defineSlicer()
         casa::IPosition trc = shape - 1;
 
         long zero = 0;
-        blc(itsSpcAxis) = std::max(zero, itsSource->getZmin() - 3);
-        trc(itsSpcAxis) = std::min(shape(itsSpcAxis) - 1, itsSource->getZmax() + 3);
+        blc(itsSpcAxis) = std::max(zero, itsSource->getZmin() - 3 + itsSource->getZOffset());
+        trc(itsSpcAxis) = std::min(shape(itsSpcAxis) - 1, itsSource->getZmax() + 3 + itsSource->getZOffset());
 
         if (itsSpatialMethod == "box") {
             blc(itsLngAxis) = std::max(zero,
-                                       itsSource->getXmin() - itsPadSize);
+                                       itsSource->getXmin() - itsPadSize + itsSource->getXOffset());
             blc(itsLatAxis) = std::max(zero,
-                                       itsSource->getYmin() - itsPadSize);
+                                       itsSource->getYmin() - itsPadSize + itsSource->getYOffset());
             trc(itsLngAxis) = std::min(shape(itsLngAxis) - 1,
-                                       itsSource->getXmax() + itsPadSize);
+                                       itsSource->getXmax() + itsPadSize + itsSource->getXOffset());
             trc(itsLatAxis) = std::min(shape(itsLatAxis) - 1,
-                                       itsSource->getYmax() + itsPadSize);
+                                       itsSource->getYmax() + itsPadSize + itsSource->getYOffset());
             /// @todo Not yet dealing with Stokes axis properly.
         } else if (itsSpatialMethod == "fullfield") {
             // Don't need to do anything here, as we use the Slicer
@@ -175,6 +175,7 @@ void MomentMapExtractor::defineSlicer()
         }
 
         itsSlicer = casa::Slicer(blc, trc, casa::Slicer::endIsLast);
+        ASKAPLOG_DEBUG_STR(logger, itsSlicer);
         this->closeInput();
         this->initialiseArray();
     } else {
@@ -208,7 +209,8 @@ void MomentMapExtractor::extract()
 
         ASKAPLOG_INFO_STR(logger,
                           "Extracting moment map from " << itsInputCube <<
-                          " surrounding source ID " << itsSourceID);
+                          " surrounding source ID " << itsSourceID <<
+                          " with slicer " << itsSlicer);
 
         const boost::shared_ptr<SubImage<Float> >
         sub(new SubImage<Float>(*itsInputCubePtr, itsSlicer));
@@ -274,8 +276,8 @@ void MomentMapExtractor::writeImage()
             // if we are trimming.
             casa::Vector<Float> shift(outshape.size(), 0);
             casa::Vector<Float> incrFac(outshape.size(), 1);
-            shift(lngAxis) = itsSource->getXmin() - itsPadSize;
-            shift(latAxis) = itsSource->getYmin() - itsPadSize;
+            shift(lngAxis) = itsSource->getXmin() - itsPadSize + itsSource->getXOffset();
+            shift(latAxis) = itsSource->getYmin() - itsPadSize + itsSource->getYOffset();
             casa::Vector<Int> newshape = outshape.asVector();
             newcoo.subImageInSitu(shift, incrFac, newshape);
         }
@@ -399,9 +401,9 @@ void MomentMapExtractor::getMom0(const casa::Array<Float> &subarray)
         std::vector<PixelInfo::Voxel> voxlist = itsSource->getPixelSet();
         std::vector<PixelInfo::Voxel>::iterator vox;
         for (vox = voxlist.begin(); vox != voxlist.end(); vox++) {
-            outloc(itsLngAxis) = inloc(itsLngAxis) = vox->getX() - start(itsLngAxis);
-            outloc(itsLatAxis) = inloc(itsLatAxis) = vox->getY() - start(itsLatAxis);
-            inloc(itsSpcAxis) = vox->getZ() - start(itsSpcAxis);
+            outloc(itsLngAxis) = inloc(itsLngAxis) = vox->getX() - start(itsLngAxis) + itsSource->getXOffset();
+            outloc(itsLatAxis) = inloc(itsLatAxis) = vox->getY() - start(itsLatAxis) + itsSource->getYOffset();
+            inloc(itsSpcAxis) = vox->getZ() - start(itsSpcAxis) + itsSource->getZOffset();
             itsMom0map(outloc) = itsMom0map(outloc) + subarray(inloc);
             itsMom0mask(outloc) = true;
         }
@@ -485,9 +487,9 @@ void MomentMapExtractor::getMom1(const casa::Array<Float> &subarray)
         std::vector<PixelInfo::Voxel> voxlist = itsSource->getPixelSet();
         std::vector<PixelInfo::Voxel>::iterator vox;
         for (vox = voxlist.begin(); vox != voxlist.end(); vox++) {
-            outloc(itsLngAxis) = inloc(itsLngAxis) = vox->getX() - start(itsLngAxis);
-            outloc(itsLatAxis) = inloc(itsLatAxis) = vox->getY() - start(itsLatAxis);
-            inloc(itsSpcAxis) = vox->getZ() - start(itsSpcAxis);
+            outloc(itsLngAxis) = inloc(itsLngAxis) = vox->getX() - start(itsLngAxis) + itsSource->getXOffset();
+            outloc(itsLatAxis) = inloc(itsLatAxis) = vox->getY() - start(itsLatAxis) + itsSource->getYOffset();
+            inloc(itsSpcAxis) = vox->getZ() - start(itsSpcAxis) + itsSource->getZOffset();
             sumNuS(outloc) = sumNuS(outloc) + subarray(inloc) * this->getSpecVal(vox->getZ());
             itsMom1mask(outloc) = true;
         }
@@ -537,9 +539,9 @@ void MomentMapExtractor::getMom2(const casa::Array<Float> &subarray)
         std::vector<PixelInfo::Voxel> voxlist = itsSource->getPixelSet();
         std::vector<PixelInfo::Voxel>::iterator vox;
         for (vox = voxlist.begin(); vox != voxlist.end(); vox++) {
-            outloc(itsLngAxis) = inloc(itsLngAxis) = vox->getX() - start(itsLngAxis);
-            outloc(itsLatAxis) = inloc(itsLatAxis) = vox->getY() - start(itsLatAxis);
-            inloc(itsSpcAxis) = vox->getZ() - start(itsSpcAxis);
+            outloc(itsLngAxis) = inloc(itsLngAxis) = vox->getX() - start(itsLngAxis) + itsSource->getXOffset();
+            outloc(itsLatAxis) = inloc(itsLatAxis) = vox->getY() - start(itsLatAxis) + itsSource->getYOffset();
+            inloc(itsSpcAxis) = vox->getZ() - start(itsSpcAxis) + itsSource->getZOffset();
             sumNu2S(outloc) = sumNu2S(outloc) +
                               subarray(inloc) *
                               (this->getSpecVal(vox->getZ()) - itsMom1map(outloc)) *

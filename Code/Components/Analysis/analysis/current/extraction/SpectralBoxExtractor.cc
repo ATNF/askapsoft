@@ -135,10 +135,10 @@ void SpectralBoxExtractor::defineSlicer()
             ASKAPASSERT(itsSource);
             // use the detected pixels of the source for the spectral
             // extraction, and the x/y ranges for slicer
-            xmin = itsSource->getXmin();
-            xmax = itsSource->getXmax();
-            ymin = itsSource->getYmin();
-            ymax = itsSource->getYmax();
+            xmin = itsSource->getXmin() + itsSource->getXOffset();
+            xmax = itsSource->getXmax() + itsSource->getXOffset();
+            ymin = itsSource->getYmin() + itsSource->getYOffset();
+            ymax = itsSource->getYmax() + itsSource->getYOffset();
         }
         casa::IPosition blc(shape.size(), 0), trc(shape.size(), 0);
         blc(itsLngAxis) = xmin;
