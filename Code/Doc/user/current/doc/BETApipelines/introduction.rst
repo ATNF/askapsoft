@@ -42,8 +42,11 @@ let me know.
 Finally, note that the processing **needs to be run on the /scratch2
 filesystem on galaxy**. The /home filesystem is not suitable for
 running this processing, and there are certain bits that will fail
-on /home (the scripts set the Lustre file system striping properties
-and /home is not such a filesystem).
+on /home. If the filesystem on which the scripts are run is not a
+Lustre filesystem, it will exit without running anything. This is
+because the lustre striping is set (to 4 for the processing
+directories, and 1 for other directories like parsets, logs &
+metadata). 
 
 Assumptions
 -----------

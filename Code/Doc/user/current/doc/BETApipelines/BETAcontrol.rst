@@ -82,6 +82,30 @@ see the *Slurm time requests* section below for details.
 |                                     |         |                                                                                 |
 +-------------------------------------+---------+---------------------------------------------------------------------------------+
 
+Filesystem control
+------------------
+
+There are a couple of parameters that affect how files interact with
+the Lustre filesystem. We set the striping of the directory at the
+start to a value configurable by the user. This only affects the
+directories where MSs, images & tables go - parsets, logs, metadata
+and the rest are given a stripe count of 1.
+
+There is also a parameter to control the I/O bucketsize of the
+measurement sets created by mssplit. This is particularly important in
+governing the I/O performance and the splitting run-time. The default,
+1MB, matches the stripe size on /scratch2, and has been found to work well. 
+
++----------------------+---------+-------------------------------------------------------------+
+| Variable             | Default | Description                                                 |
++======================+=========+=============================================================+
+| ``LUSTRE_STRIPING``  | 4       | The stripe count to assign to the data directories          |
++----------------------+---------+-------------------------------------------------------------+
+| ``BUCKET_SIZE``      | 1048576 | The bucketsize passed to mssplit (as "stman.bucketsize") in |
+|                      |         | units of bytes.                                             |
++----------------------+---------+-------------------------------------------------------------+
+
+
 Calibrator switches
 -------------------
 

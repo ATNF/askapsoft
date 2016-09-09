@@ -5,13 +5,21 @@ The linmos tool requires beam offsets to know where to place the
 primary beam models. Most of the time, these will be generated using
 the ACES *footprint.py* tool, and so all you need to specify are the
 footprint name, the position angle and pitch (separation of beams),
-and the frequency band you are observing in.
+and (for BETA data) the frequency band you are observing in.
 
-Note that, to use *footprint.py*, you will need to load the ACES
-module (to get the correct python packages) and have an up-to-date
-version of the ACES subversion repository. If you have not loaded the
-ACES module, it is likely the *footprint.py* task will fail, and
-mosaicking will be disabled.
+The footprint information is now recorded in the scheduling block
+parset itself, and can be obtained using::
+
+    module load askapcli
+    schedblock info -p <SBID>
+
+This is done within the scripts, and if that information is present,
+this will be used in conjunction with *footprint.py* to get the
+locations of the beam centres.
+
+If you are processing an older SBID, for which the footprint
+information is not available in the scheduling block, you must specify
+the footprint information yourself using the parameters given below. 
 
 It may be that you are using a non-standard arrangement that
 footprint.py doesn’t cover. In this case you need to directly specify
@@ -28,6 +36,12 @@ this (this is for the “diamond” footprint, band 1, PA=0)::
   linmos.feeds.beam6 = [ 1.077,  0.622]
   linmos.feeds.beam7 = [-2.154,  0.000]
   linmos.feeds.beam8 = [ 2.154, -0.000]"
+
+Note that ``LINMOS_BEAM_OFFSETS`` is only needed when all beams have
+the same centre position (ie. when
+``IMAGE_AT_BEAM_CENTRES=false``). If this is not the case, each beam
+image has a different centre, and linmos simply uses that, putting a
+primary beam at the centre of each image.
 
 +-------------------------+------------------------------------+-------------------------+-------------------------------------------------------------+
 | Variable                | Default                            | Parset equivalent       | Description                                                 |

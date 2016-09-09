@@ -9,6 +9,22 @@ appropriate values based on its "advise" capability (which involves
 examining the dataset and setting appropriate values for some
 parameters.
 
+For most observations to date, there is a single phase centre that
+applies for all beams. Thus, if *advise* is used to determine the
+image centre, the same direction will be used for each beam. This is
+the way the BETA processing was done, and in this case the image size
+must be chosen to be big enough to encompass all beams. This behaviour
+is applied when ``IMAGE_AT_BEAM_CENTRES=false``.
+
+The preferred behaviour, however, is to set a different image centre
+per beam, as this allows a smaller image to be made when imaging. To
+do this, the *footprint.py* tool is used to determine the locations of
+the centres of each beam. The footprint specification is determined
+preferentially from the scheduling block parset, or (if not available
+there) from the parameters described at
+:doc:`ScienceFieldContinuumMosaicking`. To use this mode, set
+``IMAGE_AT_BEAM_CENTRES=true``. 
+
 When setting the gridding parameters, note that the gridder is
 currently hardcoded to use **WProject**.  If you want to experiment
 with other gridders, you need to edit the slurm file or parset

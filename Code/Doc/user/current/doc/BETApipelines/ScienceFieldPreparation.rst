@@ -13,7 +13,14 @@ calibrator observation.
 
 The averaging scale defaults to 54 channels, resulting in a
 1MHz-resolution MS that can be imaged with cimager, although this
-averaging scale can be changed by the user. 
+averaging scale can be changed by the user.
+
+The default behaviour is to process all fields within the science MS
+(interleaving, for instance, makes use of multiple fields), with each
+field being processed in its own sub-directory. The field selection is
+done in the splitting task, at the same time as the beam selection. It
+is possible, however, to select a single field to process via the
+``FIELD_SELECTION_SCIENCE`` parameter (by giving the field **name**). 
 
 
 +-------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
@@ -41,7 +48,7 @@ averaging scale can be changed by the user.
 |                                           |                                 |                                                 | included in the output MS).                                           |
 +-------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 | ``FIELD_SELECTION_SCIENCE``               |  no default (see description)   | fields (:doc:`../calim/mssplit`)                | This allows selection of particular FIELD NAMEs from the science      |
-|                                           |                                 |                                                 | observation. If not provided, no field selection is done.             |
+|                                           |                                 |                                                 | observation. If not provided, all fields are done.                    |
 +-------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 | ``MS_BASE_SCIENCE``                       |  scienceObservation_beam%b.ms   | none                                            | Base name for the science observation measurement set after           |
 |                                           |                                 |                                                 | splitting. The wildcard %b will be replaced by the                    |

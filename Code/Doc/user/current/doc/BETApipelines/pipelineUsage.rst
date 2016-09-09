@@ -11,15 +11,15 @@ use, simply run::
 
   module load askappipeline
 
-Note that for the linear mosaicking, or if you want to set the image
-centres to be the beam centres using the beam footprint specification
-(ie. using the ACES tool *footprint.py*), you will need to load the
-ACES module (to get the correct python packages) and have an
-up-to-date version of the ACES subversion repository. If you have not
-loaded the ACES module, it is likely the *footprint.py* task will
-fail, and mosaicking will be disabled.
+Some parts of the pipeline make use of other modules, which are loaded
+at the appropriate time. The beam footprint information is obtained by
+using the *schedblock* tool in the askapcli module, while beam
+locations are set using the ACES tool *footprint.py*, which requires
+the aces module. For the latter, you will need to have an up-to-date
+version of the ACES subversion repository (which is not part of a
+module itself).
 
-Once loaded, the module will set an environment variable
+Once loaded, the askappipeline module will set an environment variable
 **PIPELINEDIR**, pointing to the directory containing the scripts. It
 also defines **PIPELINE_VERSION** to be the version number of the
 currently-used module.
@@ -118,7 +118,7 @@ files. These are:
 * *slurmFiles/* – the files in here are the job files that are submitted
   to the queue via the sbatch command. When a job is run, it makes a
   copy of the file that is labelled with the job ID.
-* *metadata/* - information about the measurement sets and the beam
+* *metadata/* – information about the measurement sets and the beam
   footprint are written to files here.  
 * *parsets/* – any parameter sets used by the askapsoft applications
   are written here. These contain the actual parameters that are used
@@ -140,7 +140,7 @@ files. These are:
 * *tools/* – utility scripts to show progress and kill all jobs for a
   given run are placed here. See :doc:`pipelineDiagnostics` for
   details.
-* *Checkfiles/* - files that indicate progress through stages of the
+* *Checkfiles/* – files that indicate progress through stages of the
   pipeline are written here. The pipeline can see these and know to
   skip certain stages, if required by the user. A version of this
   directory is put in each field directory.
@@ -170,7 +170,16 @@ Workflow summary
 
 Here is a summary of the workflow provided for by these scripts:
 
-* Get observation metadata from the MS and the beam footprint.
+* Get observation metadata from the MS and the beam footprint. This
+  does the following steps:
+  
+  * Use **mslist** to get basic metadata for the observation,
+    including number of antennas & channels, and the list of field
+    names.
+  * Use **schedblock** to determine the footprint specification.
+  * Use **footprint.py** (from the ACES tools) to convert that into
+    beam centre positions.
+  
 * Read in user-defined parameters from the provided configuration
   file, and define further parameters derived from them.
 * If bandpass calibration is required and a 1934-638 observation is
@@ -187,10 +196,13 @@ Here is a summary of the workflow provided for by these scripts:
 * The bandpass solution is then determined with **cbpcalibrator**
   (:doc:`../calim/cbpcalibrator`), using all individual MSs and stored
   in a single CASA table.
-* The science field data is similarly split and flagged with
-  **mssplit** and **cflag**, producing one measurement set per
-  beam. You can select particular scans or fields here, but the
-  default is to use everything.
+* The science field is processed for each field name - what follows
+  describes the steps used for each field.
+* The science field data is split and flagged with *mssplit** and
+  ***cflag** in the same manner as for the calibrator, producing one
+  *measurement set per beam. You can select particular scans or fields
+  *here, but the default is to use everything. Each field gets its own
+  *directory.
 * The bandpass solution is then applied to each beam MS with
   **ccalapply** (:doc:`../calim/ccalapply`).
 * The science field data are then averaged with **mssplit** to form
