@@ -149,9 +149,9 @@ void NoiseSpectrumExtractor::extract()
     if (this->openInput()) {
 
         ASKAPLOG_INFO_STR(logger, "Extracting noise spectrum from " << itsInputCube <<
-                          " surrounding source ID " << itsSourceID);
+                          " surrounding source ID " << itsSourceID <<
+                          " with slicer " << itsSlicer);
 
-        ASKAPLOG_DEBUG_STR(logger, "Constructing subimage from slicer " << itsSlicer);
         const boost::shared_ptr<SubImage<Float> >
         sub(new SubImage<Float>(*itsInputCubePtr, itsSlicer));
         casa::Array<Float> subarray = sub->get();

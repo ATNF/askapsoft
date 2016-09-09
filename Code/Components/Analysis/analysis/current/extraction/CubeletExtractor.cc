@@ -107,16 +107,16 @@ void CubeletExtractor::defineSlicer()
         casa::IPosition trc = shape - 1;
 
         long zero = 0;
-        blc(itsLngAxis) = std::max(zero, itsSource->getXmin() - itsSpatialPad);
-        blc(itsLatAxis) = std::max(zero, itsSource->getYmin() - itsSpatialPad);
-        blc(itsSpcAxis) = std::max(zero, itsSource->getZmin() - itsSpectralPad);
+        blc(itsLngAxis) = std::max(zero, itsSource->getXmin() - itsSpatialPad + itsSource->getXOffset());
+        blc(itsLatAxis) = std::max(zero, itsSource->getYmin() - itsSpatialPad + itsSource->getYOffset());
+        blc(itsSpcAxis) = std::max(zero, itsSource->getZmin() - itsSpectralPad + itsSource->getZOffset());
 
         trc(itsLngAxis) = std::min(shape(itsLngAxis) - 1,
-                                   itsSource->getXmax() + itsSpatialPad);
+                                   itsSource->getXmax() + itsSpatialPad + itsSource->getXOffset());
         trc(itsLatAxis) = std::min(shape(itsLatAxis) - 1,
-                                   itsSource->getYmax() + itsSpatialPad);
+                                   itsSource->getYmax() + itsSpatialPad + itsSource->getYOffset());
         trc(itsSpcAxis) = std::min(shape(itsSpcAxis) - 1,
-                                   itsSource->getZmax() + itsSpectralPad);
+                                   itsSource->getZmax() + itsSpectralPad + itsSource->getZOffset());
         /// @todo Not yet dealing with Stokes axis properly.
 
         itsSlicer = casa::Slicer(blc, trc, casa::Slicer::endIsLast);
@@ -210,9 +210,9 @@ void CubeletExtractor::writeImage()
         outshape(stkAxis) = stkvec.size();
         casa::Vector<Float> shift(outshape.size(), 0);
         casa::Vector<Float> incrFac(outshape.size(), 1);
-        shift(lngAxis) = itsSource->getXmin() - itsSpatialPad;
-        shift(latAxis) = itsSource->getYmin() - itsSpatialPad;
-        shift(spcAxis) = itsSource->getZmin() - itsSpectralPad;
+        shift(lngAxis) = itsSource->getXmin() - itsSpatialPad + itsSource->getXOffset();
+        shift(latAxis) = itsSource->getYmin() - itsSpatialPad + itsSource->getYOffset();
+        shift(spcAxis) = itsSource->getZmin() - itsSpectralPad + itsSource->getZOffset();
         casa::Vector<Int> newshape = outshape.asVector();
 
         newcoo.subImageInSitu(shift, incrFac, newshape);
@@ -231,13 +231,16 @@ void CubeletExtractor::writeImage()
 
         this->writeBeam(itsOutputFilename);
 
-        casa::LogicalArray
-        mask(itsInputCubePtr->pixelMask().getSlice(itsSlicer).reform(outshape));
+        if (itsInputCubePtr->isMasked()){
+            // copy the image mask to the cubelet, if there is one.
+            casa::LogicalArray
+                mask(itsInputCubePtr->pixelMask().getSlice(itsSlicer).reform(outshape));
 
-        casa::PagedImage<float> img(itsOutputFilename);
-        img.makeMask("mask");
-        img.pixelMask().put(mask);
-
+            casa::PagedImage<float> img(itsOutputFilename);
+            img.makeMask("mask");
+            img.pixelMask().put(mask);
+        }
+        
         this->closeInput();
 
     } else {
