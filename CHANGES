@@ -1,3 +1,23 @@
+0.14.0-p1 (9 September 2016)
+----------------------------
+
+An update to the pipeline processing only:
+
+ * Fixing a bug in the handling of multiple FIELDs within a
+   measurement set. These are now correctly given their own directory
+   for the processed data products.
+ * The footprint parameters are now preferentially determined from the
+   scheduling block parset (using the 'schedblock' command-line
+   utility). If not present, the scripts fall back to using the config
+   file inputs.
+ * The metadata files (taken from mslist, schedblock and footprint.py)
+   are re-used on subsequent runs of the pipeline, rather than
+   re-running each of these tools.
+ * The default bucketsize for the mssplit jobs has been increased to
+   1MB, and made configurable by the user. The stripe count for the
+   non-data directories has also been changed to 1.
+
+
 0.14.0 (11 August 2016)
 -----------------------
 
