@@ -45,6 +45,11 @@ if [ "${PIPELINEDIR}" == "" ]; then
 
 else 
 
+    if [ "`lfs getstripe -c .`" == "" ]; then
+        echo "WARNING: You don't appear to be running this on a Lustre filesystem - lfs does not work."
+        exit 1
+    fi
+    
     . ${PIPELINEDIR}/initialise.sh
 
     if [ $# == 0 ]; then
@@ -82,15 +87,7 @@ else
         PROCESS_DEFAULTS_HAS_RUN=false
 	. ${PIPELINEDIR}/processDefaults.sh
 	
-        if [ "`which lfs`" == "" ]; then
-            echo "WARNING: You don't appear to be running this on /scratch2 on galaxy, as 'lfs' is not available."
-            if [ $SUBMIT_JOBS == true ]; then
-                echo "Setting SUBMIT_JOBS=false, as you won't be able to submit (or you shouldn't submit here)"
-                SUBMIT_JOBS=false
-            fi
-        else
-	    lfs setstripe -c ${LUSTRE_STRIPING} .
-        fi
+	lfs setstripe -c ${LUSTRE_STRIPING} .
         
 	if [ $DO_1934_CAL == true ]; then
 	    
