@@ -144,7 +144,7 @@ void ResultsWriter::writeComponentCatalogue()
 void ResultsWriter::writeHiEmissionCatalogue()
 {
 
-    if (itsParset.getBool("HiEmissionCatalogue", "false")) {
+    if (itsParset.getBool("HiEmissionCatalogue", false)) {
 
         HiEmissionCatalogue cat(itsSourceList, itsParset, itsCube);
         cat.write();

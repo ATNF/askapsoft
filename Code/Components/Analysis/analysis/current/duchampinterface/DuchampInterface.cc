@@ -161,8 +161,8 @@ duchamp::Param parseParset(const LOFAR::ParameterSet& parset)
     par.setFlagSeparateHeader(parset.getBool("flagSeparateHeader",
                               par.getFlagSeparateHeader()));
     par.setHeaderFile(parset.getString("headerFile", par.getHeaderFile()));
-    par.setFlagWriteBinaryCatalogue(parset.getBool("flagWriteBinaryCatalogue",
-                                    par.getFlagWriteBinaryCatalogue()));
+    // do not write binary catalogue by default.
+    par.setFlagWriteBinaryCatalogue(parset.getBool("flagWriteBinaryCatalogue", false));
     par.setBinaryCatalogue(parset.getString("binaryCatalogue", par.getBinaryCatalogue()));
     par.setFlagPlotSpectra(false); // no graphics, so not plotting
     checkUnusedParameter(parset, "flagPlotSpectra"); // no graphics
@@ -188,11 +188,11 @@ duchamp::Param parseParset(const LOFAR::ParameterSet& parset)
     par.setFileOutputResid(parset.getString("fileOutputResid", par.getFileOutputResid()));
     par.setFlagVOT(parset.getBool("flagVOT", true));
     par.setVOTFile(parset.getString("votFile", par.getVOTFile()));
-    par.setFlagKarma(parset.getBool("flagKarma", false)); 
+    par.setFlagKarma(parset.getBool("flagKarma", false));
     par.setKarmaFile(parset.getString("karmaFile", par.getKarmaFile()));
-    par.setFlagDS9(parset.getBool("flagDS9", false)); 
+    par.setFlagDS9(parset.getBool("flagDS9", false));
     par.setDS9File(parset.getString("ds9File", par.getDS9File()));
-    par.setFlagCasa(parset.getBool("flagCasa", false)); 
+    par.setFlagCasa(parset.getBool("flagCasa", false));
     par.setCasaFile(parset.getString("casaFile", par.getCasaFile()));
     //
     par.setFlagMaps(false); // flagMaps
@@ -385,11 +385,11 @@ duchamp::FitsHeader changeSpectralAxis(duchamp::FitsHeader &inputHead,
                                        std::string newUnits)
 {
     duchamp::FitsHeader newHead(inputHead);
-    int specAxis=inputHead.WCS().spec;
+    int specAxis = inputHead.WCS().spec;
     if (specAxis >= 0) {
         std::string origSpecType(inputHead.WCS().ctype[specAxis]);
-        int status=wcssptr(newHead.getWCS(), &specAxis, (char *)newType.c_str());
-        if(status){
+        int status = wcssptr(newHead.getWCS(), &specAxis, (char *)newType.c_str());
+        if (status) {
             ASKAPLOG_ERROR_STR(logger, "Spectral axis conversion from " <<
                                origSpecType << " to " <<
                                newType << " failed: status=" << status <<
@@ -405,15 +405,14 @@ double getPeakFluxConversionScale(duchamp::FitsHeader &inputHead, std::string ne
     casa::Unit inputFluxUnits(inputHead.getFluxUnits());
     casa::Unit fluxUnits(newUnits);
     double peakFluxscale = 1.;
-    if (inputFluxUnits.getName()!=""){
+    if (inputFluxUnits.getName() != "") {
         // Cannot do the conversion if the units string is blank. If
         // this is the case, leave the conversion factor as 1.
         casa::Quantity unity(1., inputFluxUnits);
-        if (unity.isConform(fluxUnits)){
+        if (unity.isConform(fluxUnits)) {
             // Can we do a conversion between the requested units?
             peakFluxscale = casa::Quantity(1., inputFluxUnits).getValue(fluxUnits);
-        }
-        else{
+        } else {
             ASKAPLOG_WARN_STR(logger, "Cannot convert between peak flux units " <<
                               inputHead.getFluxUnits() << " and " << newUnits);
         }
@@ -427,18 +426,17 @@ double getIntFluxConversionScale(duchamp::FitsHeader &inputHead, std::string new
     casa::Unit inputIntFluxUnits(inputHead.getIntFluxUnits());
     casa::Unit intFluxUnits(newUnits);
     double intFluxscale = 1.;
-    if (inputIntFluxUnits.getName() != ""){
+    if (inputIntFluxUnits.getName() != "") {
         casa::Quantity unity(1., inputIntFluxUnits);
-        if (unity.isConform(intFluxUnits)){
+        if (unity.isConform(intFluxUnits)) {
             intFluxscale = casa::Quantity(1., inputIntFluxUnits).getValue(intFluxUnits);
             if (inputHead.needBeamSize()) {
                 intFluxscale /= inputHead.beam().area(); // Convert from mJy/beam to mJy
             }
-        }
-        else{
+        } else {
             ASKAPLOG_WARN_STR(logger, "Cannot convert between integrated flux units " <<
                               inputHead.getIntFluxUnits() << " and " << newUnits);
-        }            
+        }
     }
     return intFluxscale;
 }

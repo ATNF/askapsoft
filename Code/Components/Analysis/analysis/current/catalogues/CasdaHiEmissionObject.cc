@@ -126,41 +126,74 @@ CasdaHiEmissionObject::CasdaHiEmissionObject(sourcefitting::RadioSource &obj,
 
     int flag;
     // Peak location - don't care about RA/DEC
-    flag = newHead_vel.pixToWCS(xpeak, ypeak, zpeak, ra, dec, spec);
     if (doVel) {
-        itsVelHI_peak = spec * velScale;
-    }
-    flag = newHead_freq.pixToWCS(xpeak, ypeak, zpeak, ra, dec, spec);
-    if (doFreq) {
-        itsFreq_peak = spec * freqScale;
-    }
-    // Average (unweighted) location
-    flag = newHead_vel.pixToWCS(xave, yave, zave, ra, dec, spec);
-    if (doVel) {
-        itsVelHI_uw.value() = spec * velScale;
-    }
-    itsRA_uw.value() = ra;
-    itsDEC_uw.value() = dec;
-    analysisutilities::equatorialToGalactic(ra, dec, itsGlong_uw.value(), itsGlat_uw.value());
+        // peak location
+        flag = newHead_vel.pixToWCS(xpeak, ypeak, zpeak, ra, dec, spec);
+        if (flag == 0) {
+            itsVelHI_peak = spec * velScale;
+        } else {
+            ASKAPLOG_WARN_STR(logger, "pix to world conversion failed for velocity units"
+                              << ", peak location, with code " << flag);
+        }
 
-    flag = newHead_freq.pixToWCS(xave, yave, zave, ra, dec, spec);
-    if (doFreq) {
-        itsFreq_uw.value() = spec * freqScale;
+        // Average (unweighted) location
+        flag = newHead_vel.pixToWCS(xave, yave, zave, ra, dec, spec);
+        if (flag == 0) {
+            itsVelHI_uw.value() = spec * velScale;
+            itsRA_uw.value() = ra;
+            itsDEC_uw.value() = dec;
+            analysisutilities::equatorialToGalactic(ra, dec, itsGlong_uw.value(), itsGlat_uw.value());
+        } else {
+            ASKAPLOG_WARN_STR(logger, "pix to world conversion failed for velocity units"
+                              << ", unweighted location, with code " << flag);
+        }
+
+        // Centroid (flux-weighted) location
+        flag = newHead_vel.pixToWCS(xcent, ycent, zcent, ra, dec, spec);
+        if (flag == 0) {
+            itsVelHI_w.value() = spec * velScale;
+            itsRA_w.value() = ra;
+            itsDEC_w.value() = dec;
+            analysisutilities::equatorialToGalactic(ra, dec, itsGlong_w.value(), itsGlat_w.value());
+            itsRAs_w  = decToDMS(itsRA_w.value(), obj.header().lngtype(), precision);
+            itsDECs_w = decToDMS(itsDEC_w.value(), obj.header().lattype(), precision);
+            itsName = obj.header().getIAUName(itsRA_w.value(), itsDEC_w.value());
+        } else {
+            ASKAPLOG_WARN_STR(logger, "pix to world conversion failed for velocity units"
+                              << ", weighted location, with code " << flag);
+        }
     }
-    // Centroid (flux-weighted) location
-    flag = newHead_vel.pixToWCS(xcent, ycent, zcent, ra, dec, spec);
-    if (doVel) {
-        itsVelHI_w.value() = spec * velScale;
-    }
-    itsRA_w.value() = ra;
-    itsDEC_w.value() = dec;
-    analysisutilities::equatorialToGalactic(ra, dec, itsGlong_w.value(), itsGlat_w.value());
-    itsRAs_w  = decToDMS(itsRA_w.value(), obj.header().lngtype(), precision);
-    itsDECs_w = decToDMS(itsDEC_w.value(), obj.header().lattype(), precision);
-    itsName = obj.header().getIAUName(itsRA_w.value(), itsDEC_w.value());
-    flag = newHead_freq.pixToWCS(xcent, ycent, zcent, ra, dec, spec);
+
     if (doFreq) {
-        itsFreq_w.value() = spec * freqScale;
+        // frequency values for spectral location
+
+        // Peak location
+        flag = newHead_freq.pixToWCS(xpeak, ypeak, zpeak, ra, dec, spec);
+        if (flag == 0) {
+            itsFreq_peak = spec * freqScale;
+        } else {
+            ASKAPLOG_WARN_STR(logger, "pix to world conversion failed for frequency units"
+                              << ", peak location, with code " << flag);
+        }
+
+        // Average (unweighted) location
+        flag = newHead_freq.pixToWCS(xave, yave, zave, ra, dec, spec);
+        if (flag == 0) {
+            itsFreq_uw.value() = spec * freqScale;
+        } else {
+            ASKAPLOG_WARN_STR(logger, "pix to world conversion failed for frequency units"
+                              << ", unweighted location, with code " << flag);
+        }
+
+        // Centroid (flux-weighted) location
+        flag = newHead_freq.pixToWCS(xcent, ycent, zcent, ra, dec, spec);
+        if (flag == 0) {
+            itsFreq_w.value() = spec * freqScale;
+        } else {
+            ASKAPLOG_WARN_STR(logger, "pix to world conversion failed for frequency units"
+                              << ", weighted location, with code " << flag);
+        }
+
     }
 
     itsRMSimagecube = obj.noiseLevel() * peakFluxscale;
@@ -174,29 +207,80 @@ CasdaHiEmissionObject::CasdaHiEmissionObject(sourcefitting::RadioSource &obj,
     itsNumVoxels = obj.getSize();
 
     double spec1, spec2;
+    int flag1, flag2;
     // @todo - how do we calculate errors on these quantities
     // W50 & W20 for frequency values:
-    flag = newHead_freq.pixToWCS(xcent, ycent, obj.getZ50min(), ra, dec, spec1);
-    flag = newHead_freq.pixToWCS(xcent, ycent, obj.getZ50max(), ra, dec, spec2);
-    itsW50_freq.value() = fabs(spec1 - spec2) * freqWidthScale;
-    ASKAPLOG_DEBUG_STR(logger, "W50_FREQ: " << obj.getZ50min() << " " << obj.getZ50max() << " " <<
-                       spec1 << " " << spec2 << " " << itsW50_freq.value());
-    flag = newHead_freq.pixToWCS(xcent, ycent, obj.getZ20min(), ra, dec, spec1);
-    flag = newHead_freq.pixToWCS(xcent, ycent, obj.getZ20max(), ra, dec, spec2);
-    itsW20_freq.value() = fabs(spec1 - spec2) * freqWidthScale;
-    // W50 & W20 for velocity values:
-    flag = newHead_vel.pixToWCS(xcent, ycent, obj.getZ20min(), ra, dec, spec1);
-    flag = newHead_vel.pixToWCS(xcent, ycent, obj.getZ20max(), ra, dec, spec2);
-    itsW20_vel.value() = fabs(spec1 - spec2) * velScale;
-    flag = newHead_vel.pixToWCS(xcent, ycent, obj.getZ50min(), ra, dec, spec1);
-    flag = newHead_vel.pixToWCS(xcent, ycent, obj.getZ50max(), ra, dec, spec2);
-    itsW50_vel.value() = fabs(spec1 - spec2) * velScale;
+    if (doFreq) {
+        flag1 = newHead_freq.pixToWCS(xcent, ycent, obj.getZ50min(), ra, dec, spec1);
+        flag2 = newHead_freq.pixToWCS(xcent, ycent, obj.getZ50max(), ra, dec, spec2);
+        if ((flag1 == 0) && (flag2 == 0)) {
+            itsW50_freq.value() = fabs(spec1 - spec2) * freqWidthScale;
+            ASKAPLOG_DEBUG_STR(logger, "W50_FREQ: " << obj.getZ50min() << " " << obj.getZ50max() << " " <<
+                               spec1 << " " << spec2 << " " << itsW50_freq.value());
+        } else {
+            if (flag1 != 0) {
+                ASKAPLOG_WARN_STR(logger, "pix to world conversion failed for frequency units"
+                                  << ", 50% flux width, with code " << flag1);
+            }
+            if (flag2 != 0) {
+                ASKAPLOG_WARN_STR(logger, "pix to world conversion failed for frequency units"
+                                  << ", 50% flux width, with code " << flag2);
+            }
+        }
 
+        flag1 = newHead_freq.pixToWCS(xcent, ycent, obj.getZ20min(), ra, dec, spec1);
+        flag2 = newHead_freq.pixToWCS(xcent, ycent, obj.getZ20max(), ra, dec, spec2);
+        if ((flag1 == 0) && (flag2 == 0)) {
+            itsW20_freq.value() = fabs(spec1 - spec2) * freqWidthScale;
+        } else {
+            if (flag1 != 0) {
+                ASKAPLOG_WARN_STR(logger, "pix to world conversion failed for frequency units"
+                                  << ", 20% flux width, with code " << flag1);
+            }
+            if (flag2 != 0) {
+                ASKAPLOG_WARN_STR(logger, "pix to world conversion failed for frequency units"
+                                  << ", 20% flux width, with code " << flag2);
+            }
+        }
+    }
+
+    if (doVel) {
+        // W50 & W20 for velocity values:
+        flag1 = newHead_vel.pixToWCS(xcent, ycent, obj.getZ20min(), ra, dec, spec1);
+        flag2 = newHead_vel.pixToWCS(xcent, ycent, obj.getZ20max(), ra, dec, spec2);
+        if ((flag1 == 0) && (flag2 == 0)) {
+            itsW20_vel.value() = fabs(spec1 - spec2) * velScale;
+        } else {
+            if (flag1 != 0) {
+                ASKAPLOG_WARN_STR(logger, "pix to world conversion failed for velocity units"
+                                  << ", 20% flux width, with code " << flag1);
+            }
+            if (flag2 != 0) {
+                ASKAPLOG_WARN_STR(logger, "pix to world conversion failed for velocity units"
+                                  << ", 20% flux width, with code " << flag2);
+            }
+        }
+        flag1 = newHead_vel.pixToWCS(xcent, ycent, obj.getZ50min(), ra, dec, spec1);
+        flag2 = newHead_vel.pixToWCS(xcent, ycent, obj.getZ50max(), ra, dec, spec2);
+        if ((flag1 == 0) && (flag2 == 0)) {
+            itsW50_vel.value() = fabs(spec1 - spec2) * velScale;
+        } else {
+            if (flag1 != 0) {
+                ASKAPLOG_WARN_STR(logger, "pix to world conversion failed for velocity units"
+                                  << ", 50% flux width, with code " << flag1);
+            }
+            if (flag2 != 0) {
+                ASKAPLOG_WARN_STR(logger, "pix to world conversion failed for velocity units"
+                                  << ", 50% flux width, with code " << flag2);
+            }
+        }
+    }
 
     itsIntegFlux.value() = obj.getIntegFlux() * intFluxscale;
     //itsIntegFlux.error() = obj.getIntegFluxError();
     itsIntegFlux.error() = sqrt(itsNumVoxels) * itsRMSimagecube * (intFluxscale / peakFluxscale) *
-                           newHead_vel.WCS().cdelt[newHead_vel.WCS().spec] * velScale / newHead_vel.beam().area();
+                           newHead_vel.WCS().cdelt[newHead_vel.WCS().spec] * velScale /
+                           newHead_vel.beam().area();
     itsFluxMax = obj.getPeakFlux() * peakFluxscale;
 
 
