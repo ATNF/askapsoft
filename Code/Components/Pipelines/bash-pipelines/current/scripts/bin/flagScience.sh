@@ -95,7 +95,7 @@ Cflag.amplitude_flagger.low             = ${FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW
      fi
          
    
-    sbatchfile=$slurms/flag_science_beam${BEAM}.sbatch
+    sbatchfile=$slurms/flag_science_${FIELDBEAM}.sbatch
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -123,7 +123,7 @@ cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 DO_AMP_FLAG=${DO_AMP_FLAG}
 if [ \$DO_AMP_FLAG == true ]; then
 
-    parset=${parsets}/cflag_amp_science_beam${BEAM}_\${SLURM_JOB_ID}.in
+    parset=${parsets}/cflag_amp_science_${FIELDBEAM}_\${SLURM_JOB_ID}.in
     cat > \$parset <<EOFINNER
 # The path/filename for the measurement set
 Cflag.dataset                           = ${msSci}
@@ -137,7 +137,7 @@ ${antennaFlagging}
 ${autocorrFlagging}
 EOFINNER
 
-    log=${logs}/cflag_amp_science_beam${BEAM}_\${SLURM_JOB_ID}.log
+    log=${logs}/cflag_amp_science_${FIELDBEAM}_\${SLURM_JOB_ID}.log
 
     NCORES=1
     NPPN=1
@@ -155,7 +155,7 @@ fi
 DO_DYNAMIC=${FLAG_DO_DYNAMIC_AMPLITUDE_SCIENCE}
 if [ \${DO_DYNAMIC} == true ]; then
 
-    parset=${parsets}/cflag_dynamic_science_beam${BEAM}_\${SLURM_JOB_ID}.in
+    parset=${parsets}/cflag_dynamic_science_${FIELDBEAM}_\${SLURM_JOB_ID}.in
     cat > \$parset <<EOFINNER
 # The path/filename for the measurement set
 Cflag.dataset                           = ${msSci}
@@ -171,7 +171,7 @@ Cflag.amplitude_flagger.integrateSpectra = true
 Cflag.amplitude_flagger.integrateSpectra.threshold = ${FLAG_THRESHOLD_DYNAMIC_SCIENCE}
 EOFINNER
     
-    log=${logs}/cflag_dynamic_science_beam${BEAM}_\${SLURM_JOB_ID}.log
+    log=${logs}/cflag_dynamic_science_${FIELDBEAM}_\${SLURM_JOB_ID}.log
     
     NCORES=1
     NPPN=1

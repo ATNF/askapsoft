@@ -35,6 +35,8 @@ echo "Setting up and calibrating the science observation"
 FLAG_IMAGING_DEP=""
 
 ORIGINAL_OUTPUT=${OUTPUT}
+FIELD_ID=0
+
 for FIELD in ${FIELD_LIST}; do
 
     doField=true
@@ -45,6 +47,15 @@ for FIELD in ${FIELD_LIST}; do
     fi
 
     if [ $doField == true ]; then
+
+        parsets=$parsetsBase/$FIELD
+        mkdir -p $parsets
+        logs=$logsBase/$FIELD
+        mkdir -p $logs
+        slurms=$slurmsBase/$FIELD
+        mkdir -p $slurms
+        slurmOut=$slurmOutBase/$FIELD
+        mkdir -p $slurmOut
 
         echo "Processing field $FIELD"
         echo "-----------------------"
@@ -87,6 +98,7 @@ for FIELD in ${FIELD_LIST}; do
                 # and use for all beams
             fi
 
+            FIELDBEAM=`echo $FIELD_ID $BEAM | awk '{printf "F%02d_B%s",$1,$2}'`
             
             findScienceMSnames
 
@@ -114,10 +126,14 @@ for FIELD in ${FIELD_LIST}; do
 
         done
 
+        FIELDBEAM=`echo $FIELD_ID | awk '{printf "F%02d",$1}'`
+
         . ${PIPELINEDIR}/linmos.sh
 
         cd ..
 
     fi
 
+    FIELD_ID=`expr $FIELD_ID + 1`
+    
 done

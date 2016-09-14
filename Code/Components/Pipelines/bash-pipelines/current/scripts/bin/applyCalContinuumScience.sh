@@ -39,7 +39,7 @@ fi
 
 if [ $DO_IT == true ]; then
 
-    sbatchfile=$slurms/apply_gains_cal_cont_beam${BEAM}.sbatch
+    sbatchfile=$slurms/apply_gains_cal_cont_${FIELDBEAM}.sbatch
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -70,8 +70,8 @@ if [ "\${keepRaw}" == "true" ]; then
   aprun -n 1 cp -r ${msSciAv} ${msSciAvCal}
 fi
 
-parset=${parsets}/apply_gains_cal_cont_beam${BEAM}_\${SLURM_JOB_ID}.in
-log=${logs}/apply_gains_cal_cont_beam${BEAM}_\${SLURM_JOB_ID}.log
+parset=${parsets}/apply_gains_cal_cont_${FIELDBEAM}_\${SLURM_JOB_ID}.in
+log=${logs}/apply_gains_cal_cont_${FIELDBEAM}_\${SLURM_JOB_ID}.log
 cat > \$parset <<EOFINNER
 Ccalapply.dataset                         = ${msSciAvCal}
 #

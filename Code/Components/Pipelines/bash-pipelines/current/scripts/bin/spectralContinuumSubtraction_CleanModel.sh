@@ -72,8 +72,8 @@ else
     modelDirection="[\${ra}, \${dec}, \${epoch}]"
 fi
 
-parset=${parsets}/contsub_spectralline_beam${BEAM}_\${SLURM_JOB_ID}.in
-log=${logs}/contsub_spectralline_beam${BEAM}_\${SLURM_JOB_ID}.log
+parset=${parsets}/contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.in
+log=${logs}/contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.log
 cat > \$parset <<EOFINNER
 # The measurement set name - this will be overwritten
 CContSubtract.dataset                             = ${msSciSL}

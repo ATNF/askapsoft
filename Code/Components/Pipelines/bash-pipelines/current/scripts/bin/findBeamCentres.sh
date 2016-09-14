@@ -103,7 +103,13 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$needBeams" == "true" ]; then
 
             FIELD_LIST=`sort -k2 $fieldlist | awk '{print $2}' | uniq `
             
-            echo "List of fields: $FIELD_LIST"
+            echo "List of fields: "
+            COUNT=0
+            for FIELD in ${FIELD_LIST}; do
+                echo "$COUNT - ${FIELD}"
+                COUNT=`expr $COUNT + 1`
+            done
+            #echo $FIELD_LIST
             
             for FIELD in ${FIELD_LIST}; do
                 echo "Finding footprint for field $FIELD"

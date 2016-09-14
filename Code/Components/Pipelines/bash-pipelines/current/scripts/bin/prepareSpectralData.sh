@@ -63,7 +63,7 @@ fi
 
 if [ $DO_IT == true ]; then
 
-    sbatchfile=$slurms/split_spectralline_science_beam${BEAM}.sbatch
+    sbatchfile=$slurms/split_spectralline_science_${FIELDBEAM}.sbatch
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -88,7 +88,7 @@ cd $OUTPUT
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 
-parset=${parsets}/split_spectralline_science_beam${BEAM}_\${SLURM_JOB_ID}.in
+parset=${parsets}/split_spectralline_science_${FIELDBEAM}_\${SLURM_JOB_ID}.in
 cat > \$parset <<EOFINNER
 # Input measurement set
 # Default: <no default>
@@ -110,7 +110,7 @@ stman.bucketsize  = ${BUCKET_SIZE}
 stman.tilenchan   = ${TILENCHAN_SL}
 EOFINNER
 
-log=${logs}/split_spectralline_science_beam${BEAM}_\${SLURM_JOB_ID}.log
+log=${logs}/split_spectralline_science_${FIELDBEAM}_\${SLURM_JOB_ID}.log
 
 NCORES=1
 NPPN=1
@@ -155,7 +155,7 @@ fi
 
 if [ $DO_IT == true ]; then
 
-    sbatchfile=$slurms/apply_gains_cal_spectralline_beam${BEAM}.sbatch
+    sbatchfile=$slurms/apply_gains_cal_spectralline_${FIELDBEAM}.sbatch
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -180,8 +180,8 @@ cd $OUTPUT
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 
-parset=${parsets}/apply_gains_cal_spectralline_beam${BEAM}_\${SLURM_JOB_ID}.in
-log=${logs}/apply_gains_cal_spectralline_beam${BEAM}_\${SLURM_JOB_ID}.log
+parset=${parsets}/apply_gains_cal_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.in
+log=${logs}/apply_gains_cal_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.log
 cat > \$parset <<EOFINNER
 Ccalapply.dataset                         = ${msSciSL}
 #

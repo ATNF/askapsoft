@@ -32,18 +32,43 @@ ms1934list=""
 FLAG_CBPCAL_DEP=""
 FLAG_CBPCAL_DEP=`addDep "$FLAG_CBPCAL_DEP" "$DEP_START"`
 
+ORIGINAL_OUTPUT=${OUTPUT}
+
+#Set the FIELD string to a special one for the bandpass calibrator
+FIELD=BPCAL
+mkdir -p ${FIELD}
+cd ${FIELD}
+OUTPUT="${ORIGINAL_OUTPUT}/${FIELD}"
+mkdir -p ${OUTPUT}/Checkfiles
+lfs setstripe -c 1 ${OUTPUT}/Checkfiles
+
 for BEAM in ${BEAMS_TO_USE}; do
 
-    mkdir -p ${OUTPUT}/Checkfiles
-    lfs setstripe -c 1 ${OUTPUT}/Checkfiles
+    parsets=$parsetsBase/$FIELD
+    mkdir -p $parsets
+    logs=$logsBase/$FIELD
+    mkdir -p $logs
+    slurms=$slurmsBase/$FIELD
+    mkdir -p $slurms
+    slurmOut=$slurmOutBase/$FIELD
+    mkdir -p $slurmOut
+
     # an empty file that will indicate that the flagging has been done
     FLAG_1934_CHECK_FILE="${OUTPUT}/Checkfiles/FLAGGING_DONE_1934_BEAM${BEAM}"
+
+    FIELDBEAM="${FIELD}_B${BEAM}"
     
-   . ${PIPELINEDIR}/split1934.sh
-   . ${PIPELINEDIR}/flag1934.sh
+    . ${PIPELINEDIR}/split1934.sh
+    . ${PIPELINEDIR}/flag1934.sh
+
 
 done
 
+FIELDBEAM=$FIELD
+
 . ${PIPELINEDIR}/findBandpassCal.sh
 
+cd ..
+
+OUTPUT=${ORIGINAL_OUTPUT}
 

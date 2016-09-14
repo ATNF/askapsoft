@@ -53,7 +53,7 @@ ${exportDirective}
 ${askapsoftModuleCommands}
 
 BASEDIR=${BASEDIR}
-cd $OUTPUT
+cd $ORIGINAL_OUTPUT
 . ${PIPELINEDIR}/utils.sh	
 
 # Make a copy of this sbatch file for posterity

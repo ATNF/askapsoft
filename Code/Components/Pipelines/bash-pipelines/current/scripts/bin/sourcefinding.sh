@@ -59,8 +59,8 @@ Selavy.Weights.weightsCutoff = ${LINMOS_CUTOFF}"
 
     # get the text that does the FITS conversion - put in $fitsConvertText
     convertToFITStext
-    
-    sbatchfile=$slurms/science_selavy_B${BEAM}.sbatch
+
+    sbatchfile=$slurms/science_selavy_${FIELDBEAM}.sbatch
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -101,8 +101,8 @@ for im in ${imlist}; do
     rejuvenate \${casaim}
 done
 
-parset=${parsets}/science_selavy_B${BEAM}_\${SLURM_JOB_ID}.in
-log=${logs}/science_selavy_B${BEAM}_\${SLURM_JOB_ID}.log
+parset=${parsets}/science_selavy_${FIELDBEAM}_\${SLURM_JOB_ID}.in
+log=${logs}/science_selavy_${FIELDBEAM}_\${SLURM_JOB_ID}.log
 
 cat > \$parset <<EOFINNER
 Selavy.image = ${image##*/}.fits

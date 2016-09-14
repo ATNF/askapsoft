@@ -54,7 +54,7 @@ fi
 
 if [ $DO_IT == true ]; then
 
-    sbatchfile=$slurms/spectral_imcontsub_beam${BEAM}.sbatch
+    sbatchfile=$slurms/spectral_imcontsub_${FIELDBEAM}.sbatch
     cat > $sbatchfile <<EOF
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -80,7 +80,7 @@ cd $OUTPUT
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 
-pyscript=${parsets}/spectral_imcontsub_beam${BEAM}_\${SLURM_JOB_ID}.py
+pyscript=${parsets}/spectral_imcontsub_${FIELDBEAM}_\${SLURM_JOB_ID}.py
 cat > \$pyscript << EOFINNER
 #!/usr/bin/env python
 
@@ -93,7 +93,7 @@ rc=robust_contsub()
 rc.poly(infile="image.${imageBase}.restored",threshold=${SPECTRAL_IMSUB_THRESHOLD},verbose=True,fit_order=${SPECTRAL_IMSUB_FIT_ORDER},n_every=${SPECTRAL_IMSUB_CHAN_SAMPLING},log_every=10)
 
 EOFINNER
-log=${logs}/spectral_imcontsub_beam${BEAM}_\${SLURM_JOB_ID}.log
+log=${logs}/spectral_imcontsub_${FIELDBEAM}_\${SLURM_JOB_ID}.log
 
 NCORES=1
 NPPN=1

@@ -61,7 +61,7 @@ fi
 
 if [ $DO_IT == true ]; then
 
-    sbatchfile=$slurms/split_1934_beam$BEAM.sbatch
+    sbatchfile=$slurms/split_1934_${FIELDBEAM}.sbatch
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -86,7 +86,7 @@ cd $OUTPUT
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 
-parset=${parsets}/split_1934_beam${BEAM}_\${SLURM_JOB_ID}.in
+parset=${parsets}/split_1934_${FIELDBEAM}_\${SLURM_JOB_ID}.in
 cat > \$parset <<EOFINNER
 # Input measurement set
 # Default: <no default>
@@ -114,7 +114,7 @@ stman.bucketsize  = ${BUCKET_SIZE}
 stman.tilenchan   = ${NUM_CHAN_TO_AVERAGE}
 EOFINNER
 
-log=${logs}/split_1934_beam${BEAM}_\${SLURM_JOB_ID}.log
+log=${logs}/split_1934_${FIELDBEAM}_\${SLURM_JOB_ID}.log
 
 NCORES=1
 NPPN=1

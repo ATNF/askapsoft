@@ -95,8 +95,8 @@ cd \${contsubdir}
 #################################################
 # First, source-finding
 
-parset=${parsets}/selavy_for_contsub_spectralline_beam${BEAM}_\${SLURM_JOB_ID}.in
-log=${logs}/selavy_for_contsub_spectralline_beam${BEAM}_\${SLURM_JOB_ID}.log
+parset=${parsets}/selavy_for_contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.in
+log=${logs}/selavy_for_contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.log
 cat >> \$parset <<EOFINNER
 ##########
 ## Source-finding with selavy
@@ -181,8 +181,8 @@ else
     #################################################
     # Then, continuum subtraction
     
-    parset=${parsets}/contsub_spectralline_beam${BEAM}_\${SLURM_JOB_ID}.in
-    log=${logs}/contsub_spectralline_beam${BEAM}_\${SLURM_JOB_ID}.log
+    parset=${parsets}/contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.in
+    log=${logs}/contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.log
     cat > \$parset <<EOFINNER
 # The measurement set name - this will be overwritten
 CContSubtract.dataset                             = ${msSciSL}

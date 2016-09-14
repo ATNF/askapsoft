@@ -129,9 +129,11 @@ EOF
     makeLink $JOBLIST
     for FIELD in ${FIELD_LIST}; do
         CWD=`pwd`
-        cd ${ORIGINAL_OUTPUT}/${FIELD}
-        makeLink $JOBLIST
-        cd ${CWD}
+        if [ -e ${ORIGINAL_OUTPUT}/${FIELD} ]; then
+            cd ${ORIGINAL_OUTPUT}/${FIELD}
+            makeLink $JOBLIST
+            cd ${CWD}
+        fi
     done
 
 

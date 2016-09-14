@@ -61,7 +61,7 @@ ${LINMOS_BEAM_OFFSETS}"
     fi
 
     
-    sbatchfile=$slurms/science_linmos.sbatch
+    sbatchfile=$slurms/science_linmos_${FIELDBEAM}.sbatch
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -86,8 +86,8 @@ cd $OUTPUT
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 
-parset=${parsets}/science_linmos_\${SLURM_JOB_ID}.in
-log=${logs}/science_linmos_\${SLURM_JOB_ID}.log
+parset=${parsets}/science_linmos_${FIELDBEAM}_\${SLURM_JOB_ID}.in
+log=${logs}/science_linmos_${FIELDBEAM}_\${SLURM_JOB_ID}.log
 
 # bit of image name before the beam ID
 imagePrefix=image.${IMAGE_BASE_CONT}

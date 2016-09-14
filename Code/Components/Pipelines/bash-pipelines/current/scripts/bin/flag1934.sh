@@ -92,7 +92,7 @@ Cflag.amplitude_flagger.low             = ${FLAG_THRESHOLD_AMPLITUDE_1934_LOW}"
      fi
          
     
-    sbatchfile=$slurms/flag_1934_beam$BEAM.sbatch
+    sbatchfile=$slurms/flag_1934_${FIELDBEAM}.sbatch
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -120,7 +120,7 @@ cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 DO_AMP_FLAG=${DO_AMP_FLAG}
 if [ \$DO_AMP_FLAG == true ]; then
 
-    parset=${parsets}/cflag_amp_1934_beam${BEAM}_\${SLURM_JOB_ID}.in
+    parset=${parsets}/cflag_amp_1934_${FIELDBEAM}_\${SLURM_JOB_ID}.in
     cat > \$parset <<EOFINNER
 # The path/filename for the measurement set
 Cflag.dataset                           = ${msCal}
@@ -135,7 +135,7 @@ ${autocorrFlagging}
 
 EOFINNER
 
-    log=${logs}/cflag_amp_1934_beam${BEAM}_\${SLURM_JOB_ID}.log
+    log=${logs}/cflag_amp_1934_${FIELDBEAM}_\${SLURM_JOB_ID}.log
 
     NCORES=1
     NPPN=1
@@ -153,7 +153,7 @@ fi
 DO_DYNAMIC=${FLAG_DO_DYNAMIC_AMPLITUDE_1934}
 if [ \${DO_DYNAMIC} ]; then
 
-    parset=${parsets}/cflag_dynamic_1934_beam${BEAM}_\${SLURM_JOB_ID}.in
+    parset=${parsets}/cflag_dynamic_1934_${FIELDBEAM}_\${SLURM_JOB_ID}.in
     cat > \$parset <<EOFINNER
 # The path/filename for the measurement set
 Cflag.dataset                           = ${msCal}
@@ -168,7 +168,7 @@ Cflag.amplitude_flagger.integrateSpectra.threshold = ${FLAG_THRESHOLD_DYNAMIC_19
 ${antennaFlagging}
 EOFINNER
 
-    log=${logs}/cflag_dynamic_1934_beam${BEAM}_\${SLURM_JOB_ID}.log
+    log=${logs}/cflag_dynamic_1934_${FIELDBEAM}_\${SLURM_JOB_ID}.log
     
     NCORES=1
     NPPN=1
@@ -190,7 +190,7 @@ EOFOUTER
         DEP=`addDep "$DEP" "$DEP_START"`
         DEP=`addDep "$DEP" "$ID_SPLIT_1934"`
         ID_FLAG_1934=`sbatch $DEP $sbatchfile | awk '{print $4}'`
-        recordJob ${ID_FLAG_1934} "Splitting and flagging 1934-638, beam $BEAM"
+        recordJob ${ID_FLAG_1934} "Flagging 1934-638, beam $BEAM"
         FLAG_CBPCAL_DEP=`addDep "$FLAG_CBPCAL_DEP" "$ID_FLAG_1934"`
     else
         echo "Would run splitting & flagging of 1934-638, beam $BEAM, with slurm file $sbatchfile"

@@ -54,6 +54,14 @@ lfs setstripe -c 1 $tools
 mkdir -p $metadata
 lfs setstripe -c 1 $metadata
 
+# These are used as the base directories for these types of files. We
+# make subdirectories in each for different fields (eg. parsets/field1
+# etc), and use $parsets etc to refer to them.
+parsetsBase=$parsets
+logsBase=$logs
+slurmsBase=$slurms
+slurmOutBase=$slurmOut
+
 ####################
 # Date and time stamp
 NOW=`date +%F-%H%M`

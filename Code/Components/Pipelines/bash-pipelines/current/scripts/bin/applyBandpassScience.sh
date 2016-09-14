@@ -37,7 +37,7 @@ fi
 
 if [ $DO_IT == true ]; then
 
-    sbatchfile=$slurms/ccalapply_science_beam$BEAM.sbatch
+    sbatchfile=$slurms/ccalapply_science_${FIELDBEAM}.sbatch
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}

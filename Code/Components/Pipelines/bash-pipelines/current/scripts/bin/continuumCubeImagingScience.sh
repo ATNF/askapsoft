@@ -135,7 +135,7 @@ Simager.restore.beamLog                         = beamLog.${imageBase}.txt"
 
         echo "Imaging the continuum cube, polarisation $POLN, for the science observation"
 
-        sbatchfile=$slurms/science_contcube_imager_beam${BEAM}_${POLN}.sbatch
+        sbatchfile=$slurms/science_contcube_imager_${FIELDBEAM}_${POLN}.sbatch
         cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -175,7 +175,7 @@ else
     directionDefinition="Simager.Images.direction                       = [\${ra}, \${dec}, \${epoch}]"
 fi
 
-parset=${parsets}/science_contcube_imager_beam${BEAM}_${POLN}_\${SLURM_JOB_ID}.in
+parset=${parsets}/science_contcube_imager_${FIELDBEAM}_${POLN}_\${SLURM_JOB_ID}.in
 cat > \$parset << EOF
 Simager.dataset                                 = \${ms}
 #
@@ -206,7 +206,7 @@ ${preconditioning}
 ${restorePars}
 EOF
 
-log=${logs}/science_contcube_imager_beam${BEAM}_${POLN}_\${SLURM_JOB_ID}.log
+log=${logs}/science_contcube_imager_${FIELDBEAM}_${POLN}_\${SLURM_JOB_ID}.log
 
 # Now run the simager
 NCORES=${NUM_CPUS_CONTCUBE_SCI}

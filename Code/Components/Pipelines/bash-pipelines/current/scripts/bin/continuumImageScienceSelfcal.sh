@@ -134,7 +134,7 @@ Ccalibrator.sources.definition                  = \${sources}"
 
     fi
 
-    sbatchfile=$slurms/science_continuumImageSelfcal_beam$BEAM.sbatch
+    sbatchfile=$slurms/science_continuumImageSelfcal_${FIELDBEAM}.sbatch
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -213,8 +213,8 @@ Cimager.calibrate                               = false
 "
     fi
 
-    parset=${parsets}/science_imagingSelfcal_beam${BEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}.in
-    log=${logs}/science_imagingSelfcal_beam${BEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}.log
+    parset=${parsets}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}.in
+    log=${logs}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}.log
 
     cat > \$parset <<EOFINNER
 ##########
