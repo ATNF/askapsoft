@@ -97,6 +97,7 @@ log=${logs}/spectral_imcontsub_${FIELDBEAM}_\${SLURM_JOB_ID}.log
 
 NCORES=1
 NPPN=1
+module load casa
 aprun -n \${NCORES} -N \${NPPN} -b casa --nogui --nologger --log2term -c \${pyscript} > \${log}
 err=\$?
 rejuvenate image.${imageBase}.restored
