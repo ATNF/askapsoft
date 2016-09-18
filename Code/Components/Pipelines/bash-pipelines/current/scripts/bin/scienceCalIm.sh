@@ -137,3 +137,9 @@ for FIELD in ${FIELD_LIST}; do
     FIELD_ID=`expr $FIELD_ID + 1`
     
 done
+
+OUTPUT=${ORIGINAL_OUTPUT}
+parsets=$parsetsBase
+logs=$logsBase
+slurms=$slurmsBase
+slurmOut=$slurmOutBase

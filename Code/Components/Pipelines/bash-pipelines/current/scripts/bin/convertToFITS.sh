@@ -34,42 +34,9 @@
 
 if [ ${DO_CONVERT_TO_FITS} == true ]; then
 
-    expectedImageNames=()
-
-    beamlist="${BEAMS_TO_USE} all"
-    for BEAM in $beamlist; do
-
-        setImageBaseCont
-        for((i=0;i<${NUM_TAYLOR_TERMS};i++)); do
-
-            if [ ${NUM_TAYLOR_TERMS} -eq 1 ]; then
-                imBase=${imageBase}
-            else
-                imBase="${imageBase}.taylor.${i}"
-            fi
-            expectedImageNames+=(image.${imBase}.restored)
-            for im in ${IMAGE_LIST}; do
-
-                if [ -e ${imagename} ]; then
-                    expectedImageNames+=(${im}.${imBase})
-                fi
-            done
-        done
-
-        setImageBaseSpectral
-        expectedImageNames+=(image.${imBase}.restored)
-        for im in ${IMAGE_LIST}; do
-
-            if [ -e ${imagename} ]; then
-                expectedImageNames+=(${im}.${imBase})
-            fi
-        done
-
-    done
-
     # get the text that does the FITS conversion - put in $fitsConvertText
     convertToFITStext
-    
+
     sbatchfile="$slurms/convert_to_FITS.sbatch"
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
@@ -95,11 +62,68 @@ cd $OUTPUT
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 
-imageList=(${expectedImageNames[@]})
-casaim="\${imageList[\${SLURM_ARRAY_TASK_ID}]}"
-fitsim="\${imageList[\${SLURM_ARRAY_TASK_ID}]}.fits"
+expectedImageNames=()
 
-${fitsConvertText}
+FIELD_LIST="${FIELD_LIST}"
+BEAMS_TO_USE="${BEAMS_TO_USE}"
+NUM_TAYLOR_TERMS="${NUM_TAYLOR_TERMS}"
+IMAGE_LIST="${IMAGE_LIST}"
+IMAGE_BASE_CONT="${IMAGE_BASE_CONT}"
+IMAGE_BASE_CONTCUBE="${IMAGE_BASE_CONTCUBE}"
+IMAGE_BASE_SPECTRAL="${IMAGE_BASE_SPECTRAL}"
+
+for FIELD in \${FIELD_LIST}; do
+
+    beamlist="\${BEAMS_TO_USE} all"
+    for BEAM in \$beamlist; do
+
+        setImageBaseCont
+        for((i=0;i<\${NUM_TAYLOR_TERMS};i++)); do
+
+            if [ \${NUM_TAYLOR_TERMS} -eq 1 ]; then
+                imBase=\${imageBase}
+            else
+                imBase="\${imageBase}.taylor.\${i}"
+            fi
+            imagename=\${FIELD}/image.\${imBase}.restored
+            if [ -e \$imagename ]; then
+                expectedImageNames+=(\${imagename})
+            fi
+            for im in \${IMAGE_LIST}; do
+                imagename=\${FIELD}/\${im}.\${imBase}
+                if [ -e \${imagename} ]; then
+                    expectedImageNames+=(\${imagename})
+                fi
+            done
+        done
+
+        setImageBaseSpectral
+        imagename=\${FIELD}/image.\${imageBase}.restored
+        if [ -e \$imagename ]; then
+            expectedImageNames+=(\${imagename})
+        fi
+        for im in \${IMAGE_LIST}; do
+            imagename=\${FIELD}/\${im}.\${imageBase}
+            if [ -e \${imagename} ]; then
+                expectedImageNames+=(\${imagename})
+            fi
+        done
+
+    done
+
+done
+
+echo "Image names = \${expectedImageNames[@]}"
+
+for image in \${expectedImageNames[@]}; do
+
+    echo "Launching conversion job for \$image"
+    casaim=\${image}
+    fitsim=\${image}.fits
+    
+    ${fitsConvertText}
+
+done
 
 EOFOUTER
     
@@ -108,9 +132,7 @@ EOFOUTER
         if [ "${ALL_JOB_IDS}" != "" ]; then
             dep="-d afterok:`echo $ALL_JOB_IDS | sed -e 's/,/:/g'`"
         fi
-        numImages=${#expectedImageNames[@]}
-        arrayIndices=`echo $numImages | awk '{printf "0-%d",$1-1}'`
-        ID_FITSCONVERT=`sbatch --array=${arrayIndices} ${dep} $sbatchfile | awk '{print $4}'`
+        ID_FITSCONVERT=`sbatch ${dep} $sbatchfile | awk '{print $4}'`
         recordJob ${ID_FITSCONVERT} "Job to convert remaining images to FITS, with flags \"${dep}\""
     else
         echo "Would submit job to convert remaining images to FITS, with slurm file $sbatchfile"

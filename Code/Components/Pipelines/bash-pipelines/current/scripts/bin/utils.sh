@@ -272,45 +272,32 @@ function getPolList()
 function convertToFITStext()
 {
 
-    fitsConvertText="# The following converts the file in \$casaim to a FITS file, then fixes headers.
+    fitsConvertText="# The following converts the file in \$casaim to a FITS file, after fixing headers.
 if [ -e \${casaim} ] && [ ! -e \${fitsim} ]; then
     # The FITS version of this image doesn't exist
 
-    aprun -n 1 $image2fits in=\${casaim} out=\${fitsim}
-
-    script=$parsets/fixheader_\${casaim##*/}_\${SLURM_JOB_ID}.py
-    log=$logs/fixheader_\${casaim##*/}_\${SLURM_JOB_ID}.log
+    parset=$parsets/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.in
+    log=$logs/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.log
     if [ \"${ASKAPSOFT_VERSION}\" == \"\" ]; then
         ASKAPSOFT_VERSION_USED=`module list -t 2>&1 | grep askapsoft`
     else
         ASKAPSOFT_VERSION_USED=`echo ${ASKAPSOFT_VERSION} | sed -e 's|/||g'`
     fi
-    cat > \$script << EOFSCRIPT
-#!/usr/bin/env python
-import pyfits as fits
-image='\${fitsim}'
-project='${PROJECT_ID}'
-dateobs='${DATE_OBS}'
-duration=${DURATION}
-sbid='${SB_SCIENCE}'
-askapsoftVersion='Produced with ASKAPsoft version \${ASKAPSOFT_VERSION_USED}'
-pipelineVersion='Produced using ASKAP pipeline version ${PIPELINE_VERSION}'
-processDate='Processed with ASKAP pipelines on ${NOW_FMT}'
 
-hdulist = fits.open(image,'update')
-hdulist[0].header.update('PROJECT',project)
-hdulist[0].header.update('TELESCOP','ASKAP')
-hdulist[0].header.update('DATE-OBS',dateobs)
-hdulist[0].header.update('INTIME',duration)
-#hdulist[0].header.update('INSTRUME',instrument)
-hdulist[0].header.update('SBID',sbid)
-hdulist[0].header.add_history(askapsoftVersion)
-hdulist[0].header.add_history(pipelineVersion)
-hdulist[0].header.add_history(processDate)
-hdulist.flush()
-EOFSCRIPT
-
-    aprun -n 1 python \$script > \$log
+    cat > \$parset << EOFINNER
+ImageToFITS.casaimage = \${casaim}
+ImageToFITS.fitsimage = \${fitsim}
+ImageToFITS.stokesLast = true
+ImageToFITS.headers = [\"project\",\"sbid\",\"date-obs\",\"duration\"]
+ImageToFITS.headers.project = ${PROJECT_ID}
+ImageToFITS.headers.sbid = ${SB_SCIENCE}
+ImageToFITS.headers.date-obs = ${DATE_OBS}
+ImageToFITS.headers.duration = ${DURATION}
+ImageToFITS.history = [\"Produced with ASKAPsoft version \${ASKAPSOFT_VERSION_USED}\",\"Produced using ASKAP pipeline version ${PIPELINE_VERSION}\",\"Processed with ASKAP pipelines on ${NOW_FMT}\"]
+EOFINNER
+    NCORES=1
+    NPPN=1
+    aprun -n \${NCORES} -N \${NPPN} imageToFITS -c \${parset} > \${log}
 
 fi"
 

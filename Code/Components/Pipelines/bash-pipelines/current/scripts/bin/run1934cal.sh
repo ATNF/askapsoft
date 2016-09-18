@@ -43,6 +43,10 @@ mkdir -p ${OUTPUT}/Checkfiles
 lfs setstripe -c 1 ${OUTPUT}/Checkfiles
 
 for BEAM in ${BEAMS_TO_USE}; do
+parsets=$parsetsBase
+logs=$logsBase
+slurms=$slurmsBase
+slurmOut=$slurmOutBase
 
     parsets=$parsetsBase/$FIELD
     mkdir -p $parsets
@@ -71,4 +75,8 @@ FIELDBEAM=$FIELD
 cd ..
 
 OUTPUT=${ORIGINAL_OUTPUT}
+parsets=$parsetsBase
+logs=$logsBase
+slurms=$slurmsBase
+slurmOut=$slurmOutBase
 

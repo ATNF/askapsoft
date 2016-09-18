@@ -66,19 +66,8 @@ for((i=0;i<\${#casdaTwoDimImageNames[@]};i++)); do
     im=\${casdaTwoDimImageNames[i]}
     title=\${casdaTwoDimThumbTitles[i]}
 
-    StatParset=$parsets/cimstat-\${im}_\${SLURM_JOB_ID}.in
-    StatLog=$logs/cimstat-\${im}_\${SLURM_JOB_ID}.log
-    cat > \$StatParset <<EOF
-Cimstat.image = \${im}
-Cimstat.stats = ["Mean","Stddev","Median","MADFM","MADFMasStdDev"]
-EOF
-    aprun -n 1 $cimstat -c \$StatParset > \$StatLog
-    measuredNoise=\`grep "MADFMasStddev" \$StatLog | awk '{print \$10}'\`
-    zmin=\`echo \$measuredNoise ${THUMBNAIL_GREYSCALE_MIN} | awk '{printf "%.6f",\$1*\$2}'\`
-    zmax=\`echo \$measuredNoise ${THUMBNAIL_GREYSCALE_MAX} | awk '{printf "%.6f",\$1*\$2}'\`
-
-    log=${logs}/thumbnails-\${im}_\${SLURM_JOB_ID}.log
-    script=${parsets}/thumbnails-\${im}_\${SLURM_JOBID}.py
+    log=${logs}/thumbnails-\${im##*/}_\${SLURM_JOB_ID}.log
+    script=${parsets}/thumbnails-\${im##*/}_\${SLURM_JOBID}.py
     cat > \$script <<EOF
 #!/usr/bin/env python
 import matplotlib
@@ -88,14 +77,36 @@ matplotlib.rcParams['font.serif'] = ['Times', 'Palatino', 'New Century Schoolboo
 #matplotlib.rcParams['text.usetex'] = True
 import aplpy
 import pylab as plt
-suffix='${THUMBNAIL_SUFFIX}'
+import pyfits as fits
+import os
+import numpy as np
+
+# Get statistics for the image
+#  If there is a matching weights image, use that to
+#  avoid pixels that have zero weight.
 fitsim='\${im}'
+weightsim=fitsim
+weightsim.replace('.restored','')
+prefix=weightsim[:weightsim.find('.')]
+weightsim.replace(prefix,'weights',1)
+image=fits.getdata(fitsim)
+isgood=(np.ones(image.shape)>0)
+if os.access(weightsim,os.F_OK):
+    weights=fits.getdata(weightsim)
+    isgood=(weights>0)
+median=np.median(image[isgood])
+madfm=np.median(abs(image[isgood]-median))
+stddev=madfm * 0.6744888
+vmin=${THUMBNAIL_GREYSCALE_MIN} * stddev
+vmax=${THUMBNAIL_GREYSCALE_MAX} * stddev
+
+suffix='${THUMBNAIL_SUFFIX}'
 thumbim=fitsim.replace('.fits','.%s'%suffix)
 figtitle='\${title}'
 figsizes={'${THUMBNAIL_SIZE_TEXT[0]}':${THUMBNAIL_SIZE_INCHES[0]}, '${THUMBNAIL_SIZE_TEXT[1]}':${THUMBNAIL_SIZE_INCHES[1]}}
 for size in figsizes:
     gc=aplpy.FITSFigure(fitsim,figsize=(figsizes[size],figsizes[size]))
-    gc.show_colorscale(vmin=\$zmin,vmax=\$zmax)
+    gc.show_colorscale(vmin=vmin,vmax=vmax)
     gc.tick_labels.set_xformat('hh:mm')
     gc.tick_labels.set_yformat('dd:mm')
     gc.add_grid()
