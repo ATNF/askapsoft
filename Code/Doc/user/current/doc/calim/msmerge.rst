@@ -14,7 +14,7 @@ Running the program
 
 It can be run with the following command ::
 
-   $ msmerge.sh -o output_file list_of_input_files
+   $ msmerge -o output_file list_of_input_files
 
 The *msmerge* program is not parallel/distributed, it runs in a single process.
 
@@ -30,11 +30,11 @@ Example
 
 .. code-block:: bash
 
-   $ msmerge.sh -o fullband.ms subband_???.ms
+   $ msmerge -o fullband.ms subband_???.ms
 
 **Example 2:**
 
 .. code-block:: bash
 
-   $ msmerge.sh -o output.ms channel1.ms channel2.ms channel3.ms
+   $ msmerge -o output.ms channel1.ms channel2.ms channel3.ms
 

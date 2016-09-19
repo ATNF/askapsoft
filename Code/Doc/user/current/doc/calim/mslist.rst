@@ -11,14 +11,14 @@ Running the program
 
 It can be run with the following command ::
 
-   $ mslist.sh [options] MS_filename
+   $ mslist [options] MS_filename
 
 The *mslist* program is not parallel/distributed, it runs in a single process.
 
 Casacore tasks *MSSummary* and *MSLister* write to stderr, so to redirect output to a
 pipe or a file, first redirect stderr to stdout. For example, in bash: ::
 
-   $ mslist.sh [options] MS_filename > MS_summary.txt 2>&1
+   $ mslist [options] MS_filename > MS_summary.txt 2>&1
 
 Configuration Parameters
 ------------------------
@@ -84,11 +84,11 @@ Example
 
 .. code-block:: bash
 
-   $ mslist.sh --verbose --full 1641/2015-04-14_071714_ch00000-00511.ms 
+   $ mslist --verbose --full 1641/2015-04-14_071714_ch00000-00511.ms 
 
 **Example 2:**
 
 .. code-block:: bash
 
-   $ mslist.sh --data --antenna='3&&4' --spw='0:5~10' --correlation='XX,YY' 1641/2015-04-14_071714_ch00000-00511.ms 
+   $ mslist --data --antenna='3&&4' --spw='0:5~10' --correlation='XX,YY' 1641/2015-04-14_071714_ch00000-00511.ms 
 

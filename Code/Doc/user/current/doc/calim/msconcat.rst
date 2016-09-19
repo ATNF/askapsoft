@@ -16,7 +16,7 @@ Running the program
 
 It can be run with the following command ::
 
-   $ msconcat.sh -o output_file list_of_input_files
+   $ msconcat -o output_file list_of_input_files
 
 The *msconcat* program is not parallel/distributed, it runs in a single process.
 
@@ -32,11 +32,11 @@ Example
 
 .. code-block:: bash
 
-   $ msconcat.sh -o combo.ms block_???.ms
+   $ msconcat -o combo.ms block_???.ms
 
 **Example 2:**
 
 .. code-block:: bash
 
-   $ msconcat.sh -o cat.ms sb1.ms sb2.ms sb3.ms
+   $ msconcat -o cat.ms sb1.ms sb2.ms sb3.ms
 
