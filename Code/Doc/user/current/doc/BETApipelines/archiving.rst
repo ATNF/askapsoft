@@ -51,7 +51,9 @@ scripts, and they are detailed here.
 +--------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | ``IMAGE_LIST``                 | "image psf psf.image residual   | none                            | The list of image prefixes that will be used for generating FITS|
 |                                | sensitivity"                    |                                 | files and determining the list of images to be uploaded to      |
-|                                |                                 |                                 | CASDA.                                                          |
+|                                |                                 |                                 | CASDA. In addition, the images image.XXX.restored and           |
+|                                |                                 |                                 | image.XXX.alt.restored (in the latter's case, if present) will  |
+|                                |                                 |                                 | also be processed.                                              |
 +--------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | ``ARCHIVE_BEAM_IMAGES``        | false                           | none                            | Whether the individual beam images should be included in the    |
 |                                |                                 |                                 | archiving (true) or if only the mosaicked image should be       |

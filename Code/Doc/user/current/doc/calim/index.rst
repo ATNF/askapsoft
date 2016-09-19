@@ -30,3 +30,4 @@ data sets i.e. Hundereds of TB per hour.
    msconcat.rst
    mslist.rst
    linmos.rst
+   imagetofits.rst
