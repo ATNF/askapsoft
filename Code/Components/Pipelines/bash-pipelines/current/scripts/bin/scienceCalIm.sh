@@ -39,14 +39,15 @@ FIELD_ID=0
 
 for FIELD in ${FIELD_LIST}; do
 
-    doField=true
-    if [ "${FIELD_SELECTION_SCIENCE}" != "" ] &&
-           [ "${FIELD_SELECTION_SCIENCE}" != "$FIELD" ]; then
-        # If user has requested a given field, ignore all others
-        doField=false
-    fi
+    mkdir -p ${FIELD}
+    cd ${FIELD}
+    OUTPUT="${OUTPUT}/${FIELD}"
 
-    if [ $doField == true ]; then
+    # Get the linmos offsets when we have a common image centre for
+    # all beams - store in $LINMOS_BEAM_OFFSETS
+    getBeamOffsets
+
+    for BEAM in ${BEAMS_TO_USE}; do
 
         parsets=$parsetsBase/$FIELD
         mkdir -p $parsets
@@ -59,83 +60,90 @@ for FIELD in ${FIELD_LIST}; do
 
         echo "Processing field $FIELD"
         echo "-----------------------"
+
         
-        mkdir -p ${FIELD}
-        cd ${FIELD}
-        OUTPUT="${ORIGINAL_OUTPUT}/${FIELD}"
+        mkdir -p ${OUTPUT}/Checkfiles
+        # an empty file that will indicate that the flagging has been done
+        FLAG_CHECK_FILE="${OUTPUT}/Checkfiles/FLAGGING_DONE_BEAM${BEAM}"
+        # an empty file that will indicate that the bandpass has been done
+        BANDPASS_CHECK_FILE="${OUTPUT}/Checkfiles/BANDPASS_APPLIED_BEAM${BEAM}"
+        # an empty file that will indicate the gains have been applied to
+        # the averaged (continuum) dataset
+        CONT_GAINS_CHECK_FILE="${OUTPUT}/Checkfiles/GAINS_APPLIED_CONT_BEAM${BEAM}"
+        # an empty file that will indicate the gains have been applied to
+        # the spectral-line dataset
+        SL_GAINS_CHECK_FILE="${OUTPUT}/Checkfiles/GAINS_APPLIED_SL_BEAM${BEAM}"
+        # an empty file that will indicate the continuum has been
+        # subtracted from the spectral-line dataset
+        CONT_SUB_CHECK_FILE="${OUTPUT}/Checkfiles/CONT_SUB_SL_BEAM${BEAM}"
 
-        # Get the linmos offsets when we have a common image centre for
-        # all beams - store in $LINMOS_BEAM_OFFSETS
-        getBeamOffsets
-
-        for BEAM in ${BEAMS_TO_USE}; do
-            
-            mkdir -p ${OUTPUT}/Checkfiles
-            lfs setstripe -c 1 ${OUTPUT}/Checkfiles
-            # an empty file that will indicate that the flagging has been done
-            FLAG_CHECK_FILE="${OUTPUT}/Checkfiles/FLAGGING_DONE_BEAM${BEAM}"
-            # an empty file that will indicate that the bandpass has been done
-            BANDPASS_CHECK_FILE="${OUTPUT}/Checkfiles/BANDPASS_APPLIED_BEAM${BEAM}"
-            # an empty file that will indicate the gains have been applied to
-            # the averaged (continuum) dataset
-            CONT_GAINS_CHECK_FILE="${OUTPUT}/Checkfiles/GAINS_APPLIED_CONT_BEAM${BEAM}"
-            # an empty file that will indicate the gains have been applied to
-            # the spectral-line dataset
-            SL_GAINS_CHECK_FILE="${OUTPUT}/Checkfiles/GAINS_APPLIED_SL_BEAM${BEAM}"
-            # an empty file that will indicate the continuum has been
-            # subtracted from the spectral-line dataset
-            CONT_SUB_CHECK_FILE="${OUTPUT}/Checkfiles/CONT_SUB_SL_BEAM${BEAM}"
-
-            if [ "${DIRECTION_SCI}" != "" ]; then
-                # User has requested a particular image direction
-                DIRECTION=${DIRECTION_SCI}
-            else
-                if [ "${IMAGE_AT_BEAM_CENTRES}" == "true" ]; then
-                    # store the beam centre in $DIRECTION
-                    getBeamCentre
-                fi
-                # otherwise we get the phase centre from the MS via advise,
-                # and use for all beams
+        if [ "${DIRECTION_SCI}" != "" ]; then
+            # User has requested a particular image direction
+            DIRECTION=${DIRECTION_SCI}
+        else
+            if [ "${IMAGE_AT_BEAM_CENTRES}" == "true" ]; then
+                # store the beam centre in $DIRECTION
+                getBeamCentre
             fi
+            # otherwise we get the phase centre from the MS via advise,
+            # and use for all beams
+        fi
 
-            FIELDBEAM=`echo $FIELD_ID $BEAM | awk '{printf "F%02d_B%s",$1,$2}'`
+        
+        findScienceMSnames
+
+        . ${PIPELINEDIR}/splitScience.sh
+        . ${PIPELINEDIR}/flagScience.sh
+        
+        . ${PIPELINEDIR}/applyBandpassScience.sh
+
+        . ${PIPELINEDIR}/averageScience.sh
+        FIELDBEAM=`echo $FIELD_ID $BEAM | awk '{printf "F%02d_B%s",$1,$2}'`
             
-            findScienceMSnames
+        findScienceMSnames
 
-            . ${PIPELINEDIR}/splitScience.sh
-            . ${PIPELINEDIR}/flagScience.sh
-            
-            . ${PIPELINEDIR}/applyBandpassScience.sh
 
-            . ${PIPELINEDIR}/averageScience.sh
+        if [ $DO_SELFCAL == true ]; then
+            . ${PIPELINEDIR}/continuumImageScienceSelfcal.sh
+        else
+	    . ${PIPELINEDIR}/continuumImageScience.sh
+        fi
 
-            if [ $DO_SELFCAL == true ]; then
-                . ${PIPELINEDIR}/continuumImageScienceSelfcal.sh
-            else
-	        . ${PIPELINEDIR}/continuumImageScience.sh
-            fi
+        . ${PIPELINEDIR}/applyCalContinuumScience.sh
+        . ${PIPELINEDIR}/sourcefinding.sh
 
-            . ${PIPELINEDIR}/applyCalContinuumScience.sh
-            . ${PIPELINEDIR}/sourcefinding.sh
+        . ${PIPELINEDIR}/continuumCubeImagingScience.sh
 
-            . ${PIPELINEDIR}/continuumCubeImagingScience.sh
+        . ${PIPELINEDIR}/prepareSpectralData.sh
 
-            . ${PIPELINEDIR}/prepareSpectralData.sh
-            . ${PIPELINEDIR}/spectralImageScience.sh
-            . ${PIPELINEDIR}/spectralImContSub.sh
 
-        done
+
+        . ${PIPELINEDIR}/spectralImageScience.sh
+
+
 
         FIELDBEAM=`echo $FIELD_ID | awk '{printf "F%02d",$1}'`
 
-        . ${PIPELINEDIR}/linmos.sh
+        if [ $DO_ALT_IMAGER == true ]; then
+            . ${PIPELINEDIR}/altLinmos.sh
+        else
+            . ${PIPELINEDIR}/linmos.sh
+            . ${PIPELINEDIR}/spectralImContSub.sh
 
-        cd ..
+        fi
 
-    fi
+
+
+
+    done
+
+
+
+    cd ..
 
     FIELD_ID=`expr $FIELD_ID + 1`
     
+
 done
 
 OUTPUT=${ORIGINAL_OUTPUT}

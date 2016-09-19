@@ -143,20 +143,20 @@ void ContinuumWorker::run(void)
         ASKAPLOG_DEBUG_STR(logger,"Worker is waiting for work allocation");
         wu.receiveUnitFrom(itsMaster,itsComms);
         if (wu.get_payloadType() == ContinuumWorkUnit::DONE) {
-            ASKAPLOG_DEBUG_STR(logger,"Worker has received complete allocation");
+            ASKAPLOG_INFO_STR(logger,"Worker has received complete allocation");
             break;
         }
         else if (wu.get_payloadType() == ContinuumWorkUnit::NA) {
-            ASKAPLOG_DEBUG_STR(logger,"Worker has received non applicable allocation");
+            ASKAPLOG_WARN_STR(logger,"Worker has received non applicable allocation");
             sleep(1);
             wrequest.sendRequest(itsMaster,itsComms);
             continue;
         }
         else {
 
-            ASKAPLOG_DEBUG_STR(logger,"Worker has received valid allocation");
+            ASKAPLOG_INFO_STR(logger,"Worker has received valid allocation");
             const string ms = wu.get_dataset();
-            ASKAPLOG_DEBUG_STR(logger, "Received Work Unit for dataset " << ms
+            ASKAPLOG_INFO_STR(logger, "Received Work Unit for dataset " << ms
                               << ", local (topo) channel " << wu.get_localChannel()
                               << ", global (topo) channel " << wu.get_globalChannel()
                               << ", frequency " << wu.get_channelFrequency()/1.e6 << " MHz"
@@ -170,23 +170,33 @@ void ContinuumWorker::run(void)
             }
 
             if (wu.get_payloadType() == ContinuumWorkUnit::LAST) {
-                ASKAPLOG_DEBUG_STR(logger,"Worker has received last job");
+                ASKAPLOG_INFO_STR(logger,"Worker has received last job");
                 break;
             }
             else {
-                ASKAPLOG_DEBUG_STR(logger,"Worker is sending request for work");
+                ASKAPLOG_INFO_STR(logger,"Worker is sending request for work");
                 wrequest.sendRequest(itsMaster,itsComms);
             }
         }
 
     }
-
+    ASKAPLOG_INFO_STR(logger,"Rank " << itsComms.rank() << " received data from master - waiting at barrier");
     itsComms.barrier(itsComms.theWorkers());
+    ASKAPLOG_INFO_STR(logger,"Rank " << itsComms.rank() << " passed barrier");
 
+    const bool localSolver = itsParset.getBool("solverpercore",false);
+
+    ASKAPLOG_INFO_STR(logger,"Getting basic advice");
     synthesis::AdviseDI advice(itsComms,itsParset);
+    
+    if (localSolver) {
+        ASKAPLOG_INFO_STR(logger,"In local solver mode - reprocessing allocations (running prepare())");
+        advice.prepare();
+        advice.updateComms();
+        this->baseFrequency = advice.getBaseFrequencyAllocation(itsComms.rank()-1);
+    }
+    ASKAPLOG_INFO_STR(logger,"Adding missing parameters");
     advice.addMissingParameters();
-    advice.updateComms();
-    this->baseFrequency = advice.getBaseFrequencyAllocation(itsComms.rank()-1);
 
     if (workUnits.size()>=1) {
 
@@ -288,15 +298,20 @@ void ContinuumWorker::processWorkUnit(ContinuumWorkUnit& wu)
     unitParset.replace("Channels",ChannelPar);
 
 
-    ASKAPLOG_DEBUG_STR(logger,"getting advice on missing parameters");
+    ASKAPLOG_INFO_STR(logger,"Getting advice on missing parameters");
     synthesis::AdviseDI diadvise(itsComms,unitParset);
+    
+    /// this is running prepare and it should not have to.
+    /// currently everyone is calulating the allocations superflously why has
+    /// this complication developed clean it up ?
+    
     diadvise.addMissingParameters();
-    ASKAPLOG_DEBUG_STR(logger,"advice received");
-    ASKAPLOG_DEBUG_STR(logger,"storing workUnit");
+    ASKAPLOG_INFO_STR(logger,"advice received");
+    ASKAPLOG_INFO_STR(logger,"Storing workUnit");
     workUnits.push_back(wu);
-    ASKAPLOG_DEBUG_STR(logger,"storing parset");
+    ASKAPLOG_INFO_STR(logger,"Storing parset");
     itsParsets.push_back(diadvise.getParset());
-    ASKAPLOG_DEBUG_STR(logger,"Finished processWorkUnit");
+    ASKAPLOG_INFO_STR(logger,"Finished processWorkUnit");
 
 }
 
@@ -312,7 +327,6 @@ void ContinuumWorker::buildSpectralCube() {
     /// it marshalls the following tasks:
     /// 1. building a spectral cube image
     /// 2. local minor cycle solving of each channel
-    /// 3. Conversion to FITS and output
     /// Note: at this stage it will generate a cube per
     /// writer.
     /// Therefore the cube will be distributed across the
@@ -447,7 +461,7 @@ void ContinuumWorker::buildSpectralCube() {
             /// the workUnit count to permit a re-read of the input data.
             /// LOOP:
 
-            for (int majorCycleNumber=0; majorCycleNumber < nCycles; ++majorCycleNumber) {
+            for (int majorCycleNumber=0; majorCycleNumber <= nCycles; ++majorCycleNumber) {
 
                 int tempWorkUnitCount = initialChannelWorkUnit; // clearer if it were called nextWorkUnit
 
@@ -520,7 +534,7 @@ void ContinuumWorker::buildSpectralCube() {
                     }
 
                 }
-                if (majorCycleNumber+1 == nCycles) {
+                if (majorCycleNumber+1 > nCycles) {
                     ASKAPLOG_INFO_STR(logger,"Reached maximum majorcycle count");
                     workUnitCount = tempWorkUnitCount; // this is to remember what was processed.
                 }
@@ -864,7 +878,7 @@ void ContinuumWorker::processChannels()
         this->buildSpectralCube();
         return;
     }
-    ASKAPLOG_DEBUG_STR(logger,"Processing multiple channels central solver mode");
+    ASKAPLOG_INFO_STR(logger,"Processing multiple channels central solver mode");
     TableDataSource ds0(ms, TableDataSource::DEFAULT, colName);
 
     ds0.configureUVWMachineCache(uvwMachineCacheSize, uvwMachineCacheTolerance);
@@ -881,12 +895,17 @@ void ContinuumWorker::processChannels()
         localChannel = workUnits[0].get_localChannel();
     }
     globalChannel = workUnits[0].get_globalChannel();
+    
 
+    ASKAPLOG_INFO_STR(logger,"Building imager for channel " << localChannel);
     CalcCore rootImager(itsParsets[0],itsComms,ds0,localChannel);
 
 
     if (nCycles == 0) {
 
+        ASKAPLOG_INFO_STR(logger,"Rank " << itsComms.rank() << " at barrier");
+        itsComms.barrier(itsComms.theWorkers());
+        ASKAPLOG_INFO_STR(logger,"Rank " << itsComms.rank() << " passed barrier");
 
         rootImager.receiveModel();
         rootImager.calcNE();
@@ -942,10 +961,13 @@ void ContinuumWorker::processChannels()
             if (writeAtMajorCycle) {
                 ASKAPLOG_WARN_STR(logger,"Write at major cycle not currently supported in this mode");
             }
+            ASKAPLOG_INFO_STR(logger,"Rank " << itsComms.rank() << " at barrier");
+            itsComms.barrier(itsComms.theWorkers());
+            ASKAPLOG_INFO_STR(logger,"Rank " << itsComms.rank() << " passed barrier");
 
-            ASKAPLOG_DEBUG_STR(logger,"Worker waiting to receive new model");
+            ASKAPLOG_INFO_STR(logger,"Worker waiting to receive new model");
             rootImager.receiveModel();
-            ASKAPLOG_DEBUG_STR(logger, "Worker received model for cycle  " << n);
+            ASKAPLOG_INFO_STR(logger, "Worker received model for cycle  " << n);
 
             if (rootImager.params()->has("peak_residual")) {
                 const double peak_residual = rootImager.params()->scalarValue("peak_residual");

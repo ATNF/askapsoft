@@ -117,7 +117,8 @@ void ContinuumMaster::run(void)
     synthesis::AdviseDI diadvise(itsComms,unitParset);
 
     try {
-
+        
+        diadvise.prepare();
         diadvise.addMissingParameters();
 
         ASKAPLOG_DEBUG_STR(logger,"*****");

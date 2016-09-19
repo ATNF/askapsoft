@@ -475,11 +475,13 @@ int AdviseDI::match(int ms_number, casa::MVFrequency testFreq) {
 }
 void AdviseDI::addMissingParameters()
 {
+    /*
     if (isPrepared == false) {
         ASKAPLOG_DEBUG_STR(logger,"Running prepare from addMissingParameters");
         this->prepare();
     }
-
+    */
+    
     ASKAPLOG_DEBUG_STR(logger,"Adding missing params ");
 
     /*

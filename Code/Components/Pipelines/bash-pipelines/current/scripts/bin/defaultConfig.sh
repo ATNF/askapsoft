@@ -113,6 +113,7 @@ if [ "$ASKAP_ROOT" != "" ]; then
     ccalibrator=$ASKAP_ROOT/Code/Components/Synthesis/synthesis/current/apps/ccalibrator.sh
     ccontsubtract=$ASKAP_ROOT/Code/Components/Synthesis/synthesis/current/apps/ccontsubtract.sh
     simager=${ASKAP_ROOT}/Code/Components/CP/simager/current/apps/simager.sh
+    altimager=${ASKAP_ROOT}/Code/Components/CP/askap_imager/current/apps/imager.sh
     linmos=${ASKAP_ROOT}/Code/Components/Synthesis/synthesis/current/apps/linmos.sh
     selavy=${ASKAP_ROOT}/Code/Components/Analysis/analysis/current/apps/selavy.sh
     cimstat=${ASKAP_ROOT}/Code/Components/Analysis/analysis/current/apps/cimstat.sh
@@ -131,6 +132,7 @@ else
     ccalibrator=ccalibrator
     ccontsubtract=ccontsubtract
     simager=simager
+    altimager=imager
     linmos=linmos
     selavy=selavy
     cimstat=cimstat
@@ -167,6 +169,7 @@ DO_SPECTRAL_IMSUB=false
 DO_MOSAIC=true
 DO_SOURCE_FINDING=false
 DO_SOURCE_FINDING_MOSAIC=SETME
+DO_ALT_IMAGER=false
 #
 DO_CONVERT_TO_FITS=false
 DO_MAKE_THUMBNAILS=false
@@ -284,6 +287,28 @@ MFS_REF_FREQ=""
 # beam, else give a size
 RESTORING_BEAM_CONT=fit
 
+
+###########################
+# parameters from the new (alt) imager
+# number of channels each core will process
+NCHAN_PER_CORE=1
+# the spectral line imager needs its own otherwise we lose some flexibility
+NCHAN_PER_CORE_SL=54
+# store the visibilities in shared memory.
+# this will give a performance boost at the expense of memory usage
+USE_TMPFS=false
+# where is the shared memory mounted
+TMPFS="/dev/shm"
+# barycentre?
+DO_BARY=false
+# local solver - distribute the minor cycle - each channel is solved individually
+# this mimics simager behaviour
+# automatically set to true in the spectral imaging
+DO_LOCAL_SOLVER=false
+# How many sub-cubes to write out.
+# This improves performance of the imaging - and also permits parallelisation
+# of the LINMOS step
+NSUB_CUBES=16
 
 ####################
 # Gridding parameters for continuum imaging

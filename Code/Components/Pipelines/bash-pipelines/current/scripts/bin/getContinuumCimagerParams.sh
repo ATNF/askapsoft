@@ -124,7 +124,7 @@ Cimager.Images.image.${imageBase}.nterms       = ${NUM_TAYLOR_TERMS}
 Cimager.nworkergroups                           = ${nworkergroupsSci}
 # Leave 'Cimager.visweights' to be determined by Cimager, based on nterms"
 
-if [ "${MFS_REF_FREQ}" == "" ] || [ $MFS_REF_FREQ -le 0 ]; then
+if [ "${MFS_REF_FREQ}" == "" ]; then
     mfsParams="${mfsParams}
 # Leave 'Cimager.visweights.MFS.reffreq' to be determined by Cimager"
 else
@@ -133,7 +133,43 @@ else
 Cimager.visweights.MFS.reffreq                  = ${MFS_REF_FREQ}"
 fi
 
-cleaningPars="# These parameters define the clean algorithm 
+# This is for the new (alt) imager
+altImagerParams="# Options for the alternate imager"
+if [ $DO_ALT_IMAGER == true ]; then
+
+
+    if [ "${NCHAN_PER_CORE}" == "" ]; then
+        nchanpercore=1
+    else
+        nchanpercore="${NCHAN_PER_CORE}"
+    fi
+altImagerParams="${altImagerParams}
+Cimager.nchanpercore                           = ${nchanpercore}"
+    if [ ${USE_TMPFS} == true ]; then
+        usetmpfs="true"
+    else
+        usetmpfs="false"
+    fi
+altImagerParams="${altImagerParams}
+Cimager.usetmpfs                               = ${usetmpfs}"
+    if [ "${TMPFS}" == "" ]; then
+        tmpfs="/dev/shm"
+    else
+        tmpfs="${TMPFS}"
+    fi
+altImagerParams="${altImagerParams}
+Cimager.tmpfs                                   = ${tmpfs}"
+altImagerParams="${altImagerParams}
+# barycentre and multiple solver mode not supported in continuum imaging (yet)
+Cimager.barycentre                              = false
+Cimager.solverpercore                           = false
+Cimager.nwriters                                = 1"
+
+else
+    altImagerParams ="${altImagerParams} are not required"
+fi
+
+cleaningPars="# These parameters define the clean algorithm
 Cimager.solver                                  = ${SOLVER}"
 if [ ${SOLVER} == "Clean" ]; then
     cleaningPars="${cleaningPars}
@@ -171,6 +207,8 @@ ${directionDefinition}
 Cimager.Images.image.${imageBase}.nchan        = 1
 #
 ${mfsParams}
+#
+${altImagerParams}
 #
 # This defines the parameters for the gridding.
 Cimager.gridder.snapshotimaging                 = ${GRIDDER_SNAPSHOT_IMAGING}

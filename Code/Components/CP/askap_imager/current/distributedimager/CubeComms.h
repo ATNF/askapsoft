@@ -52,7 +52,8 @@ namespace cp {
             /// @brief isWriter
             /// @details This bool can be tested to find out whether the current
             /// rank is a writer
-            bool isWriter();
+            /// returns writerCount 1->nwriters
+            int isWriter();
             /// @brief adds a writer to the list by rank
             /// @details This adds a rank to a vector of ranks
             /// each is the rank of a writer
@@ -85,6 +86,7 @@ namespace cp {
             // Add a byte offset to the  specified pointer, returning the result
             void* addByteOffset(const void *ptr, size_t offset) const;
             std::map<int,int> writerMap;
+        int writerCount;
             size_t itsComrades;
     };
 }

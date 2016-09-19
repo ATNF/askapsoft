@@ -156,7 +156,7 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$needBeams" == "true" ]; then
                 # error handling, in case something goes wrong.
                 if [ `wc -l $footprintOut | awk '{print $1}'` -eq 0 ]; then
                     # Something has failed with footprint.py
-                    echo "ERROR - The footprint.py command has failed."
+                    echo "ERROR - The ${footprintOut} command has failed."
                     if [ "${IMAGE_AT_BEAM_CENTRES}" == "true" ]; then
                         echo "      Not running - change your config file or locate footprint.py."
                         SUBMIT_JOBS=false

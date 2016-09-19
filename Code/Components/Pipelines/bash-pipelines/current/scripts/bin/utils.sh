@@ -64,7 +64,14 @@ function rejuvenate()
         find $1 -exec touch {} \;
     fi
 }
-
+##############################
+# Get the list of subcubes
+#
+function getAltPrefix()
+{
+    wrList=$(seq 1 $NSUB_CUBES)
+    
+}
 ##############################
 # JOB ID MANAGEMENT
 

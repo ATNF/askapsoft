@@ -60,6 +60,7 @@ CubeComms::CubeComms(int argc, const char** argv) : AskapParallel(argc, const_ca
 {
 
     ASKAPLOG_DEBUG_STR(logger,"Constructor");
+    writerCount = 1; // always at least one
 
 }
 CubeComms::~CubeComms() {
@@ -87,39 +88,43 @@ void CubeComms::initWriters(int nwriters, int nchanpercore) {
     if (nWorkersPerWriter < 1) {
         nWorkersPerWriter = 1;
     }
-    int channelCount = nWorkersPerWriter * nchanpercore;
-
+    
+    
     for (int wrk = 0; wrk < nWorkersPerGroup; wrk=wrk+nWorkersPerWriter) {
         int mywriter = floor(wrk/nWorkersPerWriter)*nWorkersPerWriter + 1;
         std::pair<std::map<int,int>::iterator,bool> ret;
-
-        ret = writerMap.insert(std::pair<int,int> (mywriter,channelCount) );
-
+        ret = writerMap.insert(std::pair<int,int> (mywriter,writerCount) );
         if (ret.second==false) {
             ASKAPLOG_DEBUG_STR(logger, "element " << mywriter << " already existed");
+        }
+        else {
+            writerCount++;
         }
 
     }
 
 }
-bool CubeComms::isWriter() {
+int CubeComms::isWriter() {
     ASKAPLOG_DEBUG_STR(logger,"Providing writer status");
     /// see if my rank is in the writers list
     std::map<int,int>::iterator it = writerMap.begin();
     for (it=writerMap.begin(); it!=writerMap.end(); ++it) {
         if (itsRank == it->first) {
-            return true;
+            return it->second;
         }
     }
-    return false;
+    return 0;
 }
 void CubeComms::addWriter(unsigned int writerRank) {
-    int count = 0;
+    
     std::pair<std::map<int,int>::iterator,bool> ret;
-    ret = writerMap.insert(std::pair<int,int> (writerRank,count) );
+    ret = writerMap.insert(std::pair<int,int> (writerRank,writerCount) );
 
     if (ret.second==false) {
         ASKAPLOG_DEBUG_STR(logger, "element " << writerRank << " already existed");
+    }
+    else {
+        writerCount++;
     }
 
 }

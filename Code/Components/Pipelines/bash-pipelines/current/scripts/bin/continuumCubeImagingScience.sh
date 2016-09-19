@@ -32,6 +32,12 @@
 
 ID_CONTCUBE_SCI=""
 
+if [ $DO_ALT_IMAGER == true ]; then
+theimager=$altimager
+else
+theimager=$cimager
+fi
+
 for POLN in $POL_LIST; do
 
     # make a lower-case version of the polarisation, for image name
@@ -211,7 +217,7 @@ log=${logs}/science_contcube_imager_${FIELDBEAM}_${POLN}_\${SLURM_JOB_ID}.log
 # Now run the simager
 NCORES=${NUM_CPUS_CONTCUBE_SCI}
 NPPN=${CPUS_PER_CORE_CONTCUBE_IMAGING}
-aprun -n \${NCORES} -N \${NPPN} ${simager} -c \$parset > \$log
+aprun -n \${NCORES} -N \${NPPN} ${theimager} -c \$parset > \$log
 err=\$?
 rejuvenate \${ms}
 rejuvenate *.${imageBase}*

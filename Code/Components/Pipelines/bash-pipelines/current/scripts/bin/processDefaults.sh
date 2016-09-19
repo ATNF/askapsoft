@@ -256,6 +256,14 @@ module load askapdata"
         # total number of CPUs required for MFS continuum imaging, including
         # the master
         NUM_CPUS_CONTIMG_SCI=`echo $nchanContSci $nworkergroupsSci | awk '{print $1*$2+1}'`
+        # if we are using the new imager we need to tweak this
+        if [ $DO_ALT_IMAGER == true ]; then
+            NUM_CPUS_CONTIMG_SCI=`echo $nchanContSci $nworkergroupsSci $NCHAN_PER_CORE | awk '{print ($1/$3)*$2+1}'`
+            CPUS_PER_CORE_CONT_IMAGING=8
+            NUM_CPUS_SPECIMG_SCI=`echo $NUM_CHAN_SCIENCE $NCHAN_PER_CORE_SL | awk '{print ($1/$2) + 1}'`
+            CPUS_PER_CORE_SPEC_IMAGING=16
+
+        fi
 
         # Can't have -N greater than -n in the aprun call
         if [ ${NUM_CPUS_CONTIMG_SCI} -lt ${CPUS_PER_CORE_CONT_IMAGING} ]; then

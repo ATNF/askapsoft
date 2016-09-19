@@ -96,8 +96,8 @@ else
 	fi
 	
 	if [ $DO_SCIENCE_FIELD == true ]; then
-	    
-	    . ${PIPELINEDIR}/scienceCalIm.sh
+
+        . ${PIPELINEDIR}/scienceCalIm.sh
 	    
 	fi
 
