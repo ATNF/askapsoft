@@ -181,7 +181,7 @@ Cimager.solver.Clean.verbose                    = False
 Cimager.solver.Clean.tolerance                  = 0.01
 Cimager.solver.Clean.weightcutoff               = zero
 Cimager.solver.Clean.weightcutoff.clean         = false
-Cimager.solver.Clean.psfwidth                   = 512
+Cimager.solver.Clean.psfwidth                   = ${CLEAN_PSFWIDTH}
 Cimager.solver.Clean.logevery                   = 50"
 fi
 cleaningPars="${cleaningPars}
