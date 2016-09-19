@@ -147,6 +147,11 @@ for FIELD in \${FIELD_LIST}; do
                 casdaTwoDimImageTypes+=(cont_restored_\${typeSuffix})
                 casdaTwoDimThumbTitles+=("Restored image, \${beamSuffix}")
             fi
+            if [ -e \${FIELD}/image.\${imBase}.alt.restored.fits ]; then
+                casdaTwoDimImageNames+=(\${FIELD}/image.\${imBase}.restored.fits)
+                casdaTwoDimImageTypes+=(cont_restored_\${typeSuffix})
+                casdaTwoDimThumbTitles+=("Restored image, \${beamSuffix}")
+            fi
             if [ -e \${FIELD}/psf.\${imBase}.fits ]; then
                 casdaTwoDimImageNames+=(\${FIELD}/psf.\${imBase}.fits)
                 casdaTwoDimImageTypes+=(cont_psfnat_\${typeSuffix})
