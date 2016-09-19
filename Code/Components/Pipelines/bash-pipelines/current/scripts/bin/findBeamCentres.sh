@@ -145,7 +145,7 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$needBeams" == "true" ]; then
                 if [ -e ${footprintOut} ] && [ `wc -l $footprintOut | awk '{print $1}'` -gt 0 ]; then
                     echo "Reusing footprint file $footprintOut for field $FIELD"
                 else
-                    if [ `wc -l $footprintOut | awk '{print $1}'` -eq 0 ]; then
+                    if [ -e ${footprintOut} ]; then
                         rm -f $footprintOut
                     fi
                     echo "Writing footprint for field $FIELD to file $footprintOut"
