@@ -166,7 +166,7 @@ Cimager.solverpercore                           = false
 Cimager.nwriters                                = 1"
 
 else
-    altImagerParams ="${altImagerParams} are not required"
+    altImagerParams="${altImagerParams} are not required"
 fi
 
 cleaningPars="# These parameters define the clean algorithm

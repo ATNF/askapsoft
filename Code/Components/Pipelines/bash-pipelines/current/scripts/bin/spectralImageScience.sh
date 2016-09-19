@@ -164,7 +164,7 @@ Cimager.nwriters                                = ${NSUB_CUBES}"
 
 
 else
-    altImagerParams ="${altImagerParams} are not required"
+    altImagerParams="${altImagerParams} are not required"
 fi
 
 namestr="${Imager}.Images"
