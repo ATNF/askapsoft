@@ -161,6 +161,13 @@ class MsSplitApp : public askap::Application {
         // Optional end time filter. Rows with TIME > this value will be
         // excluded
         double itsTimeEnd;
+    
+        // Vector of rows to keep. This is for the case when we know
+        // we do not need all rows
+        map<int,int> mapOfRows;
+        void getRowsToKeep(const casa::MeasurementSet& ms); 
+        int nRowsOut;
+    
 };
 
 }

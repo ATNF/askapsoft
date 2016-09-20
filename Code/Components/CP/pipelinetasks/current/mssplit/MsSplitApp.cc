@@ -34,6 +34,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <map>
 #include <utility>
 #include <limits>
 #include <stdint.h>
@@ -166,9 +167,59 @@ boost::shared_ptr<casa::MeasurementSet> MsSplitApp::create(
         info.setSubType(String(""));
         info.readmeAddLine("This is a MeasurementSet Table holding simulated astronomical observations");
     }
+    
+   
     return ms;
 }
+void MsSplitApp::getRowsToKeep(const casa::MeasurementSet& ms) {
+    
+    const ROMSColumns sc(ms);
+    const casa::uInt nRows = sc.nrow();
+    uInt row = 0;
+    vector<int> rowsToKeep;
+    rowsToKeep.resize(0);
+    while (row < nRows) {
+        if (!rowIsFiltered(sc.scanNumber()(row),
+                           sc.fieldId()(row),
+                           sc.feed1()(row),
+                           sc.feed2()(row),
+                           sc.time()(row))) {
+            rowsToKeep.push_back(row);
+        }
+        row++;
+    }
+    
+    vector<int>::iterator it = rowsToKeep.begin();
+    nRowsOut = rowsToKeep.size();
+    ASKAPLOG_INFO_STR(logger,"There are " << nRows << " rows in the input Measurement Set"); 
+    ASKAPLOG_INFO_STR(logger,"There will be " << nRowsOut << " rows in the output Measurement Set"); 
+    int lastGoodRow = *it;
+    ASKAPLOG_INFO_STR(logger,"First good row for this split is " << *it); 
+    int nextGoodRow = 0;
+    int nGood = 1; // there is always at least 1 good one
+    for (it = rowsToKeep.begin(); it != rowsToKeep.end()-1;++it) {
+        nextGoodRow = (*it)+1;
+        if (*(it+1) == nextGoodRow) {
+            nGood++;
+        }
+        else {
+            mapOfRows.insert ( std::pair<int,int>(lastGoodRow,nGood) );
+            ASKAPLOG_INFO_STR(logger,"last good row " << lastGoodRow << " followed by " << nGood << " contiguous rows ");
+            nGood = 1;
+            lastGoodRow = *(it+1);
+        }
+    }
+    mapOfRows.insert ( std::pair<int,int>(lastGoodRow,nGood) );
+    ASKAPLOG_INFO_STR(logger,"last good row " << lastGoodRow << " followed by " << nGood << " contiguous rows ");
 
+    std::map<int,int>::iterator myMap;
+
+    for (myMap=mapOfRows.begin() ;myMap != mapOfRows.end(); ++myMap) {
+        ASKAPLOG_INFO_STR(logger,"Row " << myMap->first << " to " << myMap->first + myMap->second << " is contiguous.");
+    }
+  
+    
+}
 void MsSplitApp::copyAntenna(const casa::MeasurementSet& source, casa::MeasurementSet& dest)
 {
     const ROMSColumns srcMsc(source);
@@ -483,7 +534,13 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
 
     // Add rows upfront if no row based filters exist
     const casa::uInt nRows = sc.nrow();
-    if (!rowFiltersExist()) dest.addRow(nRows);
+    if (!rowFiltersExist()) {
+        dest.addRow(nRows);
+    }
+    else {
+       this->getRowsToKeep(source);
+       dest.addRow(nRowsOut);
+    }
 
     // Work out how many channels are to be actual input and which output
     // and how many polarisations are involved.
@@ -544,10 +601,20 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
     // filtering is used
     uInt dstRow = 0;
     uInt row = 0;
+    std::map<int,int>::iterator filteredRows;
+    
+    if (rowFiltersExist()){
+        filteredRows = mapOfRows.begin();
+        row = filteredRows->first;
+    }
+
     while (row < nRows) {
         // Number of rows to process for this iteration of the loop; either
         // maxSimultaneousRows or the remaining rows.
-        const uInt nRowsThisIteration = min(maxSimultaneousRows, nRows - row);
+        uInt nRowsThisIteration = min(maxSimultaneousRows, nRows - row);
+        if (rowFiltersExist())
+            nRowsThisIteration = mapOfRows[row];
+
         const Slicer srcrowslicer(IPosition(1, row), IPosition(1, nRowsThisIteration),
                 Slicer::endIsLength);
         Slicer dstrowslicer = srcrowslicer;
@@ -566,19 +633,8 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
                     << " rows this iteration");
         }
 
-        // Skip this row if it is filtered out
-        if (rowIsFiltered(sc.scanNumber()(row),
-                    sc.fieldId()(row),
-                    sc.feed1()(row),
-                    sc.feed2()(row),
-                    sc.time()(row))) {
-            row += nRowsThisIteration;
-            continue;
-        }
-
         // Rows have been pre-added if no row based filtering is done 
         if (rowFiltersExist()) {
-            dest.addRow();
             dstrowslicer = Slicer(IPosition(1, dstRow), IPosition(1, nRowsThisIteration),
                     Slicer::endIsLength);
         }
@@ -698,6 +754,15 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
         }
 
         row += nRowsThisIteration;
+        if (rowFiltersExist())  {
+            filteredRows++;
+            if (filteredRows != mapOfRows.end()) {
+                row = filteredRows->first;
+            }
+            else {
+               break; 
+            }
+        }
         dstRow += nRowsThisIteration;
     }
 }
