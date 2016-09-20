@@ -91,6 +91,7 @@ for FIELD in ${FIELD_LIST}; do
 
         
         findScienceMSnames
+        FIELDBEAM=`echo $FIELD_ID $BEAM | awk '{printf "F%02d_B%s",$1,$2}'`
 
         . ${PIPELINEDIR}/splitScience.sh
         . ${PIPELINEDIR}/flagScience.sh
@@ -98,11 +99,7 @@ for FIELD in ${FIELD_LIST}; do
         . ${PIPELINEDIR}/applyBandpassScience.sh
 
         . ${PIPELINEDIR}/averageScience.sh
-        FIELDBEAM=`echo $FIELD_ID $BEAM | awk '{printf "F%02d_B%s",$1,$2}'`
             
-        findScienceMSnames
-
-
         if [ $DO_SELFCAL == true ]; then
             . ${PIPELINEDIR}/continuumImageScienceSelfcal.sh
         else
