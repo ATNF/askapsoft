@@ -79,6 +79,7 @@ if [ "$PROCESS_DEFAULTS_HAS_RUN" != "true" ]; then
 module use $moduleDir
 module load askapdata
 module load askapsoft${ASKAPSOFT_VERSION}"
+            module load askapsoft${ASKAPSOFT_VERSION}
         else
             # askapsoft is already available.
             #  If a specific version has been requested, swap to that
@@ -89,6 +90,7 @@ module use $moduleDir
 module load askapdata
 module swap askapsoft askapsoft${ASKAPSOFT_VERSION}"
                 echo "Will use the askapsoft module askapsoft${ASKAPSOFT_VERSION}"
+                module swap askapsoft askapsoft${ASKAPSOFT_VERSION}
             else
                 askapsoftModuleCommands="# Using user-defined askapsoft module
 module use $moduleDir
