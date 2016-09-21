@@ -189,7 +189,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_SPECTRAL_IMAGE}
 #SBATCH --ntasks=${NUM_CPUS_SPECIMG_SCI}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_SPEC_IMAGING}
-#SBATCH --job-name specimg${BEAM}
+#SBATCH --job-name spec_${FIELDBEAMJOB}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-spectralImaging-%j.out

@@ -70,7 +70,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_SOURCEFINDING}
 #SBATCH --ntasks=${NUM_CPUS_SELAVY}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_SELAVY}
-#SBATCH --job-name=selavyB${BEAM}
+#SBATCH --job-name=selavy_${FIELDBEAMJOB}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-selavy-%j.out

@@ -73,7 +73,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_SPECTRAL_SPLIT}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --job-name=splitSLsci${BEAM}
+#SBATCH --job-name=splitSL_${FIELDBEAMJOB}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-splitSLsci-%j.out
@@ -165,7 +165,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_SPECTRAL_APPLYCAL}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --job-name=calappSLsci${BEAM}
+#SBATCH --job-name=applyCalS_${FIELDBEAMJOB}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-calappSLsci-%j.out

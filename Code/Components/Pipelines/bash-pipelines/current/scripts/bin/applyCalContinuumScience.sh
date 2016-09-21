@@ -49,7 +49,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_CONT_APPLYCAL}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --job-name=calappCont${BEAM}
+#SBATCH --job-name=applyCalC_${FIELDBEAMJOB}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-calappCont${BEAM}-%j.out

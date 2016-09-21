@@ -105,7 +105,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_FLAG_SCIENCE}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --job-name=flagSci${BEAM}
+#SBATCH --job-name=flag_${FIELDBEAMJOB}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-flagSci-b${BEAM}-%j.out

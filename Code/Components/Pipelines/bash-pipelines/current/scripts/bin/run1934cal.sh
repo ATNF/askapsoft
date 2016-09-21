@@ -61,6 +61,7 @@ slurmOut=$slurmOutBase
     FLAG_1934_CHECK_FILE="${OUTPUT}/Checkfiles/FLAGGING_DONE_1934_BEAM${BEAM}"
 
     FIELDBEAM="${FIELD}_B${BEAM}"
+    FIELDBEAMJOB=$FIELDBEAM
     
     . ${PIPELINEDIR}/split1934.sh
     . ${PIPELINEDIR}/flag1934.sh

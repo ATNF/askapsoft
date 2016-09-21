@@ -151,7 +151,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_CONTCUBE_IMAGE}
 #SBATCH --ntasks=${NUM_CPUS_CONTCUBE_SCI}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_CONTCUBE_IMAGING}
-#SBATCH --job-name contcube${BEAM}${POLN}
+#SBATCH --job-name contcube_${FIELDBEAMJOB}${POLN}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-contcubeImaging-${BEAM}-${POLN}-%j.out

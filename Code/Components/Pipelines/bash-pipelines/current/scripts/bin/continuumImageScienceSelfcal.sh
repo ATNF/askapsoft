@@ -150,7 +150,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_CONT_IMAGE}
 #SBATCH --ntasks=${NUM_CPUS_SELFCAL}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_CONT_IMAGING}
-#SBATCH --job-name=cleanSC${BEAM}
+#SBATCH --job-name=contSC_${FIELDBEAMJOB}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-contImagingSelfcal-%j.out

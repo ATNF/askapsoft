@@ -62,7 +62,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_SPECTRAL_CONTSUB}
 #SBATCH --ntasks=${NPROCS_CONTSUB}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_CONTSUB}
-#SBATCH --job-name=contsubSLsci${BEAM}
+#SBATCH --job-name=contsub_${FIELDBEAMJOB}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-contsubSLsci-%j.out

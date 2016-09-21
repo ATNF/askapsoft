@@ -60,7 +60,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_CONT_IMAGE}
 #SBATCH --ntasks=${NUM_CPUS_CONTIMG_SCI}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_CONT_IMAGING}
-#SBATCH --job-name=clean${BEAM}
+#SBATCH --job-name=cont_${FIELDBEAMJOB}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-contImaging-%j.out

@@ -102,7 +102,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_FLAG_1934}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --job-name=flagCal${BEAM}
+#SBATCH --job-name=flag_${FIELDBEAMJOB}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-flag1934-b${BEAM}-%j.out

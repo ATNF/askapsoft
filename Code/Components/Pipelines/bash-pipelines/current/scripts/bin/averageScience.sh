@@ -61,7 +61,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_AVERAGE_MS}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --job-name=avSci${BEAM}
+#SBATCH --job-name=avg_${FIELDBEAMJOB}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-averageSci-%j.out

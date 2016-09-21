@@ -92,6 +92,7 @@ for FIELD in ${FIELD_LIST}; do
         
         findScienceMSnames
         FIELDBEAM=`echo $FIELD_ID $BEAM | awk '{printf "F%02d_B%s",$1,$2}'`
+        FIELDBEAMJOB=`echo $FIELDBEAM | sed -e 's/_//g'`
 
         . ${PIPELINEDIR}/splitScience.sh
         . ${PIPELINEDIR}/flagScience.sh
@@ -113,13 +114,10 @@ for FIELD in ${FIELD_LIST}; do
 
         . ${PIPELINEDIR}/prepareSpectralData.sh
 
-
-
         . ${PIPELINEDIR}/spectralImageScience.sh
 
-
-
         FIELDBEAM=`echo $FIELD_ID | awk '{printf "F%02d",$1}'`
+        FIELDBEAMJOB=$FIELDBEAM
 
         if [ $DO_ALT_IMAGER == true ]; then
             . ${PIPELINEDIR}/altLinmos.sh

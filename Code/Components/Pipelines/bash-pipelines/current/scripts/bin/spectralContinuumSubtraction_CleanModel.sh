@@ -44,7 +44,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_SPECTRAL_CONTSUB}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --job-name=contsubSLsci${BEAM}
+#SBATCH --job-name=contsub_${FIELDBEAMJOB}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-contsubSLsci-%j.out

@@ -71,7 +71,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_SPLIT_1934}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --job-name=splitCal${BEAM}
+#SBATCH --job-name=split_${FIELDBEAMJOB}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-split1934-b${BEAM}-%j.out
