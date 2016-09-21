@@ -90,7 +90,9 @@ scripts, and they are detailed here.
 +--------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | ``WRITE_CASDA_READY``          | false                           | writeREADYfile                  | Whether to write the READY file in the staging directory,       |
 |                                |                                 | (:doc:`../utils/casdaupload`)   | indicating that no further changes are to be made and the data  |
-|                                |                                 |                                 | is ready to go into CASDA.                                      |
+|                                |                                 |                                 | is ready to go into CASDA. Setting this to true will also       |
+|                                |                                 |                                 | transition the scheduling block from PROCESSING to              |
+|                                |                                 |                                 | PENDINGARCHIVE.                                                 |
 +--------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | ``CASDA_OUTPUT_DIR``           | /scratch2/casda/prd             | outputdir                       | The output directory to put the staged data. It may be that some|
 |                                |                                 | (:doc:`../utils/casdaupload`)   | users will not have write access to this directory - in this    |

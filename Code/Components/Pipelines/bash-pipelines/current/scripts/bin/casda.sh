@@ -139,6 +139,8 @@ eval\${i}.project  = ${PROJECT_ID}"
 done
 evalArtifacts=\`echo \${evalArtifacts[@]} | sed -e 's/ /,/g'\`
 
+writeREADYfile=${WRITE_CASDA_READY}
+
 parset=${parsets}/casda_upload_\${SLURM_JOB_ID}.in
 log=${logs}/casda_upload_\${SLURM_JOB_ID}.log
 cat > \$parset << EOFINNER
@@ -148,7 +150,7 @@ telescope                       = ASKAP
 sbid                            = ${SB_SCIENCE}
 ${sbids}
 obsprogram                      = ${OBS_PROGRAM}
-writeREADYfile                  = ${WRITE_CASDA_READY}
+writeREADYfile                  = \${writeREADYfile}
 
 # Images
 images.artifactlist             = [\$imageArtifacts]
@@ -175,6 +177,18 @@ err=\$?
 if [ \$err != 0 ]; then
     exit \$err
 fi
+
+if [ "\${writeREADYfile}" == "true" ]; then
+
+    # We have uploaded successfully and notified CASDA of the data
+    # availability. We therefore transition the scheduling block to 
+    # PENDINGARCHIVE
+
+    module load askapcli
+    schedblock transition -s PENDINGARCHIVE ${SB_SCIENCE}
+
+fi
+
 
 EOFOUTER
 
