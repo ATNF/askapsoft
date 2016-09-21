@@ -28,24 +28,37 @@ import os
 
 from runcmd import runcmd
 
-# The SRC dir is a string in the repository URL to split on. For example the
-# official ASKAPsoft repository is: https://svn.atnf.csiro.au/askapsdp/trunk
-# so we split on "askapsdp" and, on the right of the split, get "trunk" or
-# "releases/CP-0.5". Note that this does not necessarily work if the URL
-# changes!
-SRCDIR = 'askapsdp/' 
 
 def get_svn_branch_info():
     '''Return the branch of the repository we are using.
     e.g. ['trunk'], ['releases', '0.3'], ['features', 'TOS', 'JC'] etc
     '''
     ASKAP_ROOT = os.environ['ASKAP_ROOT']
+    # In future layout will find Code in src subdirectory.
+    SRC_DIR = os.sep.join((ASKAP_ROOT, 'src'))
+    if os.path.isdir(SRC_DIR):
+        CODE_DIR = os.sep.join((SRC_DIR, 'Code'))
+    else: # current (old) layout
+        CODE_DIR = os.sep.join((ASKAP_ROOT, 'Code'))
+
     bi = ['Unknown']    # Define here to handle svn runtime failures or
                         # svn output format changes.
     try:
-        for line in runcmd('svn info %s' % ASKAP_ROOT)[0].split('\n'):
+        for line in runcmd('svn info %s' % CODE_DIR)[0].split('\n'):
             if line.startswith('URL:'):
-                bi = line.split(SRCDIR)[1].split(os.sep)
+                repo = line.split(os.sep)[3]
+                # handle differences in layout of SDP and TOS.
+                if repo == "askapsoft":
+                    topdir = 'Src'
+                elif repo == "askapsdp":
+                    topdir = 'askapsdp'
+                else:
+                    # just spit on the toplevel directory and down.
+                    # https://foo.com/topdir
+                    groups = line.split(os.sep)
+                    topdir = os.sep.join(groups[:4])
+
+                bi = line.split(topdir)[1].split(os.sep)[1:-1]
                 break
     except:
         pass # bi already defined.
