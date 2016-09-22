@@ -63,25 +63,25 @@ class ConvertApp : public askap::Application {
                 parset.adoptCollection(config());
                 LOFAR::ParameterSet subset(parset.makeSubset("ImageToFITS."));
 
-                std::string casaimage = subset.getString("casaimage","");
-                std::string fitsimage = subset.getString("fitsimage","");
-                unsigned int memoryInMB = subset.getUint("memoryInMB",64);
-                bool preferVelocity = subset.getBool("preferVelocity",false);
-                bool opticalVelocity = subset.getBool("opticalVelocity",true);
-                int bitpix = subset.getInt("bitpix",-32);
+                std::string casaimage = subset.getString("casaimage", "");
+                std::string fitsimage = subset.getString("fitsimage", "");
+                unsigned int memoryInMB = subset.getUint("memoryInMB", 64);
+                bool preferVelocity = subset.getBool("preferVelocity", false);
+                bool opticalVelocity = subset.getBool("opticalVelocity", true);
+                int bitpix = subset.getInt("bitpix", -32);
                 float minpix = subset.getFloat("minpix", 1.0);
                 float maxpix = subset.getFloat("maxpix", -1.0);
-                bool allowOverwrite = subset.getBool("allowOverwrite",false);
-                bool degenerateLast = subset.getBool("degenerateLast",false);
-                bool verbose = subset.getBool("verbose",true);
-                bool stokesLast = subset.getBool("stokesLast",false);
-                bool preferWavelength = subset.getBool("preferWavelength",false);
-                bool airWavelength = subset.getBool("airWavelength",false);
+                bool allowOverwrite = subset.getBool("allowOverwrite", false);
+                bool degenerateLast = subset.getBool("degenerateLast", false);
+                bool verbose = subset.getBool("verbose", true);
+                bool stokesLast = subset.getBool("stokesLast", false);
+                bool preferWavelength = subset.getBool("preferWavelength", false);
+                bool airWavelength = subset.getBool("airWavelength", false);
                 bool copyHistory = subset.getBool("copyHistory", true);
 
                 std::string origin = ASKAP_PACKAGE_VERSION;
 
-                if (bitpix!=-32 && bitpix!=16){
+                if (bitpix != -32 && bitpix != 16) {
                     ASKAPTHROW(AskapError, "BITPIX can only be -32 or 16.");
                 }
 
@@ -90,44 +90,48 @@ class ConvertApp : public askap::Application {
 
                 casa::PagedImage<float> casaim(casaimage);
                 casa::TableRecord miscinfo = casaim.miscInfo();
-                
-                std::vector<std::string> headersToUpdate = subset.getStringVector("headers","");
-                if (headersToUpdate.size()>0){
-                    // There are headers we want to update
-                    for(std::vector<std::string>::iterator head=headersToUpdate.begin();
-                        head<headersToUpdate.end();head++){
-                        std::string val = subset.getString("headers."+*head,"");
-                        if (val!=""){
-                            miscinfo.define(*head,val);
+
+                if (subset.isDefined("headers")) {
+                    std::vector<std::string> headersToUpdate = subset.getStringVector("headers", "");
+                    if (headersToUpdate.size() > 0) {
+                        // There are headers we want to update
+                        for (std::vector<std::string>::iterator head = headersToUpdate.begin();
+                                head < headersToUpdate.end(); head++) {
+                            std::string val = subset.getString("headers." + *head, "");
+                            if (val != "") {
+                                miscinfo.define(*head, val);
+                            }
+                        }
+                        casaim.setMiscInfo(miscinfo);
+                    }
+                }
+
+                if (subset.isDefined("history")) {
+                    std::vector<std::string> historyMessages = subset.getStringVector("history", "");
+                    if (historyMessages.size() > 0) {
+                        casa::LogIO log = casaim.logSink();
+                        for (std::vector<std::string>::iterator history = historyMessages.begin();
+                                history < historyMessages.end(); history++) {
+                            log << *history << casa::LogIO::POST;
                         }
                     }
-                    casaim.setMiscInfo(miscinfo);
                 }
 
-                std::vector<std::string> historyMessages = subset.getStringVector("history","");
-                if(historyMessages.size()>0){
-                    casa::LogIO log=casaim.logSink();
-                    for(std::vector<std::string>::iterator history=historyMessages.begin();
-                        history<historyMessages.end();history++){
-                        log << *history<< casa::LogIO::POST;
-                    }
-                }
-                        
-                
+
                 returnVal = casacore::ImageFITSConverter::ImageToFITS(errorMsg, casaim, fitsimage,
-                                                                      memoryInMB, preferVelocity, opticalVelocity,
-                                                                      bitpix, minpix, maxpix, allowOverwrite,
-                                                                      degenerateLast, verbose, stokesLast,
-                                                                      preferWavelength, airWavelength,
-                                                                      origin, copyHistory);
+                            memoryInMB, preferVelocity, opticalVelocity,
+                            bitpix, minpix, maxpix, allowOverwrite,
+                            degenerateLast, verbose, stokesLast,
+                            preferWavelength, airWavelength,
+                            origin, copyHistory);
 
-                if(!returnVal){
+                if (!returnVal) {
                     ASKAPTHROW(AskapError, errorMsg);
                 }
 
-                
-                 stats.logSummary();
-               ///==============================================================================
+
+                stats.logSummary();
+                ///==============================================================================
             } catch (const askap::AskapError& x) {
                 ASKAPLOG_FATAL_STR(logger, "Askap error in " << argv[0] << ": " << x.what());
                 std::cerr << "Askap error in " << argv[0] << ": " << x.what() << std::endl;
