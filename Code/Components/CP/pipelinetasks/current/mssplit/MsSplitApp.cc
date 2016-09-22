@@ -581,8 +581,8 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
     if (rowFiltersExist()) maxSimultaneousRows = 1;
 
     // Set a 64MB maximum cache size for the large columns
-    // const casa::uInt cacheSize = 64 * 1024 * 1024;
-    const casa::uInt cacheSize =  1024 * 1024;
+    const casa::uInt cacheSize = 64 * 1024 * 1024;
+    // const casa::uInt cacheSize =  1024 * 1024;
     sc.data().setMaximumCacheSize(cacheSize);
     dc.data().setMaximumCacheSize(cacheSize);
     sc.flag().setMaximumCacheSize(cacheSize);
