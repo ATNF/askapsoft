@@ -60,7 +60,7 @@ Selavy.Weights.weightsCutoff = ${LINMOS_CUTOFF}"
     # get the text that does the FITS conversion - put in $fitsConvertText
     convertToFITStext
 
-    sbatchfile=$slurms/science_selavy_${FIELDBEAM}.sbatch
+    setJob science_selavy selavy
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -70,7 +70,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_SOURCEFINDING}
 #SBATCH --ntasks=${NUM_CPUS_SELAVY}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_SELAVY}
-#SBATCH --job-name=selavy_${FIELDBEAMJOB}
+#SBATCH --job-name=${jobname}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-selavy-%j.out
@@ -140,7 +140,7 @@ NCORES=${NUM_CPUS_SELAVY}
 NPPN=${CPUS_PER_CORE_SELAVY}
 aprun -n \${NCORES} -N \${NPPN} $selavy -c \$parset >> \$log
 err=\$?
-extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} selavy_B${BEAM} "txt,csv"
+extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
 fi

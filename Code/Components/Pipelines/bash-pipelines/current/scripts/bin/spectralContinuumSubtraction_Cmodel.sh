@@ -62,7 +62,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_SPECTRAL_CONTSUB}
 #SBATCH --ntasks=${NPROCS_CONTSUB}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_CONTSUB}
-#SBATCH --job-name=contsub_${FIELDBEAMJOB}
+#SBATCH --job-name=${jobname}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-contsubSLsci-%j.out
@@ -159,7 +159,7 @@ NCORES=${NPROCS_SELAVY}
 NPPN=${CPUS_PER_CORE_CONTSUB}
 aprun -n \${NCORES} -N \${NPPN} ${selavy} -c \${parset} > \${log}
 err=\$?
-extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} selavy_contsub_spectral_B${BEAM} "txt,csv"
+extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname}_selavy "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
 fi
@@ -202,7 +202,7 @@ EOFINNER
     NPPN=2
     aprun -n \${NCORES} -N \${NPPN} ${cmodel} -c \${parset} > \${log}
     err=\$?
-    extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} cmodel_contsub_spectral_B${BEAM} "txt,csv"
+    extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname}_cmodel "txt,csv"
     if [ \$err != 0 ]; then
         exit \$err
     fi
@@ -243,7 +243,7 @@ EOFINNER
     aprun -n \${NCORES} -N \${NPPN} ${ccontsubtract} -c \${parset} > \${log}
     err=\$?
     rejuvenate ${msSciSL}
-    extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} contsub_spectral_B${BEAM} "txt,csv"
+    extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname} "txt,csv"
     if [ \$err != 0 ]; then
         exit \$err
     else

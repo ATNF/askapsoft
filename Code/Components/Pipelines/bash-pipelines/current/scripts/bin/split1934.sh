@@ -61,7 +61,7 @@ fi
 
 if [ $DO_IT == true ]; then
 
-    sbatchfile=$slurms/split_1934_${FIELDBEAM}.sbatch
+    setJob split_1934 split
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -71,7 +71,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_SPLIT_1934}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --job-name=split_${FIELDBEAMJOB}
+#SBATCH --job-name=${jobname}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-split1934-b${BEAM}-%j.out
@@ -121,7 +121,7 @@ NPPN=1
 aprun -n \${NCORES} -N \${NPPN} ${mssplit} -c \${parset} > \${log}
 err=\$?
 rejuvenate ${msCal}
-extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} split1934_B${BEAM} "txt,csv"
+extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
 fi

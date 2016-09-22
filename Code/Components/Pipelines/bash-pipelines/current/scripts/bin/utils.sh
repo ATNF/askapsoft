@@ -72,6 +72,29 @@ function getAltPrefix()
     wrList=$(seq 1 $NSUB_CUBES)
     
 }
+
+
+##############################
+# JOB NAME MANAGEMENT
+#
+# This sets the $sbatchfile and $jobname variables - the $sbatchfile
+# should be used as the name for the slurm job file, while $jobname
+# can be used both as the --job-name option to sbatch, and as the
+# Description for the extractStats call. It takes two arguments, the
+# first is the longer description for the basis of the slurm filename,
+# and the second is the shorter one used in the slurm job name and the
+# extractStats results
+#  Usage:  setJob <description> <description2>
+#  Requires:  $slurms, $FIELDBEAM, $FIELDBEAMJOB
+#  Sets:  sbatchfile=$slurms/description_FIELDBEAM.sbatch
+#         jobname=description2_FIELDBEAMJOB
+function setJob()
+{
+    sbatchfile="$slurms/$1_${FIELDBEAM}.sbatch"
+    jobname="$2_${FIELDBEAMJOB}"
+}
+
+
 ##############################
 # JOB ID MANAGEMENT
 

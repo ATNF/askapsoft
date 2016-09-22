@@ -50,7 +50,7 @@ fi
 
 if [ $DO_IT == true ]; then
 
-    sbatchfile=$slurms/science_continuumImage_${FIELDBEAM}.sbatch
+    setJob science_continuumImage cont
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -60,7 +60,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_CONT_IMAGE}
 #SBATCH --ntasks=${NUM_CPUS_CONTIMG_SCI}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_CONT_IMAGING}
-#SBATCH --job-name=cont_${FIELDBEAMJOB}
+#SBATCH --job-name=${jobname}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-contImaging-%j.out
@@ -91,7 +91,7 @@ aprun -n \${NCORES} -N \${NPPN} $theimager -c \$parset > \$log
 err=\$?
 rejuvenate *.${imageBase}*
 rejuvenate ${OUTPUT}/${msSciAv}
-extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} contImaging_B${BEAM} "txt,csv"
+extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
 fi

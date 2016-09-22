@@ -37,7 +37,7 @@ fi
 
 if [ $DO_IT == true ]; then
 
-    sbatchfile=$slurms/ccalapply_science_${FIELDBEAM}.sbatch
+    setJob apply_bandpass applyBP
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -47,7 +47,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_APPLY_BANDPASS}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --job-name=applyBP_${FIELDBEAMJOB}
+#SBATCH --job-name=${jobname}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-applyBandpass-%j.out
@@ -86,7 +86,7 @@ aprun -n \${NCORES} -N \${NPPN} ${ccalapply} -c \$parset > \$log
 err=\$?
 rejuvenate ${msSci}
 rejuvenate ${TABLE_BANDPASS}
-extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} calapply_B${BEAM} "txt,csv"
+extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
 else

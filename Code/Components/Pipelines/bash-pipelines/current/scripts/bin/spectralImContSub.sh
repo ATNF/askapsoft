@@ -54,7 +54,7 @@ fi
 
 if [ $DO_IT == true ]; then
 
-    sbatchfile=$slurms/spectral_imcontsub_${FIELDBEAM}.sbatch
+    setJob spectral_imcontsub imcontsub
     cat > $sbatchfile <<EOF
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -64,7 +64,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_SPECTRAL_IMCONTSUB}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --job-name=imcontsub_${FIELDBEAMJOB}
+#SBATCH --job-name=${jobname}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-imcontsubSL-%j.out
@@ -101,7 +101,7 @@ module load casa
 aprun -n \${NCORES} -N \${NPPN} -b casa --nogui --nologger --log2term -c \${pyscript} > \${log}
 err=\$?
 rejuvenate image.${imageBase}.restored
-extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} imcontsub_B${BEAM} "txt,csv"
+extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
 fi

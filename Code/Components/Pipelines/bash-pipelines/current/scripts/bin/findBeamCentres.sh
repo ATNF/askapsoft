@@ -60,7 +60,14 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$needBeams" == "true" ]; then
         if [ "`which schedblock`" == "" ]; then
             echo "WARNING - no schedblock executable found - try loading askapcli module."
         else
-            schedblock info -p ${SB_SCIENCE} > $sbinfo
+            if [ -e ${sbinfo} ] && [ `wc -l $sbinfo | awk '{print $1}'` -gt 1 ]; then
+                echo "Reusing schedblock info file $sbinfo for SBID ${SB_SCIENCE}"
+            else
+                if [ -e ${sbinfo} ]; then
+                    rm -f $sbinfo
+                fi
+                schedblock info -p ${SB_SCIENCE} > $sbinfo
+            fi
             defaultFPname=`grep "%d.footprint.name" ${sbinfo} | awk '{print $3}'`
             defaultFPpitch=`grep "%d.footprint.pitch" ${sbinfo} | awk '{print $3}'`
             defaultFPangle=`grep "%d.pol_axis" ${sbinfo} | awk '{print $4}' | sed -e 's/\]//g'`

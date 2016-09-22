@@ -51,7 +51,7 @@ fi
 
 if [ $DO_IT == true ]; then
 
-    sbatchfile=$slurms/science_average_${FIELDBEAM}.sbatch
+    setJob science_average avg
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -61,7 +61,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_AVERAGE_MS}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --job-name=avg_${FIELDBEAMJOB}
+#SBATCH --job-name=${jobname}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-averageSci-%j.out
@@ -113,7 +113,7 @@ NPPN=1
 aprun -n \${NCORES} -N \${NPPN} $mssplit -c \${parset} > \${log}
 err=\$?
 rejuvenate ${msSci}
-extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} avScience_B${BEAM} "txt,csv"
+extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
 fi

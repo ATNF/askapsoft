@@ -179,7 +179,7 @@ if [ $DO_IT == true ]; then
 
     echo "Imaging the spectral-line science observation"
 
-    sbatchfile=$slurms/science_spectral_imager_${FIELDBEAM}.sbatch
+    setJob science_spectral_imager spec
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -189,7 +189,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_SPECTRAL_IMAGE}
 #SBATCH --ntasks=${NUM_CPUS_SPECIMG_SCI}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_SPEC_IMAGING}
-#SBATCH --job-name spec_${FIELDBEAMJOB}
+#SBATCH --job-name=${jobname}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-spectralImaging-%j.out
@@ -259,7 +259,7 @@ aprun -n \${NCORES} -N \${NPPN} ${theImager} -c \$parset > \$log
 err=\$?
 rejuvenate ${msSciSL}
 rejuvenate *.${imageBase}*
-extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} spectralImaging_B${BEAM} "txt,csv"
+extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname} "txt,csv"
 
 if [ \${err} -ne 0 ]; then
     echo "Error: ${Imager} returned error code \${err}"

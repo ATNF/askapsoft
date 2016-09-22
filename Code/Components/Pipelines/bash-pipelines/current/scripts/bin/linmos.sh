@@ -61,7 +61,7 @@ ${LINMOS_BEAM_OFFSETS}"
     fi
 
     
-    sbatchfile=$slurms/science_linmos_${FIELDBEAM}.sbatch
+    setjob linmos linmos
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -71,7 +71,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_LINMOS}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --job-name=linmos_${FIELDBEAMJOB}
+#SBATCH --job-name=${jobname}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-linmos-%j.out
@@ -127,7 +127,7 @@ EOFINNER
     aprun -n \${NCORES} -N \${NPPN} $linmos -c \$parset > \$log
     err=\$?
     rejuvenate *.${IMAGE_BASE_CONT}*
-    extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} linmos "txt,csv"
+    extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} $jobname "txt,csv"
     if [ \$err != 0 ]; then
         exit \$err
     fi

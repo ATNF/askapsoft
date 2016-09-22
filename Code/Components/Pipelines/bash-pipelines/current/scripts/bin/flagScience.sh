@@ -51,7 +51,7 @@ if [ $DO_IT == true ]; then
     DO_AMP_FLAG=false
     ruleList=""
     
-     if [ "$ANTENNA_FLAG_SCIENCE" == "" ]; then
+    if [ "$ANTENNA_FLAG_SCIENCE" == "" ]; then
         antennaFlagging="# Not flagging any antennas"
     else
         antennaFlagging="# The following flags out the requested antennas:
@@ -62,48 +62,48 @@ Cflag.selection_flagger.rule1.antenna   = ${ANTENNA_FLAG_SCIENCE}"
             ruleList="${ruleList},rule1"
         fi
         DO_AMP_FLAG=true
-     fi
+    fi
 
-     if [ ${FLAG_AUTOCORRELATION_SCIENCE} == true ]; then
-         autocorrFlagging="# The following flags out the autocorrelations, if set to true:
+    if [ ${FLAG_AUTOCORRELATION_SCIENCE} == true ]; then
+        autocorrFlagging="# The following flags out the autocorrelations, if set to true:
 Cflag.selection_flagger.rule2.autocorr  = ${FLAG_AUTOCORRELATION_SCIENCE}"
-         if [ "${ruleList}" == "" ]; then
-             ruleList="rule2"
-         else
-             ruleList="${ruleList},rule2"
-         fi
-         DO_AMP_FLAG=true
-     else
-         autocorrFlagging="# No flagging of autocorrelations"
-     fi
+        if [ "${ruleList}" == "" ]; then
+            ruleList="rule2"
+        else
+            ruleList="${ruleList},rule2"
+        fi
+        DO_AMP_FLAG=true
+    else
+        autocorrFlagging="# No flagging of autocorrelations"
+    fi
 
-     if [ "${ruleList}" == "" ]; then
-         selectionRule="# No selection rules used"
-     else
-         selectionRule="Cflag.selection_flagger.rules           = [${ruleList}]"
-     fi
+    if [ "${ruleList}" == "" ]; then
+        selectionRule="# No selection rules used"
+    else
+        selectionRule="Cflag.selection_flagger.rules           = [${ruleList}]"
+    fi
 
-     # Define a lower bound to the amplitudes, for use in either
-     # flagging task
-     amplitudeLow="# No absolute lower bound to visibility amplitudes"
-     if [ "${FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW}" != "" ]; then
-         # Only add the low threshold if it has been given
-         amplitudeLow="Cflag.amplitude_flagger.low             = ${FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW}"
-     fi
+    # Define a lower bound to the amplitudes, for use in either
+    # flagging task
+    amplitudeLow="# No absolute lower bound to visibility amplitudes"
+    if [ "${FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW}" != "" ]; then
+        # Only add the low threshold if it has been given
+        amplitudeLow="Cflag.amplitude_flagger.low             = ${FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW}"
+    fi
 
-     # The flat amplitude cut to be applied
-     if [ ${FLAG_DO_FLAT_AMPLITUDE_SCIENCE} == true ]; then
-         amplitudeCut="# Amplitude based flagging
+    # The flat amplitude cut to be applied
+    if [ ${FLAG_DO_FLAT_AMPLITUDE_SCIENCE} == true ]; then
+        amplitudeCut="# Amplitude based flagging
 #   Here we apply a simple cut at a given amplitude level
 Cflag.amplitude_flagger.enable          = true
 Cflag.amplitude_flagger.high            = ${FLAG_THRESHOLD_AMPLITUDE_SCIENCE}
 ${amplitudeLow}"
-         DO_AMP_FLAG=true
-     else
-         amplitudeCut="# No flat amplitude flagging applied"
-     fi
+        DO_AMP_FLAG=true
+    else
+        amplitudeCut="# No flat amplitude flagging applied"
+    fi
 
-    sbatchfile=$slurms/flag_science_${FIELDBEAM}.sbatch
+    setJob flag_science flag
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -113,7 +113,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_FLAG_SCIENCE}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --job-name=flag_${FIELDBEAMJOB}
+#SBATCH --job-name=${jobname}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-flagSci-b${BEAM}-%j.out
@@ -152,7 +152,7 @@ EOFINNER
     aprun -n \${NCORES} -N \${NPPN} ${cflag} -c \${parset} > \${log}
     err=\$?
     rejuvenate ${msToFlag}
-    extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} flagScienceAmp_B${BEAM} "txt,csv"
+    extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname}_Amp "txt,csv"
     if [ \$err != 0 ]; then
         exit \$err
     else
@@ -189,7 +189,7 @@ EOFINNER
     aprun -n \${NCORES} -N \${NPPN} ${cflag} -c \${parset} > \${log}
     err=\$?
     rejuvenate ${msToFlag}
-    extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} flagScienceDynamic_B${BEAM} "txt,csv"
+    extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname}_Dyn "txt,csv"
     if [ \$err != 0 ]; then
         exit \$err
     else

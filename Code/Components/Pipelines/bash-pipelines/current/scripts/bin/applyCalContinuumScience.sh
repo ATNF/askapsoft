@@ -39,7 +39,7 @@ fi
 
 if [ $DO_IT == true ]; then
 
-    sbatchfile=$slurms/apply_gains_cal_cont_${FIELDBEAM}.sbatch
+    setJob apply_gains_cal_cont applyCalC
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -49,7 +49,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_CONT_APPLYCAL}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --job-name=applyCalC_${FIELDBEAMJOB}
+#SBATCH --job-name=${jobname}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-calappCont${BEAM}-%j.out
@@ -94,7 +94,7 @@ aprun -n \${NCORES} -N \${NPPN} ${ccalapply} -c \${parset} > \${log}
 err=\$?
 rejuvenate ${msSciAvCal}
 rejuvenate ${gainscaltab}
-extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} calapply_cont_B${BEAM} "txt,csv"
+extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
 else

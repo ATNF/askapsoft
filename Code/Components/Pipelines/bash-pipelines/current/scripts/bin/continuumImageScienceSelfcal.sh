@@ -140,7 +140,7 @@ Ccalibrator.sources.definition                  = \${sources}"
 
     fi
 
-    sbatchfile=$slurms/science_continuumImageSelfcal_${FIELDBEAM}.sbatch
+    setJob science_continuumImageSelfcal contSC
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -150,7 +150,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_CONT_IMAGE}
 #SBATCH --ntasks=${NUM_CPUS_SELFCAL}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_CONT_IMAGING}
-#SBATCH --job-name=contSC_${FIELDBEAMJOB}
+#SBATCH --job-name=${jobname}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-contImagingSelfcal-%j.out
@@ -220,7 +220,6 @@ Cimager.calibrate                               = false
     fi
 
     parset=${parsets}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}.in
-    log=${logs}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}.log
 
     cat > \$parset <<EOFINNER
 ##########
@@ -337,24 +336,26 @@ EOFINNER
         ln -s ${logs} .
         ln -s ${parsets} .
 
-        echo "--- Source finding with $selavy ---" >> \$log
+        log=${logs}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}_selavy.log
+        echo "--- Source finding with $selavy ---" > \$log
         NCORES=${NPROCS_SELAVY}
         NPPN=${CPUS_PER_CORE_SELFCAL}
         aprun -n \${NCORES} -N \${NPPN} $selavy -c \$parset >> \$log
         err=\$?
-        extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} selavySC_L\${LOOP}_B${BEAM} "txt,csv"
+        extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname}_L\${LOOP}_selavy "txt,csv"
 
         if [ \$err != 0 ]; then
             exit \$err
         fi
 
         if [ "\${selfcalMethod}" == "Cmodel" ]; then
-            echo "--- Model creation with $cmodel ---" >> \$log
+            log=${logs}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}_cmodel.log
+            echo "--- Model creation with $cmodel ---" > \$log
             NCORES=2
             NPPN=2
             aprun -n \${NCORES} -N \${NPPN} $cmodel -c \$parset >> \$log
             err=\$?
-            extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} cmodelSC_L\${LOOP}_B${BEAM} "txt,csv"
+            extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname}_L\${LOOP}_cmodel "txt,csv"
             
             if [ \$err != 0 ]; then
                 exit \$err
@@ -362,12 +363,13 @@ EOFINNER
         fi
 
 
+        log=${logs}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}_ccalibrator.log
         echo "--- Calibration with $ccalibrator ---" >> \$log
         NCORES=1
         NPPN=1
         aprun -n \${NCORES} -N \${NPPN} $ccalibrator -c \$parset >> \$log
         err=\$?
-        extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ccalSC_L\${LOOP}_B${BEAM} "txt,csv"
+        extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname}_L\${LOOP}_ccal "txt,csv"
         if [ \$err != 0 ]; then
             exit \$err
         fi
@@ -387,7 +389,8 @@ EOFINNER
     fi
 
     # Run the imager, calibrating if not the first time.
-    echo "--- Imaging with $theimager ---" >> \$log
+    log=${logs}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}.log
+    echo "--- Imaging with $theimager ---" > \$log
     NCORES=${NUM_CPUS_CONTIMG_SCI}
     NPPN=${CPUS_PER_CORE_CONT_IMAGING}
     aprun -n \${NCORES} -N \${NPPN} $theimager -c \$parset >> \$log
@@ -395,7 +398,7 @@ EOFINNER
     rejuvenate *.${imageBase}*
     rejuvenate ${OUTPUT}/${gainscaltab}
     rejuvenate ${OUTPUT}/${msSciAv}
-    extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} contImagingSC_L\${LOOP}_B${BEAM} "txt,csv"
+    extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname}_L\${LOOP} "txt,csv"
     if [ \$err != 0 ]; then
         exit \$err
     fi

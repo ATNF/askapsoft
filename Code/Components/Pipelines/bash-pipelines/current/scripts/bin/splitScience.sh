@@ -66,7 +66,7 @@ if [ $DO_IT == true ]; then
     # Select only the current field
     fieldParam="fieldnames   = ${FIELD}"
     
-    sbatchfile=$slurms/split_science_${FIELDBEAM}.sbatch
+    setJob split_science split
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -76,7 +76,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_SPLIT_SCIENCE}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --job-name=split_${FIELDBEAMJOB}
+#SBATCH --job-name=${jobname}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-splitSci-b${BEAM}-%j.out
@@ -130,7 +130,7 @@ NPPN=1
 aprun -n \${NCORES} -N \${NPPN} ${mssplit} -c \${parset} > \${log}
 err=\$?
 rejuvenate ${msSci}
-extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} splitScience_B${BEAM} "txt,csv"
+extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
 fi

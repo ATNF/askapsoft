@@ -141,7 +141,7 @@ Simager.restore.beamLog                         = beamLog.${imageBase}.txt"
 
         echo "Imaging the continuum cube, polarisation $POLN, for the science observation"
 
-        sbatchfile=$slurms/science_contcube_imager_${FIELDBEAM}_${POLN}.sbatch
+        setJob science_contcube_imager_${POLN} contcube${POLN}
         cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -151,7 +151,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_CONTCUBE_IMAGE}
 #SBATCH --ntasks=${NUM_CPUS_CONTCUBE_SCI}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_CONTCUBE_IMAGING}
-#SBATCH --job-name contcube_${FIELDBEAMJOB}${POLN}
+#SBATCH --job-name ${jobname}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-contcubeImaging-${BEAM}-${POLN}-%j.out
@@ -221,7 +221,7 @@ aprun -n \${NCORES} -N \${NPPN} ${theimager} -c \$parset > \$log
 err=\$?
 rejuvenate \${ms}
 rejuvenate *.${imageBase}*
-extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} contcubeImaging_B${BEAM} "txt,csv"
+extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname} "txt,csv"
 
 if [ \${err} -ne 0 ]; then
     echo "Error: simager returned error code \${err}"

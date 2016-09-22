@@ -32,7 +32,7 @@
 # @author Matthew Whiting <Matthew.Whiting@csiro.au>
 #
 
-sbatchfile=$slurms/contsub_spectralline_${FIELDBEAM}.sbatch
+setJob contsub_spectralline contsub
 
 if [ ${CONTSUB_METHOD} == "Cmodel" ]; then
 

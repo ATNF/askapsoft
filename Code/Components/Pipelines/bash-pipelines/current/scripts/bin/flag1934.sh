@@ -58,41 +58,41 @@ Cflag.selection_flagger.rule1.antenna   = ${ANTENNA_FLAG_1934}"
         DO_AMP_FLAG=true
     fi
 
-     if [ ${FLAG_AUTOCORRELATION_1934} == true ]; then
-         autocorrFlagging="# The following flags out the autocorrelations, if set to true:
+    if [ ${FLAG_AUTOCORRELATION_1934} == true ]; then
+        autocorrFlagging="# The following flags out the autocorrelations, if set to true:
 Cflag.selection_flagger.rule2.autocorr  = ${FLAG_AUTOCORRELATION_1934}"
-         if [ "${ruleList}" == "" ]; then
-             ruleList="rule2"
-         else
-             ruleList="${ruleList},rule2"
-         fi
-         DO_AMP_FLAG=true
-     else
-         autocorrFlagging="# No flagging of autocorrelations"
-     fi
+        if [ "${ruleList}" == "" ]; then
+            ruleList="rule2"
+        else
+            ruleList="${ruleList},rule2"
+        fi
+        DO_AMP_FLAG=true
+    else
+        autocorrFlagging="# No flagging of autocorrelations"
+    fi
 
-     if [ "${ruleList}" == "" ]; then
-         selectionRule="# No selection rules used"
-     else
-         selectionRule="Cflag.selection_flagger.rules           = [${ruleList}]"
-     fi
-     
-     # The flat amplitude cut to be applied
-     if [ ${FLAG_DO_FLAT_AMPLITUDE_1934} == true ]; then
-         amplitudeCut="# Amplitude based flagging
+    if [ "${ruleList}" == "" ]; then
+        selectionRule="# No selection rules used"
+    else
+        selectionRule="Cflag.selection_flagger.rules           = [${ruleList}]"
+    fi
+    
+    # The flat amplitude cut to be applied
+    if [ ${FLAG_DO_FLAT_AMPLITUDE_1934} == true ]; then
+        amplitudeCut="# Amplitude based flagging
 #   Here we apply a simple cut at a given amplitude level
 Cflag.amplitude_flagger.enable          = true
 Cflag.amplitude_flagger.high            = ${FLAG_THRESHOLD_AMPLITUDE_1934}"
-         if [ "${FLAG_THRESHOLD_AMPLITUDE_1934_LOW}" != "" ]; then
-             # Only add the low threshold if it has been given
-             amplitudeCut="${amplitudeCut}
+        if [ "${FLAG_THRESHOLD_AMPLITUDE_1934_LOW}" != "" ]; then
+            # Only add the low threshold if it has been given
+            amplitudeCut="${amplitudeCut}
 Cflag.amplitude_flagger.low             = ${FLAG_THRESHOLD_AMPLITUDE_1934_LOW}"
-         fi
-         DO_AMP_FLAG=true
-     fi
-         
+        fi
+        DO_AMP_FLAG=true
+    fi
     
-    sbatchfile=$slurms/flag_1934_${FIELDBEAM}.sbatch
+    
+    setJob flag_1934 flag
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -102,7 +102,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_FLAG_1934}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --job-name=flag_${FIELDBEAMJOB}
+#SBATCH --job-name=${jobname}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-flag1934-b${BEAM}-%j.out
@@ -142,7 +142,7 @@ EOFINNER
     aprun -n \${NCORES} -N \${NPPN} ${cflag} -c \${parset} > \${log}
     err=\$?
     rejuvenate ${msCal}
-    extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} flag1934Amp_B${BEAM} "txt,csv"
+    extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname}_Amp "txt,csv"
     if [ \$err != 0 ]; then
         exit \$err
     else
@@ -175,7 +175,7 @@ EOFINNER
     aprun -n \${NCORES} -N \${NPPN} ${cflag} -c \${parset} > \${log}
     err=\$?
     rejuvenate ${msCal}
-    extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} flag1934Dynamic_B${BEAM} "txt,csv"
+    extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname}_Dyn "txt,csv"
     if [ \$err != 0 ]; then
         exit \$err
     else
