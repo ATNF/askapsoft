@@ -61,7 +61,7 @@ ${LINMOS_BEAM_OFFSETS}"
     fi
 
     
-    setjob linmos linmos
+    setJob linmos linmos
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
