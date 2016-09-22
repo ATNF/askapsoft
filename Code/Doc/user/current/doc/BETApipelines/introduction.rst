@@ -18,7 +18,7 @@ BETA reduction approach with ASKAPsoft.
  .. _ASKAP-SW-0020: http://www.atnf.csiro.au/projects/askap/ASKAP-SW-0020.pdf
 
 This set of scripts handles all BETA reduction, from the splitting and
-flagging of 1934-638 and science datasets, obtaining and applying the
+flagging of bandpass-calibrator and science datasets, obtaining and applying the
 bandpass calibration, averaging of the science visibilities, continuum
 imaging (with or without self-calibration) and linear mosaicking,
 source-finding, and spectral-line imaging (including continuum
@@ -44,7 +44,7 @@ filesystem on galaxy**. The /home filesystem is not suitable for
 running this processing, and there are certain bits that will fail
 on /home. If the filesystem on which the scripts are run is not a
 Lustre filesystem, it will exit without running anything. This is
-because the lustre striping is set (to 4 for the processing
+because the Lustre striping is set at run-time (to 4 for the processing
 directories, and 1 for other directories like parsets, logs &
 metadata). 
 

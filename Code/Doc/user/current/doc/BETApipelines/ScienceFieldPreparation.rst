@@ -2,18 +2,28 @@ User Parameters - Preparation of the Science field data
 =======================================================
 
 These parameters govern the pre-processing needed for the science
-field, to split by beam, flag, apply the bandpass (although none of
-the parameters listed here relate to that), and average to
+field, to split by beam, apply the bandpass (although none of
+the parameters listed here relate to that), flag, and average to
 continuum resolution.
 
 The splitting is done by beam, and optionally by particular scans
 and/or fields (where the latter are selected on the basis of the FIELD
-NAME in the MS). The flagging is done in the same manner as for the
-calibrator observation.
+NAME in the MS).
+
+As for the bandpass calibrator, the MS is then flagged in two
+passes. First, a combination of selection rules (allowing flagging of
+antennas & baselines, and autocorrelations) and a simple flat
+amplitude threshold are applied. Then dynamic flagging of amplitudes
+is done, optionally integrating over or across individual
+spectra. Each of these steps is selectable via input parameters.
 
 The averaging scale defaults to 54 channels, resulting in a
 1MHz-resolution MS that can be imaged with cimager, although this
 averaging scale can be changed by the user.
+
+Once the averaged dataset has been created, a second round of flagging
+can be done. This uses the same settings as the first time, but
+applies them to the averaged dataset instead.
 
 The default behaviour is to process all fields within the science MS
 (interleaving, for instance, makes use of multiple fields), with each
@@ -72,15 +82,25 @@ is possible, however, to select a single field to process via the
 |                                           |                                 |                                                 | measurement set. Also determines the tile size when                   |
 |                                           |                                 |                                                 | creating the MS.                                                      |
 +-------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
+| ``FLAG_AFTER_AVERAGING``                  | true                            | none                                            | Whether to do an additional step of flagging on the channel-averaged  |
+|                                           |                                 |                                                 | MS proior to imaging. All the settings for the flagging will be       |
+|                                           |                                 |                                                 | re-used.                                                              |
++-------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 | ``FLAG_DO_DYNAMIC_AMPLITUDE_SCIENCE``     | true                            | none                                            | Whether to do the dynamic flagging, after the rule-based              |
 |                                           |                                 |                                                 | and simple flat-amplitude flagging is done                            |
 +-------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 | ``FLAG_THRESHOLD_DYNAMIC_SCIENCE``        | 4.0                             | amplitude_flagger.threshold                     |                                                                       |
-|                                           |                                 | amplitude_flagger.integrateSpectra.threshold    | Dynamic threshold applied to amplitudes when flagging                 |
+|                                           |                                 | amplitude_flagger.integrateSpectra.threshold    |                                                                       |
+|                                           |                                 | amplitude_flagger.integrateTimes.threshold      | Dynamic threshold applied to amplitudes when flagging                 |
 |                                           |                                 | (:doc:`../calim/cflag`)                         | science field data [sigma]                                            |
 +-------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
-| ``FLAG_DO_FLAT_AMPLITUDE_SCIENCE``        | true                            | none                                            |                                                                       |
-|                                           |                                 |                                                 |                                                                       |
+| ``FLAG_DYNAMIC_INTEGRATE_SPECTRA``        | false                           | amplitude_flagger.integrateSpectra              | Whether to integrate the spectra in time and flag channels during the |
+|                                           |                                 | (:doc:`../calim/cflag`)                         | dynamic flagging task.                                                |
++-------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
+| ``FLAG_DYNAMIC_INTEGRATE_TIMES``          | true                            | amplitude_flagger.integrateTimes                | Whether to integrate across spectra and flag time samples during the  |
+|                                           |                                 | (:doc:`../calim/cflag`)                         | dynamic flagging task.                                                |
++-------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
+| ``FLAG_DO_FLAT_AMPLITUDE_SCIENCE``        | true                            | none                                            | Whether to apply a flag amplitude flux threshold to the data.         |
 +-------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 |   ``FLAG_THRESHOLD_AMPLITUDE_SCIENCE``    | 0.2                             | amplitude_flagger.high (:doc:`../calim/cflag`)  | Simple amplitude threshold applied when flagging science field data.  |
 |                                           |                                 |                                                 | If set to blank (``FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW=""``),        |

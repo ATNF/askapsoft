@@ -191,22 +191,26 @@ Here is a summary of the workflow provided for by these scripts:
 * These are flagged using **cflag** (:doc:`../calim/cflag`) in two
   passes: first, selection rules covering antennas, baselines and
   autocorrelations are applied, along with a simple flat amplitude
-  threshold; then a dynamic amplitude flag that integrates over
+  threshold; then a dynamic amplitude flag that integrates
   individual spectra.
 * The bandpass solution is then determined with **cbpcalibrator**
   (:doc:`../calim/cbpcalibrator`), using all individual MSs and stored
   in a single CASA table.
 * The science field is processed for each field name - what follows
   describes the steps used for each field.
-* The science field data is split and flagged with *mssplit** and
-  ***cflag** in the same manner as for the calibrator, producing one
-  *measurement set per beam. You can select particular scans or fields
-  *here, but the default is to use everything. Each field gets its own
-  *directory.
+* The science field data is split with *mssplit**, producing one
+  measurement set per beam. You can select particular scans or fields
+  here, but the default is to use everything. Each field gets its own
+  directory.
 * The bandpass solution is then applied to each beam MS with
   **ccalapply** (:doc:`../calim/ccalapply`).
+* Flagging is then applied to the bandpass-calibrated dataset. The
+  same procedure as for the calibrator is used, although there is more
+  control over integrating the spectra.
 * The science field data are then averaged with **mssplit** to form
   continuum data sets. (Still one per beam).
+* Another round of flagging can be done, this time on the averaged
+  dataset. 
 * Each beam is then imaged individually. This is done in one of two
   ways:
   
