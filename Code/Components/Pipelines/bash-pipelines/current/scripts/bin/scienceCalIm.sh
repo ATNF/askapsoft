@@ -95,11 +95,18 @@ for FIELD in ${FIELD_LIST}; do
         FIELDBEAMJOB=`echo $FIELDBEAM | sed -e 's/_//g'`
 
         . ${PIPELINEDIR}/splitScience.sh
-        . ${PIPELINEDIR}/flagScience.sh
-        
+
         . ${PIPELINEDIR}/applyBandpassScience.sh
 
+        msToFlag=$msSci
+        . ${PIPELINEDIR}/flagScience.sh
+        
         . ${PIPELINEDIR}/averageScience.sh
+
+        if [ $FLAG_AFTER_AVERAGING == true ]; then
+            msToFlag=$msSciAv
+            . ${PIPELINEDIR}/flagScience.sh
+        fi
             
         if [ $DO_SELFCAL == true ]; then
             . ${PIPELINEDIR}/continuumImageScienceSelfcal.sh

@@ -240,6 +240,10 @@ module load askapdata"
 
     if [ $DO_SCIENCE_FIELD == true ]; then
 
+        # Name of the MS that should be flagged by flagScience.sh
+        #   This gets set differently at different stages in the scripts
+        msToFlag=""
+        
         # Total number of channels must be exact multiple of averaging
         # width.
         # If it isn't, report an error and exit without running anything.

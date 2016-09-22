@@ -41,6 +41,11 @@ if [ -e $FLAG_CHECK_FILE ]; then
     DO_IT=false
 fi
 
+if [ "$msToFlag" == "" ]; then
+    echo "Have not defined \$msToFlag for flagging"
+    DO_IT=false
+fi
+
 if [ $DO_IT == true ]; then
 
     DO_AMP_FLAG=false
@@ -77,24 +82,27 @@ Cflag.selection_flagger.rule2.autocorr  = ${FLAG_AUTOCORRELATION_SCIENCE}"
      else
          selectionRule="Cflag.selection_flagger.rules           = [${ruleList}]"
      fi
-     
+
+     # Define a lower bound to the amplitudes, for use in either
+     # flagging task
+     amplitudeLow="# No absolute lower bound to visibility amplitudes"
+     if [ "${FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW}" != "" ]; then
+         # Only add the low threshold if it has been given
+         amplitudeLow="Cflag.amplitude_flagger.low             = ${FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW}"
+     fi
+
      # The flat amplitude cut to be applied
      if [ ${FLAG_DO_FLAT_AMPLITUDE_SCIENCE} == true ]; then
          amplitudeCut="# Amplitude based flagging
 #   Here we apply a simple cut at a given amplitude level
 Cflag.amplitude_flagger.enable          = true
-Cflag.amplitude_flagger.high            = ${FLAG_THRESHOLD_AMPLITUDE_SCIENCE}"
-         if [ "${FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW}" != "" ]; then
-             # Only add the low threshold if it has been given
-             amplitudeCut="${amplitudeCut}
-Cflag.amplitude_flagger.low             = ${FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW}"
-         fi
+Cflag.amplitude_flagger.high            = ${FLAG_THRESHOLD_AMPLITUDE_SCIENCE}
+${amplitudeLow}"
          DO_AMP_FLAG=true
      else
          amplitudeCut="# No flat amplitude flagging applied"
      fi
-         
-   
+
     sbatchfile=$slurms/flag_science_${FIELDBEAM}.sbatch
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
@@ -126,7 +134,7 @@ if [ \$DO_AMP_FLAG == true ]; then
     parset=${parsets}/cflag_amp_science_${FIELDBEAM}_\${SLURM_JOB_ID}.in
     cat > \$parset <<EOFINNER
 # The path/filename for the measurement set
-Cflag.dataset                           = ${msSci}
+Cflag.dataset                           = ${msToFlag}
 
 ${amplitudeCut}
 
@@ -143,7 +151,7 @@ EOFINNER
     NPPN=1
     aprun -n \${NCORES} -N \${NPPN} ${cflag} -c \${parset} > \${log}
     err=\$?
-    rejuvenate ${msSci}
+    rejuvenate ${msToFlag}
     extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} flagScienceAmp_B${BEAM} "txt,csv"
     if [ \$err != 0 ]; then
         exit \$err
@@ -158,7 +166,7 @@ if [ \${DO_DYNAMIC} == true ]; then
     parset=${parsets}/cflag_dynamic_science_${FIELDBEAM}_\${SLURM_JOB_ID}.in
     cat > \$parset <<EOFINNER
 # The path/filename for the measurement set
-Cflag.dataset                           = ${msSci}
+Cflag.dataset                           = ${msToFlag}
 
 # Amplitude based flagging with dynamic thresholds
 #  This finds a statistical threshold in the spectrum of each
@@ -167,8 +175,11 @@ Cflag.dataset                           = ${msSci}
 Cflag.amplitude_flagger.enable           = true
 Cflag.amplitude_flagger.dynamicBounds    = true
 Cflag.amplitude_flagger.threshold        = ${FLAG_THRESHOLD_DYNAMIC_SCIENCE}
-Cflag.amplitude_flagger.integrateSpectra = true
+Cflag.amplitude_flagger.integrateSpectra = ${FLAG_DYNAMIC_INTEGRATE_SPECTRA}
 Cflag.amplitude_flagger.integrateSpectra.threshold = ${FLAG_THRESHOLD_DYNAMIC_SCIENCE}
+Cflag.amplitude_flagger.integrateTimes = ${FLAG_DYNAMIC_INTEGRATE_TIMES}
+Cflag.amplitude_flagger.integrateTimes.threshold = ${FLAG_THRESHOLD_DYNAMIC_SCIENCE}
+${amplitudeLow}
 EOFINNER
     
     log=${logs}/cflag_dynamic_science_${FIELDBEAM}_\${SLURM_JOB_ID}.log
@@ -177,7 +188,7 @@ EOFINNER
     NPPN=1
     aprun -n \${NCORES} -N \${NPPN} ${cflag} -c \${parset} > \${log}
     err=\$?
-    rejuvenate ${msSci}
+    rejuvenate ${msToFlag}
     extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} flagScienceDynamic_B${BEAM} "txt,csv"
     if [ \$err != 0 ]; then
         exit \$err
@@ -193,6 +204,8 @@ EOFOUTER
         DEP=""
         DEP=`addDep "$DEP" "$DEP_START"`
         DEP=`addDep "$DEP" "$ID_SPLIT_SCI"`
+        DEP=`addDep "$DEP" "$ID_CCALAPPLY_SCI"`
+        DEP=`addDep "$DEP" "$ID_AVERAGE_SCI"`
 	ID_FLAG_SCI=`sbatch $DEP $sbatchfile | awk '{print $4}'`
 	recordJob ${ID_FLAG_SCI} "Flagging beam ${BEAM} of science observation"
     else

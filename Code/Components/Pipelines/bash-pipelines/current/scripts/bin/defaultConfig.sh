@@ -252,10 +252,16 @@ CHAN_RANGE_SCIENCE=""
 # Number of channels to be averaged to create continuum measurement set
 NUM_CHAN_TO_AVERAGE=54
 
+# Run flagging after averaging, as well as after bandpass application
+FLAG_AFTER_AVERAGING=true
 # Whether to do dynamic flagging
 FLAG_DO_DYNAMIC_AMPLITUDE_SCIENCE=true
 # Dynamic threshold applied to amplitudes [sigma]
 FLAG_THRESHOLD_DYNAMIC_SCIENCE=4.0
+# Whether to apply a dynamic threshold to integrated spectra
+FLAG_DYNAMIC_INTEGRATE_SPECTRA=false
+# Whether to apply a dynamic threshold to integrated times
+FLAG_DYNAMIC_INTEGRATE_TIMES=true
 # Whether to apply a flat amplitude cut
 FLAG_DO_FLAT_AMPLITUDE_SCIENCE=true
 # Flat amplitude threshold applied [hardware units - before calibration]
