@@ -99,6 +99,9 @@ channel     = "1-${NUM_CHAN_SCIENCE}"
 width       = ${NUM_CHAN_TO_AVERAGE}
 
 
+# Make the tile size 54 channels, to improve I/O
+stman.tilenchan   = ${NUM_CHAN_TO_AVERAGE}
+
 EOFINNER
 
 log=${logs}/science_average_${FIELDBEAM}_\${SLURM_JOB_ID}.log
