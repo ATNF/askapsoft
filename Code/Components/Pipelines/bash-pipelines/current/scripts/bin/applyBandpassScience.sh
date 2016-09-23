@@ -99,7 +99,6 @@ EOFOUTER
 	DEP=""
         DEP=`addDep "$DEP" "$DEP_START"`
         DEP=`addDep "$DEP" "$ID_SPLIT_SCI"`
-        DEP=`addDep "$DEP" "$ID_FLAG_SCI"`
         DEP=`addDep "$DEP" "$ID_CBPCAL"`
 	ID_CCALAPPLY_SCI=`sbatch $DEP $sbatchfile | awk '{print $4}'`
 	recordJob ${ID_CCALAPPLY_SCI} "Applying bandpass calibration to science observation, with flags \"$DEP\""
