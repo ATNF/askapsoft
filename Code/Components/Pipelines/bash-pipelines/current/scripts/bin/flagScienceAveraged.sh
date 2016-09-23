@@ -166,7 +166,7 @@ EOFOUTER
         DEP=`addDep "$DEP" "$ID_FLAG_SCI"`
         DEP=`addDep "$DEP" "$ID_AVERAGE_SCI"`
 	ID_FLAG_SCI_AV=`sbatch $DEP $sbatchfile | awk '{print $4}'`
-	recordJob ${ID_FLAG_SCI_AV} "Flagging beam ${BEAM} of averaged science observation"
+	recordJob ${ID_FLAG_SCI_AV} "Flagging beam ${BEAM} of averaged science observation, with flags \"$DEP\""
     else
 	echo "Would run flagging beam ${BEAM} for the averaged science observation with slurm file $sbatchfile"
     fi

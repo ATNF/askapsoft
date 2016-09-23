@@ -235,9 +235,10 @@ EOFOUTER
             DEP=""
             DEP=`addDep "$DEP" "$DEP_START"`
             DEP=`addDep "$DEP" "$ID_SPLIT_SCI"`
-            DEP=`addDep "$DEP" "$ID_FLAG_SCI"`
             DEP=`addDep "$DEP" "$ID_CCALAPPLY_SCI"`
+            DEP=`addDep "$DEP" "$ID_FLAG_SCI"`
             DEP=`addDep "$DEP" "$ID_AVERAGE_SCI"`
+            DEP=`addDep "$DEP" "$ID_FLAG_SCI_AV"`
             DEP=`addDep "$DEP" "$ID_CAL_APPLY_CONT_SCI"`
 	    ID_CONTCUBE_SCI=`sbatch $DEP $sbatchfile | awk '{print $4}'`
 	    recordJob ${ID_CONTCUBE_SCI} "Make a continuum cube in pol $POLN for beam $BEAM of the science observation, with flags \"$DEP\""
