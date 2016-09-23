@@ -88,8 +88,8 @@ void CubeComms::initWriters(int nwriters, int nchanpercore) {
     if (nWorkersPerWriter < 1) {
         nWorkersPerWriter = 1;
     }
-    
-    
+
+
     for (int wrk = 0; wrk < nWorkersPerGroup; wrk=wrk+nWorkersPerWriter) {
         int mywriter = floor(wrk/nWorkersPerWriter)*nWorkersPerWriter + 1;
         std::pair<std::map<int,int>::iterator,bool> ret;
@@ -116,9 +116,9 @@ int CubeComms::isWriter() {
     return 0;
 }
 void CubeComms::addWriter(unsigned int writerRank) {
-    
+
     std::pair<std::map<int,int>::iterator,bool> ret;
-    ret = writerMap.insert(std::pair<int,int> (writerRank,writerCount) );
+    ret = writerMap.insert(std::pair<int,int> (writerRank,0) );
 
     if (ret.second==false) {
         ASKAPLOG_DEBUG_STR(logger, "element " << writerRank << " already existed");
@@ -138,6 +138,9 @@ void CubeComms::addChannelToWriter(unsigned int writerRank) {
         writerMap.erase (it);
         std::pair<std::map<int,int>::iterator,bool> ret;
         ret = writerMap.insert(std::pair<int,int> (writerRank,newcount) );
+        ASKAPLOG_INFO_STR(logger,"added a channel to writer " << writerRank  \
+        << " old count was " << oldcount << " current count is " << newcount);
+
     }
     else {
         ASKAPLOG_WARN_STR(logger,"Adding channel to non-existent writer");

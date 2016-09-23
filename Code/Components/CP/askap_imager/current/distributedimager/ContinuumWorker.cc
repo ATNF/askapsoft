@@ -188,7 +188,7 @@ void ContinuumWorker::run(void)
 
     ASKAPLOG_INFO_STR(logger,"Getting basic advice");
     synthesis::AdviseDI advice(itsComms,itsParset);
-    
+
     if (localSolver) {
         ASKAPLOG_INFO_STR(logger,"In local solver mode - reprocessing allocations (running prepare())");
         advice.prepare();
@@ -300,11 +300,11 @@ void ContinuumWorker::processWorkUnit(ContinuumWorkUnit& wu)
 
     ASKAPLOG_INFO_STR(logger,"Getting advice on missing parameters");
     synthesis::AdviseDI diadvise(itsComms,unitParset);
-    
+
     /// this is running prepare and it should not have to.
     /// currently everyone is calulating the allocations superflously why has
     /// this complication developed clean it up ?
-    
+    diadvise.prepare();
     diadvise.addMissingParameters();
     ASKAPLOG_INFO_STR(logger,"advice received");
     ASKAPLOG_INFO_STR(logger,"Storing workUnit");
@@ -416,8 +416,8 @@ void ContinuumWorker::buildSpectralCube() {
                       "UVWMachine cache will store " << uvwMachineCacheSize << " machines");
     ASKAPLOG_DEBUG_STR(logger, "Tolerance on the directions is "
                       << uvwMachineCacheTolerance / casa::C::pi * 180. * 3600. << " arcsec");
-  
-    
+
+
     // the workUnits may include different epochs (for the same channel)
     // the order is strictly by channel - with multiple work units per channel.
     // so you can increment the workUnit until the frequency changes - then you know you
@@ -505,7 +505,7 @@ void ContinuumWorker::buildSpectralCube() {
                         std::cerr << "Askap error in: " << e.what() << std::endl;
                     }
 
-                    tempWorkUnitCount++; 
+                    tempWorkUnitCount++;
                 }
                 /// now we have a "full" set of NE we can SolveNE to update the model
                 try {
@@ -593,7 +593,7 @@ void ContinuumWorker::buildSpectralCube() {
                 }
                 ASKAPLOG_INFO_STR(logger,"this iteration target is " << targetOutstanding);
                 ASKAPLOG_INFO_STR(logger,"iteration count is " << itsComms.getOutstanding());
-                
+
                 while (itsComms.getOutstanding()>targetOutstanding){
 
                     ASKAPLOG_INFO_STR(logger,"iteration count is " << itsComms.getOutstanding());
@@ -604,23 +604,23 @@ void ContinuumWorker::buildSpectralCube() {
                     result.receiveRequest(id,itsComms);
                     ASKAPLOG_INFO_STR(logger,"Received a request to write from rank " << id);
                     int cubeChannel = result.get_globalChannel()-baseChannel;
-                   
+
                     try {
                         ASKAPLOG_INFO_STR(logger,"Attempting to write channel " << cubeChannel << " of " << nchanperwriter);
                         ASKAPCHECK( cubeChannel < nchanperwriter, "cubeChannel outside range of cube slice");
-                        
+
                         handleImageParams(result.get_params(),cubeChannel);
-                        
+
                         ASKAPLOG_INFO_STR(logger,"Written the slice from rank" << id);
                     }
-                    
+
                     catch (const askap::AskapError& e) {
                         ASKAPLOG_WARN_STR(logger, "Failed to write a channel to the cube: " << e.what());
                     }
-                    
+
                     itsComms.removeChannelFromWriter(itsComms.rank());
                 }
-                    
+
             }
             else {
 
@@ -648,13 +648,13 @@ void ContinuumWorker::buildSpectralCube() {
                 ASKAPLOG_INFO_STR(logger,"Failed on count " << goodUnitCount);
                 ASKAPLOG_INFO_STR(logger,"Sending blankparams to writer " << workUnits[goodUnitCount].get_writer());
                 askap::scimath::Params::ShPtr blankParams;
-                
+
                 blankParams.reset(new Params);
                 ASKAPCHECK(blankParams,"blank parameters (images) not initialised");
-                
+
                 setupImage(blankParams, workUnits[goodUnitCount].get_channelFrequency());
-                
-                
+
+
                 ContinuumWorkRequest result;
                 result.set_params(blankParams);
                 result.set_globalChannel(workUnits[goodUnitCount].get_globalChannel());
@@ -663,14 +663,14 @@ void ContinuumWorker::buildSpectralCube() {
                 ASKAPLOG_INFO_STR(logger,"Sent\n");
             }
             // No need to increment workunit. Although this assumes that we are here becuase we failed the solveNE not the calcNE
-            
+
 
         }
 
         catch (const std::exception& e) {
             ASKAPLOG_WARN_STR(logger, "Unexpected exception in: " << e.what());
             std::cerr << "Unexpected exception in: " << e.what();
-            
+
         }
 
     }
@@ -684,18 +684,18 @@ void ContinuumWorker::buildSpectralCube() {
             ASKAPLOG_INFO_STR(logger,"Received a request to write from rank " << id);
             int cubeChannel = result.get_globalChannel()-baseChannel;
             try {
-                
-            
+
+
                 ASKAPLOG_INFO_STR(logger,"Attempting to write channel " << cubeChannel << " of " << nchanperwriter);
                 ASKAPCHECK( cubeChannel < nchanperwriter, "cubeChannel outside range of cube slice");
                 handleImageParams(result.get_params(),cubeChannel);
                 ASKAPLOG_INFO_STR(logger,"Written the slice from rank" << id);
-            
+
             }
             catch (const askap::AskapError& e) {
                 ASKAPLOG_WARN_STR(logger, "Failed to write a channel to the cube: " << e.what());
             }
-        
+
             itsComms.removeChannelFromWriter(itsComms.rank());
         }
     }
@@ -895,7 +895,7 @@ void ContinuumWorker::processChannels()
         localChannel = workUnits[0].get_localChannel();
     }
     globalChannel = workUnits[0].get_globalChannel();
-    
+
 
     ASKAPLOG_INFO_STR(logger,"Building imager for channel " << localChannel);
     CalcCore rootImager(itsParsets[0],itsComms,ds0,localChannel);

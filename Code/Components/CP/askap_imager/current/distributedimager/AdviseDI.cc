@@ -226,7 +226,7 @@ void AdviseDI::prepare() {
     }
 
 
-    ASKAPLOG_DEBUG_STR(logger, "Assuming tangent point: "<<printDirection(itsTangent)<<" (J2000)");
+    ASKAPLOG_INFO_STR(logger, "Assuming tangent point: "<<printDirection(itsTangent)<<" (J2000)");
 
 
 
@@ -481,8 +481,8 @@ void AdviseDI::addMissingParameters()
         this->prepare();
     }
     */
-    
-    ASKAPLOG_DEBUG_STR(logger,"Adding missing params ");
+
+    ASKAPLOG_INFO_STR(logger,"Adding missing params ");
 
     /*
     std::vector<casa::MFrequency>::iterator begin_it;
@@ -525,7 +525,7 @@ void AdviseDI::addMissingParameters()
        std::ostringstream pstr;
        // Only J2000 is implemented at the moment.
        pstr<<"["<<printLon(itsTangent)<<", "<<printLat(itsTangent)<<", J2000]";
-       ASKAPLOG_DEBUG_STR(logger, "  Advising on parameter " << param << ": " << pstr.str().c_str());
+       ASKAPLOG_INFO_STR(logger, "  Advising on parameter " << param << ": " << pstr.str().c_str());
        itsParset.add(param, pstr.str().c_str());
    }
    param = "Images.restFrequency";
@@ -534,7 +534,7 @@ void AdviseDI::addMissingParameters()
        std::ostringstream pstr;
        // Only J2000 is implemented at the moment.
        pstr<<"HI";
-       ASKAPLOG_DEBUG_STR(logger, "  Advising on parameter " << param << ": " << pstr.str().c_str());
+       ASKAPLOG_INFO_STR(logger, "  Advising on parameter " << param << ": " << pstr.str().c_str());
        itsParset.add(param, pstr.str().c_str());
    }
 
@@ -550,7 +550,7 @@ void AdviseDI::addMissingParameters()
                 const vector<string> cellSizeVector = itsParset.getStringVector("Images.cellsize");
                 std::ostringstream pstr;
                 pstr<<"["<< cellSizeVector[0].c_str() <<"arcsec,"<<cellSizeVector[1].c_str() <<"arcsec]";
-                ASKAPLOG_DEBUG_STR(logger, "  Advising on parameter " << param <<": " << pstr.str().c_str());
+                ASKAPLOG_INFO_STR(logger, "  Advising on parameter " << param <<": " << pstr.str().c_str());
                 itsParset.add(param, pstr.str().c_str());
             }
        }
@@ -573,7 +573,7 @@ void AdviseDI::addMissingParameters()
            std::ostringstream pstr;
            // Only J2000 is implemented at the moment.
            pstr<<"["<<printLon(itsTangent)<<", "<<printLat(itsTangent)<<", J2000]";
-           ASKAPLOG_DEBUG_STR(logger, "  Advising on parameter " << param << ": " << pstr.str().c_str());
+           ASKAPLOG_INFO_STR(logger, "  Advising on parameter " << param << ": " << pstr.str().c_str());
            itsParset.add(param, pstr.str().c_str());
        }
        param = "Images."+imageNames[img]+".nterms"; // if nterms is set, store it for later
@@ -614,7 +614,7 @@ in distributed mode");
    } else if ( shapeNeeded && !itsParset.isDefined("Images.shape") ) {
 
    }
-   ASKAPLOG_DEBUG_STR(logger,"Done adding missing params ");
+   ASKAPLOG_INFO_STR(logger,"Done adding missing params ");
 
 }
 // Utility function to get dataset names from parset.
