@@ -30,7 +30,7 @@
 # @author Matthew Whiting <Matthew.Whiting@csiro.au>
 #
 
-ID_FLAG_SCI=""
+ID_FLAG_SCI_AV=""
 
 DO_IT=$DO_FLAG_SCIENCE
 
@@ -46,59 +46,27 @@ if [ $DO_IT == true ]; then
     DO_AMP_FLAG=false
     ruleList=""
     
-    if [ "$ANTENNA_FLAG_SCIENCE" == "" ]; then
-        antennaFlagging="# Not flagging any antennas"
-    else
-        antennaFlagging="# The following flags out the requested antennas:
-Cflag.selection_flagger.rule1.antenna   = ${ANTENNA_FLAG_SCIENCE}"
-        if [ "${ruleList}" == "" ]; then
-            ruleList="rule1"
-        else
-            ruleList="${ruleList},rule1"
-        fi
-        DO_AMP_FLAG=true
-    fi
-
-    if [ ${FLAG_AUTOCORRELATION_SCIENCE} == true ]; then
-        autocorrFlagging="# The following flags out the autocorrelations, if set to true:
-Cflag.selection_flagger.rule2.autocorr  = ${FLAG_AUTOCORRELATION_SCIENCE}"
-        if [ "${ruleList}" == "" ]; then
-            ruleList="rule2"
-        else
-            ruleList="${ruleList},rule2"
-        fi
-        DO_AMP_FLAG=true
-    else
-        autocorrFlagging="# No flagging of autocorrelations"
-    fi
-
-    if [ "${ruleList}" == "" ]; then
-        selectionRule="# No selection rules used"
-    else
-        selectionRule="Cflag.selection_flagger.rules           = [${ruleList}]"
-    fi
-
     # Define a lower bound to the amplitudes, for use in either
     # flagging task
     amplitudeLow="# No absolute lower bound to visibility amplitudes"
-    if [ "${FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW}" != "" ]; then
+    if [ "${FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW_AV}" != "" ]; then
         # Only add the low threshold if it has been given
-        amplitudeLow="Cflag.amplitude_flagger.low             = ${FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW}"
+        amplitudeLow="Cflag.amplitude_flagger.low             = ${FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW_AV}"
     fi
 
     # The flat amplitude cut to be applied
-    if [ ${FLAG_DO_FLAT_AMPLITUDE_SCIENCE} == true ]; then
+    if [ ${FLAG_DO_FLAT_AMPLITUDE_SCIENCE_AV} == true ]; then
         amplitudeCut="# Amplitude based flagging
 #   Here we apply a simple cut at a given amplitude level
 Cflag.amplitude_flagger.enable          = true
-Cflag.amplitude_flagger.high            = ${FLAG_THRESHOLD_AMPLITUDE_SCIENCE}
+Cflag.amplitude_flagger.high            = ${FLAG_THRESHOLD_AMPLITUDE_SCIENCE_AV}
 ${amplitudeLow}"
         DO_AMP_FLAG=true
     else
         amplitudeCut="# No flat amplitude flagging applied"
     fi
 
-    setJob flag_science flag
+    setJob flag_ave_science flagAv
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -126,18 +94,13 @@ cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 DO_AMP_FLAG=${DO_AMP_FLAG}
 if [ \$DO_AMP_FLAG == true ]; then
 
-    parset=${parsets}/cflag_amp_science_${FIELDBEAM}_\${SLURM_JOB_ID}.in
+    parset=${parsets}/cflag_ave_amp_science_${FIELDBEAM}_\${SLURM_JOB_ID}.in
     cat > \$parset <<EOFINNER
 # The path/filename for the measurement set
-Cflag.dataset                           = ${msSci}
+Cflag.dataset                           = ${msSciAv}
 
 ${amplitudeCut}
 
-${selectionRule}
-
-${antennaFlagging}
-
-${autocorrFlagging}
 EOFINNER
 
     log=${logs}/cflag_amp_science_${FIELDBEAM}_\${SLURM_JOB_ID}.log
@@ -146,7 +109,7 @@ EOFINNER
     NPPN=1
     aprun -n \${NCORES} -N \${NPPN} ${cflag} -c \${parset} > \${log}
     err=\$?
-    rejuvenate ${msSci}
+    rejuvenate ${msSciAv}
     extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname}_Amp "txt,csv"
     if [ \$err != 0 ]; then
         exit \$err
@@ -155,13 +118,13 @@ EOFINNER
     fi
 fi
 
-DO_DYNAMIC=${FLAG_DO_DYNAMIC_AMPLITUDE_SCIENCE}
+DO_DYNAMIC=${FLAG_DO_DYNAMIC_AMPLITUDE_SCIENCE_AV}
 if [ \${DO_DYNAMIC} == true ]; then
 
-    parset=${parsets}/cflag_dynamic_science_${FIELDBEAM}_\${SLURM_JOB_ID}.in
+    parset=${parsets}/cflag_ave_dynamic_science_${FIELDBEAM}_\${SLURM_JOB_ID}.in
     cat > \$parset <<EOFINNER
 # The path/filename for the measurement set
-Cflag.dataset                           = ${msSci}
+Cflag.dataset                           = ${msSciAv}
 
 # Amplitude based flagging with dynamic thresholds
 #  This finds a statistical threshold in the spectrum of each
@@ -169,11 +132,11 @@ Cflag.dataset                           = ${msSci}
 #  spectrum at the end.
 Cflag.amplitude_flagger.enable           = true
 Cflag.amplitude_flagger.dynamicBounds    = true
-Cflag.amplitude_flagger.threshold        = ${FLAG_THRESHOLD_DYNAMIC_SCIENCE}
-Cflag.amplitude_flagger.integrateSpectra = ${FLAG_DYNAMIC_INTEGRATE_SPECTRA}
-Cflag.amplitude_flagger.integrateSpectra.threshold = ${FLAG_THRESHOLD_DYNAMIC_SCIENCE}
-Cflag.amplitude_flagger.integrateTimes = ${FLAG_DYNAMIC_INTEGRATE_TIMES}
-Cflag.amplitude_flagger.integrateTimes.threshold = ${FLAG_THRESHOLD_DYNAMIC_SCIENCE}
+Cflag.amplitude_flagger.threshold        = ${FLAG_THRESHOLD_DYNAMIC_SCIENCE_AV}
+Cflag.amplitude_flagger.integrateSpectra = ${FLAG_DYNAMIC_INTEGRATE_SPECTRA_AV}
+Cflag.amplitude_flagger.integrateSpectra.threshold = ${FLAG_THRESHOLD_DYNAMIC_SCIENCE_AV}
+Cflag.amplitude_flagger.integrateTimes = ${FLAG_DYNAMIC_INTEGRATE_TIMES_AV}
+Cflag.amplitude_flagger.integrateTimes.threshold = ${FLAG_THRESHOLD_DYNAMIC_SCIENCE_AV}
 ${amplitudeLow}
 EOFINNER
     
@@ -183,7 +146,7 @@ EOFINNER
     NPPN=1
     aprun -n \${NCORES} -N \${NPPN} ${cflag} -c \${parset} > \${log}
     err=\$?
-    rejuvenate ${msSci}
+    rejuvenate ${msSciAv}
     extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname}_Dyn "txt,csv"
     if [ \$err != 0 ]; then
         exit \$err
@@ -200,10 +163,12 @@ EOFOUTER
         DEP=`addDep "$DEP" "$DEP_START"`
         DEP=`addDep "$DEP" "$ID_SPLIT_SCI"`
         DEP=`addDep "$DEP" "$ID_CCALAPPLY_SCI"`
-	ID_FLAG_SCI=`sbatch $DEP $sbatchfile | awk '{print $4}'`
-	recordJob ${ID_FLAG_SCI} "Flagging beam ${BEAM} of science observation"
+        DEP=`addDep "$DEP" "$ID_FLAG_SCI"`
+        DEP=`addDep "$DEP" "$ID_AVERAGE_SCI"`
+	ID_FLAG_SCI_AV=`sbatch $DEP $sbatchfile | awk '{print $4}'`
+	recordJob ${ID_FLAG_SCI_AV} "Flagging beam ${BEAM} of averaged science observation"
     else
-	echo "Would run flagging beam ${BEAM} for science observation with slurm file $sbatchfile"
+	echo "Would run flagging beam ${BEAM} for the averaged science observation with slurm file $sbatchfile"
     fi
 
     echo " "

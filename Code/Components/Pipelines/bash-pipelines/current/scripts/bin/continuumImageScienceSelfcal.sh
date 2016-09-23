@@ -411,9 +411,10 @@ EOFOUTER
 	DEP=""
         DEP=`addDep "$DEP" "$DEP_START"`
         DEP=`addDep "$DEP" "$ID_SPLIT_SCI"`
-        DEP=`addDep "$DEP" "$ID_FLAG_SCI"`
         DEP=`addDep "$DEP" "$ID_CCALAPPLY_SCI"`
+        DEP=`addDep "$DEP" "$ID_FLAG_SCI"`
         DEP=`addDep "$DEP" "$ID_AVERAGE_SCI"`
+        DEP=`addDep "$DEP" "$ID_FLAG_SCI_AV"`
 	ID_CONTIMG_SCI_SC=`sbatch $DEP $sbatchfile | awk '{print $4}'`
 	recordJob ${ID_CONTIMG_SCI_SC} "Make a self-calibrated continuum image for beam $BEAM of the science observation, with flags \"$DEP\""
         FLAG_IMAGING_DEP=`addDep "$FLAG_IMAGING_DEP" "$ID_CONTIMG_SCI_SC"`

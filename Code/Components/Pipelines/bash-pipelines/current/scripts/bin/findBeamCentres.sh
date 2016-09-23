@@ -113,7 +113,8 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$needBeams" == "true" ]; then
             echo "List of fields: "
             COUNT=0
             for FIELD in ${FIELD_LIST}; do
-                echo "$COUNT - ${FIELD}"
+                ID=`echo $COUNT | awk '{printf "%02d",$1}'`
+                echo "${ID} - ${FIELD}"
                 COUNT=`expr $COUNT + 1`
             done
             

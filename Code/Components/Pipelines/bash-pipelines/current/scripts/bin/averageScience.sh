@@ -124,11 +124,8 @@ EOFOUTER
 	DEP=""
         DEP=`addDep "$DEP" "$DEP_START"`
         DEP=`addDep "$DEP" "$ID_SPLIT_SCI"`
-        DEP=`addDep "$DEP" "$ID_FLAG_SCI"`
         DEP=`addDep "$DEP" "$ID_CCALAPPLY_SCI"`
-	if [ "$ID_CCALAPPLY_SCI" != "" ]; then
-	    DEP="-d afterok:${ID_CCALAPPLY_SCI}"
-	fi	
+        DEP=`addDep "$DEP" "$ID_FLAG_SCI"`
 	ID_AVERAGE_SCI=`sbatch $DEP $sbatchfile | awk '{print $4}'`
 	recordJob ${ID_AVERAGE_SCI} "Averaging beam ${BEAM} of the science observation, with flags \"$DEP\""
     else

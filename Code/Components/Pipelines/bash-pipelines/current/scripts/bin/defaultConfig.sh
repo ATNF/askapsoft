@@ -252,8 +252,6 @@ CHAN_RANGE_SCIENCE=""
 # Number of channels to be averaged to create continuum measurement set
 NUM_CHAN_TO_AVERAGE=54
 
-# Run flagging after averaging, as well as after bandpass application
-FLAG_AFTER_AVERAGING=true
 # Whether to do dynamic flagging
 FLAG_DO_DYNAMIC_AMPLITUDE_SCIENCE=true
 # Dynamic threshold applied to amplitudes [sigma]
@@ -264,14 +262,33 @@ FLAG_DYNAMIC_INTEGRATE_SPECTRA=false
 FLAG_DYNAMIC_INTEGRATE_TIMES=true
 # Whether to apply a flat amplitude cut
 FLAG_DO_FLAT_AMPLITUDE_SCIENCE=true
-# Flat amplitude threshold applied [hardware units - before calibration]
-FLAG_THRESHOLD_AMPLITUDE_SCIENCE=0.2
-# Minimum amplitude threshold applied [hardware units - before calibration]
+# Flat amplitude threshold applied [calibrated flux units]
+FLAG_THRESHOLD_AMPLITUDE_SCIENCE=10.
+# Minimum amplitude threshold applied [calibrated flux units]
 FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW=0.0
 # Baselines or antennas to flag in the science data
 ANTENNA_FLAG_SCIENCE=""
 # Whether to flag autocorrelations for the science data
 FLAG_AUTOCORRELATION_SCIENCE=false
+
+# Run flagging after averaging, as well as after bandpass application
+FLAG_AFTER_AVERAGING=true
+# Whether to do dynamic flagging on the averaged data
+FLAG_DO_DYNAMIC_AMPLITUDE_SCIENCE_AV=true
+# Dynamic threshold applied to amplitudes of averaged data [sigma]
+FLAG_THRESHOLD_DYNAMIC_SCIENCE_AV=4.0
+# Whether to apply a dynamic threshold to integrated spectra on
+# averaged data
+FLAG_DYNAMIC_INTEGRATE_SPECTRA_AV=false
+# Whether to apply a dynamic threshold to integrated times on averaged
+# data 
+FLAG_DYNAMIC_INTEGRATE_TIMES_AV=true
+# Whether to apply a flat amplitude cut to the averaged data
+FLAG_DO_FLAT_AMPLITUDE_SCIENCE_AV=true
+# Flat amplitude threshold applied to the averaged data [calibrated flux units]
+FLAG_THRESHOLD_AMPLITUDE_SCIENCE_AV=10.
+# Minimum amplitude threshold applied to the averaged data [calibrated flux units]
+FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW_AV=0.0
 
 # Data column in MS to use in cimager
 DATACOLUMN=DATA
