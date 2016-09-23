@@ -58,8 +58,8 @@ for FIELD in ${FIELD_LIST}; do
         slurmOut=$slurmOutBase/$FIELD
         mkdir -p $slurmOut
 
-        echo "Processing field $FIELD"
-        echo "-----------------------"
+        echo "Processing field $FIELD, beam $BEAM"
+        echo "----------"
 
         
         mkdir -p ${OUTPUT}/Checkfiles
