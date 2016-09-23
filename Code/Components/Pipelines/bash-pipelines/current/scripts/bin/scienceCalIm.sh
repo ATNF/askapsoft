@@ -98,14 +98,12 @@ for FIELD in ${FIELD_LIST}; do
 
         . ${PIPELINEDIR}/applyBandpassScience.sh
 
-        msToFlag=$msSci
         . ${PIPELINEDIR}/flagScience.sh
         
         . ${PIPELINEDIR}/averageScience.sh
 
         if [ $FLAG_AFTER_AVERAGING == true ]; then
-            msToFlag=$msSciAv
-            . ${PIPELINEDIR}/flagScience.sh
+            . ${PIPELINEDIR}/flagScienceAveraged.sh
         fi
             
         if [ $DO_SELFCAL == true ]; then
