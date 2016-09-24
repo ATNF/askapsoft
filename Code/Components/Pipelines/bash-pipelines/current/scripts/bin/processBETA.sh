@@ -40,7 +40,7 @@
 USAGE="processBETA.sh -c <config file>"
 
 if [ "${PIPELINEDIR}" == "" ]; then
-  
+    
     echo "ERROR - the environment variable PIPELINEDIR has not been set. Cannot find the scripts!"
 
 else 
@@ -97,7 +97,7 @@ else
 	
 	if [ $DO_SCIENCE_FIELD == true ]; then
 
-        . ${PIPELINEDIR}/scienceCalIm.sh
+            . ${PIPELINEDIR}/scienceCalIm.sh
 	    
 	fi
 

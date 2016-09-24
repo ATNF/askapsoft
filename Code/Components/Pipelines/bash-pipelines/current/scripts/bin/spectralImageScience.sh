@@ -40,7 +40,7 @@ if [ $DO_ALT_IMAGER == true ]; then
     theImager=$altimager
     Imager="Cimager"
 else
-    theImager=$cimager
+    theImager=$simager
     Imager="Simager"
 fi
 
