@@ -35,7 +35,7 @@ ID_CONTCUBE_SCI=""
 if [ $DO_ALT_IMAGER == true ]; then
 theimager=$altimager
 else
-theimager=$cimager
+theimager=$simager
 fi
 
 for POLN in $POL_LIST; do
