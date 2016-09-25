@@ -1,3 +1,38 @@
+0.14.0-p2 (25 September 2016)
+-----------------------------
+
+A further update only to the pipeline processing:
+
+ * Changes to the directory structure created by the pipeline. Each
+   field in the MS is given its own directory, within which processing
+   on all beams is done. The bandpass calibrator likewise gets its own
+   directory. All files & job names are now identified by the field
+   and the beam IDs.
+ * Flagging of the science data is now done differently. The MS is
+   first bandpass-calibrated, and then flagged. After averaging, there
+   is the option to run the flagging again on the averged data. The
+   flagging for the bandpass calibrator has not been changed.
+ * The dynamic flagging for the science data also allows the use of
+   both integrateSpectra and integrateTimes, with the former no longer
+   done by default. 
+ * Modules are loaded correctly by the scripts and slurm jobs before
+   particular tasks are used, so that the scripts are less reliant on
+   the user's environment.
+ * Better handling of metadata files, particularly if a previous
+   metadata call had failed.
+ * The FITS conversion and thumbnail tasks correctly interact with the
+   different fields, and the thumbnail images make a better
+   measurement of the image noise, taking into account any masked
+   regions from the associated weights images.
+ * The cleaning parameter Clean.psfwidth is exposed to the
+   configuration file.
+ * Bugs in associating the footprint information with the correct
+   field have been fixed.
+ * If the CASDA-upload script is used to prepare data for deposit, the
+   scheduling block state is transitioned to PENDINGARCHIVE.
+
+
+
 0.14.0-p1 (9 September 2016)
 ----------------------------
 
