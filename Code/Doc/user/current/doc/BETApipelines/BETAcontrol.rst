@@ -117,7 +117,9 @@ flagging, and finding the bandpass. The ``DO_1934_CAL`` acts as the
 +----------------------+---------+------------------------------------------------------------+
 | Variable             | Default | Description                                                |
 +======================+=========+============================================================+
-| ``DO_1934_CAL``      | true    | Whether to process the 1934-638 calibrator observations    |
+| ``DO_1934_CAL``      | true    | Whether to process the 1934-638 calibrator observations. If|
+|                      |         | set to ``false`` then all the following switches will be   |
+|                      |         | set to ``false``.                                          |
 +----------------------+---------+------------------------------------------------------------+
 | ``DO_SPLIT_1934``    | true    | Whether to split a given beam/scan from the input 1934 MS  |
 +----------------------+---------+------------------------------------------------------------+
@@ -134,41 +136,45 @@ These parameter control the different types of processing done on the
 science field, with ``DO_SCIENCE_FIELD`` acting as a master switch for
 the science field processing.
 
-+-------------------------+---------+------------------------------------------------------------+
-| Variable                | Default | Description                                                |
-+=========================+=========+============================================================+
-| ``DO_SCIENCE_FIELD``    | true    | Whether to process the science field observations          |
-+-------------------------+---------+------------------------------------------------------------+
-| ``DO_SPLIT_SCIENCE``    | true    | Whether to split out the given beam from the science MS    |
-+-------------------------+---------+------------------------------------------------------------+
-| ``DO_FLAG_SCIENCE``     | true    | Whether to flag the (splitted) science MS                  |
-+-------------------------+---------+------------------------------------------------------------+
-| ``DO_APPLY_BANDPASS``   | true    | Whether to apply the bandpass calibration to the science   |
-|                         |         | observation                                                |
-+-------------------------+---------+------------------------------------------------------------+
-| ``DO_AVERAGE_CHANNELS`` | true    | Whether to average the science MS to continuum resolution  |
-+-------------------------+---------+------------------------------------------------------------+
-| ``DO_CONT_IMAGING``     | true    | Whether to image the science MS                            |
-+-------------------------+---------+------------------------------------------------------------+
-| ``DO_SELFCAL``          | false   | Whether to self-calibrate the science data when imaging    |
-+-------------------------+---------+------------------------------------------------------------+
-| ``DO_SOURCE_FINDING``   | false   | Whether to do the source-finding with Selavy on the        |
-|                         |         | individual beam images and the final mosaic.               |
-+-------------------------+---------+------------------------------------------------------------+
-| ``DO_MOSAIC``           | true    | Whether to mosaic the individual beam images, forming a    |
-|                         |         | single, primary-beam-corrected image.                      |
-+-------------------------+---------+------------------------------------------------------------+
-| ``DO_COPY_SL``          | false   | Whether to copy a channel range of the original            |
-|                         |         | full-spectral- resolution measurement set into a new MS.   |
-+-------------------------+---------+------------------------------------------------------------+
-| ``DO_APPLY_CAL_SL``     | false   | Whether to apply the gains calibration determined from the |
-|                         |         | continuum self-calibration.                                |
-+-------------------------+---------+------------------------------------------------------------+
-| ``DO_CONT_SUB_SL``      | false   | Whether to subtract a continuum model from the             |
-|                         |         | spectral-line dataset.                                     |
-+-------------------------+---------+------------------------------------------------------------+
-| ``DO_SPECTRAL_IMAGING`` | false   | Whether to do the spectral-line imaging                    |
-+-------------------------+---------+------------------------------------------------------------+
++-------------------------+---------+-------------------------------------------------------------+
+| Variable                | Default | Description                                                 |
++=========================+=========+=============================================================+
+| ``DO_SCIENCE_FIELD``    | true    | Whether to process the science field observations. If set   |
+|                         |         | to ``false`` then all the following switches will be set to |
+|                         |         | ``false``.                                                  |
++-------------------------+---------+-------------------------------------------------------------+
+| ``DO_SPLIT_SCIENCE``    | true    | Whether to split out the given beam from the science MS     |
++-------------------------+---------+-------------------------------------------------------------+
+| ``DO_FLAG_SCIENCE``     | true    | Whether to flag the (splitted) science MS                   |
++-------------------------+---------+-------------------------------------------------------------+
+| ``DO_APPLY_BANDPASS``   | true    | Whether to apply the bandpass calibration to the science    |
+|                         |         | observation                                                 |
++-------------------------+---------+-------------------------------------------------------------+
+| ``DO_AVERAGE_CHANNELS`` | true    |  Whether to average the science MS to continuum resolution  |
++-------------------------+---------+-------------------------------------------------------------+
+| ``DO_CONT_IMAGING``     | true    | Whether to image the science MS                             |
++-------------------------+---------+-------------------------------------------------------------+
+| ``DO_SELFCAL``          | false   | Whether to self-calibrate the science data when imaging     |
++-------------------------+---------+-------------------------------------------------------------+
+| ``DO_SOURCE_FINDING``   | false   | Whether to do the source-finding with Selavy on the         |
+|                         |         | individual beam images and the final mosaic.                |
++-------------------------+---------+-------------------------------------------------------------+
+| ``DO_MOSAIC``           | true    | Whether to mosaic the individual beam images, forming a     |
+|                         |         | single, primary-beam-corrected image.                       |
++-------------------------+---------+-------------------------------------------------------------+
+| ``DO_COPY_SL``          | false   | Whether to copy a channel range of the original             |
+|                         |         | full-spectral- resolution measurement set into a new MS.    |
++-------------------------+---------+-------------------------------------------------------------+
+| ``DO_APPLY_CAL_SL``     | false   | Whether to apply the gains calibration determined from the  |
+|                         |         | continuum self-calibration.                                 |
++-------------------------+---------+-------------------------------------------------------------+
+| ``DO_CONT_SUB_SL``      | false   | Whether to subtract a continuum model from the              |
+|                         |         | spectral-line dataset.                                      |
++-------------------------+---------+-------------------------------------------------------------+
+| ``DO_SPECTRAL_IMAGING`` | false   | Whether to do the spectral-line imaging                     |
++-------------------------+---------+-------------------------------------------------------------+
+|  ``DO_SPECTRAL_IMSUB``  | false   | Whether to do the image-based continuum subtraction.        |
++-------------------------+---------+-------------------------------------------------------------+
 
 
 Slurm time requests
