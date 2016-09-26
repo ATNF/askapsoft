@@ -378,6 +378,40 @@ double MomentMapExtractor::getSpectralIncrement()
     return specIncr;
 }
 
+double MomentMapExtractor::getSpectralIncrement(int z)
+{
+    int spcCoNum = itsInputCoords.findCoordinate(casa::Coordinate::SPECTRAL);
+    casa::SpectralCoordinate spcoo(itsInputCoords.spectralCoordinate(spcCoNum));
+    double specIncr;
+    if (spcoo.restFrequency() > 0.) {
+        casa::Quantum<Double> vel, velMinus, velPlus;
+        ASKAPASSERT(spcoo.pixelToVelocity(vel, double(z)));
+        ASKAPASSERT(spcoo.pixelToVelocity(velMinus, double(z - 1)));
+        ASKAPASSERT(spcoo.pixelToVelocity(velPlus, double(z + 1)));
+        ASKAPLOG_DEBUG_STR(logger, velMinus << " " << vel << " " << velPlus);
+        specIncr = fabs(velPlus.getValue() - velMinus.getValue()) / 2.;
+    } else {
+        // can't do velocity conversion, so just use the WCS spectral units
+        specIncr = fabs(spcoo.increment()[0]);
+    }
+    ASKAPLOG_DEBUG_STR(logger, "Channel " << z << " had spectral increment " << specIncr);
+    return specIncr;
+}
+
+double MomentMapExtractor::getSpecVal(int z)
+{
+    int spcCoNum = itsInputCoords.findCoordinate(casa::Coordinate::SPECTRAL);
+    casa::SpectralCoordinate spcoo(itsInputCoords.spectralCoordinate(spcCoNum));
+    double specval;
+    if (spcoo.restFrequency() > 0.) {
+        casa::Quantum<Double> vel;
+        ASKAPASSERT(spcoo.pixelToVelocity(vel, double(z)));
+        specval = vel.getValue();
+    } else {
+        ASKAPASSERT(spcoo.toWorld(specval, double(z)));
+    }
+    return specval;
+}
 
 void MomentMapExtractor::getMom0(const casa::Array<Float> &subarray)
 {
@@ -401,66 +435,26 @@ void MomentMapExtractor::getMom0(const casa::Array<Float> &subarray)
         std::vector<PixelInfo::Voxel> voxlist = itsSource->getPixelSet();
         std::vector<PixelInfo::Voxel>::iterator vox;
         for (vox = voxlist.begin(); vox != voxlist.end(); vox++) {
-            outloc(itsLngAxis) = inloc(itsLngAxis) = vox->getX() - start(itsLngAxis) + itsSource->getXOffset();
-            outloc(itsLatAxis) = inloc(itsLatAxis) = vox->getY() - start(itsLatAxis) + itsSource->getYOffset();
-            inloc(itsSpcAxis) = vox->getZ() - start(itsSpcAxis) + itsSource->getZOffset();
-            itsMom0map(outloc) = itsMom0map(outloc) + subarray(inloc);
+            int x = vox->getX() - start(itsLngAxis) + itsSource->getXOffset();
+            int y = vox->getY() - start(itsLatAxis) + itsSource->getYOffset();
+            int zin = vox->getZ() - start(itsSpcAxis) + itsSource->getZOffset();
+            int zfull = vox->getZ() + itsSource->getZOffset();
+            outloc(itsLngAxis) = inloc(itsLngAxis) = x;
+            outloc(itsLatAxis) = inloc(itsLatAxis) = y;
+            inloc(itsSpcAxis) = zin;
+            itsMom0map(outloc) = itsMom0map(outloc) + subarray(inloc) * getSpectralIncrement(zfull);
             itsMom0mask(outloc) = true;
         }
     } else {
         // just sum each spectrum over the slicer's range.
         casa::IPosition outBLC(4, 0), outTRC(itsMom0map.shape() - 1);
         casa::Array<Float> sumarray = partialSums(subarray, casa::IPosition(1, itsSpcAxis));
-        itsMom0map(outBLC, outTRC) = sumarray.reform(itsMom0map(outBLC, outTRC).shape());
+        itsMom0map(outBLC, outTRC) = sumarray.reform(itsMom0map(outBLC, outTRC).shape()) * getSpectralIncrement();
         itsMom0mask(outBLC, outTRC) = true;
     }
     itsMom0mask = itsMom0mask && basemask;
-    itsMom0map *= float(this->getSpectralIncrement());
-
-    // for(int y=itsSlicer.start()(itsLatAxis);y<=itsSlicer.end()(itsLatAxis);y++){
-    //  outloc(itsLatAxis)=inloc(itsLatAxis)=y-itsSlicer.start()(itsLatAxis);
-    //  for(int x=itsSlicer.start()(itsLngAxis);x<=itsSlicer.end()(itsLngAxis);x++){
-    //      outloc(itsLngAxis)=inloc(itsLngAxis)=x-itsSlicer.start()(itsLngAxis);
-    //      // for each pixel in the moment map...
-
-    //      int zmin,zmax;
-    //      if(itsSpatialMethod=="box"){
-    //      zmin = itsSource->getZmin();
-    //      zmax = itsSource->getZmax();
-    //      }
-    //      else{
-    //      zmin = itsSlicer.start()(itsSpcAxis);
-    //      zmax = itsSlicer.end()(itsSpcAxis);
-    //      }
-
-    //      for(int z=zmin;z<=zmax;z++){
-    //      if(itsSource->isInObject(x,y,z)){
-    //          inloc(itsSpcAxis)=z-itsSlicer.start()(itsSpcAxis);
-    //          itsMom0map(outloc) = itsMom0map(outloc) + subarray(inloc);
-    //          // ASKAPLOG_DEBUG_STR(logger, x << " " << y << " " << z << " yes " << outloc << " " << inloc << " "<< itsMom0map(outloc));
-    //      }
-    //      }
-    //      itsMom0map(outloc) *= this->getSpectralIncrement();
-
-    //  }
-    // }
 
 
-}
-
-double MomentMapExtractor::getSpecVal(int z)
-{
-    int spcCoNum = itsInputCoords.findCoordinate(casa::Coordinate::SPECTRAL);
-    casa::SpectralCoordinate spcoo(itsInputCoords.spectralCoordinate(spcCoNum));
-    double specval;
-    if (spcoo.restFrequency() > 0.) {
-        casa::Quantum<Double> vel;
-        ASKAPASSERT(spcoo.pixelToVelocity(vel, double(z)));
-        specval = vel.getValue();
-    } else {
-        ASKAPASSERT(spcoo.toWorld(specval, double(z)));
-    }
-    return specval;
 }
 
 void MomentMapExtractor::getMom1(const casa::Array<Float> &subarray)
@@ -487,10 +481,15 @@ void MomentMapExtractor::getMom1(const casa::Array<Float> &subarray)
         std::vector<PixelInfo::Voxel> voxlist = itsSource->getPixelSet();
         std::vector<PixelInfo::Voxel>::iterator vox;
         for (vox = voxlist.begin(); vox != voxlist.end(); vox++) {
-            outloc(itsLngAxis) = inloc(itsLngAxis) = vox->getX() - start(itsLngAxis) + itsSource->getXOffset();
-            outloc(itsLatAxis) = inloc(itsLatAxis) = vox->getY() - start(itsLatAxis) + itsSource->getYOffset();
-            inloc(itsSpcAxis) = vox->getZ() - start(itsSpcAxis) + itsSource->getZOffset();
-            sumNuS(outloc) = sumNuS(outloc) + subarray(inloc) * this->getSpecVal(vox->getZ());
+            int x = vox->getX() - start(itsLngAxis) + itsSource->getXOffset();
+            int y = vox->getY() - start(itsLatAxis) + itsSource->getYOffset();
+            int zin = vox->getZ() - start(itsSpcAxis) + itsSource->getZOffset();
+            int zfull = vox->getZ() + itsSource->getZOffset();
+            outloc(itsLngAxis) = inloc(itsLngAxis) = x;
+            outloc(itsLatAxis) = inloc(itsLatAxis) = y;
+            inloc(itsSpcAxis) = zin;
+            sumNuS(outloc) = sumNuS(outloc) +
+                             subarray(inloc) * this->getSpecVal(zfull) * getSpectralIncrement(zfull);
             itsMom1mask(outloc) = true;
         }
     } else {
@@ -504,7 +503,7 @@ void MomentMapExtractor::getMom1(const casa::Array<Float> &subarray)
         }
         casa::Array<Float> nuSubarray = nuArray * subarray;
         casa::Array<Float> sumarray = partialSums(nuSubarray, casa::IPosition(1, itsSpcAxis));
-        sumNuS(outBLC, outTRC) = sumarray.reform(sumNuS(outBLC, outTRC).shape());
+        sumNuS(outBLC, outTRC) = sumarray.reform(sumNuS(outBLC, outTRC).shape()) * this->getSpectralIncrement();
         itsMom1mask(outBLC, outTRC) = true;
     }
 
@@ -512,7 +511,7 @@ void MomentMapExtractor::getMom1(const casa::Array<Float> &subarray)
     itsMom1mask = itsMom1mask && basemask;
     itsMom1mask = itsMom1mask && (itsMom0map > zero);
 
-    itsMom1map = (sumNuS / itsMom0map) * this->getSpectralIncrement();
+    itsMom1map = (sumNuS / itsMom0map);
 
 }
 
@@ -539,13 +538,18 @@ void MomentMapExtractor::getMom2(const casa::Array<Float> &subarray)
         std::vector<PixelInfo::Voxel> voxlist = itsSource->getPixelSet();
         std::vector<PixelInfo::Voxel>::iterator vox;
         for (vox = voxlist.begin(); vox != voxlist.end(); vox++) {
-            outloc(itsLngAxis) = inloc(itsLngAxis) = vox->getX() - start(itsLngAxis) + itsSource->getXOffset();
-            outloc(itsLatAxis) = inloc(itsLatAxis) = vox->getY() - start(itsLatAxis) + itsSource->getYOffset();
-            inloc(itsSpcAxis) = vox->getZ() - start(itsSpcAxis) + itsSource->getZOffset();
+            int x = vox->getX() - start(itsLngAxis) + itsSource->getXOffset();
+            int y = vox->getY() - start(itsLatAxis) + itsSource->getYOffset();
+            int zin = vox->getZ() - start(itsSpcAxis) + itsSource->getZOffset();
+            int zfull = vox->getZ() + itsSource->getZOffset();
+            outloc(itsLngAxis) = inloc(itsLngAxis) = x;
+            outloc(itsLatAxis) = inloc(itsLatAxis) = y;
+            inloc(itsSpcAxis) = zin;
             sumNu2S(outloc) = sumNu2S(outloc) +
                               subarray(inloc) *
-                              (this->getSpecVal(vox->getZ()) - itsMom1map(outloc)) *
-                              (this->getSpecVal(vox->getZ()) - itsMom1map(outloc));
+                              (this->getSpecVal(zfull) - itsMom1map(outloc)) *
+                              (this->getSpecVal(zfull) - itsMom1map(outloc)) *
+                              getSpectralIncrement(zfull);
             itsMom2mask(outloc) = true;
         }
     } else {
@@ -563,11 +567,11 @@ void MomentMapExtractor::getMom2(const casa::Array<Float> &subarray)
         }
         casa::Array<Float> nu2Subarray = nu2Array * nu2Array * subarray;
         casa::Array<Float> sumarray = partialSums(nu2Subarray, casa::IPosition(1, itsSpcAxis));
-        sumNu2S(outBLC, outTRC) = sumarray.reform(sumNu2S(outBLC, outTRC).shape());
+        sumNu2S(outBLC, outTRC) = sumarray.reform(sumNu2S(outBLC, outTRC).shape()) * this->getSpectralIncrement();
         itsMom2mask(outBLC, outTRC) = true;
     }
 
-    itsMom2map = (sumNu2S / itsMom0map) * this->getSpectralIncrement();
+    itsMom2map = (sumNu2S / itsMom0map);
 
     float zero = 0.;
     itsMom2mask = itsMom2mask && basemask;

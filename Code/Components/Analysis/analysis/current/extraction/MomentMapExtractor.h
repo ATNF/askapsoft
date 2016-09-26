@@ -60,6 +60,7 @@ class MomentMapExtractor : public SourceDataExtractor {
         void initialiseArray();
         std::string outfile(int moment);
         double getSpectralIncrement();
+        double getSpectralIncrement(int z);
         double getSpecVal(int z);
         void getMom0(const casa::Array<Float> &subarray);
         void getMom1(const casa::Array<Float> &subarray);
