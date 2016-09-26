@@ -35,8 +35,44 @@ if [ "$PROCESS_DEFAULTS_HAS_RUN" != "true" ]; then
     PROCESS_DEFAULTS_HAS_RUN=true
 
     ####################
+    # Set the overall switches for CAL & SCIENCE fields
+
+    if [ $DO_1934_CAL != true ]; then
+        # turn off all calibrator-related switches
+        DO_SPLIT_1934=false
+        DO_FLAG_1934=false
+        DO_FIND_BANDPASS=false
+    fi
+
+    if [ $DO_SCIENCE_FIELD != true ]; then
+        # turn off all science-field switches
+        DO_SPLIT_SCIENCE=false
+        DO_FLAG_SCIENCE=false
+        DO_APPLY_BANDPASS=false
+        DO_AVERAGE_CHANNELS=false
+        DO_CONT_IMAGING=false
+        DO_SELFCAL=false
+        DO_APPLY_CAL_CONT=false
+        DO_CONTCUBE_IMAGING=false
+        DO_SPECTRAL_IMAGING=false
+        DO_SPECTRAL_IMSUB=false
+        DO_MOSAIC=true
+        DO_SOURCE_FINDING=false
+        DO_SOURCE_FINDING_MOSAIC=false
+        DO_ALT_IMAGER=false
+        #
+        DO_CONVERT_TO_FITS=false
+        DO_MAKE_THUMBNAILS=false
+        DO_STAGE_FOR_CASDA=false
+    fi
+
+
+
+    
+    ####################
     # Define the full path of output directory
     OUTPUT="${BASEDIR}/${OUTPUT}"
+    ORIGINAL_OUTPUT=${OUTPUT}
     mkdir -p $OUTPUT
     . ${PIPELINEDIR}/utils.sh
     BASEDIR=${BASEDIR}

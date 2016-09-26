@@ -193,7 +193,7 @@ EOFOUTER
         recordJob ${ID_FLAG_1934} "Flagging 1934-638, beam $BEAM"
         FLAG_CBPCAL_DEP=`addDep "$FLAG_CBPCAL_DEP" "$ID_FLAG_1934"`
     else
-        echo "Would run splitting & flagging of 1934-638, beam $BEAM, with slurm file $sbatchfile"
+        echo "Would run flagging of 1934-638, beam $BEAM, with slurm file $sbatchfile"
     fi
 
     echo " "

@@ -32,8 +32,6 @@
 
 echo "Setting up and calibrating the science observation"
 
-
-ORIGINAL_OUTPUT=${OUTPUT}
 FIELD_ID=0
 
 for FIELD in ${FIELD_LIST}; do
@@ -153,6 +151,7 @@ for FIELD in ${FIELD_LIST}; do
 
 done
 
+# Put all these back to the original values
 OUTPUT=${ORIGINAL_OUTPUT}
 parsets=$parsetsBase
 logs=$logsBase
