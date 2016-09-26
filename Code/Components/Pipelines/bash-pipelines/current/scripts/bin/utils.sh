@@ -307,7 +307,7 @@ function convertToFITStext()
 
     # Check whether imageToFITS is defined in askapsoft module being
     # used
-    if [ "`which imageToFITS 2> /tmp/whchim2fts`" == "" ]; then
+    if [ "`which imageToFITS 2> ${tmp}/whchim2fts`" == "" ]; then
         # Not found - use casa to do conversion
 
         fitsConvertText="# The following converts the file in \$casaim to a FITS file, after fixing headers.
@@ -623,7 +623,7 @@ function parseLog()
 function findWorkerStats()
 {
     logfile=$1
-    tmpfile=tmpout
+    tmpfile=${tmp}/tmpout
     
     PEAK_VM_WORKERS="---"
     PEAK_RSS_WORKERS="---"

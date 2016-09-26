@@ -70,6 +70,10 @@ NOW_FMT=`date +%FT%T`
 # File to record list of jobs and descriptions
 JOBLIST="${slurmOut}/jobList-${NOW}.txt"
 
+# temp directory for certain files
+tmp=/tmp/tmp`whoami`pipe
+mkdir -p $tmp
+
 ####################
 # Define the default
 

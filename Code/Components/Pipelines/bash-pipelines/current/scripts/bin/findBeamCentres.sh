@@ -36,7 +36,7 @@ fi
 
 if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$needBeams" == "true" ]; then
 
-    if [ "`which footprint.py 2> /tmp/whchftprnt`" == "" ]; then
+    if [ "`which footprint.py 2> ${tmp}/whchftprnt`" == "" ]; then
 	# If we are here, footprint.py is not in our path. Give an
 	# error message and turn off linmos
 
@@ -57,7 +57,7 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$needBeams" == "true" ]; then
         # Run schedblock to get footprint information (if present)
         sbinfo="${metadata}/schedblock-info-${SB_SCIENCE}.txt"
         module load askapcli
-        if [ "`which schedblock 2> /tmp/whchschdblk`" == "" ]; then
+        if [ "`which schedblock 2> ${tmp}/whchschdblk`" == "" ]; then
             echo "WARNING - no schedblock executable found - try loading askapcli module."
         else
             if [ -e ${sbinfo} ] && [ `wc -l $sbinfo | awk '{print $1}'` -gt 1 ]; then

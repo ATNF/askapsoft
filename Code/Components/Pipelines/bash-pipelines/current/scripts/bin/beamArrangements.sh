@@ -37,7 +37,7 @@ if [ $DO_SCIENCE_FIELD == true ] && [ $DO_MOSAIC == true ]; then
     if [ "$LINMOS_BEAM_OFFSETS" == "" ]; then
 	# Beam pattern for linmos not defined. We need to use footprint.py to work it out.
 
-	if [ "`which footprint.py 2> /tmp/whchftprnt`" == "" ]; then
+	if [ "`which footprint.py 2> ${tmp}/whchftprnt`" == "" ]; then
 	    # If we are here, footprint.py is not in our path. Give an
 	    # error message and turn off linmos
 	    
