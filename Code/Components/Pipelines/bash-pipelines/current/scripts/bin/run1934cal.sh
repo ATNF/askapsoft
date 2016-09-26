@@ -69,6 +69,7 @@ FIELDBEAM=$FIELD
 
 cd ..
 
+# Put all these back to the original values
 OUTPUT=${ORIGINAL_OUTPUT}
 parsets=$parsetsBase
 logs=$logsBase

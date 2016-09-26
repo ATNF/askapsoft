@@ -314,7 +314,7 @@ function convertToFITStext()
 if [ -e \${casaim} ] && [ ! -e \${fitsim} ]; then
     # The FITS version of this image doesn't exist
 
-    parset=$parsets/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.in
+    script=$parsets/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.py
     log=$logs/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.log
     ASKAPSOFT_VERSION=${ASKAPSOFT_VERSION}
     if [ \"\${ASKAPSOFT_VERSION}\" == \"\" ]; then

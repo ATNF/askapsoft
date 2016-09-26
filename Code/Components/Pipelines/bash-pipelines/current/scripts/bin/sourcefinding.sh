@@ -92,19 +92,28 @@ cd \${seldir}
 ln -s ${logs} .
 ln -s ${parsets} .
 
+HAVE_IMAGES=true
+
 for im in ${imlist}; do 
     casaim="../\${im##*/}"
     fitsim="../\${im##*/}.fits"
     ${fitsConvertText}
     # make a link so we point to a file in the current directory for Selavy
-    ln -s \${im}.fits .
+    if [ ! -e \$fitsim ]; then
+        HAVE_IMAGES=false
+        echo "ERROR - Could not create \${im}.fits"
+    else
+        ln -s \${im}.fits .
+    fi
     rejuvenate \${casaim}
 done
 
-parset=${parsets}/science_selavy_${FIELDBEAM}_\${SLURM_JOB_ID}.in
-log=${logs}/science_selavy_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+if [ \${HAVE_IMAGES} == true ]; then
 
-cat > \$parset <<EOFINNER
+    parset=${parsets}/science_selavy_${FIELDBEAM}_\${SLURM_JOB_ID}.in
+    log=${logs}/science_selavy_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+    
+    cat > \$parset <<EOFINNER
 Selavy.image = ${image##*/}.fits
 Selavy.SBid = ${SB_SCIENCE}
 Selavy.nsubx = ${SELAVY_NSUBX}
@@ -136,14 +145,21 @@ Selavy.minChannels = 1
 Selavy.sortingParam = -pflux
 EOFINNER
 
-NCORES=${NUM_CPUS_SELAVY}
-NPPN=${CPUS_PER_CORE_SELAVY}
-aprun -n \${NCORES} -N \${NPPN} $selavy -c \$parset >> \$log
-err=\$?
-extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname} "txt,csv"
-if [ \$err != 0 ]; then
-    exit \$err
+    NCORES=${NUM_CPUS_SELAVY}
+    NPPN=${CPUS_PER_CORE_SELAVY}
+    aprun -n \${NCORES} -N \${NPPN} $selavy -c \$parset >> \$log
+    err=\$?
+    extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname} "txt,csv"
+    if [ \$err != 0 ]; then
+        exit \$err
+    fi
+
+else
+
+    echo "FITS conversion failed, so Selavy did not run"
+
 fi
+
 EOFOUTER
 
     # Dependencies for the job
