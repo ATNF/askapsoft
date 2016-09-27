@@ -63,11 +63,18 @@
 #include "simplayback/CorrBuffer.h"
 #include "simplayback/DatagramLimit.h"
 
-#define VERBOSE
+// Make the simulator runs in indefinite loop
+//#define LOOP
+
+// Output lots of feedback to user
+//#define VERBOSE
+
 // Reorder antennas so that the numbering is contiguous (no jump)
 #define REORDER_ANTENNA
+
 // Visibility buffer with constant size
 //#define NEW_BUFFER
+
 #define SIZEOF_ARRAY(a) (sizeof( a ) / sizeof( a[ 0 ] ))
 
 using namespace askap;
@@ -127,19 +134,25 @@ bool CorrelatorSimulatorADE::sendNext(void)
 
     // Get buffer data from measurement set
     bool bufferDataExist = false;
+
 #ifdef NEW_BUFFER
+
     if (getNewBufferData()) {
         bufferDataExist = true;
     }
+
 #else
+
     if (getBufferData()) {
         bufferDataExist = true;
     }
+
 #endif
 
     if (bufferDataExist) {
 
 #ifdef NEW_BUFFER
+
         // Fill each channel with data from existing correlation products
         for (uint32_t chan = 0; chan < data[0].size(); ++chan) {
             fillOneChannel(uint32_t chan);
@@ -149,7 +162,9 @@ bool CorrelatorSimulatorADE::sendNext(void)
         for (uint32_t cp = 0; cp < data.size(); ++cp) {
             fillOneCorrProduct(uint32_t cp);
         }
-#else
+
+#else	// old buffer
+
         // The data from measurement set does not fill the whole buffer,
         // so fill in the missing data by copying from existing one.
         // First, fill in the data for the missing correlation products
@@ -159,6 +174,7 @@ bool CorrelatorSimulatorADE::sendNext(void)
         // Then, fill in the data for coarse channels not present in
         // measurement set.
         fillChannelInBuffer();
+
 #endif
 		//itsBuffer.print("all");
 
@@ -207,6 +223,14 @@ bool CorrelatorSimulatorADE::sendNext(void)
 #endif
 	return continueStatus;
 }   // sendNext
+
+
+
+void CorrelatorSimulatorADE::resetCurrentRow(void)
+{
+	itsCurrentRow = 0;
+}
+
 
 
 //------------------------------------------------------------------------
@@ -554,13 +578,28 @@ bool CorrelatorSimulatorADE::getBufferData()
     const casa::ROMSPolarizationColumns& polc = msc.polarization();
 
     const uint32_t nRow = msc.nrow();
+
+//#ifdef LOOP
+
+	// If the current row is the last row, quit
     if (itsCurrentRow >= nRow) {
-#ifdef VERBOSE
-        cout << "  No more data available" << endl;
+		//itsCurrentRow = 0;
+        cout << "  The last row" << endl;
         cout << "Getting buffer data: done" << endl;
-#endif
-        return false;
-    }
+		return false;
+	}
+
+//#else	// play once
+
+	// If the current row is the last row, quit
+//    if (itsCurrentRow >= nRow) {
+//#ifdef VERBOSE
+//        cout << "  No more data available" << endl;
+//        cout << "Getting buffer data: done" << endl;
+//#endif
+//        return false;
+//    }
+//#endif
 
     // Note, the measurement set stores integration midpoint (in seconds), 
     // while the TOS (and it is assumed the correlator) deal with 
@@ -692,7 +731,7 @@ bool CorrelatorSimulatorADE::getBufferData()
 		++itsDataReadCounter;
 	}
     return (itsBuffer.ready);
-}   // getBuffer
+}   // getBuffer (old buffer)
 
 #endif  // NEW_BUFFER
 

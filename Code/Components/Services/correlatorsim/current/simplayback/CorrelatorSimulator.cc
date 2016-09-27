@@ -261,3 +261,11 @@ bool CorrelatorSimulator::sendNext(void)
         return true;
     }
 }
+
+
+
+void CorrelatorSimulator::resetCurrentRow(void)
+{
+    itsCurrentRow = 0;
+}
+

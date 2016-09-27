@@ -36,7 +36,7 @@
 namespace askap {
 namespace cp {
 
-#define VERBOSE
+//#define VERBOSE
 //#define NEW_BUFFER
 
 

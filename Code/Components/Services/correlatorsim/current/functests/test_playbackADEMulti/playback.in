@@ -3,12 +3,30 @@
 #
 # Parameters for both
 #
+# Measurement set used as input for simulation.
+playback.dataset = ~/ASKAPsoft/Code/Components/Services/correlatorsim/current/dataset/ade4ant4chan.ms
+#playback.dataset = source.ms
+
 # Correlator cycle time in seconds
 playback.period = 5
+#playback.period = 10
 
 # Default playback mode is "normal".
-# "test" will invoke test procedure, which takes more time & memory.
+# "test" will invoke test procedure, which takes a lot more time & memory.
+# Not recommended for many data streams.
 #playback.mode = test
+playback.mode = normal
+
+# Playback loop setting
+# 0: playback indefinitely
+# 1,2, ...: playback according to the number of loops (default is 1)
+playback.loop = 1
+
+# Total number of antennas to be simulated.
+# If the number is greater than that in measurement set, data will be
+# copied from existing antennas.
+# Range: 1 (default) to 36 (max for ASKAP)
+playback.n_antennas = 12
 
 #----------------------------------------------------------------------
 # Telescope Operating System Simulator Configuration
@@ -32,17 +50,11 @@ playback.tossim.delay = 5000000
 #----------------------------------------------------------------------
 # Correlator Simulator configuration
 #
-# Total number of antennas to be simulated.
-# If the number is greater than that in measurement set, data will be 
-# copied from existing antennas.
-# Range: 1 (default) to 36 (max for ASKAP)
-playback.corrsim.n_antennas = 12
-
 # Total number of coarse channels to be simulated.
 # Ideally 304 (default), but current hardware is limited at 300.
 # If the number is greater than that in measurement set, data will be 
 # copied from existing coarse channels.
-playback.corrsim.n_coarse_channels = 4
+playback.corrsim.n_coarse_channels = 48
 
 # Division of coarse channel into fine channels
 # Default: 54
@@ -51,9 +63,6 @@ playback.corrsim.n_channel_subdivision = 54
 # Coarse channel bandwidth (Hertz)
 # Default: 1 MHz
 playback.corrsim.coarse_channel_bandwidth = 1000000
-
-# Measurement set used as input for simulation
-playback.corrsim.dataset = ../../dataset/ade4ant4chan.ms
 
 # Local host for transmission
 playback.corrsim.out.hostname = localhost

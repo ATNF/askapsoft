@@ -80,6 +80,9 @@ class TosSimulator : public ISimulator {
         ///         should not be called again.
         bool sendNext(void);
 
+        /// @brief Reset current row, so we can read from the beginning
+        void resetCurrentRow(void);
+
     private:
 
         // The chance a VisChunk will not be sent

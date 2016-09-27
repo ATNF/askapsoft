@@ -7,6 +7,8 @@
 #
 echo "This script coordinates data streaming from Correlator Simulator to Ingest."
 
+export WORKSPACE=$ASKAP_ROOT
+
 # Max number of blocks, cards and frequency channels
 MAX_BLOCK=8
 MAX_CARD_IN_BLOCK=12

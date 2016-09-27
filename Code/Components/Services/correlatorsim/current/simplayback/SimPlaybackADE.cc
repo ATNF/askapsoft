@@ -50,6 +50,9 @@
 #include "simplayback/TosSimulator.h"
 #include "simplayback/CardFailMode.h"
 
+// Loop indefinitely
+//#define LOOP
+
 //#define VERBOSE
 
 using namespace askap::cp;
@@ -203,6 +206,7 @@ boost::shared_ptr<TosSimulator> SimPlaybackADE::makeTosSim(void)
 #endif
 	const std::string filename = getPar("dataset", "");
     //const std::string filename = itsParset.getString("dataset","");
+	//itsPlaybackLoop = getPar("loop", 1);
     const std::string locatorHost = 
             itsParset.getString("tossim.ice.locator_host");
     const std::string locatorPort = 
@@ -237,6 +241,7 @@ boost::shared_ptr<CorrelatorSimulatorADE>
     const string mode = itsParset.getString("mode", "normal");
     const std::string dataset = getPar("dataset", "");
 	//const string dataset = itsParset.getString("dataset", "");
+	//itsPlaybackLoop = getPar("loop", 1);
     const uint32_t nAntenna = getPar("n_antennas", 1);
 	//const uint32_t nAntenna = getNAntenna();
     //const unsigned int nAntenna =
@@ -313,6 +318,97 @@ boost::shared_ptr<CorrelatorSimulatorADE>
 
 
 
+//#ifdef LOOP
+
+void SimPlaybackADE::run(void)
+{
+    // Wait for all processes to get here. The master alone checks the config
+    // file so this barrier ensures the configuration has been validated
+    // before all processes go and use it. If the master finds a problem
+    // an MPI_Abort is called.
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    //itsPlaybackLoop = getPar("loop", 1);
+	itsPlaybackLoop = itsParset.getUint32("loop",1);
+	cout << "itsPlaybackLoop: " << itsPlaybackLoop << endl;
+
+	// Loop indefinitely
+	if (itsPlaybackLoop == 0) {
+		uint32_t loop = 0;
+		while (loop >= 0) {
+			cout << "==============================================================" << endl;
+			cout << "Rank " << itsRank << ": playing back indefinite loop: " << 
+					(loop + 1) << endl;
+			cout << "==============================================================" << endl;
+
+    		if (itsRank == 0) {
+				boost::shared_ptr<ISimulator> sim = makeTosSim();
+        		cout << "Rank " << itsRank << ": sending TOS data ..." << endl;
+				bool moreData = true;
+				while (moreData) {
+					moreData = sim->sendNext();
+				}
+				cout << "Rank " << itsRank << 
+						": finished sending TOS data for this loop" << endl;
+				sim->resetCurrentRow();
+			}
+    		else {
+        		boost::shared_ptr<ISimulator> sim = makeCorrelatorSim();
+        		// The rest of MPI processes simulate correlator
+        		cout << "Rank " << itsRank << ": sending Correlator data ..." << endl;
+				bool moreData = true;
+				while (moreData) {
+					moreData = sim->sendNext();
+				}
+        		cout << "Rank " << itsRank << 
+            		    ": finished sending Correlator data for this loop" << endl;
+				sim->resetCurrentRow();
+			}
+			++loop;
+    		MPI_Barrier(MPI_COMM_WORLD);
+		}
+    }
+	// Loop for a specified number of times
+	else if (itsPlaybackLoop > 0) {
+        for (uint32_t loop = 0; loop < itsPlaybackLoop; ++loop) {
+			cout << "==============================================================" << endl;
+            cout << "Rank " << itsRank << ": playing back loop: " << (loop + 1) <<
+					" / " << itsPlaybackLoop << endl;
+			cout << "==============================================================" << endl;
+
+            if (itsRank == 0) {
+                boost::shared_ptr<ISimulator> sim = makeTosSim();
+                cout << "Rank " << itsRank << ": sending TOS data ..." << endl;
+                bool moreData = true;
+                while (moreData) {
+                    moreData = sim->sendNext();
+                }
+                cout << "Rank " << itsRank <<
+                        ": finished sending TOS data for this loop" << endl;
+                sim->resetCurrentRow();
+            }
+            else {
+                boost::shared_ptr<ISimulator> sim = makeCorrelatorSim();
+                // The rest of MPI processes simulate correlator
+                cout << "Rank " << itsRank << ": sending Correlator data ..." << endl;
+                bool moreData = true;
+                while (moreData) {
+                    moreData = sim->sendNext();
+                }
+                cout << "Rank " << itsRank <<
+                        ": finished sending Correlator data for this loop" << endl;
+                sim->resetCurrentRow();
+            }
+            MPI_Barrier(MPI_COMM_WORLD);
+        }
+	}
+	else {
+		ASKAPCHECK(itsPlaybackLoop >= 0, "Illegal playback loop code" << itsPlaybackLoop);
+	}
+}	// run
+
+//#else	// play once
+/*
 void SimPlaybackADE::run(void)
 {
     // Wait for all processes to get here. The master alone checks the config
@@ -322,30 +418,31 @@ void SimPlaybackADE::run(void)
     MPI_Barrier(MPI_COMM_WORLD);
 
     if (itsRank == 0) {
-		boost::shared_ptr<ISimulator> sim = makeTosSim();
-		bool moreData = true;
+        boost::shared_ptr<ISimulator> sim = makeTosSim();
+        bool moreData = true;
         cout << "Rank " << itsRank << ": sending TOS data ..." << endl;
-		while (moreData) {
-			moreData = sim->sendNext();
-		}
+        while (moreData) {
+            moreData = sim->sendNext();
+        }
         cout << "Rank " << itsRank << ": finished sending TOS data" << endl;
     }
     else {
         // The rest of MPI processes simulate correlator
 
         boost::shared_ptr<ISimulator> sim = makeCorrelatorSim();
-		bool moreData = true;
+        bool moreData = true;
         cout << "Rank " << itsRank << ": sending Correlator data ..." << endl;
-		while (moreData) {
-			moreData = sim->sendNext();
-		}
-        cout << "Rank " << itsRank << 
+        while (moreData) {
+            moreData = sim->sendNext();
+        }
+        cout << "Rank " << itsRank <<
                 ": finished sending Correlator data" << endl;
     }
-	
-    MPI_Barrier(MPI_COMM_WORLD);
-}	// run
 
+    MPI_Barrier(MPI_COMM_WORLD);
+}   // run
+*/
+//#endif
 
 #ifdef VERBOSE
 #undef VERBOSE

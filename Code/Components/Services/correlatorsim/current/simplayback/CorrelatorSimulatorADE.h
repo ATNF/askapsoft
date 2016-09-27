@@ -91,9 +91,9 @@ class CorrelatorSimulatorADE : public ISimulator {
         ///         should not be called again.
         bool sendNext(void);
 
-		// @brief Report the status of correlator simulator
-		//void report(void);
-		
+		/// @brief Reset current row, so we can read from the beginning
+		void resetCurrentRow(void);
+
     private:
 
         // The mode of simulation. Possible values:

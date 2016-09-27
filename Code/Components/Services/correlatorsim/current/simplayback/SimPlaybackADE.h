@@ -107,6 +107,9 @@ class SimPlaybackADE {
         // Playback mode
         string itsMode;
 
+		// The number of times the input measurement set is played back
+		uint32_t itsPlaybackLoop;
+
 		// A set of parameter fixes
 		vector<string> itsParPrefixes;
 };

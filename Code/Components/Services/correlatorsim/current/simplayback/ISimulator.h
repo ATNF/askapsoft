@@ -43,6 +43,9 @@ class ISimulator {
         ///         otherwise false. If false is returned, sendNext()
         ///         should not be called again.
         virtual bool sendNext(void) = 0;
+
+		/// @brief test
+		virtual void resetCurrentRow(void) = 0;
 };
 
 };

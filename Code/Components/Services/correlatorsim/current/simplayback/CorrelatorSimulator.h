@@ -83,6 +83,9 @@ class CorrelatorSimulator : public ISimulator {
         ///         should not be called again.
         bool sendNext(void);
 
+		// Added as a dummy to accommodate modification in ADE version
+		void resetCurrentRow(void);
+
     private:
 
         // Baseline ID Map

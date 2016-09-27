@@ -53,6 +53,9 @@
 #include "CommonTypes.h"
 #include "TypedValues.h"
 
+// Make indefinite loop
+//#define LOOP
+
 //#define TEST
 //#define VERBOSE
 #define CARDFREQ
@@ -285,11 +288,30 @@ bool TosSimulator::sendNext(void)
         ASKAPLOG_DEBUG_STR(logger, "Simulating metadata send failure this cycle");
     }
 
-	//return false;	// test
-	
+//#ifdef LOOP
+
+    if (itsCurrentRow >= nRow) {
+		ASKAPLOG_INFO_STR(logger,"End of a loop");
+		/*
+        ASKAPLOG_INFO_STR(logger,
+                "Sending additional metadata message indicating end-of-observation");
+        metadata.scanId(-2);    // -2
+        cout << "TOSSim: pausing " << itsDelay / 1000000 << " seconds" << endl;
+        usleep(itsDelay);
+        cout << "TOSSim: transmitting the final data" << endl;
+        itsPort->send(metadata);
+		*/
+		return false;
+	} else {
+		return true;
+	}
+
+//#else
+/*
     // If this is the final payload send another with scan == -1, 
 	// indicating the observation has ended
     if (itsCurrentRow == nRow) {
+
         ASKAPLOG_INFO_STR(logger,
                 "Sending additional metadata message indicating end-of-observation"
 				);
@@ -302,8 +324,20 @@ bool TosSimulator::sendNext(void)
 
 		//cout << "TosSimulator::sendNext: no more data" << endl;
         return false; // Indicate there is no more data after this payload
+
     } else {
 		//cout << "TosSimulator::sendNext: more data" << endl;
         return true;
     }
+*/
+//#endif
+
+}	// sendNext
+
+
+
+void TosSimulator::resetCurrentRow(void)
+{
+    itsCurrentRow = 0;
 }
+

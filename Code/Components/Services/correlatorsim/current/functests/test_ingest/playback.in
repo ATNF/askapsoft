@@ -4,7 +4,8 @@
 # Parameters for both
 #
 # Measurement set used as input for simulation.
-playback.dataset = ../../dataset/ade4ant4chan.ms
+playback.dataset = playback.dataset = ~/ASKAPsoft/Code/Components/Services/correlatorsim/current/dataset/ade4ant4chan.ms
+
 #playback.dataset = source.ms
 
 # Correlator cycle time in seconds
