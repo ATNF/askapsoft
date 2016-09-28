@@ -322,17 +322,24 @@ implemented in the ASKAP source finder:
   showing the outer borders of each worker's subimage, and each
   subimage is labelled with the worker number (starting at 1).
 * CASDA-suitable catalogues - in conjunction with the CASDA project
-  (CSIRO ASKAP Science Data Archive), catalogues of islands and
-  components (fitted 2D Gaussians) are written in both ASCII (.txt)
-  and VOTable (.xml) formats. These take their names from the
+  (CSIRO ASKAP Science Data Archive), the following catalogues may be
+  created:
+
+  * continuum islands 
+  * continuum components (fitted 2D Gaussians)
+  * spectral-line (HI) sources
+
+  These are written in both ASCII (.txt) and VOTable (.xml) formats. These take their names from the
   **resultsFile** detailed above: replacing the *.txt* extension with
-  *islands.txt* and *components.txt* (so if the **resultsFile**
+  *islands.txt*, *components.txt* and *hiobjects.txt* (so if the **resultsFile**
   parameter is *selavy-results.txt*, the islands catalogue will be
-  *selavy-results.islands.txt* and the components catalogue will be
-  *selavy-results.components.txt*). The VOTable equivalents will have
+  *selavy-results.islands.txt*, the components catalogue will be
+  *selavy-results.components.txt* and the HI emission catalogue will
+  be *selavy-results.hiobjects.txt*). The VOTable equivalents will have
   a *.xml* extension. An example of the components catalogue can be
   found at :doc:`postprocessing`, while an example island catalogue
-  is shown below.
+  is shown below. The HI catalogue is only produced when
+  **HiEmissionCatalogue=true**. 
 * Fitting results - when Gaussian fitting is done for the continuum
   sources, several files can be written: a catalogue in ASCII & VOTable
   format (differing from the CASDA-format components catalogue), and
@@ -432,10 +439,12 @@ Output-related parameters
 |votFile                  |string        |selavy-results.txt          |The VOTable containing the catalogue of detections.                                             |
 |                         |              |                            |                                                                                                |
 +-------------------------+--------------+----------------------------+------------------------------------------------------------------------------------------------+
-|flagWriteBinaryCatalogue |bool          |true                        |Produce a binary catalogue compatible with Duchamp (that can be loaded into Duchamp along with  |
+|flagWriteBinaryCatalogue |bool          |false                       |Produce a binary catalogue compatible with Duchamp (that can be loaded into Duchamp along with  |
 |                         |              |                            |the image to produce plots of the detections).                                                  |
 +-------------------------+--------------+----------------------------+------------------------------------------------------------------------------------------------+
 |binaryCatalogue          |string        |selavy-catalogue.dpc        |The binary catalogue.                                                                           |
++-------------------------+--------------+----------------------------+------------------------------------------------------------------------------------------------+
+|HiEmissionCatalogue      |bool          |false                       |Whether to write out the HI emission-line catalogue for detected sources.                       |
 +-------------------------+--------------+----------------------------+------------------------------------------------------------------------------------------------+
 |flagTextSpectra          |bool          |false                       |Produce a file with text-based values of the spectra of each detection.                         |
 |                         |              |                            |                                                                                                |

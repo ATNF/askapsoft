@@ -46,7 +46,7 @@
 #include <vector>
 #include <map>
 
-ASKAP_LOGGER(logger, ".absorptioncatalogue");
+ASKAP_LOGGER(logger, ".hiemissioncatalogue");
 
 namespace askap {
 
