@@ -7,7 +7,10 @@
 source ../init_package_env.sh
 export AIPSPATH=$ASKAP_ROOT/Code/Base/accessors/current
 
+# Execute your application under test
 java askap/cp/manager/CpManager -c $TEST_DIR/manager.cfg -l ./config-files/console.log_cfg &
+
+# Required for the functional test framework. Do not modify below this line!
 PID=$!
 trap "kill -15 $PID" TERM KILL INT
 wait

@@ -32,7 +32,7 @@ Optional
 --------
 
 By default `ice-session.py` will only start the registry. To add other 
-applications create a text file containing one application andf its arguments 
+applications create a text file containing one application and its arguments
 per line.
 
 .. code-block:: sh

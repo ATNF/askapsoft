@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA.
 #
-"""Utilities to simplify ZeroC Ice application creation and deployment in the 
+"""Utilities to simplify ZeroC Ice application creation and deployment in the
 ASKAPsoft environment"""
 __all__ = ["Server", "IceSession", "get_service_object", "get_communicator",
            "IceService", "add_monitoring"]
@@ -30,6 +30,7 @@ import time
 import Ice
 from .icesession import IceSession
 from .monitoringprovider import MonitoringProviderImpl
+from .cpfunctestbase import CPFuncTestBase
 
 
 class IceService(object):
@@ -40,7 +41,7 @@ class IceService(object):
     def _init_ice(self):
         if 'ICE_CONFIG' not in os.environ:
             raise OSError("ICE_CONFIG not defined")
-        self.ice = Ice.initialize(sys.argv)        
+        self.ice = Ice.initialize(sys.argv)
 
     def get_service(self, name, prx):
         """get the Ice service object"""
@@ -67,7 +68,7 @@ def get_service_object(communicator, name, prx, retries=25):
         try:
             obj = prx.checkedCast(p)
             break
-        except (Ice.NotRegisteredException, 
+        except (Ice.NotRegisteredException,
                 Ice.ConnectionRefusedException,
                 Ice.NoEndpointException,
                 ) as ex:

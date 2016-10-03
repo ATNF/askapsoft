@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (c) 2014 CSIRO
+# Copyright (c) 2014,2016 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -29,6 +29,7 @@ import askap.iceutils.monitoringprovider
 from askap.iceutils import Server
 from askap import logging
 
+
 class Publisher(threading.Thread):
     def __init__(self, key='a', interval=0.1):
         threading.Thread.__init__(self)
@@ -39,7 +40,8 @@ class Publisher(threading.Thread):
     def run(self):
         count = 0
         while not self.stop.is_set():
-            askap.iceutils.monitoringprovider.MONITOR.add_points({self._key: count})
+            askap.iceutils.monitoringprovider.MONITOR.add_points(
+                {self._key: count})
             self.stop.wait(self._interval)
             count += 1
 
@@ -49,7 +51,9 @@ class MonProvider(Server):
         Server.__init__(self, comm, fcmkey='dummy')
 
     def initialize_services(self):
-        self.add_service("MonProviderService", askap.iceutils.monitoringprovider.MonitoringProviderImpl())
+        self.add_service("MonProviderService",
+                         askap.iceutils.monitoringprovider.MonitoringProviderImpl())
+
 
 def main():
     communicator = Ice.initialize(sys.argv)
@@ -69,6 +73,7 @@ def main():
         pub1.stop.set()
         pub2.stop.set()
         communicator.destroy()
+
 
 if __name__ == "__main__":
     main()

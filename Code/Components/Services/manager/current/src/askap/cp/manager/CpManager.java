@@ -25,9 +25,13 @@
  */
 package askap.cp.manager;
 
+import askap.cp.manager.notifications.SBStateMonitor;
+import IceStorm.NoSuchTopic;
+import IceStorm.TopicPrx;
 import org.apache.log4j.Logger;
 
 import askap.cp.manager.monitoring.MonitoringSingleton;
+import askap.cp.manager.notifications.SBStateMonitorFactory;
 import askap.util.ServiceApplication;
 import askap.util.ServiceManager;
 
@@ -37,6 +41,16 @@ public final class CpManager extends ServiceApplication {
 	 * Logger
 	 */
 	private static final Logger logger = Logger.getLogger(CpManager.class.getName());
+
+	/**	
+	 * The IceStorm SBStateChanged topic
+	 */
+	IceStorm.TopicPrx sbStateChangedTopic = null;
+
+	/**
+	 * The IceStorm SBStateChanged subscriber
+	 */
+	Ice.ObjectPrx sbStateChangedSubscriber = null;
 
 	/**
 	 * @see askap.cp.manager.ServiceApplication#run(java.lang.String[])
@@ -69,8 +83,35 @@ public final class CpManager extends ServiceApplication {
 				}
 			}
 
-			// Blocks until shutdown
-			ServiceManager.runService(communicator(), svc, serviceName, adapterName);
+			// Initialise the Scheduling block state change subscriber
+			boolean monitorSbStates = config().getBoolean("sbstatemonitor.enabled", false);
+			if (monitorSbStates) {
+				// TODO: pass in config if required.
+				if (!initSBStateMonitor()) {
+					logger.error("Scheduling block state change subscriber failed to initialise");
+				}
+			}
+
+			// Create the service manager for Ice orchestration
+			// We don't use the utility ServiceManager.run static method anymore,
+			// as IceStorm subscriptions must be unsubscribed after waitForShutdown()
+			// and before stop().
+			ServiceManager manager = new ServiceManager();
+
+			// Kick it into life
+			manager.start(communicator(), svc, serviceName, adapterName);
+
+			// Block until shutdown
+			manager.waitForShutdown();
+
+			// Unsubscribe all IceStorm subscribers
+			if (monitorSbStates) {
+				sbStateChangedTopic.unsubscribe(sbStateChangedSubscriber);
+			}
+
+			// And now we are done
+			manager.stop();
+
 			if (monitoring) {
 				MonitoringSingleton.destroy();
 			}
@@ -117,8 +158,105 @@ public final class CpManager extends ServiceApplication {
 			logger.debug("monitoring.ice.adaptername: " + adapterName);
 		}
 
-		MonitoringSingleton.init(communicator(),
-				serviceName, adapterName);
+		MonitoringSingleton.init(communicator(), serviceName, adapterName);
 		return true;
+	}
+
+	/**
+	 * Initialises the Scheduling block state change monitor.
+	 *
+	 * @return true if the state change monitor was correctly initialised;
+	 * otherwise false.
+	 * 
+	 * @throws RuntimeException
+	 */
+	private boolean initSBStateMonitor() {
+		logger.debug("initialising SB state change subscriber");
+
+		// We need to sleep for a little while, so the IceStorm process can 
+		// start up during functional tests.
+		try {
+			Thread.sleep(1000);
+		}
+		catch (InterruptedException ex) {
+			logger.debug("Sleep interrupted");
+		}
+
+		// Get the names of the topic manager and topic from the parset
+		String topicManagerName = config().getString("sbstatemonitor.topicmanager");
+		if (topicManagerName == null) {
+			logger.error("Parameter 'sbstatemonitor.topicmanager' not found");
+			return false;
+		}
+
+		String topicName = config().getString("sbstatemonitor.topic");
+		if (topicName == null) {
+			logger.error("Parameter 'sbstatemonitor.topic' not found");
+			return false;
+		}
+
+		// get a proxy to the IceStorm topic manager
+		logger.debug("Getting topic manager proxy: " + topicManagerName);
+		Ice.ObjectPrx obj = communicator().stringToProxy(topicManagerName);
+		IceStorm.TopicManagerPrx topicManager = IceStorm.TopicManagerPrxHelper.checkedCast(obj);
+        if (topicManager == null) {
+            throw new RuntimeException("Failed to get IceStorm topic manager");
+        }
+
+		// Create the object adapter to bind our subscriber servant to the Ice runtime
+		logger.debug("Getting Ice object adapter: SBStateMonitorAdapter");
+		Ice.ObjectAdapter adapter = communicator().createObjectAdapterWithEndpoints(
+				"SBStateMonitorAdapter",
+				"tcp");
+        if (adapter == null) {
+            throw new RuntimeException("ICE adapter initialisation failed");
+        }
+
+		// Instantiate our schedblock state monitor servant and register with the adapter
+		SBStateMonitor monitor = SBStateMonitorFactory.getInstance(
+			config().getString("sbstatemonitor.notificationagenttype"),
+			config(),
+			communicator());
+		sbStateChangedSubscriber = adapter.addWithUUID(monitor).ice_oneway();
+		adapter.activate();
+
+		// subscribe to the topic
+		try {
+			sbStateChangedTopic = getTopic(topicManager, topicName);
+			java.util.Map<String, String> qos = null;
+			sbStateChangedTopic.subscribeAndGetPublisher(qos, sbStateChangedSubscriber);
+		}
+		catch (IceStorm.NoSuchTopic | IceStorm.AlreadySubscribed | IceStorm.BadQoS ex) {
+            throw new RuntimeException("ICE topic subscription failed", ex);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Gets an IceStorm topic, creating the topic if it does not already exist.
+	 * @param topicManager: The IceStorm topic manager
+	 * @param topicName: the topic name
+	 * @return The IceStorm TopicPrx instance.
+	 * 
+	 * @throws IceStorm.NoSuchTopic
+	 */
+	private static TopicPrx getTopic(
+			IceStorm.TopicManagerPrx topicManager,
+			String topicName) throws NoSuchTopic {
+		IceStorm.TopicPrx topic = null;
+		try {
+			topic = topicManager.retrieve(topicName);
+		}
+		catch (IceStorm.NoSuchTopic nst) {
+			try {
+				topic = topicManager.create(topicName);
+			}
+			catch (IceStorm.TopicExists te) {
+				topic = topicManager.retrieve(topicName);
+			}
+		}
+
+		return topic;
 	}
 }

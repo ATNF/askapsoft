@@ -44,5 +44,6 @@ setup(name="%s.%s" % (ROOTPKG, PKGNAME),
       zip_safe=0,
       dependency=dep,
       scripts=["scripts/igsession.py", "scripts/ice-session.py",
-               "scripts/metadata-subscriber.py"],
+               "scripts/metadata-subscriber.py",
+               "scripts/monica-subscriber.py"]
       )

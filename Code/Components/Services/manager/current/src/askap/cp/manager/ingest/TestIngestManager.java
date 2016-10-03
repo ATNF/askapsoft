@@ -23,6 +23,7 @@
  */
 package askap.cp.manager.ingest;
 
+import askap.cp.manager.svcclients.FuncTestReporterClient;
 import java.io.File;
 
 import org.apache.log4j.Logger;
@@ -30,42 +31,62 @@ import org.apache.log4j.Logger;
 import askap.util.ParameterSet;
 
 /**
- * This dummy ingest pipeline manager does nothing when execute/abort
+ * This test ingest pipeline manager does nothing when execute/abort
  * is called except log messages at level INFO.
  */
-public class DummyIngestManager extends AbstractIngestManager {
+public class TestIngestManager extends AbstractIngestManager {
 
     /**
      * Logger
      */
-    private static final Logger logger = Logger.getLogger(DummyIngestManager.class.getName());
+    private static final Logger logger = Logger.getLogger(TestIngestManager.class.getName());
+	private final FuncTestReporterClient funcTestReporterClient;
 
     /**
      * Constructor
+	 * @param parset
+	 * @param client
      */
-    public DummyIngestManager(ParameterSet parset) {
+    public TestIngestManager(ParameterSet parset, FuncTestReporterClient client) {
         super(parset);
+		funcTestReporterClient = client;
     }
+
+	/**
+	 * 
+	 * @param timeout
+	 * @return 
+	 */
+	@Override
+    public boolean waitIngest(long timeout) {
+        logger.info("waitIngest");
+		funcTestReporterClient.methodCalled("waitIngest");
+		return super.waitIngest(timeout);
+	}
 
     /**
      * Dummy execute - does nothing except log a message
+	 * @param workdir
      */
     @Override
     protected void executeIngestPipeline(File workdir) {
-        logger.info("DummyIngestPipeline: Execute");
+        logger.info("Execute");
+		funcTestReporterClient.methodCalled("startIngest");
     }
 
     /**
-     * Dummy abort - does nothnig except log a message
+     * Dummy abort - does nothing except log a message
      */
     @Override
     protected void abortIngestPipeline() {
-        logger.info("DummyIngestPipeline: Abort");
+        logger.info("Abort");
+		funcTestReporterClient.methodCalled("abortIngest");
     }
 
     /**
      * Always returns false. This essentially mimics an ingest pipeline
      * that starts and finishes immediately.
+	 * @return false
      */
     @Override
     public boolean isRunning() {

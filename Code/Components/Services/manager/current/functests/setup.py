@@ -8,5 +8,4 @@ dep.add_package()
 
 setup(name = "testpkg",
       dependency = dep,
-      test_suite = "nose.collector",
-)
+      test_suite = "nose.collector")

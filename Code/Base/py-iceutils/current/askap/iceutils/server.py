@@ -1,4 +1,4 @@
-# Copyright (c) 2012 CSIRO
+# Copyright (c) 2012,2016 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -20,7 +20,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA.
 #
-__all__ = ["Server"]
+"""
+ZeroC Ice application wrapper
+-----------------------------
+"""
 import sys
 import os
 import time
@@ -36,29 +39,67 @@ from askap import logging
 
 from .monitoringprovider import MonitoringProviderImpl
 
+__all__ = ["Server"]
+
 logger = logging.getLogger(__name__)
+
 
 class TimeoutError(Exception):
     """An exception raised when call timed out"""
     pass
 
+
 class Server(object):
-    """A class to abstract an ice application (server)"""
-    def __init__(self, comm, fcmkey='', retries=-1):
-        self.parameters = None
+    """A class to abstract an ice application (server). It also sets up
+    connection to and initialisation from the FCM for the fiven `fcmkey`.
+    The configuration can also be given as a command-line arg
+    `--config=<cfg_file>` for e.g. functional test set ups.
+
+    :param comm:
+    :param fcmkey:
+    :param retries:
+
+    """
+    def __init__(
+            self,
+            comm,
+            fcmkey='',
+            retries=-1,
+            monitoring=False,
+            configurable=True):
         self._comm = comm
+        self.service_key = fcmkey
+        self._retries = retries
+        self.monitoring = monitoring
+        """Enable provision of monitoring (default `False`. This automatically
+        creates a :class:`MonitoringProvider` and adapter using the class
+        name for adapter naming. e.g. a class named TestServer results
+        in  MonitoringService@TestServerAdapter
+        """
+
+        self.configurable = configurable
+        """Control configuration via FCM/command-line (default `True`)"""
+
+        self.parameters = None
         self._adapter = None
         self._mon_adapter = None
         self._services = []
-        self._retries = retries
-        self.service_key = fcmkey
         self.logger = logger
-        self.monitoring = False
-        
+
     def set_retries(self, retries):
+        """
+        *deprecated*
+        """
         self._retries = retries
 
     def get_config(self):
+        """
+        Set up FCM configuration from either given file in command-line arg or
+        the FCM
+        :return:
+        """
+        if not self.configurable:
+            return
         key = "--config="
         for arg in sys.argv:
             if arg.startswith(key):
@@ -74,15 +115,31 @@ class Server(object):
         if not prxy:
             raise RuntimeError("Invalid Proxy for FCMService")
         fcm = self.wait_for_service("FCM",
-                           askap.interfaces.fcm.IFCMServicePrx.checkedCast,
-                           prxy)
+                                    askap.interfaces.fcm.IFCMServicePrx.checkedCast,
+                                    prxy)
         self.parameters = fcm.get(-1, self.service_key)
         self.logger.info("Initialized from fcm")
 
     def get_parameter(self, key, default=None):
+        """
+        Get an FCM parameter for the given `key` in the server's namespace
+
+        :param key: the key
+        :param default: the default value to return if key now found
+        :return: value for the specified key or default
+
+        """
         return self.parameters.get(".".join((self.service_key, key)), default)
 
     def wait_for_service(self, servicename, callback, *args):
+        """
+        Try to connect to the registry and establish connection to the given
+        Ice service
+        :param servicename:
+        :param callback:
+        :param args:
+        :return:
+        """
         retval = None
         delay = 5.0
         count = 0
@@ -97,36 +154,37 @@ class Server(object):
                     Ice.ConnectFailedException,
                     Ice.DNSException) as ex:
                 if self._retries > -1 and self._retries == count:
-                    msg = "Couldn't connect to {0}".format(servicename)
-                    self.logger.error(msg)
+                    msg = "Couldn't connect to {0}: ".format(servicename)
+                    self.logger.error(msg+str(ex))
                     raise TimeoutError(msg)
                 if count < 10:
-                    print >>sys.stderr, "Waiting for", servicename
+                    print >> sys.stderr, "Waiting for", servicename
                 if count == 10:
-                    print >>sys.stderr, "Repeated 10+ times"
+                    print >> sys.stderr, "Repeated 10+ times"
                     self.logger.warn("Waiting for {0}".format(servicename))
                 registry = False
                 count += 1
                 time.sleep(delay)
         if registry:
             self.logger.info("Connected to {0}".format(servicename))
-            print >>sys.stderr, servicename, "found"
+            # print >> sys.stderr, servicename, "found"
         return retval
 
-    def run(self):
-        adname = self.__class__.__name__+"Adapter"
+    def setup_services(self):
+        adname = self.__class__.__name__ + "Adapter"
         self._adapter = self._comm.createObjectAdapter(adname)
-            
+
         self.get_config()
 
         if self.monitoring:
-            adname = self.__class__.__name__+"MonitoringAdapter"
+            adname = self.__class__.__name__ + "MonitoringAdapter"
             self._mon_adapter = self._comm.createObjectAdapter(adname)
             self._mon_adapter.add(MonitoringProviderImpl(),
-                                  self._comm.stringToIdentity("MonitoringService"))
+                                  self._comm.stringToIdentity(
+                                      "MonitoringService"))
             self.wait_for_service("registry", self._mon_adapter.activate)
 
-        ## implement this method in derived class
+        # implement this method in derived class
         self.initialize_services()
 
         for service in self._services:
@@ -134,12 +192,31 @@ class Server(object):
                               self._comm.stringToIdentity(service['name']))
 
         self.wait_for_service("registry", self._adapter.activate)
-                    
+
+    def run(self):
+        """
+        Set up the services and :meth:`wait`.
+        """
+        self.setup_services()
+        self.wait()
+
+    def wait(self):
+        """Alias for `communicator.waitForShutdown`"""
         self._comm.waitForShutdown()
 
     def add_service(self, name, value):
+        """
+        Add the service implementation `value` under the given `name` (this will
+        be the name of the identity.
+
+        :param name: name of the identity to be known under (well known name)
+        :param value: the implemnation of the interface to provide
+
+        """
         self._services.append({'name': name, 'value': value})
 
+    # noinspection PyMethodMayBeStatic
     def initialize_services(self):
-        """Implement in sub-class"""
+        """Implement in sub-class with code the set up the server application.
+        At a minimum :meth:`add_service` should be called."""
         pass

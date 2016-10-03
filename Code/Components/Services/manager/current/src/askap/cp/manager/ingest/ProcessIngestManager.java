@@ -43,8 +43,7 @@ public class ProcessIngestManager extends AbstractIngestManager {
     /**
      * Logger
      */
-    private static final Logger logger = Logger.getLogger(ProcessIngestManager.class
-            .getName());
+    private static final Logger logger = Logger.getLogger(ProcessIngestManager.class.getName());
 
     /**
      * Ingest pipeline process
@@ -86,15 +85,13 @@ public class ProcessIngestManager extends AbstractIngestManager {
 
         try {
 			logger.debug("creating ProcessBuilder");
-            ProcessBuilder pb = new ProcessBuilder(cmdLine)
-                    .redirectErrorStream(true);
+            ProcessBuilder pb = new ProcessBuilder(cmdLine).redirectErrorStream(true);
             pb.directory(workdir);
 			logger.debug("starting process");
             itsIngestProcess = pb.start();
         } catch (IOException e) {
-            logger.error("Failed to execute ingest pipeline process: "
-                    + e.getMessage());
-            throw new PipelineStartException(e.getMessage());
+            logger.error("Failed to execute ingest pipeline process: " + e.getMessage());
+			throw new PipelineStartException(e.getMessage());
         }
 
         // This method is not meant to return until the ingest pipeline is
@@ -110,8 +107,7 @@ public class ProcessIngestManager extends AbstractIngestManager {
 
         if (!isRunning()) {
             logger.error("Ingest pipeline failed to start");
-            throw new askap.interfaces.cp.PipelineStartException(
-                    "Ingest pipeline failed to start");
+            throw new askap.interfaces.cp.PipelineStartException("Ingest pipeline failed to start");
         }
     }
 

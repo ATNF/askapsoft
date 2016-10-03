@@ -61,7 +61,7 @@ module schedblock
         PENDINGARCHIVE,
         COMPLETED,
         ERRORED,
-	RETIRED
+        RETIRED
     };
 
     /**

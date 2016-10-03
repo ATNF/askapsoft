@@ -27,6 +27,7 @@
 
 #include <CommonTypes.ice>
 #include <IService.ice>
+#include <SchedulingBlockService.ice>
 
 module askap
 {
@@ -49,8 +50,8 @@ module cp
     };
 
     /**
-     * Used to indicate the a pipeline failed to start due to some
-     * problem other than the above.
+     * Used to indicate that a pipeline failed to start due to some
+     * problem other than it being already running.
      */
     exception PipelineStartException extends askap::interfaces::AskapIceException
     {
@@ -69,7 +70,7 @@ module cp
          * observation described in the parameter set associated with the
          * scheduling block. This includes both data ingest and data processing
          * (i.e. running the ingest and processing pipelines).
-         * 
+         *
          * This method, when called will block until such times as the central
          * processor is ready to begin receiving data from the correlator and
          * telescope operating system. The central processor takes some time to
@@ -90,7 +91,7 @@ module cp
          * Calling this method instructs the central processor to abort the
          * current observation. This stops the data acquisition process,
          * however does not necessarily prevent the observation from moving to
-         * the post-processing stage. The configuration parameters in the 
+         * the post-processing stage. The configuration parameters in the
          * scheduling block indicate if data processing should be attempted
          * for an aborted observation.
          *
@@ -122,6 +123,30 @@ module cp
         bool waitObs(long timeout);
     };
 
+    /**
+     * CP interface used to report information back to functional test drivers.
+     */
+    interface ICPFuncTestReporter
+    {
+        /**
+         * Schedulingblockservice specific feedback method for state change
+         * notifications.
+         *
+         * @param sbid The scheduling block ID.
+         * @param newState The new scheduling block state.
+         */
+        void sbStateChangedNotification(
+            long sbid,
+            askap::interfaces::schedblock::ObsState newState);
+
+        /**
+         * Generic functional test feedback method where the only required
+         * feedback is that a particular method has been called.
+         *
+         * @param name The method name that has been called.
+         */
+        void methodCalled(string name);
+    };
 };
 };
 };

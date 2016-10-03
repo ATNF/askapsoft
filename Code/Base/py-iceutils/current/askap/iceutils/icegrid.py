@@ -34,7 +34,16 @@ import Ice
 import IceGrid
 import threading
 
+
 class IceGridSession(object):
+    """Control object of IceGrid. It simplifies calls to administer IceGrid.
+    It can be used to startup, shutdown and add applications from xml
+    definitions.
+
+    :param configfile: The IceGrid configuration file.
+    :param stddir: Directory to write stdout, stderr files
+
+    """
     def __init__(self, configfile='config.icegrid', stddir='debug_logs'):
         """Control object of IceGrid. It simplifies calls to administer IceGrid.
         It can be used to startup, shutdown and add applications from xml
@@ -55,7 +64,7 @@ class IceGridSession(object):
         self._kathread = None
         if not os.path.exists(configfile):
             raise IOError("'%s' doesn't exist" % configfile)
-        self._cfg  = configfile
+        self._cfg = configfile
         self.init_ice()
 
     def __del__(self):
@@ -63,16 +72,16 @@ class IceGridSession(object):
 
     def _kill_existing(self, name):
         """Kill an existing registry if running"""
-        cmd = 'icegridadmin --Ice.Config=%s -u %s -p %s -e'\
+        cmd = 'icegridadmin --Ice.Config=%s -u %s -p %s -e' \
               '"registry shutdown %s"' % (self._cfg, self._user, self._passwd,
                                           name)
         p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE,
                              shell=True)
-        o,e = p.communicate()
+        o, e = p.communicate()
         if p.returncode == 0:
-            print sys.stderr, "Warning: Found existing icegridnode process. "\
-                              "Shutting it down."
+            print >> sys.stderr, "Warning: Found existing icegridnode process. " \
+                                 "Shutting it down."
             time.sleep(1)
 
     def init_ice(self):
@@ -81,13 +90,14 @@ class IceGridSession(object):
         init.properties.load(self._cfg)
         regname = init.properties.getProperty('IceGrid.Registry.ReplicaName')
         self._kill_existing(regname)
+        dirs = []
         if self._cleanup:
             for f in [init.properties.getProperty('Ice.StdOut'),
                       init.properties.getProperty('Ice.StdErr')]:
                 if f and os.path.exists(f):
                     os.remove(f)
-            dirs = [init.properties.getProperty('IceGrid.Registry.Data')]
-            dirs.append(init.properties.getProperty('IceGrid.Node.Data'))
+            dirs = [init.properties.getProperty('IceGrid.Registry.Data'),
+                    init.properties.getProperty('IceGrid.Node.Data')]
             for d in dirs:
                 d = os.path.split(d)[0]
                 if os.path.exists(d):
@@ -116,8 +126,7 @@ class IceGridSession(object):
         while notup and timeout != 0:
             try:
                 registry = IceGrid.RegistryPrx.checkedCast(prx)
-            except Exception,e:
-                #print e
+            except Exception as ex:
                 timeout -= 1
                 time.sleep(1)
                 continue
@@ -180,18 +189,19 @@ class IceGridSession(object):
                 raise IOError("File '%s' doesn't exist" % config)
         tmpfiles = []
         if self.debug and appxml.find("icestorm") < 0:
-            tmpfiles  = self.redirect_std(appxml)
+            tmpfiles = self.redirect_std(appxml)
             appxml = tmpfiles[-1]
             self._clean_targets += tmpfiles
-        cmd = 'icegridadmin --Ice.Config=%s -u %s -p %s -e "application add %s"' % (config, self._user, self._passwd, appxml)
+        cmd = 'icegridadmin --Ice.Config=%s -u %s -p %s -e "application add %s"' % (
+            config, self._user, self._passwd, appxml)
         p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                              shell=True)
-        o,e = p.communicate()
+        o, e = p.communicate()
         if p.returncode != 0:
             raise RuntimeError(e)
 
     def redirect_std(self, xmlfile):
-        #stddir = "debug_logs"
+        # stddir = "debug_logs"
         if not os.path.exists(self.stddir):
             os.makedirs(self.stddir)
         filenoext = os.path.splitext(xmlfile)[0]
@@ -207,9 +217,9 @@ class IceGridSession(object):
                     appname = match.group(2)
                     line = rx.sub('\g<1>./%s_tmp.sh\g<3>' % filebase, line)
                 tmpxml.write(line)
-        tmpname = filebase+ "_tmp.sh"
+        tmpname = filebase + "_tmp.sh"
         stdpath = os.path.join(self.stddir, filebase)
-        txt ="""#!/bin/bash
+        txt = """#!/bin/bash
 %s "$@" > %s.stdout 2> %s.stderr
 """ % (appname, stdpath, stdpath)
         with open(tmpname, 'w') as tmpexe:
@@ -254,9 +264,10 @@ class _KeepAliveThread(threading.Thread):
     def stop(self):
         self._stopped.set()
 
+
 if __name__ == "__main__":
     igs = IceGridSession("config.icegrid")
     igs.startup()
     igs.add_icestorm()
-    print igs.get_application_names()
+    print(igs.get_application_names())
     igs.shutdown()

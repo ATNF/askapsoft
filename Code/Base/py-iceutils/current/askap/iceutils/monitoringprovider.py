@@ -20,21 +20,33 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA.
 #
-__all__ = ["MONITOR", "MonitoringProviderImpl"]
+"""
+Monitoring
+----------
 
+Implementation of Ice interfaces to provide monitoring information
+
+.. literalinclude:: ../../../../Interfaces/slice/current/MonitoringProvider.ice
+
+"""
 from dogpile.core import ReadWriteMutex
 
 from askap.time import bat_now
 from askap.slice import MonitoringProvider
-from askap.interfaces.monitoring import MonitorPoint, MonitoringProvider, PointStatus
-
+from askap.interfaces.monitoring import (MonitorPoint, MonitoringProvider,
+                                         PointStatus)
 from .typedvalues import TypedValueMapper
+
+__all__ = ["MONITOR", "MonitoringProviderImpl"]
 
 
 class PointMapper(object):
     """`TypedValue` encoded Point representation"""
 
     def __init__(self):
+        """
+        :class:`TypedValueMapper` encoded Point representation
+        """
         self._mapper = TypedValueMapper()
 
     def __call__(self, name, value, timestamp, status="OK", unit=""):
@@ -48,9 +60,8 @@ class PointMapper(object):
 
 
 class MonitoringBuffer(object):
-    "Thread safe buffer of monitoring points"
-
     def __init__(self):
+        """Thread safe buffer of monitoring points"""
         self._mutex = ReadWriteMutex()
         self._buffer = {}
 
@@ -61,7 +72,8 @@ class MonitoringBuffer(object):
             timestamp = timetag or bat_now()
             self._mutex.acquire_write_lock()
             for k, v in points.items():
-                self._buffer[k] = {'value': v, 'name': k, 'timestamp': timestamp}
+                self._buffer[k] = {'value': v, 'name': k,
+                                   'timestamp': timestamp}
         finally:
             self._mutex.release_write_lock()
 
@@ -79,11 +91,12 @@ class MonitoringBuffer(object):
             self._mutex.release_write_lock()
 
     def remove(self, keys):
+        points = keys
         if isinstance(keys, basestring):
             points = (keys,)
         try:
             self._mutex.acquire_write_lock()
-            for k in keys:
+            for k in points:
                 if k in self._buffer:
                     self._buffer.pop(k)
         finally:
@@ -91,6 +104,9 @@ class MonitoringBuffer(object):
 
 
     def clear(self):
+        """
+        Clear the buffer
+        """
         try:
             self._mutex.acquire_write_lock()
             self._buffer.clear()
@@ -113,16 +129,26 @@ class MonitoringBuffer(object):
             self._mutex.release_read_lock()
 
 
-"Global monitoring buffer (singleton)"
 MONITOR = MonitoringBuffer()
+"Global :obj:`MonitoringBuffer` (singleton)"
 
 
+# noinspection PyUnusedLocal
 class MonitoringProviderImpl(MonitoringProvider):
-
+    """
+    The implementation of the ice interface to provide monitoring points.
+    """
     def __init__(self):
         self._point_mapper = PointMapper()
 
+    # noinspection PyIncorrectDocstring
     def get(self, pointnames, current=None):
+        """
+        Get a list of monitoring points from the global buffer :attr:`MONITOR`
+
+        :param pointnames: names of the points to retrieve
+        :return: list of :class:`MonitorPoint`
+        """
 
         points = []
         try:

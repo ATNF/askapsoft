@@ -21,9 +21,11 @@ clean:
 	find . -type f -name '*.log' -exec rm -f {} +
 	find . -type f -name '*.pyc' -exec rm -f {} +
 	find . -type d -name '*.ms' -exec rm -rf {} +
-	rm -rf functests/data/ install/ build/askap/
-	rm -rf dist/
+	find functests/ -type f -name '*.stderr' -exec rm -f {} +
+	find functests/ -type f -name '*.stdout' -exec rm -f {} +
+	rm -rf functests/data/ install/ build/askap/ dist/ test_reports/
 	rm -f ./cpmanager*
+	rbuild $(RBUILD_FLAGS) -t clean
 
 .PHONY: install
 install: $(CPMAN_FILES)

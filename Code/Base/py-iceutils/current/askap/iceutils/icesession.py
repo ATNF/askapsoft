@@ -21,7 +21,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA.
 #
-__all__ = ["IceSession"]
 import sys
 import os
 import time
@@ -30,6 +29,9 @@ import subprocess
 import threading
 import shutil
 import Ice
+
+__all__ = ["IceSession"]
+
 
 class IceSession(object):
     """
@@ -61,6 +63,7 @@ class IceSession(object):
         # all process will terminate here
 
     """
+
     def __init__(self, app_file=None, cleanup=False):
         if not "ICE_CONFIG" in os.environ:
             raise OSError("Environment variable ICE_CONFIG not defined")
@@ -86,7 +89,8 @@ class IceSession(object):
 
     def __enter__(self):
         return self
-    
+
+    # noinspection PyUnusedLocal
     def __exit__(self, ttype, value, traceback):
         self.terminate()
 
@@ -99,7 +103,7 @@ class IceSession(object):
             if not d:
                 continue
             if os.path.exists(d) and self.cleanup:
-                shutil.rmtree(d)                
+                shutil.rmtree(d)
             if not os.path.exists(d):
                 print "creating ice metadata directory", d
                 os.makedirs(d)
@@ -107,14 +111,14 @@ class IceSession(object):
 
     def terminate(self, signum=None, frame=None):
         """Terminate all application processes in reverse order"""
-        for proc in self.processes[::-1]:            
+        for proc in self.processes[::-1]:
             try:
                 proc.terminate()
                 proc.wait()
-                print >>sys.stdout, "SIGTERM", proc.application
+                print >> sys.stdout, "SIGTERM", proc.application
             except Exception as ex:
-                print >>sys.stderr,ex 
-                
+                print >> sys.stderr, ex
+
         self.processes = []
         self.wake_up.set()
         self._started = False
@@ -150,19 +154,20 @@ class IceSession(object):
     def run_app(self, application, args):
         """Run the application in a background process and add to 
         :attr:`.processes`"""
-        lfile = application+".log"
-        cmd = [application]+args
-        with open(lfile,"w") as logfile:
+        lfile = application + ".log"
+        cmd = [application] + args
+        with open(lfile, "w") as logfile:
             proc = subprocess.Popen(cmd, shell=False,
-                                    stderr=logfile, stdout=logfile)
+                                    stderr=logfile, stdout=logfile,
+                                    close_fds=True)
             self.processes.append(proc)
             proc.application = application
             proc.log = lfile
             if application == "icegridregistry":
                 self.wait_for_registry()
             if proc.poll() is not None:
-                print >>sys.stderr, proc.application, "failed:"
-                print >>sys.stderr, open(proc.log, 'r').read()
+                print >> sys.stderr, proc.application, "failed:"
+                print >> sys.stderr, open(proc.log, 'r').read()
                 raise RuntimeError("Application '%s' failed on start"
                                    % application)
 
@@ -180,8 +185,8 @@ class IceSession(object):
         """Block until the ice registry is up and time out after `timeout` 
         seconds.
         """
-        n = timeout/0.1
-#        t0 = time.time()
+        n = timeout / 0.1
+        #        t0 = time.time()
         i = 0
         connected = False
         while i < n:
@@ -195,8 +200,7 @@ class IceSession(object):
             i += 1
         if not connected:
             raise RuntimeError("Waiting for icegridregistry timed out")
-#        print >>sys.stderr,i, time.time() - t0
-        
+        #        print >>sys.stderr,i, time.time() - t0
 
     def wait(self):
         """Block the main process. This is interruptable through a 
@@ -204,15 +208,15 @@ class IceSession(object):
         self.wake_up.clear()
         if self.processes:
             # periodically check if a subprocess had died
-            while True:                
+            while True:
                 for proc in self.processes:
                     if proc.poll() is not None:
-                        raise RuntimeError("Process %s died" 
-                                           % proc.application) 
-                self.wake_up.wait(1)        
+                        raise RuntimeError("Process %s died"
+                                           % proc.application)
+                self.wake_up.wait(1)
                 if self.wake_up.is_set():
                     return
-    
+
     def start(self):
         """Start all applications, e.g call :meth:`run_app` on all 
         :attr:`apps`"""
@@ -230,11 +234,12 @@ class IceSession(object):
             time.sleep(1)
             self.terminate()
 
+
 if __name__ == "__main__":
     fname = None
     if len(sys.argv) == 2:
         fname = sys.argv[-1]
-    
+
     with IceSession(fname, cleanup=True) as isess:
         isess.start()
         isess.wait()

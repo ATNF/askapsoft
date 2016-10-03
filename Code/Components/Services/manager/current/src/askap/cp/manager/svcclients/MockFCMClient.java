@@ -24,8 +24,9 @@
 package askap.cp.manager.svcclients;
 
 import java.io.IOException;
-
+import org.apache.log4j.Logger;
 import askap.util.ParameterSet;
+
 
 /**
  * This class provides a mock implementation of IFCMClient. It is instantiated
@@ -34,7 +35,12 @@ import askap.util.ParameterSet;
 public class MockFCMClient implements IFCMClient {
 
     /**
-     * The config that will be returned from get();
+     * Logger.
+     */
+    private static final Logger logger = Logger.getLogger(MockFCMClient.class.getName());
+
+    /**
+     * The configuration that will be returned from get();
      */
     private ParameterSet itsData;
 
@@ -47,10 +53,10 @@ public class MockFCMClient implements IFCMClient {
      */
     public MockFCMClient(String filename) {
         try {
-            itsData = new ParameterSet(filename);
+            itsData = new ParameterSet(
+					askap.util.Path.expandvars(filename));
         } catch (IOException e) {
-            System.err.println("IOException reading " + filename
-                    + ": " + e.getMessage());
+			logger.error(e);
         }
     }
 

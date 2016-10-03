@@ -7,6 +7,7 @@ java-logappenders=Code/Base/java-logappenders/current
 
 # Functional test dependencies
 pyiceinterfaces=Code/Interfaces/python/current
+py-askap=Code/Base/py-askap/current
 iceutils=Code/Base/py-iceutils/current
 
 # Junit test dependencies

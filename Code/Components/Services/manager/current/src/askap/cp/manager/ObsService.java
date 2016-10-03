@@ -31,8 +31,9 @@ import Ice.Current;
 import askap.interfaces.cp._ICPObsServiceDisp;
 import askap.util.ParameterSet;
 import askap.cp.manager.ingest.AbstractIngestManager;
-import askap.cp.manager.ingest.DummyIngestManager;
+import askap.cp.manager.ingest.TestIngestManager;
 import askap.cp.manager.ingest.ProcessIngestManager;
+import askap.cp.manager.svcclients.FuncTestReporterClient;
 import askap.cp.manager.svcclients.IFCMClient;
 import askap.cp.manager.svcclients.IceFCMClient;
 import askap.cp.manager.svcclients.MockFCMClient;
@@ -109,9 +110,12 @@ public class ObsService extends _ICPObsServiceDisp {
         if (managertype.equalsIgnoreCase("process")) {  
 			logger.debug("ObsService factory: creating ingest manager");
             itsIngestManager = new ProcessIngestManager(parset);
-        } else if (managertype.equalsIgnoreCase("dummy")) {
+        } else if (managertype.equalsIgnoreCase("test")) {
 			logger.debug("ObsService factory: creating mock ingest manager");
-            itsIngestManager = new DummyIngestManager(parset);
+			FuncTestReporterClient client = new FuncTestReporterClient(
+				ic,
+				parset.getString("cpfunctestreporter.identity"));
+            itsIngestManager = new TestIngestManager(parset, client);
         } else {
             throw new RuntimeException("Unknown ingest manager type: "
                     + managertype);
