@@ -182,7 +182,6 @@ else
 fi
 # Reformat for Selavy's referenceDirection
 ra=\`echo \$ra | awk -F':' '{printf "%sh%sm%s",\$1,\$2,\$3}'\` 
-dec=\`echo \$dec | awk -F':' '{printf "%s.%s.%s",\$1,\$2,\$3}'\` 
 refDirection="[\${ra}, \${dec}, \${epoch}]"
 
 caldir=selfCal_${imageBase}
