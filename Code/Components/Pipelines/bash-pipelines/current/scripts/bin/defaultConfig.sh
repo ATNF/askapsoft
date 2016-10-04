@@ -618,5 +618,9 @@ THUMBNAIL_GREYSCALE_MAX="40"
 # Write the READY file after casdaupload has finished?
 WRITE_CASDA_READY=false
 
+# Transition the scheduling block status to PENDINGARCHIVE once the
+# READY file has been written
+TRANSITION_SBID=false
+
 # Base directory for casdaupload output
 CASDA_OUTPUT_DIR=/scratch2/casda/prd

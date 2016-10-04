@@ -94,6 +94,10 @@ scripts, and they are detailed here.
 |                                |                                 |                                 | transition the scheduling block from PROCESSING to              |
 |                                |                                 |                                 | PENDINGARCHIVE.                                                 |
 +--------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
+| ``TRANSITION_SBID``            | false                           | none                            | If true, the scheduling block status is transitioned from       |
+|                                |                                 |                                 | PROCESSING to PENDINGARCHIVE once the casdaupload task is       |
+|                                |                                 |                                 | complete.                                                       |
++--------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | ``CASDA_OUTPUT_DIR``           | /scratch2/casda/prd             | outputdir                       | The output directory to put the staged data. It may be that some|
 |                                |                                 | (:doc:`../utils/casdaupload`)   | users will not have write access to this directory - in this    |
 |                                |                                 |                                 | case the data is written to a local directory and the user must |

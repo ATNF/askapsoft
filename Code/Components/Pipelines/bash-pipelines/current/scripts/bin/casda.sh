@@ -64,6 +64,7 @@ ${exportDirective}
 ${askapsoftModuleCommands}
 
 BASEDIR=${BASEDIR}
+OUTPUT=${OUTPUT}
 cd $OUTPUT
 . ${PIPELINEDIR}/utils.sh	
 
@@ -178,7 +179,9 @@ if [ \$err != 0 ]; then
     exit \$err
 fi
 
-if [ "\${writeREADYfile}" == "true" ]; then
+doTransition=${TRANSITION_SBID}
+
+if [ "\${writeREADYfile}" == "true" ] && [ "\${doTransition}" == "true"]; then
 
     # We have uploaded successfully and notified CASDA of the data
     # availability. We therefore transition the scheduling block to 

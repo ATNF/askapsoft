@@ -91,6 +91,9 @@ BASEDIR=${BASEDIR}
 parsets=$parsets
 logs=$logs
 
+utilsScript=$PIPELINEDIR/utils.sh
+. \$utilsScript
+
 # List of images and their types
 
 ##############################
@@ -248,8 +251,8 @@ for FIELD in \${FIELD_LIST}; do
 
     for ms in \${possibleMSnames}; do
     
-        if [ -e \$ms ]; then
-            msNames+=(\$ms)
+        if [ -e \${FIELD}/\${ms} ]; then
+            msNames+=(\${FIELD}/\${ms})
         fi
     
     done
