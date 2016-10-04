@@ -88,15 +88,19 @@ void ImageElement::copyAndChecksum(const boost::filesystem::path& outdir) const
     ASKAPLOG_INFO_STR(logger, "Copying and calculating checksum for " << in);
     CasdaFileUtils::copyAndChecksum(in, out);
 
-    const boost::filesystem::path inLarge(itsThumbnailLarge);
-    const boost::filesystem::path outLarge(outdir / inLarge.filename());
-    ASKAPLOG_INFO_STR(logger, "Copying and calculating checksum for " << inLarge);
-    CasdaFileUtils::copyAndChecksum(inLarge, outLarge);
+    if (itsThumbnailLarge != "" ) {
+        const boost::filesystem::path inLarge(itsThumbnailLarge);
+        const boost::filesystem::path outLarge(outdir / inLarge.filename());
+        ASKAPLOG_INFO_STR(logger, "Copying and calculating checksum for " << inLarge);
+        CasdaFileUtils::copyAndChecksum(inLarge, outLarge);
+    }
 
-    const boost::filesystem::path inSmall(itsThumbnailSmall);
-    const boost::filesystem::path outSmall(outdir / inSmall.filename());
-    ASKAPLOG_INFO_STR(logger, "Copying and calculating checksum for " << inSmall);
-    CasdaFileUtils::copyAndChecksum(inSmall, outSmall);
+    if (itsThumbnailSmall != "" ){
+        const boost::filesystem::path inSmall(itsThumbnailSmall);
+        const boost::filesystem::path outSmall(outdir / inSmall.filename());
+        ASKAPLOG_INFO_STR(logger, "Copying and calculating checksum for " << inSmall);
+        CasdaFileUtils::copyAndChecksum(inSmall, outSmall);
+    }
 
 }
 
