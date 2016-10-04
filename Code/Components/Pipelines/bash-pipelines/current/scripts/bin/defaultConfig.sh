@@ -620,7 +620,7 @@ WRITE_CASDA_READY=false
 
 # Transition the scheduling block status to PENDINGARCHIVE once the
 # READY file has been written
-TRANSITION_SBID=false
+TRANSITION_SB=false
 
 # Base directory for casdaupload output
 CASDA_OUTPUT_DIR=/scratch2/casda/prd

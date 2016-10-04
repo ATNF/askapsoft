@@ -94,7 +94,7 @@ scripts, and they are detailed here.
 |                                |                                 |                                 | transition the scheduling block from PROCESSING to              |
 |                                |                                 |                                 | PENDINGARCHIVE.                                                 |
 +--------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
-| ``TRANSITION_SBID``            | false                           | none                            | If true, the scheduling block status is transitioned from       |
+| ``TRANSITION_SB``              | false                           | none                            | If true, the scheduling block status is transitioned from       |
 |                                |                                 |                                 | PROCESSING to PENDINGARCHIVE once the casdaupload task is       |
 |                                |                                 |                                 | complete.                                                       |
 +--------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+

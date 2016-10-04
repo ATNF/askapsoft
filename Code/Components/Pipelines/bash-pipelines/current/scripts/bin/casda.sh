@@ -179,7 +179,7 @@ if [ \$err != 0 ]; then
     exit \$err
 fi
 
-doTransition=${TRANSITION_SBID}
+doTransition=${TRANSITION_SB}
 
 if [ "\${writeREADYfile}" == "true" ] && [ "\${doTransition}" == "true"]; then
 
