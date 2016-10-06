@@ -1,5 +1,5 @@
 0.15.0 (nn October 2016)
------------------------------
+------------------------
 This release sees a number of bugs fixes and improvements.
 
 * Improved the efficiency of the msmerge operation by allowing the 
@@ -7,11 +7,43 @@ This release sees a number of bugs fixes and improvements.
   read operations from the source measurement set when possible.
 * To be consistent with changes made to Cimager (ASKAPSDP-1607), 
   Simager has been changed to only access cross-correlations.
-* Improved Selavy HI emission catalogue.
-* Improvements to Selavy moment-map calculations.
-* Improvements to the cubelet extraction in Selavy.
+* Parallel linmos @Steve@
+* Improved Selavy HI emission catalogue, with a more complete set of
+  parameters available. This is now turned on by an input parameter
+  Selavy.HiEmissionCatalogue. 
 * JIRA notification for Scheduling Block status changes.
-* Various minor bug fixes.
+* Pipeline updates:
+  - The bandpass calibration approach has changed slightly. All beams
+    of the calibrator will be processed up to the requested BEAM_MAX -
+    the BEAM_MIN parameter only applies to the science dataset. 
+  - There is more flexibility in specifying flagging thresholds for
+    the dynamic flagger. Each instance of the flagging can have
+    different thresholds for the integrateSpectra & integrateTimes
+    options, and both of these are now available for the bandpass
+    calibrator.
+  - When uploading to CASDA and upon successful ingest into CASDA, the
+    SB state can be transitioned through the state model.
+  
+Bug fixes:
+ * Pipelines:
+   - When components were used in the pipeline for self-calibration or
+     continuum subtraction, the reference direction was not being
+     interpreted correctly, leading to erroneous positions. 
+   - The bandpass calibration table was not inheriting the complete
+     path to it - it is now put in a standard location and all scripts
+     correctly point to it.
+   - More robustness added to the source-finding job so that it
+     doesn't run if the FITS conversion fails. 
+ * Documentation fixes to names of the MS utility functions.
+ * Fixing casdaupload to handle images that don't have associated
+   thumbnails, and to set the correct write permissions of the upload
+   directory. 
+ * Selavy's extraction of moment maps and cubelets was not working
+   correctly when a subsection was given to Selavy. These calculations
+   have also been improved slightly to better handle the spectral
+   increments.
+ * Fixes to new imager @Steve@
+ 
 
 0.14.0-p2 (25 September 2016)
 -----------------------------
