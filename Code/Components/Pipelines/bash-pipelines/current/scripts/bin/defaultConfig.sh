@@ -623,4 +623,9 @@ WRITE_CASDA_READY=false
 TRANSITION_SB=false
 
 # Base directory for casdaupload output
-CASDA_OUTPUT_DIR=/scratch2/casda/prd
+CASDA_UPLOAD_DIR=/scratch2/casda/prd
+
+# Delay between slurm jobs that poll CASDA output directory for the DONE file
+POLLING_DELAY_SEC=1800
+# Maximum time we wait to check for DONE file
+MAX_POLL_WAIT_TIME=172800

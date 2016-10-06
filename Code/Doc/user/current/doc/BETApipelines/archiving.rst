@@ -88,6 +88,11 @@ scripts, and they are detailed here.
 | ``OBS_PROGRAM``                | "Commissioning"                 | obsprogram                      | The name of the observational program to be associated with this|
 |                                |                                 | (:doc:`../utils/casdaupload`)   | data set.                                                       |
 +--------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
+| ``CASDA_UPLOAD_DIR``           | /scratch2/casda/prd             | outputdir                       | The output directory to put the staged data. It may be that some|
+|                                |                                 | (:doc:`../utils/casdaupload`)   | users will not have write access to this directory - in this    |
+|                                |                                 |                                 | case the data is written to a local directory and the user must |
+|                                |                                 |                                 | then contact CASDA staff.                                       |
++--------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | ``WRITE_CASDA_READY``          | false                           | writeREADYfile                  | Whether to write the READY file in the staging directory,       |
 |                                |                                 | (:doc:`../utils/casdaupload`)   | indicating that no further changes are to be made and the data  |
 |                                |                                 |                                 | is ready to go into CASDA. Setting this to true will also       |
@@ -98,8 +103,10 @@ scripts, and they are detailed here.
 |                                |                                 |                                 | PROCESSING to PENDINGARCHIVE once the casdaupload task is       |
 |                                |                                 |                                 | complete.                                                       |
 +--------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
-| ``CASDA_OUTPUT_DIR``           | /scratch2/casda/prd             | outputdir                       | The output directory to put the staged data. It may be that some|
-|                                |                                 | (:doc:`../utils/casdaupload`)   | users will not have write access to this directory - in this    |
-|                                |                                 |                                 | case the data is written to a local directory and the user must |
-|                                |                                 |                                 | then contact CASDA staff.                                       |
+| ``POLLING_DELAY_SEC``          | 1800                            | none                            | The time, in seconds, between slurm jobs that poll the CASDA    |
+|                                |                                 |                                 | upload directory for the DONE file, indicating ingestion into   |
+|                                |                                 |                                 | CASDA is complete.                                              |
++--------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
+| ``MAX_POLL_WAIT_TIME``         | 172800                          | none                            | The maximum time (in seconds) to poll for the DONE file, before |
+|                                |                                 |                                 | timing out and raising an error. (Default is 2 days.)           |
 +--------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+

@@ -37,12 +37,11 @@ if [ $DO_STAGE_FOR_CASDA == true ]; then
     fi
 
     # If we can't create the output directory
-    if [ ! -w ${CASDA_OUTPUT_DIR%/*} ]; then
+    if [ ! -w ${CASDA_UPLOAD_DIR%/*} ]; then
         # can't write to the destination - make a new one locally.
-        echo "WARNING - desired location for the CASDA output directory ${CASDA_OUTPUT_DIR} 
-is not writeable."
+        echo "WARNING - desired location for the CASDA output directory ${CASDA_UPLOAD_DIR} is not writeable."
         echo "        - changing output directory to ${OUTPUT}/For-CASDA"
-        CASDA_OUTPUT_DIR="${OUTPUT}/For-CASDA"
+        CASDA_UPLOAD_DIR="${OUTPUT}/For-CASDA"
     fi
 
     sbatchfile=$slurms/casda_upload.sbatch
@@ -145,7 +144,7 @@ parset=${parsets}/casda_upload_\${SLURM_JOB_ID}.in
 log=${logs}/casda_upload_\${SLURM_JOB_ID}.log
 cat > \$parset << EOFINNER
 # General
-outputdir                       = ${CASDA_OUTPUT_DIR}
+outputdir                       = ${CASDA_UPLOAD_DIR}
 telescope                       = ASKAP
 sbid                            = ${SB_SCIENCE}
 ${sbids}
@@ -188,6 +187,9 @@ if [ "\${writeREADYfile}" == "true" ] && [ "\${doTransition}" == "true"]; then
 
     module load askapcli
     schedblock transition -s PENDINGARCHIVE ${SB_SCIENCE}
+    if [ "\`whoami\`" == "askapops" ]; then
+        schedblock annotate -c "Processing complete. SB ${SB_SCIENCE} transitioned to PENDINGARCHIVE." $SB_SCIENCE
+    fi
 
 fi
 
@@ -206,5 +208,94 @@ EOFOUTER
     fi
 
 
+    # Create job that polls for success of casda ingest
+    # Only launch this when we are writing the READY file and transitioning the SBs
+    if [ ${WRITE_CASDA_READY} == true ] && [ ${TRANSITION_SB} == true ]; then
+
+        # This slurm job will check for the existence of a DONE file
+        # in the CASDA upload directory and, when it appears,
+        # transition the SB to COMPLETE.
+        # If it hasn't appeared, it relaunches itself to start at some
+        # point in the future (given by ${POLLING_DELAY_SEC})
+        # If after some longer period of time it hasn't appeared (a
+        # length given by ${MAX_POLL_WAIT_TIME}), then it exits with
+        # an error.
+        CASDA_DIR=${CASDA_UPLOAD_DIR}/${SB_SCIENCE}
+
+        if [ "${EMAIL}" != "" ]; then
+            emailFail="#SBATCH --mail-type=FAIL
+#SBATCH --mail-user=${EMAIL}"
+        else
+            emailFail="# no email notifications"
+        fi
+        
+        sbatchfile=$slurms/casda_ingest_success_poll.sbatch
+        cat > $sbatchfile <<EOFOUTER
+#!/bin/bash -l
+#SBATCH --cluster=zeus
+#SBATCH --partition=copyq
+${ACCOUNT_REQUEST}
+#SBATCH --open-mode=append
+#SBATCH --output=$slurmOut/slurm-casdaingestPolling-${SB_SCIENCE}.out
+#SBATCH --time=00:05:00
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --job-name=casdaPoll${SB_SCIENCE}
+#SBATCH --export=NONE
+${emailFail}
+#SBATCH --requeue   
+
+echo "Polling with job \${SLURM_JOB_ID}, \`date\`"
+
+if [ ! -e ${CASDA_DIR}/READY ]; then
+    echo "\`date\`: ERROR - READY file not present!" | tee -a ${CASDA_DIR}/ERROR
+    exit 1
+fi
+
+READYdate=\`date +%s -r ${CASDA_DIR}/READY\`
+NOW=\`date +%s\`
+ageOfReady=\`expr \$NOW - \$READYdate\`
+
+if [ -e ${CASDA_DIR}/DONE ]; then
+    module load askapcli
+    schedblock transition -s COMPLETE ${SB_SCIENCE}
+    err=\$?
+    if [ "\`whoami\`" == "askapops" ]; then
+        if [ \$err -eq 0 ]; then
+            schedblock annotate -c "Archiving complete. SB ${SB_SCIENCE} transitioned to COMPLETE." $SB_SCIENCE
+        else
+            schedblock annotate -c "ERROR -- Archiving complete but SB ${SB_SCIENCE} failed to transition." $SB_SCIENCE
+            echo "\`date\`: ERROR - 'schedblock transition' failed for SB ${SB_SCIENCE}" | tee -a ${CASDA_DIR}/ERROR
+        fi
+    fi
+    exit \$err
+elif [ \$ageOfReady -gt ${MAX_POLL_WAIT_TIME} ]; then
+    if [ "\`whoami\`" == "askapops" ]; then
+        module load askapcli
+        schedblock annotate -c "ERROR -- CASDA ingest has not completed within ${MAX_POLL_WAIT_TIME} sec - SB not transitioned to COMPLETE" $SB_SCIENCE
+    fi
+    echo "\`date\`: ERROR - Polling timed out! Waited longer than ${MAX_POLL_WAIT_TIME} sec" | tee -a ${CASDA_DIR}/ERROR
+    exit 1
+else
+    # Re-submit job with a delay
+    sbatch --begin=now+${POLLING_DELAY_SEC} ${sbatchfile}
+fi
+
+EOFOUTER
+
+        if [ $SUBMIT_JOBS == true ]; then    
+            dep=""
+            if [ "${ALL_JOB_IDS}" != "" ]; then
+                dep="-d afterok:`echo $ALL_JOB_IDS | sed -e 's/,/:/g'`"
+            fi
+            dep=`addDep "$dep" "$ID_CASDA"`
+            ID_CASDAPOLL=`sbatch ${dep} $sbatchfile | awk '{print $4}'`
+            recordJob ${ID_CASDAPOLL} "Job to poll CASDA directory for successful ingest, with flags \"${dep}\""
+        else
+            echo "Would submit job to poll CASDA directory for successful ingest, with slurm file $sbatchfile"
+        fi
+
+    fi
 
 fi
