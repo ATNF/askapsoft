@@ -10,6 +10,7 @@ This release sees a number of bugs fixes and improvements.
 * Improved Selavy HI emission catalogue.
 * Improvements to Selavy moment-map calculations.
 * Improvements to the cubelet extraction in Selavy.
+* JIRA notification for Scheduling Block status changes.
 * Various minor bug fixes.
 
 0.14.0-p2 (25 September 2016)
