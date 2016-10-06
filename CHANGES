@@ -1,3 +1,17 @@
+0.15.0 (nn October 2016)
+-----------------------------
+This release sees a number of bugs fixes and improvements.
+
+* Improved the efficiency of the msmerge operation by allowing the 
+  writing of arbitrary tile-sizes and the mssplit by forcing bulk 
+  read operations from the source measurement set when possible.
+* To be consistent with changes made to Cimager (ASKAPSDP-1607), 
+  Simager has been changed to only access cross-correlations.
+* Improved Selavy HI emission catalogue.
+* Improvements to Selavy moment-map calculations.
+* Improvements to the cubelet extraction in Selavy.
+* Various minor bug fixes.
+
 0.14.0-p2 (25 September 2016)
 -----------------------------
 
