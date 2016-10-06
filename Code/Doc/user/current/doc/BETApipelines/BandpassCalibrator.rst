@@ -4,9 +4,15 @@ User Parameters - Bandpass Calibration
 These parameters govern all processing used for the calibrator
 observation. The requested measurement set is split up by beam and
 scan, assuming that a given beam points at 1934-638 in the
-correspondingly-numbered scan.
+correspondingly-numbered scan. While it is possible to use the
+``BEAM_MIN`` and ``BEAM_MAX`` parameters to specify a given range of
+beams to process for the science field, only the ``BEAM_MAX``
+parameter is applied to the bandpass calibrator processing. All beams
+up to ``BEAM_MAX`` are split & flagged, and have their bandpass solved
+for. This is due to the particular requirements of
+:doc:`../calim/cbpcalibrator`.
 
-The MS is then flagged in two passes. First, a combination of
+The MS is flagged in two passes. First, a combination of
 selection rules (allowing flagging of antennas & baselines, and
 autocorrelations) and a simple flat amplitude threshold are
 applied. Then dynamic flagging of amplitudes is done, integrating over
@@ -17,6 +23,11 @@ Then the bandpass table is calculated with
 :doc:`../calim/cbpcalibrator`, which requires MSs for all beams to be
 given. This is a parallel job, the size of which is configurable
 through ``NUM_CPUS_CBPCAL``.
+
+If a second processing job is run with a higher ``BEAM_MAX`` (and
+hence wanting to use beams not included in a previous bandpass
+solution), the bandpass table is deleted and re-made once the new
+beams are split and flagged.
 
 +---------------------------------------+---------------------------------------+----------------------------------------------------+-----------------------------------------------------------+
 | Variable                              | Default                               | Parset equivalent                                  | Description                                               |
@@ -74,8 +85,10 @@ through ``NUM_CPUS_CBPCAL``.
 |                                       |                                       | (:doc:`../calim/cbpcalibrator`)                    |                                                           |
 +---------------------------------------+---------------------------------------+----------------------------------------------------+-----------------------------------------------------------+
 | ``TABLE_BANDPASS``                    | calparameters_1934_bp.tab             | calibaccess.table                                  | Name of the CASA table used for the bandpass calibration  |
-|                                       |                                       | (:doc:`../calim/cbpcalibrator` and                 | parameters.                                               |
-|                                       |                                       | :doc:`../calim/ccalapply`)                         |                                                           |
+|                                       |                                       | (:doc:`../calim/cbpcalibrator` and                 | parameters. If no leading directory is given, the table   |
+|                                       |                                       | :doc:`../calim/ccalapply`)                         | will be put in the BPCAL directory. Otherwise, the table  |
+|                                       |                                       |                                                    | is left where it is (this allows the user to specify a    |
+|                                       |                                       |                                                    | previously-created table for use with the science field). |
 +---------------------------------------+---------------------------------------+----------------------------------------------------+-----------------------------------------------------------+
 | ``BANDPASS_SCALENOISE``               | false                                 | calibrate.scalenoise (:doc:`../calim/ccalapply`)   | Whether the noise estimate will be scaled in accordance   |
 |                                       |                                       |                                                    | with the applied calibrator factor to achieve proper      |

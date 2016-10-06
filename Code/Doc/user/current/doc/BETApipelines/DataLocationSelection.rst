@@ -34,7 +34,11 @@ MS).
 | Variable       | Default   | Description                                      |
 +================+===========+==================================================+
 | ``BEAM_MIN``   | 0         |First beam number (0-based). All beams from       |
-|                |           |``BEAM_MIN`` to ``BEAM_MAX`` *inclusive* are used.|
+|                |           |``BEAM_MIN`` to ``BEAM_MAX`` *inclusive* are used |
+|                |           |for the science processing. The processing of the |
+|                |           |bandpass calibrator always starts at beam 0, but  |
+|                |           |goes up to ``BEAM_MAX`` (this is due to the       |
+|                |           |requirements of :doc:`../calim/cbpcalibrator`).   |
 +----------------+-----------+--------------------------------------------------+
 | ``BEAM_MAX``   | 8         | Final beam number (0-based)                      |
 +----------------+-----------+--------------------------------------------------+

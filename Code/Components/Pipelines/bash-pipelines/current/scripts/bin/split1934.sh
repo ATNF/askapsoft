@@ -61,6 +61,19 @@ fi
 
 if [ $DO_IT == true ]; then
 
+    if [ $DO_FIND_BANDPASS == true ] && [ -e ${TABLE_BANDPASS} ]; then
+        # If we are splitting and the user wants to find the bandpass,
+        # remove any existing bandpass table so that we will be able
+        # to create a new one
+        echo "Removing the bandpass table so we can recompute"
+        rm -rf ${TABLE_BANDPASS}
+    fi
+
+    if [ -e ${FLAG_1934_CHECK_FILE} ]; then
+        echo "Removing check file for flagging"
+        rm -f ${FLAG_1934_CHECK_FILE}
+    fi
+    
     setJob split_1934 split
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l

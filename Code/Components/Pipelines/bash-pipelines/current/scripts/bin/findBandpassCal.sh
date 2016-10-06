@@ -34,8 +34,6 @@ ID_CBPCAL=""
 
 DO_IT=$DO_FIND_BANDPASS
 
-TABLE_BANDPASS=${OUTPUT}/${TABLE_BANDPASS}
-
 if [ $CLOBBER == false ] && [ -e ${TABLE_BANDPASS} ]; then
     if [ $DO_IT == true ]; then
         echo "Bandpass table ${TABLE_BANDPASS} exists, so not running cbpcalibrator"
@@ -74,7 +72,7 @@ parset=${parsets}/cbpcalibrator_1934_\${SLURM_JOB_ID}.in
 cat > \$parset <<EOFINNER
 Cbpcalibrator.dataset                         = [${ms1934list}]
 Cbpcalibrator.nAnt                            = ${NUM_ANT}
-Cbpcalibrator.nBeam                           = ${nbeams}
+Cbpcalibrator.nBeam                           = ${maxbeam}
 Cbpcalibrator.nChan                           = ${NUM_CHAN_1934}
 Cbpcalibrator.refantenna                      = 1
 #

@@ -37,6 +37,12 @@ FIELD=BPCAL
 mkdir -p ${FIELD}
 cd ${FIELD}
 OUTPUT="${ORIGINAL_OUTPUT}/${FIELD}"
+if [ "${TABLE_BANDPASS%/*}" == "${TABLE_BANDPASS}" ]; then
+    # Have just given a filename with no leading path - need to change
+    # it to be inside the new OUTPUT directory
+    TABLE_BANDPASS=${OUTPUT}/${TABLE_BANDPASS}
+fi
+
 mkdir -p ${OUTPUT}/Checkfiles
 lfs setstripe -c 1 ${OUTPUT}/Checkfiles
 
@@ -49,7 +55,14 @@ mkdir -p $slurms
 slurmOut=$slurmOutBase/$FIELD
 mkdir -p $slurmOut
 
-for BEAM in ${BEAMS_TO_USE}; do
+highestBeam=`echo $BEAM_MAX | awk '{printf "%02d",$1}'`
+echo "Solving for the bandpass solutions for beams up to beam${highestBeam}"
+echo "========================================================="
+
+for((IBEAM=0; IBEAM<=${BEAM_MAX}; IBEAM++)); do
+    BEAM=`echo $IBEAM | awk '{printf "%02d",$1}'`
+    # Process all beams up to the maximum requested, so that we can
+    # give them all to cbpcalibrator.
 
     # an empty file that will indicate that the flagging has been done
     FLAG_1934_CHECK_FILE="${OUTPUT}/Checkfiles/FLAGGING_DONE_1934_BEAM${BEAM}"

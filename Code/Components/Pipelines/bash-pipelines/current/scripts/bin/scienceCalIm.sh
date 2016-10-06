@@ -31,6 +31,7 @@
 #
 
 echo "Setting up and calibrating the science observation"
+echo "=================================================="
 
 FIELD_ID=0
 
