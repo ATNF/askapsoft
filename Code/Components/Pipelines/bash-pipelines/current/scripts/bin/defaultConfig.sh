@@ -215,6 +215,14 @@ BANDPASS_SCALENOISE=false
 FLAG_DO_DYNAMIC_AMPLITUDE_1934=true
 # Dynamic threshold applied to amplitudes [sigma]
 FLAG_THRESHOLD_DYNAMIC_1934=4.0
+# Whether to apply a dynamic threshold to integrated spectra
+FLAG_DYNAMIC_1934_INTEGRATE_SPECTRA=false
+# Dynamic threshold applied to amplitudes in integrated spectra mode  [sigma]
+FLAG_THRESHOLD_DYNAMIC_1934_SPECTRA=4.0
+# Whether to apply a dynamic threshold to integrated times
+FLAG_DYNAMIC_1934_INTEGRATE_TIMES=true
+# Dynamic threshold applied to amplitudes in integrated times mode [sigma]
+FLAG_THRESHOLD_DYNAMIC_1934_TIMES=4.0
 # Whether to apply a flat amplitude cut
 FLAG_DO_FLAT_AMPLITUDE_1934=true
 # Flat amplitude threshold applied [hardware units - before calibration]
@@ -254,12 +262,16 @@ NUM_CHAN_TO_AVERAGE=54
 
 # Whether to do dynamic flagging
 FLAG_DO_DYNAMIC_AMPLITUDE_SCIENCE=true
-# Dynamic threshold applied to amplitudes [sigma]
+# Dynamic threshold applied to amplitudes  [sigma]
 FLAG_THRESHOLD_DYNAMIC_SCIENCE=4.0
 # Whether to apply a dynamic threshold to integrated spectra
 FLAG_DYNAMIC_INTEGRATE_SPECTRA=false
+# Dynamic threshold applied to amplitudes in integrated spectra mode  [sigma]
+FLAG_THRESHOLD_DYNAMIC_SCIENCE_SPECTRA=4.0
 # Whether to apply a dynamic threshold to integrated times
 FLAG_DYNAMIC_INTEGRATE_TIMES=true
+# Dynamic threshold applied to amplitudes in integrated times mode [sigma]
+FLAG_THRESHOLD_DYNAMIC_SCIENCE_TIMES=4.0
 # Whether to apply a flat amplitude cut
 FLAG_DO_FLAT_AMPLITUDE_SCIENCE=true
 # Flat amplitude threshold applied [calibrated flux units]
@@ -277,12 +289,14 @@ FLAG_AFTER_AVERAGING=true
 FLAG_DO_DYNAMIC_AMPLITUDE_SCIENCE_AV=true
 # Dynamic threshold applied to amplitudes of averaged data [sigma]
 FLAG_THRESHOLD_DYNAMIC_SCIENCE_AV=4.0
-# Whether to apply a dynamic threshold to integrated spectra on
-# averaged data
+# Whether to apply a dynamic threshold to integrated spectra on averaged data
 FLAG_DYNAMIC_INTEGRATE_SPECTRA_AV=false
-# Whether to apply a dynamic threshold to integrated times on averaged
-# data 
+# Dynamic threshold applied to amplitudes in integrated spectra mode  [sigma]
+FLAG_THRESHOLD_DYNAMIC_SCIENCE_SPECTRA_AV=4.0
+# Whether to apply a dynamic threshold to integrated times on averaged data 
 FLAG_DYNAMIC_INTEGRATE_TIMES_AV=true
+# Dynamic threshold applied to amplitudes in integrated times mode [sigma]
+FLAG_THRESHOLD_DYNAMIC_SCIENCE_TIMES=4.0
 # Whether to apply a flat amplitude cut to the averaged data
 FLAG_DO_FLAT_AMPLITUDE_SCIENCE_AV=true
 # Flat amplitude threshold applied to the averaged data [calibrated flux units]
