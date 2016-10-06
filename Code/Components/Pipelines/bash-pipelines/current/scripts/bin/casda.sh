@@ -36,16 +36,15 @@ if [ $DO_STAGE_FOR_CASDA == true ]; then
         sbids="# No other sbids provided."
     fi
 
-    # Make the directory - will only do anything if it is a new local one
-    mkdir -p $CASDA_OUTPUT_DIR
-    if [ ! -w ${CASDA_OUTPUT_DIR} ]; then
+    # If we can't create the output directory
+    if [ ! -w ${CASDA_OUTPUT_DIR%/*} ]; then
         # can't write to the destination - make a new one locally.
-        echo "WARNING - desired CASDA output directory ${CASDA_OUTPUT_DIR} is not writeable."
+        echo "WARNING - desired location for the CASDA output directory ${CASDA_OUTPUT_DIR} 
+is not writeable."
         echo "        - changing output directory to ${OUTPUT}/For-CASDA"
         CASDA_OUTPUT_DIR="${OUTPUT}/For-CASDA"
-        mkdir -p $CASDA_OUTPUT_DIR
     fi
-    
+
     sbatchfile=$slurms/casda_upload.sbatch
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l

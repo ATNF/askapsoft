@@ -136,6 +136,7 @@ int CasdaUploadApp::run(int argc, char* argv[])
     if (!exists(outdir)) {
         ASKAPTHROW(AskapError, "Failed to create directory " << outdir);
     }
+    permissions(outdir, boost::filesystem::add_perms | boost::filesystem::group_write);
     const fs::path metadataFile = outdir / "observation.xml";
     generateMetadataFile(metadataFile, identity, obs, images, catalogues, ms, reports);
     CasdaFileUtils::checksumFile(metadataFile);
