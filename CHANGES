@@ -27,6 +27,7 @@ This release sees a number of bugs fixes and improvements.
     calibrator.
   - When uploading to CASDA and upon successful ingest into CASDA, the
     SB state can be transitioned through the state model.
+  - Initial support for the new imager.
   
 Bug fixes:
  * Pipelines:
@@ -46,7 +47,9 @@ Bug fixes:
    correctly when a subsection was given to Selavy. These calculations
    have also been improved slightly to better handle the spectral
    increments.
- * Fixes to new imager @Steve@
+ * Minor-fixes to new imager to deal with brittle logic in the channel
+   allocations in spectral line mode. My fix for this essentially gives 
+   all the workers the same info as the master.
  
 
 0.14.0-p2 (25 September 2016)
