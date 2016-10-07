@@ -28,6 +28,8 @@ This release sees a number of bugs fixes and improvements.
   - When uploading to CASDA and upon successful ingest into CASDA, the
     SB state can be transitioned through the state model.
   - Initial support for the new imager.
+* Modified CBPCALIBRATOR to reference the XX and the YY visibilities 
+  independently to the XX and YY of the reference antenna. 
   
 Bug fixes:
  * Pipelines:
