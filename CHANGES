@@ -30,6 +30,8 @@ This release sees a number of bugs fixes and improvements.
   - Initial support for the new imager.
 * Modified CBPCALIBRATOR to reference the XX and the YY visibilities 
   independently to the XX and YY of the reference antenna. 
+* Added ability to playback in any number of loops in Correlator
+  and TOS Simulators.
   
 Bug fixes:
  * Pipelines:

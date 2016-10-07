@@ -115,7 +115,7 @@ correlator.modes = [standard]
 #
 # Task List
 #
-tasks.tasklist                          = [MergedSource, CalcUVWTask, Monitor, MSSink]
+tasks.tasklist = [MergedSource, CalcUVWTask, Monitor, MSSink]
 
 #
 # MergedSource
@@ -188,4 +188,5 @@ monitoring.adaptername = IngestPipelineMonitoringAdapter
 #
 # Merge
 tasks.Merge.type                     = ChannelMergeTask
-tasks.Merge.params.ranks2merge       = 12
+tasks.Merge.params.ranks2merge = 12
+
