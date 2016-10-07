@@ -42,6 +42,9 @@
 #include <unistd.h>
 #include <mpi.h>
 
+// 3rd party includes
+#include "log4cxx/logmanager.h"
+
 // ASKAPsoft includes
 #include "askap/AskapLogging.h"
 #include "askap/AskapError.h"
@@ -153,11 +156,11 @@ int ParallelCPApplication::run(int argc, char* argv[])
        run();
 
    } catch (const askap::AskapError& e) {
-       ASKAPLOG_ERROR_STR(logger, "Askap error in " << argv[0] << ": " << e.what());
+       ASKAPLOG_FATAL_STR(logger, "Askap error in " << argv[0] << ": " << e.what());
        std::cerr << "Askap error in " << argv[0] << ": " << e.what() << std::endl;
        error = 1;
    } catch (const std::exception& e) {
-       ASKAPLOG_ERROR_STR(logger, "Unexpected exception in " << argv[0] << ": " << e.what());
+       ASKAPLOG_FATAL_STR(logger, "Unexpected exception in " << argv[0] << ": " << e.what());
        std::cerr << "Unexpected exception in " << argv[0] << ": " << e.what()
             << std::endl;
        error = 1;
@@ -165,6 +168,8 @@ int ParallelCPApplication::run(int argc, char* argv[])
 
    if (!itsStandAlone) {
        if (error) {
+           // shutting down logging explicitly as MPI_Abort would terminate the application ungracefully
+           log4cxx::LogManager::shutdown();
            MPI_Abort(MPI_COMM_WORLD, error);
        } else {
            MPI_Finalize();
