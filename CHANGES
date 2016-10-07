@@ -7,7 +7,11 @@ This release sees a number of bugs fixes and improvements.
   read operations from the source measurement set when possible.
 * To be consistent with changes made to Cimager (ASKAPSDP-1607), 
   Simager has been changed to only access cross-correlations.
-* Parallel linmos @Steve@
+* Parallel linmos - a new application linmos-mpi with the same 
+  interface as linmos has been added. This will distribute the channels
+  of the cube between mpi ranks and process them separately. Writing each
+  channel to the output cube individually. This should allow a full 
+  resolution cube to be mosaicked.
 * Improved Selavy HI emission catalogue, with a more complete set of
   parameters available. This is now turned on by an input parameter
   Selavy.HiEmissionCatalogue. 
