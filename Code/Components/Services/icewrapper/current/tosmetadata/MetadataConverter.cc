@@ -74,7 +74,7 @@ askap::cp::TosMetadata MetadataConverter::convert(const askap::interfaces::TimeT
     dest.flagged(srcMapper.getBool("flagged"));
 
     // Centre frequency
-    const float centreFreqInMHz = srcMapper.getFloat("sky_frequency");
+    const double centreFreqInMHz = srcMapper.getDouble("sky_frequency");
     dest.centreFreq(casa::Quantity(centreFreqInMHz, "MHz"));
 
     // Target name
@@ -117,7 +117,7 @@ askap::interfaces::TimeTaggedTypedValueMap MetadataConverter::convert(const aska
     destMapper.setBool("flagged", source.flagged());
 
     // Centre frequency
-    destMapper.setFloat("sky_frequency", static_cast<float>(source.centreFreq().getValue("MHz")));
+    destMapper.setDouble("sky_frequency", source.centreFreq().getValue("MHz"));
 
     // Target name
     destMapper.setString("target_name", source.targetName());
@@ -170,7 +170,7 @@ void MetadataConverter::convertAntenna(const std::string& name,
             antenna.actualAzEl());
 
     // <antenna name>.actual_pol
-    destMapper.setFloat(makeMapKey(antennaName, "actual_pol"),
+    destMapper.setDouble(makeMapKey(antennaName, "actual_pol"),
             antenna.actualPolAngle().getValue("deg"));
 
     // <antenna name>.on_source
@@ -208,7 +208,7 @@ void MetadataConverter::convertAntenna(const std::string& antennaName,
         ant.actualAzEl(srcMapper.getDirection(makeMapKey(antennaName,
                         "actual_azel")));
         // actual_pol
-        ant.actualPolAngle(Quantity(srcMapper.getFloat(makeMapKey(antennaName,
+        ant.actualPolAngle(Quantity(srcMapper.getDouble(makeMapKey(antennaName,
                         "actual_pol")), "deg"));
         // on_source
         ant.onSource(srcMapper.getBool(makeMapKey(antennaName,
