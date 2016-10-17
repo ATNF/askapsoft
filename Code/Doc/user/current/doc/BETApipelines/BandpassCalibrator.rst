@@ -107,7 +107,7 @@ beams are split and flagged.
 +-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
 | ``NCYCLES_BANDPASS_CAL``                | 25                                    | ncycles (:doc:`../calim/cbpcalibrator`)                | Number of cycles used in cbpcalibrator.                   |
 +-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
-| ``NUM_CPUS_CBPCAL``                     | 400                                   | none                                                   | The number of cpus allocated to the cbpcalibrator job. The|
+| ``NUM_CPUS_CBPCAL``                     | 100                                   | none                                                   | The number of cpus allocated to the cbpcalibrator job. The|
 |                                         |                                       |                                                        | job will use all 20 cpus on each node (the memory         |
 |                                         |                                       |                                                        | footprint is small enough to allow this).                 |
 +-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+

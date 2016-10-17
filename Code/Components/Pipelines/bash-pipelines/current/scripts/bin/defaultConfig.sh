@@ -205,8 +205,8 @@ DIRECTION_1934="[19h39m25.036, -63.42.45.63, J2000]"
 TABLE_BANDPASS=calparameters_1934_bp.tab
 # Number of cycles used in cbpcalibrator
 NCYCLES_BANDPASS_CAL=25
-# Number of CPUs used for the cbpcalibrator job
-NUM_CPUS_CBPCAL=400
+# Number of CPUs (cores) used for the cbpcalibrator job
+NUM_CPUS_CBPCAL=100
 # Value for the calibrate.scalenoise parameter for applying the
 # bandpass solution
 BANDPASS_SCALENOISE=false
