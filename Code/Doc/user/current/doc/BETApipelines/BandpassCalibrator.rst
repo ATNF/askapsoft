@@ -64,7 +64,7 @@ beams are split and flagged.
 | ``FLAG_THRESHOLD_DYNAMIC_1934_SPECTRA`` |  4.0                                  | amplitude_flagger.integrateSpectra.threshold           | Dynamic threshold applied to amplitudes when flagging 1934|
 |                                         |                                       | (:doc:`../calim/cflag`)                                | data in integrateSpectra mode [sigma]                     |
 +-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
-|  ``FLAG_DYNAMIC_1934_INTEGRATE_TIMES``  | true                                  | amplitude_flagger.integrateTimes                       | Whether to integrate across spectra and flag time samples |
+|  ``FLAG_DYNAMIC_1934_INTEGRATE_TIMES``  | false                                 | amplitude_flagger.integrateTimes                       | Whether to integrate across spectra and flag time samples |
 |                                         |                                       | (:doc:`../calim/cflag`)                                | during the dynamic flagging task.                         |
 +-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
 |  ``FLAG_THRESHOLD_DYNAMIC_1934_TIMES``  |  4.0                                  | amplitude_flagger.integrateTimes.threshold             | Dynamic threshold applied to amplitudes when flagging 1934|

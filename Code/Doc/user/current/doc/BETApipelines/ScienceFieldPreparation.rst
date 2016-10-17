@@ -94,13 +94,13 @@ is possible, however, to select a single field to process via the
 | ``FLAG_THRESHOLD_DYNAMIC_SCIENCE``            | 4.0                             | amplitude_flagger.threshold                     | Dynamic threshold applied to amplitudes when flagging science field   |
 |                                               |                                 | (:doc:`../calim/cflag`)                         | data [sigma]                                                          |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
-| ``FLAG_DYNAMIC_INTEGRATE_SPECTRA``            | false                           | amplitude_flagger.integrateSpectra              | Whether to integrate the spectra in time and flag channels during the |
+| ``FLAG_DYNAMIC_INTEGRATE_SPECTRA``            | true                            | amplitude_flagger.integrateSpectra              | Whether to integrate the spectra in time and flag channels during the |
 |                                               |                                 | (:doc:`../calim/cflag`)                         | dynamic flagging task.                                                |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 |  ``FLAG_THRESHOLD_DYNAMIC_SCIENCE_SPECTRA``   | 4.0                             | amplitude_flagger.integrateSpectra.threshold    | Dynamic threshold applied to amplitudes when flagging science field   |
 |                                               |                                 | (:doc:`../calim/cflag`)                         | data in integrateSpectra mode [sigma]                                 |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
-| ``FLAG_DYNAMIC_INTEGRATE_TIMES``              | true                            | amplitude_flagger.integrateTimes                | Whether to integrate across spectra and flag time samples during the  |
+| ``FLAG_DYNAMIC_INTEGRATE_TIMES``              | false                           | amplitude_flagger.integrateTimes                | Whether to integrate across spectra and flag time samples during the  |
 |                                               |                                 | (:doc:`../calim/cflag`)                         | dynamic flagging task.                                                |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 |   ``FLAG_THRESHOLD_DYNAMIC_SCIENCE_TIMES``    | 4.0                             | amplitude_flagger.integrateTimes.threshold      | Dynamic threshold applied to amplitudes when flagging science field   |
@@ -137,13 +137,13 @@ is possible, however, to select a single field to process via the
 | ``FLAG_THRESHOLD_DYNAMIC_SCIENCE_AV``         | 4.0                             | amplitude_flagger.threshold                     | Dynamic threshold applied to amplitudes when flagging the averaged    |
 |                                               |                                 | (:doc:`../calim/cflag`)                         | science field data [sigma]                                            |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
-| ``FLAG_DYNAMIC_INTEGRATE_SPECTRA_AV``         | false                           | amplitude_flagger.integrateSpectra              | Whether to integrate the spectra in time and flag channels during the |
+| ``FLAG_DYNAMIC_INTEGRATE_SPECTRA_AV``         | true                            | amplitude_flagger.integrateSpectra              | Whether to integrate the spectra in time and flag channels during the |
 |                                               |                                 | (:doc:`../calim/cflag`)                         | dynamic flagging task.                                                |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 | ``FLAG_THRESHOLD_DYNAMIC_SCIENCE_SPECTRA_AV`` | 4.0                             | amplitude_flagger.integrateSpectra.threshold    | Dynamic threshold applied to amplitudes when flagging the averaged    |
 |                                               |                                 | (:doc:`../calim/cflag`)                         | science field data in integrateSpectra mode [sigma]                   |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
-| ``FLAG_DYNAMIC_INTEGRATE_TIMES_AV``           | true                            | amplitude_flagger.integrateTimes                | Whether to integrate across spectra and flag time samples during the  |
+| ``FLAG_DYNAMIC_INTEGRATE_TIMES_AV``           | false                           | amplitude_flagger.integrateTimes                | Whether to integrate across spectra and flag time samples during the  |
 |                                               |                                 | (:doc:`../calim/cflag`)                         | dynamic flagging task.                                                |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 |  ``FLAG_THRESHOLD_DYNAMIC_SCIENCE_TIMES_AV``  | 4.0                             | amplitude_flagger.integrateTimes.threshold      | Dynamic threshold applied to amplitudes when flagging the averaged    |
