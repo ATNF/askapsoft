@@ -74,6 +74,8 @@ for FIELD in ${FIELD_LIST}; do
             mkdir -p ${OUTPUT}/Checkfiles
             # an empty file that will indicate that the flagging has been done
             FLAG_CHECK_FILE="${OUTPUT}/Checkfiles/FLAGGING_DONE_BEAM${BEAM}"
+            # the same, but for the averaged dataset
+            FLAG_AV_CHECK_FILE="${OUTPUT}/Checkfiles/FLAGGING_AVERAGED_DATA_DONE_BEAM${BEAM}"
             # an empty file that will indicate that the bandpass has been done
             BANDPASS_CHECK_FILE="${OUTPUT}/Checkfiles/BANDPASS_APPLIED_BEAM${BEAM}"
             # an empty file that will indicate the gains have been applied to

@@ -34,9 +34,9 @@ ID_FLAG_SCI_AV=""
 
 DO_IT=$DO_FLAG_SCIENCE
 
-if [ -e $FLAG_CHECK_FILE ]; then
+if [ -e $FLAG_AV_CHECK_FILE ]; then
     if [ $DO_IT == true ]; then
-        echo "Flagging for beam $BEAM of science observation has already been done - not re-doing."
+        echo "Flagging of averaged data for beam $BEAM of science observation has already been done - not re-doing."
     fi
     DO_IT=false
 fi
@@ -114,7 +114,7 @@ EOFINNER
     if [ \$err != 0 ]; then
         exit \$err
     else
-        touch $FLAG_CHECK_FILE
+        touch $FLAG_AV_CHECK_FILE
     fi
 fi
 
@@ -151,7 +151,7 @@ EOFINNER
     if [ \$err != 0 ]; then
         exit \$err
     else
-        touch $FLAG_CHECK_FILE
+        touch $FLAG_AV_CHECK_FILE
     fi
     
 fi
