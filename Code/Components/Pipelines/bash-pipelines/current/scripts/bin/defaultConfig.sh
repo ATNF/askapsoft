@@ -224,7 +224,7 @@ FLAG_DYNAMIC_1934_INTEGRATE_TIMES=false
 # Dynamic threshold applied to amplitudes in integrated times mode [sigma]
 FLAG_THRESHOLD_DYNAMIC_1934_TIMES=4.0
 # Whether to apply a flat amplitude cut
-FLAG_DO_FLAT_AMPLITUDE_1934=true
+FLAG_DO_FLAT_AMPLITUDE_1934=false
 # Flat amplitude threshold applied [hardware units - before calibration]
 FLAG_THRESHOLD_AMPLITUDE_1934=0.2
 # Minimum amplitude threshold applied [hardware units - before calibration]
@@ -273,7 +273,7 @@ FLAG_DYNAMIC_INTEGRATE_TIMES=false
 # Dynamic threshold applied to amplitudes in integrated times mode [sigma]
 FLAG_THRESHOLD_DYNAMIC_SCIENCE_TIMES=4.0
 # Whether to apply a flat amplitude cut
-FLAG_DO_FLAT_AMPLITUDE_SCIENCE=true
+FLAG_DO_FLAT_AMPLITUDE_SCIENCE=false
 # Flat amplitude threshold applied [calibrated flux units]
 FLAG_THRESHOLD_AMPLITUDE_SCIENCE=10.
 # Minimum amplitude threshold applied [calibrated flux units]
@@ -298,7 +298,7 @@ FLAG_DYNAMIC_INTEGRATE_TIMES_AV=false
 # Dynamic threshold applied to amplitudes in integrated times mode [sigma]
 FLAG_THRESHOLD_DYNAMIC_SCIENCE_TIMES=4.0
 # Whether to apply a flat amplitude cut to the averaged data
-FLAG_DO_FLAT_AMPLITUDE_SCIENCE_AV=true
+FLAG_DO_FLAT_AMPLITUDE_SCIENCE_AV=false
 # Flat amplitude threshold applied to the averaged data [calibrated flux units]
 FLAG_THRESHOLD_AMPLITUDE_SCIENCE_AV=10.
 # Minimum amplitude threshold applied to the averaged data [calibrated flux units]

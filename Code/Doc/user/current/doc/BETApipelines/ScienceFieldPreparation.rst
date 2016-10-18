@@ -12,7 +12,7 @@ NAME in the MS).
 
 As for the bandpass calibrator, the MS is then flagged in two
 passes. First, a combination of selection rules (allowing flagging of
-antennas & baselines, and autocorrelations) and a simple flat
+antennas & baselines, and autocorrelations) and (optionally) a simple flat
 amplitude threshold are applied. Then dynamic flagging of amplitudes
 is done, optionally integrating over or across individual
 spectra. Each of these steps is selectable via input parameters.
@@ -106,7 +106,7 @@ is possible, however, to select a single field to process via the
 |   ``FLAG_THRESHOLD_DYNAMIC_SCIENCE_TIMES``    | 4.0                             | amplitude_flagger.integrateTimes.threshold      | Dynamic threshold applied to amplitudes when flagging science field   |
 |                                               |                                 | (:doc:`../calim/cflag`)                         | data in integrateTimes mode [sigma]                                   |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
-| ``FLAG_DO_FLAT_AMPLITUDE_SCIENCE``            | true                            | none                                            | Whether to apply a flag amplitude flux threshold to the data.         |
+| ``FLAG_DO_FLAT_AMPLITUDE_SCIENCE``            | false                           | none                                            | Whether to apply a flag amplitude flux threshold to the data.         |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 |     ``FLAG_THRESHOLD_AMPLITUDE_SCIENCE``      | 0.2                             | amplitude_flagger.high (:doc:`../calim/cflag`)  | Simple amplitude threshold applied when flagging science field data.  |
 |                                               |                                 |                                                 | If set to blank (``FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW=""``),        |
@@ -149,7 +149,7 @@ is possible, however, to select a single field to process via the
 |  ``FLAG_THRESHOLD_DYNAMIC_SCIENCE_TIMES_AV``  | 4.0                             | amplitude_flagger.integrateTimes.threshold      | Dynamic threshold applied to amplitudes when flagging the averaged    |
 |                                               |                                 | (:doc:`../calim/cflag`)                         | science field data in integrateTimes mode [sigma]                     |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
-| ``FLAG_DO_FLAT_AMPLITUDE_SCIENCE_AV``         | true                            | none                                            | Whether to apply a flag amplitude flux threshold to the averaged      |
+| ``FLAG_DO_FLAT_AMPLITUDE_SCIENCE_AV``         | false                           | none                                            | Whether to apply a flag amplitude flux threshold to the averaged      |
 |                                               |                                 |                                                 | science data.                                                         |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 |    ``FLAG_THRESHOLD_AMPLITUDE_SCIENCE_AV``    | 0.2                             | amplitude_flagger.high (:doc:`../calim/cflag`)  | Simple amplitude threshold applied when flagging the averaged science |

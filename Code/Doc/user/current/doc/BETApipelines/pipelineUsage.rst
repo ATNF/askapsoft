@@ -190,7 +190,7 @@ Here is a summary of the workflow provided for by these scripts:
   at it in order (so that beam 0 was pointing at in in scan 0, etc)
 * These are flagged using **cflag** (:doc:`../calim/cflag`) in two
   passes: first, selection rules covering antennas, baselines and
-  autocorrelations are applied, along with a simple flat amplitude
+  autocorrelations are applied, along with an optional simple flat amplitude
   threshold; then a dynamic amplitude flag that integrates
   individual spectra.
 * The bandpass solution is then determined with **cbpcalibrator**
@@ -205,8 +205,8 @@ Here is a summary of the workflow provided for by these scripts:
 * The bandpass solution is then applied to each beam MS with
   **ccalapply** (:doc:`../calim/ccalapply`).
 * Flagging is then applied to the bandpass-calibrated dataset. The
-  same procedure as for the calibrator is used, although there is more
-  control over integrating the spectra.
+  same procedure as for the calibrator is used, with separate user
+  parameters to control it.
 * The science field data are then averaged with **mssplit** to form
   continuum data sets. (Still one per beam).
 * Another round of flagging can be done, this time on the averaged

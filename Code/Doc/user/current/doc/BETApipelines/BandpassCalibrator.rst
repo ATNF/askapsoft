@@ -14,7 +14,7 @@ for. This is due to the particular requirements of
 
 The MS is flagged in two passes. First, a combination of
 selection rules (allowing flagging of antennas & baselines, and
-autocorrelations) and a simple flat amplitude threshold are
+autocorrelations) and (optionally) a simple flat amplitude threshold are
 applied. Then dynamic flagging of amplitudes is done, integrating over
 individual spectra. Each of these steps is selectable via input
 parameters. 
@@ -70,7 +70,7 @@ beams are split and flagged.
 |  ``FLAG_THRESHOLD_DYNAMIC_1934_TIMES``  |  4.0                                  | amplitude_flagger.integrateTimes.threshold             | Dynamic threshold applied to amplitudes when flagging 1934|
 |                                         |                                       | (:doc:`../calim/cflag`)                                | data in integrateTimes mode [sigma]                       |
 +-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
-| ``FLAG_DO_FLAT_AMPLITUDE_1934``         | true                                  | none                                                   | Whether to apply a simple ("flat") amplitude threshold to |
+| ``FLAG_DO_FLAT_AMPLITUDE_1934``         | false                                 | none                                                   | Whether to apply a simple ("flat") amplitude threshold to |
 |                                         |                                       |                                                        | the 1934 data.                                            |
 +-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
 |    ``FLAG_THRESHOLD_AMPLITUDE_1934``    | 0.2                                   | amplitude_flagger.high (:doc:`../calim/cflag`)         | Simple amplitude threshold applied when flagging 1934     |
