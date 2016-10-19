@@ -1,3 +1,24 @@
+0.15.1 (19 October 2016)
+------------------------
+
+This is a patch release that fixes a couple of issues:
+
+ * The bandpass calibrator cbpcalibrator has had its run-time improved
+   by changing the way the calibration table is written. It is now
+   written in one pass at the completion of the task - this reduces
+   the I/O overhead and greatly reduces the run-time for larger
+   datasets.
+ * The pipeline settings for the flagging have been changed. The
+   default settings now are to have the integrate_spectra option
+   switched on, and the integrate_times and flat amplitude options
+   switched off. This is the same approach as used in 0.14.0-p2 and
+   earlier, and so should avoid the case of most of the dataset being
+   flagged (as was seen with ADE data using the default settings in
+   0.15.0).
+ * The flagging step for the average dataset now uses a different
+   check-file to the full-size dataset flagging.
+
+
 0.15.0 (10 October 2016)
 ------------------------
 This release sees a number of bugs fixes and improvements.
