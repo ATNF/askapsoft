@@ -261,14 +261,6 @@ module load askapdata"
     done
     maxbeam=`expr $maxbeam + 1`
 
-    # Turn off mosaicking if there is just a single beam
-    if [ $nbeams -eq 1 ]; then
-        if [ $DO_MOSAIC == true ]; then
-	    echo "Only have a single beam to process, so setting DO_MOSAIC=false"
-        fi
-        DO_MOSAIC=false
-    fi
-
     
     ####################
     # Parameters required for continuum imaging
