@@ -14,6 +14,13 @@ the configuration parameters described in the next section. ::
 
 The *linmos* program is not parallel/distributed.
 
+Parallel linmos (*linmos-mpi*)
+------------------------------
+
+There is a parallel version of *linmos* which will divide the mosaic over the number of 
+ranks. This improves the run time markedly as the I/O is distributed. Furthermore this also
+reduces the memory load.
+
 Configuration Parameters
 ------------------------
 
