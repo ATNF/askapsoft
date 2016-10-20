@@ -643,3 +643,5 @@ CASDA_UPLOAD_DIR=/scratch2/casda/prd
 POLLING_DELAY_SEC=1800
 # Maximum time we wait to check for DONE file
 MAX_POLL_WAIT_TIME=172800
+# JIRA issue to which SB annotations should be sent
+SB_JIRA_ISSUE="ASKAPSUP-345"
