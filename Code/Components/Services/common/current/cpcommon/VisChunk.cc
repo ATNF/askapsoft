@@ -77,8 +77,30 @@ VisChunk::VisChunk(const casa::uInt nRow,
 {
 }
 
-VisChunk::~VisChunk()
+/// @brief copy constructor
+/// @details
+/// @param[in] src instance to copy from
+VisChunk::VisChunk(const VisChunk &src) : itsNumberOfRows(src.itsNumberOfRows), 
+    itsNumberOfChannels(src.itsNumberOfChannels), itsNumberOfPolarisations(src.itsNumberOfPolarisations),
+    itsNumberOfAntennas(src.itsNumberOfAntennas), itsTime(src.itsTime), itsTargetName(src.itsTargetName),
+    itsInterval(src.itsInterval), itsScan(src.itsScan), itsAntenna1(src.itsAntenna1.copy()), 
+    itsAntenna2(src.itsAntenna2.copy()), itsBeam1(src.itsBeam1.copy()), itsBeam2(src.itsBeam2.copy()),
+    itsBeam1PA(src.itsBeam1PA.copy()), itsBeam2PA(src.itsBeam2PA.copy()), itsPhaseCentre(src.itsPhaseCentre.copy()),
+    itsTargetPointingCentre(src.itsTargetPointingCentre.copy()), itsActualPolAngle(src.itsActualPolAngle.copy()),
+    itsActualAzimuth(src.itsActualAzimuth.copy()), itsActualElevation(src.itsActualElevation.copy()), 
+    itsOnSourceFlag(src.itsOnSourceFlag.copy()), itsVisibility(src.itsVisibility.copy()), itsFlag(src.itsFlag.copy()),
+    itsUVW(src.itsUVW.copy()), itsFrequency(src.itsFrequency.copy()), itsChannelWidth(src.itsChannelWidth), 
+    itsStokes(src.itsStokes.copy()), itsDirectionFrame(src.itsDirectionFrame)
 {
+}
+
+/// @brief assignment operator
+/// @details It is not supposed to be used, but added to avoid creation of
+/// implicit operator by the compiler.
+const VisChunk& VisChunk::operator=(const VisChunk &)
+{
+   ASKAPTHROW(AskapError, "Assignment operator is not supposed to be used for VisChunk!");
+   return *this;
 }
 
 casa::uInt VisChunk::nRow() const

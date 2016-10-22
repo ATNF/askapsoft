@@ -51,6 +51,7 @@ class VisChunkTest : public CppUnit::TestFixture {
         CPPUNIT_TEST(testResizeChans);
         CPPUNIT_TEST(testResizeRows);
         CPPUNIT_TEST(testResizePols);
+        CPPUNIT_TEST(testCopy);
         //CPPUNIT_TEST(testSerialize);
         CPPUNIT_TEST_SUITE_END();
 
@@ -140,6 +141,76 @@ class VisChunkTest : public CppUnit::TestFixture {
                     static_cast<unsigned int>(chunk->frequency().size()));
         }
 
+        void testCopy() {
+            // setup some data
+            VisChunk source(nRows, nChans, nPols, nAnt);
+            source.flag().set(true);
+            source.visibility().set(casa::Complex(2.048, -1.11)); 
+            const casa::MVEpoch epoch(55902., 0.13);
+            source.time()=epoch;
+            source.targetName() = "Virgo";
+            source.interval() = 5.;
+            source.scan() = 1u;
+            source.antenna1().set(3u);
+            source.antenna2().set(4u);
+            source.beam1().set(5u);
+            source.beam2().set(6u);
+            source.beam1PA().set(1.0);
+            source.beam2PA().set(2.0);
+            const casa::MVDirection dir(0.35, -0.85);
+            source.phaseCentre().set(dir);
+
+            // make a copy
+            VisChunk target(source);
+
+            // corrupt the original container to test whether reference semantics has been
+            // dealt with properly
+            source.flag().set(false);
+            source.visibility().set(casa::Complex(0.,0)); 
+            source.time()=casa::MVEpoch(0., 0.);
+            source.targetName() = "Junk";
+            source.interval() = 10.;
+            source.scan() = 0u;
+            source.antenna1().set(0u);
+            source.antenna2().set(0u);
+            source.beam1().set(0u);
+            source.beam2().set(0u);
+            source.beam1PA().set(0.0);
+            source.beam2PA().set(0.0);
+            source.phaseCentre().set(casa::MVDirection(0.,0.));
+            
+            // test the result
+           
+            CPPUNIT_ASSERT_EQUAL(nRows, target.nRow());
+            CPPUNIT_ASSERT_EQUAL(nChans, target.nChannel());
+            CPPUNIT_ASSERT_EQUAL(nPols, target.nPol());
+            CPPUNIT_ASSERT_EQUAL(nAnt, target.nAntenna());
+
+            // Verify sizes for visibility cube
+            CPPUNIT_ASSERT_EQUAL(nRows, static_cast<unsigned int>(target.visibility().nrow()));
+            CPPUNIT_ASSERT_EQUAL(nChans, static_cast<unsigned int>(target.visibility().ncolumn()));
+            CPPUNIT_ASSERT_EQUAL(nPols, static_cast<unsigned int>(target.visibility().nplane()));
+
+            // Verify sizes flag cube
+            CPPUNIT_ASSERT_EQUAL(nRows, static_cast<unsigned int>(target.flag().nrow()));
+            CPPUNIT_ASSERT_EQUAL(nChans, static_cast<unsigned int>(target.flag().ncolumn()));
+            CPPUNIT_ASSERT_EQUAL(nPols, static_cast<unsigned int>(target.flag().nplane()));
+
+            checkCube(target.flag(), true);
+            checkCube(target.visibility(), casa::Complex(2.048, -1.11));
+            CPPUNIT_ASSERT(epoch.near(target.time()));
+            CPPUNIT_ASSERT(target.targetName() == "Virgo");
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(5., target.interval(), 1e-6);
+            CPPUNIT_ASSERT_EQUAL(1u, target.scan());
+            checkVector(target.antenna1(), 3u);
+            checkVector(target.antenna2(), 4u);
+            checkVector(target.beam1(), 5u);
+            checkVector(target.beam2(), 6u);
+            checkVector(target.beam1PA(), float(1.0));
+            checkVector(target.beam2PA(), float(2.0));
+            checkVector(target.phaseCentre(), dir);
+        }
+
         
         /*
         // MV: commented out. It looks like the appropriate serialization operations
@@ -190,21 +261,62 @@ class VisChunkTest : public CppUnit::TestFixture {
         //
 
         // This is the size of a BETA VisChunk, 21 baselines (including
-        // auto correlations) * 36 beams (maximum number of beams)
-        static const unsigned int nRows = 21 * 36;
+        // auto correlations) * 9 beams (maximum number of beams)
+        static const unsigned int nRows = 21 * 9;
 
-        // 304 coarse channels with 54 fine channels per coarse
-        static const unsigned int nChans = 54 * 304;
+        static const unsigned int nChans = 216;
 
         // Polarisations
         static const unsigned int nPols = 4;
 
         // number of antennas
-        static const unsigned int nAnt = 12;
+        static const unsigned int nAnt = 6;
 
         // Expand size. Size of increment for Blob BufVector storage.
         // Too small and there is lots of overhead in expanding the vector.
         static const unsigned int expandSize = 4 * 1024 * 1024;
+private:
+        template<typename T>
+        static void checkVal(const T& val1, const T& val2) {
+            CPPUNIT_ASSERT_EQUAL(val2, val1);
+        }
+
+        static void checkVal(const double& val1, const double& val2) {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(val2, val1, 1e-6);
+        }
+
+        static void checkVal(const float& val1, const float& val2) {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(val2, val1, 1e-6);
+        }
+
+        static void checkVal(const casa::Complex& val1, const casa::Complex& val2) {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(casa::real(val2), casa::real(val1), 1e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(casa::imag(val2), casa::imag(val1), 1e-6);
+        }
+
+        static void checkVal(const casa::MVDirection& val1, const casa::MVDirection& val2) {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(0., val1.separation(val2), 1e-6);
+        }
+
+        template<typename T>
+        static void checkCube(const casa::Cube<T> &in, const T& val) 
+        {
+           for (casa::uInt row = 0; row < in.nrow(); ++row) {
+                for (casa::uInt column = 0; column < in.ncolumn(); ++column) {
+                     for (casa::uInt plane = 0; plane < in.nplane(); ++plane) {
+                          checkVal(in(row, column, plane), val);
+                     }
+                }
+           }
+        }
+
+        template<typename T>
+        static void checkVector(const casa::Vector<T> &in, const T& val) 
+        {
+           for (casa::uInt row = 0; row < in.nelements(); ++row) {
+                checkVal(in[row], val);
+           }
+        }
 };
 
 const unsigned int VisChunkTest::nRows;

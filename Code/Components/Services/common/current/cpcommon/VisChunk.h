@@ -63,8 +63,17 @@ class VisChunk {
                  const casa::uInt nPol,
                  const casa::uInt nAntenna);
 
-        /// Destructor
-        ~VisChunk();
+        /// @brief copy constructor
+        /// @details
+        /// @param[in] src instance to copy from
+        VisChunk(const VisChunk &src);
+
+        /// @brief assignment operator
+        /// @details It is not supposed to be used, but added to avoid creation of
+        /// implicit operator by the compiler.
+        const VisChunk& operator=(const VisChunk &);
+ 
+
 
         /// The number of rows in this chunk
         /// @return the number of rows in this chunk
