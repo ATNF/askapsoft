@@ -1,4 +1,4 @@
-/// @file tingestpipeline.cc
+/// @file tcpcommon.cc
 ///
 /// @copyright (c) 2010 CSIRO
 /// Australia Telescope National Facility (ATNF)
@@ -32,6 +32,7 @@
 #include "TosMetadataAntennaTest.h"
 #include "VisDatagramTest.h"
 #include "CasaBlobUtilsTest.h"
+#include "VisChunkSerializeTest.h"
 
 int main(int argc, char *argv[])
 {
@@ -40,6 +41,7 @@ int main(int argc, char *argv[])
     runner.addTest(askap::cp::TosMetadataAntennaTest::suite());
     runner.addTest(askap::cp::VisDatagramTest::suite());
     runner.addTest(askap::cp::CasaBlobUtilsTest::suite());
+    runner.addTest(askap::cp::VisChunkSerializeTest::suite());
     bool wasSucessful = runner.run();
 
     return wasSucessful ? 0 : 1;
