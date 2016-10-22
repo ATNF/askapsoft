@@ -32,7 +32,7 @@
 #include "TosMetadataAntennaTest.h"
 #include "VisDatagramTest.h"
 #include "CasaBlobUtilsTest.h"
-#include "VisChunkSerializeTest.h"
+#include "VisChunkTest.h"
 
 int main(int argc, char *argv[])
 {
@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
     runner.addTest(askap::cp::TosMetadataAntennaTest::suite());
     runner.addTest(askap::cp::VisDatagramTest::suite());
     runner.addTest(askap::cp::CasaBlobUtilsTest::suite());
-    runner.addTest(askap::cp::VisChunkSerializeTest::suite());
+    runner.addTest(askap::cp::VisChunkTest::suite());
     bool wasSucessful = runner.run();
 
     return wasSucessful ? 0 : 1;

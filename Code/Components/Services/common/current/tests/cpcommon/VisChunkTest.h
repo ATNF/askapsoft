@@ -1,4 +1,4 @@
-/// @file VisChunkSerializeTest.cc
+/// @file VisChunkTest.cc
 ///
 /// @copyright (c) 2010 CSIRO
 /// Australia Telescope National Facility (ATNF)
@@ -45,8 +45,8 @@ using namespace casa;
 namespace askap {
 namespace cp {
 
-class VisChunkSerializeTest : public CppUnit::TestFixture {
-        CPPUNIT_TEST_SUITE(VisChunkSerializeTest);
+class VisChunkTest : public CppUnit::TestFixture {
+        CPPUNIT_TEST_SUITE(VisChunkTest);
         CPPUNIT_TEST(testConstructor);
         CPPUNIT_TEST(testResizeChans);
         CPPUNIT_TEST(testResizeRows);
@@ -207,10 +207,10 @@ class VisChunkSerializeTest : public CppUnit::TestFixture {
         static const unsigned int expandSize = 4 * 1024 * 1024;
 };
 
-const unsigned int VisChunkSerializeTest::nRows;
-const unsigned int VisChunkSerializeTest::nChans;
-const unsigned int VisChunkSerializeTest::nPols;
-const unsigned int VisChunkSerializeTest::nAnt;
+const unsigned int VisChunkTest::nRows;
+const unsigned int VisChunkTest::nChans;
+const unsigned int VisChunkTest::nPols;
+const unsigned int VisChunkTest::nAnt;
 
 }   // End namespace cp
 
