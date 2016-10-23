@@ -159,9 +159,29 @@ class VisChunkTest : public CppUnit::TestFixture {
             source.beam2PA().set(2.0);
             const casa::MVDirection dir(0.35, -0.85);
             source.phaseCentre().set(dir);
+            source.targetPointingCentre().set(casa::MDirection(dir,casa::MDirection::J2000));
+            const casa::MDirection dir1(casa::MVDirection(0.5, -0.7), casa::MDirection::J2000);
+            source.actualPointingCentre().set(dir1);
+            const casa::Quantity pa(92.668, "deg");
+            source.actualPolAngle().set(pa);
+            const casa::Quantity az(131.195, "deg");
+            source.actualAzimuth().set(az);
+            const casa::Quantity el(37.166, "deg");
+            source.actualElevation().set(el);
+            source.onSourceFlag().set(true);
+            const casa::RigidVector<casa::Double, 3> uvw(-102.345, 12.333, 1.002);
+            source.uvw().set(uvw);
+            const double freq = 939.5e6;
+            source.frequency().set(freq);
+            const double resolution = 1e6/54;
+            source.channelWidth() = resolution;
+            source.stokes().set(casa::Stokes::XX);
+            const casa::MDirection::Ref dirFrame(casa::MDirection::J2000);
+            source.directionFrame() = dirFrame;
+            
 
             // make a copy
-            VisChunk target(source);
+            const VisChunk target(source);
 
             // corrupt the original container to test whether reference semantics has been
             // dealt with properly
@@ -178,6 +198,18 @@ class VisChunkTest : public CppUnit::TestFixture {
             source.beam1PA().set(0.0);
             source.beam2PA().set(0.0);
             source.phaseCentre().set(casa::MVDirection(0.,0.));
+            source.targetPointingCentre().set(casa::MVDirection(0.,0.));
+            source.actualPointingCentre().set(casa::MVDirection(0.,0.));
+            source.actualPolAngle().set(az);
+            source.actualAzimuth().set(el);
+            source.actualElevation().set(pa);
+            source.onSourceFlag().set(false);
+            source.uvw().set(casa::RigidVector<casa::Double, 3>());
+            source.frequency().set(0.);
+            source.channelWidth() = 0.01;
+            source.stokes().set(casa::Stokes::RR);
+            source.directionFrame() = casa::MDirection::Ref(casa::MDirection::AZEL);
+
             
             // test the result
            
@@ -196,6 +228,21 @@ class VisChunkTest : public CppUnit::TestFixture {
             CPPUNIT_ASSERT_EQUAL(nChans, static_cast<unsigned int>(target.flag().ncolumn()));
             CPPUNIT_ASSERT_EQUAL(nPols, static_cast<unsigned int>(target.flag().nplane()));
 
+            // antenna-based parameters
+            CPPUNIT_ASSERT_EQUAL(nAnt, static_cast<unsigned int>(target.actualPointingCentre().nelements()));
+            CPPUNIT_ASSERT_EQUAL(nAnt, static_cast<unsigned int>(target.actualPolAngle().nelements()));
+            CPPUNIT_ASSERT_EQUAL(nAnt, static_cast<unsigned int>(target.actualAzimuth().nelements()));
+            CPPUNIT_ASSERT_EQUAL(nAnt, static_cast<unsigned int>(target.actualElevation().nelements()));
+            CPPUNIT_ASSERT_EQUAL(nAnt, static_cast<unsigned int>(target.onSourceFlag().nelements()));
+     
+            // size of the frequency vector
+            CPPUNIT_ASSERT_EQUAL(nChans, static_cast<unsigned int>(target.frequency().nelements()));
+
+            // size of the stokes vector
+            CPPUNIT_ASSERT_EQUAL(nPols, static_cast<unsigned int>(target.stokes().nelements()));
+            
+
+            // check content 
             checkCube(target.flag(), true);
             checkCube(target.visibility(), casa::Complex(2.048, -1.11));
             CPPUNIT_ASSERT(epoch.near(target.time()));
@@ -209,6 +256,16 @@ class VisChunkTest : public CppUnit::TestFixture {
             checkVector(target.beam1PA(), float(1.0));
             checkVector(target.beam2PA(), float(2.0));
             checkVector(target.phaseCentre(), dir);
+            checkVector(target.targetPointingCentre(), casa::MDirection(dir,casa::MDirection::J2000));
+            checkVector(target.actualPolAngle(), pa);
+            checkVector(target.actualAzimuth(), az);
+            checkVector(target.actualElevation(), el);
+            checkVector(target.onSourceFlag(), true);
+            checkVector(target.uvw(), uvw);
+            checkVector(target.frequency(), freq);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(resolution, target.channelWidth(), 1e-6);
+            checkVector(target.stokes(), casa::Stokes::XX);
+            CPPUNIT_ASSERT_EQUAL(dirFrame.getType(), target.directionFrame().getType());
         }
 
         
@@ -296,6 +353,26 @@ private:
 
         static void checkVal(const casa::MVDirection& val1, const casa::MVDirection& val2) {
             CPPUNIT_ASSERT_DOUBLES_EQUAL(0., val1.separation(val2), 1e-6);
+        }
+
+        static void checkVal(const casa::MDirection& val1, const casa::MDirection& val2) {
+            // we're only concerned with an exact match of two measures, don't need to cater
+            // for the case where two directions in different frames actually point to the same
+            // physical direction on the sky
+            CPPUNIT_ASSERT_EQUAL(val1.getRef().getType(), val2.getRef().getType());
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(0., val1.getValue().separation(val2.getValue()), 1e-6);
+        }
+
+        static void checkVal(const casa::Quantity& val1, const casa::Quantity& val2) {
+            CPPUNIT_ASSERT(val1.getFullUnit() == val2.getFullUnit());
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(val1.getValue(), val2.getValue(), 1e-6);
+        }
+
+        static void checkVal(const casa::RigidVector<casa::Double, 3> &val1,
+                             const casa::RigidVector<casa::Double, 3> &val2) {
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(val1(0), val2(0), 1e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(val1(1), val2(1), 1e-6);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(val1(2), val2(2), 1e-6);
         }
 
         template<typename T>
