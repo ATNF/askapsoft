@@ -100,11 +100,51 @@ class CircularBuffer {
             boost::shared_ptr<T> obj(itsBuffer[0]);
             itsBuffer.pop_front();
 
-            // No need to notify producer. The producer doesn't block because the
-            // buffer is a circular buffer.
+            // Notify any waiters
+            lock.unlock();
+            itsCondVar.notify_all();
 
             return obj;
         };
+
+        /// @brief add when there is free space in the buffer
+        /// @details Sometimes it is required to use the circular buffer as a
+        /// loss-less container, i.e. to delay adding new items if the container
+        /// is full. This method adds an item when there is space and waits otherwise.
+        /// @param[in]  obj a pointer to be added to the circular
+        ///                 buffer. The pointer is added to the "back"
+        ///                 of the buffer.
+        /// @param[in] timeout how long to wait for data before returning
+        ///         a null pointer, in the case where the
+        ///         buffer is empty. The timeout is in microseconds,
+        ///         and anything less than zero will result in no
+        ///         timeout (i.e. blocking functionality). A timeout of zero
+        ///         will result in a non-blocking call.
+        /// @return true, if addition is successful; return of false indicates the timeout.
+        bool addWhenThereIsSpace(const boost::shared_ptr<T> obj, const long timeout = -1) {
+            boost::mutex::scoped_lock lock(itsMutex);
+            while (itsBuffer.size() == itsBuffer.capacity()) {
+                // While this call sleeps/blocks the mutex is released
+                if (timeout >= 0) {
+                    itsCondVar.timed_wait(lock, boost::posix_time::microseconds(timeout));
+
+                    if (itsBuffer.size() == itsBuffer.capacity()) {
+                        return false; // Timeout ocurred
+                    }
+                } else {
+                    itsCondVar.wait(lock);
+                }
+            }
+            itsBuffer.push_back(obj);
+
+            // Notify any waiters
+            lock.unlock();
+            itsCondVar.notify_all();
+            
+            return true;
+        }
+ 
+
 
         /// @brief Returns the number of items in the circular buffer
         size_t size(void) const {
