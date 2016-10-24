@@ -174,6 +174,29 @@ if [ "${MS_INPUT_SCIENCE}" != "" ]; then
         exit 1
     fi
 
+    # Set the OPAL Project ID
+    BACKUP_PROJECT_ID=${PROJECT_ID}
+    # Run schedblock to get parset & variables
+    sbinfo="${metadata}/schedblock-info-${SB_SCIENCE}.txt"
+    module load askapcli
+    if [ "`which schedblock 2> ${tmp}/whchschdblk`" == "" ]; then
+        echo "WARNING - no schedblock executable found - try loading askapcli module."
+    else
+        if [ -e ${sbinfo} ] && [ `wc -l $sbinfo | awk '{print $1}'` -gt 1 ]; then
+            echo "Reusing schedblock info file $sbinfo for SBID ${SB_SCIENCE}"
+        else
+            if [ -e ${sbinfo} ]; then
+                rm -f $sbinfo
+            fi
+            schedblock info -v -p ${SB_SCIENCE} > $sbinfo
+        fi
+        awkstr="\$1==${SB_SCIENCE}"
+        PROJECT_ID=`awk $awkstr $sbinfo | awk '{print $6}'`
+        if [ "$PROJECT_ID" == "" ]; then
+            PROJECT_ID=$BACKUP_PROJECT_ID
+        fi
+    fi
+
     # Find the beam centre locations    
     . ${PIPELINEDIR}/findBeamCentres.sh
 

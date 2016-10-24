@@ -60,7 +60,11 @@ scripts, and they are detailed here.
 |                                |                                 |                                 | uploaded.                                                       |
 +--------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | ``PROJECT_ID``                 | "AS031"                         | *<key>*.project                 | The project ID that is written to the FITS header, and used by  |
-|                                |                                 | (:doc:`../utils/casdaupload`)   | the casdaupload script to describe each data product.           |
+|                                |                                 | (:doc:`../utils/casdaupload`)   | the casdaupload script to describe each data product. This is   |
+|                                |                                 |                                 | usually taken from the SB parset, but can be given in the       |
+|                                |                                 |                                 | configuration file in case the SB parset does not have the      |
+|                                |                                 |                                 | information (or the SB parset is not available to the schedblock|
+|                                |                                 |                                 | command-line utility, as will be the case for BETA).            |
 +--------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | **Thumbnails**                 |                                 |                                 |                                                                 |
 +--------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
