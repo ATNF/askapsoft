@@ -63,6 +63,7 @@ class TaskDesc {
             DerippleTask,
             TCPSink,
             BeamScatterTask,
+            BufferedTask
         };
 
         /// @brief Constructor

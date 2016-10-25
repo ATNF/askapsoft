@@ -77,6 +77,11 @@ class Configuration {
         /// @brief A sequence of tasks configuration.
         const std::vector<TaskDesc>& tasks(void) const;
 
+        /// @brief task description by logical name
+        /// @param[in] name logical name of the task
+        /// @return task descriptor
+        TaskDesc taskByName(const std::string &name) const;
+
         /// @briefFeed configuration
         const FeedConfig& feed(void) const;
 

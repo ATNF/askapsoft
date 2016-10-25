@@ -166,12 +166,20 @@ void Configuration::buildTasks(void)
     const vector<string> names = itsParset.getStringVector("tasks.tasklist");
     vector<string>::const_iterator it;
     for (it = names.begin(); it != names.end(); ++it) {
-        const string keyBase = "tasks." + *it;
+        itsTasks.push_back(taskByName(*it));
+    }
+}
+
+/// @brief task description by logical name
+/// @param[in] name logical name of the task
+/// @return task descriptor
+TaskDesc Configuration::taskByName(const std::string &name) const
+{
+        const string keyBase = "tasks." + name;
         const string typeStr = itsParset.getString(keyBase + ".type");
         const TaskDesc::Type type = TaskDesc::toType(typeStr);
         const LOFAR::ParameterSet params = itsParset.makeSubset(keyBase + ".params.");
-        itsTasks.push_back(TaskDesc(*it, type, params));
-    }
+        return TaskDesc(name, type, params);
 }
 
 void Configuration::buildAntennas(void)

@@ -113,6 +113,9 @@ TaskDesc::Type TaskDesc::toType(const std::string& type)
     if (type == "BeamScatterTask") {
         return TaskDesc::BeamScatterTask;
     }
+    if (type == "BufferedTask") {
+        return TaskDesc::BufferedTask;
+    }
 
     ASKAPTHROW(AskapError, "Unknown task type");
 }

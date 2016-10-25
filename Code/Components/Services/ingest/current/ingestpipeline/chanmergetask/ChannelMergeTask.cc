@@ -260,7 +260,7 @@ void ChannelMergeTask::fillCube(const T* buf, casa::Cube<T> &out,
 
         const casa::IPosition start(3, 0, rank * sliceShape(1), 0);
         const casa::Slicer slicer(start,sliceShape);
-        ASKAPDEBUGASSERT(start(1) < out.ncolumn());
+        ASKAPDEBUGASSERT(start(1) < static_cast<int>(out.ncolumn()));
               
         out(slicer) = currentSlice;
    }
