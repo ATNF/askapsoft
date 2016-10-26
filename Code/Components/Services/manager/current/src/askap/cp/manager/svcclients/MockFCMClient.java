@@ -67,5 +67,11 @@ public class MockFCMClient implements IFCMClient {
     public ParameterSet get() {
         return itsData;
     }
-
+	
+    /**
+     * @see askap.cp.manager.svcclients.IFCMClient#get()
+     */
+    public ParameterSet get(String key) {
+		return itsData.subset(key);
+	}
 }

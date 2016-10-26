@@ -2,6 +2,8 @@
 #               Common Parameters
 ###########################################################
 
+common.jira.issue                           = FAKESTREET-123
+
 #Name of the telescope/array
 common.array.name                           = ASKAP
 

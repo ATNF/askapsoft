@@ -23,44 +23,48 @@
  * 
  * @author Daniel Collins <daniel.collins@csiro.au>
  */
-package askap.cp.manager.notifications;
+package askap.cp.manager.svcclients;
 
 import Ice.Communicator;
-import askap.cp.manager.svcclients.FuncTestReporterClient;
-import askap.cp.manager.svcclients.IFCMClient;
 import askap.util.ParameterSet;
+import org.apache.log4j.Logger;
 
 /**
  *
  * @author Daniel Collins <daniel.collins@csiro.au>
  */
-public final class SBStateMonitorFactory {
+public final class FcmClientFactory {
+
+	private static final Logger logger = Logger.getLogger(FcmClientFactory.class.getName());
 
 	/**
-	 * Factory method for SBStateMonitor.
-	 * 
-	 * @param type: Identifies the type of state monitor to create.
+	 * Factory method for FCM clients
+	 *
 	 * @param config: The parameter set.
-	 * @param fcm 	The FCM client
-	 * @return SBStateMonitor
+	 * @param communicator: The Ice communicator.
+	 * @return IFCMClient
 	 */
-	public static SBStateMonitor getInstance(
-			String type,
+	public static IFCMClient getInstance(
 			ParameterSet config,
-			Communicator communicator,
-			IFCMClient fcm) {
-		switch (type) {
-			case "test":
-				FuncTestReporterClient client = new FuncTestReporterClient(
-						communicator,
-						config.getString("cpfunctestreporter.identity"));
-				return new TestSBStateChangedMonitor(client);
-			case "jira":
-				return new JiraSBStateChangedMonitor(config, fcm);
-			case "null":
-				return new NullSBStateChangedMonitor();
-			default:
-				throw new IllegalArgumentException(type);
+			Communicator communicator) {
+
+		IFCMClient fcm = null;
+
+		// Instantiate real or mock FCM
+		boolean mockfcm = config.getBoolean("fcm.mock", false);
+		if (mockfcm) {
+			logger.debug("ObsService factory: creating mock FCM");
+			fcm = new MockFCMClient(config.getString("fcm.mock.filename"));
+		} else {
+			logger.debug("ObsService factory: creating FCM");
+			String identity = config.getString("fcm.ice.identity");
+			if (identity == null) {
+				throw new RuntimeException(
+						"Parameter 'fcm.ice.identity' not found");
+			}
+			fcm = new IceFCMClient(communicator, identity);
 		}
+
+		return fcm;
 	}
 }

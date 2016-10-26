@@ -25,9 +25,12 @@
  */
 package askap.cp.manager.notifications;
 
+import askap.cp.manager.svcclients.IFCMClient;
 import askap.interfaces.schedblock.ObsState;
 import askap.util.ParameterSet;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.log4j.Logger;
 
 /**
@@ -41,14 +44,25 @@ public final class JiraSBStateChangedMonitor extends SBStateMonitor {
      * Logger
      */
     private static final Logger logger = Logger.getLogger(JiraSBStateChangedMonitor.class.getName());
-	private final ParameterSet config;
+
+	/** 
+	 * The configuration.
+	 */
+	private final ParameterSet itsConfig;
+
+    /**
+     * Facility Configuration Manager client wrapper instance
+     */
+    private final IFCMClient itsFCM;
 
 	/**
 	 * 
-	 * @param config
+	 * @param config 	The configuration
+	 * @param fcm		The FCM client
 	 */
-	public JiraSBStateChangedMonitor(ParameterSet config) {
-		this.config = config;
+	public JiraSBStateChangedMonitor(ParameterSet config, IFCMClient fcm) {
+		this.itsConfig = config;
+		this.itsFCM = fcm;
 	}
 
 	/**
@@ -62,23 +76,69 @@ public final class JiraSBStateChangedMonitor extends SBStateMonitor {
 	@Override
 	public void notify(long sbid, ObsState newState, String updateTime) 
 			throws NotificationException {
-		// TODO: Do I need to load the module? 
         try {
 			logger.debug("creating ProcessBuilder");
-            ProcessBuilder pb = new ProcessBuilder(
-				"schedblock",
-				"annotate",
-				Long.toString(sbid),
-				"--comment",
-				"\"Ready for data processing\"");
+
+			List<String> commandList = new ArrayList<String>();
+			commandList.add("schedblock");
+			commandList.add("annotate");
+			commandList.add(Long.toString(sbid));
+			commandList.add("--comment");
+			commandList.add("\"Ready for data processing\"");
+
+			// Fcm:
+			// common.jira.issue
+			// common.jira.project
+
+			// TODO: disabling the JIRA project handling for now. 
+			// The JIRA project is valid even if the issue ID is not specified
+			/*
+			final String jiraProject = itsConfig.getString("sbstatemonitor.jira.project", null);
+			if (jiraProject != null) {
+				logger.debug("Using JIRA project " + jiraProject);
+				commandList.add("--project");
+				commandList.add(jiraProject);
+			}
+			*/
+
+			// We have 3 prioritised sources of the JIRA issue ID:
+			// 1 - CP Manager parset, which overrides
+			// 2 - FCM common.jira.issue, which overrides
+			// 3 - schedblock annotate default behaviour
+
+			// Try the parset first
+			String jiraIssueId = itsConfig.getString("common.jira.issue", null);
+
+			// If parset not found, try FCM
+			if (jiraIssueId == null) {
+				ParameterSet parset = itsFCM.get("common.jira.");
+				if (!parset.isEmpty()) {
+					jiraIssueId = parset.getString("issue", null);
+					logger.debug("JIRA issue from FCM: " + jiraIssueId);
+				}
+			}
+
+			// If we have an issue ID from parset or FCM, then append to the command,
+			// otherwise do nothing and fall back on the schedblock CLI defaults.
+			if (jiraIssueId != null) {
+//				if (jiraProject == null) {
+//					logger.warn("JIRA issue ID specified without a project specification");
+//				} 
+				logger.debug("Using JIRA issue ID " + jiraIssueId);
+				commandList.add("--issue");
+				commandList.add(jiraIssueId);
+			} else {
+				logger.warn("Issuing JIRA notification without a JIRA Issue ID");
+			}
+
+            ProcessBuilder pb = new ProcessBuilder(commandList);
 
 			// ensure that JIRA authentication environment variables are set
+			// TODO: should we abort in this case?
 			if (!(pb.environment().containsKey("JIRA_USER") ||
 				  pb.environment().containsKey("JIRA_PASSWORD"))) {
 				logger.error("JIRA credentials not set");
 			}
-
-			// TODO: do I need to grab stdout and stderr? EG for error parsing?
 
             Process p = pb.start();
 			int exitCode = p.waitFor();

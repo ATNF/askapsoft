@@ -93,4 +93,15 @@ public class IceFCMClient implements IFCMClient {
             return new ParameterSet();
         }
     }
+
+    /**
+     * @see askap.cp.manager.svcclients.IFCMClient#get()
+     */
+    public ParameterSet get(String key) {
+        try {
+            return new ParameterSet(itsProxy.get(-1, key));
+        } catch (NoSuchKeyException e) {
+            return new ParameterSet();
+        }
+    }
 }

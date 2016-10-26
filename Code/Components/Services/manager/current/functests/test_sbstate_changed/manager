@@ -5,6 +5,8 @@
 
 # Setup the environment
 export TEST_DIR=`pwd`/test_sbstate_changed
+export JIRA_USER='sa-askapops'
+export JIRA_PASSWORD=''
 
 # Note that this is not a recursive call, as the working directory means this 
 # file is not sourcing itself.

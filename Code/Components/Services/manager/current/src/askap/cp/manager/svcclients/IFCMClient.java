@@ -28,5 +28,8 @@ package askap.cp.manager.svcclients;
 import askap.util.ParameterSet;
 
 public interface IFCMClient {
+
     public ParameterSet get();
+
+    public ParameterSet get(String key);
 }

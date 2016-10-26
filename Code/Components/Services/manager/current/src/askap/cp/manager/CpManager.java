@@ -32,6 +32,8 @@ import org.apache.log4j.Logger;
 
 import askap.cp.manager.monitoring.MonitoringSingleton;
 import askap.cp.manager.notifications.SBStateMonitorFactory;
+import askap.cp.manager.svcclients.FcmClientFactory;
+import askap.cp.manager.svcclients.IFCMClient;
 import askap.util.ServiceApplication;
 import askap.util.ServiceManager;
 
@@ -45,12 +47,17 @@ public final class CpManager extends ServiceApplication {
 	/**	
 	 * The IceStorm SBStateChanged topic
 	 */
-	IceStorm.TopicPrx sbStateChangedTopic = null;
+	private IceStorm.TopicPrx sbStateChangedTopic = null;
 
 	/**
 	 * The IceStorm SBStateChanged subscriber
 	 */
-	Ice.ObjectPrx sbStateChangedSubscriber = null;
+	private Ice.ObjectPrx sbStateChangedSubscriber = null;
+
+    /**
+     * Facility Configuration Manager client wrapper instance
+     */
+    private IFCMClient itsFCM;
 
 	/**
 	 * @see askap.cp.manager.ServiceApplication#run(java.lang.String[])
@@ -71,8 +78,11 @@ public final class CpManager extends ServiceApplication {
 				return 1;
 			}
 
+			// Create the FCM client
+			itsFCM = FcmClientFactory.getInstance(config(), communicator());
+
 			// Create and register the ObsService object
-			ObsService svc = ObsService.Create(communicator(), config());
+			ObsService svc = ObsService.Create(communicator(), config(), itsFCM);
 
 			// Initialise monitoring interface if configured
 			boolean monitoring = config().getBoolean("monitoring.enabled", false);
@@ -216,7 +226,8 @@ public final class CpManager extends ServiceApplication {
 		SBStateMonitor monitor = SBStateMonitorFactory.getInstance(
 			config().getString("sbstatemonitor.notificationagenttype"),
 			config(),
-			communicator());
+			communicator(),
+			itsFCM);
 		sbStateChangedSubscriber = adapter.addWithUUID(monitor).ice_oneway();
 		adapter.activate();
 

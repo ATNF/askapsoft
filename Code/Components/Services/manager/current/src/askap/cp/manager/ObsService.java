@@ -35,8 +35,6 @@ import askap.cp.manager.ingest.TestIngestManager;
 import askap.cp.manager.ingest.ProcessIngestManager;
 import askap.cp.manager.svcclients.FuncTestReporterClient;
 import askap.cp.manager.svcclients.IFCMClient;
-import askap.cp.manager.svcclients.IceFCMClient;
-import askap.cp.manager.svcclients.MockFCMClient;
 
 /**
  * Implements the Central Processor Observation Service
@@ -70,28 +68,16 @@ public class ObsService extends _ICPObsServiceDisp {
      * @param ic        the Ice Communicator that will be used for communication
      *                  with the external services (e.g. FCM)
      * @param parset    the parameter set this program was configured with
+	 * @param fcm 		The FCM client
 	 * @return 			The ObsService instance.
 	 */
-	public static final ObsService Create(Ice.Communicator ic, ParameterSet parset) {
-		IFCMClient itsFCM = null;
+	public static final ObsService Create(
+			Ice.Communicator ic,
+			ParameterSet parset,
+			IFCMClient fcm) {
 		AbstractIngestManager itsIngestManager = null;
 
         logger.debug("ObsService factory");
-
-        // Instantiate real or mock FCM
-        boolean mockfcm = parset.getBoolean("fcm.mock", false);
-        if (mockfcm) {
-			logger.debug("ObsService factory: creating mock FCM");
-            itsFCM = new MockFCMClient(parset.getString("fcm.mock.filename"));
-        } else {
-			logger.debug("ObsService factory: creating FCM");
-            String identity = parset.getString("fcm.ice.identity");
-            if (identity == null) {
-                throw new RuntimeException(
-                        "Parameter 'fcm.ice.identity' not found");
-            }
-            itsFCM = new IceFCMClient(ic, identity);
-        }
 
         // Instantiate real or mock data service interface
         /*
@@ -122,7 +108,7 @@ public class ObsService extends _ICPObsServiceDisp {
         }
 
 		logger.debug("ObsService factory: instantiating ObsService instance");
-		return new ObsService(itsFCM, itsIngestManager);
+		return new ObsService(fcm, itsIngestManager);
 	}
 
     /**
