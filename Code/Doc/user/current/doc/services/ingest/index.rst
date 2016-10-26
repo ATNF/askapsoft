@@ -151,6 +151,13 @@ some temporary tasks are also documented. They can be taken out in the future.
 |                       |able to use the same approach for full ASKAP, but keep it as long as we  |
 |                       |can as it is handy for debugging.                                        |
 +-----------------------+-------------------------------------------------------------------------+
+|:doc:`bufferedtask`    |An adapter task to run another task in parallel, in a service thread.    |
+|                       |Provided the child task execution time does not exceed the cycle time,   |
+|                       |this enables a better utilisation of available time as significant       |
+|                       |fraction of the cycle is spent gathering data which are sent asynchronou\|
+|                       |sly. Can be used with any task which does not alter data or distribution |
+|                       |pattern.                                                                 |
++-----------------------+-------------------------------------------------------------------------+
 |:doc:`fringerotationta\|Task controlling on the fly fringe rotation in the ingest pipeline. A    |
 |sk`                    |number of algorithms are available to apply the actual delay model, i.e. |
 |                       |pure s/w-based, BETA specific DRx and hardware fringe rotator, ADE h/w   |
