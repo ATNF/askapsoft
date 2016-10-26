@@ -1,3 +1,23 @@
+0.15.2 (26 October 2016)
+------------------------
+
+This is a patch release that fixes several issues:
+
+ * The parallel linear mosaicking tool linmos-mpi has been patched to
+   correct a bug that was initialising cube slices incorrectly.
+ * Several fixes to the CP manager and the pipeline scripts were made
+   following end-to-end testing with the full ASKAP online system:
+   * The CP manager will send notifications to a nominated JIRA ticket
+     upon SB state changes.
+   * Several fixes were made to the CASDA uploading and polling
+     scripts, to ensure accurate execution. The capability of sending
+     notifications to a JIRA ticket has also been added.
+   * The Project ID is now taken preferentially from the SB, rather
+     than the config file.
+   * The linear mosaicking in the pipelines is now not turned off when
+     only a single beam is processed.
+     
+
 0.15.1 (19 October 2016)
 ------------------------
 
