@@ -34,7 +34,8 @@
 #include "askap/AskapLogging.h"
 #include "askap/AskapError.h"
 #include "askap/AskapUtil.h"
-#include <casacore/casa/Arrays/Vector.h>
+#include "casacore/casa/Arrays/Vector.h"
+#include "casacore/casa/OS/Timer.h"
 
 // std includes
 #include <string>
@@ -197,8 +198,23 @@ void FrtHWAde::process(const askap::cp::common::VisChunk::ShPtr& chunk,
        }  else { diffRate = 0.;}
        */
        /*
+       // experiments with scan-based changes of FR parameters
+       if (ant != 0) {
+           //const casa::Int rates[11] = {-10, -8, -6, -4, -2, 0, 2, 4, 6, 8,10}; 
+           //const double addRate = rates[chunk->scan() % 11]*100.;
+           //diffRate += addRate;
+           //ASKAPLOG_DEBUG_STR(logger, "Scan = "<<chunk->scan()<<" rate = "<<diffRate<<" for ant = "<<ant<<" addRate="<<addRate<<" rate in deg/s = "<<diffRate*phaseRateUnit/casa::C::pi*180.);
+           const int delayIncrement = (chunk->scan() % 11) * 500;
+           hwDelay += delayIncrement;
+           ASKAPLOG_DEBUG_STR(logger, "Scan = "<<chunk->scan()<<" addDelay = "<<delayIncrement * delayUnit*1e9<<" ns for ant = "<<ant<<" hwDelay="<<hwDelay<<" or "<<hwDelay * delayUnit*1e9<<" ns diffDelay="<<diffDelay);
+    
+       }
+       //
+       */
+
+       /*
            // experiments with delays
-       if (ant == 0) {
+       if (ant == 4) {
            const double interval = itsTm[ant]>0 ? (chunk->time().getTime("s").getValue() - itsTm[ant]) : 0;
            const int intervalMin = static_cast<int>(interval/60);
            const int delayIncrement = intervalMin*500;
@@ -209,6 +225,17 @@ void FrtHWAde::process(const askap::cp::common::VisChunk::ShPtr& chunk,
            }
        }
        */
+
+       /*
+       // to force FR update without any fudge factors
+       if (ant != 0) {
+           if (chunk->time().getTime("s").getValue() - itsTm[ant] > 120) {
+               itsTm[ant] = -1.;
+               itsFrtComm.invalidate(ant);
+           }
+       }
+       */
+
        /*
        // used for experiments with either delays or rates
        if (itsTm[ant]<=0) {
@@ -255,6 +282,9 @@ void FrtHWAde::process(const askap::cp::common::VisChunk::ShPtr& chunk,
        } // if FR had an update for a given antenna
   } // loop over antennas
   //
+
+  casa::Timer timer;
+  double appTime = 0.;
   for (casa::uInt row = 0; row < chunk->nRow(); ++row) {
        // slice to get this row of data
        const casa::uInt ant1 = chunk->antenna1()[row];
@@ -294,6 +324,7 @@ void FrtHWAde::process(const askap::cp::common::VisChunk::ShPtr& chunk,
 
            const double phaseDueToAppliedRate = itsPhases[ant1] - itsPhases[ant2];
            ASKAPDEBUGASSERT(freq.nelements() == thisRow.nrow());
+           timer.mark();
            for (casa::uInt chan = 0; chan < thisRow.nrow(); ++chan) {
                 //casa::Vector<casa::Complex> thisChan = thisRow.row(chan);
                 const float phase = static_cast<float>(phaseDueToAppliedDelay - phaseDueToAppliedRate +
@@ -305,6 +336,7 @@ void FrtHWAde::process(const askap::cp::common::VisChunk::ShPtr& chunk,
                      thisRow(chan,pol) *= phasor;
                 }
            }
+           appTime += timer.real();
            
        } else {
          // the parameters for these antennas are being changed, flag the data
@@ -312,6 +344,7 @@ void FrtHWAde::process(const askap::cp::common::VisChunk::ShPtr& chunk,
          thisFlagRow.set(casa::True); 
        }
   }
+  ASKAPLOG_DEBUG_STR(logger, "Residual phase/delay application time: "<<appTime<<" seconds");
 }
 
 } // namespace ingest 
