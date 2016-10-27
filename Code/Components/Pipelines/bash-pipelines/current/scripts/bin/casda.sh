@@ -71,6 +71,7 @@ sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 
 # Define the lists of image names, types, 
+ADD_FITS_SUFFIX=true
 . ${getArtifacts}
 
 # Set image-related parameters

@@ -1,10 +1,10 @@
 #!/bin/bash -l
 #
-# Launches a job to mosaic all individual beam images to a single
-# image. After completion, runs the source-finder on the mosaicked
-# image.
+# Launches a job to mosaic all individual beam continuum images to a
+# single image. After completion, runs the source-finder on the
+# mosaicked image.
 #
-# @copyright (c) 2015 CSIRO
+# @copyright (c) 2016 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -29,21 +29,18 @@
 # @author Matthew Whiting <Matthew.Whiting@csiro.au>
 #
 
-ID_LINMOS_SCI=""
+ID_LINMOS_CONT=""
 
 DO_IT=$DO_MOSAIC
 
+# Get the name of the mosaicked image
+imageCode=restored
 BEAM=all
-setImageBase cont
-mosImage=image.${imageBase}
-if [ $NUM_TAYLOR_TERMS -gt 1 ]; then
-    mosImage="${mosImage}.taylor.0"
-fi
-mosImage="${mosImage}.restored"
+setImageProperties cont
 
-if [ $CLOBBER == false ] && [ -e ${OUTPUT}/${mosImage} ]; then
+if [ $CLOBBER == false ] && [ -e ${OUTPUT}/${imageName} ]; then
     if [ $DO_IT == true ]; then
-        echo "Image ${mosImage} exists, so not running continuum mosaicking"
+        echo "Image ${imageName} exists, so not running continuum mosaicking"
     fi
     DO_IT=false
 fi
@@ -86,66 +83,70 @@ cd $OUTPUT
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 
-parset=${parsets}/science_linmos_${FIELDBEAM}_\${SLURM_JOB_ID}.in
-log=${logs}/science_linmos_${FIELDBEAM}_\${SLURM_JOB_ID}.log
-
-# bit of image name before the beam ID
-imagePrefix=image.${IMAGE_BASE_CONT}
-# bit of image name after the beam ID
 nterms=${NUM_TAYLOR_TERMS}
-if [ \${nterms} -gt 1 ]; then
-    imageSuffix=taylor.0.restored
-else
-    imageSuffix=restored
-fi
-beamList=""
-for BEAM in ${BEAMS_TO_USE}; do
-    if [ -e \${imagePrefix}.beam\${BEAM}.\${imageSuffix} ]; then
-        beamList="\${beamList}beam\${BEAM} "
-    else
-        echo "WARNING: Beam \${BEAM} image not present - not including in mosaic!"
-    fi 
-done
+IMAGE_BASE_CONT=${IMAGE_BASE_CONT}
+FIELD=${FIELD}
 
-if [ "\${beamList}" != "" ]; then
+for imageCode in restored altrestored image residual; do 
 
-    beamList=\`echo \${beamList} | sed -e 's/ /,/g' \`
+    for((TERM=0;TERM<\${nterms};TERM++)); do
 
-    cat > \$parset << EOFINNER
+        beamList=""
+        for BEAM in ${BEAMS_TO_USE}; do
+            setImageProperties cont
+            echo \$imageName
+            if [ -e \${imageName} ]; then
+                if [ "\${beamList}" == "" ]; then
+                    beamList="\${imageName}"
+                else
+                    beamList="\${beamList},\${imageName}"
+                fi
+            fi
+        done
+        if [ "\${beamList}" != "" ]; then
+            BEAM=all
+            setImageProperties cont
+            echo "Mosaicking to form \${imageName}"
+            parset=${parsets}/science_linmos_${FIELDBEAM}_\${imageCode}_\${SLURM_JOB_ID}.in
+            log=${logs}/science_linmos_${FIELDBEAM}_\${imageCode}_\${SLURM_JOB_ID}.log
+            cat > \${parset} << EOFINNER
 linmos.names            = [\${beamList}]
-linmos.findmosaics      = true
+linmos.outname          = \$imageName
+linmos.outweight        = \$weightsImage
 linmos.weighttype       = FromPrimaryBeamModel
 linmos.weightstate      = Inherent
 ${reference}
 linmos.psfref           = ${LINMOS_PSF_REF}
-linmos.nterms           = ${NUM_TAYLOR_TERMS}
 linmos.cutoff           = ${LINMOS_CUTOFF}
 EOFINNER
 
-    NCORES=1
-    NPPN=1
-    aprun -n \${NCORES} -N \${NPPN} $linmos -c \$parset > \$log
-    err=\$?
-    rejuvenate *.${IMAGE_BASE_CONT}*
-    extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} $jobname "txt,csv"
-    if [ \$err != 0 ]; then
-        exit \$err
-    fi
-else
-
-    echo "ERROR - no good images were found for mosaicking!"
-    writeStats \${SLURM_JOB_ID} linmos FAIL --- --- --- --- --- txt > stats/stats-\${SLURM_JOB_ID}-linmos.txt
-    writeStats \${SLURM_JOB_ID} linmos FAIL --- --- --- --- --- csv > stats/stats-\${SLURM_JOB_ID}-linmos.csv
-
-fi
+            NCORES=1
+            NPPN=1
+            aprun -n \${NCORES} -N \${NPPN} $linmos -c \$parset > \$log
+            err=\$?
+            for im in `echo \${beamList} | sed -e 's/,/ /g'`; do
+                rejuvenate \${im}
+            done
+            extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname}_\${imageCode} "txt,csv"
+            if [ \$err != 0 ]; then
+                exit \$err
+            fi
+        else
+            echo "ERROR - no good images were found for mosaicking image type '\${imageCode}'!"
+            writeStats \${SLURM_JOB_ID} linmos_\${imageCode} FAIL --- --- --- --- --- txt > stats/stats-\${SLURM_JOB_ID}-linmos.txt
+            writeStats \${SLURM_JOB_ID} linmos_\${imageCode} FAIL --- --- --- --- --- csv > stats/stats-\${SLURM_JOB_ID}-linmos.csv
+        fi
+    done
+done
 EOFOUTER
 
     if [ $SUBMIT_JOBS == true ]; then
         FLAG_IMAGING_DEP=`echo $FLAG_IMAGING_DEP | sed -e 's/afterok/afterany/g'`
-	ID_LINMOS_SCI=`sbatch $FLAG_IMAGING_DEP $sbatchfile | awk '{print $4}'`
-	recordJob ${ID_LINMOS_SCI} "Make a mosaic image of the science observation, with flags \"${FLAG_IMAGING_DEP}\""
+	ID_LINMOS_CONT=`sbatch $FLAG_IMAGING_DEP $sbatchfile | awk '{print $4}'`
+	recordJob ${ID_LINMOS_CONT} "Make a mosaic image of the science observation, field $FIELD, with flags \"${FLAG_IMAGING_DEP}\""
+        FULL_LINMOS_DEP=`addDep "${FULL_LINMOS_DEP}" "${ID_LINMOS_CONT}"`
     else
-	echo "Would make a mosaic image  of the science observation with slurm file $sbatchfile"
+	echo "Would make a mosaic image  of the science observation, field $FIELD with slurm file $sbatchfile"
     fi
 
     echo " "
@@ -156,7 +157,7 @@ fi
 if [ ${DO_SOURCE_FINDING_MOSAIC} == true ]; then
     # Run the sourcefinder on the mosaicked image.
 
-    # set the $imageBase variable to have 'linmos' in it
+    # set the $imageBase variable for the mosaicked image
     BEAM="all"
     setImageBase cont
 

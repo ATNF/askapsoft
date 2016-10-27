@@ -32,7 +32,7 @@
 ID_SPECIMG_SCI=""
 
 # set the $imageBase variable
-setImageBaseSpectral
+setImageBase spectral
 
 DO_IT=$DO_SPECTRAL_IMAGING
 

@@ -59,6 +59,7 @@ cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 
 
 # Define the lists of image names, types, 
+ADD_FITS_SUFFIX=true
 . ${getArtifacts}
 
 for((i=0;i<\${#casdaTwoDimImageNames[@]};i++)); do

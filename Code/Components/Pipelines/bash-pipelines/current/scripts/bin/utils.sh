@@ -136,42 +136,149 @@ function addDep()
 ##############################
 # FILENAME PARSING
 
-# function to return the imageBase for continuum images for a beam, or
-# for the linmos case if $BEAM=all
-function setImageBaseCont()
+# Function to define a set of variables describing an image - its
+# name, image type (for CASDA), and label (for preview images), based
+# on a type and BEAM/POL/FIELD information
+# Requires:
+#  * FIELD
+#  * BEAM
+#  * pol (lower case polarisation i/q/u/v etc)
+#  * TERM (taylor term: 0,1,2,...)
+#  * nterms (number of taylor terms being solved for. 1=no MFS)
+#  * IMAGE_BASE_CONT,IMAGE_BASE_CONTCUBE,IMAGE_BASE_SPECTRAL
+# Available upon return:
+#  * imageBase
+#  * imageName (the filename for the image)
+#  * imageType (the image type used by CASDA - eg. cont_restored_T0)
+#  * label (the title for the preview image - only used for continuum)
+#  * weightsImage, weightsType, weightsLabel (as above)
+# Usage: setImageProperties <type> [pol]
+#    type = cont | spectral | contcube
+#    pol = polarisation (lower case). Defaults to i
+function setImageProperties()
 {
-    if [ ${BEAM} == "all" ]; then
-        imageBase=${IMAGE_BASE_CONT}.linmos
+    type=$1
+    if [ $# -ge 2 ]; then
+        pol=$2
     else
-        imageBase=${IMAGE_BASE_CONT}.beam${BEAM}
+        pol="i"
     fi
+
+    imSuffix=""
+    setImageBase $type
+    if [ $type == "cont" ]; then
+        typebase="cont"
+        labelbase="continuum image"
+        if [ "$nterms" == "" ] || [ $nterms -eq 1 ]; then
+            imSuffix=""
+            typeSuffix="T0"
+        else
+            imSuffix=".taylor.$TERM"
+            typeSuffix="T${TERM}"
+        fi
+    elif [ $type == "spectral" ]; then
+        typebase="spectral"
+        labelbase="spectral cube"
+        typeSuffix="3d"
+    elif [ $type == "contcube" ]; then
+        typebase="cont"
+        labelbase="continuum cube"
+        typeSuffix="3d"
+    else
+        echo "ERROR - bad type for setImageProperies: \"$type\""
+    fi
+
+    if [ "${FIELD}" == "." ]; then
+        beamSuffix="mosaic"
+    else
+        if [ ${BEAM} == "all" ]; then
+            beamSuffix="mosaic"
+        else
+            beamSuffix="beam ${BEAM}"
+        fi
+    fi
+    
+    weightsImage="weights.${imageBase}${imSuffix}"
+    weightsType="${typebase}_weights_$typeSuffix"
+    weightsLabel="Weights image, $beamSuffix"
+    if [ "$imageCode" == "restored" ]; then
+        imageName="image.${imageBase}${imSuffix}.restored"
+        imageType="${typebase}_restored_$typeSuffix"
+        label="Restored ${labelbase}, $beamSuffix"
+    elif [ "$imageCode" == "altrestored" ]; then
+        imageName="image.${imageBase}${imSuffix}.alt.restored"
+        imageType="${typebase}_restored_$typeSuffix"
+        label="Restored ${labelbase}, $beamSuffix"
+    elif [ "$imageCode" == "image" ]; then
+        imageName="image.${imageBase}${imSuffix}"
+        imageType="${typebase}_cleanmodel_$typeSuffix"
+        label="Clean model ${labelbase}, $beamSuffix"
+    elif [ "$imageCode" == "residual" ]; then
+        imageName="residual.${imageBase}${imSuffix}"
+        imageType="${typebase}_residual_$typeSuffix"
+        label="Clean residual ${labelbase}, $beamSuffix"
+    elif [ "$imageCode" == "sensitivity" ]; then
+        imageName="sensitivity.${imageBase}${imSuffix}"
+        imageType="${typebase}_sensitivity_$typeSuffix"
+        label="Sensitivity ${labelbase}, $beamSuffix"
+    elif [ "$imageCode" == "psf" ]; then
+        imageName="psf.${imageBase}${imSuffix}"
+        imageType="${typebase}_psfnat_$typeSuffix"
+        label="PSF ${labelbase}, $beamSuffix"
+    elif [ "$imageCode" == "psfimage" ]; then
+        imageName="psf.image.${imageBase}${imSuffix}"
+        imageType="${typebase}_psfprecon_$typeSuffix"
+        label="Preconditioned PSF ${labelbase}, $beamSuffix"
+    else
+        echo "WARNING - unknown image code ${imageCode}"
+    fi
+
 }
 
-# function to return the imageBase for continuum cubes for a beam, or
-# for the linmos case if $BEAM=all
-function setImageBaseContCube()
+
+# Function to set the base name for an image/image cube. Can handle
+# different image types - continuum, continuum cube & spectral cube.
+# The name is formed based on the type, the FIELD, the BEAM (and the
+# polarisation in the case of the continuum cube).
+# Requires:
+#  * FIELD
+#  * BEAM
+#  * pol (lower case polarisation i/q/u/v etc)
+#  * IMAGE_BASE_CONT,IMAGE_BASE_CONTCUBE,IMAGE_BASE_SPECTRAL
+# Available upon return:
+#  * imageBase
+# Usage: setImageBase <type>
+#    type = cont | spectral | contcube
+function setImageBase()
 {
-    sedstr="s/^i\./$pol\./g"
-    base=`echo ${IMAGE_BASE_CONTCUBE} | sed -e $sedstr`
-    sedstr="s/%p/$pol/g"
-    base=`echo ${base} | sed -e $sedstr`
-    if [ ${BEAM} == "all" ]; then
-        imageBase=${base}.linmos
+
+    type=$1
+
+    if [ $type == "cont" ]; then
+        imageBase=${IMAGE_BASE_CONT}
+    elif [ $type == "contcube" ]; then
+        imageBase=${IMAGE_BASE_CONTCUBE}
+        sedstr="s/^i\./$pol\./g"
+        imageBase=`echo ${imageBase} | sed -e $sedstr`
+        sedstr="s/%p/$pol/g"
+        imageBase=`echo ${imageBase} | sed -e $sedstr`
+    elif [ $type == "spectral" ]; then
+        imageBase=${IMAGE_BASE_SPECTRAL}
     else
-        imageBase=${base}.beam${BEAM}
+        echo "ERROR - bad type for setImageBase: \"$type\""
     fi
+        
+    if [ "${FIELD}" != "." ]; then
+        imageBase="${imageBase}.${FIELD}"
+        if [ "${BEAM}" == "all" ]; then
+            imageBase="${imageBase}.linmos"
+        else
+            imageBase="${imageBase}.beam${BEAM}"
+        fi
+    fi
+
 }
 
-# function to return the imageBase for spectral cubes for a beam, or
-# for the linmos case if $BEAM=all
-function setImageBaseSpectral()
-{
-    if [ ${BEAM} == "all" ]; then
-        imageBase=${IMAGE_BASE_SPECTRAL}.linmos
-    else
-        imageBase=${IMAGE_BASE_SPECTRAL}.beam${BEAM}
-    fi
-}
 
 # A function to work out the measurement set names for the
 # full-resolution, spectral-line and channel-averaged cases, given the

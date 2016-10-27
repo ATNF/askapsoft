@@ -34,6 +34,7 @@ echo "Setting up and calibrating the science observation"
 echo "=================================================="
 
 FIELD_ID=0
+FULL_LINMOS_DEP=""
 
 for FIELD in ${FIELD_LIST}; do
 
@@ -142,7 +143,8 @@ for FIELD in ${FIELD_LIST}; do
         if [ $DO_ALT_IMAGER == true ]; then
             . ${PIPELINEDIR}/altLinmos.sh
         else
-            . ${PIPELINEDIR}/linmos.sh
+            #            . ${PIPELINEDIR}/linmos.sh
+            . ${PIPELINEDIR}/linmosCont.sh
         fi
         
         cd ..
@@ -160,3 +162,8 @@ parsets=$parsetsBase
 logs=$logsBase
 slurms=$slurmsBase
 slurmOut=$slurmOutBase
+FIELD="."
+
+# Final linmos, combining fields
+. ${PIPELINEDIR}/linmosFieldsCont.sh
+

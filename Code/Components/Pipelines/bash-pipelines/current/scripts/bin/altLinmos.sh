@@ -34,7 +34,7 @@ ID_LINMOS_SCI=""
 DO_IT=$DO_MOSAIC
 
 BEAM=all
-setImageBaseSpectral
+setImageBase spectral
 getAltPrefix
 
 for subband in ${wrList}; do
@@ -158,7 +158,7 @@ if [ ${DO_SOURCE_FINDING_MOSAIC} == true ]; then
 
     # set the $imageBase variable to have 'linmos' in it
     BEAM="all"
-    setImageBaseCont
+    setImageBase spectral
 
     . ${PIPELINEDIR}/sourcefinding.sh
 

@@ -35,7 +35,7 @@
 #
 
 # set the $imageBase variable
-setImageBaseSpectral
+setImageBase spectral
 
 DO_IT=$DO_SPECTRAL_IMSUB
 if [ $CLOBBER == false ] && [ -e ${OUTPUT}/image.${imageBase}.restored.contsub ]; then

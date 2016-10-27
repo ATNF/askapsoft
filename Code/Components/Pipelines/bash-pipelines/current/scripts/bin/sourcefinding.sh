@@ -165,7 +165,9 @@ EOFOUTER
     # Dependencies for the job
     DEP=""
     if [ $BEAM == "all" ]; then
-        DEP=`addDep "$DEP" "$ID_LINMOS_SCI"`
+        DEP=`addDep "$DEP" "$ID_LINMOS_CONT"`
+    elif [ "$FIELD" == "." ]; then
+        DEP=`addDep "$DEP" "$ID_LINMOS_CONT_ALL"`
     else
         if [ $DO_SELFCAL == true ]; then
             DEP=`addDep "$DEP" "$ID_CONTIMG_SCI_SC"`

@@ -41,7 +41,7 @@
 #
 
 # set the $imageBase variable
-setImageBaseCont
+setImageBase cont
 
 if [ ${NUM_TAYLOR_TERMS} -gt 1 ]; then
     outputImage="image.${imageBase}.taylor.0.restored"

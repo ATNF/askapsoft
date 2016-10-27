@@ -44,7 +44,7 @@ for POLN in $POL_LIST; do
     pol=`echo $POLN | tr '[:upper:]' '[:lower:]'`
 
     # set the $imageBase variable
-    setImageBaseContCube
+    setImageBase contcube
 
     DO_IT=$DO_CONTCUBE_IMAGING
 

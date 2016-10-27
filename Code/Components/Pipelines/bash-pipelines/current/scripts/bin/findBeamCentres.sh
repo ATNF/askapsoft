@@ -108,7 +108,11 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$needBeams" == "true" ]; then
                 grep -A${nfields} RA ${MS_METADATA} | tail -n ${nfields} | cut -f 4- >> $fieldlist
             fi
 
-            FIELD_LIST=`sort -k2 $fieldlist | awk '{print $2}' | uniq `
+            FIELD_LIST=""
+            for F in `sort -k2 $fieldlist | awk '{print $2}' | uniq `;
+            do
+                FIELD_LIST="$FIELD_LIST $F"
+            done
             
             echo "List of fields: "
             COUNT=0

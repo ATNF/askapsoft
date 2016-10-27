@@ -42,7 +42,7 @@ for BEAM in ${BEAMS_TO_USE}; do
     fi
 done
 
-
+imageCodeList="restored altrestored image residual sensitivity psf psfimage"
 
 getArtifacts=${tools}/getArchiveList-${NOW}.sh
 cat > ${getArtifacts} <<EOF
@@ -114,104 +114,79 @@ FIELD_LIST="${FIELD_LIST}"
 IMAGE_BASE_CONT="${IMAGE_BASE_CONT}"
 IMAGE_BASE_CONTCUBE="${IMAGE_BASE_CONTCUBE}"
 IMAGE_BASE_SPECTRAL="${IMAGE_BASE_SPECTRAL}"
+POL_LIST="${POL_LIST}"
+
+fitsSuffix=""
+ADD_FITS_SUFFIX=\${ADD_FITS_SUFFIX}
+if [ "\${ADD_FITS_SUFFIX}" == "true" ] || [ "\${ADD_FITS_SUFFIX}" == "" ]; then
+    fitsSuffix=".fits"
+fi
 
 LOCAL_BEAM_LIST="all"
 if [ "\${doBeams}" == true ]; then
     LOCAL_BEAM_LIST="\$LOCAL_BEAM_LIST \${beams}"
 fi
 
-for FIELD in \${FIELD_LIST}; do
+LOCAL_FIELD_LIST=". ${FIELD_LIST}"
 
-    for BEAM in \${LOCAL_BEAM_LIST}; do
-    
-        # call this to get the image base name \${imageBase} for continuum images, getting linmos in there correctly
-        setImageBaseCont
-        
+for FIELD in \${LOCAL_FIELD_LIST}; do
+
+    if [ \${FIELD} == "." ]; then
+        theBeamList="all"
+    else
+        theBeamList=\${LOCAL_BEAM_LIST}
+    fi
+
+    for BEAM in \${theBeamList}; do
+            
         # Gather lists of continuum images
     
-        if [ \${BEAM} == "all" ]; then
-            beamSuffix="mosaic"
-        else
-            beamSuffix="beam \${BEAM}"
-        fi
-        
-        for((i=0;i<\${nterms};i++)); do
-    
-            if [ \${nterms} -eq 1 ]; then
-                imBase=\${imageBase}
-            else
-                imBase="\${imageBase}.taylor.\${i}"
+        for imageCode in ${imageCodeList}; do
+
+            setImageProperties cont
+            echo \${FIELD}/\${imageName}\${fitsSuffix}
+            if [ -e \${FIELD}/\${imageName}\${fitsSuffix} ]; then
+                casdaTwoDimImageNames+=(\${FIELD}/\${imageName}\${fitsSuffix})
+                casdaTwoDimImageTypes+=("\${imageType}")
+                casdaTwoDimThumbTitles+=("\${label}")
+                if [ "\${BEAM}" == "all" ] && [ "\${imageCode}" == "restored" ]; then
+                    casdaTwoDimImageNames+=(\${FIELD}/\${weightsImage}\${fitsSuffix})
+                    casdaTwoDimImageTypes+=("\${weightsType}")
+                    casdaTwoDimThumbTitles+=("\${weightsLabel}")
+                fi
             fi
-            typeSuffix="T\${i}"
-    
-            # The following makes lists of the FITS images suitable for CASDA, and their associated image types
-            if [ -e \${FIELD}/image.\${imBase}.restored.fits ]; then
-                casdaTwoDimImageNames+=(\${FIELD}/image.\${imBase}.restored.fits)
-                casdaTwoDimImageTypes+=(cont_restored_\${typeSuffix})
-                casdaTwoDimThumbTitles+=("Restored image, \${beamSuffix}")
-            fi
-            if [ -e \${FIELD}/image.\${imBase}.alt.restored.fits ]; then
-                casdaTwoDimImageNames+=(\${FIELD}/image.\${imBase}.restored.fits)
-                casdaTwoDimImageTypes+=(cont_restored_\${typeSuffix})
-                casdaTwoDimThumbTitles+=("Restored image, \${beamSuffix}")
-            fi
-            if [ -e \${FIELD}/psf.\${imBase}.fits ]; then
-                casdaTwoDimImageNames+=(\${FIELD}/psf.\${imBase}.fits)
-                casdaTwoDimImageTypes+=(cont_psfnat_\${typeSuffix})
-                casdaTwoDimThumbTitles+=("PSF, \${beamSuffix}")
-            fi
-            if [ -e \${FIELD}/psf.image.\${imBase}.fits ]; then
-                casdaTwoDimImageNames+=(\${FIELD}/psf.image.\${imBase}.fits)
-                casdaTwoDimImageTypes+=(cont_psfprecon_\${typeSuffix})
-                casdaTwoDimThumbTitles+=("Preconditioned PSF, \${beamSuffix}")
-            fi
-            if [ -e \${FIELD}/image.\${imBase}.fits ]; then
-                casdaTwoDimImageNames+=(\${FIELD}/image.\${imBase}.fits)
-                casdaTwoDimImageTypes+=(cont_cleanmodel_\${typeSuffix})
-                casdaTwoDimThumbTitles+=("Clean model, \${beamSuffix}")
-            fi
-            if [ -e \${FIELD}/residual.\${imBase}.fits ]; then
-                casdaTwoDimImageNames+=(\${FIELD}/residual.\${imBase}.fits)
-                casdaTwoDimImageTypes+=(cont_residual_\${typeSuffix})
-                casdaTwoDimThumbTitles+=("Residual image, \${beamSuffix}")
-            fi
-            if [ -e \${FIELD}/sensitivity.\${imBase}.fits ]; then
-                casdaTwoDimImageNames+=(\${FIELD}/sensitivity.\${imBase}.fits)
-                casdaTwoDimImageTypes+=(cont_sensitivity_\${typeSuffix})
-                casdaTwoDimThumbTitles+=("Sensitivity, \${beamSuffix}")
-            fi
-            
+
         done
+
     
-        # Gather lists of spectral cubes
+        # Gather lists of spectral cubes & continuum cubes
     
-        # set the imageBase variable for the spectral-line case
-        setImageBaseSpectral
-        # The following makes lists of the FITS images suitable for CASDA, and their associated image types
-        if [ -e \${FIELD}/image.\${imageBase}.restored.fits ]; then
-            casdaOtherDimImageNames+=(\${FIELD}/image.\${imageBase}.restored.fits)
-            casdaOtherDimImageTypes+=(spectral_restored_3d)
-        fi
-        if [ -e \${FIELD}/psf.\${imageBase}.fits ]; then
-            casdaOtherDimImageNames+=(\${FIELD}/psf.\${imageBase}.fits)
-            casdaOtherDimImageTypes+=(spectral_psfnat_3d)
-        fi
-        if [ -e \${FIELD}/psf.image.\${imageBase}.fits ]; then
-            casdaOtherDimImageNames+=(\${FIELD}/psf.image.\${imageBase}.fits)
-            casdaOtherDimImageTypes+=(spectral_psfprecon_3d)
-        fi
-        if [ -e \${FIELD}/image.\${imageBase}.fits ]; then
-            casdaOtherDimImageNames+=(\${FIELD}/image.\${imageBase}.fits)
-            casdaOtherDimImageTypes+=(spectral_cleanmodel_3d)
-        fi
-        if [ -e \${FIELD}/residual.\${imageBase}.fits ]; then
-            casdaOtherDimImageNames+=(\${FIELD}/residual.\${imageBase}.fits)
-            casdaOtherDimImageTypes+=(spectral_residual_3d)
-        fi
-        if [ -e \${FIELD}/sensitivity.\${imageBase}.fits ]; then
-            casdaOtherDimImageNames+=(\${FIELD}/sensitivity.\${imageBase}.fits)
-            casdaOtherDimImageTypes+=(spectral_sensitivity_3d)
-        fi
+        for imageCode in ${imageCodeList}; do
+
+            setImageProperties spectral
+            if [ -e \${FIELD}/\${imageName}\${fitsSuffix} ]; then
+                casdaOtherDimImageNames+=(\${FIELD}/\${imageName}\${fitsSuffix})
+                casdaOtherDimImageTypes+=("\${imageType}")
+                if [ "\${BEAM}" == "all" ] && [ "\${imageCode}" == "restored" ]; then
+                    casdaOtherDimImageNames+=(\${FIELD}/\${weightsImage}\${fitsSuffix})
+                    casdaOtherDimImageTypes+=("\${weightsType}")
+                fi
+            fi
+
+            for POLN in \${POL_LIST}; do
+                pol=\`echo \$POLN | tr '[:upper:]' '[:lower:]'\`
+                setImageProperties contcube \$pol
+                if [ -e \${FIELD}/\${imageName}\${fitsSuffix} ]; then
+                    casdaOtherDimImageNames+=(\${FIELD}/\${imageName}\${fitsSuffix})
+                    casdaOtherDimImageTypes+=("\${imageType}")
+                    if [ "\${BEAM}" == "all" ] && [ "\${imageCode}" == "restored" ]; then
+                        casdaOtherDimImageNames+=(\${FIELD}/\${weightsImage}\${fitsSuffix})
+                        casdaOtherDimImageTypes+=("\${weightsType}")
+                    fi
+                fi
+            done
+
+        done
     
     done
 
@@ -228,7 +203,7 @@ catTypes=()
 BEAM=all
 for FIELD in \${FIELD_LIST}; do
 
-    setImageBaseCont
+    setImageBase cont
     contSelDir=selavy_\${imageBase}
     if [ -e \${FIELD}/\${contSelDir}/selavy-results.components.xml ]; then
         catNames+=(\${FIELD}/\${contSelDir}/selavy-results.components.xml)

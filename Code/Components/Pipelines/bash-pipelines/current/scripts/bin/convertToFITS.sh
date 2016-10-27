@@ -64,54 +64,12 @@ cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 
 expectedImageNames=()
 
-FIELD_LIST="${FIELD_LIST}"
-BEAMS_TO_USE="${BEAMS_TO_USE}"
-NUM_TAYLOR_TERMS="${NUM_TAYLOR_TERMS}"
-IMAGE_LIST="${IMAGE_LIST}"
-IMAGE_BASE_CONT="${IMAGE_BASE_CONT}"
-IMAGE_BASE_CONTCUBE="${IMAGE_BASE_CONTCUBE}"
-IMAGE_BASE_SPECTRAL="${IMAGE_BASE_SPECTRAL}"
+# Define the lists of image names, types, 
+ADD_FITS_SUFFIX=false
+. ${getArtifacts}
 
-for FIELD in \${FIELD_LIST}; do
-
-    beamlist="\${BEAMS_TO_USE} all"
-    for BEAM in \$beamlist; do
-
-        setImageBaseCont
-        for((i=0;i<\${NUM_TAYLOR_TERMS};i++)); do
-
-            if [ \${NUM_TAYLOR_TERMS} -eq 1 ]; then
-                imBase=\${imageBase}
-            else
-                imBase="\${imageBase}.taylor.\${i}"
-            fi
-            imagename=\${FIELD}/image.\${imBase}.restored
-            if [ -e \$imagename ]; then
-                expectedImageNames+=(\${imagename})
-            fi
-            for im in \${IMAGE_LIST}; do
-                imagename=\${FIELD}/\${im}.\${imBase}
-                if [ -e \${imagename} ]; then
-                    expectedImageNames+=(\${imagename})
-                fi
-            done
-        done
-
-        setImageBaseSpectral
-        imagename=\${FIELD}/image.\${imageBase}.restored
-        if [ -e \$imagename ]; then
-            expectedImageNames+=(\${imagename})
-        fi
-        for im in \${IMAGE_LIST}; do
-            imagename=\${FIELD}/\${im}.\${imageBase}
-            if [ -e \${imagename} ]; then
-                expectedImageNames+=(\${imagename})
-            fi
-        done
-
-    done
-
-done
+expectedImageNames=(\${casdaTwoDimImageNames[@]})
+expectedImageNames+=(\${casdaOtherDimImageNames[@]})
 
 echo "Image names = \${expectedImageNames[@]}"
 
