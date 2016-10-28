@@ -13,6 +13,8 @@ install_dir = "%s/install" % os.getcwd()
 if os.path.isdir(install_dir):
     shutil.rmtree(install_dir)
 
+if not os.path.exists(virtualenv):
+    os.mkdir(virtualenv)
 os.chdir(virtualenv)
 remote = os.environ.get("RBUILD_REMOTE_ARCHIVE", "")
 pkg = "%s.tar.gz" % virtualenv
