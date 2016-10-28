@@ -48,6 +48,7 @@ class VisChunkTest : public CppUnit::TestFixture {
         CPPUNIT_TEST(testResizeChans);
         CPPUNIT_TEST(testResizeRows);
         CPPUNIT_TEST(testResizePols);
+        CPPUNIT_TEST(testRawAccess);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -76,6 +77,47 @@ class VisChunkTest : public CppUnit::TestFixture {
             // Verify frequency vector
             CPPUNIT_ASSERT_EQUAL(nChans,
                                  static_cast<unsigned int>(chunk->frequency().size()));
+        }
+
+        void testRawAccess() {
+            // unfortunately, we need low level access to large cubes for performance
+            // (casacore's slicers do not provide an adequate solution)
+            // This test method tests assumed data distribution as this particular 
+            casa::Matrix<casa::uInt> mtr(3,5);
+            for (casa::uInt row=0; row<mtr.nrow(); ++row) {
+                 for (casa::uInt col=0; col<mtr.ncolumn(); ++col) {
+                      mtr(row, col) = row * 10 + col;
+                 }
+            }
+            CPPUNIT_ASSERT(mtr.contiguousStorage());
+            casa::uInt *ptr = mtr.data();
+            for (casa::uInt row=0; row<mtr.nrow(); ++row) {
+                 for (casa::uInt col=0; col<mtr.ncolumn(); ++col) {
+                      casa::uInt index = col * mtr.nrow() + row;
+                      CPPUNIT_ASSERT_EQUAL(mtr(row, col), *(ptr + index));
+                 }
+            }
+            // now test similar thing for a cube
+            casa::Cube<casa::uInt> cube(3,5,7);
+            for (casa::uInt row=0; row<cube.nrow(); ++row) {
+                 for (casa::uInt col=0; col<cube.ncolumn(); ++col) {
+                      for (casa::uInt plane=0; plane<cube.nplane(); ++plane) {
+                           cube(row, col, plane) = row * 100 + col * 10 + plane;
+                      }
+                 }
+            }
+            CPPUNIT_ASSERT(cube.contiguousStorage());
+            CPPUNIT_ASSERT(!cube.yzPlane(0).contiguousStorage());
+            casa::uInt *ptr1 = cube.data();
+            for (casa::uInt row=0; row<cube.nrow(); ++row) {
+                 for (casa::uInt col=0; col<cube.ncolumn(); ++col) {
+                      for (casa::uInt plane=0; plane<cube.nplane(); ++plane) {
+                           casa::uInt index = (plane * cube.ncolumn() + col) * cube.nrow() + row;
+                           CPPUNIT_ASSERT_EQUAL(cube(row, col, plane), *(ptr1 + index));
+                      }
+                 }
+            }
+            
         }
 
         void testResizeChans() {
