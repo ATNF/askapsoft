@@ -48,6 +48,8 @@ class ConfigurationTest : public CppUnit::TestFixture {
         CPPUNIT_TEST(testAntennas);
         CPPUNIT_TEST(testFeed);
         CPPUNIT_TEST(testServiceConfig);
+        CPPUNIT_TEST(testServiceRanks);
+        CPPUNIT_TEST_EXCEPTION(testDuplicateServiceRanks, AskapError);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -139,6 +141,29 @@ class ConfigurationTest : public CppUnit::TestFixture {
 
         void tearDown() {
             itsParset.clear();
+        }
+        void testServiceRanks() {
+           itsParset.add("service_ranks", "[1, 3, 5, 12]");
+           Configuration conf(itsParset, 4, 12);
+           CPPUNIT_ASSERT_EQUAL(4, conf.rank());
+           CPPUNIT_ASSERT_EQUAL(12, conf.nprocs());
+           CPPUNIT_ASSERT_EQUAL(2, conf.receiverId());
+           CPPUNIT_ASSERT_EQUAL(9, conf.nReceivingProcs());
+           int receiverIds[12] = {0,-1,1,-1,2,-1,3,4,5,6,7,8};
+           for (int rank = 0; rank < conf.nprocs(); ++rank) {
+                Configuration conf1(itsParset, rank, conf.nprocs());
+                CPPUNIT_ASSERT_EQUAL(rank, conf1.rank());
+                CPPUNIT_ASSERT_EQUAL(conf.nprocs(), conf1.nprocs());
+                CPPUNIT_ASSERT_EQUAL(9, conf1.nReceivingProcs());
+                CPPUNIT_ASSERT(rank < 12);
+                CPPUNIT_ASSERT_EQUAL(receiverIds[rank], conf1.receiverId());
+           }
+        }
+
+        void testDuplicateServiceRanks() {
+           itsParset.add("service_ranks", "[1, 1]");
+           // this should throw an exception
+           Configuration conf(itsParset, 4, 12);
         }
 
         void testArrayName() {

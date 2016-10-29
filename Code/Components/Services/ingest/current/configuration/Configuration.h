@@ -70,6 +70,21 @@ class Configuration {
 
         /// @brief Returns the number of processes
         int nprocs(void) const;
+ 
+        /// @brief Returns receiver Id of the calling process (zero based).
+        /// @details this is like a rank, but excludes non-receiving ranks.
+        /// If this is a non-receiving rank, -1 is returned.
+        /// @return receiver Id or -1 for non-receiving ranks
+        inline int receiverId() const { return itsReceiverId; }
+
+        /// @brief check whether the calling process is receiving data
+        /// @return true, if this process is a receiver
+        inline bool receivingRank() const { return itsReceiverId >= 0; }
+
+        /// @brief Returns the number of receiving processes
+        /// @return the total number of processes receiving data
+        inline int nReceivingProcs() const { return itsNReceivingProcs; }
+        
 
         /// @brief The name of the array. e.g. "BETA"
         casa::String arrayName(void) const;
@@ -110,6 +125,9 @@ class Configuration {
 
     private:
 
+        /// @brief populate receiver Id and calculate number of receivers
+        void buildRanksInfo();
+
         void buildTasks(void);
 
         void buildFeeds(void);
@@ -128,6 +146,12 @@ class Configuration {
 
         /// The total number of processes
         const int itsNProcs;
+
+        /// Receiver Id of this process or -1 if it is a non-receiving rank
+        int itsReceiverId;
+
+        /// The total number of receiving processes
+        int itsNReceivingProcs;
 
         boost::shared_ptr<FeedConfig> itsFeedConfig;
 

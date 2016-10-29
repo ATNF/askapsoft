@@ -66,8 +66,9 @@ using namespace askap::cp::ingest;
 ASKAP_LOGGER(logger, ".Configuration");
 
 Configuration::Configuration(const LOFAR::ParameterSet& parset, int rank, int nprocs)
-    : itsParset(parset), itsRank(rank), itsNProcs(nprocs)
+    : itsParset(parset), itsRank(rank), itsNProcs(nprocs), itsReceiverId(-1), itsNReceivingProcs(-1)
 {
+    buildRanksInfo();
     buildTasks();
     buildFeeds();
     buildAntennas();
@@ -83,6 +84,53 @@ int Configuration::rank(void) const
 int Configuration::nprocs(void) const
 {
     return itsNProcs;
+}
+
+/// @brief populate receiver Id and calculate number of receivers
+void Configuration::buildRanksInfo()
+{
+   // by default, all ranks are receiving ranks
+   std::vector<unsigned int> nonReceivingRanks = itsParset.getUint32Vector("service_ranks",std::vector<unsigned int>());
+   if (rank() < 0) { 
+       // serial case, not really our use case in the post BETA era anyway but do these checks for completeness
+       ASKAPCHECK(nprocs() == 1, "Number of processes is expected to be 1 in the serial case; you have "<<nprocs());
+       ASKAPCHECK(nonReceivingRanks.size() == 0, "Non-receiving (a.k.a service_ranks)  are not supported in the serial case");
+       itsReceiverId = 0;
+       itsNReceivingProcs = nprocs();
+   } else {
+       ASKAPDEBUGASSERT(itsReceiverId == -1);
+       ASKAPCHECK(rank() < nprocs(), "Rank "<<rank()<<" should not exceed the number of processes = "<<nprocs());
+       // by default all are receiving ranks
+       itsNReceivingProcs = nprocs();
+       bool thisProcessIsAReceiver = true;
+       int nServiceRanksBeforeThis = 0, nServiceRanksIgnored = 0;
+       for (std::vector<unsigned int>::const_iterator ci = nonReceivingRanks.begin();
+            ci != nonReceivingRanks.end(); ++ci) {
+            ASKAPCHECK(std::count(nonReceivingRanks.begin(), nonReceivingRanks.end(), *ci) == 1,
+                       "Duplicated element was found in service_ranks field: "<<nonReceivingRanks);
+            ASKAPCHECK(*ci >= 0, "Negative values are not allowed in the list of service ranks: "<<nonReceivingRanks);
+            if (*ci >= static_cast<unsigned int>(nprocs())) {
+                ++nServiceRanksIgnored;
+            } else {
+                --itsNReceivingProcs;
+                if (*ci < rank()) {
+                    ++nServiceRanksBeforeThis;
+                } else if (*ci == static_cast<unsigned int>(rank())) {
+                    thisProcessIsAReceiver = false;
+                }
+            }
+       }
+       if (thisProcessIsAReceiver) {
+           // get receiver Id for it
+           itsReceiverId = rank() - nServiceRanksBeforeThis;
+           ASKAPASSERT(itsReceiverId >= 0);
+           ASKAPASSERT(itsReceiverId < itsNReceivingProcs);
+       }
+       if (nServiceRanksIgnored > 0) {
+           ASKAPLOG_WARN_STR(logger, "Given the number of ranks available ("<<nprocs()<<"), "<<nServiceRanksIgnored<<" service rank(s) are ignored");
+       }
+   }    
+   ASKAPLOG_DEBUG_STR(logger, "Rank "<<rank()<<" out of "<<nprocs()<<" available has receiverId = "<<receiverId()<<"; number of receivers = "<<nReceivingProcs());
 }
 
 casa::String Configuration::arrayName(void) const
