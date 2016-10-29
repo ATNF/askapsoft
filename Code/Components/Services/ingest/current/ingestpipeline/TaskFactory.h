@@ -29,11 +29,13 @@
 
 // ASKAPsoft includes
 #include "boost/shared_ptr.hpp"
+#include "Common/ParameterSet.h"
 
 // Local package includes
 #include "ingestpipeline/ITask.h"
 #include "ingestpipeline/sourcetask/ISource.h"
 #include "configuration/Configuration.h" // Includes all configuration attributes too
+#include "ingestpipeline/sourcetask/IVisSource.h"
 
 namespace askap {
 namespace cp {
@@ -75,6 +77,11 @@ class TaskFactory {
         /// @brief Create a source given the parameters specified
         /// in the parameter set.
         boost::shared_ptr< ISource > createNoMetadataSource(void);
+   
+        /// @brief create visibility source
+        /// @param[in] params parameter set to set up visibility source
+        /// @return visibility source object or an empty shared pointer for service ranks
+        boost::shared_ptr<IVisSource> createVisSource(const LOFAR::ParameterSet &params);
 
     private:
         const Configuration itsConfig;

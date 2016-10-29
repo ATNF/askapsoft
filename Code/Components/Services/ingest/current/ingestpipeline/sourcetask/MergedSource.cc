@@ -80,6 +80,7 @@ MergedSource::MergedSource(const LOFAR::ParameterSet& params,
      itsSignals(itsIOService, SIGINT, SIGTERM, SIGUSR1),
      itsLastTimestamp(-1), itsVisConverter(params, config)
 {
+    ASKAPCHECK(bool(visSrc) == config.receivingRank(), "Receiving ranks should get visibility source object, service ranks shouldn't");
 
     // log TAI_UTC casacore measures table version and date
     const std::pair<double, std::string> measVersion = measuresTableVersion();
@@ -140,22 +141,29 @@ VisChunk::ShPtr MergedSource::next(void)
             "Consecutive VisChunks have the same timestamp");
     itsLastTimestamp = itsMetadata->time();
 
+    if (!itsVisConverter.config().receivingRank()) {
+        // service rank - return chunk with zero dimensions 
+        VisChunk::ShPtr dummy(new VisChunk(0,0,0,0));
+        return dummy;
+    }
+    ASKAPDEBUGASSERT(itsVisSrc);
+
     // Get the next VisDatagram if there isn't already one in the buffer
     const uint32_t maxNoDataRetries = 10;
     for (uint32_t count = 0; !itsVis && count < maxNoDataRetries; ++count) {
-        itsVis = itsVisSrc->next(ONE_SECOND);
+        itsVis = itsVisSrc->next(ONE_SECOND * 10);
         checkInterruptSignal();
         if (itsVis) { 
-            ASKAPLOG_DEBUG_STR(logger, "Received non-zero itsVis; time="<<bat2epoch(itsVis->timestamp));
+            //ASKAPLOG_DEBUG_STR(logger, "Received non-zero itsVis; time="<<bat2epoch(itsVis->timestamp));
         } else {
-            ASKAPLOG_DEBUG_STR(logger, "Received zero itsVis, retrying");
+            ASKAPLOG_DEBUG_STR(logger, "Received zero itsVis after "<<count + 1<<" attempt(s), retrying");
         }
     }
     ASKAPCHECK(itsVis, "Reached maximum number of retries for id="<<itsVisConverter.config().receiverId()<<
             ", the correlator ioc does not seem to send data to this rank. Reached the limit of "<<
             maxNoDataRetries<<" retry attempts");
 
-    ASKAPLOG_DEBUG_STR(logger, "Before aligning metadata and visibility");
+    //ASKAPLOG_DEBUG_STR(logger, "Before aligning metadata and visibility");
 
     // a hack to account for malformed BAT which can glitch different way for
     // different correlator cards, eventually we should remove this code 
@@ -165,8 +173,10 @@ VisChunk::ShPtr MergedSource::next(void)
         const casa::uLong timeMismatch = itsVis->timestamp > itsMetadata->time() ? 
               itsVis->timestamp -  itsMetadata->time() : itsMetadata->time() - itsVis->timestamp;
         if (timeMismatch < 2500000ul) {
-            ASKAPLOG_DEBUG_STR(logger, "Detected BAT glitch between metadata and visibility stream on card "<<
+            ASKAPLOG_ERROR_STR(logger, "Detected BAT glitch between metadata and visibility stream on card "<<
                  itsVisConverter.config().receiverId() + 1<<" mismatch = "<<float(timeMismatch)/1e3<<" ms");
+            ASKAPLOG_DEBUG_STR(logger, "    visibility stream: "<<std::hex<<itsVis->timestamp<<" mdata: "<<std::hex<<
+                                       itsMetadata->time());
             ASKAPLOG_DEBUG_STR(logger, "    faking metadata timestamp to read "<<bat2epoch(itsVis->timestamp).getValue());
             itsMetadata->time(itsVis->timestamp);
         }

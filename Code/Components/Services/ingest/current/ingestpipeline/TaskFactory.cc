@@ -163,11 +163,26 @@ boost::shared_ptr< ISource > TaskFactory::createMergedSource(void)
 
     // 2) Configure and create the visibility source
     const LOFAR::ParameterSet params = itsConfig.tasks().at(0).params();
-    VisSource::ShPtr visSrc(new VisSource(params, rank));
+    VisSource::ShPtr visSrc = createVisSource(params);
 
     // 3) Create and configure the merged source
     boost::shared_ptr< MergedSource > source(new MergedSource(params, itsConfig, metadataSrc, visSrc));
     return source;
+}
+
+boost::shared_ptr<IVisSource> TaskFactory::createVisSource(const LOFAR::ParameterSet &params) 
+{
+    if (itsConfig.receivingRank()) {
+        // this is a receiving rank
+        ASKAPLOG_DEBUG_STR(logger, "Rank "<<itsConfig.rank()<<" is a receiving rank with id="<<itsConfig.receiverId()<<
+                  " (total number: "<<itsConfig.nReceivingProcs()<<" receivers) - setting up VisSource");
+        return VisSource::ShPtr(new VisSource(params, itsConfig.receiverId()));
+    } else {
+        // this is a service rank
+        ASKAPLOG_DEBUG_STR(logger, "Rank "<<itsConfig.rank()<<" is a service rank (total number: "<<
+                   itsConfig.nprocs() - itsConfig.nReceivingProcs()<<" service ranks)");
+    }
+    return VisSource::ShPtr();
 }
 
 boost::shared_ptr< ISource > TaskFactory::createNoMetadataSource(void)
@@ -178,10 +193,6 @@ boost::shared_ptr< ISource > TaskFactory::createNoMetadataSource(void)
 
     //  Configure and create the visibility source
     const LOFAR::ParameterSet params = itsConfig.tasks().at(0).params();
-    const int rank = itsConfig.rank();
-    VisSource::ShPtr visSrc(new VisSource(params, rank));
-
-    // Create and configure the merged source
-    boost::shared_ptr< NoMetadataSource > source(new NoMetadataSource(params, itsConfig, visSrc));
+    boost::shared_ptr< NoMetadataSource > source(new NoMetadataSource(params, itsConfig, createVisSource(params)));
     return source;
 }

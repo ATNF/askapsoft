@@ -96,11 +96,11 @@ void IngestPipeline::ingest(void)
         ASKAPTHROW(AskapError, "No pipeline tasks specified");
     }
 
-    // at this stage we do not support the situation when
-    // some ranks may be inactive up front. This may be necessary
-    // if more parallelism is required for post-processing than
-    // for receiving. But currently, source task is instantiated
-    // for all ranks.
+    // To avoid issues with lock up in MPI collective calls, 
+    // source tasks are instantiated for all ranks. 
+    // It is up to the code of the source tasks to ensure that
+    // receiving is bypassed, if necessary.
+
     if (tasks[0].type() == TaskDesc::MergedSource) {
         itsSource = factory.createMergedSource();
     } else if (tasks[0].type() == TaskDesc::NoMetadataSource) {
@@ -121,8 +121,8 @@ void IngestPipeline::ingest(void)
         try {
             timer.mark();
             bool endOfStream = ingestOne();
-            if (itsConfig.rank() == 0) {
-                ASKAPLOG_INFO_STR(logger, "Total cycle execution time "
+            if ((itsConfig.receiverId() == 0) || !itsConfig.receivingRank()) {
+                ASKAPLOG_DEBUG_STR(logger, "Total cycle execution time "
                        << timer.real() << "s");
             }
             itsRunning = !endOfStream;
@@ -147,35 +147,56 @@ bool IngestPipeline::ingestOne(void)
     // all ranks are active up front
     ASKAPDEBUGASSERT(itsSource);
     VisChunk::ShPtr chunk(itsSource->next());
-    if (itsConfig.rank() == 0) {
-        ASKAPLOG_INFO_STR(logger, "Source task execution time " << timer.real() << "s");
+    if (itsConfig.receiverId() == 0) {
+        ASKAPLOG_DEBUG_STR(logger, "Source task execution time " << timer.real() << "s");
     }
     MonitoringSingleton::update<double>("SourceTaskDuration",timer.real(), MonitorPointStatus::OK, "s");
     if (chunk.get() == 0) {
         return true; // Finished
     }
 
-    if (itsConfig.rank() == 0) {
-        ASKAPLOG_INFO_STR(logger, "Received one VisChunk. Timestamp: " << chunk->time());
-    } else {
-        ASKAPLOG_DEBUG_STR(logger, "Received one VisChunk. Timestamp: " << chunk->time());
+    // because empty shared pointer is an exit flag, service ranks will get chunk with zero 
+    // dimensions instead - turn it back into an empty shared pointer to indicate deactivated
+    // rank (as per normal protocol of task chain traversing).
+    if (!itsConfig.receivingRank()) {
+        ASKAPDEBUGASSERT(chunk->nRow() == 0);
+        chunk.reset();
     }
+
+    if (itsConfig.receiverId() == 0) {
+        ASKAPDEBUGASSERT(chunk);
+        ASKAPLOG_DEBUG_STR(logger, "Received one VisChunk. Timestamp: " << chunk->time());
+    } 
 
     // For each task call process on the VisChunk as long as this rank stays active
     double processingTime = 0.;
+    // the following flag is used as a safeguard against no processing at all for
+    // service ranks with a non-blocking source
+    bool wasProcessed = false;
     for (unsigned int i = 0; i < itsTasks.size(); ++i) {
          if (chunk || itsTasks[i]->isAlwaysActive()) {
              timer.mark();
              itsTasks[i]->process(chunk);
-             if (itsConfig.rank() == 0) {
-                 ASKAPLOG_INFO_STR(logger, itsTasks[i]->getName() << " execution time "
+             if ((itsConfig.receiverId() == 0) || (!itsConfig.receivingRank())) {
+                 ASKAPLOG_DEBUG_STR(logger, itsTasks[i]->getName() << " execution time "
                        << timer.real() << "s");
              }
+             wasProcessed = true;
              processingTime += timer.real();
          }
     }
     
     MonitoringSingleton::update<double>("ProcessingDuration",processingTime, MonitorPointStatus::OK, "s");
+
+    // this is just some protection against going into an empty loop
+    // if the user doesn't set up any tasks to communicate with 
+    // receiving ranks from the service rank in the case of 
+    // no metadata source (metadata would act as a barrier in the 
+    // current way things are implemented)
+    if (!wasProcessed && (itsConfig.tasks().at(0).type() == TaskDesc::NoMetadataSource)) {
+        ASKAPLOG_ERROR_STR(logger, "Service rank appears to do no work and is not synchronised to data streams. Insert sleep to avoid an empty loop.");
+        sleep(5);
+    }
 
     return false; // Not finished
 }
