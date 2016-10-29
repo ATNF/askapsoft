@@ -71,7 +71,7 @@ class MergedSourceTest : public CppUnit::TestFixture,
             LOFAR::ParameterSet params;
             params.add("n_channels.0", utility::toString(nChannelsForTest()));
             const Configuration config = ConfigurationHelper::createDummyConfig();
-            itsInstance.reset(new MergedSource(params, config, itsMetadataSrc, itsVisSrc, 1, 0));
+            itsInstance.reset(new MergedSource(params, config, itsMetadataSrc, itsVisSrc));
         }
 
         void tearDown() {

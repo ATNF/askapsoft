@@ -69,13 +69,10 @@ class MergedSource : public ISource,
         ///                             TOS metadata will be sourced.
         /// @param[in] visSource    Instance of a IVisSource from which the visibilities
         ///                         will be sourced.
-        /// @param[in] numTasks     Total number of ingest pipeline tasks. This enables
-        ///                         the merged source to determine how many visibilities
-        ///                         it is responsible for receiving.
         MergedSource(const LOFAR::ParameterSet& params,
                      const Configuration& config,
                      IMetadataSource::ShPtr metadataSource,
-                     IVisSource::ShPtr visSource, int numTasks, int id);
+                     IVisSource::ShPtr visSource);
 
         /// @brief Destructor.
         virtual ~MergedSource();

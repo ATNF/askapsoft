@@ -57,9 +57,8 @@ public:
    /// @param[in] params parameters specific to the associated source task
    ///                   used to set up mapping, etc
    /// @param[in] config configuration
-   /// @param[in] id rank of the given ingest process
    VisConverter(const LOFAR::ParameterSet& params,
-                const Configuration& config, int id);
+                const Configuration& config);
 
    /// @brief create a new VisChunk
    /// @details This method initialises itsVisChunk with a new buffer.

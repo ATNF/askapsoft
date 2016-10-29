@@ -45,12 +45,11 @@ namespace ingest {
 /// @param[in] params parameters specific to the associated source task
 ///                   used to set up mapping, etc
 /// @param[in] config configuration
-/// @param[in] id rank of the given ingest process
 VisConverter<VisDatagramBETA>::VisConverter(const LOFAR::ParameterSet& params,
-       const Configuration& config, int id) : 
-       VisConverterBase(params, config, id) 
+       const Configuration& config) : 
+       VisConverterBase(params, config) 
 {
-   ASKAPLOG_INFO_STR(logger, "Initialised BETA-style visibility stream converter, id="<<id);
+   ASKAPLOG_INFO_STR(logger, "Initialised BETA-style visibility stream converter, id="<<config.receiverId());
 }
 
 /// @brief create a new VisChunk
@@ -64,7 +63,7 @@ void VisConverter<VisDatagramBETA>::initVisChunk(const casa::uLong timestamp,
 {
    itsReceivedDatagrams.clear();
    VisConverterBase::initVisChunk(timestamp, corrMode);
-   const casa::uInt nChannels = channelManager().localNChannels(id());
+   const casa::uInt nChannels = channelManager().localNChannels(config().receiverId());
     
    ASKAPCHECK(nChannels % VisDatagramTraits<VisDatagramBETA>::N_CHANNELS_PER_SLICE == 0,
         "Number of channels must be divisible by N_CHANNELS_PER_SLICE");

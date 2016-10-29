@@ -113,7 +113,7 @@ void Configuration::buildRanksInfo()
                 ++nServiceRanksIgnored;
             } else {
                 --itsNReceivingProcs;
-                if (*ci < rank()) {
+                if (*ci < static_cast<unsigned int>(rank())) {
                     ++nServiceRanksBeforeThis;
                 } else if (*ci == static_cast<unsigned int>(rank())) {
                     thisProcessIsAReceiver = false;
@@ -126,11 +126,11 @@ void Configuration::buildRanksInfo()
            ASKAPASSERT(itsReceiverId >= 0);
            ASKAPASSERT(itsReceiverId < itsNReceivingProcs);
        }
-       if (nServiceRanksIgnored > 0) {
-           ASKAPLOG_WARN_STR(logger, "Given the number of ranks available ("<<nprocs()<<"), "<<nServiceRanksIgnored<<" service rank(s) are ignored");
+       if ((nServiceRanksIgnored > 0) && (rank() == 0)) {
+           ASKAPLOG_WARN_STR(logger, "Given the number of ranks available ("<<nprocs()<<"), "<<nServiceRanksIgnored<<" service rank(s) is/are ignored");
        }
    }    
-   ASKAPLOG_DEBUG_STR(logger, "Rank "<<rank()<<" out of "<<nprocs()<<" available has receiverId = "<<receiverId()<<"; number of receivers = "<<nReceivingProcs());
+   //ASKAPLOG_DEBUG_STR(logger, "Rank "<<rank()<<" out of "<<nprocs()<<" available has receiverId = "<<receiverId()<<"; number of receivers = "<<nReceivingProcs());
 }
 
 casa::String Configuration::arrayName(void) const

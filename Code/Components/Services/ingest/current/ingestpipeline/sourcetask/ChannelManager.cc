@@ -64,14 +64,14 @@ ChannelManager::ChannelManager(const LOFAR::ParameterSet& params) :
              ASKAPCHECK(itsChannelMap.find(rank) == itsChannelMap.end(), "Number of channels has already been defined for rank="<<rank);
 
              itsChannelMap[rank] = subset.getUint32(key);
-             ASKAPLOG_DEBUG_STR(logger, "Channel Mappings - Rank " << rank
+             ASKAPLOG_DEBUG_STR(logger, "Channel Mappings - receiver " << rank
                                << " will handle " << itsChannelMap[rank] << " channels");
          } else {
              ASKAPCHECK(key.size() > pos + 2, "Unable to parse rank space "<<key<<" in channel manager");
              const int startRank = utility::fromString<int>(key.substr(0,pos));
              const int endRank = utility::fromString<int>(key.substr(pos+2));
              const unsigned int nchan = subset.getUint32(key);
-             ASKAPLOG_DEBUG_STR(logger, "Channel Mappings - Ranks from " << startRank<<" to "<<endRank<<", inclusive,"
+             ASKAPLOG_DEBUG_STR(logger, "Channel Mappings - receivers from " << startRank<<" to "<<endRank<<", inclusive,"
                                << " will handle " << nchan << " channels");
              for (int rank = startRank; rank <= endRank; ++rank) {
                   ASKAPCHECK(itsChannelMap.find(rank) == itsChannelMap.end(), "Number of channels has already been defined for rank="<<rank);

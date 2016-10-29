@@ -69,15 +69,14 @@ using namespace askap::cp::ingest;
 
 NoMetadataSource::NoMetadataSource(const LOFAR::ParameterSet& params,
                                    const Configuration& config,
-                                   IVisSource::ShPtr visSrc,
-                                   int /*numTasks*/, int id) :
+                                   IVisSource::ShPtr visSrc) :
         itsVisSrc(visSrc),
         itsInterrupted(false),
         itsSignals(itsIOService, SIGINT, SIGTERM, SIGUSR1),
         itsCentreFreq(asQuantity(params.getString("centre_freq"))),
         itsTargetName(params.getString("target_name")),
         itsTargetDirection(asMDirection(params.getStringVector("target_direction"))),
-        itsLastTimestamp(0u), itsVisConverter(params, config, id)
+        itsLastTimestamp(0u), itsVisConverter(params, config)
 {
     itsCorrelatorMode = config.lookupCorrelatorMode(params.getString("correlator_mode"));
 
@@ -215,7 +214,7 @@ VisChunk::ShPtr NoMetadataSource::createVisChunk(const casa::uLong timestamp)
 
     // Frequency vector is not of length nRows, but instead nChannels
     chunk->frequency() = itsVisConverter.channelManager().localFrequencies(
-            itsVisConverter.id(),
+            itsVisConverter.config().receiverId(),
             itsCentreFreq.getValue("Hz") - chunk->channelWidth() / 2.,
             chunk->channelWidth(),
             itsCorrelatorMode.nChan());

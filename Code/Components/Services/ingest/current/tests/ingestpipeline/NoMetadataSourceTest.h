@@ -70,7 +70,7 @@ class NoMetadataSourceTest : public CppUnit::TestFixture,
             params.add("target_direction","[12h30m49.43, +12d23m28.100, J2000]");
             params.add("correlator_mode", "standard");
             Configuration config = ConfigurationHelper::createDummyConfig();
-            itsInstance.reset(new NoMetadataSource(params, config, itsVisSrc, 1, 0));
+            itsInstance.reset(new NoMetadataSource(params, config, itsVisSrc));
         }
 
         void tearDown() {

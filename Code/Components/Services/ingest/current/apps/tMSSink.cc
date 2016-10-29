@@ -56,7 +56,7 @@ using namespace askap::cp::ingest;
 
 ASKAP_LOGGER(logger, "tMSSink");
 
-class TestParallelMetadataSnoopApp : public askap::cp::common::ParallelCPApplication
+class MSSinkTestApp : public askap::cp::common::ParallelCPApplication
 {
 public:
    virtual void run() {
@@ -67,7 +67,7 @@ public:
     
       ASKAPLOG_INFO_STR(logger, "Setting up mock up data structure for rank="<<rank());
       Configuration cfg(config(), rank(), numProcs());
-      VisConverter<VisDatagramADE> conv(config(), cfg, rank());
+      VisConverter<VisDatagramADE> conv(config(), cfg);
       conv.initVisChunk(4976749386006000ul, cfg.lookupCorrelatorMode("standard"));
       boost::shared_ptr<common::VisChunk> chunk = conv.visChunk();
       ASKAPASSERT(chunk);
@@ -105,6 +105,6 @@ private:
 
 int main(int argc, char *argv[])
 {
-    TestParallelMetadataSnoopApp app;
+    MSSinkTestApp app;
     return app.main(argc, argv);
 }

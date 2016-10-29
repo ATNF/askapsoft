@@ -166,7 +166,7 @@ boost::shared_ptr< ISource > TaskFactory::createMergedSource(void)
     VisSource::ShPtr visSrc(new VisSource(params, rank));
 
     // 3) Create and configure the merged source
-    boost::shared_ptr< MergedSource > source(new MergedSource(params, itsConfig, metadataSrc, visSrc, numProcs, rank));
+    boost::shared_ptr< MergedSource > source(new MergedSource(params, itsConfig, metadataSrc, visSrc));
     return source;
 }
 
@@ -179,10 +179,9 @@ boost::shared_ptr< ISource > TaskFactory::createNoMetadataSource(void)
     //  Configure and create the visibility source
     const LOFAR::ParameterSet params = itsConfig.tasks().at(0).params();
     const int rank = itsConfig.rank();
-    const int numProcs = itsConfig.nprocs();
     VisSource::ShPtr visSrc(new VisSource(params, rank));
 
     // Create and configure the merged source
-    boost::shared_ptr< NoMetadataSource > source(new NoMetadataSource(params, itsConfig, visSrc, numProcs, rank));
+    boost::shared_ptr< NoMetadataSource > source(new NoMetadataSource(params, itsConfig, visSrc));
     return source;
 }

@@ -63,13 +63,13 @@ class VisConverterBaseTest : public CppUnit::TestFixture {
         void setUp() {
             itsVisSrc.reset(new MockVisSource);
 
-            const Configuration config = ConfigurationHelper::createDummyConfig();
+            const Configuration config = ConfigurationHelper::createDummyConfig(1,2);
             LOFAR::ParameterSet params;
             params.add("n_channels.0", "0");
             params.add("n_channels.1", "16416");
             // input beams are one-based, MS requires zero-based:
             params.add("beammap","1:0,2:1,3:2,4:3,5:4,10:-1");
-            itsInstance.reset(new VisConverterBase(params, config, 1));
+            itsInstance.reset(new VisConverterBase(params, config));
         }
 
         void tearDown() {
@@ -79,7 +79,7 @@ class VisConverterBaseTest : public CppUnit::TestFixture {
 
         void testConstruct() {
             CPPUNIT_ASSERT(itsInstance);
-            CPPUNIT_ASSERT_EQUAL(1, itsInstance->id());
+            CPPUNIT_ASSERT_EQUAL(1, itsInstance->config().receiverId());
         }
 
         void testInitVisChunk() {

@@ -46,7 +46,7 @@ namespace ingest {
 class ConfigurationHelper {
 
     public:
-        static Configuration createDummyConfig(void)
+        static Configuration createDummyConfig(int rank = 0, int nprocs = 1)
         {
             LOFAR::ParameterSet parset;
 
@@ -153,7 +153,7 @@ class ConfigurationHelper {
             parset.add("tasks.MSSink.params.stman.tilencorr", "4");
             parset.add("tasks.MSSink.params.stman.tilenchan", "1026");
 
-            return Configuration(parset);
+            return Configuration(parset,rank,nprocs);
         }
 };
 

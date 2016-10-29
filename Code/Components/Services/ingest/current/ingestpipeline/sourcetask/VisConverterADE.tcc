@@ -49,23 +49,22 @@ namespace ingest {
 /// @param[in] params parameters specific to the associated source task
 ///                   used to set up mapping, etc
 /// @param[in] config configuration
-/// @param[in] id rank of the given ingest process
 VisConverter<VisDatagramADE>::VisConverter(const LOFAR::ParameterSet& params,
-       const Configuration& config, int id) : 
-       VisConverterBase(params, config, id), itsNSlices(4u), itsNDuplicates(0u),
+       const Configuration& config) : 
+       VisConverterBase(params, config), itsNSlices(4u), itsNDuplicates(0u),
        // unmapped products will be cached and ignored in the future processing
        // if product number falls beyond the bounds of this vector, full processing is done
        // This type of caching buys us about 0.3 seconds 
        itsInvalidProducts(2628u, false)
 {
-   ASKAPLOG_INFO_STR(logger, "Initialised ADE-style visibility stream converter, id="<<id);
+   ASKAPLOG_DEBUG_STR(logger, "Initialised ADE-style visibility stream converter, id="<<config.receiverId());
    // by default, we have 4 data slices. This number can be reduced by rejecting some
    // datagrams before they are even put in the buffer
    const uint32_t maxNSlices = VisSource::getMaxSlice(params) + 1;
    if (maxNSlices < itsNSlices) {
        itsNSlices = maxNSlices;
    }
-   ASKAPLOG_INFO_STR(logger, "Expecting "<<itsNSlices<<" slices of the correlator product space");
+   ASKAPLOG_DEBUG_STR(logger, "Expecting "<<itsNSlices<<" slices of the correlator product space");
 }
 
 /// @brief helper (and probably temporary) method to remap channels
@@ -100,7 +99,7 @@ void VisConverter<VisDatagramADE>::initVisChunk(const casa::uLong timestamp,
        itsNDuplicates = 0u;
    }
    VisConverterBase::initVisChunk(timestamp, corrMode);
-   const casa::uInt nChannels = channelManager().localNChannels(id());
+   const casa::uInt nChannels = channelManager().localNChannels(config().receiverId());
 
    ASKAPCHECK(nChannels % 216 == 0, "Bandwidth should be multiple of 4-MHz");
     

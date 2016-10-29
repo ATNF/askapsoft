@@ -77,9 +77,8 @@ public:
    /// @param[in] params parameters specific to the associated source task
    ///                   used to set up mapping, etc
    /// @param[in] config configuration
-   /// @param[in] id rank of the given ingest process
    VisConverterBase(const LOFAR::ParameterSet& params,
-                    const Configuration& config, int id);
+                    const Configuration& config);
 
    /// @brief get expected number of datagrams
    /// @return the number of datagrams required to complete VisChunk
@@ -106,10 +105,6 @@ public:
    /// @note An exception is thrown if one attempts to get an uninitialised
    /// VisChunk.
    const common::VisChunk::ShPtr& visChunk() const;
-
-   /// @brief rank of this ingest process
-   /// @return identity of this process
-   inline int id() const { return itsId; }
 
    /// @brief access to configuration
    /// @return const reference to configuration class
@@ -285,9 +280,6 @@ private:
 
    /// @brief Baseline Map
    const BaselineMap itsBaselineMap;
-
-   /// @brief The rank (identity amongst all ingest processes) of this process
-   const int itsId;
 
    /// @brief warning flag per unknown polarisation
    /// @details to avoid spitting out too much messages

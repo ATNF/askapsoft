@@ -65,12 +65,9 @@ class NoMetadataSource : public ISource,
         ///                             TOS metadata will be sourced.
         /// @param[in] visSource    Instance of a IVisSource from which the visibilities
         ///                         will be sourced.
-        /// @param[in] numTasks     Total number of ingest pipeline tasks. This enables
-        ///                         the merged source to determine how many visibilities
-        ///                         it is responsible for receiving.
         NoMetadataSource(const LOFAR::ParameterSet& params,
                          const Configuration& config,
-                         IVisSource::ShPtr visSource, int numTasks, int id);
+                         IVisSource::ShPtr visSource);
 
         /// @brief Destructor.
         virtual ~NoMetadataSource();

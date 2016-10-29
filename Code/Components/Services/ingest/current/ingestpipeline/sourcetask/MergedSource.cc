@@ -74,11 +74,11 @@ using namespace askap::cp::ingest;
 MergedSource::MergedSource(const LOFAR::ParameterSet& params,
         const Configuration& config,
         IMetadataSource::ShPtr metadataSrc,
-        IVisSource::ShPtr visSrc, int /*numTasks*/, int id) :
+        IVisSource::ShPtr visSrc) :
      itsMetadataSrc(metadataSrc), itsVisSrc(visSrc),
      itsInterrupted(false),
      itsSignals(itsIOService, SIGINT, SIGTERM, SIGUSR1),
-     itsLastTimestamp(-1), itsVisConverter(params, config, id)
+     itsLastTimestamp(-1), itsVisConverter(params, config)
 {
 
     // log TAI_UTC casacore measures table version and date
@@ -151,7 +151,7 @@ VisChunk::ShPtr MergedSource::next(void)
             ASKAPLOG_DEBUG_STR(logger, "Received zero itsVis, retrying");
         }
     }
-    ASKAPCHECK(itsVis, "Reached maximum number of retries for id="<<itsVisConverter.id()<<
+    ASKAPCHECK(itsVis, "Reached maximum number of retries for id="<<itsVisConverter.config().receiverId()<<
             ", the correlator ioc does not seem to send data to this rank. Reached the limit of "<<
             maxNoDataRetries<<" retry attempts");
 
@@ -166,7 +166,7 @@ VisChunk::ShPtr MergedSource::next(void)
               itsVis->timestamp -  itsMetadata->time() : itsMetadata->time() - itsVis->timestamp;
         if (timeMismatch < 2500000ul) {
             ASKAPLOG_DEBUG_STR(logger, "Detected BAT glitch between metadata and visibility stream on card "<<
-                 itsVisConverter.id() + 1<<" mismatch = "<<float(timeMismatch)/1e3<<" ms");
+                 itsVisConverter.config().receiverId() + 1<<" mismatch = "<<float(timeMismatch)/1e3<<" ms");
             ASKAPLOG_DEBUG_STR(logger, "    faking metadata timestamp to read "<<bat2epoch(itsVis->timestamp).getValue());
             itsMetadata->time(itsVis->timestamp);
         }
@@ -321,7 +321,7 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
     // Build frequencies vector
     // Frequency vector is not of length nRows, but instead nChannels
     chunk->frequency() = itsVisConverter.channelManager().localFrequencies(
-            itsVisConverter.id(),
+            itsVisConverter.config().receiverId(),
             metadata.centreFreq().getValue("Hz") - chunk->channelWidth() / 2.,
             chunk->channelWidth(),
             corrMode.nChan());
