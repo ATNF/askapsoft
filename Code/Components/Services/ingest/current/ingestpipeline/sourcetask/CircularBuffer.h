@@ -86,9 +86,11 @@ class CircularBuffer {
             while (itsBuffer.empty()) {
                 // While this call sleeps/blocks the mutex is released
                 if (timeout >= 0) {
-                    itsCondVar.timed_wait(lock, boost::posix_time::microseconds(timeout));
+                    // don't bother adjusting the wait time - it doesn't really matter in all our applications
+                    // checking the output protects against spurious wake ups
+                    const bool timeoutOccurred = !itsCondVar.timed_wait(lock, boost::posix_time::microseconds(timeout));
 
-                    if (itsBuffer.empty()) {
+                    if (itsBuffer.empty() && timeoutOccurred) {
                         return boost::shared_ptr<T>(); // Null pointer
                     }
                 } else {
@@ -125,9 +127,11 @@ class CircularBuffer {
             while (itsBuffer.size() == itsBuffer.capacity()) {
                 // While this call sleeps/blocks the mutex is released
                 if (timeout >= 0) {
-                    itsCondVar.timed_wait(lock, boost::posix_time::microseconds(timeout));
+                    // don't bother adjusting the wait time - it doesn't really matter in all our applications
+                    // checking the output protects against spurious wake ups
+                    const bool timeoutOccurred = !itsCondVar.timed_wait(lock, boost::posix_time::microseconds(timeout));
 
-                    if (itsBuffer.size() == itsBuffer.capacity()) {
+                    if (timeoutOccurred && (itsBuffer.size() == itsBuffer.capacity())) {
                         return false; // Timeout ocurred
                     }
                 } else {
@@ -156,9 +160,11 @@ class CircularBuffer {
             while (itsBuffer.size() != 0) {
                 // While this call sleeps/blocks the mutex is released
                 if (timeout >= 0) {
-                    itsCondVar.timed_wait(lock, boost::posix_time::microseconds(timeout));
+                    // don't bother adjusting the wait time - it doesn't really matter in all our applications
+                    // checking the output protects against spurious wake ups
+                    const bool timeoutOccurred = !itsCondVar.timed_wait(lock, boost::posix_time::microseconds(timeout));
 
-                    if (itsBuffer.size() != 0) {
+                    if (timeoutOccurred && (itsBuffer.size() != 0)) {
                         return false; // Timeout ocurred
                     }
                 } else {

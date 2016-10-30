@@ -104,7 +104,7 @@ VisChunk::ShPtr MergedSource::next(void)
     const long ONE_SECOND = 1000000;
 
     // Get metadata for a real (i.e. scan id >= 0) scan
-    const uint32_t maxNoMetadataRetries = 10;
+    const uint32_t maxNoMetadataRetries = 3;
     for (int32_t count = 0; (!itsMetadata ||  itsMetadata->scanId() == ScanManager::SCANID_IDLE) && 
                              count < static_cast<int32_t>(maxNoMetadataRetries); ++count) {
         itsMetadata = itsMetadataSrc->next(ONE_SECOND * 10);
@@ -144,14 +144,18 @@ VisChunk::ShPtr MergedSource::next(void)
     if (!itsVisConverter.config().receivingRank()) {
         // service rank - return chunk with zero dimensions 
         VisChunk::ShPtr dummy(new VisChunk(0,0,0,0));
+        // invalidate metadata to force reading new record
+        itsMetadata.reset();
         return dummy;
     }
     ASKAPDEBUGASSERT(itsVisSrc);
+    const CorrelatorMode& mode = itsVisConverter.config().lookupCorrelatorMode(itsMetadata->corrMode());
+    const casa::uInt timeout = mode.interval() * 2;
 
     // Get the next VisDatagram if there isn't already one in the buffer
-    const uint32_t maxNoDataRetries = 10;
+    const uint32_t maxNoDataRetries = 3;
     for (uint32_t count = 0; !itsVis && count < maxNoDataRetries; ++count) {
-        itsVis = itsVisSrc->next(ONE_SECOND * 10);
+        itsVis = itsVisSrc->next(timeout);
         checkInterruptSignal();
         if (itsVis) { 
             //ASKAPLOG_DEBUG_STR(logger, "Received non-zero itsVis; time="<<bat2epoch(itsVis->timestamp));
@@ -165,6 +169,7 @@ VisChunk::ShPtr MergedSource::next(void)
 
     //ASKAPLOG_DEBUG_STR(logger, "Before aligning metadata and visibility");
 
+
     // a hack to account for malformed BAT which can glitch different way for
     // different correlator cards, eventually we should remove this code 
     // (and probably rework the logic of this method which has too much BETA legacy
@@ -172,11 +177,11 @@ VisChunk::ShPtr MergedSource::next(void)
     if (itsMetadata->time() != itsVis->timestamp) {
         const casa::uLong timeMismatch = itsVis->timestamp > itsMetadata->time() ? 
               itsVis->timestamp -  itsMetadata->time() : itsMetadata->time() - itsVis->timestamp;
-        if (timeMismatch < 2500000ul) {
+        if (timeMismatch < mode.interval() / 2u) {
             ASKAPLOG_ERROR_STR(logger, "Detected BAT glitch between metadata and visibility stream on card "<<
                  itsVisConverter.config().receiverId() + 1<<" mismatch = "<<float(timeMismatch)/1e3<<" ms");
-            ASKAPLOG_DEBUG_STR(logger, "    visibility stream: "<<std::hex<<itsVis->timestamp<<" mdata: "<<std::hex<<
-                                       itsMetadata->time());
+            ASKAPLOG_DEBUG_STR(logger, "    visibility stream: 0x"<<std::hex<<itsVis->timestamp<<" mdata: 0x"<<std::hex<<
+                                       itsMetadata->time()<<" diff (abs value): 0x"<<std::hex<<timeMismatch);
             ASKAPLOG_DEBUG_STR(logger, "    faking metadata timestamp to read "<<bat2epoch(itsVis->timestamp).getValue());
             itsMetadata->time(itsVis->timestamp);
         }
@@ -189,14 +194,22 @@ VisChunk::ShPtr MergedSource::next(void)
 
         // If the VisDatagram timestamps are in the past (with respect to the
         // TosMetadata) then read VisDatagrams until they catch up
+        uint32_t count = 0;
         while (!itsVis || itsMetadata->time() > itsVis->timestamp) {
             if (logCatchup) {
                 ASKAPLOG_DEBUG_STR(logger, "Reading extra VisDatagrams to catch up");
                 logCatchup = false;
             }
-            itsVis = itsVisSrc->next(ONE_SECOND);
+            itsVis = itsVisSrc->next(timeout);
 
             checkInterruptSignal();
+           
+            if (!itsVis) {
+                ASKAPLOG_DEBUG_STR(logger, "Received zero itsVis after "<<count + 1<<" attempt(s)");
+                ASKAPCHECK(++count < maxNoDataRetries, "Reached maximum number of retries for id="<<itsVisConverter.config().receiverId()<<
+                           ", the correlator ioc does not seem to send data to this rank. Reached the limit of "<<
+                           maxNoDataRetries<<" retry attempts");
+            }
         }
         checkInterruptSignal();
 
@@ -245,9 +258,6 @@ VisChunk::ShPtr MergedSource::next(void)
     // Now the streams are synced, start building a VisChunk
     VisChunk::ShPtr chunk = createVisChunk(*itsMetadata);
     ASKAPDEBUGASSERT(chunk);
-
-    const CorrelatorMode& mode = itsVisConverter.config().lookupCorrelatorMode(itsMetadata->corrMode());
-    const casa::uInt timeout = mode.interval() * 2;
 
     double decodingTime = 0.;
 
