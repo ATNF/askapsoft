@@ -326,8 +326,6 @@ Ccalibrator.ncycles                             = 25
 EOFINNER
     fi
 
-    echo "=== Continuum imaging with Self-calibration, for beam ${BEAM}, self-cal loop \${LOOP} ===" > \$log
-
     # Other than for the first loop, run selavy to extract the
     #  component parset and use it to calibrate
     if [ \${LOOP} -gt 0 ]; then
