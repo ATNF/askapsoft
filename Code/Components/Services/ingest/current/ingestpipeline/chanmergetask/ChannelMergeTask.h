@@ -124,9 +124,10 @@ class ChannelMergeTask : public askap::cp::ingest::ITask {
         /// @details To limit complexity, only a limited number of merging
         /// options is supported. This method checks chunks for the basic consistency
         /// like matching dimensions. It is intended to be executed on all ranks and
-        /// use collective MPI calls.
+        /// uses collective MPI calls. In addition, this method creates a chunk if a new
+        /// rank is activated.
         /// @param[in] chunk the instance of VisChunk to work with
-        void checkChunkForConsistency(askap::cp::common::VisChunk::ShPtr chunk) const;
+        void checkChunkForConsistency(askap::cp::common::VisChunk::ShPtr& chunk) const;
          
         /// @brief local rank in the group
         /// @details Returns the rank against the local communicator, i.e.
@@ -138,14 +139,47 @@ class ChannelMergeTask : public askap::cp::ingest::ITask {
         /// @brief checks the number of ranks to merge against number of ranks
         /// @details This method obtains the number of available ranks against
         /// the local communicator, i.e. the number of streams to merge and checks
-        /// that it is the same as itsRanksToMerge.
-        void checkRanksToMerge() const;
+        /// that it is the same as itsRanksToMerge or one more, if spare ranks are
+        /// activated. It also does consistency checks that only one spare rank is
+        /// activated per group of ranks with valid inputs.
+        /// @param[in] beingActivated true if this rank is being activated
+        void checkRanksToMerge(bool beingActivated) const;
+
+        /// @brief configure local communucator and rank roles
+        /// @details This is the main method determining data distribution logic.
+        /// It uses MPI collective calls to figure out what other ranks are up to.
+        /// Therefore, this method should always be called on the first iteration 
+        /// when all ranks are expected to be active and call process()
+        /// @param[in] isActive true, if input is active for this rank
+        void configureRanks(bool isActive);
+
+        // data fields
+
+        /// @brief configuration
+        Configuration itsConfig;
 
         /// @brief First channel to select
         int itsRanksToMerge;
 
         /// @brief MPI communicator for the group this rank belongs to
         MPI_Comm itsCommunicator;
+
+        /// @brief true, if this rank is used for input or output of data
+        bool itsRankInUse;
+
+        /// @brief true for group of ranks which includes one previously inactive
+        /// rank. 
+        /// @note this field is set if, upon the initialisation, this rank was
+        /// found to be necessary for processing. It ensures the process() method
+        /// is called, even if no input is supplied in this rank (i.e. service ranks
+        /// can be activated on demand). It is initialised with true to ensure each rank calls
+        /// process() which uses MPI collective to configure data distribution for
+        /// the subsequent iterations.
+        bool itsGroupWithActivatedRank;
+
+        /// @brief output rank distribution mode
+        /// @details If true, inavtive ranks will be activated as much as possible
+        bool itsUseInactiveRanks;
 };
 
 }
