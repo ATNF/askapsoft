@@ -668,6 +668,7 @@ void ChannelMergeTask::sendBasicMetadata(const askap::cp::common::VisChunk::ShPt
    out.putEnd();
 
    // send size first
+   ASKAPLOG_DEBUG_STR(logger, "     -- message size "<<buf.size());
    casa::Vector<unsigned long> sndBufForSize(1, buf.size());
    ASKAPDEBUGASSERT(sndBufForSize.size() == 1);
    sendVector(sndBufForSize,++tag);
@@ -676,6 +677,7 @@ void ChannelMergeTask::sendBasicMetadata(const askap::cp::common::VisChunk::ShPt
    casa::Vector<int8_t>  sndBufForData(casa::IPosition(1,buf.size()), buf.data(), casa::SHARE);
 
    sendVector(sndBufForData,tag);
+   ASKAPLOG_DEBUG_STR(logger, "Finished sending basic metadata to the service rank");
 }
 
 /// @brief receive basic metadata from local rank 1
@@ -713,6 +715,8 @@ void ChannelMergeTask::receiveBasicMetadata(const askap::cp::common::VisChunk::S
    ASKAPDEBUGASSERT(receiveBufForSize.size() == 1);
    receiveVector(receiveBufForSize,++tag);
 
+   ASKAPLOG_DEBUG_STR(logger, "     -- message size "<<receiveBufForSize[0]);
+
    std::vector<int8_t> buf(receiveBufForSize[0]);
 
    // actual receive - referencing array by a casa vector for convenience
@@ -732,6 +736,7 @@ void ChannelMergeTask::receiveBasicMetadata(const askap::cp::common::VisChunk::S
          chunk->onSourceFlag()>>chunk->channelWidth()>>chunk->stokes()>>
          chunk->directionFrame();
    in.getEnd();
+   ASKAPLOG_DEBUG_STR(logger, "Received basic metadata from the first rank with valid input");
 }
         
 
