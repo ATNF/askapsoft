@@ -148,9 +148,17 @@ class ChannelMergeTask : public askap::cp::ingest::ITask {
         void receiveBasicMetadata(const askap::cp::common::VisChunk::ShPtr& chunk) const;
         
         /// @brief helper method to send casa vector to rank 0
-        //template<typename T>
-        //void sendVector(const casa::Vector<T>& vec)
-         
+        /// @param[in] vec vector to send
+        /// @param[in] tag optional tag for the message
+        template<typename T>
+        void sendVector(const casa::Vector<T>& vec, int tag = 0) const;
+
+        /// @brief helper method to receive casa vector from rank 1
+        /// @param[in] vec vector to populate (should already be correct size)
+        /// @param[in] tag optional tag for the message
+        template<typename T>
+        void receiveVector(casa::Vector<T>& vec, int tag = 0) const;
+
         /// @brief local rank in the group
         /// @details Returns the rank against the local communicator, i.e.
         /// the process number in the group of processes contributing to the

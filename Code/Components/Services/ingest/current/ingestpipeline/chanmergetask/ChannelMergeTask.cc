@@ -38,7 +38,19 @@
 #include "casacore/casa/aips.h"
 #include "casacore/casa/Arrays/Vector.h"
 #include "casacore/casa/Arrays/Cube.h"
+#include "casacore/measures/Measures/Stokes.h"
+#include "casacore/measures/Measures/MDirection.h"
+#include "casacore/casa/Quanta/MVDirection.h"
 #include "cpcommon/VisChunk.h"
+#include "ingestpipeline/MPITraitsHelper.h"
+#include "Blob/BlobIStream.h"
+#include "Blob/BlobIBufVector.h"
+#include "Blob/BlobOStream.h"
+#include "Blob/BlobOBufVector.h"
+#include "Blob/BlobArray.h"
+#include "Blob/BlobAipsIO.h"
+#include "utils/CasaBlobUtils.h"
+
 
 // boost includes
 #include "boost/shared_array.hpp"
@@ -52,6 +64,91 @@ ASKAP_LOGGER(logger, ".ChannelMergeTask");
 using namespace askap;
 using namespace askap::cp::common;
 using namespace askap::cp::ingest;
+using namespace LOFAR;
+
+namespace LOFAR {
+// temporary quick and dirty stuff - we need to move it to Base, test properly, etc
+LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::Quantity& q)
+{
+  os<<q.getFullUnit().getName()<<q.getValue();
+  return os;
+}
+LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::Quantity& q)
+{
+  std::string unitName;
+  casa::Double val;
+  is>>unitName>>val;
+  q=casa::Quantity(val, casa::Unit(unitName));
+  return is;
+}
+
+LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::MDirection::Ref& ref)
+{
+  const casa::uInt refType = ref.getType();
+  // for now ignore frame and offset - we're not using them in ingest anyway
+  os << refType;
+  return os;
+}
+
+LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::MDirection::Ref& ref)
+{
+  casa::uInt refType;
+  is >> refType;
+  // for now ignore frame and offset - we're not using them in ingest anyway
+  ref = casa::MDirection::Ref(refType);
+  return is;
+}
+
+LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::MVDirection& dir)
+{
+  casa::Vector<casa::Double> angles = dir.get();
+  ASKAPDEBUGASSERT(angles.nelements() == 2);
+  os << angles;
+  return os;
+}
+
+LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::MVDirection& dir)
+{
+  casa::Vector<casa::Double> angles;
+  is >> angles;
+  ASKAPDEBUGASSERT(angles.nelements() == 2);
+  dir = casa::MVDirection(angles);
+  return is;
+}
+
+LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::MDirection& dir)
+{
+  os<<dir.getValue()<<dir.getRef();
+  return os;
+}
+
+LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::MDirection& dir)
+{
+  casa::MVDirection val;
+  casa::MDirection::Ref ref;
+  is >> val >> ref;
+  dir = casa::MDirection(val,ref);
+  return is;
+}
+
+LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::Stokes::StokesTypes& pol)
+{
+  os<<(int)pol;
+  return os;
+}
+
+LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::Stokes::StokesTypes& pol)
+{
+  int intPol;
+  is >> intPol;
+  pol = casa::Stokes::StokesTypes(intPol);
+  return is;
+}
+
+}
+
+//
+
 
 ChannelMergeTask::ChannelMergeTask(const LOFAR::ParameterSet& parset,
         const Configuration& config) : itsConfig(config),
@@ -500,6 +597,35 @@ void ChannelMergeTask::checkRanksToMerge(bool beingActivated) const
    }
 }
 
+/// @brief helper method to send casa vector to rank 0
+/// @param[in] vec vector to send
+/// @param[in] tag optional tag for the message
+template<typename T>
+void ChannelMergeTask::sendVector(const casa::Vector<T>& vec, int tag) const
+{
+   const int root = 0;
+
+   ASKAPASSERT(vec.contiguousStorage());
+   const int response = MPI_Send(const_cast<casa::Vector<T>&>(vec).data(), vec.nelements() * MPITraitsHelper<T>::size, 
+                                 MPITraitsHelper<T>::datatype(), root, tag, itsCommunicator);
+   ASKAPCHECK(response == MPI_SUCCESS, "Error sending vector (message tag="<<tag<<"), response from MPI_Send = "<<response);
+}
+
+/// @brief helper method to receive casa vector from rank 1
+/// @param[in] vec vector to populate (should already be correct size)
+/// @param[in] tag optional tag for the message
+template<typename T>
+void ChannelMergeTask::receiveVector(casa::Vector<T>& vec, int tag) const
+{
+   const int source = 1;
+
+   ASKAPASSERT(vec.contiguousStorage());
+   const int response = MPI_Recv(vec.data(), vec.nelements() * MPITraitsHelper<T>::size, MPITraitsHelper<T>::datatype(), 
+                                 source, tag, itsCommunicator, MPI_STATUS_IGNORE);
+   ASKAPCHECK(response == MPI_SUCCESS, "Error receiving vector (message tag="<<tag<<"), response from MPI_Recv = "<<response);
+}
+
+
 /// @brief send basic metadata from the given chunk to local rank 0
 /// @details This method is supposed to be used if there are ranks not receiving
 /// the data (so they need metadata like antenna indices from a valid chunk).
@@ -512,12 +638,44 @@ void ChannelMergeTask::sendBasicMetadata(const askap::cp::common::VisChunk::ShPt
    ASKAPDEBUGASSERT(localRank() == 1);
    ASKAPDEBUGASSERT(chunk);
    
-   const int root = 0;
+   int tag = 0;
 
-   // 1) antenna1 indices
-   ASKAPASSERT(chunk->antenna1().contiguousStorage());
-   int response = MPI_Send(chunk->antenna1().data(), chunk->nRow(), MPI_UNSIGNED, root, 1, itsCommunicator);
-   ASKAPCHECK(response == MPI_SUCCESS, "Error sending antenna1 indices, response from MPI_Send = "<<response);
+   // 1) row-based vectors
+   sendVector(chunk->antenna1(),++tag);
+   sendVector(chunk->antenna2(),++tag);
+   sendVector(chunk->beam1(),++tag);
+   sendVector(chunk->beam2(),++tag);
+   sendVector(chunk->beam1PA(),++tag);
+   sendVector(chunk->beam2PA(),++tag);
+   sendVector(chunk->uvw(),++tag);
+
+   // 2) other minor bits and heavy measures-related types
+   // Cheat for now and use serialisation. A more efficient way of operating is
+   // possible (e.g., through complex MPI types) but it can be researched later.
+   // Quick and dirty for now.
+
+   // encode
+   std::vector<int8_t> buf;
+   LOFAR::BlobOBufVector<int8_t> obv(buf);
+   LOFAR::BlobOStream out(obv);
+   out.putStart("VisChunkFields", 1);
+   out << chunk->targetName()<<chunk->interval()<<chunk->scan()<<
+          chunk->phaseCentre()<<chunk->targetPointingCentre()<<
+          chunk->actualPointingCentre()<<chunk->actualPolAngle()<<
+          chunk->actualAzimuth()<<chunk->actualElevation()<<
+          chunk->onSourceFlag()<<chunk->channelWidth()<<chunk->stokes()<<
+          chunk->directionFrame();
+   out.putEnd();
+
+   // send size first
+   casa::Vector<unsigned long> sndBufForSize(1, buf.size());
+   ASKAPDEBUGASSERT(sndBufForSize.size() == 1);
+   sendVector(sndBufForSize,++tag);
+   
+   // now send the message - referencing same storage from a casa vector for convenience
+   casa::Vector<int8_t>  sndBufForData(casa::IPosition(1,buf.size()), buf.data(), casa::SHARE);
+
+   sendVector(sndBufForData,tag);
 }
 
 /// @brief receive basic metadata from local rank 1
@@ -532,15 +690,48 @@ void ChannelMergeTask::receiveBasicMetadata(const askap::cp::common::VisChunk::S
 {
    ASKAPDEBUGASSERT(localRank() == 0);
    ASKAPDEBUGASSERT(chunk);
-   ASKAPLOG_DEBUG_STR(logger, "Sending basic metadata to the service rank");
+   ASKAPLOG_DEBUG_STR(logger, "Receiving basic metadata from the first rank with valid input");
  
-   const int source = 1;
+   int tag = 0;
 
-   // 1) antenna1 indices
-   ASKAPASSERT(chunk->antenna1().contiguousStorage());
-   int response = MPI_Recv(chunk->antenna1().data(), chunk->nRow(), MPI_UNSIGNED, source, 1, itsCommunicator, MPI_STATUS_IGNORE);
-   ASKAPCHECK(response == MPI_SUCCESS, "Error receiving antenna1 indices, response from MPI_Recv = "<<response);
+   // 1) row-based vectors
+   receiveVector(chunk->antenna1(),++tag);
+   receiveVector(chunk->antenna2(),++tag);
+   receiveVector(chunk->beam1(),++tag);
+   receiveVector(chunk->beam2(),++tag);
+   receiveVector(chunk->beam1PA(),++tag);
+   receiveVector(chunk->beam2PA(),++tag);
+   receiveVector(chunk->uvw(),++tag);
+
+   // 2) other minor bits and heavy measures-related types
+   // Cheat for now and use serialisation. A more efficient way of operating is
+   // possible (e.g., through complex MPI types) but it can be researched later.
+   // Quick and dirty for now.
+
+   // receive the size first
+   casa::Vector<unsigned long> receiveBufForSize(1);
+   ASKAPDEBUGASSERT(receiveBufForSize.size() == 1);
+   receiveVector(receiveBufForSize,++tag);
+
+   std::vector<int8_t> buf(receiveBufForSize[0]);
+
+   // actual receive - referencing array by a casa vector for convenience
+   casa::Vector<int8_t>  receiveBufForData(casa::IPosition(1,buf.size()), buf.data(), casa::SHARE);
+   receiveVector(receiveBufForData, tag);
+
+   // decode
    
+   LOFAR::BlobIBufVector<int8_t> ibv(buf);
+   LOFAR::BlobIStream in(ibv);
+   const int version = in.getStart("VisChunkFields");
+   ASKAPASSERT(version == 1);
+   in >> chunk->targetName()>>chunk->interval()>>chunk->scan() >>
+         chunk->phaseCentre()>>chunk->targetPointingCentre()>>
+         chunk->actualPointingCentre()>>chunk->actualPolAngle()>>
+         chunk->actualAzimuth()>>chunk->actualElevation()>>
+         chunk->onSourceFlag()>>chunk->channelWidth()>>chunk->stokes()>>
+         chunk->directionFrame();
+   in.getEnd();
 }
         
 

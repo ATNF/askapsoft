@@ -44,10 +44,10 @@
 #include "casacore/casa/Arrays/Cube.h"
 #include "cpcommon/VisChunk.h"
 #include "cpcommon/CasaBlobUtils.h"
+#include "ingestpipeline/MPITraitsHelper.h"
 
 // boost includes
 #include "boost/shared_array.hpp"
-#include "boost/static_assert.hpp"
 
 
 // std includes
@@ -72,22 +72,6 @@ ASKAP_LOGGER(logger, ".BeamScatterTask");
 using namespace askap;
 using namespace askap::cp::common;
 using namespace askap::cp::ingest;
-
-// helper class to encapsulate mpi-related stuff 
-template<typename T>
-struct MPITraitsHelper {
-   BOOST_STATIC_ASSERT_MSG(sizeof(T) == 0, 
-          "Attempted a build for type without traits defined");
-};
-
-template<>
-struct MPITraitsHelper<casa::uInt> {
-   static MPI_Datatype datatype() { return MPI_UNSIGNED; };
-   static const int size = 1;
-   
-   static bool equal(casa::uInt val1, casa::uInt val2) { return val1 == val2;}
-};
-
 
 // BeamScatterTask
 
