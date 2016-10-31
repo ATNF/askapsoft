@@ -714,14 +714,14 @@ function parseLog()
 	findWorkerStats $1
     else
         # if here, it was a serial job
-        if [ `tail $1 | grep "Total times" | wc -l` -gt 0 ]; then
-            TIME_JOB_REAL=`tail $1 | grep "Total times" | awk '{print $16}'`
-            TIME_JOB_SYS=`tail $1 | grep "Total times" | awk '{print $14}'`
-            TIME_JOB_USER=`tail $1 | grep "Total times" | awk '{print $12}'`
+        if [ `grep "Total times" $1 | wc -l` -gt 0 ]; then
+            TIME_JOB_REAL=`grep "Total times" $1 | tail -1 | awk '{print $16}'`
+            TIME_JOB_SYS=`grep "Total times" $1 | tail -1 | awk '{print $14}'`
+            TIME_JOB_USER=`grep "Total times" $1 | tail -1 | awk '{print $12}'`
         fi
-        if [ `tail $1 | grep "PeakVM" | wc -l` -gt 0 ]; then
-            PEAK_VM_MASTER=`tail $1 | grep "PeakVM" | awk '{print $12}'`
-            PEAK_RSS_MASTER=`tail $1 | grep "PeakVM" | awk '{print $15}'`
+        if [ `grep "PeakVM" $1 | wc -l` -gt 0 ]; then
+            PEAK_VM_MASTER=`grep "PeakVM" $1 | tail -1 | awk '{print $12}'`
+            PEAK_RSS_MASTER=`grep "PeakVM" $1 | tail -1 | awk '{print $15}'`
         fi
     fi
 
