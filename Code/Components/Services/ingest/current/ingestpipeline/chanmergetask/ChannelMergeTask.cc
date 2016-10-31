@@ -86,7 +86,7 @@ void ChannelMergeTask::process(VisChunk::ShPtr& chunk)
     }
 
     // the following should create chunk of the correct dimensions
-    checkChunkForConsistency(chunk);
+    checkChunkForConsistencyOrCreateNew(chunk);
     ASKAPDEBUGASSERT(chunk);
 
     if (localRank() > 0) {
@@ -340,8 +340,8 @@ void ChannelMergeTask::sendVisChunk(askap::cp::common::VisChunk::ShPtr chunk) co
 /// like matching dimensions. It is intended to be executed on all ranks and
 /// uses collective MPI calls. In addition, this method creates a chunk if a new
 /// rank is activated.
-/// @param[in] chunk the instance of VisChunk to work with
-void ChannelMergeTask::checkChunkForConsistency(askap::cp::common::VisChunk::ShPtr& chunk) const
+/// @param[in,out] chunk the instance of VisChunk to work with
+void ChannelMergeTask::checkChunkForConsistencyOrCreateNew(askap::cp::common::VisChunk::ShPtr& chunk) const
 {
     const int nLocalRanks = itsRanksToMerge + (itsGroupWithActivatedRank ? 1 : 0);
     if (itsGroupWithActivatedRank) {
@@ -385,8 +385,20 @@ void ChannelMergeTask::checkChunkForConsistency(askap::cp::common::VisChunk::ShP
         }
     }
     // could in principle check that antenna1, antenna2, etc are consistent but it will waste
-    // the resourses
+    // the resourses, if written this code can be combined with the initialisation of the brand
+    // new chunk object (in a similar fashion like dimensions used above)
     
+    if (itsGroupWithActivatedRank) {
+        // have to copy basic metadata from another rank (use rank 1 which definitely exists given
+        // other asserts in the code) 
+        ASKAPDEBUGASSERT(chunk);
+        ASKAPDEBUGASSERT(nLocalRanks > 1);
+        if (localRank() == 0) {
+            receiveBasicMetadata(chunk);
+        } else if (localRank() == 1) {
+            sendBasicMetadata(chunk);
+        }
+    }
 }
 
 /// @brief should this task be executed for inactive ranks?
@@ -487,6 +499,50 @@ void ChannelMergeTask::checkRanksToMerge(bool beingActivated) const
        }
    }
 }
+
+/// @brief send basic metadata from the given chunk to local rank 0
+/// @details This method is supposed to be used if there are ranks not receiving
+/// the data (so they need metadata like antenna indices from a valid chunk).
+/// It sends data to local rank 0 in the current group communicator. 
+/// @param[in] chunk the instance of VisChunk to work with
+/// @note It is supposed to be executed in local rank 1 only
+void ChannelMergeTask::sendBasicMetadata(const askap::cp::common::VisChunk::ShPtr& chunk) const
+{
+   ASKAPLOG_DEBUG_STR(logger, "Sending basic metadata to the service rank");
+   ASKAPDEBUGASSERT(localRank() == 1);
+   ASKAPDEBUGASSERT(chunk);
+   
+   const int root = 0;
+
+   // 1) antenna1 indices
+   ASKAPASSERT(chunk->antenna1().contiguousStorage());
+   int response = MPI_Send(chunk->antenna1().data(), chunk->nRow(), MPI_UNSIGNED, root, 1, itsCommunicator);
+   ASKAPCHECK(response == MPI_SUCCESS, "Error sending antenna1 indices, response from MPI_Send = "<<response);
+}
+
+/// @brief receive basic metadata from local rank 1
+/// @details This method is supposed to be used if there are ranks not receiving 
+/// the data (so they need metadata like antenna indices from a valid chunk).
+/// It is supposed to be executed from local rank 0 only and receives the data from
+/// local rank 1 (the task requires parallel streams, so at least two ranks definitely
+/// exist in the case where this method may be used)
+/// @param[in] chunk the instance of VisChunk to work with
+/// @note This method doesn't change the shared pointer - so the const reference is used
+void ChannelMergeTask::receiveBasicMetadata(const askap::cp::common::VisChunk::ShPtr& chunk) const
+{
+   ASKAPDEBUGASSERT(localRank() == 0);
+   ASKAPDEBUGASSERT(chunk);
+   ASKAPLOG_DEBUG_STR(logger, "Sending basic metadata to the service rank");
+ 
+   const int source = 1;
+
+   // 1) antenna1 indices
+   ASKAPASSERT(chunk->antenna1().contiguousStorage());
+   int response = MPI_Recv(chunk->antenna1().data(), chunk->nRow(), MPI_UNSIGNED, source, 1, itsCommunicator, MPI_STATUS_IGNORE);
+   ASKAPCHECK(response == MPI_SUCCESS, "Error receiving antenna1 indices, response from MPI_Recv = "<<response);
+   
+}
+        
 
 /// @brief configure local communucator and rank roles
 /// @details This is the main method determining data distribution logic.

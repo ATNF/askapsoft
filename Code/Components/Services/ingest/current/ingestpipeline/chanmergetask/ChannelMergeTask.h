@@ -126,8 +126,30 @@ class ChannelMergeTask : public askap::cp::ingest::ITask {
         /// like matching dimensions. It is intended to be executed on all ranks and
         /// uses collective MPI calls. In addition, this method creates a chunk if a new
         /// rank is activated.
+        /// @param[in,out] chunk the instance of VisChunk to work with
+        void checkChunkForConsistencyOrCreateNew(askap::cp::common::VisChunk::ShPtr& chunk) const;
+
+        /// @brief send basic metadata from the given chunk to local rank 0
+        /// @details This method is supposed to be used if there are ranks not receiving
+        /// the data (so they need metadata like antenna indices from a valid chunk).
+        /// It sends data to local rank 0 in the current group communicator. 
         /// @param[in] chunk the instance of VisChunk to work with
-        void checkChunkForConsistency(askap::cp::common::VisChunk::ShPtr& chunk) const;
+        /// @note It is supposed to be executed in local rank 1 only
+        void sendBasicMetadata(const askap::cp::common::VisChunk::ShPtr& chunk) const;
+
+        /// @brief receive basic metadata from local rank 1
+        /// @details This method is supposed to be used if there are ranks not receiving 
+        /// the data (so they need metadata like antenna indices from a valid chunk).
+        /// It is supposed to be executed from local rank 0 only and receives the data from
+        /// local rank 1 (the task requires parallel streams, so at least two ranks definitely
+        /// exist in the case where this method may be used)
+        /// @param[in] chunk the instance of VisChunk to work with
+        /// @note This method doesn't change the shared pointer - so the const reference is used
+        void receiveBasicMetadata(const askap::cp::common::VisChunk::ShPtr& chunk) const;
+        
+        /// @brief helper method to send casa vector to rank 0
+        //template<typename T>
+        //void sendVector(const casa::Vector<T>& vec)
          
         /// @brief local rank in the group
         /// @details Returns the rank against the local communicator, i.e.
