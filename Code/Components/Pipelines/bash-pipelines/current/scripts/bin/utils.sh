@@ -143,7 +143,9 @@ function addDep()
 # name, image type (for CASDA), and label (for preview images), based
 # on a type and BEAM/POL/FIELD information
 # Requires:
-#  * FIELD
+#  * FIELD (the special value "." means a mosaic of multiple fields)
+#  * TILE (only for FIELD="." - special value of "ALL" means the full
+#          mosaic over all fields/tiles)
 #  * BEAM
 #  * pol (lower case polarisation i/q/u/v etc)
 #  * TERM (taylor term: 0,1,2,...)
@@ -244,7 +246,9 @@ function setImageProperties()
 # The name is formed based on the type, the FIELD, the BEAM (and the
 # polarisation in the case of the continuum cube).
 # Requires:
-#  * FIELD
+#  * FIELD (the special value "." means a mosaic of multiple fields)
+#  * TILE (only for FIELD="." - special value of "ALL" means the full
+#          mosaic over all fields/tiles)
 #  * BEAM
 #  * pol (lower case polarisation i/q/u/v etc)
 #  * IMAGE_BASE_CONT,IMAGE_BASE_CONTCUBE,IMAGE_BASE_SPECTRAL
@@ -271,7 +275,13 @@ function setImageBase()
         echo "ERROR - bad type for setImageBase: \"$type\""
     fi
         
-    if [ "${FIELD}" != "." ]; then
+    if [ "${FIELD}" == "." ]; then
+        if [ "${TILE}" == "ALL" ]; then
+            imageBase="${imageBase}"
+        else
+            imageBase="${imageBase}.${TILE}"
+        fi
+    else
         imageBase="${imageBase}.${FIELD}"
         if [ "${BEAM}" == "all" ]; then
             imageBase="${imageBase}.linmos"

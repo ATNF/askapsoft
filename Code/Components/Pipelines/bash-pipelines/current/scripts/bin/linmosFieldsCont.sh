@@ -76,32 +76,69 @@ nterms=${NUM_TAYLOR_TERMS}
 IMAGE_BASE_CONT=${IMAGE_BASE_CONT}
 SB_SCIENCE=${SB_SCIENCE}
 
-for imageCode in restored altrestored image residual; do 
-
-    for((TERM=0;TERM<\${nterms};TERM++)); do
-
-        imList=""
-        wtList=""
-        BEAM=all
-        for FIELD in ${FIELD_LIST}; do
-            setImageProperties cont
-            if [ -e \${FIELD}/\${imageName} ]; then
-                if [ "\${imList}" == "" ]; then
-                    imList="\${FIELD}/\${imageName}"
-                    wtList="\${FIELD}/\${weightsImage}"
-                else
-                    imList="\${imList},\${FIELD}/\${imageName}"
-                    wtList="\${wtList},\${FIELD}/\${weightsImage}"
-                fi
+FIELD_LIST=$FIELD_LIST
+TILE_LIST=""
+for FIELD in \$FIELD_LIST; do
+    getTile
+    if [ \$FIELD != \$TILE ]; then
+        isNew=true
+        for THETILE in \$TILELIST; do
+            if [ \$TILE == \$THETILE ]; then
+                isNew=false
             fi
         done
-        if [ "\${imList}" != "" ]; then
-            FIELD="."
-            setImageProperties cont
-            echo "Mosaicking to form \${imageName}"
-            parset=${parsets}/science_linmosFull_\${imageCode}_\${SLURM_JOB_ID}.in
-            log=${logs}/science_linmosFull_\${imageCode}_\${SLURM_JOB_ID}.log
-            cat > \${parset} << EOFINNER
+        if [ \$isNew == true ]; then
+            TILE_LIST="\$TILE_LIST \$TILE"
+        fi
+    fi
+done
+
+# If there is only one tile, only include the "ALL" case, which
+# mosaics together all fields
+if [ \`echo \$TILELIST | awk '{print NF}'\` -gt 1 ]; then
+    FULL_TILE_LIST="\$TILELIST ALL"
+else
+    FULL_TILE_LIST="ALL"
+fi
+
+for THISTILE in \$FULL_TILE_LIST; do
+
+    # First get the list of FIELDs that contribute to this TILE
+    TILE_FIELD_LIST=""
+    for FIELD in \$FIELDLIST; do
+        getTile
+        if [ \$THISTILE == "ALL" ] || [ \$TILE == \$THISTILE ]; then
+            TILE_FIELD_LIST="\$TILE_FIELD_LIST \$FIELD"
+        fi
+    done
+
+    for imageCode in restored altrestored image residual; do 
+    
+        for((TERM=0;TERM<\${nterms};TERM++)); do
+    
+            imList=""
+            wtList=""
+            BEAM=all
+            for FIELD in \${TILE_FIELD_LIST}; do
+                setImageProperties cont
+                if [ -e \${FIELD}/\${imageName} ]; then
+                    if [ "\${imList}" == "" ]; then
+                        imList="\${FIELD}/\${imageName}"
+                        wtList="\${FIELD}/\${weightsImage}"
+                    else
+                        imList="\${imList},\${FIELD}/\${imageName}"
+                        wtList="\${wtList},\${FIELD}/\${weightsImage}"
+                    fi
+                fi
+            done
+            if [ "\${imList}" != "" ]; then
+                FIELD="."
+                TILE=\$THISTILE
+                setImageProperties cont
+                echo "Mosaicking to form \${imageName}"
+                parset=${parsets}/science_linmosFull_\${imageCode}_\${SLURM_JOB_ID}.in
+                log=${logs}/science_linmosFull_\${imageCode}_\${SLURM_JOB_ID}.log
+                cat > \${parset} << EOFINNER
 linmos.names            = [\${imList}]
 linmos.weights          = [\${wtList}]
 linmos.outname          = \$imageName
@@ -109,22 +146,23 @@ linmos.outweight        = \$weightsImage
 linmos.weighttype       = FromWeightImages
 EOFINNER
 
-            NCORES=1
-            NPPN=1
-            aprun -n \${NCORES} -N \${NPPN} $linmos -c \$parset > \$log
-            err=\$?
-            for im in `echo \${imList} | sed -e 's/,/ /g'`; do
-                rejuvenate \$im
-            done
-            extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} linmosFull_\${imageCode} "txt,csv"
-            if [ \$err != 0 ]; then
-                exit \$err
+                NCORES=1
+                NPPN=1
+                aprun -n \${NCORES} -N \${NPPN} $linmos -c \$parset > \$log
+                err=\$?
+                for im in `echo \${imList} | sed -e 's/,/ /g'`; do
+                    rejuvenate \$im
+                done
+                extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} linmosFull_\${imageCode} "txt,csv"
+                if [ \$err != 0 ]; then
+                    exit \$err
+                fi
+            else
+                echo "ERROR - no good images were found for mosaicking image type '\${imageCode}'!"
+                writeStats \${SLURM_JOB_ID} linmosFull_\${imageCode} FAIL --- --- --- --- --- txt > stats/stats-\${SLURM_JOB_ID}-linmosFull.txt
+                writeStats \${SLURM_JOB_ID} linmosFull_\${imageCode} FAIL --- --- --- --- --- csv > stats/stats-\${SLURM_JOB_ID}-linmosFull.csv
             fi
-        else
-            echo "ERROR - no good images were found for mosaicking image type '\${imageCode}'!"
-            writeStats \${SLURM_JOB_ID} linmosFull_\${imageCode} FAIL --- --- --- --- --- txt > stats/stats-\${SLURM_JOB_ID}-linmosFull.txt
-            writeStats \${SLURM_JOB_ID} linmosFull_\${imageCode} FAIL --- --- --- --- --- csv > stats/stats-\${SLURM_JOB_ID}-linmosFull.csv
-        fi
+        done
     done
 done
 EOFOUTER
