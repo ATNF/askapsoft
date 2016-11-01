@@ -134,6 +134,14 @@ module load askapdata"
                 echo "Will use the askapsoft module defined by your environment (`module list -t 2>&1 | grep askapsoft`)"
             fi
         fi
+
+        # askappipeline module
+        askappipelineVersion=`module list -t 2>&1 | grep askappipeline
+| sed -e 's|askapsoft/||g'`
+        askapsoftModuleCommands="$askapsoftModuleCommands
+module unload askappipeline
+module load askappipeline/${askappipelineVersion}"
+        
         echo " "
 
     else
