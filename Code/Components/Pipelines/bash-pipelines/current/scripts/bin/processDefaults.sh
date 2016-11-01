@@ -391,6 +391,51 @@ module load askapdata"
             fi
         fi
 
+        ####################
+        # Variable inputs to Self-calibration settings
+        #  This section takes the provided parameters and creates
+        #  arrays that have a (potentially) different value for each
+        #  loop of the self-cal operation.
+        #  Parameters covered are the selfcal interval, the
+        #  source-finding threshold, and whether normalise gains is on
+        #  or not
+        if [ "`echo $SELFCAL_INTERVAL | grep "["`" != "" ]; then
+            # Have entered a comma-separate array in square brackets
+            SELFCAL_INTERVAL_ARRAY=()
+            for a in `echo $SELFCAL_INTERVAL | sed -e 's/[][,]/ /g'`; do
+                SELFCAL_INTERVAL_ARRAY+=($a)
+            done
+        else
+            SELFCAL_INTERVAL_ARRAY=()
+            for((i=0;i<${SELFCAL_NUM_LOOPS};i++)); do
+                SELFCAL_INTERVAL_ARRAY+=($SELFCAL_INTERVAL)
+            done
+        fi
+        if [ "`echo $SELFCAL_SELAVY_THRESHOLD | grep "["`" != "" ]; then
+            # Have entered a comma-separate array in square brackets
+            SELFCAL_SELAVY_THRESHOLD_ARRAY=()
+            for a in `echo $SELFCAL_SELAVY_THRESHOLD | sed -e 's/[][,]/ /g'`; do
+                SELFCAL_SELAVY_THRESHOLD_ARRAY+=($a)
+            done
+        else
+            SELFCAL_SELAVY_THRESHOLD_ARRAY=()
+            for((i=0;i<${SELFCAL_NUM_LOOPS};i++)); do
+                SELFCAL_SELAVY_THRESHOLD_ARRAY+=($SELFCAL_SELAVY_THRESHOLD)
+            done
+        fi
+        if [ "`echo $SELFCAL_NORMALISE_GAINS | grep "["`" != "" ]; then
+            # Have entered a comma-separate array in square brackets
+            SELFCAL_NORMALISE_GAINS_ARRAY=()
+            for a in `echo $SELFCAL_NORMALISE_GAINS | sed -e 's/[][,]/ /g'`; do
+                SELFCAL_NORMALISE_GAINS_ARRAY+=($a)
+            done
+        else
+            SELFCAL_NORMALISE_GAINS_ARRAY=()
+            for((i=0;i<${SELFCAL_NUM_LOOPS};i++)); do
+                SELFCAL_NORMALISE_GAINS_ARRAY+=($SELFCAL_NORMALISE_GAINS)
+            done
+        fi
+        
     fi
 
 fi
