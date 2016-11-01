@@ -87,29 +87,46 @@ nterms=${NUM_TAYLOR_TERMS}
 IMAGE_BASE_CONT=${IMAGE_BASE_CONT}
 FIELD=${FIELD}
 
-for imageCode in restored altrestored image residual; do 
+NUM_LOOPS=0
+DO_SELFCAL=$DO_SELFCAL
+MOSAIC_SELFCAL_LOOPS=${MOSAIC_SELFCAL_LOOPS}
+if [ \$DO_SELFCAL == true ] && [ \$MOSAIC_SELFCAL_LOOPS == true ]; then
+    NUM_LOOPS=\$SELFCAL_NUM_LOOPS
+fi
 
-    for((TERM=0;TERM<\${nterms};TERM++)); do
+for((LOOP=0;LOOP<=\$NUM_LOOPS;LOOP++)); do
 
-        beamList=""
-        for BEAM in ${BEAMS_TO_USE}; do
-            setImageProperties cont
-            echo \$imageName
-            if [ -e \${imageName} ]; then
-                if [ "\${beamList}" == "" ]; then
-                    beamList="\${imageName}"
+    for imageCode in restored altrestored image residual; do 
+    
+        for((TERM=0;TERM<\${nterms};TERM++)); do
+    
+            beamList=""
+            for BEAM in ${BEAMS_TO_USE}; do
+                setImageProperties cont
+                echo \$imageName
+                if [ \$LOOP -eq 0 ]; then
+                    DIR="."
                 else
-                    beamList="\${beamList},\${imageName}"
+                    DIR="selfCal_${imageBase}/Loop\${LOOP}"
                 fi
-            fi
-        done
-        if [ "\${beamList}" != "" ]; then
-            BEAM=all
-            setImageProperties cont
-            echo "Mosaicking to form \${imageName}"
-            parset=${parsets}/science_linmos_${FIELDBEAM}_\${imageCode}_\${SLURM_JOB_ID}.in
-            log=${logs}/science_linmos_${FIELDBEAM}_\${imageCode}_\${SLURM_JOB_ID}.log
-            cat > \${parset} << EOFINNER
+                if [ -e \${DIR}/\${imageName} ]; then
+                    if [ "\${beamList}" == "" ]; then
+                        beamList="\${DIR}/\${imageName}"
+                    else
+                        beamList="\${beamList},\${DIR}/\${imageName}"
+                    fi
+                fi
+            done
+            if [ "\${beamList}" != "" ]; then
+                BEAM=all
+                setImageProperties cont
+                if [ \$LOOP -gt 0 ]; then
+                    imageName="\$imageName.SelfCalLoop${LOOP}"
+                fi
+                echo "Mosaicking to form \${imageName}"
+                parset=${parsets}/science_linmos_${FIELDBEAM}_\${imageCode}_\${SLURM_JOB_ID}.in
+                log=${logs}/science_linmos_${FIELDBEAM}_\${imageCode}_\${SLURM_JOB_ID}.log
+                cat > \${parset} << EOFINNER
 linmos.names            = [\${beamList}]
 linmos.outname          = \$imageName
 linmos.outweight        = \$weightsImage
@@ -119,23 +136,24 @@ ${reference}
 linmos.psfref           = ${LINMOS_PSF_REF}
 linmos.cutoff           = ${LINMOS_CUTOFF}
 EOFINNER
-
-            NCORES=1
-            NPPN=1
-            aprun -n \${NCORES} -N \${NPPN} $linmos -c \$parset > \$log
-            err=\$?
-            for im in `echo \${beamList} | sed -e 's/,/ /g'`; do
-                rejuvenate \${im}
-            done
-            extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname}_\${imageCode} "txt,csv"
-            if [ \$err != 0 ]; then
-                exit \$err
+    
+                NCORES=1
+                NPPN=1
+                aprun -n \${NCORES} -N \${NPPN} $linmos -c \$parset > \$log
+                err=\$?
+                for im in `echo \${beamList} | sed -e 's/,/ /g'`; do
+                    rejuvenate \${im}
+                done
+                extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname}_\${imageCode} "txt,csv"
+                if [ \$err != 0 ]; then
+                    exit \$err
+                fi
+            else
+                echo "ERROR - no good images were found for mosaicking image type '\${imageCode}'!"
+                writeStats \${SLURM_JOB_ID} linmos_\${imageCode} FAIL --- --- --- --- --- txt > stats/stats-\${SLURM_JOB_ID}-linmos.txt
+                writeStats \${SLURM_JOB_ID} linmos_\${imageCode} FAIL --- --- --- --- --- csv > stats/stats-\${SLURM_JOB_ID}-linmos.csv
             fi
-        else
-            echo "ERROR - no good images were found for mosaicking image type '\${imageCode}'!"
-            writeStats \${SLURM_JOB_ID} linmos_\${imageCode} FAIL --- --- --- --- --- txt > stats/stats-\${SLURM_JOB_ID}-linmos.txt
-            writeStats \${SLURM_JOB_ID} linmos_\${imageCode} FAIL --- --- --- --- --- csv > stats/stats-\${SLURM_JOB_ID}-linmos.csv
-        fi
+        done
     done
 done
 EOFOUTER
@@ -146,7 +164,7 @@ EOFOUTER
 	recordJob ${ID_LINMOS_CONT} "Make a mosaic image of the science observation, field $FIELD, with flags \"${FLAG_IMAGING_DEP}\""
         FULL_LINMOS_DEP=`addDep "${FULL_LINMOS_DEP}" "${ID_LINMOS_CONT}"`
     else
-	echo "Would make a mosaic image  of the science observation, field $FIELD with slurm file $sbatchfile"
+	echo "Would make a mosaic image of the science observation, field $FIELD with slurm file $sbatchfile"
     fi
 
     echo " "

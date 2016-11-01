@@ -239,6 +239,9 @@ instead of BasisfunctionMFS).
 | ``SELFCAL_KEEP_IMAGES``                    | true                            | none                                                   | Should we keep the images from the intermediate selfcal      |
 |                                            |                                 |                                                        | loops?                                                       |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
+| ``MOSAIC_SELFCAL_LOOPS``                   | true                            | none                                                   | Should we make full-field mosaics for each loop of the       |
+|                                            |                                 |                                                        | self-calibration? This is done for each field separately.    |
++--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``SELFCAL_SELAVY_THRESHOLD``               | 15                              | snrCut                                                 | SNR threshold for detection with Selavy in determining       |
 |                                            |                                 | (:doc:`../analysis/selavy`)                            | selfcal sources.                                             |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
