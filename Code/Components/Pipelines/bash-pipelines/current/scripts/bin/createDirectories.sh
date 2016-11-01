@@ -1,8 +1,7 @@
 #!/bin/bash -l
 #
-# A script to set up the working directory prior to starting the job
-# submission. This defines all necessary subdirectories and sets the
-# date-time stamp.
+# A script to set up all necessary subdirectories required for the
+# pipeline processing.
 #
 # @copyright (c) 2016 CSIRO
 # Australia Telescope National Facility (ATNF)
@@ -31,30 +30,31 @@
 
 ####################
 # Define & create directories
-${askapsoftModuleCommands}
 
-BASEDIR=`pwd`
+parsets=${BASEDIR}/parsets
+logs=${BASEDIR}/logs
+slurms=${BASEDIR}/slurmFiles
+slurmOut=${BASEDIR}/slurmOutput
+tools=${BASEDIR}/tools
+metadata=${BASEDIR}/metadata
+stats=${BASEDIR}/stats
 
-. ${PIPELINEDIR}/createDirectories.sh
+mkdir -p $parsets
+lfs setstripe -c 1 $parsets
+mkdir -p $logs
+lfs setstripe -c 1 $logs
+mkdir -p $slurms
+lfs setstripe -c 1 $slurms
+mkdir -p $slurmOut
+lfs setstripe -c 1 $slurmOut
+mkdir -p $tools
+lfs setstripe -c 1 $tools
+mkdir -p $metadata
+lfs setstripe -c 1 $metadata
+mkdir -p $stats
+lfs setstripe -c 1 $stats
 
-# These are used as the base directories for these types of files. We
-# make subdirectories in each for different fields (eg. parsets/field1
-# etc), and use $parsets etc to refer to them.
-parsetsBase=$parsets
-logsBase=$logs
-slurmsBase=$slurms
-slurmOutBase=$slurmOut
 
-####################
-# Date and time stamp
-NOW=`date +%F-%H%M`
-NOW_FMT=`date +%FT%T`
-
-# File to record list of jobs and descriptions
-JOBLIST="${slurmOut}/jobList-${NOW}.txt"
-
-####################
-# Define the default
-
-. ${PIPELINEDIR}/defaultConfig.sh
-
+# temp directory for certain files that we don't need to keep
+tmp=/tmp/tmp`whoami`pipe
+mkdir -p $tmp

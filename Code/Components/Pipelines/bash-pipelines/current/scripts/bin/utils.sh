@@ -3,7 +3,7 @@
 # This file holds various utility functions and environment variables
 # that allow the scripts to do various things in a uniform manner.
 #
-# @copyright (c) 2015 CSIRO
+# @copyright (c) 2016 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -28,6 +28,9 @@
 # @author Matthew Whiting <Matthew.Whiting@csiro.au>
 #
 
+# Call the createDirectories script, so that we always define the
+# directories in which to put things - most importantly the stats directory.
+. ${PIPELINEDIR}/createDirectories.sh
 
 ##############################
 # PIPELINE VERSION REPORTING
@@ -603,16 +606,6 @@ function getBeamCentre()
 ##############################
 # JOB STATISTIC MANAGEMENT
 
-# Need to declare the stats directory variable here, so it is seen
-# from within the various slurm jobs
-if [ "${BASEDIR}" == "" ]; then
-    stats=stats
-else
-    stats=${BASEDIR}/stats
-fi
-mkdir -p $stats
-lfs setstripe -c 1 $stats
-
 function writeStats()
 {
     # usage: writeStats ID DESC RESULT NCORES REAL USER SYS VM RSS format
@@ -741,7 +734,7 @@ function findWorkerStats()
 
     if [ `wc -l $tmpfile | awk '{print $1}'` -gt 0 ]; then
 
-        awkfile=stats.awk
+        awkfile=workerstats.awk
         cat > $awkfile <<EOF
 BEGIN {
     i=0;
@@ -791,8 +784,6 @@ EOF
         AVE_RSS_WORKERS=`echo $results | awk '{print $5}'`
 
     fi
-    
-    rm -f $tmpfile $tmpfile2 $awkfile
-
+   
 
 }
