@@ -136,8 +136,7 @@ module load askapdata"
         fi
 
         # askappipeline module
-        askappipelineVersion=`module list -t 2>&1 | grep askappipeline
-| sed -e 's|askapsoft/||g'`
+        askappipelineVersion=`module list -t 2>&1 | grep askappipeline | sed -e 's|askappipeline/||g'`
         askapsoftModuleCommands="$askapsoftModuleCommands
 module unload askappipeline
 module load askappipeline/${askappipelineVersion}"
