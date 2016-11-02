@@ -263,5 +263,57 @@ EOF
         fi
 
     done
+
+
+    # If we have more than one "final" MS, then we do an extra step of
+    # merging them all into a single MS
+    if [ ${NUM_FINAL_MS} -gt 1 ]; then
+
+        merge3sbatch=${slurms}/mergeVisStage3.sbatch
+        outputname="${msdir}/${msbaseSci}.ms"
+
+        cat > $merge3sbatch <<EOF
+#!/bin/bash
+#SBATCH --ntasks=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --time=12:00:00
+#SBATCH --mail-user matthew.whiting@csiro.au
+#SBATCH --job-name visMerge3
+#SBATCH --mail-type=ALL
+#SBATCH --export=ASKAP_ROOT,AIPSPATH
+#SBATCH --output=${slurmOutput}/slurm-mergeSciVis3-%j.out
+
+ulimit -n 8192
+export APRUN_XFER_LIMITS=1
+
+msmerge=${msmerge}
+
+START=0
+END=${NUM_FINAL_MS}
+unset FILES
+for((i=\$START;i<\$END;i++)); do
+    FILES="\$FILES ${msdir}/${msbaseSci}_\${i}.ms" 
+done
+
+logfile=${logdir}/merge_s3_output_\${SLURM_JOB_ID}.log
+echo "Processing files: \$FILES" > \${logfile}
+aprun -n 1 -N 1 \${msmerge} -c ${TILENCHAN} -o ${outputname} \$FILES >> \${logfile}
+err=\$?
+if [ \$err != 0 ]; then
+    echo "Error: msmerge returned error code \${err}"
+    exit \$err
+fi
+
+EOF
+
+        if [ $doSubmit == true ]; then
+            
+            merge3ID=`sbatch -d afterok:${merge2ID} $merge3sbatch | awk '{print $4}'`
+            echo "Running merging for full science field: ID=${merge3ID} and dependency \"-d afterok:${merge2ID}"
+            
+        fi
+        
+    fi
+    
         
 fi
