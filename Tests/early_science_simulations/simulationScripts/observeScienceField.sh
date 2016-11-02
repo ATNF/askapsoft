@@ -176,7 +176,7 @@ mkdir -p ${logdir}
 logfile=${logdir}/merge_s1_output_GRP${GRP}_\${SLURM_JOB_ID}.log
 echo "Start = \$START, End = \$END" > \${logfile}
 echo "Processing files: \$FILES" >> \${logfile}
-aprun -n 1 -N 1 \${msmerge} -o ${msdir}/${msbaseSci}_GRP${GRP}.ms \$FILES >> \${logfile}
+aprun -n 1 -N 1 \${msmerge} -c ${TILENCHAN} -o ${msdir}/${msbaseSci}_GRP${GRP}.ms \$FILES >> \${logfile}
 err=\$?
 if [ \$err != 0 ]; then
     echo "Error: msmerge returned error code \${err}"
@@ -242,7 +242,7 @@ done
 
 logfile=${logdir}/merge_s2_output_$i_\${SLURM_JOB_ID}.log
 echo "Processing files: \$FILES" > \${logfile}
-aprun -n 1 -N 1 \${msmerge} -o ${outputname} \$FILES >> \${logfile}
+aprun -n 1 -N 1 \${msmerge} -c ${TILENCHAN} -o ${outputname} \$FILES >> \${logfile}
 err=\$?
 if [ \$err != 0 ]; then
     echo "Error: msmerge returned error code \${err}"

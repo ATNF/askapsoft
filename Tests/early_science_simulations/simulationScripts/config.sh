@@ -22,13 +22,13 @@ msdir=MS
 chunkdir=../ModelImages/Chunks
 slicedir=../ModelImages/Slices
 
-doCreateModel=true
+doCreateModel=false
 # Whether to slice up the model prior to simulating - set to false
 # if we've already done this
-doSlice=true
+doSlice=false
 
 doCalibrator=false
-doScience=false
+doScience=true
 
 doCorrupt=false
 randomgainsparset=${parsetdir}/randomgains.in
@@ -37,6 +37,7 @@ doNoise=true
 Tsys=50
 
 nfeeds=36
+#nfeeds=1
 antennaConfig=ADE12
 nant=12
 #antennaConfig=ADE6
@@ -72,8 +73,12 @@ os=8
 # For science field observation
 #
 
-msbaseSci=sciencefield_${antennaConfig}_SKADS_${inttime}_${now}
-feeds=${askapconfig}/ASKAP${nfeeds}feeds.in
+msbaseSci=sciencefield_${antennaConfig}_SKADS_${inttime}_${nfeeds}beam_${now}
+if [ $nfeeds -eq 36 ]; then
+    feeds=${askapconfig}/ASKAP${nfeeds}feeds-footprint-square_6x6.in
+else
+    feeds=${askapconfig}/ASKAP${nfeeds}feeds.in
+fi
 antennaParset=${askapconfig}/${antennaConfig}.in
 
 # Time required for the csimulator jobs
@@ -84,11 +89,12 @@ matchCorrelatorLayout=true
 if [ $matchCorrelatorLayout == true ]; then
 # Number of MSs to end up with after 2nd stage of merging
     NUM_FINAL_MS=7
-    msbaseSci=sciencefield_${antennaConfig}_by${NUM_FINAL_MS}_SKADS_${inttime}_${now}
+    msbaseSci=sciencefield_${antennaConfig}_by${NUM_FINAL_MS}_SKADS_${inttime}_${nfeeds}beam_${now}
     NGROUPS_CSIM=28
     NWORKERS_CSIM=216
     chanPerMSchunk=3
     NPPN_CSIM=3
+    TILENCHAN=54
 else
 # Number of MSs to end up with after 2nd stage of merging
     NUM_FINAL_MS=8
@@ -96,6 +102,7 @@ else
     NWORKERS_CSIM=171
     chanPerMSchunk=3
     NPPN_CSIM=3
+    TILENCHAN=54
 fi
 
 NCPU_CSIM=`echo $NWORKERS_CSIM | awk '{print $1+1}'`
@@ -139,8 +146,9 @@ if [ $databaseCR == "POSSUM" ]; then
     listtypeCR=continuum
     baseimage="${baseimage}_cont"
 elif [ $databaseCR == "POSSUMHI" ]; then
-    listtypeCR=spectralline
-    baseimage="${baseimage}_HI"
+    #listtypeCR=spectralline
+    listtypeCR=continuum
+    baseimage="${baseimage}_C+HI"
 elif [ $databaseCR == "joint" ]; then
     # This is the case for when we've combined the continuum and HI
     # models into "_joint" models
