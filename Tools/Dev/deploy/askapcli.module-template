@@ -1,0 +1,35 @@
+#%Module1.0#####################################################################
+##
+## askapcli modulefile
+##
+proc ModulesHelp { } {
+        global version
+
+        puts stderr "\tThis module provides command-line interfaces to ASKAP services."
+
+}
+
+# No two versions of this module can be loaded simultaneously
+conflict        askapcli
+
+# Need to have version 2.7.10 of python for libraries to work
+if { [ module-info mode load ] } {
+    if [ is-loaded python ] {
+        module unload python
+    }
+    module load python/2.7.10
+}
+
+module-whatis   "ASKAPsoft command-line interfaces"
+
+set CLIROOT  /group/askap/askapcli
+set CLIHOME  /group/askap/askapcli/current
+set PYTHON_LIB_VERSION 2.7
+
+prepend-path    PATH            $CLIHOME/bin
+prepend-path    LD_LIBRARY_PATH $CLIHOME/lib64
+prepend-path    PYTHONPATH      $CLIHOME/lib64/python${PYTHON_LIB_VERSION}/site-packages
+prepend-path    CLASSPATH       $CLIHOME/lib64/Ice-3.5.0.jar:$CLIHOME/lib64/Freeze.jar:$CLIHOME/lib64/IceStorm.jar
+
+setenv ICE_CONFIG $CLIROOT/tos.ice_cfg
+

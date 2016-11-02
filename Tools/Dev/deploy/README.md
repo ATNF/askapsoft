@@ -6,4 +6,7 @@ no use to anyone else.
 The script should be deployed to the askapops user area with suitable permissions to prevent changes and enforce private use
 by askapops only (chmod 700).
 
+*.module-template files are Modules config files for the various ASKAP modules. They contain substitution variable ${_VERSION} (the underscore to indicate that
+it's not a normal env variable) which will be replaced by a valid version number when the deployment script is run.
+
 More to come ...

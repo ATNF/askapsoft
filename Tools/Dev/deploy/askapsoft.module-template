@@ -1,0 +1,28 @@
+#%Module1.0#####################################################################
+##
+## askapsoft modulefile
+##
+proc ModulesHelp { } {
+        global version
+
+        puts stderr "\tThis module provides the ASKAPsoft software package."
+}
+
+# No two versions of this module can be loaded simultaneously
+conflict        askapsoft
+
+if { [ module-info mode load ] } {
+    if [ is-loaded gcc ] {
+        module unload gcc
+    }
+    module load gcc/4.9.0
+}
+
+module-whatis   "ASKAPsoft software package"
+
+set ASKAP_HOME  /group/askap/askapsoft/${_VERSION}  # replace with version number on install
+set PYTHON_LIB_VERSION 2.7
+
+prepend-path    PATH            $ASKAP_HOME/bin
+prepend-path    LD_LIBRARY_PATH $ASKAP_HOME/lib64
+prepend-path    PYTHONPATH      $ASKAP_HOME/lib64/python${PYTHON_LIB_VERSION}/site-packages
