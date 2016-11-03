@@ -31,8 +31,8 @@ main() {
   LOG_FILE="${NOW}-ASKAPSDP-deploy.log"
 
   # Globals
-  NOW=`date "+%Y%m%d%H%M%S"`
-  NOW_LONG=`date`
+  NOW=$(date "+%Y%m%d%H%M%S")
+  NOW_LONG=$(date)
   CFG_FILE="RELEASE.cfg"
   CURRENT_DIR=$PWD
   TAG=""
@@ -54,9 +54,12 @@ main() {
   ERROR_NOT_ASKAPOPS=69
   ERROR_ALREADY_RUNNING=70
   ERROR_WRONG_CLUSTER=71
-  TOLD_TO_DIE=72
+  ERROR_TIMEOUT=72
+  TOLD_TO_DIE=73
+  
+  TIMEOUT_VALUE=14400 # 4 hours
 
-  trap "{ cleanup ${TOLD_TO_DIE}; }" SIGHUP
+  trap '{ cleanup ${TOLD_TO_DIE}; }' SIGHUP
 
   processCmdLine "$@" 
 
@@ -66,17 +69,22 @@ main() {
 
   # Overrides are in the cfg file
   if [ -e $CFG_FILE ]; then
-    source $CFG_FILE
-    if [ $? -ne 0 ]; then
+    if ! bash ${CFG_FILE}; then
       echo "Could not process overrides file ${CFG_FILE}" >&2
       cleanup $ERROR_BAD_OVERRIDES;
     fi
   fi
-
+  
   # Create log file
   LOG_FILE="${WORKING_DIR}/${TAG}/${LOG_FILE}"
-  touch $LOG_FILE
+  touch "${LOG_FILE}"
   log "DEPLOYMENT OF ASKAP MODULES ${NOW_LONG}\n\n"
+  
+  # Check if we actually have anything to do
+  if [ "$DEPLOY_ASKAPSOFT" == false ] && [ "$DEPLOY_ASKAP_PIPLINE" == false ] && [ "$DEPLOY_ASKAP_SERVICES" == false ] && [ "$DEPLOY_ASKAP_CLI" == false ] && [ "$DEPLOY_ASKAP_USER_DOC" == false ]; then
+    logerr "There is nothing to do; all targets are set to NOT deploy\n"
+    cleanup $NO_ERROR;
+  fi
 
   # The TAG will have been provided on the command line with -t or defaulted with -l
   log "TAG = ${TAG}\n"
@@ -89,12 +97,11 @@ main() {
   doOverwriteChecks
 
   # Perform the necessary builds
-  
   mkdir ${WORKING_DIR}/${TAG}
   mkdir ${WORKING_DIR}/${TAG}/build
   BUILD_DIR="${WORKING_DIR}/${TAG}/build"
 
-  if [ "$DEPLOY_ASKAPSOFT" == true ] || [ "$DEPLOY_ASKAP_PIPLINE" == true ]; then
+  if [ "$DEPLOY_ASKAPSOFT" == true ] || [ "$DEPLOY_ASKAP_PIPLINE" == true ] || [ "$DEPLOY_ASKAP_USER_DOC" == true ]; then
     buildAskap
   fi
 
@@ -114,46 +121,59 @@ main() {
   
   # Finish
   cleanup $NO_ERROR
+  
+  cd "${CURRENT_DIR}" || exit 0
 }
 
 # Build the ASKAP modules askapsoft and pipelines and include a doco update.
 buildAskap() {
   log "Building the ASKAP modules\n"
 
-  cd ${WORKING_DIR}/${TAG}
+  cd ${WORKING_DIR}/${TAG} || cleanup $ERROR_MISSING_ENV
 
   # Get the code if it's not there
   if [ ! -e askapsoft-${TAG} ]; then
+    log "Retrieving the code base from ${ASKAPSOFT_URL} into askapsoft-${TAG}\n"
     svn export -q ${ASKAPSOFT_URL} askapsoft-${TAG}
+  else
+    log "The askapsoft-${TAG} directory already exists, using that\n"
   fi
-  
-  cd askapsoft-${TAG}
   
   # Copy for ingest cluster build if required
   if [ "$DEPLOY_ASKAP_SERVICES" == true ]; then
-    cp -R ../askapsoft-${TAG} ../askapingest-${TAG}
+    log "CP services required and will be built later; but need to build on ingest cluster; so need an independent environment\n"
+    if [ -e askapingest-${TAG} ]; then
+      log "askapingest-${TAG} already exists, so using that\n"
+    else
+      log "Copying askapsoft-${TAG} to askapingest-${TAG}\n"
+      cp -R askapsoft-${TAG} askapingest-${TAG}
+    fi
   fi
   
+  cd askapsoft-${TAG} || cleanup $ERROR_MISSING_ENV
+  
   # Create a build command which will run initialisation and all required builds in the background.
-  local BUILD_COMMAND="python2.7 bootstrap.py -n;
-                       source initaskap.sh; "
+  local BUILD_COMMAND="python2.7 bootstrap.py -n; source initaskap.sh; "
   
   # build askapsoft if specified
   if [ "$DEPLOY_ASKAPSOFT" == true ]; then
+    log "ASKAPsoft cpapps will be built and deployed\n"
     BUILD_COMMAND="${BUILD_COMMAND} rbuild -n -V --release-name ASKAPsoft-cpapps-${TAG} --stage-dir ASKAPsoft-cpapps-${TAG} -t release Code/Systems/cpapps; "
   fi
 
   # build pipelines if specified
   if [ "$DEPLOY_ASKAP_PIPLINE" == true ]; then
+    log "ASKAPsoft processing pipeline will be built and deployed\n"
     BUILD_COMMAND="${BUILD_COMMAND} rbuild -n -V --release-name ASKAPsoft-pipelines-${TAG} --stage-dir ASKAPsoft-pipelines-${TAG} -t release Code/Systems/pipelines; "
   fi
 
   # build askapdoc if specified
   if [ "$DEPLOY_ASKAP_USER_DOC" == true ]; then
-  
+    log "ASKAPsoft user documentation will be built and deployed\n"
+
     # Update version numbers on documentation conf.py file by replacing the default snapshot svn revision number (version = 'r' ...)
     # with the release number. Only do this if it hasn't been done already (someone may have done this manually in svn before).
-    if [ $(grep -q "^version = 'r'.*" Code/Doc/user/current/doc/conf.py) == 0 ]; then
+    if [ "$(grep -q \"^version = 'r'.*\" Code/Doc/user/current/doc/conf.py)" == 0 ]; then
       sed -e -i "s/^version = 'r'/#version = 'r'/" -e "s/^release = version/#release = version/" -e "s/^#version = '0.1'/version = '${VERSION}'/" -e "s/^#release = '0.1-draft'/release = '${VERSION}'/" Code/Doc/user/current/doc/conf.py
       svn ci -m "Updated version numbers for " Code/Doc/user/current/doc/conf.py
     fi
@@ -163,7 +183,8 @@ buildAskap() {
   
   BUILD_COMMAND="${BUILD_COMMAND} touch ${BUILD_DIR}/build-askapsoft-done; "
   
-  (eval $BUILD_COMMAND) &
+  log "Starting ASKAPsoft build in background\n"
+  (eval "$BUILD_COMMAND") &
 
 }
 
@@ -173,22 +194,22 @@ buildAskap() {
 buildServices() {
   log "Building the ASKAP services\n"
 
-  cd ${WORKING_DIR}/${TAG}
+  cd ${WORKING_DIR}/${TAG} || cleanup $ERROR_MISSING_ENV
 
   # Check it out of it's not there
   if [ ! -e askapingest-${TAG} ]; then
+    log "Retrieving the code base from ${ASKAPSOFT_URL} into askapsoft-${TAG}\n"
     svn export -q ${ASKAPSOFT_URL} askapingest-${TAG}
+  else
+    log "The askapingest-${TAG} directory already exists, using that\n"
   fi
 
   # This needs to be done on the ingest nodes
   # build ingest if specified
-  local BUILD_COMMAND="(cd ${WORKING_DIR}/${TAG}/askapingest-${TAG};
-                        python2.7 bootstrap.py -n;
-                        source initaskap.sh; 
-                        rbuild -n -V --release-name ASKAPsoft-cpsvcs-${TAG} --stage-dir ASKAPsoft-cpsvcs-${TAG} -t release Code/Systems/cpsvcs;
-                        touch ${BUILD_DIR}/build-cpsvcs-done) "
+  local BUILD_COMMAND="(cd ${WORKING_DIR}/${TAG}/askapingest-${TAG}; python2.7 bootstrap.py -n; source initaskap.sh; rbuild -n -V --release-name ASKAPsoft-cpsvcs-${TAG} --stage-dir ASKAPsoft-cpsvcs-${TAG} -t release Code/Systems/cpsvcs; touch ${BUILD_DIR}/build-cpsvcs-done) "
                        
   # run this on ingest
+  log "Starting services build on ingest (${INGEST_NODE})\n"
   ssh -v -t askapops@${INGEST_NODE} "${BUILD_COMMAND}"
 }
 
@@ -198,70 +219,84 @@ buildServices() {
 buildCli() {
   log "Building the CLI tools\n"
 
-  cd ${WORKING_DIR}/${TAG}
+  cd ${WORKING_DIR}/${TAG} || cleanup $ERROR_MISSING_ENV
 
   # Create a build command which will run initialisation and all required builds in the background.
-  local BUILD_COMMAND="python2.7 bootstrap.py -n;
-                       source initaskap.sh; 
-                       rbuild -n -V --release-name ASKAP-cli-${TAG} --stage-dir ASKAP-cli-${TAG} -t release Code/Components/UI/cli/current; 
-                       touch ${BUILD_DIR}/build-cli-done"
+  local BUILD_COMMAND="python2.7 bootstrap.py -n; source initaskap.sh; rbuild -n -V --release-name ASKAP-cli-${TAG} --stage-dir ASKAP-cli-${TAG} -t release Code/Components/UI/cli/current; touch ${BUILD_DIR}/build-cli-done"
                        
+  log "Retrieving the code base from ${TOS_URL} into askaptos-trunk\n"
   svn export -q ${TOS_URL} askaptos-trunk
-  cd askaptos-trunk
+  cd askaptos-trunk || cleanup $ERROR_MISSING_ENV
     
-  (eval $BUILD_COMMAND) &
+  log "Starting ASKAP CLI build in background\n"
+  (eval "${BUILD_COMMAND}") &
 
 }
 
-# Wait for the artefacts to be built and then stage the build
+# Wait for the artefacts to be built and then stage the build.
+# Times out of it has to wait too long (see $TIMEOUT_VALUE).
 stage() {
-  cd ${BUILD_DIR}
+  cd ${BUILD_DIR} || cleanup $ERROR_MISSING_ENV "Cannot find ${BUILD_DIR}"
 
   # Wait for builds to finish
   # true if the build-xxxx-done files are present for the required builds (including the services one running on ingest)
+  log "Waiting for background and remote builds to finish\n"
   local ALL_DONE=false
   local WAIT_TIME=60
-  local declare -a SEMAPHORES
+  local ELAPSED_TIME=0
+  declare -a SEMAPHORES
   local IDX=0
-  if [ "$DEPLOY_ASKAPSOFT" == true || "$DEPLOY_ASKAP_PIPLINE" == true || "$DEPLOY_ASKAP_USER_DOC" == true ]; then
+  if [ "$DEPLOY_ASKAPSOFT" == true ] || [ "$DEPLOY_ASKAP_PIPLINE" == true ] || [ "$DEPLOY_ASKAP_USER_DOC" == true ]; then
     SEMAPHORES[$IDX]="build-askapsoft-done"
-    IDX=IDX+1
+    IDX=$((IDX + 1))
   fi
   if [ "$DEPLOY_ASKAP_CLI" == true ]; then
     SEMAPHORES[$IDX]="build-cli-done"
-    IDX=IDX+1
+    IDX=$((IDX + 1))
   fi
   if [ "$DEPLOY_ASKAP_SERVICES" == true ]; then
     SEMAPHORES[$IDX]="build-cpsvcs-done"
-    IDX=IDX+1
+    IDX=$((IDX + 1))
   fi
   
-  until [ $ALL_DONE == true ]; do
+  while [ "$ALL_DONE" == false ]; do
   
     # check all the semaphores
-    for FLAG in ${SEMAPHORES[@]}; do
+    for FLAG in "${SEMAPHORES[@]}"; do
       if [ -e $FLAG ]; then
         ALL_DONE=true
+        log "${FLAG}\n"
       else
         ALL_DONE=false
       fi
     done
     
     # if any were not done then wait again
-    if [ $ALL_DONE == false ]; then
+    if [ "$ALL_DONE" == false ]; then
+      if [ "$ELAPSED_TIME" -gt "$TIMEOUT_VALUE" ]; then
+        logerr "Timeout reached while waiting for builds to finish - aborting!\n"
+        cleanup $ERROR_TIMEOUT;
+      fi
       sleep $WAIT_TIME
+      ELAPSED_TIME=$ELAPSED_TIME+$WAIT_TIME
     fi
   done
+  log "All required builds complete; staging the build ...\n"
 
   # stage askapsoft if specified
   if [ "$DEPLOY_ASKAPSOFT" == true ]; then
-    tar xf askapsoft-${TAG}/ASKAPsoft-cpapps-${TAG}.tgz
-    cd ASKAPsoft-cpapps-${TAG}; rm -rf build-1 config docs ICE_LICENSE include initenv.py local man share slice ssl; cd ..
+    
+    (tar xf askapsoft-${TAG}/ASKAPsoft-cpapps-${TAG}.tgz; \
+     cd ASKAPsoft-cpapps-${TAG}; \
+     rm -rf build-1 config docs ICE_LICENSE include initenv.py local man share slice ssl;) || \
+    cleanup ERROR_MISSING_ENV "Cannot prepare tar file askapsoft-${TAG}/ASKAPsoft-cpapps-${TAG}.tgz"
     
     # fix up permissions
     chgrp -R askap ASKAPsoft-cpapps-${TAG}
-    find ASKAPsoft-cpapps-${TAG} -type f | xargs chmod oug+r
-    find ASKAPsoft-cpapps-${TAG} -type d | xargs chmod oug+rx
+#    find ASKAPsoft-cpapps-${TAG} -type f | xargs chmod oug+r
+    find ASKAPsoft-cpapps-${TAG} -type f -exec chmod oug+r {} +
+#    find ASKAPsoft-cpapps-${TAG} -type d | xargs chmod oug+rx
+    find ASKAPsoft-cpapps-${TAG} -type d -exec chmod oug+rx {} +
     
     # stage
     mv ASKAPsoft-cpapps-${TAG} ${BUILD_DIR}
@@ -271,12 +306,12 @@ stage() {
 
   # stage pipelines if specified
   if [ "$DEPLOY_ASKAP_PIPLINE" == true ]; then
-    tar xf ${askapsoft-${TAG}/ASKAPsoft-pipelines-${TAG}.tgz
+    tar xf askapsoft-${TAG}/ASKAPsoft-pipelines-${TAG}.tgz
     
     # fix up permissions
     chgrp -R askap ASKAPsoft-pipelines-${TAG}
-    find ASKAPsoft-pipelines-${TAG} -type f | xargs chmod oug+r
-    find ASKAPsoft-pipelines-${TAG} -type d | xargs chmod oug+rx
+    find ASKAPsoft-pipelines-${TAG} -type f -exec chmod oug+r {} +
+    find ASKAPsoft-pipelines-${TAG} -type d -exec chmod oug+rx {} +
     
     # stage
     mv ASKAPsoft-pipelines-${TAG} ${BUILD_DIR}
@@ -290,8 +325,8 @@ stage() {
 
     # fix up permissions
     chgrp -R askap ASKAP-cli-${TAG}
-    find ASKAP-cli-${TAG} -type f | xargs chmod oug+r
-    find ASKAP-cli-${TAG} -type d | xargs chmod oug+rx
+    find ASKAP-cli-${TAG} -type f -exec chmod oug+r {} +
+    find ASKAP-cli-${TAG} -type d -exec chmod oug+rx {} +
     
     mv ASKAP-cli-${TAG} ${BUILD_DIR}
     sed -e "s/\${_VERSION}.*/${VERSION}/" askapsoft-${TAG}/Tools/Dev/deploy/askapcli.module-template > ${BUILD_DIR}/askapcli.module
@@ -304,13 +339,15 @@ stage() {
   
   # stage askapservices if specified
   if [ "$DEPLOY_ASKAP_SERVICES" == true ]; then
-    tar xf askapingest-${TAG}/ASKAPsoft-cpapps-${TAG}.tgz
-    cd ASKAPsoft-cpapps-${TAG}; rm -rf build-1 config docs ICE_LICENSE include initenv.py local man share slice ssl; cd ..
+    (tar xf askapingest-${TAG}/ASKAPsoft-cpapps-${TAG}.tgz; \
+     cd ASKAPsoft-cpapps-${TAG}; \
+     rm -rf build-1 config docs ICE_LICENSE include initenv.py local man share slice ssl;) || \
+    cleanup ERROR_MISSING_ENV "Cannot prepare tar file askapingest-${TAG}/ASKAPsoft-cpapps-${TAG}.tgz"
     
     # fix up permissions
     chgrp -R askap ASKAPsoft-cpapps-${TAG}
-    find ASKAPsoft-cpapps-${TAG} -type f | xargs chmod oug+r
-    find ASKAPsoft-cpapps-${TAG} -type d | xargs chmod oug+rx
+    find ASKAPsoft-cpapps-${TAG} -type f -exec chmod oug+r {} +
+    find ASKAPsoft-cpapps-${TAG} -type d -exec chmod oug+rx {} +
     
     # stage
     mv ASKAPsoft-cpapps-${TAG} ${BUILD_DIR}
@@ -325,8 +362,8 @@ deploy() {
 
   # Deploy the askap apps, if they were built, along with module configuration file
   if [ -e ${BUILD_DIR}/ASKAPsoft-cpapps-${TAG} ]; then
-    mv ${BUILD_DIR}/ASKAPsoft-cpapps-${TAG} ${DEPLOY_DIR}/askapsoft/${TAG}
-    mv ${BUILD_DIR}/askapsoft.module ${MODULES_DIR}/askapsoft/${VERSION}
+    mv "${BUILD_DIR}/ASKAPsoft-cpapps-${TAG}" "${DEPLOY_DIR}/askapsoft/${TAG}"
+    mv "${BUILD_DIR}/askapsoft.module" "${MODULES_DIR}/askapsoft/${VERSION}"
     if [ "$MAKE_DEFAULT" == true ]; then
       # change the default referenced version
       sed -i -e "s/^set ModulesVersion.*/set ModulesVersion \"${VERSION}\"/" ${MODULES_DIR}/askapsoft/.version
@@ -335,8 +372,8 @@ deploy() {
   
   # Deploy the askap pipeline scripts, if they were built, along with module configuration file
   if [ -e ${BUILD_DIR}/ASKAPsoft-pipelines-${TAG} ]; then
-    mv ${BUILD_DIR}/ASKAPsoft-pipelines-${TAG} ${DEPLOY_DIR}/askappipeline/${TAG}
-    mv ${BUILD_DIR}/askappipeline.module ${MODULES_DIR}/askappipeline/${VERSION}
+    mv "${BUILD_DIR}/ASKAPsoft-pipelines-${TAG}" "${DEPLOY_DIR}/askappipeline/${TAG}"
+    mv "${BUILD_DIR}/askappipeline.module" "${MODULES_DIR}/askappipeline/${VERSION}"
     if [ "$MAKE_DEFAULT" == true ]; then
       # change the default referenced version
       sed -i -e "s/^set ModulesVersion.*/set ModulesVersion \"${VERSION}\"/" ${MODULES_DIR}/askappipeline/.version
@@ -357,11 +394,14 @@ cleanup () {
     rm /tmp/ASKAPDEPLOY.lock
     #rm -rf ${WORKING_DIR}/${TAG}
   fi
-  exit $1
+  if [ "$2" -ne "" ]; then
+    logerr "$2"
+  fi
+  exit "$1"
 }
 
 showHelp() {
-  printf "$USAGE \n"
+  printf "%s \n" "$USAGE"
   printf "Make a release of ASKAPsoft.\n"
   printf "    -h | ?            this help\n"
   printf "    -v                verbose\n"
@@ -383,20 +423,20 @@ showHelp() {
   printf "  export DEPLOY_ASKAP_CLI=true\n"
   printf "  export MAKE_MODULES_DEFAULT=true\n"
   printf "  export REPO_URL='https://svn.atnf.csiro.au/'\n"
-  printf "  export LOG_FILE='./${NOW}-ASKAPSDP-deploy.log'\n"
+  printf "  export LOG_FILE='./%s'\n" "${NOW}-ASKAPSDP-deploy.log"
 }
 
 # Logger for logging messages
 log() {
-  printf "`date "+%Y%m%d %H:%M:%S"` - $@" >> $LOG_FILE
+  printf "%s - %s" "$(date \"+%Y%m%d %H:%M:%S\")" "$@" >> "$LOG_FILE"
   if [ "$VERBOSE" == true ]; then
-    printf "$@" 
+    printf "%s" "$@" 
   fi
 }
 logerr() {
   # Log to file and stderr
-  log "ERROR: $@"
-  printf "ERROR: $@" 1>&2
+  log "ERROR: " "$@"
+  printf "ERROR: %s" "$@" 1>&2
 }
 
 # Process the command line parameters.
@@ -537,7 +577,7 @@ doOverwriteChecks() {
 
     # exit if we have any overwrite check fails
     if [ "$BAIL" == true ]; then
-      cleanup $ERROR_OVERWRITE_CHECK_FAILED
+      cleanup $ERROR_OVERWRITE_CONFLICT
     fi
   else
     logerr "The modules directory does not exist, %s" ${MODULES_DIR} 
