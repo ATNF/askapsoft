@@ -1,12 +1,29 @@
 #!/bin/bash -l
 
 simScripts=`pwd`/simulationScripts
+configFile="config.sh"
+
+USAGE="runSimulations.sh -c <config file>
+    Where <config file> is in the directory $simScripts.
+    If no config file given, \"$configFile\" is used."
 
 doSubmit=true
 #doSubmit=false
 runIt=true
 
 depend=""
+
+while getopts ':c:h' opt
+do
+    case $opt in
+	c) configFile=$OPTARG;;
+        h) echo "Usage: $USAGE"
+           exit 0;;
+	\?) echo "ERROR: Invalid option: $USAGE"
+	    exit 1;;
+    esac
+done
+
 
 if [ "${ASKAP_ROOT}" == "" ]; then
     echo "You have not set ASKAP_ROOT! Exiting."
@@ -20,7 +37,7 @@ fi
 
 if [ $runIt == true ]; then    
 
-    . ${simScripts}/config.sh
+    . ${simScripts}/$configFile
     . ${simScripts}/setup.sh
 
     # Run the 9-beam calibration observation of 1934-638
