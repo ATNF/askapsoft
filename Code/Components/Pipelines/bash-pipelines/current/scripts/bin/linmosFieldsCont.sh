@@ -73,48 +73,40 @@ sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 
 nterms=${NUM_TAYLOR_TERMS}
+maxterm=\`echo \$nterms | awk '{print 2*\$1-1}'\`
 IMAGE_BASE_CONT=${IMAGE_BASE_CONT}
 SB_SCIENCE=${SB_SCIENCE}
 
-FIELD_LIST=$FIELD_LIST
-TILE_LIST=""
-for FIELD in \$FIELD_LIST; do
-    getTile
-    if [ \$FIELD != \$TILE ]; then
-        isNew=true
-        for THETILE in \$TILELIST; do
-            if [ \$TILE == \$THETILE ]; then
-                isNew=false
-            fi
-        done
-        if [ \$isNew == true ]; then
-            TILE_LIST="\$TILE_LIST \$TILE"
-        fi
-    fi
-done
+FIELD_LIST="$FIELD_LIST"
+TILE_LIST="$TILE_LIST"
+echo "Tile list = \$TILE_LIST"
 
 # If there is only one tile, only include the "ALL" case, which
 # mosaics together all fields
-if [ \`echo \$TILELIST | awk '{print NF}'\` -gt 1 ]; then
-    FULL_TILE_LIST="\$TILELIST ALL"
+if [ \`echo \$TILE_LIST | awk '{print NF}'\` -gt 1 ]; then
+    FULL_TILE_LIST="\$TILE_LIST ALL"
 else
     FULL_TILE_LIST="ALL"
 fi
+echo "Full tile list = \$FULL_TILE_LIST"
 
 for THISTILE in \$FULL_TILE_LIST; do
 
+    echo "Mosaicking tile \$THISTILE"
+
     # First get the list of FIELDs that contribute to this TILE
     TILE_FIELD_LIST=""
-    for FIELD in \$FIELDLIST; do
+    for FIELD in \$FIELD_LIST; do
         getTile
         if [ \$THISTILE == "ALL" ] || [ \$TILE == \$THISTILE ]; then
             TILE_FIELD_LIST="\$TILE_FIELD_LIST \$FIELD"
         fi
     done
+    echo "Tile \$THISTILE has field list \$TILE_FIELD_LIST"
 
     for imageCode in restored altrestored image residual; do 
     
-        for((TERM=0;TERM<\${nterms};TERM++)); do
+        for((TTERM=0;TTERM<\${maxterm};TTERM++)); do
     
             imList=""
             wtList=""
@@ -131,6 +123,16 @@ for THISTILE in \$FULL_TILE_LIST; do
                     fi
                 fi
             done
+
+            if [ \$THISTILE == "ALL" ]; then
+                jobCode=linmosFull_\${imageCode}
+            else
+                jobCode=linmos\${THISTILE}_\${imageCode}
+            fi
+            if [ \$maxterm -gt 1 ]; then
+                jobCode=\${jobCode}_T\${TTERM}
+            fi
+
             if [ "\${imList}" != "" ]; then
                 FIELD="."
                 TILE=\$THISTILE
@@ -153,14 +155,14 @@ EOFINNER
                 for im in `echo \${imList} | sed -e 's/,/ /g'`; do
                     rejuvenate \$im
                 done
-                extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} linmosFull_\${imageCode} "txt,csv"
+                extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} \${jobCode} "txt,csv"
                 if [ \$err != 0 ]; then
                     exit \$err
                 fi
             else
                 echo "ERROR - no good images were found for mosaicking image type '\${imageCode}'!"
-                writeStats \${SLURM_JOB_ID} linmosFull_\${imageCode} FAIL --- --- --- --- --- txt > stats/stats-\${SLURM_JOB_ID}-linmosFull.txt
-                writeStats \${SLURM_JOB_ID} linmosFull_\${imageCode} FAIL --- --- --- --- --- csv > stats/stats-\${SLURM_JOB_ID}-linmosFull.csv
+                writeStats \${SLURM_JOB_ID} 1 \${jobCode} FAIL --- --- --- --- --- txt > $stats/stats-\${SLURM_JOB_ID}-\${jobCode}.txt
+                writeStats \${SLURM_JOB_ID} 1 \${jobCode} FAIL --- --- --- --- --- csv > $stats/stats-\${SLURM_JOB_ID}-\${jobCode}.csv
             fi
         done
     done
@@ -185,9 +187,12 @@ if [ ${DO_SOURCE_FINDING_MOSAIC} == true ]; then
 
     # set the $imageBase variable to have 'linmos' in it
     imageCode=restored
+    BEAM="all"
     FIELD="."
+    TILE="ALL"
+    FIELDBEAM="Full"
+    FIELDBEAMJOB="Full"
     setImageProperties cont
-    FIELD="SB${SB_SCIENCE}"
 
     . ${PIPELINEDIR}/sourcefinding.sh
 

@@ -109,9 +109,22 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$needBeams" == "true" ]; then
             fi
 
             FIELD_LIST=""
-            for F in `sort -k2 $fieldlist | awk '{print $2}' | uniq `;
+            TILE_LIST=""
+            for FIELD in `sort -k2 $fieldlist | awk '{print $2}' | uniq `;
             do
-                FIELD_LIST="$FIELD_LIST $F"
+                FIELD_LIST="$FIELD_LIST $FIELD"
+                getTile
+                if [ $FIELD != $TILE ]; then
+                    isNew=true
+                    for THETILE in $TILE_LIST; do
+                        if [ $TILE == $THETILE ]; then
+                            isNew=false
+                        fi
+                    done
+                    if [ $isNew == true ]; then
+                        TILE_LIST="$TILE_LIST $TILE"
+                    fi
+                fi
             done
             
             echo "List of fields: "

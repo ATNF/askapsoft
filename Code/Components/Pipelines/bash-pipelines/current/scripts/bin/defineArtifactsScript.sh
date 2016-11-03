@@ -109,6 +109,8 @@ NOW="${NOW}"
 nterms="${NUM_TAYLOR_TERMS}"
 list_of_images="${IMAGE_LIST}"
 doBeams="${ARCHIVE_BEAM_IMAGES}"
+doSelfcalLoops="${ARCHIVE_SELFCAL_LOOP_MOSAICS}"
+doFieldMosaics="${ARCHIVE_FIELD_MOSAICS}"
 beams="${BEAMS_TO_USE}"
 FIELD_LIST="${FIELD_LIST}"
 IMAGE_BASE_CONT="${IMAGE_BASE_CONT}"
@@ -122,6 +124,15 @@ if [ "\${ADD_FITS_SUFFIX}" == "true" ] || [ "\${ADD_FITS_SUFFIX}" == "" ]; then
     fitsSuffix=".fits"
 fi
 
+nterms=${NUM_TAYLOR_TERMS}
+maxterm=\`echo \$nterms | awk '{print 2*\$1-1}'\`
+
+NUM_LOOPS=0
+DO_SELFCAL=$DO_SELFCAL
+if [ \$DO_SELFCAL == true ] && [ \$doSelfcalLoops == true ]; then
+    NUM_LOOPS=$SELFCAL_NUM_LOOPS
+fi
+
 LOCAL_BEAM_LIST="all"
 if [ "\${doBeams}" == true ]; then
     LOCAL_BEAM_LIST="\$LOCAL_BEAM_LIST \${beams}"
@@ -133,49 +144,59 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
 
     if [ \${FIELD} == "." ]; then
         theBeamList="all"
+        TILE_LIST="${TILE_LIST} ALL"
     else
         theBeamList=\${LOCAL_BEAM_LIST}
+        getTile
+        TILE_LIST="\${TILE}"
     fi
 
-    for BEAM in \${theBeamList}; do
-            
-        # Gather lists of continuum images
-    
-        for imageCode in ${imageCodeList}; do
+    for TILE in \${TILE_LIST}; do
 
-            setImageProperties cont
-            echo \${FIELD}/\${imageName}\${fitsSuffix}
-            if [ -e \${FIELD}/\${imageName}\${fitsSuffix} ]; then
-                casdaTwoDimImageNames+=(\${FIELD}/\${imageName}\${fitsSuffix})
-                casdaTwoDimImageTypes+=("\${imageType}")
-                casdaTwoDimThumbTitles+=("\${label}")
-                if [ "\${BEAM}" == "all" ] && [ "\${imageCode}" == "restored" ]; then
-                    casdaTwoDimImageNames+=(\${FIELD}/\${weightsImage}\${fitsSuffix})
-                    casdaTwoDimImageTypes+=("\${weightsType}")
-                    casdaTwoDimThumbTitles+=("\${weightsLabel}")
-                fi
-            fi
+        for BEAM in \${theBeamList}; do
+                
+            # Gather lists of continuum images
+        
+            for imageCode in ${imageCodeList}; do
+        
+                for((TTERM=0;TTERM<\${maxterm};TTERM++)); do
+        
+                    for((LOOP=0;LOOP<=\$NUM_LOOPS;LOOP++)); do
 
-        done
+                        if [ \$LOOP -eq 0 ] || [ \$BEAM == "all" ]; then
 
-    
-        # Gather lists of spectral cubes & continuum cubes
-    
-        for imageCode in ${imageCodeList}; do
+                            setImageProperties cont
 
-            setImageProperties spectral
-            if [ -e \${FIELD}/\${imageName}\${fitsSuffix} ]; then
-                casdaOtherDimImageNames+=(\${FIELD}/\${imageName}\${fitsSuffix})
-                casdaOtherDimImageTypes+=("\${imageType}")
-                if [ "\${BEAM}" == "all" ] && [ "\${imageCode}" == "restored" ]; then
-                    casdaOtherDimImageNames+=(\${FIELD}/\${weightsImage}\${fitsSuffix})
-                    casdaOtherDimImageTypes+=("\${weightsType}")
-                fi
-            fi
+                            if [ \$LOOP -gt 0 ]; then
+                                imageName="\$imageName.SelfCalLoop\${LOOP}"
+                                weightsImage="\$weightsImage.SelfCalLoop\${LOOP}"
+                            fi
 
-            for POLN in \${POL_LIST}; do
-                pol=\`echo \$POLN | tr '[:upper:]' '[:lower:]'\`
-                setImageProperties contcube \$pol
+#                            echo \${FIELD}/\${imageName}\${fitsSuffix}
+                            if [ -e \${FIELD}/\${imageName}\${fitsSuffix} ]; then
+                                casdaTwoDimImageNames+=(\${FIELD}/\${imageName}\${fitsSuffix})
+                                casdaTwoDimImageTypes+=("\${imageType}")
+                                casdaTwoDimThumbTitles+=("\${label}")
+                                if [ "\${BEAM}" == "all" ] && [ "\${imageCode}" == "restored" ]; then
+                                    casdaTwoDimImageNames+=(\${FIELD}/\${weightsImage}\${fitsSuffix})
+                                    casdaTwoDimImageTypes+=("\${weightsType}")
+                                    casdaTwoDimThumbTitles+=("\${weightsLabel}")
+                                fi
+                            fi
+                        fi
+
+                    done
+        
+                done
+        
+            done
+        
+        
+            # Gather lists of spectral cubes & continuum cubes
+        
+            for imageCode in ${imageCodeList}; do
+        
+                setImageProperties spectral
                 if [ -e \${FIELD}/\${imageName}\${fitsSuffix} ]; then
                     casdaOtherDimImageNames+=(\${FIELD}/\${imageName}\${fitsSuffix})
                     casdaOtherDimImageTypes+=("\${imageType}")
@@ -184,10 +205,24 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                         casdaOtherDimImageTypes+=("\${weightsType}")
                     fi
                 fi
+        
+                for POLN in \${POL_LIST}; do
+                    pol=\`echo \$POLN | tr '[:upper:]' '[:lower:]'\`
+                    setImageProperties contcube \$pol
+                    if [ -e \${FIELD}/\${imageName}\${fitsSuffix} ]; then
+                        casdaOtherDimImageNames+=(\${FIELD}/\${imageName}\${fitsSuffix})
+                        casdaOtherDimImageTypes+=("\${imageType}")
+                        if [ "\${BEAM}" == "all" ] && [ "\${imageCode}" == "restored" ]; then
+                            casdaOtherDimImageNames+=(\${FIELD}/\${weightsImage}\${fitsSuffix})
+                            casdaOtherDimImageTypes+=("\${weightsType}")
+                        fi
+                    fi
+                done
+        
             done
-
+        
         done
-    
+
     done
 
 done

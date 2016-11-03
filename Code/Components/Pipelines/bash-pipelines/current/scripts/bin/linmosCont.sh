@@ -57,7 +57,7 @@ linmos.feeds.spacing    = ${LINMOS_BEAM_SPACING}
 ${LINMOS_BEAM_OFFSETS}"
     fi
 
-    
+
     setJob linmos linmos
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
@@ -77,13 +77,14 @@ ${askapsoftModuleCommands}
 
 BASEDIR=${BASEDIR}
 cd $OUTPUT
-. ${PIPELINEDIR}/utils.sh	
+. ${PIPELINEDIR}/utils.sh
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 
 nterms=${NUM_TAYLOR_TERMS}
+maxterm=\`echo \$nterms | awk '{print 2*\$1-1}'\`
 IMAGE_BASE_CONT=${IMAGE_BASE_CONT}
 FIELD=${FIELD}
 
@@ -91,24 +92,27 @@ NUM_LOOPS=0
 DO_SELFCAL=$DO_SELFCAL
 MOSAIC_SELFCAL_LOOPS=${MOSAIC_SELFCAL_LOOPS}
 if [ \$DO_SELFCAL == true ] && [ \$MOSAIC_SELFCAL_LOOPS == true ]; then
-    NUM_LOOPS=\$SELFCAL_NUM_LOOPS
+    NUM_LOOPS=$SELFCAL_NUM_LOOPS
 fi
 
 for((LOOP=0;LOOP<=\$NUM_LOOPS;LOOP++)); do
+echo "Loop \$LOOP"
 
-    for imageCode in restored altrestored image residual; do 
-    
-        for((TERM=0;TERM<\${nterms};TERM++)); do
-    
+    for imageCode in restored altrestored image residual; do
+
+        for((TTERM=0;TTERM<\${maxterm};TTERM++)); do
+
             beamList=""
             for BEAM in ${BEAMS_TO_USE}; do
                 setImageProperties cont
-                echo \$imageName
                 if [ \$LOOP -eq 0 ]; then
                     DIR="."
                 else
-                    DIR="selfCal_${imageBase}/Loop\${LOOP}"
+                    DIR="selfCal_\${imageBase}/Loop\${LOOP}"
                 fi
+                echo \$DIR
+                echo \$BEAM
+                echo \${DIR}/\$imageName
                 if [ -e \${DIR}/\${imageName} ]; then
                     if [ "\${beamList}" == "" ]; then
                         beamList="\${DIR}/\${imageName}"
@@ -117,15 +121,26 @@ for((LOOP=0;LOOP<=\$NUM_LOOPS;LOOP++)); do
                     fi
                 fi
             done
+echo "beam list = \$beamList"
+
+            jobCode=${jobname}_\${imageCode}
+            if [ \$maxterm -gt 1 ]; then
+                jobCode=\${jobCode}_T\${TTERM}
+            fi
+            if [ \$LOOP -gt 0 ]; then
+                jobCode=\${jobCode}_L\${LOOP}
+            fi
+
             if [ "\${beamList}" != "" ]; then
                 BEAM=all
                 setImageProperties cont
                 if [ \$LOOP -gt 0 ]; then
-                    imageName="\$imageName.SelfCalLoop${LOOP}"
+                    imageName="\$imageName.SelfCalLoop\${LOOP}"
+                    weightsImage="\$weightsImage.SelfCalLoop\${LOOP}"
                 fi
                 echo "Mosaicking to form \${imageName}"
-                parset=${parsets}/science_linmos_${FIELDBEAM}_\${imageCode}_\${SLURM_JOB_ID}.in
-                log=${logs}/science_linmos_${FIELDBEAM}_\${imageCode}_\${SLURM_JOB_ID}.log
+                parset=${parsets}/science_linmos_${FIELDBEAM}_L\$LOOP_\${imageCode}_\${SLURM_JOB_ID}.in
+                log=${logs}/science_linmos_${FIELDBEAM}_L\$LOOP_\${imageCode}_\${SLURM_JOB_ID}.log
                 cat > \${parset} << EOFINNER
 linmos.names            = [\${beamList}]
 linmos.outname          = \$imageName
@@ -136,7 +151,7 @@ ${reference}
 linmos.psfref           = ${LINMOS_PSF_REF}
 linmos.cutoff           = ${LINMOS_CUTOFF}
 EOFINNER
-    
+
                 NCORES=1
                 NPPN=1
                 aprun -n \${NCORES} -N \${NPPN} $linmos -c \$parset > \$log
@@ -144,14 +159,14 @@ EOFINNER
                 for im in `echo \${beamList} | sed -e 's/,/ /g'`; do
                     rejuvenate \${im}
                 done
-                extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname}_\${imageCode} "txt,csv"
+                extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} \${jobCode} "txt,csv"
                 if [ \$err != 0 ]; then
                     exit \$err
                 fi
             else
                 echo "ERROR - no good images were found for mosaicking image type '\${imageCode}'!"
-                writeStats \${SLURM_JOB_ID} linmos_\${imageCode} FAIL --- --- --- --- --- txt > stats/stats-\${SLURM_JOB_ID}-linmos.txt
-                writeStats \${SLURM_JOB_ID} linmos_\${imageCode} FAIL --- --- --- --- --- csv > stats/stats-\${SLURM_JOB_ID}-linmos.csv
+                writeStats \${SLURM_JOB_ID} \${jobCode} 1 FAIL --- --- --- --- --- txt > $stats/stats-\${SLURM_JOB_ID}-\${jobCode}.txt
+                writeStats \${SLURM_JOB_ID} \${jobCode} 1 FAIL --- --- --- --- --- csv > $stats/stats-\${SLURM_JOB_ID}-\${jobCode}.csv
             fi
         done
     done

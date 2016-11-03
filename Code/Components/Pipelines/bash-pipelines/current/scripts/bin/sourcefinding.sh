@@ -164,10 +164,10 @@ EOFOUTER
 
     # Dependencies for the job
     DEP=""
-    if [ $BEAM == "all" ]; then
-        DEP=`addDep "$DEP" "$ID_LINMOS_CONT"`
-    elif [ "$FIELD" == "." ]; then
+    if [ "$FIELD" == "." ]; then
         DEP=`addDep "$DEP" "$ID_LINMOS_CONT_ALL"`
+    elif [ $BEAM == "all" ]; then
+        DEP=`addDep "$DEP" "$ID_LINMOS_CONT"`
     else
         if [ $DO_SELFCAL == true ]; then
             DEP=`addDep "$DEP" "$ID_CONTIMG_SCI_SC"`
@@ -178,7 +178,7 @@ EOFOUTER
     
     if [ $SUBMIT_JOBS == true ]; then
 	ID_SOURCEFINDING_SCI=`sbatch ${DEP} $sbatchfile | awk '{print $4}'`
-	recordJob ${ID_SOURCEFINDING_SCI} "Run the source-finder on the science observation"
+	recordJob ${ID_SOURCEFINDING_SCI} "Run the source-finder on the science observation with flags \"$DEP\""
     else
 	echo "Would run the source-finder on the science observation with slurm file $sbatchfile"
     fi

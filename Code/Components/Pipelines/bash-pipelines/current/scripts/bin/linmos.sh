@@ -134,8 +134,8 @@ EOFINNER
 else
 
     echo "ERROR - no good images were found for mosaicking!"
-    writeStats \${SLURM_JOB_ID} linmos FAIL --- --- --- --- --- txt > stats/stats-\${SLURM_JOB_ID}-linmos.txt
-    writeStats \${SLURM_JOB_ID} linmos FAIL --- --- --- --- --- csv > stats/stats-\${SLURM_JOB_ID}-linmos.csv
+    writeStats \${SLURM_JOB_ID} linmos FAIL --- --- --- --- --- txt > $stats/stats-\${SLURM_JOB_ID}-linmos.txt
+    writeStats \${SLURM_JOB_ID} linmos FAIL --- --- --- --- --- csv > $stats/stats-\${SLURM_JOB_ID}-linmos.csv
 
 fi
 EOFOUTER

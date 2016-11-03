@@ -612,6 +612,10 @@ IMAGE_LIST="image psf psf.image residual sensitivity"
 
 # Whether to archive individual beam images 
 ARCHIVE_BEAM_IMAGES=false
+# Whether to archive mosaics of self-calibration loops
+ARCHIVE_SELFCAL_LOOP_MOSAICS=true
+# Whether to archive the mosaicked images of each field
+ARCHIVE_FIELD_MOSAICS=true
 
 # OPAL project ID, for CASDA use
 PROJECT_ID="AS031"
