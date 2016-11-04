@@ -138,8 +138,8 @@ for THISTILE in \$FULL_TILE_LIST; do
                 TILE=\$THISTILE
                 setImageProperties cont
                 echo "Mosaicking to form \${imageName}"
-                parset=${parsets}/science_linmosFull_\${imageCode}_\${SLURM_JOB_ID}.in
-                log=${logs}/science_linmosFull_\${imageCode}_\${SLURM_JOB_ID}.log
+                parset=${parsets}/science_\${jobCode}_\${SLURM_JOB_ID}.in
+                log=${logs}/science_\${jobCode}_\${SLURM_JOB_ID}.log
                 cat > \${parset} << EOFINNER
 linmos.names            = [\${imList}]
 linmos.weights          = [\${wtList}]

@@ -139,8 +139,8 @@ echo "beam list = \$beamList"
                     weightsImage="\$weightsImage.SelfCalLoop\${LOOP}"
                 fi
                 echo "Mosaicking to form \${imageName}"
-                parset=${parsets}/science_linmos_${FIELDBEAM}_L\$LOOP_\${imageCode}_\${SLURM_JOB_ID}.in
-                log=${logs}/science_linmos_${FIELDBEAM}_L\$LOOP_\${imageCode}_\${SLURM_JOB_ID}.log
+                parset=${parsets}/science_\${jobCode}_${FIELDBEAM}_\${SLURM_JOB_ID}.in
+                log=${logs}/science_\${jobCode}_${FIELDBEAM}_\${SLURM_JOB_ID}.log
                 cat > \${parset} << EOFINNER
 linmos.names            = [\${beamList}]
 linmos.outname          = \$imageName
