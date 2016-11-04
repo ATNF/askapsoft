@@ -438,7 +438,7 @@ deploy() {
 cleanup () {
   if [ -e /tmp/ASKAPDEPLOY.lock ]; then
     rm /tmp/ASKAPDEPLOY.lock
-    #rm -rf ${WORKING_DIR}/${TAG}
+    rm -rf "${BUILD_DIR}"
   fi
   if [ "$2" -ne "" ]; then
     logerr "$2"
