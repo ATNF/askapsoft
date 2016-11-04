@@ -394,7 +394,7 @@ double AskapComponentImager::evaluateGaussian(const Gaussian2D<T> &gauss,
 {
     // If we have a very narrow Gaussian, calculate the pixel flux
     // using the 1D approach. Otherwise, we need to do a 2D integral.
-    if (gauss.minorAxis() < 1.e-10) {
+    if (gauss.minorAxis() < 1.e-3) {
         return evaluateGaussian1D<T>(gauss, xpix, ypix);
     } else {
         return evaluateGaussian2D<T>(gauss, xpix, ypix);
