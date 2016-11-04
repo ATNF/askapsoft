@@ -275,8 +275,8 @@ std::string RadioSource::boundingSubsection(std::vector<size_t> dim,
             first = this->xmin - itsFitParams.boxPadSize() + 1;
             last = this->xmax + itsFitParams.boxPadSize() + 1;
             if (itsFitParams.useNoise()) {
-                first = std::min(first, this->xpeak - itsFitParams.noiseBoxSize() / 2);
-                last = std::max(last, this->xpeak + itsFitParams.noiseBoxSize() / 2);
+                first = std::min(first, this->xpeak - itsFitParams.noiseBoxSize() / 2 + 1);
+                last = std::max(last, this->xpeak + itsFitParams.noiseBoxSize() / 2 + 1);
             }
             first = std::max(first, 1L);
             last = std::min(last, long(dim[ax]));
@@ -285,8 +285,8 @@ std::string RadioSource::boundingSubsection(std::vector<size_t> dim,
             first = this->ymin - itsFitParams.boxPadSize() + 1;
             last = this->ymax + itsFitParams.boxPadSize() + 1;
             if (itsFitParams.useNoise()) {
-                first = std::min(first, this->ypeak - itsFitParams.noiseBoxSize() / 2);
-                last = std::max(last, this->ypeak + itsFitParams.noiseBoxSize() / 2);
+                first = std::min(first, this->ypeak - itsFitParams.noiseBoxSize() / 2 + 1);
+                last = std::max(last, this->ypeak + itsFitParams.noiseBoxSize() / 2 + 1);
             }
             first = std::max(first, 1L);
             last = std::min(last, long(dim[ax]));
