@@ -141,7 +141,7 @@ buildAskap() {
   # Get the code if it's not there
   if [ ! -e "askapsoft-${TAG}" ]; then
     log "Retrieving the code base from ${ASKAPSOFT_URL} into askapsoft-${TAG}\n"
-    svn export -q "${ASKAPSOFT_URL}" "askapsoft-${TAG}"
+    svn co -q "${ASKAPSOFT_URL}" "askapsoft-${TAG}"
   else
     log "The askapsoft-${TAG} directory already exists, using that\n"
     svn update -q "askapsoft-${TAG}"
@@ -219,7 +219,7 @@ buildServices() {
   # Check it out of it's not there
   if [ ! -e "askapingest-${TAG}" ]; then
     log "Retrieving the code base from ${ASKAPSOFT_URL} into askapsoft-${TAG}\n"
-    svn export -q "${ASKAPSOFT_URL}" "askapingest-${TAG}"
+    svn co -q "${ASKAPSOFT_URL}" "askapingest-${TAG}"
   else
     log "The askapingest-${TAG} directory already exists, using that\n"
     svn update -q "askapingest-${TAG}"
@@ -255,7 +255,7 @@ buildCli() {
   # Check it out of it's not there
   if [ ! -e "askaptos-trunk" ]; then
     log "Retrieving the code base from ${TOS_URL} into askaptos-trunk\n"
-    svn export -q "${TOS_URL}" askaptos-trunk
+    svn co -q "${TOS_URL}" askaptos-trunk
   else
     log "The askaptos-trunk directory already exists, using that\n"
     svn update -q "askaptos-trunk"
