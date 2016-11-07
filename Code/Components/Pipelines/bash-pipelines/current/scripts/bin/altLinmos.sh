@@ -66,7 +66,7 @@ linmos.feeds.spacing    = ${LINMOS_BEAM_SPACING}
 ${LINMOS_BEAM_OFFSETS}"
         fi
 
-    
+
         setJob linmos_${subband} linmos_${subband}
         cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
@@ -86,7 +86,7 @@ ${askapsoftModuleCommands}
 
 BASEDIR=${BASEDIR}
 cd $OUTPUT
-. ${PIPELINEDIR}/utils.sh	
+. ${PIPELINEDIR}/utils.sh
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
@@ -97,24 +97,32 @@ log=${logs}/science_linmos_\${SLURM_JOB_ID}.log
 
 # bit of image name before the beam ID
 imagePrefix=image.restored.wr.${subband}.${IMAGE_BASE_SPECTRAL}
-imagePartialPrefix=wr.${subband}.${IMAGE_BASE_SPECTRAL}
-beamList=""
+weightPrefix=weights.wr.${subband}.${IMAGE_BASE_SPECTRAL}
+outImage="linmos.\${imagePrefix}"
+outWeight="linmos.\${weightPrefix}"
+imageList=""
+weightList=""
+
 for BEAM in ${BEAMS_TO_USE}; do
     if [ -e \${imagePrefix}.beam\${BEAM} ]; then
-        beamList="\${beamList}\${imagePartialPrefix}.beam\${BEAM} "
+        imageList="\${imageList}\${imagePrefix}.beam\${BEAM} "
+        weightList="\${imageList}\${weightPrefix}.beam\${BEAM} "
     else
         echo "WARNING: Beam \${BEAM} image not present - not including in mosaic!"
-    fi 
+    fi
 done
 
-if [ "\${beamList}" != "" ]; then
+if [ "\${imageList}" != "" ]; then
 
-    beamList=\`echo \${beamList} | sed -e 's/ /,/g' \`
-
+    imageList=\`echo \${imageList} | sed -e 's/ /,/g' \`
+    weightList=\`echo \${weightList} | sed -e 's/ /,/g' \`
     cat > \$parset << EOFINNER
-linmos.names            = [\${beamList}]
-linmos.findmosaics      = true
-linmos.weighttype       = FromPrimaryBeamModel
+linmos.names            = [\${imageList}]
+linmos.weights          = [\${weightList}]
+linmos.outname          = \${outImage}
+linmos.outWeight        = \${outWeight}
+linmos.findmosaics      = false
+linmos.weighttype       = FromWeightImages
 linmos.weightstate      = Inherent
 ${reference}
 linmos.psfref           = ${LINMOS_PSF_REF}
