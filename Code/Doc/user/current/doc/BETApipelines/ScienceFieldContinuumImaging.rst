@@ -48,7 +48,17 @@ Each loop gets its own directory, where the intermediate images,
 source-finding results, and gains calibration table are stored. At the
 end, the final gains calibration table is kept in the main output
 directory (as this can then be used by the spectral-line imaging
-pipeline). 
+pipeline).
+
+Some parameters are allowed to vary with the loop number of the
+self-calibration. This way, you can decrease, say, the detection
+threshold, or increase the number of major cycles, as the calibration
+steadily improves. These parameters are for:
+
+* Deconvolution: ``CLEAN_THRESHOLD_MAJORCYCLE`` and ``CLEAN_NUM_MAJORCYCLES``
+* Self-calibration: ``SELFCAL_SELAVY_THRESHOLD``, ``SELFCAL_INTERVAL``
+  and ``SELFCAL_NORMALISE_GAINS``
+* Data selection: ``CIMAGER_MINUV`` and ``CCALIBRATOR_MINUV``
 
 Once the gains solution has been determined, it can be applied
 directly to the continuum measurement set, creating a copy in the
@@ -131,10 +141,14 @@ instead of BasisfunctionMFS).
 |                                            |                                 | (:doc:`../calim/cimager`)                              | the appropriate beam, else give a size (such as 30arcsec, or |
 |                                            |                                 |                                                        | “[30arcsec, 30arcsec, 0deg]”).                               |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
+| ``CIMAGER_MINUV``                          | 0                               | MinUV (:doc:`../calim/data_selection`)                 | The minimum UV distance considered in the imaging - used to  |
+|                                            |                                 |                                                        | exclude the short baselines. Can be given as an array with   |
+|                                            |                                 |                                                        | different values for each self-cal loop (e.g. "[200,200,0]").|
++--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | **Gridding parameters**                    |                                 |                                                        |                                                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``GRIDDER_SNAPSHOT_IMAGING``               | true                            | snapshotimaging                                        | Whether to use snapshot imaging when gridding.               |
-|                                            |                                 | (:doc:`../calim/gridder`)                              |                                                              | 
+|                                            |                                 | (:doc:`../calim/gridder`)                              |                                                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``GRIDDER_SNAPSHOT_WTOL``                  | 2600                            | snapshotimaging.wtolerance                             | The wtolerance parameter controlling how frequently to       |
 |                                            |                                 | (:doc:`../calim/gridder`)                              | snapshot.                                                    |
@@ -153,12 +167,12 @@ instead of BasisfunctionMFS).
 |                                            |                                 | (:doc:`../calim/gridder`)                              |                                                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``GRIDDER_OVERSAMPLE``                     | 4                               | WProject.oversample                                    | The oversampling factor for the gridder.                     |
-|                                            |                                 | (:doc:`../calim/gridder`)                              |                                                              |
+|                                            |                                 | (:doc:`../calim/gridder`)                              |                                                              | 
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``GRIDDER_MAXSUPPORT``                     | 512                             | WProject.maxsupport                                    | The maxsupport parameter for the gridder.                    |
 |                                            |                                 | (:doc:`../calim/gridder`)                              |                                                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| **Cleaning parameters**                    |                                 |                                                        |                                                              | 
+| **Cleaning parameters**                    |                                 |                                                        |                                                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``SOLVER``                                 | Clean                           | solver                                                 | Which solver to use. You will mostly want to leave this as   |
 |                                            |                                 | (:doc:`../calim/cimager`)                              | 'Clean', but there is a 'Dirty' solver available.            |
@@ -185,10 +199,11 @@ instead of BasisfunctionMFS).
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``CLEAN_THRESHOLD_MAJORCYCLE``             | 1mJy                            | threshold.majorcycle                                   | The target peak residual. Major cycles stop if this is       |
 |                                            |                                 | (:doc:`../calim/cimager`)                              | reached. A negative number ensures all major cycles requested|
-|                                            |                                 | (:doc:`../calim/solver`)                               | are done.                                                    |
+|                                            |                                 | (:doc:`../calim/solver`)                               | are done. Can be given as an array with different values for |
+|                                            |                                 |                                                        | each self-cal loop (e.g. "[3mJy,1mJy,-1mJy]").               |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``CLEAN_NUM_MAJORCYCLES``                  | 2                               | ncycles                                                | Number of major cycles.                                      |
-|                                            |                                 | (:doc:`../calim/cimager`)                              |                                                              |
+| ``CLEAN_NUM_MAJORCYCLES``                  | 2                               | ncycles                                                | Number of major cycles. Can be given as an array with        |
+|                                            |                                 | (:doc:`../calim/cimager`)                              | different values for each self-cal loop (e.g. "[2,4,6]").    |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``CLEAN_WRITE_AT_MAJOR_CYCLE``             | false                           | Images.writeAtMajorCycle                               | If true, the intermediate images will be written (with a     |
 |                                            |                                 | (:doc:`../calim/cimager`)                              | .cycle suffix) after the end of each major cycle.            |
@@ -231,10 +246,11 @@ instead of BasisfunctionMFS).
 |                                            |                                 |                                                        | detected components directly through a parset (created by    |
 |                                            |                                 |                                                        | Selavy). Anything else will default to "Cmodel".             |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``SELFCAL_INTERVAL``                       | 300                             | interval                                               | Interval [sec] over which to solve for self-calibration.     |
-|                                            |                                 | (:doc:`../calim/ccalibrator`)                          |                                                              |
-+--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``SELFCAL_NUM_LOOPS``                      | 5                               | none                                                   | Number of loops of self-calibration.                         |
++--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
+| ``SELFCAL_INTERVAL``                       | 300                             | interval                                               | Interval [sec] over which to solve for self-calibration. Can |
+|                                            |                                 | (:doc:`../calim/ccalibrator`)                          | be given as an array with different values for each self-cal |
+|                                            |                                 |                                                        | loop (e.g. "[1800,900,300]")                                 |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``SELFCAL_KEEP_IMAGES``                    | true                            | none                                                   | Should we keep the images from the intermediate selfcal      |
 |                                            |                                 |                                                        | loops?                                                       |
@@ -243,7 +259,8 @@ instead of BasisfunctionMFS).
 |                                            |                                 |                                                        | self-calibration? This is done for each field separately.    |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``SELFCAL_SELAVY_THRESHOLD``               | 15                              | snrCut                                                 | SNR threshold for detection with Selavy in determining       |
-|                                            |                                 | (:doc:`../analysis/selavy`)                            | selfcal sources.                                             |
+|                                            |                                 | (:doc:`../analysis/selavy`)                            | selfcal sources. Can be given as an array with different     |
+|                                            |                                 |                                                        | values for each self-cal loop (e.g. "[15,10,8]").            |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``SELFCAL_SELAVY_NSUBX``                   | 6                               | nsubx                                                  | Division of image in x-direction for source-finding in       |
 |                                            |                                 | (:doc:`../analysis/selavy`)                            | selfcal.                                                     |
@@ -257,7 +274,9 @@ instead of BasisfunctionMFS).
 |                                            |                                 | (:doc:`../analysis/selavy`)                            | selfcal.                                                     |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``SELFCAL_NORMALISE_GAINS``                | true                            | normalisegains                                         | Whether to normalise the amplitudes of the gains to 1,       |
-|                                            |                                 | (:doc:`../calim/ccalibrator`)                          | approximating the phase-only self-calibration approach.      |
+|                                            |                                 | (:doc:`../calim/ccalibrator`)                          | approximating the phase-only self-calibration approach. Can  |
+|                                            |                                 |                                                        | be given as an array with different values for each self-cal |
+|                                            |                                 |                                                        | loop (e.g. "[true,true,false]").                             |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``SELFCAL_SCALENOISE``                     | false                           | calibrate.scalenoise                                   | Whether the noise estimate will be scaled in accordance      |
 |                                            |                                 | (:doc:`../calim/cimager`)                              | with the applied calibrator factor to achieve proper         |
@@ -269,7 +288,10 @@ instead of BasisfunctionMFS).
 |                                            |                                 |                                                        | directory. This can then be used for the spectral-line       |
 |                                            |                                 |                                                        | imaging if need be. If this is blank, both ``DO_SELFCAL``    |
 |                                            |                                 |                                                        | and ``DO_APPLY_CAL_SL`` will be set to false.                |
-|                                            |                                 |                                                        |                                                              |
++--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
+| ``CCALIBRATOR_MINUV``                      | 0                               | MinUV (:doc:`../calim/data_selection`)                 | The minimum UV distance considered in the calibration - used |
+|                                            |                                 |                                                        | to exclude the short baselines. Can be given as an array with|
+|                                            |                                 |                                                        | different values for each self-cal loop (e.g. "[200,200,0]").|
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | **Application of gains calibration**       |                                 |                                                        |                                                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
