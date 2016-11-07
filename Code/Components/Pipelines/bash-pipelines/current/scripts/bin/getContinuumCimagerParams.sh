@@ -185,11 +185,13 @@ Cimager.solver.Clean.psfwidth                   = ${CLEAN_PSFWIDTH}
 Cimager.solver.Clean.logevery                   = 50"
 fi
 cleaningPars="${cleaningPars}
-Cimager.threshold.minorcycle                    = ${CLEAN_THRESHOLD_MINORCYCLE}
-Cimager.threshold.majorcycle                    = ${CLEAN_THRESHOLD_MAJORCYCLE}
-Cimager.ncycles                                 = ${CLEAN_NUM_MAJORCYCLES}
 Cimager.Images.writeAtMajorCycle                = ${CLEAN_WRITE_AT_MAJOR_CYCLE}
+Cimager.threshold.minorcycle                    = ${CLEAN_THRESHOLD_MINORCYCLE}
 "
+# threshold.majorcycle and ncycles are defined by the function
+# cimagerSelfcalLoopParams in utils.sh. These can vary according to
+# the self-calibration loop number, so need to be set from within the
+# slurm job
 
 
 cimagerParams="#Standard Parameter set for Cimager

@@ -429,6 +429,57 @@ function getPolList()
 
 }
 
+# Function to set the cleaning parameters that can potentially depend
+# on the self-calibration loop number. The array index is taken from
+# the value of $LOOP - if this is blank then zero (the first value) is
+# used
+# Requires/uses:
+#  * LOOP
+#  * CLEAN_THRESHOLD_MAJORCYCLE_ARRAY
+#  * CLEAN_NUM_MAJORCYCLES_ARRAY
+# Returns:
+#  * loopParams
+function cimagerSelfcalLoopParams()
+{
+    if [ "$LOOP" == "" ]; then
+        loopval=0
+    else
+        loopval=$LOOP
+    fi
+    loopParams="# Parameters set for loop $loopval
+Cimager.threshold.majorcycle                    = ${CLEAN_THRESHOLD_MAJORCYCLE_ARRAY[$loopval]}
+Cimager.ncycles                                 = ${CLEAN_NUM_MAJORCYCLES_ARRAY[$loopval]}
+"
+}
+
+# Function to return self-calibration-loop-dependant parameters
+# governing data selection. This returns parset parameters suitable
+# for either Cimager or Ccalibrator (the task name is given as the
+# first argument to the function)
+# Use: dataSelectionSelfcalLoop TaskName
+#  where TaskName is "Cimager" or "Ccalibrator"
+# Requires/uses:
+#   * LOOP
+#   * CIMAGER_MINUV_ARRAY or
+#   * CCALIBRATOR_MINUV_ARRAY
+# Returns:
+#   * dataSelectionParams
+function dataSelectionSelfcalLoop()
+{
+    dataSelectionParams=""
+    if [ $1 == "Cimager" ]; then
+        if [ ${CIMAGER_MINUV_ARRAY[$LOOP]} -gt 0 ]; then
+            dataSelectionParams="Cimager.MinUV   = ${CIMAGER_MINUV_ARRAY[$LOOP]}"
+        fi
+    elif [ $1 == "Ccalibrator" ]; then
+        if [ ${CCALIBRATOR_MINUV_ARRAY[$LOOP]} -gt 0 ]; then
+            dataSelectionParams="Ccalibrator.MinUV   = ${CIMAGER_MINUV_ARRAY[$LOOP]}"
+        fi
+    else
+        dataSelectionParams="# no data selection parameter returned"
+    fi
+
+}
 
 #############################
 # CONVERSION TO FITS FORMAT

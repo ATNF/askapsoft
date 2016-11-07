@@ -75,11 +75,25 @@ cd $OUTPUT
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 
+# Parameters that can vary with self-calibration loop number (which is
+#     zero in this case)
+CLEAN_THRESHOLD_MAJORCYCLE_ARRAY=(${CLEAN_THRESHOLD_MAJORCYCLE_ARRAY[@]})
+CLEAN_NUM_MAJORCYCLES_ARRAY=(${CLEAN_NUM_MAJORCYCLES_ARRAY[@]})
+CIMAGER_MINUV_ARRAY=(${CIMAGER_MINUV_ARRAY[@]})
+CCALIBRATOR_MINUV_ARRAY=(${CCALIBRATOR_MINUV_ARRAY[@]})
+LOOP=0
+
+cleaningLoopPars
+dataSelectionSelfcalLoop Cimager
+
 parset=${parsets}/science_imaging_${FIELDBEAM}_\${SLURM_JOB_ID}.in
 cat > \$parset <<EOFINNER
 ${cimagerParams}
 #
-# Apply calibration
+\${loopParams}
+\${dataSelectionParams}
+#
+# Do not apply any calibration
 Cimager.calibrate                               = false
 EOFINNER
 

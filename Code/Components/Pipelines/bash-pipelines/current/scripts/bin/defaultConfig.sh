@@ -367,11 +367,23 @@ CLEAN_GAIN=0.5
 CLEAN_PSFWIDTH=512
 CLEAN_SCALES="[0,3,10]"
 CLEAN_THRESHOLD_MINORCYCLE="[30%, 0.9mJy]"
-CLEAN_THRESHOLD_MAJORCYCLE=1mJy
-CLEAN_NUM_MAJORCYCLES=2
 # If true, this will write out intermediate images at the end of each
 # major cycle
 CLEAN_WRITE_AT_MAJOR_CYCLE=false
+
+# Array-capable self-calibration parameters
+#   These parameters can be given as either a single value (eg. "300")
+#   which is replicated for all self-cal loops, or as an array
+#   (eg. "[1800,900,300]"), allowing a different value for each loop.
+# If no self-calibration is used, we just use the first element
+#
+# The number of major cycles in the deconvolution
+CLEAN_NUM_MAJORCYCLES=2
+# The maximum residual to stop the major-cycle deconvolution (if not
+# reached, or negative, CLEAN_NUM_MAJORCYCLES cycles are used)
+CLEAN_THRESHOLD_MAJORCYCLE=1mJy
+
+
 ####################
 # Parameters for preconditioning (A.K.A. weighting)
 PRECONDITIONER_LIST="[Wiener, GaussianTaper]"
@@ -391,16 +403,12 @@ RESTORE_PRECONDITIONER_WIENER_TAPER=""
 # Method to present self-cal model: via a model image ("Cmodel") or
 # via a components parset ("Components")
 SELFCAL_METHOD="Cmodel"
-# Interval [sec] over which to solve for self-calibration
-SELFCAL_INTERVAL=300
 # Number of loops of self-calibration
 SELFCAL_NUM_LOOPS=5
 # Should we keep the images from the intermediate selfcal loops?
 SELFCAL_KEEP_IMAGES=true
 # Should we make full-field mosaics of each loop iteration?
 MOSAIC_SELFCAL_LOOPS=true
-# SNR threshold for detection with selavy in determining selfcal sources
-SELFCAL_SELAVY_THRESHOLD=15
 # Division of image for source-finding in selfcal
 SELFCAL_SELAVY_NSUBX=6
 SELFCAL_SELAVY_NSUBY=3
@@ -408,14 +416,28 @@ SELFCAL_SELAVY_NSUBY=3
 # mode - a fraction of the peak weight, below which pixels are not
 # detected.
 SELFCAL_SELAVY_WEIGHTSCUT=0.95
-# Option to pass to the "Ccalibrator.normalisegains" parameter,
-# indicating we want to approximate phase-only self-cal
-SELFCAL_NORMALISE_GAINS=true
 # Value for the calibrate.scalenoise parameter for applying the
 # self-cal solution
 SELFCAL_SCALENOISE=false
 # Flux limit for cmodel
 SELFCAL_MODEL_FLUX_LIMIT=10mJy
+
+# Array-capable self-calibration parameters
+#   These parameters can be given as either a single value (eg. "300")
+#   which is replicated for all self-cal loops, or as an array
+#   (eg. "[1800,900,300]"), allowing a different value for each loop.
+#
+# Interval [sec] over which to solve for self-calibration
+SELFCAL_INTERVAL=300
+# SNR threshold for detection with selavy in determining selfcal sources
+SELFCAL_SELAVY_THRESHOLD=15
+# Option to pass to the "Ccalibrator.normalisegains" parameter,
+# indicating we want to approximate phase-only self-cal
+SELFCAL_NORMALISE_GAINS=true
+# Limit the data selection for imaging to a minimum UV distance [m]
+CIMAGER_MINUV=0
+# Limit the data selection for calibration to a minimum UV distance [m]
+CCALIBRATOR_MINUV=0
 
 # name of the final gains calibration table
 GAINS_CAL_TABLE=cont_gains_cal_beam%b.tab

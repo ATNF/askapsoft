@@ -189,9 +189,14 @@ mkdir -p \$caldir
 
 copyImages=${SELFCAL_KEEP_IMAGES}
 
+# Parameters that can vary with self-calibration loop number
 SELFCAL_INTERVAL_ARRAY=(${SELFCAL_INTERVAL_ARRAY[@]})
 SELFCAL_SELAVY_THRESHOLD_ARRAY=(${SELFCAL_SELAVY_THRESHOLD_ARRAY[@]})
 SELFCAL_NORMALISE_GAINS_ARRAY=(${SELFCAL_NORMALISE_GAINS_ARRAY[@]})
+CLEAN_THRESHOLD_MAJORCYCLE_ARRAY=(${CLEAN_THRESHOLD_MAJORCYCLE_ARRAY[@]})
+CLEAN_NUM_MAJORCYCLES_ARRAY=(${CLEAN_NUM_MAJORCYCLES_ARRAY[@]})
+CIMAGER_MINUV_ARRAY=(${CIMAGER_MINUV_ARRAY[@]})
+CCALIBRATOR_MINUV_ARRAY=(${CCALIBRATOR_MINUV_ARRAY[@]})
 
 for((LOOP=0;LOOP<=${SELFCAL_NUM_LOOPS};LOOP++)); do
 
@@ -224,16 +229,24 @@ Cimager.calibrate                               = false
 
     parset=${parsets}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}.in
 
+    # generate the loop-dependant cimager parameters --> loopParams & dataSelectionParams
+    cleaningLoopPars
+    dataSelectionSelfcalLoop Cimager
+
     cat > \$parset <<EOFINNER
 ##########
 ## Continuum imaging with cimager
 ##
 ${cimagerParams}
 #
+\${loopParams}
+\${dataSelectionParams}
+#
 \${calparams}
 #
 EOFINNER
     if [ \${LOOP} -gt 0 ]; then
+            dataSelectionSelfcalLoop Cccalibrator
             cat >> \$parset <<EOFINNER
 ##########
 ## Shallow source-finding with selavy
@@ -298,6 +311,7 @@ ${CmodelParset}
 ##
 # parameters for calibrator
 Ccalibrator.dataset                             = ${OUTPUT}/${msSciAv}
+\${dataSelectionParams}
 Ccalibrator.nAnt                                = ${NUM_ANT}
 Ccalibrator.nBeam                               = 1
 Ccalibrator.solve                               = antennagains
