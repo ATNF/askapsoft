@@ -13,6 +13,8 @@ runIt=true
 
 depend=""
 
+. ${simScripts}/baseConfig.sh
+
 while getopts ':c:h' opt
 do
     case $opt in
