@@ -83,7 +83,7 @@ CIMAGER_MINUV_ARRAY=(${CIMAGER_MINUV_ARRAY[@]})
 CCALIBRATOR_MINUV_ARRAY=(${CCALIBRATOR_MINUV_ARRAY[@]})
 LOOP=0
 
-cleaningLoopPars
+cimagerSelfcalLoopParams
 dataSelectionSelfcalLoop Cimager
 
 parset=${parsets}/science_imaging_${FIELDBEAM}_\${SLURM_JOB_ID}.in

@@ -230,7 +230,7 @@ Cimager.calibrate                               = false
     parset=${parsets}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}.in
 
     # generate the loop-dependant cimager parameters --> loopParams & dataSelectionParams
-    cleaningLoopPars
+    cimagerSelfcalLoopParams
     dataSelectionSelfcalLoop Cimager
 
     cat > \$parset <<EOFINNER
