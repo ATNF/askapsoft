@@ -418,7 +418,7 @@ module load askappipeline/${askappipelineVersion}"
             done
         else
             SELFCAL_INTERVAL_ARRAY=()
-            for((i=0;i<${SELFCAL_NUM_LOOPS};i++)); do
+            for((i=0;i<=${SELFCAL_NUM_LOOPS};i++)); do
                 SELFCAL_INTERVAL_ARRAY+=($SELFCAL_INTERVAL)
             done
         fi
@@ -431,7 +431,7 @@ module load askappipeline/${askappipelineVersion}"
             done
         else
             SELFCAL_SELAVY_THRESHOLD_ARRAY=()
-            for((i=0;i<${SELFCAL_NUM_LOOPS};i++)); do
+            for((i=0;i<=${SELFCAL_NUM_LOOPS};i++)); do
                 SELFCAL_SELAVY_THRESHOLD_ARRAY+=($SELFCAL_SELAVY_THRESHOLD)
             done
         fi
@@ -444,7 +444,7 @@ module load askappipeline/${askappipelineVersion}"
             done
         else
             SELFCAL_NORMALISE_GAINS_ARRAY=()
-            for((i=0;i<${SELFCAL_NUM_LOOPS};i++)); do
+            for((i=0;i<=${SELFCAL_NUM_LOOPS};i++)); do
                 SELFCAL_NORMALISE_GAINS_ARRAY+=($SELFCAL_NORMALISE_GAINS)
             done
         fi
@@ -457,7 +457,7 @@ module load askappipeline/${askappipelineVersion}"
             done
         else
             CLEAN_NUM_MAJORCYCLES_ARRAY=()
-            for((i=0;i<${SELFCAL_NUM_LOOPS};i++)); do
+            for((i=0;i<=${SELFCAL_NUM_LOOPS};i++)); do
                 CLEAN_NUM_MAJORCYCLES_ARRAY+=($CLEAN_NUM_MAJORCYCLES)
             done
         fi
@@ -470,7 +470,7 @@ module load askappipeline/${askappipelineVersion}"
             done
         else
             CLEAN_THRESHOLD_MAJORCYCLE_ARRAY=()
-            for((i=0;i<${SELFCAL_NUM_LOOPS};i++)); do
+            for((i=0;i<=${SELFCAL_NUM_LOOPS};i++)); do
                 CLEAN_THRESHOLD_MAJORCYCLE_ARRAY+=($CLEAN_THRESHOLD_MAJORCYCLE)
             done
         fi
@@ -483,7 +483,7 @@ module load askappipeline/${askappipelineVersion}"
             done
         else
             CIMAGER_MINUV_ARRAY=()
-            for((i=0;i<${SELFCAL_NUM_LOOPS};i++)); do
+            for((i=0;i<=${SELFCAL_NUM_LOOPS};i++)); do
                 CIMAGER_MINUV_ARRAY+=($CIMAGER_MINUV)
             done
         fi
@@ -496,7 +496,7 @@ module load askappipeline/${askappipelineVersion}"
             done
         else
             CCALIBRATOR_MINUV_ARRAY=()
-            for((i=0;i<${SELFCAL_NUM_LOOPS};i++)); do
+            for((i=0;i<=${SELFCAL_NUM_LOOPS};i++)); do
                 CCALIBRATOR_MINUV_ARRAY+=($CCALIBRATOR_MINUV)
             done
         fi
@@ -504,32 +504,33 @@ module load askappipeline/${askappipelineVersion}"
         # Validate that all these arrays are the same length as
         # SELFCAL_NUM_LOOPS, as long as the latter is >0
         if [ $SELFCAL_NUM_LOOPS -gt 0 ]; then
-            if [ ${SELFCAL_INTERVAL_ARRAY[@]} -ne $SELFCAL_NUM_LOOPS ]; then
-                echo "ERROR! Size of SELFCAL_INTERVAL (${SELFCAL_INTERVAL}) is not the same as SELFCAL_NUM_LOOPS (${SELFCAL_NUM_LOOPS}). Exiting."
+            arraySize=`expr $SELFCAL_NUM_LOOPS + 1`
+            if [ ${#SELFCAL_INTERVAL_ARRAY[@]} -ne $arraySize ]; then
+                echo "ERROR! Size of SELFCAL_INTERVAL (${SELFCAL_INTERVAL}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
                 exit 1
             fi
-            if [ ${SELFCAL_SELAVY_THRESHOLD_ARRAY[@]} -ne $SELFCAL_NUM_LOOPS ]; then
-                echo "ERROR! Size of SELFCAL_SELAVY_THRESHOLD (${SELFCAL_SELAVY_THRESHOLD}) is not the same as SELFCAL_NUM_LOOPS (${SELFCAL_NUM_LOOPS}). Exiting."
+            if [ ${#SELFCAL_SELAVY_THRESHOLD_ARRAY[@]} -ne $arraySize ]; then
+                echo "ERROR! Size of SELFCAL_SELAVY_THRESHOLD (${SELFCAL_SELAVY_THRESHOLD}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
                 exit 1
             fi
-            if [ ${SELFCAL_NORMALISE_GAINS_ARRAY[@]} -ne $SELFCAL_NUM_LOOPS ]; then
-                echo "ERROR! Size of SELFCAL_NORMALISE_GAINS (${SELFCAL_NORMALISE_GAINS}) is not the same as SELFCAL_NUM_LOOPS (${SELFCAL_NUM_LOOPS}). Exiting."
+            if [ ${#SELFCAL_NORMALISE_GAINS_ARRAY[@]} -ne $arraySize ]; then
+                echo "ERROR! Size of SELFCAL_NORMALISE_GAINS (${SELFCAL_NORMALISE_GAINS}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
                 exit 1
             fi
-            if [ ${CLEAN_NUM_MAJORCYCLES_ARRAY[@]} -ne $SELFCAL_NUM_LOOPS ]; then
-                echo "ERROR! Size of CLEAN_NUM_MAJORCYCLES (${CLEAN_NUM_MAJORCYCLES}) is not the same as SELFCAL_NUM_LOOPS (${SELFCAL_NUM_LOOPS}). Exiting."
+            if [ ${#CLEAN_NUM_MAJORCYCLES_ARRAY[@]} -ne $arraySize ]; then
+                echo "ERROR! Size of CLEAN_NUM_MAJORCYCLES (${CLEAN_NUM_MAJORCYCLES}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
                 exit 1
             fi
-            if [ ${CLEAN_THRESHOLD_MAJORCYCLE_ARRAY[@]} -ne $SELFCAL_NUM_LOOPS ]; then
-                echo "ERROR! Size of CLEAN_THRESHOLD_MAJORCYCLE (${CLEAN_THRESHOLD_MAJORCYCLE}) is not the same as SELFCAL_NUM_LOOPS (${SELFCAL_NUM_LOOPS}). Exiting."
+            if [ ${#CLEAN_THRESHOLD_MAJORCYCLE_ARRAY[@]} -ne $arraySize ]; then
+                echo "ERROR! Size of CLEAN_THRESHOLD_MAJORCYCLE (${CLEAN_THRESHOLD_MAJORCYCLE}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
                 exit 1
             fi
-            if [ ${CIMAGER_MINUV_ARRAY[@]} -ne $SELFCAL_NUM_LOOPS ]; then
-                echo "ERROR! Size of CIMAGER_MINUV (${CIMAGER_MINUV}) is not the same as SELFCAL_NUM_LOOPS (${SELFCAL_NUM_LOOPS}). Exiting."
+            if [ ${#CIMAGER_MINUV_ARRAY[@]} -ne $arraySize ]; then
+                echo "ERROR! Size of CIMAGER_MINUV (${CIMAGER_MINUV}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
                 exit 1
             fi
-            if [ ${CCALIBRATOR_MINUV_ARRAY[@]} -ne $SELFCAL_NUM_LOOPS ]; then
-                echo "ERROR! Size of CCALIBRATOR_MINUV (${CCALIBRATOR_MINUV}) is not the same as SELFCAL_NUM_LOOPS (${SELFCAL_NUM_LOOPS}). Exiting."
+            if [ ${#CCALIBRATOR_MINUV_ARRAY[@]} -ne $arraySize ]; then
+                echo "ERROR! Size of CCALIBRATOR_MINUV (${CCALIBRATOR_MINUV}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
                 exit 1
             fi
 
