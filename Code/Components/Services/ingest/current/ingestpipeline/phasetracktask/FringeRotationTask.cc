@@ -113,8 +113,8 @@ FringeRotationTask::FringeRotationTask(const LOFAR::ParameterSet& parset,
 /// will be passed to process method).
 bool FringeRotationTask::isAlwaysActive() const
 {
-  // the first iteration should be done on all ranks, then only on ranks width data.
-  return !itsToBeInitialised;
+  // the first iteration should be done on all ranks, then only on ranks with data.
+  return itsToBeInitialised;
 }
 
 /// @brief initialise fringe rotation approach
