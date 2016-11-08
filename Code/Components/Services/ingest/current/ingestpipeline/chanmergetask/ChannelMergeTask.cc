@@ -307,12 +307,17 @@ void ChannelMergeTask::receiveVisChunks(askap::cp::common::VisChunk::ShPtr chunk
       }
    }
   
+   // for a rank without input (i.e. brand new chunk is created) the number of channels is the total number of channels, othewise it is 
+   // the original number of channels, other dimensions should match
+   // the following qquantity is easy to get directly rather than from nChanOriginal
+   const casa::uInt chanScaleFactor = itsGroupWithActivatedRank ? itsRanksToMerge : 1;
    // 5) receive and merge visibilities (each is two floats)
    {
-      boost::shared_array<float> visRecvBuf(new float[2 * chunk->visibility().nelements() * nLocalRanks]);
+      ASKAPDEBUGASSERT(chunk->visibility().nelements() % chanScaleFactor == 0);
+      boost::shared_array<float> visRecvBuf(new float[2 * chunk->visibility().nelements() * nLocalRanks / chanScaleFactor]);
       ASKAPASSERT(chunk->visibility().contiguousStorage());
-      const int response = MPI_Gather((float*)chunk->visibility().data(), chunk->visibility().nelements() * 2, 
-            MPI_FLOAT, visRecvBuf.get(), chunk->visibility().nelements() * 2, MPI_FLOAT, 0, itsCommunicator);
+      const int response = MPI_Gather((float*)chunk->visibility().data(), chunk->visibility().nelements() * 2 / chanScaleFactor, 
+            MPI_FLOAT, visRecvBuf.get(), chunk->visibility().nelements() * 2 / chanScaleFactor, MPI_FLOAT, 0, itsCommunicator);
       ASKAPCHECK(response == MPI_SUCCESS, "Error gathering visibilities, response from MPI_Gather = "<<response);
      
       // it is a bit ugly to rely on actual representation of casa::Complex, but this is done
@@ -324,9 +329,10 @@ void ChannelMergeTask::receiveVisChunks(askap::cp::common::VisChunk::ShPtr chunk
    {
       ASKAPASSERT(chunk->flag().contiguousStorage());
       ASKAPDEBUGASSERT(sizeof(casa::Bool) == sizeof(char));
-      boost::shared_array<casa::Bool> flagRecvBuf(new casa::Bool[chunk->flag().nelements() * nLocalRanks]);
-      const int response = MPI_Gather((char*)chunk->flag().data(), chunk->flag().nelements(), 
-            MPI_CHAR, (char*)flagRecvBuf.get(), chunk->flag().nelements(), MPI_CHAR, 0, itsCommunicator);
+      ASKAPDEBUGASSERT(chunk->flag().nelements() % chanScaleFactor == 0);
+      boost::shared_array<casa::Bool> flagRecvBuf(new casa::Bool[chunk->flag().nelements() * nLocalRanks / chanScaleFactor]);
+      const int response = MPI_Gather((char*)chunk->flag().data(), chunk->flag().nelements() / chanScaleFactor, 
+            MPI_CHAR, (char*)flagRecvBuf.get(), chunk->flag().nelements() / chanScaleFactor, MPI_CHAR, 0, itsCommunicator);
       ASKAPCHECK(response == MPI_SUCCESS, "Error gathering flags, response from MPI_Gather = "<<response);
 
       // it is a bit ugly to rely on actual representation of casa::Bool, but this is done
@@ -668,7 +674,7 @@ void ChannelMergeTask::sendBasicMetadata(const askap::cp::common::VisChunk::ShPt
    out.putEnd();
 
    // send size first
-   ASKAPLOG_DEBUG_STR(logger, "     -- message size "<<buf.size());
+   //ASKAPLOG_DEBUG_STR(logger, "     -- message size "<<buf.size());
    casa::Vector<unsigned long> sndBufForSize(1, buf.size());
    ASKAPDEBUGASSERT(sndBufForSize.size() == 1);
    sendVector(sndBufForSize,++tag);
@@ -715,7 +721,7 @@ void ChannelMergeTask::receiveBasicMetadata(const askap::cp::common::VisChunk::S
    ASKAPDEBUGASSERT(receiveBufForSize.size() == 1);
    receiveVector(receiveBufForSize,++tag);
 
-   ASKAPLOG_DEBUG_STR(logger, "     -- message size "<<receiveBufForSize[0]);
+   //ASKAPLOG_DEBUG_STR(logger, "     -- message size "<<receiveBufForSize[0]);
 
    std::vector<int8_t> buf(receiveBufForSize[0]);
 
