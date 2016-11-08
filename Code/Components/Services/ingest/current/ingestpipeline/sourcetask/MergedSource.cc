@@ -116,7 +116,7 @@ VisChunk::ShPtr MergedSource::next(void)
         }
 
         if (itsMetadata && itsMetadata->scanId() == ScanManager::SCANID_IDLE) {
-            ASKAPLOG_INFO_STR(logger,
+            ASKAPLOG_DEBUG_STR(logger,
                     "Skipping this cycle, metadata indicates SCANID_IDLE");
             count = -1;
         }
@@ -127,8 +127,8 @@ VisChunk::ShPtr MergedSource::next(void)
 
     // Update the Scan Manager
     itsScanManager.update(itsMetadata->scanId());
-    ASKAPLOG_DEBUG_STR(logger, "Processing scanId="<<itsMetadata->scanId()<<" mdata time="<<
-             bat2epoch(itsMetadata->time()).getValue());
+    //ASKAPLOG_DEBUG_STR(logger, "Processing scanId="<<itsMetadata->scanId()<<" mdata time="<<
+    //         bat2epoch(itsMetadata->time()).getValue());
 
     // Check if the TOS/TOM has indicated the observation is complete
     if (itsScanManager.observationComplete()) {
@@ -253,7 +253,8 @@ VisChunk::ShPtr MergedSource::next(void)
         }
         */
     }
-    ASKAPLOG_DEBUG_STR(logger, "Aligned datagram time and metadata time: "<<bat2epoch(itsVis->timestamp).getValue());
+
+    //ASKAPLOG_DEBUG_STR(logger, "Aligned datagram time and metadata time: "<<bat2epoch(itsVis->timestamp).getValue());
 
     // Now the streams are synced, start building a VisChunk
     VisChunk::ShPtr chunk = createVisChunk(*itsMetadata);

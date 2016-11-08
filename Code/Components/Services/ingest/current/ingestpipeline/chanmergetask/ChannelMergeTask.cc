@@ -826,7 +826,7 @@ void ChannelMergeTask::configureRanks(bool isActive)
           }
        }
 
-       ASKAPLOG_DEBUG_STR(logger, "rank "<<itsConfig.rank()<<(isActive ? " active " : " inactive ")<<" seqNumber "<<seqNumber<<" colour "<<colour);
+       //ASKAPLOG_DEBUG_STR(logger, "rank "<<itsConfig.rank()<<(isActive ? " active " : " inactive ")<<" seqNumber "<<seqNumber<<" colour "<<colour);
 
        ASKAPDEBUGASSERT(colour >= 0);
        // just set up ascending order in original ranks for local group ranks, put rank handling the output to zero
@@ -843,7 +843,7 @@ void ChannelMergeTask::configureRanks(bool isActive)
       // there should be no group with colour = itsConfig.nprocs() - so this is the colour for unused group of ranks
       const int colour = isActive ? seqNumber / itsRanksToMerge : itsConfig.nprocs();
 
-      ASKAPLOG_DEBUG_STR(logger, "rank "<<itsConfig.rank()<<(isActive ? " active " : " inactive ")<<" seqNumber "<<seqNumber<<" colour "<<colour);
+      //ASKAPLOG_DEBUG_STR(logger, "rank "<<itsConfig.rank()<<(isActive ? " active " : " inactive ")<<" seqNumber "<<seqNumber<<" colour "<<colour);
 
       ASKAPDEBUGASSERT(colour >= 0);
       // just set up ascending order in original ranks for local group ranks
