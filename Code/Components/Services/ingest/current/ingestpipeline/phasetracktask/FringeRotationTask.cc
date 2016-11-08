@@ -51,6 +51,11 @@
 #include <casacore/casa/Arrays/MatrixMath.h>
 #include <casacore/measures/Measures/UVWMachine.h>
 
+// name substitution should get the same name for all ranks, we need MPI for that
+// it would be nicer to get all MPI-related stuff to a single (top-level?) file eventually
+#include <mpi.h>
+
+
 ASKAP_LOGGER(logger, ".FringeRotationTask");
 
 using namespace casa;
@@ -65,17 +70,14 @@ using namespace askap::cp::ingest;
 FringeRotationTask::FringeRotationTask(const LOFAR::ParameterSet& parset,
                                const Configuration& config)
     : CalcUVWTask(parset, config), itsConfig(config),
-      itsFixedDelays(parset.getDoubleVector("fixeddelays", std::vector<double>())),
-      itsFrtMethod(fringeRotationMethod(parset,config)), itsCalcUVW(parset.getBool("calcuvw", true))
+      itsParset(parset), itsToBeInitialised(true),
+      itsCalcUVW(parset.getBool("calcuvw", true))
 {
-    ASKAPLOG_DEBUG_STR(logger, "constructor of the generalised fringe rotation task");
-    ASKAPLOG_INFO_STR(logger, "This is a specialised version of fringe rotation tasks used for debugging; use data on your own risk");
+    //ASKAPLOG_DEBUG_STR(logger, "constructor of the generalised fringe rotation task");
     if (itsCalcUVW) {
         ASKAPLOG_INFO_STR(logger, "This task will also calculate UVW, replacing any pre-existing value");
     }
-    if (parset.isDefined("fixeddelays")) {
-        ASKAPLOG_WARN_STR(logger, "Parset has old-style fixeddelay keyword defined - ignored (delays are taken from antenna records)");
-    }
+    ASKAPCHECK(!parset.isDefined("fixeddelays"), "Parset has old-style fixeddelay keyword defined - correct it in fcm before proceeding further");
 
     const std::vector<Antenna> antennas = config.antennas();
     const size_t nAnt = antennas.size();
@@ -86,14 +88,68 @@ FringeRotationTask::FringeRotationTask(const LOFAR::ParameterSet& parset,
     }
     // end of the code treating the new parset definition of fixed delays
 
-    ASKAPLOG_INFO_STR(logger, "The fringe rotation will apply fixed delays in addition to phase rotation");
-    ASKAPLOG_INFO_STR(logger, "The following fixed delays are specified:");
-    ASKAPCHECK(itsFixedDelays.size() == nAnt, "Fixed delays do not seem to be specified for all configured antennas");
+    if (config.rank() == 0) {
+        ASKAPLOG_INFO_STR(logger, "The fringe rotation will apply fixed delays in addition to phase rotation");
+        ASKAPLOG_INFO_STR(logger, "The following fixed delays are specified:");
+        ASKAPCHECK(itsFixedDelays.size() == nAnt, "Fixed delays do not seem to be specified for all configured antennas");
 
-    for (size_t id = 0; id < casa::min(casa::uInt(nAnt),casa::uInt(itsFixedDelays.size())); ++id) {
-         ASKAPLOG_INFO_STR(logger, "    antenna: " << antennas.at(id).name()<<" (id="<<id << ") delay: "
-                 << itsFixedDelays[id] << " ns");
+        for (size_t id = 0; id < casa::min(casa::uInt(nAnt),casa::uInt(itsFixedDelays.size())); ++id) {
+             ASKAPLOG_INFO_STR(logger, "    antenna: " << antennas.at(id).name()<<" (id="<<id << ") delay: "
+                    << itsFixedDelays[id] << " ns");
+        }
     }
+}
+
+/// @brief should this task be executed for inactive ranks?
+/// @details If a particular rank is inactive, process method is
+/// not called unless this method returns true. This class has the
+/// following behavior.
+///   - Returns true initially to allow collective operations if
+///     number of ranks is more than 1.
+///   - After the first call to process method, inactive ranks are
+///     identified and false is returned for them.
+/// @return true, if process method should be called even if
+/// this rank is inactive (i.e. uninitialised chunk pointer
+/// will be passed to process method).
+bool FringeRotationTask::isAlwaysActive() const
+{
+  // the first iteration should be done on all ranks, then only on ranks width data.
+  return !itsToBeInitialised;
+}
+
+/// @brief initialise fringe rotation approach
+/// @details This method uses the factory method to initialise 
+/// the fringe rotation approach on the rank which has data. It is
+/// checked using MPI collectives, that only one rank has a valid data stream
+/// @param[in] hasData true if this rank has data, false otherwise
+void FringeRotationTask::initialise(bool hasData)
+{
+   ASKAPDEBUGASSERT(itsToBeInitialised);
+   ASKAPDEBUGASSERT(itsConfig.rank() < itsConfig.nprocs());
+   std::vector<int> activityFlags(itsConfig.nprocs(), 0);
+   if (hasData) {
+       activityFlags[itsConfig.rank()] = 1;
+   }
+   const int response = MPI_Allreduce(MPI_IN_PLACE, (void*)activityFlags.data(),
+        activityFlags.size(), MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+   ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Allreduce = "<<response);
+  
+   // now activityFlags should be consistent across all ranks - figure out the role for
+   // this particular rank
+   const int numInputs = std::accumulate(activityFlags.begin(), activityFlags.end(), 0);
+
+   // most methods talk to hardware, therefore only one data stream is
+   // supported. Technically, we could exclude 'swdelays' because it
+   // doesn't care. However, we're not using it on independent chunks
+   // anyway and it is better to have the same guard applied to avoid
+   // relying on untested case.
+   ASKAPCHECK(numInputs == 1, "Exactly one input stream is expected by FringeRotationTask, use it after merge");
+   if (hasData) {
+       ASKAPLOG_INFO_STR(logger, "This rank ("<<itsConfig.rank()<<") will handle fringe rotation and residual correction");
+       itsFrtMethod = fringeRotationMethod(itsParset, itsConfig);
+   } 
+
+   itsToBeInitialised = false;
 }
 
 /// @brief process one VisChunk 
@@ -104,8 +160,15 @@ FringeRotationTask::FringeRotationTask(const LOFAR::ParameterSet& parset,
 ///                       phase factors will be applied.
 void FringeRotationTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
 {
-    ASKAPCHECK(itsFrtMethod && chunk, 
-           "Parallel data streams are not supported; use fringe rotation task after Merge");
+    if (itsToBeInitialised) {
+        initialise(chunk);
+        if (!chunk) {
+             return;
+        }
+    } else {
+        ASKAPCHECK(itsFrtMethod && chunk, 
+             "Parallel data streams are not supported; use fringe rotation task after Merge");
+    }
 
     casa::Matrix<double> delays(nAntennas(), nBeams(),0.);
     casa::Matrix<double> rates(nAntennas(),nBeams(),0.);
@@ -214,18 +277,6 @@ IFrtApproach::ShPtr FringeRotationTask::fringeRotationMethod(const LOFAR::Parame
 {
   const std::string name = parset.getString("method");
   ASKAPLOG_INFO_STR(logger, "Selected fringe rotation method: "<<name);
-
-  // most methods talk to hardware, therefore only one data stream is
-  // supported. Technically, we could exclude 'swdelays' because it
-  // doesn't care. However, we're not using it on independent chunks
-  // anyway and it is better to have the same guard applied to avoid
-  // relying on untested case.
-  if (config.nprocs() > 1 && config.rank() != 0) {
-      ASKAPLOG_INFO_STR(logger, 
-         "Parallel streams are not supported, this task is not supposed to be used for rank="<<
-         config.rank());
-      return IFrtApproach::ShPtr();
-  }
 
   IFrtApproach::ShPtr result;
   if (name == "drxdelays") {

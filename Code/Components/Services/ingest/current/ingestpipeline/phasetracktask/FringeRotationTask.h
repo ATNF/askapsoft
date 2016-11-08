@@ -70,7 +70,28 @@ class FringeRotationTask : public askap::cp::ingest::CalcUVWTask {
         ///                       phase factors will be applied.
         virtual void process(askap::cp::common::VisChunk::ShPtr& chunk);
 
+        /// @brief should this task be executed for inactive ranks?
+        /// @details If a particular rank is inactive, process method is
+        /// not called unless this method returns true. This class has the
+        /// following behavior.
+        ///   - Returns true initially to allow collective operations if
+        ///     number of ranks is more than 1.
+        ///   - After the first call to process method, inactive ranks are
+        ///     identified and false is returned for them.
+        /// @return true, if process method should be called even if
+        /// this rank is inactive (i.e. uninitialised chunk pointer
+        /// will be passed to process method).
+        virtual bool isAlwaysActive() const;
+
     protected:
+        /// @brief initialise fringe rotation approach
+        /// @details This method uses the factory method to initialise 
+        /// the fringe rotation approach on the rank which has data. It is
+        /// checked using MPI collectives, that only one rank has a valid data stream
+        /// @param[in] hasData true if this rank has data, false otherwise
+        void initialise(bool hasData);
+ 
+
         /// @brief factory method for the fringe rotation approach classes
         /// @details This class is used to create implementations of
         /// IFrtApproach interface based on the parset. These classes do
@@ -101,6 +122,12 @@ class FringeRotationTask : public askap::cp::ingest::CalcUVWTask {
     private:
         /// @brief configuration (need scan information)
         Configuration itsConfig;
+
+        /// @brief parameters - needed to delay initialisation
+        LOFAR::ParameterSet itsParset;
+
+        /// @brief  true, if initialisation is needed
+        bool itsToBeInitialised;
 
         /// @brief fixed delay component in ns
         ///
