@@ -118,7 +118,7 @@ AdviseDI::AdviseDI(askap::cp::CubeComms& comms, LOFAR::ParameterSet& parset) :
 
 void AdviseDI::prepare() {
     // this assumes only a sinlge spectral window - must generalise
-
+    ASKAPLOG_INFO_STR(logger,"Running prepare"); 
     // Read from the configruation the list of datasets to process
     const vector<string> ms = getDatasets();
 
@@ -475,37 +475,32 @@ int AdviseDI::match(int ms_number, casa::MVFrequency testFreq) {
 }
 void AdviseDI::addMissingParameters()
 {
-    /*
-    if (isPrepared == false) {
-        ASKAPLOG_DEBUG_STR(logger,"Running prepare from addMissingParameters");
-        this->prepare();
-    }
-    */
 
     ASKAPLOG_INFO_STR(logger,"Adding missing params ");
 
-    /*
-    std::vector<casa::MFrequency>::iterator begin_it;
-    std::vector<casa::MFrequency>::iterator end_it;
-    if (barycentre) {
-        begin_it = itsBaryFrequencies.begin();
-        end_it = itsBaryFrequencies.end();
-    }
-    else {
-        begin_it = itsTopoFrequencies.begin();
-        end_it = itsTopoFrequencies.end();
+    if (isPrepared == true) {
+        ASKAPLOG_INFO_STR(logger,"Prepared therefore can add frequency label for the output image");
+        std::vector<casa::MFrequency>::iterator begin_it;
+        std::vector<casa::MFrequency>::iterator end_it;
+        if (barycentre) {
+            begin_it = itsBaryFrequencies.begin();
+            end_it = itsBaryFrequencies.end()-1;
+        }
+        else {
+            begin_it = itsTopoFrequencies.begin();
+            end_it = itsTopoFrequencies.end()-1;
+
+        }
+        this->minFrequency = (*begin_it).getValue();
+        this->maxFrequency = (*end_it).getValue();
+        ASKAPLOG_INFO_STR(logger,"Min:Max frequency -- " << this->minFrequency << ":" << this->maxFrequency); 
+        // FIXME problem .... this is probably the wrong refFreq. It needs to be for the whole
+        // observation not just this allocation....
+        // Currently I fix this by forcing it to be set in the Parset - not optimal
+
+        // refFreq = 0.5*(minFrequency + maxFrequency);
 
     }
-    minFrequency = (*begin_it).getValue();
-    maxFrequency = (*end_it).getValue();
-
-    // FIXME problem .... this is probably the wrong refFreq. It needs to be for the whole
-    // observation not just this allocation....
-    // Currently I fix this by forcing it to be set in the Parset - not optimal
-
-    refFreq = 0.5*(minFrequency + maxFrequency);
-    */
-
 
    // test for missing image-specific parameters:
 
@@ -558,13 +553,15 @@ void AdviseDI::addMissingParameters()
        if ( !itsParset.isDefined(param) ) shapeNeeded = true;
 
        param = "Images."+imageNames[img]+".frequency";
-       if ( !itsParset.isDefined(param) ) {
+       if ( !itsParset.isDefined(param) && isPrepared == true) {
+
            const string key="Images."+imageNames[img]+".frequency";
            char tmp[64];
            // changing this to match adviseParallel
            const double aveFreq = 0.5*(minFrequency+maxFrequency);
            sprintf(tmp,"[%f,%f]",aveFreq,aveFreq);
            string val = string(tmp);
+           ASKAPLOG_INFO_STR(logger, "  Advising on parameter " << param <<": " << val);
            itsParset.add(key,val);
 
        }
@@ -600,8 +597,14 @@ void AdviseDI::addMissingParameters()
 
        param = "visweights.MFS.reffreq"; // set to average frequency if unset and nTerms > 1
        if ((itsParset.getString("visweights")=="MFS")) {
-           ASKAPCHECK(itsParset.isDefined(param),"Reference Frequency MUST be defined for MFS \
-in distributed mode");
+           if (!itsParset.isDefined(param)) {
+               char tmp[64];
+               const double aveFreq = 0.5*(minFrequency+maxFrequency);
+               sprintf(tmp,"%f",aveFreq);
+               string val = string(tmp);
+               ASKAPLOG_DEBUG_STR(logger, "  Advising on parameter " << param <<": " << val);
+               itsParset.add(param,val);
+           }
 
        }
    }

@@ -196,6 +196,7 @@ void ContinuumWorker::run(void)
         this->baseFrequency = advice.getBaseFrequencyAllocation(itsComms.rank()-1);
     }
     ASKAPLOG_INFO_STR(logger,"Adding missing parameters");
+    
     advice.addMissingParameters();
 
     if (workUnits.size()>=1) {
