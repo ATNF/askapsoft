@@ -29,3 +29,6 @@ askapconfig=${ASKAP_ROOT}/Code/Components/Synthesis/testdata/current/simulation/
 
 now=`date +%F-%H%M`
 
+email=matthew.whiting@csiro.au
+
+

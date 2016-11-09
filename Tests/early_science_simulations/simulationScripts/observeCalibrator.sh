@@ -31,7 +31,7 @@ if [ $doCalibrator == true ]; then
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name csimCal${POINTING}
-#SBATCH --mail-user=matthew.whiting@csiro.au
+#SBATCH --mail-user=${email}
 #SBATCH --mail-type=ALL
 #SBATCH --export=ASKAP_ROOT,AIPSPATH
 #SBATCH --output=${slurmOutput}/slurm-csimCal-%j.out
@@ -121,7 +121,7 @@ EOF
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --time=12:00:00
-#SBATCH --mail-user matthew.whiting@csiro.au
+#SBATCH --mail-user ${email}
 #SBATCH --job-name visMergeCal
 #SBATCH --mail-type=ALL
 #SBATCH --export=ASKAP_ROOT,AIPSPATH

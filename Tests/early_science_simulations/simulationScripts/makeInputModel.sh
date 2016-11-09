@@ -16,7 +16,7 @@ if [ $doCreateModel == true ]; then
 #SBATCH --ntasks=${CREATORTASKS}
 #SBATCH --ntasks-per-node=${CREATORWORKERPERNODE}
 #SBATCH --mem=64gb
-#SBATCH --mail-user matthew.whiting@csiro.au
+#SBATCH --mail-user ${email}
 #SBATCH --job-name DCmodelCF
 #SBATCH --mail-type=ALL
 #SBATCH --no-requeue

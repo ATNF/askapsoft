@@ -60,7 +60,7 @@ while [ $GRP -lt ${NGROUPS_CSIM} ]; do
 #SBATCH --ntasks=${NCPU_CSIM}
 #SBATCH --ntasks-per-node=${NPPN_CSIM}
 #SBATCH --job-name ${slurmtag}
-#SBATCH --mail-user=matthew.whiting@csiro.au
+#SBATCH --mail-user=${email}
 #SBATCH --mail-type=ALL
 #SBATCH --export=ASKAP_ROOT,AIPSPATH
 #SBATCH --output=${slurmOutput}/slurm-csimScience-%j.out
@@ -148,7 +148,7 @@ EOF
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --time=12:00:00
-#SBATCH --mail-user matthew.whiting@csiro.au
+#SBATCH --mail-user ${email}
 #SBATCH --job-name visMerge1_${GRP}
 #SBATCH --mail-type=ALL
 #SBATCH --export=ASKAP_ROOT,AIPSPATH
@@ -222,7 +222,7 @@ if [ $doScience == true ]; then
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --time=12:00:00
-#SBATCH --mail-user matthew.whiting@csiro.au
+#SBATCH --mail-user ${email}
 #SBATCH --job-name visMerge2_${i}
 #SBATCH --mail-type=ALL
 #SBATCH --export=ASKAP_ROOT,AIPSPATH
@@ -277,7 +277,7 @@ EOF
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --time=12:00:00
-#SBATCH --mail-user matthew.whiting@csiro.au
+#SBATCH --mail-user ${email}
 #SBATCH --job-name visMerge3
 #SBATCH --mail-type=ALL
 #SBATCH --export=ASKAP_ROOT,AIPSPATH

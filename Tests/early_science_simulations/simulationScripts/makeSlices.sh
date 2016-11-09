@@ -37,7 +37,7 @@ cat > $slQsub <<EOF
 #SBATCH --time=12:00:00
 #SBATCH --ntasks=${width}
 #SBATCH --ntasks-per-node=${nppn}
-#SBATCH --mail-user matthew.whiting@csiro.au
+#SBATCH --mail-user ${email}
 #SBATCH --job-name sliceCont
 #SBATCH --mail-type=ALL
 #SBATCH --no-requeue
