@@ -26,7 +26,7 @@ Tsys=50
 
 nfeeds=36
 #nfeeds=1
-antennaConfig=ADE18
+antennaConfig=ASKAP18
 nant=18
 
 pol="XX XY YX YY"
