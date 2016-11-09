@@ -28,7 +28,7 @@ if [ $doCreateModel == true ]; then
 
 export ASKAP_ROOT=${ASKAP_ROOT}
 export AIPSPATH=\${ASKAP_ROOT}/Code/Base/accessors/current
-createFITS=\${ASKAP_ROOT}/Code/Components/Analysis/simulations/current/apps/createFITS.sh
+createFITS=$createFITS
 
 parset=${parsetdir}/createModel-\${SLURM_JOB_ID}.in
 cat > \$parset <<EOF_INNER
