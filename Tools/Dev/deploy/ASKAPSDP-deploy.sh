@@ -104,8 +104,7 @@ main() {
   doOverwriteChecks
 
   # Perform the necessary builds
-  mkdir "${WORKING_DIR}/${TAG}"
-  mkdir "${WORKING_DIR}/${TAG}/build"
+  mkdir -p "${WORKING_DIR}/${TAG}/build"
   BUILD_DIR="${WORKING_DIR}/${TAG}/build"
 
   if [ "$DEPLOY_ASKAPSOFT" == true ] || [ "$DEPLOY_ASKAP_PIPELINE" == true ] || [ "$DEPLOY_ASKAP_USER_DOC" == true ]; then
