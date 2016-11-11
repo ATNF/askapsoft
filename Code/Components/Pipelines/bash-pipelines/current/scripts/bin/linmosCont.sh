@@ -58,7 +58,7 @@ ${LINMOS_BEAM_OFFSETS}"
     fi
 
 
-    setJob linmos linmos
+    setJob linmosCont linmosC
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -71,7 +71,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --job-name=${jobname}
 ${EMAIL_REQUEST}
 ${exportDirective}
-#SBATCH --output=$slurmOut/slurm-linmos-%j.out
+#SBATCH --output=$slurmOut/slurm-linmosC-%j.out
 
 ${askapsoftModuleCommands}
 
@@ -176,8 +176,8 @@ EOFOUTER
     if [ $SUBMIT_JOBS == true ]; then
         FLAG_IMAGING_DEP=`echo $FLAG_IMAGING_DEP | sed -e 's/afterok/afterany/g'`
 	ID_LINMOS_CONT=`sbatch $FLAG_IMAGING_DEP $sbatchfile | awk '{print $4}'`
-	recordJob ${ID_LINMOS_CONT} "Make a mosaic image of the science observation, field $FIELD, with flags \"${FLAG_IMAGING_DEP}\""
-        FULL_LINMOS_DEP=`addDep "${FULL_LINMOS_DEP}" "${ID_LINMOS_CONT}"`
+	recordJob ${ID_LINMOS_CONT} "Make a mosaic continuum image of the science observation, field $FIELD, with flags \"${FLAG_IMAGING_DEP}\""
+        FULL_LINMOS_CONT_DEP=`addDep "${FULL_LINMOS_CONT_DEP}" "${ID_LINMOS_CONT}"`
     else
 	echo "Would make a mosaic image of the science observation, field $FIELD with slurm file $sbatchfile"
     fi

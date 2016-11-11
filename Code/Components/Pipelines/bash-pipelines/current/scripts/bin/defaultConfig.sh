@@ -115,6 +115,7 @@ if [ "$ASKAP_ROOT" != "" ]; then
     simager=${ASKAP_ROOT}/Code/Components/CP/simager/current/apps/simager.sh
     altimager=${ASKAP_ROOT}/Code/Components/CP/askap_imager/current/apps/imager.sh
     linmos=${ASKAP_ROOT}/Code/Components/Synthesis/synthesis/current/apps/linmos.sh
+    linmosMPI=${ASKAP_ROOT}/Code/Components/Synthesis/synthesis/current/apps/linmos-mpi.sh
     selavy=${ASKAP_ROOT}/Code/Components/Analysis/analysis/current/apps/selavy.sh
     cimstat=${ASKAP_ROOT}/Code/Components/Analysis/analysis/current/apps/cimstat.sh
     mslist=${ASKAP_ROOT}/Code/Components/Synthesis/synthesis/current/apps/mslist.sh
@@ -134,6 +135,7 @@ else
     simager=simager
     altimager=imager
     linmos=linmos
+    linmosMPI=linmos-mpi
     selavy=selavy
     cimstat=cimstat
     mslist=mslist
@@ -469,6 +471,9 @@ RESTORING_BEAM_CONTCUBE_REFERENCE=mid
 NUM_CPUS_CONTCUBE_SCI=""
 # Number of processors per node for the spectral-line imaging
 CPUS_PER_CORE_CONTCUBE_IMAGING=20
+# Number of processors for continuum-cube mosaicking.
+# Leave blank to fit to number of channels
+NUM_CPUS_CONTCUBE_LINMOS=""
 
 # Cleaning parameters for spectral-line imaging
 # Which solver to use
@@ -522,6 +527,9 @@ CONTSUB_MODEL_FLUX_LIMIT=10mJy
 NUM_CPUS_SPECIMG_SCI=2000
 # Number of processors per node for the spectral-line imaging
 CPUS_PER_CORE_SPEC_IMAGING=20
+# Number of processors for spectral-line mosaicking.
+# Leave blank to fit to number of channels
+NUM_CPUS_SPECTRAL_LINMOS=""
 
 # base name for image cubes: if IMAGE_BASE_SPECTRAL=i.blah then we'll
 # get image.i.blah, image.i.blah.restored, psf.i.blah etc

@@ -30,6 +30,7 @@
 #
 
 ID_SPECIMG_SCI=""
+DEP_SPECIMG=""
 
 # set the $imageBase variable
 setImageBase spectral
@@ -279,6 +280,7 @@ EOFOUTER
         DEP=`addDep "$DEP" "$ID_CAL_APPLY_SL_SCI"`
         DEP=`addDep "$DEP" "$ID_CONT_SUB_SL_SCI"`
 	ID_SPECIMG_SCI=`sbatch $DEP $sbatchfile | awk '{print $4}'`
+        DEP_SPECIMG=`addDep "$DEP_SPECIMG" "$ID_SPECIMG_SCI"`
 	recordJob ${ID_SPECIMG_SCI} "Make a spectral-line cube for beam $BEAM of the science observation, with flags \"$DEP\""
     else
 	echo "Would make a spectral-line cube for beam $BEAM of the science observation with slurm file $sbatchfile"

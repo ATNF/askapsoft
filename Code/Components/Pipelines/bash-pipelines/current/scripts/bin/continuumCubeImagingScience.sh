@@ -31,6 +31,7 @@
 #
 
 ID_CONTCUBE_SCI=""
+DEP_CONTCUBE=""
 
 if [ $DO_ALT_IMAGER == true ]; then
 theimager=$altimager
@@ -240,7 +241,8 @@ EOFOUTER
             DEP=`addDep "$DEP" "$ID_AVERAGE_SCI"`
             DEP=`addDep "$DEP" "$ID_FLAG_SCI_AV"`
             DEP=`addDep "$DEP" "$ID_CAL_APPLY_CONT_SCI"`
-	    ID_CONTCUBE_SCI=`sbatch $DEP $sbatchfile | awk '{print $4}'`
+            ID_CONTCUBE_SCI=`sbatch $DEP $sbatchfile | awk '{print $4}'`
+            DEP_CONTCUBE=`addDep "$DEP_CONTCUBE" "$ID_CONTCUBE_SCI"`
 	    recordJob ${ID_CONTCUBE_SCI} "Make a continuum cube in pol $POLN for beam $BEAM of the science observation, with flags \"$DEP\""
         else
 	    echo "Would make a continuum cube in pol $POLN for beam $BEAM of the science observation with slurm file $sbatchfile"

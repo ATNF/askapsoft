@@ -34,7 +34,9 @@ echo "Setting up and calibrating the science observation"
 echo "=================================================="
 
 FIELD_ID=0
-FULL_LINMOS_DEP=""
+FULL_LINMOS_CONT_DEP=""
+FULL_LINMOS_CONTCUBE_DEP=""
+FULL_LINMOS_SPEC_DEP=""
 
 for FIELD in ${FIELD_LIST}; do
 
@@ -145,6 +147,8 @@ for FIELD in ${FIELD_LIST}; do
         else
             #            . ${PIPELINEDIR}/linmos.sh
             . ${PIPELINEDIR}/linmosCont.sh
+            . ${PIPELINEDIR}/linmosContCube.sh
+            . ${PIPELINEDIR}/linmosSpectral.sh
         fi
         
         cd ..
@@ -166,4 +170,6 @@ FIELD="."
 
 # Final linmos, combining fields
 . ${PIPELINEDIR}/linmosFieldsCont.sh
+. ${PIPELINEDIR}/linmosFieldsContCube.sh
+. ${PIPELINEDIR}/linmosFieldsSpectral.sh
 
