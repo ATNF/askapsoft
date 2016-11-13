@@ -50,6 +50,7 @@
 #include "Blob/BlobArray.h"
 #include "Blob/BlobAipsIO.h"
 #include "utils/CasaBlobUtils.h"
+#include "casacore/casa/OS/Timer.h"
 
 
 // boost includes
@@ -242,6 +243,11 @@ void ChannelMergeTask::receiveVisChunks(askap::cp::common::VisChunk::ShPtr chunk
                 2, MPI_DOUBLE, 0, itsCommunicator);
    ASKAPCHECK(response == MPI_SUCCESS, "Error gathering times, response from MPI_Gather = "<<response);
 
+   casa::Timer timer;
+   // marking timer in this place allows to time data transfer as opposed to synchronisation cost
+   // due to collective call above, processes should be synchronised by this point
+   timer.mark();
+
    // 3) find the latest time - we ignore all chunks which are from the past
    // (could, in principle, find time corresponding to the largest portion of valid data,
    // but probably not worth it as we don't normally expect to loose any packets).
@@ -359,6 +365,8 @@ void ChannelMergeTask::receiveVisChunks(askap::cp::common::VisChunk::ShPtr chunk
             }
        }
    }
+
+   ASKAPLOG_DEBUG_STR(logger, "Time it takes to receive and merge data: "<<timer.real()<<" seconds");
 }
 
 /// @brief helper method to copy data from flat buffer
@@ -412,6 +420,9 @@ void ChannelMergeTask::sendVisChunk(askap::cp::common::VisChunk::ShPtr chunk) co
    int response = MPI_Gather(const_cast<double*>(timeSendBuf), 2, MPI_DOUBLE, NULL, 2, MPI_DOUBLE, 0, itsCommunicator);
    ASKAPCHECK(response == MPI_SUCCESS, "Error gathering times, response from MPI_Gather = "<<response);
 
+   casa::Timer timer;
+   timer.mark(); // marking timer here excludes synchronisation waiting time
+
    // 2) send frequencies corresponding to the current chunk
 
    ASKAPASSERT(chunk->frequency().contiguousStorage());
@@ -434,6 +445,8 @@ void ChannelMergeTask::sendVisChunk(askap::cp::common::VisChunk::ShPtr chunk) co
    response = MPI_Gather((char*)chunk->flag().data(), chunk->flag().nelements(), 
             MPI_CHAR, NULL, chunk->flag().nelements(), MPI_CHAR, 0, itsCommunicator);
    ASKAPCHECK(response == MPI_SUCCESS, "Error gathering flags, response from MPI_Gather = "<<response);
+
+   //ASKAPLOG_DEBUG_STR(logger, "Time it takes to send data to the master rank: "<<timer.real()<<" seconds");
   
 }
 

@@ -1,16 +1,11 @@
-filename = %d_%t_%s.ms
-pointingtable.enable = true
-#stman.bucketsize = 151632
-stman.bucketsize = 6469632
-stman.tilenchan = 2592
-stman.tilencorr = 4
-count = 10
+service_ranks=[0]
+count = 100
+spare_ranks = true
 
 # put number of beams here
 maxbeams = 36
 # put channels per rank here
-#n_channels.0..95 = 5184
-n_channels.0..95 = 10368
+n_channels.0..95 = 216
 
 # just an extract from cpingest.in from one of the actual scheduling blocks,
 # it fills other configuration parameters (required to write a full measurement set)
@@ -164,6 +159,6 @@ feeds.n_feeds = 36
 feeds.names = [PAF36]
 feeds.spacing = 1deg
 monitoring.enabled = false
-tasks.tasklist = [MSSink]
-tasks.MSSink.type = MSSink
+tasks.tasklist = [Merge]
+tasks.Merge.type = ChannelMergeTask
 correlator.modes=[standard]

@@ -52,9 +52,9 @@
 #include "casacore/casa/OS/Timer.h"
 #include "casacore/tables/Tables/TableDesc.h"
 #include "casacore/tables/Tables/SetupNewTab.h"
-#include "casacore/tables/Tables/IncrementalStMan.h"
-#include "casacore/tables/Tables/StandardStMan.h"
-#include "casacore/tables/Tables/TiledShapeStMan.h"
+#include "casacore/tables/DataMan/IncrementalStMan.h"
+#include "casacore/tables/DataMan/StandardStMan.h"
+#include "casacore/tables/DataMan/TiledShapeStMan.h"
 #include "casacore/ms/MeasurementSets/MeasurementSet.h"
 #include "casacore/ms/MeasurementSets/MSColumns.h"
 #include "casacore/tables/Tables/ScaColDesc.h"
@@ -423,6 +423,7 @@ void MSSink::create(void)
     {
         // Get nr of rows in a tile.
         const int nrowTile = std::max(1u, bucketSize / (8*tileNcorr*tileNchan));
+        ASKAPLOG_INFO_STR(logger, "Number of rows in the tile = "<<nrowTile);
         TiledShapeStMan dataMan("TiledData",
                 IPosition(3, tileNcorr, tileNchan, nrowTile));
         newMS.bindColumn(MeasurementSet::columnName(MeasurementSet::DATA),
