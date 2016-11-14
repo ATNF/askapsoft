@@ -72,7 +72,7 @@ cd $OUTPUT
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 
-IMAGE_BASE_CONT=${IMAGE_BASE_CONTCUBE}
+IMAGE_BASE_CONTCUBE=${IMAGE_BASE_CONTCUBE}
 SB_SCIENCE=${SB_SCIENCE}
 
 FIELD_LIST="$FIELD_LIST"
@@ -158,9 +158,7 @@ EOFINNER
                     exit \$err
                 fi
             else
-                echo "ERROR - no good images were found for mosaicking image type '\${imageCode}'!"
-                writeStats \${SLURM_JOB_ID} \$NCORES \${jobCode} FAIL --- --- --- --- --- txt > $stats/stats-\${SLURM_JOB_ID}-\${jobCode}.txt
-                writeStats \${SLURM_JOB_ID} \$NCORES \${jobCode} FAIL --- --- --- --- --- csv > $stats/stats-\${SLURM_JOB_ID}-\${jobCode}.csv
+                echo "WARNING - no good images were found for mosaicking image type '\${imageCode}'!"
             fi
         done
     done

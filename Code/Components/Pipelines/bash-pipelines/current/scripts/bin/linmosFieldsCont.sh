@@ -160,9 +160,7 @@ EOFINNER
                     exit \$err
                 fi
             else
-                echo "ERROR - no good images were found for mosaicking image type '\${imageCode}'!"
-                writeStats \${SLURM_JOB_ID} 1 \${jobCode} FAIL --- --- --- --- --- txt > $stats/stats-\${SLURM_JOB_ID}-\${jobCode}.txt
-                writeStats \${SLURM_JOB_ID} 1 \${jobCode} FAIL --- --- --- --- --- csv > $stats/stats-\${SLURM_JOB_ID}-\${jobCode}.csv
+                echo "WARNING - no good images were found for mosaicking image type '\${imageCode}'!"
             fi
         done
     done

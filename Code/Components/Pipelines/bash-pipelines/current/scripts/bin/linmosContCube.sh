@@ -111,8 +111,8 @@ for POLN in \$POL_LIST; do
             BEAM=all
             setImageProperties contcube
             echo "Mosaicking \${beamList} to form \${imageName}"
-            parset=${parsets}/science_\${jobCode}_${FIELDBEAM}_\${SLURM_JOB_ID}.in
-            log=${logs}/science_\${jobCode}_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+            parset=${parsets}/science_\${jobCode}_\${pol}_${FIELDBEAM}_\${SLURM_JOB_ID}.in
+            log=${logs}/science_\${jobCode}_\${pol}_${FIELDBEAM}_\${SLURM_JOB_ID}.log
             cat > \${parset} << EOFINNER
 linmos.names            = [\${beamList}]
 linmos.outname          = \$imageName
@@ -136,9 +136,7 @@ EOFINNER
                 exit \$err
             fi
         else
-            echo "ERROR - no good images were found for mosaicking image type '\${imageCode}'!"
-            writeStats \${SLURM_JOB_ID} \${jobCode} \$NCORES FAIL --- --- --- --- --- txt > $stats/stats-\${SLURM_JOB_ID}-\${jobCode}.txt
-            writeStats \${SLURM_JOB_ID} \${jobCode} \$NCORES FAIL --- --- --- --- --- csv > $stats/stats-\${SLURM_JOB_ID}-\${jobCode}.csv
+            echo "WARNING - no good images were found for mosaicking image type '\${imageCode}'!"
         fi
     done
 done

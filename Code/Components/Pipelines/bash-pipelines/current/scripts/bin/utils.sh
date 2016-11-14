@@ -174,17 +174,11 @@ function getTile()
 #  * imageType (the image type used by CASDA - eg. cont_restored_T0)
 #  * label (the title for the preview image - only used for continuum)
 #  * weightsImage, weightsType, weightsLabel (as above)
-# Usage: setImageProperties <type> [pol]
+# Usage: setImageProperties <type> 
 #    type = cont | spectral | contcube
-#    pol = polarisation (lower case). Defaults to i
 function setImageProperties()
 {
     type=$1
-    if [ $# -ge 2 ]; then
-        pol=$2
-    else
-        pol="i"
-    fi
 
     imSuffix=""
     setImageBase $type
