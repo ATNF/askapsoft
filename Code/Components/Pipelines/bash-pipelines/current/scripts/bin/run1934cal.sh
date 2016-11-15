@@ -34,9 +34,9 @@ FLAG_CBPCAL_DEP=`addDep "$FLAG_CBPCAL_DEP" "$DEP_START"`
 
 #Set the FIELD string to a special one for the bandpass calibrator
 FIELD=BPCAL
-mkdir -p ${FIELD}
-cd ${FIELD}
 OUTPUT="${ORIGINAL_OUTPUT}/${FIELD}"
+mkdir -p ${OUTPUT}
+cd ${OUTPUT}
 if [ "${TABLE_BANDPASS%/*}" == "${TABLE_BANDPASS}" ]; then
     # Have just given a filename with no leading path - need to change
     # it to be inside the new OUTPUT directory
