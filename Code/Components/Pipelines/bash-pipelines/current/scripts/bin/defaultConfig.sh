@@ -180,7 +180,7 @@ DO_STAGE_FOR_CASDA=false
 ####################
 # Input Scheduling Blocks (SBs)
 # Location of the SBs
-DIR_SB=/scratch2/askap/askapops/beta-scheduling-blocks
+DIR_SB=/scratch2/askap/askapops/askap-scheduling-blocks
 # SB with 1934-638 observation
 SB_1934="SET_THIS"
 MS_INPUT_1934=""
@@ -188,10 +188,12 @@ MS_INPUT_1934=""
 SB_SCIENCE="SET_THIS"
 MS_INPUT_SCIENCE=""
 
+IS_BETA=false
+
 ####################
 # Which beams to use.
 BEAM_MIN=0
-BEAM_MAX=8
+BEAM_MAX=35
 BEAMLIST=""
 
 ####################
