@@ -188,6 +188,7 @@ MS_INPUT_1934=""
 SB_SCIENCE="SET_THIS"
 MS_INPUT_SCIENCE=""
 
+# Set to true if the dataset being processed is from BETA observations
 IS_BETA=false
 
 ####################

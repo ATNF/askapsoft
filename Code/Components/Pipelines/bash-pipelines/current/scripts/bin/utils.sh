@@ -584,17 +584,18 @@ function getMSname()
     msname=${msname%%.*}
 }
 
+
+# Function to set the arguments to footprint.py, based on the
+# input parameters. They only contribute if they are not blank.
+# The arguments that are set and the parameters used are:
+#  * summary output (the -t flag)
+#  * name (-n $FP_NAME),
+#  * band (-b $FREQ_BAND_NUMBER)
+#  * PA (-a $FP_PA)
+#  * pitch (-p $FP_PITCH)
+# Returns: $footprintArgs
 function setFootprintArgs()
 {
-    # Function to set the arguments to footprint.py, based on the
-    # input parameters. They only contribute if they are not blank.
-    # The arguments that are set and the parameters used are:
-    #  * summary output (the -t flag)
-    #  * name (-n $FP_NAME),
-    #  * band (-b $FREQ_BAND_NUMBER)
-    #  * PA (-a $FP_PA)
-    #  * pitch (-p $FP_PITCH)
-    # Returns: $footprintArgs
 
     # Start with getting the summary output
     footprintArgs="-t"
@@ -659,18 +660,26 @@ function getBeamCentre()
 {
     # Function to return the centre direction of a given beam
     #  Required available parameters:
+    #     * beamFromCLI - if true, have used footprint, else have used footprint.py
     #     * SB_SCIENCE
     #     * FIELD - name of field
     #     * BEAM - the beam ID to obtain the centre for
     #     * BEAM_MAX - how many beams to consider
     #  Returns: $DIRECTION (in the process, setting $footprintOut, $ra, $dec)
 
-    setFootprintFile
     awkTest="\$1==$BEAM"
-    ra=`grep -A$[BEAM_MAX+1] Beam ${footprintOut} | tail -n $[BEAM_MAX+1] | sed -e 's/,/ /g' | sed -e 's/(//g' | sed -e 's/)//g' | awk $awkTest | awk '{print $6}'`
-    ra=`echo $ra | awk -F':' '{printf "%sh%sm%s",$1,$2,$3}'` 
-    dec=`grep -A$[BEAM_MAX+1] Beam ${footprintOut} | tail -n $[BEAM_MAX+1] | sed -e 's/,/ /g' | sed -e 's/(//g' | sed -e 's/)//g' | awk $awkTest | awk '{print $7}'`
-    dec=`echo $dec | awk -F':' '{printf "%s.%s.%s",$1,$2,$3}'` 
+    setFootprintFile
+    if [ "$beamFromCLI" == "true" ]; then
+        ra=`awk $awkTest ${footprintOut} | sed -e 's/,/ /g' | sed -e 's/(//g' | sed -e 's/)//g'| awk '{print $4}'`
+        ra=`echo $ra | awk -F':' '{printf "%sh%sm%s",$1,$2,$3}'` 
+        dec=`awk $awkTest ${footprintOut} | sed -e 's/,/ /g' | sed -e 's/(//g' | sed -e 's/)//g'| awk '{print $5}'`
+        dec=`echo $dec | awk -F':' '{printf "%s.%s.%s",$1,$2,$3}'`
+    else
+        ra=`grep -A$[BEAM_MAX+1] Beam ${footprintOut} | tail -n $[BEAM_MAX+1] | sed -e 's/,/ /g' | sed -e 's/(//g' | sed -e 's/)//g' | awk $awkTest | awk '{print $6}'`
+        ra=`echo $ra | awk -F':' '{printf "%sh%sm%s",$1,$2,$3}'` 
+        dec=`grep -A$[BEAM_MAX+1] Beam ${footprintOut} | tail -n $[BEAM_MAX+1] | sed -e 's/,/ /g' | sed -e 's/(//g' | sed -e 's/)//g' | awk $awkTest | awk '{print $7}'`
+        dec=`echo $dec | awk -F':' '{printf "%s.%s.%s",$1,$2,$3}'`
+    fi
     DIRECTION="[$ra, $dec, J2000]"
 }
 
