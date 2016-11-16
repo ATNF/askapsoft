@@ -425,7 +425,7 @@ SELFCAL_SELAVY_WEIGHTSCUT=0.95
 # self-cal solution
 SELFCAL_SCALENOISE=false
 # Flux limit for cmodel
-SELFCAL_MODEL_FLUX_LIMIT=10mJy
+SELFCAL_MODEL_FLUX_LIMIT=10uJy
 
 # Array-capable self-calibration parameters
 #   These parameters can be given as either a single value (eg. "300")
@@ -524,7 +524,7 @@ CONTSUB_SELAVY_NSUBY=3
 CONTSUB_SELAVY_THRESHOLD=6
 
 # Flux limit for cmodel
-CONTSUB_MODEL_FLUX_LIMIT=10mJy
+CONTSUB_MODEL_FLUX_LIMIT=10uJy
 
 # Number of processors allocated to the spectral-line imaging
 NUM_CPUS_SPECIMG_SCI=2000
