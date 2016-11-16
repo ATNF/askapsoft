@@ -1,4 +1,4 @@
-gsl=3rdParty/gsl/gsl-1.16
+gsl=3rdParty/gsl/gsl-1.16; gsl gslcblas
 askap=Code/Base/askap/current
 imagemath=Code/Base/imagemath/current
 blob=3rdParty/LOFAR/Blob/Blob-1.2;blob
