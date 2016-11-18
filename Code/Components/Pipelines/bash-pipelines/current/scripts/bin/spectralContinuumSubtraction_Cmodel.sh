@@ -53,6 +53,22 @@ fi
 
 modelImage=contmodel.${imageBase}
 
+ContsubModelDefinition="# The model definition
+CContsubtract.sources.names                       = [lsm]
+CContsubtract.sources.lsm.direction               = \${modelDirection}
+CContsubtract.sources.lsm.model                   = \${contsubdir}/${modelImage}
+CContsubtract.sources.lsm.nterms                  = ${NUM_TAYLOR_TERMS}"
+if [ ${NUM_TAYLOR_TERMS} -gt 1 ]; then
+    if [ "$MFS_REF_FREQ" == "" ]; then
+        freq=$CENTRE_FREQ
+    else
+        freq=${MFS_REF_FREQ}
+    fi
+    CalibratorModelDefinition="$CalibratorModelDefinition
+CContsubtract.visweights                          = MFS
+CContsubtract.visweights.MFS.reffreq              = ${freq}"
+fi
+
 cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -80,11 +96,11 @@ cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 log=${logs}/mslist_for_ccontsub_\${SLURM_JOB_ID}.log
 NCORES=1
 NPPN=1
-aprun -n \${NCORES} -N \${NPPN} $mslist --full ${msSciSL} 2>&1 1> \${log}
-freq=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=Freq\`
-if [ "${DIRECTION}" != "" ]; then
-    modelDirection="${DIRECTION}"
+DIRECTION="$DIRECTION"
+if [ "\${DIRECTION}" != "" ]; then
+    modelDirection="\${DIRECTION}"
 else
+    aprun -n \${NCORES} -N \${NPPN} $mslist --full ${msSciSL} 2>&1 1> \${log}
     ra=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=RA\`
     dec=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=Dec\`
     epoch=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=Epoch\`
@@ -180,12 +196,12 @@ else
 # The below specifies the GSM source is a selavy output file
 Cmodel.gsm.database       = votable
 Cmodel.gsm.file           = \${componentsCatalogue}
-Cmodel.gsm.ref_freq       = \${freq}MHz
+Cmodel.gsm.ref_freq       = ${CENTRE_FREQ}Hz
 
 # General parameters
 Cmodel.bunit              = Jy/pixel
-Cmodel.frequency          = \${freq}MHz
-Cmodel.increment          = 304MHz
+Cmodel.frequency          = ${CENTRE_FREQ}Hz
+Cmodel.increment          = ${BANDWIDTH}Hz
 Cmodel.flux_limit         = ${CONTSUB_MODEL_FLUX_LIMIT}
 Cmodel.shape              = [${NUM_PIXELS_CONT},${NUM_PIXELS_CONT}]
 Cmodel.cellsize           = [${CELLSIZE_CONT}arcsec, ${CELLSIZE_CONT}arcsec]
@@ -217,11 +233,7 @@ EOFINNER
     cat > \$parset <<EOFINNER
 # The measurement set name - this will be overwritten
 CContSubtract.dataset                             = ${msSciSL}
-# The model definition
-CContSubtract.sources.names                       = [lsm]
-CContSubtract.sources.lsm.direction               = \${modelDirection}
-CContSubtract.sources.lsm.model                   = \${contsubdir}/${modelImage}
-CContSubtract.sources.lsm.nterms                  = ${NUM_TAYLOR_TERMS}
+${ContsubModelDefinition}
 # The gridding parameters
 CContSubtract.gridder.snapshotimaging             = ${GRIDDER_SNAPSHOT_IMAGING}
 CContSubtract.gridder.snapshotimaging.wtolerance  = ${GRIDDER_SNAPSHOT_WTOL}

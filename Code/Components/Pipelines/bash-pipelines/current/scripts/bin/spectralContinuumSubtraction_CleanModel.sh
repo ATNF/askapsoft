@@ -35,6 +35,22 @@
 
 modelImage=image.${imageBase}
 
+ContsubModelDefinition="# The model definition
+CContsubtract.sources.names                       = [lsm]
+CContsubtract.sources.lsm.direction               = \${modelDirection}
+CContsubtract.sources.lsm.model                   = ${modelImage}
+CContsubtract.sources.lsm.nterms                  = ${NUM_TAYLOR_TERMS}"
+if [ ${NUM_TAYLOR_TERMS} -gt 1 ]; then
+    if [ "$MFS_REF_FREQ" == "" ]; then
+        freq=$CENTRE_FREQ
+    else
+        freq=${MFS_REF_FREQ}
+    fi
+    CalibratorModelDefinition="$CalibratorModelDefinition
+CContsubtract.visweights                          = MFS
+CContsubtract.visweights.MFS.reffreq              = ${freq}"
+fi
+
 cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -77,11 +93,7 @@ log=${logs}/contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.log
 cat > \$parset <<EOFINNER
 # The measurement set name - this will be overwritten
 CContSubtract.dataset                             = ${msSciSL}
-# The model definition
-CContSubtract.sources.names                       = [lsm]
-CContSubtract.sources.lsm.direction               = \${modelDirection}
-CContSubtract.sources.lsm.model                   = ${modelImage}
-CContSubtract.sources.lsm.nterms                  = ${NUM_TAYLOR_TERMS}
+${ContsubModelDefinition}
 # The gridding parameters
 CContSubtract.gridder.snapshotimaging             = ${GRIDDER_SNAPSHOT_IMAGING}
 CContSubtract.gridder.snapshotimaging.wtolerance  = ${GRIDDER_SNAPSHOT_WTOL}

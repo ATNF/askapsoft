@@ -145,7 +145,12 @@ if [ "${MS_INPUT_SCIENCE}" != "" ]; then
     NUM_ANT_SCIENCE=`grep Antennas ${MS_METADATA} | head -1 | awk '{print $6}'`
     NUM_ANT=$NUM_ANT_SCIENCE
 
+    # number of channels
     NUM_CHAN=`python ${PIPELINEDIR}/parseMSlistOutput.py --file=${MS_METADATA} --val=nChan`
+    # centre frequency - includes units
+    CENTRE_FREQ="`python ${PIPELINEDIR}/parseMSlistOutput.py --file=${MS_METADATA} --val=Freq`"
+    # bandwidth - includes units
+    BANDWIDTH="`python ${PIPELINEDIR}/parseMSlistOutput.py --file=${MS_METADATA} --val=Bandwidth`"
 
     # Get the requested number of channels from the config, and make sure they are the same for 1934
     # & science observations

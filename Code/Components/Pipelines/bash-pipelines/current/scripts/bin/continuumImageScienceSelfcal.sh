@@ -96,12 +96,12 @@ Selavy.Weights.weightsCutoff                    = ${SELFCAL_SELAVY_WEIGHTSCUT}"
 # The below specifies the GSM source is a selavy output file
 Cmodel.gsm.database       = votable
 Cmodel.gsm.file           = selavy-results.components.xml
-Cmodel.gsm.ref_freq       = \${freq}MHz
+Cmodel.gsm.ref_freq       = ${CENTRE_FREQ}Hz
 
 # General parameters
 Cmodel.bunit              = Jy/pixel
-Cmodel.frequency          = \${freq}MHz
-Cmodel.increment          = 304MHz
+Cmodel.frequency          = ${CENTRE_FREQ}Hz
+Cmodel.increment          = ${BANDWIDTH}Hz
 Cmodel.flux_limit         = ${SELFCAL_MODEL_FLUX_LIMIT}
 Cmodel.shape              = [${NUM_PIXELS_CONT},${NUM_PIXELS_CONT}]
 Cmodel.cellsize           = [${CELLSIZE_CONT}arcsec, ${CELLSIZE_CONT}arcsec]
@@ -120,7 +120,16 @@ Ccalibrator.sources.names                       = [lsm]
 Ccalibrator.sources.lsm.direction               = \${modelDirection}
 Ccalibrator.sources.lsm.model                   = ${modelImage}
 Ccalibrator.sources.lsm.nterms                  = ${NUM_TAYLOR_TERMS}"
-
+        if [ ${NUM_TAYLOR_TERMS} -gt 1 ]; then
+            if [ "$MFS_REF_FREQ" == "" ]; then
+                freq=$CENTRE_FREQ
+            else
+                freq=${MFS_REF_FREQ}
+            fi
+            CalibratorModelDefinition="$CalibratorModelDefinition
+Ccalibrator.visweights                          = MFS
+Ccalibrator.visweights.MFS.reffreq              = ${freq}"
+        fi
     else
 
         CmodelParset="##########
@@ -171,7 +180,6 @@ log=${logs}/mslist_for_selfcal_\${SLURM_JOB_ID}.log
 NCORES=1
 NPPN=1
 aprun -n \${NCORES} -N \${NPPN} $mslist --full ${msSci} 2>&1 1> \${log}
-freq=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=Freq\`
 ra=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=RA\`
 dec=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=Dec\`
 epoch=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=Epoch\`

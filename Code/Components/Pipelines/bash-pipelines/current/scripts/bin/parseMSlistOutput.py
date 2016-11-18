@@ -33,12 +33,15 @@ import argparse
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('--file', type=str, help='MSlist output file to parse')
-parser.add_argument('--val', type=str, help='Value to extract: RA, Dec, Epoch, Freq')
+parser.add_argument('--val', type=str, help='Value to extract: RA, Dec, Epoch, Freq, nChan, Bandwidth, chan0')
+parser.add_argument('--units', type=bool, default=False, help='Print units (true), or convert to Hz (false)?')
 options = parser.parse_args()
 
 if options.file == "":
     exit(1)
 
+doUnits=options.units
+hasUnits=False
 if options.val == "RA":
     str='RA'
     nextStr='Decl'
@@ -52,9 +55,22 @@ elif options.val == "Epoch":
 elif options.val == "Freq":
     str='CtrFreq'
     nextStr='Corrs'
+    hasUnits=True
 elif options.val == "nChan":
     str='#Chans'
     nextStr='Frame'
+elif options.val == 'Bandwidth':
+    str='TotBW'
+    nextStr='CtrFreq'
+    hasUnits=True
+elif options.val == "chan0":
+    str='Ch0'
+    nextStr='ChanWid'
+    hasUnits=True
+elif options.val == "chanw":
+    str='ChanWid'
+    nextStr='TotBW'
+    hasUnits=True
 else:
     print('Bad value type')
     exit(1)
@@ -67,8 +83,17 @@ for line in fin:
     if (locBeg < 0):
         locBeg = line.find(str)
         locEnd = line.find(nextStr)
+        if (locBeg > 0) and hasUnits:
+            units=line[locBeg:locEnd].replace('(',' ').replace(')',' ').split()[1]
     elif val=='':
         val=line[locBeg:locEnd].split()[0].strip()
+        if hasUnits:
+            if doUnits:
+                val='%s%s'%(val,units)
+            else:
+                factor={'Hz':1.,'kHz':1.e3,'MHz':1.e6,'GHz':1.e9,'THz':1.e12}
+                val = float(val) * factor[units]
+            
 
 fin.close()
 
