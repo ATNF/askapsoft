@@ -99,6 +99,9 @@ class FrtHWAde : virtual public IFrtApproach {
         /// @brief buffer for times, used for debugging only
         std::vector<double> itsTm;
 
+        /// @brief previous scan number, used for debugging only
+        casa::uInt itsPrevScanId;
+
         /// @brief phase accumulator to get phases per antenna accumulated since the last FR update
         std::vector<double> itsPhases;
 
