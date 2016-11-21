@@ -203,9 +203,9 @@ void FrtHWAde::process(const askap::cp::common::VisChunk::ShPtr& chunk,
        /*
        // experiments with scan-based changes of FR parameters
        if ((ant > 0) && (ant < 5)) {
-           //const casa::Int rates[11] = {-10, -8, -6, -4, -2, 0, 2, 4, 6, 8,10}; 
-           //const double addRate = rates[chunk->scan() % 11]*100.;
-           const double addRate = (chunk->scan() % 2 == 0 ? -1. : +1.) * 1000.;
+           const casa::Int rates[11] = {-10, -8, -6, -4, -2, 0, 2, 4, 6, 8,10}; 
+           const double addRate = rates[chunk->scan() % 11]*100.;
+           //const double addRate = (chunk->scan() % 2 == 0 ? -1. : +1.) * 1000.;
            diffRate += addRate;
 
            //const int delayIncrement = ((chunk->scan() % 11) - 5) * 10000;
