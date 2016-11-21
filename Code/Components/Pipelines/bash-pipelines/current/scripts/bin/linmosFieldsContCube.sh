@@ -32,6 +32,9 @@
 ID_LINMOS_FIELD_CONTCUBE=""
 
 DO_IT=$DO_MOSAIC
+if [ "$DO_CONTCUBE_IMAGING" != "true" ]; then
+    DO_IT=false
+fi
 
 # Get the name of the mosaicked image
 imageCode=restored
