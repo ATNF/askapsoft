@@ -294,9 +294,12 @@ module load askappipeline/${askappipelineVersion}"
         # nworkergroupsSci = number of worker groups, used for MFS imaging. 
         nworkergroupsSci=`echo $NUM_TAYLOR_TERMS | awk '{print 2*$1-1}'`
 
-        # total number of CPUs required for MFS continuum imaging, including
-        # the master
-        NUM_CPUS_CONTIMG_SCI=`echo $nchanContSci $nworkergroupsSci | awk '{print $1*$2+1}'`
+        # total number of CPUs required for MFS continuum imaging, including the master
+        #  Use the number given in the config file, unless it has been left blank
+        if [ "${NUM_CPUS_CONTIMG_SCI}" == "" ]; then
+            NUM_CPUS_CONTIMG_SCI=`echo $nchanContSci $nworkergroupsSci | awk '{print $1*$2+1}'`
+        fi
+        
         # if we are using the new imager we need to tweak this
         if [ $DO_ALT_IMAGER == true ]; then
             NUM_CPUS_CONTIMG_SCI=`echo $nchanContSci $nworkergroupsSci $NCHAN_PER_CORE | awk '{print ($1/$3)*$2+1}'`

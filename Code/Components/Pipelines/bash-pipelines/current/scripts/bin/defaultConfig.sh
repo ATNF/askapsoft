@@ -315,6 +315,10 @@ DATACOLUMN=DATA
 NUM_TAYLOR_TERMS=2
 # Number of CPUs to use on each core in the continuum imaging
 CPUS_PER_CORE_CONT_IMAGING=16
+# Total number of cores to use for the continuum imaging. Leave blank
+# to have one core for each of nworkergroups*nchannels (plus a
+# master). 
+NUM_CPUS_CONTIMG_SCI=""
 
 # base name for images: if IMAGE_BASE_CONT=i.blah then we'll get
 # image.i.blah, image.i.blah.restored, psf.i.blah etc
