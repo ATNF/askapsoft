@@ -108,7 +108,7 @@ catdir=/group/astronomy856/whi550/Simulations/InputCatalogue
 sourcelist=master_possum_catalogue_trim10x10deg.dat
 
 doFlatSpectrum=false
-baseimage=SKADS_model_matchADE
+baseimage=SKADS_model_matchADE_${nfeeds}beam
 writeByNode=true
 createTT_CR=true
 
