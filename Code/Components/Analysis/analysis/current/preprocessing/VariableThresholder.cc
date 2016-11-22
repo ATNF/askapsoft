@@ -62,7 +62,7 @@ namespace askap {
 namespace analysis {
 
 VariableThresholder::VariableThresholder(askap::askapparallel::AskapParallel& comms,
-        const LOFAR::ParameterSet &parset):
+                                         const LOFAR::ParameterSet &parset):
     itsComms(&comms),
     itsParset(parset)
 {
@@ -142,6 +142,9 @@ void VariableThresholder::initialise(duchamp::Cube &cube,
         analysisutilities::getSubImage(cube.pars().getImageFile(), itsSlicer);
     itsInputCoordSys = sub->coordinates();
     itsInputShape = sub->shape();
+    if (itsComms->isParallel() && itsComms->isMaster()){
+        itsInputShape=casa::IPosition(itsInputShape.size(),1);
+    }
 
     ASKAPLOG_DEBUG_STR(logger , "About to get the section for rank " << itsComms->rank());
     duchamp::Section sec = itsSubimageDef->section(itsComms->rank() - 1);
@@ -166,7 +169,7 @@ void VariableThresholder::calculate()
         ASKAPLOG_INFO_STR(logger, "Reusing SNR map from file " << itsSNRimageName);
 
         casa::Array<Float> snr = analysisutilities::getPixelsInBox(itsSNRimageName,
-                                 itsSlicer);
+                                                                   itsSlicer);
 
         if (itsCube->getRecon() == 0) {
             ASKAPLOG_ERROR_STR(logger,
@@ -229,61 +232,74 @@ void VariableThresholder::calculate()
                           "' mode with chunks of shape " << chunkshape <<
                           " and a box of shape " << box);
 
-        for (size_t ctr = 0; ctr < maxCtr; ctr++) {
-            if (maxCtr > 1) {
-                ASKAPLOG_DEBUG_STR(logger, "Variable Thresholder calculation: Iteration " <<
-                                   ctr << " of " << maxCtr);
-            }
-            bool isStart = (ctr == 0);
-            casa::Array<Float> inputChunk(chunkshape, 0.);
-            casa::MaskedArray<Float>
-            inputMaskedChunk(inputChunk, casa::LogicalArray(chunkshape, true));
-            casa::Array<Float> middle(chunkshape, 0.);
-            casa::Array<Float> spread(chunkshape, 0.);
-            casa::Array<Float> snr(chunkshape, 0.);
-            casa::Array<Float> boxsum(chunkshape, 0.);
+        casa::Array<Float> full_middle(itsInputShape, 0.);
+        casa::Array<Float> full_spread(itsInputShape, 0.);
+        casa::Array<Float> full_snr(itsInputShape, 0.);
+        casa::Array<Float> full_boxsum(itsInputShape, 0.);
 
-            casa::IPosition loc(itsLocation.size(), 0);
-            if (itsSearchType == "spatial") {
-                if (specAxis >= 0) {
-                    loc(specAxis) = ctr;
-                }
-            } else {
-                if (lngAxis >= 0) {
-                    loc(lngAxis) = ctr % itsCube->getDimX();
-                }
-                if (latAxis >= 0) {
-                    loc(latAxis) = ctr / itsCube->getDimX();
-                }
-            }
-            // loc = loc + itsSlicer.start();
-            loc = loc + itsLocation;
+        if (itsComms->isWorker()) {
 
-            if (itsComms->isWorker()) {
+            for (size_t ctr = 0; ctr < maxCtr; ctr++) {
+                if (maxCtr > 1) {
+                    ASKAPLOG_DEBUG_STR(logger, "Variable Thresholder calculation: Iteration " <<
+                                       ctr << " of " << maxCtr);
+                }
+                bool isStart = (ctr == 0);
+                casa::Array<Float> inputChunk(chunkshape, 0.);
+                casa::MaskedArray<Float>
+                    inputMaskedChunk(inputChunk, casa::LogicalArray(chunkshape, true));
+                casa::Array<Float> middle(chunkshape, 0.);
+                casa::Array<Float> spread(chunkshape, 0.);
+                casa::Array<Float> snr(chunkshape, 0.);
+                casa::Array<Float> boxsum(chunkshape, 0.);
+
+                casa::IPosition loc(itsLocation.size(), 0);
+                if (itsSearchType == "spatial") {
+                    if (specAxis >= 0) {
+                        loc(specAxis) = ctr;
+                    }
+                } else {
+                    if (lngAxis >= 0) {
+                        loc(lngAxis) = ctr % itsCube->getDimX();
+                    }
+                    if (latAxis >= 0) {
+                        loc(latAxis) = ctr / itsCube->getDimX();
+                    }
+                }
+                // loc = loc + itsSlicer.start();
+                loc = loc + itsLocation;
+
                 this->defineChunk(inputChunk, inputMaskedChunk, ctr);
                 //slidingBoxStats(inputChunk, middle, spread, box, itsFlagRobustStats);
                 slidingBoxMaskedStats(inputMaskedChunk, middle, spread, box,
                                       itsFlagRobustStats);
                 // snr = calcSNR(inputChunk,middle,spread);
                 snr = calcMaskedSNR(inputMaskedChunk, middle, spread);
+                ASKAPLOG_DEBUG_STR(logger, "Adding data for location " << loc-itsLocation
+                                   << " to " << loc-itsLocation+chunkshape-1);
+                full_middle(loc-itsLocation,loc-itsLocation+chunkshape-1) = middle;
+                full_spread(loc-itsLocation,loc-itsLocation+chunkshape-1) = spread;
+                full_snr(loc-itsLocation,loc-itsLocation+chunkshape-1) = snr;
                 if (itsBoxSumImageName != "") {
                     // boxsum = slidingArrayMath(inputChunk, box, SumFunc<Float>());
                     boxsum = slidingArrayMath(inputMaskedChunk, box, MaskedSumFunc<Float>());
+                    full_boxsum(loc,loc+chunkshape-1) = boxsum;
                 }
+                
+             ASKAPLOG_DEBUG_STR(logger,
+                                "About to store the SNR map to the cube for iteration " <<
+                                ctr << " of " << maxCtr);
+            this->saveSNRtoCube(snr, ctr);
+               
             }
 
-            if (itsFlagWriteImages) {
-                this->writeImages(middle, spread, snr, boxsum, loc, isStart);
-            }
-
-            if (itsComms->isWorker()) {
-                ASKAPLOG_DEBUG_STR(logger,
-                                   "About to store the SNR map to the cube for iteration " <<
-                                   ctr << " of " << maxCtr);
-                this->saveSNRtoCube(snr, ctr);
-            }
+            
         }
-
+        
+        if (itsFlagWriteImages) {
+            this->writeImages(full_middle, full_spread, full_snr, full_boxsum, itsLocation, true);
+        }
+        
     }
 
     itsCube->setReconFlag(true);
