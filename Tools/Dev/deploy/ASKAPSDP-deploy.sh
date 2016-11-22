@@ -46,7 +46,7 @@ main() {
   CURRENT_DIR=$PWD
   TAG=""
   TAG_FORMAT="^CP-([0-9])+\.([0-9])+\.([0-9])+(.)*$"
-  VERSION=$(echo $TAG | cut -d'-' -f 2)
+  VERSION=""
   ASKAPSOFT_URL="${REPO_URL}/askapsdp/"
   TOS_URL="${REPO_URL}/askapsoft/trunk/"
   BUILD_DIR=""
@@ -109,6 +109,7 @@ main() {
 
   # The TAG will have been provided on the command line with -t or defaulted with -l
   log "TAG = ${TAG}"
+  VERSION=$(echo $TAG | cut -d'-' -f 2)
   ASKAPSOFT_URL="${ASKAPSOFT_URL}/tags/${TAG}"
 
   # Log the environment we are using
@@ -118,9 +119,9 @@ main() {
   doOverwriteChecks
 
   # Do the builds
-  if [ "$DEPLOY_ASKAPSOFT" == true ] || [ "$DEPLOY_ASKAP_PIPELINE" == true ] || [ "$DEPLOY_ASKAP_USER_DOC" == true ]; then
-    buildAskap
-  fi
+  #if [ "$DEPLOY_ASKAPSOFT" == true ] || [ "$DEPLOY_ASKAP_PIPELINE" == true ] || [ "$DEPLOY_ASKAP_USER_DOC" == true ]; then
+    #buildAskap
+  #fi
 
   if [ "$DEPLOY_ASKAP_SERVICES" == true ]; then
     buildServices
@@ -343,7 +344,7 @@ stage() {
   # stage askapsoft if specified
   if [ "$DEPLOY_ASKAPSOFT" == true ]; then
     
-    (tar xf "askapsoft-${TAG}/ASKAPsoft-cpapps-${TAG}.tgz" || exit 1; \
+    (tar xf "${WORKING_DIR}/${TAG}/askapsoft-${TAG}/Code/Systems/cpapps/ASKAPsoft-cpapps-${TAG}.tgz" || exit 1; \
      cd "ASKAPsoft-cpapps-${TAG}" || exit 1; \
      rm -rf build-1 config docs ICE_LICENSE include initenv.py local man share slice ssl || exit 1;) || \
     cleanup $ERROR_MISSING_ENV "Cannot prepare tar file askapsoft-${TAG}/ASKAPsoft-cpapps-${TAG}.tgz"
@@ -353,48 +354,46 @@ stage() {
     find "ASKAPsoft-cpapps-${TAG}" -type f -exec chmod oug+r {} +
     find "ASKAPsoft-cpapps-${TAG}" -type d -exec chmod oug+rx {} +
     
-    # stage
-    mv "ASKAPsoft-cpapps-${TAG}" "${BUILD_DIR}"
-    sed -e "s/\${_VERSION}.*/${VERSION}/" "askapsoft-${TAG}/Tools/Dev/deploy/askapsoft.module-template" > "${BUILD_DIR}/askapsoft.module"
+    # Create a module file
+    sed -e "s/\${_VERSION}.*/${VERSION}/" "${WORKING_DIR}/${TAG}/askapsoft-${TAG}/Tools/Dev/deploy/askapsoft.module-template" > "askapsoft.module"
     
   fi
 
   # stage pipelines if specified
   if [ "$DEPLOY_ASKAP_PIPELINE" == true ]; then
-    tar xf "askapsoft-${TAG}/ASKAPsoft-pipelines-${TAG}.tgz"
+    tar xf "${WORKING_DIR}/${TAG}/askapsoft-${TAG}/Code/Systems/pipelines/ASKAPsoft-pipelines-${TAG}.tgz"
     
     # fix up permissions
     chgrp -R askap "ASKAPsoft-pipelines-${TAG}"
     find "ASKAPsoft-pipelines-${TAG}" -type f -exec chmod oug+r {} +
     find "ASKAPsoft-pipelines-${TAG}" -type d -exec chmod oug+rx {} +
     
-    # stage
-    mv "ASKAPsoft-pipelines-${TAG}" "${BUILD_DIR}"
-    sed -e "s/\${_VERSION}.*/${VERSION}/" "askapsoft-${TAG}/Tools/Dev/deploy/askappipeline.module-template" > "${BUILD_DIR}/askappipeline.module"
+    # Create a module file
+    sed -e "s/\${_VERSION}.*/${VERSION}/" "${WORKING_DIR}/${TAG}/askapsoft-${TAG}/Tools/Dev/deploy/askappipeline.module-template" > "askappipeline.module"
 
   fi
 
   # stage askapcli if specified
   if [ "$DEPLOY_ASKAP_CLI" == true ]; then
-    tar xf "askaptos-trunk/ASKAP-cli-${TAG}"
+    tar xf "${WORKING_DIR}/${TAG}/askaptos-trunk/ASKAP-cli-${TAG}"
 
     # fix up permissions
     chgrp -R "askap ASKAP-cli-${TAG}"
     find "ASKAP-cli-${TAG}" -type f -exec chmod oug+r {} +
     find "ASKAP-cli-${TAG}" -type d -exec chmod oug+rx {} +
     
-    mv "ASKAP-cli-${TAG}" "${BUILD_DIR}"
-    sed -e "s/\${_VERSION}.*/${VERSION}/" "askapsoft-${TAG}/Tools/Dev/deploy/askapcli.module-template" > "${BUILD_DIR}/askapcli.module"
+    # Create a module file
+    sed -e "s/\${_VERSION}.*/${VERSION}/" "${WORKING_DIR}/${TAG}/askapsoft-${TAG}/Tools/Dev/deploy/askapcli.module-template" > "askapcli.module"
   fi
 
   # stage askapdoc if specified
   if [ "$DEPLOY_ASKAP_USER_DOC" == true ]; then
-    mv "askapsoft-${TAG}/Code/Doc/user/current/doc/_build/html" "${BUILD_DIR}"
+    mv "${WORKING_DIR}/${TAG}/askapsoft-${TAG}/Code/Doc/user/current/doc/_build/html" .
   fi
   
   # stage askapservices if specified
   if [ "$DEPLOY_ASKAP_SERVICES" == true ]; then
-    (tar xf "askapingest-${TAG}/ASKAPsoft-cpsvcs-${TAG}.tgz"; \
+    (tar xf "${WORKING_DIR}/${TAG}/askapingest-${TAG}/Code/Systems/cpsvcs/ASKAPsoft-cpsvcs-${TAG}.tgz"; \
      cd "ASKAPsoft-cpsvcs-${TAG}"; \
      rm -rf build-1 config docs ICE_LICENSE include initenv.py local man share slice ssl;) || \
     cleanup ERROR_MISSING_ENV "Cannot prepare tar file askapingest-${TAG}/ASKAPsoft-cpsvcs-${TAG}.tgz"
@@ -404,9 +403,8 @@ stage() {
     find "ASKAPsoft-cpsvcs-${TAG}" -type f -exec chmod oug+r {} +
     find "ASKAPsoft-cpsvcs-${TAG}" -type d -exec chmod oug+rx {} +
     
-    # stage
-    mv "ASKAPsoft-cpsvcs-${TAG}" "${BUILD_DIR}"
-    sed -e "s/\${_VERSION}.*/${VERSION}/" "askapingest-${TAG}/Tools/Dev/deploy/askapservices.module-template" > "${BUILD_DIR}/askapservices.module"
+    # Create a module file
+    sed -e "s/\${_VERSION}.*/${VERSION}/" "${WORKING_DIR}/${TAG}/askapingest-${TAG}/Tools/Dev/deploy/askapservices.module-template" > "askapservices.module"
   fi
 }
 
@@ -417,7 +415,13 @@ deploy() {
 
   # Deploy the askap apps, if they were built, along with module configuration file
   if [ -e "${BUILD_DIR}/ASKAPsoft-cpapps-${TAG}" ]; then
-    mv "${BUILD_DIR}/ASKAPsoft-cpapps-${TAG}" "${DEPLOY_DIR}/askapsoft/${TAG}"
+
+    # backup the old one if it is there
+    if [ -e "${DEPLOY_DIR}/askapsoft/${VERSION}" ]; then
+      mv "${DEPLOY_DIR}/askapsoft/${VERSION}" "${DEPLOY_DIR}/askapsoft/${VERSION}.${NOW}"
+    fi
+
+    mv  "${BUILD_DIR}/ASKAPsoft-cpapps-${TAG}" "${DEPLOY_DIR}/askapsoft/${VERSION}"
     mv "${BUILD_DIR}/askapsoft.module" "${MODULES_DIR}/askapsoft/${VERSION}"
     if [ "$MAKE_DEFAULT" == true ]; then
       # change the default referenced version
@@ -427,7 +431,13 @@ deploy() {
   
   # Deploy the askap pipeline scripts, if they were built, along with module configuration file
   if [ -e "${BUILD_DIR}/ASKAPsoft-pipelines-${TAG}" ]; then
-    mv "${BUILD_DIR}/ASKAPsoft-pipelines-${TAG}" "${DEPLOY_DIR}/askappipeline/${TAG}"
+
+    # backup the old one if it is there
+    if [ -e "${DEPLOY_DIR}/askappipeline/${VERSION}" ]; then
+      mv "${DEPLOY_DIR}/askappipeline/${VERSION}" "${DEPLOY_DIR}/askappipeline/${VERSION}.${NOW}"
+    fi
+
+    mv "${BUILD_DIR}/ASKAPsoft-pipelines-${TAG}" "${DEPLOY_DIR}/askappipeline/${VERSION}"
     mv "${BUILD_DIR}/askappipeline.module" "${MODULES_DIR}/askappipeline/${VERSION}"
     if [ "$MAKE_DEFAULT" == true ]; then
       # change the default referenced version
@@ -437,14 +447,26 @@ deploy() {
   
   # Deploy the askap cli, if it was built; module configuration file is always 'current'
   if [ -e "${BUILD_DIR}/ASKAP-cli-${TAG}" ]; then
-    mv "${BUILD_DIR}/ASKAP-cli-${TAG}" "${DEPLOY_DIR}/askapcli/${TAG}"
+
+    # backup the old one if it is there
+    if [ -e "${DEPLOY_DIR}/askapcli/${VERSION}" ]; then
+      mv "${DEPLOY_DIR}/askapcli/${VERSION}" "${DEPLOY_DIR}/askapcli/${VERSION}.${NOW}"
+    fi
+
+    mv "${BUILD_DIR}/ASKAP-cli-${TAG}" "${DEPLOY_DIR}/askapcli/${VERSION}"
     rm "${DEPLOY_DIR}/askapcli/current"
     ln -s "${DEPLOY_DIR}/askapcli/${TAG}" "${DEPLOY_DIR}/askapcli/current"
   fi
 
   # Deploy the askap cpsvcs, if they were built, along with module configuration file
   if [ -e "${BUILD_DIR}/ASKAPsoft-cpsvcs-${TAG}" ]; then
-    mv "${BUILD_DIR}/ASKAPsoft-cpsvcs-${TAG}" "${DEPLOY_DIR}/askapservices/${TAG}"
+
+    # backup the old one if it is there
+    if [ -e "${DEPLOY_DIR}/askapcpsvcs/${VERSION}" ]; then
+      mv "${DEPLOY_DIR}/askapcpsvcs/${VERSION}" "${DEPLOY_DIR}/askapcpsvcs/${VERSION}.${NOW}"
+    fi
+
+    mv "${BUILD_DIR}/ASKAPsoft-cpsvcs-${TAG}" "${DEPLOY_DIR}/askapservices/${VERSION}"
     mv "${BUILD_DIR}/askapservice.module" "${MODULES_DIR}/askapservices/${VERSION}"
     if [ "$MAKE_DEFAULT" == true ]; then
       # change the default referenced version
