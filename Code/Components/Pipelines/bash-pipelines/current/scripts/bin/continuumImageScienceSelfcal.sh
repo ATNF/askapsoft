@@ -291,9 +291,9 @@ Selavy.Fitter.doFit                             = true
 # Fit all 6 parameters of the Gaussian
 Selavy.Fitter.fitTypes                          = [full]
 # Limit the number of Gaussians to 1
-Selavy.Fitter.maxNumGauss = 1
+Selavy.Fitter.maxNumGauss = ${SELFCAL_SELAVY_NUM_GAUSSIANS}
 # Do not use the number of initial estimates to determine how many Gaussians to fit
-Selavy.Fitter.numGaussFromGuess = false
+Selavy.Fitter.numGaussFromGuess = ${SELFCAL_SELAVY_GAUSSIANS_FROM_GUESS}
 # The fit may be a bit poor, so increase the reduced-chisq threshold
 Selavy.Fitter.maxReducedChisq = 15.
 #

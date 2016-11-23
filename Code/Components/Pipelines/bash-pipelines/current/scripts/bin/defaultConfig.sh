@@ -447,6 +447,11 @@ SELFCAL_SELAVY_WEIGHTSCUT=0.95
 SELFCAL_SCALENOISE=false
 # Flux limit for cmodel
 SELFCAL_MODEL_FLUX_LIMIT=10uJy
+# Whether to use the number of Gaussians taken from initial estimate
+SELFCAL_SELAVY_GAUSSIANS_FROM_GUESS=true
+# If SELFCAL_SELAVY_GAUSSIANS_FROM_GUESS=false, this is how many
+# Gaussians to use
+SELFCAL_SELAVY_NUM_GAUSSIANS=1
 
 # Array-capable self-calibration parameters
 #   These parameters can be given as either a single value (eg. "300")
