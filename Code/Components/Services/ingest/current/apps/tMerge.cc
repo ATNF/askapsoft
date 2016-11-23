@@ -77,6 +77,7 @@ public:
       boost::shared_ptr<common::VisChunk> workChunk;
       casa::Timer timer;
       float processingTime = 0.;
+      float maxProcessingTime = 0.;
       size_t actualCount = 0;
 
       ASKAPLOG_INFO_STR(logger, "Initialising ChannelMergeTask constructor for rank="<<rank());
@@ -104,6 +105,9 @@ public:
            ASKAPLOG_INFO_STR(logger, "   - merge took "<<runTime<<" seconds");
            processingTime += runTime;
            ++actualCount;
+           if (runTime > maxProcessingTime) {
+               maxProcessingTime = runTime;
+           }
            if (chunk) {
                chunk->time() += casa::Quantity(5.,"s");
            }
@@ -115,7 +119,7 @@ public:
       }
       if (actualCount > 0) {
           ASKAPLOG_INFO_STR(logger, "Average running time per cycle: "<<processingTime / actualCount<<
-                     " seconds, "<<actualCount<<" iteratons averaged");
+                     " seconds, "<<actualCount<<" iteratons averaged; peak = "<<maxProcessingTime<<" seconds");
       }
    }
 private:

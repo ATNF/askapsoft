@@ -173,6 +173,14 @@ class CircularBuffer {
             }
             return true;
         }
+
+        void clear(void) {
+            boost::mutex::scoped_lock lock(itsMutex);
+            itsBuffer.clear();
+            // Notify any waiters
+            lock.unlock();
+            itsCondVar.notify_all();
+        }
         
 
         /// @brief Returns the number of items in the circular buffer

@@ -81,6 +81,7 @@ public:
 
       casa::Timer timer;
       float processingTime = 0.;
+      float maxProcessingTime = 0.;
       size_t actualCount = 0;
 
       ASKAPLOG_INFO_STR(logger, "Running the test for rank="<<rank());
@@ -93,10 +94,13 @@ public:
            ASKAPLOG_INFO_STR(logger, "   - gather took "<<runTime<<" seconds");
            processingTime += runTime;
            ++actualCount;
+           if (runTime > maxProcessingTime) {
+               maxProcessingTime = runTime;
+           }
       }
       if (actualCount > 0) {
           ASKAPLOG_INFO_STR(logger, "Average running time per cycle: "<<processingTime / actualCount<<
-                     " seconds, "<<actualCount<<" iteratons averaged");
+                     " seconds, "<<actualCount<<" iteratons averaged, peak = "<<maxProcessingTime<<" seconds");
       }
    }
 private:
