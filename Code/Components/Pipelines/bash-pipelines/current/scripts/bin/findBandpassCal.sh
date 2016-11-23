@@ -43,6 +43,35 @@ fi
 
 if [ $DO_IT == true ]; then
 
+    # Check for bandpass smoothing options
+    DO_RUN_PLOT_CALTABLE=false
+    if [ $DO_BANDPASS_PLOT == true ] || [ $DO_BANDPASS_SMOOTH == true ]; then
+        DO_RUN_PLOT_CALTABLE=true
+    fi
+    if [ $DO_RUN_PLOT_CALTABLE == true ]; then
+        script_location="$ACES/tools"
+        script_name="plot_caltable"
+        if [ ! -e ${script_location}/${script_name}.py ]; then
+            echo "WARNING - ${script_name}.py not found in $script_location - not running bandpass smoothing/plotting."
+            DO_RUN_PLOT_CALTABLE=false
+        fi
+        script_args="-t ${TABLE_BANDPASS} -s B "
+        if [ $DO_BANDPASS_SMOOTH == true ]; then
+            script_args="${script_args} -sm"
+            if [ $DO_BANDPASS_PLOT != true ]; then
+                script_args="${script_args} --no_plot"
+            fi
+        fi
+        if [ $BANDPASS_SMOOTH_AMP == true ]; then
+            script_args="${script_args} -sa"
+        fi
+        if [ $BANDPASS_SMOOTH_OUTLIER == true ]; then
+            script_args="${script_args} -o"
+        fi
+        script_args="${script_args} -fit ${BANDPASS_SMOOTH_FIT} -th ${BANDPASS_SMOOTH_THRESHOLD}"
+        
+    fi
+
     sbatchfile=$slurms/cbpcalibrator_1934.sbatch
     cat > $sbatchfile <<EOF
 #!/bin/bash -l
@@ -106,6 +135,30 @@ rejuvenate ${TABLE_BANDPASS}
 extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} findBandpass "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
+fi
+
+PLOT_CALTABLE=${DO_RUN_PLOT_CALTABLE}
+if [ \${PLOT_CALTABLE} == true ]; then
+
+    log=${logs}/plot_caltable_\${SLURM_JOB_ID}.log
+    scriptCommand="${script_location}/${script_name}.py ${script_args}"
+
+    module load casa
+    NCORES=1
+    NPPN=1
+    aprun -n \${NCORES -N \${NPPN} -b casa --nogui --nologger --log2term -c \${scriptCommand} > \${log}
+    module unload casa
+    err=\$?
+    rejuvenate ${TABLE_BANDPASS}*
+    extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} smoothBandpass "txt,csv"
+    if [ \$err != 0 ]; then
+        exit \$err
+    fi
+
+fi
+
+
+
 fi
 
 EOF

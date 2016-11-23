@@ -62,6 +62,15 @@ cd $OUTPUT
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 
+RAW_TABLE=${TABLE_BANDPASS}
+SMOOTH_TABLE=${TABLE_BANDPASS}.smooth
+DO_SMOOTH=${DO_BANDPASS_SMOOTH}
+if [ \${DO_SMOOTH} ] && [ -e \${SMOOTH_TABLE} ]; then
+    TABLE=\${SMOOTH_TABLE}
+else
+    TABLE=\${RAW_TABLE}
+fi
+
 parset=${parsets}/ccalapply_bp_b${BEAM}_\${SLURM_JOB_ID}.in
 cat > \$parset << EOFINNER
 Ccalapply.dataset                         = ${msSci}
@@ -74,7 +83,7 @@ Ccalapply.calibaccess                     = table
 Ccalapply.calibaccess.table.maxant        = ${NUM_ANT}
 Ccalapply.calibaccess.table.maxbeam       = ${maxbeam}
 Ccalapply.calibaccess.table.maxchan       = ${NUM_CHAN_SCIENCE}
-Ccalapply.calibaccess.table               = ${TABLE_BANDPASS}
+Ccalapply.calibaccess.table               = \${TABLE}
 
 EOFINNER
 
@@ -85,7 +94,7 @@ NPPN=1
 aprun -n \${NCORES} -N \${NPPN} ${ccalapply} -c \$parset > \$log
 err=\$?
 rejuvenate ${msSci}
-rejuvenate ${TABLE_BANDPASS}
+rejuvenate \${TABLE}
 extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err

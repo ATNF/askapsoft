@@ -66,7 +66,7 @@ if [ $DO_IT == true ]; then
         # remove any existing bandpass table so that we will be able
         # to create a new one
         echo "Removing the bandpass table so we can recompute"
-        rm -rf ${TABLE_BANDPASS}
+        rm -rf ${TABLE_BANDPASS} ${TABLE_BANDPASS}.smooth
     fi
 
     if [ -e ${FLAG_1934_CHECK_FILE} ]; then

@@ -216,6 +216,23 @@ NUM_CPUS_CBPCAL=100
 # bandpass solution
 BANDPASS_SCALENOISE=false
 
+# Smoothing of the bandpass table - this is achieved by the ACES tool
+# plot_caltable.py. This tool also plots the cal solutions
+
+# Whether to run plot_caltable.py to produce plots
+DO_BANDPASS_SMOOTH=true
+# Whether to smooth the bandpass
+DO_BANDPASS_PLOT=true
+# If true, smooth the amplitudes. If false, smooth real & imaginary
+BANDPASS_SMOOTH_AMP=true
+# If true, only smooth outlier points
+BANDPASS_SMOOTH_OUTLIER=true
+# polynomial order (if >= 0) or window size (if <0) to use when smoothing bandpass
+BANDPASS_SMOOTH_FIT=1
+# The threshold level for fitting bandpass
+BANDPASS_SMOOTH_THRESHOLD=1.0
+
+
 # Whether to do dynamic flagging
 FLAG_DO_DYNAMIC_AMPLITUDE_1934=true
 # Dynamic threshold applied to amplitudes [sigma]
