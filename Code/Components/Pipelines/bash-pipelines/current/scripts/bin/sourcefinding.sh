@@ -71,21 +71,20 @@ NUM_TAYLOR_TERMS=${NUM_TAYLOR_TERMS}
 # List of images to convert to FITS in the Selavy job
 imlist=""
 
-if [ $NUM_TAYLOR_TERMS == 1 ]; then
-    image=${OUTPUT}/image.${imageBase}.restored
-    weights=${OUTPUT}/weights.${imageBase}
-    imlist="\${imlist} \${image}"
-else
-    image=${OUTPUT}/image.${imageBase}.taylor.0.restored
-    weights=${OUTPUT}/weights.${imageBase}.taylor.0
-    imlist="\${imlist} \${image}"
-    if [ -e ${OUTPUT}/image.${imageBase}.taylor.1.restored ]; then
-        imlist="\${imlist} ${OUTPUT}/image.${imageBase}.taylor.1.restored"
+image=${OUTPUT}/{imageName}
+weights=${OUTPUT}/${weightsImage}
+imlist="\${imlist} \${image}"
+if [ \$NUM_TAYLOR_TERMS -gt 1 ]; then
+    t1im=`echo $image | sed -e 's/taylor\.0/taylor\.1/g'`
+    if [ -e ${OUTPUT}/\${t1im} ]; then
+        imlist="\${imlist} ${OUTPUT}/\${t1im}"
     fi
-    if [ -e ${OUTPUT}/image.${imageBase}.taylor.2.restored ]; then
-        imlist="\${imlist} ${OUTPUT}/image.${imageBase}.taylor.2.restored"
-    fi       
+    t2im=`echo $image | sed -e 's/taylor\.0/taylor\.2/g'`
+    if [ -e ${OUTPUT}/\${t2im} ]; then
+        imlist="\${imlist} ${OUTPUT}/\${t2im}"
+    fi
 fi
+
 if [ "\${BEAM}" == "all" ]; then
     imlist="\${imlist} \${weights}"
     weightpars="Selavy.Weights.weightsImage = \${weights##*/}.fits

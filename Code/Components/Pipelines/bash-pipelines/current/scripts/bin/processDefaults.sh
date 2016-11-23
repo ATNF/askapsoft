@@ -58,7 +58,7 @@ if [ "$PROCESS_DEFAULTS_HAS_RUN" != "true" ]; then
         DO_SPECTRAL_IMSUB=false
         DO_MOSAIC=true
         DO_SOURCE_FINDING=false
-        DO_SOURCE_FINDING_MOSAIC=false
+        DO_SOURCE_FINDING_BEAMWISE=false
         DO_ALT_IMAGER=false
         #
         DO_CONVERT_TO_FITS=false
@@ -414,12 +414,10 @@ module load askappipeline/${askappipelineVersion}"
             CPUS_PER_CORE_SELAVY=20
         fi
 
-        # If the linmos sourcefinding flag has not been set, then set it to
-        # true only if both source-finding and linmos are requested.
-        if [ ${DO_SOURCE_FINDING_MOSAIC} == SETME ]; then
-            if [ ${DO_SOURCE_FINDING} == true ] && [ ${DO_MOSAIC} == true ]; then
-                DO_SOURCE_FINDING_MOSAIC=true
-            fi
+        # If the sourcefinding flag has been set, but we aren't
+        # mosaicking, turn on the beam-wise sourcefinding flag
+        if [ ${DO_SOURCE_FINDING} == true ] && [ ${DO_MOSAIC} != true ]; then
+            DO_SOURCE_FINDING_BEAMWISE=true
         fi
 
         ####################

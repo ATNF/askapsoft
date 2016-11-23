@@ -86,7 +86,7 @@ cd $OUTPUT
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 
-nterms=${NUM_TAYLOR_TERMS}
+NUM_TAYLOR_TERMS=${NUM_TAYLOR_TERMS}
 maxterm=\`echo \$nterms | awk '{print 2*\$1-1}'\`
 IMAGE_BASE_CONT=${IMAGE_BASE_CONT}
 FIELD=${FIELD}
@@ -188,13 +188,24 @@ EOFOUTER
 fi
 
 
-if [ ${DO_SOURCE_FINDING_MOSAIC} == true ]; then
+if [ ${DO_SOURCE_FINDING} == true ]; then
     # Run the sourcefinder on the mosaicked image.
 
-    # set the $imageBase variable for the mosaicked image
-    BEAM="all"
-    setImageBase cont
+    NUM_LOOPS=0
+    if [ $DO_SELFCAL == true ] && [ $MOSAIC_SELFCAL_LOOPS == true ]; then
+        NUM_LOOPS=$SELFCAL_NUM_LOOPS
+    fi
+    for((LOOP=0;LOOP<=$NUM_LOOPS;LOOP++)); do
 
-    . ${PIPELINEDIR}/sourcefinding.sh
+        # set the $imageBase variable for the mosaicked image
+        BEAM="all"
+        setImageProperties cont
+        if [ $LOOP -gt 0 ]; then
+            imageName="$imageName.SelfCalLoop${LOOP}"
+        fi            
 
+        . ${PIPELINEDIR}/sourcefinding.sh
+
+    done
+    
 fi

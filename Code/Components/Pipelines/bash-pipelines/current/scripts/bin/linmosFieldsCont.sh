@@ -75,7 +75,7 @@ cd $OUTPUT
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 
-nterms=${NUM_TAYLOR_TERMS}
+NUM_TAYLOR_TERMS=${NUM_TAYLOR_TERMS}
 maxterm=\`echo \$nterms | awk '{print 2*\$1-1}'\`
 IMAGE_BASE_CONT=${IMAGE_BASE_CONT}
 SB_SCIENCE=${SB_SCIENCE}
@@ -183,7 +183,7 @@ EOFOUTER
 fi
 
 
-if [ ${DO_SOURCE_FINDING_MOSAIC} == true ]; then
+if [ ${DO_SOURCE_FINDING} == true ]; then
     # Run the sourcefinder on the mosaicked image.
 
     # set the $imageBase variable to have 'linmos' in it

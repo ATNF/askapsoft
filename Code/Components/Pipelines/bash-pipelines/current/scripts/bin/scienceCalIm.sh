@@ -129,7 +129,13 @@ for FIELD in ${FIELD_LIST}; do
             fi
 
             . ${PIPELINEDIR}/applyCalContinuumScience.sh
-            . ${PIPELINEDIR}/sourcefinding.sh
+
+            if [ $DO_SOURCE_FINDING_BEAMWISE == true ]; then
+                TTERM=0
+                imageCode=restored
+                setImageProperties cont
+                . ${PIPELINEDIR}/sourcefinding.sh
+            fi
 
             . ${PIPELINEDIR}/continuumCubeImagingScience.sh
 
@@ -147,7 +153,6 @@ for FIELD in ${FIELD_LIST}; do
         if [ $DO_ALT_IMAGER == true ]; then
             . ${PIPELINEDIR}/altLinmos.sh
         else
-            #            . ${PIPELINEDIR}/linmos.sh
             . ${PIPELINEDIR}/linmosCont.sh
             . ${PIPELINEDIR}/linmosContCube.sh
             . ${PIPELINEDIR}/linmosSpectral.sh

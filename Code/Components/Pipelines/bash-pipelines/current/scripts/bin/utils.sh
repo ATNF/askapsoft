@@ -166,7 +166,7 @@ function getTile()
 #  * BEAM
 #  * pol (lower case polarisation i/q/u/v etc)
 #  * TTERM (Taylor term: 0,1,2,...)
-#  * nterms (number of taylor terms being solved for. 1=no MFS)
+#  * NUM_TAYLOR_TERMS (number of taylor terms being solved for. 1=no MFS)
 #  * IMAGE_BASE_CONT,IMAGE_BASE_CONTCUBE,IMAGE_BASE_SPECTRAL
 # Available upon return:
 #  * imageBase
@@ -185,7 +185,7 @@ function setImageProperties()
     if [ $type == "cont" ]; then
         typebase="cont"
         labelbase="continuum image"
-        if [ "$nterms" == "" ] || [ $nterms -eq 1 ]; then
+        if [ "$NUM_TAYLOR_TERMS" == "" ] || [ $NUM_TAYLOR_TERMS -eq 1 ]; then
             imSuffix=""
             typeSuffix="T0"
         else
