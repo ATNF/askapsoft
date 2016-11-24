@@ -219,9 +219,9 @@ BANDPASS_SCALENOISE=false
 # Smoothing of the bandpass table - this is achieved by the ACES tool
 # plot_caltable.py. This tool also plots the cal solutions
 
-# Whether to run plot_caltable.py to produce plots
-DO_BANDPASS_SMOOTH=true
 # Whether to smooth the bandpass
+DO_BANDPASS_SMOOTH=true
+# Whether to run plot_caltable.py to produce plots
 DO_BANDPASS_PLOT=true
 # If true, smooth the amplitudes. If false, smooth real & imaginary
 BANDPASS_SMOOTH_AMP=true
