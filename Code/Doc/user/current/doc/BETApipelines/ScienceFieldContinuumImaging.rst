@@ -60,6 +60,16 @@ steadily improves. These parameters are for:
   and ``SELFCAL_NORMALISE_GAINS``
 * Data selection: ``CIMAGER_MINUV`` and ``CCALIBRATOR_MINUV``
 
+To use this mode, the values for these parameters should be given as
+an array in the form ``SELFCAL_INTERVAL="[1800,1800,900,300]``. The
+size of these arrays should be one more than
+``SELFCAL_NUM_LOOPS``. This is because loop 0 is just the imaging, and
+it is followed by ``SELFCAL_NUM_LOOPS`` loops of
+source-find--model--calibrate--image. Only the parameters related to
+the imaging (the deconvolution parameters in the list above) have
+the first element of their array used. If a single value is given for
+these parameters, it is used for every loop.
+
 Once the gains solution has been determined, it can be applied
 directly to the continuum measurement set, creating a copy in the
 process. This is necessary for continuum cube processing, and for
@@ -92,7 +102,11 @@ instead of BasisfunctionMFS).
 |                                            |                                 |                                                        | the beam (IMAGE_AT_BEAM_CENTRES=true), or whether to use a   |
 |                                            |                                 |                                                        | single image centre for all beams.                           |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``CPUS_PER_CORE_CONT_IMAGING``             | 16                              | Not for parset                                         | Number of CPUs to use on each core in the continuum imaging. |
+| ``NUM_CPUS_CONTIMG_SCI``                   | ""                              | none                                                   | The number of cores in total to use for the continuum        |
+|                                            |                                 |                                                        | imaging. If left blank ("" - the default), then this is      |
+|                                            |                                 |                                                        | calculated based on the number of channels and Taylor terms. |
++--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
+| ``CPUS_PER_CORE_CONT_IMAGING``             | 16                              | Not for parset                                         |Number of cores to use on each node in the continuum imaging. |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``DATACOLUMN``                             | DATA                            | datacolumn (:doc:`../calim/cimager`)                   | The column in the measurement set from which to read the     |
 |                                            |                                 |                                                        | visibility data. The default, 'DATA', is appropriate for     |
@@ -125,7 +139,7 @@ instead of BasisfunctionMFS).
 |                                            |                                 | (:doc:`../calim/cimager`)                              | this will be set automatically by the Cimager “advise”       |
 |                                            |                                 |                                                        | function, based on examination of the MS. The default is     |
 |                                            |                                 |                                                        | chosen together with the default number of pixels to cover a |
-|                                            |                                 |                                                        | typical full BETA field.                                     |
+|                                            |                                 |                                                        | typical full ASKAP field.                                    |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``NUM_TAYLOR_TERMS``                       | 2                               | Images.image.${imageBase}.nterms                       | Number of Taylor terms to create in MFS imaging. If more than|
 |                                            |                                 | (:doc:`../calim/cimager`)                              | 1, MFS weighting will be used (equivalent to setting         |
@@ -163,11 +177,11 @@ instead of BasisfunctionMFS).
 | ``GRIDDER_WMAX``                           | 2600                            | WProject.wmax                                          | The wmax parameter for the gridder.                          |
 |                                            |                                 | (:doc:`../calim/gridder`)                              |                                                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``GRIDDER_NWPLANES``                       | 99                              | WProject.nwplanes                                      | The nwplanes parameter for the gridder.                      |
+| ``GRIDDER_NWPLANES``                       | 99                              | WProject.nwplanes                                      | The nwplanes parameter for the gridder.                      | 
 |                                            |                                 | (:doc:`../calim/gridder`)                              |                                                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``GRIDDER_OVERSAMPLE``                     | 4                               | WProject.oversample                                    | The oversampling factor for the gridder.                     |
-|                                            |                                 | (:doc:`../calim/gridder`)                              |                                                              | 
+|                                            |                                 | (:doc:`../calim/gridder`)                              |                                                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``GRIDDER_MAXSUPPORT``                     | 512                             | WProject.maxsupport                                    | The maxsupport parameter for the gridder.                    |
 |                                            |                                 | (:doc:`../calim/gridder`)                              |                                                              |
@@ -265,13 +279,23 @@ instead of BasisfunctionMFS).
 | ``SELFCAL_SELAVY_NSUBX``                   | 6                               | nsubx                                                  | Division of image in x-direction for source-finding in       |
 |                                            |                                 | (:doc:`../analysis/selavy`)                            | selfcal.                                                     |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
+| ``SELFCAL_SELAVY_NSUBY``                   | 3                               | nsuby                                                  | Division of image in y-direction for source-finding in       |
+|                                            |                                 | (:doc:`../analysis/selavy`)                            | selfcal.                                                     |
++--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
+| ``SELFCAL_SELAVY_GAUSSIANS_FROM_GUESS``    | true                            | Selavy.Fitter.numGaussFromGuess                        | Whether to fit the number of Gaussians given by the initial  |
+|                                            |                                 | (:doc:`../analysis/postprocessing`)                    | estimate (true), or to only fit a fixed number (false). The  |
+|                                            |                                 |                                                        | number is given by ``SELFCAL_SELAVY_NUM_GAUSSIANS``.         |
++--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
+| ``SELFCAL_SELAVY_NUM_GAUSSIANS``           | 1                               | Selavy.Fitter.maxNumGauss                              | The number of Gaussians to fit to each island when           |
+|                                            |                                 | (:doc:`../analysis/postprocessing`)                    | ``SELFCAL_SELAVY_GAUSSIANS_FROM_GUESS=false``.               |
++--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``SELFCAL_SELAVY_WEIGHTSCUT``              | 0.95                            | Selavy.Weights.weightsCutoff                           | Pixels with weight less than this fraction of the peak       |
 |                                            |                                 | (:doc:`../analysis/thresholds`)                        | weight will not be considered by the source-finding. If      |
 |                                            |                                 |                                                        | the value is negative, or more than one, no consideration    |
 |                                            |                                 |                                                        | of the weight is made.                                       |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``SELFCAL_SELAVY_NSUBY``                   | 3                               | nsuby                                                  | Division of image in y-direction for source-finding in       |
-|                                            |                                 | (:doc:`../analysis/selavy`)                            | selfcal.                                                     |
+| ``SELFCAL_MODEL_FLUX_LIMIT``               | 10uJy                           | Cmodel.flux_limit (:doc:`../calim/cmodel`)             | The minimum integrated flux for components to be included in |
+|                                            |                                 |                                                        | the model used for self-calibration.                         |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``SELFCAL_NORMALISE_GAINS``                | true                            | normalisegains                                         | Whether to normalise the amplitudes of the gains to 1,       |
 |                                            |                                 | (:doc:`../calim/ccalibrator`)                          | approximating the phase-only self-calibration approach. Can  |
@@ -359,16 +383,16 @@ instead of BasisfunctionMFS).
 | ``CLEAN_CONTCUBE_SCALES``                  | "[0,3,10]"                      | Clean.scales                                           | Set of scales (in pixels) to use with the multi-scale clean. |
 |                                            |                                 | (:doc:`../calim/solver`)                               |                                                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-|``CLEAN_CONTCUBE_THRESHOLD_MINORCYCLE``     | "[30%, 0.9mJy]"                 | threshold.minorcycle                                   | Threshold for the minor cycle loop.                          |
+| ``CLEAN_CONTCUBE_THRESHOLD_MINORCYCLE``    | "[30%, 0.9mJy]"                 | threshold.minorcycle                                   | Threshold for the minor cycle loop.                          |
 |                                            |                                 | (:doc:`../calim/solver`)                               |                                                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-|``CLEAN_CONTCUBE_THRESHOLD_MAJORCYCLE``     | 1mJy                            | threshold.majorcycle                                   | The target peak residual. Major cycles stop if this is       |
+| ``CLEAN_CONTCUBE_THRESHOLD_MAJORCYCLE``    | 1mJy                            | threshold.majorcycle                                   | The target peak residual. Major cycles stop if this is       |
 |                                            |                                 | (:doc:`../calim/solver`)                               | reached. A negative number ensures all major cycles requested|
 |                                            |                                 |                                                        | are done.                                                    |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``CLEAN_CONTCUBE_NUM_MAJORCYCLES``         | 2                               | ncycles                                                | Number of major cycles.                                      |
 |                                            |                                 | (:doc:`../calim/cimager`)                              |                                                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-|``CLEAN_CONTCUBE_WRITE_AT_MAJOR_CYCLE``     | false                           | Images.writeAtMajorCycle                               | If true, the intermediate images will be written (with a     |
+| ``CLEAN_CONTCUBE_WRITE_AT_MAJOR_CYCLE``    | false                           | Images.writeAtMajorCycle                               | If true, the intermediate images will be written (with a     |
 |                                            |                                 | (:doc:`../calim/cimager`)                              | .cycle suffix) after the end of each major cycle.            |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+

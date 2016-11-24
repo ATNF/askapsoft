@@ -29,6 +29,16 @@ hence wanting to use beams not included in a previous bandpass
 solution), the bandpass table is deleted and re-made once the new
 beams are split and flagged.
 
+The cbpcalibrator job can make use of a script from ACES to both plot
+the bandpass solutions (as a function of antenna, beam and
+polarisation), and to smooth the bandpass table so that outlying
+points are interpolated over. This produces a second table (with
+".smooth" appended to the name), which will then be applied to the
+science data instead of the original. There are a number of parameters
+that may be used to tweak the smoothing - this is intended to be an
+interim solution until this functionality is implemented in
+ASKAPsoft. 
+
 +-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
 | Variable                                | Default                               | Parset equivalent                                      | Description                                               |
 +=========================================+=======================================+========================================================+===========================================================+
@@ -43,6 +53,9 @@ beams are split and flagged.
 | ``DO_FIND_BANDPASS``                    | true                                  | none                                                   | Whether to fit for the bandpass using all 1934-638 MSs    |
 +-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
 | ``JOB_TIME_FIND_BANDPASS``              | ``JOB_TIME_DEFAULT`` (12:00:00)       | none                                                   | Time request for finding the bandpass solution            |
++-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| **Preparing the calibrator datasets**   |                                       |                                                        |                                                           |
+|                                         |                                       |                                                        |                                                           |
 +-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
 | ``MS_BASE_1934``                        | 1934_beam%b.ms                        | none                                                   | Base name for the 1934 measurement sets after splitting.  |
 |                                         |                                       |                                                        | The wildcard %b will be replaced with the beam number.    |
@@ -92,6 +105,9 @@ beams are split and flagged.
 | ``FLAG_AUTOCORRELATION_1934``           | false                                 | selection_flagger.<rule>.autocorr                      | If true, then autocorrelations will be flagged.           |
 |                                         |                                       |                                                        |                                                           |
 +-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| **Solving for the bandpass**            |                                       |                                                        |                                                           |
+|                                         |                                       |                                                        |                                                           |
++-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
 | ``DIRECTION_1934``                      | "[19h39m25.036, -63.42.45.63, J2000]" | sources.field1.direction                               | Location of 1934-638, formatted for use in cbpcalibrator. |
 |                                         |                                       | (:doc:`../calim/cbpcalibrator`)                        |                                                           |
 +-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
@@ -110,6 +126,25 @@ beams are split and flagged.
 | ``NUM_CPUS_CBPCAL``                     | 100                                   | none                                                   | The number of cpus allocated to the cbpcalibrator job. The|
 |                                         |                                       |                                                        | job will use all 20 cpus on each node (the memory         |
 |                                         |                                       |                                                        | footprint is small enough to allow this).                 |
++-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| **Smoothing and plotting the bandpass** |                                       |                                                        |                                                           |
+|                                         |                                       |                                                        |                                                           |
++-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| ``DO_BANDPASS_SMOOTH``                  | true                                  | none                                                   | Whether to produce a smoothed version of the bandpass     |
+|                                         |                                       |                                                        | table, which will be applied to the science data.         |
++-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| ``DO_BANDPASS_PLOT``                    | true                                  | none                                                   | Whether to produce plots of the bandpass                  |
++-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| ``BANDPASS_SMOOTH_AMP``                 | true                                  | none                                                   | Whether to smooth the amplitudes (if false, smoothing is  |
+|                                         |                                       |                                                        | done on the real and imaginary values).                   |
++-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| ``BANDPASS_SMOOTH_OUTLIER``             | true                                  | none                                                   | If true, only smooth/interpolate over outlier points      |
+|                                         |                                       |                                                        | (based on the inter-quartile range).                      |
++-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| ``BANDPASS_SMOOTH_FIT``                 | 1                                     | none                                                   | The order of the polynomial (if >=0) or the window size   |
+|                                         |                                       |                                                        | (if <0) used in the smoothing.                            |
++-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| ``BANDPASS_SMOOTH_THRESHOLD``           | 1.0                                   | none                                                   | The threshold level used for fitting to the bandpass.     |
 +-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
 
 

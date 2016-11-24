@@ -1,5 +1,5 @@
-How to run the BETA pipelines
-=============================
+How to run the ASKAP pipelines
+==============================
 
 Loading the pipeline module
 ---------------------------
@@ -27,18 +27,18 @@ currently-used module.
 Configuration file
 ------------------
 
-To run the processing, you need to call *processBETA.sh*, providing it
+To run the processing, you need to call *processASKAP.sh*, providing it
 with a user input file that defines all necessary parameters. If
 you've loaded the pipelines module as detailed above, then this should
 be able to be run directly, like so::
 
-  processBETA.sh -c myInputs.sh
+  processASKAP.sh -c myInputs.sh
 
 where the user input file myInputs.sh could look something like this::
 
   #!/usr/bin/env bash
   #
-  # Example user input file for BETA processing.
+  # Example user input file for ASKAP processing.
   # Define variables here that will control the processing.
   # Do not put spaces either side of the equals signs!
   # control flags
@@ -92,7 +92,7 @@ set and tweak the processing. The default value of the parameter (if
 it has one) is listed in the tables, and in many of the tables the
 parset parameter than the environment variable maps to is given.
 
-* :doc:`BETAcontrol`
+* :doc:`ControlParameters`
 * :doc:`DataLocationSelection`
 * :doc:`BandpassCalibrator`
 * :doc:`ScienceFieldPreparation`
@@ -109,7 +109,7 @@ What is created and where does it go?
 
 Any measurement sets, images and tables that are created are put in an
 output directory specified in the input file (if not provided, they go in
-the directory in which *processBETA.sh* is run). There will be a file
+the directory in which *processASKAP.sh* is run). There will be a file
 called *PROCESSED_ON* that holds the timestamp indicating when the
 script was run (this timestamp is used in various filenames). Also
 created are a number of subdirectories which hold various types of

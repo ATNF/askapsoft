@@ -89,10 +89,9 @@ spectral-imaging.
 | ``CONTSUB_SELAVY_THRESHOLD``                  | 6                               | snrCut (:doc:`../analysis/selavy`) | SNR threshold for detection with Selavy in determining components |
 |                                               |                                 |                                    | to go into the continuum model.                                   |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``CONTSUB_MODEL_FLUX_LIMIT``                  | 0mJy                            | flux_limit (:doc:`../calim/cmodel`)| Flux limit applied to component catalogue - only components       |
+| ``CONTSUB_MODEL_FLUX_LIMIT``                  | 10uJy                           | flux_limit (:doc:`../calim/cmodel`)| Flux limit applied to component catalogue - only components       |
 |                                               |                                 |                                    | brighter than this will be included in the model image. Parameter |
-|                                               |                                 |                                    | takes the form of a number+units string. Default (0mJy) implies   |
-|                                               |                                 |                                    | *all* compoennts are used.                                        |
+|                                               |                                 |                                    | takes the form of a number+units string.                          |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | **Basic variables for imaging**               |                                 |                                    |                                                                   |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+

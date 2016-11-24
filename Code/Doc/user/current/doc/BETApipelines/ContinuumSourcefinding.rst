@@ -20,8 +20,11 @@ re-run it yourself.
 +--------------------------------+---------------------------------+---------------------------------+-------------------------------------------------------------+
 | Variable                       |             Default             | Parset equivalent               | Description                                                 |
 +================================+=================================+=================================+=============================================================+
-| ``DO_SOURCE_FINDING``          | false                           | none                            | Whether to do the source-finding with Selavy on the         |
-|                                |                                 |                                 | individual beam images and the final mosaic.                |
+| ``DO_SOURCE_FINDING``          | true                            | none                            | Whether to do the source-finding with Selavy on the         |
+|                                |                                 |                                 | final mosaic images.                                        |
++--------------------------------+---------------------------------+---------------------------------+-------------------------------------------------------------+
+| ``DO_SOURCE_FINDING_BEAMWISE`` | false                           | none                            | If true, the source-finding will be run on the individual   |
+|                                |                                 |                                 | beam images as well.                                        |
 +--------------------------------+---------------------------------+---------------------------------+-------------------------------------------------------------+
 | ``JOB_TIME_SOURCEFINDING``     | ``JOB_TIME_DEFAULT`` (12:00:00) | none                            | Time request for mosaicking                                 |
 |                                |                                 |                                 |                                                             |
@@ -29,10 +32,10 @@ re-run it yourself.
 | ``SELAVY_NSUBX``               | 6                               | nsubx                           | Number of divisions in the x-direction that divide the image|
 |                                |                                 | (:doc:`../analysis/selavy`)     | up, allowing parallel processing in the source-detection.   |
 +--------------------------------+---------------------------------+---------------------------------+-------------------------------------------------------------+
-| ``SELAVY_NSUBY``               | 3                               | nsuby                           | Number of divisions in the y-direction that divide the image|
+| ``SELAVY_NSUBY``               | 3                               | nsuby                           | Number of divisions in the y-direction that divide the image| 
 |                                |                                 | (:doc:`../analysis/selavy`)     | up, allowing parallel processing in the source-detection.   |
 +--------------------------------+---------------------------------+---------------------------------+-------------------------------------------------------------+
-| ``SELAVY_SNR_CUT``             | 5.0                             | snrcut                          | The signal-to-noise ratio threshold to use in the           | 
+| ``SELAVY_SNR_CUT``             | 5.0                             | snrcut                          | The signal-to-noise ratio threshold to use in the           |
 |                                |                                 | (:doc:`../analysis/selavy`)     | source-detection.                                           |
 +--------------------------------+---------------------------------+---------------------------------+-------------------------------------------------------------+
 | ``SELAVY_FLAG_GROWTH``         | true                            | flagGrowth                      | A flag indicating whether to grow detections down to a      |

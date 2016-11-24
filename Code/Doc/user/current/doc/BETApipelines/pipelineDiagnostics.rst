@@ -1,27 +1,27 @@
 Diagnostics and job management
 ==============================
 
-Running the processBETA.sh script will also create two scripts that
+Running the processASKAP.sh script will also create two scripts that
 are available for the user to run. These reside in the tools/
 subdirectory, and are tagged with the date and time that
-processBETA.sh was called. Symbolic links to them are put in the top
+processASKAP.sh was called. Symbolic links to them are put in the top
 level directory. These scripts are:
 
 * *reportProgress* – (links to *tools/reportProgress-YYYY-MM-DD-HHMM.sh*)
   This is a front-end to squeue, showing only those jobs started by
-  the most recent call of *processBETA.sh*. If given a ``-v`` option, it
+  the most recent call of *processASKAP.sh*. If given a ``-v`` option, it
   will also first provide a list of the jobs along with a brief
   description of what that job is doing.
   
 * *killAll* – (links to *tools/killAll-YYYY-MM-DD-HHMM.sh*) This is a
   front-end to *scancel*, providing a simple way of cancelling all jobs
-  started by the most recent call of *processBETA.sh*.
+  started by the most recent call of *processASKAP.sh*.
   
 In each of these cases, the date-stamp (*YYYY-MM-DD-HHMM*) is the time
-at which *processBETA.sh* was run, so you can tie the results and the
+at which *processASKAP.sh* was run, so you can tie the results and the
 jobs down to a particular call of the pipeline.
 
-If you have jobs from more than one call of *processBETA.sh* running
+If you have jobs from more than one call of *processASKAP.sh* running
 at once, you can run the individual script in the tools directory,
 rather than the symbolic link (which will always point to the most
 recent one).

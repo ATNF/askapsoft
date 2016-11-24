@@ -175,6 +175,12 @@ the science field processing.
 +-------------------------+---------+-------------------------------------------------------------+
 |  ``DO_SPECTRAL_IMSUB``  | false   | Whether to do the image-based continuum subtraction.        |
 +-------------------------+---------+-------------------------------------------------------------+
+|  ``IS_BETA``            | false   | A special parameter that, if true, indicates the dataset was|
+|                         |         | taken with BETA, and so needs to be treated differently     |
+|                         |         | (many of the online services will not work with BETA        |
+|                         |         | Scheduling Blocks, and the raw data is in a different       |
+|                         |         | place).                                                     |
++-------------------------+---------+-------------------------------------------------------------+
 
 
 Slurm time requests

@@ -1,4 +1,4 @@
-ASKAPsoft processing of BETA data
+ASKAPsoft processing of ASKAP data
 =================================
 
 Introduction
@@ -10,14 +10,14 @@ observations. It has been primarily designed for full-scale ASKAP
 processing on a high-performance computing environment. The design
 philosophy and background is detailed in the ASKAP Science Processing
 document (`ASKAP-SW-0020`_), which was produced in 2011 to detail the
-entire ASKAP pipeline processing environment. BETA processing uses a
+entire ASKAP pipeline processing environment. The current processing uses a
 slightly different approach, particularly in the calibration method,
 and the set of scripts detailed here are designed to demonstrate a
-BETA reduction approach with ASKAPsoft.
+reduction approach for ASKAP with ASKAPsoft.
 
  .. _ASKAP-SW-0020: http://www.atnf.csiro.au/projects/askap/ASKAP-SW-0020.pdf
 
-This set of scripts handles all BETA reduction, from the splitting and
+This set of scripts handles all reduction steps, from the splitting and
 flagging of bandpass-calibrator and science datasets, obtaining and applying the
 bandpass calibration, averaging of the science visibilities, continuum
 imaging (with or without self-calibration) and linear mosaicking,
@@ -51,7 +51,7 @@ metadata).
 Assumptions
 -----------
 
-These scripts have been put together to process particular BETA
+These scripts have been put together to process particular 
 observations. The assumed structure of your observation is that you
 have an observation of a ‘science’ field (i.e. the field for which you
 want to make images - this can actually incorporate more than one

@@ -10,9 +10,9 @@ the ``MS_INPUT`` variables give the filename for the relevant MS.
 +----------------------+---------------------------------------------------------+------------------------------------------------------------+
 | Variable             | Default                                                 | Description                                                |
 +======================+=========================================================+============================================================+
-| ``DIR_SB``           |/scratch2/askap/askapops/beta-scheduling-blocks          |Location (on galaxy) of the scheduling blocks. This is used |
+| ``DIR_SB``           | /scratch2/askap/askapops/askap-scheduling-blocks        |Location (on galaxy) of the scheduling blocks. This is used |
 |                      |                                                         |when specifying SB numbers - the default is the standard    |
-|                      |                                                         |location for BETA operation.                                |
+|                      |                                                         |location for ASKAP operation.                               |
 +----------------------+---------------------------------------------------------+------------------------------------------------------------+
 | ``SB_1934``          | no default                                              |SB number for the 1934-638 calibration observation.         |
 +----------------------+---------------------------------------------------------+------------------------------------------------------------+
@@ -40,5 +40,5 @@ MS).
 |                |           |goes up to ``BEAM_MAX`` (this is due to the       |
 |                |           |requirements of :doc:`../calim/cbpcalibrator`).   |
 +----------------+-----------+--------------------------------------------------+
-| ``BEAM_MAX``   | 8         | Final beam number (0-based)                      |
+| ``BEAM_MAX``   | 35        | Final beam number (0-based)                      |
 +----------------+-----------+--------------------------------------------------+
