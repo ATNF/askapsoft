@@ -61,10 +61,10 @@ scripts, and they are detailed here.
 +---------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | ``ARCHIVE_SELFCAL_LOOP_MOSAICS``| true                            | none                            | Whether to archive the mosaics of the intermediate              |
 |                                 |                                 |                                 | self-calibration loop images (see                               |
-|                                 |                                 |                                 |:doc:`ScienceFieldContinuumImaging`).                            |
+|                                 |                                 |                                 | :doc:`ScienceFieldContinuumImaging`).                           |
 +---------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | ``ARCHIVE_FIELD_MOSAICS``       | true                            | none                            | Whether to archive the mosaics for each individual field, as    |
-|                                 |                                 |                                 |well as for each tile and the final mosaicked image.             |
+|                                 |                                 |                                 | well as for each tile and the final mosaicked image.            |
 +---------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | ``PROJECT_ID``                  | "AS031"                         | *<key>*.project                 | The project ID that is written to the FITS header, and used by  |
 |                                 |                                 | (:doc:`../utils/casdaupload`)   | the casdaupload script to describe each data product. This is   |

@@ -1,5 +1,5 @@
 ASKAPsoft processing of ASKAP data
-=================================
+==================================
 
 Introduction
 ------------

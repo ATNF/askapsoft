@@ -163,7 +163,7 @@ spectral-imaging.
 |                                               |                                 | (:doc:`../calim/solver`)           |                                                                   |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``CLEAN_SPECTRAL_PSFWIDTH``                   | 512                             | Clean.psfwidth                     | The width of the psf patch used in the minor cycle.               |
-|                                               |                                 |(:doc:`../calim/solver`)            |                                                                   |
+|                                               |                                 | (:doc:`../calim/solver`)           |                                                                   |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``CLEAN_SPECTRAL_SCALES``                     | "[0,3,10]"                      | Clean.scales                       | Set of scales (in pixels) to use with the multi-scale clean.      |
 |                                               |                                 | (:doc:`../calim/solver`)           |                                                                   |

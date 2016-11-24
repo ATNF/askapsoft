@@ -1,5 +1,5 @@
 ASKAP Processing Pipelines
-=========================
+==========================
 
 The processing pipelines are scripts that tie together the various
 ASKAPsoft applications and allow them to be run as a coherent whole on
