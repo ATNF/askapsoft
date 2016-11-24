@@ -199,6 +199,13 @@ void ComponentCatalogue::check(bool allColumns)
 
 }
 
+std::vector<CasdaComponent> &ComponentCatalogue::components()
+{
+    std::vector<CasdaComponent> &comp = itsComponents;
+    return comp;
+}
+
+
 void ComponentCatalogue::write()
 {
     this->check(false);

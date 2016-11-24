@@ -44,8 +44,6 @@ class NoiseSpectrumExtractor : public SpectralBoxExtractor {
         /// _X appended, where X is the ID of the object in question).
         NoiseSpectrumExtractor(const LOFAR::ParameterSet& parset);
         virtual ~NoiseSpectrumExtractor() {};
-        NoiseSpectrumExtractor(const NoiseSpectrumExtractor& other);
-        NoiseSpectrumExtractor& operator=(const NoiseSpectrumExtractor& other);
 
         void setBoxWidth(int w) {itsBoxWidth = w;};
         void setBoxWidth();

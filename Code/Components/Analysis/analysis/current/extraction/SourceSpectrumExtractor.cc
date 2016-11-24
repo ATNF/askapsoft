@@ -85,22 +85,6 @@ SourceSpectrumExtractor::SourceSpectrumExtractor(const LOFAR::ParameterSet& pars
 
 }
 
-SourceSpectrumExtractor::SourceSpectrumExtractor(const SourceSpectrumExtractor& other)
-{
-    this->operator=(other);
-}
-
-SourceSpectrumExtractor& SourceSpectrumExtractor::operator=(const SourceSpectrumExtractor& other)
-{
-    if (this == &other) return *this;
-    ((SpectralBoxExtractor &) *this) = other;
-    itsFlagDoScale = other.itsFlagDoScale;
-    itsFlagUseDetection = other.itsFlagUseDetection;
-    itsBeamScaleFactor = other.itsBeamScaleFactor;
-    itsBeamLog = other.itsBeamLog;
-    return *this;
-}
-
 
 void SourceSpectrumExtractor::setBeamScale()
 {
@@ -198,7 +182,7 @@ void SourceSpectrumExtractor::setBeamScale()
 
             this->closeInput();
         } else {
-            ASKAPLOG_ERROR_STR(logger, "Could not open image");
+            ASKAPLOG_ERROR_STR(logger, "Could not open image \"" << itsInputCube << "\".");
         }
     }
 
@@ -213,8 +197,10 @@ void SourceSpectrumExtractor::extract()
 
         // get either the matching image for the current stokes value,
         // or the first&only in the input list
-        itsInputCube = itsInputCubeList[stokes % itsInputCubeList.size()];
         itsCurrentStokes = itsStokesList[stokes];
+        itsInputCube = itsCubeStokesMap[itsCurrentStokes];
+        ASKAPLOG_INFO_STR(logger, "Extracting spectrum for Stokes " << itsCurrentStokes
+                          << " from image \""<<itsInputCube<<"\".");
         this->defineSlicer();
         if (this->openInput()) {
             casa::Stokes stk;
@@ -276,7 +262,7 @@ void SourceSpectrumExtractor::extract()
 
             this->closeInput();
         } else {
-            ASKAPLOG_ERROR_STR(logger, "Could not open image");
+            ASKAPLOG_ERROR_STR(logger, "Could not open image \"" << itsInputCube << "\".");
         }
     }
 

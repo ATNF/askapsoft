@@ -64,8 +64,6 @@ class SourceSpectrumExtractor : public SpectralBoxExtractor {
         /// the set of polarisation products to extract.
         SourceSpectrumExtractor(const LOFAR::ParameterSet& parset);
         virtual ~SourceSpectrumExtractor() {};
-        SourceSpectrumExtractor(const SourceSpectrumExtractor& other);
-        SourceSpectrumExtractor& operator=(const SourceSpectrumExtractor& other);
 
         void setBoxWidth(int w) {itsBoxWidth = w;};
         bool doScale() {return itsFlagDoScale;};

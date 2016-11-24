@@ -83,7 +83,7 @@ class SourceSpectrumExtractionTest : public CppUnit::TestFixture {
         void setUp()
         {
 
-            ASKAPLOG_DEBUG_STR(logger, "================================");
+            ASKAPLOG_DEBUG_STR(logger, "==========================");
             ASKAPLOG_DEBUG_STR(logger, "=== EXTRACTION TEST: setUp");
 
             tempImage = "tempImageForExtractionTest";
@@ -360,10 +360,9 @@ class SourceSpectrumExtractionTest : public CppUnit::TestFixture {
             ss.str();
             ss << "rm -rf " << tempBeamfile;
             system(ss.str().c_str());
-            ASKAPLOG_DEBUG_STR(logger, "---------------------------------");
+            ASKAPLOG_DEBUG_STR(logger, "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
         }
-
 };
+}
+}
 
-}
-}

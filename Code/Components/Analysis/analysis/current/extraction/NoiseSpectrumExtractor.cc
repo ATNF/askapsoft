@@ -92,20 +92,6 @@ NoiseSpectrumExtractor::NoiseSpectrumExtractor(const LOFAR::ParameterSet& parset
 
 }
 
-NoiseSpectrumExtractor::NoiseSpectrumExtractor(const NoiseSpectrumExtractor& other)
-{
-    this->operator=(other);
-}
-
-NoiseSpectrumExtractor& NoiseSpectrumExtractor::operator=(const NoiseSpectrumExtractor& other)
-{
-    if (this == &other) return *this;
-    ((SpectralBoxExtractor &) *this) = other;
-    itsAreaInBeams = other.itsAreaInBeams;
-    itsRobustFlag = other.itsRobustFlag;
-    return *this;
-}
-
 void NoiseSpectrumExtractor::setBoxWidth()
 {
 
@@ -131,7 +117,7 @@ void NoiseSpectrumExtractor::setBoxWidth()
             itsBoxWidth = int(ceil(sqrt(itsAreaInBeams * beamAreaInPix)));
 
             ASKAPLOG_INFO_STR(logger, "Noise Extractor: Using box of area " <<
-                              itsAreaInBeams << " beams (of area " <<
+                              itsAreaInBeams << " beams (each of area " <<
                               beamAreaInPix << " pix), or a square of " <<
                               itsBoxWidth << " pix on the side");
 

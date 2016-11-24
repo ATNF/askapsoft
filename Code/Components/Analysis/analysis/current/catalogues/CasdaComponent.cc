@@ -168,15 +168,46 @@ const float CasdaComponent::dec()
     return itsDEC.value();
 }
 
+const float CasdaComponent::raErr()
+{
+    return itsRA.error();
+}
+
+const float CasdaComponent::decErr()
+{
+    return itsDEC.error();
+}
+
 const std::string CasdaComponent::componentID()
 {
     return itsComponentID;
+}
+
+const std::string CasdaComponent::name()
+{
+    return itsName;
 }
 
 const double CasdaComponent::intFlux()
 {
     return itsFluxInt.value();
 }
+
+const double CasdaComponent::freq()
+{
+    return itsFreq;
+}
+
+const double CasdaComponent::alpha()
+{
+    return itsAlpha;
+}
+
+const double CasdaComponent::beta()
+{
+    return itsBeta;
+}
+
 
 void CasdaComponent::printTableRow(std::ostream &stream,
                                    duchamp::Catalogues::CatalogueSpecification &columns)

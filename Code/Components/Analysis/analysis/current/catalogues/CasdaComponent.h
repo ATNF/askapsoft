@@ -68,10 +68,22 @@ class CasdaComponent : public CatalogueEntry {
         const float ra();
         /// Return the Declination (in decimal degrees)
         const float dec();
+        /// Return the RA error (in decimal degrees)
+        const float raErr();
+        /// Return the Declination error (in decimal degrees)
+        const float decErr();
         /// Return the component ID
         const std::string componentID();
+    // Return the component name
+    const std::string name();
         /// Return the integrated flux
         const double intFlux();
+    /// Return the frequency of observation
+    const double freq();
+    /// Return the spectral index
+    const double alpha();
+    /// Return the spectral curvature
+    const double beta();
 
         ///  Print a row of values for the Component into an
         ///  output table. Each column from the catalogue

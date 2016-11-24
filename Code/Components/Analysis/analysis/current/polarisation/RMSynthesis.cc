@@ -29,7 +29,7 @@
 #include <polarisation/RMSynthesis.h>
 #include <askap_analysis.h>
 
-// #include <polarisation/PolarisationData.h>
+#include <polarisation/PolarisationData.h>
 
 #include <askap/AskapLogging.h>
 #include <askap/AskapError.h>
@@ -56,8 +56,8 @@ static const std::string defaultWeight = "variance";
 
 RMSynthesis::RMSynthesis(const LOFAR::ParameterSet &parset):
     itsWeightType(parset.getString("weightType", defaultWeight)),
-    itsNumPhiChan(parset.getUint("numPhiChan", 0)),
-    itsDeltaPhi(parset.getFloat("deltaPhi", 0.)),
+    itsNumPhiChan(parset.getUint("numPhiChan", 40)),
+    itsDeltaPhi(parset.getFloat("deltaPhi", 30.)),
     itsPhiZero(parset.getFloat("phiZero", 0.)),
     itsPhi(0),
     itsFaradayDF(0),
@@ -103,18 +103,17 @@ void RMSynthesis::defineVectors()
 }
 
 
-// ** PolarisationData not yet implemented fully **
-// void RMSynthesis::calculate(PolarisationData &poldata)
-// {
-//     casa::Vector<float> lsq = poldata.l2();
-//     // q = Q/Imod, u = U/Imod, p = q + iu
+void RMSynthesis::calculate(PolarisationData &poldata)
+{
+    // q = Q/Imod, u = U/Imod, p = q + iu
+    itsImod = poldata.Imod();
+    
+    casa::Vector<float> q=poldata.Q().spectrum() / itsImod;
+    casa::Vector<float> u=poldata.U().spectrum() / itsImod;
 
-//     casa::Vector<float> q=poldata.Q().spectrum() / poldata.Imod();
-//     casa::Vector<float> u=poldata.U().spectrum() / poldata.Imod();
+    this->calculate(poldata.l2(),q,u,poldata.noise());
 
-//     this->calculate(lsq,q,u,poldata.noise());
-
-// }
+}
 
 void RMSynthesis::calculate(const casa::Vector<float> &lsq,
                             const casa::Vector<float> &q,
@@ -122,6 +121,8 @@ void RMSynthesis::calculate(const casa::Vector<float> &lsq,
                             const casa::Vector<float> &noise)
 {
 
+    itsLamSq = lsq;
+    
     // Ensure all arrays are the same size
     ASKAPASSERT(lsq.size() == q.size());
     ASKAPASSERT(lsq.size() == u.size());
@@ -136,30 +137,35 @@ void RMSynthesis::calculate(const casa::Vector<float> &lsq,
     } else {
         itsWeights = casa::Vector<float>(noise.size(), 1.);
     }
+    ASKAPLOG_DEBUG_STR(logger, "Noise = " << noise);
+    ASKAPLOG_DEBUG_STR(logger, "Weights = " << itsWeights);
 
     itsFDFnoise = casa::mean(noise) / sqrt(noise.size());
 
     // K = \sum(w_i)^-1
     itsNormalisation = 1. / casa::sum(itsWeights);
-
+    ASKAPLOG_DEBUG_STR(logger, "FDF normalisation = " << itsNormalisation);
+    
     // \lambda^2_0 = K * \sum(w_i*\lambda^2_i)
-    itsRefLambdaSquared = itsNormalisation * casa::sum(itsWeights * lsq);
+    itsRefLambdaSquared = itsNormalisation * casa::sum(itsWeights * itsLamSq);    
 
-    // variance in the lsq distribution
-    itsLambdaSquaredVariance = (casa::sum(lsq * lsq) - pow(casa::sum(lsq), 2) / lsq.size()) /
-                               float(lsq.size() - 1);
+    // variance in the itsLamSq distribution
+    itsLambdaSquaredVariance = (casa::sum(itsLamSq * itsLamSq) - pow(casa::sum(itsLamSq), 2) / itsLamSq.size()) /
+                               float(itsLamSq.size() - 1);
 
     // Compute FDF
     for (size_t j = 0; j < itsNumPhiChan; j++) {
-        casa::Vector<float> phase = -2.F * itsPhi[j] * (lsq - itsRefLambdaSquared);
+        casa::Vector<float> phase = -2.F * itsPhi[j] * (itsLamSq - itsRefLambdaSquared);
         casa::Vector<casa::Complex> sampling = casa::makeComplex(itsWeights * cos(phase),
                                                itsWeights * sin(phase));
         itsFaradayDF[j] = itsNormalisation * casa::sum(p * sampling);
+        // multiply by the I model spectrum to get FDF in Jy
+        itsFaradayDF[j] *= itsImod[j];
     }
 
     // Compute RMSF
     for (size_t j = 0; j < 2.*itsNumPhiChan; j++) {
-        casa::Vector<float> phase = -2.F * itsPhiForRMSF[j] * (lsq - itsRefLambdaSquared);
+        casa::Vector<float> phase = -2.F * itsPhiForRMSF[j] * (itsLamSq - itsRefLambdaSquared);
         casa::Vector<casa::Complex> sampling = casa::makeComplex(itsWeights * cos(phase),
                                                itsWeights * sin(phase));
         itsRMSF[j] = itsNormalisation * casa::sum(sampling);
@@ -171,12 +177,13 @@ void RMSynthesis::calculate(const casa::Vector<float> &lsq,
 
 void RMSynthesis::fitRMSF()
 {
-// ** not yet fully implemented - TBC **
 
     casa::Vector<float> rmsf_p = casa::amplitude(itsRMSF);
     float minRMSF, maxRMSF;
     casa::IPosition locMin, locMax;
     casa::minMax<float>(minRMSF, maxRMSF, locMin, locMax, rmsf_p);
+    ASKAPLOG_DEBUG_STR(logger, "Min/Max of RMSF: min="<<minRMSF << " at " << locMin
+                       << ",  max="<<maxRMSF << " at " << locMax);
 
     // move left
     int limitLower = locMax[0];
@@ -207,8 +214,8 @@ void RMSynthesis::fitRMSF()
         sigma(i - limitLower) = 1.;
     }
 
-    // ASKAPLOG_DEBUG_STR(logger, "RMSF fit: pos = " << pos);
-    // ASKAPLOG_DEBUG_STR(logger, "RMSF fit: f = " << f);
+     ASKAPLOG_DEBUG_STR(logger, "RMSF fit: pos = " << pos);
+     ASKAPLOG_DEBUG_STR(logger, "RMSF fit: f = " << f);
 
     casa::FitGaussian<casa::Double> fitter;
     fitter.setDimensions(1);
@@ -230,6 +237,24 @@ void RMSynthesis::fitRMSF()
 
 }
 
+const float RMSynthesis::Imodel_refLambdaSq()
+{
+    
+    unsigned int locRef=0;
+    float diff=abs(itsLamSq[locRef]-itsRefLambdaSquared);
+    float olddiff;
+    do{
+        locRef++;
+        olddiff=diff;
+        diff=abs(itsLamSq[locRef]-itsRefLambdaSquared);
+    } while(diff*olddiff > 0 && (locRef<itsLamSq.size()-1));
+
+    float slope = (itsImod[locRef]-itsImod[locRef-1])/(itsLamSq[locRef]-itsLamSq[locRef-1]);
+    float refImodel = itsImod[locRef-1] + (itsRefLambdaSquared-itsImod[locRef-1])*slope;
+
+    return refImodel;
 }
 
+
+}
 }

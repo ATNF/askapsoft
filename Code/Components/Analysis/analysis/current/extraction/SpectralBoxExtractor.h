@@ -61,8 +61,6 @@ class SpectralBoxExtractor : public SourceDataExtractor {
         /// _X appended, where X is the ID of the object in question).
         SpectralBoxExtractor(const LOFAR::ParameterSet& parset);
         virtual ~SpectralBoxExtractor() {};
-        SpectralBoxExtractor(const SpectralBoxExtractor& other);
-        SpectralBoxExtractor& operator=(const SpectralBoxExtractor& other);
 
         int boxWidth() {return itsBoxWidth;};
         virtual void setBoxWidth(int w) {itsBoxWidth = w;};
@@ -70,6 +68,11 @@ class SpectralBoxExtractor : public SourceDataExtractor {
         virtual void extract() = 0;
 
         void writeImage();
+
+    /// Return a vector list of frequency values that match the spectrum array. 
+    casa::Array<Float> frequencies();
+    /// Return the frequency units from the spectrum array.
+    std::string freqUnit();
 
     protected:
         virtual void defineSlicer();

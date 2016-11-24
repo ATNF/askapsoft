@@ -121,28 +121,6 @@ MomentMapExtractor::MomentMapExtractor(const LOFAR::ParameterSet& parset):
 
 }
 
-MomentMapExtractor::MomentMapExtractor(const MomentMapExtractor& other)
-{
-    this->operator=(other);
-}
-
-MomentMapExtractor& MomentMapExtractor::operator= (const MomentMapExtractor& other)
-{
-    if (this == &other) return *this;
-    ((SourceDataExtractor &) *this) = other;
-    itsSpatialMethod = other.itsSpatialMethod;
-    itsPadSize = other.itsPadSize;
-    itsFlagUseDetection = other.itsFlagUseDetection;
-    itsMomentRequest = other.itsMomentRequest;
-    itsMom0map = other.itsMom0map;
-    itsMom1map = other.itsMom1map;
-    itsMom2map = other.itsMom2map;
-    itsMom0mask = other.itsMom0mask;
-    itsMom1mask = other.itsMom1mask;
-    itsMom2mask = other.itsMom2mask;
-    return *this;
-}
-
 void MomentMapExtractor::defineSlicer()
 {
 

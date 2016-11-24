@@ -36,6 +36,7 @@
 #include <casacore/casa/Arrays/Slicer.h>
 #include <casacore/images/Images/ImageInterface.h>
 #include <casacore/lattices/Lattices/LatticeBase.h>
+#include <casacore/casa/Quanta/Unit.h>
 #include <Common/ParameterSet.h>
 #include <casacore/measures/Measures/Stokes.h>
 #include <utils/PolConverter.h>
@@ -64,8 +65,6 @@ class SourceDataExtractor {
         SourceDataExtractor() {};
         SourceDataExtractor(const LOFAR::ParameterSet& parset);
         virtual ~SourceDataExtractor();
-        SourceDataExtractor(const SourceDataExtractor& other);
-        SourceDataExtractor& operator=(const SourceDataExtractor& other);
 
         /// @brief Set the pointer to the source, and define the output filename based on its ID
         /// @details Sets the source to be used. Also sets the output
@@ -89,7 +88,7 @@ class SourceDataExtractor {
         {
             return scimath::PolConverter::toString(itsStokesList);
         };
-
+    casa::Unit bunit();
         virtual void writeImage() = 0;
 
     protected:
@@ -97,7 +96,9 @@ class SourceDataExtractor {
         void closeInput();
         virtual void verifyInputs();
         virtual void defineSlicer() = 0;
-        void checkPol(std::string image, casa::Stokes::StokesTypes stokes, int nStokesRequest);
+
+    /// Check whether the given image contains the given stokes parameter.
+        bool checkPol(std::string image, casa::Stokes::StokesTypes stokes);
         casa::IPosition getShape(std::string image);
         virtual void initialiseArray() = 0;
         template <class T> double getRA(T &object);
@@ -112,6 +113,7 @@ class SourceDataExtractor {
         casa::Slicer itsSlicer;
         std::string itsInputCube;
         std::vector<std::string> itsInputCubeList;
+    std::map<casa::Stokes::StokesTypes,std::string> itsCubeStokesMap;
         boost::shared_ptr<casa::ImageInterface<Float> > itsInputCubePtr;
         casa::Vector<casa::Stokes::StokesTypes> itsStokesList;
         casa::Stokes::StokesTypes itsCurrentStokes;
@@ -127,6 +129,8 @@ class SourceDataExtractor {
         int  itsLatAxis;
         int  itsSpcAxis;
         int  itsStkAxis;
+
+    casa::TableRecord itsMiscInfo;
 };
 
 }

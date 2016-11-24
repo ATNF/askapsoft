@@ -52,12 +52,12 @@ namespace analysis {
 class CasdaPolarisationEntry : public CatalogueEntry {
     public:
         /// Constructor that builds the Polarisation object from a
-        /// RadioSource. It takes a single fitted component along with a
-        /// RMSynthesis object from which the results are parsed. The
-        /// parset defines the detection thresholds, as well as scheduling
-        /// block information.
-        CasdaPolarisationEntry(const CasdaComponent &comp,
-                               RMSynthesis &rmsynth,
+        /// RadioSource. It takes a single fitted component and runs
+        /// the RM Synthesis on it. The parset defines the detection
+        /// thresholds, as well as scheduling block information, and
+        /// is passed to the RM Synthesis class to determine input
+        /// images etc.
+        CasdaPolarisationEntry(CasdaComponent *comp,
                                const LOFAR::ParameterSet &parset);
 
         /// Default destructor
@@ -102,9 +102,9 @@ class CasdaPolarisationEntry : public CatalogueEntry {
         /// The J2000 IAU-format name for the component
         std::string itsName;
         /// The RA in decimal degrees
-        casda::ValueError<double>  itsRA;
+        double itsRA;
         /// The Declination in decimal degrees
-        casda::ValueError<double>  itsDEC;
+        double itsDec;
 
         /// The band-median flux for the Stokes I spectrum
         double itsFluxImedian;

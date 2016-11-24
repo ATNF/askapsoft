@@ -46,9 +46,7 @@ namespace analysis {
 class MomentMapExtractor : public SourceDataExtractor {
     public:
         MomentMapExtractor() {};
-        MomentMapExtractor(const MomentMapExtractor& other);
         MomentMapExtractor(const LOFAR::ParameterSet& parset);
-        MomentMapExtractor& operator= (const MomentMapExtractor& other);
         virtual ~MomentMapExtractor() {};
 
         void extract();

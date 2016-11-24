@@ -1196,6 +1196,7 @@ void DuchampParallel::printResults()
         writer.writeIslandCatalogue();
         writer.writeComponentCatalogue();
         writer.writeHiEmissionCatalogue();
+        writer.writePolarisationCatalogue();
         writer.writeFitResults();
         writer.writeFitAnnotations();
         writer.writeComponentParset();

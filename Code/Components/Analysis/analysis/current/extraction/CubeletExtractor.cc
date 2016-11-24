@@ -84,20 +84,6 @@ CubeletExtractor::CubeletExtractor(const LOFAR::ParameterSet& parset):
 
 }
 
-CubeletExtractor::CubeletExtractor(const CubeletExtractor& other)
-{
-    this->operator=(other);
-}
-
-CubeletExtractor& CubeletExtractor::operator= (const CubeletExtractor& other)
-{
-    if (this == &other) return *this;
-    ((SourceDataExtractor &) *this) = other;
-    itsSpatialPad = other.itsSpatialPad;
-    itsSpectralPad = other.itsSpectralPad;
-    return *this;
-}
-
 void CubeletExtractor::defineSlicer()
 {
 

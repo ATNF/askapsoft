@@ -75,21 +75,6 @@ SpectralBoxExtractor::SpectralBoxExtractor(const LOFAR::ParameterSet& parset):
 
 }
 
-SpectralBoxExtractor::SpectralBoxExtractor(const SpectralBoxExtractor& other)
-{
-    this->operator=(other);
-}
-
-SpectralBoxExtractor& SpectralBoxExtractor::operator=(const SpectralBoxExtractor& other)
-{
-    if (this == &other) return *this;
-    ((SourceDataExtractor &) *this) = other;
-    itsBoxWidth = other.itsBoxWidth;
-    itsXloc = other.itsXloc;
-    itsYloc = other.itsYloc;
-    return *this;
-}
-
 void SpectralBoxExtractor::initialiseArray()
 {
     // Form itsArray and initialise to zero
@@ -221,6 +206,43 @@ void SpectralBoxExtractor::writeImage()
     } else ASKAPLOG_ERROR_STR(logger, "Could not open image");
 }
 
+
+casa::Array<Float> SpectralBoxExtractor::frequencies()
+{
+    casa::Vector<Float> freqs;
+    if (this->openInput() && itsSpcAxis) {
+        casa::IPosition shape(itsInputCubePtr->shape());
+        freqs=casa::Vector<Float>(shape(itsSpcAxis),0.);
+        int spcCoNum = itsInputCoords.findCoordinate(casa::Coordinate::SPECTRAL);
+        casa::SpectralCoordinate spcoo(itsInputCoords.spectralCoordinate(spcCoNum));
+        for(unsigned int i=0;i<shape(itsSpcAxis);i++){
+            Double pix=i;
+            Double freq;
+            ASKAPCHECK(spcoo.toWorld(freq,pix),
+                       "WCS conversion failed in calculating frequencies");
+            freqs[i]=freq;
+        }
+        this->closeInput();
+    } else ASKAPLOG_ERROR_STR(logger, "Could not open image");
+
+    return freqs;
+}
+
+std::string SpectralBoxExtractor::freqUnit()
+{
+    std::string unit;
+    if (this->openInput() && itsSpcAxis) {
+        int spcCoNum = itsInputCoords.findCoordinate(casa::Coordinate::SPECTRAL);
+        casa::SpectralCoordinate spcoo(itsInputCoords.spectralCoordinate(spcCoNum));
+        casa::Vector<casa::String> units=spcoo.worldAxisUnits();
+        if(units.size()>1){
+            ASKAPLOG_WARN_STR(logger, "Multiple units in spectral axis: " << units);
+        }
+        unit=units[0];
+        closeInput();
+    }
+    return unit;
+}
 
 }
 

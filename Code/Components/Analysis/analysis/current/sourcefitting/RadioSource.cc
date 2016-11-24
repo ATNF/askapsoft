@@ -953,6 +953,9 @@ bool RadioSource::fitGauss(casa::Matrix<casa::Double> &pos,
                       this->getXcentre() + this->getXOffset() << "," <<
                       this->getYcentre() + this->getYOffset() << ")");
 
+    ASKAPLOG_DEBUG_STR(logger, "pos="<<pos);
+    ASKAPLOG_DEBUG_STR(logger, "f="<<f);    
+
     if (this->getSpatialSize() < itsFitParams.minFitSize()) {
         ASKAPLOG_INFO_STR(logger, "Not fitting- source is too small - " <<
                           "spatial size = " << this->getSpatialSize() <<

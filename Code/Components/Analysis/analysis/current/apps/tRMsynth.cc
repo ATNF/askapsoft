@@ -72,7 +72,7 @@ int main(int argc, const char *argv[])
 
         //std::cout << freq << "\n" << lamsq << "\n";
 
-        const float RM = 120.;
+        const float RM = 137.3;
         const float phiZero = 0.;
         casa::Vector<float> phi = lamsq * RM + phiZero;
         casa::Vector<float> u = sin(2.F * phi);

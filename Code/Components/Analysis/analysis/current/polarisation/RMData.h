@@ -64,8 +64,8 @@ class RMData {
         const float polAngleZero_err() {return itsPolAngleZero_err;};
         const float fracPol() {return itsFracPol;};
         const float fracPol_err() {return itsFracPol_err;};
-        const float sNR() {return itsSNR;};
-        const float sNR_err() {return itsSNR_err;};
+        const float SNR() {return itsSNR;};
+        const float SNR_err() {return itsSNR_err;};
 
     private:
 

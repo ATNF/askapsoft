@@ -37,6 +37,7 @@
 #include <askap/AskapError.h>
 
 #include <polarisation/RMSynthesis.h>
+#include <polarisation/RMData.h>
 #include <Common/ParameterSet.h>
 #include <duchamp/Outputs/CatalogueSpecification.hh>
 #include <duchamp/Outputs/columns.hh>
@@ -52,70 +53,90 @@ namespace analysis {
 static const float defaultSNRthreshold = 8.0;
 static const float defaultDebiasThreshold = 5.0;
 
-CasdaPolarisationEntry::CasdaPolarisationEntry(const CasdaComponent &comp,
-        RMSynthesis &rmsynth,
-        const LOFAR::ParameterSet &parset):
+CasdaPolarisationEntry::CasdaPolarisationEntry(CasdaComponent *comp,
+                                               const LOFAR::ParameterSet &parset):
     CatalogueEntry(parset),
     itsDetectionThreshold(parset.getFloat("polThresholdSNR", defaultSNRthreshold)),
     itsDebiasThreshold(parset.getFloat("polThresholdDebias", defaultDebiasThreshold))
 {
-    const casa::Vector<casa::Complex> fdf = rmsynth.fdf();
-    casa::Vector<float> fdf_p = casa::amplitude(fdf);
-    const casa::Vector<float> phi_rmsynth = rmsynth.phi();
-    const float noise = rmsynth.fdf_noise();
-    const float RMSF_FWHM = rmsynth.rmsf_width();
-    const float lsqzero = rmsynth.refLambdaSq();
-    const unsigned int numChan = rmsynth.numFreqChan();
 
-    float minFDF, maxFDF;
-    casa::IPosition locMin, locMax;
-    casa::minMax<float>(minFDF, maxFDF, locMin, locMax, fdf_p);
+    itsRA = comp->ra();
+    itsDec = comp->dec();
+    itsName = comp->name();
+    itsComponentID = comp->componentID();
 
-    itsPintFitSNR.value() = maxFDF / noise;
-    itsFlagDetection = (itsPintFitSNR.value() > itsDetectionThreshold);
+    LOFAR::ParameterSet polParset=parset.makeSubset("RMSynthesis.");
+    
+    PolarisationData poldata(polParset);
+    poldata.initialise(comp);
 
-    if (itsFlagDetection) {
+    // Do the RM Synthesis, and calculate all parameters.
+    RMSynthesis rmsynth(polParset);
+    rmsynth.calculate(poldata);
+    RMData rmdata(polParset);
+    rmdata.calculate(&rmsynth);
 
-        itsPintPeak.value() = maxFDF;
-        itsPintPeak.error() = M_SQRT2 * fabs(itsPintPeak.value()) / noise;
-        itsPintPeakDebias = sqrt(maxFDF * maxFDF - 2.3 * noise);
+    casa::Unit cubeBunit=poldata.I().bunit();
+    const double intFluxScale =
+        casa::Quantum<float>(1.0,cubeBunit).getValue(casda::intFluxUnitContinuum);
 
-        itsPhiPeak.value() = phi_rmsynth(locMax);
-        itsPhiPeak.error() = RMSF_FWHM * noise / (2. * itsPintPeak.value());
+    itsFluxImedian = poldata.I().median() * intFluxScale;
+    itsFluxQmedian = poldata.Q().median() * intFluxScale;
+    itsFluxUmedian = poldata.U().median() * intFluxScale;
+    // itsFluxVmedian = poldata.V().median();
+    itsRmsI = poldata.I().medianNoise() * intFluxScale;
+    itsRmsQ = poldata.Q().medianNoise() * intFluxScale;
+    itsRmsU = poldata.U().medianNoise() * intFluxScale;
+    // itsRmsV = poldata.V().medianNoise();
+    itsPolyCoeff0 = comp->intFlux();
+    itsPolyCoeff1 = comp->alpha();
+    itsPolyCoeff2 = comp->beta();
+    itsPolyCoeff3 = itsPolyCoeff4 = 0.;
 
+    itsLambdaSqRef = rmsynth.refLambdaSq();
+    itsRmsfFwhm = rmsynth.rmsf_width();
 
-//      itsPolAngleRef.value() = 0.5 * casa::phase(fdf(locMax));  // THIS MAY NOT WORK - NEED TO CHECK
-        itsPolAngleRef.error() = 0.5 * noise / fabs(itsPintPeak.value());
+    itsPintPeak.value() = rmdata.pintPeak() * intFluxScale;
+    itsPintPeak.error() = rmdata.pintPeak_err() * intFluxScale;
+    itsPintPeakDebias = rmdata.pintPeakEff() * intFluxScale;
+    itsPintPeakFit.value() = rmdata.pintPeakFit() * intFluxScale;
+    itsPintPeakFit.error() = rmdata.pintPeakFit_err() * intFluxScale;
+    itsPintPeakFitDebias = rmdata.pintPeakFitEff() * intFluxScale;
 
-        itsPolAngleZero.value() = itsPolAngleRef.value() - itsPhiPeak.value() * lsqzero;
-        itsPolAngleZero.error() = (1. / (4.*(numChan - 2) * itsPintPeak.value() * itsPintPeak.value())) *
-                                  (float((numChan - 1) / numChan) + pow(lsqzero, 4) /
-                                   rmsynth.lsqVariance());
+    itsPintFitSNR.value() = rmdata.SNR();
+    itsPintFitSNR.error() = rmdata.SNR_err();
+    
+    itsPhiPeak.value() = rmdata.phiPeak();
+    itsPhiPeak.error() = rmdata.phiPeak_err();
+    itsPhiPeakFit.value() = rmdata.phiPeakFit();
+    itsPhiPeakFit.error() = rmdata.phiPeakFit_err();
 
-//      itsFracPol
-        // Need to get the Imodel into the RMSynth object somehow.
+    itsPolAngleRef.value() = rmdata.polAngleRef();
+    itsPolAngleRef.error() = rmdata.polAngleRef_err();
+    itsPolAngleZero.value() = rmdata.polAngleZero();
+    itsPolAngleZero.error() = rmdata.polAngleZero_err();
 
-    } else {
+    itsFracPol.value() = rmdata.fracPol();
+    itsFracPol.error() = rmdata.fracPol_err();
 
-        //itsPintPeak = maxFDF * itsDetectionThreshold;
-        itsPintPeak.value() = noise * itsDetectionThreshold;
-        itsPintPeakDebias = -1.;
+    /// @todo
+    itsComplexity = 0.;
+    itsComplexity_screen = 0.;
 
-
-
-
-    }
-
+    itsFlagDetection = rmdata.flagDetection();
+    itsFlagEdge = rmdata.flagEdge();
+    itsFlag3 = 0;
+    itsFlag4 = 0;
 }
 
 const float CasdaPolarisationEntry::ra()
 {
-    return itsRA.value();
+    return itsRA;
 }
 
 const float CasdaPolarisationEntry::dec()
 {
-    return itsDEC.value();
+    return itsDec;
 }
 
 
@@ -139,9 +160,9 @@ void CasdaPolarisationEntry::printTableEntry(std::ostream &stream,
     } else if (type == "NAME") {
         column.printEntry(stream, itsName);
     } else if (type == "RAJD") {
-        column.printEntry(stream, itsRA.value());
+        column.printEntry(stream, itsRA);
     } else if (type == "DECJD") {
-        column.printEntry(stream, itsDEC.value());
+        column.printEntry(stream, itsDec);
     } else if (type == "IFLUX") {
         column.printEntry(stream, itsFluxImedian);
     } else if (type == "QFLUX") {
@@ -234,9 +255,9 @@ void CasdaPolarisationEntry::checkCol(duchamp::Catalogues::Column &column)
     } else if (type == "NAME") {
         column.check(itsName);
     } else if (type == "RAJD") {
-        column.check(itsRA.value());
+        column.check(itsRA);
     } else if (type == "DECJD") {
-        column.check(itsDEC.value());
+        column.check(itsDec);
     } else if (type == "IFLUX") {
         column.check(itsFluxImedian);
     } else if (type == "QFLUX") {

@@ -29,7 +29,7 @@
 #ifndef ASKAP_ANALYSIS_RM_SYNTHESIS_H_
 #define ASKAP_ANALYSIS_RM_SYNTHESIS_H_
 
-// #include <polarisation/PolarisationData.h>
+#include <polarisation/PolarisationData.h>
 
 #include <casacore/casa/Arrays/Vector.h>
 #include <casacore/casa/BasicSL/Complex.h>
@@ -49,13 +49,12 @@ class RMSynthesis {
         explicit RMSynthesis(const LOFAR::ParameterSet &parset);
         virtual ~RMSynthesis() {};
 
-// **not yet implemented fully**
-//     /// @details Takes the PolarisationData object, which
-//     /// contains the I,Q,U spectra and the QU noise spectrum,
-//     /// and the lambda-squared array, and calls the main
-//     /// calculate function on those arrays to perform RM
-//     /// synthesis.
-//      void calculate(PolarisationData &poldata);
+    /// @details Takes the PolarisationData object, which
+    /// contains the I,Q,U spectra and the QU noise spectrum,
+    /// and the lambda-squared array, and calls the main
+    /// calculate function on those arrays to perform RM
+    /// synthesis.
+     void calculate(PolarisationData &poldata);
 
         /// @details Takes the lambda-squared array and corresponding
         /// Q &U spectra and QU noise spectrum, and defines the
@@ -83,12 +82,17 @@ class RMSynthesis {
         const unsigned int numPhiChan() {return itsNumPhiChan;};
         const float deltaPhi() {return itsDeltaPhi;};
 
+    const casa::Vector<float> &imod(){return itsImod;};
+
         const casa::Vector<casa::Complex> &fdf() {return itsFaradayDF;};
         const casa::Vector<float> &phi() {return itsPhi;};
         const casa::Vector<casa::Complex> &rmsf() {return itsRMSF;};
         const casa::Vector<float> &phi_rmsf() {return itsPhiForRMSF;};
         const float rmsf_width() {return itsRMSFwidth;};
         const float refLambdaSq() {return itsRefLambdaSquared;};
+
+    void setImodel(casa::Vector<float> model){itsImod=model;};
+    const float Imodel_refLambdaSq();
 
         const float normalisation() {return itsNormalisation;};
         const float fdf_noise() {return itsFDFnoise;};
@@ -104,7 +108,8 @@ class RMSynthesis {
         casa::Vector<float> itsWeights;
         std::string itsWeightType;
         float itsNormalisation;
-        float itsLambdaSquaredVariance;
+    casa::Vector<float> itsLamSq;
+    float itsLambdaSquaredVariance;
 
         unsigned int itsNumPhiChan;
         float itsDeltaPhi;
@@ -113,9 +118,11 @@ class RMSynthesis {
 
         casa::Vector<casa::Complex> itsFaradayDF;
 
-/// The average of the provided noise spectrum, scaled by sqrt(num_freq_chan)
+    /// The average of the provided noise spectrum, scaled by sqrt(num_freq_chan)
         float itsFDFnoise;
 
+    casa::Vector<float> itsImod;
+    
         casa::Vector<float> itsPhiDouble;
 
         casa::Vector<float> itsPhiForRMSF;

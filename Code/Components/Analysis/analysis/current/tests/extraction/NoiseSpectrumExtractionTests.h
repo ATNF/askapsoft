@@ -75,6 +75,9 @@ class NoiseSpectrumExtractionTest : public CppUnit::TestFixture {
     void setUp()
         {
 
+            ASKAPLOG_DEBUG_STR(logger, "=================================");
+            ASKAPLOG_DEBUG_STR(logger, "=== NOISE EXTRACTION TEST : setUp");
+            
             tempImage = "tempImageForNoiseExtractionTest";
             outfile = "tempOutputFromNoiseExtractionTest";
             basePolList = "Q";
@@ -168,6 +171,8 @@ class NoiseSpectrumExtractionTest : public CppUnit::TestFixture {
 
         void readParset()
         {
+            ASKAPLOG_DEBUG_STR(logger, "======================================");
+            ASKAPLOG_DEBUG_STR(logger, "=== NOISE EXTRACTION TEST : readParset");
             extractor = NoiseSpectrumExtractor(parset);
             CPPUNIT_ASSERT(extractor.inputCube() == tempImage);
             CPPUNIT_ASSERT(extractor.outputFileBase() == outfile);
@@ -184,6 +189,8 @@ class NoiseSpectrumExtractionTest : public CppUnit::TestFixture {
 
         void loadSource()
         {
+            ASKAPLOG_DEBUG_STR(logger, "======================================");
+            ASKAPLOG_DEBUG_STR(logger, "=== NOISE EXTRACTION TEST : loadSource");
             extractor = NoiseSpectrumExtractor(parset);
             extractor.setSource(&object);
             std::string shouldget = outfile + "_1";
@@ -192,6 +199,8 @@ class NoiseSpectrumExtractionTest : public CppUnit::TestFixture {
 
         void extractSpectrum()
         {
+            ASKAPLOG_DEBUG_STR(logger, "===========================================");
+            ASKAPLOG_DEBUG_STR(logger, "=== NOISE EXTRACTION TEST : extractSpectrum");
             extractor = NoiseSpectrumExtractor(parset);
             extractor.setSource(&object);
             float madfm[5] = {0, 0, 0, 4, 4};
@@ -211,6 +220,8 @@ class NoiseSpectrumExtractionTest : public CppUnit::TestFixture {
 
         void tearDown()
         {
+            ASKAPLOG_DEBUG_STR(logger, "====================================");
+            ASKAPLOG_DEBUG_STR(logger, "=== NOISE EXTRACTION TEST : tearDown");
             std::stringstream ss;
             ss << "rm -rf " << tempImage;
             system(ss.str().c_str());

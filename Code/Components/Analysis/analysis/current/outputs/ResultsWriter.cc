@@ -40,6 +40,7 @@
 #include <catalogues/IslandCatalogue.h>
 #include <catalogues/ComponentCatalogue.h>
 #include <catalogues/HiEmissionCatalogue.h>
+#include <catalogues/RMCatalogue.h>
 #include <catalogues/FitCatalogue.h>
 
 #include <duchamp/Cubes/cubes.hh>
@@ -147,6 +148,19 @@ void ResultsWriter::writeHiEmissionCatalogue()
     if (itsParset.getBool("HiEmissionCatalogue", false)) {
 
         HiEmissionCatalogue cat(itsSourceList, itsParset, itsCube);
+        cat.write();
+
+    }
+
+}
+
+
+void ResultsWriter::writePolarisationCatalogue()
+{
+
+    if (itsParset.getBool("RMSynthesis", false)) {
+
+        RMCatalogue cat(itsSourceList, itsParset, itsCube);
         cat.write();
 
     }

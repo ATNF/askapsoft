@@ -33,6 +33,8 @@
 #include <askap/AskapLogging.h>
 #include <askap/AskapError.h>
 
+#include <mathsutils/MathsUtils.h>
+
 #include <casacore/casa/Arrays/Vector.h>
 #include <casacore/casa/Arrays/Matrix.h>
 #include <casacore/casa/Arrays/ArrayMath.h>
@@ -55,7 +57,30 @@ RMData::RMData(const LOFAR::ParameterSet &parset):
     itsDetectionThreshold(parset.getFloat("polThresholdSNR", defaultSNRthreshold)),
     itsDebiasThreshold(parset.getFloat("polThresholdDebias", defaultDebiasThreshold))
 {
+    itsPintPeak=0.;
+    itsPintPeak_err=0.;
+    itsPintPeakEff=0.;
+    itsPhiPeak=0.;
+    itsPhiPeak_err=0.;
+    itsPintPeakFit=0.;
+    itsPintPeakFit_err=0.;
+    itsPintPeakFitEff=0.;
+    itsPhiPeakFit=0.;
+    itsPhiPeakFit_err=0.;
 
+    itsFlagDetection=false;
+    itsFlagEdge=false;
+
+    itsPolAngleRef=0.;
+    itsPolAngleRef_err=0.;
+    itsPolAngleZero=0.;
+    itsPolAngleZero_err=0.;
+
+    itsFracPol=0.;
+    itsFracPol_err=0.;
+
+    itsSNR=0.;
+    itsSNR_err=0.;
 }
 
 void RMData::calculate(RMSynthesis *rmsynth)
@@ -68,9 +93,12 @@ void RMData::calculate(RMSynthesis *rmsynth)
     const float lsqzero = rmsynth->refLambdaSq();
     const unsigned int numChan = rmsynth->numFreqChan();
 
+    ASKAPLOG_DEBUG_STR(logger, fdf_p);
+    
     float minFDF, maxFDF;
     casa::IPosition locMin, locMax;
     casa::minMax<float>(minFDF, maxFDF, locMin, locMax, fdf_p);
+    ASKAPLOG_DEBUG_STR(logger, "minFDF="<<minFDF<< ", maxFDF="<<maxFDF);
 
     itsSNR = maxFDF / noise;
     itsFlagDetection = (itsSNR > itsDetectionThreshold);
@@ -78,23 +106,43 @@ void RMData::calculate(RMSynthesis *rmsynth)
     if (itsFlagDetection) {
 
         itsPintPeak = maxFDF;
-        itsPintPeak_err = M_SQRT2 * fabs(itsPintPeak) / noise;
+        itsPintPeak_err = noise;
         itsPintPeakEff = sqrt(maxFDF * maxFDF - 2.3 * noise);
 
         itsPhiPeak = phi_rmsynth(locMax);
         itsPhiPeak_err = RMSF_FWHM * noise / (2. * itsPintPeak);
 
+        // Fitting
+        if (locMax>0 && locMax<(fdf_p.size()-1) ){
 
-//      itsPolAngleRef = 0.5 * casa::phase(fdf(locMax));  // THIS MAY NOT WORK - NEED TO CHECK
-        itsPolAngleRef_err = 0.5 * noise / fabs(itsPintPeak);
+            std::vector<float> fit =
+                analysisutilities::fit3ptParabola(phi_rmsynth(locMax-1),fdf_p(locMax-1),
+                                                  phi_rmsynth(locMax),fdf_p(locMax),
+                                                  phi_rmsynth(locMax+1),fdf_p(locMax+1));
+            
+            itsPintPeakFit = fit[2]-(fit[1]*fit[1])/(4. * fit[0]);
+            itsPhiPeakFit = -1. * fit[1] / (2. * fit[0]);
+            // @todo The following is wrong, I think - should be normalised by the SNR, not the noise.
+            // Check Condon+98
+            //itsPintPeakFit_err = M_SQRT2 * fabs(itsPintPeakFit) / noise;
+            itsPintPeakFit_err = noise;
+            itsPhiPeakFit_err = RMSF_FWHM * noise / (2. * itsPintPeakFit);
+
+        }
+        
+
+        itsPolAngleRef = 0.5 * casa::arg(fdf(locMax)) * 180./M_PI;  
+        itsPolAngleRef_err = 0.5 * noise / fabs(itsPintPeak) * 180./M_PI;
 
         itsPolAngleZero = itsPolAngleRef - itsPhiPeak * lsqzero;
         itsPolAngleZero_err = (1. / (4.*(numChan - 2) * itsPintPeak * itsPintPeak)) *
-                              (float((numChan - 1) / numChan) + pow(lsqzero, 4) /
-                               rmsynth->lsqVariance());
+            (float((numChan - 1) / numChan) + pow(lsqzero, 4) /
+             rmsynth->lsqVariance());
 
-//      itsFracPol
-        // Need to get the Imodel into the RMSynth object somehow.
+
+        
+        itsFracPol = itsPintPeak / rmsynth->Imodel_refLambdaSq();
+        itsFracPol_err = sqrt(itsPintPeak_err*itsPintPeak_err + noise*noise);
 
     } else {
 
@@ -126,6 +174,18 @@ void RMData::printSummary()
                   << itsPhiPeak_err << std::endl;
         std::cout << "Peak Polarised intensity (effective) = "
                   << itsPintPeakEff << std::endl;
+        std::cout << "Fitted Peak Polarised intensity = "
+                  << itsPintPeakFit << std::endl;
+        std::cout << "Fitted Peak Polarised intensity (error) = "
+                  << itsPintPeakFit_err << std::endl;
+        std::cout << "RM of Fitted Peak Polarised intensity = "
+                  << itsPhiPeakFit << std::endl;
+        std::cout << "RM of Fitted Peak Polarised intensity (error) = "
+                  << itsPhiPeakFit_err << std::endl;
+        std::cout << "Pol. angle reference = "
+                  << itsPolAngleRef << std::endl;
+        std::cout << "Pol. angle reference (error) = "
+                  << itsPolAngleRef_err << std::endl;
 
     } else {
 
