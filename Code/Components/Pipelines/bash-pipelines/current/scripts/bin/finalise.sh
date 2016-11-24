@@ -1,7 +1,7 @@
 #!/bin/bash -l
 #
 # This script takes care of tasks that need to be run either upon
-# completion of all jobs from a single processBETA.sh call, or can be
+# completion of all jobs from a single processASKAP.sh call, or can be
 # run once all jobs have been submitted to the queue (and hence their
 # job IDs are known). 
 # Included here are:
@@ -43,7 +43,7 @@ if [ $SUBMIT_JOBS == true ] && [ "${ALL_JOB_IDS}" != "" ]; then
     cat > $reportscript <<EOF
 #!/bin/bash -l
 #
-# A script to report progress on all jobs associated with a given call of processBETA.sh.
+# A script to report progress on all jobs associated with a given call of processASKAP.sh.
 # It will run squeue just on the appropriate job IDs, showing those that have not yet completed.
 # Providing the '-v' option will also show a list of jobs with detailed descriptions.
 #
@@ -82,7 +82,7 @@ EOF
 #!/bin/bash -l
 #
 # A simple script to run scancel on all jobs associated with a 
-# given call of processBETA.sh
+# given call of processASKAP.sh
 #
 
 echo "This will run scancel on all remaining jobs (run 'reportProgress.sh' to see them)."

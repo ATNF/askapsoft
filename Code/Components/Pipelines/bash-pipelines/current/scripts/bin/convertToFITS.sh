@@ -2,7 +2,7 @@
 #
 # Launches a job to convert any CASA images into FITS
 # format. This job is launched as an array job, with one job for each
-# potential image (this list is defined when the processBETA script is
+# potential image (this list is defined when the processASKAP script is
 # called, so the CASA images don't necessarily exist - if they don't
 # exist at run-time, nothing is done by that individual job).
 # The FITS headers are populated with the PROJECT keyword.

@@ -1,6 +1,6 @@
 #!/bin/bash -l
 #
-# Front-end script to run BETA processing.
+# Front-end script to run ASKAP processing.
 # This handles the bandpass calibration from individual-beam
 #  observations of 1934-638, and applies them to a "science"
 #  observation, that is then averaged and imaged, optionally with 
@@ -9,10 +9,8 @@
 #  defined in scripts/defaultConfig.sh. The user needs to define the 
 #  scheduling block numbers of the datasets to be used, or to provide
 #  the filenames of specific measurement sets.
-# The scripts that this front-end makes use of are kept in the 
-#  askapsoft/ subdirectory of the ACES subversion repository.
 #
-# @copyright (c) 2015 CSIRO
+# @copyright (c) 2016 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -37,7 +35,7 @@
 # @author Matthew Whiting <Matthew.Whiting@csiro.au>
 #
 
-USAGE="processBETA.sh -c <config file>"
+USAGE="processASKAP.sh -c <config file>"
 
 if [ "${PIPELINEDIR}" == "" ]; then
     

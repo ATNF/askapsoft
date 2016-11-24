@@ -4,7 +4,7 @@
 # for archiving. This local script is needed as we need to know which
 # images are present when we actually execute various jobs (such as
 # the thumbnail creation & the casdaupload), rather than when we run
-# processBETA.
+# processASKAP.
 #
 # @copyright (c) 2016 CSIRO
 # Australia Telescope National Facility (ATNF)
