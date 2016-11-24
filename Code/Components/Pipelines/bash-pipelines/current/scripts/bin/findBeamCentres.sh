@@ -72,136 +72,135 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$needBeams" == "true" ]; then
         defaultFPangle=${BEAM_FOOTPRINT_PA}
     fi
     
-    # Check to see that the footprint provided is valid.
-    invalid=false
-    if [ "${BEAM_FOOTPRINT_NAME}" == "" ] ||
-           [ "`footprint.py -n ${BEAM_FOOTPRINT_NAME} 2>&1 | grep invalid`" != "" ]; then
-        invalid=true
+
+    # Find the number of fields in the MS
+    nfields=`grep Fields ${MS_METADATA} | head -1 | cut -f 4- | cut -d' ' -f 2`
+    getMSname ${MS_INPUT_SCIENCE}
+    fieldlist=${metadata}/fieldlist-${msname}.txt
+    if [ ! -e $fieldlist ]; then
+        grep -A${nfields} RA ${MS_METADATA} | tail -n ${nfields} | cut -f 4- >> $fieldlist
     fi
+
+    FIELD_LIST=""
+    TILE_LIST=""
+    for FIELD in `sort -k2 $fieldlist | awk '{print $2}' | uniq `;
+    do
+        FIELD_LIST="$FIELD_LIST $FIELD"
+        getTile
+        if [ $FIELD != $TILE ]; then
+            isNew=true
+            for THETILE in $TILE_LIST; do
+                if [ $TILE == $THETILE ]; then
+                    isNew=false
+                fi
+            done
+            if [ $isNew == true ]; then
+                TILE_LIST="$TILE_LIST $TILE"
+            fi
+        fi
+    done
     
-    if [ "$invalid" == "true" ]; then
-        echo "ERROR - Your requested footprint ${BEAM_FOOTPRINT_NAME} is not valid."
-        if [ ${IMAGE_AT_BEAM_CENTRES} == true ]; then
-            echo "      Not running - change your config file."
-            SUBMIT_JOBS=false
+    echo "List of fields: "
+    COUNT=0
+    for FIELD in ${FIELD_LIST}; do
+        ID=`echo $COUNT | awk '{printf "%02d",$1}'`
+        echo "${ID} - ${FIELD}"
+        COUNT=`expr $COUNT + 1`
+    done
+    
+    for FIELD in ${FIELD_LIST}; do
+        echo "Finding footprint for field $FIELD"
+        
+        ra=`grep $FIELD $fieldlist | awk '{print $3}' | head -1`
+        dec=`grep $FIELD $fieldlist | awk '{print $4}' | head -1`
+        dec=`echo $dec | awk -F'.' '{printf "%s:%s:%s.%s",$1,$2,$3,$4}'`
+
+        if [ "${IS_BETA}" != "true" ]; then
+            awkcomp="\$3==\"$FIELD\""
+            srcstr=`awk $awkcomp $sbinfo | awk -F".field_name" '{print $1}'`
+            FP_NAME=`grep "$srcstr.footprint.name" $sbinfo | awk '{print $3}'`
+            FP_PITCH=`grep "$srcstr.footprint.pitch" $sbinfo | awk '{print $3}'`
+            FP_PA=`grep "$srcstr.pol_axis" $sbinfo | awk '{print $4}' | sed -e 's/\]//g'`
+        fi
+        
+        if [ "$FP_NAME" == "" ]; then
+            FP_NAME=$defaultFPname
+        fi
+        if [ "$FP_PITCH" == "" ]; then
+            FP_PITCH=$defaultFPpitch
+        fi
+        if [ "$FP_PA" == "" ]; then
+            FP_PA=$defaultFPangle
         else
-            if [ "${DO_MOSAIC}" == "true" ]; then
-                echo "      Setting DO_MOSAIC to false."
-            fi
-        fi
-        
-    else
-
-        # Find the number of fields in the MS
-        nfields=`grep Fields ${MS_METADATA} | head -1 | cut -f 4- | cut -d' ' -f 2`
-        getMSname ${MS_INPUT_SCIENCE}
-        fieldlist=${metadata}/fieldlist-${msname}.txt
-        if [ ! -e $fieldlist ]; then
-            grep -A${nfields} RA ${MS_METADATA} | tail -n ${nfields} | cut -f 4- >> $fieldlist
+            FP_PA=`echo $FP_PA $defaultFPangle | awk '{print $1+$2}'`
         fi
 
-        FIELD_LIST=""
-        TILE_LIST=""
-        for FIELD in `sort -k2 $fieldlist | awk '{print $2}' | uniq `;
-        do
-            FIELD_LIST="$FIELD_LIST $FIELD"
-            getTile
-            if [ $FIELD != $TILE ]; then
-                isNew=true
-                for THETILE in $TILE_LIST; do
-                    if [ $TILE == $THETILE ]; then
-                        isNew=false
-                    fi
-                done
-                if [ $isNew == true ]; then
-                    TILE_LIST="$TILE_LIST $TILE"
-                fi
-            fi
-        done
-        
-        echo "List of fields: "
-        COUNT=0
-        for FIELD in ${FIELD_LIST}; do
-            ID=`echo $COUNT | awk '{printf "%02d",$1}'`
-            echo "${ID} - ${FIELD}"
-            COUNT=`expr $COUNT + 1`
-        done
-        
-        for FIELD in ${FIELD_LIST}; do
-            echo "Finding footprint for field $FIELD"
-            
-            ra=`grep $FIELD $fieldlist | awk '{print $3}' | head -1`
-            dec=`grep $FIELD $fieldlist | awk '{print $4}' | head -1`
-            dec=`echo $dec | awk -F'.' '{printf "%s:%s:%s.%s",$1,$2,$3,$4}'`
-
-            if [ "${IS_BETA}" != "true" ]; then
-                awkcomp="\$3==\"$FIELD\""
-                srcstr=`awk $awkcomp $sbinfo | awk -F".field_name" '{print $1}'`
-                FP_NAME=`grep "$srcstr.footprint.name" $sbinfo | awk '{print $3}'`
-                FP_PITCH=`grep "$srcstr.footprint.pitch" $sbinfo | awk '{print $3}'`
-                FP_PA=`grep "$srcstr.pol_axis" $sbinfo | awk '{print $4}' | sed -e 's/\]//g'`
-            fi
-            
-            if [ "$FP_NAME" == "" ]; then
-                FP_NAME=$defaultFPname
-            fi
-            if [ "$FP_PITCH" == "" ]; then
-                FP_PITCH=$defaultFPpitch
-            fi
-            if [ "$FP_PA" == "" ]; then
-                FP_PA=$defaultFPangle
+        # Check to see whether the footprint name is used by ASKAPCLI/footprint
+        beamFromCLI=true
+        if [ "${IS_BETA}" == "true" ] || [ "`grep $FP_NAME ${tmpfp}`" == "" ]; then
+            beamFromCLI=false
+            if [ "${IS_BETA}" == "true" ]; then
+                echo "Using the ACES footprint.py tool for BETA data"
             else
-                FP_PA=`echo $FP_PA $defaultFPangle | awk '{print $1+$2}'`
+                echo "Footprint name $FP_NAME is not recognised by askapcli/footprint. Using the ACES footprint.py tool"
             fi
-
-            # Check to see whether the footprint name is used by ASKAPCLI/footprint
-            beamFromCLI=true
-            if [ "${IS_BETA}" == "true" ] || [ "`grep $FP_NAME ${tmpfp}`" == "" ]; then
-                beamFromCLI=false
-                if [ "${IS_BETA}" == "true" ]; then
-                    echo "Using the ACES footprint.py tool for BETA data"
-                else
-                    echo "Footprint name $FP_NAME is not recognised by askapcli/footprint. Using the ACES footprint.py tool"
-                fi
-                if [ "`which footprint.py 2> ${tmp}/whchftprnt`" == "" ]; then
-	            # If we are here, footprint.py is not in our path. Give an
-	            # error message and turn off linmos
-                    
-                    if [ "${DO_MOSAIC}" == "true" ]; then
-	                echo "ERROR - Cannot find 'footprint.py', so cannot determine beam arrangement. 
+            if [ "`which footprint.py 2> ${tmp}/whchftprnt`" == "" ]; then
+	        # If we are here, footprint.py is not in our path. Give an
+	        # error message and turn off linmos
+                
+                if [ "${DO_MOSAIC}" == "true" ]; then
+	            echo "ERROR - Cannot find 'footprint.py', so cannot determine beam arrangement. 
       Setting DO_MOSAIC=false."  
-	                DO_MOSAIC=false
-                    fi
-                    
-                    if [ "$IMAGE_AT_BEAM_CENTRES" == "true" ]; then
-                        echo "ERROR - Cannot find 'footprint.py', so cannot set beam centres. 
+	            DO_MOSAIC=false
+                fi
+                
+                if [ "$IMAGE_AT_BEAM_CENTRES" == "true" ]; then
+                    echo "ERROR - Cannot find 'footprint.py', so cannot set beam centres. 
       Not running - you may want to find footprint.py or               change your config file."
-                        SUBMIT_JOBS=false
-                    fi
+                    SUBMIT_JOBS=false
                 fi
             fi
+        fi
 
-            # define the output file as $footprintOut
-            setFootprintFile
-            
-            # If the footprint output file exists, we don't re-run footprint.py.
-            # The only exception to that is if it exists but is empty - a previous footprint
-            # run might have failed, so we try again
-            if [ -e ${footprintOut} ] && [ `wc -l $footprintOut | awk '{print $1}'` -gt 0 ]; then
-                echo "Reusing footprint file $footprintOut for field $FIELD"
-            else
-                if [ -e ${footprintOut} ]; then
-                    rm -f $footprintOut
+        # define the output file as $footprintOut
+        setFootprintFile
+        
+        # If the footprint output file exists, we don't re-run footprint.py.
+        # The only exception to that is if it exists but is empty - a previous footprint
+        # run might have failed, so we try again
+        if [ -e ${footprintOut} ] && [ `wc -l $footprintOut | awk '{print $1}'` -gt 0 ]; then
+            echo "Reusing footprint file $footprintOut for field $FIELD"
+        else
+            if [ -e ${footprintOut} ]; then
+                rm -f $footprintOut
+            fi
+            echo "Writing footprint for field $FIELD to file $footprintOut"
+            if [ $beamFromCLI == true ]; then 
+                footprintArgs="-d $ra,$dec -p $FP_PITCH"
+                if [ "$FP_PA" != "" ]; then
+                    footprintArgs="$footprintArgs -r $FP_PA"
                 fi
-                echo "Writing footprint for field $FIELD to file $footprintOut"
-                if [ $beamFromCLI == true ]; then 
-                    footprintArgs="-d $ra,$dec -p $FP_PITCH"
-                    if [ "$FP_PA" != "" ]; then
-                        footprintArgs="$footprintArgs -r $FP_PA"
+                module load askapcli
+                footprint calculate $footprintArgs $FP_NAME 2>&1 > ${footprintOut}
+                module unload askapcli
+            else
+                # Check to see that the footprint provided is valid
+                # (ie. recognised by footprint.py
+                module load aces
+                invalidTest=`footprint.py -n ${BEAM_FOOTPRINT_NAME} 2>&1 | grep invalid`
+                module unload aces
+                if [ "${FP_NAME}" == "" ] || [ "${invalidTest}" != "" ]; then
+                    # We don't have a valid footprint name!
+                    echo "ERROR - Your requested footprint ${BEAM_FOOTPRINT_NAME} is not valid."
+                    if [ ${IMAGE_AT_BEAM_CENTRES} == true ]; then
+                        echo "      Not running - change your config file."
+                        SUBMIT_JOBS=false
+                    else
+                        if [ "${DO_MOSAIC}" == "true" ]; then
+                            echo "      Setting DO_MOSAIC to false."
+                        fi
                     fi
-                    module load askapcli
-                    footprint calculate $footprintArgs $FP_NAME 2>&1 > ${footprintOut}
-                    module unload askapcli
+                    
                 else
                     # Use the function defined in utils.sh to set the arguments to footprint.py
                     setFootprintArgs
@@ -209,26 +208,25 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$needBeams" == "true" ]; then
                     footprint.py $footprintArgs -r "$ra,$dec" 2>&1 > ${footprintOut}
                     module unload aces
                 fi
-
             fi
+        fi
 
-            # error handling, in case something goes wrong.
-            if [ `wc -l $footprintOut | awk '{print $1}'` -eq 0 ]; then
-                # Something has failed with footprint
-                echo "ERROR - The footprint command has failed."
-                if [ "${IMAGE_AT_BEAM_CENTRES}" == "true" ]; then
-                    echo "      Not running the pipeline."
-                    SUBMIT_JOBS=false
-                else
-                    if [ "${DO_MOSAIC}" == "true" ]; then
-                        echo "      Setting DO_MOSAIC to false."
-                    fi
+        # error handling, in case something goes wrong.
+        if [ `wc -l $footprintOut | awk '{print $1}'` -eq 0 ]; then
+            # Something has failed with footprint
+            echo "ERROR - The footprint command has failed."
+            if [ "${IMAGE_AT_BEAM_CENTRES}" == "true" ]; then
+                echo "      Not running the pipeline."
+                SUBMIT_JOBS=false
+            else
+                if [ "${DO_MOSAIC}" == "true" ]; then
+                    echo "      Setting DO_MOSAIC to false."
                 fi
-
             fi
-            
-        done
 
-    fi
+        fi
+        
+    done
 
 fi
+
