@@ -152,6 +152,17 @@ const float chisqProb(const float ndof, const float chisq);
 const std::vector<Double>
 deconvolveGaussian(const casa::Gaussian2D<Double> &measured, duchamp::Beam beam);
 
+
+/// @brief Fit a quadratic analytically to three points.
+/// @details Directly calculates the parabola of the form y = Ax^2 +
+/// Bx + C that goest through the three points given. The vectors may
+/// have sizes larger than three, but only the first three points in
+/// each are used. The returned vector is of size three, in order of
+/// [A,B,C].
+template <class T>
+std::vector<T> fit3ptParabola(const T x0, const T y0, const T x1, const T y1, const T x2, const T y2);
+
+
 }
 
 }

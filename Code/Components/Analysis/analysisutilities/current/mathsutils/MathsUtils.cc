@@ -395,6 +395,30 @@ deconvolveGaussian(const casa::Gaussian2D<Double> &measured, duchamp::Beam beam)
 
 }
 
+template <class T>
+std::vector<T> fit3ptParabola(const T x0, const T y0, const T x1, const T y1, const T x2, const T y2)
+{
+
+    ASKAPLOG_DEBUG_STR(logger, "Fitting parabola to " << x0 << "," << y0 << " " <<
+                       x1<<","<<y1<<" " << x2<<","<<y2);
+    
+    T det = (x0-x1) * (x0-x2) * (x1-x2);
+
+    T a = (y0*(x1-x2) + y1*(x2-x0) + y2*(x0-x1)) / det;
+    T b = (y0*(x2-x1)*(x2+x1) + y1*(x0-x2)*(x0+x2) + y2*(x1-x0)*(x1+x0)) / det;
+    T c = (y0*x1*x2*(x1-x2) + y1*x0*x2*(x2-x0) + y2*x0*x1*(x0-x1)) / det;
+
+    std::vector<T> solution(3);
+    solution[0]=a;
+    solution[1]=b;
+    solution[2]=c;
+    ASKAPLOG_DEBUG_STR(logger, "Result for Ax^2+Bx+C is A=" << a <<", B="<<b <<", C="<<c);
+    return solution;
+
+}
+template std::vector<float> fit3ptParabola(const float x0, const float y0, const float x1, const float y1, const float x2, const float y2);
+template std::vector<double> fit3ptParabola(const double x0, const double y0, const double x1, const double y1, const double x2, const double y2);
+
 
 }
 
