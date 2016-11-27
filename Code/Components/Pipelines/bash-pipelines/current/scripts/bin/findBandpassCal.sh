@@ -146,7 +146,7 @@ if [ \${PLOT_CALTABLE} == true ]; then
     module load casa
     NCORES=1
     NPPN=1
-    aprun -n \${NCORES -N \${NPPN} -b casa --nogui --nologger --log2term -c \${scriptCommand} > \${log}
+    aprun -n \${NCORES} -N \${NPPN} -b casa --nogui --nologger --log2term -c \${scriptCommand} > \${log}
     module unload casa
     err=\$?
     rejuvenate ${TABLE_BANDPASS}*
