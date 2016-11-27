@@ -18,7 +18,7 @@ the ASKAP Central Processor platform.
    BandpassCalibrator.rst
    ScienceFieldPreparation.rst
    ScienceFieldContinuumImaging.rst
-   ScienceFieldContinuumMosaicking.rst
+   ScienceFieldMosaicking.rst
    ContinuumSourcefinding.rst
    ScienceFieldSpectralLineImaging.rst
    archiving.rst

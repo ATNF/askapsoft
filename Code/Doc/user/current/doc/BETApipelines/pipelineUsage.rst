@@ -97,7 +97,7 @@ parset parameter than the environment variable maps to is given.
 * :doc:`BandpassCalibrator`
 * :doc:`ScienceFieldPreparation`
 * :doc:`ScienceFieldContinuumImaging`
-* :doc:`ScienceFieldContinuumMosaicking`
+* :doc:`ScienceFieldMosaicking`
 * :doc:`ContinuumSourcefinding`
 * :doc:`ScienceFieldSpectralLineImaging`
 * :doc:`archiving`

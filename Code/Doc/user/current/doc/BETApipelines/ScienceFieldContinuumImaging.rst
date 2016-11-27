@@ -22,7 +22,7 @@ do this, the *footprint.py* tool is used to determine the locations of
 the centres of each beam. The footprint specification is determined
 preferentially from the scheduling block parset, or (if not available
 there) from the parameters described at
-:doc:`ScienceFieldContinuumMosaicking`. To use this mode, set
+:doc:`ScienceFieldMosaicking`. To use this mode, set
 ``IMAGE_AT_BEAM_CENTRES=true``. 
 
 When setting the gridding parameters, note that the gridder is
