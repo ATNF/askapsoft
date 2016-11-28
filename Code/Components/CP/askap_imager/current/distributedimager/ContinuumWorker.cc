@@ -196,10 +196,10 @@ void ContinuumWorker::run(void)
         this->baseFrequency = advice.getBaseFrequencyAllocation(itsComms.rank()-1);
     }
     ASKAPLOG_INFO_STR(logger,"Adding missing parameters");
-    
+
     advice.addMissingParameters();
 
-    if (workUnits.size()>=1) {
+    if (workUnits.size()>=1 || itsComms.isWriter()) {
 
         try {
             processChannels();
@@ -323,7 +323,7 @@ ContinuumWorker::processSnapshot(LOFAR::ParameterSet& unitParset)
 }
 void ContinuumWorker::buildSpectralCube() {
 
-    ASKAPLOG_DEBUG_STR(logger,"Processing multiple channels local solver mode");
+    ASKAPLOG_INFO_STR(logger,"Processing multiple channels local solver mode");
     /// This is the spectral cube builder
     /// it marshalls the following tasks:
     /// 1. building a spectral cube image
@@ -354,9 +354,6 @@ void ContinuumWorker::buildSpectralCube() {
     /// nchanperwriter is an estimate - some channels, especially at the edges may not exist
     /// these will remain blank in the output cube
 
-    ASKAPLOG_INFO_STR(logger,"Configuring Spectral Cube");
-    ASKAPLOG_INFO_STR(logger,"nchan: " << nchanperwriter << " base f0: " << f0.getValue("MHz")
-    << " width: " << freqinc.getValue("MHz") <<" (" << workUnits[0].get_channelWidth() << ")");
 
     std::string root = "image";
 
@@ -378,6 +375,9 @@ void ContinuumWorker::buildSpectralCube() {
     + utility::toString(itsComms.rank());
 
     if (itsComms.isWriter()) {
+        ASKAPLOG_INFO_STR(logger,"Configuring Spectral Cube");
+        ASKAPLOG_INFO_STR(logger,"nchan: " << nchanperwriter << " base f0: " << f0.getValue("MHz")
+        << " width: " << freqinc.getValue("MHz") <<" (" << workUnits[0].get_channelWidth() << ")");
 
         itsImageCube.reset(new CubeBuilder(itsParsets[0], nchanperwriter, f0, freqinc,img_name));
         itsPSFCube.reset(new CubeBuilder(itsParsets[0], nchanperwriter, f0, freqinc, psf_name));
@@ -435,7 +435,7 @@ void ContinuumWorker::buildSpectralCube() {
                 break;
             }
 
-            ASKAPLOG_INFO_STR(logger, "Starting to process workunit " << workUnitCount);
+            ASKAPLOG_INFO_STR(logger, "Starting to process workunit " << workUnitCount << " of " << workUnits.size());
 
             int initialChannelWorkUnit = workUnitCount+1;
 
@@ -596,8 +596,12 @@ void ContinuumWorker::buildSpectralCube() {
                 ASKAPLOG_INFO_STR(logger,"iteration count is " << itsComms.getOutstanding());
 
                 while (itsComms.getOutstanding()>targetOutstanding){
+                    if (itsComms.getOutstanding() <=  (workUnits.size()-workUnitCount)) {
+                        ASKAPLOG_INFO_STR(logger,"local remaining count is " << (workUnits.size()-workUnitCount)) ;
 
-                    ASKAPLOG_INFO_STR(logger,"iteration count is " << itsComms.getOutstanding());
+                        break;
+                    }
+
 
                     ContinuumWorkRequest result;
                     int id;
@@ -847,8 +851,20 @@ void ContinuumWorker::processChannels()
 {
 
 
+    ASKAPLOG_INFO_STR(logger,"Processing Channel Allocation");
+
+
+
 
     LOFAR::ParameterSet& unitParset = itsParsets[0];
+
+    const bool localSolver = unitParset.getBool("solverpercore",false);
+
+    if (localSolver) {
+        this->buildSpectralCube();
+        return;
+    }
+
     int localChannel;
     int globalChannel;
 
@@ -873,12 +889,7 @@ void ContinuumWorker::processChannels()
     ASKAPLOG_DEBUG_STR(logger, "Tolerance on the directions is "
                       << uvwMachineCacheTolerance / casa::C::pi * 180. * 3600. << " arcsec");
 
-    const bool localSolver = unitParset.getBool("solverpercore",false);
 
-    if (localSolver) {
-        this->buildSpectralCube();
-        return;
-    }
     ASKAPLOG_INFO_STR(logger,"Processing multiple channels central solver mode");
     TableDataSource ds0(ms, TableDataSource::DEFAULT, colName);
 

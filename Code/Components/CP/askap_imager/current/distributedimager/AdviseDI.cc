@@ -118,7 +118,7 @@ AdviseDI::AdviseDI(askap::cp::CubeComms& comms, LOFAR::ParameterSet& parset) :
 
 void AdviseDI::prepare() {
     // this assumes only a sinlge spectral window - must generalise
-    ASKAPLOG_INFO_STR(logger,"Running prepare"); 
+    ASKAPLOG_INFO_STR(logger,"Running prepare");
     // Read from the configruation the list of datasets to process
     const vector<string> ms = getDatasets();
 
@@ -133,12 +133,7 @@ void AdviseDI::prepare() {
     ASKAPLOG_DEBUG_STR(logger,"nchanpercore " << nchanpercore);
     const int nwriters = itsParset.getInt32("nwriters", 1);
     ASKAPLOG_DEBUG_STR(logger,"nwriters " << nwriters);
-    unsigned int nWorkersPerWriter = floor(nWorkers / nwriters);
-    ASKAPLOG_DEBUG_STR(logger,"nwriters " << nwriters);
-    if (nWorkersPerWriter < 1) {
-        nWorkersPerWriter = 1;
-    }
-    ASKAPLOG_DEBUG_STR(logger,"nWorkersPerWriter " << nWorkersPerWriter);
+
     casa::uInt srow = 0;
     chanFreq.resize(ms.size());
     chanWidth.resize(ms.size());
@@ -335,7 +330,7 @@ void AdviseDI::prepare() {
 
             // need to allocate the measurement sets for this channel to this allocation
             // this may require appending new work units.
-            ASKAPLOG_DEBUG_STR(logger,"Allocating " << thisAllocation[frequency] \
+            ASKAPLOG_INFO_STR(logger,"Allocating " << thisAllocation[frequency] \
             << "Global channel " << globalChannel);
 
             bool allocated = false;
@@ -349,9 +344,6 @@ void AdviseDI::prepare() {
 
                     cp::ContinuumWorkUnit wu;
 
-                    int mywriter = floor(work/nWorkersPerWriter)*nWorkersPerWriter + 1;
-
-                    wu.set_writer(mywriter);
                     wu.set_payloadType(cp::ContinuumWorkUnit::WORK);
                     wu.set_channelFrequency(thisAllocation[frequency]);
                     wu.set_beam(myBeam);
@@ -366,10 +358,12 @@ void AdviseDI::prepare() {
                     wu.set_dataset(ms[set]);
                     itsAllocatedWork[work].push_back(wu);
                     itsWorkUnitCount++;
-                    ASKAPLOG_DEBUG_STR(logger,"Allocating " << thisAllocation[frequency] \
-                    << " with local channel " << lc << " of width " << wu.get_channelWidth()  \
+                    ASKAPLOG_INFO_STR(logger,"MATCH Allocating barycentric freq " << thisAllocation[frequency] \
+                    << " with local channel number " << lc << " ( " << chanFreq[set][lc] << " ) of width " << wu.get_channelWidth()  \
                     << " in set: " << ms[set] <<  " to rank " << work+1 << " this rank has " \
-                    << itsAllocatedWork[work].size() << " of a total count " << itsWorkUnitCount );
+                    << itsAllocatedWork[work].size() << " of a total count " << itsWorkUnitCount \
+                    << " the global channel is " << globalChannel);
+
                     allocated = true;
                 }
 
@@ -394,7 +388,37 @@ void AdviseDI::prepare() {
         // expand the channels by the number of groups - this is cheap on memory and
         // allows easier indexing
         // But this is only really needed by the master
+        /// Now if required we need to allocate the writers for a parallel writers
+        /// The writers do not need to be dedicated cores - they can write in addition
+        /// to their other duties.
 
+
+    unsigned int nWorkersPerWriter = floor(itsAllocatedWork.size() / nwriters);
+    for (int wrk = 0; wrk < itsAllocatedWork.size(); wrk++) {
+        int mywriter = floor(wrk/nWorkersPerWriter)*nWorkersPerWriter;
+        bool has_work = false;
+        while (has_work == false) {
+            for (int unit = 0; unit < itsAllocatedWork[mywriter].size(); unit++) {
+                if (itsAllocatedWork[mywriter][unit].get_payloadType() == cp::ContinuumWorkUnit::WORK) {
+                    has_work = true;
+                    break;
+                }
+            }
+            if (has_work == true) {
+                break;
+            }
+            else {
+                mywriter++;
+                ASKAPCHECK(mywriter < itsAllocatedWork.size(),"Ran out of eligible writers");
+            }
+        }
+
+        for (int unit = 0; unit < itsAllocatedWork[wrk].size(); unit++) {
+                    itsAllocatedWork[wrk][unit].set_writer(mywriter+1); // plus 1 for rank
+                    ASKAPLOG_INFO_STR(logger,"Set rank " << wrk+1 << " writer to be rank " << mywriter+1);
+        }
+
+    }
     for (int grp = 1; grp < itsComms.nGroups(); grp++) {
         for (int wrk = 0; wrk < nWorkersPerGroup; wrk++) {
             itsAllocatedWork[grp*nWorkersPerGroup+wrk] = itsAllocatedWork[wrk];
@@ -407,10 +431,6 @@ void AdviseDI::prepare() {
     }
 
 
-    /// Now if required we need to allocate the writers for a parallel writers
-    /// The writers do not need to be dedicated cores - they can write in addition
-    /// to their other duties.
-
 
 
     isPrepared = true;
@@ -419,7 +439,7 @@ void AdviseDI::prepare() {
 cp::ContinuumWorkUnit AdviseDI::getAllocation(int id) {
     cp::ContinuumWorkUnit rtn;
     if (itsAllocatedWork[id].empty() == true) {
-        ASKAPLOG_DEBUG_STR(logger, "Stack is empty for " << id+1);
+        ASKAPLOG_WARN_STR(logger, "Stack is empty for " << id+1);
         rtn.set_payloadType(cp::ContinuumWorkUnit::DONE);
         return rtn;
     }
@@ -430,12 +450,12 @@ cp::ContinuumWorkUnit AdviseDI::getAllocation(int id) {
     }
     if (itsAllocatedWork[id].empty() == true) {
         // this is the last unitParset
-        ASKAPLOG_DEBUG_STR(logger, "Final job for " << id+1);
+        ASKAPLOG_WARN_STR(logger, "Final job for " << id+1);
         if (rtn.get_payloadType() != cp::ContinuumWorkUnit::NA){
             rtn.set_payloadType(cp::ContinuumWorkUnit::LAST);
         }
         else {
-            ASKAPLOG_DEBUG_STR(logger, "Final job is bad for " << id+1);
+            ASKAPLOG_WARN_STR(logger, "Final job is bad for " << id+1);
             rtn.set_payloadType(cp::ContinuumWorkUnit::DONE);
         }
     }
@@ -493,7 +513,7 @@ void AdviseDI::addMissingParameters()
         }
         this->minFrequency = (*begin_it).getValue();
         this->maxFrequency = (*end_it).getValue();
-        ASKAPLOG_INFO_STR(logger,"Min:Max frequency -- " << this->minFrequency << ":" << this->maxFrequency); 
+        ASKAPLOG_INFO_STR(logger,"Min:Max frequency -- " << this->minFrequency << ":" << this->maxFrequency);
         // FIXME problem .... this is probably the wrong refFreq. It needs to be for the whole
         // observation not just this allocation....
         // Currently I fix this by forcing it to be set in the Parset - not optimal
