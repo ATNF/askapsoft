@@ -1,3 +1,66 @@
+0.16.0 (28 November 2016)
+-------------------------
+
+A release with a number of bug fixes, new features, and updates to the
+pipeline scripts
+
+New features:
+
+ * Rotation Measure synthesis is now possible within the Selavy
+   source-finder. This extracts Stokes spectra from continuum cubes at
+   the positions of identified continuum components, performs RM
+   Synthesis, and creates a catalogue of polarisation properties for
+   each component. While still requiring some development, most
+   features are available and should permit testing.
+ * The new imager, which was made available in an earlier release, has
+   been added to the askapsoft module at Pawsey.
+
+Bug fixes for processing software:
+
+ * The bandpass calibrator cbpcalibrator will now not allow through a
+   bandpass table with NaN values in it. If NaNs appear in solving the
+   bandpass, then cbpcalibrator will throw an exception. In the
+   process, the GSL library used in 3rdParty has been updated to v1.16.
+ * The writing of noise maps by Selavy (in the VariableThreshold case)
+   has been streamlined, so that making such maps for large cubes is
+   more tractable.
+
+Pipeline updates:
+
+ * The driving script for the ASKAP pipeline is now called
+   processASKAP.sh, instead of processBETA.sh. The latter is still
+   available, but gives a warning before callling processASKAP.sh. All
+   interfaces remain the same.
+ * Linear mosaicking has been improved:
+   - It is now available for spectral-line and continuum cubes, in
+     addition to continuum images.
+   - Mosaics are made for each field, and for each tile if the
+     observation was done with the "tilesky" mode.
+   - The continuum mosaicking can also include mosaics of the
+     self-calibration loops.
+ * The pipelines make better use of the online services of ASKAP, to
+   determine things like the footprint (location of beams). This makes
+   calculations more internally self-consistent.
+ * When running self-calibration, some parameters can be given
+   different values for each loop. This includes parameters for the
+   cleaning, the source-finding, and the calibration. More flexibility
+   is also provided for the source-finding within the self-calibration.
+ * Processing of BETA datasets are made possible via an IS_BETA
+   parameter, which avoids using the online system to obtain beam
+   locations, and changes the defaults for the data location.
+ * Smoothing of the bandpass solutions is now possible, using a script
+   in the ACES repository to produce a new calibration table. It also
+   allows plotting of the calibration solutions.
+ * More flexibility is allowed for the number of cores used in the
+   continuum imaging.
+ * A notable bug was fixed that led to incorrect calibration and
+   continuum-subtraction when Taylor-terms were being produced
+   (i.e. nterms>1) 
+ * Various other more minor bug fixes, related to logging, stats
+   files, and default values of parameters (for instance, the default
+   for cmodel was to use a flux cutoff that was too high).
+
+
 0.15.2 (26 October 2016)
 ------------------------
 
