@@ -32,7 +32,7 @@ At present, the decision to scale by the beam is made at the parset input stage,
 The user can select which polarisations / Stokes parameters should be included in the output spectra. There are three options here for the case of multiple polarisations, with **polarisation="IQUV"**
 
 * The user provides a single spectral cube that has all polarisations listed: **spectralCube=image.iquv.cube**
-* The user provides a list of spectral cubes that have a 1-1 match with the list of polarisations provided. The list is provided as a comma-separated list enclosed in square brackets, and the order of images should match the order of polarisations: **spectralCube=[image.i.cube,image.q.cube,image.u.cube,image.v.cube]** 
+* The user provides a list of spectral cubes that have all the polarisations requested. The list is provided as a comma-separated list enclosed in square brackets: **spectralCube=[image.i.cube,image.q.cube,image.u.cube,image.v.cube]** 
 * The user provides a single filename that uses a "%p" wildcard in place of the polarisation name (in lower case): **spectralCube=image.%p.cube**
 
 The second use case is triggered by setting **extractSpectra.useDetectedPixels=true**. This results in the spectrum being summed over all spatial pixels in which the object in question was detected. If **extractSpectra.scaleSpectraByBeam=true**, then the spectrum is scaled by the area of the beam (in the same way the integrated flux of a Duchamp detection is scaled by the beam). 

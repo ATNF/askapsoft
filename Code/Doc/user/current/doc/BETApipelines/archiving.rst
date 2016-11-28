@@ -66,7 +66,7 @@ scripts, and they are detailed here.
 +----------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | ``ARCHIVE_FIELD_MOSAICS``        | true                            | none                            | Whether to archive the mosaics for each individual field, as    |
 |                                  |                                 |                                 | well as for each tile and the final mosaicked image. See        |
-|                                  |                                 |                                 |:doc:`ScienceFieldMosaicking` for a description.                 |
+|                                  |                                 |                                 | :doc:`ScienceFieldMosaicking` for a description.                |
 +----------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | ``PROJECT_ID``                   | "AS031"                         | *<key>*.project                 | The project ID that is written to the FITS header, and used by  |
 |                                  |                                 | (:doc:`../utils/casdaupload`)   | the casdaupload script to describe each data product. This is   |

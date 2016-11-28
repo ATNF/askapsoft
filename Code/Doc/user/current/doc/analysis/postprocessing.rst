@@ -662,3 +662,76 @@ Parameters for spectral term measurement
 |Selavy.spectralTermImages |vector<string> |Derived from image name - see  |You can explicitly set the images for each term like so:              |
 |                          |               |text                           |**spectralTermImages = [image1, image2]**.                            |
 +--------------------------+---------------+-------------------------------+----------------------------------------------------------------------+
+
+
+Rotation Measure Synthesis
+--------------------------
+
+Description of the algorithm
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Selavy can be used to perform Rotation Measure Synthesis on the
+full-Stokes spectra of continuum components identified from a
+continuum map. The procedure follows that specified by the POSSUM
+survey science team, and can be described as follows:
+
+ * A continuum component is found in a continuum image, and fitted
+   with a 2D Gaussian (as described above).
+ * Spectra are extracted from the corresponding location in Stokes I,
+   Q, and U continuum cubes. The spectra are extracted from an NxN
+   pixel box centred on the peak of the Gaussian (where N defaults to
+   5, as per the POSSUM specification). See :doc:`extraction` for
+   details on the method used.
+ * The noise spectra in Q & U are extracted and averaged together to
+   form the QU noise. This is used for weighting (if the "variance"
+   weightType is selected).
+ * The Q and U spectra are normalised by a model spectrum of Stokes
+   I - we use (for now), the Taylor-term expansion from the Stokes-I
+   imaging. They are then used to generate a Faraday Depth function
+   (FDF) as a function of lambda-squared.
+ * The location of the peak of the FDF is recorded as the rotation
+   measure of the component, with the peak value of the FDF
+   (multiplied again by the Stokes I model spectrum) giving the
+   polarised intensity.
+ * The peak is also fitted with a three-point quadratic function,
+   yielding a better estimate of the peak (avoiding the sampling of
+   the Faraday depth function).
+ * These and other quantities are written to a polarisation catalogue,
+   that is named in the same way as the component and island
+   catalogues - see the description above.
+ * The extracted spectra of I, Q & U can also be written out to
+   individual files.
+
+
+Parameters for Rotation Measure Synthesis
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
++---------------------------------------+----------------+-------------------------------+----------------------------------------------------------------------+
+| *Parameter*                           | *Type*         | *Default*                     | *Explanation*                                                        |
++=======================================+================+===============================+======================================================================+
+| Selavy.RMSynthesis                    | bool           | false                         | Whether to run Rotation Measure Synthesis                            |
++---------------------------------------+----------------+-------------------------------+----------------------------------------------------------------------+
+| Selavy.RMSynthesis.cube               | string or      | ""                            | The name of the input cube to read the continuum spectra from. This  |
+|                                       | vector<string> |                               | can take wildcards ("%p") for the polarisation or be a list of cubes |
+|                                       |                |                               | corresponding to at least I,Q,U. See :doc:`extraction` for more      |
+|                                       |                |                               | details.                                                             |
++---------------------------------------+----------------+-------------------------------+----------------------------------------------------------------------+
+| Selavy.RMSynthesis.outputBase         | string         | ""                            | The base name for the output files - a front-end to                  |
+|                                       |                |                               | **extractSpectra.spectralOutputBase** (:doc:`extraction`).           |
++---------------------------------------+----------------+-------------------------------+----------------------------------------------------------------------+
+| Selavy.RMSynthesis.weightType         | string         | variance                      | The type of weighting to be used in the RM Synthesis. Can be either  |
+|                                       |                |                               | "variance" (each channel is weighted by the inverse square of its    |
+|                                       |                |                               | noise), or "uniform" (each channel has a weight of 1). Anything else |
+|                                       |                |                               | defaults to "variance".                                              |
++---------------------------------------+----------------+-------------------------------+----------------------------------------------------------------------+
+| Selavy.RMSynthesis.numPhiChan         | int            | 40                            | Number of channels in the Faraday depth sampling vector.             |
++---------------------------------------+----------------+-------------------------------+----------------------------------------------------------------------+
+| Selavy.RMSynthesis.deltaPhi           | float          | 30.                           | Spacing between the Faraday depth channels [rad/m2].                 |
++---------------------------------------+----------------+-------------------------------+----------------------------------------------------------------------+
+| Selavy.RMSynthesis.phiZero            | float          | 0.                            | Centre RM of the Faraday depth vector, [rad/m2].                     |
++---------------------------------------+----------------+-------------------------------+----------------------------------------------------------------------+
+|  Selavy.RMSynthesis.polThresholdSNR   | float          | 8.                            | Signal-to-noise threshold (in the FDF) for a valid detection.        |
++---------------------------------------+----------------+-------------------------------+----------------------------------------------------------------------+
+| Selavy.RMSynthesis.polThresholdDebias | float          | 5.                            | Signal-to-noise threshold (in the FDF) above which to perform        |
+|                                       |                |                               | debiasing.                                                           |
++---------------------------------------+----------------+-------------------------------+----------------------------------------------------------------------+
