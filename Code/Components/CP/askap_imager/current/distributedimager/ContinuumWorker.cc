@@ -198,7 +198,9 @@ void ContinuumWorker::run(void)
         int myMaxClient = itsComms.rank();
 
         if (itsComms.isWriter()) {
+            ASKAPLOG_INFO_STR(logger,"Getting client list for cube generation");
             std::list<int> myClients = itsComms.getClients();
+            ASKAPLOG_INFO_STR(logger,"Client list " << myClients);
             if (myClients.size() > 0) {
                 std::list<int>::iterator iter = std::min_element(myClients.begin(), myClients.end());
 

@@ -141,7 +141,10 @@ void CubeComms::addWorker(unsigned int workerRank) {
     ret = workerMap.insert(std::pair<int,int> (workerRank,0) );
 
     if (ret.second==false) {
-        ASKAPLOG_DEBUG_STR(logger, "element " << workerRank << " already existed");
+        ASKAPLOG_WARN_STR(logger, "worker " << workerRank << " already existed");
+    }
+    else {
+        ASKAPLOG_INFO_STR(logger, " added worker rank " << " to workerMap");
     }
 
 }
@@ -180,13 +183,16 @@ void CubeComms::addChannelToWriter(unsigned int writerRank, unsigned int workerR
         ASKAPLOG_INFO_STR(logger,"Added channel to writer rank " << writerRank );
     }
 
+    ASKAPLOG_INFO_STR(logger,"Adding " << writerRank << " to clientMap");
 
-
-
+    this->clientMap[writerRank];
+    ASKAPLOG_INFO_STR(logger,"Pushing back " << workerRank);
     this->clientMap[writerRank].push_back(workerRank);
+    ASKAPLOG_INFO_STR(logger,"clientMap " << clientMap);
     this->clientMap[writerRank].sort();
+    ASKAPLOG_INFO_STR(logger,"Sorted clientMap " << clientMap);
     this->clientMap[writerRank].unique();
-
+    ASKAPLOG_INFO_STR(logger,"Uniquified clientMap " << clientMap);
 
 
 
@@ -228,7 +234,7 @@ int CubeComms::addChannelToMap(std::map<int,int>& theMap, unsigned int theRank )
     if (it != theMap.end()) {
         int oldcount = it->second;
         int newcount = oldcount+1;
-        writerMap.erase (it);
+        theMap.erase (it);
         std::pair<std::map<int,int>::iterator,bool> ret;
         ret = theMap.insert(std::pair<int,int> (theRank,newcount) );
         ASKAPLOG_INFO_STR(logger,"added a channel to rank " << theRank  \
