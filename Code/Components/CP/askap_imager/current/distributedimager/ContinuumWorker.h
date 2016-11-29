@@ -111,10 +111,14 @@ class ContinuumWorker
 
         // the basechannel number assigned to this worker
         unsigned int baseChannel;
-        
+
         // the baseFrequency associated with this channel
         double baseFrequency;
-        
+        // the baseFrequency associated with the cube if being built
+        double baseCubeFrequency;
+        // the global channel associated with this part of the cube
+        int baseCubeGlobalChannel;
+
         boost::scoped_ptr<CubeBuilder> itsImageCube;
         boost::scoped_ptr<CubeBuilder> itsPSFCube;
         boost::scoped_ptr<CubeBuilder> itsResidualCube;
