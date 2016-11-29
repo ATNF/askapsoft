@@ -200,6 +200,10 @@ void ContinuumWorker::run(void)
         if (itsComms.isWriter()) {
             ASKAPLOG_INFO_STR(logger,"Getting client list for cube generation");
             std::list<int> myClients = itsComms.getClients();
+            myClients.push_back(itsComms.rank());
+            myClients.sort();
+            myClients.unique();
+
             ASKAPLOG_INFO_STR(logger,"Client list " << myClients);
             if (myClients.size() > 0) {
                 std::list<int>::iterator iter = std::min_element(myClients.begin(), myClients.end());
@@ -208,15 +212,21 @@ void ContinuumWorker::run(void)
                 iter = std::max_element(myClients.begin(), myClients.end());
                 myMaxClient = *iter;
 
-                if (itsComms.rank() > myMaxClient) {
-                    myMaxClient = itsComms.rank();
-                }
             }
             // these are in ranks
             // If a client is missing entirely from the list - the cube will be missing
             // channels - but they will be correctly labelled
             this->baseCubeGlobalChannel = (myMinClient - 1)*nchanpercore;
             this->baseCubeFrequency = advice.getBaseFrequencyAllocation((myMinClient - 1));
+            // e.g
+            // bottom client rank is 4 - top client is 7
+            // we have 4 chanpercore
+            // 6*4 - 3*4
+            // 3*4 = 12
+            // (6 - 3 + 1) * 4
+            this->nchanCube = (myMaxClient - myMinClient + 1)*nchanpercore;
+            ASKAPLOG_INFO_STR(logger,"Number of channels in cube is: " << this->nchanCube );
+            ASKAPLOG_INFO_STR(logger,"Base global channel of cube is " << this->baseCubeGlobalChannel);
         }
         this->baseFrequency = advice.getBaseFrequencyAllocation(itsComms.rank()-1);
     }
@@ -369,7 +379,7 @@ void ContinuumWorker::buildSpectralCube() {
     int nWorkers = itsComms.nProcs() -1;
     int nGroups = itsComms.nGroups();
     int nchantotal = nWorkers * nchanpercore / nGroups;
-    int nchanperwriter = nchantotal/nwriters;
+
 
     if (itsComms.isWriter()) {
 
@@ -377,8 +387,7 @@ void ContinuumWorker::buildSpectralCube() {
     /// The width of a channel. THis does <NOT> take account of the variable width
     /// of BArycentric channels
         Quantity freqinc(workUnits[0].get_channelWidth(),"Hz");
-    /// nchanperwriter is an estimate - some channels, especially at the edges may not exist
-    /// these will remain blank in the output cube
+
 
 
         std::string root = "image";
@@ -402,13 +411,13 @@ void ContinuumWorker::buildSpectralCube() {
 
 
         ASKAPLOG_INFO_STR(logger,"Configuring Spectral Cube");
-        ASKAPLOG_INFO_STR(logger,"nchan: " << nchanperwriter << " base f0: " << f0.getValue("MHz")
+        ASKAPLOG_INFO_STR(logger,"nchan: " << this->nchanCube << " base f0: " << f0.getValue("MHz")
         << " width: " << freqinc.getValue("MHz") <<" (" << workUnits[0].get_channelWidth() << ")");
 
-        itsImageCube.reset(new CubeBuilder(itsParsets[0], nchanperwriter, f0, freqinc,img_name));
-        itsPSFCube.reset(new CubeBuilder(itsParsets[0], nchanperwriter, f0, freqinc, psf_name));
-        itsResidualCube.reset(new CubeBuilder(itsParsets[0], nchanperwriter, f0, freqinc, residual_name));
-        itsWeightsCube.reset(new CubeBuilder(itsParsets[0], nchanperwriter, f0, freqinc, weights_name));
+        itsImageCube.reset(new CubeBuilder(itsParsets[0], this->nchanCube, f0, freqinc,img_name));
+        itsPSFCube.reset(new CubeBuilder(itsParsets[0], this->nchanCube, f0, freqinc, psf_name));
+        itsResidualCube.reset(new CubeBuilder(itsParsets[0], this->nchanCube, f0, freqinc, residual_name));
+        itsWeightsCube.reset(new CubeBuilder(itsParsets[0], this->nchanCube, f0, freqinc, weights_name));
 
 
         if (itsParset.getBool("restore", false)) {
@@ -420,9 +429,9 @@ void ContinuumWorker::buildSpectralCube() {
             + utility::toString(itsComms.rank());
             // Only create these if we are restoring, as that is when they get made
             if (itsDoingPreconditioning) {
-                itsPSFimageCube.reset(new CubeBuilder(itsParsets[0], nchanperwriter, f0, freqinc, psf_image_name));
+                itsPSFimageCube.reset(new CubeBuilder(itsParsets[0], this->nchanCube, f0, freqinc, psf_image_name));
             }
-            itsRestoredCube.reset(new CubeBuilder(itsParsets[0], nchanperwriter, f0, freqinc, restored_image_name));
+            itsRestoredCube.reset(new CubeBuilder(itsParsets[0], this->nchanCube, f0, freqinc, restored_image_name));
         }
     }
     /// What are the plans for the deconvolution?
@@ -600,8 +609,8 @@ void ContinuumWorker::buildSpectralCube() {
                 ASKAPLOG_INFO_STR(logger,"I have (including my own) " << itsComms.getOutstanding() << " units to write");
                 ASKAPLOG_INFO_STR(logger,"I have " << itsComms.getClients().size() << " clients with work");
                 int cubeChannel = workUnits[workUnitCount-1].get_globalChannel()-this->baseCubeGlobalChannel;
-                ASKAPLOG_INFO_STR(logger,"Attempting to write channel " << cubeChannel << " of " << nchanperwriter);
-                ASKAPCHECK( cubeChannel < nchanperwriter, "cubeChannel outside range of cube slice");
+                ASKAPLOG_INFO_STR(logger,"Attempting to write channel " << cubeChannel << " of " << this->nchanCube);
+                ASKAPCHECK( (cubeChannel >= 0 || cubeChannel < this->nchanCube), "cubeChannel outside range of cube slice");
                 handleImageParams(rootImager.params(),cubeChannel);
                 ASKAPLOG_INFO_STR(logger,"Written channel " << cubeChannel);
 
@@ -635,8 +644,8 @@ void ContinuumWorker::buildSpectralCube() {
                     int cubeChannel = result.get_globalChannel()-this->baseCubeGlobalChannel;
 
                     try {
-                        ASKAPLOG_INFO_STR(logger,"Attempting to write channel " << cubeChannel << " of " << nchanperwriter);
-                        ASKAPCHECK( cubeChannel < nchanperwriter, "cubeChannel outside range of cube slice");
+                        ASKAPLOG_INFO_STR(logger,"Attempting to write channel " << cubeChannel << " of " << this->nchanCube);
+                        ASKAPCHECK( (cubeChannel >= 0 || cubeChannel < this->nchanCube), "cubeChannel outside range of cube slice");
 
                         handleImageParams(result.get_params(),cubeChannel);
 
@@ -715,8 +724,8 @@ void ContinuumWorker::buildSpectralCube() {
             try {
 
 
-                ASKAPLOG_INFO_STR(logger,"Attempting to write channel " << cubeChannel << " of " << nchanperwriter);
-                ASKAPCHECK( cubeChannel < nchanperwriter, "cubeChannel outside range of cube slice");
+                ASKAPLOG_INFO_STR(logger,"Attempting to write channel " << cubeChannel << " of " << this->nchanCube);
+                ASKAPCHECK((cubeChannel >= 0 || cubeChannel < this->nchanCube), "cubeChannel outside range of cube slice");
                 handleImageParams(result.get_params(),cubeChannel);
                 ASKAPLOG_INFO_STR(logger,"Written the slice from rank" << id);
 

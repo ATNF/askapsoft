@@ -118,6 +118,8 @@ class ContinuumWorker
         double baseCubeFrequency;
         // the global channel associated with this part of the cube
         int baseCubeGlobalChannel;
+        // the number of channels in this cube (if writer)
+        int nchanCube;
 
         boost::scoped_ptr<CubeBuilder> itsImageCube;
         boost::scoped_ptr<CubeBuilder> itsPSFCube;
