@@ -158,9 +158,6 @@ if [ \${PLOT_CALTABLE} == true ]; then
 fi
 
 
-
-fi
-
 EOF
 
     if [ $SUBMIT_JOBS == true ]; then
