@@ -674,10 +674,20 @@ void AdviseDI::updateComms() {
 
     /// Go through the work allocations and set the writers
     for (int worker=0; worker < itsAllocatedWork.size() ; worker++) {
+        itsCubeComms.addWorker(worker+1);
+        int last_channel = itsAllocatedWork[worker][0].get_globalChannel();
         for (int alloc=0; alloc < itsAllocatedWork[worker].size() ; alloc++) {
-            if (itsAllocatedWork[worker][alloc].get_payloadType() != cp::ContinuumWorkUnit::NA) {
-                itsCubeComms.addWriter(itsAllocatedWork[worker][alloc].get_writer());
-                itsCubeComms.addChannelToWriter(itsAllocatedWork[worker][alloc].get_writer());
+            int current_channel = itsAllocatedWork[worker][alloc].get_globalChannel();
+            // need to test whether this is a distinct channel or a different epoch for
+            // the same epoch
+            if (current_channel != last_channel || alloc == 0) {
+                if (itsAllocatedWork[worker][alloc].get_payloadType() != cp::ContinuumWorkUnit::NA) {
+                    itsCubeComms.addWriter(itsAllocatedWork[worker][alloc].get_writer());
+
+                    itsCubeComms.addChannelToWriter(itsAllocatedWork[worker][alloc].get_writer());
+                    itsCubeComms.addChannelToWorker(worker+1);
+                }
+                last_channel = current_channel;
             }
         }
     }

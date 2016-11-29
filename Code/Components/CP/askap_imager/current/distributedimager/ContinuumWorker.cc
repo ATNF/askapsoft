@@ -579,6 +579,8 @@ void ContinuumWorker::buildSpectralCube() {
                 ASKAPLOG_INFO_STR(logger,"Written channel " << cubeChannel);
 
                 itsComms.removeChannelFromWriter(itsComms.rank());
+                itsComms.removeChannelFromWorker(itsComms.rank());
+                
                 /// write everyone elses
 
                 /// how many should be write out
