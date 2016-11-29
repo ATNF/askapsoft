@@ -684,7 +684,7 @@ void AdviseDI::updateComms() {
                 if (itsAllocatedWork[worker][alloc].get_payloadType() != cp::ContinuumWorkUnit::NA) {
                     itsCubeComms.addWriter(itsAllocatedWork[worker][alloc].get_writer());
 
-                    itsCubeComms.addChannelToWriter(itsAllocatedWork[worker][alloc].get_writer());
+                    itsCubeComms.addChannelToWriter(itsAllocatedWork[worker][alloc].get_writer(),worker+1);
                     itsCubeComms.addChannelToWorker(worker+1);
                 }
                 last_channel = current_channel;

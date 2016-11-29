@@ -30,6 +30,7 @@
 
 #include <limits>
 #include <map>
+#include <list>
 /// out own header first
 
 
@@ -121,11 +122,17 @@ void CubeComms::addWriter(unsigned int writerRank) {
     ret = writerMap.insert(std::pair<int,int> (writerRank,0) );
 
     if (ret.second==false) {
-        ASKAPLOG_DEBUG_STR(logger, "element " << writerRank << " already existed");
+        ASKAPLOG_WARN_STR(logger, "element " << writerRank << " already existed");
     }
     else {
         writerCount++;
     }
+
+
+    // ret2 = clientMap.insert(std::pair<int,std::map<int,int> > (writerRank,clientlist) );
+    // if (ret2.second==false) {
+    //     ASKAPLOG_WARN_STR(logger, "element " << writerRank << " already existed");
+    // }
 
 }
 void CubeComms::addWorker(unsigned int workerRank) {
@@ -162,7 +169,7 @@ void CubeComms::removeChannelFromWorker(unsigned int workerRank) {
     }
 
 }
-void CubeComms::addChannelToWriter(unsigned int writerRank) {
+void CubeComms::addChannelToWriter(unsigned int writerRank, unsigned int workerRank) {
 
     int rtn = addChannelToMap(writerMap, writerRank);
     if (rtn < 1) {
@@ -172,6 +179,16 @@ void CubeComms::addChannelToWriter(unsigned int writerRank) {
     else {
         ASKAPLOG_INFO_STR(logger,"Added channel to writer rank " << writerRank );
     }
+
+
+
+
+    this->clientMap[writerRank].push_back(workerRank);
+    this->clientMap[writerRank].sort();
+    this->clientMap[writerRank].unique();
+
+
+
 
 }
 void CubeComms::removeChannelFromWriter(unsigned int writerRank) {
@@ -235,4 +252,19 @@ void* CubeComms::addByteOffset(const void *ptr, size_t offset) const
 }
 int CubeComms::getOutstanding() {
     return writerMap[rank()];
+}
+std::list<int> CubeComms::getClients() {
+    // return list of clients with at least one piece of work outstanding
+    std::list<int> clients_with_work;
+    std::list<int>::iterator it;
+    it = clientMap[rank()].begin();
+
+    while (it != clientMap[rank()].end()) {
+        if (workerMap[*it] > 0) {
+            if (*it != rank())
+                clients_with_work.push_back(*it);
+        }
+        it++;
+    }
+    return clients_with_work;
 }

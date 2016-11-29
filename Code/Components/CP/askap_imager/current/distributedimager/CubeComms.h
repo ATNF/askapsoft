@@ -32,6 +32,7 @@
 #define ASKAP_CP_IMAGER_CUBECOMMS_H
 
 #include <map>
+#include <list>
 ///ASKAP includes ...
 #include <askapparallel/AskapParallel.h>
 #include "messages/IMessage.h"
@@ -70,13 +71,18 @@ namespace cp {
             void initWriters(int nwriters, int nchanpercore);
             /// @brief increments a counter (one for each rank)
             /// @details Takes the rank of the writer
-            void addChannelToWriter(unsigned int writer_rank);
+            void addChannelToWriter(unsigned int writer_rank, unsigned int worker);
+            void addClientToWriter(unsigned int writer_rank, unsigned int client_rank);
+
             void removeChannelFromWriter(unsigned int writer_rank);
 
             void addChannelToWorker(unsigned int worker_rank);
             void removeChannelFromWorker(unsigned int worker_rank);
 
             int getOutstanding();
+            std::list<int> getClients();
+
+
 
             int anyWork();
 
@@ -99,6 +105,8 @@ namespace cp {
             // write
 
             std::map<int,int > workerMap;
+
+            std::map<int,std::list<int> > clientMap;
 
             int addChannelToMap(std::map<int,int>& theMap, unsigned int theRank);
             int removeChannelFromMap(std::map<int,int>& theMap, unsigned int theRank);

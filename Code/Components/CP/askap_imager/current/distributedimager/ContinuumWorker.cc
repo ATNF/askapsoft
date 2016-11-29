@@ -572,6 +572,7 @@ void ContinuumWorker::buildSpectralCube() {
             if (itsComms.isWriter()) {
 
                 ASKAPLOG_INFO_STR(logger,"I have (including my own) " << itsComms.getOutstanding() << " units to write");
+                ASKAPLOG_INFO_STR(logger,"I have " << itsComms.getClients().size() << " clients with work");
                 int cubeChannel = workUnits[workUnitCount-1].get_globalChannel()-baseChannel;
                 ASKAPLOG_INFO_STR(logger,"Attempting to write channel " << cubeChannel << " of " << nchanperwriter);
                 ASKAPCHECK( cubeChannel < nchanperwriter, "cubeChannel outside range of cube slice");
@@ -580,17 +581,12 @@ void ContinuumWorker::buildSpectralCube() {
 
                 itsComms.removeChannelFromWriter(itsComms.rank());
                 itsComms.removeChannelFromWorker(itsComms.rank());
-                
+
                 /// write everyone elses
 
-                /// how many should be write out
-                /// there are some number of workers per writer but not all
-                /// may have a channel due to the barycentreing. THere is no
-                /// simple way to calculate this - so if I just wait for nWorkersperWriter
-                /// it should be relatively efficient.
+                /// one per client ... I dont care what order they come in at
 
-                ///
-                int targetOutstanding = itsComms.getOutstanding() - (nworkersperwriter - 1);
+                int targetOutstanding = itsComms.getOutstanding() - itsComms.getClients().size();
                 if (targetOutstanding < 0){
                     targetOutstanding = 0;
                 }
