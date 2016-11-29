@@ -340,6 +340,7 @@ void ContinuumWorker::processWorkUnit(ContinuumWorkUnit& wu)
     /// this is running prepare and it should not have to.
     /// currently everyone is calulating the allocations superflously why has
     /// this complication developed clean it up ?
+
     diadvise.prepare();
     diadvise.addMissingParameters();
     ASKAPLOG_INFO_STR(logger,"advice received");
@@ -543,13 +544,14 @@ void ContinuumWorker::buildSpectralCube() {
 
                     tempWorkUnitCount++;
                 }
+                workUnitCount = tempWorkUnitCount; // this is to remember what finished on.
                 /// now we have a "full" set of NE we can SolveNE to update the model
                 try {
                     rootImager.solveNE();
                 }
                 catch (const askap::AskapError& e) {
                     ASKAPLOG_WARN_STR(logger,"Askap error in solver");
-                    workUnitCount = tempWorkUnitCount; // this is to remember what was failed on.
+
                     throw;
                 }
 
@@ -572,7 +574,7 @@ void ContinuumWorker::buildSpectralCube() {
                 }
                 if (majorCycleNumber+1 > nCycles) {
                     ASKAPLOG_INFO_STR(logger,"Reached maximum majorcycle count");
-                    workUnitCount = tempWorkUnitCount; // this is to remember what was processed.
+                
                 }
                 else {
 
