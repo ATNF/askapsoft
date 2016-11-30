@@ -84,6 +84,17 @@ They are given in [:doc:`data_selection`] and should also have the **Cbpcalibrat
 |                       |                |              |the length of the string should be either 1 or   |
 |                       |                |              |the number of beams.                             |
 +-----------------------+----------------+--------------+-------------------------------------------------+
+|minrank                |uint            |15            |The smallest rank of the normal matrix when the  |
+|                       |                |              |calibration solution is considered to be valid.  |
+|                       |                |              |The default value of 15 corresponds to the case  |
+|                       |                |              |of *four* antennas, which is the minimal number  |
+|                       |                |              |where all parts of the solution can be trusted.  |
+|                       |                |              |Note, degeneracies in the dataset may prevent the|
+|                       |                |              |successful solution even in the case of more than|
+|                       |                |              |four antennas. This is why this threshold is     |
+|                       |                |              |defined through the rank of the normal matrix,   |
+|                       |                |              |rather than the number of antennas.              |
++-----------------------+----------------+--------------+-------------------------------------------------+
 |datacolumn             |string          |"DATA"        |The name of the data column in the measurement   |
 |                       |                |              |set which will be the source of visibilities.This|
 |                       |                |              |can be useful to process real telescope data     |
