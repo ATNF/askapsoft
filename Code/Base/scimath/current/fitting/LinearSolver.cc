@@ -234,10 +234,7 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
                   gsl_vector_set(S,i,0.);
               }
               for (int k=0; k < nParameters; ++k) {
-                   //ASKAPCHECK(!isnan(gsl_matrix_get(V,i,k)), "NaN in V: i="<<i<<" k="<<k); 
-                   if (isnan(gsl_matrix_get(V,i,k))) {
-                       gsl_matrix_set(V, i, k, 0.);
-                   }
+                   ASKAPCHECK(!isnan(gsl_matrix_get(V,i,k)), "NaN in V: i="<<i<<" k="<<k); 
               }
          }
 
@@ -314,11 +311,8 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
               for (size_t i=0; i<value.nelements(); ++i)  {
 //          	   std::cout << value(i) << " " << gsl_vector_get(X, indit->second+i) << std::endl;
                    const double adjustment = gsl_vector_get(X, indit->second+i);
-                   //ASKAPCHECK(!isnan(adjustment), "Solution resulted in NaN as an update for parameter "<<(indit->second + i));
-                   if (!isnan(adjustment)) {
-                       // just ignore NaNs at this stage - the calibration is probably junk anyway, so just skip updating the solution
-                       value(i) += adjustment;
-                   }
+                   ASKAPCHECK(!isnan(adjustment), "Solution resulted in NaN as an update for parameter "<<(indit->second + i));
+                   value(i) += adjustment;
               }
           }
           gsl_vector_free(S);
