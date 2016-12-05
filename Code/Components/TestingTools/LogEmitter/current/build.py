@@ -1,0 +1,6 @@
+# build script for LogMsgEmitter
+
+from askapdev.rbuild.builders import Scons as Builder
+
+b = Builder(".")
+b.build()
