@@ -14,7 +14,7 @@ if [ ${writeByNode} == true ]; then
 
     nsubxSlice=${nsubxCR}
     nsubySlice=${nsubyCR}
-    width=${SLICERWIDTH}
+    width=${NWORKERS_CSIM}
     nppn=${SLICERNPPN}
 
 else
