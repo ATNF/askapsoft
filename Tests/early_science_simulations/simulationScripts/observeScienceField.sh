@@ -205,6 +205,8 @@ done
 # by NUM_FINAL_MS
 if [ $doScience == true ]; then
 
+    merge3dep="-d afterok"
+
     for((i=0;i<${NUM_FINAL_MS};i++)); do
     
         START=`echo $i $NUM_GROUPS_PER_FINAL | awk '{print $1*$2}'`
@@ -259,7 +261,7 @@ EOF
             
             merge2ID=`sbatch ${merge2dep} $merge2sbatch | awk '{print $4}'`
             echo "Running merging for full science field, file $i: ID=${merge2ID} and dependency $merge2dep"
-            
+            merge3dep="${merge3dep}:${merge2ID}"
         fi
 
     done
@@ -308,8 +310,8 @@ EOF
 
         if [ $doSubmit == true ]; then
             
-            merge3ID=`sbatch -d afterok:${merge2ID} $merge3sbatch | awk '{print $4}'`
-            echo "Running merging for full science field: ID=${merge3ID} and dependency \"-d afterok:${merge2ID}"
+            merge3ID=`sbatch ${merge3dep} $merge3sbatch | awk '{print $4}'`
+            echo "Running merging for full science field: ID=${merge3ID} and dependency \"${merge3dep}\""
             
         fi
         
