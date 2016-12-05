@@ -35,6 +35,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "boost/shared_ptr.hpp"
 // ASKAPsoft includes
 #include <askap/AskapLogging.h>
 #include <askap/AskapError.h>
@@ -84,6 +85,8 @@ ContinuumWorker::ContinuumWorker(LOFAR::ParameterSet& parset,
                                        CubeComms& comms)
     : itsParset(parset), itsComms(comms)
 {
+    itsAdvisor = boost::shared_ptr<synthesis::AdviseDI> (new synthesis::AdviseDI(itsComms,itsParset));
+    itsAdvisor->prepare();
     itsGridder_p = VisGridderFactory::make(itsParset);
     // lets properly size the storage
     const int nchanpercore = itsParset.getInt32("nchanpercore", 1);
@@ -191,14 +194,13 @@ void ContinuumWorker::run(void)
     const bool localSolver = itsParset.getBool("solverpercore",false);
     int nchanpercore = itsParset.getInt("nchanpercore",1);
 
-    ASKAPLOG_INFO_STR(logger,"Getting basic advice");
 
-    synthesis::AdviseDI advice(itsComms,itsParset);
+
+
 
     if (localSolver) {
-        ASKAPLOG_INFO_STR(logger,"In local solver mode - reprocessing allocations (running prepare())");
-        advice.prepare();
-        advice.updateComms();
+        ASKAPLOG_INFO_STR(logger,"In local solver mode - reprocessing allocations)");
+        itsAdvisor->updateComms();
         int myMinClient = itsComms.rank();
         int myMaxClient = itsComms.rank();
 
@@ -222,7 +224,7 @@ void ContinuumWorker::run(void)
             // If a client is missing entirely from the list - the cube will be missing
             // channels - but they will be correctly labelled
             this->baseCubeGlobalChannel = (myMinClient - 1)*nchanpercore;
-            this->baseCubeFrequency = advice.getBaseFrequencyAllocation((myMinClient - 1));
+            this->baseCubeFrequency = itsAdvisor->getBaseFrequencyAllocation((myMinClient - 1));
             // e.g
             // bottom client rank is 4 - top client is 7
             // we have 4 chanpercore
@@ -233,11 +235,11 @@ void ContinuumWorker::run(void)
             ASKAPLOG_INFO_STR(logger,"Number of channels in cube is: " << this->nchanCube );
             ASKAPLOG_INFO_STR(logger,"Base global channel of cube is " << this->baseCubeGlobalChannel);
         }
-        this->baseFrequency = advice.getBaseFrequencyAllocation(itsComms.rank()-1);
+        this->baseFrequency = itsAdvisor->getBaseFrequencyAllocation(itsComms.rank()-1);
     }
     ASKAPLOG_INFO_STR(logger,"Adding missing parameters");
 
-    advice.addMissingParameters();
+    itsAdvisor->addMissingParameters();
 
     if (workUnits.size()>=1 || itsComms.isWriter()) {
 
@@ -336,29 +338,17 @@ void ContinuumWorker::processWorkUnit(ContinuumWorkUnit& wu)
 
         sprintf(ChannelPar,"[1,1]");
     }
-    // ASKAPLOG_INFO_STR(logger,"Parset Reports: (before replace)" << (itsParset.getStringVector("dataset", true)));
 
-    // unitParset.replace("dataset",wu.get_dataset());
-    // ASKAPLOG_INFO_STR(logger,"Parset Reports: (after replace)" << (itsParset.getStringVector("dataset", true)));
-    // ASKAPLOG_INFO_STR(logger,"Parset Reports nUVW: (after replace)" << (itsParset.getInt("nUVWMachines",3)));
     unitParset.replace("Channels",ChannelPar);
 
-
     ASKAPLOG_INFO_STR(logger,"Getting advice on missing parameters");
-    synthesis::AdviseDI diadvise(itsComms,unitParset);
 
-    /// this is running prepare and it should not have to.
-    /// currently everyone is calulating the allocations superflously why has
-    /// this complication developed clean it up ?
-
-    diadvise.prepare();
-    diadvise.addMissingParameters();
-    ASKAPLOG_INFO_STR(logger,"advice received");
+    itsAdvisor->addMissingParameters(unitParset);
 
     ASKAPLOG_INFO_STR(logger,"Storing workUnit");
     workUnits.push_back(wu);
     ASKAPLOG_INFO_STR(logger,"Storing parset");
-    itsParsets.push_back(diadvise.getParset());
+    itsParsets.push_back(unitParset);
     ASKAPLOG_INFO_STR(logger,"Finished processWorkUnit");
     ASKAPLOG_INFO_STR(logger,"Parset Reports (leaving processWorkUnit): " << (itsParset.getStringVector("dataset", true)));
 

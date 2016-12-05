@@ -495,7 +495,10 @@ int AdviseDI::match(int ms_number, casa::MVFrequency testFreq) {
 
 
 }
-void AdviseDI::addMissingParameters()
+void AdviseDI::addMissingParameters() {
+    this->addMissingParameters(this->itsParset);
+}
+void AdviseDI::addMissingParameters(LOFAR::ParameterSet& parset)
 {
 
     ASKAPLOG_INFO_STR(logger,"Adding missing params ");
@@ -516,7 +519,7 @@ void AdviseDI::addMissingParameters()
         this->minFrequency = (*begin_it).getValue();
         this->maxFrequency = (*end_it).getValue();
         ASKAPLOG_INFO_STR(logger,"Min:Max frequency -- " << this->minFrequency << ":" << this->maxFrequency);
-        
+
 
     }
 
@@ -530,11 +533,11 @@ void AdviseDI::addMissingParameters()
    string param;
 
 
-   const vector<string> imageNames = itsParset.getStringVector("Images.Names", false);
+   const vector<string> imageNames = parset.getStringVector("Images.Names", false);
 
    param = "Images.direction";
 
-   if ( !itsParset.isDefined(param) ) {
+   if ( !parset.isDefined(param) ) {
        std::ostringstream pstr;
        // Only J2000 is implemented at the moment.
        pstr<<"["<<printLon(itsTangent[0])<<", "<<printLat(itsTangent[0])<<", J2000]";
@@ -543,35 +546,35 @@ void AdviseDI::addMissingParameters()
    }
    param = "Images.restFrequency";
 
-   if ( !itsParset.isDefined(param) ) {
+   if ( !parset.isDefined(param) ) {
        std::ostringstream pstr;
        // Only J2000 is implemented at the moment.
        pstr<<"HI";
        ASKAPLOG_INFO_STR(logger, "  Advising on parameter " << param << ": " << pstr.str().c_str());
-       itsParset.add(param, pstr.str().c_str());
+       parset.add(param, pstr.str().c_str());
    }
 
    for (size_t img = 0; img < imageNames.size(); ++img) {
 
        param = "Images."+imageNames[img]+".cellsize";
-       if ( !itsParset.isDefined(param) ) {
+       if ( !parset.isDefined(param) ) {
            cellsizeNeeded = true;
        }
        else {
             param = "Images.cellsize";
-            if (!itsParset.isDefined(param) ) {
-                const vector<string> cellSizeVector = itsParset.getStringVector("Images.cellsize");
+            if (!parset.isDefined(param) ) {
+                const vector<string> cellSizeVector = parset.getStringVector("Images.cellsize");
                 std::ostringstream pstr;
                 pstr<<"["<< cellSizeVector[0].c_str() <<"arcsec,"<<cellSizeVector[1].c_str() <<"arcsec]";
                 ASKAPLOG_INFO_STR(logger, "  Advising on parameter " << param <<": " << pstr.str().c_str());
-                itsParset.add(param, pstr.str().c_str());
+                parset.add(param, pstr.str().c_str());
             }
        }
        param = "Images."+imageNames[img]+".shape";
-       if ( !itsParset.isDefined(param) ) shapeNeeded = true;
+       if ( !parset.isDefined(param) ) shapeNeeded = true;
 
        param = "Images."+imageNames[img]+".frequency";
-       if ( !itsParset.isDefined(param) && isPrepared == true) {
+       if ( !parset.isDefined(param) && isPrepared == true) {
 
            const string key="Images."+imageNames[img]+".frequency";
            char tmp[64];
@@ -580,59 +583,59 @@ void AdviseDI::addMissingParameters()
            sprintf(tmp,"[%f,%f]",aveFreq,aveFreq);
            string val = string(tmp);
            ASKAPLOG_INFO_STR(logger, "  Advising on parameter " << param <<": " << val);
-           itsParset.add(key,val);
+           parset.add(key,val);
 
        }
        param ="Images."+imageNames[img]+".direction";
-       if ( !itsParset.isDefined(param) ) {
+       if ( !parset.isDefined(param) ) {
            std::ostringstream pstr;
            // Only J2000 is implemented at the moment.
            pstr<<"["<<printLon(itsTangent[0])<<", "<<printLat(itsTangent[0])<<", J2000]";
            ASKAPLOG_INFO_STR(logger, "  Advising on parameter " << param << ": " << pstr.str().c_str());
-           itsParset.add(param, pstr.str().c_str());
+           parset.add(param, pstr.str().c_str());
        }
        param = "Images."+imageNames[img]+".nterms"; // if nterms is set, store it for later
-       if (itsParset.isDefined(param)) {
+       if (parset.isDefined(param)) {
            if ((nTerms>1) && (nTerms!=itsParset.getInt(param))) {
                ASKAPLOG_WARN_STR(logger, "  Imaging with different nterms may not work");
            }
            nTerms = itsParset.getInt(param);
        }
 
-       if ( !itsParset.isDefined("Images."+imageNames[img]+".nchan") ) {
+       if ( !parset.isDefined("Images."+imageNames[img]+".nchan") ) {
 
        }
    }
 
    if (nTerms > 1) { // check required MFS parameters
        param = "visweights"; // set to "MFS" if unset and nTerms > 1
-       if (!itsParset.isDefined(param)) {
+       if (!parset.isDefined(param)) {
            std::ostringstream pstr;
            pstr<<"MFS";
            ASKAPLOG_DEBUG_STR(logger, "  Advising on parameter " << param <<": " << pstr.str().c_str());
-           itsParset.add(param, pstr.str().c_str());
+           parset.add(param, pstr.str().c_str());
        }
 
        param = "visweights.MFS.reffreq"; // set to average frequency if unset and nTerms > 1
-       if ((itsParset.getString("visweights")=="MFS")) {
+       if ((parset.getString("visweights")=="MFS")) {
            if (!itsParset.isDefined(param)) {
                char tmp[64];
                const double aveFreq = 0.5*(minFrequency+maxFrequency);
                sprintf(tmp,"%f",aveFreq);
                string val = string(tmp);
                ASKAPLOG_DEBUG_STR(logger, "  Advising on parameter " << param <<": " << val);
-               itsParset.add(param,val);
+               parset.add(param,val);
            }
 
        }
    }
 
    // test for general missing parameters:
-   if ( cellsizeNeeded && !itsParset.isDefined("nUVWMachines") ) {
+   if ( cellsizeNeeded && !parset.isDefined("nUVWMachines") ) {
 
-   } else if ( cellsizeNeeded && !itsParset.isDefined("Images.cellsize") ) {
+   } else if ( cellsizeNeeded && !parset.isDefined("Images.cellsize") ) {
 
-   } else if ( shapeNeeded && !itsParset.isDefined("Images.shape") ) {
+   } else if ( shapeNeeded && !parset.isDefined("Images.shape") ) {
 
    }
    ASKAPLOG_INFO_STR(logger,"Done adding missing params ");

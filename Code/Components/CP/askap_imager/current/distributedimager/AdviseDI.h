@@ -82,7 +82,12 @@ namespace askap {
             /// @details Add whatever details we require for both master and
             /// worker implementations
 
+            void addMissingParameters(LOFAR::ParameterSet& parset);
+
             void addMissingParameters();
+            
+
+
 
             /// @brief Access to the parset
             /// @details Returns the current parset after advice

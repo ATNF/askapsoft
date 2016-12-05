@@ -32,7 +32,7 @@
 #include <string>
 
 // ASKAPsoft includes
-
+#include "boost/shared_ptr.hpp"
 #include <Common/ParameterSet.h>
 #include <fitting/INormalEquations.h>
 #include <fitting/Params.h>
@@ -40,7 +40,7 @@
 #include <gridding/IVisGridder.h>
 
 // Local includes
-
+#include "distributedimager/AdviseDI.h"
 #include "distributedimager/MSSplitter.h"
 #include "distributedimager/CalcCore.h"
 #include "messages/ContinuumWorkUnit.h"
@@ -61,6 +61,9 @@ class ContinuumWorker
 
 
     private:
+
+        // My Advisor
+        boost::shared_ptr<synthesis::AdviseDI> itsAdvisor;
          // The work units
         vector<ContinuumWorkUnit> workUnits;
 
