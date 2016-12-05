@@ -57,10 +57,7 @@ FluxGenerator::FluxGenerator(size_t numChan, size_t numStokes)
     ASKAPASSERT(numStokes >= 1);
     this->itsNChan = numChan;
     this->itsNStokes = numStokes;
-    this->itsFluxValues = std::vector< std::vector<float> >(numStokes);
-    for (size_t s = 0; s < numStokes; s++) {
-        this->itsFluxValues[s] = std::vector<float>(numChan, 0.);
-    }
+    this->itsFluxValues = std::vector<float>(numStokes*numChan,0.);
 }
 
 FluxGenerator::FluxGenerator(const FluxGenerator& f)
@@ -82,29 +79,21 @@ void FluxGenerator::setNumChan(size_t numChan)
 {
     ASKAPASSERT(numChan >= 0);
     this->itsNChan = numChan;
-    this->itsFluxValues = std::vector< std::vector<float> >(itsNStokes);
-    for (size_t s = 0; s < this->itsNStokes; s++) {
-        this->itsFluxValues[s] = std::vector<float>(numChan, 0.);
-    }
+    this->itsFluxValues = std::vector<float>(itsNStokes*numChan,0.);
 }
 
 void FluxGenerator::setNumStokes(size_t numStokes)
 {
     ASKAPASSERT(numStokes >= 1);
     this->itsNStokes = numStokes;
-    this->itsFluxValues = std::vector< std::vector<float> >(numStokes);
-    if (this->itsNChan > 0) {
-        for (size_t s = 0; s < this->itsNStokes; s++) {
-            this->itsFluxValues[s] = std::vector<float>(this->itsNChan, 0.);
-        }
-    }
+    this->itsFluxValues = std::vector<float>(numStokes*itsNChan,0.);
 }
 
 void FluxGenerator::zero()
 {
     for (size_t s = 0; s < this->itsNStokes; s++) {
         for (size_t c = 0; c < this->itsNChan; c++) {
-            this->itsFluxValues[s][c] = 0.;
+            this->itsFluxValues[s+c*itsNStokes] = 0.;
         }
     }
 }
@@ -129,7 +118,7 @@ void FluxGenerator::addSpectrum(boost::shared_ptr<Spectrum> &spec,
 
     for (size_t istokes = 0; istokes < this->itsNStokes; istokes++) {
         for (size_t z = 0; z < this->itsNChan; z++) {
-            this->itsFluxValues[istokes][z] += spec->flux(wld[3 * z + 2], istokes);
+            this->itsFluxValues[istokes+z*itsNStokes] += spec->flux(wld[3 * z + 2], istokes);
         }
     }
 
@@ -166,7 +155,7 @@ void FluxGenerator::addSpectrumInt(boost::shared_ptr<Spectrum> &spec,
             else df = fabs(wld[i] - wld[i - 3]);
 
 //            ASKAPLOG_DEBUG_STR(logger,"addSpectrumInt: freq="<<wld[i]<<", df="<<df<<", getting flux between "<<wld[i]-df/2.<<" and " <<wld[i]+df/2.);
-            this->itsFluxValues[istokes][z] += spec->fluxInt(wld[i] - df / 2., wld[i] + df / 2.,
+            this->itsFluxValues[istokes+z*itsNStokes] += spec->fluxInt(wld[i] - df / 2., wld[i] + df / 2.,
                                                istokes);
 //            ASKAPLOG_DEBUG_STR(logger, "flux is now " << this->itsFluxValues[istokes][z]);
             i += 3;

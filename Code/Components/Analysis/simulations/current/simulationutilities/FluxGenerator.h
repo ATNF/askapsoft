@@ -99,15 +99,15 @@ class FluxGenerator {
                             double &x, double &y, struct wcsprm *wcs);
 
         /// @brief Return the flux in channel i and Stokes plane s
-        float getFlux(size_t i, size_t s = 0) {return itsFluxValues.at(s).at(i);};
+        float getFlux(size_t i, size_t s = 0) {return itsFluxValues.at(s+itsNStokes*i);};
 
     protected:
         /// @brief Number of channels
         size_t itsNChan;
         /// Number of Stokes parameters
         size_t itsNStokes;
-        /// @brief The set of flux values for each channel & Stokes parameter
-        std::vector< std::vector<float> > itsFluxValues;
+        /// @brief The set of flux values for each channel & Stokes parameter. Stokes axis varies fastest
+        std::vector<float> itsFluxValues;
 
 };
 

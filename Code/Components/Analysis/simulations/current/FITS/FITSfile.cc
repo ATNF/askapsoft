@@ -1148,12 +1148,12 @@ void FITSfile::writeCASAimage(bool createFile, bool saveData, bool useOffset)
         std::string newName = casafy(itsFileName);
         casa::IPosition shape(itsDim);
         casa::IPosition ttshape;
+        int nstokes = this->getNumStokes();
 
         for (uint i = 0; i < itsDim; i++) shape(i) = itsAxes[i];
 
         if (createFile) {
 
-            int nstokes = this->getNumStokes();
             ASKAPLOG_DEBUG_STR(logger, "Dimension of stokes axis = " << nstokes <<
                                ", databaseOrigin = " << itsDatabaseOrigin);
             casa::IPosition tileshape(shape.size(), 1);
@@ -1222,7 +1222,7 @@ void FITSfile::writeCASAimage(bool createFile, bool saveData, bool useOffset)
                             size_t spatsize = itsAxes[itsWCS->lat] *
                                               itsAxes[itsWCS->lng];
                             // Array<Float> arr(shape, itsArray.data() + z * spatsize, casa::SHARE);
-                            Array<Float> arr(shape, itsArray.get() + z * spatsize, casa::SHARE);
+                            Array<Float> arr(shape, itsArray.get() + nstokes*z * spatsize, casa::SHARE);
                             img.putSlice(arr, location);
                             location(itsWCS->spec)++;
 
@@ -1359,6 +1359,7 @@ void FITSfile::defineTaylorTerms()
 
         const size_t xlen = itsAxes[itsWCS->lng];
         const size_t ylen = itsAxes[itsWCS->lat];
+        const size_t stlen = getNumStokes();
         casa::IPosition outpos(shape.size(), 0);
         for (size_t y = 0; y < ylen; y++) {
             outpos[1] = y;
@@ -1366,6 +1367,7 @@ void FITSfile::defineTaylorTerms()
             for (size_t x = 0; x < xlen; x++) {
                 outpos[0] = x;
 
+                // spatial position
                 size_t pos = x + y * xlen;
 
                 if (pos % int(xlen * ylen * itsTTlogevery / 100.) == 0) {
@@ -1376,7 +1378,8 @@ void FITSfile::defineTaylorTerms()
 
                 if (itsArray[pos] > 1.e-20) {
                     for (size_t i = 0; i < ndata; i++) {
-                        gsl_vector_set(ydat, i, log(itsArray[pos + i * xlen * ylen]));
+                        // assume just first stokes axis
+                        gsl_vector_set(ydat, i, log(itsArray[pos + i * xlen * ylen * stlen]));
                     }
                     gsl_multifit_linear_workspace * work = gsl_multifit_linear_alloc(ndata,
                                                            degree);
