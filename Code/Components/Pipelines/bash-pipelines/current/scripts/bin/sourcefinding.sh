@@ -71,7 +71,7 @@ NUM_TAYLOR_TERMS=${NUM_TAYLOR_TERMS}
 # List of images to convert to FITS in the Selavy job
 imlist=""
 
-image=${OUTPUT}/{imageName}
+image=${OUTPUT}/${imageName}
 weights=${OUTPUT}/${weightsImage}
 imlist="\${imlist} \${image}"
 if [ \$NUM_TAYLOR_TERMS -gt 1 ]; then
