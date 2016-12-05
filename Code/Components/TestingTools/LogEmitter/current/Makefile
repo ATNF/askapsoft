@@ -20,7 +20,7 @@ clean:
 	rbuild $(RBUILD_FLAGS) -t clean
 	find . -type f -name '*.pyc' -exec rm -f {} +
 	find . -type f -name '*.log' -exec rm -f {} +
-	rm -f ./doxy.conf.tmp ./options.cache ./askap_logmsgemitter.*
+	rm -f ./doxy.conf.tmp ./options.cache ./askap_logemitter.*
 
 .PHONY: all
 all: install
