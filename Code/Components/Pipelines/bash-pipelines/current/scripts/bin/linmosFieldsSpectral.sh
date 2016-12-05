@@ -75,7 +75,7 @@ cd $OUTPUT
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 
-IMAGE_BASE_CONT=${IMAGE_BASE_SPECTRAL}
+IMAGE_BASE_SPECTRAL=${IMAGE_BASE_SPECTRAL}
 SB_SCIENCE=${SB_SCIENCE}
 
 FIELD_LIST="$FIELD_LIST"

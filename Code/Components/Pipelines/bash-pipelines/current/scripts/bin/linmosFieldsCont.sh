@@ -76,7 +76,7 @@ sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 
 NUM_TAYLOR_TERMS=${NUM_TAYLOR_TERMS}
-maxterm=\`echo \$nterms | awk '{print 2*\$1-1}'\`
+maxterm=\`echo \${NUM_TAYLOR_TERMS} | awk '{print 2*\$1-1}'\`
 IMAGE_BASE_CONT=${IMAGE_BASE_CONT}
 SB_SCIENCE=${SB_SCIENCE}
 
