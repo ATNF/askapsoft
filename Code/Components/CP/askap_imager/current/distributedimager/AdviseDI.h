@@ -93,11 +93,11 @@ namespace askap {
             std::vector<std::string> getDatasets();
 
             ///
-            casa::MVDirection getTangent() {return itsTangent;};
+            casa::MVDirection getTangent(int ms=0) {return itsTangent[ms];};
 
-            casa::MVEpoch getEpoch() {return itsEpoch; };
+            casa::MVEpoch getEpoch(int ms=0) {return itsEpoch[ms]; };
 
-            casa::MPosition getPosition() {return itsPosition; };
+            casa::MPosition getPosition(int ms=0) {return itsPosition[ms]; };
 
             vector<casa::MFrequency> getBaryFrequencies() {return itsBaryFrequencies;};
 
@@ -142,13 +142,13 @@ namespace askap {
 
             bool constChanWidth;
 
-            casa::MVDirection itsTangent;
+            std::vector<casa::MVDirection> itsTangent;
 
-            casa::Vector<casa::MDirection> itsDirVec;
+            std::vector<casa::Vector<casa::MDirection> > itsDirVec;
 
-            casa::MVEpoch itsEpoch;
+            std::vector<casa::MVEpoch> itsEpoch;
 
-            casa::MPosition itsPosition;
+            std::vector<casa::MPosition> itsPosition;
 
             std::vector< std::vector<double> > chanFreq;
             std::vector< std::vector<double> > chanWidth;

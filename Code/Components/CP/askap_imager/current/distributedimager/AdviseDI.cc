@@ -121,7 +121,7 @@ void AdviseDI::prepare() {
     ASKAPLOG_INFO_STR(logger,"Running prepare");
     // Read from the configruation the list of datasets to process
     const vector<string> ms = getDatasets();
-
+    ASKAPLOG_INFO_STR(logger,"Data set list is " << ms);
     unsigned int nWorkers = itsComms.nProcs() - 1;
     ASKAPLOG_DEBUG_STR(logger, "nWorkers " << nWorkers);
 
@@ -185,53 +185,43 @@ void AdviseDI::prepare() {
 
         totChanIn = totChanIn + thisChanIn;
 
+        itsDirVec.push_back(fc.phaseDirMeasCol()(0));
+        itsTangent.push_back(itsDirVec[n](0).getValue());
 
-        if (n == 0) {
-            itsDirVec = fc.phaseDirMeasCol()(0);
-            itsTangent = itsDirVec(0).getValue();
+        // Read the position on Antenna 0
+        Array<casa::Double> posval;
+        ants.get(0,posval,true);
+        vector<double> pval = posval.tovector();
 
-            // Read the position on Antenna 0
-            Array<casa::Double> posval;
-            ants.get(0,posval,true);
-            vector<double> pval = posval.tovector();
+        MVPosition mvobs(Quantity(pval[0], "m").getBaseValue(),
+        Quantity(pval[1], "m").getBaseValue(),
+        Quantity(pval[2], "m").getBaseValue());
 
-            MVPosition mvobs(Quantity(pval[0], "m").getBaseValue(),
-            Quantity(pval[1], "m").getBaseValue(),
-            Quantity(pval[2], "m").getBaseValue());
+        itsPosition.push_back(MPosition(mvobs,casa::MPosition::ITRF));
 
-            itsPosition = MPosition(mvobs,casa::MPosition::ITRF);
+        // Get the Epoch
+        Array<casa::Double> tval;
+        vector<double> tvals;
 
-            // Get the Epoch
-            Array<casa::Double> tval;
-            vector<double> tvals;
+        times.get(0,tval,true);
+        tvals = tval.tovector();
+        double mjd = tvals[0]/(86400.);
+        casa::MVTime dat(mjd);
 
-            times.get(0,tval,true);
-            tvals = tval.tovector();
-            double mjd = tvals[0]/(86400.);
-            casa::MVTime dat(mjd);
+        itsEpoch.push_back(MVEpoch(dat.day()));
 
-            itsEpoch = MVEpoch(dat.day());
+        itsRef = thisRef;
 
-            itsRef = thisRef;
-        }
-        else {
-           ASKAPLOG_WARN_STR(logger,"Assuming subsequent measurement sets share Epoch,Position and Direction");
-        }
         ASKAPLOG_DEBUG_STR(logger, "Completed filecount " << n);
     }
 
 
-    ASKAPLOG_INFO_STR(logger, "Assuming tangent point: "<<printDirection(itsTangent)<<" (J2000)");
+    ASKAPLOG_INFO_STR(logger, "Assuming tangent point shared: "<<printDirection(itsTangent[0])<<" (J2000)");
 
 
 
     // Lets build a barycentric channel list
-    MeasFrame itsFrame(MEpoch(itsEpoch),itsPosition,itsDirVec[0]);
-    MFrequency::Ref refin(MFrequency::castType(itsRef),itsFrame);
-    MFrequency::Ref refout(MFrequency::BARY,itsFrame);
 
-    MFrequency::Convert forw(refin,refout);
-    MFrequency::Convert backw(refout,refin);
 
     itsBaryFrequencies.resize(0);
     itsTopoFrequencies.resize(0);
@@ -252,10 +242,19 @@ void AdviseDI::prepare() {
     itsAllocatedWork.resize(nWorkers);
 
     for (unsigned int n = 0; n < ms.size(); ++n) {
+
+        MeasFrame itsFrame(MEpoch(itsEpoch[n]),itsPosition[n],itsDirVec[n][0]);
+        MFrequency::Ref refin(MFrequency::castType(itsRef),itsFrame);
+        MFrequency::Ref refout(MFrequency::BARY,itsFrame);
+        MFrequency::Convert forw(refin,refout);
+        MFrequency::Convert backw(refout,refin);
+
+        // builds a list of all the barycentric channels
+
         for (unsigned int ch = 0; ch < chanFreq[n].size(); ++ch) {
+
             itsBaryFrequencies.push_back(forw(chanFreq[n][ch]).getValue());
             itsTopoFrequencies.push_back(MFrequency(MVFrequency(chanFreq[n][ch]),refin));
-
 
             if (barycentre) {
                 // correct the internal arrays
@@ -394,8 +393,11 @@ void AdviseDI::prepare() {
 
 
     unsigned int nWorkersPerWriter = floor(itsAllocatedWork.size() / nwriters);
+    int mywriter = 0;
     for (int wrk = 0; wrk < itsAllocatedWork.size(); wrk++) {
-        int mywriter = floor(wrk/nWorkersPerWriter)*nWorkersPerWriter;
+        if (nwriters>1) {
+            mywriter = floor(wrk/nWorkersPerWriter)*nWorkersPerWriter;
+        }
         bool has_work = false;
         while (has_work == false) {
             for (int unit = 0; unit < itsAllocatedWork[mywriter].size(); unit++) {
@@ -514,11 +516,7 @@ void AdviseDI::addMissingParameters()
         this->minFrequency = (*begin_it).getValue();
         this->maxFrequency = (*end_it).getValue();
         ASKAPLOG_INFO_STR(logger,"Min:Max frequency -- " << this->minFrequency << ":" << this->maxFrequency);
-        // FIXME problem .... this is probably the wrong refFreq. It needs to be for the whole
-        // observation not just this allocation....
-        // Currently I fix this by forcing it to be set in the Parset - not optimal
-
-        // refFreq = 0.5*(minFrequency + maxFrequency);
+        
 
     }
 
@@ -539,7 +537,7 @@ void AdviseDI::addMissingParameters()
    if ( !itsParset.isDefined(param) ) {
        std::ostringstream pstr;
        // Only J2000 is implemented at the moment.
-       pstr<<"["<<printLon(itsTangent)<<", "<<printLat(itsTangent)<<", J2000]";
+       pstr<<"["<<printLon(itsTangent[0])<<", "<<printLat(itsTangent[0])<<", J2000]";
        ASKAPLOG_INFO_STR(logger, "  Advising on parameter " << param << ": " << pstr.str().c_str());
        itsParset.add(param, pstr.str().c_str());
    }
@@ -589,7 +587,7 @@ void AdviseDI::addMissingParameters()
        if ( !itsParset.isDefined(param) ) {
            std::ostringstream pstr;
            // Only J2000 is implemented at the moment.
-           pstr<<"["<<printLon(itsTangent)<<", "<<printLat(itsTangent)<<", J2000]";
+           pstr<<"["<<printLon(itsTangent[0])<<", "<<printLat(itsTangent[0])<<", J2000]";
            ASKAPLOG_INFO_STR(logger, "  Advising on parameter " << param << ": " << pstr.str().c_str());
            itsParset.add(param, pstr.str().c_str());
        }

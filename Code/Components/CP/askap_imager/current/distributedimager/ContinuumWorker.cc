@@ -140,6 +140,8 @@ void ContinuumWorker::run(void)
     while (1) {
 
         ContinuumWorkUnit wu;
+
+
         ASKAPLOG_DEBUG_STR(logger,"Worker is waiting for work allocation");
         wu.receiveUnitFrom(itsMaster,itsComms);
         if (wu.get_payloadType() == ContinuumWorkUnit::DONE) {
@@ -162,7 +164,9 @@ void ContinuumWorker::run(void)
                               << ", frequency " << wu.get_channelFrequency()/1.e6 << " MHz"
                               << ", width " << wu.get_channelWidth()/1e3 << " kHz");
             try {
+                ASKAPLOG_INFO_STR(logger,"Parset Reports (before): " << (itsParset.getStringVector("dataset", true)));
                 processWorkUnit(wu);
+                ASKAPLOG_INFO_STR(logger,"Parset Reports (after): " << (itsParset.getStringVector("dataset", true)));
             }
             catch (AskapError& e) {
                 ASKAPLOG_WARN_STR(logger, "Failure processing workUnit");
@@ -188,6 +192,7 @@ void ContinuumWorker::run(void)
     int nchanpercore = itsParset.getInt("nchanpercore",1);
 
     ASKAPLOG_INFO_STR(logger,"Getting basic advice");
+
     synthesis::AdviseDI advice(itsComms,itsParset);
 
     if (localSolver) {
@@ -261,6 +266,7 @@ void ContinuumWorker::processWorkUnit(ContinuumWorkUnit& wu)
     // This also needs to set the frequencies and directions for all the images
     ASKAPLOG_DEBUG_STR(logger,"In processWorkUnit");
     LOFAR::ParameterSet unitParset = itsParset;
+    ASKAPLOG_INFO_STR(logger,"Parset Reports: (In process workunit)" << (itsParset.getStringVector("dataset", true)));
 
     char ChannelPar[64];
 
@@ -330,7 +336,11 @@ void ContinuumWorker::processWorkUnit(ContinuumWorkUnit& wu)
 
         sprintf(ChannelPar,"[1,1]");
     }
-    unitParset.replace("dataset",wu.get_dataset());
+    // ASKAPLOG_INFO_STR(logger,"Parset Reports: (before replace)" << (itsParset.getStringVector("dataset", true)));
+
+    // unitParset.replace("dataset",wu.get_dataset());
+    // ASKAPLOG_INFO_STR(logger,"Parset Reports: (after replace)" << (itsParset.getStringVector("dataset", true)));
+    // ASKAPLOG_INFO_STR(logger,"Parset Reports nUVW: (after replace)" << (itsParset.getInt("nUVWMachines",3)));
     unitParset.replace("Channels",ChannelPar);
 
 
@@ -344,11 +354,13 @@ void ContinuumWorker::processWorkUnit(ContinuumWorkUnit& wu)
     diadvise.prepare();
     diadvise.addMissingParameters();
     ASKAPLOG_INFO_STR(logger,"advice received");
+
     ASKAPLOG_INFO_STR(logger,"Storing workUnit");
     workUnits.push_back(wu);
     ASKAPLOG_INFO_STR(logger,"Storing parset");
     itsParsets.push_back(diadvise.getParset());
     ASKAPLOG_INFO_STR(logger,"Finished processWorkUnit");
+    ASKAPLOG_INFO_STR(logger,"Parset Reports (leaving processWorkUnit): " << (itsParset.getStringVector("dataset", true)));
 
 }
 
@@ -574,7 +586,7 @@ void ContinuumWorker::buildSpectralCube() {
                 }
                 if (majorCycleNumber+1 > nCycles) {
                     ASKAPLOG_INFO_STR(logger,"Reached maximum majorcycle count");
-                
+
                 }
                 else {
 

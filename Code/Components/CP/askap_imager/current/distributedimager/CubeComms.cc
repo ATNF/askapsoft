@@ -90,9 +90,12 @@ void CubeComms::initWriters(int nwriters, int nchanpercore) {
         nWorkersPerWriter = 1;
     }
 
-
+    int mywriter = 1;
     for (int wrk = 0; wrk < nWorkersPerGroup; wrk=wrk+nWorkersPerWriter) {
-        int mywriter = floor(wrk/nWorkersPerWriter)*nWorkersPerWriter + 1;
+        if (nwriters > 1) {
+            mywriter = floor(wrk/nWorkersPerWriter)*nWorkersPerWriter + 1;
+        }
+
         std::pair<std::map<int,int>::iterator,bool> ret;
         ret = writerMap.insert(std::pair<int,int> (mywriter,writerCount) );
         if (ret.second==false) {
