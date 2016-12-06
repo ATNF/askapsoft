@@ -190,7 +190,6 @@ duchamp::Param parseParset(const LOFAR::ParameterSet& parset)
     par.setVOTFile(parset.getString("votFile", par.getVOTFile()));
     par.setFlagKarma(parset.getBool("flagKarma", false));
     par.setKarmaFile(parset.getString("karmaFile", par.getKarmaFile()));
-    par.setAnnotationType(parset.getString("annotationType",par.getAnnotationType()));
     par.setFlagDS9(parset.getBool("flagDS9", false));
     par.setDS9File(parset.getString("ds9File", par.getDS9File()));
     par.setFlagCasa(parset.getBool("flagCasa", false));
