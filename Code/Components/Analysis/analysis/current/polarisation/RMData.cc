@@ -107,7 +107,7 @@ void RMData::calculate(RMSynthesis *rmsynth)
 
         itsPintPeak = maxFDF;
         itsPintPeak_err = noise;
-        itsPintPeakEff = sqrt(maxFDF * maxFDF - 2.3 * noise);
+        itsPintPeakEff = sqrt(maxFDF * maxFDF - 2.3 * noise * noise);
 
         itsPhiPeak = phi_rmsynth(locMax);
         itsPhiPeak_err = RMSF_FWHM * noise / (2. * itsPintPeak);
@@ -121,11 +121,13 @@ void RMData::calculate(RMSynthesis *rmsynth)
                                                   phi_rmsynth(locMax+1),fdf_p(locMax+1));
             
             itsPintPeakFit = fit[2]-(fit[1]*fit[1])/(4. * fit[0]);
-            itsPhiPeakFit = -1. * fit[1] / (2. * fit[0]);
             // @todo The following is wrong, I think - should be normalised by the SNR, not the noise.
             // Check Condon+98
             //itsPintPeakFit_err = M_SQRT2 * fabs(itsPintPeakFit) / noise;
             itsPintPeakFit_err = noise;
+            itsPintPeakFitEff = sqrt(itsPintPeakFit * itsPintPeakFit - 2.3 * noise * noise);
+
+            itsPhiPeakFit = -1. * fit[1] / (2. * fit[0]);
             itsPhiPeakFit_err = RMSF_FWHM * noise / (2. * itsPintPeakFit);
 
         }
