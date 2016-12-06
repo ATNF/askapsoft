@@ -490,8 +490,7 @@ function convertToFITStext()
     # Check whether imageToFITS is defined in askapsoft module being
     # used
     if [ "`which imageToFITS 2> ${tmp}/whchim2fts`" == "" ]; then
-        # Not found - use casa to do conversion
-
+        # Not found - use casa to do conversion        
         fitsConvertText="# The following converts the file in \$casaim to a FITS file, after fixing headers.
 if [ -e \${casaim} ] && [ ! -e \${fitsim} ]; then
     # The FITS version of this image doesn't exist
@@ -500,9 +499,9 @@ if [ -e \${casaim} ] && [ ! -e \${fitsim} ]; then
     log=$logs/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.log
     ASKAPSOFT_VERSION=${ASKAPSOFT_VERSION}
     if [ \"\${ASKAPSOFT_VERSION}\" == \"\" ]; then
-        ASKAPSOFT_VERSION_USED=`module list -t 2>&1 | grep askapsoft`
+        ASKAPSOFT_VERSION_USED=\`module list -t 2>&1 | grep askapsoft\`
     else
-        ASKAPSOFT_VERSION_USED=`echo \${ASKAPSOFT_VERSION} | sed -e 's|/||g'`
+        ASKAPSOFT_VERSION_USED=\`echo \${ASKAPSOFT_VERSION} | sed -e 's|/||g'\`
     fi
 
     cat > \$script << EOFSCRIPT
@@ -543,10 +542,11 @@ if [ -e \${casaim} ] && [ ! -e \${fitsim} ]; then
 
     parset=$parsets/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.in
     log=$logs/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.log
+    ASKAPSOFT_VERSION=${ASKAPSOFT_VERSION}
     if [ \"${ASKAPSOFT_VERSION}\" == \"\" ]; then
-        ASKAPSOFT_VERSION_USED=`module list -t 2>&1 | grep askapsoft`
+        ASKAPSOFT_VERSION_USED=\`module list -t 2>&1 | grep askapsoft\`
     else
-        ASKAPSOFT_VERSION_USED=`echo ${ASKAPSOFT_VERSION} | sed -e 's|/||g'`
+        ASKAPSOFT_VERSION_USED=\`echo \${ASKAPSOFT_VERSION} | sed -e 's|/||g'\`
     fi
 
     cat > \$parset << EOFINNER

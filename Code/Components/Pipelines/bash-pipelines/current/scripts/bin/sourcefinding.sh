@@ -2,7 +2,7 @@
 #
 # Launches a job to create a catalogue of sources in the continuum image.
 #
-# @copyright (c) 2015 CSIRO
+# @copyright (c) 2016 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -32,7 +32,16 @@ if [ $DO_SOURCE_FINDING == true ]; then
     # get the text that does the FITS conversion - put in $fitsConvertText
     convertToFITStext
 
-    setJob science_selavy selavy
+    # This adds L1, L2, etc to the job name when LOOP is defined and
+    # >0 (we are running the sourcefinding on the selfcal loop mosaics)
+    description=selavy
+    if [ "$LOOP" != "" ]; then
+       if [ $LOOP -gt 0 ]; then
+           description=selavyL${LOOP}
+       fi
+    fi
+    
+    setJob science_selavy_${imageName} $description
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -57,12 +66,10 @@ cd $OUTPUT
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 
-seldir=selavy_${imageBase}
+seldir=selavy_${imageName}
 mkdir -p \$seldir
 
 cd \${seldir}
-ln -s ${logs} .
-ln -s ${parsets} .
 
 HAVE_IMAGES=true
 BEAM=$BEAM
@@ -75,11 +82,11 @@ image=${OUTPUT}/${imageName}
 weights=${OUTPUT}/${weightsImage}
 imlist="\${imlist} \${image}"
 if [ \$NUM_TAYLOR_TERMS -gt 1 ]; then
-    t1im=`echo $image | sed -e 's/taylor\.0/taylor\.1/g'`
+    t1im=\`echo \$image | sed -e 's/taylor\.0/taylor\.1/g'\`
     if [ -e ${OUTPUT}/\${t1im} ]; then
         imlist="\${imlist} ${OUTPUT}/\${t1im}"
     fi
-    t2im=`echo $image | sed -e 's/taylor\.0/taylor\.2/g'`
+    t2im=\`echo \$image | sed -e 's/taylor\.0/taylor\.2/g'\`
     if [ -e ${OUTPUT}/\${t2im} ]; then
         imlist="\${imlist} ${OUTPUT}/\${t2im}"
     fi
