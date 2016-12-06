@@ -129,6 +129,7 @@ class SourceDataExtractor {
         int  itsLatAxis;
         int  itsSpcAxis;
         int  itsStkAxis;
+    casa::Unit itsInputUnits;
 
     casa::TableRecord itsMiscInfo;
 };

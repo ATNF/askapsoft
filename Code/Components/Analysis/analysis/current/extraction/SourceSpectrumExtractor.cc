@@ -81,111 +81,122 @@ SourceSpectrumExtractor::SourceSpectrumExtractor(const LOFAR::ParameterSet& pars
     itsFlagDoScale = parset.getBool("scaleSpectraByBeam", true);
     itsBeamLog = parset.getString("beamLog", "");
 
-    this->initialiseArray();
+    for (size_t stokes = 0; stokes < itsStokesList.size(); stokes++) {
+        itsCurrentStokes = itsStokesList[stokes];
+        itsInputCube = itsCubeStokesMap[itsCurrentStokes];
+        this->initialiseArray();
+    }
 
 }
 
 
 void SourceSpectrumExtractor::setBeamScale()
 {
+    for (size_t stokes = 0; stokes < itsStokesList.size(); stokes++) {
 
-    itsBeamScaleFactor = std::vector<float>();
+        // get either the matching image for the current stokes value,
+        // or the first&only in the input list
+        itsCurrentStokes = itsStokesList[stokes];
+        itsInputCube = itsCubeStokesMap[itsCurrentStokes];
 
-    if (itsFlagDoScale) {
+        itsBeamScaleFactor[itsCurrentStokes] = std::vector<float>();
+        ASKAPLOG_DEBUG_STR(logger, "About to find beam scale for Stokes " << itsCurrentStokes << " and image " << itsInputCube);
 
-        if (this->openInput()) {
+        if (itsFlagDoScale) {
+            
+            if (this->openInput()) {
 
-            std::vector< casa::Vector<Quantum<Double> > > beamvec;
+                std::vector< casa::Vector<Quantum<Double> > > beamvec;
 
-            casa::Vector<Quantum<Double> >
-            inputBeam = itsInputCubePtr->imageInfo().restoringBeam().toVector();
+                casa::Vector<Quantum<Double> >
+                    inputBeam = itsInputCubePtr->imageInfo().restoringBeam().toVector();
 
-            ASKAPLOG_DEBUG_STR(logger, "Setting beam scaling factor. BeamLog=" <<
-                               itsBeamLog << ", image beam = " << inputBeam);
+                ASKAPLOG_DEBUG_STR(logger, "Setting beam scaling factor. BeamLog=" <<
+                                   itsBeamLog << ", image beam = " << inputBeam);
 
-            if (itsBeamLog == "") {
-                if (inputBeam.size() == 0) {
-                    ASKAPLOG_WARN_STR(logger, "Input image \"" << itsInputCube <<
-                                      "\" has no beam information. Not scaling spectra by beam");
-                    itsBeamScaleFactor.push_back(1.);
-                } else {
-                    beamvec.push_back(inputBeam);
-                    ASKAPLOG_DEBUG_STR(logger, "Beam for input cube = " << inputBeam);
-                }
-            } else {
-                accessors::BeamLogger beamlog(itsBeamLog);
-                beamlog.read();
-                beamvec = beamlog.beamlist();
-
-                if (int(beamvec.size()) != itsInputCubePtr->shape()(itsSpcAxis)) {
-                    ASKAPLOG_ERROR_STR(logger, "Beam log " << itsBeamLog <<
-                                       " has " << beamvec.size() <<
-                                       " entries - was expecting " <<
-                                       itsInputCubePtr->shape()(itsSpcAxis));
-                    beamvec = std::vector< Vector<Quantum<Double> > >(1, inputBeam);
-                }
-            }
-
-            if (beamvec.size() > 0) {
-
-                for (size_t i = 0; i < beamvec.size(); i++) {
-
-                    int dirCoNum = itsInputCoords.findCoordinate(casa::Coordinate::DIRECTION);
-                    casa::DirectionCoordinate
-                    dirCoo = itsInputCoords.directionCoordinate(dirCoNum);
-                    double fwhmMajPix = beamvec[i][0].getValue(dirCoo.worldAxisUnits()[0]) /
-                                        fabs(dirCoo.increment()[0]);
-                    double fwhmMinPix = beamvec[i][1].getValue(dirCoo.worldAxisUnits()[1]) /
-                                        fabs(dirCoo.increment()[1]);
-
-                    if (itsFlagUseDetection) {
-                        double bpaDeg = beamvec[i][2].getValue("deg");
-                        duchamp::DuchampBeam beam(fwhmMajPix, fwhmMinPix, bpaDeg);
-                        itsBeamScaleFactor.push_back(beam.area());
-                        if (itsBeamLog == "") {
-                            ASKAPLOG_DEBUG_STR(logger, "Beam scale factor = " <<
-                                               itsBeamScaleFactor << " using beam of " <<
-                                               fwhmMajPix << "x" << fwhmMinPix);
-                        }
+                if (itsBeamLog == "") {
+                    if (inputBeam.size() == 0) {
+                        ASKAPLOG_WARN_STR(logger, "Input image \"" << itsInputCube <<
+                                          "\" has no beam information. Not scaling spectra by beam");
+                        itsBeamScaleFactor[itsCurrentStokes].push_back(1.);
                     } else {
+                        beamvec.push_back(inputBeam);
+                        ASKAPLOG_DEBUG_STR(logger, "Beam for input cube = " << inputBeam);
+                    }
+                } else {
+                    accessors::BeamLogger beamlog(itsBeamLog);
+                    beamlog.read();
+                    beamvec = beamlog.beamlist();
 
-                        double costheta = cos(beamvec[i][2].getValue("rad"));
-                        double sintheta = sin(beamvec[i][2].getValue("rad"));
-
-                        double majSDsq = fwhmMajPix * fwhmMajPix / 8. / M_LN2;
-                        double minSDsq = fwhmMinPix * fwhmMinPix / 8. / M_LN2;
-
-                        int hw = (itsBoxWidth - 1) / 2;
-                        double scaleFactor = 0.;
-                        for (int y = -hw; y <= hw; y++) {
-                            for (int x = -hw; x <= hw; x++) {
-                                double u = x * costheta + y * sintheta;
-                                double v = x * sintheta - y * costheta;
-                                scaleFactor += exp(-0.5 * (u * u / majSDsq + v * v / minSDsq));
-                            }
-                        }
-                        itsBeamScaleFactor.push_back(scaleFactor);
-
-                        if (itsBeamLog == "") {
-                            ASKAPLOG_DEBUG_STR(logger, "Beam scale factor = " <<
-                                               itsBeamScaleFactor);
-                        }
-
+                    if (int(beamvec.size()) != itsInputCubePtr->shape()(itsSpcAxis)) {
+                        ASKAPLOG_ERROR_STR(logger, "Beam log " << itsBeamLog <<
+                                           " has " << beamvec.size() <<
+                                           " entries - was expecting " <<
+                                           itsInputCubePtr->shape()(itsSpcAxis));
+                        beamvec = std::vector< Vector<Quantum<Double> > >(1, inputBeam);
                     }
                 }
 
+                if (beamvec.size() > 0) {
+
+                    for (size_t i = 0; i < beamvec.size(); i++) {
+
+                        int dirCoNum = itsInputCoords.findCoordinate(casa::Coordinate::DIRECTION);
+                        casa::DirectionCoordinate
+                            dirCoo = itsInputCoords.directionCoordinate(dirCoNum);
+                        double fwhmMajPix = beamvec[i][0].getValue(dirCoo.worldAxisUnits()[0]) /
+                            fabs(dirCoo.increment()[0]);
+                        double fwhmMinPix = beamvec[i][1].getValue(dirCoo.worldAxisUnits()[1]) /
+                            fabs(dirCoo.increment()[1]);
+
+                        if (itsFlagUseDetection) {
+                            double bpaDeg = beamvec[i][2].getValue("deg");
+                            duchamp::DuchampBeam beam(fwhmMajPix, fwhmMinPix, bpaDeg);
+                            itsBeamScaleFactor[itsCurrentStokes].push_back(beam.area());
+                            if (itsBeamLog == "") {
+                                ASKAPLOG_DEBUG_STR(logger, "Stokes "<< itsCurrentStokes << " has beam scale factor = " <<
+                                                   itsBeamScaleFactor[itsCurrentStokes] << " using beam of " <<
+                                                   fwhmMajPix << "x" << fwhmMinPix);
+                            }
+                        } else {
+
+                            double costheta = cos(beamvec[i][2].getValue("rad"));
+                            double sintheta = sin(beamvec[i][2].getValue("rad"));
+
+                            double majSDsq = fwhmMajPix * fwhmMajPix / 8. / M_LN2;
+                            double minSDsq = fwhmMinPix * fwhmMinPix / 8. / M_LN2;
+
+                            int hw = (itsBoxWidth - 1) / 2;
+                            double scaleFactor = 0.;
+                            for (int y = -hw; y <= hw; y++) {
+                                for (int x = -hw; x <= hw; x++) {
+                                    double u = x * costheta + y * sintheta;
+                                    double v = x * sintheta - y * costheta;
+                                    scaleFactor += exp(-0.5 * (u * u / majSDsq + v * v / minSDsq));
+                                }
+                            }
+                            itsBeamScaleFactor[itsCurrentStokes].push_back(scaleFactor);
+
+                            if (itsBeamLog == "") {
+                                ASKAPLOG_DEBUG_STR(logger, "Stokes " << itsCurrentStokes << " has beam scale factor = " <<
+                                                   itsBeamScaleFactor[itsCurrentStokes]);
+                            }
+
+                        }
+                    }
+
+                }
+
+                ASKAPLOG_DEBUG_STR(logger,
+                                   "Defined the beam scale factor vector of size " <<
+                                   itsBeamScaleFactor[itsCurrentStokes].size());
+
+                this->closeInput();
+            } else {
+                ASKAPLOG_ERROR_STR(logger, "Could not open image \"" << itsInputCube << "\".");
             }
-
-            ASKAPLOG_DEBUG_STR(logger,
-                               "Defined the beam scale factor vector of size " <<
-                               itsBeamScaleFactor.size());
-
-            this->closeInput();
-        } else {
-            ASKAPLOG_ERROR_STR(logger, "Could not open image \"" << itsInputCube << "\".");
         }
     }
-
 }
 
 void SourceSpectrumExtractor::extract()
@@ -269,15 +280,15 @@ void SourceSpectrumExtractor::extract()
 
     if (itsFlagDoScale) {
 
-        if (itsBeamScaleFactor.size() == 1) {
-            itsArray /= itsBeamScaleFactor[0];
+        if (itsBeamScaleFactor[itsCurrentStokes].size() == 1) {
+            itsArray /= itsBeamScaleFactor[itsCurrentStokes][0];
         } else {
             casa::IPosition start(itsArray.ndim(), 0);
             casa::IPosition end = itsArray.shape() - 1;
             start(itsLngAxis) = start(itsLatAxis) = 0;
             for (int z = 0; z < itsArray.shape()(itsSpcAxis); z++) {
                 start(itsSpcAxis) = end(itsSpcAxis) = z;
-                itsArray(start, end) = itsArray(start, end) / itsBeamScaleFactor[z];
+                itsArray(start, end) = itsArray(start, end) / itsBeamScaleFactor[itsCurrentStokes][z];
             }
         }
 

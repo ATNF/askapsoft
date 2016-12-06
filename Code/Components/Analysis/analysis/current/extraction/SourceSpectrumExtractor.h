@@ -93,7 +93,7 @@ class SourceSpectrumExtractor : public SpectralBoxExtractor {
 
     protected:
         bool itsFlagDoScale;
-        std::vector<float> itsBeamScaleFactor;
+    std::map<casa::Stokes::StokesTypes,std::vector<float> > itsBeamScaleFactor;
         bool itsFlagUseDetection;
         std::string itsBeamLog;
 

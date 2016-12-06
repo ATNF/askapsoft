@@ -247,46 +247,36 @@ void SourceDataExtractor::verifyInputs()
     } else {
         // only have a single input cube
 
-        if (itsStokesList.size() == 1) {
-            // only single Stokes parameter requested -- check if it matches the image
-            for (im = itsInputCubeList.begin(); im < itsInputCubeList.end(); im++) {
-                if(checkPol(*im, itsStokesList[0])){
-                    ASKAPLOG_DEBUG_STR(logger, "Stokes " << stokes.name(itsStokesList[0]) << " has image " << *im);
+        if (itsInputCubeList[0].find("%p") != std::string::npos) {
+            // the filename has a "%p" string, meaning
+            // polarisation substitution is possible
+            for (size_t i = 0; i < itsStokesList.size(); i++) {
+                casa::String stokesname(stokes.name(itsStokesList[i]));
+                stokesname.downcase();
+                std::string input=itsInputCubeList[0];
+                ASKAPLOG_DEBUG_STR(logger, "Input cube name: replacing \"%p\" with " <<
+                                   stokesname.c_str() << " in " << input);
+                input.replace(input.find("%p"), 2, stokesname.c_str());
+                if(checkPol(input, itsStokesList[i])){
+                    ASKAPLOG_DEBUG_STR(logger, "Stokes " << stokes.name(itsStokesList[i]) << " has image " << input);
                     itsCubeStokesMap.insert(
-                        std::pair<casa::Stokes::StokesTypes,std::string>(itsStokesList[0],*im));
+                        std::pair<casa::Stokes::StokesTypes,std::string>(itsStokesList[i],input));
                 }
             }
         } else {
-            // multiple Stokes parameters requested
-            if (itsInputCubeList[0].find("%p") != std::string::npos) {
-                // the filename has a "%p" string, meaning
-                // polarisation substitution is possible
-                for (size_t i = 0; i < itsStokesList.size(); i++) {
-                    casa::String stokesname(stokes.name(itsStokesList[i]));
-                    stokesname.downcase();
-                    std::string input=itsInputCubeList[0];
-                    ASKAPLOG_DEBUG_STR(logger, "Input cube name: replacing \"%p\" with " <<
-                                       stokesname.c_str() << " in " << input);
-                    input.replace(input.find("%p"), 2, stokesname.c_str());
-                    if(checkPol(input, itsStokesList[i])){
-                        ASKAPLOG_DEBUG_STR(logger, "Stokes " << stokes.name(itsStokesList[i]) << " has image " << input);
-                        itsCubeStokesMap.insert(
-                            std::pair<casa::Stokes::StokesTypes,std::string>(itsStokesList[i],input));
-                    }
-                }
-            } else {
-                // get list of polarisations in that one image - are
-                // all the requested ones there?
-                for (size_t i = 0; i < itsStokesList.size(); i++) {
-                    ASKAPCHECK(checkPol(itsInputCubeList[0], itsStokesList[i]),
-                               "Image " << itsInputCubeList[0] << " does not have stokes "
-                               << itsStokesList[i]);
+            // We aren't using the %p wildcard - does its polarisation match one of the ones provided?
+            bool hasMatch=false;
+            for (size_t i = 0; i < itsStokesList.size() && !hasMatch; i++) {
+                hasMatch = checkPol(itsInputCubeList[0], itsStokesList[i]);
+                if(hasMatch){
                     ASKAPLOG_DEBUG_STR(logger, "Stokes " << stokes.name(itsStokesList[i]) << " has image " << itsInputCubeList[0]);
-                     itsCubeStokesMap.insert(
-                         std::pair<casa::Stokes::StokesTypes,std::string>(itsStokesList[i],
-                                                                          itsInputCubeList[0]));
+                    itsCubeStokesMap.insert(
+                        std::pair<casa::Stokes::StokesTypes,std::string>(itsStokesList[i],
+                                                                         itsInputCubeList[0]));
                 }
             }
+            ASKAPCHECK(hasMatch,
+                       "Image "<<itsInputCubeList[0]<<" does not match any requested Stokes");
         }
     }
     ASKAPLOG_DEBUG_STR(logger, "CubeStokesMap: " << itsCubeStokesMap);
@@ -337,6 +327,7 @@ bool SourceDataExtractor::openInput()
             itsLatAxis = itsInputCoords.directionAxesNumbers()[1];
             itsSpcAxis = itsInputCoords.spectralAxisNumber();
             itsStkAxis = itsInputCoords.polarizationAxisNumber();
+            itsInputUnits = itsInputCubePtr->units();
         }
     }
     return isOK;

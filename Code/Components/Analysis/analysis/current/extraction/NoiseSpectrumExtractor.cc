@@ -72,22 +72,17 @@ NoiseSpectrumExtractor::NoiseSpectrumExtractor(const LOFAR::ParameterSet& parset
 
     casa::Stokes stk;
     itsCurrentStokes = itsStokesList[0];
+    itsInputCube = itsCubeStokesMap[itsCurrentStokes];
     if (itsStokesList.size() > 1) {
         ASKAPLOG_WARN_STR(logger, "Noise Extractor: " <<
                           "Will only use the first provided Stokes parameter: " <<
                           stk.name(itsCurrentStokes));
         itsStokesList = casa::Vector<casa::Stokes::StokesTypes>(1, itsCurrentStokes);
-    }
-    itsInputCube = itsInputCubeList[0];
-    if (itsInputCubeList.size() > 1) {
-        ASKAPLOG_WARN_STR(logger, "Noise Extractor: " <<
-                          "Will only use the first provided input cube: " <<
-                          itsInputCubeList[0]);
-        itsInputCubeList = std::vector<std::string>(1, itsInputCube);
+        itsCubeStokesMap.clear();
+        itsCubeStokesMap[itsCurrentStokes] = itsInputCube;
     }
 
     this->initialiseArray();
-
     this->setBoxWidth();
 
 }

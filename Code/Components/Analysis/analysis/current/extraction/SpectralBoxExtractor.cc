@@ -78,7 +78,6 @@ SpectralBoxExtractor::SpectralBoxExtractor(const LOFAR::ParameterSet& parset):
 void SpectralBoxExtractor::initialiseArray()
 {
     // Form itsArray and initialise to zero
-    itsInputCube = itsInputCubeList.at(0);
     if (this->openInput()) {
         int specsize = itsInputCubePtr->shape()(itsSpcAxis);
         casa::IPosition shape(itsInputCubePtr->shape().size(), 1);
@@ -152,58 +151,54 @@ void SpectralBoxExtractor::writeImage()
 {
     ASKAPLOG_INFO_STR(logger, "Writing spectrum to " << itsOutputFilename);
 
-    itsInputCube = itsInputCubeList[0];
-    if (this->openInput()) {
-        casa::CoordinateSystem newcoo = casa::CoordinateUtil::defaultCoords4D();
+    casa::CoordinateSystem newcoo = casa::CoordinateUtil::defaultCoords4D();
 
-        int dirCoNum = itsInputCoords.findCoordinate(casa::Coordinate::DIRECTION);
-        int spcCoNum = itsInputCoords.findCoordinate(casa::Coordinate::SPECTRAL);
-        int stkCoNum = itsInputCoords.findCoordinate(casa::Coordinate::STOKES);
+    int dirCoNum = itsInputCoords.findCoordinate(casa::Coordinate::DIRECTION);
+    int spcCoNum = itsInputCoords.findCoordinate(casa::Coordinate::SPECTRAL);
+    int stkCoNum = itsInputCoords.findCoordinate(casa::Coordinate::STOKES);
 
-        casa::DirectionCoordinate dircoo(itsInputCoords.directionCoordinate(dirCoNum));
-        casa::SpectralCoordinate spcoo(itsInputCoords.spectralCoordinate(spcCoNum));
-        casa::Vector<Int> stkvec(itsStokesList.size());
-        for (size_t i = 0; i < stkvec.size(); i++) {
-            stkvec[i] = itsStokesList[i];
-        }
-        casa::StokesCoordinate stkcoo(stkvec);
+    casa::DirectionCoordinate dircoo(itsInputCoords.directionCoordinate(dirCoNum));
+    casa::SpectralCoordinate spcoo(itsInputCoords.spectralCoordinate(spcCoNum));
+    casa::Vector<Int> stkvec(itsStokesList.size());
+    for (size_t i = 0; i < stkvec.size(); i++) {
+        stkvec[i] = itsStokesList[i];
+    }
+    casa::StokesCoordinate stkcoo(stkvec);
 
-        newcoo.replaceCoordinate(dircoo, newcoo.findCoordinate(casa::Coordinate::DIRECTION));
-        newcoo.replaceCoordinate(spcoo, newcoo.findCoordinate(casa::Coordinate::SPECTRAL));
-        if (stkCoNum >= 0) {
-            newcoo.replaceCoordinate(stkcoo, newcoo.findCoordinate(casa::Coordinate::STOKES));
-        }
+    newcoo.replaceCoordinate(dircoo, newcoo.findCoordinate(casa::Coordinate::DIRECTION));
+    newcoo.replaceCoordinate(spcoo, newcoo.findCoordinate(casa::Coordinate::SPECTRAL));
+    if (stkCoNum >= 0) {
+        newcoo.replaceCoordinate(stkcoo, newcoo.findCoordinate(casa::Coordinate::STOKES));
+    }
 
-        // shift the reference pixel for the spatial coords, so that
-        // the RA/DEC (or whatever) are correct. Leave the
-        // spectral/stokes axes untouched.
-        int lngAxis = newcoo.directionAxesNumbers()[0];
-        int latAxis = newcoo.directionAxesNumbers()[1];
-        int spcAxis = newcoo.spectralAxisNumber();
-        int stkAxis = newcoo.polarizationAxisNumber();
-        casa::IPosition outshape(4, 1);
-        outshape(spcAxis) = itsSlicer.length()(itsSpcAxis);
-        outshape(stkAxis) = stkvec.size();
-        casa::Vector<Float> shift(outshape.size(), 0);
-        casa::Vector<Float> incrFrac(outshape.size(), 1);
-        shift(lngAxis) = itsXloc;
-        shift(latAxis) = itsYloc;
-        casa::Vector<Int> newshape = outshape.asVector();
-        newcoo.subImageInSitu(shift, incrFrac, newshape);
+    // shift the reference pixel for the spatial coords, so that
+    // the RA/DEC (or whatever) are correct. Leave the
+    // spectral/stokes axes untouched.
+    int lngAxis = newcoo.directionAxesNumbers()[0];
+    int latAxis = newcoo.directionAxesNumbers()[1];
+    int spcAxis = newcoo.spectralAxisNumber();
+    int stkAxis = newcoo.polarizationAxisNumber();
+    casa::IPosition outshape(4, 1);
+    outshape(spcAxis) = itsSlicer.length()(itsSpcAxis);
+    outshape(stkAxis) = stkvec.size();
+    casa::Vector<Float> shift(outshape.size(), 0);
+    casa::Vector<Float> incrFrac(outshape.size(), 1);
+    shift(lngAxis) = itsXloc;
+    shift(latAxis) = itsYloc;
+    casa::Vector<Int> newshape = outshape.asVector();
+    newcoo.subImageInSitu(shift, incrFrac, newshape);
 
-        Array<Float> newarray(itsArray.reform(outshape));
+    Array<Float> newarray(itsArray.reform(outshape));
 
-        accessors::CasaImageAccess ia;
-        ia.create(itsOutputFilename, newarray.shape(), newcoo);
+    accessors::CasaImageAccess ia;
+    ia.create(itsOutputFilename, newarray.shape(), newcoo);
 
-        /// @todo save the new units - if units were per beam, remove this factor
+    /// @todo save the new units - if units were per beam, remove this factor
 
-        // write the array
-        ia.write(itsOutputFilename, newarray);
-        ia.setUnits(itsOutputFilename, itsInputCubePtr->units().getName());
+    // write the array
+    ia.write(itsOutputFilename, newarray);
+    ia.setUnits(itsOutputFilename, itsInputUnits.getName());
 
-        this->closeInput();
-    } else ASKAPLOG_ERROR_STR(logger, "Could not open image");
 }
 
 
