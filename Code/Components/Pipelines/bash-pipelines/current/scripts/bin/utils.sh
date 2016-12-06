@@ -753,7 +753,7 @@ function extractStats()
 	fi
 
 	writeStatsHeader $format > $output
-	if [ `grep "(1, " $1 | wc -l` -gt 0 ]; then
+	if [ `grep "(1, " $STATS_LOGFILE | wc -l` -gt 0 ]; then
 	    writeStats $STATS_ID $NUM_CORES "${STATS_DESC}_master"     $RESULT_TXT $TIME_JOB_REAL $TIME_JOB_USER $TIME_JOB_SYS $PEAK_VM_MASTER  $PEAK_RSS_MASTER  $format >> $output
 	    writeStats $STATS_ID $NUM_CORES "${STATS_DESC}_workerPeak" $RESULT_TXT $TIME_JOB_REAL $TIME_JOB_USER $TIME_JOB_SYS $PEAK_VM_WORKERS $PEAK_RSS_WORKERS $format >> $output
 	    writeStats $STATS_ID $NUM_CORES "${STATS_DESC}_workerAve"  $RESULT_TXT $TIME_JOB_REAL $TIME_JOB_USER $TIME_JOB_SYS $AVE_VM_WORKERS  $AVE_RSS_WORKERS  $format >> $output
@@ -768,34 +768,36 @@ function extractStats()
 function parseLog()
 {
 
+    logfile=$1
+    
     TIME_JOB_REAL="---"
     TIME_JOB_SYS="---"
     TIME_JOB_USER="---"
     PEAK_VM_MASTER="---"
     PEAK_RSS_MASTER="---"
 
-    if [ ${NUM_CORES} -ge 2 ] && [ `grep "(1, " $1 | wc -l` -gt 0 ]; then
+    if [ ${NUM_CORES} -ge 2 ] && [ `grep "(1, " $logfile | wc -l` -gt 0 ]; then
         # if here, job was a distributed job
-        if [ `grep "(0, " $1 | grep "Total times" | wc -l` -gt 0 ]; then
-            TIME_JOB_REAL=`grep "(0, " $1 | grep "Total times" | tail -1 | awk '{print $16}'`
-            TIME_JOB_SYS=`grep "(0, " $1  | grep "Total times" | tail -1 | awk '{print $14}'`
+        if [ `grep "(0, " $logfile | grep "Total times" | wc -l` -gt 0 ]; then
+            TIME_JOB_REAL=`grep "(0, " $logfile | grep "Total times" | tail -1 | awk '{print $16}'`
+            TIME_JOB_SYS=`grep "(0, " $logfile  | grep "Total times" | tail -1 | awk '{print $14}'`
             TIME_JOB_USER=`grep "(0, " $1 | grep "Total times" | tail -1 | awk '{print $12}'`
         fi
-        if [ `grep "(0, " $1 | grep "PeakVM" | wc -l` -gt 0 ]; then
-            PEAK_VM_MASTER=`grep "(0, " $1 | grep "PeakVM" | tail -1 | awk '{print $12}'`
-            PEAK_RSS_MASTER=`grep "(0, " $1 | grep "PeakVM" | tail -1 | awk '{print $15}'`
+        if [ `grep "(0, " $logfile | grep "PeakVM" | wc -l` -gt 0 ]; then
+            PEAK_VM_MASTER=`grep "(0, " $logfile | grep "PeakVM" | tail -1 | awk '{print $12}'`
+            PEAK_RSS_MASTER=`grep "(0, " $logfile | grep "PeakVM" | tail -1 | awk '{print $15}'`
         fi
-	findWorkerStats $1
+	findWorkerStats $logfile
     else
         # if here, it was a serial job
-        if [ `grep "Total times" $1 | wc -l` -gt 0 ]; then
-            TIME_JOB_REAL=`grep "Total times" $1 | tail -1 | awk '{print $16}'`
-            TIME_JOB_SYS=`grep "Total times" $1 | tail -1 | awk '{print $14}'`
-            TIME_JOB_USER=`grep "Total times" $1 | tail -1 | awk '{print $12}'`
+        if [ `grep "Total times" $logfile | wc -l` -gt 0 ]; then
+            TIME_JOB_REAL=`grep "Total times" $logfile | tail -1 | awk '{print $16}'`
+            TIME_JOB_SYS=`grep "Total times" $logfile | tail -1 | awk '{print $14}'`
+            TIME_JOB_USER=`grep "Total times" $logfile | tail -1 | awk '{print $12}'`
         fi
-        if [ `grep "PeakVM" $1 | wc -l` -gt 0 ]; then
-            PEAK_VM_MASTER=`grep "PeakVM" $1 | tail -1 | awk '{print $12}'`
-            PEAK_RSS_MASTER=`grep "PeakVM" $1 | tail -1 | awk '{print $15}'`
+        if [ `grep "PeakVM" $logfile | wc -l` -gt 0 ]; then
+            PEAK_VM_MASTER=`grep "PeakVM" $logfile | tail -1 | awk '{print $12}'`
+            PEAK_RSS_MASTER=`grep "PeakVM" $logfile | tail -1 | awk '{print $15}'`
         fi
     fi
 
