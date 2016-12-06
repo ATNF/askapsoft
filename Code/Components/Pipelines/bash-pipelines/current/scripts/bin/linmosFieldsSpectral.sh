@@ -148,7 +148,7 @@ EOFINNER
             NPPN=${CPUS_PER_CORE_SPEC_IMAGING}
             aprun -n \${NCORES} -N \${NPPN} $linmosMPI -c \$parset > \$log
             err=\$?
-            for im in `echo \${imList} | sed -e 's/,/ /g'`; do
+            for im in \`echo \${imList} | sed -e 's/,/ /g'\`; do
                 rejuvenate \$im
             done
             extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} \${jobCode} "txt,csv"
