@@ -162,8 +162,7 @@ namespace askap {
             /// otherwise false.
             bool parameterExists(const std::string& param) const;
 
-
-        private:
+        protected:
 
             /// Processes the command line arguments
             void processCmdLineArgs(int argc, char *argv[]);
@@ -173,6 +172,8 @@ namespace askap {
 
             /// Reads the "config" parameter are builds the Parset itsParset.
             void initConfig();
+
+        private:
 
             /// Prints the usage message to stderr then calls exit()
             void usage();
