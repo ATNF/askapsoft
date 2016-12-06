@@ -59,6 +59,10 @@ class PolarisationData {
         {
             StokesSpectrum &ref = itsStokesU; return ref;
         }
+        StokesSpectrum &V()
+        {
+            StokesSpectrum &ref = itsStokesV; return ref;
+        }
 
         casa::Vector<float> &Imod()
         {
@@ -82,6 +86,7 @@ class PolarisationData {
         StokesSpectrum itsStokesI;
         StokesSpectrum itsStokesQ;
         StokesSpectrum itsStokesU;
+        StokesSpectrum itsStokesV;
         /// }
 
         casa::Vector<float> itsModelStokesI;

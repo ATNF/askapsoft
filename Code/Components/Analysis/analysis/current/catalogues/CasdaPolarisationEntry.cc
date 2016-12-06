@@ -83,11 +83,12 @@ CasdaPolarisationEntry::CasdaPolarisationEntry(CasdaComponent *comp,
     itsFluxImedian = poldata.I().median() * intFluxScale;
     itsFluxQmedian = poldata.Q().median() * intFluxScale;
     itsFluxUmedian = poldata.U().median() * intFluxScale;
-    // itsFluxVmedian = poldata.V().median();
+    itsFluxVmedian = poldata.V().median() * intFluxScale;
     itsRmsI = poldata.I().medianNoise() * intFluxScale;
     itsRmsQ = poldata.Q().medianNoise() * intFluxScale;
     itsRmsU = poldata.U().medianNoise() * intFluxScale;
-    // itsRmsV = poldata.V().medianNoise();
+    itsRmsV = poldata.V().medianNoise() * intFluxScale;
+    
     itsPolyCoeff0 = comp->intFlux();
     itsPolyCoeff1 = comp->alpha();
     itsPolyCoeff2 = comp->beta();
@@ -170,7 +171,7 @@ void CasdaPolarisationEntry::printTableEntry(std::ostream &stream,
     } else if (type == "UFLUX") {
         column.printEntry(stream, itsFluxUmedian);
     } else if (type == "VFLUX") {
-        column.printEntry(stream, itsFluxImedian);
+        column.printEntry(stream, itsFluxVmedian);
     } else if (type == "RMS_I") {
         column.printEntry(stream, itsRmsI);
     } else if (type == "RMS_Q") {

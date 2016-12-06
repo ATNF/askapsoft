@@ -118,7 +118,7 @@ void StokesSpectrum::extractNoise()
     itsNoiseExtractor->setSource(itsComponent);
     itsNoiseExtractor->extract();
     itsNoiseSpectrum = casa::Vector<float>(itsNoiseExtractor->array());
-    itsMedianNoise = casa::median(itsSpectrum);
+    itsMedianNoise = casa::median(itsNoiseSpectrum);
 
 }
 

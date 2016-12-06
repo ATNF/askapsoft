@@ -50,7 +50,8 @@ PolarisationData::PolarisationData(const LOFAR::ParameterSet &parset):
     itsParset(parset),
     itsStokesI(parset,"I"),
     itsStokesQ(parset,"Q"),
-    itsStokesU(parset,"U")
+    itsStokesU(parset,"U"),
+    itsStokesV(parset,"V")
 {
     // store the locations of the images
 
@@ -73,12 +74,15 @@ void PolarisationData::initialise(CasdaComponent *comp)
     itsStokesQ.extract();
     itsStokesU.setComponent(comp);
     itsStokesU.extract();
+    itsStokesV.setComponent(comp);
+    itsStokesV.extract();
 
     // write out extracted spectra
     if (itsParset.getBool("writeSpectra","true")) {
         itsStokesI.write();
         itsStokesQ.write();
         itsStokesU.write();
+        itsStokesV.write();
     }
 
     // compute "average noise"
