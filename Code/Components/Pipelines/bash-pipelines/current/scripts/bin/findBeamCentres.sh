@@ -31,7 +31,14 @@
 tmpfp=${tmp}/listOfFootprints
 module load askapcli
 footprint list > $tmpfp
+err=$?
 module unload askapcli
+if [ $err -ne 0 ]; then
+    echo "ERROR - the 'footprint' command failed. "
+    echo "        Full command:   footprint list"
+    echo "Exiting pipeline."
+    exit $err
+fi
 
 NEED_BEAM_CENTRES=false
 if [ "$DO_MOSAIC" == "true" ] || [ "$IMAGE_AT_BEAM_CENTRES" == "true" ]; then
@@ -58,8 +65,15 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$NEED_BEAM_CENTRES" == "true" ]; then
                 rm -f $sbinfo
             fi
             module load askapcli
-            schedblock info -p ${SB_SCIENCE} > $sbinfo
+            schedblock info -v -p ${SB_SCIENCE} > $sbinfo
+            err=$?
             module unload askapcli
+            if [ $err -ne 0 ]; then
+                echo "ERROR - the 'schedblock' command failed."
+                echo "        Full command:   schedblock info -v -p ${SB_SCIENCE}"
+                echo "Exiting pipeline."
+                exit $err
+            fi
         fi
         defaultFPname=`grep "%d.footprint.name" ${sbinfo} | awk '{print $3}'`
         defaultFPpitch=`grep "%d.footprint.pitch" ${sbinfo} | awk '{print $3}'`
@@ -175,7 +189,14 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$NEED_BEAM_CENTRES" == "true" ]; then
                 fi
                 module load askapcli
                 footprint calculate $footprintArgs $FP_NAME 2>&1 > ${footprintOut}
+                err=$?
                 module unload askapcli
+                if [ $err -ne 0 ]; then
+                    echo "ERROR - the 'footprint' command failed."
+                    echo "        Full command:   footprint calculate $footprintArgs $FP_NAME"
+                    echo "Exiting pipeline."
+                    exit $err
+                fi
             else
                 # This case uses the ACES tool "footprint.py"
                 
@@ -201,7 +222,14 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$NEED_BEAM_CENTRES" == "true" ]; then
                     setFootprintArgs
                     module load aces
                     footprint.py $footprintArgs -r "$ra,$dec" 2>&1 > ${footprintOut}
+                    err=$?
                     module unload aces
+                    if [ $err -ne 0 ]; then
+                        echo "ERROR - the 'footprint.py' command failed. "
+                        echo "        Full command:   footprint.py $footprintArgs -r \"$ra,$dec\""
+                        echo "Exiting pipeline."
+                        exit $err
+                    fi
                 fi
             fi
         fi

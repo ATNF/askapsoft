@@ -238,7 +238,14 @@ if [ "${MS_INPUT_SCIENCE}" != "" ]; then
             fi
             module load askapcli
             schedblock info -v -p ${SB_SCIENCE} > $sbinfo
+            err=$?
             module unload askapcli
+            if [ $err -ne 0 ]; then
+                echo "ERROR - the 'schedblock' command failed."
+                echo "        Full command:   schedblock info -v -p ${SB_SCIENCE}"
+                echo "Exiting pipeline."
+                exit $err
+            fi
         fi
         awkstr="\$1==${SB_SCIENCE}"
         PROJECT_ID=`awk $awkstr $sbinfo | awk '{print $6}'`
