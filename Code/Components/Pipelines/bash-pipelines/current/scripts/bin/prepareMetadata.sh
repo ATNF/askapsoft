@@ -128,7 +128,10 @@ if [ "${MS_INPUT_SCIENCE}" != "" ]; then
 
     echo "Extracting metadata for science measurement set $MS_INPUT_SCIENCE"
 
+    # define $msname
     getMSname ${MS_INPUT_SCIENCE}
+
+    # Extract the MS metadata into a local file ($MS_METADATA) for parsing
     MS_METADATA=$metadata/mslist-${msname}.txt
     if [ ! -e ${MS_METADATA} ]; then
         ${mslist} --full $MS_INPUT_SCIENCE 1>& ${MS_METADATA}
@@ -139,13 +142,15 @@ if [ "${MS_INPUT_SCIENCE}" != "" ]; then
     obstime=`grep "Observed from" ${MS_METADATA} | head -1 | awk '{print $7}' | sed -e 's|/| |g' | awk '{print $2}'`
     DATE_OBS=`date -d "$obsdate" +"%Y-%m-%d"`
     DATE_OBS="${DATE_OBS}T${obstime}"
-    
+
+    # Get the duration of the observation
     DURATION=`grep "elapsed time" ${MS_METADATA} | head -1 | awk '{print $11}'`
 
+    # Get the number of antennas used in the observation
     NUM_ANT_SCIENCE=`grep Antennas ${MS_METADATA} | head -1 | awk '{print $6}'`
     NUM_ANT=$NUM_ANT_SCIENCE
 
-    # number of channels
+    # Get the number of channels used
     NUM_CHAN=`python ${PIPELINEDIR}/parseMSlistOutput.py --file=${MS_METADATA} --val=nChan`
     # centre frequency - includes units
     CENTRE_FREQ="`python ${PIPELINEDIR}/parseMSlistOutput.py --file=${MS_METADATA} --val=Freq`"
@@ -179,6 +184,45 @@ if [ "${MS_INPUT_SCIENCE}" != "" ]; then
         exit 1
     fi
 
+    ####
+    # Define the list of fields and associated tiles
+    
+    # Find the number of fields in the MS
+    NUM_FIELDS=`grep Fields ${MS_METADATA} | head -1 | cut -f 4- | cut -d' ' -f 2`
+    FIELDLISTFILE=${metadata}/fieldlist-${msname}.txt
+    if [ ! -e $FIELDLISTFILE ]; then
+        grep -A${NUM_FIELDS} RA ${MS_METADATA} | tail -n ${NUM_FIELDS} | cut -f 4- >> $FIELDLISTFILE
+    fi
+
+    FIELD_LIST=""
+    TILE_LIST=""
+    for FIELD in `sort -k2 $FIELDLISTFILE | awk '{print $2}' | uniq `;
+    do
+        FIELD_LIST="$FIELD_LIST $FIELD"
+        getTile
+        if [ $FIELD != $TILE ]; then
+            isNew=true
+            for THETILE in $TILE_LIST; do
+                if [ $TILE == $THETILE ]; then
+                    isNew=false
+                fi
+            done
+            if [ $isNew == true ]; then
+                TILE_LIST="$TILE_LIST $TILE"
+            fi
+        fi
+    done
+
+    # Print a simplified list of fields for the user
+    echo "List of fields: "
+    COUNT=0
+    for FIELD in ${FIELD_LIST}; do
+        ID=`echo $COUNT | awk '{printf "%02d",$1}'`
+        echo "${ID} - ${FIELD}"
+        COUNT=`expr $COUNT + 1`
+    done
+
+    
     # Set the OPAL Project ID
     BACKUP_PROJECT_ID=${PROJECT_ID}
 
