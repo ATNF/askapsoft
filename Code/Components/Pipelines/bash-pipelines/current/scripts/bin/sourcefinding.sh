@@ -83,12 +83,12 @@ weights=${OUTPUT}/${weightsImage}
 imlist="\${imlist} \${image}"
 if [ \$NUM_TAYLOR_TERMS -gt 1 ]; then
     t1im=\`echo \$image | sed -e 's/taylor\.0/taylor\.1/g'\`
-    if [ -e ${OUTPUT}/\${t1im} ]; then
-        imlist="\${imlist} ${OUTPUT}/\${t1im}"
+    if [ -e \${t1im} ]; then
+        imlist="\${imlist} \${t1im}"
     fi
     t2im=\`echo \$image | sed -e 's/taylor\.0/taylor\.2/g'\`
-    if [ -e ${OUTPUT}/\${t2im} ]; then
-        imlist="\${imlist} ${OUTPUT}/\${t2im}"
+    if [ -e \${t2im} ]; then
+        imlist="\${imlist} \${t2im}"
     fi
 fi
 
@@ -100,6 +100,7 @@ else
     weightpars="#"
 fi
 
+echo "Converting to FITS the following images: \${imlist}"
 for im in \${imlist}; do 
     casaim="../\${im##*/}"
     fitsim="../\${im##*/}.fits"
@@ -125,16 +126,18 @@ Selavy.SBid = ${SB_SCIENCE}
 Selavy.nsubx = ${SELAVY_NSUBX}
 Selavy.nsuby = ${SELAVY_NSUBY}
 #
+Selavy.resultsFile = selavy-${imageName}.txt
+#
 Selavy.snrCut = ${SELAVY_SNR_CUT}
 Selavy.flagGrowth = ${SELAVY_FLAG_GROWTH}
 Selavy.growthCut = ${SELAVY_GROWTH_CUT}
 #
 Selavy.VariableThreshold = ${SELAVY_VARIABLE_THRESHOLD}
 Selavy.VariableThreshold.boxSize = ${SELAVY_BOX_SIZE}
-Selavy.VariableThreshold.ThresholdImageName=detThresh.img
-Selavy.VariableThreshold.NoiseImageName=noiseMap.img
-Selavy.VariableThreshold.AverageImageName=meanMap.img
-Selavy.VariableThreshold.SNRimageName=snrMap.img
+Selavy.VariableThreshold.ThresholdImageName=detThresh.${imageName}.img
+Selavy.VariableThreshold.NoiseImageName=noiseMap.${imageName}.img
+Selavy.VariableThreshold.AverageImageName=meanMap.${imageName}.img
+Selavy.VariableThreshold.SNRimageName=snrMap.${imageName}.img
 \${weightpars}
 #
 Selavy.Fitter.doFit = true
@@ -184,9 +187,9 @@ EOFOUTER
     
     if [ $SUBMIT_JOBS == true ]; then
 	ID_SOURCEFINDING_SCI=`sbatch ${DEP} $sbatchfile | awk '{print $4}'`
-	recordJob ${ID_SOURCEFINDING_SCI} "Run the source-finder on the science observation with flags \"$DEP\""
+	recordJob ${ID_SOURCEFINDING_SCI} "Run the source-finder on the science image ${imageName} with flags \"$DEP\""
     else
-	echo "Would run the source-finder on the science observation with slurm file $sbatchfile"
+	echo "Would run the source-finder on the science image ${imageName} with slurm file $sbatchfile"
     fi
 
     echo " "
