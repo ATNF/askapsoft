@@ -31,7 +31,6 @@
 #
 
 ID_CONTCUBE_SCI=""
-DEP_CONTCUBE=""
 
 if [ $DO_ALT_IMAGER == true ]; then
 theimager=$altimager

@@ -30,7 +30,6 @@
 #
 
 ID_SPECIMG_SCI=""
-DEP_SPECIMG=""
 
 # set the $imageBase variable
 setImageBase spectral
