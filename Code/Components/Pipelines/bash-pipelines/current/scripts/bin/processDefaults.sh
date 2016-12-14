@@ -86,8 +86,10 @@ if [ "$PROCESS_DEFAULTS_HAS_RUN" != "true" ]; then
     ####################
     # ASKAPsoft module usage
 
+    # Make use of the ASKAP module directory right now
     moduleDir="/group/askap/modulefiles"
     module use $moduleDir
+    
     if [ "${ASKAP_ROOT}" == "" ]; then
         # Has the user asked for a specific askapsoft module?
         if [ "$ASKAPSOFT_VERSION" != "" ]; then
@@ -101,7 +103,8 @@ if [ "$PROCESS_DEFAULTS_HAS_RUN" != "true" ]; then
             fi
         fi
         # load the modules correctly
-        if [ "`module list -t 2>&1 | grep askapsoft`" == "" ]; then
+        currentASKAPsoftVersion="`module list -t 2>&1 | grep askapsoft`"
+        if [ "${currentASKAPsoftVersion}" == "" ]; then
             # askapsoft is not loaded by the .bashrc - need to specify for
             # slurm jobfiles. Use the requested one if necessary.
             if [ "${ASKAPSOFT_VERSION}" == "" ]; then
@@ -117,7 +120,7 @@ module load askapdata
 module load askapsoft${ASKAPSOFT_VERSION}"
             module load askapsoft${ASKAPSOFT_VERSION}
         else
-            # askapsoft is already available.
+            # askapsoft is currently available in the user's module list
             #  If a specific version has been requested, swap to that
             #  Otherwise, do nothing
             if [ "${ASKAPSOFT_VERSION}" != "" ]; then
@@ -130,8 +133,10 @@ module swap askapsoft askapsoft${ASKAPSOFT_VERSION}"
             else
                 askapsoftModuleCommands="# Using user-defined askapsoft module
 module use $moduleDir
-module load askapdata"
-                echo "Will use the askapsoft module defined by your environment (`module list -t 2>&1 | grep askapsoft`)"
+module load askapdata
+module unload askapsoft
+module load ${currentASKAPsoftVersion}"
+                echo "Will use the askapsoft module defined by your environment (${currentASKAPsoftVersion})"
             fi
         fi
 
@@ -145,6 +150,8 @@ module load askappipeline/${askappipelineVersion}"
 
     else
         askapsoftModuleCommands="# Using ASKAPsoft code tree directly, so no need to load modules"
+        echo "Using ASKAPsoft code direct from your code tree at ASKAP_ROOT=$ASKAP_ROOT"
+        echo "ASKAPsoft modules will *not* be loaded in the slurm files."
     fi
 
     ####################
