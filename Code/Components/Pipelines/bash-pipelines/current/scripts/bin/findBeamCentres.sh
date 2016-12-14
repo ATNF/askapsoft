@@ -45,8 +45,6 @@ if [ "$DO_MOSAIC" == "true" ] || [ "$IMAGE_AT_BEAM_CENTRES" == "true" ]; then
     NEED_BEAM_CENTRES=true
 fi
 
-echo "NEED_BEAM_CENTRES = $NEED_BEAM_CENTRES"
-
 if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$NEED_BEAM_CENTRES" == "true" ]; then
 
     defaultFPname=""
@@ -57,10 +55,7 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$NEED_BEAM_CENTRES" == "true" ]; then
         
         # Run schedblock to get footprint information (if present)
         sbinfo="${metadata}/schedblock-info-${SB_SCIENCE}.txt"
-        echo "Using $sbinfo as location for SB metadata"
-        if [ -e ${sbinfo} ] && [ `wc -l $sbinfo | awk '{print $1}'` -gt 1 ]; then
-            echo "Reusing schedblock info file $sbinfo for SBID ${SB_SCIENCE}"
-        else
+        if [ ! -e ${sbinfo} ] || [ `wc -l $sbinfo | awk '{print $1}'` -gt 1 ]; then
             if [ -e ${sbinfo} ]; then
                 rm -f $sbinfo
             fi
@@ -92,7 +87,6 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$NEED_BEAM_CENTRES" == "true" ]; then
 
     # Define the footprint for each field
     for FIELD in ${FIELD_LIST}; do
-        echo "Finding footprint for field $FIELD"
 
         # Get the centre location of each field (from the list of
         # fields in the metadata directory - the filename is recorded

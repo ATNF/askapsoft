@@ -236,6 +236,7 @@ if [ "${MS_INPUT_SCIENCE}" != "" ]; then
             if [ -e ${sbinfo} ]; then
                 rm -f $sbinfo
             fi
+            echo "Using $sbinfo as location for SB metadata"
             module load askapcli
             schedblock info -v -p ${SB_SCIENCE} > $sbinfo
             err=$?
