@@ -257,7 +257,7 @@ function setImageProperties()
         echo "WARNING - unknown image code ${imageCode}"
     fi
 
-    if [ $needToUnsetTterm == true ]; then
+    if [ $needToUnsetTTerm == true ]; then
         unset TTERM
     fi
     
