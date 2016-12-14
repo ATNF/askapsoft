@@ -74,6 +74,30 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$NEED_BEAM_CENTRES" == "true" ]; then
         defaultFPpitch=`grep "%d.footprint.pitch" ${sbinfo} | awk '{print $3}'`
         defaultFPangle=`grep "%d.pol_axis" ${sbinfo} | awk '{print $4}' | sed -e 's/\]//g'`
 
+        # The reference rotation angle - this is what the footprint
+        # was made with. Any pol_axis value is added to this reference
+        # value. 
+        FProtation=`grep "%d.footprint.rotation" ${sbinfo} | awk '{print $3}'`
+        if [ "$FProtation" == "" ]; then
+            # footprint.rotation is not in the schedblock parset, so
+            # need to set a value manually 
+            if [ "$FOOTPRINT_PA_REFERENCE" != "" ]; then
+                # If here, the user has provided a value for this reference
+                FProtation=$FOOTPRINT_PA_REFERENCE
+                echo "*Note* Using the user parameter FOOTPRINT_PA_REFERENCE=$FProtation as the reference position for footprint PA"
+            else
+                # if here, they haven't, so set offset to zero
+                FProtation=0.
+            fi
+        else
+            if [ "$FOOTPRINT_PA_REFERENCE" != "" ]; then
+                # If here, the user has provided a value for this
+                # reference, but we don't need to use their value. Let
+                # them know.
+                echo "*Note* You provided FOOTPRINT_PA_REFERENCE=$FOOTPRINT_PA_REFERENCE, but we instead use "
+                echo "           src%d.footprint.rotation = $FProtation from the scheduling block parset"
+            fi
+        fi
     fi
     
     if [ "$defaultFPname" == "" ]; then
@@ -82,6 +106,14 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$NEED_BEAM_CENTRES" == "true" ]; then
         defaultFPname=${BEAM_FOOTPRINT_NAME}
         defaultFPpitch=${BEAM_PITCH}
         defaultFPangle=${BEAM_FOOTPRINT_PA}
+        if [ "$FOOTPRINT_PA_REFERENCE" != "" ]; then
+            # If here, the user has provided a value for this reference
+            FProtation=$FOOTPRINT_PA_REFERENCE
+            echo "*Note* Using the user parameter FOOTPRINT_PA_REFERENCE=$FProtation as the reference position for footprint PA"
+        else
+            # if here, they haven't, so set offset to zero
+            FProtation=0.
+        fi
     fi
     
 
@@ -121,6 +153,11 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$NEED_BEAM_CENTRES" == "true" ]; then
         if [ "$FP_PA" == "" ]; then
             FP_PA=$defaultFPangle
         fi
+
+        # Add the footprint reference angle to the PA, so that FP_PA
+        # represents the net rotation of the footprint, that can be
+        # given to the footprint/footprint.py tools.
+        FP_PA=`echo $FP_PA $FProtation | awk '{print $1+$2}'`
 
         #####
         # Define the footprint locations for this field
