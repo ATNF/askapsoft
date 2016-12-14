@@ -62,7 +62,10 @@ is possible, however, to select a single field to process via the
 |                                               |                                 |                                                 | included in the output MS).                                           |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 | ``FIELD_SELECTION_SCIENCE``                   |  no default (see description)   | fields (:doc:`../calim/mssplit`)                | This allows selection of particular FIELD NAMEs from the science      |
-|                                               |                                 |                                                 | observation. If not provided, all fields are done.                    |
+|                                               |                                 |                                                 | observation. If not provided, all fields are done. The value must be  |
+|                                               |                                 |                                                 | just the field name - not surrounded by square brackets (which is a   |
+|                                               |                                 |                                                 | possible format for mssplit.fields). This is because the value iwll be|
+|                                               |                                 |                                                 | matched to field names from the measurement set.                      |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 | ``MS_BASE_SCIENCE``                           |  scienceObservation_beam%b.ms   | none                                            | Base name for the science observation measurement set after           |
 |                                               |                                 |                                                 | splitting. The wildcard %b will be replaced by the                    |
