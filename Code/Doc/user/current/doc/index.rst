@@ -12,5 +12,5 @@ ASKAP Central Processor User Documentation
    analysis/index.rst
    utils/index.rst
    services/index.rst
-   BETApipelines/index.rst
+   pipelines/index.rst
    tutorials/index.rst
