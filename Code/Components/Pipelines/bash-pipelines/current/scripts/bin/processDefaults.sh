@@ -400,9 +400,8 @@ module load askappipeline/${askappipelineVersion}"
         fi
 
         ####################
-        ##    # Define the beam arrangements for linmos
-        ##    . ${PIPELINEDIR}/beamArrangements.sh
-
+        # Mosaicking parameters
+        
         # Fix the direction string for linmos - don't need the J2000 bit
         linmosFeedCentre=`echo $DIRECTION_SCI | awk -F',' '{printf "%s,%s]",$1,$2}'`
 

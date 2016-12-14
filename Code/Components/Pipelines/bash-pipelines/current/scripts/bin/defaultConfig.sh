@@ -625,9 +625,11 @@ SPECTRAL_IMSUB_CHAN_SAMPLING=1
 ##############################
 # Linear Mosaicking
 #
-# Beam arrangement, used in linmos. If one of "diamond",
-# "octagon",... then the positions are filled automatically.
-# The name of the beam footprint. This needs to be recognised by footprint.py - see beamArrangements.sh
+# Beam arrangement, used in linmos. These specifications are only used
+# in the IS_BETA case, or if the footprint listed in the schedblock is
+# not understood by the footprint service. In this case, we use the
+# ACES tool footprint.py, and the name needs to be recognised by
+# footprint.py. See findBeamCentres.sh for details.
 BEAM_FOOTPRINT_NAME="diamond"
 # The position angle of the beam footprint
 BEAM_FOOTPRINT_PA=0
