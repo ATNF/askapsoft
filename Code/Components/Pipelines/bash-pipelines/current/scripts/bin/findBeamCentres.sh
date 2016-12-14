@@ -126,9 +126,6 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$NEED_BEAM_CENTRES" == "true" ]; then
         fi
         if [ "$FP_PA" == "" ]; then
             FP_PA=$defaultFPangle
-        else
-            # The default angle is added to the angle from the field's info
-            FP_PA=`echo $FP_PA $defaultFPangle | awk '{print $1+$2}'`
         fi
 
         #####
