@@ -193,7 +193,6 @@ if [ ${DO_SOURCE_FINDING} == true ]; then
     TILE="ALL"
     FIELDBEAM="Full"
     FIELDBEAMJOB="Full"
-    TTERM=0
     setImageProperties cont
 
     . ${PIPELINEDIR}/sourcefinding.sh

@@ -191,7 +191,6 @@ fi
 if [ ${DO_SOURCE_FINDING} == true ]; then
     # Run the sourcefinder on the mosaicked image.
 
-    TTERM=0
     NUM_LOOPS=0
     if [ $DO_SELFCAL == true ] && [ $MOSAIC_SELFCAL_LOOPS == true ]; then
         NUM_LOOPS=$SELFCAL_NUM_LOOPS
@@ -209,5 +208,6 @@ if [ ${DO_SOURCE_FINDING} == true ]; then
         . ${PIPELINEDIR}/sourcefinding.sh
 
     done
+    unset LOOP
     
 fi

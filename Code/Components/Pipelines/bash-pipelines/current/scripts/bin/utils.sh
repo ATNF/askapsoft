@@ -165,7 +165,8 @@ function getTile()
 #          mosaic over all fields/tiles)
 #  * BEAM
 #  * pol (lower case polarisation i/q/u/v etc)
-#  * TTERM (Taylor term: 0,1,2,...)
+#  * TTERM (Taylor term: 0,1,2,...) Can be blank ("" ie. unset), which
+#     defaults to zero
 #  * NUM_TAYLOR_TERMS (number of taylor terms being solved for. 1=no MFS)
 #  * IMAGE_BASE_CONT,IMAGE_BASE_CONTCUBE,IMAGE_BASE_SPECTRAL
 # Available upon return:
@@ -182,6 +183,13 @@ function setImageProperties()
 
     imSuffix=""
     setImageBase $type
+
+    needToUnsetTTerm=false
+    if [ "$TTERM" == "" ]; then
+        TTERM=0
+        needToUnsetTTerm=true
+    fi
+    
     if [ $type == "cont" ]; then
         typebase="cont"
         labelbase="continuum image"
@@ -249,6 +257,10 @@ function setImageProperties()
         echo "WARNING - unknown image code ${imageCode}"
     fi
 
+    if [ $needToUnsetTterm == true ]; then
+        unset TTERM
+    fi
+    
 }
 
 
@@ -461,6 +473,11 @@ Cimager.ncycles                                 = ${CLEAN_NUM_MAJORCYCLES_ARRAY[
 function dataSelectionSelfcalLoop()
 {
     dataSelectionParams=""
+    needToUnsetLoop=false
+    if [ "$LOOP" == "" ]; then
+        LOOP=0
+        needToUnsetLoop=true
+    fi
     if [ $1 == "Cimager" ]; then
         if [ ${CIMAGER_MINUV_ARRAY[$LOOP]} -gt 0 ]; then
             dataSelectionParams="Cimager.MinUV   = ${CIMAGER_MINUV_ARRAY[$LOOP]}"
@@ -472,7 +489,9 @@ function dataSelectionSelfcalLoop()
     else
         dataSelectionParams="# no data selection parameter returned"
     fi
-
+    if [ $needToUnsetLoop == true ]; then
+        unset LOOP
+    fi
 }
 
 #############################
