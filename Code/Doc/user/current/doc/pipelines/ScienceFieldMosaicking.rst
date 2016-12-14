@@ -41,6 +41,15 @@ interfaces to the scheduling block and footprint services. This uses
 the recorded beam footprint information in the scheduling block parset
 to regenerate the central location of each beam.
 
+Recent observations rely on the **src%d.footprint.rotation** parameter
+in the scheduling block parset to determine the reference angle from
+which the **pol_axis** parameter gives a field-based rotation. Some
+scheduling blocks make use of this parameter yet do not report it in
+the parset. If this is the case, you can manually specify the
+reference value via the ``FOOTPRINT_PA_REFERENCE`` parameter in the
+configuration file. The scheduling block parset value always takes
+precendence. 
+
 If you are processing an older SBID, for which the footprint
 information is not available in the scheduling block, you must specify
 the footprint information yourself using the parameters given
@@ -96,6 +105,12 @@ primary beam at the centre of each image.
 |                              |                                    |                         | spectral-line channels.                                     |
 +------------------------------+------------------------------------+-------------------------+-------------------------------------------------------------+
 | ``MOSAIC_SELFCAL_LOOPS``     | true                               | none                    | Whether to make mosaics of each self-calibration loop.      |
++------------------------------+------------------------------------+-------------------------+-------------------------------------------------------------+
+| ``FOOTPRINT_PA_REFERENCE``   | ""                                 | none                    | The reference rotation angle for the footprint. This should |
+|                              |                                    |                         | only be given if the scheduling block parset does not have  |
+|                              |                                    |                         | the **src.%d.footprint.rotation** parameter. If             |
+|                              |                                    |                         | **src.%d.footprint.rotation** is not given, this parameter  |
+|                              |                                    |                         | defaults to zero.                                           |
 +------------------------------+------------------------------------+-------------------------+-------------------------------------------------------------+
 |   ``BEAM_FOOTPRINT_NAME``    | diamond                            | none                    | The name of the beam footprint. This needs to be recognised |
 |                              |                                    |                         | by the ACES tool *footprint.py*, which generates the offsets|
