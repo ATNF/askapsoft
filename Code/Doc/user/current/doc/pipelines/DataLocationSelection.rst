@@ -25,20 +25,32 @@ the ``MS_INPUT`` variables give the filename for the relevant MS.
 |                      |                                                         |provided.                                                   |
 +----------------------+---------------------------------------------------------+------------------------------------------------------------+
 
-These parameters determine which beams in the data to process. This
-applies to both the calibrator and science data. The ranges are
-*inclusive*, and 0-based (as this is how the beams are recorded in the
-MS). 
+These parameters determine which beams in the data to process. The
+beams can be listed explicitly via the ``BEAMLIST`` parameter, given
+as a comma-separated list of beams and beam ranges, such as
+""0,1,4,7,8-10".
+Alternatively (and if ``BEAMLIST`` is not provided), the ``BEAM_MIN``
+and ``BEAM_MAX`` parameters are used to specify an inclusive
+range. Note that in all cases the beams are numbered from zero
+(ie. beam 0 is the first beam in the measurement set).
+
+The beams used for the bandpass calibrator will be all beams up to the
+maximum beam requested for the science dataset (either ``BEAM_MAX`` or
+the largest number in ``BEAMLIST``).
 
 +----------------+-----------+--------------------------------------------------+
 | Variable       | Default   | Description                                      |
 +================+===========+==================================================+
-| ``BEAM_MIN``   | 0         |First beam number (0-based). All beams from       |
-|                |           |``BEAM_MIN`` to ``BEAM_MAX`` *inclusive* are used |
-|                |           |for the science processing. The processing of the |
-|                |           |bandpass calibrator always starts at beam 0, but  |
-|                |           |goes up to ``BEAM_MAX`` (this is due to the       |
-|                |           |requirements of :doc:`../calim/cbpcalibrator`).   |
+| ``BEAMLIST``   | ""        | A comma-separated list of beams and beam ranges  |
+|                |           | (for instance "0,1,4,7,8-10"), to specify the set|
+|                |           | of beams than should be processed from the       |
+|                |           | science observation. Beam numbers are 0-based.   |
 +----------------+-----------+--------------------------------------------------+
-| ``BEAM_MAX``   | 35        | Final beam number (0-based)                      |
+| ``BEAM_MIN``   | 0         | First beam number (0-based). Used when           |
+|                |           | ``BEAMLIST`` is not given. All beams from        |
+|                |           | ``BEAM_MIN`` to ``BEAM_MAX`` *inclusive* are used|
+|                |           | for the science processing.                      |
++----------------+-----------+--------------------------------------------------+
+| ``BEAM_MAX``   | 35        | Final beam number (0-based), to go with          |
+|                |           | ``BEAM_MIN``.                                    |
 +----------------+-----------+--------------------------------------------------+
