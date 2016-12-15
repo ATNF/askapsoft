@@ -795,10 +795,11 @@ function parseLog()
     PEAK_VM_MASTER="---"
     PEAK_RSS_MASTER="---"
 
-    START_TIME_JOB=`grep "(0, " $logfile | head -1 | awk '{printf "%sT%s",$5,$6}' | sed -e 's/^\[//g' | sed -e 's/\]$//g'`
 
     if [ ${NUM_CORES} -ge 2 ] && [ `grep "(1, " $logfile | wc -l` -gt 0 ]; then
         # if here, job was a distributed job
+        # Get the master node's first log message, and extract the time stamp
+        START_TIME_JOB=`grep "(0, " $logfile | head -1 | awk '{printf "%sT%s",$5,$6}' | sed -e 's/^\[//g' | sed -e 's/\]$//g'`
         if [ `grep "(0, " $logfile | grep "Total times" | wc -l` -gt 0 ]; then
             TIME_JOB_REAL=`grep "(0, " $logfile | grep "Total times" | tail -1 | awk '{print $16}'`
             TIME_JOB_SYS=`grep "(0, " $logfile  | grep "Total times" | tail -1 | awk '{print $14}'`
@@ -811,6 +812,8 @@ function parseLog()
 	findWorkerStats $logfile
     else
         # if here, it was a serial job
+        # Can log with either (-1 or (0 as the rank, so instead get the first INFO line & extract time stamp
+        START_TIME_JOB=`grep "INFO" $logfile | head -1 | awk '{printf "%sT%s",$5,$6}' | sed -e 's/^\[//g' | sed -e 's/\]$//g'`
         if [ `grep "Total times" $logfile | wc -l` -gt 0 ]; then
             TIME_JOB_REAL=`grep "Total times" $logfile | tail -1 | awk '{print $16}'`
             TIME_JOB_SYS=`grep "Total times" $logfile | tail -1 | awk '{print $14}'`
