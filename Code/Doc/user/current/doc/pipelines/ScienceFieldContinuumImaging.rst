@@ -61,7 +61,7 @@ steadily improves. These parameters are for:
 * Data selection: ``CIMAGER_MINUV`` and ``CCALIBRATOR_MINUV``
 
 To use this mode, the values for these parameters should be given as
-an array in the form ``SELFCAL_INTERVAL="[1800,1800,900,300]``. The
+an array in the form ``SELFCAL_INTERVAL="[1800,1800,900,300]"``. The
 size of these arrays should be one more than
 ``SELFCAL_NUM_LOOPS``. This is because loop 0 is just the imaging, and
 it is followed by ``SELFCAL_NUM_LOOPS`` loops of
