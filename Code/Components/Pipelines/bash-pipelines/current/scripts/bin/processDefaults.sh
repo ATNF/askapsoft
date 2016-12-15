@@ -246,22 +246,35 @@ module load askappipeline/${askappipelineVersion}"
     # Configure the list of beams to be processed
     # Lists each beam in ${BEAMS_TO_USE}
 
-    #    if [ "${BEAMLIST}" == "" ]; then
-    # just use BEAM_MIN & BEAM_MAX
     BEAMS_TO_USE=""
-    for((b=${BEAM_MIN};b<=${BEAM_MAX};b++)); do
-        thisbeam=`echo $b | awk '{printf "%02d",$1}'`
-        BEAMS_TO_USE="${BEAMS_TO_USE} $thisbeam"
-    done
-    ### NOTE - CAN'T USE THIS DUE TO THE WAY CBPCALIBRATOR DEALS WITH BEAMS!
-    #    else
-    #        # re-print out the provided beam list with 0-leading integers
-    #        BEAMS_TO_USE=""
-    #        for b in $BEAMLIST; do
-    #            thisbeam=`echo $b | awk '{printf "%02d",$1}'`
-    #            BEAMS_TO_USE="${BEAMS_TO_USE} $thisbeam"
-    #        done
-    #    fi
+    if [ "${BEAMLIST}" == "" ]; then
+        # just use BEAM_MIN & BEAM_MAX
+        for((b=${BEAM_MIN};b<=${BEAM_MAX};b++)); do
+            thisbeam=`echo $b | awk '{printf "%02d",$1}'`
+            BEAMS_TO_USE="${BEAMS_TO_USE} $thisbeam"
+        done
+    else
+        # re-print out the provided beam list with 0-leading integers
+        beamAwkFile=$tmp/beamParsing.awk
+        cat > $beamAwkFile <<EOF
+BEGIN{
+  str=""
+}
+{
+  n=split(\$1,a,","); 
+  for(i=1;i<=n;i++){ 
+    n2=split(a[i],a2,"-"); 
+    for(b=a2[1];b<=a2[n2];b++){
+      str=sprintf("%s %02d",str,b);
+    } 
+  } 
+}
+END{
+  print str
+}
+EOF
+        BEAMS_TO_USE=`echo $BEAMLIST | awk -f $beamAwkFile` 
+    fi
 
     # Check the number of beams, and the maximum beam number (need the
     # latter for calibration tasks)
@@ -321,14 +334,6 @@ module load askappipeline/${askappipelineVersion}"
             CPUS_PER_CORE_CONT_IMAGING=${NUM_CPUS_CONTIMG_SCI}
         fi
 
-        ##     if [ $IMAGE_AT_BEAM_CENTRES == true ]; then
-        ##         # when imaging at beam centres, we *must* use the Cmodel
-        ##         # approach
-        ##         if [ ${SELFCAL_METHOD} != "Cmodel" ]; then
-        ##             echo "WARNING - When imaging at beam centres, must use SELFCAL_METHOD=Cmodel"
-        ##         fi
-        ##         SELFCAL_METHOD="Cmodel"
-        ##     else
         # Method used for self-calibration - needs to be either Cmodel or Components
         if [ ${SELFCAL_METHOD} != "Cmodel" ] &&
                [ ${SELFCAL_METHOD} != "Components" ]; then
