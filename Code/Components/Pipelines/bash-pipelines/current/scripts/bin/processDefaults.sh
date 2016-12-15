@@ -273,8 +273,10 @@ END{
   print str
 }
 EOF
-        BEAMS_TO_USE=`echo $BEAMLIST | awk -f $beamAwkFile` 
+        BEAMS_TO_USE=`echo $BEAMLIST | awk -f $beamAwkFile`
     fi
+
+    echo "Using the following beams for the science data: $BEAMS_TO_USE"
 
     # Check the number of beams, and the maximum beam number (need the
     # latter for calibration tasks)

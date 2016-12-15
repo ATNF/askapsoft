@@ -55,11 +55,11 @@ mkdir -p $slurms
 slurmOut=$slurmOutBase/$FIELD
 mkdir -p $slurmOut
 
-highestBeam=`echo $BEAM_MAX | awk '{printf "%02d",$1}'`
+highestBeam=`expr $maxbeam - 1`
 echo "Solving for the bandpass solutions for beams up to beam${highestBeam}"
 echo "========================================================="
 
-for((IBEAM=0; IBEAM<=${BEAM_MAX}; IBEAM++)); do
+for((IBEAM=0; IBEAM<=${highestBeam}; IBEAM++)); do
     BEAM=`echo $IBEAM | awk '{printf "%02d",$1}'`
     # Process all beams up to the maximum requested, so that we can
     # give them all to cbpcalibrator.
