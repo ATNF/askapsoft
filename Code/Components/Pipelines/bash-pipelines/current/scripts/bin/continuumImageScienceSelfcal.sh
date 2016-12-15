@@ -356,8 +356,6 @@ EOFINNER
     #  component parset and use it to calibrate
     if [ \${LOOP} -gt 0 ]; then
         cd \${loopdir}
-        ln -s ${logs} .
-        ln -s ${parsets} .
 
         log=${logs}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}_selavy.log
         echo "--- Source finding with $selavy ---" > \$log
