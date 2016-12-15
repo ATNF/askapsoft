@@ -557,8 +557,12 @@ NUM_CPUS_SPECIMG_SCI=2000
 # Number of processors per node for the spectral-line imaging
 CPUS_PER_CORE_SPEC_IMAGING=20
 # Number of processors for spectral-line mosaicking.
-# Leave blank to fit to number of channels
-NUM_CPUS_SPECTRAL_LINMOS=200
+# Leave blank to scale according to number of channels per core
+NUM_CPUS_SPECTRAL_LINMOS=""
+# Number of channels handled by each core in the spectral-line
+# mosaicking. Will determine total number of cores based on number of
+# channels to be mosaicked.
+NCHAN_PER_CORE_SPECTRAL_LINMOS=8
 
 # base name for image cubes: if IMAGE_BASE_SPECTRAL=i.blah then we'll
 # get image.i.blah, image.i.blah.restored, psf.i.blah etc

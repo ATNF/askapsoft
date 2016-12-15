@@ -375,9 +375,27 @@ module load askappipeline/${askappipelineVersion}"
         # Parameters required for spectral-line imaging
         ####
 
-        if [ "${CHAN_RANGE_SL_SCIENCE}" == "" ]; then
+        # Channel range to be used for spectral-line imaging
+        # If user has requested a different channel range, and the
+        # DO_COPY_SL flag is set, then we define a new spectral-line
+        # range of channels 
+        if [ "${CHAN_RANGE_SL_SCIENCE}" == "" ] || [ $DO_COPY_SL != true ]; then
+            # If this range hasn't been set, or we aren't doing the
+            # copy, then use the full channel range 
             CHAN_RANGE_SL_SCIENCE="1-$NUM_CHAN_SCIENCE"
         fi
+        # Check that we haven't requested invalid channels
+        minSLchan=`echo $CHAN_RANGE_SL_SCIENCE | awk -F'-' '{print $1}'`
+        maxSLchan=`echo $CHAN_RANGE_SL_SCIENCE | awk -F'-' '{print $2}'`
+        if [ $minSLchan -lt 0 ] || [ $minSLchan -gt $NUM_CHAN_SCIENCE ] ||
+               [ $maxSLchan -lt 0 ] || [ $maxSLchan -gt $NUM_CHAN_SCIENCE ] ||
+               [ $minSLchan -gt $maxSLchan ]; then
+            echo "ERROR - Invalid selection of CHAN_RANGE_SL_SCIENCE=$CHAN_RANGE_SL_SCIENCE, for total number of channels = $NUM_CHAN_SCIENCE"
+            echo "   Exiting."
+            exit 1
+        fi
+        # Define the number of channels used in the spectral-line imaging
+        NUM_CHAN_SCIENCE_SL=`echo $CHAN_RANGE_SL_SCIENCE | awk -F'-' '{print $2-$1+1}'`
 
         # Method used for continuum subtraction
         if [ ${CONTSUB_METHOD} != "Cmodel" ] &&
@@ -396,21 +414,25 @@ module load askappipeline/${askappipelineVersion}"
             echo "WARNING - the parameter RESTORING_BEAM_LOG is deprecated, and is constructed from the image name instead."
         fi
 
-        # Set the number of cores for the spectral-line mosaicking. Either
-        # set to the number of channels, or use that given in the config file
-        if [ "${NUM_CPUS_SPECTRAL_LINMOS}" == "" ]; then
-            # User has not specified
-            NUM_CPUS_SPECTRAL_LINMOS=$NUM_CHAN_SCIENCE
-        elif [ $NUM_CPUS_SPECTRAL_LINMOS -gt $NUM_CPUS_SPECIMG_SCI ]; then
-            echo "NOTE - Reducing NUM_CPUS_SPECTRAL_LINMOS to $NUM_CPUS_SPECIMG_SCI to match the number of cores used for imaging"
-            NUM_CPUS_SPECTRAL_LINMOS=$NUM_CPUS_SPECIMG_SCI
-        fi
-
         ####################
         # Mosaicking parameters
         
         # Fix the direction string for linmos - don't need the J2000 bit
         linmosFeedCentre=`echo $DIRECTION_SCI | awk -F',' '{printf "%s,%s]",$1,$2}'`
+
+        # Total number of channels should be exact multiple of
+        # channels-per-core, else the final process will take care of
+        # the rest and may run out of memory
+        # If it isn't, give a warning and push on
+        chanPerCoreLinmosOK=`echo $NUM_CHAN_SCIENCE_SL $NCHAN_PER_CORE_SPECTRAL_LINMOS | awk '{if (($1 % $2)==0) print "yes"; else print "no"}'`
+        if [ "${chanPerCoreLinmosOK}" == "no" ] && [ $DO_MOSAIC == true ]; then
+            echo "Warning! Number of spectral-line channels (${NUM_CHAN_SCIENCE_SL}) is not an exact multiple of NCHAN_PER_CORE_SPECTRAL_LINMOS (${NCHAN_PER_CORE_SPECTRAL_LINMOS})."
+            echo "         Pushing on, but there is the risk of memory problems with the spectral linmos task."
+        fi
+        # Determine the number of cores needed for spectral-line mosaicking
+        if [ "$NUM_CPUS_SPECTRAL_LINMOS" == "" ]; then
+            NUM_CPUS_SPECTRAL_LINMOS=`echo $NUM_CHAN_SCIENCE_SL $NCHAN_PER_CORE_SPECTRAL_LINMOS | awk '{print $1/$2}'`
+        fi
 
         ####################
         # Source-finding - number of cores:
