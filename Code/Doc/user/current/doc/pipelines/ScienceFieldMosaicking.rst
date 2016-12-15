@@ -84,64 +84,69 @@ the same centre position (ie. when
 image has a different centre, and linmos simply uses that, putting a
 primary beam at the centre of each image.
 
-+------------------------------+------------------------------------+-------------------------+-------------------------------------------------------------+
-| Variable                     | Default                            | Parset equivalent       | Description                                                 |
-+==============================+====================================+=========================+=============================================================+
-| ``DO_MOSAIC``                | true                               | none                    | Whether to mosaic the individual beam images, forming a     |
-|                              |                                    |                         | single, primary-beam-corrected image.                       |
-+------------------------------+------------------------------------+-------------------------+-------------------------------------------------------------+
-| ``JOB_TIME_LINMOS``          | ``JOB_TIME_DEFAULT`` (12:00:00)    | none                    | Time request for mosaicking                                 |
-+------------------------------+------------------------------------+-------------------------+-------------------------------------------------------------+
-| ``NUM_CPUS_CONTCUBE_LINMOS`` | ""                                 | none                    | Total number of cores used for each of the spectral-line    |
-|                              |                                    |                         | mosaicking jobs. If blank (the default), the number used is |
-|                              |                                    |                         | equal to the smaller of the number of cores used for the    |
-|                              |                                    |                         | continuum cube imaging (``NUM_CPUS_CONTCUBE_SCI``) or the   |
-|                              |                                    |                         | number of continuum channels.                               |
-+------------------------------+------------------------------------+-------------------------+-------------------------------------------------------------+
-| ``NUM_CPUS_SPECTRAL_LINMOS`` | 200                                | none                    | Total number of cores used for each of the spectral-line    |
-|                              |                                    |                         | mosaicking jobs. If blank, the number used is equal to the  |
-|                              |                                    |                         | smaller of the number of cores used for the spectral-line   |
-|                              |                                    |                         | imaging (``NUM_CPUS_SPECIMG_SCI``), or the number of        |
-|                              |                                    |                         | spectral-line channels.                                     |
-+------------------------------+------------------------------------+-------------------------+-------------------------------------------------------------+
-| ``MOSAIC_SELFCAL_LOOPS``     | true                               | none                    | Whether to make mosaics of each self-calibration loop.      |
-+------------------------------+------------------------------------+-------------------------+-------------------------------------------------------------+
-| ``FOOTPRINT_PA_REFERENCE``   | ""                                 | none                    | The reference rotation angle for the footprint. This should |
-|                              |                                    |                         | only be given if the scheduling block parset does not have  |
-|                              |                                    |                         | the **src.%d.footprint.rotation** parameter. If             |
-|                              |                                    |                         | **src.%d.footprint.rotation** is not given, this parameter  |
-|                              |                                    |                         | defaults to zero.                                           |
-+------------------------------+------------------------------------+-------------------------+-------------------------------------------------------------+
-|   ``BEAM_FOOTPRINT_NAME``    | diamond                            | none                    | The name of the beam footprint. This needs to be recognised |
-|                              |                                    |                         | by the ACES tool *footprint.py*, which generates the offsets|
-|                              |                                    |                         | required by the linmos application.                         |
-+------------------------------+------------------------------------+-------------------------+-------------------------------------------------------------+
-| ``BEAM_FOOTPRINT_PA``        | 0                                  | none                    | The position angle of the beam footprint pattern. Passed to |
-|                              |                                    |                         | footprint.py.                                               |
-+------------------------------+------------------------------------+-------------------------+-------------------------------------------------------------+
-| ``BEAM_PITCH``               | 1.24                               | none                    | The pitch, or beam spacing, in degrees. Passed to           |
-|                              |                                    |                         | footprint.py.                                               |
-+------------------------------+------------------------------------+-------------------------+-------------------------------------------------------------+
-| ``FREQ_BAND_NUMBER``         | ""                                 | none                    | Which frequency band are we in - determines beam arrangement|
-|                              |                                    |                         | (1,2,3,4). Passed to footprint.py. If not given, the pitch  |
-|                              |                                    |                         | value is used to set the beam separation. The band is       |
-|                              |                                    |                         | overridden by the pitch as well.                            |
-+------------------------------+------------------------------------+-------------------------+-------------------------------------------------------------+
-|   ``LINMOS_BEAM_OFFSETS``    | no default                         | feeds.beam{i}           | Parset entries that specify the beam offsets for use by     |
-|                              |                                    | (:doc:`../calim/linmos`)| linmos. Needs to have one entry for each beam being         |
-|                              |                                    |                         | mosaicked. See above for an example. Only provide this if   |
-|                              |                                    |                         | running footprint.py is not going to give you what you want |
-|                              |                                    |                         | (eg. non-standard beam locations).                          |
-+------------------------------+------------------------------------+-------------------------+-------------------------------------------------------------+
-|   ``LINMOS_BEAM_SPACING``    | "1deg"                             | feeds.spacing           | Scale factor for beam arrangement, in format like ‘1deg’.   |
-|                              |                                    | (:doc:`../calim/linmos`)| This should not be altered if you are using a standard      |
-|                              |                                    |                         | footprint from footprint.py (ie. with                       |
-|                              |                                    |                         | ``BEAM_FOOTPRINT_NAME``).                                   |
-+------------------------------+------------------------------------+-------------------------+-------------------------------------------------------------+
-| ``LINMOS_CUTOFF``            | 0.2                                | linmos.cutoff           | The primary beam cutoff, as a fraction of the peak          |
-|                              |                                    | (:doc:`../calim/linmos`)|                                                             |
-+------------------------------+------------------------------------+-------------------------+-------------------------------------------------------------+
-| ``LINMOS_PSF_REF``           | 0                                  | psfref                  | Reference beam for PSF (0-based) - which beam to take the   |
-|                              |                                    | (:doc:`../calim/linmos`)| PSF information from.                                       |
-+------------------------------+------------------------------------+-------------------------+-------------------------------------------------------------+
++------------------------------------+------------------------------------+-------------------------+--------------------------------------------------------------+
+| Variable                           | Default                            | Parset equivalent       | Description                                                  |
++====================================+====================================+=========================+==============================================================+
+| ``DO_MOSAIC``                      | true                               | none                    | Whether to mosaic the individual beam images, forming a      |
+|                                    |                                    |                         | single, primary-beam-corrected image.                        |
++------------------------------------+------------------------------------+-------------------------+--------------------------------------------------------------+
+| ``JOB_TIME_LINMOS``                | ``JOB_TIME_DEFAULT`` (12:00:00)    | none                    | Time request for mosaicking                                  |
++------------------------------------+------------------------------------+-------------------------+--------------------------------------------------------------+
+| ``NUM_CPUS_CONTCUBE_LINMOS``       | ""                                 | none                    | Total number of cores used for each of the spectral-line     |
+|                                    |                                    |                         | mosaicking jobs. If blank (the default), the number used is  |
+|                                    |                                    |                         | equal to the smaller of the number of cores used for the     |
+|                                    |                                    |                         | continuum cube imaging (``NUM_CPUS_CONTCUBE_SCI``) or the    |
+|                                    |                                    |                         | number of continuum channels.                                |
++------------------------------------+------------------------------------+-------------------------+--------------------------------------------------------------+
+| ``NCHAN_PER_CORE_SPECTRAL_LINMOS`` | 8                                  | none                    | Number of channels to be handled at once by a single process |
+|                                    |                                    |                         | in the spectral-line mosaicking. This should divide evenly   |
+|                                    |                                    |                         | into the number of spectral channels. This will determine the|
+|                                    |                                    |                         | number of cores assigned to the spectral-line mosaicking,    |
+|                                    |                                    |                         | unless ``NUM_CPUS_SPECTRAL_LINMOS`` is provided.             |
++------------------------------------+------------------------------------+-------------------------+--------------------------------------------------------------+
+| ``NUM_CPUS_SPECTRAL_LINMOS``       | ""                                 | none                    | Total number of cores used for each of the spectral-line     |
+|                                    |                                    |                         | mosaicking jobs. If blank, the number used is deterined by   |
+|                                    |                                    |                         | the total number of channels and                             |
+|                                    |                                    |                         | ``NCHAN_PER_CORE_SPECTRAL_LINMOS``.                          |
++------------------------------------+------------------------------------+-------------------------+--------------------------------------------------------------+
+| ``MOSAIC_SELFCAL_LOOPS``           | true                               | none                    | Whether to make mosaics of each self-calibration loop.       |
++------------------------------------+------------------------------------+-------------------------+--------------------------------------------------------------+
+| ``FOOTPRINT_PA_REFERENCE``         | ""                                 | none                    | The reference rotation angle for the footprint. This should  |
+|                                    |                                    |                         | only be given if the scheduling block parset does not have   |
+|                                    |                                    |                         | the **src.%d.footprint.rotation** parameter. If              |
+|                                    |                                    |                         | **src.%d.footprint.rotation** is not given, this parameter   |
+|                                    |                                    |                         | defaults to zero.                                            |
++------------------------------------+------------------------------------+-------------------------+--------------------------------------------------------------+
+| ``BEAM_FOOTPRINT_NAME``            | diamond                            | none                    | The name of the beam footprint. This needs to be recognised  |
+|                                    |                                    |                         | by the ACES tool *footprint.py*, which generates the offsets |
+|                                    |                                    |                         | required by the linmos application.                          |
++------------------------------------+------------------------------------+-------------------------+--------------------------------------------------------------+
+| ``BEAM_FOOTPRINT_PA``              | 0                                  | none                    | The position angle of the beam footprint pattern. Passed to  |
+|                                    |                                    |                         | footprint.py.                                                |
++------------------------------------+------------------------------------+-------------------------+--------------------------------------------------------------+
+| ``BEAM_PITCH``                     | 1.24                               | none                    | The pitch, or beam spacing, in degrees. Passed to            |
+|                                    |                                    |                         | footprint.py.                                                |
++------------------------------------+------------------------------------+-------------------------+--------------------------------------------------------------+
+| ``FREQ_BAND_NUMBER``               | ""                                 | none                    | Which frequency band are we in - determines beam arrangement |
+|                                    |                                    |                         | (1,2,3,4). Passed to footprint.py. If not given, the pitch   |
+|                                    |                                    |                         | value is used to set the beam separation. The band is        |
+|                                    |                                    |                         | overridden by the pitch as well.                             |
++------------------------------------+------------------------------------+-------------------------+--------------------------------------------------------------+
+| ``LINMOS_BEAM_OFFSETS``            | no default                         | feeds.beam{i}           | Parset entries that specify the beam offsets for use by      |
+|                                    |                                    | (:doc:`../calim/linmos`)| linmos. Needs to have one entry for each beam being          |
+|                                    |                                    |                         | mosaicked. See above for an example. Only provide this if    |
+|                                    |                                    |                         | running footprint.py is not going to give you what you want  |
+|                                    |                                    |                         | (eg. non-standard beam locations).                           |
++------------------------------------+------------------------------------+-------------------------+--------------------------------------------------------------+
+| ``LINMOS_BEAM_SPACING``            | "1deg"                             | feeds.spacing           | Scale factor for beam arrangement, in format like ‘1deg’.    |
+|                                    |                                    | (:doc:`../calim/linmos`)| This should not be altered if you are using a standard       |
+|                                    |                                    |                         | footprint from footprint.py (ie. with                        |
+|                                    |                                    |                         | ``BEAM_FOOTPRINT_NAME``).                                    |
++------------------------------------+------------------------------------+-------------------------+--------------------------------------------------------------+
+| ``LINMOS_CUTOFF``                  | 0.2                                | linmos.cutoff           | The primary beam cutoff, as a fraction of the peak           |
+|                                    |                                    | (:doc:`../calim/linmos`)|                                                              |
++------------------------------------+------------------------------------+-------------------------+--------------------------------------------------------------+
+| ``LINMOS_PSF_REF``                 | 0                                  | psfref                  | Reference beam for PSF (0-based) - which beam to take the    |
+|                                    |                                    | (:doc:`../calim/linmos`)| PSF information from.                                        |
++------------------------------------+------------------------------------+-------------------------+--------------------------------------------------------------+
  
