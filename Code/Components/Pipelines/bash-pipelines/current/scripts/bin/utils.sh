@@ -708,13 +708,13 @@ function getBeamCentre()
 
 function writeStats()
 {
-    # usage: writeStats ID DESC RESULT NCORES REAL USER SYS VM RSS format
+    # usage: writeStats ID DESC RESULT NCORES REAL USER SYS VM RSS STARTTIME format
     #   where format is either txt or csv. Anything else defaults to txt
-    format=${10}
-    if [ $# -ge 9 ] && [ "$format" == "csv" ]; then
-	echo $@ | awk '{printf "%s,%s,%s,%s,%s,%s,%s,%s,%s\n",$1,$2,$3,$4,$5,$6,$7,$8,$9}'
+    format=${11}
+    if [ $# -ge 10 ] && [ "$format" == "csv" ]; then
+	echo $@ | awk '{printf "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",$1,$2,$3,$4,$5,$6,$7,$8,$9,$10}'
     else
-	echo $@ | awk '{printf "%10s%10s%40s%9s%10s%10s%10s%10s%10s\n",$1,$2,$3,$4,$5,$6,$7,$8,$9}'
+	echo $@ | awk '{printf "%10s%10s%40s%9s%10s%10s%10s%10s%10s%25s\n",$1,$2,$3,$4,$5,$6,$7,$8,$9,$10}'
     fi
 }
 
@@ -727,7 +727,7 @@ function writeStatsHeader()
     else
 	format="txt"
     fi
-    writeStats "JobID" "nCores" "Description" "Result" "Real" "User" "System" "PeakVM" "PeakRSS" $format
+    writeStats "JobID" "nCores" "Description" "Result" "Real" "User" "System" "PeakVM" "PeakRSS" "StartTime" $format
 }
 
 function extractStats()
@@ -773,11 +773,11 @@ function extractStats()
 
 	writeStatsHeader $format > $output
 	if [ `grep "(1, " $STATS_LOGFILE | wc -l` -gt 0 ]; then
-	    writeStats $STATS_ID $NUM_CORES "${STATS_DESC}_master"     $RESULT_TXT $TIME_JOB_REAL $TIME_JOB_USER $TIME_JOB_SYS $PEAK_VM_MASTER  $PEAK_RSS_MASTER  $format >> $output
-	    writeStats $STATS_ID $NUM_CORES "${STATS_DESC}_workerPeak" $RESULT_TXT $TIME_JOB_REAL $TIME_JOB_USER $TIME_JOB_SYS $PEAK_VM_WORKERS $PEAK_RSS_WORKERS $format >> $output
-	    writeStats $STATS_ID $NUM_CORES "${STATS_DESC}_workerAve"  $RESULT_TXT $TIME_JOB_REAL $TIME_JOB_USER $TIME_JOB_SYS $AVE_VM_WORKERS  $AVE_RSS_WORKERS  $format >> $output
+	    writeStats $STATS_ID $NUM_CORES "${STATS_DESC}_master"     $RESULT_TXT $TIME_JOB_REAL $TIME_JOB_USER $TIME_JOB_SYS $PEAK_VM_MASTER  $PEAK_RSS_MASTER  $START_TIME_JOB $format >> $output
+	    writeStats $STATS_ID $NUM_CORES "${STATS_DESC}_workerPeak" $RESULT_TXT $TIME_JOB_REAL $TIME_JOB_USER $TIME_JOB_SYS $PEAK_VM_WORKERS $PEAK_RSS_WORKERS $START_TIME_JOB $format >> $output
+	    writeStats $STATS_ID $NUM_CORES "${STATS_DESC}_workerAve"  $RESULT_TXT $TIME_JOB_REAL $TIME_JOB_USER $TIME_JOB_SYS $AVE_VM_WORKERS  $AVE_RSS_WORKERS  $START_TIME_JOB $format >> $output
 	else                                                                      
-	    writeStats $STATS_ID $NUM_CORES $STATS_DESC                $RESULT_TXT $TIME_JOB_REAL $TIME_JOB_USER $TIME_JOB_SYS $PEAK_VM_MASTER  $PEAK_RSS_MASTER  $format >> $output
+	    writeStats $STATS_ID $NUM_CORES $STATS_DESC                $RESULT_TXT $TIME_JOB_REAL $TIME_JOB_USER $TIME_JOB_SYS $PEAK_VM_MASTER  $PEAK_RSS_MASTER  $START_TIME_JOB $format >> $output
 	fi
 
     done
@@ -794,6 +794,8 @@ function parseLog()
     TIME_JOB_USER="---"
     PEAK_VM_MASTER="---"
     PEAK_RSS_MASTER="---"
+
+    START_TIME_JOB=`head -1 $logfile | awk '{printf "%sT%s",$5,$6}' | sed -e 's/^\[//g' | sed -e 's/\]$//g'`
 
     if [ ${NUM_CORES} -ge 2 ] && [ `grep "(1, " $logfile | wc -l` -gt 0 ]; then
         # if here, job was a distributed job
