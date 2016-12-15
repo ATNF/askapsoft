@@ -795,7 +795,7 @@ function parseLog()
     PEAK_VM_MASTER="---"
     PEAK_RSS_MASTER="---"
 
-    START_TIME_JOB=`head -1 $logfile | awk '{printf "%sT%s",$5,$6}' | sed -e 's/^\[//g' | sed -e 's/\]$//g'`
+    START_TIME_JOB=`grep "(0, " $logfile | head -1 | awk '{printf "%sT%s",$5,$6}' | sed -e 's/^\[//g' | sed -e 's/\]$//g'`
 
     if [ ${NUM_CORES} -ge 2 ] && [ `grep "(1, " $logfile | wc -l` -gt 0 ]; then
         # if here, job was a distributed job
