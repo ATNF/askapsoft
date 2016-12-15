@@ -794,7 +794,7 @@ function parseLog()
     TIME_JOB_USER="---"
     PEAK_VM_MASTER="---"
     PEAK_RSS_MASTER="---"
-
+    START_TIME_JOB="---"
 
     if [ ${NUM_CORES} -ge 2 ] && [ `grep "(1, " $logfile | wc -l` -gt 0 ]; then
         # if here, job was a distributed job
