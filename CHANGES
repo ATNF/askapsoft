@@ -1,3 +1,70 @@
+0.16.1 (16 December 2016)
+-------------------------
+
+A patch release that is largely bug fixes, with several minor
+updates to the pipeline scripts.
+
+New features:
+
+ * The pipelines will now accept a list of beams to be processed, via
+   a comma-separated list of beams and beam ranges - for instance
+   0,1,4,7-9,16. This should be given with the BEAMLIST configuration
+   parameter. If this is not given, it falls back to using BEAM_MIN &
+   BEAM_MAX as usual.
+ * An additional column is now written to the stats files, showing the
+   starting time of each job.
+ * There is a new parameter FOOTPRINT_PA_REFERENCE that allows a user
+   to specify a reference rotation angle for the beam footprint,
+   should it not be included in the scheduling block parset.
+ * There is a new parameter NCHAN_PER_CORE_SPECTRAL_LINMOS that
+   determines how many cores are used for the spectral-line
+   mosaicking. This helps ensure that the job is sized such that the
+   memory load is spread evenly.
+
+Bug fixes:
+
+ * Imaging:
+   - Improvements to the new imager to handle writers who do not get
+     work due to the barycentring.
+   - Improvements to the allocation of work within the new imager.
+ * RM Synthesis & Selavy:
+   - The new RM Synthesis module was not correctly respecting the '%p'
+     wildcard in image names, which also affected extraction run from
+     within Selavy. This has been fixed. 
+ * Pipelines:
+   - The findBandpass slurm job had a bug that stopped it completing
+     successfully.
+   - A number of bugs were identified with the mosaicking:
+     + The Taylor term parameter was set incorrectly in the continuum
+       mosaicking scripts.
+     + The image name was not being set correctly in the spectral-line
+       mosaicking.
+     + The job dependencies for the spectral-line mosaicking have been
+       fixed so that all spectral imaging jobs are included.
+   - The askapsoft module is now loaded more reliably within the slurm
+     jobs.
+   - The return value of the askapcli tasks is now tested, so that
+     errors (often due to conflicting modules) can be detected and the
+     pipeline aborted.
+   - A certain combination of parameters (IMAGE_AT_BEAM_CENTRES=false
+     and DO_MOSAIC=false) meant that the determination of fields in
+     the observation was not done, so no science processing was
+     done. This has been fixed so that the list of fields is always
+     determined. 
+   - A couple of bugs in the source-finding script were fixed, where
+     the image name was incorrectly parsed, and the Taylor 1 & 2
+     images were not being found.
+   - The footprint position angle for individual fields was
+     incorrectly being added to the default value listed in the
+     scheduling block parset.
+   - To avoid conflicts between source-finding results of different
+     images, the artefacts produced by selavy (catalogues and images)
+     now incorporate the image name in their name. The source-finding
+     jobs are also more explicit in which image they are searching.
+   - Finally, two deprecated scripts have been removed from the
+     pipeline directory.
+   
+
 0.16.0 (28 November 2016)
 -------------------------
 
