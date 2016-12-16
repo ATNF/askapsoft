@@ -182,7 +182,7 @@ buildAskap() {
     # build askapsoft if specified
   if [ "$DEPLOY_ASKAPSOFT" == true ]; then
     log "ASKAPsoft cpapps will be built and deployed"
-    BUILD_COMMAND+="rbuild -n -V --release-name \"ASKAPsoft-cpapps-${TAG}\" --stage-dir \"ASKAPsoft-cpapps-${TAG}\" -t release Code/Systems/cpapps; "
+    BUILD_COMMAND+="rbuild -n --release-name \"ASKAPsoft-cpapps-${TAG}\" --stage-dir \"ASKAPsoft-cpapps-${TAG}\" -t release Code/Systems/cpapps; "
   fi
 
   # build pipelines if specified
