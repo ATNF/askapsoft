@@ -42,6 +42,7 @@
 #include "askap/AskapLogging.h"
 #include "askap/AskapError.h"
 #include "boost/shared_ptr.hpp"
+#include <boost/thread/thread.hpp>
 #include "cpcommon/VisDatagram.h"
 #include "utils/ComplexGaussianNoise.h"
 
@@ -50,6 +51,7 @@
 #include "ingestpipeline/sourcetask/VisConverterADE.h"
 #include "configuration/Configuration.h" // Includes all configuration attributes too
 #include "cpcommon/VisChunk.h"
+#include "askap/AskapUtil.h"
 
 
 // Using
@@ -58,6 +60,46 @@ using namespace askap::cp;
 using namespace askap::cp::ingest;
 
 ASKAP_LOGGER(logger, "tMSSink");
+
+class ParallelGenerator {
+public:
+   explicit ParallelGenerator(float rms, unsigned int nThreads = 1) : itsRMS(rms), itsNThreads(nThreads) {}
+   void generate(boost::shared_ptr<casa::Complex> &data, casa::uInt size) const {
+        ASKAPASSERT(itsNThreads > 0);
+        const casa::uInt chunkSize = size / itsNThreads;
+        casa::uInt offset = 0;
+        for (casa::uInt part = 1; part < itsNThreads; ++part) {
+             boost::shared_ptr<casa::Complex> start(data.get() + offset, utility::NullDeleter());
+             itsGroup.create_thread(boost::bind(&ParallelGenerator::generatePart, this, start, chunkSize, part));
+             offset += chunkSize;
+        }
+        // process the remaining data in the main thread
+        ASKAPDEBUGASSERT(offset < size);
+        const casa::uInt remainder  = size - offset;
+        ASKAPDEBUGASSERT(remainder >= chunkSize);
+        boost::shared_ptr<casa::Complex> start(data.get() + offset, utility::NullDeleter());
+        generatePart(start, remainder);
+        itsGroup.join_all();
+   }
+
+private:
+
+   void generatePart(boost::shared_ptr<casa::Complex> &data, casa::uInt size, casa::Int seed1 = 0) const {
+      scimath::ComplexGaussianNoise cns(casa::square(itsRMS),seed1);
+      casa::Complex *rawPtr = data.get();
+      casa::Complex *endMark = rawPtr + size;
+      for (; rawPtr != endMark; ++rawPtr) {
+           *rawPtr = cns();
+      }
+   }
+   
+   /// @brief rms of the simulated gaussian numbers
+   const float  itsRMS;  
+   /// @brief number of parallel threads
+   const unsigned int itsNThreads;
+
+   mutable boost::thread_group itsGroup;
+};
 
 class TCPSinkTestApp : public askap::cp::common::ParallelCPApplication
 {
@@ -95,6 +137,7 @@ public:
       ASKAPLOG_INFO_STR(logger, "TCPSink initialisation time: "<<initTime<<" seconds");
 
       scimath::ComplexGaussianNoise cns(casa::square(config().getFloat("rms",1.)));
+      ParallelGenerator pg(config().getFloat("rms",1.),config().getUint("nthreads",10));
       
       ASKAPLOG_INFO_STR(logger, "Running the test for rank="<<rank());
 
@@ -105,11 +148,8 @@ public:
            ASKAPCHECK(casa::MVTime::read(q, "today"), "MVTime::read failed");
            chunk->time() = casa::MVEpoch(q);
            ASKAPDEBUGASSERT(chunk->visibility().contiguousStorage());
-           casa::Complex *data =chunk->visibility().data();
-           casa::Complex *endData = data + chunk->visibility().nelements();
-           for (; data != endData; ++data) {
-                *data = cns();
-           }
+           boost::shared_ptr<casa::Complex> data(chunk->visibility().data(), utility::NullDeleter());
+           pg.generate(data, chunk->visibility().nelements());
            float generationTime = timer.real();
            //
            ASKAPLOG_INFO_STR(logger, "Received "<<count + 1<<" integration(s) for rank="<<rank()<<" time: "<<chunk->time());

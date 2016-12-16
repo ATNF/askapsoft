@@ -6,6 +6,8 @@ dest.port = 9001
 count = 10
 # cycle interval in microseconds
 correlator.mode.standard.interval = 9953280
+# number of threads in the visibility simulation (for performance)
+nthreads = 15
 
 # put number of beams here
 maxbeams = 36
