@@ -133,7 +133,7 @@ class ContinuumWorker
 
         void handleImageParams(askap::scimath::Params::ShPtr params, unsigned int chan);
         void recordBeam(const askap::scimath::Axes &axes, const unsigned int globalChannel);
-        void storeBeam(const unsigned int globalChannel);
+        void storeBeam(const unsigned int cubeChannel);
 
         std::map<unsigned int, casa::Vector<casa::Quantum<double> > > itsBeamList;
 

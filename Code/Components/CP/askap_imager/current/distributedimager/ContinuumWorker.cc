@@ -383,6 +383,24 @@ void ContinuumWorker::buildSpectralCube() {
     int nGroups = itsComms.nGroups();
     int nchantotal = nWorkers * nchanpercore / nGroups;
 
+    // Define reference channel for giving restoring beam
+    std::string reference = itsParset.getString("restore.beamReference", "mid");
+    if (reference == "mid") {
+        itsBeamReferenceChannel = nchanCube / 2;
+    } else if (reference == "first") {
+        itsBeamReferenceChannel = 0;
+    } else if (reference == "last") {
+        itsBeamReferenceChannel = nchanCube - 1;
+    } else { // interpret reference as a 0-based channel nuumber
+        unsigned int num = atoi(reference.c_str());
+        if (num < nchanCube) {
+            itsBeamReferenceChannel = num;
+        } else {
+            ASKAPLOG_WARN_STR(logger, "beamReference value (" << reference
+                              << ") not valid. Using middle value of " << nchanCube / 2);
+            itsBeamReferenceChannel = nchanCube / 2;
+        }
+    }
 
     if (itsComms.isWriter()) {
 
@@ -854,10 +872,10 @@ void ContinuumWorker::recordBeam(const askap::scimath::Axes &axes,
 }
 
 
-void ContinuumWorker::storeBeam(const unsigned int globalChannel)
+void ContinuumWorker::storeBeam(const unsigned int cubeChannel)
 {
-    if (globalChannel == itsBeamReferenceChannel) {
-        itsRestoredCube->addBeam(itsBeamList[globalChannel]);
+    if (cubeChannel == itsBeamReferenceChannel) {
+        itsRestoredCube->addBeam(itsBeamList[cubeChannel]);
     }
 }
 
