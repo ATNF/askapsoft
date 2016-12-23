@@ -32,6 +32,7 @@
 
 #include "ingestpipeline/sourcetask/VisConverter.h"
 #include "cpcommon/VisDatagram.h"
+#include "askap_cpingest.h"
 
 // ASKAPsoft includes
 #include "askap/AskapLogging.h"

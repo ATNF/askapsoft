@@ -31,6 +31,7 @@
 // standard includes
 #include <stdint.h>
 #include <set>
+#include <map>
 #include <vector>
 
 // 3rd party
@@ -89,7 +90,18 @@ private:
    /// This is used for duplicate detection
    typedef boost::tuple<uint32_t, uint32_t, uint32_t, uint32_t, uint32_t> DatagramIdentity;
 
+   /// @brief set of all received datagrams to check for duplicates
+   /// @note We may need to remove this check later on due to performance
    std::set<DatagramIdentity> itsReceivedDatagrams;
+
+   /// @brief normally empty map where we store detected abnormalities
+   /// @details key is a tuple of block and card (should really be only one value in the
+   /// current setup of ADE), the value is a set of beam/channel tuples
+   std::map<boost::tuple<uint32_t, uint32_t>, std::set<boost::tuple<uint32_t, uint32_t> > > itsAbnormalData;
+
+   /// @brief report on abnormal data if necessary
+   /// @details This method summarises all details from itsAbnormalData. Nothing, if the map is empty.
+   void logDetailsOnAbnormalData() const;
 
    /// @brief expected number of data slices
    uint32_t itsNSlices;

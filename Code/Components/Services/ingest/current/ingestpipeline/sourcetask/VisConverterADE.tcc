@@ -36,6 +36,7 @@
 
 // ASKAPsoft includes
 #include "askap/AskapError.h"
+#include "askap/AskapUtil.h"
 // just to access static methods
 #include "ingestpipeline/sourcetask/VisSource.h"
 
@@ -94,6 +95,9 @@ void VisConverter<VisDatagramADE>::initVisChunk(const casa::uLong timestamp,
                const CorrelatorMode &corrMode)
 {
    itsReceivedDatagrams.clear();
+   // don't bother logging on destruction, only here which is every cycle except the last one
+   logDetailsOnAbnormalData();
+   itsAbnormalData.clear();
    if (itsNDuplicates > 0) {
        ASKAPLOG_DEBUG_STR(logger, "Received "<<itsNDuplicates<<" duplicate datagram in the previous VisChunk");
        itsNDuplicates = 0u;
@@ -106,6 +110,115 @@ void VisConverter<VisDatagramADE>::initVisChunk(const casa::uLong timestamp,
    // by default, we have 4 data slices
    const casa::uInt datagramsExpected = itsNSlices * nBeamsToReceive() * nChannels;
    setNumberOfExpectedDatagrams(datagramsExpected);
+}
+
+// helper class, we'll move it to a better place later on
+struct RangeHelper  {
+
+   RangeHelper() : itsInitialised(false), itsLastRange(0u,0u) {} 
+
+   void add(uint32_t in) {
+      if (!itsInitialised) {
+          itsInitialised = true;
+          itsLastRange = std::pair<uint32_t,uint32_t>(in,in);
+      } else {
+          if (in == itsLastRange.second + 1) {
+              itsLastRange.second = in;
+          } else {
+              itsRanges.push_back(itsLastRange);
+              itsLastRange = std::pair<uint32_t,uint32_t>(in,in);
+          }
+      }
+   }
+
+   template<typename Iter>
+   void add(const Iter& start, const Iter &stop) {
+        for (Iter iter = start; iter != stop; ++iter) {
+             add(*iter);
+        }
+   }
+
+   std::string str() const {
+      if (!itsInitialised) {
+          return "none";
+      }
+      std::vector<std::pair<uint32_t, uint32_t> > ranges = itsRanges;
+      ranges.push_back(itsLastRange);
+      ASKAPDEBUGASSERT(ranges.size() > 0);
+      std::string res;
+      for (std::vector<std::pair<uint32_t, uint32_t> >::const_iterator ci = ranges.begin(); ci != ranges.end(); ++ci) {
+           if (res.size() > 0) {
+               res +=", ";
+           }
+           if (ci->first == ci->second) {
+               res += utility::toString<uint32_t>(ci->first);
+           } else {
+               ASKAPDEBUGASSERT(ci->first < ci->second);
+               res += utility::toString<uint32_t>(ci->first)+"-"+utility::toString<uint32_t>(ci->second);
+           }
+      }
+      return res;
+   }
+
+private:
+   std::vector<std::pair<uint32_t, uint32_t> > itsRanges;
+   
+   bool itsInitialised;
+
+   std::pair<uint32_t, uint32_t> itsLastRange;
+
+};
+//
+
+
+
+/// @brief report on abnormal data if necessary
+/// @details This method summarises all details from itsAbnormalData. Nothing, if the map is empty.
+void VisConverter<VisDatagramADE>::logDetailsOnAbnormalData() const
+{
+   // this method is expected to be called once per cycle to log the summary 
+   // this will avoid spamming the log too much
+   
+   // itsAbnormalData is block/card vs beam/channel map
+   for (std::map<boost::tuple<uint32_t, uint32_t>, std::set<boost::tuple<uint32_t, uint32_t> > >::const_iterator ci = 
+        itsAbnormalData.begin(); ci != itsAbnormalData.end(); ++ci) {
+        ASKAPDEBUGASSERT(ci->second.size() > 0);
+        std::map<uint32_t, std::set<uint32_t> > affected_beams;
+        for (std::set<boost::tuple<uint32_t, uint32_t> >::const_iterator valIt = ci->second.begin(); 
+             valIt != ci->second.end(); ++valIt) {
+             affected_beams[valIt->get<0>()].insert(valIt->get<1>());
+        }
+        ASKAPDEBUGASSERT(affected_beams.size() > 0);
+        bool allBeamsTheSame = true;
+        std::map<uint32_t, std::set<uint32_t> >::const_iterator abIt = affected_beams.begin();
+        ASKAPDEBUGASSERT(abIt != affected_beams.end());
+        const std::set<uint32_t> firstEncounteredBeamChannels = abIt->second;
+        RangeHelper beamRanges;
+        beamRanges.add(abIt->first);
+        for (++abIt; abIt != affected_beams.end(); ++abIt) {
+             if (abIt->second != firstEncounteredBeamChannels) {
+                 allBeamsTheSame = false;
+             }
+             beamRanges.add(abIt->first);
+        }
+        
+        if (allBeamsTheSame) {
+            RangeHelper channelRanges;
+            channelRanges.add(firstEncounteredBeamChannels.begin(),firstEncounteredBeamChannels.end());
+            ASKAPLOG_ERROR_STR(logger, "Detected NaNs in the data stream for block="<<ci->first.get<0>()<<
+                      " card="<<ci->first.get<1>()<<", affected beams: "<<beamRanges.str()<<", affected channels: "<<
+                      channelRanges.str()<<" (same for all beams, "<<firstEncounteredBeamChannels.size()<<" channels per beam)");
+        } else {
+            ASKAPLOG_ERROR_STR(logger, "Detected NaNs in the data stream for block="<<ci->first.get<0>()<<
+                      " card="<<ci->first.get<1>()<<", affected beams: "<<beamRanges.str()<<", affected channels per beam:");
+            for (abIt = affected_beams.begin(); abIt != affected_beams.end(); ++abIt) {
+                 RangeHelper channelRanges;
+                 channelRanges.add(abIt->second.begin(),abIt->second.end());
+                 ASKAPLOG_ERROR_STR(logger, "      beam "<<abIt->first<<" affected channels: "<<channelRanges.str()<<
+                          " ("<<abIt->second.size()<<" in total)");
+            }
+        }
+   }
 }
 
 /// @brief main method add datagram to the current chunk
@@ -221,12 +334,26 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
         ASKAPDEBUGASSERT(polidx < chunk->nPol());
 
         atLeastOneUseful = true;
-        casa::Complex sample(vis.vis[item].real, vis.vis[item].imag);
+        const casa::Complex sample(vis.vis[item].real, vis.vis[item].imag);
 
         const casa::uInt antenna1 = chunk->antenna1()(row);
         const casa::uInt antenna2 = chunk->antenna2()(row);
         const bool rowIsValid = isAntennaGood(antenna1) && isAntennaGood(antenna2);
         const bool isAutoCorr = antenna1 == antenna2;
+
+        if (isnan(real(sample)) || isnan(imag(sample))) {
+            /*
+            const uint32_t realPart = reinterpret_cast<const uint32_t&>(real(sample));
+            const uint32_t imagPart = reinterpret_cast<const uint32_t&>(imag(sample));
+
+            ASKAPLOG_DEBUG_STR(logger, "Detected NaN for visibility in channel "<<channel<<" row "<<row<<" polindex "<<polidx<<
+                       " antenna1: "<<antenna1<<" antennas2: "<<antenna2<<" real: 0x"<<std::hex<<realPart<<" imag: 0x"<<imagPart<<
+                       " beam "<<vis.beamid<<" product = "<<product<<" card = "<<vis.card<<" block = "<<vis.block<<" slice = "<<vis.slice);
+            */
+            itsAbnormalData[boost::tuple<uint32_t, uint32_t>(vis.block, vis.card)].insert(
+                        boost::tuple<uint32_t,uint32_t>(vis.beamid, channel));
+            continue;
+        }
        
         // note, always copy the data even if the row is flagged -
         // data could still be of interest
