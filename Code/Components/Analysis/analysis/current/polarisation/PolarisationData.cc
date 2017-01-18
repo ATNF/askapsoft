@@ -35,6 +35,7 @@
 
 #include <extraction/SourceSpectrumExtractor.h>
 #include <extraction/NoiseSpectrumExtractor.h>
+#include <catalogues/CasdaComponent.h>
 
 #include <casacore/casa/Quanta/Quantum.h>
 #include <Common/ParameterSet.h>
@@ -48,19 +49,20 @@ namespace analysis {
 
 PolarisationData::PolarisationData(const LOFAR::ParameterSet &parset):
     itsParset(parset),
-    itsStokesI(parset,"I"),
-    itsStokesQ(parset,"Q"),
-    itsStokesU(parset,"U"),
-    itsStokesV(parset,"V")
+    itsStokesI(parset, "I"),
+    itsStokesQ(parset, "Q"),
+    itsStokesU(parset, "U"),
+    itsStokesV(parset, "V"),
+    itsModelStokesI(parset)
 {
     // store the locations of the images
 
     // record extraction parameters
-    
+
     itsParset.replace("useDetectedPixels", "false");
     itsParset.replace("scaleSpectraByBeam", "true");
-    
-    
+
+
 }
 
 void PolarisationData::initialise(CasdaComponent *comp)
@@ -69,7 +71,7 @@ void PolarisationData::initialise(CasdaComponent *comp)
     // extract Stokes I,Q,U and noise spectra
     itsStokesI.setComponent(comp);
     itsStokesI.extract();
-    unsigned int size=itsStokesI.spectrum().size();
+    unsigned int size = itsStokesI.spectrum().size();
     itsStokesQ.setComponent(comp);
     itsStokesQ.extract();
     itsStokesU.setComponent(comp);
@@ -78,7 +80,7 @@ void PolarisationData::initialise(CasdaComponent *comp)
     itsStokesV.extract();
 
     // write out extracted spectra
-    if (itsParset.getBool("writeSpectra","true")) {
+    if (itsParset.getBool("writeSpectra", "true")) {
         itsStokesI.write();
         itsStokesQ.write();
         itsStokesU.write();
@@ -87,35 +89,20 @@ void PolarisationData::initialise(CasdaComponent *comp)
 
     // compute "average noise"
     itsAverageNoiseSpectrum = (itsStokesQ.noiseSpectrum() +
-                               itsStokesU.noiseSpectrum() ) / 2.;    
-     
+                               itsStokesU.noiseSpectrum()) / 2.;
+
     // get frequency array and compute lambda-squared array
     itsFrequencies = itsStokesI.frequencies();
-    ASKAPASSERT(itsFrequencies.size()==size);
+    ASKAPASSERT(itsFrequencies.size() == size);
     itsLambdaSquared = casa::Vector<Float>(size);
-    for(unsigned int i=0;i<size;i++){
+    for (unsigned int i = 0; i < size; i++) {
         float lambda = QC::c.getValue() / itsFrequencies[i];
-        itsLambdaSquared[i] = lambda*lambda;
+        itsLambdaSquared[i] = lambda * lambda;
     }
 
-    // compute model I spectrum - use alpha/beta from component
-    float flux0 = casa::Quantum<float>(comp->intFlux(),
-                                       casda::intFluxUnitContinuum).getValue(
-                                           itsStokesI.bunit());
-    float nu0 = casa::Quantum<float>(comp->freq(),casda::freqUnit).getValue(itsStokesI.freqUnit());
-                                     
-    ASKAPLOG_DEBUG_STR(logger, "PolarisationData's flux0="<<flux0 << " at freq="<<nu0);
-    ASKAPLOG_DEBUG_STR(logger, itsFrequencies);
-    float alpha = comp->alpha();
-    float beta = comp->beta();
+    // find Stokes I model
+    itsModelStokesI.initialise(itsStokesI, comp);
 
-    itsModelStokesI = casa::Vector<Float>(size);
-    for(unsigned int i=0;i<size;i++){
-        float lognu = log(itsFrequencies[i]/nu0);
-        float logflux = log(flux0) + alpha*lognu + beta*lognu*lognu;
-        itsModelStokesI[i] = exp(logflux);
-    }
-    
 }
 
 

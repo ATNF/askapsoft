@@ -73,13 +73,13 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
     casa::Gaussian2D<Double> gauss = obj.gaussFitSet(fitType)[fitNumber];
     casa::Vector<Double> errors = obj.fitResults(fitType).errors(fitNumber);
     CasdaIsland theIsland(obj, parset);
-    
+
     itsIslandID = theIsland.id();
     std::stringstream id;
     id << itsIDbase << obj.getID() << getSuffix(fitNumber);
     itsComponentID = id.str();
 
-    duchamp::FitsHeader newHead_freq = changeSpectralAxis(obj.header(),"FREQ",casda::freqUnit);
+    duchamp::FitsHeader newHead_freq = changeSpectralAxis(obj.header(), "FREQ", casda::freqUnit);
 
     double thisRA, thisDec, zworld;
     newHead_freq.pixToWCS(gauss.xCenter(), gauss.yCenter(), obj.getZcentre(),
@@ -87,8 +87,8 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
     itsRA.value() = thisRA;
     itsDEC.value() = thisDec;
 
-    double freqScale=0.;
-    if (newHead_freq.WCS().spec >= 0 ){
+    double freqScale = 0.;
+    if (newHead_freq.WCS().spec >= 0) {
         casa::Unit imageFreqUnits(newHead_freq.WCS().cunit[newHead_freq.WCS().spec]);
         casa::Unit freqUnits(casda::freqUnit);
         freqScale = casa::Quantity(1., imageFreqUnits).getValue(freqUnits);
@@ -118,13 +118,13 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
     double intFluxscale = getIntFluxConversionScale(newHead_freq, casda::intFluxUnitContinuum);
     itsFluxInt.value() = gauss.flux() * intFluxscale;
     // To calculate error on integrated flux of Gaussian, use Eq.42 from Condon (1997, PASP 109, 166).
-    double beamScaling = newHead_freq.getBeam().maj() * newHead_freq.getBeam().min() *pixscale * pixscale /
-        (itsMaj.value()*itsMin.value());
+    double beamScaling = newHead_freq.getBeam().maj() * newHead_freq.getBeam().min() * pixscale * pixscale /
+                         (itsMaj.value() * itsMin.value());
     itsFluxInt.error() = itsFluxInt.value() *
-        sqrt( (itsFluxPeak.error()*itsFluxPeak.error())/(itsFluxPeak.value()*itsFluxPeak.value())
-              + beamScaling * ( (itsMaj.error()*itsMaj.error())/(itsMaj.value()*itsMaj.value()) +
-                                (itsMaj.error()*itsMaj.error())/(itsMaj.value()*itsMaj.value())  ) );
-              
+                         sqrt((itsFluxPeak.error() * itsFluxPeak.error()) / (itsFluxPeak.value() * itsFluxPeak.value())
+                              + beamScaling * ((itsMaj.error() * itsMaj.error()) / (itsMaj.value() * itsMaj.value()) +
+                                      (itsMaj.error() * itsMaj.error()) / (itsMaj.value() * itsMaj.value())));
+
     std::vector<Double> deconv = analysisutilities::deconvolveGaussian(gauss,
                                  newHead_freq.getBeam());
     itsMaj_deconv = deconv[0] * pixscale;
@@ -193,9 +193,19 @@ const double CasdaComponent::intFlux()
     return itsFluxInt.value();
 }
 
+const double CasdaComponent::intFlux(std::string unit)
+{
+    return casa::Quantum<float>(itsFluxInt.value(), casda::intFluxUnitContinuum).getValue(unit);
+}
+
 const double CasdaComponent::freq()
 {
     return itsFreq;
+}
+
+const double CasdaComponent::freq(std::string unit)
+{
+    return casa::Quantum<float>(itsFreq, casda::freqUnit).getValue(unit);
 }
 
 const double CasdaComponent::alpha()

@@ -74,16 +74,20 @@ class CasdaComponent : public CatalogueEntry {
         const float decErr();
         /// Return the component ID
         const std::string componentID();
-    // Return the component name
-    const std::string name();
+        // Return the component name
+        const std::string name();
         /// Return the integrated flux
         const double intFlux();
-    /// Return the frequency of observation
-    const double freq();
-    /// Return the spectral index
-    const double alpha();
-    /// Return the spectral curvature
-    const double beta();
+        /// Return the integrated flux converted to the requested unit
+        const double intFlux(std::string unit);
+        /// Return the frequency of observation
+        const double freq();
+        /// Return the frequency of observation converted to the requested unit
+        const double freq(std::string unit);
+        /// Return the spectral index
+        const double alpha();
+        /// Return the spectral curvature
+        const double beta();
 
         ///  Print a row of values for the Component into an
         ///  output table. Each column from the catalogue
