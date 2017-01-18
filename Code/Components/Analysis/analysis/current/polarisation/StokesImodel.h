@@ -98,6 +98,9 @@ class StokesImodel {
         /// @brief Set the fitted coefficients directly
         void setCoeffs(casa::Vector<float> coeffs) {itsCoeffs = coeffs;};
 
+        /// @brief Set the type of model fit
+        void setType(std::string type) {itsType = type;};
+
     protected:
 
         void fit();

@@ -79,8 +79,11 @@ int main(int argc, const char *argv[])
         casa::Vector<float> q = cos(2.F * phi);
         casa::Vector<float> noise(shape, 1.);
         casa::Vector<float> i(shape, 1.);
+        casa::Vector<float> coeffs(1, 1.);
 
         rmsynth.setImodel(i);
+        rmsynth.imodel().setCoeffs(coeffs);
+        rmsynth.imodel().setType("poly");
         rmsynth.calculate(lamsq, q, u, noise);
 
         const casa::Vector<casa::Complex> fdf = rmsynth.fdf();
