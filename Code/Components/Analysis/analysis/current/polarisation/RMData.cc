@@ -148,12 +148,8 @@ void RMData::calculate(RMSynthesis *rmsynth)
 
     } else {
 
-        //itsPintPeak = maxFDF * itsDetectionThreshold;
         itsPintPeak = noise * itsDetectionThreshold;
         itsPintPeakEff = -1.;
-
-
-
 
     }
 

@@ -112,14 +112,14 @@ class PolarisationData {
 
         /// @brief Spectra extracted from cubes
         /// {
-        StokesSpectrum itsStokesI;
-        StokesSpectrum itsStokesQ;
-        StokesSpectrum itsStokesU;
-        StokesSpectrum itsStokesV;
+        StokesSpectrum      itsStokesI;
+        StokesSpectrum      itsStokesQ;
+        StokesSpectrum      itsStokesU;
+        StokesSpectrum      itsStokesV;
         /// }
 
         /// @brief The Stokes I model spectrum
-        StokesImodel itsModelStokesI;
+        StokesImodel        itsModelStokesI;
 
         /// @brief The noise spectrum, averaged between Q & U
         casa::Vector<float> itsAverageNoiseSpectrum;

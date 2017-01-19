@@ -121,46 +121,46 @@ class RMSynthesis {
         void defineVectors();
 
         /// @brief Vector of weights assigned to each channel
-        casa::Vector<float> itsWeights;
+        casa::Vector<float>         itsWeights;
         /// @brief Type of weighting used: either "variance" (default) or "uniform"
-        std::string itsWeightType;
+        std::string                 itsWeightType;
 
         /// @brief Normalisation constant that depends on the weights
-        float itsNormalisation;
+        float                       itsNormalisation;
 
         /// @brief Vector of lambda-squared values for each channel [m2]
-        casa::Vector<float> itsLamSq;
+        casa::Vector<float>         itsLamSq;
         /// @brief Variance of the lambda-square values
-        float itsLambdaSquaredVariance;
+        float                       itsLambdaSquaredVariance;
 
         /// @brief Number of channels in the FDF
-        unsigned int itsNumPhiChan;
+        unsigned int                itsNumPhiChan;
         /// @brief Spacing between the Faraday Depth channels [rad/m2]
-        float itsDeltaPhi;
+        float                       itsDeltaPhi;
         /// @brief Centre RM of the Faraday depth vector [rad/m2]
-        float itsPhiZero;
+        float                       itsPhiZero;
         /// @brief Faraday depth vector [rad/m2]
-        casa::Vector<float> itsPhi;
+        casa::Vector<float>         itsPhi;
 
         /// @brief Faraday Dispersion Function
         casa::Vector<casa::Complex> itsFaradayDF;
 
         /// @brief The average of the provided noise spectrum, scaled by sqrt(num_freq_chan)
-        float itsFDFnoise;
+        float                       itsFDFnoise;
 
         /// @brief The specification of the Stokes I model spectrum
-        StokesImodel itsImodel;
+        StokesImodel                itsImodel;
 
         /// @brief Double-length Faraday depth vector, used to calculate the RMSF [rad/m2]
-        casa::Vector<float> itsPhiForRMSF;
+        casa::Vector<float>         itsPhiForRMSF;
         /// @brief Rotation Measure Spread Function (RMSF)
         casa::Vector<casa::Complex> itsRMSF;
 
         /// @brief Fitted width of the RMSF [rad/m2]
-        float itsRMSFwidth;
+        float                       itsRMSFwidth;
 
         /// @brief Reference value of lambda-squared, based on weighted mean of lambda-squared channels [m2]
-        float itsRefLambdaSquared;
+        float                       itsRefLambdaSquared;
 
 
 };

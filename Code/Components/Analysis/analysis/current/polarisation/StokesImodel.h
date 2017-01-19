@@ -103,15 +103,25 @@ class StokesImodel {
 
     protected:
 
+        /// @brief Fit a polynomial to the spectrum
         void fit();
 
+        /// @brief The coefficients describing the model fit - either
+        /// polynomial or Taylor-expansion coefficients
         casa::Vector<float> itsCoeffs;
-        float itsRefFreq;
-        std::string itsType;
-        unsigned int itsOrder;
 
+        /// @brief The reference frequency used in the Taylor expansion
+        float               itsRefFreq;
+        /// @brief The type of model fit: "poly" or "taylor"
+        std::string         itsType;
+        /// @brief The order of the polynomial fit
+        unsigned int        itsOrder;
+
+        /// @brief The list of channel frequency values
         casa::Vector<float> itsFreqs;
+        /// @brief The input Stokes I spectrum
         casa::Vector<float> itsIspectrum;
+        /// @brief The model spectrum with the same channel sampling
         casa::Vector<float> itsModelSpectrum;
 
 

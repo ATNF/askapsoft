@@ -53,44 +53,81 @@ namespace analysis {
 /// input into the RMSynthesis pipeline.
 
 class StokesSpectrum {
-public:
-    StokesSpectrum(const LOFAR::ParameterSet &parset, std::string pol);
-    virtual ~StokesSpectrum() {};
+    public:
+        /// @brief Constructor
+        /// @details This defines the local parset along with the cube and
+        /// output base names. It then constructs parsets for the two
+        /// extractors, hard-coding some parameters that the user need not
+        /// enter via the RMSynthesis interface. The extractors are then
+        /// constructed with these parsets.
+        /// @param parset Input parameter set.
+        /// @param pol Capital-letter Stokes parameter (passed to
+        /// extractor parsets).
+        StokesSpectrum(const LOFAR::ParameterSet &parset, std::string pol);
+        virtual ~StokesSpectrum() {};
 
-    void setComponent(CasdaComponent *src){itsComponent=src;};
-    void extract();
-    void extractSpectrum();
-    void extractNoise();
-    void write();
+        /// @brief Set the component to be used.
+        void setComponent(CasdaComponent *src) {itsComponent = src;};
 
-    unsigned int size(){return itsSpectrum.size();};
+        /// @brief Front-end for two extract functions
+        void extract();
+        /// @brief Extract the source spectrum using itsSpecExtractor
+        void extractSpectrum();
+        /// @brief Extract the noise spectrum using itsNoiseExtractor
+        void extractNoise();
 
-    casa::Vector<float> spectrum() {return itsSpectrum;};
-    casa::Vector<float> noiseSpectrum() {return itsNoiseSpectrum;};
-    float median() {return itsMedianValue;};
-    float medianNoise() {return itsMedianNoise;};
-    casa::Vector<float> frequencies() {return itsFrequencies;};
-    std::string freqUnit(){return itsSpecExtractor->freqUnit();};
-    casa::Unit bunit(){return itsSpecExtractor->bunit();};
+        /// @brief Call the writeImage() function for each extractor
+        void write();
 
-private:
+        /// @brief Number of channels in the spectrum
+        unsigned int size() {return itsSpectrum.size();};
 
-    LOFAR::ParameterSet itsParset;
-    CasdaComponent *itsComponent;
-    std::string itsPol;
-    casa::Vector<casa::Stokes::StokesTypes> itsStokes;
-    std::string itsCubeName;
-    std::string itsOutputBase;
+        /// @brief Return the source spectrum
+        casa::Vector<float> spectrum() {return itsSpectrum;};
+        /// @brief Return the noise spectrum
+        casa::Vector<float> noiseSpectrum() {return itsNoiseSpectrum;};
 
-    SourceSpectrumExtractor *itsSpecExtractor;
-    NoiseSpectrumExtractor *itsNoiseExtractor;
-    
-    casa::Vector<float> itsSpectrum;
-    float itsMedianValue;
-    casa::Vector<float> itsNoiseSpectrum;
-    float itsMedianNoise;
+        /// @brief Return the median value of source spectrum
+        float median() {return itsMedianValue;};
+        /// @brief Return the median value of noise spectrum
+        float medianNoise() {return itsMedianNoise;};
+        /// @brief Return the list of channel frequency values
+        casa::Vector<float> frequencies() {return itsFrequencies;};
+        /// @brief Return the frequency units as a string
+        std::string freqUnit() {return itsSpecExtractor->freqUnit();};
+        /// @brief Return the brightness unit for the source spectrum as a
+        /// casa::Unit object
+        casa::Unit bunit() {return itsSpecExtractor->bunit();};
 
-    casa::Vector<float> itsFrequencies;
+    private:
+
+        /// @brief Parameter set for definition
+        LOFAR::ParameterSet     itsParset;
+        /// @brief Pointer to defining continuum component
+        CasdaComponent          *itsComponent;
+        /// @brief The Stokes parameter (I,Q,U,V etc)
+        std::string             itsPol;
+        /// @brief Name of the input cube
+        std::string             itsCubeName;
+        /// @brief Base name for the output spectra
+        std::string             itsOutputBase;
+
+        /// @brief Extractor to obtain the source spectrum
+        SourceSpectrumExtractor *itsSpecExtractor;
+        /// @brief Extractor to obtain the noise spectrum
+        NoiseSpectrumExtractor  *itsNoiseExtractor;
+
+        /// @brief The extracted spectrum
+        casa::Vector<float>     itsSpectrum;
+        /// @brief The median value of the extracted spectrum
+        float                   itsMedianValue;
+        /// @brief The extracted noise spectrum
+        casa::Vector<float>     itsNoiseSpectrum;
+        /// @brief The median value of the noise spectrum
+        float                   itsMedianNoise;
+
+        /// @brief The set of frequency values for the spectra
+        casa::Vector<float>     itsFrequencies;
 
 };
 
