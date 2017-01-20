@@ -2,7 +2,7 @@
 ///
 /// Base class for handling extraction of image data corresponding to a source
 ///
-/// @copyright (c) 2011 CSIRO
+/// @copyright (c) 2017 CSIRO
 /// Australia Telescope National Facility (ATNF)
 /// Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 /// PO Box 76, Epping NSW 1710, Australia
@@ -41,6 +41,7 @@
 #include <casacore/measures/Measures/Stokes.h>
 #include <utils/PolConverter.h>
 #include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
 
 using namespace askap::analysis::sourcefitting;
 
@@ -54,7 +55,7 @@ namespace analysis {
 /// extraction of an integrated spectrum of a source (either
 /// summed over a box or integrated over the entirety of an
 /// extended object), extraction of a subcube ("cubelet"),
-/// extraction of a moment-0 map. Access to multiple input
+/// extraction of a moment map. Access to multiple input
 /// images for different Stokes parameters is possible. This
 /// base class details the basic functionality, and implements
 /// constructors, input image verification, and opening of the
@@ -66,72 +67,166 @@ class SourceDataExtractor {
         SourceDataExtractor(const LOFAR::ParameterSet& parset);
         virtual ~SourceDataExtractor();
 
-        /// @brief Set the pointer to the source, and define the output filename based on its ID
-        /// @details Sets the source to be used. Also sets the output
-        /// filename correctly with the suffix indicating the object's
-        /// ID.
-        /// @param src The RadioSource detection used to centre the
-        /// spectrum. The central pixel will be chosen to be the peak
-        /// pixel, so this needs to be defined.
+        /// @brief Methods to define the source and its location in the
+        /// pixel grid of the input cube.
+        /// @details These functions identify the RA & Dec of the source,
+        /// and transform to pixel coordinates in the frame of the input
+        /// image. They also identify the source ID string, which is used
+        /// in the output filename.
+        /// @{
+        /// @brief Define the source properties for a RadioSource object
         void setSource(RadioSource *src);
+        /// @brief Define the source properties for a Component
         void setSource(CasdaComponent *src);
+        /// @}
 
+        /// @brief Method to extract the desired array - left up to the
+        /// derived classes to define.
         virtual void extract() = 0;
+        /// @brief Method to write the output image - left up to the
+        /// derived classes to define
+        virtual void writeImage() = 0;
 
+        /// @brief Return the extracted array
         casa::Array<Float> array() {return itsArray;};
+        /// @brief Return the input cube name
         std::string inputCube() {return itsInputCube;};
+        /// @brief Return the list of all possible input cubes
         std::vector<std::string> inputCubeList() {return itsInputCubeList;};
+        /// @brief Return the base name of the output image(s)
         std::string outputFileBase() {return itsOutputFilenameBase;};
+        /// @brief Return the current output image name
         std::string outputFile() {return itsOutputFilename;};
-        RadioSource* source() {return itsSource;};
+        /// @brief Return the pointer to the provided RadioSource (if
+        /// none was provided this will be null).
+        RadioSource* source() {return itsSource.get();};
+        /// @brief Return the pointer to the provided CasdaComponent
+        /// (if none was provided this will be null).
+        CasdaComponent* component() {return itsComponent.get();};
+        /// @brief Return the pixel location of the source in the
+        /// x-direction
+        float srcXloc() {return itsXloc;};
+        /// @brief Return the pixel location of the source in the
+        /// y-direction
+        float srcYloc() {return itsYloc;};
+        /// @brief Return the source's ID string
+        std::string sourceID() {return itsSourceID;};
+        /// @brief Return the list of Stokes parameters
         std::vector<std::string> polarisations()
         {
             return scimath::PolConverter::toString(itsStokesList);
         };
-    casa::Unit bunit();
-        virtual void writeImage() = 0;
+        /// @brief Return the brightness unit for the current input
+        /// image
+        casa::Unit bunit();
+
 
     protected:
+        /// @brief Open the input cube.
+        /// @details Defines itsInputCubePtr and, assuming it is valid,
+        /// sets various coordinate and unit members.
         bool openInput();
+
+        /// @brief Close the input cube
         void closeInput();
+
+        /// @brief Verify the set of input cubes conform
+        /// @details This involves checking the list of polarisations, and
+        /// ensuring there is a cube for each requested polarisation. The
+        /// shape of each cube must be the same as well.
         virtual void verifyInputs();
+
+        /// @brief Function to define the slicer used for extraction - not
+        /// defined in the base class as it will differ for the different
+        /// derived classes.
         virtual void defineSlicer() = 0;
 
-    /// Check whether the given image contains the given stokes parameter.
+        /// @brief Check whether the given image contains the given
+        /// stokes parameter.
+        /// @param image Name of the image to check
+        /// @param stokes Stokes type to check for.
         bool checkPol(std::string image, casa::Stokes::StokesTypes stokes);
+
+        /// @brief Return the shape of the given image
+        /// @details Internal function only that uses openImage()
+        /// @param image Name of image to examine.
         casa::IPosition getShape(std::string image);
+
+        /// @brief Initialise the array for the extracted data -
+        /// implementation left for derived classes
         virtual void initialiseArray() = 0;
+
+        /// @brief Return the RA for a given object (RadioSource or
+        /// CasdaComponent)
         template <class T> double getRA(T &object);
+        /// @brief Return the Dec for a given object (RadioSource or
+        /// CasdaComponent)
         template <class T> double getDec(T &object);
+        /// @brief Return the ID string for a given object
+        /// (RadioSource or CasdaComponent)
         template <class T> std::string getID(T &object);
+        /// @brief Set the source's pixel location based on the RA &
+        /// Dec, and the WCS of the input cube
         template <class T> void setSourceLoc(T *src);
+
+        /// @brief Write out the restoring beam from the current input
+        /// cube to the given filename
+        /// @param filename The image to which the restoring beam of the
+        /// current input cube is written.
         void writeBeam(std::string &filename);
 
-        RadioSource* itsSource;
-        std::string itsSourceID;
-        std::string itsCentreType;
-        casa::Slicer itsSlicer;
-        std::string itsInputCube;
-        std::vector<std::string> itsInputCubeList;
-    std::map<casa::Stokes::StokesTypes,std::string> itsCubeStokesMap;
-        boost::shared_ptr<casa::ImageInterface<Float> > itsInputCubePtr;
-        casa::Vector<casa::Stokes::StokesTypes> itsStokesList;
-        casa::Stokes::StokesTypes itsCurrentStokes;
-        std::string itsOutputFilenameBase;
-        std::string itsOutputFilename;
-        casa::Array<Float> itsArray;
 
-        float itsXloc;
-        float itsYloc;
+        // Members
 
-        casa::CoordinateSystem itsInputCoords;
-        int  itsLngAxis;
-        int  itsLatAxis;
-        int  itsSpcAxis;
-        int  itsStkAxis;
-    casa::Unit itsInputUnits;
-
-    casa::TableRecord itsMiscInfo;
+        /// @brief The RadioSource being used - if not provided,
+        /// pointer remains null
+        boost::scoped_ptr<RadioSource>                   itsSource;
+        /// @brief The Component being used - if not provided, pointer
+        /// remains null
+        boost::scoped_ptr<CasdaComponent>                itsComponent;
+        /// @brief The source's ID string
+        std::string                                      itsSourceID;
+        /// @brief The slicer used to perform the extraction
+        casa::Slicer                                     itsSlicer;
+        /// @brief The input cube the array is extracted from
+        std::string                                      itsInputCube;
+        /// @brief The list of potential input cubes - typically one
+        /// per Stokes parameter
+        std::vector<std::string>                         itsInputCubeList;
+        /// @brief Mapping between input cubes and Stokes parameters
+        std::map<casa::Stokes::StokesTypes, std::string> itsCubeStokesMap;
+        /// @brief The image interface pointer, used to access the
+        /// input image on disk
+        boost::shared_ptr<casa::ImageInterface<Float> >  itsInputCubePtr;
+        /// @brief The list of desired Stokes parameters
+        casa::Vector<casa::Stokes::StokesTypes>          itsStokesList;
+        /// @brief The Stokes parameter currently being used
+        casa::Stokes::StokesTypes                        itsCurrentStokes;
+        /// @brief The base for the output filename, that can be added
+        /// to to make the actual output filename
+        std::string                                      itsOutputFilenameBase;
+        /// @brief The name of the output file
+        std::string                                      itsOutputFilename;
+        /// @brief The array of extracted pixels
+        casa::Array<Float>                               itsArray;
+        /// @brief The pixel location of the source in the x-direction
+        float                                            itsXloc;
+        /// @brief The pixel location of the source in the y-direction
+        float                                            itsYloc;
+        /// @brief The coordinate system of the input cube
+        casa::CoordinateSystem                           itsInputCoords;
+        /// @brief The axis number for the longitude axis (0-based)
+        int                                              itsLngAxis;
+        /// @brief The axis number for the latitude axis (0-based)
+        int                                              itsLatAxis;
+        /// @brief The axis number for the spectral axis (0-based)
+        int                                              itsSpcAxis;
+        /// @brief The axis number for the Stokes axis (0-based)
+        int                                              itsStkAxis;
+        /// @brief The brightness units of the input cube
+        casa::Unit                                       itsInputUnits;
+        /// @brief Miscellaneous information for the output image
+        casa::TableRecord                                itsMiscInfo;
 };
 
 }

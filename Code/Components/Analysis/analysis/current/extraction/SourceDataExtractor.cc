@@ -2,7 +2,7 @@
 ///
 /// Base class for handling extraction of image data corresponding to a source
 ///
-/// @copyright (c) 2011 CSIRO
+/// @copyright (c) 2017 CSIRO
 /// Australia Telescope National Facility (ATNF)
 /// Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 /// PO Box 76, Epping NSW 1710, Australia
@@ -63,14 +63,13 @@ namespace analysis {
 
 SourceDataExtractor::SourceDataExtractor(const LOFAR::ParameterSet& parset)
 {
-    itsSource = 0;
+    itsSource.reset();
+    itsComponent.reset();
     itsInputCube = ""; // start off with this blank. Needs to be
     // set before calling openInput()
     itsInputCubeList = parset.getStringVector("spectralCube",
                        std::vector<std::string>(0));
     ASKAPLOG_DEBUG_STR(logger, " size of inputcubelist = " << itsInputCubeList.size());
-
-    // itsCentreType = parset.getString("pixelCentre", "peak");
 
     // Take the following from SynthesisParamsHelper.cc in Synthesis
     // there could be many ways to define stokes, e.g. ["XX YY"] or
@@ -169,7 +168,7 @@ template void SourceDataExtractor::setSourceLoc<RadioSource>(RadioSource* src);
 void SourceDataExtractor::setSource(RadioSource* src)
 {
 
-    itsSource = src;
+    itsSource.reset(src);
 
     if (itsSource) {
         setSourceLoc(src);
@@ -177,6 +176,8 @@ void SourceDataExtractor::setSource(RadioSource* src)
 }
 void SourceDataExtractor::setSource(CasdaComponent* src)
 {
+    itsComponent.reset(src);
+
     setSourceLoc(src);
 }
 //---------------
@@ -225,7 +226,7 @@ void SourceDataExtractor::verifyInputs()
                "(input parameter \"polarisation\")");
 
     if (itsInputCubeList.size() > 1) { // multiple input cubes provided
- 
+
         // check they are all the same shape
         casa::IPosition refShape = this->getShape(itsInputCubeList[0]);
         for (size_t i = 1; i < itsInputCubeList.size(); i++) {
@@ -236,10 +237,10 @@ void SourceDataExtractor::verifyInputs()
 
         for (im = itsInputCubeList.begin(); im < itsInputCubeList.end(); im++) {
             for (size_t i = 0; i < itsStokesList.size(); i++) {
-                if(checkPol(*im, itsStokesList[i])){
+                if (checkPol(*im, itsStokesList[i])) {
                     ASKAPLOG_DEBUG_STR(logger, "Stokes " << stokes.name(itsStokesList[i]) << " has image " << *im);
                     itsCubeStokesMap.insert(
-                        std::pair<casa::Stokes::StokesTypes,std::string>(itsStokesList[i],*im));
+                        std::pair<casa::Stokes::StokesTypes, std::string>(itsStokesList[i], *im));
                 }
             }
         }
@@ -253,34 +254,34 @@ void SourceDataExtractor::verifyInputs()
             for (size_t i = 0; i < itsStokesList.size(); i++) {
                 casa::String stokesname(stokes.name(itsStokesList[i]));
                 stokesname.downcase();
-                std::string input=itsInputCubeList[0];
+                std::string input = itsInputCubeList[0];
                 ASKAPLOG_DEBUG_STR(logger, "Input cube name: replacing \"%p\" with " <<
                                    stokesname.c_str() << " in " << input);
                 input.replace(input.find("%p"), 2, stokesname.c_str());
-                if(checkPol(input, itsStokesList[i])){
+                if (checkPol(input, itsStokesList[i])) {
                     ASKAPLOG_DEBUG_STR(logger, "Stokes " << stokes.name(itsStokesList[i]) << " has image " << input);
                     itsCubeStokesMap.insert(
-                        std::pair<casa::Stokes::StokesTypes,std::string>(itsStokesList[i],input));
+                        std::pair<casa::Stokes::StokesTypes, std::string>(itsStokesList[i], input));
                 }
             }
         } else {
             // We aren't using the %p wildcard - does its polarisation match one of the ones provided?
-            bool hasMatch=false;
+            bool hasMatch = false;
             for (size_t i = 0; i < itsStokesList.size() && !hasMatch; i++) {
                 hasMatch = checkPol(itsInputCubeList[0], itsStokesList[i]);
-                if(hasMatch){
+                if (hasMatch) {
                     ASKAPLOG_DEBUG_STR(logger, "Stokes " << stokes.name(itsStokesList[i]) << " has image " << itsInputCubeList[0]);
                     itsCubeStokesMap.insert(
-                        std::pair<casa::Stokes::StokesTypes,std::string>(itsStokesList[i],
-                                                                         itsInputCubeList[0]));
+                        std::pair<casa::Stokes::StokesTypes, std::string>(itsStokesList[i],
+                                itsInputCubeList[0]));
                 }
             }
             ASKAPCHECK(hasMatch,
-                       "Image "<<itsInputCubeList[0]<<" does not match any requested Stokes");
+                       "Image " << itsInputCubeList[0] << " does not match any requested Stokes");
         }
     }
     ASKAPLOG_DEBUG_STR(logger, "CubeStokesMap: " << itsCubeStokesMap);
-    
+
 }
 
 

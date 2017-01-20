@@ -99,6 +99,14 @@ class StokesSpectrum {
         /// casa::Unit object
         casa::Unit bunit() {return itsSpecExtractor->bunit();};
 
+        /// @brief Name of the cube the spectra are extracted from
+        std::string cubeName() {return itsSpecExtractor->inputCube();};
+
+        /// @brief Return pointer to the extractor used for the spectrum
+        SourceSpectrumExtractor *specExtractor() {return itsSpecExtractor;};
+        /// @brief Return pointer to the extractor used for the noise spectrum
+        SourceSpectrumExtractor *noiseExtractor() {return itsSpecExtractor;};
+
     private:
 
         /// @brief Parameter set for definition

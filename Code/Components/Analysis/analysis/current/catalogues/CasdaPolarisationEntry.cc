@@ -38,6 +38,7 @@
 
 #include <polarisation/RMSynthesis.h>
 #include <polarisation/RMData.h>
+#include <polarisation/FDFwriter.h>
 #include <Common/ParameterSet.h>
 #include <duchamp/Outputs/CatalogueSpecification.hh>
 #include <duchamp/Outputs/columns.hh>
@@ -68,8 +69,18 @@ CasdaPolarisationEntry::CasdaPolarisationEntry(CasdaComponent *comp,
     // Do the RM Synthesis, and calculate all parameters.
     RMSynthesis rmsynth(polParset);
     rmsynth.calculate(poldata);
+
+    if (polParset.getBool("writeSpectra", "true")) {
+        // write out the FDF array to image file on disk
+        FDFwriter writer(polParset, poldata, rmsynth);
+        writer.write();
+    }
+
+    // Parameterise the RM Synthesis results
     RMData rmdata(polParset);
     rmdata.calculate(&rmsynth);
+
+    // Now assign the parameters
 
     itsDetectionThreshold = rmdata.detectionThreshold();
     itsDebiasThreshold = rmdata.debiasThreshold();

@@ -55,13 +55,11 @@ PolarisationData::PolarisationData(const LOFAR::ParameterSet &parset):
     itsStokesV(parset, "V"),
     itsModelStokesI(parset)
 {
-    // store the locations of the images
 
     // record extraction parameters
 
     itsParset.replace("useDetectedPixels", "false");
     itsParset.replace("scaleSpectraByBeam", "true");
-
 
 }
 

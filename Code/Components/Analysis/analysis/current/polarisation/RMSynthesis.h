@@ -83,8 +83,10 @@ class RMSynthesis {
         const std::string weightType() {return itsWeightType;};
         /// @brief Number of faraday depth channels
         const unsigned int numPhiChan() {return itsNumPhiChan;};
-        /// @brief Spacing between faraday depth channels
+        /// @brief Spacing between faraday depth channels [rad/m2]
         const float deltaPhi() {return itsDeltaPhi;};
+        /// @brief The central value of the faraday depth vector
+        const float phiZero() {return itsPhiZero;};
 
         /// @brief Returns the Faraday Dispersion Function vector
         const casa::Vector<casa::Complex> &fdf() {return itsFaradayDF;};
