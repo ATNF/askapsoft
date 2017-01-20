@@ -50,14 +50,9 @@ namespace askap {
 
 namespace analysis {
 
-static const float defaultSNRthreshold = 8.0;
-static const float defaultDebiasThreshold = 5.0;
-
 CasdaPolarisationEntry::CasdaPolarisationEntry(CasdaComponent *comp,
         const LOFAR::ParameterSet &parset):
-    CatalogueEntry(parset),
-    itsDetectionThreshold(parset.getFloat("polThresholdSNR", defaultSNRthreshold)),
-    itsDebiasThreshold(parset.getFloat("polThresholdDebias", defaultDebiasThreshold))
+    CatalogueEntry(parset)
 {
 
     itsRA = comp->ra();
@@ -75,6 +70,9 @@ CasdaPolarisationEntry::CasdaPolarisationEntry(CasdaComponent *comp,
     rmsynth.calculate(poldata);
     RMData rmdata(polParset);
     rmdata.calculate(&rmsynth);
+
+    itsDetectionThreshold = rmdata.detectionThreshold();
+    itsDebiasThreshold = rmdata.debiasThreshold();
 
     casa::Unit cubeBunit = poldata.I().bunit();
     const double intFluxScale =
