@@ -122,9 +122,8 @@ CasdaPolarisationEntry::CasdaPolarisationEntry(CasdaComponent *comp,
     itsFracPol.value() = rmdata.fracPol();
     itsFracPol.error() = rmdata.fracPol_err();
 
-    /// @todo
-    itsComplexity = 0.;
-    itsComplexity_screen = 0.;
+    itsComplexity = rmdata.complexityConstant();
+    itsComplexity_screen = rmdata.complexityResidual();
 
     itsFlagDetection = rmdata.flagDetection();
     itsFlagEdge = rmdata.flagEdge();

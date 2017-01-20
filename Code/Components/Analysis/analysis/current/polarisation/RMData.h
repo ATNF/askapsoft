@@ -107,10 +107,18 @@ class RMData {
         const float SNR() {return itsSNR;};
         /// @brief Return the uncertainty in SNR()
         const float SNR_err() {return itsSNR_err;};
+        /// @brief Return the complexity measure showing the deviation in
+        /// fractional polarised intensity from a constant value
+        const float complexityConstant() {return itsComplexityConstant;};
+        /// @brief Return the complexity measure showing the residual
+        /// structure in the FDF following subtraction of a single thin
+        /// model
+        const float complexityResidual() {return itsComplexityResidual;};
 
     private:
 
-        /// @brief The user-defined SNR threshold for the peak to be declared a detection
+        /// @brief The user-defined SNR threshold for the peak to be
+        /// declared a detection
         float itsDetectionThreshold;
         /// @brief The user-defined SNR threshold for debiasing to be done
         float itsDebiasThreshold;
@@ -160,6 +168,11 @@ class RMData {
         /// @brief Uncertainty in itsSNR
         float itsSNR_err;
 
+        /// @brief First Faraday complexity metric - deviation from a constant
+        float itsComplexityConstant;
+        /// @brief Second Faraday complexit metric - residual structure
+        /// after subtraction of a single thin component
+        float itsComplexityResidual;
 
 
 };

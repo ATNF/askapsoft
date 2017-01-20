@@ -100,6 +100,10 @@ class RMSynthesis {
         /// from the weighted mean of the lambda-squared values)
         const float refLambdaSq() {return itsRefLambdaSquared;};
 
+        /// @brief Returns the lambda-squared array used in the RM Synthesis
+        casa::Vector<float> lambdaSquared() {return itsLamSq;};
+        /// @brief Returns the input fractional polarisation spectrum (a complex vector p = q + i u)
+        casa::Vector<casa::Complex> fracPolSpectrum() {return itsFracPolSpectrum;};
         /// @brief Define the Stokes I model spectrum by providing a vector
         void setImodel(casa::Vector<float> model) {itsImodel.setModel(model);};
         /// @brief Reference to the StokesImodel object defining the Stokes I model spectrum and fitted coefficients
@@ -124,6 +128,9 @@ class RMSynthesis {
         casa::Vector<float>         itsWeights;
         /// @brief Type of weighting used: either "variance" (default) or "uniform"
         std::string                 itsWeightType;
+
+        /// @brief The input complex fractional polarisation spectrum p=q+iu
+        casa::Vector<casa::Complex> itsFracPolSpectrum;
 
         /// @brief Normalisation constant that depends on the weights
         float                       itsNormalisation;

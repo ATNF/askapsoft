@@ -130,7 +130,7 @@ void RMSynthesis::calculate(const casa::Vector<float> &lsq,
     ASKAPASSERT(lsq.size() == noise.size());
 
     // p = q + iu
-    casa::Vector<casa::Complex> p = casa::makeComplex(q, u);
+    itsFracPolSpectrum = casa::makeComplex(q, u);
 
     if (itsWeightType == "variance") {
         itsWeights = casa::Vector<float>(noise.size(), 0.);
@@ -159,7 +159,7 @@ void RMSynthesis::calculate(const casa::Vector<float> &lsq,
         casa::Vector<float> phase = -2.F * itsPhi[j] * (itsLamSq - itsRefLambdaSquared);
         casa::Vector<casa::Complex> sampling = casa::makeComplex(itsWeights * cos(phase),
                                                itsWeights * sin(phase));
-        itsFaradayDF[j] = itsNormalisation * casa::sum(p * sampling);
+        itsFaradayDF[j] = itsNormalisation * casa::sum(itsFracPolSpectrum * sampling);
     }
 
     // Put back into Jy by multiplying by the Stokes I model at the reference wavelength
