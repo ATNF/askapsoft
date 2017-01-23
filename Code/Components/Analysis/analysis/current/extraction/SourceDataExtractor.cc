@@ -63,8 +63,8 @@ namespace analysis {
 
 SourceDataExtractor::SourceDataExtractor(const LOFAR::ParameterSet& parset)
 {
-    itsSource.reset();
-    itsComponent.reset();
+    itsSource = 0;
+    itsComponent = 0;
     itsInputCube = ""; // start off with this blank. Needs to be
     // set before calling openInput()
     itsInputCubeList = parset.getStringVector("spectralCube",
@@ -168,7 +168,7 @@ template void SourceDataExtractor::setSourceLoc<RadioSource>(RadioSource* src);
 void SourceDataExtractor::setSource(RadioSource* src)
 {
 
-    itsSource.reset(src);
+    itsSource = src;
 
     if (itsSource) {
         setSourceLoc(src);
@@ -176,7 +176,7 @@ void SourceDataExtractor::setSource(RadioSource* src)
 }
 void SourceDataExtractor::setSource(CasdaComponent* src)
 {
-    itsComponent.reset(src);
+    itsComponent = src;
 
     setSourceLoc(src);
 }
@@ -267,7 +267,7 @@ void SourceDataExtractor::verifyInputs()
         } else {
             // We aren't using the %p wildcard - does its polarisation match one of the ones provided?
             bool hasMatch = false;
-            for (size_t i = 0; i < itsStokesList.size() && !hasMatch; i++) {
+            for (size_t i = 0; i < itsStokesList.size(); i++) {
                 hasMatch = checkPol(itsInputCubeList[0], itsStokesList[i]);
                 if (hasMatch) {
                     ASKAPLOG_DEBUG_STR(logger, "Stokes " << stokes.name(itsStokesList[i]) << " has image " << itsInputCubeList[0]);

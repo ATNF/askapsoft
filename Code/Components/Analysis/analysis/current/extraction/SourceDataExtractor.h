@@ -99,10 +99,10 @@ class SourceDataExtractor {
         std::string outputFile() {return itsOutputFilename;};
         /// @brief Return the pointer to the provided RadioSource (if
         /// none was provided this will be null).
-        RadioSource* source() {return itsSource.get();};
+        RadioSource* source() {return itsSource;};
         /// @brief Return the pointer to the provided CasdaComponent
         /// (if none was provided this will be null).
-        CasdaComponent* component() {return itsComponent.get();};
+        CasdaComponent* component() {return itsComponent;};
         /// @brief Return the pixel location of the source in the
         /// x-direction
         float srcXloc() {return itsXloc;};
@@ -180,10 +180,10 @@ class SourceDataExtractor {
 
         /// @brief The RadioSource being used - if not provided,
         /// pointer remains null
-        boost::scoped_ptr<RadioSource>                   itsSource;
+        RadioSource                                     *itsSource;
         /// @brief The Component being used - if not provided, pointer
         /// remains null
-        boost::scoped_ptr<CasdaComponent>                itsComponent;
+        CasdaComponent                                  *itsComponent;
         /// @brief The source's ID string
         std::string                                      itsSourceID;
         /// @brief The slicer used to perform the extraction

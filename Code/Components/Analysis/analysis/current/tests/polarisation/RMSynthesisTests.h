@@ -44,8 +44,8 @@ const float psiZero = 0.;
 const unsigned int numPhiChan = 2500;
 const float deltaPhi = 25.;
 const float phiZero = 0.;
-const float threshSNR=8.6;
-const float threshDB=5.0;
+const float threshSNR = 8.6;
+const float threshDB = 5.0;
 class RMSynthesisTest : public CppUnit::TestFixture {
         CPPUNIT_TEST_SUITE(RMSynthesisTest);
         CPPUNIT_TEST(testParsets);
@@ -59,7 +59,7 @@ class RMSynthesisTest : public CppUnit::TestFixture {
         LOFAR::ParameterSet parset_uniform;
         LOFAR::ParameterSet parset_variance;
         casa::IPosition shape;
-    casa::Vector<float> freq, wl, lamsq, psi, u, q, noise,model;
+        casa::Vector<float> freq, wl, lamsq, psi, u, q, noise, model, coeffs;
 
     public:
 
@@ -72,15 +72,15 @@ class RMSynthesisTest : public CppUnit::TestFixture {
             parset_uniform.replace(LOFAR::KVpair("deltaPhi", deltaPhi));
             parset_uniform.replace(LOFAR::KVpair("phiZero", phiZero));
             parset_uniform.replace("weightType", "uniform");
-            parset_uniform.replace(LOFAR::KVpair("polThresholdSNR",threshSNR));
-            parset_uniform.replace(LOFAR::KVpair("polDebiasSNR",threshDB));
+            parset_uniform.replace(LOFAR::KVpair("polThresholdSNR", threshSNR));
+            parset_uniform.replace(LOFAR::KVpair("polDebiasSNR", threshDB));
 
             parset_variance.replace(LOFAR::KVpair("numPhiChan", int(numPhiChan)));
             parset_variance.replace(LOFAR::KVpair("deltaPhi", deltaPhi));
             parset_variance.replace(LOFAR::KVpair("phiZero", phiZero));
             parset_variance.replace("weightType", "variance");
-            parset_variance.replace(LOFAR::KVpair("polThresholdSNR",threshSNR));
-            parset_variance.replace(LOFAR::KVpair("polDebiasSNR",threshDB));
+            parset_variance.replace(LOFAR::KVpair("polThresholdSNR", threshSNR));
+            parset_variance.replace(LOFAR::KVpair("polDebiasSNR", threshDB));
 
             freq = casa::Vector<float>(nchan);
             casa::indgen<float>(freq, 1150.e6, 1.e6);
@@ -93,7 +93,8 @@ class RMSynthesisTest : public CppUnit::TestFixture {
             noise = casa::Vector<float>(nchan);
             casa::indgen<float>(noise, 1., 0.01);
 
-            model = casa::Vector<float>(nchan,1.);
+            model = casa::Vector<float>(nchan, 1.);
+            coeffs = casa::Vector<float>(1, 1.);
 
         }
 
@@ -113,11 +114,11 @@ class RMSynthesisTest : public CppUnit::TestFixture {
             CPPUNIT_ASSERT_DOUBLES_EQUAL(deltaPhi, rmsynthV.deltaPhi(), 1.e-5);
 
             RMData rmdataU(parset_uniform);
-            CPPUNIT_ASSERT_EQUAL(threshSNR,rmdataU.detectionThreshold());
-            CPPUNIT_ASSERT_EQUAL(threshDB,rmdataU.debiasThreshold());
+            CPPUNIT_ASSERT_EQUAL(threshSNR, rmdataU.detectionThreshold());
+            CPPUNIT_ASSERT_EQUAL(threshDB, rmdataU.debiasThreshold());
             RMData rmdataV(parset_variance);
-            CPPUNIT_ASSERT_EQUAL(threshSNR,rmdataV.detectionThreshold());
-            CPPUNIT_ASSERT_EQUAL(threshDB,rmdataV.debiasThreshold());
+            CPPUNIT_ASSERT_EQUAL(threshSNR, rmdataV.detectionThreshold());
+            CPPUNIT_ASSERT_EQUAL(threshDB, rmdataV.debiasThreshold());
 
         }
 
@@ -126,9 +127,11 @@ class RMSynthesisTest : public CppUnit::TestFixture {
         {
             ASKAPLOG_INFO_STR(logger, "+++++++++++++++++++++++++++++++++++++");
             ASKAPLOG_INFO_STR(logger, "Test the weights");
-            
+
             RMSynthesis rmsynthU(parset_uniform);
             rmsynthU.setImodel(model);
+            rmsynthU.imodel().setCoeffs(coeffs);
+            rmsynthU.imodel().setType("poly");
             rmsynthU.calculate(lamsq, q, u, noise);
             float uniformNorm = 1. / nchan;
             ASKAPLOG_DEBUG_STR(logger, "Normalisation for uniform case = " <<
@@ -138,6 +141,8 @@ class RMSynthesisTest : public CppUnit::TestFixture {
 
             RMSynthesis rmsynthV(parset_variance);
             rmsynthV.setImodel(model);
+            rmsynthV.imodel().setCoeffs(coeffs);
+            rmsynthV.imodel().setType("poly");
             rmsynthV.calculate(lamsq, q, u, noise);
             float varianceNorm = 0.;
             for (int i = 0; i < nchan; i++) {
@@ -184,13 +189,15 @@ class RMSynthesisTest : public CppUnit::TestFixture {
 
             ASKAPLOG_INFO_STR(logger, "+++++++++++++++++++++++++++++++++++++");
             ASKAPLOG_INFO_STR(logger, "Test RM synthesis");
-            
+
             // We have chosen an RM such that the peak falls
             // directly on the sampled phi value of a bin. This
             // way we get a peak of 1 for the Faraday Dispersion
             // Function
             RMSynthesis rmsynthU(parset_uniform);
             rmsynthU.setImodel(model);
+            rmsynthU.imodel().setCoeffs(coeffs);
+            rmsynthU.imodel().setType("poly");
             rmsynthU.calculate(lamsq, q, u, noise);
             const casa::Vector<casa::Complex> fdf = rmsynthU.fdf();
             ASKAPLOG_DEBUG_STR(logger, fdf);
@@ -199,8 +206,8 @@ class RMSynthesisTest : public CppUnit::TestFixture {
             float minFDF, maxFDF;
             casa::IPosition locMin, locMax;
             casa::minMax<float>(minFDF, maxFDF, locMin, locMax, fdf_p);
-            ASKAPLOG_DEBUG_STR(logger, "minFDF="<<minFDF<< ", maxFDF="<<maxFDF);
-            ASKAPLOG_DEBUG_STR(logger, "locminFDF="<<locMin<< ", locmaxFDF="<<locMax);
+            ASKAPLOG_DEBUG_STR(logger, "minFDF=" << minFDF << ", maxFDF=" << maxFDF);
+            ASKAPLOG_DEBUG_STR(logger, "locminFDF=" << locMin << ", locmaxFDF=" << locMax);
 
             float expectedMax = 1.0;
             ASKAPLOG_DEBUG_STR(logger, "Expect max of FDF to be " << expectedMax <<
@@ -224,6 +231,8 @@ class RMSynthesisTest : public CppUnit::TestFixture {
 
             RMSynthesis rmsynthU(parset_uniform);
             rmsynthU.setImodel(model);
+            rmsynthU.imodel().setCoeffs(coeffs);
+            rmsynthU.imodel().setType("poly");
             rmsynthU.calculate(lamsq, q, u, noise);
 
             casa::Vector<casa::Complex> rmsf = rmsynthU.rmsf();
@@ -255,8 +264,8 @@ class RMSynthesisTest : public CppUnit::TestFixture {
 
             ASKAPLOG_INFO_STR(logger, "+++++++++++++++++++++++++++++++++++++");
             ASKAPLOG_INFO_STR(logger, "Test the RMSF width");
-            
-           // *** NOTE - HAVE A THEORETICAL VALUE OF
+
+            // *** NOTE - HAVE A THEORETICAL VALUE OF
             // 2*SQRT(3)/(LAMSQ[0]-LAMSQ[NCHAN-1]), BUT ACTUAL WIDTH
             // SEEMS TO GET BROADENED BY AMOUNT RELATED TO SAMPLING OF
             // PHI (IE. DELTA_PHI).  TO STOP TEST FROM FAILING, SIMPLY
@@ -265,6 +274,8 @@ class RMSynthesisTest : public CppUnit::TestFixture {
 
             RMSynthesis rmsynthU(parset_uniform);
             rmsynthU.setImodel(model);
+            rmsynthU.imodel().setCoeffs(coeffs);
+            rmsynthU.imodel().setType("poly");
             rmsynthU.calculate(lamsq, q, u, noise);
 
             float expectedRMSFwidth = 2. * sqrt(3.) / (lamsq[0] - lamsq[nchan - 1]);

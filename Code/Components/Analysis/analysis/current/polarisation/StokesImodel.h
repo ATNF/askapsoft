@@ -93,7 +93,7 @@ class StokesImodel {
         casa::Vector<float> modelSpectrum() {return itsModelSpectrum;};
 
         /// @brief Set the model spectrum directly
-        void setModel(casa::Vector<float> model) {itsModelSpectrum = model;};
+        void setModel(casa::Vector<float> model) {itsModelSpectrum = model; };
 
         /// @brief Set the fitted coefficients directly
         void setCoeffs(casa::Vector<float> coeffs) {itsCoeffs = coeffs;};
