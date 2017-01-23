@@ -683,12 +683,14 @@ survey science team, and can be described as follows:
    5, as per the POSSUM specification). See :doc:`extraction` for
    details on the method used.
  * The noise spectra in Q & U are extracted and averaged together to
-   form the QU noise. This is used for weighting (if the "variance"
-   weightType is selected).
+   form the QU noise spectrum. This is used for weighting (if the "variance"
+   weightType is selected). 
  * The Q and U spectra are normalised by a model spectrum of Stokes
-   I - we use (for now), the Taylor-term expansion from the Stokes-I
-   imaging. They are then used to generate a Faraday Depth function
-   (FDF) as a function of lambda-squared.
+   I - we use either the Taylor-term expansion from the Stokes-I
+   imaging or a low-order polynomial fit. They are then used to
+   generate a Faraday Dispersion function (FDF) as a function of
+   lambda-squared. The FDF is then multiplied by the model I flux at
+   the reference wavelength.
  * The location of the peak of the FDF is recorded as the rotation
    measure of the component, with the peak value of the FDF
    (multiplied again by the Stokes I model spectrum) giving the
@@ -700,7 +702,7 @@ survey science team, and can be described as follows:
    that is named in the same way as the component and island
    catalogues - see the description above.
  * The extracted spectra of I, Q & U can also be written out to
-   individual files.
+   individual files, along with the FDF and RMSF arrays.
 
 
 Parameters for Rotation Measure Synthesis
@@ -716,13 +718,39 @@ Parameters for Rotation Measure Synthesis
 |                                       |                |                               | corresponding to at least I,Q,U. See :doc:`extraction` for more      |
 |                                       |                |                               | details.                                                             |
 +---------------------------------------+----------------+-------------------------------+----------------------------------------------------------------------+
+| Selavy.RMSynthesis.boxWidth           | int            | 5                             | The width (N) of the NxN box to be applied in the extraction of      |
+|                                       |                |                               | Stokes spectra.                                                      |
++---------------------------------------+----------------+-------------------------------+----------------------------------------------------------------------+
+| Selavy.RMSynthesis.noiseArea          | float          | 50                            | The number of beam areas over which to measure the noise.            |
++---------------------------------------+----------------+-------------------------------+----------------------------------------------------------------------+
+| Selavy.RMSynthesis.robust             | bool           | true                          | Whether to use robust statistics in measuring the noise.             |
++---------------------------------------+----------------+-------------------------------+----------------------------------------------------------------------+
+| Selavy.RMSynthesis.writeSpectra       | bool           | true                          | Whether to write out the extracted spectra to image files on         |
+|                                       |                |                               | disk. This will also write out the FDF and RMSF determined from the  |
+|                                       |                |                               | RM Synthesis. The filenames are of the form                          |
+|                                       |                |                               | **[outputbase]_spec_[Stokes]_[objectID]** for the spectra,           |
+|                                       |                |                               | **[outputbase]_FDF_[objectID]** for the FDF, and                     |
+|                                       |                |                               | **[outputbase]_RMSF_[objectID]** for the RMSF.                       |
++---------------------------------------+----------------+-------------------------------+----------------------------------------------------------------------+
 | Selavy.RMSynthesis.outputBase         | string         | ""                            | The base name for the output files - a front-end to                  |
 |                                       |                |                               | **extractSpectra.spectralOutputBase** (:doc:`extraction`).           |
++---------------------------------------+----------------+-------------------------------+----------------------------------------------------------------------+
+| Selavy.RMSynthesis.writeComplexFDF    | bool           | true                          | If true, write the FDF and RMSF spectra as single complex-valued     |
+|                                       |                |                               | image files. If false, the amplitude and phase of each are writtedn  |
+|                                       |                |                               | as separate files.                                                   |
 +---------------------------------------+----------------+-------------------------------+----------------------------------------------------------------------+
 | Selavy.RMSynthesis.weightType         | string         | variance                      | The type of weighting to be used in the RM Synthesis. Can be either  |
 |                                       |                |                               | "variance" (each channel is weighted by the inverse square of its    |
 |                                       |                |                               | noise), or "uniform" (each channel has a weight of 1). Anything else |
 |                                       |                |                               | defaults to "variance".                                              |
++---------------------------------------+----------------+-------------------------------+----------------------------------------------------------------------+
+| Selavy.RMSynthesis.modelType          | string         | taylor                        | The type of model used to represent the Stoks-I spectrum. This can be|
+|                                       |                |                               | either "taylor", in which case the Taylor-term parameters from the   |
+|                                       |                |                               | imaging & component fitting are used, or "poly", in which case a     |
+|                                       |                |                               | low-order polynomial is used to model the spectrum.                  |
++---------------------------------------+----------------+-------------------------------+----------------------------------------------------------------------+
+| Selavy.RMSynthesis.modelPolyOrder     | int            | 3                             | The order of the polynomial to use in the Stokes-I model fit. Only   |
+|                                       |                |                               | used if modelType=poly.                                              |
 +---------------------------------------+----------------+-------------------------------+----------------------------------------------------------------------+
 | Selavy.RMSynthesis.numPhiChan         | int            | 40                            | Number of channels in the Faraday depth sampling vector.             |
 +---------------------------------------+----------------+-------------------------------+----------------------------------------------------------------------+
