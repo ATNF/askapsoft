@@ -284,6 +284,26 @@ void Configuration::buildAntennas(void)
     ASKAPLOG_DEBUG_STR(logger, "Defined "<<itsAntennas.size()<<" antennas in the configuration");
 }
 
+/// @brief build vector of indices of the given antennas in the full map
+/// @details This is a helper method to provide default indices for a selected list
+/// of antennas (for ADE antennas are present in the natural order).
+/// @param[in] ants vector of antenna names
+/// @return vector of indices
+/// @note Antenna names are assumed to be in the form of "??NN" where ? is an 
+/// arbitrary letter and NN is an integer number 0..99 with a leading zero, if
+/// necessary.
+std::vector<int32_t> Configuration::buildValidAntIndices(const std::vector<std::string> &ants) {
+    ASKAPLOG_DEBUG_STR(logger, "Default antenna indices will be derived from antenna names for "<<ants.size()<<
+                               " antennas for which data to be ingested");
+    std::vector<int32_t> result(ants.size());
+    for (size_t ant = 0; ant < result.size(); ++ant) {
+         ASKAPCHECK(ants[ant].size() == 4u, "Expect 4-letter antenna names e.g. ak01. You have "<<ants[ant]);
+         result[ant] = utility::fromString<int32_t>(ants[ant].substr(2)) - 1;
+         ASKAPCHECK(result[ant] >= 0, "Negative antenna indices are not expected, antenna numbers should be 1-based; antenna: "<<ants[ant]);
+    }
+    return result;
+}
+
 void Configuration::buildBaselineMap(void)
 {
     itsBaselineMap.reset(new BaselineMap(itsParset.makeSubset("baselinemap.")));
@@ -294,8 +314,9 @@ void Configuration::buildBaselineMap(void)
     // transition to proper operations
     if (itsParset.isDefined("baselinemap.antennaindices")) {
         ASKAPLOG_INFO_STR(logger, "A subset of antenna indices will be selected from the defined correlator product configuration");
-        const vector<int32_t> validAntIndices = itsParset.getInt32Vector("baselinemap.antennaindices");
         const vector<string> antOrdering = itsParset.getStringVector("baselinemap.antennaidx");
+        const vector<int32_t> parsetAntIndices = itsParset.getInt32Vector("baselinemap.antennaindices");
+        const vector<int32_t> validAntIndices = parsetAntIndices.size() != 0 ? parsetAntIndices : buildValidAntIndices(antOrdering);
         ASKAPCHECK(validAntIndices.size() == antOrdering.size(),
                  "Number of antenna indices should match baselinemap.antennaidx; valid indices = "<<validAntIndices);
         for (size_t ant=0; ant<validAntIndices.size(); ++ant) {

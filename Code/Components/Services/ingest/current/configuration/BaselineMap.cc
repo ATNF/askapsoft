@@ -230,7 +230,7 @@ bool BaselineMap::isUpperTriangle() const
 /// @details This method is probably temporary as it is primarily intended for ADE
 /// commissioning. When we have a decent number of ASKAP antennas ready, this
 /// additional layer of mapping needs to be removed as it is a complication. 
-/// This method produces a sparse map which include only selected antenna indices.
+/// This method produces a sparse map which includes only selected antenna indices.
 /// @param[in] ids vector with antenna ids to keep
 /// @note For simplicity, indices should always be given in increasing order. This
 /// ensures that no need for data conjugation arises at the user side (i.e. upper

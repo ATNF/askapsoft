@@ -138,6 +138,17 @@ class Configuration {
 
         void buildCorrelatorModes(void);
 
+
+        /// @brief build vector of indices of the given antennas in the full map
+        /// @details This is a helper method to provide default indices for a selected list
+        /// of antennas (for ADE antennas are present in the natural order).
+        /// @param[in] ants vector of antenna names
+        /// @return vector of indices
+        /// @note Antenna names are assumed to be in the form of "??NN" where ? is an 
+        /// arbitrary letter and NN is an integer number 0..99 with a leading zero, if
+        /// necessary.
+        std::vector<int32_t> buildValidAntIndices(const std::vector<std::string> &ants);
+
         // The input configuration parameter set that this "Configuration" encapsulates.
         const LOFAR::ParameterSet itsParset;
 
