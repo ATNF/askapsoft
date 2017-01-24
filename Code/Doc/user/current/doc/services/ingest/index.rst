@@ -326,8 +326,15 @@ polarisation products and even cross-pol products of auto-correlations.
 |                            |                   |            |zero for each antenna listed in **baselinemap.antennaidx**\ . |
 |                            |                   |            |If this parameter is defined, then each element of the vector |
 |                            |                   |            |gives the corresponding hardware index for each antenna in the|
-|                            |                   |            |**baselinemap.antennaidx**\. The number of elements in these  |
-|                            |                   |            |two vectors should be the same. Note, there is the requirement|
+|                            |                   |            |**baselinemap.antennaidx**\. The empty vector is the special  |
+|                            |                   |            |case meaning to determine indices automatically from the names|
+|                            |                   |            |listed in **baselinemap.antennaidx** (for ADE, antenna names  |
+|                            |                   |            |correspond to indices plus one). The names supported should be|
+|                            |                   |            |in the form of two letters followed by two numbers with zero  |
+|                            |                   |            |padding if antenna number is below 10. Unless this special    |
+|                            |                   |            |case is used, the number of elements in **baselinemap.antenna\|
+|                            |                   |            |idx** and **baselinemap.antennaindices** should be the same.  |
+|                            |                   |            |Note, there is an additional requirement                      |
 |                            |                   |            |that the resulting slice of the map should remain a lower or  |
 |                            |                   |            |upper baseline triangle as in the original map. Listing       |
 |                            |                   |            |antennas in the increasing order of their hardware indices is |
