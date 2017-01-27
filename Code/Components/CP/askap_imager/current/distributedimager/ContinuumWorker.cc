@@ -679,6 +679,8 @@ void ContinuumWorker::buildSpectralCube() {
                     }
 
                     itsComms.removeChannelFromWriter(itsComms.rank());
+                    ASKAPLOG_INFO_STR(logger,"this iteration target is " << targetOutstanding);
+                    ASKAPLOG_INFO_STR(logger,"iteration count is " << itsComms.getOutstanding());
                 }
 
             }
@@ -689,6 +691,7 @@ void ContinuumWorker::buildSpectralCube() {
                 result.set_globalChannel(workUnits[workUnitCount-1].get_globalChannel());
                 /// send the work to the writer with a blocking send
                 result.sendRequest(workUnits[workUnitCount-1].get_writer(),itsComms);
+                itsComms.removeChannelFromWorker(itsComms.rank());
 
             }
 
@@ -730,14 +733,42 @@ void ContinuumWorker::buildSpectralCube() {
         catch (const std::exception& e) {
             ASKAPLOG_WARN_STR(logger, "Unexpected exception in: " << e.what());
             std::cerr << "Unexpected exception in: " << e.what();
+            // I need to repeat the bookkeeping here as errors other than AskapErrors are thrown by solveNE
+
+            // Need to either send an empty map - or
+            if (itsComms.isWriter()) {
+                ASKAPLOG_INFO_STR(logger,"Marking bad channel as processed in count for writer\n");
+                itsComms.removeChannelFromWriter(itsComms.rank());
+            }
+            else {
+                int goodUnitCount = workUnitCount-1; // last good one - needed for the correct freq label and writer
+                ASKAPLOG_INFO_STR(logger,"Failed on count " << goodUnitCount);
+                ASKAPLOG_INFO_STR(logger,"Sending blankparams to writer " << workUnits[goodUnitCount].get_writer());
+                askap::scimath::Params::ShPtr blankParams;
+
+                blankParams.reset(new Params);
+                ASKAPCHECK(blankParams,"blank parameters (images) not initialised");
+
+                setupImage(blankParams, workUnits[goodUnitCount].get_channelFrequency());
+
+
+                ContinuumWorkRequest result;
+                result.set_params(blankParams);
+                result.set_globalChannel(workUnits[goodUnitCount].get_globalChannel());
+                /// send the work to the writer with a blocking send
+                result.sendRequest(workUnits[goodUnitCount].get_writer(),itsComms);
+                ASKAPLOG_INFO_STR(logger,"Sent\n");
+            }
+            // No need to increment workunit. Although this assumes that we are here becuase we failed the solveNE not the calcNE
 
         }
 
     }
     // cleanup
     if (itsComms.isWriter()) {
-        while (itsComms.getOutstanding()>0) {
 
+        while (itsComms.getOutstanding()>0) {
+            ASKAPLOG_INFO_STR(logger,"I have " << itsComms.getOutstanding() << "outstanding work units");
             ContinuumWorkRequest result;
             int id;
             result.receiveRequest(id,itsComms);

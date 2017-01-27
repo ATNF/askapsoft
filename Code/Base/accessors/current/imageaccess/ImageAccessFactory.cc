@@ -2,7 +2,7 @@
 /// @brief Build an appropriate image access class
 /// @details This file contains a factory method generating a shared pointer to the image
 /// accessor from the parset file
-///  
+///
 ///
 /// @copyright (c) 2007 CSIRO
 /// Australia Telescope National Facility (ATNF)
@@ -31,6 +31,7 @@
 
 #include <imageaccess/ImageAccessFactory.h>
 #include <imageaccess/CasaImageAccess.h>
+#include <imageaccess/FitsImageAccess.h>
 
 #include <askap/AskapError.h>
 
@@ -44,7 +45,7 @@ using namespace askap::accessors;
 /// accessor from the parset file
 /// @param[in] parset parameters containing description of image accessor to be constructed
 /// @return shared pointer to the image access object
-/// @note CASA images are used by default 
+/// @note CASA images are used by default
 boost::shared_ptr<IImageAccess> askap::accessors::imageAccessFactory(const LOFAR::ParameterSet &parset)
 {
    const std::string imageType = parset.getString("imagetype","casa");
@@ -53,8 +54,12 @@ boost::shared_ptr<IImageAccess> askap::accessors::imageAccessFactory(const LOFAR
        boost::shared_ptr<CasaImageAccess> iaCASA(new CasaImageAccess());
        // optional parameter setting may come here
        result = iaCASA;
-   } else {
-      throw AskapError(std::string("Unsupported image type ")+imageType+" has been requested"); 
+   } else if (imageType == "fits"){
+       boost::shared_ptr<FitsImageAccess> iaFITS(new FitsImageAccess());
+       result = iaFITS;
+   }
+   else {
+      throw AskapError(std::string("Unsupported image type ")+imageType+" has been requested");
    }
    return result;
 }

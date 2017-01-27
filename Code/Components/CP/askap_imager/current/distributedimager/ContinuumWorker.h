@@ -124,12 +124,12 @@ class ContinuumWorker
         // the number of channels in this cube (if writer)
         int nchanCube;
 
-        boost::scoped_ptr<CubeBuilder> itsImageCube;
-        boost::scoped_ptr<CubeBuilder> itsPSFCube;
-        boost::scoped_ptr<CubeBuilder> itsResidualCube;
-        boost::scoped_ptr<CubeBuilder> itsWeightsCube;
-        boost::scoped_ptr<CubeBuilder> itsPSFimageCube;
-        boost::scoped_ptr<CubeBuilder> itsRestoredCube;
+        boost::shared_ptr<CubeBuilder> itsImageCube;
+        boost::shared_ptr<CubeBuilder> itsPSFCube;
+        boost::shared_ptr<CubeBuilder> itsResidualCube;
+        boost::shared_ptr<CubeBuilder> itsWeightsCube;
+        boost::shared_ptr<CubeBuilder> itsPSFimageCube;
+        boost::shared_ptr<CubeBuilder> itsRestoredCube;
 
         void handleImageParams(askap::scimath::Params::ShPtr params, unsigned int chan);
         void recordBeam(const askap::scimath::Axes &axes, const unsigned int globalChannel);

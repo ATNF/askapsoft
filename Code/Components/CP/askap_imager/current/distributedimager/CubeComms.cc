@@ -171,7 +171,7 @@ void CubeComms::removeChannelFromWorker(unsigned int workerRank) {
         ASKAPLOG_WARN_STR(logger,"Removing channel from non-existent writer");
     }
     else {
-        ASKAPLOG_INFO_STR(logger,"Removed channel from writer rank" << workerRank);
+        ASKAPLOG_INFO_STR(logger,"Removed channel from worker rank" << workerRank);
     }
 
 }

@@ -33,8 +33,11 @@
 #include <string>
 
 // ASKAPsoft includes
-#include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 #include <Common/ParameterSet.h>
+#include <imageaccess/ImageAccessFactory.h>
+
+
 #include <casacore/images/Images/PagedImage.h>
 #include <casacore/lattices/Lattices/PagedArray.h>
 #include <casacore/casa/Arrays/Array.h>
@@ -69,7 +72,8 @@ class CubeBuilder {
         void setUnits(const std::string &units);
 
     private:
-        boost::scoped_ptr< casa::PagedImage<float> > itsCube;
+        boost::shared_ptr<accessors::IImageAccess> itsCube;
+
 
     /// Image name from parset - must start with "image."
         std::string itsFilename;
@@ -78,7 +82,7 @@ class CubeBuilder {
         casa::Quantum<double> itsRestFrequency;
 
     /// Description of the polarisation properties of the output cubes
-    casa::Vector<casa::Stokes::StokesTypes> itsStokes;
+        casa::Vector<casa::Stokes::StokesTypes> itsStokes;
 };
 
 }
