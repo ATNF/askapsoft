@@ -54,9 +54,11 @@ class FITSImageRW {
 
 public:
 
+    FITSImageRW ();
+
     FITSImageRW (const std::string &name);
 
-    FITSImageRW (const std::string &name, const casa::IPosition &shape,\
+    bool create (const std::string &name, const casa::IPosition &shape,\
         const casa::CoordinateSystem &csys,\
         uint memoryInMB = 64,\
         bool preferVelocity = true,\

@@ -192,8 +192,12 @@ void ContinuumWorker::run(void)
     ASKAPLOG_INFO_STR(logger,"Rank " << itsComms.rank() << " passed barrier");
 
     const bool localSolver = itsParset.getBool("solverpercore",false);
+
     int nchanpercore = itsParset.getInt("nchanpercore",1);
 
+    int nWorkers = itsComms.nProcs() -1;
+    int nGroups = itsComms.nGroups();
+    int nchanTotal = nWorkers * nchanpercore / nGroups;
 
 
 
@@ -223,18 +227,29 @@ void ContinuumWorker::run(void)
             // these are in ranks
             // If a client is missing entirely from the list - the cube will be missing
             // channels - but they will be correctly labelled
-            this->baseCubeGlobalChannel = (myMinClient - 1)*nchanpercore;
-            this->baseCubeFrequency = itsAdvisor->getBaseFrequencyAllocation((myMinClient - 1));
+
             // e.g
             // bottom client rank is 4 - top client is 7
             // we have 4 chanpercore
             // 6*4 - 3*4
             // 3*4 = 12
             // (6 - 3 + 1) * 4
-            this->nchanCube = (myMaxClient - myMinClient + 1)*nchanpercore;
+            if (!itsComms.isSingleSink()) {
+                this->nchanCube = (myMaxClient - myMinClient + 1)*nchanpercore;
+                this->baseCubeGlobalChannel = (myMinClient - 1)*nchanpercore;
+                this->baseCubeFrequency = itsAdvisor->getBaseFrequencyAllocation((myMinClient - 1));
+                ASKAPLOG_INFO_STR(logger,"MultiCube with multiple writers");
+            }
+            else {
+                ASKAPLOG_INFO_STR(logger,"SingleCube with multiple writers");
+                this->nchanCube = nchanTotal;
+                this->baseCubeGlobalChannel = 0;
+                this->baseCubeFrequency = itsAdvisor->getBaseFrequencyAllocation((0));
+
+            }
             ASKAPLOG_INFO_STR(logger,"Number of channels in cube is: " << this->nchanCube );
             ASKAPLOG_INFO_STR(logger,"Base global channel of cube is " << this->baseCubeGlobalChannel);
-        }
+    }
         this->baseFrequency = itsAdvisor->getBaseFrequencyAllocation(itsComms.rank()-1);
     }
     ASKAPLOG_INFO_STR(logger,"Adding missing parameters");
@@ -371,7 +386,6 @@ void ContinuumWorker::buildSpectralCube() {
     /// Therefore the cube will be distributed across the
     /// supercomputer as a function of frequency and beams
     ///
-    /// First lets set up the cube
 
     /// The number of channels allocated to this rank
     const int nchanpercore = itsParsets[0].getInt32("nchanpercore", 1);
@@ -381,7 +395,9 @@ void ContinuumWorker::buildSpectralCube() {
 
     int nWorkers = itsComms.nProcs() -1;
     int nGroups = itsComms.nGroups();
-    int nchantotal = nWorkers * nchanpercore / nGroups;
+    int nChanTotal = nWorkers * nchanpercore / nGroups;
+
+
 
     // Define reference channel for giving restoring beam
     std::string reference = itsParset.getString("restore.beamReference", "mid");
@@ -406,10 +422,8 @@ void ContinuumWorker::buildSpectralCube() {
 
         Quantity f0(this->baseCubeFrequency,"Hz");
     /// The width of a channel. THis does <NOT> take account of the variable width
-    /// of BArycentric channels
+    /// of Barycentric channels
         Quantity freqinc(workUnits[0].get_channelWidth(),"Hz");
-
-
 
         std::string root = "image";
 
@@ -430,16 +444,34 @@ void ContinuumWorker::buildSpectralCube() {
         std::string weights_name = root + std::string(".wr.") \
         + utility::toString(itsComms.rank());
 
+        if (itsComms.isSingleSink()) {
+            // Need to reset the names to something eveyone knows
+            img_name = "image";
+            psf_name = "psf";
+            residual_name = "residual";
+            weights_name = "weights";
+        }
 
         ASKAPLOG_INFO_STR(logger,"Configuring Spectral Cube");
         ASKAPLOG_INFO_STR(logger,"nchan: " << this->nchanCube << " base f0: " << f0.getValue("MHz")
         << " width: " << freqinc.getValue("MHz") <<" (" << workUnits[0].get_channelWidth() << ")");
 
-        itsImageCube.reset(new CubeBuilder(itsParsets[0], this->nchanCube, f0, freqinc,img_name));
-        itsPSFCube.reset(new CubeBuilder(itsParsets[0], this->nchanCube, f0, freqinc, psf_name));
-        itsResidualCube.reset(new CubeBuilder(itsParsets[0], this->nchanCube, f0, freqinc, residual_name));
-        itsWeightsCube.reset(new CubeBuilder(itsParsets[0], this->nchanCube, f0, freqinc, weights_name));
 
+        if ( itsComms.isCubeCreator() ) {
+            itsImageCube.reset(new CubeBuilder(itsParsets[0], this->nchanCube, f0, freqinc,img_name));
+            itsPSFCube.reset(new CubeBuilder(itsParsets[0], this->nchanCube, f0, freqinc, psf_name));
+            itsResidualCube.reset(new CubeBuilder(itsParsets[0], this->nchanCube, f0, freqinc, residual_name));
+            itsWeightsCube.reset(new CubeBuilder(itsParsets[0], this->nchanCube, f0, freqinc, weights_name));
+        }
+
+
+
+        if (!itsComms.isCubeCreator()) {
+            itsImageCube.reset(new CubeBuilder(itsParsets[0], img_name));
+            itsPSFCube.reset(new CubeBuilder(itsParsets[0],  psf_name));
+            itsResidualCube.reset(new CubeBuilder(itsParsets[0],  residual_name));
+            itsWeightsCube.reset(new CubeBuilder(itsParsets[0], weights_name));
+        }
 
         if (itsParset.getBool("restore", false)) {
             root = "psf.image";
@@ -448,11 +480,27 @@ void ContinuumWorker::buildSpectralCube() {
             root = "image.restored";
             std::string restored_image_name = root + std::string(".wr.") \
             + utility::toString(itsComms.rank());
-            // Only create these if we are restoring, as that is when they get made
-            if (itsDoingPreconditioning) {
-                itsPSFimageCube.reset(new CubeBuilder(itsParsets[0], this->nchanCube, f0, freqinc, psf_image_name));
+            if (itsComms.isSingleSink()) {
+                // Need to reset the names to something eveyone knows
+                psf_image_name = "psf.image";
+                restored_image_name = "image.restored";
+
             }
-            itsRestoredCube.reset(new CubeBuilder(itsParsets[0], this->nchanCube, f0, freqinc, restored_image_name));
+            // Only create these if we are restoring, as that is when they get made
+            if ( itsComms.isCubeCreator() ) {
+                if (itsDoingPreconditioning) {
+                    itsPSFimageCube.reset(new CubeBuilder(itsParsets[0], this->nchanCube, f0, freqinc, psf_image_name));
+                }
+                itsRestoredCube.reset(new CubeBuilder(itsParsets[0], this->nchanCube, f0, freqinc, restored_image_name));
+            }
+
+            if (!itsComms.isCubeCreator())
+            {
+                if (itsDoingPreconditioning) {
+                    itsPSFimageCube.reset(new CubeBuilder(itsParsets[0],  psf_image_name));
+                }
+                itsRestoredCube.reset(new CubeBuilder(itsParsets[0], restored_image_name));
+            }
         }
     }
     /// What are the plans for the deconvolution?

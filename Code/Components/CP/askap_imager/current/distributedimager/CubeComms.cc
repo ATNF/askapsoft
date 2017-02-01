@@ -62,6 +62,7 @@ CubeComms::CubeComms(int argc, const char** argv) : AskapParallel(argc, const_ca
 
     ASKAPLOG_DEBUG_STR(logger,"Constructor");
     writerCount = 1; // always at least one
+    singleSink = false;
 
 }
 CubeComms::~CubeComms() {
@@ -77,8 +78,22 @@ size_t CubeComms::buildCommIndex() {
           ranks[wrk] = 1 + wrk;
      }
      itsComrades = createComm(ranks);
-     ASKAPLOG_DEBUG_STR(logger, "Interworker communicator index is "<< itsComrades);
+     ASKAPLOG_INFO_STR(logger, "Interworker communicator index is "<< itsComrades);
      return itsComrades;
+}
+size_t CubeComms::buildWriterIndex() {
+
+    std::map<int,int>::iterator it = writerMap.begin();
+    std::vector<int> ranks(writerCount);
+    int wrt=0;
+    while (it != writerMap.end()) {
+          ranks[wrt] = it->first;
+          it++;
+          wrt++;
+    }
+    itsWriters = createComm(ranks);
+    ASKAPLOG_INFO_STR(logger, "Interwriter communicator index is "<< itsComrades);
+    return itsWriters;
 }
 void CubeComms::initWriters(int nwriters, int nchanpercore) {
 
@@ -150,6 +165,35 @@ void CubeComms::addWorker(unsigned int workerRank) {
         ASKAPLOG_INFO_STR(logger, " added worker rank " << " to workerMap");
     }
 
+}
+bool CubeComms::isCubeCreator(){
+    std::list<int>::iterator it;
+    it = cubeCreators.begin();
+    while (it != cubeCreators.end()) {
+        if (*it == rank())
+                return true;
+        it++;        
+    }
+    return false;
+}
+
+void CubeComms::addCubeCreator(int creator_rank) {
+    cubeCreators.push_back(creator_rank);
+}
+void CubeComms::setSingleSink() {
+    std::map<int,int>::iterator it;
+    it = writerMap.begin();
+    addCubeCreator(it->first);
+    this->singleSink = true;
+}
+void CubeComms::setMultiSink() {
+    std::map<int,int>::iterator it;
+    it = writerMap.begin();
+    while (it != writerMap.end()) {
+        addCubeCreator(it->first);
+        it++;
+    }
+    this->singleSink = false;
 }
 void CubeComms::addChannelToWorker(unsigned int workerRank) {
 

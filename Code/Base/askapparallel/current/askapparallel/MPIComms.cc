@@ -141,7 +141,7 @@ void MPIComms::barrier(size_t comm)
 /// This index can later be used as a parameter for communication methods
 /// instead of the default one.
 /// @param[in] group ranks to include in the new communicator
-/// @param[in] comm communicator index where a new subgroup is created, 
+/// @param[in] comm communicator index where a new subgroup is created,
 ///            defaults to 0 (copy of the default world communicator)
 /// @return new communicator index
 size_t MPIComms::createComm(const std::vector<int> &group, size_t comm)
@@ -160,7 +160,7 @@ size_t MPIComms::createComm(const std::vector<int> &group, size_t comm)
 
   result = MPI_Group_incl(origGroup, int(group.size()), ranksBuf.get(), &newGroup);
   checkError(result, "MPI_Group_incl");
-  
+
   result = MPI_Comm_create(itsCommunicators[comm], newGroup, &newComm);
   checkError(result, "MPI_Comm_create");
   ASKAPDEBUGASSERT(newGroup != MPI_GROUP_NULL);
@@ -295,7 +295,7 @@ void MPIComms::broadcast(void* buf, size_t size, int root, size_t comm)
     }
 }
 
-/// @brief sum raw float buffers across all ranks of the communicator via MPI_Allreduce 
+/// @brief sum raw float buffers across all ranks of the communicator via MPI_Allreduce
 /// @details This method does an in place operation, so all buffers will have the
 /// same content equal to the sum of initial values (element-wise) sent to individual ranks
 /// @param[in,out] buf data buffer (float type is assumed)
@@ -305,7 +305,7 @@ void MPIComms::sumAndBroadcast(float *buf, size_t size, size_t comm)
 {
    ASKAPDEBUGASSERT(comm < itsCommunicators.size());
    ASKAPDEBUGASSERT(itsCommunicators[comm] != MPI_COMM_NULL);
-   const int result = MPI_Allreduce(MPI_IN_PLACE,(void*)buf, 
+   const int result = MPI_Allreduce(MPI_IN_PLACE,(void*)buf,
          int(size), MPI_FLOAT, MPI_SUM, itsCommunicators[comm]);
    checkError(result,"MPI_Allreduce");
 }
@@ -322,7 +322,7 @@ void MPIComms::aggregateFlag(bool &flag, size_t comm)
    ASKAPDEBUGASSERT(comm < itsCommunicators.size());
    ASKAPDEBUGASSERT(itsCommunicators[comm] != MPI_COMM_NULL);
    int buf = int(flag);
-   const int result = MPI_Allreduce(MPI_IN_PLACE,(void*)&buf, 
+   const int result = MPI_Allreduce(MPI_IN_PLACE,(void*)&buf,
          1, MPI_INT, MPI_LOR, itsCommunicators[comm]);
    checkError(result,"MPI_Allreduce");
    flag = bool(buf);
@@ -389,7 +389,7 @@ void MPIComms::abort(size_t)
     exit(1);
 }
 
-/// @brief sum raw float buffers across all ranks of the communicator via MPI_Allreduce 
+/// @brief sum raw float buffers across all ranks of the communicator via MPI_Allreduce
 /// @details This method does an in place operation, so all buffers will have the
 /// same content equal to the sum of initial values (element-wise) sent to individual ranks
 /// @param[in,out] buf data buffer (float type is assumed)
@@ -417,10 +417,10 @@ void MPIComms::aggregateFlag(bool &, size_t)
 /// This index can later be used as a parameter for communication methods
 /// instead of the default one.
 /// @param[in] group ranks to include in the new communicator
-/// @param[in] comm communicator index where a new subgroup is created, 
+/// @param[in] comm communicator index where a new subgroup is created,
 ///            defaults to 0 (copy of the default world communicator)
 /// @return new communicator index
-size_t MPIComms::createComm(const std::vector<int> &, size_t) 
+size_t MPIComms::createComm(const std::vector<int> &, size_t)
 {
     ASKAPTHROW(AskapError, "MPIComms::createComm() cannot be used - configured without MPI");
 }

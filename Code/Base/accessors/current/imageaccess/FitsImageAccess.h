@@ -50,6 +50,12 @@ namespace accessors {
 struct FitsImageAccess : public IImageAccess {
 
 public:
+
+    /// @brief connect accessor to an existing image
+    /// @details Instantiates the private FITSImageRW shared pointer. 
+    /// @param[in] name image name
+    void connect(const std::string &name);
+
     //////////////////
     // Reading methods
     //////////////////

@@ -56,6 +56,8 @@ class CubeBuilder {
                     const casa::Quantity& inc,
                     const std::string& name = "");
 
+        CubeBuilder(const LOFAR::ParameterSet& parset,const std:: string& name);            
+
         /// Destructor
         ~CubeBuilder();
 

@@ -70,7 +70,10 @@ FITSImageRW::FITSImageRW(const std::string &name) {
     std::string fullname = name + ".fits";
     this->name = std::string(name.c_str());
 }
-FITSImageRW::FITSImageRW(const std::string &name, const casa::IPosition &shape,\
+FITSImageRW::FITSImageRW() {
+
+}
+bool FITSImageRW::create(const std::string &name, const casa::IPosition &shape,\
     const casa::CoordinateSystem &csys,\
     uint memoryInMB, bool preferVelocity,\
 	bool opticalVelocity, int BITPIX, float minPix, float maxPix,\
@@ -98,15 +101,10 @@ FITSImageRW::FITSImageRW(const std::string &name, const casa::IPosition &shape,\
     this->allowAppend = allowAppend;
     this->history = history;
 
-
-
-}
-bool FITSImageRW::create() {
-
-    ASKAPLOG_INFO_STR(FITSlogger,"Creating R/W FITSImage");
+    ASKAPLOG_INFO_STR(FITSlogger,"Creating R/W FITSImage " << this->name);
 
     unlink(this->name.c_str());
-    
+
     casa::String error;
     const casa::uInt ndim = shape.nelements();
     // //
@@ -222,9 +220,6 @@ bool FITSImageRW::create() {
 
     header.define("ORIGIN", "ASKAPSoft");
 
-
-
-
     theKeywordList = casa::FITSKeywordUtil::makeKeywordList(primHead, casa::True);
 
     //kw.mk(FITS::EXTEND, True, "Tables may follow");
@@ -243,13 +238,13 @@ bool FITSImageRW::create() {
     theKeywordList.end();
     casa::PrimaryArray<float>* fits32 = 0;
 
-    casa::FitsOutput *outfile = new casa::FitsOutput(name.c_str(),casa::FITS::Disk);
+    casa::FitsOutput *outfile = new casa::FitsOutput(fullname.c_str(),casa::FITS::Disk);
     if (outfile->err())
         ASKAPLOG_WARN_STR(FITSlogger, "Error creating FITS file for output\n");
 
 
     fits32 = new casa::PrimaryArray<float>(theKeywordList);
-/// I could use cfitsio access routines here for a cleaner interface
+     /// I could use cfitsio access routines here for a cleaner interface
     if (fits32==0 || fits32->err()) {
         ASKAPLOG_WARN_STR(FITSlogger, "Error creating Primary HDU from keywords");
         return false;
@@ -261,7 +256,7 @@ bool FITSImageRW::create() {
     }
     ASKAPLOG_INFO_STR(FITSlogger,"Written header");
 
-    std::cout << *fits32 << std::endl;
+    // std::cout << *fits32 << std::endl;
     delete(fits32);
     delete(outfile);
 
@@ -320,7 +315,7 @@ bool FITSImageRW::write(const casa::Array<float> &arr) {
     if ( fits_open_file(&fptr, this->name.c_str(), READWRITE, &status) )
          printerror( status );
 
-    size_t fpixel = 1;                               /* first pixel to write      */
+    long fpixel = 1;                               /* first pixel to write      */
     size_t nelements = arr.nelements();          /* number of pixels to write */
     bool deleteIt;
     const float *data = arr.getStorage(deleteIt);
@@ -336,29 +331,24 @@ bool FITSImageRW::write(const casa::Array<float> &arr) {
     return true;
 }
 bool FITSImageRW::write(const casa::Array<float> &arr,const casa::IPosition &where) {
-    ASKAPLOG_INFO_STR(FITSlogger,"Writing array to FITS image");
+    ASKAPLOG_INFO_STR(FITSlogger,"Writing array to FITS image at (Cindex)" << where);
     fitsfile *fptr;       /* pointer to the FITS file, defined in fitsio.h */
 
-    int status;
+    int status, hdutype;
 
 
     status = 0;
 
     if ( fits_open_file(&fptr, this->name.c_str(), READWRITE, &status) )
-         printerror( status );
+        printerror( status );
 
+    if ( fits_movabs_hdu(fptr, 1, &hdutype, &status) )
+        printerror( status );
 
     // we do not currently support postage stamps so the write has to be of
     // the correct dimension
 
-    if (this->shape[0] != arr.shape()[0]) {
-        ASKAPLOG_ERROR_STR(FITSlogger,"RA dimension of slice does not match RA dimension of image");
-        return false;
-    }
-    if (this->shape[1] != arr.shape()[1]) {
-        ASKAPLOG_ERROR_STR(FITSlogger,"Dec dimension of slice does not match Dec dimension of image");
-        return false;
-    }
+
     // we have to place the slice at the start of a channel
 
     if (where[0] != 0 || where[1] != 0) {
@@ -366,18 +356,43 @@ bool FITSImageRW::write(const casa::Array<float> &arr,const casa::IPosition &whe
     }
 
 
-    size_t fpixel = where[2]*this->shape[0]*this->shape[1];                               /* first pixel to write      */
-    size_t nelements = arr.nelements();          /* number of pixels to write */
-    bool deleteIt;
+    long fpixel[4];
+
+
+    ASKAPLOG_INFO_STR(FITSlogger,"There are " << where.nelements() << " dimensions in the slice");
+    fpixel[0] = 1;
+    ASKAPLOG_INFO_STR(FITSlogger,"fpixel[0] = " << fpixel[0]);
+    fpixel[1] = 1;
+    ASKAPLOG_INFO_STR(FITSlogger,"fpixel[1] = " << fpixel[1]);
+    if (where.nelements() == 3) {
+        fpixel[2] = where[2] + 1;
+        ASKAPLOG_INFO_STR(FITSlogger,"fpixel[2] = " << fpixel[2]);
+    }
+    else {
+        fpixel[2] = 1;
+        ASKAPLOG_INFO_STR(FITSlogger,"fpixel[2] = " << fpixel[2]);
+        fpixel[3] = where[3] + 1;
+        ASKAPLOG_INFO_STR(FITSlogger,"fpixel[3] = " << fpixel[2]);
+    }
+
+    int64_t nelements = arr.nelements();          /* number of pixels to write */
+
+    ASKAPLOG_INFO_STR(FITSlogger,"We are writing " << nelements << " elements");
+    bool deleteIt = false;
     const float *data = arr.getStorage(deleteIt);
     void *dataptr = (void *) data;
 
-         /* write the array of unsigned integers to the FITS file */
-    if ( fits_write_img(fptr, TFLOAT, fpixel, nelements, dataptr, &status) )
+    status = 0;
+
+    if ( fits_write_pix(fptr, TFLOAT,fpixel, nelements, dataptr, &status) )
         printerror( status );
 
+    status = 0;
+
     if ( fits_close_file(fptr, &status) )
-             printerror( status );
+        printerror( status );
+
+
 
     return true;
 

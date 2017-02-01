@@ -435,6 +435,7 @@ void AdviseDI::prepare() {
 
 
 
+
     isPrepared = true;
     ASKAPLOG_DEBUG_STR(logger, "Prepared the advice");
 }
@@ -692,6 +693,16 @@ void AdviseDI::updateComms() {
             }
         }
     }
+    /// First lets set up the cube
+    const bool singleSink = itsParset.getBool("singleoutputfile",false);
+    if (singleSink){
+        itsCubeComms.setSingleSink();
+    }
+    else {
+        itsCubeComms.setMultiSink();
+    }
+
+    
 }
 std::vector<int> AdviseDI::getBeams()
 {

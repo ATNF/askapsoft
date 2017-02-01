@@ -64,6 +64,16 @@ namespace cp {
             /// each is the rank of a writer
             void addWorker(unsigned int writer_rank);
 
+            /// @brief isCubeCreator
+            /// @details This bool can be tested to find out whether the current
+            /// rank creates an output cube
+            ///
+            bool isCubeCreator();
+            /// @brief adds a creator to the list by rank
+            /// @details This adds a rank to a vector of ranks
+            /// each is the rank of a creator of a cube
+            void addCubeCreator(int creator_rank);
+
             /// @brief initialises the writer list
             /// @details By evenly dividing the writing across
             /// the ranks
@@ -82,15 +92,23 @@ namespace cp {
             int getOutstanding();
             std::list<int> getClients();
 
-
-
             int anyWork();
 
-
-            size_t buildCommIndex();
             /// @brief its communicator for its fellow workers
-            size_t theWorkers() {return itsComrades;};
+            size_t buildCommIndex();
+            /// @brief its communicator for its fellow writers
+            size_t buildWriterIndex();
 
+            /// @brief sets the cubecreator to be the first writer
+            void setSingleSink();
+            bool isSingleSink() {
+                return singleSink;
+            };
+            /// @brief sets the cubecreators to be the all writers
+            void setMultiSink();
+
+            size_t theWorkers() {return itsComrades;};
+            size_t theWriters() {return itsWriters;};
 
             ~CubeComms();
 
@@ -108,11 +126,16 @@ namespace cp {
 
             std::map<int,std::list<int> > clientMap;
 
+            // List of ranks that are creating a cube
+            std::list<int> cubeCreators;
+
             int addChannelToMap(std::map<int,int>& theMap, unsigned int theRank);
             int removeChannelFromMap(std::map<int,int>& theMap, unsigned int theRank);
 
             int writerCount;
             size_t itsComrades;
+            size_t itsWriters;
+            bool singleSink;
     };
 }
 }

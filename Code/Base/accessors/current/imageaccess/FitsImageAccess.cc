@@ -121,7 +121,10 @@ casa::Vector<casa::Quantum<double> > FitsImageAccess::beamInfo(const std::string
     casa::ImageInfo ii = img.imageInfo();
     return ii.restoringBeam().toVector();
 }
-
+void FitsImageAccess::connect(const std::string &name) {
+    std::string fullname = name + ".fits";
+    itsFITSImage.reset(new FITSImageRW(fullname));
+}
 // writing methods
 
 /// @brief create a new image
@@ -139,8 +142,8 @@ void FitsImageAccess::create(const std::string &name, const casa::IPosition &sha
     ASKAPLOG_INFO_STR(logger, "Creating a new FITS image " << name << " with the shape " << shape);
     casa::String error;
 
-    itsFITSImage.reset(new FITSImageRW(name,shape,csys));
-    if (!itsFITSImage->create()) {
+    itsFITSImage.reset(new FITSImageRW());
+    if (!itsFITSImage->create(name,shape,csys)) {
         casa::String error;
         error = casa::String("Failed to create FITSFile");
         ASKAPTHROW(AskapError,error);
@@ -164,6 +167,7 @@ void FitsImageAccess::create(const std::string &name, const casa::IPosition &sha
 void FitsImageAccess::write(const std::string &name, const casa::Array<float> &arr)
 {
     ASKAPLOG_INFO_STR(logger, "Writing an array with the shape " << arr.shape() << " into a FITS image " << name);
+    connect(name);
     itsFITSImage->write(arr);
 
 
@@ -179,7 +183,7 @@ void FitsImageAccess::write(const std::string &name, const casa::Array<float> &a
     ASKAPLOG_INFO_STR(logger, "Writing a slice with the shape " << arr.shape() << " into a FITS image " <<
                       name << " at " << where);
     casa::String error;
-
+    connect(name);
     if (!itsFITSImage->write(arr,where)) {
         error = casa::String("Failed to write slice");
         ASKAPTHROW(AskapError,error);
@@ -193,6 +197,7 @@ void FitsImageAccess::write(const std::string &name, const casa::Array<float> &a
 /// @param[in] units string describing brightness units of the image (e.g. "Jy/beam")
 void FitsImageAccess::setUnits(const std::string &name, const std::string &units)
 {
+    connect(name);
     itsFITSImage->setUnits(units);
 }
 
@@ -208,7 +213,7 @@ void FitsImageAccess::setUnits(const std::string &name, const std::string &units
 
 void FitsImageAccess::setBeamInfo(const std::string &name, double maj, double min, double pa)
 {
-
+    connect(name);
     itsFITSImage->setRestoringBeam(maj, min, pa);
 
 }
