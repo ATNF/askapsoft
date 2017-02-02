@@ -99,6 +99,7 @@ parset parameter than the environment variable maps to is given.
 * :doc:`ScienceFieldContinuumImaging`
 * :doc:`ScienceFieldMosaicking`
 * :doc:`ContinuumSourcefinding`
+* :doc:`SpectralLineSourcefinding`
 * :doc:`ScienceFieldSpectralLineImaging`
 * :doc:`archiving`
 

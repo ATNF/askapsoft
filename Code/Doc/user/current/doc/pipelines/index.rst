@@ -20,5 +20,6 @@ the ASKAP Central Processor platform.
    ScienceFieldContinuumImaging.rst
    ScienceFieldMosaicking.rst
    ContinuumSourcefinding.rst
+   SpectralLineSourcefinding.rst
    ScienceFieldSpectralLineImaging.rst
    archiving.rst

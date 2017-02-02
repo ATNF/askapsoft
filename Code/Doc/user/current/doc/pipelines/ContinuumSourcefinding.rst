@@ -26,7 +26,7 @@ re-run it yourself.
 | ``DO_SOURCE_FINDING_BEAMWISE`` | false                           | none                            | If true, the source-finding will be run on the individual   |
 |                                |                                 |                                 | beam images as well.                                        |
 +--------------------------------+---------------------------------+---------------------------------+-------------------------------------------------------------+
-| ``JOB_TIME_SOURCEFINDING``     | ``JOB_TIME_DEFAULT`` (12:00:00) | none                            | Time request for mosaicking                                 |
+| ``JOB_TIME_SOURCEFINDING``     | ``JOB_TIME_DEFAULT`` (12:00:00) | none                            | Time request for source-finding jobs.                       |
 |                                |                                 |                                 |                                                             |
 +--------------------------------+---------------------------------+---------------------------------+-------------------------------------------------------------+
 | ``SELAVY_NSUBX``               | 6                               | nsubx                           | Number of divisions in the x-direction that divide the image|
@@ -43,6 +43,13 @@ re-run it yourself.
 +--------------------------------+---------------------------------+---------------------------------+-------------------------------------------------------------+
 | ``SELAVY_GROWTH_CUT``          | 3.0                             | growthCut                       | The secondary signal-to-noise threshold to which detections |
 |                                |                                 | (:doc:`../analysis/selavy`)     | should be grown.                                            |
++--------------------------------+---------------------------------+---------------------------------+-------------------------------------------------------------+
+| ``SELAVY_FLUX_THRESHOLD``      | ""                              | threshold                       | The flux threshold to use in the source-detection. If left  |
+|                                |                                 | (:doc:`../analysis/selavy`)     | blank, we use the SNR threshold ``SELAVY_SNR_CUT``.         |
++--------------------------------+---------------------------------+---------------------------------+-------------------------------------------------------------+
+| ``SELAVY_GROWTH_THRESHOLD``    | ""                              | growthCut                       | The secondary signal-to-noise threshold to which detections |
+|                                |                                 | (:doc:`../analysis/selavy`)     | should be grown. Only used if ``SELAVY_FLUX_THRESHOLD`` is  |
+|                                |                                 |                                 | given.                                                      |
 +--------------------------------+---------------------------------+---------------------------------+-------------------------------------------------------------+
 | ``SELAVY_VARIABLE_THRESHOLD``  | true                            | VariableThreshold               | A flag indicating whether to determine the signal-to-noise  |
 |                                |                                 | (:doc:`../analysis/thresholds`) | threshold on a pixel-by-pixel basis based on local          |
