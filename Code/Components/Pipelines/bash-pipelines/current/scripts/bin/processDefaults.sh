@@ -456,6 +456,25 @@ EOF
         fi
 
         ####################
+        # Spectral source-finding
+
+        # Check search type
+        if [ ${SELAVY_SPEC_SEARCH_TYPE} != "spectral" ] || [
+               ${SELAVY_SPEC_SEARCH_TYPE} != "spatial" ]; then
+            SELAVY_SPEC_SEARCH_TYPE="spectral"
+            echo "WARNING - SELAVY_SPEC_SEARCH_TYPE needs to be 'spectral' or 'spatial' - Setting to 'spectral'"
+        fi
+            
+        # Check smooth type
+        if [ ${SELAVY_SPEC_FLAG_SMOOTH} == "true" ]; then
+            if [ ${SELAVY_SPEC_SMOOTH_TYPE} != "spectral" ] || [
+                   ${SELAVY_SPEC_SMOOTH_TYPE} != "spatial" ]; then
+                SELAVY_SPEC_SMOOTH_TYPE="spectral"
+                echo "WARNING - SELAVY_SPEC_SMOOTH_TYPE needs to be 'spectral' or 'spatial' - Setting to 'spectral'"
+            fi
+        fi
+            
+        ####################
         # Variable inputs to Self-calibration settings
         #  This section takes the provided parameters and creates
         #  arrays that have a (potentially) different value for each

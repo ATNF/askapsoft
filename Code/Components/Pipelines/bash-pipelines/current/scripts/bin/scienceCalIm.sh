@@ -148,6 +148,12 @@ for FIELD in ${FIELD_LIST}; do
 
             . ${PIPELINEDIR}/spectralImContSub.sh
             
+            if [ $DO_SOURCE_FINDING_BEAMWISE == true ]; then
+                imageCode=restored
+                setImageProperties spectral
+                . ${PIPELINEDIR}/sourcefindingSpectral.sh
+            fi
+
             FIELDBEAM=`echo $FIELD_ID | awk '{printf "F%02d",$1}'`
             FIELDBEAMJOB=$FIELDBEAM
 

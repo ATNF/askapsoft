@@ -658,14 +658,18 @@ LINMOS_PSF_REF=0
 LINMOS_CUTOFF=0.2
 
 ##############################
-# Selavy source finder
+# Selavy source finder - continuum
 #
 # Signal-to-noise ratio threshold
 SELAVY_SNR_CUT=5
+# Flux threshold - leave blank to use SNR
+SELAVY_FLUX_THRESHOLD=""
 # Whether to grow to a lower threshold
 SELAVY_FLAG_GROWTH=true
 # Growth threshold, in SNR
 SELAVY_GROWTH_CUT=3
+# Growth flux threshold - leave blank if using SNR
+SELAVY_GROWTH_THRESHOLD=""
 # Whether to use a variable threshold
 SELAVY_VARIABLE_THRESHOLD=true
 # Half-size of the box used to calculate the local threshold
@@ -674,6 +678,64 @@ SELAVY_BOX_SIZE=50
 SELAVY_NSUBX=6
 SELAVY_NSUBY=3
 
+
+##############################
+# Selavy source finder - spectral-line
+#
+# Signal-to-noise ratio threshold
+SELAVY_SPEC_SNR_CUT=5
+# Flux threshold - leave blank to use SNR
+SELAVY_SPEC_FLUX_THRESHOLD=""
+# Whether to grow to a lower threshold
+SELAVY_SPEC_FLAG_GROWTH=true
+# Growth threshold, in SNR
+SELAVY_SPEC_GROWTH_CUT=3
+# Growth flux threshold - leave blank if using SNR
+SELAVY_SPEC_GROWTH_THRESHOLD=""
+#
+# Preprocessing
+# Smoothing:
+SELAVY_SPEC_FLAG_SMOOTH=false
+# Type of smoothing - 'spectral' or 'spatial'
+SELAVY_SPEC_SMOOTH_TYPE=spectral
+# Spectral smoothing hanning width (channels)
+SELAVY_SPEC_HANN_WIDTH=5
+# Spatial smoothing Gaussian size (pixels for maj/min, degrees for PA)
+SELAVY_SPEC_KERN_MAJ=3
+SELAVY_SPEC_KERN_MIN=3
+SELAVY_SPEC_KERN_PA=0
+# Wavelet reconstruction
+SELAVY_SPEC_FLAG_WAVLET=false
+# Dimension to do the wavelet reconstruction
+SELAVY_SPEC_RECON_DIM=1
+# Signal-to-noise for wavelet thresholding 
+SELAVY_SPEC_RECON_SNR=4
+# Minimum scale for inclusion in reconstruction (1=lowest)
+SELAVY_SPEC_RECON_SCALE_MIN=1
+# Maximum scale for inclusion in reconstruction (0 means all scales)
+SELAVY_SPEC_RECON_SCALE_MAX=0
+
+# Type of searching to be done - 'spectral' or 'spatial'
+SELAVY_SPEC_SEARCH_TYPE=spectral
+# Whether to use a variable threshold
+SELAVY_SPEC_VARIABLE_THRESHOLD=true
+# Half-size of the box used to calculate the local threshold
+SELAVY_SPEC_BOX_SIZE=50
+# How the processors subdivide the image
+SELAVY_SPEC_NSUBX=6
+SELAVY_SPEC_NSUBY=3
+SELAVY_SPEC_NSUBZ=1
+#
+# Limits on sizes of reported sources
+SELAVY_SPEC_MIN_PIX=5
+SELAVY_SPEC_MIN_CHAN=5
+SELAVY_SPEC_MAX_CHAN=2592
+#
+# Base names for various extracted data products
+SELAVY_SPEC_BASE_SPECTRUM=spectrum
+SELAVY_SPEC_BASE_NOISE=noiseSpectrum
+SELAVY_SPEC_BASE_MOMENT=moment
+SELAVY_SPEC_BASE_CUBELET=cubelet
 
 ###############################
 # Archiving-related parameters

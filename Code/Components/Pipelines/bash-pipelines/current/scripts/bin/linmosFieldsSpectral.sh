@@ -174,3 +174,19 @@ EOFOUTER
 
 fi
 
+
+if [ ${DO_SOURCE_FINDING} == true ]; then
+    # Run the sourcefinder on the mosaicked image.
+
+    # set the $imageBase variable to have 'linmos' in it
+    imageCode=restored
+    BEAM="all"
+    FIELD="."
+    TILE="ALL"
+    FIELDBEAM="Full"
+    FIELDBEAMJOB="Full"
+    setImageProperties spectral
+
+    . ${PIPELINEDIR}/sourcefindingSpectral.sh
+
+fi

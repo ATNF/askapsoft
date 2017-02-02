@@ -151,3 +151,15 @@ EOFOUTER
     echo " "
 
 fi
+
+
+if [ ${DO_SOURCE_FINDING} == true ]; then
+    # Run the sourcefinder on the mosaicked cube.
+
+    # set the $imageBase variable for the mosaicked image
+    BEAM="all"
+    setImageProperties spectral
+
+    . ${PIPELINEDIR}/sourcefindingSpectral.sh
+        
+fi
