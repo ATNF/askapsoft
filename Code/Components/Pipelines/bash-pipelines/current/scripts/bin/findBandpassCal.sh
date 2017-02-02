@@ -43,6 +43,13 @@ fi
 
 if [ $DO_IT == true ]; then
 
+    # Optional data selection
+    dataSelectionPars="# Using all the data"
+    if [ ${BANDPASS_MINUV} -gt 0 ]; then
+        dataSelectionPars="# Minimum UV distance for bandpass calibration:
+Cbpcalibrator.MinUV = BANDPASS_MINUV"
+    fi        
+    
     # Check for bandpass smoothing options
     DO_RUN_PLOT_CALTABLE=false
     if [ $DO_BANDPASS_PLOT == true ] || [ $DO_BANDPASS_SMOOTH == true ]; then
@@ -100,6 +107,7 @@ cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 parset=${parsets}/cbpcalibrator_1934_\${SLURM_JOB_ID}.in
 cat > \$parset <<EOFINNER
 Cbpcalibrator.dataset                         = [${ms1934list}]
+${dataSelectionPars}
 Cbpcalibrator.nAnt                            = ${NUM_ANT}
 Cbpcalibrator.nBeam                           = ${maxbeam}
 Cbpcalibrator.nChan                           = ${NUM_CHAN_1934}

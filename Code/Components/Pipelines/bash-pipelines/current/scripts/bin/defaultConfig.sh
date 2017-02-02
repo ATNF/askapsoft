@@ -216,6 +216,8 @@ NUM_CPUS_CBPCAL=100
 # Value for the calibrate.scalenoise parameter for applying the
 # bandpass solution
 BANDPASS_SCALENOISE=false
+# Limit the data selection for bandpass solving to a minimum UV distance [m]
+BANDPASS_MINUV=0
 
 # Smoothing of the bandpass table - this is achieved by the ACES tool
 # plot_caltable.py. This tool also plots the cal solutions
