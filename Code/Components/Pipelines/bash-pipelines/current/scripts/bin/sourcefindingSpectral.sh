@@ -69,7 +69,7 @@ Selavy.kernMaj = ${SELAVY_SPEC_KERN_MAJ}
 Selavy.kernMin = ${SELAVY_SPEC_KERN_MIN}
 Selavy.kernPA = ${SELAVY_SPEC_KERN_PA}"
         fi
-    elif [ ${SELAVY_SPEC_FLAG_WAVLET} == "true" ]; then
+    elif [ ${SELAVY_SPEC_FLAG_WAVELET} == "true" ]; then
         preprocessPars="# Multi-resolution wavelet reconstruction
 Selavy.flagAtrous = ${SELAVY_SPEC_FLAG_WAVELET}
 Selavy.reconDim   = ${SELAVY_SPEC_RECON_DIM}

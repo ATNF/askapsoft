@@ -458,6 +458,15 @@ EOF
         ####################
         # Spectral source-finding
 
+        # Number of cores etc
+        NUM_CPUS_SELAVY_SPEC=`echo $SELAVY_SPEC_NSUBX $SELAVY_SPEC_NSUBY $SELAVY_SPEC_NSUBZ | awk '{print $1*$2*$3+1}'`
+        if [ ${CPUS_PER_CORE_SELAVY_SPEC} == "" ]; then
+            CPUS_PER_CORE_SELAVY_SPEC=${NUM_CPUS_SELAVY_SPEC}
+            if [ ${CPUS_PER_CORE_SELAVY_SPEC} -gt 20 ]; then
+                CPUS_PER_CORE_SELAVY_SPEC=20
+            fi
+        fi
+
         # Check search type
         if [ ${SELAVY_SPEC_SEARCH_TYPE} != "spectral" ] || [
                ${SELAVY_SPEC_SEARCH_TYPE} != "spatial" ]; then
@@ -473,7 +482,30 @@ EOF
                 echo "WARNING - SELAVY_SPEC_SMOOTH_TYPE needs to be 'spectral' or 'spatial' - Setting to 'spectral'"
             fi
         fi
-            
+
+        # Spatial smoothing kernel - interpret to form selavy parameters
+        if [ ${SELAVY_SPEC_FLAG_SMOOTH} == "true" ] && [
+               ${SELAVY_SPEC_SMOOTH_TYPE} == "spatial" ]; then
+            kernelArray=()
+            for a in `echo $SELAVY_SPEC_SPATIAL_KERNEL | sed -e 's/[][,]/ /g'`; do
+                kernelArray+=($a)
+            done
+            if [ ${#kernelArray[@]} -eq 1 ]; then
+                SELAVY_SPEC_KERN_MAJ=${kernelArray[0]}
+                SELAVY_SPEC_KERN_MIN=${kernelArray[0]}
+                SELAVY_SPEC_KERN_PA=0
+            elif [ ${#kernelArray[@]} -eq 3 ]; then
+                SELAVY_SPEC_KERN_MAJ=${kernelArray[0]}
+                SELAVY_SPEC_KERN_MIN=${kernelArray[1]}
+                SELAVY_SPEC_KERN_PA=${kernelArray[2]}
+            else
+                echo "WARNING - badly formed parameter SELAVY_SPEC_SPATIAL_KERNEL=${SELAVY_SPEC_SPATIAL_KERNEL}"
+                echo "        - turning off Selavy's spatial smoothing."
+                SELAVY_SPEC_FLAG_SMOOTH=false
+            fi
+        fi
+
+        
         ####################
         # Variable inputs to Self-calibration settings
         #  This section takes the provided parameters and creates
