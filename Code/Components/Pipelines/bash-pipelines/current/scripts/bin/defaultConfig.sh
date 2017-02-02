@@ -308,6 +308,11 @@ ANTENNA_FLAG_SCIENCE=""
 # Whether to flag autocorrelations for the science data
 FLAG_AUTOCORRELATION_SCIENCE=false
 
+# Whether to remove the full-resolution dataset after averaging
+#     (We set this to true by default, but if spectral imaging is
+#      desired we change to false)
+PURGE_FULL_MS=true
+
 # Run flagging after averaging, as well as after bandpass application
 FLAG_AFTER_AVERAGING=true
 # Whether to do dynamic flagging on the averaged data

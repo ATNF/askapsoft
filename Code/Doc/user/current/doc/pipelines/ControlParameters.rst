@@ -94,16 +94,32 @@ and the rest are given a stripe count of 1.
 There is also a parameter to control the I/O bucketsize of the
 measurement sets created by mssplit. This is particularly important in
 governing the I/O performance and the splitting run-time. The default,
-1MB, matches the stripe size on /scratch2, and has been found to work well. 
+1MB, matches the stripe size on /scratch2, and has been found to work
+well.
 
-+----------------------+---------+-------------------------------------------------------------+
-| Variable             | Default | Description                                                 |
-+======================+=========+=============================================================+
-| ``LUSTRE_STRIPING``  | 4       | The stripe count to assign to the data directories          |
-+----------------------+---------+-------------------------------------------------------------+
-| ``BUCKET_SIZE``      | 1048576 | The bucketsize passed to mssplit (as "stman.bucketsize") in |
-|                      |         | units of bytes.                                             |
-+----------------------+---------+-------------------------------------------------------------+
+There is also a parameter ``PURGE_FULL_MS`` that allows the deletion
+of the full-spectral-resolution measurement set once the averaging to
+continuum channels has been done. The idea here is that such a dataset
+is not needed for some types of processing (continuum & continuum
+cube imaging in particular), and so rather than have a large MS left
+lying around on the disk, we delete it. This parameter defaults to
+true, but is turned off if any of the spectral-line processing tasks
+are turned on (``DO_COPY_SL``, ``DO_APPLY_CAL_SL``,
+```DO_CONT_SUB_SL`` or ``DO_SPECTRAL_IMAGING``). The deletion is done
+in the averaging job, once the averaging has completed
+successfully. If the averaging fails it is not removed. 
+
++---------------------+---------+-------------------------------------------------------------+
+| Variable            | Default | Description                                                 |
++=====================+=========+=============================================================+
+| ``LUSTRE_STRIPING`` | 4       | The stripe count to assign to the data directories          |
++---------------------+---------+-------------------------------------------------------------+
+| ``BUCKET_SIZE``     | 1048576 | The bucketsize passed to mssplit (as "stman.bucketsize") in |
+|                     |         | units of bytes.                                             |
++---------------------+---------+-------------------------------------------------------------+
+| ``PURGE_FULL_MS``   | true    | Whether to remove the full-spectral-resolution measurement  |
+|                     |         | set once the averaging has been done. See notes above.      |
++---------------------+---------+-------------------------------------------------------------+
 
 
 Calibrator switches

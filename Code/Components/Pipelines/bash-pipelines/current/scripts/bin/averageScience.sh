@@ -116,6 +116,15 @@ rejuvenate ${msSci}
 extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
+else
+    # If the averaging succeeded, we can delete the full-resolution MS
+    # if so desired.
+    purgeFullMS=${PURGE_FULL_MS}
+    if [ \${purgeFullMS} == true ]; then
+        lfs find $msSci -type f -print0 | xargs -0 munlink
+        find $msSci -type l -delete
+        find $msSci -depth -type d -empty -delete
+    fi
 fi
 
 EOFOUTER

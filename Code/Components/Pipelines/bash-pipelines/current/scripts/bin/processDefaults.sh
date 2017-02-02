@@ -53,6 +53,7 @@ if [ "$PROCESS_DEFAULTS_HAS_RUN" != "true" ]; then
         DO_CONT_IMAGING=false
         DO_SELFCAL=false
         DO_APPLY_CAL_CONT=false
+        DO_APPLY_CAL_SL=false
         DO_CONTCUBE_IMAGING=false
         DO_SPECTRAL_IMAGING=false
         DO_SPECTRAL_IMSUB=false
@@ -66,8 +67,15 @@ if [ "$PROCESS_DEFAULTS_HAS_RUN" != "true" ]; then
         DO_STAGE_FOR_CASDA=false
     fi
 
+    # Turn off the purging of the full-resolution MS if we need to use it.
+    if [ ${DO_COPY_SL} == true ] ||
+           [ ${DO_APPLY_CAL_SL} == true ] ||
+           [ ${DO_CONT_SUB_SL} == true ] || 
+           [ ${DO_SPECTRAL_IMAGING} == true ]; then
 
-
+        PURGE_FULL_MS=false
+        
+    fi
     
     ####################
     # Define the full path of output directory
