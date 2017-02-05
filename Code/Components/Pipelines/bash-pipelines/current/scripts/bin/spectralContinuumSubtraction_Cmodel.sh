@@ -64,7 +64,7 @@ if [ ${NUM_TAYLOR_TERMS} -gt 1 ]; then
     else
         freq=${MFS_REF_FREQ}
     fi
-    CalibratorModelDefinition="$CalibratorModelDefinition
+    ContsubModelDefinition="$ContsubModelDefinition
 CContsubtract.visweights                          = MFS
 CContsubtract.visweights.MFS.reffreq              = ${freq}"
 fi
