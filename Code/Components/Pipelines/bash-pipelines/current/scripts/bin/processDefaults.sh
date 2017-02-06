@@ -240,6 +240,9 @@ module load askappipeline/${askappipelineVersion}"
     if [ "$JOB_TIME_SOURCEFINDING" == "" ]; then
         JOB_TIME_SOURCEFINDING=${JOB_TIME_DEFAULT}
     fi
+    if [ "$JOB_TIME_SOURCEFINDING_SPEC" == "" ]; then
+        JOB_TIME_SOURCEFINDING_SPEC=${JOB_TIME_DEFAULT}
+    fi
     if [ "$JOB_TIME_FITS_CONVERT" == "" ]; then
         JOB_TIME_FITS_CONVERT=${JOB_TIME_DEFAULT}
     fi
