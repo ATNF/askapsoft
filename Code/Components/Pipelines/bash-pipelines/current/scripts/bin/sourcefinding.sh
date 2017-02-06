@@ -42,12 +42,12 @@ if [ $DO_SOURCE_FINDING == true ]; then
     fi
 
     # Define the detection thresholds in terms of flux or SNR
-    if [ ${SELAVY_FLUX_THRESHOLD} != "" ]; then
+    if [ "${SELAVY_FLUX_THRESHOLD}" != "" ]; then
         # Use a direct flux threshold if specified
         thresholdPars="# Detection threshold
 Selavy.threshold = ${SELAVY_FLUX_THRESHOLD}"
-        if [ ${SELAVY_FLAG_GROWTH} == true ] && [
-               ${SELAVY_GROWTH_THRESHOLD} != "" ]; then
+        if [ ${SELAVY_FLAG_GROWTH} == true ] && 
+               [ ${SELAVY_GROWTH_THRESHOLD} != "" ]; then
            thresholdPars="${thresholdPars}
 Selavy.flagGrowth =  ${SELAVY_FLAG_GROWTH}
 Selavy.growthThreshold = ${SELAVY_GROWTH_THRESHOLD}"
@@ -56,8 +56,8 @@ Selavy.growthThreshold = ${SELAVY_GROWTH_THRESHOLD}"
         # Use a SNR threshold
         thresholdPars="# Detection threshold
 Selavy.snrCut = ${SELAVY_SNR_CUT}"
-        if [ ${SELAVY_FLAG_GROWTH} == true ] && [
-               ${SELAVY_GROWTH_CUT} != "" ]; then
+        if [ ${SELAVY_FLAG_GROWTH} == true ] &&
+               [ ${SELAVY_GROWTH_CUT} != "" ]; then
            thresholdPars="${thresholdPars}
 Selavy.flagGrowth =  ${SELAVY_FLAG_GROWTH}
 Selavy.growthThreshold = ${SELAVY_GROWTH_CUT}"
