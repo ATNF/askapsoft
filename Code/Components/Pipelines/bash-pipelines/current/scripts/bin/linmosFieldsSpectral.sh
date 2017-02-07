@@ -29,7 +29,7 @@
 # @author Matthew Whiting <Matthew.Whiting@csiro.au>
 #
 
-ID_LINMOS_FIELD_SPECTRAL=""
+ID_LINMOS_SPECTRAL_ALL=""
 
 DO_IT=$DO_MOSAIC
 if [ "$DO_SPECTRAL_IMAGING" != "true" ]; then

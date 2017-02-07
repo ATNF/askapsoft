@@ -29,7 +29,7 @@
 # @author Matthew Whiting <Matthew.Whiting@csiro.au>
 #
 
-ID_LINMOS_FIELD_CONTCUBE=""
+ID_LINMOS_CONTCUBE_ALL=""
 
 DO_IT=$DO_MOSAIC
 if [ "$DO_CONTCUBE_IMAGING" != "true" ]; then

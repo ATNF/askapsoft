@@ -29,7 +29,7 @@
 # @author Matthew Whiting <Matthew.Whiting@csiro.au>
 #
 
-ID_LINMOS_FIELD_CONT=""
+ID_LINMOS_CONT_ALL=""
 
 DO_IT=$DO_MOSAIC
 if [ "$DO_CONT_IMAGING" != "true" ]; then

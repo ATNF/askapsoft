@@ -141,9 +141,9 @@ EOFOUTER
 
     if [ $SUBMIT_JOBS == true ]; then
         DEP_SPECIMG=`echo $DEP_SPECIMG | sed -e 's/afterok/afterany/g'`
-	ID_LINMOS_SPECIMG=`sbatch $DEP_SPECIMG $sbatchfile | awk '{print $4}'`
-	recordJob ${ID_LINMOS_SPECIMG} "Make a mosaic spectral cube of the science observation, field $FIELD, with flags \"${DEP_SPECIMG}\""
-        FULL_LINMOS_SPECTRAL_DEP=`addDep "${FULL_LINMOS_SPECTRAL_DEP}" "${ID_LINMOS_SPECIMG}"`
+	ID_LINMOS_SPECTRAL=`sbatch $DEP_SPECIMG $sbatchfile | awk '{print $4}'`
+	recordJob ${ID_LINMOS_SPECTRAL} "Make a mosaic spectral cube of the science observation, field $FIELD, with flags \"${DEP_SPECIMG}\""
+        FULL_LINMOS_SPECTRAL_DEP=`addDep "${FULL_LINMOS_SPECTRAL_DEP}" "${ID_LINMOS_SPECTRAL}"`
     else
 	echo "Would make a mosaic image of the science observation, field $FIELD with slurm file $sbatchfile"
     fi
