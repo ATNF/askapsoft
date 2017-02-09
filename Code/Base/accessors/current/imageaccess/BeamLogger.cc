@@ -108,13 +108,15 @@ void BeamLogger::read()
 
             while (getline(fin, line),
                     !fin.eof()) {
-                std::stringstream ss(line);
-                ss >> chan >> bmaj >> bmin >> bpa;
-                casa::Vector<casa::Quantum<double> > currentbeam(3);
-                currentbeam[0] = casa::Quantum<double>(bmaj, "arcsec");
-                currentbeam[1] = casa::Quantum<double>(bmin, "arcsec");
-                currentbeam[2] = casa::Quantum<double>(bpa, "deg");
-                itsBeamList.push_back(currentbeam);
+                if ( line[0] != '#') {
+                    std::stringstream ss(line);
+                    ss >> chan >> bmaj >> bmin >> bpa;
+                    casa::Vector<casa::Quantum<double> > currentbeam(3);
+                    currentbeam[0] = casa::Quantum<double>(bmaj, "arcsec");
+                    currentbeam[1] = casa::Quantum<double>(bmin, "arcsec");
+                    currentbeam[2] = casa::Quantum<double>(bpa, "deg");
+                    itsBeamList.push_back(currentbeam);
+                }
             }
 
         } else {
