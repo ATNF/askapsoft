@@ -518,74 +518,74 @@ EOF
 
         
         ####################
-        # Variable inputs to Self-calibration settings
+        # Variable inputs to Continuum imaging and Self-calibration settings
         #  This section takes the provided parameters and creates
         #  arrays that have a (potentially) different value for each
         #  loop of the self-cal operation.
         #  Parameters covered are the selfcal interval, the
         #  source-finding threshold, and whether normalise gains is on
         #  or not
-        if [ $DO_SELFCAL != true ]; then
-            if [ $SELFCAL_NUM_LOOPS -ne 0 ]; then
-                echo "WARNING - Self-cal not selected, so setting SELFCAL_NUM_LOOPS=0"
+        if [ $DO_CONT_IMAGING == true ]; then
+            
+            expectedArrSize=`expr $SELFCAL_NUM_LOOPS + 1`
+
+            if [ $DO_SELFCAL == true ]; then
+                
+                if [ "`echo $SELFCAL_INTERVAL | grep "\["`" != "" ]; then
+                    # Have entered a comma-separate array in square brackets
+                    arrSize=`echo $SELFCAL_INTERVAL | sed -e 's/[][,]/ /g' | wc -w`
+                    if [ $arrSize -ne $expectedArrSize ]; then
+                        echo "ERROR - SELFCAL_INTERVAL ($SELFCAL_INTERVAL) needs to be of size $expectedArrSize (since SELFCAL_NUM_LOOPS=$SELFCAL_NUM_LOOPS)"
+                        exit 1
+                    fi
+                    SELFCAL_INTERVAL_ARRAY=()
+                    for a in `echo $SELFCAL_INTERVAL | sed -e 's/[][,]/ /g'`; do
+                        SELFCAL_INTERVAL_ARRAY+=($a)
+                    done
+                else
+                    SELFCAL_INTERVAL_ARRAY=()
+                    for((i=0;i<=${SELFCAL_NUM_LOOPS};i++)); do
+                        SELFCAL_INTERVAL_ARRAY+=($SELFCAL_INTERVAL)
+                    done
+                fi
+                
+                if [ "`echo $SELFCAL_SELAVY_THRESHOLD | grep "\["`" != "" ]; then
+                    # Have entered a comma-separate array in square brackets
+                    arrSize=`echo $SELFCAL_SELAVY_THRESHOLD | sed -e 's/[][,]/ /g' | wc -w`
+                    if [ $arrSize -ne $expectedArrSize ]; then
+                        echo "ERROR - SELFCAL_SELAVY_THRESHOLD ($SELFCAL_SELAVY_THRESHOLD) needs to be of size $expectedArrSize (since SELFCAL_NUM_LOOPS=$SELFCAL_NUM_LOOPS)"
+                        exit 1
+                    fi
+                    SELFCAL_SELAVY_THRESHOLD_ARRAY=()
+                    for a in `echo $SELFCAL_SELAVY_THRESHOLD | sed -e 's/[][,]/ /g'`; do
+                        SELFCAL_SELAVY_THRESHOLD_ARRAY+=($a)
+                    done
+                else
+                    SELFCAL_SELAVY_THRESHOLD_ARRAY=()
+                    for((i=0;i<=${SELFCAL_NUM_LOOPS};i++)); do
+                        SELFCAL_SELAVY_THRESHOLD_ARRAY+=($SELFCAL_SELAVY_THRESHOLD)
+                    done
+                fi
+                
+                if [ "`echo $SELFCAL_NORMALISE_GAINS | grep "\["`" != "" ]; then
+                    # Have entered a comma-separate array in square brackets
+                    arrSize=`echo $SELFCAL_NORMALISE_GAINS | sed -e 's/[][,]/ /g' | wc -w`
+                    if [ $arrSize -ne $expectedArrSize ]; then
+                        echo "ERROR - SELFCAL_NORMALISE_GAINS ($SELFCAL_NORMALISE_GAINS) needs to be of size $expectedArrSize (since SELFCAL_NUM_LOOPS=$SELFCAL_NUM_LOOPS)"
+                        exit 1
+                    fi
+                    SELFCAL_NORMALISE_GAINS_ARRAY=()
+                    for a in `echo $SELFCAL_NORMALISE_GAINS | sed -e 's/[][,]/ /g'`; do
+                        SELFCAL_NORMALISE_GAINS_ARRAY+=($a)
+                    done
+                else
+                    SELFCAL_NORMALISE_GAINS_ARRAY=()
+                    for((i=0;i<=${SELFCAL_NUM_LOOPS};i++)); do
+                        SELFCAL_NORMALISE_GAINS_ARRAY+=($SELFCAL_NORMALISE_GAINS)
+                    done
+                fi
+
             fi
-            SELFCAL_NUM_LOOPS=0
-        fi
-        expectedArrSize=`expr $SELFCAL_NUM_LOOPS + 1`
-        
-        if [ "`echo $SELFCAL_INTERVAL | grep "\["`" != "" ]; then
-            # Have entered a comma-separate array in square brackets
-            arrSize=`echo $SELFCAL_INTERVAL | sed -e 's/[][,]/ /g' | wc -w`
-            if [ $arrSize -ne $expectedArrSize ]; then
-                echo "ERROR - SELFCAL_INTERVAL ($SELFCAL_INTERVAL) needs to be of size $expectedArrSize (since SELFCAL_NUM_LOOPS=$SELFCAL_NUM_LOOPS)"
-                exit 1
-            fi
-            SELFCAL_INTERVAL_ARRAY=()
-            for a in `echo $SELFCAL_INTERVAL | sed -e 's/[][,]/ /g'`; do
-                SELFCAL_INTERVAL_ARRAY+=($a)
-            done
-        else
-            SELFCAL_INTERVAL_ARRAY=()
-            for((i=0;i<=${SELFCAL_NUM_LOOPS};i++)); do
-                SELFCAL_INTERVAL_ARRAY+=($SELFCAL_INTERVAL)
-            done
-        fi
-        
-        if [ "`echo $SELFCAL_SELAVY_THRESHOLD | grep "\["`" != "" ]; then
-            # Have entered a comma-separate array in square brackets
-            arrSize=`echo $SELFCAL_SELAVY_THRESHOLD | sed -e 's/[][,]/ /g' | wc -w`
-            if [ $arrSize -ne $expectedArrSize ]; then
-                echo "ERROR - SELFCAL_SELAVY_THRESHOLD ($SELFCAL_SELAVY_THRESHOLD) needs to be of size $expectedArrSize (since SELFCAL_NUM_LOOPS=$SELFCAL_NUM_LOOPS)"
-                exit 1
-            fi
-            SELFCAL_SELAVY_THRESHOLD_ARRAY=()
-            for a in `echo $SELFCAL_SELAVY_THRESHOLD | sed -e 's/[][,]/ /g'`; do
-                SELFCAL_SELAVY_THRESHOLD_ARRAY+=($a)
-            done
-        else
-            SELFCAL_SELAVY_THRESHOLD_ARRAY=()
-            for((i=0;i<=${SELFCAL_NUM_LOOPS};i++)); do
-                SELFCAL_SELAVY_THRESHOLD_ARRAY+=($SELFCAL_SELAVY_THRESHOLD)
-            done
-        fi
-        
-        if [ "`echo $SELFCAL_NORMALISE_GAINS | grep "\["`" != "" ]; then
-            # Have entered a comma-separate array in square brackets
-            arrSize=`echo $SELFCAL_NORMALISE_GAINS | sed -e 's/[][,]/ /g' | wc -w`
-            if [ $arrSize -ne $expectedArrSize ]; then
-                echo "ERROR - SELFCAL_NORMALISE_GAINS ($SELFCAL_NORMALISE_GAINS) needs to be of size $expectedArrSize (since SELFCAL_NUM_LOOPS=$SELFCAL_NUM_LOOPS)"
-                exit 1
-            fi
-            SELFCAL_NORMALISE_GAINS_ARRAY=()
-            for a in `echo $SELFCAL_NORMALISE_GAINS | sed -e 's/[][,]/ /g'`; do
-                SELFCAL_NORMALISE_GAINS_ARRAY+=($a)
-            done
-        else
-            SELFCAL_NORMALISE_GAINS_ARRAY=()
-            for((i=0;i<=${SELFCAL_NUM_LOOPS};i++)); do
-                SELFCAL_NORMALISE_GAINS_ARRAY+=($SELFCAL_NORMALISE_GAINS)
-            done
-        fi
 
         if [ "`echo $CLEAN_NUM_MAJORCYCLES | grep "\["`" != "" ]; then
             # Have entered a comma-separate array in square brackets
