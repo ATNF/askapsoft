@@ -54,6 +54,7 @@ Selavy.growthThreshold = ${SELAVY_SPEC_GROWTH_CUT}"
     fi
 
     # Pre-processing parameters
+    preprocessPars="# No pre-processing done"
     # Smoothing takes precedence over reconstruction
     if [ ${SELAVY_SPEC_FLAG_SMOOTH} == "true" ]; then
         if [ ${SELAVY_SPEC_SMOOTH_TYPE} == "spectral" ]; then
@@ -79,7 +80,7 @@ Selavy.snrRecon   = ${SELAVY_SPEC_RECON_SNR}"
     fi
     
 
-    setJob science_selavy_spec_${imageName} $description
+    setJob science_selavy_spec_${imageName} selavySpec
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -129,6 +130,7 @@ fi
 HAVE_IMAGES=true
 echo "Converting to FITS the following images: \${imlist}"
 for im in \${imlist}; do 
+
     casaim="../\${im##*/}"
     fitsim="../\${im##*/}.fits"
     ${fitsConvertText}
@@ -144,8 +146,8 @@ done
 
 if [ \${HAVE_IMAGES} == true ]; then
 
-    parset=${parsets}/science_selavy_spectral_${SLURM_JOB_ID}.in
-    log=${logs}/science_selavy_spectral_${SLURM_JOB_ID}.log
+    parset=${parsets}/science_selavy_spectral_\${SLURM_JOB_ID}.in
+    log=${logs}/science_selavy_spectral_\${SLURM_JOB_ID}.log
     
     # Directories for extracted data products
     spectraDir=Spectra
@@ -194,25 +196,25 @@ Selavy.spectralUnits = km/s
 Selavy.HiEmissionCatalogue=true
 # Extraction
 Selavy.extractSpectra = true
-Selavy.extractSpectra.spectralCube = $image
+Selavy.extractSpectra.spectralCube = \$image
 Selavy.extractSpectra.spectralOutputBase = \${spectraDir}/${SELAVY_SPEC_BASE_SPECTRUM}
 Selavy.extractSpectra.useDetectedPixels = true
 Selavy.extractNoiseSpectra = true
-Selavy.extractNoiseSpectra.spectralCube= $image
+Selavy.extractNoiseSpectra.spectralCube= \$image
 Selavy.extractNoiseSpectra.spectralOutputBase = \${spectraDir}/${SELAVY_SPEC_BASE_NOISE}
 Selavy.extractNoiseSpectra.useDetectedPixels = true
 Selavy.extractMomentMap = true
-Selavy.extractMomentMap.spectralCube = $image
+Selavy.extractMomentMap.spectralCube = \$image
 Selavy.extractMomentMap.momentOutputBase = \${momentDir}/${SELAVY_SPEC_BASE_MOMENT}
 Selavy.extractMomentMap.moments = [0,1,2]
 Selavy.extractCubelet = true
-Selavy.extractCubelet.spectralCube = $image
+Selavy.extractCubelet.spectralCube = \$image
 Selavy.extractCubelet.cubeletOutputBase = \${cubeletDir}/${SELAVY_SPEC_BASE_CUBELET}
 EOFINNER
 
-    NCORES==${NUM_CPUS_SELAVY_SPEC}
+    NCORES=${NUM_CPUS_SELAVY_SPEC}
     NPPN=${CPUS_PER_CORE_SELAVY_SPEC}
-    aprun -n \${NCORES} -N \${NPPN} $selavy -c $parset >> $log
+    aprun -n \${NCORES} -N \${NPPN} $selavy -c \$parset >> \$log
     err=\$?
     extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname} "txt,csv"
     if [ \$err != 0 ]; then
