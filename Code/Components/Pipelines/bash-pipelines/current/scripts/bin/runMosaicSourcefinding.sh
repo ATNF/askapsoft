@@ -41,10 +41,8 @@ if [ ${DO_SOURCE_FINDING} == true ]; then
         TILE="ALL"
         FIELDBEAM="Full"
         
-        setImageProperties cont
-        . ${PIPELINEDIR}/sourcefinding.sh
+        . ${PIPELINEDIR}/sourcefindingCont.sh
         
-        setImageProperties spectral
         . ${PIPELINEDIR}/sourcefindingSpectral.sh
 
     else
@@ -57,22 +55,11 @@ if [ ${DO_SOURCE_FINDING} == true ]; then
             NUM_LOOPS=$SELFCAL_NUM_LOOPS
         fi
         for((LOOP=0;LOOP<=$NUM_LOOPS;LOOP++)); do
-            
-            # set the $imageBase variable for the mosaicked image
-            setImageProperties cont
-            if [ $LOOP -gt 0 ]; then
-                imageName="${imageName}.SelfCalLoop${LOOP}"
-                weightsImage="${weightsImage}.SelfCalLoop${LOOP}"
-            fi            
-            
-            . ${PIPELINEDIR}/sourcefinding.sh
-            
+            . ${PIPELINEDIR}/sourcefindingCont.sh
         done
         unset LOOP
 
         # Then the spectral-line sourcefinding
-
-        setImageProperties spectral
         . ${PIPELINEDIR}/sourcefindingSpectral.sh
 
     fi

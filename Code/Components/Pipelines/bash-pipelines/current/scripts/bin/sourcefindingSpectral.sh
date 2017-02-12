@@ -30,6 +30,10 @@
 
 if [ $DO_SOURCE_FINDING == true ]; then
 
+    # set imageName etc
+    imageCode=restored
+    setImageProperties spectral
+
     # Define the detection thresholds in terms of flux or SNR
     if [ "${SELAVY_SPEC_FLUX_THRESHOLD}" != "" ]; then
         # Use a direct flux threshold if specified
@@ -134,14 +138,15 @@ for im in \${imlist}; do
     casaim="../\${im##*/}"
     fitsim="../\${im##*/}.fits"
     ${fitsConvertText}
-    # make a link so we point to a file in the current directory for Selavy
+    # Make a link so we point to a file in the current directory for
+    # Selavy. This gets the referencing correct in the catalogue
+    # metadata 
     if [ ! -e \$fitsim ]; then
         HAVE_IMAGES=false
         echo "ERROR - Could not create \${im}.fits"
     else
         ln -s \${im}.fits .
     fi
-    rejuvenate \${casaim}
 done
 
 if [ \${HAVE_IMAGES} == true ]; then

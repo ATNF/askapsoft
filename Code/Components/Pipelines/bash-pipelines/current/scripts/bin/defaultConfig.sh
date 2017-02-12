@@ -71,7 +71,7 @@ JOB_TIME_SPECTRAL_CONTSUB=""
 JOB_TIME_SPECTRAL_IMAGE=""
 JOB_TIME_SPECTRAL_IMCONTSUB=""
 JOB_TIME_LINMOS=""
-JOB_TIME_SOURCEFINDING=""
+JOB_TIME_SOURCEFINDING_CONT=""
 JOB_TIME_SOURCEFINDING_SPEC=""
 JOB_TIME_FITS_CONVERT=""
 JOB_TIME_THUMBNAILS=""
@@ -685,6 +685,41 @@ SELAVY_BOX_SIZE=50
 # How the processors subdivide the image
 SELAVY_NSUBX=6
 SELAVY_NSUBY=3
+
+
+##############################
+# Selavy source finder - polarisation
+#
+# Whether to include the RM synthesis in the continuum sourcefinding
+DO_RM_SYNTHESIS=true
+# Output base name for the spectra
+SELAVY_POL_OUTPUT_BASE=pol
+# Whether to write the spectra as individual files
+SELAVY_POL_WRITE_SPECTRA=true
+# Whether to write the Faraday Dispersion Function as individual files
+SELAVY_POL_WRITE_FDF=true
+# The full width of the box used in spectral extraction
+SELAVY_POL_BOX_WIDTH=5
+# The area (in multiples of the beam) for the noise extraction
+SELAVY_POL_NOISE_AREA=50
+# Whether to use robust statistics in the noise calculation
+SELAVY_POL_ROBUST_STATS=true
+# The type of weighting in the RM synthesis
+SELAVY_POL_WEIGHT_TYPE=variance
+# The type of Stokes-I model spectrum
+SELAVY_POL_MODEL_TYPE=taylor
+# For SELAVY_POL_MODEL_TYPE=poly, this is the order of the polynomial
+SELAVY_POL_MODEL_ORDER=3
+# The signal-to-noise threshold to accept a RM synthesis detection
+SELAVY_POL_SNR_THRESHOLD=8
+# The signal-to-noise threshold above which debiasing is performed
+SELAVY_POL_DEBIAS_THRESHOLD=5
+# The number of Faraday depth channels in RM synthesis
+SELAVY_POL_NUM_PHI_CHAN=30
+# Width of the Faraday depth channels [rad/m2]
+SELAVY_POL_DELTA_PHI=5
+# Central Faraday depth of the FDF
+SELAVY_POL_PHI_ZERO=0
 
 
 ##############################

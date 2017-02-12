@@ -133,13 +133,11 @@ for FIELD in ${FIELD_LIST}; do
 
             . ${PIPELINEDIR}/applyCalContinuumScience.sh
 
-            if [ $DO_SOURCE_FINDING_BEAMWISE == true ]; then
-                imageCode=restored
-                setImageProperties cont
-                . ${PIPELINEDIR}/sourcefinding.sh
-            fi
-
             . ${PIPELINEDIR}/continuumCubeImagingScience.sh
+
+            if [ $DO_SOURCE_FINDING_BEAMWISE == true ]; then
+                . ${PIPELINEDIR}/sourcefindingCont.sh
+            fi
 
             . ${PIPELINEDIR}/prepareSpectralData.sh
 
@@ -148,8 +146,6 @@ for FIELD in ${FIELD_LIST}; do
             . ${PIPELINEDIR}/spectralImContSub.sh
             
             if [ $DO_SOURCE_FINDING_BEAMWISE == true ]; then
-                imageCode=restored
-                setImageProperties spectral
                 . ${PIPELINEDIR}/sourcefindingSpectral.sh
             fi
 

@@ -237,8 +237,8 @@ module load askappipeline/${askappipelineVersion}"
     if [ "$JOB_TIME_LINMOS" == "" ]; then
         JOB_TIME_LINMOS=${JOB_TIME_DEFAULT}
     fi
-    if [ "$JOB_TIME_SOURCEFINDING" == "" ]; then
-        JOB_TIME_SOURCEFINDING=${JOB_TIME_DEFAULT}
+    if [ "$JOB_TIME_SOURCEFINDING_CONT" == "" ]; then
+        JOB_TIME_SOURCEFINDING_CONT=${JOB_TIME_DEFAULT}
     fi
     if [ "$JOB_TIME_SOURCEFINDING_SPEC" == "" ]; then
         JOB_TIME_SOURCEFINDING_SPEC=${JOB_TIME_DEFAULT}
@@ -453,7 +453,9 @@ EOF
         fi
 
         ####################
-        # Source-finding - number of cores:
+        # Continuum Source-finding
+
+        # Number of cores:
         NUM_CPUS_SELAVY=`echo $SELAVY_NSUBX $SELAVY_NSUBY | awk '{print $1*$2+1}'`
         CPUS_PER_CORE_SELAVY=${NUM_CPUS_SELAVY}
         if [ ${CPUS_PER_CORE_SELAVY} -gt 20 ]; then
