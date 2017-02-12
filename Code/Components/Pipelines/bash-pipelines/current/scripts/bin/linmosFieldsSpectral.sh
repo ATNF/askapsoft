@@ -50,8 +50,10 @@ fi
 
 if [ $DO_IT == true ]; then
 
-    sbatchfile=$slurms/linmos_all_spectral.sbatch
-    cat > $sbatchfile <<EOFOUTER
+    for imCode in restored image residual; do 
+
+        sbatchfile=$slurms/linmos_all_spectral_${imCode}.sbatch
+        cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
@@ -60,7 +62,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_LINMOS}
 #SBATCH --ntasks=${NUM_CPUS_SPECTRAL_LINMOS}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_SPEC_IMAGING}
-#SBATCH --job-name=linmosFullS
+#SBATCH --job-name=linmosFullS${imCode}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-linmosS-%j.out
@@ -105,38 +107,37 @@ for THISTILE in \$FULL_TILE_LIST; do
     done
     echo "Tile \$THISTILE has field list \$TILE_FIELD_LIST"
 
-    for imageCode in restored image residual; do 
-
-        imList=""
-        wtList=""
-        BEAM=all
-        for FIELD in \${TILE_FIELD_LIST}; do
-            setImageProperties spectral
-            if [ -e \${FIELD}/\${imageName} ]; then
-                if [ "\${imList}" == "" ]; then
-                    imList="\${FIELD}/\${imageName}"
-                    wtList="\${FIELD}/\${weightsImage}"
-                else
-                    imList="\${imList},\${FIELD}/\${imageName}"
-                    wtList="\${wtList},\${FIELD}/\${weightsImage}"
-                fi
+    imageCode=${imCode}
+    imList=""       
+    wtList=""
+    BEAM=all
+    for FIELD in \${TILE_FIELD_LIST}; do
+        setImageProperties spectral
+        if [ -e \${FIELD}/\${imageName} ]; then
+            if [ "\${imList}" == "" ]; then
+                imList="\${FIELD}/\${imageName}"
+                wtList="\${FIELD}/\${weightsImage}"
+            else
+                imList="\${imList},\${FIELD}/\${imageName}"
+                wtList="\${wtList},\${FIELD}/\${weightsImage}"
             fi
-        done
-
-        if [ \$THISTILE == "ALL" ]; then
-            jobCode=linmosS_Full_\${imageCode}
-        else
-            jobCode=linmosS_\${THISTILE}_\${imageCode}
         fi
+    done
 
-        if [ "\${imList}" != "" ]; then
-            FIELD="."
-            TILE=\$THISTILE
-            setImageProperties spectral
-            echo "Mosaicking to form \${imageName}"
-            parset=${parsets}/science_\${jobCode}_\${SLURM_JOB_ID}.in
-            log=${logs}/science_\${jobCode}_\${SLURM_JOB_ID}.log
-            cat > \${parset} << EOFINNER
+    if [ \$THISTILE == "ALL" ]; then
+        jobCode=linmosS_Full_\${imageCode}
+    else
+        jobCode=linmosS_\${THISTILE}_\${imageCode}
+    fi
+
+    if [ "\${imList}" != "" ]; then
+        FIELD="."
+        TILE=\$THISTILE
+        setImageProperties spectral
+        echo "Mosaicking to form \${imageName}"
+        parset=${parsets}/science_\${jobCode}_\${SLURM_JOB_ID}.in
+        log=${logs}/science_\${jobCode}_\${SLURM_JOB_ID}.log
+        cat > \${parset} << EOFINNER
 linmos.names            = [\${imList}]
 linmos.weights          = [\${wtList}]
 linmos.outname          = \$imageName
@@ -144,36 +145,36 @@ linmos.outweight        = \$weightsImage
 linmos.weighttype       = FromWeightImages
 EOFINNER
 
-            NCORES=${NUM_CPUS_SPECTRAL_LINMOS}
-            NPPN=${CPUS_PER_CORE_SPEC_IMAGING}
-            aprun -n \${NCORES} -N \${NPPN} $linmosMPI -c \$parset > \$log
-            err=\$?
-            for im in \`echo \${imList} | sed -e 's/,/ /g'\`; do
-                rejuvenate \$im
-            done
-            extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} \${jobCode} "txt,csv"
-            if [ \$err != 0 ]; then
-                exit \$err
-            fi
-        else
-            echo "WARNING - no good images were found for mosaicking image type '\${imageCode}'!"
+        NCORES=${NUM_CPUS_SPECTRAL_LINMOS}
+        NPPN=${CPUS_PER_CORE_SPEC_IMAGING}
+        aprun -n \${NCORES} -N \${NPPN} $linmosMPI -c \$parset > \$log
+        err=\$?
+        for im in \`echo \${imList} | sed -e 's/,/ /g'\`; do
+            rejuvenate \$im
+        done
+        extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} \${jobCode} "txt,csv"
+        if [ \$err != 0 ]; then
+            exit \$err
         fi
-    done
+    else
+        echo "WARNING - no good images were found for mosaicking image type '\${imageCode}'!"
+    fi
 done
 EOFOUTER
 
-    if [ $SUBMIT_JOBS == true ]; then
-        FULL_LINMOS_SPECTRAL_DEP=`echo $FULL_LINMOS_SPECTRAL_DEP | sed -e 's/afterok/afterany/g'`
-	ID_LINMOS_SPECTRAL_ALL=`sbatch $FULL_LINMOS_SPECTRAL_DEP $sbatchfile | awk '{print $4}'`
-	recordJob ${ID_LINMOS_SPECTRAL_ALL} "Make a mosaic spectral cube of the science observation, with flags \"${FULL_LINMOS_SPECTRAL_DEP}\""
-    else
-	echo "Would make a mosaic image of the science observation, with slurm file $sbatchfile"
-    fi
+        if [ $SUBMIT_JOBS == true ]; then
+            FULL_LINMOS_SPECTRAL_DEP=`echo $FULL_LINMOS_SPECTRAL_DEP | sed -e 's/afterok/afterany/g'`
+	    ID_LINMOS_SPECTRAL_ALL=`sbatch $FULL_LINMOS_SPECTRAL_DEP $sbatchfile | awk '{print $4}'`
+	    recordJob ${ID_LINMOS_SPECTRAL_ALL} "Make a mosaic spectral cube of the science observation, with flags \"${FULL_LINMOS_SPECTRAL_DEP}\""
+        else
+	    echo "Would make a mosaic image of the science observation, with slurm file $sbatchfile"
+        fi
+        
+        echo " "
 
-    echo " "
-
+    done
+    
 fi
-
 
 if [ ${DO_SOURCE_FINDING} == true ]; then
     # Run the sourcefinder on the mosaicked image.
