@@ -88,13 +88,15 @@ function getAltPrefix()
 # and the second is the shorter one used in the slurm job name and the
 # extractStats results
 #  Usage:  setJob <description> <description2>
-#  Requires:  $slurms, $FIELDBEAM, $FIELDBEAMJOB
+#  Requires:  $slurms, $FIELDBEAM
 #  Sets:  sbatchfile=$slurms/description_FIELDBEAM.sbatch
-#         jobname=description2_FIELDBEAMJOB
+#         jobname=description2_$fieldbeamjob
+#   where fieldbeamjob removes any '_' characters from FIELDBEAM
 function setJob()
 {
     sbatchfile="$slurms/$1_${FIELDBEAM}.sbatch"
-    jobname="$2_${FIELDBEAMJOB}"
+    fieldbeamjob=`echo $FIELDBEAM | sed -e 's/_//g'`
+    jobname="$2_${fieldbeamjob}"
 }
 
 

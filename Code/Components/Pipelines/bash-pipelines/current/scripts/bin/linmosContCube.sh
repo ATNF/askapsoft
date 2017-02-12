@@ -43,7 +43,7 @@ setImageProperties contcube
 
 if [ $CLOBBER == false ] && [ -e ${OUTPUT}/${imageName} ]; then
     if [ $DO_IT == true ]; then
-        echo "Image ${imageName} exists, so not running continuum mosaicking"
+        echo "Image ${imageName} exists, so not running continuum cube mosaicking"
     fi
     DO_IT=false
 fi

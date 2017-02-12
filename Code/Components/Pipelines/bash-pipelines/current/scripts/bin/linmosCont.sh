@@ -188,26 +188,3 @@ EOFOUTER
 fi
 
 
-if [ ${DO_SOURCE_FINDING} == true ]; then
-    # Run the sourcefinder on the mosaicked image.
-
-    NUM_LOOPS=0
-    if [ $DO_SELFCAL == true ] && [ $MOSAIC_SELFCAL_LOOPS == true ]; then
-        NUM_LOOPS=$SELFCAL_NUM_LOOPS
-    fi
-    for((LOOP=0;LOOP<=$NUM_LOOPS;LOOP++)); do
-
-        # set the $imageBase variable for the mosaicked image
-        BEAM="all"
-        setImageProperties cont
-        if [ $LOOP -gt 0 ]; then
-            imageName="${imageName}.SelfCalLoop${LOOP}"
-            weightsImage="${weightsImage}.SelfCalLoop${LOOP}"
-        fi            
-
-        . ${PIPELINEDIR}/sourcefinding.sh
-
-    done
-    unset LOOP
-    
-fi
