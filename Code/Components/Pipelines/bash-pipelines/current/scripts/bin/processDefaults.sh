@@ -303,7 +303,7 @@ EOF
 
     
     ####################
-    # Parameters required for continuum imaging
+    # Parameters required for science field imaging
     ####
 
     if [ $DO_SCIENCE_FIELD == true ]; then
@@ -352,7 +352,6 @@ EOF
                [ ${SELFCAL_METHOD} != "Components" ]; then
             SELFCAL_METHOD="Cmodel"
         fi
-        ##     fi
 
         # Set the polarisation list for the continuum cubes
         if [ "${CONTCUBE_POLARISATIONS}" == "" ]; then
@@ -397,7 +396,8 @@ EOF
         # If user has requested a different channel range, and the
         # DO_COPY_SL flag is set, then we define a new spectral-line
         # range of channels 
-        if [ "${CHAN_RANGE_SL_SCIENCE}" == "" ] || [ $DO_COPY_SL != true ]; then
+        if [ "${CHAN_RANGE_SL_SCIENCE}" == "" ] ||
+               [ ${DO_COPY_SL} != true ]; then
             # If this range hasn't been set, or we aren't doing the
             # copy, then use the full channel range 
             CHAN_RANGE_SL_SCIENCE="1-$NUM_CHAN_SCIENCE"
@@ -486,7 +486,7 @@ EOF
             SELAVY_SPEC_SEARCH_TYPE="spectral"
             echo "WARNING - SELAVY_SPEC_SEARCH_TYPE needs to be 'spectral' or 'spatial' - Setting to 'spectral'"
         fi
-            
+        
         # Check smooth type
         if [ ${SELAVY_SPEC_FLAG_SMOOTH} == "true" ]; then
             if [ ${SELAVY_SPEC_SMOOTH_TYPE} != "spectral" ] || 
@@ -527,11 +527,11 @@ EOF
         #  Parameters covered are the selfcal interval, the
         #  source-finding threshold, and whether normalise gains is on
         #  or not
-        if [ $DO_CONT_IMAGING == true ]; then
+        if [ "${DO_CONT_IMAGING}" == "true" ]; then
             
             expectedArrSize=`expr $SELFCAL_NUM_LOOPS + 1`
 
-            if [ $DO_SELFCAL == true ]; then
+            if [ "${DO_SELFCAL}" == "true" ]; then
                 
                 if [ "`echo $SELFCAL_INTERVAL | grep "\["`" != "" ]; then
                     # Have entered a comma-separate array in square brackets
@@ -589,111 +589,115 @@ EOF
 
             fi
 
-        if [ "`echo $CLEAN_NUM_MAJORCYCLES | grep "\["`" != "" ]; then
-            # Have entered a comma-separate array in square brackets
-            arrSize=`echo $CLEAN_NUM_MAJORCYCLES | sed -e 's/[][,]/ /g' | wc -w`
-            if [ $arrSize -ne $expectedArrSize ]; then
-                echo "ERROR - CLEAN_NUM_MAJORCYCLES ($CLEAN_NUM_MAJORCYCLES) needs to be of size $expectedArrSize (since SELFCAL_NUM_LOOPS=$SELFCAL_NUM_LOOPS)"
-                exit 1
+            if [ "`echo $CLEAN_NUM_MAJORCYCLES | grep "\["`" != "" ]; then
+                # Have entered a comma-separate array in square brackets
+                arrSize=`echo $CLEAN_NUM_MAJORCYCLES | sed -e 's/[][,]/ /g' | wc -w`
+                if [ $arrSize -ne $expectedArrSize ]; then
+                    echo "ERROR - CLEAN_NUM_MAJORCYCLES ($CLEAN_NUM_MAJORCYCLES) needs to be of size $expectedArrSize (since SELFCAL_NUM_LOOPS=$SELFCAL_NUM_LOOPS)"
+                    exit 1
+                fi
+                CLEAN_NUM_MAJORCYCLES_ARRAY=()
+                for a in `echo $CLEAN_NUM_MAJORCYCLES | sed -e 's/[][,]/ /g'`; do
+                    CLEAN_NUM_MAJORCYCLES_ARRAY+=($a)
+                done
+            else
+                CLEAN_NUM_MAJORCYCLES_ARRAY=()
+                for((i=0;i<=${SELFCAL_NUM_LOOPS};i++)); do
+                    CLEAN_NUM_MAJORCYCLES_ARRAY+=($CLEAN_NUM_MAJORCYCLES)
+                done
             fi
-            CLEAN_NUM_MAJORCYCLES_ARRAY=()
-            for a in `echo $CLEAN_NUM_MAJORCYCLES | sed -e 's/[][,]/ /g'`; do
-                CLEAN_NUM_MAJORCYCLES_ARRAY+=($a)
-            done
-        else
-            CLEAN_NUM_MAJORCYCLES_ARRAY=()
-            for((i=0;i<=${SELFCAL_NUM_LOOPS};i++)); do
-                CLEAN_NUM_MAJORCYCLES_ARRAY+=($CLEAN_NUM_MAJORCYCLES)
-            done
+
+            if [ "`echo $CLEAN_THRESHOLD_MAJORCYCLE | grep "\["`" != "" ]; then
+                # Have entered a comma-separate array in square brackets
+                arrSize=`echo $CLEAN_THRESHOLD_MAJORCYCLE | sed -e 's/[][,]/ /g' | wc -w`
+                if [ $arrSize -ne $expectedArrSize ]; then
+                    echo "ERROR - CLEAN_THRESHOLD_MAJORCYCLE ($CLEAN_THRESHOLD_MAJORCYCLE) needs to be of size $expectedArrSize (since SELFCAL_NUM_LOOPS=$SELFCAL_NUM_LOOPS)"
+                    exit 1
+                fi
+                CLEAN_THRESHOLD_MAJORCYCLE_ARRAY=()
+                for a in `echo $CLEAN_THRESHOLD_MAJORCYCLE | sed -e 's/[][,]/ /g'`; do
+                    CLEAN_THRESHOLD_MAJORCYCLE_ARRAY+=($a)
+                done
+            else
+                CLEAN_THRESHOLD_MAJORCYCLE_ARRAY=()
+                for((i=0;i<=${SELFCAL_NUM_LOOPS};i++)); do
+                    CLEAN_THRESHOLD_MAJORCYCLE_ARRAY+=($CLEAN_THRESHOLD_MAJORCYCLE)
+                done
+            fi
+
+            if [ "`echo $CIMAGER_MINUV | grep "\["`" != "" ]; then
+                # Have entered a comma-separate array in square brackets
+                arrSize=`echo $CIMAGER_MINUV | sed -e 's/[][,]/ /g' | wc -w`
+                if [ $arrSize -ne $expectedArrSize ]; then
+                    echo "ERROR - CIMAGER_MINUV ($CIMAGER_MINUV) needs to be of size $expectedArrSize (since SELFCAL_NUM_LOOPS=$SELFCAL_NUM_LOOPS)"
+                    exit 1
+                fi
+                CIMAGER_MINUV_ARRAY=()
+                for a in `echo $CIMAGER_MINUV | sed -e 's/[][,]/ /g'`; do
+                    CIMAGER_MINUV_ARRAY+=($a)
+                done
+            else
+                CIMAGER_MINUV_ARRAY=()
+                for((i=0;i<=${SELFCAL_NUM_LOOPS};i++)); do
+                    CIMAGER_MINUV_ARRAY+=($CIMAGER_MINUV)
+                done
+            fi
+
+            if [ "`echo $CCALIBRATOR_MINUV | grep "\["`" != "" ]; then
+                # Have entered a comma-separate array in square brackets
+                arrSize=`echo $CCALIBRATOR_MINUV | sed -e 's/[][,]/ /g' | wc -w`
+                if [ $arrSize -ne $expectedArrSize ]; then
+                    echo "ERROR - CCALIBRATOR_MINUV ($CCALIBRATOR_MINUV) needs to be of size $expectedArrSize (since SELFCAL_NUM_LOOPS=$SELFCAL_NUM_LOOPS)"
+                    exit 1
+                fi
+                CCALIBRATOR_MINUV_ARRAY=()
+                for a in `echo $CCALIBRATOR_MINUV | sed -e 's/[][,]/ /g'`; do
+                    CCALIBRATOR_MINUV_ARRAY+=($a)
+                done
+            else
+                CCALIBRATOR_MINUV_ARRAY=()
+                for((i=0;i<=${SELFCAL_NUM_LOOPS};i++)); do
+                    CCALIBRATOR_MINUV_ARRAY+=($CCALIBRATOR_MINUV)
+                done
+            fi
+
+            # Validate that all these arrays are the same length as
+            # SELFCAL_NUM_LOOPS, as long as the latter is >0
+            if [ $SELFCAL_NUM_LOOPS -gt 0 ]; then
+                arraySize=`expr $SELFCAL_NUM_LOOPS + 1`
+                if [ ${#SELFCAL_INTERVAL_ARRAY[@]} -ne $arraySize ]; then
+                    echo "ERROR! Size of SELFCAL_INTERVAL (${SELFCAL_INTERVAL}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
+                    exit 1
+                fi
+                if [ ${#SELFCAL_SELAVY_THRESHOLD_ARRAY[@]} -ne $arraySize ]; then
+                    echo "ERROR! Size of SELFCAL_SELAVY_THRESHOLD (${SELFCAL_SELAVY_THRESHOLD}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
+                    exit 1
+                fi
+                if [ ${#SELFCAL_NORMALISE_GAINS_ARRAY[@]} -ne $arraySize ]; then
+                    echo "ERROR! Size of SELFCAL_NORMALISE_GAINS (${SELFCAL_NORMALISE_GAINS}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
+                    exit 1
+                fi
+                if [ ${#CLEAN_NUM_MAJORCYCLES_ARRAY[@]} -ne $arraySize ]; then
+                    echo "ERROR! Size of CLEAN_NUM_MAJORCYCLES (${CLEAN_NUM_MAJORCYCLES}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
+                    exit 1
+                fi
+                if [ ${#CLEAN_THRESHOLD_MAJORCYCLE_ARRAY[@]} -ne $arraySize ]; then
+                    echo "ERROR! Size of CLEAN_THRESHOLD_MAJORCYCLE (${CLEAN_THRESHOLD_MAJORCYCLE}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
+                    exit 1
+                fi
+                if [ ${#CIMAGER_MINUV_ARRAY[@]} -ne $arraySize ]; then
+                    echo "ERROR! Size of CIMAGER_MINUV (${CIMAGER_MINUV}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
+                    exit 1
+                fi
+                if [ ${#CCALIBRATOR_MINUV_ARRAY[@]} -ne $arraySize ]; then
+                    echo "ERROR! Size of CCALIBRATOR_MINUV (${CCALIBRATOR_MINUV}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
+                    exit 1
+                fi
+
+            fi
+
         fi
-
-        if [ "`echo $CLEAN_THRESHOLD_MAJORCYCLE | grep "\["`" != "" ]; then
-            # Have entered a comma-separate array in square brackets
-            arrSize=`echo $CLEAN_THRESHOLD_MAJORCYCLE | sed -e 's/[][,]/ /g' | wc -w`
-            if [ $arrSize -ne $expectedArrSize ]; then
-                echo "ERROR - CLEAN_THRESHOLD_MAJORCYCLE ($CLEAN_THRESHOLD_MAJORCYCLE) needs to be of size $expectedArrSize (since SELFCAL_NUM_LOOPS=$SELFCAL_NUM_LOOPS)"
-                exit 1
-            fi
-            CLEAN_THRESHOLD_MAJORCYCLE_ARRAY=()
-            for a in `echo $CLEAN_THRESHOLD_MAJORCYCLE | sed -e 's/[][,]/ /g'`; do
-                CLEAN_THRESHOLD_MAJORCYCLE_ARRAY+=($a)
-            done
-        else
-            CLEAN_THRESHOLD_MAJORCYCLE_ARRAY=()
-            for((i=0;i<=${SELFCAL_NUM_LOOPS};i++)); do
-                CLEAN_THRESHOLD_MAJORCYCLE_ARRAY+=($CLEAN_THRESHOLD_MAJORCYCLE)
-            done
-        fi
-
-        if [ "`echo $CIMAGER_MINUV | grep "\["`" != "" ]; then
-            # Have entered a comma-separate array in square brackets
-            arrSize=`echo $CIMAGER_MINUV | sed -e 's/[][,]/ /g' | wc -w`
-            if [ $arrSize -ne $expectedArrSize ]; then
-                echo "ERROR - CIMAGER_MINUV ($CIMAGER_MINUV) needs to be of size $expectedArrSize (since SELFCAL_NUM_LOOPS=$SELFCAL_NUM_LOOPS)"
-                exit 1
-            fi
-            CIMAGER_MINUV_ARRAY=()
-            for a in `echo $CIMAGER_MINUV | sed -e 's/[][,]/ /g'`; do
-                CIMAGER_MINUV_ARRAY+=($a)
-            done
-        else
-            CIMAGER_MINUV_ARRAY=()
-            for((i=0;i<=${SELFCAL_NUM_LOOPS};i++)); do
-                CIMAGER_MINUV_ARRAY+=($CIMAGER_MINUV)
-            done
-        fi
-
-        if [ "`echo $CCALIBRATOR_MINUV | grep "\["`" != "" ]; then
-            # Have entered a comma-separate array in square brackets
-            arrSize=`echo $CCALIBRATOR_MINUV | sed -e 's/[][,]/ /g' | wc -w`
-            if [ $arrSize -ne $expectedArrSize ]; then
-                echo "ERROR - CCALIBRATOR_MINUV ($CCALIBRATOR_MINUV) needs to be of size $expectedArrSize (since SELFCAL_NUM_LOOPS=$SELFCAL_NUM_LOOPS)"
-                exit 1
-            fi
-            CCALIBRATOR_MINUV_ARRAY=()
-            for a in `echo $CCALIBRATOR_MINUV | sed -e 's/[][,]/ /g'`; do
-                CCALIBRATOR_MINUV_ARRAY+=($a)
-            done
-        else
-            CCALIBRATOR_MINUV_ARRAY=()
-            for((i=0;i<=${SELFCAL_NUM_LOOPS};i++)); do
-                CCALIBRATOR_MINUV_ARRAY+=($CCALIBRATOR_MINUV)
-            done
-        fi
-
-        # Validate that all these arrays are the same length as
-        # SELFCAL_NUM_LOOPS, as long as the latter is >0
-        if [ $SELFCAL_NUM_LOOPS -gt 0 ]; then
-            arraySize=`expr $SELFCAL_NUM_LOOPS + 1`
-            if [ ${#SELFCAL_INTERVAL_ARRAY[@]} -ne $arraySize ]; then
-                echo "ERROR! Size of SELFCAL_INTERVAL (${SELFCAL_INTERVAL}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
-                exit 1
-            fi
-            if [ ${#SELFCAL_SELAVY_THRESHOLD_ARRAY[@]} -ne $arraySize ]; then
-                echo "ERROR! Size of SELFCAL_SELAVY_THRESHOLD (${SELFCAL_SELAVY_THRESHOLD}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
-                exit 1
-            fi
-            if [ ${#SELFCAL_NORMALISE_GAINS_ARRAY[@]} -ne $arraySize ]; then
-                echo "ERROR! Size of SELFCAL_NORMALISE_GAINS (${SELFCAL_NORMALISE_GAINS}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
-                exit 1
-            fi
-            if [ ${#CLEAN_NUM_MAJORCYCLES_ARRAY[@]} -ne $arraySize ]; then
-                echo "ERROR! Size of CLEAN_NUM_MAJORCYCLES (${CLEAN_NUM_MAJORCYCLES}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
-                exit 1
-            fi
-            if [ ${#CLEAN_THRESHOLD_MAJORCYCLE_ARRAY[@]} -ne $arraySize ]; then
-                echo "ERROR! Size of CLEAN_THRESHOLD_MAJORCYCLE (${CLEAN_THRESHOLD_MAJORCYCLE}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
-                exit 1
-            fi
-            if [ ${#CIMAGER_MINUV_ARRAY[@]} -ne $arraySize ]; then
-                echo "ERROR! Size of CIMAGER_MINUV (${CIMAGER_MINUV}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
-                exit 1
-            fi
-            if [ ${#CCALIBRATOR_MINUV_ARRAY[@]} -ne $arraySize ]; then
-                echo "ERROR! Size of CCALIBRATOR_MINUV (${CCALIBRATOR_MINUV}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
-                exit 1
-            fi
-
+        
         fi
 
     fi
