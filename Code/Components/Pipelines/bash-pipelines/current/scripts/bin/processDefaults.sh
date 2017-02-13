@@ -58,7 +58,8 @@ if [ "$PROCESS_DEFAULTS_HAS_RUN" != "true" ]; then
         DO_SPECTRAL_IMAGING=false
         DO_SPECTRAL_IMSUB=false
         DO_MOSAIC=true
-        DO_SOURCE_FINDING=false
+        DO_SOURCE_FINDING_CONT=false
+        DO_SOURCE_FINDING_SPEC=false
         DO_SOURCE_FINDING_BEAMWISE=false
         DO_ALT_IMAGER=false
         #
@@ -450,6 +451,30 @@ EOF
         # Determine the number of cores needed for spectral-line mosaicking
         if [ "$NUM_CPUS_SPECTRAL_LINMOS" == "" ]; then
             NUM_CPUS_SPECTRAL_LINMOS=`echo $NUM_CHAN_SCIENCE_SL $NCHAN_PER_CORE_SPECTRAL_LINMOS | awk '{print $1/$2}'`
+        fi
+
+        ####################
+        # Source finding switches
+        
+        # First check for the old DO_SOURCE_FINDING.
+        #  If present, set new source-finding switches to its value
+        #  and give a warning
+        if [ "${DO_SOURCE_FINDING}" != "" ]; then
+            DO_SOURCE_FINDING_CONT=${DO_SOURCE_FINDING}
+            DO_SOURCE_FINDING_SPEC=${DO_SOURCE_FINDING}
+            echo "WARNING - Parameter DO_SOURCE_FINDING has been deprecated."
+            echo "        - Please use DO_SOURCE_FINDING_CONT and DO_SOURCE_FINDING_SPEC."
+            echo "        - For now, these have both been set to ${DO_SOURCE_FINDING}."
+        fi
+        
+        # If DO_SOURCE_FINDING_CONT has not been set, set it to be the same as the DO_CONT_IMAGING switch
+        if [ "${DO_SOURCE_FINDING_CONT}" == "" ]; then
+            DO_SOURCE_FINDING_CONT=${DO_CONT_IMAGING}
+        fi
+        
+        # If DO_SOURCE_FINDING_SPEC has not been set, set it to be the same as the DO_SPECTRAL_IMAGING switch
+        if [ "${DO_SOURCE_FINDING_SPEC}" == "" ]; then
+            DO_SOURCE_FINDING_SPEC=${DO_SPECTRAL_IMAGING}
         fi
 
         ####################

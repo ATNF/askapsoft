@@ -27,7 +27,7 @@
 # @author Matthew Whiting <Matthew.Whiting@csiro.au>
 #
 
-if [ $DO_SOURCE_FINDING == true ]; then
+if [ $DO_SOURCE_FINDING_CONT == true ]; then
 
     # set imageName, weightsImage etc
     imageCode=restored
