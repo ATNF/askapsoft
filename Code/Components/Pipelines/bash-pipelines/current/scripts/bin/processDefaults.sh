@@ -70,13 +70,13 @@ if [ "$PROCESS_DEFAULTS_HAS_RUN" != "true" ]; then
     # Turn off the purging of the full-resolution MS if we need to use it.
     if [ ${DO_COPY_SL} == true ] ||
            [ ${DO_APPLY_CAL_SL} == true ] ||
-           [ ${DO_CONT_SUB_SL} == true ] || 
+           [ ${DO_CONT_SUB_SL} == true ] ||
            [ ${DO_SPECTRAL_IMAGING} == true ]; then
 
         PURGE_FULL_MS=false
-        
+
     fi
-    
+
     ####################
     # Define the full path of output directory
     OUTPUT="${BASEDIR}/${OUTPUT}"
@@ -90,14 +90,14 @@ if [ "$PROCESS_DEFAULTS_HAS_RUN" != "true" ]; then
         ln -s ${BASEDIR}/${stats} .
     fi
     cd $BASEDIR
-    
+
     ####################
     # ASKAPsoft module usage
 
     # Make use of the ASKAP module directory right now
     moduleDir="/group/askap/modulefiles"
     module use $moduleDir
-    
+
     if [ "${ASKAP_ROOT}" == "" ]; then
         # Has the user asked for a specific askapsoft module?
         if [ "$ASKAPSOFT_VERSION" != "" ]; then
@@ -153,7 +153,7 @@ module load ${currentASKAPsoftVersion}"
         askapsoftModuleCommands="$askapsoftModuleCommands
 module unload askappipeline
 module load askappipeline/${askappipelineVersion}"
-        
+
         echo " "
 
     else
@@ -252,7 +252,7 @@ module load askappipeline/${askappipelineVersion}"
     if [ "$JOB_TIME_CASDA_UPLOAD" == "" ]; then
         JOB_TIME_CASDA_UPLOAD=${JOB_TIME_DEFAULT}
     fi
-    
+
     ####################
     # Configure the list of beams to be processed
     # Lists each beam in ${BEAMS_TO_USE}
@@ -272,13 +272,13 @@ BEGIN{
   str=""
 }
 {
-  n=split(\$1,a,","); 
-  for(i=1;i<=n;i++){ 
-    n2=split(a[i],a2,"-"); 
+  n=split(\$1,a,",");
+  for(i=1;i<=n;i++){
+    n2=split(a[i],a2,"-");
     for(b=a2[1];b<=a2[n2];b++){
       str=sprintf("%s %02d",str,b);
-    } 
-  } 
+    }
+  }
 }
 END{
   print str
@@ -301,7 +301,7 @@ EOF
     done
     maxbeam=`expr $maxbeam + 1`
 
-    
+
     ####################
     # Parameters required for science field imaging
     ####
@@ -311,7 +311,7 @@ EOF
         # Name of the MS that should be flagged by flagScience.sh
         #   This gets set differently at different stages in the scripts
         msToFlag=""
-        
+
         # Total number of channels must be exact multiple of averaging
         # width.
         # If it isn't, report an error and exit without running anything.
@@ -332,7 +332,7 @@ EOF
         if [ "${NUM_CPUS_CONTIMG_SCI}" == "" ]; then
             NUM_CPUS_CONTIMG_SCI=`echo $nchanContSci $nworkergroupsSci | awk '{print $1*$2+1}'`
         fi
-        
+
         # if we are using the new imager we need to tweak this
         if [ $DO_ALT_IMAGER == true ]; then
             NUM_CPUS_CONTIMG_SCI=`echo $nchanContSci $nworkergroupsSci $NCHAN_PER_CORE | awk '{print ($1/$3)*$2+1}'`
@@ -366,7 +366,7 @@ EOF
 
         # Set the number of cores for the continuum cube imaging. Either
         # set to the number of averaged channels + 1, or use that given in
-        # the config file, limiting to no bigger than this number 
+        # the config file, limiting to no bigger than this number
         maxContCubeCores=`expr $nchanContSci + 1`
         if [ "${NUM_CPUS_CONTCUBE_SCI}" == "" ]; then
             # User has not specified
@@ -387,7 +387,7 @@ EOF
             echo "NOTE - Reducing NUM_CPUS_CONTCUBE_LINMOS to $NUM_CPUS_CONTCUBE_SCI to match the number of cores used for imaging"
             NUM_CPUS_CONTCUBE_LINMOS=$NUM_CPUS_CONTCUBE_SCI
         fi
-        
+
         ####################
         # Parameters required for spectral-line imaging
         ####
@@ -395,11 +395,11 @@ EOF
         # Channel range to be used for spectral-line imaging
         # If user has requested a different channel range, and the
         # DO_COPY_SL flag is set, then we define a new spectral-line
-        # range of channels 
+        # range of channels
         if [ "${CHAN_RANGE_SL_SCIENCE}" == "" ] ||
                [ ${DO_COPY_SL} != true ]; then
             # If this range hasn't been set, or we aren't doing the
-            # copy, then use the full channel range 
+            # copy, then use the full channel range
             CHAN_RANGE_SL_SCIENCE="1-$NUM_CHAN_SCIENCE"
         fi
         # Check that we haven't requested invalid channels
@@ -434,7 +434,7 @@ EOF
 
         ####################
         # Mosaicking parameters
-        
+
         # Fix the direction string for linmos - don't need the J2000 bit
         linmosFeedCentre=`echo $DIRECTION_SCI | awk -F',' '{printf "%s,%s]",$1,$2}'`
 
@@ -481,15 +481,15 @@ EOF
         fi
 
         # Check search type
-        if [ ${SELAVY_SPEC_SEARCH_TYPE} != "spectral" ] || 
+        if [ ${SELAVY_SPEC_SEARCH_TYPE} != "spectral" ] ||
                [ ${SELAVY_SPEC_SEARCH_TYPE} != "spatial" ]; then
             SELAVY_SPEC_SEARCH_TYPE="spectral"
             echo "WARNING - SELAVY_SPEC_SEARCH_TYPE needs to be 'spectral' or 'spatial' - Setting to 'spectral'"
         fi
-        
+
         # Check smooth type
         if [ ${SELAVY_SPEC_FLAG_SMOOTH} == "true" ]; then
-            if [ ${SELAVY_SPEC_SMOOTH_TYPE} != "spectral" ] || 
+            if [ ${SELAVY_SPEC_SMOOTH_TYPE} != "spectral" ] ||
                    [ ${SELAVY_SPEC_SMOOTH_TYPE} != "spatial" ]; then
                 SELAVY_SPEC_SMOOTH_TYPE="spectral"
                 echo "WARNING - SELAVY_SPEC_SMOOTH_TYPE needs to be 'spectral' or 'spatial' - Setting to 'spectral'"
@@ -497,7 +497,7 @@ EOF
         fi
 
         # Spatial smoothing kernel - interpret to form selavy parameters
-        if [ ${SELAVY_SPEC_FLAG_SMOOTH} == "true" ] && 
+        if [ ${SELAVY_SPEC_FLAG_SMOOTH} == "true" ] &&
                [ ${SELAVY_SPEC_SMOOTH_TYPE} == "spatial" ]; then
             kernelArray=()
             for a in `echo $SELAVY_SPEC_SPATIAL_KERNEL | sed -e 's/[][,]/ /g'`; do
@@ -518,7 +518,7 @@ EOF
             fi
         fi
 
-        
+
         ####################
         # Variable inputs to Continuum imaging and Self-calibration settings
         #  This section takes the provided parameters and creates
@@ -528,11 +528,11 @@ EOF
         #  source-finding threshold, and whether normalise gains is on
         #  or not
         if [ "${DO_CONT_IMAGING}" == "true" ]; then
-            
+
             expectedArrSize=`expr $SELFCAL_NUM_LOOPS + 1`
 
             if [ "${DO_SELFCAL}" == "true" ]; then
-                
+
                 if [ "`echo $SELFCAL_INTERVAL | grep "\["`" != "" ]; then
                     # Have entered a comma-separate array in square brackets
                     arrSize=`echo $SELFCAL_INTERVAL | sed -e 's/[][,]/ /g' | wc -w`
@@ -550,7 +550,7 @@ EOF
                         SELFCAL_INTERVAL_ARRAY+=($SELFCAL_INTERVAL)
                     done
                 fi
-                
+
                 if [ "`echo $SELFCAL_SELAVY_THRESHOLD | grep "\["`" != "" ]; then
                     # Have entered a comma-separate array in square brackets
                     arrSize=`echo $SELFCAL_SELAVY_THRESHOLD | sed -e 's/[][,]/ /g' | wc -w`
@@ -568,7 +568,7 @@ EOF
                         SELFCAL_SELAVY_THRESHOLD_ARRAY+=($SELFCAL_SELAVY_THRESHOLD)
                     done
                 fi
-                
+
                 if [ "`echo $SELFCAL_NORMALISE_GAINS | grep "\["`" != "" ]; then
                     # Have entered a comma-separate array in square brackets
                     arrSize=`echo $SELFCAL_NORMALISE_GAINS | sed -e 's/[][,]/ /g' | wc -w`
@@ -697,9 +697,8 @@ EOF
             fi
 
         fi
-        
-        fi
 
     fi
 
 fi
+
