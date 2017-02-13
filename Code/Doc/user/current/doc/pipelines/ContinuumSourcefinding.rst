@@ -20,8 +20,9 @@ re-run it yourself.
 +--------------------------------+---------------------------------+---------------------------------+-------------------------------------------------------------+
 | Variable                       |             Default             | Parset equivalent               | Description                                                 |
 +================================+=================================+=================================+=============================================================+
-| ``DO_SOURCE_FINDING``          | true                            | none                            | Whether to do the source-finding with Selavy on the         |
-|                                |                                 |                                 | final mosaic images.                                        |
+| ``DO_SOURCE_FINDING_CONT``     | ""                              | none                            | Whether to do the source-finding with Selavy on the         |
+|                                |                                 |                                 | final mosaic continuum images. If not given in the config   |
+|                                |                                 |                                 | file, it takes on the value of ``DO_CONT_IMAGING``.         |
 +--------------------------------+---------------------------------+---------------------------------+-------------------------------------------------------------+
 | ``DO_SOURCE_FINDING_BEAMWISE`` | false                           | none                            | If true, the source-finding will be run on the individual   |
 |                                |                                 |                                 | beam images as well.                                        |
@@ -31,8 +32,8 @@ re-run it yourself.
 +--------------------------------+---------------------------------+---------------------------------+-------------------------------------------------------------+
 | ``SELAVY_NSUBX``               | 6                               | nsubx                           | Number of divisions in the x-direction that divide the image|
 |                                |                                 | (:doc:`../analysis/selavy`)     | up, allowing parallel processing in the source-detection.   |
-+--------------------------------+---------------------------------+---------------------------------+-------------------------------------------------------------+
-| ``SELAVY_NSUBY``               | 3                               | nsuby                           | Number of divisions in the y-direction that divide the image| 
++--------------------------------+---------------------------------+---------------------------------+-------------------------------------------------------------+ 
+| ``SELAVY_NSUBY``               | 3                               | nsuby                           | Number of divisions in the y-direction that divide the image|
 |                                |                                 | (:doc:`../analysis/selavy`)     | up, allowing parallel processing in the source-detection.   |
 +--------------------------------+---------------------------------+---------------------------------+-------------------------------------------------------------+
 | ``SELAVY_SNR_CUT``             | 5.0                             | snrcut                          | The signal-to-noise ratio threshold to use in the           |

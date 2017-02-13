@@ -10,8 +10,9 @@ reconstruction (to enhance the signal-to-noise of real sources).
 +------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
 | Variable                           |             Default             | Parset equivalent                            | Description                                                 |
 +====================================+=================================+==============================================+=============================================================+
-| ``DO_SOURCE_FINDING``              | true                            | none                                         | Whether to do the source-finding with Selavy on the         |
-|                                    |                                 |                                              | final mosaic images.                                        |
+| ``DO_SOURCE_FINDING_SPEC``         | ""                              | none                                         | Whether to do the source-finding with Selavy on the         |
+|                                    |                                 |                                              | final mosaic images. If not given in the config file, it    |
+|                                    |                                 |                                              | takes on the value of ``DO_SPECTRAL_IMAGING``.              |
 +------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
 |   ``DO_SOURCE_FINDING_BEAMWISE``   | false                           | none                                         | If true, the source-finding will be run on the individual   |
 |                                    |                                 |                                              | beam images as well.                                        |
@@ -21,8 +22,8 @@ reconstruction (to enhance the signal-to-noise of real sources).
 +------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
 | ``CPUS_PER_CORE_SELAVY_SPEC``      | ""                              | none                                         | Number of cores used on each node. If not provided, it will |
 |                                    |                                 |                                              | be the lower of the number of cores requested or the maximum|
-|                                    |                                 |                                              | number of cores available per node.                         |
-+------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+ 
+|                                    |                                 |                                              | number of cores available per node.                         | 
++------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
 | ``SELAVY_SPEC_NSUBX``              | 6                               | nsubx (:doc:`../analysis/selavy`)            | Number of divisions in the x-direction that divide the image|
 |                                    |                                 |                                              | up, allowing parallel processing in the source-detection.   |
 +------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+

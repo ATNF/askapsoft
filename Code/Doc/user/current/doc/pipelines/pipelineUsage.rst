@@ -262,4 +262,7 @@ Here is a summary of the workflow provided for by these scripts:
   each independently imaging a single channel.
 
 * There is a new task to remove the continuum from the image by
-  fitting a low-order polynomial to each spectrum independently. 
+  fitting a low-order polynomial to each spectrum independently.
+
+* Source-finding with **selavy** can then be run on the
+  spectral-cubes. 
