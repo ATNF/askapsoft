@@ -41,7 +41,7 @@ fi
 if [ "${DO_IT}" == "true" ] && [ "${CLOBBER}" != "true" ]; then
     BEAM=all
     for POLN in $POL_LIST; do
-        pol=\`echo \$POLN | tr '[:upper:]' '[:lower:]'\`
+        pol=`echo $POLN | tr '[:upper:]' '[:lower:]'`
         for imageCode in ${mosaicImageList}; do
             setImageProperties contcube
             if [ -e ${OUTPUT}/${imageName} ]; then

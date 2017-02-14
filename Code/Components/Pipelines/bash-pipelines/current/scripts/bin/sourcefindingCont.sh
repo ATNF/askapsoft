@@ -34,9 +34,13 @@ if [ $DO_SOURCE_FINDING_CONT == true ]; then
     setImageProperties cont
     contImage=$imageName
     contWeights=$weightsImage
+    pol="%p"
     setImageProperties contcube
     contCube=$imageName
 
+    # lower-case list of polarisations to use
+    polList=`echo ${POL_LIST} | tr [:upper:] [:lower:]`
+    
     # get the text that does the FITS conversion - put in $fitsConvertText
     convertToFITStext
 
@@ -143,12 +147,17 @@ fi
 
 doRM=${doRM}
 if [ \$doRM == true ]; then
-    if [ -e \${contcube} ]; then
-        imlist="\${imlist} \${contcube}"
-    else
-        doRM=false
-        echo "ERROR - Continuum cube \${contcube} not found. RM Synthesis being turned off."
-    fi
+    polList="${polList}"
+    for p in \${polList}; do
+        sedstr="s/%p/\$p/g"
+        thisim=\`echo \$contcube | sed -e \$sedstr\`
+        if [ -e \${thisim} ]; then
+            imlist="\${imlist} \${thisim}"
+        else
+            doRM=false
+            echo "ERROR - Continuum cube \${thisim} not found. RM Synthesis being turned off."
+        fi
+    done
 fi
 
 echo "Converting to FITS the following images: \${imlist}"
