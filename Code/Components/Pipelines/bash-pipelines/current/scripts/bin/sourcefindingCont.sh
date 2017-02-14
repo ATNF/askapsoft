@@ -179,7 +179,7 @@ if [ \${HAVE_IMAGES} == true ]; then
     if [ \${doRM} == true ]; then
         rmSynthParams="# RM Synthesis on extracted spectra from continuum cube
 Selavy.RMSynthesis = \${doRM}
-Selavy.RMSynthesis.cube = \$contCube
+Selavy.RMSynthesis.cube = \$contcube
 Selavy.RMSynthesis.outputBase = \${polDir}/${SELAVY_POL_OUTPUT_BASE}
 Selavy.RMSynthesis.writeSpectra = ${SELAVY_POL_WRITE_SPECTRA}
 Selavy.RMSynthesis.writeComplexFDF = ${SELAVY_POL_WRITE_FDF}
