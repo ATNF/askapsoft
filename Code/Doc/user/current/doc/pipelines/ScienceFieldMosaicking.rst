@@ -18,9 +18,17 @@ mosaic, where the mosaics of each interleave position for that tile
 are combined.
 
 Finally, the mosaics of all fields and/or tiles are combined to form a
-single mosaic image for the scheduling block.
+single mosaic image for the scheduling block. This second stage of
+mosaicking is not done if there is only a single field in the
+measurement set.
 
-This mosaicking is done for all image product types -- continuum
+Additionally, if there are multiple fields in the measurement set, but
+they should *not* be mosaicked together (for instance, if they are
+quite separate locations on the sky), then you can set
+``DO_MOSAIC_FIELDS=false``. Then the individual fields will be
+mosaicked but nothing more.
+
+The mosaicking is done for all image product types -- continuum
 images, continuum cubes, and spectral-line cubes. For continuum
 images, the **linmos** tool is used, while the **linmos-mpi** tool is
 used for the cubes, allowing parallelism over the spectral channels.
@@ -89,6 +97,10 @@ primary beam at the centre of each image.
 +====================================+====================================+=========================+==============================================================+
 | ``DO_MOSAIC``                      | true                               | none                    | Whether to mosaic the individual beam images, forming a      |
 |                                    |                                    |                         | single, primary-beam-corrected image.                        |
++------------------------------------+------------------------------------+-------------------------+--------------------------------------------------------------+
+| ``DO_MOSAIC_FIELDS``               | true                               | none                    | Whether to mosaic the different fields together (for when    |
+|                                    |                                    |                         | there is more than one in the MS). If set to false, only the |
+|                                    |                                    |                         | field-based mosaicking will be done.                         |
 +------------------------------------+------------------------------------+-------------------------+--------------------------------------------------------------+
 | ``JOB_TIME_LINMOS``                | ``JOB_TIME_DEFAULT`` (12:00:00)    | none                    | Time request for mosaicking                                  |
 +------------------------------------+------------------------------------+-------------------------+--------------------------------------------------------------+
