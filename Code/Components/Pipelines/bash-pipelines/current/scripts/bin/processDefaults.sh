@@ -489,7 +489,7 @@ EOF
 
         # If the sourcefinding flag has been set, but we aren't
         # mosaicking, turn on the beam-wise sourcefinding flag
-        if [ ${DO_SOURCE_FINDING} == true ] && [ ${DO_MOSAIC} != true ]; then
+        if [ "${DO_SOURCE_FINDING_CONT}" == "true" ] && [ "${DO_MOSAIC}" != "true" ]; then
             DO_SOURCE_FINDING_BEAMWISE=true
         fi
 
