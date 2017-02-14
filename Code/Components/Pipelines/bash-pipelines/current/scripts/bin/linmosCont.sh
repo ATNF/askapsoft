@@ -110,7 +110,6 @@ if [ \$DO_SELFCAL == true ] && [ \$MOSAIC_SELFCAL_LOOPS == true ]; then
 fi
 
 for((LOOP=0;LOOP<=\$NUM_LOOPS;LOOP++)); do
-echo "Loop \$LOOP"
 
     for imageCode in ${mosaicImageList}; do
 
@@ -124,9 +123,6 @@ echo "Loop \$LOOP"
                 else
                     DIR="selfCal_\${imageBase}/Loop\${LOOP}"
                 fi
-                echo \$DIR
-                echo \$BEAM
-                echo \${DIR}/\$imageName
                 if [ -e \${DIR}/\${imageName} ]; then
                     if [ "\${beamList}" == "" ]; then
                         beamList="\${DIR}/\${imageName}"
@@ -135,7 +131,6 @@ echo "Loop \$LOOP"
                     fi
                 fi
             done
-echo "beam list = \$beamList"
 
             jobCode=${jobname}_\${imageCode}
             if [ \$maxterm -gt 1 ]; then

@@ -59,7 +59,6 @@ if [ "${DO_IT}" == "true" ] && [ "${CLOBBER}" != "true" ]; then
         for imageCode in ${mosaicImageList}; do
             for((TTERM=0;TTERM<${NUM_TAYLOR_TERMS};TTERM++)); do
                 setImageProperties cont
-                echo $THISTILE $imageName
                 if [ -e ${OUTPUT}/${imageName} ]; then
                     if [ $DO_IT == true ]; then
                         echo "Image ${imageName} exists, so not running continuum mosaicking"
@@ -105,7 +104,6 @@ SB_SCIENCE=${SB_SCIENCE}
 
 FIELD_LIST="$FIELD_LIST"
 TILE_LIST="$TILE_LIST"
-echo "Tile list = \$TILE_LIST"
 
 # If there is only one tile, only include the "ALL" case, which
 # mosaics together all fields
@@ -114,7 +112,6 @@ if [ \`echo \$TILE_LIST | awk '{print NF}'\` -gt 1 ]; then
 else
     FULL_TILE_LIST="ALL"
 fi
-echo "Full tile list = \$FULL_TILE_LIST"
 
 for THISTILE in \$FULL_TILE_LIST; do
 
