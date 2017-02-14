@@ -31,22 +31,15 @@
 
 ID_LINMOS_SPECTRAL=""
 
-DO_IT=$DO_MOSAIC
-
 BEAM=all
 setImageBase spectral
 getAltPrefix
 
 for subband in ${wrList}; do
 
-    mosImage=image.${subband}.${imageBase}
+    DO_IT=$DO_MOSAIC
 
-    if [ $NUM_TAYLOR_TERMS -gt 1 ]; then
-        mosImage="${mosImage}.taylor.0"
-    fi
-
-    mosImage="${mosImage}.restored"
-
+    mosImage=linmos.image.restored.wr.${subband}.${IMAGE_BASE_SPECTRAL}
     if [ $CLOBBER == false ] && [ -e ${OUTPUT}/${mosImage} ]; then
         if [ $DO_IT == true ]; then
             echo "Image ${mosImage} exists, so not running spectral-line mosaicking"
@@ -65,7 +58,6 @@ linmos.feeds.spacing    = ${LINMOS_BEAM_SPACING}
 # Beam offsets
 ${LINMOS_BEAM_OFFSETS}"
         fi
-
 
         setJob linmos_${subband} linmos_${subband}
         cat > $sbatchfile <<EOFOUTER

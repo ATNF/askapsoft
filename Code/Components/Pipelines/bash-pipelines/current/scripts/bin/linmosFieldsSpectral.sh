@@ -31,26 +31,37 @@
 
 ID_LINMOS_SPECTRAL_ALL=""
 
+mosaicImageList="restored image residual"
+
 DO_IT=$DO_MOSAIC
 if [ "$DO_SPECTRAL_IMAGING" != "true" ]; then
     DO_IT=false
 fi
 
-# Get the name of the mosaicked image
-imageCode=restored
-FIELD="."
-setImageProperties spectral
-
-if [ $CLOBBER == false ] && [ -e ${OUTPUT}/${imageName} ]; then
-    if [ $DO_IT == true ]; then
-        echo "Image ${imageName} exists, so not running continuum mosaicking"
+if [ "${DO_IT}" == "true" ] && [ "${CLOBBER}" != "true" ]; then
+    FIELD="."
+    BEAM=all
+    if [ `echo $TILE_LIST | awk '{print NF}'` -gt 1 ]; then
+        FULL_TILE_LIST="$TILE_LIST ALL"
+    else
+        FULL_TILE_LIST="ALL"
     fi
-    DO_IT=false
+    for TILE in $FULL_TILE_LIST; do
+        for imageCode in ${mosaicImageList}; do 
+            setImageProperties spectral
+            if [ -e ${OUTPUT}/${imageName} ]; then
+                if [ $DO_IT == true ]; then
+                    echo "Image ${imageName} exists, so not running continuum mosaicking"
+                fi
+                DO_IT=false
+            fi
+        done
+    done
 fi
 
 if [ $DO_IT == true ]; then
 
-    for imCode in restored image residual; do 
+    for imCode in ${mosaicImageList}; do 
 
         sbatchfile=$slurms/linmos_all_spectral_${imCode}.sbatch
         cat > $sbatchfile <<EOFOUTER

@@ -31,24 +31,35 @@
 
 ID_LINMOS_CONT=""
 
+mosaicImageList="restored altrestored image residual"
+
 DO_IT=$DO_MOSAIC
 if [ "$DO_CONT_IMAGING" != "true" ]; then
     DO_IT=false
 fi
 
-# Get the name of the mosaicked image
-imageCode=restored
-BEAM=all
-setImageProperties cont
-
-if [ $CLOBBER == false ] && [ -e ${OUTPUT}/${imageName} ]; then
-    if [ $DO_IT == true ]; then
-        echo "Image ${imageName} exists, so not running continuum mosaicking"
+if [ "${DO_IT}" == "true" ] && [ "${CLOBBER}" != "true" ]; then
+    BEAM=all
+    NLOOPS=0
+    if [ $DO_SELFCAL == true ] && [ $MOSAIC_SELFCAL_LOOPS == true ]; then
+        NLOOPS=$SELFCAL_NUM_LOOPS
     fi
-    DO_IT=false
+    for((LOOP=0;LOOP<=$NLOOPS;LOOP++)); do
+        for imageCode in ${mosaicImageList}; do
+            for((TTERM=0;TTERM<${NUM_TAYLOR_TERMS};TTERM++)); do
+                setImageProperties cont
+                if [ -e ${OUTPUT}/${imageName} ]; then
+                    if [ $DO_IT == true ]; then
+                        echo "Image ${imageName} exists, so not running continuum mosaicking"
+                    fi
+                    DO_IT=false
+                fi
+            done
+        done
+    done
 fi
 
-if [ $DO_IT == true ]; then
+if [ "${DO_IT}" == "true" ]; then
 
     if [ ${IMAGE_AT_BEAM_CENTRES} == true ] && [ "$DIRECTION_SCI" == "" ]; then
         reference="# No reference image or offsets, as we take the image centres"
@@ -101,7 +112,7 @@ fi
 for((LOOP=0;LOOP<=\$NUM_LOOPS;LOOP++)); do
 echo "Loop \$LOOP"
 
-    for imageCode in restored altrestored image residual; do
+    for imageCode in ${mosaicImageList}; do
 
         for((TTERM=0;TTERM<\${maxterm};TTERM++)); do
 

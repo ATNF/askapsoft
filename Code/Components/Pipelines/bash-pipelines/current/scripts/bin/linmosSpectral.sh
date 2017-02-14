@@ -31,24 +31,27 @@
 
 ID_LINMOS_SPECTRAL=""
 
+mosaicImageList="restored image residual"
+
 DO_IT=$DO_MOSAIC
 if [ "$DO_SPECTRAL_IMAGING" != "true" ]; then
     DO_IT=false
 fi
 
-# Get the name of the mosaicked image
-imageCode=restored
-BEAM=all
-setImageProperties spectral
-
-if [ $CLOBBER == false ] && [ -e ${OUTPUT}/${imageName} ]; then
-    if [ $DO_IT == true ]; then
-        echo "Image ${imageName} exists, so not running continuum mosaicking"
-    fi
-    DO_IT=false
+if [ "${DO_IT}" == "true" ] && [ "${CLOBBER}" != "true" ]; then
+    BEAM=all
+    for imageCode in ${mosaicImageResidual}; do
+        setImageProperties spectral
+        if [ -e ${OUTPUT}/${imageName} ]; then
+            if [ $DO_IT == true ]; then
+                echo "Image ${imageName} exists, so not running continuum mosaicking"
+            fi
+            DO_IT=false
+        fi
+    done
 fi
 
-if [ $DO_IT == true ]; then
+if [ "${DO_IT}" == "true" ]; then
 
     if [ ${IMAGE_AT_BEAM_CENTRES} == true ] && [ "$DIRECTION_SCI" == "" ]; then
         reference="# No reference image or offsets, as we take the image centres"
@@ -60,7 +63,7 @@ linmos.feeds.spacing    = ${LINMOS_BEAM_SPACING}
 ${LINMOS_BEAM_OFFSETS}"
     fi
 
-    for imCode in restored image residual; do
+    for imCode in ${mosaicImageResidual}; do
 
         setJob linmosSpectral_${imCode} linmosS${imcode}
         cat > $sbatchfile <<EOFOUTER

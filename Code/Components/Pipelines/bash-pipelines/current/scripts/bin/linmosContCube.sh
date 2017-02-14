@@ -31,24 +31,30 @@
 
 ID_LINMOS_CONTCUBE=""
 
+mosaicImageList="restored image residual"
+
 DO_IT=$DO_MOSAIC
 if [ "$DO_CONTCUBE_IMAGING" != "true" ]; then
     DO_IT=false
 fi
 
-# Get the name of the mosaicked image
-imageCode=restored
-BEAM=all
-setImageProperties contcube
-
-if [ $CLOBBER == false ] && [ -e ${OUTPUT}/${imageName} ]; then
-    if [ $DO_IT == true ]; then
-        echo "Image ${imageName} exists, so not running continuum cube mosaicking"
-    fi
-    DO_IT=false
+if [ "${DO_IT}" == "true" ] && [ "${CLOBBER}" != "true" ]; then
+    BEAM=all
+    for POLN in $POL_LIST; do
+        pol=\`echo \$POLN | tr '[:upper:]' '[:lower:]'\`
+        for imageCode in ${mosaicImageList}; do
+            setImageProperties contcube
+            if [ -e ${OUTPUT}/${imageName} ]; then
+                if [ $DO_IT == true ]; then
+                    echo "Image ${imageName} exists, so not running continuum cube mosaicking"
+                fi
+                DO_IT=false
+            fi
+        done
+    done
 fi
 
-if [ $DO_IT == true ]; then
+if [ "${DO_IT}" == "true" ]; then
 
     if [ ${IMAGE_AT_BEAM_CENTRES} == true ] && [ "$DIRECTION_SCI" == "" ]; then
         reference="# No reference image or offsets, as we take the image centres"
@@ -94,7 +100,7 @@ for POLN in \$POL_LIST; do
 
     pol=\`echo \$POLN | tr '[:upper:]' '[:lower:]'\`
 
-    for imageCode in restored image residual; do
+    for imageCode in ${mosaicImageList}; do
     
         beamList=""
         for BEAM in ${BEAMS_TO_USE}; do
