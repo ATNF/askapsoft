@@ -196,6 +196,7 @@ if [ "${MS_INPUT_SCIENCE}" != "" ]; then
 
     FIELD_LIST=""
     TILE_LIST=""
+    NUM_TILES=0
     for FIELD in `sort -k2 $FIELDLISTFILE | awk '{print $2}' | uniq `;
     do
         FIELD_LIST="$FIELD_LIST $FIELD"
@@ -209,6 +210,7 @@ if [ "${MS_INPUT_SCIENCE}" != "" ]; then
             done
             if [ $isNew == true ]; then
                 TILE_LIST="$TILE_LIST $TILE"
+                ((NUM_TILES++))
             fi
         fi
     done
@@ -219,7 +221,7 @@ if [ "${MS_INPUT_SCIENCE}" != "" ]; then
     for FIELD in ${FIELD_LIST}; do
         ID=`echo $COUNT | awk '{printf "%02d",$1}'`
         echo "${ID} - ${FIELD}"
-        COUNT=`expr $COUNT + 1`
+        ((COUNT++))
     done
 
     

@@ -38,6 +38,15 @@ if [ "$DO_SPECTRAL_IMAGING" != "true" ]; then
     DO_IT=false
 fi
 
+# Don't run if there is only one field
+if [ ${NUM_FIELDS} -eq 1 ]; then
+    DO_IT=false
+fi
+
+if [ "${DO_MOSAIC_FIELDS}" != "true" ]; then
+    DO_IT=false
+fi
+
 if [ "${DO_IT}" == "true" ] && [ "${CLOBBER}" != "true" ]; then
     FIELD="."
     BEAM=all
