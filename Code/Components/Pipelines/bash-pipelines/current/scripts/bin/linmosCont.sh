@@ -55,6 +55,7 @@ if [ "${DO_IT}" == "true" ] && [ "${CLOBBER}" != "true" ]; then
                     DO_IT=false
                 fi
             done
+            unset TTERM
         done
     done
 fi
