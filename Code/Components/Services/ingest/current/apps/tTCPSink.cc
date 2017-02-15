@@ -63,14 +63,14 @@ ASKAP_LOGGER(logger, "tMSSink");
 
 class ParallelGenerator {
 public:
-   explicit ParallelGenerator(float rms, unsigned int nThreads = 1) : itsRMS(rms), itsNThreads(nThreads) {}
+   explicit ParallelGenerator(float rms, unsigned int nThreads = 1) : itsRMS(rms), itsNThreads(nThreads), itsSeed(0) {}
    void generate(boost::shared_ptr<casa::Complex> &data, casa::uInt size) const {
         ASKAPASSERT(itsNThreads > 0);
         const casa::uInt chunkSize = size / itsNThreads;
         casa::uInt offset = 0;
-        for (casa::uInt part = 1; part < itsNThreads; ++part) {
+        for (casa::uInt part = 1; part < itsNThreads; ++part, ++itsSeed) {
              boost::shared_ptr<casa::Complex> start(data.get() + offset, utility::NullDeleter());
-             itsGroup.create_thread(boost::bind(&ParallelGenerator::generatePart, this, start, chunkSize, part));
+             itsGroup.create_thread(boost::bind(&ParallelGenerator::generatePart, this, start, chunkSize, itsSeed));
              offset += chunkSize;
         }
         // process the remaining data in the main thread
@@ -99,6 +99,8 @@ private:
    const unsigned int itsNThreads;
 
    mutable boost::thread_group itsGroup;
+   
+   mutable casa::Int itsSeed;
 };
 
 class TCPSinkTestApp : public askap::cp::common::ParallelCPApplication

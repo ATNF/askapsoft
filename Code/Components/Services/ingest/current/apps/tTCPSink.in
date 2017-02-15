@@ -3,7 +3,7 @@ dest.hostname = 10.10.103.201
 dest.port = 9001
 
 # number of cycles to simulate; 0 - indefinite simulation
-count = 10
+count = 0
 # cycle interval in microseconds
 correlator.mode.standard.interval = 9953280
 # number of threads in the visibility simulation (for performance)
@@ -14,7 +14,8 @@ maxbeams = 36
 # put number of channels here (technically, this is the number of channels per rank, but
 # this make sense to run as single rank application only)
 # 10368 -> 192 MHz bandwidth
-n_channels.0..95 = 10368
+#n_channels.0..95 = 10368
+n_channels.0..95 = 12960
 
 # just an extract from cpingest.in from one of the actual scheduling blocks,
 # it fills other configuration parameters (required to run the task)
@@ -121,8 +122,9 @@ antenna.ant90.name = ak90
 antenna.ant90.online = false
 antennas = [ant2,ant4,ant5,ant10,ant12,ant13,ant14,ant16,ant24,ant27,ant28,ant30,ant90]
 array.name = ASKAP
-baselinemap.antennaidx = [ak02, ak04, ak05, ak10, ak12, ak13, ak14, ak16, ak24, ak27, ak28, ak30]
-baselinemap.antennaindices = [1, 3, 4, 9, 11, 12, 13, 15, 23, 26, 27, 29]
+#baselinemap.antennaidx = [ak02, ak04, ak05, ak10, ak12, ak13, ak14, ak16, ak24, ak27, ak28, ak30]
+baselinemap.antennaidx = [ak04, ak05, ak10, ak12, ak13, ak14, ak16, ak24, ak27, ak28, ak30]
+#baselinemap.antennaindices = [1, 3, 4, 9, 11, 12, 13, 15, 23, 26, 27, 29]
 baselinemap.name = standard
 correlator.mode.standard.chan_width = 18.518518kHz
 # interval moved to the top as it is configurable
