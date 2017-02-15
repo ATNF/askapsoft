@@ -117,7 +117,7 @@ void ContinuumMaster::run(void)
     synthesis::AdviseDI diadvise(itsComms,unitParset);
 
     try {
-        
+
         diadvise.prepare();
         diadvise.addMissingParameters();
 
@@ -175,14 +175,8 @@ void ContinuumMaster::run(void)
         ASKAPLOG_DEBUG_STR(logger, "Master beginning single cycle");
         imager.broadcastModel(); // initially empty model
 
-        imager.receiveNE();
-
-        /// No Minor Cycle to mimic cimager
-
-        /// Implicit receive in here
-
-        /// imager.solveNE();
-        /// Write out the images
+        imager.calcNE(); // Needed here becuase it resets the itsNE
+        imager.solveNE();
         imager.writeModel();
 
     }
@@ -199,21 +193,22 @@ void ContinuumMaster::run(void)
             imager.calcNE(); // Needed here becuase it resets the itsNE
             imager.solveNE();
 
-            imager.broadcastModel();
 
             if (imager.params()->has("peak_residual")) {
                 const double peak_residual = imager.params()->scalarValue("peak_residual");
-                ASKAPLOG_DEBUG_STR(logger, "Major Cycle " << cycle << " Reached peak residual of " << peak_residual);
+                ASKAPLOG_INFO_STR(logger, "Major Cycle " << cycle << " Reached peak residual of " << peak_residual);
                 if (peak_residual < targetPeakResidual) {
-                    ASKAPLOG_DEBUG_STR(logger, "It is below the major cycle threshold of "
+                    ASKAPLOG_INFO_STR(logger, "It is below the major cycle threshold of "
                                       << targetPeakResidual << " Jy. Stopping.");
+
+                    imager.writeModel();
                     imager.broadcastModel();
                     break;
                 } else {
                     if (targetPeakResidual < 0) {
-                        ASKAPLOG_DEBUG_STR(logger, "Major cycle flux threshold is not used.");
+                        ASKAPLOG_INFO_STR(logger, "Major cycle flux threshold is not used.");
                     } else {
-                        ASKAPLOG_DEBUG_STR(logger, "It is above the major cycle threshold of "
+                        ASKAPLOG_INFO_STR(logger, "It is above the major cycle threshold of "
                                           << targetPeakResidual << " Jy. Continuing.");
                     }
                 }
@@ -221,11 +216,14 @@ void ContinuumMaster::run(void)
             if (writeAtMajorCycle) {
                 ASKAPLOG_DEBUG_STR(logger, "Writing out model");
                 imager.writeModel(std::string(".beam") + utility::toString(beam) + \
-                std::string(".majorcycle.") + utility::toString(cycle + 1));
+                std::string(".majorcycle.") + utility::toString(cycle));
             }
             else {
                 ASKAPLOG_DEBUG_STR(logger, "Not writing out model");
             }
+
+            imager.broadcastModel();
+
             if (cycle == nCycles-1) {
                 imager.calcNE(); // resets the itsNE
                 imager.receiveNE();

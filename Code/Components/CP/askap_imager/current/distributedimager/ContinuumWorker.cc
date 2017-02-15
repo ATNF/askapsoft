@@ -1104,9 +1104,7 @@ void ContinuumWorker::processChannels()
 
 
         for (size_t n = 0; n <= nCycles; n++) {
-            if (writeAtMajorCycle) {
-                ASKAPLOG_WARN_STR(logger,"Write at major cycle not currently supported in this mode");
-            }
+            
             ASKAPLOG_INFO_STR(logger,"Rank " << itsComms.rank() << " at barrier");
             itsComms.barrier(itsComms.theWorkers());
             ASKAPLOG_INFO_STR(logger,"Rank " << itsComms.rank() << " passed barrier");
