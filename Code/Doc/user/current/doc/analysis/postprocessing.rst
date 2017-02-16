@@ -744,10 +744,11 @@ Parameters for Rotation Measure Synthesis
 |                                       |                |                               | noise), or "uniform" (each channel has a weight of 1). Anything else |
 |                                       |                |                               | defaults to "variance".                                              |
 +---------------------------------------+----------------+-------------------------------+----------------------------------------------------------------------+
-| Selavy.RMSynthesis.modelType          | string         | taylor                        | The type of model used to represent the Stoks-I spectrum. This can be|
-|                                       |                |                               | either "taylor", in which case the Taylor-term parameters from the   |
+| Selavy.RMSynthesis.modelType          | string         | taylor                        | The type of model used to represent the Stokes-I spectrum. This can  |
+|                                       |                |                               | be either "taylor", in which case the Taylor-term parameters from the|
 |                                       |                |                               | imaging & component fitting are used, or "poly", in which case a     |
 |                                       |                |                               | low-order polynomial is used to model the spectrum.                  |
+|                                       |                |                               |                                                                      |
 +---------------------------------------+----------------+-------------------------------+----------------------------------------------------------------------+
 | Selavy.RMSynthesis.modelPolyOrder     | int            | 3                             | The order of the polynomial to use in the Stokes-I model fit. Only   |
 |                                       |                |                               | used if modelType=poly.                                              |
