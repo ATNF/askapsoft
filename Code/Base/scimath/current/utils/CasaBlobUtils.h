@@ -28,9 +28,17 @@
 #define SCIMATH_CASABLOBUTILS_H
 
 // ASKAPsoft includes
+#include "askap/AskapError.h"
+
+// casacore's includes
 #include <casacore/casa/aips.h>
 #include <casacore/coordinates/Coordinates/CoordinateSystem.h>
+#include "casacore/measures/Measures/MDirection.h"
+#include "casacore/casa/Quanta/MVDirection.h"
+
+// LOFAR includes
 #include <Blob/BlobOStream.h>
+#include <Blob/BlobIStream.h>
 
 namespace LOFAR
 {
@@ -39,6 +47,31 @@ namespace LOFAR
     LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::CoordinateSystem& cSys);
     LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::CoordinateSystem& cSys);
 
+    // MV: serialisation for measures-related casacore types
+
+    /// @brief output operator for casa::Quantity
+    /// @param[in] os output stream
+    /// @param[in] q Quantity to serialise
+    /// @return output stream for chaining
+    LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::Quantity& q);
+
+    /// @brief input operator for casa::Quantity
+    /// @param[in] is input stream
+    /// @param[in] q quantity object to populate
+    /// @return input stream for chaining
+    LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::Quantity& q);
+
+    /// @brief output operator for casa::MDirection::Ref
+    /// @param[in] os output stream
+    /// @param[in] ref object to serialise
+    /// @return output stream for chaining
+    LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::MDirection::Ref& ref);
+
+    /// @brief input operator for casa::MDirection::Ref
+    /// @param[in] is input stream
+    /// @param[in] ref object to populate
+    /// @return input stream for chaining
+    LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::MDirection::Ref& ref);
 }
 
 #include "CasaBlobUtils.tcc"

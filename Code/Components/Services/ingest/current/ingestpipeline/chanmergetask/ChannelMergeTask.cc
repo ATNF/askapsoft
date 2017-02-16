@@ -68,37 +68,6 @@ using namespace askap::cp::ingest;
 using namespace LOFAR;
 
 namespace LOFAR {
-// temporary quick and dirty stuff - we need to move it to Base, test properly, etc
-LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::Quantity& q)
-{
-  os<<q.getFullUnit().getName()<<q.getValue();
-  return os;
-}
-LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::Quantity& q)
-{
-  std::string unitName;
-  casa::Double val;
-  is>>unitName>>val;
-  q=casa::Quantity(val, casa::Unit(unitName));
-  return is;
-}
-
-LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::MDirection::Ref& ref)
-{
-  const casa::uInt refType = ref.getType();
-  // for now ignore frame and offset - we're not using them in ingest anyway
-  os << refType;
-  return os;
-}
-
-LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::MDirection::Ref& ref)
-{
-  casa::uInt refType;
-  is >> refType;
-  // for now ignore frame and offset - we're not using them in ingest anyway
-  ref = casa::MDirection::Ref(refType);
-  return is;
-}
 
 LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::MVDirection& dir)
 {

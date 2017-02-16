@@ -23,6 +23,7 @@
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
 /// @author Daniel Mitchell <daniel.mitchell@csiro.au>
+/// measures stuff - Max Voronkov
 
 // CPPUnit includes
 #include <cppunit/extensions/HelperMacros.h>
@@ -49,6 +50,8 @@ namespace scimath {
 class CasaBlobUtilsTest : public CppUnit::TestFixture {
         CPPUNIT_TEST_SUITE(CasaBlobUtilsTest);
         CPPUNIT_TEST(testCoordinateSystem);
+        CPPUNIT_TEST(testQuantity);
+        CPPUNIT_TEST(testMDirectionRef);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -187,6 +190,47 @@ class CasaBlobUtilsTest : public CppUnit::TestFixture {
             }
           }
 
+        }
+
+        // MV: serialisation for the measures-related casacore types
+        
+        // helper method for serialisation and deserialisation of any type
+        // it simply takes the first variable, serialises it, then deserialises and
+        // writes the result into the second variable.
+        template<typename T> 
+        static void copyViaBlob(const T &source, T &target) {
+          // Encode
+          std::vector<int8_t> buf;
+          const int datagramVersion = 10;
+          {
+             LOFAR::BlobOBufVector<int8_t> obv(buf);
+             LOFAR::BlobOStream out(obv);
+             out.putStart("copyViaBlobTest", datagramVersion);
+             out << source;
+             out.putEnd();
+          }
+          // Decode
+          LOFAR::BlobIBufVector<int8_t> ibv(buf);
+          LOFAR::BlobIStream in(ibv);
+          const int version = in.getStart("copyViaBlobTest");
+          CPPUNIT_ASSERT_EQUAL(datagramVersion,version);
+          in >> target;
+          in.getEnd();
+        }
+
+        void testQuantity() {
+           const casa::Quantity q(3.1415, "km/s");
+           casa::Quantity receivedQ(0.1, "MHz");
+           copyViaBlob(q, receivedQ);
+           CPPUNIT_ASSERT_DOUBLES_EQUAL(q.getValue(), receivedQ.getValue(),1e-6);
+           CPPUNIT_ASSERT_EQUAL(q.getFullUnit().getName(), receivedQ.getFullUnit().getName());
+        }
+
+        void testMDirectionRef() {
+          const casa::MDirection::Ref ref(casa::MDirection::AZEL);
+          casa::MDirection::Ref receivedRef(casa::MDirection::J2000);
+          copyViaBlob(ref,receivedRef);
+          CPPUNIT_ASSERT_EQUAL(ref.getType(), receivedRef.getType());
         }
 };
 
