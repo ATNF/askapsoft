@@ -38,9 +38,6 @@
 #include "casacore/casa/aips.h"
 #include "casacore/casa/Arrays/Vector.h"
 #include "casacore/casa/Arrays/Cube.h"
-#include "casacore/measures/Measures/Stokes.h"
-#include "casacore/measures/Measures/MDirection.h"
-#include "casacore/casa/Quanta/MVDirection.h"
 #include "cpcommon/VisChunk.h"
 #include "ingestpipeline/MPITraitsHelper.h"
 #include "Blob/BlobIStream.h"
@@ -66,58 +63,6 @@ using namespace askap;
 using namespace askap::cp::common;
 using namespace askap::cp::ingest;
 using namespace LOFAR;
-
-namespace LOFAR {
-
-LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::MVDirection& dir)
-{
-  casa::Vector<casa::Double> angles = dir.get();
-  ASKAPDEBUGASSERT(angles.nelements() == 2);
-  os << angles;
-  return os;
-}
-
-LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::MVDirection& dir)
-{
-  casa::Vector<casa::Double> angles;
-  is >> angles;
-  ASKAPDEBUGASSERT(angles.nelements() == 2);
-  dir = casa::MVDirection(angles);
-  return is;
-}
-
-LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::MDirection& dir)
-{
-  os<<dir.getValue()<<dir.getRef();
-  return os;
-}
-
-LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::MDirection& dir)
-{
-  casa::MVDirection val;
-  casa::MDirection::Ref ref;
-  is >> val >> ref;
-  dir = casa::MDirection(val,ref);
-  return is;
-}
-
-LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::Stokes::StokesTypes& pol)
-{
-  os<<(int)pol;
-  return os;
-}
-
-LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::Stokes::StokesTypes& pol)
-{
-  int intPol;
-  is >> intPol;
-  pol = casa::Stokes::StokesTypes(intPol);
-  return is;
-}
-
-}
-
-//
 
 
 ChannelMergeTask::ChannelMergeTask(const LOFAR::ParameterSet& parset,

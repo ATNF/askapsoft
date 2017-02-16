@@ -35,6 +35,7 @@
 #include <casacore/coordinates/Coordinates/CoordinateSystem.h>
 #include "casacore/measures/Measures/MDirection.h"
 #include "casacore/casa/Quanta/MVDirection.h"
+#include "casacore/measures/Measures/Stokes.h"
 
 // LOFAR includes
 #include <Blob/BlobOStream.h>
@@ -72,6 +73,42 @@ namespace LOFAR
     /// @param[in] ref object to populate
     /// @return input stream for chaining
     LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::MDirection::Ref& ref);
+
+    /// @brief output operator for casa::MVDirection
+    /// @param[in] os output stream
+    /// @param[in] dir object to serialise
+    /// @return output stream for chaining
+    LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::MVDirection& dir);
+
+    /// @brief input operator for casa::MVDirection
+    /// @param[in] is input stream
+    /// @param[in] dir object to populate
+    /// @return input stream for chaining
+    LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::MVDirection& dir);
+
+    /// @brief output operator for casa::MDirection
+    /// @param[in] os output stream
+    /// @param[in] dir object to serialise
+    /// @return output stream for chaining
+    LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::MDirection& dir);
+
+    /// @brief input operator for casa::MDirection
+    /// @param[in] is input stream
+    /// @param[in] dir object to populate
+    /// @return input stream for chaining
+    LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::MDirection& dir);
+
+    /// @brief output operator for casa::Stokes::StokesTypes
+    /// @param[in] os output stream
+    /// @param[in] pol object to serialise
+    /// @return output stream for chaining
+    LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::Stokes::StokesTypes& pol);
+
+    /// @brief input operator for casa::Stokes::StokesTypes
+    /// @param[in] is input stream
+    /// @param[in] pol object to populate
+    /// @return input stream for chaining
+    LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::Stokes::StokesTypes& pol);
 }
 
 #include "CasaBlobUtils.tcc"

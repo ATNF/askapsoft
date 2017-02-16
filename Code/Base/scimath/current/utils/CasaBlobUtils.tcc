@@ -197,7 +197,8 @@ namespace LOFAR
     {
       const casa::uInt refType = ref.getType();
       // for now ignore frame and offset - we're not using them in ingest anyway
-      // but do check that the user didn't set them
+      // but do check that the user didn't set them. If someone sees the exception later on, they can add 
+      // the required logic in this and the following method
       ASKAPCHECK(const_cast<casa::MDirection::Ref&>(ref).getFrame().empty(), 
                  "Serialisation of frame information attached to measures is not implemented");
       ASKAPCHECK(ref.offset() == NULL, "Serialisation of frame offset in measures is not implemented");
@@ -219,5 +220,75 @@ namespace LOFAR
       return is;
     }
 
+    /// @brief output operator for casa::MVDirection
+    /// @param[in] os output stream
+    /// @param[in] dir object to serialise
+    /// @return output stream for chaining
+    LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::MVDirection& dir)
+    {
+      casa::Vector<casa::Double> angles = dir.get();
+      ASKAPDEBUGASSERT(angles.nelements() == 2);
+      os << angles;
+      return os;
+    }
+
+    /// @brief input operator for casa::MVDirection
+    /// @param[in] is input stream
+    /// @param[in] dir object to populate
+    /// @return input stream for chaining
+    LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::MVDirection& dir)
+    {
+      casa::Vector<casa::Double> angles;
+      is >> angles;
+      ASKAPDEBUGASSERT(angles.nelements() == 2);
+      dir = casa::MVDirection(angles);
+      return is;
+    }
+
+    /// @brief output operator for casa::MDirection
+    /// @param[in] os output stream
+    /// @param[in] dir object to serialise
+    /// @return output stream for chaining
+    LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::MDirection& dir)
+    {
+      os<<dir.getValue()<<dir.getRef();
+      return os;
+    }
+
+    /// @brief input operator for casa::MDirection
+    /// @param[in] is input stream
+    /// @param[in] dir object to populate
+    /// @return input stream for chaining
+    LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::MDirection& dir)
+    {
+      casa::MVDirection val;
+      casa::MDirection::Ref ref;
+      is >> val >> ref;
+      dir = casa::MDirection(val,ref);
+      return is;
+    }
+
+    /// @brief output operator for casa::Stokes::StokesTypes
+    /// @param[in] os output stream
+    /// @param[in] pol object to serialise
+    /// @return output stream for chaining
+    LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& os, const casa::Stokes::StokesTypes& pol)
+    {
+      os<<(int)pol;
+      return os;
+    }
+
+    /// @brief input operator for casa::Stokes::StokesTypes
+    /// @param[in] is input stream
+    /// @param[in] pol object to populate
+    /// @return input stream for chaining
+    LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& is, casa::Stokes::StokesTypes& pol)
+    {
+      int intPol;
+      is >> intPol;
+      pol = casa::Stokes::StokesTypes(intPol);
+      return is;
+    }
 
 } // End namespace LOFAR
+

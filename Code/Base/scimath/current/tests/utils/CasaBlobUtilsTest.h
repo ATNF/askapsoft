@@ -52,6 +52,9 @@ class CasaBlobUtilsTest : public CppUnit::TestFixture {
         CPPUNIT_TEST(testCoordinateSystem);
         CPPUNIT_TEST(testQuantity);
         CPPUNIT_TEST(testMDirectionRef);
+        CPPUNIT_TEST(testMVDirection);
+        CPPUNIT_TEST(testMDirection);
+        CPPUNIT_TEST(testStokesTypes);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -231,6 +234,32 @@ class CasaBlobUtilsTest : public CppUnit::TestFixture {
           casa::MDirection::Ref receivedRef(casa::MDirection::J2000);
           copyViaBlob(ref,receivedRef);
           CPPUNIT_ASSERT_EQUAL(ref.getType(), receivedRef.getType());
+        }
+
+        void testMVDirection() {
+          const casa::MVDirection dir(casa::Quantity(135.0, "deg"), casa::Quantity(-31.0, "deg"));
+          casa::MVDirection receivedDir(casa::Quantity(1.0, "rad"), casa::Quantity(0, "arcsec"));
+          copyViaBlob(dir, receivedDir);
+          CPPUNIT_ASSERT_DOUBLES_EQUAL(dir.getLong(), receivedDir.getLong(), 1e-6);
+          CPPUNIT_ASSERT_DOUBLES_EQUAL(dir.getLat(), receivedDir.getLat(), 1e-6);
+        }
+
+        void testMDirection() {
+          const casa::MDirection dir(casa::MVDirection(casa::Quantity(135.0, "deg"), casa::Quantity(+31.0, "deg")), 
+                                     casa::MDirection::AZEL);
+          casa::MDirection receivedDir(casa::MVDirection(casa::Quantity(1.0, "rad"), casa::Quantity(0, "arcsec")), 
+                                     casa::MDirection::J2000);
+          copyViaBlob(dir, receivedDir);
+          CPPUNIT_ASSERT_DOUBLES_EQUAL(dir.getValue().getLong(), receivedDir.getValue().getLong(), 1e-6);
+          CPPUNIT_ASSERT_DOUBLES_EQUAL(dir.getValue().getLat(), receivedDir.getValue().getLat(), 1e-6);
+          CPPUNIT_ASSERT_EQUAL(dir.getRef().getType(), receivedDir.getRef().getType());
+        }
+
+        void testStokesTypes() {
+          const casa::Stokes::StokesTypes pol = casa::Stokes::XY;
+          casa::Stokes::StokesTypes receivedPol(casa::Stokes::RR);
+          copyViaBlob(pol, receivedPol);
+          CPPUNIT_ASSERT_EQUAL(pol, receivedPol);
         }
 };
 
