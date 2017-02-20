@@ -31,7 +31,7 @@ Sonexion storage system mounted as a Lustre filesystem.
 
   - 2 x 2.0 GHz Intel Xeon E5-2650 (Sandy Bridge) CPUs
   - 64GB RAM
-  - 10 GbE connectivity to iVEC border router
+  - 10 GbE connectivity to Pawsey border router
   - 4x QDR Infiniband connectivity to Lustre filesystem
 
 * High-Performance Storage
@@ -245,7 +245,7 @@ at the same time.
 Additional Information
 ----------------------
 
-* `Galaxy User Guide (Pawsey User Portal) <https://portal.pawsey.org.au/docs/Supercomputers/Galaxy_User_Guide>`_
+* `Galaxy User Guide (Pawsey User Portal) <https://support.pawsey.org.au/documentation/display/US/Galaxy+User+Guide>`_
 * `Cray XC30 System Documentation <http://docs.cray.com/cgi-bin/craydoc.cgi?mode=SiteMap;f=xc_sitemap>`_
 * `SLURM Homepage <http://computing.llnl.gov/linux/slurm>`_
-* `Migrating from PBS to SLURM <https://portal.ivec.org/docs/Supercomputers/Migrating_from_PBS_Pro_to_SLURM>`_
+* `Migrating from PBS to SLURM <https://support.pawsey.org.au/documentation/display/US/Migrating+from+PBS+Pro+to+SLURM>`_

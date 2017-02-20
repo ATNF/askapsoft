@@ -59,14 +59,15 @@ Retrieving the tutorial dataset
 
 As before, there are 11 measurement sets associated with this tutorial. There are nine for the calibration observations (one per beam), named calibrator_J1934m638_forSKADS_BEAM0.ms through calibrator_J1934m638_forBETAtestfield_BEAM8.ms (these are 2.6GB each). The science field has one at full spectral resolution, named sciencefield_BETAtestfield.ms (291GB), and an averaged version of this named sciencefield_BETAtestfield_coarseChan.ms (5.5GB). You can start with the full-resolution version, and run the channel averaging yourself (see below), or you can start with the latter, and skip the channel averaging. 
 
-The measurement sets reside on the "Commissioning Archive" and can be retrieved using the scp command. As the measurement sets may need to be fetched from tape, they should be staged first::
+The measurement sets reside on the "Commissioning Archive" and can be retrieved using the ashell utility::
 
-    ssh cortex.ivec.org /opt/SUNWsamfs/bin/stage -r /pbstore/groupfs/askap/tutorials/basiccontinuum/sciencefield_SKADS.ms
-    scp -r cortex.ivec.org:/pbstore/groupfs/askap/tutorials/basiccontinuum/sciencefield_SKADS.ms .
+    ashell.py
+    <pawsey.offline>login
+    <pawsey.online>get /projects/ASKAP Commissioning Data/tutorials/BasicContinuum.tar
+    <pawsey.online>quit
+    tar xvf BasicContinuum.tar
 
-and similarly for the other measurement sets.
-
-You may notice the **scp** may stall. This is likely due to the fact the data has not been fetched (staged) from tape to disk. This is quite normal, and the length of the stall depends upon the load on the system (e.g. other users).
+You may notice the 'get' command may stall. This is likely due to the fact the data has not been fetched (staged) from tape to disk. This is quite normal, and the length of the stall depends upon the load on the system (e.g. other users).
 
 Calibration
 -----------

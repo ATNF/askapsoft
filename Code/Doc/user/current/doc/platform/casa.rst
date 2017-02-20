@@ -31,7 +31,7 @@ and start the VNC server::
 Note, you may choose any geometry you want, 1024x768 is just an example. You may wish to
 run the VNC session in full-screen mode, in which case the geometry should match your
 monitor. You will then be prompted to enter a password. Be sure to choose a secure
-password, as anyone within the iVEC network can potentially connect to your VNC server.
+password, as anyone within the Pawsey network can potentially connect to your VNC server.
 You will also be prompted to enter a *view only* password, you can answer no to this. You
 will then see output similar to the following::
 
@@ -43,7 +43,7 @@ will then see output similar to the following::
 Shortly you will be configuring your VNC client and you will need the number after the full-colon
 in the first line, in this case "1". Now the VNC server is started and is waiting for your VNC
 client to connect. You are free to use the VNC client of your choice, however as you will be
-connecting via an SSH tunnel (the VNC port is blocked at the iVEC firewall) you will want a client
+connecting via an SSH tunnel (the VNC port is blocked at the Pawsey firewall) you will want a client
 with SSH tunnelling support. On Mac OSX the VNC client "Chicken" works well.
 
 Below is a screen shot of the VNC configuration. The settings you will need to enter are:

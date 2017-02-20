@@ -37,16 +37,17 @@ Using *scp* can be quite slow and a program called *bbcp* is suggested for large
 The ASKAP software team can supply Debian packages. Usage is similar to scp, but with
 a few extra parameters. To copy a file from the /scratch2 filesystem::
 
-    bbcp -z -P 10 -s 32 -w 2M -r galaxy-data1.pawsey.org.au:/scratch2/askap/user123/image.fits .
+    bbcp -z -P 10 -s 32 -w 2M -r hpc-data1.pawsey.org.au:/scratch2/askap/user123/image.fits .
 
 and to copy a file to the /scratch2 filesystem::
 
-    bbcp -P 10 -s 32 -w 2M -r image.fits galaxy-data1.pawsey.org.au:/scratch2/askap/user123
+    bbcp -P 10 -s 32 -w 2M -r image.fits hpc-data1.pawsey.org.au:/scratch2/askap/user123
 
-.. note:: The hostname necessary to use bbcp is *galaxy-data1.pawsey.org.au*. This is one of the
-          two hosts to which the *hpc-data* DNS alias points to (the other is *galaxy-data2*).
+.. note:: The hostname necessary to use bbcp is *hpc-data1.pawsey.org.au*. This is one of the
+          four hosts to which the *hpc-data* DNS alias points to (the
+          other that works is *hpc-data2*).
           This is necessary as bbcp doesn't reliably establish connections via the galaxydata
-          alias due to the fact connections are round-robined between the two nodes.
+          alias due to the fact connections are round-robined between its four nodes.
 
 The three additional options result in production of progress messages every 10 seconds,
 sets the number of parallel network streams to be used for the transfer to 32, and sets the

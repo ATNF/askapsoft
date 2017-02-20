@@ -92,12 +92,12 @@ The measurement sets reside on the "Commissioning Archive" and can be retrieved 
 following commands::
 
     ashell.py
-    <ivec.offline>login
-    <ivec.online>get /projects/ASKAP Commissioning Data/tutorials/BasicContinuum.tar
-    <ivec.online>quit
+    <pawsey.offline>login
+    <pawsey.online>get /projects/ASKAP Commissioning Data/tutorials/BasicContinuum.tar
+    <pawsey.online>quit
     tar xvf BasicContinuum.tar
 
-You need to login with your pawsey/ivec password. Further information
+You need to login with your pawsey password. Further information
 on ashell is available on the :doc:`../platform/comm_archive` page.
     
 You may notice the **get** may stall. This is likely due to the fact the data has not been

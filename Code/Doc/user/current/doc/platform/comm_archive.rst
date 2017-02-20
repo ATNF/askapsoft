@@ -43,5 +43,5 @@ Quick help is also available via 'help' and 'help <command>'
 Additional Information
 ----------------------
 
-* `PawseyData Help <https://portal.pawsey.org.au/docs/Data_Services>`_
-* `Pawsey Data Services Command Line Client <https://portal.pawsey.org.au/docs/Data_Services/Command_Line>`_
+* `PawseyData Help <https://support.pawsey.org.au/documentation/display/US/Data+Documentation>`_
+* `Pawsey Data Services Command Line Client <https://support.pawsey.org.au/documentation/display/US/Use+the+Command+Line>`_
