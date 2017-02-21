@@ -84,25 +84,27 @@ switched on.
 | ``SELAVY_POL_WRITE_SPECTRA``    | true                            | RMSynthesis.writeSpectra            | Whether to write the extracted Stokes spectra to individual |
 |                                 |                                 | (:doc:`../analysis/postprocessing`) | files.                                                      |
 +---------------------------------+---------------------------------+-------------------------------------+-------------------------------------------------------------+
-| ``SELAVY_POL_WRITE_FDF``        | true                            | RMSynthesis.writeComplexFDF         | Whether to write the Faraday Dispersion Functions for each  | 
-|                                 |                                 | (:doc:`../analysis/postprocessing`) | source to individual files.                                 |
+| ``SELAVY_POL_WRITE_COMPLEX_FDF``| true                            | RMSynthesis.writeComplexFDF         | Whether to write the Faraday Dispersion Function for each   | 
+|                                 |                                 | (:doc:`../analysis/postprocessing`) | source as a single complex-valued spectrum (true) or as a   |
+|                                 |                                 |                                     | pair of real-valued spectra containing amplitude & phase    |
+|                                 |                                 |                                     | (false).                                                    |
 +---------------------------------+---------------------------------+-------------------------------------+-------------------------------------------------------------+
 | ``SELAVY_POL_BOX_WIDTH``        | 5                               | RMSynthesis.boxWidth                | The width (N) of the NxN box to be applied in the extraction|
-|                                 |                                 | (:doc:`../analysis/postprocessing`) | of Stokes spectra.                                          |
+|                                 |                                 | (:doc:`../analysis/postprocessing`) | of Stokes spectra.                                          | 
 +---------------------------------+---------------------------------+-------------------------------------+-------------------------------------------------------------+
-| ``SELAVY_POL_NOISE_AREA``       | 50                              | RMSynthesis.noiseArea               | The number of beam areas over which to measure the noise in | 
+| ``SELAVY_POL_NOISE_AREA``       | 50                              | RMSynthesis.noiseArea               | The number of beam areas over which to measure the noise in |
 |                                 |                                 | (:doc:`../analysis/postprocessing`) | each channel.                                               |
-+---------------------------------+---------------------------------+-------------------------------------+-------------------------------------------------------------+
++---------------------------------+---------------------------------+-------------------------------------+-------------------------------------------------------------+ 
 | ``SELAVY_POL_ROBUST_STATS``     | true                            | RMSynthesis.robust                  | Whether to use robust statistics in the calculation of the  |
-|                                 |                                 | (:doc:`../analysis/postprocessing`) | noise spectra.                                              | 
+|                                 |                                 | (:doc:`../analysis/postprocessing`) | noise spectra.                                              |
 +---------------------------------+---------------------------------+-------------------------------------+-------------------------------------------------------------+
 | ``SELAVY_POL_WEIGHT_TYPE``      | variance                        | RMSynthesis.weightType              | The type of weighting to be used in the RM Synthesis -      |
 |                                 |                                 | (:doc:`../analysis/postprocessing`) | either "variance" or "uniform".                             |
 +---------------------------------+---------------------------------+-------------------------------------+-------------------------------------------------------------+
 | ``SELAVY_POL_MODEL_TYPE``       | taylor                          | RMSynthesis.modelType               | The type of Stokes-I model to use. Either "taylor"          |
-|                                 |                                 | (:doc:`../analysis/postprocessing`) | (Taylor-term decomposition from the MFS imaging), or "poly" |
+|                                 |                                 | (:doc:`../analysis/postprocessing`) | (Taylor-term decomposition from the MFS imaging), or "poly" | 
 |                                 |                                 |                                     | (polynomial fit to the Stokes-I spectrum".                  |
-+---------------------------------+---------------------------------+-------------------------------------+-------------------------------------------------------------+ 
++---------------------------------+---------------------------------+-------------------------------------+-------------------------------------------------------------+
 | ``SELAVY_POL_MODEL_ORDER``      | 3                               | RMSynthesis.modelPolyOrder          | When ``SELAVY_POL_MODEL_TYPE=poly``, this gives the order of|
 |                                 |                                 | (:doc:`../analysis/postprocessing`) | the polynomial that is fit to the Stokes-I spectrum.        |
 +---------------------------------+---------------------------------+-------------------------------------+-------------------------------------------------------------+
