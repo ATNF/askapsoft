@@ -700,7 +700,7 @@ SELAVY_POL_OUTPUT_BASE=pol
 SELAVY_POL_WRITE_SPECTRA=true
 # Whether to write the Faraday Dispersion Function as a complex-valued
 # spectrum (true) or as two real-valued spectra for amplitude & phase
-SELAVY_POL_WRITE_COMPLEX_FDF=true
+SELAVY_POL_WRITE_COMPLEX_FDF=false
 # The full width of the box used in spectral extraction
 SELAVY_POL_BOX_WIDTH=5
 # The area (in multiples of the beam) for the noise extraction

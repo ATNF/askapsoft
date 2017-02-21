@@ -40,7 +40,7 @@ fi
 
 if [ "${DO_IT}" == "true" ] && [ "${CLOBBER}" != "true" ]; then
     BEAM=all
-    for imageCode in ${mosaicImageResidual}; do
+    for imageCode in ${mosaicImageList}; do
         setImageProperties spectral
         if [ -e ${OUTPUT}/${imageName} ]; then
             if [ $DO_IT == true ]; then
@@ -63,7 +63,7 @@ linmos.feeds.spacing    = ${LINMOS_BEAM_SPACING}
 ${LINMOS_BEAM_OFFSETS}"
     fi
 
-    for imCode in ${mosaicImageResidual}; do
+    for imCode in ${mosaicImageList}; do
 
         setJob linmosSpectral_${imCode} linmosS${imcode}
         cat > $sbatchfile <<EOFOUTER

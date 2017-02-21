@@ -49,10 +49,10 @@ if [ $DO_SOURCE_FINDING_CONT == true ]; then
     # We also can't do the RM synthesis on the LOOP images (since the
     # calibrations don't match), so we turn it off if it is on
     doRM=${DO_RM_SYNTHESIS}
-    description=selavy
+    description=selavyCont
     if [ "$LOOP" != "" ]; then
        if [ $LOOP -gt 0 ]; then
-           description=selavyL${LOOP}
+           description=selavyContL${LOOP}
            contImage="${contImage}.SelfCalLoop${LOOP}"
            contWeights="${contWeights}.SelfCalLoop${LOOP}"
            doRM=false
