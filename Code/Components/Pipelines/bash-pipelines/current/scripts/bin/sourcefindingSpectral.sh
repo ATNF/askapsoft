@@ -33,6 +33,7 @@ if [ $DO_SOURCE_FINDING_SPEC == true ]; then
     # set imageName etc
     imageCode=restored
     setImageProperties spectral
+    beamlog=beamlog.${imageBase}.txt
 
     # Define the detection thresholds in terms of flux or SNR
     if [ "${SELAVY_SPEC_FLUX_THRESHOLD}" != "" ]; then
@@ -204,6 +205,7 @@ Selavy.extractSpectra = true
 Selavy.extractSpectra.spectralCube = \$image
 Selavy.extractSpectra.spectralOutputBase = \${spectraDir}/${SELAVY_SPEC_BASE_SPECTRUM}
 Selavy.extractSpectra.useDetectedPixels = true
+Selavy.extractSpectra.beamLog = ${beamlog}
 Selavy.extractNoiseSpectra = true
 Selavy.extractNoiseSpectra.spectralCube= \$image
 Selavy.extractNoiseSpectra.spectralOutputBase = \${spectraDir}/${SELAVY_SPEC_BASE_NOISE}

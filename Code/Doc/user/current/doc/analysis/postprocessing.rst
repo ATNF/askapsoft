@@ -718,6 +718,10 @@ Parameters for Rotation Measure Synthesis
 |                                       |                |                               | corresponding to at least I,Q,U. See :doc:`extraction` for more      |
 |                                       |                |                               | details.                                                             |
 +---------------------------------------+----------------+-------------------------------+----------------------------------------------------------------------+
+| Selavy.RMSynthesis.beamLog            | string         | ""                            | The filename of a beam log file (see :doc:`extraction`) that can be  |
+|                                       |                |                               | used to correct the extracted fluxes with a channel-dependent        |
+|                                       |                |                               | beam. This can incorporate the "%p" wildcard.                        |
++---------------------------------------+----------------+-------------------------------+----------------------------------------------------------------------+
 | Selavy.RMSynthesis.boxWidth           | int            | 5                             | The width (N) of the NxN box to be applied in the extraction of      |
 |                                       |                |                               | Stokes spectra.                                                      |
 +---------------------------------------+----------------+-------------------------------+----------------------------------------------------------------------+

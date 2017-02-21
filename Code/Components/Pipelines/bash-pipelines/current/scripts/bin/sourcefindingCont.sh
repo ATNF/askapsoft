@@ -37,6 +37,7 @@ if [ $DO_SOURCE_FINDING_CONT == true ]; then
     pol="%p"
     setImageProperties contcube
     contCube=$imageName
+    beamlog=beamlog.${imageBase}.txt
 
     # lower-case list of polarisations to use
     polList=`echo ${POL_LIST} | tr [:upper:] [:lower:]`
@@ -189,6 +190,7 @@ if [ \${HAVE_IMAGES} == true ]; then
         rmSynthParams="# RM Synthesis on extracted spectra from continuum cube
 Selavy.RMSynthesis = \${doRM}
 Selavy.RMSynthesis.cube = \$contcube
+Selavy.RMSynthesis.beamLog = ${beamlog}
 Selavy.RMSynthesis.outputBase = \${polDir}/${SELAVY_POL_OUTPUT_BASE}
 Selavy.RMSynthesis.writeSpectra = ${SELAVY_POL_WRITE_SPECTRA}
 Selavy.RMSynthesis.writeComplexFDF = ${SELAVY_POL_WRITE_COMPLEX_FDF}
