@@ -124,7 +124,18 @@ void SourceSpectrumExtractor::setBeamScale()
                         ASKAPLOG_DEBUG_STR(logger, "Beam for input cube = " << inputBeam);
                     }
                 } else {
-                    accessors::BeamLogger beamlog(itsBeamLog);
+                    std::string beamlogfile = itsBeamLog;
+                    if (itsBeamLog.find("%p") != std::string::npos) {
+                        // the beam log has a "%p" string, meaning
+                        // polarisation substitution is possible
+                        casa::Stokes stokes;
+                        casa::String stokesname(stokes.name(itsCurrentStokes));
+                        stokesname.downcase();
+                        ASKAPLOG_DEBUG_STR(logger, "Input beam log: replacing \"%p\" with " <<
+                                           stokesname.c_str() << " in " << beamlogfile);
+                        beamlogfile.replace(beamlogfile.find("%p"), 2, stokesname.c_str());
+                    }
+                    accessors::BeamLogger beamlog(beamlogfile);
                     beamlog.read();
                     beamvec = beamlog.beamlist();
 

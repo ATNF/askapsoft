@@ -119,6 +119,8 @@ class StokesSpectrum {
         std::string             itsCubeName;
         /// @brief Base name for the output spectra
         std::string             itsOutputBase;
+        /// @brief Beam Log recording restoring beam per channel
+        std::string             itsBeamLog;
 
         /// @brief Extractor to obtain the source spectrum
         SourceSpectrumExtractor *itsSpecExtractor;

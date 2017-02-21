@@ -60,6 +60,8 @@ StokesSpectrum::StokesSpectrum(const LOFAR::ParameterSet &parset,
     itsOutputBase = parset.getString("outputBase", "");
     ASKAPCHECK(itsOutputBase != "", "No output name given");
 
+    itsBeamLog = parset.getString("beamLog", "");
+
     std::stringstream outputbase;
 
     // Define the parset used to set up the source extractor
@@ -72,6 +74,7 @@ StokesSpectrum::StokesSpectrum(const LOFAR::ParameterSet &parset,
     specParset.add(LOFAR::KVpair("polarisation", itsPol));
     specParset.add(LOFAR::KVpair("useDetectedPixels", false));
     specParset.add(LOFAR::KVpair("scaleSpectraByBeam", true));
+    specParset.add(LOFAR::KVpair("beamLog", itsBeamLog));
     itsSpecExtractor = new SourceSpectrumExtractor(specParset);
 
     // Define the parset used to set up the noise extractor
