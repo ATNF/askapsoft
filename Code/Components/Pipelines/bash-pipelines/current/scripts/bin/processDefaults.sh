@@ -163,6 +163,93 @@ module load askappipeline/${askappipelineVersion}"
         echo "ASKAPsoft modules will *not* be loaded in the slurm files."
     fi
 
+    #############################
+    # CONVERSION TO FITS FORMAT
+
+    # This function returns a bunch of text in $fitsConvertText that can
+    # be pasted into an external slurm job file.
+    # The text will perform the conversion of an given CASA image to FITS
+    # format, and update the headers and history appropriately.
+    # For the most recent askapsoft versions, it will use the imageToFITS
+    # tool to do both, otherwise it will use casa to do so.
+
+    # Check whether imageToFITS is defined in askapsoft module being
+    # used
+    if [ "`which imageToFITS 2> ${tmp}/whchim2fts`" == "" ]; then
+        # Not found - use casa to do conversion        
+        fitsConvertText="# The following converts the file in \$casaim to a FITS file, after fixing headers.
+if [ -e \${casaim} ] && [ ! -e \${fitsim} ]; then 
+    # The FITS version of this image doesn't exist
+
+    script=\`echo \${parset} | sed -e 's/\.in/\.py/g'\`
+    ASKAPSOFT_VERSION=${ASKAPSOFT_VERSION}
+    if [ \"\${ASKAPSOFT_VERSION}\" == \"\" ]; then
+        ASKAPSOFT_VERSION_USED=\`module list -t 2>&1 | grep askapsoft\`
+    else
+        ASKAPSOFT_VERSION_USED=\`echo \${ASKAPSOFT_VERSION} | sed -e 's|/||g'\`
+    fi
+
+    cat > \$script << EOFSCRIPT
+#!/usr/bin/env python
+
+casaimage='\${casaim}'
+fitsimage='\${fitsim}'
+
+ia.open(casaimage)
+info=ia.miscinfo()
+info['PROJECT']='${PROJECT_ID}'
+info['DATE-OBS']='${DATE_OBS}'
+info['DURATION']=${DURATION}
+info['SBID']='${SB_SCIENCE}'
+#info['INSTRUME']='${INSTRUMENT}'
+ia.setmiscinfo(info)
+imhistory=[]
+imhistory.append('Produced with ASKAPsoft version \${ASKAPSOFT_VERSION_USED}')
+imhistory.append('Produced using ASKAP pipeline version ${PIPELINE_VERSION}')
+imhistory.append('Processed with ASKAP pipelines on ${NOW_FMT}')
+ia.sethistory(origin='ASKAPsoft pipeline',history=imhistory)
+ia.tofits(outfile=fitsimage, velocity=False)
+ia.close()
+EOFSCRIPT
+
+    NCORES=1
+    NPPN=1
+    module load casa
+    aprun -n \${NCORES} -N \${NPPN} -b casa --nogui --nologger --log2term -c \${script} >> \${log}
+
+fi"
+    else
+        # We can use the new imageToFITS utility to do the conversion.
+        fitsConvertText="# The following converts the file in \$casaim to a FITS file, after fixing headers.
+if [ -e \${casaim} ] && [ ! -e \${fitsim} ]; then
+    # The FITS version of this image doesn't exist
+
+    ASKAPSOFT_VERSION=${ASKAPSOFT_VERSION}
+    if [ \"${ASKAPSOFT_VERSION}\" == \"\" ]; then
+        ASKAPSOFT_VERSION_USED=\`module list -t 2>&1 | grep askapsoft\`
+    else
+        ASKAPSOFT_VERSION_USED=\`echo \${ASKAPSOFT_VERSION} | sed -e 's|/||g'\`
+    fi
+
+    cat > \$parset << EOFINNER
+ImageToFITS.casaimage = \${casaim}
+ImageToFITS.fitsimage = \${fitsim}
+ImageToFITS.stokesLast = true
+ImageToFITS.headers = [\"project\", \"sbid\", \"date-obs\", \"duration\"]
+ImageToFITS.headers.project = ${PROJECT_ID}
+ImageToFITS.headers.sbid = ${SB_SCIENCE}
+ImageToFITS.headers.date-obs = ${DATE_OBS}
+ImageToFITS.headers.duration = ${DURATION}
+ImageToFITS.history = [\"Produced with ASKAPsoft version \${ASKAPSOFT_VERSION_USED}\", \"Produced using ASKAP pipeline version ${PIPELINE_VERSION}\", \"Processed with ASKAP pipelines on ${NOW_FMT}\"]
+EOFINNER
+    NCORES=1
+    NPPN=1
+    aprun -n \${NCORES} -N \${NPPN} imageToFITS -c \${parset} >> \${log}
+
+fi"
+    fi
+
+
     ####################
     # Slurm file headers
 

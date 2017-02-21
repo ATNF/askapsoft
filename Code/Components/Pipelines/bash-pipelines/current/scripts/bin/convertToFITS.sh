@@ -34,9 +34,6 @@
 
 if [ ${DO_CONVERT_TO_FITS} == true ]; then
 
-    # get the text that does the FITS conversion - put in $fitsConvertText
-    convertToFITStext
-
     sbatchfile="$slurms/convert_to_FITS.sbatch"
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
@@ -79,6 +76,9 @@ for image in \${expectedImageNames[@]}; do
     casaim=\${image}
     fitsim=\${image}.fits
     
+    parset=$parsets/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.in
+    log=$logs/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.log
+
     ${fitsConvertText}
 
 done

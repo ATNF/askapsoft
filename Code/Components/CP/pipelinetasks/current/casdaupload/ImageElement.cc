@@ -36,6 +36,8 @@
 // ASKAPsoft includes
 #include "casdaupload/ProjectElementBase.h"
 #include "casdaupload/ElementBase.h"
+#include "casdaupload/SpectrumElement.h"
+#include "casdaupload/MomentMapElement.h"
 #include "casdaupload/CasdaFileUtils.h"
 #include "askap/AskapLogging.h"
 #include "askap/AskapError.h"
@@ -63,6 +65,29 @@ ImageElement::ImageElement(const LOFAR::ParameterSet &parset)
     }
     itsThumbnailLarge = parset.getString("thumbnail_large", "");
     itsThumbnailSmall = parset.getString("thumbnail_small", "");
+
+    // Find spectra
+    // Expect the parset to have things like
+    //    image1.spectralist = [spectra1,spectra2]
+    //    image1.spectra1.filename = ...
+    //    image1.spectra2.filename = ...
+    // and so forth
+    if ( parset.isDefined("spectra") ){
+        std::vector<std::string> spectraList = parset.getStringVector("spectra","");
+        std::vector<std::string>::iterator spec=spectraList.begin();
+        for(;spec<spectraList.end();spec++){
+            itsSpectra.push_back(SpectrumElement(parset.makeSubset(*spec+".")));
+        }
+    }
+
+    if ( parset.isDefined("momentmaps") ){
+        std::vector<std::string> momentMapList = parset.getStringVector("momentmaps","");
+        std::vector<std::string>::iterator mom=momentMapList.begin();
+        for(;mom<momentMapList.end();mom++){
+            itsMomentmaps.push_back(MomentMapElement(parset.makeSubset(*mom+".")));
+        }
+    }
+    
 }
 
 xercesc::DOMElement* ImageElement::toXmlElement(xercesc::DOMDocument& doc) const
@@ -76,6 +101,23 @@ xercesc::DOMElement* ImageElement::toXmlElement(xercesc::DOMDocument& doc) const
         XercescUtils::addTextElement(*e, "thumbnail_small", itsThumbnailSmall.filename().string());
     }
 
+    // Create Spectra elements
+    DOMElement* childSpec = doc.createElement(XercescString("spectra"));
+    std::vector<SpectrumElement>::const_iterator spec = itsSpectra.begin();
+    for (; spec != itsSpectra.end(); ++spec) {
+        childSpec->appendChild(spec->toXmlElement(doc));
+    }
+    e->appendChild(childSpec);
+
+    // Create MomentMap elements
+    DOMElement* childMom = doc.createElement(XercescString("moment_maps"));
+    std::vector<MomentMapElement>::const_iterator mom = itsMomentmaps.begin();
+    for (; mom != itsMomentmaps.end(); ++mom) {
+        childMom->appendChild(mom->toXmlElement(doc));
+    }
+    e->appendChild(childMom);
+
+    
     return e;
 }
 
@@ -100,6 +142,16 @@ void ImageElement::copyAndChecksum(const boost::filesystem::path& outdir) const
         const boost::filesystem::path outSmall(outdir / inSmall.filename());
         ASKAPLOG_INFO_STR(logger, "Copying and calculating checksum for " << inSmall);
         CasdaFileUtils::copyAndChecksum(inSmall, outSmall);
+    }
+
+    std::vector<SpectrumElement>::const_iterator spec=itsSpectra.begin();
+    for(;spec<itsSpectra.end();spec++){
+        spec->copyAndChecksum(outdir);
+    }
+
+    std::vector<MomentMapElement>::const_iterator mom=itsMomentmaps.begin();
+    for(;mom<itsMomentmaps.end();mom++){
+        mom->copyAndChecksum(outdir);
     }
 
 }

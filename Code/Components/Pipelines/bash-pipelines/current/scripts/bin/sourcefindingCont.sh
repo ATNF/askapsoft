@@ -42,9 +42,6 @@ if [ $DO_SOURCE_FINDING_CONT == true ]; then
     # lower-case list of polarisations to use
     polList=`echo ${POL_LIST} | tr [:upper:] [:lower:]`
     
-    # get the text that does the FITS conversion - put in $fitsConvertText
-    convertToFITStext
-
     # This adds L1, L2, etc to the job name when LOOP is defined and
     # >0 -- this means that we are running the sourcefinding on the
     # selfcal loop mosaics, and so we also need to change the image &
@@ -165,6 +162,8 @@ echo "Converting to FITS the following images: \${imlist}"
 for im in \${imlist}; do 
     casaim="../\${im##*/}"
     fitsim="../\${im##*/}.fits"
+    parset=$parsets/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.in
+    log=$logs/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.log
     ${fitsConvertText}
     # Make a link so we point to a file in the current directory for
     # Selavy. This gets the referencing correct in the catalogue
@@ -253,6 +252,26 @@ EOFINNER
     extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname} "txt,csv"
     if [ \$err != 0 ]; then
         exit \$err
+    fi
+
+    # Now convert the extracted polarisation artefacts to FITS
+    if [ \${doRM} == true ]; then
+        cd \${polDir}
+        parset=temp.in
+        log=$logs/convertToFITS_polSpectra_\${SLURM_JOB_ID}.log
+        neterr=0
+        for im in \`ls\`; do 
+            casaim=\${im}
+            fitsim="\${im}.fits"
+            echo "Converting \$casaim to \$fitsim" >> \$log
+            ${fitsConvertText}
+            err=\$?
+            if [ \$err -ne 0 ]; then
+                neterr=\$err
+            fi
+        done
+        extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${neterr} convertFITSpolspec "txt,csv"
+        rm -f \$parset
     fi
 
 else
