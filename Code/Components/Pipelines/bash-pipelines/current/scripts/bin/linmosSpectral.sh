@@ -112,6 +112,9 @@ jobCode=${jobname}_\${imageCode}
 if [ "\${beamList}" != "" ]; then
     BEAM=all
     setImageProperties spectral
+    if [ "\${imageCode}" != "restored" ]; then
+        weightsImage="\${weightsImage}.\${imageCode}
+    fi
     echo "Mosaicking \${beamList} to form \${imageName}"
     parset=${parsets}/science_\${jobCode}_${FIELDBEAM}_\${SLURM_JOB_ID}.in
     log=${logs}/science_\${jobCode}_${FIELDBEAM}_\${SLURM_JOB_ID}.log

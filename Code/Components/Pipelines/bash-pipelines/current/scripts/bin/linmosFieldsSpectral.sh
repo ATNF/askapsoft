@@ -133,6 +133,9 @@ for THISTILE in \$FULL_TILE_LIST; do
     BEAM=all
     for FIELD in \${TILE_FIELD_LIST}; do
         setImageProperties spectral
+        if [ "\${imageCode}" != "restored" ]; then
+            weightsImage="\${weightsImage}.\${imageCode}
+        fi
         if [ -e \${FIELD}/\${imageName} ]; then
             if [ "\${imList}" == "" ]; then
                 imList="\${FIELD}/\${imageName}"
