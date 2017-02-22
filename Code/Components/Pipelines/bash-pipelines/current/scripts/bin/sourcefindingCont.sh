@@ -27,93 +27,93 @@
 # @author Matthew Whiting <Matthew.Whiting@csiro.au>
 #
 
-if [ $DO_SOURCE_FINDING_CONT == true ]; then
+DO_IT=$DO_SOURCE_FINDING_CONT
 
-    # Dependencies for the job
-    DEP=""
-    if [ "$FIELD" == "." ]; then
-        DEP=`addDep "$DEP" "$ID_LINMOS_CONT_ALL"`
-    elif [ $BEAM == "all" ]; then
-        DEP=`addDep "$DEP" "$ID_LINMOS_CONT"`
+
+# set imageName, weightsImage etc
+imageCode=restored
+setImageProperties cont
+contImage=$imageName
+contWeights=$weightsImage
+pol="%p"
+setImageProperties contcube
+contCube=$imageName
+beamlog=beamlog.${imageBase}.txt
+
+# lower-case list of polarisations to use
+polList=`echo ${POL_LIST} | tr [:upper:] [:lower:]`
+
+# Dependencies for the job
+DEP=""
+if [ "$FIELD" == "." ]; then
+    DEP=`addDep "$DEP" "$ID_LINMOS_CONT_ALL"`
+elif [ $BEAM == "all" ]; then
+    DEP=`addDep "$DEP" "$ID_LINMOS_CONT"`
+else
+    if [ $DO_SELFCAL == true ]; then
+        DEP=`addDep "$DEP" "$ID_CONTIMG_SCI_SC"`
     else
-        if [ $DO_SELFCAL == true ]; then
-            DEP=`addDep "$DEP" "$ID_CONTIMG_SCI_SC"`
-        else
-            DEP=`addDep "$DEP" "$ID_CONTIMG_SCI"`
-        fi
+        DEP=`addDep "$DEP" "$ID_CONTIMG_SCI"`
     fi
-    if [ ${DO_RM_SYNTHESIS} == true ]; then
-        if [ "$FIELD" == "." ]; then
-            DEP=`addDep "$DEP" "$ID_LINMOS_CONTCUBE_ALL"`
-        elif [ $BEAM == "all" ]; then
-            DEP=`addDep "$DEP" "$ID_LINMOS_CONTCUBE"`
-        else
-            DEP=`addDep "$DEP" "$ID_CONTCUBE_SCI"`
-        fi
+fi
+if [ ${DO_RM_SYNTHESIS} == true ]; then
+    if [ "$FIELD" == "." ]; then
+        DEP=`addDep "$DEP" "$ID_LINMOS_CONTCUBE_ALL"`
+    elif [ $BEAM == "all" ]; then
+        DEP=`addDep "$DEP" "$ID_LINMOS_CONTCUBE"`
+    else
+        DEP=`addDep "$DEP" "$ID_CONTCUBE_SCI"`
     fi
+fi
 
-    DO_IT=${SUBMIT_JOBS}
-    if [ ! -e ${OUTPUT}/${contImage} ] && [ "${DEP}" == "" ]; then
-        DO_IT=false
-    fi
+if [ ! -e ${OUTPUT}/${contImage} ] && [ "${DEP}" == "" ]; then
+    DO_IT=false
+fi
+
+if [ "${DO_IT}" == "true" ]; then
     
-    if [ "${DO_IT}" == "true" ]; then
-        
-        # set imageName, weightsImage etc
-        imageCode=restored
-        setImageProperties cont
-        contImage=$imageName
-        contWeights=$weightsImage
-        pol="%p"
-        setImageProperties contcube
-        contCube=$imageName
-        beamlog=beamlog.${imageBase}.txt
-
-        # lower-case list of polarisations to use
-        polList=`echo ${POL_LIST} | tr [:upper:] [:lower:]`
-        
-        # This adds L1, L2, etc to the job name when LOOP is defined and
-        # >0 -- this means that we are running the sourcefinding on the
-        # selfcal loop mosaics, and so we also need to change the image &
-        # weights names.
-        # We also can't do the RM synthesis on the LOOP images (since the
-        # calibrations don't match), so we turn it off if it is on
-        doRM=${DO_RM_SYNTHESIS}
-        description=selavyCont
-        if [ "$LOOP" != "" ]; then
-            if [ $LOOP -gt 0 ]; then
-                description=selavyContL${LOOP}
-                contImage="${contImage}.SelfCalLoop${LOOP}"
-                contWeights="${contWeights}.SelfCalLoop${LOOP}"
-                doRM=false
-            fi
+    # This adds L1, L2, etc to the job name when LOOP is defined and
+    # >0 -- this means that we are running the sourcefinding on the
+    # selfcal loop mosaics, and so we also need to change the image &
+    # weights names.
+    # We also can't do the RM synthesis on the LOOP images (since the
+    # calibrations don't match), so we turn it off if it is on
+    doRM=${DO_RM_SYNTHESIS}
+    description=selavyCont
+    if [ "$LOOP" != "" ]; then
+        if [ $LOOP -gt 0 ]; then
+            description=selavyContL${LOOP}
+            contImage="${contImage}.SelfCalLoop${LOOP}"
+            contWeights="${contWeights}.SelfCalLoop${LOOP}"
+            doRM=false
         fi
+    fi
 
-        # Define the detection thresholds in terms of flux or SNR
-        if [ "${SELAVY_FLUX_THRESHOLD}" != "" ]; then
-            # Use a direct flux threshold if specified
-            thresholdPars="# Detection threshold
+    # Define the detection thresholds in terms of flux or SNR
+    if [ "${SELAVY_FLUX_THRESHOLD}" != "" ]; then
+        # Use a direct flux threshold if specified
+        thresholdPars="# Detection threshold
 Selavy.threshold = ${SELAVY_FLUX_THRESHOLD}"
-            if [ ${SELAVY_FLAG_GROWTH} == true ] && 
-                   [ ${SELAVY_GROWTH_THRESHOLD} != "" ]; then
-                thresholdPars="${thresholdPars}
+        if [ ${SELAVY_FLAG_GROWTH} == true ] && 
+               [ ${SELAVY_GROWTH_THRESHOLD} != "" ]; then
+            thresholdPars="${thresholdPars}
 Selavy.flagGrowth =  ${SELAVY_FLAG_GROWTH}
 Selavy.growthThreshold = ${SELAVY_GROWTH_THRESHOLD}"
-            fi
-        else
-            # Use a SNR threshold
-            thresholdPars="# Detection threshold
+        fi
+    else
+        # Use a SNR threshold
+        thresholdPars="# Detection threshold
 Selavy.snrCut = ${SELAVY_SNR_CUT}"
-            if [ ${SELAVY_FLAG_GROWTH} == true ] &&
-                   [ ${SELAVY_GROWTH_CUT} != "" ]; then
-                thresholdPars="${thresholdPars}
+        if [ ${SELAVY_FLAG_GROWTH} == true ] &&
+               [ ${SELAVY_GROWTH_CUT} != "" ]; then
+            thresholdPars="${thresholdPars}
 Selavy.flagGrowth =  ${SELAVY_FLAG_GROWTH}
 Selavy.growthThreshold = ${SELAVY_GROWTH_CUT}"
-            fi
-        fi    
+        fi
+    fi    
 
-        setJob science_selavy_cont_${contImage} $description
-        cat > $sbatchfile <<EOFOUTER
+    setJob science_selavy_cont_${contImage} $description
+    cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
@@ -312,17 +312,14 @@ fi
 
 EOFOUTER
 
-        if [ "${SUBMIT_JOBS}" == "true" ]; then
-	    ID_SOURCEFINDING_CONT_SCI=`sbatch ${DEP} $sbatchfile | awk '{print $4}'`
-	    recordJob ${ID_SOURCEFINDING_CONT_SCI} "Run the continuum source-finding on the science image ${contImage} with flags \"$DEP\""
-        else
-	    echo "Would run the continuum source-finding on the science image ${contImage} with slurm file $sbatchfile"
-        fi
-
-        echo " "
-
-        
+    if [ "${SUBMIT_JOBS}" == "true" ]; then
+	ID_SOURCEFINDING_CONT_SCI=`sbatch ${DEP} $sbatchfile | awk '{print $4}'`
+	recordJob ${ID_SOURCEFINDING_CONT_SCI} "Run the continuum source-finding on the science image ${contImage} with flags \"$DEP\""
+    else
+	echo "Would run the continuum source-finding on the science image ${contImage} with slurm file $sbatchfile"
     fi
 
+    echo " "
 
+    
 fi
