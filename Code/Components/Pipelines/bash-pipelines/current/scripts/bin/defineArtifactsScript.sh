@@ -210,10 +210,6 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                 if [ -e \${FIELD}/\${imageName}\${fitsSuffix} ]; then
                     casdaOtherDimImageNames+=(\${FIELD}/\${imageName}\${fitsSuffix})
                     casdaOtherDimImageTypes+=("\${imageType}")
-                    if [ "\${BEAM}" == "all" ] && [ "\${imageCode}" == "restored" ]; then
-                        casdaOtherDimImageNames+=(\${FIELD}/\${weightsImage}\${fitsSuffix})
-                        casdaOtherDimImageTypes+=("\${weightsType}")
-                    fi
                     itsSelavyDir=\${FIELD}/selavy-spectral-\${imageName##*/}
                     if [ -e \${itsSelavyDir} ]; then
                         casdaOtherDimImageSpectra+=("\${itsSelavyDir}/Spectra/${SELAVY_SPEC_BASE_SPECTRUM}*\${fitsSuffix}")
@@ -223,6 +219,16 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                         casdaOtherDimImageRMSF+=("")
                         casdaOtherDimImagePol+=("")
                     else
+                        casdaOtherDimImageSpectra+=("")
+                        casdaOtherDimImageNoise+=("")
+                        casdaOtherDimImageMoments+=("")
+                        casdaOtherDimImageFDF+=("")
+                        casdaOtherDimImageRMSF+=("")
+                        casdaOtherDimImagePol+=("")
+                    fi
+                    if [ "\${BEAM}" == "all" ] && [ "\${imageCode}" == "restored" ]; then
+                        casdaOtherDimImageNames+=(\${FIELD}/\${weightsImage}\${fitsSuffix})
+                        casdaOtherDimImageTypes+=("\${weightsType}")
                         casdaOtherDimImageSpectra+=("")
                         casdaOtherDimImageNoise+=("")
                         casdaOtherDimImageMoments+=("")
