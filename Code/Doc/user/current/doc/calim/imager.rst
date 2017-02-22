@@ -116,10 +116,12 @@ being::
 
 **Example 4: Multiple writers**
 
-This imager can write to mode than one output image cube. This has been implemented to
-remove a serious bottle neck in the spectral line processing - writing out the cube::
+When writing CASA images this imager can write to mode than one output image cube to improve
+disk throughput. This has been implemented to remove a serious bottle neck in the spectral line processing.
+For FITS imagetypes a single cube can be written - but multiple writers are used - once again to improve write performance::
 
     Cimager.nwriters = X
+    Cimager.singleoutputfile = true
 
 **Example 5:barycentreing**
 
@@ -160,8 +162,8 @@ default to "cross".
 +==========================+==================+==============+====================================================+
 |imagetype                 |string            |"casa"        |Type of the image handler (determines the format of |
 |                          |                  |              |the images, both which are written to or read from  |
-|                          |                  |              |the disk). The default is to create casa images and |
-|                          |                  |              |this is the only option implemented so far.         |
+|                          |                  |              |the disk). The default is to create casa images but |
+|                          |                  |              |"fits" can also be chosen.                          |
 +--------------------------+------------------+--------------+----------------------------------------------------+
 |dataset                   |string or         |None          |Measurement set file name to read from. Usual       |
 |                          |vector<string>    |              |substitution rules apply if the parameter is a      |
@@ -191,11 +193,14 @@ default to "cross".
 |beams                     |vector<int>       |[0]           |Beam number to be selected from the measurement set |
 |                          |                  |              |                                                    |
 +--------------------------+------------------+--------------+----------------------------------------------------+
-|nwriters                  |int               |1             |Number of output cubes to generate in distributed   |
-|                          |                  |              |solver (simager) mode                               |
+|nwriters                  |int               |1             |The number of output cubes to                       |
+|                          |                  |              |generate in spectral cube mode.                     |
 +--------------------------+------------------+--------------+----------------------------------------------------+
 |barycentre                |bool              |false         |Generate output cubes in the barycentric frame      |
 |                          |                  |              |only applies in distributed solver (simager) mode   |
++--------------------------+------------------+--------------+----------------------------------------------------+
+|singleoutputfile          |bool              |false         |Single output cube. Useful in the case of multiple  |
+|                          |                  |              |writers                                             |
 +--------------------------+------------------+--------------+----------------------------------------------------+
 |solverpercore             |bool              |false         |Turn on distributed solver (simager) mode           |
 +--------------------------+------------------+--------------+----------------------------------------------------+

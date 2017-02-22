@@ -78,8 +78,7 @@ default to "cross".
 +==========================+==================+==============+====================================================+
 |imagetype                 |string            |"casa"        |Type of the image handler (determines the format of |
 |                          |                  |              |the images, both which are written to or read from  |
-|                          |                  |              |the disk). The default is to create casa images and |
-|                          |                  |              |this is the only option implemented so far.         |
+|                          |                  |              |the disk). Either "fits" or "casa" can be requested.|
 +--------------------------+------------------+--------------+----------------------------------------------------+
 |dataset                   |string or         |None          |Measurement set file name to read from. Usual       |
 |                          |vector<string>    |              |substitution rules apply if the parameter is a      |
