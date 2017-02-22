@@ -30,63 +30,80 @@
 
 if [ $DO_SOURCE_FINDING_SPEC == true ]; then
 
-    # set imageName etc
-    imageCode=restored
-    setImageProperties spectral
-    beamlog=beamlog.${imageBase}.txt
+    # Dependencies for the job
+    DEP=""
+    if [ "$FIELD" == "." ]; then
+        DEP=`addDep "$DEP" "$ID_LINMOS_SPECTRAL_ALL"`
+    elif [ $BEAM == "all" ]; then
+        DEP=`addDep "$DEP" "$ID_LINMOS_SPECTRAL"`
+    else
+        DEP=`addDep "$DEP" "$ID_SPECIMG_SCI"`
+    fi
+    
+    DO_IT=${SUBMIT_JOBS}
+    if [ ! -e ${OUTPUT}/${contImage} ] && [ "${DEP}" == "" ]; then
+        DO_IT=false
+    fi
+    
+    if [ "${DO_IT}" == "true" ]; then
+        
+        # set imageName etc
+        imageCode=restored
+        setImageProperties spectral
+        beamlog=beamlog.${imageBase}.txt
 
-    # Define the detection thresholds in terms of flux or SNR
-    if [ "${SELAVY_SPEC_FLUX_THRESHOLD}" != "" ]; then
-        # Use a direct flux threshold if specified
-        thresholdPars="# Detection threshold
+        # Define the detection thresholds in terms of flux or SNR
+        if [ "${SELAVY_SPEC_FLUX_THRESHOLD}" != "" ]; then
+            # Use a direct flux threshold if specified
+            thresholdPars="# Detection threshold
 Selavy.threshold = ${SELAVY_SPEC_FLUX_THRESHOLD}"
-        if [ ${SELAVY_SPEC_FLAG_GROWTH} == true ] &&
-               [ ${SELAVY_SPEC_GROWTH_THRESHOLD} != "" ]; then
-           thresholdPars="${thresholdPars}
+            if [ ${SELAVY_SPEC_FLAG_GROWTH} == true ] &&
+                   [ ${SELAVY_SPEC_GROWTH_THRESHOLD} != "" ]; then
+                thresholdPars="${thresholdPars}
 Selavy.flagGrowth =  ${SELAVY_SPEC_FLAG_GROWTH}
 Selavy.growthThreshold = ${SELAVY_SPEC_GROWTH_THRESHOLD}"
-        fi
-    else
-        # Use a SNR threshold
-        thresholdPars="# Detection threshold
+            fi
+        else
+            # Use a SNR threshold
+            thresholdPars="# Detection threshold
 Selavy.snrCut = ${SELAVY_SPEC_SNR_CUT}"
-        if [ ${SELAVY_SPEC_FLAG_GROWTH} == true ] && 
-               [ ${SELAVY_SPEC_GROWTH_CUT} != "" ]; then
-           thresholdPars="${thresholdPars}
+            if [ ${SELAVY_SPEC_FLAG_GROWTH} == true ] && 
+                   [ ${SELAVY_SPEC_GROWTH_CUT} != "" ]; then
+                thresholdPars="${thresholdPars}
 Selavy.flagGrowth =  ${SELAVY_SPEC_FLAG_GROWTH}
 Selavy.growthThreshold = ${SELAVY_SPEC_GROWTH_CUT}"
+            fi
         fi
-    fi
 
-    # Pre-processing parameters
-    preprocessPars="# No pre-processing done"
-    # Smoothing takes precedence over reconstruction
-    if [ ${SELAVY_SPEC_FLAG_SMOOTH} == "true" ]; then
-        if [ ${SELAVY_SPEC_SMOOTH_TYPE} == "spectral" ]; then
-            preprocessPars="# Spectral smoothing
+        # Pre-processing parameters
+        preprocessPars="# No pre-processing done"
+        # Smoothing takes precedence over reconstruction
+        if [ ${SELAVY_SPEC_FLAG_SMOOTH} == "true" ]; then
+            if [ ${SELAVY_SPEC_SMOOTH_TYPE} == "spectral" ]; then
+                preprocessPars="# Spectral smoothing
 Selavy.flagSmooth = ${SELAVY_SPEC_FLAG_SMOOTH}
 Selavy.smoothType = ${SELAVY_SPEC_SMOOTH_TYPE}
 Selavy.hanningWidth = ${SELAVY_SPEC_HANN_WIDTH}"
-        else
-            preprocessPars="# Spatial smoothing
+            else
+                preprocessPars="# Spatial smoothing
 Selavy.flagSmooth = ${SELAVY_SPEC_FLAG_SMOOTH}
 Selavy.smoothType = ${SELAVY_SPEC_SMOOTH_TYPE}
 Selavy.kernMaj = ${SELAVY_SPEC_KERN_MAJ}
 Selavy.kernMin = ${SELAVY_SPEC_KERN_MIN}
 Selavy.kernPA = ${SELAVY_SPEC_KERN_PA}"
-        fi
-    elif [ ${SELAVY_SPEC_FLAG_WAVELET} == "true" ]; then
-        preprocessPars="# Multi-resolution wavelet reconstruction
+            fi
+        elif [ ${SELAVY_SPEC_FLAG_WAVELET} == "true" ]; then
+            preprocessPars="# Multi-resolution wavelet reconstruction
 Selavy.flagAtrous = ${SELAVY_SPEC_FLAG_WAVELET}
 Selavy.reconDim   = ${SELAVY_SPEC_RECON_DIM}
 Selavy.scaleMin   = ${SELAVY_SPEC_RECON_SCALE_MIN}
 Selavy.scaleMax   = ${SELAVY_SPEC_RECON_SCALE_MAX}
 Selavy.snrRecon   = ${SELAVY_SPEC_RECON_SNR}"        
-    fi
-    
+        fi
+        
 
-    setJob science_selavy_spec_${imageName} selavySpec
-    cat > $sbatchfile <<EOFOUTER
+        setJob science_selavy_spec_${imageName} selavySpec
+        cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
@@ -264,25 +281,15 @@ fi
 
 EOFOUTER
 
-    # Dependencies for the job
-    DEP=""
-    if [ "$FIELD" == "." ]; then
-        DEP=`addDep "$DEP" "$ID_LINMOS_SPECTRAL_ALL"`
-    elif [ $BEAM == "all" ]; then
-        DEP=`addDep "$DEP" "$ID_LINMOS_SPECTRAL"`
-    else
-        DEP=`addDep "$DEP" "$ID_SPECIMG_SCI"`
+        if [ "${SUBMIT_JOBS}" == "true" ]; then
+	    ID_SOURCEFINDING_SPEC_SCI=`sbatch ${DEP} $sbatchfile | awk '{print $4}'`
+	    recordJob ${ID_SOURCEFINDING_SPEC_SCI} "Run the source-finder on the science cube ${imageName} with flags \"$DEP\""
+        else
+	    echo "Would run the source-finder on the science cube ${imageName} with slurm file $sbatchfile"
+        fi
+
+        echo " "
+
     fi
-    
-    if [ $SUBMIT_JOBS == true ]; then
-	ID_SOURCEFINDING_SPEC_SCI=`sbatch ${DEP} $sbatchfile | awk '{print $4}'`
-	recordJob ${ID_SOURCEFINDING_SPEC_SCI} "Run the source-finder on the science cube ${imageName} with flags \"$DEP\""
-    else
-	echo "Would run the source-finder on the science cube ${imageName} with slurm file $sbatchfile"
-    fi
-
-    echo " "
-
-
     
 fi
