@@ -37,6 +37,8 @@ These modules are:
 * **askapsoft** - The ASKAPsoft Central Processor applications binaries and libraries
 * **askapdata** - Measures data for ASKAPsoft
 * **askappipeline** - Pipeline scripts for processing ASKAP/BETA observations
+* **askaputils** - General utility scripts (*pshell* for data
+  transfer - see :doc:`comm_archive`, plus other utility scripts)
 * **casa** - NRAO's CASA software package (see :doc:`casa`)
 * **bbcp** - BBCP Fast file copy (see :doc:`externaltransfer`)
 * **ashell** - Connection to the commissioning archive (see :doc:`comm_archive`)

@@ -105,7 +105,7 @@ The minor cycle of clean is currently still performed on a single master core. B
 individual channel allocations are merged locally to the worker core.
 
 Spectral-line processing (Replacing Simager)
-------------------------------
+--------------------------------------------
 
 This imager can also be used for spectral line processing - essentially mimicking the
 performance of Simager. The each channel is processed independently and written to

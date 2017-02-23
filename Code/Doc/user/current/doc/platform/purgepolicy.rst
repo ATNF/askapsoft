@@ -32,14 +32,14 @@ Alternative Locations for Your Files
 
 group
 `````
-The advice from Pawsey admin is that you should be placing ``scratch2`` data that you want to keep in ``/group/astronomy856/$USER``. The ``group`` filesystem has a total quota of 10TB for the astronomy856 group.
+The advice from Pawsey admin is that you should be placing ``scratch2`` data that you want to keep in ``/group/askap/$USER``. The ``group`` filesystem has a total quota of 90TB for the askap group.
 
 .. note:: Although ``/group`` is effectively a robust file system with redundancy and data recovery in place, it is not backed up. It will be upgraded to a system that is backed up later in the year when its capacity 
           is also increased. This means, at the moment, if you delete something from ``group`` once you have moved it there it cannot be recovered.
 
 **Small amounts of data** can be copied directly::
 
-    you@galaxy2> scp data.tar.gz /group/astronomy856/$USER/data.tar.gz
+    you@galaxy2> scp data.tar.gz /group/askap/$USER/data.tar.gz
     
 See the Pawsey documentation for `transferring small files`_ for more information.
 

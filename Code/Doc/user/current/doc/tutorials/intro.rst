@@ -97,7 +97,7 @@ for cimager, lets call it **dirty.in**::
 Next create a file called **dirty.sbatch**, this is a description of the batch job that
 the system will execute::
 
-    #!/usr/bin/env bash
+    #!/bin/bash -l
     #SBATCH --ntasks=305
     #SBATCH --ntasks-per-node=20
     #SBATCH --time=02:00:00

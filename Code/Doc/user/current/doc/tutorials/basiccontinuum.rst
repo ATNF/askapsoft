@@ -148,7 +148,7 @@ particular format of the direction string, especially the declination!*
 Save the above parset into a file named **calibrator-BEAM0.in**. To run this, we need to create
 an sbatch file, say, **calibrator-BEAM0.sbatch**::
 
-    #!/usr/bin/env bash
+    #!/bin/bash -l
     #SBATCH --time=01:00:00
     #SBATCH --ntasks=1
     #SBATCH --ntasks-per-node=1
@@ -247,7 +247,7 @@ averaged MS provided, and is not in the *BasicContinuum* directory.
 Save this parset into a file named **mssplit.in**. To run this, we need to create a sbatch
 file, say, **mssplit.sbatch**::
 
-    #!/usr/bin/env bash
+    #!/bin/bash -l
     #SBATCH --time=04:00:00
     #SBATCH --ntasks=1
     #SBATCH --ntasks-per-node=1
@@ -419,7 +419,7 @@ the cleaning, but it does produce a lot more images. To save clutter we'll keep 
 
 To run the imaging, we need an sbatch file - call it **clean-BEAM0.sbatch**::
 
-    #!/usr/bin/env bash
+    #!/bin/bash -l
     #SBATCH --time=03:00:00
     #SBATCH --ntasks=913
     #SBATCH --ntasks-per-node=20
@@ -542,7 +542,7 @@ output images, one for each taylor term present.
 Save this parset into a file, say **linmos_image.in**, and then create an sbatch file as
 before, say, **linmos_image.sbatch**::
 
-    #!/usr/bin/env bash
+    #!/bin/bash -l
     #SBATCH --time=01:00:00
     #SBATCH --ntasks=1
     #SBATCH --ntasks-per-node=1

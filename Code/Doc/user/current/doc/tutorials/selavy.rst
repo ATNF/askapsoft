@@ -90,7 +90,7 @@ run using the following sbatch file:
 
 .. code-block:: bash
 
-    #!/usr/bin/env bash
+    #!/bin/bash -l
     #SBATCH --time=01:00:00
     #SBATCH --ntasks=19
     #SBATCH --ntasks-per-node=19

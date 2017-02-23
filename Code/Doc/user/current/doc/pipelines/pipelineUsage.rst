@@ -36,7 +36,7 @@ be able to be run directly, like so::
 
 where the user input file myInputs.sh could look something like this::
 
-  #!/usr/bin/env bash
+  #!/bin/bash -l
   #
   # Example user input file for ASKAP processing.
   # Define variables here that will control the processing.
@@ -266,3 +266,21 @@ Here is a summary of the workflow provided for by these scripts:
 
 * Source-finding with **selavy** can then be run on the
   spectral-cubes. 
+
+Staging the processing
+----------------------
+
+As described on :doc:`../platform/comm_archive`, many datasets will
+not reside on /scratch2, but only on the commissioning archive. They
+can be restored by Operations staff if you wish to process (or
+re-process) them. It is possible to set up your processing to start
+immediately upon completion of the restoration process, by using the
+**stage-processing.sh** script in the *askaputils* module. Typical
+usage is::
+  
+  stage-processing.sh myconfig.sh <jobID>
+
+where <jobID> is the slurm job ID of the restore job and 'myconfig.sh'
+can be replaced with your configuration file. Run "stage-processing.sh
+-h" for more information.
+

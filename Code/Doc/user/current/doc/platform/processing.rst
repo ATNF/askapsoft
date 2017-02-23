@@ -55,7 +55,9 @@ the following to your ~/.ssh/config file::
 
 Setting up your account
 -------------------------
-Add the following to your ~/.bashrc
+There are a number of ASKAP-specific environment modules available
+(see :doc:`modules` for details). To access them, add the following to
+your ~/.bashrc file.
 
 .. code-block:: bash
 
@@ -71,14 +73,26 @@ Add the following to your ~/.bashrc
     # Load the measures data
     module load askapdata
 
+    # Load some general utility functions
+    module load askaputils
+
     # Load the BBCP module for fast external data transfer
     module load bbcp
+
+    # Allow MPICH to fallback to 4k pages if large pages cannot be allocated
+    export MPICH_GNI_MALLOC_FALLBACK=enabled
+
+The following was previously suggested, although the **pshell**
+utility provided by askaputils is probably better. The ashell module
+is kept for backwards-compatibility reasons only, but if you already
+have scripts using it then including this in your .bashrc is advised.
+
+.. code-block:: bash
 
     # Load the "ashell" module for access to the commissioning archive
     module load ashell
 
-    # Allow MPICH to fallback to 4k pages if large pages cannot be allocated
-    export MPICH_GNI_MALLOC_FALLBACK=enabled
+
 
 Local Filesystems
 -----------------
@@ -86,8 +100,8 @@ Local Filesystems
 You have two filesystems available to you:
 
 * Your home directory
-* The *scratch* filesystem, where you have a directory ``/scratch2/askap/$USER``
-* The *group* filesystem, where you have a directory ``/group/astronomy856/$USER``
+* The *scratch2* filesystem, where you have a directory ``/scratch2/askap/$USER``
+* The *group* filesystem, where you have a directory ``/group/askap/$USER``
 
 The scratch filesystem should be used for executing your processing jobs. Specifically
 bulk data (measurement sets, images, etc) to be read from the job, and all output written,
@@ -96,7 +110,7 @@ so you should move any data you need to retain from this filesystem to another a
 See :doc:`purgepolicy` for advice. 
 
 The group filesystem is a smaller filesystem where you can store data sets or data products, however,
-this has quotas applied at the group level. e.g. ``astronomy856`` group has a quota of 10TB.
+this has quotas applied at the group level. e.g. ``askap`` group has a quota of 90TB.
 
 Note that your home directory, while it can be read from the compute nodes, cannot be
 written to from the compute nodes. It is mounted read-only on the compute nodes to prevent
@@ -110,7 +124,7 @@ This section describes the job execution environment on the ASKAP Central Proces
 system uses SLURM for Job scheduling, however the below examples use a Cray specific
 customisation to declare the resources required. An example slurm file is::
 
-    #!/usr/bin/env bash
+    #!/bin/bash -l
     #SBATCH --time=01:00:00
     #SBATCH --ntasks=80
     #SBATCH --ntasks-per-node=20
@@ -180,7 +194,7 @@ Other example resource specifications
 The following example launches a job with a number of PEs that is not a multiple of
 *ntasks-per-node*, in this case 22 PEs::
 
-    #!/usr/bin/env bash
+    #!/bin/bash -l
     #SBATCH --time=01:00:00
     #SBATCH --ntasks=22
     #SBATCH --ntasks-per-node=20
@@ -200,7 +214,7 @@ The following example launches a job with 20 OpenMP threads per process (althoug
 one process). The *cpus-per-task* option declares the number of threads to be allocated
 per process.  The below example starts a single PE with 20 threads::
 
-    #!/usr/bin/env bash
+    #!/bin/bash -l
     #SBATCH --time=00:30:00
     #SBATCH --ntasks=1
     #SBATCH --cpus-per-task=20
