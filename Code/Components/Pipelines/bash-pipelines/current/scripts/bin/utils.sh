@@ -226,7 +226,8 @@ function setImageProperties()
     fi
     
     weightsImage="weights.${imageBase}${imSuffix}"
-    weightsType="${typebase}_weights_$typeSuffix"
+    #    weightsType="${typebase}_weights_$typeSuffix"
+    weightsType="${typebase}_sensitivity_$typeSuffix"
     weightsLabel="Weights image, $beamSuffix"
     if [ "$imageCode" == "restored" ]; then
         imageName="image.${imageBase}${imSuffix}.restored"

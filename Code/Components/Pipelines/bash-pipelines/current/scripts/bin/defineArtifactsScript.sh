@@ -226,16 +226,18 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                         casdaOtherDimImageRMSF+=("")
                         casdaOtherDimImagePol+=("")
                     fi
-                    if [ "\${BEAM}" == "all" ] && [ "\${imageCode}" == "restored" ]; then
-                        casdaOtherDimImageNames+=(\${FIELD}/\${weightsImage}\${fitsSuffix})
-                        casdaOtherDimImageTypes+=("\${weightsType}")
-                        casdaOtherDimImageSpectra+=("")
-                        casdaOtherDimImageNoise+=("")
-                        casdaOtherDimImageMoments+=("")
-                        casdaOtherDimImageFDF+=("")
-                        casdaOtherDimImageRMSF+=("")
-                        casdaOtherDimImagePol+=("")
-                    fi
+#### Leave out spectral weights images - have no defined image type to
+#### support them in CASDA
+##                       if [ "\${BEAM}" == "all" ] && [ "\${imageCode}" == "restored" ]; then
+##                           casdaOtherDimImageNames+=(\${FIELD}/\${weightsImage}\${fitsSuffix})
+##                           casdaOtherDimImageTypes+=("\${weightsType}")
+##                           casdaOtherDimImageSpectra+=("")
+##                           casdaOtherDimImageNoise+=("")
+##                           casdaOtherDimImageMoments+=("")
+##                           casdaOtherDimImageFDF+=("")
+##                           casdaOtherDimImageRMSF+=("")
+##                           casdaOtherDimImagePol+=("")
+##                       fi
                 fi
         
                 for POLN in \${POL_LIST}; do
@@ -249,13 +251,15 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                         casdaOtherDimImageTypes+=("\${imageType}")
                         itsSelavyDir=\${FIELD}/selavy_\${contImage}
                         if [ -e \${itsSelavyDir} ]; then
-                            casdaOtherDimImageSpectra+=("\${itsSelavyDir}/PolData/${SELAVY_POL_OUTPUT_BASE}_spec_\${POLN}*\${fitsSuffix}")
-                            casdaOtherDimImageNoise+=("\${itsSelavyDir}/PolData/${SELAVY_POL_OUTPUT_BASE}_noise_\${POLN}*\${fitsSuffix}")
+                            prefix="\${itsSelavyDir}/PolData/${SELAVY_POL_OUTPUT_BASE}"
+                            suffix="SB${SB_SCIENCE}_\${contImage}*\${fitsSuffix}"
+                            casdaOtherDimImageSpectra+=("\${prefix}_spec_\${POLN}_\${suffix}")
+                            casdaOtherDimImageNoise+=("\${prefix}_noise_\${POLN}_\${suffix}")
                             casdaOtherDimImageMoments+=("")
                             casdaOtherDimImagePol+=(\${pol})
                             if [ "\${POLN}" == "Q" ]; then
-                                casdaOtherDimImageFDF+=("\${itsSelavyDir}/PolData/${SELAVY_POL_OUTPUT_BASE}_FDF*\${fitsSuffix}")
-                                casdaOtherDimImageRMSF+=("\${itsSelavyDir}/PolData/${SELAVY_POL_OUTPUT_BASE}_RMSF*\${fitsSuffix}")
+                                casdaOtherDimImageFDF+=("\${prefix}_FDF*_\${suffix}")
+                                casdaOtherDimImageRMSF+=("\${prefix}_RMSF*_\${suffix}")
                             else
                                 casdaOtherDimImageFDF+=("")
                                 casdaOtherDimImageRMSF+=("")
