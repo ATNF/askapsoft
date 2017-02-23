@@ -114,7 +114,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --job-name=${jobname}
 ${EMAIL_REQUEST}
 ${exportDirective}
-#SBATCH --output=slurmOutput/slurm-selavy-spec-%j.out
+#SBATCH --output=$slurmOut/slurm-selavy-spec-%j.out
 
 BASEDIR=${BASEDIR}
 cd $OUTPUT
@@ -247,36 +247,31 @@ EOFINNER
     fi
 
     # Now convert the extracted spectral & moment-map artefacts to FITS
-    if [ \${doRM} == true ]; then
-        parset=temp.in
-        log=$logs/convertToFITS_spectralArtefacts_\${SLURM_JOB_ID}.log
-        for dir in \$spectraDir \$momentDir \$cubeletDir; do
-            cd \${dir}
-            neterr=0
-            for im in \`ls\`; do 
-                casaim=\${im}
-                fitsim="\${im}.fits"
-                echo "Converting \$casaim to \$fitsim" >> \$log
-                ${fitsConvertText}
-                err=\$?
-                if [ \$err -ne 0 ]; then
-                    neterr=\$err
-                fi
-            done
-            cd ..
-        done
-        extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${neterr} convertFITSspec "txt,csv"
-        rm -f \$parset
-    fi
-
+     parset=temp.in
+     log=$logs/convertToFITS_spectralArtefacts_\${SLURM_JOB_ID}.log
+     for dir in \$spectraDir \$momentDir \$cubeletDir; do
+         cd \${dir}
+         neterr=0
+         for im in \`ls\`; do 
+             casaim=\${im}
+             fitsim="\${im}.fits"
+             echo "Converting \$casaim to \$fitsim" >> \$log
+             ${fitsConvertText}
+             err=\$?
+             if [ \$err -ne 0 ]; then
+                 neterr=\$err
+             fi
+         done
+         cd ..
+     done
+     extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${neterr} convertFITSspec "txt,csv"
+     rm -f \$parset
 
 else
 
     echo "FITS conversion failed, so Selavy did not run"
 
 fi
-
-
 
 EOFOUTER
 
