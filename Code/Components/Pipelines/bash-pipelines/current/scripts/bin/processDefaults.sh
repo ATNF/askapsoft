@@ -579,6 +579,13 @@ EOF
         if [ "${DO_SOURCE_FINDING_CONT}" == "true" ] && [ "${DO_MOSAIC}" != "true" ]; then
             DO_SOURCE_FINDING_BEAMWISE=true
         fi
+        
+        if [ "${SELAVY_POL_WRITE_FDF}" != "" ]; then
+            echo "WARNING - the parameter SELAVY_POL_WRITE_FDF is deprecated"
+            echo "        - use SELAVY_POL_WRITE_COMPLEX_FDF instead (it has been set to ${SELAVY_POL_WRITE_FDF})"
+            SELAVY_POL_WRITE_COMPLEX_FDF=${SELAVY_POL_WRITE_FDF}
+        fi
+
 
         ####################
         # Spectral source-finding
