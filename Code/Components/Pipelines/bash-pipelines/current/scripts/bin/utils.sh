@@ -166,6 +166,7 @@ function getTile()
 #  * TILE (only for FIELD="." - special value of "ALL" means the full
 #          mosaic over all fields/tiles)
 #  * BEAM
+#  * imageCode (one of restored|altrestored|image|residual|psf|psfimage)
 #  * pol (lower case polarisation i/q/u/v etc)
 #  * TTERM (Taylor term: 0,1,2,...) Can be blank ("" ie. unset), which
 #     defaults to zero

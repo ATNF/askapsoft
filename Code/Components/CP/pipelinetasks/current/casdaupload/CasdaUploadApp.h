@@ -59,12 +59,12 @@ class CasdaUploadApp : public askap::Application {
 
     private:
 
-    LOFAR::ParameterSet itsParset;
+        LOFAR::ParameterSet itsParset;
 
-    /// A function to check whether the user has used "artefactlist"
-    /// instead of "artifactlist", and correct it, giving a warning at
-    /// the same time.
-    void checkParset();
+        /// A function to check whether the user has used "artefactlist"
+        /// instead of "artifactlist", and correct it, giving a warning at
+        /// the same time.
+        void checkParset();
 
         /// Create the metadata file
         static void generateMetadataFile(const boost::filesystem::path& file,

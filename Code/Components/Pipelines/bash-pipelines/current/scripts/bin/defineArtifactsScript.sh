@@ -298,23 +298,25 @@ catNames=()
 catTypes=()
 
 BEAM=all
+imageCode=restored
 for FIELD in \${FIELD_LIST}; do
 
-    setImageBase cont
+    setImageProperties cont
     contSelDir=selavy_\${imageName}
-    if [ -e \${FIELD}/\${contSelDir}/selavy-${imageName}.components.xml ]; then
-        catNames+=(\${FIELD}/\${contSelDir}/selavy-${imageName}.components.xml)
+    echo "field=\${FIELD}, imageCode=\${imageCode}, imageName=\${imageName}, selavy dir = \${contSelDir}"
+    if [ -e \${FIELD}/\${contSelDir}/selavy-\${imageName}.components.xml ]; then
+        catNames+=(\${FIELD}/\${contSelDir}/selavy-\${imageName}.components.xml)
         catTypes+=(continuum-component)
     fi
-    if [ -e \${FIELD}/\${contSelDir}/selavy-${imageName}.islands.xml ]; then
-        catNames+=(\${FIELD}/\${contSelDir}/selavy-${imageName}.islands.xml)
+    if [ -e \${FIELD}/\${contSelDir}/selavy-\${imageName}.islands.xml ]; then
+        catNames+=(\${FIELD}/\${contSelDir}/selavy-\${imageName}.islands.xml)
         catTypes+=(continuum-island)
     fi
-    if [ -e \${FIELD}/\${contSelDir}/selavy-${imageName}.polarisation.xml ]; then
-        catNames+=(\${FIELD}/\${contSelDir}/selavy-${imageName}.polarisation.xml)
+    if [ -e \${FIELD}/\${contSelDir}/selavy-\${imageName}.polarisation.xml ]; then
+        catNames+=(\${FIELD}/\${contSelDir}/selavy-\${imageName}.polarisation.xml)
         catTypes+=(polarisation-component)
     fi
-#    setImageBase spectral
+#    setImageProperties spectral
 #    specSelDir=selavy-spectral-\${imageName}
 #    if [ -e \${FIELD}/\${contSelDir}/selavy-results.hiobjects.xml ]; then
 #        catNames+=(\${FIELD}/\${contSelDir}/selavy-results.hiobjects.xml)

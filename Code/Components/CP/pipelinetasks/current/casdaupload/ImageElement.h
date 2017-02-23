@@ -65,8 +65,8 @@ class ImageElement : public TypeElementBase {
         /// The small PNG/JPG thumbnail image
         boost::filesystem::path itsThumbnailSmall;
 
-    std::vector<SpectrumElement> itsSpectra;
-    std::vector<MomentMapElement> itsMomentmaps;
+        std::vector<SpectrumElement> itsSpectra;
+        std::vector<MomentMapElement> itsMomentmaps;
 
 };
 

@@ -32,112 +32,22 @@
 
 // System includes
 #include <string>
-#include <glob.h>
 
 // ASKAPsoft includes
-#include "casdaupload/ProjectElementBase.h"
-#include "casdaupload/ElementBase.h"
-#include "casdaupload/CasdaFileUtils.h"
+#include "casdaupload/DerivedElementBase.h"
 #include "askap/AskapLogging.h"
 #include "askap/AskapError.h"
-#include "xercesc/dom/DOM.hpp" // Includes all DOM
-#include "boost/filesystem.hpp"
-#include "votable/XercescString.h"
-#include "votable/XercescUtils.h"
 
 // Using
 using namespace askap::cp::pipelinetasks;
-using xercesc::DOMElement;
-using askap::accessors::XercescString;
-using askap::accessors::XercescUtils;
 
 ASKAP_LOGGER(logger, ".SpectrumElement");
 
 
 SpectrumElement::SpectrumElement(const LOFAR::ParameterSet &parset)
-    : TypeElementBase(parset),
-      itsFilenameList(),
-      itsThumbnailList(),
-      itsNumSpectra(0)
+    : DerivedElementBase(parset)
 {
     itsName = "spectrum";
-    itsFormat = "fits";
-    if (itsFilepath.extension() != "." + itsFormat) {
-        ASKAPTHROW(AskapError,
-                   "Unsupported format image - Expect " << itsFormat << " file extension");
-    }
-    itsThumbnail = parset.getString("thumbnail", "");
 
     checkWildcards();
 }
-
-void SpectrumElement::checkWildcards()
-{
-
-    // glob itsFilepath to get a list of possible names
-    //     --> fills itsFilenameList
-    glob_t specGlob;
-    int errSpec = glob(itsFilepath.string().c_str(), 0, NULL, &specGlob);
-    ASKAPCHECK(errSpec==0, "Failure interpreting spectrum filepath \""
-               << itsFilepath.filename().string() << "\"");
-    itsNumSpectra = specGlob.gl_pathc;
-    for(size_t i=0;i<itsNumSpectra; i++) {
-        itsFilenameList.push_back(specGlob.gl_pathv[i]);
-    }
-    globfree(&specGlob);
-
-    // glob itsThumbnail to get a list of possible names
-    //     --> fills itsThumbnailList
-
-    if (itsThumbnail != "" ){
-        glob_t thumbGlob;
-        int errThumb = glob(itsThumbnail.string().c_str(), 0, NULL, &thumbGlob);
-        ASKAPCHECK(errThumb==0, "Failure interpreting thumbnail filepath \""
-                   << itsThumbnail.filename().string() << "\"");
-        ASKAPCHECK(thumbGlob.gl_pathc == itsNumSpectra,
-                   "Thumbnail wildcard for spectra produces different number of files than filename");
-        for(size_t i=0;i<thumbGlob.gl_pathc; i++) {
-            itsThumbnailList.push_back(thumbGlob.gl_pathv[i]);
-        }
-        globfree(&thumbGlob);
-    }
-    
-}
-
-xercesc::DOMElement* SpectrumElement::toXmlElement(xercesc::DOMDocument& doc) const
-{
-    DOMElement* e = TypeElementBase::toXmlElement(doc);
-
-    if (itsThumbnail != "") {
-        XercescUtils::addTextElement(*e, "thumbnail", itsThumbnail.filename().string());
-    }
-
-    std::stringstream ss;
-    ss << itsNumSpectra;
-    XercescUtils::addTextElement(*e, "number", ss.str());
-
-    return e;
-}
-
-
-void SpectrumElement::copyAndChecksum(const boost::filesystem::path& outdir) const
-{
-
-    for(size_t i=0;i<itsFilenameList.size();i++){
-        const boost::filesystem::path in(itsFilenameList[i]);
-        const boost::filesystem::path out(outdir / in.filename());
-        ASKAPLOG_INFO_STR(logger, "Copying and calculating checksum for " << in << " using filename " << itsFilenameList[i]);
-        CasdaFileUtils::copyAndChecksum(in, out);
-    }
-    
-    if (itsThumbnail != "" ) {
-        for(size_t i=0;i<itsThumbnailList.size();i++){
-            const boost::filesystem::path in(itsThumbnailList[i]);
-            const boost::filesystem::path out(outdir / in.filename());
-            ASKAPLOG_INFO_STR(logger, "Copying and calculating checksum for " << in);
-            CasdaFileUtils::copyAndChecksum(in, out);
-        }
-    }
-
-}
-

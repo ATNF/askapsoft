@@ -79,11 +79,11 @@ xercesc::DOMElement* MeasurementSetElement::toXmlElement(xercesc::DOMDocument& d
     // '.tar' onto the filename path so that the entry in the
     // observation.xml file matches what is on disk.
     DOMElement* e = doc.createElement(XercescString(itsName));
-    
+
     XercescUtils::addTextElement(*e, "filename", itsFilepath.filename().string() + ".tar");
     XercescUtils::addTextElement(*e, "format", itsFormat);
     XercescUtils::addTextElement(*e, "project", itsProject);
-    
+
     // Confirm that there is at least one scan element
     // Throw an error if not
     ASKAPCHECK(itsScans.size() > 0,

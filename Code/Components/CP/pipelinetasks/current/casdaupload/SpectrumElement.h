@@ -34,7 +34,7 @@
 #include <string>
 
 // ASKAPsoft includes
-#include "casdaupload/TypeElementBase.h"
+#include "casdaupload/DerivedElementBase.h"
 #include "xercesc/dom/DOM.hpp" // Includes all DOM
 #include "boost/filesystem.hpp"
 #include "Common/ParameterSet.h"
@@ -55,27 +55,10 @@ namespace pipelinetasks {
 /// it also records how many spectra there are that meet the wildcard
 /// definition. If a thumbnail is given, it must resolve to the same
 /// number of files as the filename.
-class SpectrumElement : public TypeElementBase {
+class SpectrumElement : public DerivedElementBase {
     public:
         SpectrumElement(const LOFAR::ParameterSet &parset);
 
-        xercesc::DOMElement* toXmlElement(xercesc::DOMDocument& doc) const;
-
-        void copyAndChecksum(const boost::filesystem::path& outdir) const;
-
-    void checkWildcards();
-
-    protected:
-        /// The large PNG/JPG thumbnail image
-    boost::filesystem::path itsThumbnail;
-
-    /// List of names that match the filename definition
-    std::vector<std::string> itsFilenameList;
-    /// List of thumbnails that match the itsThumbnail definition
-    std::vector<std::string> itsThumbnailList;
-
-    /// Number of spectra meeting image name definition
-    unsigned int itsNumSpectra;
 
 };
 

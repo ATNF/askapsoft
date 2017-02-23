@@ -72,22 +72,26 @@ ImageElement::ImageElement(const LOFAR::ParameterSet &parset)
     //    image1.spectra1.filename = ...
     //    image1.spectra2.filename = ...
     // and so forth
-    if ( parset.isDefined("spectra") ){
-        std::vector<std::string> spectraList = parset.getStringVector("spectra","");
-        std::vector<std::string>::iterator spec=spectraList.begin();
-        for(;spec<spectraList.end();spec++){
-            itsSpectra.push_back(SpectrumElement(parset.makeSubset(*spec+".")));
+    if (parset.isDefined("spectra")) {
+        std::vector<std::string> spectraList = parset.getStringVector("spectra", "");
+        std::vector<std::string>::iterator spec = spectraList.begin();
+        for (; spec < spectraList.end(); spec++) {
+            LOFAR::ParameterSet subset = parset.makeSubset(*spec + ".");
+            subset.replace("artifactparam", *spec);
+            itsSpectra.push_back(SpectrumElement(subset));
         }
     }
 
-    if ( parset.isDefined("momentmaps") ){
-        std::vector<std::string> momentMapList = parset.getStringVector("momentmaps","");
-        std::vector<std::string>::iterator mom=momentMapList.begin();
-        for(;mom<momentMapList.end();mom++){
-            itsMomentmaps.push_back(MomentMapElement(parset.makeSubset(*mom+".")));
+    if (parset.isDefined("momentmaps")) {
+        std::vector<std::string> momentMapList = parset.getStringVector("momentmaps", "");
+        std::vector<std::string>::iterator mom = momentMapList.begin();
+        for (; mom < momentMapList.end(); mom++) {
+            LOFAR::ParameterSet subset = parset.makeSubset(*mom + ".");
+            subset.replace("artifactparam", *mom);
+            itsMomentmaps.push_back(MomentMapElement(subset));
         }
     }
-    
+
 }
 
 xercesc::DOMElement* ImageElement::toXmlElement(xercesc::DOMDocument& doc) const
@@ -117,7 +121,7 @@ xercesc::DOMElement* ImageElement::toXmlElement(xercesc::DOMDocument& doc) const
     }
     e->appendChild(childMom);
 
-    
+
     return e;
 }
 
@@ -130,27 +134,27 @@ void ImageElement::copyAndChecksum(const boost::filesystem::path& outdir) const
     ASKAPLOG_INFO_STR(logger, "Copying and calculating checksum for " << in);
     CasdaFileUtils::copyAndChecksum(in, out);
 
-    if (itsThumbnailLarge != "" ) {
+    if (itsThumbnailLarge != "") {
         const boost::filesystem::path inLarge(itsThumbnailLarge);
         const boost::filesystem::path outLarge(outdir / inLarge.filename());
         ASKAPLOG_INFO_STR(logger, "Copying and calculating checksum for " << inLarge);
         CasdaFileUtils::copyAndChecksum(inLarge, outLarge);
     }
 
-    if (itsThumbnailSmall != "" ){
+    if (itsThumbnailSmall != "") {
         const boost::filesystem::path inSmall(itsThumbnailSmall);
         const boost::filesystem::path outSmall(outdir / inSmall.filename());
         ASKAPLOG_INFO_STR(logger, "Copying and calculating checksum for " << inSmall);
         CasdaFileUtils::copyAndChecksum(inSmall, outSmall);
     }
 
-    std::vector<SpectrumElement>::const_iterator spec=itsSpectra.begin();
-    for(;spec<itsSpectra.end();spec++){
+    std::vector<SpectrumElement>::const_iterator spec = itsSpectra.begin();
+    for (; spec < itsSpectra.end(); spec++) {
         spec->copyAndChecksum(outdir);
     }
 
-    std::vector<MomentMapElement>::const_iterator mom=itsMomentmaps.begin();
-    for(;mom<itsMomentmaps.end();mom++){
+    std::vector<MomentMapElement>::const_iterator mom = itsMomentmaps.begin();
+    for (; mom < itsMomentmaps.end(); mom++) {
         mom->copyAndChecksum(outdir);
     }
 

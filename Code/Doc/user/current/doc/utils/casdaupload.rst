@@ -139,6 +139,44 @@ following parameter set entries must be present:
 |                             |                |                 |small thumbnail image. This parameter is not mandatory.                         |
 +-----------------------------+----------------+-----------------+--------------------------------------------------------------------------------+
 
+An image element may have a set of extracted spectral data products
+associated with it. These could be integrated spectra of detected
+objects, noise spectra surrounding an object, moment maps of a 3D
+(spectral-line) source, or Rotation Measure Synthesis outputs.
+
+These have the property of allowing the filename and thumbnail
+filenames to be specified with a wildcard, that is resolved at
+run-time.
+
+The following parameters are used to denote spectra and moment
+maps. They have the same syntax for each individual set of
+artifacts. Note the hierarchical structure of the parameters, and see
+below for examples.
+
++-------------------------------+----------------+-----------------+------------------------------------------------------------------------------+
+|**Parameter**                  |**Type**        |**Default**      |**Description**                                                               |
++===============================+================+=================+==============================================================================+
+|<imagekey>.spectra             |vector<string>  |None             | (Optional) A list of keys defining sets of spectral files to be              |
+|                               |                |                 | uploaded. These are referred to as <key> in the rows below.                  |
++-------------------------------+----------------+-----------------+------------------------------------------------------------------------------+
+|<imagekey>.momentmaps          |vector<string>  |None             | (Optional) A list of keys defining sets of moment-map images to be           |
+|                               |                |                 | uploaded. These are referred to as <key> in the rows below.                  |
++-------------------------------+----------------+-----------------+------------------------------------------------------------------------------+
+|<imagekey>.<key>.filename      |string          |None             | Filename (either relative or fully qualified with a path) for the            |
+|                               |                |                 | artifact. This may contain wildcards.                                        |
++-------------------------------+----------------+-----------------+------------------------------------------------------------------------------+
+|<imagekey>.<key>.type          |string          |None             | This refers to the type of spectral artifact being uploaded.                 |
+|                               |                |                 | The full list of spectral types can be found at                              |
+|                               |                |                 | https://confluence.csiro.au/display/CASDA/Stage+2+Analysis+of+Spectral+types |
++-------------------------------+----------------+-----------------+------------------------------------------------------------------------------+
+|<imagekey>.<key>.thumbnail     |string          |None             | (Optional) This parameter indicates the filename of the thumbnail            |
+|                               |                |                 | image. This parameter can use wildcards. It is not mandatory, but, if given, |
+|                               |                |                 | must resolve to the same number of files as the filename.                    |
++-------------------------------+----------------+-----------------+------------------------------------------------------------------------------+
+
+Examples
+~~~~~~~~
+
 As an example of declaring artifacts, the below defines two image artifacts, a
 deconvolved (Cleaned) image and a PSF image:
 
@@ -152,9 +190,6 @@ deconvolved (Cleaned) image and a PSF image:
     psfimg.filename     = psf.image.i.clean.fits
     psfimg.project      = AS007
 
-
-Example
-~~~~~~~
 
 The following example declares four artifacts to be uploaded to CASDA, one for
 each of the artifact types: image, source catalogue, measurement set and evaluation
@@ -194,3 +229,31 @@ report.
     evaluation.artifactlist         = [report1]
 
     report1.filename                = evaluation-report.pdf
+
+
+Finally, here is an example where an image has a number of extracted
+object and noise spectra associated with it. The wildcards provided
+would match the following images: pol_spec_I_1a.fits, pol_spec_I_2a.fits,
+pol_spec_I_3a.fits; with associated thumbnails pol_spec_I_1a.png etc.
+
+.. code-block:: bash
+    
+    # General
+    outputdir                       = /scratch2/casda
+    telescope                       = ASKAP
+    sbid                            = 1234
+    sbids                           = [1235,1236]
+    obsprogram                      = test
+    writeREADYfile                  = true
+    
+    # Images
+    images.artifactlist             = [image1]
+    image1.filename                 = image.i.contcube.sb1234.linmos.restored.fits
+    image1.type                     = cont_restored_3d
+    image1.project                  = AS033
+    image1.spectra                  = [spec,noise]
+    image1.spec.filename            = selavy_image.i.contcube.sb1234.linmos.restored/PolData/pol_spec_I*.fits
+    image1.spec.type                = cont_restored_i
+    image1.spec.thumbnail           = selavy_image.i.contcube.sb1234.linmos.restored/PolData/pol_spec_I*.png
+    image1.noise.filename           = selavy_image.i.contcube.sb1234.linmos.restored/PolData/pol_noise_I*.fits
+    image1.noise.type               = cont_noise_i
