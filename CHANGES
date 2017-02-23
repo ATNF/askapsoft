@@ -1,3 +1,65 @@
+0.17.0 (24 February 2017)
+-------------------------
+
+New features:
+
+ * Capability for direct FITS output from imager. [STEVE- DETAILS ON
+   THIS?]
+ * Selavy's RM Synthesis module can export the Faraday Dispersion
+   Function to an image on disk.
+ * New source-finding capabilities in the processing pipelines, with a
+   spectral-line source-finding task added (using Selavy), and the
+   option of RM Synthesis done in the continuum source-finding.
+ * The full-resolution measurement set can be purged by the pipeline
+   when no longer needed (ie. after the averaging has been done, and
+   if no spectral-line imaging is required). This will help to
+   minimise unncessary disk-space usage.
+ * CASDA upload is now able to handle extracted spectral data products
+   (object spectra and moment maps etc) that are produced by the
+   source-finding tasks.
+ * A few relatively minor additions have been made to the pipeline
+   scripts:
+   - A minimum UV distance can be applied to the bandpass calibration.
+   - The checks done on the self-calibration parameters are less
+     restrictive and less prone to give warning messages.
+   - Mosaicking at the top level (combining FIELDs) is now not done
+     when there is only a single FIELD.
+ * User documentation has been updated to better reflect the current
+   arrangements with Pawsey (e.g. host names and web addresses). It
+   also describes new modules that are available.
+
+Bug fixes:
+
+ * Imaging:
+   - The brightness units in the restored images from the new imager are
+     now correctly assigned (they were 'Jy/pixel' and are now
+     'Jy/beam'). The beam is also now written correctly.
+   - The beam logs (recording the restoring beam at each channel of an
+     image cube) are now read correctly - previously the comment line
+     at the start was not being ignored.
+ * Analysis:
+   - The Faraday Dispersion function in Selavy's RM Synthesis module
+     was being incorrectly normalised. It is now normalised by the
+     model Stokes I flux at the reference frequency.
+ * Pipelines:
+   - When using more than one Taylor term in the imaging, the continuum
+     subtraction with cmodel images was not working correctly, with
+     incomplete subtraction. This was due to a malformed parset
+     generated within the pipeline. This has been fixed, and the
+     continuum subtraction works as expected.
+   - The beam logs are now correctly passed to Selavy for accurate
+     flux correction of extracted spectra.
+   - Job dependencies for the mosaicking and source-finding jobs have
+     been fixed, so that all jobs start when they are intended to. The
+     mosaicking jobs now only start when they are needed, to avoid
+     wasting resources.
+   - The project ID was incorrectly obtained from the schedblock
+     service when there was more than one word in the SB alias.
+   - The SELAVY_POL_WRITE_FDF parameter was incorrectly described in
+     the documentation - it has been renamed
+     SELAVY_POL_WRITE_COMPLEX_FDF.
+     
+
 0.16.1 (16 December 2016)
 -------------------------
 
