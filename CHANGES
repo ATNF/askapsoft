@@ -3,8 +3,11 @@
 
 New features:
 
- * Capability for direct FITS output from imager. [STEVE- DETAILS ON
-   THIS?]
+ * Capability for direct FITS output from imager. The "fits" imagetype
+   is now supported for cimager and imager. This should be considered "beta"
+   as the completeness of the header information for post processing has not
+   been confirmed. This enables the parallel write of FITS cubes which considerably
+   improves the performance of spectral line imaging. 
  * Selavy's RM Synthesis module can export the Faraday Dispersion
    Function to an image on disk.
  * New source-finding capabilities in the processing pipelines, with a
@@ -37,6 +40,9 @@ Bug fixes:
    - The beam logs (recording the restoring beam at each channel of an
      image cube) are now read correctly - previously the comment line
      at the start was not being ignored.
+   - A number of fixes for the spectral line imaging mode of "imager"
+     have been implemented. These fix issues with zero channels caused
+     by flagging.
  * Analysis:
    - The Faraday Dispersion function in Selavy's RM Synthesis module
      was being incorrectly normalised. It is now normalised by the
