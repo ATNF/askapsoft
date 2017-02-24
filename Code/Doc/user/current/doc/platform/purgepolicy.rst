@@ -8,8 +8,7 @@
 scratch2 Purge Policy
 =====================
 
-The ``scratch2`` 1.4PB Lustre file system at the Pawsey Centre is allocated to the ASKAP project (1 PB) and the MWA (0.4 PB). Hard quotas are not in place, as a certain amount of 
-flexibility between ASKAP and MWA usage benefits both projects so long as total usage is managed. Manually managing free space on ``scratch2`` is not practicable. Due to the configuration and characteristics 
+The ``scratch2`` 1.4PB Lustre file system at the Pawsey Centre is allocated to the ASKAP project and the MWA. Quotas are being applied from 27/2/2017, at a level of 550 TB for each of ASKAP and MWA. Manually managing free space on ``scratch2`` is not practicable. Due to the configuration and characteristics 
 of the Lustre file system, file writes can fail even if the total free space is greater than the file size required. This is primarily due to individual Lustre Object Storage Targets (OSTs) running out of space. 
 To maintain operational stability of the ``scratch2`` filesystem, and ASKAP, free space must be maintained at a reasonable level.
 
