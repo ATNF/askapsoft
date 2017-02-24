@@ -29,8 +29,9 @@ New features:
      when there is only a single FIELD.
  * User documentation has been updated to better reflect the current
    arrangements with Pawsey (e.g. host names and web addresses). It
-   also describes new modules that are available.
-
+   also describes new modules that are available, as well as
+   alternative visualisation options using Pawsey's zeus cluster.
+ 
 Bug fixes:
 
  * Imaging:
