@@ -128,3 +128,37 @@ From here you can load the module for CASA and execute CASAPY::
 
     module load casa
     aprun -b casa --nologger --log2term --nogui
+
+
+Visualisation of images on Zeus
+-------------------------------
+
+Pawsey provide facilities for remote visualisation that offer an
+alternative to using the galaxy-vis nodes. This uses a compute node on
+the zeus cluster, combined with TurboVNC and the Strudel client
+(developed by the MASSIVE team at Monash University), to provide very
+good graphical performance. Tests have shown that it is possible to
+animate through a very large (many tens of GB) spectral cube at quite
+fast frame rates.
+
+The one limitation at the moment is that the zeus cluster cannot see
+/scratch2, but only /group and /scratch. If you have access to magnus,
+you may use the associated space on /scratch, else you will need to
+copy your images to /group.
+
+Pawsey have a `detailed set of instructions
+<https://support.pawsey.org.au/documentation/display/US/Getting+started%3A+Remote+visualisation+with+Strudel>`_
+for getting set up. You will need to install both Strudel and TurboVNC
+on your local machine. Connecting this way starts a slurm job on the
+zeus cluster. Once you are set up and connected to your zeus session,
+you may want to use, say, casaviewer to view your image. In the
+terminal, do the following::
+
+  cd /path/to/my/image
+  module load virtualgl
+  module load casa
+  vglrun casaviewer myBigCube
+
+You need the **vglrun** command to go before casaviewer. This makes
+use of the virtualGL library to use the accelerator hardware on the
+zeus nodes.
