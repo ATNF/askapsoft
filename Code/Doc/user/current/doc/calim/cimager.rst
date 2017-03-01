@@ -173,6 +173,8 @@ default to "cross".
 |                          |                  |              |given by the **restore.beam** parameter, which must |
 |                          |                  |              |be present if **restore** is set to True.           |
 +--------------------------+------------------+--------------+----------------------------------------------------+
+|residuals                 |bool              |true          |If true write out the residual image.               |
++--------------------------+------------------+--------------+----------------------------------------------------+
 |restore.beam              |vector<string>    |None          |Either a single word *fit* or a quantity string     |
 |                          |                  |              |describing the shape of the clean beam (to convolve |
 |                          |                  |              |the model image with). If quantity is given it must |
@@ -211,6 +213,13 @@ default to "cross".
 |                          |                  |              |because not all flux is recovered during the clean  |
 |                          |                  |              |process. However, the images look aesthetically     |
 |                          |                  |              |pleasing with this option.                          |
++--------------------------+------------------+--------------+----------------------------------------------------+
+|restore.updateresiduals   |bool              |true          |The residual image written out by the restore solver|
+|                          |                  |              |can be updated using the latest model. This is now  |
+|                          |                  |              |the default behviour. Note the majorcycle outputs do|
+|                          |                  |              |not pass through the restore solver so are not      |
+|                          |                  |              |updated so therefore correspond to the residuals at |
+|                          |                  |              |the beginning of the last minor cycle.              |
 +--------------------------+------------------+--------------+----------------------------------------------------+
 |Images.xxx                |various           |              |A number of parameters given in this form define the|
 |                          |                  |              |images one wants to produce (shapes, positions,     |

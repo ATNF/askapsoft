@@ -172,11 +172,11 @@ void ContinuumMaster::run(void)
 
     if (nCycles == 0) {
         synthesis::ImagerParallel imager(itsComms, diadvise.getParset());
-        ASKAPLOG_DEBUG_STR(logger, "Master beginning single cycle");
+        ASKAPLOG_DEBUG_STR(logger, "Master beginning single - empty model");
         imager.broadcastModel(); // initially empty model
 
         imager.calcNE(); // Needed here becuase it resets the itsNE
-        imager.solveNE();
+        imager.receiveNE();
         imager.writeModel();
 
     }
@@ -189,9 +189,10 @@ void ContinuumMaster::run(void)
                 imager.broadcastModel(); // initially empty model
             }
             /// Minor Cycle
-            /// Implicit receive in here
-            imager.calcNE(); // Needed here becuase it resets the itsNE
-            imager.solveNE();
+
+            imager.calcNE(); // Needed here becuase it resets the itsNE as Master
+                            // Nothing else is done
+            imager.solveNE(); /// Implicit receiveNE in here
 
 
             if (imager.params()->has("peak_residual")) {
@@ -201,9 +202,9 @@ void ContinuumMaster::run(void)
                     ASKAPLOG_INFO_STR(logger, "It is below the major cycle threshold of "
                                       << targetPeakResidual << " Jy. Stopping.");
 
-                    imager.writeModel();
-                    imager.broadcastModel();
-                    break;
+                    // set cycle to be last
+                    cycle = nCycles-1;
+
                 } else {
                     if (targetPeakResidual < 0) {
                         ASKAPLOG_INFO_STR(logger, "Major cycle flux threshold is not used.");
@@ -226,7 +227,7 @@ void ContinuumMaster::run(void)
 
             if (cycle == nCycles-1) {
                 imager.calcNE(); // resets the itsNE
-                imager.receiveNE();
+                imager.receiveNE(); // need this because we are not Solving
                 imager.writeModel();
 
             }
