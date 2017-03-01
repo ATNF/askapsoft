@@ -784,18 +784,22 @@ EOF
             # SELFCAL_NUM_LOOPS, as long as the latter is >0
             if [ $SELFCAL_NUM_LOOPS -gt 0 ]; then
                 arraySize=`expr $SELFCAL_NUM_LOOPS + 1`
-                if [ ${#SELFCAL_INTERVAL_ARRAY[@]} -ne $arraySize ]; then
-                    echo "ERROR! Size of SELFCAL_INTERVAL (${SELFCAL_INTERVAL}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
-                    exit 1
+
+                if [ "${DO_SELFCAL}" == "true" ]; then
+                    if [ ${#SELFCAL_INTERVAL_ARRAY[@]} -ne $arraySize ]; then
+                        echo "ERROR! Size of SELFCAL_INTERVAL (${SELFCAL_INTERVAL}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
+                        exit 1
+                    fi
+                    if [ ${#SELFCAL_SELAVY_THRESHOLD_ARRAY[@]} -ne $arraySize ]; then
+                        echo "ERROR! Size of SELFCAL_SELAVY_THRESHOLD (${SELFCAL_SELAVY_THRESHOLD}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
+                        exit 1
+                    fi
+                    if [ ${#SELFCAL_NORMALISE_GAINS_ARRAY[@]} -ne $arraySize ]; then
+                        echo "ERROR! Size of SELFCAL_NORMALISE_GAINS (${SELFCAL_NORMALISE_GAINS}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
+                        exit 1
+                    fi
                 fi
-                if [ ${#SELFCAL_SELAVY_THRESHOLD_ARRAY[@]} -ne $arraySize ]; then
-                    echo "ERROR! Size of SELFCAL_SELAVY_THRESHOLD (${SELFCAL_SELAVY_THRESHOLD}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
-                    exit 1
-                fi
-                if [ ${#SELFCAL_NORMALISE_GAINS_ARRAY[@]} -ne $arraySize ]; then
-                    echo "ERROR! Size of SELFCAL_NORMALISE_GAINS (${SELFCAL_NORMALISE_GAINS}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
-                    exit 1
-                fi
+                
                 if [ ${#CLEAN_NUM_MAJORCYCLES_ARRAY[@]} -ne $arraySize ]; then
                     echo "ERROR! Size of CLEAN_NUM_MAJORCYCLES (${CLEAN_NUM_MAJORCYCLES}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
                     exit 1
