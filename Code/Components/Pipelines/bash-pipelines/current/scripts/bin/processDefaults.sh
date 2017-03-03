@@ -600,7 +600,7 @@ EOF
         fi
 
         # Check search type
-        if [ ${SELAVY_SPEC_SEARCH_TYPE} != "spectral" ] ||
+        if [ ${SELAVY_SPEC_SEARCH_TYPE} != "spectral" ] &&
                [ ${SELAVY_SPEC_SEARCH_TYPE} != "spatial" ]; then
             SELAVY_SPEC_SEARCH_TYPE="spectral"
             echo "WARNING - SELAVY_SPEC_SEARCH_TYPE needs to be 'spectral' or 'spatial' - Setting to 'spectral'"
