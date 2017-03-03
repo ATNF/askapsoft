@@ -132,18 +132,32 @@ EOF
     NUM_ANT_1934=`grep Antennas ${MS_METADATA} | head -1 | awk '{print $6}'`
     NUM_ANT=$NUM_ANT_1934
 
+    if [ "${NUM_ANT_1934}" == "" ]; then
+        echo "ERROR - unable to determine number of antennas in calibration dataset"
+        echo "        please check metadata in ${MS_METADATA}"
+        echo "Exiting pipeline."
+        exit 1
+    fi
+    
     # Number of channels used in the calibration observation
     NUM_CHAN=`python ${PIPELINEDIR}/parseMSlistOutput.py --file=${MS_METADATA} --val=nChan`
 
+    if [ "${NUM_CHAN}" == "" ]; then
+        echo "ERROR - unable to determine number of channels in calibration dataset"
+        echo "        please check metadata in ${MS_METADATA}"
+        echo "Exiting pipeline."
+        exit 1
+    fi
+        
     # Number of channels for 1934 observation
-    if [ "$CHAN_RANGE_1934" == "" ]; then
+    if [ "${CHAN_RANGE_1934}" == "" ]; then
         NUM_CHAN_1934=${NUM_CHAN}
         CHAN_RANGE_1934="1-${NUM_CHAN}"
     else
         NUM_CHAN_1934=`echo $CHAN_RANGE_1934 | awk -F'-' '{print $2-$1+1}'`
     fi
 
-    if [ ${NUM_CHAN} -lt ${NUM_CHAN_1934} ]; then
+    if [ "${NUM_CHAN}" -lt "${NUM_CHAN_1934}" ]; then
         echo "ERROR! Number of channels requested for the calibration observation (${NUM_CHAN_1934}, from \"${CHAN_RANGE_1934}\") is bigger than the number in the MS (${NUM_CHAN})."
         exit 1
     fi
@@ -193,13 +207,33 @@ EOF
     DATE_OBS=`date -d "$obsdate" +"%Y-%m-%d"`
     DATE_OBS="${DATE_OBS}T${obstime}"
 
+    if [ "${obsdate}" == "" ] || [ "${obstime}" == "" ]; then
+        echo "ERROR - unable to determine observation time/date of science dataset"
+        echo "        please check metadata in ${MS_METADATA}"
+        echo "Exiting pipeline."
+        exit 1
+    fi
+
     # Get the duration of the observation
     DURATION=`grep "elapsed time" ${MS_METADATA} | head -1 | awk '{print $11}'`
+    if [ "${DURATION}" == "" ]; then
+        echo "ERROR - unable to determine observation duration for science dataset"
+        echo "        please check metadata in ${MS_METADATA}"
+        echo "Exiting pipeline."
+        exit 1
+    fi
 
     # Get the number of antennas used in the observation
     NUM_ANT_SCIENCE=`grep Antennas ${MS_METADATA} | head -1 | awk '{print $6}'`
     NUM_ANT=$NUM_ANT_SCIENCE
 
+    if [ "${NUM_ANT_SCIENCE}" == "" ]; then
+        echo "ERROR - unable to determine number of antennas in science dataset"
+        echo "        please check metadata in ${MS_METADATA}"
+        echo "Exiting pipeline."
+        exit 1
+    fi
+    
     # Get the number of channels used
     NUM_CHAN=`python ${PIPELINEDIR}/parseMSlistOutput.py --file=${MS_METADATA} --val=nChan`
     # centre frequency - includes units
@@ -207,6 +241,13 @@ EOF
     # bandwidth - includes units
     BANDWIDTH="`python ${PIPELINEDIR}/parseMSlistOutput.py --file=${MS_METADATA} --val=Bandwidth`"
 
+    if [ "${NUM_CHAN}" == "" ] || [ "${CENTRE_FREQ}" == "" ] || [ "${BANDWIDTH}" == "" ]; then
+        echo "ERROR - unable to determine frequency setup (# channels/freq0/bandwidth) in science dataset"
+        echo "        please check metadata in ${MS_METADATA}"
+        echo "Exiting pipeline."
+        exit 1
+    fi
+    
     # Get the requested number of channels from the config, and make sure they are the same for 1934
     # & science observations
 
@@ -239,6 +280,13 @@ EOF
     
     # Find the number of fields in the MS
     NUM_FIELDS=`grep Fields ${MS_METADATA} | head -1 | cut -f 4- | cut -d' ' -f 2`
+    if [ "${NUM_FIELDS}" == "" ]; then
+        echo "ERROR - unable to determine number of fields in science dataset"
+        echo "        please check metadata in ${MS_METADATA}"
+        echo "Exiting pipeline."
+        exit 1
+    fi
+    
     FIELDLISTFILE=${metadata}/fieldlist-${msname}.txt
     if [ ! -e $FIELDLISTFILE ]; then
         grep -A${NUM_FIELDS} RA ${MS_METADATA} | tail -n ${NUM_FIELDS} | cut -f 4- >> $FIELDLISTFILE
