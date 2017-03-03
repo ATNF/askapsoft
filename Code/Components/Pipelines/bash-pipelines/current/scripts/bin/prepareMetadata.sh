@@ -88,16 +88,44 @@ if [ "${NUM_ANT}" != "" ]; then
     echo "You've entered NUM_ANT=${NUM_ANT}. This is no longer used, as we take this info from the MS."
 fi
 
+#####
+# Text to write to metadata files to indicate success
+METADATA_IS_GOOD=METADATA_IS_GOOD
+
+
+
 ####################
 # Once we've defined the bandpass calibrator MS name, extract metadata from it
 if [ $DO_1934_CAL == true ] && [ "${MS_INPUT_1934}" != "" ]; then
 
-    echo "Extracting metadata for calibrator measurement set $MS_INPUT_1934"
-    
     getMSname ${MS_INPUT_1934}
     MS_METADATA=$metadata/mslist-cal-${msname}.txt
-    if [ ! -e ${MS_METADATA} ]; then
+
+    runMSlist=true
+    if [ -e "${MS_METADATA}" ]; then
+        if [ `grep ${METADATA_IS_GOOD} ${MS_METADATA} | wc -l` -gt 0 ]; then
+            runMSlist=false
+        else
+            rm -f ${MS_METADATA}
+        fi
+    fi
+    
+    if [ "${runMSlist}" == "true" ]; then
+        echo "Extracting metadata for calibrator measurement set $MS_INPUT_1934"
         ${mslist} --full $MS_INPUT_1934 1>& ${MS_METADATA}
+        err=$?
+        if [ $err -ne 0 ]; then
+            echo "ERROR - the 'mslist' command failed."
+            echo "        Full command:  ${mslist} --full $MS_INPUT_1934" 
+            echo "Exiting pipeline."
+            exit $err
+        else
+            cat >> ${MS_METADATA} <<EOF
+${METADATA_IS_GOOD} ${NOW}
+EOF
+        fi
+    else
+        echo "Reusing calibrator metadata file ${MS_METADATA}"
     fi
 
     # Number of antennas used in the calibration observation
@@ -126,15 +154,37 @@ fi
 # Once we've defined the science MS name, extract metadata from it
 if [ "${MS_INPUT_SCIENCE}" != "" ]; then
 
-    echo "Extracting metadata for science measurement set $MS_INPUT_SCIENCE"
-
     # define $msname
     getMSname ${MS_INPUT_SCIENCE}
 
     # Extract the MS metadata into a local file ($MS_METADATA) for parsing
     MS_METADATA=$metadata/mslist-${msname}.txt
-    if [ ! -e ${MS_METADATA} ]; then
+
+    runMSlist=true
+    if [ -e "${MS_METADATA}" ]; then
+        if [ `grep ${METADATA_IS_GOOD} ${MS_METADATA} | wc -l` -gt 0 ]; then
+            runMSlist=false
+        else
+            rm -f ${MS_METADATA}
+        fi
+    fi
+    
+    if [ "${runMSlist}" == "true" ]; then
+        echo "Extracting metadata for science measurement set $MS_INPUT_SCIENCE"
         ${mslist} --full $MS_INPUT_SCIENCE 1>& ${MS_METADATA}
+        err=$?
+        if [ $err -ne 0 ]; then
+            echo "ERROR - the 'mslist' command failed."
+            echo "        Full command:  ${mslist} --full $MS_INPUT_1934" 
+            echo "Exiting pipeline."
+            exit $err
+        else
+            cat >> ${MS_METADATA} <<EOF
+${METADATA_IS_GOOD} ${NOW}
+EOF
+        fi
+    else
+        echo "Reusing science metadata file ${MS_METADATA}"
     fi
 
     # Get the observation time
