@@ -166,7 +166,7 @@ function getTile()
 #  * TILE (only for FIELD="." - special value of "ALL" means the full
 #          mosaic over all fields/tiles)
 #  * BEAM
-#  * imageCode (one of restored|altrestored|image|residual|psf|psfimage)
+#  * imageCode (one of restored|altrestored|contsub|image|residual|psf|psfimage)
 #  * pol (lower case polarisation i/q/u/v etc)
 #  * TTERM (Taylor term: 0,1,2,...) Can be blank ("" ie. unset), which
 #     defaults to zero
@@ -233,6 +233,10 @@ function setImageProperties()
         imageName="image.${imageBase}${imSuffix}.restored"
         imageType="${typebase}_restored_$typeSuffix"
         label="Restored ${labelbase}, $beamSuffix"
+    if [ "$imageCode" == "contsub" ]; then
+        imageName="image.${imageBase}${imSuffix}.restored.contsub"
+        imageType="${typebase}_restored_$typeSuffix"
+        label="Restored, Continuum-subtracted ${labelbase}, $beamSuffix"
     elif [ "$imageCode" == "altrestored" ]; then
         imageName="image.${imageBase}${imSuffix}.alt.restored"
         imageType="${typebase}_restored_$typeSuffix"

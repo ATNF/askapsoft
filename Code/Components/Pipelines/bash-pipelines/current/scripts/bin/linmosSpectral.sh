@@ -31,7 +31,7 @@
 
 ID_LINMOS_SPECTRAL=""
 
-mosaicImageList="restored image residual"
+mosaicImageList="restored contsub image residual"
 
 DO_IT=$DO_MOSAIC
 if [ "$DO_SPECTRAL_IMAGING" != "true" ]; then
