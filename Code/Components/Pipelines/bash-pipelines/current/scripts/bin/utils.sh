@@ -233,7 +233,7 @@ function setImageProperties()
         imageName="image.${imageBase}${imSuffix}.restored"
         imageType="${typebase}_restored_$typeSuffix"
         label="Restored ${labelbase}, $beamSuffix"
-    if [ "$imageCode" == "contsub" ]; then
+    elif [ "$imageCode" == "contsub" ]; then
         imageName="image.${imageBase}${imSuffix}.restored.contsub"
         imageType="${typebase}_restored_$typeSuffix"
         label="Restored, Continuum-subtracted ${labelbase}, $beamSuffix"
