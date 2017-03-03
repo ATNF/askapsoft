@@ -33,39 +33,37 @@ ID_LINMOS_SPECTRAL=""
 
 mosaicImageList="restored contsub image residual"
 
-DO_IT=$DO_MOSAIC
-if [ "$DO_SPECTRAL_IMAGING" != "true" ]; then
-    DO_IT=false
-fi
-
-if [ "${DO_IT}" == "true" ] && [ "${CLOBBER}" != "true" ]; then
-    BEAM=all
-    for imageCode in ${mosaicImageList}; do
-        setImageProperties spectral
-        if [ -e ${OUTPUT}/${imageName} ]; then
-            if [ $DO_IT == true ]; then
-                echo "Image ${imageName} exists, so not running continuum mosaicking"
-            fi
-            DO_IT=false
-        fi
-    done
-fi
-
-if [ "${DO_IT}" == "true" ]; then
-
-    if [ ${IMAGE_AT_BEAM_CENTRES} == true ] && [ "$DIRECTION_SCI" == "" ]; then
-        reference="# No reference image or offsets, as we take the image centres"
-    else
-        reference="# Reference image for offsets
+if [ ${IMAGE_AT_BEAM_CENTRES} == true ] && [ "$DIRECTION_SCI" == "" ]; then
+    reference="# No reference image or offsets, as we take the image centres"
+else
+    reference="# Reference image for offsets
 linmos.feeds.centreref  = 0
 linmos.feeds.spacing    = ${LINMOS_BEAM_SPACING}
 # Beam offsets
 ${LINMOS_BEAM_OFFSETS}"
+fi
+
+for imageCode in ${mosaicImageList}; do
+
+    DO_IT=$DO_MOSAIC
+    if [ "$DO_SPECTRAL_IMAGING" != "true" ]; then
+        DO_IT=false
+    fi
+    
+    if [ "${DO_IT}" == "true" ] && [ "${CLOBBER}" != "true" ]; then
+        BEAM=all
+        setImageProperties spectral
+        if [ -e ${OUTPUT}/${imageName} ]; then
+            if [ $DO_IT == true ]; then
+                echo "Image ${imageName} exists, so not running its spectral-line mosaicking"
+            fi
+            DO_IT=false
+        fi
     fi
 
-    for imCode in ${mosaicImageList}; do
+    if [ "${DO_IT}" == "true" ]; then
 
-        setJob linmosSpectral_${imCode} linmosS${imcode}
+        setJob linmosSpectral_${imageCode} linmosS${imcode}
         cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -93,7 +91,7 @@ cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 IMAGE_BASE_SPECTRAL=${IMAGE_BASE_SPECTRAL}
 FIELD=${FIELD}
 
-imageCode=${imCode}
+imageCode=${imageCode}
 
 beamList=""
 for BEAM in ${BEAMS_TO_USE}; do
@@ -148,14 +146,15 @@ EOFOUTER
         if [ $SUBMIT_JOBS == true ]; then
             DEP_SPECIMG=`echo $DEP_SPECIMG | sed -e 's/afterok/afterany/g'`
 	    ID_LINMOS_SPECTRAL=`sbatch $DEP_SPECIMG $sbatchfile | awk '{print $4}'`
-	    recordJob ${ID_LINMOS_SPECTRAL} "Make a mosaic spectral cube of the science observation, field $FIELD, with flags \"${DEP_SPECIMG}\""
+	    recordJob ${ID_LINMOS_SPECTRAL} "Make a mosaic ${imageCode} spectral cube of the science observation, field $FIELD, with flags \"${DEP_SPECIMG}\""
             FULL_LINMOS_SPECTRAL_DEP=`addDep "${FULL_LINMOS_SPECTRAL_DEP}" "${ID_LINMOS_SPECTRAL}"`
         else
-	    echo "Would make a mosaic image of the science observation, field $FIELD with slurm file $sbatchfile"
+	    echo "Would make a mosaic ${imageCode} spectral cube of the science observation, field $FIELD with slurm file $sbatchfile"
         fi
         
-        echo " "
+    fi
 
-    done
-    
-fi
+done
+
+echo " "
+   

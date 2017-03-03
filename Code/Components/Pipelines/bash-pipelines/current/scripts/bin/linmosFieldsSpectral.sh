@@ -33,46 +33,44 @@ ID_LINMOS_SPECTRAL_ALL=""
 
 mosaicImageList="restored contsub image residual"
 
-DO_IT=$DO_MOSAIC
-if [ "$DO_SPECTRAL_IMAGING" != "true" ]; then
-    DO_IT=false
-fi
+for imageCode in ${mosaicImageList}; do 
 
-# Don't run if there is only one field
-if [ ${NUM_FIELDS} -eq 1 ]; then
-    DO_IT=false
-fi
-
-if [ "${DO_MOSAIC_FIELDS}" != "true" ]; then
-    DO_IT=false
-fi
-
-if [ "${DO_IT}" == "true" ] && [ "${CLOBBER}" != "true" ]; then
-    FIELD="."
-    BEAM=all
-    if [ `echo $TILE_LIST | awk '{print NF}'` -gt 1 ]; then
-        FULL_TILE_LIST="$TILE_LIST ALL"
-    else
-        FULL_TILE_LIST="ALL"
+    DO_IT=$DO_MOSAIC
+    if [ "$DO_SPECTRAL_IMAGING" != "true" ]; then
+        DO_IT=false
     fi
-    for TILE in $FULL_TILE_LIST; do
-        for imageCode in ${mosaicImageList}; do 
+
+    # Don't run if there is only one field
+    if [ ${NUM_FIELDS} -eq 1 ]; then
+        DO_IT=false
+    fi
+
+    if [ "${DO_MOSAIC_FIELDS}" != "true" ]; then
+        DO_IT=false
+    fi
+
+    if [ "${DO_IT}" == "true" ] && [ "${CLOBBER}" != "true" ]; then
+        FIELD="."
+        BEAM=all
+        if [ `echo $TILE_LIST | awk '{print NF}'` -gt 1 ]; then
+            FULL_TILE_LIST="$TILE_LIST ALL"
+        else
+            FULL_TILE_LIST="ALL"
+        fi
+        for TILE in $FULL_TILE_LIST; do
             setImageProperties spectral
             if [ -e ${OUTPUT}/${imageName} ]; then
                 if [ $DO_IT == true ]; then
-                    echo "Image ${imageName} exists, so not running continuum mosaicking"
+                    echo "Image ${imageName} exists, so not running its spectral-line mosaicking"
                 fi
                 DO_IT=false
             fi
         done
-    done
-fi
+    fi
 
-if [ $DO_IT == true ]; then
+    if [ $DO_IT == true ]; then
 
-    for imCode in ${mosaicImageList}; do 
-
-        sbatchfile=$slurms/linmos_all_spectral_${imCode}.sbatch
+        sbatchfile=$slurms/linmos_all_spectral_${imageCode}.sbatch
         cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -82,7 +80,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --time=${JOB_TIME_LINMOS}
 #SBATCH --ntasks=${NUM_CPUS_SPECTRAL_LINMOS}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_SPEC_IMAGING}
-#SBATCH --job-name=linmosFullS${imCode}
+#SBATCH --job-name=linmosFullS${imageCode}
 ${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-linmosS-%j.out
@@ -127,7 +125,7 @@ for THISTILE in \$FULL_TILE_LIST; do
     done
     echo "Tile \$THISTILE has field list \$TILE_FIELD_LIST"
 
-    imageCode=${imCode}
+    imageCode=${imageCode}
     imList=""       
     wtList=""
     BEAM=all
@@ -188,13 +186,13 @@ EOFOUTER
         if [ $SUBMIT_JOBS == true ]; then
             FULL_LINMOS_SPECTRAL_DEP=`echo $FULL_LINMOS_SPECTRAL_DEP | sed -e 's/afterok/afterany/g'`
 	    ID_LINMOS_SPECTRAL_ALL=`sbatch $FULL_LINMOS_SPECTRAL_DEP $sbatchfile | awk '{print $4}'`
-	    recordJob ${ID_LINMOS_SPECTRAL_ALL} "Make a mosaic spectral cube of the science observation, with flags \"${FULL_LINMOS_SPECTRAL_DEP}\""
+	    recordJob ${ID_LINMOS_SPECTRAL_ALL} "Make a mosaic ${imageCode} spectral cube of the science observation, with flags \"${FULL_LINMOS_SPECTRAL_DEP}\""
         else
-	    echo "Would make a mosaic image of the science observation, with slurm file $sbatchfile"
+	    echo "Would make a mosaic ${imageCode} spectral cube of the science observation, with slurm file $sbatchfile"
         fi
         
         echo " "
 
-    done
-    
-fi
+    fi
+
+done
