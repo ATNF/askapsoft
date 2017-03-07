@@ -145,6 +145,13 @@ cd $WORKSPACE/trunk/Code/Components/Services/ingest/current/functests/test_inges
 
 rm -rf ingest_test0.ms
 
+# Start the Ice Services
+../start_ice.sh ../iceregistry.cfg ../icegridadmin.cfg ../icestorm.cfg
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to start Ice Services"
+    exit 1
+fi
+
 cat > tmp.simcor.sh <<EOF
 #!/bin/sh
 cd ../../../../correlatorsim/current/functests/test_playbackADE
@@ -160,10 +167,23 @@ chmod u+x tmp.simcor.sh
 
 echo "Starting ingest pipeline: "`date`
 
-timeout -s 9 10m ./run.sh
-ERROR=$?
+timeout -s 9 10m ../../apps/cpingest.sh -s -c cpingest.in | tee ingest.out
+ERROR=${PIPESTATUS[0]}
+
 
 echo "Ingest finished: "`date`
+
+for job in `jobs -p`
+do
+  echo "Waiting for pid="${job}" to finish"
+  wait $job
+done
+
+# Stop the Ice Services
+echo "Stopping ICE"
+../stop_ice.sh ../icegridadmin.cfg
+
+
 
 echo "-------------- output of the correlator simulator:"
 cat simcor.out
@@ -171,7 +191,12 @@ echo "--------------------------------------------------"
 
 if [ $ERROR -ne 0 ]; then
     echo "ingest/current/functests/test_ingestpipeline/run.sh returned errorcode $ERROR"
-    echo "Failing the test on this condition has been disabled"
+    # workarund for ASKAPSDP-1673
+    ICE_EXCEPT=`tail -1 ingest.out | grep IceUtil::NullHandleException | wc -l`
+    if [ ${ICE_EXCEPT} != "1" ]; then
+         exit 1
+    fi
+    echo "Failing the test on IceUtil::NullHandleException thas been disabled"
     #exit 1
 fi
 

@@ -292,7 +292,7 @@ bool TosSimulator::sendNext(void)
 
     if (itsCurrentRow >= nRow) {
 		ASKAPLOG_INFO_STR(logger,"End of a loop");
-		/*
+		
         ASKAPLOG_INFO_STR(logger,
                 "Sending additional metadata message indicating end-of-observation");
         metadata.scanId(-2);    // -2
@@ -300,7 +300,7 @@ bool TosSimulator::sendNext(void)
         usleep(itsDelay);
         cout << "TOSSim: transmitting the final data" << endl;
         itsPort->send(metadata);
-		*/
+		
 		return false;
 	} else {
 		return true;
