@@ -54,7 +54,8 @@ if __name__ == '__main__':
     sourceFluxScale = inputPars.get_value('sourceFluxScale',1.0)
     matchfile = inputPars.get_value('matchfile','matches.txt')
 
-    
+    outputType = inputPars.get_value('outputType','png')
+
     if not os.path.exists(threshImageName):
         print "Threshold image %s does not exist. Exiting."%threshImageName
         exit(0)
@@ -126,7 +127,7 @@ if __name__ == '__main__':
     plt.hist(snrmap[abs(snrmap)<100],bins=50,log=True)
     labelPlot('Pixel value','Count','SNR map histogram','x-small')
 
-    plt.savefig('histograms.png')
+    plt.savefig('histograms.%s'%outputType)
 
 #########################################
 #  SNR map distribution
@@ -158,7 +159,7 @@ if __name__ == '__main__':
     plt.ylim(1,1.e7)
     labelPlot('Signal-to-noise ratio','Number of pixels exceeding SNR','SNR pixel distribution','medium')
     plt.legend()
-    plt.savefig('snrCounts.png')
+    plt.savefig('snrCounts.%s'%outputType)
     
 #####################################
 #  source counts
@@ -307,7 +308,7 @@ if __name__ == '__main__':
     labelPlot('S [Jy]', r'$S^{5/2}n(S)$ [ Jy$^{3/2}$ sr$^{-1}$ ]','Differential source counts','medium')
     plt.legend(loc='best')
     
-    plt.savefig('sourceCounts.png')
+    plt.savefig('sourceCounts.%s'%outputType)
 
     if not skymodelOrigCat == '':
         print "Source counts: Numbers in each bin, for Components | Matched components | Skymodel | Original sky model"

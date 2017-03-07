@@ -64,7 +64,8 @@ if __name__ == '__main__':
         exit(0)
     sourceCatType = inputPars.get_value('sourceCatalogueType','Selavy')
     sourceCat = readCat(sourceCatFile,sourceCatType)
-    
+    sourceFluxScale = inputPars.get_value('sourceFluxScale',1.0)
+
     refCatFile = inputPars.get_value('refCatalogue','')
     if(refCatFile == ''):
         logging.error('Eval.refCatalogue not provided. Doing no evaluation.')
@@ -74,6 +75,7 @@ if __name__ == '__main__':
         exit(0)
     refCatType = inputPars.get_value('refCatalogueType','Selavy')
     refCat = readCat(refCatFile,refCatType)
+    refFluxScale = inputPars.get_value('refFluxScale',1.0)
 
     matchfile = inputPars.get_value('matchfile',"matches.txt")
     if(not os.access(matchfile,os.F_OK)):
@@ -87,6 +89,8 @@ if __name__ == '__main__':
         exit(0)
     srcmisslist = readMisses(missfile,sourceCat,'S')
     refmisslist = readMisses(missfile,refCat,'R')
+
+    outputType = inputPars.get_value('outputType','png')
 
     # Put data into individual arrays to match old plotting functions.
     xS=array([])
@@ -109,8 +113,8 @@ if __name__ == '__main__':
         yS=append(yS,m.src.dec)
         if sourceCatType=="Selavy" :
             imagerms=append(imagerms,m.src.RMSimage)
-        fS=append(fS,m.src.flux())
-        fR=append(fR,m.ref.flux())
+        fS=append(fS,m.src.flux()*sourceFluxScale)
+        fR=append(fR,m.ref.flux()*refFluxScale)
         aS=append(aS,m.src.maj)
         bS=append(bS,m.src.min)
         pS=append(pS,m.src.pa)
@@ -351,7 +355,7 @@ if __name__ == '__main__':
         xlim(min(snr[ind])*0.9,max(snr[ind])*1.1)
 
 #    show()
-    print "Saving to fluxEval.png"
+    print "Saving to fluxEval.%s"%outputType
     savefig('fluxEval')
     close()
     
@@ -509,7 +513,7 @@ if __name__ == '__main__':
         xlabel(r'No. of unmatched nearby catalogue sources',font)
         ylabel(lab,font)
 
-        print "Saving to %s.png"%figname
+        print "Saving to %s.%s"%(figname,outputType)
         savefig(figname)
         close()
     # end of: for loop in range(2)
