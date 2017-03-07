@@ -54,7 +54,7 @@ public abstract class SBStateMonitor
 			ObsState newState,
 			String updateTime,
 			Ice.Current current) {
-		if (0 == newState.compareTo(ObsState.PROCESSING)) {
+		if (0 == newState.compareTo(ObsState.OBSERVED)) {
 			try {
 				notify(sbid, newState, updateTime);
 			} catch (NotificationException ex) {

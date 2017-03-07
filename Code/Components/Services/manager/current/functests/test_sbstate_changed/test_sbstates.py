@@ -89,7 +89,7 @@ class Test(CPFuncTestBase):
         timestamp = datetime.now()
         self.publisher_proxy.changed(
             sbid,
-            ObsState.PROCESSING,
+            ObsState.OBSERVED,
             str(timestamp))
 
         expected_history_length = 1
@@ -99,4 +99,4 @@ class Test(CPFuncTestBase):
         name, args = fbs.history[0]
         assert name == 'sbStateChangedNotification'
         assert args['sbid'] == sbid
-        assert args['obsState'] == ObsState.PROCESSING
+        assert args['obsState'] == ObsState.OBSERVED
