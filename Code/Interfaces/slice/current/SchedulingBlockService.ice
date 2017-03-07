@@ -61,7 +61,8 @@ module schedblock
         PENDINGARCHIVE,
         COMPLETED,
         ERRORED,
-        RETIRED
+	    RETIRED,
+        OBSERVED
     };
 
     /**
@@ -170,11 +171,14 @@ module schedblock
          * @param program The name of the Owner Observation Program.
          * @param templname The name of the Scheduling Block Template to use
          * @param alias a string alias (does not have to be unique)
+         * @param the ObsuserParameters to set. This can be done later.
          * @returns The id of the newly created Scheduling Block
          *
          **/
-        long create(string program, string templname, string alias)
+        long create(string program, string templname, string alias,
+                    askap::interfaces::ParameterMap userparams)
              throws NoSuchSBTemplateException,
+                ParameterException,
 	            NoSuchObsProgramException;
 
         /**

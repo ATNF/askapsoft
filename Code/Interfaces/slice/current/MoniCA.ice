@@ -2,6 +2,20 @@ module atnf {
   module atoms {
     module mon {
       module comms {
+	struct EnumItemEntry {
+	    string name;
+	    int val;
+	};
+        ////////////
+        //Tuple of long/int pairs used to indicate a millisecond count since
+        //the 1st of January 1970 UTC and the corresponding dUTC which came
+        //into effect at that time.
+        struct dUTCEntry {
+          long epoch;
+          int dUTC;
+        };
+        sequence<dUTCEntry> dutcarray;
+        
         ////////////
         //Data structure definitions
         sequence<string> stringarray;
@@ -28,7 +42,7 @@ module atnf {
         sequence<PointDescriptionIce> pointarray;
 
         //Enum to represent data type        
-        enum DataType {DTNull, DTFloat, DTDouble, DTInt, DTLong, DTString, DTBoolean, DTAbsTime, DTRelTime, DTAngle};
+        enum DataType {DTNull, DTFloat, DTDouble, DTInt, DTLong, DTString, DTBoolean, DTAbsTime, DTRelTime, DTAngle, DTEnumItem};
         //Classes to hold different data types
         class DataValue { 
           DataType type;
@@ -59,6 +73,9 @@ module atnf {
         };
         class DataValueAngle extends DataValue {
           double value;
+        };
+        class DataValueEnumItem extends DataValue {
+          EnumItemEntry value;
         };
         class DataValueFloatArray extends DataValue {
           floatarray value;
@@ -174,6 +191,10 @@ module atnf {
           idempotent stringarray getEncryptionInfo();
           //Get current time from server
           idempotent long getCurrentTime();
+          //Get dUTC (leap second) dictionary. This information can be used
+          //for calculating Binary Atomic Time (BAT) timestamps from the
+          //system time.
+          idempotent dutcarray getLeapSeconds();
         };
         
         

@@ -72,6 +72,11 @@ module schedblock
 	string projectRef;
 
 	/**
+	 * An (optional) description of the program
+	**/
+	string description;
+
+	/**
 	 * A sequence of date/time allocations for this program
 	 **/
 	AllocationSeq allocations;
