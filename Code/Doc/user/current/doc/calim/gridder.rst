@@ -88,7 +88,8 @@ The following are common to all gridders:
 |                               |              |              |padded grid. This option is mainly intended for   |
 |                               |              |              |faceting (to reduce aliasing from other facets),  |
 |                               |              |              |but will work for all gridders and in the         |
-|                               |              |              |non-faceted case                                  |
+|                               |              |              |non-faceted case. Note that at present this will  |
+|                               |              |              |damage the Wiener filter if preservecf = true.    |
 +-------------------------------+--------------+--------------+--------------------------------------------------+
 |alldatapsf                     |bool          |false         |Set to true to use all data for PSF calculations  |
 |                               |              |              |instead of just the representative feed and       |
@@ -142,12 +143,23 @@ The following are common to all gridders:
 |                               |              |              |tolerance cannot be achieved by plane fitting.    |
 +-------------------------------+--------------+--------------+--------------------------------------------------+
 |snapshotimaging.clipping       |double        |0             |Optional clipping to avoid edge effects during    |
-|                               |              |              |image reprojection.This parameter represents the  |
+|                               |              |              |image reprojection. This parameter represents the |
 |                               |              |              |fraction of the image size (on each directional   |
 |                               |              |              |axis) which is zeroed (equally from both          |
 |                               |              |              |sides). It should be a non-negative number less   |
 |                               |              |              |than 1. Set it to 0 (default) to avoid any        |
-|                               |              |              |clipping.                                         |
+|                               |              |              |clipping. Applies to all images (image.*,         |
+|                               |              |              |residual.*, weights.*, etc.).                     |
++-------------------------------+--------------+--------------+--------------------------------------------------+
+|snapshotimaging.weightsclipping|double        |the general   |Optional clipping of the weights image to avoid   |
+|                               |              |snapshot      |edge effects during image reprojection. As the    |
+|                               |              |imaging       |general clipping mentioned above can create its   |
+|                               |              |clipping      |own edge effects, clipping only the weights will  |
+|                               |              |factor        |stop edge effects from contaminating the sky model|
+|                               |              |              |during deconvolution. Thus they can be cleaned    |
+|                               |              |              |away and their residuals will be ignored during   |
+|                               |              |              |any linmos operation. See the general clipping    |
+|                               |              |              |factor above for usage.                           |
 +-------------------------------+--------------+--------------+--------------------------------------------------+
 |snapshotimaging.reprojectpsf   |bool          |false         |If true, the PSF will be reprojected and          |
 |                               |              |              |accumulated the same way as the dirty             |

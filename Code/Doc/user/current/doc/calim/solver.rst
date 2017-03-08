@@ -273,13 +273,15 @@ The table below contains the description of individual parameters (names starts 
 |                       |              |              |Note that the Wiener filter must be specified with  |
 |                       |              |              |either **noisepower** or **robustness**.            |
 +-----------------------+--------------+--------------+----------------------------------------------------+
-|Wiener.taper           |float         |none          |If defined, the Wiener filter will be tapered in the|
-|                       |              |              |image domain with a Gaussian. The value of the      |
+|Wiener.taper           |float         |none          |If defined, the FFT of the uv sampling function used|
+|                       |              |              |to generate the Wiener filter (effectively the PSF) |
+|                       |              |              |will be tapered with a Gaussian. The value of the   |
 |                       |              |              |parameter is the FWHM of the taper in image pixels. |
 |                       |              |              |Restricting the filter size to approximately that   |
 |                       |              |              |of the primary beam size is of particular           |
 |                       |              |              |importance when imaging over fields that are larger |
-|                       |              |              |than the primary beam.                              |
+|                       |              |              |than the primary beam. There is little point to     |
+|                       |              |              |tapering if preservecf = true.                      |
 +-----------------------+--------------+--------------+----------------------------------------------------+
 |NormWiener.robustness  |float         |0.0           |Roughly the same effect as the same parameter in    |
 |                       |              |              |Robust.                                             |
