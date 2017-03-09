@@ -39,9 +39,9 @@ ID_CONTIMG_SCI_SC=""
 
 DO_IT=$DO_CONT_IMAGING
 
-if [ $CLOBBER == false ] && [ -e ${OUTPUT}/${outputImage} ]; then
+if [ $CLOBBER == false ] && [ -e ${OUTPUT}/${imageName} ]; then
     if [ $DO_IT == true ]; then
-        echo "Image ${outputImage} exists, so not running continuum imaging for beam ${BEAM}"
+        echo "Image ${imageName} exists, so not running continuum imaging for beam ${BEAM}"
     fi
     DO_IT=false
 fi
@@ -67,13 +67,9 @@ if [ $DO_IT == true ] && [ $DO_SELFCAL == true ]; then
 	CPUS_PER_CORE_SELFCAL=${NPROCS_SELAVY}
     fi
 
-    if [ $NUM_TAYLOR_TERMS == 1 ]; then
-        selavyImage=${OUTPUT}/image.${imageBase}.restored
-        selavyWeights=${OUTPUT}/weights.${imageBase}
-    else
-        selavyImage=${OUTPUT}/image.${imageBase}.taylor.0.restored
-        selavyWeights=${OUTPUT}/weights.${imageBase}.taylor.0
-    fi
+    setImageProperties cont
+    selavyImage=${imageName}
+    selavyWeights=${weightsImage}
 
     cutWeights=`echo ${SELFCAL_SELAVY_WEIGHTSCUT} | awk '{if (($1>0.)&&($1<1.)) print "true"; else print "false";}'`
     if [ ${cutWeights} == "true" ]; then

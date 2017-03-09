@@ -33,11 +33,8 @@
 # cmodel to create the corresponding continuum model image, which
 # is then subtracted from the MS
 
-if [ $NUM_TAYLOR_TERMS == 1 ]; then
-    selavyImage=${OUTPUT}/image.${imageBase}.restored
-else
-    selavyImage=${OUTPUT}/image.${imageBase}.taylor.0.restored
-fi
+setImageProperties cont
+selavyImage=${imageName}
 
 NPROCS_SELAVY=`echo $CONTSUB_SELAVY_NSUBX $CONTSUB_SELAVY_NSUBY | awk '{print $1*$2+1}'`
 if [ ${NPROCS_SELAVY} -le 20 ]; then

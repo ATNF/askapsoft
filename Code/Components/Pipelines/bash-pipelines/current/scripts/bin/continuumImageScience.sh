@@ -41,9 +41,9 @@ else
     theimager=$cimager
 fi
 
-if [ $CLOBBER == false ] && [ -e ${OUTPUT}/${outputImage} ]; then
+if [ $CLOBBER == false ] && [ -e ${OUTPUT}/${imageName} ]; then
     if [ $DO_IT == true ]; then
-        echo "Image ${outputImage} exists, so not running continuum imaging for beam ${BEAM}"
+        echo "Image ${imageName} exists, so not running continuum imaging for beam ${BEAM}"
     fi
     DO_IT=false
 fi

@@ -40,14 +40,8 @@
 # @author Matthew Whiting <Matthew.Whiting@csiro.au>
 #
 
-# set the $imageBase variable
-setImageBase cont
-
-if [ ${NUM_TAYLOR_TERMS} -gt 1 ]; then
-    outputImage="image.${imageBase}.taylor.0.restored"
-else
-    outputImage="image.${imageBase}.restored"
-fi
+# set the image name
+setImageProperties cont
 
 # Define the shape parameter, or leave to "advise"
 shapeDefinition="# Leave shape definition to Cimager to determine from the data"
