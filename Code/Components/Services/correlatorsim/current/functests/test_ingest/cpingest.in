@@ -191,7 +191,7 @@ correlator.modes = [standard]
 #
 # Task List
 # Changed outside
-tasks.tasklist = [MergedSource, CalcUVWTask, Monitor, MSSink]
+tasks.tasklist = [MergedSource, Merge, CalcUVWTask, Monitor, MSSink]
 
 # metadata-specific 
 metadata_source.ice.locator_host = localhost
@@ -239,7 +239,7 @@ monitoring.adaptername = IngestPipelineMonitoringAdapter
 #
 # Merge
 tasks.Merge.type                     = ChannelMergeTask
-tasks.Merge.params.ranks2merge = 2
+#tasks.Merge.params.ranks2merge = 1
 
 
 # Number of channels a given ingest process is meant to receive/process

@@ -108,17 +108,18 @@ if [ $NVSTREAM -eq 1 ]; then
 	sed -i "s/tasks.tasklist.*/tasks.tasklist = [MergedSource, MSSink]/" $INGEST_PARSET
 else
 	# parallel
-	#sed -i "s/tasks.tasklist.*/tasks.tasklist = [MergedSource, Merge, CalcUVWTask, Monitor, MSSink]/" $INGEST_PARSET
-	sed -i "s/tasks.tasklist.*/tasks.tasklist = [MergedSource, CalcUVWTask, Monitor, MSSink]/" $INGEST_PARSET
+	sed -i "s/tasks.tasklist.*/tasks.tasklist = [MergedSource, Merge, CalcUVWTask, Monitor, MSSink]/" $INGEST_PARSET
+	#sed -i "s/tasks.tasklist.*/tasks.tasklist = [MergedSource, CalcUVWTask, Monitor, MSSink]/" $INGEST_PARSET
 fi
 
-if [ $NVSTREAM -lt $MAX_CARD_IN_BLOCK ]; then
-  	NFILE=$NVSTREAM
-else
-  	NFILE=$MAX_CARD_IN_BLOCK
-fi
-echo "Setting ingest parameter: ranks to merge: $NFILE"
-sed -i "s/tasks.Merge.params.ranks2merge.*/tasks.Merge.params.ranks2merge = $NFILE/" $INGEST_PARSET
+#if [ $NVSTREAM -lt $MAX_CARD_IN_BLOCK ]; then
+#  	NFILE=$NVSTREAM
+#else
+#  	NFILE=$MAX_CARD_IN_BLOCK
+#fi
+#let NFILE=1
+#echo "Setting ingest parameter: ranks to merge: $NFILE"
+#sed -i "s/tasks.Merge.params.ranks2merge.*/tasks.Merge.params.ranks2merge = $NFILE/" $INGEST_PARSET
 
 echo "Removing ingest parameter: channel list"
 CHANNEL_COMMENT="# Automatically generated channel list"

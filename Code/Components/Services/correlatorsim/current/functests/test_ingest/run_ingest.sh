@@ -30,11 +30,20 @@ APP_DIR=$PACKAGE_DIR/apps
 source $PACKAGE_DIR/init_package_env.sh
 export AIPSPATH=$ASKAP_ROOT/Code/Base/accessors/current
 
+let NINGEST=$NVSTREAM
+
 # Run the ingest pipeline
-if [ $NVSTREAM -gt 1 ]; then
-    echo "Running a parallel of $NVSTREAM processes of ingest ..."
-    mpirun -np $NVSTREAM $APP_DIR/cpingest.sh -c cpingest.in
-elif [ $NVSTREAM -eq 1 ]; then
+#if [ $NINGEST -ge 1 ]; then
+#    echo "Running $NINGEST processes of ingest ..."
+#    mpirun -np $NINGEST $APP_DIR/cpingest.sh -c cpingest.in
+#else
+#    echo "Illegal argument"
+#    exit -1
+#fi
+if [ $NINGEST -gt 1 ]; then
+    echo "Running a parallel of $NINGEST processes of ingest ..."
+    mpirun -np $NINGEST $APP_DIR/cpingest.sh -c cpingest.in
+elif [ $NINGEST -eq 1 ]; then
     echo "Running a single process of ingest ..."
     $APP_DIR/cpingest.sh -s -c cpingest.in
 else
