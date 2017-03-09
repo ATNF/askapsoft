@@ -4,7 +4,7 @@
 # Parameters for both
 #
 # Measurement set used as input for simulation.
-playback.dataset = playback.dataset = ~/ASKAPsoft/Code/Components/Services/correlatorsim/current/dataset/ade4ant4chan.ms
+playback.dataset = ../../dataset/ade4ant4chan.ms
 
 #playback.dataset = source.ms
 
@@ -69,7 +69,7 @@ playback.tossim.delay = 5000000
 # Ideally 304 (default), but current hardware is limited at 300.
 # If the number is greater than that in measurement set, data will be 
 # copied from existing coarse channels.
-playback.corrsim.n_coarse_channels = 4
+playback.corrsim.n_coarse_channels = 8
 
 # Division of coarse channel into fine channels
 # Default: 54
