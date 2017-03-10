@@ -212,6 +212,8 @@ if [ "$SZ" != "118M" ]; then
    exit 1
 fi
 
+exit 0
+
 #
 # Phase 6
 #
