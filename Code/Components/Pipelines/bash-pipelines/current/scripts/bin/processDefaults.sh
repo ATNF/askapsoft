@@ -382,8 +382,9 @@ EOF
     maxbeam=-1
     nbeams=0
     for b in ${BEAMS_TO_USE}; do
-        if [ $b -gt $maxbeam ]; then
-            maxbeam=$b
+        thisbeam=$( echo "$b" | awk '{printf "%d",$1}')
+        if [ "$thisbeam" -gt "$maxbeam" ]; then
+            maxbeam=$thisbeam
         fi
         nbeams=`expr $nbeams + 1`
     done
