@@ -41,6 +41,7 @@
 #
 
 # set the image name
+imageCode=restored
 setImageProperties cont
 
 # Define the shape parameter, or leave to "advise"

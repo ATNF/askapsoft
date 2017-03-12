@@ -45,7 +45,8 @@ else
     DEP=`addDep "$DEP" "$ID_SPECIMG_SCI"`
 fi
 
-if [ ! -e ${OUTPUT}/${imageName} ] && [ "${DEP}" == "" ]; then
+if [ ! -e ${OUTPUT}/${imageName} ] && [ "${DEP}" == "" ] &&
+       [ "${SUBMIT_JOBS}" == "true" ]; then
     DO_IT=false
 fi
 

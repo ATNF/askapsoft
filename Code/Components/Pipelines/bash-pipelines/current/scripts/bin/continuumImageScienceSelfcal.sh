@@ -67,6 +67,7 @@ if [ $DO_IT == true ] && [ $DO_SELFCAL == true ]; then
 	CPUS_PER_CORE_SELFCAL=${NPROCS_SELAVY}
     fi
 
+    imageCode=restored
     setImageProperties cont
     selavyImage=${imageName}
     selavyWeights=${weightsImage}

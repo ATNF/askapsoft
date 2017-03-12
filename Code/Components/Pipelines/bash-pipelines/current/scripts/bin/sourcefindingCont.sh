@@ -66,7 +66,8 @@ if [ ${DO_RM_SYNTHESIS} == true ]; then
     fi
 fi
 
-if [ ! -e ${OUTPUT}/${contImage} ] && [ "${DEP}" == "" ]; then
+if [ ! -e ${OUTPUT}/${contImage} ] && [ "${DEP}" == "" ] &&
+       [ "${SUBMIT_JOBS}" == "true" ]; then
     DO_IT=false
 fi
 
