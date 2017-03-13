@@ -69,8 +69,8 @@ if [ $DO_IT == true ] && [ $DO_SELFCAL == true ]; then
 
     imageCode=restored
     setImageProperties cont
-    selavyImage=${imageName}
-    selavyWeights=${weightsImage}
+    selavyImage="${OUTPUT}/${imageName}"
+    selavyWeights="${OUTPUT}/${weightsImage}"
 
     cutWeights=`echo ${SELFCAL_SELAVY_WEIGHTSCUT} | awk '{if (($1>0.)&&($1<1.)) print "true"; else print "false";}'`
     if [ ${cutWeights} == "true" ]; then
