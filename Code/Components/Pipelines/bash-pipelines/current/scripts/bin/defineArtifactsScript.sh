@@ -305,28 +305,42 @@ BEAM=all
 imageCode=restored
 for FIELD in \${FIELD_LIST}; do
 
-    setImageProperties cont
-    contSelDir=selavy_\${imageName}
-    echo "field=\${FIELD}, imageCode=\${imageCode}, imageName=\${imageName}, selavy dir = \${contSelDir}"
-    if [ -e \${FIELD}/\${contSelDir}/selavy-\${imageName}.components.xml ]; then
-        catNames+=(\${FIELD}/\${contSelDir}/selavy-\${imageName}.components.xml)
-        catTypes+=(continuum-component)
+    if [ \${FIELD} == "." ]; then
+        theBeamList="all"
+        TILE_LIST="${TILE_LIST} ALL"
+    else
+        theBeamList=\${LOCAL_BEAM_LIST}
+        getTile
+        TILE_LIST="\${TILE}"
     fi
-    if [ -e \${FIELD}/\${contSelDir}/selavy-\${imageName}.islands.xml ]; then
-        catNames+=(\${FIELD}/\${contSelDir}/selavy-\${imageName}.islands.xml)
-        catTypes+=(continuum-island)
-    fi
-    if [ -e \${FIELD}/\${contSelDir}/selavy-\${imageName}.polarisation.xml ]; then
-        catNames+=(\${FIELD}/\${contSelDir}/selavy-\${imageName}.polarisation.xml)
-        catTypes+=(polarisation-component)
-    fi
-#    setImageProperties spectral
-#    specSelDir=selavy-spectral-\${imageName}
-#    if [ -e \${FIELD}/\${contSelDir}/selavy-results.hiobjects.xml ]; then
-#        catNames+=(\${FIELD}/\${contSelDir}/selavy-results.hiobjects.xml)
-#        catTypes+=(spectralline)
-#    fi
 
+    for TILE in \${TILE_LIST}; do
+
+        for BEAM in \${theBeamList}; do               
+
+            setImageProperties cont
+            contSelDir=selavy_\${imageName}
+            echo "field=\${FIELD}, imageCode=\${imageCode}, imageName=\${imageName}, selavy dir = \${contSelDir}"
+            if [ -e \${FIELD}/\${contSelDir}/selavy-\${imageName}.components.xml ]; then
+                catNames+=(\${FIELD}/\${contSelDir}/selavy-\${imageName}.components.xml)
+                catTypes+=(continuum-component)
+            fi
+            if [ -e \${FIELD}/\${contSelDir}/selavy-\${imageName}.islands.xml ]; then
+                catNames+=(\${FIELD}/\${contSelDir}/selavy-\${imageName}.islands.xml)
+                catTypes+=(continuum-island)
+            fi
+            if [ -e \${FIELD}/\${contSelDir}/selavy-\${imageName}.polarisation.xml ]; then
+                catNames+=(\${FIELD}/\${contSelDir}/selavy-\${imageName}.polarisation.xml)
+                catTypes+=(polarisation-component)
+            fi
+            setImageProperties spectral
+            specSelDir=selavy-spectral-\${imageName}
+            if [ -e \${FIELD}/\${contSelDir}/selavy-\${imageName}.hiobjects.xml ]; then
+                catNames+=(\${FIELD}/\${contSelDir}/selavy-\${imageName}.hiobjects.xml)
+                catTypes+=(spectral-line-emission)
+            fi
+        done
+    done
 done
 ##############################
 # Next, search for MSs

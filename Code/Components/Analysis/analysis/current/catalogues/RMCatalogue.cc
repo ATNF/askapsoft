@@ -58,7 +58,7 @@ RMCatalogue::RMCatalogue(std::vector<sourcefitting::RadioSource> &srclist,
     itsComponents(),
     itsSpec(),
     itsCube(cube),
-    itsVersion("casda.polarisation_v0.6")
+    itsVersion("casda.polarisation_v0.7")
 {
     this->defineComponents(srclist, parset);
     this->defineSpec();
@@ -86,7 +86,7 @@ void RMCatalogue::defineComponents(std::vector<sourcefitting::RadioSource> &srcl
 
 void RMCatalogue::defineSpec()
 {
-    itsSpec.addColumn("ID", "component_id", "--", 6, 0,
+    itsSpec.addColumn("ID", "component_id", "", 6, 0,
                       "meta.id;meta.main", "char", "col_component_id", "");
     itsSpec.addColumn("NAME", "component_name", "", 8, 0,
                       "meta.id", "char", "col_component_name", "");
@@ -94,32 +94,32 @@ void RMCatalogue::defineSpec()
                       "pos.eq.ra;meta.main", "double", "col_ra_deg_cont", "J2000");
     itsSpec.addColumn("DECJD", "dec_deg_cont", "[deg]", 11, casda::precPos,
                       "pos.eq.dec;meta.main", "double", "col_dec_deg_cont", "J2000");
-    itsSpec.addColumn("IFLUX", "flux_i_med", "[" + casda::fluxUnit + "]",
+    itsSpec.addColumn("IFLUX", "flux_I_median", "[" + casda::fluxUnit + "]",
                       9, casda::precFlux,
-                      "phot.flux.density;em.radio", "double", "col_flux_i_med", "");
-    itsSpec.addColumn("QFLUX", "flux_q_med", "[" + casda::fluxUnit + "]",
+                      "phot.flux.density;em.radio", "double", "col_flux_I_median", "");
+    itsSpec.addColumn("QFLUX", "flux_Q_median", "[" + casda::fluxUnit + "]",
                       9, casda::precFlux,
                       "phot.flux.density;em.radio;askap:phys.polarization.stokes.Q",
-                      "double", "col_flux_q_med", "");
-    itsSpec.addColumn("UFLUX", "flux_u_med", "[" + casda::fluxUnit + "]",
+                      "double", "col_flux_Q_median", "");
+    itsSpec.addColumn("UFLUX", "flux_U_median", "[" + casda::fluxUnit + "]",
                       9, casda::precFlux,
                       "phot.flux.density;em.radio;askap:phys.polarization.stokes.U",
-                      "double", "col_flux_u_med", "");
-    itsSpec.addColumn("VFLUX", "flux_v_med", "[" + casda::fluxUnit + "]",
+                      "double", "col_flux_U_median", "");
+    itsSpec.addColumn("VFLUX", "flux_V_median", "[" + casda::fluxUnit + "]",
                       9, casda::precFlux,
                       "phot.flux.density;em.radio;askap:phys.polarization.stokes.V",
-                      "double", "col_flux_v_med", "");
-    itsSpec.addColumn("RMS_I", "rms_i", "[" + casda::fluxUnit + "]", 9, casda::precFlux,
-                      "stat.stdev;phot.flux.density", "double", "col_rms_i", "");
-    itsSpec.addColumn("RMS_Q", "rms_q", "[" + casda::fluxUnit + "]", 9, casda::precFlux,
+                      "double", "col_flux_V_median", "");
+    itsSpec.addColumn("RMS_I", "rms_I", "[" + casda::fluxUnit + "]", 9, casda::precFlux,
+                      "stat.stdev;phot.flux.density", "double", "col_rms_I", "");
+    itsSpec.addColumn("RMS_Q", "rms_Q", "[" + casda::fluxUnit + "]", 9, casda::precFlux,
                       "stat.stdev;phot.flux.density;askap:phys.polarization.stokes.Q",
-                      "double", "col_rms_q", "");
-    itsSpec.addColumn("RMS_U", "rms_u", "[" + casda::fluxUnit + "]", 9, casda::precFlux,
+                      "double", "col_rms_Q", "");
+    itsSpec.addColumn("RMS_U", "rms_U", "[" + casda::fluxUnit + "]", 9, casda::precFlux,
                       "stat.stdev;phot.flux.density;askap:phys.polarization.stokes.U",
-                      "double", "col_rms_u", "");
-    itsSpec.addColumn("RMS_V", "rms_v", "[" + casda::fluxUnit + "]", 9, casda::precFlux,
+                      "double", "col_rms_U", "");
+    itsSpec.addColumn("RMS_V", "rms_V", "[" + casda::fluxUnit + "]", 9, casda::precFlux,
                       "stat.stdev;phot.flux.density;askap:phys.polarization.stokes.V",
-                      "double", "col_rms_v", "");
+                      "double", "col_rms_V", "");
     itsSpec.addColumn("CO1", "co_1", "", 8, casda::precFlux,
                       "stat.fit.param;spect.continuum", "double", "col_co_1", "");
     itsSpec.addColumn("CO2", "co_2", "", 8, casda::precFlux,
@@ -198,10 +198,10 @@ void RMCatalogue::defineSpec()
                       "stat.value;phys.polarization", "double", "col_complex_1", "");
     itsSpec.addColumn("COMPLEX2", "complex_2", "", 5, casda::precStats,
                       "stat.value;phys.polarization", "double", "col_complex_2", "");
-    itsSpec.addColumn("FLAG1", "flag_is_detection", "", 1, 0, "meta.code", "int", "col_flag_is_detection", "");
-    itsSpec.addColumn("FLAG2", "flag_edge", "", 1, 0, "meta.code", "int", "col_flag_edge", "");
-    itsSpec.addColumn("FLAG3", "flag_3", "", 1, 0, "meta.code", "int", "col_flag_3", "");
-    itsSpec.addColumn("FLAG4", "flag_4", "", 1, 0, "meta.code", "int", "col_flag_4", "");
+    itsSpec.addColumn("FLAG1", "flag_is_detection", "", 1, 0, "meta.code", "boolean", "col_flag_is_detection", "");
+    itsSpec.addColumn("FLAG2", "flag_edge", "", 1, 0, "meta.code", "boolean", "col_flag_edge", "");
+    itsSpec.addColumn("FLAG3", "flag_p3", "", 1, 0, "meta.code", "char", "col_flag_p3", "");
+    itsSpec.addColumn("FLAG4", "flag_p4", "", 1, 0, "meta.code", "char", "col_flag_p4", "");
 
 }
 
