@@ -212,8 +212,6 @@ if [ "$SZ" != "118M" ]; then
    exit 1
 fi
 
-exit 0
-
 #
 # Phase 6
 #
@@ -236,22 +234,22 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-cat > tmp.simcor.sh <<EOF
+cat > tmp.simcor2.sh <<EOF
 #!/bin/sh
 cd ../../../../correlatorsim/current/functests/test_playbackADE
 sleep 10
 timeout -s 9 10m mpirun -np 3 ../../apps/playbackADE.sh -c playback_2cards.in
 EOF
 
-chmod u+x tmp.simcor.sh
+chmod u+x tmp.simcori2.sh
 
 # asynchronous launch of the correlator simulator with a delay set
 # in the script
-./tmp.simcor.sh > simcor.out &
+./tmp.simcor2.sh > simcor2.out &
 
 echo "Starting ingest pipeline: "`date`
 
-timeout -s 9 10m mpirun -np 3 ../../apps/cpingest.sh -c cpingest_serviceranks.in | tee ingest.out
+timeout -s 9 10m mpirun -np 3 ../../apps/cpingest.sh -c cpingest_serviceranks.in | tee ingest2.out
 ERROR=${PIPESTATUS[0]}
 echo "Error status: "${ERROR}
 
@@ -269,13 +267,13 @@ echo "Stopping ICE"
 
 
 echo "-------------- output of the correlator simulator:"
-cat simcor.out
+cat simcor2.out
 echo "--------------------------------------------------"
 
 if [ $ERROR -ne 0 ]; then
     echo "ingest/current/functests/test_ingestpipeline/run.sh returned errorcode $ERROR"
     # workarund for ASKAPSDP-1673
-    ICE_EXCEPT=`cat ingest.out | grep -v DEBUG | tail -1 | grep IceUtil::NullHandleException | wc -l`
+    ICE_EXCEPT=`cat ingest2.out | grep -v DEBUG | tail -1 | grep IceUtil::NullHandleException | wc -l`
     if [ ${ICE_EXCEPT} != "1" ]; then
          exit 1
     fi
@@ -283,7 +281,7 @@ if [ $ERROR -ne 0 ]; then
     #exit 1
 fi
 
-if [ ! -d $WORKSPACE/Code/Components/Services/ingest/current/functests/test_ingestpipeline/ingest_test0.ms ]; then
+if [ ! -d $WORKSPACE/trunk/Code/Components/Services/ingest/current/functests/test_ingestpipeline/ingest_test0.ms ]; then
     echo "Error: ingest_test0.ms was not created"
     exit 1
 fi
