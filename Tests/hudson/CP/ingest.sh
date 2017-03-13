@@ -241,7 +241,7 @@ sleep 10
 timeout -s 9 10m mpirun -np 3 ../../apps/playbackADE.sh -c playback_2cards.in
 EOF
 
-chmod u+x tmp.simcori2.sh
+chmod u+x tmp.simcor2.sh
 
 # asynchronous launch of the correlator simulator with a delay set
 # in the script
