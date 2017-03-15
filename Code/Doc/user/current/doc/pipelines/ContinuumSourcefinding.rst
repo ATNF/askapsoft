@@ -12,6 +12,11 @@ The source-finding applies a spatially-varying signal-to-noise
 threshold, and fits 2D Gaussians to detected islands to create a
 component catalogue.
 
+When the source-finding operates on the mosaicked image, it uses the
+weights image to apply a weights cutoff (as described at
+:doc:`../analysis/thresholds`), so that the searching is only done on
+the imaged region.
+
 At this point, only a limited set of Selavy's possible parameters are
 made available through these scripts. This will likely increase, but
 in the interim you can edit the sbatch files that are created and

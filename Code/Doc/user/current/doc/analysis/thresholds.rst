@@ -50,8 +50,11 @@ Threshold-related parameters
 +----------------------------------+------------+-------------+------------------------------------------------------------------+
 |Selavy.Weights.weightsCutoff      |float       |-1           |If positive (not by default), pixels with a weight below this     |
 |                                  |            |             |value are set to zero for the searching step. The value provided  |
-|                                  |            |             |should be a fraction (between 0 and 1) or the maximum weight value|
-|                                  |            |             |in the image.                                                     |
+|                                  |            |             |should be a fraction (between 0 and 1) of the maximum weight value|
+|                                  |            |             |in the image. Note that this is different to the cutoff used by   |
+|                                  |            |             |:doc:`../calim/linmos`, which is a cutoff in the gain value. (You |
+|                                  |            |             |need to square the value given to linmos to provide the same value|
+|                                  |            |             |to Selavy.)                                                       |
 +----------------------------------+------------+-------------+------------------------------------------------------------------+
 |Selavy.VariableThreshold          |bool        |false        |If true, a sliding box function is used to find the local noise   |
 |                                  |            |             |properties, which are used to make a signal-to-noise map that can |
