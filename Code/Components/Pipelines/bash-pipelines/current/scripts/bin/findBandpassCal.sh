@@ -47,7 +47,7 @@ if [ $DO_IT == true ]; then
     dataSelectionPars="# Using all the data"
     if [ ${BANDPASS_MINUV} -gt 0 ]; then
         dataSelectionPars="# Minimum UV distance for bandpass calibration:
-Cbpcalibrator.MinUV = BANDPASS_MINUV"
+Cbpcalibrator.MinUV = ${BANDPASS_MINUV}"
     fi        
     
     # Check for bandpass smoothing options
