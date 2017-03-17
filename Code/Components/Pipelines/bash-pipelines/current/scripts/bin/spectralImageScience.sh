@@ -262,8 +262,8 @@ rejuvenate *.${imageBase}*
 extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname} "txt,csv"
 
 if [ \${err} -ne 0 ]; then
-    echo "Error: ${Imager} returned error code \${err}"
-    exit 1
+    echo "Error: ${theImager} returned error code \${err}"
+    exit \$err
 fi
 
 
