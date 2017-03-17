@@ -23,6 +23,13 @@
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
 /// @author Ben Humphreys <ben.humphreys@csiro.au>
+/// Last modification: Wasim Raja <Wasim.Raja@csiro.au>
+///                    * Fixed bug leading to bad_alloc error
+///                    * When row filters are set to 1, MsSplit was trying 
+///                    * to read all rows in one go leading to the error
+///                    * This was fixed by modifying the mapOfrows function. 
+///                    * 
+///                    *                --wr, 09Mar, 2017 
 
 // Package level header file
 #include "askap_pipelinetasks.h"
@@ -171,7 +178,8 @@ boost::shared_ptr<casa::MeasurementSet> MsSplitApp::create(
    
     return ms;
 }
-void MsSplitApp::getRowsToKeep(const casa::MeasurementSet& ms) {
+void MsSplitApp::getRowsToKeep(const casa::MeasurementSet& ms, 
+        const uInt maxSimultaneousRows) {
     
     const ROMSColumns sc(ms);
     const casa::uInt nRows = sc.nrow();
@@ -199,7 +207,8 @@ void MsSplitApp::getRowsToKeep(const casa::MeasurementSet& ms) {
     int nGood = 1; // there is always at least 1 good one
     for (it = rowsToKeep.begin(); it != rowsToKeep.end()-1;++it) {
         nextGoodRow = (*it)+1;
-        if (*(it+1) == nextGoodRow) {
+	// add additional condition to check nGood < maxSimultaneousRows -- wasim 
+        if (*(it+1) == nextGoodRow && nGood < maxSimultaneousRows) {
             nGood++;
         }
         else {
@@ -531,17 +540,6 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
 
     const ROMSColumns sc(source);
     MSColumns dc(dest);
-
-    // Add rows upfront if no row based filters exist
-    const casa::uInt nRows = sc.nrow();
-    if (!rowFiltersExist()) {
-        dest.addRow(nRows);
-    }
-    else {
-       this->getRowsToKeep(source);
-       dest.addRow(nRowsOut);
-    }
-
     // Work out how many channels are to be actual input and which output
     // and how many polarisations are involved.
     const uInt nChanIn = endChan - startChan + 1;
@@ -573,13 +571,23 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
         outDataSize += sizeof(casa::Float);
     }
     uInt maxSimultaneousRows = (32 * 1024 * 1024) / nPol /
-            (nChanIn * inDataSize) / (nChanOut * outDataSize);
+            (nChanIn * inDataSize + nChanOut * outDataSize);
     if (maxSimultaneousRows<1) maxSimultaneousRows = 1;
-
-    // However, if there is row-based filtering only one row can be copied
-    // at a time.
-    if (rowFiltersExist()) maxSimultaneousRows = 1;
-
+    
+    const casa::uInt nRows = sc.nrow();
+    if (!rowFiltersExist()) {
+        dest.addRow(nRows);
+    }
+    else {
+	    /*Modified the getRowsToKeep function: 
+	     * Passing maxSimultaneousRows to it as well 
+	     * for optimal copying of data. 
+	     *       --wasim, 03Mar2017
+	     * */
+       this->getRowsToKeep(source,
+		       maxSimultaneousRows);
+       dest.addRow(nRowsOut);
+    }
     // Set a 64MB maximum cache size for the large columns
     const casa::uInt cacheSize = 64 * 1024 * 1024;
     // const casa::uInt cacheSize =  1024 * 1024;
@@ -612,8 +620,9 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
         // Number of rows to process for this iteration of the loop; either
         // maxSimultaneousRows or the remaining rows.
         uInt nRowsThisIteration = min(maxSimultaneousRows, nRows - row);
-        if (rowFiltersExist())
+        if (rowFiltersExist()){
             nRowsThisIteration = mapOfRows[row];
+	}
 
         const Slicer srcrowslicer(IPosition(1, row), IPosition(1, nRowsThisIteration),
                 Slicer::endIsLength);

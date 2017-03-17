@@ -165,7 +165,7 @@ class MsSplitApp : public askap::Application {
         // Vector of rows to keep. This is for the case when we know
         // we do not need all rows
         map<int,int> mapOfRows;
-        void getRowsToKeep(const casa::MeasurementSet& ms); 
+        void getRowsToKeep(const casa::MeasurementSet& ms, const casa::uInt maxSimultaneousRows); 
         int nRowsOut;
     
 };
