@@ -134,6 +134,8 @@ void AdviseDI::prepare() {
     const int nwriters = itsParset.getInt32("nwriters", 1);
     ASKAPLOG_DEBUG_STR(logger,"nwriters " << nwriters);
 
+    ASKAPCHECK(nwriters > 0 ,"Number of writers must be greater than zero");
+
     casa::uInt srow = 0;
     chanFreq.resize(ms.size());
     chanWidth.resize(ms.size());

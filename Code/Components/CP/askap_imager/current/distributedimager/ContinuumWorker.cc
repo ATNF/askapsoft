@@ -388,14 +388,15 @@ void ContinuumWorker::buildSpectralCube() {
     ///
 
     /// The number of channels allocated to this rank
-    const int nchanpercore = itsParsets[0].getInt32("nchanpercore", 1);
+    // const int nchanpercore = itsParsets[0].getInt32("nchanpercore", 1);
     /// the base channel of this allocation. we know this as the channel allocations
     /// are sorted
     const int nwriters = itsParsets[0].getInt32("nwriters",1);
+    ASKAPCHECK(nwriters>0,"Number of writers must be greater than 0");
 
-    int nWorkers = itsComms.nProcs() -1;
-    int nGroups = itsComms.nGroups();
-    int nChanTotal = nWorkers * nchanpercore / nGroups;
+    // int nWorkers = itsComms.nProcs() -1;
+    // int nGroups = itsComms.nGroups();
+    // int nChanTotal = nWorkers * nchanpercore / nGroups;
 
 
 
@@ -1004,7 +1005,7 @@ void ContinuumWorker::processChannels()
 
     const string colName = unitParset.getString("datacolumn", "DATA");
     const string ms = workUnits[0].get_dataset();
-    const bool writeAtMajorCycle = unitParset.getBool("Images.writeAtMajorCycle",false);
+    // const bool writeAtMajorCycle = unitParset.getBool("Images.writeAtMajorCycle",false);
 
     std::string majorcycle = unitParset.getString("threshold.majorcycle", "-1Jy");
     const double targetPeakResidual = SynthesisParamsHelper::convertQuantity(majorcycle, "Jy");
