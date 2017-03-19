@@ -14,10 +14,12 @@ with several optional pre-processing steps:
    image constructed by Cmodel from the component catalogue generated
    by Selavy.
 
-Following this pre-processing, the resulting MS is imaged by the
-simager task, creating a set of spectral cubes. At this point, no
-mosaicking of these is done, but this will be added in a future
-version of the pipeline.
+Following this pre-processing, the resulting MS is imaged by either the
+simager task (the default), or the new imager, creating a set of
+spectral cubes. The new imager provides the ability to image in the
+barycentric reference frame, and allows (for efficiency purposes) the
+option of writing out multiple sub-cubes (each having a subset of the
+full range of channels).
 
 A final task can perform image-based continuum subtraction. This uses
 the *robust_contsub.py* script in the ACES directory to fit and
@@ -210,6 +212,29 @@ spectral-imaging.
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``RESTORING_BEAM_LOG``                        |  beamLog.IMAGE.txt (with IMAGE  | restore.beamLog                    | The ASCII text file to which will be written the restoring beam   |
 |                                               |  from ``IMAGE_BASE_SPECTRAL``)  | (:doc:`../calim/simager`)          | for each channel. If blank, no such file will be written.         |
++-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
+| **New imager parameters**                     |                                 |                                    |                                                                   |
++-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
+| ``DO_ALT_IMAGER``                             | false                           | none                               | If true, the spectral-line imaging is done by imager              |
+|                                               |                                 |                                    | (:doc:`../calim/imager`). If false, it is done by simager         |
+|                                               |                                 |                                    | (:doc:`../calim/simager`). When true, the following parameters are|
+|                                               |                                 |                                    | used.                                                             |
++-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
+| ``NCHAN_PER_CORE_SL``                         | 54                              | nchanpercore                       | The number of channels each core will process.                    |
+|                                               |                                 | (:doc:`../calim/imager`)           |                                                                   |
++-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
+| ``USE_TMPFS``                                 | false                           | usetmpfs (:doc:`../calim/imager`)  | Whether to store the visibilities in shared memory. This will give|
+|                                               |                                 |                                    | a performance boost at the expense of memory usage. Better used   |
+|                                               |                                 |                                    | for processing continuum data.                                    |
++-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
+| ``TMPFS``                                     | /dev/shm                        | tmpfs (:doc:`../calim/imager`)     | Location of the shared memory.                                    |
++-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
+| ``NUM_SPECTRAL_CUBES``                        | 16                              | nwriters (:doc:`../calim/imager`)  | Number of spectral cubes to be produced. This actually configures |
+|                                               |                                 |                                    | the number of writers employed by imager, each of which writes a  |
+|                                               |                                 |                                    | sub-band. No combination of the sub-cubes is currently done.      |
++-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
+| ``DO_BARY``                                   | true                            | barycentre (:doc:`../calim/imager`)| Whether to write the spectral cubes in the Barycentric reference  |
+|                                               |                                 |                                    | frame.                                                            |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | **Image-based continuum subtraction**         |                                 |                                    |                                                                   |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+

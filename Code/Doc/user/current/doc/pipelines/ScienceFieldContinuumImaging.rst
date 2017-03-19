@@ -31,10 +31,15 @@ with other gridders, you need to edit the slurm file or parset
 yourself (ie. set ``SUBMIT_JOBS=false`` to produce the slurm files
 without submission, then edit and manually submit).
 
+While the default application used for the imaging is **cimager**, it
+is possible to use the newer **imager** (:doc:`../calim/imager`). Much
+of the functionality will be identical for continuum data (imager was
+developed initially as a better spectral-line imaging tool).
+
 An option exists to do the continuum-imaging with self-calibration.
 The algorithm here is as follows:
 
-1. Image the data with cimager
+1. Image the data with cimager or imager
 2. Run source-finding with Selavy with a relatively large threshold
 3. Use the results to calibrate the antenna-based gains by either:
    
@@ -249,6 +254,24 @@ instead of BasisfunctionMFS).
 | ``RESTORE_PRECONDITIONER_WIENER_TAPER``    | ""                              | restore.preconditioner.Wiener.taper                    | Size of gaussian taper applied in image domain to Wiener     |
 |                                            |                                 | (:doc:`../calim/cimager` & :doc:`../calim/solver`)     | filter in the restore preconditioning. Ignored if blank      |
 |                                            |                                 |                                                        | (ie. “”).                                                    |
++--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
+| ***New imager parameters**                 |                                 |                                                        |                                                              |
++--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
+| ``DO_ALT_IMAGER``                          | false                           | none                                                   | If true, the spectral-line imaging is done by imager         |
+|                                            |                                 |                                                        | (:doc:`../calim/imager`). If false, it is done by cimager    |
+|                                            |                                 |                                                        | (:doc:`../calim/cimager`). When true, the following          |
+|                                            |                                 |                                                        | parameters are used.                                         |
++--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
+| ``NCHAN_PER_CORE``                         | 1                               | nchanpercore                                           | The number of channels each core will process.               |
+|                                            |                                 | (:doc:`../calim/imager`)                               |                                                              |
++--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
+| ``USE_TMPFS``                              | false                           | usetmpfs (:doc:`../calim/imager`)                      | Whether to store the visibilities in shared memory.This will |
+|                                            |                                 |                                                        | give a performance boost at the expense of memory            |
+|                                            |                                 |                                                        | usage. Better used for processing continuum data.            |
++--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
+| ``TMPFS``                                  | /dev/shm                        | tmpfs (:doc:`../calim/imager`)                         | Location of the shared memory.                               |
++--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
+|                                            |                                 |                                                        |                                                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | **Self-calibration**                       |                                 |                                                        |                                                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
