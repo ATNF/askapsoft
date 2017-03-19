@@ -33,9 +33,8 @@ ID_LINMOS_SPECTRAL=""
 
 BEAM=all
 setImageBase spectral
-getAltPrefix
 
-for subband in ${wrList}; do
+for subband in ${SUBBAND_WRITER_LIST}; do
 
     DO_IT=$DO_MOSAIC
 

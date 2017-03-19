@@ -67,14 +67,6 @@ function rejuvenate()
         find $1 -exec touch {} \;
     fi
 }
-##############################
-# Get the list of subcubes
-#
-function getAltPrefix()
-{
-    wrList=$(seq 1 $NSUB_CUBES)
-    
-}
 
 
 ##############################
@@ -172,6 +164,7 @@ function getTile()
 #     defaults to zero
 #  * NUM_TAYLOR_TERMS (number of taylor terms being solved for. 1=no MFS)
 #  * IMAGE_BASE_CONT,IMAGE_BASE_CONTCUBE,IMAGE_BASE_SPECTRAL
+#  * subband (only used if NUM_SPECTRAL_CUBES > 1)
 # Available upon return:
 #  * imageBase
 #  * imageName (the filename for the image)
@@ -224,41 +217,59 @@ function setImageProperties()
             beamSuffix="beam ${BEAM}"
         fi
     fi
+
+    band=""
+    if [ "${NUM_SPECTRAL_CUBES}" -gt 1 ]; then
+        band="wr.${subband}."
+    fi
+    base="${band}${imageBase}${imSuffix}"
     
     weightsImage="weights.${imageBase}${imSuffix}"
     #    weightsType="${typebase}_weights_$typeSuffix"
     weightsType="${typebase}_sensitivity_$typeSuffix"
     weightsLabel="Weights image, $beamSuffix"
     if [ "$imageCode" == "restored" ]; then
-        imageName="image.${imageBase}${imSuffix}.restored"
+        if [ "${DO_ALT_IMAGER}" == "true" ] && [ "$type" == "spectral" ]; then
+            imageName="image.restored.${base}"
+        else
+            imageName="image.${base}.restored"
+        fi
         imageType="${typebase}_restored_$typeSuffix"
         label="Restored ${labelbase}, $beamSuffix"
     elif [ "$imageCode" == "contsub" ]; then
-        imageName="image.${imageBase}${imSuffix}.restored.contsub"
+        if [ "${DO_ALT_IMAGER}" == "true" ] && [ "$type" == "spectral" ]; then
+            imageName="image.restored.${base}.contsub"
+        else
+            imageName="image.${base}.restored.contsub"
+        fi
         imageType="${typebase}_restored_$typeSuffix"
         label="Restored, Continuum-subtracted ${labelbase}, $beamSuffix"
     elif [ "$imageCode" == "altrestored" ]; then
-        imageName="image.${imageBase}${imSuffix}.alt.restored"
+        if [ "${DO_ALT_IMAGER}" == "true" ] && [ "$type" == "spectral" ]; then
+            imageName="image.restored.${base}.alt"
+        else
+            imageName="image.${base}.alt.restored"
+        fi
         imageType="${typebase}_restored_$typeSuffix"
         label="Restored ${labelbase}, $beamSuffix"
     elif [ "$imageCode" == "image" ]; then
-        imageName="image.${imageBase}${imSuffix}"
+        imageName="image.${base}"
         imageType="${typebase}_cleanmodel_$typeSuffix"
         label="Clean model ${labelbase}, $beamSuffix"
     elif [ "$imageCode" == "residual" ]; then
-        imageName="residual.${imageBase}${imSuffix}"
+        imageName="residual.${base}"
         imageType="${typebase}_residual_$typeSuffix"
         label="Clean residual ${labelbase}, $beamSuffix"
     elif [ "$imageCode" == "sensitivity" ]; then
-        imageName="sensitivity.${imageBase}${imSuffix}"
+        imageName="sensitivity.${base}"
         imageType="${typebase}_sensitivity_$typeSuffix"
         label="Sensitivity ${labelbase}, $beamSuffix"
     elif [ "$imageCode" == "psf" ]; then
-        imageName="psf.${imageBase}${imSuffix}"
+        imageName="psf.${base}"
         imageType="${typebase}_psfnat_$typeSuffix"
         label="PSF ${labelbase}, $beamSuffix"
     elif [ "$imageCode" == "psfimage" ]; then
-        imageName="psf.image.${imageBase}${imSuffix}"
+        imageName="psf.image.${base}"
         imageType="${typebase}_psfprecon_$typeSuffix"
         label="Preconditioned PSF ${labelbase}, $beamSuffix"
     else

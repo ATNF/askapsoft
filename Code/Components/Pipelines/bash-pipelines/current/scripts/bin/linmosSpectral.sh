@@ -45,26 +45,32 @@ fi
 
 for imageCode in ${mosaicImageList}; do
 
-    DO_IT=$DO_MOSAIC
-    if [ "$DO_SPECTRAL_IMAGING" != "true" ]; then
-        DO_IT=false
-    fi
-    
-    if [ "${DO_IT}" == "true" ] && [ "${CLOBBER}" != "true" ]; then
-        BEAM=all
-        setImageProperties spectral
-        if [ -e ${OUTPUT}/${imageName} ]; then
-            if [ $DO_IT == true ]; then
-                echo "Image ${imageName} exists, so not running its spectral-line mosaicking"
-            fi
+    for subband in ${SUBBAND_WRITER_LIST}; do
+
+        DO_IT=$DO_MOSAIC
+        if [ "$DO_SPECTRAL_IMAGING" != "true" ]; then
             DO_IT=false
         fi
-    fi
+        
+        if [ "${DO_IT}" == "true" ] && [ "${CLOBBER}" != "true" ]; then
+            BEAM=all
+            setImageProperties spectral
+            if [ -e ${OUTPUT}/${imageName} ]; then
+                if [ $DO_IT == true ]; then
+                    echo "Image ${imageName} exists, so not running its spectral-line mosaicking"
+                fi
+                DO_IT=false
+            fi
+        fi
 
-    if [ "${DO_IT}" == "true" ]; then
+        if [ "${DO_IT}" == "true" ]; then
 
-        setJob linmosSpectral_${imageCode} linmosS${imcode}
-        cat > $sbatchfile <<EOFOUTER
+            code=${imageCode}
+            if [ "${NUM_SPECTRAL_CUBES}" -gt 1 ]; then
+                code="${code}${subband}"
+            fi
+            setJob linmosSpectral_${code} linmosS${code}
+            cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
@@ -92,6 +98,8 @@ IMAGE_BASE_SPECTRAL=${IMAGE_BASE_SPECTRAL}
 FIELD=${FIELD}
 
 imageCode=${imageCode}
+NUM_SPECTRAL_CUBES=${NUM_SPECTRAL_CUBES}
+subband=${subband}
 
 beamList=""
 for BEAM in ${BEAMS_TO_USE}; do
@@ -106,6 +114,9 @@ for BEAM in ${BEAMS_TO_USE}; do
 done
 
 jobCode=${jobname}_\${imageCode}
+if [ "\${NUM_SPECTRAL_CUBES}" -gt 1 ]; then
+    jobCode="\${jobCode}\${subband}"
+fi
 
 if [ "\${beamList}" != "" ]; then
     BEAM=all
@@ -143,18 +154,28 @@ else
 fi
 EOFOUTER
 
-        if [ $SUBMIT_JOBS == true ]; then
-            DEP_SPECIMG=`echo $DEP_SPECIMG | sed -e 's/afterok/afterany/g'`
-	    ID_LINMOS_SPECTRAL=`sbatch $DEP_SPECIMG $sbatchfile | awk '{print $4}'`
-	    recordJob ${ID_LINMOS_SPECTRAL} "Make a mosaic ${imageCode} spectral cube of the science observation, field $FIELD, with flags \"${DEP_SPECIMG}\""
-            FULL_LINMOS_SPECTRAL_DEP=`addDep "${FULL_LINMOS_SPECTRAL_DEP}" "${ID_LINMOS_SPECTRAL}"`
-        else
-	    echo "Would make a mosaic ${imageCode} spectral cube of the science observation, field $FIELD with slurm file $sbatchfile"
+            if [ $SUBMIT_JOBS == true ]; then
+                DEP_SPECIMG=`echo $DEP_SPECIMG | sed -e 's/afterok/afterany/g'`
+	        ID_LINMOS_SPECTRAL=`sbatch $DEP_SPECIMG $sbatchfile | awk '{print $4}'`
+                if [ "${NUM_SPECTRAL_CUBES}" -gt 1 ];then
+	            recordJob ${ID_LINMOS_SPECTRAL} "Make a mosaic ${imageCode} (subband ${subband}) spectral cube of the science observation, field $FIELD, with flags \"${DEP_SPECIMG}\""
+                else
+                    recordJob ${ID_LINMOS_SPECTRAL} "Make a mosaic ${imageCode} spectral cube of the science observation, field $FIELD, with flags \"${DEP_SPECIMG}\""
+                fi
+                FULL_LINMOS_SPECTRAL_DEP=`addDep "${FULL_LINMOS_SPECTRAL_DEP}" "${ID_LINMOS_SPECTRAL}"`
+            else
+                if [ "${NUM_SPECTRAL_CUBES}" -gt 1 ];then
+	            echo "Would make a mosaic ${imageCode} (subband ${subband}) spectral cube of the science observation, field $FIELD with slurm file $sbatchfile"
+                else
+                    echo "Would make a mosaic ${imageCode} spectral cube of the science observation, field $FIELD with slurm file $sbatchfile"
+                fi
+            fi
+            
         fi
-        
-    fi
+
+    done
 
 done
 
 echo " "
-   
+

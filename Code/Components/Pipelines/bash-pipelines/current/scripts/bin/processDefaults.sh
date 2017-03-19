@@ -521,6 +521,23 @@ EOF
             echo "WARNING - the parameter RESTORING_BEAM_LOG is deprecated, and is constructed from the image name instead."
         fi
 
+        # Define the list of writer ranks used in the askap_imager
+        # spectral-line output
+        # Only define if we are using the askap_imager and not writing
+        # to a single file. Otherwise, we define a single-value list
+        # so that the loop over subbands is only done once ($subband
+        # will not be referenced in that case). 
+        if [ "${DO_ALT_IMAGER}" == "true" ] && [ "${ALT_IMAGER_SINGLE_FILE}" != "true" ]; then
+            nworkers=$(echo "${NUM_CHAN_SCIENCE}" "${NCHAN_PER_CORE_SL}" | awk '{print $1/$2}')
+            writerIncrement=$(echo "$nworkers" "${NUM_SPECTRAL_CUBES}" | awk '{print $1/$2}')
+            SUBBAND_WRITER_LIST=$(seq 1 "$writerIncrement" "$nworkers")
+            unset nworkers
+            unset writerIncrement
+        else
+            SUBBAND_WRITER_LIST=1
+            NUM_SPECTRAL_CUBES=1
+        fi
+        
         ####################
         # Mosaicking parameters
 
@@ -538,7 +555,7 @@ EOF
         fi
         # Determine the number of cores needed for spectral-line mosaicking
         if [ "$NUM_CPUS_SPECTRAL_LINMOS" == "" ]; then
-            NUM_CPUS_SPECTRAL_LINMOS=`echo $NUM_CHAN_SCIENCE_SL $NCHAN_PER_CORE_SPECTRAL_LINMOS | awk '{print $1/$2}'`
+            NUM_CPUS_SPECTRAL_LINMOS=`echo $NUM_CHAN_SCIENCE_SL ${NUM_SPECTRAL_CUBES} $NCHAN_PER_CORE_SPECTRAL_LINMOS | awk '{print $1/$2/$3}'`
         fi
 
         ####################

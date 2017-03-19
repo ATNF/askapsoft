@@ -132,7 +132,6 @@ fi
 altImagerParams="# Options for the alternate imager"
 if [ $DO_ALT_IMAGER == true ]; then
 
-
     if [ "${NCHAN_PER_CORE}" == "" ]; then
         nchanpercore=1
     else

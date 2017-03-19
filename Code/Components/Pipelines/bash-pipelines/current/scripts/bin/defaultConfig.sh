@@ -372,8 +372,8 @@ NCHAN_PER_CORE_SL=54
 USE_TMPFS=false
 # where is the shared memory mounted
 TMPFS="/dev/shm"
-# barycentre?
-DO_BARY=false
+# Whether to convert the frequency channels to the Barycentre frame
+DO_BARY=true
 # local solver - distribute the minor cycle - each channel is solved individually
 # this mimics simager behaviour
 # automatically set to true in the spectral imaging
@@ -381,7 +381,10 @@ DO_LOCAL_SOLVER=false
 # How many sub-cubes to write out.
 # This improves performance of the imaging - and also permits parallelisation
 # of the LINMOS step
-NSUB_CUBES=16
+NUM_SPECTRAL_CUBES=16
+# Whether to write out a single file in the case of writing to FITS
+# (Note that FITS output is not yet implemented fully)
+ALT_IMAGER_SINGLE_FILE=false
 
 ####################
 # Gridding parameters for continuum imaging

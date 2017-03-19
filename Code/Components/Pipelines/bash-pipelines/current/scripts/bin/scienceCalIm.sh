@@ -155,11 +155,7 @@ for FIELD in ${FIELD_LIST}; do
 
         . ${PIPELINEDIR}/linmosCont.sh
         . ${PIPELINEDIR}/linmosContCube.sh
-        if [ $DO_ALT_IMAGER == true ]; then
-            . ${PIPELINEDIR}/altLinmos.sh
-        else
-            . ${PIPELINEDIR}/linmosSpectral.sh
-        fi
+        . ${PIPELINEDIR}/linmosSpectral.sh
         
         # Source-finding on the mosaics created by these jobs
         . ${PIPELINEDIR}/runMosaicSourcefinding.sh        
