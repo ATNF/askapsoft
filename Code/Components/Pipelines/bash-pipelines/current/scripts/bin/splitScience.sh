@@ -51,6 +51,12 @@ if [ -e ${OUTPUT}/${msSci} ]; then
     fi
 fi
 
+if [ -e "${OUTPUT}/${msSciAv}" ] && [ "${PURGE_FULL_MS}" == "true" ]; then
+    # If we are purging the full MS, that means we don't need it.
+    # If the averaged one works, we don't need to run the splitting
+    DO_IT=false
+fi
+
 if [ $DO_IT == true ]; then
 
     if [ "$SCAN_SELECTION_SCIENCE" == "" ]; then
