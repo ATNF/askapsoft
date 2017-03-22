@@ -33,6 +33,7 @@
 
 #include <askap/AskapLogging.h>
 #include <casacore/images/Images/PagedImage.h>
+#include <casacore/images/Images/SubImage.h>
 
 ASKAP_LOGGER(logger, ".casaImageAccessor");
 
@@ -81,7 +82,17 @@ casa::CoordinateSystem CasaImageAccess::coordSys(const std::string &name) const
     casa::PagedImage<float> img(name);
     return img.coordinates();
 }
+casa::CoordinateSystem CasaImageAccess::coordSysSlice(const std::string &name,const casa::IPosition &blc,
+                                const casa::IPosition &trc ) const
+{
+    casa::Slicer slc(blc,trc,casa::Slicer::endIsLast);
+    ASKAPLOG_INFO_STR(logger, " CasaImageAccess - Slicer " << slc);
+    casa::PagedImage<float> img(name);
+    casa::SubImage<casa::Float> si = casa::SubImage<casa::Float>(img,slc,casa::AxesSpecifier(casa::True));
+    return si.coordinates();
 
+
+}
 /// @brief obtain beam info
 /// @param[in] name image name
 /// @return beam info vector
@@ -92,6 +103,12 @@ casa::Vector<casa::Quantum<double> > CasaImageAccess::beamInfo(const std::string
     return ii.restoringBeam().toVector();
 }
 
+std::string CasaImageAccess::getUnits(const std::string &name) const
+{
+    casa::Table tmpTable(name);
+    std::string units = tmpTable.keywordSet().asString("units");
+    return units;
+}
 // writing methods
 
 /// @brief create a new image

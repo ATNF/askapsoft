@@ -68,10 +68,20 @@ struct CasaImageAccess : public IImageAccess {
     /// @return coordinate system object
     virtual casa::CoordinateSystem coordSys(const std::string &name) const;
 
+    /// @brief obtain coordinate system info for part of an image
+    /// @param[in] name image name
+    /// @return coordinate system object
+    virtual casa::CoordinateSystem coordSysSlice(const std::string &name,const casa::IPosition &blc,
+                                    const casa::IPosition &trc ) const;
     /// @brief obtain beam info
     /// @param[in] name image name
     /// @return beam info vector
     virtual casa::Vector<casa::Quantum<double> > beamInfo(const std::string &name) const;
+
+    /// @brief obtain pixel units
+    /// @param[in] name image name
+    /// @return units string
+    virtual std::string getUnits(const std::string &name) const;
 
     //////////////////
     // Writing methods
@@ -120,4 +130,3 @@ struct CasaImageAccess : public IImageAccess {
 } // namespace askap
 
 #endif
-

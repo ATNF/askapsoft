@@ -58,6 +58,12 @@ public:
 
     FITSImageRW (const std::string &name);
 
+    /// @brief create a new FITS image
+    /// @details A call to this method should preceed any write calls. The actual
+    /// image may be created only upon the first write call. Details depend on the
+    /// implementation.
+    
+
     bool create (const std::string &name, const casa::IPosition &shape,\
         const casa::CoordinateSystem &csys,\
         uint memoryInMB = 64,\
@@ -82,6 +88,7 @@ public:
 
     void print_hdr();
     void setUnits(const std::string &units);
+
     void setRestoringBeam(double,double,double);
     // write into a FITS image
     bool write(const casa::Array<float>& );

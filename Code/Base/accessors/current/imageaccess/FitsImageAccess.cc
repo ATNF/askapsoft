@@ -37,12 +37,15 @@
 
 #include <casacore/images/Images/FITSImage.h>
 #include <casacore/images/Images/TempImage.h>
+#include <casacore/images/Images/SubImage.h>
 #include <casacore/images/Images/ImageFITSConverter.h>
 #include <casacore/images/Images/PagedImage.h>
 #include <casacore/lattices/Lattices/ArrayLattice.h>
 
 #include <imageaccess/FITSImageRW.h>
 #include <imageaccess/FitsImageAccess.h>
+
+#include <fitsio.h>
 
 ASKAP_LOGGER(logger, ".fitsImageAccessor");
 
@@ -76,6 +79,12 @@ casa::Array<float> FitsImageAccess::read(const std::string &name) const
 
     casa::IPosition blc(shape.nelements(),0);
     casa::IPosition trc(shape);
+
+    trc[0] = trc[0]-1;
+    trc[1] = trc[1]-1;
+    trc[2] = trc[2]-1;
+    trc[3] = trc[3]-1;
+
     return this->read(name,blc,trc);
 
 
@@ -94,7 +103,7 @@ casa::Array<float> FitsImageAccess::read(const std::string &name, const casa::IP
 
     casa::FITSImage img(fullname);
     casa::Array<float> buffer;
-    casa::Slicer slc(blc,trc,casa::Slicer::endIsLength);
+    casa::Slicer slc(blc,trc,casa::Slicer::endIsLast);
     // std::cout << "Reading a slice of the FITS image " << name << " slice " << slc << std::endl;
     ASKAPCHECK(img.doGetSlice(buffer,slc) == casa::False, "Cannot read image");
     return buffer;
@@ -111,6 +120,17 @@ casa::CoordinateSystem FitsImageAccess::coordSys(const std::string &name) const
     return img.coordinates();
 }
 
+casa::CoordinateSystem FitsImageAccess::coordSysSlice(const std::string &name,const casa::IPosition &blc,
+                                const casa::IPosition &trc ) const
+{
+    std::string fullname = name + ".fits";
+    casa::Slicer slc(blc,trc,casa::Slicer::endIsLast);
+    ASKAPLOG_INFO_STR(logger, " FITSImageAccess - Slicer " << slc);
+    casa::FITSImage img(fullname);
+    casa::SubImage<casa::Float> si = casa::SubImage<casa::Float>(img,slc,casa::AxesSpecifier(casa::True));
+    return si.coordinates();
+
+}
 /// @brief obtain beam info
 /// @param[in] name image name
 /// @return beam info vector
@@ -120,6 +140,26 @@ casa::Vector<casa::Quantum<double> > FitsImageAccess::beamInfo(const std::string
     casa::FITSImage img(fullname);
     casa::ImageInfo ii = img.imageInfo();
     return ii.restoringBeam().toVector();
+}
+std::string FitsImageAccess::getUnits(const std::string &name) const
+{
+
+    fitsfile *fptr;       /* pointer to the FITS file, defined in fitsio.h */
+    int status = 0;
+    std::string units;
+    const std::string key("Brightness (pixel) unit");
+    char comment[1024];
+    if ( fits_open_file(&fptr, name.c_str(), READONLY, &status) )
+        ASKAPCHECK(status,"FITSImageAccess:: Cannot open FITS file");
+
+    if ( fits_read_key(fptr, TSTRING, "BUNIT",(void *) (units.c_str()), comment,  &status) )
+         ASKAPCHECK(status,"FITSImageAccess:: Cannot find Brightness keyword");
+
+    if ( fits_close_file(fptr, &status) )
+        ASKAPCHECK(status,"FITSImageAccess:: Error on closing file");
+
+    return units;
+
 }
 void FitsImageAccess::connect(const std::string &name) {
     std::string fullname = name + ".fits";

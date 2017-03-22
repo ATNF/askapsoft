@@ -413,6 +413,7 @@ void FITSImageRW::setUnits(const std::string &units) {
         printerror( status );
 
 }
+
 void FITSImageRW::setRestoringBeam(double maj, double min, double pa) {
     ASKAPLOG_INFO_STR(FITSlogger,"Setting Beam info");
     ASKAPLOG_INFO_STR(FITSlogger,"Updating brightness units");
