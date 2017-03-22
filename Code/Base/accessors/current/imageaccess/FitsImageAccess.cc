@@ -145,18 +145,19 @@ std::string FitsImageAccess::getUnits(const std::string &name) const
 {
 
     fitsfile *fptr;       /* pointer to the FITS file, defined in fitsio.h */
+    std::string fullname = name + ".fits";
     int status = 0;
     std::string units;
     const std::string key("Brightness (pixel) unit");
     char comment[1024];
-    if ( fits_open_file(&fptr, name.c_str(), READONLY, &status) )
-        ASKAPCHECK(status,"FITSImageAccess:: Cannot open FITS file");
+    if ( fits_open_file(&fptr, fullname.c_str(), READONLY, &status) )
+        ASKAPCHECK(status==0,"FITSImageAccess:: Cannot open FITS file");
 
     if ( fits_read_key(fptr, TSTRING, "BUNIT",(void *) (units.c_str()), comment,  &status) )
-         ASKAPCHECK(status,"FITSImageAccess:: Cannot find Brightness keyword");
+         ASKAPCHECK(status==0,"FITSImageAccess:: Cannot find Brightness keyword");
 
     if ( fits_close_file(fptr, &status) )
-        ASKAPCHECK(status,"FITSImageAccess:: Error on closing file");
+        ASKAPCHECK(status==0,"FITSImageAccess:: Error on closing file");
 
     return units;
 
