@@ -105,7 +105,7 @@ bool FITSImageRW::create(const std::string &name, const casa::IPosition &shape,\
     ASKAPLOG_INFO_STR(FITSlogger,"Creating R/W FITSImage " << this->name);
 
     unlink(this->name.c_str());
-    std::ofstream outfile (this->name);
+    std::ofstream outfile (this->name.c_str());
     ASKAPCHECK(outfile.is_open(),"Cannot open FITS file for output");
 
 
