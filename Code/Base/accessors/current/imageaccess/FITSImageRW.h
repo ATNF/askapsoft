@@ -62,12 +62,12 @@ public:
     /// @details A call to this method should preceed any write calls. The actual
     /// image may be created only upon the first write call. Details depend on the
     /// implementation.
-    
+
 
     bool create (const std::string &name, const casa::IPosition &shape,\
         const casa::CoordinateSystem &csys,\
         uint memoryInMB = 64,\
-        bool preferVelocity = true,\
+        bool preferVelocity = false,\
         bool opticalVelocity = true,\
         int BITPIX=-32,\
         float minPix = 1.0,\
@@ -75,7 +75,7 @@ public:
         bool degenerateLast=false,\
         bool verbose=true,\
         bool stokesLast=false,\
-        bool preferWavelength=false,\
+        bool preferWavelength=true,\
         bool airWavelength=false,\
         bool primHead=true,\
         bool allowAppend=false,\

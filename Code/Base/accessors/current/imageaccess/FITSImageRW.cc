@@ -43,7 +43,8 @@
 #include <imageaccess/FITSImageRW.h>
 
 #include <fitsio.h>
-
+#include <iostream>
+#include <fstream>
 
 ASKAP_LOGGER(FITSlogger, ".FITSImageRW");
 
@@ -104,6 +105,11 @@ bool FITSImageRW::create(const std::string &name, const casa::IPosition &shape,\
     ASKAPLOG_INFO_STR(FITSlogger,"Creating R/W FITSImage " << this->name);
 
     unlink(this->name.c_str());
+    std::ofstream outfile (this->name);
+    ASKAPCHECK(outfile.is_open(),"Cannot open FITS file for output");
+
+
+
 
     casa::String error;
     const casa::uInt ndim = shape.nelements();
@@ -236,29 +242,21 @@ bool FITSImageRW::create(const std::string &name, const casa::IPosition &shape,\
     //
 
     theKeywordList.end();
-    casa::PrimaryArray<float>* fits32 = 0;
 
-    casa::FitsOutput *outfile = new casa::FitsOutput(fullname.c_str(),casa::FITS::Disk);
-    if (outfile->err())
-        ASKAPLOG_WARN_STR(FITSlogger, "Error creating FITS file for output\n");
+    // now get them into a file ...
 
+    theKeywordList.first();
+    theKeywordList.next(); // skipping an extra SIMPLE... hack
+    casa::FitsKeyCardTranslator m_kc;
 
-    fits32 = new casa::PrimaryArray<float>(theKeywordList);
-     /// I could use cfitsio access routines here for a cleaner interface
-    if (fits32==0 || fits32->err()) {
-        ASKAPLOG_WARN_STR(FITSlogger, "Error creating Primary HDU from keywords");
-        return false;
+    char cards[2880];
+
+    while (m_kc.build(cards,theKeywordList)) {
+        outfile << cards;
     }
-    if (fits32->write_hdr(*outfile)) {
-        ASKAPLOG_INFO_STR(FITSlogger,"Error writing FITS header");
-        delete outfile;
-        return false;
-    }
-    ASKAPLOG_INFO_STR(FITSlogger,"Written header");
+    outfile << cards;
 
-    // std::cout << *fits32 << std::endl;
-    delete(fits32);
-    delete(outfile);
+    outfile.close();
 
     return true;
 
