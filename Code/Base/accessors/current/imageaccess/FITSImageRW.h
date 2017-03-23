@@ -75,7 +75,7 @@ public:
         bool degenerateLast=false,\
         bool verbose=true,\
         bool stokesLast=false,\
-        bool preferWavelength=true,\
+        bool preferWavelength=false,\
         bool airWavelength=false,\
         bool primHead=true,\
         bool allowAppend=false,\
