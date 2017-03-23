@@ -98,8 +98,9 @@ IMAGE_BASE_SPECTRAL=${IMAGE_BASE_SPECTRAL}
 FIELD=${FIELD}
 
 imageCode=${imageCode}
+DO_ALT_IMAGER=${DO_ALT_IMAGER}
 NUM_SPECTRAL_CUBES=${NUM_SPECTRAL_CUBES}
-subband=${subband}
+subband="${subband}"
 
 beamList=""
 for BEAM in ${BEAMS_TO_USE}; do

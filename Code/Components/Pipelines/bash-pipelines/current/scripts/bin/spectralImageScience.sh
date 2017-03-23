@@ -31,9 +31,6 @@
 
 ID_SPECIMG_SCI=""
 
-# set the $imageBase variable
-setImageBase spectral
-
 DO_IT=$DO_SPECTRAL_IMAGING
 
 if [ $DO_ALT_IMAGER == true ]; then
@@ -44,13 +41,18 @@ else
     Imager="Simager"
 fi
 
-if [ $CLOBBER == false ] && [ -e ${OUTPUT}/image.${imageBase}.restored ]; then
-    if [ $DO_IT == true ]; then
-        echo "Image ${imageBase}.restored exists, so not running spectral-line imaging for beam ${BEAM}"
-        echo " "
+for subband in ${SUBBAND_WRITER_LIST}; do
+    imageCode=restored
+    setImageProperties spectral
+    if [ "${CLOBBER}" != "true" ] && [ -e "${imageName}" ]; then
+        if [ $DO_IT == true ]; then
+            echo "Image ${imageName} exists, so not running spectral-line imaging for beam ${BEAM}"
+            echo " "
+        fi
+        DO_IT=false
     fi
-    DO_IT=false
-fi
+done
+unset subband
 
 # Define the preconditioning
 preconditioning="${Imager}.preconditioner.Names                    = ${PRECONDITIONER_LIST_SPECTRAL}"
@@ -258,7 +260,9 @@ NPPN=${CPUS_PER_CORE_SPEC_IMAGING}
 aprun -n \${NCORES} -N \${NPPN} ${theImager} -c \$parset > \$log
 err=\$?
 rejuvenate ${msSciSL}
-rejuvenate *.${imageBase}*
+for im in *.${imageBase}*; do
+    rejuvenate \$im
+done
 extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname} "txt,csv"
 
 if [ \${err} -ne 0 ]; then

@@ -219,12 +219,15 @@ function setImageProperties()
     fi
 
     band=""
-    if [ "${NUM_SPECTRAL_CUBES}" -gt 1 ]; then
+    # Add the writer information for the askap_imager case, but not when we have a single-file FITS output
+    if [ "$type" == "spectral" ] &&
+           [ "${DO_ALT_IMAGER}" == "true" ] &&
+           [ "${ALT_IMAGER_SINGLE_FILE}" != "true" ]; then
         band="wr.${subband}."
     fi
     base="${band}${imageBase}${imSuffix}"
     
-    weightsImage="weights.${imageBase}${imSuffix}"
+    weightsImage="weights.${base}"
     #    weightsType="${typebase}_weights_$typeSuffix"
     weightsType="${typebase}_sensitivity_$typeSuffix"
     weightsLabel="Weights image, $beamSuffix"
@@ -640,7 +643,7 @@ function writeStats()
     if [ $# -ge 10 ] && [ "$format" == "csv" ]; then
 	echo $@ | awk '{printf "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",$1,$2,$3,$4,$5,$6,$7,$8,$9,$10}'
     else
-	echo $@ | awk '{printf "%10s%10s%40s%9s%10s%10s%10s%10s%10s%25s\n",$1,$2,$3,$4,$5,$6,$7,$8,$9,$10}'
+	echo $@ | awk '{printf "%10s%10s%50s%9s%10s%10s%10s%10s%10s%25s\n",$1,$2,$3,$4,$5,$6,$7,$8,$9,$10}'
     fi
 }
 
