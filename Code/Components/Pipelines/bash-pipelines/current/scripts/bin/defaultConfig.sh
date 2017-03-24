@@ -468,6 +468,12 @@ SELFCAL_SELAVY_GAUSSIANS_FROM_GUESS=true
 # If SELFCAL_SELAVY_GAUSSIANS_FROM_GUESS=false, this is how many
 # Gaussians to use
 SELFCAL_SELAVY_NUM_GAUSSIANS=1
+# Reference antenna to use in self-calibration. Should be antenna
+# number, 0 - nAnt-1 that matches antenna numbering in MS
+SELFCAL_REF_ANTENNA=""
+# Reference gains to use in self-calibration - something like
+# gain.g11.0.0
+SELFCAL_REF_GAINS=""
 
 # Array-capable self-calibration parameters
 #   These parameters can be given as either a single value (eg. "300")

@@ -146,6 +146,20 @@ Ccalibrator.sources.definition                  = \${sources}"
 
     fi
 
+    # Optional referencing of ccalibrator
+    CcalibratorReference="# Referencing for ccalibrator"
+    if [ "${SELFCAL_REF_ANTENNA}" != "" ]; then
+        CcalibratorReference="${CcalibratorReference}
+Ccalibrator.refantenna                          = ${SELFCAL_REF_ANTENNA}"
+    fi
+    if [ "${SELFCAL_REF_GAINS}" != "" ]; then
+        CcalibratorReference="${CcalibratorReference}
+Ccalibrator.refgain                             = ${SELFCAL_REF_GAINS}"
+    fi
+    if [ "${SELFCAL_REF_ANTENNA}" == "" ] && [ "${SELFCAL_REF_GAINS}" == "" ]; then
+        CcalibratorReference="${CcalibratorReference} is not done in this job"
+    fi
+    
     setJob science_continuumImageSelfcal contSC
     cat > $sbatchfile <<EOFOUTER
 #!/bin/bash -l
@@ -331,6 +345,8 @@ Ccalibrator.calibaccess.table.maxchan           = ${nchanContSci}
 Ccalibrator.calibaccess.table.reuse             = false
 #
 ${CalibratorModelDefinition}
+#
+${CcalibratorReference}
 #
 Ccalibrator.gridder.snapshotimaging             = ${GRIDDER_SNAPSHOT_IMAGING}
 Ccalibrator.gridder.snapshotimaging.wtolerance  = ${GRIDDER_SNAPSHOT_WTOL}
