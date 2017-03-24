@@ -41,7 +41,7 @@ a few extra parameters. To copy a file from the /scratch2 filesystem::
 
 and to copy a file to the /scratch2 filesystem::
 
-    bbcp -P 10 -s 32 -w 2M -r image.fits hpc-data1.pawsey.org.au:/scratch2/askap/user123
+    bbcp -P 10 -s 32 -w 2M -m 2755/644 -r image.fits hpc-data1.pawsey.org.au:/scratch2/askap/user123
 
 .. note:: The hostname necessary to use bbcp is *hpc-data1.pawsey.org.au*. This is one of the
           four hosts to which the *hpc-data* DNS alias points to (the
