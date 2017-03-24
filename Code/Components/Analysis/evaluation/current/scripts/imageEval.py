@@ -11,8 +11,8 @@ import scipy.special
 from askap.analysis.evaluation.readData import *
 import askap.analysis.evaluation.modelcomponents as models
 from askap.analysis.evaluation.sourceSelection import *
-import pyfits
-import pywcs
+from astropy.io import fits
+from astropy import wcs
 import os
 from optparse import OptionParser
 import askap.parset as parset
@@ -66,12 +66,12 @@ if __name__ == '__main__':
         print "SNR image %s does not exist. Exiting."%snrImageName
         exit(0)
     
-    threshim=pyfits.open(threshImageName)
+    threshim=fits.open(threshImageName)
     threshmapFull=threshim[0].data
     goodpixels=threshmapFull>0.
     threshmap = threshmapFull[goodpixels]
     threshHeader = threshim[0].header
-    threshWCS = pywcs.WCS(threshHeader)
+    threshWCS = wcs.WCS(threshHeader)
     threshim.close()
 
     # Tools used to determine whether a given missed reference source should be included
@@ -80,12 +80,12 @@ if __name__ == '__main__':
     selectorUnprecessed = sourceSelector(inputPars)
     selectorUnprecessed.setWCSreference(0.,0.)
     
-    noiseim=pyfits.open(noiseImageName)
+    noiseim=fits.open(noiseImageName)
     noisemapFull=noiseim[0].data
     noisemap = noisemapFull[goodpixels]
     noiseim.close()
 
-    snrim = pyfits.open(snrImageName)
+    snrim = fits.open(snrImageName)
     snrmapFull=snrim[0].data
     snrmap = snrmapFull[goodpixels]
     snrim.close()
@@ -189,7 +189,7 @@ if __name__ == '__main__':
 
     # area of a single pixel, in deg^2
     pixelarea=abs(threshWCS.wcs.cdelt[0:2].prod())
-    pixelunit=threshWCS.wcs.cunit[0].strip()
+    pixelunit=threshWCS.wcs.cunit[0]
     if pixelunit == 'deg':
         pixelarea = pixelarea * (math.pi/180.)**2
     fullFieldArea = threshmap.size * pixelarea

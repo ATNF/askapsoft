@@ -15,7 +15,7 @@ def callback():
    
 platform =  utils.get_platform()
 builder = Builder()
-builder.remote_archive = "numpy-1.6.2.tar.gz"
+builder.remote_archive = "numpy-1.12.0.tar.gz"
 
 if platform['system'] == 'Darwin':
     builder.add_option('CFLAGS="-framework Accelerate"')

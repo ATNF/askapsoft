@@ -38,6 +38,7 @@ slurmOut="${BASEDIR}/slurmOutput"
 tools="${BASEDIR}/tools"
 metadata="${BASEDIR}/metadata"
 stats="${BASEDIR}/stats"
+diagnostics="${BASEDIR}/diagnostics"
 
 mkdir -p "$parsets"
 lfs setstripe -c 1 "$parsets"
@@ -53,7 +54,8 @@ mkdir -p "$metadata"
 lfs setstripe -c 1 "$metadata"
 mkdir -p "$stats"
 lfs setstripe -c 1 "$stats"
-
+mkdir -p "$diagnostics"
+lfs setstripe -c 1 "$diagnostics"
 
 # temp directory for certain files that we don't need to keep
 tmp=/tmp/tmp$(whoami)pipe

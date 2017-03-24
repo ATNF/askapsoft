@@ -543,7 +543,7 @@ def spatPosPlot(xS=None, yS=None, xR=None, yR=None, matchFlag=None, xMiss=None, 
     rc('ytick', labelsize=6)
 #    axes(setBox(232,'r'))
     axes(setBox(locationCode,'r'))
-    n, bins, patches = hist(offset, max(minPlottedOff,max(offset))/0.25)
+    n, bins, patches = hist(offset, int(max(minPlottedOff,max(offset))/0.25))
     ax=axis()
 #    ax2=[ax[0],ax[1],ax[2],max(minPlottedOff,max(offset))]
 #    axis(ax2)

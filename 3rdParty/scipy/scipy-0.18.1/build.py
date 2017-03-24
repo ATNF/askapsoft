@@ -4,7 +4,7 @@ from askapdev.rbuild.builders import Setuptools as Builder
 import askapdev.rbuild.utils as utils
 
 builder = Builder()
-builder.remote_archive = "scipy-0.11.0.tar.gz"
+builder.remote_archive = "scipy-0.18.1.tar.gz"
 
 platform = utils.get_platform()
 if platform['system'] != 'Darwin':

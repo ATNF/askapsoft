@@ -1,5 +1,5 @@
 # This file lists the external dependencies
 # use pkgname=ASKAP_ROOT_relative_path
 
-pytz=3rdParty/pytz/pytz-2012j
+pytz=3rdParty/pytz/pytz-2016.10
 requests=3rdParty/requests/requests-2.8.1

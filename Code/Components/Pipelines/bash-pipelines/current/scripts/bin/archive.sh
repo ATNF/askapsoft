@@ -34,8 +34,6 @@
 
 ##############################
 
-. "${PIPELINEDIR}/defineArtifactsScript.sh"
-
 . "${PIPELINEDIR}/convertToFITS.sh"
 
 . "${PIPELINEDIR}/makeThumbnails.sh"

@@ -1,4 +1,0 @@
-pymodule=numpy==1.6.2
-distdir=numpy-1.6.2/dist
-# pure python module
-libs=

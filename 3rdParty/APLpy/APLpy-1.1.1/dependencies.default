@@ -1,0 +1,4 @@
+# This file lists the external dependencies
+numpy=3rdParty/numpy/numpy-1.12.0
+matplotlib=3rdParty/matplotlib/matplotlib-2.0.0
+pywcs=3rdParty/pywcs/pywcs-1.12

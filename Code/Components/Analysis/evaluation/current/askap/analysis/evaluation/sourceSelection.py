@@ -5,8 +5,8 @@
 
 from math import *
 from utils import *
-import pyfits
-import pywcs
+from astropy.io import fits
+from astropy import wcs
 import os
 import askap.parset as parset
 
@@ -20,10 +20,10 @@ class sourceSelector:
         if self.method == 'threshold':
             self.threshImageName = parset.get_value('thresholdImage','detectionThreshold.i.clean.fits')
             if os.path.exists(self.threshImageName):
-                threshim=pyfits.open(self.threshImageName)
+                threshim=fits.open(self.threshImageName)
                 self.threshmap = threshim[0].data
                 threshHeader = threshim[0].header
-                self.threshWCS = pywcs.WCS(threshHeader)
+                self.threshWCS = wcs.WCS(threshHeader)
                 threshim.close()
                 print "Using threshold map %s to determine source inclusion"%self.threshImageName
             else:
@@ -32,10 +32,10 @@ class sourceSelector:
         elif self.method == 'weights':
             self.weightsImageName = parset.get_value('weightsImage','weights.i.clean.fits')
             if os.path.exists(self.weightsImageName):
-                weightsim = pyfits.open(self.weightsImageName)
+                weightsim = fits.open(self.weightsImageName)
                 self.weightsmap = weightsim[0].data
                 weightsHeader = weightsim[0].header
-                self.weightsWCS = pywcs.WCS(weightsHeader)
+                self.weightsWCS = wcs.WCS(weightsHeader)
                 self.weightCutoff = parset.get_value('weightsCutoff',0.1)
                 print "Using weights image %s with relative cutoff %f (=%f) to determine source inclusion"%(self.weightsImageName,self.weightCutoff,self.weightCutoff*self.weightsmap.max())
                 self.weightCutoff = self.weightCutoff * self.weightsmap.max()
@@ -50,18 +50,18 @@ class sourceSelector:
 
     def setWCSreference(self, raRef, decRef):
         if self.method == 'threshold':
-            threshim=pyfits.open(self.threshImageName)
+            threshim=fits.open(self.threshImageName)
             threshHeader = threshim[0].header
-            threshHeader.update('CRVAL1',raRef)
-            threshHeader.update('CRVAL2',decRef)
-            self.threshWCS = pywcs.WCS(threshHeader)
+            threshHeader.update(CRVAL1=raRef)
+            threshHeader.update(CRVAL2=decRef)
+            self.threshWCS = wcs.WCS(threshHeader)
             threshim.close()
         elif self.method == 'weights':
-            weightsim=pyfits.open(self.threshImageName)
+            weightsim=fits.open(self.threshImageName)
             weightsHeader = weightsim[0].header
-            weightsHeader.update('CRVAL1',raRef)
-            weightsHeader.update('CRVAL2',decRef)
-            self.threshWCS = pywcs.WCS(weightsHeader)
+            weightsHeader.update(CRVAL1=raRef)
+            weightsHeader.update(CRVAL2=decRef)
+            self.threshWCS = wcs.WCS(weightsHeader)
             weightsim.close()
                 
             
@@ -78,7 +78,7 @@ class sourceSelector:
             else:
                 flux = source.flux()
             useRef=False
-            pixcrd=self.threshWCS.wcs_sky2pix(skycrd,1)
+            pixcrd=self.threshWCS.wcs_world2pix(skycrd,1)
             if (pixcrd[0][0]>0 and pixcrd[0][0]<self.threshmap.shape[-1]) and (pixcrd[0][1]>0 and pixcrd[0][1]<self.threshmap.shape[-2]) :
                 pos=tuple(np.array(pixcrd[0][::-1],dtype=int)-1)
                 if self.threshmap[pos] > 0 and self.threshmap[pos] < flux :

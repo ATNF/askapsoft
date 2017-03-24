@@ -209,8 +209,8 @@ if __name__ == '__main__':
     print "MADFM of dS  = %10.6f  = %10.6f as RMS"%(madfm(dFgood),madfmToRMS(madfm(dFgood)))
 
     if sourceCatType=="Selavy" :
-        print "Average of the ImageRMS values = %10.6f"%(mean(imagerms[npf>0]))
-        print "Weighted average of the ImageRMS values = %10.6f"%(sum(imagerms[npf>0]*npf[npf>0])/(sum(npf[npf>0])*1.))
+        print "Average of the ImageRMS values = %10.6f"%(mean(imagerms))
+#        print "Weighted average of the ImageRMS values = %10.6f"%(sum(imagerms[npf>0]*npf[npf>0])/(sum(npf[npf>0])*1.))
 
 #    if sourceCatType=="Selavy" :
 #        goodfit = npf>0
@@ -265,7 +265,8 @@ if __name__ == '__main__':
         #        l1 = plot(bins, ytemp1, 'r-',label=r"$\Delta S$ mean&rms")
         l1 = plot(bins, ytemp1, 'r-')
         if loop==0 and sourceCatType=="Selavy" :
-            ytemp2 = normpdf(bins,mu,mean(imagerms[npf>0]))
+#            ytemp2 = normpdf(bins,mu,mean(imagerms[npf>0]))
+            ytemp2 = normpdf(bins,mu,mean(imagerms))
             #l2 = plot(bins, ytemp2*max(ytemp1)/max(ytemp2), 'g-', label="image rms")
             l2 = plot(bins, ytemp2*max(ytemp1)/max(ytemp2), 'g-')
         axisrange = axis()

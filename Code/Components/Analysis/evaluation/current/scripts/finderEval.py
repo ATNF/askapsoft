@@ -6,8 +6,7 @@ import matplotlib
 matplotlib.use('Agg')
 from numpy import *
 import os
-import pyfits
-import pywcs
+from astropy.io import fits
 from askap.analysis.evaluation.readData import *
 from askap.analysis.evaluation.distributionPlotsNew import *
 from askap.analysis.evaluation.distributionPlots import *
@@ -81,7 +80,7 @@ if __name__ == '__main__':
     imageName=inputPars.get_value('image','image.i.clean.taylor.0.restored.fits')
     haveBeam = os.path.exists(imageName)
     if haveBeam:
-        image = pyfits.open(imageName)
+        image = fits.open(imageName)
         imhead = image[0].header
         bmaj = imhead.get('bmaj')*3600.
         bmin = imhead.get('bmin')*3600.
@@ -454,9 +453,9 @@ if __name__ == '__main__':
         minFlux=floor(log10(f.min())*2.)/2.
         maxFlux=ceil(log10(f.max())*2.)/2.
 	    
-        numMatchBinnedByFlux = np.zeros((maxFlux-minFlux)*10)
-        numMissSrcBinnedByFlux = np.zeros((maxFlux-minFlux)*10)
-        numMissRefBinnedByFlux = np.zeros((maxFlux-minFlux)*10)
+        numMatchBinnedByFlux = np.zeros(int(maxFlux-minFlux)*10)
+        numMissSrcBinnedByFlux = np.zeros(int(maxFlux-minFlux)*10)
+        numMissRefBinnedByFlux = np.zeros(int(maxFlux-minFlux)*10)
 	    
         for m in matchlist:
             binNumber = int((log10(m.src.flux()*sourceFluxScale)-minFlux)*10)
@@ -598,9 +597,9 @@ if __name__ == '__main__':
         amin=floor(a.min()/5.)*5
         amax=ceil(a.max()/5.)*5
 	
-        nmatch2d=np.zeros(((amax-amin)/5.,(maxFlux-minFlux)*10.))
-        nmissSrc2d=np.zeros(((amax-amin)/5.,(maxFlux-minFlux)*10.))
-        nmissRef2d=np.zeros(((amax-amin)/5.,(maxFlux-minFlux)*10.))
+        nmatch2d=np.zeros((int(amax-amin)/5,int(maxFlux-minFlux)*10))
+        nmissSrc2d=np.zeros((int(amax-amin)/5,int(maxFlux-minFlux)*10))
+        nmissRef2d=np.zeros((int(amax-amin)/5,int(maxFlux-minFlux)*10))
 	
         for m in matchlist:
             abin=int((m.ref.maj-amin)/5.)
