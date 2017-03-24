@@ -15,7 +15,7 @@
 #   * cellsizeDefinition - the shape of the images, as a Cimager
 #   parameter if 'CELLSIZE_CONT' is defined
 #
-# @copyright (c) 2015 CSIRO
+# @copyright (c) 2017 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -46,14 +46,14 @@ setImageProperties cont
 
 # Define the shape parameter, or leave to "advise"
 shapeDefinition="# Leave shape definition to Cimager to determine from the data"
-if [ "${NUM_PIXELS_CONT}" != "" ] && [ $NUM_PIXELS_CONT -gt 0 ]; then
+if [ "${NUM_PIXELS_CONT}" != "" ] && [ "${NUM_PIXELS_CONT}" -gt 0 ]; then
     shapeDefinition="Cimager.Images.shape                            = [${NUM_PIXELS_CONT}, ${NUM_PIXELS_CONT}]"
 fi
 
 # Define the cellsize parameter, or leave to "advise"
 cellsizeDefinition="# Leave cellsize definition to Cimager to determine from the data"
-cellsizeGood=`echo ${CELLSIZE_CONT} | awk '{if($1>0.) print "true"; else print "false";}'`
-if [ "${CELLSIZE_CONT}" != "" ] && [ $cellsizeGood == true ]; then
+cellsizeGood=$(echo "${CELLSIZE_CONT}" | awk '{if($1>0.) print "true"; else print "false";}')
+if [ "${CELLSIZE_CONT}" != "" ] && [ "$cellsizeGood" == "true" ]; then
     cellsizeDefinition="Cimager.Images.cellsize                         = [${CELLSIZE_CONT}arcsec, ${CELLSIZE_CONT}arcsec]"
 fi
 
@@ -65,11 +65,11 @@ fi
 
 # Define the preconditioning
 preconditioning="Cimager.preconditioner.Names                    = ${PRECONDITIONER_LIST}"
-if [ "`echo ${PRECONDITIONER_LIST} | grep GaussianTaper`" != "" ]; then
+if [ "$(echo "${PRECONDITIONER_LIST}" | grep GaussianTaper)" != "" ]; then
     preconditioning="$preconditioning
 Cimager.preconditioner.GaussianTaper            = ${PRECONDITIONER_GAUSS_TAPER}"
 fi
-if [ "`echo ${PRECONDITIONER_LIST} | grep Wiener`" != "" ]; then
+if [ "$(echo "${PRECONDITIONER_LIST}" | grep Wiener)" != "" ]; then
     # Use the new preservecf preconditioner option, but only for the
     # Wiener filter
     preconditioning="$preconditioning
@@ -90,11 +90,11 @@ Cimager.restore.beam                            = ${RESTORING_BEAM_CONT}"
 if [ "${RESTORE_PRECONDITIONER_LIST}" != "" ]; then
     restore="${restore}
 Cimager.restore.preconditioner.Names                    = ${RESTORE_PRECONDITIONER_LIST}"
-    if [ "`echo ${RESTORE_PRECONDITIONER_LIST} | grep GaussianTaper`" != "" ]; then
+    if [ "$(echo "${RESTORE_PRECONDITIONER_LIST}" | grep GaussianTaper)" != "" ]; then
         restore="$restore
 Cimager.restore.preconditioner.GaussianTaper            = ${RESTORE_PRECONDITIONER_GAUSS_TAPER}"
     fi
-    if [ "`echo ${RESTORE_PRECONDITIONER_LIST} | grep Wiener`" != "" ]; then
+    if [ "$(echo "${RESTORE_PRECONDITIONER_LIST}" | grep Wiener)" != "" ]; then
         # Use the new preservecf preconditioner option, but only for the
         # Wiener filter
         restore="$restore
@@ -139,8 +139,7 @@ if [ "${DO_ALT_IMAGER_CONT}" == "true" ]; then
     fi
     altImagerParams="${altImagerParams}
 Cimager.nchanpercore                           = ${nchanpercore}"
-
-    if [ ${USE_TMPFS} == true ]; then
+    if [ "${USE_TMPFS}" == "true" ]; then
         usetmpfs="true"
     else
         usetmpfs="false"
@@ -168,7 +167,7 @@ fi
 
 cleaningPars="# These parameters define the clean algorithm
 Cimager.solver                                  = ${SOLVER}"
-if [ ${SOLVER} == "Clean" ]; then
+if [ "${SOLVER}" == "Clean" ]; then
     cleaningPars="${cleaningPars}
 Cimager.solver.Clean.algorithm                  = ${CLEAN_ALGORITHM}
 Cimager.solver.Clean.niter                      = ${CLEAN_MINORCYCLE_NITER}

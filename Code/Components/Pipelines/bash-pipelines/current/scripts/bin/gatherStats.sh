@@ -4,7 +4,7 @@
 # processing jobs into a single file (this is done at the end to avoid
 # race conditions). 
 #
-# @copyright (c) 2016 CSIRO
+# @copyright (c) 2017 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -31,12 +31,14 @@
 
 ##############################
 
-if [ $SUBMIT_JOBS == true ] && [ "${ALL_JOB_IDS}" != "" ]; then
+if [ "${SUBMIT_JOBS}" == "true" ] && [ "${ALL_JOB_IDS}" != "" ]; then
 
     # Gather stats on all running jobs
 
+    joblist=$(echo "$ALL_JOB_IDS" | sed -e 's/,/ /g')
+    
     sbatchfile=$slurms/gatherAll.sbatch
-    cat > $sbatchfile <<EOF
+    cat > "$sbatchfile" <<EOF
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
@@ -58,26 +60,31 @@ cd $ORIGINAL_OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
+thisfile=$sbatchfile
+cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
 statsTXT=stats-all-${NOW}.txt
 statsCSV=stats-all-${NOW}.csv
 writeStatsHeader txt > \$statsTXT
 writeStatsHeader csv > \$statsCSV
-for i in `echo $ALL_JOB_IDS | sed -e 's/,/ /g'`; do
-    for file in \`\ls $stats/stats-\$i*.txt\`; do
-        grep -v JobID \$file >> \$statsTXT
+for i in ${joblist}; do
+    for file in "$stats"/stats-\$i*.txt; do
+        if [ -e "\$file" ]; then
+            grep -v JobID \$file >> \$statsTXT
+        fi
     done
-    for file in \`\ls $stats/stats-\$i*.csv\`; do
-        grep -v JobID \$file >> \$statsCSV
+    for file in "$stats"/stats-\$i*.csv; do
+        if [ -e "\$file" ]; then
+            grep -v JobID \$file >> \$statsCSV
+        fi
     done
 done
 EOF
 
-    if [ $SUBMIT_JOBS == true ]; then    
-        dep="-d afterany:`echo $ALL_JOB_IDS | sed -e 's/,/:/g'`"
-        ID_STATS=`sbatch ${dep} $sbatchfile | awk '{print $4}'`
-        recordJob ${ID_STATS} "Final job to gather statistics on all jobs, with flags \"${dep}\""
+    if [ "${SUBMIT_JOBS}" == "true" ]; then    
+        dep="-d afterany:$(echo "$ALL_JOB_IDS" | sed -e 's/,/:/g')"
+        ID_STATS=$(sbatch ${dep} "$sbatchfile" | awk '{print $4}')
+        recordJob "${ID_STATS}" "Final job to gather statistics on all jobs, with flags \"${dep}\""
     else
         echo "Would submit job to gather statistics based on all jobs, with slurm file $sbatchfile"
     fi

@@ -4,7 +4,7 @@
 # observation, at full spectral resolution, using the spectral-line
 # imager 'simager'
 #
-# @copyright (c) 2015 CSIRO
+# @copyright (c) 2017 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -45,7 +45,7 @@ for subband in ${SUBBAND_WRITER_LIST}; do
     imageCode=restored
     setImageProperties spectral
     if [ "${CLOBBER}" != "true" ] && [ -e "${imageName}" ]; then
-        if [ $DO_IT == true ]; then
+        if [ "${DO_IT}" == "true" ]; then
             echo "Image ${imageName} exists, so not running spectral-line imaging for beam ${BEAM}"
             echo " "
         fi
@@ -56,11 +56,11 @@ unset subband
 
 # Define the preconditioning
 preconditioning="${Imager}.preconditioner.Names                    = ${PRECONDITIONER_LIST_SPECTRAL}"
-if [ "`echo ${PRECONDITIONER_LIST_SPECTRAL} | grep GaussianTaper`" != "" ]; then
+if [ "$(echo "${PRECONDITIONER_LIST_SPECTRAL}" | grep GaussianTaper)" != "" ]; then
     preconditioning="$preconditioning
 ${Imager}.preconditioner.GaussianTaper            = ${PRECONDITIONER_SPECTRAL_GAUSS_TAPER}"
 fi
-if [ "`echo ${PRECONDITIONER_LIST_SPECTRAL} | grep Wiener`" != "" ]; then
+if [ "$(echo "${PRECONDITIONER_LIST_SPECTRAL}" | grep Wiener)" != "" ]; then
     # Use the new preservecf preconditioner option, but only for the
     # Wiener filter
     preconditioning="$preconditioning
@@ -75,14 +75,14 @@ ${Imager}.preconditioner.Wiener.taper             = ${PRECONDITIONER_SPECTRAL_WI
     fi
 fi
 shapeDefinition="# Leave shape definition to advise"
-if [ "${NUM_PIXELS_SPECTRAL}" != "" ] && [ $NUM_PIXELS_SPECTRAL -gt 0 ]; then
+if [ "${NUM_PIXELS_SPECTRAL}" != "" ] && [ "${NUM_PIXELS_SPECTRAL}" -gt 0 ]; then
     shapeDefinition="${Imager}.Images.shape                            = [${NUM_PIXELS_SPECTRAL}, ${NUM_PIXELS_SPECTRAL}]"
 else
     echo "WARNING - No valid NUM_PIXELS_SPECTRAL parameter given.  Not running spectral imaging."
     DO_IT=false
 fi
-cellsizeGood=`echo ${CELLSIZE_SPECTRAL} | awk '{if($1>0.) print "true"; else print "false";}'`
-if [ "${CELLSIZE_SPECTRAL}" != "" ] && [ $cellsizeGood == true ]; then
+cellsizeGood=$(echo "${CELLSIZE_SPECTRAL}" | awk '{if($1>0.) print "true"; else print "false";}')
+if [ "${CELLSIZE_SPECTRAL}" != "" ] && [ "$cellsizeGood" == "true" ]; then
     cellsizeDefinition="${Imager}.Images.cellsize                         = [${CELLSIZE_SPECTRAL}arcsec, ${CELLSIZE_SPECTRAL}arcsec]"
 else
     echo "WARNING - No valid CELLSIZE_SPECTRAL parameter given.  Not running spectral imaging."
@@ -95,7 +95,7 @@ fi
 
 cleaningPars="# These parameters define the clean algorithm 
 ${Imager}.solver                                  = ${SOLVER_SPECTRAL}"
-if [ ${SOLVER_SPECTRAL} == "Clean" ]; then
+if [ "${SOLVER_SPECTRAL}" == "Clean" ]; then
     cleaningPars="${cleaningPars}
 ${Imager}.solver.Clean.algorithm                  = ${CLEAN_SPECTRAL_ALGORITHM}
 ${Imager}.solver.Clean.niter                      = ${CLEAN_SPECTRAL_MINORCYCLE_NITER}
@@ -113,7 +113,7 @@ ${Imager}.ncycles                                 = ${CLEAN_SPECTRAL_NUM_MAJORCY
 ${Imager}.Images.writeAtMajorCycle                = ${CLEAN_SPECTRAL_WRITE_AT_MAJOR_CYCLE}
 "
 fi
-if [ ${SOLVER_SPECTRAL} == "Dirty" ]; then
+if [ "${SOLVER_SPECTRAL}" == "Dirty" ]; then
     cleaningPars="${cleaningPars}
 ${Imager}.solver.Dirty.tolerance                  = 0.01
 ${Imager}.solver.Dirty.verbose                    = False
@@ -122,7 +122,7 @@ fi
 
 restorePars="# These parameter govern the restoring of the image and the recording of the beam
 ${Imager}.restore                                 = ${RESTORE_SPECTRAL}"
-if [ ${RESTORE_SPECTRAL} == "true" ]; then
+if [ "${RESTORE_SPECTRAL}" == "true" ]; then
     restorePars="${restorePars}
 ${Imager}.restore.beam                            = ${RESTORING_BEAM_SPECTRAL}
 ${Imager}.restore.beamReference                   = ${RESTORING_BEAM_REFERENCE}
@@ -142,7 +142,7 @@ if [ "${DO_ALT_IMAGER_SPECTRAL}" == "true" ]; then
     fi
     altImagerParams="${altImagerParams}
 Cimager.nchanpercore                           = ${nchanpercore}"
-    if [ ${USE_TMPFS} == true ]; then
+    if [ "${USE_TMPFS}" == "true" ]; then
         usetmpfs="true"
     else
         usetmpfs="false"
@@ -204,7 +204,8 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
+thisfile=$sbatchfile
+cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
 direction="${DIRECTION}"
 if [ "\${direction}" != "" ]; then
@@ -213,16 +214,16 @@ else
     log=${logs}/mslist_for_${Imager}_\${SLURM_JOB_ID}.log
     NCORES=1
     NPPN=1
-    aprun -n \${NCORES} -N \${NPPN} $mslist --full ${msSciSL} 2>&1 1> \${log}
-    ra=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=RA\`
-    dec=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=Dec\`
-    epoch=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=Epoch\`
+    aprun -n \${NCORES} -N \${NPPN} $mslist --full "${msSciSL}" 1>& "\${log}"
+    ra=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=RA)
+    dec=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=Dec)
+    epoch=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=Epoch)
     directionDefinition="${Imager}.Images.direction                       = [\${ra}, \${dec}, \${epoch}]"
 fi
 
 parset=${parsets}/science_spectral_imager_${FIELDBEAM}_\${SLURM_JOB_ID}.in
 
-cat > \$parset << EOF
+cat > "\$parset" << EOF
 ${Imager}.dataset                                 = ${msSciSL}
 #
 ${nameDefinition}
@@ -257,7 +258,7 @@ log=${logs}/science_spectral_imager_${FIELDBEAM}_\${SLURM_JOB_ID}.log
 # Now run the simager
 NCORES=${NUM_CPUS_SPECIMG_SCI}
 NPPN=${CPUS_PER_CORE_SPEC_IMAGING}
-aprun -n \${NCORES} -N \${NPPN} ${theImager} -c \$parset > \$log
+aprun -n \${NCORES} -N \${NPPN} ${theImager} -c "\$parset" > "\$log"
 err=\$?
 rejuvenate ${msSciSL}
 for im in *.${imageBase}*; do

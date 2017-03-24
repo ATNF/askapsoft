@@ -7,7 +7,7 @@
 # exist at run-time, nothing is done by that individual job).
 # The FITS headers are populated with the PROJECT keyword.
 #
-# @copyright (c) 2016 CSIRO
+# @copyright (c) 2017 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -32,10 +32,10 @@
 # @author Matthew Whiting <Matthew.Whiting@csiro.au>
 #
 
-if [ ${DO_CONVERT_TO_FITS} == true ]; then
+if [ "${DO_CONVERT_TO_FITS}" == "true" ]; then
 
     sbatchfile="$slurms/convert_to_FITS.sbatch"
-    cat > $sbatchfile <<EOFOUTER
+    cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
@@ -57,7 +57,8 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
+thisfile=$sbatchfile
+cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
 expectedImageNames=()
 
@@ -68,9 +69,9 @@ ADD_FITS_SUFFIX=false
 expectedImageNames=(\${casdaTwoDimImageNames[@]})
 expectedImageNames+=(\${casdaOtherDimImageNames[@]})
 
-echo "Image names = \${expectedImageNames[@]}"
+echo "Image names = " "\${expectedImageNames[@]}"
 
-for image in \${expectedImageNames[@]}; do
+for image in "\${expectedImageNames[@]}"; do
 
     echo "Launching conversion job for \$image"
     casaim=\${image}
@@ -85,13 +86,13 @@ done
 
 EOFOUTER
     
-    if [ $SUBMIT_JOBS == true ]; then
+    if [ "${SUBMIT_JOBS}" == "true" ]; then
         dep=""
         if [ "${ALL_JOB_IDS}" != "" ]; then
-            dep="-d afterok:`echo $ALL_JOB_IDS | sed -e 's/,/:/g'`"
+            dep="-d afterok:$(echo "$ALL_JOB_IDS" | sed -e 's/,/:/g')"
         fi
-        ID_FITSCONVERT=`sbatch ${dep} $sbatchfile | awk '{print $4}'`
-        recordJob ${ID_FITSCONVERT} "Job to convert remaining images to FITS, with flags \"${dep}\""
+        ID_FITSCONVERT=$(sbatch ${dep} "$sbatchfile" | awk '{print $4}')
+        recordJob "${ID_FITSCONVERT}" "Job to convert remaining images to FITS, with flags \"${dep}\""
     else
         echo "Would submit job to convert remaining images to FITS, with slurm file $sbatchfile"
     fi

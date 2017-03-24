@@ -8,7 +8,7 @@
 #  * Creation of a user script to indicate progress of queued jobs.
 #  * Creation of a user script to kill all launched jobs
 #
-# @copyright (c) 2015 CSIRO
+# @copyright (c) 2017 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -35,12 +35,12 @@
 
 ##############################
 
-if [ $SUBMIT_JOBS == true ] && [ "${ALL_JOB_IDS}" != "" ]; then
+if [ "${SUBMIT_JOBS}" == "true" ] && [ "${ALL_JOB_IDS}" != "" ]; then
 
     # Create tool to report progress
 
-    reportscript=${tools}/reportProgress-${NOW}.sh
-    cat > $reportscript <<EOF
+    reportscript="${tools}/reportProgress-${NOW}.sh"
+    cat > "$reportscript" <<EOF
 #!/bin/bash -l
 #
 # A script to report progress on all jobs associated with a given call of processASKAP.sh.
@@ -60,25 +60,26 @@ do
     esac
 done
 
-if [ \$verbose == "true" ]; then
+if [ "\$verbose" == "true" ]; then
 
     echo "SUMMARY OF JOBS:"
-    cat $JOBLIST
+    cat "$JOBLIST"
     echo " "
 
 fi
 
-squeue --jobs=${ALL_JOB_IDS}
+squeue --jobs="${ALL_JOB_IDS}"
 
 EOF
     # make it executable
-    chmod a+x $reportscript
+    chmod a+x "$reportscript"
 
     ##############################
 
     # Create tool to kill all jobs with this datestamp
-    killscript=${tools}/killAll-${NOW}.sh
-    cat > $killscript <<EOF
+    killscript="${tools}/killAll-${NOW}.sh"
+    joblist=$(echo "${ALL_JOB_IDS}" | sed -e 's/,/ /g')
+    cat > "$killscript" <<EOF
 #!/bin/bash -l
 #
 # A simple script to run scancel on all jobs associated with a 
@@ -90,7 +91,7 @@ read -p "Are you sure? (type yes to continue) : " ANS
 
 if [ "\$ANS" == "yes" ]; then
 
-    scancel `echo $ALL_JOB_IDS | sed -e 's/,/ /g'`
+    scancel ${joblist}
 
 else
 
@@ -99,7 +100,7 @@ else
 fi
 EOF
     # make it executable
-    chmod a+x $killscript
+    chmod a+x "$killscript"
 
     ##############################
 
@@ -108,31 +109,31 @@ EOF
     {
         # first, remove the timestamp
         sedstr="s/-${NOW}//g"
-        link=`echo $1 | sed -e $sedstr`
+        link=$(echo "$1" | sed -e "$sedstr")
         # remove trailing suffix
-        link=`echo ${link%.*}`
+        link=${link%.*}
         # remove all leading paths
-        link=`echo ${link##*/}`
+        link=${link##*/}
         # clobber any existing link
-        if [ -e $link ]; then
-	    rm -f $link
+        if [ -e "$link" ]; then
+	    rm -f "$link"
         fi
         # make the link
-        ln -s $1 $link
+        ln -s "$1" "$link"
     }
 
     # make links to the current scripts
-    makeLink $reportscript 
-    makeLink $killscript
+    makeLink "$reportscript" 
+    makeLink "$killscript"
 
     # make links to the current job list, both at the top level *and* in each output directory
-    makeLink $JOBLIST
+    makeLink "$JOBLIST"
     for FIELD in ${FIELD_LIST}; do
-        CWD=`pwd`
-        if [ -e ${ORIGINAL_OUTPUT}/${FIELD} ]; then
-            cd ${ORIGINAL_OUTPUT}/${FIELD}
-            makeLink $JOBLIST
-            cd ${CWD}
+        CWD=$(pwd)
+        if [ -e "${ORIGINAL_OUTPUT}/${FIELD}" ]; then
+            cd "${ORIGINAL_OUTPUT}/${FIELD}"
+            makeLink "$JOBLIST"
+            cd "${CWD}"
         fi
     done
 

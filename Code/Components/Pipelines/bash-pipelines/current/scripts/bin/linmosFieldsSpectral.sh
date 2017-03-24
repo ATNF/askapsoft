@@ -4,7 +4,7 @@
 # single image. After completion, runs the source-finder on the
 # mosaicked image.
 #
-# @copyright (c) 2016 CSIRO
+# @copyright (c) 2017 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -43,7 +43,7 @@ for imageCode in ${mosaicImageList}; do
         fi
 
         # Don't run if there is only one field
-        if [ ${NUM_FIELDS} -eq 1 ]; then
+        if [ "${NUM_FIELDS}" -eq 1 ]; then
             DO_IT=false
         fi
 
@@ -54,15 +54,15 @@ for imageCode in ${mosaicImageList}; do
         if [ "${DO_IT}" == "true" ] && [ "${CLOBBER}" != "true" ]; then
             FIELD="."
             BEAM=all
-            if [ `echo $TILE_LIST | awk '{print NF}'` -gt 1 ]; then
+            if [ "$(echo "${TILE_LIST}" | awk '{print NF}')" -gt 1 ]; then
                 FULL_TILE_LIST="$TILE_LIST ALL"
             else
                 FULL_TILE_LIST="ALL"
             fi
             for TILE in $FULL_TILE_LIST; do
                 setImageProperties spectral
-                if [ -e ${OUTPUT}/${imageName} ]; then
-                    if [ $DO_IT == true ]; then
+                if [ -e "${OUTPUT}/${imageName}" ]; then
+                    if [ "${DO_IT}" == "true" ]; then
                         echo "Image ${imageName} exists, so not running its spectral-line mosaicking"
                     fi
                     DO_IT=false
@@ -70,14 +70,14 @@ for imageCode in ${mosaicImageList}; do
             done
         fi
 
-        if [ $DO_IT == true ]; then
+        if [ "${DO_IT}" == "true" ]; then
 
             code=${imageCode}
             if [ "${NUM_SPECTRAL_CUBES}" -gt 1 ]; then
                 code="${code}${subband}"
             fi
             sbatchfile=$slurms/linmos_all_spectral_${code}.sbatch
-            cat > $sbatchfile <<EOFOUTER
+            cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
@@ -99,7 +99,8 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
+thisfile=$sbatchfile
+cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
 IMAGE_BASE_SPECTRAL=${IMAGE_BASE_SPECTRAL}
 SB_SCIENCE=${SB_SCIENCE}
@@ -110,7 +111,7 @@ echo "Tile list = \$TILE_LIST"
 
 # If there is only one tile, only include the "ALL" case, which
 # mosaics together all fields
-if [ \`echo \$TILE_LIST | awk '{print NF}'\` -gt 1 ]; then
+if [ \$(echo "\$TILE_LIST" | awk '{print NF}') -gt 1 ]; then
     FULL_TILE_LIST="\$TILE_LIST ALL"
 else
     FULL_TILE_LIST="ALL"
@@ -125,7 +126,7 @@ for THISTILE in \$FULL_TILE_LIST; do
     TILE_FIELD_LIST=""
     for FIELD in \$FIELD_LIST; do
         getTile
-        if [ \$THISTILE == "ALL" ] || [ \$TILE == \$THISTILE ]; then
+        if [ "\$THISTILE" == "ALL" ] || [ "\$TILE" == "\$THISTILE" ]; then
             TILE_FIELD_LIST="\$TILE_FIELD_LIST \$FIELD"
         fi
     done
@@ -143,7 +144,7 @@ for THISTILE in \$FULL_TILE_LIST; do
         if [ "\${imageCode}" != "restored" ]; then
             weightsImage="\${weightsImage}.\${imageCode}"
         fi
-        if [ -e \${FIELD}/\${imageName} ]; then
+        if [ -e "\${FIELD}/\${imageName}" ]; then
             if [ "\${imList}" == "" ]; then
                 imList="\${FIELD}/\${imageName}"
                 wtList="\${FIELD}/\${weightsImage}"
@@ -154,7 +155,7 @@ for THISTILE in \$FULL_TILE_LIST; do
         fi
     done
 
-    if [ \$THISTILE == "ALL" ]; then
+    if [ "\$THISTILE" == "ALL" ]; then
         jobCode=linmosS_Full_\${imageCode}
     else
         jobCode=linmosS_\${THISTILE}_\${imageCode}
@@ -170,7 +171,7 @@ for THISTILE in \$FULL_TILE_LIST; do
         echo "Mosaicking to form \${imageName}"
         parset=${parsets}/science_\${jobCode}_\${SLURM_JOB_ID}.in
         log=${logs}/science_\${jobCode}_\${SLURM_JOB_ID}.log
-        cat > \${parset} << EOFINNER
+        cat > "\${parset}" << EOFINNER
 linmos.names            = [\${imList}]
 linmos.weights          = [\${wtList}]
 linmos.outname          = \$imageName
@@ -180,12 +181,12 @@ EOFINNER
 
         NCORES=${NUM_CPUS_SPECTRAL_LINMOS}
         NPPN=${CPUS_PER_CORE_SPEC_IMAGING}
-        aprun -n \${NCORES} -N \${NPPN} $linmosMPI -c \$parset > \$log
+        aprun -n \${NCORES} -N \${NPPN} $linmosMPI -c "\$parset" > "\$log"
         err=\$?
-        for im in \`echo \${imList} | sed -e 's/,/ /g'\`; do
-            rejuvenate \$im
+        for im in \$(echo "\${imList}" | sed -e 's/,/ /g'); do
+            rejuvenate "\$im"
         done
-        extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} \${jobCode} "txt,csv"
+        extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} \${jobCode} "txt,csv"
         if [ \$err != 0 ]; then
             exit \$err
         fi
@@ -195,13 +196,13 @@ EOFINNER
 done
 EOFOUTER
 
-            if [ $SUBMIT_JOBS == true ]; then
-                FULL_LINMOS_SPECTRAL_DEP=`echo $FULL_LINMOS_SPECTRAL_DEP | sed -e 's/afterok/afterany/g'`
-	        ID_LINMOS_SPECTRAL_ALL=`sbatch $FULL_LINMOS_SPECTRAL_DEP $sbatchfile | awk '{print $4}'`
+            if [ "${SUBMIT_JOBS}" == "true" ]; then
+                FULL_LINMOS_SPECTRAL_DEP=$(echo "${FULL_LINMOS_SPECTRAL_DEP}" | sed -e 's/afterok/afterany/g')
+	        ID_LINMOS_SPECTRAL_ALL=$(sbatch ${FULL_LINMOS_SPECTRAL_DEP} "$sbatchfile" | awk '{print $4}')
                 if [ "${NUM_SPECTRAL_CUBES}" -gt 1 ];then
-	            recordJob ${ID_LINMOS_SPECTRAL_ALL} "Make a mosaic ${imageCode} (subband ${subband}) spectral cube of the science observation, with flags \"${FULL_LINMOS_SPECTRAL_DEP}\""
+	            recordJob "${ID_LINMOS_SPECTRAL_ALL}" "Make a mosaic ${imageCode} (subband ${subband}) spectral cube of the science observation, with flags \"${FULL_LINMOS_SPECTRAL_DEP}\""
                 else
-                    recordJob ${ID_LINMOS_SPECTRAL_ALL} "Make a mosaic ${imageCode} spectral cube of the science observation, with flags \"${FULL_LINMOS_SPECTRAL_DEP}\""
+                    recordJob "${ID_LINMOS_SPECTRAL_ALL}" "Make a mosaic ${imageCode} spectral cube of the science observation, with flags \"${FULL_LINMOS_SPECTRAL_DEP}\""
                 fi
             else
                 if [ "${NUM_SPECTRAL_CUBES}" -gt 1 ];then

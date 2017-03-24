@@ -4,7 +4,7 @@
 # appropriate measurement set, selecting the required beam and,
 # optionally, a given scan or field
 #
-# @copyright (c) 2016 CSIRO
+# @copyright (c) 2017 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -33,20 +33,20 @@ ID_SPLIT_SCI=""
 
 DO_IT=$DO_SPLIT_SCIENCE
 
-if [ -e ${OUTPUT}/${msSci} ]; then
-    if [ $CLOBBER == false ]; then
+if [ -e "${OUTPUT}/${msSci}" ]; then
+    if [ "${CLOBBER}" != "true" ]; then
         # If we aren't clobbering files, don't run anything
-        if [ $DO_IT == true ]; then
+        if [ "${DO_IT}" == "true" ]; then
             echo "MS ${msSci} exists, so not splitting for beam ${BEAM}"
         fi
         DO_IT=false
     else
         # If we are clobbering files, removing the existing one, but
         # only if we are going to be running the job
-        if [ $DO_IT == true ]; then
-            rm -rf ${OUTPUT}/${msSci}
-            rm -f ${FLAG_CHECK_FILE}
-            rm -f ${BANDPASS_CHECK_FILE}
+        if [ "${DO_IT}" == "true" ]; then
+            rm -rf "${OUTPUT}/${msSci}"
+            rm -f "${FLAG_CHECK_FILE}"
+            rm -f "${BANDPASS_CHECK_FILE}"
         fi
     fi
 fi
@@ -57,12 +57,12 @@ if [ -e "${OUTPUT}/${msSciAv}" ] && [ "${PURGE_FULL_MS}" == "true" ]; then
     DO_IT=false
 fi
 
-if [ $DO_IT == true ]; then
+if [ "${DO_IT}" == "true" ]; then
 
     if [ "$SCAN_SELECTION_SCIENCE" == "" ]; then
 	scanParam="# No scan selection done"
     else
-        if [ `echo ${SCAN_SELECTION_SCIENCE} | awk -F'[' '{print NF}'` -gt 1 ]; then
+        if [ "$(echo "${SCAN_SELECTION_SCIENCE}" | awk -F'[' '{print NF}')" -gt 1 ]; then
 	    scanParam="scans        = ${SCAN_SELECTION_SCIENCE}"
         else
             scanParam="scans        = [${SCAN_SELECTION_SCIENCE}]"
@@ -73,7 +73,7 @@ if [ $DO_IT == true ]; then
     fieldParam="fieldnames   = ${FIELD}"
     
     setJob split_science split
-    cat > $sbatchfile <<EOFOUTER
+    cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
@@ -95,10 +95,11 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
+thisfile=$sbatchfile
+cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
 parset=${parsets}/split_science_${FIELDBEAM}_\${SLURM_JOB_ID}.in
-cat > \$parset <<EOFINNER
+cat > "\$parset" <<EOFINNER
 # Input measurement set
 # Default: <no default>
 vis         = ${MS_INPUT_SCIENCE}
@@ -133,21 +134,21 @@ log=${logs}/split_science_${FIELDBEAM}_\${SLURM_JOB_ID}.log
 
 NCORES=1
 NPPN=1
-aprun -n \${NCORES} -N \${NPPN} ${mssplit} -c \${parset} > \${log}
+aprun -n \${NCORES} -N \${NPPN} ${mssplit} -c "\${parset}" > "\${log}"
 err=\$?
 rejuvenate ${msSci}
-extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname} "txt,csv"
+extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
 fi
 
 EOFOUTER
     
-    if [ $SUBMIT_JOBS == true ]; then
+    if [ "${SUBMIT_JOBS}" == "true" ]; then
         DEP=""
-        DEP=`addDep "$DEP" "$DEP_START"`
-	ID_SPLIT_SCI=`sbatch $DEP $sbatchfile | awk '{print $4}'`
-	recordJob ${ID_SPLIT_SCI} "Splitting beam ${BEAM} of science observation"
+        DEP=$(addDep "$DEP" "$DEP_START")
+	ID_SPLIT_SCI=$(sbatch $DEP "$sbatchfile" | awk '{print $4}')
+	recordJob "${ID_SPLIT_SCI}" "Splitting beam ${BEAM} of science observation"
     else
 	echo "Would run splitting ${BEAM} of science observation with slurm file $sbatchfile"
     fi

@@ -7,7 +7,7 @@
 # set; or two by using the continuum clean model to subtract from the
 # measurement set.
 #
-# @copyright (c) 2016 CSIRO
+# @copyright (c) 2017 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -34,34 +34,34 @@
 
 setJob contsub_spectralline contsub
 
-if [ ${CONTSUB_METHOD} == "Cmodel" ]; then
+if [ "${CONTSUB_METHOD}" == "Cmodel" ]; then
 
-    . ${PIPELINEDIR}/spectralContinuumSubtraction_Cmodel.sh
+    . "${PIPELINEDIR}/spectralContinuumSubtraction_Cmodel.sh"
     
-elif [ ${CONTSUB_METHOD} == "Components" ]; then
+elif [ "${CONTSUB_METHOD}" == "Components" ]; then
 
-    . ${PIPELINEDIR}/spectralContinuumSubtraction_Components.sh
+    . "${PIPELINEDIR}/spectralContinuumSubtraction_Components.sh"
 
-elif [ ${CONTSUB_METHOD} == "CleanModel" ]; then
+elif [ "${CONTSUB_METHOD}" == "CleanModel" ]; then
 
-    . ${PIPELINEDIR}/spectralContinuumSubtraction_CleanModel.sh
+    . "${PIPELINEDIR}/spectralContinuumSubtraction_CleanModel.sh"
 
 fi
 
-if [ $SUBMIT_JOBS == true ]; then
+if [ "${SUBMIT_JOBS}" == "true" ]; then
     DEP=""
-    DEP=`addDep "$DEP" "$DEP_START"`
-    DEP=`addDep "$DEP" "$ID_SPLIT_SCI"`
-    DEP=`addDep "$DEP" "$ID_CCALAPPLY_SCI"`
-    DEP=`addDep "$DEP" "$ID_FLAG_SCI"`
-    DEP=`addDep "$DEP" "$ID_AVERAGE_SCI"`
-    DEP=`addDep "$DEP" "$ID_FLAG_SCI_AV"`
-    DEP=`addDep "$DEP" "$ID_CONTIMG_SCI"`
-    DEP=`addDep "$DEP" "$ID_CONTIMG_SCI_SC"`
-    DEP=`addDep "$DEP" "$ID_SPLIT_SL_SCI"`
-    DEP=`addDep "$DEP" "$ID_CAL_APPLY_SL_SCI"`
-    ID_CONT_SUB_SL_SCI=`sbatch $DEP $sbatchfile | awk '{print $4}'`
-    recordJob ${ID_CONT_SUB_SL_SCI} "Subtract the continuum model from the spectral-line dataset for imaging beam $BEAM of the science observation, with flags \"$DEP\""
+    DEP=$(addDep "$DEP" "$DEP_START")
+    DEP=$(addDep "$DEP" "$ID_SPLIT_SCI")
+    DEP=$(addDep "$DEP" "$ID_CCALAPPLY_SCI")
+    DEP=$(addDep "$DEP" "$ID_FLAG_SCI")
+    DEP=$(addDep "$DEP" "$ID_AVERAGE_SCI")
+    DEP=$(addDep "$DEP" "$ID_FLAG_SCI_AV")
+    DEP=$(addDep "$DEP" "$ID_CONTIMG_SCI")
+    DEP=$(addDep "$DEP" "$ID_CONTIMG_SCI_SC")
+    DEP=$(addDep "$DEP" "$ID_SPLIT_SL_SCI")
+    DEP=$(addDep "$DEP" "$ID_CAL_APPLY_SL_SCI")
+    ID_CONT_SUB_SL_SCI=$(sbatch $DEP "${sbatchfile}" | awk '{print $4}')
+    recordJob "${ID_CONT_SUB_SL_SCI}" "Subtract the continuum model from the spectral-line dataset for imaging beam $BEAM of the science observation, with flags \"$DEP\""
 else
     echo "Would subtract the continuum model from the spectral-line dataset for imaging beam $BEAM of the science observation with slurm file $sbatchfile"
 fi

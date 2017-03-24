@@ -41,7 +41,7 @@ for subband in ${SUBBAND_WRITER_LIST}; do
     # Check for the existence of the output - don't overwrite if CLOBBER!=true
     imageCode=contsub
     setImageProperties spectral
-    if [ "$CLOBBER" != "true" ] && [ -e "${imageName}" ]; then
+    if [ "${CLOBBER}" != "true" ] && [ -e "${imageName}" ]; then
         if [ "${DO_IT}" == "true" ]; then
             echo "Continuum-subtracted spectral cube ${imageName} exists. Not re-doing."
         fi

@@ -4,7 +4,7 @@
 # user's config file, and creates other variables that depend upon
 # them and do not require user input.
 #
-# @copyright (c) 2015 CSIRO
+# @copyright (c) 2017 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -37,14 +37,14 @@ if [ "$PROCESS_DEFAULTS_HAS_RUN" != "true" ]; then
     ####################
     # Set the overall switches for CAL & SCIENCE fields
 
-    if [ $DO_1934_CAL != true ]; then
+    if [ "${DO_1934_CAL}" != "true" ]; then
         # turn off all calibrator-related switches
         DO_SPLIT_1934=false
         DO_FLAG_1934=false
         DO_FIND_BANDPASS=false
     fi
 
-    if [ $DO_SCIENCE_FIELD != true ]; then
+    if [ "${DO_SCIENCE_FIELD}" != "true" ]; then
         # turn off all science-field switches
         DO_SPLIT_SCIENCE=false
         DO_FLAG_SCIENCE=false
@@ -69,10 +69,10 @@ if [ "$PROCESS_DEFAULTS_HAS_RUN" != "true" ]; then
     fi
 
     # Turn off the purging of the full-resolution MS if we need to use it.
-    if [ ${DO_COPY_SL} == true ] ||
-           [ ${DO_APPLY_CAL_SL} == true ] ||
-           [ ${DO_CONT_SUB_SL} == true ] ||
-           [ ${DO_SPECTRAL_IMAGING} == true ]; then
+    if [ "${DO_COPY_SL}" == "true" ] ||
+           [ "${DO_APPLY_CAL_SL}" == "true" ] ||
+           [ "${DO_CONT_SUB_SL}" == "true" ] ||
+           [ "${DO_SPECTRAL_IMAGING}" == "true" ]; then
 
         PURGE_FULL_MS=false
 
@@ -81,29 +81,29 @@ if [ "$PROCESS_DEFAULTS_HAS_RUN" != "true" ]; then
     ####################
     # Define the full path of output directory
     OUTPUT="${BASEDIR}/${OUTPUT}"
-    ORIGINAL_OUTPUT=${OUTPUT}
-    mkdir -p $OUTPUT
-    . ${PIPELINEDIR}/utils.sh
+    ORIGINAL_OUTPUT="${OUTPUT}"
+    mkdir -p "$OUTPUT"
+    . "${PIPELINEDIR}/utils.sh"
     BASEDIR=${BASEDIR}
-    cd $OUTPUT
-    echo $NOW >> PROCESSED_ON
-    if [ ! -e ${stats} ]; then
-        ln -s ${BASEDIR}/${stats} .
+    cd "$OUTPUT"
+    echo "$NOW" >> PROCESSED_ON
+    if [ ! -e "${stats}" ]; then
+        ln -s "${BASEDIR}/${stats}" .
     fi
-    cd $BASEDIR
+    cd "$BASEDIR"
 
     ####################
     # ASKAPsoft module usage
 
     # Make use of the ASKAP module directory right now
     moduleDir="/group/askap/modulefiles"
-    module use $moduleDir
+    module use "$moduleDir"
 
     if [ "${ASKAP_ROOT}" == "" ]; then
         # Has the user asked for a specific askapsoft module?
-        if [ "$ASKAPSOFT_VERSION" != "" ]; then
+        if [ "${ASKAPSOFT_VERSION}" != "" ]; then
             # If so, ensure it exists
-            if [ "`module avail -t askapsoft/${ASKAPSOFT_VERSION} 2>&1 | grep askapsoft`" == "" ]; then
+            if [ "$(module avail -t "askapsoft/${ASKAPSOFT_VERSION}" 2>&1 | grep askapsoft)" == "" ]; then
                 echo "WARNING - Requested askapsoft version ${ASKAPSOFT_VERSION} not available"
                 ASKAPSOFT_VERSION=""
             else
@@ -112,7 +112,7 @@ if [ "$PROCESS_DEFAULTS_HAS_RUN" != "true" ]; then
             fi
         fi
         # load the modules correctly
-        currentASKAPsoftVersion="`module list -t 2>&1 | grep askapsoft`"
+        currentASKAPsoftVersion="$(module list -t 2>&1 | grep askapsoft)"
         if [ "${currentASKAPsoftVersion}" == "" ]; then
             # askapsoft is not loaded by the .bashrc - need to specify for
             # slurm jobfiles. Use the requested one if necessary.
@@ -150,7 +150,7 @@ module load ${currentASKAPsoftVersion}"
         fi
 
         # askappipeline module
-        askappipelineVersion=`module list -t 2>&1 | grep askappipeline | sed -e 's|askappipeline/||g'`
+        askappipelineVersion=$(module list -t 2>&1 | grep askappipeline | sed -e 's|askappipeline/||g')
         askapsoftModuleCommands="$askapsoftModuleCommands
 module unload askappipeline
 module load askappipeline/${askappipelineVersion}"
@@ -175,18 +175,18 @@ module load askappipeline/${askappipelineVersion}"
 
     # Check whether imageToFITS is defined in askapsoft module being
     # used
-    if [ "`which imageToFITS 2> ${tmp}/whchim2fts`" == "" ]; then
+    if [ "$(which imageToFITS 2> "${tmp}/whchim2fts")" == "" ]; then
         # Not found - use casa to do conversion        
         fitsConvertText="# The following converts the file in \$casaim to a FITS file, after fixing headers.
-if [ -e \${casaim} ] && [ ! -e \${fitsim} ]; then 
+if [ -e \"\${casaim}\" ] && [ ! -e \"\${fitsim}\" ]; then 
     # The FITS version of this image doesn't exist
 
-    script=\`echo \${parset} | sed -e 's/\.in/\.py/g'\`
-    ASKAPSOFT_VERSION=${ASKAPSOFT_VERSION}
+    script=\$(echo \"\${parset}\" | sed -e 's/\.in/\.py/g')
+    ASKAPSOFT_VERSION=\"${ASKAPSOFT_VERSION}\"
     if [ \"\${ASKAPSOFT_VERSION}\" == \"\" ]; then
-        ASKAPSOFT_VERSION_USED=\`module list -t 2>&1 | grep askapsoft\`
+        ASKAPSOFT_VERSION_USED=\$(module list -t 2>&1 | grep askapsoft)
     else
-        ASKAPSOFT_VERSION_USED=\`echo \${ASKAPSOFT_VERSION} | sed -e 's|/||g'\`
+        ASKAPSOFT_VERSION_USED=\$(echo \"\${ASKAPSOFT_VERSION}\" | sed -e 's|/||g')
     fi
 
     cat > \$script << EOFSCRIPT
@@ -215,23 +215,23 @@ EOFSCRIPT
     NCORES=1
     NPPN=1
     module load casa
-    aprun -n \${NCORES} -N \${NPPN} -b casa --nogui --nologger --log2term -c \${script} >> \${log}
+    aprun -n \${NCORES} -N \${NPPN} -b casa --nogui --nologger --log2term -c \"\${script}\" >> \"\${log}\"
 
 fi"
     else
         # We can use the new imageToFITS utility to do the conversion.
         fitsConvertText="# The following converts the file in \$casaim to a FITS file, after fixing headers.
-if [ -e \${casaim} ] && [ ! -e \${fitsim} ]; then
+if [ -e \"\${casaim}\" ] && [ ! -e \"\${fitsim}\" ]; then
     # The FITS version of this image doesn't exist
 
-    ASKAPSOFT_VERSION=${ASKAPSOFT_VERSION}
-    if [ \"${ASKAPSOFT_VERSION}\" == \"\" ]; then
-        ASKAPSOFT_VERSION_USED=\`module list -t 2>&1 | grep askapsoft\`
+    ASKAPSOFT_VERSION=\"\${ASKAPSOFT_VERSION}\"
+    if [ \"\${ASKAPSOFT_VERSION}\" == \"\" ]; then
+        ASKAPSOFT_VERSION_USED=\$(module list -t 2>&1 | grep askapsoft)
     else
-        ASKAPSOFT_VERSION_USED=\`echo \${ASKAPSOFT_VERSION} | sed -e 's|/||g'\`
+        ASKAPSOFT_VERSION_USED=\$(echo \"\${ASKAPSOFT_VERSION}\" | sed -e 's|/||g')
     fi
 
-    cat > \$parset << EOFINNER
+    cat > \"\$parset\" << EOFINNER
 ImageToFITS.casaimage = \${casaim}
 ImageToFITS.fitsimage = \${fitsim}
 ImageToFITS.stokesLast = true
@@ -244,7 +244,7 @@ ImageToFITS.history = [\"Produced with ASKAPsoft version \${ASKAPSOFT_VERSION_US
 EOFINNER
     NCORES=1
     NPPN=1
-    aprun -n \${NCORES} -N \${NPPN} imageToFITS -c \${parset} >> \${log}
+    aprun -n \${NCORES} -N \${NPPN} imageToFITS -c \"\${parset}\" >> \"\${log}\"
 
 fi"
     fi
@@ -348,14 +348,14 @@ fi"
     BEAMS_TO_USE=""
     if [ "${BEAMLIST}" == "" ]; then
         # just use BEAM_MIN & BEAM_MAX
-        for((b=${BEAM_MIN};b<=${BEAM_MAX};b++)); do
-            thisbeam=`echo $b | awk '{printf "%02d",$1}'`
+        for((b=BEAM_MIN;b<=BEAM_MAX;b++)); do
+            thisbeam=$(echo "$b" | awk '{printf "%02d",$1}')
             BEAMS_TO_USE="${BEAMS_TO_USE} $thisbeam"
         done
     else
         # re-print out the provided beam list with 0-leading integers
-        beamAwkFile=$tmp/beamParsing.awk
-        cat > $beamAwkFile <<EOF
+        beamAwkFile="$tmp/beamParsing.awk"
+        cat > "$beamAwkFile" <<EOF
 BEGIN{
   str=""
 }
@@ -372,7 +372,7 @@ END{
   print str
 }
 EOF
-        BEAMS_TO_USE=`echo $BEAMLIST | awk -f $beamAwkFile`
+        BEAMS_TO_USE=$(echo "$BEAMLIST" | awk -f "$beamAwkFile")
     fi
 
     echo "Using the following beams for the science data: $BEAMS_TO_USE"
@@ -386,16 +386,16 @@ EOF
         if [ "$thisbeam" -gt "$maxbeam" ]; then
             maxbeam=$thisbeam
         fi
-        nbeams=`expr $nbeams + 1`
+        ((nbeams++))
     done
-    maxbeam=`expr $maxbeam + 1`
+    ((maxbeam++))
 
 
     ####################
     # Parameters required for science field imaging
     ####
 
-    if [ $DO_SCIENCE_FIELD == true ]; then
+    if [ "${DO_SCIENCE_FIELD}" == "true" ]; then
 
         # Switching on the DO_ALT_IMAGER_xxx flags for each type of
         # imaging. If they aren't defined in the config file, then set
@@ -422,22 +422,22 @@ EOF
         # Total number of channels must be exact multiple of averaging
         # width.
         # If it isn't, report an error and exit without running anything.
-        averageWidthOK=`echo $NUM_CHAN_SCIENCE $NUM_CHAN_TO_AVERAGE | awk '{if (($1 % $2)==0) print "yes"; else print "no"}'`
+        averageWidthOK=$(echo "${NUM_CHAN_SCIENCE}" "${NUM_CHAN_TO_AVERAGE}" | awk '{if (($1 % $2)==0) print "yes"; else print "no"}')
         if [ "${averageWidthOK}" == "no" ]; then
             echo "ERROR! Number of channels (${NUM_CHAN_SCIENCE}) must be an exact multiple of NUM_CHAN_TO_AVERAGE (${NUM_CHAN_TO_AVERAGE}). Exiting."
             exit 1
         fi
 
         # nchanContSci = number of channels after averaging
-        nchanContSci=`echo $NUM_CHAN_SCIENCE $NUM_CHAN_TO_AVERAGE | awk '{print $1/$2}'`
+        nchanContSci=$(echo "${NUM_CHAN_SCIENCE}" "${NUM_CHAN_TO_AVERAGE}" | awk '{print $1/$2}')
 
         # nworkergroupsSci = number of worker groups, used for MFS imaging. 
-        nworkergroupsSci=`echo $NUM_TAYLOR_TERMS | awk '{print 2*$1-1}'`
+        nworkergroupsSci=$(echo "${NUM_TAYLOR_TERMS}" | awk '{print 2*$1-1}')
 
         # total number of CPUs required for MFS continuum imaging, including the master
         #  Use the number given in the config file, unless it has been left blank
         if [ "${NUM_CPUS_CONTIMG_SCI}" == "" ]; then
-            NUM_CPUS_CONTIMG_SCI=`echo $nchanContSci $nworkergroupsSci | awk '{print $1*$2+1}'`
+            NUM_CPUS_CONTIMG_SCI=$(echo "$nchanContSci" "$nworkergroupsSci" | awk '{print $1*$2+1}')
         fi
 
         # if we are using the new imager we need to tweak this
@@ -451,13 +451,13 @@ EOF
         fi
 
         # Can't have -N greater than -n in the aprun call
-        if [ ${NUM_CPUS_CONTIMG_SCI} -lt ${CPUS_PER_CORE_CONT_IMAGING} ]; then
+        if [ "${NUM_CPUS_CONTIMG_SCI}" -lt "${CPUS_PER_CORE_CONT_IMAGING}" ]; then
             CPUS_PER_CORE_CONT_IMAGING=${NUM_CPUS_CONTIMG_SCI}
         fi
 
         # Method used for self-calibration - needs to be either Cmodel or Components
-        if [ ${SELFCAL_METHOD} != "Cmodel" ] &&
-               [ ${SELFCAL_METHOD} != "Components" ]; then
+        if [ "${SELFCAL_METHOD}" != "Cmodel" ] &&
+               [ "${SELFCAL_METHOD}" != "Components" ]; then
             SELFCAL_METHOD="Cmodel"
         fi
 
@@ -475,11 +475,11 @@ EOF
         # Set the number of cores for the continuum cube imaging. Either
         # set to the number of averaged channels + 1, or use that given in
         # the config file, limiting to no bigger than this number
-        maxContCubeCores=`expr $nchanContSci + 1`
+        maxContCubeCores=$((nchanContSci + 1))
         if [ "${NUM_CPUS_CONTCUBE_SCI}" == "" ]; then
             # User has not specified
             NUM_CPUS_CONTCUBE_SCI=$maxContCubeCores
-        elif [ $NUM_CPUS_CONTCUBE_SCI -gt $maxContCubeCores ]; then
+        elif [ "${NUM_CPUS_CONTCUBE_SCI}" -gt "$maxContCubeCores" ]; then
             # Have more cores than we need - reduce number
             echo "NOTE - Reducing NUM_CPUS_CONTCUBE_SCI to $maxContCubeCores to match the number of averaged channels"
             NUM_CPUS_CONTCUBE_SCI=$maxContCubeCores
@@ -491,7 +491,7 @@ EOF
         if [ "${NUM_CPUS_CONTCUBE_LINMOS}" == "" ]; then
             # User has not specified
             NUM_CPUS_CONTCUBE_LINMOS=$nchanContSci
-        elif [ $NUM_CPUS_CONTCUBE_LINMOS -gt $NUM_CPUS_CONTCUBE_SCI ]; then
+        elif [ "${NUM_CPUS_CONTCUBE_LINMOS}" -gt "${NUM_CPUS_CONTCUBE_SCI}" ]; then
             echo "NOTE - Reducing NUM_CPUS_CONTCUBE_LINMOS to $NUM_CPUS_CONTCUBE_SCI to match the number of cores used for imaging"
             NUM_CPUS_CONTCUBE_LINMOS=$NUM_CPUS_CONTCUBE_SCI
         fi
@@ -505,28 +505,28 @@ EOF
         # DO_COPY_SL flag is set, then we define a new spectral-line
         # range of channels
         if [ "${CHAN_RANGE_SL_SCIENCE}" == "" ] ||
-               [ ${DO_COPY_SL} != true ]; then
+               [ "${DO_COPY_SL}" != "true" ]; then
             # If this range hasn't been set, or we aren't doing the
             # copy, then use the full channel range
             CHAN_RANGE_SL_SCIENCE="1-$NUM_CHAN_SCIENCE"
         fi
         # Check that we haven't requested invalid channels
-        minSLchan=`echo $CHAN_RANGE_SL_SCIENCE | awk -F'-' '{print $1}'`
-        maxSLchan=`echo $CHAN_RANGE_SL_SCIENCE | awk -F'-' '{print $2}'`
-        if [ $minSLchan -lt 0 ] || [ $minSLchan -gt $NUM_CHAN_SCIENCE ] ||
-               [ $maxSLchan -lt 0 ] || [ $maxSLchan -gt $NUM_CHAN_SCIENCE ] ||
-               [ $minSLchan -gt $maxSLchan ]; then
+        minSLchan=$(echo "${CHAN_RANGE_SL_SCIENCE}" | awk -F'-' '{print $1}')
+        maxSLchan=$(echo "${CHAN_RANGE_SL_SCIENCE}" | awk -F'-' '{print $2}')
+        if [ "$minSLchan" -lt 0 ] || [ "$minSLchan" -gt "${NUM_CHAN_SCIENCE}" ] ||
+               [ "$maxSLchan" -lt 0 ] || [ "$maxSLchan" -gt "${NUM_CHAN_SCIENCE}" ] ||
+               [ "$minSLchan" -gt "$maxSLchan" ]; then
             echo "ERROR - Invalid selection of CHAN_RANGE_SL_SCIENCE=$CHAN_RANGE_SL_SCIENCE, for total number of channels = $NUM_CHAN_SCIENCE"
             echo "   Exiting."
             exit 1
         fi
         # Define the number of channels used in the spectral-line imaging
-        NUM_CHAN_SCIENCE_SL=`echo $CHAN_RANGE_SL_SCIENCE | awk -F'-' '{print $2-$1+1}'`
+        NUM_CHAN_SCIENCE_SL=$(echo "${CHAN_RANGE_SL_SCIENCE}" | awk -F'-' '{print $2-$1+1}')
 
         # Method used for continuum subtraction
-        if [ ${CONTSUB_METHOD} != "Cmodel" ] &&
-               [ ${CONTSUB_METHOD} != "Components" ] &&
-               [ ${CONTSUB_METHOD} != "CleanModel" ]; then
+        if [ "${CONTSUB_METHOD}" != "Cmodel" ] &&
+               [ "${CONTSUB_METHOD}" != "Components" ] &&
+               [ "${CONTSUB_METHOD}" != "CleanModel" ]; then
             CONTSUB_METHOD="Cmodel"
         fi
         # Old way of choosing above
@@ -565,20 +565,20 @@ EOF
         # Mosaicking parameters
 
         # Fix the direction string for linmos - don't need the J2000 bit
-        linmosFeedCentre=`echo $DIRECTION_SCI | awk -F',' '{printf "%s,%s]",$1,$2}'`
+        linmosFeedCentre=$(echo "${DIRECTION_SCI}" | awk -F',' '{printf "%s,%s]",$1,$2}')
 
         # Total number of channels should be exact multiple of
         # channels-per-core, else the final process will take care of
         # the rest and may run out of memory
         # If it isn't, give a warning and push on
-        chanPerCoreLinmosOK=$(echo ${NUM_CHAN_SCIENCE_SL} ${NUM_SPECTRAL_CUBES} ${NCHAN_PER_CORE_SPECTRAL_LINMOS} | awk '{if (($1/$2 % $3)==0) print "yes"; else print "no"}')
+        chanPerCoreLinmosOK=$(echo "${NUM_CHAN_SCIENCE_SL}" "${NUM_SPECTRAL_CUBES}" "${NCHAN_PER_CORE_SPECTRAL_LINMOS}" | awk '{if (($1/$2 % $3)==0) print "yes"; else print "no"}')
         if [ "${chanPerCoreLinmosOK}" == "no" ] && [ "${DO_MOSAIC}" == "true" ]; then
             echo "Warning! Number of spectral-line channels (${NUM_CHAN_SCIENCE_SL}) is not an exact multiple of NCHAN_PER_CORE_SPECTRAL_LINMOS (${NCHAN_PER_CORE_SPECTRAL_LINMOS})."
             echo "         Pushing on, but there is the risk of memory problems with the spectral linmos task."
         fi
         # Determine the number of cores needed for spectral-line mosaicking
         if [ "$NUM_CPUS_SPECTRAL_LINMOS" == "" ]; then
-            NUM_CPUS_SPECTRAL_LINMOS=$(echo ${NUM_CHAN_SCIENCE_SL} ${NUM_SPECTRAL_CUBES} ${NCHAN_PER_CORE_SPECTRAL_LINMOS} | awk '{if($1%($2*$3)==0) print $1/$2/$3; else print int($1/$2/$3)+1;}')
+            NUM_CPUS_SPECTRAL_LINMOS=$(echo "${NUM_CHAN_SCIENCE_SL}" "${NUM_SPECTRAL_CUBES}" "${NCHAN_PER_CORE_SPECTRAL_LINMOS}" | awk '{if($1%($2*$3)==0) print $1/$2/$3; else print int($1/$2/$3)+1;}')
         fi
 
         ####################
@@ -609,9 +609,9 @@ EOF
         # Continuum Source-finding
 
         # Number of cores:
-        NUM_CPUS_SELAVY=`echo $SELAVY_NSUBX $SELAVY_NSUBY | awk '{print $1*$2+1}'`
+        NUM_CPUS_SELAVY=$(echo "${SELAVY_NSUBX}" "${SELAVY_NSUBY}" | awk '{print $1*$2+1}')
         CPUS_PER_CORE_SELAVY=${NUM_CPUS_SELAVY}
-        if [ ${CPUS_PER_CORE_SELAVY} -gt 20 ]; then
+        if [ "${CPUS_PER_CORE_SELAVY}" -gt 20 ]; then
             CPUS_PER_CORE_SELAVY=20
         fi
 
@@ -632,42 +632,42 @@ EOF
         # Spectral source-finding
 
         # Number of cores etc
-        NUM_CPUS_SELAVY_SPEC=`echo $SELAVY_SPEC_NSUBX $SELAVY_SPEC_NSUBY $SELAVY_SPEC_NSUBZ | awk '{print $1*$2*$3+1}'`
+        NUM_CPUS_SELAVY_SPEC=$(echo "${SELAVY_SPEC_NSUBX}" "${SELAVY_SPEC_NSUBY}" "${SELAVY_SPEC_NSUBZ}" | awk '{print $1*$2*$3+1}')
         if [ "${CPUS_PER_CORE_SELAVY_SPEC}" == "" ]; then
             CPUS_PER_CORE_SELAVY_SPEC=${NUM_CPUS_SELAVY_SPEC}
-            if [ ${CPUS_PER_CORE_SELAVY_SPEC} -gt 20 ]; then
+            if [ "${CPUS_PER_CORE_SELAVY_SPEC}" -gt 20 ]; then
                 CPUS_PER_CORE_SELAVY_SPEC=20
             fi
         fi
 
         # Check search type
-        if [ ${SELAVY_SPEC_SEARCH_TYPE} != "spectral" ] &&
-               [ ${SELAVY_SPEC_SEARCH_TYPE} != "spatial" ]; then
+        if [ "${SELAVY_SPEC_SEARCH_TYPE}" != "spectral" ] &&
+               [ "${SELAVY_SPEC_SEARCH_TYPE}" != "spatial" ]; then
             SELAVY_SPEC_SEARCH_TYPE="spectral"
             echo "WARNING - SELAVY_SPEC_SEARCH_TYPE needs to be 'spectral' or 'spatial' - Setting to 'spectral'"
         fi
 
         # Check smooth type
-        if [ ${SELAVY_SPEC_FLAG_SMOOTH} == "true" ]; then
-            if [ ${SELAVY_SPEC_SMOOTH_TYPE} != "spectral" ] ||
-                   [ ${SELAVY_SPEC_SMOOTH_TYPE} != "spatial" ]; then
+        if [ "${SELAVY_SPEC_FLAG_SMOOTH}" == "true" ]; then
+            if [ "${SELAVY_SPEC_SMOOTH_TYPE}" != "spectral" ] ||
+                   [ "${SELAVY_SPEC_SMOOTH_TYPE}" != "spatial" ]; then
                 SELAVY_SPEC_SMOOTH_TYPE="spectral"
                 echo "WARNING - SELAVY_SPEC_SMOOTH_TYPE needs to be 'spectral' or 'spatial' - Setting to 'spectral'"
             fi
         fi
 
         # Spatial smoothing kernel - interpret to form selavy parameters
-        if [ ${SELAVY_SPEC_FLAG_SMOOTH} == "true" ] &&
-               [ ${SELAVY_SPEC_SMOOTH_TYPE} == "spatial" ]; then
+        if [ "${SELAVY_SPEC_FLAG_SMOOTH}" == "true" ] &&
+               [ "${SELAVY_SPEC_SMOOTH_TYPE}" == "spatial" ]; then
             kernelArray=()
-            for a in `echo $SELAVY_SPEC_SPATIAL_KERNEL | sed -e 's/[][,]/ /g'`; do
+            for a in $(echo "${SELAVY_SPEC_SPATIAL_KERNEL}" | sed -e 's/[][,]/ /g'); do
                 kernelArray+=($a)
             done
-            if [ ${#kernelArray[@]} -eq 1 ]; then
+            if [ "${#kernelArray[@]}" -eq 1 ]; then
                 SELAVY_SPEC_KERN_MAJ=${kernelArray[0]}
                 SELAVY_SPEC_KERN_MIN=${kernelArray[0]}
                 SELAVY_SPEC_KERN_PA=0
-            elif [ ${#kernelArray[@]} -eq 3 ]; then
+            elif [ "${#kernelArray[@]}" -eq 3 ]; then
                 SELAVY_SPEC_KERN_MAJ=${kernelArray[0]}
                 SELAVY_SPEC_KERN_MIN=${kernelArray[1]}
                 SELAVY_SPEC_KERN_PA=${kernelArray[2]}
@@ -689,171 +689,171 @@ EOF
         #  or not
         if [ "${DO_CONT_IMAGING}" == "true" ]; then
 
-            expectedArrSize=`expr $SELFCAL_NUM_LOOPS + 1`
+            expectedArrSize=$((SELFCAL_NUM_LOOPS + 1))
 
             if [ "${DO_SELFCAL}" == "true" ]; then
 
-                if [ "`echo $SELFCAL_INTERVAL | grep "\["`" != "" ]; then
+                if [ "$(echo "${SELFCAL_INTERVAL}" | grep "\[")" != "" ]; then
                     # Have entered a comma-separate array in square brackets
-                    arrSize=`echo $SELFCAL_INTERVAL | sed -e 's/[][,]/ /g' | wc -w`
-                    if [ $arrSize -ne $expectedArrSize ]; then
+                    arrSize=$(echo "${SELFCAL_INTERVAL}" | sed -e 's/[][,]/ /g' | wc -w)
+                    if [ "$arrSize" -ne "$expectedArrSize" ]; then
                         echo "ERROR - SELFCAL_INTERVAL ($SELFCAL_INTERVAL) needs to be of size $expectedArrSize (since SELFCAL_NUM_LOOPS=$SELFCAL_NUM_LOOPS)"
                         exit 1
                     fi
                     SELFCAL_INTERVAL_ARRAY=()
-                    for a in `echo $SELFCAL_INTERVAL | sed -e 's/[][,]/ /g'`; do
+                    for a in $(echo "$SELFCAL_INTERVAL" | sed -e 's/[][,]/ /g'); do
                         SELFCAL_INTERVAL_ARRAY+=($a)
                     done
                 else
                     SELFCAL_INTERVAL_ARRAY=()
-                    for((i=0;i<=${SELFCAL_NUM_LOOPS};i++)); do
+                    for((i=0;i<=SELFCAL_NUM_LOOPS;i++)); do
                         SELFCAL_INTERVAL_ARRAY+=($SELFCAL_INTERVAL)
                     done
                 fi
 
-                if [ "`echo $SELFCAL_SELAVY_THRESHOLD | grep "\["`" != "" ]; then
+                if [ "$(echo "${SELFCAL_SELAVY_THRESHOLD}" | grep "\[")" != "" ]; then
                     # Have entered a comma-separate array in square brackets
-                    arrSize=`echo $SELFCAL_SELAVY_THRESHOLD | sed -e 's/[][,]/ /g' | wc -w`
-                    if [ $arrSize -ne $expectedArrSize ]; then
+                    arrSize=$(echo "${SELFCAL_SELAVY_THRESHOLD}" | sed -e 's/[][,]/ /g' | wc -w)
+                    if [ "$arrSize" -ne "$expectedArrSize" ]; then
                         echo "ERROR - SELFCAL_SELAVY_THRESHOLD ($SELFCAL_SELAVY_THRESHOLD) needs to be of size $expectedArrSize (since SELFCAL_NUM_LOOPS=$SELFCAL_NUM_LOOPS)"
                         exit 1
                     fi
                     SELFCAL_SELAVY_THRESHOLD_ARRAY=()
-                    for a in `echo $SELFCAL_SELAVY_THRESHOLD | sed -e 's/[][,]/ /g'`; do
+                    for a in $(echo "${SELFCAL_SELAVY_THRESHOLD}" | sed -e 's/[][,]/ /g'); do
                         SELFCAL_SELAVY_THRESHOLD_ARRAY+=($a)
                     done
                 else
                     SELFCAL_SELAVY_THRESHOLD_ARRAY=()
-                    for((i=0;i<=${SELFCAL_NUM_LOOPS};i++)); do
+                    for((i=0;i<=SELFCAL_NUM_LOOPS;i++)); do
                         SELFCAL_SELAVY_THRESHOLD_ARRAY+=($SELFCAL_SELAVY_THRESHOLD)
                     done
                 fi
 
-                if [ "`echo $SELFCAL_NORMALISE_GAINS | grep "\["`" != "" ]; then
+                if [ "$(echo "${SELFCAL_NORMALISE_GAINS}" | grep "\[")" != "" ]; then
                     # Have entered a comma-separate array in square brackets
-                    arrSize=`echo $SELFCAL_NORMALISE_GAINS | sed -e 's/[][,]/ /g' | wc -w`
-                    if [ $arrSize -ne $expectedArrSize ]; then
+                    arrSize=$(echo "${SELFCAL_NORMALISE_GAINS}" | sed -e 's/[][,]/ /g' | wc -w)
+                    if [ "$arrSize" -ne "$expectedArrSize" ]; then
                         echo "ERROR - SELFCAL_NORMALISE_GAINS ($SELFCAL_NORMALISE_GAINS) needs to be of size $expectedArrSize (since SELFCAL_NUM_LOOPS=$SELFCAL_NUM_LOOPS)"
                         exit 1
                     fi
                     SELFCAL_NORMALISE_GAINS_ARRAY=()
-                    for a in `echo $SELFCAL_NORMALISE_GAINS | sed -e 's/[][,]/ /g'`; do
+                    for a in $(echo "${SELFCAL_NORMALISE_GAINS}" | sed -e 's/[][,]/ /g'); do
                         SELFCAL_NORMALISE_GAINS_ARRAY+=($a)
                     done
                 else
                     SELFCAL_NORMALISE_GAINS_ARRAY=()
-                    for((i=0;i<=${SELFCAL_NUM_LOOPS};i++)); do
+                    for((i=0;i<=SELFCAL_NUM_LOOPS;i++)); do
                         SELFCAL_NORMALISE_GAINS_ARRAY+=($SELFCAL_NORMALISE_GAINS)
                     done
                 fi
 
             fi
 
-            if [ "`echo $CLEAN_NUM_MAJORCYCLES | grep "\["`" != "" ]; then
+            if [ "$(echo "${CLEAN_NUM_MAJORCYCLES}" | grep "\[")" != "" ]; then
                 # Have entered a comma-separate array in square brackets
-                arrSize=`echo $CLEAN_NUM_MAJORCYCLES | sed -e 's/[][,]/ /g' | wc -w`
-                if [ $arrSize -ne $expectedArrSize ]; then
+                arrSize=$(echo "${CLEAN_NUM_MAJORCYCLES}" | sed -e 's/[][,]/ /g' | wc -w)
+                if [ "$arrSize" -ne "$expectedArrSize" ]; then
                     echo "ERROR - CLEAN_NUM_MAJORCYCLES ($CLEAN_NUM_MAJORCYCLES) needs to be of size $expectedArrSize (since SELFCAL_NUM_LOOPS=$SELFCAL_NUM_LOOPS)"
                     exit 1
                 fi
                 CLEAN_NUM_MAJORCYCLES_ARRAY=()
-                for a in `echo $CLEAN_NUM_MAJORCYCLES | sed -e 's/[][,]/ /g'`; do
+                for a in $(echo "${CLEAN_NUM_MAJORCYCLES}" | sed -e 's/[][,]/ /g'); do
                     CLEAN_NUM_MAJORCYCLES_ARRAY+=($a)
                 done
             else
                 CLEAN_NUM_MAJORCYCLES_ARRAY=()
-                for((i=0;i<=${SELFCAL_NUM_LOOPS};i++)); do
+                for((i=0;i<=SELFCAL_NUM_LOOPS;i++)); do
                     CLEAN_NUM_MAJORCYCLES_ARRAY+=($CLEAN_NUM_MAJORCYCLES)
                 done
             fi
 
-            if [ "`echo $CLEAN_THRESHOLD_MAJORCYCLE | grep "\["`" != "" ]; then
+            if [ "$(echo "${CLEAN_THRESHOLD_MAJORCYCLE}" | grep "\[")" != "" ]; then
                 # Have entered a comma-separate array in square brackets
-                arrSize=`echo $CLEAN_THRESHOLD_MAJORCYCLE | sed -e 's/[][,]/ /g' | wc -w`
-                if [ $arrSize -ne $expectedArrSize ]; then
+                arrSize=$(echo "${CLEAN_THRESHOLD_MAJORCYCLE}" | sed -e 's/[][,]/ /g' | wc -w)
+                if [ "$arrSize" -ne "$expectedArrSize" ]; then
                     echo "ERROR - CLEAN_THRESHOLD_MAJORCYCLE ($CLEAN_THRESHOLD_MAJORCYCLE) needs to be of size $expectedArrSize (since SELFCAL_NUM_LOOPS=$SELFCAL_NUM_LOOPS)"
                     exit 1
                 fi
                 CLEAN_THRESHOLD_MAJORCYCLE_ARRAY=()
-                for a in `echo $CLEAN_THRESHOLD_MAJORCYCLE | sed -e 's/[][,]/ /g'`; do
+                for a in $(echo "${CLEAN_THRESHOLD_MAJORCYCLE}" | sed -e 's/[][,]/ /g'); do
                     CLEAN_THRESHOLD_MAJORCYCLE_ARRAY+=($a)
                 done
             else
                 CLEAN_THRESHOLD_MAJORCYCLE_ARRAY=()
-                for((i=0;i<=${SELFCAL_NUM_LOOPS};i++)); do
+                for((i=0;i<=SELFCAL_NUM_LOOPS;i++)); do
                     CLEAN_THRESHOLD_MAJORCYCLE_ARRAY+=($CLEAN_THRESHOLD_MAJORCYCLE)
                 done
             fi
 
-            if [ "`echo $CIMAGER_MINUV | grep "\["`" != "" ]; then
+            if [ "$(echo "${CIMAGER_MINUV}" | grep "\[")" != "" ]; then
                 # Have entered a comma-separate array in square brackets
-                arrSize=`echo $CIMAGER_MINUV | sed -e 's/[][,]/ /g' | wc -w`
-                if [ $arrSize -ne $expectedArrSize ]; then
+                arrSize=$(echo "${CIMAGER_MINUV}" | sed -e 's/[][,]/ /g' | wc -w)
+                if [ "$arrSize" -ne "$expectedArrSize" ]; then
                     echo "ERROR - CIMAGER_MINUV ($CIMAGER_MINUV) needs to be of size $expectedArrSize (since SELFCAL_NUM_LOOPS=$SELFCAL_NUM_LOOPS)"
                     exit 1
                 fi
                 CIMAGER_MINUV_ARRAY=()
-                for a in `echo $CIMAGER_MINUV | sed -e 's/[][,]/ /g'`; do
+                for a in $(echo "${CIMAGER_MINUV}" | sed -e 's/[][,]/ /g'); do
                     CIMAGER_MINUV_ARRAY+=($a)
                 done
             else
                 CIMAGER_MINUV_ARRAY=()
-                for((i=0;i<=${SELFCAL_NUM_LOOPS};i++)); do
+                for((i=0;i<=SELFCAL_NUM_LOOPS;i++)); do
                     CIMAGER_MINUV_ARRAY+=($CIMAGER_MINUV)
                 done
             fi
 
-            if [ "`echo $CCALIBRATOR_MINUV | grep "\["`" != "" ]; then
+            if [ "$(echo "${CCALIBRATOR_MINUV}" | grep "\[")" != "" ]; then
                 # Have entered a comma-separate array in square brackets
-                arrSize=`echo $CCALIBRATOR_MINUV | sed -e 's/[][,]/ /g' | wc -w`
-                if [ $arrSize -ne $expectedArrSize ]; then
+                arrSize=$(echo "${CCALIBRATOR_MINUV}" | sed -e 's/[][,]/ /g' | wc -w)
+                if [ "$arrSize" -ne "$expectedArrSize" ]; then
                     echo "ERROR - CCALIBRATOR_MINUV ($CCALIBRATOR_MINUV) needs to be of size $expectedArrSize (since SELFCAL_NUM_LOOPS=$SELFCAL_NUM_LOOPS)"
                     exit 1
                 fi
                 CCALIBRATOR_MINUV_ARRAY=()
-                for a in `echo $CCALIBRATOR_MINUV | sed -e 's/[][,]/ /g'`; do
+                for a in $(echo "${CCALIBRATOR_MINUV}" | sed -e 's/[][,]/ /g'); do
                     CCALIBRATOR_MINUV_ARRAY+=($a)
                 done
             else
                 CCALIBRATOR_MINUV_ARRAY=()
-                for((i=0;i<=${SELFCAL_NUM_LOOPS};i++)); do
+                for((i=0;i<=SELFCAL_NUM_LOOPS;i++)); do
                     CCALIBRATOR_MINUV_ARRAY+=($CCALIBRATOR_MINUV)
                 done
             fi
 
             # Validate that all these arrays are the same length as
             # SELFCAL_NUM_LOOPS, as long as the latter is >0
-            if [ $SELFCAL_NUM_LOOPS -gt 0 ]; then
-                arraySize=`expr $SELFCAL_NUM_LOOPS + 1`
+            if [ "${SELFCAL_NUM_LOOPS}" -gt 0 ]; then
+                arraySize=$((SELFCAL_NUM_LOOPS + 1))
 
                 if [ "${DO_SELFCAL}" == "true" ]; then
-                    if [ ${#SELFCAL_INTERVAL_ARRAY[@]} -ne $arraySize ]; then
+                    if [ "${#SELFCAL_INTERVAL_ARRAY[@]}" -ne "$arraySize" ]; then
                         echo "ERROR! Size of SELFCAL_INTERVAL (${SELFCAL_INTERVAL}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
                         exit 1
                     fi
-                    if [ ${#SELFCAL_SELAVY_THRESHOLD_ARRAY[@]} -ne $arraySize ]; then
+                    if [ "${#SELFCAL_SELAVY_THRESHOLD_ARRAY[@]}" -ne "$arraySize" ]; then
                         echo "ERROR! Size of SELFCAL_SELAVY_THRESHOLD (${SELFCAL_SELAVY_THRESHOLD}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
                         exit 1
                     fi
-                    if [ ${#SELFCAL_NORMALISE_GAINS_ARRAY[@]} -ne $arraySize ]; then
+                    if [ "${#SELFCAL_NORMALISE_GAINS_ARRAY[@]}" -ne "$arraySize" ]; then
                         echo "ERROR! Size of SELFCAL_NORMALISE_GAINS (${SELFCAL_NORMALISE_GAINS}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
                         exit 1
                     fi
                 fi
                 
-                if [ ${#CLEAN_NUM_MAJORCYCLES_ARRAY[@]} -ne $arraySize ]; then
+                if [ "${#CLEAN_NUM_MAJORCYCLES_ARRAY[@]}" -ne "$arraySize" ]; then
                     echo "ERROR! Size of CLEAN_NUM_MAJORCYCLES (${CLEAN_NUM_MAJORCYCLES}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
                     exit 1
                 fi
-                if [ ${#CLEAN_THRESHOLD_MAJORCYCLE_ARRAY[@]} -ne $arraySize ]; then
+                if [ "${#CLEAN_THRESHOLD_MAJORCYCLE_ARRAY[@]}" -ne "$arraySize" ]; then
                     echo "ERROR! Size of CLEAN_THRESHOLD_MAJORCYCLE (${CLEAN_THRESHOLD_MAJORCYCLE}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
                     exit 1
                 fi
-                if [ ${#CIMAGER_MINUV_ARRAY[@]} -ne $arraySize ]; then
+                if [ "${#CIMAGER_MINUV_ARRAY[@]}" -ne "$arraySize" ]; then
                     echo "ERROR! Size of CIMAGER_MINUV (${CIMAGER_MINUV}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
                     exit 1
                 fi
-                if [ ${#CCALIBRATOR_MINUV_ARRAY[@]} -ne $arraySize ]; then
+                if [ "${#CCALIBRATOR_MINUV_ARRAY[@]}" -ne "$arraySize" ]; then
                     echo "ERROR! Size of CCALIBRATOR_MINUV (${CCALIBRATOR_MINUV}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
                     exit 1
                 fi

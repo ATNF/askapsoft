@@ -5,7 +5,7 @@
 # with or without self-calibration, and image the spectral-line
 # data. Finally, mosaic the continuum images.
 #
-# @copyright (c) 2015 CSIRO
+# @copyright (c) 2017 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -38,7 +38,7 @@ FULL_LINMOS_CONT_DEP=""
 FULL_LINMOS_CONTCUBE_DEP=""
 FULL_LINMOS_SPEC_DEP=""
 
-cd ${ORIGINAL_OUTPUT}
+cd "${ORIGINAL_OUTPUT}"
 
 for FIELD in ${FIELD_LIST}; do
 
@@ -49,22 +49,22 @@ for FIELD in ${FIELD_LIST}; do
         doField=false
     fi
 
-    if [ $doField == true ]; then
+    if [ "$doField" == "true" ]; then
 
-        parsets=$parsetsBase/$FIELD
-        mkdir -p $parsets
-        logs=$logsBase/$FIELD
-        mkdir -p $logs
-        slurms=$slurmsBase/$FIELD
-        mkdir -p $slurms
-        slurmOut=$slurmOutBase/$FIELD
-        mkdir -p $slurmOut
+        parsets="$parsetsBase/$FIELD"
+        mkdir -p "$parsets"
+        logs="$logsBase/$FIELD"
+        mkdir -p "$logs"
+        slurms="$slurmsBase/$FIELD"
+        mkdir -p "$slurms"
+        slurmOut="$slurmOutBase/$FIELD"
+        mkdir -p "$slurmOut"
 
-        mkdir -p ${FIELD}
-        cd ${FIELD}
+        mkdir -p "${FIELD}"
+        cd "${FIELD}"
         OUTPUT="${ORIGINAL_OUTPUT}/${FIELD}"
 
-        if [ $NEED_BEAM_CENTRES == true ]; then
+        if [ "${NEED_BEAM_CENTRES}" == "true" ]; then
             # Get the linmos offsets when we have a common image centre for
             # all beams - store in $LINMOS_BEAM_OFFSETS
             getBeamOffsets
@@ -80,7 +80,7 @@ for FIELD in ${FIELD_LIST}; do
             echo "----------"
 
             
-            mkdir -p ${OUTPUT}/Checkfiles
+            mkdir -p "${OUTPUT}/Checkfiles"
             # an empty file that will indicate that the flagging has been done
             FLAG_CHECK_FILE="${OUTPUT}/Checkfiles/FLAGGING_DONE_BEAM${BEAM}"
             # the same, but for the averaged dataset
@@ -111,75 +111,75 @@ for FIELD in ${FIELD_LIST}; do
 
             
             findScienceMSnames
-            FIELDBEAM=`echo $FIELD_ID $BEAM | awk '{printf "F%02d_B%s",$1,$2}'`
+            FIELDBEAM=$(echo "$FIELD_ID" "$BEAM" | awk '{printf "F%02d_B%s",$1,$2}')
 
-            . ${PIPELINEDIR}/splitScience.sh
+            . "${PIPELINEDIR}/splitScience.sh"
 
-            . ${PIPELINEDIR}/applyBandpassScience.sh
+            . "${PIPELINEDIR}/applyBandpassScience.sh"
 
-            . ${PIPELINEDIR}/flagScience.sh
+            . "${PIPELINEDIR}/flagScience.sh"
             
-            . ${PIPELINEDIR}/averageScience.sh
+            . "${PIPELINEDIR}/averageScience.sh"
 
-            if [ $FLAG_AFTER_AVERAGING == true ]; then
-                . ${PIPELINEDIR}/flagScienceAveraged.sh
+            if [ "${FLAG_AFTER_AVERAGING}" == "true" ]; then
+                . "${PIPELINEDIR}/flagScienceAveraged.sh"
             fi
             
-            if [ $DO_SELFCAL == true ]; then
-                . ${PIPELINEDIR}/continuumImageScienceSelfcal.sh
+            if [ "${DO_SELFCAL}" == "true" ]; then
+                . "${PIPELINEDIR}/continuumImageScienceSelfcal.sh"
             else
-	        . ${PIPELINEDIR}/continuumImageScience.sh
+	        . "${PIPELINEDIR}/continuumImageScience.sh"
             fi
 
-            . ${PIPELINEDIR}/applyCalContinuumScience.sh
+            . "${PIPELINEDIR}/applyCalContinuumScience.sh"
 
-            . ${PIPELINEDIR}/continuumCubeImagingScience.sh
+            . "${PIPELINEDIR}/continuumCubeImagingScience.sh"
 
-            if [ $DO_SOURCE_FINDING_BEAMWISE == true ]; then
-                . ${PIPELINEDIR}/sourcefindingCont.sh
+            if [ "${DO_SOURCE_FINDING_BEAMWISE}" == "true" ]; then
+                . "${PIPELINEDIR}/sourcefindingCont.sh"
             fi
 
-            . ${PIPELINEDIR}/prepareSpectralData.sh
+            . "${PIPELINEDIR}/prepareSpectralData.sh"
 
-            . ${PIPELINEDIR}/spectralImageScience.sh
+            . "${PIPELINEDIR}/spectralImageScience.sh"
 
-            . ${PIPELINEDIR}/spectralImContSub.sh
+            . "${PIPELINEDIR}/spectralImContSub.sh"
             
-            if [ $DO_SOURCE_FINDING_BEAMWISE == true ]; then
-                . ${PIPELINEDIR}/sourcefindingSpectral.sh
+            if [ "${DO_SOURCE_FINDING_BEAMWISE}" == "true" ]; then
+                . "${PIPELINEDIR}/sourcefindingSpectral.sh"
             fi
 
         done
 
-        FIELDBEAM=`echo $FIELD_ID | awk '{printf "F%02d",$1}'`
+        FIELDBEAM=$(echo "$FIELD_ID" | awk '{printf "F%02d",$1}')
 
-        . ${PIPELINEDIR}/linmosCont.sh
-        . ${PIPELINEDIR}/linmosContCube.sh
-        . ${PIPELINEDIR}/linmosSpectral.sh
+        . "${PIPELINEDIR}/linmosCont.sh"
+        . "${PIPELINEDIR}/linmosContCube.sh"
+        . "${PIPELINEDIR}/linmosSpectral.sh"
         
         # Source-finding on the mosaics created by these jobs
-        . ${PIPELINEDIR}/runMosaicSourcefinding.sh        
+        . "${PIPELINEDIR}/runMosaicSourcefinding.sh"        
         cd ..
 
     fi
 
-    FIELD_ID=`expr $FIELD_ID + 1`
+    ((FIELD_ID++))
     
 
 done
 
 # Put all these back to the original values
-OUTPUT=${ORIGINAL_OUTPUT}
-parsets=$parsetsBase
-logs=$logsBase
-slurms=$slurmsBase
-slurmOut=$slurmOutBase
+OUTPUT="${ORIGINAL_OUTPUT}"
+parsets="$parsetsBase"
+logs="$logsBase"
+slurms="$slurmsBase"
+slurmOut="$slurmOutBase"
 FIELD="."
 
 # Final linmos, combining fields
-. ${PIPELINEDIR}/linmosFieldsCont.sh
-. ${PIPELINEDIR}/linmosFieldsContCube.sh
-. ${PIPELINEDIR}/linmosFieldsSpectral.sh
+. "${PIPELINEDIR}/linmosFieldsCont.sh"
+. "${PIPELINEDIR}/linmosFieldsContCube.sh"
+. "${PIPELINEDIR}/linmosFieldsSpectral.sh"
 
 # Final source-finding on the mosaics created by these jobs
-. ${PIPELINEDIR}/runMosaicSourcefinding.sh
+. "${PIPELINEDIR}/runMosaicSourcefinding.sh"

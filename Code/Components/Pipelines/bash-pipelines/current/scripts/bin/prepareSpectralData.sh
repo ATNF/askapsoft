@@ -5,7 +5,7 @@
 # of the gains calibration table from the continuum self-calibration,
 # and subtraction of the continuum flux
 #
-# @copyright (c) 2015 CSIRO
+# @copyright (c) 2017 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -35,36 +35,36 @@
 # calibration & subtracting the continuum
 
 # Define a few parameters related to the continuum imaging
-. ${PIPELINEDIR}/getContinuumCimagerParams.sh
+. "${PIPELINEDIR}/getContinuumCimagerParams.sh"
 
 ID_SPLIT_SL_SCI=""
 ID_CAL_APPLY_SL_SCI=""
 ID_CONT_SUB_SL_SCI=""
 
 DO_IT=${DO_COPY_SL}
-if [ -e ${OUTPUT}/${msSciSL} ]; then
-    if [ $CLOBBER == false ]; then
+if [ -e "${OUTPUT}/${msSciSL}" ]; then
+    if [ "${CLOBBER}" != "true" ]; then
         # If we aren't clobbering files, don't run anything
-        if [ $DO_IT == true ]; then
+        if [ "${DO_IT}" == "true" ]; then
             echo "MS ${msSciSL} exists, so not making spectral-line dataset for beam ${BEAM}"
         fi
         DO_IT=false
     else
         # If we are clobbering files, removing the existing one, but
         # only if we are going to be running the job
-        if [ $DO_IT == true ]; then
-            rm -rf ${OUTPUT}/${msSciSL}
-            rm -f ${SL_GAINS_CHECK_FILE}
-            rm -f ${CONT_SUB_CHECK_FILE}
+        if [ "${DO_IT}" == "true" ]; then
+            rm -rf "${OUTPUT}/${msSciSL}"
+            rm -f "${SL_GAINS_CHECK_FILE}"
+            rm -f "${CONT_SUB_CHECK_FILE}"
         fi
     fi
 fi
 
 
-if [ $DO_IT == true ]; then
+if [ "${DO_IT}" == "true" ]; then
 
     setJob split_spectralline_science splitSL
-    cat > $sbatchfile <<EOFOUTER
+    cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
@@ -86,10 +86,11 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
+thisfile=$sbatchfile
+cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
 parset=${parsets}/split_spectralline_science_${FIELDBEAM}_\${SLURM_JOB_ID}.in
-cat > \$parset <<EOFINNER
+cat > "\$parset" <<EOFINNER
 # Input measurement set
 # Default: <no default>
 vis         = ${msSci}
@@ -114,10 +115,10 @@ log=${logs}/split_spectralline_science_${FIELDBEAM}_\${SLURM_JOB_ID}.log
 
 NCORES=1
 NPPN=1
-aprun -n \${NCORES} -N \${NPPN} ${mssplit} -c \${parset} > \${log}
+aprun -n \${NCORES} -N \${NPPN} ${mssplit} -c "\${parset}" > "\${log}"
 err=\$?
 rejuvenate ${msSciSL}
-extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname} "txt,csv"
+extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
 fi
@@ -125,14 +126,14 @@ fi
 EOFOUTER
 
 
-    if [ $SUBMIT_JOBS == true ]; then
+    if [ "${SUBMIT_JOBS}" == "true" ]; then
 	DEP=""
-        DEP=`addDep "$DEP" "$DEP_START"`
-        DEP=`addDep "$DEP" "$ID_SPLIT_SCI"`
-        DEP=`addDep "$DEP" "$ID_CCALAPPLY_SCI"`
-        DEP=`addDep "$DEP" "$ID_FLAG_SCI"`
-        ID_SPLIT_SL_SCI=`sbatch $DEP $sbatchfile | awk '{print $4}'`
-        recordJob ${ID_SPLIT_SL_SCI} "Copy the required spectral-line dataset for imaging beam $BEAM of the science observation, with flags \"$DEP\""
+        DEP=$(addDep "$DEP" "$DEP_START")
+        DEP=$(addDep "$DEP" "$ID_SPLIT_SCI")
+        DEP=$(addDep "$DEP" "$ID_CCALAPPLY_SCI")
+        DEP=$(addDep "$DEP" "$ID_FLAG_SCI")
+        ID_SPLIT_SL_SCI=$(sbatch $DEP "$sbatchfile" | awk '{print $4}')
+        recordJob "${ID_SPLIT_SL_SCI}" "Copy the required spectral-line dataset for imaging beam $BEAM of the science observation, with flags \"$DEP\""
     else
         echo "Would copy the required spectral-line dataset for imaging beam $BEAM of the science observation with slurm file $sbatchfile"
     fi
@@ -146,17 +147,17 @@ fi
 # Apply gains calibration
 
 DO_IT=$DO_APPLY_CAL_SL
-if [ -e $SL_GAINS_CHECK_FILE ]; then
-    if [ $DO_IT == true ]; then
+if [ -e "${SL_GAINS_CHECK_FILE}" ]; then
+    if [ "${DO_IT}" == "true" ]; then
         echo "Application of gains solution to spectral-line data for beam $BEAM of science observation has already been done - not re-doing."
     fi
     DO_IT=false
 fi
 
-if [ $DO_IT == true ]; then
+if [ "${DO_IT}" == "true" ]; then
 
     setJob apply_gains_cal_spectralline applyCalS
-    cat > $sbatchfile <<EOFOUTER
+    cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
@@ -178,11 +179,12 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
+thisfile=$sbatchfile
+cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
 parset=${parsets}/apply_gains_cal_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.in
 log=${logs}/apply_gains_cal_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.log
-cat > \$parset <<EOFINNER
+cat > "\$parset" <<EOFINNER
 Ccalapply.dataset                         = ${msSciSL}
 #
 # Allow flagging of vis if inversion of Mueller matrix fails
@@ -200,11 +202,11 @@ EOFINNER
 
 NCORES=1
 NPPN=1
-aprun -n \${NCORES} -N \${NPPN} ${ccalapply} -c \${parset} > \${log}
+aprun -n \${NCORES} -N \${NPPN} ${ccalapply} -c "\${parset}" > "\${log}"
 err=\$?
 rejuvenate ${msSciSL}
 rejuvenate ${gainscaltab}
-extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname} "txt,csv"
+extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
 else
@@ -213,9 +215,9 @@ fi
 
 EOFOUTER
 
-    if [ $SUBMIT_JOBS == true ]; then
+    if [ "${SUBMIT_JOBS}" == "true" ]; then
         submitIt=true
-        if [ $DO_CONT_IMAGING != true ] || [ $DO_SELFCAL != true ]; then
+        if [ "${DO_CONT_IMAGING}" != "true" ] || [ "${DO_SELFCAL}" != "true" ]; then
             # If we aren't creating the gains cal table with a self-cal job, then check to see if it exists.
             # If it doesn't, we can't run this job.
             if [ ! -e "${gainscaltab}" ]; then
@@ -223,18 +225,18 @@ EOFOUTER
                 echo "Not submitting gains calibration of spectral-line dataset as gains table ${gainscaltab} doesn't exist"
             fi
         fi
-        if [ $submitIt == true ]; then
+        if [ "${submitIt}" == "true" ]; then
             DEP=""
-            DEP=`addDep "$DEP" "$DEP_START"`
-            DEP=`addDep "$DEP" "$ID_SPLIT_SCI"`
-            DEP=`addDep "$DEP" "$ID_CCALAPPLY_SCI"`
-            DEP=`addDep "$DEP" "$ID_FLAG_SCI"`
-            DEP=`addDep "$DEP" "$ID_AVERAGE_SCI"`
-            DEP=`addDep "$DEP" "$ID_FLAG_SCI_AV"`
-            DEP=`addDep "$DEP" "$ID_CONTIMG_SCI_SC"`
-            DEP=`addDep "$DEP" "$ID_SPLIT_SL_SCI"`
-            ID_CAL_APPLY_SL_SCI=`sbatch $DEP $sbatchfile | awk '{print $4}'`
-            recordJob ${ID_CAL_APPLY_SL_SCI} "Apply gains calibration to the spectral-line dataset for imaging beam $BEAM of the science observation, with flags \"$DEP\""
+            DEP=$(addDep "$DEP" "$DEP_START")
+            DEP=$(addDep "$DEP" "$ID_SPLIT_SCI")
+            DEP=$(addDep "$DEP" "$ID_CCALAPPLY_SCI")
+            DEP=$(addDep "$DEP" "$ID_FLAG_SCI")
+            DEP=$(addDep "$DEP" "$ID_AVERAGE_SCI")
+            DEP=$(addDep "$DEP" "$ID_FLAG_SCI_AV")
+            DEP=$(addDep "$DEP" "$ID_CONTIMG_SCI_SC")
+            DEP=$(addDep "$DEP" "$ID_SPLIT_SL_SCI")
+            ID_CAL_APPLY_SL_SCI=$(sbatch $DEP "$sbatchfile" | awk '{print $4}')
+            recordJob "${ID_CAL_APPLY_SL_SCI}" "Apply gains calibration to the spectral-line dataset for imaging beam $BEAM of the science observation, with flags \"$DEP\""
         fi
     else
         echo "Would apply gains calibration to the spectral-line dataset for imaging beam $BEAM of the science observation with slurm file $sbatchfile"
@@ -248,16 +250,16 @@ fi
 # Subtract continuum model
 
 DO_IT=$DO_CONT_SUB_SL
-if [ -e $CONT_SUB_CHECK_FILE ]; then
-    if [ $DO_IT == true ]; then
+if [ -e "${CONT_SUB_CHECK_FILE}" ]; then
+    if [ "${DO_IT}" == "true" ]; then
         echo "Continuum subtraction from spectral-line data for beam $BEAM of science observation has already been done - not re-doing."
     fi
     DO_IT=false
 fi
 
-if [ ${DO_IT} == "true" ]; then
+if [ "${DO_IT}" == "true" ]; then
 
-    . ${PIPELINEDIR}/spectralContinuumSubtraction.sh
+    . "${PIPELINEDIR}/spectralContinuumSubtraction.sh"
         
 fi
 

@@ -44,13 +44,13 @@ else
 
     # Define the lists of image names, types, 
     ADD_FITS_SUFFIX=false
-    . ${getArtifacts}
+    . "${getArtifacts}"
 
     expectedImageNames=(${casdaTwoDimImageNames[@]})
     expectedImageNames+=(${casdaOtherDimImageNames[@]})
 
     for image in ${expectedImageNames[@]}; do
-        echo $image >> $output
+        echo $image >> "$output"
     done
 
 fi

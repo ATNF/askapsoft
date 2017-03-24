@@ -3,7 +3,7 @@
 # Process the 1934-638 calibration observations: split out per beam,
 # flag, then find the bandpass solution
 #
-# @copyright (c) 2015 CSIRO
+# @copyright (c) 2017 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -30,37 +30,37 @@
 
 ms1934list=""
 FLAG_CBPCAL_DEP=""
-FLAG_CBPCAL_DEP=`addDep "$FLAG_CBPCAL_DEP" "$DEP_START"`
+FLAG_CBPCAL_DEP=$(addDep "$FLAG_CBPCAL_DEP" "$DEP_START")
 
 #Set the FIELD string to a special one for the bandpass calibrator
 FIELD=BPCAL
 OUTPUT="${ORIGINAL_OUTPUT}/${FIELD}"
-mkdir -p ${OUTPUT}
-cd ${OUTPUT}
+mkdir -p "${OUTPUT}"
+cd "${OUTPUT}"
 if [ "${TABLE_BANDPASS%/*}" == "${TABLE_BANDPASS}" ]; then
     # Have just given a filename with no leading path - need to change
     # it to be inside the new OUTPUT directory
-    TABLE_BANDPASS=${OUTPUT}/${TABLE_BANDPASS}
+    TABLE_BANDPASS="${OUTPUT}/${TABLE_BANDPASS}"
 fi
 
-mkdir -p ${OUTPUT}/Checkfiles
-lfs setstripe -c 1 ${OUTPUT}/Checkfiles
+mkdir -p "${OUTPUT}/Checkfiles"
+lfs setstripe -c 1 "${OUTPUT}/Checkfiles"
 
-parsets=$parsetsBase/$FIELD
-mkdir -p $parsets
-logs=$logsBase/$FIELD
-mkdir -p $logs
-slurms=$slurmsBase/$FIELD
-mkdir -p $slurms
-slurmOut=$slurmOutBase/$FIELD
-mkdir -p $slurmOut
+parsets="$parsetsBase/$FIELD"
+mkdir -p "$parsets"
+logs="$logsBase/$FIELD"
+mkdir -p "$logs"
+slurms="$slurmsBase/$FIELD"
+mkdir -p "$slurms"
+slurmOut="$slurmOutBase/$FIELD"
+mkdir -p "$slurmOut"
 
-highestBeam=`expr $maxbeam - 1`
+highestBeam=$((maxbeam - 1))
 echo "Solving for the bandpass solutions for beams up to beam${highestBeam}"
 echo "========================================================="
 
-for((IBEAM=0; IBEAM<=${highestBeam}; IBEAM++)); do
-    BEAM=`echo $IBEAM | awk '{printf "%02d",$1}'`
+for((IBEAM=0; IBEAM<=highestBeam; IBEAM++)); do
+    BEAM=$(echo "$IBEAM" | awk '{printf "%02d",$1}')
     # Process all beams up to the maximum requested, so that we can
     # give them all to cbpcalibrator.
 
@@ -69,22 +69,22 @@ for((IBEAM=0; IBEAM<=${highestBeam}; IBEAM++)); do
 
     FIELDBEAM="${FIELD}_B${BEAM}"
     
-    . ${PIPELINEDIR}/split1934.sh
-    . ${PIPELINEDIR}/flag1934.sh
+    . "${PIPELINEDIR}/split1934.sh"
+    . "${PIPELINEDIR}/flag1934.sh"
 
 
 done
 
 FIELDBEAM=$FIELD
 
-. ${PIPELINEDIR}/findBandpassCal.sh
+. "${PIPELINEDIR}/findBandpassCal.sh"
 
 cd ..
 
 # Put all these back to the original values
-OUTPUT=${ORIGINAL_OUTPUT}
-parsets=$parsetsBase
-logs=$logsBase
-slurms=$slurmsBase
-slurmOut=$slurmOutBase
+OUTPUT="${ORIGINAL_OUTPUT}"
+parsets="$parsetsBase"
+logs="$logsBase"
+slurms="$slurmsBase"
+slurmOut="$slurmOutBase"
 

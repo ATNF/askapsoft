@@ -41,9 +41,9 @@ if [ "${DO_SOURCE_FINDING_CONT}" == "true" ] || [ "${DO_SOURCE_FINDING_SPEC}" ==
         TILE="ALL"
         FIELDBEAM="Full"
         
-        . ${PIPELINEDIR}/sourcefindingCont.sh
+        . "${PIPELINEDIR}/sourcefindingCont.sh"
         
-        . ${PIPELINEDIR}/sourcefindingSpectral.sh
+        . "${PIPELINEDIR}/sourcefindingSpectral.sh"
 
     else
         # This is the case of source-finding on a mosaic for a single
@@ -51,16 +51,16 @@ if [ "${DO_SOURCE_FINDING_CONT}" == "true" ] || [ "${DO_SOURCE_FINDING_SPEC}" ==
 
         # First the continuum source-finding
         NUM_LOOPS=0
-        if [ $DO_SELFCAL == true ] && [ $MOSAIC_SELFCAL_LOOPS == true ]; then
+        if [ "${DO_SELFCAL}" == "true" ] && [ "${MOSAIC_SELFCAL_LOOPS}" == "true" ]; then
             NUM_LOOPS=$SELFCAL_NUM_LOOPS
         fi
-        for((LOOP=0;LOOP<=$NUM_LOOPS;LOOP++)); do
-            . ${PIPELINEDIR}/sourcefindingCont.sh
+        for((LOOP=0;LOOP<=NUM_LOOPS;LOOP++)); do
+            . "${PIPELINEDIR}/sourcefindingCont.sh"
         done
         unset LOOP
 
         # Then the spectral-line sourcefinding
-        . ${PIPELINEDIR}/sourcefindingSpectral.sh
+        . "${PIPELINEDIR}/sourcefindingSpectral.sh"
 
     fi
 

@@ -4,7 +4,7 @@
 # the continuum dataset to that continuum (averaged) MS. The MS can
 # optionally be copied first, to preserve the raw averaged MS.
 #
-# @copyright (c) 2016 CSIRO
+# @copyright (c) 2017 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -30,17 +30,17 @@
 #
 
 DO_IT=$DO_APPLY_CAL_CONT
-if [ -e $CONT_GAINS_CHECK_FILE ]; then
-    if [ $DO_IT == true ]; then
+if [ -e "$CONT_GAINS_CHECK_FILE" ]; then
+    if [ "${DO_IT}" == "true" ]; then
         echo "Application of gains solution to continuum data for beam $BEAM of science observation has already been done - not re-doing."
     fi
     DO_IT=false
 fi
 
-if [ $DO_IT == true ]; then
+if [ "${DO_IT}" == "true" ]; then
 
     setJob apply_gains_cal_cont applyCalC
-    cat > $sbatchfile <<EOFOUTER
+    cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
@@ -62,7 +62,8 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
+thisfile=$sbatchfile
+cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
 keepRaw=${KEEP_RAW_AV_MS}
 if [ "\${keepRaw}" == "true" ]; then
@@ -72,7 +73,7 @@ fi
 
 parset=${parsets}/apply_gains_cal_cont_${FIELDBEAM}_\${SLURM_JOB_ID}.in
 log=${logs}/apply_gains_cal_cont_${FIELDBEAM}_\${SLURM_JOB_ID}.log
-cat > \$parset <<EOFINNER
+cat > "\$parset" <<EOFINNER
 Ccalapply.dataset                         = ${msSciAvCal}
 #
 # Allow flagging of vis if inversion of Mueller matrix fails
@@ -90,11 +91,11 @@ EOFINNER
 
 NCORES=1
 NPPN=1
-aprun -n \${NCORES} -N \${NPPN} ${ccalapply} -c \${parset} > \${log}
+aprun -n \${NCORES} -N \${NPPN} ${ccalapply} -c "\${parset}" > "\${log}"
 err=\$?
 rejuvenate ${msSciAvCal}
 rejuvenate ${gainscaltab}
-extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname} "txt,csv"
+extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
 else
@@ -103,9 +104,9 @@ fi
 
 EOFOUTER
 
-    if [ $SUBMIT_JOBS == true ]; then
+    if [ "${SUBMIT_JOBS}" == "true" ]; then
         submitIt=true
-        if [ $DO_CONT_IMAGING != true ] || [ $DO_SELFCAL != true ]; then
+        if [ "${DO_CONT_IMAGING}" != "true" ] || [ "${DO_SELFCAL}" != "true" ]; then
             # If we aren't creating the gains cal table with a self-cal job, then check to see if it exists.
             # If it doesn't, we can't run this job.
             if [ ! -e "${OUTPUT}/${gainscaltab}" ]; then
@@ -113,17 +114,17 @@ EOFOUTER
                 echo "Not submitting gains calibration of continuum dataset as gains table ${gainscaltab} doesn't exist"
             fi
         fi
-        if [ $submitIt == true ]; then
+        if [ "$submitIt" == "true" ]; then
             DEP=""
-            DEP=`addDep "$DEP" "$DEP_START"`
-            DEP=`addDep "$DEP" "$ID_SPLIT_SCI"`
-            DEP=`addDep "$DEP" "$ID_CCALAPPLY_SCI"`
-            DEP=`addDep "$DEP" "$ID_FLAG_SCI"`
-            DEP=`addDep "$DEP" "$ID_AVERAGE_SCI"`
-            DEP=`addDep "$DEP" "$ID_FLAG_SCI_AV"`
-            DEP=`addDep "$DEP" "$ID_CONTIMG_SCI_SC"`
-            ID_CAL_APPLY_CONT_SCI=`sbatch $DEP $sbatchfile | awk '{print $4}'`
-            recordJob ${ID_CAL_APPLY_CONT_SCI} "Apply gains calibration to the continuum dataset for imaging beam $BEAM of the science observation, with flags \"$DEP\""
+            DEP=$(addDep "$DEP" "$DEP_START")
+            DEP=$(addDep "$DEP" "$ID_SPLIT_SCI")
+            DEP=$(addDep "$DEP" "$ID_CCALAPPLY_SCI")
+            DEP=$(addDep "$DEP" "$ID_FLAG_SCI")
+            DEP=$(addDep "$DEP" "$ID_AVERAGE_SCI")
+            DEP=$(addDep "$DEP" "$ID_FLAG_SCI_AV")
+            DEP=$(addDep "$DEP" "$ID_CONTIMG_SCI_SC")
+            ID_CAL_APPLY_CONT_SCI=$(sbatch $DEP "$sbatchfile" | awk '{print $4}')
+            recordJob "${ID_CAL_APPLY_CONT_SCI}" "Apply gains calibration to the continuum dataset for imaging beam $BEAM of the science observation, with flags \"$DEP\""
         fi
     else
         echo "Would apply gains calibration to the continuum dataset for imaging beam $BEAM of the science observation with slurm file $sbatchfile"

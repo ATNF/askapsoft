@@ -5,7 +5,7 @@
 # autocorrelation-based flagging, and a second with a dynamic
 # amplitude threshold
 #
-# @copyright (c) 2016 CSIRO
+# @copyright (c) 2017 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -34,14 +34,14 @@ ID_FLAG_SCI_AV=""
 
 DO_IT=$DO_FLAG_SCIENCE
 
-if [ -e $FLAG_AV_CHECK_FILE ]; then
-    if [ $DO_IT == true ]; then
+if [ -e "${FLAG_AV_CHECK_FILE}" ]; then
+    if [ "${DO_IT}" == "true" ]; then
         echo "Flagging of averaged data for beam $BEAM of science observation has already been done - not re-doing."
     fi
     DO_IT=false
 fi
 
-if [ $DO_IT == true ]; then
+if [ "${DO_IT}" == "true" ]; then
 
     DO_AMP_FLAG=false
     ruleList=""
@@ -55,7 +55,7 @@ if [ $DO_IT == true ]; then
     fi
 
     # The flat amplitude cut to be applied
-    if [ ${FLAG_DO_FLAT_AMPLITUDE_SCIENCE_AV} == true ]; then
+    if [ "${FLAG_DO_FLAT_AMPLITUDE_SCIENCE_AV}" == "true" ]; then
         amplitudeCut="# Amplitude based flagging
 #   Here we apply a simple cut at a given amplitude level
 Cflag.amplitude_flagger.enable          = true
@@ -67,7 +67,7 @@ ${amplitudeLow}"
     fi
 
     setJob flag_ave_science flagAv
-    cat > $sbatchfile <<EOFOUTER
+    cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
@@ -89,13 +89,14 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
+thisfile=$sbatchfile
+cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
 DO_AMP_FLAG=${DO_AMP_FLAG}
 if [ \$DO_AMP_FLAG == true ]; then
 
     parset=${parsets}/cflag_ave_amp_science_${FIELDBEAM}_\${SLURM_JOB_ID}.in
-    cat > \$parset <<EOFINNER
+    cat > "\$parset" <<EOFINNER
 # The path/filename for the measurement set
 Cflag.dataset                           = ${msSciAv}
 
@@ -107,10 +108,10 @@ EOFINNER
 
     NCORES=1
     NPPN=1
-    aprun -n \${NCORES} -N \${NPPN} ${cflag} -c \${parset} > \${log}
+    aprun -n \${NCORES} -N \${NPPN} ${cflag} -c "\${parset}" > "\${log}"
     err=\$?
     rejuvenate ${msSciAv}
-    extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname}_Amp "txt,csv"
+    extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname}_Amp "txt,csv"
     if [ \$err != 0 ]; then
         exit \$err
     else
@@ -122,7 +123,7 @@ DO_DYNAMIC=${FLAG_DO_DYNAMIC_AMPLITUDE_SCIENCE_AV}
 if [ \${DO_DYNAMIC} == true ]; then
 
     parset=${parsets}/cflag_ave_dynamic_science_${FIELDBEAM}_\${SLURM_JOB_ID}.in
-    cat > \$parset <<EOFINNER
+    cat > "\$parset" <<EOFINNER
 # The path/filename for the measurement set
 Cflag.dataset                           = ${msSciAv}
 
@@ -144,10 +145,10 @@ EOFINNER
     
     NCORES=1
     NPPN=1
-    aprun -n \${NCORES} -N \${NPPN} ${cflag} -c \${parset} > \${log}
+    aprun -n \${NCORES} -N \${NPPN} ${cflag} -c "\${parset}" > "\${log}"
     err=\$?
     rejuvenate ${msSciAv}
-    extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname}_Dyn "txt,csv"
+    extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname}_Dyn "txt,csv"
     if [ \$err != 0 ]; then
         exit \$err
     else
@@ -158,15 +159,15 @@ fi
 
 EOFOUTER
 
-    if [ $SUBMIT_JOBS == true ]; then
+    if [ "${SUBMIT_JOBS}" == "true" ]; then
         DEP=""
-        DEP=`addDep "$DEP" "$DEP_START"`
-        DEP=`addDep "$DEP" "$ID_SPLIT_SCI"`
-        DEP=`addDep "$DEP" "$ID_CCALAPPLY_SCI"`
-        DEP=`addDep "$DEP" "$ID_FLAG_SCI"`
-        DEP=`addDep "$DEP" "$ID_AVERAGE_SCI"`
-	ID_FLAG_SCI_AV=`sbatch $DEP $sbatchfile | awk '{print $4}'`
-	recordJob ${ID_FLAG_SCI_AV} "Flagging beam ${BEAM} of averaged science observation, with flags \"$DEP\""
+        DEP=$(addDep "$DEP" "$DEP_START")
+        DEP=$(addDep "$DEP" "$ID_SPLIT_SCI")
+        DEP=$(addDep "$DEP" "$ID_CCALAPPLY_SCI")
+        DEP=$(addDep "$DEP" "$ID_FLAG_SCI")
+        DEP=$(addDep "$DEP" "$ID_AVERAGE_SCI")
+	ID_FLAG_SCI_AV=$(sbatch $DEP "$sbatchfile" | awk '{print $4}')
+	recordJob "${ID_FLAG_SCI_AV}" "Flagging beam ${BEAM} of averaged science observation, with flags \"$DEP\""
     else
 	echo "Would run flagging beam ${BEAM} for the averaged science observation with slurm file $sbatchfile"
     fi

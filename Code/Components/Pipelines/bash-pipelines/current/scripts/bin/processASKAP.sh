@@ -10,7 +10,7 @@
 #  scheduling block numbers of the datasets to be used, or to provide
 #  the filenames of specific measurement sets.
 #
-# @copyright (c) 2016 CSIRO
+# @copyright (c) 2017 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -43,12 +43,12 @@ if [ "${PIPELINEDIR}" == "" ]; then
 
 else 
 
-    if [ "`lfs getstripe -c .`" == "" ]; then
+    if [ "$(lfs getstripe -c .)" == "" ]; then
         echo "WARNING: You don't appear to be running this on a Lustre filesystem - lfs does not work."
         exit 1
     fi
     
-    . ${PIPELINEDIR}/initialise.sh
+    . "${PIPELINEDIR}/initialise.sh"
 
     if [ $# == 0 ]; then
         echo "No config file provided!"
@@ -67,35 +67,35 @@ else
 	    esac
 	done
 
-	. ${PIPELINEDIR}/utils.sh	
-        reportVersion | tee -a $JOBLIST
+	. "${PIPELINEDIR}/utils.sh"
+        reportVersion | tee -a "$JOBLIST"
 
 	if [ "$userConfig" != "" ]; then
-            if [ -e ${userConfig} ]; then
+            if [ -e "${userConfig}" ]; then
 	        echo "Getting extra config from file $userConfig"
-	        . ${userConfig}
-                archiveConfig $userConfig
+	        . "${userConfig}"
+                archiveConfig "$userConfig"
             else
                 echo "ERROR: Configuration file $userConfig not found"
                 exit 1
             fi
 	fi
 
-        . ${PIPELINEDIR}/prepareMetadata.sh
+        . "${PIPELINEDIR}/prepareMetadata.sh"
         PROCESS_DEFAULTS_HAS_RUN=false
-	. ${PIPELINEDIR}/processDefaults.sh
+	. "${PIPELINEDIR}/processDefaults.sh"
 	
-	lfs setstripe -c ${LUSTRE_STRIPING} .
+	lfs setstripe -c "${LUSTRE_STRIPING}" .
         
-	. ${PIPELINEDIR}/run1934cal.sh
+	. "${PIPELINEDIR}/run1934cal.sh"
 	    
-        . ${PIPELINEDIR}/scienceCalIm.sh
+        . "${PIPELINEDIR}/scienceCalIm.sh"
 	    
-        . ${PIPELINEDIR}/gatherStats.sh
+        . "${PIPELINEDIR}/gatherStats.sh"
         
-        . ${PIPELINEDIR}/archive.sh
+        . "${PIPELINEDIR}/archive.sh"
 	
-	. ${PIPELINEDIR}/finalise.sh
+	. "${PIPELINEDIR}/finalise.sh"
 
     fi
 

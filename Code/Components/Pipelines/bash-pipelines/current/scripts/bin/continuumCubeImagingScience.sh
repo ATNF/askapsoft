@@ -43,7 +43,7 @@ fi
 for POLN in $POL_LIST; do
 
     # make a lower-case version of the polarisation, for image name
-    pol=$(echo $POLN | tr '[:upper:]' '[:lower:]')
+    pol=$(echo "$POLN" | tr '[:upper:]' '[:lower:]')
 
     imageCode=restored
     setImageProperties contcube
@@ -88,14 +88,14 @@ ${Imager}.preconditioner.Wiener.taper             = ${PRECONDITIONER_WIENER_TAPE
         fi
     fi
     shapeDefinition="# Leave shape definition to advise"
-    if [ "${NUM_PIXELS_CONT}" != "" ] && [ $NUM_PIXELS_CONT -gt 0 ]; then
+    if [ "${NUM_PIXELS_CONT}" != "" ] && [ "${NUM_PIXELS_CONT}" -gt 0 ]; then
         shapeDefinition="${Imager}.Images.shape                            = [${NUM_PIXELS_CONT}, ${NUM_PIXELS_CONT}]"
     else
         echo "WARNING - No valid NUM_PIXELS_CONT parameter given.  Not running continuum cube imaging."
         DO_IT=false
     fi
-    cellsizeGood=`echo ${CELLSIZE_CONT} | awk '{if($1>0.) print "true"; else print "false";}'`
-    if [ "${CELLSIZE_CONT}" != "" ] && [ $cellsizeGood == true ]; then
+    cellsizeGood=$(echo "${CELLSIZE_CONT}" | awk '{if($1>0.) print "true"; else print "false";}')
+    if [ "${CELLSIZE_CONT}" != "" ] && [ "$cellsizeGood" == "true" ]; then
         cellsizeDefinition="${Imager}.Images.cellsize                         = [${CELLSIZE_CONT}arcsec, ${CELLSIZE_CONT}arcsec]"
     else
         echo "WARNING - No valid CELLSIZE_CONT parameter given.  Not running continuum cube imaging."
@@ -173,7 +173,8 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
+thisfile=$sbatchfile
+cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
 ms=${msToUse}
 
@@ -183,15 +184,15 @@ else
     log=${logs}/mslist_for_simager_\${SLURM_JOB_ID}.log
     NCORES=1
     NPPN=1
-    aprun -n \${NCORES} -N \${NPPN} $mslist --full \${ms} 2>&1 1> \${log}
-    ra=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=RA\`
-    dec=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=Dec\`
-    epoch=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=Epoch\`
+    aprun -n \${NCORES} -N \${NPPN} $mslist --full "\${ms}" 1>& "\${log}"
+    ra=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=RA)
+    dec=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=Dec)
+    epoch=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=Epoch)
     directionDefinition="${Imager}.Images.direction                       = [\${ra}, \${dec}, \${epoch}]"
 fi
 
 parset=${parsets}/science_contcube_imager_${FIELDBEAM}_${POLN}_\${SLURM_JOB_ID}.in
-cat > \$parset << EOF
+cat > "\$parset" << EOF
 ${Imager}.dataset                                 = \${ms}
 #
 ${nameDefinition}
@@ -229,8 +230,8 @@ NPPN=${CPUS_PER_CORE_CONTCUBE_IMAGING}
 aprun -n \${NCORES} -N \${NPPN} ${theImager} -c \$parset > \$log
 err=\$?
 rejuvenate \${ms}
-rejuvenate *.${imageBase}*
-extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname} "txt,csv"
+rejuvenate "./*.${imageBase}*"
+extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv"
 
 if [ \${err} -ne 0 ]; then
     echo "Error: ${theImager} returned error code \${err}"

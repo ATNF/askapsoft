@@ -3,7 +3,7 @@
 # This file holds various utility functions and environment variables
 # that allow the scripts to do various things in a uniform manner.
 #
-# @copyright (c) 2016 CSIRO
+# @copyright (c) 2017 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -30,7 +30,7 @@
 
 # Call the createDirectories script, so that we always define the
 # directories in which to put things - most importantly the stats directory.
-. ${PIPELINEDIR}/createDirectories.sh
+. "${PIPELINEDIR}/createDirectories.sh"
 
 ##############################
 # PIPELINE VERSION REPORTING
@@ -53,7 +53,7 @@ function archiveConfig()
     extension="${filename##*.}"
     filename="${filename%.*}"
     archivedConfig=$slurmOut/${filename}__${NOW}.${extension}
-    cp $1 $archivedConfig
+    cp "$1" "$archivedConfig"
     
 }
 
@@ -64,7 +64,7 @@ function archiveConfig()
 function rejuvenate()
 {
     if [ "$1" != "" ]; then
-        find $1 -exec touch {} \;
+        find "$1" -exec touch {} \;
     fi
 }
 
@@ -87,7 +87,7 @@ function rejuvenate()
 function setJob()
 {
     sbatchfile="$slurms/$1_${FIELDBEAM}.sbatch"
-    fieldbeamjob=`echo $FIELDBEAM | sed -e 's/_//g'`
+    fieldbeamjob=$(echo "$FIELDBEAM" | sed -e 's/_//g')
     jobname="$2_${fieldbeamjob}"
 }
 
@@ -102,17 +102,17 @@ ALL_JOB_IDS=""
 function addJobID()
 {
     if [ "${ALL_JOB_IDS}" == "" ]; then
-	ALL_JOB_IDS="$@"
+	ALL_JOB_IDS="$1"
     else
-	ALL_JOB_IDS="${ALL_JOB_IDS},$@"
+	ALL_JOB_IDS="${ALL_JOB_IDS},$1"
     fi
 }
 
 function recordJob()
 {
     # Usage: recordJob ID "This is a long description of this job"
-    addJobID $1
-    echo "$1 -- $2" | tee -a ${JOBLIST}
+    addJobID "$1"
+    echo "$1 -- $2" | tee -a "${JOBLIST}"
 }
 
 # Function to add a job id to a list of dependencies. Calling syntax
@@ -127,7 +127,7 @@ function addDep()
         fi
         DEP="$DEP:$2"
     fi
-    echo $DEP
+    echo "$DEP"
 }
 
 ##############################
@@ -143,8 +143,8 @@ function addDep()
 # Sets:     TILE
 function getTile()
 {
-    if [ `echo $FIELD | awk -F"_T" '{print NF}'` -eq 2 ]; then
-        TILE=`echo $FIELD | awk '{len=length($1); print substr($1,0,len-1)}'`
+    if [ "$(echo "$FIELD" | awk -F"_T" '{print NF}')" -eq 2 ]; then
+        TILE=$(echo "$FIELD" | awk '{len=length($1); print substr($1,0,len-1)}')
     else
         TILE=$FIELD
     fi
@@ -178,7 +178,7 @@ function setImageProperties()
     type=$1
 
     imSuffix=""
-    setImageBase $type
+    setImageBase "$type"
 
     needToUnsetTTerm=false
     if [ "$TTERM" == "" ]; then
@@ -189,10 +189,10 @@ function setImageProperties()
     band=""
     doAlt=false
     
-    if [ $type == "cont" ]; then
+    if [ "$type" == "cont" ]; then
         typebase="cont"
         labelbase="continuum image"
-        if [ "$NUM_TAYLOR_TERMS" == "" ] || [ $NUM_TAYLOR_TERMS -eq 1 ]; then
+        if [ "${NUM_TAYLOR_TERMS}" == "" ] || [ "${NUM_TAYLOR_TERMS}" -eq 1 ]; then
             imSuffix=""
             typeSuffix="T0"
         else
@@ -206,7 +206,7 @@ function setImageProperties()
                 band="wr.${subband}."
             fi
         fi
-    elif [ $type == "spectral" ]; then
+    elif [ "$type" == "spectral" ]; then
         typebase="spectral"
         labelbase="spectral cube"
         typeSuffix="3d"
@@ -217,7 +217,7 @@ function setImageProperties()
                 band="wr.${subband}."
             fi
         fi
-    elif [ $type == "contcube" ]; then
+    elif [ "$type" == "contcube" ]; then
         typebase="cont"
         labelbase="continuum cube"
         typeSuffix="3d"
@@ -235,7 +235,7 @@ function setImageProperties()
     if [ "${FIELD}" == "." ]; then
         beamSuffix="mosaic"
     else
-        if [ ${BEAM} == "all" ]; then
+        if [ "${BEAM}" == "all" ]; then
             beamSuffix="mosaic"
         else
             beamSuffix="beam ${BEAM}"
@@ -293,10 +293,10 @@ function setImageProperties()
         imageType="${typebase}_psfprecon_$typeSuffix"
         label="Preconditioned PSF ${labelbase}, $beamSuffix"
     else
-        echo "WARNING - unknown image code ${imageCode}"
+        echo "WARNING - unknown image code \"${imageCode}\""
     fi
 
-    if [ $needToUnsetTTerm == true ]; then
+    if [ "$needToUnsetTTerm" == "true" ]; then
         unset TTERM
     fi
     
@@ -321,17 +321,17 @@ function setImageProperties()
 function setImageBase()
 {
 
-    type=$1
+    type="$1"
 
-    if [ $type == "cont" ]; then
+    if [ "$type" == "cont" ]; then
         imageBase=${IMAGE_BASE_CONT}
-    elif [ $type == "contcube" ]; then
+    elif [ "$type" == "contcube" ]; then
         imageBase=${IMAGE_BASE_CONTCUBE}
         sedstr="s/^i\./$pol\./g"
-        imageBase=`echo ${imageBase} | sed -e $sedstr`
+        imageBase=$(echo "${imageBase}" | sed -e "$sedstr")
         sedstr="s/%p/$pol/g"
-        imageBase=`echo ${imageBase} | sed -e $sedstr`
-    elif [ $type == "spectral" ]; then
+        imageBase=$(echo "${imageBase}" | sed -e "$sedstr")
+    elif [ "$type" == "spectral" ]; then
         imageBase=${IMAGE_BASE_SPECTRAL}
     else
         echo "ERROR - bad type for setImageBase: \"$type\""
@@ -362,24 +362,24 @@ function findScienceMSnames()
 {
     
     # 1. Get the value for $msSci (the un-averaged MS)
-    if [ "`echo ${MS_BASE_SCIENCE} | grep %b`" != "" ]; then
+    if [ "$(echo "${MS_BASE_SCIENCE}" | grep %b)" != "" ]; then
         # If we are here, then $MS_BASE_SCIENCE has a %b that needs to be
         # replaced by the current $BEAM value
         sedstr="s|%b|${BEAM}|g"
-        msSci=`echo ${MS_BASE_SCIENCE} | sed -e $sedstr`
+        msSci=$(echo "${MS_BASE_SCIENCE}" | sed -e "$sedstr")
     else
         # If we are here, then there is no %b, and we just append
         # _${BEAM} to the MS name
         sedstr="s/\.ms/_${BEAM}\.ms/g"
-        msSci=`echo ${MS_BASE_SCIENCE} | sed -e $sedstr`
+        msSci=$(echo "${MS_BASE_SCIENCE}" | sed -e "$sedstr")
     fi
 
-    if [ ${DO_COPY_SL} == true ]; then
+    if [ "${DO_COPY_SL}" == "true" ]; then
         # If we make a copy of the spectral-line MS, then append '_SL'
         # to the MS name before the suffix for the MS used for
         # spectral-line imaging
         sedstr="s/\.ms/_SL\.ms/g"
-        msSciSL=`echo ${msSci} | sed -e $sedstr`
+        msSciSL=$(echo "${msSci}" | sed -e "$sedstr")
     else
         # If we aren't copying, just use the original full-resolution dataset
         msSciSL=${msSci}
@@ -391,20 +391,20 @@ function findScienceMSnames()
         # MS_SCIENCE_AVERAGE, and we need to work out $msSciAv from
         # $msSci
         sedstr="s/\.ms/_averaged\.ms/g"
-        msSciAv=`echo $msSci | sed -e $sedstr`
+        msSciAv=$(echo "$msSci" | sed -e "$sedstr")
     else
         # If we are here, then the user has given a specific filename
         # for MS_SCIENCE_AVERAGE. In this case, we can either replace
         # the %b with the beam number, or leave as is (but give a
         # warning).
-        if [ "`echo ${MS_SCIENCE_AVERAGE} | grep %b`" != "" ]; then
+        if [ "$(echo "${MS_SCIENCE_AVERAGE}" | grep %b)" != "" ]; then
             # If we are here, then $MS_SCIENCE_AVERAGE has a %b that
             # needs to be replaced by the current $BEAM value
             sedstr="s|%b|${BEAM}|g"
-            msSciAv=`echo ${MS_SCIENCE_AVERAGE} | sed -e $sedstr`
+            msSciAv=$(echo "${MS_SCIENCE_AVERAGE}" | sed -e "$sedstr")
         else
             msSciAv=${MS_SCIENCE_AVERAGE}
-            if [ $nbeam -gt 1 ]; then
+            if [ "$nbeam" -gt 1 ]; then
                 # Only give the warning if there is more than one beam
                 # (which means we're using the same MS for them)
                 echo "Warning! Using ${msSciAv} as averaged MS for beam ${BEAM}"
@@ -416,7 +416,7 @@ function findScienceMSnames()
     if [ "${KEEP_RAW_AV_MS}" == "true" ]; then
         # If we are keeping the raw data, need a new MS name
         sedstr="s/averaged/averaged_cal/g"
-        msSciAvCal=`echo $msSciAv | sed -e $sedstr`
+        msSciAvCal=$(echo "$msSciAv" | sed -e "$sedstr")
     else
         # Otherwise, apply the calibration to the raw data
         msSciAvCal=$msSciAv
@@ -425,20 +425,20 @@ function findScienceMSnames()
     if [ "${GAINS_CAL_TABLE}" == "" ]; then
         # The name of the gains cal table is blank, so turn off
         # selfcal & cal-apply for the SL case
-        if [ ${DO_SELFCAL} == true ]; then
+        if [ "${DO_SELFCAL}" == "true" ]; then
             DO_SELFCAL=false
             echo "Gains cal filename (GAINS_CAL_TABLE) blank, so turning off selfcal"
         fi
-        if [ ${DO_APPLY_CAL_SL} == true ]; then
+        if [ "${DO_APPLY_CAL_SL}" == "true" ]; then
             DO_APPLY_CAL_SL=false
             echo "Gains cal filename (GAINS_CAL_TABlE) blank, so turning off SL cal apply"
         fi
     else
         # Otherwise, need to replace any %b with the current BEAM, if there is one present
-        if [ "`echo ${GAINS_CAL_TABLE} | grep %b`" != "" ]; then
+        if [ "$(echo "${GAINS_CAL_TABLE}" | grep %b)" != "" ]; then
             # We have a %b that needs replacing
             sedstr="s|%b|${BEAM}|g"
-            gainscaltab=`echo ${GAINS_CAL_TABLE} | sed -e $sedstr`
+            gainscaltab=$(echo "${GAINS_CAL_TABLE}" | sed -e "$sedstr")
         else
             # just use filename as provided
             gainscaltab=${GAINS_CAL_TABLE}
@@ -449,11 +449,11 @@ function findScienceMSnames()
 
 function find1934MSnames()
 {
-    if [ "`echo ${MS_BASE_1934} | grep %b`" != "" ]; then
+    if [ "$(echo "${MS_BASE_1934}" | grep %b)" != "" ]; then
         # If we are here, then $MS_BASE_1934 has a %b that
         # needs to be replaced by the current $BEAM value
         sedstr="s|%b|${BEAM}|g"
-        msCal=`echo ${MS_BASE_1934} | sed -e $sedstr`
+        msCal=$(echo "${MS_BASE_1934}" | sed -e "$sedstr")
     else
         msCal=${MS_BASE_1934}
         echo "Warning! Using ${msCal} as 1934-638 MS for beam ${BEAM}"
@@ -470,7 +470,7 @@ function getPolList()
     #     * CONTCUBE_POLARISATIONS - something like "I,Q,U,V"
     #  Returns: $POL_LIST (would convert above to "I Q U V")
 
-    POL_LIST=`echo $CONTCUBE_POLARISATIONS | sed -e 's/,/ /g'`
+    POL_LIST=$(echo "$CONTCUBE_POLARISATIONS" | sed -e 's/,/ /g')
 
 }
 
@@ -517,18 +517,18 @@ function dataSelectionSelfcalLoop()
         LOOP=0
         needToUnsetLoop=true
     fi
-    if [ $1 == "Cimager" ]; then
-        if [ ${CIMAGER_MINUV_ARRAY[$LOOP]} -gt 0 ]; then
+    if [ "$1" == "Cimager" ]; then
+        if [ "${CIMAGER_MINUV_ARRAY[$LOOP]}" -gt 0 ]; then
             dataSelectionParams="Cimager.MinUV   = ${CIMAGER_MINUV_ARRAY[$LOOP]}"
         fi
-    elif [ $1 == "Ccalibrator" ]; then
-        if [ ${CCALIBRATOR_MINUV_ARRAY[$LOOP]} -gt 0 ]; then
+    elif [ "$1" == "Ccalibrator" ]; then
+        if [ "${CCALIBRATOR_MINUV_ARRAY[$LOOP]}" -gt 0 ]; then
             dataSelectionParams="Ccalibrator.MinUV   = ${CIMAGER_MINUV_ARRAY[$LOOP]}"
         fi
     else
         dataSelectionParams="# no data selection parameter returned"
     fi
-    if [ $needToUnsetLoop == true ]; then
+    if [ "$needToUnsetLoop" == "true" ]; then
         unset LOOP
     fi
 }
@@ -618,7 +618,7 @@ function getBeamOffsets()
     #  Returns: $LINMOS_BEAM_OFFSETS (in the process, setting $footprintOut)
 
     setFootprintFile
-    LINMOS_BEAM_OFFSETS=`grep -A$[BEAM_MAX+1] Beam ${footprintOut} | tail -n $[BEAM_MAX+1] | sed -e 's/(//g' | sed -e 's/)//g' | awk '{printf "linmos.feeds.beam%02d = [%6.3f, %6.3f]\n",$1,-$4,$5}'`
+    LINMOS_BEAM_OFFSETS=$(grep -A$((BEAM_MAX+1)) Beam "${footprintOut}" | tail -n $((BEAM_MAX+1)) | sed -e 's/(//g' | sed -e 's/)//g' | awk '{printf "linmos.feeds.beam%02d = [%6.3f, %6.3f]\n",$1,-$4,$5}')
 }
 
 function getBeamCentre()
@@ -635,15 +635,15 @@ function getBeamCentre()
     awkTest="\$1==$BEAM"
     setFootprintFile
     if [ "$beamFromCLI" == "true" ]; then
-        ra=`awk $awkTest ${footprintOut} | sed -e 's/,/ /g' | sed -e 's/(//g' | sed -e 's/)//g'| awk '{print $4}'`
-        ra=`echo $ra | awk -F':' '{printf "%sh%sm%s",$1,$2,$3}'` 
-        dec=`awk $awkTest ${footprintOut} | sed -e 's/,/ /g' | sed -e 's/(//g' | sed -e 's/)//g'| awk '{print $5}'`
-        dec=`echo $dec | awk -F':' '{printf "%s.%s.%s",$1,$2,$3}'`
+        ra=$(awk "$awkTest" "${footprintOut}" | sed -e 's/,/ /g' | sed -e 's/(//g' | sed -e 's/)//g'| awk '{print $4}')
+        ra=$(echo "$ra" | awk -F':' '{printf "%sh%sm%s",$1,$2,$3}')
+        dec=$(awk "$awkTest" "${footprintOut}" | sed -e 's/,/ /g' | sed -e 's/(//g' | sed -e 's/)//g'| awk '{print $5}')
+        dec=$(echo "$dec" | awk -F':' '{printf "%s.%s.%s",$1,$2,$3}')
     else
-        ra=`grep -A$[BEAM_MAX+1] Beam ${footprintOut} | tail -n $[BEAM_MAX+1] | sed -e 's/,/ /g' | sed -e 's/(//g' | sed -e 's/)//g' | awk $awkTest | awk '{print $6}'`
-        ra=`echo $ra | awk -F':' '{printf "%sh%sm%s",$1,$2,$3}'` 
-        dec=`grep -A$[BEAM_MAX+1] Beam ${footprintOut} | tail -n $[BEAM_MAX+1] | sed -e 's/,/ /g' | sed -e 's/(//g' | sed -e 's/)//g' | awk $awkTest | awk '{print $7}'`
-        dec=`echo $dec | awk -F':' '{printf "%s.%s.%s",$1,$2,$3}'`
+        ra=$(grep -A$((BEAM_MAX+1)) Beam "${footprintOut}" | tail -n $((BEAM_MAX+1)) | sed -e 's/,/ /g' | sed -e 's/(//g' | sed -e 's/)//g' | awk "$awkTest" | awk '{print $6}')
+        ra=$(echo "$ra" | awk -F':' '{printf "%sh%sm%s",$1,$2,$3}')
+        dec=$(grep -A$((BEAM_MAX+1)) Beam "${footprintOut}" | tail -n $((BEAM_MAX+1)) | sed -e 's/,/ /g' | sed -e 's/(//g' | sed -e 's/)//g' | awk "$awkTest" | awk '{print $7}')
+        dec=$(echo "$dec" | awk -F':' '{printf "%s.%s.%s",$1,$2,$3}')
     fi
     DIRECTION="[$ra, $dec, J2000]"
 }
@@ -658,9 +658,9 @@ function writeStats()
     #   where format is either txt or csv. Anything else defaults to txt
     format=${11}
     if [ $# -ge 10 ] && [ "$format" == "csv" ]; then
-	echo $@ | awk '{printf "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",$1,$2,$3,$4,$5,$6,$7,$8,$9,$10}'
+	echo "$@" | awk '{printf "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",$1,$2,$3,$4,$5,$6,$7,$8,$9,$10}'
     else
-	echo $@ | awk '{printf "%10s%10s%50s%9s%10s%10s%10s%10s%10s%25s\n",$1,$2,$3,$4,$5,$6,$7,$8,$9,$10}'
+	echo "$@" | awk '{printf "%10s%10s%50s%9s%10s%10s%10s%10s%10s%25s\n",$1,$2,$3,$4,$5,$6,$7,$8,$9,$10}'
     fi
 }
 
@@ -699,7 +699,7 @@ function extractStats()
         RESULT_TXT="FAIL"
     fi
     
-    parseLog $STATS_LOGFILE    
+    parseLog "${STATS_LOGFILE}"    
 
     if [ $# -lt 6 ]; then
 	formatlist="stdout"
@@ -707,23 +707,23 @@ function extractStats()
 	formatlist=$6
     fi
     
-    for format in `echo $formatlist | sed -e 's/,/ /g'`; do
+    for format in $(echo "$formatlist" | sed -e 's/,/ /g'); do
 
-	if [ $format == "txt" ]; then
-	    output=${stats}/stats-${STATS_ID}-${STATS_DESC}.txt
-	elif [ $format == "csv" ]; then
-	    output=${stats}/stats-${STATS_ID}-${STATS_DESC}.csv
+	if [ "$format" == "txt" ]; then
+	    output="${stats}/stats-${STATS_ID}-${STATS_DESC}.txt"
+	elif [ "$format" == "csv" ]; then
+	    output="${stats}/stats-${STATS_ID}-${STATS_DESC}.csv"
 	else
 	    output=/dev/stdout
 	fi
 
-	writeStatsHeader $format > $output
-	if [ `grep "(1, " $STATS_LOGFILE | wc -l` -gt 0 ]; then
-	    writeStats $STATS_ID $NUM_CORES "${STATS_DESC}_master"     $RESULT_TXT $TIME_JOB_REAL $TIME_JOB_USER $TIME_JOB_SYS $PEAK_VM_MASTER  $PEAK_RSS_MASTER  $START_TIME_JOB $format >> $output
-	    writeStats $STATS_ID $NUM_CORES "${STATS_DESC}_workerPeak" $RESULT_TXT $TIME_JOB_REAL $TIME_JOB_USER $TIME_JOB_SYS $PEAK_VM_WORKERS $PEAK_RSS_WORKERS $START_TIME_JOB $format >> $output
-	    writeStats $STATS_ID $NUM_CORES "${STATS_DESC}_workerAve"  $RESULT_TXT $TIME_JOB_REAL $TIME_JOB_USER $TIME_JOB_SYS $AVE_VM_WORKERS  $AVE_RSS_WORKERS  $START_TIME_JOB $format >> $output
-	else                                                                      
-	    writeStats $STATS_ID $NUM_CORES $STATS_DESC                $RESULT_TXT $TIME_JOB_REAL $TIME_JOB_USER $TIME_JOB_SYS $PEAK_VM_MASTER  $PEAK_RSS_MASTER  $START_TIME_JOB $format >> $output
+	writeStatsHeader "$format" > "$output"
+	if [ "$(grep -c "(1, " "${STATS_LOGFILE}")" -gt 0 ]; then
+	    writeStats "$STATS_ID" "$NUM_CORES" "${STATS_DESC}_master"     "$RESULT_TXT" "$TIME_JOB_REAL" "$TIME_JOB_USER" "$TIME_JOB_SYS" "$PEAK_VM_MASTER"  "$PEAK_RSS_MASTER"  "$START_TIME_JOB" "$format" >> "$output"
+	    writeStats "$STATS_ID" "$NUM_CORES" "${STATS_DESC}_workerPeak" "$RESULT_TXT" "$TIME_JOB_REAL" "$TIME_JOB_USER" "$TIME_JOB_SYS" "$PEAK_VM_WORKER"S "$PEAK_RSS_WORKERS" "$START_TIME_JOB" "$format" >> "$output"
+	    writeStats "$STATS_ID" "$NUM_CORES" "${STATS_DESC}_workerAve"  "$RESULT_TXT" "$TIME_JOB_REAL" "$TIME_JOB_USER" "$TIME_JOB_SYS" "$AVE_VM_WORKERS"  "$AVE_RSS_WORKERS"  "$START_TIME_JOB" "$format" >> "$output"
+	else
+	    writeStats "$STATS_ID" "$NUM_CORES" "$STATS_DESC"              "$RESULT_TXT" "$TIME_JOB_REAL" "$TIME_JOB_USER" "$TIME_JOB_SYS" "$PEAK_VM_MASTER"  "$PEAK_RSS_MASTER"  "$START_TIME_JOB" "$format" >> "$output"
 	fi
 
     done
@@ -742,32 +742,32 @@ function parseLog()
     PEAK_RSS_MASTER="---"
     START_TIME_JOB="---"
 
-    if [ ${NUM_CORES} -ge 2 ] && [ `grep "(1, " $logfile | wc -l` -gt 0 ]; then
+    if [ "${NUM_CORES}" -ge 2 ] && [ "$(grep -c "(1, " "$logfile")" -gt 0 ]; then
         # if here, job was a distributed job
         # Get the master node's first log message, and extract the time stamp
-        START_TIME_JOB=`grep "(0, " $logfile | head -1 | awk '{printf "%sT%s",$5,$6}' | sed -e 's/^\[//g' | sed -e 's/\]$//g'`
-        if [ `grep "(0, " $logfile | grep "Total times" | wc -l` -gt 0 ]; then
-            TIME_JOB_REAL=`grep "(0, " $logfile | grep "Total times" | tail -1 | awk '{print $16}'`
-            TIME_JOB_SYS=`grep "(0, " $logfile  | grep "Total times" | tail -1 | awk '{print $14}'`
-            TIME_JOB_USER=`grep "(0, " $1 | grep "Total times" | tail -1 | awk '{print $12}'`
+        START_TIME_JOB=$(grep "(0, " "$logfile" | head -1 | awk '{printf "%sT%s",$5,$6}' | sed -e 's/^\[//g' | sed -e 's/\]$//g')
+        if [ "$(grep "(0, " "$logfile" | grep -c "Total times")" -gt 0 ]; then
+            TIME_JOB_REAL=$(grep "(0, " "$logfile" | grep "Total times" | tail -1 | awk '{print $16}')
+            TIME_JOB_SYS=$(grep "(0, " "$logfile"  | grep "Total times" | tail -1 | awk '{print $14}')
+            TIME_JOB_USER=$(grep "(0, " "$1" | grep "Total times" | tail -1 | awk '{print $12}')
         fi
-        if [ `grep "(0, " $logfile | grep "PeakVM" | wc -l` -gt 0 ]; then
-            PEAK_VM_MASTER=`grep "(0, " $logfile | grep "PeakVM" | tail -1 | awk '{print $12}'`
-            PEAK_RSS_MASTER=`grep "(0, " $logfile | grep "PeakVM" | tail -1 | awk '{print $15}'`
+        if [ "$(grep "(0, " "$logfile" | grep -c "PeakVM")" -gt 0 ]; then
+            PEAK_VM_MASTER=$(grep "(0, " "$logfile" | grep "PeakVM" | tail -1 | awk '{print $12}')
+            PEAK_RSS_MASTER=$(grep "(0, " "$logfile" | grep "PeakVM" | tail -1 | awk '{print $15}')
         fi
-	findWorkerStats $logfile
+	findWorkerStats "$logfile"
     else
         # if here, it was a serial job
         # Can log with either (-1 or (0 as the rank, so instead get the first INFO line & extract time stamp
-        START_TIME_JOB=`grep "INFO" $logfile | head -1 | awk '{printf "%sT%s",$5,$6}' | sed -e 's/^\[//g' | sed -e 's/\]$//g'`
-        if [ `grep "Total times" $logfile | wc -l` -gt 0 ]; then
-            TIME_JOB_REAL=`grep "Total times" $logfile | tail -1 | awk '{print $16}'`
-            TIME_JOB_SYS=`grep "Total times" $logfile | tail -1 | awk '{print $14}'`
-            TIME_JOB_USER=`grep "Total times" $logfile | tail -1 | awk '{print $12}'`
+        START_TIME_JOB=$(grep "INFO" "$logfile" | head -1 | awk '{printf "%sT%s",$5,$6}' | sed -e 's/^\[//g' | sed -e 's/\]$//g')
+        if [ "$(grep -c "Total times" "$logfile")" -gt 0 ]; then
+            TIME_JOB_REAL=$(grep "Total times" "$logfile" | tail -1 | awk '{print $16}')
+            TIME_JOB_SYS=$(grep "Total times" "$logfile" | tail -1 | awk '{print $14}')
+            TIME_JOB_USER=$(grep "Total times" "$logfile" | tail -1 | awk '{print $12}')
         fi
-        if [ `grep "PeakVM" $logfile | wc -l` -gt 0 ]; then
-            PEAK_VM_MASTER=`grep "PeakVM" $logfile | tail -1 | awk '{print $12}'`
-            PEAK_RSS_MASTER=`grep "PeakVM" $logfile | tail -1 | awk '{print $15}'`
+        if [ "$(grep -c "PeakVM" "$logfile")" -gt 0 ]; then
+            PEAK_VM_MASTER=$(grep "PeakVM" "$logfile" | tail -1 | awk '{print $12}')
+            PEAK_RSS_MASTER=$(grep "PeakVM" "$logfile" | tail -1 | awk '{print $15}')
         fi
     fi
 
@@ -783,13 +783,13 @@ function findWorkerStats()
     AVE_VM_WORKERS="---"
     AVE_RSS_WORKERS="---"
 
-    grep "PeakVM" $logfile | grep -v "(0, " > $tmpfile
+    grep "PeakVM" "$logfile" | grep -v "(0, " > "$tmpfile"
 
-    if [ `wc -l $tmpfile | awk '{print $1}'` -gt 0 ]; then
+    if [ "$(wc -l "$tmpfile" | awk '{print $1}')" -gt 0 ]; then
 
-        awkfile=$tmp/workerstats.awk
-        if [ ! -e $awkfile ]; then
-            cat > $awkfile <<EOF
+        awkfile="$tmp/workerstats.awk"
+        if [ ! -e "$awkfile" ]; then
+            cat > "$awkfile" <<EOF
 BEGIN {
     i=0;
     sumV=0.;
@@ -822,21 +822,21 @@ EOF
         fi
         
         tmpfile2="$tmpfile.2"
-        rm -f $tmpfile2
+        rm -f "$tmpfile2"
         if [ "${NUM_CORES}" == "" ]; then
             NUM_CORES=2
         fi
-        for((i=1;i<${NUM_CORES};i++)); do
+        for((i=1;i<NUM_CORES;i++)); do
 
-	    grep "($i, " $tmpfile | tail -1 >> $tmpfile2
+	    grep "($i, " "$tmpfile" | tail -1 >> "$tmpfile2"
 	    
         done
         
-        results=`awk -f $awkfile $tmpfile2`
-        PEAK_VM_WORKERS=`echo $results | awk '{print $3}'`
-        PEAK_RSS_WORKERS=`echo $results | awk '{print $6}'`
-        AVE_VM_WORKERS=`echo $results | awk '{print $2}'`
-        AVE_RSS_WORKERS=`echo $results | awk '{print $5}'`
+        results=$(awk -f "$awkfile" "$tmpfile2")
+        PEAK_VM_WORKERS=$(echo "$results" | awk '{print $3}')
+        PEAK_RSS_WORKERS=$(echo "$results" | awk '{print $6}')
+        AVE_VM_WORKERS=$(echo "$results" | awk '{print $2}')
+        AVE_RSS_WORKERS=$(echo "$results" | awk '{print $5}')
 
     fi
    

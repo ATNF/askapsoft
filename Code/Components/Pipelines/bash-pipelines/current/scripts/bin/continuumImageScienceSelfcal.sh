@@ -7,7 +7,7 @@
 # to calibrate the gains, before running Cimager again. This is done a
 # number of times to hopefully converge to a sensible image.
 #
-# @copyright (c) 2015 CSIRO
+# @copyright (c) 2017 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -33,14 +33,14 @@
 #
 
 # Define the Cimager parset and associated parameters
-. ${PIPELINEDIR}/getContinuumCimagerParams.sh
+. "${PIPELINEDIR}/getContinuumCimagerParams.sh"
 
 ID_CONTIMG_SCI_SC=""
 
 DO_IT=$DO_CONT_IMAGING
 
-if [ $CLOBBER == false ] && [ -e ${OUTPUT}/${imageName} ]; then
-    if [ $DO_IT == true ]; then
+if [ "${CLOBBER}" != "true" ] && [ -e "${OUTPUT}/${imageName}" ]; then
+    if [ "${DO_IT}" == "true" ]; then
         echo "Image ${imageName} exists, so not running continuum imaging for beam ${BEAM}"
     fi
     DO_IT=false
@@ -52,16 +52,16 @@ else
     theimager=$cimager
 fi
 
-if [ $DO_IT == true ] && [ $DO_SELFCAL == true ]; then
+if [ "${DO_IT}" == "true" ] && [ "${DO_SELFCAL}" == "true" ]; then
 
-    if [ $NUM_CPUS_CONTIMG_SCI -lt 19 ]; then
+    if [ "${NUM_CPUS_CONTIMG_SCI}" -lt 19 ]; then
 	NUM_CPUS_SELFCAL=19
     else
 	NUM_CPUS_SELFCAL=$NUM_CPUS_CONTIMG_SCI
     fi
 
-    NPROCS_SELAVY=`echo $SELFCAL_SELAVY_NSUBX $SELFCAL_SELAVY_NSUBY | awk '{print $1*$2+1}'`
-    if [ ${CPUS_PER_CORE_CONT_IMAGING} -lt ${NPROCS_SELAVY} ]; then
+    NPROCS_SELAVY=$(echo "${SELFCAL_SELAVY_NSUBX}" "${SELFCAL_SELAVY_NSUBY}" | awk '{print $1*$2+1}')
+    if [ "${CPUS_PER_CORE_CONT_IMAGING}" -lt "${NPROCS_SELAVY}" ]; then
 	CPUS_PER_CORE_SELFCAL=${CPUS_PER_CORE_CONT_IMAGING}
     else
 	CPUS_PER_CORE_SELFCAL=${NPROCS_SELAVY}
@@ -72,8 +72,8 @@ if [ $DO_IT == true ] && [ $DO_SELFCAL == true ]; then
     selavyImage="${OUTPUT}/${imageName}"
     selavyWeights="${OUTPUT}/${weightsImage}"
 
-    cutWeights=`echo ${SELFCAL_SELAVY_WEIGHTSCUT} | awk '{if (($1>0.)&&($1<1.)) print "true"; else print "false";}'`
-    if [ ${cutWeights} == "true" ]; then
+    cutWeights=$(echo "${SELFCAL_SELAVY_WEIGHTSCUT}" | awk '{if (($1>0.)&&($1<1.)) print "true"; else print "false";}')
+    if [ "${cutWeights}" == "true" ]; then
         selavyWeights="# Use the weights image, with a high cutoff - since we are using
 # WProject, everything should be flat. This will reject areas where
 # the snapshot warp is reducing the weight.
@@ -83,7 +83,7 @@ Selavy.Weights.weightsCutoff                    = ${SELFCAL_SELAVY_WEIGHTSCUT}"
         selavyWeights="# No weights scaling applied in Selavy"
     fi
 
-    modelImage=contmodel.${imageBase}
+    modelImage="contmodel.${imageBase}"
 
     if [ "${SELFCAL_METHOD}" == "Cmodel" ]; then
 
@@ -117,7 +117,7 @@ Ccalibrator.sources.names                       = [lsm]
 Ccalibrator.sources.lsm.direction               = \${modelDirection}
 Ccalibrator.sources.lsm.model                   = ${modelImage}
 Ccalibrator.sources.lsm.nterms                  = ${NUM_TAYLOR_TERMS}"
-        if [ ${NUM_TAYLOR_TERMS} -gt 1 ]; then
+        if [ "${NUM_TAYLOR_TERMS}" -gt 1 ]; then
             if [ "$MFS_REF_FREQ" == "" ]; then
                 freq=$CENTRE_FREQ
             else
@@ -161,7 +161,7 @@ Ccalibrator.refgain                             = ${SELFCAL_REF_GAINS}"
     fi
     
     setJob science_continuumImageSelfcal contSC
-    cat > $sbatchfile <<EOFOUTER
+    cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
@@ -183,24 +183,27 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
+thisfile=$sbatchfile
+cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
 selfcalMethod=${SELFCAL_METHOD}
 
 log=${logs}/mslist_for_selfcal_\${SLURM_JOB_ID}.log
 NCORES=1
 NPPN=1
-aprun -n \${NCORES} -N \${NPPN} $mslist --full ${msSci} 2>&1 1> \${log}
-ra=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=RA\`
-dec=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=Dec\`
-epoch=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=Epoch\`
-if [ "${DIRECTION}" != "" ]; then
-    modelDirection="${DIRECTION}"
+aprun -n \${NCORES} -N \${NPPN} $mslist --full "${msSci}" 1>& "\${log}"
+ra=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=RA)
+dec=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=Dec)
+epoch=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=Epoch)
+
+direction="${DIRECTION}"
+if [ "\${direction}" != "" ]; then
+    modelDirection="\${direction}"
 else
     modelDirection="[\${ra}, \${dec}, \${epoch}]"
 fi
 # Reformat for Selavy's referenceDirection
-ra=\`echo \$ra | awk -F':' '{printf "%sh%sm%s",\$1,\$2,\$3}'\` 
+ra=\$(echo "\$ra" | awk -F':' '{printf "%sh%sm%s",\$1,\$2,\$3}')
 refDirection="[\${ra}, \${dec}, \${epoch}]"
 
 caldir=selfCal_${imageBase}
@@ -217,14 +220,14 @@ CLEAN_NUM_MAJORCYCLES_ARRAY=(${CLEAN_NUM_MAJORCYCLES_ARRAY[@]})
 CIMAGER_MINUV_ARRAY=(${CIMAGER_MINUV_ARRAY[@]})
 CCALIBRATOR_MINUV_ARRAY=(${CCALIBRATOR_MINUV_ARRAY[@]})
 
-for((LOOP=0;LOOP<=${SELFCAL_NUM_LOOPS};LOOP++)); do
+for((LOOP=0;LOOP<=SELFCAL_NUM_LOOPS;LOOP++)); do
 
-    loopdir=\${caldir}/Loop\${LOOP}
+    loopdir="\${caldir}/Loop\${LOOP}"
     sources=sources_loop\${LOOP}.in
     caldata=caldata_loop\${LOOP}.tab
 
-    if [ \${LOOP} -gt 0 ]; then
-        mkdir -p \${loopdir}
+    if [ "\${LOOP}" -gt 0 ]; then
+        mkdir -p "\${loopdir}"
         calparams="# Self-calibration using the recently-generated cal table
 Cimager.calibrate                           = true
 Cimager.calibrate.ignorebeam                = true
@@ -252,7 +255,7 @@ Cimager.calibrate                               = false
     cimagerSelfcalLoopParams
     dataSelectionSelfcalLoop Cimager
 
-    cat > \$parset <<EOFINNER
+    cat > "\$parset" <<EOFINNER
 ##########
 ## Continuum imaging with cimager
 ##
@@ -264,9 +267,9 @@ ${cimagerParams}
 \${calparams}
 #
 EOFINNER
-    if [ \${LOOP} -gt 0 ]; then
+    if [ "\${LOOP}" -gt 0 ]; then
             dataSelectionSelfcalLoop Cccalibrator
-            cat >> \$parset <<EOFINNER
+            cat >> "\$parset" <<EOFINNER
 ##########
 ## Shallow source-finding with selavy
 ##
@@ -371,13 +374,13 @@ EOFINNER
         cd \${loopdir}
 
         log=${logs}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}_selavy.log
-        echo "--- Source finding with $selavy ---" > \$log
-        echo "---    Loop=\$LOOP, Threshold = \${SELFCAL_SELAVY_THRESHOLD_ARRAY[\$LOOP-1]} --" >> \$log
+        echo "--- Source finding with $selavy ---" > "\$log"
+        echo "---    Loop=\$LOOP, Threshold = \${SELFCAL_SELAVY_THRESHOLD_ARRAY[\$LOOP-1]} --" >> "\$log"
         NCORES=${NPROCS_SELAVY}
         NPPN=${CPUS_PER_CORE_SELFCAL}
-        aprun -n \${NCORES} -N \${NPPN} $selavy -c \$parset >> \$log
+        aprun -n \${NCORES} -N \${NPPN} $selavy -c "\$parset" >> "\$log"
         err=\$?
-        extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname}_L\${LOOP}_selavy "txt,csv"
+        extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname}_L\${LOOP}_selavy "txt,csv"
 
         if [ \$err != 0 ]; then
             exit \$err
@@ -385,12 +388,12 @@ EOFINNER
 
         if [ "\${selfcalMethod}" == "Cmodel" ]; then
             log=${logs}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}_cmodel.log
-            echo "--- Model creation with $cmodel ---" > \$log
+            echo "--- Model creation with $cmodel ---" > "\$log"
             NCORES=2
             NPPN=2
-            aprun -n \${NCORES} -N \${NPPN} $cmodel -c \$parset >> \$log
+            aprun -n \${NCORES} -N \${NPPN} $cmodel -c "\$parset" >> "\$log"
             err=\$?
-            extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname}_L\${LOOP}_cmodel "txt,csv"
+            extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname}_L\${LOOP}_cmodel "txt,csv"
             
             if [ \$err != 0 ]; then
                 exit \$err
@@ -399,27 +402,27 @@ EOFINNER
 
 
         log=${logs}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}_ccalibrator.log
-        echo "--- Calibration with $ccalibrator ---" > \$log
-        echo "---    Loop \$LOOP, Interval = \${SELFCAL_INTERVAL_ARRAY[\$LOOP-1]} --" >> \$log
-        echo "---    Normalise gains = \${SELFCAL_NORMALISE_GAINS_ARRAY[\$LOOP-1]} --" >> \$log
+        echo "--- Calibration with $ccalibrator ---" > "\$log"
+        echo "---    Loop \$LOOP, Interval = \${SELFCAL_INTERVAL_ARRAY[\$LOOP-1]} --" >> "\$log"
+        echo "---    Normalise gains = \${SELFCAL_NORMALISE_GAINS_ARRAY[\$LOOP-1]} --" >> "\$log"
         NCORES=1
         NPPN=1
-        aprun -n \${NCORES} -N \${NPPN} $ccalibrator -c \$parset >> \$log
+        aprun -n \${NCORES} -N \${NPPN} $ccalibrator -c "\$parset" >> "\$log"
         err=\$?
-        extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname}_L\${LOOP}_ccal "txt,csv"
+        extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname}_L\${LOOP}_ccal "txt,csv"
         if [ \$err != 0 ]; then
             exit \$err
         fi
 
         # Remove the previous cal table and copy the new one in its place
-        rm -rf ${OUTPUT}/${gainscaltab}
-        cp -r \${caldata} ${OUTPUT}/${gainscaltab}
+        rm -rf "${OUTPUT}/${gainscaltab}"
+        cp -r "\${caldata}" "${OUTPUT}/${gainscaltab}"
 
         # Keep a backup of the intermediate images, prior to re-imaging.
         if [ \${copyImages} == true ]; then
             # Use the . with imageBase to get images only, so we don't
             #  move the selfCal directory itself
-            mv ${OUTPUT}/*.${imageBase}* .
+            mv "${OUTPUT}/*.${imageBase}*" .
         fi
 
         cd $OUTPUT
@@ -427,15 +430,15 @@ EOFINNER
 
     # Run the imager, calibrating if not the first time.
     log=${logs}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}.log
-    echo "--- Imaging with $theimager ---" > \$log
+    echo "--- Imaging with $theimager ---" > "\$log"
     NCORES=${NUM_CPUS_CONTIMG_SCI}
     NPPN=${CPUS_PER_CORE_CONT_IMAGING}
-    aprun -n \${NCORES} -N \${NPPN} $theimager -c \$parset >> \$log
+    aprun -n \${NCORES} -N \${NPPN} $theimager -c "\$parset" >> "\$log"
     err=\$?
-    rejuvenate *.${imageBase}*
-    rejuvenate ${OUTPUT}/${gainscaltab}
-    rejuvenate ${OUTPUT}/${msSciAv}
-    extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname}_L\${LOOP} "txt,csv"
+    rejuvenate "./*.${imageBase}*"
+    rejuvenate "${OUTPUT}/${gainscaltab}"
+    rejuvenate "${OUTPUT}/${msSciAv}"
+    extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname}_L\${LOOP} "txt,csv"
     if [ \$err != 0 ]; then
         exit \$err
     fi
@@ -444,17 +447,17 @@ done
 
 EOFOUTER
 
-    if [ $SUBMIT_JOBS == true ]; then
+    if [ "${SUBMIT_JOBS}" == "true" ]; then
 	DEP=""
-        DEP=`addDep "$DEP" "$DEP_START"`
-        DEP=`addDep "$DEP" "$ID_SPLIT_SCI"`
-        DEP=`addDep "$DEP" "$ID_CCALAPPLY_SCI"`
-        DEP=`addDep "$DEP" "$ID_FLAG_SCI"`
-        DEP=`addDep "$DEP" "$ID_AVERAGE_SCI"`
-        DEP=`addDep "$DEP" "$ID_FLAG_SCI_AV"`
-	ID_CONTIMG_SCI_SC=`sbatch $DEP $sbatchfile | awk '{print $4}'`
-	recordJob ${ID_CONTIMG_SCI_SC} "Make a self-calibrated continuum image for beam $BEAM of the science observation, with flags \"$DEP\""
-        FLAG_IMAGING_DEP=`addDep "$FLAG_IMAGING_DEP" "$ID_CONTIMG_SCI_SC"`
+        DEP=$(addDep "$DEP" "$DEP_START")
+        DEP=$(addDep "$DEP" "$ID_SPLIT_SCI")
+        DEP=$(addDep "$DEP" "$ID_CCALAPPLY_SCI")
+        DEP=$(addDep "$DEP" "$ID_FLAG_SCI")
+        DEP=$(addDep "$DEP" "$ID_AVERAGE_SCI")
+        DEP=$(addDep "$DEP" "$ID_FLAG_SCI_AV")
+	ID_CONTIMG_SCI_SC=$(sbatch $DEP "$sbatchfile" | awk '{print $4}')
+	recordJob "${ID_CONTIMG_SCI_SC}" "Make a self-calibrated continuum image for beam $BEAM of the science observation, with flags \"$DEP\""
+        FLAG_IMAGING_DEP=$(addDep "$FLAG_IMAGING_DEP" "$ID_CONTIMG_SCI_SC")
     else
 	echo "Would make a self-calibrated continuum image for beam $BEAM of the science observation with slurm file $sbatchfile"
     fi

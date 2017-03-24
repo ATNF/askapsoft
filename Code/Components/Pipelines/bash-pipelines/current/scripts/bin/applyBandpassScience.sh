@@ -2,7 +2,7 @@
 #
 # Launches a job to apply the bandpass solution to the measurement set 
 #
-# @copyright (c) 2015 CSIRO
+# @copyright (c) 2017 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -30,15 +30,15 @@
 ID_CCALAPPLY_SCI=""
 
 DO_IT=$DO_APPLY_BANDPASS
-if [ $DO_IT == true ] && [ -e $BANDPASS_CHECK_FILE ]; then
+if [ "$DO_IT" == "true" ] && [ -e "$BANDPASS_CHECK_FILE" ]; then
     echo "Bandpass has already been applied to beam $BEAM of the science observation - not re-doing"
     DO_IT=false
 fi
 
-if [ $DO_IT == true ]; then
+if [ "$DO_IT" == "true" ]; then
 
     setJob apply_bandpass applyBP
-    cat > $sbatchfile <<EOFOUTER
+    cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
@@ -60,7 +60,8 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
+thisfile=$sbatchfile
+cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
 RAW_TABLE=${TABLE_BANDPASS}
 SMOOTH_TABLE=${TABLE_BANDPASS}.smooth
@@ -72,7 +73,7 @@ else
 fi
 
 parset=${parsets}/ccalapply_bp_b${BEAM}_\${SLURM_JOB_ID}.in
-cat > \$parset << EOFINNER
+cat > "\$parset" << EOFINNER
 Ccalapply.dataset                         = ${msSci}
 #
 # Allow flagging of vis if inversion of Mueller matrix fails
@@ -91,11 +92,11 @@ log=${logs}/ccalapply_bp_b${BEAM}_\${SLURM_JOB_ID}.log
 
 NCORES=1
 NPPN=1
-aprun -n \${NCORES} -N \${NPPN} ${ccalapply} -c \$parset > \$log
+aprun -n \${NCORES} -N \${NPPN} ${ccalapply} -c "\$parset" > "\$log"
 err=\$?
 rejuvenate ${msSci}
 rejuvenate \${TABLE}
-extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname} "txt,csv"
+extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
 else
@@ -104,13 +105,13 @@ fi
 
 EOFOUTER
 
-    if [ $SUBMIT_JOBS == true ]; then
+    if [ "${SUBMIT_JOBS}" == "true" ]; then
 	DEP=""
-        DEP=`addDep "$DEP" "$DEP_START"`
-        DEP=`addDep "$DEP" "$ID_SPLIT_SCI"`
-        DEP=`addDep "$DEP" "$ID_CBPCAL"`
-	ID_CCALAPPLY_SCI=`sbatch $DEP $sbatchfile | awk '{print $4}'`
-	recordJob ${ID_CCALAPPLY_SCI} "Applying bandpass calibration to science observation, with flags \"$DEP\""
+        DEP=$(addDep "$DEP" "$DEP_START")
+        DEP=$(addDep "$DEP" "$ID_SPLIT_SCI")
+        DEP=$(addDep "$DEP" "$ID_CBPCAL")
+	ID_CCALAPPLY_SCI=$(sbatch $DEP "$sbatchfile" | awk '{print $4}')
+	recordJob "${ID_CCALAPPLY_SCI}" "Applying bandpass calibration to science observation, with flags \"$DEP\""
     else
 	echo "Would apply bandpass calibration to science observation with slurm file $sbatchfile"
     fi

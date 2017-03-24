@@ -3,7 +3,7 @@
 # A script to set up all necessary subdirectories required for the
 # pipeline processing.
 #
-# @copyright (c) 2016 CSIRO
+# @copyright (c) 2017 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -31,30 +31,30 @@
 ####################
 # Define & create directories
 
-parsets=${BASEDIR}/parsets
-logs=${BASEDIR}/logs
-slurms=${BASEDIR}/slurmFiles
-slurmOut=${BASEDIR}/slurmOutput
-tools=${BASEDIR}/tools
-metadata=${BASEDIR}/metadata
-stats=${BASEDIR}/stats
+parsets="${BASEDIR}/parsets"
+logs="${BASEDIR}/logs"
+slurms="${BASEDIR}/slurmFiles"
+slurmOut="${BASEDIR}/slurmOutput"
+tools="${BASEDIR}/tools"
+metadata="${BASEDIR}/metadata"
+stats="${BASEDIR}/stats"
 
-mkdir -p $parsets
-lfs setstripe -c 1 $parsets
-mkdir -p $logs
-lfs setstripe -c 1 $logs
-mkdir -p $slurms
-lfs setstripe -c 1 $slurms
-mkdir -p $slurmOut
-lfs setstripe -c 1 $slurmOut
-mkdir -p $tools
-lfs setstripe -c 1 $tools
-mkdir -p $metadata
-lfs setstripe -c 1 $metadata
-mkdir -p $stats
-lfs setstripe -c 1 $stats
+mkdir -p "$parsets"
+lfs setstripe -c 1 "$parsets"
+mkdir -p "$logs"
+lfs setstripe -c 1 "$logs"
+mkdir -p "$slurms"
+lfs setstripe -c 1 "$slurms"
+mkdir -p "$slurmOut"
+lfs setstripe -c 1 "$slurmOut"
+mkdir -p "$tools"
+lfs setstripe -c 1 "$tools"
+mkdir -p "$metadata"
+lfs setstripe -c 1 "$metadata"
+mkdir -p "$stats"
+lfs setstripe -c 1 "$stats"
 
 
 # temp directory for certain files that we don't need to keep
-tmp=/tmp/tmp`whoami`pipe
-mkdir -p $tmp
+tmp=/tmp/tmp$(whoami)pipe
+mkdir -p "$tmp"

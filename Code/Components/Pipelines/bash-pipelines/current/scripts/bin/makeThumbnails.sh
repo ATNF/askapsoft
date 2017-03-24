@@ -5,7 +5,7 @@
 # to determine the noise (via robust statistics), and the greyscale is
 # set to -10 to +40 times the effective rms.
 #
-# @copyright (c) 2016 CSIRO
+# @copyright (c) 2017 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -30,10 +30,10 @@
 # @author Matthew Whiting <Matthew.Whiting@csiro.au>
 #
 
-if [ ${DO_MAKE_THUMBNAILS} == true ]; then
+if [ "${DO_MAKE_THUMBNAILS}" == "true" ]; then
 
     sbatchfile=$slurms/makeThumbnails.sbatch
-    cat > $sbatchfile <<EOFOUTER
+    cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
@@ -55,7 +55,8 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
+thisfile=$sbatchfile
+cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
 
 # Define the lists of image names, types, 
@@ -69,7 +70,7 @@ for((i=0;i<\${#casdaTwoDimImageNames[@]};i++)); do
 
     log=${logs}/thumbnails-\${im##*/}_\${SLURM_JOB_ID}.log
     script=${parsets}/thumbnails-\${im##*/}_\${SLURM_JOBID}.py
-    cat > \$script <<EOF
+    cat > "\$script" <<EOF
 #!/usr/bin/env python
 import matplotlib
 matplotlib.use('Agg')
@@ -119,18 +120,18 @@ for size in figsizes:
     gc.save(thumbim.replace('.%s'%suffix,'_%s.%s'%(size,suffix)))
 
 EOF
-    python \$script > \$log
+    python "\$script" > "\$log"
 
 done
 EOFOUTER
 
-    if [ $SUBMIT_JOBS == true ]; then
+    if [ "${SUBMIT_JOBS}" == "true" ]; then
         dep=""
         if [ "${ALL_JOB_IDS}" != "" ]; then
-            dep="-d afterok:`echo $ALL_JOB_IDS | sed -e 's/,/:/g'`"
+            dep="-d afterok:$(echo "${ALL_JOB_IDS}" | sed -e 's/,/:/g')"
         fi
-        ID_THUMBS=`sbatch ${dep} $sbatchfile | awk '{print $4}'`
-        recordJob ${ID_THUMBS} "Job to create ${THUMBNAIL_SUFFIX} thumbnails of all 2D images, with flags \"${dep}\""
+        ID_THUMBS=$(sbatch ${dep} "$sbatchfile" | awk '{print $4}')
+        recordJob "${ID_THUMBS}" "Job to create ${THUMBNAIL_SUFFIX} thumbnails of all 2D images, with flags \"${dep}\""
     else
         echo "Would submit job to create ${THUMBNAIL_SUFFIX} thumbnails of all 2D images, with slurm file $sbatchfile"
     fi

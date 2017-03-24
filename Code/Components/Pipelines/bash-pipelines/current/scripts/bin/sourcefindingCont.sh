@@ -41,32 +41,32 @@ contCube=$imageName
 beamlog=beamlog.${imageBase}.txt
 
 # lower-case list of polarisations to use
-polList=`echo ${POL_LIST} | tr [:upper:] [:lower:]`
+polList=$(echo "${POL_LIST}" | tr '[:upper:]' '[:lower:]')
 
 # Dependencies for the job
 DEP=""
 if [ "$FIELD" == "." ]; then
-    DEP=`addDep "$DEP" "$ID_LINMOS_CONT_ALL"`
-elif [ $BEAM == "all" ]; then
-    DEP=`addDep "$DEP" "$ID_LINMOS_CONT"`
+    DEP=$(addDep "$DEP" "$ID_LINMOS_CONT_ALL")
+elif [ "$BEAM" == "all" ]; then
+    DEP=$(addDep "$DEP" "$ID_LINMOS_CONT")
 else
-    if [ $DO_SELFCAL == true ]; then
-        DEP=`addDep "$DEP" "$ID_CONTIMG_SCI_SC"`
+    if [ "${DO_SELFCAL}" == "true" ]; then
+        DEP=$(addDep "$DEP" "$ID_CONTIMG_SCI_SC")
     else
-        DEP=`addDep "$DEP" "$ID_CONTIMG_SCI"`
+        DEP=$(addDep "$DEP" "$ID_CONTIMG_SCI")
     fi
 fi
-if [ ${DO_RM_SYNTHESIS} == true ]; then
+if [ "${DO_RM_SYNTHESIS}" == "true" ]; then
     if [ "$FIELD" == "." ]; then
-        DEP=`addDep "$DEP" "$ID_LINMOS_CONTCUBE_ALL"`
-    elif [ $BEAM == "all" ]; then
-        DEP=`addDep "$DEP" "$ID_LINMOS_CONTCUBE"`
+        DEP=$(addDep "$DEP" "$ID_LINMOS_CONTCUBE_ALL")
+    elif [ "$BEAM" == "all" ]; then
+        DEP=$(addDep "$DEP" "$ID_LINMOS_CONTCUBE")
     else
-        DEP=`addDep "$DEP" "$ID_CONTCUBE_SCI"`
+        DEP=$(addDep "$DEP" "$ID_CONTCUBE_SCI")
     fi
 fi
 
-if [ ! -e ${OUTPUT}/${contImage} ] && [ "${DEP}" == "" ] &&
+if [ ! -e "${OUTPUT}/${contImage}" ] && [ "${DEP}" == "" ] &&
        [ "${SUBMIT_JOBS}" == "true" ]; then
     DO_IT=false
 fi
@@ -82,8 +82,8 @@ if [ "${DO_IT}" == "true" ]; then
     doRM=${DO_RM_SYNTHESIS}
     description=selavyCont
     if [ "$LOOP" != "" ]; then
-        if [ $LOOP -gt 0 ]; then
-            description=selavyContL${LOOP}
+        if [ "$LOOP" -gt 0 ]; then
+            description="selavyContL${LOOP}"
             contImage="${contImage}.SelfCalLoop${LOOP}"
             contWeights="${contWeights}.SelfCalLoop${LOOP}"
             doRM=false
@@ -95,8 +95,8 @@ if [ "${DO_IT}" == "true" ]; then
         # Use a direct flux threshold if specified
         thresholdPars="# Detection threshold
 Selavy.threshold = ${SELAVY_FLUX_THRESHOLD}"
-        if [ ${SELAVY_FLAG_GROWTH} == true ] && 
-               [ ${SELAVY_GROWTH_THRESHOLD} != "" ]; then
+        if [ "${SELAVY_FLAG_GROWTH}" == "true" ] && 
+               [ "${SELAVY_GROWTH_THRESHOLD}" != "" ]; then
             thresholdPars="${thresholdPars}
 Selavy.flagGrowth =  ${SELAVY_FLAG_GROWTH}
 Selavy.growthThreshold = ${SELAVY_GROWTH_THRESHOLD}"
@@ -105,16 +105,16 @@ Selavy.growthThreshold = ${SELAVY_GROWTH_THRESHOLD}"
         # Use a SNR threshold
         thresholdPars="# Detection threshold
 Selavy.snrCut = ${SELAVY_SNR_CUT}"
-        if [ ${SELAVY_FLAG_GROWTH} == true ] &&
-               [ ${SELAVY_GROWTH_CUT} != "" ]; then
+        if [ "${SELAVY_FLAG_GROWTH}" == "true" ] &&
+               [ "${SELAVY_GROWTH_CUT}" != "" ]; then
             thresholdPars="${thresholdPars}
 Selavy.flagGrowth =  ${SELAVY_FLAG_GROWTH}
 Selavy.growthThreshold = ${SELAVY_GROWTH_CUT}"
         fi
     fi    
 
-    setJob science_selavy_cont_${contImage} $description
-    cat > $sbatchfile <<EOFOUTER
+    setJob "science_selavy_cont_${contImage}" "$description"
+    cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
@@ -136,7 +136,8 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
+thisfile=$sbatchfile
+cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
 seldir=selavy_${contImage}
 mkdir -p \$seldir
@@ -155,13 +156,13 @@ weights=${OUTPUT}/${contWeights}
 contcube=${OUTPUT}/${contCube}
 
 imlist="\${imlist} \${image}"
-if [ \$NUM_TAYLOR_TERMS -gt 1 ]; then
-    t1im=\`echo \$image | sed -e 's/taylor\.0/taylor\.1/g'\`
-    if [ -e \${t1im} ]; then
+if [ "\${NUM_TAYLOR_TERMS}" -gt 1 ]; then
+    t1im=\$(echo "\$image" | sed -e 's/taylor\.0/taylor\.1/g')
+    if [ -e "\${t1im}" ]; then
         imlist="\${imlist} \${t1im}"
     fi
-    t2im=\`echo \$image | sed -e 's/taylor\.0/taylor\.2/g'\`
-    if [ -e \${t2im} ]; then
+    t2im=\$(echo "\$image" | sed -e 's/taylor\.0/taylor\.2/g')
+    if [ -e "\${t2im}" ]; then
         imlist="\${imlist} \${t2im}"
     fi
 fi
@@ -181,8 +182,8 @@ if [ \$doRM == true ]; then
     polList="${polList}"
     for p in \${polList}; do
         sedstr="s/%p/\$p/g"
-        thisim=\`echo \$contcube | sed -e \$sedstr\`
-        if [ -e \${thisim} ]; then
+        thisim=\$(echo "\$contcube" | sed -e "\$sedstr")
+        if [ -e "\${thisim}" ]; then
             imlist="\${imlist} \${thisim}"
         else
             doRM=false
@@ -201,15 +202,15 @@ for im in \${imlist}; do
     # Make a link so we point to a file in the current directory for
     # Selavy. This gets the referencing correct in the catalogue
     # metadata 
-    if [ ! -e \$fitsim ]; then
+    if [ ! -e "\$fitsim" ]; then
         HAVE_IMAGES=false
         echo "ERROR - Could not create \${im}.fits"
     else
-        ln -s \${im}.fits .
+        ln -s "\${im}.fits" .
     fi
 done
 
-if [ \${HAVE_IMAGES} == true ]; then
+if [ "\${HAVE_IMAGES}" == "true" ]; then
 
     parset=${parsets}/science_selavy_cont_${FIELDBEAM}_\${SLURM_JOB_ID}.in
     log=${logs}/science_selavy_cont_${FIELDBEAM}_\${SLURM_JOB_ID}.log
@@ -218,7 +219,7 @@ if [ \${HAVE_IMAGES} == true ]; then
     polDir=PolData
     mkdir -p \$polDir
 
-    if [ \${doRM} == true ]; then
+    if [ "\${doRM}" == "true" ]; then
         rmSynthParams="# RM Synthesis on extracted spectra from continuum cube
 Selavy.RMSynthesis = \${doRM}
 Selavy.RMSynthesis.cube = \$contcube
@@ -242,7 +243,7 @@ Selavy.RMSynthesis.phiZero = ${SELAVY_POL_PHI_ZERO}"
 Selavy.RMSynthesis = \${doRM}"
     fi
 
-    cat > \$parset <<EOFINNER
+    cat > "\$parset" <<EOFINNER
 Selavy.image = \${image##*/}.fits
 Selavy.SBid = ${SB_SCIENCE}
 Selavy.nsubx = ${SELAVY_NSUBX}
@@ -280,30 +281,30 @@ EOFINNER
 
     NCORES=${NUM_CPUS_SELAVY}
     NPPN=${CPUS_PER_CORE_SELAVY}
-    aprun -n \${NCORES} -N \${NPPN} $selavy -c \$parset >> \$log
+    aprun -n \${NCORES} -N \${NPPN} $selavy -c "\$parset" >> "\$log"
     err=\$?
-    extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname} "txt,csv"
+    extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv"
     if [ \$err != 0 ]; then
         exit \$err
     fi
 
     # Now convert the extracted polarisation artefacts to FITS
-    if [ \${doRM} == true ]; then
-        cd \${polDir}
+    if [ "\${doRM}" == "true" ]; then
+        cd "\${polDir}"
         parset=temp.in
         log=$logs/convertToFITS_polSpectra_\${SLURM_JOB_ID}.log
         neterr=0
-        for im in \`ls\`; do 
+        for im in ./*; do 
             casaim=\${im}
             fitsim="\${im}.fits"
-            echo "Converting \$casaim to \$fitsim" >> \$log
+            echo "Converting \$casaim to \$fitsim" >> "\$log"
             ${fitsConvertText}
             err=\$?
             if [ \$err -ne 0 ]; then
                 neterr=\$err
             fi
         done
-        extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${neterr} convertFITSpolspec "txt,csv"
+        extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${neterr} convertFITSpolspec "txt,csv"
         rm -f \$parset
     fi
 
@@ -316,8 +317,8 @@ fi
 EOFOUTER
 
     if [ "${SUBMIT_JOBS}" == "true" ]; then
-	ID_SOURCEFINDING_CONT_SCI=`sbatch ${DEP} $sbatchfile | awk '{print $4}'`
-	recordJob ${ID_SOURCEFINDING_CONT_SCI} "Run the continuum source-finding on the science image ${contImage} with flags \"$DEP\""
+	ID_SOURCEFINDING_CONT_SCI=$(sbatch ${DEP} "$sbatchfile" | awk '{print $4}')
+	recordJob "${ID_SOURCEFINDING_CONT_SCI}" "Run the continuum source-finding on the science image ${contImage} with flags \"$DEP\""
     else
 	echo "Would run the continuum source-finding on the science image ${contImage} with slurm file $sbatchfile"
     fi

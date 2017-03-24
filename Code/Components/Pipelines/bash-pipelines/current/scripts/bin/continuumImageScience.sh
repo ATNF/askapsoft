@@ -3,7 +3,7 @@
 # Launches a job to image the current beam of the science
 # observation, using the BasisfunctionMFS solver.
 #
-# @copyright (c) 2015 CSIRO
+# @copyright (c) 2017 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -29,11 +29,11 @@
 #
 
 # Define the Cimager parset and associated parameters
-. ${PIPELINEDIR}/getContinuumCimagerParams.sh
+. "${PIPELINEDIR}/getContinuumCimagerParams.sh"
 
 ID_CONTIMG_SCI=""
 
-DO_IT=$DO_CONT_IMAGING
+DO_IT="$DO_CONT_IMAGING"
 
 if [ "${DO_ALT_IMAGER_CONT}" == "true" ]; then
     theimager=$altimager
@@ -76,7 +76,8 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
+thisfile=$sbatchfile
+cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
 # Parameters that can vary with self-calibration loop number (which is
 #     zero in this case)
@@ -90,7 +91,7 @@ cimagerSelfcalLoopParams
 dataSelectionSelfcalLoop Cimager
 
 parset=${parsets}/science_imaging_${FIELDBEAM}_\${SLURM_JOB_ID}.in
-cat > \$parset <<EOFINNER
+cat > "\$parset" <<EOFINNER
 ${cimagerParams}
 #
 \${loopParams}
@@ -104,7 +105,7 @@ log=${logs}/science_imaging_${FIELDBEAM}_\${SLURM_JOB_ID}.log
 
 NCORES=${NUM_CPUS_CONTIMG_SCI}
 NPPN=${CPUS_PER_CORE_CONT_IMAGING}
-aprun -n \${NCORES} -N \${NPPN} $theimager -c \$parset > \$log
+aprun -n \${NCORES} -N \${NPPN} $theimager -c "\$parset" > "\$log"
 err=\$?
 rejuvenate *.${imageBase}*
 rejuvenate "${OUTPUT}/${msSciAv}"
