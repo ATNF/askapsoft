@@ -147,7 +147,7 @@ EOF
                 DEP=$(addDep "$DEP" "$ID_CAL_APPLY_SL_SCI")
                 DEP=$(addDep "$DEP" "$ID_CONT_SUB_SL_SCI")
                 DEP=$(addDep "$DEP" "$ID_SPECIMG_SCI")
-                ID_SPEC_IMCONTSUB_SCI=$(sbatch "$DEP" "$sbatchfile" | awk '{print $4}')
+                ID_SPEC_IMCONTSUB_SCI=$(sbatch $DEP "$sbatchfile" | awk '{print $4}')
                 recordJob "${ID_SPEC_IMCONTSUB_SCI}" "Image-based continuum subtraction for beam $BEAM of the science observation, with flags \"$DEP\""
             fi
         else
