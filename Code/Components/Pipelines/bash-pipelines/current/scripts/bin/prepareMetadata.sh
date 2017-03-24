@@ -432,7 +432,7 @@ EOF
                             echo "$(date): ERROR - 'schedblock annotate' failed with error code ${annotErr}" | tee -a ${ERROR_FILE}
                         fi
                     else
-                        schedblock annotate -i ${SB_JIRA_ISSUE} -c "ERROR -- Failed to transition SB ${SB_SCIENCE} to PROCESSING." ${SB_SCIENCE}
+                        schedblock annotate -i ${SB_JIRA_ISSUE} -c "ERROR -- Failed to transition SB ${SB_1934} to PROCESSING." ${SB_SCIENCE}
                         annotErr=$?
                         if [ ${annotErr} -ne 0 ]; then
                             echo "$(date): ERROR - 'schedblock annotate' failed with error code ${annotErr}" | tee -a ${ERROR_FILE}
