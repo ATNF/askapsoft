@@ -46,7 +46,7 @@ if [ $CLOBBER == false ] && [ -e ${OUTPUT}/${imageName} ]; then
     DO_IT=false
 fi
 
-if [ $DO_ALT_IMAGER == true ]; then
+if [ "${DO_ALT_IMAGER_CONT}" == "true" ]; then
     theimager=$altimager
 else
     theimager=$cimager

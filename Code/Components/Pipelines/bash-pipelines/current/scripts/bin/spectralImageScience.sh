@@ -33,7 +33,7 @@ ID_SPECIMG_SCI=""
 
 DO_IT=$DO_SPECTRAL_IMAGING
 
-if [ $DO_ALT_IMAGER == true ]; then
+if [ "${DO_ALT_IMAGER_SPECTRAL}" == "true" ]; then
     theImager=$altimager
     Imager="Cimager"
 else
@@ -132,7 +132,7 @@ fi
 
 # This is for the new (alt) imager
 altImagerParams="# Options for the alternate imager"
-if [ $DO_ALT_IMAGER == true ]; then
+if [ "${DO_ALT_IMAGER_SPECTRAL}" == "true" ]; then
 
 
     if [ "${NCHAN_PER_CORE_SL}" == "" ]; then
@@ -169,11 +169,11 @@ else
     altImagerParams="${altImagerParams} are not required"
 fi
 
-namestr="${Imager}.Images"
-if [ $DO_ALT_IMAGER == true ]; then
-namestr="${namestr}.Names                           = [image.${imageBase}]"
+nameDefinition="${Imager}.Images"
+if [ "${DO_ALT_IMAGER_SPECTRAL}" == "true" ]; then
+    nameDefinition="${nameDefinition}.Names                           = [image.${imageBase}]"
 else
-namestr="${namestr}.name                            = image.${imageBase}"
+    nameDefinition="${nameDefinition}.name                            = image.${imageBase}"
 fi
 
 
@@ -225,7 +225,7 @@ parset=${parsets}/science_spectral_imager_${FIELDBEAM}_\${SLURM_JOB_ID}.in
 cat > \$parset << EOF
 ${Imager}.dataset                                 = ${msSciSL}
 #
-${namestr}
+${nameDefinition}
 ${shapeDefinition}
 ${cellsizeDefinition}
 \${directionDefinition}

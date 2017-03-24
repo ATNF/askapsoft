@@ -35,23 +35,26 @@ ID_CONTIMG_SCI=""
 
 DO_IT=$DO_CONT_IMAGING
 
-if [ $DO_ALT_IMAGER == true ]; then
+if [ "${DO_ALT_IMAGER_CONT}" == "true" ]; then
     theimager=$altimager
 else
     theimager=$cimager
 fi
 
-if [ $CLOBBER == false ] && [ -e ${OUTPUT}/${imageName} ]; then
-    if [ $DO_IT == true ]; then
+imageCode=restored
+setImageProperties cont
+
+if [ "${CLOBBER}" != "true" ] && [ -e "${imageName}" ]; then
+    if [ "${DO_IT}" == "true" ]; then
         echo "Image ${imageName} exists, so not running continuum imaging for beam ${BEAM}"
     fi
     DO_IT=false
 fi
 
-if [ $DO_IT == true ]; then
+if [ "${DO_IT}" == "true" ]; then
 
     setJob science_continuumImage cont
-    cat > $sbatchfile <<EOFOUTER
+    cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
@@ -104,7 +107,7 @@ NPPN=${CPUS_PER_CORE_CONT_IMAGING}
 aprun -n \${NCORES} -N \${NPPN} $theimager -c \$parset > \$log
 err=\$?
 rejuvenate *.${imageBase}*
-rejuvenate ${OUTPUT}/${msSciAv}
+rejuvenate "${OUTPUT}/${msSciAv}"
 extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
@@ -112,17 +115,17 @@ fi
 
 EOFOUTER
 
-    if [ $SUBMIT_JOBS == true ]; then
+    if [ "${SUBMIT_JOBS}" == "true" ]; then
 	DEP=""
-        DEP=`addDep "$DEP" "$DEP_START"`
-        DEP=`addDep "$DEP" "$ID_SPLIT_SCI"`
-        DEP=`addDep "$DEP" "$ID_CCALAPPLY_SCI"`
-        DEP=`addDep "$DEP" "$ID_FLAG_SCI"`
-        DEP=`addDep "$DEP" "$ID_AVERAGE_SCI"`
-        DEP=`addDep "$DEP" "$ID_FLAG_SCI_AV"`
-	ID_CONTIMG_SCI=`sbatch $DEP $sbatchfile | awk '{print $4}'`
-	recordJob ${ID_CONTIMG_SCI} "Make a continuum image for beam $BEAM of the science observation, with flags \"$DEP\""
-        FLAG_IMAGING_DEP=`addDep "$FLAG_IMAGING_DEP" "$ID_CONTIMG_SCI"`
+        DEP=$(addDep "$DEP" "$DEP_START")
+        DEP=$(addDep "$DEP" "$ID_SPLIT_SCI")
+        DEP=$(addDep "$DEP" "$ID_CCALAPPLY_SCI")
+        DEP=$(addDep "$DEP" "$ID_FLAG_SCI")
+        DEP=$(addDep "$DEP" "$ID_AVERAGE_SCI")
+        DEP=$(addDep "$DEP" "$ID_FLAG_SCI_AV")
+	ID_CONTIMG_SCI=$(sbatch $DEP "$sbatchfile" | awk '{print $4}')
+	recordJob "${ID_CONTIMG_SCI}" "Make a continuum image for beam $BEAM of the science observation, with flags \"$DEP\""
+        FLAG_IMAGING_DEP=$(addDep "$FLAG_IMAGING_DEP" "$ID_CONTIMG_SCI")
     else
 	echo "Would make a continuum image for beam $BEAM of the science observation with slurm file $sbatchfile"
     fi

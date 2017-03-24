@@ -130,30 +130,33 @@ fi
 
 # This is for the new (alt) imager
 altImagerParams="# Options for the alternate imager"
-if [ $DO_ALT_IMAGER == true ]; then
+if [ "${DO_ALT_IMAGER_CONT}" == "true" ]; then
 
     if [ "${NCHAN_PER_CORE}" == "" ]; then
         nchanpercore=1
     else
         nchanpercore="${NCHAN_PER_CORE}"
     fi
-altImagerParams="${altImagerParams}
+    altImagerParams="${altImagerParams}
 Cimager.nchanpercore                           = ${nchanpercore}"
+
     if [ ${USE_TMPFS} == true ]; then
         usetmpfs="true"
     else
         usetmpfs="false"
     fi
-altImagerParams="${altImagerParams}
+    altImagerParams="${altImagerParams}
 Cimager.usetmpfs                               = ${usetmpfs}"
+
     if [ "${TMPFS}" == "" ]; then
         tmpfs="/dev/shm"
     else
         tmpfs="${TMPFS}"
     fi
-altImagerParams="${altImagerParams}
+    altImagerParams="${altImagerParams}
 Cimager.tmpfs                                   = ${tmpfs}"
-altImagerParams="${altImagerParams}
+
+    altImagerParams="${altImagerParams}
 # barycentre and multiple solver mode not supported in continuum imaging (yet)
 Cimager.barycentre                              = false
 Cimager.solverpercore                           = false

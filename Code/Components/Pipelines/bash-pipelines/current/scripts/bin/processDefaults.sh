@@ -397,6 +397,24 @@ EOF
 
     if [ $DO_SCIENCE_FIELD == true ]; then
 
+        # Switching on the DO_ALT_IMAGER_xxx flags for each type of
+        # imaging. If they aren't defined in the config file, then set
+        # to the value of DO_ALT_IMAGER.
+        if [ "${DO_ALT_IMAGER}" == "true" ]; then
+
+            if [ "${DO_ALT_IMAGER_CONT}" != "" ]; then
+                DO_ALT_IMAGER_CONT=${DO_ALT_IMAGER}
+            fi
+            if [ "${DO_ALT_IMAGER_CONTCUBE}" != "" ]; then
+                DO_ALT_IMAGER_CONTCUBE=${DO_ALT_IMAGER}
+            fi
+            if [ "${DO_ALT_IMAGER_SPECTRAL}" != "" ]; then
+                DO_ALT_IMAGER_SPECTRAL=${DO_ALT_IMAGER}
+            fi
+            
+        fi
+        
+
         # Name of the MS that should be flagged by flagScience.sh
         #   This gets set differently at different stages in the scripts
         msToFlag=""
@@ -423,12 +441,13 @@ EOF
         fi
 
         # if we are using the new imager we need to tweak this
-        if [ $DO_ALT_IMAGER == true ]; then
-            NUM_CPUS_CONTIMG_SCI=`echo $nchanContSci $nworkergroupsSci $NCHAN_PER_CORE | awk '{print ($1/$3)*$2+1}'`
+        if [ "${DO_ALT_IMAGER_CONT}" == "true" ]; then
+            NUM_CPUS_CONTIMG_SCI=$(echo "$nchanContSci" "$nworkergroupsSci" "${NCHAN_PER_CORE}" | awk '{print ($1/$3)*$2+1}')
             CPUS_PER_CORE_CONT_IMAGING=8
-            NUM_CPUS_SPECIMG_SCI=`echo $NUM_CHAN_SCIENCE $NCHAN_PER_CORE_SL | awk '{print ($1/$2) + 1}'`
+        fi
+        if [ "${DO_ALT_IMAGER_SPECTRAL}" == "true" ]; then
+            NUM_CPUS_SPECIMG_SCI=$(echo "${NUM_CHAN_SCIENCE}" "${NCHAN_PER_CORE_SL}" | awk '{print ($1/$2) + 1}')
             CPUS_PER_CORE_SPEC_IMAGING=16
-
         fi
 
         # Can't have -N greater than -n in the aprun call
@@ -531,7 +550,7 @@ EOF
             echo "WARNING - the parameter NSUB_CUBES is deprectated. Using NUM_SPECTRAL_CUBES=${NUM_SPECTRAL_CUBES} instead."
         fi
         
-        if [ "${DO_ALT_IMAGER}" == "true" ] && [ "${ALT_IMAGER_SINGLE_FILE}" != "true" ]; then
+        if [ "${DO_ALT_IMAGER_SPECTRAL}" == "true" ] && [ "${ALT_IMAGER_SINGLE_FILE}" != "true" ]; then
             nworkers=$(echo "${NUM_CHAN_SCIENCE}" "${NCHAN_PER_CORE_SL}" | awk '{print $1/$2}')
             writerIncrement=$(echo "$nworkers" "${NUM_SPECTRAL_CUBES}" | awk '{print $1/$2}')
             SUBBAND_WRITER_LIST=$(seq 1 "$writerIncrement" "$nworkers")

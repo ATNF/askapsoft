@@ -5,7 +5,7 @@
 # requested polarisations. This uses the $POL_LIST variable, which
 # should be something like "I Q U V".
 #
-# @copyright (c) 2015 CSIRO
+# @copyright (c) 2017 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -32,117 +32,126 @@
 
 ID_CONTCUBE_SCI=""
 
-if [ $DO_ALT_IMAGER == true ]; then
-theimager=$altimager
+if [ "${DO_ALT_IMAGER_CONTCUBE}" == "true" ]; then
+    theImager=$altimager
+    Imager="Cimager"
 else
-theimager=$simager
+    theImager=$simager
+    Imager="Simager"
 fi
 
 for POLN in $POL_LIST; do
 
     # make a lower-case version of the polarisation, for image name
-    pol=`echo $POLN | tr '[:upper:]' '[:lower:]'`
+    pol=$(echo $POLN | tr '[:upper:]' '[:lower:]')
 
-    # set the $imageBase variable
-    setImageBase contcube
+    imageCode=restored
+    setImageProperties contcube
 
     DO_IT=$DO_CONTCUBE_IMAGING
 
-    if [ $CLOBBER == false ] && [ -e ${OUTPUT}/image.${imageBase}.restored ]; then
-        if [ $DO_IT == true ]; then
-            echo "Image ${imageBase}.restored exists, so not running continuum-cube imaging for beam ${BEAM}"
+    if [ "${CLOBBER}" != "true" ] && [ -e "${imageName}" ]; then
+        if [ "${DO_IT}" == "true" ]; then
+            echo "Image ${imageName} exists, so not running continuum-cube imaging for beam ${BEAM}"
             echo " "
         fi
         DO_IT=false
     fi
 
-    if [ ${DO_APPLY_CAL_CONT} == true ]; then
+    if [ "${DO_APPLY_CAL_CONT}" == "true" ]; then
         msToUse=$msSciAvCal
     else
         msToUse=$msSciAv
     fi
 
     # Define the image polarisation
-    polarisation="Simager.Images.polarisation                     = [\"${POLN}\"]"
+    polarisation="${Imager}.Images.polarisation                     = [\"${POLN}\"]"
 
     # Define the preconditioning
-    preconditioning="Simager.preconditioner.Names                    = ${PRECONDITIONER_LIST}"
-    if [ "`echo ${PRECONDITIONER_LIST} | grep GaussianTaper`" != "" ]; then
+    preconditioning="${Imager}.preconditioner.Names                    = ${PRECONDITIONER_LIST}"
+    if [ "$(echo "${PRECONDITIONER_LIST}" | grep GaussianTaper)" != "" ]; then
         preconditioning="$preconditioning
-Simager.preconditioner.GaussianTaper            = ${PRECONDITIONER_GAUSS_TAPER}"
+${Imager}.preconditioner.GaussianTaper            = ${PRECONDITIONER_GAUSS_TAPER}"
     fi
-    if [ "`echo ${PRECONDITIONER_LIST} | grep Wiener`" != "" ]; then
+    if [ "$(echo "${PRECONDITIONER_LIST}" | grep Wiener)" != "" ]; then
         # Use the new preservecf preconditioner option, but only for the
         # Wiener filter
         preconditioning="$preconditioning
-Simager.preconditioner.preservecf               = true"
+${Imager}.preconditioner.preservecf               = true"
         if [ "${PRECONDITIONER_WIENER_ROBUSTNESS}" != "" ]; then
 	    preconditioning="$preconditioning
-Simager.preconditioner.Wiener.robustness        = ${PRECONDITIONER_WIENER_ROBUSTNESS}"
+${Imager}.preconditioner.Wiener.robustness        = ${PRECONDITIONER_WIENER_ROBUSTNESS}"
         fi
         if [ "${PRECONDITIONER_WIENER_TAPER}" != "" ]; then
 	    preconditioning="$preconditioning
-Simager.preconditioner.Wiener.taper             = ${PRECONDITIONER_WIENER_TAPER}"
+${Imager}.preconditioner.Wiener.taper             = ${PRECONDITIONER_WIENER_TAPER}"
         fi
     fi
     shapeDefinition="# Leave shape definition to advise"
     if [ "${NUM_PIXELS_CONT}" != "" ] && [ $NUM_PIXELS_CONT -gt 0 ]; then
-        shapeDefinition="Simager.Images.shape                            = [${NUM_PIXELS_CONT}, ${NUM_PIXELS_CONT}]"
+        shapeDefinition="${Imager}.Images.shape                            = [${NUM_PIXELS_CONT}, ${NUM_PIXELS_CONT}]"
     else
         echo "WARNING - No valid NUM_PIXELS_CONT parameter given.  Not running continuum cube imaging."
         DO_IT=false
     fi
     cellsizeGood=`echo ${CELLSIZE_CONT} | awk '{if($1>0.) print "true"; else print "false";}'`
     if [ "${CELLSIZE_CONT}" != "" ] && [ $cellsizeGood == true ]; then
-        cellsizeDefinition="Simager.Images.cellsize                         = [${CELLSIZE_CONT}arcsec, ${CELLSIZE_CONT}arcsec]"
+        cellsizeDefinition="${Imager}.Images.cellsize                         = [${CELLSIZE_CONT}arcsec, ${CELLSIZE_CONT}arcsec]"
     else
         echo "WARNING - No valid CELLSIZE_CONT parameter given.  Not running continuum cube imaging."
         DO_IT=false
     fi
     restFrequency="# No rest frequency specified for continuum cubes"
     if [ "${REST_FREQUENCY_CONTCUBE}" != "" ]; then
-        restFrequency="Simager.Images.restFrequency                    = ${REST_FREQUENCY_CONTCUBE}"
+        restFrequency="${Imager}.Images.restFrequency                    = ${REST_FREQUENCY_CONTCUBE}"
     fi
 
     cleaningPars="# These parameters define the clean algorithm 
-Simager.solver                                  = ${SOLVER_CONTCUBE}"
-    if [ ${SOLVER_CONTCUBE} == "Clean" ]; then
+${Imager}.solver                                  = ${SOLVER_CONTCUBE}"
+    if [ "${SOLVER_CONTCUBE}" == "Clean" ]; then
         cleaningPars="${cleaningPars}
-Simager.solver.Clean.algorithm                  = ${CLEAN_CONTCUBE_ALGORITHM}
-Simager.solver.Clean.niter                      = ${CLEAN_CONTCUBE_MINORCYCLE_NITER}
-Simager.solver.Clean.gain                       = ${CLEAN_CONTCUBE_GAIN}
-Simager.solver.Clean.scales                     = ${CLEAN_CONTCUBE_SCALES}
-Simager.solver.Clean.verbose                    = False
-Simager.solver.Clean.tolerance                  = 0.01
-Simager.solver.Clean.weightcutoff               = zero
-Simager.solver.Clean.weightcutoff.clean         = false
-Simager.solver.Clean.psfwidth                   = ${CLEAN_CONTCUBE_PSFWIDTH}
-Simager.solver.Clean.logevery                   = 50
-Simager.threshold.minorcycle                    = ${CLEAN_CONTCUBE_THRESHOLD_MINORCYCLE}
-Simager.threshold.majorcycle                    = ${CLEAN_CONTCUBE_THRESHOLD_MAJORCYCLE}
-Simager.ncycles                                 = ${CLEAN_CONTCUBE_NUM_MAJORCYCLES}
-Simager.Images.writeAtMajorCycle                = ${CLEAN_CONTCUBE_WRITE_AT_MAJOR_CYCLE}
+${Imager}.solver.Clean.algorithm                  = ${CLEAN_CONTCUBE_ALGORITHM}
+${Imager}.solver.Clean.niter                      = ${CLEAN_CONTCUBE_MINORCYCLE_NITER}
+${Imager}.solver.Clean.gain                       = ${CLEAN_CONTCUBE_GAIN}
+${Imager}.solver.Clean.scales                     = ${CLEAN_CONTCUBE_SCALES}
+${Imager}.solver.Clean.verbose                    = False
+${Imager}.solver.Clean.tolerance                  = 0.01
+${Imager}.solver.Clean.weightcutoff               = zero
+${Imager}.solver.Clean.weightcutoff.clean         = false
+${Imager}.solver.Clean.psfwidth                   = ${CLEAN_CONTCUBE_PSFWIDTH}
+${Imager}.solver.Clean.logevery                   = 50
+${Imager}.threshold.minorcycle                    = ${CLEAN_CONTCUBE_THRESHOLD_MINORCYCLE}
+${Imager}.threshold.majorcycle                    = ${CLEAN_CONTCUBE_THRESHOLD_MAJORCYCLE}
+${Imager}.ncycles                                 = ${CLEAN_CONTCUBE_NUM_MAJORCYCLES}
+${Imager}.Images.writeAtMajorCycle                = ${CLEAN_CONTCUBE_WRITE_AT_MAJOR_CYCLE}
 "
     fi
-    if [ ${SOLVER} == "Dirty" ]; then
+    if [ "${SOLVER}" == "Dirty" ]; then
         cleaningPars="${cleaningPars}
-Simager.solver.Dirty.tolerance                  = 0.01
-Simager.solver.Dirty.verbose                    = False
-Simager.ncycles                                 = 0"
+${Imager}.solver.Dirty.tolerance                  = 0.01
+${Imager}.solver.Dirty.verbose                    = False
+${Imager}.ncycles                                 = 0"
     fi
 
     restorePars="# These parameter govern the restoring of the image and the recording of the beam
-Simager.restore                                 = true
-Simager.restore.beam                            = ${RESTORING_BEAM_CONTCUBE}
-Simager.restore.beamReference                   = ${RESTORING_BEAM_CONTCUBE_REFERENCE}
-Simager.restore.beamLog                         = beamLog.${imageBase}.txt"
+${Imager}.restore                                 = true
+${Imager}.restore.beam                            = ${RESTORING_BEAM_CONTCUBE}
+${Imager}.restore.beamReference                   = ${RESTORING_BEAM_CONTCUBE_REFERENCE}
+${Imager}.restore.beamLog                         = beamLog.${imageBase}.txt"
 
-    if [ $DO_IT == true ]; then
+    nameDefinition="${Imager}.Images"
+    if [ "${DO_ALT_IMAGER_CONTCUBE}" == "true" ]; then
+        nameDefinition="${nameDefinition}.Names                           = [image.${imageBase}]"
+    else
+        nameDefinition="${nameDefinition}.name                            = image.${imageBase}"
+    fi
+    
+    if [ "${DO_IT}" == "true" ]; then
 
         echo "Imaging the continuum cube, polarisation $POLN, for the science observation"
 
-        setJob science_contcube_imager_${POLN} contcube${POLN}
-        cat > $sbatchfile <<EOFOUTER
+        setJob "science_contcube_imager_${POLN}" "contcube${POLN}"
+        cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
@@ -169,7 +178,7 @@ cp $sbatchfile \`echo $sbatchfile | sed -e \$sedstr\`
 ms=${msToUse}
 
 if [ "${DIRECTION}" != "" ]; then
-    directionDefinition="Simager.Images.direction                       = ${DIRECTION}"
+    directionDefinition="${Imager}.Images.direction                       = ${DIRECTION}"
 else
     log=${logs}/mslist_for_simager_\${SLURM_JOB_ID}.log
     NCORES=1
@@ -178,14 +187,14 @@ else
     ra=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=RA\`
     dec=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=Dec\`
     epoch=\`python ${PIPELINEDIR}/parseMSlistOutput.py --file=\$log --val=Epoch\`
-    directionDefinition="Simager.Images.direction                       = [\${ra}, \${dec}, \${epoch}]"
+    directionDefinition="${Imager}.Images.direction                       = [\${ra}, \${dec}, \${epoch}]"
 fi
 
 parset=${parsets}/science_contcube_imager_${FIELDBEAM}_${POLN}_\${SLURM_JOB_ID}.in
 cat > \$parset << EOF
-Simager.dataset                                 = \${ms}
+${Imager}.dataset                                 = \${ms}
 #
-Simager.Images.name                             = image.${imageBase}
+${nameDefinition}
 ${polarisation}
 ${shapeDefinition}
 ${cellsizeDefinition}
@@ -193,17 +202,17 @@ ${cellsizeDefinition}
 ${restFrequency}
 #
 # This defines the parameters for the gridding.
-Simager.gridder.snapshotimaging                 = ${GRIDDER_SNAPSHOT_IMAGING}
-Simager.gridder.snapshotimaging.wtolerance      = ${GRIDDER_SNAPSHOT_WTOL}
-Simager.gridder.snapshotimaging.longtrack       = ${GRIDDER_SNAPSHOT_LONGTRACK}
-Simager.gridder.snapshotimaging.clipping        = ${GRIDDER_SNAPSHOT_CLIPPING}
-Simager.gridder                                 = WProject
-Simager.gridder.WProject.wmax                   = ${GRIDDER_WMAX}
-Simager.gridder.WProject.nwplanes               = ${GRIDDER_NWPLANES}
-Simager.gridder.WProject.oversample             = ${GRIDDER_OVERSAMPLE}
-Simager.gridder.WProject.maxsupport             = ${GRIDDER_MAXSUPPORT}
-Simager.gridder.WProject.variablesupport        = true
-Simager.gridder.WProject.offsetsupport          = true
+${Imager}.gridder.snapshotimaging                 = ${GRIDDER_SNAPSHOT_IMAGING}
+${Imager}.gridder.snapshotimaging.wtolerance      = ${GRIDDER_SNAPSHOT_WTOL}
+${Imager}.gridder.snapshotimaging.longtrack       = ${GRIDDER_SNAPSHOT_LONGTRACK}
+${Imager}.gridder.snapshotimaging.clipping        = ${GRIDDER_SNAPSHOT_CLIPPING}
+${Imager}.gridder                                 = WProject
+${Imager}.gridder.WProject.wmax                   = ${GRIDDER_WMAX}
+${Imager}.gridder.WProject.nwplanes               = ${GRIDDER_NWPLANES}
+${Imager}.gridder.WProject.oversample             = ${GRIDDER_OVERSAMPLE}
+${Imager}.gridder.WProject.maxsupport             = ${GRIDDER_MAXSUPPORT}
+${Imager}.gridder.WProject.variablesupport        = true
+${Imager}.gridder.WProject.offsetsupport          = true
 #
 ${cleaningPars}
 #
@@ -217,32 +226,32 @@ log=${logs}/science_contcube_imager_${FIELDBEAM}_${POLN}_\${SLURM_JOB_ID}.log
 # Now run the simager
 NCORES=${NUM_CPUS_CONTCUBE_SCI}
 NPPN=${CPUS_PER_CORE_CONTCUBE_IMAGING}
-aprun -n \${NCORES} -N \${NPPN} ${theimager} -c \$parset > \$log
+aprun -n \${NCORES} -N \${NPPN} ${theImager} -c \$parset > \$log
 err=\$?
 rejuvenate \${ms}
 rejuvenate *.${imageBase}*
 extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname} "txt,csv"
 
 if [ \${err} -ne 0 ]; then
-    echo "Error: simager returned error code \${err}"
+    echo "Error: ${theImager} returned error code \${err}"
     exit 1
 fi
 
 
 EOFOUTER
 
-        if [ $SUBMIT_JOBS == true ]; then
+        if [ "${SUBMIT_JOBS}" == "true" ]; then
             DEP=""
-            DEP=`addDep "$DEP" "$DEP_START"`
-            DEP=`addDep "$DEP" "$ID_SPLIT_SCI"`
-            DEP=`addDep "$DEP" "$ID_CCALAPPLY_SCI"`
-            DEP=`addDep "$DEP" "$ID_FLAG_SCI"`
-            DEP=`addDep "$DEP" "$ID_AVERAGE_SCI"`
-            DEP=`addDep "$DEP" "$ID_FLAG_SCI_AV"`
-            DEP=`addDep "$DEP" "$ID_CAL_APPLY_CONT_SCI"`
-            ID_CONTCUBE_SCI=`sbatch $DEP $sbatchfile | awk '{print $4}'`
-            DEP_CONTCUBE=`addDep "$DEP_CONTCUBE" "$ID_CONTCUBE_SCI"`
-	    recordJob ${ID_CONTCUBE_SCI} "Make a continuum cube in pol $POLN for beam $BEAM of the science observation, with flags \"$DEP\""
+            DEP=$(addDep "$DEP" "$DEP_START")
+            DEP=$(addDep "$DEP" "$ID_SPLIT_SCI")
+            DEP=$(addDep "$DEP" "$ID_CCALAPPLY_SCI")
+            DEP=$(addDep "$DEP" "$ID_FLAG_SCI")
+            DEP=$(addDep "$DEP" "$ID_AVERAGE_SCI")
+            DEP=$(addDep "$DEP" "$ID_FLAG_SCI_AV")
+            DEP=$(addDep "$DEP" "$ID_CAL_APPLY_CONT_SCI")
+            ID_CONTCUBE_SCI=$(sbatch $DEP "$sbatchfile" | awk '{print $4}')
+            DEP_CONTCUBE=$(addDep "$DEP_CONTCUBE" "$ID_CONTCUBE_SCI")
+	    recordJob "${ID_CONTCUBE_SCI}" "Make a continuum cube in pol $POLN for beam $BEAM of the science observation, with flags \"$DEP\""
         else
 	    echo "Would make a continuum cube in pol $POLN for beam $BEAM of the science observation with slurm file $sbatchfile"
         fi
