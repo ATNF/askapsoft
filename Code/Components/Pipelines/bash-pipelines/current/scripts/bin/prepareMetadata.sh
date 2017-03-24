@@ -361,33 +361,94 @@ EOF
         # pipeline is being run by the askapops user, then we can
         # annotate the relevant JIRA ticket that we have done so.
         #
-        SB_STATE_INITIAL=`awk $awkstr ${sbinfo} | awk '{split($0,a,FS); print a[NF-3];}'`
-        if [ "${SB_STATE_INITIAL}" == "OBSERVED" ]; then
-            module load askapcli
-            schedblock transition -s PROCESSING ${SB_SCIENCE} > ${logs}/transition-to-PROCESSING.log
-            err=$?
-            module unload askapcli
-            if [ $err -ne 0 ]; then
-                echo "`date`: ERROR - 'schedblock transition' failed for SB ${SB_SCIENCE} with error code \$err"
-            fi
-            if [ "`whoami`" == "askapops" ]; then
-                if [ $err -eq 0 ]; then
-                    schedblock annotate -i ${SB_JIRA_ISSUE} -c "Commencing processing. SB ${SB_SCIENCE} transitioned to PROCESSING." ${SB_SCIENCE}
-                    annotErr=$?
-                    if [ ${annotErr} -ne 0 ]; then
-                        echo "`date`: ERROR - 'schedblock annotate' failed with error code ${annotErr}" | tee -a ${ERROR_FILE}
-                    fi
-                else
-                    schedblock annotate -i ${SB_JIRA_ISSUE} -c "ERROR -- Failed to transition SB ${SB_SCIENCE} to PROCESSING." ${SB_SCIENCE}
-                    annotErr=$?
-                    if [ ${annotErr} -ne 0 ]; then
-                        echo "`date`: ERROR - 'schedblock annotate' failed with error code ${annotErr}" | tee -a ${ERROR_FILE}
+        if [ "${DO_SCIENCE_FIELD}" == "true" ]; then
+            
+            SB_STATE_INITIAL=$(awk "$awkstr" "${sbinfo}" | awk '{split($0,a,FS); print a[NF-3];}')
+            if [ "${SB_STATE_INITIAL}" == "OBSERVED" ]; then
+                module load askapcli
+                schedblock transition -s PROCESSING ${SB_SCIENCE} > "${logs}/transition-to-PROCESSING.log"
+                err=$?
+                module unload askapcli
+                if [ $err -ne 0 ]; then
+                    echo "$(date): ERROR - 'schedblock transition' failed for SB ${SB_SCIENCE} with error code \$err"
+                fi
+                if [ "$(whoami)" == "askapops" ]; then
+                    if [ $err -eq 0 ]; then
+                        schedblock annotate -i ${SB_JIRA_ISSUE} -c "Commencing processing. SB ${SB_SCIENCE} transitioned to PROCESSING." ${SB_SCIENCE}
+                        annotErr=$?
+                        if [ ${annotErr} -ne 0 ]; then
+                            echo "$(date): ERROR - 'schedblock annotate' failed with error code ${annotErr}" | tee -a ${ERROR_FILE}
+                        fi
+                    else
+                        schedblock annotate -i ${SB_JIRA_ISSUE} -c "ERROR -- Failed to transition SB ${SB_SCIENCE} to PROCESSING." ${SB_SCIENCE}
+                        annotErr=$?
+                        if [ ${annotErr} -ne 0 ]; then
+                            echo "$(date): ERROR - 'schedblock annotate' failed with error code ${annotErr}" | tee -a ${ERROR_FILE}
+                        fi
                     fi
                 fi
             fi
+
         fi
 
+    # Do the same for the 1934 SB
+        if [ "${DO_1934_CAL}" == "true" ]; then
+
+            # Run schedblock to get parset & variables
+            sbinfoCal="${metadata}/schedblock-info-${SB_1934}.txt"
+            if [ -e "${sbinfoCal}" ] && [ "$(wc -l "$sbinfoCal" | awk '{print $1}')" -gt 1 ]; then
+                echo "Reusing schedblock info file $sbinfoCal for SBID ${SB_1934}"
+            else
+                if [ -e "${sbinfoCal}" ]; then
+                    rm -f "$sbinfoCal"
+                fi
+                echo "Using $sbinfo as location for bandpass SB metadata"
+                module load askapcli
+                schedblock info -v -p ${SB_1934} > $sbinfoCal
+                err=$?
+                module unload askapcli
+                if [ $err -ne 0 ]; then
+                    echo "ERROR - the 'schedblock' command failed."
+                    echo "        Full command:   schedblock info -v -p ${SB_1934}"
+                    echo "Exiting pipeline."
+                    exit $err
+                fi
+            fi
+
+            SB_STATE_INITIAL_CAL=$(awk "$awkstr" "${sbinfoCal}" | awk '{split($0,a,FS); print a[NF-3];}')
+            if [ "${SB_STATE_INITIAL_CAL}" == "OBSERVED" ]; then
+                module load askapcli
+                schedblock transition -s PROCESSING ${SB_1934} >> "${logs}/transition-to-PROCESSING.log"
+                err=$?
+                module unload askapcli
+                if [ $err -ne 0 ]; then
+                    echo "$(date): ERROR - 'schedblock transition' failed for SB ${SB_1934} with error code \$err"
+                fi
+                if [ "$(whoami)" == "askapops" ]; then
+                    if [ $err -eq 0 ]; then
+                        schedblock annotate -i ${SB_JIRA_ISSUE} -c "Commencing processing. SB ${SB_1934} transitioned to PROCESSING." ${SB_SCIENCE}
+                        annotErr=$?
+                        if [ ${annotErr} -ne 0 ]; then
+                            echo "$(date): ERROR - 'schedblock annotate' failed with error code ${annotErr}" | tee -a ${ERROR_FILE}
+                        fi
+                    else
+                        schedblock annotate -i ${SB_JIRA_ISSUE} -c "ERROR -- Failed to transition SB ${SB_SCIENCE} to PROCESSING." ${SB_SCIENCE}
+                        annotErr=$?
+                        if [ ${annotErr} -ne 0 ]; then
+                            echo "$(date): ERROR - 'schedblock annotate' failed with error code ${annotErr}" | tee -a ${ERROR_FILE}
+                        fi
+                    fi
+                fi
+ 
+            fi
+            
+        fi
+
+
+
+        
     fi
+
 
     # Find the beam centre locations    
     . ${PIPELINEDIR}/findBeamCentres.sh
