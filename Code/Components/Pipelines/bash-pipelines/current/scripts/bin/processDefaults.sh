@@ -405,13 +405,16 @@ EOF
         # to the value of DO_ALT_IMAGER.
         if [ "${DO_ALT_IMAGER}" == "true" ]; then
 
-            if [ "${DO_ALT_IMAGER_CONT}" != "" ]; then
+            if [ "${DO_ALT_IMAGER_CONT}" == "" ]; then
+                echo "WARNING - You have not defined DO_ALT_IMAGER_CONT - setting to $DO_ALT_IMAGER, the value of DO_ALT_IMAGER"
                 DO_ALT_IMAGER_CONT=${DO_ALT_IMAGER}
             fi
-            if [ "${DO_ALT_IMAGER_CONTCUBE}" != "" ]; then
+            if [ "${DO_ALT_IMAGER_CONTCUBE}" == "" ]; then
+                echo "WARNING - You have not defined DO_ALT_IMAGER_CONTCUBE - setting to $DO_ALT_IMAGER, the value of DO_ALT_IMAGER"
                 DO_ALT_IMAGER_CONTCUBE=${DO_ALT_IMAGER}
             fi
-            if [ "${DO_ALT_IMAGER_SPECTRAL}" != "" ]; then
+            if [ "${DO_ALT_IMAGER_SPECTRAL}" == "" ]; then
+                echo "WARNING - You have not defined DO_ALT_IMAGER_SPECTRAL - setting to $DO_ALT_IMAGER, the value of DO_ALT_IMAGER"
                 DO_ALT_IMAGER_SPECTRAL=${DO_ALT_IMAGER}
             fi
             

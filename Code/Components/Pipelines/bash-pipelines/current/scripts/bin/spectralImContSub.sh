@@ -87,7 +87,7 @@ cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
 IMAGE_BASE_SPECTRAL=${IMAGE_BASE_SPECTRAL}
 FIELD=${FIELD}
-DO_ALT_IMAGER_SPECTRAL=${DO_ALT_IMAGER_SPECTRAL}
+DO_ALT_IMAGER_SPECTRAL="${DO_ALT_IMAGER_SPECTRAL}"
 NUM_SPECTRAL_CUBES=${NUM_SPECTRAL_CUBES}
 subband="${subband}"
 imageCode=restored

@@ -100,6 +100,7 @@ sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 thisfile=$sbatchfile
 cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
+DO_ALT_IMAGER_CONTCUBE="${DO_ALT_IMAGER_CONTCUBE}"
 IMAGE_BASE_CONTCUBE=${IMAGE_BASE_CONTCUBE}
 SB_SCIENCE=${SB_SCIENCE}
 

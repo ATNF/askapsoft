@@ -133,7 +133,7 @@ for THISTILE in \$FULL_TILE_LIST; do
     echo "Tile \$THISTILE has field list \$TILE_FIELD_LIST"
 
     imageCode=${imageCode}
-    DO_ALT_IMAGER=${DO_ALT_IMAGER}
+    DO_ALT_IMAGER_SPECTRAL="${DO_ALT_IMAGER_SPECTRAL}"
     NUM_SPECTRAL_CUBES=${NUM_SPECTRAL_CUBES}
     subband="${subband}"
     imList=""       
