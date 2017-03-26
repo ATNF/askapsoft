@@ -211,6 +211,7 @@ mkdir -p \$caldir
 
 copyImages=${SELFCAL_KEEP_IMAGES}
 
+SELFCAL_NUM_LOOPS=${SELFCAL_NUM_LOOPS}
 # Parameters that can vary with self-calibration loop number
 SELFCAL_INTERVAL_ARRAY=(${SELFCAL_INTERVAL_ARRAY[@]})
 SELFCAL_SELAVY_THRESHOLD_ARRAY=(${SELFCAL_SELAVY_THRESHOLD_ARRAY[@]})
