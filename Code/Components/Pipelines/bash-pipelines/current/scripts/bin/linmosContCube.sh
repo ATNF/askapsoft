@@ -156,7 +156,7 @@ EOFOUTER
 
     if [ "${SUBMIT_JOBS}" == "true" ]; then
         DEP_CONTCUBE=$(echo "$DEP_CONTCUBE" | sed -e 's/afterok/afterany/g')
-	ID_LINMOS_CONTCUBE=$(sbatch ${DEP_CONTCUBE} "$sbatchfile" | awk '{print $4}'$)
+	ID_LINMOS_CONTCUBE=$(sbatch ${DEP_CONTCUBE} "$sbatchfile" | awk '{print $4}')
 	recordJob "${ID_LINMOS_CONTCUBE}" "Make a mosaic continuum cube of the science observation, field $FIELD, with flags \"${DEP_CONTCUBE}\""
         FULL_LINMOS_CONTCUBE_DEP=$(addDep "${FULL_LINMOS_CONTCUBE_DEP}" "${ID_LINMOS_CONTCUBE}")
     else
