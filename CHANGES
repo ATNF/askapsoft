@@ -1,3 +1,78 @@
+0.18.0 (29 March 2017)
+----------------------
+
+New features and updates:
+
+ * Scheduling block state changes, in conjunction with a new TOS
+  release:
+   - The CP manager now monitors the transition from EXECUTING to
+     OBSERVED, and the ICE interfaces have been updated accordingly. 
+   - The pipeline will now transition the scheduling block state from
+     OBSERVED to PROCESSING at the beginning of processing. This will
+     only be done for scheduling blocks in the OBSERVED state, and
+     will apply to both the science field and the bandpass calibrator.
+ * Python libraries:
+   - 3rdParty python libraries have been updated to current
+     versions. This applies to: numpy, scipy, matplotlib, pywcs, pytz,
+     and APLpy. The current astropy package has been added, and pyfits
+     has been removed. The python scripts in Analysis/evaluation have
+     been updated to be consistent with these new packages.
+   - There is a new script in Analysis/evaluation,
+     makeThumbnailImage.py, that produces grey-scale plots of
+     continuum images, and has the capability to add weights contours
+     and/or continuum components. This script is used by the
+     makeThumbnails script in the pipeline, as well as the new
+     diagnostics script (that produces more complex plots aimed at
+     being aids for quality analysis).
+ * Calibration & Imaging changes:
+   - The residual image is now the residual at the end of the last
+     major cycle. (Previously, it was the residual at the beginning of
+     the last major cycle.)
+   - The residual images now have units of Jy/beam rather than
+     Jy/pixel, and have the restoring beam written to the header.
+   - When the "restore preconditioner" option is used in imaging, the
+     residual and psf.image are also written out for this
+     preconditioner.
+ * Pipeline updates:
+   - There is a new pipeline parameter, CCALIBRATOR_MINUV, that allows
+     the bandpass calibration to exclude baseline below some value.
+   - Minor errors and inconsistencies in some catalogue specifications
+     have been fixed, with the polarisation catalogue being updated to
+     v0.7.
+   - The spectral-line catalogue has been added to the CASDA upload part
+     of the pipeline, and has been renamed to incorporate the image name
+     (in the line of other data products).
+   - There are new pipeline parameters SELFCAL_REF_ANTENNA &
+     SELFCAL_REF_GAINS that allow the self-calibration to use a
+     reference antenna and/or gain solution. 
+
+Bug fixes:
+
+ * Casacore v2 had several patches added that had been left out of the
+   upgrade. Notably a patch allowing the use of the SIGMA_SPECTRUM
+   measurement set column following concatenation of measurement
+   sets. 
+ * The mssplit utility has been made more robust with memory allocation
+   when splitting large datasets. 
+ * Better checking of the size of SELFCAL- and imaging-related arrays
+   in the pipeline configuration, particularly when not using
+   self-calibration. 
+ * [Weights bug in Selavy]
+ * The continuum-subtracted cubes were not being mosaicked by the
+   pipeline.
+ * The pipeline is more robust against errors encountered when
+   obtaining the metadata at the beginning. It can better detect when
+   a corrupted metadata file is present, and re-run the extraction of
+   that metadata.
+ * An error in handling the beam numbering for non-zero beam numbers
+   was identified & fixed.
+ * The pipeline Selavy jobs were using the incorrect weights cutoff,
+   leading to them not searching the full extent of the image.
+ * The use of the PURGE_FULL_MS flag in the pipelines will now not
+   trigger the re-splitting (and subsequent processing) of the
+   full-resolution dataset. 
+
+
 0.17.0 (24 February 2017)
 -------------------------
 
