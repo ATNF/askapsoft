@@ -215,10 +215,11 @@ spectral-imaging.
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | **New imager parameters**                     |                                 |                                    |                                                                   |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``DO_ALT_IMAGER``                             | false                           | none                               | If true, the spectral-line imaging is done by imager              |
+| ``DO_ALT_IMAGER_SPECTRAL``                    | ""                              | none                               | If true, the spectral-line imaging is done by imager              |
 |                                               |                                 |                                    | (:doc:`../calim/imager`). If false, it is done by simager         |
 |                                               |                                 |                                    | (:doc:`../calim/simager`). When true, the following parameters are|
-|                                               |                                 |                                    | used.                                                             |
+|                                               |                                 |                                    | used. If left blank (the default), the value is given by the      |
+|                                               |                                 |                                    | overall parameter ``DO_ALT_IMAGER``.                              |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``NCHAN_PER_CORE_SL``                         | 54                              | nchanpercore                       | The number of channels each core will process.                    |
 |                                               |                                 | (:doc:`../calim/imager`)           |                                                                   |

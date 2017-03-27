@@ -265,7 +265,11 @@ Here is a summary of the workflow provided for by these scripts:
   fitting a low-order polynomial to each spectrum independently.
 
 * Source-finding with **selavy** can then be run on the
-  spectral-cubes. 
+  spectral-cubes.
+
+* Finally a diagnostics script is run to produce QA & related
+  plots. This is a prototype script at present, although we will look
+  to expand it in the near future.
 
 Staging the processing
 ----------------------

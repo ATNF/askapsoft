@@ -2,9 +2,14 @@ User parameters - Archiving
 ===========================
 
 The final stage of the pipeline involves preparing data for storage in
-CASDA, the CSIRO ASKAP Science Data Archive. This involves three
+CASDA, the CSIRO ASKAP Science Data Archive. This involves four
 steps:
 
+* Diagnostic plots are created. These are intended to be used for
+  Quality Analysis & validation. Currently the script that does this
+  is only a prototype, producing both greyscale plots of the continuum
+  images, with weights contours and the component catalogue overlaid,
+  and greyscale plots of the noise maps produced by Selavy.
 * All images are converted to FITS format. FITS is the format required
   for storage in CASDA - the ASKAPsoft tasks will ultimately write
   directly to FITS, but for now an additional step is required.
@@ -35,6 +40,11 @@ scripts, and they are detailed here.
 +----------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | Variable                         |             Default             | Parset equivalent               | Description                                                     |
 +==================================+=================================+=================================+=================================================================+
+| ``DO_DIAGNOSTICS``               | true                            | none                            | Whether to run the diagnostic script upon completion of imaging |
+|                                  |                                 |                                 | and source-finding.                                             |
++----------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
+| ``JOB_TIME_DIAGNOSTICS``         | ``JOB_TIME_DEFAULT`` (12:00:00) | none                            | Time request for the diagnostic script.                         |
++----------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | ``DO_CONVERT_TO_FITS``           | false                           | none                            | Whether to convert the CASA images to FITS format.              |
 +----------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | ``JOB_TIME_FITS_CONVERT``        | ``JOB_TIME_DEFAULT`` (12:00:00) | none                            | Time request for the FITS conversion.                           |
@@ -86,12 +96,11 @@ scripts, and they are detailed here.
 | ``THUMBNAIL_GREYSCALE_MAX``      | 40                              | none                            | Maximum greyscale level fro the thumbnail image colourmap. In   |
 |                                  |                                 |                                 | units of the overall image rms noise.                           |
 +----------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
-| ``THUMBNAIL_SIZE_INCHES``        | (16 5)                          | none                            | The sizes (in inches) of the thumbnail images. This parameter is|
-|                                  |                                 |                                 | passed as a bash array, so is surrounded by () with just spaces |
-|                                  |                                 |                                 | between the entries. The sizes correspond to the size names     |
-|                                  |                                 |                                 | given below. Don't change unless you know what you are doing.   |
+| ``THUMBNAIL_SIZE_INCHES``        | [16,5]                          | none                            | The sizes (in inches) of the thumbnail images. The sizes        |
+|                                  |                                 |                                 | correspond to the size names given below. Don't change unless   |
+|                                  |                                 |                                 | you know what you are doing.                                    |
 +----------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
-| ``THUMBNAIL_SIZE_TEXT``          | (large small)                   | none                            | The labels that go with the thumbnail sizes. These are          |
+| ``THUMBNAIL_SIZE_TEXT``          | ['large','small']               | none                            | The labels that go with the thumbnail sizes. These are          |
 |                                  |                                 |                                 | incorporated into the thumbnail name, so that image.fits gets a |
 |                                  |                                 |                                 | thumbnail image_large.png etc. Don't change unless you know what|
 |                                  |                                 |                                 | you are doing.                                                  |

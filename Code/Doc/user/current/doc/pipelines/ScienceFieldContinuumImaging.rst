@@ -257,10 +257,17 @@ instead of BasisfunctionMFS).
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ***New imager parameters**                 |                                 |                                                        |                                                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``DO_ALT_IMAGER``                          | false                           | none                                                   | If true, the spectral-line imaging is done by imager         |
+| ``DO_ALT_IMAGER_CONT``                     | ""                              | none                                                   | If true, the continuum imaging is done by imager             |
 |                                            |                                 |                                                        | (:doc:`../calim/imager`). If false, it is done by cimager    |
 |                                            |                                 |                                                        | (:doc:`../calim/cimager`). When true, the following          |
-|                                            |                                 |                                                        | parameters are used.                                         |
+|                                            |                                 |                                                        | parameters are used. If left blank (the default), the value  |
+|                                            |                                 |                                                        | is given by the overall parameter ``DO_ALT_IMAGER``.         |
++--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
+| ``DO_ALT_IMAGER_CONTCUBE``                 | ""                              | none                                                   | If true, the continuum cube imaging is done by imager        |
+|                                            |                                 |                                                        | (:doc:`../calim/imager`). If false, it is done by cimager    |
+|                                            |                                 |                                                        | (:doc:`../calim/cimager`). When true, the following          |
+|                                            |                                 |                                                        | parameters are used. If left blank (the default), the value  |
+|                                            |                                 |                                                        | is given by the overall parameter ``DO_ALT_IMAGER``.         |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``NCHAN_PER_CORE``                         | 1                               | nchanpercore                                           | The number of channels each core will process.               |
 |                                            |                                 | (:doc:`../calim/imager`)                               |                                                              |
@@ -324,6 +331,13 @@ instead of BasisfunctionMFS).
 |                                            |                                 | (:doc:`../calim/ccalibrator`)                          | approximating the phase-only self-calibration approach. Can  |
 |                                            |                                 |                                                        | be given as an array with different values for each self-cal |
 |                                            |                                 |                                                        | loop (e.g. "[true,true,false]").                             |
++--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
+| ``SELFCAL_REF_ANTENNA``                    | ""                              | refantenna (:doc:`../calim/ccalibrator`)               | Reference antenna to use in the calibration. Should be       |
+|                                            |                                 |                                                        | antenna number, 0 - nAnt-1, that matches the antenna         |
+|                                            |                                 |                                                        | numbering in the MS.                                         |
++--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
+| ``SELFCAL_REF_GAINS``                      | ""                              | refgains (:doc:`../calim/ccalibrator`)                 | Reference gains to use in the calibration - something like   |
+|                                            |                                 |                                                        | gain.g11.0.0.                                                |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``SELFCAL_SCALENOISE``                     | false                           | calibrate.scalenoise                                   | Whether the noise estimate will be scaled in accordance      |
 |                                            |                                 | (:doc:`../calim/cimager`)                              | with the applied calibrator factor to achieve proper         |
