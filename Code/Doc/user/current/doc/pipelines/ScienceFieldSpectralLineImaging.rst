@@ -206,6 +206,10 @@ spectral-imaging.
 |                                               |                                 |                                    | else give a size (such as 30arcsec, or                            |
 |                                               |                                 |                                    | “[30arcsec, 30arcsec, 0deg]”).                                    |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
+| ``RESTORING_BEAM_CUTOFF_SPECTRAL``            | 0.05                            | restore.beam.cutoff                | Cutoff value used in determining the support for the fitting      |
+|                                               |                                 | (:doc:`../calim/simager`)          | (ie. the rectangular area given to the fitting routine). Value is |
+|                                               |                                 |                                    | a fraction of the peak.                                           |
++-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``RESTORING_BEAM_REFERENCE``                  | mid                             | restore.beamReference              | Which channel to use as the reference when writing the restoring  |
 |                                               |                                 | (:doc:`../calim/simager`)          | beam to the image cube. Can be an integer as the channel number   |
 |                                               |                                 |                                    | (0-based), or one of 'mid' (the middle channel), 'first' or 'last'|

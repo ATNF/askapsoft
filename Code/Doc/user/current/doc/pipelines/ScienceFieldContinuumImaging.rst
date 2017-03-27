@@ -160,6 +160,10 @@ instead of BasisfunctionMFS).
 |                                            |                                 | (:doc:`../calim/cimager`)                              | the appropriate beam, else give a size (such as 30arcsec, or |
 |                                            |                                 |                                                        | “[30arcsec, 30arcsec, 0deg]”).                               |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
+| ``RESTORING_BEAM_CUTOFF_CONT``             | 0.05                            | restore.beam.cutoff                                    | Cutoff value used in determining the support for the fitting |
+|                                            |                                 | (:doc:`../calim/simager`)                              | (ie. the rectangular area given to the fitting routine).     |
+|                                            |                                 |                                                        | Value is a fraction of the peak.                             |
++--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``CIMAGER_MINUV``                          | 0                               | MinUV (:doc:`../calim/data_selection`)                 | The minimum UV distance considered in the imaging - used to  |
 |                                            |                                 |                                                        | exclude the short baselines. Can be given as an array with   |
 |                                            |                                 |                                                        | different values for each self-cal loop (e.g. "[200,200,0]").|
@@ -387,6 +391,10 @@ instead of BasisfunctionMFS).
 |                                            |                                 |                                                        | separately to determine the appropriate beam for that        |
 |                                            |                                 |                                                        | channel, else give a size (such as 30arcsec, or “[30arcsec,  |
 |                                            |                                 |                                                        | 30arcsec, 0deg]”).                                           |
++--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
+| ``RESTORING_BEAM_CUTOFF_CONTCUBE``         | 0.05                            | restore.beam.cutoff                                    | Cutoff value used in determining the support for the fitting |
+|                                            |                                 | (:doc:`../calim/simager`)                              | (ie. the rectangular area given to the fitting routine).     |
+|                                            |                                 |                                                        | Value is a fraction of the peak.                             |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``RESTORING_BEAM_CONTCUBE_REFERENCE``      | mid                             | restore.beamReference (:doc:`../calim/simager`)        | Which channel to use as the reference when writing the       |
 |                                            |                                 |                                                        | restoring beam to the image cube. Can be an integer as the   |
