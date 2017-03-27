@@ -86,7 +86,8 @@ fi
 
 # Define the restore solver
 restore="Cimager.restore                                 = true
-Cimager.restore.beam                            = ${RESTORING_BEAM_CONT}"
+Cimager.restore.beam                            = ${RESTORING_BEAM_CONT}
+Cimager.restore.beam.cutoff                     = ${RESTORING_BEAM_CUTOFF_CONT}"
 if [ "${RESTORE_PRECONDITIONER_LIST}" != "" ]; then
     restore="${restore}
 Cimager.restore.preconditioner.Names                    = ${RESTORE_PRECONDITIONER_LIST}"

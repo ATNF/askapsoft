@@ -136,6 +136,7 @@ ${Imager}.ncycles                                 = 0"
     restorePars="# These parameter govern the restoring of the image and the recording of the beam
 ${Imager}.restore                                 = true
 ${Imager}.restore.beam                            = ${RESTORING_BEAM_CONTCUBE}
+${Imager}.restore.beam.cutoff                     = ${RESTORING_BEAM_CUTOFF_CONTCUBE}
 ${Imager}.restore.beamReference                   = ${RESTORING_BEAM_CONTCUBE_REFERENCE}
 ${Imager}.restore.beamLog                         = beamLog.${imageBase}.txt"
 

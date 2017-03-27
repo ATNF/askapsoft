@@ -366,7 +366,8 @@ MFS_REF_FREQ=""
 # Restoring beam: 'fit' will fit the PSF to determine the appropriate
 # beam, else give a size
 RESTORING_BEAM_CONT=fit
-
+# Cutoff in determining support for the fit to the PSF
+RESTORING_BEAM_CUTOFF_CONT=0.05
 
 ###########################
 # parameters from the new (alt) imager
@@ -520,6 +521,8 @@ REST_FREQUENCY_CONTCUBE=""
 RESTORING_BEAM_CONTCUBE=fit
 # Reference channel for recording the restoring beam of the cube
 RESTORING_BEAM_CONTCUBE_REFERENCE=mid
+# Cutoff in determining support for the fit to the PSF
+RESTORING_BEAM_CUTOFF_CONTCUBE=0.05
 
 # Number of processors for continuum-cube imaging.
 # Leave blank to fit to number of channels
@@ -642,6 +645,8 @@ RESTORE_SPECTRAL=true
 RESTORING_BEAM_SPECTRAL=fit
 # Reference channel for recording the restoring beam of the cube
 RESTORING_BEAM_REFERENCE=mid
+# Cutoff in determining support for the fit to the PSF
+RESTORING_BEAM_CUTOFF_SPECTRAL=0.05
 
 # Image-based continuum subtraction
 # Threshold [sigma] to mask outliers prior to fitting ('threshold' parameter) 
