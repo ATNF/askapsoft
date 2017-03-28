@@ -396,6 +396,7 @@ ALT_IMAGER_SINGLE_FILE=false
 
 # Same for continuum cubes
 NUM_SPECTRAL_CUBES_CONTCUBE=1
+ALT_IMAGER_SINGLE_FILE_CONTCUBE=true
 
 
 ####################
