@@ -47,35 +47,37 @@ if [ "${DO_MOSAIC_FIELDS}" != "true" ]; then
     DO_IT=false
 fi
 
-if [ "${DO_IT}" == "true" ] && [ "${CLOBBER}" != "true" ]; then
-    BEAM=all
-    FIELD="."
-    tilelistsize=$(echo "${TILE_LIST}" | awk '{print NF}')
-    if [ "${tilelistsize}" -gt 1 ]; then
-        FULL_TILE_LIST="$TILE_LIST ALL"
-    else
-        FULL_TILE_LIST="ALL"
-    fi
-    for TILE in $FULL_TILE_LIST; do
-        for POLN in $POL_LIST; do
-            pol=$(echo "$POLN" | tr '[:upper:]' '[:lower:]')
-            for imageCode in ${mosaicImageList}; do
-                setImageProperties contcube
-                if [ -e "${OUTPUT}/${imageName}" ]; then
-                    if [ "${DO_IT}" == "true" ]; then
-                        echo "Image ${imageName} exists, so not running continuum mosaicking"
+for imageCode in ${mosaicImageList}; do
+
+    if [ "${DO_IT}" == "true" ] && [ "${CLOBBER}" != "true" ]; then
+        BEAM=all
+        FIELD="."
+        tilelistsize=$(echo "${TILE_LIST}" | awk '{print NF}')
+        if [ "${tilelistsize}" -gt 1 ]; then
+            FULL_TILE_LIST="$TILE_LIST ALL"
+        else
+            FULL_TILE_LIST="ALL"
+        fi
+        for TILE in $FULL_TILE_LIST; do
+            for POLN in $POL_LIST; do
+                pol=$(echo "$POLN" | tr '[:upper:]' '[:lower:]')
+                for subband in ${SUBBAND_WRITER_LIST_CONTCUBE}; do
+                    setImageProperties contcube
+                    if [ -e "${OUTPUT}/${imageName}" ]; then
+                        if [ "${DO_IT}" == "true" ]; then
+                            echo "Image ${imageName} exists, so not running ${imageCode} continuum mosaicking"
+                        fi
+                        DO_IT=false
                     fi
-                    DO_IT=false
-                fi
+                done
             done
         done
-    done
-fi
+    fi
 
-if [ "${DO_IT}" == "true" ]; then
+    if [ "${DO_IT}" == "true" ]; then
 
-    sbatchfile=$slurms/linmos_all_contcube.sbatch
-    cat > "$sbatchfile" <<EOFOUTER
+        sbatchfile=$slurms/linmos_all_contcube_${imageCode}.sbatch
+        cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
@@ -109,6 +111,8 @@ TILE_LIST="$TILE_LIST"
 POL_LIST="${POL_LIST}"
 echo "Tile list = \$TILE_LIST"
 
+imageCode=${imageCode}
+
 # If there is only one tile, only include the "ALL" case, which
 # mosaics together all fields
 if [ "\$(echo \$TILE_LIST | awk '{print NF}')" -gt 1 ]; then
@@ -136,7 +140,7 @@ for THISTILE in \$FULL_TILE_LIST; do
     
         pol=\$(echo "\$POLN" | tr '[:upper:]' '[:lower:]')
     
-        for imageCode in ${mosaicImageList}; do 
+        for subband in ${SUBBAND_WRITER_LIST_CONTCUBE}; do
     
             imList=""
             wtList=""
@@ -155,9 +159,9 @@ for THISTILE in \$FULL_TILE_LIST; do
             done
 
             if [ "\$THISTILE" == "ALL" ]; then
-                jobCode=linmosCC_Full_\${imageCode}
+                jobCode=linmosCC_Full_\${imageCode}\${subband}
             else
-                jobCode=linmosCC_\${THISTILE}_\${imageCode}
+                jobCode=linmosCC_\${THISTILE}_\${imageCode}\${subband}
             fi
 
             if [ "\${imList}" != "" ]; then
@@ -194,15 +198,17 @@ EOFINNER
 done
 EOFOUTER
 
-    if [ "${SUBMIT_JOBS}" == "true" ]; then
-        FULL_LINMOS_CONTCUBE_DEP=$(echo "${FULL_LINMOS_CONTCUBE_DEP}" | sed -e 's/afterok/afterany/g')
-	ID_LINMOS_CONTCUBE_ALL=$(sbatch ${FULL_LINMOS_CONTCUBE_DEP} "$sbatchfile" | awk '{print $4}')
-	recordJob "${ID_LINMOS_CONTCUBE_ALL}" "Make a mosaic continuum cube of the science observation, with flags \"${FULL_LINMOS_CONTCUBE_DEP}\""
-    else
-	echo "Would make a mosaic image of the science observation, with slurm file $sbatchfile"
+        if [ "${SUBMIT_JOBS}" == "true" ]; then
+            FULL_LINMOS_CONTCUBE_DEP=$(echo "${FULL_LINMOS_CONTCUBE_DEP}" | sed -e 's/afterok/afterany/g')
+	    ID_LINMOS_CONTCUBE_ALL=$(sbatch ${FULL_LINMOS_CONTCUBE_DEP} "$sbatchfile" | awk '{print $4}')
+	    recordJob "${ID_LINMOS_CONTCUBE_ALL}" "Make a mosaic ${imageCode} continuum cube of the science observation, with flags \"${FULL_LINMOS_CONTCUBE_DEP}\""
+        else
+	    echo "Would make a mosaic ${imageCode} continuum cube of the science observation, with slurm file $sbatchfile"
+        fi
+
     fi
 
-    echo " "
+done
 
-fi
+echo " "
 

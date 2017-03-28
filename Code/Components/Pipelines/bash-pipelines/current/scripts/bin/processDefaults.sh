@@ -567,6 +567,17 @@ EOF
             NUM_SPECTRAL_CUBES=1
         fi
         
+        if [ "${DO_ALT_IMAGER_CONTCUBE}" == "true" ] && [ "${ALT_IMAGER_SINGLE_FILE_CONTCUBE}" != "true" ]; then
+            nworkers=$nchanContSci
+            writerIncrement=$(echo "$nworkers" "${NUM_SPECTRAL_CUBES_CONTCUBE}" | awk '{print $1/$2}')
+            SUBBAND_WRITER_LIST_CONTCUBE=$(seq 1 "$writerIncrement" "$nworkers")
+            unset nworkers
+            unset writerIncrement
+        else
+            SUBBAND_WRITER_LIST_CONTCUBE=1
+            NUM_SPECTRAL_CUBES_CONTCUBE=1
+        fi
+        
         ####################
         # Mosaicking parameters
 

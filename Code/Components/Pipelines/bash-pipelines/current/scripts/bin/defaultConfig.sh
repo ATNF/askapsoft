@@ -394,6 +394,10 @@ NUM_SPECTRAL_CUBES=16
 # (Note that FITS output is not yet implemented fully)
 ALT_IMAGER_SINGLE_FILE=false
 
+# Same for continuum cubes
+NUM_SPECTRAL_CUBES_CONTCUBE=1
+
+
 ####################
 # Gridding parameters for continuum imaging
 GRIDDER_SNAPSHOT_IMAGING=true

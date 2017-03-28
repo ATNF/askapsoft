@@ -164,7 +164,7 @@ function getTile()
 #     defaults to zero
 #  * NUM_TAYLOR_TERMS (number of taylor terms being solved for. 1=no MFS)
 #  * IMAGE_BASE_CONT,IMAGE_BASE_CONTCUBE,IMAGE_BASE_SPECTRAL
-#  * subband (only used if NUM_SPECTRAL_CUBES > 1)
+#  * subband (only used if NUM_SPECTRAL_CUBES or NUM_SPECTRAL_CUBES_CONTCUBE > 1)
 # Available upon return:
 #  * imageBase
 #  * imageName (the filename for the image)
@@ -202,9 +202,6 @@ function setImageProperties()
         # Add the writer information for the askap_imager case, but not when we have a single-file FITS output
         if [ "${DO_ALT_IMAGER_CONT}" == "true" ]; then
             doAlt=true
-            if [ "${ALT_IMAGER_SINGLE_FILE}" != "true" ]; then
-                band="wr.${subband}."
-            fi
         fi
     elif [ "$type" == "spectral" ]; then
         typebase="spectral"
@@ -224,7 +221,7 @@ function setImageProperties()
         # Add the writer information for the askap_imager case, but not when we have a single-file FITS output
         if [ "${DO_ALT_IMAGER_CONTCUBE}" == "true" ]; then
             doAlt=true
-            if [ "${ALT_IMAGER_SINGLE_FILE}" != "true" ]; then
+            if [ "${ALT_IMAGER_SINGLE_FILE_CONTCUBE}" != "true" ]; then
                 band="wr.${subband}."
             fi
         fi
