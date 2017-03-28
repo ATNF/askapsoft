@@ -400,6 +400,39 @@ EOF
 
     if [ "${DO_SCIENCE_FIELD}" == "true" ]; then
 
+        # Check value of IMAGETYPE - needs to be casa or fits
+        if [ "${IMAGETYPE_CONT}" != "casa" ] && [ "${IMAGETYPE_CONT}" != "fits" ]; then
+            echo "ERROR - Invalid image type \"${IMAGETYPE_CONT}\" - IMAGETYPE_CONT needs to be casa or fits"
+            echo "   Exiting"
+            exit 1
+        fi
+        if [ "${IMAGETYPE_CONTCUBE}" != "casa" ] && [ "${IMAGETYPE_CONTCUBE}" != "fits" ]; then
+            echo "ERROR - Invalid image type \"${IMAGETYPE_CONTCUBE}\" - IMAGETYPE_CONTCUBE needs to be casa or fits"
+            echo "   Exiting"
+            exit 1
+        fi
+        if [ "${IMAGETYPE_SPECTRAL}" != "casa" ] && [ "${IMAGETYPE_SPECTRAL}" != "fits" ]; then
+            echo "ERROR - Invalid image type \"${IMAGETYPE_SPECTRAL}\" - IMAGETYPE_SPECTRAL needs to be casa or fits"
+            echo "   Exiting"
+            exit 1
+        fi
+
+        
+        # For the spectral imaging (spectral-line & continuum cubes),
+        # simager is not currently able to write out FITS files. So if
+        # the user has requested FITS imagetype, but has not set the
+        # ALT_IMAGE flag, give a warning and stop to let them fix it.
+        if [ "${IMAGETYPE_SPECTRAL}" == "fits" ] && [ "${DO_ALT_IMAGER_SPECTRAL}" != "true" ]; then
+            echo "ERROR - IMAGETYPE_SPECTRAL=fits can only work with DO_ALT_IMAGER_SPECTRAL=true"
+            echo "   Exiting"
+            exit 1
+        fi
+        if [ "${IMAGETYPE_CONTCUBE}" == "fits" ] && [ "${DO_ALT_IMAGER_CONTCUBE}" != "true" ]; then
+            echo "ERROR - IMAGETYPE_CONTCUBE=fits can only work with DO_ALT_IMAGER_CONTCUBE=true"
+            echo "   Exiting"
+            exit 1
+        fi
+
         # Switching on the DO_ALT_IMAGER_xxx flags for each type of
         # imaging. If they aren't defined in the config file, then set
         # to the value of DO_ALT_IMAGER.

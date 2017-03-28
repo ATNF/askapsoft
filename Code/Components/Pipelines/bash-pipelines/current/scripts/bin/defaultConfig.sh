@@ -208,6 +208,12 @@ BEAM_MAX=35
 BEAMLIST=""
 
 ####################
+# Image output type
+IMAGETYPE_CONT=casa
+IMAGETYPE_CONTCUBE=casa
+IMAGETYPE_SPECTRAL=casa
+
+####################
 ##  BANDPASS CAL
 
 # Base name for the 1934 measurement sets after splitting

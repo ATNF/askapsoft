@@ -130,6 +130,7 @@ for POLN in \$POL_LIST; do
             log=${logs}/science_\${jobCode}_\${pol}_${FIELDBEAM}_\${SLURM_JOB_ID}.log
             cat > "\${parset}" << EOFINNER
 linmos.names            = [\${beamList}]
+linmos.imagetype        = ${IMAGETYPE_CONTCUBE}
 linmos.outname          = \$imageName
 linmos.outweight        = \$weightsImage
 linmos.weighttype       = FromPrimaryBeamModel

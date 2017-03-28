@@ -132,6 +132,7 @@ if [ "\${beamList}" != "" ]; then
     log=${logs}/science_\${jobCode}_${FIELDBEAM}_\${SLURM_JOB_ID}.log
     cat > "\${parset}" << EOFINNER
 linmos.names            = [\${beamList}]
+linmos.imagetype        = ${IMAGETYPE_SPECTRAL}
 linmos.outname          = \$imageName
 linmos.outweight        = \$weightsImage
 linmos.weighttype       = FromPrimaryBeamModel

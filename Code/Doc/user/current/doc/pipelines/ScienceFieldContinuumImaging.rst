@@ -93,6 +93,22 @@ used for the continuum cube, although the cleaning parameters can be
 given as different (the default Solver, for instance, is Basisfunction
 instead of BasisfunctionMFS).
 
+
+A note on the imagers and the output formats. The default approach is
+to use **cimager** for the continuum imaging and **simager** for the
+continuum cubes. The new imager application **imager**
+(:doc:`../calim/imager`) can be used by setting ``DO_ALT_IMAGER_CONT``
+or ``DO_ALT_IMAGER_CONTCUBE`` to true.
+
+The default output format is CASA images, although FITS files can be
+written directly by setting ``IMAGETYPE_CONT`` or
+``IMAGETYPE_CONTCUBE`` to ``fits`` (rather than ``casa``). This mode
+is still in development, so may not be completely reliable. The
+recommended method for getting images into FITS format is still to use
+the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
+:doc:`../calim/imageToFITS` application.
+
+
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | Variable                                   | Default                         | Parset equivalent                                      | Description                                                  |
 +============================================+=================================+========================================================+==============================================================+
@@ -100,6 +116,13 @@ instead of BasisfunctionMFS).
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``JOB_TIME_CONT_IMAGE``                    | ``JOB_TIME_DEFAULT`` (12:00:00) | none                                                   | Time request for imaging the continuum (both types - with and|
 |                                            |                                 |                                                        | without self-calibration)                                    |
++--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
+| ``IMAGETYPE_CONT``                         | casa                            | imagetype (:doc:`../calim/cimager` and                 | Image format to use - can be either 'casa' or 'fits'.        |
+|                                            |                                 | :doc:`../calim/imager`)                                |                                                              |
++--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
+| ``IMAGETYPE_CONTCUBE``                     | casa                            | imagetype (:doc:`../calim/imager`)                     | Image format to use - can be either 'casa' or 'fits',        |
+|                                            |                                 |                                                        | although 'fits' can only be given in conjunction with        |
+|                                            |                                 |                                                        | ``DO_ALT_IMAGER_SPECTRAL=true``.                             |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | **Basic variables**                        |                                 |                                                        |                                                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
@@ -184,9 +207,9 @@ instead of BasisfunctionMFS).
 |                                            |                                 |                                                        | the edges can generate artefacts.                            |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``GRIDDER_WMAX``                           | 2600                            | WProject.wmax                                          | The wmax parameter for the gridder.                          |
-|                                            |                                 | (:doc:`../calim/gridder`)                              |                                                              |
+|                                            |                                 | (:doc:`../calim/gridder`)                              |                                                              | 
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``GRIDDER_NWPLANES``                       | 99                              | WProject.nwplanes                                      | The nwplanes parameter for the gridder.                      | 
+| ``GRIDDER_NWPLANES``                       | 99                              | WProject.nwplanes                                      | The nwplanes parameter for the gridder.                      |
 |                                            |                                 | (:doc:`../calim/gridder`)                              |                                                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``GRIDDER_OVERSAMPLE``                     | 4                               | WProject.oversample                                    | The oversampling factor for the gridder.                     |

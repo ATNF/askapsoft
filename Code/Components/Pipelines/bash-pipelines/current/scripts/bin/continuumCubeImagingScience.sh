@@ -228,6 +228,7 @@ fi
 parset=${parsets}/science_contcube_imager_${FIELDBEAM}_${POLN}_\${SLURM_JOB_ID}.in
 cat > "\$parset" << EOF
 ${Imager}.dataset                                 = \${ms}
+${Imager}.imagetype                               = ${IMAGETYPE_CONTCUBE}
 #
 ${nameDefinition}
 ${polarisation}

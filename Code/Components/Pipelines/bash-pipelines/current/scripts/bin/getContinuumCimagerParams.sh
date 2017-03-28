@@ -194,6 +194,7 @@ Cimager.threshold.minorcycle                    = ${CLEAN_THRESHOLD_MINORCYCLE}
 cimagerParams="#Standard Parameter set for Cimager
 Cimager.dataset                                 = ${msSciAv}
 Cimager.datacolumn                              = ${DATACOLUMN}
+Cimager.imagetype                               = ${IMAGETYPE_CONT}
 #
 # Each worker will read a single channel selection
 Cimager.Channels                                = [1, %w]

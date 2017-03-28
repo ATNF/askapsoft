@@ -156,6 +156,7 @@ for((LOOP=0;LOOP<=NUM_LOOPS;LOOP++)); do
                 log=${logs}/science_\${jobCode}_${FIELDBEAM}_\${SLURM_JOB_ID}.log
                 cat > "\${parset}" << EOFINNER
 linmos.names            = [\${beamList}]
+linmos.imagetype        = ${IMAGETYPE_CONT}
 linmos.outname          = \$imageName
 linmos.outweight        = \$weightsImage
 linmos.weighttype       = FromPrimaryBeamModel

@@ -170,6 +170,7 @@ for THISTILE in \$FULL_TILE_LIST; do
                 cat > "\${parset}" << EOFINNER
 linmos.names            = [\${imList}]
 linmos.weights          = [\${wtList}]
+linmos.imagetype        = ${IMAGETYPE_CONT}
 linmos.outname          = \$imageName
 linmos.outweight        = \$weightsImage
 linmos.weighttype       = FromWeightImages
