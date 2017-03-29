@@ -44,7 +44,17 @@ New features and updates:
      (in the line of other data products).
    - There are new pipeline parameters SELFCAL_REF_ANTENNA &
      SELFCAL_REF_GAINS that allow the self-calibration to use a
-     reference antenna and/or gain solution. 
+     reference antenna and/or gain solution.
+   - A weights cutoff for Selavy can now be specified via the config
+     file using the new parameters SELAVY_WEIGHTS_CUTOFF &
+     SELAVY_SPEC_WEIGHTS_CUTOFF (rather than using the linmos cutoff
+     value). 
+   - The new imager is better integrated into the pipeline, with
+     DO_ALT_IMAGER parameters for CONT, CONTCUBE & SPECTRAL.
+   - It is possible to make use of the direct FITS output in the
+     pipeline, by using IMAGETYPE_ parameters for CONT, CONTCUBE &
+     SPECTRAL. Note that this is still somewhat of a
+     work-in-progress. 
 
 Bug fixes:
 
