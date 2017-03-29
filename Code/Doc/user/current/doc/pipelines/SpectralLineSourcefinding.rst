@@ -52,6 +52,10 @@ reconstruction (to enhance the signal-to-noise of real sources).
 |                                    |                                 |                                              | should be grown. Only used if ``SELAVY_FLUX_THRESHOLD`` is  |
 |                                    |                                 |                                              | given.                                                      |
 +------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
+| ``SELAVY_SPEC_WEIGHTS_CUTOFF``     | 0.15                            | Weights.weightsCutoff                        | The cutoff level, as a fraction of the peak in the weights  |
+|                                    |                                 | (:doc:`../analysis/thresholds`)              | image, used in the source-finding. Only applies if the image|
+|                                    |                                 |                                              | being searched has a corresponding weights image.           |
++------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
 | ``SELAVY_SPEC_SEARCH_TYPE``        | spectral                        | searchType (:doc:`../analysis/selavy`)       | Type of searching to be performed: either 'spectral'        |
 |                                    |                                 |                                              | (searches are done in each 1D spectrum) or 'spatial'        |
 |                                    |                                 |                                              | (searches are done in each 2D channel image). Anything else |

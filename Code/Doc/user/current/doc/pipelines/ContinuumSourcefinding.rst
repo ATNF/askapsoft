@@ -67,47 +67,51 @@ switched on.
 |                                  |                                 | (:doc:`../analysis/selavy`)         | should be grown. Only used if ``SELAVY_FLUX_THRESHOLD`` is  |
 |                                  |                                 |                                     | given.                                                      |
 +----------------------------------+---------------------------------+-------------------------------------+-------------------------------------------------------------+
+| ``SELAVY_WEIGHTS_CUTOFF``        | 0.15                            | Weights.weightsCutoff               | The cutoff level, as a fraction of the peak in the weights  |
+|                                  |                                 | (:doc:`../analysis/thresholds`)     | image, used in the source-finding. Only applies if the image|
+|                                  |                                 |                                     | being searched has a corresponding weights image.           |
++----------------------------------+---------------------------------+-------------------------------------+-------------------------------------------------------------+
 |  ``SELAVY_VARIABLE_THRESHOLD``   | true                            | VariableThreshold                   | A flag indicating whether to determine the signal-to-noise  |
 |                                  |                                 | (:doc:`../analysis/thresholds`)     | threshold on a pixel-by-pixel basis based on local          |
 |                                  |                                 |                                     | statistics (that is, the statistics within a relatively     |
 |                                  |                                 |                                     | small box centred on the pixel in question).                |
 +----------------------------------+---------------------------------+-------------------------------------+-------------------------------------------------------------+
-| ``SELAVY_BOX_SIZE``              | 50                              | VariableThreshold.boxSize           | The half-width of the sliding box used to determine the     |
+| ``SELAVY_BOX_SIZE``              | 50                              | VariableThreshold.boxSize           | The half-width of the sliding box used to determine the     | 
 |                                  |                                 | (:doc:`../analysis/thresholds`)     | local statistics.                                           |
 +----------------------------------+---------------------------------+-------------------------------------+-------------------------------------------------------------+
 | **RM Synthesis**                 | 50                              | VariableThreshold.boxSize           | The half-width of the sliding box used to determine the     |
-|                                  |                                 | (:doc:`../analysis/thresholds`)     | local statistics.                                           |
-+----------------------------------+---------------------------------+-------------------------------------+-------------------------------------------------------------+ 
+|                                  |                                 | (:doc:`../analysis/thresholds`)     | local statistics.                                           | 
++----------------------------------+---------------------------------+-------------------------------------+-------------------------------------------------------------+
 | ``DO_RM_SYNTHESIS``              | true                            | none                                | Whether to perform RM Synthesis after continuum             |
 |                                  |                                 |                                     | source-finding.                                             |
-+----------------------------------+---------------------------------+-------------------------------------+-------------------------------------------------------------+
-| ``SELAVY_POL_OUTPUT_BASE``       | pol                             | Forms part of                       | Base part of the filenames of extracted spectra and Faraday | 
++----------------------------------+---------------------------------+-------------------------------------+-------------------------------------------------------------+ 
+| ``SELAVY_POL_OUTPUT_BASE``       | pol                             | Forms part of                       | Base part of the filenames of extracted spectra and Faraday |
 |                                  |                                 | RMSynthesis.outputBase              | Dispersion function. All files will go in a directory       |
 |                                  |                                 | (:doc:`../analysis/postprocessing`) | PolData within the Selavy directory, and will be called     |
-|                                  |                                 |                                     | "<outputBase>_<imageBase>_spec" or similar.                 |
-+----------------------------------+---------------------------------+-------------------------------------+-------------------------------------------------------------+ 
+|                                  |                                 |                                     | "<outputBase>_<imageBase>_spec" or similar.                 | 
++----------------------------------+---------------------------------+-------------------------------------+-------------------------------------------------------------+
 | ``SELAVY_POL_WRITE_SPECTRA``     | true                            | RMSynthesis.writeSpectra            | Whether to write the extracted Stokes spectra to individual |
 |                                  |                                 | (:doc:`../analysis/postprocessing`) | files.                                                      |
 +----------------------------------+---------------------------------+-------------------------------------+-------------------------------------------------------------+
-| ``SELAVY_POL_WRITE_COMPLEX_FDF`` | false                           | RMSynthesis.writeComplexFDF         | Whether to write the Faraday Dispersion Function for each   | 
-|                                  |                                 | (:doc:`../analysis/postprocessing`) | source as a single complex-valued spectrum (true) or as a   |
+| ``SELAVY_POL_WRITE_COMPLEX_FDF`` | false                           | RMSynthesis.writeComplexFDF         | Whether to write the Faraday Dispersion Function for each   |
+|                                  |                                 | (:doc:`../analysis/postprocessing`) | source as a single complex-valued spectrum (true) or as a   | 
 |                                  |                                 |                                     | pair of real-valued spectra containing amplitude & phase    |
 |                                  |                                 |                                     | (false).                                                    |
 +----------------------------------+---------------------------------+-------------------------------------+-------------------------------------------------------------+
-| ``SELAVY_POL_BOX_WIDTH``         | 5                               | RMSynthesis.boxWidth                | The width (N) of the NxN box to be applied in the extraction|
-|                                  |                                 | (:doc:`../analysis/postprocessing`) | of Stokes spectra.                                          | 
+| ``SELAVY_POL_BOX_WIDTH``         | 5                               | RMSynthesis.boxWidth                | The width (N) of the NxN box to be applied in the extraction| 
+|                                  |                                 | (:doc:`../analysis/postprocessing`) | of Stokes spectra.                                          |
 +----------------------------------+---------------------------------+-------------------------------------+-------------------------------------------------------------+
 | ``SELAVY_POL_NOISE_AREA``        | 50                              | RMSynthesis.noiseArea               | The number of beam areas over which to measure the noise in |
 |                                  |                                 | (:doc:`../analysis/postprocessing`) | each channel.                                               |
-+----------------------------------+---------------------------------+-------------------------------------+-------------------------------------------------------------+ 
++----------------------------------+---------------------------------+-------------------------------------+-------------------------------------------------------------+
 | ``SELAVY_POL_ROBUST_STATS``      | true                            | RMSynthesis.robust                  | Whether to use robust statistics in the calculation of the  |
 |                                  |                                 | (:doc:`../analysis/postprocessing`) | noise spectra.                                              |
-+----------------------------------+---------------------------------+-------------------------------------+-------------------------------------------------------------+
++----------------------------------+---------------------------------+-------------------------------------+-------------------------------------------------------------+ 
 | ``SELAVY_POL_WEIGHT_TYPE``       | variance                        | RMSynthesis.weightType              | The type of weighting to be used in the RM Synthesis -      |
 |                                  |                                 | (:doc:`../analysis/postprocessing`) | either "variance" or "uniform".                             |
 +----------------------------------+---------------------------------+-------------------------------------+-------------------------------------------------------------+
 | ``SELAVY_POL_MODEL_TYPE``        | taylor                          | RMSynthesis.modelType               | The type of Stokes-I model to use. Either "taylor"          |
-|                                  |                                 | (:doc:`../analysis/postprocessing`) | (Taylor-term decomposition from the MFS imaging), or "poly" | 
+|                                  |                                 | (:doc:`../analysis/postprocessing`) | (Taylor-term decomposition from the MFS imaging), or "poly" |
 |                                  |                                 |                                     | (polynomial fit to the Stokes-I spectrum".                  |
 +----------------------------------+---------------------------------+-------------------------------------+-------------------------------------------------------------+
 | ``SELAVY_POL_MODEL_ORDER``       | 3                               | RMSynthesis.modelPolyOrder          | When ``SELAVY_POL_MODEL_TYPE=poly``, this gives the order of|
