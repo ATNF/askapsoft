@@ -712,6 +712,8 @@ SELAVY_FLAG_GROWTH=true
 SELAVY_GROWTH_CUT=3
 # Growth flux threshold - leave blank if using SNR
 SELAVY_GROWTH_THRESHOLD=""
+# Cutoff in the weights for source-detection
+SELAVY_WEIGHTS_CUTOFF=0.15
 # Whether to use a variable threshold
 SELAVY_VARIABLE_THRESHOLD=true
 # Half-size of the box used to calculate the local threshold
@@ -719,7 +721,6 @@ SELAVY_BOX_SIZE=50
 # How the processors subdivide the image
 SELAVY_NSUBX=6
 SELAVY_NSUBY=3
-
 
 ##############################
 # Selavy source finder - polarisation
@@ -773,6 +774,8 @@ SELAVY_SPEC_FLAG_GROWTH=true
 SELAVY_SPEC_GROWTH_CUT=3
 # Growth flux threshold - leave blank if using SNR
 SELAVY_SPEC_GROWTH_THRESHOLD=""
+# Cutoff in the weights for source-detection
+SELAVY_WEIGHTS_CUTOFF=0.15
 #
 # Preprocessing
 # Smoothing:

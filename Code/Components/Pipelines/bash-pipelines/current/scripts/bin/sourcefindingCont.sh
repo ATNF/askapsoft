@@ -169,10 +169,8 @@ fi
 
 if [ "\${BEAM}" == "all" ]; then
     imlist="\${imlist} \${weights}"
-    cutoff=${LINMOS_CUTOFF}
-    cutoff=\$(echo \$cutoff | awk '{print $1*$1}')
     weightpars="Selavy.Weights.weightsImage = \${weights##*/}.fits
-Selavy.Weights.weightsCutoff = \${cutoff}"
+Selavy.Weights.weightsCutoff = ${SELAVY_WEIGHTS_CUTOFF}"
 else
     weightpars="#"
 fi
