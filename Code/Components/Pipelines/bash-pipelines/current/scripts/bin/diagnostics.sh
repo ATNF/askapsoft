@@ -67,7 +67,7 @@ ADD_FITS_SUFFIX=true
 # and fitted components
 
 log=${logs}/diagnostics_\${SLURM_JOB_ID}.log
-parset=${parsets}/diagnostics_\${SLURM_JOB_ID}.in    
+diagParset=${parsets}/diagnostics_\${SLURM_JOB_ID}.in    
 
 pathToScript=\$(which makeThumbnailImage.py 2> "${tmp}/whchmkthumb")
 if [ "\${pathToScript}" != "" ]; then
@@ -87,7 +87,7 @@ if [ "\${pathToScript}" != "" ]; then
             echo "catalogue = \$catalogue"
             if [ -e "\${seldir}" ] && [ -e "\${catalogue}" ]; then
 
-                cat >> "\$parset" <<EOF
+                cat >> "\$diagParset" <<EOF
 ###### Image #\${i} catalogue #############
 makeThumbnail.image = \${casdaTwoDimImageNames[i]}
 makeThumbnail.imageTitle = \${casdaTwoDimThumbTitles[i]}
@@ -103,7 +103,7 @@ EOF
     
                 NCORES=1
                 NPPN=1
-                aprun -n \${NCORES} -N \${NPPN} ${makeThumbnails} -c "\${parset}" >> "\${log}"
+                aprun -n \${NCORES} -N \${NPPN} ${makeThumbnails} -c "\${diagParset}" >> "\${log}"
                 err=\$?
                 if [ \$err != 0 ]; then
                     echo "ERROR - Sources thumbnail creation failed for image \${casdaTwoDimImageNames[i]}" | tee -a "\${log}"
@@ -128,6 +128,8 @@ fi
 
 if [ "\${pathToScript}" != "" ]; then
 
+    fitsParset=${parsets}/diagnostics_fitsConversion_\${SLURM_JOB_ID}.
+
     for((i=0;i<\${#casdaTwoDimImageNames[@]};i++)); do
 
         imdir="\${casdaTwoDimImageNames[i]%/*}"
@@ -144,13 +146,14 @@ if [ "\${pathToScript}" != "" ]; then
 
             if [ ! -e "\${noisemapbase}.fits" ] && [ -e "\${noisemapbase}.img" ]; then
                 # need to convert to FITS
+                parset=\${fitsParset}
                 casaim=\${noisemapbase}.img
                 fitsim=\${noisemapbase}.fits
                 ${fitsConvertText}
             fi
             catalogue="\${seldir}/selavy-\${imageNoFITS}.components.txt"
             if [ -e "\${noisemapbase}.fits" ]; then
-                cat >> "\$parset" <<EOF
+                cat >> "\$diagParset" <<EOF
 ###### Image #\${i} catalogue #############
 makeThumbnail.image = \${noisemapbase}.fits
 makeThumbnail.weights = \${seldir}/\$(echo \$imageNoFITS | sed -e 's/image\./weights\./g' | sed -e 's/\.restored//g').fits
@@ -167,7 +170,7 @@ EOF
     
                 NCORES=1
                 NPPN=1
-                aprun -n \${NCORES} -N \${NPPN} ${makeThumbnails} -c "\${parset}" >> "\${log}"
+                aprun -n \${NCORES} -N \${NPPN} ${makeThumbnails} -c "\${diagParset}" >> "\${log}"
                 err=\$?
                 if [ \$err != 0 ]; then
                     echo "ERROR - Sources thumbnail creation failed for image \${noisemapbase}.fits" | tee -a "\${log}"
