@@ -220,7 +220,7 @@ buildAskap() {
     # with the release number. Only do this if it hasn't been done already (someone may have done this manually in svn before).
     if [ "$(grep -q \"^version = 'r'.*\" Code/Doc/user/current/doc/conf.py)" == 0 ]; then
       sed -e -i "s/^version = 'r'/#version = 'r'/" -e "s/^release = version/#release = version/" -e "s/^#version = '0.1'/version = '${VERSION}'/" -e "s/^#release = '0.1-draft'/release = '${VERSION}'/" Code/Doc/user/current/doc/conf.py
-      svn ci -m "Updated version numbers for " Code/Doc/user/current/doc/conf.py --username ${SVN_USERNAME} --password ${SVN_PASSWORD}
+      svn ci -m "Updated version numbers for ASKAPsoft documentation." Code/Doc/user/current/doc/conf.py --username ${SVN_USERNAME} --password ${SVN_PASSWORD}
     fi
     
     BUILD_COMMAND+="rbuild -n -t doc Code/Doc/user/current; "
