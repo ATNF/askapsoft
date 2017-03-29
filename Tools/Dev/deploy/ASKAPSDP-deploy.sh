@@ -21,16 +21,17 @@ main() {
   NOW=$(date "+%Y%m%d%H%M%S")
   NOW_LONG=$(date)
 
+  # We have to be askapops user to run this.
   doUserCheck
   
   # Usage
   me=$(basename "$0")
   USAGE="$me [-h | ?] [-t <svn-tag>] [-l] [-c <cfg-file>]"
   
-  # Defaults, these can be overriden in config file (see -c switch)
+  # Defaults, these can be overridden in config file (see -c switch)
   OVERWRITE_EXISTING=FALSE
   MODULES_DIR="/group/askap/modulefiles"
-  WORKING_DIR="/group/astronomy856/askapops/workspace/askapsdp/"
+  WORKING_DIR="/group/askap/askapops/workspace/askapsdp/"
   DEPLOY_DIR="/group/askap/"
   DEPLOY_ASKAPSOFT=true
   DEPLOY_ASKAP_USER_DOC=true
@@ -42,23 +43,27 @@ main() {
   LOG_FILE="${NOW}-ASKAPSDP-deploy.log"
 
   # Globals
-  CFG_FILE="RELEASE.cfg"
+  CFG_FILE="RELEASE.cfg"       # default
   CURRENT_DIR=$PWD
-  TAG=""
+  TAG=""                       # e.g. CP-0.12.3
   TAG_FORMAT="^CP-([0-9])+\.([0-9])+\.([0-9])+(.)*$"
-  VERSION=""
+  VERSION=""                   # e.g. 0.12.3
   ASKAPSOFT_URL="${REPO_URL}/askapsdp/"
-  TOS_URL="${REPO_URL}/askapsoft/trunk/"
+  TOS_URL="${REPO_URL}/askapsoft/Src/trunk/"
   BUILD_DIR=""
-  VERBOSE=false
+  VERBOSE=false               # change with -v, if true then echos log entries to the console
   INGEST_NODE=galaxy-ingest01.pawsey.org.au
-  FORCE_RESET=false
+  FORCE_RESET=false           # use -x to force reset (clears lock file)
   
-  # Build flags
+  # Build finished flags
   BUILD_ASKAPSOFT_DONE_FLAG="build-askapsoft-done"
   BUILD_CPSVCS_DONE_FLAG="build-cpsvcs-done"
   BUILD_CLI_DONE_FLAG="build-cli-done"
   BUILD_FAILED_FLAG="build-error"
+
+  # svn settings - these have to be overridden in svn.cfg, if not then SSubversion will prompt for them so not good for unattended run
+  SVN_USERNAME=""
+  SVN_PASSWORD=""
   
   # Errors
   NO_ERROR=0
@@ -72,15 +77,22 @@ main() {
   ERROR_WRONG_CLUSTER=71
   ERROR_TIMEOUT=72
   ERROR_BUILD_FAILED=73
-  TOLD_TO_DIE=74
+  TOLD_TO_DIE=74             # used on terminate SIGnals
   
-  TIMEOUT_VALUE=14400 # 4 hours
+  TIMEOUT_VALUE=14400        # 4 hours
 
   trap '{ cleanup ${TOLD_TO_DIE}; }' SIGHUP SIGINT SIGTERM
 
-  processCmdLine "$@" 
+  # svn overrides are in the svn.cfg file
+  if [ -e "svn.cfg" ]; then
+    if ! source "svn.cfg"; then
+      echo "Could not process overrides file svn.cfg" >&2
+      exit $ERROR_BAD_OVERRIDES;
+    fi
+  fi
 
-  detectHost
+  # Process the command line switches
+  processCmdLine "$@" 
 
   # Overrides are in the cfg file
   if [ -e "$CFG_FILE" ]; then
@@ -90,6 +102,10 @@ main() {
     fi
   fi
 
+  # We can only run this on galaxy
+  detectHost
+
+  # We only want to run once at a time
   doLockCheck
   
   # Set up the dirs
@@ -119,23 +135,28 @@ main() {
   doOverwriteChecks
 
   # Do the builds
-  #if [ "$DEPLOY_ASKAPSOFT" == true ] || [ "$DEPLOY_ASKAP_PIPELINE" == true ] || [ "$DEPLOY_ASKAP_USER_DOC" == true ]; then
-    #buildAskap
-  #fi
+  if [ "$DEPLOY_ASKAPSOFT" == true ] || [ "$DEPLOY_ASKAP_PIPELINE" == true ] || [ "$DEPLOY_ASKAP_USER_DOC" == true ]; then
+    buildAskap
+    log "building ASKAPsoft"
+  fi
 
   if [ "$DEPLOY_ASKAP_SERVICES" == true ]; then
     buildServices
+    log "building services"
   fi
 
   if [ "$DEPLOY_ASKAP_CLI" == true ]; then
     buildCli
+    log "building cli"
   fi
   
   # Stage the build
   stage
+  log "staging build"
 
   # Deploy the modules
   deploy
+  log "deploying build"
   
   # Finish
   cleanup $NO_ERROR
@@ -152,10 +173,10 @@ buildAskap() {
   # Get the code if it's not there
   if [ ! -e "askapsoft-${TAG}" ]; then
     log "Retrieving the code base from ${ASKAPSOFT_URL} into askapsoft-${TAG}"
-    svn co -q "${ASKAPSOFT_URL}" "askapsoft-${TAG}"
+    svn co -q --username ${SVN_USERNAME} --password ${SVN_PASSWORD} "${ASKAPSOFT_URL}" "askapsoft-${TAG}"
   else
     log "The askapsoft-${TAG} directory already exists, using that"
-    svn update -q "askapsoft-${TAG}"
+    svn update -q --username ${SVN_USERNAME} --password ${SVN_PASSWORD} "askapsoft-${TAG}"
   fi
   
   # Copy for ingest cluster build if required
@@ -199,7 +220,7 @@ buildAskap() {
     # with the release number. Only do this if it hasn't been done already (someone may have done this manually in svn before).
     if [ "$(grep -q \"^version = 'r'.*\" Code/Doc/user/current/doc/conf.py)" == 0 ]; then
       sed -e -i "s/^version = 'r'/#version = 'r'/" -e "s/^release = version/#release = version/" -e "s/^#version = '0.1'/version = '${VERSION}'/" -e "s/^#release = '0.1-draft'/release = '${VERSION}'/" Code/Doc/user/current/doc/conf.py
-      svn ci -m "Updated version numbers for " Code/Doc/user/current/doc/conf.py
+      svn ci -m "Updated version numbers for " Code/Doc/user/current/doc/conf.py --username ${SVN_USERNAME} --password ${SVN_PASSWORD}
     fi
     
     BUILD_COMMAND+="rbuild -n -t doc Code/Doc/user/current; "
@@ -229,10 +250,10 @@ buildServices() {
   # Check it out of it's not there
   if [ ! -e "askapingest-${TAG}" ]; then
     log "Retrieving the code base from ${ASKAPSOFT_URL} into askapsoft-${TAG}"
-    svn co -q "${ASKAPSOFT_URL}" "askapingest-${TAG}"
+    svn co -q --username ${SVN_USERNAME} --password ${SVN_PASSWORD} "${ASKAPSOFT_URL}" "askapingest-${TAG}"
   else
     log "The askapingest-${TAG} directory already exists, using that"
-    svn update -q "askapingest-${TAG}"
+    svn update -q --username ${SVN_USERNAME} --password ${SVN_PASSWORD} "askapingest-${TAG}"
   fi
 
   # Check to see if we have already bootstrapped the env
@@ -242,7 +263,7 @@ buildServices() {
   fi
 
   BUILD_COMMAND="${BUILD_COMMAND} \
-                 bash initaskap.sh; \
+                 source initaskap.sh; \
                  rbuild -n -V --release-name \"ASKAPsoft-cpsvcs-${TAG}\" --stage-dir \"ASKAPsoft-cpsvcs-${TAG}\" -t release Code/Systems/cpsvcs; \
                  touch \"${BUILD_DIR}/build-cpsvcs-done\") "
                        
@@ -265,10 +286,10 @@ buildCli() {
   # Check it out of it's not there
   if [ ! -e "askaptos-trunk" ]; then
     log "Retrieving the code base from ${TOS_URL} into askaptos-trunk"
-    svn co -q "${TOS_URL}" askaptos-trunk
+    svn co -q --username ${SVN_USERNAME} --password ${SVN_PASSWORD} "${TOS_URL}" askaptos-trunk
   else
     log "The askaptos-trunk directory already exists, using that"
-    svn update -q "askaptos-trunk"
+    svn update -q --username ${SVN_USERNAME} --password ${SVN_PASSWORD} "askaptos-trunk"
   fi
   
   # Check to see if we have already bootstrapped the env
@@ -278,13 +299,14 @@ buildCli() {
   fi
   
   BUILD_COMMAND="${BUILD_COMMAND} \
-                 bash initaskap.sh; \
+                 source initaskap.sh; \
                  rbuild -n -V --release-name \"ASKAP-cli-${TAG}\" --stage-dir \"ASKAP-cli-${TAG}\" -t release Code/Components/UI/cli/current; \
                  touch \"${BUILD_DIR}/build-cli-done\""
   
   cd askaptos-trunk || cleanup $ERROR_MISSING_ENV
     
   log "Starting ASKAP CLI build in background"
+  log "$BUILD_COMMAND"
   (eval "${BUILD_COMMAND}") &
 
 }
@@ -302,14 +324,20 @@ stage() {
   local ELAPSED_TIME=0
   declare -a SEMAPHORES
   local IDX=0
+
+  # Check for ASKAPsoft done if we are building any of askap apps, askap pipeline, askap doc
   if [ "$DEPLOY_ASKAPSOFT" == true ] || [ "$DEPLOY_ASKAP_PIPELINE" == true ] || [ "$DEPLOY_ASKAP_USER_DOC" == true ]; then
     SEMAPHORES[$IDX]="$BUILD_ASKAPSOFT_DONE_FLAG"
     IDX=$((IDX + 1))
   fi
+
+  # Check for ASKAP CLI done if we are building the command line interface
   if [ "$DEPLOY_ASKAP_CLI" == true ]; then
     SEMAPHORES[$IDX]="$BUILD_CLI_DONE_FLAG"
     IDX=$((IDX + 1))
   fi
+
+  # Check for ASKAP Services done if we are building ingest (on ingest cluster)
   if [ "$DEPLOY_ASKAP_SERVICES" == true ]; then
     SEMAPHORES[$IDX]="$BUILD_CPSVCS_DONE_FLAG"
     IDX=$((IDX + 1))
@@ -317,13 +345,17 @@ stage() {
   
   while [ "$ALL_DONE" == false ]; do
   
-    # check all the semaphores
+    # check all the semaphores - all semaphore files will have to be present for ALL_DONE to stay true after this loop
+    # Assume ALL_DONE
+    ALL_DONE=true
+
+    # Now prove it wrong ...
     for FLAG in "${SEMAPHORES[@]}"; do
-      if [ -e $FLAG ]; then
-        ALL_DONE=true
-        log "${FLAG}"
-      else
+      if [ ! -e $FLAG ]; then
         ALL_DONE=false
+        break
+      else
+        log "${FLAG}"
       fi
     done
     
@@ -375,10 +407,10 @@ stage() {
 
   # stage askapcli if specified
   if [ "$DEPLOY_ASKAP_CLI" == true ]; then
-    tar xf "${WORKING_DIR}/${TAG}/askaptos-trunk/ASKAP-cli-${TAG}"
+    tar xf "${WORKING_DIR}/${TAG}/askaptos-trunk/Code/Components/UI/cli/current/ASKAP-cli-${TAG}.tgz"
 
     # fix up permissions
-    chgrp -R "askap ASKAP-cli-${TAG}"
+    chgrp -R askap "ASKAP-cli-${TAG}"
     find "ASKAP-cli-${TAG}" -type f -exec chmod oug+r {} +
     find "ASKAP-cli-${TAG}" -type d -exec chmod oug+rx {} +
     
@@ -453,6 +485,7 @@ deploy() {
       mv "${DEPLOY_DIR}/askapcli/${VERSION}" "${DEPLOY_DIR}/askapcli/${VERSION}.${NOW}"
     fi
 
+    mv "${BUILD_DIR}/askapcli.module" "${MODULES_DIR}/askapcli/current"
     mv "${BUILD_DIR}/ASKAP-cli-${TAG}" "${DEPLOY_DIR}/askapcli/${VERSION}"
     rm "${DEPLOY_DIR}/askapcli/current"
     ln -s "${DEPLOY_DIR}/askapcli/${TAG}" "${DEPLOY_DIR}/askapcli/current"
@@ -485,6 +518,16 @@ cleanup () {
   if [ -n "$2" ]; then
     logerr "$2"
   fi
+
+  # Change the group of all the build artefacts in the code tree resulting from rbuild calls otherwise
+  # askapops quota will run out.
+  chgrp -R askap "${WORKING_DIR}/${TAG}"
+
+  # Kill all the sub proceses
+  #if [ $1 -eq $TOLD_TO_DIE ]; then
+    pkill -P $$
+  #fi
+
   exit "$1"
 }
 
@@ -506,7 +549,7 @@ showHelp() {
   printf "You can override the following settings by editing a scriptable config file and passing it via -c switch \n"
   printf "(or use the default RELEASE.cfg). This script will be sourced to set up the deploy environment. \n"
   printf "Unless overriden in this way, the defaults are:\n\n"
-  printf "  export WORKING_DIR='/group/astronomy856/askapops/workspace/askapsdp/'\n"
+  printf "  export WORKING_DIR='/group/askap/askapops/workspace/askapsdp/'\n"
   printf "  export OVERWRITE_EXISTING=false\n"
   printf "  export DEPLOY_DIR='/group/askap/'\n"
   printf "  export MODULES_DIR='/group/askap/modulefiles'\n"
@@ -612,7 +655,7 @@ findLatestTag() {
 
   log "Using the latest tag from subversion for ASKAPsoft"
 
-  LATEST_TAG=$(svn ls -v https://svn.atnf.csiro.au/askapsdp/tags | sort | tail -n 1 | awk -F " " '{print $NF}')
+  LATEST_TAG=$(svn --username ${SVN_USERNAME} --password ${SVN_PASSWORD} ls -v https://svn.atnf.csiro.au/askapsdp/tags | sort | tail -n 1 | awk -F ' ' '{print $NF}' | cut -d'/' -f 1)
 
   if [[ ${LATEST_TAG} =~ $TAG_FORMAT ]]; then
     log "The latest tag is ${LATEST_TAG}"
@@ -625,17 +668,18 @@ findLatestTag() {
 
 # Print the environment to the log file
 logENV () {
-  log "OVERWRITE_EXISTING =" "$([ \"$OVERWRITE_EXISTING\" == true ] && echo "true" || echo "false")"
-  log "MAKE_MODULES_DEFAULT =" "$([ \"$MAKE_MODULES_DEFAULT\" == true ] && echo "true" || echo "false")"
+  log "OVERWRITE_EXISTING =" "$([ $OVERWRITE_EXISTING = true ] && echo "true" || echo "false")"
+  log "MAKE_MODULES_DEFAULT =" "$([ $MAKE_MODULES_DEFAULT = true ] && echo "true" || echo "false")"
   log "MODULES_DIR =" "$MODULES_DIR"
   log "WORKING_DIR =" "$WORKING_DIR"
   log "DEPLOY_DIR =" "$DEPLOY_DIR"
-  log "DEPLOY_ASKAPSOFT =" "$([ \"$DEPLOY_ASKAPSOFT\" == true ] && echo "true" || echo "false")"
-  log "DEPLOY_ASKAP_PIPELINE =" "$([ \"$DEPLOY_ASKAP_PIPELINE\" == true ] && echo "true" || echo "false")"
-  log "DEPLOY_ASKAP_SERVICES =" "$([ \"$DEPLOY_ASKAP_SERVICES\" == true ] && echo "true" || echo "false")"
-  log "DEPLOY_ASKAP_CLI =" "$([ \"$DEPLOY_ASKAP_CLI\" == true ] && echo "true" || echo "false")"
+  log "DEPLOY_ASKAPSOFT =" "$([ $DEPLOY_ASKAPSOFT = true ] && echo "true" || echo "false")"
+  log "DEPLOY_ASKAP_PIPELINE =" "$([ $DEPLOY_ASKAP_PIPELINE = true ] && echo "true" || echo "false")"
+  log "DEPLOY_ASKAP_SERVICES =" "$([ $DEPLOY_ASKAP_SERVICES = true ] && echo "true" || echo "false")"
+  log "DEPLOY_ASKAP_CLI =" "$([ $DEPLOY_ASKAP_CLI = true ] && echo "true" || echo "false")"
   log "ASKAPSOFT_URL =" "$ASKAPSOFT_URL"
   log "TOS_URL =" "$TOS_URL"
+  log "SVN_USERNAME =" "$SVN_USERNAME"
 }
 
 # Check what is going to be overwritten. Combined with existing cfg after this we will know what we have

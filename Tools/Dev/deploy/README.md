@@ -4,9 +4,12 @@ a script for admins of that system only or for use in a continuous integration e
 no use to anyone else.
 
 The script should be deployed to the askapops user area with suitable permissions to prevent changes and enforce private use
-by askapops only (chmod 700).
+by askapops only (`chmod 700`).
 
-*.module-template files are Modules config files for the various ASKAP modules. They contain substitution variable ${_VERSION} (the underscore to indicate that
+`*.module-template` files are Modules config files for the various ASKAP modules. They contain substitution variable `${_VERSION}` (the underscore to indicate that
 it's not a normal env variable) which will be replaced by a valid version number when the deployment script is run.
 
-More to come ...
+As Subversion access to a repository is required, credentials need to be supplied in a `svn.cfg` file as:
+
+    SVN_USERNAME=<username>
+    SVN_PASSWORD=<password>
