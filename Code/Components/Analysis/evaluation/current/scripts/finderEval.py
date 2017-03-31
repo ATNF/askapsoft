@@ -452,10 +452,10 @@ if __name__ == '__main__':
         f=np.array(f,dtype=float)
         minFlux=floor(log10(f.min())*2.)/2.
         maxFlux=ceil(log10(f.max())*2.)/2.
-	    
-        numMatchBinnedByFlux = np.zeros(int(maxFlux-minFlux)*10)
-        numMissSrcBinnedByFlux = np.zeros(int(maxFlux-minFlux)*10)
-        numMissRefBinnedByFlux = np.zeros(int(maxFlux-minFlux)*10)
+
+        numMatchBinnedByFlux = np.zeros(int((maxFlux-minFlux)*10))
+        numMissSrcBinnedByFlux = np.zeros(int((maxFlux-minFlux)*10))
+        numMissRefBinnedByFlux = np.zeros(int((maxFlux-minFlux)*10))
 	    
         for m in matchlist:
             binNumber = int((log10(m.src.flux()*sourceFluxScale)-minFlux)*10)
@@ -472,7 +472,8 @@ if __name__ == '__main__':
 	
         numSrcBinnedByFlux = numMatchBinnedByFlux + numMissSrcBinnedByFlux
         numRefBinnedByFlux = numMatchBinnedByFlux + numMissRefBinnedByFlux
-	
+
+        # Have the additional +3 here to match the extension down below (clist)
         fluxBin=10**(minFlux-0.1+arange((maxFlux-minFlux)*10+3)/10.)
         fluxBinPlot=10**(minFlux-0.1+arange((maxFlux-minFlux)*10)/10.)
 	    
@@ -486,7 +487,6 @@ if __name__ == '__main__':
 
         completenessReliability = np.zeros(numMatchBinnedByFlux.shape)
         completenessReliability[(numSrcBinnedByFlux>0)&(numRefBinnedByFlux>0)] = completenessBinnedByFlux[(numSrcBinnedByFlux>0)&(numRefBinnedByFlux>0)] * reliabilityBinnedByFlux[(numSrcBinnedByFlux>0)&(numRefBinnedByFlux>0)]
-        print completenessBinnedByFlux.shape,completenessReliability.shape,fluxBin.shape,fluxBinPlot.shape
 
         clist=[0]
         clist.extend(completenessBinnedByFlux)
