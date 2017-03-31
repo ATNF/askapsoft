@@ -597,9 +597,9 @@ if __name__ == '__main__':
         amin=floor(a.min()/5.)*5
         amax=ceil(a.max()/5.)*5
 	
-        nmatch2d=np.zeros((int(amax-amin)/5,int(maxFlux-minFlux)*10))
-        nmissSrc2d=np.zeros((int(amax-amin)/5,int(maxFlux-minFlux)*10))
-        nmissRef2d=np.zeros((int(amax-amin)/5,int(maxFlux-minFlux)*10))
+        nmatch2d=np.zeros((int((amax-amin)/5),int((maxFlux-minFlux)*10)))
+        nmissSrc2d=np.zeros((int((amax-amin)/5),int((maxFlux-minFlux)*10)))
+        nmissRef2d=np.zeros((int((amax-amin)/5),int((maxFlux-minFlux)*10)))
 	
         for m in matchlist:
             abin=int((m.ref.maj-amin)/5.)
