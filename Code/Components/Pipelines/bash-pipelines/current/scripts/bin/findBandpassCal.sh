@@ -48,8 +48,8 @@ if [ "${DO_IT}" == "true" ]; then
     if [ "${BANDPASS_MINUV}" -gt 0 ]; then
         dataSelectionPars="# Minimum UV distance for bandpass calibration:
 Cbpcalibrator.MinUV = ${BANDPASS_MINUV}"
-    fi        
-    
+    fi
+
     # Check for bandpass smoothing options
     DO_RUN_PLOT_CALTABLE=false
     if [ "${DO_BANDPASS_PLOT}" == "true" ] || [ "${DO_BANDPASS_SMOOTH}" == "true" ]; then
@@ -76,7 +76,7 @@ Cbpcalibrator.MinUV = ${BANDPASS_MINUV}"
             script_args="${script_args} -o"
         fi
         script_args="${script_args} -fit ${BANDPASS_SMOOTH_FIT} -th ${BANDPASS_SMOOTH_THRESHOLD}"
-        
+
     fi
 
     sbatchfile="$slurms/cbpcalibrator_1934.sbatch"
@@ -98,7 +98,7 @@ ${askapsoftModuleCommands}
 
 BASEDIR=${BASEDIR}
 cd $OUTPUT
-. ${PIPELINEDIR}/utils.sh	
+. ${PIPELINEDIR}/utils.sh
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
@@ -137,7 +137,7 @@ NCORES=${NUM_CPUS_CBPCAL}
 NPPN=20
 aprun -n \${NCORES} -N \${NPPN} $cbpcalibrator -c "\$parset" > "\$log"
 err=\$?
-for ms in \$(echo $ms1934list | sed -e 's/,/ /g'); do 
+for ms in \$(echo $ms1934list | sed -e 's/,/ /g'); do
     rejuvenate "\$ms";
 done
 rejuvenate ${TABLE_BANDPASS}
@@ -158,7 +158,9 @@ if [ \${PLOT_CALTABLE} == true ]; then
     aprun -n \${NCORES} -N \${NPPN} -b casa --nogui --nologger --log2term -c "\${scriptCommand}" > "\${log}"
     module unload casa
     err=\$?
-    rejuvenate ${TABLE_BANDPASS}*
+    for tab in ${TABLE_BANDPASS}*; do
+        rejuvenate "\${tab}"
+    done
     extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} smoothBandpass "txt,csv"
     if [ \$err != 0 ]; then
         exit \$err

@@ -159,7 +159,7 @@ Ccalibrator.refgain                             = ${SELFCAL_REF_GAINS}"
     if [ "${SELFCAL_REF_ANTENNA}" == "" ] && [ "${SELFCAL_REF_GAINS}" == "" ]; then
         CcalibratorReference="${CcalibratorReference} is not done in this job"
     fi
-    
+
     setJob science_continuumImageSelfcal contSC
     cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
@@ -179,7 +179,7 @@ ${askapsoftModuleCommands}
 
 BASEDIR=${BASEDIR}
 cd $OUTPUT
-. ${PIPELINEDIR}/utils.sh	
+. ${PIPELINEDIR}/utils.sh
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
@@ -395,7 +395,7 @@ EOFINNER
             aprun -n \${NCORES} -N \${NPPN} $cmodel -c "\$parset" >> "\$log"
             err=\$?
             extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname}_L\${LOOP}_cmodel "txt,csv"
-            
+
             if [ \$err != 0 ]; then
                 exit \$err
             fi
@@ -423,7 +423,7 @@ EOFINNER
         if [ \${copyImages} == true ]; then
             # Use the . with imageBase to get images only, so we don't
             #  move the selfCal directory itself
-            mv "${OUTPUT}/*.${imageBase}*" .
+            mv "${OUTPUT}"/*.${imageBase}* .
         fi
 
         cd $OUTPUT
@@ -436,9 +436,11 @@ EOFINNER
     NPPN=${CPUS_PER_CORE_CONT_IMAGING}
     aprun -n \${NCORES} -N \${NPPN} $theimager -c "\$parset" >> "\$log"
     err=\$?
-    rejuvenate "./*.${imageBase}*"
-    rejuvenate "${OUTPUT}/${gainscaltab}"
-    rejuvenate "${OUTPUT}/${msSciAv}"
+    for im in *.${imageBase}*; do
+        rejuvenate "\$im"
+    done
+    rejuvenate "${OUTPUT}"/"${gainscaltab}"
+    rejuvenate "${OUTPUT}"/"${msSciAv}"
     extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname}_L\${LOOP} "txt,csv"
     if [ \$err != 0 ]; then
         exit \$err
@@ -449,15 +451,15 @@ done
 EOFOUTER
 
     if [ "${SUBMIT_JOBS}" == "true" ]; then
-	DEP=""
+        DEP=""
         DEP=$(addDep "$DEP" "$DEP_START")
         DEP=$(addDep "$DEP" "$ID_SPLIT_SCI")
         DEP=$(addDep "$DEP" "$ID_CCALAPPLY_SCI")
         DEP=$(addDep "$DEP" "$ID_FLAG_SCI")
         DEP=$(addDep "$DEP" "$ID_AVERAGE_SCI")
         DEP=$(addDep "$DEP" "$ID_FLAG_SCI_AV")
-	ID_CONTIMG_SCI_SC=$(sbatch $DEP "$sbatchfile" | awk '{print $4}')
-	recordJob "${ID_CONTIMG_SCI_SC}" "Make a self-calibrated continuum image for beam $BEAM of the science observation, with flags \"$DEP\""
+        ID_CONTIMG_SCI_SC=$(sbatch $DEP "$sbatchfile" | awk '{print $4}')
+        recordJob "${ID_CONTIMG_SCI_SC}" "Make a self-calibrated continuum image for beam $BEAM of the science observation, with flags \"$DEP\""
         FLAG_IMAGING_DEP=$(addDep "$FLAG_IMAGING_DEP" "$ID_CONTIMG_SCI_SC")
     else
 	echo "Would make a self-calibrated continuum image for beam $BEAM of the science observation with slurm file $sbatchfile"

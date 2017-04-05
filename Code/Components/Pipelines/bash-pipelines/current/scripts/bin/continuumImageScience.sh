@@ -72,7 +72,7 @@ ${askapsoftModuleCommands}
 
 BASEDIR=${BASEDIR}
 cd $OUTPUT
-. ${PIPELINEDIR}/utils.sh	
+. ${PIPELINEDIR}/utils.sh
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
@@ -107,8 +107,10 @@ NCORES=${NUM_CPUS_CONTIMG_SCI}
 NPPN=${CPUS_PER_CORE_CONT_IMAGING}
 aprun -n \${NCORES} -N \${NPPN} $theimager -c "\$parset" > "\$log"
 err=\$?
-rejuvenate *.${imageBase}*
-rejuvenate "${OUTPUT}/${msSciAv}"
+for im in *.${imageBase}*; do
+    rejuvenate ""\$im"
+done
+rejuvenate "${OUTPUT}"/"${msSciAv}"
 extractStats \${log} \${NCORES} \${SLURM_JOB_ID} \${err} ${jobname} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err

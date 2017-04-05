@@ -48,13 +48,13 @@ function reportVersion()
 # Takes one argument, the config file
 function archiveConfig()
 {
-    
+
     filename=$(basename "$1")
     extension="${filename##*.}"
     filename="${filename%.*}"
     archivedConfig=$slurmOut/${filename}__${NOW}.${extension}
     cp "$1" "$archivedConfig"
-    
+
 }
 
 ##############################
@@ -171,7 +171,7 @@ function getTile()
 #  * imageType (the image type used by CASDA - eg. cont_restored_T0)
 #  * label (the title for the preview image - only used for continuum)
 #  * weightsImage, weightsType, weightsLabel (as above)
-# Usage: setImageProperties <type> 
+# Usage: setImageProperties <type>
 #    type = cont | spectral | contcube
 function setImageProperties()
 {
@@ -188,7 +188,7 @@ function setImageProperties()
 
     band=""
     doAlt=false
-    
+
     if [ "$type" == "cont" ]; then
         typebase="cont"
         labelbase="continuum image"
@@ -240,7 +240,7 @@ function setImageProperties()
     fi
 
     base="${band}${imageBase}${imSuffix}"
-    
+
     weightsImage="weights.${base}"
     #    weightsType="${typebase}_weights_$typeSuffix"
     weightsType="${typebase}_sensitivity_$typeSuffix"
@@ -296,7 +296,7 @@ function setImageProperties()
     if [ "$needToUnsetTTerm" == "true" ]; then
         unset TTERM
     fi
-    
+
 }
 
 
@@ -333,7 +333,7 @@ function setImageBase()
     else
         echo "ERROR - bad type for setImageBase: \"$type\""
     fi
-        
+
     if [ "${FIELD}" == "." ]; then
         if [ "${TILE}" == "ALL" ]; then
             imageBase="${imageBase}"
@@ -357,7 +357,7 @@ function setImageBase()
 # current BEAM.
 function findScienceMSnames()
 {
-    
+
     # 1. Get the value for $msSci (the un-averaged MS)
     if [ "$(echo "${MS_BASE_SCIENCE}" | grep %b)" != "" ]; then
         # If we are here, then $MS_BASE_SCIENCE has a %b that needs to be
@@ -418,7 +418,7 @@ function findScienceMSnames()
         # Otherwise, apply the calibration to the raw data
         msSciAvCal=$msSciAv
     fi
-    
+
     if [ "${GAINS_CAL_TABLE}" == "" ]; then
         # The name of the gains cal table is blank, so turn off
         # selfcal & cal-apply for the SL case
@@ -435,10 +435,10 @@ function findScienceMSnames()
         if [ "$(echo "${GAINS_CAL_TABLE}" | grep %b)" != "" ]; then
             # We have a %b that needs replacing
             sedstr="s|%b|${BEAM}|g"
-            gainscaltab=$(echo "${GAINS_CAL_TABLE}" | sed -e "$sedstr")
+            gainscaltab="$(echo "${GAINS_CAL_TABLE}" | sed -e "$sedstr")"
         else
             # just use filename as provided
-            gainscaltab=${GAINS_CAL_TABLE}
+            gainscaltab="${GAINS_CAL_TABLE}"
         fi
     fi
 
@@ -541,7 +541,7 @@ function getMSname()
     # /path/to/2016-01-02-0345.ms returns 2016-01-02-0345
     # Usage:     getMSname MS
     # Returns:   $msname
-    
+
     msname=${1##*/}
     msname=${msname%%.*}
 }
@@ -581,7 +581,7 @@ function setFootprintArgs()
     if [ "$FP_PITCH" != "" ]; then
         footprintArgs="$footprintArgs -p $FP_PITCH"
     fi
-} 
+}
 
 function setFootprintFile()
 {
@@ -695,15 +695,15 @@ function extractStats()
     else
         RESULT_TXT="FAIL"
     fi
-    
-    parseLog "${STATS_LOGFILE}"    
+
+    parseLog "${STATS_LOGFILE}"
 
     if [ $# -lt 6 ]; then
 	formatlist="stdout"
     else
 	formatlist=$6
     fi
-    
+
     for format in $(echo "$formatlist" | sed -e 's/,/ /g'); do
 
 	if [ "$format" == "txt" ]; then
@@ -731,7 +731,7 @@ function parseLog()
 {
 
     logfile=$1
-    
+
     TIME_JOB_REAL="---"
     TIME_JOB_SYS="---"
     TIME_JOB_USER="---"
@@ -774,7 +774,7 @@ function findWorkerStats()
 {
     logfile=$1
     tmpfile=${tmp}/tmpout
-    
+
     PEAK_VM_WORKERS="---"
     PEAK_RSS_WORKERS="---"
     AVE_VM_WORKERS="---"
@@ -817,7 +817,7 @@ END{
 
 EOF
         fi
-        
+
         tmpfile2="$tmpfile.2"
         rm -f "$tmpfile2"
         if [ "${NUM_CORES}" == "" ]; then
@@ -826,9 +826,9 @@ EOF
         for((i=1;i<NUM_CORES;i++)); do
 
 	    grep "($i, " "$tmpfile" | tail -1 >> "$tmpfile2"
-	    
+
         done
-        
+
         results=$(awk -f "$awkfile" "$tmpfile2")
         PEAK_VM_WORKERS=$(echo "$results" | awk '{print $3}')
         PEAK_RSS_WORKERS=$(echo "$results" | awk '{print $6}')
@@ -836,6 +836,6 @@ EOF
         AVE_RSS_WORKERS=$(echo "$results" | awk '{print $5}')
 
     fi
-   
+
 
 }

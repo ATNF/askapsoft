@@ -106,7 +106,7 @@ ${Imager}.preconditioner.Wiener.taper             = ${PRECONDITIONER_WIENER_TAPE
         restFrequency="${Imager}.Images.restFrequency                    = ${REST_FREQUENCY_CONTCUBE}"
     fi
 
-    cleaningPars="# These parameters define the clean algorithm 
+    cleaningPars="# These parameters define the clean algorithm
 ${Imager}.solver                                  = ${SOLVER_CONTCUBE}"
     if [ "${SOLVER_CONTCUBE}" == "Clean" ]; then
         cleaningPars="${cleaningPars}
@@ -168,7 +168,7 @@ Cimager.solverpercore                           = true
 Cimager.nwriters                                = ${NUM_SPECTRAL_CUBES_CONTCUBE}"
 
         # we also need to change the CPU allocations
-        
+
     else
         altImagerParams="${altImagerParams} are not required"
     fi
@@ -179,7 +179,7 @@ Cimager.nwriters                                = ${NUM_SPECTRAL_CUBES_CONTCUBE}
     else
         nameDefinition="${nameDefinition}.name                            = image.${imageBase}"
     fi
-    
+
     if [ "${DO_IT}" == "true" ]; then
 
         echo "Imaging the continuum cube, polarisation $POLN, for the science observation"
@@ -203,7 +203,7 @@ ${askapsoftModuleCommands}
 
 BASEDIR=${BASEDIR}
 cd $OUTPUT
-. ${PIPELINEDIR}/utils.sh	
+. ${PIPELINEDIR}/utils.sh
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
@@ -265,7 +265,9 @@ NPPN=${CPUS_PER_CORE_CONTCUBE_IMAGING}
 aprun -n \${NCORES} -N \${NPPN} ${theImager} -c \$parset > \$log
 err=\$?
 rejuvenate \${ms}
-rejuvenate "./*.${imageBase}*"
+for im in ./*.${imageBase}*; do
+    rejuvenate "\$im"
+done
 extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv"
 
 if [ \${err} -ne 0 ]; then
