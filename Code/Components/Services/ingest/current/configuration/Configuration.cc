@@ -313,21 +313,27 @@ void Configuration::buildBaselineMap(void)
     // it introduces an additional mapping and probably should be removed when we 
     // transition to proper operations
     if (itsParset.isDefined("baselinemap.antennaindices")) {
-        ASKAPLOG_INFO_STR(logger, "A subset of antenna indices will be selected from the defined correlator product configuration");
+        if (receiverId() == 0) {
+            ASKAPLOG_INFO_STR(logger, "A subset of antenna indices will be selected from the defined correlator product configuration");
+        }
         const vector<string> antOrdering = itsParset.getStringVector("baselinemap.antennaidx");
         const vector<int32_t> parsetAntIndices = itsParset.getInt32Vector("baselinemap.antennaindices");
         const vector<int32_t> validAntIndices = parsetAntIndices.size() != 0 ? parsetAntIndices : buildValidAntIndices(antOrdering);
         ASKAPCHECK(validAntIndices.size() == antOrdering.size(),
                  "Number of antenna indices should match baselinemap.antennaidx; valid indices = "<<validAntIndices);
-        for (size_t ant=0; ant<validAntIndices.size(); ++ant) {
-             ASKAPLOG_DEBUG_STR(logger, "Re-mapping antenna "<<validAntIndices[ant]<<" ("<<antOrdering[ant]<<
-                           ") to the new antenna index of "<<ant);
+        if (receiverId() == 0) {
+            for (size_t ant=0; ant<validAntIndices.size(); ++ant) {
+                 ASKAPLOG_DEBUG_STR(logger, "Re-mapping antenna "<<validAntIndices[ant]<<" ("<<antOrdering[ant]<<
+                               ") to the new antenna index of "<<ant);
+            }
         }
         const size_t nMappedProductsBefore = itsBaselineMap->size();
         itsBaselineMap->sliceMap(validAntIndices);
         const size_t nMappedProductsAfter = itsBaselineMap->size();
-        ASKAPLOG_DEBUG_STR(logger, "Reduced number of accepted correlation products from "<<nMappedProductsBefore<<
-                      " to "<<nMappedProductsAfter);
+        if (receiverId() == 0) {
+            ASKAPLOG_DEBUG_STR(logger, "Reduced number of accepted correlation products from "<<nMappedProductsBefore<<
+                          " to "<<nMappedProductsAfter);
+        }
     }
     //
 }
