@@ -97,10 +97,10 @@ LUSTRE_STRIPE_SIZE=1048576
 BUCKET_SIZE=1048576
 
 ####################
-# Locations of the executables. 
+# Locations of the executables.
 # If you have a local version of the ASKAPsoft codebase, and have
 # defined ASKAP_ROOT, then you will use the executables from that
-# tree. 
+# tree.
 # Otherwise (the most common case for ACES members), the executables
 # from the askapsoft module will be used.
 
@@ -338,7 +338,7 @@ FLAG_THRESHOLD_DYNAMIC_SCIENCE_AV=4.0
 FLAG_DYNAMIC_INTEGRATE_SPECTRA_AV=true
 # Dynamic threshold applied to amplitudes in integrated spectra mode  [sigma]
 FLAG_THRESHOLD_DYNAMIC_SCIENCE_SPECTRA_AV=4.0
-# Whether to apply a dynamic threshold to integrated times on averaged data 
+# Whether to apply a dynamic threshold to integrated times on averaged data
 FLAG_DYNAMIC_INTEGRATE_TIMES_AV=false
 # Dynamic threshold applied to amplitudes in integrated times mode [sigma]
 FLAG_THRESHOLD_DYNAMIC_SCIENCE_TIMES_AV=4.0
@@ -357,7 +357,7 @@ NUM_TAYLOR_TERMS=2
 CPUS_PER_CORE_CONT_IMAGING=16
 # Total number of cores to use for the continuum imaging. Leave blank
 # to have one core for each of nworkergroups*nchannels (plus a
-# master). 
+# master).
 NUM_CPUS_CONTIMG_SCI=""
 
 # base name for images: if IMAGE_BASE_CONT=i.blah then we'll get
@@ -563,7 +563,7 @@ CLEAN_CONTCUBE_WRITE_AT_MAJOR_CYCLE=false
 
 ##############################
 # Spectral-line imaging
-# 
+#
 # For this, we repeat some of the parameters used for continuum
 # imaging, with names that reflect the spectral-line nature...
 
@@ -593,7 +593,7 @@ CONTSUB_SELAVY_THRESHOLD=6
 CONTSUB_MODEL_FLUX_LIMIT=10uJy
 
 # Number of processors allocated to the spectral-line imaging
-NUM_CPUS_SPECIMG_SCI=2000
+NUM_CPUS_SPECIMG_SCI=200
 # Number of processors per node for the spectral-line imaging
 CPUS_PER_CORE_SPEC_IMAGING=20
 # Number of processors for spectral-line mosaicking.
@@ -660,7 +660,7 @@ RESTORING_BEAM_REFERENCE=mid
 RESTORING_BEAM_CUTOFF_SPECTRAL=0.05
 
 # Image-based continuum subtraction
-# Threshold [sigma] to mask outliers prior to fitting ('threshold' parameter) 
+# Threshold [sigma] to mask outliers prior to fitting ('threshold' parameter)
 SPECTRAL_IMSUB_THRESHOLD=2.0
 # Order of polynomial to fit ('fit_order' parameter)
 SPECTRAL_IMSUB_FIT_ORDER=2
@@ -672,7 +672,7 @@ SPECTRAL_IMSUB_CHAN_SAMPLING=1
 # Linear Mosaicking & beam locations
 #
 # Reference footprint rotation angle. This is used only when the
-# scheduling block parset does not contain the parameter 
+# scheduling block parset does not contain the parameter
 # common.target.src%d.footprint.rotation
 #    If not given, same effect as setting to zero.
 FOOTPRINT_PA_REFERENCE=""
@@ -791,7 +791,7 @@ SELAVY_SPEC_SPATIAL_KERNEL=3
 SELAVY_SPEC_FLAG_WAVELET=false
 # Dimension to do the wavelet reconstruction
 SELAVY_SPEC_RECON_DIM=1
-# Signal-to-noise for wavelet thresholding 
+# Signal-to-noise for wavelet thresholding
 SELAVY_SPEC_RECON_SNR=4
 # Minimum scale for inclusion in reconstruction (1=lowest)
 SELAVY_SPEC_RECON_SCALE_MIN=1
@@ -826,7 +826,7 @@ SELAVY_SPEC_BASE_CUBELET=cubelet
 # The image prefixes to be archived
 IMAGE_LIST="image psf psf.image residual sensitivity"
 
-# Whether to archive individual beam images 
+# Whether to archive individual beam images
 ARCHIVE_BEAM_IMAGES=false
 # Whether to archive mosaics of self-calibration loops
 ARCHIVE_SELFCAL_LOOP_MOSAICS=true
