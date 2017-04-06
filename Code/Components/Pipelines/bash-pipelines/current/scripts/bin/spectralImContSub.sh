@@ -7,7 +7,7 @@
 # For an input cube image.something.restored, it produces
 # image.something.restored.contsub, holding the continuum-subtracted
 # data, and image.something.restored.coefs, holding the polynomial
-# coefficients for each spectrum 
+# coefficients for each spectrum
 #
 # @copyright (c) 2017 CSIRO
 # Australia Telescope National Facility (ATNF)
@@ -86,15 +86,25 @@ thisfile=$sbatchfile
 cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
 IMAGE_BASE_SPECTRAL=${IMAGE_BASE_SPECTRAL}
+TILE=${TILE}
 FIELD=${FIELD}
+BEAM=${BEAM}
+pol=${pol}
 DO_ALT_IMAGER_SPECTRAL="${DO_ALT_IMAGER_SPECTRAL}"
 NUM_SPECTRAL_CUBES=${NUM_SPECTRAL_CUBES}
 subband="${subband}"
 imageCode=restored
 setImageProperties spectral
 
-pyscript=${parsets}/spectral_imcontsub_${FIELDBEAM}_\${SLURM_JOB_ID}.py
-cat > "\$pyscript" << EOFINNER
+if [ ! -e "\${imageName}" ]; then
+
+    echo "Image cube \${imageName} does not exist."
+    echo "Not running image-based continuum subtraction"
+
+else
+
+    pyscript=${parsets}/spectral_imcontsub_${FIELDBEAM}_\${SLURM_JOB_ID}.py
+    cat > "\$pyscript" << EOFINNER
 #!/usr/bin/env python
 
 # Need to import this from ACES
@@ -110,19 +120,20 @@ rc=robust_contsub()
 rc.poly(infile=image,threshold=threshold,verbose=True,fit_order=fit_order,n_every=n_every,log_every=10)
 
 EOFINNER
-log=${logs}/spectral_imcontsub_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+    log=${logs}/spectral_imcontsub_${FIELDBEAM}_\${SLURM_JOB_ID}.log
 
-NCORES=1
-NPPN=1
-module load casa
-aprun -n \${NCORES} -N \${NPPN} -b casa --nogui --nologger --log2term -c "\${pyscript}" > "\${log}"
-err=\$?
-rejuvenate "\${imageName}"
-extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv"
-if [ \$err != 0 ]; then
-    exit \$err
+    NCORES=1
+    NPPN=1
+    module load casa
+    aprun -n \${NCORES} -N \${NPPN} -b casa --nogui --nologger --log2term -c "\${pyscript}" > "\${log}"
+    err=\$?
+    rejuvenate "\${imageName}"
+    #extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv"
+    if [ \$err != 0 ]; then
+        exit \$err
+    fi
+
 fi
-
 EOF
 
         if [ "${SUBMIT_JOBS}" == "true" ]; then
@@ -157,5 +168,3 @@ EOF
     fi
 done
 echo " "
-        
-
