@@ -55,16 +55,16 @@ fi
 if [ "${DO_IT}" == "true" ] && [ "${DO_SELFCAL}" == "true" ]; then
 
     if [ "${NUM_CPUS_CONTIMG_SCI}" -lt 19 ]; then
-	NUM_CPUS_SELFCAL=19
+        NUM_CPUS_SELFCAL=19
     else
-	NUM_CPUS_SELFCAL=$NUM_CPUS_CONTIMG_SCI
+        NUM_CPUS_SELFCAL=$NUM_CPUS_CONTIMG_SCI
     fi
 
     NPROCS_SELAVY=$(echo "${SELFCAL_SELAVY_NSUBX}" "${SELFCAL_SELAVY_NSUBY}" | awk '{print $1*$2+1}')
     if [ "${CPUS_PER_CORE_CONT_IMAGING}" -lt "${NPROCS_SELAVY}" ]; then
-	CPUS_PER_CORE_SELFCAL=${CPUS_PER_CORE_CONT_IMAGING}
+        CPUS_PER_CORE_SELFCAL_SELAVY=${CPUS_PER_CORE_CONT_IMAGING}
     else
-	CPUS_PER_CORE_SELFCAL=${NPROCS_SELAVY}
+        CPUS_PER_CORE_SELFCAL_SELAVY=${NPROCS_SELAVY}
     fi
 
     imageCode=restored
@@ -378,7 +378,7 @@ EOFINNER
         echo "--- Source finding with $selavy ---" > "\$log"
         echo "---    Loop=\$LOOP, Threshold = \${SELFCAL_SELAVY_THRESHOLD_ARRAY[\$LOOP-1]} --" >> "\$log"
         NCORES=${NPROCS_SELAVY}
-        NPPN=${CPUS_PER_CORE_SELFCAL}
+        NPPN=${CPUS_PER_CORE_SELFCAL_SELAVY}
         aprun -n \${NCORES} -N \${NPPN} $selavy -c "\$parset" >> "\$log"
         err=\$?
         extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname}_L\${LOOP}_selavy "txt,csv"

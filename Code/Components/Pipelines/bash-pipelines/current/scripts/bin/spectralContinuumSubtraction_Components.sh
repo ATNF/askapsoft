@@ -37,16 +37,15 @@ imageCode=restored
 setImageProperties cont
 selavyImage="${OUTPUT}/${imageName}"
 
-NPROCS_SELAVY=$(echo "${CONTSUB_SELAVY_NSUBX}" "${CONTSUB_SELAVY_NSUBY}" | awk '{print $1*$2+1}')
-if [ "${NPROCS_SELAVY}" -le 20 ]; then
-    CPUS_PER_CORE_CONTSUB=${NPROCS_SELAVY}
-else
-    CPUS_PER_CORE_CONTSUB=20
-fi
-NPROCS_CONTSUB=${NPROCS_SELAVY}
+NPROCS_CONTSUB=$(echo "${CONTSUB_SELAVY_NSUBX}" "${CONTSUB_SELAVY_NSUBY}" | awk '{print $1*$2+1}')
 if [ "${NPROCS_CONTSUB}" -eq 1 ]; then
     # If Selavy is just serial, increase nprocs to 2 for cmodel
     NPROCS_CONTSUB=2
+fi
+if [ "${NPROCS_CONTSUB}" -le 20 ]; then
+    CPUS_PER_CORE_CONTSUB=${NPROCS_CONTSUB}
+else
+    CPUS_PER_CORE_CONTSUB=20
 fi
 
 components=modelComponents.in
@@ -69,7 +68,7 @@ ${askapsoftModuleCommands}
 
 BASEDIR=${BASEDIR}
 cd $OUTPUT
-. ${PIPELINEDIR}/utils.sh	
+. ${PIPELINEDIR}/utils.sh
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
@@ -158,7 +157,7 @@ Selavy.minChannels                              = 1
 Selavy.sortingParam                             = -iflux
 EOFINNER
 
-NCORES=${NPROCS_SELAVY}
+NCORES=${NPROCS_CONTSUB}
 NPPN=${CPUS_PER_CORE_CONTSUB}
 aprun -n \${NCORES} -N \${NPPN} ${selavy} -c "\${parset}" > "\${log}"
 err=\$?
@@ -178,7 +177,7 @@ else
 
     #################################################
     # Then, continuum subtraction
-    
+
     parset=${parsets}/contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.in
     log=${logs}/contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.log
     cat > "\$parset" <<EOFINNER
@@ -201,7 +200,7 @@ CContSubtract.gridder.WProject.frequencydependent = true
 CContSubtract.gridder.WProject.variablesupport    = true
 CContSubtract.gridder.WProject.offsetsupport      = true
 EOFINNER
-    
+
     NCORES=1
     NPPN=1
     aprun -n \${NCORES} -N \${NPPN} ${ccontsubtract} -c "\${parset}" > "\${log}"
@@ -213,7 +212,7 @@ EOFINNER
     else
         touch "$CONT_SUB_CHECK_FILE"
     fi
-    
+
 fi
 
 EOFOUTER

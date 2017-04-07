@@ -176,9 +176,9 @@ module load askappipeline/${askappipelineVersion}"
     # Check whether imageToFITS is defined in askapsoft module being
     # used
     if [ "$(which imageToFITS 2> "${tmp}/whchim2fts")" == "" ]; then
-        # Not found - use casa to do conversion        
+        # Not found - use casa to do conversion
         fitsConvertText="# The following converts the file in \$casaim to a FITS file, after fixing headers.
-if [ -e \"\${casaim}\" ] && [ ! -e \"\${fitsim}\" ]; then 
+if [ -e \"\${casaim}\" ] && [ ! -e \"\${fitsim}\" ]; then
     # The FITS version of this image doesn't exist
 
     script=\$(echo \"\${parset}\" | sed -e 's/\.in/\.py/g')
@@ -417,7 +417,7 @@ EOF
             exit 1
         fi
 
-        
+
         # For the spectral imaging (spectral-line & continuum cubes),
         # simager is not currently able to write out FITS files. So if
         # the user has requested FITS imagetype, but has not set the
@@ -450,9 +450,9 @@ EOF
                 echo "WARNING - You have not defined DO_ALT_IMAGER_SPECTRAL - setting to $DO_ALT_IMAGER, the value of DO_ALT_IMAGER"
                 DO_ALT_IMAGER_SPECTRAL=${DO_ALT_IMAGER}
             fi
-            
+
         fi
-        
+
 
         # Name of the MS that should be flagged by flagScience.sh
         #   This gets set differently at different stages in the scripts
@@ -470,7 +470,7 @@ EOF
         # nchanContSci = number of channels after averaging
         nchanContSci=$(echo "${NUM_CHAN_SCIENCE}" "${NUM_CHAN_TO_AVERAGE}" | awk '{print $1/$2}')
 
-        # nworkergroupsSci = number of worker groups, used for MFS imaging. 
+        # nworkergroupsSci = number of worker groups, used for MFS imaging.
         nworkergroupsSci=$(echo "${NUM_TAYLOR_TERMS}" | awk '{print 2*$1-1}')
 
         # total number of CPUs required for MFS continuum imaging, including the master
@@ -492,6 +492,9 @@ EOF
         # Can't have -N greater than -n in the aprun call
         if [ "${NUM_CPUS_CONTIMG_SCI}" -lt "${CPUS_PER_CORE_CONT_IMAGING}" ]; then
             CPUS_PER_CORE_CONT_IMAGING=${NUM_CPUS_CONTIMG_SCI}
+        fi
+        if [ "${NUM_CPUS_SPECIMG_SCI}" -lt "${CPUS_PER_CORE_SPEC_IMAGING}" ]; then
+            CPUS_PER_CORE_SPEC_IMAGING=${NUM_CPUS_SPECIMG_SCI}
         fi
 
         # Method used for self-calibration - needs to be either Cmodel or Components
@@ -588,7 +591,7 @@ EOF
         if [ "${NSUB_CUBES}" != "" ]; then
             echo "WARNING - the parameter NSUB_CUBES is deprectated. Using NUM_SPECTRAL_CUBES=${NUM_SPECTRAL_CUBES} instead."
         fi
-        
+
         if [ "${DO_ALT_IMAGER_SPECTRAL}" == "true" ] && [ "${ALT_IMAGER_SINGLE_FILE}" != "true" ]; then
             nworkers=$(echo "${NUM_CHAN_SCIENCE}" "${NCHAN_PER_CORE_SL}" | awk '{print $1/$2}')
             writerIncrement=$(echo "$nworkers" "${NUM_SPECTRAL_CUBES}" | awk '{print $1/$2}')
@@ -599,7 +602,7 @@ EOF
             SUBBAND_WRITER_LIST=1
             NUM_SPECTRAL_CUBES=1
         fi
-        
+
         if [ "${DO_ALT_IMAGER_CONTCUBE}" == "true" ] && [ "${ALT_IMAGER_SINGLE_FILE_CONTCUBE}" != "true" ]; then
             nworkers=$nchanContSci
             writerIncrement=$(echo "$nworkers" "${NUM_SPECTRAL_CUBES_CONTCUBE}" | awk '{print $1/$2}')
@@ -610,7 +613,7 @@ EOF
             SUBBAND_WRITER_LIST_CONTCUBE=1
             NUM_SPECTRAL_CUBES_CONTCUBE=1
         fi
-        
+
         ####################
         # Mosaicking parameters
 
@@ -633,7 +636,7 @@ EOF
 
         ####################
         # Source finding switches
-        
+
         # First check for the old DO_SOURCE_FINDING.
         #  If present, set new source-finding switches to its value
         #  and give a warning
@@ -644,12 +647,12 @@ EOF
             echo "        - Please use DO_SOURCE_FINDING_CONT and DO_SOURCE_FINDING_SPEC."
             echo "        - For now, these have both been set to ${DO_SOURCE_FINDING}."
         fi
-        
+
         # If DO_SOURCE_FINDING_CONT has not been set, set it to be the same as the DO_CONT_IMAGING switch
         if [ "${DO_SOURCE_FINDING_CONT}" == "" ]; then
             DO_SOURCE_FINDING_CONT=${DO_CONT_IMAGING}
         fi
-        
+
         # If DO_SOURCE_FINDING_SPEC has not been set, set it to be the same as the DO_SPECTRAL_IMAGING switch
         if [ "${DO_SOURCE_FINDING_SPEC}" == "" ]; then
             DO_SOURCE_FINDING_SPEC=${DO_SPECTRAL_IMAGING}
@@ -670,7 +673,7 @@ EOF
         if [ "${DO_SOURCE_FINDING_CONT}" == "true" ] && [ "${DO_MOSAIC}" != "true" ]; then
             DO_SOURCE_FINDING_BEAMWISE=true
         fi
-        
+
         if [ "${SELAVY_POL_WRITE_FDF}" != "" ]; then
             echo "WARNING - the parameter SELAVY_POL_WRITE_FDF is deprecated"
             echo "        - use SELAVY_POL_WRITE_COMPLEX_FDF instead (it has been set to ${SELAVY_POL_WRITE_FDF})"
@@ -890,7 +893,7 @@ EOF
                         exit 1
                     fi
                 fi
-                
+
                 if [ "${#CLEAN_NUM_MAJORCYCLES_ARRAY[@]}" -ne "$arraySize" ]; then
                     echo "ERROR! Size of CLEAN_NUM_MAJORCYCLES (${CLEAN_NUM_MAJORCYCLES}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
                     exit 1
@@ -915,4 +918,3 @@ EOF
     fi
 
 fi
-
