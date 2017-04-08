@@ -162,39 +162,58 @@ void ChannelMergeTask::receiveVisChunks(askap::cp::common::VisChunk::ShPtr chunk
    // due to collective call above, processes should be synchronised by this point
    timer.mark();
 
-   // 3) find the latest time - we ignore all chunks which are from the past
-   // (could, in principle, find time corresponding to the largest portion of valid data,
-   // but probably not worth it as we don't normally expect to loose any packets).
+   // 3) find the best time for merged chunk - we ignore all chunks which are from other times
+   // The best time corresponds to the largest chunk of data to retain
 
-   //casa::MVEpoch latestTime(chunk->time());
-   casa::MVEpoch latestTime(timeRecvBuf[2 * rankOffset], timeRecvBuf[2 *  rankOffset + 1]);
+   casa::MVEpoch timeWithMostData;
+
+
+   // as nLocalRanks > 1, zero means it is uninitialised
+   unsigned int largestNumberOfChunks = 0;
+   for (int rank = rankOffset; rank < nLocalRanks; ++rank) {
+        const casa::MVEpoch currentTime(timeRecvBuf[2 * rank], timeRecvBuf[2 *  rank + 1]);
+        // compare how many matches currentTime gives. It is possible to implement the same with less comparisons
+        // but straight forward approach sounds preferable for now
+        unsigned int numberOfMatches = 0;
+        for (int testRank = rankOffset; testRank < nLocalRanks; ++testRank) {
+             const casa::MVEpoch testTime(timeRecvBuf[2 * testRank], timeRecvBuf[2 *  testRank + 1]);
+             if (currentTime.nearAbs(testTime)) {
+                 ++numberOfMatches;
+             }
+        }
+        ASKAPDEBUGASSERT(numberOfMatches > 0);
+       
+        if (largestNumberOfChunks < numberOfMatches) {
+            largestNumberOfChunks = numberOfMatches;
+            timeWithMostData = currentTime;
+        }
+   }
+   ASKAPASSERT(largestNumberOfChunks > 0);
+   if (timeWithMostData.nearAbs(casa::MVEpoch())) {
+       ASKAPLOG_ERROR_STR(logger, "The majority ("<<largestNumberOfChunks<<") of the data streams are likely to be idle, check correlator.");
+   }
+
+   if (itsGroupWithActivatedRank) {
+       ASKAPDEBUGASSERT(localRank() == 0);
+       //chunk->time() = latestTime;
+       chunk->time() = timeWithMostData;
+   }
 
    // invalid chunk flag per rank, zero length array means that all chunks are valid
    // (could've stored validity flags as opposed to invalidity flags, but it makes the
    //  code a bit less readable).
    std::vector<bool> invalidFlags;
 
-   for (int rank = 1 + rankOffset; rank < nLocalRanks; ++rank) {
-        const casa::MVEpoch currentTime(timeRecvBuf[2 * rank], timeRecvBuf[2 *  rank + 1]);
-        if ((latestTime - currentTime).get() < 0.) {
-             latestTime = currentTime;
-             // this also means that there is at least one bad chunk to exclude
-             if (invalidFlags.size() == 0) {
-                 invalidFlags.resize(itsRanksToMerge, true);
-             }
-        }
-   }
-   if (itsGroupWithActivatedRank) {
-       ASKAPDEBUGASSERT(localRank() == 0);
-       chunk->time() = latestTime;
-   }
+   if (static_cast<int>(largestNumberOfChunks) != itsRanksToMerge) {
+       ASKAPLOG_DEBUG_STR(logger, "VisChunks being merged correspond to different times, keeping time with most data = "<<timeWithMostData);
 
-   if (invalidFlags.size() > 0) {
-       ASKAPLOG_DEBUG_STR(logger, "VisChunks being merged correspond to different times, keep only the latest = "<<latestTime);
+       // there is something to flag, initialise the flag vector
+       invalidFlags.resize(itsRanksToMerge, true);
+
        int counter = 0;
        for (size_t rank = 0; rank < invalidFlags.size(); ++rank) {
             const casa::MVEpoch currentTime(timeRecvBuf[2 * (rank + rankOffset)], timeRecvBuf[2 *  (rank + rankOffset) + 1]);
-            if (latestTime.nearAbs(currentTime)) {
+            if (timeWithMostData.nearAbs(currentTime)) {
                 invalidFlags[rank] = false;
                 ++counter;
             }
@@ -202,11 +221,13 @@ void ChannelMergeTask::receiveVisChunks(askap::cp::common::VisChunk::ShPtr chunk
        ASKAPCHECK(counter != 0, "It looks like comparison of time stamps failed due to floating point precision, this shouldn't have happened!");
        // case of counter == itsRanksToMerge is not supposed to be inside this if-statement
        ASKAPDEBUGASSERT(counter < itsRanksToMerge);
+       ASKAPDEBUGASSERT(counter == static_cast<int>(largestNumberOfChunks));
        ASKAPLOG_DEBUG_STR(logger, "      - keeping "<<counter<<" chunks out of "<<itsRanksToMerge<<
                                   " merged");
-       MonitoringSingleton::update<int32_t>("MisalignedStreamsCount", counter);
+       const int32_t misalignedStreamsNumber = itsRanksToMerge - counter;
+       MonitoringSingleton::update<int32_t>("MisalignedStreamsCount", misalignedStreamsNumber);
        ASKAPDEBUGASSERT(itsRanksToMerge > 0);
-       MonitoringSingleton::update<float>("MisalignedStreamsPercent", static_cast<float>(counter) / itsRanksToMerge * 100.);
+       MonitoringSingleton::update<float>("MisalignedStreamsPercent", static_cast<float>(misalignedStreamsNumber) / itsRanksToMerge * 100.);
    } else {
        MonitoringSingleton::update<int32_t>("MisalignedStreamsCount", 0);
        MonitoringSingleton::update<float>("MisalignedStreamsPercent", 0.);
@@ -567,7 +588,7 @@ void ChannelMergeTask::receiveVector(casa::Vector<T>& vec, int tag) const
 /// @note It is supposed to be executed in local rank 1 only
 void ChannelMergeTask::sendBasicMetadata(const askap::cp::common::VisChunk::ShPtr& chunk) const
 {
-   ASKAPLOG_DEBUG_STR(logger, "Sending basic metadata to the service rank");
+   //ASKAPLOG_DEBUG_STR(logger, "Sending basic metadata to the service rank");
    ASKAPDEBUGASSERT(localRank() == 1);
    ASKAPDEBUGASSERT(chunk);
    
@@ -610,7 +631,7 @@ void ChannelMergeTask::sendBasicMetadata(const askap::cp::common::VisChunk::ShPt
    casa::Vector<int8_t>  sndBufForData(casa::IPosition(1,buf.size()), buf.data(), casa::SHARE);
 
    sendVector(sndBufForData,tag);
-   ASKAPLOG_DEBUG_STR(logger, "Finished sending basic metadata to the service rank");
+   //ASKAPLOG_DEBUG_STR(logger, "Finished sending basic metadata to the service rank");
 }
 
 /// @brief receive basic metadata from local rank 1
@@ -625,7 +646,7 @@ void ChannelMergeTask::receiveBasicMetadata(const askap::cp::common::VisChunk::S
 {
    ASKAPDEBUGASSERT(localRank() == 0);
    ASKAPDEBUGASSERT(chunk);
-   ASKAPLOG_DEBUG_STR(logger, "Receiving basic metadata from the first rank with valid input");
+   //ASKAPLOG_DEBUG_STR(logger, "Receiving basic metadata from the first rank with valid input");
  
    int tag = 0;
 
@@ -669,7 +690,7 @@ void ChannelMergeTask::receiveBasicMetadata(const askap::cp::common::VisChunk::S
          chunk->onSourceFlag()>>chunk->channelWidth()>>chunk->stokes()>>
          chunk->directionFrame();
    in.getEnd();
-   ASKAPLOG_DEBUG_STR(logger, "Received basic metadata from the first rank with valid input");
+   //ASKAPLOG_DEBUG_STR(logger, "Received basic metadata from the first rank with valid input");
 }
         
 
