@@ -96,9 +96,9 @@ public:
    inline casa::uInt datagramsIgnored() const { return itsDatagramsIgnored; }
 
    /// @brief check that all expected datagrams received
-   /// @return true, if datagramsCount() == datagramsExpected()
+   /// @return true, if datagramsCount() + datagramsIgnored() == datagramsExpected()
    inline bool gotAllExpectedDatagrams() const
-         { return datagramsCount() == datagramsExpected(); }
+         { return datagramsCount() + datagramsIgnored() == datagramsExpected(); }
 
    /// @brief current vis chunk
    /// @return shared pointer to current vis chunk for further processing
