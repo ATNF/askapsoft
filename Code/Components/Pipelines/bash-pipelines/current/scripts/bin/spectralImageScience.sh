@@ -93,7 +93,7 @@ if [ "${REST_FREQUENCY_SPECTRAL}" != "" ]; then
     restFrequency="${Imager}.Images.restFrequency                    = ${REST_FREQUENCY_SPECTRAL}"
 fi
 
-cleaningPars="# These parameters define the clean algorithm 
+cleaningPars="# These parameters define the clean algorithm
 ${Imager}.solver                                  = ${SOLVER_SPECTRAL}"
 if [ "${SOLVER_SPECTRAL}" == "Clean" ]; then
     cleaningPars="${cleaningPars}
@@ -161,7 +161,8 @@ Cimager.tmpfs                                   = ${tmpfs}"
 # barycentre and multiple solver mode not supported in continuum imaging (yet)
 Cimager.barycentre                              = ${DO_BARY}
 Cimager.solverpercore                           = true
-Cimager.nwriters                                = ${NUM_SPECTRAL_CUBES}"
+Cimager.nwriters                                = ${NUM_SPECTRAL_CUBES}
+Cimager.singleoutputfile                        = ${ALT_IMAGER_SINGLE_FILE}"
 
 # we also need to change the CPU allocations
 
@@ -201,7 +202,7 @@ ${askapsoftModuleCommands}
 
 BASEDIR=${BASEDIR}
 cd $OUTPUT
-. ${PIPELINEDIR}/utils.sh	
+. ${PIPELINEDIR}/utils.sh
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
