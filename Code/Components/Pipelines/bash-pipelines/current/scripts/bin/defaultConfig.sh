@@ -354,7 +354,7 @@ DATACOLUMN=DATA
 # Number of Taylor terms to create in MFS imaging
 NUM_TAYLOR_TERMS=2
 # Number of CPUs to use on each core in the continuum imaging
-CPUS_PER_CORE_CONT_IMAGING=16
+CPUS_PER_CORE_CONT_IMAGING=20
 # Total number of cores to use for the continuum imaging. Leave blank
 # to have one core for each of nworkergroups*nchannels (plus a
 # master).
