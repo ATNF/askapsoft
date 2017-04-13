@@ -1,3 +1,29 @@
+0.18.1 (13 April 2017)
+----------------------
+
+This patch release sees a few bug-fixes to the pipeline scripts:
+
+ * When re-running the pipeline on already-processed data, where the raw input
+   data no longer exists in the archive directory, the pipeline was previously
+   failing due to it not knowing the name of the MS or the related metadata
+   file. It now has the ability to read MS_INPUT_SCIENCE and MS_INPUT_1934 and
+   determine the metadata file from that. It will also not try to run jobs that
+   depend on the raw data.
+ * The new imager used in spectral-line mode can now be directed to create a
+   single spectral cube, even with multiple writers, via the
+   ALT_IMAGER_SINGLE_FILE and ALT_IMAGER_SINGLE_FILE_CONTCUBE parameters.
+ * There have been changes to the defaults for the number of cores for spectral 
+   imaging (from 2000 to 200) and the number of cores per node for continuum
+   imaging (from 16 to 20), based on benchmarking tests.
+ * In addition, the following bugs were fixed:
+   - The ntasks-per-node parameter could sometimes be more than ntasks, causing
+     a slurm failure.
+   - The self-calibration algorithm was not retaining images from the
+     intermediate loops.
+   - The image-based continuum subtraction script was not finding the correct
+     image cube.
+
+
 0.18.0 (29 March 2017)
 ----------------------
 
@@ -6,7 +32,7 @@ New features and updates:
  * Scheduling block state changes, in conjunction with a new TOS
   release:
    - The CP manager now monitors the transition from EXECUTING to
-     OBSERVED, and the ICE interfaces have been updated accordingly. 
+     OBSERVED, and the ICE interfaces have been updated accordingly.
    - The pipeline will now transition the scheduling block state from
      OBSERVED to PROCESSING at the beginning of processing. This will
      only be done for scheduling blocks in the OBSERVED state, and
@@ -48,25 +74,25 @@ New features and updates:
    - A weights cutoff for Selavy can now be specified via the config
      file using the new parameters SELAVY_WEIGHTS_CUTOFF &
      SELAVY_SPEC_WEIGHTS_CUTOFF (rather than using the linmos cutoff
-     value). 
+     value).
    - The new imager is better integrated into the pipeline, with
      DO_ALT_IMAGER parameters for CONT, CONTCUBE & SPECTRAL.
    - It is possible to make use of the direct FITS output in the
      pipeline, by using IMAGETYPE_ parameters for CONT, CONTCUBE &
      SPECTRAL. Note that this is still somewhat of a
-     work-in-progress. 
+     work-in-progress.
 
 Bug fixes:
 
  * Casacore v2 had several patches added that had been left out of the
    upgrade. Notably a patch allowing the use of the SIGMA_SPECTRUM
    measurement set column following concatenation of measurement
-   sets. 
+   sets.
  * The mssplit utility has been made more robust with memory allocation
-   when splitting large datasets. 
+   when splitting large datasets.
  * Better checking of the size of SELFCAL- and imaging-related arrays
    in the pipeline configuration, particularly when not using
-   self-calibration. 
+   self-calibration.
  * [Weights bug in Selavy]
  * The continuum-subtracted cubes were not being mosaicked by the
    pipeline.
@@ -80,7 +106,7 @@ Bug fixes:
    leading to them not searching the full extent of the image.
  * The use of the PURGE_FULL_MS flag in the pipelines will now not
    trigger the re-splitting (and subsequent processing) of the
-   full-resolution dataset. 
+   full-resolution dataset.
 
 
 0.17.0 (24 February 2017)
@@ -92,7 +118,7 @@ New features:
    is now supported for cimager and imager. This should be considered "beta"
    as the completeness of the header information for post processing has not
    been confirmed. This enables the parallel write of FITS cubes which considerably
-   improves the performance of spectral line imaging. 
+   improves the performance of spectral line imaging.
  * Selavy's RM Synthesis module can export the Faraday Dispersion
    Function to an image on disk.
  * New source-finding capabilities in the processing pipelines, with a
@@ -116,7 +142,7 @@ New features:
    arrangements with Pawsey (e.g. host names and web addresses). It
    also describes new modules that are available, as well as
    alternative visualisation options using Pawsey's zeus cluster.
- 
+
 Bug fixes:
 
  * Imaging:
@@ -150,7 +176,7 @@ Bug fixes:
    - The SELAVY_POL_WRITE_FDF parameter was incorrectly described in
      the documentation - it has been renamed
      SELAVY_POL_WRITE_COMPLEX_FDF.
-     
+
 
 0.16.1 (16 December 2016)
 -------------------------
@@ -184,7 +210,7 @@ Bug fixes:
  * RM Synthesis & Selavy:
    - The new RM Synthesis module was not correctly respecting the '%p'
      wildcard in image names, which also affected extraction run from
-     within Selavy. This has been fixed. 
+     within Selavy. This has been fixed.
  * Pipelines:
    - The findBandpass slurm job had a bug that stopped it completing
      successfully.
@@ -204,7 +230,7 @@ Bug fixes:
      and DO_MOSAIC=false) meant that the determination of fields in
      the observation was not done, so no science processing was
      done. This has been fixed so that the list of fields is always
-     determined. 
+     determined.
    - A couple of bugs in the source-finding script were fixed, where
      the image name was incorrectly parsed, and the Taylor 1 & 2
      images were not being found.
@@ -217,7 +243,7 @@ Bug fixes:
      jobs are also more explicit in which image they are searching.
    - Finally, two deprecated scripts have been removed from the
      pipeline directory.
-   
+
 
 0.16.0 (28 November 2016)
 -------------------------
@@ -276,7 +302,7 @@ Pipeline updates:
    continuum imaging.
  * A notable bug was fixed that led to incorrect calibration and
    continuum-subtraction when Taylor-terms were being produced
-   (i.e. nterms>1) 
+   (i.e. nterms>1)
  * Various other more minor bug fixes, related to logging, stats
    files, and default values of parameters (for instance, the default
    for cmodel was to use a flux cutoff that was too high).
@@ -300,7 +326,7 @@ This is a patch release that fixes several issues:
      than the config file.
    * The linear mosaicking in the pipelines is now not turned off when
      only a single beam is processed.
-     
+
 
 0.15.1 (19 October 2016)
 ------------------------
@@ -327,24 +353,24 @@ This is a patch release that fixes a couple of issues:
 ------------------------
 This release sees a number of bugs fixes and improvements.
 
-* Improved the efficiency of the msmerge operation by allowing the 
-  writing of arbitrary tile-sizes and the mssplit by forcing bulk 
+* Improved the efficiency of the msmerge operation by allowing the
+  writing of arbitrary tile-sizes and the mssplit by forcing bulk
   read operations from the source measurement set when possible.
-* To be consistent with changes made to Cimager (ASKAPSDP-1607), 
+* To be consistent with changes made to Cimager (ASKAPSDP-1607),
   Simager has been changed to only access cross-correlations.
-* Parallel linmos - a new application linmos-mpi with the same 
+* Parallel linmos - a new application linmos-mpi with the same
   interface as linmos has been added. This will distribute the channels
   of the cube between mpi ranks and process them separately. Writing each
-  channel to the output cube individually. This should allow a full 
+  channel to the output cube individually. This should allow a full
   resolution cube to be mosaicked.
 * Improved Selavy HI emission catalogue, with a more complete set of
   parameters available. This is now turned on by an input parameter
-  Selavy.HiEmissionCatalogue. 
+  Selavy.HiEmissionCatalogue.
 * JIRA notification for Scheduling Block status changes.
 * Pipeline updates:
   - The bandpass calibration approach has changed slightly. All beams
     of the calibrator will be processed up to the requested BEAM_MAX -
-    the BEAM_MIN parameter only applies to the science dataset. 
+    the BEAM_MIN parameter only applies to the science dataset.
   - There is more flexibility in specifying flagging thresholds for
     the dynamic flagger. Each instance of the flagging can have
     different thresholds for the integrateSpectra & integrateTimes
@@ -353,33 +379,33 @@ This release sees a number of bugs fixes and improvements.
   - When uploading to CASDA and upon successful ingest into CASDA, the
     SB state can be transitioned through the state model.
   - Initial support for the new imager.
-* Modified CBPCALIBRATOR to reference the XX and the YY visibilities 
-  independently to the XX and YY of the reference antenna. 
+* Modified CBPCALIBRATOR to reference the XX and the YY visibilities
+  independently to the XX and YY of the reference antenna.
 * Added ability to playback in any number of loops in Correlator
   and TOS Simulators.
-  
+
 Bug fixes:
  * Pipelines:
    - When components were used in the pipeline for self-calibration or
      continuum subtraction, the reference direction was not being
-     interpreted correctly, leading to erroneous positions. 
+     interpreted correctly, leading to erroneous positions.
    - The bandpass calibration table was not inheriting the complete
      path to it - it is now put in a standard location and all scripts
      correctly point to it.
    - More robustness added to the source-finding job so that it
-     doesn't run if the FITS conversion fails. 
+     doesn't run if the FITS conversion fails.
  * Documentation fixes to names of the MS utility functions.
  * Fixing casdaupload to handle images that don't have associated
    thumbnails, and to set the correct write permissions of the upload
-   directory. 
+   directory.
  * Selavy's extraction of moment maps and cubelets was not working
    correctly when a subsection was given to Selavy. These calculations
    have also been improved slightly to better handle the spectral
    increments.
  * Minor-fixes to new imager to deal with brittle logic in the channel
-   allocations in spectral line mode. My fix for this essentially gives 
+   allocations in spectral line mode. My fix for this essentially gives
    all the workers the same info as the master.
- 
+
 
 0.14.0-p2 (25 September 2016)
 -----------------------------
@@ -397,7 +423,7 @@ A further update only to the pipeline processing:
    flagging for the bandpass calibrator has not been changed.
  * The dynamic flagging for the science data also allows the use of
    both integrateSpectra and integrateTimes, with the former no longer
-   done by default. 
+   done by default.
  * Modules are loaded correctly by the scripts and slurm jobs before
    particular tasks are used, so that the scripts are less reliant on
    the user's environment.
@@ -442,30 +468,30 @@ An update to the pipeline processing only:
 A major release, with several new features and improvements for both
 the imaging software and the pipeline scripts.
 
-A new imager in under test in this release, currently just called 
+A new imager in under test in this release, currently just called
 "imager" and it has the following features:
 
  * In continuum mode it allows a core to process more than one channel.
    This has a small cost in memory and a proportional increase in disk
    access. But allows the continuum imaging to proceed with a much smaller
-   footprint on the cluster. This will allow simultaneous processing of all 
-   beams in a coming release. 
+   footprint on the cluster. This will allow simultaneous processing of all
+   beams in a coming release.
  * Spectral line cubes can be made from measurement sets that are from different
    epochs. The epochs are imaged separately but merged into the same image for
    minor-cycle solving.
  * The output spectral line cubes can be in the barycentric frame. This is currently
    just nearest neighbour indexing. But the possibility of interpolation has not been
-   designed out. 
- * The concept of "multiple writers" has been introduced to improve the disk access 
-   pattern for the spectral line mode.  This breaks up the cube into frequency bands.  
-   These can be recombined post-processing. 
+   designed out.
+ * The concept of "multiple writers" has been introduced to improve the disk access
+   pattern for the spectral line mode.  This breaks up the cube into frequency bands.
+   These can be recombined post-processing.
  * If you really want to increase the performance for many major cycles you can
-   also turn on a shared memory option which stores visibility sets in memory throughout 
+   also turn on a shared memory option which stores visibility sets in memory throughout
    processing.
  * The imager takes the same parset as Cimager - but extra key-value pairs are required to implement
-   the features. 
+   the features.
 
-This new imager is still under test and we have not added the hooks into the pipeline yet. 
+This new imager is still under test and we have not added the hooks into the pipeline yet.
 
 Other updates to the imaging code include:
  * Simager is now more robust against completely-flagged
@@ -571,7 +597,7 @@ pipelines. The following bugs have been fixed:
    - The catalogue keys in the observation.xml are now internally
      consistent.
    - The way thumbnail sizes are specified in the pipeline
-     configuration file has changed slightly. 
+     configuration file has changed slightly.
 
 Related to the above changes, the C++ code has had a couple of
 changes:
@@ -587,7 +613,7 @@ Other C++ code changes include:
 The documentation has also been updated, with updated descriptions of
 parameters that have changed as a result of the above, a few typos
 fixed, and new information about the management of data on Pawsey's
-scratch2 filesystem. 
+scratch2 filesystem.
 
 0.13.0 (31 May 2016)
 --------------------
@@ -663,45 +689,45 @@ and the pipeline scripts.
 Bugs that have been fixed in the processing applications include:
 * The deconvolution major cycles were using out-of-date residual
  values when logging and testing against the threshold.majorcycle
- parameter. This is now fixed.  
+ parameter. This is now fixed.
 * The initialisation of calibrator input now depends more closely on
 the input parameters nAnt, nBeam & the calibrator model, rather than
 the first chunk of the data - this allows the shape of the data cube
 to change throughout the dataset (which will help with data imported
-from MIRIAD/CASA). 
+from MIRIAD/CASA).
 * Simager was showing a cross-shaped artefact when Wiener
 preconditioning was used, even with the preservecf parameter set to
 true. This parameter is now recognised, and the artefact is no longer
-seen. 
+seen.
 * Full polarisation handling is now possible with simager (in the same
-manner as for cimager). 
+manner as for cimager).
 * Simager was crashing when no preconditioner was given - this has
-been fixed. 
+been fixed.
 * The casdaupload task now conforms to the current CASDA requirements
-of allowing multiple SBIDs, and of reporting the image type. 
+of allowing multiple SBIDs, and of reporting the image type.
 * Selavy's Gaussian fitting is now more able to fit confused
 components that are not immediately identified from the initial
-estimates. 
+estimates.
 * Selavy was also failing when given images of a particular name
-(short, without a full-stop). This has been fixed. 
+(short, without a full-stop). This has been fixed.
 
 The pipeline scripts have had a number of improvements:
 * They are more robust for processing ADE data, with >9 beams and >6
-antennas. 
+antennas.
 * The flagging tasks have been improved, with:
  - Flagging of autocorrelations an option
  - The selection flagger (that does antenna-based & autocorrelations)
- is done first, along with (an optional) flat amplitude threshold. 
+ is done first, along with (an optional) flat amplitude threshold.
  - The dynamic flagging is done as the second pass
  - There is more user control over these individual elements
 * New parameters are available in the scripts, to make use of the
 snapshotimaging.longtrack parameter in the gridding, and
 normalisegains option in the self-calibration. The latter improves the
 performance of the self-calibration, approximating phase-only
-self-calibration. 
+self-calibration.
 * The slurm jobfiles are now more robust to the user's environment -
 if the askapsoft module has not been loaded, it will be in the
-jobfile, and the user can request a different version. 
+jobfile, and the user can request a different version.
 
 
 0.11.2 (28 March 2016)
@@ -717,10 +743,10 @@ number of major cycles.
 Other changes include:
 * The pipeline scripts have a few minor fixes to the code to improve
 reliability, and ensure the correct number of cores used for jobs is
-reported in the statistics files. 
+reported in the statistics files.
 * The only change to the ingest pipeline (within askapservices)
 incorporates an extra half-cycle wait following fringe-rotator
-update. 
+update.
 
 
 0.11.1 (8 March 2016)
@@ -731,16 +757,16 @@ in 0.11.0) into the SphFunc gridder, and introduces a new option to
 the gridding - snapshotimaging.longtrack - that predicts the best fit
 W plane used for the snapshot imaging, finding the plane that
 minimises the future deviation in W. This can have substantial savings
-in processing time for long tracks. 
+in processing time for long tracks.
 
 The pipeline scripts have seen a number of minor improvements and
 fixes, with improved alternative methods for continuum subtraction,
 and improved reporting of resource usage (including a record of the
 number of cores used for each job). The user configuration file is now
-also copied to a timestamped version for future reference. 
+also copied to a timestamped version for future reference.
 
 The ingest pipeline code has incorporated changes resulting from the
-recent commissioning activities. 
+recent commissioning activities.
 
 
 0.11.0 (15 February 2016)
@@ -753,28 +779,28 @@ Wiener preconditioner. This has fixed a couple of issues - at low
 (negative) robustness values, the cross-shaped artefact that was
 sometimes seen has now gone, and the performance should now more
 closely match that expected from robust weighting for the full range
-of robustness values. 
+of robustness values.
 
 Several other bugs were fixed:
 * Linmos had a bug (that was introduced in version 0.10) where
 automatically-generated primary beams were being set to the position
-of the first image.  
+of the first image.
 * The multiscale-MFS solver had a small bug that would lead to
-higher-order terms being preconditioned multiple times 
+higher-order terms being preconditioned multiple times
 * Cmodel had bugs related to the reading of Selavy catalogues, and
 correctly representing deconvolved Gaussians. It now works correctly
-with such data 
+with such data
 * Simager would fail were no preconditioners supplied.
 * Selavy now better handles images that do not have spectral axes (an
 issue when dealing with images made by packages other than
-ASKAPsoft). 
+ASKAPsoft).
 
 Additionally, the regridding has been sped up through a patch to the
-casacore library. 
+casacore library.
 
 The pipeline scripts also have a new feature, making use of Selavy +
 Cmodel to better perform the continuum subtraction from spectral-line
-data. The old approach is still available, but is not the default. 
+data. The old approach is still available, but is not the default.
 
 
 0.10.1 (18 January 2016)
@@ -783,23 +809,23 @@ data. The old approach is still available, but is not the default.
 Much of this release relates to updates to the ingest pipeline and
 related tasks, in preparation for getting it running at Pawsey. These
 are now deployed as their own module, although it is not expected that
-ACES members will need to use this. 
+ACES members will need to use this.
 
 In the science processing area, an important fix was made to the code
 responsible for uvw rotations. A fault was identified where these were
 being projected into the wrong frame, which could lead to positional
 offsets in images made away from the initial phase centre. This fault
-has been fixed. 
+has been fixed.
 
 Some initial fixes to the preconditioner have been made that may
 improve images when Wiener filtering with a low or negative robustness
 parameter. Improvements are only expected when snapshot imaging is not
 being used. A full fix is being tested and is planned for the next
-release. 
+release.
 
 This release also sees the BETA pipeline scripts move into an
 askapsoft-derived module (although this had previously been
-announced). 
+announced).
 
 
 0.9.0 (12 October 2015)
@@ -811,7 +837,7 @@ almost all to do with the source-finder Selavy. The default values of
 some parameters governing output files have changed, with the
 preference now to minimise the number of output files. A few
 corrections have been made to the units of parameters in some of the
-output catalogues. 
+output catalogues.
 
 
 0.8.1 (10 September 2015)
@@ -824,34 +850,34 @@ cimager. While this is not the final version of the spectral-line
 imager - the software framework that underpins the imaging code is
 going through a re-design prior to early science - it does demonstrate
 the distributed-processing approach that enables large numbers of
-spectral channels to be processed. 
+spectral channels to be processed.
 
 For those wanting to make use of the ACES scripts under subversion,
-these will be updated shortly to include use of simager. 
+these will be updated shortly to include use of simager.
 
 Other changes to the askapsoft module include minor updates to the
 CASDA HI catalogue interface from the Selavy sourcefinder, and
 ADE-related updates to the ingest pipeline and associated tools (which
-won’t affect work on galaxy). 
+won’t affect work on galaxy).
 
 
 0.7.3 (21 August 2015)
 ----------------------
 
 This release has a few relatively small bug fixes that have been
-resolved in the past week: 
+resolved in the past week:
 * a minor fix to cimager that solves a rare problem with the
 visibility metadata statistics calculations, that would result in
 cimager failing (this had been seen in processing the basic continuum
-tutorial data). 
+tutorial data).
 * correcting the shape (BMAJ/BMIN/BPA) parameters in the
 Selavy-generated component parset output (that might be used as input
 to ccalibrator in self-calibration) - they were previously given in
 arcsec/degrees rather than radians (as required by
-ccalibrator/csimulator). 
+ccalibrator/csimulator).
 * aligning the cmodel VOTable inputs with the new Selavy output
-formats 
-* a fix to the units in one of the Selavy VOTable outputs 
+formats
+* a fix to the units in one of the Selavy VOTable outputs
 
 
 0.7.2 (9 August 2015)
@@ -862,27 +888,27 @@ in running the basic continuum imaging tutorial. There was an issue
 with the way the simulated data had been created, which meant that
 mssplit would fail on those measurement sets. This has been fixed
 (fixing both mssplit and msmerge), and the tutorial dataset and
-description have been updated. 
+description have been updated.
 
 If you use mssplit on real BETA data, you will not notice any
-difference, save for potentially a small performance improvement. 
+difference, save for potentially a small performance improvement.
 
 The only other change has been implementation of the CASDA format for
 absorption-line catalogues, although the implementation of actual
 absorption-line searching is not complete in Selavy, so this will
 probably not affect any of you (it has been more to provide early
-examples for use by the CASDA team). 
+examples for use by the CASDA team).
 
 
 0.7.0 (3 July 2015)
 -------------------
 
 The key features of the release are:
- * Mk-II compatible ingest (although not applicable for galaxy processing) 
+ * Mk-II compatible ingest (although not applicable for galaxy processing)
  * A new task mslist that provides basic information for a measurement
- set 
+ set
  * Phase-only calibration
- 
+
 Bug:
 [ASKAPSDP-1657] - mssplit corrupts POINTING table
 [ASKAPSDP-1658] - change actual_pol to expect degrees as the unit
@@ -903,9 +929,9 @@ Task:
 
 Changes for this release include bug fixes and improvements to assist
 the casdaupload tool, and a calibration bug that affected leakage
-terms. The release notes follow. 
+terms. The release notes follow.
 Bug
-[ASKAPSDP-1665] - Data format bug in casdaupload 
+[ASKAPSDP-1665] - Data format bug in casdaupload
 Feature
 [ASKAPSDP-1659] - Update casdaupload utility to conform to new spec
 Task
@@ -1038,7 +1064,7 @@ Task
 The version 0.3 release of the ASKAPsoft Science Data Processor has
 been installed as a module to Galaxy. The included features/bugfixes
 are listed below, and are also listed on Redmine:
-https://pm.atnf.csiro.au/askap/projects/cmpt/versions/197 
+https://pm.atnf.csiro.au/askap/projects/cmpt/versions/197
 
 Bug #6029: Ingest pipeline zeros flagged visibilities
 Bug #6107: Fix the curvature-map option in Selavy's Gaussian fitting
