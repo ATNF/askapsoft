@@ -97,6 +97,20 @@ class MergedSource : public ISource,
 
     private:
 
+        /// @brief populate itsVis with next datagram
+        /// @details This helper method is more or less equivalent to calling
+        /// next method for the visibility source, but has some logic to 
+        /// try getting non-zero shared pointer (i.e. some handling of timeouts).
+        /// @note itsVis may still be void after the call to this method if 
+        /// timeout has occurred. It is a requirement that itsMetadata object 
+        ///  is valid before this method is called. If itsVis is valid before this 
+        /// method is called, nothing is done
+        /// @param[in] maxNoDataRetries maximum number of retries (cycle-long
+        /// timeouts before giving up). The value of 1 is a special case where timeout
+        /// cause the cycle to be ignored instead of the exception being thrown.
+        /// @return true if itsVis is invalid at the completion of this method and cycle must be skipped
+        bool ensureValidVis(casa::uInt maxNoDataRetries);
+
 
         /// Initialises an "empty" VisChunk
         askap::cp::common::VisChunk::ShPtr createVisChunk(const TosMetadata& metadata);
@@ -118,6 +132,16 @@ class MergedSource : public ISource,
         // Pointers to the two constituent datatypes
         boost::shared_ptr<TosMetadata> itsMetadata;
         boost::shared_ptr<VisDatagram> itsVis;
+
+        /// @brief flag that this stream is idle 
+        //// @details If correlator is not sending the data, the flag is set to true
+        bool itsIdleStream;
+
+        /// @brief flag showing that the data are bad in this cycle
+        /// @details As a workaround against occassional correlator BAT glitches we're forced to fudge metadata timestamp
+        /// to be able to align them with the visibilities. If this happens, the flag is raised and is used to flag the cycle
+        /// after all data are received.
+        bool itsBadCycle;
 
         // Scan Manager
         ScanManager itsScanManager;

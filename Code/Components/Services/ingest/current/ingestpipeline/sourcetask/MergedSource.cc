@@ -76,7 +76,7 @@ MergedSource::MergedSource(const LOFAR::ParameterSet& params,
         IMetadataSource::ShPtr metadataSrc,
         IVisSource::ShPtr visSrc) :
      itsMetadataSrc(metadataSrc), itsVisSrc(visSrc),
-     itsInterrupted(false),
+     itsIdleStream(false), itsBadCycle(false), itsInterrupted(false),
      itsSignals(itsIOService, SIGINT, SIGTERM, SIGUSR1),
      itsLastTimestamp(-1), itsVisConverter(params, config)
 {
@@ -97,11 +97,76 @@ MergedSource::~MergedSource()
     itsSignals.cancel();
 }
 
+/// @brief populate itsVis with next datagram
+/// @details This helper method is more or less equivalent to calling
+/// next method for the visibility source, but has some logic to 
+/// try getting non-zero shared pointer (i.e. some handling of timeouts).
+/// @note itsVis may still be void after the call to this method if 
+/// timeout has occurred. It is a requirement that itsMetadata object 
+//  is valid before this method is called. If itsVis is valid before this 
+/// method is called, nothing is done
+/// @param[in] maxNoDataRetries maximum number of retries (cycle-long
+/// timeouts before giving up). The value of 1 is a special case where timeout
+/// cause the cycle to be ignored instead of the exception being thrown.
+/// @return true if itsVis is invalid at the completion of this method and cycle must be skipped
+bool MergedSource::ensureValidVis(casa::uInt maxNoDataRetries) 
+{
+   ASKAPDEBUGASSERT(itsMetadata);
+   ASKAPDEBUGASSERT(itsVisSrc);
+   const CorrelatorMode& mode = itsVisConverter.config().lookupCorrelatorMode(itsMetadata->corrMode());
+   const casa::uInt timeout = mode.interval();
+   itsBadCycle = false;
+
+   for (uint32_t count = 0; !itsVis && count < maxNoDataRetries; ++count) {
+        itsVis = itsVisSrc->next(timeout);
+        checkInterruptSignal();
+        if (itsVis) { 
+            //ASKAPLOG_DEBUG_STR(logger, "Received non-zero itsVis; time="<<bat2epoch(itsVis->timestamp));
+
+            // a hack to account for malformed BAT which can glitch different way for
+            // different correlator cards, eventually we should remove this code 
+            // (and probably rework the logic of this method which has too much BETA legacy
+            //  and also fudged 10s timouts which were probably put there by Ben during early BETA debugging)
+            if (itsMetadata->time() != itsVis->timestamp) {
+                const casa::uLong timeMismatch = itsVis->timestamp > itsMetadata->time() ? 
+                      itsVis->timestamp -  itsMetadata->time() : itsMetadata->time() - itsVis->timestamp;
+                if (timeMismatch < mode.interval() / 2u) {
+                    ASKAPLOG_ERROR_STR(logger, "Detected BAT glitch between metadata and visibility stream on card "<<
+                         itsVisConverter.config().receiverId() + 1<<" mismatch = "<<float(timeMismatch)/1e3<<" ms");
+                    ASKAPLOG_DEBUG_STR(logger, "    visibility stream: 0x"<<std::hex<<itsVis->timestamp<<" mdata: 0x"<<std::hex<<
+                                               itsMetadata->time()<<" diff (abs value): 0x"<<std::hex<<timeMismatch);
+                    ASKAPLOG_DEBUG_STR(logger, "    faking metadata timestamp to read "<<bat2epoch(itsVis->timestamp).getValue());
+                    itsMetadata->time(itsVis->timestamp);
+                    itsBadCycle = true;
+                }
+            }
+            //
+        } else {
+            // standard behaviour is to try a few times before aborting
+            ASKAPLOG_DEBUG_STR(logger, "Received zero itsVis after "<<count + 1<<" attempt(s)");
+       }
+   }
+   if (!itsVis) {
+       ASKAPCHECK(maxNoDataRetries == 1, "Reached maximum number of retries for id="<<itsVisConverter.config().receiverId()<<
+            ", the correlator ioc does not seem to send data to this rank. Reached the limit of "<<
+            maxNoDataRetries<<" retry attempts");
+       // special case - ignoring this stream
+       // invalidate metadata to force reading new record
+       itsMetadata.reset();
+       ASKAPLOG_ERROR_STR(logger, "Stream "<<itsVisConverter.config().receiverId()<<
+                      " has no data, most likely correlator IOC is not sending data to this rank. Ignoring this data stream.");
+       itsIdleStream = true;
+       return true;
+   }
+   return false;
+}
+
 VisChunk::ShPtr MergedSource::next(void)
 {
     casa::Timer timer;
     // Used for a timeout
     const long ONE_SECOND = 1000000;
+    const long HUNDRED_MILLISECONDS = 100000;
 
     // Get metadata for a real (i.e. scan id >= 0) scan
     const uint32_t maxNoMetadataRetries = 3;
@@ -149,44 +214,32 @@ VisChunk::ShPtr MergedSource::next(void)
         return dummy;
     }
     ASKAPDEBUGASSERT(itsVisSrc);
-    const CorrelatorMode& mode = itsVisConverter.config().lookupCorrelatorMode(itsMetadata->corrMode());
-    const casa::uInt timeout = mode.interval() * 2;
+    //const CorrelatorMode& mode = itsVisConverter.config().lookupCorrelatorMode(itsMetadata->corrMode());
+    //const casa::uInt timeout = mode.interval();
+
+    VisChunk::ShPtr chunk = createVisChunk(*itsMetadata);
+    ASKAPDEBUGASSERT(chunk);
+
+    if (itsIdleStream) {
+        if (itsVisSrc->bufferUsage().first > 0) {
+            // there is something in the buffer, reactivate receiving
+            ASKAPLOG_WARN_STR(logger, "Stream "<<itsVisConverter.config().receiverId()<<
+                    " has some data, attempting to reactivate receiving");
+            itsIdleStream = false;
+        } else {
+            // invalidate metadata to force reading new record
+            itsMetadata.reset();
+            return chunk;
+        }
+    }
 
     // Get the next VisDatagram if there isn't already one in the buffer
-    const uint32_t maxNoDataRetries = 3;
-    for (uint32_t count = 0; !itsVis && count < maxNoDataRetries; ++count) {
-        itsVis = itsVisSrc->next(timeout);
-        checkInterruptSignal();
-        if (itsVis) { 
-            //ASKAPLOG_DEBUG_STR(logger, "Received non-zero itsVis; time="<<bat2epoch(itsVis->timestamp));
-        } else {
-            ASKAPLOG_DEBUG_STR(logger, "Received zero itsVis after "<<count + 1<<" attempt(s), retrying");
-        }
+    const uint32_t maxNoDataRetries = 1;
+    if (ensureValidVis(maxNoDataRetries)) {
+        return chunk;
     }
-    ASKAPCHECK(itsVis, "Reached maximum number of retries for id="<<itsVisConverter.config().receiverId()<<
-            ", the correlator ioc does not seem to send data to this rank. Reached the limit of "<<
-            maxNoDataRetries<<" retry attempts");
 
-    //ASKAPLOG_DEBUG_STR(logger, "Before aligning metadata and visibility");
-
-
-    // a hack to account for malformed BAT which can glitch different way for
-    // different correlator cards, eventually we should remove this code 
-    // (and probably rework the logic of this method which has too much BETA legacy
-    //  and also fudged 10s timouts which were probably put there by Ben during early BETA debugging)
-    if (itsMetadata->time() != itsVis->timestamp) {
-        const casa::uLong timeMismatch = itsVis->timestamp > itsMetadata->time() ? 
-              itsVis->timestamp -  itsMetadata->time() : itsMetadata->time() - itsVis->timestamp;
-        if (timeMismatch < mode.interval() / 2u) {
-            ASKAPLOG_ERROR_STR(logger, "Detected BAT glitch between metadata and visibility stream on card "<<
-                 itsVisConverter.config().receiverId() + 1<<" mismatch = "<<float(timeMismatch)/1e3<<" ms");
-            ASKAPLOG_DEBUG_STR(logger, "    visibility stream: 0x"<<std::hex<<itsVis->timestamp<<" mdata: 0x"<<std::hex<<
-                                       itsMetadata->time()<<" diff (abs value): 0x"<<std::hex<<timeMismatch);
-            ASKAPLOG_DEBUG_STR(logger, "    faking metadata timestamp to read "<<bat2epoch(itsVis->timestamp).getValue());
-            itsMetadata->time(itsVis->timestamp);
-        }
-    }
-    //
+    ASKAPASSERT(itsVis);
 
     // Find data with matching timestamps
     bool logCatchup = true;
@@ -194,72 +247,35 @@ VisChunk::ShPtr MergedSource::next(void)
 
         // If the VisDatagram timestamps are in the past (with respect to the
         // TosMetadata) then read VisDatagrams until they catch up
-        uint32_t count = 0;
-        while (!itsVis || itsMetadata->time() > itsVis->timestamp) {
+        if (itsMetadata->time() > itsVis->timestamp) {
+            ASKAPDEBUGASSERT(itsVis);
             if (logCatchup) {
-                ASKAPLOG_DEBUG_STR(logger, "Reading extra VisDatagrams to catch up");
+                ASKAPLOG_DEBUG_STR(logger, "Reading extra VisDatagrams to catch up for stream id="<<itsVisConverter.config().receiverId()<<
+                                           ", metadata time: "<<bat2epoch(itsMetadata->time()).getValue()<<
+                                           " visibility time: "<<bat2epoch(itsVis->timestamp).getValue());
                 logCatchup = false;
             }
-            itsVis = itsVisSrc->next(timeout);
+            itsVis.reset();
 
-            checkInterruptSignal();
-           
-            if (!itsVis) {
-                ASKAPLOG_DEBUG_STR(logger, "Received zero itsVis after "<<count + 1<<" attempt(s)");
-                ASKAPCHECK(++count < maxNoDataRetries, "Reached maximum number of retries for id="<<itsVisConverter.config().receiverId()<<
-                           ", the correlator ioc does not seem to send data to this rank. Reached the limit of "<<
-                           maxNoDataRetries<<" retry attempts");
+            if (ensureValidVis(maxNoDataRetries)) {
+                return chunk;
             }
+            ASKAPASSERT(itsVis);
         }
         checkInterruptSignal();
 
         if (itsMetadata->time() < itsVis->timestamp) {
-            ASKAPLOG_WARN_STR(logger, "Visibility data stream is ahead ("<<bat2epoch(itsVis->timestamp).getValue()<<
+            ASKAPLOG_WARN_STR(logger, "Visibility data stream "<<itsVisConverter.config().receiverId()<<" is ahead ("<<bat2epoch(itsVis->timestamp).getValue()<<
                      ") of metadata stream ("<<bat2epoch(itsMetadata->time()).getValue()<<"), skipping the cycle for this card");
-            VisChunk::ShPtr chunk = createVisChunk(*itsMetadata);
-            ASKAPDEBUGASSERT(chunk);
             // invalidate metadata to force reading new record
             itsMetadata.reset();
             return chunk;
         }
-
-        /*
-            // this original Ben's code seem to conflict with 
-            // parallel synchronisation in the ADE case
-            // instead of trying to align metadata and visibilities
-            // if metadata are lagging, just return flagged chunk.
-            // This may cause problems if the metadata take longer to 
-            // reach Pawsey centre. In that case, all logic has to be
-            // re-worked as there is too much BETA legacy anyway.
- 
-        // But if the timestamp in the VisDatagram is in the future (with
-        // respect to the TosMetadata) then it is time to fetch new TosMetadata
-        if (!itsMetadata || itsMetadata->time() < itsVis->timestamp) {
-            if (logCatchup) {
-                ASKAPLOG_DEBUG_STR(logger, "Reading extra TosMetadata to catch up");
-                logCatchup = false;
-            }
-            itsMetadata = itsMetadataSrc->next(ONE_SECOND);
-            checkInterruptSignal();
-            if (itsMetadata) {
-                itsScanManager.update(itsMetadata->scanId());
-                if (itsScanManager.observationComplete()) {
-                    ASKAPLOG_INFO_STR(logger, "End-of-observation condition met");
-                    return VisChunk::ShPtr();
-                }
-            } else {
-                ASKAPLOG_DEBUG_STR(logger, "Received empty metadata - timeout waiting");
-            }
-        }
-        */
     }
 
     //ASKAPLOG_DEBUG_STR(logger, "Aligned datagram time and metadata time: "<<bat2epoch(itsVis->timestamp).getValue());
 
     // Now the streams are synced, start building a VisChunk
-    VisChunk::ShPtr chunk = createVisChunk(*itsMetadata);
-    ASKAPDEBUGASSERT(chunk);
-
     double decodingTime = 0.;
 
     // Read VisDatagrams and add them to the VisChunk. If itsVisSrc->next()
@@ -271,8 +287,8 @@ VisChunk::ShPtr MergedSource::next(void)
 
         if (itsMetadata->time() > itsVis->timestamp) {
             // If the VisDatagram is from a prior integration then discard it
-            ASKAPLOG_WARN_STR(logger, "Received VisDatagram from past integration");
-            itsVis = itsVisSrc->next(timeout);
+            ASKAPLOG_WARN_STR(logger, "Received VisDatagram from past integration. This shouldn't happen. Stream id = "<<itsVisConverter.config().receiverId());
+            itsVis = itsVisSrc->next(HUNDRED_MILLISECONDS);
             continue;
         }
 
@@ -285,13 +301,12 @@ VisChunk::ShPtr MergedSource::next(void)
             // This integration is finished
             break;
         }
-        itsVis = itsVisSrc->next(timeout);
+        itsVis = itsVisSrc->next(HUNDRED_MILLISECONDS);
     }
 
     ASKAPLOG_DEBUG_STR(logger, "VisChunk built with " << itsVisConverter.datagramsCount() <<
-            " of expected " << itsVisConverter.datagramsExpected() << " visibility datagrams");
-    ASKAPLOG_DEBUG_STR(logger, "     - ignored " << itsVisConverter.datagramsIgnored()
-        << " successfully received datagrams");
+            " of expected " << itsVisConverter.datagramsExpected() << " visibility datagrams ("<<
+            itsVisConverter.datagramsIgnored()<<" intentionally ignored)");
 
     const std::pair<uint32_t, uint32_t> bufferUsage = itsVisSrc->bufferUsage();
     const float bufferUsagePercent = bufferUsage.second != 0 ? static_cast<float>(bufferUsage.first) / bufferUsage.second * 100. : 100.;
@@ -313,6 +328,11 @@ VisChunk::ShPtr MergedSource::next(void)
         itsMonitoringPointManager.submitPoint<float>("PacketsLostPercent",
             static_cast<float>(datagramsLost) / itsVisConverter.datagramsExpected() * 100.);
     }
+
+    if (itsBadCycle) {
+        chunk->flag().set(true);
+    }
+
     itsMonitoringPointManager.submitMonitoringPoints(*chunk);
 
     itsMetadata.reset();
