@@ -3,10 +3,10 @@
 # Front-end script to run ASKAP processing.
 # This handles the bandpass calibration from individual-beam
 #  observations of 1934-638, and applies them to a "science"
-#  observation, that is then averaged and imaged, optionally with 
-#  self-calibration in the case of continuum imaging. 
+#  observation, that is then averaged and imaged, optionally with
+#  self-calibration in the case of continuum imaging.
 # Many of the parameters are governed by the environment variables
-#  defined in scripts/defaultConfig.sh. The user needs to define the 
+#  defined in scripts/defaultConfig.sh. The user needs to define the
 #  scheduling block numbers of the datasets to be used, or to provide
 #  the filenames of specific measurement sets.
 #
@@ -38,23 +38,23 @@
 USAGE="processASKAP.sh -c <config file>"
 
 if [ "${PIPELINEDIR}" == "" ]; then
-    
+
     echo "ERROR - the environment variable PIPELINEDIR has not been set. Cannot find the scripts!"
 
-else 
+else
 
     if [ "$(lfs getstripe -c .)" == "" ]; then
         echo "WARNING: You don't appear to be running this on a Lustre filesystem - lfs does not work."
         exit 1
     fi
-    
+
     . "${PIPELINEDIR}/initialise.sh"
 
     if [ $# == 0 ]; then
         echo "No config file provided!"
 	echo "Usage: $USAGE"
     else
-	
+
 	userConfig=""
 	while getopts ':c:h' opt
 	do
@@ -81,27 +81,41 @@ else
             fi
 	fi
 
-        . "${PIPELINEDIR}/prepareMetadata.sh"
-        PROCESS_DEFAULTS_HAS_RUN=false
+    . "${PIPELINEDIR}/prepareMetadata.sh"
+    PROCESS_DEFAULTS_HAS_RUN=false
 	. "${PIPELINEDIR}/processDefaults.sh"
-	
+
 	lfs setstripe -c "${LUSTRE_STRIPING}" .
-        
-	. "${PIPELINEDIR}/run1934cal.sh"
-	    
+
+    if [ "${DO_1934_CAL}" != "true" ] && [ "${DO_SCIENCE_FIELD}" != "true" ]; then
+
+        echo "Nothing to do!"
+        echo "Goodbye..."
+
+    fi
+
+    if [ "${DO_1934_CAL}" == "true" ]; then
+
+        . "${PIPELINEDIR}/run1934cal.sh"
+
+    fi
+
+    if [ "${DO_SCIENCE_FIELD}" == "true" ]; then
+
         . "${PIPELINEDIR}/scienceCalIm.sh"
 
         . "${PIPELINEDIR}/defineArtifactsScript.sh"
 
         . "${PIPELINEDIR}/diagnostics.sh"
-        
+
         . "${PIPELINEDIR}/gatherStats.sh"
-        
+
         . "${PIPELINEDIR}/archive.sh"
-	
+
+    fi
+
 	. "${PIPELINEDIR}/finalise.sh"
 
     fi
 
 fi
-

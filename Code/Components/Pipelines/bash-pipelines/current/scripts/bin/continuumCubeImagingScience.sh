@@ -142,7 +142,7 @@ ${Imager}.restore.beamLog                         = beamLog.${imageBase}.txt"
 
     # This is for the new (alt) imager
     altImagerParams="# Options for the alternate imager"
-    if [ "${DO_ALT_IMAGER_SPECTRAL}" == "true" ]; then
+    if [ "${DO_ALT_IMAGER_CONTCUBE}" == "true" ]; then
 
         nchanpercore=1
         altImagerParams="${altImagerParams}

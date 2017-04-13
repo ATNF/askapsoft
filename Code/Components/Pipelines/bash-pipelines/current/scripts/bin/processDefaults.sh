@@ -399,7 +399,8 @@ EOF
         # Turn off splitting
         DO_SPLIT_1934=false
         # Check for existence of each MS
-        for((BEAM=0; BEAM<maxbeam; BEAM++)); do
+        for((IBEAM=0; IBEAM<=highestBeam; IBEAM++)); do
+            BEAM=$(echo "$IBEAM" | awk '{printf "%02d",$1}')
             find1934MSnames
             if [ "${DO_1934_CAL}" == "true" ] && [ ! -e ${msCal} ]; then
                 echo "The MS for the calibration SB does not exist, and at least one derived MS (${msCal}) is not present."
@@ -425,6 +426,7 @@ EOF
         done
     fi
 
+    echo " "
 
     ####################
     # Parameters required for science field imaging
