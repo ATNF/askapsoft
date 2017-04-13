@@ -31,12 +31,12 @@ if it is not found, the task will not run.
 
 The variables presented below work in the same manner as those for the
 continuum imaging, albeit with names that clearly refer to the
-spectral-imaging. 
+spectral-imaging.
 
 A note on the imagers and the output formats. The default approach is
 to use **simager** to produce the spectral-line cubes. The new imager
 application **imager** (:doc:`../calim/imager`) can be used by setting
-``DO_ALT_IMAGER_SPECTRAL`` to true. 
+``DO_ALT_IMAGER_SPECTRAL`` to true.
 
 The default output format is CASA images, although FITS files can be
 written directly by setting ``IMAGETYPE_SPECTRAL`` to ``fits`` (rather
@@ -45,7 +45,7 @@ than ``casa``). This will only work with the new imager, as
 in development, so may not be completely reliable. The recommended
 method for getting images into FITS format is still to use the
 ``DO_CONVERT_TO_FITS`` flag, which makes use of the
-:doc:`../calim/imageToFITS` application. A single FITS file can be
+:doc:`../calim/imagetofits` application. A single FITS file can be
 produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 
 
@@ -117,11 +117,11 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | **Basic variables for imaging**               |                                 |                                    |                                                                   |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``NUM_CPUS_SPECIMG_SCI``                      | 2000                            | none                               | The total number of processors allocated to the spectral-imaging  |
+| ``NUM_CPUS_SPECIMG_SCI``                      | 200                             | none                               | The total number of cores allocated to the spectral-imaging       |
 |                                               |                                 |                                    | job. One will be the master, while the rest will be devoted to    |
 |                                               |                                 |                                    | imaging individual channels.                                      |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``CPUS_PER_CORE_SPEC_IMAGING``                | 20                              | none                               | The number of processors per node to use (max 20).                |
+| ``CPUS_PER_CORE_SPEC_IMAGING``                | 20                              | none                               | The number of cores per node to use (max 20).                     |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``IMAGE_BASE_SPECTRAL``                       | i.cube                          | Helps form Images.name             | The base name for image cubes: if ``IMAGE_BASE_SPECTRAL=i.blah``  |
 |                                               |                                 | (:doc:`../calim/simager`)          | then we'll get image.i.blah, image.i.blah.restored, psf.i.blah etc|
@@ -151,7 +151,7 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 |                                               |                                 | (:doc:`../calim/gridder`)          |                                                                   |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``GRIDDER_SPECTRAL_SNAPSHOT_LONGTRACK``       | true                            | snapshotimaging.longtrack          | The longtrack parameter controlling how the best-fit W plane is   |
-|                                               |                                 | (:doc:`../calim/gridder`)          | determined when using snapshots.                                  | 
+|                                               |                                 | (:doc:`../calim/gridder`)          | determined when using snapshots.                                  |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``GRIDDER_SPECTRAL_SNAPSHOT_CLIPPING``        | 0                               | snapshotimaging.clipping           | If greater than zero, this fraction of the full image width       |
 |                                               |                                 | (:doc:`../calim/gridder`)          | is set to zero. Useful when imaging at high declination as        |
@@ -254,9 +254,15 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``TMPFS``                                     | /dev/shm                        | tmpfs (:doc:`../calim/imager`)     | Location of the shared memory.                                    |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``NUM_SPECTRAL_CUBES``                        | 16                              | nwriters (:doc:`../calim/imager`)  | Number of spectral cubes to be produced. This actually configures |
-|                                               |                                 |                                    | the number of writers employed by imager, each of which writes a  |
-|                                               |                                 |                                    | sub-band. No combination of the sub-cubes is currently done.      |
+| ``NUM_SPECTRAL_CUBES``                        | 16                              | nwriters (:doc:`../calim/imager`)  | Number of spectral cubes to be produced, or the number of writers |
+|                                               |                                 |                                    | used when ``ALT_IMAGER_SINGLE_FILE=true``. This actually          |
+|                                               |                                 |                                    | configures the number of writers employed by imager, each of      |
+|                                               |                                 |                                    | which writes a sub-band in the multiple-writer case. No           |
+|                                               |                                 |                                    | combination of the sub-cubes is currently done.                   |
++-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
+| ``ALT_IMAGER_SINGLE_FILE``                    | false                           | singleoutputfile                   | Whether to write a single cube, even with multiple writers (ie.   |
+|                                               |                                 | (:doc:`../calim/imager`)           | ``NUM_SPECTRAL_CUBES>1``). Only works when                        |
+|                                               |                                 |                                    | ``IMAGETYPE_SPECTRAL=fits``                                       |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``DO_BARY``                                   | true                            | barycentre (:doc:`../calim/imager`)| Whether to write the spectral cubes in the Barycentric reference  |
 |                                               |                                 |                                    | frame.                                                            |

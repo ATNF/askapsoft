@@ -23,7 +23,7 @@ the centres of each beam. The footprint specification is determined
 preferentially from the scheduling block parset, or (if not available
 there) from the parameters described at
 :doc:`ScienceFieldMosaicking`. To use this mode, set
-``IMAGE_AT_BEAM_CENTRES=true``. 
+``IMAGE_AT_BEAM_CENTRES=true``.
 
 When setting the gridding parameters, note that the gridder is
 currently hardcoded to use **WProject**.  If you want to experiment
@@ -42,10 +42,10 @@ The algorithm here is as follows:
 1. Image the data with cimager or imager
 2. Run source-finding with Selavy with a relatively large threshold
 3. Use the results to calibrate the antenna-based gains by either:
-   
+
    a. Create a component parset from the resulting component catalogue and use this parset in ccalibrator, or
    b. Create a model image from the component catalogue, and use in ccalibrator
-      
+
 4. Re-run imaging, applying the latest gains table
 5. Repeat steps 2-5 for a given number of loops
 
@@ -106,7 +106,7 @@ written directly by setting ``IMAGETYPE_CONT`` or
 is still in development, so may not be completely reliable. The
 recommended method for getting images into FITS format is still to use
 the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
-:doc:`../calim/imageToFITS` application.
+:doc:`../calim/imagetofits` application.
 
 
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
@@ -134,7 +134,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                 |                                                        | imaging. If left blank ("" - the default), then this is      |
 |                                            |                                 |                                                        | calculated based on the number of channels and Taylor terms. |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``CPUS_PER_CORE_CONT_IMAGING``             | 16                              | Not for parset                                         |Number of cores to use on each node in the continuum imaging. |
+| ``CPUS_PER_CORE_CONT_IMAGING``             | 20                              | Not for parset                                         |Number of cores to use on each node in the continuum imaging. |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``DATACOLUMN``                             | DATA                            | datacolumn (:doc:`../calim/cimager`)                   | The column in the measurement set from which to read the     |
 |                                            |                                 |                                                        | visibility data. The default, 'DATA', is appropriate for     |
@@ -207,7 +207,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                 |                                                        | the edges can generate artefacts.                            |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``GRIDDER_WMAX``                           | 2600                            | WProject.wmax                                          | The wmax parameter for the gridder.                          |
-|                                            |                                 | (:doc:`../calim/gridder`)                              |                                                              | 
+|                                            |                                 | (:doc:`../calim/gridder`)                              |                                                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``GRIDDER_NWPLANES``                       | 99                              | WProject.nwplanes                                      | The nwplanes parameter for the gridder.                      |
 |                                            |                                 | (:doc:`../calim/gridder`)                              |                                                              |
@@ -305,12 +305,17 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``TMPFS``                                  | /dev/shm                        | tmpfs (:doc:`../calim/imager`)                         | Location of the shared memory.                               |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``NUM_SPECTRAL_CUBES_CONTCUBE``            | 1                               | nwriters (:doc:`../calim/imager`)                      | Number of spectral cubes to be produced. This actually       |
+| ``NUM_SPECTRAL_CUBES_CONTCUBE``            |  1                              | nwriters (:doc:`../calim/imager`)                      | Number of spectral cubes to be produced, or the number of    |
+|                                            |                                 |                                                        | writers used when ``ALT_IMAGER_SINGLE_FILE=true``. This      |
 |                                            |                                 |                                                        | configures the number of writers employed by imager, each of |
-|                                            |                                 |                                                        | which writes a sub-band. No combination of the sub-cubes is  |
-|                                            |                                 |                                                        | currently done. Note that this defaults to a single cube, as |
-|                                            |                                 |                                                        | the continuum cubes are not as I/O intensive as the          |
-|                                            |                                 |                                                        | spectral-line cubes.                                         |
+|                                            |                                 |                                                        | which writes a sub-band in the multiple-writer case. No      |
+|                                            |                                 |                                                        | combination of the sub-cubes is currently done. Note that    |
+|                                            |                                 |                                                        | this defaults to a single cube, as the continuum cubes are   |
+|                                            |                                 |                                                        | not as I/O intensive as the spectral-line cubes.             |
++--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
+| ``ALT_IMAGER_SINGLE_FILE``                 | false                           | singleoutputfile                                       | Whether to write a single cube, even with multiple writers   |
+|                                            |                                 | (:doc:`../calim/imager`)                               | (ie. ``NUM_SPECTRAL_CUBES_CONTCUBE>1``). Only works when     |
+|                                            |                                 |                                                        | ``IMAGETYPE_SPECTRAL=fits``                                  |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | **Self-calibration**                       |                                 |                                                        |                                                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
