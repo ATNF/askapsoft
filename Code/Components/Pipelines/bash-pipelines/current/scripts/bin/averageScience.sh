@@ -2,7 +2,7 @@
 #
 # Launches a job to average the measurement set for the current beam
 # of the science observation so that it can be imaged by the continuum
-# imager. 
+# imager.
 #
 # @copyright (c) 2017 CSIRO
 # Australia Telescope National Facility (ATNF)
@@ -50,6 +50,16 @@ if [ "${DO_IT}" == "true" ] && [ -e "${OUTPUT}/${msSciAv}" ]; then
 fi
 
 if [ "${DO_IT}" == "true" ]; then
+    # Running the splitting, or having the full-resolution MS available, is a necessary precondition for running the averaging.
+    if [ "${DO_SPLIT_SCIENCE}" != "true" ]; then
+        if [ "${DO_IT}" == "true" ] && [ ! -e "${msSci}" ]; then
+            echo "MS ${msSci} does not exist, so turning off averaging."
+            DO_IT=false
+        fi
+    fi
+fi
+
+if [ "${DO_IT}" == "true" ]; then
 
     setJob science_average avg
     cat > "$sbatchfile" <<EOFOUTER
@@ -70,7 +80,7 @@ ${askapsoftModuleCommands}
 
 BASEDIR=${BASEDIR}
 cd $OUTPUT
-. ${PIPELINEDIR}/utils.sh	
+. ${PIPELINEDIR}/utils.sh
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"

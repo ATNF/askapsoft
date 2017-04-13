@@ -40,6 +40,14 @@ if [ -e "${FLAG_1934_CHECK_FILE}" ]; then
     DO_IT=false
 fi
 
+if [ "${DO_SPLIT_1934}" != "true" ]; then
+    # If we aren't doing splitting, we need the relevant MS to already exist
+    if [ "${DO_IT}" == "true "] && [ ! -e "${OUTPUT}/${msCal}" ]; then
+        echo "Single-beam MS $msCal does not exist, so cannot run flagging"
+        DO_IT=false
+    fi
+fi
+
 if [ "${DO_IT}" == "true" ]; then
 
     DO_AMP_FLAG=false
@@ -76,7 +84,7 @@ Cflag.selection_flagger.rule2.autocorr  = ${FLAG_AUTOCORRELATION_1934}"
     else
         selectionRule="Cflag.selection_flagger.rules           = [${ruleList}]"
     fi
-    
+
     # The flat amplitude cut to be applied
     if [ "${FLAG_DO_FLAT_AMPLITUDE_1934}" == "true" ]; then
         amplitudeCut="# Amplitude based flagging
@@ -90,8 +98,8 @@ Cflag.amplitude_flagger.low             = ${FLAG_THRESHOLD_AMPLITUDE_1934_LOW}"
         fi
         DO_AMP_FLAG=true
     fi
-    
-    
+
+
     setJob flag_1934 flag
     cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
@@ -111,7 +119,7 @@ ${askapsoftModuleCommands}
 
 BASEDIR=${BASEDIR}
 cd $OUTPUT
-. ${PIPELINEDIR}/utils.sh	
+. ${PIPELINEDIR}/utils.sh
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
@@ -172,7 +180,7 @@ ${antennaFlagging}
 EOFINNER
 
     log=${logs}/cflag_dynamic_1934_${FIELDBEAM}_\${SLURM_JOB_ID}.log
-    
+
     NCORES=1
     NPPN=1
     aprun -n \${NCORES} -N \${NPPN} ${cflag} -c "\${parset}" > "\${log}"

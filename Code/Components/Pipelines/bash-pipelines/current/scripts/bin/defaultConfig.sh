@@ -192,10 +192,10 @@ DO_STAGE_FOR_CASDA=false
 # Location of the SBs
 DIR_SB=/scratch2/askap/askapops/askap-scheduling-blocks
 # SB with 1934-638 observation
-SB_1934="SET_THIS"
+SB_1934=""
 MS_INPUT_1934=""
 # SB with science observation
-SB_SCIENCE="SET_THIS"
+SB_SCIENCE=""
 MS_INPUT_SCIENCE=""
 
 # Set to true if the dataset being processed is from BETA observations

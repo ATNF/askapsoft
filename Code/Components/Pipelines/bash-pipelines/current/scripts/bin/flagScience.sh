@@ -41,11 +41,19 @@ if [ -e "${FLAG_CHECK_FILE}" ]; then
     DO_IT=false
 fi
 
+if [ "${DO_SPLIT_SCIENCE}" != "true" ]; then
+    # If we aren't doing splitting, we need the relevant MS to already exist
+    if [ "${DO_IT}" == "true "] && [ ! -e "${OUTPUT}/${msSci}" ]; then
+        echo "Single-beam MS $msSci does not exist, so cannot run flagging"
+        DO_IT=false
+    fi
+fi
+
 if [ "${DO_IT}" == "true" ]; then
 
     DO_AMP_FLAG=false
     ruleList=""
-    
+
     if [ "${ANTENNA_FLAG_SCIENCE}" == "" ]; then
         antennaFlagging="# Not flagging any antennas"
     else
@@ -117,7 +125,7 @@ ${askapsoftModuleCommands}
 
 BASEDIR=${BASEDIR}
 cd $OUTPUT
-. ${PIPELINEDIR}/utils.sh	
+. ${PIPELINEDIR}/utils.sh
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
@@ -177,9 +185,9 @@ Cflag.amplitude_flagger.integrateTimes = ${FLAG_DYNAMIC_INTEGRATE_TIMES}
 Cflag.amplitude_flagger.integrateTimes.threshold = ${FLAG_THRESHOLD_DYNAMIC_SCIENCE_TIMES}
 ${amplitudeLow}
 EOFINNER
-    
+
     log=${logs}/cflag_dynamic_science_${FIELDBEAM}_\${SLURM_JOB_ID}.log
-    
+
     NCORES=1
     NPPN=1
     aprun -n \${NCORES} -N \${NPPN} ${cflag} -c "\${parset}" > "\${log}"
@@ -191,7 +199,7 @@ EOFINNER
     else
         touch $FLAG_CHECK_FILE
     fi
-    
+
 fi
 
 EOFOUTER

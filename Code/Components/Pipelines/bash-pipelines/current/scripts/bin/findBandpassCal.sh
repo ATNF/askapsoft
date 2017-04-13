@@ -41,6 +41,24 @@ if [ "${CLOBBER}" != "true" ] && [ -e "${TABLE_BANDPASS}" ]; then
     DO_IT=false
 fi
 
+if [ "${ms1934list}" == "" ]; then
+    echo "ERROR (findBandpass) - don't have any bandpass MS files to use"
+    exit 1
+fi
+
+if [ "${DO_IT}" == "true" ]; then
+    # If we aren't splitting, check for the existence of each MS in our list.
+    # They all need to be there for the bandpass cal job to work
+    if [ "${DO_SPLIT_1934}" != "true" ]; then
+        for ms in $(echo $ms1934list | sed -e 's/,/ /g'); do
+            if [ "${DO_IT}" == "true" ] && [ ! -e "${ms}" ]; then
+                echo "Calibrator MS ${ms} does not exist, so turning off bandpass calibration."
+                DO_IT=false
+            fi
+        done
+    fi
+fi
+
 if [ "${DO_IT}" == "true" ]; then
 
     # Optional data selection

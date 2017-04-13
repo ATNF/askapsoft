@@ -393,6 +393,38 @@ EOF
     done
     ((maxbeam++))
 
+    # Handle the case where the SB MS is missing.
+    # First for the bandpass calibrator
+    if [ "${MS_CAL_MISSING}" == "true" ]; then
+        # Turn off splitting
+        DO_SPLIT_1934=false
+        # Check for existence of each MS
+        for((BEAM=0; BEAM<maxbeam; BEAM++)); do
+            find1934MSnames
+            if [ "${DO_1934_CAL}" == "true" ] && [ ! -e ${msCal} ]; then
+                echo "The MS for the calibration SB does not exist, and at least one derived MS (${msCal}) is not present."
+                echo "Turning off Bandpass Calibration processing ('DO_1934_CAL=false')"
+                DO_1934_CAL=false
+            fi
+        done
+    fi
+    # Now for the science field
+    if [ "${MS_SCIENCE_MISSING}" == "true" ]; then
+        # Turn off splitting
+        DO_SPLIT_SCIENCE=false
+        # Check for existence of each MS
+        for BEAM in ${BEAMS_TO_USE}; do
+            findScienceMSnames
+            if [ "${DO_SCIENCE_FIELD}" == "true" ]; then
+                if [ ! -e ${msSci} ] && [ ! -e ${msSciAv}]; then
+                    echo "The MS for the science field SB does not exist, and at least one beam (${BEAM}) does not have derived MSs."
+                    echo "Turning off Science Field processing ('DO_SCIENCE_FIELD=false')"
+                    DO_SCIENCE_FIELD=false
+                fi
+            fi
+        done
+    fi
+
 
     ####################
     # Parameters required for science field imaging

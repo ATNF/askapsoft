@@ -35,49 +35,87 @@
 
 # 1934-638 calibration
 if [ "${DO_1934_CAL}" == "true" ]; then
-
-    if [ "${MS_INPUT_1934}" == "" ]; then
-        if [ "${SB_1934}" != "SET_THIS" ]; then
-	    sb1934dir="$DIR_SB/$SB_1934"
-            msnames=$(find "$sb1934dir" -name "*.ms")
-	    if [ "$(echo "$msnames" | wc -l)" -eq 1 ]; then
-	        MS_INPUT_1934="$sb1934dir/${msnames##*/}"
-	    else
-	        echo "SB directory $SB_1934 has more than one measurement set. Please specify with parameter 'MS_INPUT_1934'."
-	    fi
+    # This is set to true if the SB MS is absent
+    MS_CAL_MISSING=false
+    if [ "${SB_1934}" != "" ]; then
+        sb1934dir="$DIR_SB/$SB_1934"
+        msnames=$(find "$sb1934dir" -type d -name "*.ms" -maxdepth 1)
+        numMS=$(find "$sb1934dir" -type d -name "*.ms" -maxdepth 1 | wc -l)
+        if [ "${numMS}" -eq 1 ]; then
+            MS_INPUT_1934="$sb1934dir/${msnames##*/}"
+        elif [ "${numMS}" -eq 0 ]; then
+            MS_CAL_MISSING=true
+            if [ "${MS_INPUT_1934}" == "" ]; then
+                echo "SB directory $SB_1934 has no measurement sets. You need to give the measurement set name via 'MS_INPUT_1934'"
+                echo "Exiting pipeline"
+                exit 1
+            else
+                echo "No MS found in SB directory ${sb1934dir}. Using MS name given by 'MS_INPUT_1934=${MS_INPUT_1934}'"
+                if [ "${DO_SPLIT_1934}" == "true" ]; then
+                    echo "Turning off splitting for calibration dataset."
+                    DO_SPLIT_1934=false
+                fi
+            fi
         else
-	    echo "You must set either 'SB_1934' (scheduling block number) or 'MS_INPUT_1934' (1934 measurement set)."
+            echo "SB directory $SB_1934 has more than one measurement set, and the pipeline can currently only process one at a time."
+            echo "Please specify input MS with parameter 'MS_INPUT_1934'."
+            exit 1
         fi
     fi
     if [ "$MS_INPUT_1934" == "" ]; then
-	echo "Parameter 'MS_INPUT_1934' not defined. Turning off 1934-638 processing with DO_1934_CAL=false."
+        echo "Parameter 'MS_INPUT_1934' not defined. Turning off 1934-638 processing with DO_1934_CAL=false."
         DO_1934_CAL=false
+    else
+        # Set up the metadata filename - this is where the mslist information will go
+        getMSname "${MS_INPUT_1934}"
+        MS_METADATA_CAL=$metadata/mslist-cal-${msname}.txt
     fi
 
 fi
 
 # science observation - check that MS_INPUT_SCIENCE is OK:
 if [ "${DO_SCIENCE_FIELD}" == "true" ]; then
-    if [ "$MS_INPUT_SCIENCE" == "" ]; then
-        if [ "${SB_SCIENCE}" != "SET_THIS" ]; then
-	    sbScienceDir=$DIR_SB/$SB_SCIENCE
-            msnames=$(find "$sbScienceDir" -name "*.ms")
-	    if [ "$(echo "$msnames" | wc -l)" -eq 1 ]; then
-	        MS_INPUT_SCIENCE="$sbScienceDir/${msnames##*/}"
-	    else
-	        echo "SB directory $SB_SCIENCE has more than one measurement set. Please specify with parameter 'MS_INPUT_SCIENCE'."
-	    fi
+    # This is set to true if the SB MS is absent
+    MS_SCIENCE_MISSING=false
+    if [ "${SB_SCIENCE}" != "" ]; then
+        sbScienceDir=$DIR_SB/$SB_SCIENCE
+        msnames=$(find "$sbScienceDir" -type d -name "*.ms" -maxdepth 1)
+        numMS=$(find "$sbScienceDir" -type d -name "*.ms" -maxdepth 1 | wc -l)
+        if [ "${numMS}" -eq 1 ]; then
+            MS_INPUT_SCIENCE="$sbScienceDir/${msnames##*/}"
+        elif [ "${numMS}" -eq 0 ]; then
+            MS_SCIENCE_MISSING=true
+            if [ "${MS_INPUT_SCIENCE}" == "" ]; then
+                echo "SB directory $SB_SCIENCE has no measurement sets. You need to give the measurement set name via 'MS_INPUT_SCIENCE'"
+                echo "Exiting pipeline"
+                exit 1
+            else
+                echo "No MS found in SB directory ${sbScienceDir}. Using MS name given by 'MS_INPUT_SCIENCE=${MS_INPUT_SCIENCE}'"
+                if [ "${DO_SPLIT_SCIENCE}" == "true" ]; then
+                    echo "Turning off splitting for science dataset."
+                    DO_SPLIT_SCIENCE=false
+                fi
+            fi
         else
-	    echo "You must set either 'SB_SCIENCE' (scheduling block number) or 'MS_INPUT_SCIENCE' (Science observation measurement set)."
+            echo "SB directory $SB_SCIENCE has more than one measurement set, and the pipeline can currently only process one at a time."
+            echo "Please specify with parameter 'MS_INPUT_SCIENCE'."
+            exit 1
         fi
     fi
+
     if [ "${MS_INPUT_SCIENCE}" == "" ]; then
-        if [ "${DO_SCIENCE_FIELD}" == true ]; then
-	    echo "Parameter 'MS_INPUT_SCIENCE' not defined. Turning off splitting/flagging with DO_FLAG_SCIENCE=false and pushing on.."
-        fi
+        echo "Parameter 'MS_INPUT_SCIENCE' not defined. Turning off science processing with DO_SCIENCE_FIELD=false."
         DO_SCIENCE_FIELD=false
+    else
+        # Set up the metadata filename - this is where the mslist information will go
+        # define $msname
+        getMSname "${MS_INPUT_SCIENCE}"
+        # Extract the MS metadata into a local file ($MS_METADATA) for parsing
+        MS_METADATA="$metadata/mslist-${msname}.txt"
     fi
+
 fi
+
 ####################
 # Catching old parameters
 
@@ -94,63 +132,58 @@ fi
 # Text to write to metadata files to indicate success
 METADATA_IS_GOOD=METADATA_IS_GOOD
 
-
-
 ####################
 # Once we've defined the bandpass calibrator MS name, extract metadata from it
 if [ "${DO_1934_CAL}" == "true" ] && [ "${MS_INPUT_1934}" != "" ]; then
 
-    getMSname "${MS_INPUT_1934}"
-    MS_METADATA=$metadata/mslist-cal-${msname}.txt
-
     runMSlist=true
-    if [ -e "${MS_METADATA}" ]; then
-        if [ "$(grep -c "${METADATA_IS_GOOD}" "${MS_METADATA}")" -gt 0 ]; then
+    if [ -e "${MS_METADATA_CAL}" ]; then
+        if [ "$(grep -c "${METADATA_IS_GOOD}" "${MS_METADATA_CAL}")" -gt 0 ]; then
             runMSlist=false
         else
-            rm -f "${MS_METADATA}"
+            rm -f "${MS_METADATA_CAL}"
         fi
     fi
-    
+
     if [ "${runMSlist}" == "true" ]; then
         echo "Extracting metadata for calibrator measurement set $MS_INPUT_1934"
-        ${mslist} --full "${MS_INPUT_1934}" 1>& "${MS_METADATA}"
+        ${mslist} --full "${MS_INPUT_1934}" 1>& "${MS_METADATA_CAL}"
         err=$?
         if [ $err -ne 0 ]; then
             echo "ERROR - the 'mslist' command failed."
-            echo "        Full command:  ${mslist} --full $MS_INPUT_1934" 
+            echo "        Full command:  ${mslist} --full $MS_INPUT_1934"
             echo "Exiting pipeline."
             exit $err
         else
-            cat >> "${MS_METADATA}" <<EOF
+            cat >> "${MS_METADATA_CAL}" <<EOF
 ${METADATA_IS_GOOD} ${NOW}
 EOF
         fi
     else
-        echo "Reusing calibrator metadata file ${MS_METADATA}"
+        echo "Reusing calibrator metadata file ${MS_METADATA_CAL}"
     fi
 
     # Number of antennas used in the calibration observation
-    NUM_ANT_1934=$(grep Antennas "${MS_METADATA}" | head -1 | awk '{print $6}')
+    NUM_ANT_1934=$(grep Antennas "${MS_METADATA_CAL}" | head -1 | awk '{print $6}')
     NUM_ANT=$NUM_ANT_1934
 
     if [ "${NUM_ANT_1934}" == "" ]; then
         echo "ERROR - unable to determine number of antennas in calibration dataset"
-        echo "        please check metadata in ${MS_METADATA}"
+        echo "        please check metadata in ${MS_METADATA_CAL}"
         echo "Exiting pipeline."
         exit 1
     fi
-    
+
     # Number of channels used in the calibration observation
-    NUM_CHAN=$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="${MS_METADATA}" --val=nChan)
+    NUM_CHAN=$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="${MS_METADATA_CAL}" --val=nChan)
 
     if [ "${NUM_CHAN}" == "" ]; then
         echo "ERROR - unable to determine number of channels in calibration dataset"
-        echo "        please check metadata in ${MS_METADATA}"
+        echo "        please check metadata in ${MS_METADATA_CAL}"
         echo "Exiting pipeline."
         exit 1
     fi
-        
+
     # Number of channels for 1934 observation
     if [ "${CHAN_RANGE_1934}" == "" ]; then
         NUM_CHAN_1934=${NUM_CHAN}
@@ -166,15 +199,10 @@ EOF
 
 
 fi
-    
+
+####################
 # Once we've defined the science MS name, extract metadata from it
 if [ "${MS_INPUT_SCIENCE}" != "" ]; then
-
-    # define $msname
-    getMSname "${MS_INPUT_SCIENCE}"
-
-    # Extract the MS metadata into a local file ($MS_METADATA) for parsing
-    MS_METADATA="$metadata/mslist-${msname}.txt"
 
     runMSlist=true
     if [ -e "${MS_METADATA}" ]; then
@@ -184,14 +212,14 @@ if [ "${MS_INPUT_SCIENCE}" != "" ]; then
             rm -f "${MS_METADATA}"
         fi
     fi
-    
+
     if [ "${runMSlist}" == "true" ]; then
         echo "Extracting metadata for science measurement set $MS_INPUT_SCIENCE"
         ${mslist} --full "${MS_INPUT_SCIENCE}" 1>& "${MS_METADATA}"
         err=$?
         if [ $err -ne 0 ]; then
             echo "ERROR - the 'mslist' command failed."
-            echo "        Full command:  ${mslist} --full $MS_INPUT_1934" 
+            echo "        Full command:  ${mslist} --full $MS_INPUT_1934"
             echo "Exiting pipeline."
             exit $err
         else
@@ -235,7 +263,7 @@ EOF
         echo "Exiting pipeline."
         exit 1
     fi
-    
+
     # Get the number of channels used
     NUM_CHAN=$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="${MS_METADATA}" --val=nChan)
     # centre frequency - includes units
@@ -249,7 +277,7 @@ EOF
         echo "Exiting pipeline."
         exit 1
     fi
-    
+
     # Get the requested number of channels from the config, and make sure they are the same for 1934
     # & science observations
 
@@ -279,7 +307,7 @@ EOF
 
     ####
     # Define the list of fields and associated tiles
-    
+
     # Find the number of fields in the MS
     NUM_FIELDS=$(grep Fields "${MS_METADATA}" | head -1 | cut -f 4- | cut -d' ' -f 2)
     if [ "${NUM_FIELDS}" == "" ]; then
@@ -288,7 +316,7 @@ EOF
         echo "Exiting pipeline."
         exit 1
     fi
-    
+
     FIELDLISTFILE=${metadata}/fieldlist-${msname}.txt
     if [ ! -e "$FIELDLISTFILE" ]; then
         grep -A"${NUM_FIELDS}" RA "${MS_METADATA}" | tail -n "${NUM_FIELDS}" | cut -f 4- >> "$FIELDLISTFILE"
@@ -324,12 +352,12 @@ EOF
         ((COUNT++))
     done
 
-    
+
     # Set the OPAL Project ID
     BACKUP_PROJECT_ID=${PROJECT_ID}
 
     if [ "${IS_BETA}" != "true" ]; then
-        
+
         # Run schedblock to get parset & variables
         sbinfo="${metadata}/schedblock-info-${SB_SCIENCE}.txt"
         if [ -e "${sbinfo}" ] && [ "$(wc -l "$sbinfo" | awk '{print $1}')" -gt 1 ]; then
@@ -364,7 +392,7 @@ EOF
         # annotate the relevant JIRA ticket that we have done so.
         #
         if [ "${DO_SCIENCE_FIELD}" == "true" ]; then
-            
+
             SB_STATE_INITIAL=$(awk "$awkstr" "${sbinfo}" | awk '{split($0,a,FS); print a[NF-3];}')
             if [ "${SB_STATE_INITIAL}" == "OBSERVED" ]; then
                 module load askapcli
@@ -441,18 +469,18 @@ EOF
                         fi
                     fi
                 fi
- 
+
             fi
-            
+
         fi
 
 
 
-        
+
     fi
 
 
-    # Find the beam centre locations    
+    # Find the beam centre locations
     . "${PIPELINEDIR}/findBeamCentres.sh"
 
 fi
