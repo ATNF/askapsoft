@@ -416,7 +416,7 @@ EOF
         for BEAM in ${BEAMS_TO_USE}; do
             findScienceMSnames
             if [ "${DO_SCIENCE_FIELD}" == "true" ]; then
-                if [ ! -e ${msSci} ] && [ ! -e ${msSciAv}]; then
+                if [ ! -e ${msSci} ] && [ ! -e ${msSciAv} ]; then
                     echo "The MS for the science field SB does not exist, and at least one beam (${BEAM}) does not have derived MSs."
                     echo "Turning off Science Field processing ('DO_SCIENCE_FIELD=false')"
                     DO_SCIENCE_FIELD=false
@@ -705,7 +705,7 @@ EOF
         if [ "${CPUS_PER_CORE_SELAVY}" -gt 20 ]; then
             CPUS_PER_CORE_SELAVY=20
         fi
-        if [ "${CPUS_PER_CORE_SELAVY}" -gt "${NUM_CPUS_SELAVY}"]; then
+        if [ "${CPUS_PER_CORE_SELAVY}" -gt "${NUM_CPUS_SELAVY}" ]; then
             CPUS_PER_CORE_SELAVY=${NUM_CPUS_SELAVY}
         fi
 
@@ -733,7 +733,7 @@ EOF
         if [ "${CPUS_PER_CORE_SELAVY_SPEC}" -gt 20 ]; then
             CPUS_PER_CORE_SELAVY_SPEC=20
         fi
-        if [ "${CPUS_PER_CORE_SELAVY_SPEC}" -gt "${NUM_CPUS_SELAVY_SPEC}"]; then
+        if [ "${CPUS_PER_CORE_SELAVY_SPEC}" -gt "${NUM_CPUS_SELAVY_SPEC}" ]; then
             CPUS_PER_CORE_SELAVY_SPEC=${NUM_CPUS_SELAVY_SPEC}
         fi
 
