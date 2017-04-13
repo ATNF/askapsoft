@@ -39,8 +39,8 @@ if [ "${DO_1934_CAL}" == "true" ]; then
     MS_CAL_MISSING=false
     if [ "${SB_1934}" != "" ]; then
         sb1934dir="$DIR_SB/$SB_1934"
-        msnames=$(find "$sb1934dir" -type d -maxdepth 1 -name "*.ms")
-        numMS=$(find "$sb1934dir" -type d -maxdepth 1 -name "*.ms" | wc -l)
+        msnames=$(find "$sb1934dir" -maxdepth 1 -type d -name "*.ms")
+        numMS=$(find "$sb1934dir" -maxdepth 1 -type d -name "*.ms" | wc -l)
         if [ "${numMS}" -eq 1 ]; then
             MS_INPUT_1934="$sb1934dir/${msnames##*/}"
         elif [ "${numMS}" -eq 0 ]; then
@@ -79,8 +79,8 @@ if [ "${DO_SCIENCE_FIELD}" == "true" ]; then
     MS_SCIENCE_MISSING=false
     if [ "${SB_SCIENCE}" != "" ]; then
         sbScienceDir=$DIR_SB/$SB_SCIENCE
-        msnames=$(find "$sbScienceDir" -type d -maxdepth 1 -name "*.ms")
-        numMS=$(find "$sbScienceDir" -type d -maxdepth 1 -name "*.ms" | wc -l)
+        msnames=$(find "$sbScienceDir" -maxdepth 1 -type d -name "*.ms")
+        numMS=$(find "$sbScienceDir" -maxdepth 1 -type d -name "*.ms" | wc -l)
         if [ "${numMS}" -eq 1 ]; then
             MS_INPUT_SCIENCE="$sbScienceDir/${msnames##*/}"
         elif [ "${numMS}" -eq 0 ]; then
