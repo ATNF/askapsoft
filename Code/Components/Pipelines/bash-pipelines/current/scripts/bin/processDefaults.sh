@@ -526,6 +526,12 @@ EOF
             echo "NOTE - Reducing NUM_CPUS_CONTCUBE_SCI to $maxContCubeCores to match the number of averaged channels"
             NUM_CPUS_CONTCUBE_SCI=$maxContCubeCores
         fi
+        if [ "${CPUS_PER_CORE_CONTCUBE_IMAGING}" -gt 20 ]; then
+            CPUS_PER_CORE_CONTCUBE_IMAGING=20
+        fi
+        if [ "${CPUS_PER_CORE_CONTCUBE_IMAGING}" -gt "${NUM_CPUS_CONTCUBE_SCI}" ]; then
+            CPUS_PER_CORE_CONTCUBE_IMAGING=${NUM_CPUS_CONTCUBE_SCI}
+        fi
 
         # Set the number of cores for the continuum cube mosaicking. Either
         # set to the number of averaged channels, or use that given in
@@ -667,6 +673,9 @@ EOF
         if [ "${CPUS_PER_CORE_SELAVY}" -gt 20 ]; then
             CPUS_PER_CORE_SELAVY=20
         fi
+        if [ "${CPUS_PER_CORE_SELAVY}" -gt "${NUM_CPUS_SELAVY}"]; then
+            CPUS_PER_CORE_SELAVY=${NUM_CPUS_SELAVY}
+        fi
 
         # If the sourcefinding flag has been set, but we aren't
         # mosaicking, turn on the beam-wise sourcefinding flag
@@ -688,9 +697,12 @@ EOF
         NUM_CPUS_SELAVY_SPEC=$(echo "${SELAVY_SPEC_NSUBX}" "${SELAVY_SPEC_NSUBY}" "${SELAVY_SPEC_NSUBZ}" | awk '{print $1*$2*$3+1}')
         if [ "${CPUS_PER_CORE_SELAVY_SPEC}" == "" ]; then
             CPUS_PER_CORE_SELAVY_SPEC=${NUM_CPUS_SELAVY_SPEC}
-            if [ "${CPUS_PER_CORE_SELAVY_SPEC}" -gt 20 ]; then
-                CPUS_PER_CORE_SELAVY_SPEC=20
-            fi
+        fi
+        if [ "${CPUS_PER_CORE_SELAVY_SPEC}" -gt 20 ]; then
+            CPUS_PER_CORE_SELAVY_SPEC=20
+        fi
+        if [ "${CPUS_PER_CORE_SELAVY_SPEC}" -gt "${NUM_CPUS_SELAVY_SPEC}"]; then
+            CPUS_PER_CORE_SELAVY_SPEC=${NUM_CPUS_SELAVY_SPEC}
         fi
 
         # Check search type
