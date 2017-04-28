@@ -107,12 +107,16 @@ subband="${subband}"
 beamList=""
 for BEAM in \${BEAMS_TO_USE}; do
     setImageProperties spectral
+    echo "Testing image \${imageName}"
     if [ -e "\${imageName}" ]; then
+        echo "   Found! Adding to beamList"
         if [ "\${beamList}" == "" ]; then
             beamList="\${imageName}"
         else
             beamList="\${beamList},\${imageName}"
         fi
+    else
+        echo "   Not found :("
     fi
 done
 
@@ -122,6 +126,7 @@ if [ "\${NUM_SPECTRAL_CUBES}" -gt 1 ]; then
 fi
 
 if [ "\${beamList}" != "" ]; then
+    echo "Have list of images to be mosaicked:  \$beamList"
     BEAM=all
     setImageProperties spectral
     if [ "\${imageCode}" != "restored" ]; then
@@ -159,12 +164,15 @@ fi
 EOFOUTER
 
             if [ "${SUBMIT_JOBS}" == "true" ]; then
-                DEP_SPECIMG=$(echo "${DEP_SPECIMG}" | sed -e 's/afterok/afterany/g')
-	        ID_LINMOS_SPECTRAL=$(sbatch ${DEP_SPECIMG} "$sbatchfile" | awk '{print $4}')
+                DEP=$(echo "${DEP_SPECIMG}" | sed -e 's/afterok/afterany/g')
+                if [ "${imageCode}" == "contsub" ]; then
+                    DEP=$(addDep "${DEP}" "$(echo "${DEP_SPECIMCONTSUB}" | sed -e 's/-d afterok://g')")
+                fi
+	        ID_LINMOS_SPECTRAL=$(sbatch ${DEP} "$sbatchfile" | awk '{print $4}')
                 if [ "${NUM_SPECTRAL_CUBES}" -gt 1 ];then
-	            recordJob "${ID_LINMOS_SPECTRAL}" "Make a mosaic ${imageCode} (subband ${subband}) spectral cube of the science observation, field $FIELD, with flags \"${DEP_SPECIMG}\""
+	            recordJob "${ID_LINMOS_SPECTRAL}" "Make a mosaic ${imageCode} (subband ${subband}) spectral cube of the science observation, field $FIELD, with flags \"${DEP}\""
                 else
-                    recordJob "${ID_LINMOS_SPECTRAL}" "Make a mosaic ${imageCode} spectral cube of the science observation, field $FIELD, with flags \"${DEP_SPECIMG}\""
+                    recordJob "${ID_LINMOS_SPECTRAL}" "Make a mosaic ${imageCode} spectral cube of the science observation, field $FIELD, with flags \"${DEP}\""
                 fi
                 FULL_LINMOS_SPECTRAL_DEP=$(addDep "${FULL_LINMOS_SPECTRAL_DEP}" "${ID_LINMOS_SPECTRAL}")
             else
