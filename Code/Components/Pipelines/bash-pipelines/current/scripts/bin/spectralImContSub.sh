@@ -103,6 +103,12 @@ if [ ! -e "\${imageName}" ]; then
 
 else
 
+    # Make a working directory - the casapy & ipython log files will go in here.
+    # This will prevent conflicts
+    workdir=imcontsub-working-beam\${BEAM}
+    mkdir -p \$workdir
+    cd \$workdir
+
     pyscript=${parsets}/spectral_imcontsub_${FIELDBEAM}_\${SLURM_JOB_ID}.py
     cat > "\$pyscript" << EOFINNER
 #!/usr/bin/env python
@@ -112,7 +118,7 @@ import sys
 sys.path.append('${script_location}')
 from ${script_name} import robust_contsub
 
-image="\${imageName}"
+image="../\${imageName}"
 threshold=${SPECTRAL_IMSUB_THRESHOLD}
 fit_order=${SPECTRAL_IMSUB_FIT_ORDER}
 n_every=${SPECTRAL_IMSUB_CHAN_SAMPLING}
@@ -127,6 +133,7 @@ EOFINNER
     module load casa
     aprun -n \${NCORES} -N \${NPPN} -b casa --nogui --nologger --log2term -c "\${pyscript}" > "\${log}"
     err=\$?
+    cd ..
     rejuvenate "\${imageName}"
     #extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv"
     if [ \$err != 0 ]; then
