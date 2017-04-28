@@ -73,6 +73,7 @@ for FIELD in ${FIELD_LIST}; do
         FLAG_IMAGING_DEP=""
         DEP_CONTCUBE=""
         DEP_SPECIMG=""
+        DEP_SPECIMCONTSUB=""
         
         for BEAM in ${BEAMS_TO_USE}; do
 
