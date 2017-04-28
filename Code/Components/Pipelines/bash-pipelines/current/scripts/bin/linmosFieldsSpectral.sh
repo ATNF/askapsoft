@@ -168,6 +168,9 @@ for THISTILE in \$FULL_TILE_LIST; do
         FIELD="."
         TILE=\$THISTILE
         setImageProperties spectral
+        if [ "\${imageCode}" != "restored" ]; then
+            weightsImage="\${weightsImage}.\${imageCode}"
+        fi
         echo "Mosaicking to form \${imageName}"
         parset=${parsets}/science_\${jobCode}_\${SLURM_JOB_ID}.in
         log=${logs}/science_\${jobCode}_\${SLURM_JOB_ID}.log
