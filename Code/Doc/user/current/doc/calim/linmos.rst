@@ -96,8 +96,8 @@ If input images need to be regridded, the following ImageRegrid options are avai
 +------------------+------------------+--------------+------------------------------------------------------------+
 |**Parameter**     |**Type**          |**Default**   |**Description**                                             |
 +==================+==================+==============+============================================================+
-|regrid.method     |string            |linear        |ImageRegrid interpolation method:                           |
-|                  |                  |              |*nearest*, *linear* or *cubic* (possibly *lanczos* soon).   |
+|regrid.method     |string            |linear        |ImageRegrid interpolation method: *nearest*, *linear*,      |
+|                  |                  |              |*cubic* or *lanczos*.                                       |
 +------------------+------------------+--------------+------------------------------------------------------------+
 |regrid.decimate   |uint              |3             |ImageRegrid decimation factor. In the range 3-10 is likely  |
 |                  |                  |              |to provide the best performance/accuracy tradeoff           |
