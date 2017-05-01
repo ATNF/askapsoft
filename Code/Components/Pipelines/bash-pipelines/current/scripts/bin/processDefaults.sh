@@ -434,66 +434,30 @@ EOF
 
     if [ "${DO_SCIENCE_FIELD}" == "true" ]; then
 
+        if [ "${NSUB_CUBES}" != "" ]; then
+            echo "WARNING - the parameter NSUB_CUBES is deprectated. Using NUM_SPECTRAL_CUBES=${NUM_SPECTRAL_CUBES} instead."
+        fi
+
+        ####################
+        # Parameters required for continuum imaging
+        ####
+
         # Check value of IMAGETYPE - needs to be casa or fits
         if [ "${IMAGETYPE_CONT}" != "casa" ] && [ "${IMAGETYPE_CONT}" != "fits" ]; then
             echo "ERROR - Invalid image type \"${IMAGETYPE_CONT}\" - IMAGETYPE_CONT needs to be casa or fits"
             echo "   Exiting"
             exit 1
         fi
-        if [ "${IMAGETYPE_CONTCUBE}" != "casa" ] && [ "${IMAGETYPE_CONTCUBE}" != "fits" ]; then
-            echo "ERROR - Invalid image type \"${IMAGETYPE_CONTCUBE}\" - IMAGETYPE_CONTCUBE needs to be casa or fits"
-            echo "   Exiting"
-            exit 1
-        fi
-        if [ "${IMAGETYPE_SPECTRAL}" != "casa" ] && [ "${IMAGETYPE_SPECTRAL}" != "fits" ]; then
-            echo "ERROR - Invalid image type \"${IMAGETYPE_SPECTRAL}\" - IMAGETYPE_SPECTRAL needs to be casa or fits"
-            echo "   Exiting"
-            exit 1
+
+        # Switching on the DO_ALT_IMAGER_CONT flag - if it isn't
+        # defined in the config file, then set to the value of
+        # DO_ALT_IMAGER. 
+        if [ "${DO_ALT_IMAGER}" == "true" ] && [ "${DO_ALT_IMAGER_CONT}" == "" ]; then
+            echo "WARNING - You have not defined DO_ALT_IMAGER_CONT - setting to $DO_ALT_IMAGER, the value of DO_ALT_IMAGER"
+            DO_ALT_IMAGER_CONT=${DO_ALT_IMAGER}
         fi
 
-
-        # For the spectral imaging (spectral-line & continuum cubes),
-        # simager is not currently able to write out FITS files. So if
-        # the user has requested FITS imagetype, but has not set the
-        # ALT_IMAGE flag, give a warning and stop to let them fix it.
-        if [ "${IMAGETYPE_SPECTRAL}" == "fits" ] && [ "${DO_ALT_IMAGER_SPECTRAL}" != "true" ]; then
-            echo "ERROR - IMAGETYPE_SPECTRAL=fits can only work with DO_ALT_IMAGER_SPECTRAL=true"
-            echo "   Exiting"
-            exit 1
-        fi
-        if [ "${IMAGETYPE_CONTCUBE}" == "fits" ] && [ "${DO_ALT_IMAGER_CONTCUBE}" != "true" ]; then
-            echo "ERROR - IMAGETYPE_CONTCUBE=fits can only work with DO_ALT_IMAGER_CONTCUBE=true"
-            echo "   Exiting"
-            exit 1
-        fi
-
-        # Switching on the DO_ALT_IMAGER_xxx flags for each type of
-        # imaging. If they aren't defined in the config file, then set
-        # to the value of DO_ALT_IMAGER.
-        if [ "${DO_ALT_IMAGER}" == "true" ]; then
-
-            if [ "${DO_ALT_IMAGER_CONT}" == "" ]; then
-                echo "WARNING - You have not defined DO_ALT_IMAGER_CONT - setting to $DO_ALT_IMAGER, the value of DO_ALT_IMAGER"
-                DO_ALT_IMAGER_CONT=${DO_ALT_IMAGER}
-            fi
-            if [ "${DO_ALT_IMAGER_CONTCUBE}" == "" ]; then
-                echo "WARNING - You have not defined DO_ALT_IMAGER_CONTCUBE - setting to $DO_ALT_IMAGER, the value of DO_ALT_IMAGER"
-                DO_ALT_IMAGER_CONTCUBE=${DO_ALT_IMAGER}
-            fi
-            if [ "${DO_ALT_IMAGER_SPECTRAL}" == "" ]; then
-                echo "WARNING - You have not defined DO_ALT_IMAGER_SPECTRAL - setting to $DO_ALT_IMAGER, the value of DO_ALT_IMAGER"
-                DO_ALT_IMAGER_SPECTRAL=${DO_ALT_IMAGER}
-            fi
-
-        fi
-
-
-        # Name of the MS that should be flagged by flagScience.sh
-        #   This gets set differently at different stages in the scripts
-        msToFlag=""
-
-        # Total number of channels must be exact multiple of averaging
-        # width.
+        # Total number of channels must be exact multiple of averaging width.
         # If it isn't, report an error and exit without running anything.
         averageWidthOK=$(echo "${NUM_CHAN_SCIENCE}" "${NUM_CHAN_TO_AVERAGE}" | awk '{if (($1 % $2)==0) print "yes"; else print "no"}')
         if [ "${averageWidthOK}" == "no" ]; then
@@ -518,23 +482,46 @@ EOF
             NUM_CPUS_CONTIMG_SCI=$(echo "$nchanContSci" "$nworkergroupsSci" "${NCHAN_PER_CORE}" | awk '{print ($1/$3)*$2+1}')
             # CPUS_PER_CORE_CONT_IMAGING=8 # get rid of this change as it is unnecessary
         fi
-        if [ "${DO_ALT_IMAGER_SPECTRAL}" == "true" ]; then
-            NUM_CPUS_SPECIMG_SCI=$(echo "${NUM_CHAN_SCIENCE}" "${NCHAN_PER_CORE_SL}" | awk '{print ($1/$2) + 1}')
-            # CPUS_PER_CORE_SPEC_IMAGING=16 # get rid of this change as it is unnecessary
-        fi
 
         # Can't have -N greater than -n in the aprun call
         if [ "${NUM_CPUS_CONTIMG_SCI}" -lt "${CPUS_PER_CORE_CONT_IMAGING}" ]; then
             CPUS_PER_CORE_CONT_IMAGING=${NUM_CPUS_CONTIMG_SCI}
-        fi
-        if [ "${NUM_CPUS_SPECIMG_SCI}" -lt "${CPUS_PER_CORE_SPEC_IMAGING}" ]; then
-            CPUS_PER_CORE_SPEC_IMAGING=${NUM_CPUS_SPECIMG_SCI}
         fi
 
         # Method used for self-calibration - needs to be either Cmodel or Components
         if [ "${SELFCAL_METHOD}" != "Cmodel" ] &&
                [ "${SELFCAL_METHOD}" != "Components" ]; then
             SELFCAL_METHOD="Cmodel"
+        fi
+
+
+
+        ####################
+        # Parameters required for continuum-cube imaging
+        ####
+
+        # Check value of IMAGETYPE - needs to be casa or fits
+        if [ "${IMAGETYPE_CONTCUBE}" != "casa" ] && [ "${IMAGETYPE_CONTCUBE}" != "fits" ]; then
+            echo "ERROR - Invalid image type \"${IMAGETYPE_CONTCUBE}\" - IMAGETYPE_CONTCUBE needs to be casa or fits"
+            echo "   Exiting"
+            exit 1
+        fi
+
+        # simager is not currently able to write out FITS files. So if
+        # the user has requested FITS imagetype, but has not set the
+        # ALT_IMAGER flag, give a warning and stop to let them fix it.
+        if [ "${IMAGETYPE_CONTCUBE}" == "fits" ] && [ "${DO_ALT_IMAGER_CONTCUBE}" != "true" ]; then
+            echo "ERROR - IMAGETYPE_CONTCUBE=fits can only work with DO_ALT_IMAGER_CONTCUBE=true"
+            echo "   Exiting"
+            exit 1
+        fi
+
+        # Switching on the DO_ALT_IMAGER_CONTCUBE flag - if it isn't
+        # defined in the config file, then set to the value of
+        # DO_ALT_IMAGER. 
+        if [ "${DO_ALT_IMAGER}" == "true" ] && [ "${DO_ALT_IMAGER_CONTCUBE}" == "" ]; then
+            echo "WARNING - You have not defined DO_ALT_IMAGER_CONTCUBE - setting to $DO_ALT_IMAGER, the value of DO_ALT_IMAGER"
+            DO_ALT_IMAGER_CONTCUBE=${DO_ALT_IMAGER}
         fi
 
         # Set the polarisation list for the continuum cubes
@@ -578,9 +565,51 @@ EOF
             NUM_CPUS_CONTCUBE_LINMOS=$NUM_CPUS_CONTCUBE_SCI
         fi
 
+        # Define the list of writer ranks used in the askap_imager
+        # spectral-line output
+        # Only define if we are using the askap_imager and not writing
+        # to a single file. Otherwise, we define a single-value list
+        # so that the loop over subbands is only done once ($subband
+        # will not be referenced in that case).
+        if [ "${DO_ALT_IMAGER_CONTCUBE}" == "true" ] && [ "${ALT_IMAGER_SINGLE_FILE_CONTCUBE}" != "true" ]; then
+            nworkers=$nchanContSci
+            writerIncrement=$(echo "$nworkers" "${NUM_SPECTRAL_CUBES_CONTCUBE}" | awk '{print $1/$2}')
+            SUBBAND_WRITER_LIST_CONTCUBE=$(seq 1 "$writerIncrement" "$nworkers")
+            unset nworkers
+            unset writerIncrement
+        else
+            SUBBAND_WRITER_LIST_CONTCUBE=1
+            NUM_SPECTRAL_CUBES_CONTCUBE=1
+        fi
+
+
         ####################
         # Parameters required for spectral-line imaging
         ####
+
+        # Check value of IMAGETYPE - needs to be casa or fits
+        if [ "${IMAGETYPE_SPECTRAL}" != "casa" ] && [ "${IMAGETYPE_SPECTRAL}" != "fits" ]; then
+            echo "ERROR - Invalid image type \"${IMAGETYPE_SPECTRAL}\" - IMAGETYPE_SPECTRAL needs to be casa or fits"
+            echo "   Exiting"
+            exit 1
+        fi
+
+        # simager is not currently able to write out FITS files. So if
+        # the user has requested FITS imagetype, but has not set the
+        # ALT_IMAGER flag, give a warning and stop to let them fix it.
+        if [ "${IMAGETYPE_SPECTRAL}" == "fits" ] && [ "${DO_ALT_IMAGER_SPECTRAL}" != "true" ]; then
+            echo "ERROR - IMAGETYPE_SPECTRAL=fits can only work with DO_ALT_IMAGER_SPECTRAL=true"
+            echo "   Exiting"
+            exit 1
+        fi
+
+        # Switching on the DO_ALT_IMAGER_SPECTRAL flag - if it isn't
+        # defined in the config file, then set to the value of
+        # DO_ALT_IMAGER.  
+        if [ "${DO_ALT_IMAGER}" == "true" ] || [ "${DO_ALT_IMAGER_SPECTRAL}" == "" ]; then
+            echo "WARNING - You have not defined DO_ALT_IMAGER_SPECTRAL - setting to $DO_ALT_IMAGER, the value of DO_ALT_IMAGER"
+            DO_ALT_IMAGER_SPECTRAL=${DO_ALT_IMAGER}
+        fi
 
         # Channel range to be used for spectral-line imaging
         # If user has requested a different channel range, and the
@@ -605,6 +634,17 @@ EOF
         # Define the number of channels used in the spectral-line imaging
         NUM_CHAN_SCIENCE_SL=$(echo "${CHAN_RANGE_SL_SCIENCE}" | awk -F'-' '{print $2-$1+1}')
 
+        # if we are using the new imager we need to tweak this
+        if [ "${DO_ALT_IMAGER_SPECTRAL}" == "true" ]; then
+            NUM_CPUS_SPECIMG_SCI=$(echo "${NUM_CHAN_SCIENCE_SL}" "${NCHAN_PER_CORE_SL}" | awk '{print ($1/$2) + 1}')
+            # CPUS_PER_CORE_SPEC_IMAGING=16 # get rid of this change as it is unnecessary
+        fi
+
+        # Can't have -N greater than -n in the aprun call
+        if [ "${NUM_CPUS_SPECIMG_SCI}" -lt "${CPUS_PER_CORE_SPEC_IMAGING}" ]; then
+            CPUS_PER_CORE_SPEC_IMAGING=${NUM_CPUS_SPECIMG_SCI}
+        fi
+
         # Method used for continuum subtraction
         if [ "${CONTSUB_METHOD}" != "Cmodel" ] &&
                [ "${CONTSUB_METHOD}" != "Components" ] &&
@@ -628,12 +668,8 @@ EOF
         # to a single file. Otherwise, we define a single-value list
         # so that the loop over subbands is only done once ($subband
         # will not be referenced in that case).
-        if [ "${NSUB_CUBES}" != "" ]; then
-            echo "WARNING - the parameter NSUB_CUBES is deprectated. Using NUM_SPECTRAL_CUBES=${NUM_SPECTRAL_CUBES} instead."
-        fi
-
         if [ "${DO_ALT_IMAGER_SPECTRAL}" == "true" ] && [ "${ALT_IMAGER_SINGLE_FILE}" != "true" ]; then
-            nworkers=$(echo "${NUM_CHAN_SCIENCE}" "${NCHAN_PER_CORE_SL}" | awk '{print $1/$2}')
+            nworkers=$(echo "${NUM_CHAN_SCIENCE_SL}" "${NCHAN_PER_CORE_SL}" | awk '{print $1/$2}')
             writerIncrement=$(echo "$nworkers" "${NUM_SPECTRAL_CUBES}" | awk '{print $1/$2}')
             SUBBAND_WRITER_LIST=$(seq 1 "$writerIncrement" "$nworkers")
             unset nworkers
@@ -641,17 +677,6 @@ EOF
         else
             SUBBAND_WRITER_LIST=1
             NUM_SPECTRAL_CUBES=1
-        fi
-
-        if [ "${DO_ALT_IMAGER_CONTCUBE}" == "true" ] && [ "${ALT_IMAGER_SINGLE_FILE_CONTCUBE}" != "true" ]; then
-            nworkers=$nchanContSci
-            writerIncrement=$(echo "$nworkers" "${NUM_SPECTRAL_CUBES_CONTCUBE}" | awk '{print $1/$2}')
-            SUBBAND_WRITER_LIST_CONTCUBE=$(seq 1 "$writerIncrement" "$nworkers")
-            unset nworkers
-            unset writerIncrement
-        else
-            SUBBAND_WRITER_LIST_CONTCUBE=1
-            NUM_SPECTRAL_CUBES_CONTCUBE=1
         fi
 
         ####################
