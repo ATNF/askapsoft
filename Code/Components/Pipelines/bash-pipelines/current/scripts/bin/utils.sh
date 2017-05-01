@@ -165,6 +165,9 @@ function getTile()
 #  * NUM_TAYLOR_TERMS (number of taylor terms being solved for. 1=no MFS)
 #  * IMAGE_BASE_CONT,IMAGE_BASE_CONTCUBE,IMAGE_BASE_SPECTRAL
 #  * subband (only used if NUM_SPECTRAL_CUBES or NUM_SPECTRAL_CUBES_CONTCUBE > 1)
+#  * DO_ALT_IMAGER_{CONT,CONTCUBE,SPECTRAL} (if required)
+#  * ALT_IMAGER_SINGLE_FILE or ALT_IMAGER_SINGLE_FILE_CONTCUBE (for
+#         spectral-line or continuum cube respectively, for ALT_IMAGER=true)
 # Available upon return:
 #  * imageBase
 #  * imageName (the filename for the image)
