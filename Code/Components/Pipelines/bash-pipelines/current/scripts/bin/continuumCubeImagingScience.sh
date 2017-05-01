@@ -237,6 +237,7 @@ ${shapeDefinition}
 ${cellsizeDefinition}
 \${directionDefinition}
 ${restFrequency}
+${altImagerParams}
 #
 # This defines the parameters for the gridding.
 ${Imager}.gridder.snapshotimaging                 = ${GRIDDER_SNAPSHOT_IMAGING}

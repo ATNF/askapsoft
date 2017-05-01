@@ -245,8 +245,15 @@ function setImageProperties()
     #    weightsType="${typebase}_weights_$typeSuffix"
     weightsType="${typebase}_sensitivity_$typeSuffix"
     weightsLabel="Weights image, $beamSuffix"
+
+    # Set the imageName according to the image code.
+    # For the restored images, we need to have image.restored.$base
+    # when we are using the new imager, except for the continuum
+    # image, since we use solverpercore=false. When using cimager, we
+    # revert to image.$base.restored.
+    # Same idea for contsub and altrestored.
     if [ "$imageCode" == "restored" ]; then
-        if [ "${doAlt}" == "true" ]; then
+        if [ "${doAlt}" == "true" ] && [ "${type}" != "cont" ]; then
             imageName="image.restored.${base}"
         else
             imageName="image.${base}.restored"
@@ -254,7 +261,7 @@ function setImageProperties()
         imageType="${typebase}_restored_$typeSuffix"
         label="Restored ${labelbase}, $beamSuffix"
     elif [ "$imageCode" == "contsub" ]; then
-        if [ "${doAlt}" == "true" ]; then
+        if [ "${doAlt}" == "true" ] && [ "${type}" != "cont" ]; then
             imageName="image.restored.${base}.contsub"
         else
             imageName="image.${base}.restored.contsub"
@@ -262,7 +269,7 @@ function setImageProperties()
         imageType="${typebase}_restored_$typeSuffix"
         label="Restored, Continuum-subtracted ${labelbase}, $beamSuffix"
     elif [ "$imageCode" == "altrestored" ]; then
-        if [ "${doAlt}" == "true" ]; then
+        if [ "${doAlt}" == "true" ] && [ "${type}" != "cont" ]; then
             imageName="image.restored.${base}.alt"
         else
             imageName="image.${base}.alt.restored"
