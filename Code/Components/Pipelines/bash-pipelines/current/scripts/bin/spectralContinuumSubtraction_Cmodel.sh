@@ -169,7 +169,7 @@ Selavy.minChannels                              = 1
 Selavy.sortingParam                             = -iflux
 EOFINNER
 
-NCORES=${NPROCS_SELAVY}
+NCORES=${NPROCS_CONTSUB}
 NPPN=${CPUS_PER_CORE_CONTSUB}
 aprun -n \${NCORES} -N \${NPPN} ${selavy} -c "\${parset}" > "\${log}"
 err=\$?
