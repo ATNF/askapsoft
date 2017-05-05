@@ -410,10 +410,10 @@ EOFINNER
             exit \$err
         fi
 
-        if [ "${DO_POSITION_OFFSET}" == "true" ]; then
+        if [ "${DO_POSITION_OFFSET}" == "true" ] && [ -e "${script_location}/fix_position_offsets.py" ]; then
           if [ \${LOOP} -eq ${SELFCAL_NUM_LOOPS} ]; then
             log=${logs}/fix_position_offsets_\${SLURM_JOB_ID}.log
-            python ${script_location}/fix_position_offsets.py ${script_args} > "\${log}"
+            python "${script_location}/fix_position_offsets.py" ${script_args} > "\${log}"
           fi
         fi
 
