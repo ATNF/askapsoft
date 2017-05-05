@@ -512,6 +512,13 @@ CCALIBRATOR_MINUV=0
 GAINS_CAL_TABLE=cont_gains_cal_beam%b.tab
 KEEP_RAW_AV_MS=true
 
+# Shift position offsets - precomputed, and added to position in final
+# self-cal selavy catalogue
+DO_POSITION_OFFSET=false
+# Position offsets in arcsec
+RA_POSITION_OFFSET=0
+DEC_POSITION_OFFSET=0
+
 ###################
 # Parameters for continuum cube imaging
 

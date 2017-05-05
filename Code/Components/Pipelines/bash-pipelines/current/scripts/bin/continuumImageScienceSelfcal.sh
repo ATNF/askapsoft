@@ -67,6 +67,29 @@ if [ "${DO_IT}" == "true" ] && [ "${DO_SELFCAL}" == "true" ]; then
         CPUS_PER_CORE_SELFCAL_SELAVY=${NPROCS_SELAVY}
     fi
 
+    script_location="${ACES}/tools"
+    script_args="${RA_POSITION_OFFSET} ${DEC_POSITION_OFFSET}"
+    script="${script_location}/fix_position_offsets.py"
+    if [ ! -e "${script}" ]; then
+        if [ "${DO_POSITION_OFFSET}" == "true" ]; then
+            echo "Could not find ACES directory, so turning off DO_POSITION_OFFSET"
+            DO_POSITION_OFFSET=false
+        fi
+    fi
+    if [ "${DO_POSITION_OFFSET}" == "true" ]; then
+        if [ "${GIVEN_POSITION_OFFSET_WARNING}" != "true" ]; then
+            echo "###################"
+            echo "# WARNING - you have turned on the DO_POSITION_OFFSET option"
+            echo "# This will apply a shift of "
+            echo "#    ${RA_POSITION_OFFSET} arcsec in RA"
+            echo "#    ${DEC_POSITION_OFFSET} arcsec in Dec"
+            echo "#  to the positions of sources in the model used by"
+            echo "#  the final self-calibration loop"
+            echo "###################"
+            GIVEN_POSITION_OFFSET_WARNING=true
+        fi
+    fi
+    
     imageCode=restored
     setImageProperties cont
     selavyImage="${OUTPUT}/${imageName}"
@@ -385,6 +408,13 @@ EOFINNER
 
         if [ \$err != 0 ]; then
             exit \$err
+        fi
+
+        if [ "${DO_POSITION_OFFSET}" == "true" ]; then
+          if [ \${LOOP} -eq ${SELFCAL_NUM_LOOPS} ]; then
+            log=${logs}/fix_position_offsets_\${SLURM_JOB_ID}.log
+            python ${script_location}/fix_position_offsets.py ${script_args} > "\${log}"
+          fi
         fi
 
         if [ "\${selfcalMethod}" == "Cmodel" ]; then
