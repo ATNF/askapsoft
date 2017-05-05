@@ -19,6 +19,8 @@ This patch release fixes the following bugs in the pipeline scripts:
    cubes for each type of image product.
  * Continuum imaging with the new imager has been improved, fixing
    inconsistencies in the names of images.
+ * The PNG thumbnails were not being propagated to the CASDA
+   directory. 
 
 The noise map produced by Selavy is now included in the set of
 artefacts converted to FITS and sent to CASDA. 
