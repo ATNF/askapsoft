@@ -134,7 +134,8 @@ POL_LIST="${POL_LIST}"
 DO_ALT_IMAGER_CONT="${DO_ALT_IMAGER_CONT}"
 DO_ALT_IMAGER_CONTCUBE="${DO_ALT_IMAGER_CONTCUBE}"
 DO_ALT_IMAGER_SPECTRAL="${DO_ALT_IMAGER_SPECTRAL}"
-
+ALT_IMAGER_SINGLE_FILE_CONTCUBE="${ALT_IMAGER_SINGLE_FILE_CONTCUBE}"
+ALT_IMAGER_SINGLE_FILE="${ALT_IMAGER_SINGLE_FILE}"
 fitsSuffix=""
 ADD_FITS_SUFFIX=\${ADD_FITS_SUFFIX}
 if [ "\${ADD_FITS_SUFFIX}" == "true" ] || [ "\${ADD_FITS_SUFFIX}" == "" ]; then
@@ -217,30 +218,32 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
             # Gather lists of spectral cubes & continuum cubes
         
             for imageCode in ${imageCodeList}; do
+
+                for subband in ${SUBBAND_WRITER_LIST}; do
         
-                setImageProperties spectral
-                if [ -e "\${FIELD}/\${imageName}\${fitsSuffix}" ]; then
-                    casdaOtherDimImageNames+=(\${FIELD}/\${imageName}\${fitsSuffix})
-                    casdaOtherDimImageTypes+=("\${imageType}")
-                    if [ -e "\${FIELD}/\${selavyDir}" ]; then
-                        casdaOtherDimImageSpectra+=("\${FIELD}/\${selavySpectraDir}/${SELAVY_SPEC_BASE_SPECTRUM}*\${fitsSuffix}")
-                        casdaOtherDimImageNoise+=("\${FIELD}/\${selavySpectraDir}/${SELAVY_SPEC_BASE_NOISE}*\${fitsSuffix}")
-                        casdaOtherDimImageMoments+=("\${FIELD}/\${selavyMomentsDir}/${SELAVY_SPEC_BASE_MOMENT}*\${fitsSuffix}")
-                        casdaOtherDimImageFDF+=("")
-                        casdaOtherDimImageRMSF+=("")
-                        casdaOtherDimImagePol+=("")
-                        if [ -e "\${FIELD}/\${selavyDir}/\${noiseMap}\${fitsSuffix}" ]; then
-                            casdaOtherDimImageNames+=(\${FIELD}/\${selavyDir}/\${noiseMap}\${fitsSuffix})
-                            casdaOtherDimImageTypes+=(\${noiseType})
+                    setImageProperties spectral
+                    if [ -e "\${FIELD}/\${imageName}\${fitsSuffix}" ]; then
+                        casdaOtherDimImageNames+=(\${FIELD}/\${imageName}\${fitsSuffix})
+                        casdaOtherDimImageTypes+=("\${imageType}")
+                        if [ -e "\${FIELD}/\${selavyDir}" ]; then
+                            casdaOtherDimImageSpectra+=("\${FIELD}/\${selavySpectraDir}/${SELAVY_SPEC_BASE_SPECTRUM}*\${fitsSuffix}")
+                            casdaOtherDimImageNoise+=("\${FIELD}/\${selavySpectraDir}/${SELAVY_SPEC_BASE_NOISE}*\${fitsSuffix}")
+                            casdaOtherDimImageMoments+=("\${FIELD}/\${selavyMomentsDir}/${SELAVY_SPEC_BASE_MOMENT}*\${fitsSuffix}")
+                            casdaOtherDimImageFDF+=("")
+                            casdaOtherDimImageRMSF+=("")
+                            casdaOtherDimImagePol+=("")
+                            if [ -e "\${FIELD}/\${selavyDir}/\${noiseMap}\${fitsSuffix}" ]; then
+                                casdaOtherDimImageNames+=(\${FIELD}/\${selavyDir}/\${noiseMap}\${fitsSuffix})
+                                casdaOtherDimImageTypes+=(\${noiseType})
+                            fi
+                        else
+                            casdaOtherDimImageSpectra+=("")
+                            casdaOtherDimImageNoise+=("")
+                            casdaOtherDimImageMoments+=("")
+                            casdaOtherDimImageFDF+=("")
+                            casdaOtherDimImageRMSF+=("")
+                            casdaOtherDimImagePol+=("")
                         fi
-                    else
-                        casdaOtherDimImageSpectra+=("")
-                        casdaOtherDimImageNoise+=("")
-                        casdaOtherDimImageMoments+=("")
-                        casdaOtherDimImageFDF+=("")
-                        casdaOtherDimImageRMSF+=("")
-                        casdaOtherDimImagePol+=("")
-                    fi
 #### Leave out spectral weights images - have no defined image type to
 #### support them in CASDA
 ##                       if [ "\${BEAM}" == "all" ] && [ "\${imageCode}" == "restored" ]; then
@@ -252,51 +255,57 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
 ##                           casdaOtherDimImageFDF+=("")
 ##                           casdaOtherDimImageRMSF+=("")
 ##                           casdaOtherDimImagePol+=("")
-##                       fi
-                fi
+##                      fi
+                    fi
+                done
+
+
+                for subband in ${SUBBAND_WRITER_LIST_CONTCUBE}; do
         
-                for POLN in \${POL_LIST}; do
-                    TTERM=0
-                    setImageProperties cont
-                    contImage=\${imageName}
-                    pol=\$(echo "\$POLN" | tr '[:upper:]' '[:lower:]')
-                    setImageProperties contcube "\$pol"
-                    if [ -e "\${FIELD}/\${imageName}\${fitsSuffix}" ]; then
-                        casdaOtherDimImageNames+=(\${FIELD}/\${imageName}\${fitsSuffix})
-                        casdaOtherDimImageTypes+=("\${imageType}")
-                        if [ -e "\${FIELD}/\${selavyDir}" ]; then
-                            prefix="\${FIELD}/\${selavyPolDir}/${SELAVY_POL_OUTPUT_BASE}"
-                            suffix="SB${SB_SCIENCE}_\${contImage}*\${fitsSuffix}"
-                            casdaOtherDimImageSpectra+=("\${prefix}_spec_\${POLN}_\${suffix}")
-                            casdaOtherDimImageNoise+=("\${prefix}_noise_\${POLN}_\${suffix}")
-                            casdaOtherDimImageMoments+=("")
-                            casdaOtherDimImagePol+=(\${pol})
-                            if [ "\${POLN}" == "Q" ]; then
-                                casdaOtherDimImageFDF+=("\${prefix}_FDF*_\${suffix}")
-                                casdaOtherDimImageRMSF+=("\${prefix}_RMSF*_\${suffix}")
+                    for POLN in \${POL_LIST}; do
+                        TTERM=0
+                        setImageProperties cont
+                        contImage=\${imageName}
+                        pol=\$(echo "\$POLN" | tr '[:upper:]' '[:lower:]')
+                        setImageProperties contcube "\$pol"
+                        if [ -e "\${FIELD}/\${imageName}\${fitsSuffix}" ]; then
+                            casdaOtherDimImageNames+=(\${FIELD}/\${imageName}\${fitsSuffix})
+                            casdaOtherDimImageTypes+=("\${imageType}")
+                            if [ -e "\${FIELD}/\${selavyDir}" ]; then
+                                prefix="\${FIELD}/\${selavyPolDir}/${SELAVY_POL_OUTPUT_BASE}"
+                                suffix="SB${SB_SCIENCE}_\${contImage}*\${fitsSuffix}"
+                                casdaOtherDimImageSpectra+=("\${prefix}_spec_\${POLN}_\${suffix}")
+                                casdaOtherDimImageNoise+=("\${prefix}_noise_\${POLN}_\${suffix}")
+                                casdaOtherDimImageMoments+=("")
+                                casdaOtherDimImagePol+=(\${pol})
+                                if [ "\${POLN}" == "Q" ]; then
+                                    casdaOtherDimImageFDF+=("\${prefix}_FDF*_\${suffix}")
+                                    casdaOtherDimImageRMSF+=("\${prefix}_RMSF*_\${suffix}")
+                                else
+                                    casdaOtherDimImageFDF+=("")
+                                    casdaOtherDimImageRMSF+=("")
+                                fi
                             else
+                                casdaOtherDimImageSpectra+=("")
+                                casdaOtherDimImageNoise+=("")
+                                casdaOtherDimImageMoments+=("")
                                 casdaOtherDimImageFDF+=("")
                                 casdaOtherDimImageRMSF+=("")
+                                casdaOtherDimImagePol+=("")
                             fi
-                        else
-                            casdaOtherDimImageSpectra+=("")
-                            casdaOtherDimImageNoise+=("")
-                            casdaOtherDimImageMoments+=("")
-                            casdaOtherDimImageFDF+=("")
-                            casdaOtherDimImageRMSF+=("")
-                            casdaOtherDimImagePol+=("")
+                            if [ "\${BEAM}" == "all" ] && [ "\${imageCode}" == "restored" ]; then
+                                casdaOtherDimImageNames+=(\${FIELD}/\${weightsImage}\${fitsSuffix})
+                                casdaOtherDimImageTypes+=("\${weightsType}")
+                                casdaOtherDimImageSpectra+=("")
+                                casdaOtherDimImageNoise+=("")
+                                casdaOtherDimImageMoments+=("")
+                                casdaOtherDimImageFDF+=("")
+                                casdaOtherDimImageRMSF+=("")
+                                casdaOtherDimImagePol+=("")
+                            fi
                         fi
-                        if [ "\${BEAM}" == "all" ] && [ "\${imageCode}" == "restored" ]; then
-                            casdaOtherDimImageNames+=(\${FIELD}/\${weightsImage}\${fitsSuffix})
-                            casdaOtherDimImageTypes+=("\${weightsType}")
-                            casdaOtherDimImageSpectra+=("")
-                            casdaOtherDimImageNoise+=("")
-                            casdaOtherDimImageMoments+=("")
-                            casdaOtherDimImageFDF+=("")
-                            casdaOtherDimImageRMSF+=("")
-                            casdaOtherDimImagePol+=("")
-                        fi
-                    fi
+                    done
+
                 done
         
             done
@@ -345,11 +354,13 @@ for FIELD in \${FIELD_LIST}; do
                 catNames+=(\${FIELD}/\${selavyDir}/selavy-\${imageName}.polarisation.xml)
                 catTypes+=(polarisation-component)
             fi
-            setImageProperties spectral
-            if [ -e "\${FIELD}/\${selavyDir}/selavy-\${imageName}.hiobjects.xml" ]; then
-                catNames+=(\${FIELD}/\${selavyDir}/selavy-\${imageName}.hiobjects.xml)
-                catTypes+=(spectral-line-emission)
-            fi
+##  Have blocked this for now, as spectral-line-emission is not
+##   recognised as a valid type.
+#            setImageProperties spectral
+#            if [ -e "\${FIELD}/\${selavyDir}/selavy-\${imageName}.hiobjects.xml" ]; then
+#                catNames+=(\${FIELD}/\${selavyDir}/selavy-\${imageName}.hiobjects.xml)
+#                catTypes+=(spectral-line-emission)
+#            fi
         done
     done
 done

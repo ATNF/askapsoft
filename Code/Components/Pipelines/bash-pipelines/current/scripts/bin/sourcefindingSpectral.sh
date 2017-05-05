@@ -176,9 +176,9 @@ if [ "\${HAVE_IMAGES}" == "true" ]; then
     log=${logs}/science_selavy_spectral_\${SLURM_JOB_ID}.log
     
     # Directories for extracted data products
-    mkdir -p "$selavySpectraDir"
-    mkdir -p "$selavyMomentsDir"
-    mkdir -p "$selavyCubeletsDir"
+    mkdir -p "${OUTPUT}/$selavySpectraDir"
+    mkdir -p "${OUTPUT}/$selavyMomentsDir"
+    mkdir -p "${OUTPUT}/$selavyCubeletsDir"
     
     cat > "\$parset" <<EOFINNER
 Selavy.image = \${image##*/}.fits
@@ -222,20 +222,20 @@ Selavy.HiEmissionCatalogue=true
 # Extraction
 Selavy.extractSpectra = true
 Selavy.extractSpectra.spectralCube = \$image
-Selavy.extractSpectra.spectralOutputBase = ${selavySpectraDir}/${SELAVY_SPEC_BASE_SPECTRUM}
+Selavy.extractSpectra.spectralOutputBase = ${OUTPUT}/${selavySpectraDir}/${SELAVY_SPEC_BASE_SPECTRUM}
 Selavy.extractSpectra.useDetectedPixels = true
 Selavy.extractSpectra.beamLog = ${beamlog}
 Selavy.extractNoiseSpectra = true
 Selavy.extractNoiseSpectra.spectralCube= \$image
-Selavy.extractNoiseSpectra.spectralOutputBase = ${selavySpectraDir}/${SELAVY_SPEC_BASE_NOISE}
+Selavy.extractNoiseSpectra.spectralOutputBase = ${OUTPUT}/${selavySpectraDir}/${SELAVY_SPEC_BASE_NOISE}
 Selavy.extractNoiseSpectra.useDetectedPixels = true
 Selavy.extractMomentMap = true
 Selavy.extractMomentMap.spectralCube = \$image
-Selavy.extractMomentMap.momentOutputBase = ${selavyMomentsDir}/${SELAVY_SPEC_BASE_MOMENT}
+Selavy.extractMomentMap.momentOutputBase = ${OUTPUT}/${selavyMomentsDir}/${SELAVY_SPEC_BASE_MOMENT}
 Selavy.extractMomentMap.moments = [0,1,2]
 Selavy.extractCubelet = true
 Selavy.extractCubelet.spectralCube = \$image
-Selavy.extractCubelet.cubeletOutputBase = ${selavyCubeletsDir}/${SELAVY_SPEC_BASE_CUBELET}
+Selavy.extractCubelet.cubeletOutputBase = ${OUTPUT}/${selavyCubeletsDir}/${SELAVY_SPEC_BASE_CUBELET}
 EOFINNER
 
     NCORES=${NUM_CPUS_SELAVY_SPEC}

@@ -225,7 +225,7 @@ if [ "\${HAVE_IMAGES}" == "true" ]; then
 Selavy.RMSynthesis = \${doRM}
 Selavy.RMSynthesis.cube = \$contcube
 Selavy.RMSynthesis.beamLog = ${beamlog}
-Selavy.RMSynthesis.outputBase = ${selavyPolDir}/${SELAVY_POL_OUTPUT_BASE}
+Selavy.RMSynthesis.outputBase = ${OUTPUT}/${selavyPolDir}/${SELAVY_POL_OUTPUT_BASE}
 Selavy.RMSynthesis.writeSpectra = ${SELAVY_POL_WRITE_SPECTRA}
 Selavy.RMSynthesis.writeComplexFDF = ${SELAVY_POL_WRITE_COMPLEX_FDF}
 Selavy.RMSynthesis.boxwidth = ${SELAVY_POL_BOX_WIDTH}
@@ -291,7 +291,7 @@ EOFINNER
 
     # Now convert the extracted polarisation artefacts to FITS
     if [ "\${doRM}" == "true" ]; then
-        cd "\${polDir}"
+        cd "${selavyPolDir}"
         parset=temp.in
         log=$logs/convertToFITS_polSpectra_\${SLURM_JOB_ID}.log
         neterr=0

@@ -150,6 +150,12 @@ function getTile()
     fi
 }
 
+# Function to set the directory names used by Selavy - where the
+# selavy jobs are run and the sub-directories where extracted spectra
+# etc go.
+# Requires:
+#    first argument defines the type ("cont" or "spectral")
+# Uses: $imageName
 function setSelavyDirs()
 {
     type=$1
