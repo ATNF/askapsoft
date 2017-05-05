@@ -391,6 +391,17 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                 |                                                        | to exclude the short baselines. Can be given as an array with|
 |                                            |                                 |                                                        | different values for each self-cal loop (e.g. "[200,200,0]").|
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
+| ``DO_POSITION_OFFSET``                     | false                           | none                                                   | Whether to add a fixed RA & Dec offset to the positions of   |
+|                                            |                                 |                                                        | sources in the final self-calibration catalogue (prior to it |
+|                                            |                                 |                                                        | being used to calibrate the data). This has been implemented |
+|                                            |                                 |                                                        | to help with commissioning - do not use unless you understand|
+|                                            |                                 |                                                        | what it is doing! This makes use of the ACES script          |
+|                                            |                                 |                                                        | *tools/fix_position_offsets.py*.                             |
++--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
+| ``RA_POSITION_OFFSET``                     | 0.                              | none                                                   | The offset in position in the RA direction.                  |
++--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
+| ``DEC_POSITION_OFFSET``                    | 0.                              | none                                                   | The offset in position in the DEC direction.                 |
++--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | **Application of gains calibration**       |                                 |                                                        |                                                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``DO_APPLY_CAL_CONT``                      | true                            | none                                                   | Whether to apply the calibration to the averaged             |
