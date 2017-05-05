@@ -150,6 +150,23 @@ function getTile()
     fi
 }
 
+function setSelavyDirs()
+{
+    type=$1
+
+    if [ "${type}" == "cont" ]; then
+        selavyDir=selavy-cont-${imageName}
+        selavyPolDir="${selavyDir}/PolData"
+    elif [ "${type}" == "spectral" ]; then
+        selavyDir=selavy-spectral-${imageName}
+        selavySpectraDir="${selavyDir}/Spectra"
+        selavyMomentsDir="${selavyDir}/Moments"
+        selavyCubeletsDir="${selavyDir}/Cubelets"
+    fi
+        
+    
+}
+
 # Function to define a set of variables describing an image - its
 # name, image type (for CASDA), and label (for preview images), based
 # on a type and BEAM/POL/FIELD information
@@ -303,6 +320,24 @@ function setImageProperties()
         echo "WARNING - unknown image code \"${imageCode}\""
     fi
 
+    # Definitions use by Selavy jobs
+    setSelavyDirs $type
+    if [ "${type}" == "cont" ]; then
+        noiseMap=noiseMap.${imageName}
+        noiseType="cont_noise_T0"
+        noiseLabel="Continuum image noise map"
+        thresholdMap=detThresh.${imageName}
+        meanMap=meanMap.${imageName}
+        snrMap=snrMap.${imageName}
+    elif [ "${type}" == "spectral" ]; then
+        noiseMap=noiseMap.${imageName}
+        noiseType="spectral_noise_3d"
+        noiseLabel="Spectral cube noise map"
+        thresholdMap=detThresh.${imageName}
+        meanMap=meanMap.${imageName}
+        snrMap=snrMap.${imageName}
+    fi
+    
     if [ "$needToUnsetTTerm" == "true" ]; then
         unset TTERM
     fi

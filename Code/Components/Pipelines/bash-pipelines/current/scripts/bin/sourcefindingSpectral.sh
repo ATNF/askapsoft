@@ -30,7 +30,7 @@
 
 DO_IT=$DO_SOURCE_FINDING_SPEC 
 
-# set imageName etc
+# set imageName and selavy directories
 imageCode=restored
 setImageProperties spectral
 beamlog=beamlog.${imageBase}.txt
@@ -38,9 +38,9 @@ beamlog=beamlog.${imageBase}.txt
 # Dependencies for the job
 DEP=""
 if [ "$FIELD" == "." ]; then
-    DEP=$(addDep "$DEP" "$ID_LINMOS_SPECTRAL_ALL")
+    DEP=$(addDep "$DEP" "$ID_LINMOS_SPECTRAL_ALL_RESTORED")
 elif [ "$BEAM" == "all" ]; then
-    DEP=$(addDep "$DEP" "$ID_LINMOS_SPECTRAL")
+    DEP=$(addDep "$DEP" "$ID_LINMOS_SPECTRAL_RESTORED")
 else
     DEP=$(addDep "$DEP" "$ID_SPECIMG_SCI")
 fi
@@ -166,7 +166,7 @@ for im in \${imlist}; do
         HAVE_IMAGES=false
         echo "ERROR - Could not create \${im}.fits"
     else
-        ln -s "\${im}.fits" .
+        ln -s -f "\${im}.fits" .
     fi
 done
 
@@ -176,12 +176,9 @@ if [ "\${HAVE_IMAGES}" == "true" ]; then
     log=${logs}/science_selavy_spectral_\${SLURM_JOB_ID}.log
     
     # Directories for extracted data products
-    spectraDir=Spectra
-    mkdir -p "\$spectraDir"
-    momentDir=Moments
-    mkdir -p "\$momentDir"
-    cubeletDir=Cubelets
-    mkdir -p "\$cubeletDir"
+    mkdir -p "$selavySpectraDir"
+    mkdir -p "$selavyMomentsDir"
+    mkdir -p "$selavyCubeletsDir"
     
     cat > "\$parset" <<EOFINNER
 Selavy.image = \${image##*/}.fits
@@ -225,20 +222,20 @@ Selavy.HiEmissionCatalogue=true
 # Extraction
 Selavy.extractSpectra = true
 Selavy.extractSpectra.spectralCube = \$image
-Selavy.extractSpectra.spectralOutputBase = \${spectraDir}/${SELAVY_SPEC_BASE_SPECTRUM}
+Selavy.extractSpectra.spectralOutputBase = ${selavySpectraDir}/${SELAVY_SPEC_BASE_SPECTRUM}
 Selavy.extractSpectra.useDetectedPixels = true
 Selavy.extractSpectra.beamLog = ${beamlog}
 Selavy.extractNoiseSpectra = true
 Selavy.extractNoiseSpectra.spectralCube= \$image
-Selavy.extractNoiseSpectra.spectralOutputBase = \${spectraDir}/${SELAVY_SPEC_BASE_NOISE}
+Selavy.extractNoiseSpectra.spectralOutputBase = ${selavySpectraDir}/${SELAVY_SPEC_BASE_NOISE}
 Selavy.extractNoiseSpectra.useDetectedPixels = true
 Selavy.extractMomentMap = true
 Selavy.extractMomentMap.spectralCube = \$image
-Selavy.extractMomentMap.momentOutputBase = \${momentDir}/${SELAVY_SPEC_BASE_MOMENT}
+Selavy.extractMomentMap.momentOutputBase = ${selavyMomentsDir}/${SELAVY_SPEC_BASE_MOMENT}
 Selavy.extractMomentMap.moments = [0,1,2]
 Selavy.extractCubelet = true
 Selavy.extractCubelet.spectralCube = \$image
-Selavy.extractCubelet.cubeletOutputBase = \${cubeletDir}/${SELAVY_SPEC_BASE_CUBELET}
+Selavy.extractCubelet.cubeletOutputBase = ${selavyCubeletsDir}/${SELAVY_SPEC_BASE_CUBELET}
 EOFINNER
 
     NCORES=${NUM_CPUS_SELAVY_SPEC}
@@ -253,7 +250,7 @@ EOFINNER
     # Now convert the extracted spectral & moment-map artefacts to FITS
      parset=temp.in
      log=$logs/convertToFITS_spectralArtefacts_\${SLURM_JOB_ID}.log
-     for dir in \$spectraDir \$momentDir \$cubeletDir; do
+     for dir in $selavySpectraDir $selavyMomentsDir $selavyCubeletsDir; do
          cd "\${dir}"
          neterr=0
          for im in ./*; do 

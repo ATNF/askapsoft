@@ -182,8 +182,16 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                             setImageProperties cont
 
                             if [ \$LOOP -gt 0 ]; then
-                                imageName="\$imageName.SelfCalLoop\${LOOP}"
-                                weightsImage="\$weightsImage.SelfCalLoop\${LOOP}"
+                                imageName="\${imageName}.SelfCalLoop\${LOOP}"
+                                weightsImage="\${weightsImage}.SelfCalLoop\${LOOP}"
+                                noiseMap="\${noiseMap}.SelfCalLoop\${LOOP}"
+                            fi
+
+                            setSelavyDirs cont
+                            if [ -e "\${FIELD}/\${selavyDir}/\${noiseMap}\${fitsSuffix}" ]; then
+                                casdaTwoDimImageNames+=(\${FIELD}/\${selavyDir}/\${noiseMap}\${fitsSuffix})
+                                casdaTwoDimImageTypes+=(\${noiseType})
+                                casdaTwoDimThumbTitles+=(\${noiseLabel})
                             fi
 
 #                            echo \${FIELD}/\${imageName}\${fitsSuffix}
@@ -214,14 +222,17 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                 if [ -e "\${FIELD}/\${imageName}\${fitsSuffix}" ]; then
                     casdaOtherDimImageNames+=(\${FIELD}/\${imageName}\${fitsSuffix})
                     casdaOtherDimImageTypes+=("\${imageType}")
-                    itsSelavyDir=\${FIELD}/selavy-spectral-\${imageName##*/}
-                    if [ -e "\${itsSelavyDir}" ]; then
-                        casdaOtherDimImageSpectra+=("\${itsSelavyDir}/Spectra/${SELAVY_SPEC_BASE_SPECTRUM}*\${fitsSuffix}")
-                        casdaOtherDimImageNoise+=("\${itsSelavyDir}/Spectra/${SELAVY_SPEC_BASE_NOISE}*\${fitsSuffix}")
-                        casdaOtherDimImageMoments+=("\${itsSelavyDir}/Moments/${SELAVY_SPEC_BASE_MOMENT}*\${fitsSuffix}")
+                    if [ -e "\${FIELD}/\${selavyDir}" ]; then
+                        casdaOtherDimImageSpectra+=("\${FIELD}/\${selavySpectraDir}/${SELAVY_SPEC_BASE_SPECTRUM}*\${fitsSuffix}")
+                        casdaOtherDimImageNoise+=("\${FIELD}/\${selavySpectraDir}/${SELAVY_SPEC_BASE_NOISE}*\${fitsSuffix}")
+                        casdaOtherDimImageMoments+=("\${FIELD}/\${selavyMomentsDir}/${SELAVY_SPEC_BASE_MOMENT}*\${fitsSuffix}")
                         casdaOtherDimImageFDF+=("")
                         casdaOtherDimImageRMSF+=("")
                         casdaOtherDimImagePol+=("")
+                        if [ -e "\${FIELD}/\${selavyDir}/\${noiseMap}\${fitsSuffix}" ]; then
+                            casdaOtherDimImageNames+=(\${FIELD}/\${selavyDir}/\${noiseMap}\${fitsSuffix})
+                            casdaOtherDimImageTypes+=(\${noiseType})
+                        fi
                     else
                         casdaOtherDimImageSpectra+=("")
                         casdaOtherDimImageNoise+=("")
@@ -253,9 +264,8 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                     if [ -e "\${FIELD}/\${imageName}\${fitsSuffix}" ]; then
                         casdaOtherDimImageNames+=(\${FIELD}/\${imageName}\${fitsSuffix})
                         casdaOtherDimImageTypes+=("\${imageType}")
-                        itsSelavyDir=\${FIELD}/selavy_\${contImage}
-                        if [ -e "\${itsSelavyDir}" ]; then
-                            prefix="\${itsSelavyDir}/PolData/${SELAVY_POL_OUTPUT_BASE}"
+                        if [ -e "\${FIELD}/\${selavyDir}" ]; then
+                            prefix="\${FIELD}/\${selavyPolDir}/${SELAVY_POL_OUTPUT_BASE}"
                             suffix="SB${SB_SCIENCE}_\${contImage}*\${fitsSuffix}"
                             casdaOtherDimImageSpectra+=("\${prefix}_spec_\${POLN}_\${suffix}")
                             casdaOtherDimImageNoise+=("\${prefix}_noise_\${POLN}_\${suffix}")
@@ -323,23 +333,21 @@ for FIELD in \${FIELD_LIST}; do
         for BEAM in \${theBeamList}; do               
 
             setImageProperties cont
-            contSelDir=selavy_\${imageName}
-            if [ -e "\${FIELD}/\${contSelDir}/selavy-\${imageName}.components.xml" ]; then
-                catNames+=(\${FIELD}/\${contSelDir}/selavy-\${imageName}.components.xml)
+            if [ -e "\${FIELD}/\${selavyDir}/selavy-\${imageName}.components.xml" ]; then
+                catNames+=(\${FIELD}/\${selavyDir}/selavy-\${imageName}.components.xml)
                 catTypes+=(continuum-component)
             fi
-            if [ -e "\${FIELD}/\${contSelDir}/selavy-\${imageName}.islands.xml" ]; then
-                catNames+=(\${FIELD}/\${contSelDir}/selavy-\${imageName}.islands.xml)
+            if [ -e "\${FIELD}/\${selavyDir}/selavy-\${imageName}.islands.xml" ]; then
+                catNames+=(\${FIELD}/\${selavyDir}/selavy-\${imageName}.islands.xml)
                 catTypes+=(continuum-island)
             fi
-            if [ -e "\${FIELD}/\${contSelDir}/selavy-\${imageName}.polarisation.xml" ]; then
-                catNames+=(\${FIELD}/\${contSelDir}/selavy-\${imageName}.polarisation.xml)
+            if [ -e "\${FIELD}/\${selavyDir}/selavy-\${imageName}.polarisation.xml" ]; then
+                catNames+=(\${FIELD}/\${selavyDir}/selavy-\${imageName}.polarisation.xml)
                 catTypes+=(polarisation-component)
             fi
             setImageProperties spectral
-            specSelDir=selavy-spectral-\${imageName}
-            if [ -e "\${FIELD}/\${contSelDir}/selavy-\${imageName}.hiobjects.xml" ]; then
-                catNames+=(\${FIELD}/\${contSelDir}/selavy-\${imageName}.hiobjects.xml)
+            if [ -e "\${FIELD}/\${selavyDir}/selavy-\${imageName}.hiobjects.xml" ]; then
+                catNames+=(\${FIELD}/\${selavyDir}/selavy-\${imageName}.hiobjects.xml)
                 catTypes+=(spectral-line-emission)
             fi
         done

@@ -58,9 +58,9 @@ else
 fi
 if [ "${DO_RM_SYNTHESIS}" == "true" ]; then
     if [ "$FIELD" == "." ]; then
-        DEP=$(addDep "$DEP" "$ID_LINMOS_CONTCUBE_ALL")
+        DEP=$(addDep "$DEP" "$ID_LINMOS_CONTCUBE_ALL_RESTORED")
     elif [ "$BEAM" == "all" ]; then
-        DEP=$(addDep "$DEP" "$ID_LINMOS_CONTCUBE")
+        DEP=$(addDep "$DEP" "$ID_LINMOS_CONTCUBE_RESTORED")
     else
         DEP=$(addDep "$DEP" "$ID_CONTCUBE_SCI")
     fi
@@ -86,6 +86,12 @@ if [ "${DO_IT}" == "true" ]; then
             description="selavyContL${LOOP}"
             contImage="${contImage}.SelfCalLoop${LOOP}"
             contWeights="${contWeights}.SelfCalLoop${LOOP}"
+            imageName=${contImage}
+            setSelavyDirs cont
+            noiseMap=${noiseMap}.SelfCalLoop${LOOP}
+            thresholdMap=${thresholdMap}.SelfCalLoop${LOOP}
+            meanMap=${meanMap}.SelfCalLoop${LOOP}
+            snrMap=${snrMap}.SelfCalLoop${LOOP}
             doRM=false
         fi
     fi
@@ -139,10 +145,11 @@ sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 thisfile=$sbatchfile
 cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
-seldir=selavy_${contImage}
-mkdir -p \$seldir
-
-cd \${seldir}
+# Base directory for Selavy work
+mkdir -p $selavyDir
+# Directory for extracted polarisation data products
+mkdir -p $selavyPolDir
+cd ${selavyDir}
 
 HAVE_IMAGES=true
 BEAM=$BEAM
@@ -213,16 +220,12 @@ if [ "\${HAVE_IMAGES}" == "true" ]; then
     parset=${parsets}/science_selavy_cont_${FIELDBEAM}_\${SLURM_JOB_ID}.in
     log=${logs}/science_selavy_cont_${FIELDBEAM}_\${SLURM_JOB_ID}.log
     
-    # Directory for extracted data products
-    polDir=PolData
-    mkdir -p \$polDir
-
     if [ "\${doRM}" == "true" ]; then
         rmSynthParams="# RM Synthesis on extracted spectra from continuum cube
 Selavy.RMSynthesis = \${doRM}
 Selavy.RMSynthesis.cube = \$contcube
 Selavy.RMSynthesis.beamLog = ${beamlog}
-Selavy.RMSynthesis.outputBase = \${polDir}/${SELAVY_POL_OUTPUT_BASE}
+Selavy.RMSynthesis.outputBase = ${selavyPolDir}/${SELAVY_POL_OUTPUT_BASE}
 Selavy.RMSynthesis.writeSpectra = ${SELAVY_POL_WRITE_SPECTRA}
 Selavy.RMSynthesis.writeComplexFDF = ${SELAVY_POL_WRITE_COMPLEX_FDF}
 Selavy.RMSynthesis.boxwidth = ${SELAVY_POL_BOX_WIDTH}
@@ -255,10 +258,10 @@ Selavy.growthCut = ${SELAVY_GROWTH_CUT}
 #
 Selavy.VariableThreshold = ${SELAVY_VARIABLE_THRESHOLD}
 Selavy.VariableThreshold.boxSize = ${SELAVY_BOX_SIZE}
-Selavy.VariableThreshold.ThresholdImageName=detThresh.${contImage}.img
-Selavy.VariableThreshold.NoiseImageName=noiseMap.${contImage}.img
-Selavy.VariableThreshold.AverageImageName=meanMap.${contImage}.img
-Selavy.VariableThreshold.SNRimageName=snrMap.${contImage}.img
+Selavy.VariableThreshold.ThresholdImageName=${detThresh}
+Selavy.VariableThreshold.NoiseImageName=${noiseMap}
+Selavy.VariableThreshold.AverageImageName=${meanMap}
+Selavy.VariableThreshold.SNRimageName=${snrMap}
 \${weightpars}
 #
 Selavy.Fitter.doFit = true

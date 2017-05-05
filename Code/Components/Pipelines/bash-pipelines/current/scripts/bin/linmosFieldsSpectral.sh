@@ -204,6 +204,9 @@ EOFOUTER
             if [ "${SUBMIT_JOBS}" == "true" ]; then
                 FULL_LINMOS_SPECTRAL_DEP=$(echo "${FULL_LINMOS_SPECTRAL_DEP}" | sed -e 's/afterok/afterany/g')
 	        ID_LINMOS_SPECTRAL_ALL=$(sbatch ${FULL_LINMOS_SPECTRAL_DEP} "$sbatchfile" | awk '{print $4}')
+                if [ "${imageCode}" == "restored" ]; then
+                    ID_LINMOS_SPECTRAL_RESTORED_ALL=${ID_LINMOS_SPECTRAL_ALL}
+                fi
                 if [ "${NUM_SPECTRAL_CUBES}" -gt 1 ];then
 	            recordJob "${ID_LINMOS_SPECTRAL_ALL}" "Make a mosaic ${imageCode} (subband ${subband}) spectral cube of the science observation, with flags \"${FULL_LINMOS_SPECTRAL_DEP}\""
                 else

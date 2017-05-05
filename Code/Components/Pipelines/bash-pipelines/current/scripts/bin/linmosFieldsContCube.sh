@@ -206,6 +206,9 @@ EOFOUTER
         if [ "${SUBMIT_JOBS}" == "true" ]; then
             FULL_LINMOS_CONTCUBE_DEP=$(echo "${FULL_LINMOS_CONTCUBE_DEP}" | sed -e 's/afterok/afterany/g')
 	    ID_LINMOS_CONTCUBE_ALL=$(sbatch ${FULL_LINMOS_CONTCUBE_DEP} "$sbatchfile" | awk '{print $4}')
+            if [ "${imageCode}" == "restored" ]; then
+                ID_LINMOS_CONTCUBE_ALL_RESTORED=${ID_LINMOS_CONTCUBE_ALL}
+            fi
 	    recordJob "${ID_LINMOS_CONTCUBE_ALL}" "Make a mosaic ${imageCode} continuum cube of the science observation, with flags \"${FULL_LINMOS_CONTCUBE_DEP}\""
         else
 	    echo "Would make a mosaic ${imageCode} continuum cube of the science observation, with slurm file $sbatchfile"

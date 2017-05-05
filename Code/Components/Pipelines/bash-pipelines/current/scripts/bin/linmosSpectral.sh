@@ -170,6 +170,10 @@ EOFOUTER
                     DEP=$(addDep "${DEP}" "$(echo "${DEP_SPECIMCONTSUB}" | sed -e 's/-d afterok://g')")
                 fi
 	        ID_LINMOS_SPECTRAL=$(sbatch ${DEP} "$sbatchfile" | awk '{print $4}')
+                if [ "${imageCode}" == "restored" ]; then
+                    ID_LINMOS_SPECTRAL_RESTORED=${ID_LINMOS_SPECTRAL}
+                fi
+                
                 if [ "${NUM_SPECTRAL_CUBES}" -gt 1 ];then
 	            recordJob "${ID_LINMOS_SPECTRAL}" "Make a mosaic ${imageCode} (subband ${subband}) spectral cube of the science observation, field $FIELD, with flags \"${DEP}\""
                 else
