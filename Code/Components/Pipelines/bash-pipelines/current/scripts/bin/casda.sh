@@ -44,6 +44,8 @@ if [ "${DO_STAGE_FOR_CASDA}" == "true" ]; then
         CASDA_UPLOAD_DIR="${OUTPUT}/For-CASDA"
     fi
 
+    thumbSizeList="$(echo $THUMBNAIL_SIZE_TEXT | sed -e 's/,/ /g')"
+
     sbatchfile="$slurms/casda_upload.sbatch"
     cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
@@ -86,7 +88,7 @@ for((i=0;i<\${#casdaTwoDimImageNames[@]};i++)); do
 image\${count}.filename  = \${OUTPUT}/\${casdaTwoDimImageNames[i]}
 image\${count}.type      = \${casdaTwoDimImageTypes[i]}
 image\${count}.project   = ${PROJECT_ID}"
-    for size in ${THUMBNAIL_SIZE_TEXT[@]}; do
+    for size in ${thumbSizeList}; do
         sedstr="s/\.fits/_\${size}.${THUMBNAIL_SUFFIX}/g"
         thumb=\$(echo "\${casdaTwoDimImageNames[i]}" | sed -e \$sedstr)
         if [ -e \${OUTPUT}/"\$thumb" ]; then

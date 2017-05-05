@@ -108,7 +108,9 @@ vmax=${THUMBNAIL_GREYSCALE_MAX} * stddev
 suffix='${THUMBNAIL_SUFFIX}'
 thumbim=fitsim.replace('.fits','.%s'%suffix)
 figtitle='\${title}'
-figsizes={'${THUMBNAIL_SIZE_TEXT[0]}':${THUMBNAIL_SIZE_INCHES[0]}, '${THUMBNAIL_SIZE_TEXT[1]}':${THUMBNAIL_SIZE_INCHES[1]}}
+sizetext=[${THUMBNAIL_SIZE_TEXT}]
+sizeinch=[${THUMBNAIL_SIZE_INCHES}]
+figsizes={sizetext[0]:sizeinch[0], sizetext[1]:sizeinch[1]}
 for size in figsizes:
     gc=aplpy.FITSFigure(fitsim,figsize=(figsizes[size],figsizes[size]))
     gc.show_colorscale(vmin=vmin,vmax=vmax)
@@ -141,8 +143,8 @@ makeThumbnail.imageTitle = \${casdaTwoDimThumbTitles[i]}
 makeThumbnail.imageSuffix = ${THUMBNAIL_SUFFIX}
 makeThumbnail.zmin = ${THUMBNAIL_GREYSCALE_MIN}
 makeThumbnail.zmax = ${THUMBNAIL_GREYSCALE_MAX}
-makeThumbnail.imageSizes = ${THUMBNAIL_SIZE_INCHES}
-makeThumbnail.imageSizeNames = ${THUMBNAIL_SIZE_TEXT}
+makeThumbnail.imageSizes = [${THUMBNAIL_SIZE_INCHES}]
+makeThumbnail.imageSizeNames = [${THUMBNAIL_SIZE_TEXT}]
 EOF
     
         NCORES=1

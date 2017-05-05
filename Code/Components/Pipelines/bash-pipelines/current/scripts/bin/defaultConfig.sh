@@ -847,9 +847,9 @@ PROJECT_ID="AS031"
 OBS_PROGRAM="Commissioning"
 
 # For making thumbnails, this is the size value given to figsize (in inches)
-THUMBNAIL_SIZE_INCHES="[16,5]"
+THUMBNAIL_SIZE_INCHES="16,5"
 # For making thumbnails, this is the corresponding string for the sizes
-THUMBNAIL_SIZE_TEXT="['large','small']"
+THUMBNAIL_SIZE_TEXT="large,small"
 
 # Suffix for thumnail images - determines the image type
 THUMBNAIL_SUFFIX="png"
