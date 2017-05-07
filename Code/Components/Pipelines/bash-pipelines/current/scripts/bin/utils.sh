@@ -571,7 +571,7 @@ function dataSelectionSelfcalLoop()
         fi
     elif [ "$1" == "Ccalibrator" ]; then
         if [ "${CCALIBRATOR_MINUV_ARRAY[$LOOP]}" -gt 0 ]; then
-            dataSelectionParams="Ccalibrator.MinUV   = ${CIMAGER_MINUV_ARRAY[$LOOP]}"
+            dataSelectionParams="Ccalibrator.MinUV   = ${CCALIBRATOR_MINUV_ARRAY[$LOOP]}"
         fi
     else
         dataSelectionParams="# no data selection parameter returned"
