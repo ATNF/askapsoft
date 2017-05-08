@@ -225,6 +225,8 @@ class SourceDataExtractor {
         int                                              itsStkAxis;
         /// @brief The brightness units of the input cube
         casa::Unit                                       itsInputUnits;
+        /// @brief The brightness units of the output product
+        casa::Unit                                       itsOutputUnits;
         /// @brief Miscellaneous information for the output image
         casa::TableRecord                                itsMiscInfo;
 };

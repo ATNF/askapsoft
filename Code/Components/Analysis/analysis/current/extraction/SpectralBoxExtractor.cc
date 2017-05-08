@@ -197,7 +197,7 @@ void SpectralBoxExtractor::writeImage()
 
     // write the array
     ia.write(itsOutputFilename, newarray);
-    ia.setUnits(itsOutputFilename, itsInputUnits.getName());
+    ia.setUnits(itsOutputFilename, itsOutputUnits.getName());
 
 }
 

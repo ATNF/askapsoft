@@ -87,6 +87,9 @@ SourceDataExtractor::SourceDataExtractor(const LOFAR::ParameterSet& parset)
 
     this->verifyInputs();
 
+    openInput();
+    itsOutputUnits = itsInputUnits;
+
 }
 
 SourceDataExtractor::~SourceDataExtractor()

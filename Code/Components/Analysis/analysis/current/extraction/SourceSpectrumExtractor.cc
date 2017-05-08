@@ -106,6 +106,12 @@ void SourceSpectrumExtractor::setBeamScale()
 
             if (this->openInput()) {
 
+                // Change the output units to remove the "/beam" extension
+                std::string inunit=itsInputUnits.getName();
+                if (inunit.substr(inunit.size()-5,inunit.size()) == "/beam"){
+                    itsOutputUnits.setName(inunit.substr(0,inunit.size()-5));
+                }
+    
                 std::vector< casa::Vector<Quantum<Double> > > beamvec;
 
                 casa::Vector<Quantum<Double> >
