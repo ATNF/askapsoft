@@ -56,7 +56,9 @@ CatalogueElement::CatalogueElement(const LOFAR::ParameterSet &parset)
     }
     if ((itsType != "continuum-island") &&
             (itsType != "continuum-component") &&
-            (itsType != "polarisation-component")) {
+            (itsType != "polarisation-component") &&
+            (itsType != "spectral-line-emission") &&
+            (itsType != "spectral-line-absorption")) {
         ASKAPTHROW(AskapError, "Unsupported type '" << itsType << "' for catalogue");
     }
 }
