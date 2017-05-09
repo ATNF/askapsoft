@@ -354,13 +354,11 @@ for FIELD in \${FIELD_LIST}; do
                 catNames+=(\${FIELD}/\${selavyDir}/selavy-\${imageName}.polarisation.xml)
                 catTypes+=(polarisation-component)
             fi
-##  Have blocked this for now, as spectral-line-emission is not
-##   recognised as a valid type.
-#            setImageProperties spectral
-#            if [ -e "\${FIELD}/\${selavyDir}/selavy-\${imageName}.hiobjects.xml" ]; then
-#                catNames+=(\${FIELD}/\${selavyDir}/selavy-\${imageName}.hiobjects.xml)
-#                catTypes+=(spectral-line-emission)
-#            fi
+            setImageProperties spectral
+            if [ -e "\${FIELD}/\${selavyDir}/selavy-\${imageName}.hiobjects.xml" ]; then
+                catNames+=(\${FIELD}/\${selavyDir}/selavy-\${imageName}.hiobjects.xml)
+                catTypes+=(spectral-line-emission)
+            fi
         done
     done
 done
