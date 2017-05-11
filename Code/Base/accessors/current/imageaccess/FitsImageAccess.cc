@@ -34,7 +34,7 @@
 
 
 #include <askap/AskapLogging.h>
-
+#include <casacore/casa/System/ProgressMeter.h>
 #include <casacore/images/Images/FITSImage.h>
 #include <casacore/images/Images/TempImage.h>
 #include <casacore/images/Images/SubImage.h>
@@ -104,7 +104,7 @@ casa::Array<float> FitsImageAccess::read(const std::string &name, const casa::IP
     casa::FITSImage img(fullname);
     casa::Array<float> buffer;
     casa::Slicer slc(blc,trc,casa::Slicer::endIsLast);
-    // std::cout << "Reading a slice of the FITS image " << name << " slice " << slc << std::endl;
+    std::cout << "Reading a slice of the FITS image " << name << " slice " << slc << std::endl;
     ASKAPCHECK(img.doGetSlice(buffer,slc) == casa::False, "Cannot read image");
     return buffer;
 
@@ -231,7 +231,16 @@ void FitsImageAccess::write(const std::string &name, const casa::Array<float> &a
     }
 
 }
-
+/// @brief write a slice of an image mask
+/// @param[in] name image name
+/// @param[in] arr array with pixels
+/// @param[in] where bottom left corner where to put the slice to (trc is deduced from the array shape)
+void FitsImageAccess::writeMask(const std::string &name, const casa::Array<bool> &mask,
+                            const casa::IPosition &where)
+{
+    casa::String error = casa::String("FITS pixel mask not yet implemented");
+    ASKAPLOG_INFO_STR(logger,error);
+}
 /// @brief set brightness units of the image
 /// @details
 /// @param[in] name image name
@@ -256,5 +265,24 @@ void FitsImageAccess::setBeamInfo(const std::string &name, double maj, double mi
 {
     connect(name);
     itsFITSImage->setRestoringBeam(maj, min, pa);
+
+}
+/// @brief apply mask to image
+/// @details Details depend upon the implemenation - CASA images will have the pixel mask assigned
+/// but FITS images will have it applied to the pixels ... which is an irreversible process
+/// In this mode we would either have to apply it to the array - or readback the array - mask
+/// then write ...
+
+
+
+void FitsImageAccess::makeDefaultMask(const std::string &name){
+
+    casa::String error = casa::String("A default mask in FITS makes no sense");
+    ASKAPLOG_INFO_STR(logger,error);
+
+
+
+
+
 
 }

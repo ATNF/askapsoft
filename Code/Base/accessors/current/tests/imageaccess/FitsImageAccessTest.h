@@ -72,7 +72,7 @@ public:
     void testReadWrite() {
         // Create FITS image
         const std::string name = "tmpfitsimage";
-    
+
         CPPUNIT_ASSERT(itsImageAccessor);
         size_t ra=100, dec=100, spec=5;
         const casa::IPosition shape(3,ra,dec,spec);
@@ -118,9 +118,11 @@ public:
         casa::Array<float> readBack = itsImageAccessor->read(name);
         CPPUNIT_ASSERT(readBack.shape() == shape);
         for (int x=0; x<shape[0]; ++x) {
+
             for (int y=0; y<shape[1]; ++y) {
                 for (int z = 0; z < shape[2]; ++z) {
-                    const casa::IPosition index(2,x,y,z);
+                    std::cout << x << ":" << y << ":" << z << std::endl;
+                    const casa::IPosition index(3,x,y,z);
                     CPPUNIT_ASSERT(fabs(readBack(index)-arr(index))<1e-7);
                 }
             }

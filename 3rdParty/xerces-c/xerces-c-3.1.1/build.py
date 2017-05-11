@@ -12,6 +12,12 @@ if os.environ.has_key("CRAYOS_VERSION"):
 platform = utils.get_platform()
 
 if platform['system'] == 'Darwin':
-    builder.add_option("--with-curl=/usr/lib/")
+    builder.add_option("--with-curl=/usr/")
+    builder.add_option("--enable-transcoder-macosunicodeconverter")
+    builder.add_option("--enable-netaccessor-cfurl")
+    builder.add_option("--enable-netaccessor-cfurl")
+    builder.add_option('CFLAGS="-arch x86_64"')
+    builder.add_option('CXXFLAGS="-arch x86_64"')
+
 
 builder.build()

@@ -34,6 +34,8 @@
 #include <askap/AskapLogging.h>
 #include <casacore/images/Images/PagedImage.h>
 #include <casacore/images/Images/SubImage.h>
+#include <casacore/images/Regions/ImageRegion.h>
+#include <casacore/images/Regions/RegionHandler.h>
 
 ASKAP_LOGGER(logger, ".casaImageAccessor");
 
@@ -147,7 +149,18 @@ void CasaImageAccess::write(const std::string &name, const casa::Array<float> &a
     casa::PagedImage<float> img(name);
     img.putSlice(arr, where);
 }
-
+/// @brief write a slice of an image mask
+/// @param[in] name image name
+/// @param[in] arr array with pixels
+/// @param[in] where bottom left corner where to put the slice to (trc is deduced from the array shape)
+void CasaImageAccess::writeMask(const std::string &name, const casa::Array<bool> &mask,
+                            const casa::IPosition &where)
+{
+    ASKAPLOG_INFO_STR(logger, "Writing a slice with the shape " << mask.shape() << " into a CASA image " <<
+                      name << " at " << where);
+    casa::PagedImage<float> img(name);
+    img.pixelMask().putSlice(mask, where);
+}
 /// @brief set brightness units of the image
 /// @details
 /// @param[in] name image name
@@ -171,4 +184,24 @@ void CasaImageAccess::setBeamInfo(const std::string &name, double maj, double mi
     casa::ImageInfo ii = img.imageInfo();
     ii.setRestoringBeam(casa::Quantity(maj, "rad"), casa::Quantity(min, "rad"), casa::Quantity(pa, "rad"));
     img.setImageInfo(ii);
+}
+
+/// @brief apply mask to image
+/// @details Deteails depend upon the implemenation - CASA images will have the pixel mask assigned
+/// but FITS images will have it applied to the pixels ... which is an irreversible process
+/// @param[in] name image name
+/// @param[in] the mask
+
+void CasaImageAccess::makeDefaultMask(const std::string &name){
+    casa::PagedImage<float> img(name);
+
+    // Create a mask and make it default region.
+    // need to assert sizes etc ...
+    img.makeMask ("mask", casa::True, casa::True);
+    casa::Array<casa::Bool> mask(img.shape());
+    mask = casa::True;
+    img.pixelMask().put(mask);
+
+
+
 }

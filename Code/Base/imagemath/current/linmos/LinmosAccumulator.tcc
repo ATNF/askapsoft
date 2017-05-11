@@ -1,7 +1,7 @@
 /// @file LinmosAccumulator.tcc
 ///
 /// @brief combine a number of images as a linear mosaic
-/// @details 
+/// @details
 ///
 /// @copyright (c) 2012,2014,2015 CSIRO
 /// Australia Telescope National Facility (ATNF)
@@ -66,7 +66,7 @@ MVDirection convertDir(const std::string &ra, const std::string &dec) {
     Quantity tmpra,tmpdec;
     Quantity::read(tmpra, ra);
     Quantity::read(tmpdec,dec);
-    return MVDirection(tmpra,tmpdec);  
+    return MVDirection(tmpra,tmpdec);
 }
 
 namespace askap {
@@ -105,7 +105,7 @@ namespace askap {
             // Check weighting options. One of the following must be set:
             //  - weightTypeName==FromWeightImages: get weights from input weight images
             //    * the number of weight images and their shapes must match the input images
-            //  - weightTypeName==FromPrimaryBeamModel: set weights using a Gaussian beam model 
+            //  - weightTypeName==FromPrimaryBeamModel: set weights using a Gaussian beam model
             //    * the direction coordinate centre will be used as beam centre, unless ...
             //    * an output weight image will be written, so an output file name is required
 
@@ -145,14 +145,14 @@ namespace askap {
                 if (itsWeightType == FROM_WEIGHT_IMAGES) {
                     ASKAPCHECK(inImgNames.size()==inWgtNames.size(), "# weight images should equal # images");
                 }
- 
+
                 // Check for taylor terms
- 
+
                 if (parset.isDefined("nterms")) {
- 
+
                     itsNumTaylorTerms = parset.getInt32("nterms");
                     findAndSetTaylorTerms(inImgNames, inWgtNames, outImgName, outWgtName);
- 
+
                 } else {
 
                     setSingleMosaic(inImgNames, inWgtNames, outImgName, outWgtName);
@@ -162,7 +162,7 @@ namespace askap {
             }
 
             if (itsWeightType == FROM_WEIGHT_IMAGES) {
- 
+
                 // if reading weights from images, check for inputs associated with other kinds of weighting
                 if (parset.isDefined("feeds.centre") ||
                     parset.isDefined("feeds.centreref") ||
@@ -172,7 +172,7 @@ namespace askap {
                     ASKAPLOG_WARN_STR(linmoslogger,
                         "Beam information specified in parset but ignored. Using weight images");
                 }
- 
+
             } else if (itsWeightType == FROM_BP_MODEL) {
 
                 // check for inputs associated with other kinds of weighting
@@ -236,7 +236,7 @@ namespace askap {
                 ASKAPCHECK(inImgNames[img]!=outImgName,
                     "Output image, "<<outImgName<<", is present among the inputs");
 
-                // if this is an "image*" file, see if there is an appropriate sensitivity image 
+                // if this is an "image*" file, see if there is an appropriate sensitivity image
                 if (itsDoSensitivity) {
                     tmpName = inImgNames[img];
                     size_t image_pos = tmpName.find(image_tag);
@@ -359,7 +359,7 @@ namespace askap {
                             "Output wgt image, "<<outWgtName<<", is among the inputs");
                     }
 
-                    // if this is an "image*" file, see if there is an appropriate sensitivity image 
+                    // if this is an "image*" file, see if there is an appropriate sensitivity image
                     if (itsDoSensitivity) {
                         tmpName = inImgName;
                         size_t image_pos = tmpName.find(image_tag);
@@ -675,7 +675,7 @@ namespace askap {
         template<typename T>
         void LinmosAccumulator<T>::setOutputParameters(const vector<IPosition>& inShapeVec,
                                                        const vector<CoordinateSystem>& inCoordSysVec) {
-                                                 
+
             ASKAPLOG_INFO_STR(linmoslogger, "Determining output image based on the overlap of input images");
             ASKAPCHECK(inShapeVec.size()==inCoordSysVec.size(), "Input vectors are inconsistent");
             ASKAPCHECK(inShapeVec.size()>0, "Number of input vectors should be greater that 0");
@@ -686,17 +686,17 @@ namespace askap {
             const int dcPos = refCS.findCoordinate(Coordinate::DIRECTION,-1);
             const DirectionCoordinate refDC = refCS.directionCoordinate(dcPos);
             IPosition refBLC(refShape.nelements(),0);
-            IPosition refTRC(refShape);       
+            IPosition refTRC(refShape);
             for (uInt dim=0; dim<refShape.nelements(); ++dim) {
                 --refTRC(dim); // these are added back later. Is this just to deal with degenerate axes?
             }
             ASKAPDEBUGASSERT(refBLC.nelements() >= 2);
             ASKAPDEBUGASSERT(refTRC.nelements() >= 2);
- 
+
             IPosition tempBLC = refBLC;
             IPosition tempTRC = refTRC;
 
-            // Loop over input vectors, converting their image bounds to the ref system 
+            // Loop over input vectors, converting their image bounds to the ref system
             // and expanding the new overlapping image bounds where appropriate.
             for (uint img = 1; img < inShapeVec.size(); ++img ) {
 
@@ -722,14 +722,14 @@ namespace askap {
                         tempTRC(dim) = newTRC(dim);
                     }
                 }
- 
+
             }
 
             itsOutShape = refShape;
             itsOutShape(0) = tempTRC(0) - tempBLC(0) + 1;
             itsOutShape(1) = tempTRC(1) - tempBLC(1) + 1;
             ASKAPDEBUGASSERT(itsOutShape(0) > 0);
-            ASKAPDEBUGASSERT(itsOutShape(1) > 0);       
+            ASKAPDEBUGASSERT(itsOutShape(1) > 0);
             Vector<Double> refPix = refDC.referencePixel();
             refPix[0] -= Double(tempBLC(0) - refBLC(0));
             refPix[1] -= Double(tempBLC(1) - refBLC(1));
@@ -801,13 +801,13 @@ namespace askap {
             itsInBuffer = TempImage<T>(shape,cSys,maxMemoryInMB);
             ASKAPCHECK(itsInBuffer.shape().nelements()>0, "Input buffer does not appear to be set");
             if (itsWeightType == FROM_WEIGHT_IMAGES) {
-                itsInWgtBuffer = TempImage<T>(shape,cSys,maxMemoryInMB);       
+                itsInWgtBuffer = TempImage<T>(shape,cSys,maxMemoryInMB);
                 ASKAPCHECK(itsInWgtBuffer.shape().nelements()>0,
                     "Input weights buffer does not appear to be set");
             }
             if (itsDoSensitivity) {
-                itsInSenBuffer = TempImage<T>(shape,cSys,maxMemoryInMB);       
-                itsInSnrBuffer = TempImage<T>(shape,cSys,maxMemoryInMB);       
+                itsInSenBuffer = TempImage<T>(shape,cSys,maxMemoryInMB);
+                itsInSnrBuffer = TempImage<T>(shape,cSys,maxMemoryInMB);
                 ASKAPCHECK(itsInSnrBuffer.shape().nelements()>0,
                     "Input sensitivity buffer does not appear to be set");
             }
@@ -1154,7 +1154,10 @@ namespace askap {
                 for (int y=0; y<outPix.shape()[1];++y) {
                     fullpos[0] = x;
                     fullpos[1] = y;
-                    if (outWgtPix(fullpos)>0.0) {
+                    if (isNaN(outWgtPix(fullpos))) {
+                        setNaN(outPix(fullpos));
+                    }
+                    else if (outWgtPix(fullpos)>0.0) {
                         outPix(fullpos) = outPix(fullpos) / outWgtPix(fullpos);
                     } else {
                         outPix(fullpos) = 0.0;
@@ -1167,7 +1170,10 @@ namespace askap {
                     for (int y=0; y<outPix.shape()[1];++y) {
                         fullpos[0] = x;
                         fullpos[1] = y;
-                        if (outSenPix(fullpos)>0.0) {
+                        if (isNaN(outWgtPix(fullpos))) {
+                            setNaN(outSenPix(fullpos));
+                        }
+                        else if (outSenPix(fullpos)>0.0) {
                             outSenPix(fullpos) = sqrt(1.0 / outSenPix(fullpos));
                         } else {
                             outSenPix(fullpos) = 0.0;
@@ -1196,7 +1202,7 @@ namespace askap {
             }
             // currently blc,trc describe the whole input image; convert coordinates
             Vector<Double> pix(2);
-            
+
             // first process BLC
             pix[0] = Double(blc[0]);
             pix[1] = Double(blc[1]);
@@ -1211,7 +1217,7 @@ namespace askap {
                 << refDC.errorMessage());
             blc[0] = casa::Int(round(pix[0]));
             blc[1] = casa::Int(round(pix[1]));
- 
+
             // now process TRC
             pix[0] = Double(trc[0]);
             pix[1] = Double(trc[1]);

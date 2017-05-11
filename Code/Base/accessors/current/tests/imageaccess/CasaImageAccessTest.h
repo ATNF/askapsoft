@@ -33,6 +33,8 @@
 #include <casacore/casa/Arrays/Vector.h>
 #include <casacore/casa/Arrays/IPosition.h>
 #include <casacore/coordinates/Coordinates/LinearCoordinate.h>
+#include <casacore/images/Regions/ImageRegion.h>
+#include <casacore/images/Regions/RegionHandler.h>
 
 
 #include <boost/shared_ptr.hpp>
@@ -109,6 +111,11 @@ public:
       // auxilliary methods
       itsImageAccessor->setUnits(name,"Jy/pixel");
       itsImageAccessor->setBeamInfo(name,0.02,0.01,1.0);
+      // mask tests
+
+      itsImageAccessor->makeDefaultMask(name);
+
+
 
    }
 

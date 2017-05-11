@@ -117,12 +117,12 @@ bool FITSImageRW::create(const std::string &name, const casa::IPosition &shape,\
     // // Find scale factors
     // //
     casa::Record header;
-    casa::Double bscale, bzero;
+    casa::Double b_scale, b_zero;
 
     if (BITPIX == -32) {
 
-        bscale = 1.0;
-        bzero = 0.0;
+        b_scale = 1.0;
+        b_zero = 0.0;
         header.define("bitpix", BITPIX);
         header.setComment("bitpix", "Floating point (32 bit)");
 
@@ -152,9 +152,9 @@ bool FITSImageRW::create(const std::string &name, const casa::IPosition &shape,\
         header.define("PCOUNT", 0);
         header.define("GCOUNT", 1);
     }
-    header.define("bscale", bscale);
+    header.define("bscale", b_scale);
     header.setComment("bscale", "PHYSICAL = PIXEL*BSCALE + BZERO");
-    header.define("bzero", bzero);
+    header.define("bzero", b_zero);
 
 
     header.define("COMMENT1", ""); // inserts spaces
@@ -249,7 +249,7 @@ bool FITSImageRW::create(const std::string &name, const casa::IPosition &shape,\
     theKeywordList.next(); // skipping an extra SIMPLE... hack
     casa::FitsKeyCardTranslator m_kc;
 
-    char cards[2880];
+    char cards[2880*1024];
 
     while (m_kc.build(cards,theKeywordList)) {
         outfile << cards;

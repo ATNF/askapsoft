@@ -125,6 +125,12 @@ public:
     virtual void write(const std::string &name, const casa::Array<float> &arr,
                        const casa::IPosition &where);
 
+    /// @brief write a slice of an image mask
+    /// @param[in] name image name
+    /// @param[in] arr array with pixels
+    /// @param[in] where bottom left corner where to put the slice to (trc is deduced from the array shape)
+    virtual void writeMask(const std::string &name, const casa::Array<bool> &mask,
+                                                   const casa::IPosition &where);
     /// @brief set brightness units of the image
     /// @details
     /// @param[in] name image name
@@ -139,6 +145,14 @@ public:
     /// @param[in] min minor axis in radians
     /// @param[in] pa position angle in radians
     virtual void setBeamInfo(const std::string &name, double maj, double min, double pa);
+
+    /// @brief apply mask to image
+    /// @details Deteails depend upon the implemenation - CASA images will have the pixel mask assigned
+    /// but FITS images will have it applied to the pixels ... which is an irreversible process
+    /// @param[in] name image name
+
+
+    virtual void makeDefaultMask(const std::string &name);
 
 
 private:
