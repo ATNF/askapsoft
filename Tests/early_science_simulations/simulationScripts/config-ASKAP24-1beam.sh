@@ -12,13 +12,13 @@ msdir=MS
 chunkdir=../ModelImages/Chunks
 slicedir=../ModelImages/Slices
 
-doCreateModel=false
+doCreateModel=true
 # Whether to slice up the model prior to simulating - set to false
 # if we've already done this
-doSlice=false
+doSlice=true
 
 doCalibrator=false
-doScience=true
+doScience=false
 
 doCorrupt=false
 randomgainsparset=${parsetdir}/randomgains.in
@@ -106,7 +106,7 @@ fi
 # completed successfully
 CLOBBER_INTERMEDIATE_MS=true
 
-catdir=/group/astronomy856/whi550/Simulations/InputCatalogue
+catdir=/group/askap/whi550/Simulations/InputCatalogue
 sourcelist=master_possum_catalogue_trim10x10deg.dat
 
 doFlatSpectrum=false
