@@ -311,7 +311,7 @@ Selavy.overlapx                                 = 50
 Selavy.overlapy                                 = 50
 #
 # The search threshold, in units of sigma
-Selavy.snrCut                                   = \${SELFCAL_SELAVY_THRESHOLD_ARRAY[\$LOOP-1]}
+Selavy.snrCut                                   = \${SELFCAL_SELAVY_THRESHOLD_ARRAY[\$LOOP]}
 # Grow the detections to a secondary threshold
 Selavy.flagGrowth                               = true
 Selavy.growthCut                                = 5
@@ -361,8 +361,8 @@ Ccalibrator.dataset                             = ${OUTPUT}/${msSciAv}
 Ccalibrator.nAnt                                = ${NUM_ANT}
 Ccalibrator.nBeam                               = 1
 Ccalibrator.solve                               = antennagains
-Ccalibrator.normalisegains                      = \${SELFCAL_NORMALISE_GAINS_ARRAY[\$LOOP-1]}
-Ccalibrator.interval                            = \${SELFCAL_INTERVAL_ARRAY[\$LOOP-1]}
+Ccalibrator.normalisegains                      = \${SELFCAL_NORMALISE_GAINS_ARRAY[\$LOOP]}
+Ccalibrator.interval                            = \${SELFCAL_INTERVAL_ARRAY[\$LOOP]}
 #
 Ccalibrator.calibaccess                         = table
 Ccalibrator.calibaccess.table                   = \${caldata}
@@ -399,7 +399,7 @@ EOFINNER
 
         log=${logs}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}_selavy.log
         echo "--- Source finding with $selavy ---" > "\$log"
-        echo "---    Loop=\$LOOP, Threshold = \${SELFCAL_SELAVY_THRESHOLD_ARRAY[\$LOOP-1]} --" >> "\$log"
+        echo "---    Loop=\$LOOP, Threshold = \${SELFCAL_SELAVY_THRESHOLD_ARRAY[\$LOOP]} --" >> "\$log"
         NCORES=${NPROCS_SELAVY}
         NPPN=${CPUS_PER_CORE_SELFCAL_SELAVY}
         aprun -n \${NCORES} -N \${NPPN} $selavy -c "\$parset" >> "\$log"
@@ -434,8 +434,8 @@ EOFINNER
 
         log=${logs}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}_ccalibrator.log
         echo "--- Calibration with $ccalibrator ---" > "\$log"
-        echo "---    Loop \$LOOP, Interval = \${SELFCAL_INTERVAL_ARRAY[\$LOOP-1]} --" >> "\$log"
-        echo "---    Normalise gains = \${SELFCAL_NORMALISE_GAINS_ARRAY[\$LOOP-1]} --" >> "\$log"
+        echo "---    Loop \$LOOP, Interval = \${SELFCAL_INTERVAL_ARRAY[\$LOOP]} --" >> "\$log"
+        echo "---    Normalise gains = \${SELFCAL_NORMALISE_GAINS_ARRAY[\$LOOP]} --" >> "\$log"
         NCORES=1
         NPPN=1
         aprun -n \${NCORES} -N \${NPPN} $ccalibrator -c "\$parset" >> "\$log"
