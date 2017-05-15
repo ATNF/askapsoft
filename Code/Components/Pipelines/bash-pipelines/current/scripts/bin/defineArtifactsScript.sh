@@ -42,7 +42,7 @@ for BEAM in ${BEAMS_TO_USE}; do
     fi
 done
 
-imageCodeList="restored altrestored image residual sensitivity psf psfimage"
+imageCodeList="restored altrestored image contsub residual sensitivity psf psfimage"
 
 getArtifacts="${tools}/getArchiveList-${NOW}.sh"
 cat > "${getArtifacts}" <<EOF
