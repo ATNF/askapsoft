@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.apache.log4j.Logger;
@@ -50,6 +51,8 @@ public class ProcessIngestManager extends AbstractIngestManager {
      */
     private Process itsIngestProcess = null;
 
+    private long sbid = -1;
+
     /**
      * Constructor
      */
@@ -65,11 +68,11 @@ public class ProcessIngestManager extends AbstractIngestManager {
      * @throws PipelineStartException if the ingest pipeline fails to start.
      */
     @Override
-    protected synchronized void executeIngestPipeline(File workdir)
+    protected synchronized void executeIngestPipeline(File workdir, long sbid)
             throws PipelineStartException {
         // The superclass calls this method and is not meant to call execute
         // if the ingest pipeline is running
-        assert (!isRunning());
+        assert (isRunning()>=0);
 
         String command = Path.expandvars(parset().getString("ingest.command"));
         String args = Path.expandvars(parset().getString("ingest.args"));
@@ -87,8 +90,11 @@ public class ProcessIngestManager extends AbstractIngestManager {
 			logger.debug("creating ProcessBuilder");
             ProcessBuilder pb = new ProcessBuilder(cmdLine).redirectErrorStream(true);
             pb.directory(workdir);
+            Map<String, String> env = pb.environment();
+            env.put("sbid", "" + sbid);
 			logger.debug("starting process");
             itsIngestProcess = pb.start();
+            this.sbid = sbid;
         } catch (IOException e) {
             logger.error("Failed to execute ingest pipeline process: " + e.getMessage());
 			throw new PipelineStartException(e.getMessage());
@@ -105,7 +111,7 @@ public class ProcessIngestManager extends AbstractIngestManager {
         } catch (InterruptedException e) {
         }
 
-        if (!isRunning()) {
+        if (isRunning()>=0) {
             logger.error("Ingest pipeline failed to start");
             throw new askap.interfaces.cp.PipelineStartException("Ingest pipeline failed to start");
         }
@@ -137,17 +143,17 @@ public class ProcessIngestManager extends AbstractIngestManager {
      * Returns true if the ingest pipeline is running, otherwise false.
      */
     @Override
-    public synchronized boolean isRunning() {
+    public synchronized long isRunning() {
         if (itsIngestProcess == null) {
-            return false;
+            return -1;
         } else {
             try {
                 itsIngestProcess.exitValue();
                 itsIngestProcess = null;
-                return false;
+                return -1;
             } catch (IllegalThreadStateException e) {
                 // Means the process has not exited
-                return true;
+                return this.sbid;
             }
         }
 

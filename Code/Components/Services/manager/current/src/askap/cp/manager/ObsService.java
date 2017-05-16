@@ -98,10 +98,10 @@ public class ObsService extends _ICPObsServiceDisp {
             itsIngestManager = new ProcessIngestManager(parset);
         } else if (managertype.equalsIgnoreCase("test")) {
 			logger.debug("ObsService factory: creating mock ingest manager");
-			FuncTestReporterClient client = new FuncTestReporterClient(
+			FuncTestReporterClient.createFuncTestReporterClient(
 				ic,
 				parset.getString("cpfunctestreporter.identity"));
-            itsIngestManager = new TestIngestManager(parset, client);
+            itsIngestManager = new TestIngestManager(parset, FuncTestReporterClient.getFuncTestReporterClient());
         } else {
             throw new RuntimeException("Unknown ingest manager type: "
                     + managertype);

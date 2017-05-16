@@ -51,10 +51,10 @@ public final class SBStateMonitorFactory {
 			IFCMClient fcm) {
 		switch (type) {
 			case "test":
-				FuncTestReporterClient client = new FuncTestReporterClient(
+				FuncTestReporterClient.createFuncTestReporterClient(
 						communicator,
 						config.getString("cpfunctestreporter.identity"));
-				return new TestSBStateChangedMonitor(client);
+				return new TestSBStateChangedMonitor(FuncTestReporterClient.getFuncTestReporterClient());
 			case "jira":
 				return new JiraSBStateChangedMonitor(config, fcm);
 			case "null":

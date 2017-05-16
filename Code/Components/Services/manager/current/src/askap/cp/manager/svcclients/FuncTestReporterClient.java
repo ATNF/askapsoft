@@ -54,13 +54,15 @@ public class FuncTestReporterClient {
 	 */
     protected ICPFuncTestReporterPrx itsProxy = null;
 
+    private static FuncTestReporterClient funcTestReporterClient = null;
+
 	/**
 	 * Instantiate a FuncTestReporterClient.
 	 * 
 	 * @param ic The Ice communicator.
 	 * @param iceIdentity The Ice remote server identity string.
 	 */
-	public FuncTestReporterClient(Ice.Communicator ic, String iceIdentity) {
+	private FuncTestReporterClient(Ice.Communicator ic, String iceIdentity) {
         logger.debug("Obtaining proxy to FuncTestReporterClient: " + iceIdentity);
 
         while (itsProxy == null) {
@@ -95,6 +97,15 @@ public class FuncTestReporterClient {
             }
         }
         logger.debug("Obtained proxy to FuncTestReporterClient");
+    }
+
+    public static synchronized void createFuncTestReporterClient(Ice.Communicator ic, String iceIdentity) {
+	    if (funcTestReporterClient==null)
+	        funcTestReporterClient = new FuncTestReporterClient(ic, iceIdentity);
+    }
+
+    public static synchronized FuncTestReporterClient getFuncTestReporterClient() {
+	    return funcTestReporterClient;
     }
 
 	/**

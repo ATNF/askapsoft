@@ -32,7 +32,7 @@ import org.apache.log4j.Logger;
 
 import askap.cp.manager.monitoring.MonitoringSingleton;
 import askap.cp.manager.notifications.SBStateMonitorFactory;
-import askap.cp.manager.svcclients.FcmClientFactory;
+import askap.cp.manager.svcclients.ClientServiceFactory;
 import askap.cp.manager.svcclients.IFCMClient;
 import askap.util.ServiceApplication;
 import askap.util.ServiceManager;
@@ -60,7 +60,7 @@ public final class CpManager extends ServiceApplication {
     private IFCMClient itsFCM;
 
 	/**
-	 * @see askap.cp.manager.ServiceApplication#run(java.lang.String[])
+	 * @see askap.util.ServiceApplication#run(java.lang.String[])
 	 */
 	@Override
 	public int run(String[] args) {
@@ -79,7 +79,8 @@ public final class CpManager extends ServiceApplication {
 			}
 
 			// Create the FCM client
-			itsFCM = FcmClientFactory.getInstance(config(), communicator());
+			ClientServiceFactory.init(config(), communicator());
+			itsFCM = ClientServiceFactory.getFCMInstance();
 
 			// Create and register the ObsService object
 			ObsService svc = ObsService.Create(communicator(), config(), itsFCM);

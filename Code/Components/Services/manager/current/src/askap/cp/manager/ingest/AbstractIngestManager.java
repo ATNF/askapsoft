@@ -86,7 +86,7 @@ public abstract class AbstractIngestManager {
             askap.interfaces.cp.PipelineStartException {
 
         // 1: Check the pipeline is not already running
-        if (isRunning()) {
+        if (isRunning()>=0) {
             String msg = "Ingest Pipeline already running";
             logger.error(msg);
             throw new AlreadyRunningException(msg);
@@ -116,7 +116,7 @@ public abstract class AbstractIngestManager {
 
         // 4: Execute the job (blocks until pipeline is running)
         logger.info("Starting Ingest Pipeline");
-        executeIngestPipeline(workdir);
+        executeIngestPipeline(workdir, sbid);
     }
 
     /**
@@ -150,7 +150,7 @@ public abstract class AbstractIngestManager {
         final long SLEEP_TIME = 100;
 
         long timeleft = (timeout < 0) ? Long.MAX_VALUE : timeout;
-        while (timeleft > 0 && isRunning()) {
+        while (timeleft > 0 && isRunning()>=0) {
             try {
                 Thread.sleep(SLEEP_TIME);
             } catch (InterruptedException e) { /* Do nothing */
@@ -161,13 +161,13 @@ public abstract class AbstractIngestManager {
             if (timeout < 0) timeleft = Long.MAX_VALUE;
         }
 
-        return !isRunning();
+        return isRunning()>=0;
     }
 
     /**
      * Concrete classes implement this to start/execute the ingest pipeline.
      */
-    abstract protected void executeIngestPipeline(File workdir)
+    abstract protected void executeIngestPipeline(File workdir, long sbid)
             throws PipelineStartException;
 
     /**
@@ -179,9 +179,9 @@ public abstract class AbstractIngestManager {
      * Concrete classes implement this to indicate if the pipeline is already
      * running.
      *
-     * @return true if the pipeline is running, otherwise false.
+     * @return the current sbid if the pipeline is running, otherwise return -1.
      */
-    abstract public boolean isRunning();
+    abstract public long isRunning();
 
     /**
      * @return the parset passed to this class when it was constructed
@@ -189,4 +189,5 @@ public abstract class AbstractIngestManager {
     protected ParameterSet parset() {
         return itsParset;
     }
+
 }

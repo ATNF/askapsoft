@@ -26,8 +26,10 @@ package askap.cp.manager.svcclients;
 // ASKAPsoft imports
 
 import java.io.IOException;
+import java.util.Map;
 
 import askap.interfaces.schedblock.NoSuchSchedulingBlockException;
+import askap.interfaces.schedblock.ParameterException;
 import askap.util.ParameterSet;
 
 /**
@@ -37,10 +39,12 @@ import askap.util.ParameterSet;
  */
 public class MockDataServiceClient implements IDataServiceClient {
 
+    private final String filename;
     /**
      * The obs parameters for the mock schedulgin block with id of 0
      */
     private ParameterSet itsObsParams;
+
 
     /**
      * Constructor.
@@ -50,12 +54,7 @@ public class MockDataServiceClient implements IDataServiceClient {
      *                  getObsParameters() on objects of this class
      */
     public MockDataServiceClient(String filename) {
-        try {
-            itsObsParams = new ParameterSet(filename);
-        } catch (IOException e) {
-            System.err.println("IOException reading " + filename
-                    + ": " + e.getMessage());
-        }
+        this.filename = filename;
     }
 
     /*
@@ -67,7 +66,19 @@ public class MockDataServiceClient implements IDataServiceClient {
         if (sbid != 0) {
             throw new NoSuchSchedulingBlockException();
         }
+        try {
+            itsObsParams = new ParameterSet(filename);
+        } catch (IOException e) {
+            System.err.println("IOException reading " + filename
+                    + ": " + e.getMessage());
+        }
         return itsObsParams;
     }
 
+    @Override
+    public void setObsVariables(long sbid, Map<String, String> obsVars) throws NoSuchSchedulingBlockException, ParameterException {
+        // only need to check the obsVar string is correct
+        String obsVar = obsVars.get("obs.info");
+        FuncTestReporterClient.getFuncTestReporterClient().methodCalled(obsVar);
+    }
 }

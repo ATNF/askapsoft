@@ -173,6 +173,12 @@ public final class MonitoringSingleton {
         }
     }
 
+    public void update(MonitorPoint point) {
+        synchronized (pointdata) {
+            pointdata.put(point.name, point);
+        }
+    }
+
     /**
      * Maps from a native "MonitorPointStatus" to an Ice "PointStatus"
      *
@@ -198,7 +204,7 @@ public final class MonitoringSingleton {
     /**
      * @return Current time expressed as microseconds since MJD=0.
      */
-    static long getCurrentTimeMJD() {
+    public static long getCurrentTimeMJD() {
         final long MJD1970 = 40587; // MJD of 1970/01/01
         final long SECONDS_PER_DAY = 86400;
         java.util.Date now = new java.util.Date();

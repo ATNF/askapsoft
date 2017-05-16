@@ -25,55 +25,58 @@
  */
 package askap.cp.manager.svcclients;
 
-import askap.interfaces.schedblock.ParameterException;
-import org.apache.log4j.Logger;
-
+import askap.interfaces.monitoring.MonitorPoint;
+import askap.interfaces.monitoring.MonitoringProviderPrx;
+import askap.interfaces.monitoring.MonitoringProviderPrxHelper;
 import askap.interfaces.schedblock.ISchedulingBlockServicePrx;
 import askap.interfaces.schedblock.ISchedulingBlockServicePrxHelper;
 import askap.interfaces.schedblock.NoSuchSchedulingBlockException;
+import askap.interfaces.schedblock.ParameterException;
 import askap.util.ParameterSet;
+import org.apache.log4j.Logger;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
-public class IceDataServiceClient implements IDataServiceClient {
+public class IceMonitoringServiceClient implements IMonitoringServiceClient {
+    /**
+     * The interval (in seconds) between connection retry attempts.
+     * This includes retrying connection to the Ice Locator service
+     * of the TOS Data service.
+     */
+    private static final int RETRY_INTERVAL = 5;
+
     /**
      * Logger.
      */
-    private static final Logger logger = Logger.getLogger(IceDataServiceClient.class.getName());
+    private static final Logger logger = Logger.getLogger(IceMonitoringServiceClient.class.getName());
+
+    private MonitoringProviderPrx itsProxy = null;
+
     private final String iceIdentity;
     private final Ice.Communicator ic;
 
-    private ISchedulingBlockServicePrx itsProxy = null;
+    private String[] pointNames = null;
 
-
-
-    IceDataServiceClient(Ice.Communicator ic, String iceIdentity) {
+    IceMonitoringServiceClient(Ice.Communicator ic, String iceIdentity, String[] pointNames) {
         this.ic = ic;
         this.iceIdentity = iceIdentity;
     }
 
-    void getProxy() {
-        logger.info("Obtaining proxy to DataServiceClient");
-
-        Ice.ObjectPrx obj = ic.stringToProxy(iceIdentity);
-        itsProxy = ISchedulingBlockServicePrxHelper.checkedCast(obj);
-        logger.info("Obtained proxy to DataServiceClient");
-    }
-
-    /**
-     * @see askap.cp.manager.svcclients.IDataServiceClient#getObsParameters(long)
-     */
-    public ParameterSet getObsParameters(long sbid)
-            throws NoSuchSchedulingBlockException {
-        getProxy();
-        return new ParameterSet(itsProxy.getObsParameters(sbid));
+    private void getProxy() {
+        if (itsProxy==null) {
+            Ice.ObjectPrx obj = ic.stringToProxy(iceIdentity);
+            itsProxy = MonitoringProviderPrxHelper.checkedCast(obj);
+            logger.info("Obtained proxy to MonitoringServiceClient: " + iceIdentity);
+        }
     }
 
     @Override
-    public void setObsVariables(long sbid, Map<String, String> obsVars) throws NoSuchSchedulingBlockException, ParameterException {
+    public List<MonitorPoint> get() {
         getProxy();
-        itsProxy.setObsVariables(sbid, obsVars);
+        MonitorPoint pointValues[] = itsProxy.get(this.pointNames);
+        return Arrays.asList(pointValues);
     }
-
-// TODO: Implement getState and transition on ISchedulingBlockServicePrx
 }

@@ -42,6 +42,8 @@ public class TestIngestManager extends AbstractIngestManager {
     private static final Logger logger = Logger.getLogger(TestIngestManager.class.getName());
 	private final FuncTestReporterClient funcTestReporterClient;
 
+	private int sbid = -1;
+
     /**
      * Constructor
 	 * @param parset
@@ -69,7 +71,7 @@ public class TestIngestManager extends AbstractIngestManager {
 	 * @param workdir
      */
     @Override
-    protected void executeIngestPipeline(File workdir) {
+    protected void executeIngestPipeline(File workdir, long sbid) {
         logger.info("Execute");
 		funcTestReporterClient.methodCalled("startIngest");
     }
@@ -84,12 +86,18 @@ public class TestIngestManager extends AbstractIngestManager {
     }
 
     /**
-     * Always returns false. This essentially mimics an ingest pipeline
-     * that starts and finishes immediately.
+     * Always returns alternatively true/false. This essentially mimics an ingest pipeline
+     * that starts and finishes next call immediately.
 	 * @return false
      */
     @Override
-    public boolean isRunning() {
-        return false;
+    public long isRunning() {
+        if (this.sbid <0) {
+            this.sbid = 5;
+        } else {
+            this.sbid = -1;
+        }
+
+        return this.sbid;
     }
 }
