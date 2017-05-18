@@ -524,6 +524,9 @@ void ContinuumWorker::buildSpectralCube() {
                       << uvwMachineCacheTolerance / casa::C::pi * 180. * 3600. << " arcsec");
 
 
+    // Whether we need to write the beam log at the end
+    bool doLogBeams=false;
+
     // the workUnits may include different epochs (for the same channel)
     // the order is strictly by channel - with multiple work units per channel.
     // so you can increment the workUnit until the frequency changes - then you know you
@@ -677,6 +680,8 @@ void ContinuumWorker::buildSpectralCube() {
 
             if (itsComms.isWriter()) {
 
+                doLogBeams=true;
+                
                 ASKAPLOG_INFO_STR(logger,"I have (including my own) " << itsComms.getOutstanding() << " units to write");
                 ASKAPLOG_INFO_STR(logger,"I have " << itsComms.getClients().size() << " clients with work");
                 int cubeChannel = workUnits[workUnitCount-1].get_globalChannel()-this->baseCubeGlobalChannel;
@@ -839,6 +844,13 @@ void ContinuumWorker::buildSpectralCube() {
             itsComms.removeChannelFromWriter(itsComms.rank());
         }
     }
+
+    if (doLogBeams) {
+                // write out the beam log
+        ASKAPLOG_INFO_STR(logger, "About to log the full set of restoring beams");
+        logBeamInfo();
+    }
+    
 }
 void ContinuumWorker::handleImageParams(askap::scimath::Params::ShPtr params,
         unsigned int chan)
@@ -928,14 +940,14 @@ void ContinuumWorker::handleImageParams(askap::scimath::Params::ShPtr params,
 
 
 void ContinuumWorker::recordBeam(const askap::scimath::Axes &axes,
-                                    const unsigned int globalChannel)
+                                    const unsigned int cubeChannel)
 {
 
     if (axes.has("MAJMIN")) {
         // this is a restored image with beam parameters set
         ASKAPCHECK(axes.has("PA"), "PA axis should always accompany MAJMIN");
         ASKAPLOG_DEBUG_STR(logger, "Found beam for image.slice, channel " <<
-                          globalChannel << ", with shape " <<
+                          cubeChannel << ", with shape " <<
                           axes.start("MAJMIN") * 180. / M_PI * 3600. << "x" <<
                           axes.end("MAJMIN") * 180. / M_PI * 3600. << ", " <<
                           axes.start("PA") * 180. / M_PI);
@@ -945,7 +957,7 @@ void ContinuumWorker::recordBeam(const askap::scimath::Axes &axes,
         beamVec[1] = casa::Quantum<double>(axes.end("MAJMIN"), "rad");
         beamVec[2] = casa::Quantum<double>(axes.start("PA"), "rad");
 
-        itsBeamList[globalChannel] = beamVec;
+        itsBeamList[cubeChannel] = beamVec;
 
     }
 
@@ -963,8 +975,10 @@ void ContinuumWorker::logBeamInfo()
 {
 
     if (itsParset.getBool("restore", false)) {
-        askap::accessors::BeamLogger beamlog(itsParset.makeSubset("restore."));
+        askap::accessors::BeamLogger beamlog;
+        beamlog.setFilename("beamlog."+itsRestoredCube->filename()+".txt");
         if (beamlog.filename() != "") {
+            ASKAPLOG_INFO_STR(logger, "Channel-dependent restoring beams will be written to log file " << beamlog.filename());
             ASKAPCHECK(itsBeamList.begin()->first == 0, "Beam list doesn't start at channel 0");
             ASKAPCHECK((itsBeamList.size() == (itsBeamList.rbegin()->first + 1)),
                        "Beam list doesn't finish at channel " << itsBeamList.size() - 1);
