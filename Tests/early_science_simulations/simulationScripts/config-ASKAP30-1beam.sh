@@ -10,10 +10,10 @@ msdir=MS
 chunkdir=../ModelImages/Chunks
 slicedir=../ModelImages/Slices
 
-doCreateModel=true
+doCreateModel=false
 # Whether to slice up the model prior to simulating - set to false
 # if we've already done this
-doSlice=true
+doSlice=false
 
 doCalibrator=false
 doScience=true
