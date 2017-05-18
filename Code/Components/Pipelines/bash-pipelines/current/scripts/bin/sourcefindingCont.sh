@@ -38,7 +38,7 @@ contWeights=$weightsImage
 pol="%p"
 setImageProperties contcube
 contCube=$imageName
-beamlog=beamlog.${imageBase}.txt
+beamlog=beamlog.${imageName}.txt
 
 # lower-case list of polarisations to use
 polList=$(echo "${POL_LIST}" | tr '[:upper:]' '[:lower:]')

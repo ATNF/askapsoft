@@ -126,8 +126,7 @@ if [ "${RESTORE_SPECTRAL}" == "true" ]; then
     restorePars="${restorePars}
 ${Imager}.restore.beam                            = ${RESTORING_BEAM_SPECTRAL}
 ${Imager}.restore.beam.cutoff                     = ${RESTORING_BEAM_CUTOFF_SPECTRAL}
-${Imager}.restore.beamReference                   = ${RESTORING_BEAM_REFERENCE}
-${Imager}.restore.beamLog                         = beamlog.${imageBase}.txt"
+${Imager}.restore.beamReference                   = ${RESTORING_BEAM_REFERENCE}"
 fi
 
 

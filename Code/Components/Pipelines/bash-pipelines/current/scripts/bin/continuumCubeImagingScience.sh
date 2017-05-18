@@ -137,8 +137,7 @@ ${Imager}.ncycles                                 = 0"
 ${Imager}.restore                                 = true
 ${Imager}.restore.beam                            = ${RESTORING_BEAM_CONTCUBE}
 ${Imager}.restore.beam.cutoff                     = ${RESTORING_BEAM_CUTOFF_CONTCUBE}
-${Imager}.restore.beamReference                   = ${RESTORING_BEAM_CONTCUBE_REFERENCE}
-${Imager}.restore.beamLog                         = beamLog.${imageBase}.txt"
+${Imager}.restore.beamReference                   = ${RESTORING_BEAM_CONTCUBE_REFERENCE}"
 
     # This is for the new (alt) imager
     altImagerParams="# Options for the alternate imager"

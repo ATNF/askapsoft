@@ -33,7 +33,7 @@ DO_IT=$DO_SOURCE_FINDING_SPEC
 # set imageName and selavy directories
 imageCode=restored
 setImageProperties spectral
-beamlog=beamlog.${imageBase}.txt
+beamlog=beamlog.${imageName}.txt
 
 # Dependencies for the job
 DEP=""
