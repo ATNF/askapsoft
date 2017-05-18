@@ -18,7 +18,7 @@ doCreateModel=true
 doSlice=true
 
 doCalibrator=false
-doScience=false
+doScience=true
 
 doCorrupt=false
 randomgainsparset=${parsetdir}/randomgains.in
@@ -79,9 +79,10 @@ if [ $matchCorrelatorLayout == true ]; then
     NUM_FINAL_MS=7
     msbaseSci=sciencefield_${antennaConfig}_by${NUM_FINAL_MS}_SKADS_${inttime}_${nfeeds}beam_${now}
     NGROUPS_CSIM=28
-    NWORKERS_CSIM=65
-    chanPerMSchunk=10
-    NPPN_CSIM=3
+    NWORKERS_CSIM=72
+    chanPerMSchunk=9
+#    NPPN_CSIM=3
+    NPPN_CSIM=2
     TILENCHAN=54
 else
 # Number of MSs to end up with after 2nd stage of merging
@@ -115,8 +116,8 @@ writeByNode=true
 createTT_CR=true
 
 npixModel=3072
-nsubxCR=9
-nsubyCR=5
+nsubxCR=8
+nsubyCR=8
 CREATORTASKS=`echo $nsubxCR $nsubyCR | awk '{print $1*$2+1}'`
 CREATORWORKERPERNODE=1
 CREATORNODES=`echo $CREATORTASKS ${CREATORWORKERPERNODE} | awk '{print int($1/$2)}'`
