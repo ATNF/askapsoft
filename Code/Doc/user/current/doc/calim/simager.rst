@@ -87,9 +87,10 @@ introduced to *simager*.
   reference, by using the **Simager.restore.beamReference**
   parameter. This can be a channel number (0-based), or one of
   'first', 'last' or 'mid'.
-* To record the individual channel beams, the user can set
-  **Simager.restore.beamLog**, which will produce an ASCII text file
-  listing the beam parameters for each channel. The file has columns:
+* To record the individual channel beams, simager will produce an ASCII text file
+  listing the beam parameters for each channel. This is known as the
+  "beam log". If the image cube name is "image.i.blah", then the beam
+  log will be called "beamlog.image.i.blah.txt". The file has columns:
   index | major axis [arcsec] | minor axis [arcsec] | position angle [deg]
   Should the imaging of a channel fail for some reason, the beam for
   that channel will be recorded as having zero for all three
@@ -179,10 +180,6 @@ Here is an example of the start of a beam log::
 |                          |                  |              |or one of 'mid', 'first', or 'last'.                    |
 |                          |                  |              |                                                        |
 +--------------------------+------------------+--------------+--------------------------------------------------------+
-|restore.beamLog           |string            |None          |The filename to which the list of restoring beams for   |
-|                          |                  |              |each channel is written. See text for format of this    |
-|                          |                  |              |file.                                                   |
-+--------------------------+------------------+--------------+--------------------------------------------------------+
 |restore.beam.cutoff       |double            |0.05          |Cutoff for the support search prior to beam fitting, as |
 |                          |                  |              |a fraction of the PSF peak. This parameter is only used |
 |                          |                  |              |if *restore.beam=fit*. The code does fitting on a       |
@@ -240,7 +237,6 @@ Example parset
    Simager.restore                                = true
    Simager.restore.beam                           = fit
    Simager.restore.beamReference                  = first
-   Simager.restore.beamLog                        = beamlog.image.i.cube.txt
    #
    Simager.preconditioner.Names                   = [Wiener, GaussianTaper]
    Simager.preconditioner.GaussianTaper           = [50arcsec, 50arcsec, 0deg]

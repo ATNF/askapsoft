@@ -157,6 +157,27 @@ They are given in a separate table (see :doc:`data_selection`) and should also h
 **Cimager** prefix. Note that option **Cimager.CorrelationType** will be ignored and
 default to "cross".
 
+To record the individual channel beams when run in spectral-line mode,
+the imager will produce an ASCII text file listing the beam parameters
+for each channel. This is known as the "beam log". If the image cube
+name is "image.i.blah", then the beam log will be called
+"beamlog.image.i.blah.txt". The file has columns:
+index | major axis[arcsec] | minor axis [arcsec] | position angle [deg]
+Should the imaging of a channel fail for some reason, the beam for
+that channel will be recorded as having zero for all three
+parameters. This beam log is compatible with other askapsoft tasks,
+specfically the spectral extraction in Selavy (see
+:doc:`../analysis/extraction`).
+     
+Here is an example of the start of a beam log::
+  
+  #Channel BMAJ[arcsec] BMIN[arcsec] BPA[deg]
+  0 64.4269 59.2985 -70.8055
+  1 64.4313 59.299 -70.8831
+  2 64.4333 59.3018 -70.9345
+  3 64.4338 59.2996 -70.9256
+  4 64.4349 59.2982 -70.9108
+
 +--------------------------+------------------+--------------+----------------------------------------------------+
 |**Parameter**             |**Type**          |**Default**   |**Description**                                     |
 +==========================+==================+==============+====================================================+

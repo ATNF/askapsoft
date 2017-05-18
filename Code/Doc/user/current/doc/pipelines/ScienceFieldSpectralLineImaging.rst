@@ -234,9 +234,6 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 |                                               |                                 | (:doc:`../calim/simager`)          | beam to the image cube. Can be an integer as the channel number   |
 |                                               |                                 |                                    | (0-based), or one of 'mid' (the middle channel), 'first' or 'last'|
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``RESTORING_BEAM_LOG``                        |  beamLog.IMAGE.txt (with IMAGE  | restore.beamLog                    | The ASCII text file to which will be written the restoring beam   |
-|                                               |  from ``IMAGE_BASE_SPECTRAL``)  | (:doc:`../calim/simager`)          | for each channel. If blank, no such file will be written.         |
-+-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | **New imager parameters**                     |                                 |                                    |                                                                   |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``DO_ALT_IMAGER_SPECTRAL``                    | ""                              | none                               | If true, the spectral-line imaging is done by imager              |
