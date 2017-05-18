@@ -380,7 +380,8 @@ void SpectralLineMaster::logBeamInfo()
 {
 
     if (itsParset.getBool("restore", false)) {
-        askap::accessors::BeamLogger beamlog(itsParset.makeSubset("restore."));
+        askap::accessors::BeamLogger beamlog;
+        beamlog.setFilename("beamlog."+itsRestoredCube->filename()+".txt");
         if (beamlog.filename() != "") {
             ASKAPCHECK(itsBeamList.begin()->first == 0, "Beam list doesn't start at channel 0");
             ASKAPCHECK((itsBeamList.size() == (itsBeamList.rbegin()->first + 1)),

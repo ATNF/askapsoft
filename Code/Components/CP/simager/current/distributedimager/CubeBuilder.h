@@ -68,6 +68,8 @@ class CubeBuilder {
         void addBeam(casa::Vector<casa::Quantum<double> > &beam);
         void setUnits(const std::string &units);
 
+        std::string filename() const{return itsFilename;};
+
     private:
         boost::scoped_ptr< casa::PagedImage<float> > itsCube;
 
