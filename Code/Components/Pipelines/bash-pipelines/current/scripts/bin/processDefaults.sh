@@ -507,6 +507,14 @@ EOF
             exit 1
         fi
 
+        # Switching on the DO_ALT_IMAGER_CONTCUBE flag - if it isn't
+        # defined in the config file, then set to the value of
+        # DO_ALT_IMAGER. 
+        if [ "${DO_ALT_IMAGER}" == "true" ] && [ "${DO_ALT_IMAGER_CONTCUBE}" == "" ]; then
+            echo "WARNING - You have not defined DO_ALT_IMAGER_CONTCUBE - setting to $DO_ALT_IMAGER, the value of DO_ALT_IMAGER"
+            DO_ALT_IMAGER_CONTCUBE=${DO_ALT_IMAGER}
+        fi
+
         # simager is not currently able to write out FITS files. So if
         # the user has requested FITS imagetype, but has not set the
         # ALT_IMAGER flag, give a warning and stop to let them fix it.
@@ -514,14 +522,6 @@ EOF
             echo "ERROR - IMAGETYPE_CONTCUBE=fits can only work with DO_ALT_IMAGER_CONTCUBE=true"
             echo "   Exiting"
             exit 1
-        fi
-
-        # Switching on the DO_ALT_IMAGER_CONTCUBE flag - if it isn't
-        # defined in the config file, then set to the value of
-        # DO_ALT_IMAGER. 
-        if [ "${DO_ALT_IMAGER}" == "true" ] && [ "${DO_ALT_IMAGER_CONTCUBE}" == "" ]; then
-            echo "WARNING - You have not defined DO_ALT_IMAGER_CONTCUBE - setting to $DO_ALT_IMAGER, the value of DO_ALT_IMAGER"
-            DO_ALT_IMAGER_CONTCUBE=${DO_ALT_IMAGER}
         fi
 
         # Set the polarisation list for the continuum cubes
@@ -594,6 +594,14 @@ EOF
             exit 1
         fi
 
+        # Switching on the DO_ALT_IMAGER_SPECTRAL flag - if it isn't
+        # defined in the config file, then set to the value of
+        # DO_ALT_IMAGER.  
+        if [ "${DO_ALT_IMAGER}" == "true" ] && [ "${DO_ALT_IMAGER_SPECTRAL}" == "" ]; then
+            echo "WARNING - You have not defined DO_ALT_IMAGER_SPECTRAL - setting to $DO_ALT_IMAGER, the value of DO_ALT_IMAGER"
+            DO_ALT_IMAGER_SPECTRAL=${DO_ALT_IMAGER}
+        fi
+
         # simager is not currently able to write out FITS files. So if
         # the user has requested FITS imagetype, but has not set the
         # ALT_IMAGER flag, give a warning and stop to let them fix it.
@@ -601,14 +609,6 @@ EOF
             echo "ERROR - IMAGETYPE_SPECTRAL=fits can only work with DO_ALT_IMAGER_SPECTRAL=true"
             echo "   Exiting"
             exit 1
-        fi
-
-        # Switching on the DO_ALT_IMAGER_SPECTRAL flag - if it isn't
-        # defined in the config file, then set to the value of
-        # DO_ALT_IMAGER.  
-        if [ "${DO_ALT_IMAGER}" == "true" ] || [ "${DO_ALT_IMAGER_SPECTRAL}" == "" ]; then
-            echo "WARNING - You have not defined DO_ALT_IMAGER_SPECTRAL - setting to $DO_ALT_IMAGER, the value of DO_ALT_IMAGER"
-            DO_ALT_IMAGER_SPECTRAL=${DO_ALT_IMAGER}
         fi
 
         # Channel range to be used for spectral-line imaging
