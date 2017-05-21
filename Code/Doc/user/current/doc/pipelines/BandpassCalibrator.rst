@@ -121,13 +121,13 @@ ASKAPsoft.
 |                                         |                                       |                                                        | with the applied calibrator factor to achieve proper      |
 |                                         |                                       |                                                        | weighting.                                                |
 +-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
-| ``NCYCLES_BANDPASS_CAL``                | 25                                    | ncycles (:doc:`../calim/cbpcalibrator`)                | Number of cycles used in cbpcalibrator.                   |
+| ``NCYCLES_BANDPASS_CAL``                | 50                                    | ncycles (:doc:`../calim/cbpcalibrator`)                | Number of cycles used in cbpcalibrator.                   |
 +-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
-| ``NUM_CPUS_CBPCAL``                     | 100                                   | none                                                   | The number of cpus allocated to the cbpcalibrator job. The|
+| ``NUM_CPUS_CBPCAL``                     | 216                                   | none                                                   | The number of cpus allocated to the cbpcalibrator job. The|
 |                                         |                                       |                                                        | job will use all 20 cpus on each node (the memory         |
 |                                         |                                       |                                                        | footprint is small enough to allow this).                 |
 +-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
-| ``BANDPASS_MINUV``                      | 0                                     | MinUV (:doc:`../calim/data_selection`)                 | Minimum UV distance [m] applied to data prior to solving  |
+| ``BANDPASS_MINUV``                      | 200                                   | MinUV (:doc:`../calim/data_selection`)                 | Minimum UV distance [m] applied to data prior to solving  |
 |                                         |                                       |                                                        | for the bandpass (used to exclude the short baselines).   |
 +-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
 | **Smoothing and plotting the bandpass** |                                       |                                                        |                                                           |
@@ -144,10 +144,10 @@ ASKAPsoft.
 | ``BANDPASS_SMOOTH_OUTLIER``             | true                                  | none                                                   | If true, only smooth/interpolate over outlier points      |
 |                                         |                                       |                                                        | (based on the inter-quartile range).                      |
 +-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
-| ``BANDPASS_SMOOTH_FIT``                 | 1                                     | none                                                   | The order of the polynomial (if >=0) or the window size   |
+| ``BANDPASS_SMOOTH_FIT``                 | 0                                     | none                                                   | The order of the polynomial (if >=0) or the window size   |
 |                                         |                                       |                                                        | (if <0) used in the smoothing.                            |
 +-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
-| ``BANDPASS_SMOOTH_THRESHOLD``           | 1.0                                   | none                                                   | The threshold level used for fitting to the bandpass.     |
+| ``BANDPASS_SMOOTH_THRESHOLD``           | 3.0                                   | none                                                   | The threshold level used for fitting to the bandpass.     |
 +-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
 
 

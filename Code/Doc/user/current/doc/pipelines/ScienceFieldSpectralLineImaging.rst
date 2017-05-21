@@ -226,7 +226,7 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 |                                               |                                 |                                    | else give a size (such as 30arcsec, or                            |
 |                                               |                                 |                                    | “[30arcsec, 30arcsec, 0deg]”).                                    |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``RESTORING_BEAM_CUTOFF_SPECTRAL``            | 0.05                            | restore.beam.cutoff                | Cutoff value used in determining the support for the fitting      |
+| ``RESTORING_BEAM_CUTOFF_SPECTRAL``            | 0.5                             | restore.beam.cutoff                | Cutoff value used in determining the support for the fitting      |
 |                                               |                                 | (:doc:`../calim/simager`)          | (ie. the rectangular area given to the fitting routine). Value is |
 |                                               |                                 |                                    | a fraction of the peak.                                           |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+

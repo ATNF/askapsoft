@@ -2,7 +2,10 @@ User Parameters - Continuum imaging
 ===================================
 
 The parameters listed here allow the user to configure the parset and
-the slurm job for continuum imaging of the science field.
+the slurm job for continuum imaging of the science field. The defaults
+have been set based on experience with science commissioning and ASKAP
+Early Science, using the 12-antenna array. If you are processing
+different data sets, adjusting these defaults may be necessary.
 
 Some of the parameters can be set to blank, to allow cimager to choose
 appropriate values based on its "advise" capability (which involves
@@ -151,7 +154,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                 |                                                        | IMAGE_AT_BEAM_CENTRES=true) or from the measurement set using|
 |                                            |                                 |                                                        | the "advise" functionality (for IMAGE_AT_BEAM_CENTRES=false).|
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``NUM_PIXELS_CONT``                        | 4096                            | Images.shape                                           | The number of pixels on the side of the images to be created.|
+| ``NUM_PIXELS_CONT``                        | 3200                            | Images.shape                                           | The number of pixels on the side of the images to be created.|
 |                                            |                                 | (:doc:`../calim/cimager`)                              | If negative, zero, or absent (i.e. ``NUM_PIXELS_CONT=""``),  |
 |                                            |                                 |                                                        | this will be set automatically by the Cimager “advise”       |
 |                                            |                                 |                                                        | function, based on examination of the MS. Note that this     |
@@ -163,13 +166,13 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                 |                                                        | IMAGE_AT_BEAM_CENTRES=true then this needs only to be big    |
 |                                            |                                 |                                                        | enough to fit a single beam.                                 |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``CELLSIZE_CONT``                          | 10                              | Images.cellsize                                        | Size of the pixels in arcsec. If negative, zero or absent,   |
+| ``CELLSIZE_CONT``                          | 4                               | Images.cellsize                                        | Size of the pixels in arcsec. If negative, zero or absent,   |
 |                                            |                                 | (:doc:`../calim/cimager`)                              | this will be set automatically by the Cimager “advise”       |
 |                                            |                                 |                                                        | function, based on examination of the MS. The default is     |
 |                                            |                                 |                                                        | chosen together with the default number of pixels to cover a |
-|                                            |                                 |                                                        | typical full ASKAP field.                                    |
+|                                            |                                 |                                                        | typical ASKAP beam with the sidelobes being imaged.          |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``NUM_TAYLOR_TERMS``                       | 2                               | Images.image.${imageBase}.nterms                       | Number of Taylor terms to create in MFS imaging. If more than|
+| ``NUM_TAYLOR_TERMS``                       | 1                               | Images.image.${imageBase}.nterms                       | Number of Taylor terms to create in MFS imaging. If more than|
 |                                            |                                 | (:doc:`../calim/cimager`)                              | 1, MFS weighting will be used (equivalent to setting         |
 |                                            |                                 | linmos.nterms (:doc:`../calim/linmos`)                 | **Cimager.visweights=MFS** in the cimager parset).           |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
@@ -183,7 +186,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                 | (:doc:`../calim/cimager`)                              | the appropriate beam, else give a size (such as 30arcsec, or |
 |                                            |                                 |                                                        | “[30arcsec, 30arcsec, 0deg]”).                               |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``RESTORING_BEAM_CUTOFF_CONT``             | 0.05                            | restore.beam.cutoff                                    | Cutoff value used in determining the support for the fitting |
+| ``RESTORING_BEAM_CUTOFF_CONT``             | 0.5                             | restore.beam.cutoff                                    | Cutoff value used in determining the support for the fitting |
 |                                            |                                 | (:doc:`../calim/simager`)                              | (ie. the rectangular area given to the fitting routine).     |
 |                                            |                                 |                                                        | Value is a fraction of the peak.                             |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
@@ -202,7 +205,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 | ``GRIDDER_SNAPSHOT_LONGTRACK``             | true                            | snapshotimaging.longtrack                              | The longtrack parameter controlling how the best-fit W plane |
 |                                            |                                 | (:doc:`../calim/gridder`)                              | is determined when using snapshots.                          |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``GRIDDER_SNAPSHOT_CLIPPING``              | 0                               | snapshotimaging.clipping                               | If greater than zero, this fraction of the full image width  |
+| ``GRIDDER_SNAPSHOT_CLIPPING``              | 0.01                            | snapshotimaging.clipping                               | If greater than zero, this fraction of the full image width  |
 |                                            |                                 | (:doc:`../calim/gridder`)                              | is set to zero. Useful when imaging at high declination as   |
 |                                            |                                 |                                                        | the edges can generate artefacts.                            |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
@@ -212,7 +215,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 | ``GRIDDER_NWPLANES``                       | 99                              | WProject.nwplanes                                      | The nwplanes parameter for the gridder.                      |
 |                                            |                                 | (:doc:`../calim/gridder`)                              |                                                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``GRIDDER_OVERSAMPLE``                     | 4                               | WProject.oversample                                    | The oversampling factor for the gridder.                     |
+| ``GRIDDER_OVERSAMPLE``                     | 5                               | WProject.oversample                                    | The oversampling factor for the gridder.                     |
 |                                            |                                 | (:doc:`../calim/gridder`)                              |                                                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``GRIDDER_MAXSUPPORT``                     | 512                             | WProject.maxsupport                                    | The maxsupport parameter for the gridder.                    |
@@ -227,28 +230,28 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 | ``CLEAN_ALGORITHM``                        | BasisfunctionMFS                | Clean.algorithm                                        | The name of the clean algorithm to use.                      |
 |                                            |                                 | (:doc:`../calim/solver`)                               |                                                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``CLEAN_MINORCYCLE_NITER``                 | 500                             | Clean.niter                                            | The number of iterations for the minor cycle clean.          |
+| ``CLEAN_MINORCYCLE_NITER``                 | 4000                            | Clean.niter                                            | The number of iterations for the minor cycle clean.          |
 |                                            |                                 | (:doc:`../calim/solver`)                               |                                                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``CLEAN_GAIN``                             | 0.5                             | Clean.gain                                             | The loop gain (fraction of peak subtracted per minor cycle). |
+| ``CLEAN_GAIN``                             | 0.1                             | Clean.gain                                             | The loop gain (fraction of peak subtracted per minor cycle). |
 |                                            |                                 | (:doc:`../calim/solver`)                               |                                                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``CLEAN_PSFWIDTH``                         | 512                             | Clean.psfwidth                                         | The width of the psf patch used in the minor cycle.          |
+| ``CLEAN_PSFWIDTH``                         | 1600                            | Clean.psfwidth                                         | The width of the psf patch used in the minor cycle.          |
 |                                            |                                 | (:doc:`../calim/solver`)                               |                                                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``CLEAN_SCALES``                           | "[0,3,10]"                      | Clean.scales                                           | Set of scales (in pixels) to use with the multi-scale clean. |
+| ``CLEAN_SCALES``                           | "[0]"                           | Clean.scales                                           | Set of scales (in pixels) to use with the multi-scale clean. |
 |                                            |                                 | (:doc:`../calim/solver`)                               |                                                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``CLEAN_THRESHOLD_MINORCYCLE``             | "[30%, 0.9mJy]"                 | threshold.minorcycle                                   | Threshold for the minor cycle loop.                          |
+| ``CLEAN_THRESHOLD_MINORCYCLE``             | "[40%, 1.8mJy]"                 | threshold.minorcycle                                   | Threshold for the minor cycle loop.                          |
 |                                            |                                 | (:doc:`../calim/cimager`)                              |                                                              |
 |                                            |                                 | (:doc:`../calim/solver`)                               |                                                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``CLEAN_THRESHOLD_MAJORCYCLE``             | 1mJy                            | threshold.majorcycle                                   | The target peak residual. Major cycles stop if this is       |
+| ``CLEAN_THRESHOLD_MAJORCYCLE``             | "[10mJy,4mJy,2mJy]"             | threshold.majorcycle                                   | The target peak residual. Major cycles stop if this is       |
 |                                            |                                 | (:doc:`../calim/cimager`)                              | reached. A negative number ensures all major cycles requested|
 |                                            |                                 | (:doc:`../calim/solver`)                               | are done. Can be given as an array with different values for |
 |                                            |                                 |                                                        | each self-cal loop (e.g. "[3mJy,1mJy,-1mJy]").               |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``CLEAN_NUM_MAJORCYCLES``                  | 2                               | ncycles                                                | Number of major cycles. Can be given as an array with        |
+| ``CLEAN_NUM_MAJORCYCLES``                  | "[1,8,10]"                      | ncycles                                                | Number of major cycles. Can be given as an array with        |
 |                                            |                                 | (:doc:`../calim/cimager`)                              | different values for each self-cal loop (e.g. "[2,4,6]").    |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``CLEAN_WRITE_AT_MAJOR_CYCLE``             | false                           | Images.writeAtMajorCycle                               | If true, the intermediate images will be written (with a     |
@@ -256,26 +259,26 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | **Preconditioning parameters**             |                                 |                                                        |                                                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``PRECONDITIONER_LIST``                    | "[Wiener, GaussianTaper]"       | preconditioner.Names                                   | List of preconditioners to apply.                            |
+| ``PRECONDITIONER_LIST``                    | "[Wiener]"                      | preconditioner.Names                                   | List of preconditioners to apply.                            |
 |                                            |                                 | (:doc:`../calim/solver`)                               |                                                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``PRECONDITIONER_GAUSS_TAPER``             |  "[30arcsec, 30arcsec, 0deg]"   | preconditioner.GaussianTaper                           | Size of the Gaussian taper - either single value (for        |
+| ``PRECONDITIONER_GAUSS_TAPER``             |  "[10arcsec, 10arcsec, 0deg]"   | preconditioner.GaussianTaper                           | Size of the Gaussian taper - either single value (for        |
 |                                            |                                 | (:doc:`../calim/solver`)                               | circular taper) or 3 values giving an elliptical size.       |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``PRECONDITIONER_WIENER_ROBUSTNESS``       | 0.5                             | preconditioner.Wiener.robustness                       | Robustness value for the Wiener filter.                      |
+| ``PRECONDITIONER_WIENER_ROBUSTNESS``       | -0.5                            | preconditioner.Wiener.robustness                       | Robustness value for the Wiener filter.                      |
 |                                            |                                 | (:doc:`../calim/solver`)                               |                                                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``PRECONDITIONER_WIENER_TAPER``            | ""                              | preconditioner.Wiener.taper                            | Size of gaussian taper applied in image domain to Wiener     |
 |                                            |                                 | (:doc:`../calim/solver`)                               | filter. Ignored if blank (ie. “”).                           |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``RESTORE_PRECONDITIONER_LIST``            | "[Wiener, GaussianTaper]"       | restore.preconditioner.Names                           | List of preconditioners to apply at the restore stage, to    |
+| ``RESTORE_PRECONDITIONER_LIST``            | "[Wiener]"                      | restore.preconditioner.Names                           | List of preconditioners to apply at the restore stage, to    |
 |                                            |                                 | (:doc:`../calim/cimager` & :doc:`../calim/solver`)     | produce an additional restored image.                        |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``RESTORE_PRECONDITIONER_GAUSS_TAPER``     |  "[30arcsec, 30arcsec, 0deg]"   | restore.preconditioner.GaussianTaper                   | Size of the Gaussian taper for the restore preconditioning - |
+| ``RESTORE_PRECONDITIONER_GAUSS_TAPER``     |  "[10arcsec, 10arcsec, 0deg]"   | restore.preconditioner.GaussianTaper                   | Size of the Gaussian taper for the restore preconditioning - |
 |                                            |                                 | (:doc:`../calim/cimager` & :doc:`../calim/solver`)     | either single value (for circular taper) or 3 values giving  |
 |                                            |                                 |                                                        | an elliptical size.                                          |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-|``RESTORE_PRECONDITIONER_WIENER_ROBUSTNESS``| -1.                             | restore.preconditioner.Wiener.robustness               | Robustness value for the Wiener filter in the restore        |
+|``RESTORE_PRECONDITIONER_WIENER_ROBUSTNESS``| -2                              | restore.preconditioner.Wiener.robustness               | Robustness value for the Wiener filter in the restore        |
 |                                            |                                 | (:doc:`../calim/cimager` & :doc:`../calim/solver`)     | preconditioning.                                             |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``RESTORE_PRECONDITIONER_WIENER_TAPER``    | ""                              | restore.preconditioner.Wiener.taper                    | Size of gaussian taper applied in image domain to Wiener     |
@@ -327,11 +330,13 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                 |                                                        | detected components directly through a parset (created by    |
 |                                            |                                 |                                                        | Selavy). Anything else will default to "Cmodel".             |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``SELFCAL_NUM_LOOPS``                      | 5                               | none                                                   | Number of loops of self-calibration.                         |
+| ``SELFCAL_NUM_LOOPS``                      | 2                               | none                                                   | Number of loops of self-calibration.                         |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``SELFCAL_INTERVAL``                       | 300                             | interval                                               | Interval [sec] over which to solve for self-calibration. Can |
+| ``SELFCAL_INTERVAL``                       | "[57600,57600,1]"               | interval                                               | Interval [sec] over which to solve for self-calibration. Can |
 |                                            |                                 | (:doc:`../calim/ccalibrator`)                          | be given as an array with different values for each self-cal |
-|                                            |                                 |                                                        | loop (e.g. "[1800,900,300]")                                 |
+|                                            |                                 |                                                        | loop, as for the default. Here, the initial intervals are    |
+|                                            |                                 |                                                        | chosen to be longer than typical observations, so that all   |
+|                                            |                                 |                                                        | data are included.                                           |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
 | ``SELFCAL_KEEP_IMAGES``                    | true                            | none                                                   | Should we keep the images from the intermediate selfcal      |
 |                                            |                                 |                                                        | loops?                                                       |
@@ -339,7 +344,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 | ``MOSAIC_SELFCAL_LOOPS``                   | true                            | none                                                   | Should we make full-field mosaics for each loop of the       |
 |                                            |                                 |                                                        | self-calibration? This is done for each field separately.    |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``SELFCAL_SELAVY_THRESHOLD``               | 15                              | snrCut                                                 | SNR threshold for detection with Selavy in determining       |
+| ``SELFCAL_SELAVY_THRESHOLD``               | 8                               | snrCut                                                 | SNR threshold for detection with Selavy in determining       |
 |                                            |                                 | (:doc:`../analysis/selavy`)                            | selfcal sources. Can be given as an array with different     |
 |                                            |                                 |                                                        | values for each self-cal loop (e.g. "[15,10,8]").            |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
@@ -436,7 +441,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                 |                                                        | channel, else give a size (such as 30arcsec, or “[30arcsec,  |
 |                                            |                                 |                                                        | 30arcsec, 0deg]”).                                           |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
-| ``RESTORING_BEAM_CUTOFF_CONTCUBE``         | 0.05                            | restore.beam.cutoff                                    | Cutoff value used in determining the support for the fitting |
+| ``RESTORING_BEAM_CUTOFF_CONTCUBE``         | 0.5                             | restore.beam.cutoff                                    | Cutoff value used in determining the support for the fitting |
 |                                            |                                 | (:doc:`../calim/simager`)                              | (ie. the rectangular area given to the fitting routine).     |
 |                                            |                                 |                                                        | Value is a fraction of the peak.                             |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+--------------------------------------------------------------+
