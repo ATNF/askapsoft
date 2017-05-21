@@ -225,14 +225,14 @@ DIRECTION_1934="[19h39m25.036, -63.42.45.63, J2000]"
 # Name of the table for the bandpass calibration parameters
 TABLE_BANDPASS=calparameters_1934_bp.tab
 # Number of cycles used in cbpcalibrator
-NCYCLES_BANDPASS_CAL=25
+NCYCLES_BANDPASS_CAL=50
 # Number of CPUs (cores) used for the cbpcalibrator job
-NUM_CPUS_CBPCAL=100
+NUM_CPUS_CBPCAL=216
 # Value for the calibrate.scalenoise parameter for applying the
 # bandpass solution
 BANDPASS_SCALENOISE=false
 # Limit the data selection for bandpass solving to a minimum UV distance [m]
-BANDPASS_MINUV=0
+BANDPASS_MINUV=200
 
 # Smoothing of the bandpass table - this is achieved by the ACES tool
 # plot_caltable.py. This tool also plots the cal solutions
@@ -246,9 +246,9 @@ BANDPASS_SMOOTH_AMP=true
 # If true, only smooth outlier points
 BANDPASS_SMOOTH_OUTLIER=true
 # polynomial order (if >= 0) or window size (if <0) to use when smoothing bandpass
-BANDPASS_SMOOTH_FIT=1
+BANDPASS_SMOOTH_FIT=0
 # The threshold level for fitting bandpass
-BANDPASS_SMOOTH_THRESHOLD=1.0
+BANDPASS_SMOOTH_THRESHOLD=3.0
 
 
 # Whether to do dynamic flagging
@@ -352,7 +352,7 @@ FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW_AV=0.0
 # Data column in MS to use in cimager
 DATACOLUMN=DATA
 # Number of Taylor terms to create in MFS imaging
-NUM_TAYLOR_TERMS=2
+NUM_TAYLOR_TERMS=1
 # Number of CPUs to use on each core in the continuum imaging
 CPUS_PER_CORE_CONT_IMAGING=20
 # Total number of cores to use for the continuum imaging. Leave blank
@@ -364,16 +364,16 @@ NUM_CPUS_CONTIMG_SCI=""
 # image.i.blah, image.i.blah.restored, psf.i.blah etc
 IMAGE_BASE_CONT=i.cont
 # number of pixels on the side of the images to be created
-NUM_PIXELS_CONT=4096
+NUM_PIXELS_CONT=3200
 # Size of the pixels in arcsec
-CELLSIZE_CONT=10
+CELLSIZE_CONT=4
 # Frequency at which continuum image is made [Hz]
 MFS_REF_FREQ=""
 # Restoring beam: 'fit' will fit the PSF to determine the appropriate
 # beam, else give a size
 RESTORING_BEAM_CONT=fit
 # Cutoff in determining support for the fit to the PSF
-RESTORING_BEAM_CUTOFF_CONT=0.05
+RESTORING_BEAM_CUTOFF_CONT=0.5
 
 ###########################
 # parameters from the new (alt) imager
@@ -413,18 +413,18 @@ GRIDDER_SNAPSHOT_LONGTRACK=true
 GRIDDER_SNAPSHOT_CLIPPING=0.01
 GRIDDER_WMAX=2600
 GRIDDER_NWPLANES=99
-GRIDDER_OVERSAMPLE=4
+GRIDDER_OVERSAMPLE=5
 GRIDDER_MAXSUPPORT=512
 
 ####################
 # Cleaning parameters for continuum imaging
 SOLVER=Clean
 CLEAN_ALGORITHM=BasisfunctionMFS
-CLEAN_MINORCYCLE_NITER=500
+CLEAN_MINORCYCLE_NITER=4000
 CLEAN_GAIN=0.5
-CLEAN_PSFWIDTH=512
-CLEAN_SCALES="[0,3,10]"
-CLEAN_THRESHOLD_MINORCYCLE="[30%, 0.9mJy]"
+CLEAN_PSFWIDTH=1600
+CLEAN_SCALES="[0]"
+CLEAN_THRESHOLD_MINORCYCLE="[40%, 1.8mJy]"
 # If true, this will write out intermediate images at the end of each
 # major cycle
 CLEAN_WRITE_AT_MAJOR_CYCLE=false
@@ -436,22 +436,22 @@ CLEAN_WRITE_AT_MAJOR_CYCLE=false
 # If no self-calibration is used, we just use the first element
 #
 # The number of major cycles in the deconvolution
-CLEAN_NUM_MAJORCYCLES=2
+CLEAN_NUM_MAJORCYCLES="[1,8,10]"
 # The maximum residual to stop the major-cycle deconvolution (if not
 # reached, or negative, CLEAN_NUM_MAJORCYCLES cycles are used)
-CLEAN_THRESHOLD_MAJORCYCLE=1mJy
+CLEAN_THRESHOLD_MAJORCYCLE="[10mJy,4mJy,2mJy]"
 
 
 ####################
 # Parameters for preconditioning (A.K.A. weighting)
-PRECONDITIONER_LIST="[Wiener, GaussianTaper]"
-PRECONDITIONER_GAUSS_TAPER="[30arcsec, 30arcsec, 0deg]"
-PRECONDITIONER_WIENER_ROBUSTNESS=0.5
+PRECONDITIONER_LIST="[Wiener]"
+PRECONDITIONER_GAUSS_TAPER="[10arcsec, 10arcsec, 0deg]"
+PRECONDITIONER_WIENER_ROBUSTNESS=-0.5
 PRECONDITIONER_WIENER_TAPER=""
 # Parameters for preconditioning for the restore solver alone
-RESTORE_PRECONDITIONER_LIST="[Wiener, GaussianTaper]"
-RESTORE_PRECONDITIONER_GAUSS_TAPER="[30arcsec, 30arcsec, 0deg]"
-RESTORE_PRECONDITIONER_WIENER_ROBUSTNESS=-1
+RESTORE_PRECONDITIONER_LIST="[Wiener]"
+RESTORE_PRECONDITIONER_GAUSS_TAPER="[10arcsec, 10arcsec, 0deg]"
+RESTORE_PRECONDITIONER_WIENER_ROBUSTNESS=-2
 RESTORE_PRECONDITIONER_WIENER_TAPER=""
 
 
@@ -462,7 +462,7 @@ RESTORE_PRECONDITIONER_WIENER_TAPER=""
 # via a components parset ("Components")
 SELFCAL_METHOD="Cmodel"
 # Number of loops of self-calibration
-SELFCAL_NUM_LOOPS=5
+SELFCAL_NUM_LOOPS=2
 # Should we keep the images from the intermediate selfcal loops?
 SELFCAL_KEEP_IMAGES=true
 # Should we make full-field mosaics of each loop iteration?
@@ -497,9 +497,9 @@ SELFCAL_REF_GAINS=""
 #   (eg. "[1800,900,300]"), allowing a different value for each loop.
 #
 # Interval [sec] over which to solve for self-calibration
-SELFCAL_INTERVAL=300
+SELFCAL_INTERVAL="[57600,57600,1]"
 # SNR threshold for detection with selavy in determining selfcal sources
-SELFCAL_SELAVY_THRESHOLD=15
+SELFCAL_SELAVY_THRESHOLD=8
 # Option to pass to the "Ccalibrator.normalisegains" parameter,
 # indicating we want to approximate phase-only self-cal
 SELFCAL_NORMALISE_GAINS=true
@@ -540,7 +540,7 @@ RESTORING_BEAM_CONTCUBE=fit
 # Reference channel for recording the restoring beam of the cube
 RESTORING_BEAM_CONTCUBE_REFERENCE=mid
 # Cutoff in determining support for the fit to the PSF
-RESTORING_BEAM_CUTOFF_CONTCUBE=0.05
+RESTORING_BEAM_CUTOFF_CONTCUBE=0.5
 
 # Number of processors for continuum-cube imaging.
 # Leave blank to fit to number of channels
@@ -664,7 +664,7 @@ RESTORING_BEAM_SPECTRAL=fit
 # Reference channel for recording the restoring beam of the cube
 RESTORING_BEAM_REFERENCE=mid
 # Cutoff in determining support for the fit to the PSF
-RESTORING_BEAM_CUTOFF_SPECTRAL=0.05
+RESTORING_BEAM_CUTOFF_SPECTRAL=0.5
 
 # Image-based continuum subtraction
 # Threshold [sigma] to mask outliers prior to fitting ('threshold' parameter)
