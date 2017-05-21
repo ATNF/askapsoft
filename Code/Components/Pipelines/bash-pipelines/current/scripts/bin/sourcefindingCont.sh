@@ -291,7 +291,7 @@ EOFINNER
 
     # Now convert the extracted polarisation artefacts to FITS
     if [ "\${doRM}" == "true" ]; then
-        cd "${selavyPolDir}"
+        cd "$OUTPUT/${selavyPolDir}"
         parset=temp.in
         log=$logs/convertToFITS_polSpectra_\${SLURM_JOB_ID}.log
         neterr=0

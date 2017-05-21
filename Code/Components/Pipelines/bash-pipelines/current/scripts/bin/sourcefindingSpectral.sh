@@ -250,7 +250,7 @@ EOFINNER
     # Now convert the extracted spectral & moment-map artefacts to FITS
      parset=temp.in
      log=$logs/convertToFITS_spectralArtefacts_\${SLURM_JOB_ID}.log
-     for dir in $selavySpectraDir $selavyMomentsDir $selavyCubeletsDir; do
+     for dir in $OUTPUT/$selavySpectraDir $OUTPUT/$selavyMomentsDir $OUTPUT/$selavyCubeletsDir; do
          cd "\${dir}"
          neterr=0
          for im in ./*; do 
@@ -263,7 +263,7 @@ EOFINNER
                  neterr=\$err
              fi
          done
-         cd ..
+         cd -
      done
      extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${neterr} convertFITSspec "txt,csv"
      rm -f \$parset
