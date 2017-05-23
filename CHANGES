@@ -1,3 +1,56 @@
+0.18.3 (23 May 2017)
+--------------------
+
+This patch release fixes the following bugs in the pipeline scripts:
+
+ * Incorrect indexing of some self-calibration array parameters
+ * Better handling of logic in determining the usage of the
+   alternative imager.
+ * Ensuring the image-based continuum-subtracted cubes are converted
+   to FITS and handled by the CASDA upload. Also that this task is
+   able to see cubes directly written to FITS by the spectral
+   imagers. 
+ * Fixing handling of directory names so that extracted artefacts are
+   found correctly for FITS conversion.
+ * Removal of extraneous inverted commas in the continuum imaging
+   jobscript.
+
+Additionally, there is a new parameter USE_CLI, which defaults to true
+but allows the user to turn off use of the online services, should
+they not be available.
+
+Finally, a number of the default parameters used by the bandpass
+calibration and the continuum imaging have been updated, following
+extensive commissioning work with the 12-antenna early science
+datasets. Here is a list of the changed parameters:
+ * NCYCLES_BANDPASS_CAL=50
+ * NUM_CPUS_CBPCAL=216
+ * BANDPASS_MINUV=200
+ * BANDPASS_SMOOTH_FIT=0
+ * BANDPASS_SMOOTH_THRESHOLD=3.0
+ * NUM_TAYLOR_TERMS=1
+ * NUM_PIXELS_CONT=3200
+ * CELLSIZE_CONT=4
+ * RESTORING_BEAM_CUTOFF_CONT=0.5
+ * GRIDDER_OVERSAMPLE=5
+ * CLEAN_MINORCYCLE_NITER=4000
+ * CLEAN_PSFWIDTH=1600
+ * CLEAN_SCALES="[0]"
+ * CLEAN_THRESHOLD_MINORCYCLE="[40%, 1.8mJy]"
+ * CLEAN_NUM_MAJORCYCLES="[1,8,10]"
+ * CLEAN_THRESHOLD_MAJORCYCLE="[10mJy,4mJy,2mJy]"
+ * PRECONDITIONER_LIST="[Wiener]"
+ * PRECONDITIONER_GAUSS_TAPER="[10arcsec, 10arcsec, 0deg]"
+ * PRECONDITIONER_WIENER_ROBUSTNESS=-0.5
+ * RESTORE_PRECONDITIONER_LIST="[Wiener]"
+ * RESTORE_PRECONDITIONER_GAUSS_TAPER="[10arcsec, 10arcsec, 0deg]"
+ * RESTORE_PRECONDITIONER_WIENER_ROBUSTNESS=-2
+ * SELFCAL_NUM_LOOPS=2
+ * SELFCAL_INTERVAL="[57600,57600,1]"
+ * SELFCAL_SELAVY_THRESHOLD=8
+ * RESTORING_BEAM_CUTOFF_CONTCUBE=0.5
+ * RESTORING_BEAM_CUTOFF_SPECTRAL=0.5
+
 0.18.2 (5 May 2017)
 -------------------
 
