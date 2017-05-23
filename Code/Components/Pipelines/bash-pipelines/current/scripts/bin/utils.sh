@@ -610,9 +610,6 @@ function getMSname()
 function setFootprintArgs()
 {
 
-    # Start with getting the summary output
-    footprintArgs="-t"
-
     # Specify the name of the footprint
     if [ "$FP_NAME" != "" ]; then
         footprintArgs="$footprintArgs -n $FP_NAME"

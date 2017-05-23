@@ -356,7 +356,7 @@ EOF
     # Set the OPAL Project ID
     BACKUP_PROJECT_ID=${PROJECT_ID}
 
-    if [ "${IS_BETA}" != "true" ]; then
+    if [ "${USE_CLI}" == "true" ] && [ "${IS_BETA}" != "true" ]; then
 
         # Run schedblock to get parset & variables
         sbinfo="${metadata}/schedblock-info-${SB_SCIENCE}.txt"
@@ -421,7 +421,7 @@ EOF
 
         fi
 
-    # Do the same for the 1934 SB
+        # Do the same for the 1934 SB
         if [ "${DO_1934_CAL}" == "true" ]; then
 
             # Run schedblock to get parset & variables
@@ -474,9 +474,11 @@ EOF
 
         fi
 
-
-
-
+    elif [ "${USE_CLI}" != "true" ]; then
+        
+        echo "You have set USE_CLI=false, so not contacting the schedblock service."
+        echo "  SB State transitions will not be possible."
+        
     fi
 
 

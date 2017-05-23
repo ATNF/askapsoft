@@ -201,6 +201,9 @@ MS_INPUT_SCIENCE=""
 # Set to true if the dataset being processed is from BETA observations
 IS_BETA=false
 
+# Set to not true if you know the schedblock & footprint services are offline
+USE_CLI=true
+
 ####################
 # Which beams to use.
 BEAM_MIN=0
