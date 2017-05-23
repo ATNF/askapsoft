@@ -49,6 +49,12 @@ interfaces to the scheduling block and footprint services. This uses
 the recorded beam footprint information in the scheduling block parset
 to regenerate the central location of each beam.
 
+The services are hosted at the MRO, and in the event of an
+interruption to service, the use of these can be bypassed by setting
+``USE_CLI=false``. This requires, however, that you have
+previously-made metadata files available in the metadata directory (in
+particular the footprint file).
+
 Recent observations rely on the **src%d.footprint.rotation** parameter
 in the scheduling block parset to determine the reference angle from
 which the **pol_axis** parameter gives a field-based rotation. Some

@@ -122,6 +122,39 @@ successfully. If the averaging fails it is not removed.
 +---------------------+---------+-------------------------------------------------------------+
 
 
+Control of Online Services
+--------------------------
+
+The pipeline makes use of two online databases: the scheduling block
+service, which provides information about individual scheduling blocks
+and their parsets; and the footprint service, which translates
+descriptive names of beam footprints into celestial positions.
+
+These are hosted at the MRO, and it may be that the MRO is offline but
+Pawsey is still available. If that is the case, use of these can be
+turned off via the ``USE_CLI`` parameter (CLI="command line
+interface"). If you have previously created the relevant metadata
+files, the pipeline will be able to proceed as usual. If the footprint
+information is not available, but you know what the footprint name
+was, you can use the ``IS_BETA`` option. See
+:doc:`ScienceFieldMosaicking` for more information and related
+parameters. 
+
++-------------------------+---------+-------------------------------------------------------------+
+| Variable                | Default | Description                                                 |
++=========================+=========+=============================================================+
+| ``USE_CLI``             | true    | A parameter that determines whether to use the command-line |
+|                         |         | interfaces to the online services, specifically schedblock  |
+|                         |         | and footprint.                                              |
++-------------------------+---------+-------------------------------------------------------------+
+|  ``IS_BETA``            | false   | A special parameter that, if true, indicates the dataset was|
+|                         |         | taken with BETA, and so needs to be treated differently     |
+|                         |         | (many of the online services will not work with BETA        |
+|                         |         | Scheduling Blocks, and the raw data is in a different       |
+|                         |         | place).                                                     |
++-------------------------+---------+-------------------------------------------------------------+
+
+
 Calibrator switches
 -------------------
 
@@ -190,12 +223,6 @@ the science field processing.
 | ``DO_SPECTRAL_IMAGING`` | false   | Whether to do the spectral-line imaging                     |
 +-------------------------+---------+-------------------------------------------------------------+
 |  ``DO_SPECTRAL_IMSUB``  | false   | Whether to do the image-based continuum subtraction.        |
-+-------------------------+---------+-------------------------------------------------------------+
-|  ``IS_BETA``            | false   | A special parameter that, if true, indicates the dataset was|
-|                         |         | taken with BETA, and so needs to be treated differently     |
-|                         |         | (many of the online services will not work with BETA        |
-|                         |         | Scheduling Blocks, and the raw data is in a different       |
-|                         |         | place).                                                     |
 +-------------------------+---------+-------------------------------------------------------------+
 
 
