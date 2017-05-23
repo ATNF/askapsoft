@@ -96,6 +96,12 @@ subband="${subband}"
 imageCode=restored
 setImageProperties spectral
 
+IMAGETYPE_SPECTRAL=${IMAGETYPE_SPECTRAL}
+if [ "\${IMAGETYPE_SPECTRAL}" == "fits" ]; then
+    # If we made a FITS cube, need to append a .fits suffix to the imageName
+    imageName="\${imageName}.fits"
+fi
+
 if [ ! -e "\${imageName}" ]; then
 
     echo "Image cube \${imageName} does not exist."
