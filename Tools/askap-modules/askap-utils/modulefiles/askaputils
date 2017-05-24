@@ -1,0 +1,23 @@
+#%Module1.0#####################################################################
+##
+## ashell modulefile
+##
+proc ModulesHelp { } {
+        global version
+
+        puts stderr "\tThis modules provides various utilties for use with ASKAP"
+}
+
+module-whatis   "ASKAP utilities package"
+
+set UTILS_HOME  /group/askap/askaputils
+
+prepend-path    PATH            $UTILS_HOME/bin
+
+# Using set-alias will make some scripts look like commands rather than scripts.
+ 
+# Set up an alias/function which calls the munlink instead of rm -rf to delete a large directory hierarchy.
+set-alias mrm { mrm.sh $* }
+ 
+# Set up an alias/function which calls the dcp instead of cp  to copy a large directory hierarchy or file.
+set-alias dcp { dcp.sh $* }
