@@ -274,6 +274,7 @@ void ContinuumWorker::run(void)
     ASKAPLOG_INFO_STR(logger,"Rank " << itsComms.rank() << " finished");
 
     itsComms.barrier(itsComms.theWorkers());
+    ASKAPLOG_INFO_STR(logger,"Rank " << itsComms.rank() << " passed final barrier");
 }
 void ContinuumWorker::processWorkUnit(ContinuumWorkUnit& wu)
 {

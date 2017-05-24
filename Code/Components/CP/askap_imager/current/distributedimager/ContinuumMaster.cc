@@ -214,22 +214,21 @@ void ContinuumMaster::run(void)
                     }
                 }
             }
-            if (writeAtMajorCycle) {
+            imager.broadcastModel();
+
+            if (writeAtMajorCycle && (cycle != nCycles-1) ) {
                 ASKAPLOG_DEBUG_STR(logger, "Writing out model");
                 imager.writeModel(std::string(".beam") + utility::toString(beam) + \
                 std::string(".majorcycle.") + utility::toString(cycle));
             }
-            else {
-                ASKAPLOG_DEBUG_STR(logger, "Not writing out model");
-            }
-
-            imager.broadcastModel();
-
-            if (cycle == nCycles-1) {
-                imager.calcNE(); // resets the itsNE
-                imager.receiveNE(); // need this because we are not Solving
+            else if (cycle == nCycles-1) {
+                ASKAPLOG_DEBUG_STR(logger, "Writing out final model");
                 imager.writeModel();
 
+
+            }
+            else {
+                ASKAPLOG_DEBUG_STR(logger, "Not writing out model");
             }
 
         }
