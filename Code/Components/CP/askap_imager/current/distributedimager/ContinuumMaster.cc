@@ -214,8 +214,10 @@ void ContinuumMaster::run(void)
                     }
                 }
             }
-            imager.broadcastModel();
-
+            if  (cycle != nCycles-1)  {
+                imager.broadcastModel();
+            }
+            
             if (writeAtMajorCycle && (cycle != nCycles-1) ) {
                 ASKAPLOG_DEBUG_STR(logger, "Writing out model");
                 imager.writeModel(std::string(".beam") + utility::toString(beam) + \

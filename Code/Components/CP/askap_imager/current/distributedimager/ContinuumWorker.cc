@@ -682,7 +682,7 @@ void ContinuumWorker::buildSpectralCube() {
             if (itsComms.isWriter()) {
 
                 doLogBeams=true;
-                
+
                 ASKAPLOG_INFO_STR(logger,"I have (including my own) " << itsComms.getOutstanding() << " units to write");
                 ASKAPLOG_INFO_STR(logger,"I have " << itsComms.getClients().size() << " clients with work");
                 int cubeChannel = workUnits[workUnitCount-1].get_globalChannel()-this->baseCubeGlobalChannel;
@@ -851,7 +851,7 @@ void ContinuumWorker::buildSpectralCube() {
         ASKAPLOG_INFO_STR(logger, "About to log the full set of restoring beams");
         logBeamInfo();
     }
-    
+
 }
 void ContinuumWorker::handleImageParams(askap::scimath::Params::ShPtr params,
         unsigned int chan)
@@ -1119,8 +1119,8 @@ void ContinuumWorker::processChannels()
     else {
 
 
-        for (size_t n = 0; n <= nCycles; n++) {
-            
+        for (size_t n = 0; n < nCycles; n++) {
+
             ASKAPLOG_INFO_STR(logger,"Rank " << itsComms.rank() << " at barrier");
             itsComms.barrier(itsComms.theWorkers());
             ASKAPLOG_INFO_STR(logger,"Rank " << itsComms.rank() << " passed barrier");
