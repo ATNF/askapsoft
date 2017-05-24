@@ -229,6 +229,8 @@ void CatalogueMatcher::zeroOffsetMatch()
         }
     }
 
+    itsSenseMatch = true;
+
     ASKAPLOG_DEBUG_STR(logger, "Matched " << nmatch << " pairs of points");
 
 }
