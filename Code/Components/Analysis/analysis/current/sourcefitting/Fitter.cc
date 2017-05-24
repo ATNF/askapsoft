@@ -204,7 +204,7 @@ void Fitter::fit(casa::Matrix<casa::Double> pos,
             } else {
                 if (!itsParams.negativeFluxPossible()) {
                     // If we don't allow negative fluxes, set all negative components to zero flux
-                    for (uint i = 0; i < itsNumGauss; i++) {
+                    for (unsigned int i = 0; i < itsNumGauss; i++) {
                         if (itsSolution(i, 0) < 0) {
                             itsSolution(i, 0) = 0.;
                         }
@@ -464,7 +464,7 @@ std::multimap<double, int> Fitter::peakFluxList()
 {
     std::multimap<double, int> fitMap;
 
-    for (uint i = 0; i < itsNumGauss; i++) {
+    for (unsigned int i = 0; i < itsNumGauss; i++) {
         fitMap.insert(std::pair<double, int>(itsSolution(i, 0), i));
     }
 

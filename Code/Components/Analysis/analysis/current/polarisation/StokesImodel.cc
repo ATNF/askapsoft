@@ -121,7 +121,7 @@ float StokesImodel::flux(float frequency)
 void StokesImodel::fit()
 {
 
-    int size = itsIspectrum.size();
+    unsigned int size = itsIspectrum.size();
 
     gsl_matrix *x, *cov;
     gsl_vector *y, *w, *c;
@@ -130,8 +130,8 @@ void StokesImodel::fit()
     w = gsl_vector_alloc(size);
     c = gsl_vector_alloc(itsOrder);
     cov = gsl_matrix_alloc(itsOrder, itsOrder);
-    for (int i = 0; i < size; i++) {
-        for (int t = 0; t < itsOrder; t++) {
+    for (unsigned int i = 0; i < size; i++) {
+        for (unsigned int t = 0; t < itsOrder; t++) {
             gsl_matrix_set(x, i, t, pow(itsFreqs[i], t));
         }
         gsl_vector_set(y, i, itsIspectrum[i]);

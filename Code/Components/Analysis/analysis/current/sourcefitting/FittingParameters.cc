@@ -147,7 +147,7 @@ void FittingParameters::setBoxFlux(casa::Vector<casa::Double> f)
 {
 
     itsBoxFlux = 0.;
-    for (uint i = 0; i < f.size(); i++)
+    for (unsigned int i = 0; i < f.size(); i++)
         itsBoxFlux += f(i);
 
 }

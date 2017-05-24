@@ -94,9 +94,10 @@ void Weighter::readWeights()
     ASKAPLOG_INFO_STR(logger, "Reading weights from " << itsImage <<
                       ", section " << itsCube->pars().section().getSection());
 
-    itsWeights = getPixelsInBox(itsImage,
-                                subsectionToSlicer(itsCube->pars().section()),
-                                false);
+    casa::Slicer theSlicer=subsectionToSlicer(itsCube->pars().section());
+    ASKAPLOG_INFO_STR(logger, "Using casa::Slicer " << theSlicer);
+    
+    itsWeights = getPixelsInBox(itsImage, theSlicer, false);
 }
 
 void Weighter::findNorm()
