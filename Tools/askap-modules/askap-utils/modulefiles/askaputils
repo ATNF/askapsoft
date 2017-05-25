@@ -19,5 +19,5 @@ prepend-path    PATH            $UTILS_HOME/bin
 # Set up an alias/function which calls the munlink instead of rm -rf to delete a large directory hierarchy.
 set-alias mrm { mrm.sh $* }
  
-# Set up an alias/function which calls the dcp instead of cp  to copy a large directory hierarchy or file.
-set-alias dcp { dcp.sh $* }
+# Set up an alias/function which calls the mcp instead of cp  to copy a large directory hierarchy or file.
+set-alias mcp { mcp.sh $* }
