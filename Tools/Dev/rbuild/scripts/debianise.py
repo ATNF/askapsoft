@@ -29,23 +29,23 @@
 import os, re
 import sys
 
-from askapdev.rbuild.dependencies.depends import Depends
+from askapdev.rbuild.dependencies import Dependency
 from askapdev.rbuild.debian import *
 from askapdev.rbuild.utils import q_print
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print "Usage: debianise.py <package_path or . >"
-        sys.exit(1)
-    rdir = sys.argv[1]
+    rdir = os.path.abspath(os.curdir)
+    if not os.path.exists("build.py"):
+        raise OSError("Can only be run from within package directory")
     a_root = os.getenv('ASKAP_ROOT')
     myself = os.path.relpath(rdir, a_root)
-    d = Depends(rdir)
-    for dep in d.ordered_dependencies+[myself]:
+    deps = Dependency()
+    deps.add_package()
+    dep_list = [os.path.relpath(rdir, a_root) for rdir in deps.get_rootdirs()]
+    for dep in dep_list+[myself]:
         nodeb = os.path.join(a_root, dep, "NO_DEBIAN")
         if os.path.exists(nodeb):
             q_print("Ignoring package '{0}' which set to NO_DEBIAN".format(dep))
             continue
-        name, version = get_versioned_name(dep)
         add_debian(dep)
     

@@ -1,5 +1,5 @@
 #
-# @copyright (c) 2013 CSIRO
+# @copyright (c) 2013-2016 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -27,7 +27,6 @@ __all__ = ["to_debian_name", "depends_list", "get_versioned_name", "get_package_
 
 import os
 import re
-from ..dependencies.depends import Depends
 from .. import utils
 
 def to_debian_name(package):
@@ -67,12 +66,11 @@ def to_debian_name(package):
     return r.replace("_", "-")
 
 
-def depends_list(pkg_path):
-    """Get a list of debian package dependencies for the given ASKAPsoft 
-    package"""
-    d = Depends(rootpkgdir=pkg_path)
+def depends_list(dependency):
+    """Get a list of debian package dependencies for the given Dependency.
+    """
     deps = []
-    for name in d.get_explicit():
+    for name in dependency.get_explicit():
         nodeb = os.path.join(os.getenv("ASKAP_ROOT"), name, "NO_DEBIAN")
         if os.path.exists(nodeb):
             utils.q_print("Ignoring package {0}".format(name))
@@ -125,7 +123,7 @@ def get_versioned_name(package):
     else:
         pth = os.path.join(a_root, package)
         rev = get_package_revision(pth)
-        versioned = [deb, "%s~tos1.0" %rev]        
+        versioned = [deb, "%s~UNKNOWN" %rev]        
     return versioned
 
 

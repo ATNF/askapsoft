@@ -64,10 +64,12 @@ def package(pkg, outdir, force=False):
         check_built(pkg)
         rpkg = os.path.relpath(pkg, os.environ["ASKAP_ROOT"])
         os.chdir(pkg)
+        dep = Dependency()
+        dep.add_package()
         pydep = glob.glob("install/lib/python*") and "askap-python, " or ""
         with open(os.path.join("debian", "askap.dependencies"), "w") as sf:
             sf.write("AskapDependencies={0}\n"
-                      .format(pydep+debian.depends_list(pkg)) )
+                      .format(pydep+debian.depends_list(dep)) )
         vers = debian.get_versioned_name(pkg)[-1]
         if needs_rebuild(pkg):
             utils.q_print("info: Updating '{1}' changelog to {0}".format(vers,
