@@ -1,9 +1,9 @@
 #!/bin/bash
 #
-# Script to copy a source to a destination using the dcp utility.
-# This submits a job to the copy queue and uses dcp to efficiently perform the copy.
+# Script to call the slurm batch script /<ASKAP MODULES>/askaputils/slurm/mcp.sbatch to schedule a job to
+# do a copy operation.
 #
-# This can be called using the dcp alias that has been setup in the askaputils module
+# This can be called using the mcp alias that has been setup in the askaputils module
 #
 # ----
 #
@@ -32,9 +32,14 @@
 # @author Eric Bastholm <eric.bastholm@csiro.au>
 #
 
+copy() {
+    SOURCE="$1"
+    DEST="$2"
+    sbatch << EOF
+#!/bin/bash
 #SBATCH --export=NONE
-#SBATCH --output=/group/askap/logs/dcp2-copy-logs/%j-copy.out
-#SBATCH --error=/group/askap/logs/dcp2-copy-logs/%j-copy.err
+#SBATCH --output=/group/askap/logs/mcp-copy-logs/%j-copy.out
+#SBATCH --error=/group/askap/logs/mcp-copy-logs/%j-copy.err
 #SBATCH --account=askap
 #SBATCH --clusters=zeus
 #
@@ -42,5 +47,38 @@
 #SBATCH --time=7:59:00
  
 module load mpifileutils
-mpirun -np 12 dcp -p -d info $1 $2
+mpirun -np 12 dcp -p -d info ${SOURCE} ${DEST}
+EOF
+}
 
+# Process the command line parameters.
+#
+# Valid parameters:
+#   -h | ?        Help
+#
+processCmdLine() {
+
+  # For option processing
+  OPTIND=1
+
+  # Process our options
+  while getopts "h?" opt "$@"; do
+      case "$opt" in
+
+      h|\?)
+          printf "mcp: Copy from source to destination using dcp from the mpifileutils module.\n"
+          printf "mcp usage: mcp [source] [destination]\n"
+          exit $NO_ERROR
+          ;;
+      esac
+  done
+
+  shift $((OPTIND-1))
+
+  [ "$1" = "--" ] && shift
+
+}
+
+processCmdLine "$@"
+
+copy "$@"
