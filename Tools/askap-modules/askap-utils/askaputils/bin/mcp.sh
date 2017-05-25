@@ -35,7 +35,7 @@
 copy() {
     SOURCE="$1"
     DEST="$2"
-    sbatch << EOF
+    sbatch << EOF | awk '{print "Submitted batch job " $4 " on cluster zeus - find slurm output in /group/askap/logs/mcp-copy-logs, look for " $4}'
 #!/bin/bash
 #SBATCH --export=NONE
 #SBATCH --output=/group/askap/logs/mcp-copy-logs/%j-copy.out
