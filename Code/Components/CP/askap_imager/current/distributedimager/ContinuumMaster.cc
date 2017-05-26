@@ -198,7 +198,9 @@ void ContinuumMaster::run(void)
             if (imager.params()->has("peak_residual")) {
                 const double peak_residual = imager.params()->scalarValue("peak_residual");
                 ASKAPLOG_INFO_STR(logger, "Major Cycle " << cycle << " Reached peak residual of " << peak_residual);
+
                 if (peak_residual < targetPeakResidual) {
+
                     ASKAPLOG_INFO_STR(logger, "It is below the major cycle threshold of "
                                       << targetPeakResidual << " Jy. Stopping.");
 
@@ -214,16 +216,19 @@ void ContinuumMaster::run(void)
                     }
                 }
             }
-            if  (cycle != nCycles-1)  {
-                imager.broadcastModel();
-            }
-            
+            ASKAPLOG_DEBUG_STR(logger, "Broadcasting latest model");
+            imager.broadcastModel();
+            ASKAPLOG_DEBUG_STR(logger, "Broadcasting latest model - done");
+
             if (writeAtMajorCycle && (cycle != nCycles-1) ) {
                 ASKAPLOG_DEBUG_STR(logger, "Writing out model");
                 imager.writeModel(std::string(".beam") + utility::toString(beam) + \
                 std::string(".majorcycle.") + utility::toString(cycle));
             }
             else if (cycle == nCycles-1) {
+                ASKAPLOG_DEBUG_STR(logger,"Receiving Normal Equation");
+                imager.calcNE(); // just a reset
+                imager.receiveNE(); // get the most recent residual
                 ASKAPLOG_DEBUG_STR(logger, "Writing out final model");
                 imager.writeModel();
 

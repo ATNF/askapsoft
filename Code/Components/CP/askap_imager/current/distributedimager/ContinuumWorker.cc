@@ -1118,12 +1118,19 @@ void ContinuumWorker::processChannels()
     }
     else {
 
+        bool stopping = false;
 
-        for (size_t n = 0; n < nCycles; n++) {
+        for (size_t n = 0; n <= nCycles; n++) {
+
+            if (stopping == true) {
+                ASKAPLOG_INFO_STR(logger,"Worker breaking out of major-cycle loop");
+                break;
+            }
 
             ASKAPLOG_INFO_STR(logger,"Rank " << itsComms.rank() << " at barrier");
             itsComms.barrier(itsComms.theWorkers());
             ASKAPLOG_INFO_STR(logger,"Rank " << itsComms.rank() << " passed barrier");
+
 
             ASKAPLOG_INFO_STR(logger,"Worker waiting to receive new model");
             rootImager.receiveModel();
@@ -1135,7 +1142,7 @@ void ContinuumWorker::processChannels()
                 if (peak_residual < targetPeakResidual) {
                     ASKAPLOG_DEBUG_STR(logger, "It is below the major cycle threshold of "
                                       << targetPeakResidual << " Jy. Stopping.");
-                    break;
+                    stopping = true;
                 } else {
                     if (targetPeakResidual < 0) {
                         ASKAPLOG_DEBUG_STR(logger, "Major cycle flux threshold is not used.");
