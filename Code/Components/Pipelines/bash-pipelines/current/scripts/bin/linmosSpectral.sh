@@ -104,20 +104,22 @@ DO_ALT_IMAGER_SPECTRAL="${DO_ALT_IMAGER_SPECTRAL}"
 ALT_IMAGER_SINGLE_FILE="${ALT_IMAGER_SINGLE_FILE}"
 NUM_SPECTRAL_CUBES=${NUM_SPECTRAL_CUBES}
 subband="${subband}"
+IMAGETYPE_SPECTRAL="${IMAGETYPE_SPECTRAL}"
 
 beamList=""
 for BEAM in \${BEAMS_TO_USE}; do
     setImageProperties spectral
-    echo "Testing image \${imageName}"
-    if [ -e "\${imageName}" ]; then
+    im="\${imageName}"
+    if [ "\${IMAGETYPE_SPECTRAL}" == "fits" ]; then
+        im="\${im}.fits"
+    fi
+    if [ -e "\${im}" ]; then
         echo "   Found! Adding to beamList"
         if [ "\${beamList}" == "" ]; then
-            beamList="\${imageName}"
+            beamList="\${im}"
         else
-            beamList="\${beamList},\${imageName}"
+            beamList="\${beamList},\${im}"
         fi
-    else
-        echo "   Not found :("
     fi
 done
 
@@ -138,7 +140,7 @@ if [ "\${beamList}" != "" ]; then
     log=${logs}/science_\${jobCode}_${FIELDBEAM}_\${SLURM_JOB_ID}.log
     cat > "\${parset}" << EOFINNER
 linmos.names            = [\${beamList}]
-linmos.imagetype        = ${IMAGETYPE_SPECTRAL}
+linmos.imagetype        = \${IMAGETYPE_SPECTRAL}
 linmos.outname          = \$imageName
 linmos.outweight        = \$weightsImage
 linmos.weighttype       = FromPrimaryBeamModel

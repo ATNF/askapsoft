@@ -109,6 +109,8 @@ SB_SCIENCE=${SB_SCIENCE}
 FIELD_LIST="$FIELD_LIST"
 TILE_LIST="$TILE_LIST"
 
+IMAGETYPE_CONT="${IMAGETYPE_CONT}"
+
 # If there is only one tile, only include the "ALL" case, which
 # mosaics together all fields
 if [ "\$(echo \$TILE_LIST | awk '{print NF}')" -gt 1 ]; then
@@ -140,13 +142,19 @@ for THISTILE in \$FULL_TILE_LIST; do
             BEAM=all
             for FIELD in \${TILE_FIELD_LIST}; do
                 setImageProperties cont
-                if [ -e "\${FIELD}/\${imageName}" ]; then
+                im="\${FIELD}/\${imageName}"
+                wt="\${FIELD}/\${weightsImage}"
+                if [ "\${{IMAGETYPE_CONT}" == "fits" ]; then
+                    im="\${im}.fits"
+                    wt="\${wt}.fits"
+                fi
+                if [ -e "\${im}" ]; then
                     if [ "\${imList}" == "" ]; then
-                        imList="\${FIELD}/\${imageName}"
-                        wtList="\${FIELD}/\${weightsImage}"
+                        imList="\${im}"
+                        wtList="\${wt}"
                     else
-                        imList="\${imList},\${FIELD}/\${imageName}"
-                        wtList="\${wtList},\${FIELD}/\${weightsImage}"
+                        imList="\${imList},\${im}"
+                        wtList="\${wtList},\${wt}"
                     fi
                 fi
             done
@@ -170,7 +178,7 @@ for THISTILE in \$FULL_TILE_LIST; do
                 cat > "\${parset}" << EOFINNER
 linmos.names            = [\${imList}]
 linmos.weights          = [\${wtList}]
-linmos.imagetype        = ${IMAGETYPE_CONT}
+linmos.imagetype        = \${IMAGETYPE_CONT}
 linmos.outname          = \$imageName
 linmos.outweight        = \$weightsImage
 linmos.weighttype       = FromWeightImages

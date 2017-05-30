@@ -102,6 +102,7 @@ FIELD=${FIELD}
 POL_LIST="${POL_LIST}"
 BEAMS_TO_USE="${BEAMS_TO_USE}"
 imageCode=${imageCode}
+IMAGETYPE_CONTCUBE="${IMAGETYPE_CONTCUBE}"
 
 for POLN in \$POL_LIST; do
 
@@ -113,10 +114,14 @@ for POLN in \$POL_LIST; do
         for BEAM in \${BEAMS_TO_USE}; do
             setImageProperties contcube
             if [ -e "\${imageName}" ]; then
+                im="\${imageName}"
+                if [ "\${IMAGETYPE_CONTCUBE}" == "fits" ]; then
+                    im="\${im}.fits"
+                fi
                 if [ "\${beamList}" == "" ]; then
-                    beamList="\${imageName}"
+                    beamList="\${im}"
                 else
-                    beamList="\${beamList},\${imageName}"
+                    beamList="\${beamList},\${im}"
                 fi
             fi
         done
@@ -134,7 +139,7 @@ for POLN in \$POL_LIST; do
             log=${logs}/science_\${jobCode}_\${pol}_${FIELDBEAM}_\${SLURM_JOB_ID}.log
             cat > "\${parset}" << EOFINNER
 linmos.names            = [\${beamList}]
-linmos.imagetype        = ${IMAGETYPE_CONTCUBE}
+linmos.imagetype        = \${IMAGETYPE_CONTCUBE}
 linmos.outname          = \$imageName
 linmos.outweight        = \$weightsImage
 linmos.weighttype       = FromPrimaryBeamModel

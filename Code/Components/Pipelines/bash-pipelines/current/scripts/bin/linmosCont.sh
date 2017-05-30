@@ -105,6 +105,7 @@ maxterm=\$(echo "\${NUM_TAYLOR_TERMS}" | awk '{print 2*\$1-1}')
 IMAGE_BASE_CONT=${IMAGE_BASE_CONT}
 FIELD=${FIELD}
 BEAMS_TO_USE="${BEAMS_TO_USE}"
+IMAGETYPE_CONT="${IMAGETYPE_CONT}"
 
 NUM_LOOPS=0
 DO_SELFCAL=$DO_SELFCAL
@@ -127,11 +128,15 @@ for((LOOP=0;LOOP<=NUM_LOOPS;LOOP++)); do
                 else
                     DIR="selfCal_\${imageBase}/Loop\${LOOP}"
                 fi
-                if [ -e "\${DIR}/\${imageName}" ]; then
+                im="\${DIR}/\${imageName}"
+                if [ "\${IMAGETYPE_CONT}" == "fits" ]; then
+                    im="\${im}.fits"
+                fi
+                if [ -e "\${im}" ]; then
                     if [ "\${beamList}" == "" ]; then
-                        beamList="\${DIR}/\${imageName}"
+                        beamList="\${im}"
                     else
-                        beamList="\${beamList},\${DIR}/\${imageName}"
+                        beamList="\${beamList},\${im}"
                     fi
                 fi
             done
@@ -156,7 +161,7 @@ for((LOOP=0;LOOP<=NUM_LOOPS;LOOP++)); do
                 log=${logs}/science_\${jobCode}_${FIELDBEAM}_\${SLURM_JOB_ID}.log
                 cat > "\${parset}" << EOFINNER
 linmos.names            = [\${beamList}]
-linmos.imagetype        = ${IMAGETYPE_CONT}
+linmos.imagetype        = \${IMAGETYPE_CONT}
 linmos.outname          = \$imageName
 linmos.outweight        = \$weightsImage
 linmos.weighttype       = FromPrimaryBeamModel
