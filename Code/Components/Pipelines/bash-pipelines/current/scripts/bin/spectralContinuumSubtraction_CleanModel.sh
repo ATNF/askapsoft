@@ -34,6 +34,9 @@
 # as the input to ccontsubtract
 
 modelImage=image.${imageBase}
+if [ "${IMAGETYPE_CONT}" == "fits" ]; then
+    modelImage="${modelImage}.fits"
+fi
 
 ContsubModelDefinition="# The model definition
 CContsubtract.sources.names                       = [lsm]

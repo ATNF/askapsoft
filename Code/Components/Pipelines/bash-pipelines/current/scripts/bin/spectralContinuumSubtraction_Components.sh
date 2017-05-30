@@ -36,6 +36,9 @@
 imageCode=restored
 setImageProperties cont
 selavyImage="${OUTPUT}/${imageName}"
+if [ "${IMAGETYPE_CONT}" == "fits" ]; then
+    selavyImage="${selavyImage}.fits"
+fi
 
 NPROCS_CONTSUB=$(echo "${CONTSUB_SELAVY_NSUBX}" "${CONTSUB_SELAVY_NSUBY}" | awk '{print $1*$2+1}')
 if [ "${NPROCS_CONTSUB}" -eq 1 ]; then
