@@ -113,11 +113,11 @@ for POLN in \$POL_LIST; do
         beamList=""
         for BEAM in \${BEAMS_TO_USE}; do
             setImageProperties contcube
-            if [ -e "\${imageName}" ]; then
-                im="\${imageName}"
-                if [ "\${IMAGETYPE_CONTCUBE}" == "fits" ]; then
-                    im="\${im}.fits"
-                fi
+            im="\${imageName}"
+            if [ "\${IMAGETYPE_CONTCUBE}" == "fits" ]; then
+                im="\${im}.fits"
+            fi
+            if [ -e "\${im}" ]; then
                 if [ "\${beamList}" == "" ]; then
                     beamList="\${im}"
                 else
