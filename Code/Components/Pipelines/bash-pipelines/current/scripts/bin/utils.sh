@@ -281,8 +281,7 @@ function setImageProperties()
     base="${band}${imageBase}${imSuffix}"
 
     weightsImage="weights.${base}${extension}"
-    #    weightsType="${typebase}_weights_$typeSuffix"
-    weightsType="${typebase}_sensitivity_$typeSuffix"
+    weightsType="${typebase}_weight_$typeSuffix"
     weightsLabel="Weights image, $beamSuffix"
 
     # Set the imageName according to the image code.

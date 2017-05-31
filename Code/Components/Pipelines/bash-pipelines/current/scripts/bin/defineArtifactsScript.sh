@@ -246,18 +246,16 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                     if [ -e "\${FIELD}/\${imageName}\${fitsSuffix}" ]; then
                         casdaOtherDimImageNames+=(\${FIELD}/\${imageName}\${fitsSuffix})
                         casdaOtherDimImageTypes+=("\${imageType}")
-#### Leave out spectral weights images - have no defined image type to
-#### support them in CASDA
-##                       if [ "\${BEAM}" == "all" ] && [ "\${imageCode}" == "restored" ]; then
-##                           casdaOtherDimImageNames+=(\${FIELD}/\${weightsImage}\${fitsSuffix})
-##                           casdaOtherDimImageTypes+=("\${weightsType}")
-##                           casdaOtherDimImageSpectra+=("")
-##                           casdaOtherDimImageNoise+=("")
-##                           casdaOtherDimImageMoments+=("")
-##                           casdaOtherDimImageFDF+=("")
-##                           casdaOtherDimImageRMSF+=("")
-##                           casdaOtherDimImagePol+=("")
-##                      fi
+                        if [ "\${BEAM}" == "all" ] && [ "\${imageCode}" == "restored" ]; then
+                            casdaOtherDimImageNames+=(\${FIELD}/\${weightsImage}\${fitsSuffix})
+                            casdaOtherDimImageTypes+=("\${weightsType}")
+                            casdaOtherDimImageSpectra+=("")
+                            casdaOtherDimImageNoise+=("")
+                            casdaOtherDimImageMoments+=("")
+                            casdaOtherDimImageFDF+=("")
+                            casdaOtherDimImageRMSF+=("")
+                            casdaOtherDimImagePol+=("")
+                        fi
                         ### Not yet writing extracted files direct to FITS, so change the assignment of fitsSuffix
                         fitsSuffix=""
                         if [ "\${ADD_FITS_SUFFIX}" == "true" ]; then
