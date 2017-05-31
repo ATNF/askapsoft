@@ -136,11 +136,11 @@ DO_ALT_IMAGER_CONTCUBE="${DO_ALT_IMAGER_CONTCUBE}"
 DO_ALT_IMAGER_SPECTRAL="${DO_ALT_IMAGER_SPECTRAL}"
 ALT_IMAGER_SINGLE_FILE_CONTCUBE="${ALT_IMAGER_SINGLE_FILE_CONTCUBE}"
 ALT_IMAGER_SINGLE_FILE="${ALT_IMAGER_SINGLE_FILE}"
-fitsSuffix=""
+
 ADD_FITS_SUFFIX=\${ADD_FITS_SUFFIX}
-if [ "\${ADD_FITS_SUFFIX}" == "true" ] || [ "\${ADD_FITS_SUFFIX}" == "" ]; then
-    fitsSuffix=".fits"
-fi
+IMAGETYPE_CONT=${IMAGETYPE_CONT}
+IMAGETYPE_CONTCUBE=${IMAGETYPE_CONTCUBE}
+IMAGETYPE_SPECTRAL=${IMAGETYPE_SPECTRAL}
 
 NUM_LOOPS=0
 DO_SELFCAL=$DO_SELFCAL
@@ -181,21 +181,21 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                         if [ \$LOOP -eq 0 ] || [ "\$BEAM" == "all" ]; then
 
                             setImageProperties cont
+                            fitsSuffix=""
+                            if [ "\${ADD_FITS_SUFFIX}" == "true" ] && [ "\${IMAGETYPE_CONT}" != "fits" ]; then
+                                fitsSuffix=".fits"
+                            fi
 
                             if [ \$LOOP -gt 0 ]; then
-                                imageName="\${imageName}.SelfCalLoop\${LOOP}"
-                                weightsImage="\${weightsImage}.SelfCalLoop\${LOOP}"
-                                noiseMap="\${noiseMap}.SelfCalLoop\${LOOP}"
+                                if [ "\${IMAGETYPE_CONT}" == "fits" ]; then
+                                    imageName="\${imageName%%.fits}.SelfCalLoop\${LOOP}.fits"
+                                    weightsImage="\${weightsImage%%.fits}.SelfCalLoop\${LOOP}.fits"
+                                else
+                                    imageName="\${imageName}.SelfCalLoop\${LOOP}"
+                                    weightsImage="\${weightsImage}.SelfCalLoop\${LOOP}"
+                                fi
                             fi
 
-                            setSelavyDirs cont
-                            if [ -e "\${FIELD}/\${selavyDir}/\${noiseMap}\${fitsSuffix}" ]; then
-                                casdaTwoDimImageNames+=(\${FIELD}/\${selavyDir}/\${noiseMap}\${fitsSuffix})
-                                casdaTwoDimImageTypes+=(\${noiseType})
-                                casdaTwoDimThumbTitles+=(\${noiseLabel})
-                            fi
-
-#                            echo \${FIELD}/\${imageName}\${fitsSuffix}
                             if [ -e "\${FIELD}/\${imageName}\${fitsSuffix}" ]; then
                                 casdaTwoDimImageNames+=(\${FIELD}/\${imageName}\${fitsSuffix})
                                 casdaTwoDimImageTypes+=("\${imageType}")
@@ -206,6 +206,23 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                                     casdaTwoDimThumbTitles+=("\${weightsLabel}")
                                 fi
                             fi
+
+                            ### Noise map not yet written direct to FITS, so change the assignment of fitsSuffix
+                            fitsSuffix=""
+                            if [ "\${ADD_FITS_SUFFIX}" == "true" ]; then
+                                fitsSuffix=".fits"
+                            fi
+                            ### Also, don't need the test for IMAGETYPE here either
+                            if [ \$LOOP -gt 0 ]; then
+                                noiseMap="\${noiseMap}.SelfCalLoop\${LOOP}"
+                            fi
+                            setSelavyDirs cont
+                            if [ -e "\${FIELD}/\${selavyDir}/\${noiseMap}\${fitsSuffix}" ]; then
+                                casdaTwoDimImageNames+=(\${FIELD}/\${selavyDir}/\${noiseMap}\${fitsSuffix})
+                                casdaTwoDimImageTypes+=(\${noiseType})
+                                casdaTwoDimThumbTitles+=(\${noiseLabel})
+                            fi
+
                         fi
 
                     done
@@ -222,9 +239,30 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                 for subband in ${SUBBAND_WRITER_LIST}; do
         
                     setImageProperties spectral
+                    fitsSuffix=""
+                    if [ "\${ADD_FITS_SUFFIX}" == "true" ] && [ "\${IMAGETYPE_SPECTRAL}" != "fits" ]; then
+                        fitsSuffix=".fits"
+                    fi
                     if [ -e "\${FIELD}/\${imageName}\${fitsSuffix}" ]; then
                         casdaOtherDimImageNames+=(\${FIELD}/\${imageName}\${fitsSuffix})
                         casdaOtherDimImageTypes+=("\${imageType}")
+#### Leave out spectral weights images - have no defined image type to
+#### support them in CASDA
+##                       if [ "\${BEAM}" == "all" ] && [ "\${imageCode}" == "restored" ]; then
+##                           casdaOtherDimImageNames+=(\${FIELD}/\${weightsImage}\${fitsSuffix})
+##                           casdaOtherDimImageTypes+=("\${weightsType}")
+##                           casdaOtherDimImageSpectra+=("")
+##                           casdaOtherDimImageNoise+=("")
+##                           casdaOtherDimImageMoments+=("")
+##                           casdaOtherDimImageFDF+=("")
+##                           casdaOtherDimImageRMSF+=("")
+##                           casdaOtherDimImagePol+=("")
+##                      fi
+                        ### Not yet writing extracted files direct to FITS, so change the assignment of fitsSuffix
+                        fitsSuffix=""
+                        if [ "\${ADD_FITS_SUFFIX}" == "true" ]; then
+                            fitsSuffix=".fits"
+                        fi                        
                         if [ -e "\${FIELD}/\${selavyDir}" ]; then
                             casdaOtherDimImageSpectra+=("\${FIELD}/\${selavySpectraDir}/${SELAVY_SPEC_BASE_SPECTRUM}*\${fitsSuffix}")
                             casdaOtherDimImageNoise+=("\${FIELD}/\${selavySpectraDir}/${SELAVY_SPEC_BASE_NOISE}*\${fitsSuffix}")
@@ -244,18 +282,6 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                             casdaOtherDimImageRMSF+=("")
                             casdaOtherDimImagePol+=("")
                         fi
-#### Leave out spectral weights images - have no defined image type to
-#### support them in CASDA
-##                       if [ "\${BEAM}" == "all" ] && [ "\${imageCode}" == "restored" ]; then
-##                           casdaOtherDimImageNames+=(\${FIELD}/\${weightsImage}\${fitsSuffix})
-##                           casdaOtherDimImageTypes+=("\${weightsType}")
-##                           casdaOtherDimImageSpectra+=("")
-##                           casdaOtherDimImageNoise+=("")
-##                           casdaOtherDimImageMoments+=("")
-##                           casdaOtherDimImageFDF+=("")
-##                           casdaOtherDimImageRMSF+=("")
-##                           casdaOtherDimImagePol+=("")
-##                      fi
                     fi
                 done
 
@@ -268,9 +294,28 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                         contImage=\${imageName}
                         pol=\$(echo "\$POLN" | tr '[:upper:]' '[:lower:]')
                         setImageProperties contcube "\$pol"
+                        fitsSuffix=""
+                        if [ "\${ADD_FITS_SUFFIX}" == "true" ] && [ "\${IMAGETYPE_CONTCUBE}" != "fits" ]; then
+                            fitsSuffix=".fits"
+                        fi
                         if [ -e "\${FIELD}/\${imageName}\${fitsSuffix}" ]; then
                             casdaOtherDimImageNames+=(\${FIELD}/\${imageName}\${fitsSuffix})
                             casdaOtherDimImageTypes+=("\${imageType}")
+                            if [ "\${BEAM}" == "all" ] && [ "\${imageCode}" == "restored" ]; then
+                                casdaOtherDimImageNames+=(\${FIELD}/\${weightsImage}\${fitsSuffix})
+                                casdaOtherDimImageTypes+=("\${weightsType}")
+                                casdaOtherDimImageSpectra+=("")
+                                casdaOtherDimImageNoise+=("")
+                                casdaOtherDimImageMoments+=("")
+                                casdaOtherDimImageFDF+=("")
+                                casdaOtherDimImageRMSF+=("")
+                                casdaOtherDimImagePol+=("")
+                            fi
+                            ### Not yet writing extracted files direct to FITS, so change the assignment of fitsSuffix
+                            fitsSuffix=""
+                            if [ "\${ADD_FITS_SUFFIX}" == "true" ]; then
+                                fitsSuffix=".fits"
+                            fi                        
                             if [ -e "\${FIELD}/\${selavyDir}" ]; then
                                 prefix="\${FIELD}/\${selavyPolDir}/${SELAVY_POL_OUTPUT_BASE}"
                                 suffix="SB${SB_SCIENCE}_\${contImage}*\${fitsSuffix}"
@@ -286,16 +331,6 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                                     casdaOtherDimImageRMSF+=("")
                                 fi
                             else
-                                casdaOtherDimImageSpectra+=("")
-                                casdaOtherDimImageNoise+=("")
-                                casdaOtherDimImageMoments+=("")
-                                casdaOtherDimImageFDF+=("")
-                                casdaOtherDimImageRMSF+=("")
-                                casdaOtherDimImagePol+=("")
-                            fi
-                            if [ "\${BEAM}" == "all" ] && [ "\${imageCode}" == "restored" ]; then
-                                casdaOtherDimImageNames+=(\${FIELD}/\${weightsImage}\${fitsSuffix})
-                                casdaOtherDimImageTypes+=("\${weightsType}")
                                 casdaOtherDimImageSpectra+=("")
                                 casdaOtherDimImageNoise+=("")
                                 casdaOtherDimImageMoments+=("")

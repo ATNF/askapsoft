@@ -110,9 +110,6 @@ beamList=""
 for BEAM in \${BEAMS_TO_USE}; do
     setImageProperties spectral
     im="\${imageName}"
-    if [ "\${IMAGETYPE_SPECTRAL}" == "fits" ]; then
-        im="\${im}.fits"
-    fi
     if [ -e "\${im}" ]; then
         echo "   Found! Adding to beamList"
         if [ "\${beamList}" == "" ]; then

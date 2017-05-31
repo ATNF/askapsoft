@@ -94,10 +94,6 @@ if [ "${DO_IT}" == "true" ] && [ "${DO_SELFCAL}" == "true" ]; then
     setImageProperties cont
     selavyImage="${OUTPUT}/${imageName}"
     selavyWeights="${OUTPUT}/${weightsImage}"
-    if [ "${IMAGETYPE_CONT}" == "fits" ]; then
-        selavyImage="${selavyImage}.fits"
-        selavyWeights="${selavyWeights}.fits"
-    fi
 
     cutWeights=$(echo "${SELFCAL_SELAVY_WEIGHTSCUT}" | awk '{if (($1>0.)&&($1<1.)) print "true"; else print "false";}')
     if [ "${cutWeights}" == "true" ]; then

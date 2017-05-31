@@ -151,10 +151,6 @@ for THISTILE in \$FULL_TILE_LIST; do
                 setImageProperties contcube
                 im="\${FIELD}/\${imageName}"
                 wt="\${FIELD}/\${weightsImage}"
-                if [ "\${IMAGETYPE_CONTCUBE}" == "fits" ]; then
-                    im="\${im}.fits"
-                    wt="\${wt}.fits"
-                fi
                 if [ -e "\${im}" ]; then
                     if [ "\${imList}" == "" ]; then
                         imList="\${im}"

@@ -129,9 +129,6 @@ for((LOOP=0;LOOP<=NUM_LOOPS;LOOP++)); do
                     DIR="selfCal_\${imageBase}/Loop\${LOOP}"
                 fi
                 im="\${DIR}/\${imageName}"
-                if [ "\${IMAGETYPE_CONT}" == "fits" ]; then
-                    im="\${im}.fits"
-                fi
                 if [ -e "\${im}" ]; then
                     if [ "\${beamList}" == "" ]; then
                         beamList="\${im}"
@@ -153,8 +150,12 @@ for((LOOP=0;LOOP<=NUM_LOOPS;LOOP++)); do
                 BEAM=all
                 setImageProperties cont
                 if [ "\$LOOP" -gt 0 ]; then
-                    imageName="\$imageName.SelfCalLoop\${LOOP}"
-                    weightsImage="\$weightsImage.SelfCalLoop\${LOOP}"
+                    imageName="\${imageName%%.fits}.SelfCalLoop\${LOOP}"
+                    weightsImage="\${weightsImage%%.fits}.SelfCalLoop\${LOOP}"
+                    if [ "\${IMAGETYPE_CONT}" == "fits" ]; then
+                        imageName="\${imageName}.fits"
+                        weightsImage="\${weightsImage}.fits"
+                    fi
                 fi
                 echo "Mosaicking to form \${imageName}"
                 parset=${parsets}/science_\${jobCode}_${FIELDBEAM}_\${SLURM_JOB_ID}.in

@@ -33,10 +33,9 @@
 # In this bit, we use the clean model from the continuum imaging
 # as the input to ccontsubtract
 
-modelImage=image.${imageBase}
-if [ "${IMAGETYPE_CONT}" == "fits" ]; then
-    modelImage="${modelImage}.fits"
-fi
+imageCode=image
+setImageProperties cont
+modelImage=${imageName}
 
 ContsubModelDefinition="# The model definition
 CContsubtract.sources.names                       = [lsm]

@@ -159,12 +159,13 @@ function getTile()
 function setSelavyDirs()
 {
     type=$1
-
+    # remove .fits extension if present
+    im=${imageName%%.fits}
     if [ "${type}" == "cont" ]; then
-        selavyDir=selavy-cont-${imageName}
+        selavyDir=selavy-cont-${im}
         selavyPolDir="${selavyDir}/PolData"
     elif [ "${type}" == "spectral" ]; then
-        selavyDir=selavy-spectral-${imageName}
+        selavyDir=selavy-spectral-${im}
         selavySpectraDir="${selavyDir}/Spectra"
         selavyMomentsDir="${selavyDir}/Moments"
         selavyCubeletsDir="${selavyDir}/Cubelets"
@@ -189,6 +190,8 @@ function setSelavyDirs()
 #  * IMAGE_BASE_CONT,IMAGE_BASE_CONTCUBE,IMAGE_BASE_SPECTRAL
 #  * subband (only used if NUM_SPECTRAL_CUBES or NUM_SPECTRAL_CUBES_CONTCUBE > 1)
 #  * DO_ALT_IMAGER_{CONT,CONTCUBE,SPECTRAL} (if required)
+#  * IMAGETYPE_{CONT,CONTCUBE,SPECTRAL}, to determine whether a .fits
+#    extension is added to the filenames.
 #  * ALT_IMAGER_SINGLE_FILE or ALT_IMAGER_SINGLE_FILE_CONTCUBE (for
 #         spectral-line or continuum cube respectively, for ALT_IMAGER=true)
 # Available upon return:
@@ -214,6 +217,7 @@ function setImageProperties()
 
     band=""
     doAlt=false
+    extension=""
 
     if [ "$type" == "cont" ]; then
         typebase="cont"
@@ -225,6 +229,9 @@ function setImageProperties()
             imSuffix=".taylor.$TTERM"
             typeSuffix="T${TTERM}"
         fi
+        if [ "${IMAGETYPE_CONT}" == "fits" ]; then
+            extension=".fits"
+        fi
         # Add the writer information for the askap_imager case, but not when we have a single-file FITS output
         if [ "${DO_ALT_IMAGER_CONT}" == "true" ]; then
             doAlt=true
@@ -233,6 +240,9 @@ function setImageProperties()
         typebase="spectral"
         labelbase="spectral cube"
         typeSuffix="3d"
+        if [ "${IMAGETYPE_SPECTRAL}" == "fits" ]; then
+            extension=".fits"
+        fi
         # Add the writer information for the askap_imager case, but not when we have a single-file FITS output
         if [ "${DO_ALT_IMAGER_SPECTRAL}" == "true" ]; then
             doAlt=true
@@ -244,6 +254,9 @@ function setImageProperties()
         typebase="cont"
         labelbase="continuum cube"
         typeSuffix="3d"
+        if [ "${IMAGETYPE_CONTCUBE}" == "fits" ]; then
+            extension=".fits"
+        fi
         # Add the writer information for the askap_imager case, but not when we have a single-file FITS output
         if [ "${DO_ALT_IMAGER_CONTCUBE}" == "true" ]; then
             doAlt=true
@@ -267,7 +280,7 @@ function setImageProperties()
 
     base="${band}${imageBase}${imSuffix}"
 
-    weightsImage="weights.${base}"
+    weightsImage="weights.${base}${extension}"
     #    weightsType="${typebase}_weights_$typeSuffix"
     weightsType="${typebase}_sensitivity_$typeSuffix"
     weightsLabel="Weights image, $beamSuffix"
@@ -326,6 +339,8 @@ function setImageProperties()
         echo "WARNING - unknown image code \"${imageCode}\""
     fi
 
+    imageName="${imageName}${extension}"
+    
     # Definitions use by Selavy jobs
     setSelavyDirs $type
     if [ "${type}" == "cont" ]; then
