@@ -29,7 +29,7 @@
 #ifndef ASKAP_ANALYSIS_CASDA_POLARISATION_ENTRY_H_
 #define ASKAP_ANALYSIS_CASDA_POLARISATION_ENTRY_H_
 
-#include <catalogues/casda.h>
+#include <catalogues/Casda.h>
 #include <catalogues/CatalogueEntry.h>
 #include <catalogues/CasdaComponent.h>
 #include <polarisation/RMSynthesis.h>
@@ -37,6 +37,8 @@
 #include <duchamp/Outputs/CatalogueSpecification.hh>
 #include <duchamp/Outputs/columns.hh>
 #include <vector>
+#include <Blob/BlobIStream.h>
+#include <Blob/BlobOStream.h>
 
 namespace askap {
 
@@ -51,7 +53,10 @@ namespace analysis {
 /// file.
 class CasdaPolarisationEntry : public CatalogueEntry {
     public:
-        /// Constructor that builds the Polarisation object from a
+        /// Default constructor that does nothing.
+        CasdaPolarisationEntry();
+
+/// Constructor that builds the Polarisation object from a
         /// RadioSource. It takes a single fitted component and runs
         /// the RM Synthesis on it. The parset defines the detection
         /// thresholds, as well as scheduling block information, and
@@ -67,6 +72,8 @@ class CasdaPolarisationEntry : public CatalogueEntry {
         const float ra();
         /// Return the Declination (in decimal degrees)
         const float dec();
+        // Return the component ID
+        const std::string id();
 
         ///  Print a row of values for the Component into an
         ///  output table. Each column from the catalogue
@@ -94,6 +101,32 @@ class CasdaPolarisationEntry : public CatalogueEntry {
 
         /// Perform the column check for all colums in specification.
         void checkSpec(duchamp::Catalogues::CatalogueSpecification &spec);
+
+        /// @brief Functions allowing CasdaPolarisationEntry objects to be passed
+        /// over LOFAR Blobs
+        /// @name
+        /// @{
+        /// @brief Pass a CasdaPolarisationEntry object into a Blob
+        /// @details This function provides a mechanism for passing the
+        /// entire contents of a CasdaPolarisationEntry object into a
+        /// LOFAR::BlobOStream stream
+        friend LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream &stream,
+                                              CasdaPolarisationEntry& src);
+        /// @brief Receive a CasdaPolarisationEntry object from a Blob
+        /// @details This function provides a mechanism for receiving the
+        /// entire contents of a CasdaPolarisationEntry object from a
+        /// LOFAR::BlobIStream stream
+        friend LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream &stream,
+                                              CasdaPolarisationEntry& src);
+
+        /// @}
+
+        /// @brief Comparison operator, using the component ID
+        friend bool operator< (CasdaPolarisationEntry lhs, CasdaPolarisationEntry rhs)
+        {
+            return (lhs.id() < rhs.id());
+        }
+
 
     protected:
 
@@ -152,32 +185,32 @@ class CasdaPolarisationEntry : public CatalogueEntry {
         float itsDebiasThreshold;
 
         /// The peak polarised intensity in the FDF
-        casda::ValueError<double>  itsPintPeak;
+        casda::ValueError  itsPintPeak;
         /// The peak polarised intensity in the FDF, corrected for
         /// polarisation bias
         double itsPintPeakDebias;
         /// The fitted peak polarised intensity in the FDF
-        casda::ValueError<double>  itsPintPeakFit;
+        casda::ValueError  itsPintPeakFit;
         /// The fitted peak polarised intensity in the FDF, corrected for
         /// polarisation bias
         double itsPintPeakFitDebias;
 
         /// The signal-to-noise ratio of the fitted peak polarised
         /// intensity
-        casda::ValueError<double>  itsPintFitSNR;
+        casda::ValueError  itsPintFitSNR;
 
         /// The Faraday Depth at the peak of the FDF
-        casda::ValueError<double>  itsPhiPeak;
+        casda::ValueError  itsPhiPeak;
         /// The Faraday Depth from a fit to the peak of the FDF
-        casda::ValueError<double>  itsPhiPeakFit;
+        casda::ValueError  itsPhiPeakFit;
 
         /// The polarisation angle at the reference wavelength
-        casda::ValueError<double>  itsPolAngleRef;
+        casda::ValueError  itsPolAngleRef;
         /// The polarisation angle at zero wavelength
-        casda::ValueError<double>  itsPolAngleZero;
+        casda::ValueError  itsPolAngleZero;
 
         /// The fractional polarisation
-        casda::ValueError<double>  itsFracPol;
+        casda::ValueError  itsFracPol;
 
         /// The first Faraday Complexity metric - deviation from constant
         /// P(nu)

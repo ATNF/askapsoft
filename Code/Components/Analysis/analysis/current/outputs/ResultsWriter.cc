@@ -31,6 +31,7 @@
 
 #include <askap/AskapLogging.h>
 #include <askap/AskapError.h>
+#include <askapparallel/AskapParallel.h>
 
 #include <parallelanalysis/DuchampParallel.h>
 #include <sourcefitting/RadioSource.h>
@@ -60,8 +61,9 @@ namespace askap {
 
 namespace analysis {
 
-ResultsWriter::ResultsWriter(DuchampParallel *finder):
+ResultsWriter::ResultsWriter(DuchampParallel *finder, askap::askapparallel::AskapParallel &comms):
     itsParset(finder->parset()),
+    itsComms(comms),
     itsCube(finder->cube()),
     itsSourceList(finder->rSourceList()),
     itsFitParams(finder->fitParams()),
@@ -78,80 +80,83 @@ void ResultsWriter::setFlag2D(bool flag2D)
 void ResultsWriter::duchampOutput()
 {
 
-    if (itsParset.getBool("writeDuchampFiles", true)) {
+    if (itsComms.isMaster()) {
 
-        // Write standard Duchamp results file
-        ASKAPLOG_INFO_STR(logger,
-                          "Writing to output catalogue " << itsCube.pars().getOutFile());
-        itsCube.outputCatalogue();
+        if (itsParset.getBool("writeDuchampFiles", true)) {
 
-        if (itsCube.pars().getFlagLog() && (itsCube.getNumObj() > 0)) {
-            // Write the log summary only if required
-            itsCube.logSummary();
-        }
-
-        // Write all Duchamp annotation files
-        itsCube.outputAnnotations();
-
-        if (itsCube.pars().getFlagVOT()) {
+            // Write standard Duchamp results file
             ASKAPLOG_INFO_STR(logger,
-                              "Writing to output VOTable " << itsCube.pars().getVOTFile());
-            // Write the standard Duchamp VOTable (not the CASDA islands table!)
-            itsCube.outputDetectionsVOTable();
-        }
+                              "Writing to output catalogue " << itsCube.pars().getOutFile());
+            itsCube.outputCatalogue();
 
-        if (itsCube.pars().getFlagTextSpectra()) {
-            ASKAPLOG_INFO_STR(logger, "Saving spectra to text file " <<
-                              itsCube.pars().getSpectraTextFile());
-            // Write a text file containing identified spectra
-            itsCube.writeSpectralData();
-        }
+            if (itsCube.pars().getFlagLog() && (itsCube.getNumObj() > 0)) {
+                // Write the log summary only if required
+                itsCube.logSummary();
+            }
 
-        if (itsCube.pars().getFlagWriteBinaryCatalogue() &&
-                (itsCube.getNumObj() > 0)) {
-            ASKAPLOG_INFO_STR(logger,
-                              "Creating binary catalogue of detections, called " <<
-                              itsCube.pars().getBinaryCatalogue());
-            // Write the standard Duchamp-format binary catalogue.
-            itsCube.writeBinaryCatalogue();
-        }
+            // Write all Duchamp annotation files
+            itsCube.outputAnnotations();
 
+            if (itsCube.pars().getFlagVOT()) {
+                ASKAPLOG_INFO_STR(logger,
+                                  "Writing to output VOTable " << itsCube.pars().getVOTFile());
+                // Write the standard Duchamp VOTable (not the CASDA islands table!)
+                itsCube.outputDetectionsVOTable();
+            }
+
+            if (itsCube.pars().getFlagTextSpectra()) {
+                ASKAPLOG_INFO_STR(logger, "Saving spectra to text file " <<
+                                  itsCube.pars().getSpectraTextFile());
+                // Write a text file containing identified spectra
+                itsCube.writeSpectralData();
+            }
+
+            if (itsCube.pars().getFlagWriteBinaryCatalogue() &&
+                    (itsCube.getNumObj() > 0)) {
+                ASKAPLOG_INFO_STR(logger,
+                                  "Creating binary catalogue of detections, called " <<
+                                  itsCube.pars().getBinaryCatalogue());
+                // Write the standard Duchamp-format binary catalogue.
+                itsCube.writeBinaryCatalogue();
+            }
+
+        }
     }
-
 }
 
 void ResultsWriter::writeIslandCatalogue()
 {
-    if (itsFlag2D) {
+    if (itsComms.isMaster()) {
+        if (itsFlag2D) {
 
-        IslandCatalogue cat(itsSourceList, itsParset, itsCube);
-        cat.write();
+            IslandCatalogue cat(itsSourceList, itsParset, &itsCube);
+            cat.write();
 
+        }
     }
-
 }
 
 void ResultsWriter::writeComponentCatalogue()
 {
-    if (itsFitParams.doFit()) {
+    if (itsComms.isMaster()) {
+        if (itsFitParams.doFit()) {
 
-        ComponentCatalogue cat(itsSourceList, itsParset, itsCube);
-        cat.write();
+            ComponentCatalogue cat(itsSourceList, itsParset, &itsCube);
+            cat.write();
 
+        }
     }
-
 }
 
 void ResultsWriter::writeHiEmissionCatalogue()
 {
-
     if (itsParset.getBool("HiEmissionCatalogue", false)) {
-
-        HiEmissionCatalogue cat(itsSourceList, itsParset, itsCube);
-        cat.write();
-
+        
+        HiEmissionCatalogue cat(itsSourceList, itsParset, &itsCube, itsComms);
+        if (itsComms.isMaster()) {
+            cat.write();
+        }
     }
-
 }
 
 
@@ -160,9 +165,10 @@ void ResultsWriter::writePolarisationCatalogue()
 
     if (itsParset.getBool("RMSynthesis", false)) {
 
-        RMCatalogue cat(itsSourceList, itsParset, itsCube);
-        cat.write();
-
+        RMCatalogue cat(itsSourceList, itsParset, &itsCube, itsComms);
+        if (itsComms.isMaster()) {
+            cat.write();
+        }
     }
 
 }
@@ -170,111 +176,116 @@ void ResultsWriter::writePolarisationCatalogue()
 
 void ResultsWriter::writeFitResults()
 {
-    if (itsFitParams.doFit()) {
+    if (itsComms.isMaster()) {
+        if (itsFitParams.doFit()) {
 
-        if (itsParset.getBool("writeFitResults", false)) {
+            if (itsParset.getBool("writeFitResults", false)) {
 
-            std::vector<std::string> outtypes = itsFitParams.fitTypes();
-            outtypes.push_back("best");
+                std::vector<std::string> outtypes = itsFitParams.fitTypes();
+                outtypes.push_back("best");
 
-            for (size_t t = 0; t < outtypes.size(); t++) {
+                for (size_t t = 0; t < outtypes.size(); t++) {
 
-                FitCatalogue cat(itsSourceList, itsParset, itsCube, outtypes[t]);
-                cat.write();
-
-            }
-
-        }
-
-    }
-
-}
-
-void ResultsWriter::writeFitAnnotations()
-{
-    if (itsFitParams.doFit()) {
-
-        std::string fitBoxAnnotationFile = itsParset.getString("fitBoxAnnotationFile",
-                                           "selavy-fitResults.boxes.ann");
-        if (!itsFitParams.fitJustDetection()) {
-
-            if (itsSourceList.size() > 0) {
-
-                for (int i = 0; i < 3; i++) {
-                    boost::shared_ptr<duchamp::AnnotationWriter> writerFit;
-                    boost::shared_ptr<duchamp::AnnotationWriter> writerBox;
-                    std::string filename;
-                    size_t loc;
-                    switch (i) {
-                        case 0: //Karma
-                            writerBox = boost::shared_ptr<KarmaAnnotationWriter>(
-                                            new KarmaAnnotationWriter(fitBoxAnnotationFile));
-                            break;
-                        case 1://DS9
-                            filename = fitBoxAnnotationFile;
-                            loc = filename.rfind(".ann");
-                            if (loc == std::string::npos) filename += ".reg";
-                            else filename.replace(loc, 4, ".reg");
-                            writerBox = boost::shared_ptr<DS9AnnotationWriter>(
-                                            new DS9AnnotationWriter(filename));
-                            break;
-                        case 2://CASA
-                            filename = fitBoxAnnotationFile;
-                            loc = filename.rfind(".ann");
-                            if (loc == std::string::npos) filename += ".reg";
-                            else filename.replace(loc, 4, ".reg");
-                            writerBox =
-                                boost::shared_ptr<CasaAnnotationWriter>(
-                                    new CasaAnnotationWriter(filename));
-                            break;
-                    }
-
-                    if (writerBox.get() != 0) {
-                        writerBox->setup(&itsCube);
-                        writerBox->openCatalogue();
-                        writerBox->setColourString("BLUE");
-                        writerBox->writeHeader();
-                        writerBox->writeParameters();
-                        writerBox->writeStats();
-                        writerBox->writeTableHeader();
-
-                        std::vector<sourcefitting::RadioSource>::iterator src;
-                        int num = 1;
-                        for (src = itsSourceList.begin(); src < itsSourceList.end(); src++) {
-                            src->writeFitToAnnotationFile(writerBox, num++, false, true);
-                        }
-
-                        writerBox->writeFooter();
-                        writerBox->closeCatalogue();
-                    }
-
-                    writerBox.reset();
+                    FitCatalogue cat(itsSourceList, itsParset, &itsCube, outtypes[t]);
+                    cat.write();
 
                 }
 
             }
 
         }
+    }
+}
 
+void ResultsWriter::writeFitAnnotations()
+{
+    if (itsComms.isMaster()) {
+        if (itsFitParams.doFit()) {
+
+            std::string fitBoxAnnotationFile = itsParset.getString("fitBoxAnnotationFile",
+                                               "selavy-fitResults.boxes.ann");
+            if (!itsFitParams.fitJustDetection()) {
+
+                if (itsSourceList.size() > 0) {
+
+                    for (int i = 0; i < 3; i++) {
+                        boost::shared_ptr<duchamp::AnnotationWriter> writerFit;
+                        boost::shared_ptr<duchamp::AnnotationWriter> writerBox;
+                        std::string filename;
+                        size_t loc;
+                        switch (i) {
+                            case 0: //Karma
+                                writerBox = boost::shared_ptr<KarmaAnnotationWriter>(
+                                                new KarmaAnnotationWriter(fitBoxAnnotationFile));
+                                break;
+                            case 1://DS9
+                                filename = fitBoxAnnotationFile;
+                                loc = filename.rfind(".ann");
+                                if (loc == std::string::npos) filename += ".reg";
+                                else filename.replace(loc, 4, ".reg");
+                                writerBox = boost::shared_ptr<DS9AnnotationWriter>(
+                                                new DS9AnnotationWriter(filename));
+                                break;
+                            case 2://CASA
+                                filename = fitBoxAnnotationFile;
+                                loc = filename.rfind(".ann");
+                                if (loc == std::string::npos) filename += ".reg";
+                                else filename.replace(loc, 4, ".reg");
+                                writerBox =
+                                    boost::shared_ptr<CasaAnnotationWriter>(
+                                        new CasaAnnotationWriter(filename));
+                                break;
+                        }
+
+                        if (writerBox.get() != 0) {
+                            writerBox->setup(&itsCube);
+                            writerBox->openCatalogue();
+                            writerBox->setColourString("BLUE");
+                            writerBox->writeHeader();
+                            writerBox->writeParameters();
+                            writerBox->writeStats();
+                            writerBox->writeTableHeader();
+
+                            std::vector<sourcefitting::RadioSource>::iterator src;
+                            int num = 1;
+                            for (src = itsSourceList.begin(); src < itsSourceList.end(); src++) {
+                                src->writeFitToAnnotationFile(writerBox, num++, false, true);
+                            }
+
+                            writerBox->writeFooter();
+                            writerBox->closeCatalogue();
+                        }
+
+                        writerBox.reset();
+
+                    }
+
+                }
+
+            }
+
+        }
     }
 }
 
 void ResultsWriter::writeComponentParset()
 {
-    if (itsFitParams.doFit()) {
-        if (itsParset.getBool("outputComponentParset", false)) {
-            /// @todo Instantiate the writer from a parset - then don't have to find the flags etc
-            LOFAR::ParameterSet subset = itsParset.makeSubset("outputComponentParset.");
-            ASKAPLOG_INFO_STR(logger, "Writing Fit results to parset named "
-                              << subset.getString("filename"));
-            AskapComponentParsetWriter pwriter(subset, &itsCube);
-            pwriter.setFitType("best");
-            pwriter.setSourceList(&itsSourceList);
-            pwriter.openCatalogue();
-            pwriter.writeTableHeader();
-            pwriter.writeEntries();
-            pwriter.writeFooter();
-            pwriter.closeCatalogue();
+    if (itsComms.isMaster()) {
+        if (itsFitParams.doFit()) {
+            if (itsParset.getBool("outputComponentParset", false)) {
+                /// @todo Instantiate the writer from a parset - then don't have to find the flags etc
+                LOFAR::ParameterSet subset = itsParset.makeSubset("outputComponentParset.");
+                ASKAPLOG_INFO_STR(logger, "Writing Fit results to parset named "
+                                  << subset.getString("filename"));
+                AskapComponentParsetWriter pwriter(subset, &itsCube);
+                pwriter.setFitType("best");
+                pwriter.setSourceList(&itsSourceList);
+                pwriter.openCatalogue();
+                pwriter.writeTableHeader();
+                pwriter.writeEntries();
+                pwriter.writeFooter();
+                pwriter.closeCatalogue();
+            }
         }
     }
 }

@@ -53,7 +53,7 @@ int main(int argc, const char *argv[])
         objlist.push_back(std::pair<CasdaComponent,sourcefitting::RadioSource>(comp,obj));
         duchamp::Cube *cube = finder.pCube();
         
-        AbsorptionCatalogue cat(objlist, parset, *cube);
+        AbsorptionCatalogue cat(objlist, parset, cube);
         cat.write();
 
 

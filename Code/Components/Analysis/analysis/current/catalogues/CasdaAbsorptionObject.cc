@@ -29,7 +29,7 @@
 #include <catalogues/CasdaAbsorptionObject.h>
 #include <catalogues/CatalogueEntry.h>
 #include <catalogues/CasdaComponent.h>
-#include <catalogues/casda.h>
+#include <catalogues/Casda.h>
 #include <askap_analysis.h>
 
 #include <askap/AskapLogging.h>
@@ -45,6 +45,8 @@
 #include <duchampinterface/DuchampInterface.h>
 
 #include <Common/ParameterSet.h>
+#include <Blob/BlobIStream.h>
+#include <Blob/BlobOStream.h>
 #include <casacore/casa/Quanta/Quantum.h>
 #include <casacore/casa/Quanta/MVTime.h>
 #include <casacore/images/Images/ImageInterface.h>
@@ -58,6 +60,11 @@ ASKAP_LOGGER(logger, ".casdaabsorptionobject");
 namespace askap {
 
 namespace analysis {
+
+CasdaAbsorptionObject::CasdaAbsorptionObject():
+    CatalogueEntry()
+{
+}
 
 CasdaAbsorptionObject::CasdaAbsorptionObject(CasdaComponent &component,
         sourcefitting::RadioSource &obj,
@@ -137,6 +144,11 @@ const float CasdaAbsorptionObject::ra()
 const float CasdaAbsorptionObject::dec()
 {
     return itsDEC.value();
+}
+
+const std::string CasdaAbsorptionObject::id()
+{
+    return itsObjectID;
 }
 
 void CasdaAbsorptionObject::printTableRow(std::ostream &stream,
@@ -319,9 +331,69 @@ void CasdaAbsorptionObject::checkSpec(duchamp::Catalogues::CatalogueSpecificatio
     }
 }
 
+LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream &blob,
+                               CasdaAbsorptionObject& src)
+{
+    std::string s;
+    double d;
+    casda::ValueError v;
 
+    s = src.itsImageID; blob << s;
+    s = src.itsDate; blob << s;
+    s = src.itsComponentID; blob << s;
+    d = src.itsContinuumFlux; blob << d;
+    s = src.itsObjectID; blob << s;
+    s = src.itsName; blob << s;
+    s = src.itsRAs; blob << s;
+    s = src.itsDECs; blob << s;
+    v = src.itsRA; blob << v;
+    v = src.itsDEC; blob << v;
+    v = src.itsFreqUW; blob << v;
+    v = src.itsFreqW; blob << v;
+    v = src.itsZHI_UW; blob << v;
+    v = src.itsZHI_W; blob << v;
+    v = src.itsZHI_peak; blob << v;
+    v = src.itsW50; blob << v;
+    v = src.itsW20; blob << v;
+    d = src.itsRMSimagecube; blob << d;
+    v = src.itsOpticalDepth_peak; blob << v;
+    v = src.itsOpticalDepth_int; blob << v;
+    s = src.itsComment; blob << s;
 
-
+    return blob;
 }
 
+LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream &blob,
+                               CasdaAbsorptionObject& src)
+{
+    std::string s;
+    double d;
+    casda::ValueError v;
+
+    blob >> s; src.itsImageID = s;
+    blob >> s; src.itsDate = s;
+    blob >> s; src.itsComponentID = s;
+    blob >> d; src.itsContinuumFlux = d;
+    blob >> s; src.itsObjectID = s;
+    blob >> s; src.itsName = s;
+    blob >> s; src.itsRAs = s;
+    blob >> s; src.itsDECs = s;
+    blob >> v; src.itsRA = v;
+    blob >> v; src.itsDEC = v;
+    blob >> v; src.itsFreqUW = v;
+    blob >> v; src.itsFreqW = v;
+    blob >> v; src.itsZHI_UW = v;
+    blob >> v; src.itsZHI_W = v;
+    blob >> v; src.itsZHI_peak = v;
+    blob >> v; src.itsW50 = v;
+    blob >> v; src.itsW20 = v;
+    blob >> d; src.itsRMSimagecube = d;
+    blob >> v; src.itsOpticalDepth_peak = v;
+    blob >> v; src.itsOpticalDepth_int = v;
+    blob >> s; src.itsComment = s;
+
+    return blob;
+}
+
+}
 }

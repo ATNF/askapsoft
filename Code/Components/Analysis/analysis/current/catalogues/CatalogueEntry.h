@@ -42,6 +42,10 @@ namespace analysis {
 /// RA and Dec of the entry.
 class CatalogueEntry {
     public:
+
+        /// Default constructor that does nothing
+        CatalogueEntry();
+
         /// Constructor from a parset, getting the SB ID and making a
         /// base ID with it and the image name.
         CatalogueEntry(const LOFAR::ParameterSet &parset);

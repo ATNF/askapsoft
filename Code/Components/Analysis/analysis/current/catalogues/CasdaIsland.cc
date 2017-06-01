@@ -29,7 +29,7 @@
 #include <catalogues/CasdaIsland.h>
 #include <askap_analysis.h>
 #include <catalogues/CatalogueEntry.h>
-#include <catalogues/casda.h>
+#include <catalogues/Casda.h>
 
 #include <askap/AskapLogging.h>
 #include <askap/AskapError.h>
@@ -87,8 +87,8 @@ CasdaIsland::CasdaIsland(sourcefitting::RadioSource &obj,
     itsIslandID = id.str();
 
     // Convert the header class to use FREQ type and the appropriate unit
-    duchamp::FitsHeader newHead_freq = changeSpectralAxis(obj.header(),"FREQ-???",casda::freqUnit);
-    
+    duchamp::FitsHeader newHead_freq = changeSpectralAxis(obj.header(), "FREQ-???", casda::freqUnit);
+
     casa::Unit wcsFreqUnits(newHead_freq.getSpectralUnits());
     casa::Unit freqUnits(casda::freqUnit);
     double freqScale = casa::Quantity(1., wcsFreqUnits).getValue(freqUnits);
@@ -101,8 +101,8 @@ CasdaIsland::CasdaIsland(sourcefitting::RadioSource &obj,
 
     // Re-calculate WCS parameters
     obj.calcWCSparams(newHead_freq);
-    itsFreq = obj.getVel()*freqScale;
-    
+    itsFreq = obj.getVel() * freqScale;
+
 }
 
 const float CasdaIsland::ra()

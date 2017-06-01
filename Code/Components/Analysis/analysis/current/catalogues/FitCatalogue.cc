@@ -33,7 +33,7 @@
 #include <askap/AskapError.h>
 
 #include <catalogues/CasdaComponent.h>
-#include <catalogues/casda.h>
+#include <catalogues/Casda.h>
 
 #include <sourcefitting/RadioSource.h>
 #include <outputs/AskapVOTableCatalogueWriter.h>
@@ -52,7 +52,7 @@ namespace analysis {
 
 FitCatalogue::FitCatalogue(std::vector<sourcefitting::RadioSource> &srclist,
                            const LOFAR::ParameterSet &parset,
-                           duchamp::Cube &cube,
+                           duchamp::Cube *cube,
                            const std::string fitType):
     ComponentCatalogue(srclist, parset, cube, fitType)
 {

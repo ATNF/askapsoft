@@ -1,6 +1,6 @@
 /// @file
 ///
-/// Implementation of base class CatalogueEntry
+/// Constants needed for CASDA catalogues
 ///
 /// @copyright (c) 2014 CSIRO
 /// Australia Telescope National Facility (ATNF)
@@ -26,44 +26,47 @@
 ///
 /// @author Matthew Whiting <Matthew.Whiting@csiro.au>
 ///
-#include <catalogues/CatalogueEntry.h>
-#include <askap_analysis.h>
-
-#include <askap/AskapLogging.h>
-#include <askap/AskapError.h>
-
-#include <Common/ParameterSet.h>
-
-ASKAP_LOGGER(logger, ".catalogueentry");
+#include <catalogues/Casda.h>
+#include <Blob/BlobIStream.h>
+#include <Blob/BlobOStream.h>
 
 namespace askap {
 
 namespace analysis {
 
-CatalogueEntry::CatalogueEntry()
+namespace casda {
+
+ValueError::ValueError():
+    itsValue(0.),
+    itsError(0.)
 {
 }
 
-CatalogueEntry::CatalogueEntry(const LOFAR::ParameterSet &parset):
-    itsSBid(parset.getString("sbid", "null"))
+ValueError::ValueError(double val, double err):
+    itsValue(val),
+    itsError(err)
 {
-    std::string imageName = parset.getString("image");
-    if (imageName.find(".fits") != std::string::npos) {
-        if (imageName.substr(imageName.rfind("."), std::string::npos) == ".fits") {
-            imageName.erase(imageName.rfind("."), std::string::npos);
-        }
-    }
-    imageName.erase(0, imageName.rfind("/") + 1);
-    std::stringstream id;
-    if (itsSBid != "null") {
-        id << "SB" << itsSBid << "_";
-    }
-    id << imageName << "_";
-    itsIDbase = id.str();
-
 }
 
+ValueError::~ValueError()
+{
+}
 
+LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream &blob, ValueError& src)
+{
+    blob << src.itsValue;
+    blob << src.itsError;
+    return blob;
+}
+
+LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream &blob, ValueError& src)
+{
+    blob >> src.itsValue;
+    blob >> src.itsError;
+    return blob;
 }
 
 }
+}
+}
+

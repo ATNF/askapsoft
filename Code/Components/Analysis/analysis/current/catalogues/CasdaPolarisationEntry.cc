@@ -30,7 +30,7 @@
 #include <catalogues/CasdaComponent.h>
 #include <catalogues/CatalogueEntry.h>
 #include <catalogues/CasdaIsland.h>
-#include <catalogues/casda.h>
+#include <catalogues/Casda.h>
 #include <askap_analysis.h>
 
 #include <askap/AskapLogging.h>
@@ -43,6 +43,9 @@
 #include <duchamp/Outputs/CatalogueSpecification.hh>
 #include <duchamp/Outputs/columns.hh>
 
+#include <Blob/BlobIStream.h>
+#include <Blob/BlobOStream.h>
+
 #include <vector>
 
 ASKAP_LOGGER(logger, ".casdapolarisation");
@@ -50,6 +53,11 @@ ASKAP_LOGGER(logger, ".casdapolarisation");
 namespace askap {
 
 namespace analysis {
+
+CasdaPolarisationEntry::CasdaPolarisationEntry():
+    CatalogueEntry()
+{
+}
 
 CasdaPolarisationEntry::CasdaPolarisationEntry(CasdaComponent *comp,
         const LOFAR::ParameterSet &parset):
@@ -150,6 +158,10 @@ const float CasdaPolarisationEntry::dec()
     return itsDec;
 }
 
+const std::string CasdaPolarisationEntry::id()
+{
+    return itsComponentID;
+}
 
 void CasdaPolarisationEntry::printTableRow(std::ostream &stream,
         duchamp::Catalogues::CatalogueSpecification &columns)
@@ -361,8 +373,113 @@ void CasdaPolarisationEntry::checkSpec(duchamp::Catalogues::CatalogueSpecificati
     }
 }
 
+//**************************************************************//
 
+LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& blob, CasdaPolarisationEntry& src)
+{
+    std::string s;
+    double d;
+    casda::ValueError v;
+    unsigned int u;
+
+    // from CatalogueEntry.h
+    s = src.itsSBid; blob << s;
+    s = src.itsIDbase; blob << s;
+    // from CasdaPolarisationEntry.h
+    s = src.itsComponentID; blob << s;
+    s = src.itsName; blob << s;
+    d = src.itsRA; blob << d;
+    d = src.itsDec; blob << d;
+    d = src.itsFluxImedian; blob << d;
+    d = src.itsFluxQmedian; blob << d;
+    d = src.itsFluxUmedian; blob << d;
+    d = src.itsFluxVmedian; blob << d;
+    d = src.itsRmsI; blob << d;
+    d = src.itsRmsQ; blob << d;
+    d = src.itsRmsU; blob << d;
+    d = src.itsRmsV; blob << d;
+    d = src.itsPolyCoeff0; blob << d;
+    d = src.itsPolyCoeff1; blob << d;
+    d = src.itsPolyCoeff2; blob << d;
+    d = src.itsPolyCoeff3; blob << d;
+    d = src.itsPolyCoeff4; blob << d;
+    d = src.itsLambdaSqRef; blob << d;
+    d = src.itsRmsfFwhm; blob << d;
+    d = src.itsDetectionThreshold; blob << d;
+    d = src.itsDebiasThreshold; blob << d;
+    v = src.itsPintPeak; blob << v;
+    d = src.itsPintPeakDebias; blob << d;
+    v = src.itsPintPeakFit; blob << v;
+    d = src.itsPintPeakFitDebias; blob << d;
+    v = src.itsPintFitSNR; blob << v;
+    v = src.itsPhiPeak; blob << v;
+    v = src.itsPhiPeakFit; blob << v;
+    v = src.itsPolAngleRef; blob << v;
+    v = src.itsPolAngleZero; blob << v;
+    v = src.itsFracPol; blob << v;
+    d = src.itsComplexity; blob << d;
+    d = src.itsComplexity_screen; blob << d;
+    u = src.itsFlagDetection; blob << u;
+    u = src.itsFlagEdge; blob << u;
+    u = src.itsFlag3; blob << u;
+    u = src.itsFlag4; blob << u;
+
+    return blob;
 
 }
 
+LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& blob, CasdaPolarisationEntry& src)
+{
+    std::string s;
+    double d;
+    casda::ValueError v;
+    unsigned int u;
+
+    // from CatalogueEntry.h
+    blob >> s; src.itsSBid = s;
+    blob >> s; src.itsIDbase = s;
+    // from CasdaPolarisationEntry.h
+    blob >> s; src.itsComponentID = s;
+    blob >> s; src.itsName = s;
+    blob >> d; src.itsRA = d;
+    blob >> d; src.itsDec = d;
+    blob >> d; src.itsFluxImedian = d;
+    blob >> d; src.itsFluxQmedian = d;
+    blob >> d; src.itsFluxUmedian = d;
+    blob >> d; src.itsFluxVmedian = d;
+    blob >> d; src.itsRmsI = d;
+    blob >> d; src.itsRmsQ = d;
+    blob >> d; src.itsRmsU = d;
+    blob >> d; src.itsRmsV = d;
+    blob >> d; src.itsPolyCoeff0 = d;
+    blob >> d; src.itsPolyCoeff1 = d;
+    blob >> d; src.itsPolyCoeff2 = d;
+    blob >> d; src.itsPolyCoeff3 = d;
+    blob >> d; src.itsPolyCoeff4 = d;
+    blob >> d; src.itsLambdaSqRef = d;
+    blob >> d; src.itsRmsfFwhm = d;
+    blob >> d; src.itsDetectionThreshold = d;
+    blob >> d; src.itsDebiasThreshold = d;
+    blob >> v; src.itsPintPeak = v;
+    blob >> d; src.itsPintPeakDebias = d;
+    blob >> v; src.itsPintPeakFit = v;
+    blob >> d; src.itsPintPeakFitDebias = d;
+    blob >> v; src.itsPintFitSNR = v;
+    blob >> v; src.itsPhiPeak = v;
+    blob >> v; src.itsPhiPeakFit = v;
+    blob >> v; src.itsPolAngleRef = v;
+    blob >> v; src.itsPolAngleZero = v;
+    blob >> v; src.itsFracPol = v;
+    blob >> d; src.itsComplexity = d;
+    blob >> d; src.itsComplexity_screen = d;
+    blob >> u; src.itsFlagDetection = u;
+    blob >> u; src.itsFlagEdge = u;
+    blob >> u; src.itsFlag3 = u;
+    blob >> u; src.itsFlag4 = u;
+
+    return blob;
+
+}
+
+}
 }

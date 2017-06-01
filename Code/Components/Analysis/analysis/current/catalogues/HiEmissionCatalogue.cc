@@ -32,9 +32,10 @@
 #include <askap/AskapLogging.h>
 #include <askap/AskapError.h>
 
+#include <parallelanalysis/DistributedHIemission.h>
 #include <catalogues/CasdaHiEmissionObject.h>
 #include <catalogues/CasdaComponent.h>
-#include <catalogues/casda.h>
+#include <catalogues/Casda.h>
 
 #include <sourcefitting/RadioSource.h>
 #include <outputs/AskapVOTableCatalogueWriter.h>
@@ -53,15 +54,21 @@ namespace askap {
 namespace analysis {
 
 HiEmissionCatalogue::HiEmissionCatalogue(std::vector<sourcefitting::RadioSource> &srclist,
-        const LOFAR::ParameterSet &parset,
-        duchamp::Cube &cube):
+                                         const LOFAR::ParameterSet &parset,
+                                         duchamp::Cube *cube,
+                                         askap::askapparallel::AskapParallel &comms):
     itsObjects(),
     itsSpec(),
     itsCube(cube),
     itsVersion("casda.sl_hi_emission_object_v0.11")
 {
-    this->defineObjects(srclist, parset);
     this->defineSpec();
+
+    DistributedHIemission distribHI(comms, parset, srclist);
+    distribHI.distribute();
+    distribHI.parameterise();
+    distribHI.gather();
+    itsObjects = distribHI.finalList();
 
     duchamp::Param par = parseParset(parset);
     std::string filenameBase = par.getOutFile();
@@ -88,39 +95,39 @@ void HiEmissionCatalogue::defineSpec()
                       "meta.id;meta.main", "char", "col_object_id", "");
     itsSpec.addColumn("NAME", "object_name", "", 8, 0,
                       "meta.id", "char", "col_object_name", "");
-    itsSpec.addColumn("RA", "ra_hms_w", "["+casda::stringRAUnit+"]", 11, 0,
+    itsSpec.addColumn("RA", "ra_hms_w", "[" + casda::stringRAUnit + "]", 11, 0,
                       "pos.eq.ra", "char", "col_ra_hms_w", "J2000");
-    itsSpec.addColumn("DEC", "dec_dms_w", "["+casda::stringDECUnit+"]", 11, 0,
+    itsSpec.addColumn("DEC", "dec_dms_w", "[" + casda::stringDECUnit + "]", 11, 0,
                       "pos.eq.dec", "char", "col_dec_dms_w", "J2000");
-    itsSpec.addColumn("RA_W", "ra_deg_w", "["+casda::positionUnit+"]", 11, casda::precPos,
+    itsSpec.addColumn("RA_W", "ra_deg_w", "[" + casda::positionUnit + "]", 11, casda::precPos,
                       "pos.eq.ra;meta.main", "double", "col_ra_deg_w", "J2000");
     itsSpec.addColumn("RA_W_ERR", "ra_deg_w_err", "[arcsec]", 11, casda::precSize,
                       "stat.error;pos.eq.ra;meta.main", "float", "col_ra_deg_w_err", "J2000");
-    itsSpec.addColumn("DEC_W", "dec_deg_w", "["+casda::positionUnit+"]", 11, casda::precPos,
+    itsSpec.addColumn("DEC_W", "dec_deg_w", "[" + casda::positionUnit + "]", 11, casda::precPos,
                       "pos.eq.dec;meta.main", "double", "col_dec_deg_w", "J2000");
     itsSpec.addColumn("DEC_W_ERR", "dec_deg_w_err", "[arcsec]", 11, casda::precSize,
                       "stat.error;pos.eq.dec;meta.main", "float", "col_dec_deg_w_err", "J2000");
-    itsSpec.addColumn("RA_UW", "ra_deg_uw", "["+casda::positionUnit+"]", 11, casda::precPos,
+    itsSpec.addColumn("RA_UW", "ra_deg_uw", "[" + casda::positionUnit + "]", 11, casda::precPos,
                       "pos.eq.ra", "double", "col_ra_deg_uw", "J2000");
     itsSpec.addColumn("RA_UW_ERR", "ra_deg_uw_err", "[arcsec]", 11, casda::precSize,
                       "stat.error;pos.eq.ra", "float", "col_ra_deg_uw_err", "J2000");
-    itsSpec.addColumn("DEC_UW", "dec_deg_uw", "["+casda::positionUnit+"]", 11, casda::precPos,
+    itsSpec.addColumn("DEC_UW", "dec_deg_uw", "[" + casda::positionUnit + "]", 11, casda::precPos,
                       "pos.eq.dec", "double", "col_dec_deg_uw", "J2000");
     itsSpec.addColumn("DEC_UW_ERR", "dec_deg_uw_err", "[arcsec]", 11, casda::precSize,
                       "stat.error;pos.eq.dec", "float", "col_dec_deg_uw_err", "J2000");
-    itsSpec.addColumn("GLONG_W", "glong_w", "["+casda::positionUnit+"]", 11, casda::precPos,
+    itsSpec.addColumn("GLONG_W", "glong_w", "[" + casda::positionUnit + "]", 11, casda::precPos,
                       "pos.galactic.lon;meta.main", "double", "col_glong_w", "J2000");
     itsSpec.addColumn("GLONG_W_ERR", "glong_w_err", "[arcsec]", 11, casda::precSize,
                       "stat.error;pos.galactic.lon;meta.main", "float", "col_glong_w_err", "J2000");
-    itsSpec.addColumn("GLAT_W", "glat_w", "["+casda::positionUnit+"]", 11, casda::precPos,
+    itsSpec.addColumn("GLAT_W", "glat_w", "[" + casda::positionUnit + "]", 11, casda::precPos,
                       "pos.galactic.lat;meta.main", "double", "col_glat_w", "J2000");
     itsSpec.addColumn("GLAT_W_ERR", "glat_w_err", "[arcsec]", 11, casda::precSize,
                       "stat.error;pos.galactic.lat;meta.main", "float", "col_glat_w_err", "J2000");
-    itsSpec.addColumn("GLONG_UW", "glong_uw", "["+casda::positionUnit+"]", 11, casda::precPos,
+    itsSpec.addColumn("GLONG_UW", "glong_uw", "[" + casda::positionUnit + "]", 11, casda::precPos,
                       "pos.galactic.lon;meta.main", "double", "col_glong_uw", "J2000");
     itsSpec.addColumn("GLONG_UW_ERR", "glong_uw_err", "[arcsec]", 11, casda::precSize,
                       "stat.error;pos.galactic.lon;meta.main", "float", "col_glong_uw_err", "J2000");
-    itsSpec.addColumn("GLAT_UW", "glat_uw", "["+casda::positionUnit+"]", 11, casda::precPos,
+    itsSpec.addColumn("GLAT_UW", "glat_uw", "[" + casda::positionUnit + "]", 11, casda::precPos,
                       "pos.galactic.lat;meta.main", "double", "col_glat_uw", "J2000");
     itsSpec.addColumn("GLAT_UW_ERR", "glat_uw_err", "[arcsec]", 11, casda::precSize,
                       "stat.error;pos.galactic.lat;meta.main", "float", "col_glat_uw_err", "J2000");
@@ -196,29 +203,29 @@ void HiEmissionCatalogue::defineSpec()
                       11, casda::precVelSpectral,
                       "spect.dopplerVeloc.opt;em.line.HI;phot.flux.density;stat.max",
                       "float", "col_vel_peak", "");
-    itsSpec.addColumn("FINT", "integ_flux", "["+casda::intFluxUnitSpectral+"]",
+    itsSpec.addColumn("FINT", "integ_flux", "[" + casda::intFluxUnitSpectral + "]",
                       10, casda::precFlux,
                       "phot.flux.density;askap:arith.integrated;em.radio",
                       "float", "col_integ_flux", "");
-    itsSpec.addColumn("FINT_ERR", "integ_flux_err", "["+casda::intFluxUnitSpectral+"]",
+    itsSpec.addColumn("FINT_ERR", "integ_flux_err", "[" + casda::intFluxUnitSpectral + "]",
                       10, casda::precFlux,
                       "stat.error;phot.flux.density;askap:arith.integrated;em.radio",
                       "float", "col_integ_flux_err", "");
-    itsSpec.addColumn("FLUXMAX", "flux_voxel_max", "["+casda::fluxUnit+"]",10, casda::precFlux,
+    itsSpec.addColumn("FLUXMAX", "flux_voxel_max", "[" + casda::fluxUnit + "]", 10, casda::precFlux,
                       "askap:phot.flux.density.voxel;stat.max;em.radio",
-                      "float", "col_flux_voxel_max","");
-    itsSpec.addColumn("FLUXMIN", "flux_voxel_min", "["+casda::fluxUnit+"]",10, casda::precFlux,
+                      "float", "col_flux_voxel_max", "");
+    itsSpec.addColumn("FLUXMIN", "flux_voxel_min", "[" + casda::fluxUnit + "]", 10, casda::precFlux,
                       "askap:phot.flux.density.voxel;stat.min;em.radio",
-                      "float", "col_flux_voxel_min","");
-    itsSpec.addColumn("FLUXMEAN", "flux_voxel_mean", "["+casda::fluxUnit+"]",10, casda::precFlux,
+                      "float", "col_flux_voxel_min", "");
+    itsSpec.addColumn("FLUXMEAN", "flux_voxel_mean", "[" + casda::fluxUnit + "]", 10, casda::precFlux,
                       "askap:phot.flux.density.voxel;stat.mean;em.radio",
-                      "float", "col_flux_voxel_mean","");
-    itsSpec.addColumn("FLUXSTDDEV", "flux_voxel_stddev", "["+casda::fluxUnit+"]",10, casda::precFlux,
+                      "float", "col_flux_voxel_mean", "");
+    itsSpec.addColumn("FLUXSTDDEV", "flux_voxel_stddev", "[" + casda::fluxUnit + "]", 10, casda::precFlux,
                       "askap:phot.flux.density.voxel;stat.stdev;em.radio",
-                      "float", "col_flux_voxel_stddev","");
-    itsSpec.addColumn("FLUXRMS", "flux_voxel_rms", "["+casda::fluxUnit+"]",10, casda::precFlux,
+                      "float", "col_flux_voxel_stddev", "");
+    itsSpec.addColumn("FLUXRMS", "flux_voxel_rms", "[" + casda::fluxUnit + "]", 10, casda::precFlux,
                       "askap:phot.flux.density.voxel;askap:stat.rms;em.radio",
-                      "float", "col_flux_voxel_rms","");
+                      "float", "col_flux_voxel_rms", "");
     itsSpec.addColumn("RMS_IMAGECUBE", "rms_imagecube", "[" + casda::fluxUnit + "]", 10,
                       casda::precFlux, "stat.stdev;phot.flux.density",
                       "float", "col_rms_imagecube", "");
@@ -366,46 +373,46 @@ void HiEmissionCatalogue::defineSpec()
     itsSpec.addColumn("VEL_CW20_W_ERR", "vel_cw20_clip_w_err", "[" + casda::velocityUnit + "]",
                       11, casda::precVelSpectral, "stat.error;spect.dopplerVeloc.opt;em.line.HI",
                       "float", "col_vel_cw20_clip_w_err", "");
-    itsSpec.addColumn("FINT_W50", "integ_flux_w50_clip", "["+casda::intFluxUnitSpectral+"]",
+    itsSpec.addColumn("FINT_W50", "integ_flux_w50_clip", "[" + casda::intFluxUnitSpectral + "]",
                       10, casda::precFlux,
                       "phot.flux.density;askap:arith.integrated;em.radio",
                       "float", "col_integ_flux_w50_clip", "");
-    itsSpec.addColumn("FINT_W50_ERR", "integ_flux_w50_clip_err", "["+casda::intFluxUnitSpectral+"]",
+    itsSpec.addColumn("FINT_W50_ERR", "integ_flux_w50_clip_err", "[" + casda::intFluxUnitSpectral + "]",
                       10, casda::precFlux,
                       "stat.error;phot.flux.density;askap:arith.integrated;em.radio",
                       "float", "col_integ_flux_w50_clip_err", "");
-    itsSpec.addColumn("FINT_CW50", "integ_flux_cw50_clip", "["+casda::intFluxUnitSpectral+"]",
+    itsSpec.addColumn("FINT_CW50", "integ_flux_cw50_clip", "[" + casda::intFluxUnitSpectral + "]",
                       10, casda::precFlux,
                       "phot.flux.density;askap:arith.integrated;em.radio",
                       "float", "col_integ_flux_cw50_clip", "");
-    itsSpec.addColumn("FINT_CW50_ERR", "integ_flux_cw50_clip_err", "["+casda::intFluxUnitSpectral+"]",
+    itsSpec.addColumn("FINT_CW50_ERR", "integ_flux_cw50_clip_err", "[" + casda::intFluxUnitSpectral + "]",
                       10, casda::precFlux,
                       "stat.error;phot.flux.density;askap:arith.integrated;em.radio",
                       "float", "col_integ_flux_cw50_clip_err", "");
-    itsSpec.addColumn("FINT_W20", "integ_flux_w20_clip", "["+casda::intFluxUnitSpectral+"]",
+    itsSpec.addColumn("FINT_W20", "integ_flux_w20_clip", "[" + casda::intFluxUnitSpectral + "]",
                       10, casda::precFlux,
                       "phot.flux.density;askap:arith.integrated;em.radio",
                       "float", "col_integ_flux_w20_clip", "");
-    itsSpec.addColumn("FINT_W20_ERR", "integ_flux_w20_clip_err", "["+casda::intFluxUnitSpectral+"]",
+    itsSpec.addColumn("FINT_W20_ERR", "integ_flux_w20_clip_err", "[" + casda::intFluxUnitSpectral + "]",
                       10, casda::precFlux,
                       "stat.error;phot.flux.density;askap:arith.integrated;em.radio",
                       "float", "col_integ_flux_w20_clip_err", "");
-    itsSpec.addColumn("FINT_CW20", "integ_flux_cw20_clip", "["+casda::intFluxUnitSpectral+"]",
+    itsSpec.addColumn("FINT_CW20", "integ_flux_cw20_clip", "[" + casda::intFluxUnitSpectral + "]",
                       10, casda::precFlux,
                       "phot.flux.density;askap:arith.integrated;em.radio",
                       "float", "col_integ_flux_cw20_clip", "");
-    itsSpec.addColumn("FINT_CW20_ERR", "integ_flux_cw20_clip_err", "["+casda::intFluxUnitSpectral+"]",
+    itsSpec.addColumn("FINT_CW20_ERR", "integ_flux_cw20_clip_err", "[" + casda::intFluxUnitSpectral + "]",
                       10, casda::precFlux,
                       "stat.error;phot.flux.density;askap:arith.integrated;em.radio",
                       "float", "col_integ_flux_cw20_clip_err", "");
-    itsSpec.addColumn("BF_A", "bf_a", "["+casda::intFluxUnitSpectral+"]",10, casda::precFlux,
+    itsSpec.addColumn("BF_A", "bf_a", "[" + casda::intFluxUnitSpectral + "]", 10, casda::precFlux,
                       "stat.fit.param", "float", "col_bf_a", "");
-    itsSpec.addColumn("BF_A_ERR", "bf_a_err", "["+casda::intFluxUnitSpectral+"]",
+    itsSpec.addColumn("BF_A_ERR", "bf_a_err", "[" + casda::intFluxUnitSpectral + "]",
                       10, casda::precFlux, "stat.error;stat.fit.param",
                       "float", "col_bf_a_err", "");
-    itsSpec.addColumn("BF_W", "bf_w", "["+casda::freqUnit+"]",10, casda::precFreqSpectral,
+    itsSpec.addColumn("BF_W", "bf_w", "[" + casda::freqUnit + "]", 10, casda::precFreqSpectral,
                       "stat.fit.param", "double", "col_bf_w", "");
-    itsSpec.addColumn("BF_W_ERR", "bf_w_err", "["+casda::freqUnit+"]",
+    itsSpec.addColumn("BF_W_ERR", "bf_w_err", "[" + casda::freqUnit + "]",
                       10, casda::precFreqSpectral, "stat.error;stat.fit.param",
                       "double", "col_bf_w_err", "");
     itsSpec.addColumn("BF_B1", "bf_b1", "", 10, casda::precFlux,
@@ -416,14 +423,14 @@ void HiEmissionCatalogue::defineSpec()
                       "stat.fit.param", "float", "col_bf_b2", "");
     itsSpec.addColumn("BF_B2_ERR", "bf_b2_err", "", 10, casda::precFlux,
                       "stat.error;stat.fit.param", "float", "col_bf_b2_err", "");
-    itsSpec.addColumn("BF_XE", "bf_xe", "["+casda::freqUnit+"]",10, casda::precFreqSpectral,
+    itsSpec.addColumn("BF_XE", "bf_xe", "[" + casda::freqUnit + "]", 10, casda::precFreqSpectral,
                       "stat.fit.param", "double", "col_bf_xe", "");
-    itsSpec.addColumn("BF_XE_ERR", "bf_xe_err", "["+casda::freqUnit+"]",
+    itsSpec.addColumn("BF_XE_ERR", "bf_xe_err", "[" + casda::freqUnit + "]",
                       10, casda::precFreqSpectral, "stat.error;stat.fit.param",
                       "double", "col_bf_xe_err", "");
-    itsSpec.addColumn("BF_XP", "bf_xp", "["+casda::freqUnit+"]",10, casda::precFreqSpectral,
+    itsSpec.addColumn("BF_XP", "bf_xp", "[" + casda::freqUnit + "]", 10, casda::precFreqSpectral,
                       "stat.fit.param", "double", "col_bf_xp", "");
-    itsSpec.addColumn("BF_XP_ERR", "bf_xp_err", "["+casda::freqUnit+"]",
+    itsSpec.addColumn("BF_XP_ERR", "bf_xp_err", "[" + casda::freqUnit + "]",
                       10, casda::precFreqSpectral, "stat.error;stat.fit.param",
                       "double", "col_bf_xp_err", "");
     itsSpec.addColumn("BF_C", "bf_c", "", 10, casda::precFlux,
@@ -465,7 +472,7 @@ void HiEmissionCatalogue::write()
 void HiEmissionCatalogue::writeVOT()
 {
     AskapVOTableCatalogueWriter vowriter(itsVotableFilename);
-    vowriter.setup(&itsCube);
+    vowriter.setup(itsCube);
     ASKAPLOG_DEBUG_STR(logger, "Writing object table to the VOTable " <<
                        itsVotableFilename);
     vowriter.setColumnSpec(&itsSpec);
@@ -473,7 +480,7 @@ void HiEmissionCatalogue::writeVOT()
     vowriter.setResourceName("HI Emission-line object catalogue from Selavy source-finding");
     vowriter.setTableName("HI Emission-line object catalogue");
     vowriter.writeHeader();
-    duchamp::VOParam version("table_version", "meta.version", "char", itsVersion, itsVersion.size()+1, "");
+    duchamp::VOParam version("table_version", "meta.version", "char", itsVersion, itsVersion.size() + 1, "");
     vowriter.writeParameter(version);
     vowriter.writeParameters();
     vowriter.writeFrequencyParam();
@@ -489,7 +496,7 @@ void HiEmissionCatalogue::writeASCII()
 
     AskapAsciiCatalogueWriter writer(itsAsciiFilename);
     ASKAPLOG_DEBUG_STR(logger, "Writing Fit results to " << itsAsciiFilename);
-    writer.setup(&itsCube);
+    writer.setup(itsCube);
     writer.setColumnSpec(&itsSpec);
     writer.openCatalogue();
     writer.writeTableHeader();

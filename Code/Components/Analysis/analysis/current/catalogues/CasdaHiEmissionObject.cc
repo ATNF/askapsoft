@@ -29,7 +29,7 @@
 #include <catalogues/CasdaHiEmissionObject.h>
 #include <catalogues/CatalogueEntry.h>
 #include <catalogues/CasdaComponent.h>
-#include <catalogues/casda.h>
+#include <catalogues/Casda.h>
 #include <askap_analysis.h>
 
 #include <askap/AskapLogging.h>
@@ -46,6 +46,8 @@
 #include <duchampinterface/DuchampInterface.h>
 
 #include <Common/ParameterSet.h>
+#include <Blob/BlobIStream.h>
+#include <Blob/BlobOStream.h>
 #include <casacore/casa/Quanta/Quantum.h>
 #include <casacore/casa/Quanta/MVTime.h>
 #include <casacore/images/Images/ImageInterface.h>
@@ -60,6 +62,11 @@ ASKAP_LOGGER(logger, ".casdaabsorptionobject");
 namespace askap {
 
 namespace analysis {
+
+CasdaHiEmissionObject::CasdaHiEmissionObject():
+    CatalogueEntry()
+{
+}
 
 CasdaHiEmissionObject::CasdaHiEmissionObject(sourcefitting::RadioSource &obj,
         const LOFAR::ParameterSet &parset):
@@ -302,6 +309,11 @@ const float CasdaHiEmissionObject::ra()
 const float CasdaHiEmissionObject::dec()
 {
     return itsDEC_w.value();
+}
+
+const std::string CasdaHiEmissionObject::id()
+{
+    return itsObjectID;
 }
 
 void CasdaHiEmissionObject::printTableRow(std::ostream &stream,
@@ -864,9 +876,187 @@ void CasdaHiEmissionObject::checkSpec(duchamp::Catalogues::CatalogueSpecificatio
     }
 }
 
+//**************************************************************//
 
+LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& blob, CasdaHiEmissionObject& src)
+{
+    std::string s;
+    double d;
+    casda::ValueError v;
+    unsigned int u;
+    int i;
 
+    s = src.itsObjectID; blob << s;
+    s = src.itsName; blob << s;
+    s = src.itsRAs_w; blob << s;
+    s = src.itsDECs_w; blob << s;
+    v = src.itsRA_w; blob << v;
+    v = src.itsDEC_w; blob << v;
+    v = src.itsRA_uw; blob << v;
+    v = src.itsDEC_uw; blob << v;
+    v = src.itsGlong_w; blob << v;
+    v = src.itsGlat_w; blob << v;
+    v = src.itsGlong_uw; blob << v;
+    v = src.itsGlat_uw; blob << v;
+    d = src.itsMajorAxis; blob << d;
+    d = src.itsMinorAxis; blob << d;
+    d = src.itsPositionAngle; blob << d;
+    v = src.itsMajorAxis_fit; blob << v;
+    v = src.itsMinorAxis_fit; blob << v;
+    v = src.itsPositionAngle_fit; blob << v;
+    i = src.itsSizeX; blob << i;
+    i = src.itsSizeY; blob << i;
+    i = src.itsSizeZ; blob << i;
+    i = src.itsNumVoxels; blob << i;
+    v = src.itsAsymmetry2d; blob << v;
+    v = src.itsAsymmetry3d; blob << v;
+    v = src.itsFreq_uw; blob << v;
+    v = src.itsFreq_w; blob << v;
+    d = src.itsFreq_peak; blob << d;
+    v = src.itsVelHI_uw; blob << v;
+    v = src.itsVelHI_w; blob << v;
+    d = src.itsVelHI_peak; blob << d;
+    v = src.itsIntegFlux; blob << v;
+    d = src.itsFluxMax; blob << d;
+    d = src.itsFluxMin; blob << d;
+    d = src.itsFluxMean; blob << d;
+    d = src.itsFluxStddev; blob << d;
+    d = src.itsFluxRMS; blob << d;
+    d = src.itsRMSimagecube; blob << d;
+    v = src.itsW50_freq; blob << v;
+    v = src.itsW20_freq; blob << v;
+    v = src.itsCW50_freq; blob << v;
+    v = src.itsCW20_freq; blob << v;
+    v = src.itsW50_vel; blob << v;
+    v = src.itsW20_vel; blob << v;
+    v = src.itsCW50_vel; blob << v;
+    v = src.itsCW20_vel; blob << v;
+    v = src.itsFreq_W50clip_uw; blob << v;
+    v = src.itsFreq_W20clip_uw; blob << v;
+    v = src.itsFreq_CW50clip_uw; blob << v;
+    v = src.itsFreq_CW20clip_uw; blob << v;
+    v = src.itsFreq_W50clip_w; blob << v;
+    v = src.itsFreq_W20clip_w; blob << v;
+    v = src.itsFreq_CW50clip_w; blob << v;
+    v = src.itsFreq_CW20clip_w; blob << v;
+    v = src.itsVelHI_W50clip_uw; blob << v;
+    v = src.itsVelHI_W20clip_uw; blob << v;
+    v = src.itsVelHI_CW50clip_uw; blob << v;
+    v = src.itsVelHI_CW20clip_uw; blob << v;
+    v = src.itsVelHI_W50clip_w; blob << v;
+    v = src.itsVelHI_W20clip_w; blob << v;
+    v = src.itsVelHI_CW50clip_w; blob << v;
+    v = src.itsVelHI_CW20clip_w; blob << v;
+    v = src.itsIntegFlux_W50clip; blob << v;
+    v = src.itsIntegFlux_W20clip; blob << v;
+    v = src.itsIntegFlux_CW50clip; blob << v;
+    v = src.itsIntegFlux_CW20clip; blob << v;
+    v = src.itsBFfit_a; blob << v;
+    v = src.itsBFfit_w; blob << v;
+    v = src.itsBFfit_b1; blob << v;
+    v = src.itsBFfit_b2; blob << v;
+    v = src.itsBFfit_xe; blob << v;
+    v = src.itsBFfit_xp; blob << v;
+    v = src.itsBFfit_c; blob << v;
+    v = src.itsBFfit_n; blob << v;
+    u = src.itsFlagResolved; blob << u;
+    u = src.itsFlag2; blob << u;
+    u = src.itsFlag3; blob << u;
+    s = src.itsComment; blob << s;
 
+    return blob;
+
+}
+
+LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& blob, CasdaHiEmissionObject& src)
+{
+    std::string s;
+    double d;
+    casda::ValueError v;
+    unsigned int u;
+    int i;
+
+    blob >> s; src.itsObjectID = s;
+    blob >> s; src.itsName = s;
+    blob >> s; src.itsRAs_w = s;
+    blob >> s; src.itsDECs_w = s;
+    blob >> v; src.itsRA_w = v;
+    blob >> v; src.itsDEC_w = v;
+    blob >> v; src.itsRA_uw = v;
+    blob >> v; src.itsDEC_uw = v;
+    blob >> v; src.itsGlong_w = v;
+    blob >> v; src.itsGlat_w = v;
+    blob >> v; src.itsGlong_uw = v;
+    blob >> v; src.itsGlat_uw = v;
+    blob >> d; src.itsMajorAxis = d;
+    blob >> d; src.itsMinorAxis = d;
+    blob >> d; src.itsPositionAngle = d;
+    blob >> v; src.itsMajorAxis_fit = v;
+    blob >> v; src.itsMinorAxis_fit = v;
+    blob >> v; src.itsPositionAngle_fit = v;
+    blob >> i; src.itsSizeX = i;
+    blob >> i; src.itsSizeY = i;
+    blob >> i; src.itsSizeZ = i;
+    blob >> i; src.itsNumVoxels = i;
+    blob >> v; src.itsAsymmetry2d = v;
+    blob >> v; src.itsAsymmetry3d = v;
+    blob >> v; src.itsFreq_uw = v;
+    blob >> v; src.itsFreq_w = v;
+    blob >> d; src.itsFreq_peak = d;
+    blob >> v; src.itsVelHI_uw = v;
+    blob >> v; src.itsVelHI_w = v;
+    blob >> d; src.itsVelHI_peak = d;
+    blob >> v; src.itsIntegFlux = v;
+    blob >> d; src.itsFluxMax = d;
+    blob >> d; src.itsFluxMin = d;
+    blob >> d; src.itsFluxMean = d;
+    blob >> d; src.itsFluxStddev = d;
+    blob >> d; src.itsFluxRMS = d;
+    blob >> d; src.itsRMSimagecube = d;
+    blob >> v; src.itsW50_freq = v;
+    blob >> v; src.itsW20_freq = v;
+    blob >> v; src.itsCW50_freq = v;
+    blob >> v; src.itsCW20_freq = v;
+    blob >> v; src.itsW50_vel = v;
+    blob >> v; src.itsW20_vel = v;
+    blob >> v; src.itsCW50_vel = v;
+    blob >> v; src.itsCW20_vel = v;
+    blob >> v; src.itsFreq_W50clip_uw = v;
+    blob >> v; src.itsFreq_W20clip_uw = v;
+    blob >> v; src.itsFreq_CW50clip_uw = v;
+    blob >> v; src.itsFreq_CW20clip_uw = v;
+    blob >> v; src.itsFreq_W50clip_w = v;
+    blob >> v; src.itsFreq_W20clip_w = v;
+    blob >> v; src.itsFreq_CW50clip_w = v;
+    blob >> v; src.itsFreq_CW20clip_w = v;
+    blob >> v; src.itsVelHI_W50clip_uw = v;
+    blob >> v; src.itsVelHI_W20clip_uw = v;
+    blob >> v; src.itsVelHI_CW50clip_uw = v;
+    blob >> v; src.itsVelHI_CW20clip_uw = v;
+    blob >> v; src.itsVelHI_W50clip_w = v;
+    blob >> v; src.itsVelHI_W20clip_w = v;
+    blob >> v; src.itsVelHI_CW50clip_w = v;
+    blob >> v; src.itsVelHI_CW20clip_w = v;
+    blob >> v; src.itsIntegFlux_W50clip = v;
+    blob >> v; src.itsIntegFlux_W20clip = v;
+    blob >> v; src.itsIntegFlux_CW50clip = v;
+    blob >> v; src.itsIntegFlux_CW20clip = v;
+    blob >> v; src.itsBFfit_a = v;
+    blob >> v; src.itsBFfit_w = v;
+    blob >> v; src.itsBFfit_b1 = v;
+    blob >> v; src.itsBFfit_b2 = v;
+    blob >> v; src.itsBFfit_xe = v;
+    blob >> v; src.itsBFfit_xp = v;
+    blob >> v; src.itsBFfit_c = v;
+    blob >> v; src.itsBFfit_n = v;
+    blob >> u; src.itsFlagResolved = u;
+    blob >> u; src.itsFlag2 = u;
+    blob >> u; src.itsFlag3 = u;
+    blob >> s; src.itsComment = s;
+
+    return blob;
+}
+    
 }
 
 }

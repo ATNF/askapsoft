@@ -62,7 +62,7 @@ class FitCatalogue : public ComponentCatalogue {
         /// based on the output file given in the parset.
         FitCatalogue(std::vector<sourcefitting::RadioSource> &srclist,
                      const LOFAR::ParameterSet &parset,
-                     duchamp::Cube &cube,
+                     duchamp::Cube *cube,
                      const std::string fitType);
 
         /// Default destructor

@@ -29,11 +29,13 @@
 #ifndef ASKAP_ANALYSIS_CASDA_ABSORPTION_H_
 #define ASKAP_ANALYSIS_CASDA_ABSORPTION_H_
 
-#include <catalogues/casda.h>
+#include <catalogues/Casda.h>
 #include <catalogues/CatalogueEntry.h>
 #include <catalogues/CasdaComponent.h>
 #include <sourcefitting/RadioSource.h>
 #include <Common/ParameterSet.h>
+#include <Blob/BlobIStream.h>
+#include <Blob/BlobOStream.h>
 #include <duchamp/Outputs/CatalogueSpecification.hh>
 #include <duchamp/Outputs/columns.hh>
 #include <vector>
@@ -50,6 +52,9 @@ namespace analysis {
 /// file.
 class CasdaAbsorptionObject : public CatalogueEntry {
     public:
+        /// Default constructor that does nothing.
+        CasdaAbsorptionObject();
+    
         /// Constructor that builds the Absorption object from a
         /// RadioSource.
         /// **THE INTERFACE IS STILL TO BE WORKED OUT FULLY**
@@ -70,6 +75,8 @@ class CasdaAbsorptionObject : public CatalogueEntry {
         const float ra();
         /// Return the Declination (in decimal degrees)
         const float dec();
+        // Return the ID string
+        const std::string id();
 
         ///  Print a row of values for the objet into an
         ///  output table. Each column from the catalogue
@@ -100,6 +107,31 @@ class CasdaAbsorptionObject : public CatalogueEntry {
         /// with type=char are checked, otherwise all are.
         void checkSpec(duchamp::Catalogues::CatalogueSpecification &spec, bool allColumns = true);
 
+    /// @brief Functions allowing CasdaPolarisationEntry objects to be passed
+        /// over LOFAR Blobs
+        /// @name
+        /// @{
+        /// @brief Pass a CasdaPolarisationEntry object into a Blob
+        /// @details This function provides a mechanism for passing the
+        /// entire contents of a CasdaPolarisationEntry object into a
+        /// LOFAR::BlobOStream stream
+        friend LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream &blob,
+                                              CasdaAbsorptionObject& src);
+        /// @brief Receive a CasdaPolarisationEntry object from a Blob
+        /// @details This function provides a mechanism for receiving the
+        /// entire contents of a CasdaPolarisationEntry object from a
+        /// LOFAR::BlobIStream stream
+        friend LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream &blob,
+                                              CasdaAbsorptionObject& src);
+
+        /// @}
+
+        /// @brief Comparison operator, using the component ID
+        friend bool operator< (CasdaAbsorptionObject lhs, CasdaAbsorptionObject rhs)
+        {
+            return (lhs.id() < rhs.id());
+        }
+
 
     protected:
         /// The ID of the image cube in which this object was found
@@ -119,29 +151,29 @@ class CasdaAbsorptionObject : public CatalogueEntry {
         /// The Declination in string format: 12:34:56.7
         std::string itsDECs;
         /// The RA in decimal degrees
-        casda::ValueError<double> itsRA;
+        casda::ValueError itsRA;
         /// The Declination in decimal degrees
-        casda::ValueError<double> itsDEC;
+        casda::ValueError itsDEC;
         /// The frequency of the object, unweighted average
-        casda::ValueError<double> itsFreqUW;
+        casda::ValueError itsFreqUW;
         /// The frequency of the object, weighted average
-        casda::ValueError<double> itsFreqW;
+        casda::ValueError itsFreqW;
         /// The HI redshift for the unweighted average frequency of the object
-        casda::ValueError<double> itsZHI_UW;
+        casda::ValueError itsZHI_UW;
         /// The HI redshift for the weighted average frequency of the object
-        casda::ValueError<double> itsZHI_W;
+        casda::ValueError itsZHI_W;
         /// The HI redshift for the frequency of the peak optical depth
-        casda::ValueError<double> itsZHI_peak;
+        casda::ValueError itsZHI_peak;
         /// The velocity width of the object at 50% of the peak optical depth
-        casda::ValueError<double> itsW50;
+        casda::ValueError itsW50;
         /// The velocity width of the object at 20% of the peak optical depth
-        casda::ValueError<double> itsW20;
+        casda::ValueError itsW20;
         /// The local RMS noise of the image cube surrounding the object
         double itsRMSimagecube;
         // The peak optical depth of the object
-        casda::ValueError<double> itsOpticalDepth_peak;
+        casda::ValueError itsOpticalDepth_peak;
         /// The integrated optical depth of the object
-        casda::ValueError<double> itsOpticalDepth_int;
+        casda::ValueError itsOpticalDepth_int;
 
         /// A flag indicating whether the object's continuum component is resolved spatially
         unsigned int itsFlagResolved;

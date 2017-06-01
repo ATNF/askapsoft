@@ -55,7 +55,7 @@ int main(int argc, const char *argv[])
         std::vector<sourcefitting::RadioSource> objlist = finder.sourceList();
         duchamp::Cube *cube = finder.pCube();
         
-        HiEmissionCatalogue cat(objlist, parset, *cube);
+        HiEmissionCatalogue cat(objlist, parset, cube, comms);
         cat.write();
 
 

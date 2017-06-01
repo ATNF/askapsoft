@@ -32,7 +32,7 @@
 #include <askap/AskapLogging.h>
 #include <askap/AskapError.h>
 
-#include <catalogues/casda.h>
+#include <catalogues/Casda.h>
 #include <catalogues/CasdaIsland.h>
 #include <sourcefitting/RadioSource.h>
 #include <outputs/AskapVOTableCatalogueWriter.h>
@@ -51,7 +51,7 @@ namespace analysis {
 
 IslandCatalogue::IslandCatalogue(std::vector<sourcefitting::RadioSource> &srclist,
                                  const LOFAR::ParameterSet &parset,
-                                 duchamp::Cube &cube):
+                                 duchamp::Cube *cube):
     itsIslands(),
     itsSpec(),
     itsCube(cube),
@@ -162,7 +162,7 @@ void IslandCatalogue::write()
 void IslandCatalogue::writeVOT()
 {
     AskapVOTableCatalogueWriter vowriter(itsVotableFilename);
-    vowriter.setup(&itsCube);
+    vowriter.setup(itsCube);
     ASKAPLOG_DEBUG_STR(logger, "Writing island table to the VOTable " <<
                        itsVotableFilename);
     vowriter.setColumnSpec(&itsSpec);
@@ -170,7 +170,7 @@ void IslandCatalogue::writeVOT()
     vowriter.setResourceName("Island catalogue from Selavy source finding");
     vowriter.setTableName("Island catalogue");
     vowriter.writeHeader();
-    duchamp::VOParam version("table_version", "meta.version", "char", itsVersion, itsVersion.size()+1, "");
+    duchamp::VOParam version("table_version", "meta.version", "char", itsVersion, itsVersion.size() + 1, "");
     vowriter.writeParameter(version);
     vowriter.writeParameters();
     vowriter.writeStats();
@@ -185,7 +185,7 @@ void IslandCatalogue::writeASCII()
 
     AskapAsciiCatalogueWriter writer(itsAsciiFilename);
     ASKAPLOG_DEBUG_STR(logger, "Writing islands results to " << itsAsciiFilename);
-    writer.setup(&itsCube);
+    writer.setup(itsCube);
     writer.setColumnSpec(&itsSpec);
     writer.openCatalogue();
     writer.writeTableHeader();

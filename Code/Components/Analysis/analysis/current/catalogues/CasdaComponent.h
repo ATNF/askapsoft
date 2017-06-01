@@ -29,7 +29,7 @@
 #ifndef ASKAP_ANALYSIS_CASDA_COMPONENT_H_
 #define ASKAP_ANALYSIS_CASDA_COMPONENT_H_
 
-#include <catalogues/casda.h>
+#include <catalogues/Casda.h>
 #include <catalogues/CatalogueEntry.h>
 #include <sourcefitting/RadioSource.h>
 #include <Common/ParameterSet.h>
@@ -135,21 +135,21 @@ class CasdaComponent : public CatalogueEntry {
         /// The Declination in string format: 12:34:56.7
         std::string itsDECs;
         /// The RA in decimal degrees
-        casda::ValueError<double> itsRA;
+        casda::ValueError itsRA;
         /// The Declination in decimal degrees
-        casda::ValueError<double> itsDEC;
+        casda::ValueError itsDEC;
         /// The frequency of the image
         double itsFreq;
         /// The fitted peak flux of the component
-        casda::ValueError<double> itsFluxPeak;
+        casda::ValueError itsFluxPeak;
         /// The integrated flux (fitted) of the component
-        casda::ValueError<double> itsFluxInt;
+        casda::ValueError itsFluxInt;
         /// The fitted major axis (FWHM)
-        casda::ValueError<double> itsMaj;
+        casda::ValueError itsMaj;
         /// The fitted minor axis (FWHM)
-        casda::ValueError<double> itsMin;
+        casda::ValueError itsMin;
         /// The position angle of the fitted major axis
-        casda::ValueError<double> itsPA;
+        casda::ValueError itsPA;
         /// The major axis after deconvolution
         double itsMaj_deconv;
         /// The minor axis after deconvolution

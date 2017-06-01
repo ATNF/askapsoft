@@ -2,7 +2,7 @@
 ///
 /// Handle the parameterisation of objects that require reading from a file on disk
 ///
-/// @copyright (c) 2014 CSIRO
+/// @copyright (c) 2017 CSIRO
 /// Australia Telescope National Facility (ATNF)
 /// Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 /// PO Box 76, Epping NSW 1710, Australia
@@ -26,28 +26,31 @@
 ///
 /// @author Matthew Whiting <Matthew.Whiting@csiro.au>
 ///
-#ifndef ASKAP_OBJECT_PARAMER_H_
-#define ASKAP_OBJECT_PARAMER_H_
+#ifndef ASKAP_DISTRIB_HIEMISSION_H_
+#define ASKAP_DISTRIB_HIEMISSION_H_
 
+#include <parallelanalysis/DistributedParameteriserBase.h>
 #include <askapparallel/AskapParallel.h>
-#include <parallelanalysis/DuchampParallel.h>
+#include <catalogues/CasdaHiEmissionObject.h>
 #include <vector>
 
 namespace askap {
 
 namespace analysis {
 
-class ObjectParameteriser {
+/// @brief Distributed handling of HI emission-line catalogues.
+/// @details This distributes a list of RadioSource objects from the
+/// master to the workers, in a round-robin fashion. The workers then
+/// create the HI emission catalogue and related processing on their
+/// local list of objects, and then return the list of HI catalogue
+/// entries to the master. The master can then access this for writing
+/// out.
+class DistributedHIemission : public DistributedParameteriserBase {
     public:
-        ObjectParameteriser(askap::askapparallel::AskapParallel& comms);
-        virtual ~ObjectParameteriser();
-
-        /// @brief Initialise members - parameters, header and input object list.
-        void initialise(DuchampParallel *dp);
-
-        /// @brief Master sends list to workers, who fill out
-        /// itsInputList
-        void distribute();
+        DistributedHIemission(askap::askapparallel::AskapParallel& comms,
+                              const LOFAR::ParameterSet &parset,
+                              std::vector<sourcefitting::RadioSource> sourcelist);
+        virtual ~DistributedHIemission();
 
         /// @brief Each object on a worker is parameterised, and
         /// fitted (if requested).
@@ -57,32 +60,12 @@ class ObjectParameteriser {
         void gather();
 
         /// @brief The final list of objects is returned
-        const std::vector<sourcefitting::RadioSource> finalList() {return itsOutputList;};
+        const std::vector<CasdaHiEmissionObject> finalList() {return itsOutputList;};
 
     protected:
 
-        /// The communication class
-        askap::askapparallel::AskapParallel *itsComms;
-
-        /// The image header information. The WCS is the key element
-        /// used in this.
-        duchamp::FitsHeader itsHeader;
-
-        /// The set of Duchamp parameters. The subsection and offsets
-        /// are the key elements here.
-        duchamp::Param itsReferenceParams;
-
-        /// The input parset. Used for fitting purposes.
-        LOFAR::ParameterSet itsReferenceParset;
-
-        /// The initial set of objects, before parameterisation
-        std::vector<sourcefitting::RadioSource> itsInputList;
-
-        /// The list of parameterised objects.
-        std::vector<sourcefitting::RadioSource> itsOutputList;
-
-        /// The total number of objects that are to be parameterised.
-        unsigned int itsTotalListSize;
+        /// The list of polarisation catalogue entries
+        std::vector<CasdaHiEmissionObject> itsOutputList;
 
 };
 

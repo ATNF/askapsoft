@@ -33,7 +33,7 @@
 #include <askap/AskapError.h>
 
 #include <catalogues/CasdaComponent.h>
-#include <catalogues/casda.h>
+#include <catalogues/Casda.h>
 
 #include <sourcefitting/RadioSource.h>
 #include <outputs/AskapVOTableCatalogueWriter.h>
@@ -55,7 +55,7 @@ namespace analysis {
 
 ComponentCatalogue::ComponentCatalogue(std::vector<sourcefitting::RadioSource> &srclist,
                                        const LOFAR::ParameterSet &parset,
-                                       duchamp::Cube &cube,
+                                       duchamp::Cube *cube,
                                        const std::string fitType):
     itsFitType(casda::componentFitType),
     itsComponents(),
@@ -67,7 +67,7 @@ ComponentCatalogue::ComponentCatalogue(std::vector<sourcefitting::RadioSource> &
     itsVersion("casda.continuum_component_description_v1.7")
 {
     ASKAPLOG_DEBUG_STR(logger, "Defining component catalogue, version " << itsVersion);
-    
+
     this->defineComponents(srclist, parset);
     this->defineSpec();
 
@@ -218,14 +218,14 @@ void ComponentCatalogue::write()
 void ComponentCatalogue::writeVOT()
 {
     AskapVOTableCatalogueWriter vowriter(itsVotableFilename);
-    vowriter.setup(&itsCube);
+    vowriter.setup(itsCube);
     ASKAPLOG_DEBUG_STR(logger, "Writing component table to the VOTable " <<
                        itsVotableFilename);
     vowriter.setColumnSpec(&itsSpec);
     vowriter.openCatalogue();
     writeVOTinformation(vowriter);
     vowriter.writeHeader();
-    duchamp::VOParam version("table_version", "meta.version", "char", itsVersion, itsVersion.size()+1, "");
+    duchamp::VOParam version("table_version", "meta.version", "char", itsVersion, itsVersion.size() + 1, "");
     vowriter.writeParameter(version);
     vowriter.writeParameters();
     vowriter.writeFrequencyParam();
@@ -247,7 +247,7 @@ void ComponentCatalogue::writeASCII()
 
     AskapAsciiCatalogueWriter writer(itsAsciiFilename);
     ASKAPLOG_DEBUG_STR(logger, "Writing Fitted components to " << itsAsciiFilename);
-    writer.setup(&itsCube);
+    writer.setup(itsCube);
     writer.setColumnSpec(&itsSpec);
     writer.openCatalogue();
     writer.writeTableHeader();
@@ -289,7 +289,7 @@ void ComponentCatalogue::writeAnnotations()
         }
 
         if (writer.get() != 0) {
-            writer->setup(&itsCube);
+            writer->setup(itsCube);
             writer->openCatalogue();
             writer->setColourString("BLUE");
             writer->writeHeader();

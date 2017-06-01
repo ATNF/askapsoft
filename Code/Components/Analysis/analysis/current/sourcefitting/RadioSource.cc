@@ -372,7 +372,7 @@ void RadioSource::setAtEdge(duchamp::Cube &cube,
 
 void RadioSource::setNoiseLevel(duchamp::Cube &cube)
 {
-    if (itsFitParams.useNoise()) {
+    if (itsFitParams.useNoise() || !itsFitParams.doFit()) {
         std::vector<float> array(cube.getArray(),
                                  cube.getArray() + cube.getSize());
         std::vector<size_t> dim(cube.getDimArray(),

@@ -30,6 +30,8 @@
 #define ASKAP_ANALYSIS_CATALOGUES_CASDA_H_
 
 #include <string>
+#include <Blob/BlobIStream.h>
+#include <Blob/BlobOStream.h>
 
 namespace askap {
 
@@ -107,20 +109,39 @@ const int precPfrac = 2;
 /// Precision for polarisation statistics
 const int precStats = 2;
 
-template <class T>
 class ValueError
 {
 public:
-    ValueError(){itsValue=T(0); itsError=T(0);};
-    ValueError(T val, T err):itsValue(val),itsError(err){};
-    ~ValueError(){};
+    ValueError();
+    ValueError(double val, double err);
+    ~ValueError();
     
-    T& value(){return itsValue;}
-    T& error(){return itsError;}
-    
+    double& value(){return itsValue;}
+    double& error(){return itsError;}
+
+        /// @brief Functions allowing ValueError objects to be passed
+        /// over LOFAR Blobs
+        /// @name
+        /// @{
+        /// @brief Pass a ValueError object into a Blob
+        /// @details This function provides a mechanism for passing the
+        /// entire contents of a ValueError object into a
+        /// LOFAR::BlobOStream stream
+        friend LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream &blob,
+                                              ValueError& src);
+        /// @brief Receive a ValueError object from a Blob
+        /// @details This function provides a mechanism for receiving the
+        /// entire contents of a ValueError object from a
+        /// LOFAR::BlobIStream stream
+        friend LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream &blob,
+                                              ValueError& src);
+
+        /// @}
+
+
 protected:
-    T itsValue;
-    T itsError;
+    double itsValue;
+    double itsError;
 
 };
 

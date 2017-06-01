@@ -29,7 +29,7 @@
 #include <catalogues/CasdaComponent.h>
 #include <catalogues/CatalogueEntry.h>
 #include <catalogues/CasdaIsland.h>
-#include <catalogues/casda.h>
+#include <catalogues/Casda.h>
 #include <askap_analysis.h>
 
 #include <askap/AskapLogging.h>

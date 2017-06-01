@@ -52,9 +52,10 @@ class AbsorptionCatalogue {
         /// catalogue from a set of RadioSource object, and defineSpec
         /// to set the column specification. The filenames are set
         /// based on the output file given in the parset.
-        AbsorptionCatalogue(std::vector< std::pair<CasdaComponent, sourcefitting::RadioSource> > &srclist,
+        AbsorptionCatalogue(std::vector< std::pair<CasdaComponent,
+                            sourcefitting::RadioSource> > &srclist,
                             const LOFAR::ParameterSet &parset,
-                            duchamp::Cube &cube);
+                            duchamp::Cube *cube);
 
         /// Default destructor
         virtual ~AbsorptionCatalogue() {};
@@ -103,7 +104,7 @@ class AbsorptionCatalogue {
 
         /// The duchamp::Cube, used to help instantiate the classes to
         /// write out the ASCII and VOTable files.
-        duchamp::Cube &itsCube;
+        duchamp::Cube *itsCube;
 
         /// The filename of the VOTable output file
         std::string itsVotableFilename;

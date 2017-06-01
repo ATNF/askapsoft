@@ -34,7 +34,7 @@
 
 #include <catalogues/CasdaAbsorptionObject.h>
 #include <catalogues/CasdaComponent.h>
-#include <catalogues/casda.h>
+#include <catalogues/Casda.h>
 
 #include <sourcefitting/RadioSource.h>
 #include <outputs/AskapVOTableCatalogueWriter.h>
@@ -52,9 +52,10 @@ namespace askap {
 
 namespace analysis {
 
-AbsorptionCatalogue::AbsorptionCatalogue(std::vector< std::pair<CasdaComponent, sourcefitting::RadioSource> > &srclist,
-        const LOFAR::ParameterSet &parset,
-        duchamp::Cube &cube):
+AbsorptionCatalogue::AbsorptionCatalogue(std::vector< std::pair<CasdaComponent,
+                                         sourcefitting::RadioSource> > &srclist,
+                                         const LOFAR::ParameterSet &parset,
+                                         duchamp::Cube *cube):
     itsObjects(),
     itsSpec(),
     itsCube(cube),
@@ -201,7 +202,7 @@ void AbsorptionCatalogue::write()
 void AbsorptionCatalogue::writeVOT()
 {
     AskapVOTableCatalogueWriter vowriter(itsVotableFilename);
-    vowriter.setup(&itsCube);
+    vowriter.setup(itsCube);
     ASKAPLOG_DEBUG_STR(logger, "Writing object table to the VOTable " <<
                        itsVotableFilename);
     vowriter.setColumnSpec(&itsSpec);
@@ -209,7 +210,7 @@ void AbsorptionCatalogue::writeVOT()
     vowriter.setResourceName("Absorption object catalogue from Selavy source-finding");
     vowriter.setTableName("Absorption object catalogue");
     vowriter.writeHeader();
-    duchamp::VOParam version("table_version", "meta.version", "char", itsVersion, itsVersion.size()+1, "");
+    duchamp::VOParam version("table_version", "meta.version", "char", itsVersion, itsVersion.size() + 1, "");
     vowriter.writeParameter(version);
     vowriter.writeParameters();
     vowriter.writeFrequencyParam();
@@ -225,7 +226,7 @@ void AbsorptionCatalogue::writeASCII()
 
     AskapAsciiCatalogueWriter writer(itsAsciiFilename);
     ASKAPLOG_DEBUG_STR(logger, "Writing Fit results to " << itsAsciiFilename);
-    writer.setup(&itsCube);
+    writer.setup(itsCube);
     writer.setColumnSpec(&itsSpec);
     writer.openCatalogue();
     writer.writeTableHeader();

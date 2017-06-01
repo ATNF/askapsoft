@@ -54,7 +54,8 @@ class HiEmissionCatalogue {
         /// based on the output file given in the parset.
         HiEmissionCatalogue(std::vector< sourcefitting::RadioSource> &srclist,
                             const LOFAR::ParameterSet &parset,
-                            duchamp::Cube &cube);
+                            duchamp::Cube *cube,
+                            askap::askapparallel::AskapParallel &comms);
 
         /// Default destructor
         virtual ~HiEmissionCatalogue() {};
@@ -103,7 +104,7 @@ class HiEmissionCatalogue {
 
         /// The duchamp::Cube, used to help instantiate the classes to
         /// write out the ASCII and VOTable files.
-        duchamp::Cube &itsCube;
+        duchamp::Cube *itsCube;
 
         /// The filename of the VOTable output file
         std::string itsVotableFilename;

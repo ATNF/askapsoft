@@ -35,7 +35,8 @@
 #include <catalogues/CasdaPolarisationEntry.h>
 #include <catalogues/ComponentCatalogue.h>
 #include <catalogues/CasdaComponent.h>
-#include <catalogues/casda.h>
+#include <catalogues/Casda.h>
+#include <parallelanalysis/DistributedRMsynthesis.h>
 
 #include <sourcefitting/RadioSource.h>
 #include <outputs/AskapVOTableCatalogueWriter.h>
@@ -54,14 +55,26 @@ namespace analysis {
 
 RMCatalogue::RMCatalogue(std::vector<sourcefitting::RadioSource> &srclist,
                          const LOFAR::ParameterSet &parset,
-                         duchamp::Cube &cube):
+                         duchamp::Cube *cube,
+                         askap::askapparallel::AskapParallel &comms):
     itsComponents(),
     itsSpec(),
     itsCube(cube),
     itsVersion("casda.polarisation_v0.7")
 {
-    this->defineComponents(srclist, parset);
+
+    ASKAPLOG_INFO_STR(logger, "Defining the RM Catalogue");
     this->defineSpec();
+
+    DistributedRMsynthesis distribRM(comms, parset, srclist);
+    distribRM.distribute();
+    distribRM.parameterise();
+    distribRM.gather();
+    itsComponents = distribRM.finalList();
+
+    if (comms.isMaster()) {
+        ASKAPLOG_INFO_STR(logger, "Defined list of " << itsComponents.size() << " polarisation components");
+    }
 
     duchamp::Param par = parseParset(parset);
     std::string filenameBase = par.getOutFile();
@@ -75,10 +88,10 @@ RMCatalogue::RMCatalogue(std::vector<sourcefitting::RadioSource> &srclist,
 void RMCatalogue::defineComponents(std::vector<sourcefitting::RadioSource> &srclist,
                                    const LOFAR::ParameterSet &parset)
 {
-    ComponentCatalogue compCat(srclist,parset,itsCube,"best");
-    std::vector<CasdaComponent> comps=compCat.components();
-    for(unsigned int i=0;i<comps.size();i++){
-        CasdaPolarisationEntry pol(&comps[i],parset);
+    ComponentCatalogue compCat(srclist, parset, itsCube, "best");
+    std::vector<CasdaComponent> comps = compCat.components();
+    for (unsigned int i = 0; i < comps.size(); i++) {
+        CasdaPolarisationEntry pol(&comps[i], parset);
         itsComponents.push_back(pol);
     }
 
@@ -225,13 +238,13 @@ void RMCatalogue::write()
 void RMCatalogue::writeVOT()
 {
     AskapVOTableCatalogueWriter vowriter(itsVotableFilename);
-    vowriter.setup(&itsCube);
-    ASKAPLOG_DEBUG_STR(logger, "Writing component table to the VOTable " <<
+    vowriter.setup(itsCube);
+    ASKAPLOG_DEBUG_STR(logger, "Writing polarisation catalogue to the VOTable " <<
                        itsVotableFilename);
     vowriter.setColumnSpec(&itsSpec);
     vowriter.openCatalogue();
     vowriter.writeHeader();
-    duchamp::VOParam version("table_version", "meta.version", "char", itsVersion, itsVersion.size()+1, "");
+    duchamp::VOParam version("table_version", "meta.version", "char", itsVersion, itsVersion.size() + 1, "");
     vowriter.writeParameter(version);
     vowriter.writeParameters();
     vowriter.writeFrequencyParam();
@@ -246,8 +259,8 @@ void RMCatalogue::writeASCII()
 {
 
     AskapAsciiCatalogueWriter writer(itsAsciiFilename);
-    ASKAPLOG_DEBUG_STR(logger, "Writing Fit results to " << itsAsciiFilename);
-    writer.setup(&itsCube);
+    ASKAPLOG_DEBUG_STR(logger, "Writing polarisation catalogue to text file " << itsAsciiFilename);
+    writer.setup(itsCube);
     writer.setColumnSpec(&itsSpec);
     writer.openCatalogue();
     writer.writeTableHeader();

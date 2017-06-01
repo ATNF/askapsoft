@@ -72,7 +72,7 @@ using namespace LOFAR::TYPES;
 #include <parallelanalysis/DuchampParallel.h>
 #include <parallelanalysis/Weighter.h>
 #include <parallelanalysis/ParallelStats.h>
-#include <parallelanalysis/ObjectParameteriser.h>
+#include <parallelanalysis/DistributedFitter.h>
 #include <preprocessing/VariableThresholder.h>
 #include <extraction/ExtractionFactory.h>
 #include <duchampinterface/DuchampInterface.h>
@@ -225,7 +225,6 @@ DuchampParallel::DuchampParallel(askap::askapparallel::AskapParallel& comms,
 
     LOFAR::ParameterSet fitParset = itsParset.makeSubset("Fitter.");
     itsFitParams = sourcefitting::FittingParameters(fitParset);
-    itsFlagDistribFit = itsParset.getBool("distribFit", true);
 
     itsFlagFindSpectralTerms = itsParset.getBoolVector("findSpectralTerms",
                                std::vector<bool>(2, itsFitParams.doFit()));
@@ -1067,19 +1066,6 @@ void DuchampParallel::receiveObjects()
 void DuchampParallel::cleanup()
 {
 
-    if (itsComms.isParallel() && itsComms.isWorker()) {
-        // need to call ObjectParameteriser only, so that the distributed calculation works
-
-        ASKAPLOG_DEBUG_STR(logger, "Parameterising edge objects in distributed manner");
-        ObjectParameteriser objParam(itsComms);
-        objParam.initialise(this);
-        objParam.distribute();
-        objParam.parameterise();
-        objParam.gather();
-
-    }
-
-
     if (!itsComms.isParallel() || itsComms.isMaster()) {
         ASKAPLOG_INFO_STR(logger, "Beginning the cleanup");
 
@@ -1124,19 +1110,24 @@ void DuchampParallel::cleanup()
             }
 
         }
+    }
 
-        ObjectParameteriser objParam(itsComms);
-        objParam.initialise(this);
-        objParam.distribute();
-        objParam.parameterise();
-        objParam.gather();
-        itsEdgeSourceList = objParam.finalList();
+    // Run this on both workers and master
+    DistributedFitter distribFitter(itsComms, itsParset, itsEdgeSourceList);
+    distribFitter.distribute();
+    distribFitter.parameterise();
+    distribFitter.gather();
+
+    // Back to just the master
+    if (!itsComms.isParallel() || itsComms.isMaster()) {
+
+        itsEdgeSourceList = distribFitter.finalList();
 
         ASKAPLOG_INFO_STR(logger, "Finished parameterising " << itsEdgeSourceList.size()
                           << " edge sources");
 
+        std::vector<sourcefitting::RadioSource>::iterator src;
         for (src = itsEdgeSourceList.begin(); src < itsEdgeSourceList.end(); src++) {
-            ASKAPLOG_DEBUG_STR(logger, "'Edge' source, name " << src->getName());
             itsSourceList.push_back(*src);
         }
         itsEdgeSourceList.clear();
@@ -1191,18 +1182,20 @@ void DuchampParallel::printResults()
         }
         ASKAPLOG_INFO_STR(logger, "Found " << itsCube.getNumObj() << " sources.");
 
-        ResultsWriter writer(this);
-        writer.duchampOutput();
-        writer.writeIslandCatalogue();
-        writer.writeComponentCatalogue();
-        writer.writeHiEmissionCatalogue();
-        writer.writePolarisationCatalogue();
-        writer.writeFitResults();
-        writer.writeFitAnnotations();
-        writer.writeComponentParset();
+    }
+
+    // Do this for all workers as well as master
+    ResultsWriter writer(this, itsComms);
+    writer.duchampOutput();
+    writer.writeIslandCatalogue();
+    writer.writeComponentCatalogue();
+    writer.writeHiEmissionCatalogue();
+    writer.writePolarisationCatalogue();
+    writer.writeFitResults();
+    writer.writeFitAnnotations();
+    writer.writeComponentParset();
 
 
-    } // end of 'if isMaster'
 }
 
 //**************************************************************//
