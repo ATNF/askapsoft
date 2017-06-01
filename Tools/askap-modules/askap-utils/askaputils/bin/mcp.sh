@@ -42,11 +42,11 @@ copy() {
 #SBATCH --error=/group/askap/logs/mcp-copy-logs/%j-copy.err
 #SBATCH --account=askap
 #SBATCH --clusters=zeus
-#
+#SBATCH --job-name=mcp
 #SBATCH --partition=copyq
 #SBATCH --time=7:59:00
 
-printf "Copying $(cd "$(dirname "${SOURCE}")"; pwd)/$(basename "${SOURCE}") to $(cd "$(dirname "${DEST}")"; pwd)/$(basename "${DEST}")\n"
+printf "Copying \$(cd "\$(dirname "${SOURCE}")"; pwd)/\$(basename "${SOURCE}") to \$(cd "\$(dirname "${DEST}")"; pwd)/\$(basename "${DEST}")\n"
 module load mpifileutils
 mpirun -np 12 dcp -p -d info ${SOURCE} ${DEST}
 EOF
