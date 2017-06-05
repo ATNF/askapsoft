@@ -92,15 +92,10 @@ BEAM=${BEAM}
 pol=${pol}
 DO_ALT_IMAGER_SPECTRAL="${DO_ALT_IMAGER_SPECTRAL}"
 NUM_SPECTRAL_CUBES=${NUM_SPECTRAL_CUBES}
+IMAGETYPE_SPECTRAL=${IMAGETYPE_SPECTRAL}
 subband="${subband}"
 imageCode=restored
 setImageProperties spectral
-
-IMAGETYPE_SPECTRAL=${IMAGETYPE_SPECTRAL}
-if [ "\${IMAGETYPE_SPECTRAL}" == "fits" ]; then
-    # If we made a FITS cube, need to append a .fits suffix to the imageName
-    imageName="\${imageName}.fits"
-fi
 
 if [ ! -e "\${imageName}" ]; then
 
@@ -145,6 +140,11 @@ EOFINNER
     if [ \$err != 0 ]; then
         exit \$err
     fi
+    outputName="\${imageName}.contsub"
+    imageCode=restored
+    setImageProperties spectral
+    echo "Renaming \$outputName to \$imageName"
+    mv \$outputName \$imageName
 
 fi
 EOF

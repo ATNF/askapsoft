@@ -148,6 +148,9 @@ for THISTILE in \$FULL_TILE_LIST; do
         wt="\${FIELD}/\${weightsImage}"
         if [ "\${imageCode}" != "restored" ]; then
             wt="\${wt}.\${imageCode}"
+            if [ "\${IMAGETYPE_SPECTRAL}" == "fits" ]; then
+                wt="\${wt}.fits"
+            fi
         fi
         if [ -e "\${im}" ]; then
             if [ "\${imList}" == "" ]; then
@@ -183,8 +186,8 @@ for THISTILE in \$FULL_TILE_LIST; do
 linmos.names            = [\${imList}]
 linmos.weights          = [\${wtList}]
 linmos.imagetype        = \${IMAGETYPE_SPECTRAL}
-linmos.outname          = \$imageName
-linmos.outweight        = \$weightsImage
+linmos.outname          = \${imageName%%.fits}
+linmos.outweight        = \${weightsImage%%.fits}
 linmos.weighttype       = FromWeightImages
 EOFINNER
 

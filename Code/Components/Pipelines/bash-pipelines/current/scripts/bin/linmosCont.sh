@@ -131,9 +131,9 @@ for((LOOP=0;LOOP<=NUM_LOOPS;LOOP++)); do
                 im="\${DIR}/\${imageName}"
                 if [ -e "\${im}" ]; then
                     if [ "\${beamList}" == "" ]; then
-                        beamList="\${im}"
+                        beamList="\${im%%.fits}"
                     else
-                        beamList="\${beamList},\${im}"
+                        beamList="\${beamList},\${im%%.fits}"
                     fi
                 fi
             done
@@ -163,8 +163,8 @@ for((LOOP=0;LOOP<=NUM_LOOPS;LOOP++)); do
                 cat > "\${parset}" << EOFINNER
 linmos.names            = [\${beamList}]
 linmos.imagetype        = \${IMAGETYPE_CONT}
-linmos.outname          = \$imageName
-linmos.outweight        = \$weightsImage
+linmos.outname          = \${imageName%%.fits}
+linmos.outweight        = \${weightsImage%%.fits}
 linmos.weighttype       = FromPrimaryBeamModel
 linmos.weightstate      = Inherent
 ${reference}

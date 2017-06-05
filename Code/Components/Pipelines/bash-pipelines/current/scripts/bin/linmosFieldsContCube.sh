@@ -151,13 +151,16 @@ for THISTILE in \$FULL_TILE_LIST; do
                 setImageProperties contcube
                 im="\${FIELD}/\${imageName}"
                 wt="\${FIELD}/\${weightsImage}"
+                if [ "\${IMAGETYPE_CONTCUBE}" == "fits" ]; then
+                    wt="\${wt}.fits"
+                fi
                 if [ -e "\${im}" ]; then
                     if [ "\${imList}" == "" ]; then
-                        imList="\${im}"
-                        wtList="\${wt}"
+                        imList="\${im%%.fits}"
+                        wtList="\${wt%%.fits}"
                     else
-                        imList="\${imList},\${im}"
-                        wtList="\${wtList},\${wt}"
+                        imList="\${imList},\${im%%.fits}"
+                        wtList="\${wtList},\${wt%%.fits}"
                     fi
                 fi
             done
@@ -182,8 +185,8 @@ for THISTILE in \$FULL_TILE_LIST; do
 linmos.names            = [\${imList}]
 linmos.weights          = [\${wtList}]
 linmos.imagetype        = \${IMAGETYPE_CONTCUBE}
-linmos.outname          = \$imageName
-linmos.outweight        = \$weightsImage
+linmos.outname          = \${imageName%%.fits}
+linmos.outweight        = \${weightsImage%%.fits}
 linmos.weighttype       = FromWeightImages
 EOFINNER
 

@@ -116,9 +116,9 @@ for POLN in \$POL_LIST; do
             im="\${imageName}"
             if [ -e "\${im}" ]; then
                 if [ "\${beamList}" == "" ]; then
-                    beamList="\${im}"
+                    beamList="\${im%%.fits}"
                 else
-                    beamList="\${beamList},\${im}"
+                    beamList="\${beamList},\${im%%.fits}"
                 fi
             fi
         done
@@ -129,7 +129,10 @@ for POLN in \$POL_LIST; do
             BEAM=all
             setImageProperties contcube
             if [ "\${imageCode}" != "restored" ]; then
-                weightsImage="\${weightsImage}.\${imageCode}"
+                weightsImage="\${weightsImage%%.fits}.\${imageCode}"
+                if [ "\${IMAGETYPE_CONTCUBE}" == "fits" ]; then
+                    weightsImage="\${weightsImage}.fits"
+                fi
             fi
             echo "Mosaicking \${beamList} to form \${imageName}"
             parset=${parsets}/science_\${jobCode}_\${pol}_${FIELDBEAM}_\${SLURM_JOB_ID}.in
@@ -137,8 +140,8 @@ for POLN in \$POL_LIST; do
             cat > "\${parset}" << EOFINNER
 linmos.names            = [\${beamList}]
 linmos.imagetype        = \${IMAGETYPE_CONTCUBE}
-linmos.outname          = \$imageName
-linmos.outweight        = \$weightsImage
+linmos.outname          = \${imageName%%.fits}
+linmos.outweight        = \${weightsImage%%.fits}
 linmos.weighttype       = FromPrimaryBeamModel
 linmos.weightstate      = Inherent
 ${reference}
