@@ -91,7 +91,7 @@ EOFOUTER
     if [ "${SUBMIT_JOBS}" == "true" ]; then
         dep=""
         if [ "${ALL_JOB_IDS}" != "" ]; then
-            dep="-d afterok:$(echo "$ALL_JOB_IDS" | sed -e 's/,/:/g')"
+            dep="-d afterany:$(echo "$ALL_JOB_IDS" | sed -e 's/,/:/g')"
         fi
         ID_FITSCONVERT=$(sbatch ${dep} "$sbatchfile" | awk '{print $4}')
         recordJob "${ID_FITSCONVERT}" "Job to convert remaining images to FITS, with flags \"${dep}\""
