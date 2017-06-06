@@ -410,7 +410,104 @@ namespace askap {
             } // n loop (taylor term)
 
         } // void LinmosAccumulator<T>::findAndSetTaylorTerms()
+        template<typename T>
+        void LinmosAccumulator<T>::removeBeamFromTaylorTerms(
+                                        Array<T>& taylor0,
+                                        Array<T>& taylor1,
+                                        Array<T>& taylor2,
+                                    const IPosition& curpos) {
 
+            // The basics of this are we need to remove the effect of the beam
+            // from the Taylor terms
+            // This is only required if you do not grid with the beam. One wonders
+            // whether we should just implement the beam (A) projection in the gridding.
+
+            // This means redistribution of some of Taylor terms (tt) into tt'
+            //
+            // tt0' = tt0 - no change
+            // tt1' = tt1 - (tt0 x alpha)
+            // tt2' = tt2 - tt1 x alpha - tt2 x (beta - alpha(alpha + 1.)/2. )
+            //
+            // we therefore need some partial products ...
+            //
+            //
+            // tt0 x alpha = tt0Alpha
+            // tt1 x alpha = tt1Alpha
+            // tt2 x (beta - alpha(alpha + 1.)/2.) = tt2AlphaBeta
+            //
+            // the taylor terms have no frequency axis - by contruction - but
+            // I'm keeping this assumption that there may be some frequency structure
+            // I should probably clean this up.
+            //
+            // copy the pixel iterator containing all dimensions
+            //
+            //
+            IPosition fullpos(curpos);
+            // set a pixel iterator that does not have the higher dimensions
+            IPosition pos(2);
+            // copy the pixel iterator containing all dimensions
+            Vector<double> pixel(2,0.);
+
+            MVDirection world0, world1;
+            T offsetBeam, alpha, beta;
+
+            // get coordinates of the spectral axis and the current frequency
+            const int scPos = itsInCoordSys.findCoordinate(Coordinate::SPECTRAL,-1);
+            const SpectralCoordinate inSC = itsInCoordSys.spectralCoordinate(scPos);
+            int chPos = itsInCoordSys.pixelAxes(scPos)[0];
+            const T freq = inSC.referenceValue()[0] +
+                (curpos[chPos] - inSC.referencePixel()[0]) * inSC.increment()[0];
+
+            // set FWHM for the current beam
+            // Removing the factor of 1.22 gives a good match to the simultation weight images
+            // const T fwhm = 1.22*3e8/freq/12;
+
+            const T fwhm = 3e8/freq/12.;
+
+            // get coordinates of the direction axes
+            const int dcPos = itsInCoordSys.findCoordinate(Coordinate::DIRECTION,-1);
+            const DirectionCoordinate inDC = itsInCoordSys.directionCoordinate(dcPos);
+            const DirectionCoordinate outDC = itsOutCoordSys.directionCoordinate(dcPos);
+
+            // set the centre of the input beam (needs to be more flexible -- and correct...)
+            inDC.toWorld(world0,inDC.referencePixel());
+
+            //
+            // step through the pixels
+            //
+
+            Array<T> scr1 = taylor1.copy();
+            Array<T> scr2 = taylor2.copy();
+
+            for (int x=0; x < taylor1.shape()[0];++x) {
+                for (int y=0; y < taylor1.shape()[1];++y) {
+
+                    pos[0] = x;
+                    pos[1] = y;
+
+                    // get the current pixel location and distance from beam centre
+                    pixel[0] = double(x);
+                    pixel[1] = double(y);
+                    outDC.toWorld(world1,pixel);
+                    offsetBeam = world0.separation(world1);
+                    //
+                    // set the alpha
+                    // this assumes that the reference frequency is the current
+                    // frequency.
+                    //
+                    alpha = -8. * log(2.) * pow((offsetBeam/fwhm),2.);
+                    T toPut = scr1(pos) - taylor0(pos) * alpha;
+                    // build
+                    taylor1.putAt(toPut, pos);
+                    beta = alpha;
+                    toPut = scr2(pos) - scr1(pos) * alpha - taylor0(pos)*(beta * alpha * (alpha + 1)/2.);
+                    //
+                    taylor2.putAt(toPut,pos);
+                    //
+                }
+            } // for all pixels
+
+        } // removeBeamFromTaylorTerms()
         template<typename T>
         void LinmosAccumulator<T>::findAndSetMosaics(const vector<string> &imageTags) {
 

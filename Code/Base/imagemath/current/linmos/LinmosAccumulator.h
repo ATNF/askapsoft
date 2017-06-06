@@ -1,7 +1,7 @@
 /// @file LinmosAccumulator.h
 ///
 /// @brief combine a number of images as a linear mosaic
-/// @details 
+/// @details
 ///
 /// @copyright (c) 2012,2014,2015 CSIRO
 /// Australia Telescope National Facility (ATNF)
@@ -80,6 +80,20 @@ namespace askap {
                                            const vector<string> &inWgtNames,
                                            const string &outImgName,
                                            const string &outWgtName);
+
+                /// @brief if the images have not been corrected for the primary
+                /// beam they still contain the spectral structure of the primary
+                /// beam as well as their intrinsic spectral indices
+                /// this method decouples the beam spectral behaviour from the images
+                /// Based on a Gaussian beam approximation.
+                /// @param[in] Array<T>& Taylor0 pixels
+                /// @param[in] Array<T>& Taylor1 pixels
+                /// @param[in] Array<T>& Taylor2 pixels
+
+                void removeBeamFromTaylorTerms( Array<T>& taylor0,
+                                                Array<T>& taylor1,
+                                                Array<T>& taylor2,
+                                            const IPosition& curpos);
 
                 /// @brief search the current directory for suitable mosaics
                 /// @details based on a vector of image tags, look for sets of images with names
@@ -247,7 +261,7 @@ namespace askap {
 
                 T itsCutoff;
 
-                // 
+                //
                 Vector<MVDirection> itsCentres;
                 MVDirection itsInCentre;
 
@@ -272,4 +286,3 @@ namespace askap {
 #include <linmos/LinmosAccumulator.tcc>
 
 #endif
-
