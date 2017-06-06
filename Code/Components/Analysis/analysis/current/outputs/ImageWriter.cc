@@ -33,15 +33,17 @@
 #include <casacore/casa/Arrays/Array.h>
 #include <casacore/casa/Arrays/IPosition.h>
 #include <casacore/coordinates/Coordinates/CoordinateSystem.h>
-#include <casacore/images/Images/PagedImage.h>
+// #include <casacore/images/Images/PagedImage.h>
 #include <casacore/images/Images/ImageInfo.h>
-#include <casacore/images/Images/ImageOpener.h>
-#include <casacore/images/Images/FITSImage.h>
-#include <casacore/images/Images/MIRIADImage.h>
+// #include <casacore/images/Images/ImageOpener.h>
+// #include <casacore/images/Images/FITSImage.h>
+// #include <casacore/images/Images/MIRIADImage.h>
+#include <Common/ParameterSet.h>
 
 #include <casainterface/CasaInterface.h>
 #include <casacore/casa/aipstype.h>
 
+#include <imageaccess/ImageAccessFactory.h>
 ///@brief Where the log messages go.
 ASKAP_LOGGER(logger, ".imagewriter");
 
@@ -49,7 +51,8 @@ namespace askap {
 
 namespace analysis {
 
-ImageWriter::ImageWriter(duchamp::Cube *cube, std::string imageName)
+ImageWriter::ImageWriter(const LOFAR::ParameterSet &parset,duchamp::Cube *cube, std::string imageName):
+    itsParset(parset)
 {
     this->copyMetadata(cube);
     itsImageName = imageName;
@@ -95,10 +98,19 @@ void ImageWriter::create()
                            " with shape " << itsShape <<
                            " and tileshape " << itsTileshape);
 
-        casa::PagedImage<float> img(casa::TiledShape(itsShape, itsTileshape),
-                                    itsCoordSys, itsImageName);
-        img.setUnits(itsBunit);
-        img.setImageInfo(itsImageInfo);
+        // casa::PagedImage<float> img(casa::TiledShape(itsShape, itsTileshape),
+        //                             itsCoordSys, itsImageName);
+        // img.setUnits(itsBunit);
+        // img.setImageInfo(itsImageInfo);
+
+        boost::shared_ptr<accessors::IImageAccess> imageAcc = accessors::imageAccessFactory(itsParset);
+//        imageAcc->create(itsImageName, casa::TiledShape(itsShape, itsTileshape), itsCoordSys);
+        imageAcc->create(itsImageName, itsShape, itsCoordSys);
+        imageAcc->setUnits(itsImageName, itsBunit.getName());
+        // imageAcc->setImageInfo...
+        casa::Vector<casa::Quantity> beam=itsImageInfo.restoringBeam().toVector();
+        imageAcc->setBeamInfo(itsImageName, beam[0].getValue("rad"), beam[1].getValue("rad"), beam[2].getValue("rad"));
+
     }
 }
 
@@ -132,17 +144,20 @@ void ImageWriter::write(const casa::Array<Float> &data,
 {
     ASKAPASSERT(data.ndim() == itsShape.size());
     ASKAPASSERT(loc.size() == itsShape.size());
-    ASKAPLOG_DEBUG_STR(logger, "Opening image " << itsImageName << " for writing");
-    casa::PagedImage<float> img(itsImageName);
+//    ASKAPLOG_DEBUG_STR(logger, "Opening image " << itsImageName << " for writing");
+    boost::shared_ptr<accessors::IImageAccess> imageAcc = accessors::imageAccessFactory(itsParset);
+    // casa::PagedImage<float> img(itsImageName);
     ASKAPLOG_DEBUG_STR(logger,
                        "Writing array of shape " << data.shape() <<
                        " to image " << itsImageName <<
                        " at location " << loc);
     if (accumulate) {
         casa::Array<casa::Float> newdata = data + this->read(loc, data.shape());
-        img.putSlice(newdata, loc);
+        // img.putSlice(newdata, loc);
+        imageAcc->write(itsImageName, newdata, loc);
     } else {
-        img.putSlice(data, loc);
+        // img.putSlice(data, loc);
+        imageAcc->write(itsImageName, data, loc);
     }
 
 }
@@ -151,8 +166,13 @@ casa::Array<casa::Float>
 ImageWriter::read(const casa::IPosition& loc, const casa::IPosition &shape)
 {
     ASKAPASSERT(loc.size() == shape.size());
-    casa::PagedImage<float> img(itsImageName);
-    return img.getSlice(loc, shape);
+    // casa::PagedImage<float> img(itsImageName);
+    // return img.getSlice(loc, shape);
+    boost::shared_ptr<accessors::IImageAccess> imageAcc = accessors::imageAccessFactory(itsParset);
+    casa::IPosition trc = loc;
+    trc += shape-1;
+    ASKAPLOG_DEBUG_STR(logger, "About to read from " << itsImageName <<" at loc="<<loc << " and shape="<<shape<<" which means trc="<<trc);
+    return imageAcc->read(itsImageName, loc, trc);
 }
 
 

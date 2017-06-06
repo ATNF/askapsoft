@@ -180,7 +180,7 @@ void CurvatureMapCreator::write()
     if (itsFilename != "") {
         ASKAPLOG_DEBUG_STR(logger, "In CurvatureMapCreator::write()");
 
-        DistributedImageWriter writer(*itsComms, itsCube, itsFilename);
+        DistributedImageWriter writer(*itsComms, itsParset, itsCube, itsFilename);
         ASKAPLOG_DEBUG_STR(logger, "Creating the output image " << itsFilename);
         writer.create();
         ASKAPLOG_DEBUG_STR(logger, "Writing curvature map of shape " <<

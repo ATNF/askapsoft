@@ -46,6 +46,7 @@ namespace analysis {
 class DistributedImageWriter : public ImageWriter {
     public:
         DistributedImageWriter(askap::askapparallel::AskapParallel& comms,
+                               const LOFAR::ParameterSet &parset,
                                duchamp::Cube *cube,
                                std::string imageName);
         virtual ~DistributedImageWriter() {};
@@ -75,6 +76,9 @@ class DistributedImageWriter : public ImageWriter {
     protected:
 
         askap::askapparallel::AskapParallel *itsComms;
+
+    /// @brief The defining parset
+        LOFAR::ParameterSet itsParset;
 
 };
 

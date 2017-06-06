@@ -51,9 +51,10 @@ namespace askap {
 namespace analysis {
 
 DistributedImageWriter::DistributedImageWriter(askap::askapparallel::AskapParallel& comms,
-        duchamp::Cube *cube,
-        std::string imageName):
-    ImageWriter(cube, imageName), itsComms(&comms)
+                                               const LOFAR::ParameterSet &parset,
+                                               duchamp::Cube *cube,
+                                               std::string imageName):
+    ImageWriter(parset, cube, imageName), itsComms(&comms)
 {
 
 }
