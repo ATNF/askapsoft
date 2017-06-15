@@ -211,10 +211,10 @@ void RMCatalogue::defineSpec()
                       "stat.value;phys.polarization", "double", "col_complex_1", "");
     itsSpec.addColumn("COMPLEX2", "complex_2", "", 5, casda::precStats,
                       "stat.value;phys.polarization", "double", "col_complex_2", "");
-    itsSpec.addColumn("FLAG1", "flag_is_detection", "", 1, 0, "meta.code", "boolean", "col_flag_is_detection", "");
-    itsSpec.addColumn("FLAG2", "flag_edge", "", 1, 0, "meta.code", "boolean", "col_flag_edge", "");
-    itsSpec.addColumn("FLAG3", "flag_p3", "", 1, 0, "meta.code", "char", "col_flag_p3", "");
-    itsSpec.addColumn("FLAG4", "flag_p4", "", 1, 0, "meta.code", "char", "col_flag_p4", "");
+    itsSpec.addColumn("FLAG1", "flag_is_detection", "", 1, 0, "meta.code", "int", "col_flag_is_detection", "");
+    itsSpec.addColumn("FLAG2", "flag_edge", "", 1, 0, "meta.code", "int", "col_flag_edge", "");
+    itsSpec.addColumn("FLAG3", "flag_p3", "", 1, 0, "meta.code", "int", "col_flag_p3", "");
+    itsSpec.addColumn("FLAG4", "flag_p4", "", 1, 0, "meta.code", "int", "col_flag_p4", "");
 
 }
 
