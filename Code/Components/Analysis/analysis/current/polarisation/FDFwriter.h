@@ -60,6 +60,9 @@ class FDFwriter {
 
     protected:
 
+        /// @brief The defining parset
+        LOFAR::ParameterSet itsParset;
+
         /// @brief User flag indicating whether the images should be
         /// written as complex-valued (true) or separate files for phase &
         /// amplitude.

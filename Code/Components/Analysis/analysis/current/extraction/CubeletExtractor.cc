@@ -35,7 +35,7 @@
 
 #include <sourcefitting/RadioSource.h>
 
-#include <imageaccess/CasaImageAccess.h>
+#include <imageaccess/ImageAccessFactory.h>
 
 #include <casacore/casa/Arrays/IPosition.h>
 #include <casacore/casa/Arrays/Array.h>
@@ -205,15 +205,15 @@ void CubeletExtractor::writeImage()
 
         Array<Float> newarray(itsArray.reform(outshape));
 
-        accessors::CasaImageAccess ia;
-        ia.create(itsOutputFilename, newarray.shape(), newcoo);
+        boost::shared_ptr<accessors::IImageAccess> ia = accessors::imageAccessFactory(itsParset);
+        ia->create(itsOutputFilename, newarray.shape(), newcoo);
 
         // write the array
-        ia.write(itsOutputFilename, newarray);
+        ia->write(itsOutputFilename, newarray);
 
         // write the flux units
         std::string units = itsInputCubePtr->units().getName();
-        ia.setUnits(itsOutputFilename, units);
+        ia->setUnits(itsOutputFilename, units);
 
         this->writeBeam(itsOutputFilename);
 
@@ -221,10 +221,8 @@ void CubeletExtractor::writeImage()
             // copy the image mask to the cubelet, if there is one.
             casa::LogicalArray
                 mask(itsInputCubePtr->pixelMask().getSlice(itsSlicer).reform(outshape));
-
-            casa::PagedImage<float> img(itsOutputFilename);
-            img.makeMask("mask");
-            img.pixelMask().put(mask);
+            ia->makeDefaultMask(itsOutputFilename);
+            ia->writeMask(itsOutputFilename, mask, casa::IPosition(outshape.nelements(),0));
         }
         
         this->closeInput();

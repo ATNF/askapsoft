@@ -35,7 +35,7 @@
 
 #include <sourcefitting/RadioSource.h>
 
-#include <imageaccess/CasaImageAccess.h>
+#include <imageaccess/ImageAccessFactory.h>
 
 #include <casacore/casa/Arrays/IPosition.h>
 #include <casacore/casa/Arrays/Array.h>
@@ -190,14 +190,14 @@ void SpectralBoxExtractor::writeImage()
 
     Array<Float> newarray(itsArray.reform(outshape));
 
-    accessors::CasaImageAccess ia;
-    ia.create(itsOutputFilename, newarray.shape(), newcoo);
+    boost::shared_ptr<accessors::IImageAccess> ia = accessors::imageAccessFactory(itsParset);
+    ia->create(itsOutputFilename, newarray.shape(), newcoo);
 
     /// @todo save the new units - if units were per beam, remove this factor
 
     // write the array
-    ia.write(itsOutputFilename, newarray);
-    ia.setUnits(itsOutputFilename, itsOutputUnits.getName());
+    ia->write(itsOutputFilename, newarray);
+    ia->setUnits(itsOutputFilename, itsOutputUnits.getName());
 
 }
 

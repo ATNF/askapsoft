@@ -75,6 +75,7 @@ StokesSpectrum::StokesSpectrum(const LOFAR::ParameterSet &parset,
     specParset.add(LOFAR::KVpair("useDetectedPixels", false));
     specParset.add(LOFAR::KVpair("scaleSpectraByBeam", true));
     specParset.add(LOFAR::KVpair("beamLog", itsBeamLog));
+    specParset.add("imagetype",itsParset.getString("imagetype","fits"));
     itsSpecExtractor = new SourceSpectrumExtractor(specParset);
 
     // Define the parset used to set up the noise extractor
@@ -90,6 +91,7 @@ StokesSpectrum::StokesSpectrum(const LOFAR::ParameterSet &parset,
     noiseParset.add(LOFAR::KVpair("polarisation", itsPol));
     noiseParset.add(LOFAR::KVpair("useDetectedPixels", false));
     noiseParset.add(LOFAR::KVpair("scaleSpectraByBeam", true));
+    noiseParset.add("imagetype",itsParset.getString("imagetype","fits"));
     itsNoiseExtractor = new NoiseSpectrumExtractor(noiseParset);
 
 

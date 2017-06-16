@@ -39,7 +39,7 @@
 
 #include <sourcefitting/RadioSource.h>
 
-#include <imageaccess/CasaImageAccess.h>
+#include <imageaccess/ImageAccessFactory.h>
 
 #include <casacore/casa/Arrays/IPosition.h>
 #include <casacore/casa/Arrays/Array.h>
@@ -302,19 +302,18 @@ void MomentMapExtractor::writeImage()
                 std::string filename = this->outfile(i);
                 ASKAPLOG_INFO_STR(logger, "Writing moment-" << i << " map to '" <<
                                   filename << "'");
-                accessors::CasaImageAccess ia;
-                ia.create(filename, newarray.shape(), newcoo);
+                boost::shared_ptr<accessors::IImageAccess> ia = accessors::imageAccessFactory(itsParset);
+                ia->create(filename, newarray.shape(), newcoo);
 
                 // write the array
-                ia.write(filename, newarray);
+                ia->write(filename, newarray);
 
-                ia.setUnits(filename, newunits);
+                ia->setUnits(filename, newunits);
 
                 this->writeBeam(filename);
 
-                casa::PagedImage<float> img(filename);
-                img.makeMask("mask");
-                img.pixelMask().put(theMask);
+                ia->makeDefaultMask(filename);
+                ia->writeMask(filename, theMask, casa::IPosition(outshape.nelements(),0));
 
             }
         }

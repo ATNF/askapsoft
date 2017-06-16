@@ -70,6 +70,9 @@ CasdaPolarisationEntry::CasdaPolarisationEntry(CasdaComponent *comp,
     itsComponentID = comp->componentID();
 
     LOFAR::ParameterSet polParset = parset.makeSubset("RMSynthesis.");
+    if(! polParset.isDefined("imagetype")){
+        polParset.add("imagetype","fits");
+    }
 
     PolarisationData poldata(polParset);
     poldata.initialise(comp);

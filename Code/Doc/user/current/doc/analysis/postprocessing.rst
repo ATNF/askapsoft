@@ -702,7 +702,13 @@ survey science team, and can be described as follows:
    that is named in the same way as the component and island
    catalogues - see the description above.
  * The extracted spectra of I, Q & U can also be written out to
-   individual files, along with the FDF and RMSF arrays.
+   individual files, along with the FDF and RMSF arrays. These files
+   can be either CASA or FITS format, selectable via the
+   **RMSynthesis.imagetype** parameter. Unlike elsewhere, this
+   defaults to **fits**. The FDF and RMSF files can each be written as 
+   either single complex-valued spectra, or separate spectra for the
+   phase & amplitude. If FITS output is being used, the complex-valued
+   option is not available.
 
 
 Parameters for Rotation Measure Synthesis
@@ -735,6 +741,9 @@ Parameters for Rotation Measure Synthesis
 |                                       |                |                               | **[outputbase]_spec_[Stokes]_[objectID]** for the spectra,           |
 |                                       |                |                               | **[outputbase]_FDF_[objectID]** for the FDF, and                     |
 |                                       |                |                               | **[outputbase]_RMSF_[objectID]** for the RMSF.                       |
++---------------------------------------+----------------+-------------------------------+----------------------------------------------------------------------+
+| Selavy.RMSynthesis.imagetype          | string         | casa                          | Type of image to create when extracting. Can be either "casa" or     |
+|                                       |                |                               | "fits" - anything else will throw an error.                          |
 +---------------------------------------+----------------+-------------------------------+----------------------------------------------------------------------+
 | Selavy.RMSynthesis.outputBase         | string         | ""                            | The base name for the output files - a front-end to                  |
 |                                       |                |                               | **extractSpectra.spectralOutputBase** (:doc:`extraction`).           |

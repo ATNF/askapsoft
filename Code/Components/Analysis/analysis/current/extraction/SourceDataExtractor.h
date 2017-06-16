@@ -178,6 +178,8 @@ class SourceDataExtractor {
 
         // Members
 
+        /// @brief The defining parset
+        LOFAR::ParameterSet                              itsParset;
         /// @brief The RadioSource being used - if not provided,
         /// pointer remains null
         RadioSource                                     *itsSource;
