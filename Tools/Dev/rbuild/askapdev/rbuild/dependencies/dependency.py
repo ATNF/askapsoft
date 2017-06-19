@@ -99,6 +99,8 @@ class Dependency:
     def get_dep_path(self, key):
         return self._deps[key]["path"]
 
+    def get_explicit(self):
+        return [ v["path"] for v in self._deps.values() if v["explicit"] ]
 
     # Used by "in" test.
     # object.__contains__(self, item)
