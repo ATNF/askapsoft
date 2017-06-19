@@ -221,7 +221,7 @@ class Dependency:
         hostname = socket.gethostname().split(".")[0]
 
         for ext in [hostname, system, codename, 'default']:
-            if ext:
+            if ext:  # i.e. not empty string
                 depfile = '%s.%s' % (self.DEPFILE, ext)
                 if package:
                     depfile = os.path.join(self.ASKAPROOT, package, depfile)
@@ -230,10 +230,10 @@ class Dependency:
                     basedir = os.path.split(depfile)[0] or "."
                     if not os.path.exists(basedir):
                         utils.update_tree(basedir)
-		if os.path.exists(depfile):
-		    self.q_print("info: processing %s" % depfile)
+                if os.path.exists(depfile):
+                    self.q_print("info: processing %s" % depfile)
                     self._get_depfile(depfile)
-		    break
+                    break
 
 
 
