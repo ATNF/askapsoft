@@ -1,0 +1,13 @@
+IOR START
+    testFile=/scratch2/askap/lah00b/measurement/testFile
+    # The amount of data to write at one time
+    # For /scratch, the safe limit is around 2GB
+    transferSize=[1m, 2m, 3m]
+    # The amount of data to write (multiples of transferSize)
+    blockSize=[10m, 20m, 30m]
+    filePerProc=1
+    repetitions=2
+    # Direct IO (do not use buffer)
+    useO_DIRECT=1
+RUN
+IOR STOP
