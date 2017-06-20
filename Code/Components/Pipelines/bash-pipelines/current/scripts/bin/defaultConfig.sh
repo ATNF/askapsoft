@@ -452,7 +452,7 @@ PRECONDITIONER_GAUSS_TAPER="[10arcsec, 10arcsec, 0deg]"
 PRECONDITIONER_WIENER_ROBUSTNESS=-0.5
 PRECONDITIONER_WIENER_TAPER=""
 # Parameters for preconditioning for the restore solver alone
-RESTORE_PRECONDITIONER_LIST="[Wiener]"
+RESTORE_PRECONDITIONER_LIST=""
 RESTORE_PRECONDITIONER_GAUSS_TAPER="[10arcsec, 10arcsec, 0deg]"
 RESTORE_PRECONDITIONER_WIENER_ROBUSTNESS=-2
 RESTORE_PRECONDITIONER_WIENER_TAPER=""
@@ -533,7 +533,7 @@ IMAGE_BASE_CONTCUBE=i.contcube
 
 # List of polarisations to make continuum cubes for. The lower-case
 # version of these will go in the image name.
-CONTCUBE_POLARISATIONS="I,Q,U,V"
+CONTCUBE_POLARISATIONS="I"
 
 # Set if there needs to be a rest frequency recorded in the continuum cubes
 REST_FREQUENCY_CONTCUBE=""
@@ -736,7 +736,7 @@ SELAVY_NSUBY=3
 # Selavy source finder - polarisation
 #
 # Whether to include the RM synthesis in the continuum sourcefinding
-DO_RM_SYNTHESIS=true
+DO_RM_SYNTHESIS=false
 # Output base name for the spectra
 SELAVY_POL_OUTPUT_BASE=pol
 # Whether to write the spectra as individual files
@@ -839,9 +839,9 @@ IMAGE_LIST="image psf psf.image residual sensitivity"
 # Whether to archive individual beam images
 ARCHIVE_BEAM_IMAGES=false
 # Whether to archive mosaics of self-calibration loops
-ARCHIVE_SELFCAL_LOOP_MOSAICS=true
+ARCHIVE_SELFCAL_LOOP_MOSAICS=false
 # Whether to archive the mosaicked images of each field
-ARCHIVE_FIELD_MOSAICS=true
+ARCHIVE_FIELD_MOSAICS=false
 
 # OPAL project ID, for CASDA use
 PROJECT_ID="AS031"
