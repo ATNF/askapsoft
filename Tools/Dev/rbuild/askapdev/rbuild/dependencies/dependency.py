@@ -85,6 +85,10 @@ class Dependency:
         self._silent = silent   # mimimal output
         self.selfupdate = False # should object request updates from svn
 
+        self._codename = utils.get_platform()['codename']
+        self._system = utils.get_platform()['system'].lower()
+        self._hostname = socket.gethostname().split(".")[0]
+
 
     def q_print(self, msg):
         if self._silent:
@@ -216,11 +220,8 @@ class Dependency:
 
 
     def _get_dependencies(self, package, explicit=False):
-        codename = utils.get_platform()['codename']
-        system = utils.get_platform()['system'].lower()
-        hostname = socket.gethostname().split(".")[0]
 
-        for ext in [hostname, system, codename, 'default']:
+        for ext in [self._hostname, self._system, self._codename, 'default']:
             if ext: # i.e. not empty string
                 depfile = '%s.%s' % (self.DEPFILE, ext)
                 if package:
@@ -230,10 +231,9 @@ class Dependency:
                     basedir = os.path.split(depfile)[0] or "."
                     if not os.path.exists(basedir):
                         utils.update_tree(basedir)
-                self._get_depfile(depfile, explicit=explicit)
                 if os.path.exists(depfile):
                     self.q_print("info: processing %s" % depfile)
-                    self._get_depfile(depfile)
+                    self._get_depfile(depfile, explicit=explicit)
                     break
 
 
