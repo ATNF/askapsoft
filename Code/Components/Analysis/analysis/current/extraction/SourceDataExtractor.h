@@ -91,6 +91,10 @@ class SourceDataExtractor {
         casa::Array<Float> array() {return itsArray;};
         /// @brief Return the input cube name
         std::string inputCube() {return itsInputCube;};
+    /// @brief Return the input cube restoring beam
+    casa::Vector<Quantum<Double> > inputBeam();
+    /// @brief Return the input cube's coordinate system
+    casa::CoordinateSystem inputCoordSys(){return itsInputCoords;};
         /// @brief Return the list of all possible input cubes
         std::vector<std::string> inputCubeList() {return itsInputCubeList;};
         /// @brief Return the base name of the output image(s)
@@ -119,6 +123,9 @@ class SourceDataExtractor {
         /// @brief Return the brightness unit for the current input
         /// image
         casa::Unit bunit();
+
+    /// @brief Return the slicer used for the extraction
+    casa::Slicer slicer(){return itsSlicer;};
 
 
     protected:

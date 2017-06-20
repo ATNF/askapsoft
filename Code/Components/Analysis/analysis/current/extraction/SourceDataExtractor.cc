@@ -98,6 +98,16 @@ SourceDataExtractor::~SourceDataExtractor()
     itsInputCubePtr.reset();
 }
 
+casa::Vector<Quantum<Double> > SourceDataExtractor::inputBeam()
+{
+    casa::Vector<Quantum<Double> > inputBeam(3,0.);
+    if (this->openInput()) {   
+        inputBeam = itsInputCubePtr->imageInfo().restoringBeam().toVector();
+    }
+    return inputBeam;
+}
+
+
 casa::IPosition SourceDataExtractor::getShape(std::string image)
 {
     itsInputCube = image;

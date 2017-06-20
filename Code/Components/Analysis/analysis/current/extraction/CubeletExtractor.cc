@@ -139,7 +139,7 @@ void CubeletExtractor::extract()
     if (this->openInput()) {
 
         ASKAPLOG_INFO_STR(logger,
-                          "Extracting noise spectrum from " << itsInputCube <<
+                          "Extracting cubelet from " << itsInputCube <<
                           " surrounding source ID " << itsSourceID);
 
         const boost::shared_ptr<SubImage<Float> >

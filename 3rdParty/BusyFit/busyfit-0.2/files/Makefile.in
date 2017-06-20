@@ -1,0 +1,64 @@
+CFLAGS = -O2 -ftree-vectorize -fPIC
+
+CC =    @CC@ $(CFLAGS)
+CXX =   @CXX@ $(CFLAGS)
+LINK=   @LINKER@
+
+INSTALLDIR = @prefix@/bin
+LIBDIR = @prefix@/lib
+INCDIR = @prefix@/include/busyfit
+
+V = @PACKAGE_VERSION@
+EXEC = Busyfit-$(V)
+EXEC-STUB = Busyfit
+
+AR = ar cq
+LIB = libbusyfit-$(V).a
+LIB_LN = libbusyfit.a
+RANLIB = ranlib
+SHAREDLIB = @SHRLD@
+LIBSO = @SHRLIB@
+LIBSO_LN = @SHRLN@
+
+INSTALL = @INSTALL@
+LN_S = @LN_S@
+
+GSLINC = @GSLINC@
+GSLLIB = @GSLLIB@
+
+CINC = $(GSLINC)
+
+LIBS = $(GSLLIB)
+
+HEADS = helperFunctions.h BusyFit.h
+
+OBJECTS = main.o helperFunctions.o BusyFit.o
+
+busyfit : $(OBJECTS)
+	$(LINK) -o $(EXEC) $(OBJECTS) $(LIBS)
+
+lib     : $(OBJECTS)
+	$(AR) $(LIB) $(OBJECTS)
+	$(RANLIB) $(LIB)
+	$(SHAREDLIB) $(CINC) $(LIBS) -o $(LIBSO) $(OBJECTS)
+
+install : 
+	$(INSTALL) -d -m 2755 $(INSTALLDIR)
+	$(INSTALL) -m 755 $(EXEC) $(INSTALLDIR)
+	$(RM) $(INSTALLDIR)/$(EXEC-STUB)
+	cd $(INSTALLDIR) && $(LN_S) $(EXEC) $(EXEC-STUB)
+	-test ! -f $(LIB) || $(INSTALL) -d -m 2755 $(LIBDIR)
+	-test ! -f $(LIB) || $(INSTALL) -m 644 $(LIB) $(LIBDIR)
+	-test ! -f $(LIB) || ( cd $(LIBDIR) && $(RM) $(LIB_LN) && $(LN_S) $(LIB) $(LIB_LN) )
+	-test ! -f $(LIBSO) || ( $(INSTALL) -m 755 $(LIBSO) $(LIBDIR) && \
+		if [ "@SHRLN@" != "" ] ; then \
+			cd $(LIBDIR) && $(RM) $(LIBSO_LN) && $(LN_S) $(LIBSO) $(LIBSO_LN); \
+		fi )
+	$(INSTALL) -d -m 2755 $(INCDIR)
+	$(INSTALL) -m 644 *.h $(INCDIR)
+
+$(OBJECTS) : $(HEADS)
+
+.cpp.o:
+	$(CXX) -c $< $(CINC) -o $@
+

@@ -35,6 +35,7 @@
 #include <askap/AskapLogging.h>
 #include <askap/AskapError.h>
 
+#include <extraction/HIdata.h>
 #include <sourcefitting/RadioSource.h>
 #include <sourcefitting/FitResults.h>
 #include <outputs/CataloguePreparation.h>
@@ -101,6 +102,18 @@ CasdaHiEmissionObject::CasdaHiEmissionObject(sourcefitting::RadioSource &obj,
     id << itsIDbase << obj.getID();
     itsObjectID = id.str();
 
+    LOFAR::ParameterSet hiParset = parset.makeSubset("HiEmissionCatalogue.");
+    if(! hiParset.isDefined("imagetype")){
+        hiParset.add("imagetype","fits");
+    }
+
+    HIdata hidata(parset);
+    hidata.setSource(&obj);
+    hidata.extract();
+    if ( hiParset.getBool("writeSpectra", "true")) {
+        hidata.write();
+    }
+    
     double peakFluxscale = getPeakFluxConversionScale(obj.header(), casda::fluxUnit);
 
     int lng = obj.header().WCS().lng;
@@ -111,10 +124,18 @@ CasdaHiEmissionObject::CasdaHiEmissionObject(sourcefitting::RadioSource &obj,
     ASKAPLOG_DEBUG_STR(logger, newHead_freq.WCS().ctype[newHead_freq.WCS().spec] << " " <<
                        strncmp(newHead_freq.WCS().ctype[newHead_freq.WCS().spec], "FREQ", 4));
     bool doFreq = (strncmp(newHead_freq.WCS().ctype[newHead_freq.WCS().spec], "FREQ", 4) == 0);
+    if ( ! doFreq ){
+        ASKAPLOG_ERROR_STR(logger,
+                           "Conversion to Frequency-based WCS failed - cannot compute frequency-based quantities.");
+    }
     duchamp::FitsHeader newHead_vel = changeSpectralAxis(obj.header(), "VOPT-???", casda::velocityUnit);
     ASKAPLOG_DEBUG_STR(logger, newHead_vel.WCS().ctype[newHead_vel.WCS().spec] << " " <<
                        strncmp(newHead_vel.WCS().ctype[newHead_vel.WCS().spec], "VOPT", 4));
     bool doVel = (strncmp(newHead_vel.WCS().ctype[newHead_vel.WCS().spec], "VOPT", 4) == 0);
+    if ( ! doVel ){
+        ASKAPLOG_ERROR_STR(logger,
+                           "Conversion to Velocity-based WCS failed - cannot compute velocity-based quantities.");
+    }
     double intFluxscale = getIntFluxConversionScale(newHead_vel, casda::intFluxUnitSpectral);
 
     casa::Unit imageFreqUnits(newHead_freq.WCS().cunit[obj.header().WCS().spec]);
@@ -208,6 +229,15 @@ CasdaHiEmissionObject::CasdaHiEmissionObject(sourcefitting::RadioSource &obj,
     itsMajorAxis = obj.getMajorAxis() * 60.; // major axis from Object is in arcmin
     itsMinorAxis = obj.getMinorAxis() * 60.;
     itsPositionAngle = obj.getPositionAngle();
+
+    // From 2D Gaussian fit to the moment-zero image
+    hidata.fitToMom0();
+    itsMajorAxis_fit.value() = hidata.mom0Fit()[0] * 3600.;
+    itsMajorAxis_fit.error() = hidata.mom0FitError()[0] * 3600.;
+    itsMinorAxis_fit.value() = hidata.mom0Fit()[1] * 3600.;
+    itsMinorAxis_fit.error() = hidata.mom0FitError()[1] * 3600.;
+    itsPositionAngle_fit.value() = hidata.mom0Fit()[2] * 180. / M_PI;
+    itsPositionAngle_fit.error() = hidata.mom0FitError()[2] * 180. / M_PI;
     itsSizeX = obj.getXmax() - obj.getXmin() + 1;
     itsSizeY = obj.getYmax() - obj.getYmin() + 1;
     itsSizeZ = obj.getZmax() - obj.getZmin() + 1;
@@ -288,16 +318,52 @@ CasdaHiEmissionObject::CasdaHiEmissionObject(sourcefitting::RadioSource &obj,
     itsIntegFlux.error() = sqrt(itsNumVoxels) * itsRMSimagecube * (intFluxscale / peakFluxscale) *
                            newHead_vel.WCS().cdelt[newHead_vel.WCS().spec] * velScale /
                            newHead_vel.beam().area();
-    itsFluxMax = obj.getPeakFlux() * peakFluxscale;
+
+    // Voxel statistics
+    hidata.findVoxelStats();
+    itsFluxMax = hidata.fluxMax() * peakFluxscale;
+    itsFluxMin = hidata.fluxMin() * peakFluxscale;
+    itsFluxMean = hidata.fluxMean() * peakFluxscale;
+    itsFluxStddev = hidata.fluxStddev() * peakFluxscale;
+    itsFluxRMS = hidata.fluxRMS() * peakFluxscale;
+    
 
 
     // @todo - Make moment-0 array, then fit single Gaussian to it.
     // Q - what if fit fails?
 
-    // @todo - Busy Function fitting
-
-    // @todo - Need to add logic to measure resolvedness.
-    itsFlagResolved = 1;
+    // Busy Function fitting
+    ASKAPLOG_INFO_STR(logger, "Fitting Busy function to spectrum of object " << itsObjectID);
+    int status = hidata.busyFunctionFit();
+    if (status == 0) {
+        casa::Vector<double> BFparams = hidata.BFparams();
+        ASKAPLOG_INFO_STR(logger, "BF results: " << BFparams);
+        casa::Vector<double> BFerrors = hidata.BFerrors();
+        const float channelFreqWidth = newHead_freq.WCS().cdelt[obj.header().WCS().spec] * freqScale;
+        itsBFfit_a.value()=BFparams[0];
+        itsBFfit_a.error()=BFerrors[0];
+        itsBFfit_b1.value()=BFparams[1];
+        itsBFfit_b1.error()=BFerrors[1];
+        itsBFfit_b2.value()=BFparams[2];
+        itsBFfit_b2.error()=BFerrors[2];
+        itsBFfit_c.value()=BFparams[3];
+        itsBFfit_c.error()=BFerrors[3];
+        itsBFfit_xe.value()=BFparams[4]*channelFreqWidth;
+        itsBFfit_xe.error()=BFerrors[4]*channelFreqWidth;
+        itsBFfit_xp.value()=BFparams[5]*channelFreqWidth;
+        itsBFfit_xp.error()=BFerrors[5]*channelFreqWidth;
+        itsBFfit_w.value()=BFparams[6]*channelFreqWidth;
+        itsBFfit_w.error()=BFerrors[6]*channelFreqWidth;
+        itsBFfit_n.value()=BFparams[7];
+        itsBFfit_n.error()=BFerrors[7];
+    } else {
+        ASKAPLOG_WARN_STR(logger, "Could not fit busy function to object " << itsObjectID);
+    }
+        
+    // @todo - Need to add logic to measure resolvedness. Currently it
+    // is "Is the mom0 map adequately fitted by a PSF-shaped Gaussian?
+    // If so, it is not resolved."
+    itsFlagResolved = hidata.mom0Resolved() ? 1 : 0;
 
 }
 

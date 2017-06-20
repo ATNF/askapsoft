@@ -441,8 +441,8 @@ void HiEmissionCatalogue::defineSpec()
                       "stat.fit.param", "float", "col_bf_n", "");
     itsSpec.addColumn("BF_N_ERR", "bf_n_err", "", 10, casda::precFlux,
                       "stat.error;stat.fit.param", "float", "col_bf_n_err", "");
-    itsSpec.addColumn("FLAG1", "flag_s1", "", 5, 0,
-                      "meta.code", "int", "col_flag_s1", "");
+    itsSpec.addColumn("FLAG1", "flag_resolved", "", 5, 0,
+                      "meta.code", "int", "col_flag_resolved", "");
     itsSpec.addColumn("FLAG2", "flag_s2", "", 5, 0,
                       "meta.code", "int", "col_flag_s2", "");
     itsSpec.addColumn("FLAG3", "flag_s3", "", 5, 0,

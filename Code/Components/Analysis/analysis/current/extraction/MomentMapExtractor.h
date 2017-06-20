@@ -52,6 +52,14 @@ class MomentMapExtractor : public SourceDataExtractor {
         void extract();
         void writeImage();
 
+    casa::Array<float> mom0() { return itsMom0map; };
+    casa::Array<float> mom1() { return itsMom1map; };
+    casa::Array<float> mom2() { return itsMom2map; };
+
+    casa::LogicalArray mom0mask() { return itsMom0mask; };
+    casa::LogicalArray mom1mask() { return itsMom1mask; };
+    casa::LogicalArray mom2mask() { return itsMom2mask; };
+
     protected:
         void defineSlicer();
         casa::IPosition arrayShape();

@@ -13,3 +13,4 @@ wcs=3rdParty/wcslib/wcslib-4.18
 accessors=Code/Base/accessors/current
 analysisutilities=Code/Components/Analysis/analysisutilities/current
 askap_components=Code/Base/components/current
+busyfit=3rdParty/BusyFit/busyfit-0.2
