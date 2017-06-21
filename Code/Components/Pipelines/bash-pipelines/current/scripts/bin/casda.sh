@@ -75,6 +75,7 @@ cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
 # Define the lists of image names, types, 
 ADD_FITS_SUFFIX=true
+PREPARE_FOR_CASDA=true
 . ${getArtifacts}
 
 # Set image-related parameters
@@ -172,6 +173,7 @@ for((i=0;i<\${#evalNames[@]};i++)); do
     evalArtifacts+=(eval\${i})
     evalParams="\${evalParams}
 eval\${i}.filename = \${OUTPUT}/\${evalNames[i]}
+eval\${i}.type     = \${evalTypes[i]}
 eval\${i}.project  = ${PROJECT_ID}"
 done
 evalArtifacts=\$(echo "\${evalArtifacts[@]}" | sed -e 's/ /,/g')

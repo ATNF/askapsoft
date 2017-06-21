@@ -130,6 +130,7 @@ IMAGE_BASE_CONT="${IMAGE_BASE_CONT}"
 IMAGE_BASE_CONTCUBE="${IMAGE_BASE_CONTCUBE}"
 IMAGE_BASE_SPECTRAL="${IMAGE_BASE_SPECTRAL}"
 POL_LIST="${POL_LIST}"
+PREPARE_FOR_CASDA="${PREPARE_FOR_CASDA}"
 
 DO_ALT_IMAGER_CONT="${DO_ALT_IMAGER_CONT}"
 DO_ALT_IMAGER_CONTCUBE="${DO_ALT_IMAGER_CONTCUBE}"
@@ -415,6 +416,41 @@ for FIELD in \${FIELD_LIST}; do
 done
 
 ##############################
+# Next, search for Calibration tables
+
+calTables=()
+
+# Bandpass table first
+RAW_TABLE=${TABLE_BANDPASS}
+SMOOTH_TABLE=${TABLE_BANDPASS}.smooth
+DO_SMOOTH=${DO_BANDPASS_SMOOTH}
+if [ \${DO_SMOOTH} ] && [ -e \${SMOOTH_TABLE} ]; then
+    TABLE=\${SMOOTH_TABLE}
+else
+    TABLE=\${RAW_TABLE}
+fi
+
+if [ -e "\${TABLE}" ]; then
+
+    # If the bandpass table is elsewhere, copy it to the BPCAL directory
+    if [ ! -e "${ORIGINAL_OUTPUT}/BPCAL/\${TABLE##*/}" ]; then
+        cp -r \${TABLE} ${ORIGINAL_OUTPUT}/BPCAL
+    fi
+
+    calTables+=(BPCAL/\${TABLE##*/})
+fi
+
+for FIELD in \${FIELD_LIST}; do 
+    for BEAM in \${BEAM_LIST}; do
+        findScienceMSnames
+        if [ -e "\${FIELD}/\${gainscaltab}" ]; then
+            calTables+=(\${FIELD}/\${gainscaltab})
+        fi
+    done
+done
+
+
+##############################
 # Next, search for evaluation-related documents
 
 evalNames=()
@@ -422,6 +458,24 @@ evalNames=()
 # Stats summary files
 for file in "${OUTPUT}"/stats-all*.txt; do
     evalNames+=(\${file##*/})
+    evalTypes+=(pdf)
 done
+
+if [ "\${PREPARE_FOR_CASDA}" == "true" ]; then
+    # Tar up the directory structure with the cal tables, logs,
+    # slurm files & diagnostics etc, and add to the evaluation file list
+    tarlist="\${calTables[@]}"
+    tarlist="\${tarlist} \${diagnostics##*/}"
+    tarlist="\${tarlist} \${metadata}"
+    tar zcvf slurmFiles.tgz \${slurmFiles##*/}
+    tarlist="\${tarlist} slurmFiles.tgz"
+    tar zcvf logs.tgz \${logs##*/}
+    tarlist="\${tarlist} logs.tgz"
+    tarfile=calibration-metadata-processing-logs.tar
+    tar cvf \$tarfile \${tarlist}
+    evalNames+=(\$tarfile)
+    evalTypes+=(calibration)
+fi
+
 
 EOF
