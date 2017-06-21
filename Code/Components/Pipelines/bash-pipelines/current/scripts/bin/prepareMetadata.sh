@@ -432,7 +432,7 @@ EOF
                 if [ -e "${sbinfoCal}" ]; then
                     rm -f "$sbinfoCal"
                 fi
-                echo "Using $sbinfo as location for bandpass SB metadata"
+                echo "Using $sbinfoCal as location for bandpass SB metadata"
                 loadModule askapcli
                 schedblock info -v -p ${SB_1934} > $sbinfoCal
                 err=$?

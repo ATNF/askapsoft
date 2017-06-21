@@ -57,7 +57,11 @@ mkdir -p "$slurmOut"
 
 highestBeam=$((maxbeam - 1))
 echo "Solving for the bandpass solutions for beams up to beam${highestBeam}"
-echo "========================================================="
+if [ $highestBeam -ge 10 ]; then
+    echo "========================================================="
+else
+    echo "========================================================"
+fi
 
 for((IBEAM=0; IBEAM<=highestBeam; IBEAM++)); do
     BEAM=$(echo "$IBEAM" | awk '{printf "%02d",$1}')
