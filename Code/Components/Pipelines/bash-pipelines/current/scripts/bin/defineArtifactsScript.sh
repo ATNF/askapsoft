@@ -66,7 +66,10 @@ cat > "${getArtifacts}" <<EOF
 #   * catNames - names of catalogue files to archived
 #   * catTypes - their corresponding catalogue types
 #   * msNames - names of measurement sets to be archived
+#   * calTables - names of calibration tables to be archived (for now
+#       these are included in a tar file sent with the evaluation files)
 #   * evalNames - names of evaluation files to be archived
+#   * evalFormats - format strings for the evaluation files
 #
 # @copyright (c) 2017 CSIRO
 # Australia Telescope National Facility (ATNF)
@@ -458,7 +461,7 @@ evalNames=()
 # Stats summary files
 for file in "${OUTPUT}"/stats-all*.txt; do
     evalNames+=(\${file##*/})
-    evalTypes+=(pdf)
+    evalFormats+=(pdf)
 done
 
 if [ "\${PREPARE_FOR_CASDA}" == "true" ]; then
@@ -474,7 +477,7 @@ if [ "\${PREPARE_FOR_CASDA}" == "true" ]; then
     tarfile=calibration-metadata-processing-logs.tar
     tar cvf \$tarfile \${tarlist}
     evalNames+=(\$tarfile)
-    evalTypes+=(calibration)
+    evalFormats+=(calibration)
 fi
 
 

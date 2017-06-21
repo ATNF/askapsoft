@@ -173,7 +173,7 @@ for((i=0;i<\${#evalNames[@]};i++)); do
     evalArtifacts+=(eval\${i})
     evalParams="\${evalParams}
 eval\${i}.filename = \${OUTPUT}/\${evalNames[i]}
-eval\${i}.type     = \${evalTypes[i]}
+eval\${i}.format   = \${evalFormats[i]}
 eval\${i}.project  = ${PROJECT_ID}"
 done
 evalArtifacts=\$(echo "\${evalArtifacts[@]}" | sed -e 's/ /,/g')
