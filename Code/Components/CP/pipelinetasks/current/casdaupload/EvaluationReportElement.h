@@ -31,7 +31,7 @@
 #include <string>
 
 // ASKAPsoft includes
-#include "casdaupload/ElementBase.h"
+#include "casdaupload/ProjectElementBase.h"
 #include "xercesc/dom/DOM.hpp" // Includes all DOM
 #include "boost/filesystem.hpp"
 #include "Common/ParameterSet.h"
