@@ -289,6 +289,27 @@ EOFINNER
         exit \$err
     fi
 
+    doValidation=${DO_CONTINUUM_VALIDATION}
+    validatePerBeam=${VALIDATE_BEAM_IMAGES}
+    if [ "\${doValidation}" == "true" ] && [ "\${BEAM}" != "all" ]; then
+        doValidation=\${validatePerBeam}
+    fi
+    scriptname="${ACES}/UserScripts/col52r/ASKAP_continuum_validation.py"
+    if [ "\${doValidation}" == "true" ]; then
+        if [ ! -e "\${scriptname}" ]; then
+            echo "ERROR - Validation script \${scriptname} not found"
+        else
+            cd ..
+            module use /group/askap/continuum_validation
+            module load continuum_validation_env
+            aprun -n 1 -N 1 \${scriptname} \${image##*/}.fits -S \${selavyDir}/selavy-\${image##*/}.components.xml -N \${selavyDir}/${noiseMap}.fits
+            module unload continuum_validation_env
+            if [ ! -e "\${validationDir}" ]; then
+                echo "ERROR - could not create validation directory \${validationDir}"
+            fi
+        fi
+    fi
+
     # Now convert the extracted polarisation artefacts to FITS
     if [ "\${doRM}" == "true" ]; then
         cd "$OUTPUT/${selavyPolDir}"

@@ -734,6 +734,13 @@ SELAVY_NSUBX=6
 SELAVY_NSUBY=3
 
 ##############################
+# Run the continuum validation script following source finding
+DO_CONTINUUM_VALIDATION=true
+
+# Run the validation for individual beam images
+VALIDATE_BEAM_IMAGES=false
+
+##############################
 # Selavy source finder - polarisation
 #
 # Whether to include the RM synthesis in the continuum sourcefinding

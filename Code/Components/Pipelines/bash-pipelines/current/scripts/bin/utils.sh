@@ -349,6 +349,7 @@ function setImageProperties()
         thresholdMap=detThresh.${imageName}
         meanMap=meanMap.${imageName}
         snrMap=snrMap.${imageName}
+        validationDir=${imageName}_continuum_validation
     elif [ "${type}" == "spectral" ]; then
         noiseMap=noiseMap.${imageName}
         noiseType="spectral_noise_3d"

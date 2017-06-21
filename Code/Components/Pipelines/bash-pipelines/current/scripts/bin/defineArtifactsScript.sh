@@ -480,5 +480,37 @@ if [ "\${PREPARE_FOR_CASDA}" == "true" ]; then
     evalFormats+=(calibration)
 fi
 
+if [ "\${DO_CONTINUUM_VALIDATION}" == "true" ]; then
+    # Tar up the validation directory and add the xml file (although
+       not yet - not implemented in the script)
+    
+    # Only include TILE validation, but this may not exist (ie. if
+    #   there is only a single FIELD), so need to test
+    BEAM="all"
+    imageCode=restored
+
+    validationDirs=()
+
+    if [ "${NUM_FIELDS}" -eq 1 ]; then
+        for FIELD in ${FIELD_LIST}; do
+            setImageProperties cont
+            validationDirs+=("\${FIELD}/\${validationDir}")
+        done
+    else
+        FIELD=".'
+        TILE="ALL"
+        setImageProperties cont
+        validationDirs+=("./\${validationDir}")
+    fi
+    
+    for dir in \${validationDirs[@]}; do
+        cd \${dir%/*}
+        tar cvf \${dir##*/}.tar \${dir##*/}
+        cd -
+        evalNames+=(\${dir}.tar)
+        evalFormats+=(tar)
+    done
+
+fi
 
 EOF
