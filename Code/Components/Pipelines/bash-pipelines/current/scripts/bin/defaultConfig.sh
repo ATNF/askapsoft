@@ -190,7 +190,7 @@ DO_STAGE_FOR_CASDA=false
 ####################
 # Input Scheduling Blocks (SBs)
 # Location of the SBs
-DIR_SB=/scratch2/askap/askapops/askap-scheduling-blocks
+DIR_SB=/astro/askaprt/askapops/askap-scheduling-blocks
 # SB with 1934-638 observation
 SB_1934=""
 MS_INPUT_1934=""
