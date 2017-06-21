@@ -351,6 +351,10 @@ fi"
     BEAMS_TO_USE=""
     if [ "${BEAMLIST}" == "" ]; then
         # just use BEAM_MIN & BEAM_MAX
+        if [ "${NUM_BEAMS_FOOTPRINT}" != "" ] && [ ${BEAM_MAX} -ge $NUM_BEAMS_FOOTPRINT ]; then
+            BEAM_MAX=$(echo $NUM_BEAMS_FOOTPRINT | awk '{print $1-1}')
+            echo "WARNING - SB ${SB_SCIENCE} only has ${NUM_BEAMS_FOOTPRINT} beams - setting BEAM_MAX=${BEAM_MAX}"
+        fi
         for((b=BEAM_MIN;b<=BEAM_MAX;b++)); do
             thisbeam=$(echo "$b" | awk '{printf "%02d",$1}')
             BEAMS_TO_USE="${BEAMS_TO_USE} $thisbeam"
@@ -361,13 +365,16 @@ fi"
         cat > "$beamAwkFile" <<EOF
 BEGIN{
   str=""
+  maxbeam=${NUM_BEAMS_FOOTPRINT}
 }
 {
   n=split(\$1,a,",");
   for(i=1;i<=n;i++){
     n2=split(a[i],a2,"-");
     for(b=a2[1];b<=a2[n2];b++){
-      str=sprintf("%s %02d",str,b);
+      if (b < maxbeam){
+        str=sprintf("%s %02d",str,b);
+      }
     }
   }
 }
