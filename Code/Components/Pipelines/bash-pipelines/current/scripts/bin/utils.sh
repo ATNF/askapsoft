@@ -43,6 +43,38 @@ function reportVersion()
 }
 
 ##############################
+# MODULE HANDLING
+
+# loadModule loads a particular module, but only if a version of it is
+# not loaded already. It determines this by checking "module list".
+# If it is, a parameter __MODULE_HAS_BEEN_LOADED__ is set to true, and it
+# can later be removed by unloadModule
+# Takes one argument, the module name: loadModule askapcli
+function loadModule()
+{
+    mod=$1
+    version="$(module list -t 2>&1 | grep $mod)"
+    if [ "$version" == "" ]; then
+        module load $mod
+        __MODULE_HAS_BEEN_LOADED__=true
+    fi
+}
+
+# unloadModule unloads a particular module, only if it was previously
+# loaded by loadModule(). Once unloaded, the parameter
+# __MODULE_HAS_BEEN_LOADED__ is set to false.
+# Takes one argument, the module name::  unloadModule askapcli
+function unloadModule()
+{
+    mod=$1
+    version="$(module list -t 2>&1 | grep $mod)"
+    if [ "$version" == "" ] && [ "${__MODULE_HAS_BEEN_LOADED__}" == "true" ]; then
+        module unload $mod
+        __MODULE_HAS_BEEN_LOADED__=false
+    fi
+}
+
+##############################
 # ARCHIVING A CONFIG FILE
 
 # Takes one argument, the config file

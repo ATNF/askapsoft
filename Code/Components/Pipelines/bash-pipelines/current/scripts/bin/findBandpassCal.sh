@@ -168,14 +168,14 @@ PLOT_CALTABLE=${DO_RUN_PLOT_CALTABLE}
 if [ \${PLOT_CALTABLE} == true ]; then
 
     log=${logs}/plot_caltable_\${SLURM_JOB_ID}.log
-    scriptCommand="${script_location}/${script_name}.py ${script_args}"
+    script="${script_location}/${script_name}.py"
 
-    module load casa
+    loadModule casa
     NCORES=1
     NPPN=1
-    aprun -n \${NCORES} -N \${NPPN} -b casa --nogui --nologger --log2term -c "\${scriptCommand}" > "\${log}"
-    module unload casa
+    aprun -n \${NCORES} -N \${NPPN} -b casa --nogui --nologger --log2term -c "\${scriptCommand}" ${script_args} > "\${log}"
     err=\$?
+    unloadModule casa
     for tab in ${TABLE_BANDPASS}*; do
         rejuvenate "\${tab}"
     done

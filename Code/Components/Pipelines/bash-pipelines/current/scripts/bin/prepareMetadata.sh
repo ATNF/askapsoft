@@ -367,10 +367,10 @@ EOF
                 rm -f "$sbinfo"
             fi
             echo "Using $sbinfo as location for SB metadata"
-            module load askapcli
+            loadModule askapcli
             schedblock info -v -p "${SB_SCIENCE}" > "$sbinfo"
             err=$?
-            module unload askapcli
+            unloadModule askapcli
             if [ $err -ne 0 ]; then
                 echo "ERROR - the 'schedblock' command failed."
                 echo "        Full command:   schedblock info -v -p ${SB_SCIENCE}"
@@ -395,10 +395,10 @@ EOF
 
             SB_STATE_INITIAL=$(awk "$awkstr" "${sbinfo}" | awk '{split($0,a,FS); print a[NF-3];}')
             if [ "${SB_STATE_INITIAL}" == "OBSERVED" ]; then
-                module load askapcli
+                loadModule askapcli
                 schedblock transition -s PROCESSING ${SB_SCIENCE} > "${logs}/transition-to-PROCESSING.log"
                 err=$?
-                module unload askapcli
+                unloadModule askapcli
                 if [ $err -ne 0 ]; then
                     echo "$(date): ERROR - 'schedblock transition' failed for SB ${SB_SCIENCE} with error code \$err"
                 fi
@@ -433,10 +433,10 @@ EOF
                     rm -f "$sbinfoCal"
                 fi
                 echo "Using $sbinfo as location for bandpass SB metadata"
-                module load askapcli
+                loadModule askapcli
                 schedblock info -v -p ${SB_1934} > $sbinfoCal
                 err=$?
-                module unload askapcli
+                unloadModule askapcli
                 if [ $err -ne 0 ]; then
                     echo "ERROR - the 'schedblock' command failed."
                     echo "        Full command:   schedblock info -v -p ${SB_1934}"
@@ -447,10 +447,10 @@ EOF
 
             SB_STATE_INITIAL_CAL=$(awk "$awkstr" "${sbinfoCal}" | awk '{split($0,a,FS); print a[NF-3];}')
             if [ "${SB_STATE_INITIAL_CAL}" == "OBSERVED" ]; then
-                module load askapcli
+                loadModule askapcli
                 schedblock transition -s PROCESSING ${SB_1934} >> "${logs}/transition-to-PROCESSING.log"
                 err=$?
-                module unload askapcli
+                unloadModule askapcli
                 if [ $err -ne 0 ]; then
                     echo "$(date): ERROR - 'schedblock transition' failed for SB ${SB_1934} with error code \$err"
                 fi

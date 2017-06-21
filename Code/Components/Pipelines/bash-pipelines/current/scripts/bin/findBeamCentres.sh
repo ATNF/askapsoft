@@ -30,10 +30,10 @@
 
 tmpfp="${tmp}/listOfFootprints"
 if [ "${USE_CLI}" == "true" ] && [ "${IS_BETA}" != "true" ]; then
-    module load askapcli
+    loadModule askapcli
     footprint list > "$tmpfp"
     err=$?
-    module unload askapcli
+    unloadModule askapcli
     if [ $err -ne 0 ]; then
         echo "ERROR - the 'footprint' command failed. "
         echo "        Full command:   footprint list"
@@ -76,10 +76,10 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$NEED_BEAM_CENTRES" == "true" ]; then
                 if [ -e "${sbinfo}" ]; then
                     rm -f "$sbinfo"
                 fi
-                module load askapcli
+                loadModule askapcli
                 schedblock info -v -p "${SB_SCIENCE}" > "$sbinfo"
                 err=$?
-                module unload askapcli
+                unloadModule askapcli
                 if [ $err -ne 0 ]; then
                     echo "ERROR - the 'schedblock' command failed."
                     echo "        Full command:   schedblock info -v -p ${SB_SCIENCE}"
@@ -229,11 +229,11 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$NEED_BEAM_CENTRES" == "true" ]; then
                 if [ "$FP_PA" != "" ]; then
                     footprintArgs="$footprintArgs -r $FP_PA"
                 fi
-                module load askapcli
+                loadModule askapcli
                 NUM_BEAMS_FOOTPRINT=$(footprint info ${FP_NAME} | grep n_beams | awk '{print $3}')
                 footprint calculate $footprintArgs "$FP_NAME" > "${footprintOut}"
                 err=$?
-                module unload askapcli
+                unloadModule askapcli
                 if [ $err -ne 0 ]; then
                     echo "ERROR - the 'footprint' command failed."
                     echo "        Full command:   footprint calculate $footprintArgs $FP_NAME"
@@ -262,9 +262,9 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$NEED_BEAM_CENTRES" == "true" ]; then
                 
                     # Next, need to check that the footprint provided is
                     # valid (ie. recognised by footprint.py)
-                    module load aces
+                    loadModule aces
                     invalidTest=$(footprint.py -n "${BEAM_FOOTPRINT_NAME}" 2>&1 | grep invalid)
-                    module unload aces
+                    unloadModule aces
                     if [ "${FP_NAME}" == "" ] || [ "${invalidTest}" != "" ]; then
                         # We don't have a valid footprint name!
                         echo "ERROR - Your requested footprint ${BEAM_FOOTPRINT_NAME} is not valid."
@@ -280,10 +280,10 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$NEED_BEAM_CENTRES" == "true" ]; then
                     else
                         # Use the function defined in utils.sh to set the arguments to footprint.py
                         setFootprintArgs
-                        module load aces
+                        loadModule aces
                         footprint.py $footprintArgs -r "$ra,$dec" > "${footprintOut}"
                         err=$?
-                        module unload aces
+                        unloadModule aces
                         if [ $err -ne 0 ]; then
                             echo "ERROR - the 'footprint.py' command failed. "
                             echo "        Full command:   footprint.py $footprintArgs -r \"$ra,$dec\""

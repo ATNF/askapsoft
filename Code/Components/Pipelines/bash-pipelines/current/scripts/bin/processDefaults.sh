@@ -214,9 +214,9 @@ EOFSCRIPT
 
     NCORES=1
     NPPN=1
-    module load casa
+    loadModule casa
     aprun -n \${NCORES} -N \${NPPN} -b casa --nogui --nologger --log2term -c \"\${script}\" >> \"\${log}\"
-
+    unloadModule casa
 fi"
     else
         # We can use the new imageToFITS utility to do the conversion.
