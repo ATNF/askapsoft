@@ -73,7 +73,7 @@ echo "Image names = " "\${expectedImageNames[@]}"
 
 for image in "\${expectedImageNames[@]}"; do
 
-    if [ "${image}" == "${image%%.fits}" ]; then
+    if [ "\${image}" == "\${image%%.fits}" ]; then
         echo "Launching conversion job for \$image"
         casaim=\${image}
         fitsim=\${image}.fits

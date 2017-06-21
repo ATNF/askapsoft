@@ -224,7 +224,7 @@ fi"
 if [ -e \"\${casaim}\" ] && [ ! -e \"\${fitsim}\" ]; then
     # The FITS version of this image doesn't exist
 
-    ASKAPSOFT_VERSION=\"\${ASKAPSOFT_VERSION}\"
+    ASKAPSOFT_VERSION=\"${ASKAPSOFT_VERSION}\"
     if [ \"\${ASKAPSOFT_VERSION}\" == \"\" ]; then
         ASKAPSOFT_VERSION_USED=\$(module list -t 2>&1 | grep askapsoft)
     else
