@@ -44,7 +44,7 @@ namespace pipelinetasks {
 ///evaluation report) for upload to CASDA. Simply a specialisation of
 ///the ElementBase class, with the constructor defining the element
 ///name ("evaluation")
-class EvaluationReportElement : public ElementBase {
+class EvaluationReportElement : public ProjectElementBase {
     public:
         EvaluationReportElement(const LOFAR::ParameterSet &parset);
 

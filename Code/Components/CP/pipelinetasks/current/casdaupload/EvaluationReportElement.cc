@@ -48,6 +48,6 @@ EvaluationReportElement::EvaluationReportElement(const LOFAR::ParameterSet &pars
     : ElementBase(parset)
 {
     itsName = "evaluation";
-    itsFormat = "pdf";
+    itsFormat = parset.getString("format","pdf");
 }
 
