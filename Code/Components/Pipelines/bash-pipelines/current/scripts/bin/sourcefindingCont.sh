@@ -173,6 +173,7 @@ NUM_TAYLOR_TERMS=${NUM_TAYLOR_TERMS}
 imlist=""
 
 image=${contImage}
+fitsimage=${image%%.fits}.fits
 weights=${contWeights}
 contcube=${contCube}
 
@@ -263,12 +264,12 @@ Selavy.RMSynthesis = \${doRM}"
     fi
 
     cat > "\$parset" <<EOFINNER
-Selavy.image = \${image%%.fits}.fits
+Selavy.image = \${fitsimage}
 Selavy.SBid = ${SB_SCIENCE}
 Selavy.nsubx = ${SELAVY_NSUBX}
 Selavy.nsuby = ${SELAVY_NSUBY}
 #
-Selavy.resultsFile = selavy-${contImage}.txt
+Selavy.resultsFile = selavy-${fitsimage}.txt
 #
 Selavy.snrCut = ${SELAVY_SNR_CUT}
 Selavy.flagGrowth = ${SELAVY_FLAG_GROWTH}
@@ -320,7 +321,7 @@ EOFINNER
             cd ..
             module use /group/askap/continuum_validation
             loadModule continuum_validation_env
-            aprun -n 1 -N 1 \${scriptname} \${image##*/}.fits -S \${selavyDir}/selavy-\${image##*/}.components.xml -N \${selavyDir}/${noiseMap}.fits
+            aprun -n 1 -N 1 \${scriptname} \${fitsimage}.fits -S \${selavyDir}/selavy-\${fitsimage}.components.xml -N \${selavyDir}/${noiseMap}.fits
             unloadModule continuum_validation_env
             if [ ! -e "\${validationDir}" ]; then
                 echo "ERROR - could not create validation directory \${validationDir}"
