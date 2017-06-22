@@ -173,7 +173,7 @@ NUM_TAYLOR_TERMS=${NUM_TAYLOR_TERMS}
 imlist=""
 
 image=${contImage}
-fitsimage=${image%%.fits}.fits
+fitsimage=${contImage%%.fits}.fits
 weights=${contWeights}
 contcube=${contCube}
 
