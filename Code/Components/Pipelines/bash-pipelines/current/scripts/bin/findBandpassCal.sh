@@ -173,7 +173,7 @@ if [ \${PLOT_CALTABLE} == true ]; then
     loadModule casa
     NCORES=1
     NPPN=1
-    aprun -n \${NCORES} -N \${NPPN} -b casa --nogui --nologger --log2term -c "\${scriptCommand}" ${script_args} > "\${log}"
+    aprun -n \${NCORES} -N \${NPPN} -b casa --nogui --nologger --log2term -c "\${script}" ${script_args} > "\${log}"
     err=\$?
     unloadModule casa
     for tab in ${TABLE_BANDPASS}*; do
