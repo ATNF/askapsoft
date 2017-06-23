@@ -141,11 +141,12 @@ EOFINNER
     if [ \$err != 0 ]; then
         exit \$err
     fi
-    outputName="\${imageName}.contsub"
-    imageCode=restored
-    setImageProperties spectral
-    echo "Renaming \$outputName to \$imageName"
-    mv \$outputName \$imageName
+    
+    if [ "\${imageName%%.fits}" == "\${imageName}" ]; then
+        # Want image.contsub.fits, not image.fits.contsub
+        echo "Renaming \${imageName}.contsub to \${imageName%%.fits}.contsub.fits"
+        mv \${imageName}.contsub \${imageName%%.fits}.contsub.fits
+    fi
 
 fi
 EOF
