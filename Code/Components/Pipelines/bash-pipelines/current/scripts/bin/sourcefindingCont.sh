@@ -269,7 +269,7 @@ Selavy.SBid = ${SB_SCIENCE}
 Selavy.nsubx = ${SELAVY_NSUBX}
 Selavy.nsuby = ${SELAVY_NSUBY}
 #
-Selavy.resultsFile = selavy-${fitsimage}.txt
+Selavy.resultsFile = selavy-\${fitsimage}.txt
 #
 Selavy.snrCut = ${SELAVY_SNR_CUT}
 Selavy.flagGrowth = ${SELAVY_FLAG_GROWTH}
