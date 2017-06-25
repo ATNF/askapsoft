@@ -129,6 +129,7 @@ doSelfcalLoops="${ARCHIVE_SELFCAL_LOOP_MOSAICS}"
 doFieldMosaics="${ARCHIVE_FIELD_MOSAICS}"
 beams="${BEAMS_TO_USE}"
 FIELD_LIST="${FIELD_LIST}"
+NUM_FIELDS="${NUM_FIELDS}"
 IMAGE_BASE_CONT="${IMAGE_BASE_CONT}"
 IMAGE_BASE_CONTCUBE="${IMAGE_BASE_CONTCUBE}"
 IMAGE_BASE_SPECTRAL="${IMAGE_BASE_SPECTRAL}"
@@ -482,7 +483,7 @@ fi
 
 if [ "\${DO_CONTINUUM_VALIDATION}" == "true" ]; then
     # Tar up the validation directory and add the xml file (although
-       not yet - not implemented in the script)
+    #  not yet - not implemented in the script)
     
     # Only include TILE validation, but this may not exist (ie. if
     #   there is only a single FIELD), so need to test
@@ -491,13 +492,13 @@ if [ "\${DO_CONTINUUM_VALIDATION}" == "true" ]; then
 
     validationDirs=()
 
-    if [ "${NUM_FIELDS}" -eq 1 ]; then
+    if [ \${NUM_FIELDS} -eq 1 ]; then
         for FIELD in ${FIELD_LIST}; do
             setImageProperties cont
             validationDirs+=("\${FIELD}/\${validationDir}")
         done
     else
-        FIELD=".'
+        FIELD="."
         TILE="ALL"
         setImageProperties cont
         validationDirs+=("./\${validationDir}")
