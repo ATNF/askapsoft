@@ -175,9 +175,21 @@ void ResultsWriter::writeComponentMaps(casa::Array<float> &componentImage)
     bool doComponentMap = fitParset.getBool("writeComponentMap", true);
     if (doComponentMap) {
         std::string componentMap = "componentMap_" + infile.filename().string();
+        // Need to remove any ".fits" extension, as this will be added by the accessor
+        if (componentMap.find(".fits") != std::string::npos) {
+            if (componentMap.substr(componentMap.rfind("."), std::string::npos) == ".fits") {
+                componentMap.erase(componentMap.rfind("."), std::string::npos);
+            }
+        }
         imageAcc->create(componentMap, componentImage.shape(), coords);
         imageAcc->write(componentMap, componentImage);
         std::string componentResidualMap = "componentResidual_" + infile.filename().string();
+        // Need to remove any ".fits" extension, as this will be added by the accessor
+        if (componentResidualMap.find(".fits") != std::string::npos) {
+            if (componentResidualMap.substr(componentResidualMap.rfind("."), std::string::npos) == ".fits") {
+                componentResidualMap.erase(componentResidualMap.rfind("."), std::string::npos);
+            }
+        }
         casa::Array<float> residual = inputImage - componentImage;
         imageAcc->create(componentResidualMap, residual.shape(), coords);
         imageAcc->write(componentResidualMap, residual);
