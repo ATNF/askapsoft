@@ -269,7 +269,7 @@ Selavy.SBid = ${SB_SCIENCE}
 Selavy.nsubx = ${SELAVY_NSUBX}
 Selavy.nsuby = ${SELAVY_NSUBY}
 #
-Selavy.resultsFile = selavy-\${fitsimage}.txt
+Selavy.resultsFile = selavy-\${fitsimage%%.fits}.txt
 #
 Selavy.snrCut = ${SELAVY_SNR_CUT}
 Selavy.flagGrowth = ${SELAVY_FLAG_GROWTH}
@@ -321,7 +321,7 @@ EOFINNER
             cd ..
             module use /group/askap/continuum_validation
             loadModule continuum_validation_env
-            aprun -n 1 -N 1 \${scriptname} \${fitsimage}.fits -S \${selavyDir}/selavy-\${fitsimage}.components.xml -N \${selavyDir}/${noiseMap}.fits
+            aprun -n 1 -N 1 \${scriptname} \${fitsimage%%.fits}.fits -S \${selavyDir}/selavy-\${fitsimage%%.fits}.components.xml -N \${selavyDir}/${noiseMap}.fits
             unloadModule continuum_validation_env
             if [ ! -e "\${validationDir}" ]; then
                 echo "ERROR - could not create validation directory \${validationDir}"
