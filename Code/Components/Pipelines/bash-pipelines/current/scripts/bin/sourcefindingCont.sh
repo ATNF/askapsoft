@@ -321,7 +321,7 @@ EOFINNER
             cd ..
             module use /group/askap/continuum_validation
             loadModule continuum_validation_env
-            aprun -n 1 -N 1 \${scriptname} \${fitsimage%%.fits}.fits -S \${selavyDir}/selavy-\${fitsimage%%.fits}.components.xml -N \${selavyDir}/${noiseMap}.fits
+            aprun -n 1 -N 1 \${scriptname} \${fitsimage%%.fits}.fits -S ${selavyDir}/selavy-\${fitsimage%%.fits}.components.xml -N ${selavyDir}/${noiseMap}.fits
             unloadModule continuum_validation_env
             if [ ! -e "\${validationDir}" ]; then
                 echo "ERROR - could not create validation directory \${validationDir}"
