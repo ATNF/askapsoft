@@ -48,6 +48,15 @@ namespace analysis {
 /// information to VOTable and ASCII format files.
 class ComponentCatalogue {
     public:
+        /// Constructor, that uses a pre-defined list of Components,
+        /// and then calls setup to set the column specification. The
+        /// filenames are set based on the output file given in the
+        /// parset.
+        ComponentCatalogue(std::vector<CasdaComponent> &componentList,
+                           const LOFAR::ParameterSet &parset,
+                           duchamp::Cube *cube,
+                           const std::string fitType = casda::componentFitType);
+
         /// Constructor, that calls defineComponents to define the
         /// catalogue from a set of RadioSource object, and defineSpec
         /// to set the column specification. The filenames are set
@@ -74,6 +83,11 @@ class ComponentCatalogue {
         std::vector<CasdaComponent> &components();
 
     protected:
+        /// Complete the initialisation of the catalogue - defining the
+        /// catalogue spec and setting up filenames. The filenames are set
+        /// based on the output file given in the parset.
+        void setup(const LOFAR::ParameterSet &parset);
+
         /// Define the vector list of Components using the input list
         /// of RadioSource objects and the parset. One component is
         /// created for each fitted Gaussian component from each

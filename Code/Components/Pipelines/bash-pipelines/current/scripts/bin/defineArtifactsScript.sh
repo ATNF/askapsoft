@@ -220,12 +220,20 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                             ### Also, don't need the test for IMAGETYPE here either
                             if [ \$LOOP -gt 0 ]; then
                                 noiseMap="\${noiseMap}.SelfCalLoop\${LOOP}"
+                                compMap="\${compMap}.SelfCalLoop\${LOOP}"
+                                compResidual="\${compResidual}.SelfCalLoop\${LOOP}"
                             fi
                             setSelavyDirs cont
                             if [ -e "\${FIELD}/\${selavyDir}/\${noiseMap}\${fitsSuffix}" ]; then
                                 casdaTwoDimImageNames+=(\${FIELD}/\${selavyDir}/\${noiseMap}\${fitsSuffix})
                                 casdaTwoDimImageTypes+=(\${noiseType})
                                 casdaTwoDimThumbTitles+=(\${noiseLabel})
+                                casdaTwoDimImageNames+=(\${FIELD}/\${selavyDir}/\${compMap}\${fitsSuffix})
+                                casdaTwoDimImageTypes+=(\${compMapType})
+                                casdaTwoDimThumbTitles+=(\${compMapLabel})
+                                casdaTwoDimImageNames+=(\${FIELD}/\${selavyDir}/\${compResidual}\${fitsSuffix})
+                                casdaTwoDimImageTypes+=(\${compResidualType})
+                                casdaTwoDimThumbTitles+=(\${compResidualLabel})
                             fi
 
                         fi

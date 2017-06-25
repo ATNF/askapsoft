@@ -1187,8 +1187,9 @@ void DuchampParallel::printResults()
     // Do this for all workers as well as master
     ResultsWriter writer(this, itsComms);
     writer.duchampOutput();
-    writer.writeIslandCatalogue();
-    writer.writeComponentCatalogue();
+    // writer.writeIslandCatalogue();
+    // writer.writeComponentCatalogue();
+    writer.writeContinuumCatalogues();
     writer.writeHiEmissionCatalogue();
     writer.writePolarisationCatalogue();
     writer.writeFitResults();

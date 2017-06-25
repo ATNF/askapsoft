@@ -49,6 +49,9 @@ namespace analysis {
 /// file.
 class CasdaComponent : public CatalogueEntry {
     public:
+        /// Default constructor that does nothing.
+        CasdaComponent();
+
         /// Constructor that builds the Component object from a
         /// RadioSource. It takes a single fitted component, indicated
         /// by the parameter fitNumber, from the fit results given by
@@ -122,6 +125,31 @@ class CasdaComponent : public CatalogueEntry {
         /// Annotation file. This allows writing to Karma, DS9 or CASA
         /// annotation/region file.
         void writeAnnotation(boost::shared_ptr<duchamp::AnnotationWriter> &writer);
+
+        /// @brief Functions allowing CasdaComponent objects to be passed
+        /// over LOFAR Blobs
+        /// @name
+        /// @{
+        /// @brief Pass a CasdaComponent object into a Blob
+        /// @details This function provides a mechanism for passing the
+        /// entire contents of a CasdaComponent object into a
+        /// LOFAR::BlobOStream stream
+        friend LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream &stream,
+                                              CasdaComponent& src);
+        /// @brief Receive a CasdaComponent object from a Blob
+        /// @details This function provides a mechanism for receiving the
+        /// entire contents of a CasdaComponent object from a
+        /// LOFAR::BlobIStream stream
+        friend LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream &stream,
+                                              CasdaComponent& src);
+
+        /// @}
+
+        /// @brief Comparison operator, using the component ID
+        friend bool operator< (CasdaComponent lhs, CasdaComponent rhs)
+        {
+            return (lhs.componentID() < rhs.componentID());
+        }
 
     protected:
         /// The ID of the island that this component came from.

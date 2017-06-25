@@ -53,6 +53,11 @@ namespace askap {
 
 namespace analysis {
 
+CasdaComponent::CasdaComponent():
+    CatalogueEntry()
+{
+}
+
 CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
                                const LOFAR::ParameterSet &parset,
                                const unsigned int fitNumber,
@@ -440,7 +445,97 @@ void CasdaComponent::writeAnnotation(boost::shared_ptr<duchamp::AnnotationWriter
 
 }
 
+LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& blob, CasdaComponent& src)
+{
+    std::string s;
+    double d;
+    unsigned int u;
+    casda::ValueError v;
 
+    s = src.itsIslandID; blob << s;
+    s = src.itsComponentID; blob << s;
+    s = src.itsName; blob << s;
+    s = src.itsRAs; blob << s;
+    s = src.itsDECs; blob << s;
+    v = src.itsRA; blob << v;
+    v = src.itsDEC; blob << v;
+    d = src.itsFreq; blob << d;
+    v = src.itsFluxPeak; blob << v;
+    v = src.itsFluxInt; blob << v;
+    v = src.itsMaj; blob << v;
+    v = src.itsMin; blob << v;
+    v = src.itsPA; blob << v;
+    d = src.itsMaj_deconv; blob << d;
+    d = src.itsMin_deconv; blob << d;
+    d = src.itsPA_deconv; blob << d;
+    d = src.itsChisq; blob << d;
+    d = src.itsRMSfit; blob << d;
+    d = src.itsAlpha; blob << d;
+    d = src.itsBeta; blob << d;
+    d = src.itsRMSimage; blob << d;
+    u = src.itsFlagSiblings; blob << u;
+    u = src.itsFlagGuess; blob << u;
+    u = src.itsFlag3; blob << u;
+    u = src.itsFlag4; blob << u;
+    s = src.itsComment; blob << s;
+    s = src.itsLocalID; blob << s;
+    d = src.itsXpos; blob << d;
+    d = src.itsYpos; blob << d;
+    d = src.itsFluxInt_island; blob << d;
+    d = src.itsFluxPeak_island; blob << d;
+    u = src.itsNfree_fit; blob << u;
+    u = src.itsNDoF_fit; blob << u;
+    u = src.itsNpix_fit; blob << u;
+    u = src.itsNpix_island; blob << u;
+
+    return blob;
+}
+
+LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& blob, CasdaComponent& src)
+{
+    std::string s;
+    double d;
+    casda::ValueError v;
+    unsigned int u;
+
+    blob >> s; src.itsIslandID = s;
+    blob >> s; src.itsComponentID = s;
+    blob >> s; src.itsName = s;
+    blob >> s; src.itsRAs = s;
+    blob >> s; src.itsDECs = s;
+    blob >> v; src.itsRA = v;
+    blob >> v; src.itsDEC = v;
+    blob >> d; src.itsFreq = d;
+    blob >> v; src.itsFluxPeak = v;
+    blob >> v; src.itsFluxInt = v;
+    blob >> v; src.itsMaj = v;
+    blob >> v; src.itsMin = v;
+    blob >> v; src.itsPA = v;
+    blob >> d; src.itsMaj_deconv = d;
+    blob >> d; src.itsMin_deconv = d;
+    blob >> d; src.itsPA_deconv = d;
+    blob >> d; src.itsChisq = d;
+    blob >> d; src.itsRMSfit = d;
+    blob >> d; src.itsAlpha = d;
+    blob >> d; src.itsBeta = d;
+    blob >> d; src.itsRMSimage = d;
+    blob >> u; src.itsFlagSiblings = u;
+    blob >> u; src.itsFlagGuess = u;
+    blob >> u; src.itsFlag3 = u;
+    blob >> u; src.itsFlag4 = u;
+    blob >> s; src.itsComment = s;
+    blob >> s; src.itsLocalID = s;
+    blob >> d; src.itsXpos = d;
+    blob >> d; src.itsYpos = d;
+    blob >> d; src.itsFluxInt_island = d;
+    blob >> d; src.itsFluxPeak_island = d;
+    blob >> u; src.itsNfree_fit = u;
+    blob >> u; src.itsNDoF_fit = u;
+    blob >> u; src.itsNpix_fit = u;
+    blob >> u; src.itsNpix_island = u;
+
+    return blob;
+}
 
 }
 

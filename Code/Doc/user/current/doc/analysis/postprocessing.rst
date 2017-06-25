@@ -402,6 +402,15 @@ but with a .ann/.crf/.reg extension respectively. Whether these are
 produced is governed by the flagKarma/flagCasa/flagDS9 parameters (see
 :doc:`selavy` for details).
 
+By setting **Fitter.writeComponentMap=true** (the default), an image
+is made showing just the fitted Gaussian components. This is the
+"component map". At the same time, a residual map (input image with
+the component map subtracted) is created. These default to being FITS
+files, unless **Fitter.imagetype=casa** is given. If *imagename* is
+the input image given to Selavy, the name of these images will be
+componentMap_*imagename*.fits and componentResidual_*imagename*.fits
+(with no ".fits" extension for casa images),
+
 A similar output file is the fit Results catalogue. This is only
 produced when **writeFitResults=true**. This shows the fit results
 with a different emphasis (this is the original method of showing the
@@ -581,6 +590,11 @@ Parameters for fitting
 |                                               |               |                            |the fitting).                                                                            |
 +-----------------------------------------------+---------------+----------------------------+-----------------------------------------------------------------------------------------+
 |**Output files**                               |               |                            |                                                                                         |
++-----------------------------------------------+---------------+----------------------------+-----------------------------------------------------------------------------------------+
+|Selavy.Fitter.writeComponentMap                |bool           |true                        |Whether to write out an image showing the fitted Gaussian components, as well as a "fit  |
+|                                               |               |                            |residual" map (the input image with the component map subtracted).                       |
++-----------------------------------------------+---------------+----------------------------+-----------------------------------------------------------------------------------------+
+|Selavy.Fitter.imagetype                        |string         |fits                        |Type of image to write - either "casa" or "fits".                                        |
 +-----------------------------------------------+---------------+----------------------------+-----------------------------------------------------------------------------------------+
 |Selavy.writeFitResults                         |bool           |false                       |Whether to write out the fitResults files (catalogues and annotations).                  |
 +-----------------------------------------------+---------------+----------------------------+-----------------------------------------------------------------------------------------+

@@ -50,6 +50,11 @@ namespace askap {
 
 namespace analysis {
 
+CasdaIsland::CasdaIsland():
+    CatalogueEntry()
+{
+}
+
 CasdaIsland::CasdaIsland(sourcefitting::RadioSource &obj,
                          const LOFAR::ParameterSet &parset):
     CatalogueEntry(parset),
@@ -276,7 +281,86 @@ void CasdaIsland::checkSpec(duchamp::Catalogues::CatalogueSpecification &spec, b
     }
 }
 
+LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& blob, CasdaIsland& src)
+{
+    std::string s;
+    double d;
+    unsigned int u;
+    int i;
 
+    s = src.itsIslandID; blob << s;
+    s = src.itsName; blob << s;
+    u = src.itsNumComponents; blob << u;
+    s = src.itsRAs; blob << s;
+    s = src.itsDECs; blob << s;
+    d = src.itsRA; blob << d;
+    d = src.itsDEC; blob << d;
+    d = src.itsFreq; blob << d;
+    d = src.itsMaj; blob << d;
+    d = src.itsMin; blob << d;
+    d = src.itsPA; blob << d;
+    d = src.itsFluxInt; blob << d;
+    d = src.itsFluxPeak; blob << d;
+    i = src.itsXmin; blob << i;
+    i = src.itsXmax; blob << i;
+    i = src.itsYmin; blob << i;
+    i = src.itsYmax; blob << i;
+    u = src.itsNumPix; blob << u;
+    d = src.itsXaverage; blob << d;
+    d = src.itsYaverage; blob << d;
+    d = src.itsXcentroid; blob << d;
+    d = src.itsYcentroid; blob << d;
+    i = src.itsXpeak; blob << i;
+    i = src.itsYpeak; blob << i;
+    u = src.itsFlag1; blob << u;
+    u = src.itsFlag2; blob << u;
+    u = src.itsFlag3; blob << u;
+    u = src.itsFlag4; blob << u;
+    s = src.itsComment; blob << s;
+
+    return blob;
+}
+
+LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& blob, CasdaIsland& src)
+{
+    std::string s;
+    double d;
+    unsigned int u;
+    int i;
+
+    blob >> s; src.itsIslandID = s;
+    blob >> s; src.itsName = s;
+    blob >> u; src.itsNumComponents = u;
+    blob >> s; src.itsRAs = s;
+    blob >> s; src.itsDECs = s;
+    blob >> d; src.itsRA = d;
+    blob >> d; src.itsDEC = d;
+    blob >> d; src.itsFreq = d;
+    blob >> d; src.itsMaj = d;
+    blob >> d; src.itsMin = d;
+    blob >> d; src.itsPA = d;
+    blob >> d; src.itsFluxInt = d;
+    blob >> d; src.itsFluxPeak = d;
+    blob >> i; src.itsXmin = i;
+    blob >> i; src.itsXmax = i;
+    blob >> i; src.itsYmin = i;
+    blob >> i; src.itsYmax = i;
+    blob >> u; src.itsNumPix = u;
+    blob >> d; src.itsXaverage = d;
+    blob >> d; src.itsYaverage = d;
+    blob >> d; src.itsXcentroid = d;
+    blob >> d; src.itsYcentroid = d;
+    blob >> i; src.itsXpeak = i;
+    blob >> i; src.itsYpeak = i;
+    blob >> u; src.itsFlag1 = u;
+    blob >> u; src.itsFlag2 = u;
+    blob >> u; src.itsFlag3 = u;
+    blob >> u; src.itsFlag4 = u;
+    blob >> s; src.itsComment = s;
+
+    return blob;
+
+}
 
 }
 

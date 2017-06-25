@@ -54,7 +54,7 @@ class CasdaHiEmissionObject : public CatalogueEntry {
     public:
         /// Default constructor that does nothing.
         CasdaHiEmissionObject();
-    
+
         /// Constructor that builds the Emission-line object from a
         /// RadioSource. It takes a single detection, stored as a
         /// RadioSource. The parset is used to...
@@ -100,19 +100,19 @@ class CasdaHiEmissionObject : public CatalogueEntry {
         /// with type=char are checked, otherwise all are.
         void checkSpec(duchamp::Catalogues::CatalogueSpecification &spec, bool allColumns = true);
 
-    /// @brief Functions allowing CasdaPolarisationEntry objects to be passed
+        /// @brief Functions allowing CasdaHiEmissionObject objects to be passed
         /// over LOFAR Blobs
         /// @name
         /// @{
-        /// @brief Pass a CasdaPolarisationEntry object into a Blob
+        /// @brief Pass a CasdaHiEmissionObject object into a Blob
         /// @details This function provides a mechanism for passing the
-        /// entire contents of a CasdaPolarisationEntry object into a
+        /// entire contents of a CasdaHiEmissionObject object into a
         /// LOFAR::BlobOStream stream
         friend LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream &stream,
                                               CasdaHiEmissionObject& src);
-        /// @brief Receive a CasdaPolarisationEntry object from a Blob
+        /// @brief Receive a CasdaHiEmissionObject object from a Blob
         /// @details This function provides a mechanism for receiving the
-        /// entire contents of a CasdaPolarisationEntry object from a
+        /// entire contents of a CasdaHiEmissionObject object from a
         /// LOFAR::BlobIStream stream
         friend LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream &stream,
                                               CasdaHiEmissionObject& src);

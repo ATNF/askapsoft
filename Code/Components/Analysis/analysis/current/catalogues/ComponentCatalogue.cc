@@ -53,6 +53,24 @@ namespace askap {
 
 namespace analysis {
 
+ComponentCatalogue::ComponentCatalogue(std::vector<CasdaComponent> &componentList,
+                                       const LOFAR::ParameterSet &parset,
+                                       duchamp::Cube *cube,
+                                       const std::string fitType):
+    itsFitType(casda::componentFitType),
+    itsComponents(componentList),
+    itsSpec(),
+    itsCube(cube),
+    itsKarmaFilename(""),
+    itsCASAFilename(""),
+    itsDS9Filename(""),
+    itsVersion("casda.continuum_component_description_v1.7")
+{
+    ASKAPLOG_DEBUG_STR(logger, "Defining component catalogue, version " << itsVersion);
+
+    this->setup(parset);
+}
+
 ComponentCatalogue::ComponentCatalogue(std::vector<sourcefitting::RadioSource> &srclist,
                                        const LOFAR::ParameterSet &parset,
                                        duchamp::Cube *cube,
@@ -69,6 +87,12 @@ ComponentCatalogue::ComponentCatalogue(std::vector<sourcefitting::RadioSource> &
     ASKAPLOG_DEBUG_STR(logger, "Defining component catalogue, version " << itsVersion);
 
     this->defineComponents(srclist, parset);
+    this->setup(parset);
+}
+
+void ComponentCatalogue::setup(const LOFAR::ParameterSet &parset)
+{
+
     this->defineSpec();
 
     duchamp::Param par = parseParset(parset);

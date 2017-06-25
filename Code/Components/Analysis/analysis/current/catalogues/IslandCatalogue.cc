@@ -49,6 +49,17 @@ namespace askap {
 
 namespace analysis {
 
+IslandCatalogue::IslandCatalogue(std::vector<CasdaIsland> &islandList,
+                                 const LOFAR::ParameterSet &parset,
+                                 duchamp::Cube *cube):
+    itsIslands(islandList),
+    itsSpec(),
+    itsCube(cube),
+    itsVersion("casda.continuum_island_description_v0.5")
+{
+    this->setup(parset);
+}
+
 IslandCatalogue::IslandCatalogue(std::vector<sourcefitting::RadioSource> &srclist,
                                  const LOFAR::ParameterSet &parset,
                                  duchamp::Cube *cube):
@@ -58,6 +69,12 @@ IslandCatalogue::IslandCatalogue(std::vector<sourcefitting::RadioSource> &srclis
     itsVersion("casda.continuum_island_description_v0.5")
 {
     this->defineIslands(srclist, parset);
+    this->setup(parset);
+}
+
+void IslandCatalogue::setup(const LOFAR::ParameterSet &parset)
+{
+
     this->defineSpec();
 
     duchamp::Param par = parseParset(parset);
@@ -68,6 +85,7 @@ IslandCatalogue::IslandCatalogue(std::vector<sourcefitting::RadioSource> &srclis
     itsAsciiFilename = filenameBase + ".txt";
 
 }
+
 
 void IslandCatalogue::defineIslands(std::vector<sourcefitting::RadioSource> &srclist,
                                     const LOFAR::ParameterSet &parset)

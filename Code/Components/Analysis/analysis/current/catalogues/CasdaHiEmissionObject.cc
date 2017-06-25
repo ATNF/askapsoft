@@ -103,17 +103,17 @@ CasdaHiEmissionObject::CasdaHiEmissionObject(sourcefitting::RadioSource &obj,
     itsObjectID = id.str();
 
     LOFAR::ParameterSet hiParset = parset.makeSubset("HiEmissionCatalogue.");
-    if(! hiParset.isDefined("imagetype")){
-        hiParset.add("imagetype","fits");
+    if (! hiParset.isDefined("imagetype")) {
+        hiParset.add("imagetype", "fits");
     }
 
     HIdata hidata(parset);
     hidata.setSource(&obj);
     hidata.extract();
-    if ( hiParset.getBool("writeSpectra", "true")) {
+    if (hiParset.getBool("writeSpectra", "true")) {
         hidata.write();
     }
-    
+
     double peakFluxscale = getPeakFluxConversionScale(obj.header(), casda::fluxUnit);
 
     int lng = obj.header().WCS().lng;
@@ -124,7 +124,7 @@ CasdaHiEmissionObject::CasdaHiEmissionObject(sourcefitting::RadioSource &obj,
     ASKAPLOG_DEBUG_STR(logger, newHead_freq.WCS().ctype[newHead_freq.WCS().spec] << " " <<
                        strncmp(newHead_freq.WCS().ctype[newHead_freq.WCS().spec], "FREQ", 4));
     bool doFreq = (strncmp(newHead_freq.WCS().ctype[newHead_freq.WCS().spec], "FREQ", 4) == 0);
-    if ( ! doFreq ){
+    if (! doFreq) {
         ASKAPLOG_ERROR_STR(logger,
                            "Conversion to Frequency-based WCS failed - cannot compute frequency-based quantities.");
     }
@@ -132,7 +132,7 @@ CasdaHiEmissionObject::CasdaHiEmissionObject(sourcefitting::RadioSource &obj,
     ASKAPLOG_DEBUG_STR(logger, newHead_vel.WCS().ctype[newHead_vel.WCS().spec] << " " <<
                        strncmp(newHead_vel.WCS().ctype[newHead_vel.WCS().spec], "VOPT", 4));
     bool doVel = (strncmp(newHead_vel.WCS().ctype[newHead_vel.WCS().spec], "VOPT", 4) == 0);
-    if ( ! doVel ){
+    if (! doVel) {
         ASKAPLOG_ERROR_STR(logger,
                            "Conversion to Velocity-based WCS failed - cannot compute velocity-based quantities.");
     }
@@ -326,7 +326,7 @@ CasdaHiEmissionObject::CasdaHiEmissionObject(sourcefitting::RadioSource &obj,
     itsFluxMean = hidata.fluxMean() * peakFluxscale;
     itsFluxStddev = hidata.fluxStddev() * peakFluxscale;
     itsFluxRMS = hidata.fluxRMS() * peakFluxscale;
-    
+
 
 
     // @todo - Make moment-0 array, then fit single Gaussian to it.
@@ -340,26 +340,26 @@ CasdaHiEmissionObject::CasdaHiEmissionObject(sourcefitting::RadioSource &obj,
         ASKAPLOG_INFO_STR(logger, "BF results: " << BFparams);
         casa::Vector<double> BFerrors = hidata.BFerrors();
         const float channelFreqWidth = newHead_freq.WCS().cdelt[obj.header().WCS().spec] * freqScale;
-        itsBFfit_a.value()=BFparams[0];
-        itsBFfit_a.error()=BFerrors[0];
-        itsBFfit_b1.value()=BFparams[1];
-        itsBFfit_b1.error()=BFerrors[1];
-        itsBFfit_b2.value()=BFparams[2];
-        itsBFfit_b2.error()=BFerrors[2];
-        itsBFfit_c.value()=BFparams[3];
-        itsBFfit_c.error()=BFerrors[3];
-        itsBFfit_xe.value()=BFparams[4]*channelFreqWidth;
-        itsBFfit_xe.error()=BFerrors[4]*channelFreqWidth;
-        itsBFfit_xp.value()=BFparams[5]*channelFreqWidth;
-        itsBFfit_xp.error()=BFerrors[5]*channelFreqWidth;
-        itsBFfit_w.value()=BFparams[6]*channelFreqWidth;
-        itsBFfit_w.error()=BFerrors[6]*channelFreqWidth;
-        itsBFfit_n.value()=BFparams[7];
-        itsBFfit_n.error()=BFerrors[7];
+        itsBFfit_a.value() = BFparams[0];
+        itsBFfit_a.error() = BFerrors[0];
+        itsBFfit_b1.value() = BFparams[1];
+        itsBFfit_b1.error() = BFerrors[1];
+        itsBFfit_b2.value() = BFparams[2];
+        itsBFfit_b2.error() = BFerrors[2];
+        itsBFfit_c.value() = BFparams[3];
+        itsBFfit_c.error() = BFerrors[3];
+        itsBFfit_xe.value() = BFparams[4] * channelFreqWidth;
+        itsBFfit_xe.error() = BFerrors[4] * channelFreqWidth;
+        itsBFfit_xp.value() = BFparams[5] * channelFreqWidth;
+        itsBFfit_xp.error() = BFerrors[5] * channelFreqWidth;
+        itsBFfit_w.value() = BFparams[6] * channelFreqWidth;
+        itsBFfit_w.error() = BFerrors[6] * channelFreqWidth;
+        itsBFfit_n.value() = BFparams[7];
+        itsBFfit_n.error() = BFerrors[7];
     } else {
         ASKAPLOG_WARN_STR(logger, "Could not fit busy function to object " << itsObjectID);
     }
-        
+
     // @todo - Need to add logic to measure resolvedness. Currently it
     // is "Is the mom0 map adequately fitted by a PSF-shaped Gaussian?
     // If so, it is not resolved."
@@ -948,8 +948,8 @@ LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& blob, CasdaHiEmissionObject& 
 {
     std::string s;
     double d;
-    casda::ValueError v;
     unsigned int u;
+    casda::ValueError v;
     int i;
 
     s = src.itsObjectID; blob << s;
@@ -1122,7 +1122,7 @@ LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& blob, CasdaHiEmissionObject& 
 
     return blob;
 }
-    
+
 }
 
 }

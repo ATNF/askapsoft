@@ -67,6 +67,16 @@ class ResultsWriter {
         /// text-based spectra.
         void duchampOutput();
 
+        /// Writes out the CASDA island and component catalogues, as well
+        /// as the maps of components and their residuals via the
+        /// writeComponentMaps(componentImage) function.
+        void writeContinuumCatalogues();
+
+        /// Writes images that contain: a) a map of all continuum
+        /// components, and b) the residual emission after these are
+        /// removed from the input image.
+        void writeComponentMaps(casa::Array<float> &componentImage);
+
         /// Writes out the CASDA island catalogue, using the
         /// IslandCatalogue class to handle the writing (which will
         /// create VOTable and ASCII text versions of the catalogue).

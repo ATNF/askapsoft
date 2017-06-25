@@ -381,6 +381,12 @@ function setImageProperties()
         thresholdMap=detThresh.${imageName}
         meanMap=meanMap.${imageName}
         snrMap=snrMap.${imageName}
+        compMap=componentMap_${imageName}
+        compMapType="cont_components_T0"
+        compMapLabel="Continuum component map"
+        compResidual=componentResidual_${imageName}
+        compResidualType="cont_fitresidual_T0"
+        compResidualLabel="Continuum component residual map"
         validationDir=${imageName}_continuum_validation
     elif [ "${type}" == "spectral" ]; then
         noiseMap=noiseMap.${imageName}
