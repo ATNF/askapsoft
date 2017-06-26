@@ -163,15 +163,17 @@ void VariableThresholder::calculate()
 
         ASKAPLOG_INFO_STR(logger, "Reusing SNR map from file " << itsSNRimageName);
 
-        casa::Array<Float> snr = analysisutilities::getPixelsInBox(itsSNRimageName,
-                                                                   itsSlicer);
+        // casa::Array<Float> snr = analysisutilities::getPixelsInBox(itsSNRimageName,
+        //                                                            itsSlicer);
+        casa::MaskedArray<Float> snr = analysisutilities::getPixelsInBox(itsSNRimageName,
+                                                                         itsSlicer);
 
         if (itsCube->getRecon() == 0) {
             ASKAPLOG_ERROR_STR(logger,
                                "The Cube's recon array not defined - cannot save SNR map");
         } else {
             for (size_t i = 0; i < itsCube->getSize(); i++) {
-                itsCube->getRecon()[i] = snr.data()[i];
+                itsCube->getRecon()[i] = snr.getArray().data()[i];
             }
         }
 

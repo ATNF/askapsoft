@@ -108,13 +108,15 @@ void Weighter::findNorm()
             if (itsWeights.size() == 0)
                 ASKAPLOG_ERROR_STR(logger, "Weights array not initialised!");
             // find maximum of weights and send to master
-            float maxW = max(itsWeights);
+            bool isvalid = itsWeights.nelementsValid() > 0;
+            float maxW = 0.;
+            if (isvalid) maxW = max(itsWeights.getCompressedArray());
             ASKAPLOG_DEBUG_STR(logger, "Local maximum weight = " << maxW);
             bs.resize(0);
             LOFAR::BlobOBufString bob(bs);
             LOFAR::BlobOStream out(bob);
             out.putStart("localmax", 1);
-            out << maxW;
+            out << isvalid << maxW;
             out.putEnd();
             itsComms->sendBlob(bs, 0);
 
@@ -131,13 +133,16 @@ void Weighter::findNorm()
             // read local maxima from workers and find the maximum of them
             for (int n = 0; n < itsComms->nProcs() - 1; n++) {
                 float localmax;
+                bool isvalid;
                 itsComms->receiveBlob(bs, n + 1);
                 LOFAR::BlobIBufString bib(bs);
                 LOFAR::BlobIStream in(bib);
                 int version = in.getStart("localmax");
                 ASKAPASSERT(version == 1);
-                in >> localmax;
-                itsNorm = (n == 0) ? localmax : std::max(localmax, itsNorm);
+                in >> isvalid  >> localmax;
+                if(isvalid){
+                    itsNorm = (n == 0) ? localmax : std::max(localmax, itsNorm);
+                }
                 in.getEnd();
             }
             // send the actual maximum to all workers
@@ -151,7 +156,8 @@ void Weighter::findNorm()
         }
     } else {
         // serial mode - read entire weights image, so can just measure maximum directly
-        itsNorm = max(itsWeights);
+        ASKAPCHECK(itsWeights.nelementsValid()>0, "Weights array has no valid elements!");
+        itsNorm = max(itsWeights.getCompressedArray());
     }
 
     ASKAPLOG_INFO_STR(logger, "Normalising weights image to maximum " << itsNorm);
@@ -164,13 +170,18 @@ float Weighter::weight(size_t i)
                "Index out of bounds for weights array : index=" << i <<
                ", weights array is size " << itsWeights.size());
 
-    return sqrt(itsWeights.data()[i] / itsNorm);
+    if (itsWeights.getMask().data()[i]){
+        return sqrt(itsWeights.getArray().data()[i] / itsNorm);
+    } else {
+        return 0.;
+    }
 }
 
 bool Weighter::isValid(size_t i)
 {
     if (this->doApplyCutoff()) {
-        return (itsWeights.data()[i] / itsNorm > itsWeightCutoff);
+        return itsWeights.getMask().data()[i] &&
+            (itsWeights.getArray().data()[i] / itsNorm > itsWeightCutoff);
     } else {
         return true;
     }

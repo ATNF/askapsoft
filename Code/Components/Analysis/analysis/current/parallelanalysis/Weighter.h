@@ -77,7 +77,8 @@ class Weighter {
         float itsWeightCutoff;
         std::string itsCutoffType;
         bool itsFlagDoScaling;
-        casa::Array<casa::Float> itsWeights;
+//        casa::Array<casa::Float> itsWeights;
+    casa::MaskedArray<casa::Float> itsWeights;
 
 };
 

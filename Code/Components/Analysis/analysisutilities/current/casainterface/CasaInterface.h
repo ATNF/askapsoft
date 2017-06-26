@@ -109,8 +109,10 @@ void fixSlicer(Slicer &slice, wcsprm *wcs);
 float findSurroundingNoise(std::string filename, float xpt, float ypt, int noiseBoxSize);
 
 /// @brief Return a vector of pixel values in a box subsection of an image.
-casa::Array<casa::Float> getPixelsInBox(std::string imageName, casa::Slicer box,
-                                        bool fixSlicer = true);
+// casa::Array<casa::Float> getPixelsInBox(std::string imageName, casa::Slicer box,
+//                                         bool fixSlicer = true);
+casa::MaskedArray<casa::Float> getPixelsInBox(std::string imageName, casa::Slicer box,
+                                              bool fixSlicer = true);
 
 /// @brief Increase the length of a Slicer by adding degenerate dimensions on the end
 void lengthenSlicer(Slicer &slice, int ndim);

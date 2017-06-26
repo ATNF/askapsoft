@@ -1377,7 +1377,10 @@ duchamp::OUTCOME DuchampParallel::getCASA(DATATYPE typeOfData, bool useSubimageI
 
         casa::Array<Float> subarray(sub->shape());
         const casa::MaskedArray<Float> msub(sub->get(), sub->getMask());
-        float minval = min(msub) - 10.;
+        float minval = 0.;
+        if (msub.nelementsValid()>0){
+            minval = min(msub) - 10.;
+        }
         subarray = msub;
         if (sub->hasPixelMask()) {
             subarray(!sub->getMask()) = minval;

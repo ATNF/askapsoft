@@ -61,6 +61,7 @@
 #include <casacore/scimath/Functionals/Gaussian3D.h>
 #include <casacore/casa/namespace.h>
 #include <casacore/casa/Arrays/IPosition.h>
+#include <casacore/casa/Arrays/MaskedArray.h>
 #include <casacore/casa/Arrays/Slicer.h>
 #include <casacore/casa/Arrays/ArrayMath.h>
 #include <casacore/casa/Quanta/Quantum.h>
@@ -571,7 +572,10 @@ RadioSource::getSubComponentList(casa::Matrix<casa::Double> pos,
                                   itsBox.length(), Slicer::endIsLength);
 
 
-        casa::Array<float> curvArray =
+        // casa::Array<float> curvArray =
+        //     analysisutilities::getPixelsInBox(itsFitParams.curvatureImage(),
+        //                                       fullImageBox, false);
+        casa::MaskedArray<float> curvArray =
             analysisutilities::getPixelsInBox(itsFitParams.curvatureImage(),
                                               fullImageBox, false);
 
@@ -589,7 +593,7 @@ RadioSource::getSubComponentList(casa::Matrix<casa::Double> pos,
             if (spatMap.isInObject(x, y)) {
                 int loc = (x - this->boxXmin()) + this->boxXsize() * (y - this->boxYmin());
                 fluxArray[loc] = float(f(i));
-                summitMap[loc] = (curvArray.data()[loc] < -1.*itsFitParams.sigmaCurv());
+                summitMap[loc] = (curvArray.getArray().data()[loc] < -1.*itsFitParams.sigmaCurv());
             }
         }
 
@@ -1171,12 +1175,13 @@ void RadioSource::findSpectralTerm(std::string imageName, int term, bool doCalc)
                                    this->boxYmax() - this->boxYmin() + 1, 1);
         Slicer theBox = casa::Slicer(xrange, yrange);
 
-        casa::Array<casa::Float> flux_all = getPixelsInBox(imageName, theBox);
+        // casa::Array<casa::Float> flux_all = getPixelsInBox(imageName, theBox);
+        casa::MaskedArray<casa::Float> flux_all = getPixelsInBox(imageName, theBox);
 
         std::vector<double> fluxvec;
         for (size_t i = 0; i < flux_all.size(); i++) {
-            if (!isnan(flux_all.data()[i])) {
-                fluxvec.push_back(flux_all.data()[i]);
+            if (!isnan(flux_all.getArray().data()[i])) {
+                fluxvec.push_back(flux_all.getArray().data()[i]);
             }
         }
         casa::Matrix<casa::Double> pos;
@@ -1190,7 +1195,7 @@ void RadioSource::findSpectralTerm(std::string imageName, int term, bool doCalc)
         // ignores them
         int counter = 0;
         for (size_t i = 0; i < flux_all.size(); i++) {
-            if (!isnan(flux_all.data()[i])) {
+            if (flux_all.getMask().data()[i]) {
                 sigma(counter) = 1;
                 curpos(0) = i % this->boxXsize() + this->boxXmin();
                 curpos(1) = i / this->boxXsize() + this->boxYmin();

@@ -317,7 +317,8 @@ float findSurroundingNoise(std::string filename, float xpt, float ypt, int noise
 
 //**************************************************************//
 
-casa::Array<casa::Float> getPixelsInBox(std::string imageName, casa::Slicer box, bool fixSlice)
+// casa::Array<casa::Float> getPixelsInBox(std::string imageName, casa::Slicer box, bool fixSlice)
+casa::MaskedArray<casa::Float> getPixelsInBox(std::string imageName, casa::Slicer box, bool fixSlice)
 {
     /// @details Extract a set of pixel values from a region of
     /// an image. The region is defined by a casa::Slicer
@@ -337,9 +338,14 @@ casa::Array<casa::Float> getPixelsInBox(std::string imageName, casa::Slicer box,
         fixSlicer(newSlicer, tempwcs);
     }
 
-    casa::Array<Float> array = imagePtr->getSlice(newSlicer, true);
+    const boost::shared_ptr<SubImage<Float> > sub(new SubImage<Float>(*imagePtr, newSlicer));
+    casa::Array<Float> subarray(sub->shape());
+    const casa::MaskedArray<Float> msub(sub->get(), sub->getMask());
+    return msub;
+    
+    // casa::Array<Float> array = imagePtr->getSlice(newSlicer, true);
 
-    return array;
+    // return array;
 }
 
 //**************************************************************//
