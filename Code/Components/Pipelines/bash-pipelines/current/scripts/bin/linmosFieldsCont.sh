@@ -182,7 +182,7 @@ EOFINNER
 
                 NCORES=1
                 NPPN=1
-                aprun -n \${NCORES} -N \${NPPN} $linmos -c "\$parset" > "\$log"
+                aprun -n \${NCORES} -N \${NPPN} $linmosMPI -c "\$parset" > "\$log"
                 err=\$?
                 for im in \$(echo "\${imList}" | sed -e 's/,/ /g'); do
                     rejuvenate "\$im"
