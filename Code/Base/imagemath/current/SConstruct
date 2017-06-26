@@ -15,6 +15,7 @@ pkg = env.AskapPackage("imagemath")
 
 # add sub packages 
 pkg.AddSubPackage("linmos")
+pkg.AddSubPackage("primarybeam")
 
 # run the build process
 pkg()

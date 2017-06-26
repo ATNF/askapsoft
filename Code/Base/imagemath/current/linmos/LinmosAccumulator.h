@@ -37,6 +37,8 @@
 
 // ASKAPsoft includes
 #include <utils/MultiDimArrayPlaneIter.h>
+#include <primarybeam/PrimaryBeam.h>
+
 
 using namespace casa;
 
@@ -276,6 +278,8 @@ namespace askap {
                 map<string,vector<string> > itsInSenNameVecs;
                 map<string,bool> itsOutWgtDuplicates;
                 map<string,bool> itsGenSensitivityImage;
+                //
+                PrimaryBeam::ShPtr itsPB;
 
         };
 

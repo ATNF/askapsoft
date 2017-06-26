@@ -1,0 +1,16 @@
+# @file
+# SConstruct build script for this module.
+#
+
+# Always import this
+from askapenv import env
+
+# create build object with library name
+pkg = env.AskapPackage("daliuge_pipeline")
+
+pkg.AddSubPackage("daliuge")
+pkg.AddSubPackage("factory")
+env.AppendUnique(CCFLAGS=['-O3'])
+
+# run the build process
+pkg()

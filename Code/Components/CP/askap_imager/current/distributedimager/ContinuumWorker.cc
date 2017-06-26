@@ -167,9 +167,9 @@ void ContinuumWorker::run(void)
                               << ", frequency " << wu.get_channelFrequency()/1.e6 << " MHz"
                               << ", width " << wu.get_channelWidth()/1e3 << " kHz");
             try {
-                ASKAPLOG_INFO_STR(logger,"Parset Reports (before): " << (itsParset.getStringVector("dataset", true)));
+                ASKAPLOG_DEBUG_STR(logger,"Parset Reports (before): " << (itsParset.getStringVector("dataset", true)));
                 processWorkUnit(wu);
-                ASKAPLOG_INFO_STR(logger,"Parset Reports (after): " << (itsParset.getStringVector("dataset", true)));
+                ASKAPLOG_DEBUG_STR(logger,"Parset Reports (after): " << (itsParset.getStringVector("dataset", true)));
             }
             catch (AskapError& e) {
                 ASKAPLOG_WARN_STR(logger, "Failure processing workUnit");
@@ -209,13 +209,13 @@ void ContinuumWorker::run(void)
         int myMaxClient = itsComms.rank();
 
         if (itsComms.isWriter()) {
-            ASKAPLOG_INFO_STR(logger,"Getting client list for cube generation");
+            ASKAPLOG_DEBUG_STR(logger,"Getting client list for cube generation");
             std::list<int> myClients = itsComms.getClients();
             myClients.push_back(itsComms.rank());
             myClients.sort();
             myClients.unique();
 
-            ASKAPLOG_INFO_STR(logger,"Client list " << myClients);
+            ASKAPLOG_DEBUG_STR(logger,"Client list " << myClients);
             if (myClients.size() > 0) {
                 std::list<int>::iterator iter = std::min_element(myClients.begin(), myClients.end());
 
@@ -284,7 +284,7 @@ void ContinuumWorker::processWorkUnit(ContinuumWorkUnit& wu)
     // This also needs to set the frequencies and directions for all the images
     ASKAPLOG_DEBUG_STR(logger,"In processWorkUnit");
     LOFAR::ParameterSet unitParset = itsParset;
-    ASKAPLOG_INFO_STR(logger,"Parset Reports: (In process workunit)" << (itsParset.getStringVector("dataset", true)));
+    ASKAPLOG_DEBUG_STR(logger,"Parset Reports: (In process workunit)" << (itsParset.getStringVector("dataset", true)));
 
     char ChannelPar[64];
 
@@ -357,16 +357,16 @@ void ContinuumWorker::processWorkUnit(ContinuumWorkUnit& wu)
 
     unitParset.replace("Channels",ChannelPar);
 
-    ASKAPLOG_INFO_STR(logger,"Getting advice on missing parameters");
+    ASKAPLOG_DEBUG_STR(logger,"Getting advice on missing parameters");
 
     itsAdvisor->addMissingParameters(unitParset);
 
-    ASKAPLOG_INFO_STR(logger,"Storing workUnit");
+    ASKAPLOG_DEBUG_STR(logger,"Storing workUnit");
     workUnits.push_back(wu);
-    ASKAPLOG_INFO_STR(logger,"Storing parset");
+    ASKAPLOG_DEBUG_STR(logger,"Storing parset");
     itsParsets.push_back(unitParset);
-    ASKAPLOG_INFO_STR(logger,"Finished processWorkUnit");
-    ASKAPLOG_INFO_STR(logger,"Parset Reports (leaving processWorkUnit): " << (itsParset.getStringVector("dataset", true)));
+    ASKAPLOG_DEBUG_STR(logger,"Finished processWorkUnit");
+    ASKAPLOG_DEBUG_STR(logger,"Parset Reports (leaving processWorkUnit): " << (itsParset.getStringVector("dataset", true)));
 
 }
 
@@ -377,7 +377,7 @@ ContinuumWorker::processSnapshot(LOFAR::ParameterSet& unitParset)
 }
 void ContinuumWorker::buildSpectralCube() {
 
-    ASKAPLOG_INFO_STR(logger,"Processing multiple channels local solver mode");
+    ASKAPLOG_DEBUG_STR(logger,"Processing multiple channels local solver mode");
     /// This is the spectral cube builder
     /// it marshalls the following tasks:
     /// 1. building a spectral cube image
@@ -454,8 +454,8 @@ void ContinuumWorker::buildSpectralCube() {
             weights_name = "weights";
         }
 
-        ASKAPLOG_INFO_STR(logger,"Configuring Spectral Cube");
-        ASKAPLOG_INFO_STR(logger,"nchan: " << this->nchanCube << " base f0: " << f0.getValue("MHz")
+        ASKAPLOG_DEBUG_STR(logger,"Configuring Spectral Cube");
+        ASKAPLOG_DEBUG_STR(logger,"nchan: " << this->nchanCube << " base f0: " << f0.getValue("MHz")
         << " width: " << freqinc.getValue("MHz") <<" (" << workUnits[0].get_channelWidth() << ")");
 
 

@@ -42,6 +42,8 @@
 #include <askap/AskapUtil.h>
 #include <askap/StatReporter.h>
 #include <utils/MultiDimArrayPlaneIter.h>
+#include <primarybeam/PrimaryBeam.h>
+#include <primarybeam/PrimaryBeamFactory.h>
 
 ASKAP_LOGGER(linmoslogger, ".linmosaccumulator");
 
@@ -214,6 +216,9 @@ namespace askap {
                 ASKAPCHECK(parset.getUint("psfref")<inImgNames.size(), "PSF reference-image number is too large");
             }
 
+            // sort out primary beam
+            itsPB = PrimaryBeamFactory::make(parset);
+
             return true;
 
         }
@@ -383,8 +388,9 @@ namespace askap {
                                 "Input not an image* file. Ignoring sensitivities.");
                             itsDoSensitivity = false;
                         }
-                    }
 
+                    }
+                    ASKAPLOG_INFO_STR(linmoslogger,"Taylor Image: " << inImgName);
                 } // img loop (input image)
 
                 // check whether any sensitivity images were found
@@ -999,7 +1005,7 @@ namespace askap {
                 // set FWHM for the current beam
                 // Removing the factor of 1.22 gives a good match to the simultation weight images
                 //const T fwhm = 1.22*3e8/freq/12;
-                const T fwhm = 3e8/freq/12;
+                //const T fwhm = 3e8/freq/12;
 
                 // get coordinates of the direction axes
                 const int dcPos = itsInCoordSys.findCoordinate(Coordinate::DIRECTION,-1);
@@ -1026,7 +1032,8 @@ namespace askap {
                         offsetBeam = world0.separation(world1);
 
                         // set the weight
-                        pb = exp(-offsetBeam*offsetBeam*4.*log(2.)/fwhm/fwhm);
+                        //pb = exp(-offsetBeam*offsetBeam*4.*log(2.)/fwhm/fwhm);
+                        pb = itsPB->evaluateAtOffset(offsetBeam,freq);
                         wgtBuffer.putAt(pb * pb, pos);
 
                     }
@@ -1139,7 +1146,7 @@ namespace askap {
                 // set FWHM for the current beam
                 // Removing the factor of 1.22 gives a good match to the simultation weight images
                 //const T fwhm = 1.22*3e8/freq/12;
-                const T fwhm = 3e8/freq/12;
+                //const T fwhm = 3e8/freq/12;
 
                 // get coordinates of the direction axes
                 const int dcPos = itsInCoordSys.findCoordinate(Coordinate::DIRECTION,-1);
@@ -1164,7 +1171,8 @@ namespace askap {
                         offsetBeam = itsInCentre.separation(world);
 
                         // set the weight
-                        pb = exp(-offsetBeam*offsetBeam*4.*log(2.)/fwhm/fwhm);
+                        //pb = exp(-offsetBeam*offsetBeam*4.*log(2.)/fwhm/fwhm);
+                        pb = itsPB->evaluateAtOffset(offsetBeam,freq);
                         wgtPix(wgtpos) = pb * pb;
 
                     }
