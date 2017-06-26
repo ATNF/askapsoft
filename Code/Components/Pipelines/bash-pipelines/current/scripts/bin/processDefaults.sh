@@ -196,18 +196,18 @@ casaimage='\${casaim}'
 fitsimage='\${fitsim}'
 
 ia.open(casaimage)
-info=ia.miscinfo()
-info['PROJECT']='${PROJECT_ID}'
-info['DATE-OBS']='${DATE_OBS}'
-info['DURATION']=${DURATION}
-info['SBID']='${SB_SCIENCE}'
-#info['INSTRUME']='${INSTRUMENT}'
-ia.setmiscinfo(info)
-imhistory=[]
-imhistory.append('Produced with ASKAPsoft version \${ASKAPSOFT_VERSION_USED}')
-imhistory.append('Produced using ASKAP pipeline version ${PIPELINE_VERSION}')
-imhistory.append('Processed with ASKAP pipelines on ${NOW_FMT}')
-ia.sethistory(origin='ASKAPsoft pipeline',history=imhistory)
+#info=ia.miscinfo()
+#info['PROJECT']='${PROJECT_ID}'
+#info['DATE-OBS']='${DATE_OBS}'
+#info['DURATION']=${DURATION}
+#info['SBID']='${SB_SCIENCE}'
+##info['INSTRUME']='${INSTRUMENT}'
+#ia.setmiscinfo(info)
+#imhistory=[]
+#imhistory.append('Produced with ASKAPsoft version \${ASKAPSOFT_VERSION_USED}')
+#imhistory.append('Produced using ASKAP pipeline version ${PIPELINE_VERSION}')
+#imhistory.append('Processed with ASKAP pipelines on ${NOW_FMT}')
+#ia.sethistory(origin='ASKAPsoft pipeline',history=imhistory)
 ia.tofits(outfile=fitsimage, velocity=False)
 ia.close()
 EOFSCRIPT
@@ -235,12 +235,12 @@ if [ -e \"\${casaim}\" ] && [ ! -e \"\${fitsim}\" ]; then
 ImageToFITS.casaimage = \${casaim}
 ImageToFITS.fitsimage = \${fitsim}
 ImageToFITS.stokesLast = true
-ImageToFITS.headers = [\"project\", \"sbid\", \"date-obs\", \"duration\"]
-ImageToFITS.headers.project = ${PROJECT_ID}
-ImageToFITS.headers.sbid = ${SB_SCIENCE}
-ImageToFITS.headers.date-obs = ${DATE_OBS}
-ImageToFITS.headers.duration = ${DURATION}
-ImageToFITS.history = [\"Produced with ASKAPsoft version \${ASKAPSOFT_VERSION_USED}\", \"Produced using ASKAP pipeline version ${PIPELINE_VERSION}\", \"Processed with ASKAP pipelines on ${NOW_FMT}\"]
+#ImageToFITS.headers = [\"project\", \"sbid\", \"date-obs\", \"duration\"]
+#ImageToFITS.headers.project = ${PROJECT_ID}
+#ImageToFITS.headers.sbid = ${SB_SCIENCE}
+#ImageToFITS.headers.date-obs = ${DATE_OBS}
+#ImageToFITS.headers.duration = ${DURATION}
+#ImageToFITS.history = [\"Produced with ASKAPsoft version \${ASKAPSOFT_VERSION_USED}\", \"Produced using ASKAP pipeline version ${PIPELINE_VERSION}\", \"Processed with ASKAP pipelines on ${NOW_FMT}\"]
 EOFINNER
     NCORES=1
     NPPN=1
@@ -248,6 +248,12 @@ EOFINNER
 
 fi"
     fi
+    # Update the headers
+    fitsConvertText="${fitsConvertText}
+# Header updates
+NCORES=1
+NPPN=1
+aprun -n \${NCORES} -N \${NPPN} \"${PIPELINEDIR}/updateFITSheaders.py\" --fitsfile=\${fitsim} --project=${PROJECT_ID} --sbid=${SB_SCIENCE} --dateobs=${DATE_OBS} --duration=$DURATION \"Produced with ASKAPsoft version \${ASKAPSOFT_RELEASE}\", \"Produced using ASKAP pipeline version ${PIPELINE_VERSION}\", \"Processed with ASKAP pipelines on ${NOW_FMT}\"
 
 
     ####################
