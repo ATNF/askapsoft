@@ -76,7 +76,7 @@ if [ "\${pathToScript}" != "" ]; then
     
         if [ "\${casdaTwoDimImageTypes[i]}" == "cont_restored_T0" ]; then
 
-            imdir="\${casdaTwoDimImageNames[i]%/*}"
+            imdir="\${casdaTwoDimImageNames[i]%%/*}"
             imageNoFITS=\$(echo "\${casdaTwoDimImageNames[i]##*/}"| sed -e 's/\\.fits//g')
             echo "image = \${imageNoFITS}"
 
@@ -133,7 +133,7 @@ if [ "\${pathToScript}" != "" ]; then
 
     for((i=0;i<\${#casdaTwoDimImageNames[@]};i++)); do
 
-        imdir="\${casdaTwoDimImageNames[i]%/*}"
+        imdir="\${casdaTwoDimImageNames[i]%%/*}"
         imageNoFITS=\$(echo "\${casdaTwoDimImageNames[i]##*/}"| sed -e 's/\\.fits//g')
         echo "image = \$imageNoFITS"
     

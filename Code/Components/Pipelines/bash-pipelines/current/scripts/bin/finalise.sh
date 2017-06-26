@@ -111,7 +111,7 @@ EOF
         sedstr="s/-${NOW}//g"
         link=$(echo "$1" | sed -e "$sedstr")
         # remove trailing suffix
-        link=${link%.*}
+        link=${link%%.*}
         # remove all leading paths
         link=${link##*/}
         # make the link, and clobber any existing link

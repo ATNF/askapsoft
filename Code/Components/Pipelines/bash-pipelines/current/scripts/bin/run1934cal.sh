@@ -37,7 +37,7 @@ FIELD=BPCAL
 OUTPUT="${ORIGINAL_OUTPUT}/${FIELD}"
 mkdir -p "${OUTPUT}"
 cd "${OUTPUT}"
-if [ "${TABLE_BANDPASS%/*}" == "${TABLE_BANDPASS}" ]; then
+if [ "${TABLE_BANDPASS%%/*}" == "${TABLE_BANDPASS}" ]; then
     # Have just given a filename with no leading path - need to change
     # it to be inside the new OUTPUT directory
     TABLE_BANDPASS="${OUTPUT}/${TABLE_BANDPASS}"

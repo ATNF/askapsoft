@@ -513,7 +513,7 @@ if [ "\${DO_CONTINUUM_VALIDATION}" == "true" ]; then
     fi
     
     for dir in \${validationDirs[@]}; do
-        cd \${dir%/*}/..
+        cd \${dir%%/*}/..
         tar cvf \${dir##*/}.tar \${dir##*/}
         cd -
         evalNames+=(\${dir}.tar)
