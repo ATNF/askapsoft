@@ -147,6 +147,9 @@ IMAGETYPE_CONT=${IMAGETYPE_CONT}
 IMAGETYPE_CONTCUBE=${IMAGETYPE_CONTCUBE}
 IMAGETYPE_SPECTRAL=${IMAGETYPE_SPECTRAL}
 
+GAINS_CAL_TABLE="${GAINS_CAL_TABLE}"
+DO_CONTINUUM_VALIDATION="${DO_CONTINUUM_VALIDATION}"
+
 NUM_LOOPS=0
 DO_SELFCAL=$DO_SELFCAL
 if [ "\${DO_SELFCAL}" == "true" ] && [ "\$doSelfcalLoops" == "true" ]; then
@@ -453,7 +456,7 @@ if [ -e "\${TABLE}" ]; then
 fi
 
 for FIELD in \${FIELD_LIST}; do 
-    for BEAM in \${BEAM_LIST}; do
+    for BEAM in \${beams}; do
         findScienceMSnames
         if [ -e "\${FIELD}/\${gainscaltab}" ]; then
             calTables+=(\${FIELD}/\${gainscaltab})
@@ -478,8 +481,8 @@ if [ "\${PREPARE_FOR_CASDA}" == "true" ]; then
     # slurm files & diagnostics etc, and add to the evaluation file list
     tarlist="\${calTables[@]}"
     tarlist="\${tarlist} \${diagnostics##*/}"
-    tarlist="\${tarlist} \${metadata}"
-    tar zcvf slurmFiles.tgz \${slurmFiles##*/}
+    tarlist="\${tarlist} \${metadata##*/}"
+    tar zcvf slurmFiles.tgz \${slurms##*/}
     tarlist="\${tarlist} slurmFiles.tgz"
     tar zcvf logs.tgz \${logs##*/}
     tarlist="\${tarlist} logs.tgz"
@@ -513,9 +516,14 @@ if [ "\${DO_CONTINUUM_VALIDATION}" == "true" ]; then
     fi
     
     for dir in \${validationDirs[@]}; do
-        cd \${dir%%/*}/..
+        echo "Have validation directory \$dir"
+        cd \${dir##/*}/..
+        echo "Moved to \$(pwd)"
+        echo "Running: tar cvf \${dir##*/}.tar \${dir##*/}"
         tar cvf \${dir##*/}.tar \${dir##*/}
+        echo "Done"
         cd -
+        echo "Now in \$(pwd)"
         evalNames+=(\${dir}.tar)
         evalFormats+=(tar)
     done
