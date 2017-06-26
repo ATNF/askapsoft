@@ -241,6 +241,14 @@ void FitsImageAccess::writeMask(const std::string &name, const casa::Array<bool>
     casa::String error = casa::String("FITS pixel mask not yet implemented");
     ASKAPLOG_INFO_STR(logger,error);
 }
+/// @brief write a slice of an image mask
+/// @param[in] name image name
+/// @param[in] arr array with pixels
+void FitsImageAccess::writeMask(const std::string &name, const casa::Array<bool> &mask)
+{
+    casa::String error = casa::String("FITS pixel mask not yet implemented");
+    ASKAPLOG_INFO_STR(logger,error);
+}
 /// @brief set brightness units of the image
 /// @details
 /// @param[in] name image name

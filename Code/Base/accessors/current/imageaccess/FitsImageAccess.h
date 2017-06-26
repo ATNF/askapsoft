@@ -131,6 +131,12 @@ public:
     /// @param[in] where bottom left corner where to put the slice to (trc is deduced from the array shape)
     virtual void writeMask(const std::string &name, const casa::Array<bool> &mask,
                                                    const casa::IPosition &where);
+
+    /// @brief write a slice of an image mask
+    /// @param[in] name image name
+    /// @param[in] arr array with pixels
+    
+    virtual void writeMask(const std::string &name, const casa::Array<bool> &mask);
     /// @brief set brightness units of the image
     /// @details
     /// @param[in] name image name

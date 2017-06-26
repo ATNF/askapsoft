@@ -1,7 +1,7 @@
 #
 # ASKAP auto-generated file
 #
-ASKAP_ROOT=/Users/ord006/Soft/Branches/dev
+ASKAP_ROOT=/Users/ord006/Soft/ASKAPSoft
 export ASKAP_ROOT
 if [ "${PATH}" !=  "" ]
 then

@@ -1,10 +1,11 @@
-@INCLUDE_PATH = /Users/ord006/Soft/Branches/dev/share/doxygen
+@INCLUDE_PATH = /Users/ord006/Soft/ASKAPSoft/share/doxygen
 @INCLUDE = doxygen.conf
-HTML_STYLESHEET = /Users/ord006/Soft/Branches/dev/share/doxygen/doxygen.css
+HTML_STYLESHEET = /Users/ord006/Soft/ASKAPSoft/share/doxygen/doxygen.css
 OPTIMIZE_OUTPUT_JAVA = NO
 EXTRACT_STATIC = YES
 GENERATE_TAGFILE = daliuge-current.doxytag
 FILE_PATTERNS = *.h *.tcc *.cc *.c
 INPUT                  = package.dox components
 FILE_PATTERNS          = *.h *.cc *.tcc
+TAGFILES = "/Users/ord006/Soft/ASKAPSoft/Code/Base/askap/current/askap-current.doxytag=/Users/ord006/Soft/ASKAPSoft/Code/Base/askap/current/html"
 INPUT += askap_daliuge_pipeline.h

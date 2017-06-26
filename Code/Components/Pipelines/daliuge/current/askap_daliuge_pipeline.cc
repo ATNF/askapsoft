@@ -10,7 +10,7 @@ namespace askap {
 
   /// @return version of the package
   std::string getAskapPackageVersion_daliuge_pipeline() {
-      return std::string("daliuge; ASKAPsoft==trunk; runknown; 2017-06-26");
+      return std::string("daliuge; ASKAPsoft==trunk; r8872M; 2017-06-26");
   }
 
 }

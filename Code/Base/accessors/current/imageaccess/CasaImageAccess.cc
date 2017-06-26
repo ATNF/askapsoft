@@ -161,6 +161,18 @@ void CasaImageAccess::writeMask(const std::string &name, const casa::Array<bool>
     casa::PagedImage<float> img(name);
     img.pixelMask().putSlice(mask, where);
 }
+
+/// @brief write a slice of an image mask
+/// @param[in] name image name
+/// @param[in] arr array with pixels
+
+void CasaImageAccess::writeMask(const std::string &name, const casa::Array<bool> &mask)
+{
+    ASKAPLOG_INFO_STR(logger, "Writing a full mask with the shape " << mask.shape() << " into a CASA image " <<
+                      name);
+    casa::PagedImage<float> img(name);
+    img.pixelMask().put(mask);
+}
 /// @brief set brightness units of the image
 /// @details
 /// @param[in] name image name
