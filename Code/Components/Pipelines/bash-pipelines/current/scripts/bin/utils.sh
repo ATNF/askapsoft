@@ -387,7 +387,7 @@ function setImageProperties()
         compResidual=componentResidual_${imageName}
         compResidualType="cont_fitresidual_T0"
         compResidualLabel="Continuum component residual map"
-        validationDir=${imageName}_continuum_validation
+        validationDir=${imageName}_continuum_validation_selavy_snr5.0_int
     elif [ "${type}" == "spectral" ]; then
         noiseMap=noiseMap.${imageName}
         noiseType="spectral_noise_3d"

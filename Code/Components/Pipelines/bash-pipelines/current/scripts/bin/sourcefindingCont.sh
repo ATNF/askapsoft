@@ -308,6 +308,16 @@ EOFINNER
         exit \$err
     fi
 
+    casaim="\${noiseMap%%.fits}"
+    fitsim="\${noiseMap%%.fits}.fits"
+    echo "Converting to FITS the image \${im}"
+    parset=$parsets/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.in
+    log=$logs/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.log
+    ${fitsConvertText}
+    if [ ! -e "\$fitsim" ]; then
+        echo "ERROR - Could not create \${fitsim##*/}"
+    fi
+
     doValidation=${DO_CONTINUUM_VALIDATION}
     validatePerBeam=${VALIDATE_BEAM_IMAGES}
     if [ "\${doValidation}" == "true" ] && [ "\${BEAM}" != "all" ]; then
@@ -321,7 +331,10 @@ EOFINNER
             cd ..
             module use /group/askap/continuum_validation
             loadModule continuum_validation_env
-            aprun -n 1 -N 1 \${scriptname} \${fitsimage%%.fits}.fits -S ${selavyDir}/selavy-\${fitsimage%%.fits}.components.xml -N ${selavyDir}/${noiseMap}.fits
+            log=${logs}/continuum_validation_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+            aprun -n 1 -N 1 \${scriptname} \${fitsimage%%.fits}.fits -S ${selavyDir}/selavy-\${fitsimage%%.fits}.components.xml -N ${selavyDir}/${noiseMap}.fits > "\${log}"
+            err=\$?
+            extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} validationCont "txt,csv"
             unloadModule continuum_validation_env
             if [ ! -e "\${validationDir}" ]; then
                 echo "ERROR - could not create validation directory \${validationDir}"
