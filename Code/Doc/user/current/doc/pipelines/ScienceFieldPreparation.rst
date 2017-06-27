@@ -67,9 +67,10 @@ is possible, however, to select a single field to process via the
 |                                               |                                 |                                                 | possible format for mssplit.fields). This is because the value iwll be|
 |                                               |                                 |                                                 | matched to field names from the measurement set.                      |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
-| ``MS_BASE_SCIENCE``                           |  scienceObservation_beam%b.ms   | none                                            | Base name for the science observation measurement set after           |
+| ``MS_BASE_SCIENCE``                           |   scienceData_SB%s_beam%b.ms    | none                                            | Base name for the science observation measurement set after           |
 |                                               |                                 |                                                 | splitting. The wildcard %b will be replaced by the                    |
-|                                               |                                 |                                                 | beam number (scienceObservation_beam0.ms etc).                        |
+|                                               |                                 |                                                 | beam number (scienceObservation_beam0.ms etc), and the %s will be     |
+|                                               |                                 |                                                 | replaced by the scheduling block ID.                                  |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 | ``MS_SCIENCE_AVERAGE``                        |  no default (see description)   | dataset (:doc:`../calim/cimager`)               | The name of the averaged measurement set that will be                 |
 |                                               |                                 |                                                 | imaged by the continuum imager. Provide this if you want              |

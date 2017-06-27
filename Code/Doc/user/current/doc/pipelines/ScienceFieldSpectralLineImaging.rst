@@ -123,9 +123,10 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``CPUS_PER_CORE_SPEC_IMAGING``                | 20                              | none                               | The number of cores per node to use (max 20).                     |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``IMAGE_BASE_SPECTRAL``                       | i.cube                          | Helps form Images.name             | The base name for image cubes: if ``IMAGE_BASE_SPECTRAL=i.blah``  |
-|                                               |                                 | (:doc:`../calim/simager`)          | then we'll get image.i.blah, image.i.blah.restored, psf.i.blah etc|
-|                                               |                                 |                                    |                                                                   |
+| ``IMAGE_BASE_SPECTRAL``                       | i.SB%s.cube                     | Helps form Images.name             | The base name for image cubes: if ``IMAGE_BASE_SPECTRAL=i.blah``  |
+|                                               |                                 | (:doc:`../calim/simager`)          | then we'll get image.i.blah, image.i.blah.restored, psf.i.blah    |
+|                                               |                                 |                                    | etc. The %s wildcard will be resolved into the scheduling block   |
+|                                               |                                 |                                    | ID.                                                               |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``DIRECTION_SCI``                             | none                            | Images.direction                   | The direction parameter for the image cubes, i.e. the central     |
 |                                               |                                 | (:doc:`../calim/simager`)          | position. Can be left out, in which case it will be determined    |

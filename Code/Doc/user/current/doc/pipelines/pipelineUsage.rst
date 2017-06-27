@@ -158,7 +158,8 @@ scheduling blocks (SBs) of the two observations, or provide specific
 measurement sets (MSs) for each case.
 
 The measurement sets that will be created should be named in the
-configuration file. A wildcard %b should be used to represent the beam
+configuration file. A wildcard %s can be used to represent the
+scheduling block ID, and %b should be used to represent the beam
 number in the resulting MSs, since the individual beams will be split
 into separate files.
 
@@ -167,7 +168,8 @@ will run fine (provided any pre- requisites such as measurement sets
 or bandpass solutions etc are available). If you have already created
 an averaged science MS, you can re-use that with the
 ``MS_SCIENCE_AVERAGE`` parameter (see :doc:`ScienceFieldPreparation`),
-again with the %b wildcard to represent the beam number.
+again with the %b wildcard to represent the beam number and %s the
+scheduling block ID.
 
 Workflow summary
 ----------------
