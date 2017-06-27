@@ -475,6 +475,10 @@ function findScienceMSnames()
         msSci=$(echo "${MS_BASE_SCIENCE}" | sed -e "$sedstr")
     fi
 
+    # Replace the %s wildcard with the SBID
+    sedstr="s|%s|${SB_SCIENCE}|g"
+    msSci=$(echo "${msSci}" | sed -e "$sedstr")
+    
     if [ "${DO_COPY_SL}" == "true" ]; then
         # If we make a copy of the spectral-line MS, then append '_SL'
         # to the MS name before the suffix for the MS used for
@@ -511,6 +515,10 @@ function findScienceMSnames()
                 echo "Warning! Using ${msSciAv} as averaged MS for beam ${BEAM}"
             fi
         fi
+        # Replace the %s wildcard with the SBID
+        sedstr="s|%s|${SB_SCIENCE}|g"
+        msSciAv=$(echo "${msSciAv}" | sed -e "$sedstr")
+    
     fi
 
     # We now define the name of the calibrated averaged dataset
@@ -544,6 +552,10 @@ function findScienceMSnames()
             # just use filename as provided
             gainscaltab="${GAINS_CAL_TABLE}"
         fi
+        # Replace the %s wildcard with the SBID
+        sedstr="s|%s|${SB_SCIENCE}|g"
+        gainscaltab=$(echo "${gainscaltab}" | sed -e "$sedstr")
+    
     fi
 
 }
@@ -559,7 +571,10 @@ function find1934MSnames()
         msCal=${MS_BASE_1934}
         echo "Warning! Using ${msCal} as 1934-638 MS for beam ${BEAM}"
     fi
-
+    # Replace the %s wildcard with the SBID
+    sedstr="s|%s|${SB_1934}|g"
+    msCal=$(echo "${msCal}" | sed -e "$sedstr")
+    
 }
 
 function getPolList()

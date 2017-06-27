@@ -442,6 +442,20 @@ EOF
     echo " "
 
     ####################
+    # Parameters required for bandpass calibration
+    ####
+    if [ "${DO_FIND_BANDPASS}" == "true" ]; then
+        
+        ####################
+        # Filling out wildcards for calibration table
+        ####
+        # Replace the %s wildcard with the SBID
+        sedstr="s|%s|${SB_1934}|g"
+        TABLE_BANDPASS=$(echo "${TABLE_BANDPASS}" | sed -e "$sedstr")
+        
+    fi
+
+    ####################
     # Parameters required for science field imaging
     ####
 
@@ -450,6 +464,16 @@ EOF
         if [ "${NSUB_CUBES}" != "" ]; then
             echo "WARNING - the parameter NSUB_CUBES is deprectated. Using NUM_SPECTRAL_CUBES=${NUM_SPECTRAL_CUBES} instead."
         fi
+
+        ####################
+        # Filling out wildcards for image names
+        ####
+        # Replace the %s wildcard with the SBID
+        sedstr="s|%s|${SB_SCIENCE}|g"
+    
+        IMAGE_BASE_CONT=$(echo "${IMAGE_BASE_CONT}" | sed -e "$sedstr")
+        IMAGE_BASE_CONTCUBE=$(echo "${IMAGE_BASE_CONTCUBE}" | sed -e "$sedstr")
+        IMAGE_BASE_SPECTRAL=$(echo "${IMAGE_BASE_SPECTRAL}" | sed -e "$sedstr")
 
         ####################
         # Parameters required for continuum imaging

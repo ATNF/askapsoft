@@ -227,7 +227,7 @@ CHAN_RANGE_1934=""
 # Location of 1934-638, formatted for use in cbpcalibrator
 DIRECTION_1934="[19h39m25.036, -63.42.45.63, J2000]"
 # Name of the table for the bandpass calibration parameters
-TABLE_BANDPASS=calparameters_1934_bp.tab
+TABLE_BANDPASS="calparameters_1934_bp_SB%s.tab"
 # Number of cycles used in cbpcalibrator
 NCYCLES_BANDPASS_CAL=50
 # Number of CPUs (cores) used for the cbpcalibrator job
@@ -288,7 +288,7 @@ SCAN_SELECTION_SCIENCE=""
 # science observation. If this isn't needed, leave as a blank string.
 FIELD_SELECTION_SCIENCE=""
 # Base name for the science observation measurement set
-MS_BASE_SCIENCE=scienceObservation_beam%b.ms
+MS_BASE_SCIENCE="scienceData_SB%s_beam%b.ms"
 # Name for the channel-averaged science measurement set (if blank, it
 # will be set using MS_BASE_SCIENCE)
 MS_SCIENCE_AVERAGE=""
@@ -366,7 +366,7 @@ NUM_CPUS_CONTIMG_SCI=""
 
 # base name for images: if IMAGE_BASE_CONT=i.blah then we'll get
 # image.i.blah, image.i.blah.restored, psf.i.blah etc
-IMAGE_BASE_CONT=i.cont
+IMAGE_BASE_CONT="i.SB%s.cont"
 # number of pixels on the side of the images to be created
 NUM_PIXELS_CONT=3200
 # Size of the pixels in arcsec
@@ -513,7 +513,7 @@ CIMAGER_MINUV=0
 CCALIBRATOR_MINUV=0
 
 # name of the final gains calibration table
-GAINS_CAL_TABLE=cont_gains_cal_beam%b.tab
+GAINS_CAL_TABLE="cont_gains_cal_SB%s_beam%b.tab"
 KEEP_RAW_AV_MS=true
 
 # Shift position offsets - precomputed, and added to position in final
@@ -530,7 +530,7 @@ DEC_POSITION_OFFSET=0
 # get image.i.blah, image.i.blah.restored, psf.i.blah etc
 # Polarisations will replace the .i. in the image name using the list
 # in CONTCUBE_POLARISATIONS
-IMAGE_BASE_CONTCUBE=i.contcube
+IMAGE_BASE_CONTCUBE="i.SB%s.contcube"
 
 # List of polarisations to make continuum cubes for. The lower-case
 # version of these will go in the image name.
@@ -617,7 +617,7 @@ NCHAN_PER_CORE_SPECTRAL_LINMOS=8
 
 # base name for image cubes: if IMAGE_BASE_SPECTRAL=i.blah then we'll
 # get image.i.blah, image.i.blah.restored, psf.i.blah etc
-IMAGE_BASE_SPECTRAL=i.cube
+IMAGE_BASE_SPECTRAL="i.SB%s.cube"
 
 # Direction of the science field makes use of DIRECTION_SCI, as above
 
