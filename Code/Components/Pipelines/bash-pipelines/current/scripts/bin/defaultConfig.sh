@@ -221,7 +221,7 @@ IMAGETYPE_SPECTRAL=casa
 ##  BANDPASS CAL
 
 # Base name for the 1934 measurement sets after splitting
-MS_BASE_1934="1934_beam%b.ms"
+MS_BASE_1934="1934_SB%s_beam%b.ms"
 # Channel range for splitting - defaults to full set of channels in MS
 CHAN_RANGE_1934=""
 # Location of 1934-638, formatted for use in cbpcalibrator
