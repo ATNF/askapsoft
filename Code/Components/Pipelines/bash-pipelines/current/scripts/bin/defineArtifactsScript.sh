@@ -484,6 +484,8 @@ if [ "\${PREPARE_FOR_CASDA}" == "true" ]; then
     tarlist="\${tarlist} \${metadata##*/}"
     tar zcvf slurmFiles.tgz \${slurms##*/}
     tarlist="\${tarlist} slurmFiles.tgz"
+    tar zcvf slurmOutputs.tgz \${slurmOut##*/}
+    tarlist="\${tarlist} slurmOutputs.tgz"
     tar zcvf logs.tgz \${logs##*/}
     tarlist="\${tarlist} logs.tgz"
     tarfile=calibration-metadata-processing-logs.tar
