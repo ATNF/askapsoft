@@ -253,8 +253,13 @@ fi"
 # Header updates
 NCORES=1
 NPPN=1
-aprun -n \${NCORES} -N \${NPPN} \"${PIPELINEDIR}/updateFITSheaders.py\" --fitsfile=\${fitsim} --project=${PROJECT_ID} --sbid=${SB_SCIENCE} --dateobs=${DATE_OBS} --duration=$DURATION \"Produced with ASKAPsoft version \${ASKAPSOFT_RELEASE}\", \"Produced using ASKAP pipeline version ${PIPELINE_VERSION}\", \"Processed with ASKAP pipelines on ${NOW_FMT}\"
-
+updateArgs=\"--fitsfile=\${fitsim}\"
+updateArgs=\"\${updateArgs} --project=${PROJECT_ID}\"
+updateArgs=\"\${updateArgs} --sbid=${SB_SCIENCE}\"
+updateArgs=\"\${updateArgs} --dateobs=${DATE_OBS}\"
+updateArgs=\"\${updateArgs} --duration=${DURATION}\"
+aprun -n \${NCORES} -N \${NPPN} \"${PIPELINEDIR}/updateFITSheaders.py\" \${updateArgs} \"Produced with ASKAPsoft version \${ASKAPSOFT_RELEASE}\", \"Produced using ASKAP pipeline version ${PIPELINE_VERSION}\", \"Processed with ASKAP pipelines on ${NOW_FMT}\""
+    
 
     ####################
     # Slurm file headers
