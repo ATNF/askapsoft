@@ -388,6 +388,7 @@ function setImageProperties()
         compResidualType="cont_fitresidual_T0"
         compResidualLabel="Continuum component residual map"
         validationDir=${imageName}_continuum_validation_selavy_snr5.0_int
+        validationFile=${PROJECT_ID}_CASDA_continuum_validation.xml
     elif [ "${type}" == "spectral" ]; then
         noiseMap=noiseMap.${imageName}
         noiseType="spectral_noise_3d"

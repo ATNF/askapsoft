@@ -502,17 +502,19 @@ if [ "\${DO_CONTINUUM_VALIDATION}" == "true" ]; then
     imageCode=restored
 
     validationDirs=()
-
+    validationFiles=()
     if [ \${NUM_FIELDS} -eq 1 ]; then
         for FIELD in ${FIELD_LIST}; do
             setImageProperties cont
             validationDirs+=("\${FIELD}/\${validationDir}")
+            validationFiles+=("\${FIELD}/\${validationDir}/\${validationFile}")
         done
     else
         FIELD="."
         TILE="ALL"
         setImageProperties cont
         validationDirs+=("./\${validationDir}")
+        validationFiles+=("./\${validationDir}/\${validationFile}")
     fi
     
     for dir in \${validationDirs[@]}; do
@@ -526,6 +528,12 @@ if [ "\${DO_CONTINUUM_VALIDATION}" == "true" ]; then
         echo "Now in \$(pwd)"
         evalNames+=(\${dir}.tar)
         evalFormats+=(tar)
+    done
+
+    for valfile = \${validationFiles[@]}; do
+        echo "Have validation file \$valfile"
+        evalNames+=(\${valfile})
+        evalFormats+=(validation-metrics)
     done
 
 fi
