@@ -308,14 +308,14 @@ EOFINNER
         exit \$err
     fi
 
-    casaim="\${noiseMap%%.fits}"
-    fitsim="\${noiseMap%%.fits}.fits"
-    echo "Converting to FITS the image \${noiseMap}"
+    casaim="${noiseMap%%.fits}"
+    fitsim="${noiseMap%%.fits}.fits"
+    echo "Converting to FITS the image ${noiseMap}"
     parset=$parsets/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.in
     log=$logs/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.log
     ${fitsConvertText}
     if [ ! -e "\$fitsim" ]; then
-        echo "ERROR - Could not create \${fitsim##*/}"
+        echo "ERROR - Could not create \${fitsim}"
     fi
 
     doValidation=${DO_CONTINUUM_VALIDATION}
