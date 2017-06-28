@@ -332,6 +332,10 @@ EOFINNER
             module use /group/askap/continuum_validation
             loadModule continuum_validation_env
             log=${logs}/continuum_validation_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+            validateArgs="\${fitsimage%%.fits}.fits"
+            validateArgs="\${validateArgs} -S ${selavyDir}/selavy-\${fitsimage%%.fits}.components.xml"
+            validateArgs="\${validateArgs} -N ${selavyDir}/${noiseMap}.fits "
+            validateArgs="\${validateArgs} -C NVSS_config.txt,SUMSS_config.txt"          
             aprun -n 1 -N 1 \${scriptname} \${fitsimage%%.fits}.fits -S ${selavyDir}/selavy-\${fitsimage%%.fits}.components.xml -N ${selavyDir}/${noiseMap}.fits > "\${log}"
             err=\$?
             extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} validationCont "txt,csv"
