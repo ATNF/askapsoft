@@ -495,8 +495,7 @@ if [ "\${PREPARE_FOR_CASDA}" == "true" ]; then
 fi
 
 if [ "\${DO_CONTINUUM_VALIDATION}" == "true" ]; then
-    # Tar up the validation directory and add the xml file (although
-    #  not yet - not implemented in the script)
+    # Tar up the validation directory and add the xml file
     
     # Only include TILE validation, but this may not exist (ie. if
     #   there is only a single FIELD), so need to test
@@ -532,7 +531,7 @@ if [ "\${DO_CONTINUUM_VALIDATION}" == "true" ]; then
         evalFormats+=(tar)
     done
 
-    for valfile = \${validationFiles[@]}; do
+    for valfile in \${validationFiles[@]}; do
         echo "Have validation file \$valfile"
         evalNames+=(\${valfile})
         evalFormats+=(validation-metrics)
