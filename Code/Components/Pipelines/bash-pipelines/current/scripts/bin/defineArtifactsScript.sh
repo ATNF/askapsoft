@@ -119,8 +119,9 @@ casdaOtherDimImageFDF=()
 casdaOtherDimImageRMSF=()
 casdaOtherDimImagePol=()
 
-# Variables defined from configuration file
+# Variables defined from configuration file or metadata
 NOW="${NOW}"
+PROJECT_ID="${PROJECT_ID}"
 NUM_TAYLOR_TERMS="${NUM_TAYLOR_TERMS}"
 maxterm=\$(echo "\${NUM_TAYLOR_TERMS}" | awk '{print 2*\$1-1}')
 list_of_images="${IMAGE_LIST}"

@@ -226,6 +226,7 @@ function setSelavyDirs()
 #    extension is added to the filenames.
 #  * ALT_IMAGER_SINGLE_FILE or ALT_IMAGER_SINGLE_FILE_CONTCUBE (for
 #         spectral-line or continuum cube respectively, for ALT_IMAGER=true)
+#  * PROJECT_ID - for the name of the continuum validation file
 # Available upon return:
 #  * imageBase
 #  * imageName (the filename for the image)
