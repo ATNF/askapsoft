@@ -18,6 +18,8 @@ if [ "$(whoami)" != "askapops" ]; then
     exit 1
 fi
 
+CWD=$(pwd)
+
 releaseDir=/group/askap/acesops
 moduleDir=/group/askap/modulefiles/acesops
 URL="https://svn.atnf.csiro.au/askap/ACES"
@@ -39,15 +41,17 @@ if [ $revision -eq 0 ]; then
 fi
 newRepo=ACES-r${revision}
 
-mkdir -p releaseDir
-mkdir -p moduleDir
+mkdir -p $releaseDir
+chgrp askap $releaseDir
+mkdir -p $moduleDir
+chgrp askap $moduleDir
 
 cd $releaseDir
 svn co -r $revision $URL $newRepo
 
 chgrp -R askap $newRepo
-find $newRepo -type f | xargs chmod oug+r
-find $newRepo -type d | xargs chmod oug+rx
+find $newRepo -type f -exec chmod oug+r {} \;
+find $newRepo -type d -exec chmod oug+rx {} \;
 
 cd $moduleDir
 cat > r${revision} <<EOF
@@ -58,23 +62,23 @@ cat > r${revision} <<EOF
 proc ModulesHelp { } {
         global version
 
-        puts stderr "\tThis modules provides a fixed version of the ACES subversion repository"
+        puts stderr "\tThis module provides a fixed version of the ACES subversion repository"
 
 }
 
 # No two versions of this module can be loaded simultaneously
 conflict        acesops
 
+# Load the aces module so we get the python libraries
+module load aces
 
-prereq aces
-if { [ module-info mode load ] } {
-    module load aces
-}
-
-module-whatis   "ASKAPsoft pipeline processing"
+module-whatis   "ACES support software"
 
 set REVISION  $revision
-set ACESHOME  /group/askap/acesops/ACES-r\$REVISION
+set ACESHOME  ${releaseDir}/${newRepo}
+
+prepend-path    PATH        \$ACESHOME/tools
+prepend-path    PYTHONPATH  \$ACESHOME/pythonlib
 
 setenv ACES \$ACESHOME
 setenv ACES_VERSION r\$REVISION
@@ -84,3 +88,4 @@ EOF
 chmod oug+r r${revision}
 chgrp askap r${revision}
 
+cd $CWD
