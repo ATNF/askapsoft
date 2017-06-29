@@ -49,13 +49,13 @@ for subband in ${SUBBAND_WRITER_LIST}; do
     fi
 
     # Make sure we can see the robust_contsub script
-    script_location="$ACES/tools"
+    script_location="${ACES_LOCATION}/tools"
     script_name=robust_contsub
     if [ ! -e "${script_location}/${script_name}.py" ]; then
         echo "WARNING - ${script_name}.py not found in $script_location - not running image-based continuum subtraction."
         DO_IT=false
     fi
-
+    
     if [ "${DO_IT}" == "true" ]; then
 
         setJob "spectral_imcontsub${subband}" "imcontsub${subband}"
@@ -74,7 +74,6 @@ ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-imcontsubSL-%j.out
 
 ${askapsoftModuleCommands}
-loadModule aces
 
 BASEDIR=${BASEDIR}
 cd $OUTPUT

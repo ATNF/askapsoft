@@ -262,9 +262,9 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$NEED_BEAM_CENTRES" == "true" ]; then
                 
                     # Next, need to check that the footprint provided is
                     # valid (ie. recognised by footprint.py)
-                    loadModule aces
+                    loadACES
                     invalidTest=$(footprint.py -n "${BEAM_FOOTPRINT_NAME}" 2>&1 | grep invalid)
-                    unloadModule aces
+                    unloadACES
                     if [ "${FP_NAME}" == "" ] || [ "${invalidTest}" != "" ]; then
                         # We don't have a valid footprint name!
                         echo "ERROR - Your requested footprint ${BEAM_FOOTPRINT_NAME} is not valid."
@@ -280,10 +280,10 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$NEED_BEAM_CENTRES" == "true" ]; then
                     else
                         # Use the function defined in utils.sh to set the arguments to footprint.py
                         setFootprintArgs
-                        loadModule aces
+                        loadACES
                         footprint.py $footprintArgs -r "$ra,$dec" > "${footprintOut}"
                         err=$?
-                        unloadModule aces
+                        unloadACES
                         if [ $err -ne 0 ]; then
                             echo "ERROR - the 'footprint.py' command failed. "
                             echo "        Full command:   footprint.py $footprintArgs -r \"$ra,$dec\""

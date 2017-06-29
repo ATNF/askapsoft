@@ -45,32 +45,44 @@ function reportVersion()
 ##############################
 # MODULE HANDLING
 
+# Array used to track which modules have been loaded within the pipelines
+moduleTracking=()
+
 # loadModule loads a particular module, but only if a version of it is
 # not loaded already. It determines this by checking "module list".
-# If it is, a parameter __MODULE_HAS_BEEN_LOADED__ is set to true, and it
-# can later be removed by unloadModule
-# Takes one argument, the module name: loadModule askapcli
+# If it is, the module name is added to the moduleTracking array, so
+# that unloadModule() can remove it.
+# Takes one argument, the module name. e.g.: loadModule askapcli
 function loadModule()
 {
     mod=$1
     version="$(module list -t 2>&1 | grep $mod)"
     if [ "$version" == "" ]; then
-        module load $mod
-        __MODULE_HAS_BEEN_LOADED__=true
+        moduleTracking+=($mod)
     fi
 }
 
 # unloadModule unloads a particular module, only if it was previously
-# loaded by loadModule(). Once unloaded, the parameter
-# __MODULE_HAS_BEEN_LOADED__ is set to false.
-# Takes one argument, the module name::  unloadModule askapcli
+# loaded by loadModule(). Once unloaded, the module name is removed
+# from the moduleTracking array.
+# Takes one argument, the module name. e.g.:  unloadModule askapcli
 function unloadModule()
 {
     mod=$1
-    version="$(module list -t 2>&1 | grep $mod)"
-    if [ "$version" == "" ] && [ "${__MODULE_HAS_BEEN_LOADED__}" == "true" ]; then
-        module unload $mod
-        __MODULE_HAS_BEEN_LOADED__=false
+    hasLoaded=false
+    for m in ${moduleTracking[@]}; do
+        if [ "$m" == "$mod" ]; then
+            hasLoaded=true
+        fi
+    done
+    if [ "${hasLoaded}" == "true" ]; then
+        newTracking=()
+        for m in ${moduleTracking[@]}; do
+            if [ "$m" != "$mod" ]; then
+                newTracking+=($m)
+            fi
+        done
+        moduleTracking=($newTracking)
     fi
 }
 

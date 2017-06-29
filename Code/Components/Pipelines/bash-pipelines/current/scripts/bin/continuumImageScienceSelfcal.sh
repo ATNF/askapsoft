@@ -67,7 +67,7 @@ if [ "${DO_IT}" == "true" ] && [ "${DO_SELFCAL}" == "true" ]; then
         CPUS_PER_CORE_SELFCAL_SELAVY=${NPROCS_SELAVY}
     fi
 
-    script_location="${ACES}/tools"
+    script_location="${ACES_LOCATION}/tools"
     script_args="${RA_POSITION_OFFSET} ${DEC_POSITION_OFFSET}"
     script="${script_location}/fix_position_offsets.py"
     if [ ! -e "${script}" ]; then

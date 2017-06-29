@@ -149,7 +149,15 @@ else
     exportDirective="#SBATCH --export=NONE"
 fi
 
+# User can select a particular version of the askapsoft module
 ASKAPSOFT_VERSION=""
+
+# User can use the acesops module (true), or their own nominated ACES
+# directory (false)
+USE_ACES_OPS=true
+
+# Version of the acesops module to use. Leave blank for the default
+ACESOPS_VERSION=""
 
 ####################
 # Control flags

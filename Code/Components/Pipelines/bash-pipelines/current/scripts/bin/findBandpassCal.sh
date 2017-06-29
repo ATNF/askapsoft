@@ -74,7 +74,7 @@ Cbpcalibrator.MinUV = ${BANDPASS_MINUV}"
         DO_RUN_PLOT_CALTABLE=true
     fi
     if [ "${DO_RUN_PLOT_CALTABLE}" == "true" ]; then
-        script_location="$ACES/tools"
+        script_location="${ACES_LOCATION}/tools"
         script_name="plot_caltable"
         if [ ! -e "${script_location}/${script_name}.py" ]; then
             echo "WARNING - ${script_name}.py not found in $script_location - not running bandpass smoothing/plotting."

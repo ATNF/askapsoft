@@ -163,6 +163,72 @@ module load askappipeline/${askappipelineVersion}"
         echo "ASKAPsoft modules will *not* be loaded in the slurm files."
     fi
 
+    ####################
+    # ACES usage - either ACESOPS or personal/local ACES directory
+    #  Here we define two functions: loadACES and unloadACES
+
+    #  These are used to set up the ACES environment prior to running
+    #  tools out of the ACES subversion repository. Rather than use
+    #  $ACES as the location, we make use of $ACES_LOCATION, which we
+    #  determine once. Similarly for the revision number
+    #  $ACES_VERSION_USED.
+    #  If USE_ACES_OPS=true then we use the acesops module, else we
+    #  point to the ACES directory defined in the user's environment,
+    #  setting the ACES_VERSION_USED variable to be the revision at the
+    #  top-level directory.
+    #  We also define loadACES() and unloadACES(), that set up the
+    #  correct environment depending on the situation.
+    
+    if [ "${USE_ACES_OPS}" != "true" ] && [ "${ACES}" == "" ]; then
+        echo "WARNING - USE_ACES_OPS is not set to 'true', but ACES is not defined. Using the acesops module."
+        USE_ACES_OPS=true
+    fi
+    if [ "${USE_ACES_OPS}" != "true" ] && [ ! -d "${ACES}" ]; then
+        echo "WARNING - USE_ACES_OPS is not set to 'true', but ACES=$ACES can not be found. Using the acesops module."
+        USE_ACES_OPS=true
+    fi
+    
+    if [ "${USE_ACES_OPS}" == "true" ]; then
+        function loadACES()
+        {
+            if [ "${ACESOPS_VERSION}" == "" ]; then
+                module=acesops
+            else
+                module="acesops/${ACESOPS_VERSION}"
+            fi
+            loadModule ${module}
+        }
+        function unloadACES()
+        {
+            if [ "${ACESOPS_VERSION}" == "" ]; then
+                module=acesops
+            else
+                module="acesops/${ACESOPS_VERSION}"
+            fi
+            unloadModule ${module}
+        }
+
+        # in case $ACES is already defined, we capture it here before overwriting it
+        ACES_ORIGINAL=${ACES}
+        loadACES
+        ACES_LOCATION=${ACES}
+        ACES_VERSION_USED=${ACES_VERSION}
+        unloadACES
+        ACES=${ACES_ORIGINAL}
+                
+    else
+        ACES_LOCATION=${ACES}
+        ACES_VERSION_USED=$(cd $ACES; svn info | grep Revision | awk '{print $2}')
+        function loadACES()
+        {
+            loadModule aces
+        }
+        function unloadACES()
+        {
+            unloadModule aces
+        }
+    fi
+    
     #############################
     # CONVERSION TO FITS FORMAT
 
@@ -206,6 +272,7 @@ ia.open(casaimage)
 #imhistory=[]
 #imhistory.append('Produced with ASKAPsoft version \${ASKAPSOFT_VERSION_USED}')
 #imhistory.append('Produced using ASKAP pipeline version ${PIPELINE_VERSION}')
+#imhistory.append('Produced using ACES software revision ${ACES_VERSION_USED}')
 #imhistory.append('Processed with ASKAP pipelines on ${NOW_FMT}')
 #ia.sethistory(origin='ASKAPsoft pipeline',history=imhistory)
 ia.tofits(outfile=fitsimage, velocity=False)
@@ -240,7 +307,7 @@ ImageToFITS.stokesLast = true
 #ImageToFITS.headers.sbid = ${SB_SCIENCE}
 #ImageToFITS.headers.date-obs = ${DATE_OBS}
 #ImageToFITS.headers.duration = ${DURATION}
-#ImageToFITS.history = [\"Produced with ASKAPsoft version \${ASKAPSOFT_VERSION_USED}\", \"Produced using ASKAP pipeline version ${PIPELINE_VERSION}\", \"Processed with ASKAP pipelines on ${NOW_FMT}\"]
+#ImageToFITS.history = [\"Produced with ASKAPsoft version \${ASKAPSOFT_VERSION_USED}\", \"Produced using ASKAP pipeline version ${PIPELINE_VERSION}\", \"Produced using ACES software revision ${ACES_VERSION_USED}\", \"Processed with ASKAP pipelines on ${NOW_FMT}\"]
 EOFINNER
     NCORES=1
     NPPN=1
@@ -258,9 +325,8 @@ updateArgs=\"\${updateArgs} --project=${PROJECT_ID}\"
 updateArgs=\"\${updateArgs} --sbid=${SB_SCIENCE}\"
 updateArgs=\"\${updateArgs} --dateobs=${DATE_OBS}\"
 updateArgs=\"\${updateArgs} --duration=${DURATION}\"
-aprun -n \${NCORES} -N \${NPPN} \"${PIPELINEDIR}/updateFITSheaders.py\" \${updateArgs} \"Produced with ASKAPsoft version \${ASKAPSOFT_RELEASE}\", \"Produced using ASKAP pipeline version ${PIPELINE_VERSION}\", \"Processed with ASKAP pipelines on ${NOW_FMT}\"
+aprun -n \${NCORES} -N \${NPPN} \"${PIPELINEDIR}/updateFITSheaders.py\" \${updateArgs} \"Produced with ASKAPsoft version \${ASKAPSOFT_RELEASE}\", \"Produced using ASKAP pipeline version ${PIPELINE_VERSION}\", \"Produced using ACES software revision ${ACES_VERSION_USED}\", \"Processed with ASKAP pipelines on ${NOW_FMT}\"
 "
-    
 
     ####################
     # Slurm file headers
