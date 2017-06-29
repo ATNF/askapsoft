@@ -58,6 +58,7 @@ function loadModule()
     mod=$1
     version="$(module list -t 2>&1 | grep $mod)"
     if [ "$version" == "" ]; then
+        module load ${mod}
         moduleTracking+=($mod)
     fi
 }
@@ -76,6 +77,7 @@ function unloadModule()
         fi
     done
     if [ "${hasLoaded}" == "true" ]; then
+        module unload ${mod}
         newTracking=()
         for m in ${moduleTracking[@]}; do
             if [ "$m" != "$mod" ]; then
