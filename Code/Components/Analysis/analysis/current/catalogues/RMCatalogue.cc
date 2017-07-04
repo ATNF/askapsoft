@@ -231,7 +231,6 @@ void RMCatalogue::write()
 {
     this->check();
     this->writeVOT();
-    this->check();
     this->writeASCII();
 }
 

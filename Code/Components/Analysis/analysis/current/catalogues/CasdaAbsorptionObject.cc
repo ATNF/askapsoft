@@ -322,12 +322,10 @@ void CasdaAbsorptionObject::checkCol(duchamp::Catalogues::Column &column)
 
 }
 
-void CasdaAbsorptionObject::checkSpec(duchamp::Catalogues::CatalogueSpecification &spec, bool allColumns)
+void CasdaAbsorptionObject::checkSpec(duchamp::Catalogues::CatalogueSpecification &spec)
 {
     for (size_t i = 0; i < spec.size(); i++) {
-        if ((spec.column(i).getDatatype() == "char") || allColumns) {
-            this->checkCol(spec.column(i));
-        }
+        this->checkCol(spec.column(i));
     }
 }
 

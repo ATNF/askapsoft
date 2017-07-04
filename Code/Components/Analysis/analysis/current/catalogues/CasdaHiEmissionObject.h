@@ -95,10 +95,9 @@ class CasdaHiEmissionObject : public CatalogueEntry {
         /// could change.
         void checkCol(duchamp::Catalogues::Column &column);
 
-        /// Perform the column check for all colums in
-        /// specification. If allColumns is false, only the columns
-        /// with type=char are checked, otherwise all are.
-        void checkSpec(duchamp::Catalogues::CatalogueSpecification &spec, bool allColumns = true);
+        /// Perform the column check for all columns in
+        /// specification. 
+        void checkSpec(duchamp::Catalogues::CatalogueSpecification &spec);
 
         /// @brief Functions allowing CasdaHiEmissionObject objects to be passed
         /// over LOFAR Blobs

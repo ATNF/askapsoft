@@ -117,9 +117,8 @@ class CasdaComponent : public CatalogueEntry {
         void checkCol(duchamp::Catalogues::Column &column);
 
         /// Perform the column check for all colums in
-        /// specification. If allColumns is false, only the columns
-        /// with type=char are checked, otherwise all are.
-        void checkSpec(duchamp::Catalogues::CatalogueSpecification &spec, bool allColumns = true);
+        /// specification. 
+        void checkSpec(duchamp::Catalogues::CatalogueSpecification &spec);
 
         /// Write the ellipse showing the component shape to the given
         /// Annotation file. This allows writing to Karma, DS9 or CASA

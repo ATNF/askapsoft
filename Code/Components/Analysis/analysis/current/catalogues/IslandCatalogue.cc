@@ -160,20 +160,19 @@ void IslandCatalogue::defineSpec()
 
 }
 
-void IslandCatalogue::check(bool allColumns)
+void IslandCatalogue::check()
 {
     std::vector<CasdaIsland>::iterator isle;
     for (isle = itsIslands.begin(); isle != itsIslands.end(); isle++) {
-        isle->checkSpec(itsSpec, allColumns);
+        isle->checkSpec(itsSpec);
     }
 
 }
 
 void IslandCatalogue::write()
 {
-    this->check(false);
+    this->check();
     this->writeVOT();
-    this->check(true);
     this->writeASCII();
 }
 
