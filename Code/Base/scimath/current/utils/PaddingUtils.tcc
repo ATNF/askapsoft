@@ -51,12 +51,15 @@ casa::Array<T> PaddingUtils::centeredSubArray(casa::Array<T> &source,
   ASKAPDEBUGASSERT(shape.nelements() == srcShape.nelements());
   casa::IPosition blc(shape), trc(shape);
   for (size_t i=0;i<blc.nelements();++i) {
-       blc[i] = (srcShape[i]-shape[i])/2;
+       blc[i] = srcShape[i]/2 - shape[i]/2;
        ASKAPCHECK(blc[i]>=0, "A bigger array is requested from centeredSubArray, dimension "<<i<<
                  " inputSize="<<srcShape[i]<<" outputSize="<<shape[i]);
        ASKAPDEBUGASSERT(srcShape[i]>0);
        ASKAPDEBUGASSERT(shape[i]>0);          
-       trc[i] = (srcShape[i]+shape[i])/2-1; 
+       trc[i] = srcShape[i]/2 + shape[i]/2;
+       if (shape[i]%2==0) {
+           trc[i] -= 1;
+       }
        ASKAPDEBUGASSERT(trc[i]<srcShape[i]);
        
        ASKAPDEBUGASSERT(trc[i]-blc[i]+1 == shape[i]);
