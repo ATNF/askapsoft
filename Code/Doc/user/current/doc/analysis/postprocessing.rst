@@ -651,14 +651,19 @@ spectral index map).
 Selavy defaults to assuming the images have been produced in the
 ASKAPsoft pipeline, and are thus named in a specific way. It is
 possible, however, to specify alternative names for the spectral index
-& curvature images (ie. taylor 1 & 2 maps), although the data they
+& curvature images (ie. Taylor 1 & 2 maps), although the data they
 hold must be formed in the same way (ie. conform to the above
 relationships). The image names are specified via the
 **spectralTermImages** input parameter. If this is not given, the
 names are derived, if possible, from the image name, assuming a
 standard format: if the total intensity image is named
 XXX.taylor.0.YYY, then the spectral index map will be XXX.taylor.1.YYY
-and the spectral curvature map will be XXX.taylor.2.YYY
+and the spectral curvature map will be XXX.taylor.2.YYY.
+
+If the additional Taylor maps are not available, or the
+**findSpectralTerms** parameters are set to **false**, then the values
+for spectral-index and spectral-curvature will be set to the special
+value of -99.
 
 
 Parameters for spectral term measurement

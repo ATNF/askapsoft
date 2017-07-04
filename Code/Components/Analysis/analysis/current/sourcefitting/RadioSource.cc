@@ -1146,23 +1146,7 @@ void RadioSource::findSpectralTerm(std::string imageName, int term, bool doCalc)
                ") must be either 1 (for spectral index) or 2 (for spectral curvature)");
 
 
-    if (!doCalc) {
-        // initialise arrays to zero and do nothing else
-
-        std::vector<std::string>::iterator type;
-        std::vector<std::string> typelist = availableFitTypes;
-        typelist.push_back("best");
-
-        for (type = typelist.begin(); type < typelist.end(); type++) {
-            int nfits = itsBestFitMap[*type].numFits();
-            if (term == 1) {
-                itsAlphaMap[*type] = std::vector<float>(nfits, 0.);
-            } else if (term == 2) {
-                itsBetaMap[*type] = std::vector<float>(nfits, 0.);
-            }
-        }
-
-    } else {
+    if (doCalc) {
 
         ASKAPLOG_DEBUG_STR(logger,
                            "About to find the " << termtype[term] <<
