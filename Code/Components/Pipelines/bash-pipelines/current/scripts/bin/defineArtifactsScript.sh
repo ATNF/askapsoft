@@ -122,6 +122,8 @@ casdaOtherDimImagePol=()
 # Variables defined from configuration file or metadata
 NOW="${NOW}"
 PROJECT_ID="${PROJECT_ID}"
+SB_SCIENCE="${SB_SCIENCE}"
+archivedConfig="${archivedConfig}"
 NUM_TAYLOR_TERMS="${NUM_TAYLOR_TERMS}"
 maxterm=\$(echo "\${NUM_TAYLOR_TERMS}" | awk '{print 2*\$1-1}')
 list_of_images="${IMAGE_LIST}"
@@ -162,7 +164,10 @@ if [ "\${doBeams}" == "true" ]; then
     LOCAL_BEAM_LIST="\$LOCAL_BEAM_LIST \${beams}"
 fi
 
-LOCAL_FIELD_LIST=". ${FIELD_LIST}"
+LOCAL_FIELD_LIST=". "
+if [ "\${doFieldMosaics}" == "true" ]; then
+    LOCAL_FIELD_LIST="\$LOCAL_FIELD_LIST ${FIELD_LIST}"
+fi
 
 for FIELD in \${LOCAL_FIELD_LIST}; do
 
@@ -369,14 +374,12 @@ done
 ##############################
 # Next, search for catalogues
 
-# Only continuum catalogues so far - both islands and components
-
 catNames=()
 catTypes=()
 
 BEAM=all
 imageCode=restored
-for FIELD in \${FIELD_LIST}; do
+for FIELD in \${LOCAL_FIELD_LIST}; do
 
     if [ "\${FIELD}" == "." ]; then
         theBeamList="all"
@@ -537,6 +540,10 @@ if [ "\${DO_CONTINUUM_VALIDATION}" == "true" ]; then
         evalNames+=(\${valfile})
         evalFormats+=(validation-metrics)
     done
+
+    # Add the archived config file, getting the relative path correct.
+    evalNames+=(\${slurmOut##*/}/\${archivedConfig##*/})
+    evalFormats+=(txt)
 
 fi
 

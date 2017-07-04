@@ -101,6 +101,15 @@ function archiveConfig()
     archivedConfig=$slurmOut/${filename}__${NOW}.${extension}
     cp "$1" "$archivedConfig"
 
+    cat >> "$archivedConfig" <<EOF
+
+# Processed with ASKAP pipelines on ${NOW_FMT}
+# Produced with ASKAPsoft version ${ASKAPSOFT_RELEASE}
+# Produced using ASKAP pipeline version ${PIPELINE_VERSION}
+# Produced using ACES software revision ${ACES_VERSION_USED}
+
+EOF
+
 }
 
 ##############################
@@ -475,19 +484,33 @@ function setImageBase()
 # A function to work out the measurement set names for the
 # full-resolution, spectral-line and channel-averaged cases, given the
 # current BEAM.
+# Does wildcard replacement of %b (->BEAM) and %s (->SB_SCIENCE)
+# Requires the following:
+#   * MS_BASE_SCIENCE
+#   * BEAM
+#   * SB_SCIENCE
+#   * DO_COPY_SL
+#   * MS_SCIENCE_AVERAGE  (can be blank)
+#   * nbeam
+#   * KEEP_RAW_AV_MS
+#   * GAINS_CAL_TABLE
+#   * DO_SELFCAL
+#   * DO_APPLY_CAL_SL
+#   * 
 function findScienceMSnames()
 {
 
     # 1. Get the value for $msSci (the un-averaged MS)
     if [ "$(echo "${MS_BASE_SCIENCE}" | grep %b)" != "" ]; then
         # If we are here, then $MS_BASE_SCIENCE has a %b that needs to be
-        # replaced by the current $BEAM value
-        sedstr="s|%b|${BEAM}|g"
+        # replaced by the current $BEAM value.
+        # Also include the $FIELD value to uniquely identify it
+        sedstr="s|%b|${FIELD}\.${BEAM}|g"
         msSci=$(echo "${MS_BASE_SCIENCE}" | sed -e "$sedstr")
     else
         # If we are here, then there is no %b, and we just append
-        # _${BEAM} to the MS name
-        sedstr="s/\.ms/_${BEAM}\.ms/g"
+        # _${FIELD}.${BEAM} to the MS name
+        sedstr="s/\.ms/_${FIELD}\.${BEAM}\.ms/g"
         msSci=$(echo "${MS_BASE_SCIENCE}" | sed -e "$sedstr")
     fi
 
@@ -521,7 +544,7 @@ function findScienceMSnames()
         if [ "$(echo "${MS_SCIENCE_AVERAGE}" | grep %b)" != "" ]; then
             # If we are here, then $MS_SCIENCE_AVERAGE has a %b that
             # needs to be replaced by the current $BEAM value
-            sedstr="s|%b|${BEAM}|g"
+            sedstr="s|%b|${FIELD}\.${BEAM}|g"
             msSciAv=$(echo "${MS_SCIENCE_AVERAGE}" | sed -e "$sedstr")
         else
             msSciAv=${MS_SCIENCE_AVERAGE}
@@ -562,7 +585,7 @@ function findScienceMSnames()
         # Otherwise, need to replace any %b with the current BEAM, if there is one present
         if [ "$(echo "${GAINS_CAL_TABLE}" | grep %b)" != "" ]; then
             # We have a %b that needs replacing
-            sedstr="s|%b|${BEAM}|g"
+            sedstr="s|%b|${FIELD}\.${BEAM}|g"
             gainscaltab="$(echo "${GAINS_CAL_TABLE}" | sed -e "$sedstr")"
         else
             # just use filename as provided

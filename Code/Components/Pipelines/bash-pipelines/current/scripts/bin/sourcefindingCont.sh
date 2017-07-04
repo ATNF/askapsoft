@@ -343,6 +343,17 @@ EOFINNER
             if [ ! -e "\${validationDir}" ]; then
                 echo "ERROR - could not create validation directory \${validationDir}"
             fi
+            # Place a copy in a standard place on /group
+            copyLocation="${VALIDATION_ARCHIVE_DIR}"
+            purgeCSV="${REMOVE_VALIDATION_CSV}"
+            if [ "\${copyLocation}" != "" ] && [ -e "\${copyLocation}" ]; then
+                sedstr="s/\.xml/__\$(whoami)_${NOW}/g"
+                validationDirCopy=\$(echo \${validationDir} | sed -e \${sedstr})
+                cp -r \${validationDir} \${copyLocation}/\${validationDirCopy}
+                if [ "\${purgeCSV}" == "true" ]; then
+                    rm -f \${copyLocation}/\${validationDirCopy}/*.csv
+                fi
+            fi
         fi
     fi
 

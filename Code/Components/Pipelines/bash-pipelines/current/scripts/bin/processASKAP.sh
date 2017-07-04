@@ -74,45 +74,45 @@ else
             if [ -e "${userConfig}" ]; then
 	        echo "Getting extra config from file $userConfig"
 	        . "${userConfig}"
-                archiveConfig "$userConfig"
             else
                 echo "ERROR: Configuration file $userConfig not found"
                 exit 1
             fi
 	fi
 
-    . "${PIPELINEDIR}/prepareMetadata.sh"
-    PROCESS_DEFAULTS_HAS_RUN=false
+        . "${PIPELINEDIR}/prepareMetadata.sh"
+        PROCESS_DEFAULTS_HAS_RUN=false
 	. "${PIPELINEDIR}/processDefaults.sh"
+        archiveConfig "$userConfig"
 
 	lfs setstripe -c "${LUSTRE_STRIPING}" .
 
-    if [ "${DO_1934_CAL}" != "true" ] && [ "${DO_SCIENCE_FIELD}" != "true" ]; then
+        if [ "${DO_1934_CAL}" != "true" ] && [ "${DO_SCIENCE_FIELD}" != "true" ]; then
 
-        echo "Nothing to do!"
-        echo "Goodbye..."
+            echo "Nothing to do!"
+            echo "Goodbye..."
 
-    fi
+        fi
 
-    if [ "${DO_1934_CAL}" == "true" ]; then
+        if [ "${DO_1934_CAL}" == "true" ]; then
 
-        . "${PIPELINEDIR}/run1934cal.sh"
+            . "${PIPELINEDIR}/run1934cal.sh"
 
-    fi
+        fi
 
-    if [ "${DO_SCIENCE_FIELD}" == "true" ]; then
+        if [ "${DO_SCIENCE_FIELD}" == "true" ]; then
 
-        . "${PIPELINEDIR}/scienceCalIm.sh"
+            . "${PIPELINEDIR}/scienceCalIm.sh"
 
-        . "${PIPELINEDIR}/defineArtifactsScript.sh"
+            . "${PIPELINEDIR}/defineArtifactsScript.sh"
 
-        . "${PIPELINEDIR}/diagnostics.sh"
+            . "${PIPELINEDIR}/diagnostics.sh"
 
-        . "${PIPELINEDIR}/gatherStats.sh"
+            . "${PIPELINEDIR}/gatherStats.sh"
 
-        . "${PIPELINEDIR}/archive.sh"
+            . "${PIPELINEDIR}/archive.sh"
 
-    fi
+        fi
 
 	. "${PIPELINEDIR}/finalise.sh"
 

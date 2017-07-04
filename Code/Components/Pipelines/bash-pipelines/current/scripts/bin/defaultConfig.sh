@@ -191,7 +191,7 @@ DO_ALT_IMAGER_CONTCUBE=""
 DO_ALT_IMAGER_SPECTRAL=""
 #
 DO_DIAGNOSTICS=true
-DO_CONVERT_TO_FITS=false
+DO_CONVERT_TO_FITS=true
 DO_MAKE_THUMBNAILS=false
 DO_STAGE_FOR_CASDA=false
 
@@ -478,7 +478,7 @@ SELFCAL_NUM_LOOPS=2
 # Should we keep the images from the intermediate selfcal loops?
 SELFCAL_KEEP_IMAGES=true
 # Should we make full-field mosaics of each loop iteration?
-MOSAIC_SELFCAL_LOOPS=true
+MOSAIC_SELFCAL_LOOPS=false
 # Division of image for source-finding in selfcal
 SELFCAL_SELAVY_NSUBX=6
 SELFCAL_SELAVY_NSUBY=3
@@ -747,6 +747,13 @@ DO_CONTINUUM_VALIDATION=true
 
 # Run the validation for individual beam images
 VALIDATE_BEAM_IMAGES=false
+
+# Location to copy validation directories to
+VALIDATION_ARCHIVE_DIR="/group/askap/continuum_validation/reports"
+
+# Whether to remove the .csv files when copying the validation
+# directories
+REMOVE_VALIDATION_CSV=true
 
 ##############################
 # Selavy source finder - polarisation

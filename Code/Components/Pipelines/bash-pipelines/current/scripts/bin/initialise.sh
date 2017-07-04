@@ -47,7 +47,7 @@ slurmOutBase="$slurmOut"
 
 ####################
 # Date and time stamp
-NOW=$(date +%F-%H%M)
+NOW=$(date +%F-%H%M%S)
 NOW_FMT=$(date +%FT%T)
 
 # File to record list of jobs and descriptions
