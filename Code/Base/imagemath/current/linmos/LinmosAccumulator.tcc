@@ -520,7 +520,7 @@ namespace askap {
                     // frequency.
                     //
                     alpha = -8. * log(2.) * pow((offsetBeam/fwhm),2.);
-                    ASKAPLOG_INFO_STR(linmoslogger, "alpha " << alpha);
+                    // ASKAPLOG_INFO_STR(linmoslogger, "alpha " << alpha);
                     T toPut = scr1(fullpos) - taylor0(fullpos) * alpha;
                     // build
 
