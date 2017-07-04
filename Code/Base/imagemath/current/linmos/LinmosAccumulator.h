@@ -88,14 +88,17 @@ namespace askap {
                 /// beam as well as their intrinsic spectral indices
                 /// this method decouples the beam spectral behaviour from the images
                 /// Based on a Gaussian beam approximation.
-                /// @param[in] Array<T>& Taylor0 pixels
-                /// @param[in] Array<T>& Taylor1 pixels
-                /// @param[in] Array<T>& Taylor2 pixels
+                /// @param[in] const vector<string> &inImgNames : vector of images to mosaic
+                /// @param[in] const vector<string> &inWgtNames : vector of weight images, if required
+                /// @param[in] const string &outImgName : output mosaic image name
+                /// @param[in] const string &outWgtName : output mosaic weight image name
 
-                void removeBeamFromTaylorTerms( Array<T>& taylor0,
-                                                Array<T>& taylor1,
-                                                Array<T>& taylor2,
-                                            const IPosition& curpos);
+
+                void removeBeamFromTaylorTerms(Array<T> &taylor0,
+                                               Array<T> &taylor1,
+                                               Array<T> &taylor2,
+                                               const IPosition& curpos,
+                                               const CoordinateSystem& inSys);
 
                 /// @brief search the current directory for suitable mosaics
                 /// @details based on a vector of image tags, look for sets of images with names

@@ -214,7 +214,18 @@ In the parfile these are sub parameters of the Primary beam type. (e.g linmos.pr
 |expscaling        |double            | 4 log(2)     |Scaling of the primary beam exponent                        |                                   |
 +------------------+------------------+--------------+------------------------------------------------------------+
 
+Primary Beam Corrections to the Taylor terms
+--------------------------------------------
 
+The primary beam is a function of frequency. Therefore the apparent spectral index of a point source away from beam centre
+will contain a contribution from the frequency dependence of the primary beam. It is possible to estimate this contribution
+and remove it by scaling the Taylor term images appropriately.
+
++------------------+------------------+--------------+------------------------------------------------------------+
+|**Parameter**     |**Type**          |**Default**   |**Description**                                             |
++==================+==================+==============+============================================================+
+|removebeam        |bool              |false         |Remove beam from the Taylor term images                     |
++-----------------------------------------------------------------------------------------------------------------+
 Examples
 --------
 
