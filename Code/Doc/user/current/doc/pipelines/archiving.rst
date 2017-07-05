@@ -11,13 +11,14 @@ steps:
   images, with weights contours and the component catalogue overlaid,
   and greyscale plots of the noise maps produced by Selavy.
 * All images are converted to FITS format. FITS is the format required
-  for storage in CASDA - the ASKAPsoft tasks will ultimately write
-  directly to FITS, but for now an additional step is required.
-  This job is launched as an array job, effectively with a separate
-  job for each CASA image.
-  At the same time, the FITS header is given a PROJECT keyword,
-  linking the image to the appropriate OPAL project. Future versions
-  will have a more complete set of metadata.
+  for storage in CASDA - the ASKAPsoft tasks are able to write
+  directly to FITS (``IMAGETYPE_CONT`` etc), but if CASA-format images
+  are created, an additional step is required.
+  At the same time, the FITS header is given the following keywords:
+  PROJECT (the OPAL project code), SBID (the scheduling block ID),
+  DATE-OBS (the date/time of the observation), DURATION (the length of
+  the observation). Additionally, information on the version of the
+  askapsoft, askappipeline and aces software is added to the HISTORY. 
 * All two-dimensional images have two "thumbnail" images made. The
   thumbnail image is designed as a "quick-look" image that can be
   incorporated into the CASDA search results. Two sizes are made - a
@@ -34,6 +35,33 @@ steps:
   thumbnail images, and the stats summary file detailing how the
   processing tasks went.
 
+
+The follwing is a list of files included in the upload to CASDA:
+
+* Images: all FITS files that have been processed (ie. continuum
+  images, spectral cubes if requested, continuum cubes if requested)
+  that meet the naming system governed by ``IMAGE_LIST``.
+* Additional images produced by Selavy - the noise map, and the
+  component map and its associated residual image.
+* Measurement sets: all continuum measurement sets are included as
+  individual files. These will be tarred for access through CASDA.
+* Catalogues: all Selavy catalogues created for the final mosaics, in
+  VOTable/XML format
+* Evaluation files: several files are included for use with the
+  validation:
+
+  * An XML file listing the validation metrics from the continuum
+    source-finding validation.
+  * A tar file containing the validation directory
+  * The stats files that summarise the resource usage of each job.
+  * A tar file containing the processing directory structure, with the
+    following:
+
+    * All calibration tables
+    * Logs, slurm output and slurm file directories individually
+      tarred.
+    * The metadata directory
+
 There are a number of user parameters that govern aspects of these
 scripts, and they are detailed here.
 
@@ -45,7 +73,7 @@ scripts, and they are detailed here.
 +----------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | ``JOB_TIME_DIAGNOSTICS``         | ``JOB_TIME_DEFAULT`` (12:00:00) | none                            | Time request for the diagnostic script.                         |
 +----------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
-| ``DO_CONVERT_TO_FITS``           | false                           | none                            | Whether to convert the CASA images to FITS format.              |
+| ``DO_CONVERT_TO_FITS``           | true                            | none                            | Whether to convert the CASA images to FITS format.              |
 +----------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | ``JOB_TIME_FITS_CONVERT``        | ``JOB_TIME_DEFAULT`` (12:00:00) | none                            | Time request for the FITS conversion.                           |
 +----------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
@@ -69,12 +97,12 @@ scripts, and they are detailed here.
 |                                  |                                 |                                 | archiving (true) or if only the mosaicked image should be       |
 |                                  |                                 |                                 | uploaded.                                                       |
 +----------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
-| ``ARCHIVE_SELFCAL_LOOP_MOSAICS`` | true                            | none                            | Whether to archive the mosaics of the intermediate              |
+| ``ARCHIVE_SELFCAL_LOOP_MOSAICS`` | false                           | none                            | Whether to archive the mosaics of the intermediate              |
 |                                  |                                 |                                 | self-calibration loop images (see                               |
 |                                  |                                 |                                 | :doc:`ScienceFieldContinuumImaging` and                         |
 |                                  |                                 |                                 | :doc:`ScienceFieldMosaicking`).                                 |
 +----------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
-| ``ARCHIVE_FIELD_MOSAICS``        | true                            | none                            | Whether to archive the mosaics for each individual field, as    |
+| ``ARCHIVE_FIELD_MOSAICS``        | false                           | none                            | Whether to archive the mosaics for each individual field, as    |
 |                                  |                                 |                                 | well as for each tile and the final mosaicked image. See        |
 |                                  |                                 |                                 | :doc:`ScienceFieldMosaicking` for a description.                |
 +----------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
@@ -113,7 +141,7 @@ scripts, and they are detailed here.
 | ``CASDA_UPLOAD_DIR``             | /scratch2/casda/prd             | outputdir                       | The output directory to put the staged data. It may be that some|
 |                                  |                                 | (:doc:`../utils/casdaupload`)   | users will not have write access to this directory - in this    |
 |                                  |                                 |                                 | case the data is written to a local directory and the user must |
-|                                  |                                 |                                 | then contact CASDA staff.                                       |
+|                                  |                                 |                                 | then contact CASDA or Operations staff.                         |
 +----------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | ``WRITE_CASDA_READY``            | false                           | writeREADYfile                  | Whether to write the READY file in the staging directory,       |
 |                                  |                                 | (:doc:`../utils/casdaupload`)   | indicating that no further changes are to be made and the data  |
@@ -123,7 +151,7 @@ scripts, and they are detailed here.
 +----------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | ``TRANSITION_SB``                | false                           | none                            | If true, the scheduling block status is transitioned from       |
 |                                  |                                 |                                 | PROCESSING to PENDINGARCHIVE once the casdaupload task is       |
-|                                  |                                 |                                 | complete.                                                       |
+|                                  |                                 |                                 | complete. This can only be done by the 'askapops' user.         |
 +----------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | ``POLLING_DELAY_SEC``            | 1800                            | none                            | The time, in seconds, between slurm jobs that poll the CASDA    |
 |                                  |                                 |                                 | upload directory for the DONE file, indicating ingestion into   |

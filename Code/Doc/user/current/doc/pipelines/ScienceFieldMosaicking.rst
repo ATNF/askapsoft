@@ -127,7 +127,7 @@ primary beam at the centre of each image.
 |                                    |                                    |                         | the total number of channels and                             |
 |                                    |                                    |                         | ``NCHAN_PER_CORE_SPECTRAL_LINMOS``.                          |
 +------------------------------------+------------------------------------+-------------------------+--------------------------------------------------------------+
-| ``MOSAIC_SELFCAL_LOOPS``           | true                               | none                    | Whether to make mosaics of each self-calibration loop.       |
+| ``MOSAIC_SELFCAL_LOOPS``           | false                              | none                    | Whether to make mosaics of each self-calibration loop.       |
 +------------------------------------+------------------------------------+-------------------------+--------------------------------------------------------------+
 | ``FOOTPRINT_PA_REFERENCE``         | ""                                 | none                    | The reference rotation angle for the footprint. This should  |
 |                                    |                                    |                         | only be given if the scheduling block parset does not have   |
@@ -149,6 +149,11 @@ primary beam at the centre of each image.
 |                                    |                                    |                         | (1,2,3,4). Passed to footprint.py. If not given, the pitch   |
 |                                    |                                    |                         | value is used to set the beam separation. The band is        |
 |                                    |                                    |                         | overridden by the pitch as well.                             |
++------------------------------------+------------------------------------+-------------------------+--------------------------------------------------------------+
+| ``NUM_BEAMS_FOOTPRINT``            | 36                                 | none                    | The number of beams in the footprint. In regular operation,  |
+|                                    |                                    |                         | this will be determined from the footprint service, but will |
+|                                    |                                    |                         | need to be specified in the case of non-standard or BETA     |
+|                                    |                                    |                         | footprints.                                                  |
 +------------------------------------+------------------------------------+-------------------------+--------------------------------------------------------------+
 | ``LINMOS_BEAM_OFFSETS``            | no default                         | feeds.beam{i}           | Parset entries that specify the beam offsets for use by      |
 |                                    |                                    | (:doc:`../calim/linmos`)| linmos. Needs to have one entry for each beam being          |

@@ -123,10 +123,15 @@ following parameter set entries must be present:
 |                             |                |                 |                                                                                |
 +-----------------------------+----------------+-----------------+--------------------------------------------------------------------------------+
 |<key>.type                   |string          |None             |This is only valid for catalogue or image artifacts. This refers to the type of |
-|                             |                |                 |catalogue or image being uploaded. For catalogues, it must be one of            |
-|                             |                |                 |'continuum-island', 'continuum-component' or 'polarisation-component'. The full |
-|                             |                |                 |list of image types can be found at                                             |
+|                             |                |                 |catalogue or image being uploaded. For catalogues, it must be one of the        |
+|                             |                |                 |following: 'continuum-island', 'continuum-component', 'polarisation-component', |
+|                             |                |                 |'spectral-line-emission' or 'spectral-line-absorption'. The full list of image  |
+|                             |                |                 |types can be found at                                                           |
 |                             |                |                 |https://confluence.csiro.au/display/CASDA/Stage+1.5+Analaysis+of+Image+Types    |
++-----------------------------+----------------+-----------------+--------------------------------------------------------------------------------+
+|<key>.format                 |string          |pdf              |This is only valid for evaluation artifacts. This defines the format that the   |
+|                             |                |                 |file in question is presented in. Accepted values of format are: 'pdf', 'txt',  |
+|                             |                |                 |'validation-metrics', 'calibration' or 'tar'.                                   |
 +-----------------------------+----------------+-----------------+--------------------------------------------------------------------------------+
 |<key>.project                |string          |None             |The project identifier (OPAL code) to which this artifact is allocated for      |
 |                             |                |                 |validation. For the evaluation artifacts this parameter may be present, however |
@@ -229,6 +234,7 @@ report.
     evaluation.artifactlist         = [report1]
 
     report1.filename                = evaluation-report.pdf
+    report1.format                  = pdf
 
 
 Finally, here is an example where an image has a number of extracted

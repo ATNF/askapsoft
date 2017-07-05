@@ -19,7 +19,7 @@ run the splitting, so that there is a local copy of the individual beam data.
 +----------------------+---------------------------------------------------------+------------------------------------------------------------+
 | Variable             | Default                                                 | Description                                                |
 +======================+=========================================================+============================================================+
-| ``DIR_SB``           | /scratch2/askap/askapops/askap-scheduling-blocks        |Location (on galaxy) of the scheduling blocks. This is used |
+| ``DIR_SB``           | /astro/askaprt/askapops/askap-scheduling-blocks         |Location (on galaxy) of the scheduling blocks. This is used |
 |                      |                                                         |when specifying SB numbers - the default is the standard    |
 |                      |                                                         |location for ASKAP operation.                               |
 +----------------------+---------------------------------------------------------+------------------------------------------------------------+

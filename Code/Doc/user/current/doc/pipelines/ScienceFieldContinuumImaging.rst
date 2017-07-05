@@ -272,7 +272,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 | ``PRECONDITIONER_WIENER_TAPER``            | ""                              | preconditioner.Wiener.taper                            | Size of gaussian taper applied in image domain to Wiener      |
 |                                            |                                 | (:doc:`../calim/solver`)                               | filter. Ignored if blank (ie. “”).                            |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``RESTORE_PRECONDITIONER_LIST``            | "[Wiener]"                      | restore.preconditioner.Names                           | List of preconditioners to apply at the restore stage, to     |
+| ``RESTORE_PRECONDITIONER_LIST``            | ""                              | restore.preconditioner.Names                           | List of preconditioners to apply at the restore stage, to     |
 |                                            |                                 | (:doc:`../calim/cimager` & :doc:`../calim/solver`)     | produce an additional restored image.                         |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``RESTORE_PRECONDITIONER_GAUSS_TAPER``     |  "[10arcsec, 10arcsec, 0deg]"   | restore.preconditioner.GaussianTaper                   | Size of the Gaussian taper for the restore preconditioning -  |
@@ -342,7 +342,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 | ``SELFCAL_KEEP_IMAGES``                    | true                            | none                                                   | Should we keep the images from the intermediate selfcal       |
 |                                            |                                 |                                                        | loops?                                                        |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``MOSAIC_SELFCAL_LOOPS``                   | true                            | none                                                   | Should we make full-field mosaics for each loop of the        |
+| ``MOSAIC_SELFCAL_LOOPS``                   | false                           | none                                                   | Should we make full-field mosaics for each loop of the        |
 |                                            |                                 |                                                        | self-calibration? This is done for each field separately.     |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``SELFCAL_SELAVY_THRESHOLD``               | 8                               | snrCut                                                 | SNR threshold for detection with Selavy in determining        |
@@ -432,7 +432,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                 |                                                        | so on).  The %s wildcard will be resolved into the scheduling |
 |                                            |                                 |                                                        | block ID.                                                     |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``CONTCUBE_POLARISATIONS``                 | "I,Q,U,V"                       | Images.polarisation (:doc:`../calim/simager`)          | List of polarisations to create cubes for. This should be a   |
+| ``CONTCUBE_POLARISATIONS``                 | "I"                             | Images.polarisation (:doc:`../calim/simager`)          | List of polarisations to create cubes for. This should be a   |
 |                                            |                                 |                                                        | comma-separated list of (upper-case) polarisations. Separate  |
 |                                            |                                 |                                                        | jobs will be launched for each polarisation given.            |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+

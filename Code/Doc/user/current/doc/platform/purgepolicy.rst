@@ -1,9 +1,9 @@
 .. _purgepolicy:
-.. _Pawsey file systems: https://portal.pawsey.org.au/docs/Supercomputers/File_Systems
-.. _Transferring files: https://portal.pawsey.org.au/docs/Supercomputers/Transferring_Files#Data_Transfers
-.. _transferring large files: https://portal.pawsey.org.au/docs/Supercomputers/Transferring_Files#Large_Data_Transfers
-.. _transferring small files: https://portal.pawsey.org.au/docs/Supercomputers/Transferring_Files#Small_Data_Transfers
-.. _Removing files on /scratch and /group: https://portal.pawsey.org.au/docs/Supercomputers/File_Systems_with_munlink
+.. _Pawsey file systems: https://support.pawsey.org.au/documentation/display/US/File+Systems
+.. _Transferring files: https://support.pawsey.org.au/documentation/display/US/Transferring+Files
+.. _transferring large files: https://support.pawsey.org.au/documentation/display/US/Transferring+Files#TransferringFiles-LargeDataTransfers
+.. _transferring small files: https://support.pawsey.org.au/documentation/display/US/Transferring+Files#TransferringFiles-SmallDataTransfers
+.. _Removing files on /scratch and /group: https://support.pawsey.org.au/documentation/display/US/Tips+and+Best+Practices#TipsandBestPractices-Removingfileson/scratchand/group
 
 scratch2 Purge Policy
 =====================
