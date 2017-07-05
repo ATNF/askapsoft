@@ -137,6 +137,7 @@ for THISTILE in \$FULL_TILE_LIST; do
     imList=""       
     wtList=""
     BEAM=all
+    listCount=0
     for FIELD in \${TILE_FIELD_LIST}; do
         setImageProperties spectral
         im="\${FIELD}/\${imageName}"
@@ -148,6 +149,7 @@ for THISTILE in \$FULL_TILE_LIST; do
             fi
         fi
         if [ -e "\${im}" ]; then
+            ((listCount++))
             if [ "\${imList}" == "" ]; then
                 imList="\${im}"
                 wtList="\${wt}"
@@ -171,13 +173,15 @@ for THISTILE in \$FULL_TILE_LIST; do
         FIELD="."
         TILE=\$THISTILE
         setImageProperties spectral
-        if [ "\${imageCode}" != "restored" ]; then
-            weightsImage="\${weightsImage}.\${imageCode}"
-        fi
-        echo "Mosaicking to form \${imageName}"
-        parset=${parsets}/science_\${jobCode}_\${SLURM_JOB_ID}.in
-        log=${logs}/science_\${jobCode}_\${SLURM_JOB_ID}.log
-        cat > "\${parset}" << EOFINNER
+
+        if [ \${listCount} -gt 1 ]; then
+            if [ "\${imageCode}" != "restored" ]; then
+                weightsImage="\${weightsImage}.\${imageCode}"
+            fi
+            echo "Mosaicking to form \${imageName}"
+            parset=${parsets}/science_\${jobCode}_\${SLURM_JOB_ID}.in
+            log=${logs}/science_\${jobCode}_\${SLURM_JOB_ID}.log
+            cat > "\${parset}" << EOFINNER
 linmos.names            = [\${imList}]
 linmos.weights          = [\${wtList}]
 linmos.imagetype        = \${IMAGETYPE_SPECTRAL}
@@ -186,17 +190,25 @@ linmos.outweight        = \${weightsImage%%.fits}
 linmos.weighttype       = FromWeightImages
 EOFINNER
 
-        NCORES=${NUM_CPUS_SPECTRAL_LINMOS}
-        NPPN=${CPUS_PER_CORE_SPEC_IMAGING}
-        aprun -n \${NCORES} -N \${NPPN} $linmosMPI -c "\$parset" > "\$log"
-        err=\$?
-        for im in \$(echo "\${imList}" | sed -e 's/,/ /g'); do
-            rejuvenate "\$im"
-        done
-        extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} \${jobCode} "txt,csv"
-        if [ \$err != 0 ]; then
-            exit \$err
+            NCORES=${NUM_CPUS_SPECTRAL_LINMOS}
+            NPPN=${CPUS_PER_CORE_SPEC_IMAGING}
+            aprun -n \${NCORES} -N \${NPPN} $linmosMPI -c "\$parset" > "\$log"
+            err=\$?
+            for im in \$(echo "\${imList}" | sed -e 's/,/ /g'); do
+                rejuvenate "\$im"
+            done
+            extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} \${jobCode} "txt,csv"
+            if [ \$err != 0 ]; then
+                exit \$err
+            fi
+        else
+            # imList and wtList just have a single image -
+            #  just do a simple copy rather than running linmos
+            echo "Copying \${imList} to form \${imageName}
+            cp -r \${imList} \${imageName}
+            cp -r \${wtList} \${weightsImage}
         fi
+
     else
         echo "WARNING - no good images were found for mosaicking image type '\${imageCode}'!"
     fi
