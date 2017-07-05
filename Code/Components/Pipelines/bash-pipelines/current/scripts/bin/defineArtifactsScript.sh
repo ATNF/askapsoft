@@ -474,26 +474,39 @@ done
 
 evalNames=()
 
-# Stats summary files
-for file in "${OUTPUT}"/stats-all*.txt; do
-    evalNames+=(\${file##*/})
-    evalFormats+=(pdf)
-done
-
 if [ "\${PREPARE_FOR_CASDA}" == "true" ]; then
     # Tar up the directory structure with the cal tables, logs,
     # slurm files & diagnostics etc, and add to the evaluation file list
+
+    # cal tables
     tarlist="\${calTables[@]}"
+    # diagnostics directory
     tarlist="\${tarlist} \${diagnostics##*/}"
+    # metadata directory
     tarlist="\${tarlist} \${metadata##*/}"
+    # stats directory, tarred & compressed
+    tar zcvf stats.tgz \${stats##*/}
+    tarlist="\${tarlist} stats.tgz"
+    # stats summary files
+    for file in "${OUTPUT}"/stats-all*.txt; do
+        tarlist="\${tarlist} \${file##*/}"
+    done
+    # slurm jobscripts directory, tarred & compressed
     tar zcvf slurmFiles.tgz \${slurms##*/}
     tarlist="\${tarlist} slurmFiles.tgz"
+    # slurm output directory, tarred & compressed
     tar zcvf slurmOutputs.tgz \${slurmOut##*/}
     tarlist="\${tarlist} slurmOutputs.tgz"
+    # logs directory, tarred & compressed
     tar zcvf logs.tgz \${logs##*/}
     tarlist="\${tarlist} logs.tgz"
+    # parsets directory, tarred & compressed
+    tar zcvf parsets.tgz \${parsets##*/}
+    tarlist="\${tarlist} parsets.tgz"
+
     tarfile=calibration-metadata-processing-logs.tar
     tar cvf \$tarfile \${tarlist}
+
     evalNames+=(\$tarfile)
     evalFormats+=(calibration)
 fi
