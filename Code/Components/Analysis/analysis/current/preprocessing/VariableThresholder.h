@@ -186,6 +186,7 @@ class VariableThresholder {
         casa::IPosition itsInputShape;
         casa::IPosition itsLocation;
         casa::CoordinateSystem itsInputCoordSys;
+    casa::Array<bool> itsMask;
 
 };
 

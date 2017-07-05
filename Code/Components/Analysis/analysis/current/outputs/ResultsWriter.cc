@@ -144,8 +144,7 @@ void ResultsWriter::writeContinuumCatalogues()
             islandCat.write();
             compCat.write();
 
-            casa::Array<float> compMap = distribCont.componentImage();
-            writeComponentMaps(compMap);
+            writeComponentMaps(distribCont);
 
         }
 
@@ -154,21 +153,33 @@ void ResultsWriter::writeContinuumCatalogues()
 
 }
 
-void ResultsWriter::writeComponentMaps(casa::Array<float> &componentImage)
+void ResultsWriter::writeComponentMaps(DistributedContinuumParameterisation &dcp)
 {
 
+    casa::Array<float> componentImage = dcp.componentImage();
+    
     std::string inputImageName = itsParset.getString("image", "");
     const boost::filesystem::path infile(inputImageName);
     ASKAPCHECK(inputImageName != "", "No image name provided in parset with parameter 'image'");
 
     DuchampParallel dp(itsComms,itsParset);
     ASKAPCHECK(dp.getCASA(IMAGE) == duchamp::SUCCESS, "Reading data from input image failed");
+    
+    casa::Slicer theSlicer = analysisutilities::subsectionToSlicer(dp.cube().pars().section());
+    
     casa::Array<float> inputImage(componentImage.shape(),dp.cube().getArray(),SHARE);
+    casa::Vector<bool> maskVec(dp.cube().makeBlankMask());
+    casa::Array<bool> mask(componentImage.shape(),maskVec.data(),SHARE);
+
+    ASKAPLOG_INFO_STR(logger, "mask shapes: maskVec->"<<maskVec.shape()<<", mask->"<<mask.shape());
+    
     int nstokes=1;
     casa::CoordinateSystem coords = analysisutilities::wcsToCASAcoord(dp.cube().header().getWCS(), nstokes);
     
     LOFAR::ParameterSet fitParset = itsParset.makeSubset("Fitter.");
-    fitParset.add("imagetype","fits");
+    if (!fitParset.isDefined("imagetype")){
+        fitParset.add("imagetype","fits");
+    }
 
     boost::shared_ptr<accessors::IImageAccess> imageAcc = accessors::imageAccessFactory(fitParset);
 
@@ -181,8 +192,12 @@ void ResultsWriter::writeComponentMaps(casa::Array<float> &componentImage)
                 componentMap.erase(componentMap.rfind("."), std::string::npos);
             }
         }
+        casa::IPosition blc(componentImage.ndim(),0);
         imageAcc->create(componentMap, componentImage.shape(), coords);
         imageAcc->write(componentMap, componentImage);
+        imageAcc->makeDefaultMask(componentMap);
+        imageAcc->writeMask(componentMap, mask, casa::IPosition(componentImage.shape().nelements(),0));
+        
         std::string componentResidualMap = "componentResidual_" + infile.filename().string();
         // Need to remove any ".fits" extension, as this will be added by the accessor
         if (componentResidualMap.find(".fits") != std::string::npos) {
@@ -193,6 +208,9 @@ void ResultsWriter::writeComponentMaps(casa::Array<float> &componentImage)
         casa::Array<float> residual = inputImage - componentImage;
         imageAcc->create(componentResidualMap, residual.shape(), coords);
         imageAcc->write(componentResidualMap, residual);
+        imageAcc->makeDefaultMask(componentResidualMap);
+        imageAcc->writeMask(componentResidualMap, mask, casa::IPosition(componentImage.shape().nelements(),0));
+
     }
 
 

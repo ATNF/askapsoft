@@ -73,6 +73,9 @@ class DistributedContinuumParameterisation : public DistributedParameteriserBase
     /// @brief Return the array of imaged components
     const casa::Array<float> componentImage() {return itsComponentImage;};
 
+    /// @brief Return the slicer applied to the input image
+    const casa::Slicer inputSlicer() {return itsInputSlicer;};
+
     protected:
 
         /// @brief The list of polarisation catalogue entries

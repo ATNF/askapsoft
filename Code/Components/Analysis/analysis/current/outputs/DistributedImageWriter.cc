@@ -70,6 +70,14 @@ void DistributedImageWriter::create()
 void DistributedImageWriter::write(const casa::Array<casa::Float> &data,
                                    const casa::IPosition &loc, bool accumulate)
 {
+    casa::Array<bool> mask(data.shape(),true);
+    write(data,mask,loc,accumulate);
+}
+
+void DistributedImageWriter::write(const casa::Array<casa::Float> &data,
+                                   const casa::Array<bool> &mask,
+                                   const casa::IPosition &loc, bool accumulate)
+{
 
     if (itsComms->isParallel()) {
 
@@ -120,6 +128,7 @@ void DistributedImageWriter::write(const casa::Array<casa::Float> &data,
 
             if (OK) {
                 this->ImageWriter::write(data, loc, accumulate);
+                this->ImageWriter::writeMask(mask, loc);
 
                 // Return the OK to the master to say that we've written to the image
                 if (itsComms->isParallel()) {

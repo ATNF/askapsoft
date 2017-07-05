@@ -30,6 +30,7 @@
 #define ASKAP_ANALYSIS_RESULTS_H_
 
 #include <parallelanalysis/DuchampParallel.h>
+#include <parallelanalysis/DistributedContinuumParameterisation.h>
 #include <duchamp/Cubes/cubes.hh>
 #include <Common/ParameterSet.h>
 #include <sourcefitting/RadioSource.h>
@@ -75,7 +76,7 @@ class ResultsWriter {
         /// Writes images that contain: a) a map of all continuum
         /// components, and b) the residual emission after these are
         /// removed from the input image.
-        void writeComponentMaps(casa::Array<float> &componentImage);
+        void writeComponentMaps(DistributedContinuumParameterisation &dcp);
 
         /// Writes out the CASDA island catalogue, using the
         /// IslandCatalogue class to handle the writing (which will

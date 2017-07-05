@@ -58,20 +58,23 @@ class DistributedImageWriter : public ImageWriter {
         /// nothing here.
         void create();
 
-        /// @details Handles distributed writing of the requested
-        /// data. When in parallel mode, the master cycles through
-        /// the workers, sending an OK signal for them to write,
-        /// and waiting for an OK reply before contacting the
-        /// next. Once all have finished, an 'all done' signal is
-        /// broadcast. The workers wait for the signal from the
-        /// master for them to write, then write the array using
-        /// the write function from ImageWriter, then send an OK
-        /// signal back to the master.
-        /// In serial mode, we directly call ImageWriter::write.
         void write(const casa::Array<casa::Float> &data,
                    const casa::IPosition &loc,
                    bool accumulate = false);
 
+        /// @details Handles distributed writing of the requested
+        /// data. When in parallel mode, the master cycles through the
+        /// workers, sending an OK signal for them to write, and
+        /// waiting for an OK reply before contacting the next. Once
+        /// all have finished, an 'all done' signal is broadcast. The
+        /// workers wait for the signal from the master for them to
+        /// write, then write the array using the write function from
+        /// ImageWriter and the mask using the writeMask function,
+        /// then send an OK signal back to the master.  In serial
+        /// mode, we directly call ImageWriter::write.
+    void write(const casa::Array<casa::Float> &data,
+               const casa::Array<bool> &mask,
+               const casa::IPosition &loc, bool accumulate);
 
     protected:
 

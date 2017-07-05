@@ -76,6 +76,9 @@ class ImageWriter {
                            const casa::IPosition &loc,
                            bool accumulate = false);
 
+    void writeMask(const casa::Array<bool> &mask,
+                   const casa::IPosition &loc);
+
         casa::Array<casa::Float> read(const casa::IPosition& loc,
                                       const casa::IPosition &shape);
 

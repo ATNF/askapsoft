@@ -137,6 +137,7 @@ void VariableThresholder::initialise(duchamp::Cube &cube,
         analysisutilities::getSubImage(cube.pars().getImageFile(), itsSlicer);
     itsInputCoordSys = sub->coordinates();
     itsInputShape = sub->shape();
+    itsMask = sub->getMask();
     if (itsComms->isParallel() && itsComms->isMaster()){
         itsInputShape=casa::IPosition(itsInputShape.size(),1);
     }
@@ -362,32 +363,32 @@ void VariableThresholder::writeImages(casa::Array<Float> &middle,
     if (itsNoiseImageName != "") {
         DistributedImageWriter noiseWriter(*itsComms, itsParset, itsCube, itsNoiseImageName);
         noiseWriter.create();
-        noiseWriter.write(spread, loc, addToImage);
+        noiseWriter.write(spread, itsMask, loc, addToImage);
     }
 
     if (itsAverageImageName != "") {
         DistributedImageWriter averageWriter(*itsComms, itsParset, itsCube, itsAverageImageName);
         averageWriter.create();
-        averageWriter.write(middle, loc, addToImage);
+        averageWriter.write(middle, itsMask, loc, addToImage);
     }
 
     if (itsThresholdImageName != "") {
         DistributedImageWriter threshWriter(*itsComms, itsParset, itsCube, itsThresholdImageName);
         threshWriter.create();
         casa::Array<Float> thresh = middle + itsSNRthreshold * spread;
-        threshWriter.write(thresh, loc, addToImage);
+        threshWriter.write(thresh, itsMask, loc, addToImage);
     }
 
     if (itsSNRimageName != "") {
         DistributedImageWriter snrWriter(*itsComms, itsParset, itsCube, itsSNRimageName);
         snrWriter.create();
-        snrWriter.write(snr, loc, addToImage);
+        snrWriter.write(snr, itsMask, loc, addToImage);
     }
 
     if (itsBoxSumImageName != "") {
         DistributedImageWriter boxWriter(*itsComms, itsParset, itsCube, itsBoxSumImageName);
         boxWriter.create();
-        boxWriter.write(boxsum, loc, addToImage);
+        boxWriter.write(boxsum, itsMask, loc, addToImage);
     }
 
 

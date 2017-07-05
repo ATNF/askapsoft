@@ -93,19 +93,14 @@ void ImageWriter::setTileshapeFromShape(casa::IPosition &shape)
 void ImageWriter::create()
 {
     if (itsImageName != "") {
-        ASKAPLOG_DEBUG_STR(logger,
-                           "Creating image named " << itsImageName <<
-                           " with shape " << itsShape <<
-                           " and tileshape " << itsTileshape);
-
-        // casa::PagedImage<float> img(casa::TiledShape(itsShape, itsTileshape),
-        //                             itsCoordSys, itsImageName);
-        // img.setUnits(itsBunit);
-        // img.setImageInfo(itsImageInfo);
+        // ASKAPLOG_DEBUG_STR(logger,
+        //                    "Creating image named " << itsImageName <<
+        //                    " with shape " << itsShape <<
+        //                    " and tileshape " << itsTileshape);
 
         boost::shared_ptr<accessors::IImageAccess> imageAcc = accessors::imageAccessFactory(itsParset);
-//        imageAcc->create(itsImageName, casa::TiledShape(itsShape, itsTileshape), itsCoordSys);
         imageAcc->create(itsImageName, itsShape, itsCoordSys);
+        imageAcc->makeDefaultMask(itsImageName);
         imageAcc->setUnits(itsImageName, itsBunit.getName());
         // imageAcc->setImageInfo...
         casa::Vector<casa::Quantity> beam=itsImageInfo.restoringBeam().toVector();
@@ -120,7 +115,7 @@ void ImageWriter::write(float *data, const casa::IPosition &shape, bool accumula
     ASKAPASSERT(shape.size() == itsShape.size());
     casa::Array<Float> arr(shape, data, casa::SHARE);
     casa::IPosition location(itsShape.size(), 0);
-    this->write(arr, location);
+    this->write(arr, location, accumulate);
 }
 
 void ImageWriter::write(float *data, const casa::IPosition &shape,
@@ -129,14 +124,14 @@ void ImageWriter::write(float *data, const casa::IPosition &shape,
     ASKAPASSERT(shape.size() == itsShape.size());
     ASKAPASSERT(loc.size() == itsShape.size());
     casa::Array<Float> arr(shape, data, casa::SHARE);
-    this->write(arr, loc);
+    this->write(arr, loc, accumulate);
 }
 
 void ImageWriter::write(const casa::Array<Float> &data, bool accumulate)
 {
     ASKAPASSERT(data.ndim() == itsShape.size());
     casa::IPosition location(itsShape.size(), 0);
-    this->write(data, location);
+    this->write(data, location, accumulate);
 }
 
 void ImageWriter::write(const casa::Array<Float> &data,
@@ -144,21 +139,27 @@ void ImageWriter::write(const casa::Array<Float> &data,
 {
     ASKAPASSERT(data.ndim() == itsShape.size());
     ASKAPASSERT(loc.size() == itsShape.size());
-//    ASKAPLOG_DEBUG_STR(logger, "Opening image " << itsImageName << " for writing");
     boost::shared_ptr<accessors::IImageAccess> imageAcc = accessors::imageAccessFactory(itsParset);
-    // casa::PagedImage<float> img(itsImageName);
-    ASKAPLOG_DEBUG_STR(logger,
-                       "Writing array of shape " << data.shape() <<
-                       " to image " << itsImageName <<
-                       " at location " << loc);
+    // ASKAPLOG_DEBUG_STR(logger,
+    //                    "Writing array of shape " << data.shape() <<
+    //                    " to image " << itsImageName <<
+    //                    " at location " << loc);
     if (accumulate) {
         casa::Array<casa::Float> newdata = data + this->read(loc, data.shape());
-        // img.putSlice(newdata, loc);
         imageAcc->write(itsImageName, newdata, loc);
     } else {
-        // img.putSlice(data, loc);
         imageAcc->write(itsImageName, data, loc);
     }
+
+}
+
+void ImageWriter::writeMask(const casa::Array<bool> &mask,
+                            const casa::IPosition &loc)
+{
+    ASKAPASSERT(mask.ndim() == itsShape.size());
+    ASKAPASSERT(loc.size() == itsShape.size());
+    boost::shared_ptr<accessors::IImageAccess> imageAcc = accessors::imageAccessFactory(itsParset);
+    imageAcc->writeMask(itsImageName, mask, loc);
 
 }
 
@@ -166,12 +167,10 @@ casa::Array<casa::Float>
 ImageWriter::read(const casa::IPosition& loc, const casa::IPosition &shape)
 {
     ASKAPASSERT(loc.size() == shape.size());
-    // casa::PagedImage<float> img(itsImageName);
-    // return img.getSlice(loc, shape);
     boost::shared_ptr<accessors::IImageAccess> imageAcc = accessors::imageAccessFactory(itsParset);
     casa::IPosition trc = loc;
     trc += shape-1;
-    ASKAPLOG_DEBUG_STR(logger, "About to read from " << itsImageName <<" at loc="<<loc << " and shape="<<shape<<" which means trc="<<trc);
+    // ASKAPLOG_DEBUG_STR(logger, "About to read from " << itsImageName <<" at loc="<<loc << " and shape="<<shape<<" which means trc="<<trc);
     return imageAcc->read(itsImageName, loc, trc);
 }
 
