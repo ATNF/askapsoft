@@ -193,7 +193,7 @@ EOFINNER
                 else
                     # imList and wtList just have a single image -
                     #  just do a simple copy rather than running linmos
-                    echo "Copying \${imList} to form \${imageName}
+                    echo "Copying \${imList} to form \${imageName}"
                     cp -r \${imList} \${imageName}
                     cp -r \${wtList} \${weightsImage}
                 fi
