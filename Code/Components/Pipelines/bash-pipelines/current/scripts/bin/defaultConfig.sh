@@ -229,7 +229,7 @@ IMAGETYPE_SPECTRAL=casa
 ##  BANDPASS CAL
 
 # Base name for the 1934 measurement sets after splitting
-MS_BASE_1934="1934_SB%s_beam%b.ms"
+MS_BASE_1934="1934_SB%s_%b.ms"
 # Channel range for splitting - defaults to full set of channels in MS
 CHAN_RANGE_1934=""
 # Location of 1934-638, formatted for use in cbpcalibrator
@@ -296,7 +296,7 @@ SCAN_SELECTION_SCIENCE=""
 # science observation. If this isn't needed, leave as a blank string.
 FIELD_SELECTION_SCIENCE=""
 # Base name for the science observation measurement set
-MS_BASE_SCIENCE="scienceData_SB%s_beam%b.ms"
+MS_BASE_SCIENCE="scienceData_SB%s_%b.ms"
 # Name for the channel-averaged science measurement set (if blank, it
 # will be set using MS_BASE_SCIENCE)
 MS_SCIENCE_AVERAGE=""
@@ -521,7 +521,7 @@ CIMAGER_MINUV=0
 CCALIBRATOR_MINUV=0
 
 # name of the final gains calibration table
-GAINS_CAL_TABLE="cont_gains_cal_SB%s_beam%b.tab"
+GAINS_CAL_TABLE="cont_gains_cal_SB%s_%b.tab"
 KEEP_RAW_AV_MS=true
 
 # Shift position offsets - precomputed, and added to position in final

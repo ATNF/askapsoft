@@ -484,7 +484,7 @@ function setImageBase()
 # A function to work out the measurement set names for the
 # full-resolution, spectral-line and channel-averaged cases, given the
 # current BEAM.
-# Does wildcard replacement of %b (->BEAM) and %s (->SB_SCIENCE)
+# Does wildcard replacement of %b (->FIELD.beamBEAM) and %s (->SB_SCIENCE)
 # Requires the following:
 #   * MS_BASE_SCIENCE
 #   * BEAM
@@ -503,14 +503,14 @@ function findScienceMSnames()
     # 1. Get the value for $msSci (the un-averaged MS)
     if [ "$(echo "${MS_BASE_SCIENCE}" | grep %b)" != "" ]; then
         # If we are here, then $MS_BASE_SCIENCE has a %b that needs to be
-        # replaced by the current $BEAM value.
+        # replaced by the current ${FIELD}.beam$BEAM value.
         # Also include the $FIELD value to uniquely identify it
-        sedstr="s|%b|${FIELD}\.${BEAM}|g"
+        sedstr="s|%b|${FIELD}\.beam${BEAM}|g"
         msSci=$(echo "${MS_BASE_SCIENCE}" | sed -e "$sedstr")
     else
         # If we are here, then there is no %b, and we just append
         # _${FIELD}.${BEAM} to the MS name
-        sedstr="s/\.ms/_${FIELD}\.${BEAM}\.ms/g"
+        sedstr="s/\.ms/_${FIELD}\.beam${BEAM}\.ms/g"
         msSci=$(echo "${MS_BASE_SCIENCE}" | sed -e "$sedstr")
     fi
 
@@ -544,7 +544,7 @@ function findScienceMSnames()
         if [ "$(echo "${MS_SCIENCE_AVERAGE}" | grep %b)" != "" ]; then
             # If we are here, then $MS_SCIENCE_AVERAGE has a %b that
             # needs to be replaced by the current $BEAM value
-            sedstr="s|%b|${FIELD}\.${BEAM}|g"
+            sedstr="s|%b|${FIELD}\.beam${BEAM}|g"
             msSciAv=$(echo "${MS_SCIENCE_AVERAGE}" | sed -e "$sedstr")
         else
             msSciAv=${MS_SCIENCE_AVERAGE}
@@ -585,7 +585,7 @@ function findScienceMSnames()
         # Otherwise, need to replace any %b with the current BEAM, if there is one present
         if [ "$(echo "${GAINS_CAL_TABLE}" | grep %b)" != "" ]; then
             # We have a %b that needs replacing
-            sedstr="s|%b|${FIELD}\.${BEAM}|g"
+            sedstr="s|%b|${FIELD}\.beam${BEAM}|g"
             gainscaltab="$(echo "${GAINS_CAL_TABLE}" | sed -e "$sedstr")"
         else
             # just use filename as provided
@@ -604,7 +604,7 @@ function find1934MSnames()
     if [ "$(echo "${MS_BASE_1934}" | grep %b)" != "" ]; then
         # If we are here, then $MS_BASE_1934 has a %b that
         # needs to be replaced by the current $BEAM value
-        sedstr="s|%b|${BEAM}|g"
+        sedstr="s|%b|beam${BEAM}|g"
         msCal=$(echo "${MS_BASE_1934}" | sed -e "$sedstr")
     else
         msCal=${MS_BASE_1934}

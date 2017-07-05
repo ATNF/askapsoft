@@ -386,13 +386,15 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                 | (:doc:`../calim/cimager`)                              | with the applied calibrator factor to achieve proper          |
 |                                            |                                 |                                                        | weighting.                                                    |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``GAINS_CAL_TABLE``                        | cont_gains_cal_SB%s_beam%b.tab  | none (directly)                                        | The table name to hold the final gains solution. Once         |
+| ``GAINS_CAL_TABLE``                        |   cont_gains_cal_SB%s_%b.tab    | none (directly)                                        | The table name to hold the final gains solution. Once         |
 |                                            |                                 |                                                        | the self-cal loops have completed, the cal table in the       |
 |                                            |                                 |                                                        | final loop is copied to a table of this name in the base      |
 |                                            |                                 |                                                        | directory. This can then be used for the spectral-line        |
 |                                            |                                 |                                                        | imaging if need be. If this is blank, both ``DO_SELFCAL``     |
 |                                            |                                 |                                                        | and ``DO_APPLY_CAL_SL`` will be set to false. The %s wildcard |
-|                                            |                                 |                                                        | will be resolved into the scehduling block ID.                |
+|                                            |                                 |                                                        | will be resolved into the scehduling block ID, and the %b will|
+|                                            |                                 |                                                        | be replaced with "FIELD_beamBB", where FIELD is the field id, |
+|                                            |                                 |                                                        | and BB the (zero-based) beam number.                          |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CCALIBRATOR_MINUV``                      | 0                               | MinUV (:doc:`../calim/data_selection`)                 | The minimum UV distance considered in the calibration - used  |
 |                                            |                                 |                                                        | to exclude the short baselines. Can be given as an array with |

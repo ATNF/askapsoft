@@ -57,8 +57,9 @@ ASKAPsoft.
 | **Preparing the calibrator datasets**   |                                       |                                                        |                                                           |
 |                                         |                                       |                                                        |                                                           |
 +-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
-| ``MS_BASE_1934``                        | 1934_SB%s_beam%b.ms                   | none                                                   | Base name for the 1934 measurement sets after splitting.  |
-|                                         |                                       |                                                        | The wildcard %b will be replaced with the beam number, and|
+| ``MS_BASE_1934``                        | 1934_SB%s_%b.ms                       | none                                                   | Base name for the 1934 measurement sets after splitting.  |
+|                                         |                                       |                                                        | The wildcard %b will be replaced with the string "beamBB",|
+|                                         |                                       |                                                        | where BB is the (zero-based) beam number, and             |
 |                                         |                                       |                                                        | the %s will be replaced by the calibration scheduling     |
 |                                         |                                       |                                                        | block ID.                                                 |
 +-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
