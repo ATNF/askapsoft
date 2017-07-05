@@ -14,14 +14,18 @@ use, simply run::
 Some parts of the pipeline make use of other modules, which are loaded
 at the appropriate time. The beam footprint information is obtained by
 using the *schedblock* tool in the askapcli module, while beam
-locations are set using the ACES tool *footprint.py*, which requires
-the aces module. For the latter, you will need to have an up-to-date
-version of the ACES subversion repository (which is not part of a
-module itself).
+locations are set using *footprint* from the same module.
+
+For the case of either BETA data or observations made with a
+non-standard footprint, the *footprint* tool will not have the correct
+information, and the ACES tool *footprint.py* is used. This is located
+in the ACES subversion repository, and is accessed either via the
+**acesops** module, or (should ``USE_ACES_OPS=false``) your own
+location defined by the $ACES environment variable.
 
 Once loaded, the askappipeline module will set an environment variable
-**PIPELINEDIR**, pointing to the directory containing the scripts. It
-also defines **PIPELINE_VERSION** to be the version number of the
+**$PIPELINEDIR**, pointing to the directory containing the scripts. It
+also defines **$PIPELINE_VERSION** to be the version number of the
 currently-used module.
 
 Configuration file

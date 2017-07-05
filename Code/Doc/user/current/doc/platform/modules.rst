@@ -42,7 +42,8 @@ These modules are:
 * **casa** - NRAO's CASA software package (see :doc:`casa`)
 * **bbcp** - BBCP Fast file copy (see :doc:`externaltransfer`)
 * **ashell** - Connection to the commissioning archive (see :doc:`comm_archive`)
-* **aces** - Libraries used for the ACES tools (see `ACES wiki page`_)
+* **aces** - Python libraries used for the ACES tools (see `ACES wiki page`_) and the **acesops** module.
+* **acesops** - A tagged version of the ACES subversion repository, designed to give a static set of ACES tools to enable reproducibility of processing.
 
   .. _ACES wiki page: https://confluence.csiro.au/display/ACES/Getting+started+with+ACES+tools+on+Galaxy
 

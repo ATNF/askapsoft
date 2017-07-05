@@ -24,6 +24,23 @@ module defined in the ~/.bashrc - in this case the default module is
 used, unless ``ASKAPSOFT_VERSION`` is given in the configuration
 file. 
 
+ACES software
+-------------
+
+A small number of tasks within the pipeline make use of tools or
+scripts developed by the ACES (ASKAP Commissioning & Early Science)
+team. These live in a subversion repository that can be checked out by
+users (should you have permission) and pointed to by ``$ACES``. The
+preferred means of using this is, however, is to use the **acesops**
+module, which provides a controlled snapshot of the subversion tree,
+allowing processing to be reproducible by recording the revision
+number.
+
+Use of the **acesops** module is the default behaviour of the
+pipeline, and the user does not need to load it prior to running the
+pipeline. To use your own copy of the subversion tree, you need to set
+``USE_ACES_OPS=false``. A particular version of the **acesops** module
+can be chosen via the ``ACESOPS_VERSION`` config parameter.
 
 Slurm control
 -------------
@@ -80,6 +97,14 @@ see the *Slurm time requests* section below for details.
 |                                     |         |BEGIN, END, FAIL, REQUEUE, ALL, TIME_LIMIT, TIME_LIMIT_90, TIME_LIMIT_80, &      |
 |                                     |         |TIME_LIMIT_50 (taken from the sbatch man page on galaxy).                        |
 |                                     |         |                                                                                 |
++-------------------------------------+---------+---------------------------------------------------------------------------------+
+| ``USE_ACES_OPS``                    | true    |Whether to use the **acesops** module to access ACES tools within the            |
+|                                     |         |pipeline. Setting to false will force the pipeline to look in the ``$ACES``      |
+|                                     |         |directory defined by your environment. If ``$ACES`` is not set, then             |
+|                                     |         |``USE_ACES_OPS`` will be set back to true.                                       |
++-------------------------------------+---------+---------------------------------------------------------------------------------+
+| ``ACESOPS_VERSION``                 | ""      |The version of the **acesops** module used by the pipeline. Leaving blank will   |
+|                                     |         |make it use the default at the time.                                             |
 +-------------------------------------+---------+---------------------------------------------------------------------------------+
 
 Filesystem control
