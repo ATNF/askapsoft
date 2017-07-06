@@ -99,6 +99,10 @@ void RMCatalogue::defineComponents(std::vector<sourcefitting::RadioSource> &srcl
 
 void RMCatalogue::defineSpec()
 {
+    // -------------------------------------------
+    // DO NOT CHANGE UNLESS COORDINATED WITH CASDA
+    // -------------------------------------------
+
     itsSpec.addColumn("ID", "component_id", "", 6, 0,
                       "meta.id;meta.main", "char", "col_component_id", "");
     itsSpec.addColumn("NAME", "component_name", "", 8, 0,

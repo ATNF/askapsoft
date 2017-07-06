@@ -99,6 +99,10 @@ void IslandCatalogue::defineIslands(std::vector<sourcefitting::RadioSource> &src
 
 void IslandCatalogue::defineSpec()
 {
+    // -------------------------------------------
+    // DO NOT CHANGE UNLESS COORDINATED WITH CASDA
+    // -------------------------------------------
+
     itsSpec.addColumn("ID", "island_id", "--", 6, 0,
                       "meta.id;meta.main", "char", "col_island_id", "");
     itsSpec.addColumn("NAME", "island_name", "", 8, 0,

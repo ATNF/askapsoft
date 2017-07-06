@@ -91,6 +91,10 @@ void HiEmissionCatalogue::defineObjects(std::vector<sourcefitting::RadioSource> 
 
 void HiEmissionCatalogue::defineSpec()
 {
+    // -------------------------------------------
+    // DO NOT CHANGE UNLESS COORDINATED WITH CASDA
+    // -------------------------------------------
+
     itsSpec.addColumn("ID", "object_id", "", 6, 0,
                       "meta.id;meta.main", "char", "col_object_id", "");
     itsSpec.addColumn("NAME", "object_name", "", 8, 0,

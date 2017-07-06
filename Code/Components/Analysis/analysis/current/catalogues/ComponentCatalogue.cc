@@ -127,6 +127,10 @@ void ComponentCatalogue::defineComponents(std::vector<sourcefitting::RadioSource
 
 void ComponentCatalogue::defineSpec()
 {
+    // -------------------------------------------
+    // DO NOT CHANGE UNLESS COORDINATED WITH CASDA
+    // -------------------------------------------
+    
     itsSpec.addColumn("ISLAND", "island_id", "--", 6, 0,
                       "meta.id.parent", "char", "col_island_id", "");
     itsSpec.addColumn("ID", "component_id", "--", 6, 0,
@@ -194,9 +198,9 @@ void ComponentCatalogue::defineSpec()
     itsSpec.addColumn("CHISQ", "chi_squared_fit", "--", casda::precFlux+2, casda::precFlux,
                       "stat.fit.chi2", "float", "col_chi_squared_fit", "");
     itsSpec.addColumn("RMSFIT", "rms_fit_gauss", "[" + casda::fluxUnit + "]", casda::precFlux+2, casda::precFlux,
-                      "stat.stdev;stat.fit", "double", "col_rms_fit_gauss", "");
+                      "stat.stdev;stat.fit", "float", "col_rms_fit_gauss", "");
     itsSpec.addColumn("ALPHA", "spectral_index", "--", casda::precSpecShape+2, casda::precSpecShape,
-                      "spect.index;em.radio", "double", "col_spectral_index", "");
+                      "spect.index;em.radio", "float", "col_spectral_index", "");
     itsSpec.addColumn("BETA", "spectral_curvature", "--", casda::precSpecShape+2, casda::precSpecShape,
                       "askap:spect.curvature;em.radio", "float", "col_spectral_curvature", "");
     itsSpec.addColumn("RMSIMAGE", "rms_image", "[" + casda::fluxUnit + "]", casda::precFlux+2, casda::precFlux,

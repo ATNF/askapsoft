@@ -87,6 +87,10 @@ void AbsorptionCatalogue::defineObjects(std::vector< std::pair<CasdaComponent, s
 
 void AbsorptionCatalogue::defineSpec()
 {
+    // -------------------------------------------
+    // DO NOT CHANGE UNLESS COORDINATED WITH CASDA
+    // -------------------------------------------
+
     itsSpec.addColumn("IMAGEID", "image_id", "--", 50, 0,
                       "meta.id", "char", "col_image_id", "");
     itsSpec.addColumn("DATEOBS", "date_time_ut", "--", 50, 0,
