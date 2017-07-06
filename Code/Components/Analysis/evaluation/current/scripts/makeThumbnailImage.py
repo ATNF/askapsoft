@@ -68,14 +68,7 @@ if __name__ == '__main__':
 
     # Define the weights image - we use this for plotting contours and
     # determining the correct noise level.
-    # The weights image can be given directly, but if not it is worked out from the image name.
-    if weightsim == '':
-        weightsim=os.path.basename(fitsim)
-        weightsim = weightsim.replace('.restored','')
-        prefix=weightsim[:weightsim.find('.')]
-        weightsim = weightsim.replace(prefix,'weights',1)
-        weightsim = "%s/%s"%(os.path.dirname(fitsim),weightsim)
-    if not os.access(weightsim,os.F_OK):
+    if weightsim != "" and not os.access(weightsim,os.F_OK):
         logging.warn('Weights image %s not found - no weights contours applied'%weightsim)
 
     # Get statistics for the image to determine greyscale levels.
@@ -83,9 +76,10 @@ if __name__ == '__main__':
     #  avoid pixels that have zero weight.
     image=fits.getdata(fitsim)
     isgood=(np.ones(image.shape)>0)
-    if os.access(weightsim,os.F_OK):
+    if weightsim!="" and os.access(weightsim,os.F_OK):
         weights=fits.getdata(weightsim)
         isgood=(weights>weightCutoff)
+    isgood = isgood * ~np.isnan(image)
     if robust:
         median=np.median(image[isgood])
         madfm=np.median(abs(image[isgood]-median))
