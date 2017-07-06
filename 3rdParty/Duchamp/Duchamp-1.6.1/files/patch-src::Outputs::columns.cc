@@ -1,6 +1,31 @@
---- src/Outputs/columns.cc.orig	2015-01-12 13:18:34.000000000 +1100
-+++ src/Outputs/columns.cc	2015-01-12 13:12:46.000000000 +1100
-@@ -419,71 +419,8 @@
+--- src/Outputs/columns.cc.orig	2017-07-06 12:28:02.000000000 +1000
++++ src/Outputs/columns.cc	2017-07-06 12:27:47.000000000 +1000
+@@ -123,17 +123,20 @@
+ 	  }
+       }
+ 
+-      void Column::checkWidth(int width)
++      void Column::checkWidth(int width, bool checkHeader)
+       {
+ 	  /// Three checks on the width, looking at the name, the
+ 	  /// units string, and then some minimum width. This can be
+ 	  /// obtained from the other check() functions that work
+ 	  /// from various value types.
++          /// If checkHeader=false, then we only look at the width of the value. 
+ 
+ 	  for(int i=this->itsWidth;i<=width;i++) this->widen();// +1 for the space
+-	  for(int i=this->itsWidth;i<=int(this->itsName.size());i++) this->widen();  // +1 for the space
+-	  for(int i=this->itsWidth;i<=int(this->itsUnits.size());i++) this->widen(); // +1 for the space 
+-
++          if (checkHeader) {
++              for(int i=this->itsWidth;i<=int(this->itsName.size());i++) this->widen();  // +1 for the space
++              for(int i=this->itsWidth;i<=int(this->itsUnits.size());i++) this->widen(); // +1 for the space 
++          }
++          
+       }
+ 
+     //------------------------------------------------------------
+@@ -419,71 +422,8 @@
        newset.column("FTOTERR").setUnits("[" + head.getFluxUnits() + "]");
        newset.column("FPEAK").setUnits("[" + head.getFluxUnits() + "]");
        
