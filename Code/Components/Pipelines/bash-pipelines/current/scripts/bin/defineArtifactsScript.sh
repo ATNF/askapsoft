@@ -33,15 +33,17 @@
 
 # Define list of possible MSs:
 msNameList=()
-for BEAM in ${BEAMS_TO_USE}; do
-    findScienceMSnames
-    if [ "${DO_APPLY_CAL_CONT}" == "true" ]; then
-        msNameList+=($msSciAvCal)
-    else
-        msNameList+=($msSciAv)
-    fi
+for FIELD in ${FIELD_LIST}; do
+    for BEAM in ${BEAMS_TO_USE}; do
+        findScienceMSnames
+        if [ "${DO_APPLY_CAL_CONT}" == "true" ]; then
+            msNameList+=(${FIELD}/${msSciAvCal})
+        else
+            msNameList+=(${FIELD}/${msSciAv})
+        fi
+    done
 done
-
+    
 imageCodeList="restored altrestored image contsub residual sensitivity psf psfimage"
 
 getArtifacts="${tools}/getArchiveList-${NOW}.sh"
@@ -236,13 +238,13 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                             if [ -e "\${FIELD}/\${selavyDir}/\${noiseMap}\${fitsSuffix}" ]; then
                                 casdaTwoDimImageNames+=(\${FIELD}/\${selavyDir}/\${noiseMap}\${fitsSuffix})
                                 casdaTwoDimImageTypes+=(\${noiseType})
-                                casdaTwoDimThumbTitles+=(\${noiseLabel})
+                                casdaTwoDimThumbTitles+=("\${noiseLabel}")
                                 casdaTwoDimImageNames+=(\${FIELD}/\${selavyDir}/\${compMap}\${fitsSuffix})
                                 casdaTwoDimImageTypes+=(\${compMapType})
-                                casdaTwoDimThumbTitles+=(\${compMapLabel})
+                                casdaTwoDimThumbTitles+=("\${compMapLabel}")
                                 casdaTwoDimImageNames+=(\${FIELD}/\${selavyDir}/\${compResidual}\${fitsSuffix})
                                 casdaTwoDimImageTypes+=(\${compResidualType})
-                                casdaTwoDimThumbTitles+=(\${compResidualLabel})
+                                casdaTwoDimThumbTitles+=("\${compResidualLabel}")
                             fi
 
                         fi
@@ -422,15 +424,11 @@ done
 msNames=()
 possibleMSnames="${msNameList[@]}"
 
-for FIELD in \${FIELD_LIST}; do
+for ms in \${possibleMSnames}; do
 
-    for ms in \${possibleMSnames}; do
-    
-        if [ -e "\${FIELD}/\${ms}" ]; then
-            msNames+=(\${FIELD}/\${ms})
-        fi
-    
-    done
+    if [ -e "\${ms}" ]; then
+        msNames+=(\${ms})
+    fi
 
 done
 
