@@ -71,6 +71,11 @@ class DuchampParallel;
 
 namespace sourcefitting {
 
+/// @brief Default value for the spectral index
+const double defaultAlpha=-99.;
+
+/// @brief Default value for the spectral curvature
+const double defaultBeta=-99.;
 
 /// @brief Class to store all information on a detected source.
 ///
@@ -341,8 +346,8 @@ class RadioSource : public duchamp::Detection {
             return itsBestFitMap["best"].numFits();
         };
 
-        std::vector<float> alphaValues(std::string type) {return itsAlphaMap[type];};
-        std::vector<float> betaValues(std::string type) {return itsBetaMap[type];};
+        std::vector<double> alphaValues(std::string type) {return itsAlphaMap[type];};
+        std::vector<double> betaValues(std::string type) {return itsBetaMap[type];};
 
         /// @brief Return a reference to the set of Gaussian fits.
         std::vector<casa::Gaussian2D<Double> >& fitset(std::string type)
@@ -535,6 +540,10 @@ class RadioSource : public duchamp::Detection {
 
     protected:
 
+    /// @brief Function to set the initial values of the alpha & beta maps
+    void initialiseAlphaBetaMaps();
+    
+    
         /// @brief A flag indicating whether the source is on the
         /// boundary of a subimage.
         bool itsFlagAtEdge;
@@ -572,10 +581,10 @@ class RadioSource : public duchamp::Detection {
         casa::Slicer itsBox;
 
         /// @brief The spectral indices of the source components
-        std::map<std::string, std::vector<float> > itsAlphaMap;
+        std::map<std::string, std::vector<double> > itsAlphaMap;
 
         /// @brief The spectral curvature of the source components
-        std::map<std::string, std::vector<float> > itsBetaMap;
+        std::map<std::string, std::vector<double> > itsBetaMap;
 
 };
 

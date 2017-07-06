@@ -71,7 +71,8 @@ class ComponentCatalogue {
 
         /// Check the widths of the columns based on the values within
         /// the catalogue.
-        virtual void check();
+    /// @param checkTitle - whether to include the title widths in the checking
+        virtual void check(bool checkTitle);
 
         /// Write the catalogue to the ASCII & VOTable files (acts as
         /// a front-end to the writeVOT() and writeASCII() functions)

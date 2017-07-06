@@ -97,10 +97,10 @@ class CasdaPolarisationEntry : public CatalogueEntry {
         /// the COLNAME key. If a key is given that was not expected,
         /// an Askap Error is thrown. Column must be non-const as it
         /// could change.
-        void checkCol(duchamp::Catalogues::Column &column);
+    void checkCol(duchamp::Catalogues::Column &column, bool checkTitle);
 
         /// Perform the column check for all colums in specification.
-        void checkSpec(duchamp::Catalogues::CatalogueSpecification &spec);
+    void checkSpec(duchamp::Catalogues::CatalogueSpecification &spec, bool checkTitle);
 
         /// @brief Functions allowing CasdaPolarisationEntry objects to be passed
         /// over LOFAR Blobs

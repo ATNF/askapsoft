@@ -133,73 +133,73 @@ void ComponentCatalogue::defineSpec()
                       "meta.id;meta.main", "char", "col_component_id", "");
     itsSpec.addColumn("NAME", "component_name", "", 8, 0,
                       "meta.id", "char", "col_component_name", "");
-    itsSpec.addColumn("RA", "ra_hms_cont", "", 11, 0,
+    itsSpec.addColumn("RA", "ra_hms_cont", "", 10, 0,
                       "pos.eq.ra", "char", "col_ra_hms_cont", "J2000");
-    itsSpec.addColumn("DEC", "dec_dms_cont", "", 11, 0,
+    itsSpec.addColumn("DEC", "dec_dms_cont", "", 9, 0,
                       "pos.eq.dec", "char", "col_dec_dms_cont", "J2000");
-    itsSpec.addColumn("RAJD", "ra_deg_cont", "[deg]", 11, casda::precPos,
+    itsSpec.addColumn("RAJD", "ra_deg_cont", "[deg]", casda::precPos+2, casda::precPos,
                       "pos.eq.ra;meta.main", "double", "col_ra_deg_cont", "J2000");
-    itsSpec.addColumn("DECJD", "dec_deg_cont", "[deg]", 11, casda::precPos,
+    itsSpec.addColumn("DECJD", "dec_deg_cont", "[deg]", casda::precPos+2, casda::precPos,
                       "pos.eq.dec;meta.main", "double", "col_dec_deg_cont", "J2000");
-    itsSpec.addColumn("RAERR", "ra_err", "[arcsec]", 11, casda::precSize,
+    itsSpec.addColumn("RAERR", "ra_err", "[arcsec]", casda::precSize+2, casda::precSize,
                       "stat.error;pos.eq.ra", "float", "col_ra_err", "J2000");
-    itsSpec.addColumn("DECERR", "dec_err", "[arcsec]", 11, casda::precSize,
+    itsSpec.addColumn("DECERR", "dec_err", "[arcsec]", casda::precSize+2, casda::precSize,
                       "stat.error;pos.eq.dec", "float", "col_dec_err", "J2000");
     itsSpec.addColumn("FREQ", "freq", "[" + casda::freqUnit + "]",
-                      11, casda::precFreqContinuum,
+                      casda::precFreqContinuum+2, casda::precFreqContinuum,
                       "em.freq", "float", "col_freq", "");
     itsSpec.addColumn("FPEAK", "flux_peak", "[" + casda::fluxUnit + "]",
-                      9, casda::precFlux,
+                      casda::precFlux+2, casda::precFlux,
                       "phot.flux.density;stat.max;em.radio;stat.fit",
                       "float", "col_flux_peak", "");
     itsSpec.addColumn("FPEAKERR", "flux_peak_err", "[" + casda::fluxUnit + "]",
-                      9, casda::precFlux,
+                      casda::precFlux+2, casda::precFlux,
                       "stat.error;phot.flux.density;stat.max;em.radio;stat.fit",
                       "float", "col_flux_peak_err", "");
     itsSpec.addColumn("FINT", "flux_int", "[" + casda::intFluxUnitContinuum + "]",
-                      9, casda::precFlux,
+                      casda::precFlux+2, casda::precFlux,
                       "phot.flux.density;em.radio;stat.fit",
                       "float", "col_flux_int", "");
     itsSpec.addColumn("FINTERR", "flux_int_err", "[" + casda::intFluxUnitContinuum + "]",
-                      9, casda::precFlux,
+                      casda::precFlux+2, casda::precFlux,
                       "stat.error;phot.flux.density;em.radio;stat.fit",
                       "float", "col_flux_int_err", "");
-    itsSpec.addColumn("MAJ", "maj_axis", "[arcsec]", 6, casda::precSize,
+    itsSpec.addColumn("MAJ", "maj_axis", "[arcsec]", casda::precSize+2, casda::precSize,
                       "phys.angSize.smajAxis;em.radio;stat.fit",
                       "float", "col_maj_axis", "");
-    itsSpec.addColumn("MIN", "min_axis", "[arcsec]", 6, casda::precSize,
+    itsSpec.addColumn("MIN", "min_axis", "[arcsec]", casda::precSize+2, casda::precSize,
                       "phys.angSize.sminAxis;em.radio;stat.fit",
                       "float", "col_min_axis", "");
-    itsSpec.addColumn("PA", "pos_ang", "[deg]", 7, casda::precSize,
+    itsSpec.addColumn("PA", "pos_ang", "[deg]", casda::precSize+2, casda::precSize,
                       "phys.angSize;pos.posAng;em.radio;stat.fit",
                       "float", "col_pos_ang", "");
-    itsSpec.addColumn("MAJERR", "maj_axis_err", "[arcsec]", 6, casda::precSize,
+    itsSpec.addColumn("MAJERR", "maj_axis_err", "[arcsec]", casda::precSize+2, casda::precSize,
                       "stat.error;phys.angSize.smajAxis;em.radio",
                       "float", "col_maj_axis_err", "");
-    itsSpec.addColumn("MINERR", "min_axis_err", "[arcsec]", 6, casda::precSize,
+    itsSpec.addColumn("MINERR", "min_axis_err", "[arcsec]", casda::precSize+2, casda::precSize,
                       "stat.error;phys.angSize.sminAxis;em.radio",
                       "float", "col_min_axis_err", "");
-    itsSpec.addColumn("PAERR", "pos_ang_err", "[deg]", 7, casda::precSize,
+    itsSpec.addColumn("PAERR", "pos_ang_err", "[deg]", casda::precSize+2, casda::precSize,
                       "stat.error;phys.angSize;pos.posAng;em.radio",
                       "float", "col_pos_ang_err", "");
-    itsSpec.addColumn("MAJDECONV", "maj_axis_deconv", "[arcsec]", 6, casda::precSize,
+    itsSpec.addColumn("MAJDECONV", "maj_axis_deconv", "[arcsec]", casda::precSize+2, casda::precSize,
                       "phys.angSize.smajAxis;em.radio;askap:meta.deconvolved",
                       "float", "col_maj_axis_deconv", "");
-    itsSpec.addColumn("MINDECONV", "min_axis_deconv", "[arcsec]", 6, casda::precSize,
+    itsSpec.addColumn("MINDECONV", "min_axis_deconv", "[arcsec]", casda::precSize+2, casda::precSize,
                       "phys.angSize.sminAxis;em.radio;askap:meta.deconvolved",
                       "float", "col_min_axis_deconv", "");
-    itsSpec.addColumn("PADECONV", "pos_ang_deconv", "[deg]", 7, casda::precSize,
+    itsSpec.addColumn("PADECONV", "pos_ang_deconv", "[deg]", casda::precSize+2, casda::precSize,
                       "phys.angSize;pos.posAng;em.radio;askap:meta.deconvolved",
                       "float", "col_pos_ang_deconv", "");
-    itsSpec.addColumn("CHISQ", "chi_squared_fit", "--", 10, casda::precFlux,
+    itsSpec.addColumn("CHISQ", "chi_squared_fit", "--", casda::precFlux+2, casda::precFlux,
                       "stat.fit.chi2", "float", "col_chi_squared_fit", "");
-    itsSpec.addColumn("RMSFIT", "rms_fit_gauss", "[" + casda::fluxUnit + "]", 10, casda::precFlux,
-                      "stat.stdev;stat.fit", "float", "col_rms_fit_gauss", "");
-    itsSpec.addColumn("ALPHA", "spectral_index", "--", 8, casda::precSpecShape,
-                      "spect.index;em.radio", "float", "col_spectral_index", "");
-    itsSpec.addColumn("BETA", "spectral_curvature", "--", 8, casda::precSpecShape,
+    itsSpec.addColumn("RMSFIT", "rms_fit_gauss", "[" + casda::fluxUnit + "]", casda::precFlux+2, casda::precFlux,
+                      "stat.stdev;stat.fit", "double", "col_rms_fit_gauss", "");
+    itsSpec.addColumn("ALPHA", "spectral_index", "--", casda::precSpecShape+2, casda::precSpecShape,
+                      "spect.index;em.radio", "double", "col_spectral_index", "");
+    itsSpec.addColumn("BETA", "spectral_curvature", "--", casda::precSpecShape+2, casda::precSpecShape,
                       "askap:spect.curvature;em.radio", "float", "col_spectral_curvature", "");
-    itsSpec.addColumn("RMSIMAGE", "rms_image", "[" + casda::fluxUnit + "]", 10, casda::precFlux,
+    itsSpec.addColumn("RMSIMAGE", "rms_image", "[" + casda::fluxUnit + "]", casda::precFlux+2, casda::precFlux,
                       "stat.stdev;phot.flux.density", "float", "col_rms_image", "");
     itsSpec.addColumn("FLAG1", "has_siblings", "", 5, 0,
                       "meta.code", "int", "col_has_siblings", "");
@@ -214,11 +214,11 @@ void ComponentCatalogue::defineSpec()
 
 }
 
-void ComponentCatalogue::check()
+void ComponentCatalogue::check(bool checkTitle)
 {
     std::vector<CasdaComponent>::iterator comp;
     for (comp = itsComponents.begin(); comp != itsComponents.end(); comp++) {
-        comp->checkSpec(itsSpec);
+        comp->checkSpec(itsSpec, checkTitle);
     }
 
 }
@@ -232,8 +232,9 @@ std::vector<CasdaComponent> &ComponentCatalogue::components()
 
 void ComponentCatalogue::write()
 {
-    this->check();
+    this->check(false);
     this->writeVOT();
+    this->check(true);
     this->writeASCII();
     this->writeAnnotations();
 }

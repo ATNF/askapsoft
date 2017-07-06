@@ -452,19 +452,20 @@ void HiEmissionCatalogue::defineSpec()
 
 }
 
-void HiEmissionCatalogue::check()
+void HiEmissionCatalogue::check(bool checkTitle)
 {
     std::vector<CasdaHiEmissionObject>::iterator obj;
     for (obj = itsObjects.begin(); obj != itsObjects.end(); obj++) {
-        obj->checkSpec(itsSpec);
+        obj->checkSpec(itsSpec, checkTitle);
     }
 
 }
 
 void HiEmissionCatalogue::write()
 {
-    this->check();
+    this->check(false);
     this->writeVOT();
+    this->check(true);
     this->writeASCII();
 }
 

@@ -218,19 +218,20 @@ void RMCatalogue::defineSpec()
 
 }
 
-void RMCatalogue::check()
+void RMCatalogue::check(bool checkTitle)
 {
     std::vector<CasdaPolarisationEntry>::iterator comp;
     for (comp = itsComponents.begin(); comp != itsComponents.end(); comp++) {
-        comp->checkSpec(itsSpec);
+        comp->checkSpec(itsSpec, checkTitle);
     }
 
 }
 
 void RMCatalogue::write()
 {
-    this->check();
+    this->check(false);
     this->writeVOT();
+    this->check(true);
     this->writeASCII();
 }
 

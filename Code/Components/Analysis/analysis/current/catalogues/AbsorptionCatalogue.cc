@@ -182,19 +182,20 @@ void AbsorptionCatalogue::defineSpec()
 
 }
 
-void AbsorptionCatalogue::check()
+void AbsorptionCatalogue::check(bool checkTitle)
 {
     std::vector<CasdaAbsorptionObject>::iterator obj;
     for (obj = itsObjects.begin(); obj != itsObjects.end(); obj++) {
-        obj->checkSpec(itsSpec);
+        obj->checkSpec(itsSpec, checkTitle);
     }
 
 }
 
 void AbsorptionCatalogue::write()
 {
-    this->check();
+    this->check(false);
     this->writeVOT();
+    this->check(true);
     this->writeASCII();
 }
 

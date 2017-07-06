@@ -242,79 +242,79 @@ void CasdaAbsorptionObject::printTableEntry(std::ostream &stream,
 
 }
 
-void CasdaAbsorptionObject::checkCol(duchamp::Catalogues::Column &column)
+void CasdaAbsorptionObject::checkCol(duchamp::Catalogues::Column &column, bool checkTitle)
 {
     std::string type = column.type();
     if (type == "IMAGEID") {
-        column.check(itsImageID);
+        column.check(itsImageID, checkTitle);
     } else if (type == "DATEOBS") {
-        column.check(itsDate);
+        column.check(itsDate, checkTitle);
     } else if (type == "COMP_ID") {
-        column.check(itsComponentID);
+        column.check(itsComponentID, checkTitle);
     } else if (type == "CONTFLUX") {
-        column.check(itsContinuumFlux);
+        column.check(itsContinuumFlux, checkTitle);
     } else if (type == "ID") {
-        column.check(itsObjectID);
+        column.check(itsObjectID, checkTitle);
     } else if (type == "NAME") {
-        column.check(itsName);
+        column.check(itsName, checkTitle);
     } else if (type == "RA") {
-        column.check(itsRAs);
+        column.check(itsRAs, checkTitle);
     } else if (type == "DEC") {
-        column.check(itsDECs);
+        column.check(itsDECs, checkTitle);
     } else if (type == "RAJD") {
-        column.check(itsRA.value());
+        column.check(itsRA.value(), checkTitle);
     } else if (type == "RAERR") {
-        column.check(itsRA.error());
+        column.check(itsRA.error(), checkTitle);
     } else if (type == "DECJD") {
-        column.check(itsDEC.value());
+        column.check(itsDEC.value(), checkTitle);
     } else if (type == "DECERR") {
-        column.check(itsDEC.error());
+        column.check(itsDEC.error(), checkTitle);
     } else if (type == "FREQ_UW") {
-        column.check(itsFreqUW.value());
+        column.check(itsFreqUW.value(), checkTitle);
     } else if (type == "FREQ_UW_ERR") {
-        column.check(itsFreqUW.error());
+        column.check(itsFreqUW.error(), checkTitle);
     } else if (type == "FREQ_W") {
-        column.check(itsFreqW.value());
+        column.check(itsFreqW.value(), checkTitle);
     } else if (type == "FREQ_W_ERR") {
-        column.check(itsFreqW.error());
+        column.check(itsFreqW.error(), checkTitle);
     } else if (type == "Z_HI_UW") {
-        column.check(itsZHI_UW.value());
+        column.check(itsZHI_UW.value(), checkTitle);
     } else if (type == "Z_HI_UW_ERR") {
-        column.check(itsZHI_UW.error());
+        column.check(itsZHI_UW.error(), checkTitle);
     } else if (type == "Z_HI_W") {
-        column.check(itsZHI_W.value());
+        column.check(itsZHI_W.value(), checkTitle);
     } else if (type == "Z_HI_W_ERR") {
-        column.check(itsZHI_W.error());
+        column.check(itsZHI_W.error(), checkTitle);
     } else if (type == "Z_HI_PEAK") {
-        column.check(itsZHI_peak.value());
+        column.check(itsZHI_peak.value(), checkTitle);
     } else if (type == "Z_HI_PEAK_ERR") {
-        column.check(itsZHI_peak.error());
+        column.check(itsZHI_peak.error(), checkTitle);
     } else if (type == "W50") {
-        column.check(itsW50.value());
+        column.check(itsW50.value(), checkTitle);
     } else if (type == "W50_ERR") {
-        column.check(itsW50.error());
+        column.check(itsW50.error(), checkTitle);
     } else if (type == "W20") {
-        column.check(itsW20.value());
+        column.check(itsW20.value(), checkTitle);
     } else if (type == "W20_ERR") {
-        column.check(itsW20.error());
+        column.check(itsW20.error(), checkTitle);
     } else if (type == "RMS_IMAGECUBE") {
-        column.check(itsRMSimagecube);
+        column.check(itsRMSimagecube, checkTitle);
     } else if (type == "OPT_DEPTH_PEAK") {
-        column.check(itsOpticalDepth_peak.value());
+        column.check(itsOpticalDepth_peak.value(), checkTitle);
     } else if (type == "OPT_DEPTH_PEAK_ERR") {
-        column.check(itsOpticalDepth_peak.error());
+        column.check(itsOpticalDepth_peak.error(), checkTitle);
     } else if (type == "OPT_DEPTH_INT") {
-        column.check(itsOpticalDepth_int.value());
+        column.check(itsOpticalDepth_int.value(), checkTitle);
     } else if (type == "OPT_DEPTH_INT_ERR") {
-        column.check(itsOpticalDepth_int.error());
+        column.check(itsOpticalDepth_int.error(), checkTitle);
     } else if (type == "FLAG1") {
-        column.check(itsFlagResolved);
+        column.check(itsFlagResolved, checkTitle);
     } else if (type == "FLAG2") {
-        column.check(itsFlag2);
+        column.check(itsFlag2, checkTitle);
     } else if (type == "FLAG3") {
-        column.check(itsFlag3);
+        column.check(itsFlag3, checkTitle);
     } else if (type == "COMMENT") {
-        column.check(itsComment);
+        column.check(itsComment, checkTitle);
     } else {
         ASKAPTHROW(AskapError,
                    "Unknown column type " << type);
@@ -322,10 +322,10 @@ void CasdaAbsorptionObject::checkCol(duchamp::Catalogues::Column &column)
 
 }
 
-void CasdaAbsorptionObject::checkSpec(duchamp::Catalogues::CatalogueSpecification &spec)
+void CasdaAbsorptionObject::checkSpec(duchamp::Catalogues::CatalogueSpecification &spec, bool checkTitle)
 {
     for (size_t i = 0; i < spec.size(); i++) {
-        this->checkCol(spec.column(i));
+        this->checkCol(spec.column(i), checkTitle);
     }
 }
 

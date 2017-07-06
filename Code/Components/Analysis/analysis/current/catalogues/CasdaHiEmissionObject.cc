@@ -663,269 +663,269 @@ void CasdaHiEmissionObject::printTableEntry(std::ostream &stream,
 
 }
 
-void CasdaHiEmissionObject::checkCol(duchamp::Catalogues::Column &column)
+void CasdaHiEmissionObject::checkCol(duchamp::Catalogues::Column &column, bool checkTitle)
 {
     std::string type = column.type();
     if (type == "ID") {
-        column.check(itsObjectID);
+        column.check(itsObjectID, checkTitle);
     } else if (type == "NAME") {
-        column.check(itsName);
+        column.check(itsName, checkTitle);
     } else if (type == "RA") {
-        column.check(itsRAs_w);
+        column.check(itsRAs_w, checkTitle);
     } else if (type == "DEC") {
-        column.check(itsDECs_w);
+        column.check(itsDECs_w, checkTitle);
     } else if (type == "RA_W") {
-        column.check(itsRA_w.value());
+        column.check(itsRA_w.value(), checkTitle);
     } else if (type == "RA_W_ERR") {
-        column.check(itsRA_w.error());
+        column.check(itsRA_w.error(), checkTitle);
     } else if (type == "DEC_W") {
-        column.check(itsDEC_w.value());
+        column.check(itsDEC_w.value(), checkTitle);
     } else if (type == "DEC_W_ERR") {
-        column.check(itsDEC_w.error());
+        column.check(itsDEC_w.error(), checkTitle);
     } else if (type == "RA_UW") {
-        column.check(itsRA_uw.value());
+        column.check(itsRA_uw.value(), checkTitle);
     } else if (type == "RA_UW_ERR") {
-        column.check(itsRA_uw.error());
+        column.check(itsRA_uw.error(), checkTitle);
     } else if (type == "DEC_UW") {
-        column.check(itsDEC_uw.value());
+        column.check(itsDEC_uw.value(), checkTitle);
     } else if (type == "DEC_UW_ERR") {
-        column.check(itsDEC_uw.error());
+        column.check(itsDEC_uw.error(), checkTitle);
     } else if (type == "GLONG_W") {
-        column.check(itsGlong_w.value());
+        column.check(itsGlong_w.value(), checkTitle);
     } else if (type == "GLONG_W_ERR") {
-        column.check(itsGlong_w.error());
+        column.check(itsGlong_w.error(), checkTitle);
     } else if (type == "GLAT_W") {
-        column.check(itsGlat_w.value());
+        column.check(itsGlat_w.value(), checkTitle);
     } else if (type == "GLAT_W_ERR") {
-        column.check(itsGlat_w.error());
+        column.check(itsGlat_w.error(), checkTitle);
     } else if (type == "GLONG_UW") {
-        column.check(itsGlong_uw.value());
+        column.check(itsGlong_uw.value(), checkTitle);
     } else if (type == "GLONG_UW_ERR") {
-        column.check(itsGlong_uw.error());
+        column.check(itsGlong_uw.error(), checkTitle);
     } else if (type == "GLAT_UW") {
-        column.check(itsGlat_uw.value());
+        column.check(itsGlat_uw.value(), checkTitle);
     } else if (type == "GLAT_UW_ERR") {
-        column.check(itsGlat_uw.error());
+        column.check(itsGlat_uw.error(), checkTitle);
     } else if (type == "MAJ") {
-        column.check(itsMajorAxis);
+        column.check(itsMajorAxis, checkTitle);
     } else if (type == "MIN") {
-        column.check(itsMinorAxis);
+        column.check(itsMinorAxis, checkTitle);
     } else if (type == "PA") {
-        column.check(itsPositionAngle);
+        column.check(itsPositionAngle, checkTitle);
     } else if (type == "MAJFIT") {
-        column.check(itsMajorAxis_fit.value());
+        column.check(itsMajorAxis_fit.value(), checkTitle);
     } else if (type == "MAJFIT_ERR") {
-        column.check(itsMajorAxis_fit.error());
+        column.check(itsMajorAxis_fit.error(), checkTitle);
     } else if (type == "MINFIT") {
-        column.check(itsMinorAxis_fit.value());
+        column.check(itsMinorAxis_fit.value(), checkTitle);
     } else if (type == "MINFIT_ERR") {
-        column.check(itsMinorAxis_fit.error());
+        column.check(itsMinorAxis_fit.error(), checkTitle);
     } else if (type == "PAFIT") {
-        column.check(itsPositionAngle_fit.value());
+        column.check(itsPositionAngle_fit.value(), checkTitle);
     } else if (type == "PAFIT_ERR") {
-        column.check(itsPositionAngle_fit.error());
+        column.check(itsPositionAngle_fit.error(), checkTitle);
     } else if (type == "SIZEX") {
-        column.check(itsSizeX);
+        column.check(itsSizeX, checkTitle);
     } else if (type == "SIZEY") {
-        column.check(itsSizeY);
+        column.check(itsSizeY, checkTitle);
     } else if (type == "SIZEZ") {
-        column.check(itsSizeZ);
+        column.check(itsSizeZ, checkTitle);
     } else if (type == "NVOX") {
-        column.check(itsNumVoxels);
+        column.check(itsNumVoxels, checkTitle);
     } else if (type == "ASYMM2D") {
-        column.check(itsAsymmetry2d.value());
+        column.check(itsAsymmetry2d.value(), checkTitle);
     } else if (type == "ASYMM2D_ERR") {
-        column.check(itsAsymmetry2d.error());
+        column.check(itsAsymmetry2d.error(), checkTitle);
     } else if (type == "ASYMM3D") {
-        column.check(itsAsymmetry3d.value());
+        column.check(itsAsymmetry3d.value(), checkTitle);
     } else if (type == "ASYMM3D_ERR") {
-        column.check(itsAsymmetry3d.error());
+        column.check(itsAsymmetry3d.error(), checkTitle);
     } else if (type == "FREQ_UW") {
-        column.check(itsFreq_uw.value());
+        column.check(itsFreq_uw.value(), checkTitle);
     } else if (type == "FREQ_UW_ERR") {
-        column.check(itsFreq_uw.error());
+        column.check(itsFreq_uw.error(), checkTitle);
     } else if (type == "FREQ_W") {
-        column.check(itsFreq_w.value());
+        column.check(itsFreq_w.value(), checkTitle);
     } else if (type == "FREQ_W_ERR") {
-        column.check(itsFreq_w.error());
+        column.check(itsFreq_w.error(), checkTitle);
     } else if (type == "FREQ_PEAK") {
-        column.check(itsFreq_peak);
+        column.check(itsFreq_peak, checkTitle);
     } else if (type == "VEL_UW") {
-        column.check(itsVelHI_uw.value());
+        column.check(itsVelHI_uw.value(), checkTitle);
     } else if (type == "VEL_UW_ERR") {
-        column.check(itsVelHI_uw.error());
+        column.check(itsVelHI_uw.error(), checkTitle);
     } else if (type == "VEL_W") {
-        column.check(itsVelHI_w.value());
+        column.check(itsVelHI_w.value(), checkTitle);
     } else if (type == "VEL_W_ERR") {
-        column.check(itsVelHI_w.error());
+        column.check(itsVelHI_w.error(), checkTitle);
     } else if (type == "VEL_PEAK") {
-        column.check(itsVelHI_peak);
+        column.check(itsVelHI_peak, checkTitle);
     } else if (type == "FINT") {
-        column.check(itsIntegFlux.value());
+        column.check(itsIntegFlux.value(), checkTitle);
     } else if (type == "FINT_ERR") {
-        column.check(itsIntegFlux.error());
+        column.check(itsIntegFlux.error(), checkTitle);
     } else if (type == "FLUXMAX") {
-        column.check(itsFluxMax);
+        column.check(itsFluxMax, checkTitle);
     } else if (type == "FLUXMIN") {
-        column.check(itsFluxMin);
+        column.check(itsFluxMin, checkTitle);
     } else if (type == "FLUXMEAN") {
-        column.check(itsFluxMean);
+        column.check(itsFluxMean, checkTitle);
     } else if (type == "FLUXSTDDEV") {
-        column.check(itsFluxStddev);
+        column.check(itsFluxStddev, checkTitle);
     } else if (type == "FLUXRMS") {
-        column.check(itsFluxRMS);
+        column.check(itsFluxRMS, checkTitle);
     } else if (type == "RMS_IMAGECUBE") {
-        column.check(itsRMSimagecube);
+        column.check(itsRMSimagecube, checkTitle);
     } else if (type == "W50_FREQ") {
-        column.check(itsW50_freq.value());
+        column.check(itsW50_freq.value(), checkTitle);
     } else if (type == "W50_FREQ_ERR") {
-        column.check(itsW50_freq.error());
+        column.check(itsW50_freq.error(), checkTitle);
     } else if (type == "CW50_FREQ") {
-        column.check(itsCW50_freq.value());
+        column.check(itsCW50_freq.value(), checkTitle);
     } else if (type == "CW50_FREQ_ERR") {
-        column.check(itsCW50_freq.error());
+        column.check(itsCW50_freq.error(), checkTitle);
     } else if (type == "W20_FREQ") {
-        column.check(itsW20_freq.value());
+        column.check(itsW20_freq.value(), checkTitle);
     } else if (type == "W20_FREQ_ERR") {
-        column.check(itsW20_freq.error());
+        column.check(itsW20_freq.error(), checkTitle);
     } else if (type == "CW20_FREQ") {
-        column.check(itsCW20_freq.value());
+        column.check(itsCW20_freq.value(), checkTitle);
     } else if (type == "CW20_FREQ_ERR") {
-        column.check(itsCW20_freq.error());
+        column.check(itsCW20_freq.error(), checkTitle);
     } else if (type == "W50_VEL") {
-        column.check(itsW50_vel.value());
+        column.check(itsW50_vel.value(), checkTitle);
     } else if (type == "W50_VEL_ERR") {
-        column.check(itsW50_vel.error());
+        column.check(itsW50_vel.error(), checkTitle);
     } else if (type == "CW50_VEL") {
-        column.check(itsCW50_vel.value());
+        column.check(itsCW50_vel.value(), checkTitle);
     } else if (type == "CW50_VEL_ERR") {
-        column.check(itsCW50_vel.error());
+        column.check(itsCW50_vel.error(), checkTitle);
     } else if (type == "W20_VEL") {
-        column.check(itsW20_vel.value());
+        column.check(itsW20_vel.value(), checkTitle);
     } else if (type == "W20_VEL_ERR") {
-        column.check(itsW20_vel.error());
+        column.check(itsW20_vel.error(), checkTitle);
     } else if (type == "CW20_VEL") {
-        column.check(itsCW20_vel.value());
+        column.check(itsCW20_vel.value(), checkTitle);
     } else if (type == "CW20_VEL_ERR") {
-        column.check(itsCW20_vel.error());
+        column.check(itsCW20_vel.error(), checkTitle);
     } else if (type == "FREQ_W50_UW") {
-        column.check(itsFreq_W50clip_uw.value());
+        column.check(itsFreq_W50clip_uw.value(), checkTitle);
     } else if (type == "FREQ_W50_UW_ERR") {
-        column.check(itsFreq_W50clip_uw.error());
+        column.check(itsFreq_W50clip_uw.error(), checkTitle);
     } else if (type == "FREQ_CW50_UW") {
-        column.check(itsFreq_CW50clip_uw.value());
+        column.check(itsFreq_CW50clip_uw.value(), checkTitle);
     } else if (type == "FREQ_CW50_UW_ERR") {
-        column.check(itsFreq_CW50clip_uw.error());
+        column.check(itsFreq_CW50clip_uw.error(), checkTitle);
     } else if (type == "FREQ_W20_UW") {
-        column.check(itsFreq_W20clip_uw.value());
+        column.check(itsFreq_W20clip_uw.value(), checkTitle);
     } else if (type == "FREQ_W20_UW_ERR") {
-        column.check(itsFreq_W20clip_uw.error());
+        column.check(itsFreq_W20clip_uw.error(), checkTitle);
     } else if (type == "FREQ_CW20_UW") {
-        column.check(itsFreq_CW20clip_uw.value());
+        column.check(itsFreq_CW20clip_uw.value(), checkTitle);
     } else if (type == "FREQ_CW20_UW_ERR") {
-        column.check(itsFreq_CW20clip_uw.error());
+        column.check(itsFreq_CW20clip_uw.error(), checkTitle);
     } else if (type == "VEL_W50_UW") {
-        column.check(itsVelHI_W50clip_uw.value());
+        column.check(itsVelHI_W50clip_uw.value(), checkTitle);
     } else if (type == "VEL_W50_UW_ERR") {
-        column.check(itsVelHI_W50clip_uw.error());
+        column.check(itsVelHI_W50clip_uw.error(), checkTitle);
     } else if (type == "VEL_CW50_UW") {
-        column.check(itsVelHI_CW50clip_uw.value());
+        column.check(itsVelHI_CW50clip_uw.value(), checkTitle);
     } else if (type == "VEL_CW50_UW_ERR") {
-        column.check(itsVelHI_CW50clip_uw.error());
+        column.check(itsVelHI_CW50clip_uw.error(), checkTitle);
     } else if (type == "VEL_W20_UW") {
-        column.check(itsVelHI_W20clip_uw.value());
+        column.check(itsVelHI_W20clip_uw.value(), checkTitle);
     } else if (type == "VEL_W20_UW_ERR") {
-        column.check(itsVelHI_W20clip_uw.error());
+        column.check(itsVelHI_W20clip_uw.error(), checkTitle);
     } else if (type == "VEL_CW20_UW") {
-        column.check(itsVelHI_CW20clip_uw.value());
+        column.check(itsVelHI_CW20clip_uw.value(), checkTitle);
     } else if (type == "VEL_CW20_UW_ERR") {
-        column.check(itsVelHI_CW20clip_uw.error());
+        column.check(itsVelHI_CW20clip_uw.error(), checkTitle);
     } else if (type == "FREQ_W50_W") {
-        column.check(itsFreq_W50clip_w.value());
+        column.check(itsFreq_W50clip_w.value(), checkTitle);
     } else if (type == "FREQ_W50_W_ERR") {
-        column.check(itsFreq_W50clip_w.error());
+        column.check(itsFreq_W50clip_w.error(), checkTitle);
     } else if (type == "FREQ_CW50_W") {
-        column.check(itsFreq_CW50clip_w.value());
+        column.check(itsFreq_CW50clip_w.value(), checkTitle);
     } else if (type == "FREQ_CW50_W_ERR") {
-        column.check(itsFreq_CW50clip_w.error());
+        column.check(itsFreq_CW50clip_w.error(), checkTitle);
     } else if (type == "FREQ_W20_W") {
-        column.check(itsFreq_W20clip_w.value());
+        column.check(itsFreq_W20clip_w.value(), checkTitle);
     } else if (type == "FREQ_W20_W_ERR") {
-        column.check(itsFreq_W20clip_w.error());
+        column.check(itsFreq_W20clip_w.error(), checkTitle);
     } else if (type == "FREQ_CW20_W") {
-        column.check(itsFreq_CW20clip_w.value());
+        column.check(itsFreq_CW20clip_w.value(), checkTitle);
     } else if (type == "FREQ_CW20_W_ERR") {
-        column.check(itsFreq_CW20clip_w.error());
+        column.check(itsFreq_CW20clip_w.error(), checkTitle);
     } else if (type == "VEL_W50_W") {
-        column.check(itsVelHI_W50clip_w.value());
+        column.check(itsVelHI_W50clip_w.value(), checkTitle);
     } else if (type == "VEL_W50_W_ERR") {
-        column.check(itsVelHI_W50clip_w.error());
+        column.check(itsVelHI_W50clip_w.error(), checkTitle);
     } else if (type == "VEL_CW50_W") {
-        column.check(itsVelHI_CW50clip_w.value());
+        column.check(itsVelHI_CW50clip_w.value(), checkTitle);
     } else if (type == "VEL_CW50_W_ERR") {
-        column.check(itsVelHI_CW50clip_w.error());
+        column.check(itsVelHI_CW50clip_w.error(), checkTitle);
     } else if (type == "VEL_W20_W") {
-        column.check(itsVelHI_W20clip_w.value());
+        column.check(itsVelHI_W20clip_w.value(), checkTitle);
     } else if (type == "VEL_W20_W_ERR") {
-        column.check(itsVelHI_W20clip_w.error());
+        column.check(itsVelHI_W20clip_w.error(), checkTitle);
     } else if (type == "VEL_CW20_W") {
-        column.check(itsVelHI_CW20clip_w.value());
+        column.check(itsVelHI_CW20clip_w.value(), checkTitle);
     } else if (type == "VEL_CW20_W_ERR") {
-        column.check(itsVelHI_CW20clip_w.error());
+        column.check(itsVelHI_CW20clip_w.error(), checkTitle);
     } else if (type == "FINT_W50") {
-        column.check(itsIntegFlux_W50clip.value());
+        column.check(itsIntegFlux_W50clip.value(), checkTitle);
     } else if (type == "FINT_W50_ERR") {
-        column.check(itsIntegFlux_W50clip.error());
+        column.check(itsIntegFlux_W50clip.error(), checkTitle);
     } else if (type == "FINT_CW50") {
-        column.check(itsIntegFlux_CW50clip.value());
+        column.check(itsIntegFlux_CW50clip.value(), checkTitle);
     } else if (type == "FINT_CW50_ERR") {
-        column.check(itsIntegFlux_CW50clip.error());
+        column.check(itsIntegFlux_CW50clip.error(), checkTitle);
     } else if (type == "FINT_W20") {
-        column.check(itsIntegFlux_W20clip.value());
+        column.check(itsIntegFlux_W20clip.value(), checkTitle);
     } else if (type == "FINT_W20_ERR") {
-        column.check(itsIntegFlux_W20clip.error());
+        column.check(itsIntegFlux_W20clip.error(), checkTitle);
     } else if (type == "FINT_CW20") {
-        column.check(itsIntegFlux_CW20clip.value());
+        column.check(itsIntegFlux_CW20clip.value(), checkTitle);
     } else if (type == "FINT_CW20_ERR") {
-        column.check(itsIntegFlux_CW20clip.error());
+        column.check(itsIntegFlux_CW20clip.error(), checkTitle);
     } else if (type == "BF_A") {
-        column.check(itsBFfit_a.value());
+        column.check(itsBFfit_a.value(), checkTitle);
     } else if (type == "BF_A_ERR") {
-        column.check(itsBFfit_a.error());
+        column.check(itsBFfit_a.error(), checkTitle);
     } else if (type == "BF_W") {
-        column.check(itsBFfit_w.value());
+        column.check(itsBFfit_w.value(), checkTitle);
     } else if (type == "BF_W_ERR") {
-        column.check(itsBFfit_w.error());
+        column.check(itsBFfit_w.error(), checkTitle);
     } else if (type == "BF_B1") {
-        column.check(itsBFfit_b1.value());
+        column.check(itsBFfit_b1.value(), checkTitle);
     } else if (type == "BF_B1_ERR") {
-        column.check(itsBFfit_b1.error());
+        column.check(itsBFfit_b1.error(), checkTitle);
     } else if (type == "BF_B2") {
-        column.check(itsBFfit_b2.value());
+        column.check(itsBFfit_b2.value(), checkTitle);
     } else if (type == "BF_B2_ERR") {
-        column.check(itsBFfit_b2.value());
+        column.check(itsBFfit_b2.value(), checkTitle);
     } else if (type == "BF_XE") {
-        column.check(itsBFfit_xe.value());
+        column.check(itsBFfit_xe.value(), checkTitle);
     } else if (type == "BF_XE_ERR") {
-        column.check(itsBFfit_xe.error());
+        column.check(itsBFfit_xe.error(), checkTitle);
     } else if (type == "BF_XP") {
-        column.check(itsBFfit_xp.value());
+        column.check(itsBFfit_xp.value(), checkTitle);
     } else if (type == "BF_XP_ERR") {
-        column.check(itsBFfit_xp.error());
+        column.check(itsBFfit_xp.error(), checkTitle);
     } else if (type == "BF_C") {
-        column.check(itsBFfit_c.value());
+        column.check(itsBFfit_c.value(), checkTitle);
     } else if (type == "BF_C_ERR") {
-        column.check(itsBFfit_c.error());
+        column.check(itsBFfit_c.error(), checkTitle);
     } else if (type == "BF_N") {
-        column.check(itsBFfit_n.value());
+        column.check(itsBFfit_n.value(), checkTitle);
     } else if (type == "BF_N_ERR") {
-        column.check(itsBFfit_n.error());
+        column.check(itsBFfit_n.error(), checkTitle);
     } else if (type == "FLAG1") {
-        column.check(itsFlagResolved);
+        column.check(itsFlagResolved, checkTitle);
     } else if (type == "FLAG2") {
-        column.check(itsFlag2);
+        column.check(itsFlag2, checkTitle);
     } else if (type == "FLAG3") {
-        column.check(itsFlag3);
+        column.check(itsFlag3, checkTitle);
     } else {
         ASKAPTHROW(AskapError,
                    "Unknown column type " << type);
@@ -933,10 +933,10 @@ void CasdaHiEmissionObject::checkCol(duchamp::Catalogues::Column &column)
 
 }
 
-void CasdaHiEmissionObject::checkSpec(duchamp::Catalogues::CatalogueSpecification &spec)
+void CasdaHiEmissionObject::checkSpec(duchamp::Catalogues::CatalogueSpecification &spec, bool checkTitle)
 {
     for (size_t i = 0; i < spec.size(); i++) {
-        this->checkCol(spec.column(i));
+        this->checkCol(spec.column(i), checkTitle);
     }
 }
 

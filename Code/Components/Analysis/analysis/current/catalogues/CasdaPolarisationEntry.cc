@@ -273,95 +273,95 @@ void CasdaPolarisationEntry::printTableEntry(std::ostream &stream,
     }
 }
 
-void CasdaPolarisationEntry::checkCol(duchamp::Catalogues::Column &column)
+void CasdaPolarisationEntry::checkCol(duchamp::Catalogues::Column &column, bool checkTitle)
 {
     std::string type = column.type();
     if (type == "ID") {
-        column.check(itsComponentID);
+        column.check(itsComponentID, checkTitle);
     } else if (type == "NAME") {
-        column.check(itsName);
+        column.check(itsName, checkTitle);
     } else if (type == "RAJD") {
-        column.check(itsRA);
+        column.check(itsRA, checkTitle);
     } else if (type == "DECJD") {
-        column.check(itsDec);
+        column.check(itsDec, checkTitle);
     } else if (type == "IFLUX") {
-        column.check(itsFluxImedian);
+        column.check(itsFluxImedian, checkTitle);
     } else if (type == "QFLUX") {
-        column.check(itsFluxQmedian);
+        column.check(itsFluxQmedian, checkTitle);
     } else if (type == "UFLUX") {
-        column.check(itsFluxUmedian);
+        column.check(itsFluxUmedian, checkTitle);
     } else if (type == "VFLUX") {
-        column.check(itsFluxImedian);
+        column.check(itsFluxImedian, checkTitle);
     } else if (type == "RMS_I") {
-        column.check(itsRmsI);
+        column.check(itsRmsI, checkTitle);
     } else if (type == "RMS_Q") {
-        column.check(itsRmsQ);
+        column.check(itsRmsQ, checkTitle);
     } else if (type == "RMS_U") {
-        column.check(itsRmsU);
+        column.check(itsRmsU, checkTitle);
     } else if (type == "RMS_V") {
-        column.check(itsRmsV);
+        column.check(itsRmsV, checkTitle);
     } else if (type == "CO1") {
-        column.check(itsPolyCoeff0);
+        column.check(itsPolyCoeff0, checkTitle);
     } else if (type == "CO2") {
-        column.check(itsPolyCoeff1);
+        column.check(itsPolyCoeff1, checkTitle);
     } else if (type == "CO3") {
-        column.check(itsPolyCoeff2);
+        column.check(itsPolyCoeff2, checkTitle);
     } else if (type == "CO4") {
-        column.check(itsPolyCoeff3);
+        column.check(itsPolyCoeff3, checkTitle);
     } else if (type == "CO5") {
-        column.check(itsPolyCoeff4);
+        column.check(itsPolyCoeff4, checkTitle);
     } else if (type == "LAMSQ") {
-        column.check(itsLambdaSqRef);
+        column.check(itsLambdaSqRef, checkTitle);
     } else if (type == "RMSF") {
-        column.check(itsRmsfFwhm);
+        column.check(itsRmsfFwhm, checkTitle);
     } else if (type == "POLPEAK") {
-        column.check(itsPintPeak.value());
+        column.check(itsPintPeak.value(), checkTitle);
     } else if (type == "POLPEAKDB") {
-        column.check(itsPintPeakDebias);
+        column.check(itsPintPeakDebias, checkTitle);
     } else if (type == "POLPEAKERR") {
-        column.check(itsPintPeak.error());
+        column.check(itsPintPeak.error(), checkTitle);
     } else if (type == "POLPEAKFIT") {
-        column.check(itsPintPeakFit.value());
+        column.check(itsPintPeakFit.value(), checkTitle);
     } else if (type == "POLPEAKFITDB") {
-        column.check(itsPintPeakFitDebias);
+        column.check(itsPintPeakFitDebias, checkTitle);
     } else if (type == "POLPEAKFITERR") {
-        column.check(itsPintPeakFit.error());
+        column.check(itsPintPeakFit.error(), checkTitle);
     } else if (type == "POLPEAKFITSNR") {
-        column.check(itsPintFitSNR.value());
+        column.check(itsPintFitSNR.value(), checkTitle);
     } else if (type == "POLPEAKFITSNRERR") {
-        column.check(itsPintFitSNR.error());
+        column.check(itsPintFitSNR.error(), checkTitle);
     } else if (type == "FDPEAK") {
-        column.check(itsPhiPeak.value());
+        column.check(itsPhiPeak.value(), checkTitle);
     } else if (type == "FDPEAKERR") {
-        column.check(itsPhiPeak.error());
+        column.check(itsPhiPeak.error(), checkTitle);
     } else if (type == "FDPEAKFIT") {
-        column.check(itsPhiPeakFit.value());
+        column.check(itsPhiPeakFit.value(), checkTitle);
     } else if (type == "FDPEAKFITERR") {
-        column.check(itsPhiPeakFit.error());
+        column.check(itsPhiPeakFit.error(), checkTitle);
     } else if (type == "POLANG") {
-        column.check(itsPolAngleRef.value());
+        column.check(itsPolAngleRef.value(), checkTitle);
     } else if (type == "POLANGERR") {
-        column.check(itsPolAngleRef.error());
+        column.check(itsPolAngleRef.error(), checkTitle);
     } else if (type == "POLANG0") {
-        column.check(itsPolAngleZero.value());
+        column.check(itsPolAngleZero.value(), checkTitle);
     } else if (type == "POLANG0ERR") {
-        column.check(itsPolAngleZero.error());
+        column.check(itsPolAngleZero.error(), checkTitle);
     } else if (type == "POLFRAC") {
-        column.check(itsFracPol.value());
+        column.check(itsFracPol.value(), checkTitle);
     } else if (type == "POLFRACERR") {
-        column.check(itsFracPol.error());
+        column.check(itsFracPol.error(), checkTitle);
     } else if (type == "COMPLEX1") {
-        column.check(itsComplexity);
+        column.check(itsComplexity, checkTitle);
     } else if (type == "COMPLEX2") {
-        column.check(itsComplexity_screen);
+        column.check(itsComplexity_screen, checkTitle);
     } else if (type == "FLAG1") {
-        column.check(itsFlagDetection);
+        column.check(itsFlagDetection, checkTitle);
     } else if (type == "FLAG2") {
-        column.check(itsFlagEdge);
+        column.check(itsFlagEdge, checkTitle);
     } else if (type == "FLAG3") {
-        column.check(itsFlag3);
+        column.check(itsFlag3, checkTitle);
     } else if (type == "FLAG4") {
-        column.check(itsFlag4);
+        column.check(itsFlag4, checkTitle);
     } else {
         ASKAPTHROW(AskapError,
                    "Unknown column type " << type);
@@ -369,10 +369,10 @@ void CasdaPolarisationEntry::checkCol(duchamp::Catalogues::Column &column)
 
 }
 
-void CasdaPolarisationEntry::checkSpec(duchamp::Catalogues::CatalogueSpecification &spec)
+void CasdaPolarisationEntry::checkSpec(duchamp::Catalogues::CatalogueSpecification &spec, bool checkTitle)
 {
     for (size_t i = 0; i < spec.size(); i++) {
-        this->checkCol(spec.column(i));
+        this->checkCol(spec.column(i), checkTitle);
     }
 }
 

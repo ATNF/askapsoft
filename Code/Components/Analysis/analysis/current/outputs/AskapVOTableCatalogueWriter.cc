@@ -161,6 +161,7 @@ void AskapVOTableCatalogueWriter::writeEntry(T &obj)
         itsFileStream << "          ";
         for (size_t i = 0; i < itsColumnSpecification->size(); i++) {
             Column col = itsColumnSpecification->column(i);
+            std::cout << "COLUMN -- " << col.getName() << " " << col.getPrecision() << "\n";
             itsFileStream << "<TD>";
             obj.printTableEntry(itsFileStream, col);
             itsFileStream << "</TD>";

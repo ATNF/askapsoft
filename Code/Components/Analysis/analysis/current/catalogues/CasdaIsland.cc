@@ -204,67 +204,67 @@ void CasdaIsland::printTableEntry(std::ostream &stream,
 
 }
 
-void CasdaIsland::checkCol(duchamp::Catalogues::Column &column)
+void CasdaIsland::checkCol(duchamp::Catalogues::Column &column, bool checkTitle)
 {
     std::string type = column.type();
     if (type == "ID") {
-        column.check(itsIslandID);
+        column.check(itsIslandID, checkTitle);
     } else if (type == "NAME") {
-        column.check(itsName);
+        column.check(itsName, checkTitle);
     } else if (type == "NCOMP") {
-        column.check(itsNumComponents);
+        column.check(itsNumComponents, checkTitle);
     } else if (type == "RA") {
-        column.check(itsRAs);
+        column.check(itsRAs, checkTitle);
     } else if (type == "DEC") {
-        column.check(itsDECs);
+        column.check(itsDECs, checkTitle);
     } else if (type == "RAJD") {
-        column.check(itsRA);
+        column.check(itsRA, checkTitle);
     } else if (type == "DECJD") {
-        column.check(itsDEC);
+        column.check(itsDEC, checkTitle);
     } else if (type == "FREQ") {
-        column.check(itsFreq);
+        column.check(itsFreq, checkTitle);
     } else if (type == "MAJ") {
-        column.check(itsMaj);
+        column.check(itsMaj, checkTitle);
     } else if (type == "MIN") {
-        column.check(itsMin);
+        column.check(itsMin, checkTitle);
     } else if (type == "PA") {
-        column.check(itsPA);
+        column.check(itsPA, checkTitle);
     } else if (type == "FINT") {
-        column.check(itsFluxInt);
+        column.check(itsFluxInt, checkTitle);
     } else if (type == "FPEAK") {
-        column.check(itsFluxPeak);
+        column.check(itsFluxPeak, checkTitle);
     } else if (type == "XMIN") {
-        column.check(itsXmin);
+        column.check(itsXmin, checkTitle);
     } else if (type == "XMAX") {
-        column.check(itsXmax);
+        column.check(itsXmax, checkTitle);
     } else if (type == "YMIN") {
-        column.check(itsYmin);
+        column.check(itsYmin, checkTitle);
     } else if (type == "YMAX") {
-        column.check(itsYmax);
+        column.check(itsYmax, checkTitle);
     } else if (type == "NPIX") {
-        column.check(itsNumPix);
+        column.check(itsNumPix, checkTitle);
     } else if (type == "XAV") {
-        column.check(itsXaverage);
+        column.check(itsXaverage, checkTitle);
     } else if (type == "YAV") {
-        column.check(itsYaverage);
+        column.check(itsYaverage, checkTitle);
     } else if (type == "XCENT") {
-        column.check(itsXcentroid);
+        column.check(itsXcentroid, checkTitle);
     } else if (type == "YCENT") {
-        column.check(itsYcentroid);
+        column.check(itsYcentroid, checkTitle);
     } else if (type == "XPEAK") {
-        column.check(itsXpeak);
+        column.check(itsXpeak, checkTitle);
     } else if (type == "YPEAK") {
-        column.check(itsYpeak);
+        column.check(itsYpeak, checkTitle);
     } else if (type == "FLAG1") {
-        column.check(itsFlag1);
+        column.check(itsFlag1, checkTitle);
     } else if (type == "FLAG2") {
-        column.check(itsFlag2);
+        column.check(itsFlag2, checkTitle);
     } else if (type == "FLAG3") {
-        column.check(itsFlag3);
+        column.check(itsFlag3, checkTitle);
     } else if (type == "FLAG4") {
-        column.check(itsFlag4);
+        column.check(itsFlag4, checkTitle);
     } else if (type == "COMMENT") {
-        column.check(itsComment);
+        column.check(itsComment, checkTitle);
     } else {
         ASKAPTHROW(AskapError,
                    "Unknown column type " << type);
@@ -272,10 +272,10 @@ void CasdaIsland::checkCol(duchamp::Catalogues::Column &column)
 
 }
 
-void CasdaIsland::checkSpec(duchamp::Catalogues::CatalogueSpecification &spec)
+void CasdaIsland::checkSpec(duchamp::Catalogues::CatalogueSpecification &spec, bool checkTitle)
 {
     for (size_t i = 0; i < spec.size(); i++) {
-        this->checkCol(spec.column(i));
+        this->checkCol(spec.column(i), checkTitle);
     }
 }
 

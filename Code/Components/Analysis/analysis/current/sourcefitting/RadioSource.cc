@@ -108,16 +108,8 @@ RadioSource::RadioSource():
     itsHeader = duchamp::FitsHeader();
     itsFitParams = FittingParameters();
     itsNoiseLevel = itsFitParams.noiseLevel();
-    std::vector<std::string>::iterator type;
-    std::vector<std::string> typelist = availableFitTypes;
 
-    for (type = typelist.begin(); type < typelist.end(); type++) {
-        itsAlphaMap[*type] = std::vector<float>(1, -99.);
-        itsBetaMap[*type] = std::vector<float>(1, -99.);
-    }
-
-    itsAlphaMap["best"] = std::vector<float>(1, -99.);
-    itsBetaMap["best"] = std::vector<float>(1, -99.);
+    initialiseAlphaBetaMaps();
 }
 
 //**************************************************************//
@@ -130,16 +122,9 @@ RadioSource::RadioSource(duchamp::Detection obj):
     itsHeader = duchamp::FitsHeader();
     itsFitParams = FittingParameters();
     itsNoiseLevel = itsFitParams.noiseLevel();
-    std::vector<std::string>::iterator type;
-    std::vector<std::string> typelist = availableFitTypes;
 
-    for (type = typelist.begin(); type < typelist.end(); type++) {
-        itsAlphaMap[*type] = std::vector<float>(1, -99.);
-        itsBetaMap[*type] = std::vector<float>(1, -99.);
-    }
+    initialiseAlphaBetaMaps();
 
-    itsAlphaMap["best"] = std::vector<float>(1, -99.);
-    itsBetaMap["best"] = std::vector<float>(1, -99.);
 }
 
 //**************************************************************//
@@ -160,16 +145,9 @@ RadioSource& RadioSource::operator= (const duchamp::Detection& det)
     itsFitParams = FittingParameters();
     itsHeader = duchamp::FitsHeader();
     itsNoiseLevel = itsFitParams.noiseLevel();
-    std::vector<std::string>::iterator type;
-    std::vector<std::string> typelist = availableFitTypes;
 
-    for (type = typelist.begin(); type < typelist.end(); type++) {
-        itsAlphaMap[*type] = std::vector<float>(1, -99.);
-        itsBetaMap[*type] = std::vector<float>(1, -99.);
-    }
+    initialiseAlphaBetaMaps();
 
-    itsAlphaMap["best"] = std::vector<float>(1, -99.);
-    itsBetaMap["best"] = std::vector<float>(1, -99.);
     return *this;
 }
 
@@ -190,6 +168,24 @@ RadioSource& RadioSource::operator= (const RadioSource& src)
     itsAlphaMap = src.itsAlphaMap;
     itsBetaMap = src.itsBetaMap;
     return *this;
+}
+
+//**************************************************************//
+
+void RadioSource::initialiseAlphaBetaMaps()
+{
+
+    std::vector<std::string>::iterator type;
+    std::vector<std::string> typelist = availableFitTypes;
+
+    for (type = typelist.begin(); type < typelist.end(); type++) {
+        itsAlphaMap[*type] = std::vector<double>(1, defaultAlpha);
+        itsBetaMap[*type] = std::vector<double>(1, defaultBeta);
+    }
+
+    itsAlphaMap["best"] = std::vector<double>(1, defaultAlpha);
+    itsBetaMap["best"] = std::vector<double>(1, defaultBeta);
+
 }
 
 //**************************************************************//
@@ -1146,8 +1142,25 @@ void RadioSource::findSpectralTerm(std::string imageName, int term, bool doCalc)
                ") must be either 1 (for spectral index) or 2 (for spectral curvature)");
 
 
-    if (doCalc) {
+    if (!doCalc) {
 
+        std::vector<std::string>::iterator type;
+        std::vector<std::string> typelist = availableFitTypes;
+        typelist.push_back("best");
+
+        for (type = typelist.begin(); type < typelist.end(); type++) {
+            int nfits = itsBestFitMap[*type].numFits();
+            if (term == 1) {
+                itsAlphaMap[*type] = std::vector<double>(nfits, defaultAlpha);
+            } else if (term == 2) {
+                itsBetaMap[*type] = std::vector<double>(nfits, defaultBeta);
+            }
+        }
+
+
+
+    }
+    else {
         ASKAPLOG_DEBUG_STR(logger,
                            "About to find the " << termtype[term] <<
                            ", for image " << imageName);
@@ -1194,7 +1207,7 @@ void RadioSource::findSpectralTerm(std::string imageName, int term, bool doCalc)
         std::vector<std::string> typelist = availableFitTypes;
 
         for (type = typelist.begin(); type < typelist.end(); type++) {
-            std::vector<float> termValues(itsBestFitMap[*type].numGauss(), 0.);
+            std::vector<double> termValues(itsBestFitMap[*type].numGauss(), 0.);
 
             if (itsBestFitMap[*type].isGood() || itsBestFitMap[*type].fitIsGuess()) {
 
@@ -1218,11 +1231,11 @@ void RadioSource::findSpectralTerm(std::string imageName, int term, bool doCalc)
                                        "(" << itsBestFitMap[*type].numGauss() << " of them):");
 
                     for (unsigned int i = 0; i < itsBestFitMap[*type].numGauss(); i++) {
-                        float Iref = itsBestFitMap[*type].gaussian(i).flux();
+                        double Iref = itsBestFitMap[*type].gaussian(i).flux();
                         if (term == 1) {
                             termValues[i] = fit.gaussian(i).flux() / Iref;
                         } else if (term == 2) {
-                            float alpha = itsAlphaMap[*type][i];
+                            double alpha = itsAlphaMap[*type][i];
                             termValues[i] = fit.gaussian(i).flux() / Iref -
                                             0.5 * alpha * (alpha - 1.);
                         }
@@ -1320,8 +1333,8 @@ void RadioSource::printTableEntry(std::ostream &stream,
     if (itsHeader.needBeamSize()) {
         intfluxfit /= itsHeader.beam().area(); // Convert from Jy/beam to Jy
     }
-    float alpha = itsAlphaMap[fitType][fitNum];
-    float beta = itsBetaMap[fitType][fitNum];
+    double alpha = itsAlphaMap[fitType][fitNum];
+    double beta = itsBetaMap[fitType][fitNum];
     std::string blankComment = "--";
     int flagGuess = results.fitIsGuess() ? 1 : 0;
     int flagSiblings = itsBestFitMap[fitType].numFits() > 1 ? 1 : 0;
@@ -1571,7 +1584,7 @@ LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& blob, RadioSource& src)
 
     size = src.itsAlphaMap.size();
     blob << size;
-    std::map<std::string, std::vector<float> >::iterator val;
+    std::map<std::string, std::vector<double> >::iterator val;
 
     for (val = src.itsAlphaMap.begin(); val != src.itsAlphaMap.end(); val++) {
         blob << val->first;
@@ -1698,7 +1711,7 @@ LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream &blob, RadioSource& src)
     for (int i = 0; i < size; i++) {
         int32 vecsize;
         blob >> s >> vecsize;
-        std::vector<float> vec(vecsize);
+        std::vector<double> vec(vecsize);
 
         for (int i = 0; i < vecsize; i++) blob >> vec[i];
 
@@ -1710,7 +1723,7 @@ LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream &blob, RadioSource& src)
     for (int i = 0; i < size; i++) {
         int32 vecsize;
         blob >> s >> vecsize;
-        std::vector<float> vec(vecsize);
+        std::vector<double> vec(vecsize);
 
         for (int i = 0; i < vecsize; i++) blob >> vec[i];
 

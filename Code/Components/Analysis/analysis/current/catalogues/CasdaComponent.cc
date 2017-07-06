@@ -329,93 +329,95 @@ void CasdaComponent::printTableEntry(std::ostream &stream,
 
 }
 
-void CasdaComponent::checkCol(duchamp::Catalogues::Column &column)
+void CasdaComponent::checkCol(duchamp::Catalogues::Column &column, bool checkTitle)
 {
     std::string type = column.type();
     if (type == "ISLAND") {
-        column.check(itsIslandID);
+        column.check(itsIslandID, checkTitle);
     } else if (type == "ID") {
-        column.check(itsComponentID);
+        column.check(itsComponentID, checkTitle);
     } else if (type == "NAME") {
-        column.check(itsName);
+        column.check(itsName, checkTitle);
     } else if (type == "RA") {
-        column.check(itsRAs);
+        column.check(itsRAs, checkTitle);
     } else if (type == "DEC") {
-        column.check(itsDECs);
+        column.check(itsDECs, checkTitle);
     } else if (type == "RAJD") {
-        column.check(itsRA.value());
+        column.check(itsRA.value(), checkTitle);
     } else if (type == "DECJD") {
-        column.check(itsDEC.value());
+        column.check(itsDEC.value(), checkTitle);
     } else if (type == "RAERR") {
-        column.check(itsRA.error());
+        column.check(itsRA.error(), checkTitle);
     } else if (type == "DECERR") {
-        column.check(itsDEC.error());
+        column.check(itsDEC.error(), checkTitle);
     } else if (type == "FREQ") {
-        column.check(itsFreq);
+        column.check(itsFreq, checkTitle);
     } else if (type == "FPEAK") {
-        column.check(itsFluxPeak.value());
+        column.check(itsFluxPeak.value(), checkTitle);
     } else if (type == "FPEAKERR") {
-        column.check(itsFluxPeak.error());
+        column.check(itsFluxPeak.error(), checkTitle);
     } else if (type == "FINT") {
-        column.check(itsFluxInt.value());
+        column.check(itsFluxInt.value(), checkTitle);
     } else if (type == "FINTERR") {
-        column.check(itsFluxInt.error());
+        column.check(itsFluxInt.error(), checkTitle);
     } else if (type == "MAJ") {
-        column.check(itsMaj.value());
+        column.check(itsMaj.value(), checkTitle);
     } else if (type == "MIN") {
-        column.check(itsMin.value());
+        column.check(itsMin.value(), checkTitle);
     } else if (type == "PA") {
-        column.check(itsPA.value());
+        column.check(itsPA.value(), checkTitle);
     } else if (type == "MAJERR") {
-        column.check(itsMaj.error());
+        column.check(itsMaj.error(), checkTitle);
     } else if (type == "MINERR") {
-        column.check(itsMin.error());
+        column.check(itsMin.error(), checkTitle);
     } else if (type == "PAERR") {
-        column.check(itsPA.error());
+        column.check(itsPA.error(), checkTitle);
     } else if (type == "MAJDECONV") {
-        column.check(itsMaj_deconv);
+        column.check(itsMaj_deconv, checkTitle);
     } else if (type == "MINDECONV") {
-        column.check(itsMin_deconv);
+        column.check(itsMin_deconv, checkTitle);
     } else if (type == "PADECONV") {
-        column.check(itsPA_deconv);
+        column.check(itsPA_deconv, checkTitle);
     } else if (type == "CHISQ") {
-        column.check(itsChisq);
+        column.check(itsChisq, checkTitle);
     } else if (type == "RMSFIT") {
-        column.check(itsRMSfit);
+        column.check(itsRMSfit, checkTitle);
     } else if (type == "ALPHA") {
-        column.check(itsAlpha);
+        std::cout << "COLUMN CHECK " << itsComponentID<<" -- " << column.getName() << " " << column.getPrecision() << " " << itsAlpha << "\n";
+        column.check(itsAlpha, checkTitle);
+        std::cout << "COLUMN CHECK " << itsComponentID<<" -- " << column.getName() << " " << column.getPrecision() << " " << itsAlpha << "\n";
     } else if (type == "BETA") {
-        column.check(itsBeta);
+        column.check(itsBeta, checkTitle);
     } else if (type == "RMSIMAGE") {
-        column.check(itsRMSimage);
+        column.check(itsRMSimage, checkTitle);
     } else if (type == "FLAG1") {
-        column.check(itsFlagSiblings);
+        column.check(itsFlagSiblings, checkTitle);
     } else if (type == "FLAG2") {
-        column.check(itsFlagGuess);
+        column.check(itsFlagGuess, checkTitle);
     } else if (type == "FLAG3") {
-        column.check(itsFlag3);
+        column.check(itsFlag3, checkTitle);
     } else if (type == "FLAG4") {
-        column.check(itsFlag4);
+        column.check(itsFlag4, checkTitle);
     } else if (type == "COMMENT") {
-        column.check(itsComment);
+        column.check(itsComment, checkTitle);
     } else if (type == "LOCALID") {
-        column.check(itsLocalID);
+        column.check(itsLocalID, checkTitle);
     } else if (type == "XPOS") {
-        column.check(itsXpos);
+        column.check(itsXpos, checkTitle);
     } else if (type == "YPOS") {
-        column.check(itsYpos);
+        column.check(itsYpos, checkTitle);
     } else if (type == "FINTISLAND") {
-        column.check(itsFluxInt_island);
+        column.check(itsFluxInt_island, checkTitle);
     } else if (type == "FPEAKISLAND") {
-        column.check(itsFluxPeak_island);
+        column.check(itsFluxPeak_island, checkTitle);
     } else if (type == "NFREEFIT") {
-        column.check(itsNfree_fit);
+        column.check(itsNfree_fit, checkTitle);
     } else if (type == "NDOFFIT") {
-        column.check(itsNDoF_fit);
+        column.check(itsNDoF_fit, checkTitle);
     } else if (type == "NPIXFIT") {
-        column.check(itsNpix_fit);
+        column.check(itsNpix_fit, checkTitle);
     } else if (type == "NPIXISLAND") {
-        column.check(itsNpix_island);
+        column.check(itsNpix_island, checkTitle);
     } else {
         ASKAPTHROW(AskapError,
                    "Unknown column type " << type);
@@ -423,10 +425,10 @@ void CasdaComponent::checkCol(duchamp::Catalogues::Column &column)
 
 }
 
-void CasdaComponent::checkSpec(duchamp::Catalogues::CatalogueSpecification &spec)
+void CasdaComponent::checkSpec(duchamp::Catalogues::CatalogueSpecification &spec, bool checkTitle)
 {
     for (size_t i = 0; i < spec.size(); i++) {
-        this->checkCol(spec.column(i));
+        this->checkCol(spec.column(i),checkTitle);
     }
 }
 

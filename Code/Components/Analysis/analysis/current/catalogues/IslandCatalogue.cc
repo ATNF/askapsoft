@@ -105,25 +105,25 @@ void IslandCatalogue::defineSpec()
                       "meta.id", "char", "col_island_name", "");
     itsSpec.addColumn("NCOMP", "n_components", "", 5, 0,
                       "meta.number", "int", "col_n_components", "");
-    itsSpec.addColumn("RA", "ra_hms_cont", "", 11, 0,
+    itsSpec.addColumn("RA", "ra_hms_cont", "", 10, 0,
                       "pos.eq.ra", "char", "col_ra_hms_cont", "J2000");
-    itsSpec.addColumn("DEC", "dec_dms_cont", "", 11, 0,
+    itsSpec.addColumn("DEC", "dec_dms_cont", "", 9, 0,
                       "pos.eq.dec", "char", "col_dec_dms_cont", "J2000");
-    itsSpec.addColumn("RAJD", "ra_deg_cont", "[deg]", 11, casda::precPos,
+    itsSpec.addColumn("RAJD", "ra_deg_cont", "[deg]", casda::precPos+2, casda::precPos,
                       "pos.eq.ra;meta.main", "double", "col_ra_deg_cont", "J2000");
-    itsSpec.addColumn("DECJD", "dec_deg_cont", "[deg]", 11, casda::precPos,
+    itsSpec.addColumn("DECJD", "dec_deg_cont", "[deg]", casda::precPos+2, casda::precPos,
                       "pos.eq.dec;meta.main", "double", "col_dec_deg_cont", "J2000");
-    itsSpec.addColumn("FREQ", "freq", "[MHz]", 11, casda::precFreqContinuum,
+    itsSpec.addColumn("FREQ", "freq", "[MHz]", casda::precPos+2, casda::precFreqContinuum,
                       "em.freq", "float", "col_freq", "");
-    itsSpec.addColumn("MAJ", "maj_axis", "[arcsec]", 6, casda::precSize,
+    itsSpec.addColumn("MAJ", "maj_axis", "[arcsec]", casda::precSize+2, casda::precSize,
                       "phys.angSize.smajAxis;em.radio", "float", "col_maj_axis", "");
-    itsSpec.addColumn("MIN", "min_axis", "[arcsec]", 6, casda::precSize,
+    itsSpec.addColumn("MIN", "min_axis", "[arcsec]", casda::precSize+2, casda::precSize,
                       "phys.angSize.sminAxis;em.radio", "float", "col_min_axis", "");
-    itsSpec.addColumn("PA", "pos_ang", "[deg]", 7, casda::precSize,
+    itsSpec.addColumn("PA", "pos_ang", "[deg]", casda::precSize+2, casda::precSize,
                       "phys.angSize;pos.posAng;em.radio", "float", "col_pos_ang", "");
-    itsSpec.addColumn("FINT", "flux_int", "[mJy]", 10, casda::precFlux,
+    itsSpec.addColumn("FINT", "flux_int", "[mJy]", casda::precFlux+2, casda::precFlux,
                       "phot.flux.density.integrated;em.radio", "float", "col_flux_int", "");
-    itsSpec.addColumn("FPEAK", "flux_peak", "[mJy/beam]", 9, casda::precFlux,
+    itsSpec.addColumn("FPEAK", "flux_peak", "[mJy/beam]", casda::precFlux+2, casda::precFlux,
                       "phot.flux.density;stat.max;em.radio", "float", "col_flux_peak", "");
     itsSpec.addColumn("XMIN", "x_min", "", 5, 0,
                       "pos.cartesian.x;stat.min", "int", "col_x_min", "");
@@ -135,17 +135,17 @@ void IslandCatalogue::defineSpec()
                       "pos.cartesian.y;stat.max", "int", "col_y_max", "");
     itsSpec.addColumn("NPIX", "n_pix", "", 9, 0,
                       "phys.angArea;instr.pixel;meta.number", "int", "col_n_pix", "");
-    itsSpec.addColumn("XAV", "x_ave", "", 8, casda::precPix,
+    itsSpec.addColumn("XAV", "x_ave", "", casda::precPix+2, casda::precPix,
                       "pos.cartesian.x;stat.mean", "float", "col_x_ave", "");
-    itsSpec.addColumn("YAV", "y_ave", "", 8, casda::precPix,
+    itsSpec.addColumn("YAV", "y_ave", "", casda::precPix+2, casda::precPix,
                       "pos.cartesian.y;stat.mean", "float", "col_y_ave", "");
-    itsSpec.addColumn("XCENT", "x_cen", "", 8, casda::precPix,
+    itsSpec.addColumn("XCENT", "x_cen", "", casda::precPix+2, casda::precPix,
                       "pos.cartesian.x;askap:stat.centroid", "float", "col_x_cen", "");
-    itsSpec.addColumn("YCENT", "y_cen", "", 8, casda::precPix,
+    itsSpec.addColumn("YCENT", "y_cen", "", casda::precPix+2, casda::precPix,
                       "pos.cartesian.y;askap:stat.centroid", "float", "col_y_cen", "");
-    itsSpec.addColumn("XPEAK", "x_peak", "", 8, casda::precPix,
+    itsSpec.addColumn("XPEAK", "x_peak", "", casda::precPix+2, casda::precPix,
                       "pos.cartesian.x;phot.flux;stat.max", "int", "col_x_peak", "");
-    itsSpec.addColumn("YPEAK", "y_peak", "", 8, casda::precPix,
+    itsSpec.addColumn("YPEAK", "y_peak", "", casda::precPix+2, casda::precPix,
                       "pos.cartesian.y;phot.flux;stat.max", "int", "col_y_peak", "");
     itsSpec.addColumn("FLAG1", "flag_i1", "", 5, 0,
                       "meta.code", "int", "col_flag_i1", "");
@@ -160,19 +160,20 @@ void IslandCatalogue::defineSpec()
 
 }
 
-void IslandCatalogue::check()
+void IslandCatalogue::check(bool checkTitle)
 {
     std::vector<CasdaIsland>::iterator isle;
     for (isle = itsIslands.begin(); isle != itsIslands.end(); isle++) {
-        isle->checkSpec(itsSpec);
+        isle->checkSpec(itsSpec, checkTitle);
     }
 
 }
 
 void IslandCatalogue::write()
 {
-    this->check();
+    this->check(false);
     this->writeVOT();
+    this->check(true);
     this->writeASCII();
 }
 

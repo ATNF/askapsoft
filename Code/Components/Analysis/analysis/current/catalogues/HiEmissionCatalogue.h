@@ -62,7 +62,7 @@ class HiEmissionCatalogue {
 
         /// Check the widths of the columns based on the values within
         /// the catalogue.
-        void check();
+        void check(bool checkTitle);
 
         /// Write the catalogue to the ASCII & VOTable files (acts as
         /// a front-end to the writeVOT() and writeASCII() functions)
