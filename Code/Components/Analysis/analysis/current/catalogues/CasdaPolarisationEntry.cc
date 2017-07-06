@@ -275,85 +275,86 @@ void CasdaPolarisationEntry::printTableEntry(std::ostream &stream,
 
 void CasdaPolarisationEntry::checkCol(duchamp::Catalogues::Column &column, bool checkTitle)
 {
+    bool checkPrec=false;
     std::string type = column.type();
     if (type == "ID") {
         column.check(itsComponentID, checkTitle);
     } else if (type == "NAME") {
         column.check(itsName, checkTitle);
     } else if (type == "RAJD") {
-        column.check(itsRA, checkTitle);
+        column.check(itsRA, checkTitle, checkPrec);
     } else if (type == "DECJD") {
-        column.check(itsDec, checkTitle);
+        column.check(itsDec, checkTitle, checkPrec);
     } else if (type == "IFLUX") {
-        column.check(itsFluxImedian, checkTitle);
+        column.check(itsFluxImedian, checkTitle, checkPrec);
     } else if (type == "QFLUX") {
-        column.check(itsFluxQmedian, checkTitle);
+        column.check(itsFluxQmedian, checkTitle, checkPrec);
     } else if (type == "UFLUX") {
-        column.check(itsFluxUmedian, checkTitle);
+        column.check(itsFluxUmedian, checkTitle, checkPrec);
     } else if (type == "VFLUX") {
-        column.check(itsFluxImedian, checkTitle);
+        column.check(itsFluxImedian, checkTitle, checkPrec);
     } else if (type == "RMS_I") {
-        column.check(itsRmsI, checkTitle);
+        column.check(itsRmsI, checkTitle, checkPrec);
     } else if (type == "RMS_Q") {
-        column.check(itsRmsQ, checkTitle);
+        column.check(itsRmsQ, checkTitle, checkPrec);
     } else if (type == "RMS_U") {
-        column.check(itsRmsU, checkTitle);
+        column.check(itsRmsU, checkTitle, checkPrec);
     } else if (type == "RMS_V") {
-        column.check(itsRmsV, checkTitle);
+        column.check(itsRmsV, checkTitle, checkPrec);
     } else if (type == "CO1") {
-        column.check(itsPolyCoeff0, checkTitle);
+        column.check(itsPolyCoeff0, checkTitle, checkPrec);
     } else if (type == "CO2") {
-        column.check(itsPolyCoeff1, checkTitle);
+        column.check(itsPolyCoeff1, checkTitle, checkPrec);
     } else if (type == "CO3") {
-        column.check(itsPolyCoeff2, checkTitle);
+        column.check(itsPolyCoeff2, checkTitle, checkPrec);
     } else if (type == "CO4") {
-        column.check(itsPolyCoeff3, checkTitle);
+        column.check(itsPolyCoeff3, checkTitle, checkPrec);
     } else if (type == "CO5") {
-        column.check(itsPolyCoeff4, checkTitle);
+        column.check(itsPolyCoeff4, checkTitle, checkPrec);
     } else if (type == "LAMSQ") {
-        column.check(itsLambdaSqRef, checkTitle);
+        column.check(itsLambdaSqRef, checkTitle, checkPrec);
     } else if (type == "RMSF") {
-        column.check(itsRmsfFwhm, checkTitle);
+        column.check(itsRmsfFwhm, checkTitle, checkPrec);
     } else if (type == "POLPEAK") {
-        column.check(itsPintPeak.value(), checkTitle);
+        column.check(itsPintPeak.value(), checkTitle, checkPrec);
     } else if (type == "POLPEAKDB") {
-        column.check(itsPintPeakDebias, checkTitle);
+        column.check(itsPintPeakDebias, checkTitle, checkPrec);
     } else if (type == "POLPEAKERR") {
-        column.check(itsPintPeak.error(), checkTitle);
+        column.check(itsPintPeak.error(), checkTitle, checkPrec);
     } else if (type == "POLPEAKFIT") {
-        column.check(itsPintPeakFit.value(), checkTitle);
+        column.check(itsPintPeakFit.value(), checkTitle, checkPrec);
     } else if (type == "POLPEAKFITDB") {
-        column.check(itsPintPeakFitDebias, checkTitle);
+        column.check(itsPintPeakFitDebias, checkTitle, checkPrec);
     } else if (type == "POLPEAKFITERR") {
-        column.check(itsPintPeakFit.error(), checkTitle);
+        column.check(itsPintPeakFit.error(), checkTitle, checkPrec);
     } else if (type == "POLPEAKFITSNR") {
-        column.check(itsPintFitSNR.value(), checkTitle);
+        column.check(itsPintFitSNR.value(), checkTitle, checkPrec);
     } else if (type == "POLPEAKFITSNRERR") {
-        column.check(itsPintFitSNR.error(), checkTitle);
+        column.check(itsPintFitSNR.error(), checkTitle, checkPrec);
     } else if (type == "FDPEAK") {
-        column.check(itsPhiPeak.value(), checkTitle);
+        column.check(itsPhiPeak.value(), checkTitle, checkPrec);
     } else if (type == "FDPEAKERR") {
-        column.check(itsPhiPeak.error(), checkTitle);
+        column.check(itsPhiPeak.error(), checkTitle, checkPrec);
     } else if (type == "FDPEAKFIT") {
-        column.check(itsPhiPeakFit.value(), checkTitle);
+        column.check(itsPhiPeakFit.value(), checkTitle, checkPrec);
     } else if (type == "FDPEAKFITERR") {
-        column.check(itsPhiPeakFit.error(), checkTitle);
+        column.check(itsPhiPeakFit.error(), checkTitle, checkPrec);
     } else if (type == "POLANG") {
-        column.check(itsPolAngleRef.value(), checkTitle);
+        column.check(itsPolAngleRef.value(), checkTitle, checkPrec);
     } else if (type == "POLANGERR") {
-        column.check(itsPolAngleRef.error(), checkTitle);
+        column.check(itsPolAngleRef.error(), checkTitle, checkPrec);
     } else if (type == "POLANG0") {
-        column.check(itsPolAngleZero.value(), checkTitle);
+        column.check(itsPolAngleZero.value(), checkTitle, checkPrec);
     } else if (type == "POLANG0ERR") {
-        column.check(itsPolAngleZero.error(), checkTitle);
+        column.check(itsPolAngleZero.error(), checkTitle, checkPrec);
     } else if (type == "POLFRAC") {
-        column.check(itsFracPol.value(), checkTitle);
+        column.check(itsFracPol.value(), checkTitle, checkPrec);
     } else if (type == "POLFRACERR") {
-        column.check(itsFracPol.error(), checkTitle);
+        column.check(itsFracPol.error(), checkTitle, checkPrec);
     } else if (type == "COMPLEX1") {
-        column.check(itsComplexity, checkTitle);
+        column.check(itsComplexity, checkTitle, checkPrec);
     } else if (type == "COMPLEX2") {
-        column.check(itsComplexity_screen, checkTitle);
+        column.check(itsComplexity_screen, checkTitle, checkPrec);
     } else if (type == "FLAG1") {
         column.check(itsFlagDetection, checkTitle);
     } else if (type == "FLAG2") {

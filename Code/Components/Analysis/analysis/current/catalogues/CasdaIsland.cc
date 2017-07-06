@@ -206,6 +206,7 @@ void CasdaIsland::printTableEntry(std::ostream &stream,
 
 void CasdaIsland::checkCol(duchamp::Catalogues::Column &column, bool checkTitle)
 {
+    bool checkPrec=false;
     std::string type = column.type();
     if (type == "ID") {
         column.check(itsIslandID, checkTitle);
@@ -218,21 +219,21 @@ void CasdaIsland::checkCol(duchamp::Catalogues::Column &column, bool checkTitle)
     } else if (type == "DEC") {
         column.check(itsDECs, checkTitle);
     } else if (type == "RAJD") {
-        column.check(itsRA, checkTitle);
+        column.check(itsRA, checkTitle, checkPrec);
     } else if (type == "DECJD") {
-        column.check(itsDEC, checkTitle);
+        column.check(itsDEC, checkTitle, checkPrec);
     } else if (type == "FREQ") {
-        column.check(itsFreq, checkTitle);
+        column.check(itsFreq, checkTitle, checkPrec);
     } else if (type == "MAJ") {
-        column.check(itsMaj, checkTitle);
+        column.check(itsMaj, checkTitle, checkPrec);
     } else if (type == "MIN") {
-        column.check(itsMin, checkTitle);
+        column.check(itsMin, checkTitle, checkPrec);
     } else if (type == "PA") {
-        column.check(itsPA, checkTitle);
+        column.check(itsPA, checkTitle, checkPrec);
     } else if (type == "FINT") {
-        column.check(itsFluxInt, checkTitle);
+        column.check(itsFluxInt, checkTitle, checkPrec);
     } else if (type == "FPEAK") {
-        column.check(itsFluxPeak, checkTitle);
+        column.check(itsFluxPeak, checkTitle, checkPrec);
     } else if (type == "XMIN") {
         column.check(itsXmin, checkTitle);
     } else if (type == "XMAX") {
@@ -244,13 +245,13 @@ void CasdaIsland::checkCol(duchamp::Catalogues::Column &column, bool checkTitle)
     } else if (type == "NPIX") {
         column.check(itsNumPix, checkTitle);
     } else if (type == "XAV") {
-        column.check(itsXaverage, checkTitle);
+        column.check(itsXaverage, checkTitle, checkPrec);
     } else if (type == "YAV") {
-        column.check(itsYaverage, checkTitle);
+        column.check(itsYaverage, checkTitle, checkPrec);
     } else if (type == "XCENT") {
-        column.check(itsXcentroid, checkTitle);
+        column.check(itsXcentroid, checkTitle, checkPrec);
     } else if (type == "YCENT") {
-        column.check(itsYcentroid, checkTitle);
+        column.check(itsYcentroid, checkTitle, checkPrec);
     } else if (type == "XPEAK") {
         column.check(itsXpeak, checkTitle);
     } else if (type == "YPEAK") {
