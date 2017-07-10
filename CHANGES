@@ -1,3 +1,20 @@
+0.19.0
+
+linmos-mpi new features:
+
+ *  Now produces mosaicks with correct masking of pixels in
+    in both CASA and FITS formats. 
+
+ *  Can also remove the contribution of the primary beam frequency
+    dependence to the Taylor term images. This only applies to Gaussian
+    primary beam models.
+
+bug fixes
+
+ *  Reduced memory footprint. A bug was found that was causing a complete
+    image cube to accessed, when only the image shape was required. This has been
+    fixed.
+
 0.18.3 (23 May 2017)
 --------------------
 
