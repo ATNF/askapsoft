@@ -1,19 +1,54 @@
 0.19.0
 
-linmos-mpi new features:
+ new features:
 
- *  Now produces mosaicks with correct masking of pixels in
-    in both CASA and FITS formats. 
+ * linmos now produces mosaicks with correct masking of pixels in
+   in both CASA and FITS formats. 
 
- *  Can also remove the contribution of the primary beam frequency
-    dependence to the Taylor term images. This only applies to Gaussian
-    primary beam models.
-
+ * linmos can also remove the contribution of the primary beam frequency
+   dependence to the Taylor term images. This only applies to Gaussian
+   primary beam models.
+ 
+ * Added Selavy support for FITS outputs
+ 
+ * Addition of ACES-OPS module to facilitate controlled dependency between ASKAPsoft and ACES Tools.
+ 
+ * Parallelised the RM Synthesis module in Selavy.
+ 
+ * New Selavy output - a map of the residual emission not covered by the fitted Gaussians in a continuum image.
+ 
+ * Developed patch for casacore's poor handling of the lanczos interpolation method.
+ 
+ * Added support for casdaupload to handle spectral-line catalogues.
+ 
+ * CASDA related Support for new image types.
+ 
+ * Ensure calibration tables are uploaded to CASDA.
+ 
+ * Added support for continuum validation script and results including CASDA upload.
+ 
+ * Improvements to Selavy spectral-line parameterisation.
+ 
+ * Selavy sets spectral index & curvature to a flag-value if not calculated rather than leaving as zero.
+ 
 bug fixes
 
- *  Reduced memory footprint. A bug was found that was causing a complete
+ *  linmos, reduced memory footprint. A bug was found that was causing a complete
     image cube to accessed, when only the image shape was required. This has been
     fixed.
+
+ * Selavy catalogues occasionally fail CASDA validation due to wide columns - fixed.
+ 
+ * Fixed bug where restore.beam.cutoff value not read from parset when present.
+ 
+ * Added missing beam log output to new imager.
+ 
+ * Improved handling of failed processing and the effect of that on executing final 
+   diagnostics/FITSconversion/thumbnails jobs at end of pipeline.
+   
+ * Use number of beams in footprint rather than assume 36.
+ 
+ * Minor bug fixes
 
 0.18.3 (23 May 2017)
 --------------------
