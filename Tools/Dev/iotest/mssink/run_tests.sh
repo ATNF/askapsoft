@@ -28,7 +28,7 @@ ES2C=($tester ${invocations[0]} ${ranks[3]} ${antennas[0]} ${channels[0]} ${minu
 ES3=($tester ${invocations[1]} ${ranks[0]} ${antennas[0]} ${channels[0]} ${minutes[0]} "ES3" )
 
 # Early science ++ split by frequency
-ES4=($tester ${invocations[0]} ${ranks[0]} ${antennas[1]} ${channels[0]} ${minutes[0]} "ES4") ${ntasks_per_node[0]}
+ES4=($tester ${invocations[0]} ${ranks[0]} ${antennas[1]} ${channels[0]} ${minutes[0]} "ES4" ${ntasks_per_node[0]})
 ES5A=($tester ${invocations[0]} ${ranks[1]} ${antennas[1]} ${channels[0]} ${minutes[0]} "ES5A" ${ntasks_per_node[0]})
 ES5B=($tester ${invocations[0]} ${ranks[2]} ${antennas[1]} ${channels[0]} ${minutes[0]} "ES5B" ${ntasks_per_node[0]}) 
 ES5C=($tester ${invocations[0]} ${ranks[3]} ${antennas[1]} ${channels[0]} ${minutes[0]} "ES5C" ${ntasks_per_node[0]})
