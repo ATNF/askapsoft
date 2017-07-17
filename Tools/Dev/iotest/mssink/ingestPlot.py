@@ -90,7 +90,7 @@ runningMean = np.convolve(values, np.ones((100,))/100, mode="valid")
 
 # Plotting
 timeMin = 0.0
-timeMax = 5.0
+timeMax = 10.0
 
 pl.figure(1)
 
