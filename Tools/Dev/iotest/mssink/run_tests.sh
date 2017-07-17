@@ -69,6 +69,9 @@ TESTARRAY=(
 cnt=${#TESTARRAY[@]}
 
 echo "Number of tests: $cnt"
+
+#add some checks here and make this a command line argument
+mkdir $workdir
 cd $workdir
 
 for (( i = 0 ; i < cnt ; i++ ))
