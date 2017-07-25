@@ -196,7 +196,7 @@ the key "primarybeam"
 +==================+==================+==============+============================================================+
 |primarybeam       |string            |"GaussianPB"  |Optional parameter that allows the user to select which     |
 |                  |                  |              |primary beam will be used in weighting. The parameters of   |
-|                  |                  |              |which can also be altered if required                       |                                   |
+|                  |                  |              |which can also be altered if required                       |
 +------------------+------------------+--------------+------------------------------------------------------------+
 
 **Gaussian Primary Beam Options**
@@ -208,10 +208,10 @@ In the parfile these are sub parameters of the Primary beam type. (e.g linmos.pr
 |**Parameter**     |**Type**          |**Default**   |**Description**                                             |
 +==================+==================+==============+============================================================+
 |aperture          |double            |12            |Aperture size in metres.                                    |
-+==================+==================+==============+============================================================+
++------------------+------------------+--------------+------------------------------------------------------------+
 |fwhmscaling       |double            |1.0           |Scaling of the full width half max of the Gaussian          |
-+==================+==================+==============+============================================================+
-|expscaling        |double            | 4 log(2)     |Scaling of the primary beam exponent                        |                                   |
++------------------+------------------+--------------+------------------------------------------------------------+
+|expscaling        |double            | 4 log(2)     |Scaling of the primary beam exponent                        |
 +------------------+------------------+--------------+------------------------------------------------------------+
 
 Primary Beam Corrections to the Taylor terms
