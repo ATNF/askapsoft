@@ -141,7 +141,7 @@ EOFINNER
         exit \$err
     fi
     
-    if [ "\${imageName%%.fits}" == "\${imageName}" ]; then
+    if [ "\${imageName%%.fits}" != "\${imageName}" ]; then
         # Want image.contsub.fits, not image.fits.contsub
         echo "Renaming \${imageName}.contsub to \${imageName%%.fits}.contsub.fits"
         mv \${imageName}.contsub \${imageName%%.fits}.contsub.fits

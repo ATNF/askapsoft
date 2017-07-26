@@ -147,8 +147,11 @@ for THISTILE in \$FULL_TILE_LIST; do
                 setImageProperties contcube
                 im="\${FIELD}/\${imageName}"
                 wt="\${FIELD}/\${weightsImage}"
-                if [ "\${IMAGETYPE_CONTCUBE}" == "fits" ]; then
-                    wt="\${wt}.fits"
+                if [ "\${imageCode}" != "restored" ]; then
+                    wt="\${wt%%.fits}.\${imageCode}"
+                    if [ "\${IMAGETYPE_CONTCUBE}" == "fits" ]; then
+                        wt="\${wt}.fits"
+                    fi
                 fi
                 if [ -e "\${im}" ]; then
                     ((listCount++))

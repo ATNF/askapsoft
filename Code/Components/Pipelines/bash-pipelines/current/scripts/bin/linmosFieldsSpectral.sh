@@ -143,7 +143,7 @@ for THISTILE in \$FULL_TILE_LIST; do
         im="\${FIELD}/\${imageName}"
         wt="\${FIELD}/\${weightsImage}"
         if [ "\${imageCode}" != "restored" ]; then
-            wt="\${wt}.\${imageCode}"
+            wt="\${wt%%.fits}.\${imageCode}"
             if [ "\${IMAGETYPE_SPECTRAL}" == "fits" ]; then
                 wt="\${wt}.fits"
             fi
