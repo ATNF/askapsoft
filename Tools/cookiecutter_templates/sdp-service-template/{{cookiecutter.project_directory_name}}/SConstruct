@@ -1,0 +1,20 @@
+# @file {{cookiecutter.service_long_name}} SCons build file
+# @author {{cookiecutter.user_name}} <{{cookiecutter.user_email}}>
+
+from askapenv import env
+import os
+import sys
+
+if 'AIPSPATH' not in os.environ:
+   os.environ['AIPSPATH']=os.environ['ASKAP_ROOT']+'/Code/Base/accessors/current'
+env["ENV"]["AIPSPATH"] = os.environ['AIPSPATH']
+
+#You can adjust build flags here.
+#env.Append(CCFLAGS=['-O2', '-DASKAP_DEBUG', '-g'])
+env.AppendUnique(CCFLAGS=['-DASKAP_DEBUG'])
+
+env.Append(CCFLAGS=['-Wno-unknown-pragmas'])
+
+pkg = env.AskapPackage("{{cookiecutter.package_name}}")
+pkg.AddSubPackage("service")
+pkg()

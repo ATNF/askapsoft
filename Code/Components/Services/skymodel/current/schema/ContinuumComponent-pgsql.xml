@@ -1,0 +1,66 @@
+<changelog xmlns="http://www.codesynthesis.com/xmlns/odb/changelog" database="pgsql" version="1">
+  <model version="1">
+    <table name="ContinuumComponent" kind="object">
+      <column name="version" type="BIGINT" null="false"/>
+      <column name="continuum_component_id" type="BIGINT" null="false"/>
+      <column name="observation_date" type="TIMESTAMP" null="true"/>
+      <column name="healpix_index" type="BIGINT" null="false"/>
+      <column name="sb_id" type="BIGINT" null="true"/>
+      <column name="component_id" type="TEXT" null="true"/>
+      <column name="ra" type="DOUBLE PRECISION" null="false"/>
+      <column name="dec" type="DOUBLE PRECISION" null="false"/>
+      <column name="ra_err" type="REAL" null="false"/>
+      <column name="dec_err" type="REAL" null="false"/>
+      <column name="freq" type="REAL" null="false"/>
+      <column name="flux_peak" type="REAL" null="false"/>
+      <column name="flux_peak_err" type="REAL" null="false"/>
+      <column name="flux_int" type="REAL" null="false"/>
+      <column name="flux_int_err" type="REAL" null="false"/>
+      <column name="maj_axis" type="REAL" null="false"/>
+      <column name="min_axis" type="REAL" null="false"/>
+      <column name="pos_ang" type="REAL" null="false"/>
+      <column name="maj_axis_err" type="REAL" null="false"/>
+      <column name="min_axis_err" type="REAL" null="false"/>
+      <column name="pos_ang_err" type="REAL" null="false"/>
+      <column name="maj_axis_deconv" type="REAL" null="false"/>
+      <column name="min_axis_deconv" type="REAL" null="false"/>
+      <column name="pos_ang_deconv" type="REAL" null="false"/>
+      <column name="chi_squared_fit" type="REAL" null="false"/>
+      <column name="rms_fit_Gauss" type="REAL" null="false"/>
+      <column name="spectral_index" type="REAL" null="false"/>
+      <column name="spectral_curvature" type="REAL" null="false"/>
+      <column name="rms_image" type="REAL" null="false"/>
+      <column name="has_siblings" type="INT" null="false"/>
+      <column name="fit_is_estimate" type="INT" null="false"/>
+      <column name="polarisation_component_id" type="BIGINT" null="true"/>
+      <column name="data_source_id" type="BIGINT" null="true"/>
+      <primary-key auto="true">
+        <column name="continuum_component_id"/>
+      </primary-key>
+      <foreign-key name="polarisation_component_id_fk" deferrable="DEFERRED">
+        <column name="polarisation_component_id"/>
+        <references table="Polarisation">
+          <column name="polarisation_component_id"/>
+        </references>
+      </foreign-key>
+      <foreign-key name="data_source_id_fk" deferrable="DEFERRED">
+        <column name="data_source_id"/>
+        <references table="DataSource">
+          <column name="data_source_id"/>
+        </references>
+      </foreign-key>
+      <index name="ContinuumComponent_continuum_component_id_i">
+        <column name="continuum_component_id"/>
+      </index>
+      <index name="ContinuumComponent_observation_date_i">
+        <column name="observation_date"/>
+      </index>
+      <index name="ContinuumComponent_healpix_index_i">
+        <column name="healpix_index"/>
+      </index>
+      <index name="ContinuumComponent_sb_id_i">
+        <column name="sb_id"/>
+      </index>
+    </table>
+  </model>
+</changelog>

@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+<VOTABLE version="1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns="http://www.ivoa.net/xml/VOTable/v1.3"
+ xmlns:stc="http://www.ivoa.net/xml/STC/v1.30" >
+  <COOSYS ID="J2000" equinox="J2000" system="eq_FK5"/>
+  <RESOURCE name="Component catalogue from Selavy source-finding">
+    <TABLE name="Component catalogue">
+      <DESCRIPTION></DESCRIPTION>
+      <PARAM name="table_version" ucd="meta.version" datatype="char" arraysize="43" value="casda.continuum_component_description_v1.7"/>
+      <PARAM name="imageFile" ucd="meta.file;meta.fits" datatype="char" arraysize="46" value="image.i.LMC.cont.sb1958.taylor.0.restored.fits"/>
+      <PARAM name="flagSubsection" ucd="meta.code" datatype="boolean" value="1"/>
+      <PARAM name="subsection" ucd="" datatype="char" arraysize="23" value="[1:1952,1:1853,1:1,1:1]"/>
+      <PARAM name="flagStatSec" ucd="meta.code" datatype="boolean" value="0"/>
+      <PARAM name="StatSec" ucd="" datatype="char" arraysize="7" value="[*,*,*]"/>
+      <PARAM name="searchType" ucd="meta.note" datatype="char" arraysize="7" value="spatial"/>
+      <PARAM name="flagNegative" ucd="meta.code" datatype="boolean" value="0"/>
+      <PARAM name="flagBaseline" ucd="meta.code" datatype="boolean" value="0"/>
+      <PARAM name="flagRobustStats" ucd="meta.code" datatype="boolean" value="1"/>
+      <PARAM name="flagFDR" ucd="meta.code" datatype="boolean" value="0"/>
+      <PARAM name="threshold" ucd="phot.flux;stat.min" datatype="float" value="5"/>
+      <PARAM name="flagGrowth" ucd="meta.code" datatype="boolean" value="1"/>
+      <PARAM name="growthThreshold" ucd="phot.flux;stat.min" datatype="float" value="3"/>
+      <PARAM name="minPix" ucd="" datatype="int" value="3"/>
+      <PARAM name="minChannels" ucd="" datatype="int" value="0"/>
+      <PARAM name="minVoxels" ucd="" datatype="int" value="3"/>
+      <PARAM name="flagAdjacent" ucd="meta.code" datatype="boolean" value="0"/>
+      <PARAM name="threshSpatial" ucd="" datatype="float" value="5"/>
+      <PARAM name="threshVelocity" ucd="" datatype="float" value="7"/>
+      <PARAM name="flagRejectBeforeMerge" ucd="" datatype="boolean" value="0"/>
+      <PARAM name="flagTwoStageMerging" ucd="" datatype="boolean" value="1"/>
+      <PARAM name="pixelCentre" ucd="" datatype="char" arraysize="8" value="centroid"/>
+      <PARAM name="flagSmooth" ucd="meta.code" datatype="boolean" value="0"/>
+      <PARAM name="flagATrous" ucd="meta.code" datatype="boolean" value="0"/>
+      <PARAM name="Reference frequency" ucd="em.freq;meta.main" datatype="float" unit="Hz" value="1.40049e+09"/>
+      <PARAM name="thresholdActual" ucd="" datatype="float" unit="Jy/beam" value="5"/>
+      <FIELD name="island_id" ID="col_island_id" ucd="meta.id.parent" datatype="char" unit="--" arraysize="53"/>
+      <FIELD name="component_id" ID="col_component_id" ucd="meta.id;meta.main" datatype="char" unit="--" arraysize="54"/>
+      <FIELD name="component_name" ID="col_component_name" ucd="meta.id" datatype="char" unit="" arraysize="15"/>
+      <FIELD name="ra_hms_cont" ID="col_ra_hms_cont" ucd="pos.eq.ra" ref="J2000" datatype="char" unit="" arraysize="12"/>
+      <FIELD name="dec_dms_cont" ID="col_dec_dms_cont" ucd="pos.eq.dec" ref="J2000" datatype="char" unit="" arraysize="13"/>
+      <FIELD name="ra_deg_cont" ID="col_ra_deg_cont" ucd="pos.eq.ra;meta.main" ref="J2000" datatype="double" unit="deg" width="11" precision="6"/>
+      <FIELD name="dec_deg_cont" ID="col_dec_deg_cont" ucd="pos.eq.dec;meta.main" ref="J2000" datatype="double" unit="deg" width="11" precision="6"/>
+      <FIELD name="ra_err" ID="col_ra_err" ucd="stat.error;pos.eq.ra" ref="J2000" datatype="float" unit="arcsec" width="11" precision="2"/>
+      <FIELD name="dec_err" ID="col_dec_err" ucd="stat.error;pos.eq.dec" ref="J2000" datatype="float" unit="arcsec" width="11" precision="2"/>
+      <FIELD name="freq" ID="col_freq" ucd="em.freq" datatype="float" unit="MHz" width="11" precision="1"/>
+      <FIELD name="flux_peak" ID="col_flux_peak" ucd="phot.flux.density;stat.max;em.radio;stat.fit" datatype="float" unit="mJy/beam" width="9" precision="3"/>
+      <FIELD name="flux_peak_err" ID="col_flux_peak_err" ucd="stat.error;phot.flux.density;stat.max;em.radio;stat.fit" datatype="float" unit="mJy/beam" width="9" precision="3"/>
+      <FIELD name="flux_int" ID="col_flux_int" ucd="phot.flux.density;em.radio;stat.fit" datatype="float" unit="mJy" width="9" precision="3"/>
+      <FIELD name="flux_int_err" ID="col_flux_int_err" ucd="stat.error;phot.flux.density;em.radio;stat.fit" datatype="float" unit="mJy" width="9" precision="3"/>
+      <FIELD name="maj_axis" ID="col_maj_axis" ucd="phys.angSize.smajAxis;em.radio;stat.fit" datatype="float" unit="arcsec" width="6" precision="2"/>
+      <FIELD name="min_axis" ID="col_min_axis" ucd="phys.angSize.sminAxis;em.radio;stat.fit" datatype="float" unit="arcsec" width="6" precision="2"/>
+      <FIELD name="pos_ang" ID="col_pos_ang" ucd="phys.angSize;pos.posAng;em.radio;stat.fit" datatype="float" unit="deg" width="7" precision="2"/>
+      <FIELD name="maj_axis_err" ID="col_maj_axis_err" ucd="stat.error;phys.angSize.smajAxis;em.radio" datatype="float" unit="arcsec" width="6" precision="2"/>
+      <FIELD name="min_axis_err" ID="col_min_axis_err" ucd="stat.error;phys.angSize.sminAxis;em.radio" datatype="float" unit="arcsec" width="6" precision="2"/>
+      <FIELD name="pos_ang_err" ID="col_pos_ang_err" ucd="stat.error;phys.angSize;pos.posAng;em.radio" datatype="float" unit="deg" width="7" precision="2"/>
+      <FIELD name="maj_axis_deconv" ID="col_maj_axis_deconv" ucd="phys.angSize.smajAxis;em.radio;askap:meta.deconvolved" datatype="float" unit="arcsec" width="6" precision="2"/>
+      <FIELD name="min_axis_deconv" ID="col_min_axis_deconv" ucd="phys.angSize.sminAxis;em.radio;askap:meta.deconvolved" datatype="float" unit="arcsec" width="6" precision="2"/>
+      <FIELD name="pos_ang_deconv" ID="col_pos_ang_deconv" ucd="phys.angSize;pos.posAng;em.radio;askap:meta.deconvolved" datatype="float" unit="deg" width="7" precision="2"/>
+      <FIELD name="chi_squared_fit" ID="col_chi_squared_fit" ucd="stat.fit.chi2" datatype="float" unit="--" width="10" precision="3"/>
+      <FIELD name="rms_fit_gauss" ID="col_rms_fit_gauss" ucd="stat.stdev;stat.fit" datatype="float" unit="mJy/beam" width="10" precision="3"/>
+      <FIELD name="spectral_index" ID="col_spectral_index" ucd="spect.index;em.radio" datatype="float" unit="--" width="8" precision="2"/>
+      <FIELD name="spectral_curvature" ID="col_spectral_curvature" ucd="askap:spect.curvature;em.radio" datatype="float" unit="--" width="8" precision="2"/>
+      <FIELD name="rms_image" ID="col_rms_image" ucd="stat.stdev;phot.flux.density" datatype="float" unit="mJy/beam" width="10" precision="3"/>
+      <FIELD name="has_siblings" ID="col_has_siblings" ucd="meta.code" datatype="int" unit="" width="5"/>
+      <FIELD name="fit_is_estimate" ID="col_fit_is_estimate" ucd="meta.code" datatype="int" unit="" width="5"/>
+      <FIELD name="flag_c3" ID="col_flag_c3" ucd="meta.code" datatype="int" unit="" width="5"/>
+      <FIELD name="flag_c4" ID="col_flag_c4" ucd="meta.code" datatype="int" unit="" width="5"/>
+      <FIELD name="comment" ID="col_comment" ucd="meta.note" datatype="char" unit="" arraysize="100"/>
+      <DATA>
+        <TABLEDATA>
+        <TR>
+          <TD>   SB1958_image.i.LMC.cont.sb1958.taylor.0.restored_1</TD><TD>   SB1958_image.i.LMC.cont.sb1958.taylor.0.restored_1a</TD><TD> J051642-714910</TD><TD>  05:16:42.5</TD><TD>    -71:49:10</TD><TD>  79.176918</TD><TD> -71.819671</TD><TD>       0.01</TD><TD>       0.01</TD><TD>     1400.5</TD><TD>  326.530</TD><TD>    0.283</TD><TD>  378.831</TD><TD>    0.542</TD><TD> 34.53</TD><TD> 30.62</TD><TD>  83.54</TD><TD>  0.03</TD><TD>  0.01</TD><TD>   0.29</TD><TD> 12.84</TD><TD> 10.85</TD><TD> -15.32</TD><TD>   243.077</TD><TD>  1210.092</TD><TD>   -1.24</TD><TD>   -1.38</TD><TD>     0.509</TD><TD>    1</TD><TD>    0</TD><TD>    0</TD><TD>    0</TD><TD>                                                                                                    </TD>
+        </TR>
+        <TR>
+          <TD>   SB1958_image.i.LMC.cont.sb1958.taylor.0.restored_1</TD><TD>   SB1958_image.i.LMC.cont.sb1958.taylor.0.restored_1b</TD><TD> J051642-715019</TD><TD>  05:16:42.3</TD><TD>    -71:50:19</TD><TD>  79.176065</TD><TD> -71.838630</TD><TD>       1.28</TD><TD>       1.04</TD><TD>     1400.5</TD><TD>    4.332</TD><TD>    0.349</TD><TD>    4.863</TD><TD>    0.983</TD><TD> 34.99</TD><TD> 29.24</TD><TD>  67.68</TD><TD>  4.86</TD><TD>  1.01</TD><TD>  24.76</TD><TD> 14.36</TD><TD>  5.08</TD><TD>  40.87</TD><TD>   243.077</TD><TD>  1210.092</TD><TD>   -3.19</TD><TD>   -6.69</TD><TD>     0.509</TD><TD>    1</TD><TD>    0</TD><TD>    0</TD><TD>    0</TD><TD>                                                                                                    </TD>
+        </TR>
+        <TR>
+          <TD>   SB1958_image.i.LMC.cont.sb1958.taylor.0.restored_1</TD><TD>   SB1958_image.i.LMC.cont.sb1958.taylor.0.restored_1c</TD><TD> J051631-715114</TD><TD>  05:16:31.2</TD><TD>    -71:51:14</TD><TD>  79.130091</TD><TD> -71.853996</TD><TD>       1.40</TD><TD>       1.30</TD><TD>     1400.5</TD><TD>    3.924</TD><TD>    0.339</TD><TD>    5.129</TD><TD>    1.004</TD><TD> 38.93</TD><TD> 30.60</TD><TD>  53.23</TD><TD>  5.52</TD><TD>  1.02</TD><TD>  21.35</TD><TD> 23.40</TD><TD>  7.56</TD><TD>  37.64</TD><TD>   243.077</TD><TD>  1210.092</TD><TD>  -10.51</TD><TD>  -60.44</TD><TD>     0.509</TD><TD>    1</TD><TD>    0</TD><TD>    0</TD><TD>    0</TD><TD>                                                                                                    </TD>
+        </TR>
+        <TR>
+          <TD>   SB1958_image.i.LMC.cont.sb1958.taylor.0.restored_2</TD><TD>   SB1958_image.i.LMC.cont.sb1958.taylor.0.restored_2a</TD><TD> J050403-720351</TD><TD>  05:04:03.9</TD><TD>    -72:03:51</TD><TD>  76.016241</TD><TD> -72.064198</TD><TD>       0.02</TD><TD>       0.01</TD><TD>     1400.5</TD><TD>   96.818</TD><TD>    0.109</TD><TD>  107.713</TD><TD>    0.204</TD><TD> 34.31</TD><TD> 29.55</TD><TD>  83.05</TD><TD>  0.04</TD><TD>  0.01</TD><TD>   0.31</TD><TD> 10.33</TD><TD>  9.83</TD><TD> -64.36</TD><TD>    18.564</TD><TD>   494.229</TD><TD>   -1.25</TD><TD>   -1.41</TD><TD>     0.472</TD><TD>    0</TD><TD>    0</TD><TD>    0</TD><TD>    0</TD><TD>                                                                                                    </TD>
+        </TR>
+        <TR>
+          <TD>   SB1958_image.i.LMC.cont.sb1958.taylor.0.restored_3</TD><TD>   SB1958_image.i.LMC.cont.sb1958.taylor.0.restored_3a</TD><TD> J050541-710746</TD><TD>  05:05:41.2</TD><TD>    -71:07:46</TD><TD>  76.421530</TD><TD> -71.129446</TD><TD>       0.02</TD><TD>       0.02</TD><TD>     1400.5</TD><TD>   86.383</TD><TD>    0.117</TD><TD>   99.901</TD><TD>    0.224</TD><TD> 35.92</TD><TD> 29.35</TD><TD>  82.79</TD><TD>  0.05</TD><TD>  0.01</TD><TD>   0.27</TD><TD> 14.72</TD><TD>  9.35</TD><TD>  84.24</TD><TD>    56.114</TD><TD>   768.555</TD><TD>   -1.21</TD><TD>    0.00</TD><TD>     0.339</TD><TD>    0</TD><TD>    0</TD><TD>    0</TD><TD>    0</TD><TD>                                                                                                    </TD>
+        </TR>
+        <TR>
+          <TD>   SB1958_image.i.LMC.cont.sb1958.taylor.0.restored_4</TD><TD>   SB1958_image.i.LMC.cont.sb1958.taylor.0.restored_4a</TD><TD> J051908-714752</TD><TD>  05:19:08.5</TD><TD>    -71:47:52</TD><TD>  79.785367</TD><TD> -71.798021</TD><TD>       0.03</TD><TD>       0.03</TD><TD>     1400.5</TD><TD>   71.012</TD><TD>    0.144</TD><TD>   87.641</TD><TD>    0.315</TD><TD> 35.74</TD><TD> 31.48</TD><TD>  92.82</TD><TD>  0.08</TD><TD>  0.02</TD><TD>   0.69</TD><TD> 16.27</TD><TD> 12.48</TD><TD> -43.97</TD><TD>    86.153</TD><TD>   722.590</TD><TD>   -0.21</TD><TD>    0.00</TD><TD>     0.443</TD><TD>    1</TD><TD>    0</TD><TD>    0</TD><TD>    0</TD><TD>                                                                                                    </TD>
+        </TR>
+        <TR>
+          <TD>   SB1958_image.i.LMC.cont.sb1958.taylor.0.restored_4</TD><TD>   SB1958_image.i.LMC.cont.sb1958.taylor.0.restored_4b</TD><TD> J051920-714810</TD><TD>  05:19:20.2</TD><TD>    -71:48:10</TD><TD>  79.834160</TD><TD> -71.803000</TD><TD>       0.07</TD><TD>       0.05</TD><TD>     1400.5</TD><TD>   34.945</TD><TD>    0.139</TD><TD>   48.322</TD><TD>    0.335</TD><TD> 40.78</TD><TD> 30.90</TD><TD>  98.03</TD><TD>  0.19</TD><TD>  0.03</TD><TD>   0.59</TD><TD> 25.01</TD><TD> 12.06</TD><TD> -72.38</TD><TD>    86.153</TD><TD>   722.590</TD><TD>   -1.24</TD><TD>    0.00</TD><TD>     0.443</TD><TD>    1</TD><TD>    0</TD><TD>    0</TD><TD>    0</TD><TD>                                                                                                    </TD>
+        </TR>
+        <TR>
+          <TD>   SB1958_image.i.LMC.cont.sb1958.taylor.0.restored_4</TD><TD>   SB1958_image.i.LMC.cont.sb1958.taylor.0.restored_4c</TD><TD> J051851-714900</TD><TD>  05:18:51.6</TD><TD>    -71:49:00</TD><TD>  79.715193</TD><TD> -71.816638</TD><TD>       2.11</TD><TD>       1.58</TD><TD>     1400.5</TD><TD>    2.239</TD><TD>    0.214</TD><TD>    3.494</TD><TD>    0.962</TD><TD> 45.61</TD><TD> 31.19</TD><TD>  88.85</TD><TD> 10.41</TD><TD>  1.94</TD><TD>  19.91</TD><TD> 31.82</TD><TD> 13.91</TD><TD> -88.71</TD><TD>    86.153</TD><TD>   722.590</TD><TD>    8.54</TD><TD>    0.00</TD><TD>     0.443</TD><TD>    1</TD><TD>    0</TD><TD>    0</TD><TD>    0</TD><TD>                                                                                                    </TD>
+        </TR>
+        <TR>
+          <TD>   SB1958_image.i.LMC.cont.sb1958.taylor.0.restored_5</TD><TD>   SB1958_image.i.LMC.cont.sb1958.taylor.0.restored_5a</TD><TD> J050712-714409</TD><TD>  05:07:12.2</TD><TD>    -71:44:09</TD><TD>  76.800819</TD><TD> -71.736080</TD><TD>       0.03</TD><TD>       0.02</TD><TD>     1400.5</TD><TD>   66.751</TD><TD>    0.121</TD><TD>   72.479</TD><TD>    0.222</TD><TD> 33.36</TD><TD> 29.66</TD><TD>  78.74</TD><TD>  0.06</TD><TD>  0.02</TD><TD>   0.63</TD><TD> 10.48</TD><TD>  5.98</TD><TD>   3.20</TD><TD>    73.804</TD><TD>   915.797</TD><TD>   -1.40</TD><TD>    0.00</TD><TD>     0.285</TD><TD>    0</TD><TD>    0</TD><TD>    0</TD><TD>    0</TD><TD>                                                                                                    </TD>
+        </TR>
+        <TR>
+          <TD>   SB1958_image.i.LMC.cont.sb1958.taylor.0.restored_6</TD><TD>   SB1958_image.i.LMC.cont.sb1958.taylor.0.restored_6a</TD><TD> J050510-704442</TD><TD>  05:05:10.3</TD><TD>    -70:44:42</TD><TD>  76.292994</TD><TD> -70.745011</TD><TD>       0.06</TD><TD>       0.05</TD><TD>     1400.5</TD><TD>   51.583</TD><TD>    0.199</TD><TD>   59.886</TD><TD>    0.388</TD><TD> 35.91</TD><TD> 29.47</TD><TD>  74.55</TD><TD>  0.14</TD><TD>  0.03</TD><TD>   0.79</TD><TD> 15.22</TD><TD>  8.86</TD><TD>  59.09</TD><TD>    60.310</TD><TD>   673.392</TD><TD>   -1.61</TD><TD>   -2.09</TD><TD>     0.638</TD><TD>    1</TD><TD>    0</TD><TD>    0</TD><TD>    0</TD><TD>                                                                                                    </TD>
+        </TR>
+        </TABLEDATA>
+      </DATA>
+    </TABLE>
+  </RESOURCE>
+</VOTABLE>

@@ -1,0 +1,10 @@
+# Build test binary fr us in nosetests
+Import("functestenv")
+myenv = functestenv.Clone()
+
+# TODO: Reinstate these two lines if I require separate functest C++ binaries
+#ftest = myenv.Program(source="../apps/tsms.cc")
+#myenv.Alias("functest", ftest)
+
+# For now, we don't need to build anything
+myenv.Alias("functest", None)

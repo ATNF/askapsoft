@@ -126,6 +126,8 @@ void ComponentResultSet::Iterator::init(
 
 void ComponentResultSet::Iterator::fillBuffer(void)
 {
+    ASKAPTHROW(AskapError, "Deprecated Method");
+    /*
     // Pre-conditions
     ASKAPCHECK(itsComponentList && itsService, "Iterator not initialised");
     ASKAPCHECK(itsIndex < itsComponentList->size(),
@@ -167,4 +169,5 @@ void ComponentResultSet::Iterator::fillBuffer(void)
     ASKAPCHECK(itsIndex <= itsComponentList->size(),
             "Index to component list out of bounds");
     ASKAPCHECK(!itsComponentBuffer.empty(), "Component list is empty");
+    */
 }

@@ -1,0 +1,9 @@
+/// The central processor sky model service namespace.
+namespace askap::cp::sms {};
+
+/// @mainpage ASKAP Central Processor Sky Model Service
+///
+/// @section cpservices_sms Introduction
+/// The Central Processor Sky Model Service ...
+///
+/// @copyright 2016 CSIRO, All Rights Reserved.

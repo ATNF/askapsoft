@@ -75,6 +75,8 @@ SkyModelServiceClient::~SkyModelServiceClient()
 
 std::vector<ComponentId> SkyModelServiceClient::addComponents(const std::vector<Component>& components)
 {
+    ASKAPTHROW(AskapError, "Deprecated Method");
+    /*
     askap::interfaces::skymodelservice::ComponentSeq ice_components;
     for (size_t i = 0; i < components.size(); ++i) {
         askap::interfaces::skymodelservice::Component ice_component;
@@ -98,12 +100,15 @@ std::vector<ComponentId> SkyModelServiceClient::addComponents(const std::vector<
     }
 
     return ids;
+    */
 }
 
 ComponentResultSet SkyModelServiceClient::coneSearch(const casa::Quantity& ra, 
         const casa::Quantity& dec, const casa::Quantity& searchRadius,
         const casa::Quantity& fluxLimit)
 {
+    ASKAPTHROW(AskapError, "Deprecated Method");
+    /*
     ASKAPCHECK(ra.isConform("deg"), "ra must conform to degrees");
     ASKAPCHECK(dec.isConform("deg"), "dec must conform to degrees");
     ASKAPCHECK(searchRadius.isConform("deg"), "searchRadius must conform to degrees");
@@ -114,4 +119,5 @@ ComponentResultSet SkyModelServiceClient::coneSearch(const casa::Quantity& ra,
                 searchRadius.getValue("deg"), fluxLimit.getValue("Jy"));
 
     return ComponentResultSet(ice_resultset, itsService);
+    */
 }

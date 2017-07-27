@@ -1,0 +1,38 @@
+#!/bin/bash
+
+DB="./sqlite.cfg"
+#DB="./mysql.cfg"
+#DB="./pgsql.cfg"
+COMMON_ARGS="--config "$DB" --log-config ./sms.log_cfg"
+
+echo ======================================================================
+echo Check db
+../apps/sms_tools.sh --gsm-stats $COMMON_ARGS
+echo ======================================================================
+
+RA="37.0"
+DEC="43.2"
+RADIUS="3.0"
+echo
+echo ======================================================================
+echo RA: $RA, Dec: $DEC, Radius: $RADIUS
+echo ----------------------------------------------------------------------
+time ../apps/sms_tools.sh $COMMON_ARGS --cone-search --ra $RA --dec $DEC --radius $RADIUS
+
+RA="190.0"
+DEC="-27.0"
+RADIUS="6.0"
+echo
+echo ======================================================================
+echo RA: $RA, Dec: $DEC, Radius: $RADIUS
+echo ----------------------------------------------------------------------
+time ../apps/sms_tools.sh $COMMON_ARGS --cone-search --ra $RA --dec $DEC --radius $RADIUS
+
+RA="255.0"
+DEC="0.0"
+RADIUS="40.0"
+echo
+echo ======================================================================
+echo RA: $RA, Dec: $DEC, Radius: $RADIUS
+echo ----------------------------------------------------------------------
+time ../apps/sms_tools.sh $COMMON_ARGS --cone-search --ra $RA --dec $DEC --radius $RADIUS

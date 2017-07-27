@@ -40,13 +40,23 @@
 #include <cppunit/TestResultCollector.h>
 #include <cppunit/TestRunner.h>
 #include <cppunit/TextTestProgressListener.h>
+#include <cppunit/BriefTestProgressListener.h>
 #include <cppunit/Test.h>
 
 using namespace askapdev::testutils;
 
-AskapTestRunner::AskapTestRunner(const std::string& testname)
+AskapTestRunner::AskapTestRunner(const std::string& testname, bool verbose)
     : itsTestname(testname)
 {
+    if (verbose) {
+        // The BriefTestProgressListener prints the full test name before
+        // running it
+        itsTestListener.reset(new CppUnit::BriefTestProgressListener());
+    }
+    else {
+        // The TextTestProgressListener will produce the '...F...' style output.
+        itsTestListener.reset(new CppUnit::TextTestProgressListener());
+    }
 }
 
 AskapTestRunner::~AskapTestRunner()
@@ -68,9 +78,7 @@ bool AskapTestRunner::run(void)
     testresult.addListener(&collectedresults);
 
     // Register listener for per-test progress output.
-    // The TextTestProgressListener will produce the '...F...' style output.
-    CppUnit::TextTestProgressListener progress;
-    testresult.addListener(&progress);
+    testresult.addListener(itsTestListener.get());
 
     // Run the tests.
     itsRunner.run(testresult);

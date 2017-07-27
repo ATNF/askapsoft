@@ -1,0 +1,4 @@
+# This file lists the external dependencies
+# use pkgname=askap_relative_path
+boost=3rdParty/boost/boost-1.56.0
+libodb=3rdParty/odb/odb-2.4.0/libodb

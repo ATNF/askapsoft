@@ -1,0 +1,15 @@
+{
+    "user_name": "user_name",
+    "user_email": "user_email@mail.org",
+    "year": "2017",
+    "project_directory_name": "project_directory_name",
+    "service_long_name": "Service Long Name",
+    "namespace": "service_namespace",
+    "package_name": "package_name",
+    "service_class_name": "ServiceClassName",
+    "cli_app_name": "cli_app_name",
+    "cli_app_class_name": "cli_app_class_name",
+    "ice_service_name": "Service",
+    "ice_interface_filename": "IService",
+    "ice_interface_namespace": "services"
+}

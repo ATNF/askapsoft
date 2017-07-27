@@ -27,9 +27,12 @@
 #ifndef ASKAP_TOOLS_ASKAPTESTRUNNER_H
 #define ASKAP_TOOLS_ASKAPTESTRUNNER_H
 
+#include <memory>
+
 // CppUnit includes
 #include <cppunit/Test.h>
 #include <cppunit/ui/text/TestRunner.h>
+#include <cppunit/TestListener.h>
 
 namespace askapdev {
 namespace testutils {
@@ -70,7 +73,7 @@ namespace testutils {
             ///     name and hence this class simply allows the contents of
             ///     argv[0] be passed. If this string contains the full path
             ///     then this will be stripped off.
-            AskapTestRunner(const std::string& testname);
+            AskapTestRunner(const std::string& testname, bool verbose=false);
 
             /// @brief Destructor.
             virtual ~AskapTestRunner();
@@ -89,6 +92,7 @@ namespace testutils {
         private:
             CppUnit::TextUi::TestRunner itsRunner;
             const std::string itsTestname;
+            std::auto_ptr<CppUnit::TestListener> itsTestListener;
     };
 };
 };
