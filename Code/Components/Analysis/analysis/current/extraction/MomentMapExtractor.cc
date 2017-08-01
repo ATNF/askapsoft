@@ -365,13 +365,13 @@ double MomentMapExtractor::getSpectralIncrement(int z)
         ASKAPASSERT(spcoo.pixelToVelocity(vel, double(z)));
         ASKAPASSERT(spcoo.pixelToVelocity(velMinus, double(z - 1)));
         ASKAPASSERT(spcoo.pixelToVelocity(velPlus, double(z + 1)));
-        ASKAPLOG_DEBUG_STR(logger, velMinus << " " << vel << " " << velPlus);
+//        ASKAPLOG_DEBUG_STR(logger, velMinus << " " << vel << " " << velPlus);
         specIncr = fabs(velPlus.getValue() - velMinus.getValue()) / 2.;
     } else {
         // can't do velocity conversion, so just use the WCS spectral units
         specIncr = fabs(spcoo.increment()[0]);
     }
-    ASKAPLOG_DEBUG_STR(logger, "Channel " << z << " had spectral increment " << specIncr);
+//    ASKAPLOG_DEBUG_STR(logger, "Channel " << z << " had spectral increment " << specIncr);
     return specIncr;
 }
 

@@ -58,7 +58,7 @@
 #include <duchamp/Utils/utils.hh>
 #include <vector>
 
-ASKAP_LOGGER(logger, ".casdaabsorptionobject");
+ASKAP_LOGGER(logger, ".casdahiemissionobject");
 
 namespace askap {
 

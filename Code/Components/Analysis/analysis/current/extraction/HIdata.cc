@@ -121,15 +121,27 @@ void HIdata::findVoxelStats()
 {
 
     itsFluxMax = itsSource->getPeakFlux();
-    casa::IPosition start=itsCubeletExtractor->slicer().start().nonDegenerate();
-    casa::Array<float> cubelet = itsCubeletExtractor->array().nonDegenerate();
+    casa::IPosition start=itsCubeletExtractor->slicer().start();
+    casa::Array<float> cubelet = itsCubeletExtractor->array();
     std::vector<PixelInfo::Voxel> voxelList = itsSource->getPixelSet();
     float min,sumf=0.,sumff=0.;
     std::vector<PixelInfo::Voxel>::iterator vox = voxelList.begin();
     for(;vox < voxelList.end(); vox++){
         //float flux = vox->getF();
         if (itsSource->isInObject(*vox)) {
-            casa::IPosition loc(3, vox->getX(), vox->getY(), vox->getZ());
+            // The Stokes axis, if present, will be of length 1, and will be either location 2 or 3 in the IPosition
+            casa::IPosition loc;
+            if (start.size() == 2 ){
+                loc = casa::IPosition(start.size(), vox->getX(), vox->getY());
+            } else if (start.size() == 3){
+                loc = casa::IPosition(start.size(), vox->getX(), vox->getY(), vox->getZ());
+            } else {
+                if(itsCubeletExtractor->slicer().length()[2]==1) {
+                    loc = casa::IPosition(start.size(), vox->getX(), vox->getY(), 0, vox->getZ());
+                } else {
+                    loc = casa::IPosition(start.size(), vox->getX(), vox->getY(), vox->getZ(), 0);
+                }
+            }
             float flux = cubelet(loc-start);
             if(vox==voxelList.begin()) {
                 min = flux;
@@ -194,27 +206,28 @@ void HIdata::write()
 int HIdata::busyFunctionFit()
 {
 
-    casa::Array<double> spectrum(itsSpecExtractor->array().shape(),0.);
-    for(size_t i=0;i<itsSpecExtractor->array().size();i++){
-        spectrum[i] = itsSpecExtractor->array().data()[i];
-    }
-    casa::Array<double> noise(itsNoiseExtractor->array().shape(),0.);
-    for(size_t i=0;i<itsNoiseExtractor->array().size();i++){
-        noise[i] = itsNoiseExtractor->array().data()[i];
-    }
+    //convert to doubles
+    casa::Array<double> spectrum(itsSpecExtractor->array().shape(),
+                                 (double *)itsSpecExtractor->array().data());
+    casa::Array<double> noise(itsNoiseExtractor->array().shape(),
+                              (double *)itsNoiseExtractor->array().data());
 
     BusyFit *theFitter = new BusyFit();
 
     bool plotsTurnedOff = true;
     bool relax=false;
     bool verbose=false;
-       
-    theFitter->setup(spectrum.size(), spectrum.data(), noise.data(), plotsTurnedOff, relax, verbose);
-    
+
+    theFitter->setup(spectrum.size(), spectrum.data(), noise.data(),
+                     plotsTurnedOff, relax, verbose);
+
     int status = theFitter->fit();
+    
     if (status == 0 ){
-        theFitter->getResult(itsBFparams.data(), itsBFerrors.data(), itsBFchisq, itsBFredChisq, itsBFndof);
+        theFitter->getResult(itsBFparams.data(), itsBFerrors.data(),
+                             itsBFchisq, itsBFredChisq, itsBFndof);
     }
+
     return status;
     
 }
@@ -249,7 +262,7 @@ void HIdata::fitToMom0()
                 f(i) = mom0.data()[i];
             }
             sigma(i) = 1.;
-            ASKAPLOG_DEBUG_STR(logger, "i="<<i<<", (x,y)=("<<x<<","<<y<<"), f(i)="<<f(i));
+            // ASKAPLOG_DEBUG_STR(logger, "i="<<i<<", (x,y)=("<<x<<","<<y<<"), f(i)="<<f(i));
         }
     }
 
@@ -274,7 +287,8 @@ void HIdata::fitToMom0()
     fullfit.setRetries();
     fullfit.setMasks();
     fullfit.fit(pos, f, sigma);
-    
+
+    // Fit a PSF-shaped Gaussian, fixing it to be at the centre
     fitparams.setFlagFitThisParam("psf");
     Fitter psffit(fitparams);
     psffit.setNumGauss(1);
