@@ -90,8 +90,8 @@ dictionary<JonesIndex, JonesJTermSeq> BandpassSolution;
  
 /** Structure containing gains solution plus a timestamp */
 struct TimeTaggedGainSolution {
-    /** Absolute time expressed as microseconds since MJD=0. */
-    long timestamp;
+    /** Absolute time expressed as MJD in UTC frame */
+    double timestamp;
 
     /** Gain solution */
     GainSolution solutionMap;
@@ -99,8 +99,8 @@ struct TimeTaggedGainSolution {
 
 /** Structure containing leakage solution plus a timestamp */
 struct TimeTaggedLeakageSolution {
-    /** Absolute time expressed as microseconds since MJD=0. */
-    long timestamp;
+    /** Absolute time expressed as MJD in UTC frame */
+    double timestamp;
 
     /** Leakage solution */
     LeakageSolution solutionMap;
@@ -108,11 +108,13 @@ struct TimeTaggedLeakageSolution {
 
 /** Structure containing bandpass solution plus a timestamp */
 struct TimeTaggedBandpassSolution {
-    /** Absolute time expressed as microseconds since MJD=0. */
-    long timestamp;
+    /** Absolute time expressed as MJD in UTC frame */
+    double timestamp;
 
     /** Bandpass solution */
     BandpassSolution solutionMap;
+
+    //CalParamStatus status;
 };
 
 // Design Note: Structures above describe the calibration solutions as such (i.e.
@@ -121,7 +123,7 @@ struct TimeTaggedBandpassSolution {
 // different time. Therefore, it would be handy to have a buffer of the parameters which
 // are actually applied (it may be a responsibility of another piece of code to poll the
 // database and populate this buffer with the most recent solutions for every
-// calibration parameter. The ingest pipeline would access this buffer and just applyall
+// calibration parameter. The ingest pipeline would access this buffer and just apply all
 // values. In the future, the structure is likely to change, because it should be aligned
 // with the actual architecture. Interfaces below are given as an example or a starting
 // point. They essentially pass the same information as the interfaces given above but
