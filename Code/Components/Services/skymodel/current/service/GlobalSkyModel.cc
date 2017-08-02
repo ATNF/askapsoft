@@ -128,6 +128,12 @@ shared_ptr<GlobalSkyModel> GlobalSkyModel::create(const LOFAR::ParameterSet& par
         ASKAPLOG_DEBUG_STR(logger, "creating GlobalSkyModel");
         pImpl.reset(new GlobalSkyModel(pDb, maxPixelsPerQuery));
     }
+    /* PostgreSQL support is being removed in order to simplify build
+     * dependencies. MySQL has been chosen as the production backend, while unit
+     * and functional tests run against sqlite.
+     * See https://jira.csiro.au/browse/ASKAPSDP-2738
+     */
+    /*
     else if (dbType.compare("pgsql") == 0) {
         ASKAPLOG_INFO_STR(logger, "connecting to pgsql");
 
@@ -154,6 +160,7 @@ shared_ptr<GlobalSkyModel> GlobalSkyModel::create(const LOFAR::ParameterSet& par
         ASKAPLOG_DEBUG_STR(logger, "creating GlobalSkyModel");
         pImpl.reset(new GlobalSkyModel(pDb, maxPixelsPerQuery));
     }
+    */
     else {
         ASKAPTHROW(AskapError, "Unsupported database backend: " << dbType);
     }
