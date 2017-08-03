@@ -61,54 +61,42 @@ class CalibrationDataServiceClient {
         /// Destructor.
         ~CalibrationDataServiceClient();
 
+
+        /// Create new solution ID to use with add functions
+        ///
+        /// @return ID of the brand new entry to with calibration solutions can be attached
+        casa::Long newSolutionID();
+
         /// Add a new gain solution to the data service. This method is
         /// intended to be used by the calibratin pipeine, and is called
         /// to submit new gain solutions.
         ///
+        /// @param[in] id solution id to work with
         /// @param[in] sol  the gain solution to add.
-        /// @return a unique id referencing the solution in the data service.
-        casa::Long addGainSolution(const GainSolution& sol);
+        void addGainSolution(casa::Long id, const GainSolution& sol);
 
         /// Add a new leakage solution to the data service. This method is
         /// intended to be used by the calibratin pipeine, and is called
         /// to submit new leakage solutions.
         ///
+        /// @param[in] id solution id to work with
         /// @param[in] sol  the leakage solution to add.
         /// @return a unique id referencing the solution in the data service.
-        casa::Long addLeakageSolution(const LeakageSolution& sol);
+        void addLeakageSolution(casa::Long id, const LeakageSolution& sol);
 
         /// Add a new bandpass solution to the data service. This method is
         /// intended to be used by the calibratin pipeine, and is called
         /// to submit new bandpass solutions.
         ///
+        /// @param[in] id solution id to work with
         /// @param[in] sol  the bandpass solution to add.
         /// @return a unique id referencing the solution in the data service.
-        casa::Long addBandpassSolution(const BandpassSolution& sol);
+        void addBandpassSolution(casa::Long id, const BandpassSolution& sol);
 
-        /// Obtain the ID for the latest/optimum gain solution.
+        /// Obtain the ID for the latest solution.
         ///
-        /// @note The optimum solution is typically the latest solution,
-        /// although where the latest solution is flawed, either in part of
-        /// in full, the calibration data service will provide either one of
-        /// the older solutions, or a fusion of multiple solutions. If an
-        /// override is in place, the ID of the solution specified by the
-        /// override is supplied instead.
-        ///
-        /// @return the ID of the latest/optimum gain solution, or -1 in the
-        ///         case the calibration data service has no gain solutions.
-        casa::Long getCurrentGainSolutionID(void);
-
-        /// Obtain the ID for the latest/optimum leakage solution.
-        ///
-        /// @return the ID of the latest/optimum leakage solution, or -1 in the
-        ///         case the calibration data service has no leakage solutions.
-        casa::Long getCurrentLeakageSolutionID(void);
-
-        /// Obtain the ID for the latest/optimum bandpass solution.
-        ///
-        /// @return the ID of the latest/optimum bandpass solution, or -1 in the
-        ///         case the calibration data service has no bandpass solutions.
-        casa::Long getCurrentBandpassSolutionID(void);
+        /// @return the ID of the latest solution
+        casa::Long getLatestSolutionID(void);
 
         /// Get a gain solution.
         ///

@@ -53,7 +53,7 @@ class GenericSolution {
         /// @param[in] timestamp    timestamp indicating when the solution was
         ///                         created. Absolute time expressed as
         ///                         microseconds since MJD=0.
-        GenericSolution(const casa::Long timestamp) {
+        GenericSolution(const casa::Double timestamp) {
             itsTimestamp = timestamp;
         }
 
@@ -79,7 +79,7 @@ class GenericSolution {
         }
 
     private:
-        casa::Long itsTimestamp;
+        casa::Double itsTimestamp;
 
         std::map<JonesIndex, T> itsMap;
 };

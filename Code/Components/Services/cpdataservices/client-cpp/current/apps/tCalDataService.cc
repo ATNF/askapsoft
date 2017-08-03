@@ -87,8 +87,8 @@ class Stopwatch {
         clock_t m_start;
 };
 
-void addGainSolution(CalibrationDataServiceClient& svc,
-        const casa::Long timestamp,
+void addGainSolution(CalibrationDataServiceClient& svc, const casa::Long id,
+        const casa::Double timestamp,
         const casa::Short nAntenna, const casa::Short nBeam)
 {
     GainSolution sol(timestamp);
@@ -101,11 +101,11 @@ void addGainSolution(CalibrationDataServiceClient& svc,
         }
     }
 
-    svc.addGainSolution(sol);
+    svc.addGainSolution(id,sol);
 }
 
-void addLeakageSolution(CalibrationDataServiceClient& svc,
-        const casa::Long timestamp,
+void addLeakageSolution(CalibrationDataServiceClient& svc, const casa::Long id,
+        const casa::Double timestamp,
         const casa::Short nAntenna, const casa::Short nBeam)
 {
     LeakageSolution sol(timestamp);
@@ -117,11 +117,11 @@ void addLeakageSolution(CalibrationDataServiceClient& svc,
         }
     }
 
-    svc.addLeakageSolution(sol);
+    svc.addLeakageSolution(id,sol);
 }
 
-void addBandpassSolution(CalibrationDataServiceClient& svc,
-        const casa::Long timestamp,
+void addBandpassSolution(CalibrationDataServiceClient& svc, const casa::Long id,
+        const casa::Double timestamp,
         const casa::Short nAntenna, const casa::Short nBeam, const casa::Int nChan)
 {
     BandpassSolution sol(timestamp);
@@ -135,7 +135,7 @@ void addBandpassSolution(CalibrationDataServiceClient& svc,
         }
     }
 
-    svc.addBandpassSolution(sol);
+    svc.addBandpassSolution(id,sol);
 }
 
 // main()
@@ -162,21 +162,26 @@ int main(int argc, char *argv[])
     const casa::Int nChan = parset.getInt32("test.nchannel");
 
     CalibrationDataServiceClient svc(locatorHost, locatorPort, serviceName);
-    const casa::Long timestamp = 1000;
+    const casa::Double timestamp = 55790.1;
 
     Stopwatch sw;
     sw.start();
-    addGainSolution(svc, timestamp, nAntenna, nBeam);
+    casa::Long newID = svc.newSolutionID();
     double time = sw.stop();
+    std::cout << "Time to get new solution ID: " << time << std::endl;
+
+    sw.start();
+    addGainSolution(svc, newID, timestamp, nAntenna, nBeam);
+    time = sw.stop();
     std::cout << "Time to add gains solution: " << time << std::endl;
 
     sw.start();
-    addLeakageSolution(svc, timestamp, nAntenna, nBeam);
+    addLeakageSolution(svc, newID, timestamp, nAntenna, nBeam);
     time = sw.stop();
     std::cout << "Time to add leakage solution: " << time << std::endl;
 
     sw.start();
-    addBandpassSolution(svc, timestamp, nAntenna, nBeam, nChan);
+    addBandpassSolution(svc, newID, timestamp, nAntenna, nBeam, nChan);
     time = sw.stop();
     std::cout << "Time to add bandpass solution: " << time << std::endl;
 

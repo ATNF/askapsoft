@@ -179,7 +179,8 @@ int main(int argc, char *argv[])
         // Process gain solution if exists
         LOFAR::ParameterSet gainSubset = parset.makeSubset("gain.");
         if (gainSubset.size() > 0) {
-            const long id = svc.addGainSolution(buildGainSolution(gainSubset));
+            const long id = svc.newSolutionID();
+            svc.addGainSolution(id,buildGainSolution(gainSubset));
             std::cout << "ID of new gain solution: " << id << std::endl;
         } else {
             std::cout << "No gains in input file" << std::endl;

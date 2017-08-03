@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
 
     // Gain Solution
     if (gainID == -1) {
-        gainID = svc.getCurrentGainSolutionID();
+        gainID = svc.getLatestSolutionID();
         cout << "Calibration data service reports latest gain solution is: "
             << gainID << endl;
     }
@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
 
     // Leakage Solution
     if (leakageID == -1) {
-        leakageID = svc.getCurrentLeakageSolutionID();
+        leakageID = svc.getLatestSolutionID();
         cout << "Calibration data service reports latest leakage solution is: "
             << leakageID << endl;
     }
@@ -189,7 +189,7 @@ int main(int argc, char *argv[])
 
     // Bandpass Solution
     if (bandpassID == -1) {
-        bandpassID = svc.getCurrentBandpassSolutionID();
+        bandpassID = svc.getLatestSolutionID();
         cout << "Calibration data service reports latest bandpass solution is: "
             << bandpassID << endl;
     }

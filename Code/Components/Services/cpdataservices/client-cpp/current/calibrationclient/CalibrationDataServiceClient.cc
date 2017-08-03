@@ -76,35 +76,34 @@ CalibrationDataServiceClient::~CalibrationDataServiceClient()
     itsComm->destroy();
 }
 
-casa::Long CalibrationDataServiceClient::addGainSolution(const GainSolution& sol)
+void CalibrationDataServiceClient::addGainSolution(casa::Long id, const GainSolution& sol)
 {
-    return itsService->addGainsSolution(IceMapper::toIce(sol));
+    itsService->addGainsSolution(id,IceMapper::toIce(sol));
 }
 
-casa::Long CalibrationDataServiceClient::addLeakageSolution(const LeakageSolution& sol)
+void CalibrationDataServiceClient::addLeakageSolution(casa::Long id, const LeakageSolution& sol)
 {
-    return itsService->addLeakageSolution(IceMapper::toIce(sol));
+    itsService->addLeakageSolution(id, IceMapper::toIce(sol));
 }
 
-casa::Long CalibrationDataServiceClient::addBandpassSolution(const BandpassSolution& sol)
+void CalibrationDataServiceClient::addBandpassSolution(casa::Long id, const BandpassSolution& sol)
 {
-    return itsService->addBandpassSolution(IceMapper::toIce(sol));
+    itsService->addBandpassSolution(id, IceMapper::toIce(sol));
 }
 
-casa::Long CalibrationDataServiceClient::getCurrentGainSolutionID(void)
+casa::Long CalibrationDataServiceClient::getLatestSolutionID(void)
 {
-    return itsService->getCurrentGainSolutionID();
+    return itsService->getLatestSolutionID();
 }
 
-casa::Long CalibrationDataServiceClient::getCurrentLeakageSolutionID(void)
+/// Create new solution ID to use with add functions
+///
+/// @return ID of the brand new entry to with calibration solutions can be attached
+casa::Long CalibrationDataServiceClient::newSolutionID()
 {
-    return itsService->getCurrentLeakageSolutionID();
+    return itsService->newSolutionID();
 }
 
-casa::Long CalibrationDataServiceClient::getCurrentBandpassSolutionID(void)
-{
-    return itsService->getCurrentBandpassSolutionID();
-}
 
 GainSolution CalibrationDataServiceClient::getGainSolution(const casa::Long id)
 {
