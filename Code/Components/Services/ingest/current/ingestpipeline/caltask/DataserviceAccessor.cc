@@ -171,8 +171,7 @@ casa::Complex DataserviceAccessor::getBandpass(casa::uInt ant, casa::uInt beam,
 
 void DataserviceAccessor::updateSolutions(void)
 {
-    casa::Long newID;
-    newID = itsService.getCurrentGainSolutionID();
+    casa::Long newID = itsService.getLatestSolutionID();
     if (newID > itsGainID) {
         boost::shared_ptr<askap::cp::caldataservice::GainSolution> temp(new GainSolution(itsService.getGainSolution(newID)));
         ASKAPLOG_INFO_STR(logger, "Updating gain solution with ID: " << newID);
@@ -181,7 +180,7 @@ void DataserviceAccessor::updateSolutions(void)
         itsGainID = newID;
     }
 
-    newID = itsService.getCurrentLeakageSolutionID();
+    //newID = itsService.getCurrentLeakageSolutionID();
     if (newID > itsLeakageID) {
         boost::shared_ptr<askap::cp::caldataservice::LeakageSolution> temp(new LeakageSolution(itsService.getLeakageSolution(newID)));
         ASKAPLOG_INFO_STR(logger, "Updating leakage solution with ID: " << newID);
@@ -190,7 +189,7 @@ void DataserviceAccessor::updateSolutions(void)
         itsLeakageID = newID;
     }
 
-    newID = itsService.getCurrentBandpassSolutionID();
+    //newID = itsService.getCurrentBandpassSolutionID();
     if (newID > itsBandpassID) {
         boost::shared_ptr<askap::cp::caldataservice::BandpassSolution> temp(new BandpassSolution(itsService.getBandpassSolution(newID)));
         ASKAPLOG_INFO_STR(logger, "Updating bandpass solution with ID: " << newID);
