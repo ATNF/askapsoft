@@ -39,6 +39,51 @@ module interfaces
 module calparams 
 {
 
+/** Status enum for a calibration solution */
+enum CalParamStatus {
+
+    /**
+     * The appropriate parameter has a default value (i.e. 1.0 for gains), neither
+     * automatic calibration pipeline, nor manual adjustment was done. The related
+     * timestamp field is meaningless.
+     */
+    DEFAULT,
+
+    /**
+     * The value is set by operator (or any actor other than the calibration
+     * pipeline) at the given time.
+     * Design Note:  Do we need a special option which ensures that the appropriate
+     * value is not be overwritten by the calibration pipeline?
+     */
+    USERDEFINED,
+
+    /**
+     * The value is a result of the calibration pipeline execution at the given
+     * time and it is considered to be valid.
+     */
+    DERIVED,
+
+    /**
+     * The pipeline failed to determine the value for some reason. This option is
+     * present here for consistency, although the merging logic should probably
+     * keep the previous value/status for the given antenna/beam if the solution
+     * for an update fails for some reason. The time field shows when the solution
+     * for an update has been attempted.
+     */
+    FAILED,
+
+    /**
+     * The value is invalidated by some other mechanism, i.e. the operator
+     * intervention. The merging logic should probably keep it invalid when
+     * the next solution arrives, unlike the FAILED case which should be replaced
+     * by the new soltuion if it is valid. The ingest pipeline behavior may also be
+     * different in this case (i.e. it may flag this beam/antenna in the dataset
+     * prepared for the calibration pipeline)
+     */
+    INVALID
+};
+
+
 /**
  * Jones Index
  */
@@ -129,49 +174,6 @@ struct TimeTaggedBandpassSolution {
 // point. They essentially pass the same information as the interfaces given above but
 // in somewhat transposed form.
 
-/** Status enum for a calibration parameter */
-enum CalParamStatus {
-
-    /**
-     * The appropriate parameter has a default value (i.e. 1.0 for gains), neither
-     * automatic calibration pipeline, nor manual adjustment was done. The related
-     * timestamp field is meaningless.
-     */
-    DEFAULT,
-
-    /**
-     * The value is set by operator (or any actor other than the calibration
-     * pipeline) at the given time.
-     * Design Note:  Do we need a special option which ensures that the appropriate
-     * value is not be overwritten by the calibration pipeline?
-     */
-    USERDEFINED,
-
-    /**
-     * The value is a result of the calibration pipeline execution at the given
-     * time and it is considered to be valid.
-     */
-    DERIVED,
-
-    /**
-     * The pipeline failed to determine the value for some reason. This option is
-     * present here for consistency, although the merging logic should probably
-     * keep the previous value/status for the given antenna/beam if the solution
-     * for an update fails for some reason. The time field shows when the solution
-     * for an update has been attempted.
-     */
-    FAILED,
-
-    /**
-     * The value is invalidated by some other mechanism, i.e. the operator
-     * intervention. The merging logic should probably keep it invalid when
-     * the next solution arrives, unlike the FAILED case which should be replaced
-     * by the new soltuion if it is valid. The ingest pipeline behavior may also be
-     * different in this case (i.e. it may flag this beam/antenna in the dataset
-     * prepared for the calibration pipeline)
-     */
-    INVALID
-};
 
 };
 
