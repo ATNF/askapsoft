@@ -7,7 +7,7 @@ from the given Scheduling Block (SB) directory. If SB numbers are
 given, this is where to look. If SB numbers are not provided, however,
 the ``MS_INPUT`` variables give the filename for the relevant MS.
 
-It may be that the SB you wish to process has been removed from /scratch2.
+It may be that the SB you wish to process has been removed from /astro.
 You can follow the instructions on :doc:`../platform/comm_archive` to request
 it be reinstated. If you have already started processing it and wish to
 continue, you can specify the measurement set name it would have (this forms

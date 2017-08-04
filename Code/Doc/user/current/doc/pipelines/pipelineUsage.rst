@@ -285,7 +285,7 @@ Staging the processing
 ----------------------
 
 As described on :doc:`../platform/comm_archive`, many datasets will
-not reside on /scratch2, but only on the commissioning archive. They
+not reside on /astro, but only on the commissioning archive. They
 can be restored by Operations staff if you wish to process (or
 re-process) them. It is possible to set up your processing to start
 immediately upon completion of the restoration process, by using the

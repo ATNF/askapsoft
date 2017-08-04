@@ -7,7 +7,7 @@ Recent datasets
 Scheduling block measurements sets that have been recently observed,
 or are the subject of current processing, are kept on the Galaxy
 Lustre file system at
-*/scratch2/askap/askapops/askap-scheduling-blocks*. Each scheduling
+*/astro/askaprt/askapops/askap-scheduling-blocks*. Each scheduling
 block directory contains a measurement set, the ingest pipeline parset
 and log, as well as other files indicating the state of the
 archiving.
@@ -16,12 +16,12 @@ Archiving of measurement sets
 -----------------------------
 
 After the observation is complete, new datasets are archived on the
-commisisoning archive. This is tape- and disk-based storage aimed at
+commisisoning archive. This is tape and disk-based storage aimed at
 keeping raw and some processed data during ASKAP commissioning.
 
 The observations are archived by tar-ing the entire scheduling block
 directory. After this is copied to the archive, the measurement set
-within the directory on /scratch2 is removed, and a file called
+within the directory on /astro is removed, and a file called
 ARCHIVED is created.
 
 There is a RESTORE.SH script that ASKAP operations will make use of to
@@ -39,7 +39,7 @@ where <jobID> is the slurm job ID of the restore job. Run
 "stage-processing.sh -h" for more information.
 
 All BETA datasets were archived in the same fashion, and are available
-in their own directory on both the commissioning archive and /scratch2
+in their own directory on both the commissioning archive
 (in beta-scheduling-blocks rather than askap-scheduling-blocks).
 
 Viewing and accessing the archive

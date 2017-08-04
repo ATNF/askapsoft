@@ -117,6 +117,10 @@ written to from the compute nodes. It is mounted read-only on the compute nodes 
 users from being able to "clobber" the home directory server with thousands of concurrent I/Os
 from compute nodes.
 
+In addition to /scratch2 and /group there is another filesystem, /astro, which is reserved for real-time 
+use by the askap system. /astro has restricted access and is intended for ASKAP operations to write scheduling 
+blocks and for processing pipelines to read them. All non-askap-system write operations are to be to /scratch2.
+
 Submitting a job:
 -----------------
 
