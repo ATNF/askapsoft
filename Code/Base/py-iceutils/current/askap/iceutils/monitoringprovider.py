@@ -30,7 +30,6 @@ Implementation of Ice interfaces to provide monitoring information
 
 """
 from dogpile.core import ReadWriteMutex
-
 from askap.time import bat_now
 from askap.slice import MonitoringProvider
 from askap.interfaces.monitoring import (MonitorPoint, MonitoringProvider,
@@ -41,8 +40,6 @@ __all__ = ["MONITOR", "MonitoringProviderImpl"]
 
 
 class PointMapper(object):
-    """`TypedValue` encoded Point representation"""
-
     def __init__(self):
         """
         :class:`TypedValueMapper` encoded Point representation
@@ -77,6 +74,22 @@ class MonitoringBuffer(object):
         finally:
             self._mutex.release_write_lock()
 
+    def add_full_points(self, points):
+        ""points is a list of dict, each is a monitor point
+	try:
+            self._mutex.acquire_write_lock()
+	    for point in points:
+		name = point['name]
+                mon_point = {'name': name, 
+		     'timestamp': point['timestamp'] or bat_now(),
+                     'unit': point['unit'] or ''
+                     'status': point['status'] or 'OK',
+                     'value': point['value']}
+                self._buffer[name] = mon_point
+        finally:
+            self._mutex.release_write_lock()
+	
+
     def add(self, name, value, timestamp=None, status="OK", unit=""):
         """Add a monitor point with metadata"""
         try:
@@ -102,7 +115,6 @@ class MonitoringBuffer(object):
         finally:
             self._mutex.release_write_lock()
 
-
     def clear(self):
         """
         Clear the buffer
@@ -112,7 +124,6 @@ class MonitoringBuffer(object):
             self._buffer.clear()
         finally:
             self._mutex.release_write_lock()
-
 
     def get(self, keys):
         """Get given point names `keys` from buffer
@@ -139,6 +150,7 @@ class MonitoringProviderImpl(MonitoringProvider):
     The implementation of the ice interface to provide monitoring points.
     """
     def __init__(self):
+
         self._point_mapper = PointMapper()
 
     # noinspection PyIncorrectDocstring
