@@ -75,20 +75,19 @@ class MonitoringBuffer(object):
             self._mutex.release_write_lock()
 
     def add_full_points(self, points):
-        ""points is a list of dict, each is a monitor point
-	try:
+        """ points is a list of dict, each is a monitor point """
+        try:
             self._mutex.acquire_write_lock()
-	    for point in points:
-		name = point['name']
+            for point in points:
+                name = point['name']
                 mon_point = {'name': name, 
-		     'timestamp': point['timestamp'] or bat_now(),
-                     'unit': point['unit'] or ''
+		             'timestamp': point['timestamp'] or bat_now(),
+                     'unit': point['unit'] or '',
                      'status': point['status'] or 'OK',
                      'value': point['value']}
                 self._buffer[name] = mon_point
         finally:
             self._mutex.release_write_lock()
-	
 
     def add(self, name, value, timestamp=None, status="OK", unit=""):
         """Add a monitor point with metadata"""
