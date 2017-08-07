@@ -79,7 +79,7 @@ class MonitoringBuffer(object):
 	try:
             self._mutex.acquire_write_lock()
 	    for point in points:
-		name = point['name]
+		name = point['name']
                 mon_point = {'name': name, 
 		     'timestamp': point['timestamp'] or bat_now(),
                      'unit': point['unit'] or ''
