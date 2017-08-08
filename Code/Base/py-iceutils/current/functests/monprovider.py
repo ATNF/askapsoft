@@ -31,17 +31,28 @@ from askap import logging
 
 
 class Publisher(threading.Thread):
-    def __init__(self, key='a', interval=0.1):
+    def __init__(self, key='a', interval=0.1, unit=None):
         threading.Thread.__init__(self)
         self.stop = threading.Event()
         self._key = key
         self._interval = interval
+        self._unit = unit
 
     def run(self):
         count = 0
         while not self.stop.is_set():
-            askap.iceutils.monitoringprovider.MONITOR.add_points(
-                {self._key: count})
+	    if self._unit is not None:
+	        points = []
+	        point = {'name': self._key + str(count), 'value': count}
+		if self._unit is not None:
+		    point['unit'] = self._unit
+
+	        points.append(point)
+                askap.iceutils.monitoringprovider.MONITOR.add_full_points(points)
+	    else:
+                askap.iceutils.monitoringprovider.MONITOR.add_points(
+                    {self._key: count})
+
             self.stop.wait(self._interval)
             count += 1
 
@@ -61,10 +72,12 @@ def main():
     logger = logging.getLogger(__file__)
     pub1 = Publisher('a', 0.1)
     pub2 = Publisher('b', 0.11)
+    pub3 = Publisher('foo', 0.12, 'MHz')
     try:
         fcm = MonProvider(communicator)
         pub1.start()
         pub2.start()
+        pub3.start()
         fcm.run()
     except Exception as ex:
         logger.error(str(ex))

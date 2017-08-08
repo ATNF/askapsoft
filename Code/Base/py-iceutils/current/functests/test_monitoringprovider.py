@@ -35,6 +35,7 @@ class TestMonProvider(object):
 
     def test_get(self):
         block = threading.Event()
+
         first = self.service.get(['a'])
         assert_equals(first[0].name, 'a')
         block.wait(0.1)
@@ -44,3 +45,10 @@ class TestMonProvider(object):
         both = self.service.get(['a', 'b'])
         assert_equals(len(both), 2)
         assert_equals(len(self.service.get(['c'])), 0)
+
+	foo = self.service.get(['foo1'])
+        assert_equals(foo[0].name, 'foo1')
+        assert_equals(foo[0].unit, 'MHz')
+        assert_equals(foo[0].status, askap.interfaces.monitoring.PointStatus.OK)
+        assert_equals(foo[0].value.value, 1)
+

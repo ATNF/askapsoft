@@ -80,11 +80,11 @@ class MonitoringBuffer(object):
             self._mutex.acquire_write_lock()
             for point in points:
                 name = point['name']
-                mon_point = {'name': name, 
-		             'timestamp': point['timestamp'] or bat_now(),
-                     'unit': point['unit'] or '',
-                     'status': point['status'] or 'OK',
-                     'value': point['value']}
+                mon_point = {'name': name,
+                             'timestamp': point.get('timestamp', bat_now()),
+                             'unit': point.get('unit', ''),
+                             'status': point.get('status', 'OK'),
+                             'value': point['value']}
                 self._buffer[name] = mon_point
         finally:
             self._mutex.release_write_lock()
@@ -148,6 +148,7 @@ class MonitoringProviderImpl(MonitoringProvider):
     """
     The implementation of the ice interface to provide monitoring points.
     """
+
     def __init__(self):
 
         self._point_mapper = PointMapper()

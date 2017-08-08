@@ -133,35 +133,6 @@ class TestMonitors:
             nottimedout = block.wait(5.0)
             assert_equals(nottimedout, True)
 
-    def test_monitor_send_full_points(self):
-        data = []
-        block = threading.Event()
-        with Monitoring(topic=self.topic, 
-                           communicator=self.isession.communicator) as mon:
-            subscriber = TypedValueSubscriber(
-                topic=self.topic, communicator=self.isession.communicator,
-                impl_cls=TTSubscriberImpl, impl_kwargs={'event': block,
-                                                        'data': data,
-                                                        'length': 10}
-                )
-            outd = []
-	    points = []
-
-	    point = {'name': 'foo.1', 
-		     'unit': 'MHz',
-                     'value': 5} 
-	    points.append(point)
-
-	    point = {'name': 'foo.2', 
-		     'status': 'MAJOR',
-                     'value': "Hello world!"} 
-	    points.append(point)
-
-            mon.add_full_points(points)
-	    
-            nottimedout = block.wait(5.0)
-            assert_equals(nottimedout, True)
-
     def test_monitor_send(self):
         data = []
         block = threading.Event()
