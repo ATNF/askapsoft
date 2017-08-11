@@ -15,14 +15,14 @@ submit=1
 buildsbatch=1
 
 function show_usage() {
-    echo "Usage: $0 [-d DIRECTORY] [-h] [-T] [-B] [-A ASKAP_ROOT]"
+    echo "Usage: $0 [-d DIRECTORY] [-h] [-S] [-B] [-A ASKAP_ROOT]"
     echo "A convenient way to run a suite of tests"
     echo "Required arguments:"
     echo "-A ASKAP_ROOT"
     echo "-d  test directory (there is no default)"
     echo "-h  Help (this usage)"
     echo "Option arguments:"
-    echo "-T  Testmode - do not submit the jobs"
+    echo "-S  testmode - do not submit the jobs"
     echo "-B  no batch files - do not build the batch files"
     echo "-A ASKAP_ROOT (defaults to environment)"
     exit
