@@ -84,6 +84,8 @@ def runSnoop(block, card, count = 10, verbose = True):
    else:
       os.system("mpirun -np %i -f %s %s -c %s > %s" % (nranks, tmp_hosts_file, path2snoop, tmp_parset_file, tmp_result_file))
    # parse output to present summary (and leave the file for future investigation)
+   print "--------------------------- Summary ----------------------------"
+   allGood = True
    with open(tmp_result_file) as f:
       ranksSighted = [False] * nranks
       expected = 31104
@@ -110,6 +112,9 @@ def runSnoop(block, card, count = 10, verbose = True):
                 if curCard == None:
                    curCard = rank + 1
                 print "Missed %i datagrams from card %i of block %i at epoch %s" % (expected-received, curCard, block, parts[8])
+                allGood = False
+   if allGood:
+      print "All expected datagrams are successfully received"
              
    
 if block == None:
