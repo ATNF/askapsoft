@@ -349,11 +349,10 @@ EOFINNER
             copyLocation="${VALIDATION_ARCHIVE_DIR}"
             purgeCSV="${REMOVE_VALIDATION_CSV}"
             if [ "\${copyLocation}" != "" ] && [ -e "\${copyLocation}" ]; then
-                sedstr="s/\.xml/__\$(whoami)_${NOW}/g"
-                validationDirCopy=\$(echo \${validationDir} | sed -e \${sedstr})
-                cp -r \${validationDir} \${copyLocation}/\${validationDirCopy}
+                validationDirCopy="\${copyLocation}/\${validationDir}__\$(whoami)_${NOW}"
+                cp -r \${validationDir} \${validationDirCopy}
                 if [ "\${purgeCSV}" == "true" ]; then
-                    rm -f \${copyLocation}/\${validationDirCopy}/*.csv
+                    rm -f \${validationDirCopy}/*.csv
                 fi
             fi
         fi
