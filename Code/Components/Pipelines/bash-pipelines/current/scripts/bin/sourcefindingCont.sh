@@ -342,6 +342,7 @@ EOFINNER
             err=\$?
             extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} validationCont "txt,csv"
             unloadModule continuum_validation_env
+            validationDir=${validationDir}
             if [ ! -e "\${validationDir}" ]; then
                 echo "ERROR - could not create validation directory \${validationDir}"
             fi
