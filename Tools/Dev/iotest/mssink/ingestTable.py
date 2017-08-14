@@ -138,7 +138,7 @@ for x,log in enumerate(namelist):
     print("integration time: median: {0:.2f}".format(median))
     print("integration time: sdev  : {0:.2f}".format(sdev))
 
-    with open(parset) as fp:
+    
 
     #print("integration time: bad   : {0:.2f}%".format(bad))
     Row = namedtuple('Row',['Min','Max','Mean'])
