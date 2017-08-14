@@ -450,7 +450,7 @@ echo "parameter: lustre stripe size  = ${lustre_size}"    >> \${report_file}
 echo "parameter: node count          = ${nnode}"          >> \${report_file}
 echo "parameter: lustre stripe count = ${lustre_nstripe}" >> \${report_file}
 echo "parameter: duration            = ${duration}"       >> \${report_file}
-echo "parameter: writer per node     = {nwriter}"        >> \${report_file}
+echo "parameter: writer per node     = ${nwriter}"        >> \${report_file}
 echo "parameter: channels per writer = ${nchannel_per_node}"  >> \${report_file}
 echo "parameter: total channels = ${nchannel}"  >> \${report_file}
 
