@@ -1,3 +1,4 @@
 # This file lists the external dependencies
 # use pkgname=askap_relative_path
 libodb=3rdParty/odb/odb-2.4.0/libodb
+libmysqlc=3rdParty/mysql-connector-c/mysql-connector-c-6.1.11

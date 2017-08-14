@@ -4,12 +4,11 @@ from askapdev.rbuild.builders import Autotools as Builder
 
 builder = Builder(pkgname="libodb-sqlite-2.4.0")
 
-# setup the libodb dependency
+# dependencies
 libodb = builder.dep.get_install_path("libodb")
-builder.add_option("CPPFLAGS=-I{0}/include".format(libodb))
-builder.add_option("LDFLAGS=-L{0}/lib".format(libodb))
-# --with-libodb isn't working, but CPPFLAGS and LDFLAGS are OK
-# builder.add_option("--with-libodb={0}".format(libodb))
+libsqlite = builder.dep.get_install_path("libsqlite3")
+builder.add_option('"CPPFLAGS=-I{0}/include -I{1}/include"'.format(libodb, libsqlite))
+builder.add_option('"LDFLAGS=-L{0}/lib -L{1}/lib"'.format(libodb, libsqlite))
 
 builder.remote_archive = "libodb-sqlite-2.4.0.tar.gz"
 builder.nowarnings = True

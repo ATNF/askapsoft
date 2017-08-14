@@ -1,12 +1,5 @@
 # ASKAP Sky Model Service
 
-## Dependencies
-
-The following databases are required as system packages. They are ***not***
-present in the 3rdParty code tree:
-* MySQL
-* SQLite
-
 ## Directory Layout
 
 The database schema is defined by the ODB-annotated classes in the `schema`

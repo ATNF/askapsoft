@@ -1,3 +1,5 @@
 # This file lists the external dependencies
 # use pkgname=askap_relative_path
 libodb=3rdParty/odb/odb-2.4.0/libodb
+libsqlite3=3rdParty/sqlite3/sqlite-autoconf-3200000
+

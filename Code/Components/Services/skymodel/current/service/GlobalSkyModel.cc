@@ -41,8 +41,9 @@
 // ODB includes
 #include <odb/mysql/database.hxx>
 #include <odb/mysql/connection-factory.hxx>
-#include <odb/pgsql/database.hxx>
-#include <odb/pgsql/connection-factory.hxx>
+// Removing the PostgreSQL dependency, but keeping code just in case.
+//#include <odb/pgsql/database.hxx>
+//#include <odb/pgsql/connection-factory.hxx>
 #include <odb/sqlite/database.hxx>
 #include <odb/schema-catalog.hxx>
 #include <odb/connection.hxx>

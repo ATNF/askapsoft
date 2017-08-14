@@ -16,6 +16,6 @@ if [ ! -f ./data/large.db ]; then
     sms_tools --gen-random-components $COUNT --config $TEST_DIR/sms.cfg --log-config ./config-files/logging.log_cfg &
 fi
 
-# Note that this is not a recursive call, as the working directory means this 
-# file is not sourcing itself.
+# Note that this is not a recursive call, as the working directory is one 
+# level up, so this file is not sourcing itself.
 source ./sms
