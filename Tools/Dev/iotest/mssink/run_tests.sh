@@ -84,13 +84,13 @@ ES3=($tester ${invocations[1]} ${ranks[0]} ${antennas[0]} ${channels[0]} ${minut
 
 # Early science ++ split by frequency
 ES4=($tester ${invocations[0]} ${ranks[0]} ${antennas[1]} ${channels[0]} ${minutes[0]} "ES4" ${ntasks_per_node[0]})
-ES5A=($tester ${invocations[0]} ${ranks[1]} ${antennas[1]} ${channels[0]} ${minutes[0]} "ES5A" ${ntasks_per_node[0]})
-ES5B=($tester ${invocations[0]} ${ranks[2]} ${antennas[1]} ${channels[0]} ${minutes[0]} "ES5B" ${ntasks_per_node[0]})
-ES5C=($tester ${invocations[0]} ${ranks[3]} ${antennas[1]} ${channels[0]} ${minutes[0]} "ES5C" ${ntasks_per_node[0]})
+ES4A=($tester ${invocations[0]} ${ranks[1]} ${antennas[1]} ${channels[0]} ${minutes[0]} "ES4A" ${ntasks_per_node[0]})
+ES4B=($tester ${invocations[0]} ${ranks[2]} ${antennas[1]} ${channels[0]} ${minutes[0]} "ES4B" ${ntasks_per_node[0]})
+ES4C=($tester ${invocations[0]} ${ranks[3]} ${antennas[1]} ${channels[0]} ${minutes[0]} "ES4C" ${ntasks_per_node[0]})
 let nnodes=${ranks[6]}/${ntasks_per_node[4]}
-ES5D=($tester ${invocations[0]} ${nnodes} ${antennas[1]} ${channels[0]} ${minutes[0]} "ES5D" ${ntasks_per_node[4]})
+ES4D=($tester ${invocations[0]} ${nnodes} ${antennas[1]} ${channels[0]} ${minutes[0]} "ES4D" ${ntasks_per_node[4]})
 # Early science ++ split by beam
-ES6=($tester ${invocations[1]} ${ranks[0]} ${antennas[1]} ${channels[0]} ${minutes[0]} "ES6")
+ES5=($tester ${invocations[1]} ${ranks[0]} ${antennas[1]} ${channels[0]} ${minutes[0]} "ES5")
 
 # Full ASKAP split by frequency
 FA1=($tester ${invocations[0]} ${ranks[0]} ${antennas[2]} ${channels[1]} ${minutes[0]} "FA1" ${ntasks_per_node[0]})
@@ -115,11 +115,11 @@ TESTARRAY=(
     "${ES2C[*]}"
 #    "${ES3[*]}"
     "${ES4[*]}"
-    "${ES5A[*]}"
-    "${ES5B[*]}"
-    "${ES5C[*]}"
-    "${ES5D[*]}"
-#    "${ES6[*]}"
+    "${ES4A[*]}"
+    "${ES4B[*]}"
+    "${ES4C[*]}"
+    "${ES4D[*]}"
+#    "${ES5[*]}"
     "${FA1[*]}"
     "${FA2A[*]}"
     "${FA2B[*]}"

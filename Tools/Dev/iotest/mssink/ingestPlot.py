@@ -27,6 +27,7 @@
 # Author: Max Voronkov <maxim.voronkov@csiro.au>(original)
 # Author: Eric Bastholm <eric.bastholm@csiro.au>
 # Author: Paulus Lahur <paulus.lahur@csiro.au>
+# Author: Stephen Ord <stephen.ord@csiro.au> (just added the table)
 
 # import python modules
 import argparse
@@ -130,4 +131,3 @@ pl.tight_layout()
 # save into file
 pl.savefig(plotFile)
 print("plot file: " + plotFile)
-
