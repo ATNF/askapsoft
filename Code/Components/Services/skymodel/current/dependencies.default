@@ -20,7 +20,6 @@ libodb=3rdParty/odb/odb-2.4.0/libodb
 libodb-boost=3rdParty/odb/odb-2.4.0/libodb-boost
 libodb-sqlite=3rdParty/odb/odb-2.4.0/libodb-sqlite
 libodb-mysql=3rdParty/odb/odb-2.4.0/libodb-mysql
-#libmysqlc=3rdParty/mysql-connector-c/mysql-connector-c-6.1.11
 
 # Functional test dependencies
 pyiceinterfaces=Code/Interfaces/python/current
