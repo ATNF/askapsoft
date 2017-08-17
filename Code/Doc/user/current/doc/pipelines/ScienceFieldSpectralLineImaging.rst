@@ -79,7 +79,7 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``DO_APPLY_CAL_SL``                           | false                           | none                               | Whether to apply the gains calibration determined from the        |
 |                                               |                                 |                                    | continuum self-calibration (see ``GAINS_CAL_TABLE`` in            |
-|                                               |                                 |                                    | :doc:`ScienceFieldSelfCalibration`).                              |
+|                                               |                                 |                                    | :doc:`ScienceFieldContinuumImaging`).                             |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``JOB_TIME_SPECTRAL_APPLYCAL``                | ``JOB_TIME_DEFAULT`` (12:00:00) | none                               | Time request for applying the gains calibration to the spectral   |
 |                                               |                                 |                                    | data                                                              |
