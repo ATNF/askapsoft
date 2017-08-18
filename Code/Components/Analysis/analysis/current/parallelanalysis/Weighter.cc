@@ -24,7 +24,7 @@
 /// along with this program; if not, write to the Free Software
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
-/// @author XXX XXX <XXX.XXX@csiro.au>
+/// @author Matthew Whiting <Matthew.Whiting@csiro.au>
 ///
 #include <askap_analysis.h>
 #include <parallelanalysis/Weighter.h>
@@ -59,7 +59,8 @@ using namespace analysisutilities;
 
 Weighter::Weighter(askap::askapparallel::AskapParallel& comms,
                    const LOFAR::ParameterSet &parset):
-    itsComms(&comms)
+    itsComms(&comms),
+    itsNorm(0.)
 {
     itsImage = parset.getString("weightsImage", "");
     if (itsComms->isMaster()) {
@@ -108,15 +109,18 @@ void Weighter::findNorm()
             if (itsWeights.size() == 0)
                 ASKAPLOG_ERROR_STR(logger, "Weights array not initialised!");
             // find maximum of weights and send to master
-            bool isvalid = itsWeights.nelementsValid() > 0;
+            unsigned int numValid = itsWeights.nelementsValid();
             float maxW = 0.;
-            if (isvalid) maxW = max(itsWeights.getCompressedArray());
-            ASKAPLOG_DEBUG_STR(logger, "Local maximum weight = " << maxW);
+            if (numValid > 0) {
+                maxW = max(itsWeights.getCompressedArray());
+            }
+            ASKAPLOG_DEBUG_STR(logger, "Local maximum weight = " << maxW
+                               << ", number of valid elements = " << numValid);
             bs.resize(0);
             LOFAR::BlobOBufString bob(bs);
             LOFAR::BlobOStream out(bob);
             out.putStart("localmax", 1);
-            out << isvalid << maxW;
+            out << numValid << maxW;
             out.putEnd();
             itsComms->sendBlob(bs, 0);
 
@@ -133,15 +137,15 @@ void Weighter::findNorm()
             // read local maxima from workers and find the maximum of them
             for (int n = 0; n < itsComms->nProcs() - 1; n++) {
                 float localmax;
-                bool isvalid;
+                unsigned int numValid;
                 itsComms->receiveBlob(bs, n + 1);
                 LOFAR::BlobIBufString bib(bs);
                 LOFAR::BlobIStream in(bib);
                 int version = in.getStart("localmax");
                 ASKAPASSERT(version == 1);
-                in >> isvalid  >> localmax;
-                if(isvalid){
-                    itsNorm = (n == 0) ? localmax : std::max(localmax, itsNorm);
+                in >> numValid  >> localmax;
+                if(numValid > 0){
+                    itsNorm = std::max(localmax, itsNorm);
                 }
                 in.getEnd();
             }
