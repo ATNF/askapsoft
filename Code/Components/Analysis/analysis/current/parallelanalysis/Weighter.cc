@@ -95,9 +95,9 @@ void Weighter::readWeights()
     ASKAPLOG_INFO_STR(logger, "Reading weights from " << itsImage <<
                       ", section " << itsCube->pars().section().getSection());
 
-    casa::Slicer theSlicer=subsectionToSlicer(itsCube->pars().section());
+    casa::Slicer theSlicer = subsectionToSlicer(itsCube->pars().section());
     ASKAPLOG_INFO_STR(logger, "Using casa::Slicer " << theSlicer);
-    
+
     itsWeights = getPixelsInBox(itsImage, theSlicer, false);
 }
 
@@ -144,7 +144,7 @@ void Weighter::findNorm()
                 int version = in.getStart("localmax");
                 ASKAPASSERT(version == 1);
                 in >> numValid  >> localmax;
-                if(numValid > 0){
+                if (numValid > 0) {
                     itsNorm = std::max(localmax, itsNorm);
                 }
                 in.getEnd();
@@ -160,7 +160,7 @@ void Weighter::findNorm()
         }
     } else {
         // serial mode - read entire weights image, so can just measure maximum directly
-        ASKAPCHECK(itsWeights.nelementsValid()>0, "Weights array has no valid elements!");
+        ASKAPCHECK(itsWeights.nelementsValid() > 0, "Weights array has no valid elements!");
         itsNorm = max(itsWeights.getCompressedArray());
     }
 
@@ -174,7 +174,7 @@ float Weighter::weight(size_t i)
                "Index out of bounds for weights array : index=" << i <<
                ", weights array is size " << itsWeights.size());
 
-    if (itsWeights.getMask().data()[i]){
+    if (itsWeights.getMask().data()[i]) {
         return sqrt(itsWeights.getArray().data()[i] / itsNorm);
     } else {
         return 0.;
@@ -185,7 +185,7 @@ bool Weighter::isValid(size_t i)
 {
     if (this->doApplyCutoff()) {
         return itsWeights.getMask().data()[i] &&
-            (itsWeights.getArray().data()[i] / itsNorm > itsWeightCutoff);
+               (itsWeights.getArray().data()[i] / itsNorm > itsWeightCutoff);
     } else {
         return true;
     }
