@@ -41,6 +41,13 @@ if [ -e "${FLAG_AV_CHECK_FILE}" ]; then
     DO_IT=false
 fi
 
+if [ ! -e "${msSciAv}" ] && [ "${DO_AVERAGE_CHANNELS}" != "true" ]; then
+    if [ "${DO_IT}" == "true" ]; then
+        echo "Flagging of averaged data will be turned off, as we are not creating the averaged data!"
+    fi
+    DO_IT=false
+fi
+
 if [ "${DO_IT}" == "true" ]; then
 
     DO_AMP_FLAG=false
