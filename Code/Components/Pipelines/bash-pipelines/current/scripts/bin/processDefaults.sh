@@ -743,15 +743,21 @@ EOF
         # Define the number of channels used in the spectral-line imaging
         NUM_CHAN_SCIENCE_SL=$(echo "${CHAN_RANGE_SL_SCIENCE}" | awk -F'-' '{print $2-$1+1}')
 
-        # if we are using the new imager we need to tweak this
+        # if we are using the new imager we need to tweak the number of cores
         if [ "${DO_ALT_IMAGER_SPECTRAL}" == "true" ]; then
-            NUM_CPUS_SPECIMG_SCI=$(echo "${NUM_CHAN_SCIENCE_SL}" "${NCHAN_PER_CORE_SL}" | awk '{print ($1/$2) + 1}')
-            # CPUS_PER_CORE_SPEC_IMAGING=16 # get rid of this change as it is unnecessary
+            NUM_CPUS_SPECIMG_SCI=$(echo "${NUM_CHAN_SCIENCE_SL}" "${NCHAN_PER_CORE_SL}" | awk '{print int($1/$2) + 1}')
         fi
 
         # Can't have -N greater than -n in the aprun call
         if [ "${NUM_CPUS_SPECIMG_SCI}" -lt "${CPUS_PER_CORE_SPEC_IMAGING}" ]; then
             CPUS_PER_CORE_SPEC_IMAGING=${NUM_CPUS_SPECIMG_SCI}
+        fi
+
+        # Reduce the number of writers to no more than the number of
+        # workers
+        if [ "${NUM_SPECTRAL_CUBES}" -ge "${NUM_CPUS_SPECIMG_SCI}" ]; then
+            NUM_SPECTRAL_CUBES=$(echo ${NUM_CPUS_SPECIMG_SCI} | awk '{print $1-1}')
+            echo "WARNING - Reducing NUM_SPECTRAL_CUBES to ${NUM_SPECTRAL_CUBES} to match number of spectral workers"
         fi
 
         # Method used for continuum subtraction
@@ -778,8 +784,8 @@ EOF
         # so that the loop over subbands is only done once ($subband
         # will not be referenced in that case).
         if [ "${DO_ALT_IMAGER_SPECTRAL}" == "true" ] && [ "${ALT_IMAGER_SINGLE_FILE}" != "true" ]; then
-            nworkers=$(echo "${NUM_CHAN_SCIENCE_SL}" "${NCHAN_PER_CORE_SL}" | awk '{print $1/$2}')
-            writerIncrement=$(echo "$nworkers" "${NUM_SPECTRAL_CUBES}" | awk '{print $1/$2}')
+            nworkers=$(echo "${NUM_CHAN_SCIENCE_SL}" "${NCHAN_PER_CORE_SL}" | awk '{print int($1/$2)}')
+            writerIncrement=$(echo "$nworkers" "${NUM_SPECTRAL_CUBES}" | awk '{print int($1/$2)}')
             SUBBAND_WRITER_LIST=$(seq 1 "$writerIncrement" "$nworkers")
             unset nworkers
             unset writerIncrement
