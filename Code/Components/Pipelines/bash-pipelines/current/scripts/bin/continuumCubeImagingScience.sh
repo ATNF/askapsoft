@@ -88,17 +88,17 @@ ${Imager}.preconditioner.Wiener.taper             = ${PRECONDITIONER_WIENER_TAPE
         fi
     fi
     shapeDefinition="# Leave shape definition to advise"
-    if [ "${NUM_PIXELS_CONT}" != "" ] && [ "${NUM_PIXELS_CONT}" -gt 0 ]; then
-        shapeDefinition="${Imager}.Images.shape                            = [${NUM_PIXELS_CONT}, ${NUM_PIXELS_CONT}]"
+    if [ "${NUM_PIXELS_CONTCUBE}" != "" ] && [ "${NUM_PIXELS_CONTCUBE}" -gt 0 ]; then
+        shapeDefinition="${Imager}.Images.shape                            = [${NUM_PIXELS_CONTCUBE}, ${NUM_PIXELS_CONTCUBE}]"
     else
-        echo "WARNING - No valid NUM_PIXELS_CONT parameter given.  Not running continuum cube imaging."
+        echo "WARNING - No valid NUM_PIXELS_CONTCUBE parameter given.  Not running continuum cube imaging."
         DO_IT=false
     fi
-    cellsizeGood=$(echo "${CELLSIZE_CONT}" | awk '{if($1>0.) print "true"; else print "false";}')
-    if [ "${CELLSIZE_CONT}" != "" ] && [ "$cellsizeGood" == "true" ]; then
-        cellsizeDefinition="${Imager}.Images.cellsize                         = [${CELLSIZE_CONT}arcsec, ${CELLSIZE_CONT}arcsec]"
+    cellsizeGood=$(echo "${CELLSIZE_CONTCUBE}" | awk '{if($1>0.) print "true"; else print "false";}')
+    if [ "${CELLSIZE_CONTCUBE}" != "" ] && [ "$cellsizeGood" == "true" ]; then
+        cellsizeDefinition="${Imager}.Images.cellsize                         = [${CELLSIZE_CONTCUBE}arcsec, ${CELLSIZE_CONTCUBE}arcsec]"
     else
-        echo "WARNING - No valid CELLSIZE_CONT parameter given.  Not running continuum cube imaging."
+        echo "WARNING - No valid CELLSIZE_CONTCUBE parameter given.  Not running continuum cube imaging."
         DO_IT=false
     fi
     restFrequency="# No rest frequency specified for continuum cubes"

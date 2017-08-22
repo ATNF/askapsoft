@@ -540,6 +540,12 @@ DEC_POSITION_OFFSET=0
 # in CONTCUBE_POLARISATIONS
 IMAGE_BASE_CONTCUBE="i.SB%s.contcube"
 
+# Image size for continuum cubes (spatial size) [pixels]
+NUM_PIXELS_CONTCUBE=1536
+
+# Size of the pixels for the continuum cubes [arcsec]
+CELLSIZE_CONTCUBE=""
+
 # List of polarisations to make continuum cubes for. The lower-case
 # version of these will go in the image name.
 CONTCUBE_POLARISATIONS="I"
@@ -569,12 +575,12 @@ SOLVER_CONTCUBE=Clean
 # default clean algorithm is Basisfunction, as we don't need the
 # multi-frequency part that is used by BasisfunctionMFS
 CLEAN_CONTCUBE_ALGORITHM=Basisfunction
-CLEAN_CONTCUBE_MINORCYCLE_NITER=500
-CLEAN_CONTCUBE_GAIN=0.5
+CLEAN_CONTCUBE_MINORCYCLE_NITER=4000
+CLEAN_CONTCUBE_GAIN=0.1
 CLEAN_CONTCUBE_PSFWIDTH=512
 CLEAN_CONTCUBE_SCALES="[0,3,10]"
-CLEAN_CONTCUBE_THRESHOLD_MINORCYCLE="[30%]"
-CLEAN_CONTCUBE_THRESHOLD_MAJORCYCLE=1mJy
+CLEAN_CONTCUBE_THRESHOLD_MINORCYCLE="[40%, 12.6mJy]"
+CLEAN_CONTCUBE_THRESHOLD_MAJORCYCLE=12mJy
 CLEAN_CONTCUBE_NUM_MAJORCYCLES=2
 # If true, this will write out intermediate images at the end of each
 # major cycle

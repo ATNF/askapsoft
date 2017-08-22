@@ -633,6 +633,11 @@ EOF
             exit 1
         fi
 
+        # Set the cell size for the continuum cubes - if not provided by the user, set to that given for the continuum imaging
+        if [ "${CELLSIZE_CONTCUBE}" == "" ]; then
+            CELLSIZE_CONTCUBE=${CELLSIZE_CONT}
+        fi
+
         # Set the polarisation list for the continuum cubes
         if [ "${CONTCUBE_POLARISATIONS}" == "" ]; then
             if [ "$DO_CONTCUBE_IMAGING" == "true" ]; then
