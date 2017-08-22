@@ -434,6 +434,12 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                 |                                                        | so on).  The %s wildcard will be resolved into the scheduling |
 |                                            |                                 |                                                        | block ID.                                                     |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``NUM_PIXELS_CONTCUBE``                    | 1536                            | Images.shape (:doc:`../calim/simager`)                 | Number of pixels on the spatial dimension for the continuum   |
+|                                            |                                 |                                                        | cubes.                                                        |
++--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``CELLSIZE_CONTCUBE``                      | ""                              | Images.cellsize (:doc:`../calim/simager`)              | Angular size of spatial pixels for the continuum cubes. If not|
+|                                            |                                 |                                                        | provided, it defaults to the value of ``CELLSIZE_CONT``.      |
++--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CONTCUBE_POLARISATIONS``                 | "I"                             | Images.polarisation (:doc:`../calim/simager`)          | List of polarisations to create cubes for. This should be a   |
 |                                            |                                 |                                                        | comma-separated list of (upper-case) polarisations. Separate  |
 |                                            |                                 |                                                        | jobs will be launched for each polarisation given.            |
@@ -470,10 +476,10 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 | ``CLEAN_CONTCUBE_ALGORITHM``               | Basisfunction                   | Clean.algorithm                                        | The name of the clean algorithm to use.                       |
 |                                            |                                 | (:doc:`../calim/solver`)                               |                                                               |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``CLEAN_CONTCUBE_MINORCYCLE_NITER``        | 500                             | Clean.niter                                            | The number of iterations for the minor cycle clean.           |
+| ``CLEAN_CONTCUBE_MINORCYCLE_NITER``        | 4000                            | Clean.niter                                            | The number of iterations for the minor cycle clean.           |
 |                                            |                                 | (:doc:`../calim/solver`)                               |                                                               |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``CLEAN_CONTCUBE_GAIN``                    | 0.5                             | Clean.gain                                             | The loop gain (fraction of peak subtracted per minor cycle).  |
+| ``CLEAN_CONTCUBE_GAIN``                    | 0.1                             | Clean.gain                                             | The loop gain (fraction of peak subtracted per minor cycle).  |
 |                                            |                                 | (:doc:`../calim/solver`)                               |                                                               |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CLEAN_CONTCUBE_PSFWIDTH``                | 512                             | Clean.psfwidth                                         | The width of the psf patch used in the minor cycle.           |
@@ -482,10 +488,10 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 | ``CLEAN_CONTCUBE_SCALES``                  | "[0,3,10]"                      | Clean.scales                                           | Set of scales (in pixels) to use with the multi-scale clean.  |
 |                                            |                                 | (:doc:`../calim/solver`)                               |                                                               |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``CLEAN_CONTCUBE_THRESHOLD_MINORCYCLE``    | "[30%, 0.9mJy]"                 | threshold.minorcycle                                   | Threshold for the minor cycle loop.                           |
+| ``CLEAN_CONTCUBE_THRESHOLD_MINORCYCLE``    | "[40%, 12.6mJy]"                | threshold.minorcycle                                   | Threshold for the minor cycle loop.                           |
 |                                            |                                 | (:doc:`../calim/solver`)                               |                                                               |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``CLEAN_CONTCUBE_THRESHOLD_MAJORCYCLE``    | 1mJy                            | threshold.majorcycle                                   | The target peak residual. Major cycles stop if this is        |
+| ``CLEAN_CONTCUBE_THRESHOLD_MAJORCYCLE``    | 12mJy                           | threshold.majorcycle                                   | The target peak residual. Major cycles stop if this is        |
 |                                            |                                 | (:doc:`../calim/solver`)                               | reached. A negative number ensures all major cycles requested |
 |                                            |                                 |                                                        | are done.                                                     |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+

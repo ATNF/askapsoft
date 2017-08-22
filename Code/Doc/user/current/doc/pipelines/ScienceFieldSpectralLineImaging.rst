@@ -252,7 +252,7 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``TMPFS``                                     | /dev/shm                        | tmpfs (:doc:`../calim/imager`)     | Location of the shared memory.                                    |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``NUM_SPECTRAL_CUBES``                        | 16                              | nwriters (:doc:`../calim/imager`)  | Number of spectral cubes to be produced, or the number of writers |
+| ``NUM_SPECTRAL_CUBES``                        | 1                               | nwriters (:doc:`../calim/imager`)  | Number of spectral cubes to be produced, or the number of writers |
 |                                               |                                 |                                    | used when ``ALT_IMAGER_SINGLE_FILE=true``. This actually          |
 |                                               |                                 |                                    | configures the number of writers employed by imager, each of      |
 |                                               |                                 |                                    | which writes a sub-band in the multiple-writer case. No           |
