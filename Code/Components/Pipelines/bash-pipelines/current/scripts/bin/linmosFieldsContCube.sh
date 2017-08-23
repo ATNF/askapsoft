@@ -207,6 +207,10 @@ EOFINNER
                     # imList and wtList just have a single image -
                     #  just do a simple copy rather than running linmos
                     echo "Copying \${imList} to form \${imageName}"
+                    if [ "\${IMAGETYPE_CONTCUBE}" == "fits" ]; then
+                        imList="\${imList}.fits"
+                        wtList="\${wtList}.fits"
+                    fi
                     cp -r \${imList} \${imageName}
                     cp -r \${wtList} \${weightsImage}
                 fi
