@@ -51,20 +51,42 @@ class ComponentCatalogue {
         /// Constructor, that uses a pre-defined list of Components,
         /// and then calls setup to set the column specification. The
         /// filenames are set based on the output file given in the
-        /// parset.
+        /// parset. This constructor takes a fitType to determine
+        /// which fit results to use.
         ComponentCatalogue(std::vector<CasdaComponent> &componentList,
                            const LOFAR::ParameterSet &parset,
                            duchamp::Cube *cube,
-                           const std::string fitType = casda::componentFitType);
+                           const std::string fitType);
+
+        /// Constructor, that uses a pre-defined list of Components,
+        /// and then calls setup to set the column specification. The
+        /// filenames are set based on the output file given in the
+        /// parset. This constructor assumes we are using the
+        /// casda::componentFitType for the fitType.
+        ComponentCatalogue(std::vector<CasdaComponent> &componentList,
+                           const LOFAR::ParameterSet &parset,
+                           duchamp::Cube *cube);
 
         /// Constructor, that calls defineComponents to define the
         /// catalogue from a set of RadioSource object, and defineSpec
         /// to set the column specification. The filenames are set
-        /// based on the output file given in the parset.
+        /// based on the output file given in the parset. This
+        /// constructor takes a fitType to determine which fit results
+        /// to use.
         ComponentCatalogue(std::vector<sourcefitting::RadioSource> &srclist,
                            const LOFAR::ParameterSet &parset,
                            duchamp::Cube *cube,
-                           const std::string fitType = casda::componentFitType);
+                           const std::string fitType);
+
+        /// Constructor, that calls defineComponents to define the
+        /// catalogue from a set of RadioSource object, and defineSpec
+        /// to set the column specification. The filenames are set
+        /// based on the output file given in the parset. This
+        /// constructor assumes we are using the
+        /// casda::componentFitType for the fitType.
+        ComponentCatalogue(std::vector<sourcefitting::RadioSource> &srclist,
+                           const LOFAR::ParameterSet &parset,
+                           duchamp::Cube *cube);
 
         /// Default destructor
         virtual ~ComponentCatalogue() {};

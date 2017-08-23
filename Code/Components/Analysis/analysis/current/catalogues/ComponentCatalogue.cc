@@ -55,9 +55,26 @@ namespace analysis {
 
 ComponentCatalogue::ComponentCatalogue(std::vector<CasdaComponent> &componentList,
                                        const LOFAR::ParameterSet &parset,
+                                       duchamp::Cube *cube):
+    itsFitType(casda::componentFitType),
+    itsComponents(componentList),
+    itsSpec(),
+    itsCube(cube),
+    itsKarmaFilename(""),
+    itsCASAFilename(""),
+    itsDS9Filename(""),
+    itsVersion("casda.continuum_component_description_v1.7")
+{
+    ASKAPLOG_DEBUG_STR(logger, "Defining component catalogue, version " << itsVersion);
+
+    this->setup(parset);
+}
+
+ComponentCatalogue::ComponentCatalogue(std::vector<CasdaComponent> &componentList,
+                                       const LOFAR::ParameterSet &parset,
                                        duchamp::Cube *cube,
                                        const std::string fitType):
-    itsFitType(casda::componentFitType),
+    itsFitType(fitType),
     itsComponents(componentList),
     itsSpec(),
     itsCube(cube),
@@ -73,9 +90,27 @@ ComponentCatalogue::ComponentCatalogue(std::vector<CasdaComponent> &componentLis
 
 ComponentCatalogue::ComponentCatalogue(std::vector<sourcefitting::RadioSource> &srclist,
                                        const LOFAR::ParameterSet &parset,
+                                       duchamp::Cube *cube):
+    itsFitType(casda::componentFitType),
+    itsComponents(),
+    itsSpec(),
+    itsCube(cube),
+    itsKarmaFilename(""),
+    itsCASAFilename(""),
+    itsDS9Filename(""),
+    itsVersion("casda.continuum_component_description_v1.7")
+{
+    ASKAPLOG_DEBUG_STR(logger, "Defining component catalogue, version " << itsVersion);
+
+    this->defineComponents(srclist, parset);
+    this->setup(parset);
+}
+
+ComponentCatalogue::ComponentCatalogue(std::vector<sourcefitting::RadioSource> &srclist,
+                                       const LOFAR::ParameterSet &parset,
                                        duchamp::Cube *cube,
                                        const std::string fitType):
-    itsFitType(casda::componentFitType),
+    itsFitType(fitType),
     itsComponents(),
     itsSpec(),
     itsCube(cube),
@@ -118,7 +153,7 @@ void ComponentCatalogue::defineComponents(std::vector<sourcefitting::RadioSource
 {
     std::vector<sourcefitting::RadioSource>::iterator src;
     for (src = srclist.begin(); src != srclist.end(); src++) {
-        for (size_t i = 0; i < src->numFits(); i++) {
+        for (size_t i = 0; i < src->numFits(itsFitType); i++) {
             CasdaComponent component(*src, parset, i, itsFitType);
             itsComponents.push_back(component);
         }
@@ -237,8 +272,10 @@ std::vector<CasdaComponent> &ComponentCatalogue::components()
 void ComponentCatalogue::write()
 {
     this->check(false);
+    ASKAPLOG_DEBUG_STR(logger, "Writing to votable " << itsVotableFilename);
     this->writeVOT();
     this->check(true);
+    ASKAPLOG_DEBUG_STR(logger, "Writing to ascii file " << itsAsciiFilename);
     this->writeASCII();
     this->writeAnnotations();
 }

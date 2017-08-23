@@ -59,7 +59,7 @@ CasdaIsland::CasdaIsland(sourcefitting::RadioSource &obj,
                          const LOFAR::ParameterSet &parset):
     CatalogueEntry(parset),
     itsName(obj.getName()),
-    itsNumComponents(obj.numFits("best")),
+    itsNumComponents(obj.numFits(casda::componentFitType)),
     itsRAs(obj.getRAs()),
     itsDECs(obj.getDecs()),
     itsRA(obj.getRA()),

@@ -57,7 +57,7 @@ FitCatalogue::FitCatalogue(std::vector<sourcefitting::RadioSource> &srclist,
     ComponentCatalogue(srclist, parset, cube, fitType)
 {
     itsVersion = ASKAP_PACKAGE_VERSION;
-    this->defineComponents(srclist, parset);
+    itsFitType = fitType;
     this->defineSpec();
 
     duchamp::Param par = parseParset(parset);

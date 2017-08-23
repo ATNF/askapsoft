@@ -69,8 +69,8 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
 {
     // check that we are requesting a valid fit number
     ASKAPCHECK(fitNumber < obj.numFits(fitType),
-               "fitNumber=" << fitNumber << ", but source " << obj.getID() <<
-               " only has " << obj.numFits(fitType));
+               "For fitType="<<fitType<<", fitNumber=" << fitNumber << ", but source " << obj.getID() <<
+               "("<<obj.getName()<<") only has " << obj.numFits(fitType));
 
     sourcefitting::FitResults results = obj.fitResults(fitType);
 
