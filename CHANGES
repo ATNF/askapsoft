@@ -1,7 +1,55 @@
+0.19.2 (24 August 2017)
+-----------------------
+
+A patch release that fixes bugs in both the pipeline scripts and
+Selavy.
+
+Pipeline fixes:
+ * The 'contsub' spectral cubes were not being mosaicked. This was
+   caused by incorrect handling of the ".fits" suffix (it was being
+   added for CASA images, not FITS image).
+ * It was possible for the pipeline to attempt to flag an averaged MS
+   even if the averaged MS was not being created. The pipeline is now
+   more careful about setting its switches to cover this scenario.
+ * The continuum validation reports are now automatically (by default)
+   copied to a standard location, tagged with the user's ID and
+   timestamp of pipeline. This can be turned off by setting
+   VALIDATION_ARCHIVE_DIR to "".
+ * The spectral imaging jobs were capable of asking for more writers
+   than there were cores in the job. The pipeline scripts are now
+   careful to check the number of writers, and ensure it is no more
+   than the number of workers. The default number of writers has been
+   changed to one.
+
+Pipeline improvements:
+ * The image size (number of pixels) and cellsize (in arcsec) for the
+   continuum cubes can now be given explicitly, and so be allowed to
+   differ from the continuum images.
+ * Some default cleaning parameters for continuum cube imaging have
+   been changed as well.
+
+
+The following bugs in Selavy have been fixed:
+ * There was an issue with the weight-normalisation option in Selavy,
+   where the incorrect normalisation was applied if a subsection (in
+   particular the first subsection) had no valid pixels present
+   (ie. all were masked). The masking is now correctly accounted for.
+ * There were bugs that caused memory errors in the spectral-line (HI)
+   parameterisation of sources. This code has been improved.
+ * The 'fitResults' files were reporting the catalogue twice, and
+   producing the same catalogue for all fit types. Additionally, there
+   was the possibility of errors if different fit types yielded
+   different numbers of components for a given island. 
+
+
 0.19.1 (04 August 2017)
+-----------------------
+
 User documentation changes only. No code changes.
 
+
 0.19.0 (06 July 2017)
+---------------------
 
  new features:
 
