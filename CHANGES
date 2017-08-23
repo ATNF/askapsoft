@@ -20,6 +20,10 @@ Pipeline fixes:
    careful to check the number of writers, and ensure it is no more
    than the number of workers. The default number of writers has been
    changed to one.
+ * The handling of FITS files by the inter-field mosaicking tasks was
+   error-prone - files would either not be copied (in the case of a
+   single field) or would not be identified correctly (for the
+   spectral-line case). 
 
 Pipeline improvements:
  * The image size (number of pixels) and cellsize (in arcsec) for the
