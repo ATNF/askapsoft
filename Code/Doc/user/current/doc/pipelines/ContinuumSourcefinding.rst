@@ -63,7 +63,7 @@ is only the latter that are passsed to CASDA).
 | ``VALIDATE_BEAM_IMAGES``         | false                                    | none                                | Run the validation on the individual beam images, as well as|
 |                                  |                                          |                                     | the mosaics.                                                |
 +----------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
-| ``VALIDATION_ARCHIVE_DIR``       | /group/askap/continuum_validation/reports| none                                | Directory to which the validation report directory should be|
+| ``VALIDATION_ARCHIVE_DIR``       | /group/askap/ValidationReportsArchive    | none                                | Directory to which the validation report directory should be|
 |                                  |                                          |                                     | copied. They will be used from there for commissioning      |
 |                                  |                                          |                                     | purposes, and in the process will be renamed with the       |
 |                                  |                                          |                                     | username and date appended to make them unique. Leave blank |

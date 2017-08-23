@@ -755,7 +755,7 @@ DO_CONTINUUM_VALIDATION=true
 VALIDATE_BEAM_IMAGES=false
 
 # Location to copy validation directories to
-VALIDATION_ARCHIVE_DIR="/group/askap/continuum_validation/reports"
+VALIDATION_ARCHIVE_DIR="/group/askap/ValidationReportsArchive"
 
 # Whether to remove the .csv files when copying the validation
 # directories
