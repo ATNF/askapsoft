@@ -82,9 +82,14 @@ void DerivedElementBase::checkWildcards()
     //     --> fills itsFilenameList
     glob_t theGlob;
     int errGlob = glob(itsFilepath.string().c_str(), 0, NULL, &theGlob);
-    ASKAPCHECK(errGlob == 0, "Failure interpreting " << itsName << " filepath \""
-               << itsFilepath.filename().string() << "\"");
-    itsNumFiles = theGlob.gl_pathc;
+    if (errGlob == 0) {
+        itsNumFiles = theGlob.gl_pathc;
+    } else if (errGlob == GLOB_NOMATCH) {
+        itsNumFiles = 0;
+        ASKAPLOG_WARN_STR(logger, "Wildcard " << itsFilepath.string() << " does not resolve to anything");
+    } else {
+        ASKAPTHROW(AskapError, "Error in interpreting \"" << itsFilepath.string() <<"\" - glob returned error " << errGlob);
+    }
     for (size_t i = 0; i < itsNumFiles; i++) {
         itsFilenameList.push_back(theGlob.gl_pathv[i]);
     }
@@ -93,14 +98,21 @@ void DerivedElementBase::checkWildcards()
     // glob itsThumbnail to get a list of possible names
     //     --> fills itsThumbnailList
 
-    if (itsThumbnail != "") {
+    if ((itsNumFiles > 0 ) && (itsThumbnail != "")) {
         glob_t thumbGlob;
         int errThumb = glob(itsThumbnail.string().c_str(), 0, NULL, &thumbGlob);
-        ASKAPCHECK(errThumb == 0, "Failure interpreting thumbnail filepath \""
-                   << itsThumbnail.filename().string() << "\"");
-        ASKAPCHECK(thumbGlob.gl_pathc == itsNumFiles,
+        unsigned int numThumbs;
+        if (errGlob == 0) {
+           numThumbs  = thumbGlob.gl_pathc;
+        } else if (errGlob == GLOB_NOMATCH) {
+            numThumbs = 0;
+            ASKAPLOG_WARN_STR(logger, "Wildcard " << itsFilepath.string() << " does not resolve to anything");
+        } else {
+            ASKAPTHROW(AskapError, "Error in interpreting \"" << itsFilepath.string() <<"\" - glob returned error " << errGlob);
+        }
+        ASKAPCHECK(numThumbs == itsNumFiles,
                    "Thumbnail wildcard for " << itsName << " produces different number of files than filename");
-        for (size_t i = 0; i < thumbGlob.gl_pathc; i++) {
+        for (size_t i = 0; i < numThumbs; i++) {
             itsThumbnailList.push_back(thumbGlob.gl_pathv[i]);
         }
         globfree(&thumbGlob);
