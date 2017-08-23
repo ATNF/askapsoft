@@ -207,11 +207,20 @@ int HIdata::busyFunctionFit()
 {
 
     //convert to doubles
-    casa::Array<double> spectrum(itsSpecExtractor->array().shape(),
-                                 (double *)itsSpecExtractor->array().data());
-    casa::Array<double> noise(itsNoiseExtractor->array().shape(),
-                              (double *)itsNoiseExtractor->array().data());
+    // casa::Array<double> spectrum(itsSpecExtractor->array().shape(),
+    //                              (double *)itsSpecExtractor->array().data());
+    // casa::Array<double> noise(itsNoiseExtractor->array().shape(),
+    //                           (double *)itsNoiseExtractor->array().data());
 
+    std::vector<double> spectrum(itsSpecExtractor->array().size());
+    for(size_t i=0;i<spectrum.size();i++){
+        spectrum[i] = double(itsSpecExtractor->array().tovector()[i]);
+    }
+    std::vector<double> noise(itsSpecExtractor->array().size());
+    for(size_t i=0;i<noise.size();i++){
+        noise[i] = double(itsNoiseExtractor->array().tovector()[i]);
+    }
+    
     BusyFit *theFitter = new BusyFit();
 
     bool plotsTurnedOff = true;
