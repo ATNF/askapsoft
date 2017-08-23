@@ -2,7 +2,7 @@
 -----------------------
 
 A patch release that fixes bugs in both the pipeline scripts and
-Selavy.
+Selavy, as well as a minor one in casdaupload.
 
 Pipeline fixes:
  * The 'contsub' spectral cubes were not being mosaicked. This was
@@ -23,7 +23,7 @@ Pipeline fixes:
  * The handling of FITS files by the inter-field mosaicking tasks was
    error-prone - files would either not be copied (in the case of a
    single field) or would not be identified correctly (for the
-   spectral-line case). 
+   spectral-line case).
 
 Pipeline improvements:
  * The image size (number of pixels) and cellsize (in arcsec) for the
@@ -44,6 +44,10 @@ The following bugs in Selavy have been fixed:
    producing the same catalogue for all fit types. Additionally, there
    was the possibility of errors if different fit types yielded
    different numbers of components for a given island. 
+
+Finally, the casdaupload utility would fail if presented with a
+wildcard that did not resolve to anything. It will now just carry on,
+ignoring that particular parameter.
 
 
 0.19.1 (04 August 2017)
