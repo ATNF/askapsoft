@@ -81,7 +81,7 @@ using namespace casa;
 
 MSSink::MSSink(const LOFAR::ParameterSet& parset,
         const Configuration& config) :
-    itsParset(parset), itsConfig(config), 
+    itsParset(parset), itsConfig(config),
     itsPointingTableEnabled(parset.getBool("pointingtable.enable", false)),
     itsPreviousScanIndex(-1),
     itsFieldRow(-1), itsDataDescRow(-1), itsStreamNumber(0)
@@ -117,7 +117,7 @@ bool MSSink::isAlwaysActive() const
    // initially: itsStreamNumber is 0, itsMs is empty for all ranks -> make them always active
    // after first call to process:
    //          -  inactive ranks have itsStreamNumber of -1 and empty itsMs (don't want to create
-   //             junk files). 
+   //             junk files).
    //          -  active ranks have non-empty itsMs and non-negative itsStreamNumber
 
    return !itsMs && (itsStreamNumber >= 0);
@@ -192,8 +192,8 @@ void MSSink::process(VisChunk::ShPtr& chunk)
         msc.feed2().put(row, chunk->beam2()(i));
         msc.uvw().put(row, chunk->uvw()(i).vector());
 
-        msc.data().put(row, casa::transpose(chunk->visibility().yzPlane(i)));
-        msc.flag().put(row, casa::transpose(chunk->flag().yzPlane(i)));
+        //msc.data().put(row, casa::transpose(chunk->visibility().yzPlane(i)));
+        //msc.flag().put(row, casa::transpose(chunk->flag().yzPlane(i)));
         msc.flagRow().put(row, False);
 
         // TODO: Need to get this data from somewhere
@@ -214,7 +214,7 @@ void MSSink::process(VisChunk::ShPtr& chunk)
     casa::Vector<casa::Double> timeRange = obsc.timeRange()(0);
     if (timeRange(0) == 0) {
         const casa::Double Tstart = Tmid - (Tint / 2);
-        timeRange(0) = Tstart; 
+        timeRange(0) = Tstart;
     }
 
     const casa::Double Tend = Tmid + (Tint / 2);
@@ -239,7 +239,7 @@ void MSSink::process(VisChunk::ShPtr& chunk)
 /// @details To simplify configuring the pipeline for different purposes certain
 /// expressions are recognised and substituted by this methiod
 /// %w is replaced by the rank, %d is replaced by the date (in YYYY-MM-DD format),
-/// %t is replaced by the time (in HHMMSS format). Note, both date and time are 
+/// %t is replaced by the time (in HHMMSS format). Note, both date and time are
 /// obtained on the rank zero and then broadcast to other ranks, unless in the standalone
 /// mode.
 /// @param[in] in input file name (may contain patterns to substitute)
@@ -289,7 +289,7 @@ std::string MSSink::substituteFileName(const std::string &in) const
        size_t pos = in.find("%",cursor);
        if (pos == std::string::npos) {
            result += in.substr(cursor);
-           break; 
+           break;
        }
        result += in.substr(cursor, pos - cursor);
        if (++pos == in.size()) {
@@ -408,7 +408,7 @@ void MSSink::create(void)
         newMS.bindAll(incrStMan, True);
     }
 
-    // Bind ANTENNA1, and ANTENNA2 to the standardStMan 
+    // Bind ANTENNA1, and ANTENNA2 to the standardStMan
     // as they may change sufficiently frequently to make the
     // incremental storage manager inefficient for these columns.
 
@@ -472,15 +472,15 @@ void MSSink::create(void)
 /// column.
 /// @param[in] name column name
 /// @param[in] description text description
-void MSSink::addNonStandardPointingColumn(const std::string &name, 
-                  const std::string &description) 
+void MSSink::addNonStandardPointingColumn(const std::string &name,
+                  const std::string &description)
 {
    ASKAPASSERT(itsMs);
    MSPointing& pointing = itsMs->pointing();
    casa::ScalarColumnDesc<casa::Float> colDesc(name, description);
    colDesc.rwKeywordSet().define("unit","deg");
    pointing.addColumn(colDesc);
-}  
+}
 
 void MSSink::initAntennas(void)
 {
@@ -521,7 +521,7 @@ void MSSink::initObs(void)
     addObs("ASKAP", "", 0, 0);
 }
 
-casa::Int MSSink::addObs(const casa::String& telescope, 
+casa::Int MSSink::addObs(const casa::String& telescope,
         const casa::String& observer,
         const double obsStartTime,
         const double obsEndTime)
@@ -1005,7 +1005,7 @@ void MSSink::submitMonitoringPoints(askap::cp::common::VisChunk::ShPtr chunk)
         MonitoringSingleton::update("obs.DataRate", nDataInMB / chunk->interval());
     } else {
        MonitoringSingleton::invalidatePoint("obs.DataRate");
-    }   
+    }
 
     MonitoringSingleton::update<float>("obs.StartFreq", chunk->frequency()[0]/ 1000 / 1000);
     MonitoringSingleton::update<int32_t>("obs.nChan", chunk->nChannel());
@@ -1026,7 +1026,7 @@ bool MSSink::equal(const casa::MDirection &dir1, const casa::MDirection &dir2)
 /// However, in the parallel mode it is handy to initialise the measurement set
 /// upon the first call to process method (as this is the only way to automatically
 /// deduce which ranks are active and which are not; the alternative design would be
-/// to specify this information in parset, but this seems to be unnecessary). 
+/// to specify this information in parset, but this seems to be unnecessary).
 /// This method encapsulates all required initialisation actions.
 void MSSink::initialise()
 {
