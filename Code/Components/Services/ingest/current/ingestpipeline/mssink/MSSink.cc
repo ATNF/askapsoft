@@ -192,8 +192,8 @@ void MSSink::process(VisChunk::ShPtr& chunk)
         msc.feed2().put(row, chunk->beam2()(i));
         msc.uvw().put(row, chunk->uvw()(i).vector());
 
-        //msc.data().put(row, casa::transpose(chunk->visibility().yzPlane(i)));
-        //msc.flag().put(row, casa::transpose(chunk->flag().yzPlane(i)));
+        msc.data().put(row, casa::transpose(chunk->visibility().yzPlane(i)));
+        msc.flag().put(row, casa::transpose(chunk->flag().yzPlane(i)));
         msc.flagRow().put(row, False);
 
         // TODO: Need to get this data from somewhere
