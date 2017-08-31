@@ -325,7 +325,8 @@ EOFINNER
     if [ "\${doValidation}" == "true" ] && [ "\${BEAM}" != "all" ]; then
         doValidation=\${validatePerBeam}
     fi
-    scriptname="${ACES_LOCATION}/UserScripts/col52r/ASKAP_continuum_validation.py"
+    ACES=${ACES_LOCATION}
+    scriptname="${ACES}/UserScripts/col52r/ASKAP_continuum_validation.py"
     if [ "\${doValidation}" == "true" ]; then
         if [ ! -e "\${scriptname}" ]; then
             echo "ERROR - Validation script \${scriptname} not found"

@@ -207,6 +207,7 @@ module load askappipeline/${askappipelineVersion}"
             fi
             unloadModule ${module}
         }
+        acesModuleCommand="module load ${module}"
 
         # in case $ACES is already defined, we capture it here before overwriting it
         ACES_ORIGINAL=${ACES}
@@ -227,6 +228,7 @@ module load askappipeline/${askappipelineVersion}"
         {
             unloadModule aces
         }
+        acesModuleCommand="module load aces"
     fi
     
     #############################
