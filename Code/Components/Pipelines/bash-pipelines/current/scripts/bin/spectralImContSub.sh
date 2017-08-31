@@ -84,17 +84,8 @@ sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 thisfile=$sbatchfile
 cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
-IMAGE_BASE_SPECTRAL=${IMAGE_BASE_SPECTRAL}
-TILE=${TILE}
-FIELD=${FIELD}
 BEAM=${BEAM}
-pol=${pol}
-DO_ALT_IMAGER_SPECTRAL="${DO_ALT_IMAGER_SPECTRAL}"
-NUM_SPECTRAL_CUBES=${NUM_SPECTRAL_CUBES}
-IMAGETYPE_SPECTRAL=${IMAGETYPE_SPECTRAL}
-subband="${subband}"
-imageCode=restored
-setImageProperties spectral
+imageName=${imageName}
 
 if [ ! -e "\${imageName}" ]; then
 
