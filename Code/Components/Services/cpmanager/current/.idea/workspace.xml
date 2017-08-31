@@ -1,0 +1,975 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" readonly="true" id="951286e6-48e7-46a5-ae78-1b05c28cf3a7" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/askap" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/askap/._.DS_Store" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/askap/ingest" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/build" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/build/bdist.macosx-10.12-x86_64" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/build/lib" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/build/lib/askap" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/build/lib/askap/ingest" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/config-files" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/data" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/data/registry" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/data/registry/__Freeze" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/data/registry/__catalog" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/data/registry/__catalogIndexList" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/data/registry/adapters" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/data/registry/adapters.replicaGroupId" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/data/registry/applications" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/data/registry/internal-objects" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/data/registry/internal-objects.type" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/data/registry/log.0000000001" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/data/registry/objects" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/data/registry/objects.type" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/data" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/data/registry" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/data/registry/__Freeze" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/data/registry/__catalog" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/data/registry/__catalogIndexList" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/data/registry/adapters" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/data/registry/adapters.replicaGroupId" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/data/registry/applications" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/data/registry/internal-objects" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/data/registry/internal-objects.type" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/data/registry/log.0000000001" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/data/registry/objects" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/data/registry/objects.type" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/ice_data" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/ice_data/icestorm_db" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/ice_data/registry" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/test" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/test/5" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/scripts" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/test" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/test/5" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/current.iml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/modules.xml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/askap/__init__.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/askap/ingest/JIRAStateChangeMonitor.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/askap/ingest/ObsService.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/askap/ingest/__init__.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/askap/ingest/server.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/askap/ingest/svcclients.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/askap/ingest/version.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/build.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/build/lib/askap/__init__.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/build/lib/askap/ingest/Client.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/build/lib/askap/ingest/JIRAStateChangeMonitor.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/build/lib/askap/ingest/ObsService.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/build/lib/askap/ingest/Server 2.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/build/lib/askap/ingest/__init__.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/build/lib/askap/ingest/server.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/build/lib/askap/ingest/svcclients.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/config-files/console.log_cfg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/config-files/ice.cfg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/config-files/ingest.cfg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/config-files/ingest.log_cfg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/config-files/mock_fcm.cfg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/config-files/remote.log_cfg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/cpingest.log" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/dependencies.default" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/Client.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/IngestPipelineMonitorServer36.py.log" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/MockDataServer.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/MockDataServer.py.log" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/MockDataService.py.log" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/MockIngest.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/MockIngestPipeline0.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/MockIngestPipeline0.py.log" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/MockIngestPipeline36.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/MockIngestPipeline36.py.log" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/Server 2.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/__init__.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/applications.txt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/applications.txt.orig" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/cpingest.log" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/functests-junit-results.xml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/ice.cfg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/icebox.log" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/icegridregistry.log" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/ingest.cfg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/ingestmanager.pylog_cfg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/ingestservice.py.log" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/test/5/cpingest.in" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/functests/test_ingest.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/package.info" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/scripts/ice.cfg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/scripts/ingestservice.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/setup.cfg" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/setup.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/test/5/cpingest.in" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="TRACKING_ENABLED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="svcclients.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/askap/ingest/svcclients.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="231">
+              <caret line="42" column="0" lean-forward="false" selection-start-line="42" selection-start-column="0" selection-end-line="42" selection-end-column="0" />
+              <folding>
+                <element signature="e#0#10#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="MockIngestPipeline0.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/functests/MockIngestPipeline0.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="60">
+              <caret line="65" column="55" lean-forward="false" selection-start-line="65" selection-start-column="55" selection-end-line="65" selection-end-column="55" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Client.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/functests/Client.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="188">
+              <caret line="71" column="0" lean-forward="false" selection-start-line="71" selection-start-column="0" selection-end-line="71" selection-end-column="0" />
+              <folding>
+                <element signature="e#0#32#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="MockIngestPipeline36.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/functests/MockIngestPipeline36.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-612">
+              <caret line="9" column="31" lean-forward="false" selection-start-line="9" selection-start-column="31" selection-end-line="9" selection-end-column="31" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="test_ingest.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/functests/test_ingest.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="108">
+              <caret line="119" column="29" lean-forward="true" selection-start-line="119" selection-start-column="20" selection-end-line="119" selection-end-column="29" />
+              <folding>
+                <element signature="e#23#59#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ingest.cfg" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/functests/ingest.cfg">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="102">
+              <caret line="6" column="26" lean-forward="false" selection-start-line="6" selection-start-column="26" selection-end-line="6" selection-end-column="26" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ObsService.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/askap/ingest/ObsService.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="336">
+              <caret line="90" column="0" lean-forward="false" selection-start-line="90" selection-start-column="0" selection-end-line="90" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="applications.txt" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/functests/applications.txt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="68">
+              <caret line="4" column="25" lean-forward="false" selection-start-line="4" selection-start-column="25" selection-end-line="4" selection-end-column="25" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>process_ingest_monitoring</find>
+      <find>JIRAStateChangeMonitor</find>
+      <find>CPObsServerImp</find>
+      <find>get_parameter</find>
+      <find>except</find>
+      <find>range</find>
+      <find>param.get</find>
+      <find>get(</find>
+      <find>ingest_service_map</find>
+      <find>write_config</find>
+      <find>getObsParameters</find>
+      <find>_monitor</find>
+      <find>write</find>
+      <find>start_</find>
+      <find>writeline</find>
+      <find>sbid</find>
+      <find>is_ru</find>
+      <find>TypedValueTypedvaluedouble</find>
+    </findStrings>
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/askap/ingest/JIRAStateChangeMonitor.py" />
+        <option value="$PROJECT_DIR$/askap/ingest/__init__.py" />
+        <option value="$PROJECT_DIR$/functests/config-files/cpmanager.in" />
+        <option value="$PROJECT_DIR$/scripts/cpmanager.in" />
+        <option value="$PROJECT_DIR$/functests/config-files/ingest.cfg" />
+        <option value="$PROJECT_DIR$/askap/ingest/IngestPipelineMonitor.py" />
+        <option value="$PROJECT_DIR$/askap/ingest/Server 2.py" />
+        <option value="$PROJECT_DIR$/askap/ingest/IngestPipelineMonitorServer.py" />
+        <option value="$PROJECT_DIR$/functests/config-files/ice.ice_cfg" />
+        <option value="$PROJECT_DIR$/scripts/ice.ice_cfg" />
+        <option value="$PROJECT_DIR$/scripts/ingestservice.py" />
+        <option value="$PROJECT_DIR$/askap/ingest/Client.py" />
+        <option value="$PROJECT_DIR$/functests/IngestPipelineMonitorServer.py" />
+        <option value="$PROJECT_DIR$/functests/IngestPipelineMonitorServer36.py" />
+        <option value="$PROJECT_DIR$/functests/ice.cfg" />
+        <option value="$PROJECT_DIR$/functests/test_obsprogram.py" />
+        <option value="$PROJECT_DIR$/functests/Server 2.py" />
+        <option value="$PROJECT_DIR$/functests/MockIngestPipelineMonitorServer36.py" />
+        <option value="$PROJECT_DIR$/functests/MockIngestPipelineMonitorServer0.py" />
+        <option value="$PROJECT_DIR$/askap/ingest/server.py" />
+        <option value="$PROJECT_DIR$/functests/MockIngestPipeline36.py" />
+        <option value="$PROJECT_DIR$/functests/applications.txt.orig" />
+        <option value="$PROJECT_DIR$/functests/MockDataServer.py" />
+        <option value="$PROJECT_DIR$/askap/ingest/ObsService.py" />
+        <option value="$PROJECT_DIR$/functests/MockIngest.py" />
+        <option value="$PROJECT_DIR$/functests/applications.txt" />
+        <option value="$PROJECT_DIR$/functests/Client.py" />
+        <option value="$PROJECT_DIR$/askap/ingest/svcclients.py" />
+        <option value="$PROJECT_DIR$/functests/ingest.cfg" />
+        <option value="$PROJECT_DIR$/functests/MockIngestPipeline0.py" />
+        <option value="$PROJECT_DIR$/functests/test_ingest.py" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectFrameBounds">
+    <option name="x" value="76" />
+    <option name="y" value="31" />
+    <option name="width" value="1041" />
+    <option name="height" value="605" />
+  </component>
+  <component name="ProjectInspectionProfilesVisibleTreeState">
+    <entry key="Project Default">
+      <profile-state>
+        <expanded-state>
+          <State>
+            <id />
+          </State>
+          <State>
+            <id>Python</id>
+          </State>
+        </expanded-state>
+        <selected-state>
+          <State>
+            <id>PyRaisingNewStyleClassInspection</id>
+          </State>
+        </selected-state>
+      </profile-state>
+    </entry>
+  </component>
+  <component name="ProjectView">
+    <navigator currentView="ProjectPane" proportions="" version="1">
+      <flattenPackages />
+      <showMembers />
+      <showModules />
+      <showLibraryContents />
+      <hideEmptyPackages />
+      <abbreviatePackageNames />
+      <autoscrollToSource />
+      <autoscrollFromSource />
+      <sortByType />
+      <manualOrder />
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="Scope" />
+      <pane id="Scratches" />
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="current" type="b2602c69:ProjectViewProjectNode" />
+              <item name="current" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="current" type="b2602c69:ProjectViewProjectNode" />
+              <item name="current" type="462c0819:PsiDirectoryNode" />
+              <item name="askap" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="current" type="b2602c69:ProjectViewProjectNode" />
+              <item name="current" type="462c0819:PsiDirectoryNode" />
+              <item name="askap" type="462c0819:PsiDirectoryNode" />
+              <item name="ingest" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="current" type="b2602c69:ProjectViewProjectNode" />
+              <item name="current" type="462c0819:PsiDirectoryNode" />
+              <item name="functests" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="current" type="b2602c69:ProjectViewProjectNode" />
+              <item name="current" type="462c0819:PsiDirectoryNode" />
+              <item name="functests" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="current" type="b2602c69:ProjectViewProjectNode" />
+              <item name="current" type="462c0819:PsiDirectoryNode" />
+              <item name="functests" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
+              <item name="5" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="current" type="b2602c69:ProjectViewProjectNode" />
+              <item name="current" type="462c0819:PsiDirectoryNode" />
+              <item name="scripts" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="settings.editor.selected.configurable" value="vcs.Subversion" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/functests" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/functests" />
+      <recent name="$PROJECT_DIR$/functests/config-files" />
+      <recent name="$PROJECT_DIR$/scripts" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="Python tests.unit_tests">
+    <configuration name="Client" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+        <env name="ICE_CONFIG" value="scripts/ice.cfg" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="current" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/functests/Client.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+    </configuration>
+    <configuration name="IngestPipelineMonitorServer0" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+        <env name="ICE_CONFIG" value="functests/ice.cfg" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="current" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/functests/MockIngestPipeline0.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+    </configuration>
+    <configuration name="IngestPipelineMonitorServer36" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+        <env name="ICE_CONFIG" value="functests/ice.cfg" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="current" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/functests/MockIngestPipeline36.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+    </configuration>
+    <configuration name="ingestservice" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+        <env name="ICE_CONFIG" value="scripts/ice.cfg" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="current" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scripts/ingestservice.py" />
+      <option name="PARAMETERS" value="--log-config=functests/ingestmanager.pylog_cfg --config=functests/ingest.cfg" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+    </configuration>
+    <configuration name="unit_tests" type="tests" factoryName="Nosetests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="$PROJECT_DIR$/../../../../../bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="current" />
+      <option name="_new_regexPattern" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/functests&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+    </configuration>
+    <list size="5">
+      <item index="0" class="java.lang.String" itemvalue="Python tests.unit_tests" />
+      <item index="1" class="java.lang.String" itemvalue="Python.ingestservice" />
+      <item index="2" class="java.lang.String" itemvalue="Python.IngestPipelineMonitorServer0" />
+      <item index="3" class="java.lang.String" itemvalue="Python.IngestPipelineMonitorServer36" />
+      <item index="4" class="java.lang.String" itemvalue="Python.Client" />
+    </list>
+    <recent_temporary>
+      <list size="4">
+        <item index="0" class="java.lang.String" itemvalue="Python.Client" />
+        <item index="1" class="java.lang.String" itemvalue="Python.ingestservice" />
+        <item index="2" class="java.lang.String" itemvalue="Python.IngestPipelineMonitorServer36" />
+        <item index="3" class="java.lang.String" itemvalue="Python.IngestPipelineMonitorServer0" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="ShelveChangesManager" show_recycled="false">
+    <option name="remove_strategy" value="false" />
+  </component>
+  <component name="SvnConfiguration" cleanupOnStartRun="true">
+    <configuration>$USER_HOME$/.subversion</configuration>
+    <supportedVersion>125</supportedVersion>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="951286e6-48e7-46a5-ae78-1b05c28cf3a7" name="Default" comment="" />
+      <created>1502063925982</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1502063925982</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="TestHistory">
+    <history-entry file="unit_tests - 2017.08.31 at 22h 17m 47s.xml">
+      <configuration name="unit_tests" configurationId="tests" />
+    </history-entry>
+    <history-entry file="unit_tests - 2017.08.31 at 22h 20m 53s.xml">
+      <configuration name="unit_tests" configurationId="tests" />
+    </history-entry>
+    <history-entry file="unit_tests - 2017.08.31 at 22h 23m 06s.xml">
+      <configuration name="unit_tests" configurationId="tests" />
+    </history-entry>
+    <history-entry file="unit_tests - 2017.08.31 at 22h 26m 30s.xml">
+      <configuration name="unit_tests" configurationId="tests" />
+    </history-entry>
+    <history-entry file="unit_tests - 2017.08.31 at 22h 27m 35s.xml">
+      <configuration name="unit_tests" configurationId="tests" />
+    </history-entry>
+    <history-entry file="unit_tests - 2017.08.31 at 22h 29m 03s.xml">
+      <configuration name="unit_tests" configurationId="tests" />
+    </history-entry>
+    <history-entry file="unit_tests - 2017.08.31 at 22h 30m 40s.xml">
+      <configuration name="unit_tests" configurationId="tests" />
+    </history-entry>
+    <history-entry file="unit_tests - 2017.08.31 at 22h 32m 16s.xml">
+      <configuration name="unit_tests" configurationId="tests" />
+    </history-entry>
+    <history-entry file="unit_tests - 2017.08.31 at 22h 33m 31s.xml">
+      <configuration name="unit_tests" configurationId="tests" />
+    </history-entry>
+    <history-entry file="unit_tests - 2017.08.31 at 22h 45m 53s.xml">
+      <configuration name="unit_tests" configurationId="tests" />
+    </history-entry>
+  </component>
+  <component name="TodoView">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="76" y="31" width="1041" height="605" extended-state="0" />
+    <layout>
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2808425" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3293556" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3197279" sideWeight="0.5038381" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33917397" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.41286308" sideWeight="0.4961619" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.46058092" sideWeight="0.49748382" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Inspection Results" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3296837" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+    </layout>
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/../../../../Base/py-iceutils/current/install/lib/python2.7/site-packages/askap.iceutils-current-py2.7.egg/askap/iceutils/monitoringprovider.py</url>
+          <line>169</line>
+          <option name="timeStamp" value="76" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/askap/ingest/ObsService.py</url>
+          <line>88</line>
+          <option name="timeStamp" value="78" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/functests/Client.py</url>
+          <line>59</line>
+          <option name="timeStamp" value="83" />
+        </line-breakpoint>
+      </breakpoints>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
+      <option name="time" value="93" />
+    </breakpoint-manager>
+    <watches-manager>
+      <configuration name="tests">
+        <watch expression="points[3]" />
+        <watch expression="points[3].value.value" />
+      </configuration>
+    </watches-manager>
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/askap/ingest/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="408">
+          <caret line="24" column="25" lean-forward="true" selection-start-line="24" selection-start-column="25" selection-end-line="24" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/askap/ingest/server.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="170">
+          <caret line="10" column="0" lean-forward="true" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/functests/Client.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="85">
+          <caret line="5" column="0" lean-forward="true" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/askap/ingest/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/askap/ingest/ObsService.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="323">
+          <caret line="19" column="46" lean-forward="false" selection-start-line="19" selection-start-column="46" selection-end-line="19" selection-end-column="46" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/askap/ingest/JIRAStateChangeMonitor.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="136">
+          <caret line="8" column="0" lean-forward="true" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/functests/Server 2.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/askap/ingest/svcclients.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1122">
+          <caret line="66" column="33" lean-forward="true" selection-start-line="66" selection-start-column="33" selection-end-line="66" selection-end-column="33" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/lib/python2.7/ConfigParser.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="70">
+          <caret line="506" column="15" lean-forward="false" selection-start-line="506" selection-start-column="15" selection-end-line="506" selection-end-column="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../../../Base/py-askap/current/install/lib/python2.7/site-packages/askap-current-py2.7.egg/askap/logging/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="322">
+          <caret line="125" column="0" lean-forward="false" selection-start-line="125" selection-start-column="0" selection-end-line="125" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../../../Base/py-iceutils/current/install/lib/python2.7/site-packages/askap.iceutils-current-py2.7.egg/askap/iceutils/server.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="359">
+          <caret line="199" column="0" lean-forward="false" selection-start-line="199" selection-start-column="0" selection-end-line="199" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/cpmanager.in" />
+    <entry file="file://$PROJECT_DIR$/functests/config-files/console.log_cfg" />
+    <entry file="file://$PROJECT_DIR$/functests/config-files/cpmanager.in" />
+    <entry file="file://$PROJECT_DIR$/functests/config-files/ice.cfg" />
+    <entry file="file://$PROJECT_DIR$/functests/config-files/ingest.log_cfg" />
+    <entry file="file://$PROJECT_DIR$/functests/config-files/mock_fcm.cfg" />
+    <entry file="file://$PROJECT_DIR$/askap/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="102">
+          <caret line="6" column="0" lean-forward="false" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/pydevd.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2073">
+          <caret line="1601" column="0" lean-forward="false" selection-start-line="1601" selection-start-column="0" selection-end-line="1601" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/functests/start_services.sh" />
+    <entry file="file://$PROJECT_DIR$/scripts/ice.cfg">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="85">
+          <caret line="5" column="0" lean-forward="true" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/functests/Server 2.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="289">
+          <caret line="18" column="8" lean-forward="true" selection-start-line="18" selection-start-column="8" selection-end-line="18" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/askap/ingest/JIRAStateChangeMonitor.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="85">
+          <caret line="12" column="21" lean-forward="false" selection-start-line="12" selection-start-column="21" selection-end-line="12" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/functests/functests-junit-results.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/lib/python2.7/unittest/case.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="146">
+          <caret line="395" column="0" lean-forward="false" selection-start-line="395" selection-start-column="0" selection-end-line="395" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../../../../local/lib/python2.7/site-packages/nose-0.11.3-py2.7.egg/nose/suite.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="103">
+          <caret line="208" column="54" lean-forward="true" selection-start-line="208" selection-start-column="54" selection-end-line="208" selection-end-column="54" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../../../Base/py-iceutils/current/install/lib/python2.7/site-packages/askap.iceutils-current-py2.7.egg/askap/iceutils/icesession.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="299">
+          <caret line="231" column="0" lean-forward="false" selection-start-line="231" selection-start-column="0" selection-end-line="231" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/askap/ingest/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="343">
+          <caret line="38" column="0" lean-forward="false" selection-start-line="38" selection-start-column="0" selection-end-line="38" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/functests/ice.cfg">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="190">
+          <caret line="95" column="51" lean-forward="false" selection-start-line="95" selection-start-column="31" selection-end-line="95" selection-end-column="51" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/askap/ingest/version.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/askap/ingest/server.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="34">
+          <caret line="10" column="0" lean-forward="false" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/ingestservice.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="131">
+          <caret line="20" column="29" lean-forward="false" selection-start-line="20" selection-start-column="29" selection-end-line="20" selection-end-column="29" />
+          <folding>
+            <element signature="e#23#38#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/functests/test/5/cpingest.in">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="13" lean-forward="false" selection-start-line="0" selection-start-column="13" selection-end-line="0" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../../../../local/lib/python2.7/site-packages/nose-0.11.3-py2.7.egg/nose/util.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="93">
+          <caret line="490" column="0" lean-forward="false" selection-start-line="490" selection-start-column="0" selection-end-line="490" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/functests/MockDataService.py.log">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/functests/applications.txt.orig">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="15" lean-forward="false" selection-start-line="0" selection-start-column="15" selection-end-line="0" selection-end-column="15" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/functests/MockDataServer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="21" />
+          <folding>
+            <element signature="e#647#679#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/functests/MockIngest.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="187">
+          <caret line="11" column="0" lean-forward="false" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../../../../3rdParty/Ice/Ice-3.5.0/install/lib/python2.7/site-packages/IcePy-3.5.0-py2.7.egg/Ice.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="127">
+          <caret line="520" column="0" lean-forward="false" selection-start-line="520" selection-start-column="0" selection-end-line="520" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../../../Base/py-iceutils/current/install/lib/python2.7/site-packages/askap.iceutils-current-py2.7.egg/askap/iceutils/monitoringprovider.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="119">
+          <caret line="53" column="0" lean-forward="false" selection-start-line="53" selection-start-column="0" selection-end-line="53" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/askap/ingest/ObsService.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="336">
+          <caret line="90" column="0" lean-forward="false" selection-start-line="90" selection-start-column="0" selection-end-line="90" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/functests/ingestservice.py.log">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/functests/ingestmanager.pylog_cfg">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="204">
+          <caret line="12" column="10" lean-forward="false" selection-start-line="12" selection-start-column="10" selection-end-line="12" selection-end-column="10" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/functests/applications.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="68">
+          <caret line="4" column="25" lean-forward="false" selection-start-line="4" selection-start-column="25" selection-end-line="4" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/askap/ingest/svcclients.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="231">
+          <caret line="42" column="0" lean-forward="false" selection-start-line="42" selection-start-column="0" selection-end-line="42" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/functests/Client.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="188">
+          <caret line="71" column="0" lean-forward="false" selection-start-line="71" selection-start-column="0" selection-end-line="71" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#32#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/functests/ingest.cfg">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="102">
+          <caret line="6" column="26" lean-forward="false" selection-start-line="6" selection-start-column="26" selection-end-line="6" selection-end-column="26" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/functests/MockIngestPipeline36.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-612">
+          <caret line="9" column="31" lean-forward="false" selection-start-line="9" selection-start-column="31" selection-end-line="9" selection-end-column="31" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/functests/MockIngestPipeline0.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="65" column="55" lean-forward="false" selection-start-line="65" selection-start-column="55" selection-end-line="65" selection-end-column="55" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../../../../../local/lib/python2.7/site-packages/nose-0.11.3-py2.7.egg/nose/case.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="681">
+          <caret line="185" column="0" lean-forward="false" selection-start-line="185" selection-start-column="0" selection-end-line="185" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/functests/test_ingest.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="108">
+          <caret line="119" column="29" lean-forward="true" selection-start-line="119" selection-start-column="20" selection-end-line="119" selection-end-column="29" />
+          <folding>
+            <element signature="e#23#59#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+  </component>
+</project>

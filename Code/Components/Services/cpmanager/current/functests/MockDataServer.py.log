@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "./MockDataServer.py", line 59, in <module>
+    main()
+  File "./MockDataServer.py", line 54, in main
+    ic.waitForShutdown()
+  File "/home/wu049/ASKAPSDP/3rdParty/Ice/Ice-3.5.0/install/lib/python2.7/site-packages/IcePy-3.5.0-py2.7.egg/Ice.py", line 532, in waitForShutdown
+    while not self._impl.waitForShutdown(500):
+KeyboardInterrupt

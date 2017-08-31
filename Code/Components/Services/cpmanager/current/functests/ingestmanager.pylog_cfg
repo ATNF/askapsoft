@@ -1,0 +1,23 @@
+[loggers]
+keys=root
+
+[handlers]
+keys=stdoutHandler
+
+[logger_root]
+level=DEBUG
+handlers=stdoutHandler
+
+[handler_stdoutHandler]
+class=StreamHandler
+level=INFO
+formatter=simpleFormatter
+args=(sys.stdout,)
+
+# This is not used in the IceHandler, but neccessary for config
+[formatters]
+keys=simpleFormatter
+
+[formatter_simpleFormatter]
+format=%(asctime)s - %(name)s - %(levelname)s - %(message)s
+datefmt=

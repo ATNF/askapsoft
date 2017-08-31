@@ -1,0 +1,16 @@
+Waiting for IceStorm
+Traceback (most recent call last):
+  File "/home/wu049/ASKAPSDP/Code/Components/Services/cpmanager/current/install/bin/ingestservice.py", line 5, in <module>
+  File "/home/wu049/ASKAPSDP/local/lib/python2.7/site-packages/pkg_resources.py", line 488, in run_script
+    self.require(requires)[0].run_script(script_name, ns)
+  File "/home/wu049/ASKAPSDP/local/lib/python2.7/site-packages/pkg_resources.py", line 1354, in run_script
+    execfile(script_filename, namespace, namespace)
+  File "/home/wu049/ASKAPSDP/Code/Components/Services/cpmanager/current/install/lib/python2.7/site-packages/askap.ingest-current-py2.7.egg/EGG-INFO/scripts/ingestservice.py", line 28, in <module>
+  File "/home/wu049/ASKAPSDP/Code/Components/Services/cpmanager/current/install/lib/python2.7/site-packages/askap.ingest-current-py2.7.egg/EGG-INFO/scripts/ingestservice.py", line 19, in main
+  File "/home/wu049/ASKAPSDP/Code/Base/py-iceutils/current/install/lib/python2.7/site-packages/askap.iceutils-current-py2.7.egg/askap/iceutils/server.py", line 201, in run
+    self.wait()
+  File "/home/wu049/ASKAPSDP/Code/Base/py-iceutils/current/install/lib/python2.7/site-packages/askap.iceutils-current-py2.7.egg/askap/iceutils/server.py", line 205, in wait
+    self._comm.waitForShutdown()
+  File "/home/wu049/ASKAPSDP/3rdParty/Ice/Ice-3.5.0/install/lib/python2.7/site-packages/IcePy-3.5.0-py2.7.egg/Ice.py", line 532, in waitForShutdown
+    while not self._impl.waitForShutdown(500):
+KeyboardInterrupt
