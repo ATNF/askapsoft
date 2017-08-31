@@ -103,13 +103,13 @@ void ContinuumMaster::run(void)
 
 
 
-    char ChannelPar[64];
 
-    sprintf(ChannelPar,"[1,0]"); // we are the master
+
+
 
     LOFAR::ParameterSet unitParset = itsParset;
 
-    unitParset.replace("Channels",ChannelPar);
+
 
     const bool writeAtMajorCycle = unitParset.getBool("Images.writeAtMajorCycle", false);
     const int nCycles = unitParset.getInt32("ncycles", 0);

@@ -52,21 +52,25 @@ Typically we are processing a single measurement set with 304 spectral channels,
 worker to a single spectral channel::
 
     Cimager.nchanpercore    = 1
-    Cimager.Channels        = [1,%w]
 
-Upon execution, the %w is replaced with the worker ID, a number from 0 to 303 in the case
-of 304 workers. You will need 305 cores to run. However if you decide that a core will process
+You will need 305 cores to run. However if you decide that a core will process
 4 channels. Then you would use::
 
     Cimager.nchanpercore    = 4
-    Cimager.Channels        = [1,%w]
-
 
 Now you would only need to invoke::
 
     $ aprun -n 77 -N 20 imager -c config.in
 
 This would only require 4 nodes.
+
+**Update:
+
+The Channels keyword behaves differently for this imager as compared to cimager in this case it controls how many channels are processed from the measurement sets. If it is omitted the entire set is processed however you can specify:
+
+    Cimager.Channels = [<start>,<stop>]
+
+
 
 **Note: The Reference Frequency**
 
@@ -168,9 +172,9 @@ that channel will be recorded as having zero for all three
 parameters. This beam log is compatible with other askapsoft tasks,
 specfically the spectral extraction in Selavy (see
 :doc:`../analysis/extraction`).
-     
+
 Here is an example of the start of a beam log::
-  
+
   #Channel BMAJ[arcsec] BMIN[arcsec] BPA[deg]
   0 64.4269 59.2985 -70.8055
   1 64.4313 59.299 -70.8831
@@ -210,6 +214,10 @@ Here is an example of the start of a beam log::
 +--------------------------+------------------+--------------+----------------------------------------------------+
 |nchanpercore              |int               |1             |Number of channels allocated to each worker core    |
 |                          |                  |              |                                                    |
++--------------------------+------------------+--------------+----------------------------------------------------+
++--------------------------+------------------+--------------+----------------------------------------------------+
+|Channels                  |vector<int>       |[0,<all>]     |Channels to be selected from the measurement set.   |
+|                          |                  |              |Syntax is [<start>,<stop>]                          |
 +--------------------------+------------------+--------------+----------------------------------------------------+
 |beams                     |vector<int>       |[0]           |Beam number to be selected from the measurement set |
 |                          |                  |              |                                                    |

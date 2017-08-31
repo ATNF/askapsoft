@@ -136,6 +136,12 @@ void AdviseDI::prepare() {
 
     ASKAPCHECK(nwriters > 0 ,"Number of writers must be greater than zero");
 
+    /// Get the channel range
+    /// The imager ususally uses the Channels keyword in the parset to
+    /// defined the work unit that it will attempt. That does not work in this
+
+
+
     casa::uInt srow = 0;
     chanFreq.resize(ms.size());
     chanWidth.resize(ms.size());
@@ -173,16 +179,49 @@ void AdviseDI::prepare() {
         const casa::ROArrayColumn<casa::Double> times = casa::ROArrayColumn<casa::Double>(oc.timeRange());
         const casa::ROArrayColumn<casa::Double> ants = casa::ROArrayColumn<casa::Double>(ac.position());
         const casa::uInt thisRef = casa::ROScalarColumn<casa::Int>(in.spectralWindow(),"MEAS_FREQ_REF")(0);
-        const  casa::uInt thisChanIn = casa::ROScalarColumn<casa::Int>(in.spectralWindow(),"NUM_CHAN")(0);
+
+        casa::uInt thisChanIn = 0;
         srow = sc.nrow()-1;
 
         ASKAPCHECK(srow==0,"More than one spectral window not currently supported in adviseDI");
 
-        for (uint i = 0; i < thisChanIn; ++i) {
+        // get the channel selection
+
+        vector<int> itsChannels = getChannels();
+
+        size_t chanStart=0;
+        size_t chanStop=0;
+        size_t chanStep=0;
+
+
+        if (itsChannels[2] > 0) {
+            // this also picks up whether the Channels keyword wad defined
+            // we should be averaging
+            // not sure how yet so just step for the moment
+            chanStart = itsChannels[0];
+            chanStop = itsChannels[1];
+            chanStep = itsChannels[2];
+
+            if (chanStop > casa::ROScalarColumn<casa::Int>(in.spectralWindow(),"NUM_CHAN")(0)) {
+                chanStop = casa::ROScalarColumn<casa::Int>(in.spectralWindow(),"NUM_CHAN")(0);
+            }
+            thisChanIn = 0;
+        }
+        else {
+            chanStart = 0;
+            chanStop = casa::ROScalarColumn<casa::Int>(in.spectralWindow(),"NUM_CHAN")(0);
+            chanStep = 1;
+
+        }
+
+        ASKAPLOG_INFO_STR(logger, "Chan start: " << chanStart << " stop: " << chanStop << " step: " << chanStep);
+
+        for (uint i = chanStart; i < chanStop; i = i + chanStep) {
           chanFreq[n].push_back(sc.chanFreq()(srow)(casa::IPosition(1, i)));
           chanWidth[n].push_back(sc.chanWidth()(srow)(casa::IPosition(1, i)));
           effectiveBW[n].push_back(sc.effectiveBW()(srow)(casa::IPosition(1, i)));
           resolution[n].push_back(sc.resolution()(srow)(casa::IPosition(1, i)));
+          thisChanIn++;
         }
 
         totChanIn = totChanIn + thisChanIn;
@@ -672,6 +711,44 @@ std::vector<std::string> AdviseDI::getDatasets()
 
     return ms;
 }
+
+std::vector<int> AdviseDI::getChannels() {
+
+    // channels is now a start and stop for the whole dataset so be careful
+    std::vector<int> c(3,0);
+    std::vector<string> cstr(3,"0");
+
+    if (!itsParset.isDefined("Channels")) {
+    ASKAPLOG_WARN_STR(logger,
+        "Channels keyword is not defined");
+        c[2] = -1;
+    }
+    else {
+        cstr = itsParset.getStringVector("Channels",true);
+        c[0] = stoi(cstr[0]);
+        string wild = "%w";
+        if (cstr[1].compare(wild) == 0) {
+            c[1] = 0;
+            c[2] = -1;
+        }
+        else {
+            c[1] = stoi(cstr[1]);
+            c[2] = stoi(cstr[2]);
+        }
+
+
+    }
+
+    // just a start and stop - assume no averaging
+    if (c[2] == 0) {
+        c[2] = 1;
+    }
+    // otherwise averaging needs to be performed -- see later
+
+    return c;
+
+}
+
 void AdviseDI::updateComms() {
 
     cp::CubeComms& itsCubeComms = dynamic_cast< cp::CubeComms& >(itsComms);
@@ -704,7 +781,7 @@ void AdviseDI::updateComms() {
         itsCubeComms.setMultiSink();
     }
 
-    
+
 }
 std::vector<int> AdviseDI::getBeams()
 {

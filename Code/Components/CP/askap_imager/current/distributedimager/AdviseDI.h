@@ -85,7 +85,7 @@ namespace askap {
             void addMissingParameters(LOFAR::ParameterSet& parset);
 
             void addMissingParameters();
-            
+
 
 
 
@@ -96,6 +96,10 @@ namespace askap {
 
             /// @brief the datasets
             std::vector<std::string> getDatasets();
+
+
+            /// @brief get the channels
+            std::vector<int> getChannels();
 
             ///
             casa::MVDirection getTangent(int ms=0) {return itsTangent[ms];};
@@ -135,17 +139,12 @@ namespace askap {
 
             vector<casa::MFrequency> itsTopoFrequencies;
 
-            double refFreq;
 
             double minFrequency;
 
             double maxFrequency;
 
-            double deltaFrequency;
 
-            int numFrequencies;
-
-            bool constChanWidth;
 
             std::vector<casa::MVDirection> itsTangent;
 
