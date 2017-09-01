@@ -1,5 +1,5 @@
 [loggers]
-keys=root
+keys=root, askap
 
 [handlers]
 keys=stdoutHandler
@@ -8,9 +8,14 @@ keys=stdoutHandler
 level=DEBUG
 handlers=stdoutHandler
 
+[logger_askap]
+qualname=askap
+level=DEBUG
+handlers=stdoutHandler
+
 [handler_stdoutHandler]
 class=StreamHandler
-level=INFO
+level=DEBUG
 formatter=simpleFormatter
 args=(sys.stdout,)
 
