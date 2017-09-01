@@ -309,16 +309,16 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``TMPFS``                                  | /dev/shm                        | tmpfs (:doc:`../calim/imager`)                         | Location of the shared memory.                                |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``NUM_SPECTRAL_CUBES_CONTCUBE``            |  1                              | nwriters (:doc:`../calim/imager`)                      | Number of spectral cubes to be produced, or the number of     |
-|                                            |                                 |                                                        | writers used when ``ALT_IMAGER_SINGLE_FILE=true``. This       |
-|                                            |                                 |                                                        | configures the number of writers employed by imager, each of  |
-|                                            |                                 |                                                        | which writes a sub-band in the multiple-writer case. No       |
-|                                            |                                 |                                                        | combination of the sub-cubes is currently done. Note that     |
-|                                            |                                 |                                                        | this defaults to a single cube, as the continuum cubes are    |
-|                                            |                                 |                                                        | not as I/O intensive as the spectral-line cubes.              |
+| ``NUM_SPECTRAL_WRITERS_CONTCUBE``          | 1                               | nwriters (:doc:`../calim/imager`)                      | The number of writers used by imager. Unless                  |
+|                                            |                                 |                                                        | ``ALT_IMAGER_SINGLE_FILE_CONTCUBE=true``, this will equate to |
+|                                            |                                 |                                                        | the number of distinct spectral cubes produced.In the case of |
+|                                            |                                 |                                                        | multiple cubes, each will be a sub-band of the full           |
+|                                            |                                 |                                                        | bandwidth. No combination of the sub-cubes is currently       |
+|                                            |                                 |                                                        | done. The number of writers will be reduced to the number of  |
+|                                            |                                 |                                                        | workers in the job if necessary.                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``ALT_IMAGER_SINGLE_FILE``                 | false                           | singleoutputfile                                       | Whether to write a single cube, even with multiple writers    |
-|                                            |                                 | (:doc:`../calim/imager`)                               | (ie. ``NUM_SPECTRAL_CUBES_CONTCUBE>1``). Only works when      |
+| ``ALT_IMAGER_SINGLE_FILE_CONTCUBE``        | false                           | singleoutputfile                                       | Whether to write a single cube, even with multiple writers    |
+|                                            |                                 | (:doc:`../calim/imager`)                               | (ie. ``NUM_SPECTRAL_WRITERS_CONTCUBE>1``). Only works when    |
 |                                            |                                 |                                                        | ``IMAGETYPE_SPECTRAL=fits``                                   |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | **Self-calibration**                       |                                 |                                                        |                                                               |
