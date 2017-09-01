@@ -1,7 +1,0 @@
--- 08/31/17 22:32:41.410 icebox-IceStorm: TopicManager: creating new topic "sbstatechange". id: IceStorm/topic.sbstatechange subscribers: 
--- 08/31/17 22:32:41.412 icebox-IceStorm: Topic: sbstatechange: subscribeAndGetPublisher: 41EA8931-AD31-46CD-999B-BC903815318D endpoints: "tcp -h 192.168.56.101 -p 54484", "tcp -h 10.0.2.15 -p 54484" QoS:  subscriptions: []
--- 08/31/17 22:45:53.007 icebox-IceStorm: Berkeley DB: DbEnv "IceStorm": BDB3028 subscribers: unable to flush: No such file or directory
--- 08/31/17 22:45:53.007 icebox-IceStorm: Berkeley DB: DbEnv "IceStorm": BDB3028 __catalog: unable to flush: No such file or directory
--- 08/31/17 22:45:53.008 icebox-IceStorm: Berkeley DB: DbEnv "IceStorm": BDB3028 llu: unable to flush: No such file or directory
-!! 08/31/17 22:45:53.010 icebox-IceStorm: error: Freeze DbEnv close error:SharedDbEnv.cpp:686: Freeze::DatabaseException:
-   DbEnv::close: No such file or directory
