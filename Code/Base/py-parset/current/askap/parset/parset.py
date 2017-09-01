@@ -48,11 +48,18 @@ def sub_parset(d, key):
 def parset_to_dict(st, raw=False):
     """Turn a parameterset string into a python `dict`"""
     d = {}
+    full_line = ''
     for line in st.splitlines():
-        pval, comm = extract(line)
-        if pval:
-            val = raw and pval[1] or decode(pval[1])
-            d[pval[0]] = val
+	full_line += line.strip()
+
+	if full_line.endswith('\\'):
+	    full_line = full_line[:-1].strip()
+	else:
+            pval, comm = extract(full_line)
+            if pval:
+                val = raw and pval[1] or decode(pval[1])
+                d[pval[0]] = val
+	    full_line = ''
     return d
 
 def dict_to_parset(d, sort=False):
