@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from nose.tools import assert_equals
+from nose.tools import assert_equals, assert_almost_equals
 import sys, traceback, os, time, json
 from askap.iceutils import IceSession
 
@@ -32,7 +32,8 @@ class TestCPIngest(object):
         self.igsession = IceSession('applications.txt', cleanup=True)
         try:
             self.igsession.start()
-            time.sleep(10)
+            time.sleep(1)
+
             self.dataservice = get_service("SchedulingBlockService@DataServiceAdapter",
                           ISchedulingBlockServicePrx,
                           self.igsession.communicator)
@@ -41,6 +42,7 @@ class TestCPIngest(object):
                           MonitoringProviderPrx,
                           self.igsession.communicator)
 
+            time.sleep(5)
             self.cpservice = get_service(
                 "CentralProcessorService@IngestManagerAdapter",
                 ICPObsServicePrx,
@@ -117,15 +119,15 @@ class TestCPIngest(object):
         assert_equals(points[1].value.value, 1376.5)
         assert_equals(points[2].value.value, 2592.0)
 
-#        chanWidth = 18.518518
-#        value = points[3].value.value
-#        assert_equals(value, chanWidth)
+        chanWidth = 18.518518
+        value = points[3].value.value
+        assert_almost_equals(value, chanWidth, places=6)
 
         assert_equals(points[4].value.value, 'Virgo')
         assert_equals(points[5].value.value, 73)
 
         self.cpservice.abortObs()
-        self.cpservice.waitObs(2000)
+        time.sleep(2)
         # monitoring points should be gone
         points = self.monitoringservice.get(point_names)
         assert_equals(len(points), 1)

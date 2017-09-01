@@ -1,4 +1,3 @@
-icegridregistry
 icebox
 ingestservice.py --log-config=ingestmanager.pylog_cfg --config=ingest.cfg
 ./MockDataServer.py
