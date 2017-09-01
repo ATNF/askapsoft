@@ -407,13 +407,12 @@ DO_LOCAL_SOLVER=false
 # How many sub-cubes to write out.
 # This improves performance of the imaging - and also permits parallelisation
 # of the LINMOS step
-NUM_SPECTRAL_CUBES=1
+NUM_SPECTRAL_WRITERS=1
 # Whether to write out a single file in the case of writing to FITS
-# (Note that FITS output is not yet implemented fully)
 ALT_IMAGER_SINGLE_FILE=false
 
 # Same for continuum cubes
-NUM_SPECTRAL_CUBES_CONTCUBE=1
+NUM_SPECTRAL_WRITERS_CONTCUBE=1
 ALT_IMAGER_SINGLE_FILE_CONTCUBE=true
 
 

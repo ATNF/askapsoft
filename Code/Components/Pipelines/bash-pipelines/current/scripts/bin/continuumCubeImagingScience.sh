@@ -164,7 +164,7 @@ Cimager.tmpfs                                   = ${tmpfs}"
 # barycentre and multiple solver mode not supported in continuum imaging (yet)
 Cimager.barycentre                              = false
 Cimager.solverpercore                           = true
-Cimager.nwriters                                = ${NUM_SPECTRAL_CUBES_CONTCUBE}
+Cimager.nwriters                                = ${NUM_SPECTRAL_WRITERS_CONTCUBE}
 Cimager.singleoutputfile                        = ${ALT_IMAGER_SINGLE_FILE_CONTCUBE}"
 
         # we also need to change the CPU allocations
