@@ -725,15 +725,15 @@ std::vector<int> AdviseDI::getChannels() {
     }
     else {
         cstr = itsParset.getStringVector("Channels",true);
-        c[0] = stoi(cstr[0]);
+        c[0] = atoi(cstr[0].c_str());
         string wild = "%w";
         if (cstr[1].compare(wild) == 0) {
             c[1] = 0;
             c[2] = -1;
         }
         else {
-            c[1] = stoi(cstr[1]);
-            c[2] = stoi(cstr[2]);
+            c[1] = atoi(cstr[1].c_str());
+            c[2] = atoi(cstr[2].c_str());
         }
 
 
