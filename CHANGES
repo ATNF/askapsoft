@@ -1,3 +1,25 @@
+0.19.3 (4 September 2017)
+-------------------------
+
+A patch release just covering the pipeline scripts. The following bugs
+are fixed:
+
+ * The number of writers used in the spectral-line imaging when the
+   askap_imager is used (DO_ALT_IMAGER=true) is now better
+   described. The input parameter NUM_SPECTRAL_CUBES is now
+   NUM_SPECTRAL_WRITERS, and the pipeline is better able to handle a
+   single output (FITS) cube written by multiple writers.
+ * The running of the validation script after continuum source-finding
+   now has the $ACES environment variable set correctly. The
+   validation script requires it to be set, and when it was
+   not set within a user's environment the script could crash.
+ * The image-based continuum subtraction script has had two fixes:
+   - The cube name was being incorrectly set when the single-writer
+     FITS option was used
+   - The working directory was the same for all sub-bands for a given
+     beam. This could cause issues with casa's ipython log file,
+     resulting in jobs crashing with obscure errors.
+
 0.19.2 (24 August 2017)
 -----------------------
 
