@@ -58,6 +58,14 @@ for subband in ${SUBBAND_WRITER_LIST}; do
     
     if [ "${DO_IT}" == "true" ]; then
 
+        # Make a working directory - the casapy & ipython log files
+        # will go in here. This will prevent conflicts between jobs
+        # that start at the same time
+        workingDirectory="imcontsub-working-beam${BEAM}"
+        if [ ${NUM_SPECTRAL_CUBES} -gt 1 ]; then
+            workingDirectory="${workingDirectory}.${subband}"
+        fi
+
         setJob "spectral_imcontsub${subband}" "imcontsub${subband}"
         cat > "$sbatchfile" <<EOF
 #!/bin/bash -l
@@ -96,7 +104,7 @@ else
 
     # Make a working directory - the casapy & ipython log files will go in here.
     # This will prevent conflicts
-    workdir=imcontsub-working-beam\${BEAM}
+    workdir=${workingDirectory}
     mkdir -p \$workdir
     cd \$workdir
 
