@@ -697,9 +697,9 @@ EOF
         # will not be referenced in that case).
         if [ "${DO_ALT_IMAGER_CONTCUBE}" == "true" ] && [ "${ALT_IMAGER_SINGLE_FILE_CONTCUBE}" != "true" ]; then
             nworkers=$nchanContSci
+            NUM_SPECTRAL_CUBES_CONTCUBE=${NUM_SPECTRAL_WRITERS_CONTCUBE}
             writerIncrement=$(echo "$nworkers" "${NUM_SPECTRAL_CUBES_CONTCUBE}" | awk '{print $1/$2}')
             SUBBAND_WRITER_LIST_CONTCUBE=$(seq 1 "$writerIncrement" "$nworkers")
-            NUM_SPECTRAL_CUBES_CONTCUBE=${NUM_SPECTRAL_WRITERS_CONTCUBE}
             unset nworkers
             unset writerIncrement
         else
@@ -809,10 +809,10 @@ EOF
         # so that the loop over subbands is only done once ($subband
         # will not be referenced in that case).
         if [ "${DO_ALT_IMAGER_SPECTRAL}" == "true" ] && [ "${ALT_IMAGER_SINGLE_FILE}" != "true" ]; then
+            NUM_SPECTRAL_CUBES=${NUM_SPECTRAL_WRITERS}
             nworkers=$(echo "${NUM_CHAN_SCIENCE_SL}" "${NCHAN_PER_CORE_SL}" | awk '{print int($1/$2)}')
             writerIncrement=$(echo "$nworkers" "${NUM_SPECTRAL_CUBES}" | awk '{print int($1/$2)}')
             SUBBAND_WRITER_LIST=$(seq 1 "$writerIncrement" "$nworkers")
-            NUM_SPECTRAL_CUBES=${NUM_SPECTRAL_WRITERS}
             unset nworkers
             unset writerIncrement
         else

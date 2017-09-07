@@ -66,6 +66,10 @@ for subband in ${SUBBAND_WRITER_LIST}; do
             workingDirectory="${workingDirectory}.${subband}"
         fi
 
+        # Set the $imageName for the restored cube, as we will use this in the slurm job
+        imageCode=restored
+        setImageProperties spectral
+
         setJob "spectral_imcontsub${subband}" "imcontsub${subband}"
         cat > "$sbatchfile" <<EOF
 #!/bin/bash -l
