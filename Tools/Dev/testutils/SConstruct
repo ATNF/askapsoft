@@ -9,7 +9,11 @@ askap_root = os.environ['ASKAP_ROOT']
 incdir = '%s/include' % askap_root
 libdir = '%s/lib' % askap_root
 
-env = Environment()
+# I want to inherit the path from the environment
+# I did this to avoid the compiler choice being clobbered
+# on supercomputer enviroments where the defualt compiler is not being used
+#
+env = Environment(ENV = {'PATH' : os.environ['PATH']})
 
 env.AppendUnique(CPPPATH=["%s/include" % askap_root])
 

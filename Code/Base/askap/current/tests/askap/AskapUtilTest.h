@@ -231,7 +231,7 @@ class AskapUtilTest : public CppUnit::TestFixture {
         }
 
     private:
-        static const double dblTolerance = 10e-14;
+        static constexpr double dblTolerance = 10e-14;
 
 };
 
