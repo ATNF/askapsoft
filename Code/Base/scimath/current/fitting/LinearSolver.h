@@ -48,7 +48,7 @@ namespace askap
     {
       public:
        /// @brief no limit on the condition number
-       static const double KeepAllSingularValues = -1.;
+       static constexpr double KeepAllSingularValues = -1.;
       
        /// @brief Constructor
        /// @details Optionally, it is possible to limit the condition number of

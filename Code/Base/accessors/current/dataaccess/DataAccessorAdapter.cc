@@ -376,7 +376,7 @@ void DataAccessorAdapter::associate(IDataAccessor &acc)
 /// @return true if adapter is associated with an accessor, false otherwise
 bool DataAccessorAdapter::isAssociated() const
 {
-  return itsAccessor;
+  return static_cast<bool>(itsAccessor);
 }
 
 /// @brief detach adapter from an accessor

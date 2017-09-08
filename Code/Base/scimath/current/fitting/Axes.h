@@ -104,7 +104,7 @@ namespace askap
       
       /// @brief check whether direction axis is present
       /// @return true if direction axis is defined
-      inline bool hasDirection() const { return itsDirectionAxis;}
+      inline bool hasDirection() const { return static_cast<bool>(itsDirectionAxis);}
 
       /// Order of this axis
       /// @param name Name of axis

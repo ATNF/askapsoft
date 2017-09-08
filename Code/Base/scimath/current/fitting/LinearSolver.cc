@@ -57,7 +57,7 @@ namespace askap
 {
   namespace scimath
   {
-    const double LinearSolver::KeepAllSingularValues;
+    constexpr double LinearSolver::KeepAllSingularValues;
     
     /// @brief Constructor
     /// @details Optionally, it is possible to limit the condition number of
@@ -178,7 +178,7 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
              for (size_t row=0; row<nm.nrow(); ++row)  {
                   for (size_t col=0; col<nm.ncolumn(); ++col) {
                        const double elem = nm(row,col);
-                       ASKAPCHECK(!isnan(elem), "Normal matrix seems to have NaN for row = "<<row<<" and col = "<<col<<", this shouldn't happem!");
+                       ASKAPCHECK(!std::isnan(elem), "Normal matrix seems to have NaN for row = "<<row<<" and col = "<<col<<", this shouldn't happem!");
                        gsl_matrix_set(A, row+(indit1->second), col+(indit2->second), elem);
                        //   std::cout << "A " << row << " " << col << " " << nm(row,col) << std::endl; 
                   }
@@ -190,7 +190,7 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
         const casa::Vector<double> &dv = normalEquations().dataVector(indit1->first);
         for (size_t row=0; row<dv.nelements(); ++row) {
              const double elem = dv(row);
-             ASKAPCHECK(!isnan(elem), "Data vector seems to have NaN for row = "<<row<<", this shouldn't happem!");
+             ASKAPCHECK(!std::isnan(elem), "Data vector seems to have NaN for row = "<<row<<", this shouldn't happem!");
              gsl_vector_set(B, row+(indit1->second), elem);
 //          std::cout << "B " << row << " " << dv(row) << std::endl; 
         }
@@ -230,11 +230,11 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
          // numerical precision issue inside SVD. Although it needs to be investigated further  (see ASKAPSDP-2270), for now trying
          // to replace those singular values with zeros to exclude them from processing. Note, singular vectors may also contain NaNs
          for (int i=0; i<nParameters; ++i) {
-              if (isnan(gsl_vector_get(S,i))) {
+              if (std::isnan(gsl_vector_get(S,i))) {
                   gsl_vector_set(S,i,0.);
               }
               for (int k=0; k < nParameters; ++k) {
-                   ASKAPCHECK(!isnan(gsl_matrix_get(V,i,k)), "NaN in V: i="<<i<<" k="<<k); 
+                   ASKAPCHECK(!std::isnan(gsl_matrix_get(V,i,k)), "NaN in V: i="<<i<<" k="<<k); 
               }
          }
 
@@ -279,7 +279,7 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
          double smax = 0.0;
          for (int i=0;i<nParameters; ++i) {
               const double sValue = std::abs(gsl_vector_get(S, i));
-              ASKAPCHECK(!isnan(sValue), "Got NaN as a singular value for normal matrix, this shouldn't happen S[i]="<<gsl_vector_get(S,i)<<" parameter "<<i<<" singularValueLimit="<<singularValueLimit);
+              ASKAPCHECK(!std::isnan(sValue), "Got NaN as a singular value for normal matrix, this shouldn't happen S[i]="<<gsl_vector_get(S,i)<<" parameter "<<i<<" singularValueLimit="<<singularValueLimit);
               if(sValue>0.0) {
                  ++rank;
                  if ((sValue>smax) || (i == 0)) {
@@ -311,7 +311,7 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
               for (size_t i=0; i<value.nelements(); ++i)  {
 //          	   std::cout << value(i) << " " << gsl_vector_get(X, indit->second+i) << std::endl;
                    const double adjustment = gsl_vector_get(X, indit->second+i);
-                   ASKAPCHECK(!isnan(adjustment), "Solution resulted in NaN as an update for parameter "<<(indit->second + i));
+                   ASKAPCHECK(!std::isnan(adjustment), "Solution resulted in NaN as an update for parameter "<<(indit->second + i));
                    value(i) += adjustment;
               }
           }

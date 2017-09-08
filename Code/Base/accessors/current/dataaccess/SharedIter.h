@@ -293,7 +293,7 @@ public:
     /// @return true, if shared iterator has been initialized, false otherwise
     inline operator bool() const throw()
     {
-       return itsSharedPtr;
+       return static_cast<bool>(itsSharedPtr);
     }
     
     /// @brief dynamic cast operator

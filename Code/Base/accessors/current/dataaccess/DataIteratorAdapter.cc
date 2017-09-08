@@ -68,7 +68,7 @@ void DataIteratorAdapter::associate(const boost::shared_ptr<IConstDataIterator> 
 /// @return true if adapter is associated with an iterator, false otherwise
 bool DataIteratorAdapter::isAssociated() const
 {
-  return itsConstIterator;
+  return static_cast<bool>(itsConstIterator);
 }
   
 /// @brief detach adapter from the currently associated iterator, if any
@@ -83,7 +83,7 @@ void DataIteratorAdapter::detach()
 /// @return true, if write is possible
 bool DataIteratorAdapter::canWrite() const
 {
-  return itsIterator;
+  return static_cast<bool>(itsIterator);
 }
 
 /// @brief obtain a reference to associated iterator for read-only access
