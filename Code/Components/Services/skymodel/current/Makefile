@@ -1,19 +1,19 @@
-RBUILD_FLAGS=-SMTR
+RBUILD_FLAGS=-na
 
 # Uncomment for verbose rbuild output
-RBUILD_FLAGS+= -v
+#RBUILD_FLAGS+= -v
 
 .PHONY: install
 install:
 	rbuild $(RBUILD_FLAGS) -t install
 
 .PHONY: ftest
-ftest: install
-	rbuild $(RBUILD_FLAGS) -t functests
+ftest:
+	rbuild $(RBUILD_FLAGS) -R -t functests
 
 .PHONY: test
 test:
-	rbuild $(RBUILD_FLAGS) -t test
+	rbuild $(RBUILD_FLAGS) -R -t test
 
 .PHONY: clean
 clean:
@@ -37,6 +37,7 @@ rebuild: clean
 .PHONY: generate
 generate:
 	cd ./schema_definitions && python3 generate.py
+	python3 ./run_odb_compiler.py
 
 .PHONY: generate_ice
 generate_ice: generate

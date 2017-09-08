@@ -29,7 +29,7 @@ from askap.interfaces.skymodelservice import (
 )
 
 
-# @skip
+@skip
 class Test(CPFuncTestBase):
     def __init__(self):
         super(Test, self).__init__()

@@ -15,7 +15,6 @@ logfilters=Code/Base/logfilters/current
 healpix=3rdParty/healpix/healpix-3.31
 
 ## ODB and database dependencies
-odb=3rdParty/odb/odb-2.4.0/odb
 libodb=3rdParty/odb/odb-2.4.0/libodb
 libodb-boost=3rdParty/odb/odb-2.4.0/libodb-boost
 libodb-sqlite=3rdParty/odb/odb-2.4.0/libodb-sqlite
