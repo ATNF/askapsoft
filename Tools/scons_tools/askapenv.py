@@ -68,6 +68,7 @@ opts.Update(env)
 env.AppendUnique(CCFLAGS=['-Wall'])
 env.AppendUnique(CCFLAGS=['-O2'])
 env.AppendUnique(CCFLAGS=['-g'])
+env.AppendUnique(CCFLAGS=['-std=c++11'])
 env.AppendUnique(CCFLAGS=['-DASKAP_DEBUG'])
 
 # If the system has environment modules support we need to import

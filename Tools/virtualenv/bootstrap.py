@@ -18,12 +18,13 @@ if not os.path.exists(virtualenv):
 os.chdir(virtualenv)
 remote = os.environ.get("RBUILD_REMOTE_ARCHIVE", "")
 pkg = "%s.tar.gz" % virtualenv
-if remote:
-    pth = os.path.join(remote, pkg)
-    url = urllib2.urlopen(pth)
-    with open(pkg, "wb") as of:
-        of.write(url.read())
-    print "Downloading", remote
+if not os.path.exists(pkg):
+    if remote:
+        pth = os.path.join(remote, pkg)
+        url = urllib2.urlopen(pth)
+        with open(pkg, "wb") as of:
+            of.write(url.read())
+        print "Downloading", remote
 
 os.system("tar xvzf %s" % pkg)
 os.chdir("%s" % virtualenv)
