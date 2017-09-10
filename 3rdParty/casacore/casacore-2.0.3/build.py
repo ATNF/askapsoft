@@ -44,7 +44,7 @@ else:
     builder.add_option("-DCMAKE_C_COMPILER=gcc")
     builder.add_option("-DCMAKE_CXX_COMPILER=g++")
 
-#builder.add_option("-DCXX11=ON")
+builder.add_option("-DCXX11=ON")
 
 
 builder.build()

@@ -52,4 +52,5 @@ if platform['system'] == 'Darwin':
     if (int(platform['tversion'][1]) >= 10):
         builder.add_option("-DCMAKE_Fortran_FLAGS=-Wa,-q")
 
+builder.add_option("-DCXX11=ON")
 builder.build()
