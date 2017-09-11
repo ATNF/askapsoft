@@ -123,12 +123,12 @@ class GlobalSkyModelTest : public CppUnit::TestFixture {
 
         void testNside() {
             initEmptyDatabase();
-            CPPUNIT_ASSERT_EQUAL(2l << 9, gsm->getHealpixNside());
+            CPPUNIT_ASSERT_EQUAL(2ll << 9, gsm->getHealpixNside());
         }
 
         void testHealpixOrder() {
             initEmptyDatabase();
-            CPPUNIT_ASSERT_EQUAL(9l, gsm->getHealpixOrder());
+            CPPUNIT_ASSERT_EQUAL(9ll, gsm->getHealpixOrder());
         }
 
         void testGetMissingComponentById() {
@@ -149,7 +149,7 @@ class GlobalSkyModelTest : public CppUnit::TestFixture {
             CPPUNIT_ASSERT_EQUAL(size_t(10), ids->size());
 
             // test that some expected components can be found
-            shared_ptr<ContinuumComponent> component(
+            boost::shared_ptr<ContinuumComponent> component(
                 gsm->getComponentByID((*ids)[0]));
             CPPUNIT_ASSERT(component.get());
             CPPUNIT_ASSERT_EQUAL(
@@ -172,7 +172,7 @@ class GlobalSkyModelTest : public CppUnit::TestFixture {
             for (GlobalSkyModel::IdList::const_iterator it = ids->begin();
                 it != ids->end();
                 it++) {
-                shared_ptr<ContinuumComponent> component(gsm->getComponentByID(*it));
+                boost::shared_ptr<ContinuumComponent> component(gsm->getComponentByID(*it));
 
                 // Check that we have a polarisation object
                 CPPUNIT_ASSERT(component->polarisation.get());
@@ -187,7 +187,7 @@ class GlobalSkyModelTest : public CppUnit::TestFixture {
             initEmptyDatabase();
 
             // Non-ASKAP data sources need metadata that is assumed for ASKAP sources.
-            shared_ptr<DataSource> expectedDataSource(new DataSource());
+            boost::shared_ptr<DataSource> expectedDataSource(new DataSource());
             expectedDataSource->name = "Robby Dobby the Bear";
             expectedDataSource->catalogue_id = "RDTB";
 
@@ -200,7 +200,7 @@ class GlobalSkyModelTest : public CppUnit::TestFixture {
             for (GlobalSkyModel::IdList::const_iterator it = ids->begin();
                 it != ids->end();
                 it++) {
-                shared_ptr<ContinuumComponent> component(gsm->getComponentByID(*it));
+                boost::shared_ptr<ContinuumComponent> component(gsm->getComponentByID(*it));
                 // should have reference to the data source metadata
                 CPPUNIT_ASSERT(component->data_source.get());
                 // should not have a scheduling block ID
@@ -230,7 +230,7 @@ class GlobalSkyModelTest : public CppUnit::TestFixture {
             for (GlobalSkyModel::IdList::const_iterator it = ids->begin();
                 it != ids->end();
                 it++) {
-                shared_ptr<ContinuumComponent> component(gsm->getComponentByID(*it));
+                boost::shared_ptr<ContinuumComponent> component(gsm->getComponentByID(*it));
 
                 CPPUNIT_ASSERT_EQUAL(expected_sb_id, component->sb_id);
                 // CPPUNIT_ASSERT_EQUAL chokes on the ptime values
@@ -366,7 +366,7 @@ class GlobalSkyModelTest : public CppUnit::TestFixture {
 
             // The search parameters map to 60 pixels at order 9, but if the GSM
             // NSide/Order is ever changed, then this test may be invalidated
-            CPPUNIT_ASSERT_EQUAL(9l, gsm->getHealpixOrder());
+            CPPUNIT_ASSERT_EQUAL(9ll, gsm->getHealpixOrder());
 
             CPPUNIT_ASSERT_NO_THROW(gsm->coneSearch(Coordinate(70.2, -61.8), 0.21));
         }

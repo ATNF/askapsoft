@@ -65,9 +65,9 @@ using namespace askap::cp::sms::datamodel;
 using namespace askap::accessors;
 
 
-shared_ptr<GlobalSkyModel> GlobalSkyModel::create(const LOFAR::ParameterSet& parset)
+boost::shared_ptr<GlobalSkyModel> GlobalSkyModel::create(const LOFAR::ParameterSet& parset)
 {
-    shared_ptr<GlobalSkyModel> pImpl;
+    boost::shared_ptr<GlobalSkyModel> pImpl;
     const string dbType = parset.get("database.backend");
     ASKAPLOG_DEBUG_STR(logger, "database backend: " << dbType);
 
@@ -91,7 +91,7 @@ shared_ptr<GlobalSkyModel> GlobalSkyModel::create(const LOFAR::ParameterSet& par
         ASKAPLOG_INFO_STR(logger, "Instantiating sqlite file " << dbName);
 
         // TODO Parset flag for db creation control
-        shared_ptr<odb::database> pDb(
+        boost::shared_ptr<odb::database> pDb(
             new sqlite::database(
                 dbName,
                 SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE));
@@ -112,7 +112,7 @@ shared_ptr<GlobalSkyModel> GlobalSkyModel::create(const LOFAR::ParameterSet& par
         ASKAPCHECK(pConnectionFactory.get(), "MySQL connection factory failed");
 
         ASKAPLOG_DEBUG_STR(logger, "creating MySQL database");
-        shared_ptr<odb::database> pDb(
+        boost::shared_ptr<odb::database> pDb(
             new mysql::database(
                 parset.get("mysql.user"),
                 parset.get("mysql.password"),
@@ -146,7 +146,7 @@ shared_ptr<GlobalSkyModel> GlobalSkyModel::create(const LOFAR::ParameterSet& par
         ASKAPCHECK(pConnectionFactory.get(), "pgsql connection factory failed");
 
         ASKAPLOG_DEBUG_STR(logger, "creating pgsql database");
-        shared_ptr<odb::database> pDb(
+        boost::shared_ptr<odb::database> pDb(
             new pgsql::database(
                 parset.get("pgsql.user"),
                 parset.get("pgsql.password"),
@@ -238,7 +238,7 @@ GlobalSkyModel::IdListPtr GlobalSkyModel::ingestVOTable(
     return ingestVOTable(
             componentsCatalog,
             polarisationCatalog,
-            shared_ptr<datamodel::DataSource>(),
+            boost::shared_ptr<datamodel::DataSource>(),
             sb_id,
             obs_date);
 }
@@ -246,7 +246,7 @@ GlobalSkyModel::IdListPtr GlobalSkyModel::ingestVOTable(
 GlobalSkyModel::IdListPtr GlobalSkyModel::ingestVOTable(
     const std::string& componentsCatalog,
     const std::string& polarisationCatalog,
-    shared_ptr<datamodel::DataSource> dataSource)
+    boost::shared_ptr<datamodel::DataSource> dataSource)
 {
     ASKAPASSERT(dataSource.get());
     return ingestVOTable(
@@ -260,7 +260,7 @@ GlobalSkyModel::IdListPtr GlobalSkyModel::ingestVOTable(
 GlobalSkyModel::IdListPtr GlobalSkyModel::ingestVOTable(
     const std::string& componentsCatalog,
     const std::string& polarisationCatalog,
-    shared_ptr<datamodel::DataSource> dataSource,
+    boost::shared_ptr<datamodel::DataSource> dataSource,
     int64_t sb_id,
     posix_time::ptime obs_date)
 {
@@ -268,7 +268,7 @@ GlobalSkyModel::IdListPtr GlobalSkyModel::ingestVOTable(
         "Starting VO Table ingest. Component catalog: '" << componentsCatalog <<
         "' polarisationCatalog: '" << polarisationCatalog << "'");
 
-    shared_ptr<VOTableData> pCatalog(
+    boost::shared_ptr<VOTableData> pCatalog(
         VOTableData::create(
             componentsCatalog,
             polarisationCatalog,

@@ -74,10 +74,10 @@ class HealpixTest : public CppUnit::TestFixture {
                 1.0/60.0,
                 8);
             CPPUNIT_ASSERT_EQUAL(size_t(4), actual->size());
-            CPPUNIT_ASSERT_EQUAL(33942670l, (*actual)[0]);
-            CPPUNIT_ASSERT_EQUAL(33942671l, (*actual)[1]);
-            CPPUNIT_ASSERT_EQUAL(33942692l, (*actual)[2]);
-            CPPUNIT_ASSERT_EQUAL(33942693l, (*actual)[3]);
+            CPPUNIT_ASSERT_EQUAL(33942670ll, (*actual)[0]);
+            CPPUNIT_ASSERT_EQUAL(33942671ll, (*actual)[1]);
+            CPPUNIT_ASSERT_EQUAL(33942692ll, (*actual)[2]);
+            CPPUNIT_ASSERT_EQUAL(33942693ll, (*actual)[3]);
         }
 
         void testQueryRect_Small() {
