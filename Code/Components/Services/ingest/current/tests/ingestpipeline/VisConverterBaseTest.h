@@ -168,15 +168,19 @@ class VisConverterBaseTest : public CppUnit::TestFixture {
             
             for (uint32_t n = 0; n < nProducts; ++n) {
                  // beam 10 is intentionally unmapped
-                 const bool invalidBeamProduct = 
-                       itsInstance->mapCorrProduct(n+1, 10);
+                 bool invalidBeamProduct = true;
+                 if (itsInstance->mapCorrProduct(n+1, 10)) {
+                    invalidBeamProduct = false;
+                 }
                  CPPUNIT_ASSERT(!invalidBeamProduct);
             }
             
            
             for (uint32_t beam = 0; beam < nBeams; ++beam) {
-                 const bool invalidBaselineProduct = 
-                       itsInstance->mapCorrProduct(nProducts+1, beam + 1);
+                 bool invalidBaselineProduct = true;
+                 if (itsInstance->mapCorrProduct(nProducts+1, beam + 1)) {
+                    invalidBaselineProduct = false;
+                 } 
                  CPPUNIT_ASSERT(!invalidBaselineProduct);
             }
         }
@@ -216,10 +220,12 @@ class VisConverterBaseTest : public CppUnit::TestFixture {
 
             itsInstance->initVisChunk(starttime, corrMode);
             // beam 5 is unmapped, and test configuration only has 4 beams,
-            // so the following line should trigger an exception
-            const bool invalidBeamProduct = 
-                       itsInstance->mapCorrProduct(1, 5);
-            CPPUNIT_ASSERT(!invalidBeamProduct);
+            // so the following lines should trigger an exception
+            bool validBeamProduct = false;
+            if (itsInstance->mapCorrProduct(1, 5))
+                validBeamProduct = true;
+
+            CPPUNIT_ASSERT(!validBeamProduct);
         }
 
         void testSumOfArithmeticSeries()
