@@ -29,15 +29,20 @@
 #include <askap_skymodel.h>
 
 // System includes
-#include <string>
+#include <algorithm>
+#include <cstdlib>
+#include <iostream>
 #include <fstream>
 #include <sstream>
+#include <string>
+#include <vector>
 
 // Boost includes
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include "boost/random/uniform_real.hpp"
 #include "boost/random/variate_generator.hpp"
 #include "boost/random/linear_congruential.hpp"
+#include "boost/program_options.hpp"
 
 // ASKAPsoft includes
 #include <askap/Application.h>
@@ -230,10 +235,37 @@ class SmsToolsApp : public askap::Application {
 
 int main(int argc, char *argv[])
 {
+    // make a copy of the command-line argument array
+    std::vector<char*> args(argv, argv + argc);
+
+    // use boost program_options to parse the actual args to check for the 
+    // config option
+    program_options::options_description desc;
+    desc.add_options()
+        ("config,c", program_options::value<string>(), "");
+    program_options::variables_map vm;
+    program_options::store(program_options::parse_command_line(argc, argv, desc), vm);
+    program_options::notify(vm);
+
+    if (vm.count("config") == 0) 
+    {
+        // parset file was not supplied, so try to read parset config location
+        // from environment variable
+        char* parset_env = std::getenv("ASKAP_SMS_PARSET");
+        if (parset_env)
+        {
+            // We have the environment variable, so add it to the argument array 
+            // that will be passed to the Application base class:
+            args.push_back((char*)"--config");
+            args.push_back(parset_env);
+            argc+=2;
+        }
+    }
+
     SmsToolsApp app;
     app.addParameter(STATS, "v", "Output some database statistics", false);
     app.addParameter(CREATE_SCHEMA, "s", "Initialises an empty database", false);
-    app.addParameter(INGEST_COMPONENTS, "c", "Ingest/upload a VO Table of components to the global sky model", true);
+    app.addParameter(INGEST_COMPONENTS, "g", "Ingest/upload a VO Table of components to the global sky model", true);
     app.addParameter(INGEST_POLARISATION, "p", "Optional polarisation data catalog", true);
     app.addParameter(SB_ID, "i", "Scheduling block ID for ingested catalog", true);
     app.addParameter(OBS_DATE, "d", "Observation date for ingested catalog, in form YYYY-MM-DDTHH:MM:SS", true);
@@ -242,5 +274,8 @@ int main(int argc, char *argv[])
     app.addParameter(RA, "x", "Right-ascension for cone search tests", "0");
     app.addParameter(DEC, "y", "Declination for cone search tests", "0");
     app.addParameter(RADIUS, "z", "Radius for cone search tests", "0.1");
-    return app.main(argc, argv);
+
+    // Note that we pass the address of the first element in std::vector<char*>
+    // args, effectively getting a char*[] as expected by Application::main
+    return app.main(argc, &args[0]);
 }
