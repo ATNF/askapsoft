@@ -71,7 +71,7 @@ HIdata::HIdata(const LOFAR::ParameterSet &parset):
     const int status = system(cmd.str().c_str());
     if (status != 0 ) {
         ASKAPTHROW(AskapError, "Error making directories for extracted data products: code = " << status
-                   << " - Command = " << cmd);
+                   << " - Command = " << cmd.str());
     }
     
     // Define the parset used to set up the source extractor
