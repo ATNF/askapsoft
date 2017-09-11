@@ -102,7 +102,10 @@ void BeamScatterTask::process(VisChunk::ShPtr& chunk)
 {
    if (itsCommunicator == NULL) {
        // this is the first integration, figure out which ranks are active, cache data structure info, etc
-       itsStreamNumber = countActiveRanks(chunk);
+       bool isActive= false;
+       if (chunk) 
+           isActive = true; 
+       itsStreamNumber = countActiveRanks(isActive);
        initialiseSplit(chunk);      
    } else {
        ASKAPASSERT(itsStreamNumber >= 0);
