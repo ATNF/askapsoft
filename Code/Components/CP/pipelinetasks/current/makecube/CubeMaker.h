@@ -76,7 +76,7 @@ class CubeMaker {
         void recordBeams();
 
         /// @brief Rest frequency of the HI fine-structure line [Hz]
-        static const double REST_FREQ_HI = 1420405751.786;
+        static constexpr double REST_FREQ_HI = 1420405751.786;
 
     private:
         /// @brief Read the reference coordinate system data

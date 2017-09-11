@@ -212,7 +212,7 @@ static pair<double, double> fluxFit(double i_610, double i_1400, double i_4860)
     verifyFit(solution, fluxes(1), x(1), "i_1400");
     verifyFit(solution, fluxes(2), x(2), "i_4860");
 
-    return make_pair<double, double>(solution(1), solution(2));
+    return std::make_pair(solution(1), solution(2));
 }
 
 static VOTableRow processLine(const std::string& line)

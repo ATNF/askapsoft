@@ -73,7 +73,7 @@ void CasdaFileUtils::tarAndChecksum(const fs::path& infile, const fs::path& outf
     const int status = system(cmd.str().c_str());
     if (status != 0) {
         ASKAPTHROW(AskapError, "Tar command failed with error code: " << status
-                   << " - Cmd: " << cmd);
+                   << " - Cmd: " << cmd.str());
     }
     checksumFile(outfile);
 }
