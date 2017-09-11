@@ -1,0 +1,17 @@
+--- ./src/logging/configure.orig	2017-09-11 13:37:49.000000000 +1000
++++ ./src/logging/configure	2017-09-11 13:37:19.000000000 +1000
+@@ -4675,10 +4675,10 @@
+ done
+  fi
+ if test "X$mpe_c99_inttypes_h" != "X" ; then
+-    mpe_int8_fmt="\"%\"PRId8"
+-    mpe_int16_fmt="\"%\"PRId16"
+-    mpe_int32_fmt="\"%\"PRId32"
+-    mpe_int64_fmt="\"%\"PRId64"
++    mpe_int8_fmt="\"%\" PRId8"
++    mpe_int16_fmt="\"%\" PRId16"
++    mpe_int32_fmt="\"%\" PRId32"
++    mpe_int64_fmt="\"%\" PRId64"
+     mpe_c99_pridxx_h="$mpe_c99_inttypes_h"
+ else
+     mpe_int8_fmt="\"%d\""
