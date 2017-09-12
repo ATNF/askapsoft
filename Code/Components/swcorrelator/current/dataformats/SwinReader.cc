@@ -98,7 +98,14 @@ void SwinReader::assign(const std::string &name)
 bool SwinReader::hasMore() const
 {
   // empty shared pointer is a signature of the end of file
-  return itsStream;
+  bool isThereMore = false;
+  if (itsStream) {
+      isThereMore = true;
+  }
+  else {
+      isThereMore = false;
+  }
+  return isThereMore;
 }
    
 /// @brief advance to the next visibility chunk

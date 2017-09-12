@@ -123,12 +123,12 @@ class GlobalSkyModelTest : public CppUnit::TestFixture {
 
         void testNside() {
             initEmptyDatabase();
-            CPPUNIT_ASSERT_EQUAL(2ll << 9, gsm->getHealpixNside());
+            CPPUNIT_ASSERT_EQUAL(2l << 9, gsm->getHealpixNside());
         }
 
         void testHealpixOrder() {
             initEmptyDatabase();
-            CPPUNIT_ASSERT_EQUAL(9ll, gsm->getHealpixOrder());
+            CPPUNIT_ASSERT_EQUAL(9l, gsm->getHealpixOrder());
         }
 
         void testGetMissingComponentById() {
@@ -366,7 +366,7 @@ class GlobalSkyModelTest : public CppUnit::TestFixture {
 
             // The search parameters map to 60 pixels at order 9, but if the GSM
             // NSide/Order is ever changed, then this test may be invalidated
-            CPPUNIT_ASSERT_EQUAL(9ll, gsm->getHealpixOrder());
+            CPPUNIT_ASSERT_EQUAL((int64_t) 9, gsm->getHealpixOrder());
 
             CPPUNIT_ASSERT_NO_THROW(gsm->coneSearch(Coordinate(70.2, -61.8), 0.21));
         }
