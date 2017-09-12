@@ -319,7 +319,7 @@ EOF
 
     FIELDLISTFILE=${metadata}/fieldlist-${msname}.txt
     if [ ! -e "$FIELDLISTFILE" ]; then
-        grep -A"${NUM_FIELDS}" RA "${MS_METADATA}" | tail -n "${NUM_FIELDS}" | cut -f 4- >> "$FIELDLISTFILE"
+        grep -A"${NUM_FIELDS}" " RA " "${MS_METADATA}" | tail -n "${NUM_FIELDS}" | cut -f 4- >> "$FIELDLISTFILE"
     fi
 
     FIELD_LIST=""
