@@ -319,7 +319,15 @@ EOF
 
     FIELDLISTFILE=${metadata}/fieldlist-${msname}.txt
     if [ ! -e "$FIELDLISTFILE" ]; then
-        grep -A"${NUM_FIELDS}" " RA " "${MS_METADATA}" | tail -n "${NUM_FIELDS}" | cut -f 4- >> "$FIELDLISTFILE"
+        # This works on the assumption we have something like this in
+        # the mslist output:
+# 2017-09-12 01:31:12	INFO		Fields: 2
+# 2017-09-12 01:31:12	INFO	+	  ID   Code Name                RA               Decl           Epoch        nRows
+# 2017-09-12 01:31:12	INFO	+	  0         DRAGN_T0-0A         17:05:10.000000 -24.40.00.00000 J2000      1934712
+# 2017-09-12 01:31:12	INFO	+	  1         DRAGN_T0-0B         17:06:07.763000 -25.15.52.00000 J2000      1929096
+        # We look for the "Fields: n" line, get the next n+1 lines,
+        # and only keep the last n, which should be all the fields
+        grep -A$(echo $NUM_FIELDS | awk '{print $1+1}') "Fields: ${NUM_FIELDS}" "${MS_METADATA}" | tail -n ${NUM_FIELDS} | cut -f 4- >> "$FIELDLISTFILE"
     fi
 
     FIELD_LIST=""
