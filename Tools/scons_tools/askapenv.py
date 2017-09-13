@@ -75,8 +75,21 @@ opts.Update(env)
 env.AppendUnique(CCFLAGS=['-Wall'])
 env.AppendUnique(CCFLAGS=['-O2'])
 env.AppendUnique(CCFLAGS=['-g'])
-env.AppendUnique(CCFLAGS=['-std=c++11'])
 env.AppendUnique(CCFLAGS=['-DASKAP_DEBUG'])
+
+# Compiler flags related to the upgrade to C++11 support
+# For most of these, we should reinstate the warnings and fix the code,
+# however the flags can be uncommented to suppress most of the current
+# compatibility warnings
+env.AppendUnique(CCFLAGS=['-std=c++11'])
+env.AppendUnique(CCFLAGS=['-fdiagnostics-show-option'])
+# env.AppendUnique(CCFLAGS=['-Wno-deprecated-declarations'])
+# env.AppendUnique(CCFLAGS=['-Wno-deprecated'])
+# env.AppendUnique(CCFLAGS=['-Wno-unused-variable'])
+# env.AppendUnique(CCFLAGS=['-Wno-terminate'])
+# env.AppendUnique(CCFLAGS=['-Wno-sign-compare'])
+# env.AppendUnique(CCFLAGS=['-Wno-cpp'])
+# env.AppendUnique(CCFLAGS=['-Wno-psabi'])
 
 # If the system has environment modules support we need to import
 # the whole environment

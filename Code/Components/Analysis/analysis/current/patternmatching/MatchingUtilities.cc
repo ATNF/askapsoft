@@ -464,7 +464,11 @@ void trimTriList(std::vector<std::pair<Triangle, Triangle> > &trilist)
         mean = sumx / double(size);
         rms = sqrt(sumxx / double(size) - mean * mean);
 
-        double trueOnFalse = abs(nSame - nOpp) / double(nSame + nOpp - abs(nSame - nOpp));
+        //double trueOnFalse = abs(nSame - nOpp) / double(nSame + nOpp - abs(nSame - nOpp));
+        // Rewriting for compatibility with gcc >= 7. calling abs() with
+        // unsigned values is undefined and gcc 7+ finally rejects it.
+        unsigned int diff = (nSame > nOpp) ? (nSame - nOpp) : (nOpp - nSame);
+        double trueOnFalse = diff / double (nSame + nOpp - diff);
         double scale;
 
         if (trueOnFalse < 1.) scale = 1.;
