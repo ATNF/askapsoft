@@ -40,7 +40,12 @@ def has_explicit_mpi(env):
 # Others, such as the Cray environment have MPI support already wrapped
 # in the CC & CXX commands
 def has_implicit_mpi():
-    return os.environ.has_key("CRAYOS_VERSION")
+    if (os.environ.has_key("CRAYOS_VERSION")):
+        return True
+    if env['usepgi']:
+        return True
+    return False
+
 
 # This is always needed as it defines the ASKAP scons environment
 askaptoolpath = os.path.join(os.environ['ASKAP_ROOT'], 'share', 'scons_tools')
@@ -61,6 +66,8 @@ if 'TERM' in os.environ:
 opts = Variables('sconsopts.cfg', ARGUMENTS)
 opts.Add(BoolVariable("nompi", "Disable MPI", False))
 opts.Add(BoolVariable("openmp", "Use OpenMP", False))
+opts.Add(BoolVariable("squash", "Squash some compiler warnings",False))
+opts.Add(BoolVariable("usepgi", "Use Portland Group Compiler",False))
 opts.Add(BoolVariable("update", "svn update?", False))
 opts.Update(env)
 
@@ -81,6 +88,18 @@ if has_environment_modules():
 if os.environ.has_key('RBUILD_NOMPI') and os.environ['RBUILD_NOMPI'] == '1':
     print "info: RBUILD_NOMPI=1 found in env, building without MPI support"
     env['nompi'] = 1
+
+# squash Warnings?
+if env['squash']:
+    env.AppendUnique(CCFLAGS=['-fdiagnostics-show-option'])
+    env.AppendUnique(CCFLAGS=['-Wno-deprecated-declarations'])
+    env.AppendUnique(CCFLAGS=['-Wno-deprecated'])
+    env.AppendUnique(CCFLAGS=['-Wno-unused-variable'])
+    env.AppendUnique(CCFLAGS=['-Wno-terminate'])
+    env.AppendUnique(CCFLAGS=['-Wno-sign-compare'])
+    env.AppendUnique(CCFLAGS=['-Wno-cpp'])
+    env.AppendUnique(CCFLAGS=['-Wno-psabi'])
+    env.AppendUnique(CCFLAGS=['-Wno-unused-local-typedef'])
 
 # Setup MPI support
 if has_implicit_mpi():
@@ -112,6 +131,16 @@ if os.environ.has_key("CRAYOS_VERSION"):
     env["CXX"] = "CC"
     env["LINK"] = "CC"
     env["SHLINK"] = "CC"
+    env.AppendUnique(LINKFLAGS=['-dynamic'])
+if env['usepgi']:
+
+    # The PGroup compilers support some MPI out of the box
+    # athena uses 
+    env["ENV"] = os.environ
+    env["CC"] = "pgcc"
+    env["CXX"] = "pgc++"
+    env["LINK"] = "pgc++"
+    env["SHLINK"] = "pgc++"
     env.AppendUnique(LINKFLAGS=['-dynamic'])
 
 # use global environment definitions
