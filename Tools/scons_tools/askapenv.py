@@ -137,10 +137,10 @@ if env['usepgi']:
     # The PGroup compilers support some MPI out of the box
     # athena uses 
     env["ENV"] = os.environ
-    env["CC"] = "pgcc"
-    env["CXX"] = "pgc++"
-    env["LINK"] = "pgc++"
-    env["SHLINK"] = "pgc++"
+    env["CC"] = "pgcc -Mmpi=mpich1"
+    env["CXX"] = "pgc++ -Mmpi=mpich1"
+    env["LINK"] = "pgc++ -Mmpi=mpich1"
+    env["SHLINK"] = "pgc++ -Mmpi=mpich1"
     env.AppendUnique(LINKFLAGS=['-dynamic'])
 
 # use global environment definitions
