@@ -1,5 +1,4 @@
 
-from askapenv import env
 import sys
 import os
 from askapdev.rbuild.builders import Autotools as Builder
@@ -39,6 +38,5 @@ builder.nowarnings = True
 
 builder.build()
 
-if env['usepgi'] == 0:
-    if 'install' in sys.argv[1:]:
-        fix_package_info()
+if 'install' in sys.argv[1:]:
+    fix_package_info()
