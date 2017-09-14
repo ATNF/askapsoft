@@ -148,6 +148,7 @@ class VisConverterBaseTest : public CppUnit::TestFixture {
                            0,1,0,1,3,2,3,0,1,3};
             VisChunk::ShPtr chunk = itsInstance->visChunk();
             CPPUNIT_ASSERT(chunk);
+
             for (uint32_t beam = 0; beam < nBeams; ++beam) {
                  for (uint32_t n = 0; n < nProducts; ++n) {
                       // hardware indices are 1-based
@@ -164,24 +165,19 @@ class VisConverterBaseTest : public CppUnit::TestFixture {
                       CPPUNIT_ASSERT_EQUAL(beam, chunk->beam2()(row));
                  }
             }
-         
             
             for (uint32_t n = 0; n < nProducts; ++n) {
                  // beam 10 is intentionally unmapped
-                 bool invalidBeamProduct = true;
-                 if (itsInstance->mapCorrProduct(n+1, 10)) {
-                    invalidBeamProduct = false;
-                 }
-                 CPPUNIT_ASSERT(!invalidBeamProduct);
+                 const bool validBeamProduct = 
+                       itsInstance->mapCorrProduct(n+1, 10) != boost::none;
+                 CPPUNIT_ASSERT(!validBeamProduct);
             }
             
            
             for (uint32_t beam = 0; beam < nBeams; ++beam) {
-                 bool invalidBaselineProduct = true;
-                 if (itsInstance->mapCorrProduct(nProducts+1, beam + 1)) {
-                    invalidBaselineProduct = false;
-                 } 
-                 CPPUNIT_ASSERT(!invalidBaselineProduct);
+                 const bool validBaselineProduct = 
+                      itsInstance->mapCorrProduct(nProducts+1, beam + 1) != boost::none;
+                 CPPUNIT_ASSERT(!validBaselineProduct);
             }
         }
 
@@ -213,19 +209,17 @@ class VisConverterBaseTest : public CppUnit::TestFixture {
             }
         }
 
-        void testInvalidBeamProduct() {
+        void testInvalidBeamProduct() { 
             const unsigned long starttime = 1000000; // One second after epoch 0
             CPPUNIT_ASSERT(itsInstance);
             const CorrelatorMode corrMode = itsInstance->itsConfig.lookupCorrelatorMode("standard");
 
             itsInstance->initVisChunk(starttime, corrMode);
             // beam 5 is unmapped, and test configuration only has 4 beams,
-            // so the following lines should trigger an exception
-            bool validBeamProduct = false;
-            if (itsInstance->mapCorrProduct(1, 5))
-                validBeamProduct = true;
+            // so the following line should trigger an exception
+            const bool invalidBeamProduct = (itsInstance->mapCorrProduct(1, 5) == boost::none);
 
-            CPPUNIT_ASSERT(!validBeamProduct);
+            CPPUNIT_ASSERT(invalidBeamProduct); 
         }
 
         void testSumOfArithmeticSeries()

@@ -160,18 +160,13 @@ void FringeRotationTask::initialise(bool hasData)
 ///                       phase factors will be applied.
 void FringeRotationTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
 {
-    bool hasData = false;
-    if (chunk) { // doing this test as the boolean method on the shared pointer is only spotted if explicit.
-        hasData = true;
-    }
-    
     if (itsToBeInitialised) {
-        initialise(hasData);
-        if (!hasData) {
+        initialise(static_cast<bool>(chunk));
+        if (!chunk) {
              return;
         }
     } else {
-        ASKAPCHECK(itsFrtMethod && hasData, 
+        ASKAPCHECK(itsFrtMethod && chunk, 
              "Parallel data streams are not supported; use fringe rotation task after Merge");
     }
 

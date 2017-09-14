@@ -85,9 +85,7 @@ ParallelMetadataSource::ParallelMetadataSource(const boost::shared_ptr<IMetadata
     //    we do it as a cross-check and to find out the master rank on all slave ranks
     //    (this information could've been given as a parameter, but this way the interface is simpler)
     ASKAPDEBUGASSERT(sizeof(bool) == sizeof(char));
-    bool sendBuf = false;
-    if (msrc) 
-        sendBuf = true; // true, if this is the master rank
+    bool sendBuf = (bool)msrc; // true, if this is the master rank
     boost::shared_array<bool> receiveBuf(new bool[nRanks]);
 
     response = MPI_Allgather((char*)(&sendBuf), 1, MPI_CHAR, (char*)(receiveBuf.get()), 1, MPI_CHAR, MPI_COMM_WORLD);

@@ -89,10 +89,7 @@ void ChannelMergeTask::process(VisChunk::ShPtr& chunk)
 {
     if (itsCommunicator == MPI_COMM_NULL) {
         // this is the first iteration
-        bool isActive = false;
-        if (chunk)
-            isActive = true;
-        configureRanks(isActive);
+        configureRanks(static_cast<bool>(chunk));
         if (!itsRankInUse) {
             return;
         }

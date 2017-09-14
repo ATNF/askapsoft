@@ -131,15 +131,8 @@ void MSSink::process(VisChunk::ShPtr& chunk)
     if (!itsMs) {
         // this is delayed initialisation in the parallel mode
         ASKAPDEBUGASSERT(itsConfig.nprocs() > 1);
-        // active ranks receive non-zero shared pointer, can cast it to bool
-        // but the obfuscation here is fooling at least one compiler - going to 
-        // make it explicit
 
-        bool isActive = false;
-        if (chunk)
-            isActive = true;
-
-        itsStreamNumber = countActiveRanks(isActive);
+        itsStreamNumber = countActiveRanks(static_cast<bool>(chunk));
 
         // collective MPI calls are still possible here (required for substitution)
         // this is the reason the file name is initialised outside initialise
