@@ -42,8 +42,6 @@ def has_explicit_mpi(env):
 def has_implicit_mpi():
     if (os.environ.has_key("CRAYOS_VERSION")):
         return True
-    if env['usepgi']:
-        return True
     return False
 
 
@@ -72,7 +70,6 @@ opts.Add(BoolVariable("update", "svn update?", False))
 opts.Update(env)
 
 # Standard compiler flags
-env.AppendUnique(CCFLAGS=['-Wall'])
 env.AppendUnique(CCFLAGS=['-O2'])
 env.AppendUnique(CCFLAGS=['-g'])
 env.AppendUnique(CCFLAGS=['-DASKAP_DEBUG'])
@@ -150,12 +147,12 @@ if env['usepgi']:
     # The PGroup compilers support some MPI out of the box
     # athena uses 
     env["ENV"] = os.environ
-    env["CC"] = "pgcc -Mmpi=mpich1"
-    env["CXX"] = "pgc++ -Mmpi=mpich1"
-    env["LINK"] = "pgc++ -Mmpi=mpich1"
-    env["SHLINK"] = "pgc++ -Mmpi=mpich1"
-    env.AppendUnique(LINKFLAGS=['-dynamic'])
-
+    env["CC"] = "pgcc "
+    env["CXX"] = "pgc++ "
+    env["LINK"] = "pgc++ "
+    env["SHLINK"] = "pgc++ "
+else:
+    env.AppendUnique(CPPFLAGS=['-Wall'])    
 # use global environment definitions
 ASKAP_ROOT = os.getenv('ASKAP_ROOT')
 envfiles =  ['%s/env.default' % ASKAP_ROOT,]
