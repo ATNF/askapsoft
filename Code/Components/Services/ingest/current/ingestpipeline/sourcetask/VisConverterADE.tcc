@@ -342,14 +342,19 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
         const bool isAutoCorr = antenna1 == antenna2;
 
         if (isnan(real(sample)) || isnan(imag(sample))) {
+            
             /*
-            const uint32_t realPart = reinterpret_cast<const uint32_t&>(real(sample));
-            const uint32_t imagPart = reinterpret_cast<const uint32_t&>(imag(sample));
+            const float realPartFloat = real(sample);
+            const float imagPartFloat = imag(sample);
+            const uint32_t realPart = reinterpret_cast<const uint32_t&>(realPartFloat);
+            const uint32_t imagPart = reinterpret_cast<const uint32_t&>(imagPartFloat);
+            
 
             ASKAPLOG_DEBUG_STR(logger, "Detected NaN for visibility in channel "<<channel<<" row "<<row<<" polindex "<<polidx<<
                        " antenna1: "<<antenna1<<" antennas2: "<<antenna2<<" real: 0x"<<std::hex<<realPart<<" imag: 0x"<<imagPart<<
                        " beam "<<vis.beamid<<" product = "<<product<<" card = "<<vis.card<<" block = "<<vis.block<<" slice = "<<vis.slice);
             */
+            
             itsAbnormalData[boost::tuple<uint32_t, uint32_t>(vis.block, vis.card)].insert(
                         boost::tuple<uint32_t,uint32_t>(vis.beamid, channel));
             continue;

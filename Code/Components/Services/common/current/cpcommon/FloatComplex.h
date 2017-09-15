@@ -35,6 +35,12 @@ namespace askap {
         /// for the correlator to central processor interface.
         struct FloatComplex
         {
+            /// default constructor - uninitialised structure
+            FloatComplex() {};
+
+            /// set values for convenience 
+            FloatComplex(float re, float im) : real(re), imag(im) {}
+
             /// The real part of the complex number.
             float real;
 

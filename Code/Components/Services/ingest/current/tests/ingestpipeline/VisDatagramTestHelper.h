@@ -38,6 +38,9 @@
 #include "cpcommon/VisDatagram.h"
 #include <boost/static_assert.hpp>
 
+// std includes
+#include <algorithm>
+
 namespace askap {
 namespace cp {
 namespace ingest {
@@ -69,8 +72,12 @@ struct VisDatagramTestHelper<T, typename boost::enable_if<boost::is_class<typena
    /// @brief populate protocol-specific fields
    /// @param[in] vis visibility datagram to work with
    static void fillProtocolSpecificInfo(T& vis) {
-       // we simulate only first correlation product
+       // we simulate only the first correlation product
        vis.baselineid = 1;
+       // initialise visibility array with zeros - although we don't check
+       // visibilities as part of the test, NaNs, etc can fail the integrity check logic and
+       // cause incorrect results
+       std::fill_n(vis.vis, VisDatagramTraits<T>::N_CHANNELS_PER_SLICE, FloatComplex(0.,0.));
    }     
 
    /// @brief test whether given accessor channel and baseline product are expected to be defined
@@ -106,13 +113,17 @@ struct VisDatagramTestHelper<T, typename boost::enable_if<boost::is_class<typena
    /// @brief populate protocol-specific fields
    /// @param[in] vis visibility datagram to work with
    static void fillProtocolSpecificInfo(T& vis) {
-       // we simulate only first correlation product
+       // we simulate only the first correlation product
        vis.baseline1 = 1;
        vis.baseline2 = 21;
        vis.block = 1;
        vis.card = 1;
        vis.channel = 11;
        vis.freq = 1e3;
+       // initialise visibility array with zeros - although we don't check
+       // visibilities as part of the test, NaNs, etc can fail the integrity check logic and
+       // cause incorrect results
+       std::fill_n(vis.vis, VisDatagramTraits<T>::MAX_BASELINES_PER_SLICE, FloatComplex(0.,0.));
    }     
         
    /// @brief test whether given accessor channel and baseline product are expected to be defined
