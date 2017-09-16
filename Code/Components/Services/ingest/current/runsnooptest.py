@@ -114,7 +114,14 @@ def runSnoop(block, card, count = 10, verbose = True):
                    curCard = rank + 1
                 print "Missed %i datagrams from card %i of block %i at epoch %s" % (expected-received, curCard, block, parts[8])
                 allGood = False
-   if allGood:
+   if False in ranksSighted:
+      for r in range(len(ranksSighted)):
+          if not ranksSighted[r]:
+             curCard = card
+             if curCard == None:
+                curCard = r + 1
+             print "Didn't seem to receive data from card %i of block %i at all or can't start the snoop utility" % (curCard, block)
+   elif allGood:
       addMsg = ""
       if card!=None:
          addMsg = " card %i" % (card,)
