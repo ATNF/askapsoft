@@ -44,6 +44,9 @@
 #include "casacore/casa/Arrays/Cube.h"
 #include "cpcommon/VisChunk.h"
 #include "cpcommon/CasaBlobUtils.h"
+#include "Blob/BlobAipsIO.h"
+#include <Blob/BlobSTL.h>
+#include "utils/CasaBlobUtils.h"
 #include "ingestpipeline/MPITraitsHelper.h"
 
 // boost includes
@@ -72,6 +75,7 @@ ASKAP_LOGGER(logger, ".BeamScatterTask");
 using namespace askap;
 using namespace askap::cp::common;
 using namespace askap::cp::ingest;
+using namespace LOFAR;
 
 // BeamScatterTask
 
@@ -87,6 +91,8 @@ BeamScatterTask::BeamScatterTask(const LOFAR::ParameterSet& parset,
             "This task is intended to be used in parallel mode only");
     ASKAPCHECK(itsNStreams > 1, "Beam scatter task doesn't make sense for a single output data stream");
     ASKAPLOG_INFO_STR(logger, "Will split beam space into "<<itsNStreams<<" data streams");
+    // we implicitly assume the following in MPI code
+    ASKAPASSERT(sizeof(casa::Bool) == sizeof(char));
 }
 
 BeamScatterTask::~BeamScatterTask()
@@ -121,39 +127,30 @@ void BeamScatterTask::process(VisChunk::ShPtr& chunk)
        }
    }
 
-   /*
-   if (chunk) {
-       ASKAPLOG_DEBUG_STR(logger, "This rank has an active input");
-       ASKAPCHECK(itsStreamNumber == 0, "Only the first rank of the group (i.e. first stream) is expected to have an active input");
-   } else {
-       ASKAPLOG_DEBUG_STR(logger, "This rank has an inactive input");
-       ASKAPCHECK(itsStreamNumber != 0, "First rank of the group (i.e. first stream) is expected to have an active input");
-   }
-   */
-
    if (itsStreamNumber >= 0) {
        // work only with the ranks involved in redistribution
-       broadcastRIFields(chunk); // this also initialises the chunk and activates the stream if necessary
+       broadcastRIFields(chunk); // this also initialises the chunk and, thus, activates the stream if necessary
        ASKAPDEBUGASSERT(chunk);
        if (localRank() > 0) {
-           // copy cached fields
+           // copy cached fields for slave ranks - they are of the right size
            chunk->antenna1().assign(itsAntenna1.copy());
            chunk->antenna2().assign(itsAntenna2.copy());
            chunk->beam1().assign(itsBeam.copy());
            chunk->beam2().assign(itsBeam.copy());
-           // temporary to allow realistic performance measurements
-           chunk->flag().set(false);
        }
    
        ASKAPDEBUGASSERT(chunk);
    
-       /*
+       
        scatterVector(chunk->beam1PA());
        scatterVector(chunk->beam2PA());
+       scatterVector(chunk->phaseCentre());
        scatterVector(chunk->uvw());
-       */
 
-       // other fields and data come here
+       scatterCube(chunk->visibility());
+       scatterCube(chunk->flag());
+      
+
        if (localRank() == 0) {
            trimChunk(chunk, itsRowCounts[0]);
        }
@@ -216,22 +213,60 @@ int BeamScatterTask::countActiveRanks(bool isActive)
         activityFlags.size(), MPI_INT, MPI_SUM, MPI_COMM_WORLD);
    ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Allreduce = "<<response);
 
-   // count inactive ranks trailing each active one - the assumption is that
-   // active rank always comes first. In principle, more logic can be built into this but
-   // it seems unnecessary at this stage.
-   ASKAPDEBUGASSERT(activityFlags.size() > 1);
-   ASKAPCHECK(activityFlags[0] == 1, "Expect the zero rank to be active which doesn't seem to be the case");
+   std::vector<int> recvFlags(itsConfig.nprocs(), 0);
+   if (itsConfig.receivingRank()) {
+       recvFlags[itsConfig.rank()] = 1;
+   }
+   const int response3 = MPI_Allreduce(MPI_IN_PLACE, (void*)recvFlags.data(),
+        recvFlags.size(), MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+   ASKAPCHECK(response3 == MPI_SUCCESS, "Erroneous response from MPI_Allreduce = "<<response3);
 
+   // now recvFlags and activityFlags are consistent across all ranks - figure out the role of this particular rank
+   ASKAPDEBUGASSERT(activityFlags.size() > 1);
+   ASKAPDEBUGASSERT(recvFlags.size() > 1);
+   ASKAPDEBUGASSERT(recvFlags.size() == activityFlags.size());
+   ASKAPDEBUGASSERT(std::accumulate(recvFlags.begin(), recvFlags.end(),0) == itsConfig.nReceivingProcs());
+   const size_t numActive = std::count_if(activityFlags.begin(), activityFlags.end(), std::bind2nd(std::greater<int>(),0));
+   ASKAPCHECK(numActive > 0, "There seems to be no inputs to this task - this shouldn't have happened");
+
+
+   // build a list of ranks which get output in the order of priority.
+   // in principle, the same can be done without building such a list, but for now - quick and dirty way  
+   // boost::circular_buffer would probably be better than a vector here
+   std::vector<size_t> ranksHandlingOutput;
+   ranksHandlingOutput.reserve(itsConfig.nprocs());
+
+   // first add non-ingesting and inactive ranks
+   for (size_t rank = 0; rank < recvFlags.size(); ++rank) {
+        if ((recvFlags[rank] == 0) && (activityFlags[rank] == 0)) {
+            ranksHandlingOutput.push_back(rank);
+        }
+   }
+   const size_t numNonIngestingAndInactive = ranksHandlingOutput.size();
+   
+   // then ingesting and inactive ranks
+   for (size_t rank = 0; rank < recvFlags.size(); ++rank) {
+        if ((recvFlags[rank] > 0) && (activityFlags[rank] == 0)) {
+            ranksHandlingOutput.push_back(rank);
+        }
+   }
+   const size_t numIngestingAndInactive = ranksHandlingOutput.size() - numNonIngestingAndInactive;
+   ASKAPDEBUGASSERT(static_cast<int>(ranksHandlingOutput.size()) < itsConfig.nprocs());
+   ASKAPDEBUGASSERT(static_cast<int>(numIngestingAndInactive + numNonIngestingAndInactive + numActive) == itsConfig.nprocs());
+   ASKAPCHECK(ranksHandlingOutput.size() > 0, "Need at least one free rank to handle the output");
+   //ASKAPLOG_INFO_STR(logger, "numIngestingAndInactive = "<<numIngestingAndInactive<<" numNonIngestingAndInactive = "<<numNonIngestingAndInactive<<" numActive="<<numActive);
+   ASKAPDEBUGASSERT(itsNStreams > 1);
+   
+   // now assign groups to each rank (one group per input)
    // do it for all ranks, just as an extra consistency check
    // (although, in principle, only group this rank belongs to matters)
-   // each value is the group number or -1 if it is uninitialised
+   // each value is the group number or groups.size() if it is uninitialised
    // later we use groups.size() as a flag of unused rank (MPI requires non-negative number)
-   std::vector<int> groups(activityFlags.size(), -1);
-   // start ranks for each group
-   std::map<int,int> startRanksMap;
-
-   // start rank + the group count (the value of -2 is the flag for first iteration)
-   int startRank = -2, group = -1;
+   std::vector<int> groups(activityFlags.size(), activityFlags.size());
+   
+   // loop over ranks with active input and assign groups to them and appropriate service ranks
+   int currentGroup = 0;
+   size_t nextAvailableServiceRank = 0;
    for (size_t rank = 0; rank < activityFlags.size(); ++rank) {
         const int currentFlag = activityFlags[rank];
         // could be either 0 or 1
@@ -239,75 +274,53 @@ int BeamScatterTask::countActiveRanks(bool isActive)
         ASKAPASSERT(currentFlag >= 0);
         
         if (currentFlag) {
-            // next group
-            ++group;
-            ASKAPCHECK(static_cast<int>(rank) - startRank > 1, "There seems to be no idle streams available before rank="<<rank);
-            startRank = rank;
-            startRanksMap[group] = startRank;
-        } 
-        groups[rank] = group;
+            groups[rank] = currentGroup;
+            // need itsNStreams - 1 service ranks (one stream is handled by current rank - may change it in the future)
+            for (size_t serviceRank = 0; static_cast<int>(serviceRank) < itsNStreams - 1; ++serviceRank,++nextAvailableServiceRank) {
+                 ASKAPCHECK(nextAvailableServiceRank < ranksHandlingOutput.size(), "Not enough free ranks to assign the output to (trying to assign "<<itsNStreams - 1<<" service ranks for input stream "<<currentGroup<<")");
+                 const size_t currentRank = ranksHandlingOutput[nextAvailableServiceRank];
+                 ASKAPDEBUGASSERT(currentRank < groups.size());
+                 groups[currentRank] = currentGroup;
+                 if ((nextAvailableServiceRank == numNonIngestingAndInactive) && (itsConfig.rank() == 0)) {
+                     ASKAPLOG_WARN_STR(logger, "Assigning output to ingesting rank due to limited number ("<<numNonIngestingAndInactive<<") of free service ranks");
+                 }
+            }
+            ++currentGroup;
+        }
    }
-   
-   ASKAPCHECK(group >= 0, "BeamScatterTask has no active input streams!");
-   const size_t nGroups = static_cast<size_t>(group + 1);
+   ASKAPDEBUGASSERT(currentGroup == static_cast<int>(numActive));
+   ASKAPDEBUGASSERT(currentGroup > 0);
 
-   ASKAPDEBUGASSERT(itsNStreams > 1);
    // all elements of the groups vector should be non-negative
    ASKAPASSERT(std::count_if(groups.begin(), groups.end(), std::bind2nd(std::less<int>(), 0)) == 0);
 
    ASKAPDEBUGASSERT(itsConfig.rank() < static_cast<int>(groups.size()));
+   ASKAPASSERT(currentGroup < static_cast<int>(groups.size()));
    const int thisRankGroup = groups[itsConfig.rank()];
-
-   for (size_t grp = 0; grp < nGroups; ++grp) {
-        const int nRanksThisGroup = std::count_if(groups.begin(), groups.end(), std::bind2nd(std::equal_to<int>(), static_cast<int>(grp)));
-        ASKAPASSERT(nRanksThisGroup > 1);
-        const std::map<int,int>::const_iterator ciStart = startRanksMap.find(grp);
-        ASKAPASSERT(ciStart != startRanksMap.end());
-        const int startRankThisGroup = ciStart->second;
-        const std::map<int,int>::const_iterator ciEnd = startRanksMap.find(grp+1);
-        const int stopRankThisGroup  = (ciEnd != startRanksMap.end() ? ciEnd->second : static_cast<int>(activityFlags.size())) - 1;
-        if (thisRankGroup == static_cast<int>(grp)) {
-            ASKAPLOG_DEBUG_STR(logger, "This rank belongs to initial group "<<thisRankGroup<<" (ranks from "<<startRankThisGroup<<
-                                       " to "<<stopRankThisGroup<<", inclusive)");
-            ASKAPLOG_DEBUG_STR(logger, "    - available "<<nRanksThisGroup<<" ranks");
-        }
-        // consistency check
-        ASKAPASSERT(nRanksThisGroup == stopRankThisGroup - startRankThisGroup + 1);
-        ASKAPCHECK(itsNStreams <= nRanksThisGroup, "Number of streams requested ("<<itsNStreams<<
-                   ") exceeds the number of ranks available ("<<nRanksThisGroup<<")");
-        const int maxStride = (nRanksThisGroup - 1) / (itsNStreams - 1);
-        ASKAPDEBUGASSERT(maxStride > 0);
-        // trying to space active ranks as much as we can (in the future we can make this configurable)
-        for (int rankOffset = 0; rankOffset < nRanksThisGroup; ++rankOffset) {
-             const int rank = rankOffset + startRankThisGroup;
-             if (rankOffset % maxStride == 0) {
-                 if (thisRankGroup == static_cast<int>(grp)) {
-                     if (rankOffset == 0) {
-                         ASKAPLOG_DEBUG_STR(logger,"    - rank "<<rank<<" will be kept active");
-                     } else {
-                         ASKAPLOG_INFO_STR(logger,"    - rank "<<rank<<" will be activated");
-                     }
-                 }
-             } else {
-                 if (thisRankGroup == static_cast<int>(grp)) {
-                     ASKAPLOG_DEBUG_STR(logger,"    - rank "<<rank<<" will be kept deactivated");
-                 }
-                 groups[rank] = static_cast<int>(groups.size());   
-             }
-        }
+   if (thisRankGroup == static_cast<int>(groups.size())) {
+       ASKAPLOG_DEBUG_STR(logger,"This rank will be kept deactivated");
+   } else {
+       if (isActive) {
+           ASKAPLOG_DEBUG_STR(logger,"This rank will be kept active and feed data for the group "<<thisRankGroup);
+       } else {
+           ASKAPLOG_DEBUG_STR(logger,"This rank will be activated and assigned to group "<<thisRankGroup);
+       }
    }
+   
+   
    // now create intra-group communicator
-   const int actualGroup = groups[itsConfig.rank()];
-   //ASKAPLOG_DEBUG_STR(logger,"Building intra-group communicator, actualGroup = "<<actualGroup);
+   //ASKAPLOG_DEBUG_STR(logger,"Building intra-group communicator, group = "<<thisRankGroup);
 
-   // just do ascending order in original ranks for local group ranks
-   const int response2 = MPI_Comm_split(MPI_COMM_WORLD, actualGroup, itsConfig.rank(), &itsCommunicator);
+   // just do ascending order in original ranks for local group ranks, but ensure that the rank with
+   // active input is put first - there should be only one rank with input per group, so just assign zero sequence number to it
+   const int seqNumber = isActive ? 0 : itsConfig.rank() + 1;
+   const int response2 = MPI_Comm_split(MPI_COMM_WORLD, thisRankGroup, seqNumber, &itsCommunicator);
    ASKAPCHECK(response2 == MPI_SUCCESS, "Erroneous response from MPI_Comm_split = "<<response2);
 
    int thisRankStream = -1;
-   if (actualGroup < static_cast<int>(groups.size())) {
+   if (thisRankGroup < static_cast<int>(groups.size())) {
        thisRankStream = localRank();
-       ASKAPLOG_INFO_STR(logger, "This rank corresponds to stream "<<thisRankStream<<" group "<<actualGroup);
+       ASKAPLOG_INFO_STR(logger, "This rank corresponds to stream "<<thisRankStream<<" group "<<thisRankGroup);
    } else {
        ASKAPLOG_INFO_STR(logger, "This rank will not be used");
    }
@@ -419,6 +432,53 @@ void BeamScatterTask::initialiseSplit(const askap::cp::common::VisChunk::ShPtr& 
   scatterVector(itsAntenna1);
   scatterVector(itsAntenna2);
   scatterVector(itsBeam);
+
+  // don't trim vectors on the root rank here - values are used for consistency as we cache the row numbers corresponding to the beam scatter layout
+}
+
+/// @brief helper method to scatter row-based cube
+/// @details MPI routines work with raw pointers. This method encapsulates
+/// all ugliness of marrying this with complex casa types.
+/// It relies on exact physical representation of data. It is assumed that
+/// local rank 0 is the root. 
+/// @param[in,out] cube cube for both input (on local rank 0) and output
+/// (on other ranks of the local communicator). It is the requirement that
+/// the shape is correctly initialised before calling this method.
+template<typename T>
+void BeamScatterTask::scatterCube(casa::Cube<T> &cube) const
+{
+  // the code is very similar to that of scatterVector, but cross-checks differ
+  // it is also implied that cubes dealt with in this method are large
+  ASKAPDEBUGASSERT(itsHandledRows.second > itsHandledRows.first);
+  const casa::uInt expectedNumberOfRows = itsHandledRows.second - itsHandledRows.first + 1;
+  const casa::uInt elementsPerRow = cube.ncolumn() * cube.nplane();
+  if (localRank() == 0) {
+      ASKAPASSERT(cube.contiguousStorage());
+      ASKAPDEBUGASSERT(itsNStreams > 1);
+      ASKAPASSERT(itsRowCounts[0] == static_cast<int>(expectedNumberOfRows));
+
+      // need to scale the number of elements and the offsets up to account for both value type and other dimensions
+      // it is not worth to implement simple case as in the scatterVector because we will always have other dimensions here
+      std::vector<int> tempCounts(itsRowCounts);
+      std::vector<int> tempOffsets(itsRowOffsets);
+      // note - the following is the same for all iterations and could be cached, if we're desperate for more performance
+      for (std::vector<int>::iterator ci1 = tempCounts.begin(), ci2 = tempOffsets.begin(); 
+           ci1 != tempCounts.end(); ++ci1,++ci2) {
+           ASKAPDEBUGASSERT(ci2 != tempOffsets.end());
+           ASKAPASSERT(*ci1 + *ci2 <= static_cast<int>(cube.nrow()));
+           (*ci1) *= MPITraitsHelper<T>::size * elementsPerRow;
+           (*ci2) *= MPITraitsHelper<T>::size * elementsPerRow;
+      }
+      const int response = MPI_Scatterv((void*)cube.data(), tempCounts.data(), tempOffsets.data(), MPITraitsHelper<T>::datatype(), MPI_IN_PLACE,
+            static_cast<int>(expectedNumberOfRows) * MPITraitsHelper<T>::size * elementsPerRow,  MPITraitsHelper<T>::datatype(), 0, itsCommunicator);
+      ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Scatterv = "<<response);
+  } else {
+      ASKAPASSERT(cube.nrow() == expectedNumberOfRows);
+      ASKAPASSERT(cube.contiguousStorage());
+      const int response = MPI_Scatterv(NULL, NULL, NULL, MPITraitsHelper<T>::datatype(), (void*)cube.data(), 
+            static_cast<int>(expectedNumberOfRows) * MPITraitsHelper<T>::size * elementsPerRow,  MPITraitsHelper<T>::datatype(), 0, itsCommunicator);
+      ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Scatterv = "<<response);
+  }
 }
 
 /// @brief helper method to scatter row-based vector
@@ -476,6 +536,33 @@ void  BeamScatterTask::scatterVector(casa::Vector<T> &vec) const
   }
 }
 
+/// @brief specialisation to scatter vector of MVDirections
+/// @param[in,out] vec vector for both input (on local rank 0) and output
+/// (on other ranks of the local communicator)
+void BeamScatterTask::scatterVector(casa::Vector<casa::MVDirection> &vec) const
+{
+   // quick and dirty way of scattering vector of MVDirections
+   // relying on internal representation is probably too dangerous here
+   casa::Vector<casa::RigidVector<casa::Double, 3> > mvdBuf(vec.nelements());
+   if (localRank() == 0) {
+       // pack data in the buffer
+       for (casa::uInt row=0; row<vec.nelements(); ++row) {
+            const casa::Vector<casa::Double> representation = vec[row].getVector();
+            ASKAPDEBUGASSERT(representation.nelements() == 3);
+            mvdBuf[row] = representation;
+       }
+   }
+   scatterVector(mvdBuf);
+   if (localRank() > 0) {
+       // unpack the results, mvdBuf should be of the right length
+       if (vec.nelements() != mvdBuf.nelements()) {
+           vec.resize(mvdBuf.nelements());
+       }
+       for (casa::uInt row=0; row<vec.nelements(); ++row) {
+            vec[row].putVector(mvdBuf[row].vector());
+       }
+   }
+}
 
 /// @brief broadcast row-independent fields
 /// @details This method handles row-independent fields, broadcasts 
@@ -485,29 +572,24 @@ void  BeamScatterTask::scatterVector(casa::Vector<T> &vec) const
 void BeamScatterTask::broadcastRIFields(askap::cp::common::VisChunk::ShPtr& chunk) const
 {
   ASKAPDEBUGASSERT(itsStreamNumber >= 0);
-  const int formatId = 1;
+  const int formatId = 2;
   if (localRank() == 0) {
       ASKAPDEBUGASSERT(chunk);
       // as we need to pass sizes anyway, pass also basic parameters required to initialise the chunk
       // for slave ranks.
       uint32_t buffer[5] = {0u, chunk->nRow(), chunk->nChannel(), chunk->nPol(), chunk->nAntenna()};
 
-      // 1) encode info into blob (some of it we could've done directly, but I am too bored to do it for
-      //    some casa types (especially as I don't have time for testing)
+      // 1) encode info into blob 
       LOFAR::BlobString bs;
       bs.resize(0);
       LOFAR::BlobOBufString bob(bs);
       LOFAR::BlobOStream out(bob);
       out.putStart("RowIndependentParameters", formatId);
       out << chunk->time() << chunk->targetName() << chunk->interval() << chunk->scan() << 
-             chunk->channelWidth();
-      
-      // todo:  chunk->targetPointingCentre() , chunk->actualPointingCentre() 
-      // todo: chunk->actualPolAngle() << chunk->actualAzimuth() << chunk->actualElevation() 
-      // todo: chunk->onSourceFlag()
-      // todo:  chunk->frequency()
-      // todo: chunk->stokes()
-      // todo: chunk->directionFrame();
+             chunk->targetPointingCentre() << chunk->actualPointingCentre() <<
+             chunk->actualPolAngle() << chunk->actualAzimuth() << chunk->actualElevation() <<
+             chunk->onSourceFlag() << chunk->frequency() << chunk->channelWidth() <<
+             chunk->stokes() << chunk->directionFrame();
       out.putEnd();
       // pass the size along with basic parameters
       buffer[0] = bs.size();
@@ -551,34 +633,22 @@ void BeamScatterTask::broadcastRIFields(askap::cp::common::VisChunk::ShPtr& chun
       const int version=in.getStart("RowIndependentParameters");
       ASKAPASSERT(version == formatId);
       
-      // time
-      casa::MVEpoch epoch;
-      in >> epoch;
-      chunk->time() = epoch;
-  
-      // targetName
-      std::string targetName;
-      in >> targetName;
-      chunk->targetName() = targetName;
-
-      // interval
-      casa::Double interval = -1.;
-      in >> interval;
-      chunk->interval() = interval;
-
-      // scan
-      casa::uInt scan = 0;
-      in >> scan;
-      chunk->scan() = scan;
-   
-      // channel width
-      casa::Double channelWidth = 0.;
-      in >> channelWidth;
-      chunk->channelWidth() = channelWidth;
-
-      // other fields come here, we can probably refactor this code via templates
+      in >> chunk->time() >> chunk->targetName() >> chunk->interval() >> chunk->scan() >>
+            chunk->targetPointingCentre() >> chunk->actualPointingCentre() >> chunk->actualPolAngle() >>
+            chunk->actualAzimuth() >> chunk->actualElevation() >> chunk->onSourceFlag() >> chunk->frequency() >>
+            chunk->channelWidth() >> chunk->stokes() >> chunk->directionFrame();
 
       in.getEnd();
+
+      // some consistency checks
+      ASKAPASSERT(chunk->actualAzimuth().nelements() == chunk->nAntenna());
+      ASKAPASSERT(chunk->actualElevation().nelements() == chunk->nAntenna());
+      ASKAPASSERT(chunk->actualPolAngle().nelements() == chunk->nAntenna());
+      ASKAPASSERT(chunk->actualPointingCentre().nelements() == chunk->nAntenna());
+      ASKAPASSERT(chunk->targetPointingCentre().nelements() == chunk->nAntenna());
+      ASKAPASSERT(chunk->onSourceFlag().nelements() == chunk->nAntenna());
+      ASKAPASSERT(chunk->frequency().nelements() == chunk->nChannel());
+      ASKAPASSERT(chunk->stokes().nelements() == chunk->nPol());
   }
 }
 

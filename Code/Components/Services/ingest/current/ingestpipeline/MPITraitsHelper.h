@@ -38,6 +38,7 @@
 
 // casacore includes
 #include "casacore/scimath/Mathematics/RigidVector.h"
+#include "casacore/casa/BasicSL/Complex.h"
 
 
 namespace askap {
@@ -66,6 +67,24 @@ template<>
 struct MPITraitsHelper<casa::Float> {
    static MPI_Datatype datatype() { return MPI_FLOAT; };
    static const int size = 1;
+
+   static bool equal(casa::Float val1, casa::Float val2) { return fabsf(val1 - val2) <= 1e-7 * fabsf(val1 + val2);}
+};
+
+// specialisation for casa::Complex
+template<>
+struct MPITraitsHelper<casa::Complex> {
+   static MPI_Datatype datatype() { return MPI_FLOAT; };
+   static const int size = 2;
+};
+
+// specialisation for casa::Bool
+template<>
+struct MPITraitsHelper<casa::Bool> {
+   static MPI_Datatype datatype() { return MPI_CHAR; };
+   static const int size = 1;
+
+   static bool equal(casa::Bool val1, casa::Bool val2) { return val1 == val2;}
 };
 
 // specialisation for casa::Double
@@ -73,6 +92,8 @@ template<>
 struct MPITraitsHelper<casa::Double> {
    static MPI_Datatype datatype() { return MPI_DOUBLE; };
    static const int size = 1;
+
+   static bool equal(casa::Double val1, casa::Double val2) { return fabs(val1 - val2) <= 1e-13 * fabs(val1 + val2);}
 };
 
 // specialisation for casa::RidigVector<casa::Double, 3>
@@ -80,6 +101,9 @@ template<>
 struct MPITraitsHelper<casa::RigidVector<casa::Double, 3> > {
    static MPI_Datatype datatype() { return MPI_DOUBLE; };
    static const int size = 3;
+
+   // skip comparison - we don't really need it in the cross-check code
+   static bool equal(casa::RigidVector<casa::Double, 3>, casa::RigidVector<casa::Double, 3>) { return true;}
 };
 
 // specialisation for unsigned long

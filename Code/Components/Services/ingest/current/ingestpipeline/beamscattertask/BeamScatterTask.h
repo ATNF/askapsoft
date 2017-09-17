@@ -144,6 +144,22 @@ class BeamScatterTask : public askap::cp::ingest::ITask {
         template<typename T>
         void scatterVector(casa::Vector<T> &vec) const;
 
+        /// @brief specialisation to scatter vector of MVDirections
+        /// @param[in,out] vec vector for both input (on local rank 0) and output
+        /// (on other ranks of the local communicator)
+        void scatterVector(casa::Vector<casa::MVDirection> &vec) const;
+
+        /// @brief helper method to scatter row-based cube
+        /// @details MPI routines work with raw pointers. This method encapsulates
+        /// all ugliness of marrying this with complex casa types.
+        /// It relies on exact physical representation of data. It is assumed that
+        /// local rank 0 is the root. 
+        /// @param[in,out] cube cube for both input (on local rank 0) and output
+        /// (on other ranks of the local communicator). It is the requirement that
+        /// the shape is correctly initialised before calling this method.
+        template<typename T>
+        void scatterCube(casa::Cube<T> &cube) const;
+
         /// @brief trim chunk to the given number of rows
         /// @details
         /// @param[in,out] chunk the instance of VisChunk to work with
