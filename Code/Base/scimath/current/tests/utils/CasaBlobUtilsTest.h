@@ -35,6 +35,12 @@
 #include "Blob/BlobIStream.h"
 #include "Blob/BlobIBufVector.h"
 #include "Blob/BlobOStream.h"
+
+// for coordinate system
+#include <casacore/coordinates/Coordinates/CoordinateSystem.h>
+#include <casacore/coordinates/Coordinates/DirectionCoordinate.h>
+#include <casacore/coordinates/Coordinates/SpectralCoordinate.h>
+#include <casacore/coordinates/Coordinates/StokesCoordinate.h>
 #include "Blob/BlobOBufVector.h"
 
 // Classes to test
