@@ -1093,9 +1093,7 @@ bool RadioSource::fitGauss(casa::Matrix<casa::Double> &pos,
     } else {
         itsFlagHasFit = false;
         if (itsFitParams.useGuessIfBad()) {
-            if (!itsFitParams.numGaussFromGuess()) {
-                cmpntList.resize(std::min(size_t(itsFitParams.maxNumGauss()), f.size()));
-            }
+            ASKAPLOG_INFO_STR(logger, "Fits failed, so saving initial estimate (" << cmpntList.size() << " components) as solution"); 
             itsBestFitType = "guess";
             // set the components to be at least as big as the beam
             for (size_t i = 0; i < cmpntList.size(); i++) {
