@@ -42,6 +42,7 @@
 #include "casacore/casa/aips.h"
 #include "casacore/casa/Arrays/Vector.h"
 #include "casacore/casa/Arrays/Cube.h"
+#include "casacore/casa/Arrays/Slicer.h"
 #include "cpcommon/VisChunk.h"
 #include "cpcommon/CasaBlobUtils.h"
 #include "Blob/BlobAipsIO.h"
@@ -447,29 +448,49 @@ void BeamScatterTask::initialiseSplit(const askap::cp::common::VisChunk::ShPtr& 
 template<typename T>
 void BeamScatterTask::scatterCube(casa::Cube<T> &cube) const
 {
-  // the code is very similar to that of scatterVector, but cross-checks differ
-  // it is also implied that cubes dealt with in this method are large
+  // due to unfavourable layout of casa::Cube data storage, we can't use the similar approach to 
+  // scatterVector. At this stage, do the job with extra copy 
+
   ASKAPDEBUGASSERT(itsHandledRows.second > itsHandledRows.first);
   const casa::uInt expectedNumberOfRows = itsHandledRows.second - itsHandledRows.first + 1;
   const casa::uInt elementsPerRow = cube.ncolumn() * cube.nplane();
   if (localRank() == 0) {
-      ASKAPASSERT(cube.contiguousStorage());
       ASKAPDEBUGASSERT(itsNStreams > 1);
       ASKAPASSERT(itsRowCounts[0] == static_cast<int>(expectedNumberOfRows));
+      ASKAPDEBUGASSERT(cube.nelements() == elementsPerRow * cube.nrow());
+
+      // use plain memory array as std::vector has different interface for bool and non-bool types complicating
+      // working with this type in a template
+      typename boost::shared_array<T> sndBuffer(new T[cube.nelements()]);
 
       // need to scale the number of elements and the offsets up to account for both value type and other dimensions
       // it is not worth to implement simple case as in the scatterVector because we will always have other dimensions here
       std::vector<int> tempCounts(itsRowCounts);
       std::vector<int> tempOffsets(itsRowOffsets);
-      // note - the following is the same for all iterations and could be cached, if we're desperate for more performance
+      // note - scaling of offsets is the same for all iterations and could be cached, if we're desperate for more performance
       for (std::vector<int>::iterator ci1 = tempCounts.begin(), ci2 = tempOffsets.begin(); 
            ci1 != tempCounts.end(); ++ci1,++ci2) {
            ASKAPDEBUGASSERT(ci2 != tempOffsets.end());
            ASKAPASSERT(*ci1 + *ci2 <= static_cast<int>(cube.nrow()));
+           // use this opportunity to copy the appropriate section, we could've done it for the whole cube at once (not sure if there
+           // are any benefits in terms of performance). However, separating it this way may allow parallelisation if we are desperate for
+           // extra peformance and/or replacing scatter call with individual (and perhaps asynchronous) sends, when the data for the 
+           // particular rank are ready).
+           casa::Slicer curStreamDataSlicer(casa::IPosition(3,*ci2, 0, 0), casa::IPosition(3, *ci1, cube.ncolumn(), cube.nplane()));
+           typename casa::Cube<T> curStreamData = cube(curStreamDataSlicer);
+           ASKAPASSERT(curStreamData.nelements() == elementsPerRow * (*ci1));
+           {
+              // perform the copy and keep the order the same as for the target container - this way we don't need transpose on the receive side
+              typename casa::Array<T> bufReference;
+              bufReference.takeStorage(curStreamData.shape(), sndBuffer.get() + (*ci2), casa::SHARE);
+              bufReference = curStreamData;
+           }
+
+           // now scale the offset
            (*ci1) *= MPITraitsHelper<T>::size * elementsPerRow;
            (*ci2) *= MPITraitsHelper<T>::size * elementsPerRow;
       }
-      const int response = MPI_Scatterv((void*)cube.data(), tempCounts.data(), tempOffsets.data(), MPITraitsHelper<T>::datatype(), MPI_IN_PLACE,
+      const int response = MPI_Scatterv((void*)sndBuffer.get(), tempCounts.data(), tempOffsets.data(), MPITraitsHelper<T>::datatype(), MPI_IN_PLACE,
             static_cast<int>(expectedNumberOfRows) * MPITraitsHelper<T>::size * elementsPerRow,  MPITraitsHelper<T>::datatype(), 0, itsCommunicator);
       ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Scatterv = "<<response);
   } else {
@@ -661,28 +682,65 @@ void BeamScatterTask::trimChunk(askap::cp::common::VisChunk::ShPtr& chunk, casa:
   // note - code largely untested, only used to study performance, i.e. scientific content is not preserved / dealt with correctly yet
   ASKAPLOG_DEBUG_STR(logger, "Trimming chunk to contain "<<newNRows<<" rows");
 
+  // it may be worth to promote this code to a member of VisChunk - copying of row-independent fields will then be unnecessary resulting in a cleaner code
   ASKAPASSERT(chunk);
   ASKAPASSERT(newNRows < chunk->nRow());
+  // casa arrays don't go not allow trimming through manipulation of metadata (and for cubes it doesn't work anyway due to data order),
+  // so we have to do explicit copy of the part we are after anyway.
   askap::cp::common::VisChunk::ShPtr newChunk(new VisChunk(newNRows, chunk->nChannel(), chunk->nPol(), chunk->nAntenna()));
-  newChunk->flag().set(false);
+ 
+  // first copy row-independent fields - for casa arrays it will be referencing
+  newChunk->time() = chunk->time();
+  newChunk->targetName() = chunk->targetName();
+  newChunk->interval() = chunk->interval();
+  newChunk->scan() = chunk->scan();
+  newChunk->targetPointingCentre().assign(chunk->targetPointingCentre());
+  newChunk->actualPointingCentre().assign(chunk->actualPointingCentre());
+  newChunk->actualPolAngle().assign(chunk->actualPolAngle());
+  newChunk->actualAzimuth().assign(chunk->actualElevation());
+  newChunk->onSourceFlag().assign(chunk->onSourceFlag());
+  newChunk->frequency().assign(chunk->frequency());
+  newChunk->channelWidth() = chunk->channelWidth();
+  newChunk->stokes().assign(chunk->stokes());
+  newChunk->directionFrame() = chunk->directionFrame();
+
+  const casa::Slicer vecSlicer(casa::IPosition(1,0), casa::IPosition(1,newNRows));
   
-  /*
-  newChunk->antenna1().resize(newNRows);
-  newChunk->antenna2().resize(newNRows);
-  newChunk->beam1().resize(newNRows);
-  newChunk->beam2().resize(newNRows);
-  newChunk->beam1PA().resize(newNRows);
-  newChunk->beam2PA().resize(newNRows);
-  newChunk->phaseCentre().resize(newNRows);
-  newChunk->uvw().resize(newNRows);
-  casa::IPosition shape = newChunk->visibility().shape();
-  ASKAPASSERT(newChunk->flag().shape() == shape);
+  // have to copy row-dependent vectors to ensure they're contiguous
+  newChunk->antenna1().assign(chunk->antenna1()(vecSlicer).copy());
+  newChunk->antenna2().assign(chunk->antenna2()(vecSlicer).copy());
+  newChunk->beam1().assign(chunk->beam1()(vecSlicer).copy());
+  newChunk->beam2().assign(chunk->beam2()(vecSlicer).copy());
+  newChunk->beam1PA().assign(chunk->beam1PA()(vecSlicer).copy());
+  newChunk->beam2PA().assign(chunk->beam2PA()(vecSlicer).copy());
+  newChunk->phaseCentre().assign(chunk->phaseCentre()(vecSlicer).copy());
+  newChunk->uvw().assign(chunk->uvw()(vecSlicer).copy());
+  
+  casa::IPosition shape = chunk->visibility().shape();
+  ASKAPASSERT(chunk->flag().shape() == shape);
   ASKAPASSERT(shape.nelements() == 3);
   shape[0] = newNRows;
-  newChunk->visibility().resize(shape);
-  newChunk->flag().resize(shape);
+  const casa::Slicer cubeSlicer(casa::IPosition(3,0,0,0), shape);
+
+
+  // have to copy row-dependent cubes to ensure they're contiguous
+  newChunk->flag().assign(chunk->flag()(cubeSlicer).copy());
+  newChunk->visibility().assign(chunk->visibility()(cubeSlicer).copy());
+
+  // consistency checks
+  ASKAPDEBUGASSERT(newChunk->antenna1().nelements() == newNRows);
+  ASKAPDEBUGASSERT(newChunk->antenna2().nelements() == newNRows);
+  ASKAPDEBUGASSERT(newChunk->beam1().nelements() == newNRows);
+  ASKAPDEBUGASSERT(newChunk->beam2().nelements() == newNRows);
+  ASKAPDEBUGASSERT(newChunk->beam1PA().nelements() == newNRows);
+  ASKAPDEBUGASSERT(newChunk->beam2PA().nelements() == newNRows);
+  ASKAPDEBUGASSERT(newChunk->phaseCentre().nelements() == newNRows);
+  ASKAPDEBUGASSERT(newChunk->uvw().nelements() == newNRows);
+
+  ASKAPDEBUGASSERT(newChunk->nRow() == newNRows);
+  ASKAPASSERT(newChunk->visibility().shape()  == shape);
+  ASKAPASSERT(newChunk->flag().shape()  == shape);
   
-  */
   chunk = newChunk;
 } 
 
