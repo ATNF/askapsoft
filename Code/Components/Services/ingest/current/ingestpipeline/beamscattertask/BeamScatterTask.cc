@@ -314,7 +314,9 @@ int BeamScatterTask::countActiveRanks(bool isActive)
 
    // just do ascending order in original ranks for local group ranks, but ensure that the rank with
    // active input is put first - there should be only one rank with input per group, so just assign zero sequence number to it
-   const int seqNumber = isActive ? 0 : itsConfig.rank() + 1;
+   // also put ingesting ranks to the back (as they're always assigned last) - this will give beam distribution in the order of beam number
+   // in the local communicator at no extra cost, just a handy feature.
+   const int seqNumber = (isActive ? 0 : itsConfig.rank() + 1) + (itsConfig.receivingRank() ? itsConfig.nprocs() + 1 : 0);
    const int response2 = MPI_Comm_split(MPI_COMM_WORLD, thisRankGroup, seqNumber, &itsCommunicator);
    ASKAPCHECK(response2 == MPI_SUCCESS, "Erroneous response from MPI_Comm_split = "<<response2);
 
@@ -397,7 +399,7 @@ void BeamScatterTask::initialiseSplit(const askap::cp::common::VisChunk::ShPtr& 
 
       // now do collectives, matching code on slave ranks is in the else part of the if-statement
 
-      //1) scatter rows dealt with by particular stream (stream number is the local rank in the intra-group communicator) 
+      //1) scatter rows dealt with by this particular stream (stream number is the local rank in the intra-group communicator) 
       
       ASKAPDEBUGASSERT(sizeof(std::pair<casa::uInt, casa::uInt>) == 2 * sizeof(uint32_t));
       casa::uInt tempBuf[2] = {lastRow + 1, lastRow + 1};
@@ -478,7 +480,10 @@ void BeamScatterTask::scatterCube(casa::Cube<T> &cube) const
            // particular rank are ready).
            casa::Slicer curStreamDataSlicer(casa::IPosition(3,*ci2, 0, 0), casa::IPosition(3, *ci1, cube.ncolumn(), cube.nplane()));
            typename casa::Cube<T> curStreamData = cube(curStreamDataSlicer);
-           ASKAPASSERT(curStreamData.nelements() == elementsPerRow * (*ci1));
+           // scale the offset and counts with elementsPerRow, now these are the offsets in flattened array of type T
+           (*ci1) *= elementsPerRow;
+           (*ci2) *= elementsPerRow;
+           ASKAPASSERT(static_cast<int>(curStreamData.nelements()) == *ci1);
            {
               // perform the copy and keep the order the same as for the target container - this way we don't need transpose on the receive side
               typename casa::Array<T> bufReference;
@@ -486,9 +491,9 @@ void BeamScatterTask::scatterCube(casa::Cube<T> &cube) const
               bufReference = curStreamData;
            }
 
-           // now scale the offset
-           (*ci1) *= MPITraitsHelper<T>::size * elementsPerRow;
-           (*ci2) *= MPITraitsHelper<T>::size * elementsPerRow;
+           // now scale the offset and counts with size for composite types as MPI routines accept a plain C view
+           (*ci1) *= MPITraitsHelper<T>::size;
+           (*ci2) *= MPITraitsHelper<T>::size; 
       }
       const int response = MPI_Scatterv((void*)sndBuffer.get(), tempCounts.data(), tempOffsets.data(), MPITraitsHelper<T>::datatype(), MPI_IN_PLACE,
             static_cast<int>(expectedNumberOfRows) * MPITraitsHelper<T>::size * elementsPerRow,  MPITraitsHelper<T>::datatype(), 0, itsCommunicator);
@@ -697,7 +702,8 @@ void BeamScatterTask::trimChunk(askap::cp::common::VisChunk::ShPtr& chunk, casa:
   newChunk->targetPointingCentre().assign(chunk->targetPointingCentre());
   newChunk->actualPointingCentre().assign(chunk->actualPointingCentre());
   newChunk->actualPolAngle().assign(chunk->actualPolAngle());
-  newChunk->actualAzimuth().assign(chunk->actualElevation());
+  newChunk->actualAzimuth().assign(chunk->actualAzimuth());
+  newChunk->actualElevation().assign(chunk->actualElevation());
   newChunk->onSourceFlag().assign(chunk->onSourceFlag());
   newChunk->frequency().assign(chunk->frequency());
   newChunk->channelWidth() = chunk->channelWidth();
