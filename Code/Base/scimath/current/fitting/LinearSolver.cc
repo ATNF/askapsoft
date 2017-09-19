@@ -30,6 +30,7 @@
 
 #include <askap/AskapError.h>
 #include <profile/AskapProfiler.h>
+#include <boost/config.hpp>
 
 #include <casacore/casa/aips.h>
 #include <casacore/casa/Arrays/Array.h>
@@ -57,7 +58,7 @@ namespace askap
 {
   namespace scimath
   {
-    constexpr double LinearSolver::KeepAllSingularValues;
+    BOOST_CONSTEXPR_OR_CONST double LinearSolver::KeepAllSingularValues;
     
     /// @brief Constructor
     /// @details Optionally, it is possible to limit the condition number of

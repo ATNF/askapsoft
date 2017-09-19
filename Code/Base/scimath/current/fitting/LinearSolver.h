@@ -35,6 +35,8 @@
 #include <fitting/DesignMatrix.h>
 #include <fitting/Params.h>
 
+#include <boost/config.hpp>
+
 #include <utility>
 #include <vector>
 
@@ -48,7 +50,7 @@ namespace askap
     {
       public:
        /// @brief no limit on the condition number
-       static constexpr double KeepAllSingularValues = -1.;
+       static BOOST_CONSTEXPR_OR_CONST double KeepAllSingularValues = -1.;
       
        /// @brief Constructor
        /// @details Optionally, it is possible to limit the condition number of

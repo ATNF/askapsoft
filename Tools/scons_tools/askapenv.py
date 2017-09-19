@@ -66,6 +66,8 @@ opts.Add(BoolVariable("nompi", "Disable MPI", False))
 opts.Add(BoolVariable("openmp", "Use OpenMP", False))
 opts.Add(BoolVariable("squash", "Squash some compiler warnings",False))
 opts.Add(BoolVariable("usepgi", "Use Portland Group Compiler",False))
+opts.Add(BoolVariable("cpp11", "Use c++11",False))
+opts.Add(BoolVariable("nocpp11", "Use c++11 (old flag)",False))
 opts.Add(BoolVariable("update", "svn update?", False))
 opts.Update(env)
 
@@ -78,7 +80,11 @@ env.AppendUnique(CCFLAGS=['-DASKAP_DEBUG'])
 # For most of these, we should reinstate the warnings and fix the code,
 # however the flags can be uncommented to suppress most of the current
 # compatibility warnings
-env.AppendUnique(CCFLAGS=['-std=c++11'])
+if env['cpp11']:
+    env.AppendUnique(CCFLAGS=['-std=c++11'])
+if env['nocpp11']:
+    env.AppendUnique(CCFLAGS=['-std=c++0x'])
+
 env.AppendUnique(CCFLAGS=['-fdiagnostics-show-option'])
 # env.AppendUnique(CCFLAGS=['-Wno-deprecated-declarations'])
 # env.AppendUnique(CCFLAGS=['-Wno-deprecated'])

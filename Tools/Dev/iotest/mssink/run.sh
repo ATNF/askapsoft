@@ -431,6 +431,7 @@ cat > ${mssink_batch_file} <<EOF
 #################################################################
 # load an askapsoft
 module load askapsoft
+module load askapdata
 
 # The root dir is inferred from the location of this script.
 root_dir=\`echo "${dir}" | cut -d "/" -f2\`

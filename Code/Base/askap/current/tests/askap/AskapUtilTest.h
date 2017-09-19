@@ -31,6 +31,7 @@
 #define ASKAP_UTIL_TEST_H
 
 #include <cppunit/extensions/HelperMacros.h>
+#include <boost/config.hpp>
 
 // Class under test
 #include <askap/AskapUtil.h>
@@ -231,7 +232,8 @@ class AskapUtilTest : public CppUnit::TestFixture {
         }
 
     private:
-        static constexpr double dblTolerance = 10e-14;
+
+        static BOOST_CONSTEXPR_OR_CONST double dblTolerance = 10e-14;
 
 };
 
