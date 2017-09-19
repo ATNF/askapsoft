@@ -15,8 +15,8 @@ pkg.AddSubPackage("messages")
 pkg.build_shared = False;
 pkg.build_static = True;
 
-env.AppendUnique(CCFLAGS=['-O3'])
-env.AppendUnique(CCFLAGS=['-Wno-unused-local-typedef'])
+#env.AppendUnique(CCFLAGS=['-O3'])
+#env.AppendUnique(CCFLAGS=['-Wno-unused-local-typedef'])
 
 # run the build process
 pkg()
