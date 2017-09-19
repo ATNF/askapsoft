@@ -84,7 +84,7 @@ MSSink::MSSink(const LOFAR::ParameterSet& parset,
     itsParset(parset), itsConfig(config),
     itsPointingTableEnabled(parset.getBool("pointingtable.enable", false)),
     itsPreviousScanIndex(-1),
-    itsFieldRow(-1), itsDataDescRow(-1), itsStreamNumber(0)
+    itsFieldRow(-1), itsDataDescRow(-1), itsStreamNumber(0), itsDataVolumeOtherRanks(0.)
 {
     if (itsConfig.nprocs() == 1) {
         ASKAPLOG_DEBUG_STR(logger, "Constructor - serial mode, initialising");
@@ -141,12 +141,27 @@ void MSSink::process(VisChunk::ShPtr& chunk)
         itsFileName = substituteFileName(itsParset.getString("filename"));
         ASKAPCHECK(itsFileName.size() > 0, "Substituted file name appears to be an empty string");
 
+        // get data volume information from other ranks while we can do it - the shape of the 
+        // data cube is fixed from cycle to cycle, so only need to do it once
+        // it is possible to incorporate this logic into countActiveRanks and avoid another collective call
+        // But this way, the code is easier to read (and it is only executed on the first iteration)
+
+        std::vector<float> dataVolumesPerRank(itsConfig.nprocs(), 0.);
+        dataVolumesPerRank[itsConfig.rank()] = dataVolumeInMB(chunk);
+    
+        const int response = MPI_Allreduce(MPI_IN_PLACE, (void*)dataVolumesPerRank.data(),
+                                   dataVolumesPerRank.size(), MPI_FLOAT, MPI_SUM, MPI_COMM_WORLD);
+        ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Allreduce = "<<response);
+        dataVolumesPerRank[itsConfig.rank()] = 0.;
+        itsDataVolumeOtherRanks = std::accumulate(dataVolumesPerRank.begin(), dataVolumesPerRank.end(), 0.);
+
+
+        // no collective MPI calls are possible below this point
         if (itsStreamNumber < 0) {
             ASKAPLOG_DEBUG_STR(logger, "This rank is not active");
             return;
         }
 
-        // no collective MPI calls are possible below this point
         ASKAPLOG_DEBUG_STR(logger, "Initialising MS, stream number "<<itsStreamNumber);
         initialise();
     }
@@ -353,6 +368,7 @@ int MSSink::countActiveRanks(const bool isActive) const
    // consistency checks
    ASKAPDEBUGASSERT(streamNumber < totalNumber);
    ASKAPDEBUGASSERT(totalNumber <= itsConfig.nprocs());
+   MonitoringSingleton::update<int32_t>("nStreamsMSSink", totalNumber);
    if (totalNumber == itsConfig.nprocs()) {
        ASKAPASSERT(streamNumber == itsConfig.rank());
    }
@@ -999,17 +1015,40 @@ void MSSink::submitMonitoringPoints(askap::cp::common::VisChunk::ShPtr chunk)
     // note, this has been moved from source task. We can have separate monitoring
     // points here and there with different names
     if (chunk->interval() > 0) {
-        const float nVis = chunk->nChannel() * chunk->nRow() * chunk->nPol();
-        // data estimated as 8byte vis, 4byte sigma + nRow * 100 bytes (mdata)
-        const float nDataInMB = (12. * nVis + 100. * chunk->nRow()) / 1048576.;
-        MonitoringSingleton::update("obs.DataRate", nDataInMB / chunk->interval());
+        const float nDataInMB = dataVolumeInMB(chunk);
+        MonitoringSingleton::update("obs.DataRate", (nDataInMB + itsDataVolumeOtherRanks) / chunk->interval());
+        MonitoringSingleton::update("obs.DataRateThisRank", nDataInMB / chunk->interval());
     } else {
        MonitoringSingleton::invalidatePoint("obs.DataRate");
+       MonitoringSingleton::invalidatePoint("obs.DataRateThisRank");
     }
 
     MonitoringSingleton::update<float>("obs.StartFreq", chunk->frequency()[0]/ 1000 / 1000);
     MonitoringSingleton::update<int32_t>("obs.nChan", chunk->nChannel());
     MonitoringSingleton::update<float>("obs.ChanWidth", chunk->channelWidth() / 1000);
+
+    if (itsStreamNumber >= 0) {
+        MonitoringSingleton::update<int32_t>("MSSinkStream", itsStreamNumber);
+    } else {
+        MonitoringSingleton::invalidatePoint("MSSinkStream");
+    }
+}
+
+/// @brief helper method to obtain data volume written
+/// @details Calculate data volume for the current integration/chunk. This is handy
+/// for monitoring when we have multiple data streams
+/// @param[in] chunk the instance of VisChunk to work with (read-only)
+/// @return volume of the current integration in megabytes
+float MSSink::dataVolumeInMB(askap::cp::common::VisChunk::ShPtr& chunk) 
+{
+    if (!chunk) {
+        return 0.;
+    }
+
+    const float nVis = chunk->nChannel() * chunk->nRow() * chunk->nPol();
+    // data estimated as 8byte vis, 4byte sigma + nRow * 100 bytes (mdata)
+    const float nDataInMB = (12. * nVis + 100. * chunk->nRow()) / 1048576.;
+    return nDataInMB;
 }
 
 bool MSSink::equal(const casa::MDirection &dir1, const casa::MDirection &dir2)

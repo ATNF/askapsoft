@@ -82,7 +82,7 @@ using namespace LOFAR;
 
 BeamScatterTask::BeamScatterTask(const LOFAR::ParameterSet& parset,
         const Configuration& config) :
-    itsNStreams(static_cast<int>(parset.getUint32("nstreams", config.nprocs()))),
+    itsNStreams(static_cast<int>(parset.getUint32("nstreams", std::max(config.nprocs()-config.nReceivingProcs(), 2)))),
     itsCommunicator(NULL),
     itsConfig(config),
     itsStreamNumber(-1)

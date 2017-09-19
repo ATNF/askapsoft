@@ -128,6 +128,13 @@ class MSSink : public askap::cp::ingest::ITask,
         /// @param[in] in input number
         /// @return two-element string
         static std::string makeTwoElementString(const casa::uInt in);
+
+        /// @brief helper method to obtain data volume written
+        /// @details Calculate data volume for the current integration/chunk. This is handy
+        /// for monitoring when we have multiple data streams
+        /// @param[in] chunk the instance of VisChunk to work with (read-only)
+        /// @return volume of the current integration in megabytes
+        static float dataVolumeInMB(askap::cp::common::VisChunk::ShPtr& chunk);
           
 
         // Initialises the ANTENNA table
@@ -251,6 +258,9 @@ class MSSink : public askap::cp::ingest::ITask,
         /// @brief name of the MS to write
         /// @details Each active rank writes file under unique name which is stored here
         std::string itsFileName;
+
+        /// @brief data volume in MB per integration handled by other ranks
+        float itsDataVolumeOtherRanks;
 };
 
 }
