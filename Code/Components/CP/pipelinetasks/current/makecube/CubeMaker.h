@@ -36,6 +36,8 @@
 // ASKAPsoft includes
 #include <Common/ParameterSet.h>
 #include <boost/scoped_ptr.hpp>
+#include <boost/config.hpp>
+
 #include <casacore/casa/Arrays/IPosition.h>
 #include <casacore/casa/Quanta/Unit.h>
 #include <casacore/coordinates/Coordinates/CoordinateSystem.h>
@@ -76,7 +78,7 @@ class CubeMaker {
         void recordBeams();
 
         /// @brief Rest frequency of the HI fine-structure line [Hz]
-        static constexpr double REST_FREQ_HI = 1420405751.786;
+        static BOOST_CONSTEXPR_OR_CONST double REST_FREQ_HI = 1420405751.786;
 
     private:
         /// @brief Read the reference coordinate system data
