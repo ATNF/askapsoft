@@ -143,6 +143,9 @@ class BufferedTask : public askap::cp::ingest::ITask {
         /// @brief true, if this is the first cycle
         bool itsFirstCycle;
 
+        /// @brief rank reported in log from the service thread
+        int itsRank;
+
 }; // BufferedTask class
 
 } // ingest

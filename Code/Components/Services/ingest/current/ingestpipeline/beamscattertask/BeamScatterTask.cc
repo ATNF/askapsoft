@@ -156,9 +156,11 @@ void BeamScatterTask::process(VisChunk::ShPtr& chunk)
            trimChunk(chunk, itsRowCounts[0]);
        }
    }
+   /*
    if (chunk) {
        ASKAPLOG_DEBUG_STR(logger, "nRow="<<chunk->nRow()<<" shape: "<<chunk->visibility().shape());
    }
+   */
 }
 
 /// @brief should this task be executed for inactive ranks?
@@ -642,8 +644,9 @@ void BeamScatterTask::broadcastRIFields(askap::cp::common::VisChunk::ShPtr& chun
       ASKAPCHECK(itsHandledRows.second < buffer[1], "Selected row numbers for this stream exceed the number of rows available");
       const casa::uInt expectedSize = itsHandledRows.second - itsHandledRows.first + 1;
       
-      ASKAPLOG_DEBUG_STR(logger, "Initialising chunk for "<<buffer[2]<<" channels, "<<
-                         buffer[3]<<" polarisations and "<<buffer[4]<<" antennas, but for "<<expectedSize<<" rows");
+      //ASKAPLOG_DEBUG_STR(logger, "Initialising chunk for "<<buffer[2]<<" channels, "<<
+      //                   buffer[3]<<" polarisations and "<<buffer[4]<<" antennas, but for "<<expectedSize<<" rows");
+
       chunk.reset(new VisChunk(expectedSize, buffer[2], buffer[3], buffer[4]));
 
       //  3) receive encoded message

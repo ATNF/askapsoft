@@ -64,6 +64,7 @@ BufferedTask::BufferedTask(const LOFAR::ParameterSet& parset,
    itsTask = factory.createTask(config.taskByName(childTaskName));
    ASKAPCHECK(itsTask, "Failed to create task "<<childTaskName);
    itsChildActiveForAllRanks = itsTask->isAlwaysActive();
+   itsRank = config.rank();
 }
 
 /// @brief destructor
@@ -86,22 +87,34 @@ void BufferedTask::parallelThread()
    ASKAPDEBUGASSERT(itsTask);
    // Used for a timeout
    const long ONE_SECOND = 1000000;
-   ASKAPLOG_DEBUG_STR(logger, "Running service thread");
+   ASKAPLOG_DEBUG_STR(logger, "Running service thread in rank = "<<itsRank);
+
+   casa::Timer timer;
+   double timeToGetData = 0.;
+   size_t numberOfFalseWakes = 0;
+   timer.mark();
+
    while (!itsStopRequested) {
       boost::shared_ptr<askap::cp::common::VisChunk> chunk = itsBuffer.next(ONE_SECOND);
+      timeToGetData += timer.real();
       if (chunk) {
-          casa::Timer timer;
+          ASKAPLOG_DEBUG_STR(logger, "Took "<<timeToGetData<<" seconds and "<<numberOfFalseWakes<<" false wakes to get data for rank = "<<itsRank);
+          numberOfFalseWakes = 0;
+          timeToGetData = 0.;
           timer.mark();
  
           itsTask->process(chunk);
-          ASKAPLOG_DEBUG_STR(logger, "Child task "<<itsTask->getName()<<" execution time "<<timer.real()<<" seconds");
+          ASKAPLOG_DEBUG_STR(logger, "Child task "<<itsTask->getName()<<" execution time "<<timer.real()<<" seconds for rank = "<<itsRank);
           
           if (!chunk) {
                ASKAPLOG_WARN_STR(logger, "Child task of the BufferedTask attempted to change the data distribution - not supported");
           }
+      } else {
+          ++numberOfFalseWakes;
       }
+      timer.mark();
    }
-   ASKAPLOG_DEBUG_STR(logger, "Service thread finishing");
+   ASKAPLOG_DEBUG_STR(logger, "Service thread finishing in rank = "<<itsRank);
 }
 
 /// @brief Process single visibility chunk
