@@ -37,6 +37,13 @@
 #include "publisher/InputMessage.h"
 #include "publisher/SpdOutputMessage.h"
 
+#include "publisher/VisMessageBuilder.h"
+#include "publisher/ZmqPublisher.h"
+#include "publisher/ZmqVisControlPort.h"
+
+#include <boost/asio.hpp>
+#include <boost/shared_ptr.hpp>
+
 namespace askap {
 namespace cp {
 namespace vispublisher {
@@ -48,11 +55,23 @@ class PublisherApp : public askap::Application {
         virtual int run(int argc, char* argv[]);
 
     private:
+        /// actual loop of the program receiving and publishing messages
+        void receiveAndPublishLoop(boost::asio::ip::tcp::socket &socket);
 
         /// Build an Spd message for a givn beam and polarisation
         static SpdOutputMessage buildSpdOutputMessage(const InputMessage& in,
                                                       uint32_t beam,
                                                       uint32_t pol);
+
+        /// shared pointer to zmq publisher for vis messages
+        boost::shared_ptr<ZmqPublisher> itsVisMsgPublisher;
+
+        /// shared pointer to zmq publisher for spd messages
+        boost::shared_ptr<ZmqPublisher> itsSpdMsgPublisher;
+
+        /// shared pointer to zmq publisher for control port
+        boost::shared_ptr<ZmqVisControlPort> itsVisCtrlPort;
+
 };
 
 }
