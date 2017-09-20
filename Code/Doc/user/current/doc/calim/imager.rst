@@ -64,7 +64,7 @@ Now you would only need to invoke::
 
 This would only require 4 nodes.
 
-**Update:
+**Update**:
 
 The Channels keyword behaves differently for this imager as compared to cimager in this case it controls how many channels are processed from the measurement sets. If it is omitted the entire set is processed however you can specify:
 

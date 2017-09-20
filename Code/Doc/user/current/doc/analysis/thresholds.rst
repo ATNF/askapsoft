@@ -63,7 +63,7 @@ Threshold-related parameters
 |Selavy.VariableThreshold.boxSize  |int         |50           |The half-width of the box used in the SNR map calculation. The    |
 |                                  |            |             |full width of the box is 2*boxSize+1.                             |
 +----------------------------------+------------+-------------+------------------------------------------------------------------+
-|Selavy.VaraibleThreshold.reuse    |bool        |false        |If true, Selavy will load the signal-to-noise ratio map from the  |
+|Selavy.VariableThreshold.reuse    |bool        |false        |If true, Selavy will load the signal-to-noise ratio map from the  |
 |                                  |            |             |image named by the *SNRimageName* parameter (see table below). If |
 |                                  |            |             |this image does not exist, the calculations will proceed as       |
 |                                  |            |             |normal.                                                           |

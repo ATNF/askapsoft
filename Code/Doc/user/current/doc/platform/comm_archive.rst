@@ -54,7 +54,7 @@ There are also command-line tools available on Galaxy to access the
 archive and retrieve data. While the preferred way is to have the data
 restored to the standard location via the RESTORE.SH script, there are
 situations where downloading the datasets yourself is
-desirable. *(Remember to moderate your usage of /scratch2!)
+desirable. *(Remember to moderate your usage of /scratch2!)*
 
 pshell
 ......

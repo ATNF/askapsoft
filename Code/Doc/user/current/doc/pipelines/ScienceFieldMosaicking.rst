@@ -131,9 +131,10 @@ primary beam at the centre of each image.
 +------------------------------------+------------------------------------+-------------------------+--------------------------------------------------------------+
 | ``FOOTPRINT_PA_REFERENCE``         | ""                                 | none                    | The reference rotation angle for the footprint. This should  |
 |                                    |                                    |                         | only be given if the scheduling block parset does not have   |
-|                                    |                                    |                         | the **src.%d.footprint.rotation** parameter. If              |
-|                                    |                                    |                         | **src.%d.footprint.rotation** is not given, this parameter   |
-|                                    |                                    |                         | defaults to zero.                                            |
+|                                    |                                    |                         | the **common.src.%d.footprint.rotation** parameter, or if    |
+|                                    |                                    |                         | you want to over-ride that value. If not given, the          |
+|                                    |                                    |                         | footprint.rotation value will be used, or (in its absence),  |
+|                                    |                                    |                         | zero.                                                        |
 +------------------------------------+------------------------------------+-------------------------+--------------------------------------------------------------+
 | ``BEAM_FOOTPRINT_NAME``            | diamond                            | none                    | The name of the beam footprint. This needs to be recognised  |
 |                                    |                                    |                         | by the ACES tool *footprint.py*, which generates the offsets |

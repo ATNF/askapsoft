@@ -407,9 +407,15 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                 |                                                        | what it is doing! This makes use of the ACES script           |
 |                                            |                                 |                                                        | *tools/fix_position_offsets.py*.                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``RA_POSITION_OFFSET``                     | 0.                              | none                                                   | The offset in position in the RA direction.                   |
+| ``RA_POSITION_OFFSET``                     | 0.                              | none                                                   | The offset in position in the RA direction, in arcsec. This is|
+|                                            |                                 |                                                        | taken from the **offset_pipeline_params.txt** file produced by|
+|                                            |                                 |                                                        | the continuum validation script, where the sense of the offset|
+|                                            |                                 |                                                        | is **REFERENCE-ASKAP**.                                       |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``DEC_POSITION_OFFSET``                    | 0.                              | none                                                   | The offset in position in the DEC direction.                  |
+| ``DEC_POSITION_OFFSET``                    | 0.                              | none                                                   | The offset in position in the DEC direction, in arcsec. This  |
+|                                            |                                 |                                                        | is taken from the **offset_pipeline_params.txt** file produced|
+|                                            |                                 |                                                        | by the continuum validation script, where the sense of the    |
+|                                            |                                 |                                                        | offset is **REFERENCE-ASKAP**.                                |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | **Application of gains calibration**       |                                 |                                                        |                                                               |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
