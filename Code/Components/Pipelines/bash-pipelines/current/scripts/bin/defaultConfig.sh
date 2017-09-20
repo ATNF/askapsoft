@@ -695,10 +695,12 @@ SPECTRAL_IMSUB_CHAN_SAMPLING=1
 ##############################
 # Linear Mosaicking & beam locations
 #
-# Reference footprint rotation angle. This is used only when the
-# scheduling block parset does not contain the parameter
-# common.target.src%d.footprint.rotation
-#    If not given, same effect as setting to zero.
+# Reference footprint rotation angle. This is meant to stand in for
+# the scheduling block parameter
+# common.target.src%d.footprint.rotation, but if given, it will
+# over-ride that value.
+# If not given, footprint.rotation is used. If that is not present,
+# it has the same effect as setting to zero.
 FOOTPRINT_PA_REFERENCE=""
 #
 # Beam arrangement, used in linmos. These specifications are only used

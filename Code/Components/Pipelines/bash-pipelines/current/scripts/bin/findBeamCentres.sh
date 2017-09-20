@@ -72,10 +72,16 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$NEED_BEAM_CENTRES" == "true" ]; then
         else
             
             # Run schedblock to get footprint information (if present)
-            if [ ! -e "${sbinfo}" ] || [ "$(wc -l "$sbinfo" | awk '{print $1}')" -gt 1 ]; then
-                if [ -e "${sbinfo}" ]; then
+            getSchedblock=true
+            if [ -e "${sbinfo}" ]; then
+                if [ "$(grep -c "${METADATA_IS_GOOD}" "${sbinfo}")" -gt 0 ]; then
+                    # SB info file exists and is complete. Don't need to regenerate.
+                    getSchedblock=false
+                else
                     rm -f "$sbinfo"
                 fi
+            fi
+            if [ "${getSchedblock}" == "true" ]; then
                 loadModule askapcli
                 schedblock info -v -p "${SB_SCIENCE}" > "$sbinfo"
                 err=$?
@@ -111,10 +117,14 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$NEED_BEAM_CENTRES" == "true" ]; then
         else
             if [ "$FOOTPRINT_PA_REFERENCE" != "" ]; then
                 # If here, the user has provided a value for this
-                # reference, but we don't need to use their value. Let
-                # them know.
-                echo "*Note* You provided FOOTPRINT_PA_REFERENCE=$FOOTPRINT_PA_REFERENCE, but we instead use "
-                echo "           src%d.footprint.rotation = $FProtation from the scheduling block parset"
+                # reference. We will use their value, over-riding the
+                # parset value, but we give them a nice warning.
+                echo "###################"
+                echo "# WARNING - you are over-riding footprint.rotation"
+                echo "#  This has a value in the SB parset of ${FProtation}"
+                echo "#  It will be replaced by FOOTPRINT_PA_REFERENCE=${FOOTPRINT_PA_REFERENCE}"
+                echo "###################"
+                FProtation=${FOOTPRINT_PA_REFERENCE}
             fi
         fi
     fi
