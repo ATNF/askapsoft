@@ -1,3 +1,30 @@
+0.19.4 (21 September 2017)
+--------------------------
+
+A patch release covering the pipeline scripts and the processing
+software. The following bugs are fixed:
+
+ * The pipeline configuration parameter FOOTPRINT_PA_REFERENCE will
+   now over-ride the value of footprint.rotation in the scheduling
+   block parset. Additionally, the scheduling block summary metadata
+   files (created in the pipeline working directory) are now not
+   regenerated if they already exist.
+ * The metadata collection in the pipeline now does not fail if a
+   FIELD in the measurement set has 'RA' in its name.
+ * There was a memory leak in Selavy, causing an error to be thrown
+   when dealing with fitted components, specifically when the
+   numGaussFromGuess flag was set to false and a fit failed. The code
+   now falls back to whatever the initial estimate for components was,
+   even if that has fewer than the maximum number indicated by
+   maxNumGauss.
+ * There was a half-pixel offset enforced in the location of the
+   fitted Gaussian when fitting to the restoring beam when
+   imaging. This was resulting in a slightly incorrect restoring
+   beam.
+ * If there are multiple MSs in the SB directory, one can be processed
+   by giving MS_INPUT_SCIENCE its full path, setting the SB_SCIENCE
+   parameter appropriately, and putting DIR_SB="".
+
 0.19.3 (4 September 2017)
 -------------------------
 
