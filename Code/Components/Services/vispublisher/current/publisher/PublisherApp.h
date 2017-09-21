@@ -43,6 +43,7 @@
 
 #include <boost/asio.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/thread/thread.hpp>
 
 namespace askap {
 namespace cp {
@@ -51,6 +52,9 @@ namespace vispublisher {
 /// @brief Implementation of the VisPublisher application.
 class PublisherApp : public askap::Application {
     public:
+        /// constructor
+        PublisherApp();
+ 
         /// Run the application
         virtual int run(int argc, char* argv[]);
 
@@ -63,6 +67,20 @@ class PublisherApp : public askap::Application {
                                                       uint32_t beam,
                                                       uint32_t pol);
 
+        /// initialisation of asynchronous accept
+        void initAsyncAccept();
+
+        /// @brief handler of asynchronous accept
+        /// @details This method is called to accept another connection from ingest
+        /// @param[in] socket socket to use
+        /// @param[in] e error code
+        void asyncAcceptHandler(const boost::asio::ip::tcp::socket &socket, const boost::system::error_code &e);
+
+        /// @brief parallel thread entry point 
+        /// @details Upon new connection is received, a new thread is created and this handler is executed in that thread
+        /// @param[in] socket socket to use
+        void connectionHandler(boost::asio::ip::tcp::socket socket);
+
         /// shared pointer to zmq publisher for vis messages
         boost::shared_ptr<ZmqPublisher> itsVisMsgPublisher;
 
@@ -72,6 +90,16 @@ class PublisherApp : public askap::Application {
         /// shared pointer to zmq publisher for control port
         boost::shared_ptr<ZmqVisControlPort> itsVisCtrlPort;
 
+        /// thread group to manage connections from ingest
+        mutable boost::thread_group itsThreadGroup;
+
+        /// stop flag
+        mutable bool itsStopRequested;
+
+        
+ 
+        /// shared pointer to the next socket to use
+        
 };
 
 }

@@ -129,6 +129,38 @@ void PublisherApp::receiveAndPublishLoop(boost::asio::ip::tcp::socket &socket)
     }
 }
 
+/// constructor
+PublisherApp::PublisherApp() : itsStopRequested(false) 
+{
+}
+
+ /// initialisation of asynchronous accept
+void PublisherApp::initAsyncAccept()
+{
+}
+
+/// @brief handler of asynchronous accept
+/// @details This method is called to accept another connection from ingest
+/// @param[in] socket socket to use
+/// @param[in] e error code
+void PublisherApp::asyncAcceptHandler(const boost::asio::ip::tcp::socket &socket, const boost::system::error_code &e)
+{
+  if (!e) {
+     //itsThreadGroup.create_thread(boost::bind(&PublisherApp::connectionHandler, this, socket)); 
+  }
+  if (!itsStopRequested) {
+      initAsyncAccept();
+  }
+}
+
+/// @brief parallel thread entry point 
+/// @details Upon new connection is received, a new thread is created and this handler is executed in that thread
+/// @param[in] socket socket to use
+void PublisherApp::connectionHandler(boost::asio::ip::tcp::socket socket)
+{
+}
+
+
 int PublisherApp::run(int argc, char* argv[])
 {
     StatReporter stats;
@@ -137,12 +169,14 @@ int PublisherApp::run(int argc, char* argv[])
     const uint16_t spdPort = subset.getUint16("spd.port");
     const uint16_t visPort = subset.getUint16("vis.port");
     const uint16_t visControlPort = subset.getUint16("viscontrol.port");
+    const uint16_t nThreads = subset.getUint16("nthreads",1);
 
     ASKAPLOG_INFO_STR(logger, "ASKAP Vis Publisher " << ASKAP_PACKAGE_VERSION);
     ASKAPLOG_INFO_STR(logger, "Input Port: " << inPort);
     ASKAPLOG_INFO_STR(logger, "Spd Output Port: " << spdPort);
     ASKAPLOG_INFO_STR(logger, "Vis Output Port: " << visPort);
     ASKAPLOG_INFO_STR(logger, "Vis Control Port: " << visControlPort);
+    ASKAPLOG_INFO_STR(logger, "Will setup "<<nThreads<<" threads to receive messages from ingest");
 
     // Setup the ZeroMQ publisher and control objects
     itsSpdMsgPublisher.reset(new ZmqPublisher(spdPort));
@@ -153,6 +187,9 @@ int PublisherApp::run(int argc, char* argv[])
     boost::asio::io_service io_service;
     tcp::acceptor acceptor(io_service, tcp::endpoint(tcp::v4(), inPort));
     acceptor.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
+
+   
+
     tcp::socket socket(io_service);
     casa::Timer timer;
     while (true) {
@@ -163,6 +200,8 @@ int PublisherApp::run(int argc, char* argv[])
         receiveAndPublishLoop(socket);
     }
     ASKAPLOG_INFO_STR(logger, "Stopping ASKAP Vis Publisher");
+    itsStopRequested = true;
+    itsThreadGroup.join_all();
 
     stats.logSummary();
     return 0;
