@@ -24,5 +24,5 @@ setup(name = '%s.%s' % (ROOTPKG, COMPONENT),
       scripts = ["scripts/ingestservice.py"],
 
       # Uncomment if using unit tests
-     test_suite = "nose.collector", install_requires=['nose']
-      )
+     test_suite = "nose.collector"
+)

@@ -34,8 +34,6 @@ class IngestManager(Server):
                                         IceStorm.TopicManagerPrx.checkedCast,
                                         prx)
 
-        logger.debug('Connected to IceStorm')
-
         try:
             topic = manager.retrieve(topicname)
         except IceStorm.NoSuchTopic:
