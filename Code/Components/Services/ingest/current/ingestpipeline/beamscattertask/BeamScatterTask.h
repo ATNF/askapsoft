@@ -166,6 +166,15 @@ class BeamScatterTask : public askap::cp::ingest::ITask {
         /// @param[in] newNRows new number of rows
         static void trimChunk(askap::cp::common::VisChunk::ShPtr& chunk, casa::uInt newNRows);
 
+        /// @brief reduce the number of streams if number of beams is smaller
+        /// @details It is handy to have less output streams automatically, if the number of
+        /// beams in the input stream changes. This method executed during the first iteration
+        /// allows to trim the number of output streams. It uses collectives to ensure consistent
+        /// picture across all rank space. It only changes itsNStreams (can reduce it, but never
+        /// increases it.
+        /// @param[in,out] chunk the instance of VisChunk to work with
+        void reduceNumberOfStreamsIfNecessary(const askap::cp::common::VisChunk::ShPtr& chunk);
+
         /// @brief Number of streams to create
         int itsNStreams;
 

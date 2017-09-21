@@ -57,6 +57,7 @@
 // std includes
 #include <vector>
 #include <map>
+#include <set>
 #include <algorithm>
 
 // Local package includes
@@ -90,8 +91,7 @@ BeamScatterTask::BeamScatterTask(const LOFAR::ParameterSet& parset,
     ASKAPLOG_DEBUG_STR(logger, "Constructor");
     ASKAPCHECK(config.nprocs() > 1,
             "This task is intended to be used in parallel mode only");
-    ASKAPCHECK(itsNStreams > 1, "Beam scatter task doesn't make sense for a single output data stream");
-    ASKAPLOG_INFO_STR(logger, "Will split beam space into "<<itsNStreams<<" data streams");
+    ASKAPCHECK(itsNStreams > 0, "Beam scatter task needs non-zero number of streams");
     // we implicitly assume the following in MPI code
     ASKAPASSERT(sizeof(casa::Bool) == sizeof(char));
 }
@@ -107,8 +107,19 @@ BeamScatterTask::~BeamScatterTask()
 
 void BeamScatterTask::process(VisChunk::ShPtr& chunk)
 {
+   // no operation if only one stream has been selected
+   if (itsNStreams == 1) {
+       return;
+   }
+   // 
    if (itsCommunicator == NULL) {
        // this is the first integration, figure out which ranks are active, cache data structure info, etc
+       reduceNumberOfStreamsIfNecessary(chunk);
+       if (itsNStreams == 1) {
+           // no operation if we have only one output stream
+           return;
+       }
+       ASKAPLOG_INFO_STR(logger, "Will split beam space into "<<itsNStreams<<" data streams");
        itsStreamNumber = countActiveRanks(static_cast<bool>(chunk));
        initialiseSplit(chunk);      
    } else {
@@ -194,6 +205,50 @@ int BeamScatterTask::localRank() const
    
    ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Comm_rank = "<<response);
    return rank;
+}
+
+/// @brief reduce the number of streams if number of beams is smaller
+/// @details It is handy to have less output streams automatically, if the number of
+/// beams in the input stream changes. This method executed during the first iteration
+/// allows to trim the number of output streams. It uses collectives to ensure consistent
+/// picture across all rank space. It only changes itsNStreams (can reduce it, but never
+/// increases it.
+/// @param[in,out] chunk the instance of VisChunk to work with
+void BeamScatterTask::reduceNumberOfStreamsIfNecessary(const askap::cp::common::VisChunk::ShPtr& chunk)
+{
+   ASKAPDEBUGASSERT(itsConfig.rank() < itsConfig.nprocs());
+   // 0 is a flag for inactive rank
+   std::vector<int> numberOfBeamsPerRank(itsConfig.nprocs(), 0);
+   if (chunk) {
+       // get number of beams in this chunk, it is assumed that beam1 == beam2, it is checked later anyway
+       std::set<int> beamSet(chunk->beam1().begin(), chunk->beam1().end());
+       ASKAPCHECK(beamSet.size() > 0, "Beam index vector is empty in the received VisChunk, this shouldn't have happened");
+ 
+       numberOfBeamsPerRank[itsConfig.rank()] = static_cast<int>(beamSet.size());
+   } 
+   const int response = MPI_Allreduce(MPI_IN_PLACE, (void*)numberOfBeamsPerRank.data(),
+        numberOfBeamsPerRank.size(), MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+   ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Allreduce = "<<response);
+
+   // now numberOfBeamsPerRank is consistent across all ranks, check that they're the same (excluding inactive ranks)
+
+   std::set<int> beamSet(numberOfBeamsPerRank.begin(), numberOfBeamsPerRank.end());
+   // the set should only contain either one or two elements if number of beams are consistent across all active ranks
+   ASKAPDEBUGASSERT(beamSet.size() > 0);
+   ASKAPCHECK(beamSet.size() < 3, "VisChunks presented to BeamScatterTask has varying numbers of beams across the rank space - not supported!");
+   // and only one of them should be non-zero
+   std::set<int>::iterator zeroIt = beamSet.find(0);
+   if (zeroIt != beamSet.end()) {
+       // we have zero (i.e. inactive ranks are present) - remove it
+       beamSet.erase(zeroIt);
+   }
+   ASKAPCHECK(beamSet.size() == 1, "VisChunks presented to BeamScatterTask has varying numbers of beams across the rank space - not supported!");
+   const int nBeams = *beamSet.begin();
+   ASKAPDEBUGASSERT(nBeams > 0);
+   if (nBeams < itsNStreams) {
+       ASKAPLOG_INFO_STR(logger, "Reducing the number of requested output data streams ("<<itsNStreams<<") to match the number of available beams ("<<nBeams<<")");
+       itsNStreams = nBeams;
+   }
 }
 
 
