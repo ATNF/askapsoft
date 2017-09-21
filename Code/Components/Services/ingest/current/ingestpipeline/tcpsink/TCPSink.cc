@@ -90,6 +90,7 @@ void TCPSink::process(VisChunk::ShPtr& chunk)
     if (beamSet.size() == 1) {
         if (*beamSet.begin() != 0) {
             ASKAPLOG_DEBUG_STR(logger, "Intentionally skipping beam "<<*beamSet.begin()<<" single beam data");
+            return;
         }
     }
     //
