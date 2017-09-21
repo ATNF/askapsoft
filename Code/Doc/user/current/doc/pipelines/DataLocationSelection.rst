@@ -4,8 +4,20 @@ User Parameters - Data Location & Beam Selection
 The following parameters determine where the measurement sets are that
 hold the data to be processed. The default behaviour is to read the MS
 from the given Scheduling Block (SB) directory. If SB numbers are
-given, this is where to look. If SB numbers are not provided, however,
-the ``MS_INPUT`` variables give the filename for the relevant MS.
+given, this is where to look. The location for these SB directories is
+given by ``DIR_SB``. If SB numbers are not provided, however,
+the ``MS_INPUT`` variables give the filename for the relevant MS. The
+full path must be specified here.
+
+Some recent datasets have been taken in multi-measurement set mode,
+typically one per beam. In this case, the usual pipeline behaviour
+will be to not run the processing. To force it to run on a single one
+of these MSs, you need to give ``MS_INPUT_SCIENCE`` as the full path
+to the MS of choice, and set ``DIR_SB=""``. You will still need to
+provide ``SB_SCIENCE``, as this is used to find certain parts of the
+metadata. Use a similar setup for the bandpass calibrator information
+(``MS_INPUT_1934`` and ``SB_1934``). The pipeline will be upgraded to
+fully handle these multi-MS datasets in an upcoming release.
 
 It may be that the SB you wish to process has been removed from /astro.
 You can follow the instructions on :doc:`../platform/comm_archive` to request
@@ -21,7 +33,8 @@ run the splitting, so that there is a local copy of the individual beam data.
 +======================+=========================================================+============================================================+
 | ``DIR_SB``           | /astro/askaprt/askapops/askap-scheduling-blocks         |Location (on galaxy) of the scheduling blocks. This is used |
 |                      |                                                         |when specifying SB numbers - the default is the standard    |
-|                      |                                                         |location for ASKAP operation.                               |
+|                      |                                                         |location for ASKAP operation. If blank (""), the MS used    |
+|                      |                                                         |will be given by ``MS_INPUT_SCIENCE`` and ``MS_INPUT_1934``.|
 +----------------------+---------------------------------------------------------+------------------------------------------------------------+
 | ``SB_1934``          | no default                                              |SB number for the 1934-638 calibration observation.         |
 +----------------------+---------------------------------------------------------+------------------------------------------------------------+

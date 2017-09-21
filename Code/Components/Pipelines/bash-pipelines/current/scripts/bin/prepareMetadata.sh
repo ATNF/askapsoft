@@ -37,7 +37,7 @@
 if [ "${DO_1934_CAL}" == "true" ]; then
     # This is set to true if the SB MS is absent
     MS_CAL_MISSING=false
-    if [ "${SB_1934}" != "" ]; then
+    if [ "${SB_1934}" != "" ] && [ "${DIR_SB}" != "" ]; then
         sb1934dir="$DIR_SB/$SB_1934"
         msnames=$(find "$sb1934dir" -maxdepth 1 -type d -name "*.ms")
         numMS=$(find "$sb1934dir" -maxdepth 1 -type d -name "*.ms" | wc -l)
@@ -77,7 +77,7 @@ fi
 if [ "${DO_SCIENCE_FIELD}" == "true" ]; then
     # This is set to true if the SB MS is absent
     MS_SCIENCE_MISSING=false
-    if [ "${SB_SCIENCE}" != "" ]; then
+    if [ "${SB_SCIENCE}" != "" ] && [ "${DIR_SB}" != "" ]; then
         sbScienceDir=$DIR_SB/$SB_SCIENCE
         msnames=$(find "$sbScienceDir" -maxdepth 1 -type d -name "*.ms")
         numMS=$(find "$sbScienceDir" -maxdepth 1 -type d -name "*.ms" | wc -l)
