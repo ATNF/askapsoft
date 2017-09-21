@@ -41,6 +41,9 @@
 #include "publisher/ZmqPublisher.h"
 #include "publisher/ZmqVisControlPort.h"
 
+// to be moved to base
+#include "publisher/CircularBuffer.h"
+
 #include <boost/asio.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/thread.hpp>
@@ -54,6 +57,9 @@ class PublisherApp : public askap::Application {
     public:
         /// constructor
         PublisherApp();
+
+        /// destructor
+        ~PublisherApp();
  
         /// Run the application
         virtual int run(int argc, char* argv[]);
@@ -67,19 +73,10 @@ class PublisherApp : public askap::Application {
                                                       uint32_t beam,
                                                       uint32_t pol);
 
-        /// initialisation of asynchronous accept
-        void initAsyncAccept();
-
-        /// @brief handler of asynchronous accept
-        /// @details This method is called to accept another connection from ingest
-        /// @param[in] socket socket to use
-        /// @param[in] e error code
-        void asyncAcceptHandler(const boost::asio::ip::tcp::socket &socket, const boost::system::error_code &e);
-
         /// @brief parallel thread entry point 
-        /// @details Upon new connection is received, a new thread is created and this handler is executed in that thread
-        /// @param[in] socket socket to use
-        void connectionHandler(boost::asio::ip::tcp::socket socket);
+        /// @details This is the code of the parallel thread
+        /// @param[in] stream unique stream number (e.g. for logging and storing data to avoid synchronisation)
+        void parallelThread(int stream);
 
         /// shared pointer to zmq publisher for vis messages
         boost::shared_ptr<ZmqPublisher> itsVisMsgPublisher;
@@ -95,11 +92,9 @@ class PublisherApp : public askap::Application {
 
         /// stop flag
         mutable bool itsStopRequested;
-
         
- 
-        /// shared pointer to the next socket to use
-        
+        // circular buffer handling jobs for individual threads
+        ingest::CircularBuffer<boost::asio::ip::tcp::socket> itsBuffer;
 };
 
 }

@@ -130,34 +130,33 @@ void PublisherApp::receiveAndPublishLoop(boost::asio::ip::tcp::socket &socket)
 }
 
 /// constructor
-PublisherApp::PublisherApp() : itsStopRequested(false) 
+PublisherApp::PublisherApp() : itsStopRequested(false), itsBuffer(36) //subset.getUint16("nthreads",1))
 {
 }
 
- /// initialisation of asynchronous accept
-void PublisherApp::initAsyncAccept()
+/// destructor
+PublisherApp::~PublisherApp() 
 {
+   itsStopRequested = true; 
+   itsThreadGroup.join_all();
 }
 
-/// @brief handler of asynchronous accept
-/// @details This method is called to accept another connection from ingest
-/// @param[in] socket socket to use
-/// @param[in] e error code
-void PublisherApp::asyncAcceptHandler(const boost::asio::ip::tcp::socket &socket, const boost::system::error_code &e)
-{
-  if (!e) {
-     //itsThreadGroup.create_thread(boost::bind(&PublisherApp::connectionHandler, this, socket)); 
-  }
-  if (!itsStopRequested) {
-      initAsyncAccept();
-  }
-}
 
 /// @brief parallel thread entry point 
-/// @details Upon new connection is received, a new thread is created and this handler is executed in that thread
-/// @param[in] socket socket to use
-void PublisherApp::connectionHandler(boost::asio::ip::tcp::socket socket)
+/// @details This is the code of the parallel thread
+/// @param[in] stream unique stream number (e.g. for logging and storing data to avoid synchronisation)
+void PublisherApp::parallelThread(int stream)
 {
+   ASKAPLOG_DEBUG_STR(logger, "Started thread to handle stream = "<<stream);
+   const long ONE_SECOND = 1000000;
+   while (!itsStopRequested) {
+      boost::shared_ptr<tcp::socket> nextConnection = itsBuffer.next(ONE_SECOND);
+      if (nextConnection) {
+          ASKAPLOG_DEBUG_STR(logger, "Assigning incoming connection from: "<<nextConnection->remote_endpoint().address()<<
+                                     " to stream: "<<stream);
+          receiveAndPublishLoop(*nextConnection);
+      }
+   }
 }
 
 
@@ -169,7 +168,7 @@ int PublisherApp::run(int argc, char* argv[])
     const uint16_t spdPort = subset.getUint16("spd.port");
     const uint16_t visPort = subset.getUint16("vis.port");
     const uint16_t visControlPort = subset.getUint16("viscontrol.port");
-    const uint16_t nThreads = subset.getUint16("nthreads",1);
+    const uint16_t nThreads = itsBuffer.capacity();
 
     ASKAPLOG_INFO_STR(logger, "ASKAP Vis Publisher " << ASKAP_PACKAGE_VERSION);
     ASKAPLOG_INFO_STR(logger, "Input Port: " << inPort);
@@ -188,16 +187,20 @@ int PublisherApp::run(int argc, char* argv[])
     tcp::acceptor acceptor(io_service, tcp::endpoint(tcp::v4(), inPort));
     acceptor.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
 
-   
+    // create the fixed number of parallel threads to handle connections
+    for (size_t thread = 0; thread < itsBuffer.capacity(); ++thread) {
+         itsThreadGroup.create_thread(boost::bind(&PublisherApp::parallelThread, this, thread));
+    }
 
-    tcp::socket socket(io_service);
+    //tcp::socket socket(io_service);
     casa::Timer timer;
     while (true) {
-        acceptor.accept(socket);
+        boost::shared_ptr<tcp::socket> socket(new tcp::socket(io_service));
+        ASKAPASSERT(socket);
+        acceptor.accept(*socket);
         ASKAPLOG_DEBUG_STR(logger, "Accepted incoming connection from: "
-                << socket.remote_endpoint().address());
-
-        receiveAndPublishLoop(socket);
+                << socket->remote_endpoint().address());
+        itsBuffer.add(socket);
     }
     ASKAPLOG_INFO_STR(logger, "Stopping ASKAP Vis Publisher");
     itsStopRequested = true;
