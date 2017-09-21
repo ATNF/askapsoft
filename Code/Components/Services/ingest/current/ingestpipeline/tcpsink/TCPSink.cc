@@ -34,6 +34,8 @@
 #include <string>
 #include <stdint.h>
 
+#include <set>
+
 // ASKAPsoft includes
 #include "boost/scoped_ptr.hpp"
 #include "boost/thread/mutex.hpp"
@@ -67,7 +69,7 @@ TCPSink::TCPSink(const LOFAR::ParameterSet& parset,
     : itsParset(parset), itsSocket(itsIOService)
 {
     ASKAPLOG_DEBUG_STR(logger, "Constructor");
-    itsThread.reset(new boost::thread(boost::bind(&TCPSink::runSender, this)));
+    //itsThread.reset(new boost::thread(boost::bind(&TCPSink::runSender, this)));
 }
 
 TCPSink::~TCPSink()
@@ -81,6 +83,24 @@ TCPSink::~TCPSink()
 
 void TCPSink::process(VisChunk::ShPtr& chunk)
 {
+    // temportary hack for commissoning - only proceed if work with beam 0, if it is a single beam file
+    ASKAPASSERT(chunk);
+    /*
+    std::set<casa::uInt> beamSet(chunk->beam1().begin(), chunk->beam1().end());
+    if (beamSet.size() == 1) {
+        if (*beamSet.begin() != 0) {
+            ASKAPLOG_DEBUG_STR(logger, "Intentionally skipping beam "<<*beamSet.begin()<<" single beam data");
+        }
+    }
+    //
+*/
+    if (!itsThread) {
+        itsThread.reset(new boost::thread(boost::bind(&TCPSink::runSender, this)));
+    }
+
+    ASKAPASSERT(itsThread);
+
+
     // 1: Try to acquire the mutex protecting the buffer. Don't wait because we
     // don't want to block the main thread
     boost::mutex::scoped_lock lock(itsMutex, boost::try_to_lock);
