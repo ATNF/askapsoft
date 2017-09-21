@@ -264,9 +264,27 @@ int DelaySolverApp::run(int, char **) {
          // do not follow symlinks, non-recursive
          const casa::Vector<casa::String> dirContent = sbDir.find(casa::Regex::fromPattern("*.ms"),casa::False, casa::False);
          ASKAPCHECK(dirContent.nelements() > 0, "Unable to find a measurement set file in "<<sbDir.path().absoluteName());
-         ASKAPCHECK(dirContent.nelements() == 1, "Multiple measurement sets are present in "<<sbDir.path().absoluteName());
+         int fileIndex = -1;
+         if (dirContent.nelements() != 1) {
+             ASKAPLOG_INFO_STR(logger, "Multiple MSs are found in "<<sbDir.path().absoluteName()<<" - assume one file per beam and index == beam");
+             casa::uInt beam = config().getUint("beam",0);
+             for (casa::uInt i = 0; i<dirContent.nelements(); ++i) {
+                  const casa::String nameTemplate = "_"+utility::toString<casa::uInt>(beam)+".ms";
+                  const size_t pos = dirContent[i].rfind(nameTemplate);
+                  if ((pos != casa::String::npos) && (pos + nameTemplate.size() == dirContent[i].size())) {
+                      ASKAPCHECK(fileIndex == -1, "Multiple measurement sets matching beam = "<<beam<<" are present in "<<sbDir.path().absoluteName());
+                      ASKAPLOG_INFO_STR(logger, "Using "<<dirContent[i]);
+                      fileIndex = static_cast<int>(i);
+                  }
+             }
+             ASKAPCHECK(fileIndex >= 0, "Unable to find MS matching beam = "<<beam<<" selected in "<<sbDir.path().absoluteName());
+         } else {
+           fileIndex = 0;
+         }
+             
+         ASKAPASSERT((fileIndex >= 0) && (fileIndex < static_cast<int>(dirContent.nelements())));
          casa::Path path2ms(path2sb);
-         path2ms.append(dirContent[0]);
+         path2ms.append(dirContent[fileIndex]);
          msName = path2ms.absoluteName();
          // fixed delays will be taken from cpingest.in in the SB directory
          casa::Path path2cpingest(path2sb);
