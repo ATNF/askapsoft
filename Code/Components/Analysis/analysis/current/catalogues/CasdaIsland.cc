@@ -65,8 +65,6 @@ CasdaIsland::CasdaIsland(sourcefitting::RadioSource &obj,
     itsRA(obj.getRA()),
     itsDEC(obj.getDec()),
     itsFreq(obj.getVel()),
-    itsMaj(obj.getMajorAxis()),
-    itsMin(obj.getMinorAxis()),
     itsPA(obj.getPositionAngle()),
     itsFluxInt(obj.getIntegFlux()),
     itsFluxPeak(obj.getPeakFlux()),
@@ -104,6 +102,13 @@ CasdaIsland::CasdaIsland(sourcefitting::RadioSource &obj,
     double intFluxscale = getIntFluxConversionScale(newHead_freq, casda::intFluxUnitContinuum);
     itsFluxInt *= intFluxscale;
 
+    // scale factor for the angular size
+    casa::Unit headerShapeUnits(obj.header().getShapeUnits());
+    casa::Unit shapeUnits(casda::shapeUnit);
+    double shapeScale = casa::Quantity(1., headerShapeUnits).getValue(shapeUnits);
+    itsMaj = obj.getMajorAxis() * shapeScale;
+    itsMin = obj.getMinorAxis() * shapeScale;
+    
     // Re-calculate WCS parameters
     obj.calcWCSparams(newHead_freq);
     itsFreq = obj.getVel() * freqScale;

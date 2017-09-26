@@ -75,6 +75,9 @@ const std::string lamsqUnit = "m2";
 /// Units for Faraday Depth
 const std::string faradayDepthUnit = "rad/m2";
 
+/// Units for angular size on the sky
+const std::string shapeUnit = "arcsec";
+
 /// Units for angle (such as polarisation position angle)
 const std::string angleUnit = "deg";
 
