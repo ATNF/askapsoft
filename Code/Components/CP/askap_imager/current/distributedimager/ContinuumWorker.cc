@@ -200,8 +200,6 @@ void ContinuumWorker::run(void)
     int nchanTotal = nWorkers * nchanpercore / nGroups;
 
 
-
-
     if (localSolver) {
         ASKAPLOG_INFO_STR(logger,"In local solver mode - reprocessing allocations)");
         itsAdvisor->updateComms();
