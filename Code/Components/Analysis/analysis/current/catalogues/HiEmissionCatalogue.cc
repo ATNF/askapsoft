@@ -135,20 +135,20 @@ void HiEmissionCatalogue::defineSpec()
                       "pos.galactic.lat;meta.main", "double", "col_glat_uw", "J2000");
     itsSpec.addColumn("GLAT_UW_ERR", "glat_uw_err", "[arcsec]", 11, casda::precSize,
                       "stat.error;pos.galactic.lat;meta.main", "float", "col_glat_uw_err", "J2000");
-    itsSpec.addColumn("MAJ", "maj_axis", "[arcsec]", 6, casda::precSize,
+    itsSpec.addColumn("MAJ", "maj_axis", "["+casda::shapeUnit+"]", 6, casda::precSize,
                       "askap:src.smajAxis;em.radio", "float", "col_maj_axis", "");
-    itsSpec.addColumn("MIN", "min_axis", "[arcsec]", 6, casda::precSize,
+    itsSpec.addColumn("MIN", "min_axis", "["+casda::shapeUnit+"]", 6, casda::precSize,
                       "askap:src.sminAxis;em.radio", "float", "col_min_axis", "");
     itsSpec.addColumn("PA", "pos_ang", "[deg]", 7, casda::precSize,
                       "askap:src.posAng;em.radio", "float", "col_pos_ang", "");
-    itsSpec.addColumn("MAJFIT", "maj_axis_fit", "[arcsec]", 6, casda::precSize,
+    itsSpec.addColumn("MAJFIT", "maj_axis_fit", "["+casda::shapeUnit+"]", 6, casda::precSize,
                       "askap:src.smajAxis;em.radio;stat.fit", "float", "col_maj_axis_fit", "");
-    itsSpec.addColumn("MAJFIT_ERR", "maj_axis_fit_err", "[arcsec]", 6, casda::precSize,
+    itsSpec.addColumn("MAJFIT_ERR", "maj_axis_fit_err", "["+casda::shapeUnit+"]", 6, casda::precSize,
                       "stat.error;askap:src.smajAxis;em.radio;stat.fit",
                       "float", "col_maj_axis_fit_err", "");
-    itsSpec.addColumn("MINFIT", "min_axis_fit", "[arcsec]", 6, casda::precSize,
+    itsSpec.addColumn("MINFIT", "min_axis_fit", "["+casda::shapeUnit+"]", 6, casda::precSize,
                       "askap:src.sminAxis;em.radio;stat.fit", "float", "col_min_axis_fit", "");
-    itsSpec.addColumn("MINFIT_ERR", "min_axis_fit_err", "[arcsec]", 6, casda::precSize,
+    itsSpec.addColumn("MINFIT_ERR", "min_axis_fit_err", "["+casda::shapeUnit+"]", 6, casda::precSize,
                       "stat.error;askap:src.sminAxis;em.radio;stat.fit",
                       "float", "col_min_axis_fit_err", "");
     itsSpec.addColumn("PAFIT", "pos_ang_fit", "[deg]", 7, casda::precSize,

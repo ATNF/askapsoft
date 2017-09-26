@@ -203,28 +203,28 @@ void ComponentCatalogue::defineSpec()
                       casda::precFlux+2, casda::precFlux,
                       "stat.error;phot.flux.density;em.radio;stat.fit",
                       "float", "col_flux_int_err", "");
-    itsSpec.addColumn("MAJ", "maj_axis", "[arcsec]", casda::precSize+2, casda::precSize,
+    itsSpec.addColumn("MAJ", "maj_axis", "["+casda::shapeUnit+"]", casda::precSize+2, casda::precSize,
                       "phys.angSize.smajAxis;em.radio;stat.fit",
                       "float", "col_maj_axis", "");
-    itsSpec.addColumn("MIN", "min_axis", "[arcsec]", casda::precSize+2, casda::precSize,
+    itsSpec.addColumn("MIN", "min_axis", "["+casda::shapeUnit+"]", casda::precSize+2, casda::precSize,
                       "phys.angSize.sminAxis;em.radio;stat.fit",
                       "float", "col_min_axis", "");
     itsSpec.addColumn("PA", "pos_ang", "[deg]", casda::precSize+2, casda::precSize,
                       "phys.angSize;pos.posAng;em.radio;stat.fit",
                       "float", "col_pos_ang", "");
-    itsSpec.addColumn("MAJERR", "maj_axis_err", "[arcsec]", casda::precSize+2, casda::precSize,
+    itsSpec.addColumn("MAJERR", "maj_axis_err", "["+casda::shapeUnit+"]", casda::precSize+2, casda::precSize,
                       "stat.error;phys.angSize.smajAxis;em.radio",
                       "float", "col_maj_axis_err", "");
-    itsSpec.addColumn("MINERR", "min_axis_err", "[arcsec]", casda::precSize+2, casda::precSize,
+    itsSpec.addColumn("MINERR", "min_axis_err", "["+casda::shapeUnit+"]", casda::precSize+2, casda::precSize,
                       "stat.error;phys.angSize.sminAxis;em.radio",
                       "float", "col_min_axis_err", "");
     itsSpec.addColumn("PAERR", "pos_ang_err", "[deg]", casda::precSize+2, casda::precSize,
                       "stat.error;phys.angSize;pos.posAng;em.radio",
                       "float", "col_pos_ang_err", "");
-    itsSpec.addColumn("MAJDECONV", "maj_axis_deconv", "[arcsec]", casda::precSize+2, casda::precSize,
+    itsSpec.addColumn("MAJDECONV", "maj_axis_deconv", "["+casda::shapeUnit+"]", casda::precSize+2, casda::precSize,
                       "phys.angSize.smajAxis;em.radio;askap:meta.deconvolved",
                       "float", "col_maj_axis_deconv", "");
-    itsSpec.addColumn("MINDECONV", "min_axis_deconv", "[arcsec]", casda::precSize+2, casda::precSize,
+    itsSpec.addColumn("MINDECONV", "min_axis_deconv", "["+casda::shapeUnit+"]", casda::precSize+2, casda::precSize,
                       "phys.angSize.sminAxis;em.radio;askap:meta.deconvolved",
                       "float", "col_min_axis_deconv", "");
     itsSpec.addColumn("PADECONV", "pos_ang_deconv", "[deg]", casda::precSize+2, casda::precSize,

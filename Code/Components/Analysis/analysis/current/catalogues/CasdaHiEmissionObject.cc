@@ -146,6 +146,10 @@ CasdaHiEmissionObject::CasdaHiEmissionObject(sourcefitting::RadioSource &obj,
     casa::Unit imageVelUnits(newHead_vel.WCS().cunit[obj.header().WCS().spec]);
     casa::Unit velUnits(casda::velocityUnit);
     double velScale = casa::Quantity(1., imageVelUnits).getValue(velUnits);
+    // scale factor for the angular size
+    casa::Unit headerShapeUnits(obj.header().getShapeUnits());
+    casa::Unit shapeUnits(casda::shapeUnit);
+    double shapeScale = casa::Quantity(1., headerShapeUnits).getValue(shapeUnits);
 
     double xpeak = obj.getXPeak(), ypeak = obj.getYPeak(), zpeak = obj.getZPeak();
     double xave = obj.getXaverage(), yave = obj.getYaverage(), zave = obj.getZaverage();
@@ -226,8 +230,8 @@ CasdaHiEmissionObject::CasdaHiEmissionObject(sourcefitting::RadioSource &obj,
 
     itsRMSimagecube = obj.noiseLevel() * peakFluxscale;
 
-    itsMajorAxis = obj.getMajorAxis() * 60.; // major axis from Object is in arcmin
-    itsMinorAxis = obj.getMinorAxis() * 60.;
+    itsMajorAxis = obj.getMajorAxis() * shapeScale;
+    itsMinorAxis = obj.getMinorAxis() * shapeScale;
     itsPositionAngle = obj.getPositionAngle();
 
     // From 2D Gaussian fit to the moment-zero image
