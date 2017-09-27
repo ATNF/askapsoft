@@ -67,7 +67,7 @@ opts.Add(BoolVariable("openmp", "Use OpenMP", False))
 opts.Add(BoolVariable("squash", "Squash some compiler warnings",False))
 opts.Add(BoolVariable("usepgi", "Use Portland Group Compiler",False))
 opts.Add(BoolVariable("cpp11", "Use c++11",False))
-opts.Add(BoolVariable("nocpp11", "Use c++11 (old flag)",False))
+opts.Add(BoolVariable("oldcpp11", "Use c++11 (old flag)",False))
 opts.Add(BoolVariable("update", "svn update?", False))
 opts.Update(env)
 
@@ -82,7 +82,7 @@ env.AppendUnique(CCFLAGS=['-DASKAP_DEBUG'])
 # compatibility warnings
 if env['cpp11']:
     env.AppendUnique(CCFLAGS=['-std=c++11'])
-if env['nocpp11']:
+if env['oldcpp11']:
     env.AppendUnique(CCFLAGS=['-std=c++0x'])
 
 env.AppendUnique(CCFLAGS=['-fdiagnostics-show-option'])
