@@ -114,11 +114,11 @@ class CasdaComponent : public CatalogueEntry {
         /// the COLNAME key. If a key is given that was not expected,
         /// an Askap Error is thrown. Column must be non-const as it
         /// could change.
-    void checkCol(duchamp::Catalogues::Column &column, bool checkTitle);
+        void checkCol(duchamp::Catalogues::Column &column, bool checkTitle);
 
         /// Perform the column check for all colums in
-        /// specification. 
-    void checkSpec(duchamp::Catalogues::CatalogueSpecification &spec, bool checkTitle);
+        /// specification.
+        void checkSpec(duchamp::Catalogues::CatalogueSpecification &spec, bool checkTitle);
 
         /// Write the ellipse showing the component shape to the given
         /// Annotation file. This allows writing to Karma, DS9 or CASA
@@ -178,19 +178,19 @@ class CasdaComponent : public CatalogueEntry {
         /// The position angle of the fitted major axis
         casda::ValueError itsPA;
         /// The major axis after deconvolution
-        double itsMaj_deconv;
+        casda::ValueError itsMaj_deconv;
         /// The minor axis after deconvolution
-        double itsMin_deconv;
+        casda::ValueError itsMin_deconv;
         /// The position angle of the major axis after deconvolution
-        double itsPA_deconv;
+        casda::ValueError itsPA_deconv;
         /// The chi-squared value from the fit
         double itsChisq;
         /// The RMS of the residual from the fit
         double itsRMSfit;
         /// The fitted spectral index of the component
-        double itsAlpha;
+        casda::ValueError itsAlpha;
         /// The fitted spectral curvature of the component
-        double itsBeta;
+        casda::ValueError itsBeta;
         /// The local RMS noise of the image surrounding the component
         double itsRMSimage;
         /// A flag indicating whether more than one component was
@@ -199,8 +199,8 @@ class CasdaComponent : public CatalogueEntry {
         /// A flag indicating the parameters of the component are from
         /// the initial estimate, and not the result of the fit
         unsigned int itsFlagGuess;
-        /// A yet-to-be-identified quality flag
-        unsigned int itsFlag3;
+        /// A flag indicating origin of spectral indices: true=from Taylor terms, false=from cube
+        unsigned int itsFlagSpectralIndexOrigin;
         /// A yet-to-be-identified quality flag
         unsigned int itsFlag4;
         /// A comment string, not used as yet.

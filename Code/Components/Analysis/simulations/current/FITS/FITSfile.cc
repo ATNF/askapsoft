@@ -71,6 +71,7 @@
 #include <casacore/casa/Arrays/ArrayBase.h>
 
 #include <gsl/gsl_multifit.h>
+#include <gsl/gsl_multifit_nlin.h>
 
 #include <wcslib/wcs.h>
 #include <wcslib/wcshdr.h>
@@ -890,6 +891,33 @@ void FITSfile::convolveWithBeam()
             }
         }
 
+        // smooth taylor term images
+        const size_t xlen = itsAxes[0];
+        const size_t ylen = itsAxes[1];
+        for (int term=0; term<itsMaxTaylorTerm;term++) {
+            casa::IPosition outpos(itsDim, 0);
+            for (size_t y = 0; y < ylen; y++) {
+                outpos[1] = y;
+                for (size_t x = 0; x < xlen; x++) {
+                    outpos[0] = x;
+                    image[x+xlen*y] = itsTTmaps[term](outpos);
+                }
+            }
+            boost::scoped_ptr<float>
+                newArray(smoother.smooth(image.data(), itsAxes[0],
+                                         itsAxes[1], SCALEBYCOVERAGE));
+            
+            for (size_t y = 0; y < ylen; y++) {
+                outpos[1] = y;
+                for (size_t x = 0; x < xlen; x++) {
+                    outpos[0] = x;
+                    itsTTmaps[term](outpos) = newArray.get()[x+xlen*y] / scaleFactor;
+                }
+            }
+        }
+            
+            
+
         ASKAPLOG_DEBUG_STR(logger, "Convolving done.");
 
     }
@@ -1306,6 +1334,70 @@ void FITSfile::createTaylorTermImages(std::string nameBase,
 
 }
 
+struct data {
+    size_t ndata;
+    double * xdat;
+    double * ydat;
+};
+     
+
+int taylor_f (const gsl_vector * p, void *data,  gsl_vector * f)
+{
+    // Function to be fit - F = f0 * x^(alpha + beta*x) where x=(nu/nu0)
+    
+  size_t n = ((struct data *)data)->ndata;
+  double *xdat = ((struct data *)data)->xdat;
+  double *ydat = ((struct data *)data)->ydat;
+
+  double f0 = gsl_vector_get (p, 0);
+  double alpha = gsl_vector_get (p, 1);
+  double beta = gsl_vector_get (p, 2);
+
+  size_t i;
+
+  for (i = 0; i < n; i++)
+    {
+        // Model Yi = f0 * x^(alpha + beta*x) 
+      double Yi = f0 * pow(xdat[i],alpha+beta*xdat[i]);
+      gsl_vector_set (f, i, Yi - ydat[i]);
+    }
+
+  return GSL_SUCCESS;
+}
+
+int taylor_df (const gsl_vector * p, void *data,  gsl_matrix * J)
+{
+  size_t n = ((struct data *)data)->ndata;
+  double *xdat = ((struct data *)data)->xdat;
+
+  double f0 = gsl_vector_get (p, 0);
+  double alpha = gsl_vector_get (p, 1);
+  double beta = gsl_vector_get (p, 2);
+
+  size_t i;
+
+  for (i = 0; i < n; i++)
+    {
+      // Jacobian matrix J(i,j) = dfi / dxj, 
+      // where fi = (Yi - yi)/sigma[i],      
+      //       Yi = f0 * x^(alpha + beta*x)   
+      // and the xj are the parameters (f0,alpha,beta)
+      double e = pow(xdat[i],alpha+beta*xdat[i]);
+      double logx = log(xdat[i]);
+      gsl_matrix_set (J, i, 0, e); 
+      gsl_matrix_set (J, i, 1, f0*logx*e);
+      gsl_matrix_set (J, i, 2, f0*logx*e*xdat[i]);
+    }
+  return GSL_SUCCESS;
+}
+
+int taylor_fdf (const gsl_vector * x, void *data, gsl_vector * f, gsl_matrix * J)
+{
+    taylor_f (x, data, f);
+    taylor_df (x, data, J);
+    
+    return GSL_SUCCESS;
+}
 
 void FITSfile::defineTaylorTerms()
 {
@@ -1333,28 +1425,35 @@ void FITSfile::defineTaylorTerms()
             itsTTmaps[i] = casa::Array<float>(shape, 0.);
         }
         const size_t ndata = itsAxes[itsWCS->spec];
-        const size_t degree = itsMaxTaylorTerm + 3;
+        // const size_t degree = itsMaxTaylorTerm + 3;
         double chisq;
-        gsl_matrix *xdat, *cov;
-        gsl_vector *ydat, *w, *c;
-        xdat = gsl_matrix_alloc(ndata, degree);
-        ydat = gsl_vector_alloc(ndata);
-        w = gsl_vector_alloc(ndata);
-        c = gsl_vector_alloc(degree);
-        cov = gsl_matrix_alloc(degree, degree);
+        // gsl_matrix *xdat, *cov;
+        // gsl_vector *ydat, *w, *c;
+        // xdat = gsl_matrix_alloc(ndata, degree);
+        // ydat = gsl_vector_alloc(ndata);
+        // w = gsl_vector_alloc(ndata);
+        // c = gsl_vector_alloc(degree);
+        // cov = gsl_matrix_alloc(degree, degree);
+
+        double xdat[ndata],ydat[ndata];
+        struct data d = { ndata,xdat, ydat };
+        const size_t p=3;
+        gsl_matrix *covar = gsl_matrix_alloc (p, p);
+        int status;
 
         for (size_t i = 0; i < ndata; i++) {
             // Set the frequency values, normalised by the reference frequency nuZero.
             // Note that the fitting is done in log-space (and **NOT** log10-space!!)
             double freq = itsWCS->crval[spec] +
                           (i - itsWCS->crpix[spec]) * itsWCS->cdelt[spec];
-            float logfreq = log(freq / itsBaseFreq);
-            float xval = 1.;
-            for (size_t d = 0; d < degree; d++) {
-                gsl_matrix_set(xdat, i, d, xval);
-                xval *= logfreq;
-            }
-            gsl_vector_set(w, i, 1.);
+            xdat[i] = freq/itsBaseFreq;
+            // float logfreq = log(freq / itsBaseFreq);
+            // float xval = 1.;
+            // for (size_t d = 0; d < degree; d++) {
+            //     gsl_matrix_set(xdat, i, d, xval);
+            //     xval *= logfreq;
+            // }
+            // gsl_vector_set(w, i, 1.);
         }
 
         const size_t xlen = itsAxes[itsWCS->lng];
@@ -1379,16 +1478,65 @@ void FITSfile::defineTaylorTerms()
                 if (itsArray[pos] > 1.e-20) {
                     for (size_t i = 0; i < ndata; i++) {
                         // assume just first stokes axis
-                        gsl_vector_set(ydat, i, log(itsArray[pos + i * xlen * ylen * stlen]));
+//                        gsl_vector_set(ydat, i, log(itsArray[pos + i * xlen * ylen * stlen]));
+                        // gsl_vector_set(ydat, i, itsArray[pos + i * xlen * ylen * stlen]));
+                        ydat[i] = itsArray[pos + i * xlen * ylen * stlen];
                     }
-                    gsl_multifit_linear_workspace * work = gsl_multifit_linear_alloc(ndata,
-                                                           degree);
-                    gsl_multifit_wlinear(xdat, w, ydat, c, cov, &chisq, work);
-                    gsl_multifit_linear_free(work);
+                    // gsl_multifit_linear_workspace * work = gsl_multifit_linear_alloc(ndata,
+                    //                                        degree);
+                    // gsl_multifit_wlinear(xdat, w, ydat, c, cov, &chisq, work);
+                    // gsl_multifit_linear_free(work);
 
-                    float Izero = exp(gsl_vector_get(c, 0));
-                    float alpha = gsl_vector_get(c, 1);
-                    float beta = gsl_vector_get(c, 2);
+                    double x_init[3] = { ydat[ndata/2], 0.0, 0.0 }; /* starting values */
+                    gsl_vector_view x = gsl_vector_view_array (x_init, p);
+                    // gsl_multifit_nlin_workspace *w;
+                    gsl_multifit_function_fdf f;
+                    /* define the function to be minimized */
+                    f.f = taylor_f;
+                    f.df = taylor_df;  
+                    f.fdf = taylor_fdf;
+                    f.n = ndata;
+                    f.p = p;
+                    f.params = &d;
+                    // gsl_multifit_nlin_parameters fdf_params = gsl_multifit_nlin_default_parameters();
+
+                    const gsl_multifit_fdfsolver_type *T;
+                    gsl_multifit_fdfsolver *s;
+                    T = gsl_multifit_fdfsolver_lmsder;
+                    s = gsl_multifit_fdfsolver_alloc (T, ndata, p);
+                    gsl_multifit_fdfsolver_set (s, &f, &x.vector);
+                    unsigned int iter=0;
+                    do
+                    {
+                        iter++;
+                        status = gsl_multifit_fdfsolver_iterate (s);
+                        if (status)
+                            break;
+                        status = gsl_multifit_test_delta (s->dx, s->x,
+                                                          1e-4, 1e-4);
+                    }
+                    while (status == GSL_CONTINUE && iter < 5);
+     
+                    gsl_multifit_covar (s->J, 0.0, covar);
+
+
+// /* allocate workspace with default parameters */
+//                     w = gsl_multifit_nlin_alloc (T, &fdf_params, n, p);
+                    
+//                     /* initialize solver with starting point and weights */
+//                     gsl_multifit_nlin_winit (&x.vector, &wts.vector, &fdf, w);
+                    
+//                     /* solve the system with a maximum of 20 iterations */
+//                     status = gsl_multifit_nlin_driver(5, xtol, gtol, ftol,
+//                                                          callback, NULL, &info, w);
+
+                    
+                    // float Izero = exp(gsl_vector_get(c, 0));
+                    // float alpha = gsl_vector_get(c, 1);
+                    // float beta = gsl_vector_get(c, 2);
+                    float Izero = gsl_vector_get(s->x, 0);
+                    float alpha = gsl_vector_get(s->x, 1);
+                    float beta = gsl_vector_get(s->x, 2);
                     itsTTmaps[0](outpos) = Izero;
                     if (itsMaxTaylorTerm >= 1) {
                         itsTTmaps[1](outpos) = Izero * alpha;
@@ -1401,11 +1549,11 @@ void FITSfile::defineTaylorTerms()
             }
         }
 
-        gsl_matrix_free(cov);
-        gsl_vector_free(c);
-        gsl_vector_free(w);
-        gsl_vector_free(ydat);
-        gsl_matrix_free(xdat);
+        // gsl_matrix_free(cov);
+        // gsl_vector_free(c);
+        // gsl_vector_free(w);
+        // gsl_vector_free(ydat);
+        // gsl_matrix_free(xdat);
 
     }
 }

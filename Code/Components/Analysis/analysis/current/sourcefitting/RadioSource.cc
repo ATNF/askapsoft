@@ -167,6 +167,8 @@ RadioSource& RadioSource::operator= (const RadioSource& src)
     itsBestFitType = src.itsBestFitType;
     itsAlphaMap = src.itsAlphaMap;
     itsBetaMap = src.itsBetaMap;
+    itsAlphaError = src.itsAlphaError;
+    itsBetaError = src.itsBetaError;
     return *this;
 }
 
@@ -180,11 +182,15 @@ void RadioSource::initialiseAlphaBetaMaps()
 
     for (type = typelist.begin(); type < typelist.end(); type++) {
         itsAlphaMap[*type] = std::vector<double>(1, defaultAlpha);
+        itsAlphaError[*type] = std::vector<double>(1, 0.);
         itsBetaMap[*type] = std::vector<double>(1, defaultBeta);
+        itsBetaError[*type] = std::vector<double>(1, 0.);
     }
 
     itsAlphaMap["best"] = std::vector<double>(1, defaultAlpha);
+    itsAlphaError["best"] = std::vector<double>(1, 0.);
     itsBetaMap["best"] = std::vector<double>(1, defaultBeta);
+    itsBetaError["best"] = std::vector<double>(1, 0.);
 
 }
 
@@ -1150,8 +1156,10 @@ void RadioSource::findSpectralTerm(std::string imageName, int term, bool doCalc)
             int nfits = itsBestFitMap[*type].numFits();
             if (term == 1) {
                 itsAlphaMap[*type] = std::vector<double>(nfits, defaultAlpha);
+                itsAlphaError[*type] = std::vector<double>(nfits, 0.);
             } else if (term == 2) {
                 itsBetaMap[*type] = std::vector<double>(nfits, defaultBeta);
+                itsBetaError[*type] = std::vector<double>(nfits, 0.);
             }
         }
 
@@ -1206,6 +1214,7 @@ void RadioSource::findSpectralTerm(std::string imageName, int term, bool doCalc)
 
         for (type = typelist.begin(); type < typelist.end(); type++) {
             std::vector<double> termValues(itsBestFitMap[*type].numGauss(), 0.);
+            std::vector<double> termErrors(itsBestFitMap[*type].numGauss(), 0.);
 
             if (itsBestFitMap[*type].isGood() || itsBestFitMap[*type].fitIsGuess()) {
 
@@ -1230,15 +1239,24 @@ void RadioSource::findSpectralTerm(std::string imageName, int term, bool doCalc)
 
                     for (unsigned int i = 0; i < itsBestFitMap[*type].numGauss(); i++) {
                         double Iref = itsBestFitMap[*type].gaussian(i).flux();
+                        double Iref_err = itsBestFitMap[*type].errors(i)[0];
                         if (term == 1) {
                             termValues[i] = fit.gaussian(i).flux() / Iref;
+                            termErrors[i] = abs(termValues[i]) *
+                                sqrt(Iref_err*Iref_err/(Iref*Iref) +
+                                     fit.error(i)[0]*fit.error(i)[0]/(fit.gaussian(i).flux()*fit.gaussian(i).flux()));
                         } else if (term == 2) {
                             double alpha = itsAlphaMap[*type][i];
+                            double alpha_err = itsAlphaError[*type][i];
                             termValues[i] = fit.gaussian(i).flux() / Iref -
                                             0.5 * alpha * (alpha - 1.);
+                            termErrors[i] = sqrt(fit.error(i)[0]*fit.error(i)[0]/(Iref*Iref) +
+                                                 fit.error(i)[0]*fit.error(i)[0]*fit.gaussian(i).flux()*fit.gaussian(i).flux()/(Iref*Iref*Iref*Iref) +
+                                                 (0.5-alpha)*(0.5-alpha)*alpha_err*alpha_err);
                         }
                         ASKAPLOG_DEBUG_STR(logger,
                                            "   Component " << i << ": " << termValues[i] <<
+                                           " +- " << termErrors[i] <<
                                            ", calculated with fitted flux of " <<
                                            fit.gaussian(i).flux() <<
                                            ", peaking at " << fit.gaussian(i).height() <<
@@ -1250,8 +1268,10 @@ void RadioSource::findSpectralTerm(std::string imageName, int term, bool doCalc)
 
             if (term == 1) {
                 itsAlphaMap[*type] = termValues;
+                itsAlphaError[*type] = termErrors;
             } else if (term == 2) {
                 itsBetaMap[*type] = termValues;
+                itsBetaError[*type] = termErrors;
             }
         }
 
@@ -1261,8 +1281,10 @@ void RadioSource::findSpectralTerm(std::string imageName, int term, bool doCalc)
 
     if (term == 1) {
         itsAlphaMap["best"] = itsAlphaMap[itsBestFitType];
+        itsAlphaError["best"] = itsAlphaError[itsBestFitType];
     } else if (term == 2) {
         itsBetaMap["best"] = itsBetaMap[itsBestFitType];
+        itsBetaError["best"] = itsBetaError[itsBestFitType];
     }
 
 }
@@ -1580,11 +1602,20 @@ LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& blob, RadioSource& src)
         blob << fit->second;
     }
 
+    std::map<std::string, std::vector<double> >::iterator val;
     size = src.itsAlphaMap.size();
     blob << size;
-    std::map<std::string, std::vector<double> >::iterator val;
-
     for (val = src.itsAlphaMap.begin(); val != src.itsAlphaMap.end(); val++) {
+        blob << val->first;
+        size = val->second.size();
+        blob << size;
+
+        for (int i = 0; i < size; i++) blob << val->second[i];
+    }
+
+    size = src.itsAlphaError.size();
+    blob << size;
+    for (val = src.itsAlphaError.begin(); val != src.itsAlphaError.end(); val++) {
         blob << val->first;
         size = val->second.size();
         blob << size;
@@ -1594,8 +1625,17 @@ LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& blob, RadioSource& src)
 
     size = src.itsBetaMap.size();
     blob << size;
-
     for (val = src.itsBetaMap.begin(); val != src.itsBetaMap.end(); val++) {
+        blob << val->first;
+        size = val->second.size();
+        blob << size;
+
+        for (int i = 0; i < size; i++) blob << val->second[i];
+    }
+
+    size = src.itsBetaError.size();
+    blob << size;
+    for (val = src.itsBetaError.begin(); val != src.itsBetaError.end(); val++) {
         blob << val->first;
         size = val->second.size();
         blob << size;
@@ -1723,9 +1763,36 @@ LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream &blob, RadioSource& src)
         blob >> s >> vecsize;
         std::vector<double> vec(vecsize);
 
+        for (int i = 0; i < vecsize; i++){
+            blob >> vec[i];
+            ASKAPLOG_DEBUG_STR(logger, "alpha error " << vec[i]);
+        }
+
+        src.itsAlphaError[s] = vec;
+    }
+
+    blob >> size;
+
+    for (int i = 0; i < size; i++) {
+        int32 vecsize;
+        blob >> s >> vecsize;
+        std::vector<double> vec(vecsize);
+
         for (int i = 0; i < vecsize; i++) blob >> vec[i];
 
         src.itsBetaMap[s] = vec;
+    }
+
+    blob >> size;
+
+    for (int i = 0; i < size; i++) {
+        int32 vecsize;
+        blob >> s >> vecsize;
+        std::vector<double> vec(vecsize);
+
+        for (int i = 0; i < vecsize; i++) blob >> vec[i];
+
+        src.itsBetaError[s] = vec;
     }
 
     int ndim, x1, y1, z1, x2, y2, z2;

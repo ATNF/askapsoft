@@ -305,7 +305,16 @@ void FITSparallel::processSources()
         ASKAPLOG_DEBUG_STR(logger, "Worker #" << itsComms.rank() << ": About to add sources");
         itsFITSfile->processSources();
     }
+    
 }
+
+void FITSparallel::makeTaylorTerms()
+{
+   if (this->itsFITSfile->createTaylorTerms()) {
+        this->itsFITSfile->defineTaylorTerms();
+    }
+
+} 
 
 void FITSparallel::convolveWithBeam()
 {
@@ -319,10 +328,6 @@ void FITSparallel::convolveWithBeam()
 
 void FITSparallel::output()
 {
-    if (this->itsFITSfile->createTaylorTerms()) {
-        this->itsFITSfile->defineTaylorTerms();
-    }
-
     if (this->itsFlagStagedWriting) {
         this->stagedWriting();
     } else {

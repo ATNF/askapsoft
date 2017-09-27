@@ -63,14 +63,14 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
                                const unsigned int fitNumber,
                                const std::string fitType):
     CatalogueEntry(parset),
-    itsFlag3(0),
+    itsFlagSpectralIndexOrigin(0),
     itsFlag4(0),
     itsComment("")
 {
     // check that we are requesting a valid fit number
     ASKAPCHECK(fitNumber < obj.numFits(fitType),
-               "For fitType="<<fitType<<", fitNumber=" << fitNumber << ", but source " << obj.getID() <<
-               "("<<obj.getName()<<") only has " << obj.numFits(fitType));
+               "For fitType=" << fitType << ", fitNumber=" << fitNumber << ", but source " << obj.getID() <<
+               "(" << obj.getName() << ") only has " << obj.numFits(fitType));
 
     sourcefitting::FitResults results = obj.fitResults(fitType);
 
@@ -130,22 +130,31 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
                               + beamScaling * ((itsMaj.error() * itsMaj.error()) / (itsMaj.value() * itsMaj.value()) +
                                       (itsMaj.error() * itsMaj.error()) / (itsMaj.value() * itsMaj.value())));
 
-    std::vector<Double> deconv = analysisutilities::deconvolveGaussian(gauss,
+    std::vector<Double> deconv = analysisutilities::deconvolveGaussian(gauss, errors,
                                  newHead_freq.getBeam());
-    itsMaj_deconv = deconv[0] * pixscale;
-    itsMin_deconv = deconv[1] * pixscale;
-    itsPA_deconv = deconv[2] * 180. / M_PI;
+    itsMaj_deconv.value() = deconv[0] * pixscale;
+    itsMin_deconv.value() = deconv[1] * pixscale;
+    itsPA_deconv.value() = deconv[2] * 180. / M_PI;
+    itsMaj_deconv.error() = deconv[3] * pixscale;
+    itsMin_deconv.error() = deconv[4] * pixscale;
+    itsPA_deconv.error() = deconv[5] * 180. / M_PI;
 
     itsChisq = results.chisq();
     itsRMSfit = results.RMS() * peakFluxscale;
 
-    itsAlpha = obj.alphaValues(fitType)[fitNumber];
-    itsBeta = obj.betaValues(fitType)[fitNumber];
+    itsAlpha.value() = obj.alphaValues(fitType)[fitNumber];
+    itsBeta.value() = obj.betaValues(fitType)[fitNumber];
+    itsAlpha.error() = obj.alphaErrors(fitType)[fitNumber];
+    itsBeta.error() = obj.betaErrors(fitType)[fitNumber];
 
     itsRMSimage = obj.noiseLevel() * peakFluxscale;
 
     itsFlagGuess = results.fitIsGuess() ? 1 : 0;
     itsFlagSiblings = obj.numFits(fitType) > 1 ? 1 : 0;
+
+    /// @todo - fix this to respond to how alpha/beta came about. Only
+    /// one way to calculate them at the moment.
+    itsFlagSpectralIndexOrigin = 1;
 
     // These are the additional parameters not used in the CASDA
     // component catalogue v1.7:
@@ -215,12 +224,12 @@ const double CasdaComponent::freq(std::string unit)
 
 const double CasdaComponent::alpha()
 {
-    return itsAlpha;
+    return itsAlpha.value();
 }
 
 const double CasdaComponent::beta()
 {
-    return itsBeta;
+    return itsBeta.value();
 }
 
 
@@ -279,19 +288,29 @@ void CasdaComponent::printTableEntry(std::ostream &stream,
     } else if (type == "PAERR") {
         column.printEntry(stream, itsPA.error());
     } else if (type == "MAJDECONV") {
-        column.printEntry(stream, itsMaj_deconv);
+        column.printEntry(stream, itsMaj_deconv.value());
     } else if (type == "MINDECONV") {
-        column.printEntry(stream, itsMin_deconv);
+        column.printEntry(stream, itsMin_deconv.value());
     } else if (type == "PADECONV") {
-        column.printEntry(stream, itsPA_deconv);
+        column.printEntry(stream, itsPA_deconv.value());
+    } else if (type == "MAJDECONVERR") {
+        column.printEntry(stream, itsMaj_deconv.error());
+    } else if (type == "MINDECONVERR") {
+        column.printEntry(stream, itsMin_deconv.error());
+    } else if (type == "PADECONVERR") {
+        column.printEntry(stream, itsPA_deconv.error());
     } else if (type == "CHISQ") {
         column.printEntry(stream, itsChisq);
     } else if (type == "RMSFIT") {
         column.printEntry(stream, itsRMSfit);
     } else if (type == "ALPHA") {
-        column.printEntry(stream, itsAlpha);
+        column.printEntry(stream, itsAlpha.value());
     } else if (type == "BETA") {
-        column.printEntry(stream, itsBeta);
+        column.printEntry(stream, itsBeta.value());
+    } else if (type == "ALPHAERR") {
+        column.printEntry(stream, itsAlpha.error());
+    } else if (type == "BETAERR") {
+        column.printEntry(stream, itsBeta.error());
     } else if (type == "RMSIMAGE") {
         column.printEntry(stream, itsRMSimage);
     } else if (type == "FLAG1") {
@@ -299,7 +318,7 @@ void CasdaComponent::printTableEntry(std::ostream &stream,
     } else if (type == "FLAG2") {
         column.printEntry(stream, itsFlagGuess);
     } else if (type == "FLAG3") {
-        column.printEntry(stream, itsFlag3);
+        column.printEntry(stream, itsFlagSpectralIndexOrigin);
     } else if (type == "FLAG4") {
         column.printEntry(stream, itsFlag4);
     } else if (type == "COMMENT") {
@@ -331,7 +350,7 @@ void CasdaComponent::printTableEntry(std::ostream &stream,
 
 void CasdaComponent::checkCol(duchamp::Catalogues::Column &column, bool checkTitle)
 {
-    bool checkPrec=false;
+    bool checkPrec = false;
     std::string type = column.type();
     if (type == "ISLAND") {
         column.check(itsIslandID, checkTitle);
@@ -374,19 +393,29 @@ void CasdaComponent::checkCol(duchamp::Catalogues::Column &column, bool checkTit
     } else if (type == "PAERR") {
         column.check(itsPA.error(), checkTitle, checkPrec);
     } else if (type == "MAJDECONV") {
-        column.check(itsMaj_deconv, checkTitle, checkPrec);
+        column.check(itsMaj_deconv.value(), checkTitle, checkPrec);
     } else if (type == "MINDECONV") {
-        column.check(itsMin_deconv, checkTitle, checkPrec);
+        column.check(itsMin_deconv.value(), checkTitle, checkPrec);
     } else if (type == "PADECONV") {
-        column.check(itsPA_deconv, checkTitle, checkPrec);
+        column.check(itsPA_deconv.value(), checkTitle, checkPrec);
+    } else if (type == "MAJDECONVERR") {
+        column.check(itsMaj_deconv.error(), checkTitle, checkPrec);
+    } else if (type == "MINDECONVERR") {
+        column.check(itsMin_deconv.error(), checkTitle, checkPrec);
+    } else if (type == "PADECONVERR") {
+        column.check(itsPA_deconv.error(), checkTitle, checkPrec);
     } else if (type == "CHISQ") {
         column.check(itsChisq, checkTitle, checkPrec);
     } else if (type == "RMSFIT") {
         column.check(itsRMSfit, checkTitle, checkPrec);
     } else if (type == "ALPHA") {
-        column.check(itsAlpha, checkTitle, checkPrec);
+        column.check(itsAlpha.value(), checkTitle, checkPrec);
     } else if (type == "BETA") {
-        column.check(itsBeta, checkTitle, checkPrec);
+        column.check(itsBeta.value(), checkTitle, checkPrec);
+    } else if (type == "ALPHAERR") {
+        column.check(itsAlpha.error(), checkTitle, checkPrec);
+    } else if (type == "BETAERR") {
+        column.check(itsBeta.error(), checkTitle, checkPrec);
     } else if (type == "RMSIMAGE") {
         column.check(itsRMSimage, checkTitle, checkPrec);
     } else if (type == "FLAG1") {
@@ -394,7 +423,7 @@ void CasdaComponent::checkCol(duchamp::Catalogues::Column &column, bool checkTit
     } else if (type == "FLAG2") {
         column.check(itsFlagGuess, checkTitle);
     } else if (type == "FLAG3") {
-        column.check(itsFlag3, checkTitle);
+        column.check(itsFlagSpectralIndexOrigin, checkTitle);
     } else if (type == "FLAG4") {
         column.check(itsFlag4, checkTitle);
     } else if (type == "COMMENT") {
@@ -427,7 +456,7 @@ void CasdaComponent::checkCol(duchamp::Catalogues::Column &column, bool checkTit
 void CasdaComponent::checkSpec(duchamp::Catalogues::CatalogueSpecification &spec, bool checkTitle)
 {
     for (size_t i = 0; i < spec.size(); i++) {
-        this->checkCol(spec.column(i),checkTitle);
+        this->checkCol(spec.column(i), checkTitle);
     }
 }
 
@@ -464,17 +493,17 @@ LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream& blob, CasdaComponent& src)
     v = src.itsMaj; blob << v;
     v = src.itsMin; blob << v;
     v = src.itsPA; blob << v;
-    d = src.itsMaj_deconv; blob << d;
-    d = src.itsMin_deconv; blob << d;
-    d = src.itsPA_deconv; blob << d;
+    v = src.itsMaj_deconv; blob << v;
+    v = src.itsMin_deconv; blob << v;
+    v = src.itsPA_deconv; blob << v;
     d = src.itsChisq; blob << d;
     d = src.itsRMSfit; blob << d;
-    d = src.itsAlpha; blob << d;
-    d = src.itsBeta; blob << d;
+    v = src.itsAlpha; blob << v;
+    v = src.itsBeta; blob << v;
     d = src.itsRMSimage; blob << d;
     u = src.itsFlagSiblings; blob << u;
     u = src.itsFlagGuess; blob << u;
-    u = src.itsFlag3; blob << u;
+    u = src.itsFlagSpectralIndexOrigin; blob << u;
     u = src.itsFlag4; blob << u;
     s = src.itsComment; blob << s;
     s = src.itsLocalID; blob << s;
@@ -510,17 +539,17 @@ LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream& blob, CasdaComponent& src)
     blob >> v; src.itsMaj = v;
     blob >> v; src.itsMin = v;
     blob >> v; src.itsPA = v;
-    blob >> d; src.itsMaj_deconv = d;
-    blob >> d; src.itsMin_deconv = d;
-    blob >> d; src.itsPA_deconv = d;
+    blob >> v; src.itsMaj_deconv = v;
+    blob >> v; src.itsMin_deconv = v;
+    blob >> v; src.itsPA_deconv = v;
     blob >> d; src.itsChisq = d;
     blob >> d; src.itsRMSfit = d;
-    blob >> d; src.itsAlpha = d;
-    blob >> d; src.itsBeta = d;
+    blob >> v; src.itsAlpha = v;
+    blob >> v; src.itsBeta = v;
     blob >> d; src.itsRMSimage = d;
     blob >> u; src.itsFlagSiblings = u;
     blob >> u; src.itsFlagGuess = u;
-    blob >> u; src.itsFlag3 = u;
+    blob >> u; src.itsFlagSpectralIndexOrigin = u;
     blob >> u; src.itsFlag4 = u;
     blob >> s; src.itsComment = s;
     blob >> s; src.itsLocalID = s;

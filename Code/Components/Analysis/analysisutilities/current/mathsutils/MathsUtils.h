@@ -152,6 +152,19 @@ const float chisqProb(const float ndof, const float chisq);
 const std::vector<Double>
 deconvolveGaussian(const casa::Gaussian2D<Double> &measured, duchamp::Beam beam);
 
+/// @brief Return the Gaussian after deconvolution with the given beam
+/// @details Deconvolution of a Gaussian shape, assuming it was
+/// convolved with the given beam. This procedure replicates the
+/// approach described in Wild (1970), AuJPh 23, 113. Also returned
+/// are the errors on the deconvolved sizes, calculated using the
+/// errors on the measured sizes.
+/// @param measured Gaussian shape to be deconvolved
+/// @param beam Beam shape of image
+/// @return A vector containing (in order), the major & minor axes,
+/// and the position angle (in radians), followed by the error on
+/// those three parameters
+const std::vector<Double>
+deconvolveGaussian(const casa::Gaussian2D<Double> &measured, casa::Vector<Double> &errors, duchamp::Beam beam);
 
 /// @brief Fit a quadratic analytically to three points.
 /// @details Directly calculates the parabola of the form y = Ax^2 +

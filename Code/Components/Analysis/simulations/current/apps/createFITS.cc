@@ -79,6 +79,7 @@ class CreateFitsApp : public askap::Application {
 
                 file.toMaster();
 
+
                 if (doConvolution) {
                     file.convolveWithBeam();
                 }
@@ -87,6 +88,7 @@ class CreateFitsApp : public askap::Application {
                     file.addNoise(false);
                 }
 
+                file.makeTaylorTerms();
                 file.output();
 
                 stats.logSummary();

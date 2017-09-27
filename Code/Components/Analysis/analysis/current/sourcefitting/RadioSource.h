@@ -348,6 +348,8 @@ class RadioSource : public duchamp::Detection {
 
         std::vector<double> alphaValues(std::string type) {return itsAlphaMap[type];};
         std::vector<double> betaValues(std::string type) {return itsBetaMap[type];};
+        std::vector<double> alphaErrors(std::string type) {return itsAlphaError[type];};
+        std::vector<double> betaErrors(std::string type) {return itsBetaError[type];};
 
         /// @brief Return a reference to the set of Gaussian fits.
         std::vector<casa::Gaussian2D<Double> >& fitset(std::string type)
@@ -585,6 +587,12 @@ class RadioSource : public duchamp::Detection {
 
         /// @brief The spectral curvature of the source components
         std::map<std::string, std::vector<double> > itsBetaMap;
+
+        /// @brief The errors on the spectral indices of the source components
+        std::map<std::string, std::vector<double> > itsAlphaError;
+
+        /// @brief The errors on the spectral curvature of the source components
+        std::map<std::string, std::vector<double> > itsBetaError;
 
 };
 

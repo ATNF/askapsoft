@@ -24,7 +24,7 @@
 /// along with this program; if not, write to the Free Software
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
-/// @author XXX XXX <XXX.XXX@csiro.au>
+/// @author Matthew Whiting <Matthew.Whiting@csiro.au>
 ///
 #include <extraction/CubeletExtractor.h>
 #include <askap_analysis.h>
@@ -81,7 +81,6 @@ CubeletExtractor::CubeletExtractor(const LOFAR::ParameterSet& parset):
     }
 
     itsOutputFilenameBase = parset.getString("cubeletOutputBase", "");
-
 }
 
 void CubeletExtractor::defineSlicer()
@@ -119,7 +118,7 @@ void CubeletExtractor::initialiseArray()
         int lngsize = itsSlicer.length()(itsLngAxis);
         int latsize = itsSlicer.length()(itsLatAxis);
         int spcsize = itsSlicer.length()(itsSpcAxis);
-        casa::IPosition shape(itsInputCubePtr->shape().size(), 1);
+        casa::IPosition shape(itsInputCubePtr->shape());
         shape(itsLngAxis) = lngsize;
         shape(itsLatAxis) = latsize;
         shape(itsSpcAxis) = spcsize;
@@ -140,7 +139,8 @@ void CubeletExtractor::extract()
 
         ASKAPLOG_INFO_STR(logger,
                           "Extracting cubelet from " << itsInputCube <<
-                          " surrounding source ID " << itsSourceID);
+                          " surrounding source ID " << itsSourceID <<
+                          " with slicer " << itsSlicer);
 
         const boost::shared_ptr<SubImage<Float> >
         sub(new SubImage<Float>(*itsInputCubePtr, itsSlicer));
@@ -217,14 +217,14 @@ void CubeletExtractor::writeImage()
 
         this->writeBeam(itsOutputFilename);
 
-        if (itsInputCubePtr->isMasked()){
+        if (itsInputCubePtr->isMasked()) {
             // copy the image mask to the cubelet, if there is one.
             casa::LogicalArray
-                mask(itsInputCubePtr->pixelMask().getSlice(itsSlicer).reform(outshape));
+            mask(itsInputCubePtr->pixelMask().getSlice(itsSlicer).reform(outshape));
             ia->makeDefaultMask(itsOutputFilename);
-            ia->writeMask(itsOutputFilename, mask, casa::IPosition(outshape.nelements(),0));
+            ia->writeMask(itsOutputFilename, mask, casa::IPosition(outshape.nelements(), 0));
         }
-        
+
         this->closeInput();
 
     } else {

@@ -394,6 +394,94 @@ deconvolveGaussian(const casa::Gaussian2D<Double> &measured, duchamp::Beam beam)
     return deconv;
 
 }
+const std::vector<Double>
+deconvolveGaussian(const casa::Gaussian2D<Double> &measured, casa::Vector<Double> &errors, duchamp::Beam beam)
+{
+    double a2 = beam.maj(), b2 = beam.min(), pa2 = beam.pa() * M_PI / 180.;
+    double a0 = measured.majorAxis(), b0 = measured.minorAxis(), pa0 = measured.PA();
+    double aerr = errors[0], berr = errors[1], paerr = errors[2];
+    double twopa0 = 2.0 * pa0, twopa2 = 2.0 * pa2;
+    double a0sq = a0 * a0;
+    double b0sq = b0 * b0;
+    double a2sq = a2 * a2;
+    double b2sq = b2 * b2;
+    double d0 = a0sq - b0sq;
+    double d2 = a2sq - b2sq;
+
+    double d1 = sqrt(d0 * d0 + d2 * d2 - 2.0 * d0 * d2 * cos(twopa0 - twopa2));
+    double absum0 = a0sq + b0sq;
+    double absum2 = a2sq + b2sq;
+    double a1sq = 0.5 * (absum0 - absum2 + d1);
+    double b1sq = 0.5 * (absum0 - absum2 - d1);
+    double a1 = 0., b1 = 0.;
+    if (a1sq > 0.) a1 = sqrt(a1sq);
+    if (b1sq > 0.) b1 = sqrt(b1sq);
+
+    double pa1;
+    double sin2pa1 = (d0 * sin(twopa0) - d2 * sin(twopa2));
+    double cos2pa1 = (d0 * cos(twopa0) - d2 * cos(twopa2));
+    if (cos2pa1 == 0.) pa1 = 0.;
+    else {
+        pa1 = atan2(sin2pa1, cos2pa1) / 2.;
+    }
+
+    std::vector<Double> deconv(6);
+    double maj = std::max(std::max(a1, b1), 0.);
+    double min = std::max(std::min(a1, b1), 0.);
+    deconv[0] = maj;
+    deconv[1] = min;
+    deconv[2] = pa1;
+
+    // error on a1:
+    double err_a1,err_b1,err_pa1;
+    double err_from_a0,err_from_b0,err_from_p0;
+    double dterm = d1 - 2.*d0 - 2. * d2 * cos(twopa0-twopa2);
+    if ((a1 == 0.) || (aerr == 0.)) {
+        err_a1 = 0.;
+    } else {
+        err_from_a0 = a0 * (d1 + dterm) / d1;
+        err_from_b0 = b0 * (d1 + dterm) / d1;
+        err_from_p0 = -2. * d0 * d2 * sin(twopa0-twopa2) / d1;
+        err_a1 = sqrt(err_from_a0*err_from_a0 * aerr*aerr +
+                      err_from_b0*err_from_b0 * berr*berr +
+                      err_from_p0*err_from_p0 * paerr*paerr) / (2.*a1*a1);
+    }
+    // error on b1:
+    if ((b1 == 0.) || (berr == 0.)) {
+        err_b1 = 0.;
+    } else {
+        err_from_a0 = a0 * (d1 - dterm) / d1;
+        err_from_b0 = b0 * (d1 - dterm) / d1;
+        err_from_p0 = -2. * d0 * d2 * sin(twopa0-twopa2) / d1;
+        err_b1 = sqrt(err_from_a0*err_from_a0 * aerr*aerr +
+                         err_from_b0*err_from_b0 * berr*berr +
+                         err_from_p0*err_from_p0 * paerr*paerr) / (2.*b1*b1);
+    }
+    // error on pa1:
+    if ((cos2pa1 == 0.)||(paerr == 0.)) {
+        err_pa1 = 0.;
+    }else {
+        err_from_a0 = 2.*a0 * d2 * (sin(twopa2)*cos(twopa0) - sin(twopa0)*cos(twopa2)) / (cos2pa1*cos2pa1);
+        err_from_b0 = -2.*b0 * d2 * (sin(twopa2)*cos(twopa0) - sin(twopa0)*cos(twopa2)) / (cos2pa1*cos2pa1);
+        err_from_p0 = -2.*d0 * (d0 - d2*cos(twopa0-twopa2)) / (cos2pa1*cos2pa1);
+        double tan2pa1 = sin2pa1 / cos2pa1;
+        err_pa1 = sqrt(err_from_a0*err_from_a0 * aerr*aerr +
+                       err_from_b0*err_from_b0 * berr*berr +
+                       err_from_p0*err_from_p0 * paerr*paerr) / (2. * (1 + tan2pa1*tan2pa1));
+    }
+
+    if (a1 > b1){
+        deconv[3] = err_a1;
+        deconv[4] = err_b1;
+    } else {        
+        deconv[3] = err_a1;
+        deconv[4] = err_b1;
+    }
+    deconv[5] = err_pa1;
+    
+    return deconv;
+
+}
 
 template <class T>
 std::vector<T> fit3ptParabola(const T x0, const T y0, const T x1, const T y1, const T x2, const T y2)

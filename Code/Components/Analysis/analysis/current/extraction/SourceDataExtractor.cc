@@ -70,7 +70,6 @@ SourceDataExtractor::SourceDataExtractor(const LOFAR::ParameterSet& parset):
     // set before calling openInput()
     itsInputCubeList = parset.getStringVector("spectralCube",
                        std::vector<std::string>(0));
-    ASKAPLOG_DEBUG_STR(logger, " size of inputcubelist = " << itsInputCubeList.size());
 
     // Take the following from SynthesisParamsHelper.cc in Synthesis
     // there could be many ways to define stokes, e.g. ["XX YY"] or
@@ -100,8 +99,8 @@ SourceDataExtractor::~SourceDataExtractor()
 
 casa::Vector<Quantum<Double> > SourceDataExtractor::inputBeam()
 {
-    casa::Vector<Quantum<Double> > inputBeam(3,0.);
-    if (this->openInput()) {   
+    casa::Vector<Quantum<Double> > inputBeam(3, 0.);
+    if (this->openInput()) {
         inputBeam = itsInputCubePtr->imageInfo().restoringBeam().toVector();
     }
     return inputBeam;
@@ -225,7 +224,7 @@ bool SourceDataExtractor::checkPol(std::string image,
         } else {
             ASKAPLOG_WARN_STR(logger, "Input cube has no Stokes axis - assuming it is Stokes I");
             // No Stokes axis - assume it is Stokes I
-            haveMatch = (stokes==casa::Stokes::I);
+            haveMatch = (stokes == casa::Stokes::I);
         }
         this->closeInput();
     } else ASKAPLOG_ERROR_STR(logger, "Could not open image");
@@ -311,9 +310,9 @@ void SourceDataExtractor::writeBeam(std::string &filename)
     if (inputBeam.size() > 0) {
         boost::shared_ptr<accessors::IImageAccess> ia = accessors::imageAccessFactory(itsParset);
         ia->setBeamInfo(filename,
-                       inputBeam[0].getValue("rad"),
-                       inputBeam[1].getValue("rad"),
-                       inputBeam[2].getValue("rad"));
+                        inputBeam[0].getValue("rad"),
+                        inputBeam[1].getValue("rad"),
+                        inputBeam[2].getValue("rad"));
     } else {
         ASKAPLOG_WARN_STR(logger,
                           "Input cube has no restoring beam, so cannot write to output image.");

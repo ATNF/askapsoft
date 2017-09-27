@@ -63,7 +63,7 @@ ComponentCatalogue::ComponentCatalogue(std::vector<CasdaComponent> &componentLis
     itsKarmaFilename(""),
     itsCASAFilename(""),
     itsDS9Filename(""),
-    itsVersion("casda.continuum_component_description_v1.7")
+    itsVersion("casda.continuum_component_description_v1.9")
 {
     ASKAPLOG_DEBUG_STR(logger, "Defining component catalogue, version " << itsVersion);
 
@@ -81,7 +81,7 @@ ComponentCatalogue::ComponentCatalogue(std::vector<CasdaComponent> &componentLis
     itsKarmaFilename(""),
     itsCASAFilename(""),
     itsDS9Filename(""),
-    itsVersion("casda.continuum_component_description_v1.7")
+    itsVersion("casda.continuum_component_description_v1.9")
 {
     ASKAPLOG_DEBUG_STR(logger, "Defining component catalogue, version " << itsVersion);
 
@@ -98,7 +98,7 @@ ComponentCatalogue::ComponentCatalogue(std::vector<sourcefitting::RadioSource> &
     itsKarmaFilename(""),
     itsCASAFilename(""),
     itsDS9Filename(""),
-    itsVersion("casda.continuum_component_description_v1.7")
+    itsVersion("casda.continuum_component_description_v1.9")
 {
     ASKAPLOG_DEBUG_STR(logger, "Defining component catalogue, version " << itsVersion);
 
@@ -117,7 +117,7 @@ ComponentCatalogue::ComponentCatalogue(std::vector<sourcefitting::RadioSource> &
     itsKarmaFilename(""),
     itsCASAFilename(""),
     itsDS9Filename(""),
-    itsVersion("casda.continuum_component_description_v1.7")
+    itsVersion("casda.continuum_component_description_v1.9")
 {
     ASKAPLOG_DEBUG_STR(logger, "Defining component catalogue, version " << itsVersion);
 
@@ -165,7 +165,7 @@ void ComponentCatalogue::defineSpec()
     // -------------------------------------------
     // DO NOT CHANGE UNLESS COORDINATED WITH CASDA
     // -------------------------------------------
-    
+
     itsSpec.addColumn("ISLAND", "island_id", "--", 6, 0,
                       "meta.id.parent", "char", "col_island_id", "");
     itsSpec.addColumn("ID", "component_id", "--", 6, 0,
@@ -176,31 +176,31 @@ void ComponentCatalogue::defineSpec()
                       "pos.eq.ra", "char", "col_ra_hms_cont", "J2000");
     itsSpec.addColumn("DEC", "dec_dms_cont", "", 9, 0,
                       "pos.eq.dec", "char", "col_dec_dms_cont", "J2000");
-    itsSpec.addColumn("RAJD", "ra_deg_cont", "[deg]", casda::precPos+2, casda::precPos,
+    itsSpec.addColumn("RAJD", "ra_deg_cont", "[deg]", casda::precPos + 2, casda::precPos,
                       "pos.eq.ra;meta.main", "double", "col_ra_deg_cont", "J2000");
-    itsSpec.addColumn("DECJD", "dec_deg_cont", "[deg]", casda::precPos+2, casda::precPos,
+    itsSpec.addColumn("DECJD", "dec_deg_cont", "[deg]", casda::precPos + 2, casda::precPos,
                       "pos.eq.dec;meta.main", "double", "col_dec_deg_cont", "J2000");
-    itsSpec.addColumn("RAERR", "ra_err", "[arcsec]", casda::precSize+2, casda::precSize,
+    itsSpec.addColumn("RAERR", "ra_err", "[arcsec]", casda::precSize + 2, casda::precSize,
                       "stat.error;pos.eq.ra", "float", "col_ra_err", "J2000");
-    itsSpec.addColumn("DECERR", "dec_err", "[arcsec]", casda::precSize+2, casda::precSize,
+    itsSpec.addColumn("DECERR", "dec_err", "[arcsec]", casda::precSize + 2, casda::precSize,
                       "stat.error;pos.eq.dec", "float", "col_dec_err", "J2000");
     itsSpec.addColumn("FREQ", "freq", "[" + casda::freqUnit + "]",
-                      casda::precFreqContinuum+2, casda::precFreqContinuum,
+                      casda::precFreqContinuum + 2, casda::precFreqContinuum,
                       "em.freq", "float", "col_freq", "");
     itsSpec.addColumn("FPEAK", "flux_peak", "[" + casda::fluxUnit + "]",
-                      casda::precFlux+2, casda::precFlux,
+                      casda::precFlux + 2, casda::precFlux,
                       "phot.flux.density;stat.max;em.radio;stat.fit",
                       "float", "col_flux_peak", "");
     itsSpec.addColumn("FPEAKERR", "flux_peak_err", "[" + casda::fluxUnit + "]",
-                      casda::precFlux+2, casda::precFlux,
+                      casda::precFlux + 2, casda::precFlux,
                       "stat.error;phot.flux.density;stat.max;em.radio;stat.fit",
                       "float", "col_flux_peak_err", "");
     itsSpec.addColumn("FINT", "flux_int", "[" + casda::intFluxUnitContinuum + "]",
-                      casda::precFlux+2, casda::precFlux,
+                      casda::precFlux + 2, casda::precFlux,
                       "phot.flux.density;em.radio;stat.fit",
                       "float", "col_flux_int", "");
     itsSpec.addColumn("FINTERR", "flux_int_err", "[" + casda::intFluxUnitContinuum + "]",
-                      casda::precFlux+2, casda::precFlux,
+                      casda::precFlux + 2, casda::precFlux,
                       "stat.error;phot.flux.density;em.radio;stat.fit",
                       "float", "col_flux_int_err", "");
     itsSpec.addColumn("MAJ", "maj_axis", "["+casda::shapeUnit+"]", casda::precSize+2, casda::precSize,
@@ -209,7 +209,7 @@ void ComponentCatalogue::defineSpec()
     itsSpec.addColumn("MIN", "min_axis", "["+casda::shapeUnit+"]", casda::precSize+2, casda::precSize,
                       "phys.angSize.sminAxis;em.radio;stat.fit",
                       "float", "col_min_axis", "");
-    itsSpec.addColumn("PA", "pos_ang", "[deg]", casda::precSize+2, casda::precSize,
+    itsSpec.addColumn("PA", "pos_ang", "[deg]", casda::precSize + 2, casda::precSize,
                       "phys.angSize;pos.posAng;em.radio;stat.fit",
                       "float", "col_pos_ang", "");
     itsSpec.addColumn("MAJERR", "maj_axis_err", "["+casda::shapeUnit+"]", casda::precSize+2, casda::precSize,
@@ -218,7 +218,7 @@ void ComponentCatalogue::defineSpec()
     itsSpec.addColumn("MINERR", "min_axis_err", "["+casda::shapeUnit+"]", casda::precSize+2, casda::precSize,
                       "stat.error;phys.angSize.sminAxis;em.radio",
                       "float", "col_min_axis_err", "");
-    itsSpec.addColumn("PAERR", "pos_ang_err", "[deg]", casda::precSize+2, casda::precSize,
+    itsSpec.addColumn("PAERR", "pos_ang_err", "[deg]", casda::precSize + 2, casda::precSize,
                       "stat.error;phys.angSize;pos.posAng;em.radio",
                       "float", "col_pos_ang_err", "");
     itsSpec.addColumn("MAJDECONV", "maj_axis_deconv", "["+casda::shapeUnit+"]", casda::precSize+2, casda::precSize,
@@ -227,25 +227,38 @@ void ComponentCatalogue::defineSpec()
     itsSpec.addColumn("MINDECONV", "min_axis_deconv", "["+casda::shapeUnit+"]", casda::precSize+2, casda::precSize,
                       "phys.angSize.sminAxis;em.radio;askap:meta.deconvolved",
                       "float", "col_min_axis_deconv", "");
-    itsSpec.addColumn("PADECONV", "pos_ang_deconv", "[deg]", casda::precSize+2, casda::precSize,
+    itsSpec.addColumn("PADECONV", "pos_ang_deconv", "[deg]", casda::precSize + 2, casda::precSize,
                       "phys.angSize;pos.posAng;em.radio;askap:meta.deconvolved",
                       "float", "col_pos_ang_deconv", "");
-    itsSpec.addColumn("CHISQ", "chi_squared_fit", "--", casda::precFlux+2, casda::precFlux,
+    itsSpec.addColumn("MAJDECONVERR", "maj_axis_deconv_err", "[arcsec]", casda::precSize + 2, casda::precSize,
+                      "stat.error;phys.angSize.smajAxis;em.radio;askap:meta.deconvolved",
+                      "float", "col_maj_axis_deconv_err", "");
+    itsSpec.addColumn("MINDECONVERR", "min_axis_deconv_err", "[arcsec]", casda::precSize + 2, casda::precSize,
+                      "stat.error;phys.angSize.sminAxis;em.radio;askap:meta.deconvolved",
+                      "float", "col_min_axis_deconv_err", "");
+    itsSpec.addColumn("PADECONVERR", "pos_ang_deconv_err", "[deg]", casda::precSize + 2, casda::precSize,
+                      "stat.error;phys.angSize;pos.posAng;em.radio;askap:meta.deconvolved",
+                      "float", "col_pos_ang_deconv_err", "");
+    itsSpec.addColumn("CHISQ", "chi_squared_fit", "--", casda::precFlux + 2, casda::precFlux,
                       "stat.fit.chi2", "float", "col_chi_squared_fit", "");
-    itsSpec.addColumn("RMSFIT", "rms_fit_gauss", "[" + casda::fluxUnit + "]", casda::precFlux+2, casda::precFlux,
+    itsSpec.addColumn("RMSFIT", "rms_fit_gauss", "[" + casda::fluxUnit + "]", casda::precFlux + 2, casda::precFlux,
                       "stat.stdev;stat.fit", "float", "col_rms_fit_gauss", "");
-    itsSpec.addColumn("ALPHA", "spectral_index", "--", casda::precSpecShape+2, casda::precSpecShape,
+    itsSpec.addColumn("ALPHA", "spectral_index", "--", casda::precSpecShape + 2, casda::precSpecShape,
                       "spect.index;em.radio", "float", "col_spectral_index", "");
-    itsSpec.addColumn("BETA", "spectral_curvature", "--", casda::precSpecShape+2, casda::precSpecShape,
+    itsSpec.addColumn("BETA", "spectral_curvature", "--", casda::precSpecShape + 2, casda::precSpecShape,
                       "askap:spect.curvature;em.radio", "float", "col_spectral_curvature", "");
-    itsSpec.addColumn("RMSIMAGE", "rms_image", "[" + casda::fluxUnit + "]", casda::precFlux+2, casda::precFlux,
+    itsSpec.addColumn("ALPHAERR", "spectral_index_err", "--", casda::precSpecShape + 2, casda::precSpecShape,
+                      "stat.error;spect.index;em.radio", "float", "col_spectral_index_err", "");
+    itsSpec.addColumn("BETAERR", "spectral_curvature_err", "--", casda::precSpecShape + 2, casda::precSpecShape,
+                      "stat.error;askap:spect.curvature;em.radio", "float", "col_spectral_curvature_err", "");
+    itsSpec.addColumn("RMSIMAGE", "rms_image", "[" + casda::fluxUnit + "]", casda::precFlux + 2, casda::precFlux,
                       "stat.stdev;phot.flux.density", "float", "col_rms_image", "");
     itsSpec.addColumn("FLAG1", "has_siblings", "", 5, 0,
                       "meta.code", "int", "col_has_siblings", "");
     itsSpec.addColumn("FLAG2", "fit_is_estimate", "", 5, 0,
                       "meta.code", "int", "col_fit_is_estimate", "");
-    itsSpec.addColumn("FLAG3", "flag_c3", "", 5, 0,
-                      "meta.code", "int", "col_flag_c3", "");
+    itsSpec.addColumn("FLAG3", "spectral_index_from_TT", "", 5, 0,
+                      "meta.code", "int", "col_spectral_index_from_TT", "");
     itsSpec.addColumn("FLAG4", "flag_c4", "", 5, 0,
                       "meta.code", "int", "col_flag_c4", "");
     itsSpec.addColumn("COMMENT", "comment", "", 100, 0,

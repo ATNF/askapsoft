@@ -78,6 +78,9 @@ class FITSparallel {
         /// @brief Add sources to the flux array
         void processSources();
 
+    /// @brief Make the Taylor-term images from the cube
+    void makeTaylorTerms();
+    
         /// @brief Convolve the flux array with a beam
         void convolveWithBeam();
 
