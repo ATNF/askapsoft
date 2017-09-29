@@ -157,6 +157,7 @@ if env['usepgi']:
     env["CXX"] = "pgc++ "
     env["LINK"] = "pgc++ "
     env["SHLINK"] = "pgc++ "
+    env.AppendUnique(CPPFLAGS=['-noswitcherror'])
 else:
     env.AppendUnique(CPPFLAGS=['-Wall'])    
 # use global environment definitions
