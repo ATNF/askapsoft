@@ -77,6 +77,8 @@ void PublisherApp::receiveAndPublishLoop(boost::asio::ip::tcp::socket &socket)
             timer.mark();
             ASKAPLOG_DEBUG_STR(logger, "Received a message - Timestamp: "
                     << inMsg.timestamp() << " Scan: " << inMsg.scan());
+   
+            boost::mutex::scoped_lock lock(itsMutex);
 
             ///////////////////
             // Publish SPD data
@@ -87,8 +89,7 @@ void PublisherApp::receiveAndPublishLoop(boost::asio::ip::tcp::socket &socket)
                     beamit != beamset.end(); ++beamit) {
                 for (uint32_t pol = 0; pol < N_POLS; ++pol) {
                     SpdOutputMessage outmsg = SubsetExtractor::subset(inMsg, *beamit, pol);
-                    ASKAPLOG_DEBUG_STR(logger, "Publishing Spd message for beam " << *beamit
-                            << " pol " << pol);
+                    //ASKAPLOG_DEBUG_STR(logger, "Publishing Spd message for beam " << *beamit << " pol " << pol);
                     itsSpdMsgPublisher->publish(outmsg);
                 }
             }
@@ -96,6 +97,14 @@ void PublisherApp::receiveAndPublishLoop(boost::asio::ip::tcp::socket &socket)
             ///////////////////
             // Publish VIS data
             ///////////////////
+
+            // commissioning hack - only publish vis message for the first beam if it is a single beam case
+            if (beamset.size() == 1) {
+                if (*beamset.begin() != 0) {
+                    continue;
+                }
+            }
+            //
 
             // Get and check the tvchan setting
             uint32_t tvChanBegin = 0;

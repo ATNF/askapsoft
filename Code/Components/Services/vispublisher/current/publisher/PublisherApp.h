@@ -47,6 +47,7 @@
 #include <boost/asio.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/thread.hpp>
+#include <boost/thread/mutex.hpp>
 
 namespace askap {
 namespace cp {
@@ -95,6 +96,10 @@ class PublisherApp : public askap::Application {
         
         // circular buffer handling jobs for individual threads
         ingest::CircularBuffer<boost::asio::ip::tcp::socket> itsBuffer;
+
+        /// @details synchronisation to ensure vis and spd messages
+        /// are published in one chunk
+        mutable boost::mutex itsMutex;
 };
 
 }
