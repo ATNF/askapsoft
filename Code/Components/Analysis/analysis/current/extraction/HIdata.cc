@@ -220,7 +220,7 @@ int HIdata::busyFunctionFit()
     for (size_t i = 0; i < noise.size(); i++) {
         noise[i] = double(itsNoiseExtractor->array().tovector()[i]);
     }
-    
+
     BusyFit *theFitter = new BusyFit();
 
     bool plotsTurnedOff = true;
@@ -230,6 +230,7 @@ int HIdata::busyFunctionFit()
     theFitter->setup(spectrum.size(), spectrum.data(), noise.data(),
                      plotsTurnedOff, relax, verbose);
 
+    int status = theFitter->fit();
 
     if (status == 0) {
         theFitter->getResult(itsBFparams.data(), itsBFerrors.data(),

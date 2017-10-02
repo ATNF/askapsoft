@@ -221,7 +221,7 @@ void Weighter::search()
     if (itsFlagDoScaling) {
 
         ASKAPASSERT(itsCube->getSize() == itsWeights.size());
-        ASKAPASSERT(itsCube->getRecon() > 0);
+        ASKAPASSERT(itsCube->getRecon());
         for (size_t i = 0; i < itsCube->getSize(); i++) {
             itsCube->getRecon()[i] = itsCube->getPixValue(i) * this->weight(i);
         }
