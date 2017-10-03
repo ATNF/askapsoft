@@ -1,4 +1,4 @@
 accessors=Code/Base/accessors/current
-parallel=/Code/Base/askapparallel/current
-scimath=/Code/Base/scimath/current
-synthesis=/Code/Components/Synthesis/synthesis/current
+parallel=Code/Base/askapparallel/current
+scimath=Code/Base/scimath/current
+synthesis=Code/Components/Synthesis/synthesis/current
