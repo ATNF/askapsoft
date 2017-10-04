@@ -491,7 +491,7 @@ function setImageBase()
 #   * SB_SCIENCE
 #   * DO_COPY_SL
 #   * MS_SCIENCE_AVERAGE  (can be blank)
-#   * nbeam
+#   * nbeams
 #   * KEEP_RAW_AV_MS
 #   * GAINS_CAL_TABLE
 #   * DO_SELFCAL
@@ -548,7 +548,7 @@ function findScienceMSnames()
             msSciAv=$(echo "${MS_SCIENCE_AVERAGE}" | sed -e "$sedstr")
         else
             msSciAv=${MS_SCIENCE_AVERAGE}
-            if [ "$nbeam" -gt 1 ]; then
+            if [ "$nbeams" -gt 1 ]; then
                 # Only give the warning if there is more than one beam
                 # (which means we're using the same MS for them)
                 echo "Warning! Using ${msSciAv} as averaged MS for beam ${BEAM}"
