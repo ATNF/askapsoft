@@ -160,7 +160,8 @@ EOFINNER
 fi
 
 DO_DYNAMIC=${FLAG_DO_DYNAMIC_AMPLITUDE_1934}
-if [ \${DO_DYNAMIC} ]; then
+DO_STOKESV=${FLAG_DO_STOKESV_1934}
+if [ "\${DO_DYNAMIC}" == "true" ] || [ "\${DO_STOKESV}" == "true" ]; then
 
     parset=${parsets}/cflag_dynamic_1934_${FIELDBEAM}_\${SLURM_JOB_ID}.in
     cat > "\$parset" <<EOFINNER
@@ -168,13 +169,22 @@ if [ \${DO_DYNAMIC} ]; then
 Cflag.dataset                           = ${msCal}
 
 # Amplitude based flagging
-Cflag.amplitude_flagger.enable           = true
+Cflag.amplitude_flagger.enable           = \${DO_DYNAMIC}
 Cflag.amplitude_flagger.dynamicBounds    = true
 Cflag.amplitude_flagger.threshold        = ${FLAG_THRESHOLD_DYNAMIC_1934}
 Cflag.amplitude_flagger.integrateSpectra = ${FLAG_DYNAMIC_1934_INTEGRATE_SPECTRA}
 Cflag.amplitude_flagger.integrateSpectra.threshold = ${FLAG_THRESHOLD_DYNAMIC_1934_SPECTRA}
 Cflag.amplitude_flagger.integrateTimes = ${FLAG_DYNAMIC_1934_INTEGRATE_TIMES}
 Cflag.amplitude_flagger.integrateTimes.threshold = ${FLAG_THRESHOLD_DYNAMIC_1934_TIMES}
+
+# Stokes-V based flagging
+Cflag.stokesv_flagger.enable           = \${DO_STOKESV}
+Cflag.stokesv_flagger.dynamicBounds    = true
+Cflag.stokesv_flagger.threshold        = ${FLAG_THRESHOLD_STOKESV_1934}
+Cflag.stokesv_flagger.integrateSpectra = ${FLAG_STOKESV_1934_INTEGRATE_SPECTRA}
+Cflag.stokesv_flagger.integrateSpectra.threshold = ${FLAG_THRESHOLD_STOKESV_1934_SPECTRA}
+Cflag.stokesv_flagger.integrateTimes = ${FLAG_STOKESV_1934_INTEGRATE_TIMES}
+Cflag.stokesv_flagger.integrateTimes.threshold = ${FLAG_THRESHOLD_STOKESV_1934_TIMES}
 
 ${antennaFlagging}
 EOFINNER

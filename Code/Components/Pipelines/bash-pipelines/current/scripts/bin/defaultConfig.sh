@@ -275,6 +275,22 @@ FLAG_THRESHOLD_DYNAMIC_1934_SPECTRA=4.0
 FLAG_DYNAMIC_1934_INTEGRATE_TIMES=false
 # Dynamic threshold applied to amplitudes in integrated times mode [sigma]
 FLAG_THRESHOLD_DYNAMIC_1934_TIMES=4.0
+#
+# Whether to do Stokes-V flagging
+FLAG_DO_STOKESV_1934=true
+# Threshold applied to amplitudes in Stokes-V flagging [sigma]
+FLAG_THRESHOLD_STOKESV_1934=4.0
+# Whether to apply a Stokes-V threshold to integrated spectra
+FLAG_STOKESV_1934_INTEGRATE_SPECTRA=true
+# Threshold applied to amplitudes in integrated spectra mode of
+# Stokes-V flagging  [sigma]
+FLAG_THRESHOLD_STOKESV_1934_SPECTRA=4.0
+# Whether to apply a Stokes-V threshold to integrated times
+FLAG_STOKESV_1934_INTEGRATE_TIMES=false
+# Threshold applied to amplitudes in integrated times mode of Stokes-V
+# flagging [sigma]
+FLAG_THRESHOLD_STOKESV_1934_TIMES=4.0
+#
 # Whether to apply a flat amplitude cut
 FLAG_DO_FLAT_AMPLITUDE_1934=false
 # Flat amplitude threshold applied [hardware units - before calibration]
@@ -324,6 +340,22 @@ FLAG_THRESHOLD_DYNAMIC_SCIENCE_SPECTRA=4.0
 FLAG_DYNAMIC_INTEGRATE_TIMES=false
 # Dynamic threshold applied to amplitudes in integrated times mode [sigma]
 FLAG_THRESHOLD_DYNAMIC_SCIENCE_TIMES=4.0
+#
+# Whether to do Stokes-V flagging
+FLAG_DO_STOKESV_SCIENCE=true
+# Threshold applied to amplitudes in Stokes-V flagging  [sigma]
+FLAG_THRESHOLD_STOKESV_SCIENCE=4.0
+# Whether to apply a Stokes-V threshold to integrated spectra
+FLAG_STOKESV_INTEGRATE_SPECTRA=true
+# Threshold applied to amplitudes in integrated spectra mode for
+# Stokes-V flagging  [sigma]
+FLAG_THRESHOLD_STOKESV_SCIENCE_SPECTRA=4.0
+# Whether to apply a Stokes-V threshold to integrated times
+FLAG_STOKESV_INTEGRATE_TIMES=false
+# Threshold applied to amplitudes in integrated times mode for
+# Stokes-V flagging [sigma]
+FLAG_THRESHOLD_STOKESV_SCIENCE_TIMES=4.0
+#
 # Whether to apply a flat amplitude cut
 FLAG_DO_FLAT_AMPLITUDE_SCIENCE=false
 # Flat amplitude threshold applied [calibrated flux units]
@@ -354,6 +386,23 @@ FLAG_THRESHOLD_DYNAMIC_SCIENCE_SPECTRA_AV=4.0
 FLAG_DYNAMIC_INTEGRATE_TIMES_AV=false
 # Dynamic threshold applied to amplitudes in integrated times mode [sigma]
 FLAG_THRESHOLD_DYNAMIC_SCIENCE_TIMES_AV=4.0
+#
+# Whether to do Stokes-V flagging on the averaged data
+FLAG_DO_STOKESV_SCIENCE_AV=true
+# Threshold applied to amplitudes of averaged data for Stokes-V
+# flagging [sigma]
+FLAG_THRESHOLD_STOKESV_SCIENCE_AV=4.0
+# Whether to apply a Stokes-V threshold to integrated spectra on averaged data
+FLAG_STOKESV_INTEGRATE_SPECTRA_AV=true
+# Threshold applied to amplitudes in integrated spectra mode for
+# Stokes-V flagging  [sigma]
+FLAG_THRESHOLD_STOKESV_SCIENCE_SPECTRA_AV=4.0
+# Whether to apply a Stokes-V threshold to integrated times on averaged data
+FLAG_STOKESV_INTEGRATE_TIMES_AV=false
+# Threshold applied to amplitudes in integrated times mode for
+# Stokes-V flagging [sigma]
+FLAG_THRESHOLD_STOKESV_SCIENCE_TIMES_AV=4.0
+#
 # Whether to apply a flat amplitude cut to the averaged data
 FLAG_DO_FLAT_AMPLITUDE_SCIENCE_AV=false
 # Flat amplitude threshold applied to the averaged data [calibrated flux units]

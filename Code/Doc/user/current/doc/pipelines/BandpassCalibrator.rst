@@ -86,6 +86,24 @@ ASKAPsoft.
 |  ``FLAG_THRESHOLD_DYNAMIC_1934_TIMES``  |  4.0                                  | amplitude_flagger.integrateTimes.threshold             | Dynamic threshold applied to amplitudes when flagging 1934|
 |                                         |                                       | (:doc:`../calim/cflag`)                                | data in integrateTimes mode [sigma]                       |
 +-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| ``FLAG_DO_STOKESV_1934``                | true                                  | none                                                   | Whether to do Stokes-V flagging, after the rule-based     |
+|                                         |                                       |                                                        | and simple flat-amplitude flagging is done.               |
++-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| ``FLAG_THRESHOLD_STOKESV_1934``         |  4.0                                  | stokesv_flagger.threshold                              | Threshold applied to amplitudes when flagging Stokes-V in |
+|                                         |                                       |  (:doc:`../calim/cflag`)                               | 1934 data [sigma]                                         |
++-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| ``FLAG_STOKESV_1934_INTEGRATE_SPECTRA`` | true                                  | stokesv_flagger.integrateSpectra                       | Whether to integrate the spectra in time and flag channels|
+|                                         |                                       | (:doc:`../calim/cflag`)                                | during the Stokes-V flagging task.                        |
++-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| ``FLAG_THRESHOLD_STOKESV_1934_SPECTRA`` |  4.0                                  | stokesv_flagger.integrateSpectra.threshold             | Threshold applied to amplitudes when flagging Stokes-V    |
+|                                         |                                       | (:doc:`../calim/cflag`)                                | in 1934 data in integrateSpectra mode [sigma]             |
++-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+|  ``FLAG_STOKESV_1934_INTEGRATE_TIMES``  | false                                 | stokesv_flagger.integrateTimes                         | Whether to integrate across spectra and flag time samples |
+|                                         |                                       | (:doc:`../calim/cflag`)                                | during the Stokes-V flagging task.                        |
++-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+|  ``FLAG_THRESHOLD_STOKESV_1934_TIMES``  |  4.0                                  | stokesv_flagger.integrateTimes.threshold               | Threshold applied to amplitudes when flagging Stokes-V in |
+|                                         |                                       | (:doc:`../calim/cflag`)                                | 1934 data in integrateTimes mode [sigma]                  |
++-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
 | ``FLAG_DO_FLAT_AMPLITUDE_1934``         | false                                 | none                                                   | Whether to apply a simple ("flat") amplitude threshold to |
 |                                         |                                       |                                                        | the 1934 data.                                            |
 +-----------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+

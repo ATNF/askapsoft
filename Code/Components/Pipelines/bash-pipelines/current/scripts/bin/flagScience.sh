@@ -165,7 +165,8 @@ EOFINNER
 fi
 
 DO_DYNAMIC=${FLAG_DO_DYNAMIC_AMPLITUDE_SCIENCE}
-if [ \${DO_DYNAMIC} == true ]; then
+DO_STOKESV=${FLAG_DO_STOKESV_SCIENCE}
+if [ "\${DO_DYNAMIC}" == "true" ] || [ "\${DO_STOKESV}" == "true" ]; then
 
     parset=${parsets}/cflag_dynamic_science_${FIELDBEAM}_\${SLURM_JOB_ID}.in
     cat > "\$parset" <<EOFINNER
@@ -176,14 +177,25 @@ Cflag.dataset                           = ${msSci}
 #  This finds a statistical threshold in the spectrum of each
 #  time-step, then applies the same threshold level to the integrated
 #  spectrum at the end.
-Cflag.amplitude_flagger.enable           = true
+Cflag.amplitude_flagger.enable           = \${DO_DYNAMIC}
 Cflag.amplitude_flagger.dynamicBounds    = true
 Cflag.amplitude_flagger.threshold        = ${FLAG_THRESHOLD_DYNAMIC_SCIENCE}
 Cflag.amplitude_flagger.integrateSpectra = ${FLAG_DYNAMIC_INTEGRATE_SPECTRA}
 Cflag.amplitude_flagger.integrateSpectra.threshold = ${FLAG_THRESHOLD_DYNAMIC_SCIENCE_SPECTRA}
 Cflag.amplitude_flagger.integrateTimes = ${FLAG_DYNAMIC_INTEGRATE_TIMES}
 Cflag.amplitude_flagger.integrateTimes.threshold = ${FLAG_THRESHOLD_DYNAMIC_SCIENCE_TIMES}
+
 ${amplitudeLow}
+
+# Stokes-V flagging
+Cflag.stokesv_flagger.enable           = \${DO_STOKESV}
+Cflag.stokesv_flagger.dynamicBounds    = true
+Cflag.stokesv_flagger.threshold        = ${FLAG_THRESHOLD_STOKESV_SCIENCE}
+Cflag.stokesv_flagger.integrateSpectra = ${FLAG_STOKESV_INTEGRATE_SPECTRA}
+Cflag.stokesv_flagger.integrateSpectra.threshold = ${FLAG_THRESHOLD_STOKESV_SCIENCE_SPECTRA}
+Cflag.stokesv_flagger.integrateTimes = ${FLAG_STOKESV_INTEGRATE_TIMES}
+Cflag.stokesv_flagger.integrateTimes.threshold = ${FLAG_THRESHOLD_STOKESV_SCIENCE_TIMES}
+
 EOFINNER
 
     log=${logs}/cflag_dynamic_science_${FIELDBEAM}_\${SLURM_JOB_ID}.log
