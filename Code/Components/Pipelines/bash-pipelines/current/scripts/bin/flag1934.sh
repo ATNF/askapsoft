@@ -179,7 +179,7 @@ Cflag.amplitude_flagger.integrateTimes.threshold = ${FLAG_THRESHOLD_DYNAMIC_1934
 
 # Stokes-V based flagging
 Cflag.stokesv_flagger.enable           = \${DO_STOKESV}
-Cflag.stokesv_flagger.dynamicBounds    = true
+Cflag.stokesv_flagger.useRobustStatistics = ${FLAG_USE_ROBUST_STATS_STOKESV_1934}
 Cflag.stokesv_flagger.threshold        = ${FLAG_THRESHOLD_STOKESV_1934}
 Cflag.stokesv_flagger.integrateSpectra = ${FLAG_STOKESV_1934_INTEGRATE_SPECTRA}
 Cflag.stokesv_flagger.integrateSpectra.threshold = ${FLAG_THRESHOLD_STOKESV_1934_SPECTRA}

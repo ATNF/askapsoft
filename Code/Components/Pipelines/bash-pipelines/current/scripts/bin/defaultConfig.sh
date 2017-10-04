@@ -278,6 +278,8 @@ FLAG_THRESHOLD_DYNAMIC_1934_TIMES=4.0
 #
 # Whether to do Stokes-V flagging
 FLAG_DO_STOKESV_1934=true
+# Whether to use robust statistics for Stokes-V flagging
+FLAG_USE_ROBUST_STATS_STOKESV_1934=true
 # Threshold applied to amplitudes in Stokes-V flagging [sigma]
 FLAG_THRESHOLD_STOKESV_1934=4.0
 # Whether to apply a Stokes-V threshold to integrated spectra
@@ -343,6 +345,8 @@ FLAG_THRESHOLD_DYNAMIC_SCIENCE_TIMES=4.0
 #
 # Whether to do Stokes-V flagging
 FLAG_DO_STOKESV_SCIENCE=true
+# Whether to use robust statistics for Stokes-V flagging
+FLAG_USE_ROBUST_STATS_STOKESV_SCIENCE=true
 # Threshold applied to amplitudes in Stokes-V flagging  [sigma]
 FLAG_THRESHOLD_STOKESV_SCIENCE=4.0
 # Whether to apply a Stokes-V threshold to integrated spectra
@@ -389,6 +393,8 @@ FLAG_THRESHOLD_DYNAMIC_SCIENCE_TIMES_AV=4.0
 #
 # Whether to do Stokes-V flagging on the averaged data
 FLAG_DO_STOKESV_SCIENCE_AV=true
+# Whether to use robust statistics for Stokes-V flagging
+FLAG_USE_ROBUST_STATS_STOKESV_SCIENCE_AV=true
 # Threshold applied to amplitudes of averaged data for Stokes-V
 # flagging [sigma]
 FLAG_THRESHOLD_STOKESV_SCIENCE_AV=4.0

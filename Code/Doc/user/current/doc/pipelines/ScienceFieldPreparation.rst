@@ -113,6 +113,9 @@ is possible, however, to select a single field to process via the
 | ``FLAG_DO_STOKESV_SCIENCE``                   | true                            | none                                            | Whether to do the Stokes-V flagging on the science data, after the    |
 |                                               |                                 |                                                 | rule-based and simple flat-amplitude flagging is done                 |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
+| ``FLAG_USE_ROBUST_STATS_STOKESV_SCIENCE``     | true                            | stokesv_flagger.useRobustStatistics             | Whether to use robust statistics (median and inter-quartile range) in |
+|                                               |                                 | (:doc:`../calim/cflag`)                         | computing the Stokes-V statistics.                                    |
++-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 | ``FLAG_THRESHOLD_STOKESV_SCIENCE``            | 4.0                             | stokesv_flagger.threshold                       | Threshold applied to amplitudes when flagging the Stokes-V for the    |
 |                                               |                                 | (:doc:`../calim/cflag`)                         | science field data [sigma]                                            |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
@@ -173,6 +176,9 @@ is possible, however, to select a single field to process via the
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 | ``FLAG_DO_STOKESV_SCIENCE_AV``                | true                            | none                                            | Whether to do the Stokes-V flagging on the averaged science data,     |
 |                                               |                                 |                                                 | after the rule-based and simple flat-amplitude flagging is done       |
++-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
+| ``FLAG_USE_ROBUST_STATS_STOKESV_SCIENCE_AV``  | true                            | stokesv_flagger.useRobustStatistics             | Whether to use robust statistics (median and inter-quartile range) in |
+|                                               |                                 | (:doc:`../calim/cflag`)                         | computing the Stokes-V statistics.                                    |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 | ``FLAG_THRESHOLD_STOKESV_SCIENCE_AV``         | 4.0                             | stokesv_flagger.threshold                       | Threshold applied to amplitudes when flagging the Stokes-V for the    |
 |                                               |                                 | (:doc:`../calim/cflag`)                         | averaged science field data [sigma]                                   |
