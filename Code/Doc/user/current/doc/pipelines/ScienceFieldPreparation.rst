@@ -12,10 +12,11 @@ NAME in the MS).
 
 As for the bandpass calibrator, the MS is then flagged in two
 passes. First, a combination of selection rules (allowing flagging of
-antennas & baselines, and autocorrelations) and (optionally) a simple flat
-amplitude threshold are applied. Then dynamic flagging of amplitudes
-is done, optionally integrating over or across individual
-spectra. Each of these steps is selectable via input parameters.
+channels, antennas & baselines, and autocorrelations) and (optionally)
+a simple flat amplitude threshold are applied. Then a sequence of
+Stokes-V flagging and dynamic flagging of amplitudes is done,
+optionally integrating over or across individual spectra. Each of
+these steps is selectable via input parameters.
 
 The averaging scale defaults to 54 channels, resulting in a
 1MHz-resolution MS that can be imaged with cimager, although this
@@ -149,6 +150,10 @@ is possible, however, to select a single field to process via the
 |                                               |                                 |                                                 | the quote marks). See documentation for further details on            |
 |                                               |                                 |                                                 | format.                                                               |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
+| ``CHANNEL_FLAG_SCIENCE``                      | ""                              | selection_flagger.<rule>.spw                    | Allows flagging of a specified range of channels. For example, to flag|
+|                                               |                                 | (:doc:`../calim/cflag`)                         | out the first 100 channnels, use "0:0~16" (with the quote marks). See |
+|                                               |                                 |                                                 | the docuemntation for further details on the format.                  |
++-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 | ``FLAG_AUTOCORRELATION_SCIENCE``              | false                           | selection_flagger.<rule>.autocorr               | If true, then autocorrelations will be flagged.                       |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 | **Flagging of averaged data**                 |                                 |                                                 |                                                                       |
@@ -206,6 +211,10 @@ is possible, however, to select a single field to process via the
 |  ``FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW_AV``  | 0.                              | amplitude_flagger.low (:doc:`../calim/cflag`)   | Lower threshold for the simple amplitude flagging on the averaged     |
 |                                               |                                 |                                                 | data. If set to blank (``FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW=""``),  |
 |                                               |                                 |                                                 | then no minimum value is applied. [value in flux-calibrated units]    |
++-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
+| ``CHANNEL_FLAG_SCIENCE_AV``                   | ""                              | selection_flagger.<rule>.spw                    | Allows flagging of a specified range of channels. For example, to flag|
+|                                               |                                 | (:doc:`../calim/cflag`)                         | out the first 100 channnels, use "0:0~16" (with the quote marks). See |
+|                                               |                                 |                                                 | the docuemntation for further details on the format.                  |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 
 

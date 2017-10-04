@@ -200,10 +200,10 @@ Here is a summary of the workflow provided for by these scripts:
   pointing at 1934-638 is used - this assumes the beams were pointed
   at it in order (so that beam 0 was pointing at in in scan 0, etc)
 * These are flagged using **cflag** (:doc:`../calim/cflag`) in two
-  passes: first, selection rules covering antennas, baselines and
+  passes: first, selection rules covering channels, antennas & baselines, and
   autocorrelations are applied, along with an optional simple flat amplitude
-  threshold; then a dynamic amplitude flag that integrates
-  individual spectra.
+  threshold; then a second pass that covers Stokes-V and dynamic
+  amplitude flagging, that integrate individual spectra.
 * The bandpass solution is then determined with **cbpcalibrator**
   (:doc:`../calim/cbpcalibrator`), using all individual MSs and stored
   in a single CASA table.

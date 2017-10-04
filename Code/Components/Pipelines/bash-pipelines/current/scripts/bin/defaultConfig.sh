@@ -299,8 +299,10 @@ FLAG_DO_FLAT_AMPLITUDE_1934=false
 FLAG_THRESHOLD_AMPLITUDE_1934=0.2
 # Minimum amplitude threshold applied [hardware units - before calibration]
 FLAG_THRESHOLD_AMPLITUDE_1934_LOW=0.0
-# Baselines or antennas to flag in the 1934 case
+# Baselines or antennas to flag in the 1934 data
 ANTENNA_FLAG_1934=""
+# Channel range(s) to flag in the 1934 data
+CHANNEL_FLAG_1934=""
 # Whether to flag autocorrelations for the 1934 data
 FLAG_AUTOCORRELATION_1934=false
 
@@ -368,6 +370,8 @@ FLAG_THRESHOLD_AMPLITUDE_SCIENCE=10.
 FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW=0.0
 # Baselines or antennas to flag in the science data
 ANTENNA_FLAG_SCIENCE=""
+# Channel range(s) to flag in the science data
+CHANNEL_FLAG_SCIENCE=""
 # Whether to flag autocorrelations for the science data
 FLAG_AUTOCORRELATION_SCIENCE=false
 
@@ -415,6 +419,8 @@ FLAG_DO_FLAT_AMPLITUDE_SCIENCE_AV=false
 FLAG_THRESHOLD_AMPLITUDE_SCIENCE_AV=10.
 # Minimum amplitude threshold applied to the averaged data [calibrated flux units]
 FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW_AV=0.0
+# Channel range(s) to flag in the averaged science data
+CHANNEL_FLAG_SCIENCE_AV=""
 
 # Data column in MS to use in cimager
 DATACOLUMN=DATA

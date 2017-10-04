@@ -12,12 +12,12 @@ up to ``BEAM_MAX`` are split & flagged, and have their bandpass solved
 for. This is due to the particular requirements of
 :doc:`../calim/cbpcalibrator`.
 
-The MS is flagged in two passes. First, a combination of
-selection rules (allowing flagging of antennas & baselines, and
-autocorrelations) and (optionally) a simple flat amplitude threshold are
-applied. Then dynamic flagging of amplitudes is done, integrating over
-individual spectra. Each of these steps is selectable via input
-parameters. 
+The MS is flagged in two passes. First, a combination of selection
+rules (allowing flagging of channels, antennas & baselines, and
+autocorrelations) and (optionally) a simple flat amplitude threshold
+are applied. Then a sequence of Stokes-V flagging and dynamic flagging
+of amplitudes is done, integrating over individual spectra. Each of
+these steps is selectable via input parameters.
 
 Then the bandpass table is calculated with
 :doc:`../calim/cbpcalibrator`, which requires MSs for all beams to be
@@ -124,8 +124,13 @@ ASKAPsoft.
 +-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
 | ``ANTENNA_FLAG_1934``                         | ""                                    | selection_flagger.<rule>.antenna                       | Allows flagging of antennas or baselines. For example, to |
 |                                               |                                       | (:doc:`../calim/cflag`)                                | flag out the 1-3 baseline, set this to "ak01&&ak03" (with |
-|                                               |                                       |                                                        | the quote marks). See documentation for further details on|
-|                                               |                                       |                                                        | format.                                                   |
+|                                               |                                       |                                                        | the quote marks). See the documentation for further       |
+|                                               |                                       |                                                        | details on the format.                                    |
++-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| ``CHANNEL_FLAG_1934``                         | ""                                    | selection_flagger.<rule>.spw (:doc:`../calim/cflag`)   | Allows flagging of a specified range of channels. For     |
+|                                               |                                       |                                                        | example, to flag out the first 100 channnels, use "0:0~16"|
+|                                               |                                       |                                                        | (with the quote marks). See the docuemntation for further |
+|                                               |                                       |                                                        | details on the format.                                    |
 +-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
 | ``FLAG_AUTOCORRELATION_1934``                 | false                                 | selection_flagger.<rule>.autocorr                      | If true, then autocorrelations will be flagged.           |
 |                                               |                                       |                                                        |                                                           |

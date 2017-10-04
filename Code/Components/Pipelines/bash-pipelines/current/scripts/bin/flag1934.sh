@@ -66,13 +66,26 @@ Cflag.selection_flagger.rule1.antenna   = ${ANTENNA_FLAG_1934}"
         DO_AMP_FLAG=true
     fi
 
-    if [ "${FLAG_AUTOCORRELATION_1934}" == "true" ]; then
-        autocorrFlagging="# The following flags out the autocorrelations, if set to true:
-Cflag.selection_flagger.rule2.autocorr  = ${FLAG_AUTOCORRELATION_1934}"
+    if [ "${CHANNEL_FLAG_1934}" == "" ]; then
+        channelFlagging="# Not flagging any specific channel range"
+    else
+        channelFlagging="# The following flags out specific channels:
+Cflag.selection_flagger.rule2.spw = ${CHANNEL_FLAG_1934}"
         if [ "${ruleList}" == "" ]; then
             ruleList="rule2"
         else
             ruleList="${ruleList},rule2"
+        fi
+        DO_AMP_FLAG=true
+    fi
+
+    if [ "${FLAG_AUTOCORRELATION_1934}" == "true" ]; then
+        autocorrFlagging="# The following flags out the autocorrelations, if set to true:
+Cflag.selection_flagger.rule3.autocorr  = ${FLAG_AUTOCORRELATION_1934}"
+        if [ "${ruleList}" == "" ]; then
+            ruleList="rule3"
+        else
+            ruleList="${ruleList},rule3"
         fi
         DO_AMP_FLAG=true
     else
@@ -139,6 +152,8 @@ ${amplitudeCut}
 ${selectionRule}
 
 ${antennaFlagging}
+
+${channelFlagging}
 
 ${autocorrFlagging}
 

@@ -73,6 +73,25 @@ ${amplitudeLow}"
         amplitudeCut="# No flat amplitude flagging applied"
     fi
 
+    if [ "${CHANNEL_FLAG_SCIENCE_AV}" == "" ]; then
+        channelFlagging="# Not flagging any specific channel range"
+    else
+        channelFlagging="# The following flags out specific channels:
+Cflag.selection_flagger.rule1.spw = ${CHANNEL_FLAG_SCIENCE_AV}"
+        if [ "${ruleList}" == "" ]; then
+            ruleList="rule1"
+        else
+            ruleList="${ruleList},rule1"
+        fi
+        DO_AMP_FLAG=true
+    fi
+
+    if [ "${ruleList}" == "" ]; then
+        selectionRule="# No selection rules used"
+    else
+        selectionRule="Cflag.selection_flagger.rules           = [${ruleList}]"
+    fi
+
     setJob flag_ave_science flagAv
     cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
@@ -108,6 +127,10 @@ if [ \$DO_AMP_FLAG == true ]; then
 Cflag.dataset                           = ${msSciAv}
 
 ${amplitudeCut}
+
+${selectionRule}
+
+${channelFlagging}
 
 EOFINNER
 
