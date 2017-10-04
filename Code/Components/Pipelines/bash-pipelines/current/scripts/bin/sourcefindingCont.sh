@@ -181,11 +181,11 @@ imlist="\${imlist} ${OUTPUT}/\${image}"
 
 if [ "\${NUM_TAYLOR_TERMS}" -gt 1 ]; then
     t1im=\$(echo "\$image" | sed -e 's/taylor\.0/taylor\.1/g')
-    if [ -e "\${t1im}" ]; then
+    if [ -e "${OUTPUT}/\${t1im}" ]; then
         imlist="\${imlist} ${OUTPUT}/\${t1im}"
     fi
     t2im=\$(echo "\$image" | sed -e 's/taylor\.0/taylor\.2/g')
-    if [ -e "\${t2im}" ]; then
+    if [ -e "${OUTPUT}/\${t2im}" ]; then
         imlist="\${imlist} ${OUTPUT}/\${t2im}"
     fi
 fi
