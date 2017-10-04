@@ -3,7 +3,7 @@
 if [ $# -gt 0 ]; then
     TOPDIR=$1
 else
-    TOPDIR=trunk
+    TOPDIR=askapsoft
 fi
 
 
