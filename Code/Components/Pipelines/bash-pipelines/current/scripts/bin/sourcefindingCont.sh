@@ -204,7 +204,7 @@ if [ \$doRM == true ]; then
     for p in \${polList}; do
         sedstr="s/%p/\$p/g"
         thisim=\$(echo "\$contcube" | sed -e "\$sedstr")
-        if [ -e "\${thisim}" ]; then
+        if [ -e "${OUTPUT}/\${thisim}" ]; then
             imlist="\${imlist} ${OUTPUT}/\${thisim}"
         else
             doRM=false
