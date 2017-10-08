@@ -10,6 +10,12 @@ The splitting is done by beam, and optionally by particular scans
 and/or fields (where the latter are selected on the basis of the FIELD
 NAME in the MS).
 
+As noted in :doc:`DataLocationSelection`, when an observation was
+taken in one-field-per-beam mode, and no selection on scans or
+channels is done, and there is only a single beam in the MS, then the
+beam MSs are copied instead of using *mssplit*. This will run much
+faster.
+
 As for the bandpass calibrator, the MS is then flagged in two
 passes. First, a combination of selection rules (allowing flagging of
 channels, antennas & baselines, and autocorrelations) and (optionally)

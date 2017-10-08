@@ -39,11 +39,14 @@ if [ "${DO_1934_CAL}" == "true" ]; then
     MS_CAL_MISSING=false
     if [ "${SB_1934}" != "" ] && [ "${DIR_SB}" != "" ]; then
         sb1934dir="$DIR_SB/$SB_1934"
-        msnames=$(find "$sb1934dir" -maxdepth 1 -type d -name "*.ms")
-        numMS=$(find "$sb1934dir" -maxdepth 1 -type d -name "*.ms" | wc -l)
-        if [ "${numMS}" -eq 1 ]; then
-            MS_INPUT_1934="$sb1934dir/${msnames##*/}"
-        elif [ "${numMS}" -eq 0 ]; then
+        msnames1934=$(find "$sb1934dir" -maxdepth 1 -type d -name "*.ms")
+        numMS1934=$(echo $msnames1934 | wc -w)
+        if [ "${numMS1934}" -eq 0 ]; then
+            # If here, we did not find any measurement sets in the
+            # archive directory. Fall back to MS_INPUT_1934 from the
+            # config file, unless it isn't provided, in which case we
+            # don't do the splitting.
+            
             MS_CAL_MISSING=true
             if [ "${MS_INPUT_1934}" == "" ]; then
                 echo "SB directory $SB_1934 has no measurement sets. You need to give the measurement set name via 'MS_INPUT_1934'"
@@ -57,9 +60,10 @@ if [ "${DO_1934_CAL}" == "true" ]; then
                 fi
             fi
         else
-            echo "SB directory $SB_1934 has more than one measurement set, and the pipeline can currently only process one at a time."
-            echo "Please specify input MS with parameter 'MS_INPUT_1934'."
-            exit 1
+            # Set the first one in the list to be the reference MS
+            # used for metadata. The order doesn't matter, since all
+            # the MSs should have the same metadata.
+            MS_INPUT_1934="$(echo $msnames1934 | awk '{print $1}')"
         fi
     fi
     if [ "$MS_INPUT_1934" == "" ]; then
@@ -79,11 +83,14 @@ if [ "${DO_SCIENCE_FIELD}" == "true" ]; then
     MS_SCIENCE_MISSING=false
     if [ "${SB_SCIENCE}" != "" ] && [ "${DIR_SB}" != "" ]; then
         sbScienceDir=$DIR_SB/$SB_SCIENCE
-        msnames=$(find "$sbScienceDir" -maxdepth 1 -type d -name "*.ms")
-        numMS=$(find "$sbScienceDir" -maxdepth 1 -type d -name "*.ms" | wc -l)
-        if [ "${numMS}" -eq 1 ]; then
-            MS_INPUT_SCIENCE="$sbScienceDir/${msnames##*/}"
-        elif [ "${numMS}" -eq 0 ]; then
+        msnamesSci=$(find "$sbScienceDir" -maxdepth 1 -type d -name "*.ms")
+        numMSsci=$(echo $msnamesSci | wc -w)
+        if [ "${numMSsci}" -eq 0 ]; then
+            # If here, we did not find any measurement sets in the
+            # archive directory. Fall back to MS_INPUT_SCIENCE from
+            # the config file, unless it isn't provided, in which case
+            # we don't do the splitting.
+            
             MS_SCIENCE_MISSING=true
             if [ "${MS_INPUT_SCIENCE}" == "" ]; then
                 echo "SB directory $SB_SCIENCE has no measurement sets. You need to give the measurement set name via 'MS_INPUT_SCIENCE'"
@@ -97,9 +104,10 @@ if [ "${DO_SCIENCE_FIELD}" == "true" ]; then
                 fi
             fi
         else
-            echo "SB directory $SB_SCIENCE has more than one measurement set, and the pipeline can currently only process one at a time."
-            echo "Please specify with parameter 'MS_INPUT_SCIENCE'."
-            exit 1
+            # Set the first one in the list to be the reference MS
+            # used for metadata. The order doesn't matter, since all
+            # the MSs should have the same metadata.
+            MS_INPUT_SCIENCE="$(echo $msnamesSci | awk '{print $1}')"
         fi
     fi
 
@@ -284,7 +292,6 @@ EOF
     # Number of channels in science observation (used in applying the bandpass solution)
     if [ "$CHAN_RANGE_SCIENCE" == "" ]; then
         NUM_CHAN_SCIENCE=${NUM_CHAN}
-        CHAN_RANGE_SCIENCE="1-${NUM_CHAN}"
     else
         NUM_CHAN_SCIENCE=$(echo "${CHAN_RANGE_SCIENCE}" | awk -F'-' '{print $2-$1+1}')
     fi

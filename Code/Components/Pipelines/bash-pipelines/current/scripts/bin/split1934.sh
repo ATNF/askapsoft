@@ -61,6 +61,25 @@ fi
 
 if [ "${DO_IT}" == "true" ]; then
 
+    # Define the input MS. If there is a single MS in the archive
+    # directory, just use MS_INPUT_1934. If there is more than one, we
+    # assume it is split per beam. Unlike the science case, we don't
+    # compare the number of beams with the number of MSs, we just use
+    # the list as presented. We add the beam number to the root MS
+    # name.
+
+    if [ $numMS1934 -eq 1 ]; then
+        inputMS=${MS_INPUT_1934}
+    else
+        msroot=$(for ms in ${msnames1934}; do echo $ms; done | sed -e 's/[0-9]*[0-9].ms//g' | uniq)
+        inputMS=$(echo $msroot $BEAM | awk '{printf "%s%d.ms\n",$1,$2}')
+        if [ ! -e "${inputMS}" ]; then
+            echo "ERROR - wanted to use $inputMS as input for beam $BEAM"
+            echo "      -  but it does not exist! Exiting."
+            exit 1
+        fi
+    fi
+        
     if [ "${DO_FIND_BANDPASS}" == "true" ] && [ -e "${TABLE_BANDPASS}" ]; then
         # If we are splitting and the user wants to find the bandpass,
         # remove any existing bandpass table so that we will be able
@@ -104,7 +123,7 @@ parset=${parsets}/split_1934_${FIELDBEAM}_\${SLURM_JOB_ID}.in
 cat > "\$parset" <<EOFINNER
 # Input measurement set
 # Default: <no default>
-vis         = ${MS_INPUT_1934}
+vis         = ${inputMS}
 
 # Output measurement set
 # Default: <no default>

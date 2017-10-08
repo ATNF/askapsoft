@@ -9,15 +9,28 @@ given by ``DIR_SB``. If SB numbers are not provided, however,
 the ``MS_INPUT`` variables give the filename for the relevant MS. The
 full path must be specified here.
 
-Some recent datasets have been taken in multi-measurement set mode,
-typically one per beam. In this case, the usual pipeline behaviour
-will be to not run the processing. To force it to run on a single one
-of these MSs, you need to give ``MS_INPUT_SCIENCE`` as the full path
-to the MS of choice, and set ``DIR_SB=""``. You will still need to
-provide ``SB_SCIENCE``, as this is used to find certain parts of the
-metadata. Use a similar setup for the bandpass calibrator information
-(``MS_INPUT_1934`` and ``SB_1934``). The pipeline will be upgraded to
-fully handle these multi-MS datasets in an upcoming release.
+There are two modes in which ingest has been run to create measurement
+sets in the SB directory. The usual way has been to create a single
+file for the entire observation. Recently, ingest has started
+producing a single MS per beam. The pipeline is now compatible with
+both these modes. For the file-per-beam mode, it assumes there is the
+same number of beams as in the footprint. If there is not, the
+pipeline will currently exit with an error message.
+
+In the file-per-beam mode, the metadata for the observation is taken
+from a single MS (although they should all be the same for a given
+observation).
+
+If no channel or scan selection is being made (that is, using
+``CHANNEL_RANGE_SCIENCE`` or ``SCAN_SELECTION_SCIENCE``), there is
+only a single field in the dataset, and the observation used the
+MS-per-beam mode, then instead of splitting the dataset the pipeline
+uses a parallel copy (using the *dcp* utility) to copy the archive MS
+to the output directory. This should run faster than using *mssplit*.
+
+The bandpass calibration datasets are treated the same way, although
+*mssplit* is always used (since the relevant scan needs to be split
+out). 
 
 It may be that the SB you wish to process has been removed from /astro.
 You can follow the instructions on :doc:`../platform/comm_archive` to request

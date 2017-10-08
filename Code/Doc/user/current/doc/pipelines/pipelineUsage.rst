@@ -54,10 +54,6 @@ where the user input file myInputs.sh could look something like this::
   # base names for MS and image data products
   MS_BASE_SCIENCE=B1740_10hr.ms
   IMAGE_BASE_CONT=i.b1740m517.cont
-  # beam location information, for mosaicking
-  BEAM_FOOTPRINT_NAME=diamond
-  FREQ_BAND=1
-  BEAM_FOOTPRINT_PA=0
   # other imaging parameters
   NUM_PIXELS_CONT=4096
   NUM_TAYLOR_TERMS=2
@@ -188,8 +184,7 @@ Here is a summary of the workflow provided for by these scripts:
     including number of antennas & channels, and the list of field
     names.
   * Use **schedblock** to determine the footprint specification.
-  * Use **footprint.py** (from the ACES tools) to convert that into
-    beam centre positions.
+  * Use **footprint** to convert that into beam centre positions.
 
 * Read in user-defined parameters from the provided configuration
   file, and define further parameters derived from them.
@@ -209,10 +204,12 @@ Here is a summary of the workflow provided for by these scripts:
   in a single CASA table.
 * The science field is processed for each field name - what follows
   describes the steps used for each field.
-* The science field data is split with *mssplit**, producing one
+* The science field data is split with **mssplit**, producing one
   measurement set per beam. You can select particular scans or fields
   here, but the default is to use everything. Each field gets its own
-  directory.
+  directory. If the data was taken with the file-per-beam mode, and no
+  selection is required, a direct copy with *dcp* is used instead of
+  **mssplit**. 
 * The bandpass solution is then applied to each beam MS with
   **ccalapply** (:doc:`../calim/ccalapply`).
 * Flagging is then applied to the bandpass-calibrated dataset. The

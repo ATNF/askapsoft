@@ -59,7 +59,30 @@ fi
 
 if [ "${DO_IT}" == "true" ]; then
 
-    if [ "$SCAN_SELECTION_SCIENCE" == "" ]; then
+    # Define the input MS. If there is a single MS in the archive
+    # directory, just use MS_INPUT_SCIENCE. If there is more than one,
+    # we assume it is split per beam. We compare the number of beams
+    # with the number of MSs, giving an error if they are
+    # different. If OK, then we add the beam number to the root MS
+    # name.
+
+    if [ $numMSsci -eq 1 ]; then
+        inputMS=${MS_INPUT_SCIENCE}
+    elif [ $numMSsci -eq ${NUM_BEAMS_FOOTPRINT} ]; then
+        msroot=$(for ms in ${msnamesSci}; do echo $ms; done | sed -e 's/[0-9]*[0-9].ms//g' | uniq)
+        inputMS=$(echo $msroot $BEAM | awk '{printf "%s%d.ms\n",$1,$2}')
+        if [ ! -e "${inputMS}" ]; then
+            echo "ERROR - wanted to use $inputMS as input for beam $BEAM"
+            echo "      -  but it does not exist! Exiting."
+            exit 1
+        fi
+    else
+        echo "ERROR - have more than one MS, but not the same number as the number of beams."
+        echo "      - this is unexpected. Exiting."
+        exit 1
+    fi
+        
+    if [ "${SCAN_SELECTION_SCIENCE}" == "" ]; then
 	scanParam="# No scan selection done"
     else
         if [ "$(echo "${SCAN_SELECTION_SCIENCE}" | awk -F'[' '{print NF}')" -gt 1 ]; then
@@ -69,11 +92,101 @@ if [ "${DO_IT}" == "true" ]; then
         fi
     fi
 
+    if [ "${CHAN_RANGE_SCIENCE}" == "" ]; then
+        channelParam="channel     = 1-${NUM_CHAN_SCIENCE}"
+    else
+        channelParam="channel     = ${CHAN_RANGE_SCIENCE}"
+    fi
+
     # Select only the current field
     fieldParam="fieldnames   = ${FIELD}"
+
+
+    # If only a single field, and no channel or scan selection, and we are in the MS-per-beam mode, then we can just copy the MS without needing a split
+
+    if [ ${NUM_FIELDS} -eq 1 ] &&
+           [ "${CHAN_RANGE_SCIENCE}" == "" ] &&
+           [ "${SCAN_SELECTION_SCIENCE}" == "" ] &&
+           [ $numMSsci -eq ${NUM_BEAMS_FOOTPRINT} ]; then
+
+        # copy $inputMS to $msSci
+
+        setJob copy_science copy
+        cat > "$sbatchfile" <<EOFOUTER
+#!/bin/bash -l
+#SBATCH --partition=${QUEUE}
+#SBATCH --clusters=${CLUSTER}
+${ACCOUNT_REQUEST}
+${RESERVATION_REQUEST}
+#SBATCH --time=${JOB_TIME_SPLIT_SCIENCE}
+#SBATCH --ntasks=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --job-name=${jobname}
+${EMAIL_REQUEST}
+${exportDirective}
+#SBATCH --output=$slurmOut/slurm-copySci-b${BEAM}-%j.out
+
+${askapsoftModuleCommands}
+
+BASEDIR=${BASEDIR}
+cd $OUTPUT
+. ${PIPELINEDIR}/utils.sh	
+
+# Make a copy of this sbatch file for posterity
+sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
+thisfile=$sbatchfile
+cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
+
+STARTTIME=$(date +%FT%T)
+log=${logs}/copyMS_science_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+cat > \$log <<EOFINNER
+Log file for copying input measurement set :
+inputMS=${inputMS}
+outputMS=${OUTPUT}/${msSci}
+
+EOFINNER
+
+/usr/bin/time -p -o \$log ssh hpc-data "module load mpifileutils; mpirun -np 4 dcp $inputMS ${OUTPUT}/$msSci"
+
+err=\$?
+if [ "\$?" -eq 0 ]; then
+    RESULT_TXT="OK"
+else
+    RESULT_TXT="FAIL"
+fi
+
+REALTIME=\$(grep real \$log | awk '{print \$2}')
+USERTIME=\$(grep user \$log | awk '{print \$2}')
+SYSTIME=\$(grep sys \$log | awk '{print \$2}')
+
+for format in csv txt; do
+    if [ "\$format" == "txt" ]; then
+        output="${stats}/stats-\${SLURM_JOB_ID}-${jobname}.txt"
+    elif [ "\$format" == "csv" ]; then
+        output="${stats}/stats-\${SLURM_JOB_ID}-${jobname}.csv"
+    fi
+    writeStats "\$SLURM_JOB_ID" 1 "${jobname}"  "\$RESULT_TXT" "\$REALTIME" "\$USERTIME" "\$SYSTIME" 0. 0.  "\$STARTTIME" "\$format" >> "\$output"
+done
+
+
+EOFOUTER
+
+        if [ "${SUBMIT_JOBS}" == "true" ]; then
+            DEP=""
+            DEP=$(addDep "$DEP" "$DEP_START")
+	    ID_SPLIT_SCI=$(sbatch $DEP "$sbatchfile" | awk '{print $4}')
+	    recordJob "${ID_SPLIT_SCI}" "Copying beam ${BEAM} of science observation"
+        else
+	    echo "Would run copying for ${BEAM} of science observation with slurm file $sbatchfile"
+        fi
+
+       
+    else
+
+        # need to run mssplit
     
-    setJob split_science split
-    cat > "$sbatchfile" <<EOFOUTER
+        setJob split_science split
+        cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
@@ -102,7 +215,7 @@ parset=${parsets}/split_science_${FIELDBEAM}_\${SLURM_JOB_ID}.in
 cat > "\$parset" <<EOFINNER
 # Input measurement set
 # Default: <no default>
-vis         = ${MS_INPUT_SCIENCE}
+vis         = ${inputMS}
 
 # Output measurement set
 # Default: <no default>
@@ -112,7 +225,7 @@ outputvis   = ${msSci}
 # Can be either a single integer (e.g. 1) or a range (e.g. 1-300). The range
 # is inclusive of both the start and end, indexing is one-based.
 # Default: <no default>
-channel     = ${CHAN_RANGE_SCIENCE}
+$channelParam
 
 # Beam selection via beam ID
 # Select an individual beam
@@ -144,13 +257,15 @@ fi
 
 EOFOUTER
     
-    if [ "${SUBMIT_JOBS}" == "true" ]; then
-        DEP=""
-        DEP=$(addDep "$DEP" "$DEP_START")
-	ID_SPLIT_SCI=$(sbatch $DEP "$sbatchfile" | awk '{print $4}')
-	recordJob "${ID_SPLIT_SCI}" "Splitting beam ${BEAM} of science observation"
-    else
-	echo "Would run splitting ${BEAM} of science observation with slurm file $sbatchfile"
-    fi
+        if [ "${SUBMIT_JOBS}" == "true" ]; then
+            DEP=""
+            DEP=$(addDep "$DEP" "$DEP_START")
+	    ID_SPLIT_SCI=$(sbatch $DEP "$sbatchfile" | awk '{print $4}')
+	    recordJob "${ID_SPLIT_SCI}" "Splitting beam ${BEAM} of science observation"
+        else
+	    echo "Would run splitting ${BEAM} of science observation with slurm file $sbatchfile"
+        fi
 
+    fi
+        
 fi
