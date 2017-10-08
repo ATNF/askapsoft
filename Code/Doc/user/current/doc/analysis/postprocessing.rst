@@ -351,13 +351,14 @@ version of this catalogue is shown here:
 
 .. code-block:: bash
 
- #         island_id       component_id component_name ra_hms_cont dec_dms_cont ra_deg_cont dec_deg_cont     ra_err    dec_err       freq  flux_peak flux_peak_err flux_int flux_int_err maj_axis min_axis pos_ang maj_axis_err min_axis_err pos_ang_err maj_axis_deconv min_axis_deconv pos_ang_deconv  chi_squared_fit rms_fit_gauss spectral_index spectral_curvature  rms_image has_siblings fit_is_estimate flag_c3 flag_c4                                                                                             comment
- #                --                 --                                               [deg]        [deg]   [arcsec]   [arcsec]      [MHz] [mJy/beam]    [mJy/beam]    [mJy]        [mJy] [arcsec] [arcsec]   [deg]     [arcsec]     [arcsec]       [deg]        [arcsec]        [arcsec]          [deg]               --    [mJy/beam]             --                 -- [mJy/beam]
-      SB9999_image_1    SB9999_image_1a J222645-623529  22:26:45.4    -62:35:29  336.689324   -62.591524       0.00       0.00      864.0   1312.663         0.000 1440.637        0.000    80.09    48.60  156.33         0.00         0.00        0.00           21.08           15.45         -43.78        1194.4159      2590.406           0.00               0.00      1.477            0               0       0       0
-      SB9999_image_2    SB9999_image_2a J231716-613701  23:17:16.9    -61:37:01  349.320503   -61.617206       0.00       0.00      864.0   1130.305         0.000 1130.305        0.000    77.43    45.81  157.31         0.00         0.00        0.00            0.00            0.00         -22.69         999.0000         0.000           0.00               0.00      0.674            0               1       0       0
-      SB9999_image_3    SB9999_image_3a J231447-621207  23:14:47.5    -62:12:07  348.697906   -62.202125       0.00       0.00      864.0    858.726         0.000  858.726        0.000    77.43    45.81  157.31         0.00         0.00        0.00            0.00            0.00         -22.69         999.0000         0.000           0.00               0.00      0.544            0               1       0       0                
-      SB9999_image_4    SB9999_image_4a J231034-632958  23:10:34.0    -63:29:58  347.641771   -63.499709       0.00       0.00      864.0    842.032         0.000 1056.211        0.000    78.19    56.90  160.68         0.00         0.00        0.00           34.30            9.00          58.34         411.3000      1471.304           0.00               0.00      6.397            0               0       0       0
-
+#                                        island_id                                      component_id component_name ra_hms_cont dec_dms_cont ra_deg_cont dec_deg_cont   ra_err  dec_err   freq  flux_peak flux_peak_err flux_int flux_int_err maj_axis min_axis pos_ang maj_axis_err min_axis_err pos_ang_err maj_axis_deconv min_axis_deconv pos_ang_deconv maj_axis_deconv_err min_axis_deconv_err pos_ang_deconv_err chi_squared_fit rms_fit_gauss spectral_index spectral_curvature spectral_index_err spectral_curvature_err  rms_image has_siblings fit_is_estimate spectral_index_from_TT flag_c4                                                                                             comment
+#                                               --                                                --                                               [deg]        [deg] [arcsec] [arcsec]  [MHz] [mJy/beam]    [mJy/beam]    [mJy]        [mJy] [arcsec] [arcsec]   [deg]     [arcsec]     [arcsec]       [deg]        [arcsec]        [arcsec]          [deg]            [arcsec]            [arcsec]              [deg]              --    [mJy/beam]             --                 --                 --                     -- [mJy/beam]
+   image.i.ngc7232.cont.linmos.taylor.0.restored_1  image.i.ngc7232.cont.linmos.taylor.0.restored_1a J221655-452147  22:16:55.8    -45:21:47  334.232312   -45.363235     0.00     0.00 1400.5   1726.833         0.000 1726.833        0.000    30.33    22.89   65.89         0.00         0.00        0.00            0.00            0.00          65.89                0.00                0.00               0.00         999.000         0.000          -0.00               0.00               0.00                   0.00      2.916            1               1                      1       0
+   image.i.ngc7232.cont.linmos.taylor.0.restored_1  image.i.ngc7232.cont.linmos.taylor.0.restored_1b J221644-452149  22:16:44.4    -45:21:49  334.184870   -45.363875     0.00     0.00 1400.5     15.852         0.000   15.852        0.000    30.33    22.89   65.89         0.00         0.00        0.00            0.00            0.00          65.89                0.00                0.00               0.00         999.000         0.000          -0.00              -0.00               0.00                   0.00      2.916            1               1                      1       0
+   image.i.ngc7232.cont.linmos.taylor.0.restored_1  image.i.ngc7232.cont.linmos.taylor.0.restored_1c J221706-452221  22:17:06.1    -45:22:21  334.275298   -45.372641     0.00     0.00 1400.5     14.891         0.000   14.891        0.000    30.33    22.89   65.89         0.00         0.00        0.00            0.00            0.00          65.89                0.00                0.00               0.00         999.000         0.000          -0.00              -0.00               0.00                   0.00      2.916            1               1                      1       0
+   image.i.ngc7232.cont.linmos.taylor.0.restored_2  image.i.ngc7232.cont.linmos.taylor.0.restored_2a J221021-454250  22:10:21.7    -45:42:50  332.590255   -45.714104     0.00     0.00 1400.5    766.953         0.000 1272.454        0.000    33.94    33.94  135.00         0.00         0.00        0.00           25.06           15.24         -24.11                0.00                0.00               0.00         999.000         0.000          -0.00               0.00               0.00                   0.00      2.262            1               1                      1       0
+   image.i.ngc7232.cont.linmos.taylor.0.restored_3  image.i.ngc7232.cont.linmos.taylor.0.restored_3a J221416-425710  22:14:16.8    -42:57:10  333.569959   -42.953043     0.05     0.04 1400.5    538.313         1.863  622.263        3.602    34.77    23.09   75.13         0.12         0.04        0.34           17.65            0.00          86.46                0.12                0.00               0.35         174.815      2374.698          -0.00               0.00               0.00                   0.00      0.900            0               0                      1       0
+   image.i.ngc7232.cont.linmos.taylor.0.restored_4  image.i.ngc7232.cont.linmos.taylor.0.restored_4a J215840-471934  21:58:40.9    -47:19:34  329.670361   -47.326273     0.07     0.07 1400.5    374.492         2.079  471.220        4.218    32.58    26.81   49.71         0.18         0.08        1.15           16.56            7.90           5.86                0.22                1.33               0.56         202.162      2220.534           0.00               0.00               0.00                   0.00      1.027            1               0                      1       0
 The columns are:
 
 * *island_ID* and *component_ID* are the unique identifiers of the
@@ -373,25 +374,25 @@ The columns are:
   for both RA and DEC. Errors in the position will also be given in
   time (not yet implemented fully).
 * *freq* shows the frequency of the image.
-* The peak and integrated fluxes are shown, with their errors (again,
-  not yet implemented).
+* The peak and integrated fluxes are shown, with their errors.
 * The size and orientation of the fitted Gaussian is shown by the
   major and minor axes (FWHM) and the position angle of the major
   axis. This is shown for the fitted values (*maj_axis* et al), their
   errors (*maj_axis_err* et al), and their deconvolved values given
-  the image's restoring beam (*maj_axis_deconv* et al).
+  the image's restoring beam (*maj_axis_deconv* et al) along with errors. 
 * The quality of the fit is shown by *chi_squared_fit* and
   *rms_fit_gauss*.
 * The fitted spectral index and spectral curvature are shown when
   calculated. This is only done when the appropriate flags are set -
-  see `Spectral Terms`_.
+  see `Spectral Terms`_. Errors are given for these as well.
 * *rms_image* shows the measurement of the local noise.
 * Several flags are reported: *has_siblings* is true if the component
   is one of many fitted to the same island; *fit_is_estimate* is true
   if the fit failed for some reason - the reported values for the
-  component parameters come from the initial estimate. There are two
-  further flags that are not yet defined (they are left as
-  placeholders for now).
+  component parameters come from the initial estimate; and
+  *spectral_index_from_TT* shows that the spectral index & curvature
+  were calculated from Taylor-term images (if *true*) or the continuum
+  cube (if *false*).
 
 Along with the components catalogue, a matching Karma/CASA/DS9
 annotation (region) file will be produced showing the location & size
@@ -420,11 +421,14 @@ fit results in Selavy). This too takes its name from the
 
 .. code-block:: bash
 
- #      ID           Name         RA        DEC      X      Y       F_int     F_peak  F_int(fit)  F_pk(fit)  Maj(fit)  Min(fit) P.A.(fit) Maj(fit_deconv.)   Min(fit_deconv.) P.A.(fit_deconv.)      Alpha      Beta  Chisq(fit)  RMS(image)  RMS(fit) Nfree(fit) NDoF(fit) NPix(fit) NPix(obj) Guess?
- #      --             --      [deg]      [deg]  [pix]  [pix]        [Jy]  [Jy/beam]        [Jy]  [Jy/beam]  [arcsec]  [arcsec]     [deg]         [arcsec]           [arcsec]             [deg]         --        --          --   [Jy/beam] [Jy/beam]         --        --        --        --     --
-        1a J121529-464244 183.871792 -46.711242 1919.0  388.0     0.15264     0.1291      0.1291     0.1291    58.661    43.973    147.38            0.012            0.00055            294.77  -5.865861 -20.13710    999.0000     0.00516     0.000          0         0         0        78      1
-        1b J121529-464244 183.880826 -46.697610 1917.0  393.0     0.15264     0.1291      0.0218     0.0218    58.661    43.973    147.38            0.012            0.00055            294.77   1.223772  -0.13692    999.0000     0.00516     0.000          0         0         0        78      1
-        2a J121557-450037 183.987820 -45.010316 1917.3 1000.9     0.13569     0.1136      0.1566     0.1171    68.806    50.160    166.85           40.537           15.24053            318.09  -3.117519  -6.41822     30.9322     0.00290     0.622          6        73        80        80      0
+#                                        island_id                                      component_id ra_hms_cont dec_dms_cont   ra_err  dec_err   freq flux_peak_err flux_int_err maj_axis_err min_axis_err pos_ang_err maj_axis_deconv_err min_axis_deconv_err pos_ang_deconv_err spectral_index_err spectral_curvature_err has_siblings spectral_index_from_TT flag_c4                                                                                             comment    ID           Name         RA        DEC       X       Y    F_int     F_peak F_int(fit)  F_pk(fit) Maj(fit) Min(fit) PA(fit) Maj(fit_deconv) Min(fit_deconv) PA(fit_deconv)   Alpha    Beta Chisq(fit) RMS(image)   RMS(fit) Nfree(fit) NDoF(fit) NPix(fit) NPix(obj) Guess?
+#                                               --                                                --                          [arcsec] [arcsec]  [MHz]    [mJy/beam]        [mJy]     [arcsec]     [arcsec]       [deg]            [arcsec]            [arcsec]              [deg]                 --                     --                                                                                                                                                    --             --      [deg]      [deg]   [pix]   [pix]    [mJy] [mJy/beam]      [mJy] [mJy/beam] [arcsec] [arcsec]   [deg]        [arcsec]        [arcsec]          [deg]      --      --         -- [mJy/beam] [mJy/beam]         --        --        --        --
+   image.i.ngc7232.cont.linmos.taylor.0.restored_1  image.i.ngc7232.cont.linmos.taylor.0.restored_1a  22:16:55.8    -45:21:47     0.00     0.00 1400.5         0.000        0.000         0.00         0.00        0.00                0.00                0.00               0.00               0.00                   0.00            1                      1       0                                                                                                        1a J221655-452147 334.232312 -45.363235 1454.00 1722.00  399.155   1726.833   1726.833   1726.833    30.33    22.89   65.89            0.00            0.00          65.89   -0.00    0.00    999.000      2.916      0.000          0         0         0        48      1
+   image.i.ngc7232.cont.linmos.taylor.0.restored_1  image.i.ngc7232.cont.linmos.taylor.0.restored_1b  22:16:44.4    -45:21:49     0.00     0.00 1400.5         0.000        0.000         0.00         0.00        0.00                0.00                0.00               0.00               0.00                   0.00            1                      1       0                                                                                                        1b J221644-452149 334.184870 -45.363875 1464.00 1722.00  399.155   1726.833     15.852     15.852    30.33    22.89   65.89            0.00            0.00          65.89   -0.00   -0.00    999.000      2.916      0.000          0         0         0        48      1
+   image.i.ngc7232.cont.linmos.taylor.0.restored_1  image.i.ngc7232.cont.linmos.taylor.0.restored_1c  22:17:06.1    -45:22:21     0.00     0.00 1400.5         0.000        0.000         0.00         0.00        0.00                0.00                0.00               0.00               0.00                   0.00            1                      1       0                                                                                                        1c J221706-452221 334.275298 -45.372641 1445.00 1719.00  399.155   1726.833     14.891     14.891    30.33    22.89   65.89            0.00            0.00          65.89   -0.00   -0.00    999.000      2.916      0.000          0         0         0        48      1
+   image.i.ngc7232.cont.linmos.taylor.0.restored_2  image.i.ngc7232.cont.linmos.taylor.0.restored_2a  22:10:21.7    -45:42:50     0.07     0.07 1400.5         2.079        8.230         0.18         0.08        1.15                0.09                0.10               0.25               0.00                   0.00            1                      1       0                                                                                                        2a J221021-454250 332.590255 -45.714104 1800.00 1620.00  253.272    766.953   1272.454    766.953    33.94    33.94  135.00           25.06           15.24         -24.11   -0.00    0.00    999.000      2.262      0.000          0         0         0        59      1
+   image.i.ngc7232.cont.linmos.taylor.0.restored_3  image.i.ngc7232.cont.linmos.taylor.0.restored_3a  22:14:16.8    -42:57:10     0.05     0.04 1400.5         1.863        3.602         0.12         0.04        0.34                0.12                0.00               0.35               0.00                   0.00            0                      1       0                                                                                                        5a J221416-425710 333.569959 -42.953043 1585.47 2447.06  112.661    493.966    622.263    538.313    34.77    23.09   75.13           17.65            0.00          86.46   -0.00    0.00    174.815      0.900   2374.698          6        24        31        31      0
+   image.i.ngc7232.cont.linmos.taylor.0.restored_4  image.i.ngc7232.cont.linmos.taylor.0.restored_4a  21:58:40.9    -47:19:34     0.07     0.07 1400.5         2.079        4.218         0.18         0.08        1.15                0.22                1.33               0.56               0.00                   0.00            1                      1       0                                                                                                        6a J215840-471934 329.670361 -47.326273 2393.13 1125.49   87.930    329.294    471.220    374.492    32.58    26.81   49.71           16.56            7.90           5.86    0.00    0.00    202.162      1.027   2220.534          6        28        41        41      0
 
 To summarise the columns:
 
@@ -488,7 +492,7 @@ Two types of annotation files will also be produced:
   boxes were not used, ie. **fitJustDetection=true**, this file is not
   created). 
 
-Finally, the user can request that a component parset be created,
+The user can request that a component parset be created,
 showing the fitted components. Such a file could be used in tasks such
 as :doc:`../calim/ccalibrator`, for self-calibration, or
 :doc:`../calim/csimulator`. This file is created by providing a
@@ -502,6 +506,13 @@ to be point sources by setting
 **Selavy.outputComponentParset.reportSize=false**. See
 :doc:`../calim/csimulator` for details on how components should be
 specified.
+
+Additionally, images showing the fitted Gaussians and the residual map
+after subtracting these Gaussians from the input image are always
+created when *doFit=true*. These will be named to match the input
+image: the map of fitted Gaussians will have "componentMap_" prepended
+to the image name, and the residual map will have "componentResidual_"
+prepended.
 
 .. _Spectral Terms: postprocessing.html#spectral-index-curvature
 

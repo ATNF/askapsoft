@@ -353,7 +353,9 @@ implemented in the ASKAP source finder:
   described in more detail in :doc:`preprocessing`. Additionally, when
   the curvature-map option in the Gaussian fitting is used, the
   curvature map can be written to a CASA image - consult
-  :doc:`postprocessing` for information.
+  :doc:`postprocessing` for information. Finally, whenever Gaussian
+  fitting is used, maps of the fitted components and the residuals
+  after subtracting them from the input image are always created. 
 * Extracted spectra and images: :doc:`extraction` describes various
   ways to extract data from the input image relating to individual
   detections. These can include integrated spectra, moment maps,
@@ -367,12 +369,12 @@ The island catalogue will look something like the following:
 
 .. code-block:: bash
 
- #         island_id    island_name n_components ra_hms_cont dec_dms_cont ra_deg_cont dec_deg_cont       freq maj_axis min_axis pos_ang    flux_int   flux_peak x_min x_max y_min y_max    n_pix   x_ave   y_ave   x_cen   y_cen x_peak y_peak flag_i1 flag_i2 flag_i3 flag_i4                                                                                             comment
- #                --                                                            [deg]        [deg]      [MHz] [arcsec] [arcsec]   [deg]       [mJy]  [mJy/beam]
-      SB9999_image_1 J222645-623530            1  22:26:45.4    -62:35:30  336.689117   -62.591704      864.0     1.24     0.74  157.31     1.43677      1.2909  2350  2361   290   308      178 2355.71  299.10 2355.36  300.08   2355    300       0       0       0       0
-      SB9999_image_2 J231717-613700            1  23:17:17.7    -61:37:00  349.323782   -61.616938      864.0     1.20     0.75  163.07     1.25480      1.1303   580   592   603   619      180  585.72  611.03  585.53  611.04    586    611       0       0       0       0
-      SB9999_image_3 J231447-621212            1  23:14:47.5    -62:12:12  348.698019   -62.203388      864.0     1.16     0.84  151.38     0.91437      0.8587   682   696   434   451      197  688.52  442.41  688.01  442.62    688    443       0       0       0       0
-      SB9999_image_4 J231034-633000            1  23:10:34.1    -63:30:00  347.642163   -63.499988      864.0     1.18     0.88  157.61     1.07729      0.8547   851   866    56    71      190  858.75   63.37  858.93   63.64    859     64       0       0       0       0
+#                                        island_id    island_name n_components ra_hms_cont dec_dms_cont ra_deg_cont dec_deg_cont    freq maj_axis min_axis pos_ang flux_int flux_int_err  flux_peak mean_background background_noise max_residual min_residual mean_residual max_residual max_residual x_min x_max y_min y_max    n_pix solid_angle beam_area   x_ave   y_ave   x_cen   y_cen x_peak y_peak flag_i1 flag_i2 flag_i3 flag_i4                                                                                             comment
+#                                               --                                                            [deg]        [deg]   [MHz] [arcsec] [arcsec]   [deg]    [mJy]        [mJy] [mJy/beam]      [mJy/beam]       [mJy/beam]   [mJy/beam]   [mJy/beam]    [mJy/beam]   [mJy/beam]   [mJy/beam]                                    [arcmin2] [arcmin2]
+   image.i.ngc7232.cont.linmos.taylor.0.restored_1 J221655-452150            3  22:16:55.2    -45:21:50  334.229793   -45.363969  1400.5     0.41     0.40   16.87  399.155        0.000   1726.833           0.000            0.000        0.000        0.000         0.000        0.000        0.000  1445  1466  1708  1734       48        1.92      0.22 1456.00 1720.56 1454.54 1721.79   1454   1722       0       0       0       0
+   image.i.ngc7232.cont.linmos.taylor.0.restored_2 J221021-454251            5  22:10:21.4    -45:42:51  332.589201   -45.714269  1400.5     0.73     0.42   43.78  253.272        0.000    766.953           0.000            0.000        0.000        0.000         0.000        0.000        0.000  1790  1809  1611  1627       59        2.36      0.22 1800.68 1620.15 1800.22 1619.95   1800   1620       0       0       0       0
+   image.i.ngc7232.cont.linmos.taylor.0.restored_3 J221416-425710            1  22:14:16.8    -42:57:10  333.569943   -42.952993  1400.5     0.46     0.27   51.68  112.661        0.000    493.966           0.000            0.000        0.000        0.000         0.000        0.000        0.000  1582  1589  2445  2449       31        1.24      0.22 1585.55 2447.06 1585.47 2447.08   1585   2447       0       0       0       0
+   image.i.ngc7232.cont.linmos.taylor.0.restored_4 J215840-471934            2  21:58:40.7    -47:19:34  329.669445   -47.326162  1400.5     0.63     0.40   86.95   87.930        0.000    329.294           0.000            0.000        0.000        0.000         0.000        0.000        0.000  2390  2400  1123  1128       41        1.64      0.22 2394.37 1125.68 2393.31 1125.52   2393   1126       0       0       0       0
 
 The columns used are:
 
@@ -391,10 +393,19 @@ The columns used are:
   with *maj_axis*, *min_axis* and *pos_ang* -- these are *not* fitted
   values, but calculated by the Duchamp code based on detected
   pixels.
-* The integrated and peak fluxes are given by *flux_int* and
-  *flux_peak*.
+* The integrated and peak fluxes are given by *flux_int* (with an
+  error) and flux_peak*.
+* The background level and noise in the vicinity of the island are
+  indicated by the *mean_background* and the *background_noise*.
+* The effectiveness of the Gaussian fits can be seen by the residual
+  statistics - these are the residuals from subtracting the fitted
+  Gaussians of the island from the image, and the statistics are
+  evaluated using only the pixels within the island.
 * The pixel ranges are shown by *x_min*, *x_max*, *y_min* and
-  *y_max*, with *n_pix* giving the total number of detected pixels. 
+  *y_max*, with *n_pix* giving the total number of detected pixels.
+* The size of the island is also indicated by the *solid_angle* (in
+  square-arcmin), with the comparable size of the restoring beam in
+  *beam_area*. 
 * Three estimates of the "centre" of the island are shown: *x_ave* &
   *y_ave* give the average pixel in each axis; *x_cen* & *y_cen* give
   the centroid, or flux-weighted-average; and *x_peak* & *y_peak* give
