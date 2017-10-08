@@ -127,9 +127,14 @@ class ContinuumSelavy : public Continuum {
     float itsMajDECONV;
     float itsMinDECONV;
     float itsPADECONV;
+    float itsMajDECONVerr;
+    float itsMinDECONVerr;
+    float itsPADECONVerr;
     float itsChisq;
     float itsRMSimage;
     float itsRMSfit;
+    float itsAlphaErr;
+    float itsBetaErr;
     int itsFlagSiblings;
     int itsFlagEstimate;
     int itsFlag3;

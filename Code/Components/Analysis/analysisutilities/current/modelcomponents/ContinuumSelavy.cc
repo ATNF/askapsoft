@@ -101,8 +101,9 @@ void ContinuumSelavy::define(const std::string &line)
        >> itsMaj >> itsMin >> itsPA
        >> itsMajErr >> itsMinErr >> itsPAerr
        >> itsMajDECONV >> itsMinDECONV >> itsPADECONV
+       >> itsMajDECONVerr >> itsMinDECONVerr >> itsPADECONVerr
        >> itsChisq >> itsRMSfit
-       >> itsAlpha >> itsBeta >> itsRMSimage
+       >> itsAlpha >> itsBeta >> itsAlphaErr >> itsBetaErr >> itsRMSimage
        >> itsFlagSiblings >> itsFlagEstimate >> itsFlag3 >> itsFlag4;       
 
     if (itsFlagUseDeconvolvedSizes) {
