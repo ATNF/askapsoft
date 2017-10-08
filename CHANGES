@@ -40,7 +40,12 @@ The pipelines have been updated with new functionality and options:
    CHANNEL_FLAG_SCIENCE_AV. 
  * A bug that meant the continuum source-finding job would fail to
    convert higher-order Taylor terms or continuum cubes to FITS format 
-   has been fixed
+   has been fixed.
+ * A fix has been made to the bandpass-smoothing casa script call,
+   adding in a --agg command-line flag to the casa arguments. This
+   allows the plotting to be run correctly on the compute nodes.
+ * Scripting errors in the flagging scripts that showed up when
+   splitting was not being done have been rectified.
 
 
 0.19.4 (21 September 2017)

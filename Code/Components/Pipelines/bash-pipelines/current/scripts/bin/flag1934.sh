@@ -42,7 +42,7 @@ fi
 
 if [ "${DO_SPLIT_1934}" != "true" ]; then
     # If we aren't doing splitting, we need the relevant MS to already exist
-    if [ "${DO_IT}" == "true "] && [ ! -e "${OUTPUT}/${msCal}" ]; then
+    if [ "${DO_IT}" == "true" ] && [ ! -e "${OUTPUT}/${msCal}" ]; then
         echo "Single-beam MS $msCal does not exist, so cannot run flagging"
         DO_IT=false
     fi
