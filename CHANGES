@@ -1,3 +1,48 @@
+0.19.5 (8 October 2017)
+-----------------------
+
+A patch release that adds a few new bits of functionality:
+
+The Selavy code has been updated to add to the catalogue
+specifications for the continuum island & component catalogues:
+ * The component catalogue now has error columns for the deconvolved
+   sizes, as well as for the alpha & beta values.
+ * Additionally, the 3rd flag column now indicates where the alpha &
+   beta values are measured from - true indicates they come from
+   Taylor-term images.
+ * The island catalogue now has:
+   - An error column for the integrated flux density
+   - Columns describing the background level, both the mean background
+     across the island, and the average background noise level.
+   - Statistics for the residual after subtracting the island's fitted
+     Gaussian components - columns for the max, mean, min, standard
+     deviation and rms.
+   - Columns indicating the solid angle of the island, and of the
+     image restoring beam.
+ * Occasional errors in converting the major/minor axis sizes to the
+   correct units have also been fixed.
+
+The pipelines have been updated with new functionality and options:
+ * The new ingest mode of recording one measurement set per beam is
+   now able to be processed. The MS metadata is recorded from one of
+   the measurement sets, and the splitting is done from the
+   appropriate beam. For the science dataset, if no selection of
+   channels or scans is required, and there is only a single field in
+   the observation, then copying of the MS is done instead of
+   splitting.
+ * Stokes-V flagging is available for all flagging steps. This is
+   performed in the same job as the dynamic amplitude flagging, and is
+   parameterised by its own parameters - consult the documentation for
+   the full list (essentially the same as FLAG_DYNAMIC parameters with
+   STOKESV replacing DYNAMIC or DYNAMIC_AMPLITUDE).
+ * Selection of specific spectral channels in the flagging tasks is
+   now possible with CHANNEL_FLAG_1934, CHANNEL_FLAG_SCIENCE, and
+   CHANNEL_FLAG_SCIENCE_AV. 
+ * A bug that meant the continuum source-finding job would fail to
+   convert higher-order Taylor terms or continuum cubes to FITS format 
+   has been fixed
+
+
 0.19.4 (21 September 2017)
 --------------------------
 
