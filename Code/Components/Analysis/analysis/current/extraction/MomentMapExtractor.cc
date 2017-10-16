@@ -405,6 +405,12 @@ void MomentMapExtractor::getMom0(const casa::Array<Float> &subarray)
     }
     itsMom0mask = casa::LogicalArray(this->arrayShape(), false);
 
+    // To get the mask to be applied in FITS images, we divide through
+    // at the end by this array. Valid pixels have value of 1. Masked
+    // pixels have value of 0. That way the pixels that should be
+    // masked are converted to nans.
+    casa::Array<float> maskScaler(this->arrayShape(), 0.);
+
     casa::IPosition outloc(4, 0), inloc(4, 0);
     casa::IPosition start = itsSlicer.start();
 
@@ -421,6 +427,7 @@ void MomentMapExtractor::getMom0(const casa::Array<Float> &subarray)
             inloc(itsSpcAxis) = zin;
             itsMom0map(outloc) = itsMom0map(outloc) + subarray(inloc) * getSpectralIncrement(zfull);
             itsMom0mask(outloc) = true;
+            maskScaler(outloc) = 1.;
         }
     } else {
         // just sum each spectrum over the slicer's range.
@@ -431,6 +438,7 @@ void MomentMapExtractor::getMom0(const casa::Array<Float> &subarray)
     }
     itsMom0mask = itsMom0mask && basemask;
 
+    itsMom0map /= maskScaler;
 
 }
 
