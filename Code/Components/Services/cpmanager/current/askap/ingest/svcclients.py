@@ -85,7 +85,7 @@ class IceMonitoringServiceClient(object):
                     provider = get_service(adaptor_name,
                                                       MonitoringProviderPrx, self._comm)
                     self.ingest_service_map[i] = provider
-                except:
+                except Exception as e:
                     # if ingest is not running move on
                     continue
 
@@ -172,13 +172,13 @@ class DataServiceClient(object):
                     self.obs_info.endFreq = new_obs_info.endFreq
                     self.obs_info.centreFreq = (self.obs_info.startFreq + self.obs_info.endFreq)/2
                     self.obs_info.bandWidth = self.obs_info.endFreq - self.obs_info.startFreq
-                    self.obs_info.nChan = math.ceil(self.obs_info.bandWidth/chanWidthPoint.chanWidth)
+                    self.obs_info.nChan = math.floor(self.obs_info.bandWidth/new_obs_info.chanWidth)
                     changed = True
                 elif new_obs_info.endFreq <= self.obs_info.startFreq:
                     self.obs_info.startFreq = new_obs_info.startFreq
                     self.obs_info.centreFreq = (self.obs_info.startFreq + self.obs_info.endFreq)/2
                     self.obs_info.bandWidth = self.obs_info.endFreq - self.obs_info.startFreq
-                    self.obs_info.nChan = math.ceil(self.obs_info.bandWidth/chanWidthPoint.chanWidth)
+                    self.obs_info.nChan = math.ceil(self.obs_info.bandWidth/new_obs_info.chanWidth)
                     changed = True
             else:
                 self.obs_info = ObsVariable()
