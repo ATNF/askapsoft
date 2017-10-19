@@ -53,6 +53,17 @@ class IceMonitoringServiceClient(object):
         self._monitor = askap.iceutils.monitoringprovider.MONITOR
         self._comm = comm
         self.pointnames = param.get("cp.ingest.monitoring.points")
+        if not self.pointnames:
+            self.pointnames=['cp.ingest.PacketsLostCount', 'cp.ingest.PacketsLostPercent', \
+    'cp.ingest.VisFlagCount', 'cp.ingest.VisFlagPercent', 'cp.ingest.MisalignedStreamsCount', \
+    'cp.ingest.MisalignedStreamsPercent', 'cp.ingest.MSWritingDuration', 'cp.ingest.VisCornerTurnDuration', \
+    'cp.ingest.ProcessingDuration', 'cp.ingest.SourceTaskDuration', 'cp.ingest.obs.ScanId', \
+    'cp.ingest.obs.FieldName', 'cp.ingest.obs.dir1', 'cp.ingest.obs.dir2', 'cp.ingest.obs.CoordSys', \
+    'cp.ingest.obs.Interval', 'cp.ingest.obs.StartFreq', 'cp.ingest.obs.nChan', 'cp.ingest.obs.ChanWidth', \
+    'cp.ingest.obs.SourceStartFreq', 'cp.ingest.obs.SourceNChan', 'cp.ingest.obs.SourceChanWidth', \
+    'cp.ingest.dUTC', 'cp.ingest.dUT1', 'cp.ingest.MeasuresTableMJD', 'cp.ingest.MeasuresTableVersion', \
+    'cp.ingest.SoftwareVersion', 'cp.ingest.obs.DataRate', 'cp.ingest.PacketsBuffered', 'cp.ingest.BufferUsagePercent']
+
         self.data_service = DataServiceClient(comm)
 
         self.host_map = param.get("cp.ingest.hosts_map")
