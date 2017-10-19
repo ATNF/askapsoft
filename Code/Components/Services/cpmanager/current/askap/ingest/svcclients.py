@@ -1,7 +1,7 @@
 import Ice
 import json
 import threading
-import time
+import time, math
 
 import askap.iceutils.monitoringprovider
 
@@ -54,7 +54,14 @@ class IceMonitoringServiceClient(object):
         self._comm = comm
         self.pointnames = param.get("cp.ingest.monitoring.points")
         self.data_service = DataServiceClient(comm)
-        self.rank_count = param.get("cp.ingest.monitoring.rank.count")
+
+        self.host_map = param.get("cp.ingest.hosts_map")
+        self.rank_count = 0
+
+        for host in self.host_map.split(','):
+            counts = host.split(':')
+            self.rank_count += int(counts[1])
+
         self.ingest_service_map = {}
         for i in range(0, self.rank_count):
             self.ingest_service_map[i] = None
@@ -85,9 +92,9 @@ class IceMonitoringServiceClient(object):
             try:
                 points = []
                 pointvalues = provider.get(self.pointnames)
-                self.data_service.update(sbid, pointvalues)
-            except:
+            except Exception as e:
                 # if ingest is not running need to remove the monitoring points
+                logger.error('Error while trying to get point values ', str(e))
                 self.remove_monitoring_points(ingest='ingest' + str(i))
                 continue
 
@@ -103,10 +110,26 @@ class IceMonitoringServiceClient(object):
                 points.append(p_map)
             self._monitor.add_full_points(points)
 
+            try:
+                self.data_service.update(sbid, pointvalues)
+            except Exception as e:
+                # if ingest is not running need to remove the monitoring points
+                logger.error('Error while trying to update data service ', str(e))
+                continue
+
+class ObsVariable(object):
+    def __init__(self):
+        self.startFreq = 0
+        self.endFreq = 0
+        self.centreFreq = 0
+        self.bandWidth = 0
+        self.nChan = 0
+
 
 class DataServiceClient(object):
     def __init__(self, comm):
         self.last_sbid = -1
+        self.obs_info = {}
         self.data_service = get_service("SchedulingBlockService@DataServiceAdapter",
                           ISchedulingBlockServicePrx, comm)
 
@@ -114,9 +137,10 @@ class DataServiceClient(object):
         self.data_service.setObsVariables(sbid, obsvars)
 
     def update(self, sbid, pointvalues):
-        if self.last_sbid==sbid:
-            return
+        if self.last_sbid!=sbid:
+            self.obs_info = {}
 
+        startFreqPoint = nChanPoint = chanWidthPoint = {}
         for point in pointvalues:
             if point.name == "cp.ingest.obs.StartFreq":
                 startFreqPoint = point
@@ -126,27 +150,56 @@ class DataServiceClient(object):
                 chanWidthPoint = point
 
 
+        new_obs_info = ObsVariable()
         if startFreqPoint and nChanPoint and chanWidthPoint:
-            startFreq = startFreqPoint.value.value
-            chanWidth = chanWidthPoint.value.value
-            nChan = nChanPoint.value.value
+            new_obs_info.startFreq = startFreqPoint.value.value
+            new_obs_info.chanWidth = chanWidthPoint.value.value
+            new_obs_info.nChan = nChanPoint.value.value
 
-            bandWidth = 0
+            new_obs_info.bandWidth = 0
             if chanWidthPoint.unit.lower == "khz":
-                bandWidth = chanWidth * nChan / 1000
+                new_obs_info.bandWidth = new_obs_info.chanWidth * new_obs_info.nChan / 1000
             else: # assume mhz
-                bandWidth = chanWidth * nChan
+                new_obs_info.bandWidth = new_obs_info.chanWidth * new_obs_info.nChan
 
-            centreFreq = startFreq + bandWidth / 2
+            new_obs_info.centreFreq = new_obs_info.startFreq + new_obs_info.bandWidth / 2
+            new_obs_info.endFreq = new_obs_info.startFreq + new_obs_info.bandWidth
 
-            obs_info = {}
-            obs_info["nChan"] = {"value":nChan}
-            obs_info["ChanWidth"] = {"value":chanWidth, "unit":chanWidthPoint.unit}
-            obs_info["StartFreq"] = {"value":startFreq, "unit":startFreqPoint.unit}
-            obs_info["CentreFreq"] = {"value":centreFreq, "unit":startFreqPoint.unit}
-            obs_info["BandWidth"] = {"value":bandWidth, "unit":startFreqPoint.unit}
+            # amend freq is necessary. No need to worry about gaps as they will get filled
+            changed = False
+            if self.obs_info:
+                if new_obs_info.startFreq >= self.obs_info.endFreq:
+                    self.obs_info.endFreq = new_obs_info.endFreq
+                    self.obs_info.centreFreq = (self.obs_info.startFreq + self.obs_info.endFreq)/2
+                    self.obs_info.bandWidth = self.obs_info.endFreq - self.obs_info.startFreq
+                    self.obs_info.nChan = math.ceil(self.obs_info.bandWidth/chanWidthPoint.chanWidth)
+                    changed = True
+                elif new_obs_info.endFreq <= self.obs_info.startFreq:
+                    self.obs_info.startFreq = new_obs_info.startFreq
+                    self.obs_info.centreFreq = (self.obs_info.startFreq + self.obs_info.endFreq)/2
+                    self.obs_info.bandWidth = self.obs_info.endFreq - self.obs_info.startFreq
+                    self.obs_info.nChan = math.ceil(self.obs_info.bandWidth/chanWidthPoint.chanWidth)
+                    changed = True
+            else:
+                self.obs_info = ObsVariable()
+                self.obs_info.startFreq = new_obs_info.startFreq
+                self.obs_info.chanWidth = new_obs_info.chanWidth
+                self.obs_info.nChan = new_obs_info.nChan
+                self.obs_info.bandWidth = new_obs_info.bandWidth
+                self.obs_info.centreFreq = new_obs_info.centreFreq
+                self.obs_info.endFreq = new_obs_info.endFreq
+                changed = True
 
-            obsVar= {"obs.info": json.dumps(obs_info)}
-            self.setObsVariables(sbid, obsVar)
+            # if anything changed then update obsvar
+            if changed:
+                obs_var = {}
+                obs_var["nChan"] = {"value":self.obs_info.nChan}
+                obs_var["ChanWidth"] = {"value":chanWidthPoint.value.value, "unit":chanWidthPoint.unit}
+                obs_var["StartFreq"] = {"value":self.obs_info.startFreq, "unit":startFreqPoint.unit}
+                obs_var["CentreFreq"] = {"value":self.obs_info.centreFreq, "unit":startFreqPoint.unit}
+                obs_var["BandWidth"] = {"value":self.obs_info.bandWidth, "unit":startFreqPoint.unit}
 
-            self.last_sbid = sbid
+                obs_var_json= {"obs.info": json.dumps(obs_var)}
+                self.setObsVariables(sbid, obs_var_json)
+
+                self.last_sbid = sbid

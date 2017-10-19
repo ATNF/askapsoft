@@ -111,7 +111,7 @@ class TestCPIngest(object):
         assert_equals(points[0].value.value, False)
 
         self.cpservice.startObs(5)
-        time.sleep(2)
+        time.sleep(5)
         # monitoring points should be there
         points = self.monitoringservice.get(point_names)
         assert_equals(len(points), 6)
@@ -127,7 +127,7 @@ class TestCPIngest(object):
         assert_equals(points[5].value.value, 73)
 
         self.cpservice.abortObs()
-        time.sleep(2)
+        time.sleep(5)
         # monitoring points should be gone
         points = self.monitoringservice.get(point_names)
         assert_equals(len(points), 1)
