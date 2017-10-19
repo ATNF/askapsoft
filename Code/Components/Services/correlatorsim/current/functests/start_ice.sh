@@ -56,8 +56,8 @@ if [ ! -f $2 ]; then
     exit 1
 fi
 
-if [ ! -f $2 ]; then
-    echo "Error: IceStorm config file $2 not found"
+if [ ! -f $3 ]; then
+    echo "Error: IceStorm config file $3 not found"
     exit 1
 fi
 
