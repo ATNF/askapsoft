@@ -46,8 +46,8 @@ class CPObsServiceImp(ICPObsService):
 
             self.start_ingest(workdir, sbid)
         except Exception as ex:
-            logger.error("Could not start ingest for " + sbid + ": " + str(ex))
-            raise RuntimeError("Could not start ingest for: " + sbid + str(ex))
+            logger.error("Could not start ingest for " + str(sbid) + ": " + str(ex))
+            raise RuntimeError("Could not start ingest for: " + str(sbid) + str(ex))
 
     def abortObs(self, current=None):
         logger.debug("Abort " + str(self.current_sbid))
@@ -88,15 +88,15 @@ class CPObsServiceImp(ICPObsService):
 
     def start_ingest(self, work_dir, sbid):
         command = os.path.expandvars(self.params.get("cp.ingest.command"))
-        args = self.params.get("cp.ingest.args").split(',')
+        args = self.params.get("cp.ingest.args").split(' ')
         logfile = os.path.expandvars(self.params.get("cp.ingest.logfile", "cpingest.log"))
 
         os.environ["sbid"] = str(sbid)
 
         cmd = [command]
-        cmd.append(args)
+        cmd = cmd + args
 
-        logger.info("start ingest for " + sbid + ": " + str(cmd))
+        logger.info("start ingest for " + str(sbid) + ": " + str(cmd))
         with open(os.path.join(work_dir, logfile), "w") as log:
             self.proc = subprocess.Popen(cmd, shell=False,
                      stderr=log, stdout=log, cwd=work_dir)
