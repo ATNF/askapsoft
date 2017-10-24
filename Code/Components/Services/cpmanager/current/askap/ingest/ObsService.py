@@ -25,8 +25,13 @@ class CPObsServiceImp(ICPObsService):
             logger.error("Ingest Pipeline already running")
             raise RuntimeError("Ingest Pipeline already running")
 
-        workdir = self.params.get("cp.ingest.workdir") + "/" + str(sbid)
-        configFile = "cpingest.in"
+        if self.params.get("cp.ingest.workdir"):
+            workdir = self.params.get("cp.ingest.workdir") + "/" + str(sbid)
+            configFile = "cpingest.in"
+        else:
+            logger.error("cp.ingest.workdir not configured in fcm")
+            raise RuntimeError("cp.ingest.workdir not configured in fcm")
+
 
         if not os.path.exists(workdir):
             try:
@@ -35,10 +40,14 @@ class CPObsServiceImp(ICPObsService):
                 logger.error("Could not create directory: " + workdir)
                 raise RuntimeError("Could not create directory: " + workdir)
 
-        with open(os.path.join(workdir, configFile), 'w+') as config_file:
-            self.write_config(config_file, sbid)
+        try:
+            with open(os.path.join(workdir, configFile), 'w+') as config_file:
+                self.write_config(config_file, sbid)
 
-        self.start_ingest(workdir, sbid)
+            self.start_ingest(workdir, sbid)
+        except Exception as ex:
+            logger.error("Could not start ingest for " + sbid + ": " + str(ex))
+            raise RuntimeError("Could not start ingest for: " + sbid + str(ex))
 
     def abortObs(self, current=None):
         logger.debug("Abort " + str(self.current_sbid))
@@ -79,14 +88,17 @@ class CPObsServiceImp(ICPObsService):
 
     def start_ingest(self, work_dir, sbid):
         command = os.path.expandvars(self.params.get("cp.ingest.command"))
-        args = os.path.expandvars(self.params.get("cp.ingest.args"))
+        args = self.params.get("cp.ingest.args").split(',')
         logfile = os.path.expandvars(self.params.get("cp.ingest.logfile", "cpingest.log"))
 
         os.environ["sbid"] = str(sbid)
 
         cmd = [command]
         cmd.append(args)
-        with open(logfile, "w") as log:
+
+        logger.info("start ingest for " + sbid + ": " + str(cmd))
+        with open(os.path.join(work_dir, logfile), "w") as log:
             self.proc = subprocess.Popen(cmd, shell=False,
-                            stderr=log, stdout=log, cwd=work_dir)
+                     stderr=log, stdout=log, cwd=work_dir)
+
         self.current_sbid = sbid
