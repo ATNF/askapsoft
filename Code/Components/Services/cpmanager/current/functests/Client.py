@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sys, traceback, Ice, time
 
 from askap.ingest import get_service
@@ -39,7 +41,7 @@ try:
 
 #    CPObsService.abortObs()
 
-    CPObsService.startObs(sys.argv[1])
+    CPObsService.startObs(int(sys.argv[1]))
 
     # time.sleep(5)
     #
