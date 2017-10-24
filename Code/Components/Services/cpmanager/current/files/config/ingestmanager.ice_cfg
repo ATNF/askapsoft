@@ -1,6 +1,7 @@
 # Registry
 Ice.Default.Locator=IceGrid/Locator:tcp -p 4061 -h aktos10.atnf.csiro.au
 #Ice.Default.Locator=IceGrid/Locator:tcp -p 4061 -h localhost
+Ice.Default.Host=galaxy-ingest01.pawsey.org.au
 
 # Disable IPv6 (as it is not enabled by default on Debian Lenny)
 Ice.IPv6=0
