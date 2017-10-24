@@ -37,27 +37,27 @@ try:
                 ICPObsServicePrx,
                 ic)
 
-    CPObsService.abortObs()
+#    CPObsService.abortObs()
 
-    CPObsService.startObs(5)
+    CPObsService.startObs(sys.argv[1])
 
-    time.sleep(5)
-
-    monitoringservice = get_service("MonitoringService@IngestManagerMonitoringAdapter",
-                                         MonitoringProviderPrx,
-                                         ic)
-
-
-    point_names = ['ingest.running', 'ingest0.cp.ingest.obs.StartFreq', 'ingest0.cp.ingest.obs.nChan',
-                   'ingest0.cp.ingest.obs.ChanWidth', 'ingest36.cp.ingest.obs.FieldName',
-                   'ingest36.cp.ingest.obs.ScanId']
-
-    points = monitoringservice.get(point_names)
-
-    time.sleep(5)
-
-    CPObsService.abortObs()
-    points = monitoringservice.get(point_names)
+    # time.sleep(5)
+    #
+    # monitoringservice = get_service("MonitoringService@IngestManagerMonitoringAdapter",
+    #                                      MonitoringProviderPrx,
+    #                                      ic)
+    #
+    #
+    # point_names = ['ingest.running', 'ingest0.cp.ingest.obs.StartFreq', 'ingest0.cp.ingest.obs.nChan',
+    #                'ingest0.cp.ingest.obs.ChanWidth', 'ingest36.cp.ingest.obs.FieldName',
+    #                'ingest36.cp.ingest.obs.ScanId']
+    #
+    # points = monitoringservice.get(point_names)
+    #
+    # time.sleep(5)
+    #
+    # CPObsService.abortObs()
+    # points = monitoringservice.get(point_names)
 
 
 #    point_names = ["cp.ingest.obs.StartFreq"]
