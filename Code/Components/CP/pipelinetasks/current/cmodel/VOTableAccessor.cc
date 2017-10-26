@@ -152,7 +152,7 @@ void VOTableAccessor::initFieldInfo(const std::vector<askap::accessors::VOTableF
 
         // RA
         VOTableAccessor::FieldEnum key = RA;
-        if (hasUCD(field, "pos.eq.ra")) {
+        if (hasUCD(field, "pos.eq.ra") && !hasUCD(field, "stat.error")) {
             if (posMap.find(key) == posMap.end() || hasUCD(field, "meta.main")) {
                 posMap[key] = i;
                 unitMap[key] = Unit(field.getUnit());
@@ -162,7 +162,7 @@ void VOTableAccessor::initFieldInfo(const std::vector<askap::accessors::VOTableF
 
         // Dec
         key = DEC;
-        if (hasUCD(field, "pos.eq.dec")) {
+        if (hasUCD(field, "pos.eq.dec") && !hasUCD(field, "stat.error")) {
             if (posMap.find(key) == posMap.end() || hasUCD(field, "meta.main")) {
                 posMap[key] = i;
                 unitMap[key] = Unit(field.getUnit());
@@ -173,7 +173,7 @@ void VOTableAccessor::initFieldInfo(const std::vector<askap::accessors::VOTableF
         // Flux
         key = FLUX;
         if ((hasUCD(field, "phot.flux.density") || hasUCD(field, "phot.flux.density.integrated")) &&
-            !hasUCD(field, "meta.id.parent")){
+            !hasUCD(field, "meta.id.parent") && !hasUCD(field, "stat.error")){
             if (posMap.find(key) == posMap.end() || hasUCD(field, "phot.flux.density.integrated") || field.getName()=="flux_int") {
                 posMap[key] = i;
                 unitMap[key] = Unit(field.getUnit());
@@ -183,7 +183,7 @@ void VOTableAccessor::initFieldInfo(const std::vector<askap::accessors::VOTableF
 
         // Major Axis
         key = MAJOR_AXIS;
-        if (hasUCD(field, "phys.angSize.smajAxis")) {
+        if (hasUCD(field, "phys.angSize.smajAxis") && !hasUCD(field, "stat.error")) {
             if (posMap.find(key) == posMap.end() || hasUCD(field, "askap:meta.deconvolved")) {
                 posMap[key] = i;
                 unitMap[key] = Unit(field.getUnit());
@@ -193,7 +193,7 @@ void VOTableAccessor::initFieldInfo(const std::vector<askap::accessors::VOTableF
 
         // Minor Axis
         key = MINOR_AXIS;
-        if (hasUCD(field, "phys.angSize.sminAxis")) {
+        if (hasUCD(field, "phys.angSize.sminAxis") && !hasUCD(field, "stat.error")) {
             if (posMap.find(key) == posMap.end() || hasUCD(field, "askap:meta.deconvolved")) {
                 posMap[key] = i;
                 unitMap[key] = Unit(field.getUnit());
@@ -203,7 +203,7 @@ void VOTableAccessor::initFieldInfo(const std::vector<askap::accessors::VOTableF
 
         // Position angle
         key = POSITION_ANGLE;
-        if (hasUCD(field, "phys.angSize") && hasUCD(field, "pos.posAng")) {
+        if (hasUCD(field, "phys.angSize") && hasUCD(field, "pos.posAng") && !hasUCD(field, "stat.error")) {
             if (posMap.find(key) == posMap.end() || hasUCD(field, "askap:meta.deconvolved")) {
                 posMap[key] = i;
                 unitMap[key] = Unit(field.getUnit());
@@ -213,7 +213,7 @@ void VOTableAccessor::initFieldInfo(const std::vector<askap::accessors::VOTableF
 
         // Spectral index
         key = SPECTRAL_INDEX;
-        if (hasUCD(field, "spect.index")) {
+        if (hasUCD(field, "spect.index") && !hasUCD(field, "stat.error")) {
             if (posMap.find(key) == posMap.end() || hasUCD(field, "meta.main")) {
                 posMap[key] = i;
                 // No units
@@ -223,7 +223,7 @@ void VOTableAccessor::initFieldInfo(const std::vector<askap::accessors::VOTableF
 
         // Spectral curvature
         key = SPECTRAL_CURVATURE;
-        if (hasUCD(field, "askap:spect.curvature")) {
+        if (hasUCD(field, "askap:spect.curvature") && !hasUCD(field, "stat.error")) {
             if (posMap.find(key) == posMap.end() || hasUCD(field, "meta.main")) {
                 posMap[key] = i;
                 // No units
@@ -283,6 +283,7 @@ void VOTableAccessor::processRow(const std::vector<std::string>& cells,
         itsBelowFluxLimit++;
         return;
     }
+    ASKAPLOG_DEBUG_STR(logger, "flux from VO table = " << flux.getValue() << " " << flux.getUnit());
 
     casa::Quantity majorAxis(boost::lexical_cast<casa::Double>(cells[posMap[MAJOR_AXIS]]),
                              unitMap[MAJOR_AXIS]);
@@ -292,6 +293,7 @@ void VOTableAccessor::processRow(const std::vector<std::string>& cells,
 
     const casa::Quantity positionAngle(boost::lexical_cast<casa::Double>(cells[posMap[POSITION_ANGLE]]),
                                        unitMap[POSITION_ANGLE]);
+    ASKAPLOG_DEBUG_STR(logger, "positionAngle from VO table = " << positionAngle.getValue() << " " << positionAngle.getUnit());
 
     double spectralIndex = boost::lexical_cast<casa::Double>(cells[posMap[SPECTRAL_INDEX]]);
     double spectralCurvature = boost::lexical_cast<casa::Double>(cells[posMap[SPECTRAL_CURVATURE]]);
