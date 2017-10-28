@@ -61,6 +61,7 @@ def runSnoop(block, card, count = 10, verbose = True):
    tmp_parset_file = os.path.join(os.path.abspath("./"),".tmp.tVisSourceSnoop.in")
    tmp_result_file = os.path.join(os.path.abspath("./"),"out.dat")
    tmp_hosts_file = os.path.join(os.path.abspath("./"),".tmp.tVisSourceSnoop.hosts")
+   tmp_script = os.path.join(os.path.abspath("./"),".tmp.tVisSourceSnoop.sh")
    
    if len(current_ingest_config[block]) != 2:
       raise RuntimeError, "Expect 2-element tuple in current_ingest_config, you have %s" % (current_ingest_config,)
@@ -77,12 +78,30 @@ def runSnoop(block, card, count = 10, verbose = True):
       f.write("vis_source.receive_buffer_size = 67108864\n")
       f.write("count = %i\n" % (count,))
    with open(tmp_hosts_file,"w") as f:
-      f.write("# automatically generated hosts file\n")
-      f.write("10.10.101.%i:%i\n" % (200+current_ingest_config[block][0],nranks))
+      #for Hydra-based mpi only
+      #f.write("# automatically generated hosts file\n")
+      #f.write("10.10.101.%i:%i\n" % (200+current_ingest_config[block][0],nranks))
+      #for srun
+      for r in range(nranks):
+          f.write("galaxy-ingest%02i\n" % (current_ingest_config[block][0],))
+ 
+   with open(tmp_script,"w") as f:
+      f.write("#!/bin/bash\n")
+      #f.write("export SLURM_HOSTFILE=%s\n" % (tmp_hosts_file,))
+      #f.write("srun -I --account=askaprt --partition=askap -n %i %s -c %s\n" % (nranks, path2snoop, tmp_parset_file))
+      f.write("module use /group/pawsey0233/software/sles12sp2/modulefiles\n")
+      f.write("module load sandybridge gcc/4.8.5 mvapich/2.3b\n")
+      f.write("export MV2_ENABLE_AFFINITY=0\n")
+      f.write("mpirun_rsh -export-all -n %i -hostfile %s %s -c %s\n" % (nranks, tmp_hosts_file, path2snoop, tmp_parset_file))
+      f.write("\n")
+     
    if verbose:
-      os.system("mpirun -np %i -f %s %s -c %s | tee %s" % (nranks, tmp_hosts_file, path2snoop, tmp_parset_file, tmp_result_file))
+      #os.system("mpirun -np %i -f %s %s -c %s | tee %s" % (nranks, tmp_hosts_file, path2snoop, tmp_parset_file, tmp_result_file))
+      os.system("bash %s | tee %s" % (tmp_script, tmp_result_file))
+     
    else:
-      os.system("mpirun -np %i -f %s %s -c %s > %s" % (nranks, tmp_hosts_file, path2snoop, tmp_parset_file, tmp_result_file))
+      #os.system("mpirun -np %i -f %s %s -c %s > %s" % (nranks, tmp_hosts_file, path2snoop, tmp_parset_file, tmp_result_file))
+      os.system("bash %s > %s" % (tmp_script, tmp_result_file))
    # parse output to present summary (and leave the file for future investigation)
    if verbose:
       print "--------------------------- Summary ----------------------------"
