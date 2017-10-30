@@ -65,7 +65,7 @@ ASKAP_LOGGER(logger, ".adviseDI");
 
 #include <vector>
 #include <string>
-
+#include <float.h>
 #include <boost/shared_ptr.hpp>
 
 
@@ -73,9 +73,19 @@ namespace askap {
 
 namespace synthesis {
 
-bool custom_compare (const casa::MFrequency& X, const casa::MFrequency& Y) {
+bool compare_tol (const casa::MFrequency& X, const casa::MFrequency& Y) {
+    if (abs(X.getValue() - Y.getValue()) < FLT_EPSILON) {
+      return true;
+    }
+    else {
+      return false;
+    }
+}
+
+bool compare (const casa::MFrequency& X, const casa::MFrequency& Y) {
     return (X.getValue() == Y.getValue());
 }
+
 bool custom_lessthan (const casa::MFrequency& X, const casa::MFrequency& Y) {
     return (X.getValue() < Y.getValue());
 }
@@ -133,6 +143,7 @@ void AdviseDI::prepare() {
     ASKAPLOG_DEBUG_STR(logger,"nchanpercore " << nchanpercore);
     const int nwriters = itsParset.getInt32("nwriters", 1);
     ASKAPLOG_DEBUG_STR(logger,"nwriters " << nwriters);
+    const bool useTol = itsParset.getBool("variableChannelLabels",false);
 
     ASKAPCHECK(nwriters > 0 ,"Number of writers must be greater than zero");
 
@@ -315,6 +326,17 @@ void AdviseDI::prepare() {
     }
 
     ///uniquifying the lists
+
+    bool (*custom_compare)(const casa::MFrequency& , const casa::MFrequency& ) = NULL;
+
+    if (useTol) {
+      custom_compare = compare_tol;
+      ASKAPLOG_WARN_STR(logger,"Comparing frequencies with floating point tolerance");
+    }
+    else {
+      custom_compare = compare;
+      ASKAPLOG_INFO_STR(logger,"Using standard compare for (zero tolerance) for freuqnecy allocations");
+    }
 
     std::sort(itsBaryFrequencies.begin(),itsBaryFrequencies.end(), custom_lessthan);
     std::vector<casa::MFrequency>::iterator bary_it;
