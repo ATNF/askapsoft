@@ -82,9 +82,9 @@ class CPObsServiceImp(ICPObsService):
             return True     # process finished
 
     def write_config(self, file, sbid):
-        file.write("sbid = " + str(sbid) + "\n")
+        file.write("sbid=" + str(sbid) + "\n")
         for k,v in self.params.items():
-                file.write(k + " = " + str(v) + "\n")
+                file.write(k + "=" + str(v) + "\n")
 
     def start_ingest(self, work_dir, sbid):
         command = self.params.get("cp.ingest.command")
