@@ -87,16 +87,14 @@ class CPObsServiceImp(ICPObsService):
                 file.write(k + "=" + str(v) + "\n")
 
     def start_ingest(self, work_dir, sbid):
-        command = self.params.get("cp.ingest.command")
-        args = self.params.get("cp.ingest.args")
-
-
+        command = os.path.expandvars(self.params.get("cp.ingest.command"))
+        args = self.params.get("cp.ingest.args").split(' ')
         logfile = os.path.expandvars(self.params.get("cp.ingest.logfile", "cpingestlauncher.log"))
 
         os.environ["sbid"] = str(sbid)
 
         cmd = [command]
-        cmd.append(args)
+        cmd = cmd + args
 
         logger.info("start ingest for " + str(sbid) + ": " + str(cmd))
         with open(os.path.join(work_dir, logfile), "w") as log:
