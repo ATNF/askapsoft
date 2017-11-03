@@ -327,7 +327,7 @@ Selavy.VariableThreshold.SNRimageName           = snrMap.img
 # Parameters to switch on and control the Gaussian fitting
 Selavy.Fitter.doFit                             = true
 # Fit all 6 parameters of the Gaussian
-Selavy.Fitter.fitTypes                          = [full]
+Selavy.Fitter.fitTypes                          = [${SELFCAL_SELAVY_FIT_TYPE}]
 # Limit the number of Gaussians to 1
 Selavy.Fitter.maxNumGauss = ${SELFCAL_SELAVY_NUM_GAUSSIANS}
 # Do not use the number of initial estimates to determine how many Gaussians to fit

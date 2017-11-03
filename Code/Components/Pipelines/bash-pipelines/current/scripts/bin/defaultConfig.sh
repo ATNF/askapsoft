@@ -546,6 +546,8 @@ SELFCAL_SELAVY_NSUBY=3
 # mode - a fraction of the peak weight, below which pixels are not
 # detected.
 SELFCAL_SELAVY_WEIGHTSCUT=0.95
+# Type of fitting to apply within Selavy for the self-calibration.
+SELFCAL_SELAVY_FIT_TYPE="full"
 # Value for the calibrate.scalenoise parameter for applying the
 # self-cal solution
 SELFCAL_SCALENOISE=false
