@@ -362,6 +362,9 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 | ``SELFCAL_SELAVY_NUM_GAUSSIANS``           | 1                               | Selavy.Fitter.maxNumGauss                              | The number of Gaussians to fit to each island when            |
 |                                            |                                 | (:doc:`../analysis/postprocessing`)                    | ``SELFCAL_SELAVY_GAUSSIANS_FROM_GUESS=false``.                |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``SELFCAL_SELAVY_FIT_TYPE``                | full                            | Selavy.Fitter.fitTypes                                 | The type of fit to be used in the Selavy job. The possible    |
+|                                            |                                 |(:doc:`../analysis/postprocessing`)                     | options are 'full', 'psf', 'shape', or 'height'.              |
++--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``SELFCAL_SELAVY_WEIGHTSCUT``              | 0.95                            | Selavy.Weights.weightsCutoff                           | Pixels with weight less than this fraction of the peak        |
 |                                            |                                 | (:doc:`../analysis/thresholds`)                        | weight will not be considered by the source-finding. If       |
 |                                            |                                 |                                                        | the value is negative, or more than one, no consideration     |
