@@ -245,6 +245,8 @@ NUM_CPUS_CBPCAL=216
 BANDPASS_SCALENOISE=false
 # Limit the data selection for bandpass solving to a minimum UV distance [m]
 BANDPASS_MINUV=200
+# Reference antenna to be used in the cbpcalibrator task
+BANDPASS_REFANTENNA=1
 
 # Smoothing of the bandpass table - this is achieved by the ACES tool
 # plot_caltable.py. This tool also plots the cal solutions

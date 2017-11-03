@@ -162,6 +162,10 @@ ASKAPsoft.
 | ``BANDPASS_MINUV``                            | 200                                   | MinUV (:doc:`../calim/data_selection`)                 | Minimum UV distance [m] applied to data prior to solving  |
 |                                               |                                       |                                                        | for the bandpass (used to exclude the short baselines).   |
 +-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| ``BANDPASS_REFANTENNA``                       | 1                                     | refantenna (:doc:`../calim/cbpcalibrator`)             | Antenna number to be used as reference in the bandpass    |
+|                                               |                                       |                                                        | calibration. Ignored if negative, or if provided as a     |
+|                                               |                                       |                                                        | blank string (``BANDPASS_REFANTENNA=""``).                |
++-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
 | **Smoothing and plotting the bandpass**       |                                       |                                                        |                                                           |
 |                                               |                                       |                                                        |                                                           |
 +-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+

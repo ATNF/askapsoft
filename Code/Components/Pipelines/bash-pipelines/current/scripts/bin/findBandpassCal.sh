@@ -67,6 +67,12 @@ if [ "${DO_IT}" == "true" ]; then
         dataSelectionPars="# Minimum UV distance for bandpass calibration:
 Cbpcalibrator.MinUV = ${BANDPASS_MINUV}"
     fi
+    referencePars="# Referencing for cbpcalibrator"
+    if [ "${BANDPASS_REFANTENNA}" != "" ]; then
+        referencePars="${referencePars}
+Cbpcalibrator.refantenna                      = ${BANDPASS_REFANTENNA}"
+    fi
+    
 
     # Check for bandpass smoothing options
     DO_RUN_PLOT_CALTABLE=false
@@ -130,7 +136,7 @@ ${dataSelectionPars}
 Cbpcalibrator.nAnt                            = ${NUM_ANT}
 Cbpcalibrator.nBeam                           = ${maxbeam}
 Cbpcalibrator.nChan                           = ${NUM_CHAN_1934}
-Cbpcalibrator.refantenna                      = 1
+${referencePars}
 #
 Cbpcalibrator.calibaccess                     = table
 Cbpcalibrator.calibaccess.table.maxant        = ${NUM_ANT}
