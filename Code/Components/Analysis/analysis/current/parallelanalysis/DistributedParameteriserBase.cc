@@ -69,7 +69,7 @@ DistributedParameteriserBase::DistributedParameteriserBase(askap::askapparallel:
     itsReferenceParset.replace("nsubz", "1");
     itsDP = boost::shared_ptr<DuchampParallel>(new DuchampParallel(comms, itsReferenceParset));
     itsDP->cube().setReconFlag(false);
-    itsDP->readData();
+    itsDP->getMetadata();
     itsCube = itsDP->pCube();
 }
 

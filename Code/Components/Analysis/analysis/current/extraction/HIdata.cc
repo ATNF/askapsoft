@@ -2,7 +2,7 @@
 ///
 /// Class to hold the extracted data for a single HI source
 ///
-/// @copyright (c) 2016 CSIRO
+/// @copyright (c) 2017 CSIRO
 /// Australia Telescope National Facility (ATNF)
 /// Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 /// PO Box 76, Epping NSW 1710, Australia
@@ -33,6 +33,7 @@
 #include <askap/AskapError.h>
 
 #include <boost/shared_ptr.hpp>
+#include <boost/filesystem.hpp>
 #include <extraction/SourceSpectrumExtractor.h>
 #include <extraction/NoiseSpectrumExtractor.h>
 #include <extraction/MomentMapExtractor.h>
@@ -67,11 +68,14 @@ HIdata::HIdata(const LOFAR::ParameterSet &parset):
     std::string spectraDir = itsParset.getString("HiEmissionCatalogue.spectraDir", "Spectra");
     std::string momentDir = itsParset.getString("HiEmissionCatalogue.momentDir", "Moments");
     std::string cubeletDir = itsParset.getString("HiEmissionCatalogue.cubeletDir", "Cubelets");
-    cmd << " mkdir -p " << spectraDir << " " << momentDir << " " << cubeletDir;
-    const int status = system(cmd.str().c_str());
-    if (status != 0) {
-        ASKAPTHROW(AskapError, "Error making directories for extracted data products: code = " << status
-                   << " - Command = " << cmd.str());
+    if(!boost::filesystem::create_directory(spectraDir)) {
+        ASKAPLOG_ERROR_STR(logger, "Error making directory " << spectraDir );
+    }
+    if(!boost::filesystem::create_directory(momentDir)) {
+        ASKAPLOG_ERROR_STR(logger, "Error making directory " << momentDir );
+    }
+    if(!boost::filesystem::create_directory(cubeletDir)) {
+        ASKAPLOG_ERROR_STR(logger, "Error making directory " << cubeletDir );
     }
 
     // Define the parset used to set up the source extractor

@@ -374,9 +374,12 @@ bool Fitter::passIntFlux()
     float intFlux = 0.;
 
     for (unsigned int i = 0; i < itsNumGauss; i++) {
-        Gaussian2D<Double> component(itsSolution(i, 0), itsSolution(i, 1), itsSolution(i, 2),
-                                     itsSolution(i, 3), itsSolution(i, 4), itsSolution(i, 5));
-        intFlux += component.flux();
+
+        if (itsSolution(i, 2) > 0.){
+            Gaussian2D<Double> component(itsSolution(i, 0), itsSolution(i, 1), itsSolution(i, 2),
+                                         itsSolution(i, 3), itsSolution(i, 4), itsSolution(i, 5));
+            intFlux += component.flux();
+        }
     }
 
     // If fitJustDetection=true, return true (ie. we don't care about the integrated flux
@@ -475,11 +478,16 @@ std::multimap<double, int> Fitter::peakFluxList()
 
 casa::Gaussian2D<casa::Double> Fitter::gaussian(unsigned int num)
 {
-    casa::Gaussian2D<casa::Double>
-    gauss(itsSolution(num, 0),
-          itsSolution(num, 1), itsSolution(num, 2),
-          itsSolution(num, 3), itsSolution(num, 4), itsSolution(num, 5));
-    return gauss;
+    if (itsSolution(num,3) > 0.) {
+        casa::Gaussian2D<casa::Double>
+            gauss(itsSolution(num, 0),
+                  itsSolution(num, 1), itsSolution(num, 2),
+                  itsSolution(num, 3), itsSolution(num, 4), itsSolution(num, 5));
+        return gauss;
+    } else {
+        ASKAPLOG_WARN_STR(logger, "Gaussian #"<<num<<" has major axis of " << itsSolution(num,3) << " - must be positive. Returning blank Gaussian");
+        return casa::Gaussian2D<casa::Double>();
+    }
 }
 
 casa::Vector<casa::Double> Fitter::error(unsigned int num)
