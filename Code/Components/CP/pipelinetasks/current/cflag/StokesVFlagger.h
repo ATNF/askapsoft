@@ -129,8 +129,12 @@ class StokesVFlagger : public IFlagger {
         std::map<casa::Int, casa::StokesConverter> itsConverterCache;
 
         // Calculate the median, the interquartile range, the min and the max
-        // of a masked array
+        // of a simple array without masking
         casa::Vector<casa::Float> getRobustStats(casa::Vector<casa::Float> amplitudes);
+
+        // Calculate the median, the interquartile range, the min and the max
+        // of a masked array
+        casa::Vector<casa::Float>getRobustStats(casa::MaskedArray<casa::Float> maskedAmplitudes);
 
         // Generate a tuple for a given row and polarisation
         rowKey getRowKey(const casa::MSColumns& msc, const casa::uInt row);

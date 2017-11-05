@@ -323,6 +323,42 @@ void StokesVFlagger::processRow(casa::MSColumns& msc, const casa::uInt pass,
 
 // return the median, the interquartile range, and the min/max of a masked array
 casa::Vector<casa::Float>StokesVFlagger::getRobustStats(
+    casa::MaskedArray<casa::Float> maskedAmplitudes)
+{
+    casa::Vector<casa::Float> statsVector(4);
+   
+    // Grab unflagged frequency channels and sort their amplitudes.
+    // From casacore comments:
+    // "use HeapSort as it's performance is guaranteed, quicksort is often
+    // extremely slow (O(n*n)) for inputs with many successive duplicates".
+
+    // extract all of the unflagged amplitudes
+    casa::Array<casa::Float>
+        sortedAmplitudes = maskedAmplitudes.getCompressedArray();
+
+    // return with zeros if all of the data are flagged
+    if (sortedAmplitudes.shape()[0] == 0) {
+        statsVector.set(0.0);
+        return(statsVector);
+    }
+
+    // sort the unflagged amplitudes
+    casa::Int numUnflagged=GenSort<casa::Float>::sort(sortedAmplitudes,
+        Sort::Ascending, Sort::HeapSort);
+
+    // estimate stats, assuming Gaussian noise dominates the frequency channels.
+    // (50% of a Gaussian dist. is within 0.67448 sigma of the mean...)
+    statsVector[0] = sortedAmplitudes.data()[numUnflagged/2]; // median
+    statsVector[1] = (sortedAmplitudes.data()[3*numUnflagged/4] - 
+        sortedAmplitudes.data()[numUnflagged/4]) / 1.34896; // sigma from IQR
+    statsVector[2] = sortedAmplitudes.data()[0]; // min
+    statsVector[3] = sortedAmplitudes.data()[numUnflagged-1]; // max
+
+    return(statsVector);   
+
+}
+// return the median, the interquartile range, and the min/max of a non-masked array
+casa::Vector<casa::Float>StokesVFlagger::getRobustStats(
     casa::Vector<casa::Float> amplitudes)
 {
     casa::Vector<casa::Float> statsVector(4);
@@ -421,7 +457,7 @@ void StokesVFlagger::setFlagsFromIntegrations(void)
             casa::MaskedArray<casa::Float>
                 maskedAmplitudes(aveSpectrum, maskSpectrum);
             casa::Vector<casa::Float>
-                statsVector = getRobustStats(maskedAmplitudes.getCompressedArray());
+                statsVector = getRobustStats(maskedAmplitudes);
             casa::Float median = statsVector[0];
             casa::Float sigma_IQR = statsVector[1];
          
@@ -459,7 +495,7 @@ void StokesVFlagger::setFlagsFromIntegrations(void)
             // generate the flagging stats
             casa::MaskedArray<casa::Float> maskedAmplitudes(aveTime, maskTime);
             casa::Vector<casa::Float>
-                statsVector = getRobustStats(maskedAmplitudes.getCompressedArray());
+                statsVector = getRobustStats(maskedAmplitudes);
             casa::Float median = statsVector[0];
             casa::Float sigma_IQR = statsVector[1];
          
