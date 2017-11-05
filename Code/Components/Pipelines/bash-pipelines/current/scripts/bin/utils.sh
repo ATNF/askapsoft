@@ -872,7 +872,7 @@ function extractStats()
 	writeStatsHeader "$format" > "$output"
 	if [ "$(grep -c "(1, " "${STATS_LOGFILE}")" -gt 0 ]; then
 	    writeStats "$STATS_ID" "$NUM_CORES" "${STATS_DESC}_master"     "$RESULT_TXT" "$TIME_JOB_REAL" "$TIME_JOB_USER" "$TIME_JOB_SYS" "$PEAK_VM_MASTER"  "$PEAK_RSS_MASTER"  "$START_TIME_JOB" "$format" >> "$output"
-	    writeStats "$STATS_ID" "$NUM_CORES" "${STATS_DESC}_workerPeak" "$RESULT_TXT" "$TIME_JOB_REAL" "$TIME_JOB_USER" "$TIME_JOB_SYS" "$PEAK_VM_WORKER"S "$PEAK_RSS_WORKERS" "$START_TIME_JOB" "$format" >> "$output"
+	    writeStats "$STATS_ID" "$NUM_CORES" "${STATS_DESC}_workerPeak" "$RESULT_TXT" "$TIME_JOB_REAL" "$TIME_JOB_USER" "$TIME_JOB_SYS" "$PEAK_VM_WORKERS" "$PEAK_RSS_WORKERS" "$START_TIME_JOB" "$format" >> "$output"
 	    writeStats "$STATS_ID" "$NUM_CORES" "${STATS_DESC}_workerAve"  "$RESULT_TXT" "$TIME_JOB_REAL" "$TIME_JOB_USER" "$TIME_JOB_SYS" "$AVE_VM_WORKERS"  "$AVE_RSS_WORKERS"  "$START_TIME_JOB" "$format" >> "$output"
 	else
 	    writeStats "$STATS_ID" "$NUM_CORES" "$STATS_DESC"              "$RESULT_TXT" "$TIME_JOB_REAL" "$TIME_JOB_USER" "$TIME_JOB_SYS" "$PEAK_VM_MASTER"  "$PEAK_RSS_MASTER"  "$START_TIME_JOB" "$format" >> "$output"
