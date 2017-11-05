@@ -883,6 +883,33 @@ EOF
             DO_SOURCE_FINDING_BEAMWISE=true
         fi
 
+        # We can only do RM Synthesis if we are making I,Q,U continuum
+        # cubes. Need to check that the list of polarisations
+        # contains these.
+        if [ "${CONTCUBE_POLARISATIONS}" == "" ]; then
+            if [ "${DO_RM_SYNTHESIS}" == "true" ]; then
+                echo "No list of contcube polarisations provided - turning off RM Synthesis"
+            fi
+            DO_RM_SYNTHESIS=false
+        else
+            haveI=false
+            haveU=false
+            haveQ=false
+            for p in ${POL_LIST}; do
+                if [ "$p" == "I" ]; then haveI=true; fi
+                if [ "$p" == "Q" ]; then haveQ=true; fi
+                if [ "$p" == "U" ]; then haveU=true; fi
+            done
+            if [ "$haveI" != "true" ] || [ "$haveQ" != "true" ] || [ "$haveU" != "true" ]; then
+                if [ "${DO_RM_SYNTHESIS}" == "true" ]; then
+                    echo "Warning - List of polarisations provided (${CONTCUBE_POLARISATIONS}) doesn't have I,Q,U"
+                    echo "        - turning off RM Synthesis"
+                fi
+                DO_RM_SYNTHESIS=false
+            fi
+        fi
+        
+
         if [ "${SELAVY_POL_WRITE_FDF}" != "" ]; then
             echo "WARNING - the parameter SELAVY_POL_WRITE_FDF is deprecated"
             echo "        - use SELAVY_POL_WRITE_COMPLEX_FDF instead (it has been set to ${SELAVY_POL_WRITE_FDF})"
