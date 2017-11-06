@@ -21,13 +21,17 @@ barycentric reference frame, and allows (for efficiency purposes) the
 option of writing out multiple sub-cubes (each having a subset of the
 full range of channels).
 
-A final task can perform image-based continuum subtraction. This uses
-the *robust_contsub.py* script in the ACES directory to fit and
-subtract a low-order polynomial to each spectrum in the cube
-separately. This task is intended as a demonstration of this
-capability - there will be an ASKAPsoft equivalent to this in a future
-release. The task assumes that the python script is in *$ACES/tools* -
-if it is not found, the task will not run.
+A final task can perform image-based continuum subtraction. There are
+two choices for this step, made via the ``SPECTRAL_IMSUB_SCRIPT``
+parameter. The first uses the *robust_contsub.py* script in the ACES
+directory to fit and subtract a low-order polynomial to each spectrum
+in the cube separately. The second uses the *contsub_im.py* script
+which uses a Savitzky-Golay filter to find and remove the spectral
+baseline, again in each spectrum of the cube separately. These tasks
+are intended as demonstrations of this capability - there will be an
+ASKAPsoft equivalent to this in a future release. The task assumes
+that the requested python script is in *$ACES/tools* - if it is not
+found, the task will not run.
 
 The variables presented below work in the same manner as those for the
 continuum imaging, albeit with names that clearly refer to the
@@ -273,12 +277,31 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``JOB_TIME_SPECTRAL_IMCONTSUB``               | ``JOB_TIME_DEFAULT`` (12:00:00) | none                               | Time request for image-based continuum subtraction                |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``SPECTRAL_IMSUB_THRESHOLD``                  | 2.0                             | none ('threshold' parameter in     | Threshold [sigma] to mask outliers prior to fitting the continuum |
-|                                               |                                 | robust_contsub.poly)               | baseline in the iamge-based continuum-subtraction.                |
+| ``SPECTRAL_IMSUB_SCRIPT``                     | "robust_contsub.py"             | none                               | The name of the script from the ACES repository to use for        |
+|                                               |                                 |                                    | image-based continuum subtraction. The only two accepted values   |
+|                                               |                                 |                                    | are "robust_contsub.py" and "contsub_im.py". Anything else reverts|
+|                                               |                                 |                                    | to the default.                                                   |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``SPECTRAL_IMSUB_FIT_ORDER``                  | 2                               | none ('fit_order' parameter in     | Order of the polynomial to fit to the continuum baseline.         |
-|                                               |                                 | robust_contsub.poly                |                                                                   |
+| ``SPECTRAL_IMSUB_VERBOSE``                    | true                            | none                               | Whether to use verbose output in the logging for the image-based  |
+|                                               |                                 |                                    | continuum subtraction.                                            |
++-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
+| ``SPECTRAL_IMSUB_THRESHOLD``                  | 2.0                             | none ('threshold' parameter in     | Threshold [sigma] to mask outliers prior to fitting the continuum |
+|                                               |                                 | robust_contsub.py)                 | baseline in the "robust_contsub.py" version of the image-based    |
+|                                               |                                 |                                    | continuum-subtraction.                                            |
++-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
+| ``SPECTRAL_IMSUB_FIT_ORDER``                  | 2                               | none ('fit_order' parameter in     | Order of the polynomial to fit to the continuum baseline in the   |
+|                                               |                                 | robust_contsub.py)                 | "robust_contsub.py" version of the image-based continuum          |
+|                                               |                                 |                                    | subtraction.                                                      |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``SPECTRAL_IMSUB_CHAN_SAMPLING``              | 1                               | none ('n_every' parameter in       | If set to n, we use only every nth channel in the polynomial fit  |
-|                                               |                                 | robust_contsub.poly                | (1 uses every channel).                                           |
+|                                               |                                 | robust_contsub.py)                 | (1 uses every channel). Only for "robust_contsub.py"              |
++-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
+| ``SPECTRAL_IMSUB_LOG_SAMPLING``               | 1                               | none ('log_every' parameter in     | How frequently the log messages from "robust_contsub.py" should be|
+|                                               |                                 | robust_contsub.py)                 | written (1 means every channel).                                  |
++-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
+| ``SPECTRAL_IMSUB_SG_FILTERWIDTH``             | 200                             | none ('filterwidth' parameter in   | The half-width of the Savitzky-Golay filter for baseline smoothing|
+|                                               |                                 | contsub_im.py)                     | in the "contsub_im.py" script.                                    |
++-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
+| ``SPECTRAL_IMSUB_SG_BINWIDTH``                | 4                               | none ('binwidth' parameter in      | The bin width used for binning the spectrum before continuum      |
+|                                               |                                 | contsub_im.py)                     | subtraction ("contsub_im.py" only).                               |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
