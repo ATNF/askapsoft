@@ -111,6 +111,7 @@ class MonicaSubscriber(object):
         try:
             self.topic.unsubscribe(self.subscriber)
             self.control.unsubscribe(self.topic_name)
+            self.ice.destroy()
         except:
             pass
         return False
@@ -133,3 +134,4 @@ if __name__ == "__main__":
     with MonicaSubscriber("mypoints") as msub:
         msub.add_points(points)
         msub.ice.waitForShutdown()            
+        

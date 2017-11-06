@@ -157,7 +157,9 @@ class IceGridSession(object):
             # Need to wait here so the next call works.
             self._wait_for_shutdown()
             self._admin = None
-
+        if self.communicator:
+            self.communicator.destroy()
+            
     def _wait_for_shutdown(self):
         timeout = 10
         while timeout != 0:
@@ -168,7 +170,6 @@ class IceGridSession(object):
                 break
             timeout -= 1
             time.sleep(1)
-
 
     def add_application(self, appxml, config=None):
         """Add an application to IceGrid given and xml definition (file)

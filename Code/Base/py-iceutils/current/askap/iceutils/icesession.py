@@ -122,6 +122,8 @@ class IceSession(object):
         self.processes = []
         self.wake_up.set()
         self._started = False
+        if self.communicator:
+            self.communicator.destroy()
 
     def from_file(self, filename=None):
         """Load application list from file provided in :attr:`sys.argv`.
@@ -171,7 +173,6 @@ class IceSession(object):
                 raise RuntimeError("Application '%s' failed on start"
                                    % application)
 
-            
     def registry_running(self):
         """Check wether an icegridregistry is running"""
         try:
@@ -179,7 +180,6 @@ class IceSession(object):
             return True
         except Ice.ConnectionRefusedException as ex:
             return False
-
 
     def wait_for_registry(self, timeout=10):
         """Block until the ice registry is up and time out after `timeout` 

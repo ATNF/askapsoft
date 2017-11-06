@@ -1,4 +1,4 @@
-# Copyright (c) 2012,2016 CSIRO
+# Copyright (c) 2012-2017 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -29,12 +29,13 @@ import os
 import time
 import Ice
 
-# pylint: disable-msg=W0611
+# noinspection PyUnresolvedReferences
 from askap.slice import FCMService
 import askap.interfaces.fcm
 
 from askap.parset import parset_to_dict
 
+# noinspection PyUnresolvedReferences
 from askap import logging
 
 from .monitoringprovider import MonitoringProviderImpl
@@ -44,11 +45,55 @@ __all__ = ["Server"]
 logger = logging.getLogger(__name__)
 
 
+class FileFCMService(object):
+    def __init__(self, pars):
+        self._parameters = pars
+
+    # noinspection PyUnusedLocal,PyMethodMayBeStatic
+    def get(self, update=True):
+        return self._parameters
+
+
+class FCMWrapper(object):
+    """Wrap up FCM service parameter gets to present a simpler interface
+    to get only paramters of interest"""
+    def __init__(self, parent):
+        self._parent = parent
+        self._fcm = None
+        self._parameters = None
+        self._init_fcm()
+
+    def _init_fcm(self):
+        prxy = self._parent._comm.stringToProxy("FCMService@FCMAdapter")
+        if not prxy:
+            raise RuntimeError("Invalid Proxy for FCMService")
+        self._fcm = self._parent.wait_for_service(
+            "FCM", askap.interfaces.fcm.IFCMServicePrx.checkedCast, prxy)
+
+    def get(self, update=True):
+        """
+        Get FCM parameters for keys "common" and the service namespace, e.g.
+        "dataservice".
+
+        :param update: update from FCM (default) or uses cached version
+
+        :return: dict
+
+        """
+        if self._parameters is None or update:
+            parameters = self._fcm.get(-1, self._parent.service_key)
+            common = self._fcm.get(-1, "common")
+            parameters.update(common)
+            self._parameters = parameters
+        return self._parameters
+
+
 class TimeoutError(Exception):
     """An exception raised when call timed out"""
     pass
 
 
+# noinspection PyUnresolvedReferences
 class Server(object):
     """A class to abstract an ice application (server). It also sets up
     connection to and initialisation from the FCM for the fiven `fcmkey`.
@@ -60,31 +105,26 @@ class Server(object):
     :param retries:
 
     """
-    def __init__(
-            self,
-            comm,
-            fcmkey='',
-            retries=-1,
-            monitoring=False,
-            configurable=True):
-        self._comm = comm
-        self.service_key = fcmkey
-        self._retries = retries
-        self.monitoring = monitoring
-        """Enable provision of monitoring (default `False`. This automatically
-        creates a :class:`MonitoringProvider` and adapter using the class
-        name for adapter naming. e.g. a class named TestServer results
-        in  MonitoringService@TestServerAdapter
-        """
-
-        self.configurable = configurable
-        """Control configuration via FCM/command-line (default `True`)"""
-
+    def __init__(self, comm, fcmkey='', retries=-1):
         self.parameters = None
+        self._comm = comm
         self._adapter = None
         self._mon_adapter = None
+        self._adapter_config = {}
         self._services = []
+        self._retries = retries
+        self.service_key = fcmkey
         self.logger = logger
+        self.monitoring = False
+        """Enable provision of monitoring (default `False`. This automatically
+        creates a :class:`MonitoringProvider` and adapter using the class
+        name for adpater naming. e.g. a class named TestServer results
+        in  MonitoringService@TestServerAdapter
+        """
+        self.configurable = True
+        """Control configuration via FCM/command-line (default `True`)"""
+        self.fcm = None
+        """the FCM service via :obj:`FCMWrapper`"""
 
     def set_retries(self, retries):
         """
@@ -107,17 +147,14 @@ class Server(object):
                 p = os.path.expanduser(os.path.expandvars(v))
                 self.parameters = parset_to_dict(open(p).read())
                 self.logger.info("Initialized from local config '%s'" % p)
+                self.fcm = FileFCMService(self.parameters)
+                self.logger.debug("Created dummy FCM service")
                 return
         self._config_from_fcm()
 
     def _config_from_fcm(self):
-        prxy = self._comm.stringToProxy("FCMService@FCMAdapter")
-        if not prxy:
-            raise RuntimeError("Invalid Proxy for FCMService")
-        fcm = self.wait_for_service("FCM",
-                                    askap.interfaces.fcm.IFCMServicePrx.checkedCast,
-                                    prxy)
-        self.parameters = fcm.get(-1, self.service_key)
+        self.fcm = FCMWrapper(self)
+        self.parameters = self.fcm.get()
         self.logger.info("Initialized from fcm")
 
     def get_parameter(self, key, default=None):
@@ -167,18 +204,32 @@ class Server(object):
                 time.sleep(delay)
         if registry:
             self.logger.info("Connected to {0}".format(servicename))
-            # print >> sys.stderr, servicename, "found"
+            print >> sys.stderr, servicename, "found"
         return retval
 
-    def setup_services(self):
-        adname = self.__class__.__name__ + "Adapter"
-        self._adapter = self._comm.createObjectAdapter(adname)
+    def _create_adapter(self, name, endpoints=None):
+        if endpoints is None:
+            adapter = self._comm.createObjectAdapter(name)
+        else:
+            adapter = self._comm.createObjectAdapterWithEndpoints(name,
+                                                                  endpoints)
+        logger.info("Created adapter {}".format(adapter.getName()))
+        return adapter
 
+    def setup_services(self):
+        name = self.__class__.__name__ + "Adapter"
+        self._adapter = self._create_adapter(
+            self._adapter_config.get("name", name),
+            self._adapter_config.get("endpoints", None)
+        )
         self.get_config()
 
         if self.monitoring:
-            adname = self.__class__.__name__ + "MonitoringAdapter"
-            self._mon_adapter = self._comm.createObjectAdapter(adname)
+            name = name.replace("Adapter", "MonitoringAdapter")
+            self._mon_adapter = self._create_adapter(
+                self._adapter_config.get("name", name),
+                self._adapter_config.get("endpoints", None)
+            )
             self._mon_adapter.add(MonitoringProviderImpl(),
                                   self._comm.stringToIdentity(
                                       "MonitoringService"))

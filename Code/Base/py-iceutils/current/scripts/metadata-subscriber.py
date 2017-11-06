@@ -109,3 +109,4 @@ if __name__ == "__main__":
     msub = MetadataSubscriber(topic_name)
     msub.ice.waitForShutdown()
     msub.topic.unsubscribe(self.subscriber)
+    msub.ice.destroy()
