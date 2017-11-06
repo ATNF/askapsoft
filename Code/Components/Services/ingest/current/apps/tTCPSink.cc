@@ -53,6 +53,11 @@
 #include "cpcommon/VisChunk.h"
 #include "askap/AskapUtil.h"
 
+// I am not very happy to have MPI includes here, we may abstract this interaction
+// eventually. This task is specific for the parallel case, so there is no reason to
+// hide MPI for now.
+#include <mpi.h>
+
 
 // Using
 using namespace askap;
@@ -63,7 +68,7 @@ ASKAP_LOGGER(logger, "tMSSink");
 
 class ParallelGenerator {
 public:
-   explicit ParallelGenerator(float rms, unsigned int nThreads = 1) : itsRMS(rms), itsNThreads(nThreads), itsSeed(0) {}
+   explicit ParallelGenerator(float rms, unsigned int nThreads = 1, int seed = 0) : itsRMS(rms), itsNThreads(nThreads), itsSeed(seed) {}
    void generate(boost::shared_ptr<casa::Complex> &data, casa::uInt size) const {
         ASKAPASSERT(itsNThreads > 0);
         const casa::uInt chunkSize = size / itsNThreads;
@@ -127,6 +132,21 @@ public:
       for (casa::uInt chan = 0; chan < chunk->nChannel(); ++chan) {
            chunk->frequency()[chan] = 1e9 + 1e6/54.*double(chan);
       }
+      chunk->scan() = 0;
+      if (numProcs() > 1) {
+          // patch beam IDs in the chunk to ensure different ranks have different beams
+          const casa::uInt maxBeams = config().getUint("maxbeams");
+          const int beamStep = maxBeams * rank();
+          ASKAPLOG_INFO_STR(logger, "Adding "<<beamStep<<" to beam indices simulated by this rank");
+          casa::Vector<casa::uInt> &beam1 = chunk->beam1();
+          casa::Vector<casa::uInt> &beam2 = chunk->beam2();
+          ASKAPDEBUGASSERT(chunk->nRow() == chunk->beam1().nelements());
+          ASKAPDEBUGASSERT(chunk->nRow() == chunk->beam2().nelements());
+          for (casa::uInt row=0; row<beam1.nelements(); ++row) {
+               beam1[row] += beamStep;
+               beam2[row] += beamStep;
+          }
+      }
       casa::Timer timer;
       float processingTime = 0.;
       size_t actualCount = 0;
@@ -139,7 +159,8 @@ public:
       ASKAPLOG_INFO_STR(logger, "TCPSink initialisation time: "<<initTime<<" seconds");
 
       scimath::ComplexGaussianNoise cns(casa::square(config().getFloat("rms",1.)));
-      ParallelGenerator pg(config().getFloat("rms",1.),config().getUint("nthreads",10));
+      const casa::uInt nThreads = config().getUint("nthreads",10);
+      ParallelGenerator pg(config().getFloat("rms",1.),nThreads, isStandAlone() ? 0 : rank() * nThreads);
       
       ASKAPLOG_INFO_STR(logger, "Running the test for rank="<<rank());
 
@@ -149,6 +170,20 @@ public:
            casa::Quantity q;
            ASKAPCHECK(casa::MVTime::read(q, "today"), "MVTime::read failed");
            chunk->time() = casa::MVEpoch(q);
+           // if we want synchronised times, it may be interesting to have this code optional
+           if (numProcs() > 1) {
+               double timeRecvBuf[2];
+               if (rank() == 0) {
+                   timeRecvBuf[0] = chunk->time().getDay();
+                   timeRecvBuf[1] = chunk->time().getDayFraction();
+               }
+               const int response = MPI_Bcast(timeRecvBuf, 2, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+               ASKAPCHECK(response == MPI_SUCCESS, "Error gathering times, response from MPI_Bcast = "<<response);
+               if (rank() != 0) {
+                   const casa::MVEpoch receivedTime(timeRecvBuf[0], timeRecvBuf[1]);
+                   chunk->time() = receivedTime;
+               }
+           }
            ASKAPDEBUGASSERT(chunk->visibility().contiguousStorage());
            boost::shared_ptr<casa::Complex> data(chunk->visibility().data(), utility::NullDeleter());
            pg.generate(data, chunk->visibility().nelements());
