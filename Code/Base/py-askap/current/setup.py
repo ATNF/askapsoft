@@ -20,27 +20,34 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA.
 #
-from askapdev.rbuild.setup import setup
-from askapdev.rbuild.dependencies import Dependency
-from setuptools import find_packages
+try:
+    from askapdev.rbuild.setup import setup
+    from askapdev.rbuild.dependencies import Dependency
 
-dep = Dependency()
-dep.add_package()
+    dep = Dependency()
+    dep.add_package()
+except ImportError:
+    from setuptools import setup
+
+    dep = None
+
+from setuptools import find_packages
 
 PKGNAME = ROOTPKG = "askap"
 
-setup(name = PKGNAME,
-      version = 'current',
-      description = 'ASKAP basic modules',
-      author = 'Malte Marquarding',
-      author_email = 'Malte.Marquarding@csiro.au',
-      url = 'http://svn.atnf.csiro.au/askap',
-      keywords = ['ASKAP', 'logging', 'Base'],
-      long_description = '''General basic ASKAP modules such as logging
+setup(name=PKGNAME,
+      version='current',
+      description='ASKAP basic modules',
+      author='Malte Marquarding',
+      author_email='Malte.Marquarding@csiro.au',
+      url='http://svn.atnf.csiro.au/askap',
+      keywords=['ASKAP', 'logging', 'Base'],
+      long_description='''General basic ASKAP modules such as logging
 ''',
-      packages = find_packages(),
-      license = 'GPL',
-      zip_safe = 0,
-      dependency = dep,
-      test_suite = "nose.collector",
-)
+      namespace_packages=[ROOTPKG],
+      packages=find_packages(),
+      license='GPL',
+      zip_safe=0,
+      dependency=dep,
+      test_suite="nose.collector",
+      )

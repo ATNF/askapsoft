@@ -30,24 +30,14 @@ following functionality:
 
     * :func:`log_debug` - a decorator for logging at the DEBUG level.
 
-.. todo::
-
-    python < 2.6.3 has a bug where::
-
-        from logging import *
-
-    doesn't import all symbols. We can remove the explicit imports once
-    everyone is using version above 2.6.2
-
 """
-import os
 # pylint: disable-msg=W0401
 from logging import *
-# python 2.6 now has __all__, which means not everything gets in
-# this is a bug fixed in 2.6.3
 from logging import config
+# noinspection PyUnresolvedReferences
 from logging import handlers
-from logging import getLogger, basicConfig, getLevelName
+import os
+
 
 # decorator
 def log_debug(func):
@@ -78,6 +68,7 @@ Example::
         logger = getLogger("Unspecified")
         basicConfig(level=DEBUG)
     fname = func.func_name
+
     def postlog(*args, **kwargs):
         logname = ""
         outargs = None
@@ -95,6 +86,7 @@ Example::
         return func(*args, **kwargs)
     return postlog
 
+
 def init_logging(args):
     """Parse `args` for --log-config=filename and initialise loggers using
     the configuration file.
@@ -107,13 +99,13 @@ def init_logging(args):
         if arg.startswith(key):
             k, v = arg.split("=")
             if os.path.exists(v):
-                config.fileConfig(v)
+                config.fileConfig(v, disable_existing_loggers=False)
                 return
 
     if "ASKAP_LOGCFG" in os.environ:
         fname = os.environ.get("ASKAP_LOGCFG")
         if os.path.exists(fname):
-            config.fileConfig(fname)
+            config.fileConfig(fname, disable_existing_loggers=False)
             return
         
     fnames = ["askap.pylog_cfg", "askap.log_cfg",
@@ -121,6 +113,6 @@ def init_logging(args):
               "/etc/askap/askap.pylog_cfg"]
     for fname in fnames:
         if os.path.exists(fname):
-            config.fileConfig(fname)
+            config.fileConfig(fname, disable_existing_loggers=False)
             return
     raise IOError("No log configuration file found")

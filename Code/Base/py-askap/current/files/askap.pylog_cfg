@@ -1,8 +1,8 @@
 [loggers]
-keys=root, askap
+keys=root, askap, dogpile
 
 [handlers]
-keys=iceHandler, fileHandler
+keys=iceHandler, fileHandler, nullHandler
 
 [logger_root]
 level=INFO
@@ -13,6 +13,15 @@ qualname=askap
 level=INFO
 handlers=iceHandler
 propagate=1
+
+[logger_dogpile]
+qualname=dogpile
+handlers=nullHandler
+propagate=0
+
+[handler_nullHandler]
+class=NullHandler
+args=(0,)
 
 [handler_fileHandler]
 class=handlers.TimedRotatingFileHandler

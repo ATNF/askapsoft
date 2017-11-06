@@ -74,6 +74,9 @@ class Jira(object):
             user = user or self.user
             password = getpass.getpass()
         r = self._session.post(self.server, auth=(user, password))
+        os.environ["JIRA_USER"] = user
+        os.environ["JIRA_PASSWORD"] = password
+        self.user = user
         r.raise_for_status()
 
     def create_issue(self, sbid, description, project="ASKAPTOS"):
@@ -113,7 +116,6 @@ class Jira(object):
         if isinstance(attachments, basestring):
             attachments = [attachments]
         for i, attachment in enumerate(attachments):
-            handle = None
             if isinstance(attachment, basestring):
                 fname = os.path.expanduser(os.path.expandvars(attachment))
                 handle = open(fname, "rb")

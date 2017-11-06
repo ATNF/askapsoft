@@ -32,19 +32,22 @@ class ListHandler(Handler):
     def emit(self, record):
         self.event = [record.name, record.getMessage()]
 
-# This passes in as reference as it is a list. Use this to access it 
+
+# This passes in as reference as it is a list. Use this to access it
 # globally
-#event = None
+# event = None
 hand = ListHandler()
 logger = getLogger(__name__)
 logger.setLevel(DEBUG)
 logger.addHandler(hand)
 
-# pylint: disable-msg=W0613
+
+# noinspection PyUnusedLocal
 @log_debug
 def debug_me(arg, kwarg=2):
     pass
-    
+
+
 def test_log_debug():
     debugmestr = 'debug_me:  (1, 2) '
     debugmename = "test_logging"

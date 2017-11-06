@@ -20,7 +20,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA.
 #
-from askap import get_config
+from askap.config import get_config
+
 
 def test_get_config():
     cfg = get_config("askap.logging", "logging_server.ice_cfg")

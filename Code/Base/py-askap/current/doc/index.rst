@@ -9,10 +9,19 @@ Welcome to askap's documentation!
 .. automodule:: askap
    :members:
 
+.. automodule:: askap.config
+   :members:
+
 .. automodule:: askap.logging
    :members:
 
+.. automodule:: askap.coordinates
+   :members:
+
 .. automodule:: askap.time
+   :members:
+
+.. automodule:: askap.timer
    :members:
 
 .. automodule:: askap.event

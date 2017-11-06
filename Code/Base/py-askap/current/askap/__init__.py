@@ -25,25 +25,5 @@ try:
     __import__('pkg_resources').declare_namespace(__name__)
 except ImportError:
     from pkgutil import extend_path
+    # noinspection PyUnboundLocalVariable
     __path__ = extend_path(__path__, __name__)
-"""
-=============================================
-Module :mod:`askap` -- ASKAP global utilities
-=============================================
-
-This module contains ASKAP wide basic utilities.
-
-"""
-
-__all__ = ['get_config']
-
-import os
-
-def get_config(module, filename):
-    """Return package relative configuration directory. This could for example
-    contain ice configuration and slice files.
-    """
-    from pkg_resources import resource_filename
-    cfg = resource_filename(module,
-                            os.path.join("config", filename))
-    return cfg

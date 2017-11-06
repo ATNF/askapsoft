@@ -25,9 +25,13 @@
 Module :mod:`askap.event` 
 =========================
 
-Additions to the :mod:`threading` module"""
-__all__ = ["AbortError", "AbortEvent", "raise_abort"]
+Additions to the :mod:`threading` module
+"""
+
 from threading import Condition, Lock
+
+__all__ = ["AbortError", "AbortEvent", "raise_abort"]
+
 
 class AbortEvent(object):
     """Event class with same interface as :func:`threading.Event` but it
@@ -58,7 +62,10 @@ class AbortEvent(object):
             self.__cond.release()
 
     def raise_exception(self, reason):
-        """set the event and provide a reason"""
+        """set the event and provide a reason
+
+        :param reason: the exception message
+        """
         if self.raised:
             return
         self.__cond.acquire()
@@ -79,6 +86,11 @@ class AbortEvent(object):
             self.__cond.release()
 
     def wait(self, timeout=None):
+        """
+        :param timeout:  the time to wait in seconds until timing out
+                        (passed to the :obj:`Condition` variable
+        :return:
+        """
         self.__cond.acquire()
         try:
             if not self.__flag:
@@ -101,4 +113,4 @@ def raise_abort(event):
     """    
     if event.is_set() and not event.raised:
         msg = event.message() or "Unknown reason"
-        raise AbortError(event.message())
+        raise AbortError(msg)

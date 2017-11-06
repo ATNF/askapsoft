@@ -37,7 +37,7 @@ def test_utc2bat():
 
 @raises(SiteError)
 def test_site_raises():
-    val = siteID2LocTimezone('blah')
+    siteID2LocTimezone('blah')
 
 
 # run tests for all dictionary items

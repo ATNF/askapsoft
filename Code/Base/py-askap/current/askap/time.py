@@ -69,6 +69,7 @@ LEAPSECONDS = [
     [datetime.datetime(1972, 7, 1, tzinfo=pytz.utc), 41499, 11],
     [datetime.datetime(1972, 1, 1, tzinfo=pytz.utc), 41317, 10],
 ]
+"# Leap seconds definition, [UTC datetime, MJD, DUTC]"
 
 
 class SiteError(Exception):
