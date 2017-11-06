@@ -1,4 +1,4 @@
-# Copyright (c) 2009 CSIRO
+# Copyright (c) 2009-2017 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -20,14 +20,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA.
 #
-__all__ = ["ParameterSet", "dict_to_parset", "parset_to_dict", "slice_parset",
-           "sub_parset", "merge"]
-
 import os
 import re
 import warnings
+import ast
 
-from askap.parset import logger
+__all__ = ["ParameterSet", "dict_to_parset", "parset_to_dict", "slice_parset",
+           "sub_parset", "merge"]
+
 
 def to_dict(parmap):
     if isinstance(parmap, dict):
@@ -37,30 +37,27 @@ def to_dict(parmap):
     else:
         raise TypeError("argument not a ParamterSet (or dict)")
 
+
 def slice_parset(d, key):
     """Return a subset of the `dict` d  return matching key prefix only"""
-    return dict((k, v) for k,v in d.items() if k.startswith(key))
+    return dict((k, v) for k, v in d.items() if k.startswith(key))
+
 
 def sub_parset(d, key):
-    return dict((k.replace(key+".",""), v) \
-                    for k,v in d.items() if k.startswith(key))
+    return dict((k.replace(key + ".", ""), v)
+                for k, v in d.items() if k.startswith(key))
+
 
 def parset_to_dict(st, raw=False):
     """Turn a parameterset string into a python `dict`"""
     d = {}
-    full_line = ''
     for line in st.splitlines():
-	full_line += line.strip()
-
-	if full_line.endswith('\\'):
-	    full_line = full_line[:-1].strip()
-	else:
-            pval, comm = extract(full_line)
-            if pval:
-                val = raw and pval[1] or decode(pval[1])
-                d[pval[0]] = val
-	    full_line = ''
+        pval, comm = extract(line)
+        if pval:
+            val = raw and pval[1] or decode(pval[1])
+            d[pval[0]] = val
     return d
+
 
 def dict_to_parset(d, sort=False):
     """Turn a python `dict` into a parameterset string.
@@ -125,12 +122,13 @@ class ParameterSet(object):
 
         >>> p0 = ParameterSet()
         >>> p1 = ParameterSet('x.y', 1)
-        >>> p2 = ParameterSet(x=1, y=2, z=ParameterSet('a', 3))
-        >>> print x.a
-        3
-        >>> print x['a']
-        3
-        >>> print x.get_value('a')
+        >>> x = ParameterSet('a', 3)
+        >>> p2 = ParameterSet(x=1, y=2, z=x)
+        >>> print p2.x
+        1
+        >>> print p2["y"]
+        2
+        >>> print p2.z.get_value('a')
         3
         >>> p3 = ParameterSet('xyz.parset')
         >>> p1.set_value('x.a', 2)
@@ -138,11 +136,12 @@ class ParameterSet(object):
         >>> p5 = ParameterSet(**{'x.y': 1})
 
     """
+
     def __init__(self, *args, **kw):
         object.__setattr__(self, "_keys", [])
         object.__setattr__(self, "_pdict", {})
         object.__setattr__(self, "_docdict", {})
-       # from file
+        # from file
         if len(args) == 1:
             if isinstance(args[0], basestring):
                 if args[0].find("=") > -1:
@@ -157,45 +156,45 @@ class ParameterSet(object):
                 for line in pfile:
                     pair, comment = extract(line, doc)
                     if pair and pair in pairs:
-                        lineno = pairs.index(pair)+1
-                        msg = "Overwriting value for key '%s' first "\
+                        lineno = pairs.index(pair) + 1
+                        msg = "Overwriting value for key '%s' first " \
                               "defined in line %d" % (pair[0], lineno)
                         warnings.warn(msg)
                     pairs.append(pair)
                     if pair:
                         try:
-#                            print pair, "->",comment,"<-"
                             self.set_value(pair[0], pair[1], comment)
                             doc = ""
-                        except ValueError, ex:
-                            raise ValueError("In line %d of %s. %s" % (i,
-                                                                       args[0],
-                                                                       ex.message))
+                        except ValueError as ex:
+                            raise ValueError(
+                                "In line %d of %s. %s" % (i, args[0],
+                                                          ex.message))
                     else:
                         doc = comment
                     i += 1
-#                logger.info("Read ParameterSet file %s" % args[0])
             elif isinstance(args[0], dict):
-                for k,v in args[0].iteritems():
+                for k, v in args[0].iteritems():
                     self.set_value(k, v)
             else:
-                raise ValueError("Given (single) argument is not a file name or dict")
+                raise ValueError(
+                    "Given (single) argument is not a file name or dict")
         # from key, value
         elif len(args) == 2:
             self.set_value(*args)
         elif len(kw):
-            for k,v in kw.iteritems():
+            for k, v in kw.iteritems():
                 self.set_value(k, v)
         elif len(args) == 0 and len(kw) == 0:
             pass
         else:
             raise ValueError("Incorrect arguments to constructor.")
 
+    # noinspection PyIncorrectDocstring
     def get_value(self, k, default=None, _full=None):
         """Return the value from the ParameterSet using an optional default
         value if the key doesn't exist.
 
-        :param key: the key to get the value for
+        :param k: the key to get the value for
         :param default: the default value to return if the key doesn't exist
 
         """
@@ -205,22 +204,22 @@ class ParameterSet(object):
         if k in self._keys:
             child = self._pdict[k]
             if isinstance(child, self.__class__):
-                if tail is not None:                    
+                if tail is not None:
                     return child.get_value(tail, default, fullkey)
                 else:
                     return decode(child)
             else:
                 if tail is not None:
                     if default is None:
-                        raise KeyError("Key '%s' not found." % fullkey )
+                        raise KeyError("Key '%s' not found." % fullkey)
                     else:
                         return default
                 return decode(child)
         else:
             if default is None:
-                raise KeyError("Key '%s' not found." % fullkey )
+                raise KeyError("Key '%s' not found." % fullkey)
             else:
-                return default       
+                return default
 
     def get_doc(self, k):
         """Get the documentation for the specified key `k`"""
@@ -236,8 +235,7 @@ class ParameterSet(object):
             else:
                 return self._docdict[k]
         else:
-            raise KeyError("Key '%s' not found." % inkey )
-
+            raise KeyError("Key '%s' not found." % inkey)
 
     def keys(self):
         """Return the name of the keys in this `ParameterSet`."""
@@ -259,7 +257,7 @@ class ParameterSet(object):
         :param string doc:  the (new) documentation
 
         """
-        
+
         v = self.get_value(k)
         self.set_value(k, v, doc)
 
@@ -283,9 +281,9 @@ class ParameterSet(object):
 
         :param k: key
         :param v: value
+        :param doc: documentation string
 
         """
-        inkey = k
         k, tail = self._split(k)
         if k in self._keys:
             child = self._pdict[k]
@@ -342,13 +340,13 @@ class ParameterSet(object):
                     del self._docdict[k]
                 self._keys.remove(k)
         else:
-            raise KeyError("Key '%s' not found." % inkey )
-
+            raise KeyError("Key '%s' not found." % inkey)
 
     def __getattr__(self, k):
         return self.get_value(k)
 
-    def _split(self, k):
+    @staticmethod
+    def _split(k):
         keys = k.split(".")
         k = keys[0]
         tail = None
@@ -370,7 +368,6 @@ class ParameterSet(object):
         else:
             return False
 
-
     def to_dict(self):
         """
         Returns a python :class:`dict` representation of the `ParameterSet`,
@@ -389,13 +386,13 @@ class ParameterSet(object):
         Returns a python :class:`dict` representation of the `ParameterSet`,
         with flat keys and encoded (string) values.
         """
-        return dict([(k, encode(v))  for k, v in self.items()])
+        return dict([(k, encode(v)) for k, v in self.items()])
 
     def _get_strings(self):
         """
         Get a list of key=values strings as they appear in ParameterSet files.
         """
-        return ["%s = %s" % (k, encode(v))  for k, v in self.items()]
+        return ["%s = %s" % (k, encode(v)) for k, v in self.items()]
 
     def __str__(self):
         return "\n".join(self._get_strings())
@@ -405,7 +402,7 @@ class ParameterSet(object):
 
     def to_file(self, filename):
         f = open(filename, 'w')
-        f.write(str(self)+'\n')
+        f.write(str(self) + '\n')
         f.close()
 
     def __iter__(self):
@@ -419,6 +416,7 @@ class ParameterSet(object):
     def items(self):
         return [(k, self.get_value(k)) for k in self.keys()]
 
+
 def encode(value):
     """Encode a python value as ParameterSet string.
 
@@ -426,56 +424,66 @@ def encode(value):
        handle hex values is to make them strings.
     """
 
-    def single_str(value):
-        if isinstance(value, bool):
-            return value and 'true' or 'false'
-        if isinstance(value, str):
-            return value
-        return value
+    def single_str(v):
+        if isinstance(v, bool):
+            return v and 'true' or 'false'
+        if isinstance(v, str):
+            return v
+        return v
+
     value = single_str(value)
     # deal with numpy arrays, by converting to lists
     if hasattr(value, 'tolist'):
         value = value.tolist()
     if isinstance(value, list) or isinstance(value, tuple):
-        def to_str(value, islement=False):
-            if isinstance(value, list) or isinstance(value, tuple):
+        def to_str(val, islement=False):
+            if isinstance(val, list) or isinstance(val, tuple):
                 vals = []
-                for i in value:
+                for j in val:
                     # quote text in lists which contains whitespace
-                    if isinstance(i, basestring) and len(i.split()) > 1:
-                        i = '"'+i+'"'
-                    vals.append(to_str(i))
-                return "[" + ", ".join(vals)  + "]"
+                    if isinstance(j, basestring) and len(j.split()) > 1:
+                        j = '"' + j + '"'
+                    vals.append(to_str(j))
+                return "[" + ", ".join(vals) + "]"
             else:
-                if isinstance(value, bool):
-                    return value and 'true' or 'false'
-                return str(value)
+                if isinstance(val, bool):
+                    return val and 'true' or 'false'
+                return str(val)
 
         if len(value) > 2 and not isinstance(value[0], list):
             # [ n * val ]
-            if value == [value[0]]*len(value):
+            if value == [value[0]] * len(value):
                 val = str(single_str(value[0]))
                 return '[' + str(len(value)) + ' * ' + val + ']'
             # n..m
-            elif all([isinstance(i, int) for i in value ])\
-                and value == range(value[0], value[-1]+1):
+            elif all([isinstance(i, int) for i in value]) \
+                    and value == range(value[0], value[-1] + 1):
                 return str(value[0]) + '..' + str(value[-1])
         return to_str(value)
     return str(value)
+
 
 def _fromdotdot(match, value):
     rxisrange = re.compile(r"(\d+)\.{2}(\d+)")
     r = match.groups()
     r0 = int(r[0])
+    padded = False
+    if r[0].startswith("0") and len(r[0]) > 1:
+        padded = True
     r1 = int(r[1])
+    if r[1].startswith("0") and len(r[1]) > 1:
+        padded = True
     sgn = (r0 < r1) and 1 or -1
-    rng  = range(r0, r1+sgn, sgn)
+    rng = range(r0, r1 + sgn, sgn)
     # just numerical range
     if match.span()[0] == 0 and match.span()[1] == len(value):
         return rng
-    nwidth = max(len(r[0]), len(r[1]))
+    nwidth = 1
+    if padded:
+        nwidth = max(len(r[0]), len(r[1]))
     strg = rxisrange.sub("%%0%ii" % nwidth, value)
-    return [ strg % i for i in rng ]
+    return [strg % i for i in rng]
+
 
 def decode(value):
     """
@@ -496,7 +504,7 @@ def decode(value):
     """
     if not isinstance(value, basestring):
         return value
-    rxislist = re.compile(r"^\[(.+)\]$")
+    rxislist = re.compile(r"^\[(.*)\]$")
     rxbool = re.compile(r"([tT]rue|[fF]alse)")
     rxisrange = re.compile(r"(\d+)\.{2}(\d+)")
     rxisnum = re.compile(r"^([+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?)$")
@@ -507,58 +515,61 @@ def decode(value):
     if match:
         # look for  '01..10' type pattern inside []
         svalue = match.groups()[0]
-        submatch = rxisrange.search(svalue) 
+        if svalue == '':
+            return []
+        submatch = rxisrange.search(svalue)
         if submatch:
             return _fromdotdot(submatch, svalue)
         # check for [ n * <value> ] and expand
         # doesn't work for vectors elements
-        if value.count(",")  == 0:
+        if value.count(",") == 0:
             rxtimes = re.compile(r"\[.*?(\d+)\s*[*](.+)\]")
             mtch = rxtimes.match(value)
             if mtch:
                 fact = int(mtch.groups()[0])
                 val = mtch.groups()[1].strip()
                 if rxbool.match(val):
-                    val = eval(val.title())
+                    val = ast.literal_eval(val.title())
                 elif rxishex.match(val):
-                    val = eval(val)
+                    val = ast.literal_eval(val)
                 elif rxisnum.match(val):
-                    val = eval(val)
-                return fact*[val]
+                    val = ast.literal_eval(val)
+                return fact * [val]
 
-        # dodgey way to test for arrays of numerical values
-        # don't support any other array type
         if value.count("[") > 1:
-            try:
-                out = eval(value)
-                return out
-            except:
-                raise ValueError("Can't decode arrays of non-numbers")
+            inner = value[1:-1]
+            rxitem = re.compile(r"(\[.+?\])")
+            out = []
+            for item in rxitem.findall(inner):
+                out.append(decode(item))
+            return out
         out = []
         items = match.groups()[0].split(",")
         for i in items:
-
             i = i.strip()
             if rxisnum.match(i):
-                i = eval(i)
+                i = ast.literal_eval(i)
+            elif rxbool.match(i):
+                i = ast.literal_eval(i.title())
             elif rxstr.match(i):
                 i = rxstr.match(i).groups()[0]
             out.append(i)
         return out
     # look for  '01..10' type pattern
-    match = rxisrange.search(value)        
+    match = rxisrange.search(value)
     if match:
         return _fromdotdot(match, value)
     # hex
     if rxishex.match(value):
-        return eval(value)    
+        return ast.literal_eval(value)
     # int/float
     if rxisnum.match(value):
-        return eval(value)
+        return ast.literal_eval(value)
     # true/false
     if rxbool.match(value):
-        return eval(value.title())
+        return ast.literal_eval(value.title())
     return value
+
 
 def extract(line, comment=""):
     """
@@ -589,7 +600,8 @@ def extract(line, comment=""):
         return [i.strip() for i in kv], comment
 
 
-def merge(*parsets, **kw):    
+# noinspection PyUnusedLocal
+def merge(*parsets, **kw):
     """Merge n :class:`ParameterSet` into one. Existing keys will be 
     overwritten, so that the last given argument wins.
 

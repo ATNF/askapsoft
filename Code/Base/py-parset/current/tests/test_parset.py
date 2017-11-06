@@ -1,4 +1,4 @@
-# Copyright (c) 2009-2013 CSIRO
+# Copyright (c) 2009-2016 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -24,6 +24,7 @@ import os
 from askap.parset import ParameterSet, decode, encode, merge
 from nose.tools import raises, assert_equals
 
+
 # default constructor test
 def test_constructor():
     p = ParameterSet()
@@ -34,16 +35,19 @@ def test_stringconstructor():
 a.b.d = x"""
     p = ParameterSet(pset)
     assert_equals(p.a.b.c, 1)
-    
+
+
 # from file
 def test_fileconstructor():
     testfile = os.path.join(os.path.split(__file__)[0], 'example.parset')
     p = ParameterSet(testfile)
 
+
 # from file
 def test_dictconstructor():
     p1 = ParameterSet({'x.y': 1})
     p2 = ParameterSet(**{'x.y': 1})
+
 
 # call constructor with args
 def constructor(args):
@@ -51,14 +55,17 @@ def constructor(args):
         args = (args,)
     p = ParameterSet(*args)
 
+
 # generator for constructor arguments
 def test_args():
-    for t in [('x.y', 1), ('x', [1,2])]:
+    for t in [('x.y', 1), ('x', [1, 2])]:
         yield constructor, t
+
 
 @raises(OSError)
 def test_failconstructor():
     p = ParameterSet("xxx.parset")
+
 
 # test set_value
 def test_set_value():
@@ -66,9 +73,11 @@ def test_set_value():
     p.set_value("x.y", 1)
     p.set_value("x.z", 2)
 
+
 def test_len():
-    p = ParameterSet(a=1,b=2)
+    p = ParameterSet(a=1, b=2)
     assert_equals(len(p), 2)
+
 
 # test __str__ function
 def test_str():
@@ -80,13 +89,15 @@ def test_str():
     p.set_value(key0, value0)
     assert_equals(str(p), "%s = %d\n%s = %d" % (key0, value0, key1, value1))
 
+
 def test_to_dict():
     p = ParameterSet(x=1, y=2)
     d = p.to_dict()
     assert d == {'x': 1, 'y': 2}
 
+
 def test_to_flat_dict():
-    din = {'x.y':1, 'x.z':2}
+    din = {'x.y': 1, 'x.z': 2}
     p = ParameterSet(**din)
     d = p.to_flat_dict()
     assert_equals(d.keys(), din.keys())
@@ -97,6 +108,7 @@ def test_slice():
     p = ParameterSet('x.y.z', 1)
     assert isinstance(p.x.y, ParameterSet)
 
+
 def test_get_value():
     p = ParameterSet('x.y.z', 1)
     v = p.get_value('x.y.z')
@@ -105,6 +117,7 @@ def test_get_value():
     v = p['x.y']
     v = p.x
     v = p.x.y.z
+
 
 def test_get_value_default():
     p = ParameterSet('x.y.z', 1)
@@ -119,15 +132,18 @@ def test_decoded():
     assert_equals(p['x.y.z'], 1)
     assert_equals(p.x.y.z, 1)
 
+
 @raises(KeyError)
 def test_get_value_fail():
     p = ParameterSet()
     v = p.get_value('x.y.x')
 
+
 @raises(KeyError)
 def test_get_by_key_fail():
     p = ParameterSet()
     v = p.get_value('x.y.x')
+
 
 @raises(KeyError)
 def test_get_past_leafnode_fail():
@@ -143,53 +159,65 @@ def test_in():
     assert 'a' not in p
     assert 'x.y.z.a' not in p
 
+
 # check decoded value
 def decoder(k, v):
     assert_equals(decode(k), v)
+
 
 # test generator for parset expressions
 def test_decode():
     expr = {'1..9': range(1, 10),
             '[1..9]': range(1, 10),
             '9..1': range(9, 0, -1),
+            '01..10': range(1, 11),
             'abc1..2.txt': ['abc1.txt', 'abc2.txt'],
             '[abc1..2.txt]': ['abc1.txt', 'abc2.txt'],
-            '[1,2]': [1,2],
+            'a01..03.txt': ['a01.txt', 'a02.txt', 'a03.txt'],
+            'a9..10.txt': ['a9.txt', 'a10.txt'],
+            'a09..10.txt': ['a09.txt', 'a10.txt'],
+            '[1,2]': [1, 2],
             '[x, y]': ['x', 'y'],
             '[1, x]': [1, 'x'],
-            '[[1,2], [3,4]]': [[1,2], [3,4]],
+            '[[1,2], [3,4]]': [[1, 2], [3, 4]],
+            '[[a,false],[c,1]]': [['a', False], ['c', 1]],
             'true': True,
             'false': False,
-            '[3 * false]': 3*[False],
+            '[3 * false]': 3 * [False],
             '1e10': 1e10,
             '.1': 0.1,
             '-1.0e-10': -1.0e-10,
-            '[1, 2, "x y"]': [1,2, "x y" ],
+            '[1, 2, "x y"]': [1, 2, "x y"],
             '0xff0': 4080,
+            '[]': [],
             }
 
-    for k,v in expr.items():
+    for k, v in expr.items():
         yield decoder, k, v
+
 
 # check encoded value
 def encoder(k, v):
     assert_equals(encode(k), v)
 
+
 # test generator for parset expressions
 def test_encode():
     expr = {'1..9': range(1, 10),
-            '[1, 2]': [1,2],
+            '[1, 2]': [1, 2],
             '[x, y]': ['x', 'y'],
             '[1, x]': [1, 'x'],
-            '[[1, 2], [3, 4]]': [[1,2], [3,4]],
-            '[3 * false]': 3*[False],
+            '[[1, 2], [3, 4]]': [[1, 2], [3, 4]],
+            '[3 * false]': 3 * [False],
             'true': True,
             'false': False,
             '-1e-10': -1.0e-10,
-            '[1, 2, "x y"]': [1,2, "x y" ],
+            '[1, 2, "x y"]': [1, 2, "x y"],
+            '[]': [],
             }
-    for k,v in expr.items():
+    for k, v in expr.items():
         yield encoder, v, k
+
 
 def test_keys():
     keys = ['a', 'x.y.z']
@@ -197,24 +225,28 @@ def test_keys():
     p.set_value(keys[0], 1)
     assert_equals(p.keys(), keys)
 
+
 def test_items():
     keys = ['x.a', 'x.y.z']
     p = ParameterSet('x.y.z', 1)
     p.set_value('x.a', 2)
     assert_equals(p.items(), [('x.a', 2), ('x.y.z', 1)])
 
+
 def test_del():
-    d = {'a.b.c': 0, 'a.b.d': 0, 'a.x' : 0}
+    d = {'a.b.c': 0, 'a.b.d': 0, 'a.x': 0}
     p = ParameterSet(**d)
     del p['a.b']
     assert_equals(p.keys(), ['a.x'])
 
+
 def test_pop():
-    d = {'a.b.c': 0, 'a.b.d': 0, 'a.x' : 0}
+    d = {'a.b.c': 0, 'a.b.d': 0, 'a.x': 0}
     p = ParameterSet(**d)
     v = p.pop('a.b')
     assert_equals(p.keys(), ['a.x'])
-    assert_equals(v.items(), [('c', 0),('d', 0),])
+    assert_equals(v.items(), [('c', 0), ('d', 0), ])
+
 
 def test_merge():
     d1 = {'a': 1, 'b': 2}
@@ -223,5 +255,5 @@ def test_merge():
     dmerged.update(d2)
     p1 = ParameterSet(d1)
     p2 = ParameterSet(d2)
-    pmerged = merge(p1,p2)
+    pmerged = merge(p1, p2)
     assert_equals(dmerged, pmerged.to_dict())

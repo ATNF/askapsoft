@@ -20,30 +20,35 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA.
 #
-from askapdev.rbuild.setup import setup
-from askapdev.rbuild.dependencies import Dependency
+try:
+    from askapdev.rbuild.setup import setup
+    from askapdev.rbuild.dependencies import Dependency
+    dep = Dependency()
+    dep.add_package()
+except ImportError:
+    from setuptools import setup
+    dep = None
+
 from setuptools import find_packages
 
-dep = Dependency()
-dep.add_package()
 
 PKGNAME = "parset"
 ROOTPKG = "askap"
 
-setup(name = '%s.%s' % (ROOTPKG, PKGNAME),
-      version = 'current',
-      description = 'LOFAR ParameterSet parser',
-      author = 'Malte Marquarding',
-      author_email = 'Malte.Marquarding@csiro.au',
-      url = 'http://svn.atnf.csiro.au/askap',
-      keywords = ['ASKAP', 'ParameterSet', 'Base', 'LOFAR'],
-      long_description = '''This package provides native python parsing of LOFAR ParamterSets.
+setup(name='%s.%s' % (ROOTPKG, PKGNAME),
+      version='current',
+      description='LOFAR ParameterSet parser',
+      author='Malte Marquarding',
+      author_email='Malte.Marquarding@csiro.au',
+      url='http://svn.atnf.csiro.au/askap',
+      keywords=['ASKAP', 'ParameterSet', 'Base', 'LOFAR'],
+      long_description='''This package provides native python parsing of LOFAR ParamterSets.
 ''',
-      packages = find_packages(),
-      namespace_packages = [ROOTPKG],
-      license = 'GPL',
-      zip_safe = 1,
-      dependency = dep,
-      scripts = ["scripts/doc_parset.py"],
-      test_suite = "nose.collector",
-)
+      packages=find_packages(),
+      namespace_packages=[ROOTPKG],
+      license='GPL',
+      zip_safe=1,
+      dependency=dep,
+      scripts=["scripts/doc_parset.py"],
+      test_suite="nose.collector",
+      )
