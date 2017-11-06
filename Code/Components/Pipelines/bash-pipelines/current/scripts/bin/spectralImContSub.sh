@@ -71,7 +71,107 @@ for subband in ${SUBBAND_WRITER_LIST}; do
         setImageProperties spectral
 
         setJob "spectral_imcontsub${subband}" "imcontsub${subband}"
-        cat > "$sbatchfile" <<EOF
+
+        if [ "${ACES_VERSION_USED}" -gt 47195 ]; then
+
+            setup="# Setting up command-line arguments for contsub"
+            if [ "${SPECTRAL_IMSUB_VERBOSE}" == "true" ]; then
+                setup="${setup}
+    args=\"--image=../${imageName}\"
+    args=\"\${args} -v\""
+            fi
+            
+            if [ "${SPECTRAL_IMSUB_SCRIPT}" == "contsub_im.py" ]; then
+                setup="${setup}
+    args=\"\${args} --filterwidth=${SPECTRAL_IMSUB_SG_FILTERWIDTH}\"
+    args=\"\${args} --binwidth=${SPECTRAL_IMSUB_SG_BINWIDTH}\""
+
+            else
+                if [ "${SPECTRAL_IMSUB_SCRIPT}" != "robust_contsub.py" ]; then
+                    echo "SPECTRAL_IMSUB_SCRIPT - only \"robust_contsub.py\" or \"contsub_im.py\" allowed."
+                    echo "                      - using \"robust_contsub.py\""
+                    SPECTRAL_IMSUB_SCRIPT="robust_contsub.py"
+                fi
+                setup="${setup}
+    args=\"\${args} --threshold=${SPECTRAL_IMSUB_THRESHOLD}\"
+    args=\"\${args} --order=${SPECTRAL_IMSUB_FIT_ORDER}\"
+    args=\"\${args} --n_every=${SPECTRAL_IMSUB_CHAN_SAMPLING}\"
+    args=\"\${args} --log_every=${SPECTRAL_IMSUB_LOG_SAMPLING}\""
+            fi
+                
+            cat > "$sbatchfile" <<EOF
+#!/bin/bash -l
+#SBATCH --partition=${QUEUE}
+#SBATCH --clusters=${CLUSTER}
+${ACCOUNT_REQUEST}
+${RESERVATION_REQUEST}
+#SBATCH --time=${JOB_TIME_SPECTRAL_IMCONTSUB}
+#SBATCH --ntasks=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --job-name=${jobname}
+${EMAIL_REQUEST}
+${exportDirective}
+#SBATCH --output=$slurmOut/slurm-imcontsubSL-%j.out
+
+${askapsoftModuleCommands}
+
+BASEDIR=${BASEDIR}
+cd $OUTPUT
+. "${PIPELINEDIR}/utils.sh"
+
+# Make a copy of this sbatch file for posterity
+sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
+thisfile=$sbatchfile
+cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
+
+BEAM=${BEAM}
+imageName=${imageName}
+
+if [ ! -e "\${imageName}" ]; then
+
+    echo "Image cube \${imageName} does not exist."
+    echo "Not running image-based continuum subtraction"
+
+else
+
+    # Make a working directory - the casapy & ipython log files will go in here.
+    # This will prevent conflicts
+    workdir=${workingDirectory}
+    mkdir -p \$workdir
+    cd \$workdir
+
+    log=${logs}/spectral_imcontsub_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+
+    ${setup}
+    script="${ACES_LOCATION}/tools/${SPECTRAL_IMSUB_SCRIPT}"
+
+    NCORES=1
+    NPPN=1
+    loadModule casa
+    echo "Running image-based continuum subtraction with script \${script}" > "\${log}"
+    aprun -n \${NCORES} -N \${NPPN} -b casa --nogui --nologger --log2term -c "\${script}" \${args} >> "\${log}"
+    err=\$?
+    unloadModule casa
+    cd ..
+    rejuvenate "\${imageName}"
+    #extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv"
+    if [ \$err != 0 ]; then
+        exit \$err
+    fi
+    
+    if [ "\${imageName%%.fits}" != "\${imageName}" ]; then
+        # Want image.contsub.fits, not image.fits.contsub
+        echo "Renaming \${imageName}.contsub to \${imageName%%.fits}.contsub.fits"
+        mv \${imageName}.contsub \${imageName%%.fits}.contsub.fits
+    fi
+
+fi
+
+EOF
+            
+        else
+        
+            cat > "$sbatchfile" <<EOF
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
 #SBATCH --clusters=${CLUSTER}
@@ -153,6 +253,8 @@ EOFINNER
 fi
 EOF
 
+        fi
+            
         if [ "${SUBMIT_JOBS}" == "true" ]; then
             submitIt=true
             if [ "${DO_SPECTRAL_IMAGING}" != "true" ]; then

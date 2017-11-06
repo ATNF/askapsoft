@@ -213,7 +213,7 @@ module load askappipeline/${askappipelineVersion}"
         ACES_ORIGINAL=${ACES}
         loadACES
         ACES_LOCATION=${ACES}
-        ACES_VERSION_USED=${ACES_VERSION}
+        ACES_VERSION_USED=$(echo ${ACES_VERSION} | sed -e 's/r//g')
         unloadACES
         ACES=${ACES_ORIGINAL}
                 
@@ -800,6 +800,12 @@ EOF
 
         if [ "${RESTORING_BEAM_LOG}" != "" ]; then
             echo "WARNING - the parameter RESTORING_BEAM_LOG is deprecated, and is constructed from the image name instead."
+        fi
+
+        # Script for image-based continuum subtraction
+        if [ "${SPECTRAL_IMSUB_SCRIPT}" != "robust_contsub.py" ] &&
+               [ "${SPECTRAL_IMSUB_SCRIPT}" != "contsub_im.py" ]; then
+            SPECTRAL_IMSUB_SCRIPT="robust_contsub.py"
         fi
 
         # Define the list of writer ranks used in the askap_imager

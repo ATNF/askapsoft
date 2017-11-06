@@ -749,13 +749,28 @@ RESTORING_BEAM_REFERENCE=mid
 RESTORING_BEAM_CUTOFF_SPECTRAL=0.5
 
 # Image-based continuum subtraction
+# Which ACES script to use - only "robust_contsub.py" or
+# "contsub_im.py" accepted
+SPECTRAL_IMSUB_SCRIPT=robust_contsub.py
+# Defaults that apply to both scripts
+# Verbose output
+SPECTRAL_IMSUB_VERBOSE=true
+#
+# Defaults for the robust_contsub.py script
 # Threshold [sigma] to mask outliers prior to fitting ('threshold' parameter)
 SPECTRAL_IMSUB_THRESHOLD=2.0
 # Order of polynomial to fit ('fit_order' parameter)
 SPECTRAL_IMSUB_FIT_ORDER=2
 # Only use every nth channel ('n_every' parameter)
 SPECTRAL_IMSUB_CHAN_SAMPLING=1
-
+# Log every nth channel ('log_every' parameter)
+SPECTRAL_IMSUB_LOG_SAMPLING=1
+#
+# Defaults for the contsub_im.py script
+# Half-width of the Savitzky-Golay filter [channels]
+SPECTRAL_IMSUB_SG_FILTERWIDTH=200
+# Bin width for binning spectrum before continuum subtraction
+SPECTRAL_IMSUB_SG_BINWIDTH=4
 
 ##############################
 # Linear Mosaicking & beam locations
