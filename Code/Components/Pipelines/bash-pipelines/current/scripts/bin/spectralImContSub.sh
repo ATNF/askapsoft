@@ -1,13 +1,16 @@
 #!/bin/bash -l
 #
 # Runs a job to do image-based continuum subtraction on the current
-# spectral cube, using the ACES tasks in
-# $ACES/tools/robust_contsub.py. This fits a low-order polynomial to
-# each spectrum, subtracting it from the image.
-# For an input cube image.something.restored, it produces
+# spectral cube, using the ACES tasks in either
+# $ACES/tools/robust_contsub.py or $ACES/tools/contsub_im.py. The
+# former fits a low-order polynomial to each spectrum, subtracting it
+# from the image. The later uses a Savitzky-Golay filter to find &
+# remove the spectral baseline For an input cube
+# image.something.restored, it produces
 # image.something.restored.contsub, holding the continuum-subtracted
 # data, and image.something.restored.coefs, holding the polynomial
-# coefficients for each spectrum
+# coefficients for each spectrum (only for the robust_contsub.py
+# case). 
 #
 # @copyright (c) 2017 CSIRO
 # Australia Telescope National Facility (ATNF)
@@ -50,9 +53,8 @@ for subband in ${SUBBAND_WRITER_LIST}; do
 
     # Make sure we can see the robust_contsub script
     script_location="${ACES_LOCATION}/tools"
-    script_name=robust_contsub
-    if [ ! -e "${script_location}/${script_name}.py" ]; then
-        echo "WARNING - ${script_name}.py not found in $script_location - not running image-based continuum subtraction."
+    if [ ! -e "${script_location}/${SPECTRAL_IMSUB_SCRIPT}" ]; then
+        echo "WARNING - ${SPECTRAL_IMSUB_SCRIPT} not found in $script_location - not running image-based continuum subtraction."
         DO_IT=false
     fi
     
@@ -74,10 +76,10 @@ for subband in ${SUBBAND_WRITER_LIST}; do
 
         if [ "${ACES_VERSION_USED}" -gt 47195 ]; then
 
-            setup="# Setting up command-line arguments for contsub"
+            setup="# Setting up command-line arguments for contsub
+    args=\"--image=../${imageName}\""
             if [ "${SPECTRAL_IMSUB_VERBOSE}" == "true" ]; then
                 setup="${setup}
-    args=\"--image=../${imageName}\"
     args=\"\${args} -v\""
             fi
             
@@ -143,7 +145,7 @@ else
     log=${logs}/spectral_imcontsub_${FIELDBEAM}_\${SLURM_JOB_ID}.log
 
     ${setup}
-    script="${ACES_LOCATION}/tools/${SPECTRAL_IMSUB_SCRIPT}"
+    script="${script_location}/${SPECTRAL_IMSUB_SCRIPT}"
 
     NCORES=1
     NPPN=1
