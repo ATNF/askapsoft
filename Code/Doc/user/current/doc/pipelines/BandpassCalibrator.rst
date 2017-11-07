@@ -37,7 +37,11 @@ points are interpolated over. This produces a second table (with
 science data instead of the original. There are a number of parameters
 that may be used to tweak the smoothing - this is intended to be an
 interim solution until this functionality is implemented in
-ASKAPsoft. 
+ASKAPsoft.
+
+Finally, the bandpass solutions can be applied back to the 1934
+datasets themselves. This will permit possible diagnostic analysis of
+the quality of the bandpass solution.
 
 +-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
 | Variable                                      | Default                               | Parset equivalent                                      | Description                                               |
@@ -184,6 +188,15 @@ ASKAPsoft.
 |                                               |                                       |                                                        | (if <0) used in the smoothing.                            |
 +-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
 | ``BANDPASS_SMOOTH_THRESHOLD``                 | 3.0                                   | none                                                   | The threshold level used for fitting to the bandpass.     |
++-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| **Applying the bandpass solution**            |                                       |                                                        |                                                           |
++-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| ``DO_APPLY_BANDPASS_1934``                    | true                                  | none                                                   | Whether to apply the bandpass solution to the 1934        |
+|                                               |                                       |                                                        | datasets.                                                 |
++-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| ``KEEP_RAW_1934_DATA``                        | true                                  | none                                                   | If true, the 1934 MSs will be copied prior to having the  |
+|                                               |                                       |                                                        | bandpass solution applied. This means you will have copies|
+|                                               |                                       |                                                        | of both the raw and calibrated datasets.                  |
 +-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
 
 

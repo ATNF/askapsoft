@@ -1,6 +1,7 @@
 #!/bin/bash -l
 #
-# Launches a job to apply the bandpass solution to the science measurement set 
+# Launches a job to apply the bandpass solution to the
+# bandpass-calibrator measurement set itself
 #
 # @copyright (c) 2017 CSIRO
 # Australia Telescope National Facility (ATNF)
@@ -27,17 +28,23 @@
 # @author Matthew Whiting <Matthew.Whiting@csiro.au>
 #
 
-ID_CCALAPPLY_SCI=""
+ID_CCALAPPLY_1934=""
 
-DO_IT=$DO_APPLY_BANDPASS
+# Get the name of the 1934 dataset, replacing any %b with the beam
+# number if necessary
+find1934MSnames
+
+DO_IT=$DO_APPLY_BANDPASS_1934
 if [ "$DO_IT" == "true" ] && [ -e "$BANDPASS_CHECK_FILE" ]; then
-    echo "Bandpass has already been applied to beam $BEAM of the science observation - not re-doing"
+    echo "Bandpass has already been applied to beam $BEAM of the 1934 observation - not re-doing"
     DO_IT=false
 fi
 
 if [ "$DO_IT" == "true" ]; then
 
-    setJob apply_bandpass applyBP
+    calMS=$(echo $msCal | sed -e 's/\.ms/_cal\.ms/g')
+    
+    setJob apply_bandpass_1934 applyBP1934
     cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
 #SBATCH --partition=${QUEUE}
@@ -50,7 +57,7 @@ ${RESERVATION_REQUEST}
 #SBATCH --job-name=${jobname}
 ${EMAIL_REQUEST}
 ${exportDirective}
-#SBATCH --output=$slurmOut/slurm-applyBandpass-%j.out
+#SBATCH --output=$slurmOut/slurm-applyBandpass1934-%j.out
 
 ${askapsoftModuleCommands}
 
@@ -72,9 +79,17 @@ else
     TABLE=\${RAW_TABLE}
 fi
 
-parset=${parsets}/ccalapply_bp_b${BEAM}_\${SLURM_JOB_ID}.in
+copyData=${KEEP_RAW_1934_DATA}
+if [ "\${copyData}" == "true" ]; then
+    cp -r ${msCal} ${calMS}
+    ms=${calMS}
+else
+    ms=${msCal}
+fi
+
+parset=${parsets}/ccalapply_bp1934_b${BEAM}_\${SLURM_JOB_ID}.in
 cat > "\$parset" << EOFINNER
-Ccalapply.dataset                         = ${msSci}
+Ccalapply.dataset                         = ${ms}
 #
 # Allow flagging of vis if inversion of Mueller matrix fails
 Ccalapply.calibrate.allowflag             = true
@@ -88,13 +103,13 @@ Ccalapply.calibaccess.table               = \${TABLE}
 
 EOFINNER
 
-log=${logs}/ccalapply_bp_b${BEAM}_\${SLURM_JOB_ID}.log
+log=${logs}/ccalapply_bp1934_b${BEAM}_\${SLURM_JOB_ID}.log
 
 NCORES=1
 NPPN=1
 aprun -n \${NCORES} -N \${NPPN} ${ccalapply} -c "\$parset" > "\$log"
 err=\$?
-rejuvenate ${msSci}
+rejuvenate ${ms}
 rejuvenate \${TABLE}
 extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv"
 if [ \$err != 0 ]; then
@@ -108,12 +123,11 @@ EOFOUTER
     if [ "${SUBMIT_JOBS}" == "true" ]; then
 	DEP=""
         DEP=$(addDep "$DEP" "$DEP_START")
-        DEP=$(addDep "$DEP" "$ID_SPLIT_SCI")
         DEP=$(addDep "$DEP" "$ID_CBPCAL")
-	ID_CCALAPPLY_SCI=$(sbatch $DEP "$sbatchfile" | awk '{print $4}')
-	recordJob "${ID_CCALAPPLY_SCI}" "Applying bandpass calibration to science observation, with flags \"$DEP\""
+	ID_CCALAPPLY_1934=$(sbatch $DEP "$sbatchfile" | awk '{print $4}')
+	recordJob "${ID_CCALAPPLY_1934}" "Applying bandpass calibration to calibrator observation, with flags \"$DEP\""
     else
-	echo "Would apply bandpass calibration to science observation with slurm file $sbatchfile"
+	echo "Would apply bandpass calibration to calibrator observation with slurm file $sbatchfile"
     fi
 
     echo " "

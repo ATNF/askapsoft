@@ -264,7 +264,16 @@ BANDPASS_SMOOTH_FIT=0
 # The threshold level for fitting bandpass
 BANDPASS_SMOOTH_THRESHOLD=3.0
 
+# Whether to apply the bandpass solution to the 1934 dataset itself
+DO_APPLY_BANDPASS_1934=false
+# If true, keep the raw bandpass datasets separate to the calibrated
+# versions
+KEEP_RAW_1934_DATA=true
 
+
+####################
+##  Flagging the bandpass calibrator dataset
+#
 # Whether to do dynamic flagging
 FLAG_DO_DYNAMIC_AMPLITUDE_1934=true
 # Dynamic threshold applied to amplitudes [sigma]

@@ -83,6 +83,16 @@ FIELDBEAM=$FIELD
 
 . "${PIPELINEDIR}/findBandpassCal.sh"
 
+for((IBEAM=0; IBEAM<=highestBeam; IBEAM++)); do
+    BEAM=$(echo "$IBEAM" | awk '{printf "%02d",$1}')
+    
+    # an empty file that will indicate that the bandpass has been done
+    BANDPASS_CHECK_FILE="${OUTPUT}/Checkfiles/BANDPASS_APPLIED_1934_BEAM${BEAM}"
+
+    . "${PIPELINEDIR}/applyBandpass1934.sh"
+
+done
+
 cd ..
 
 # Put all these back to the original values
