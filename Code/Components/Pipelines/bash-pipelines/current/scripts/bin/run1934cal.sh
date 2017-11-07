@@ -89,6 +89,7 @@ for((IBEAM=0; IBEAM<=highestBeam; IBEAM++)); do
     # an empty file that will indicate that the bandpass has been done
     BANDPASS_CHECK_FILE="${OUTPUT}/Checkfiles/BANDPASS_APPLIED_1934_BEAM${BEAM}"
 
+    FIELDBEAM="${FIELD}_B${BEAM}"
     . "${PIPELINEDIR}/applyBandpass1934.sh"
 
 done

@@ -89,7 +89,7 @@ fi
 
 parset=${parsets}/ccalapply_bp1934_b${BEAM}_\${SLURM_JOB_ID}.in
 cat > "\$parset" << EOFINNER
-Ccalapply.dataset                         = ${ms}
+Ccalapply.dataset                         = \${ms}
 #
 # Allow flagging of vis if inversion of Mueller matrix fails
 Ccalapply.calibrate.allowflag             = true
