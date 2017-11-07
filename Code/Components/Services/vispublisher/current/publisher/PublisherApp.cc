@@ -98,6 +98,7 @@ void PublisherApp::receiveAndPublishLoop(boost::asio::ip::tcp::socket &socket)
             // Publish VIS data
             ///////////////////
 
+            /*
             // commissioning hack - only publish vis message for the first beam if it is a single beam case
             if (beamset.size() == 1) {
                 if (*beamset.begin() != 0) {
@@ -105,6 +106,7 @@ void PublisherApp::receiveAndPublishLoop(boost::asio::ip::tcp::socket &socket)
                 }
             }
             //
+            */
 
             // Get and check the tvchan setting
             uint32_t tvChanBegin = 0;
