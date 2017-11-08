@@ -65,7 +65,7 @@ exactly the same operations according to the task chain but acts on a different 
 Therefore, the number of measurement
 sets written by the *ingest pipeline* is tied down to the number of ranks running the  **MS Sink** task. The file 
 name of the created measurement set can have a suffix added to distinguish between measurement sets written by different 
-ranks. More than one file is usually required to increase the writing throughput. At the moment, all ranks always receive
+ranks. More than one file is usually required to increase the writing throughput. By default, all ranks always receive
 data (i.e. execute an appropriate **Source** task). However, later down the processing chain, each
 rank can be activated and deactivated by special type tasks which rearrange the data flow and parallelisation.
 If the given rank is not active, data are not passed through the task chain for this rank. This can be used to inhibit data
@@ -73,7 +73,9 @@ writing for a subset of ranks. In particular, we use this feature of the task in
 to aggregade more bandwidth than is defined by the natural hardware-based distribution (one stream normally 
 covers 4 MHz of bandwidth produced by a single correlator card). In the future, we envisage also to have 
 tasks which would fork data streams to allow more parallel processing (e.g. a separate measurement set for 
-calibration can be prepared in parallel). 
+calibration can be prepared in parallel). It is also possible to add so called service ranks (see below) which are not 
+receiving any data. These ranks are deactivated by default and could be used for additional processing later on 
+if some task activates them. 
 
 Configuration Parameters
 ------------------------
@@ -122,6 +124,32 @@ General parameters
 |                            |                   |            |task **name** listed in the **tasklist** parameter can have   |
 |                            |                   |            |a separate set of paramters defined, even if there is more    |
 |                            |                   |            |than one task of the same physical **type**\ .                |  
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|service_ranks               |vector<uint>       |[]          |If ingest has a rank listed in this parameter, it will be     |
+|                            |                   |            |treated as a service rank, i.e. it will not receive data and  |
+|                            |                   |            |will be de-activated at the start of the processing chain. All|
+|                            |                   |            |numbers in this list which exceed the total number of ranks   |
+|                            |                   |            |available are ignored.                                        |  
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|hosts_map                   |string             |None        |Strictly speaking, this is not the parameter of ingest itself,|
+|                            |                   |            |but rather the parameter consumed by the wrapper script which |
+|                            |                   |            |starts the proper MPI job. It controls the correct deployment |
+|                            |                   |            |of ingest pipeline with required number of ranks deployed on  |
+|                            |                   |            |given nodes of the ingest cluster. The string is a comma-sepa\|
+|                            |                   |            |rated list of pairs of numbers separated, in turn, by semi-co\|
+|                            |                   |            |lons like "9:12,10:12,11:1". The first number in each pair is |
+|                            |                   |            |the node number (i.e. 9 means **galaxy-ingest09**, 10 means   |
+|                            |                   |            |**galaxy-ingest10** and so on with leading zeros being added, |
+|                            |                   |            |if necessary), the second number represents the number of MPI | 
+|                            |                   |            |ranks to be run on the given node. The ranks are assigned in  |
+|                            |                   |            |the order of this list, i.e. the above mentioned example would|
+|                            |                   |            |result in MPI ranks 0 to 11 assigned to **galaxy-ingest09**,  |
+|                            |                   |            |ranks 12 to 23 to **galaxy-ingest10** and rank 24 would be as\|
+|                            |                   |            |signed to **galaxy-ingest11** by itself. The exact assignment |
+|                            |                   |            |is important for the following reasons: hardware sends data in|
+|                            |                   |            |a distributed way, monitoring and service rank configuration. |
+|                            |                   |            |The  map given as an example above would result in a 25-rank  |
+|                            |                   |            |job. In principle, one can start ingest bypassing this script.|
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
 
 Available tasks
