@@ -42,8 +42,13 @@ class CPObsServiceImp(ICPObsService):
 
         try:
             with open(os.path.join(workdir, configFile), 'w+') as config_file:
+                logger.debug("writing ingest config: " + config_file.name)
                 self.write_config(config_file, sbid)
+        except Exception as ex:
+            logger.error("Could not write ingest config for " + str(sbid) + ": " + str(ex))
+            raise RuntimeError("Could not write ingest config for " + str(sbid) + str(ex))
 
+        try:
             self.start_ingest(workdir, sbid)
         except Exception as ex:
             logger.error("Could not start ingest for " + str(sbid) + ": " + str(ex))
@@ -84,12 +89,16 @@ class CPObsServiceImp(ICPObsService):
     def write_config(self, file, sbid):
         file.write("sbid=" + str(sbid) + "\n")
         for k,v in self.params.items():
-                file.write(k + "=" + str(v) + "\n")
+            # strip out prefixes 'common.' and 'cp.ingest'
+            key = k
+            key = key.replace('common.', '', 1)
+            key = key.replace('cp.ingest.', '', 1)
+            file.write(key + "=" + str(v) + "\n")
 
     def start_ingest(self, work_dir, sbid):
-        command = os.path.expandvars(self.params.get("cp.ingest.command"))
+        command = self.params.get("cp.ingest.command")
         args = self.params.get("cp.ingest.args").split(' ')
-        logfile = os.path.expandvars(self.params.get("cp.ingest.logfile", "cpingestlauncher.log"))
+        logfile = self.params.get("cp.ingest.logfile", "cpingestlauncher.log")
 
         os.environ["sbid"] = str(sbid)
 

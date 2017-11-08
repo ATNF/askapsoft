@@ -1,4 +1,5 @@
 icebox
-ingestservice.py --log-config=ingestmanager.pylog_cfg --config=ingest.cfg
+ingestservice.py --log-config=../files/config/ingestmanager.pylog_cfg --config=ingest.cfg
 ./MockDataServer.py
 ./MockIngestPipeline36.py
+./MockIngestPipeline55.py

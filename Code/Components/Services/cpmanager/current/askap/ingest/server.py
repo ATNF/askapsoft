@@ -11,9 +11,10 @@ from JIRAStateChangeMonitor import JIRAStateChangeMonitor
 
 class IngestManager(Server):
     def __init__(self, comm):
-        Server.__init__(self, comm, fcmkey='cp.ingest', monitoring=True)
+        Server.__init__(self, comm, fcmkey='cp.ingest')
         self._monitor = None
         self.logger = logger
+        self.monitoring = True
 
     def initialize_services(self):
         logger.debug('initialize_services')

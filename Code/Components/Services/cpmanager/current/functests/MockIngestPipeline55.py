@@ -46,7 +46,7 @@ class IngestPipelineMonitor(MonitoringProvider):
         point = MonitorPoint()
         point.name = "cp.ingest.obs.StartFreq"
         point.timestamp = timestamp
-        double_typed_value = ice_types.TypedValueFloat(ice_types.TypedValueType.TypeFloat, 1376.5)
+        double_typed_value = ice_types.TypedValueFloat(ice_types.TypedValueType.TypeFloat, 33376.5)
         point.value = double_typed_value
         point.status = PointStatus.OK
         point.unit = 'MHz'
@@ -74,7 +74,7 @@ class IngestPipelineMonitor(MonitoringProvider):
 
 def main():
     ic = Ice.initialize(sys.argv)
-    adapter = ic.createObjectAdapter("IngestPipelineMonitoringAdapter0")
+    adapter = ic.createObjectAdapter("IngestPipelineMonitoringAdapter55")
     object = IngestPipelineMonitor()
     adapter.add(object, ic.stringToIdentity("MonitoringService"))
     adapter.activate()
