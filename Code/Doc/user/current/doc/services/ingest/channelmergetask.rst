@@ -8,7 +8,7 @@ diagram below illustrates the merge operation.
 
 .. image:: figures/merge_overview.png
 
-By design, all ranks of ingest pipeline are active at the start of the processing chain. The number
+In this diagram, all ranks of ingest pipeline are active at the start of the processing chain. The number
 of source tasks is equal to the total number of ranks available and, therefore, this is the number
 of data streams received from the correlator Input Output Controllers (IOCs). Each source task listens
 its own data port (the port number given in the configuration is incremented for each rank). The following
@@ -19,11 +19,12 @@ setup, the total number of ranks should be even (i.e. there should be no danglin
 contributing to the output). The data are joined based on the rank number. However, the task
 checks that the resulting frequency axis is contiguous.  Therefore, bandwidth should be split in the 
 contiguous fashion between source tasks (by the configuration of the hardware and software). Otherwise,
-an exception will be raised. The diagram shows MSSink task at the end of the chain. In the current setup,
+an exception will be raised. The diagram shows MSSink task at the end of the chain. In the setup given in this example,
 only two files will be written (because there are only two active chunks). A second merge task can be 
-present in the task chain after MSSink to provide full bandwidth for monitoring. This is the most likely
-setup for ASKAP12 early science (recording is I/O bandwidth limited, so two files need to be written, but
-full bandwidth can be monitored via TCPSink as long as we have only 12 antennas).
+present in the task chain after MSSink (e.g. to provide full bandwidth for monitoring). If service ranks are
+present, the task can be instructed to use them preferrentially for the output (i.e. one or more of these
+ranks can be activated after this task). In particular, such a setup allows to do some processing on the ranks
+which do not receive data.
 
 Configuration Parameters
 ------------------------
@@ -48,6 +49,10 @@ the task defined by tasks.\ **name**\ .type should be set to *ChannelMergeTask*.
 |                            |                   |            |are deactivated. For example, if the total number of available|
 |                            |                   |            |ranks is 12 and this parameter is set to 6 then ranks 0 and 6 |
 |                            |                   |            |will remain active and will handle half of the bandwidth each.|
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|spare_ranks                 |bool               |false       |This option has no effect if no service ranks are present in  |
+|                            |                   |            |the current configuration. Otherwise, if this option is true, |
+|                            |                   |            |service ranks will be used for the result of the merge.       |
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
 
 

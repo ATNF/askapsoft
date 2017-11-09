@@ -147,9 +147,16 @@ General parameters
 |                            |                   |            |ranks 12 to 23 to **galaxy-ingest10** and rank 24 would be as\|
 |                            |                   |            |signed to **galaxy-ingest11** by itself. The exact assignment |
 |                            |                   |            |is important for the following reasons: hardware sends data in|
-|                            |                   |            |a distributed way, monitoring and service rank configuration. |
-|                            |                   |            |The  map given as an example above would result in a 25-rank  |
-|                            |                   |            |job. In principle, one can start ingest bypassing this script.|
+|                            |                   |            |a distributed way and each particular chunk of the frequency  |
+|                            |                   |            |band is only available on a specific node, monitoring is      |
+|                            |                   |            |configured in a certain way which may not be always convenient|
+|                            |                   |            |to change and, finally, service rank configuration is done by |
+|                            |                   |            |listing the rank numbers (see above). We typically would like |
+|                            |                   |            |to assign service ranks on those nodes which do not receive   |
+|                            |                   |            |any data. The total number of ranks for the job is also deduc\|
+|                            |                   |            |ed automatically. The  map given as an example above would    |
+|                            |                   |            |result in a 25-rank job. In principle, one can start ingest   |
+|                            |                   |            |bypassing this script.                                        |
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
 
 Available tasks
