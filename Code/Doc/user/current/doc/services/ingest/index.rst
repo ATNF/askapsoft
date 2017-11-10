@@ -205,6 +205,8 @@ some temporary tasks are also documented. They can be taken out in the future.
 +-----------------------+-------------------------------------------------------------------------+
 |:doc:`channelavgtask`  |Task to average adjacent channels reducing the spectral resolution       |
 +-----------------------+-------------------------------------------------------------------------+
+|:doc:`beamscattertask` |Task to split single data stream into a number of streams by beam        |
++-----------------------+-------------------------------------------------------------------------+
 |:doc:`channelseltask`  |Task to select a contiguous subset of spectral channels and discard the  |
 |                       |rest. This task is largely used for debugging and is not intended as     |
 |                       |permanent.                                                               |
