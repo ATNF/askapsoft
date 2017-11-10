@@ -430,6 +430,12 @@ Here is an example of the start of a beam log::
 |                          |                  |              |when the dataset is read). Either lsrk or topo is   |
 |                          |                  |              |supported.                                          |
 +--------------------------+------------------+--------------+----------------------------------------------------+
+|variableChannelLabels     |bool              |false         |Whether to use the floating-point tolerance in      |
+|                          |                  |              |comparing frequencies from different datasets,      |
+|                          |                  |              |allowing for small differences in the frequency     |
+|                          |                  |              |settings. Default is to require the frequencies to  |
+|                          |                  |              |match exactly.                                      |
++--------------------------+------------------+--------------+----------------------------------------------------+
 
 
 Parameters of images
