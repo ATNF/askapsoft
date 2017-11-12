@@ -376,10 +376,10 @@ parameters::
 This will result in the creation of "Taylor-term images". These represent the Taylor terms
 that represent the frequency dependence of each spatial pixel. The different terms relate
 to the spectral index (alpha) and spectral curvature (beta) of the spectrum, which can be
-defined through a second-order polynomial in log-space, shown in the first equation below.
-The second equation shows the result of a Taylor expansion about the reference frequency.
+defined through a second-order polynomial in log-space, shown in the first two equations below.
+The third equation shows the result of a Taylor expansion about the reference frequency.
 
-.. image:: figures/MFS_formulae.png
+.. image:: figures/spectralEquations.png
    :width: 80%
    :align: center
 

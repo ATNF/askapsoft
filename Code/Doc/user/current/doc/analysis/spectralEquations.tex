@@ -1,0 +1,12 @@
+\documentclass[10pt]{article}
+\usepackage[usenames]{color} %used for font color
+\usepackage{amssymb} %maths
+\usepackage{amsmath} %maths
+\usepackage[utf8]{inputenc} %useful to type directly diacritic characters
+\begin{document}
+\begin{eqnarray}
+I(\nu) &= &I_0 \left(\frac{\nu}{\nu_0}\right) ^ {\alpha + \beta\log(\nu/\nu_0)}\\
+\log(I) &= &\log(I_0) + \alpha \log\left(\frac{\nu}{\nu_0}\right) + \beta \log\left(\frac{\nu}{\nu_0}\right)^2\\
+I(\nu) & \approx &I(\nu_0) + I(\nu_0)\alpha\left(\frac{\nu-\nu_0}{\nu_0}\right) + I(\nu_0)\left[\frac{\alpha(\alpha-1)}{2}+\beta\right]\left(\frac{\nu-\nu_0}{\nu_0}\right)^2
+\end{eqnarray}
+\end{document}

@@ -221,6 +221,7 @@ void IslandData::findResidualStats()
     itsResidualStddev = sqrt(sumff / size - sumf * sumf / size / size);
     itsResidualRMS = sqrt(sumff / size);
 
+    ASKAPLOG_DEBUG_STR(logger, "Residual stats on island: max=" << itsResidualMax << " min=" << itsResidualMin << " mean=" << itsResidualMean << " stddev=" << itsResidualStddev << " rms=" << itsResidualRMS);
 
 }
 

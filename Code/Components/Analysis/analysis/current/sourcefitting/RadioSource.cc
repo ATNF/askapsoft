@@ -429,7 +429,7 @@ void RadioSource::setDetectionThreshold(duchamp::Cube &cube,
         // Cube's recon array. So just need the max value from that
         // array to get peakSNR, and the minimum flux value of all
         // detected pixels to get the detection threshold.
-        
+
         std::vector<PixelInfo::Voxel> voxSet = this->getPixelSet();
 
         std::vector<PixelInfo::Voxel>::iterator vox = voxSet.begin();
@@ -1099,7 +1099,7 @@ bool RadioSource::fitGauss(casa::Matrix<casa::Double> &pos,
     } else {
         itsFlagHasFit = false;
         if (itsFitParams.useGuessIfBad()) {
-            ASKAPLOG_INFO_STR(logger, "Fits failed, so saving initial estimate (" << cmpntList.size() << " components) as solution"); 
+            ASKAPLOG_INFO_STR(logger, "Fits failed, so saving initial estimate (" << cmpntList.size() << " components) as solution");
             itsBestFitType = "guess";
             // set the components to be at least as big as the beam
             for (size_t i = 0; i < cmpntList.size(); i++) {
@@ -1165,8 +1165,7 @@ void RadioSource::findSpectralTerm(std::string imageName, int term, bool doCalc)
 
 
 
-    }
-    else {
+    } else {
         ASKAPLOG_DEBUG_STR(logger,
                            "About to find the " << termtype[term] <<
                            ", for image " << imageName);
@@ -1243,16 +1242,16 @@ void RadioSource::findSpectralTerm(std::string imageName, int term, bool doCalc)
                         if (term == 1) {
                             termValues[i] = fit.gaussian(i).flux() / Iref;
                             termErrors[i] = abs(termValues[i]) *
-                                sqrt(Iref_err*Iref_err/(Iref*Iref) +
-                                     fit.error(i)[0]*fit.error(i)[0]/(fit.gaussian(i).flux()*fit.gaussian(i).flux()));
+                                            sqrt(Iref_err * Iref_err / (Iref * Iref) +
+                                                 fit.error(i)[0] * fit.error(i)[0] / (fit.gaussian(i).flux() * fit.gaussian(i).flux()));
                         } else if (term == 2) {
                             double alpha = itsAlphaMap[*type][i];
                             double alpha_err = itsAlphaError[*type][i];
                             termValues[i] = fit.gaussian(i).flux() / Iref -
                                             0.5 * alpha * (alpha - 1.);
-                            termErrors[i] = sqrt(fit.error(i)[0]*fit.error(i)[0]/(Iref*Iref) +
-                                                 fit.error(i)[0]*fit.error(i)[0]*fit.gaussian(i).flux()*fit.gaussian(i).flux()/(Iref*Iref*Iref*Iref) +
-                                                 (0.5-alpha)*(0.5-alpha)*alpha_err*alpha_err);
+                            termErrors[i] = sqrt(fit.error(i)[0] * fit.error(i)[0] / (Iref * Iref) +
+                                                 fit.error(i)[0] * fit.error(i)[0] * fit.gaussian(i).flux() * fit.gaussian(i).flux() / (Iref * Iref * Iref * Iref) +
+                                                 (0.5 - alpha) * (0.5 - alpha) * alpha_err * alpha_err);
                         }
                         ASKAPLOG_DEBUG_STR(logger,
                                            "   Component " << i << ": " << termValues[i] <<
@@ -1285,6 +1284,77 @@ void RadioSource::findSpectralTerm(std::string imageName, int term, bool doCalc)
     } else if (term == 2) {
         itsBetaMap["best"] = itsBetaMap[itsBestFitType];
         itsBetaError["best"] = itsBetaError[itsBestFitType];
+    }
+
+}
+
+
+//**************************************************************//
+
+void RadioSource::extractSpectralTerms(LOFAR::ParameterSet &parset)
+{
+
+    std::vector<std::string>::iterator type;
+    std::vector<std::string> typelist = availableFitTypes;
+    typelist.push_back("best");
+
+    // Define the parameter set, and
+    LOFAR::ParameterSet spectralTermSubset = parset.makeSubset("spectralTerms.");
+    // get the number of terms to fit
+    int nterms = spectralTermSubset.getUint("nterms", 3);
+    // get the peak SNR threshold above which we do the fitting.
+    float thresholdForFit = spectralTermSubset.getFloat("snrThreshold", 0.);
+
+    // Loop over fit types  - ie. the set of different component catalogues
+    for (type = typelist.begin(); type < typelist.end(); type++) {
+
+        if (itsBestFitMap[*type].isGood() || itsBestFitMap[*type].fitIsGuess()) {
+
+            ASKAPLOG_DEBUG_STR(logger, "Extracting spectral index & curvature values for fit type \"" << *type <<
+                               "\", with " << itsBestFitMap[*type].numGauss() << " components ");
+
+            for (unsigned int i = 0; i < itsBestFitMap[*type].numGauss(); i++) {
+
+                // make Component
+                ASKAPLOG_DEBUG_STR(logger, "Making component for ID " << this->name << ", fit #" << i);
+                CasdaComponent component(*this, parset, i, *type);
+
+                // Only run the fit for things above the SNR threshold
+                if ((itsBestFitMap[*type].gaussian(i).height() / itsNoiseLevel) > thresholdForFit) {
+
+                    // make StokesSpectrum
+                    ASKAPLOG_DEBUG_STR(logger, "Making Stokes Spectrum");
+                    StokesSpectrum spectrum(spectralTermSubset, "I");
+                    ASKAPLOG_DEBUG_STR(logger, "Setting component");
+                    spectrum.setComponent(&component);
+                    ASKAPLOG_DEBUG_STR(logger, "Extracting");
+                    spectrum.extract();
+
+                    // initialise StokesImodel
+                    LOFAR::ParameterSet modelParset;
+                    modelParset.add(LOFAR::KVpair("modelType", "taylor"));
+                    modelParset.add(LOFAR::KVpair("recomputeAlphaBeta", true));
+                    modelParset.add(LOFAR::KVpair("taylor.nterms", nterms));
+                    ASKAPLOG_DEBUG_STR(logger, "Making StokesImodel");
+                    StokesImodel model(modelParset);
+                    ASKAPLOG_DEBUG_STR(logger, "Initialising");
+                    model.initialise(spectrum, &component);
+
+                    // get coefficients as alpha & beta, and their errors
+                    if (nterms > 1) {
+                        itsAlphaMap[*type][i] = model.coeff(1);
+                        itsAlphaError[*type][i] = model.coeffErr(1);
+                    }
+                    if (nterms > 2) {
+                        itsBetaMap[*type][i] = model.coeff(2);
+                        itsBetaError[*type][i] = model.coeffErr(2);
+                    }
+
+                }
+            }
+
+        }
+
     }
 
 }
@@ -1763,7 +1833,7 @@ LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream &blob, RadioSource& src)
         blob >> s >> vecsize;
         std::vector<double> vec(vecsize);
 
-        for (int i = 0; i < vecsize; i++){
+        for (int i = 0; i < vecsize; i++) {
             blob >> vec[i];
             ASKAPLOG_DEBUG_STR(logger, "alpha error " << vec[i]);
         }

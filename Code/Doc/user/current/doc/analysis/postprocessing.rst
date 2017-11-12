@@ -635,14 +635,24 @@ Parameters for fitting
 Spectral Index & Curvature
 --------------------------
 
-Measuring spectral terms
-~~~~~~~~~~~~~~~~~~~~~~~~
+Measuring spectral terms from Taylor-term images
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Selavy is designed to work in conjunction with the ASKAPsoft
 pipeline. For continuum data, a common processing mode will be
 multi-frequency synthesis, where the output will be a series of
 "Taylor-term" images, being the coefficients of a Taylor-expansion of
-the frequency spectrum at each pixel. These images will be; taylor 0 -
+the frequency spectrum at each pixel. The equations governing this
+expansion are indicated here
+
+.. image:: spectralEquations.png
+   :width: 80%
+   :align: center
+
+Equation 1 and 2 show the assumed spectral shape (in linear and log
+space respectively), while Equation 3 shows the Taylor expansion about
+the reference frequency (nu_0) for 3 terms. The coefficients of these
+terms are the quantities in the Taylor-term images: taylor 0 -
 a total intensity (I) image (at a fiducial frequency); taylor 1 - the
 alpha * I map, where alpha is the spectral index; taylor 2 - I *
 (beta + 0.5*alpha*(alpha-1)), where beta is the spectral curvature.
@@ -677,22 +687,57 @@ If the additional Taylor maps are not available, or the
 for spectral-index and spectral-curvature will be set to the special
 value of -99.
 
+Measuring spectral terms from a continuum cube
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Selavy provides an alternative method for obtaining the spectral
+terms. If a continuum cube is available (that is, a cube that
+preserves the individual channels, rather than collapsing them to form
+the Taylor images), then spectra can be extracted from it and the
+spectral terms determined via fitting.
+
+Each component has its spectrum extracted in the same manner as for
+the Rotation Measure Synthesis (see below, and on :doc:`extraction`).
+This spectrum is then fitted, using a non-linear Levenberg-Marquardt
+algorithm, with the function given by Equation 1 above. The user can
+select how many terms to fit - the default is 3, so that I_0, alpha
+and beta will be fit, but this can be set to 1 or 2 instead.
+
+The user can also impose a threshold S/N value on a
+component-by-component basis, below which no fitting will be done.
+This defaults to zero, however, meaning all components will have their
+spectra fitted. 
+
 
 Parameters for spectral term measurement
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-+--------------------------+---------------+-------------------------------+----------------------------------------------------------------------+
-| *Parameter*              | *Type*        | *Default*                     | *Explanation*                                                        |
-+==========================+===============+===============================+======================================================================+
-|Selavy.findSpectralTerms  |vector<bool>   |2 terms, same as Fitter.doFit  |A vector of 2 terms, indiciating whether to find the spectral index   |
-|                          |               |                               |(first term) and the spectral curvature (2nd term). It is possible to |
-|                          |               |                               |give only one term (e.g. findSpectralTerms = true) - then the second  |
-|                          |               |                               |term will be set to false. To request both, put **findSpectralTerms = |
-|                          |               |                               |[true,true]**.                                                        |
-+--------------------------+---------------+-------------------------------+----------------------------------------------------------------------+
-|Selavy.spectralTermImages |vector<string> |Derived from image name - see  |You can explicitly set the images for each term like so:              |
-|                          |               |text                           |**spectralTermImages = [image1, image2]**.                            |
-+--------------------------+---------------+-------------------------------+----------------------------------------------------------------------+
++----------------------------------+---------------+-------------------------------+----------------------------------------------------------------------+
+| *Parameter*                      | *Type*        | *Default*                     | *Explanation*                                                        |
++==================================+===============+===============================+======================================================================+
+|Selavy.spectralTermsFromTaylor    |bool           |true                           |Which mode to use to measure the spectral terms. True means use the   |
+|                                  |               |                               |Taylor-term images, while false means use a continuum cube.           |
++----------------------------------+---------------+-------------------------------+----------------------------------------------------------------------+
+|**Taylor-term images**            |               |                               |                                                                      |
++----------------------------------+---------------+-------------------------------+----------------------------------------------------------------------+
+|Selavy.findSpectralTerms          |vector<bool>   |2 terms, same as Fitter.doFit  |A vector of 2 terms, indiciating whether to find the spectral index   |
+|                                  |               |                               |(first term) and the spectral curvature (2nd term). It is possible to |
+|                                  |               |                               |give only one term (e.g. findSpectralTerms = true) - then the second  |
+|                                  |               |                               |term will be set to false. To request both, put **findSpectralTerms = |
+|                                  |               |                               |[true,true]**.                                                        |
++----------------------------------+---------------+-------------------------------+----------------------------------------------------------------------+
+|Selavy.spectralTermImages         |vector<string> |Derived from image name - see  |You can explicitly set the images for each term like so:              |
+|                                  |               |text                           |**spectralTermImages = [image1, image2]**.                            |
++----------------------------------+---------------+-------------------------------+----------------------------------------------------------------------+
+|**Continuum-cube**                |               |                               |                                                                      |
++----------------------------------+---------------+-------------------------------+----------------------------------------------------------------------+
+|Selavy.spectralTerms.nterms       |int            |3                              |The number of terms to fit to in the continuum cube spectrum. Valid   |
+|                                  |               |                               |values are 1 (only I_0), 2 (I_0 &alpha), or 3 (I_0, alpha &           |
+|                                  |               |                               |beta). Larger values are set to 3, smaller values to 1.               |
++----------------------------------+---------------+-------------------------------+----------------------------------------------------------------------+
+|Selavy.spectralTerms.snrThreshold |float          |0.                             |The threshold in component signal-to-noise ratio, below which no      |
+|                                  |               |                               |fitting is done to the spectra.                                       |
++----------------------------------+---------------+-------------------------------+----------------------------------------------------------------------+
 
 
 Rotation Measure Synthesis

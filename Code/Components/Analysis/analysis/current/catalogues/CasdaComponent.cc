@@ -154,7 +154,7 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
 
     /// @todo - fix this to respond to how alpha/beta came about. Only
     /// one way to calculate them at the moment.
-    itsFlagSpectralIndexOrigin = 1;
+    itsFlagSpectralIndexOrigin = parset.getBool("spectralTermsFromTaylor", "true") ? 1 : 0;
 
     // These are the additional parameters not used in the CASDA
     // component catalogue v1.7:
@@ -207,9 +207,19 @@ const double CasdaComponent::intFlux()
     return itsFluxInt.value();
 }
 
+const double CasdaComponent::intFluxErr()
+{
+    return itsFluxInt.error();
+}
+
 const double CasdaComponent::intFlux(std::string unit)
 {
     return casa::Quantum<float>(itsFluxInt.value(), casda::intFluxUnitContinuum).getValue(unit);
+}
+
+const double CasdaComponent::intFluxErr(std::string unit)
+{
+    return casa::Quantum<float>(itsFluxInt.error(), casda::intFluxUnitContinuum).getValue(unit);
 }
 
 const double CasdaComponent::freq()
@@ -227,9 +237,19 @@ const double CasdaComponent::alpha()
     return itsAlpha.value();
 }
 
+const double CasdaComponent::alphaErr()
+{
+    return itsAlpha.error();
+}
+
 const double CasdaComponent::beta()
 {
     return itsBeta.value();
+}
+
+const double CasdaComponent::betaErr()
+{
+    return itsBeta.error();
 }
 
 

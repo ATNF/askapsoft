@@ -77,11 +77,20 @@ class StokesImodel {
         /// @brief Return all fitted coefficients
         casa::Vector<float> coeffs() {return itsCoeffs;};
 
-        /// @brief Rerun a single fitted coefficient.
+        /// @brief Return all errors on fitted coefficients
+        casa::Vector<float> coeffErrs() {return itsCoeffErrs;};
+
+        /// @brief Return a single fitted coefficient.
         /// @details Return a single coefficient, where i is the index to the
         /// itsCoeffs vector. If i does not fall in the valid range, zero
         /// is returned.
         float coeff(unsigned int i);
+
+        /// @brief Return the error on a single fitted coefficient.
+        /// @details Return the error on a single coefficient, where i
+        /// is the index to the itsCoeffs vector. If i does not fall
+        /// in the valid range, zero is returned.
+        float coeffErr(unsigned int i);
 
         /// @brief Return the type of model fit
         std::string type() {return itsType;};
@@ -98,6 +107,9 @@ class StokesImodel {
         /// @brief Set the fitted coefficients directly
         void setCoeffs(casa::Vector<float> coeffs) {itsCoeffs = coeffs;};
 
+        /// @brief Set the errors on the fitted coefficients directly
+        void setCoeffErrs(casa::Vector<float> coeffErrs) {itsCoeffErrs = coeffErrs;};
+
         /// @brief Set the type of model fit
         void setType(std::string type) {itsType = type;};
 
@@ -105,10 +117,14 @@ class StokesImodel {
 
         /// @brief Fit a polynomial to the spectrum
         void fit();
+        void fitPoly();
+        void fitTT();
 
         /// @brief The coefficients describing the model fit - either
         /// polynomial or Taylor-expansion coefficients
         casa::Vector<float> itsCoeffs;
+        /// @brief The errors on the coefficients that describe the model fit
+        casa::Vector<float> itsCoeffErrs;
 
         /// @brief The reference frequency used in the Taylor expansion
         float               itsRefFreq;
@@ -116,6 +132,12 @@ class StokesImodel {
         std::string         itsType;
         /// @brief The order of the polynomial fit
         unsigned int        itsOrder;
+
+        /// @brief Whether to use the alpha/beta values from the component (true), or to fit for them
+        bool recomputeAlphaBeta;
+
+        /// @brief How many Taylor terms if recomputing them
+        unsigned int         itsTaylorNterms;
 
         /// @brief The list of channel frequency values
         casa::Vector<float> itsFreqs;

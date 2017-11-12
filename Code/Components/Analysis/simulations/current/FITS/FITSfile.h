@@ -127,7 +127,7 @@ class FITSfile {
 
         /// @brief Get and set individual values in the flux array
         /// @{
-    float array(int pos) {return itsArray[pos];};
+        float array(int pos) {return itsArray[pos];};
         float array(unsigned int x, unsigned int y)
         {
             size_t pos = x + itsAxes[0] * y; return itsArray[pos];
@@ -161,6 +161,8 @@ class FITSfile {
         int getSpectralAxisIndex() {return itsWCS->spec;};
         /// @brief Return the number of pixels
         size_t getSize() {return itsNumPix;};
+        /// @brief Get the Stokes axis number
+        int getStokesAxis();
         /// @brief Get the size of the Stokes axis
         int getNumStokes();
         /// @brief Get the size of the spectral axis
@@ -234,8 +236,8 @@ class FITSfile {
 
     protected:
 
-    LOFAR::ParameterSet itsParset;
-    
+        LOFAR::ParameterSet itsParset;
+
         /// @brief The name of the file to be written to
         std::string itsFileName;
         /// @brief Whether to write to a FITS-format image
@@ -285,7 +287,7 @@ class FITSfile {
 
         /// @brief The array of pixel fluxes
         //std::vector<float> itsArray;
-    boost::shared_ptr<float[]> itsArray;
+        boost::shared_ptr<float[]> itsArray;
         /// @brief The arrays holding the Taylor term maps
         std::vector<casa::Array<float> > itsTTmaps;
         /// @brief The RMS of the noise distribution
