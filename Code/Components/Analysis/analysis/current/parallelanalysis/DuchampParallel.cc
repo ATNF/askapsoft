@@ -942,8 +942,16 @@ void DuchampParallel::fitSource(sourcefitting::RadioSource &src)
 
     src.fitGauss(itsCube);
 
-    for (int t = 1; t <= 2; t++) {
-        src.findSpectralTerm(itsSpectralTermImages[t - 1], t, itsFlagFindSpectralTerms[t - 1]);
+    if (itsParset.getBool("spectralTermsFromTaylor", "true")){
+    
+        for (int t = 1; t <= 2; t++) {
+            src.findSpectralTerm(itsSpectralTermImages[t - 1], t, itsFlagFindSpectralTerms[t - 1]);
+        }
+
+    } else {
+
+        src.extractSpectralTerms(itsParset);
+        
     }
 
 }

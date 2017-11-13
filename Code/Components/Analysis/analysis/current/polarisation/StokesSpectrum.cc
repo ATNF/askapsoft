@@ -58,7 +58,7 @@ StokesSpectrum::StokesSpectrum(const LOFAR::ParameterSet &parset,
     ASKAPCHECK(itsCubeName != "", "No cube name given");
 
     itsOutputBase = parset.getString("outputBase", "");
-    ASKAPCHECK(itsOutputBase != "", "No output name given");
+//    ASKAPCHECK(itsOutputBase != "", "No output name given");
 
     itsBeamLog = parset.getString("beamLog", "");
 
