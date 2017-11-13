@@ -73,8 +73,11 @@ namespace askap {
 
 namespace synthesis {
 
+float frequency_tolerance = 0.0;
+    
 bool compare_tol (const casa::MFrequency& X, const casa::MFrequency& Y) {
-    if (abs(X.getValue() - Y.getValue()) < FLT_EPSILON) {
+
+    if (abs(X.getValue() - Y.getValue()) <= frequency_tolerance) {
       return true;
     }
     else {
@@ -143,8 +146,8 @@ void AdviseDI::prepare() {
     ASKAPLOG_DEBUG_STR(logger,"nchanpercore " << nchanpercore);
     const int nwriters = itsParset.getInt32("nwriters", 1);
     ASKAPLOG_DEBUG_STR(logger,"nwriters " << nwriters);
-    const bool useTol = itsParset.getBool("variableChannelLabels",false);
-
+    frequency_tolerance = itsParset.getDouble("channeltolerance",0.0);
+    
     ASKAPCHECK(nwriters > 0 ,"Number of writers must be greater than zero");
 
     /// Get the channel range
@@ -264,7 +267,7 @@ void AdviseDI::prepare() {
 
         itsRef = thisRef;
 
-        ASKAPLOG_DEBUG_STR(logger, "Completed filecount " << n);
+        ASKAPLOG_INFO_STR(logger, "Completed filecount " << n);
     }
 
 
@@ -305,6 +308,8 @@ void AdviseDI::prepare() {
 
         for (unsigned int ch = 0; ch < chanFreq[n].size(); ++ch) {
 
+            ASKAPLOG_INFO_STR(logger, "CHECK --- File " << n << " Chan " << ch << " Freq " << chanFreq[n][ch]);
+
             itsBaryFrequencies.push_back(forw(chanFreq[n][ch]).getValue());
             itsTopoFrequencies.push_back(MFrequency(MVFrequency(chanFreq[n][ch]),refin));
 
@@ -329,9 +334,9 @@ void AdviseDI::prepare() {
 
     bool (*custom_compare)(const casa::MFrequency& , const casa::MFrequency& ) = NULL;
 
-    if (useTol) {
+    if (frequency_tolerance > 0) {
       custom_compare = compare_tol;
-      ASKAPLOG_WARN_STR(logger,"Comparing frequencies with floating point tolerance");
+      ASKAPLOG_WARN_STR(logger,"Comparing frequencies with floating point tolerance of " << frequency_tolerance);
     }
     else {
       custom_compare = compare;
@@ -347,6 +352,7 @@ void AdviseDI::prepare() {
     std::vector<casa::MFrequency>::iterator topo_it;
     topo_it = std::unique(itsTopoFrequencies.begin(),itsTopoFrequencies.end(),custom_compare);
     itsTopoFrequencies.resize(std::distance(itsTopoFrequencies.begin(),topo_it));
+    ASKAPLOG_DEBUG_STR(logger," Unique sizes Topo " << itsTopoFrequencies.size() << " Bary " << itsBaryFrequencies.size());
 
     for (unsigned int ch = 0; ch < itsTopoFrequencies.size(); ++ch) {
 
@@ -392,7 +398,7 @@ void AdviseDI::prepare() {
 
             // need to allocate the measurement sets for this channel to this allocation
             // this may require appending new work units.
-            ASKAPLOG_INFO_STR(logger,"Allocating " << thisAllocation[frequency] \
+            ASKAPLOG_DEBUG_STR(logger,"Allocating " << thisAllocation[frequency] \
             << "Global channel " << globalChannel);
 
             bool allocated = false;
@@ -420,7 +426,7 @@ void AdviseDI::prepare() {
                     wu.set_dataset(ms[set]);
                     itsAllocatedWork[work].push_back(wu);
                     itsWorkUnitCount++;
-                    ASKAPLOG_INFO_STR(logger,"MATCH Allocating barycentric freq " << thisAllocation[frequency] \
+                    ASKAPLOG_DEBUG_STR(logger,"MATCH Allocating barycentric freq " << thisAllocation[frequency] \
                     << " with local channel number " << lc << " ( " << chanFreq[set][lc] << " ) of width " << wu.get_channelWidth()  \
                     << " in set: " << ms[set] <<  " to rank " << work+1 << " this rank has " \
                     << itsAllocatedWork[work].size() << " of a total count " << itsWorkUnitCount \
