@@ -540,6 +540,11 @@ class RadioSource : public duchamp::Detection {
         /// fill the alpha & beta values to 0. for all fit types.
         void findSpectralTerm(std::string imageName, int term, bool doCalc);
 
+
+    /// @brief Extract spectrum for a component from a continuum cube,
+    /// and fit to measure the spectral index and curvature.
+    void extractSpectralTerms(LOFAR::ParameterSet &parset);
+
     protected:
 
     /// @brief Function to set the initial values of the alpha & beta maps

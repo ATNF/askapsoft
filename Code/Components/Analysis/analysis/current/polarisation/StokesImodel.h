@@ -143,6 +143,8 @@ class StokesImodel {
         casa::Vector<float> itsFreqs;
         /// @brief The input Stokes I spectrum
         casa::Vector<float> itsIspectrum;
+        /// @brief The noise associated with the input Stokes I spectrum
+        casa::Vector<float> itsInoise;
         /// @brief The model spectrum with the same channel sampling
         casa::Vector<float> itsModelSpectrum;
 

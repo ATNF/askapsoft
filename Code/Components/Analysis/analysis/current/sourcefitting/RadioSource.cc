@@ -41,6 +41,10 @@
 #include <mathsutils/MathsUtils.h>
 #include <outputs/CataloguePreparation.h>
 
+#include <polarisation/StokesSpectrum.h>
+#include <polarisation/StokesImodel.h>
+#include <catalogues/CasdaComponent.h>
+
 #include <duchamp/fitsHeader.hh>
 #include <duchamp/PixelMap/Voxel.hh>
 #include <duchamp/PixelMap/Object2D.hh>

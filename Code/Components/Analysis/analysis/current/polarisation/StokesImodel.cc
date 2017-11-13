@@ -69,6 +69,7 @@ void StokesImodel::initialise(StokesSpectrum &I,
                               CasdaComponent *comp)
 {
 
+    ASKAPLOG_DEBUG_STR(logger, "Obtaining frequencies and spectra");
     itsFreqs = I.frequencies();
     ASKAPLOG_DEBUG_STR(logger, "frequencies = " << itsFreqs);
     if (itsRefFreq < 0.) {
@@ -76,6 +77,7 @@ void StokesImodel::initialise(StokesSpectrum &I,
     }
     ASKAPLOG_DEBUG_STR(logger, "reference freq = " << itsRefFreq);
     itsIspectrum = I.spectrum();
+    itsInoise = I.noiseSpectrum();
 
     ASKAPLOG_DEBUG_STR(logger, "spectrum = " << itsIspectrum);
 
@@ -191,6 +193,8 @@ void StokesImodel::fitPoly()
     ASKAPLOG_DEBUG_STR(logger, "Fitting returned with value " << returnval << " and chisq = " << chisq);
     gsl_multifit_linear_free(work);
 
+    std::stringstream ss;
+    ss << "List of coefficients: [";
     for (size_t i = 0; i < itsOrder; i++) {
         itsCoeffs[i] = gsl_vector_get(c, i);
         itsCoeffErrs[i] = sqrt(gsl_matrix_get(cov, i, i));
