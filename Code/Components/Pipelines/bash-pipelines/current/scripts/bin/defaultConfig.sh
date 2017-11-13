@@ -309,7 +309,7 @@ FLAG_DO_FLAT_AMPLITUDE_1934=false
 # Flat amplitude threshold applied [hardware units - before calibration]
 FLAG_THRESHOLD_AMPLITUDE_1934=0.2
 # Minimum amplitude threshold applied [hardware units - before calibration]
-FLAG_THRESHOLD_AMPLITUDE_1934_LOW=0.0
+FLAG_THRESHOLD_AMPLITUDE_1934_LOW=""
 # Baselines or antennas to flag in the 1934 data
 ANTENNA_FLAG_1934=""
 # Channel range(s) to flag in the 1934 data
@@ -378,7 +378,7 @@ FLAG_DO_FLAT_AMPLITUDE_SCIENCE=false
 # Flat amplitude threshold applied [calibrated flux units]
 FLAG_THRESHOLD_AMPLITUDE_SCIENCE=10.
 # Minimum amplitude threshold applied [calibrated flux units]
-FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW=0.0
+FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW=""
 # Baselines or antennas to flag in the science data
 ANTENNA_FLAG_SCIENCE=""
 # Channel range(s) to flag in the science data
@@ -429,7 +429,7 @@ FLAG_DO_FLAT_AMPLITUDE_SCIENCE_AV=false
 # Flat amplitude threshold applied to the averaged data [calibrated flux units]
 FLAG_THRESHOLD_AMPLITUDE_SCIENCE_AV=10.
 # Minimum amplitude threshold applied to the averaged data [calibrated flux units]
-FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW_AV=0.0
+FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW_AV=""
 # Channel range(s) to flag in the averaged science data
 CHANNEL_FLAG_SCIENCE_AV=""
 
@@ -709,17 +709,17 @@ IMAGE_BASE_SPECTRAL="i.SB%s.cube"
 # Direction of the science field makes use of DIRECTION_SCI, as above
 
 # number of spatial pixels on the side of the image cubes
-NUM_PIXELS_SPECTRAL=2048
+NUM_PIXELS_SPECTRAL=1536
 # Size of the pixels in arcsec
-CELLSIZE_SPECTRAL=10
+CELLSIZE_SPECTRAL=4
 # Rest frequency for the cube
 REST_FREQUENCY_SPECTRAL=HI
 
 # Parameters for preconditioning (A.K.A. weighting) - allow these to
 # be different to the continuum case
-PRECONDITIONER_LIST_SPECTRAL="[Wiener, GaussianTaper]"
-PRECONDITIONER_SPECTRAL_GAUSS_TAPER="[50arcsec, 50arcsec, 0deg]"
-PRECONDITIONER_SPECTRAL_WIENER_ROBUSTNESS=0.5
+PRECONDITIONER_LIST_SPECTRAL="[Wiener]"
+PRECONDITIONER_SPECTRAL_GAUSS_TAPER="[10arcsec, 10arcsec, 0deg]"
+PRECONDITIONER_SPECTRAL_WIENER_ROBUSTNESS=2.
 PRECONDITIONER_SPECTRAL_WIENER_TAPER=""
 
 # Gridding parameters for spectral-line imaging
@@ -737,13 +737,13 @@ SOLVER_SPECTRAL=Clean
 # default clean algorithm is Basisfunction, as we don't need the
 # multi-frequency part that is used by BasisfunctionMFS
 CLEAN_SPECTRAL_ALGORITHM=Basisfunction
-CLEAN_SPECTRAL_MINORCYCLE_NITER=500
-CLEAN_SPECTRAL_GAIN=0.5
+CLEAN_SPECTRAL_MINORCYCLE_NITER=5000
+CLEAN_SPECTRAL_GAIN=0.1
 CLEAN_SPECTRAL_PSFWIDTH=512
 CLEAN_SPECTRAL_SCALES="[0,3,10]"
-CLEAN_SPECTRAL_THRESHOLD_MINORCYCLE="[30%, 0.9mJy]"
-CLEAN_SPECTRAL_THRESHOLD_MAJORCYCLE=1mJy
-CLEAN_SPECTRAL_NUM_MAJORCYCLES=0
+CLEAN_SPECTRAL_THRESHOLD_MINORCYCLE="[50%, 30mJy]"
+CLEAN_SPECTRAL_THRESHOLD_MAJORCYCLE=20mJy
+CLEAN_SPECTRAL_NUM_MAJORCYCLES=5
 # If true, this will write out intermediate images at the end of each
 # major cycle
 CLEAN_SPECTRAL_WRITE_AT_MAJOR_CYCLE=false

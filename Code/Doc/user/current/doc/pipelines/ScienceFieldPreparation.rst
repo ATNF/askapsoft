@@ -135,18 +135,18 @@ is possible, however, to select a single field to process via the
 | ``FLAG_STOKESV_INTEGRATE_TIMES``              | false                           | stokesv_flagger.integrateTimes                  | Whether to integrate across spectra and flag time samples during the  |
 |                                               |                                 | (:doc:`../calim/cflag`)                         | Stokes-V flagging task.                                               |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
-|   ``FLAG_THRESHOLD_STOKESV_SCIENCE_TIMES``    | 4.0                             | stokesv_flagger.integrateTimes.threshold        | Threshold applied to amplitudes when flagging the Stokes-V for the    |
+| ``FLAG_THRESHOLD_STOKESV_SCIENCE_TIMES``      | 4.0                             | stokesv_flagger.integrateTimes.threshold        | Threshold applied to amplitudes when flagging the Stokes-V for the    |
 |                                               |                                 | (:doc:`../calim/cflag`)                         | science field data in integrateTimes mode [sigma]                     |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 | ``FLAG_DO_FLAT_AMPLITUDE_SCIENCE``            | false                           | none                                            | Whether to apply a flag amplitude flux threshold to the data.         |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
-|     ``FLAG_THRESHOLD_AMPLITUDE_SCIENCE``      | 0.2                             | amplitude_flagger.high (:doc:`../calim/cflag`)  | Simple amplitude threshold applied when flagging science field data.  |
+| ``FLAG_THRESHOLD_AMPLITUDE_SCIENCE``          | 0.2                             | amplitude_flagger.high (:doc:`../calim/cflag`)  | Simple amplitude threshold applied when flagging science field data.  |
 |                                               |                                 |                                                 | If set to blank (``FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW=""``),        |
 |                                               |                                 |                                                 | then no minimum value is applied.                                     |
 |                                               |                                 |                                                 | [hardware units - before calibration]                                 |
 |                                               |                                 |                                                 |                                                                       |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
-|   ```FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW``   | 0.                              | amplitude_flagger.low (:doc:`../calim/cflag`)   | Lower threshold for the simple amplitude flagging. If set             |
+| ```FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW``     | ""                              | amplitude_flagger.low (:doc:`../calim/cflag`)   | Lower threshold for the simple amplitude flagging. If set             |
 |                                               |                                 |                                                 | to blank (``FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW=""``),               |
 |                                               |                                 |                                                 | then no minimum value is applied.                                     |
 |                                               |                                 |                                                 | [value in hardware units - before calibration]                        |
@@ -214,7 +214,7 @@ is possible, however, to select a single field to process via the
 |                                               |                                 |                                                 | (``FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW=""``),                        |
 |                                               |                                 |                                                 | then no minimum value is applied. [value in flux-calibrated units]    |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
-|  ``FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW_AV``  | 0.                              | amplitude_flagger.low (:doc:`../calim/cflag`)   | Lower threshold for the simple amplitude flagging on the averaged     |
+|  ``FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW_AV``  | ""                              | amplitude_flagger.low (:doc:`../calim/cflag`)   | Lower threshold for the simple amplitude flagging on the averaged     |
 |                                               |                                 |                                                 | data. If set to blank (``FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW=""``),  |
 |                                               |                                 |                                                 | then no minimum value is applied. [value in flux-calibrated units]    |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+

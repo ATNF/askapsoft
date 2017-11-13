@@ -121,7 +121,7 @@ the quality of the bandpass solution.
 |                                               |                                       |                                                        | then no minimum value is applied.                         |
 |                                               |                                       |                                                        | [value in hardware units - before calibration]            |
 +-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
-|  ``FLAG_THRESHOLD_AMPLITUDE_1934_LOW``        | 0.                                    | amplitude_flagger.low (:doc:`../calim/cflag`)          | Lower threshold for the simple amplitude flagging. If set |
+|  ``FLAG_THRESHOLD_AMPLITUDE_1934_LOW``        | ""                                    | amplitude_flagger.low (:doc:`../calim/cflag`)          | Lower threshold for the simple amplitude flagging. If set |
 |                                               |                                       |                                                        | to blank (``FLAG_THRESHOLD_AMPLITUDE_1934_LOW=""``), then |
 |                                               |                                       |                                                        | no minimum value is applied.                              |
 |                                               |                                       |                                                        | [value in hardware units - before calibration]            |

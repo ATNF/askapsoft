@@ -137,10 +137,10 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 |                                               |                                 |                                    | from the measurement set by mslist. This is the same input        |
 |                                               |                                 |                                    | parameter as that used for the continuum imaging.                 |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``NUM_PIXELS_SPECTRAL``                       | 2048                            | Images.shape                       | The number of spatial pixels along the side for the image cubes.  |
+| ``NUM_PIXELS_SPECTRAL``                       | 1536                            | Images.shape                       | The number of spatial pixels along the side for the image cubes.  |
 |                                               |                                 | (:doc:`../calim/simager`)          | Needs to be specified (unlike the continuum imaging case).        |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``CELLSIZE_SPECTRAL``                         | 10                              | Images.cellsize                    | The spatial pixel size for the image cubes. Must be specified.    |
+| ``CELLSIZE_SPECTRAL``                         | 4                               | Images.cellsize                    | The spatial pixel size for the image cubes. Must be specified.    |
 |                                               |                                 | (:doc:`../calim/simager`)          |                                                                   |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``REST_FREQUENCY_SPECTRAL``                   | HI                              | Images.restFrequency               | The rest frequency for the cube. Can be a quantity string (eg.    |
@@ -183,10 +183,10 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 |                                               |                                 | (:doc:`../calim/solver`)           | changed to 'Basisfunction', as we don't need the multi-frequency  |
 |                                               |                                 |                                    | capabilities of 'BasisfunctionMFS'.                               |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``CLEAN_SPECTRAL_MINORCYCLE_NITER``           | 500                             | Clean.niter                        | The number of iterations for the minor cycle clean.               |
+| ``CLEAN_SPECTRAL_MINORCYCLE_NITER``           | 5000                            | Clean.niter                        | The number of iterations for the minor cycle clean.               |
 |                                               |                                 | (:doc:`../calim/solver`)           |                                                                   |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``CLEAN_SPECTRAL_GAIN``                       | 0.5                             | Clean.gain                         | The loop gain (fraction of peak subtracted per minor cycle).      |
+| ``CLEAN_SPECTRAL_GAIN``                       | 0.1                             | Clean.gain                         | The loop gain (fraction of peak subtracted per minor cycle).      |
 |                                               |                                 | (:doc:`../calim/solver`)           |                                                                   |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``CLEAN_SPECTRAL_PSFWIDTH``                   | 512                             | Clean.psfwidth                     | The width of the psf patch used in the minor cycle.               |
@@ -195,13 +195,13 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 | ``CLEAN_SPECTRAL_SCALES``                     | "[0,3,10]"                      | Clean.scales                       | Set of scales (in pixels) to use with the multi-scale clean.      |
 |                                               |                                 | (:doc:`../calim/solver`)           |                                                                   |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``CLEAN_SPECTRAL_THRESHOLD_MINORCYCLE``       | "[30%, 0.9mJy]"                 | threshold.minorcycle               | Threshold for the minor cycle loop.                               |
+| ``CLEAN_SPECTRAL_THRESHOLD_MINORCYCLE``       | "[50%, 30mJy]"                  | threshold.minorcycle               | Threshold for the minor cycle loop.                               |
 |                                               |                                 | (:doc:`../calim/solver`)           |                                                                   |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``CLEAN_SPECTRAL_THRESHOLD_MAJORCYCLE``       | 1mJy                            | threshold.majorcycle               | The target peak residual. Major cycles stop if this is reached. A |
+| ``CLEAN_SPECTRAL_THRESHOLD_MAJORCYCLE``       | 20mJy                           | threshold.majorcycle               | The target peak residual. Major cycles stop if this is reached. A |
 |                                               |                                 | (:doc:`../calim/solver`)           | negative number ensures all major cycles requested are done.      |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``CLEAN_SPECTRAL_NUM_MAJORCYCLES``            | 0                               | ncycles                            | Number of major cycles.                                           |
+| ``CLEAN_SPECTRAL_NUM_MAJORCYCLES``            | 5                               | ncycles                            | Number of major cycles.                                           |
 |                                               |                                 | (:doc:`../calim/solver`)           |                                                                   |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``CLEAN_WRITE_AT_MAJOR_CYCLE``                | false                           | Images.writeAtMajorCycle           | If true, the intermediate images will be written (with a .cycle   |
@@ -209,10 +209,10 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | **Preconditioning**                           |                                 |                                    |                                                                   |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``PRECONDITIONER_LIST_SPECTRAL``              | "[Wiener, GaussianTaper]"       | preconditioner.Names               | List of preconditioners to apply.                                 |
+| ``PRECONDITIONER_LIST_SPECTRAL``              | "[Wiener]"                      | preconditioner.Names               | List of preconditioners to apply.                                 |
 |                                               |                                 | (:doc:`../calim/solver`)           |                                                                   |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``PRECONDITIONER_SPECTRAL_GAUSS_TAPER``       |  "[50arcsec, 50arcsec, 0deg]"   | preconditioner.GaussianTaper       | Size of the Gaussian taper - either single value (for circular    |
+| ``PRECONDITIONER_SPECTRAL_GAUSS_TAPER``       |  "[10arcsec, 10arcsec, 0deg]"   | preconditioner.GaussianTaper       | Size of the Gaussian taper - either single value (for circular    |
 |                                               |                                 | (:doc:`../calim/solver`)           | taper) or 3 values giving an elliptical size.                     |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``PRECONDITIONER_SPECTRAL_WIENER_ROBUSTNESS`` | 0.5                             | preconditioner.Wiener.robustness   | Robustness value for the Wiener filter.                           |
