@@ -51,6 +51,7 @@
 #include <coordutils/SpectralUtilities.h>
 #include <casainterface/CasaInterface.h>
 #include <mathsutils/MathsUtils.h>
+#include <mathsutils/FitTT.h>
 
 #include <Common/ParameterSet.h>
 #include <boost/shared_ptr.hpp>
@@ -1453,7 +1454,7 @@ void FITSfile::defineTaylorTerms()
         }
         const size_t ndata = itsAxes[itsWCS->spec];
 
-        double xdat[ndata], ydat[ndata];
+        double xdat[ndata], ydat[ndata], wts[ndata];
 
         for (size_t i = 0; i < ndata; i++) {
             // Set the frequency values, normalised by the reference frequency nuZero.
@@ -1485,10 +1486,12 @@ void FITSfile::defineTaylorTerms()
                     for (size_t i = 0; i < ndata; i++) {
                         // assume just first stokes axis
                         ydat[i] = itsArray[pos + i * xlen * ylen * stlen];
+                        // set weights to 1
+                        wts[i] = 1.;
                     }
 
                     FitTT fitter(3);
-                    fitter.fit(ndata, xdat, ydat);
+                    fitter.fit(ndata, xdat, ydat, wts);
 
                     float Izero = fitter.fluxZero();
                     float alpha = fitter.alpha();
