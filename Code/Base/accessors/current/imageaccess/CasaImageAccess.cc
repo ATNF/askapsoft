@@ -60,7 +60,29 @@ casa::Array<float> CasaImageAccess::read(const std::string &name) const
 {
     ASKAPLOG_INFO_STR(logger, "Reading CASA image " << name);
     casa::PagedImage<float> img(name);
-    return img.get();
+    if ( img.hasPixelMask() ) {
+        ASKAPLOG_INFO_STR(logger, " - setting unmasked pixels to zero");
+        // generate an Array of zeros and copy the elements for which the mask is true
+        casa::Array<float> tempArray(img.get().shape(),0.0);
+        tempArray = casa::MaskedArray<float>(img.get(), img.getMask(), casa::True);
+        return tempArray;
+        // The following seems to avoid a copy but takes longer:
+        //// Iterate over image array and set any unmasked pixels to zero
+        //casa::Array<float> tempArray = img.get();
+        //const casa::LogicalArray tempMask = img.getMask();
+        //casa::Array<float>::iterator iterArray = tempArray.begin();
+        //casa::LogicalArray::const_iterator iterMask = tempMask.begin();
+        //for( ; iterArray != tempArray.end() ; iterArray++ ) {
+        //    if (*iterMask == casa::False) {
+        //        *iterArray = 0.0;
+        //    }
+        //    iterMask++;
+        //}
+        //return tempArray;
+    }
+    else {
+        return img.get();
+    }
 }
 
 /// @brief read part of the image
@@ -73,7 +95,31 @@ casa::Array<float> CasaImageAccess::read(const std::string &name, const casa::IP
 {
     ASKAPLOG_INFO_STR(logger, "Reading a slice of the CASA image " << name << " from " << blc << " to " << trc);
     casa::PagedImage<float> img(name);
-    return img.getSlice(casa::Slicer(blc, trc, casa::Slicer::endIsLast));
+    if ( img.hasPixelMask() ) {
+        ASKAPLOG_INFO_STR(logger, " - setting unmasked pixels to zero");
+        // generate an Array of zeros and copy the elements for which the mask is true
+        const casa::Slicer slicer(blc,trc,casa::Slicer::endIsLast);
+        casa::Array<float> tempSlice(img.getSlice(slicer).shape(),0.0);
+        tempSlice = casa::MaskedArray<float>(img.getSlice(slicer), img.getMaskSlice(slicer), casa::True);
+        return tempSlice;
+        // The following seems to avoid a copy but takes longer:
+        //// Iterate over image array and set any unmasked pixels to zero
+        //const casa::Slicer slicer(blc,trc,casa::Slicer::endIsLast);
+        //casa::Array<float> tempSlice = img.getSlice(slicer);
+        //const casa::LogicalArray tempMask = img.getMaskSlice(slicer);
+        //casa::Array<float>::iterator iterSlice = tempSlice.begin();
+        //casa::LogicalArray::const_iterator iterMask = tempMask.begin();
+        //for( ; iterSlice != tempSlice.end() ; iterSlice++ ) {
+        //    if (*iterMask == casa::False) {
+        //        *iterSlice = 0.0;
+        //    }
+        //    iterMask++;
+        //}
+        //return tempSlice;
+    }
+    else {
+        return img.getSlice(casa::Slicer(blc, trc, casa::Slicer::endIsLast));
+    }
 }
 
 /// @brief obtain coordinate system info
