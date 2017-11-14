@@ -389,7 +389,7 @@ deconvolveGaussian(const casa::Gaussian2D<Double> &measured, duchamp::Beam beam)
     double min = std::max(std::min(a1, b1), 0.);
     deconv[0] = maj;
     deconv[1] = min;
-    deconv[2] = pa1;
+    deconv[2] = fmod(pa1, 2.*M_PI);
 
     return deconv;
 
@@ -430,7 +430,7 @@ deconvolveGaussian(const casa::Gaussian2D<Double> &measured, casa::Vector<Double
     double min = std::max(std::min(a1, b1), 0.);
     deconv[0] = maj;
     deconv[1] = min;
-    deconv[2] = pa1;
+    deconv[2] = fmod(pa1, 2.*M_PI);
 
     // error on a1:
     double err_a1,err_b1,err_pa1;
@@ -477,8 +477,8 @@ deconvolveGaussian(const casa::Gaussian2D<Double> &measured, casa::Vector<Double
         deconv[3] = err_a1;
         deconv[4] = err_b1;
     }
-    deconv[5] = err_pa1;
-    
+    deconv[5] = std::min(err_pa1, 2.*M_PI);
+
     return deconv;
 
 }
