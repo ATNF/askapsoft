@@ -96,6 +96,9 @@ LUSTRE_STRIPE_SIZE=1048576
 # Storage manager bucket size - I/O quantum for MS writing
 BUCKET_SIZE=1048576
 
+# If true, copy with distributed copy tool dcp. Else use cp
+USE_DCP_TO_COPY_MS=true
+
 ####################
 # Locations of the executables.
 # If you have a local version of the ASKAPsoft codebase, and have

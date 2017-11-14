@@ -146,13 +146,30 @@ outputMS=${OUTPUT}/${msSci}
 
 EOFINNER
 
-/usr/bin/time -p -o \$log ssh hpc-data "module load mpifileutils; mpirun -np 4 dcp $inputMS ${OUTPUT}/$msSci"
+useDCP=${USE_DCP_TO_COPY_MS}
 
-err=\$?
-if [ "\$?" -eq 0 ]; then
-    RESULT_TXT="OK"
+if [ "\${useDCP}" == "true" ]; then
+
+    /usr/bin/time -p -o \$log ssh hpc-data "module load mpifileutils; mpirun -np 4 dcp $inputMS ${OUTPUT}/$msSci"
+
+    err=\$?
+    if [ "\$?" -eq 0 ]; then
+        RESULT_TXT="OK"
+    else
+        RESULT_TXT="FAIL"
+    fi
+    
 else
-    RESULT_TXT="FAIL"
+
+    /usr/bin/time -p -o \$log cp -r $inputMS ${OUTPUT}/$msSci
+
+    err=\$?
+    if [ "\$?" -eq 0 ]; then
+        RESULT_TXT="OK"
+    else
+        RESULT_TXT="FAIL"
+    fi
+
 fi
 
 REALTIME=\$(grep real \$log | awk '{print \$2}')

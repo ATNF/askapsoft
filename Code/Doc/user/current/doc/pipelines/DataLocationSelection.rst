@@ -28,6 +28,14 @@ MS-per-beam mode, then instead of splitting the dataset the pipeline
 uses a parallel copy (using the *dcp* utility) to copy the archive MS
 to the output directory. This should run faster than using *mssplit*.
 
+To use this mode, you will need to have your SSH keys set
+appropriately in your ~/.ssh directory. The copying is run
+on *hpc-data*, under an SSH connection, and you need to be able to
+connect to it without providing a password. If there is an issue with
+your SSH keys, or you know *hpc-data* is unavailable, you can use
+regular **cp** by setting ``USE_DCP_TO_COPY_MS=false``. Note that this
+will be slower than the **dcp** option.
+
 The bandpass calibration datasets are treated the same way, although
 *mssplit* is always used (since the relevant scan needs to be split
 out). 
@@ -41,24 +49,29 @@ the **metadata/mslist_** filename), using the parameters ``MS_INPUT_1934`` or
 file and continue. For anything to be done, it requires you to have already
 run the splitting, so that there is a local copy of the individual beam data.
 
-+----------------------+---------------------------------------------------------+------------------------------------------------------------+
-| Variable             | Default                                                 | Description                                                |
-+======================+=========================================================+============================================================+
-| ``DIR_SB``           | /astro/askaprt/askapops/askap-scheduling-blocks         |Location (on galaxy) of the scheduling blocks. This is used |
-|                      |                                                         |when specifying SB numbers - the default is the standard    |
-|                      |                                                         |location for ASKAP operation. If blank (""), the MS used    |
-|                      |                                                         |will be given by ``MS_INPUT_SCIENCE`` and ``MS_INPUT_1934``.|
-+----------------------+---------------------------------------------------------+------------------------------------------------------------+
-| ``SB_1934``          | no default                                              |SB number for the 1934-638 calibration observation.         |
-+----------------------+---------------------------------------------------------+------------------------------------------------------------+
-| ``MS_INPUT_1934``    | no default                                              |MS for the 1934-638 observation. Ignored if the SB number   |
-|                      |                                                         |is provided.                                                |
-+----------------------+---------------------------------------------------------+------------------------------------------------------------+
-| ``SB_SCIENCE``       | no default                                              |SB number for the science field observation.                |
-+----------------------+---------------------------------------------------------+------------------------------------------------------------+
-| ``MS_INPUT_SCIENCE`` | no default                                              |MS for the science field. Ignored if the SB number is       |
-|                      |                                                         |provided.                                                   |
-+----------------------+---------------------------------------------------------+------------------------------------------------------------+
++------------------------+---------------------------------------------------------+------------------------------------------------------------+
+| Variable               | Default                                                 | Description                                                |
++========================+=========================================================+============================================================+
+| ``DIR_SB``             | /astro/askaprt/askapops/askap-scheduling-blocks         | Location (on galaxy) of the scheduling blocks. This is used|
+|                        |                                                         | when specifying SB numbers - the default is the standard   |
+|                        |                                                         | location for ASKAP operation. If blank (""), the MS used   |
+|                        |                                                         | will be given by ``MS_INPUT_SCIENCE`` and                  |
+|                        |                                                         | ``MS_INPUT_1934``.                                         |
++------------------------+---------------------------------------------------------+------------------------------------------------------------+
+| ``SB_1934``            | no default                                              | SB number for the 1934-638 calibration observation.        |
++------------------------+---------------------------------------------------------+------------------------------------------------------------+
+| ``MS_INPUT_1934``      | no default                                              | MS for the 1934-638 observation. Ignored if the SB number  |
+|                        |                                                         | is provided.                                               |
++------------------------+---------------------------------------------------------+------------------------------------------------------------+
+| ``SB_SCIENCE``         | no default                                              | SB number for the science field observation.               |
++------------------------+---------------------------------------------------------+------------------------------------------------------------+
+| ``MS_INPUT_SCIENCE``   | no default                                              | MS for the science field. Ignored if the SB number is      |
+|                        |                                                         | provided.                                                  |
++------------------------+---------------------------------------------------------+------------------------------------------------------------+
+| ``USE_DCP_TO_COPY_MS`` | true                                                    | Whether to use dcp via ssh to hpc-data to run the copying  |
+|                        |                                                         | of the input data. If false, ordinary cp is used without   |
+|                        |                                                         | ssh.                                                       |
++------------------------+---------------------------------------------------------+------------------------------------------------------------+
 
 These parameters determine which beams in the data to process. The
 beams can be listed explicitly via the ``BEAMLIST`` parameter, given
