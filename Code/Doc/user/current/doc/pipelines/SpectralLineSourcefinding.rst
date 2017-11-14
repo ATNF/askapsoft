@@ -30,7 +30,7 @@ reconstruction (to enhance the signal-to-noise of real sources).
 | ``SELAVY_SPEC_NSUBY``              | 3                               | nsuby (:doc:`../analysis/selavy`)            | Number of divisions in the y-direction that divide the image|
 |                                    |                                 |                                              | up, allowing parallel processing in the source-detection.   |
 +------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
-| ``SELAVY_SPEC_NSUBZ``              | 1                               | nsubz (:doc:`../analysis/selavy`)            | Number of divisions in the z-direction that divide the image|
+| ``SELAVY_SPEC_NSUBZ``              | 11                              | nsubz (:doc:`../analysis/selavy`)            | Number of divisions in the z-direction that divide the image|
 |                                    |                                 |                                              | up, allowing parallel processing in the source-detection.   |
 +------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
 | **Searching**                      |                                 |                                              |                                                             |
@@ -56,7 +56,7 @@ reconstruction (to enhance the signal-to-noise of real sources).
 |                                    |                                 | (:doc:`../analysis/thresholds`)              | image, used in the source-finding. Only applies if the image|
 |                                    |                                 |                                              | being searched has a corresponding weights image.           |
 +------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
-| ``SELAVY_SPEC_SEARCH_TYPE``        | spectral                        | searchType (:doc:`../analysis/selavy`)       | Type of searching to be performed: either 'spectral'        |
+| ``SELAVY_SPEC_SEARCH_TYPE``        | spatial                         | searchType (:doc:`../analysis/selavy`)       | Type of searching to be performed: either 'spectral'        |
 |                                    |                                 |                                              | (searches are done in each 1D spectrum) or 'spatial'        |
 |                                    |                                 |                                              | (searches are done in each 2D channel image). Anything else |
 |                                    |                                 |                                              | defaults to spectral.                                       |
@@ -70,7 +70,7 @@ reconstruction (to enhance the signal-to-noise of real sources).
 |                                    |                                 |                                              | spectrum, else if 'spatial' it will be a 2D box done on each|
 |                                    |                                 |                                              | channel image.                                              |
 +------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
-| ``SELAVY_SPEC_BOX_SIZE``           | 50                              | VariableThreshold.boxSize                    | The half-width of the sliding box used to determine the     |
+| ``SELAVY_SPEC_BOX_SIZE``           | 35                              | VariableThreshold.boxSize                    | The half-width of the sliding box used to determine the     |
 |                                    |                                 | (:doc:`../analysis/thresholds`)              | local statistics.                                           |
 +------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
 | ``SELAVY_SPEC_MIN_PIX``            | 5                               | minPix (:doc:`../analysis/selavy`)           | Minimum number of (spatial) pixels allowed in a detection   |
@@ -85,7 +85,7 @@ reconstruction (to enhance the signal-to-noise of real sources).
 | **Pre-processing**                 |                                 |                                              |                                                             |
 |                                    |                                 |                                              |                                                             |
 +------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
-| ``SELAVY_SPEC_FLAG_SMOOTH``        | false                           | flagSmooth                                   | Whether to smooth the input cube prior to searching.        |
+| ``SELAVY_SPEC_FLAG_SMOOTH``        | true                            | flagSmooth                                   | Whether to smooth the input cube prior to searching.        |
 |                                    |                                 | (:doc:`../analysis/preprocessing`)           |                                                             |
 +------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
 | ``SELAVY_SPEC_SMOOTH_TYPE``        | spectral                        | smoothType                                   | Type of smoothing to perform - either 'spectral' or         |
@@ -117,4 +117,10 @@ reconstruction (to enhance the signal-to-noise of real sources).
 | ``SELAVY_SPEC_RECON_SCALE_MAX``    | 0                               | scaleMax (:doc:`../analysis/preprocessing`)  | Maximum wavelet scale to use in the reconstruction. If 0 or |
 |                                    |                                 |                                              | negative, then the maximum scale is calculated from the size|
 |                                    |                                 |                                              | of the array.                                               |
++------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
+| **Pre-processing**                 |                                 |                                              |                                                             |
+|                                    |                                 |                                              |                                                             |
++------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
+| ``SELAVY_SPEC_OPTIMISE_MASK``      | true                            | optimiseMask                                 | Whether to improve the mask of detected sources prior to    |
+|                                    |                                 | (:doc:`../analysis/postprocessing.rst`)      | parameterisation via the mask optimisation technique.       |
 +------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+

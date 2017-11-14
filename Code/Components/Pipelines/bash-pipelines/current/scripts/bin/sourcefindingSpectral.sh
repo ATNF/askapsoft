@@ -147,7 +147,7 @@ if [ "\${BEAM}" == "all" ]; then
     weights=${OUTPUT}/${weightsImage}
     imlist="\${imlist} \${weights}"
     weightpars="Selavy.Weights.weightsImage = \${weights##*/}.fits
-Selavy.Weights.weightsCutoff = ${SELAVY_WEIGHTS_CUTOFF}"
+Selavy.Weights.weightsCutoff = ${SELAVY_SPEC_WEIGHTS_CUTOFF}"
 else
     weightpars="#"
 fi
@@ -221,23 +221,7 @@ Selavy.spectralUnits = km/s
 #
 # Emission-line catalogue
 Selavy.HiEmissionCatalogue=true
-# Extraction
-Selavy.extractSpectra = true
-Selavy.extractSpectra.spectralCube = \$image
-Selavy.extractSpectra.spectralOutputBase = ${OUTPUT}/${selavySpectraDir}/${SELAVY_SPEC_BASE_SPECTRUM}
-Selavy.extractSpectra.useDetectedPixels = true
-Selavy.extractSpectra.beamLog = ${beamlog}
-Selavy.extractNoiseSpectra = true
-Selavy.extractNoiseSpectra.spectralCube= \$image
-Selavy.extractNoiseSpectra.spectralOutputBase = ${OUTPUT}/${selavySpectraDir}/${SELAVY_SPEC_BASE_NOISE}
-Selavy.extractNoiseSpectra.useDetectedPixels = true
-Selavy.extractMomentMap = true
-Selavy.extractMomentMap.spectralCube = \$image
-Selavy.extractMomentMap.momentOutputBase = ${OUTPUT}/${selavyMomentsDir}/${SELAVY_SPEC_BASE_MOMENT}
-Selavy.extractMomentMap.moments = [0,1,2]
-Selavy.extractCubelet = true
-Selavy.extractCubelet.spectralCube = \$image
-Selavy.extractCubelet.cubeletOutputBase = ${OUTPUT}/${selavyCubeletsDir}/${SELAVY_SPEC_BASE_CUBELET}
+Selavy.optimiseMask = ${SELAVY_SPEC_OPTIMISE_MASK}
 EOFINNER
 
     NCORES=${NUM_CPUS_SELAVY_SPEC}

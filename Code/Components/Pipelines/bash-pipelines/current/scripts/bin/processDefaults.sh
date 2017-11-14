@@ -926,6 +926,20 @@ EOF
         ####################
         # Spectral source-finding
 
+        # Deprecated parameters
+        if [ "${SELAVY_SPEC_BASE_SPECTRUM}" ]; then
+            echo "NOTE - SELAVY_SPEC_BASE_SPECTRUM is no longer used"
+        fi
+        if [ "${SELAVY_SPEC_BASE_NOISE}" ]; then
+            echo "NOTE - SELAVY_SPEC_BASE_NOISE is no longer used"
+        fi
+        if [ "${SELAVY_SPEC_BASE_MOMENT}" ]; then
+            echo "NOTE - SELAVY_SPEC_BASE_MOMENT is no longer used"
+        fi
+        if [ "${SELAVY_SPEC_BASE_CUBELET}" ]; then
+            echo "NOTE - SELAVY_SPEC_BASE_CUBELET is no longer used"
+        fi
+        
         # Number of cores etc
         NUM_CPUS_SELAVY_SPEC=$(echo "${SELAVY_SPEC_NSUBX}" "${SELAVY_SPEC_NSUBY}" "${SELAVY_SPEC_NSUBZ}" | awk '{print $1*$2*$3+1}')
         if [ "${CPUS_PER_CORE_SELAVY_SPEC}" == "" ]; then
