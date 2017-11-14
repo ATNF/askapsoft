@@ -29,7 +29,6 @@
 
 DO_IT=$DO_SOURCE_FINDING_CONT
 
-
 # set imageName, weightsImage etc
 imageCode=restored
 setImageProperties cont
@@ -159,12 +158,6 @@ sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 thisfile=$sbatchfile
 cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
-# Base directory for Selavy work
-mkdir -p $selavyDir
-# Directory for extracted polarisation data products
-mkdir -p $selavyPolDir
-cd ${selavyDir}
-
 HAVE_IMAGES=true
 BEAM=$BEAM
 NUM_TAYLOR_TERMS=${NUM_TAYLOR_TERMS}
@@ -230,7 +223,12 @@ if [ "\${imlist}" != "" ]; then
         # Make a link so we point to a file in the current directory for
         # Selavy. This gets the referencing correct in the catalogue
         # metadata 
-        ln -s "\${fitsim}" .
+        if [ "\${HAVE_IMAGES}" == "true" ]; then
+            mkdir -p ${selavyDir}
+            cd ${selavyDir}
+            ln -s "\${fitsim}" .
+            cd ..
+        fi
     done
 fi
 
@@ -238,6 +236,12 @@ if [ "\${HAVE_IMAGES}" == "true" ]; then
 
     parset=${parsets}/science_selavy_cont_${FIELDBEAM}_\${SLURM_JOB_ID}.in
     log=${logs}/science_selavy_cont_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+
+    # Directory for extracted polarisation data products
+    mkdir -p $selavyPolDir
+
+    # Move to the working directory
+    cd $selavyDir
     
     if [ "\${doRM}" == "true" ]; then
         rmSynthParams="# RM Synthesis on extracted spectra from continuum cube
@@ -310,6 +314,7 @@ EOFINNER
         exit \$err
     fi
 
+    # Convert the noise map to fits, for use with the validation script
     casaim="${noiseMap%%.fits}"
     fitsim="${noiseMap%%.fits}.fits"
     echo "Converting to FITS the image ${noiseMap}"
