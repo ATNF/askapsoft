@@ -1,3 +1,68 @@
+0.19.6 (15 November 2017)
+-------------------------
+
+A patch release for both the processing and pipeline areas. This fixes
+a few bugs and introduces a few minor features to enhance the
+processing.
+
+Pipelines:
+ * Default values of a number of parameters have been updated,
+   particularly for the spectral-line imaging. Importantly, the
+   default imager has been changed *for all imaging jobs* to be the
+   new imager task.
+ * Fix for the image-based continuum subtraction script. This uses
+   scripts in the ACES repository, which have been recently updated,
+   and this change allows the use of the new interface. Needs to be
+   used with ACES revision number 47195 or later.
+ * The bandpass solutions can now be applied to the calibrator
+   observations themselves, producing calibrated MSs that could be
+   used later for analysis.
+ * The reference antenna for the bandpass calibration can be specified
+   via the new config parameter BANDPASS_REFANTENNA.
+ * Self-calibration with cmodel can now avoid using components below
+   some nominated signal-to-noise level. It can also be forced to use
+   PSF-shaped components for the calibration.
+ * When copying raw per-beam measurement sets, there is now the option
+   to use regular cp, instead of the dcp-over-ssh approach (which
+   requires the ability to ssh to hpc-data).
+ * The following bugs have been fixed:
+   - RM Synthesis is now turned off if only the Stokes-I continuum
+     cube is being created (which is the default).
+   - When using a component parset for self-calibration, the reference
+     direction could be incorrect (if the full-resolution MS was
+     absent). This has been fixed, by obtaining the direction from the
+     averaged dataset.
+
+Processing software:
+
+ * Cflag:
+   - There was a bug where the StokesV flagger would crash with a
+     segmentation fault on occasions where it was presented with a
+     spectrum or time-series that was entirely flagged. It is now more
+     robust against such datasets.
+ * Imager:
+   - The imager is now more robust against small changes in the
+     frequency labels of channels, with an optional tolerance
+     parameter available.
+ * Selavy:
+   - A few bugs were fixed that were preventing Selavy working for
+     spectral-line cubes, where it was trying to read in the entire
+     cube on all processing cores (leading to an out-of-memory
+     error). 
+   - Moment-0 maps now have a valid mask applied to them.
+   - Selavy can now measure the spectral index & curvature from a
+     continuum cube, instead of fitting to Taylor-term images.
+   - Duchamp version 1.6.2 has been included in the askapsoft
+     codebase.
+   - The deconvolved position angle of components is now forced to lie
+     between 0 & 2pi, and its error is limited to be no more than 2pi. 
+ * Linmos:
+   - Fixed a bug that meant (in some cases) only a single input image
+     was included in the mosaic. Happened when the input images had
+     masks attached to them (for instance, combination of mosaics).
+   
+
+
 0.19.5 (8 October 2017)
 -----------------------
 
