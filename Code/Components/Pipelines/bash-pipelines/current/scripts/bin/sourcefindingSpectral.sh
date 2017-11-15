@@ -130,8 +130,6 @@ cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
 # Working directory for the selavy output
 seldir=selavy-spectral-${imageName##*/}
-mkdir -p "\$seldir"
-cd "\$seldir"
     
 HAVE_IMAGES=true
 BEAM=$BEAM
@@ -156,8 +154,8 @@ HAVE_IMAGES=true
 echo "Converting to FITS the following images: \${imlist}"
 for im in \${imlist}; do 
 
-    casaim="../\${im##*/}"
-    fitsim="../\${im##*/}.fits"
+    casaim="\${im%%.fits}"
+    fitsim="\${im%%.fits}.fits"
     parset=$parsets/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.in
     log=$logs/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.log
     ${fitsConvertText}
@@ -168,7 +166,10 @@ for im in \${imlist}; do
         HAVE_IMAGES=false
         echo "ERROR - Could not create \${im}.fits"
     else
+        mkdir -p ${seldir}
+        cd ${seldir}
         ln -s -f "\${im}.fits" .
+        cd ..
     fi
 done
 
@@ -177,6 +178,9 @@ if [ "\${HAVE_IMAGES}" == "true" ]; then
     parset=${parsets}/science_selavy_spectral_\${SLURM_JOB_ID}.in
     log=${logs}/science_selavy_spectral_\${SLURM_JOB_ID}.log
     
+    mkdir -p ${seldir}
+    cd ${seldir}
+
     # Directories for extracted data products
     mkdir -p "${OUTPUT}/$selavySpectraDir"
     mkdir -p "${OUTPUT}/$selavyMomentsDir"
@@ -240,8 +244,8 @@ EOFINNER
          cd "\${dir}"
          neterr=0
          for im in ./*; do 
-             casaim=\${im}
-             fitsim="\${im}.fits"
+             casaim=\${im%%.fits}
+             fitsim="\${im%%.fits}.fits"
              echo "Converting \$casaim to \$fitsim" >> "\$log"
              ${fitsConvertText}
              err=\$?

@@ -372,8 +372,8 @@ EOFINNER
         log=$logs/convertToFITS_polSpectra_\${SLURM_JOB_ID}.log
         neterr=0
         for im in ./*; do 
-            casaim=\${im}
-            fitsim="\${im}.fits"
+            casaim=\${im%%.fits}
+            fitsim="\${im%%.fits}.fits"
             echo "Converting \$casaim to \$fitsim" >> "\$log"
             ${fitsConvertText}
             err=\$?
