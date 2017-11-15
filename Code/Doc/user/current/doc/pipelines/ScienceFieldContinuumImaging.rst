@@ -125,7 +125,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``IMAGETYPE_CONTCUBE``                     | casa                            | imagetype (:doc:`../calim/imager`)                     | Image format to use - can be either 'casa' or 'fits',         |
 |                                            |                                 |                                                        | although 'fits' can only be given in conjunction with         |
-|                                            |                                 |                                                        | ``DO_ALT_IMAGER_SPECTRAL=true``.                              |
+|                                            |                                 |                                                        | ``DO_ALT_IMAGER_CONTCUBE=true``.                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | **Basic variables**                        |                                 |                                                        |                                                               |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
@@ -292,7 +292,8 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                 |                                                        | (:doc:`../calim/imager`). If false, it is done by cimager     |
 |                                            |                                 |                                                        | (:doc:`../calim/cimager`). When true, the following           |
 |                                            |                                 |                                                        | parameters are used. If left blank (the default), the value   |
-|                                            |                                 |                                                        | is given by the overall parameter ``DO_ALT_IMAGER``.          |
+|                                            |                                 |                                                        | is given by the overall parameter ``DO_ALT_IMAGER`` (see      |
+|                                            |                                 |                                                        | :doc:`ControlParameters`).                                    |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``DO_ALT_IMAGER_CONTCUBE``                 | ""                              | none                                                   | If true, the continuum cube imaging is done by imager         |
 |                                            |                                 |                                                        | (:doc:`../calim/imager`). If false, it is done by cimager     |

@@ -271,7 +271,7 @@ the science field processing.
 |                             |         | can be done via the ``DO_MOSAIC_FIELDS`` parameter (default |
 |                             |         | is ``true``).                                               |
 +-----------------------------+---------+-------------------------------------------------------------+
-| ``DO_ALT_IMAGER``           | false   | Whether to use the new imager (:doc:`../calim/imager`) for  |
+| ``DO_ALT_IMAGER``           | true    | Whether to use the new imager (:doc:`../calim/imager`) for  |
 |                             |         | all imaging. Its use for specific modes can be selected by  |
 |                             |         | the parameters ``DO_ALT_IMAGER_CONT``,                      |
 |                             |         | ``DO_ALT_IMAGER_CONTCUBE``, and ``DO_ALT_IMAGER_SPECTRAL``  |

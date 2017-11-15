@@ -245,7 +245,8 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 |                                               |                                 |                                    | (:doc:`../calim/imager`). If false, it is done by simager         |
 |                                               |                                 |                                    | (:doc:`../calim/simager`). When true, the following parameters are|
 |                                               |                                 |                                    | used. If left blank (the default), the value is given by the      |
-|                                               |                                 |                                    | overall parameter ``DO_ALT_IMAGER``.                              |
+|                                               |                                 |                                    | overall parameter ``DO_ALT_IMAGER`` (see                          |
+|                                               |                                 |                                    | :doc:`ControlParameters`).                                        |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``NCHAN_PER_CORE_SL``                         | 54                              | nchanpercore                       | The number of channels each core will process.                    |
 |                                               |                                 | (:doc:`../calim/imager`)           |                                                                   |
