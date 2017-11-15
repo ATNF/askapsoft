@@ -38,7 +38,7 @@ beamlog=beamlog.${imageName}.txt
 # Dependencies for the job
 DEP=""
 if [ "$FIELD" == "." ]; then
-    DEP=$(addDep "$DEP" "$ID_LINMOS_SPECTRAL_ALL_RESTORED")
+    DEP=$(addDep "$DEP" "$ID_LINMOS_SPECTRAL_RESTORED_ALL")
 elif [ "$BEAM" == "all" ]; then
     DEP=$(addDep "$DEP" "$ID_LINMOS_SPECTRAL_RESTORED")
 else
