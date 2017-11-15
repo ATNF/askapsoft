@@ -166,8 +166,8 @@ for im in \${imlist}; do
         HAVE_IMAGES=false
         echo "ERROR - Could not create \${im}.fits"
     else
-        mkdir -p ${seldir}
-        cd ${seldir}
+        mkdir -p \${seldir}
+        cd \${seldir}
         ln -s -f "\${im}.fits" .
         cd ..
     fi
@@ -178,8 +178,8 @@ if [ "\${HAVE_IMAGES}" == "true" ]; then
     parset=${parsets}/science_selavy_spectral_\${SLURM_JOB_ID}.in
     log=${logs}/science_selavy_spectral_\${SLURM_JOB_ID}.log
     
-    mkdir -p ${seldir}
-    cd ${seldir}
+    mkdir -p \${seldir}
+    cd \${seldir}
 
     # Directories for extracted data products
     mkdir -p "${OUTPUT}/$selavySpectraDir"
