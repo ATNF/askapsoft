@@ -370,6 +370,12 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                 |                                                        | the value is negative, or more than one, no consideration     |
 |                                            |                                 |                                                        | of the weight is made.                                        |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``SELFCAL_COMPONENT_SNR_LIMIT``            | 10                              | Used to create Cmodel.flux_limit                       | The signal-to-noise level used to set the flux limit for      |
+|                                            |                                 | (:doc:`../calim/cmodel`)                               | components that are used by Cmodel. The image noise values    |
+|                                            |                                 |                                                        | reported for all components are averaged, then multiplied by  |
+|                                            |                                 |                                                        | this value to form the Cmodel flux limit. If left blank (""), |
+|                                            |                                 |                                                        | the flux limit is determined by ``SELFCAL_MODEL_FLUX_LIMIT``. |
++--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``SELFCAL_MODEL_FLUX_LIMIT``               | 10uJy                           | Cmodel.flux_limit (:doc:`../calim/cmodel`)             | The minimum integrated flux for components to be included in  |
 |                                            |                                 |                                                        | the model used for self-calibration.                          |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+

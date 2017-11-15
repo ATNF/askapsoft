@@ -110,6 +110,13 @@ Selavy.Weights.weightsCutoff                    = ${SELFCAL_SELAVY_WEIGHTSCUT}"
 
     if [ "${SELFCAL_METHOD}" == "Cmodel" ]; then
 
+        # If no SNR limit has been given, fall back to the flux limit
+        if [ "${SELFCAL_COMPONENT_SNR_LIMIT}" == "" ]; then
+            CmodelFluxLimit="Cmodel.flux_limit         = ${SELFCAL_MODEL_FLUX_LIMIT}"
+        else
+            CmodelFluxLimit="# flux limit for cmodel determined from image noise - see below"
+        fi
+        
         CmodelParset="##########
 ## Creation of the model image
 ##
@@ -418,6 +425,14 @@ EOFINNER
         fi
 
         if [ "\${selfcalMethod}" == "Cmodel" ]; then
+            fluxLimitSNR=${SELFCAL_COMPONENT_SNR_LIMIT}
+            if [ "\${fluxLimitSNR}" != "" ]; then
+                # Get the average noise at location of components, and set a flux limit for cmodel based on it
+                avNoise=\$(awk 'BEGIN{sum=0;ct=0}{if(NF==38)&&(\$33>0.){ sum+=\$33; ct++; }}END{print sum/ct}' selavy-results.components.txt)
+                fluxLimit=\$(echo \$avNoise \$fluxLimitSNR | awk '{print \$1*\$2}')
+                echo "# Flux limit for cmodel determined from image noise & SNR=${SELFCAL_COMPONENT_SNR_LIMIT}
+Cmodel.flux_limit    = \${fluxLimit}mJy" >> \$parset
+            fi
             log=${logs}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}_cmodel.log
             echo "--- Model creation with $cmodel ---" > "\$log"
             NCORES=2
