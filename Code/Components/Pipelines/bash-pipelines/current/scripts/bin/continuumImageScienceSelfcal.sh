@@ -425,7 +425,7 @@ EOFINNER
         fi
 
         if [ "\${selfcalMethod}" == "Cmodel" ]; then
-            fluxLimitSNR=${SELFCAL_COMPONENT_SNR_LIMIT}
+            fluxLimitSNR="${SELFCAL_COMPONENT_SNR_LIMIT}"
             if [ "\${fluxLimitSNR}" != "" ]; then
                 # Get the average noise at location of components, and set a flux limit for cmodel based on it
                 avNoise=\$(awk 'BEGIN{sum=0;ct=0}{if(NF==38)&&(\$33>0.){ sum+=\$33; ct++; }}END{print sum/ct}' selavy-results.components.txt)
