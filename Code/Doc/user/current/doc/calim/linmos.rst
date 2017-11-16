@@ -57,6 +57,8 @@ For example, the *weighttype* parameter becomes *linmos.weighttype*.
 |                  |                  |              |- **FromPrimaryBeamModel**: using a Gaussian primary-beam   |
 |                  |                  |              |  model. **If beam centres are not specified (see below),   |
 |                  |                  |              |  the reference pixel of each input image is used.**        |
+|                  |                  |              |- **Combined**: ** linmos-mpi only ** uses both the weight  |
+|                  |                  |              |  images and the PB model to form the pixel weight          |
 +------------------+------------------+--------------+------------------------------------------------------------+
 |weightstate       |string            |Corrected     |The weighting state of the input images.                    |
 |                  |                  |              |Options:                                                    |
