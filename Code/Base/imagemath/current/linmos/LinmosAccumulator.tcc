@@ -1098,16 +1098,29 @@ namespace askap {
 
             }
 
-            T minVal, maxVal;
+            T minVal, maxVal, wgtCutoff;
             IPosition minPos, maxPos;
-            minMax(minVal,maxVal,minPos,maxPos,wgtBuffer);
-            T wgtCutoff = itsCutoff * itsCutoff * maxVal; // wgtBuffer is prop. to image (gain/sigma)^2
+            if (itsWeightType == FROM_BP_MODEL) {
+              minMax(minVal,maxVal,minPos,maxPos,wgtBuffer); // this covers the
+            }
+            else if (itsWeightType == COMBINED) {
+                minMax(minVal,maxVal,minPos,maxPos,wgtBeamBuffer);
+                maxVal = wgtBuffer.getAt(maxPos) * maxVal * maxVal;
+            }
+            else { // FROM WEIGHT IMAGES
+              maxVal = 0.0;
+            }
+
+            wgtCutoff = itsCutoff * itsCutoff * maxVal; // wgtBuffer is prop. to image (gain/sigma)^2
 
             // Accumulate the pixels of this slice.
             // Could restrict it (and the regrid) to a smaller region of interest.
             if (itsWeightState == CORRECTED) {
-                for (int x=0; x<outPix.shape()[0];++x) {
-                    for (int y=0; y<outPix.shape()[1];++y) {
+
+
+
+              for (int x=0; x<outPix.shape()[0];++x) {
+                  for (int y=0; y<outPix.shape()[1];++y) {
                         fullpos[0] = x;
                         fullpos[1] = y;
                         pos[0] = x;
@@ -1119,8 +1132,8 @@ namespace askap {
                             outPix(fullpos) = outPix(fullpos) + itsOutBuffer.getAt(pos) * theWeight;
                             outWgtPix(fullpos) = outWgtPix(fullpos) + theWeight;
                         }
-                    }
-                }
+                  }
+              }
             } else if (itsWeightState == INHERENT) {
                 for (int x=0; x<outPix.shape()[0];++x) {
                     for (int y=0; y<outPix.shape()[1];++y) {
@@ -1298,11 +1311,20 @@ namespace askap {
 
             }
 
-            T minVal, maxVal;
+            T minVal, maxVal, wgtCutoff;
             IPosition minPos, maxPos;
-            minMax(minVal,maxVal,minPos,maxPos,wgtPix);
-            T wgtCutoff = itsCutoff * itsCutoff * maxVal; // wgtPix is prop. to image (gain/sigma)^2
 
+            if (itsWeightType == FROM_BP_MODEL) {
+              minMax(minVal,maxVal,minPos,maxPos,wgtPix); // this covers the
+            }
+            else if (itsWeightType == COMBINED) {
+                minMax(minVal,maxVal,minPos,maxPos,wgtPixBeam);
+                maxVal = wgtPix(maxPos) * maxVal * maxVal;
+            }
+            else { // FROM WEIGHT IMAGES
+              maxVal = 0.0;
+            }
+            wgtCutoff = itsCutoff * itsCutoff * maxVal; // wgtPix is prop. to image (gain/sigma)^2
 ///
 ///
 
