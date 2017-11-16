@@ -1084,11 +1084,13 @@ namespace askap {
                         if (itsWeightType == FROM_BP_MODEL) {
                           // this replicates the case where we just use the PB model
                           wgtBuffer.putAt(pb * pb, pos); // this is an image
+
                         }
                         else { // COMBINED
                           // this replicates the case where we use the model and the inv. variance
                           // so we need somewhere to put the beam as the wgtBuffer contains the inv. variance
                           wgtBeamBuffer.putAt(pb,pos);
+
                         }
 
 
@@ -1096,28 +1098,29 @@ namespace askap {
                     }
                 }
 
+
             }
 
             T minVal, maxVal, wgtCutoff;
             IPosition minPos, maxPos;
             if (itsWeightType == FROM_BP_MODEL) {
               minMax(minVal,maxVal,minPos,maxPos,wgtBuffer); // this covers the
+              ASKAPLOG_INFO_STR(linmoslogger, "Primary beam model weighting - maxVal: " << maxVal );
             }
             else if (itsWeightType == COMBINED) {
                 minMax(minVal,maxVal,minPos,maxPos,wgtBeamBuffer);
                 maxVal = wgtBuffer.getAt(maxPos) * maxVal * maxVal;
+                  ASKAPLOG_INFO_STR(linmoslogger, "Primary COMBINED beam model weighting - maxVal: " << maxVal << " NVIS: " << wgtBuffer.getAt(maxPos) << " beam " <<  wgtBeamBuffer.getAt(maxPos) );
             }
             else { // FROM WEIGHT IMAGES
               maxVal = 0.0;
             }
 
             wgtCutoff = itsCutoff * itsCutoff * maxVal; // wgtBuffer is prop. to image (gain/sigma)^2
-
+            ASKAPLOG_INFO_STR(linmoslogger,"Weight cut-off: " << wgtCutoff);
             // Accumulate the pixels of this slice.
             // Could restrict it (and the regrid) to a smaller region of interest.
             if (itsWeightState == CORRECTED) {
-
-
 
               for (int x=0; x<outPix.shape()[0];++x) {
                   for (int y=0; y<outPix.shape()[1];++y) {
@@ -1162,7 +1165,7 @@ namespace askap {
 
                         }
 
-                        if (theWeight >=wgtCutoff) {
+                        if (theWeight >= wgtCutoff) {
                             outPix(fullpos) = outPix(fullpos) + itsOutBuffer.getAt(pos) * theWeight;
                             outWgtPix(fullpos) = outWgtPix(fullpos) + theDeWeight;
                         }
@@ -1242,11 +1245,7 @@ namespace askap {
             Array<T> wgtPix; // typically for the weight image
             Array<T> wgtPixBeam;// typically for the weight beam
 
-
-            // set the weights, either to those read in or using the primary-beam model
-            if (itsWeightType == FROM_WEIGHT_IMAGES) {
-                wgtPix.reference(inWgtPix);
-            }
+            wgtPix.reference(inWgtPix); // note FROM_BP_MODEL overwrites this - the others dont
 
             if ( itsWeightType == FROM_BP_MODEL || itsWeightType == COMBINED ) {
 
@@ -1304,10 +1303,6 @@ namespace askap {
                   }
 
                 }
-                else {
-                  wgtPix.reference(inWgtPix);
-                }
-
 
             }
 
@@ -1315,16 +1310,22 @@ namespace askap {
             IPosition minPos, maxPos;
 
             if (itsWeightType == FROM_BP_MODEL) {
+
               minMax(minVal,maxVal,minPos,maxPos,wgtPix); // this covers the
+              ASKAPLOG_INFO_STR(linmoslogger, "Primary beam model weighting - maxVal: " << maxVal );
             }
             else if (itsWeightType == COMBINED) {
                 minMax(minVal,maxVal,minPos,maxPos,wgtPixBeam);
-                maxVal = wgtPix(maxPos) * maxVal * maxVal;
+                T temp = wgtPix(maxPos) * maxVal * maxVal;
+                maxVal = temp;
+                ASKAPLOG_INFO_STR(linmoslogger, "Primary COMBINED beam model weighting - maxVal: " << maxVal << " NVIS: " << wgtPix(maxPos) << " beam " <<  wgtPixBeam(maxPos) );
             }
             else { // FROM WEIGHT IMAGES
               maxVal = 0.0;
             }
+
             wgtCutoff = itsCutoff * itsCutoff * maxVal; // wgtPix is prop. to image (gain/sigma)^2
+            ASKAPLOG_INFO_STR(linmoslogger,"Weight cut-off: " << wgtCutoff);
 ///
 ///
 
@@ -1343,6 +1344,7 @@ namespace askap {
                             outPix(fullpos)    = outPix(fullpos)    + inPix(fullpos) * theWeight;
                             outWgtPix(fullpos) = outWgtPix(fullpos) + theWeight ;
                         }
+
                     }
                 }
             } else if (itsWeightState == INHERENT) {
@@ -1369,9 +1371,9 @@ namespace askap {
                           theWeight = wgtPix(wgtpos);
                           theDeWeight = wgtPix(wgtpos);
                         }
-                        if (theWeight>=wgtCutoff) {
-                            outPix(fullpos)    = outPix(fullpos)    + inPix(fullpos) * sqrt(wgtPix(wgtpos));
-                            outWgtPix(fullpos) = outWgtPix(fullpos) + wgtPix(wgtpos);
+                        if (theWeight >= wgtCutoff) {
+                            outPix(fullpos)    = outPix(fullpos)    + inPix(fullpos) * theWeight;
+                            outWgtPix(fullpos) = outWgtPix(fullpos) + theDeWeight;
                         }
                     }
                 }
