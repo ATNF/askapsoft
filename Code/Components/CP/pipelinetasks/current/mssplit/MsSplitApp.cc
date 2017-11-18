@@ -65,9 +65,9 @@
 #include "casacore/casa/Quanta/MVTime.h"
 #include "casacore/tables/Tables/TableDesc.h"
 #include "casacore/tables/Tables/SetupNewTab.h"
-#include "casacore/tables/Tables/IncrementalStMan.h"
-#include "casacore/tables/Tables/StandardStMan.h"
-#include "casacore/tables/Tables/TiledShapeStMan.h"
+#include "casacore/tables/DataMan/IncrementalStMan.h"
+#include "casacore/tables/DataMan/StandardStMan.h"
+#include "casacore/tables/DataMan/TiledShapeStMan.h"
 #include "casacore/ms/MeasurementSets/MeasurementSet.h"
 #include "casacore/ms/MeasurementSets/MSColumns.h"
 
@@ -205,10 +205,15 @@ void MsSplitApp::getRowsToKeep(const casa::MeasurementSet& ms,
     ASKAPLOG_INFO_STR(logger,"First good row for this split is " << *it); 
     int nextGoodRow = 0;
     int nGood = 1; // there is always at least 1 good one
+    // mv: in the process of cleaning out compiler warnings I've noticed the following for-loop
+    //     where I didn't like handling of iterators. Instead of trying to clean up logic, I've
+    //     added the following assert statement to avoid a nasty surprise if the vector happens
+    //     to be empty 
+    ASKAPASSERT(rowsToKeep.begin() != rowsToKeep.end());
     for (it = rowsToKeep.begin(); it != rowsToKeep.end()-1;++it) {
         nextGoodRow = (*it)+1;
 	// add additional condition to check nGood < maxSimultaneousRows -- wasim 
-        if (*(it+1) == nextGoodRow && nGood < maxSimultaneousRows) {
+        if (*(it+1) == nextGoodRow && nGood < static_cast<int>(maxSimultaneousRows)) {
             nGood++;
         }
         else {
