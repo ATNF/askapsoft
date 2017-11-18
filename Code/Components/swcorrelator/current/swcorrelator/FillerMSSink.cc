@@ -46,9 +46,9 @@
 #include "casacore/tables/Tables/ScaColDesc.h"
 #include "casacore/tables/Tables/ScalarColumn.h"
 #include "casacore/tables/Tables/SetupNewTab.h"
-#include "casacore/tables/Tables/IncrementalStMan.h"
-#include "casacore/tables/Tables/StandardStMan.h"
-#include "casacore/tables/Tables/TiledShapeStMan.h"
+#include "casacore/tables/DataMan/IncrementalStMan.h"
+#include "casacore/tables/DataMan/StandardStMan.h"
+#include "casacore/tables/DataMan/TiledShapeStMan.h"
 #include <casacore/casa/Arrays/MatrixMath.h>
 #include <casacore/casa/Arrays/ArrayMath.h>
 #include <casacore/measures/Measures/MeasFrame.h>
