@@ -25,7 +25,7 @@
 /// along with this program; if not, write to the Free Software
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
-/// @author Max Voronkov <maxim.voronkov@csiro.au>
+/// @author Steve Ord <stephen.ord@csiro.au>
 
 #include <imageaccess/ImageAccessFactory.h>
 #include <cppunit/extensions/HelperMacros.h>
@@ -121,7 +121,7 @@ public:
 
             for (int y=0; y<shape[1]; ++y) {
                 for (int z = 0; z < shape[2]; ++z) {
-                    std::cout << x << ":" << y << ":" << z << std::endl;
+                    //std::cout << x << ":" << y << ":" << z << std::endl;
                     const casa::IPosition index(3,x,y,z);
                     CPPUNIT_ASSERT(fabs(readBack(index)-arr(index))<1e-7);
                 }
