@@ -17,6 +17,13 @@ are optional. If present, a corresponding data selection is done and only those 
 |                      |              |              |either **Cimager** or **Ccalibrator**. The value is 0-based |
 |                      |              |              |number of the beam.                                         |
 +----------------------+--------------+--------------+------------------------------------------------------------+
+|Beam                  |uint32        |None          |Synonym of Feed. Should probably be used instead to avoid   |
+|                      |              |              |confusion. Note, only one of the two recognised keywords is |
+|                      |              |              |allowed to be present in the same parset.                   |
++----------------------+--------------+--------------+------------------------------------------------------------+
+|Antenna               |uint32        |None          |Select all baselines to the given antenna, irrespective of  |
+|                      |              |              |the order.                                                  |
++----------------------+--------------+--------------+------------------------------------------------------------+
 |Baseline              |vector<uint32>|None          |Select a subset of the data corresponding to a particular   |
 |                      |              |              |baseline. If defined, only data from the given baseline will|
 |                      |              |              |be read from the dataset and processed by either **Cimager**|
