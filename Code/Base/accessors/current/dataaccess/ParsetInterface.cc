@@ -51,7 +51,12 @@ void askap::accessors::operator<<(const boost::shared_ptr<IDataSelector> &sel,
 {
   ASKAPDEBUGASSERT(sel);
   if (parset.isDefined("Feed")) {
+      ASKAPCHECK(!parset.isDefined("Beam"), "Both 'Feed' and 'Beam' should not be defined simultaneously!");
       sel->chooseFeed(static_cast<casa::uInt>(parset.getUint32("Feed")));
+  }
+  if (parset.isDefined("Beam")) {
+      ASKAPCHECK(!parset.isDefined("Feed"), "Both 'Feed' and 'Beam' should not be defined simultaneously!");
+      sel->chooseFeed(static_cast<casa::uInt>(parset.getUint32("Beam")));
   }
   if (parset.isDefined("Baseline")) {
       std::vector<LOFAR::uint32> baseline = parset.getUint32Vector("Baseline");
@@ -61,6 +66,9 @@ void askap::accessors::operator<<(const boost::shared_ptr<IDataSelector> &sel,
       }
       sel->chooseBaseline(static_cast<casa::uInt>(baseline[0]),
                           static_cast<casa::uInt>(baseline[1]));  
+  }
+  if (parset.isDefined("Antenna")) {
+      sel->chooseAntenna(static_cast<casa::uInt>(parset.getUint32("Antenna")));
   }
   if (parset.isDefined("Channels")) {
       std::vector<LOFAR::uint32> chans = parset.getUint32Vector("Channels");

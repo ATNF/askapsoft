@@ -84,6 +84,10 @@ public:
   /// Which one is the first and which is the second is not important
   virtual void chooseBaseline(casa::uInt ant1, casa::uInt ant2);
 
+  /// Choose all baselines to given antenna
+  /// @param[in] ant the sequence number of antenna
+  virtual void chooseAntenna(casa::uInt ant);
+
   /// Choose a single spectral window (also known as IF).
   /// @param[in] spWinID the ID of the spectral window to choose
   virtual void chooseSpectralWindow(casa::uInt spWinID);

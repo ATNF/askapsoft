@@ -61,6 +61,7 @@ class TableDataAccessTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(corrTypeSelectionTest);
   CPPUNIT_TEST(userDefinedIndexSelectionTest);
   CPPUNIT_TEST(uvDistanceSelectionTest);
+  CPPUNIT_TEST(antennaSelectionTest);
   CPPUNIT_TEST_EXCEPTION(bufferManagerExceptionTest,casa::TableError);
   CPPUNIT_TEST(bufferManagerTest);
   CPPUNIT_TEST(dataDescTest);
@@ -85,6 +86,8 @@ public:
   void userDefinedIndexSelectionTest();
   /// test of selection based on uv-distance
   void uvDistanceSelectionTest();
+  /// test of selection based on antenna index
+  void antennaSelectionTest();
   /// test of read only operations of the whole table-based implementation
   void readOnlyTest();
   /// test exception if disk-based buffers are requested for a read-only table  
@@ -241,6 +244,43 @@ void TableDataAccessTest::uvDistanceSelectionTest()
             CPPUNIT_ASSERT(uvDist<=3000.);                                 
        }
   }  
+}
+
+/// test of selection based on antenna index
+void TableDataAccessTest::antennaSelectionTest()
+{
+  TableConstDataSource ds(TableTestRunner::msName());
+  IDataSelectorPtr sel = ds.createSelector();   
+  sel->chooseAntenna(2u);
+  for (IConstDataSharedIter it=ds.createConstIterator(sel);it!=it.end();++it) {  
+       for (casa::uInt row=0;row<it->nRow();++row) {
+            CPPUNIT_ASSERT((it->antenna1()[row] == 2u) || (it->antenna2()[row] == 2u));
+       }
+  }
+  // and now checking that chaining different selectors work as expected
+  sel = ds.createSelector();
+  sel->chooseCrossCorrelations();
+  sel->chooseAntenna(2u);
+  for (IConstDataSharedIter it=ds.createConstIterator(sel);it!=it.end();++it) {  
+       casa::uInt cntFirst = 0u;
+       casa::uInt cntSecond = 0u;
+       for (casa::uInt row=0;row<it->nRow();++row) {
+            CPPUNIT_ASSERT((it->antenna1()[row] != it->antenna2()[row]) ||
+                           (it->feed1()[row] != it->feed2()[row])); 
+            CPPUNIT_ASSERT((it->antenna1()[row] == 2u) || (it->antenna2()[row] == 2u));
+            if (it->antenna1()[row] == 2u) {
+                ++cntFirst;
+            } else {
+                ++cntSecond;
+            }
+       }
+       // test dataset has 6 antennas, so 5 cross-correlations with antenna 2 
+       // first index is slow varying, so 3 cross-correlations will have antenna 2 as
+       // the first index and 2 as the second
+       CPPUNIT_ASSERT_EQUAL(5u, cntFirst + cntSecond);
+       CPPUNIT_ASSERT_EQUAL(3u, cntFirst);
+       CPPUNIT_ASSERT_EQUAL(2u, cntSecond);
+  }
 }
 
 

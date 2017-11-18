@@ -91,6 +91,21 @@ void TableScalarFieldSelector::chooseBaseline(casa::uInt ant1,
    }
 }
 
+/// Choose all baselines to given antenna
+/// @param[in] ant the sequence number of antenna
+void TableScalarFieldSelector::chooseAntenna(casa::uInt ant)
+{
+   if (itsTableSelector.isNull()) {
+       itsTableSelector=(table().col("ANTENNA1") ==
+           static_cast<casa::Int>(ant)) || (table().col("ANTENNA2") ==
+	   static_cast<casa::Int>(ant));
+   } else {
+       itsTableSelector=itsTableSelector && ((table().col("ANTENNA1") ==
+           static_cast<casa::Int>(ant)) || (table().col("ANTENNA2") ==
+	   static_cast<casa::Int>(ant)));
+   }
+}
+
 /// @brief Choose samples corresponding to a uv-distance larger than threshold
 /// @details This effectively rejects the baselines giving a smaller
 /// uv-distance than the specified threshold
