@@ -829,6 +829,14 @@ EOF
         ####################
         # Mosaicking parameters
 
+        # Check the value of weighttype for the single-field mosaicking job
+        if [ "${LINMOS_SINGLE_FIELD_WEIGHTTYPE}" != "Combined" ] &&
+               [ "${LINMOS_SINGLE_FIELD_WEIGHTTYPE}" != "FromPrimaryBeamModel" ]; then
+            echo "WARNING - LINMOS_SINGLE_FIELD_WEIGHTTYPE can only have value of \"Combined\" or \"FromPrimaryBeamModel\""
+            echo "        - Setting to \"Combined\""
+            LINMOS_SINGLE_FIELD_WEIGHTTYPE="Combined"
+        fi
+        
         # Fix the direction string for linmos - don't need the J2000 bit
         linmosFeedCentre=$(echo "${DIRECTION_SCI}" | awk -F',' '{printf "%s,%s]",$1,$2}')
 
@@ -838,7 +846,7 @@ EOF
         # If it isn't, give a warning and push on
         chanPerCoreLinmosOK=$(echo "${NUM_CHAN_SCIENCE_SL}" "${NUM_SPECTRAL_CUBES}" "${NCHAN_PER_CORE_SPECTRAL_LINMOS}" | awk '{if (($1/$2 % $3)==0) print "yes"; else print "no"}')
         if [ "${chanPerCoreLinmosOK}" == "no" ] && [ "${DO_MOSAIC}" == "true" ]; then
-            echo "Warning! Number of spectral-line channels (${NUM_CHAN_SCIENCE_SL}) is not an exact multiple of NCHAN_PER_CORE_SPECTRAL_LINMOS (${NCHAN_PER_CORE_SPECTRAL_LINMOS})."
+            echo "WARNING - Number of spectral-line channels (${NUM_CHAN_SCIENCE_SL}) is not an exact multiple of NCHAN_PER_CORE_SPECTRAL_LINMOS (${NCHAN_PER_CORE_SPECTRAL_LINMOS})."
             echo "         Pushing on, but there is the risk of memory problems with the spectral linmos task."
         fi
         # Determine the number of cores needed for spectral-line mosaicking

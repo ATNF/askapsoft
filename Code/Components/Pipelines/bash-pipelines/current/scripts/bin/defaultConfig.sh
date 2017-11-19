@@ -818,6 +818,8 @@ LINMOS_BEAM_SPACING="1deg"
 LINMOS_PSF_REF=0
 # Cutoff for weights in linmos
 LINMOS_CUTOFF=0.2
+# The argument used for linmos.weighttype when mosaicking all beams of a given footprint. Can be either "Combined" or "FromPrimaryBeamModel".
+LINMOS_SINGLE_FIELD_WEIGHTTYPE="Combined"
 
 ##############################
 # Selavy source finder - continuum

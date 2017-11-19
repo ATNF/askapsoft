@@ -110,22 +110,26 @@ for POLN in \$POL_LIST; do
 
     for subband in ${SUBBAND_WRITER_LIST_CONTCUBE}; do
     
-        beamList=""
+        imList=""
+        wtList=""
         for BEAM in \${BEAMS_TO_USE}; do
             setImageProperties contcube
             im="\${imageName}"
+            wt="\${DIR}/\${weightsImage}"
             if [ -e "\${im}" ]; then
-                if [ "\${beamList}" == "" ]; then
-                    beamList="\${im%%.fits}"
+                if [ "\${imList}" == "" ]; then
+                    imList="\${im%%.fits}"
+                    wtList="\${wt%%.fits}"
                 else
-                    beamList="\${beamList},\${im%%.fits}"
+                    imList="\${imList},\${im%%.fits}"
+                    wtList="\${wtList},\${wt%%.fits}"
                 fi
             fi
         done
     
         jobCode=${jobname}_\${imageCode}\${subband}
     
-        if [ "\${beamList}" != "" ]; then
+        if [ "\${imList}" != "" ]; then
             BEAM=all
             setImageProperties contcube
             if [ "\${imageCode}" != "restored" ]; then
@@ -134,15 +138,16 @@ for POLN in \$POL_LIST; do
                     weightsImage="\${weightsImage}.fits"
                 fi
             fi
-            echo "Mosaicking \${beamList} to form \${imageName}"
+            echo "Mosaicking \${imList} to form \${imageName}"
             parset=${parsets}/science_\${jobCode}_\${pol}_${FIELDBEAM}_\${SLURM_JOB_ID}.in
             log=${logs}/science_\${jobCode}_\${pol}_${FIELDBEAM}_\${SLURM_JOB_ID}.log
             cat > "\${parset}" << EOFINNER
-linmos.names            = [\${beamList}]
+linmos.names            = [\${imList}]
+linmos.weights          = [\${wtList}]
 linmos.imagetype        = \${IMAGETYPE_CONTCUBE}
 linmos.outname          = \${imageName%%.fits}
 linmos.outweight        = \${weightsImage%%.fits}
-linmos.weighttype       = FromPrimaryBeamModel
+linmos.weighttype       = ${LINMOS_SINGLE_FIELD_WEIGHTTYPE}
 linmos.weightstate      = Inherent
 ${reference}
 linmos.psfref           = ${LINMOS_PSF_REF}
@@ -153,7 +158,7 @@ EOFINNER
             NPPN=${CPUS_PER_CORE_CONTCUBE_IMAGING}
             aprun -n \${NCORES} -N \${NPPN} $linmosMPI -c "\$parset" > "\$log"
             err=\$?
-            for im in \$(echo "\${beamList}" | sed -e 's/,/ /g'); do
+            for im in \$(echo "\${imList}" | sed -e 's/,/ /g'); do
                 rejuvenate "\${im}"
             done
             extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} \${jobCode} "txt,csv"

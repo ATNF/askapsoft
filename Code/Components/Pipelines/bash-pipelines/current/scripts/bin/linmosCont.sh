@@ -120,7 +120,8 @@ for((LOOP=0;LOOP<=NUM_LOOPS;LOOP++)); do
 
         for((TTERM=0;TTERM<maxterm;TTERM++)); do
 
-            beamList=""
+            imList=""
+            wtList=""
             for BEAM in \${BEAMS_TO_USE}; do
                 setImageProperties cont
                 if [ "\$LOOP" -eq 0 ]; then
@@ -129,11 +130,14 @@ for((LOOP=0;LOOP<=NUM_LOOPS;LOOP++)); do
                     DIR="selfCal_\${imageBase}/Loop\${LOOP}"
                 fi
                 im="\${DIR}/\${imageName}"
+                wt="\${DIR}/\${weightsImage}"
                 if [ -e "\${im}" ]; then
-                    if [ "\${beamList}" == "" ]; then
-                        beamList="\${im%%.fits}"
+                    if [ "\${imList}" == "" ]; then
+                        imList="\${im%%.fits}"
+                        wtList="\${wt%%.fits}"
                     else
-                        beamList="\${beamList},\${im%%.fits}"
+                        imList="\${imList},\${im%%.fits}"
+                        wtList="\${wtList},\${wt%%.fits}"
                     fi
                 fi
             done
@@ -146,7 +150,7 @@ for((LOOP=0;LOOP<=NUM_LOOPS;LOOP++)); do
                 jobCode=\${jobCode}_L\${LOOP}
             fi
 
-            if [ "\${beamList}" != "" ]; then
+            if [ "\${imList}" != "" ]; then
                 BEAM=all
                 setImageProperties cont
                 if [ "\$LOOP" -gt 0 ]; then
@@ -157,15 +161,17 @@ for((LOOP=0;LOOP<=NUM_LOOPS;LOOP++)); do
                         weightsImage="\${weightsImage}.fits"
                     fi
                 fi
-                echo "Mosaicking to form \${imageName}"
+                echo "Mosaicking to form \${imageName} using weighttype=${LINMOS_SINGLE_FIELD_WEIGHTTYPE}"
+                echo "Image list = " << \${imList}
                 parset=${parsets}/science_\${jobCode}_${FIELDBEAM}_\${SLURM_JOB_ID}.in
                 log=${logs}/science_\${jobCode}_${FIELDBEAM}_\${SLURM_JOB_ID}.log
                 cat > "\${parset}" << EOFINNER
-linmos.names            = [\${beamList}]
+linmos.names            = [\${imList}]
+linmos.weights          = [\${wtList}]
 linmos.imagetype        = \${IMAGETYPE_CONT}
 linmos.outname          = \${imageName%%.fits}
 linmos.outweight        = \${weightsImage%%.fits}
-linmos.weighttype       = FromPrimaryBeamModel
+linmos.weighttype       = ${LINMOS_SINGLE_FIELD_WEIGHTTYPE}
 linmos.weightstate      = Inherent
 ${reference}
 linmos.psfref           = ${LINMOS_PSF_REF}
@@ -176,7 +182,7 @@ EOFINNER
                 NPPN=1
                 aprun -n \${NCORES} -N \${NPPN} $linmosMPI -c "\$parset" > "\$log"
                 err=\$?
-                for im in \$(echo "\${beamList}" | sed -e 's/,/ /g'); do
+                for im in \$(echo "\${imList}" | sed -e 's/,/ /g'); do
                     rejuvenate "\${im}"
                 done
                 extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} \${jobCode} "txt,csv"

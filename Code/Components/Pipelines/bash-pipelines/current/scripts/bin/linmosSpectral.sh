@@ -106,16 +106,20 @@ NUM_SPECTRAL_CUBES=${NUM_SPECTRAL_CUBES}
 subband="${subband}"
 IMAGETYPE_SPECTRAL="${IMAGETYPE_SPECTRAL}"
 
-beamList=""
+imList=""
+wtList=""
 for BEAM in \${BEAMS_TO_USE}; do
     setImageProperties spectral
     im="\${imageName}"
+    wt="\${DIR}/\${weightsImage}"
     if [ -e "\${im}" ]; then
-        echo "   Found! Adding to beamList"
-        if [ "\${beamList}" == "" ]; then
-            beamList="\${im%%.fits}"
+        echo "   Found! Adding to imList"
+        if [ "\${imList}" == "" ]; then
+            imList="\${im%%.fits}"
+            wtList="\${wt%%.fits}"
         else
-            beamList="\${beamList},\${im%%.fits}"
+            imList="\${imList},\${im%%.fits}"
+            wtList="\${wtList},\${wt%%.fits}"
         fi
     fi
 done
@@ -125,8 +129,8 @@ if [ "\${NUM_SPECTRAL_CUBES}" -gt 1 ]; then
     jobCode="\${jobCode}\${subband}"
 fi
 
-if [ "\${beamList}" != "" ]; then
-    echo "Have list of images to be mosaicked:  \$beamList"
+if [ "\${imList}" != "" ]; then
+    echo "Have list of images to be mosaicked:  \$imList"
     BEAM=all
     setImageProperties spectral
     if [ "\${imageCode}" != "restored" ]; then
@@ -135,15 +139,16 @@ if [ "\${beamList}" != "" ]; then
             weightsImage="\${weightsImage}.fits"
         fi
     fi
-    echo "Mosaicking \${beamList} to form \${imageName}"
+    echo "Mosaicking \${imList} to form \${imageName}"
     parset=${parsets}/science_\${jobCode}_${FIELDBEAM}_\${SLURM_JOB_ID}.in
     log=${logs}/science_\${jobCode}_${FIELDBEAM}_\${SLURM_JOB_ID}.log
     cat > "\${parset}" << EOFINNER
-linmos.names            = [\${beamList}]
+linmos.names            = [\${imList}]
+linmos.weights          = [\${wtList}]
 linmos.imagetype        = \${IMAGETYPE_SPECTRAL}
 linmos.outname          = \${imageName%%.fits}
 linmos.outweight        = \${weightsImage%%.fits}
-linmos.weighttype       = FromPrimaryBeamModel
+linmos.weighttype       = ${LINMOS_SINGLE_FIELD_WEIGHTTYPE}
 linmos.weightstate      = Inherent
 ${reference}
 linmos.psfref           = ${LINMOS_PSF_REF}
@@ -154,7 +159,7 @@ EOFINNER
     NPPN=${CPUS_PER_CORE_SPEC_IMAGING}
     aprun -n \${NCORES} -N \${NPPN} $linmosMPI -c "\$parset" > "\$log"
     err=\$?
-    for im in \$(echo "\${beamList}" | sed -e 's/,/ /g'); do
+    for im in \$(echo "\${imList}" | sed -e 's/,/ /g'); do
         rejuvenate "\${im}"
     done
     extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} \${jobCode} "txt,csv"
