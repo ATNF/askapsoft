@@ -1,4 +1,4 @@
-0.19.6 (15 November 2017)
+0.19.6 (19 November 2017)
 -------------------------
 
 A patch release for both the processing and pipeline areas. This fixes
@@ -25,6 +25,11 @@ Pipelines:
  * When copying raw per-beam measurement sets, there is now the option
    to use regular cp, instead of the dcp-over-ssh approach (which
    requires the ability to ssh to hpc-data).
+ * The first stage of mosaicking now uses the weighttype=Combined
+   option (see below), which should give a better reflection of the
+   data in the event different beams have different weights. Previous
+   behaviour can be used by setting the config parameter
+   LINMOS_SINGLE_FIELD_WEIGHTTYPE=FromPrimaryBeamModel.  
  * The following bugs have been fixed:
    - RM Synthesis is now turned off if only the Stokes-I continuum
      cube is being created (which is the default).
@@ -32,6 +37,12 @@ Pipelines:
      direction could be incorrect (if the full-resolution MS was
      absent). This has been fixed, by obtaining the direction from the
      averaged dataset.
+   - The continuum source-finding will now not attempt to measure
+     spectral terms of higher order than the number of terms requested 
+     in the imaging (for instance, if nterms=2, the spectral curvature
+     will not be measured). Similarly, in that situation the .taylor.2
+     images will not be provided as mosaics or as final archived
+     artefacts. 
 
 Processing software:
 
@@ -60,6 +71,9 @@ Processing software:
    - Fixed a bug that meant (in some cases) only a single input image
      was included in the mosaic. Happened when the input images had
      masks attached to them (for instance, combination of mosaics).
+   - New option of "weighttype=Combined" for linmos-mpi, that uses
+     both the weight images and the primary beam model to create the
+     output weights.
    
 
 
