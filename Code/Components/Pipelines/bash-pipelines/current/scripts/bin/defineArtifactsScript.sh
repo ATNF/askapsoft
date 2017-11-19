@@ -127,7 +127,6 @@ PROJECT_ID="${PROJECT_ID}"
 SB_SCIENCE="${SB_SCIENCE}"
 archivedConfig="${archivedConfig}"
 NUM_TAYLOR_TERMS="${NUM_TAYLOR_TERMS}"
-maxterm=\$(echo "\${NUM_TAYLOR_TERMS}" | awk '{print 2*\$1-1}')
 list_of_images="${IMAGE_LIST}"
 doBeams="${ARCHIVE_BEAM_IMAGES}"
 doSelfcalLoops="${ARCHIVE_SELFCAL_LOOP_MOSAICS}"
@@ -190,7 +189,7 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
         
             for imageCode in ${imageCodeList}; do
         
-                for((TTERM=0;TTERM<maxterm;TTERM++)); do
+                for((TTERM=0;TTERM<NUM_TAYLOR_TERMS;TTERM++)); do
         
                     for((LOOP=0;LOOP<=NUM_LOOPS;LOOP++)); do
 

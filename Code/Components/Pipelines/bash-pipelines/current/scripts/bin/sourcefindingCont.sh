@@ -172,16 +172,22 @@ contcube=${contCube}
 
 imlist="\${imlist} ${OUTPUT}/\${image}"
 
+haveT1=false
+haveT2=false
 if [ "\${NUM_TAYLOR_TERMS}" -gt 1 ]; then
     t1im=\$(echo "\$image" | sed -e 's/taylor\.0/taylor\.1/g')
     if [ -e "${OUTPUT}/\${t1im}" ]; then
         imlist="\${imlist} ${OUTPUT}/\${t1im}"
+        haveT1=true
     fi
     t2im=\$(echo "\$image" | sed -e 's/taylor\.0/taylor\.2/g')
-    if [ -e "${OUTPUT}/\${t2im}" ]; then
+    if [ -e "${OUTPUT}/\${t2im}" ] && [ "\${NUM_TAYLOR_TERMS}" -gt 2 ]; then
         imlist="\${imlist} ${OUTPUT}/\${t2im}"
+        haveT2=true
     fi
 fi
+# Set the flag indicating whether to measure from Taylor-term images
+TaylorTermUse="Selavy.findSpectralTerms = [\${haveT1}, \${haveT2}]"
 
 if [ "\${BEAM}" == "all" ]; then
     imlist="\${imlist} ${OUTPUT}/\${weights}"
@@ -269,6 +275,7 @@ Selavy.RMSynthesis = \${doRM}"
 
     cat > "\$parset" <<EOFINNER
 Selavy.image = \${fitsimage}
+\${TaylorTermUse}
 Selavy.SBid = ${SB_SCIENCE}
 Selavy.nsubx = ${SELAVY_NSUBX}
 Selavy.nsuby = ${SELAVY_NSUBY}

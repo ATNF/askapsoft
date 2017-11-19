@@ -101,7 +101,6 @@ cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
 DO_ALT_IMAGER_CONT="${DO_ALT_IMAGER_CONT}"
 NUM_TAYLOR_TERMS=${NUM_TAYLOR_TERMS}
-maxterm=\$(echo "\${NUM_TAYLOR_TERMS}" | awk '{print 2*\$1-1}')
 IMAGE_BASE_CONT=${IMAGE_BASE_CONT}
 FIELD=${FIELD}
 BEAMS_TO_USE="${BEAMS_TO_USE}"
@@ -118,7 +117,7 @@ for((LOOP=0;LOOP<=NUM_LOOPS;LOOP++)); do
 
     for imageCode in ${mosaicImageList}; do
 
-        for((TTERM=0;TTERM<maxterm;TTERM++)); do
+        for((TTERM=0;TTERM<NUM_TAYLOR_TERMS;TTERM++)); do
 
             imList=""
             wtList=""
@@ -143,7 +142,7 @@ for((LOOP=0;LOOP<=NUM_LOOPS;LOOP++)); do
             done
 
             jobCode=${jobname}_\${imageCode}
-            if [ "\$maxterm" -gt 1 ]; then
+            if [ "\${NUM_TAYLOR_TERMS}" -gt 1 ]; then
                 jobCode=\${jobCode}_T\${TTERM}
             fi
             if [ "\$LOOP" -gt 0 ]; then

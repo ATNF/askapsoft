@@ -97,7 +97,6 @@ cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
 DO_ALT_IMAGER_CONT="${DO_ALT_IMAGER_CONT}"
 NUM_TAYLOR_TERMS=${NUM_TAYLOR_TERMS}
-maxterm=\$(echo "\${NUM_TAYLOR_TERMS}" | awk '{print 2*\$1-1}')
 IMAGE_BASE_CONT=${IMAGE_BASE_CONT}
 SB_SCIENCE=${SB_SCIENCE}
 
@@ -130,7 +129,7 @@ for THISTILE in \$FULL_TILE_LIST; do
 
     for imageCode in ${mosaicImageList}; do 
     
-        for((TTERM=0;TTERM<\${maxterm};TTERM++)); do
+        for((TTERM=0;TTERM<NUM_TAYLOR_TERMS;TTERM++)); do
     
             imList=""
             wtList=""
@@ -157,7 +156,7 @@ for THISTILE in \$FULL_TILE_LIST; do
             else
                 jobCode=linmosC_\${THISTILE}_\${imageCode}
             fi
-            if [ "\$maxterm" -gt 1 ]; then
+            if [ "\${NUM_TAYLOR_TERMS}" -gt 1 ]; then
                 jobCode=\${jobCode}_T\${TTERM}
             fi
 
