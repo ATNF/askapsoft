@@ -9,6 +9,18 @@ levels for a given scheduling block. Each field in the measurement set
 will have its own mosaic, combining all requested beams for that
 field.
 
+There is a choice for how the weighting is done at this step. The
+method until recently has been to use
+*weighttype=FromPrimaryBeamModel*, which simply applies a primary beam
+correction (given that the weights image is essentially flat for
+W-projection). The new default, however, is *weighttype=Combined*,
+which combines the primary beam weighting with the value from the
+weights image, better accounting for differences in effective
+integration time or flagging. The former method will produce mosaic
+weights images normalised to a peak of 1, while the latter does not
+apply any normalisation. The choice between the two is made with the
+``LINMOS_SINGLE_FIELD_WEIGHTTYPE`` config parameter.
+
 When the scheduling block has used the *tilesky* mode, the fields in the
 measurement set will be of the form *NAME_Tx-yI*, where *x* & *y* give
 the offsets in the tiling grid, and *I* is one of A,B,C,D, indicating
@@ -20,7 +32,8 @@ are combined.
 Finally, the mosaics of all fields and/or tiles are combined to form a
 single mosaic image for the scheduling block. This second stage of
 mosaicking is not done if there is only a single field in the
-measurement set.
+measurement set (instead the single field mosaic is copied to the
+top-level directory).
 
 Additionally, if there are multiple fields in the measurement set, but
 they should *not* be mosaicked together (for instance, if they are
@@ -170,7 +183,11 @@ primary beam at the centre of each image.
 | ``LINMOS_CUTOFF``                  | 0.2                                | linmos.cutoff           | The primary beam cutoff, as a fraction of the peak           |
 |                                    |                                    | (:doc:`../calim/linmos`)|                                                              |
 +------------------------------------+------------------------------------+-------------------------+--------------------------------------------------------------+
-| ``LINMOS_PSF_REF``                 | 0                                  | psfref                  | Reference beam for PSF (0-based) - which beam to take the    |
+| ``LINMOS_PSF_REF``                 | 0                                  | linmos.psfref           | Reference beam for PSF (0-based) - which beam to take the    |
 |                                    |                                    | (:doc:`../calim/linmos`)| PSF information from.                                        |
++------------------------------------+------------------------------------+-------------------------+--------------------------------------------------------------+
+| ``LINMOS_SINGLE_FIELD_WEIGHTTYPE`` | Combined                           | linmos.weighttype       | How to do the weighting in the first stage of mosaicking (all|
+|                                    |                                    | (:doc:`../calim/linmos`)| beams of a single field). Can be either "Combined" or        |
+|                                    |                                    |                         | "FromPrimaryBeamModel".                                      |
 +------------------------------------+------------------------------------+-------------------------+--------------------------------------------------------------+
  
