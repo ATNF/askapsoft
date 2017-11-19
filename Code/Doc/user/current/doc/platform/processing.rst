@@ -46,12 +46,20 @@ To login to the ASKAP Central Processor::
 
    ssh abc123@galaxy.pawsey.org.au
 
-Where abc123 is the login name Pawsey gave you. In that case that your CSIRO login differers
+Where abc123 is the login name Pawsey gave you. In that case that your CSIRO login differs
 from your Pawsey login, and to avoid having to specify the username each time, you can add
 the following to your ~/.ssh/config file::
 
    Host *.pawsey.org.au
      User abc123
+
+If you intend running the ASKAP pipelines
+(see :doc:`../pipelines/DataLocationSelection`), it is best to set up
+an SSH key for your Pawsey account. This will allow you to connect to
+other Pawsey machines (including hpc-data, which is used within the
+pipeline scripts) without having to provide a password. This can be
+done by using *ssh-keygen* to create *id_dsa.pub* and *id_dsa* files
+in your ~/.ssh directory.
 
 Setting up your account
 -------------------------
