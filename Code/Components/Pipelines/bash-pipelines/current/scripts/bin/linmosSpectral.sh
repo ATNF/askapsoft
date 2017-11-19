@@ -111,7 +111,7 @@ wtList=""
 for BEAM in \${BEAMS_TO_USE}; do
     setImageProperties spectral
     im="\${imageName}"
-    wt="\${DIR}/\${weightsImage}"
+    wt="\${weightsImage}"
     if [ -e "\${im}" ]; then
         echo "   Found! Adding to imList"
         if [ "\${imList}" == "" ]; then

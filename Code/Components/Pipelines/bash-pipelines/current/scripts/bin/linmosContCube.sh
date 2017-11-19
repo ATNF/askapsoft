@@ -115,7 +115,7 @@ for POLN in \$POL_LIST; do
         for BEAM in \${BEAMS_TO_USE}; do
             setImageProperties contcube
             im="\${imageName}"
-            wt="\${DIR}/\${weightsImage}"
+            wt="\${weightsImage}"
             if [ -e "\${im}" ]; then
                 if [ "\${imList}" == "" ]; then
                     imList="\${im%%.fits}"

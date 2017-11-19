@@ -162,7 +162,7 @@ for((LOOP=0;LOOP<=NUM_LOOPS;LOOP++)); do
                     fi
                 fi
                 echo "Mosaicking to form \${imageName} using weighttype=${LINMOS_SINGLE_FIELD_WEIGHTTYPE}"
-                echo "Image list = " << \${imList}
+                echo "Image list = \${imList}"
                 parset=${parsets}/science_\${jobCode}_${FIELDBEAM}_\${SLURM_JOB_ID}.in
                 log=${logs}/science_\${jobCode}_${FIELDBEAM}_\${SLURM_JOB_ID}.log
                 cat > "\${parset}" << EOFINNER
