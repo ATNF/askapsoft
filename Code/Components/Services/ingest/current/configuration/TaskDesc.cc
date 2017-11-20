@@ -116,6 +116,9 @@ TaskDesc::Type TaskDesc::toType(const std::string& type)
     if (type == "BufferedTask") {
         return TaskDesc::BufferedTask;
     }
+    if (type == "ShadowFlagTask") {
+        return TaskDesc::ShadowFlagTask;
+    }
 
     ASKAPTHROW(AskapError, "Unknown task type");
 }
