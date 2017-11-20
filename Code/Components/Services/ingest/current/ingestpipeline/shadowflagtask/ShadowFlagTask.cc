@@ -44,7 +44,8 @@ using namespace askap::cp::ingest;
 
 /// @brief Constructor
 ShadowFlagTask::ShadowFlagTask(const LOFAR::ParameterSet &parset, const Configuration &config) : 
-     itsDishDiameter(parset.getFloat("dish_diameter", 12)), itsDryRun(parset.getBool("dry_run", false))
+     itsDishDiameter(parset.getFloat("dish_diameter", 12)), itsDryRun(parset.getBool("dry_run", false)),
+     itsNumberOfBeams(-1)
 {
    ASKAPLOG_DEBUG_STR(logger, "Constructor");
    itsAntennaNames.reserve(config.antennas().size());
@@ -68,6 +69,11 @@ ShadowFlagTask::~ShadowFlagTask()
 void ShadowFlagTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
 {
    ASKAPDEBUGASSERT(chunk);
+   if (itsNumberOfBeams < 0) {
+       std::set<casa::uInt> beamIDs(chunk->beam1().begin(),chunk->beam1().end());
+       itsNumberOfBeams = static_cast<int>(beamIDs.size());
+       ASKAPCHECK(itsNumberOfBeams > 0, "Data chunk received on the first iteration seems to be empty");
+   }
    // first build a set of shadowed antennas
    std::set<casa::uInt> shadowedAntennasThisCycle;
    casa::Vector<casa::RigidVector<casa::Double, 3> > &uvw = chunk->uvw();
@@ -87,13 +93,19 @@ void ShadowFlagTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
             }
         }
    }
+   const bool logAtHigherPriority = (itsNumberOfBeams > 1) || (chunk->nRow() > 0 ? chunk->beam1()[0] == 0 : false);
    // now, check on changes in the list of flagged antennas for reporting
    for (std::set<casa::uInt>::const_iterator ci = shadowedAntennasThisCycle.begin(); 
                       ci != shadowedAntennasThisCycle.end(); ++ci) {
         if (itsShadowedAntennas.find(*ci) == itsShadowedAntennas.end()) {
             ASKAPDEBUGASSERT(*ci < itsAntennaNames.size());
-            ASKAPLOG_WARN_STR(logger, "Antenna "<<itsAntennaNames[*ci]<<" (id="<<*ci<<
-                  ") is now shadowed, corresponding baselines will be flagged until further notice");
+            if (logAtHigherPriority) {
+                ASKAPLOG_WARN_STR(logger, "Antenna "<<itsAntennaNames[*ci]<<" (id="<<*ci<<
+                     ") is now shadowed, corresponding baselines will be flagged until further notice");
+            } else {
+                ASKAPLOG_DEBUG_STR(logger, "Antenna "<<itsAntennaNames[*ci]<<" (id="<<*ci<<
+                     ") is now shadowed, corresponding baselines will be flagged until further notice");
+            }
         }
    }
 
@@ -101,14 +113,19 @@ void ShadowFlagTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
                       ci != itsShadowedAntennas.end(); ++ci) {
         if (shadowedAntennasThisCycle.find(*ci) == shadowedAntennasThisCycle.end()) {
             ASKAPDEBUGASSERT(*ci < itsAntennaNames.size());
-            ASKAPLOG_WARN_STR(logger, "Antenna "<<itsAntennaNames[*ci]<<" (id="<<*ci<<
-                  ") is no longer shadowed");
+            if (logAtHigherPriority) {
+                ASKAPLOG_WARN_STR(logger, "Antenna "<<itsAntennaNames[*ci]<<" (id="<<*ci<<
+                      ") is no longer shadowed");
+            } else {
+                ASKAPLOG_DEBUG_STR(logger, "Antenna "<<itsAntennaNames[*ci]<<" (id="<<*ci<<
+                      ") is no longer shadowed");
+            }
         }
    }
    itsShadowedAntennas = shadowedAntennasThisCycle;
    
    // now flag affected baselines
-   if (!itsDryRun) {
+   if (!itsDryRun && itsShadowedAntennas.size() > 0) {
        for (casa::uInt row = 0; row < chunk->nRow(); ++row) {
             if ((itsShadowedAntennas.find(chunk->antenna2()[row]) != itsShadowedAntennas.end()) || 
                 (itsShadowedAntennas.find(chunk->antenna1()[row]) != itsShadowedAntennas.end())) {

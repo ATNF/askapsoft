@@ -86,6 +86,14 @@ class ShadowFlagTask : public askap::cp::ingest::ITask {
         /// @details Used only for reporting
         std::vector<std::string> itsAntennaNames;
 
+        /// @brief number of beams in the data
+        /// @details To avoid spamming the log with one message per beam we
+        /// can downgrade the message for beams > 0 if it is the distributed by beam case.
+        /// Proper solution should probably involve communication between different ranks,
+        /// but current way will do for now.
+        /// @note negative value means uninitialised case
+        bool itsNumberOfBeams;
+
 }; // ShadowFlagTask class
 
 } // ingest
