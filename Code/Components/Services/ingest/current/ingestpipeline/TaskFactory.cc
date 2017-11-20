@@ -126,6 +126,7 @@ ITask::ShPtr TaskFactory::createTask(const TaskDesc& taskDescription)
             break;
         case TaskDesc::ShadowFlagTask:
             task.reset(new ShadowFlagTask(params, itsConfig));
+            break;
         default:
             ASKAPTHROW(AskapError, "Unknown task type specified");
             break;
