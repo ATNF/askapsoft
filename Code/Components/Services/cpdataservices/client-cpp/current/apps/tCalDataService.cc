@@ -40,9 +40,9 @@
 
 // Local package includes
 #include "calibrationclient/CalibrationDataServiceClient.h"
-#include "calibrationclient/JonesIndex.h"
-#include "calibrationclient/JonesJTerm.h"
-#include "calibrationclient/JonesDTerm.h"
+#include "calibaccess/JonesIndex.h"
+#include "calibaccess/JonesJTerm.h"
+#include "calibaccess/JonesDTerm.h"
 #include "calibrationclient/GenericSolution.h"
 
 using namespace std;
@@ -97,7 +97,7 @@ void addGainSolution(CalibrationDataServiceClient& svc, const casa::Long id,
         for (casa::Short beam = 1; beam <= nBeam; ++beam) {
             JonesJTerm jterm(casa::Complex(1.0, 1.0), true,
                     casa::Complex(1.0, 1.0), true);
-            sol.map()[JonesIndex(antenna, beam)] = jterm;
+            sol.map()[askap::accessors::JonesIndex(antenna, beam)] = jterm;
         }
     }
 
@@ -112,7 +112,7 @@ void addLeakageSolution(CalibrationDataServiceClient& svc, const casa::Long id,
     // Create a map entry for each antenna/beam combination
     for (casa::Short antenna = 1; antenna <= nAntenna; ++antenna) {
         for (casa::Short beam = 1; beam <= nBeam; ++beam) {
-            sol.map()[JonesIndex(antenna, beam)] = JonesDTerm(
+            sol.map()[askap::accessors::JonesIndex(antenna, beam)] = askap::accessors::JonesDTerm(
                     casa::Complex(1.0, 1.0), casa::Complex(1.0, 1.0));
         }
     }
@@ -130,8 +130,8 @@ void addBandpassSolution(CalibrationDataServiceClient& svc, const casa::Long id,
         for (casa::Short beam = 1; beam <= nBeam; ++beam) {
             JonesJTerm jterm(casa::Complex(1.0, 1.0), true,
                     casa::Complex(1.0, 1.0), true);
-            std::vector<JonesJTerm> jterms(nChan, jterm);
-            sol.map()[JonesIndex(antenna, beam)] = jterms;
+            std::vector<askap::accessors::JonesJTerm> jterms(nChan, jterm);
+            sol.map()[askap::accessors::JonesIndex(antenna, beam)] = jterms;
         }
     }
 
@@ -162,6 +162,7 @@ int main(int argc, char *argv[])
     const casa::Int nChan = parset.getInt32("test.nchannel");
 
     CalibrationDataServiceClient svc(locatorHost, locatorPort, serviceName);
+
     const casa::Double timestamp = 55790.1;
 
     Stopwatch sw;

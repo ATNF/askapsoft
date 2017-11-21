@@ -31,8 +31,8 @@
 #include "casacore/casa/aipstype.h"
 #include "casacore/casa/BasicSL/Complex.h"
 #include "CalibrationDataService.h" // Ice generated interface
-#include "calibrationclient/JonesJTerm.h"
-#include "calibrationclient/JonesIndex.h"
+#include "calibaccess/JonesJTerm.h"
+#include "calibaccess/JonesIndex.h"
 #include "calibrationclient/GenericSolution.h"
 
 // Classes to test
@@ -221,7 +221,7 @@ class IceMapperTest : public CppUnit::TestFixture {
             CPPUNIT_ASSERT_DOUBLES_EQUAL(expected.real, actual.real, tolerance);
             CPPUNIT_ASSERT_DOUBLES_EQUAL(expected.imag, actual.imag, tolerance);
         }
- 
+
         static const casa::Long theirTimestamp;
         static const casa::Short theirNAntenna;
         static const casa::Short theirNBeam;

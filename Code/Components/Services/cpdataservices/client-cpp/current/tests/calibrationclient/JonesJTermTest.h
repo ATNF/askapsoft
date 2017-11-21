@@ -32,7 +32,7 @@
 #include "casacore/casa/BasicSL/Complex.h"
 
 // Classes to test
-#include "calibrationclient/JonesJTerm.h"
+#include "calibaccess/JonesJTerm.h"
 
 namespace askap {
 namespace cp {
@@ -52,7 +52,7 @@ class JonesJTermTest : public CppUnit::TestFixture {
         }
 
         void testDefaultConstructor() {
-            JonesJTerm jterm;
+            accessors::JonesJTerm jterm;
             CPPUNIT_ASSERT_EQUAL(casa::Complex(-1.0, -1.0), jterm.g1());
             CPPUNIT_ASSERT_EQUAL(false, jterm.g1IsValid());
             CPPUNIT_ASSERT_EQUAL(casa::Complex(-1.0, -1.0), jterm.g2());
@@ -60,11 +60,11 @@ class JonesJTermTest : public CppUnit::TestFixture {
         }
 
         void testConstructor() {
-            casa::Complex g1(1.0, 1.0);            
+            casa::Complex g1(1.0, 1.0);
             casa::Bool g1Valid = true;
             casa::Complex g2(1.1, 1.1);
             casa::Bool g2Valid = false;
-            JonesJTerm jterm(g1, g1Valid, g2, g2Valid);
+            accessors::JonesJTerm jterm(g1, g1Valid, g2, g2Valid);
 
             CPPUNIT_ASSERT_EQUAL(g1, jterm.g1());
             CPPUNIT_ASSERT_EQUAL(g1Valid, jterm.g1IsValid());

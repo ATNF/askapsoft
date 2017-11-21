@@ -37,6 +37,8 @@
 #include <calibaccess/ParsetCalSolutionConstSource.h>
 #include <calibaccess/TableCalSolutionSource.h>
 #include <calibaccess/TableCalSolutionConstSource.h>
+#include <calibaccess/ServiceCalSolutionSource.h>
+
 #include <askap/AskapError.h>
 
 // logging stuff
@@ -52,7 +54,7 @@ namespace accessors {
 /// @brief Build an appropriate "calibration source" class
 /// @details This is a factory method generating a shared pointer to the calibration
 /// solution source according to the parset file which allows write operation.
-/// @param[in] parset parameters containing description of the class to be constructed 
+/// @param[in] parset parameters containing description of the class to be constructed
 /// (without leading Cimager., etc)
 /// @return shared pointer to the calibration solution source object
 boost::shared_ptr<ICalSolutionSource> CalibAccessFactory::rwCalSolutionSource(const LOFAR::ParameterSet &parset)
@@ -64,29 +66,28 @@ boost::shared_ptr<ICalSolutionSource> CalibAccessFactory::rwCalSolutionSource(co
 
 /// @brief Build an appropriate "calibration source" class
 /// @details This is a factory method generating a shared pointer to the calibration
-/// solution source according to the parset file. The code for read-only and 
+/// solution source according to the parset file. The code for read-only and
 /// read-write operations is similar. Therefore, it is handy to contain it in one method only.
-/// @param[in] parset parameters containing description of the class to be constructed 
+/// @param[in] parset parameters containing description of the class to be constructed
 /// (without leading Cimager., etc)
 /// @param[in] readonly true if a read-only solution source is required
 /// @return shared pointer to the calibration solution source object
 boost::shared_ptr<ICalSolutionConstSource> CalibAccessFactory::calSolutionSource(const LOFAR::ParameterSet &parset, bool readonly)
 {
    const std::string calAccType = parset.getString("calibaccess","parset");
-   ASKAPCHECK((calAccType == "parset") || (calAccType == "table"), 
+   ASKAPCHECK((calAccType == "parset") || (calAccType == "table"),
        "Only parset-based and table-based implementations are supported by the calibration access factory at the moment; you request: "<<calAccType);
    boost::shared_ptr<ICalSolutionConstSource> result;
-   if (calAccType == "parset") {    
+   if (calAccType == "parset") {
        const std::string fname = parset.getString("calibaccess.parset", "result.dat");
        ASKAPLOG_INFO_STR(logger, "Using implementation of the calibration solution accessor working with parset file "<<fname);
        if (readonly) {
            result.reset(new ParsetCalSolutionConstSource(fname));
        } else {
            result.reset(new ParsetCalSolutionSource(fname));
-       }       
+       }
        // further configuration fine tuning can happen here
-   } else {
-       ASKAPDEBUGASSERT(calAccType == "table");
+   } else if (calAccType == "table") {
        const std::string fname = parset.getString("calibaccess.table", "calibdata.tab");
        ASKAPLOG_INFO_STR(logger, "Using implementation of the calibration solution accessor working with casa table "<<fname);
        if (readonly) {
@@ -109,8 +110,11 @@ boost::shared_ptr<ICalSolutionConstSource> CalibAccessFactory::calSolutionSource
            }
            result.reset(new TableCalSolutionSource(fname,maxAnt,maxBeam,maxChan));
        }
+   } else if (calAccType == "service") {
+      ASKAPLOG_INFO_STR(logger, "Using implementation of the calibration solution accessor working with the calibration service" );
+      result.reset(new ServiceCalSolutionSource(parset));
    }
-   
+
    ASKAPDEBUGASSERT(result);
    return result;
 }
@@ -119,4 +123,3 @@ boost::shared_ptr<ICalSolutionConstSource> CalibAccessFactory::calSolutionSource
 } // namespace accessors
 
 } // namespace askap
-

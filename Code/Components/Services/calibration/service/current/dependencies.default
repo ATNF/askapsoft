@@ -1,0 +1,6 @@
+# @file
+# dependencies.default for Code/Components
+
+askap=Code/Base/java-askap/current
+interfaces=Code/Interfaces/slice/current
+h2=3rdParty/h2/h2-1.4.196

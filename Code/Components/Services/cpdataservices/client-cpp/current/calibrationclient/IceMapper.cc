@@ -35,16 +35,16 @@
 #include "casacore/casa/aipstype.h"
 
 // Local package includes
-#include "calibrationclient/JonesJTerm.h"
-#include "calibrationclient/JonesIndex.h"
-#include "calibrationclient/GenericSolution.h"
+#include "calibaccess/JonesJTerm.h"
+#include "calibaccess/JonesIndex.h"
+#include "GenericSolution.h"
 
 // Using
 using namespace askap;
 using namespace askap::cp::caldataservice;
 
 // Convert the casa type GainSolution to the ice GainSolution
-askap::interfaces::calparams::TimeTaggedGainSolution IceMapper::toIce(const askap::cp::caldataservice::GainSolution& sol)
+askap::interfaces::calparams::TimeTaggedGainSolution IceMapper::toIce(const GainSolution& sol)
 {
     askap::interfaces::calparams::TimeTaggedGainSolution ice_sol;
     ice_sol.timestamp = sol.timestamp();
@@ -190,7 +190,7 @@ casa::Complex IceMapper::fromIce(const askap::interfaces::FloatComplex& ice_val)
     return casa::Complex(ice_val.real, ice_val.imag);
 }
 
-askap::interfaces::calparams::JonesIndex IceMapper::toIce(const askap::cp::caldataservice::JonesIndex& jindex)
+askap::interfaces::calparams::JonesIndex IceMapper::toIce(const askap::accessors::JonesIndex& jindex)
 {
     askap::interfaces::calparams::JonesIndex ice_jindex;
     ice_jindex.antennaID = jindex.antenna();
@@ -198,12 +198,12 @@ askap::interfaces::calparams::JonesIndex IceMapper::toIce(const askap::cp::calda
     return ice_jindex;
 }
 
-askap::cp::caldataservice::JonesIndex IceMapper::fromIce(const askap::interfaces::calparams::JonesIndex& ice_jindex)
+askap::accessors::JonesIndex IceMapper::fromIce(const askap::interfaces::calparams::JonesIndex& ice_jindex)
 {
-    return askap::cp::caldataservice::JonesIndex(ice_jindex.antennaID, ice_jindex.beamID);
+    return askap::accessors::JonesIndex(ice_jindex.antennaID, ice_jindex.beamID);
 }
 
-askap::interfaces::calparams::JonesJTerm IceMapper::toIce(const askap::cp::caldataservice::JonesJTerm& jterm)
+askap::interfaces::calparams::JonesJTerm IceMapper::toIce(const askap::accessors::JonesJTerm& jterm)
 {
     askap::interfaces::calparams::JonesJTerm ice_jterm;
     ice_jterm.g1 = toIce(jterm.g1());
@@ -213,14 +213,14 @@ askap::interfaces::calparams::JonesJTerm IceMapper::toIce(const askap::cp::calda
     return ice_jterm;
 }
 
-askap::cp::caldataservice::JonesJTerm IceMapper::fromIce(const askap::interfaces::calparams::JonesJTerm& ice_jterm)
+askap::accessors::JonesJTerm IceMapper::fromIce(const askap::interfaces::calparams::JonesJTerm& ice_jterm)
 {
-    return askap::cp::caldataservice::JonesJTerm(fromIce(ice_jterm.g1), ice_jterm.g1Valid,
+    return askap::accessors::JonesJTerm(fromIce(ice_jterm.g1), ice_jterm.g1Valid,
                                                  fromIce(ice_jterm.g2), ice_jterm.g2Valid);
 }
 
 /////
-askap::interfaces::calparams::JonesDTerm IceMapper::toIce(const askap::cp::caldataservice::JonesDTerm& dterm)
+askap::interfaces::calparams::JonesDTerm IceMapper::toIce(const askap::accessors::JonesDTerm& dterm)
 {
     askap::interfaces::calparams::JonesDTerm ice_dterm;
     ice_dterm.d12 = toIce(dterm.d12());
@@ -228,7 +228,7 @@ askap::interfaces::calparams::JonesDTerm IceMapper::toIce(const askap::cp::calda
     return ice_dterm;
 }
 
-askap::cp::caldataservice::JonesDTerm IceMapper::fromIce(const askap::interfaces::calparams::JonesDTerm& ice_dterm)
+askap::accessors::JonesDTerm IceMapper::fromIce(const askap::interfaces::calparams::JonesDTerm& ice_dterm)
 {
-    return askap::cp::caldataservice::JonesDTerm(fromIce(ice_dterm.d12), fromIce(ice_dterm.d21));
+    return askap::accessors::JonesDTerm(fromIce(ice_dterm.d12), fromIce(ice_dterm.d21));
 }

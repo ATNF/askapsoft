@@ -1,7 +1,7 @@
 ice.locator.host                = localhost
 ice.locator.port                = 4061
 
-calibrationdataservice.name     = CalibrationDataService
+calibrationdataservice.name     = CDSServer @ CDSAdapter
 
 test.nantenna                   = 36
 test.nbeam                      = 36

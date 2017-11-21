@@ -44,8 +44,8 @@
 #include "casacore/casa/aipstype.h"
 #include "casacore/casa/BasicSL/Complex.h"
 #include "calibrationclient/CalibrationDataServiceClient.h"
-#include "calibrationclient/JonesJTerm.h"
-#include "calibrationclient/JonesDTerm.h"
+#include "calibaccess/JonesJTerm.h"
+#include "calibaccess/JonesDTerm.h"
 #include "calibrationclient/GenericSolution.h"
 
 using namespace askap::cp::ingest;

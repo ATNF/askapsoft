@@ -33,11 +33,11 @@
 
 // ASKAPsoft includes
 #include "casacore/casa/aipstype.h"
+#include "calibaccess/JonesJTerm.h"
+#include "calibaccess/JonesDTerm.h"
+#include "calibaccess/JonesIndex.h"
 
-// Local package includes
-#include "calibrationclient/JonesJTerm.h"
-#include "calibrationclient/JonesDTerm.h"
-#include "calibrationclient/JonesIndex.h"
+using namespace askap::accessors;
 
 namespace askap {
 namespace cp {

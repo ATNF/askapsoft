@@ -39,8 +39,8 @@
 
 // Local package includes
 #include "calibrationclient/CalibrationDataServiceClient.h"
-#include "calibrationclient/JonesJTerm.h"
-#include "calibrationclient/JonesIndex.h"
+#include "calibaccess/JonesJTerm.h"
+#include "calibaccess/JonesIndex.h"
 #include "calibrationclient/GenericSolution.h"
 
 using namespace std;

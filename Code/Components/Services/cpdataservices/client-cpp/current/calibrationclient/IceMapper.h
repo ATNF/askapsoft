@@ -32,10 +32,10 @@
 #include "CalibrationDataService.h" // Ice generated interface
 
 // Local package includes
-#include "calibrationclient/JonesIndex.h"
-#include "calibrationclient/JonesJTerm.h"
-#include "calibrationclient/JonesDTerm.h"
-#include "calibrationclient/GenericSolution.h"
+#include "calibaccess/JonesIndex.h"
+#include "calibaccess/JonesJTerm.h"
+#include "calibaccess/JonesDTerm.h"
+#include "GenericSolution.h"
 
 namespace askap {
 namespace cp {
@@ -57,14 +57,14 @@ class IceMapper {
 
     private:
         static askap::interfaces::FloatComplex toIce(const casa::Complex& val);
-        static askap::interfaces::calparams::JonesIndex toIce(const askap::cp::caldataservice::JonesIndex& jindex);
-        static askap::interfaces::calparams::JonesJTerm toIce(const askap::cp::caldataservice::JonesJTerm& jterm);
-        static askap::interfaces::calparams::JonesDTerm toIce(const askap::cp::caldataservice::JonesDTerm& dterm);
+        static askap::interfaces::calparams::JonesIndex toIce(const askap::accessors::JonesIndex& jindex);
+        static askap::interfaces::calparams::JonesJTerm toIce(const askap::accessors::JonesJTerm& jterm);
+        static askap::interfaces::calparams::JonesDTerm toIce(const askap::accessors::JonesDTerm& dterm);
 
         static casa::Complex fromIce(const askap::interfaces::FloatComplex& ice_val);
-        static askap::cp::caldataservice::JonesIndex fromIce(const askap::interfaces::calparams::JonesIndex& ice_jindex);
-        static askap::cp::caldataservice::JonesJTerm fromIce(const askap::interfaces::calparams::JonesJTerm& ice_jterm);
-        static askap::cp::caldataservice::JonesDTerm fromIce(const askap::interfaces::calparams::JonesDTerm& ice_dterm);
+        static askap::accessors::JonesIndex fromIce(const askap::interfaces::calparams::JonesIndex& ice_jindex);
+        static askap::accessors::JonesJTerm fromIce(const askap::interfaces::calparams::JonesJTerm& ice_jterm);
+        static askap::accessors::JonesDTerm fromIce(const askap::interfaces::calparams::JonesDTerm& ice_dterm);
 };
 
 };

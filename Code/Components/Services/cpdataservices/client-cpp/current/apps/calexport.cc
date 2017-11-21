@@ -39,8 +39,8 @@
 
 // Local package includes
 #include "calibrationclient/CalibrationDataServiceClient.h"
-#include "calibrationclient/JonesJTerm.h"
-#include "calibrationclient/JonesIndex.h"
+#include "calibaccess/JonesJTerm.h"
+#include "calibaccess/JonesIndex.h"
 #include "calibrationclient/GenericSolution.h"
 
 using namespace std;
@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
     po::variables_map vm;
     try {
         po::store(po::parse_command_line(argc, argv, desc), vm);
-        po::notify(vm);    
+        po::notify(vm);
     } catch (const po::unknown_option& e) {
         cerr << desc << endl;
         return 1;

@@ -31,7 +31,7 @@
 #include "casacore/casa/aipstype.h"
 
 // Classes to test
-#include "calibrationclient/JonesIndex.h"
+#include "calibaccess/JonesIndex.h"
 
 namespace askap {
 namespace cp {
@@ -54,7 +54,7 @@ class JonesIndexTest : public CppUnit::TestFixture {
         void testGetters() {
             const casa::Short antenna = 3;
             const casa::Short beam = 5;
-            JonesIndex index(antenna, beam);
+            accessors::JonesIndex index(antenna, beam);
 
             CPPUNIT_ASSERT_EQUAL(antenna, index.antenna());
             CPPUNIT_ASSERT_EQUAL(beam, index.beam());
@@ -66,10 +66,10 @@ class JonesIndexTest : public CppUnit::TestFixture {
             const casa::Short b1 = 3;
             const casa::Short b2 = 4;
 
-            JonesIndex index1(a1, b1);
-            JonesIndex index2(a2, b2);
-            JonesIndex index3(a1, b1);
-            JonesIndex index4(a1, b2);
+            accessors::JonesIndex index1(a1, b1);
+            accessors::JonesIndex index2(a2, b2);
+            accessors::JonesIndex index3(a1, b1);
+            accessors::JonesIndex index4(a1, b2);
 
             CPPUNIT_ASSERT(index1 != index2);
             CPPUNIT_ASSERT(index2 != index3);
@@ -88,10 +88,10 @@ class JonesIndexTest : public CppUnit::TestFixture {
             const casa::Short b1 = 3;
             const casa::Short b2 = 4;
 
-            JonesIndex index1(a1, b1);
-            JonesIndex index2(a2, b2);
-            JonesIndex index3(a1, b1);
-            JonesIndex index4(a1, b2);
+            accessors::JonesIndex index1(a1, b1);
+            accessors::JonesIndex index2(a2, b2);
+            accessors::JonesIndex index3(a1, b1);
+            accessors::JonesIndex index4(a1, b2);
 
             CPPUNIT_ASSERT(index1 < index2);
             CPPUNIT_ASSERT(index1 < index4);
