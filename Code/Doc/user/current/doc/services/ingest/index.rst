@@ -199,6 +199,12 @@ some temporary tasks are also documented. They can be taken out in the future.
 |                       |fringe rotator, etc. This is a temporary task, as fringe rotation is     |
 |                       |expected to be done outside of SDP.                                      |
 +-----------------------+-------------------------------------------------------------------------+
+|:doc:`shadowflagtask`  |Experimental task to detect and flag shadowed antennas on the fly. It    |
+|                       |supports basic interferometry mode and uses phase centre information to  |
+|                       |assess shadowing. Note, antennas excluded from data recording may also   |
+|                       |cause shadowing would not be detected. The task requires uvw information |
+|                       |and, therefore, should be in the appropriate position in the task chain. |
++-----------------------+-------------------------------------------------------------------------+
 |CalTask                |Calibration task, part of implementation of predict forward approach.    |
 |                       |This task has never been tested or used, but some skeleton implementation|
 |                       |exists. It will be worked on past early science.                         |

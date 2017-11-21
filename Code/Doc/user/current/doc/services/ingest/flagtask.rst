@@ -53,7 +53,7 @@ Example
     # threshold for cross-correlations, no flagging based on auto-correlations
     tasks.FlagTask.params.threshold.crosscorr = 10
     # zero flagged visibilities
-    task.FlagTask.params.zeroflagged = true
+    tasks.FlagTask.params.zeroflagged = true
     # type of the task
     tasks.FlagTask.type = FlagTask
 
