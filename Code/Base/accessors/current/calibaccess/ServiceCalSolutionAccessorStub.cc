@@ -39,6 +39,13 @@ namespace askap {
 
 namespace accessors {
 
+
+/// @brief default constructor
+/// @details - just to keep the compiler happy
+ServiceCalSolutionAccessorStub::ServiceCalSolutionAccessorStub() {
+  ;
+}
+
 /// @brief constructor
 /// @details It reads the given parset, configures the service client
 /// @param[in] parset
