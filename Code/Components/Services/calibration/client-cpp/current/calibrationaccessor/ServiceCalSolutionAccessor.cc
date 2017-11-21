@@ -28,17 +28,17 @@
 /// @author Max Voronkov <Maxim.Voronkov@csiro.au>
 /// @author Stephen Ord <Stephen.Ord@csiro.au>
 
-
-#include <calibrationaccessor/ServiceCalSolutionAccessor.h>
+#include <calibaccess/ServiceCalSolutionAccessorStub.h>
+#include "ServiceCalSolutionAccessor.h"
 #include <askap/AskapError.h>
 
 using namespace askap::accessors;
 
 namespace askap {
 
-namespace cp {
+namespace accessors {
 
-namespace   caldataservice {
+
 
 
 /// @brief constructor
@@ -46,7 +46,7 @@ namespace   caldataservice {
 /// @param[in] parset parset file name
 /// @param[in] the iD of the solution to get - or to make
 /// @param[in] readonly if true, additional checks are done that file exists
-ServiceCalSolutionAccessor::ServiceCalSolutionAccessor(const std::string &parset, casa::Long iD, bool readonly) : itsParsetFileName(parset)
+ServiceCalSolutionAccessor::ServiceCalSolutionAccessor(const std::string &parset, casa::Long iD, bool readonly) : ServiceCalSolutionAccessorStub()
 
 {
 ;
@@ -61,7 +61,7 @@ ServiceCalSolutionAccessor::ServiceCalSolutionAccessor(const std::string &parset
 /// @return JonesJTerm object with gains and validity flags
 accessors::JonesJTerm ServiceCalSolutionAccessor::gain(const accessors::JonesIndex &index) const
 {
-
+  return accessors::JonesJTerm();
 }
 
 /// @brief obtain leakage (D-Jones)
@@ -74,7 +74,7 @@ accessors::JonesJTerm ServiceCalSolutionAccessor::gain(const accessors::JonesInd
 /// @return JonesDTerm object with leakages and validity flags
 accessors::JonesDTerm ServiceCalSolutionAccessor::leakage(const accessors::JonesIndex &index) const
 {
-
+  return accessors::JonesDTerm();
 }
 
 /// @brief obtain bandpass (frequency dependent J-Jones)
@@ -92,7 +92,7 @@ accessors::JonesDTerm ServiceCalSolutionAccessor::leakage(const accessors::Jones
 /// @return JonesJTerm object with gains and validity flags
 accessors::JonesJTerm ServiceCalSolutionAccessor::bandpass(const accessors::JonesIndex &index, const casa::uInt chan) const
 {
-
+  return accessors::JonesJTerm();
 }
 
 /// @brief set gains (J-Jones)
@@ -136,8 +136,8 @@ ServiceCalSolutionAccessor::~ServiceCalSolutionAccessor()
 
 }
 
-} // namespace caldataservice
 
-} // namespace cp
+
+} // namespace accessors
 
 } // namespace askap

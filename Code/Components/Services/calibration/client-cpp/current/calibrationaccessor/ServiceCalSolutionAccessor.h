@@ -29,27 +29,26 @@
 /// @author Stephen Ord <Stephen.Ord@csiro.au>
 
 
-#ifndef ASKAP_CP_CALDATASERVICE_SOLUTION_ACCESSOR_H
-#define ASKAP_CP_CALDATASERVICE_SOLUTION_ACCESSOR_H
+#ifndef ASKAP_ACCESSORS_SERVICECALSOLUTION_ACCESSOR_H
+#define ASKAP_ACCESSORS_SERVICECALSOLUTION_ACCESSOR_H
 
 // own includes
-#include <calibaccess/ICalSolutionAccessor.h>
 
+#include <calibaccess/ServiceCalSolutionAccessorStub.h>
 // std includes
 #include <string>
 
 namespace askap {
 
-namespace cp {
-
-namespace caldataservice {
+namespace accessors {
 
 /// @brief Service based implementation of the calibration solution accessor
 /// @details This implementation is to be used with the Calibration Data Service
 /// it implements both a source and sink depending upon the context.
 
 /// @ingroup calibaccess
-class ServiceCalSolutionAccessor : virtual public accessors::ICalSolutionAccessor
+class ServiceCalSolutionAccessor : public accessors::ServiceCalSolutionAccessorStub
+
 
   {
 public:
@@ -74,7 +73,7 @@ public:
   /// returned.
   /// @param[in] index ant/beam index
   /// @return JonesJTerm object with gains and validity flags
-  virtual accessors::JonesJTerm gain(const accessors::JonesIndex &index) const;
+  virtual accessors::JonesJTerm gain(const accessors::JonesIndex &index) const; //  override;
 
   /// @brief obtain leakage (D-Jones)
   /// @details This method retrieves cross-hand elements of the
@@ -84,7 +83,7 @@ public:
   /// zero leakages are returned with invalid flags set.
   /// @param[in] index ant/beam index
   /// @return JonesDTerm object with leakages and validity flags
-  virtual accessors::JonesDTerm leakage(const accessors::JonesIndex &index) const;
+  virtual accessors::JonesDTerm leakage(const accessors::JonesIndex &index) const; // override;
 
   /// @brief obtain bandpass (frequency dependent J-Jones)
   /// @details This method retrieves parallel-hand spectral
@@ -99,21 +98,21 @@ public:
   /// @param[in] index ant/beam index
   /// @param[in] chan spectral channel of interest
   /// @return JonesJTerm object with gains and validity flags
-  virtual accessors::JonesJTerm bandpass(const accessors::JonesIndex &index, const casa::uInt chan) const;
+  virtual accessors::JonesJTerm bandpass(const accessors::JonesIndex &index, const casa::uInt chan) const; // override;
 
   /// @brief set gains (J-Jones)
   /// @details This method writes parallel-hand gains for both
   /// polarisations (corresponding to XX and YY)
   /// @param[in] index ant/beam index
   /// @param[in] gains JonesJTerm object with gains and validity flags
-  virtual void setGain(const accessors::JonesIndex &index, const accessors::JonesJTerm &gains);
+  virtual void setGain(const accessors::JonesIndex &index, const accessors::JonesJTerm &gains); // override;
 
   /// @brief set leakages (D-Jones)
   /// @details This method writes cross-pol leakages
   /// (corresponding to XY and YX)
   /// @param[in] index ant/beam index
   /// @param[in] leakages JonesDTerm object with leakages and validity flags
-  virtual void setLeakage(const accessors::JonesIndex &index, const accessors::JonesDTerm &leakages);
+  virtual void setLeakage(const accessors::JonesIndex &index, const accessors::JonesDTerm &leakages); // override;
 
   /// @brief set gains for a single bandpass channel
   /// @details This method writes parallel-hand gains corresponding to a single
@@ -124,7 +123,7 @@ public:
   /// @note We may add later variants of this method assuming that the bandpass is
   /// approximated somehow, e.g. by a polynomial. For simplicity, for now we deal with
   /// gains set explicitly for each channel.
-  virtual void setBandpass(const accessors::JonesIndex &index, const accessors::JonesJTerm &bp, const casa::uInt chan);
+  virtual void setBandpass(const accessors::JonesIndex &index, const accessors::JonesJTerm &bp, const casa::uInt chan); // override;
 
   /// @brief shared pointer definition
   typedef boost::shared_ptr<ServiceCalSolutionAccessor> ShPtr;
@@ -135,12 +134,10 @@ protected:
 
 
 private:
-  /// @brief parset file name for reading or writing
-  std::string itsParsetFileName;
-
+  
 
 };
-} // namespace caldataservice
+
 
 } // namespace accessors
 
