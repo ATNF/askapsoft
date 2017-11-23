@@ -105,7 +105,7 @@ class IceMonitoringServiceClient(object):
                 pointvalues = provider.get(self.pointnames)
             except Exception as e:
                 # if ingest is not running need to remove the monitoring points
-                logger.error('Error while trying to get point values ', str(e))
+                logger.error('Error while trying to get point values {}'.format(str(e)))
                 self.remove_monitoring_points(ingest='ingest' + str(i))
                 continue
 

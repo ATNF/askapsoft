@@ -16,11 +16,14 @@ import askap.iceutils.monitoringprovider
 class CPObsServiceImp(ICPObsService):
     def __init__(self, params):
         self._monitor = askap.iceutils.monitoringprovider.MONITOR
-        self.params = params
+        self.fcm = params
         self.current_sbid = -1
         self.proc = None
+        self.params = None
 
     def startObs(self, sbid, current=None):
+        # everytime an obs is started, load latest from fcm
+        self.params = self.fcm.get()
         if self.current_sbid >= 0:
             logger.error("Ingest Pipeline already running")
             raise RuntimeError("Ingest Pipeline already running")

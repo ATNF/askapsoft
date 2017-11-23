@@ -19,7 +19,7 @@ class IngestManager(Server):
     def initialize_services(self):
         logger.debug('initialize_services')
 
-        cp_obsServer = CPObsServiceImp(self.parameters)
+        cp_obsServer = CPObsServiceImp(self.fcm)
         self.add_service("CentralProcessorService", cp_obsServer)
 
         ingest_monitor = IngestMonitor(self._comm, self.parameters, cp_obsServer)
