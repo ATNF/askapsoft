@@ -124,19 +124,39 @@ void CalcUVWTask::calcForRow(VisChunk::ShPtr chunk, const casa::uInt row)
 
     ASKAPCHECK(ant1 < nAnt, "Antenna index (" << ant1 << ") is invalid");
     ASKAPCHECK(ant2 < nAnt, "Antenna index (" << ant2 << ") is invalid");
+    ASKAPDEBUGASSERT(nAnt > 0);
 
-    // Determine Greenwich Mean Sidereal Time
-    const double gast = calcGAST(chunk->time()); 
-    casa::MeasFrame frame(casa::MEpoch(chunk->time(), casa::MEpoch::UTC));
+    /*
+    // reference point, could've used one of the antennas
+    const casa::MPosition mroPos(casa::MVPosition(casa::Quantity(370.81, "m"),
+                            casa::Quantity(116.6310372795, "deg"),
+                            casa::Quantity(-26.6991531922, "deg")),
+                            casa::MPosition::Ref(casa::MPosition::WGS84));
+    */
+
+    const casa::MPosition mroPos(casa::MVPosition(antXYZ(0)), casa::MPosition::ITRF);
+   
+
+    // Determine Greenwich Apparent Sidereal Time
+    //const double gast = calcGAST(chunk->time()); 
+    casa::MeasFrame frame(casa::MEpoch(chunk->time(), casa::MEpoch::UTC), mroPos);
 
     // phase center for a given beam
+    /*    
     const casa::MDirection fpc = casa::MDirection::Convert(phaseCentre(chunk->phaseCentre()(row),chunk->beam1()(row)),
                                     casa::MDirection::Ref(casa::MDirection::TOPO, frame))();
+
     const double ra = fpc.getAngle().getValue()(0);
     const double dec = fpc.getAngle().getValue()(1);
+    */
+    const casa::MDirection hadec = casa::MDirection::Convert(phaseCentre(chunk->phaseCentre()(row),
+                       chunk->beam1()(row)),
+                       casa::MDirection::Ref(casa::MDirection::HADEC, frame))();
+    const double H0 = hadec.getValue().getLong() - mroPos.getValue().getLong();
+    const double dec = hadec.getValue().getLat();
 
     // Transformation from antenna position difference (ant2-ant1) to uvw
-    const double H0 = gast - ra;
+    //const double H0 = gast - ra;
     const double sH0 = sin(H0);
     const double cH0 = cos(H0);
     const double sd = sin(dec);
@@ -174,7 +194,7 @@ void CalcUVWTask::calcForRow(VisChunk::ShPtr chunk, const casa::uInt row)
     // do the conversion to J2000 in a quick and dirty way for now
     // some optimisation and caching of rotation matrix are definitely possible here
     // but cache class in accessors needs to be adapted first.
-    casa::UVWMachine uvm(casa::MDirection::Ref(casa::MDirection::J2000), fpc);
+    casa::UVWMachine uvm(casa::MDirection::Ref(casa::MDirection::J2000), hadec, frame);
     uvm.convertUVW(uvwvec);
     ASKAPDEBUGASSERT(uvwvec.nelements() == 3);
 
