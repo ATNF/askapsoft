@@ -200,6 +200,12 @@ void FringeRotationTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
          const casa::Vector<double> xyz = antXYZ(ant);
          ASKAPDEBUGASSERT(xyz.nelements() == 3);
          const casa::MPosition antPos(casa::MVPosition(xyz), casa::MPosition::ITRF);
+         /*
+         const casa::MPosition antPos(casa::MVPosition(casa::Quantity(370.81, "m"),
+                            casa::Quantity(116.6310372795, "deg"),
+                            casa::Quantity(-26.6991531922, "deg")),
+                            casa::MPosition::Ref(casa::MPosition::WGS84));
+         */
          const casa::MeasFrame frame(epoch, antPos);
 
          for (casa::uInt beam = 0; beam < nBeams(); ++beam) {
