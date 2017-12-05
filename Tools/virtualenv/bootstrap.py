@@ -42,7 +42,7 @@ os.system("%s virtualenv.py --no-site-packages %s" % (python_exe, askap_root))
 os.system("%s virtualenv.py --no-site-packages %s" % (python_exe, install_dir))
 
 for name, version in cfg_parser.items("Python Dependencies"):
-        install_line="source %s/bin/activate && pip install %s" % (askap_root,version)
+        install_line=". %s/bin/activate && pip install %s" % (askap_root,version)
         
         print "running ", install_line
         os.system(install_line)
