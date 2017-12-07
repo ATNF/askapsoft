@@ -39,6 +39,8 @@
 #include <casacore/casa/BasicSL/Constants.h>
 #include <casacore/casa/Quanta.h>
 #include <casacore/scimath/Mathematics/RigidVector.h>
+#include <casacore/casa/Arrays/Vector.h>
+#include <casacore/casa/Arrays/ArrayMath.h>
 
 
 #include <boost/shared_ptr.hpp>
@@ -53,6 +55,7 @@ class UVWMachineCacheTest : public CppUnit::TestFixture {
    CPPUNIT_TEST_EXCEPTION(exceptionTest,AskapError);
    CPPUNIT_TEST(oneElementCacheTest);
    CPPUNIT_TEST(twoElementsCacheTest);
+   CPPUNIT_TEST(uvwMachineFrameConvTest);
    CPPUNIT_TEST_SUITE_END();
 public:
    void setUp() {
@@ -176,6 +179,51 @@ public:
       CPPUNIT_ASSERT(doUVWMachineTest(baselines, 0, 2., "-45.00.00.0") < 0.2);
       CPPUNIT_ASSERT(doUVWMachineTest(baselines, 2., 2., "00.00.00.0") < 1.5);
    }   
+
+   void uvwMachineFrameConvTest() {
+      // another test of the UVWMachine, not of our code
+      // this code is used to investigate frame conversion behavior and serves as
+      // another unit test for the current status quo
+
+      const casa::MPosition antPos(casa::MVPosition(casa::Quantity(370.81, "m"),
+                      casa::Quantity(116.6310372795, "deg"),
+                      casa::Quantity(-26.6991531922, "deg")),
+                      casa::MPosition::Ref(casa::MPosition::WGS84));
+      
+      const casa::MEpoch epoch(casa::MVEpoch(casa::Quantity(58100.5, "d")), casa::MEpoch::UTC);
+      const casa::MeasFrame frame(epoch, antPos);
+      casa::MDirection dishPnt(casa::MVDirection(convert("5h30m00.000"),convert("-10.00.00.000")), casa::MDirection::J2000);
+     
+      const casa::MDirection fpc = casa::MDirection::Convert(dishPnt,
+                           casa::MDirection::Ref(casa::MDirection::TOPO, frame))();
+      const casa::MDirection hadec = casa::MDirection::Convert(dishPnt,
+                           casa::MDirection::Ref(casa::MDirection::HADEC, frame))();
+
+      //std::cout<<printDirection(fpc.getValue())<<" "<<printDirection(hadec.getValue())<<std::endl;
+      casa::Vector<casa::Double> uvw1(3);
+      uvw1(0) = 100.;
+      uvw1(1) = -300.;
+      uvw1(2) = 20.;
+      casa::Vector<casa::Double> uvw2(uvw1.copy());
+   
+      casa::UVWMachine machine1(casa::MDirection::Ref(casa::MDirection::J2000), hadec, frame);
+      machine1.convertUVW(uvw1);
+      // negate the sign of the first component of the vector due to left-handed/right-handed frame issue
+      // I am not sure whether this is a bug or a feature of UVWMachine - it depends on the definitions 
+      // of the vector (i.e. we can consider the resulting image to have incorrect coordinate).
+      // See ADESCOM-342.
+      uvw1(0) *= -1.;
+      casa::UVWMachine machine2(casa::MDirection::Ref(casa::MDirection::J2000), fpc, frame);
+      machine2.convertUVW(uvw2);
+      
+      //std::cout<<uvw1<<" "<<uvw2<<std::endl;
+      uvw1 -= uvw2;
+
+      CPPUNIT_ASSERT(uvw1.nelements() == 3);
+      const double norm = sqrt(uvw1(0)*uvw1(0)+uvw1(1)*uvw1(1)+uvw1(2)*uvw1(2));
+      // the error seems to be rather large between these two systems. Not sure if HADEC frame works fine.
+      CPPUNIT_ASSERT(norm < 1.5);
+   }
    
       
    void oneElementCacheTest() {
