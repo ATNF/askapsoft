@@ -210,13 +210,16 @@ void FringeRotationTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
 
          for (casa::uInt beam = 0; beam < nBeams(); ++beam) {
               // Current APP phase center
-              //const casa::MDirection fpc = casa::MDirection::Convert(phaseCentre(dishPnt, beam),
-              //                      casa::MDirection::Ref(casa::MDirection::TOPO, frame))();
+              const casa::MDirection fpc = casa::MDirection::Convert(phaseCentre(dishPnt, beam),
+                                    casa::MDirection::Ref(casa::MDirection::TOPO, frame))();
               const casa::MDirection hadec = casa::MDirection::Convert(phaseCentre(dishPnt, beam),
                                     casa::MDirection::Ref(casa::MDirection::HADEC, frame))();
               if (itsCalcUVW && (ant == 0)) {
                   // for optional uvw rotation
-                  uvwMachines[beam].reset(new casa::UVWMachine(casa::MDirection::Ref(casa::MDirection::J2000), hadec, frame));
+                  // HADEC frame doesn't seem to work correctly, even apart from inversion of the first coordinate
+                  // For details see ADESCOM-342.
+                  //uvwMachines[beam].reset(new casa::UVWMachine(casa::MDirection::Ref(casa::MDirection::J2000), hadec, frame));
+                  uvwMachines[beam].reset(new casa::UVWMachine(casa::MDirection::Ref(casa::MDirection::J2000), fpc, frame));
               }
               //const double ra = fpc.getAngle().getValue()(0);
               const double dec = hadec.getValue().getLat(); //fpc.getAngle().getValue()(1);
