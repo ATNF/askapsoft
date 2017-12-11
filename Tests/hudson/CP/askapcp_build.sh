@@ -22,6 +22,8 @@ fi
 #
 unset ASKAP_ROOT
 
+newgrp askap
+
 cd $WORKSPACE/${TOPDIR}
 if [ $? -ne 0 ]; then
     echo "Error: Failed to chdir to  ${WORKSPACE}/${TOPDIR}"
