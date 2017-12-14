@@ -93,10 +93,90 @@ class CalibrationDataServiceClient {
         /// @return a unique id referencing the solution in the data service.
         void addBandpassSolution(casa::Long id, const BandpassSolution& sol);
 
+        /**
+         * Merge in a new time tagged gains solution with the latest gains and store it
+         * in the calibration data service. If no previous solutions are present, store as is.
+         *
+         * @param id entry to attach the resulting solution to
+         * @param solution  new time tagged gains solution treated as an update
+         * @note An exception is thrown if gain solution has already been added for this id
+         */
+        void adjustGains(long id, GainSolution& sol);
+
+        /**
+         * Merge in a new time tagged bandpass solution with the latest bandpass and store the
+         * result in the calibration data service. If no previous solutions are present, store as is.
+         *
+         * @param id entry to attach the resulting solution to
+         * @param solution  new time tagged bandpass solution.
+         * @note An exception is thrown if bandpass solution has already been added for this id
+         */
+        void adjustBandpass(long id, BandpassSolution& sol);
+
+        /**
+         * Merge in a new time tagged leakage solution with the latest leakage solution and store
+         * the result to the calibration data service (as a new solution)
+         *
+         * @param id entry to add the solution to
+         * @param solution  new time tagged leakage solution.
+         * @note An exception is thrown if leakage solution has already been added for this id
+         */
+        void adjustLeakages(long id, LeakageSolution& sol);
+
+        /**
+         * Check that the gain solution is present.
+         * @param id entry to check
+         * @return true, if the given id has a gain solution.
+         */
+        bool hasGainSolution(long id);
+
+        /**
+         * Check that the leakage solution is present.
+         * @param id entry to check
+         * Obtain the ID of the current/optimum leakage solution.
+         * @return true, if the given id has a leakage solution.
+         */
+        bool hasLeakageSolution(long id);
+
+        /**
+         * Check that the bandpass solution is present.
+         * @param id entry to check
+         * @return true, if the given id has a bandpass solution.
+         */
+        bool hasBandpassSolution(long id);
+
         /// Obtain the ID for the latest solution.
         ///
         /// @return the ID of the latest solution
         casa::Long getLatestSolutionID(void);
+
+
+        /**
+         * Obtain smallest solution ID corresponding to the time >= the given timestamp
+         * @param timestamp absolute time given as MJD in the UTC frame (same as timestamp
+         *                  in solutions - can be compared directly)
+         * @return solution ID
+         * @note gain, bandpass and leakage solutions corresponding to one solution ID
+         *       can have different timestamps. Use the greatest for comparison.
+         * if all the timestamps in the stored solutions are less than the given timestamp,
+         * this method is equivalent to getLatestSolutionID().
+         */
+        long getUpperBoundID(double timestamp);
+
+
+        /**
+         * Obtain largest solution ID corresponding to the time <= the given timestamp
+         * @param timestamp absolute time given as MJD in the UTC frame (same as timestamp
+         *                  in solutions - can be compared directly)
+         * @return solution ID
+         * @note gain, bandpass and leakage solutions corresponding to one solution ID
+         *       can have different timestamps. Use the smallest for comparison.
+         * if all the timestamps in the stored solutions are greater than the given timestamp,
+         * this method should return zero.
+         */
+        long getLowerBoundID(double timestamp);
+
+
 
         /// Get a gain solution.
         ///

@@ -8,3 +8,4 @@ ice=3rdParty/Ice/Ice-3.5.0;IceStorm Ice IceUtil
 cppiceinterfaces=Code/Interfaces/cpp/current
 icewrapper=Code/Components/Services/icewrapper/current
 casa_components=3rdParty/casa-components/casa-components-1.6.0
+calibrationclient=Code/Components/Services/cpdataservices/client-cpp/current

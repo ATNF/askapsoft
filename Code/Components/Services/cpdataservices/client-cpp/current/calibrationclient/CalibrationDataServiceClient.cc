@@ -36,6 +36,7 @@
 
 // ASKAPsoft includes
 #include "casacore/casa/aipstype.h"
+#include <askap/AskapLogging.h>
 #include "askap/AskapError.h"
 #include "Ice/Ice.h"
 #include "iceutils/CommunicatorConfig.h"
@@ -51,6 +52,9 @@ using namespace std;
 using namespace askap;
 using namespace askap::cp::caldataservice;
 using askap::interfaces::caldataservice::UnknownSolutionIdException;
+using askap::interfaces::caldataservice::AlreadyExists;
+
+ASKAP_LOGGER(logger, ".CalibrationDataServiceClient");
 
 CalibrationDataServiceClient::CalibrationDataServiceClient(const std::string& locatorHost,
         const std::string& locatorPort,
@@ -68,7 +72,9 @@ CalibrationDataServiceClient::CalibrationDataServiceClient(const std::string& lo
 
     if (!itsService) {
         ASKAPTHROW(AskapError, "CalibrationDataService proxy is invalid");
+
     }
+    ASKAPLOG_INFO_STR(logger,"Conected to CalibrationDataService");
 }
 
 CalibrationDataServiceClient::~CalibrationDataServiceClient()
@@ -136,4 +142,72 @@ BandpassSolution CalibrationDataServiceClient::getBandpassSolution(const casa::L
         ASKAPTHROW(AskapError, "Unknown Solution ID");
     }
     return IceMapper::fromIce(ice_sol);
+
+}
+void CalibrationDataServiceClient::adjustGains(casa::Long id, GainSolution &sol)
+{
+  try {
+    itsService->adjustGains(id, IceMapper::toIce(sol));
+  } catch (const AlreadyExists& e) {
+      ASKAPTHROW(AskapError, "Gain Solution already added");
+  }
+
+}
+void CalibrationDataServiceClient::adjustLeakages(long id, LeakageSolution &sol)
+{
+  try {
+    itsService->adjustLeakages(id, IceMapper::toIce(sol));
+  } catch (const AlreadyExists& e) {
+      ASKAPTHROW(AskapError, "Leakage Solution already added");
+  }
+
+}
+void CalibrationDataServiceClient::adjustBandpass(long id, BandpassSolution &sol)
+{
+  try {
+    itsService->adjustBandpass(id, IceMapper::toIce(sol));
+  } catch (const AlreadyExists& e) {
+      ASKAPTHROW(AskapError, "Bandpass Solution already added");
+  }
+
+}
+
+bool CalibrationDataServiceClient::hasGainSolution(long id) {
+  return itsService->hasGainSolution(id);
+}
+bool CalibrationDataServiceClient::hasLeakageSolution(long id) {
+  return itsService->hasLeakageSolution(id);
+}
+bool CalibrationDataServiceClient::hasBandpassSolution(long id) {
+  return itsService->hasBandpassSolution(id);
+}
+
+/**
+ * Obtain smallest solution ID corresponding to the time >= the given timestamp
+ * @param timestamp absolute time given as MJD in the UTC frame (same as timestamp
+ *                  in solutions - can be compared directly)
+ * @return solution ID
+ * @note gain, bandpass and leakage solutions corresponding to one solution ID
+ *       can have different timestamps. Use the greatest for comparison.
+ * if all the timestamps in the stored solutions are less than the given timestamp,
+ * this method is equivalent to getLatestSolutionID().
+ */
+long CalibrationDataServiceClient::getLowerBoundID(double timestamp)
+{
+  try {
+    return itsService->getLowerBoundID(timestamp);
+  } catch (const UnknownSolutionIdException& e) {
+      ASKAPTHROW(AskapError, "Unknown Solution ID"); // that is not very informative
+
+  }
+}
+long CalibrationDataServiceClient::getUpperBoundID(double timestamp)
+{
+  try {
+    return itsService->getUpperBoundID(timestamp);
+  } catch (const UnknownSolutionIdException& e) {
+      ASKAPTHROW(AskapError, "Unknown Solution ID"); // that is not very informative
+
+  }
+
 }

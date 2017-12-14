@@ -37,7 +37,7 @@
 #include <calibaccess/ParsetCalSolutionConstSource.h>
 #include <calibaccess/TableCalSolutionSource.h>
 #include <calibaccess/TableCalSolutionConstSource.h>
-#include <calibaccess/ServiceCalSolutionSource.h>
+#include <calibaccess/ServiceCalSolutionSourceStub.h>
 
 #include <askap/AskapError.h>
 
@@ -75,8 +75,8 @@ boost::shared_ptr<ICalSolutionSource> CalibAccessFactory::rwCalSolutionSource(co
 boost::shared_ptr<ICalSolutionConstSource> CalibAccessFactory::calSolutionSource(const LOFAR::ParameterSet &parset, bool readonly)
 {
    const std::string calAccType = parset.getString("calibaccess","parset");
-   ASKAPCHECK((calAccType == "parset") || (calAccType == "table"),
-       "Only parset-based and table-based implementations are supported by the calibration access factory at the moment; you request: "<<calAccType);
+   ASKAPCHECK((calAccType == "parset") || (calAccType == "table") || (calAccType == "service"),
+       "Only parset-based, table-based and service-based implementations are supported by the calibration access factory at the moment; you request: "<<calAccType);
    boost::shared_ptr<ICalSolutionConstSource> result;
    if (calAccType == "parset") {
        const std::string fname = parset.getString("calibaccess.parset", "result.dat");
@@ -112,7 +112,7 @@ boost::shared_ptr<ICalSolutionConstSource> CalibAccessFactory::calSolutionSource
        }
    } else if (calAccType == "service") {
       ASKAPLOG_INFO_STR(logger, "Using implementation of the calibration solution accessor working with the calibration service" );
-      result.reset(new ServiceCalSolutionSource(parset));
+      result.reset(new ServiceCalSolutionSourceStub(parset));
    }
 
    ASKAPDEBUGASSERT(result);

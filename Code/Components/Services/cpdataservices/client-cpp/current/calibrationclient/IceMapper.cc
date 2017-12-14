@@ -162,8 +162,9 @@ askap::cp::caldataservice::BandpassSolution IceMapper::fromIce(const askap::inte
         // Handle the vector
         const valueType& ice_terms = it->second;
 
-        std::vector<JonesJTerm> terms(ice_terms.size());
-        for (size_t chan = 0; chan < terms.size(); ++chan) {
+        std::vector<JonesJTerm> terms;
+      
+        for (size_t chan = 0; chan < ice_terms.size(); ++chan) {
             terms.push_back(IceMapper::fromIce(ice_terms[chan]));
         }
 

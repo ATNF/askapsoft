@@ -1,8 +1,8 @@
 /// @file
-/// @brief Service based implementation of the calibration solution source
-/// @details This implementation is to be used with the Calibration Data Service
-/// Main functionality is implemented in the corresponding ServiceCalSolutionAccessor class.
-/// This class just creates an instance of the accessor and manages it.
+///
+/// Unit test for the table-based implementation of the interface to access
+/// calibration solutions
+///
 ///
 /// @copyright (c) 2017 CSIRO
 /// Australia Telescope National Facility (ATNF)
@@ -26,31 +26,51 @@
 /// along with this program; if not, write to the Free Software
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
-/// @author Max Voronkov <Maxim.Voronkov@csiro.au>
-/// @author Stephen Ord <Stephen.Ord@csiro.au>
+/// @author Stephen Ord <stephen.ord@csiro.au>
 
 
-#include <calibaccess/ServiceCalSolutionSource.h>
-#include <calibaccess/ServiceCalSolutionAccessorStub.h>
+#include <cppunit/extensions/HelperMacros.h>
+#include <calibaccess/JonesIndex.h>
 
-// logging stuff
-#include <askap_accessors.h>
-#include <askap/AskapLogging.h>
-ASKAP_LOGGER(logger, ".calibaccess");
+#include <boost/shared_ptr.hpp>
+#include <boost/thread.hpp>
+#include <string>
 
 namespace askap {
 
 namespace accessors {
 
-/// @brief constructor
-/// @details Creates solution source object for a given parset file
-/// (whether it is for writing or reading depends on the actual methods
-/// used).
-/// @param[in] parset parset file name
-ServiceCalSolutionSource::ServiceCalSolutionSource(const LOFAR::ParameterSet &parset) :
-   accessors::CalSolutionSourceStub(boost::shared_ptr<ServiceCalSolutionAccessorStub>(new ServiceCalSolutionAccessorStub(parset))) {}
+
+class ServiceCalSolutionTest : public CppUnit::TestFixture
+{
+   CPPUNIT_TEST_SUITE(ServiceCalSolutionTest);
+   CPPUNIT_TEST(testStub);
+   CPPUNIT_TEST_SUITE_END();
+
+protected:
 
 
-} // accessors
+public:
+
+    void setUp() {
+    /// spawn a thread to fire up the server
+
+    }
+    void tearDown() {
+    /// shutdown the test server
+    }
+
+    void testStub() {
+      CPPUNIT_ASSERT(true);
+
+    }
+
+
+
+
+
+};
+
+} // namespace accessors
 
 } // namespace askap

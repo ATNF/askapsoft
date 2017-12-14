@@ -186,5 +186,21 @@ int main(int argc, char *argv[])
     time = sw.stop();
     std::cout << "Time to add bandpass solution: " << time << std::endl;
 
+
+    sw.start();
+    GainSolution gsol = svc.getGainSolution(newID);
+    time = sw.stop();
+    std::cout << "Time to get gains solution: " << time << std::endl;
+
+    sw.start();
+    LeakageSolution lsol = svc.getLeakageSolution(newID);
+    time = sw.stop();
+    std::cout << "Time to get leakage solution: " << time << std::endl;
+
+    sw.start();
+    BandpassSolution bsol = svc.getBandpassSolution(newID);
+    time = sw.stop();
+    std::cout << "Time to get bandpass solution: " << time << std::endl;
+
     return 0;
 }

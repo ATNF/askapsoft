@@ -29,11 +29,17 @@
 /// @author Stephen Ord <Stephen.Ord@csiro.au>
 
 
-#ifndef ASKAP_ACCESSORS_SERVICE_SOLUTION_ACCESSOR_STUB_H
-#define ASKAP_ACCESSORS_SERVICE_SOLUTION_ACCESSOR_STUB_H
-// third party
-#include <Common/ParameterSet.h>
+#ifndef ASKAP_ACCESSORS_SERVICECALSOLUTION_ACCESSOR_H
+#define ASKAP_ACCESSORS_SERVICECALSOLUTION_ACCESSOR_H
 
+// thirdparty
+#include <Ice/Ice.h>
+#include <CalibrationDataService.h> // Ice generated interface
+#include <calibrationclient/CalibrationDataServiceClient.h>
+#include <calibrationclient/GenericSolution.h>
+
+
+#include <Common/ParameterSet.h>
 
 // own includes
 #include <calibaccess/ICalSolutionAccessor.h>
@@ -50,26 +56,29 @@ namespace accessors {
 /// it implements both a source and sink depending upon the context.
 
 /// @ingroup calibaccess
-class ServiceCalSolutionAccessorStub : virtual public accessors::ICalSolutionAccessor
-
-  {
+class ServiceCalSolutionAccessor : public accessors::ICalSolutionAccessor {
 public:
-
-  ServiceCalSolutionAccessorStub();
-  
   /// @brief constructor
   /// @details It reads the given parset file, configures the service client
   /// @param[in] parset parset file name
   /// @param[in] readonly if true, additional checks are done that file exists
 
-  explicit ServiceCalSolutionAccessorStub(const LOFAR::ParameterSet &parset, casa::Long iD = 0, bool readonly = false);
+  explicit ServiceCalSolutionAccessor(const LOFAR::ParameterSet &parset, casa::Long iD = 0, bool readonly = false);
 
+  /// @brief constructor
+  /// @details It is passed a service client - so therefore does not need the parset
+  /// @param[in] CalibrationDataServiceClient
+  /// @param[in] readonly if true, additional checks are done that file exists
   /// @brief destructor
   /// @details Not yet sure what functionality that needs to be here
 
-  virtual ~ServiceCalSolutionAccessorStub();
+  explicit ServiceCalSolutionAccessor(boost::shared_ptr<askap::cp::caldataservice::CalibrationDataServiceClient> inClient, casa::Long iD = 0, bool readonly = false);
 
-  // override write methods to handle service access
+
+  virtual ~ServiceCalSolutionAccessor();
+
+  /// override write methods to handle service access - probably do all of this
+  /// via the service client or some replication of its functionality
 
   /// @brief obtain gains (J-Jones)
   /// @details This method retrieves parallel-hand gains for both
@@ -78,7 +87,7 @@ public:
   /// returned.
   /// @param[in] index ant/beam index
   /// @return JonesJTerm object with gains and validity flags
-  virtual accessors::JonesJTerm gain(const accessors::JonesIndex &index) const;
+  virtual accessors::JonesJTerm gain(const accessors::JonesIndex &index) const; //  override;
 
   /// @brief obtain leakage (D-Jones)
   /// @details This method retrieves cross-hand elements of the
@@ -88,7 +97,7 @@ public:
   /// zero leakages are returned with invalid flags set.
   /// @param[in] index ant/beam index
   /// @return JonesDTerm object with leakages and validity flags
-  virtual accessors::JonesDTerm leakage(const accessors::JonesIndex &index) const;
+  virtual accessors::JonesDTerm leakage(const accessors::JonesIndex &index) const; // override;
 
   /// @brief obtain bandpass (frequency dependent J-Jones)
   /// @details This method retrieves parallel-hand spectral
@@ -103,21 +112,21 @@ public:
   /// @param[in] index ant/beam index
   /// @param[in] chan spectral channel of interest
   /// @return JonesJTerm object with gains and validity flags
-  virtual accessors::JonesJTerm bandpass(const accessors::JonesIndex &index, const casa::uInt chan) const;
+  virtual accessors::JonesJTerm bandpass(const accessors::JonesIndex &index, const casa::uInt chan) const; // override;
 
   /// @brief set gains (J-Jones)
   /// @details This method writes parallel-hand gains for both
   /// polarisations (corresponding to XX and YY)
   /// @param[in] index ant/beam index
   /// @param[in] gains JonesJTerm object with gains and validity flags
-  virtual void setGain(const accessors::JonesIndex &index, const accessors::JonesJTerm &gains);
+  virtual void setGain(const accessors::JonesIndex &index, const accessors::JonesJTerm &gains); // override;
 
   /// @brief set leakages (D-Jones)
   /// @details This method writes cross-pol leakages
   /// (corresponding to XY and YX)
   /// @param[in] index ant/beam index
   /// @param[in] leakages JonesDTerm object with leakages and validity flags
-  virtual void setLeakage(const accessors::JonesIndex &index, const accessors::JonesDTerm &leakages);
+  virtual void setLeakage(const accessors::JonesIndex &index, const accessors::JonesDTerm &leakages); // override;
 
   /// @brief set gains for a single bandpass channel
   /// @details This method writes parallel-hand gains corresponding to a single
@@ -128,21 +137,46 @@ public:
   /// @note We may add later variants of this method assuming that the bandpass is
   /// approximated somehow, e.g. by a polynomial. For simplicity, for now we deal with
   /// gains set explicitly for each channel.
-  virtual void setBandpass(const accessors::JonesIndex &index, const accessors::JonesJTerm &bp, const casa::uInt chan);
+  virtual void setBandpass(const accessors::JonesIndex &index, const accessors::JonesJTerm &bp, const casa::uInt chan); // override;
 
   /// @brief shared pointer definition
-  typedef boost::shared_ptr<ServiceCalSolutionAccessorStub> ShPtr;
+  typedef boost::shared_ptr<ServiceCalSolutionAccessor> ShPtr;
 
+  /// are the solutions valid
+  bool solutionsValid;
 
 protected:
 
 
-
 private:
+
+  long solutionID;
+  /// should we store solutions within this accessor - so we dont continually
+  /// access the service for individual Jones matrices. Other accessors have the
+  /// the table or some other Cache. I say yes. I suspect that the solution will
+  /// be updated for each call so I'll need - I'll use shared_ptr as I dont want to
+  /// allocate storage and instantiate them when I construct this accessor - but I'll
+  /// need some sort of "connect" or "initialise" method to fill them dependent upon
+  /// whether this is RO or RW instance ...
+
+  boost::shared_ptr<askap::cp::caldataservice::CalibrationDataServiceClient> theClientPtr;
+
+  askap::cp::caldataservice::GainSolution itsGainSolution;
+
+  askap::cp::caldataservice::LeakageSolution itsLeakageSolution;
+
+  askap::cp::caldataservice::BandpassSolution itsBandpassSolution;
+
+  /// @brief use the client pull the solutions
+  void pullSolutions();
+
+  /// @brief push the current solutions to the service via the client
+  void pushSolutions();
 
 
 
 };
+
 
 } // namespace accessors
 
