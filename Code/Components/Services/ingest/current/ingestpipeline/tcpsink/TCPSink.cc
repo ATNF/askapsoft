@@ -83,9 +83,10 @@ TCPSink::~TCPSink()
 
 void TCPSink::process(VisChunk::ShPtr& chunk)
 {
+    /*
     // temportary hack for commissoning - only proceed if work with beam 0, if it is a single beam file
     ASKAPASSERT(chunk);
-    /*
+    
     std::set<casa::uInt> beamSet(chunk->beam1().begin(), chunk->beam1().end());
     if (beamSet.size() == 1) {
         if (*beamSet.begin() != 0) {
@@ -94,7 +95,8 @@ void TCPSink::process(VisChunk::ShPtr& chunk)
         }
     }
     //
-*/
+    */
+
     if (!itsThread) {
         itsThread.reset(new boost::thread(boost::bind(&TCPSink::runSender, this)));
     }
