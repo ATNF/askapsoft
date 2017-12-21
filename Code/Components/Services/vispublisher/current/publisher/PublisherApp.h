@@ -32,6 +32,7 @@
 
 // ASKAPsoft includes
 #include "askap/Application.h"
+#include "askap/CircularBuffer.h"
 
 // Local package includes
 #include "publisher/InputMessage.h"
@@ -40,9 +41,6 @@
 #include "publisher/VisMessageBuilder.h"
 #include "publisher/ZmqPublisher.h"
 #include "publisher/ZmqVisControlPort.h"
-
-// to be moved to base
-#include "publisher/CircularBuffer.h"
 
 #include <boost/asio.hpp>
 #include <boost/shared_ptr.hpp>
@@ -95,7 +93,7 @@ class PublisherApp : public askap::Application {
         mutable bool itsStopRequested;
         
         // circular buffer handling jobs for individual threads
-        ingest::CircularBuffer<boost::asio::ip::tcp::socket> itsBuffer;
+        utility::CircularBuffer<boost::asio::ip::tcp::socket> itsBuffer;
 
         /// @details synchronisation to ensure vis and spd messages
         /// are published in one chunk

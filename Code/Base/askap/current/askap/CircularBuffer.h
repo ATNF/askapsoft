@@ -35,8 +35,7 @@
 #include "boost/circular_buffer.hpp"
 
 namespace askap {
-namespace cp {
-namespace ingest {
+namespace utility {
 
 /// @brief A simple thread safe circular buffer.
 template<class T>
@@ -207,7 +206,6 @@ class CircularBuffer {
         mutable boost::condition itsCondVar;
 };
 
-}
 }
 }
 

@@ -31,11 +31,10 @@
 #include "boost/shared_ptr.hpp"
 
 // Classes to test
-#include "ingestpipeline/sourcetask/CircularBuffer.h"
+#include "askap/CircularBuffer.h"
 
 namespace askap {
-namespace cp {
-namespace ingest {
+namespace utility {
 
 class CircularBufferTest : public CppUnit::TestFixture {
         CPPUNIT_TEST_SUITE(CircularBufferTest);
@@ -101,6 +100,5 @@ class CircularBufferTest : public CppUnit::TestFixture {
         };
 };
 
-}   // End namespace ingest
-}   // End namespace cp
+}   // End namespace utility
 }   // End namespace askap

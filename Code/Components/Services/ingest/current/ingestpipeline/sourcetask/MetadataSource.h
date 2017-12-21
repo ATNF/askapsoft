@@ -35,10 +35,10 @@
 #include "boost/noncopyable.hpp"
 #include "tosmetadata/MetadataReceiver.h"
 #include "cpcommon/TosMetadata.h"
+#include "askap/CircularBuffer.h"
 
 // Local package includes
 #include "ingestpipeline/sourcetask/IMetadataSource.h"
-#include "ingestpipeline/sourcetask/CircularBuffer.h"
 
 namespace askap {
 namespace cp {
@@ -88,7 +88,7 @@ class MetadataSource :
 
     private:
         // Circular buffer of metadata objects
-        askap::cp::ingest::CircularBuffer< askap::cp::TosMetadata > itsBuffer;
+        utility::CircularBuffer< askap::cp::TosMetadata > itsBuffer;
 
 };
 

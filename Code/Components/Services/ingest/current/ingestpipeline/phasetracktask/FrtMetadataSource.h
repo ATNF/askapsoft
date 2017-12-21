@@ -41,9 +41,7 @@
 // ASKAPsoft includes
 #include "boost/shared_ptr.hpp"
 #include "frtmetadata/FrtMetadataReceiver.h"
-
-// Local package includes
-#include "ingestpipeline/sourcetask/CircularBuffer.h"
+#include "askap/CircularBuffer.h"
 
 namespace askap {
 namespace cp {
@@ -98,7 +96,7 @@ class FrtMetadataSource :
 
     private:
         // Circular buffer of message maps objects
-        askap::cp::ingest::CircularBuffer<std::map<std::string, int> > itsBuffer;
+        utility::CircularBuffer<std::map<std::string, int> > itsBuffer;
 
 };
 

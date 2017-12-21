@@ -28,7 +28,6 @@
 #include <AskapTestRunner.h>
 
 // Test includes
-#include "CircularBufferTest.h"
 #include "VisChunkTest.h"
 #include "ScanManagerTest.h"
 #include "ChannelManagerTest.h"
@@ -43,7 +42,6 @@
 int main(int argc, char *argv[])
 {
     askapdev::testutils::AskapTestRunner runner(argv[0]);
-    runner.addTest(askap::cp::ingest::CircularBufferTest::suite());
     runner.addTest(askap::cp::ingest::VisChunkTest::suite());
     runner.addTest(askap::cp::ingest::ScanManagerTest::suite());
     runner.addTest(askap::cp::ingest::ChannelManagerTest::suite());

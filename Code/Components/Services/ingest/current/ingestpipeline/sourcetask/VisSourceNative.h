@@ -32,10 +32,10 @@
 #include "boost/scoped_ptr.hpp"
 #include "boost/thread.hpp"
 #include "cpcommon/VisDatagram.h"
+#include "askap/CircularBuffer.h"
 
 // Local package includes
 #include "ingestpipeline/sourcetask/IVisSource.h"
-#include "ingestpipeline/sourcetask/CircularBuffer.h"
 
 namespace askap {
 namespace cp {
@@ -66,7 +66,7 @@ class VisSourceNative : public IVisSource {
         void run(void);
 
         // Circular buffer of VisDatagram objects
-        askap::cp::ingest::CircularBuffer< askap::cp::VisDatagram > itsBuffer;
+        utility::CircularBuffer< askap::cp::VisDatagram > itsBuffer;
 
         // Service thread
         boost::shared_ptr<boost::thread> itsThread;

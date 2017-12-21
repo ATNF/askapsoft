@@ -36,11 +36,11 @@
 #include "boost/noncopyable.hpp"
 #include "cpcommon/VisDatagram.h"
 #include "Common/ParameterSet.h"
+#include "askap/CircularBuffer.h"
 
 
 // Local package includes
 #include "ingestpipeline/sourcetask/IVisSource.h"
-#include "ingestpipeline/sourcetask/CircularBuffer.h"
 
 namespace askap {
 namespace cp {
@@ -94,7 +94,7 @@ class VisSource : public IVisSource, public boost::noncopyable {
         void run(void);
 
         // Circular buffer of VisDatagram objects
-        askap::cp::ingest::CircularBuffer< VisDatagram > itsBuffer;
+        utility::CircularBuffer< VisDatagram > itsBuffer;
 
         // Service thread
         boost::shared_ptr<boost::thread> itsThread;

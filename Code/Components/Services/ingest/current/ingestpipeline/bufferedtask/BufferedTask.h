@@ -31,6 +31,7 @@
 #include "Common/ParameterSet.h"
 #include "cpcommon/VisChunk.h"
 #include "utils/DelayEstimator.h"
+#include "askap/CircularBuffer.h"
 
 // casa includes
 #include <casacore/casa/Arrays/Matrix.h>
@@ -42,7 +43,6 @@
 // Local package includes
 #include "ingestpipeline/ITask.h"
 #include "configuration/Configuration.h" // Includes all configuration attributes too
-#include "ingestpipeline/sourcetask/CircularBuffer.h"
 
 // std includes
 #include <fstream>
@@ -135,7 +135,7 @@ class BufferedTask : public askap::cp::ingest::ITask {
         bool itsStopRequested;
 
         /// @brief actual buffer for data chunks
-        askap::cp::ingest::CircularBuffer<askap::cp::common::VisChunk> itsBuffer;
+        utility::CircularBuffer<askap::cp::common::VisChunk> itsBuffer;
 
         /// @brief true if child task is active for all ranks
         bool itsChildActiveForAllRanks;
