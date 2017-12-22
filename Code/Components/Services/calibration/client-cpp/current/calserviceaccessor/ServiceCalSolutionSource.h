@@ -113,6 +113,15 @@ struct ServiceCalSolutionSource : public accessors::ServiceCalSolutionSourceStub
   /// @brief shared pointer definition
   typedef boost::shared_ptr<ServiceCalSolutionSource> ShPtr;
 
+  /// @brief this source will be used to solve for the following:
+  /// @details this works by setting flags in the accessor to allow it to
+  /// update the solution in the database. Without these the solution will still
+  /// be found but <not> pushed to the service
+  
+  void solveGains();
+  void solveLeakages();
+  void solveBandpass();
+
 protected:
   /// @brief get shared pointer to accessor
   /// @return shared pointer to the accessor

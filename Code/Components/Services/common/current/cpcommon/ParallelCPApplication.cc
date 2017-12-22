@@ -40,7 +40,10 @@
 // System includes
 #include <stdexcept>
 #include <unistd.h>
+
+#ifdef HAVE_MPI
 #include <mpi.h>
+#endif
 
 // 3rd party includes
 #include "log4cxx/logmanager.h"
@@ -85,7 +88,7 @@ int ParallelCPApplication::numProcs() const
 {
    return itsNumProcs;
 }
-
+#ifdef HAVE_MPI
 /// @brief obtain node name for logging
 /// @return node name
 std::string ParallelCPApplication::nodeName()
@@ -101,7 +104,13 @@ std::string ParallelCPApplication::nodeName()
     }
     return nodename;
 }
-
+#else
+std::string ParallelCPApplication::nodeName()
+{
+  return std::string rtn("none");
+}
+#endif
+#ifdef HAVE_MPI
 /// @brief obtain raw mpi rank
 /// @return rank as returned by the appropriate MPI call
 int ParallelCPApplication::mpiRank()
@@ -110,7 +119,13 @@ int ParallelCPApplication::mpiRank()
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     return rank;
 }
-
+#else
+int ParallelCPApplication::mpiRank()
+{
+    return 0;
+}
+#endif
+#ifdef HAVE_MPI
 /// @brief obtain raw number of mpi processes/tasks
 /// @return number of ranks available returned by the appropriate MPI call
 int ParallelCPApplication::mpiNumProcs()
@@ -119,10 +134,18 @@ int ParallelCPApplication::mpiNumProcs()
     MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
     return ntasks;
 }
-
+#else
+int ParallelCPApplication::mpiNumProcs()
+{
+    return 0;
+}
+#endif
 /// @brief constructor
-ParallelCPApplication::ParallelCPApplication() : 
+ParallelCPApplication::ParallelCPApplication() :
    itsRank(-1), itsNumProcs(-1), itsStandAlone(false) {}
+   
+#ifdef HAVE_MPI
+
 
 int ParallelCPApplication::run(int argc, char* argv[])
 {
@@ -178,4 +201,9 @@ int ParallelCPApplication::run(int argc, char* argv[])
 
    return error;
 }
-
+#else
+int ParallelCPApplication::run(int argc, char* argv[])
+{
+  return 0;
+}
+#endif

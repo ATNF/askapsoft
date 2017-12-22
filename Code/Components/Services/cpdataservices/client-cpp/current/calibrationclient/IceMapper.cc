@@ -97,8 +97,9 @@ askap::interfaces::calparams::TimeTaggedBandpassSolution IceMapper::toIce(const 
         // Handle the vector
         const valueType& terms = it->second;
 
-        askap::interfaces::calparams::JonesJTermSeq ice_terms(terms.size());
+        askap::interfaces::calparams::JonesJTermSeq ice_terms;
         for (size_t chan = 0; chan < terms.size(); ++chan) {
+            std::cout << "chan " << chan << " g1 " << terms[chan].g1() << " g2 " << terms[chan].g2() << std::endl;
             ice_terms.push_back(IceMapper::toIce(terms[chan]));
         }
 
@@ -163,8 +164,9 @@ askap::cp::caldataservice::BandpassSolution IceMapper::fromIce(const askap::inte
         const valueType& ice_terms = it->second;
 
         std::vector<JonesJTerm> terms;
-      
+
         for (size_t chan = 0; chan < ice_terms.size(); ++chan) {
+            std::cout << "chan " << chan << " g1 [" << ice_terms[chan].g1.real << "," << ice_terms[chan].g1.imag << "] "<< " g2 [" << ice_terms[chan].g2.real << "," << ice_terms[chan].g2.imag << "]" << std::endl;
             terms.push_back(IceMapper::fromIce(ice_terms[chan]));
         }
 

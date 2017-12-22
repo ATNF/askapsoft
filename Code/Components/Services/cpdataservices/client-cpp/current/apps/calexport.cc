@@ -1,6 +1,6 @@
 /// @file calexport.cc
 ///
-/// @copyright (c) 2011 CSIRO
+/// @copyright (c) 2011, 2017 CSIRO
 /// Australia Telescope National Facility (ATNF)
 /// Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 /// PO Box 76, Epping NSW 1710, Australia
@@ -23,6 +23,11 @@
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
 /// @author Ben Humphreys <ben.humphreys@csiro.au>
+/// Updated the interface to the serive to make it more general and to work with
+/// the service as implemented'
+/// @author Steve Ord <stephen.ord@csiro.au>
+
+
 
 // System includes
 #include <string>
@@ -126,6 +131,7 @@ int main(int argc, char *argv[])
     string locatorHost;
     string locatorPort;
     string serviceName;
+    string parsetFileName;
     string filename;
     long gainID = -1;
     long leakageID = -1;
@@ -147,8 +153,11 @@ int main(int argc, char *argv[])
              "Leakage solution identifier (or -1 to get latest)")
         ("bid,b", po::value<long>(&bandpassID)->default_value(-1),
              "Bandpass solution identifier (or -1 to get latest)")
+        ("inputs,c", po::value<string>(&parsetFileName)->default_value("tExport.in"),
+             "Configuration file")
         ("filename,f", po::value<string>(&filename),
              "Output filename");
+
 
     po::variables_map vm;
     try {
@@ -157,6 +166,16 @@ int main(int argc, char *argv[])
     } catch (const po::unknown_option& e) {
         cerr << desc << endl;
         return 1;
+    }
+
+    fstream parfile(parsetFileName.c_str(), ios::in);
+
+    if (parfile.is_open()) {
+      parfile.close();
+      LOFAR::ParameterSet parset(parsetFileName);
+      locatorHost = parset.getString("ice.locator.host");
+      locatorPort = parset.getString("ice.locator.port");
+      serviceName = parset.getString("calibrationdataservice.name");
     }
 
     if (vm.count("help") || !vm.count("filename")) {
@@ -173,9 +192,13 @@ int main(int argc, char *argv[])
         cout << "Calibration data service reports latest gain solution is: "
             << gainID << endl;
     }
-    cout << "Obtaining gain solution " << gainID << endl;
-    GainSolution gainSolution = svc.getGainSolution(gainID);
-    dumpGainSolution(gainSolution, file);
+
+    if (svc.hasGainSolution(gainID)) {
+      cout << "Obtaining gain solution " << gainID << endl;
+
+      GainSolution gainSolution = svc.getGainSolution(gainID);
+      dumpGainSolution(gainSolution, file);
+    }
 
     // Leakage Solution
     if (leakageID == -1) {
@@ -183,9 +206,11 @@ int main(int argc, char *argv[])
         cout << "Calibration data service reports latest leakage solution is: "
             << leakageID << endl;
     }
-    cout << "Obtaining leakage solution " << leakageID << endl;
-    LeakageSolution leakageSolution = svc.getLeakageSolution(leakageID);
-    dumpLeakageSolution(leakageSolution, file);
+    if (svc.hasLeakageSolution(leakageID)) {
+      cout << "Obtaining leakage solution " << leakageID << endl;
+      LeakageSolution leakageSolution = svc.getLeakageSolution(leakageID);
+      dumpLeakageSolution(leakageSolution, file);
+    }
 
     // Bandpass Solution
     if (bandpassID == -1) {
@@ -193,10 +218,12 @@ int main(int argc, char *argv[])
         cout << "Calibration data service reports latest bandpass solution is: "
             << bandpassID << endl;
     }
-    cout << "Obtaining bandpass solution " << bandpassID << endl;
-    BandpassSolution bandpassSolution = svc.getBandpassSolution(bandpassID);
-    dumpBandpassSolution(bandpassSolution, file);
-
+    if (svc.hasBandpassSolution(bandpassID)) {
+      cout << "Obtaining bandpass solution " << bandpassID << endl;
+      BandpassSolution bandpassSolution = svc.getBandpassSolution(bandpassID);
+      dumpBandpassSolution(bandpassSolution, file);
+    }
+    
     file.close();
     return 0;
 }
