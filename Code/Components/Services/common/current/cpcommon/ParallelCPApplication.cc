@@ -107,7 +107,9 @@ std::string ParallelCPApplication::nodeName()
 #else
 std::string ParallelCPApplication::nodeName()
 {
-  return std::string rtn("none");
+  std::string node = "none";
+  return node;
+
 }
 #endif
 #ifdef HAVE_MPI
@@ -143,7 +145,7 @@ int ParallelCPApplication::mpiNumProcs()
 /// @brief constructor
 ParallelCPApplication::ParallelCPApplication() :
    itsRank(-1), itsNumProcs(-1), itsStandAlone(false) {}
-   
+
 #ifdef HAVE_MPI
 
 
