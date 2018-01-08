@@ -52,11 +52,11 @@
 #include <dataaccess/IDataSelector.h>
 #include <dataaccess/IDataIterator.h>
 #include <dataaccess/SharedIter.h>
+#include <dataaccess/ParsetInterface.h>
 #include <utils/PolConverter.h>
 #include <Common/ParameterSet.h>
 #include <Common/Exceptions.h>
 #include <casacore/casa/OS/Timer.h>
-
 
 // Local includes
 #include "distributedimager/IBasicComms.h"
@@ -154,6 +154,7 @@ askap::scimath::Params::ShPtr SpectralLineWorker::processWorkUnit(const Spectral
     ds.configureUVWMachineCache(uvwMachineCacheSize, uvwMachineCacheTolerance);
     IDataSelectorPtr sel = ds.createSelector();
     sel->chooseCrossCorrelations();
+    sel << itsParset;
     IDataConverterPtr conv = ds.createConverter();
 
     conv->setFrequencyFrame(casa::MFrequency::Ref(casa::MFrequency::TOPO), "Hz");
@@ -192,6 +193,7 @@ SpectralLineWorker::processChannel(askap::accessors::TableDataSource& ds,
     IDataSelectorPtr sel = ds.createSelector();
     sel->chooseCrossCorrelations();
     sel->chooseChannels(1, localChannel);
+    sel << itsParset;
     IDataConverterPtr conv = ds.createConverter();
     conv->setFrequencyFrame(casa::MFrequency::Ref(casa::MFrequency::TOPO), "Hz");
     conv->setDirectionFrame(casa::MDirection::Ref(casa::MDirection::J2000));
