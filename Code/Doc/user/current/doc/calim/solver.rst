@@ -145,15 +145,21 @@ All parameters given in the next table **do not** have **solver.Clean** prefix (
 |**Parameter**            |**Type**       |**Default**   |**Description**                                   |
 +=========================+===============+==============+==================================================+
 |threshold.minorcycle     |vector<string> |no threshold  |If defined, the parameter can be either a single  |
-|                         |               |              |string or a vector of two strings. A number       |
-|                         |               |              |without units is interpreted as a fractional      |
-|                         |               |              |stopping threshold (with respect to the peak      |
-|                         |               |              |residual) as well as the number with the          |
-|                         |               |              |percentage sign. An absolute flux given in Jy or  |
+|                         |               |              |string or a vector of 2 or 3 strings. A number    |
+|                         |               |              |without units, or with a percentage sign, is      |
+|                         |               |              |interpreted as a fractional stopping threshold    |
+|                         |               |              |(with respect to the peak residual).              |
+|                         |               |              |An absolute flux given in Jy or                   |
 |                         |               |              |related units is interpreted as an absolute       |
 |                         |               |              |threshold. Either one or both of these thresholds |
-|                         |               |              |can be given in the same time. Undefined parameter|
-|                         |               |              |means no minor cycle thresholding is done         |
+|                         |               |              |can be given at the same time. Undefined parameter|
+|                         |               |              |means no minor cycle thresholding is done.        |
+|                         |               |              |A second absolute flux parameter can be used to   |
+|                         |               |              |specify a deep clean threshold. During deep       |
+|                         |               |              |cleaning only pixels already in the model are     |
+|                         |               |              |searched to find new components. Setting the deep |
+|                         |               |              |clean threshold to 0.5 times the noise level      |
+|                         |               |              |generally leaves very few sidelobes visible.      |
 +-------------------------+---------------+--------------+--------------------------------------------------+
 |threshold.majorcycle     |string         |-1Jy          |The target peak residual. Use negative value to   |
 |                         |               |              |ensure all requested major cycles are done.       |
