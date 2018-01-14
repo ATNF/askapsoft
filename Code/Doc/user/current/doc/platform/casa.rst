@@ -21,8 +21,8 @@ X11-Forwarding.
 Running CASA via VNC
 --------------------
 
-A remote desktop environment can be accessed via VNC. Either of the two visulisation servers
-can be used to host a VNC server. First you must login to one of the visulisation servers
+A remote desktop environment can be accessed via VNC. Either of the two visualisation servers
+can be used to host a VNC server. First you must login to one of the visualisation servers
 and start the VNC server::
 
     ssh galaxy-vis1.pawsey.org.au
@@ -101,7 +101,7 @@ The following commands will launch CASA::
     casa
 
 Note you can choose from *galaxy-vis1* or *galaxy-vis2*. These nodes share the home directory
-with the Cray supercomputer itself and also mount the /scratch2 filesystem.
+with the Cray supercomputer itself and also mount the /group filesystem.
 
 
 Running CASA on Compute Nodes
@@ -127,7 +127,7 @@ Upon invoking this command one of two things will happen:
 From here you can load the module for CASA and execute CASAPY::
 
     module load casa
-    aprun -b casa --nologger --log2term --nogui
+    srun --export=ALL casa --nologger --log2term --nogui
 
 
 Visualisation of images on Zeus
@@ -140,11 +140,6 @@ the zeus cluster, combined with TurboVNC and the Strudel client
 good graphical performance. Tests have shown that it is possible to
 animate through a very large (many tens of GB) spectral cube at quite
 fast frame rates.
-
-The one limitation at the moment is that the zeus cluster cannot see
-/scratch2, but only /group and /scratch. If you have access to magnus,
-you may use the associated space on /scratch, else you will need to
-copy your images to /group.
 
 Pawsey have a `detailed set of instructions
 <https://support.pawsey.org.au/documentation/display/US/Getting+started%3A+Remote+visualisation+with+Strudel>`_

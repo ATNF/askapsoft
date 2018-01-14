@@ -49,15 +49,11 @@ if [ "${DO_STAGE_FOR_CASDA}" == "true" ]; then
     sbatchfile="$slurms/casda_upload.sbatch"
     cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
-#SBATCH --partition=${QUEUE}
-#SBATCH --clusters=${CLUSTER}
-${ACCOUNT_REQUEST}
-${RESERVATION_REQUEST}
+${SLURM_CONFIG}
 #SBATCH --time=${JOB_TIME_CASDA_UPLOAD}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=casdaupload
-${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-casdaupload-%j.out
 
@@ -211,7 +207,7 @@ EOFINNER
 
 NCORES=1
 NPPN=1
-aprun -n \${NCORES} -N \${NPPN} $casdaupload -c "\$parset" > "\$log"
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} $casdaupload -c "\$parset" > "\$log"
 err=\$?
 if [ \$err != 0 ]; then
     exit \$err
@@ -293,7 +289,6 @@ EOFOUTER
 #!/bin/bash -l
 #SBATCH --cluster=zeus
 #SBATCH --partition=copyq
-${ACCOUNT_REQUEST}
 #SBATCH --open-mode=append
 #SBATCH --output=$slurmOut/slurm-casdaingestPolling-${SB_SCIENCE}.out
 #SBATCH --time=00:05:00

@@ -1,3 +1,18 @@
+0.19.7 (11 January 2018)
+------------------------
+
+A patch release that allows the pipelines to run correctly on native
+slurm, using srun to launch applications rather than aprun. This is
+timed to be available for the upgrade of the galaxy supercomputer to
+CLE6.
+
+The release also has a slightly improved build procedure that better
+handles python dependencies, and updated documentation regarding the
+ASKAP processing platform at Pawsey.
+
+No functional change is expected for the processing software itself.
+
+
 0.19.6 (19 November 2017)
 -------------------------
 

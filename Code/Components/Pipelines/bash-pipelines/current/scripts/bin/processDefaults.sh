@@ -99,6 +99,9 @@ if [ "$PROCESS_DEFAULTS_HAS_RUN" != "true" ]; then
     moduleDir="/group/askap/modulefiles"
     module use "$moduleDir"
 
+    askapsoftModuleCommands="# Need to load the slurm module directly
+module load slurm"
+
     if [ "${ASKAP_ROOT}" == "" ]; then
         # Has the user asked for a specific askapsoft module?
         if [ "${ASKAPSOFT_VERSION}" != "" ]; then
@@ -117,10 +120,12 @@ if [ "$PROCESS_DEFAULTS_HAS_RUN" != "true" ]; then
             # askapsoft is not loaded by the .bashrc - need to specify for
             # slurm jobfiles. Use the requested one if necessary.
             if [ "${ASKAPSOFT_VERSION}" == "" ]; then
-                askapsoftModuleCommands="# Loading the default askapsoft module"
+                askapsoftModuleCommands="${askapsoftModuleCommands}
+# Loading the default askapsoft module"
                 echo "Will use the default askapsoft module"
             else
-                askapsoftModuleCommands="# Loading the requested askapsoft module"
+                askapsoftModuleCommands="${askapsoftModuleCommands}
+# Loading the requested askapsoft module"
                 echo "Will use the askapsoft module askapsoft${ASKAPSOFT_VERSION}"
             fi
             askapsoftModuleCommands="${askapsoftModuleCommands}
@@ -133,14 +138,16 @@ module load askapsoft${ASKAPSOFT_VERSION}"
             #  If a specific version has been requested, swap to that
             #  Otherwise, do nothing
             if [ "${ASKAPSOFT_VERSION}" != "" ]; then
-                askapsoftModuleCommands="# Swapping to the requested askapsoft module
+                askapsoftModuleCommands="${askapsoftModuleCommands}
+# Swapping to the requested askapsoft module
 module use $moduleDir
 module load askapdata
 module swap askapsoft askapsoft${ASKAPSOFT_VERSION}"
                 echo "Will use the askapsoft module askapsoft${ASKAPSOFT_VERSION}"
                 module swap askapsoft askapsoft${ASKAPSOFT_VERSION}
             else
-                askapsoftModuleCommands="# Using user-defined askapsoft module
+                askapsoftModuleCommands="${askapsoftModuleCommands}
+# Using user-defined askapsoft module
 module use $moduleDir
 module load askapdata
 module unload askapsoft
@@ -151,14 +158,15 @@ module load ${currentASKAPsoftVersion}"
 
         # askappipeline module
         askappipelineVersion=$(module list -t 2>&1 | grep askappipeline | sed -e 's|askappipeline/||g')
-        askapsoftModuleCommands="$askapsoftModuleCommands
+        askapsoftModuleCommands="${askapsoftModuleCommands}
 module unload askappipeline
 module load askappipeline/${askappipelineVersion}"
 
         echo " "
 
     else
-        askapsoftModuleCommands="# Using ASKAPsoft code tree directly, so no need to load modules"
+        askapsoftModuleCommands="${askapsoftModuleCommands}
+# Using ASKAPsoft code tree directly, so no need to load modules"
         echo "Using ASKAPsoft code direct from your code tree at ASKAP_ROOT=$ASKAP_ROOT"
         echo "ASKAPsoft modules will *not* be loaded in the slurm files."
     fi
@@ -284,7 +292,7 @@ EOFSCRIPT
     NCORES=1
     NPPN=1
     loadModule casa
-    aprun -n \${NCORES} -N \${NPPN} -b casa --nogui --nologger --log2term -c \"\${script}\" >> \"\${log}\"
+    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} casa --nogui --nologger --log2term -c \"\${script}\" >> \"\${log}\"
     unloadModule casa
 fi"
     else
@@ -313,7 +321,7 @@ ImageToFITS.stokesLast = true
 EOFINNER
     NCORES=1
     NPPN=1
-    aprun -n \${NCORES} -N \${NPPN} imageToFITS -c \"\${parset}\" >> \"\${log}\"
+    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} imageToFITS -c \"\${parset}\" >> \"\${log}\"
 
 fi"
     fi
@@ -327,33 +335,58 @@ updateArgs=\"\${updateArgs} --project=${PROJECT_ID}\"
 updateArgs=\"\${updateArgs} --sbid=${SB_SCIENCE}\"
 updateArgs=\"\${updateArgs} --dateobs=${DATE_OBS}\"
 updateArgs=\"\${updateArgs} --duration=${DURATION}\"
-aprun -n \${NCORES} -N \${NPPN} \"${PIPELINEDIR}/updateFITSheaders.py\" \${updateArgs} \"Produced with ASKAPsoft version \${ASKAPSOFT_RELEASE}\", \"Produced using ASKAP pipeline version ${PIPELINE_VERSION}\", \"Produced using ACES software revision ${ACES_VERSION_USED}\", \"Processed with ASKAP pipelines on ${NOW_FMT}\"
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} \"${PIPELINEDIR}/updateFITSheaders.py\" \${updateArgs} \"Produced with ASKAPsoft version \${ASKAPSOFT_RELEASE}\", \"Produced using ASKAP pipeline version ${PIPELINE_VERSION}\", \"Produced using ACES software revision ${ACES_VERSION_USED}\", \"Processed with ASKAP pipelines on ${NOW_FMT}\"
 "
 
     ####################
     # Slurm file headers
+    #  This adds the slurm headers for the partition, cluster,
+    #  account, constraints, reservation & email notifications
+
+    SLURM_CONFIG="#SBATCH --partition=${QUEUE}"
+
+    if [ "${CLUSTER}" != "" ]; then
+        SLURM_CONFIG="${SLURM_CONFIG}
+#SBATCH --clusters=${CLUSTER}"
+    fi
+    
+    # Account to be used
+    if [ "$ACCOUNT" != "" ]; then
+        SLURM_CONFIG="${SLURM_CONFIG}
+#SBATCH --account=${ACCOUNT}"
+    else
+        SLURM_CONFIG="${SLURM_CONFIG}
+# Using the default account"
+    fi
+
+    # Slurm constraints to be applied
+    if [ "${CONSTRAINT}" != "" ]; then
+        SLURM_CONFIG="${SLURM_CONFIG}
+#SBATCH --constraint=${CONSTRAINT}"
+    else
+        SLURM_CONFIG="${SLURM_CONFIG}
+# No further constraints applied"
+    fi
 
     # Reservation string
     if [ "$RESERVATION" != "" ]; then
-        RESERVATION_REQUEST="#SBATCH --reservation=${RESERVATION}"
+        SLURM_CONFIG="${SLURM_CONFIG}
+#SBATCH --reservation=${RESERVATION}"
     else
-        RESERVATION_REQUEST="# No reservation requested"
+        SLURM_CONFIG="${SLURM_CONFIG}
+# No reservation requested"
     fi
 
     # Email request
     if [ "$EMAIL" != "" ]; then
-        EMAIL_REQUEST="#SBATCH --mail-user=${EMAIL}
+        SLURM_CONFIG="${SLURM_CONFIG}
+#SBATCH --mail-user=${EMAIL}
 #SBATCH --mail-type=${EMAIL_TYPE}"
     else
-        EMAIL_REQUEST="# No email notifications sent"
+        SLURM_CONFIG="${SLURM_CONFIG}
+# No email notifications sent"
     fi
 
-    # Account to be used
-    if [ "$ACCOUNT" != "" ]; then
-        ACCOUNT_REQUEST="#SBATCH --account=${ACCOUNT}"
-    else
-        ACCOUNT_REQUEST="# Using the default account"
-    fi
 
     ####################
     # Set the times for each job
@@ -594,7 +627,7 @@ EOF
             # CPUS_PER_CORE_CONT_IMAGING=8 # get rid of this change as it is unnecessary
         fi
 
-        # Can't have -N greater than -n in the aprun call
+        # Can't have -N greater than -n in the srun call
         if [ "${NUM_CPUS_CONTIMG_SCI}" -lt "${CPUS_PER_CORE_CONT_IMAGING}" ]; then
             CPUS_PER_CORE_CONT_IMAGING=${NUM_CPUS_CONTIMG_SCI}
         fi
@@ -764,7 +797,7 @@ EOF
             NUM_CPUS_SPECIMG_SCI=$(echo "${NUM_CHAN_SCIENCE_SL}" "${NCHAN_PER_CORE_SL}" | awk '{print int($1/$2) + 1}')
         fi
 
-        # Can't have -N greater than -n in the aprun call
+        # Can't have -N greater than -n in the srun call
         if [ "${NUM_CPUS_SPECIMG_SCI}" -lt "${CPUS_PER_CORE_SPEC_IMAGING}" ]; then
             CPUS_PER_CORE_SPEC_IMAGING=${NUM_CPUS_SPECIMG_SCI}
         fi

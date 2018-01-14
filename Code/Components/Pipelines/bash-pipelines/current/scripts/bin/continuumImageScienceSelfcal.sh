@@ -193,15 +193,11 @@ Ccalibrator.refgain                             = ${SELFCAL_REF_GAINS}"
     setJob science_continuumImageSelfcal contSC
     cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
-#SBATCH --partition=${QUEUE}
-#SBATCH --clusters=${CLUSTER}
-${ACCOUNT_REQUEST}
-${RESERVATION_REQUEST}
+${SLURM_CONFIG}
 #SBATCH --time=${JOB_TIME_CONT_IMAGE}
 #SBATCH --ntasks=${NUM_CPUS_SELFCAL}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_CONT_IMAGING}
 #SBATCH --job-name=${jobname}
-${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-contImagingSelfcal-%j.out
 
@@ -221,7 +217,7 @@ selfcalMethod=${SELFCAL_METHOD}
 log=${logs}/mslist_for_selfcal_\${SLURM_JOB_ID}.log
 NCORES=1
 NPPN=1
-aprun -n \${NCORES} -N \${NPPN} $mslist --full "${msSciAv}" 1>& "\${log}"
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} $mslist --full "${msSciAv}" 1>& "\${log}"
 ra=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=RA)
 dec=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=Dec)
 epoch=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=Epoch)
@@ -409,7 +405,7 @@ EOFINNER
         echo "---    Loop=\$LOOP, Threshold = \${SELFCAL_SELAVY_THRESHOLD_ARRAY[\$LOOP]} --" >> "\$log"
         NCORES=${NPROCS_SELAVY}
         NPPN=${CPUS_PER_CORE_SELFCAL_SELAVY}
-        aprun -n \${NCORES} -N \${NPPN} $selavy -c "\$parset" >> "\$log"
+        srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} $selavy -c "\$parset" >> "\$log"
         err=\$?
         extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname}_L\${LOOP}_selavy "txt,csv"
 
@@ -437,7 +433,7 @@ Cmodel.flux_limit    = \${fluxLimit}mJy" >> \$parset
             echo "--- Model creation with $cmodel ---" > "\$log"
             NCORES=2
             NPPN=2
-            aprun -n \${NCORES} -N \${NPPN} $cmodel -c "\$parset" >> "\$log"
+            srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} $cmodel -c "\$parset" >> "\$log"
             err=\$?
             extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname}_L\${LOOP}_cmodel "txt,csv"
 
@@ -453,7 +449,7 @@ Cmodel.flux_limit    = \${fluxLimit}mJy" >> \$parset
         echo "---    Normalise gains = \${SELFCAL_NORMALISE_GAINS_ARRAY[\$LOOP]} --" >> "\$log"
         NCORES=1
         NPPN=1
-        aprun -n \${NCORES} -N \${NPPN} $ccalibrator -c "\$parset" >> "\$log"
+        srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} $ccalibrator -c "\$parset" >> "\$log"
         err=\$?
         extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname}_L\${LOOP}_ccal "txt,csv"
         if [ \$err != 0 ]; then
@@ -479,7 +475,7 @@ Cmodel.flux_limit    = \${fluxLimit}mJy" >> \$parset
     echo "--- Imaging with $theimager ---" > "\$log"
     NCORES=${NUM_CPUS_CONTIMG_SCI}
     NPPN=${CPUS_PER_CORE_CONT_IMAGING}
-    aprun -n \${NCORES} -N \${NPPN} $theimager -c "\$parset" >> "\$log"
+    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} $theimager -c "\$parset" >> "\$log"
     err=\$?
     for im in *.${imageBase}*; do
         rejuvenate "\$im"

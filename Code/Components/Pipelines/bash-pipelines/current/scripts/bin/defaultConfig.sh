@@ -44,6 +44,9 @@ RESERVATION=""
 # Account to use for the jobs. If left blank, the user's default
 # account is used
 ACCOUNT=""
+# Special constraints to apply. Not needed for galaxy queue, but may
+# be useful for other clusters
+CONSTRAINT=""
 # Email address to send notifications to. No notifications sent if
 # blank
 EMAIL=""

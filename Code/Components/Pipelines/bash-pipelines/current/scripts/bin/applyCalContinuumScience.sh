@@ -42,15 +42,11 @@ if [ "${DO_IT}" == "true" ]; then
     setJob apply_gains_cal_cont applyCalC
     cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
-#SBATCH --partition=${QUEUE}
-#SBATCH --clusters=${CLUSTER}
-${ACCOUNT_REQUEST}
-${RESERVATION_REQUEST}
+${SLURM_CONFIG}
 #SBATCH --time=${JOB_TIME_CONT_APPLYCAL}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=${jobname}
-${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-calappCont${BEAM}-%j.out
 
@@ -68,7 +64,9 @@ cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 keepRaw=${KEEP_RAW_AV_MS}
 if [ "\${keepRaw}" == "true" ]; then
   # we need to make a copy that we will then apply the cal to
-  aprun -n 1 cp -r ${msSciAv} ${msSciAvCal}
+  NCORES=1
+  NPPN=1
+  srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} cp -r ${msSciAv} ${msSciAvCal}
 fi
 
 parset=${parsets}/apply_gains_cal_cont_${FIELDBEAM}_\${SLURM_JOB_ID}.in
@@ -91,7 +89,7 @@ EOFINNER
 
 NCORES=1
 NPPN=1
-aprun -n \${NCORES} -N \${NPPN} ${ccalapply} -c "\${parset}" > "\${log}"
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${ccalapply} -c "\${parset}" > "\${log}"
 err=\$?
 rejuvenate ${msSciAvCal}
 rejuvenate ${gainscaltab}

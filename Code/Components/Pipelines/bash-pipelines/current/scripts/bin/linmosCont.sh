@@ -76,15 +76,11 @@ ${LINMOS_BEAM_OFFSETS}"
     setJob linmosCont linmosC
     cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
-#SBATCH --partition=${QUEUE}
-#SBATCH --clusters=${CLUSTER}
-${ACCOUNT_REQUEST}
-${RESERVATION_REQUEST}
+${SLURM_CONFIG}
 #SBATCH --time=${JOB_TIME_LINMOS}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=${jobname}
-${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-linmosC-%j.out
 
@@ -179,7 +175,7 @@ EOFINNER
 
                 NCORES=1
                 NPPN=1
-                aprun -n \${NCORES} -N \${NPPN} $linmosMPI -c "\$parset" > "\$log"
+                srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} $linmosMPI -c "\$parset" > "\$log"
                 err=\$?
                 for im in \$(echo "\${imList}" | sed -e 's/,/ /g'); do
                     rejuvenate "\${im}"

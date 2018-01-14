@@ -106,15 +106,11 @@ Cbpcalibrator.refantenna                      = ${BANDPASS_REFANTENNA}"
     sbatchfile="$slurms/cbpcalibrator_1934.sbatch"
     cat > "$sbatchfile" <<EOF
 #!/bin/bash -l
-#SBATCH --partition=${QUEUE}
-#SBATCH --clusters=${CLUSTER}
-${ACCOUNT_REQUEST}
-${RESERVATION_REQUEST}
+${SLURM_CONFIG}
 #SBATCH --time=${JOB_TIME_FIND_BANDPASS}
 #SBATCH --ntasks=${NUM_CPUS_CBPCAL}
 #SBATCH --ntasks-per-node=20
 #SBATCH --job-name=cbpcal
-${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-findBandpass-%j.out
 
@@ -159,7 +155,7 @@ log=${logs}/cbpcalibrator_1934_\${SLURM_JOB_ID}.log
 
 NCORES=${NUM_CPUS_CBPCAL}
 NPPN=20
-aprun -n \${NCORES} -N \${NPPN} $cbpcalibrator -c "\$parset" > "\$log"
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} $cbpcalibrator -c "\$parset" > "\$log"
 err=\$?
 for ms in \$(echo $ms1934list | sed -e 's/,/ /g'); do
     rejuvenate "\$ms";
@@ -179,7 +175,7 @@ if [ \${PLOT_CALTABLE} == true ]; then
     loadModule casa
     NCORES=1
     NPPN=1
-    aprun -n \${NCORES} -N \${NPPN} -b casa --nogui --nologger --log2term --agg -c "\${script}" ${script_args} > "\${log}"
+    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} casa --nogui --nologger --log2term --agg -c "\${script}" ${script_args} > "\${log}"
     err=\$?
     unloadModule casa
     for tab in ${TABLE_BANDPASS}*; do

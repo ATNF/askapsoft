@@ -37,15 +37,11 @@ if [ "${DO_CONVERT_TO_FITS}" == "true" ]; then
     sbatchfile="$slurms/convert_to_FITS.sbatch"
     cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
-#SBATCH --partition=${QUEUE}
-#SBATCH --clusters=${CLUSTER}
-${ACCOUNT_REQUEST}
-${RESERVATION_REQUEST}
+${SLURM_CONFIG}
 #SBATCH --time=${JOB_TIME_FITS_CONVERT}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=FITSconvert
-${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-FITSconvert-%j.out
 

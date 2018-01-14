@@ -66,15 +66,11 @@ if [ "${DO_IT}" == "true" ]; then
     setJob split_spectralline_science splitSL
     cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
-#SBATCH --partition=${QUEUE}
-#SBATCH --clusters=${CLUSTER}
-${ACCOUNT_REQUEST}
-${RESERVATION_REQUEST}
+${SLURM_CONFIG}
 #SBATCH --time=${JOB_TIME_SPECTRAL_SPLIT}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=${jobname}
-${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-splitSLsci-%j.out
 
@@ -115,7 +111,7 @@ log=${logs}/split_spectralline_science_${FIELDBEAM}_\${SLURM_JOB_ID}.log
 
 NCORES=1
 NPPN=1
-aprun -n \${NCORES} -N \${NPPN} ${mssplit} -c "\${parset}" > "\${log}"
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${mssplit} -c "\${parset}" > "\${log}"
 err=\$?
 rejuvenate ${msSciSL}
 extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv"
@@ -159,15 +155,11 @@ if [ "${DO_IT}" == "true" ]; then
     setJob apply_gains_cal_spectralline applyCalS
     cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
-#SBATCH --partition=${QUEUE}
-#SBATCH --clusters=${CLUSTER}
-${ACCOUNT_REQUEST}
-${RESERVATION_REQUEST}
+${SLURM_CONFIG}
 #SBATCH --time=${JOB_TIME_SPECTRAL_APPLYCAL}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=${jobname}
-${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-calappSLsci-%j.out
 
@@ -202,7 +194,7 @@ EOFINNER
 
 NCORES=1
 NPPN=1
-aprun -n \${NCORES} -N \${NPPN} ${ccalapply} -c "\${parset}" > "\${log}"
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${ccalapply} -c "\${parset}" > "\${log}"
 err=\$?
 rejuvenate ${msSciSL}
 rejuvenate ${gainscaltab}

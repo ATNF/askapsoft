@@ -5,6 +5,8 @@
 .. _transferring small files: https://support.pawsey.org.au/documentation/display/US/Transferring+Files#TransferringFiles-SmallDataTransfers
 .. _Removing files on /scratch and /group: https://support.pawsey.org.au/documentation/display/US/Tips+and+Best+Practices#TipsandBestPractices-Removingfileson/scratchand/group
 
+**OUT OF DATE - scratch2 is no longer used. This page will be removed soon and is kept for historical purposes only.**
+
 scratch2 Purge Policy
 =====================
 

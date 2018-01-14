@@ -98,6 +98,12 @@ else
 
             . "${PIPELINEDIR}/run1934cal.sh"
 
+            if [ "${DO_SCIENCE_FIELD}" != "true" ]; then
+
+                . "${PIPELINEDIR}/gatherStats.sh"
+
+            fi
+
         fi
 
         if [ "${DO_SCIENCE_FIELD}" == "true" ]; then

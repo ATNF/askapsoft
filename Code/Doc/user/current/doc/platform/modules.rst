@@ -23,14 +23,15 @@ executed the following command. However this command should have been added to y
 The ASKAP modules appear in their own section in the output from the *module avail*
 command::
 
-  ------------------------------------------------------------------ /group/askap/modulefiles -----------------------------------------
-  aces/0.3(default)                askapsoft/0.4.0                  askapsoft/0.7.2                  bbcp/13.05.03.00.0(default)
-  ashell                           askapsoft/0.4.1                  askapsoft/0.7.3                  casa/30.1.11097-001-64b
-  askapdata/current(default)       askapsoft/0.5.0                  askapsoft/0.8.0                  casa/4.3.0-el5
-  askappipeline/r7046              askapsoft/0.6.1                  askapsoft/0.8.1                  casa/41.0.24668-001(default)
-  askappipeline/r7054              askapsoft/0.6.2                  askapsoft/0.9.0                  casa/42.2.30986-1-64b
-  askappipeline/r7064              askapsoft/0.6.3                  askapsoft/0.9.1(default)         deprecated-python/2.7.6(default)
-  askappipeline/r7067(default)     askapsoft/0.7.0                  askapsoft/r6822                  tmux/1.8(default)
+    ---------------------------------------------------------------------- /group/askap/modulefiles ----------------------------------------------------------------------
+    aces/0.5(default)                    askappipeline/0.19.0                 askapsoft/0.19.0                     bbcp/13.05.03.00.0(default)
+    aces/0.5b                            askappipeline/0.19.2                 askapsoft/0.19.2                     casa/4.7.0-el6
+    aces/0.6                             askappipeline/0.19.3                 askapsoft/0.19.4                     casa/5.0.0-218.el6(default)
+    acesops/r47210                       askappipeline/0.19.4                 askapsoft/0.19.5                     karma/1.7.25(default)
+    acesops/r47349(default)              askappipeline/0.19.5                 askapsoft/0.19.6                     tmux/1.8(default)
+    ashell                               askappipeline/0.19.6                 askapsoft/cle6-dev-9419(default)
+    askapcli/current(default)            askappipeline/cle6-dev-9419(default) askaputils
+    askapdata/current(default)           askapservices/0.15.0(default)        askapvis/current(default)
 
 These modules are:
 
@@ -39,6 +40,7 @@ These modules are:
 * **askappipeline** - Pipeline scripts for processing ASKAP/BETA observations
 * **askaputils** - General utility scripts (*pshell* for data
   transfer - see :doc:`comm_archive`, plus other utility scripts)
+* **askapcli** - Command-Line-Interface to the online systems (scheduling block service, FCM and footprint are perhaps the most commonly-used). 
 * **casa** - NRAO's CASA software package (see :doc:`casa`)
 * **bbcp** - BBCP Fast file copy (see :doc:`externaltransfer`)
 * **ashell** - Connection to the commissioning archive (see :doc:`comm_archive`)
@@ -68,18 +70,18 @@ askapsoft"* command you will load the default version. You can load a
 specific version by specifying the version in the *module load*
 command::
 
-    module load askapsoft/0.9.0
+    module load askapsoft/0.19.0
 
 Often it is useful to understand exactly how a module will modify your environment. The
 *module display* command can be used to determine this. For instance::
 
     $ module display askapsoft
     -------------------------------------------------------------------
-    /group/askap/modulefiles/askapsoft/0.9.1:
+    /group/askap/modulefiles/askapsoft/0.19.7:
 
     module-whatis    ASKAPsoft software package 
-    prepend-path     PATH /group/askap/askapsoft/0.9.1/bin 
-    prepend-path     LD_LIBRARY_PATH /group/askap/askapsoft/0.9.1/lib64 
+    prepend-path     PATH /group/askap/askapsoft/0.19.7/bin 
+    prepend-path     LD_LIBRARY_PATH /group/askap/askapsoft/0.19.7/lib64 
     -------------------------------------------------------------------
 
 The above shows that the askapsoft module will prepend the ASKAPsoft *bin* directory to

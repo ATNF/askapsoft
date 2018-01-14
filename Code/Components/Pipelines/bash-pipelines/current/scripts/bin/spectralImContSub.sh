@@ -103,15 +103,11 @@ for subband in ${SUBBAND_WRITER_LIST}; do
                 
             cat > "$sbatchfile" <<EOF
 #!/bin/bash -l
-#SBATCH --partition=${QUEUE}
-#SBATCH --clusters=${CLUSTER}
-${ACCOUNT_REQUEST}
-${RESERVATION_REQUEST}
+${SLURM_CONFIG}
 #SBATCH --time=${JOB_TIME_SPECTRAL_IMCONTSUB}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=${jobname}
-${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-imcontsubSL-%j.out
 
@@ -151,7 +147,7 @@ else
     NPPN=1
     loadModule casa
     echo "Running image-based continuum subtraction with script \${script}" > "\${log}"
-    aprun -n \${NCORES} -N \${NPPN} -b casa --nogui --nologger --log2term -c "\${script}" \${args} >> "\${log}"
+    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} casa --nogui --nologger --log2term -c "\${script}" \${args} >> "\${log}"
     err=\$?
     unloadModule casa
     cd ..
@@ -175,15 +171,11 @@ EOF
         
             cat > "$sbatchfile" <<EOF
 #!/bin/bash -l
-#SBATCH --partition=${QUEUE}
-#SBATCH --clusters=${CLUSTER}
-${ACCOUNT_REQUEST}
-${RESERVATION_REQUEST}
+${SLURM_CONFIG}
 #SBATCH --time=${JOB_TIME_SPECTRAL_IMCONTSUB}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=${jobname}
-${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-imcontsubSL-%j.out
 
@@ -236,7 +228,7 @@ EOFINNER
     NCORES=1
     NPPN=1
     loadModule casa
-    aprun -n \${NCORES} -N \${NPPN} -b casa --nogui --nologger --log2term -c "\${pyscript}" > "\${log}"
+    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} casa --nogui --nologger --log2term -c "\${pyscript}" > "\${log}"
     err=\$?
     unloadModule casa
     cd ..

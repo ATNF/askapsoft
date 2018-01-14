@@ -116,15 +116,11 @@ Cflag.amplitude_flagger.low             = ${FLAG_THRESHOLD_AMPLITUDE_1934_LOW}"
     setJob flag_1934 flag
     cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
-#SBATCH --partition=${QUEUE}
-#SBATCH --clusters=${CLUSTER}
-${ACCOUNT_REQUEST}
-${RESERVATION_REQUEST}
+${SLURM_CONFIG}
 #SBATCH --time=${JOB_TIME_FLAG_1934}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=${jobname}
-${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-flag1934-b${BEAM}-%j.out
 
@@ -163,7 +159,7 @@ EOFINNER
 
     NCORES=1
     NPPN=1
-    aprun -n \${NCORES} -N \${NPPN} ${cflag} -c "\${parset}" > "\${log}"
+    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${cflag} -c "\${parset}" > "\${log}"
     err=\$?
     rejuvenate ${msCal}
     extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname}_Amp "txt,csv"
@@ -208,7 +204,7 @@ EOFINNER
 
     NCORES=1
     NPPN=1
-    aprun -n \${NCORES} -N \${NPPN} ${cflag} -c "\${parset}" > "\${log}"
+    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${cflag} -c "\${parset}" > "\${log}"
     err=\$?
     rejuvenate ${msCal}
     extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname}_Dyn "txt,csv"

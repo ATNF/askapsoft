@@ -36,15 +36,11 @@ if [ "${DO_IT}" == "true" ]; then
     sbatchfile=$slurms/runDiagnostics.sbatch
     cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
-#SBATCH --partition=${QUEUE}
-#SBATCH --clusters=${CLUSTER}
-${ACCOUNT_REQUEST}
-${RESERVATION_REQUEST}
+${SLURM_CONFIG}
 #SBATCH --time=${JOB_TIME_DIAGNOSTICS}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=diagnostics
-${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-diagnostics-%j.out
 
@@ -104,7 +100,7 @@ EOF
     
                 NCORES=1
                 NPPN=1
-                aprun -n \${NCORES} -N \${NPPN} ${makeThumbnails} -c "\${diagParset}" >> "\${log}"
+                srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${makeThumbnails} -c "\${diagParset}" >> "\${log}"
                 err=\$?
                 if [ \$err != 0 ]; then
                     echo "ERROR - Sources thumbnail creation failed for image \${casdaTwoDimImageNames[i]}" | tee -a "\${log}"
@@ -172,7 +168,7 @@ EOF
     
                 NCORES=1
                 NPPN=1
-                aprun -n \${NCORES} -N \${NPPN} ${makeThumbnails} -c "\${diagParset}" >> "\${log}"
+                srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${makeThumbnails} -c "\${diagParset}" >> "\${log}"
                 err=\$?
                 if [ \$err != 0 ]; then
                     echo "ERROR - Sources thumbnail creation failed for image \${noisemapbase}.fits" | tee -a "\${log}"

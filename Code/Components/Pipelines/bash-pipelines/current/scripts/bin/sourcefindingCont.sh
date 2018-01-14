@@ -135,15 +135,11 @@ Selavy.growthThreshold = ${SELAVY_GROWTH_CUT}"
     setJob "science_selavy_cont_${contImage}" "$description"
     cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
-#SBATCH --partition=${QUEUE}
-#SBATCH --clusters=${CLUSTER}
-${ACCOUNT_REQUEST}
-${RESERVATION_REQUEST}
+${SLURM_CONFIG}
 #SBATCH --time=${JOB_TIME_SOURCEFINDING_CONT}
 #SBATCH --ntasks=${NUM_CPUS_SELAVY}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_SELAVY}
 #SBATCH --job-name=${jobname}
-${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-selavy-cont-%j.out
 
@@ -314,7 +310,7 @@ EOFINNER
 
     NCORES=${NUM_CPUS_SELAVY}
     NPPN=${CPUS_PER_CORE_SELAVY}
-    aprun -n \${NCORES} -N \${NPPN} $selavy -c "\$parset" >> "\$log"
+    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} $selavy -c "\$parset" >> "\$log"
     err=\$?
     extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv"
     if [ \$err != 0 ]; then
@@ -351,7 +347,9 @@ EOFINNER
             validateArgs="\${validateArgs} -S ${selavyDir}/selavy-\${fitsimage%%.fits}.components.xml"
             validateArgs="\${validateArgs} -N ${selavyDir}/${noiseMap}.fits "
             validateArgs="\${validateArgs} -C NVSS_config.txt,SUMSS_config.txt"          
-            aprun -n 1 -N 1 \${scriptname} \${validateArgs} > "\${log}"
+            NCORES=1
+            NPPN=1
+            srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} \${scriptname} \${validateArgs} > "\${log}"
             err=\$?
             extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} validationCont "txt,csv"
             unloadModule continuum_validation_env

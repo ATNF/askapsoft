@@ -105,15 +105,11 @@ Selavy.snrRecon   = ${SELAVY_SPEC_RECON_SNR}"
     setJob "science_selavy_spec_${imageName}" selavySpec
     cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
-#SBATCH --partition=${QUEUE}
-#SBATCH --clusters=${CLUSTER}
-${ACCOUNT_REQUEST}
-${RESERVATION_REQUEST}
+${SLURM_CONFIG}
 #SBATCH --time=${JOB_TIME_SOURCEFINDING_SPEC}
 #SBATCH --ntasks=${NUM_CPUS_SELAVY_SPEC}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_SELAVY_SPEC}
 #SBATCH --job-name=${jobname}
-${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-selavy-spec-%j.out
 
@@ -230,7 +226,7 @@ EOFINNER
 
     NCORES=${NUM_CPUS_SELAVY_SPEC}
     NPPN=${CPUS_PER_CORE_SELAVY_SPEC}
-    aprun -n \${NCORES} -N \${NPPN} $selavy -c "\$parset" >> "\$log"
+    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} $selavy -c "\$parset" >> "\$log"
     err=\$?
     extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv"
     if [ \$err != 0 ]; then

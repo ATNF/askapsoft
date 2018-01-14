@@ -35,15 +35,11 @@ if [ "${DO_MAKE_THUMBNAILS}" == "true" ]; then
     sbatchfile=$slurms/makeThumbnails.sbatch
     cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
-#SBATCH --partition=${QUEUE}
-#SBATCH --clusters=${CLUSTER}
-${ACCOUNT_REQUEST}
-${RESERVATION_REQUEST}
+${SLURM_CONFIG}
 #SBATCH --time=${JOB_TIME_THUMBNAILS}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=thumbnails
-${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-thumbnails-%j.out
 
@@ -149,7 +145,7 @@ EOF
     
         NCORES=1
         NPPN=1
-        aprun -n \${NCORES} -N \${NPPN} ${makeThumbnails} -c "\${parset}" >> "\${log}"
+        srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${makeThumbnails} -c "\${parset}" >> "\${log}"
         err=\$?
         if [ \$err != 0 ]; then
             echo "ERROR - Thumbnail creation failed for image \${casdaTwoDimImageNames[i]}" | tee -a "\${log}"

@@ -56,15 +56,11 @@ if [ "${DO_IT}" == "true" ]; then
     setJob science_continuumImage cont
     cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
-#SBATCH --partition=${QUEUE}
-#SBATCH --clusters=${CLUSTER}
-${ACCOUNT_REQUEST}
-${RESERVATION_REQUEST}
+${SLURM_CONFIG}
 #SBATCH --time=${JOB_TIME_CONT_IMAGE}
 #SBATCH --ntasks=${NUM_CPUS_CONTIMG_SCI}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_CONT_IMAGING}
 #SBATCH --job-name=${jobname}
-${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-contImaging-%j.out
 
@@ -105,7 +101,7 @@ log=${logs}/science_imaging_${FIELDBEAM}_\${SLURM_JOB_ID}.log
 
 NCORES=${NUM_CPUS_CONTIMG_SCI}
 NPPN=${CPUS_PER_CORE_CONT_IMAGING}
-aprun -n \${NCORES} -N \${NPPN} $theimager -c "\$parset" > "\$log"
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} $theimager -c "\$parset" > "\$log"
 err=\$?
 for im in *.${imageBase}*; do
     rejuvenate "\$im"

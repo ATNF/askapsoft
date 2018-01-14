@@ -68,15 +68,11 @@ fi
 
 cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
-#SBATCH --partition=${QUEUE}
-#SBATCH --clusters=${CLUSTER}
-${ACCOUNT_REQUEST}
-${RESERVATION_REQUEST}
+${SLURM_CONFIG}
 #SBATCH --time=${JOB_TIME_SPECTRAL_CONTSUB}
 #SBATCH --ntasks=${NPROCS_CONTSUB}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_CONTSUB}
 #SBATCH --job-name=${jobname}
-${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-contsubSLsci-%j.out
 
@@ -98,7 +94,7 @@ DIRECTION="$DIRECTION"
 if [ "\${DIRECTION}" != "" ]; then
     modelDirection="\${DIRECTION}"
 else
-    aprun -n \${NCORES} -N \${NPPN} $mslist --full "${msSciSL}" 1>& "\${log}"
+    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} $mslist --full "${msSciSL}" 1>& "\${log}"
     ra=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=RA)
     dec=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=Dec)
     epoch=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=Epoch)
@@ -171,7 +167,7 @@ EOFINNER
 
 NCORES=${NPROCS_CONTSUB}
 NPPN=${CPUS_PER_CORE_CONTSUB}
-aprun -n \${NCORES} -N \${NPPN} ${selavy} -c "\${parset}" > "\${log}"
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${selavy} -c "\${parset}" > "\${log}"
 err=\$?
 extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname}_selavy "txt,csv"
 if [ \$err != 0 ]; then
@@ -214,7 +210,7 @@ EOFINNER
 
     NCORES=2
     NPPN=2
-    aprun -n \${NCORES} -N \${NPPN} ${cmodel} -c "\${parset}" > "\${log}"
+    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${cmodel} -c "\${parset}" > "\${log}"
     err=\$?
     extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname}_cmodel "txt,csv"
     if [ \$err != 0 ]; then
@@ -250,7 +246,7 @@ EOFINNER
 
     NCORES=1
     NPPN=1
-    aprun -n \${NCORES} -N \${NPPN} ${ccontsubtract} -c "\${parset}" > "\${log}"
+    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${ccontsubtract} -c "\${parset}" > "\${log}"
     err=\$?
     rejuvenate ${msSciSL}
     extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv"

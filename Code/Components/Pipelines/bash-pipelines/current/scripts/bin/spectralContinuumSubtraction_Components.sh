@@ -52,15 +52,11 @@ components=modelComponents.in
 
 cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
-#SBATCH --partition=${QUEUE}
-#SBATCH --clusters=${CLUSTER}
-${ACCOUNT_REQUEST}
-${RESERVATION_REQUEST}
+${SLURM_CONFIG}
 #SBATCH --time=${JOB_TIME_SPECTRAL_CONTSUB}
 #SBATCH --ntasks=${NPROCS_CONTSUB}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_CONTSUB}
 #SBATCH --job-name=${jobname}
-${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-contsubSLsci-%j.out
 
@@ -78,7 +74,7 @@ cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 log=${logs}/mslist_for_contsub_\${SLURM_JOB_ID}.log
 NCORES=1
 NPPN=1
-aprun -n \${NCORES} -N \${NPPN} $mslist --full "${msSci}" 1>& "\${log}"
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} $mslist --full "${msSci}" 1>& "\${log}"
 ra=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=RA)
 ra=\$(echo \$ra | awk -F':' '{printf "%sh%sm%s",\$1,\$2,\$3}')
 dec=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=Dec)
@@ -159,7 +155,7 @@ EOFINNER
 
 NCORES=${NPROCS_CONTSUB}
 NPPN=${CPUS_PER_CORE_CONTSUB}
-aprun -n \${NCORES} -N \${NPPN} ${selavy} -c "\${parset}" > "\${log}"
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${selavy} -c "\${parset}" > "\${log}"
 err=\$?
 extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname}_selavy "txt,csv"
 if [ \$err != 0 ]; then
@@ -203,7 +199,7 @@ EOFINNER
 
     NCORES=1
     NPPN=1
-    aprun -n \${NCORES} -N \${NPPN} ${ccontsubtract} -c "\${parset}" > "\${log}"
+    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${ccontsubtract} -c "\${parset}" > "\${log}"
     err=\$?
     rejuvenate ${msSciSL}
     extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv"

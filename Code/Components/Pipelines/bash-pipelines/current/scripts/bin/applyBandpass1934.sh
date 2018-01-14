@@ -47,15 +47,11 @@ if [ "$DO_IT" == "true" ]; then
     setJob apply_bandpass_1934 applyBP1934
     cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
-#SBATCH --partition=${QUEUE}
-#SBATCH --clusters=${CLUSTER}
-${ACCOUNT_REQUEST}
-${RESERVATION_REQUEST}
+${SLURM_CONFIG}
 #SBATCH --time=${JOB_TIME_APPLY_BANDPASS}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=${jobname}
-${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-applyBandpass1934-%j.out
 
@@ -107,7 +103,7 @@ log=${logs}/ccalapply_bp1934_b${BEAM}_\${SLURM_JOB_ID}.log
 
 NCORES=1
 NPPN=1
-aprun -n \${NCORES} -N \${NPPN} ${ccalapply} -c "\$parset" > "\$log"
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${ccalapply} -c "\$parset" > "\$log"
 err=\$?
 rejuvenate ${ms}
 rejuvenate \${TABLE}

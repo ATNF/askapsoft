@@ -74,15 +74,11 @@ for imageCode in ${mosaicImageList}; do
         sbatchfile=$slurms/linmos_all_contcube_${imageCode}.sbatch
         cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
-#SBATCH --partition=${QUEUE}
-#SBATCH --clusters=${CLUSTER}
-${ACCOUNT_REQUEST}
-${RESERVATION_REQUEST}
+${SLURM_CONFIG}
 #SBATCH --time=${JOB_TIME_LINMOS}
 #SBATCH --ntasks=${NUM_CPUS_CONTCUBE_SCI}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_CONTCUBE_IMAGING}
 #SBATCH --job-name=linmosFullCC
-${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-linmosCC-%j.out
 
@@ -194,7 +190,7 @@ EOFINNER
 
                     NCORES=${NUM_CPUS_CONTCUBE_SCI}
                     NPPN=${CPUS_PER_CORE_CONTCUBE_IMAGING}
-                    aprun -n \${NCORES} -N \${NPPN} $linmosMPI -c "\$parset" > "\$log"
+                    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} $linmosMPI -c "\$parset" > "\$log"
                     err=\$?
                     for im in \$(echo "\${imList}" | sed -e 's/,/ /g'); do
                         rejuvenate "\$im"

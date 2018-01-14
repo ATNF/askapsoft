@@ -39,7 +39,7 @@ will be created but not submitted). If there are parameters that you
 would like defined for user input that are currently hardcoded, please
 let me know.
 
-Finally, note that the processing **needs to be run on the /scratch2
+Finally, note that the processing **needs to be run on the /group
 filesystem on galaxy**. The /home filesystem is not suitable for
 running this processing, and there are certain bits that will fail
 on /home. If the filesystem on which the scripts are run is not a

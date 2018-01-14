@@ -185,15 +185,11 @@ if [ "${DO_IT}" == "true" ]; then
     setJob science_spectral_imager spec
     cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
-#SBATCH --partition=${QUEUE}
-#SBATCH --clusters=${CLUSTER}
-${ACCOUNT_REQUEST}
-${RESERVATION_REQUEST}
+${SLURM_CONFIG}
 #SBATCH --time=${JOB_TIME_SPECTRAL_IMAGE}
 #SBATCH --ntasks=${NUM_CPUS_SPECIMG_SCI}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_SPEC_IMAGING}
 #SBATCH --job-name=${jobname}
-${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-spectralImaging-%j.out
 
@@ -215,7 +211,7 @@ else
     log=${logs}/mslist_for_${Imager}_\${SLURM_JOB_ID}.log
     NCORES=1
     NPPN=1
-    aprun -n \${NCORES} -N \${NPPN} $mslist --full "${msSciSL}" 1>& "\${log}"
+    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} $mslist --full "${msSciSL}" 1>& "\${log}"
     ra=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=RA)
     dec=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=Dec)
     epoch=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=Epoch)
@@ -260,7 +256,7 @@ log=${logs}/science_spectral_imager_${FIELDBEAM}_\${SLURM_JOB_ID}.log
 # Now run the simager
 NCORES=${NUM_CPUS_SPECIMG_SCI}
 NPPN=${CPUS_PER_CORE_SPEC_IMAGING}
-aprun -n \${NCORES} -N \${NPPN} ${theImager} -c "\$parset" > "\$log"
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${theImager} -c "\$parset" > "\$log"
 err=\$?
 rejuvenate ${msSciSL}
 for im in *.${imageBase}*; do

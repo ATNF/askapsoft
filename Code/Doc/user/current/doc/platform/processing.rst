@@ -108,26 +108,33 @@ Local Filesystems
 You have two filesystems available to you:
 
 * Your home directory
-* The *scratch2* filesystem, where you have a directory ``/scratch2/askap/$USER``
 * The *group* filesystem, where you have a directory ``/group/askap/$USER``
 
-The scratch filesystem should be used for executing your processing jobs. Specifically
-bulk data (measurement sets, images, etc) to be read from the job, and all output written,
-should be from/to the scratch filesystem. The scratch filesystem is subject to a purge policy and
-so you should move any data you need to retain from this filesystem to another area. 
-See :doc:`purgepolicy` for advice. 
+There was formerly a third filesystem, *scratch2*, that was used for
+processing. This was removed at the start of 2018 (although is
+available for a month from the *hpc-data* nodes in a read-only
+fashion, to facilitate further moving of data).
 
-The group filesystem is a smaller filesystem where you can store data sets or data products, however,
-this has quotas applied at the group level. e.g. ``askap`` group has a quota of 90TB.
+The group filesystem provides the working space for ASKAP users. It is
+aimed primarily as a place where you can store data sets or data
+products for the medium-term. It has quotas applied at the group
+level. e.g. ``askap`` group has a quota of 500TB. 
 
+There is a directory ``/group/askap/scratch`` in which you can create
+your own ``$USER`` directory. This has been set up as the preferred
+location for running processing jobs (the aim was to apply a purge to
+this space, although for technical reasons this will not be done). It
+is not essential to run processing here, but it should help you
+organise your work.
+  
 Note that your home directory, while it can be read from the compute nodes, cannot be
 written to from the compute nodes. It is mounted read-only on the compute nodes to prevent
 users from being able to "clobber" the home directory server with thousands of concurrent I/Os
 from compute nodes.
 
-In addition to /scratch2 and /group there is another filesystem, /astro, which is reserved for real-time 
+In addition to /group there is another filesystem, /astro, which is reserved for real-time 
 use by the askap system. /astro has restricted access and is intended for ASKAP operations to write scheduling 
-blocks and for processing pipelines to read them. All non-askap-system write operations are to be to /scratch2.
+blocks and for processing pipelines to read them. All non-askap-system write operations are to be to /group.
 
 Submitting a job:
 -----------------
@@ -144,11 +151,11 @@ customisation to declare the resources required. An example slurm file is::
     #SBATCH --no-requeue
     #SBATCH --export=NONE
 
-    aprun -B ./myprogram
+    srun --export=ALL ./myprogram
 
-Note the use of *aprun* instead of *mpirun*. The -B option to *aprun* tells ALPS (the
-Application Level Placement Scheduler) to reuse the width, depth, nppn and memory requests
-specified with the corresponding batch reservation.
+Galaxy now uses native slurm, so note the use of *srun* instead of the
+previous *aprun*. The --export=ALL option exports all environment
+variables to the launched application (necessary for some cases). 
 
 Specifically, the following part of the above file requests 80 processing
 elements (PE) to be created. A PE is just a process. The parameter *ntasks-per-node*
@@ -214,11 +221,10 @@ The following example launches a job with a number of PEs that is not a multiple
     #SBATCH --no-requeue
     #SBATCH --export=NONE
 
-    aprun -n 22 -N 20 ./myprogram
+    srun --ntasks=22 --ntasks-per-node=20 ./myprogram
 
-Note that instead of passing "-B", which says use the numbers from *ntasks* & *ntasks-per-node*,
-you must pass "-n" and "-N" specifically. Using the "-B" option only works if *ntasks* is
-divisible by *ntasks-per-node*.
+Note that this explicitly specifies the total number of tasks and the
+number per node that the application should use.
 
 **OpenMP Programs:**
 
@@ -236,7 +242,7 @@ per process.  The below example starts a single PE with 20 threads::
     # Instructs OpenMP to use 20 threads
     export OMP_NUM_THREADS=20
 
-    aprun -B ./my_openmp_program
+    srun --ntasks=1 --ntasks-per-node=20 ./my_openmp_program
 
 
 Monitoring job status
@@ -250,7 +256,6 @@ Sometimes it is useful to see the entire queue, particularly when your job is qu
 to see how busy the system is. The following commands show running jobs::
 
     squeue 
-    apstat
 
 And to display accounting information, that includes completed jobs, the following command
 can be used::

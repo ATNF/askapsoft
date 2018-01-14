@@ -187,15 +187,11 @@ Cimager.singleoutputfile                        = ${ALT_IMAGER_SINGLE_FILE_CONTC
         setJob "science_contcube_imager_${POLN}" "contcube${POLN}"
         cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
-#SBATCH --partition=${QUEUE}
-#SBATCH --clusters=${CLUSTER}
-${ACCOUNT_REQUEST}
-${RESERVATION_REQUEST}
+${SLURM_CONFIG}
 #SBATCH --time=${JOB_TIME_CONTCUBE_IMAGE}
 #SBATCH --ntasks=${NUM_CPUS_CONTCUBE_SCI}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_CONTCUBE_IMAGING}
 #SBATCH --job-name ${jobname}
-${EMAIL_REQUEST}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-contcubeImaging-${BEAM}-${POLN}-%j.out
 
@@ -218,7 +214,7 @@ else
     log=${logs}/mslist_for_simager_\${SLURM_JOB_ID}.log
     NCORES=1
     NPPN=1
-    aprun -n \${NCORES} -N \${NPPN} $mslist --full "\${ms}" 1>& "\${log}"
+    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} $mslist --full "\${ms}" 1>& "\${log}"
     ra=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=RA)
     dec=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=Dec)
     epoch=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=Epoch)
@@ -263,7 +259,7 @@ log=${logs}/science_contcube_imager_${FIELDBEAM}_${POLN}_\${SLURM_JOB_ID}.log
 # Now run the simager
 NCORES=${NUM_CPUS_CONTCUBE_SCI}
 NPPN=${CPUS_PER_CORE_CONTCUBE_IMAGING}
-aprun -n \${NCORES} -N \${NPPN} ${theImager} -c \$parset > \$log
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${theImager} -c \$parset > \$log
 err=\$?
 rejuvenate \${ms}
 for im in ./*.${imageBase}*; do

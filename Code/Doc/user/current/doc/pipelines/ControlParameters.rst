@@ -15,7 +15,7 @@ ASKAPsoft versions
 The default behaviour of the slurm jobs is to use the askapsoft module
 that is loaded in your ~/.bashrc file. However, it is possible to run
 the pipeline using a different askapsoft module, by setting
-``ASKAPSOFT_VERSION`` to the module version (0.11.2, for instance). If
+``ASKAPSOFT_VERSION`` to the module version (0.19.2, for instance). If
 the requested version is not available, the default version is used
 instead. 
 
@@ -70,6 +70,10 @@ see the *Slurm time requests* section below for details.
 +-------------------------------------+---------+---------------------------------------------------------------------------------+
 | ``QUEUE``                           | workq   |This should be left as is unless you know better.                                |
 +-------------------------------------+---------+---------------------------------------------------------------------------------+
+| ``CONSTRAINT``                      | ""      |This allows one to provide slurm with additional constraints. While not needed   |
+|                                     |         |for galaxy, this can be of use in other clusters (particularly those that have a |
+|                                     |         |mix of technologies).                                                            |
++-------------------------------------+---------+---------------------------------------------------------------------------------+
 | ``ACCOUNT``                         | ""      |This is the account that the jobs should be charged to. If left blank, then the  |
 |                                     |         |user's default account will be used.                                             |
 +-------------------------------------+---------+---------------------------------------------------------------------------------+
@@ -119,7 +123,7 @@ and the rest are given a stripe count of 1.
 There is also a parameter to control the I/O bucketsize of the
 measurement sets created by mssplit. This is particularly important in
 governing the I/O performance and the splitting run-time. The default,
-1MB, matches the stripe size on /scratch2, and has been found to work
+1MB, matches the stripe size on /group, and has been found to work
 well.
 
 There is also a parameter ``PURGE_FULL_MS`` that allows the deletion

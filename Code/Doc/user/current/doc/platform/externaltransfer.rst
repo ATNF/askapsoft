@@ -10,17 +10,17 @@ the scratch filesysyem. A special data-mover node exists, with hostname *hpc-dat
 for this purpose. It is possible to copy data through the login nodes, however this should
 be avoided so as to reduce the load on the login
 nodes. This data-mover node is actually a front-end to one of four
-nodes, and these can see both /scratch2 (on galaxy) and /scratch (on magnus).
+nodes, and these can see both /group (on galaxy) and /scratch (on magnus).
 
 Here is an example of copying a file from both the home directory and the scratch filesystem.
 Note these commands are executed on your local host (e.g. your desktop or laptop)::
 
-    scp -r hpc-data.pawsey.org.au:/scratch2/askap/user123/image.fits .
+    scp -r hpc-data.pawsey.org.au:/group/askap/user123/image.fits .
     scp -r hpc-data.pawsey.org.au:~/1934-638.ms .
 
 or to copy from your laptop/desktop to the Central Processor::
 
-    scp -r image.fits hpc-data.pawsey.org.au:/scratch2/askap/user123
+    scp -r image.fits hpc-data.pawsey.org.au:/group/askap/user123
     scp -r 1934-638.ms hpc-data.pawsey.org.au:~
 
 Note the "-r" performs a recursive copy so can be used to copy files or directories.
@@ -35,13 +35,13 @@ Using *scp* can be quite slow and a program called *bbcp* is suggested for large
 * Command line parameters: http://www.slac.stanford.edu/~abh/bbcp/
 
 The ASKAP software team can supply Debian packages. Usage is similar to scp, but with
-a few extra parameters. To copy a file from the /scratch2 filesystem::
+a few extra parameters. To copy a file from the /group filesystem::
 
-    bbcp -z -P 10 -s 32 -w 2M -r hpc-data1.pawsey.org.au:/scratch2/askap/user123/image.fits .
+    bbcp -z -P 10 -s 32 -w 2M -r hpc-data1.pawsey.org.au:/group/askap/user123/image.fits .
 
-and to copy a file to the /scratch2 filesystem::
+and to copy a file to the /group filesystem::
 
-    bbcp -P 10 -s 32 -w 2M -m 2755/644 -r image.fits hpc-data1.pawsey.org.au:/scratch2/askap/user123
+    bbcp -P 10 -s 32 -w 2M -m 2755/644 -r image.fits hpc-data1.pawsey.org.au:/group/askap/user123
 
 .. note:: The hostname necessary to use bbcp is *hpc-data1.pawsey.org.au*. This is one of the
           four hosts to which the *hpc-data* DNS alias points to (the
