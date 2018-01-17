@@ -49,18 +49,22 @@ if [ "${DO_SOURCE_FINDING_CONT}" == "true" ] || [ "${DO_SOURCE_FINDING_SPEC}" ==
         # This is the case of source-finding on a mosaic for a single
         # FIELD - FIELDBEAM is already set to the FIELD id
 
-        # First the continuum source-finding
-        NUM_LOOPS=0
-        if [ "${DO_SELFCAL}" == "true" ] && [ "${MOSAIC_SELFCAL_LOOPS}" == "true" ]; then
-            NUM_LOOPS=$SELFCAL_NUM_LOOPS
-        fi
-        for((LOOP=0;LOOP<=NUM_LOOPS;LOOP++)); do
-            . "${PIPELINEDIR}/sourcefindingCont.sh"
-        done
-        unset LOOP
+        if [ "${DO_SOURCE_FINDING_FIELD_MOSAICS}" == "true" ]; then
+        
+            # First the continuum source-finding
+            NUM_LOOPS=0
+            if [ "${DO_SELFCAL}" == "true" ] && [ "${MOSAIC_SELFCAL_LOOPS}" == "true" ]; then
+                NUM_LOOPS=$SELFCAL_NUM_LOOPS
+            fi
+            for((LOOP=0;LOOP<=NUM_LOOPS;LOOP++)); do
+                . "${PIPELINEDIR}/sourcefindingCont.sh"
+            done
+            unset LOOP
+            
+            # Then the spectral-line sourcefinding
+            . "${PIPELINEDIR}/sourcefindingSpectral.sh"
 
-        # Then the spectral-line sourcefinding
-        . "${PIPELINEDIR}/sourcefindingSpectral.sh"
+        fi
 
     fi
 

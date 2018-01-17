@@ -911,6 +911,15 @@ EOF
             DO_SOURCE_FINDING_SPEC=${DO_SPECTRAL_IMAGING}
         fi
 
+        # If there is only one field, we turn off the source-finding
+        # for the individual fields, since that will be a replication
+        # of the top-level source-finding.
+        if [ ${NUM_FIELDS} -eq 1 ]; then
+            if [ "${DO_SOURCE_FINDING_FIELD_MOSAICS}" == "true" ]; then
+                echo "WARNING - Only 1 field present, so turning off DO_SOURCE_FINDING_FIELD_MOSAICS"
+                DO_SOURCE_FINDING_FIELD_MOSAICS=false
+            fi
+        fi
         ####################
         # Continuum Source-finding
 
