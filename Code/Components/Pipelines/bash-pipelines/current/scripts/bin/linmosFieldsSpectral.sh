@@ -206,7 +206,11 @@ EOFINNER
             fi
             echo "Copying \${imList} to form \${imageName}"
             cp -r \${imList} \${imageName}
-            cp -r \${wtList} \${weightsImage}
+            if [ "\${imageCode}" == "restored" ]; then
+                # Only copy the main weights image
+                echo "Copying \${wtList} to form \${weightsImage}"
+                cp -r \${wtList} \${weightsImage}
+            fi
         fi
 
     else
