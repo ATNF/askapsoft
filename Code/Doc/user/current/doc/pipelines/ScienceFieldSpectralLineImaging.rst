@@ -40,7 +40,9 @@ spectral-imaging.
 A note on the imagers and the output formats. The default approach is
 to use **simager** to produce the spectral-line cubes. The new imager
 application **imager** (:doc:`../calim/imager`) can be used by setting
-``DO_ALT_IMAGER_SPECTRAL`` to true.
+``DO_ALT_IMAGER_SPECTRAL`` or ``DO_ALT_IMAGER`` to true (this is now
+the default). The latter is the switch controlling all types of
+imaging, but can be overridden by the former, if provided.
 
 The default output format is CASA images, although FITS files can be
 written directly by setting ``IMAGETYPE_SPECTRAL`` to ``fits`` (rather
@@ -215,7 +217,7 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 | ``PRECONDITIONER_SPECTRAL_GAUSS_TAPER``       |  "[10arcsec, 10arcsec, 0deg]"   | preconditioner.GaussianTaper       | Size of the Gaussian taper - either single value (for circular    |
 |                                               |                                 | (:doc:`../calim/solver`)           | taper) or 3 values giving an elliptical size.                     |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``PRECONDITIONER_SPECTRAL_WIENER_ROBUSTNESS`` | 0.5                             | preconditioner.Wiener.robustness   | Robustness value for the Wiener filter.                           |
+| ``PRECONDITIONER_SPECTRAL_WIENER_ROBUSTNESS`` | 2.                              | preconditioner.Wiener.robustness   | Robustness value for the Wiener filter.                           |
 |                                               |                                 | (:doc:`../calim/solver`)           |                                                                   |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``PRECONDITIONER_SPECTRAL_WIENER_TAPER``      | ""                              | preconditioner.Wiener.taper        | Size of gaussian taper applied in image domain to Wiener filter.  |

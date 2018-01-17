@@ -101,7 +101,10 @@ A note on the imagers and the output formats. The default approach is
 to use **cimager** for the continuum imaging and **simager** for the
 continuum cubes. The new imager application **imager**
 (:doc:`../calim/imager`) can be used by setting ``DO_ALT_IMAGER_CONT``
-or ``DO_ALT_IMAGER_CONTCUBE`` to true.
+or ``DO_ALT_IMAGER_CONTCUBE``, or the main switch ``DO_ALT_IMAGER`` to
+true (this is now the default). The latter is the switch controlling
+all types of imaging, but can be overridden by the type-specific
+versions, if they are provided.
 
 The default output format is CASA images, although FITS files can be
 written directly by setting ``IMAGETYPE_CONT`` or
