@@ -134,12 +134,13 @@ BEAM=$BEAM
 imlist=""
 
 # Image to be searched
-image="${OUTPUT}/${imageName}"
-imlist="\${imlist} \${image}"
+image="${imageName}"
+fitsimage=${imageName%%.fits}.fits"
+imlist="\${imlist} ${OUTPUT}/\${image}"
 if [ "\${BEAM}" == "all" ]; then
     # Weights image - really only useful if primary-beam corrected
-    weights=${OUTPUT}/${weightsImage}
-    imlist="\${imlist} \${weights}"
+    weights=${weightsImage}
+    imlist="\${imlist} ${OUTPUT}/\${weights}"
     weightpars="Selavy.Weights.weightsImage = \${weights##*/}.fits
 Selavy.Weights.weightsCutoff = ${SELAVY_SPEC_WEIGHTS_CUTOFF}"
 else
@@ -164,7 +165,7 @@ for im in \${imlist}; do
     else
         mkdir -p \${seldir}
         cd \${seldir}
-        ln -s -f "\${im}.fits" .
+        ln -s -f "\${fitsim}" .
         cd ..
     fi
 done
@@ -183,7 +184,7 @@ if [ "\${HAVE_IMAGES}" == "true" ]; then
     mkdir -p "${OUTPUT}/$selavyCubeletsDir"
     
     cat > "\$parset" <<EOFINNER
-Selavy.image = \${image##*/}.fits
+Selavy.image = \${fitsimage}
 Selavy.nsubx = ${SELAVY_SPEC_NSUBX}
 Selavy.nsuby = ${SELAVY_SPEC_NSUBY}
 Selavy.nsubz = ${SELAVY_SPEC_NSUBZ}

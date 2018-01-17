@@ -188,7 +188,7 @@ EOFINNER
                 else
                     # imList and wtList just have a single image -
                     #  just do a simple copy rather than running linmos
-                    if [ "\${IMAGETYPE_CONTCUBE}" == "fits" ]; then
+                    if [ "\${IMAGETYPE_CONT}" == "fits" ]; then
                         imList="\${imList}.fits"
                         wtList="\${wtList}.fits"
                     fi

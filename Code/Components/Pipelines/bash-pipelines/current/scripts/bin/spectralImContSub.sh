@@ -157,11 +157,6 @@ else
         exit \$err
     fi
     
-    if [ "\${imageName%%.fits}" != "\${imageName}" ]; then
-        # Want image.contsub.fits, not image.fits.contsub
-        echo "Renaming \${imageName}.contsub to \${imageName%%.fits}.contsub.fits"
-        mv \${imageName}.contsub \${imageName%%.fits}.contsub.fits
-    fi
 
 fi
 
@@ -238,10 +233,16 @@ EOFINNER
         exit \$err
     fi
     
-    if [ "\${imageName%%.fits}" != "\${imageName}" ]; then
-        # Want image.contsub.fits, not image.fits.contsub
-        echo "Renaming \${imageName}.contsub to \${imageName%%.fits}.contsub.fits"
-        mv \${imageName}.contsub \${imageName%%.fits}.contsub.fits
+    # Need to convert the contsub image to FITS if we are working in
+    #   FITS format
+    IMAGETYPE_SPECTRAL=${IMAGETYPE_SPECTRAL}
+    if [ "\${IMAGETYPE_SPECTRAL}" == "fits" ]; then
+        echo "Converting contsub images to FITS"
+        casaim="\${imageName%%.fits}.contsub"
+        fitsim="\${imageName%%.fits}.contsub.fits"
+        parset=$parsets/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.in
+        log=$logs/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.log
+        ${fitsConvertText}
     fi
 
 fi

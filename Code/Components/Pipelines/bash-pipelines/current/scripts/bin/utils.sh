@@ -356,9 +356,9 @@ function setImageProperties()
         label="Restored ${labelbase}, $beamSuffix"
     elif [ "$imageCode" == "contsub" ]; then
         if [ "${doAlt}" == "true" ] && [ "${type}" != "cont" ]; then
-            imageName="image.restored.${base}.contsub"
+            imageName="image.restored.${base%%.fits}.contsub"
         else
-            imageName="image.${base}.restored.contsub"
+            imageName="image.${base%%.fits}.restored.contsub"
         fi
         imageType="${typebase}_restored_$typeSuffix"
         label="Restored, Continuum-subtracted ${labelbase}, $beamSuffix"
