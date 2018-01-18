@@ -58,6 +58,7 @@ if [ "${DO_IT}" == "true" ] && [ "${CLOBBER}" != "true" ]; then
             unset TTERM
         done
     done
+    unset LOOP
 fi
 
 if [ "${DO_IT}" == "true" ]; then
