@@ -135,13 +135,13 @@ imlist=""
 
 # Image to be searched
 image="${imageName}"
-fitsimage=${imageName%%.fits}.fits"
+fitsimage="${imageName%%.fits}.fits"
 imlist="\${imlist} ${OUTPUT}/\${image}"
 if [ "\${BEAM}" == "all" ]; then
     # Weights image - really only useful if primary-beam corrected
     weights=${weightsImage}
     imlist="\${imlist} ${OUTPUT}/\${weights}"
-    weightpars="Selavy.Weights.weightsImage = \${weights##*/}.fits
+    weightpars="Selavy.Weights.weightsImage = \${weights##*/}
 Selavy.Weights.weightsCutoff = ${SELAVY_SPEC_WEIGHTS_CUTOFF}"
 else
     weightpars="#"
