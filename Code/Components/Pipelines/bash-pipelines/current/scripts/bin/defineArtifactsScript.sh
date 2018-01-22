@@ -519,17 +519,21 @@ if [ "\${DO_CONTINUUM_VALIDATION}" == "true" ]; then
     validationDirs=()
     validationFiles=()
     if [ \${NUM_FIELDS} -eq 1 ]; then
-        for FIELD in ${FIELD_LIST}; do
+        for FIELD in \${FIELD_LIST}; do
             setImageProperties cont
-            validationDirs+=("\${FIELD}/\${validationDir}")
-            validationFiles+=("\${FIELD}/\${validationDir}/\${validationFile}")
+            if [ -e "\${FIELD}/\${validationDir}/\${validationFile}" ]; then
+                validationDirs+=("\${FIELD}/\${validationDir}")
+                validationFiles+=("\${FIELD}/\${validationDir}/\${validationFile}")
+            fi
         done
     else
         FIELD="."
         TILE="ALL"
         setImageProperties cont
-        validationDirs+=("./\${validationDir}")
-        validationFiles+=("./\${validationDir}/\${validationFile}")
+        if [ -e "\${FIELD}/\${validationDir}/\${validationFile}" ]; then
+            validationDirs+=("./\${validationDir}")
+            validationFiles+=("./\${validationDir}/\${validationFile}")
+        fi
     fi
     
     for dir in \${validationDirs[@]}; do
