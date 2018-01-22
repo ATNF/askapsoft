@@ -212,15 +212,13 @@ if [ "\${imlist}" != "" ]; then
     for im in \${imlist}; do 
         casaim="\${im%%.fits}"
         fitsim="\${im%%.fits}.fits"
-        if [ "\${im%%.fits}" == "\${im}" ]; then
-            echo "Converting to FITS the image \${im}"
-            parset=$parsets/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.in
-            log=$logs/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.log
-            ${fitsConvertText}
-            if [ ! -e "\$fitsim" ]; then
-                HAVE_IMAGES=false
-                echo "ERROR - Could not create \${fitsim##*/}"
-            fi
+        echo "Converting to FITS the image \${im}"
+        parset=$parsets/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.in
+        log=$logs/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.log
+        ${fitsConvertText}
+        if [ ! -e "\$fitsim" ]; then
+            HAVE_IMAGES=false
+            echo "ERROR - Could not create \${fitsim##*/}"
         fi
         # Make a link so we point to a file in the current directory for
         # Selavy. This gets the referencing correct in the catalogue

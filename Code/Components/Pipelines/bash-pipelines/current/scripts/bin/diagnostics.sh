@@ -142,13 +142,12 @@ if [ "\${pathToScript}" != "" ]; then
             echo "selavy dir = \$selavyDir"
             echo "noise map base = \$noisemapbase"
 
-            if [ ! -e "\${noisemapbase}.fits" ] && [ -e "\${noisemapbase}" ]; then
-                # need to convert to FITS
-                parset=\${fitsParset}
-                casaim=\${noisemapbase}
-                fitsim=\${noisemapbase}.fits
-                ${fitsConvertText}
-            fi
+            # need to convert to FITS
+            parset=\${fitsParset}
+            casaim=\${noisemapbase}
+            fitsim=\${noisemapbase}.fits
+            ${fitsConvertText}
+
             catalogue="\${imdir}/\${selavyDir}/selavy-\${imageNoFITS}.components.txt"
             if [ -e "\${noisemapbase}.fits" ]; then
                 cat >> "\$diagParset" <<EOF
