@@ -396,21 +396,21 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
         for BEAM in \${theBeamList}; do               
 
             setImageProperties cont
-            if [ -e "\${FIELD}/\${selavyDir}/selavy-\${imageName}.components.xml" ]; then
-                catNames+=(\${FIELD}/\${selavyDir}/selavy-\${imageName}.components.xml)
+            if [ -e "\${FIELD}/\${selavyDir}/selavy-\${imageName%%.fits}.components.xml" ]; then
+                catNames+=(\${FIELD}/\${selavyDir}/selavy-\${imageName%%.fits}.components.xml)
                 catTypes+=(continuum-component)
             fi
-            if [ -e "\${FIELD}/\${selavyDir}/selavy-\${imageName}.islands.xml" ]; then
-                catNames+=(\${FIELD}/\${selavyDir}/selavy-\${imageName}.islands.xml)
+            if [ -e "\${FIELD}/\${selavyDir}/selavy-\${imageName%%.fits}.islands.xml" ]; then
+                catNames+=(\${FIELD}/\${selavyDir}/selavy-\${imageName%%.fits}.islands.xml)
                 catTypes+=(continuum-island)
             fi
-            if [ -e "\${FIELD}/\${selavyDir}/selavy-\${imageName}.polarisation.xml" ]; then
-                catNames+=(\${FIELD}/\${selavyDir}/selavy-\${imageName}.polarisation.xml)
+            if [ -e "\${FIELD}/\${selavyDir}/selavy-\${imageName%%.fits}.polarisation.xml" ]; then
+                catNames+=(\${FIELD}/\${selavyDir}/selavy-\${imageName%%.fits}.polarisation.xml)
                 catTypes+=(polarisation-component)
             fi
             setImageProperties spectral
-            if [ -e "\${FIELD}/\${selavyDir}/selavy-\${imageName}.hiobjects.xml" ]; then
-                catNames+=(\${FIELD}/\${selavyDir}/selavy-\${imageName}.hiobjects.xml)
+            if [ -e "\${FIELD}/\${selavyDir}/selavy-\${imageName%%.fits}.hiobjects.xml" ]; then
+                catNames+=(\${FIELD}/\${selavyDir}/selavy-\${imageName%%.fits}.hiobjects.xml)
                 catTypes+=(spectral-line-emission)
             fi
         done
@@ -518,7 +518,7 @@ if [ "\${DO_CONTINUUM_VALIDATION}" == "true" ]; then
 
     validationDirs=()
     validationFiles=()
-    if [ \${NUM_FIELDS} -eq 1 ]; then
+    if [ \${NUM_FIELDS} -gt 1 ]; then
         for FIELD in \${FIELD_LIST}; do
             setImageProperties cont
             if [ -e "\${FIELD}/\${validationDir}/\${validationFile}" ]; then
