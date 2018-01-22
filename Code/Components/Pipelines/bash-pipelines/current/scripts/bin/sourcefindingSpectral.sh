@@ -125,7 +125,7 @@ thisfile=$sbatchfile
 cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
 # Working directory for the selavy output
-seldir=selavy-spectral-${imageName##*/}
+seldir=${selavyDir}
     
 HAVE_IMAGES=true
 BEAM=$BEAM
