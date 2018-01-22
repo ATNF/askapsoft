@@ -189,7 +189,7 @@ Selavy.nsubx = ${SELAVY_SPEC_NSUBX}
 Selavy.nsuby = ${SELAVY_SPEC_NSUBY}
 Selavy.nsubz = ${SELAVY_SPEC_NSUBZ}
 #
-Selavy.resultsFile = selavy-${imageName}.txt
+Selavy.resultsFile = selavy-\${fitsimage%%.fits}.txt
 #
 \${weightpars}
 #
