@@ -69,16 +69,14 @@ echo "Image names = " "\${expectedImageNames[@]}"
 
 for image in "\${expectedImageNames[@]}"; do
 
-    if [ "\${image}" == "\${image%%.fits}" ]; then
-        echo "Launching conversion job for \$image"
-        casaim=\${image}
-        fitsim=\${image}.fits
-        
-        parset=$parsets/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.in
-        log=$logs/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.log
+    echo "Launching conversion job for \$image"
+    casaim=\${image}
+    fitsim=\${image}.fits
     
-        ${fitsConvertText}
-    fi
+    parset=$parsets/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.in
+    log=$logs/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.log
+    
+    ${fitsConvertText}
 
 done
 
