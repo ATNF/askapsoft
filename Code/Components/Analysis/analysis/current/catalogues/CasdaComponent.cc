@@ -81,7 +81,7 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
 
     itsIslandID = theIsland.id();
     std::stringstream id;
-    id << itsIDbase << obj.getID() << getSuffix(fitNumber);
+    id << itsIDbase << "component_" << obj.getID() << getSuffix(fitNumber);
     itsComponentID = id.str();
 
     duchamp::FitsHeader newHead_freq = changeSpectralAxis(obj.header(), "FREQ", casda::freqUnit);

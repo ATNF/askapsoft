@@ -99,7 +99,7 @@ CasdaHiEmissionObject::CasdaHiEmissionObject(sourcefitting::RadioSource &obj,
 //    itsImageID = parset.getString("image");
 
     std::stringstream id;
-    id << itsIDbase << obj.getID();
+    id << itsIDbase << "emission_" << obj.getID();
     itsObjectID = id.str();
 
     LOFAR::ParameterSet hiParset = parset.makeSubset("HiEmissionCatalogue.");

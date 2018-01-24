@@ -96,7 +96,7 @@ CasdaIsland::CasdaIsland(sourcefitting::RadioSource &obj,
     itsComment("")
 {
     std::stringstream id;
-    id << itsIDbase << obj.getID();
+    id << itsIDbase << "island_" << obj.getID();
     itsIslandID = id.str();
 
     // Convert the header class to use FREQ type and the appropriate unit

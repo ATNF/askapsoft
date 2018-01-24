@@ -47,18 +47,10 @@ CatalogueEntry::CatalogueEntry()
 CatalogueEntry::CatalogueEntry(const LOFAR::ParameterSet &parset):
     itsSBid(parset.getString("sbid", "null"))
 {
-    std::string imageName = parset.getString("image");
-    if (imageName.find(".fits") != std::string::npos) {
-        if (imageName.substr(imageName.rfind("."), std::string::npos) == ".fits") {
-            imageName.erase(imageName.rfind("."), std::string::npos);
-        }
-    }
-    imageName.erase(0, imageName.rfind("/") + 1);
     std::stringstream id;
     if (itsSBid != "null") {
         id << "SB" << itsSBid << "_";
     }
-    id << imageName << "_";
     itsIDbase = id.str();
 
 }
