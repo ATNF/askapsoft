@@ -116,6 +116,7 @@ cat >> "\$parset" <<EOFINNER
 ##
 # The image to be searched
 Selavy.image                                    = ${selavyImage}
+Selavy.sbid                                     = ${SB_SCIENCE}
 #
 # This is how we divide it up for distributed processing, with the
 #  number of subdivisions in each direction, and the size of the

@@ -302,6 +302,7 @@ EOFINNER
 ##
 # The image to be searched
 Selavy.image                                    = ${selavyImage}
+Selavy.sbid                                     = ${SB_SCIENCE}
 #
 ${selavyWeights}
 #

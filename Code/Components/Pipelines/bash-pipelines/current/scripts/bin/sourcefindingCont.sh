@@ -269,6 +269,7 @@ Selavy.RMSynthesis = \${doRM}"
 
     cat > "\$parset" <<EOFINNER
 Selavy.image = \${fitsimage}
+Selavy.sbid  = ${SB_SCIENCE}
 \${TaylorTermUse}
 Selavy.SBid = ${SB_SCIENCE}
 Selavy.nsubx = ${SELAVY_NSUBX}
