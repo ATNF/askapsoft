@@ -52,48 +52,48 @@ extern bool created;
 
 class FITSImageRW {
 
-public:
+    public:
 
-    FITSImageRW ();
+        FITSImageRW();
 
-    FITSImageRW (const std::string &name);
+        FITSImageRW(const std::string &name);
 
-    /// @brief create a new FITS image
-    /// @details A call to this method should preceed any write calls. The actual
-    /// image may be created only upon the first write call. Details depend on the
-    /// implementation.
+        /// @brief create a new FITS image
+        /// @details A call to this method should preceed any write calls. The actual
+        /// image may be created only upon the first write call. Details depend on the
+        /// implementation.
 
 
-    bool create (const std::string &name, const casa::IPosition &shape,\
-        const casa::CoordinateSystem &csys,\
-        uint memoryInMB = 64,\
-        bool preferVelocity = false,\
-        bool opticalVelocity = true,\
-        int BITPIX=-32,\
-        float minPix = 1.0,\
-        float maxPix = -1.0,\
-        bool degenerateLast=false,\
-        bool verbose=true,\
-        bool stokesLast=false,\
-        bool preferWavelength=false,\
-        bool airWavelength=false,\
-        bool primHead=true,\
-        bool allowAppend=false,\
-        bool history=true);
+        bool create(const std::string &name, const casa::IPosition &shape, \
+                    const casa::CoordinateSystem &csys, \
+                    uint memoryInMB = 64, \
+                    bool preferVelocity = false, \
+                    bool opticalVelocity = true, \
+                    int BITPIX = -32, \
+                    float minPix = 1.0, \
+                    float maxPix = -1.0, \
+                    bool degenerateLast = false, \
+                    bool verbose = true, \
+                    bool stokesLast = false, \
+                    bool preferWavelength = false, \
+                    bool airWavelength = false, \
+                    bool primHead = true, \
+                    bool allowAppend = false, \
+                    bool history = true);
 
-    // Destructor does nothing
-    virtual ~FITSImageRW();
+        // Destructor does nothing
+        virtual ~FITSImageRW();
 
-    bool create();
+        bool create();
 
-    void print_hdr();
-    void setUnits(const std::string &units);
+        void print_hdr();
+        void setUnits(const std::string &units);
 
-    void setHeader(const std::string &keyword, const std::string &value, const std::string &desc);
-    void setRestoringBeam(double,double,double);
-    // write into a FITS image
-    bool write(const casa::Array<float>& );
-    bool write(const casa::Array<float> &arr,const casa::IPosition &where);
+        void setHeader(const std::string &keyword, const std::string &value, const std::string &desc);
+        void setRestoringBeam(double, double, double);
+        // write into a FITS image
+        bool write(const casa::Array<float>&);
+        bool write(const casa::Array<float> &arr, const casa::IPosition &where);
     private:
 
 

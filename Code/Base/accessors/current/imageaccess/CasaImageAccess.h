@@ -71,8 +71,8 @@ struct CasaImageAccess : public IImageAccess {
     /// @brief obtain coordinate system info for part of an image
     /// @param[in] name image name
     /// @return coordinate system object
-    virtual casa::CoordinateSystem coordSysSlice(const std::string &name,const casa::IPosition &blc,
-                                    const casa::IPosition &trc ) const;
+    virtual casa::CoordinateSystem coordSysSlice(const std::string &name, const casa::IPosition &blc,
+            const casa::IPosition &trc) const;
     /// @brief obtain beam info
     /// @param[in] name image name
     /// @return beam info vector
@@ -120,7 +120,7 @@ struct CasaImageAccess : public IImageAccess {
     /// @param[in] arr array with pixels
     /// @param[in] where bottom left corner where to put the slice to (trc is deduced from the array shape)
     virtual void writeMask(const std::string &name, const casa::Array<bool> &mask,
-                                                   const casa::IPosition &where);
+                           const casa::IPosition &where);
     /// @brief write a slice of an image mask
     /// @param[in] name image name
     /// @param[in] arr array with pixels
@@ -158,7 +158,7 @@ struct CasaImageAccess : public IImageAccess {
     /// @param[in] value The value for the keyword, in string format
     /// @param[in] desc A description of the keyword
     virtual void setMetadataKeyword(const std::string &name, const std::string &keyword,
-                                    const std::string value, const std::string &desc="");
+                                    const std::string value, const std::string &desc = "");
 
 };
 

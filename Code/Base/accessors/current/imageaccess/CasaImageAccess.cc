@@ -60,10 +60,10 @@ casa::Array<float> CasaImageAccess::read(const std::string &name) const
 {
     ASKAPLOG_INFO_STR(logger, "Reading CASA image " << name);
     casa::PagedImage<float> img(name);
-    if ( img.hasPixelMask() ) {
+    if (img.hasPixelMask()) {
         ASKAPLOG_INFO_STR(logger, " - setting unmasked pixels to zero");
         // generate an Array of zeros and copy the elements for which the mask is true
-        casa::Array<float> tempArray(img.get().shape(),0.0);
+        casa::Array<float> tempArray(img.get().shape(), 0.0);
         tempArray = casa::MaskedArray<float>(img.get(), img.getMask(), casa::True);
         return tempArray;
         // The following seems to avoid a copy but takes longer:
@@ -79,8 +79,7 @@ casa::Array<float> CasaImageAccess::read(const std::string &name) const
         //    iterMask++;
         //}
         //return tempArray;
-    }
-    else {
+    } else {
         return img.get();
     }
 }
@@ -95,11 +94,11 @@ casa::Array<float> CasaImageAccess::read(const std::string &name, const casa::IP
 {
     ASKAPLOG_INFO_STR(logger, "Reading a slice of the CASA image " << name << " from " << blc << " to " << trc);
     casa::PagedImage<float> img(name);
-    if ( img.hasPixelMask() ) {
+    if (img.hasPixelMask()) {
         ASKAPLOG_INFO_STR(logger, " - setting unmasked pixels to zero");
         // generate an Array of zeros and copy the elements for which the mask is true
-        const casa::Slicer slicer(blc,trc,casa::Slicer::endIsLast);
-        casa::Array<float> tempSlice(img.getSlice(slicer).shape(),0.0);
+        const casa::Slicer slicer(blc, trc, casa::Slicer::endIsLast);
+        casa::Array<float> tempSlice(img.getSlice(slicer).shape(), 0.0);
         tempSlice = casa::MaskedArray<float>(img.getSlice(slicer), img.getMaskSlice(slicer), casa::True);
         return tempSlice;
         // The following seems to avoid a copy but takes longer:
@@ -116,8 +115,7 @@ casa::Array<float> CasaImageAccess::read(const std::string &name, const casa::IP
         //    iterMask++;
         //}
         //return tempSlice;
-    }
-    else {
+    } else {
         return img.getSlice(casa::Slicer(blc, trc, casa::Slicer::endIsLast));
     }
 }
@@ -130,13 +128,13 @@ casa::CoordinateSystem CasaImageAccess::coordSys(const std::string &name) const
     casa::PagedImage<float> img(name);
     return img.coordinates();
 }
-casa::CoordinateSystem CasaImageAccess::coordSysSlice(const std::string &name,const casa::IPosition &blc,
-                                const casa::IPosition &trc ) const
+casa::CoordinateSystem CasaImageAccess::coordSysSlice(const std::string &name, const casa::IPosition &blc,
+        const casa::IPosition &trc) const
 {
-    casa::Slicer slc(blc,trc,casa::Slicer::endIsLast);
+    casa::Slicer slc(blc, trc, casa::Slicer::endIsLast);
     ASKAPLOG_INFO_STR(logger, " CasaImageAccess - Slicer " << slc);
     casa::PagedImage<float> img(name);
-    casa::SubImage<casa::Float> si = casa::SubImage<casa::Float>(img,slc,casa::AxesSpecifier(casa::True));
+    casa::SubImage<casa::Float> si = casa::SubImage<casa::Float>(img, slc, casa::AxesSpecifier(casa::True));
     return si.coordinates();
 
 
@@ -163,15 +161,15 @@ std::string CasaImageAccess::getUnits(const std::string &name) const
 /// @param[in] name Image name
 /// @param[in] keyword The name of the metadata keyword
 std::string CasaImageAccess::getMetadataKeyword(const std::string &name,
-                                                const std::string &keyword) const
+        const std::string &keyword) const
 {
 
     casa::PagedImage<float> img(name);
     casa::TableRecord miscinfo = img.miscInfo();
-    std::string value="";
-    if (miscinfo.isDefined(keyword)){
+    std::string value = "";
+    if (miscinfo.isDefined(keyword)) {
         value = miscinfo.asString(keyword);
-    } else{
+    } else {
         ASKAPLOG_WARN_STR(logger, "Keyword " << keyword << " is not defined in metadata for image " << name);
     }
     return value;
@@ -222,7 +220,7 @@ void CasaImageAccess::write(const std::string &name, const casa::Array<float> &a
 /// @param[in] arr array with pixels
 /// @param[in] where bottom left corner where to put the slice to (trc is deduced from the array shape)
 void CasaImageAccess::writeMask(const std::string &name, const casa::Array<bool> &mask,
-                            const casa::IPosition &where)
+                                const casa::IPosition &where)
 {
     ASKAPLOG_INFO_STR(logger, "Writing a slice with the shape " << mask.shape() << " into a CASA image " <<
                       name << " at " << where);
@@ -272,12 +270,13 @@ void CasaImageAccess::setBeamInfo(const std::string &name, double maj, double mi
 /// @param[in] name image name
 /// @param[in] the mask
 
-void CasaImageAccess::makeDefaultMask(const std::string &name){
+void CasaImageAccess::makeDefaultMask(const std::string &name)
+{
     casa::PagedImage<float> img(name);
 
     // Create a mask and make it default region.
     // need to assert sizes etc ...
-    img.makeMask ("mask", casa::True, casa::True);
+    img.makeMask("mask", casa::True, casa::True);
     casa::Array<casa::Bool> mask(img.shape());
     mask = casa::True;
     img.pixelMask().put(mask);
@@ -290,15 +289,15 @@ void CasaImageAccess::makeDefaultMask(const std::string &name){
 /// @param[in] name Image name
 /// @param[in] keyword The name of the metadata keyword
 /// @param[in] value The value for the keyword, in string format
-/// @param[in] desc A description of the keyword 
+/// @param[in] desc A description of the keyword
 void CasaImageAccess::setMetadataKeyword(const std::string &name, const std::string &keyword,
-                                         const std::string value, const std::string &desc)
+        const std::string value, const std::string &desc)
 {
 
     casa::PagedImage<float> img(name);
     casa::TableRecord miscinfo = img.miscInfo();
     miscinfo.define(keyword, value);
-    miscinfo.setComment(keyword,desc);
+    miscinfo.setComment(keyword, desc);
     img.setMiscInfo(miscinfo);
 
 }

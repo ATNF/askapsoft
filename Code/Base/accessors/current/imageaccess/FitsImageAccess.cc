@@ -75,17 +75,17 @@ casa::Array<float> FitsImageAccess::read(const std::string &name) const
     casa::FITSImage img(fullname);
 
     const casa::IPosition shape = img.shape();
-    ASKAPLOG_INFO_STR(logger," - Shape " << shape);
+    ASKAPLOG_INFO_STR(logger, " - Shape " << shape);
 
-    casa::IPosition blc(shape.nelements(),0);
+    casa::IPosition blc(shape.nelements(), 0);
     casa::IPosition trc(shape);
 
-    trc[0] = trc[0]-1;
-    trc[1] = trc[1]-1;
-    trc[2] = trc[2]-1;
-    trc[3] = trc[3]-1;
+    trc[0] = trc[0] - 1;
+    trc[1] = trc[1] - 1;
+    trc[2] = trc[2] - 1;
+    trc[3] = trc[3] - 1;
 
-    return this->read(name,blc,trc);
+    return this->read(name, blc, trc);
 
 
 }
@@ -103,9 +103,9 @@ casa::Array<float> FitsImageAccess::read(const std::string &name, const casa::IP
 
     casa::FITSImage img(fullname);
     casa::Array<float> buffer;
-    casa::Slicer slc(blc,trc,casa::Slicer::endIsLast);
+    casa::Slicer slc(blc, trc, casa::Slicer::endIsLast);
     std::cout << "Reading a slice of the FITS image " << name << " slice " << slc << std::endl;
-    ASKAPCHECK(img.doGetSlice(buffer,slc) == casa::False, "Cannot read image");
+    ASKAPCHECK(img.doGetSlice(buffer, slc) == casa::False, "Cannot read image");
     return buffer;
 
 }
@@ -120,14 +120,14 @@ casa::CoordinateSystem FitsImageAccess::coordSys(const std::string &name) const
     return img.coordinates();
 }
 
-casa::CoordinateSystem FitsImageAccess::coordSysSlice(const std::string &name,const casa::IPosition &blc,
-                                const casa::IPosition &trc ) const
+casa::CoordinateSystem FitsImageAccess::coordSysSlice(const std::string &name, const casa::IPosition &blc,
+        const casa::IPosition &trc) const
 {
     std::string fullname = name + ".fits";
-    casa::Slicer slc(blc,trc,casa::Slicer::endIsLast);
+    casa::Slicer slc(blc, trc, casa::Slicer::endIsLast);
     ASKAPLOG_INFO_STR(logger, " FITSImageAccess - Slicer " << slc);
     casa::FITSImage img(fullname);
-    casa::SubImage<casa::Float> si = casa::SubImage<casa::Float>(img,slc,casa::AxesSpecifier(casa::True));
+    casa::SubImage<casa::Float> si = casa::SubImage<casa::Float>(img, slc, casa::AxesSpecifier(casa::True));
     return si.coordinates();
 
 }
@@ -150,14 +150,14 @@ std::string FitsImageAccess::getUnits(const std::string &name) const
     std::string units;
     const std::string key("Brightness (pixel) unit");
     char comment[1024];
-    if ( fits_open_file(&fptr, fullname.c_str(), READONLY, &status) )
-        ASKAPCHECK(status==0,"FITSImageAccess:: Cannot open FITS file");
+    if (fits_open_file(&fptr, fullname.c_str(), READONLY, &status))
+        ASKAPCHECK(status == 0, "FITSImageAccess:: Cannot open FITS file");
 
-    if ( fits_read_key(fptr, TSTRING, "BUNIT",(void *) (units.c_str()), comment,  &status) )
-         ASKAPCHECK(status==0,"FITSImageAccess:: Cannot find Brightness keyword");
+    if (fits_read_key(fptr, TSTRING, "BUNIT", (void *)(units.c_str()), comment,  &status))
+        ASKAPCHECK(status == 0, "FITSImageAccess:: Cannot find Brightness keyword");
 
-    if ( fits_close_file(fptr, &status) )
-        ASKAPCHECK(status==0,"FITSImageAccess:: Error on closing file");
+    if (fits_close_file(fptr, &status))
+        ASKAPCHECK(status == 0, "FITSImageAccess:: Error on closing file");
 
     return units;
 
@@ -175,14 +175,14 @@ std::string FitsImageAccess::getMetadataKeyword(const std::string &name, const s
     int status = 0;
     char value[1024];
     char comment[1024];
-    if ( fits_open_file(&fptr, fullname.c_str(), READONLY, &status) )
-        ASKAPCHECK(status==0,"FITSImageAccess:: Cannot open FITS file");
+    if (fits_open_file(&fptr, fullname.c_str(), READONLY, &status))
+        ASKAPCHECK(status == 0, "FITSImageAccess:: Cannot open FITS file");
 
-    if ( fits_read_key(fptr, TSTRING, keyword.c_str(), value, comment,  &status) )
-        ASKAPCHECK(status==0,"FITSImageAccess:: Cannot find keyword " << keyword);
+    if (fits_read_key(fptr, TSTRING, keyword.c_str(), value, comment,  &status))
+        ASKAPCHECK(status == 0, "FITSImageAccess:: Cannot find keyword " << keyword);
 
-    if ( fits_close_file(fptr, &status) )
-        ASKAPCHECK(status==0,"FITSImageAccess:: Error on closing file");
+    if (fits_close_file(fptr, &status))
+        ASKAPCHECK(status == 0, "FITSImageAccess:: Error on closing file");
 
     std::string valueStr(value);
     return valueStr;
@@ -190,7 +190,8 @@ std::string FitsImageAccess::getMetadataKeyword(const std::string &name, const s
 }
 
 
-void FitsImageAccess::connect(const std::string &name) {
+void FitsImageAccess::connect(const std::string &name)
+{
     std::string fullname = name + ".fits";
     itsFITSImage.reset(new FITSImageRW(fullname));
 }
@@ -212,10 +213,10 @@ void FitsImageAccess::create(const std::string &name, const casa::IPosition &sha
     casa::String error;
 
     itsFITSImage.reset(new FITSImageRW());
-    if (!itsFITSImage->create(name,shape,csys)) {
+    if (!itsFITSImage->create(name, shape, csys)) {
         casa::String error;
         error = casa::String("Failed to create FITSFile");
-        ASKAPTHROW(AskapError,error);
+        ASKAPTHROW(AskapError, error);
     }
     itsFITSImage->print_hdr();
     // make an array
@@ -253,9 +254,9 @@ void FitsImageAccess::write(const std::string &name, const casa::Array<float> &a
                       name << " at " << where);
     casa::String error;
     connect(name);
-    if (!itsFITSImage->write(arr,where)) {
+    if (!itsFITSImage->write(arr, where)) {
         error = casa::String("Failed to write slice");
-        ASKAPTHROW(AskapError,error);
+        ASKAPTHROW(AskapError, error);
     }
 
 }
@@ -264,10 +265,10 @@ void FitsImageAccess::write(const std::string &name, const casa::Array<float> &a
 /// @param[in] arr array with pixels
 /// @param[in] where bottom left corner where to put the slice to (trc is deduced from the array shape)
 void FitsImageAccess::writeMask(const std::string &name, const casa::Array<bool> &mask,
-                            const casa::IPosition &where)
+                                const casa::IPosition &where)
 {
     casa::String error = casa::String("FITS pixel mask not yet implemented");
-    ASKAPLOG_INFO_STR(logger,error);
+    ASKAPLOG_INFO_STR(logger, error);
 }
 /// @brief write a slice of an image mask
 /// @param[in] name image name
@@ -275,7 +276,7 @@ void FitsImageAccess::writeMask(const std::string &name, const casa::Array<bool>
 void FitsImageAccess::writeMask(const std::string &name, const casa::Array<bool> &mask)
 {
     casa::String error = casa::String("FITS pixel mask not yet implemented");
-    ASKAPLOG_INFO_STR(logger,error);
+    ASKAPLOG_INFO_STR(logger, error);
 }
 /// @brief set brightness units of the image
 /// @details
@@ -308,10 +309,11 @@ void FitsImageAccess::setBeamInfo(const std::string &name, double maj, double mi
 /// but FITS images will have it applied to the pixels ... which is an irreversible process
 /// In this mode we would either have to apply it to the array - or readback the array - mask
 /// then write ...
-void FitsImageAccess::makeDefaultMask(const std::string &name){
+void FitsImageAccess::makeDefaultMask(const std::string &name)
+{
 
     casa::String error = casa::String("A default mask in FITS makes no sense");
-    ASKAPLOG_INFO_STR(logger,error);
+    ASKAPLOG_INFO_STR(logger, error);
 
 }
 
@@ -322,9 +324,9 @@ void FitsImageAccess::makeDefaultMask(const std::string &name){
 /// @param[in] value The value for the keyword, in string format
 /// @param[in] desc A description of the keyword
 void FitsImageAccess::setMetadataKeyword(const std::string &name, const std::string &keyword,
-                                const std::string value, const std::string &desc)
+        const std::string value, const std::string &desc)
 {
     connect(name);
-    itsFITSImage->setHeader(keyword,value,desc);    
+    itsFITSImage->setHeader(keyword, value, desc);
 }
 
