@@ -60,7 +60,10 @@ class CatalogueEntry {
         virtual const float dec() = 0;
 
     protected:
-        /// The Scheduling Block ID
+    /// @brief Parset - can add things here
+    LOFAR::ParameterSet            itsParset;
+
+    /// The Scheduling Block ID
         std::string itsSBid;
 
         /// The base ID that ties an entry to a unique observation &

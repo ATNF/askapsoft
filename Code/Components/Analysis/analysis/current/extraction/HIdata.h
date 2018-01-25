@@ -57,7 +57,10 @@ class HIdata {
 
     /// @brief Calculate the range of voxel statistics needed by the HI catalogue.
     void findVoxelStats();
-    
+
+    /// @brief  Front-end for functions to set the object ID & name for the extractors
+    void setObjectIDs(const std::string &objid, const std::string &objectname);
+
     /// @brief Front-end for the extract functions
     void extract();
     /// @brief Extract the source spectrum using itsSpecExtractor

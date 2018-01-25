@@ -62,10 +62,12 @@ namespace askap {
 namespace analysis {
 
 SourceDataExtractor::SourceDataExtractor(const LOFAR::ParameterSet& parset):
-    itsParset(parset)
+    itsParset(parset),
+    itsSource(0),
+    itsComponent(0),
+    itsObjID(""),
+    itsObjectName("")
 {
-    itsSource = 0;
-    itsComponent = 0;
     itsInputCube = ""; // start off with this blank. Needs to be
     // set before calling openInput()
     itsInputCubeList = parset.getStringVector("spectralCube",
@@ -161,16 +163,25 @@ template <class T>
 void SourceDataExtractor::setSourceLoc(T* src)
 {
     itsSourceID = getID(*src);
+    
     std::stringstream ss;
-    ss << itsOutputFilenameBase << "_" << itsSourceID;
+    ss << itsOutputFilenameBase;
+    if (itsObjID==""){
+        ss << "_" << itsSourceID;
+    } else {
+        ss << "_" << itsObjID;
+    }
     itsOutputFilename = ss.str();
-
+    ASKAPLOG_DEBUG_STR(logger, "SourceDataExtractor for source " << itsOutputFilename);
     casa::DirectionCoordinate dc = itsInputCoords.directionCoordinate();
     casa::Vector<casa::Double> pix(2);
     MDirection refDir(casa::Quantity(getRA(*src), "deg"),
                       casa::Quantity(getDec(*src), "deg"),
                       dc.directionType());
     dc.toPixel(pix, refDir);
+    ASKAPLOG_DEBUG_STR(logger, "Converting to pixel coords: refDir="<<refDir<<", pix="<<pix);
+    ASKAPLOG_DEBUG_STR(logger, "Direction coordinate ref: " << dc.referenceValue() << " at " << dc.referencePixel());
+    ASKAPLOG_DEBUG_STR(logger, "Direction coordinate inc: " << dc.increment());
     itsXloc = pix[0];
     itsYloc = pix[1];
 
@@ -349,6 +360,56 @@ bool SourceDataExtractor::openInput()
         }
     }
     return isOK;
+}
+
+void SourceDataExtractor::setObjectIDs(const std::string &objid, const std::string &objectname)
+{
+    itsObjID = objid;
+    itsObjectName = objectname;
+}
+    
+
+void SourceDataExtractor::updateHeaders(const std::string &filename)
+{
+
+    boost::shared_ptr<accessors::IImageAccess> ia = accessors::imageAccessFactory(itsParset);
+
+    // set the object ID and object name keywords    
+    if (itsObjID != ""){
+        ia->setMetadataKeyword(filename, "OBJID", itsObjID, "Object ID");
+    }
+    if (itsObjectName != "" ){
+        ia->setMetadataKeyword(filename, "OBJECT", itsObjectName, "IAU-format Object Name");
+    }
+
+    std::string infile = itsInputCube;
+    // Need to remove any ".fits" extension, as this will be added by the accessor
+    if (infile.find(".fits") != std::string::npos) {
+        if (infile.substr(infile.rfind("."), std::string::npos) == ".fits") {
+            infile.erase(infile.rfind("."), std::string::npos);
+        }
+    }
+
+    
+    std::string value;
+    // set the other required keywords by copying from input file
+    value = ia->getMetadataKeyword(infile, "DATE-OBS");
+    if (value != ""){
+        ia->setMetadataKeyword(filename, "DATE-OBS", value, "Date of observation");
+    }
+    value = ia->getMetadataKeyword(infile, "DURATION");
+    if (value != ""){
+        ia->setMetadataKeyword(filename, "DURATION", value, "Length of observation");
+    }
+    value = ia->getMetadataKeyword(infile, "PROJECT");
+    if (value != ""){
+        ia->setMetadataKeyword(filename, "PROJECT", value, "Project ID");
+    }
+    value = ia->getMetadataKeyword(infile, "SBID");
+    if (value != ""){
+        ia->setMetadataKeyword(filename, "SBID", value, "Scheduling block ID");
+    }    
+
 }
 
 

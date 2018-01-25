@@ -45,6 +45,7 @@ CatalogueEntry::CatalogueEntry()
 }
 
 CatalogueEntry::CatalogueEntry(const LOFAR::ParameterSet &parset):
+    itsParset(parset),
     itsSBid(parset.getString("sbid", "null"))
 {
     std::stringstream id;

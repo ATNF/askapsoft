@@ -127,6 +127,15 @@ class SourceDataExtractor {
     /// @brief Return the slicer used for the extraction
     casa::Slicer slicer(){return itsSlicer;};
 
+    /// @brief Define the object ID (itsObjID) and name (itsObjectName)
+    void setObjectIDs(const std::string &objid, const std::string &objectname);
+
+    /// @brief Add to the metadata for the image 'filename'.
+    /// @details This adds the objID and object name, if they are
+    /// defined, and copies the following from the input image
+    /// metadata: PROJECT, DATE-OBS,DURATION, SBID
+    void updateHeaders(const std::string &filename);
+
 
     protected:
         /// @brief Open the input cube.
@@ -193,8 +202,14 @@ class SourceDataExtractor {
         /// @brief The Component being used - if not provided, pointer
         /// remains null
         CasdaComponent                                  *itsComponent;
-        /// @brief The source's ID string
+        /// @brief The source's ID string, from either the RadioSource or CasdaComponent
         std::string                                      itsSourceID;
+    /// @brief The object ID of the source to be written to the header of the extracted file
+    std::string                                      itsObjID;
+    /// @brief The object name of the source to be written to the
+    /// header of the extracted file, in "IAU-format" of
+    /// J123456-123456 or similar.
+    std::string                                      itsObjectName;
         /// @brief The slicer used to perform the extraction
         casa::Slicer                                     itsSlicer;
         /// @brief The input cube the array is extracted from

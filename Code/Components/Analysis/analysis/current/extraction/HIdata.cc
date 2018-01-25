@@ -78,6 +78,9 @@ HIdata::HIdata(const LOFAR::ParameterSet &parset):
         ASKAPLOG_ERROR_STR(logger, "Error making directory " << cubeletDir );
     }
 
+    std::string objid = itsParset.getString("HiEmissionCatalogue.objid","");
+    std::string objectName = itsParset.getString("HiEmissionCatalogue.objectname","");
+    
     // Define the parset used to set up the source extractor
     LOFAR::ParameterSet specParset;
     specParset.add(LOFAR::KVpair("spectralCube", itsCubeName));
@@ -118,6 +121,16 @@ HIdata::HIdata(const LOFAR::ParameterSet &parset):
     cubeletParset.add("imagetype", itsParset.getString("imagetype", "fits"));
     itsCubeletExtractor = boost::shared_ptr<CubeletExtractor>(new CubeletExtractor(cubeletParset));
 
+    setObjectIDs(objid,objectName);
+
+}
+
+void HIdata::setObjectIDs(const std::string &objid, const std::string &objectname)
+{
+    itsSpecExtractor->setObjectIDs(objid,objectname);
+    itsNoiseExtractor->setObjectIDs(objid,objectname);
+    itsMomentExtractor->setObjectIDs(objid,objectname);
+    itsCubeletExtractor->setObjectIDs(objid,objectname);
 
 }
 
@@ -211,11 +224,6 @@ int HIdata::busyFunctionFit()
 {
 
     //convert to doubles
-    // casa::Array<double> spectrum(itsSpecExtractor->array().shape(),
-    //                              (double *)itsSpecExtractor->array().data());
-    // casa::Array<double> noise(itsNoiseExtractor->array().shape(),
-    //                           (double *)itsNoiseExtractor->array().data());
-
     std::vector<double> spectrum(itsSpecExtractor->array().size());
     for (size_t i = 0; i < spectrum.size(); i++) {
         spectrum[i] = double(itsSpecExtractor->array().tovector()[i]);

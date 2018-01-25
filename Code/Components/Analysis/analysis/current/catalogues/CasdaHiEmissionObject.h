@@ -124,7 +124,7 @@ class CasdaHiEmissionObject : public CatalogueEntry {
             return (lhs.id() < rhs.id());
         }
 
-    protected:
+protected:
         /// The unique ID for this object
         std::string itsObjectID;
         /// The J2000 IAU-format name

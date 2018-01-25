@@ -111,10 +111,12 @@ void SpectralBoxExtractor::defineSlicer()
             int xloc = int(itsXloc);
             int yloc = int(itsYloc);
             int zero = 0;
+            ASKAPLOG_DEBUG_STR(logger, "Problematic bit: xloc="<<xloc<<" yloc="<<yloc<<" hw="<<hw <<" shape(itsLngAxis)="<<shape(itsLngAxis) << " shape(itsLatAxis)="<<shape(itsLatAxis));
             xmin = std::max(zero, xloc - hw);
             xmax = std::min(int(shape(itsLngAxis) - 1), xloc + hw);
             ymin = std::max(zero, yloc - hw);
             ymax = std::min(int(shape(itsLatAxis) - 1), yloc + hw);
+            ASKAPLOG_DEBUG_STR(logger, "Problematic bit 2: xmin="<<xmin<<" xmax="<< xmax<< " ymin="<<ymin <<" ymax="<<ymax);
         } else {
             ASKAPASSERT(itsSource);
             // use the detected pixels of the source for the spectral
@@ -194,10 +196,13 @@ void SpectralBoxExtractor::writeImage()
     ia->create(itsOutputFilename, newarray.shape(), newcoo);
 
     /// @todo save the new units - if units were per beam, remove this factor
-
+    
     // write the array
     ia->write(itsOutputFilename, newarray);
     ia->setUnits(itsOutputFilename, itsOutputUnits.getName());
+
+    // update the metadata
+    updateHeaders(itsOutputFilename);
 
 }
 

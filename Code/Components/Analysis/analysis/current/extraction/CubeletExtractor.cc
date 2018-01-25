@@ -216,6 +216,7 @@ void CubeletExtractor::writeImage()
         ia->setUnits(itsOutputFilename, units);
 
         this->writeBeam(itsOutputFilename);
+        updateHeaders(itsOutputFilename);
 
         if (itsInputCubePtr->isMasked()) {
             // copy the image mask to the cubelet, if there is one.
