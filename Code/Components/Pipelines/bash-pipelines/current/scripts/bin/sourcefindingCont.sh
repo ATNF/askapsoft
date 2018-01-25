@@ -369,26 +369,6 @@ EOFINNER
         fi
     fi
 
-    # Now convert the extracted polarisation artefacts to FITS
-    if [ "\${doRM}" == "true" ]; then
-        cd "$OUTPUT/${selavyPolDir}"
-        parset=temp.in
-        log=$logs/convertToFITS_polSpectra_\${SLURM_JOB_ID}.log
-        neterr=0
-        for im in ./*; do 
-            casaim=\${im%%.fits}
-            fitsim="\${im%%.fits}.fits"
-            echo "Converting \$casaim to \$fitsim" >> "\$log"
-            ${fitsConvertText}
-            err=\$?
-            if [ \$err -ne 0 ]; then
-                neterr=\$err
-            fi
-        done
-        extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${neterr} convertFITSpolspec "txt,csv"
-        rm -f \$parset
-    fi
-
 else
 
     echo "FITS conversion failed, so Selavy did not run"
