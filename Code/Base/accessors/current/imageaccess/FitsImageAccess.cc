@@ -162,6 +162,34 @@ std::string FitsImageAccess::getUnits(const std::string &name) const
     return units;
 
 }
+
+/// @brief Get a particular keyword from the image metadata (A.K.A header)
+/// @details This reads a given keyword to the image metadata.
+/// @param[in] name Image name
+/// @param[in] keyword The name of the metadata keyword
+std::string FitsImageAccess::getMetadataKeyword(const std::string &name, const std::string &keyword) const
+{
+
+    fitsfile *fptr;       /* pointer to the FITS file, defined in fitsio.h */
+    std::string fullname = name + ".fits";
+    int status = 0;
+    char value[1024];
+    char comment[1024];
+    if ( fits_open_file(&fptr, fullname.c_str(), READONLY, &status) )
+        ASKAPCHECK(status==0,"FITSImageAccess:: Cannot open FITS file");
+
+    if ( fits_read_key(fptr, TSTRING, keyword.c_str(), value, comment,  &status) )
+        ASKAPCHECK(status==0,"FITSImageAccess:: Cannot find keyword " << keyword);
+
+    if ( fits_close_file(fptr, &status) )
+        ASKAPCHECK(status==0,"FITSImageAccess:: Error on closing file");
+
+    std::string valueStr(value);
+    return valueStr;
+
+}
+
+
 void FitsImageAccess::connect(const std::string &name) {
     std::string fullname = name + ".fits";
     itsFITSImage.reset(new FITSImageRW(fullname));
@@ -280,17 +308,23 @@ void FitsImageAccess::setBeamInfo(const std::string &name, double maj, double mi
 /// but FITS images will have it applied to the pixels ... which is an irreversible process
 /// In this mode we would either have to apply it to the array - or readback the array - mask
 /// then write ...
-
-
-
 void FitsImageAccess::makeDefaultMask(const std::string &name){
 
     casa::String error = casa::String("A default mask in FITS makes no sense");
     ASKAPLOG_INFO_STR(logger,error);
 
-
-
-
-
-
 }
+
+/// @brief Set a particular keyword for the metadata (A.K.A header)
+/// @details This adds a given keyword to the image metadata.
+/// @param[in] name Image name
+/// @param[in] keyword The name of the metadata keyword
+/// @param[in] value The value for the keyword, in string format
+/// @param[in] desc A description of the keyword
+void FitsImageAccess::setMetadataKeyword(const std::string &name, const std::string &keyword,
+                                const std::string value, const std::string &desc)
+{
+    connect(name);
+    itsFITSImage->setHeader(keyword,value,desc);    
+}
+

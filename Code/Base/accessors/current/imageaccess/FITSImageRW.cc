@@ -433,6 +433,25 @@ void FITSImageRW::setUnits(const std::string &units) {
 
 }
 
+void FITSImageRW::setHeader(const std::string &keyword, const std::string &value, const std::string &desc)
+{
+    ASKAPLOG_INFO_STR(FITSlogger,"Setting header value for " << keyword);
+    fitsfile *fptr;       /* pointer to the FITS file, defined in fitsio.h */
+    int status = 0;
+    if ( fits_open_file(&fptr, this->name.c_str(), READWRITE, &status) )
+        printerror( status );
+
+    
+    if ( fits_update_key(fptr, TSTRING, keyword.c_str(), (char *)value.c_str(),
+                         desc.c_str(), &status) )
+        printerror( status );
+
+    if ( fits_close_file(fptr, &status) )
+        printerror( status );
+
+
+}
+
 void FITSImageRW::setRestoringBeam(double maj, double min, double pa) {
     ASKAPLOG_INFO_STR(FITSlogger,"Setting Beam info");
     ASKAPLOG_INFO_STR(FITSlogger,"Updating brightness units");

@@ -157,6 +157,28 @@ std::string CasaImageAccess::getUnits(const std::string &name) const
     std::string units = tmpTable.keywordSet().asString("units");
     return units;
 }
+
+/// @brief Get a particular keyword from the image metadata (A.K.A header)
+/// @details This reads a given keyword to the image metadata.
+/// @param[in] name Image name
+/// @param[in] keyword The name of the metadata keyword
+std::string CasaImageAccess::getMetadataKeyword(const std::string &name,
+                                                const std::string &keyword) const
+{
+
+    casa::PagedImage<float> img(name);
+    casa::TableRecord miscinfo = img.miscInfo();
+    std::string value="";
+    if (miscinfo.isDefined(keyword)){
+        value = miscinfo.asString(keyword);
+    } else{
+        ASKAPLOG_WARN_STR(logger, "Keyword " << keyword << " is not defined in metadata for image " << name);
+    }
+    return value;
+
+}
+
+
 // writing methods
 
 /// @brief create a new image
@@ -260,6 +282,23 @@ void CasaImageAccess::makeDefaultMask(const std::string &name){
     mask = casa::True;
     img.pixelMask().put(mask);
 
+}
 
+
+/// @brief Set a particular keyword for the metadata (A.K.A header)
+/// @details This adds a given keyword to the image metadata.
+/// @param[in] name Image name
+/// @param[in] keyword The name of the metadata keyword
+/// @param[in] value The value for the keyword, in string format
+/// @param[in] desc A description of the keyword 
+void CasaImageAccess::setMetadataKeyword(const std::string &name, const std::string &keyword,
+                                         const std::string value, const std::string &desc)
+{
+
+    casa::PagedImage<float> img(name);
+    casa::TableRecord miscinfo = img.miscInfo();
+    miscinfo.define(keyword, value);
+    miscinfo.setComment(keyword,desc);
+    img.setMiscInfo(miscinfo);
 
 }

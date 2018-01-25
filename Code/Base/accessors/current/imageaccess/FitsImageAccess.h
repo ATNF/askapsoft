@@ -99,6 +99,12 @@ public:
     /// @return units string
     virtual std::string getUnits(const std::string &name) const;
 
+    /// @brief Get a particular keyword from the image metadata (A.K.A header)
+    /// @details This reads a given keyword to the image metadata.
+    /// @param[in] name Image name
+    /// @param[in] keyword The name of the metadata keyword
+    virtual std::string getMetadataKeyword(const std::string &name, const std::string &keyword) const;
+
     //////////////////
     // Writing methods
     //////////////////
@@ -156,9 +162,16 @@ public:
     /// @details Deteails depend upon the implemenation - CASA images will have the pixel mask assigned
     /// but FITS images will have it applied to the pixels ... which is an irreversible process
     /// @param[in] name image name
-
-
     virtual void makeDefaultMask(const std::string &name);
+
+    /// @brief Set a particular keyword for the metadata (A.K.A header)
+    /// @details This adds a given keyword to the image metadata.
+    /// @param[in] name Image name
+    /// @param[in] keyword The name of the metadata keyword
+    /// @param[in] value The value for the keyword, in string format
+    /// @param[in] desc A description of the keyword
+    virtual void setMetadataKeyword(const std::string &name, const std::string &keyword,
+                                    const std::string value, const std::string &desc="");
 
 
 private:

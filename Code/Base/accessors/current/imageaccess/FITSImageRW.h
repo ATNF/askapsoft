@@ -89,6 +89,7 @@ public:
     void print_hdr();
     void setUnits(const std::string &units);
 
+    void setHeader(const std::string &keyword, const std::string &value, const std::string &desc);
     void setRestoringBeam(double,double,double);
     // write into a FITS image
     bool write(const casa::Array<float>& );
