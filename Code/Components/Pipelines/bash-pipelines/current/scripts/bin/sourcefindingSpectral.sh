@@ -235,27 +235,6 @@ EOFINNER
         exit \$err
     fi
 
-    # Now convert the extracted spectral & moment-map artefacts to FITS
-     parset=temp.in
-     log=$logs/convertToFITS_spectralArtefacts_\${SLURM_JOB_ID}.log
-     for dir in $OUTPUT/$selavySpectraDir $OUTPUT/$selavyMomentsDir $OUTPUT/$selavyCubeletsDir; do
-         cd "\${dir}"
-         neterr=0
-         for im in ./*; do 
-             casaim=\${im%%.fits}
-             fitsim="\${im%%.fits}.fits"
-             echo "Converting \$casaim to \$fitsim" >> "\$log"
-             ${fitsConvertText}
-             err=\$?
-             if [ \$err -ne 0 ]; then
-                 neterr=\$err
-             fi
-         done
-         cd -
-     done
-     extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${neterr} convertFITSspec "txt,csv"
-     rm -f \$parset
-
 else
 
     echo "FITS conversion failed, so Selavy did not run"
