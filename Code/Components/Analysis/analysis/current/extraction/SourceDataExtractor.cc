@@ -383,29 +383,34 @@ void SourceDataExtractor::updateHeaders(const std::string &filename)
     }
 
     std::string infile = itsInputCube;
+    LOFAR::ParameterSet inputImageParset;
     // Need to remove any ".fits" extension, as this will be added by the accessor
     if (infile.find(".fits") != std::string::npos) {
         if (infile.substr(infile.rfind("."), std::string::npos) == ".fits") {
             infile.erase(infile.rfind("."), std::string::npos);
         }
+        inputImageParset.add("imagetype", "fits");
+    } else {
+        inputImageParset.add("imagetype", "casa");
     }
+    boost::shared_ptr<accessors::IImageAccess> iaInput = accessors::imageAccessFactory(inputImageParset);
 
     
     std::string value;
     // set the other required keywords by copying from input file
-    value = ia->getMetadataKeyword(infile, "DATE-OBS");
+    value = iaInput->getMetadataKeyword(infile, "DATE-OBS");
     if (value != ""){
         ia->setMetadataKeyword(filename, "DATE-OBS", value, "Date of observation");
     }
-    value = ia->getMetadataKeyword(infile, "DURATION");
+    value = iaInput->getMetadataKeyword(infile, "DURATION");
     if (value != ""){
         ia->setMetadataKeyword(filename, "DURATION", value, "Length of observation");
     }
-    value = ia->getMetadataKeyword(infile, "PROJECT");
+    value = iaInput->getMetadataKeyword(infile, "PROJECT");
     if (value != ""){
         ia->setMetadataKeyword(filename, "PROJECT", value, "Project ID");
     }
-    value = ia->getMetadataKeyword(infile, "SBID");
+    value = iaInput->getMetadataKeyword(infile, "SBID");
     if (value != ""){
         ia->setMetadataKeyword(filename, "SBID", value, "Scheduling block ID");
     }    

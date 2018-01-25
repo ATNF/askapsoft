@@ -63,6 +63,8 @@ StokesSpectrum::StokesSpectrum(const LOFAR::ParameterSet &parset,
     itsBeamLog = parset.getString("beamLog", "");
 
     std::stringstream outputbase;
+    std::string objid = itsParset.getString("objid","");
+    std::string objectname = itsParset.getString("objectname","");
 
     // Define the parset used to set up the source extractor
     LOFAR::ParameterSet specParset;
@@ -77,6 +79,7 @@ StokesSpectrum::StokesSpectrum(const LOFAR::ParameterSet &parset,
     specParset.add(LOFAR::KVpair("beamLog", itsBeamLog));
     specParset.add("imagetype",itsParset.getString("imagetype","fits"));
     itsSpecExtractor = new SourceSpectrumExtractor(specParset);
+    itsSpecExtractor->setObjectIDs(objid,objectname);
 
     // Define the parset used to set up the noise extractor
     LOFAR::ParameterSet noiseParset;
@@ -93,6 +96,7 @@ StokesSpectrum::StokesSpectrum(const LOFAR::ParameterSet &parset,
     noiseParset.add(LOFAR::KVpair("scaleSpectraByBeam", true));
     noiseParset.add("imagetype",itsParset.getString("imagetype","fits"));
     itsNoiseExtractor = new NoiseSpectrumExtractor(noiseParset);
+    itsNoiseExtractor->setObjectIDs(objid,objectname);
 
 
 }
