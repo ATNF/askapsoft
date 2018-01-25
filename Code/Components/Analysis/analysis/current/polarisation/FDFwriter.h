@@ -58,12 +58,26 @@ class FDFwriter {
         /// @details Create and write the arrays to the image files
         void write();
 
+    /// @brief Set the object & observation metadata header keywords
+    void updateHeaders(const std::string &filename);
+
+
     protected:
 
         /// @brief The defining parset
         LOFAR::ParameterSet itsParset;
 
-        /// @brief User flag indicating whether the images should be
+    /// @brief The object ID of the source to be written to the header of the extracted file
+    std::string                                      itsObjID;
+    /// @brief The object name of the source to be written to the
+    /// header of the extracted file, in "IAU-format" of
+    /// J123456-123456 or similar.
+    std::string                                      itsObjectName;
+
+    /// @brief Name of Stokes-I cube - for coordinates and header metadata
+    std::string                    itsInputCube;
+    
+    /// @brief User flag indicating whether the images should be
         /// written as complex-valued (true) or separate files for phase &
         /// amplitude.
         bool                       itsFlagWriteAsComplex;

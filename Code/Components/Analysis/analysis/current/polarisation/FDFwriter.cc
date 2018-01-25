@@ -57,16 +57,21 @@ FDFwriter::FDFwriter(LOFAR::ParameterSet &parset,
                      PolarisationData &poldata,
                      RMSynthesis &rmsynth):
     itsParset(parset),
+    itsObjID(""),
+    itsObjectName(""),
+    itsInputCube(poldata.I().cubeName()),
     itsFlagWriteAsComplex(parset.getBool("writeComplexFDF", true)),
     itsOutputBase(parset.getString("outputBase", "")),
     itsSourceID(poldata.I().specExtractor()->sourceID())
 
 {
+    // Object ID & name
+    itsObjID = itsParset.getString("objid","");
+    itsObjectName = itsParset.getString("objectname","");
 
     // Set up coordinate systems
-    const std::string cubename = poldata.I().cubeName();
     const boost::shared_ptr<casa::ImageInterface<Float> > inputCubePtr =
-        askap::analysisutilities::openImage(cubename);
+        askap::analysisutilities::openImage(itsInputCube);
     const casa::CoordinateSystem inputcoords = inputCubePtr->coordinates();
 
     const int dirCoNum = inputcoords.findCoordinate(casa::Coordinate::DIRECTION);
@@ -115,18 +120,25 @@ FDFwriter::FDFwriter(LOFAR::ParameterSet &parset,
 
 void FDFwriter::write()
 {
+    std::string idstring;
+    if (itsObjID==""){
+        idstring = itsSourceID;
+    } else {
+        idstring = itsObjID;
+    }
+    
     std::stringstream ss;
     if( (itsFlagWriteAsComplex) && (itsParset.getString("imagetype","casa") == "casa") ){
         // write a single file for each, holding a complex array
         //   NOTE - CAN ONLY DO THIS FOR CASA-FORMAT OUTPUT
         ss.str("");
-        ss << itsOutputBase << "_FDF_" << itsSourceID;
+        ss << itsOutputBase << "_FDF_" << idstring;
         std::string fdfName = ss.str();
         casa::PagedImage<casa::Complex> imgF(casa::TiledShape(itsFDF.shape()), itsCoordSysForFDF, fdfName);
         imgF.put(itsFDF);
         
         ss.str("");
-        ss << itsOutputBase << "_RMSF_" << itsSourceID;
+        ss << itsOutputBase << "_RMSF_" << idstring;
         std::string rmsfName = ss.str();
         casa::PagedImage<casa::Complex> imgR(casa::TiledShape(itsRMSF.shape()), itsCoordSysForRMSF, rmsfName);
         imgR.put(itsRMSF);
@@ -138,40 +150,92 @@ void FDFwriter::write()
         boost::shared_ptr<accessors::IImageAccess> imageAcc = accessors::imageAccessFactory(itsParset);
         // write separate files for the amplitude and the phase for each array
         ss.str("");
-        ss << itsOutputBase << "_FDF_amp_" << itsSourceID;
+        ss << itsOutputBase << "_FDF_amp_" << idstring;
         std::string fdfName = ss.str();
         // casa::PagedImage<float> imgFa(casa::TiledShape(itsFDF.shape()), itsCoordSysForFDF, fdfName);
         // imgFa.put(casa::amplitude(itsFDF));
         imageAcc->create(fdfName, itsFDF.shape(), itsCoordSysForFDF);
         imageAcc->write(fdfName, casa::amplitude(itsFDF));
+        updateHeaders(fdfName);
 
         ss.str("");
-        ss << itsOutputBase << "_FDF_phase_" << itsSourceID;
+        ss << itsOutputBase << "_FDF_phase_" << idstring;
         fdfName = ss.str();
         // casa::PagedImage<float> imgFp(casa::TiledShape(itsFDF.shape()), itsCoordSysForFDF, fdfName);
         // imgFp.put(casa::phase(itsFDF));
         imageAcc->create(fdfName, itsFDF.shape(), itsCoordSysForFDF);
         imageAcc->write(fdfName, casa::phase(itsFDF));
+        updateHeaders(fdfName);
 
         ss.str("");
-        ss << itsOutputBase << "_RMSF_amp_" << itsSourceID;
+        ss << itsOutputBase << "_RMSF_amp_" << idstring;
         std::string rmsfName = ss.str();
         // casa::PagedImage<float> imgRa(casa::TiledShape(itsRMSF.shape()), itsCoordSysForRMSF, rmsfName);
         // imgRa.put(casa::amplitude(itsRMSF));
         imageAcc->create(rmsfName, itsRMSF.shape(), itsCoordSysForRMSF);
         imageAcc->write(rmsfName, casa::amplitude(itsRMSF));
-        
+        updateHeaders(rmsfName);
+
         ss.str("");
-        ss << itsOutputBase << "_RMSF_phase_" << itsSourceID;
+        ss << itsOutputBase << "_RMSF_phase_" << idstring;
         rmsfName = ss.str();
         // casa::PagedImage<float> imgRp(casa::TiledShape(itsRMSF.shape()), itsCoordSysForRMSF, rmsfName);
         // imgRp.put(casa::phase(itsRMSF));
         imageAcc->create(rmsfName, itsRMSF.shape(), itsCoordSysForRMSF);
         imageAcc->write(rmsfName, casa::phase(itsRMSF));
-
+        updateHeaders(rmsfName);
+        
     }
 
 }
+
+void FDFwriter::updateHeaders(const std::string &filename)
+{
+
+    boost::shared_ptr<accessors::IImageAccess> ia = accessors::imageAccessFactory(itsParset);
+
+    // set the object ID and object name keywords    
+    if (itsObjID != ""){
+        ia->setMetadataKeyword(filename, "OBJID", itsObjID, "Object ID");
+    }
+    if (itsObjectName != "" ){
+        ia->setMetadataKeyword(filename, "OBJECT", itsObjectName, "IAU-format Object Name");
+    }
+
+    std::string infile = itsInputCube;
+    LOFAR::ParameterSet inputImageParset;
+    // Need to remove any ".fits" extension, as this will be added by the accessor
+    if (infile.find(".fits") != std::string::npos) {
+        if (infile.substr(infile.rfind("."), std::string::npos) == ".fits") {
+            infile.erase(infile.rfind("."), std::string::npos);
+        }
+        inputImageParset.add("imagetype", "fits");
+    } else {
+        inputImageParset.add("imagetype", "casa");
+    }
+    boost::shared_ptr<accessors::IImageAccess> iaInput = accessors::imageAccessFactory(inputImageParset);
+
+    std::string value;
+    // set the other required keywords by copying from input file
+    value = iaInput->getMetadataKeyword(infile, "DATE-OBS");
+    if (value != ""){
+        ia->setMetadataKeyword(filename, "DATE-OBS", value, "Date of observation");
+    }
+    value = iaInput->getMetadataKeyword(infile, "DURATION");
+    if (value != ""){
+        ia->setMetadataKeyword(filename, "DURATION", value, "Length of observation");
+    }
+    value = iaInput->getMetadataKeyword(infile, "PROJECT");
+    if (value != ""){
+        ia->setMetadataKeyword(filename, "PROJECT", value, "Project ID");
+    }
+    value = iaInput->getMetadataKeyword(infile, "SBID");
+    if (value != ""){
+        ia->setMetadataKeyword(filename, "SBID", value, "Scheduling block ID");
+    }    
+
+}
+
 
 
 }
