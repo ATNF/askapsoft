@@ -46,10 +46,13 @@ CatalogueEntry::CatalogueEntry()
 
 CatalogueEntry::CatalogueEntry(const LOFAR::ParameterSet &parset):
     itsParset(parset),
-    itsSBid(parset.getString("sbid", "null"))
+    itsSBid(parset.getString("sbid", "null")),
+    itsIDbase(parset.getString("sourceIdBase",""))
 {
     std::stringstream id;
-    if (itsSBid != "null") {
+    if (itsIDbase != "" ) {
+        id << itsIDbase << "_";
+    } else if (itsSBid != "null") {
         id << "SB" << itsSBid << "_";
     }
     itsIDbase = id.str();
