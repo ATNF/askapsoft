@@ -65,6 +65,15 @@ if [ "${DO_RM_SYNTHESIS}" == "true" ]; then
     fi
 fi
 
+# Define base string for source IDs
+if [ "${FIELD}" == "." ]; then
+    sourceIDbase="SB${SB_SCIENCE}"
+elif [ "${BEAM}" == "all" ]; then
+    sourceIDbase="SB${SB_SCIENCE}_${FIELD}"
+else
+    sourceIDbase="SB${SB_SCIENCE}_${FIELD}_Beam${BEAM}"
+fi
+
 if [ ! -e "${OUTPUT}/${contImage}" ] && [ "${DEP}" == "" ] &&
        [ "${SUBMIT_JOBS}" == "true" ]; then
     DO_IT=false
@@ -270,6 +279,7 @@ Selavy.RMSynthesis = \${doRM}"
     cat > "\$parset" <<EOFINNER
 Selavy.image = \${fitsimage}
 Selavy.sbid  = ${SB_SCIENCE}
+Selavy.sourceIdBase = ${sourceIDbase}
 \${TaylorTermUse}
 Selavy.SBid = ${SB_SCIENCE}
 Selavy.nsubx = ${SELAVY_NSUBX}
