@@ -27,11 +27,13 @@
 import os
 
 CODE_DIR = "Code"
+ASKAP_ROOT = os.environ['ASKAP_ROOT']
 
 
 def in_code_tree():
     '''Are we inside the "Code" tree (ASKAPsoft sources)'''
-    return CODE_DIR in os.getcwd()
+    rpath = os.path.relpath(os.getcwd(), ASKAP_ROOT)
+    return CODE_DIR in rpath
 
 if __name__ == "__main__":
     print in_code_tree() and "Yes" or "No"
