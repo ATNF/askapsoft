@@ -92,6 +92,16 @@ ImageElement::ImageElement(const LOFAR::ParameterSet &parset)
         }
     }
 
+    if (parset.isDefined("cubelets")) {
+        std::vector<std::string> cubeletList = parset.getStringVector("cubelets", "");
+        std::vector<std::string>::iterator cube = cubeletList.begin();
+        for (; cube < cubeletList.end(); cube++) {
+            LOFAR::ParameterSet subset = parset.makeSubset(*cube + ".");
+            subset.replace("artifactparam", *cube);
+            itsCubelets.push_back(CubeletElement(subset));
+        }
+    }
+
 }
 
 xercesc::DOMElement* ImageElement::toXmlElement(xercesc::DOMDocument& doc) const
@@ -120,6 +130,14 @@ xercesc::DOMElement* ImageElement::toXmlElement(xercesc::DOMDocument& doc) const
         childMom->appendChild(mom->toXmlElement(doc));
     }
     e->appendChild(childMom);
+
+    // Create Cubelet elements
+    DOMElement* childCube = doc.createElement(XercescString("cubelets"));
+    std::vector<CubeletElement>::const_iterator cube = itsCubelets.begin();
+    for (; cube != itsCubelets.end(); ++cube) {
+        childCube->appendChild(cube->toXmlElement(doc));
+    }
+    e->appendChild(childCube);
 
 
     return e;
@@ -156,6 +174,11 @@ void ImageElement::copyAndChecksum(const boost::filesystem::path& outdir) const
     std::vector<MomentMapElement>::const_iterator mom = itsMomentmaps.begin();
     for (; mom < itsMomentmaps.end(); mom++) {
         mom->copyAndChecksum(outdir);
+    }
+
+    std::vector<CubeletElement>::const_iterator cube = itsCubelets.begin();
+    for (; cube < itsCubelets.end(); cube++) {
+        cube->copyAndChecksum(outdir);
     }
 
 }
