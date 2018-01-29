@@ -137,9 +137,11 @@ void VariableThresholder::initialise(duchamp::Cube &cube,
         analysisutilities::getSubImage(cube.pars().getImageFile(), itsSlicer);
     itsInputCoordSys = sub->coordinates();
     itsInputShape = sub->shape();
-    itsMask = sub->getMask();
     if (itsComms->isParallel() && itsComms->isMaster()){
         itsInputShape=casa::IPosition(itsInputShape.size(),1);
+    }
+    else { 
+        itsMask = sub->getMask();
     }
 
     ASKAPLOG_DEBUG_STR(logger , "About to get the section for rank " << itsComms->rank());

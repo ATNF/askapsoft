@@ -1155,6 +1155,7 @@ void DuchampParallel::cleanup()
 
             itsCube.addObject(duchamp::Detection(*src));
         }
+        itsCube.calcObjectWCSparams();
 
         ASKAPLOG_INFO_STR(logger, "Finished adding sources to cube. Now have " <<
                           itsCube.getNumObj() << " objects.");

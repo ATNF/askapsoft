@@ -107,7 +107,7 @@ HIdata::HIdata(const LOFAR::ParameterSet &parset):
     // Define the parset used to set up the moment-map extractor
     LOFAR::ParameterSet momentParset;
     momentParset.add(LOFAR::KVpair("spectralCube", itsCubeName));
-    momentParset.add(LOFAR::KVpair("momentOutputBase", momentDir + "/mom%m"));
+    momentParset.add(LOFAR::KVpair("momentOutputBase", momentDir + "/moment%m"));
     momentParset.add("moments", itsParset.getString("HiEmissionCatalogue.moments", "[0,1,2]"));
     momentParset.add(LOFAR::KVpair("beamLog", itsBeamLog));
     momentParset.add("imagetype", itsParset.getString("imagetype", "fits"));
