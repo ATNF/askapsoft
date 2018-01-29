@@ -275,20 +275,6 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                     if [ -e "\${FIELD}/\${imageName}\${fitsSuffix}" ]; then
                         casdaOtherDimImageNames+=(\${FIELD}/\${imageName}\${fitsSuffix})
                         casdaOtherDimImageTypes+=("\${imageType}")
-                        if [ "\${BEAM}" == "all" ] && [ "\${imageCode}" == "restored" ]; then
-                            casdaOtherDimImageNames+=(\${FIELD}/\${weightsImage}\${fitsSuffix})
-                            casdaOtherDimImageTypes+=("\${weightsType}")
-                            casdaOtherDimImageSpectra+=("")
-                            casdaOtherDimImageNoise+=("")
-                            casdaOtherDimImageMoment0s+=("")
-                            casdaOtherDimImageMoment1s+=("")
-                            casdaOtherDimImageMoment2s+=("")
-                            casdaOtherDimImageCubelets+=("")
-                            casdaOtherDimImageFDF+=("")
-                            casdaOtherDimImageRMSF+=("")
-                            casdaOtherDimImagePol+=("")
-                        fi
-                        ### Not yet writing extracted files direct to FITS, so change the assignment of fitsSuffix
                         fitsSuffix=""
                         if [ "\${ADD_FITS_SUFFIX}" == "true" ]; then
                             fitsSuffix=".fits"
@@ -318,6 +304,19 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                             casdaOtherDimImageRMSF+=("")
                             casdaOtherDimImagePol+=("")
                         fi
+                        if [ "\${BEAM}" == "all" ] && [ "\${imageCode}" == "restored" ]; then
+                            casdaOtherDimImageNames+=(\${FIELD}/\${weightsImage}\${fitsSuffix})
+                            casdaOtherDimImageTypes+=("\${weightsType}")
+                            casdaOtherDimImageSpectra+=("")
+                            casdaOtherDimImageNoise+=("")
+                            casdaOtherDimImageMoment0s+=("")
+                            casdaOtherDimImageMoment1s+=("")
+                            casdaOtherDimImageMoment2s+=("")
+                            casdaOtherDimImageCubelets+=("")
+                            casdaOtherDimImageFDF+=("")
+                            casdaOtherDimImageRMSF+=("")
+                            casdaOtherDimImagePol+=("")
+                        fi
                     fi
                 done
 
@@ -337,19 +336,6 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                         if [ -e "\${FIELD}/\${imageName}\${fitsSuffix}" ]; then
                             casdaOtherDimImageNames+=(\${FIELD}/\${imageName}\${fitsSuffix})
                             casdaOtherDimImageTypes+=("\${imageType}")
-                            if [ "\${BEAM}" == "all" ] && [ "\${imageCode}" == "restored" ]; then
-                                casdaOtherDimImageNames+=(\${FIELD}/\${weightsImage}\${fitsSuffix})
-                                casdaOtherDimImageTypes+=("\${weightsType}")
-                                casdaOtherDimImageSpectra+=("")
-                                casdaOtherDimImageNoise+=("")
-                                casdaOtherDimImageMoment0s+=("")
-                                casdaOtherDimImageMoment1s+=("")
-                                casdaOtherDimImageMoment2s+=("")
-                                casdaOtherDimImageCubelets+=("")
-                                casdaOtherDimImageFDF+=("")
-                                casdaOtherDimImageRMSF+=("")
-                                casdaOtherDimImagePol+=("")
-                            fi
                             ### Not yet writing extracted files direct to FITS, so change the assignment of fitsSuffix
                             fitsSuffix=""
                             if [ "\${ADD_FITS_SUFFIX}" == "true" ]; then
@@ -383,7 +369,20 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                                 casdaOtherDimImageRMSF+=("")
                                 casdaOtherDimImagePol+=("")
                             fi
-                        fi
+                            if [ "\${BEAM}" == "all" ] && [ "\${imageCode}" == "restored" ]; then
+                                casdaOtherDimImageNames+=(\${FIELD}/\${weightsImage}\${fitsSuffix})
+                                casdaOtherDimImageTypes+=("\${weightsType}")
+                                casdaOtherDimImageSpectra+=("")
+                                casdaOtherDimImageNoise+=("")
+                                casdaOtherDimImageMoment0s+=("")
+                                casdaOtherDimImageMoment1s+=("")
+                                casdaOtherDimImageMoment2s+=("")
+                                casdaOtherDimImageCubelets+=("")
+                                casdaOtherDimImageFDF+=("")
+                                casdaOtherDimImageRMSF+=("")
+                                casdaOtherDimImagePol+=("")
+                            fi
+s                        fi
                     done
 
                 done
