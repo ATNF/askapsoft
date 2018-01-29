@@ -167,6 +167,10 @@ below for examples.
 |<imagekey>.momentmaps          |vector<string>  |None             | (Optional) A list of keys defining sets of moment-map images to be           |
 |                               |                |                 | uploaded. These are referred to as <key> in the rows below.                  |
 +-------------------------------+----------------+-----------------+------------------------------------------------------------------------------+
+|<imagekey>.cubelets            |vector<string>  |None             | (Optional) A list of keys defining sets of cubelets (cut-outs from the larger|
+|                               |                |                 | spectral cube) to be uploaded. These are referred to as <key> in the rows    |
+|                               |                |                 | below.                                                                       |
++-------------------------------+----------------+-----------------+------------------------------------------------------------------------------+
 |<imagekey>.<key>.filename      |string          |None             | Filename (either relative or fully qualified with a path) for the            |
 |                               |                |                 | artifact. This may contain wildcards.                                        |
 +-------------------------------+----------------+-----------------+------------------------------------------------------------------------------+
@@ -252,8 +256,8 @@ pol_spec_I_3a.fits; with associated thumbnails pol_spec_I_1a.png etc.
     obsprogram                      = test
     writeREADYfile                  = true
     
-    # Images
-    images.artifactlist             = [image1]
+    # Images - continuum cube and spectral cube
+    images.artifactlist             = [image1,image2]
     image1.filename                 = image.i.contcube.sb1234.linmos.restored.fits
     image1.type                     = cont_restored_3d
     image1.project                  = AS033
@@ -263,3 +267,22 @@ pol_spec_I_3a.fits; with associated thumbnails pol_spec_I_1a.png etc.
     image1.spec.thumbnail           = selavy_image.i.contcube.sb1234.linmos.restored/PolData/pol_spec_I*.png
     image1.noise.filename           = selavy_image.i.contcube.sb1234.linmos.restored/PolData/pol_noise_I*.fits
     image1.noise.type               = cont_noise_i
+    #
+    image2.filename                 = image.i.cube.sb1234.linmos.restored.fits
+    image2.type                     = spectral_restored_3d
+    image2.spectra                  = [spec,noise]
+    image2.spec.filename            = selavy_image.i.cube.sb1234.linmos.restored/Spectra/spectrum*.fits
+    image2.spec.type                = cont_restored_i
+    image2.spec.thumbnail           = selavy_image.i.cube.sb1234.linmos.restored/Spectra/spectrum*.png
+    image2.noise.filename           = selavy_image.i.cube.sb1234.linmos.restored/Spectra/noiseSpectrum*.fits
+    image2.noise.type               = cont_noise_i   
+    image2.momentmaps               = [mom0,mom1,mom2]
+    image2.mom0.filename            = selavy_image.i.cube.sb1234.linmos.restored/Moments/moment0*.fits 
+    image2.mom0.type                = spectral_restored_mom0
+    image2.mom1.filename            = selavy_image.i.cube.sb1234.linmos.restored/Moments/moment1*.fits 
+    image2.mom1.type                = spectral_restored_mom1
+    image2.mom2.filename            = selavy_image.i.cube.sb1234.linmos.restored/Moments/moment2*.fits 
+    image2.mom2.type                = spectral_restored_mom2
+    image2.cubelets                 = [cubelet]
+    image2.cubelet.filename         = selavy_image.i.cube.sb1234.linmos.restored/Cubelets/cubelet*.fits 
+    image2.cubelet.type             = spectral_restored_3d
