@@ -61,7 +61,10 @@ cat > "${getArtifacts}" <<EOF
 #   * casdaOtherDimImageTypes - their corresponding image types
 #   * casdaOtherDimImageSpectra - extracted spectra from 3D cubes
 #   * casdaOtherDimImageNoise - extracted noise spectra from 3D cubes
-#   * casdaOtherDimImageMoments - extracted moment maps
+#   * casdaOtherDimImageMoment0s - extracted moment-0 maps
+#   * casdaOtherDimImageMoment1s - extracted moment-1 maps
+#   * casdaOtherDimImageMoment2s - extracted moment-2 maps
+#   * casdaOtherDimImageCubelets - extracted cubelets
 #   * casdaOtherDimImageFDF - derived Faraday Dispersion Functions
 #   * casdaOtherDimImageRMSF - derived Rotation Measure Spread Functions
 #   * casdaOtherDimImagePol - lower-case polarisation character
@@ -116,7 +119,10 @@ casdaOtherDimImageNames=()
 casdaOtherDimImageTypes=()
 casdaOtherDimImageSpectra=()
 casdaOtherDimImageNoise=()
-casdaOtherDimImageMoments=()
+casdaOtherDimImageMoment0s=()
+casdaOtherDimImageMoment1s=()
+casdaOtherDimImageMoment2s=()
+casdaOtherDimImageCubelets=()
 casdaOtherDimImageFDF=()
 casdaOtherDimImageRMSF=()
 casdaOtherDimImagePol=()
@@ -274,7 +280,10 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                             casdaOtherDimImageTypes+=("\${weightsType}")
                             casdaOtherDimImageSpectra+=("")
                             casdaOtherDimImageNoise+=("")
-                            casdaOtherDimImageMoments+=("")
+                            casdaOtherDimImageMoment0s+=("")
+                            casdaOtherDimImageMoment1s+=("")
+                            casdaOtherDimImageMoment2s+=("")
+                            casdaOtherDimImageCubelets+=("")
                             casdaOtherDimImageFDF+=("")
                             casdaOtherDimImageRMSF+=("")
                             casdaOtherDimImagePol+=("")
@@ -285,9 +294,12 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                             fitsSuffix=".fits"
                         fi                        
                         if [ -e "\${FIELD}/\${selavyDir}" ]; then
-                            casdaOtherDimImageSpectra+=("\${FIELD}/\${selavySpectraDir}/${SELAVY_SPEC_BASE_SPECTRUM}*\${fitsSuffix}")
-                            casdaOtherDimImageNoise+=("\${FIELD}/\${selavySpectraDir}/${SELAVY_SPEC_BASE_NOISE}*\${fitsSuffix}")
-                            casdaOtherDimImageMoments+=("\${FIELD}/\${selavyMomentsDir}/${SELAVY_SPEC_BASE_MOMENT}*\${fitsSuffix}")
+                            casdaOtherDimImageSpectra+=("\${FIELD}/\${selavySpectraDir}/spec*\${fitsSuffix}")
+                            casdaOtherDimImageNoise+=("\${FIELD}/\${selavySpectraDir}/noiseSpec*\${fitsSuffix}")
+                            casdaOtherDimImageMoment0s+=("\${FIELD}/\${selavyMomentsDir}/moment0*\${fitsSuffix}")
+                            casdaOtherDimImageMoment1s+=("\${FIELD}/\${selavyMomentsDir}/moment1*\${fitsSuffix}")
+                            casdaOtherDimImageMoment2s+=("\${FIELD}/\${selavyMomentsDir}/moment2*\${fitsSuffix}")
+                            casdaOtherDimImageCubelets+=("\${FIELD}/\${selavyCubeletsDir}/cubelet*\${fitsSuffix}")
                             casdaOtherDimImageFDF+=("")
                             casdaOtherDimImageRMSF+=("")
                             casdaOtherDimImagePol+=("")
@@ -298,7 +310,10 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                         else
                             casdaOtherDimImageSpectra+=("")
                             casdaOtherDimImageNoise+=("")
-                            casdaOtherDimImageMoments+=("")
+                            casdaOtherDimImageMoment0s+=("")
+                            casdaOtherDimImageMoment1s+=("")
+                            casdaOtherDimImageMoment2s+=("")
+                            casdaOtherDimImageCubelets+=("")
                             casdaOtherDimImageFDF+=("")
                             casdaOtherDimImageRMSF+=("")
                             casdaOtherDimImagePol+=("")
@@ -327,7 +342,10 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                                 casdaOtherDimImageTypes+=("\${weightsType}")
                                 casdaOtherDimImageSpectra+=("")
                                 casdaOtherDimImageNoise+=("")
-                                casdaOtherDimImageMoments+=("")
+                                casdaOtherDimImageMoment0s+=("")
+                                casdaOtherDimImageMoment1s+=("")
+                                casdaOtherDimImageMoment2s+=("")
+                                casdaOtherDimImageCubelets+=("")
                                 casdaOtherDimImageFDF+=("")
                                 casdaOtherDimImageRMSF+=("")
                                 casdaOtherDimImagePol+=("")
@@ -342,7 +360,10 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                                 suffix="SB${SB_SCIENCE}_\${contImage}*\${fitsSuffix}"
                                 casdaOtherDimImageSpectra+=("\${prefix}_spec_\${POLN}_\${suffix}")
                                 casdaOtherDimImageNoise+=("\${prefix}_noise_\${POLN}_\${suffix}")
-                                casdaOtherDimImageMoments+=("")
+                                casdaOtherDimImageMoment0s+=("")
+                                casdaOtherDimImageMoment1s+=("")
+                                casdaOtherDimImageMoment2s+=("")
+                                casdaOtherDimImageCubelets+=("")
                                 casdaOtherDimImagePol+=(\${pol})
                                 if [ "\${POLN}" == "Q" ]; then
                                     casdaOtherDimImageFDF+=("\${prefix}_FDF*_\${suffix}")
@@ -354,7 +375,10 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                             else
                                 casdaOtherDimImageSpectra+=("")
                                 casdaOtherDimImageNoise+=("")
-                                casdaOtherDimImageMoments+=("")
+                                casdaOtherDimImageMoment0s+=("")
+                                casdaOtherDimImageMoment1s+=("")
+                                casdaOtherDimImageMoment2s+=("")
+                                casdaOtherDimImageCubelets+=("")
                                 casdaOtherDimImageFDF+=("")
                                 casdaOtherDimImageRMSF+=("")
                                 casdaOtherDimImagePol+=("")

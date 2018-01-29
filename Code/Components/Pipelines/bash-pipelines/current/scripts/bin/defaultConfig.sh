@@ -941,7 +941,7 @@ SELAVY_SPEC_RECON_SCALE_MAX=0
 # Type of searching to be done - 'spectral' or 'spatial'
 SELAVY_SPEC_SEARCH_TYPE=spatial
 # Whether to use a variable threshold
-SELAVY_SPEC_VARIABLE_THRESHOLD=true
+SELAVY_SPEC_VARIABLE_THRESHOLD=false
 # Half-size of the box used to calculate the local threshold
 SELAVY_SPEC_BOX_SIZE=35
 # How the processors subdivide the image
@@ -957,11 +957,6 @@ SELAVY_SPEC_MAX_CHAN=2592
 # Whether to use the optimiseMask option
 SELAVY_SPEC_OPTIMISE_MASK=true
 #
-# Base names for various extracted data products
-SELAVY_SPEC_BASE_SPECTRUM=spectrum
-SELAVY_SPEC_BASE_NOISE=noiseSpectrum
-SELAVY_SPEC_BASE_MOMENT="moment%m"
-SELAVY_SPEC_BASE_CUBELET=cubelet
 
 ###############################
 # Archiving-related parameters
