@@ -330,3 +330,14 @@ void FitsImageAccess::setMetadataKeyword(const std::string &name, const std::str
     itsFITSImage->setHeader(keyword, value, desc);
 }
 
+/// @brief Add a HISTORY message to the image metadata
+/// @details Adds a string detailing the history of the image
+/// @param[in] name Image name
+/// @param[in] history History comment to add
+void FitsImageAccess::addHistory(const std::string &name, const std::string &history)
+{
+
+    connect(name);
+    itsFITSImage->addHistory(history);
+    
+}

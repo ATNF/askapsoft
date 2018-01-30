@@ -301,3 +301,17 @@ void CasaImageAccess::setMetadataKeyword(const std::string &name, const std::str
     img.setMiscInfo(miscinfo);
 
 }
+
+/// @brief Add a HISTORY message to the image metadata
+/// @details Adds a string detailing the history of the image
+/// @param[in] name Image name
+/// @param[in] history History comment to add
+void CasaImageAccess::addHistory(const std::string &name, const std::string &history)
+{
+
+    casa::PagedImage<float> img(name);
+    casa::LogIO log = img.logSink();
+    log << history << casa::LogIO::POST;
+
+}
+

@@ -173,6 +173,13 @@ struct IImageAccess {
                                     const std::string value, const std::string &desc = "") = 0;
 
 
+    /// @brief Add a HISTORY message to the image metadata
+    /// @details Adds a string detailing the history of the image
+    /// @param[in] name Image name
+    /// @param[in] history History comment to add
+    virtual void addHistory(const std::string &name, const std::string &history) = 0;
+
+
 };
 
 } // namespace accessors
