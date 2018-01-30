@@ -18,7 +18,7 @@ faster.
 
 As for the bandpass calibrator, the MS is then flagged in two
 passes. First, a combination of selection rules (allowing flagging of
-channels, antennas & baselines, and autocorrelations) and (optionally)
+channels, time ranges, antennas & baselines, and autocorrelations) and (optionally)
 a simple flat amplitude threshold are applied. Then a sequence of
 Stokes-V flagging and dynamic flagging of amplitudes is done,
 optionally integrating over or across individual spectra. Each of
@@ -160,6 +160,11 @@ is possible, however, to select a single field to process via the
 |                                               |                                 | (:doc:`../calim/cflag`)                         | out the first 100 channnels, use "0:0~16" (with the quote marks). See |
 |                                               |                                 |                                                 | the docuemntation for further details on the format.                  |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
+| ``TIME_FLAG_SCIENCE``                         | ""                              | selection_flagger.<rule>.timerange              | Allows flagging of a specified time range(s). The string given is     |
+|                                               |                                 | (:doc:`../calim/cflag`)                         | passed directly to the ``timerange`` option of cflag's selection      |
+|                                               |                                 |                                                 | flagger. For details on the possible syntax, consult the `MS          |
+|                                               |                                 |                                                 | selection`_ documentation.                                            |
++-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 | ``FLAG_AUTOCORRELATION_SCIENCE``              | false                           | selection_flagger.<rule>.autocorr               | If true, then autocorrelations will be flagged.                       |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 | **Flagging of averaged data**                 |                                 |                                                 |                                                                       |
@@ -222,5 +227,12 @@ is possible, however, to select a single field to process via the
 |                                               |                                 | (:doc:`../calim/cflag`)                         | out the first 100 channnels, use "0:0~16" (with the quote marks). See |
 |                                               |                                 |                                                 | the docuemntation for further details on the format.                  |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
+| ``TIME_FLAG_SCIENCE_AV``                      | ""                              | selection_flagger.<rule>.timerange              | Allows flagging of a specified time range(s). The string given is     |
+|                                               |                                 | (:doc:`../calim/cflag`)                         | passed directly to the ``timerange`` option of cflag's selection      |
+|                                               |                                 |                                                 | flagger. For details on the possible syntax, consult the `MS          |
+|                                               |                                 |                                                 | selection`_ documentation.                                            |
++-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 
 
+ .. _MS selection :  http://www.aoc.nrao.edu/~sbhatnag/misc/msselection/msselection.html
+ 

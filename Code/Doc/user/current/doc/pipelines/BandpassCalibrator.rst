@@ -13,7 +13,7 @@ for. This is due to the particular requirements of
 :doc:`../calim/cbpcalibrator`.
 
 The MS is flagged in two passes. First, a combination of selection
-rules (allowing flagging of channels, antennas & baselines, and
+rules (allowing flagging of channels, time ranges, antennas & baselines, and
 autocorrelations) and (optionally) a simple flat amplitude threshold
 are applied. Then a sequence of Stokes-V flagging and dynamic flagging
 of amplitudes is done, integrating over individual spectra. Each of
@@ -136,6 +136,12 @@ the quality of the bandpass solution.
 |                                               |                                       |                                                        | (with the quote marks). See the docuemntation for further |
 |                                               |                                       |                                                        | details on the format.                                    |
 +-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| ``TIME_FLAG_1934``                            | ""                                    | selection_flagger.<rule>.timerange                     | Allows flagging of a specified time range(s). The string  |
+|                                               |                                       | (:doc:`../calim/cflag`)                                | given is passed directly to the ``timerange`` option of   |
+|                                               |                                       |                                                        | cflag's selection flagger. For details on the possible    |
+|                                               |                                       |                                                        | syntax, consult the `MS selection`_ documentation.        |
+|                                               |                                       |                                                        |                                                           |
++-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
 | ``FLAG_AUTOCORRELATION_1934``                 | false                                 | selection_flagger.<rule>.autocorr                      | If true, then autocorrelations will be flagged.           |
 |                                               |                                       |                                                        |                                                           |
 +-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
@@ -200,3 +206,5 @@ the quality of the bandpass solution.
 +-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
 
 
+ .. _MS selection :  http://www.aoc.nrao.edu/~sbhatnag/misc/msselection/msselection.html
+ 
