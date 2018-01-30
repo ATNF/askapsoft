@@ -238,10 +238,15 @@ module load askappipeline/${askappipelineVersion}"
         }
         acesModuleCommand="module load aces"
     fi
+
+    #############################
+    # HISTORY metadata string
+
+    imageHistoryString="\"Produced with ASKAPsoft version \${ASKAPSOFT_VERSION_USED}\", \"Produced using ASKAP pipeline version ${PIPELINE_VERSION}\", \"Produced using ACES software revision ${ACES_VERSION_USED}\", \"Processed with ASKAP pipelines on ${NOW_FMT}\""
     
     #############################
     # CONVERSION TO FITS FORMAT
-
+    
     # This function returns a bunch of text in $fitsConvertText that can
     # be pasted into an external slurm job file.
     # The text will perform the conversion of an given CASA image to FITS
@@ -267,24 +272,9 @@ if [ -e \"\${casaim}\" ] && [ ! -e \"\${fitsim}\" ]; then
 
     cat > \$script << EOFSCRIPT
 #!/usr/bin/env python
-
 casaimage='\${casaim}'
 fitsimage='\${fitsim}'
-
 ia.open(casaimage)
-#info=ia.miscinfo()
-#info['PROJECT']='${PROJECT_ID}'
-#info['DATE-OBS']='${DATE_OBS}'
-#info['DURATION']=${DURATION}
-#info['SBID']='${SB_SCIENCE}'
-##info['INSTRUME']='${INSTRUMENT}'
-#ia.setmiscinfo(info)
-#imhistory=[]
-#imhistory.append('Produced with ASKAPsoft version \${ASKAPSOFT_VERSION_USED}')
-#imhistory.append('Produced using ASKAP pipeline version ${PIPELINE_VERSION}')
-#imhistory.append('Produced using ACES software revision ${ACES_VERSION_USED}')
-#imhistory.append('Processed with ASKAP pipelines on ${NOW_FMT}')
-#ia.sethistory(origin='ASKAPsoft pipeline',history=imhistory)
 ia.tofits(outfile=fitsimage, velocity=False)
 ia.close()
 EOFSCRIPT
@@ -317,7 +307,7 @@ ImageToFITS.stokesLast = true
 #ImageToFITS.headers.sbid = ${SB_SCIENCE}
 #ImageToFITS.headers.date-obs = ${DATE_OBS}
 #ImageToFITS.headers.duration = ${DURATION}
-#ImageToFITS.history = [\"Produced with ASKAPsoft version \${ASKAPSOFT_VERSION_USED}\", \"Produced using ASKAP pipeline version ${PIPELINE_VERSION}\", \"Produced using ACES software revision ${ACES_VERSION_USED}\", \"Processed with ASKAP pipelines on ${NOW_FMT}\"]
+#ImageToFITS.history = [${imageHistoryString}]
 EOFINNER
     NCORES=1
     NPPN=1
@@ -335,7 +325,7 @@ updateArgs=\"\${updateArgs} --project=${PROJECT_ID}\"
 updateArgs=\"\${updateArgs} --sbid=${SB_SCIENCE}\"
 updateArgs=\"\${updateArgs} --dateobs=${DATE_OBS}\"
 updateArgs=\"\${updateArgs} --duration=${DURATION}\"
-srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} \"${PIPELINEDIR}/updateFITSheaders.py\" \${updateArgs} \"Produced with ASKAPsoft version \${ASKAPSOFT_RELEASE}\", \"Produced using ASKAP pipeline version ${PIPELINE_VERSION}\", \"Produced using ACES software revision ${ACES_VERSION_USED}\", \"Processed with ASKAP pipelines on ${NOW_FMT}\"
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} \"${PIPELINEDIR}/updateFITSheaders.py\" \${updateArgs} ${imageHistoryString}
 "
 
     ####################

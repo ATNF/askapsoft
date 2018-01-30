@@ -280,8 +280,9 @@ Selavy.RMSynthesis = \${doRM}"
 Selavy.image = \${fitsimage}
 Selavy.sbid  = ${SB_SCIENCE}
 Selavy.sourceIdBase = ${sourceIDbase}
+Selavy.imageHistory = [${imageHistoryString}]
+#
 \${TaylorTermUse}
-Selavy.SBid = ${SB_SCIENCE}
 Selavy.nsubx = ${SELAVY_NSUBX}
 Selavy.nsuby = ${SELAVY_NSUBY}
 #

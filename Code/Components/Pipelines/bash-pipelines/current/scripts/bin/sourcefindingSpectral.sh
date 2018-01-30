@@ -196,6 +196,8 @@ if [ "\${HAVE_IMAGES}" == "true" ]; then
 Selavy.image = \${fitsimage}
 Selavy.sbid  = ${SB_SCIENCE}
 Selavy.sourceIdBase = ${sourceIDbase}
+Selavy.imageHistory = [${imageHistoryString}]
+#
 Selavy.nsubx = ${SELAVY_SPEC_NSUBX}
 Selavy.nsuby = ${SELAVY_SPEC_NSUBY}
 Selavy.nsubz = ${SELAVY_SPEC_NSUBZ}
