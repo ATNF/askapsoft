@@ -12,7 +12,8 @@ install:
 
 .PHONY: ftest
 ftest:
-	rbuild $(RBUILD_FLAGS) -R -t functests
+	#rbuild $(RBUILD_FLAGS) -R -t functests
+	./functests/run.sh
 
 .PHONY: test
 test:
@@ -21,14 +22,13 @@ test:
 .PHONY: clean
 clean:
 	rbuild $(RBUILD_FLAGS) -R -t clean
-	find . -type f -name '*-results.xml' -exec rm -f {} +
-	find . -type f -name '*.pyc' -exec rm -f {} +
-	find functests/ -type f -name '*.stderr' -exec rm -f {} +
-	find functests/ -type f -name '*.stdout' -exec rm -f {} +
+	# Build artifacts not hit by rbuild -t clean
+	rm -f ./doxy.conf.tmp ./options.cache ./askap_pipelinetasks.cc
+	rm -f ./doxy.conf.tmp ./options.cache ./askap_pipelinetasks.cc
+	rm -rf functests/test_data_accessors/ice_data
 	find . -type f -name '*.log' -exec rm -f {} +
-	rm -rf functests/data/
-	rm -f ./doxy.conf.tmp ./options.cache ./askap_skymodel.* ./*.ice
-	find . -type f -name '*.dbtmp' -exec rm -f {} +
+	find . -type f -name '*-results.xml' -exec rm -f {} +
+	#find . -type f -name '*.dbtmp' -exec rm -f {} +
 
 .PHONY: all
 all: install test ftest
