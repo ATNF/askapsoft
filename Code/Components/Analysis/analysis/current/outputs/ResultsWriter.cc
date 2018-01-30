@@ -197,6 +197,18 @@ void ResultsWriter::writeComponentMaps(DistributedContinuumParameterisation &dcp
         imageAcc->write(componentMap, componentImage);
         imageAcc->makeDefaultMask(componentMap);
         imageAcc->writeMask(componentMap, mask, casa::IPosition(componentImage.shape().nelements(),0));
+        imageAcc->addHistory(componentMap, "Map of fitted components, made by Selavy");
+        imageAcc->addHistory(componentMap, "Original image: " + inputImageName);
+        if (itsParset.isDefined("imageHistory")) {
+            std::vector<std::string> historyMessages = itsParset.getStringVector("imageHistory", "");
+            if (historyMessages.size() > 0) {
+                for (std::vector<std::string>::iterator history = historyMessages.begin();
+                     history < historyMessages.end(); history++) {
+                    imageAcc->addHistory(componentMap, *history);
+                }
+            }
+        }
+        
         
         std::string componentResidualMap = "componentResidual_" + infile.filename().string();
         // Need to remove any ".fits" extension, as this will be added by the accessor
@@ -210,6 +222,17 @@ void ResultsWriter::writeComponentMaps(DistributedContinuumParameterisation &dcp
         imageAcc->write(componentResidualMap, residual);
         imageAcc->makeDefaultMask(componentResidualMap);
         imageAcc->writeMask(componentResidualMap, mask, casa::IPosition(componentImage.shape().nelements(),0));
+        imageAcc->addHistory(componentResidualMap, "Residual after subtracting fitted components, made by Selavy");
+        imageAcc->addHistory(componentResidualMap, "Original image: " + inputImageName);
+        if (itsParset.isDefined("imageHistory")) {
+            std::vector<std::string> historyMessages = itsParset.getStringVector("imageHistory", "");
+            if (historyMessages.size() > 0) {
+                for (std::vector<std::string>::iterator history = historyMessages.begin();
+                     history < historyMessages.end(); history++) {
+                    imageAcc->addHistory(componentResidualMap, *history);
+                }
+            }
+        }
 
     }
 

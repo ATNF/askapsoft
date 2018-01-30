@@ -93,11 +93,6 @@ void ImageWriter::setTileshapeFromShape(casa::IPosition &shape)
 void ImageWriter::create()
 {
     if (itsImageName != "") {
-        // ASKAPLOG_DEBUG_STR(logger,
-        //                    "Creating image named " << itsImageName <<
-        //                    " with shape " << itsShape <<
-        //                    " and tileshape " << itsTileshape);
-
         boost::shared_ptr<accessors::IImageAccess> imageAcc = accessors::imageAccessFactory(itsParset);
         imageAcc->create(itsImageName, itsShape, itsCoordSys);
         imageAcc->makeDefaultMask(itsImageName);
@@ -105,7 +100,15 @@ void ImageWriter::create()
         // imageAcc->setImageInfo...
         casa::Vector<casa::Quantity> beam=itsImageInfo.restoringBeam().toVector();
         imageAcc->setBeamInfo(itsImageName, beam[0].getValue("rad"), beam[1].getValue("rad"), beam[2].getValue("rad"));
-
+        if (itsParset.isDefined("imageHistory")) {
+            std::vector<std::string> historyMessages = itsParset.getStringVector("imageHistory", "");
+            if (historyMessages.size() > 0) {
+                for (std::vector<std::string>::iterator history = historyMessages.begin();
+                     history < historyMessages.end(); history++) {
+                    itsImageName->addHistory(componentResidualMap, *history);
+                }
+            }
+        }
     }
 }
 
