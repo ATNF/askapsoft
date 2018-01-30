@@ -78,6 +78,9 @@ StokesSpectrum::StokesSpectrum(const LOFAR::ParameterSet &parset,
     specParset.add(LOFAR::KVpair("scaleSpectraByBeam", true));
     specParset.add(LOFAR::KVpair("beamLog", itsBeamLog));
     specParset.add("imagetype",itsParset.getString("imagetype","fits"));
+    if (itsParset.isDefined("imageHistory")){
+        specParset.add("imageHistory", itsParset.getString("imageHistory"));
+    }
     itsSpecExtractor = new SourceSpectrumExtractor(specParset);
     itsSpecExtractor->setObjectIDs(objid,objectname);
 
@@ -95,6 +98,9 @@ StokesSpectrum::StokesSpectrum(const LOFAR::ParameterSet &parset,
     noiseParset.add(LOFAR::KVpair("useDetectedPixels", false));
     noiseParset.add(LOFAR::KVpair("scaleSpectraByBeam", true));
     noiseParset.add("imagetype",itsParset.getString("imagetype","fits"));
+    if (itsParset.isDefined("imageHistory")){
+        noiseParset.add("imageHistory", itsParset.getString("imageHistory"));
+    }
     itsNoiseExtractor = new NoiseSpectrumExtractor(noiseParset);
     itsNoiseExtractor->setObjectIDs(objid,objectname);
 

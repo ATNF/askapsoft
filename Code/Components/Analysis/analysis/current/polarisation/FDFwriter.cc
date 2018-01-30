@@ -234,6 +234,17 @@ void FDFwriter::updateHeaders(const std::string &filename)
         ia->setMetadataKeyword(filename, "SBID", value, "Scheduling block ID");
     }    
 
+    if (itsParset.isDefined("imageHistory")) {
+        std::vector<std::string> historyMessages = itsParset.getStringVector("imageHistory", "");
+        if (historyMessages.size() > 0) {
+            for (std::vector<std::string>::iterator history = historyMessages.begin();
+                 history < historyMessages.end(); history++) {
+                ASKAPLOG_DEBUG_STR(logger, "Writing history string to " << filename <<": " << *history);
+                ia->addHistory(filename, *history);
+            }
+        }
+    }
+    
 }
 
 

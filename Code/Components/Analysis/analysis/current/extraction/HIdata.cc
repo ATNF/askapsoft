@@ -80,7 +80,7 @@ HIdata::HIdata(const LOFAR::ParameterSet &parset):
 
     std::string objid = itsParset.getString("HiEmissionCatalogue.objid","");
     std::string objectName = itsParset.getString("HiEmissionCatalogue.objectname","");
-    
+
     // Define the parset used to set up the source extractor
     LOFAR::ParameterSet specParset;
     specParset.add(LOFAR::KVpair("spectralCube", itsCubeName));
@@ -89,6 +89,9 @@ HIdata::HIdata(const LOFAR::ParameterSet &parset):
     specParset.add(LOFAR::KVpair("scaleSpectraByBeam", true));
     specParset.add(LOFAR::KVpair("beamLog", itsBeamLog));
     specParset.add("imagetype", itsParset.getString("imagetype", "fits"));
+    if (itsParset.isDefined("imageHistory")){
+        specParset.add("imageHistory", itsParset.getString("imageHistory"));
+    }
     itsSpecExtractor = boost::shared_ptr<SourceSpectrumExtractor>(new SourceSpectrumExtractor(specParset));
 
     // Define the parset used to set up the noise extractor
@@ -102,6 +105,9 @@ HIdata::HIdata(const LOFAR::ParameterSet &parset):
     noiseParset.add(LOFAR::KVpair("useDetectedPixels", true));
     noiseParset.add(LOFAR::KVpair("scaleSpectraByBeam", false));
     noiseParset.add("imagetype", itsParset.getString("imagetype", "fits"));
+    if (itsParset.isDefined("imageHistory")){
+        noiseParset.add("imageHistory", itsParset.getString("imageHistory"));
+    }
     itsNoiseExtractor = boost::shared_ptr<NoiseSpectrumExtractor>(new NoiseSpectrumExtractor(noiseParset));
 
     // Define the parset used to set up the moment-map extractor
@@ -111,6 +117,9 @@ HIdata::HIdata(const LOFAR::ParameterSet &parset):
     momentParset.add("moments", itsParset.getString("HiEmissionCatalogue.moments", "[0,1,2]"));
     momentParset.add(LOFAR::KVpair("beamLog", itsBeamLog));
     momentParset.add("imagetype", itsParset.getString("imagetype", "fits"));
+    if (itsParset.isDefined("imageHistory")){
+        momentParset.add("imageHistory", itsParset.getString("imageHistory"));
+    }
     itsMomentExtractor = boost::shared_ptr<MomentMapExtractor>(new MomentMapExtractor(momentParset));
 
     // Define the parset used to set up the cubelet extractor
@@ -119,6 +128,9 @@ HIdata::HIdata(const LOFAR::ParameterSet &parset):
     cubeletParset.add(LOFAR::KVpair("cubeletOutputBase", cubeletDir + "/cubelet"));
     cubeletParset.add(LOFAR::KVpair("beamLog", itsBeamLog));
     cubeletParset.add("imagetype", itsParset.getString("imagetype", "fits"));
+    if (itsParset.isDefined("imageHistory")){
+        cubeletParset.add("imageHistory", itsParset.getString("imageHistory"));
+    }
     itsCubeletExtractor = boost::shared_ptr<CubeletExtractor>(new CubeletExtractor(cubeletParset));
 
     setObjectIDs(objid,objectName);
