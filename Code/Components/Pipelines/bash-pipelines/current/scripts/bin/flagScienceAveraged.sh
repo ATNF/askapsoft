@@ -86,6 +86,19 @@ Cflag.selection_flagger.rule1.spw = ${CHANNEL_FLAG_SCIENCE_AV}"
         DO_AMP_FLAG=true
     fi
 
+    if [ "${TIME_FLAG_SCIENCE_AV}" == "" ]; then
+        timeFlagging="# Not flagging any specific time range"
+    else
+        timeFlagging="# The following flags out specific time range(s):
+Cflag.selection_flagger.rule2.timerange = ${TIME_FLAG_SCIENCE_AV}"
+        if [ "${ruleList}" == "" ]; then
+            ruleList="rule2"
+        else
+            ruleList="${ruleList},rule2"
+        fi
+        DO_AMP_FLAG=true
+    fi
+
     if [ "${ruleList}" == "" ]; then
         selectionRule="# No selection rules used"
     else
@@ -127,6 +140,8 @@ ${amplitudeCut}
 ${selectionRule}
 
 ${channelFlagging}
+
+${timeFlagging}
 
 EOFINNER
 

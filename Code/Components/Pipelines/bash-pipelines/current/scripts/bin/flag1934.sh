@@ -79,6 +79,19 @@ Cflag.selection_flagger.rule2.spw = ${CHANNEL_FLAG_1934}"
         DO_AMP_FLAG=true
     fi
 
+    if [ "${TIME_FLAG_1934}" == "" ]; then
+        timeFlagging="# Not flagging any specific time range"
+    else
+        timeFlagging="# The following flags out specific time range(s):
+Cflag.selection_flagger.rule3.timerange = ${TIME_FLAG_1934}"
+        if [ "${ruleList}" == "" ]; then
+            ruleList="rule3"
+        else
+            ruleList="${ruleList},rule3"
+        fi
+        DO_AMP_FLAG=true
+    fi
+
     if [ "${FLAG_AUTOCORRELATION_1934}" == "true" ]; then
         autocorrFlagging="# The following flags out the autocorrelations, if set to true:
 Cflag.selection_flagger.rule3.autocorr  = ${FLAG_AUTOCORRELATION_1934}"
@@ -150,6 +163,8 @@ ${selectionRule}
 ${antennaFlagging}
 
 ${channelFlagging}
+
+${timeFlagging}
 
 ${autocorrFlagging}
 
