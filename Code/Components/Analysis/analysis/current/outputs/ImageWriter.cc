@@ -105,7 +105,7 @@ void ImageWriter::create()
             if (historyMessages.size() > 0) {
                 for (std::vector<std::string>::iterator history = historyMessages.begin();
                      history < historyMessages.end(); history++) {
-                    itsImageName->addHistory(componentResidualMap, *history);
+                    imageAcc->addHistory(itsImageName, *history);
                 }
             }
         }
