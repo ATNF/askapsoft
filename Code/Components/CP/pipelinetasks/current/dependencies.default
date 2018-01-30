@@ -9,4 +9,5 @@ components=Code/Base/components/current
 casa_components=3rdParty/casa-components/casa-components-1.6.0
 
 cpdataservices-client=Code/Components/Services/cpdataservices/client-cpp/current
-smsclient=Code/Components/Services/skymodel/client-cpp
+sms_client=Code/Components/Services/skymodel/client-cpp
+askap_skymodel=Code/Components/Services/skymodel/service

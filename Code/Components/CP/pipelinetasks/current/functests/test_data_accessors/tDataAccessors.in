@@ -1,3 +1,5 @@
-ice.locator_host        = localhost
-ice.locator_port        = 4061
-ice.adapter_name        = fixme
+ice.locator_host                = localhost
+ice.locator_port                = 4061
+ice.service_name                = SkyModelService
+ice.adapter_name                = SkyModelServiceAdapter
+ice.adapter_endpoints           = tcp
