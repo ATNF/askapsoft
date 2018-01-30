@@ -1,6 +1,7 @@
-manager=Code/Components/Services/manager/current
+#This is the deprecated Java manager
+#manager=Code/Components/Services/manager/current
 cpdataservices=Code/Components/Services/cpdataservices/server/current
 ingest=Code/Components/Services/ingest/current
 vispublisher=Code/Components/Services/vispublisher/current
 correlatorsim=Code/Components/Services/correlatorsim/current
-
+skymodelservice=Code/Components/Services/skymodel/service

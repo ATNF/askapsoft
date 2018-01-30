@@ -28,15 +28,13 @@
 #define ASKAP_CP_PIPELINETASKS_MPIBASICCOMMS_H
 
 // System includes
-#include <string>
-#include <vector>
 #include <mpi.h>
 
 // ASKAPsoft includes
-#include "Common/ParameterSet.h"
-#include "casacore/casa/aipstype.h"
 #include "casacore/images/Images/ImageInterface.h"
-#include "skymodelclient/Component.h"
+
+// Local includes
+#include "cmodel/Common.h"
 
 namespace askap {
 namespace cp {
@@ -67,9 +65,9 @@ class MPIBasicComms {
         /// @brief MPI_bcast a ParameterSet
         void broadcastParset(LOFAR::ParameterSet& parset, int root);
 
-        void sendComponents(const std::vector<askap::cp::skymodelservice::Component>& components, int dest);
+        void sendComponents(const std::vector<askap::cp::sms::client::Component>& components, int dest);
 
-        std::vector<askap::cp::skymodelservice::Component> receiveComponents(int source);
+        std::vector<askap::cp::sms::client::Component> receiveComponents(int source);
 
         void sumImages(casa::ImageInterface<casa::Float>& image, int root);
 

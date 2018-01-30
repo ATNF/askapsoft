@@ -28,13 +28,11 @@
 #define ASKAP_CP_PIPELINETASKS_COMPONENTIMAGERWRAPPER_H
 
 // System includes
-#include <vector>
 
 // ASKAPsoft includes
-#include "Common/ParameterSet.h"
-#include "skymodelclient/Component.h"
 
 // Casacore includes
+#include "cmodel/Common.h"
 #include "components/ComponentModels/ComponentList.h"
 #include "casacore/images/Images/ImageInterface.h"
 
@@ -52,7 +50,7 @@ class ComponentImagerWrapper {
         /// Project components onto the image
         /// @param[in] vector of components to be projected.
         /// @param[in] image to which the components will be projected.
-        void projectComponents(const std::vector<askap::cp::skymodelservice::Component>& components,
+        void projectComponents(const std::vector<askap::cp::sms::client::Component>& components,
                                casa::ImageInterface<casa::Float>& image,
                                const unsigned int term);
 
@@ -60,7 +58,7 @@ class ComponentImagerWrapper {
         // Converts a vector of components (as obtained from the sky model
         // service) into CASA omponents.
         casa::ComponentList translateComponentList(
-            const std::vector<askap::cp::skymodelservice::Component>& components);
+            const std::vector<askap::cp::sms::client::Component>& components);
 
         // Parameter set
         const LOFAR::ParameterSet itsParset;

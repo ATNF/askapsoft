@@ -28,17 +28,13 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 // Support classes
-#include <string>
-#include <sstream>
-#include <vector>
-#include "casacore/casa/Quanta/Quantum.h"
-#include "skymodelclient/Component.h"
-#include "Common/ParameterSet.h"
+#include "cmodel/Common.h"
 
 // Classes to test
 #include "cmodel/AsciiTableAccessor.h"
 
 using namespace casa;
+using namespace askap::cp::sms::client;
 
 namespace askap {
 namespace cp {
@@ -54,23 +50,23 @@ class AsciiTableAccessorTest : public CppUnit::TestFixture {
 
     public:
         void setUp() {
-            itsParset.add("tablespec.ra.col","3"); 
-            itsParset.add("tablespec.ra.units","deg"); 
+            itsParset.add("tablespec.ra.col","3");
+            itsParset.add("tablespec.ra.units","deg");
 
-            itsParset.add("tablespec.dec.col","4"); 
-            itsParset.add("tablespec.dec.units","deg"); 
+            itsParset.add("tablespec.dec.col","4");
+            itsParset.add("tablespec.dec.units","deg");
 
-            itsParset.add("tablespec.flux.col","10"); 
-            itsParset.add("tablespec.flux.units","Jy"); 
+            itsParset.add("tablespec.flux.col","10");
+            itsParset.add("tablespec.flux.units","Jy");
 
-            itsParset.add("tablespec.majoraxis.col","6"); 
-            itsParset.add("tablespec.majoraxis.units","arcsec"); 
+            itsParset.add("tablespec.majoraxis.col","6");
+            itsParset.add("tablespec.majoraxis.units","arcsec");
 
-            itsParset.add("tablespec.minoraxis.col","7"); 
-            itsParset.add("tablespec.minoraxis.units","arcsec"); 
+            itsParset.add("tablespec.minoraxis.col","7");
+            itsParset.add("tablespec.minoraxis.units","arcsec");
 
-            itsParset.add("tablespec.posangle.col","5"); 
-            itsParset.add("tablespec.posangle.units","rad"); 
+            itsParset.add("tablespec.posangle.col","5");
+            itsParset.add("tablespec.posangle.units","rad");
         };
 
         void tearDown() {
@@ -87,8 +83,8 @@ class AsciiTableAccessorTest : public CppUnit::TestFixture {
             casa::Quantity ra(187.5, "deg");
             casa::Quantity dec(-45.0, "deg");
             AsciiTableAccessor acc(ss, itsParset);
-            std::vector<askap::cp::skymodelservice::Component> list = acc.coneSearch(ra, dec, radius, fluxLimit);
-            CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), list.size());
+            ComponentListPtr list = acc.coneSearch(ra, dec, radius, fluxLimit);
+            CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), list->size());
         }
 
         void testConeSearchRadiusCutoff() {
@@ -102,8 +98,8 @@ class AsciiTableAccessorTest : public CppUnit::TestFixture {
             casa::Quantity ra(187.5, "deg");
             casa::Quantity dec(-45.0, "deg");
             AsciiTableAccessor acc(ss, itsParset);
-            std::vector<askap::cp::skymodelservice::Component> list = acc.coneSearch(ra, dec, radius, fluxLimit);
-            CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), list.size());
+            ComponentListPtr list = acc.coneSearch(ra, dec, radius, fluxLimit);
+            CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), list->size());
         }
 
         void testConeSearchWraparoundRA() {
@@ -116,8 +112,8 @@ class AsciiTableAccessorTest : public CppUnit::TestFixture {
             casa::Quantity ra(359.5, "deg");
             casa::Quantity dec(-45.0, "deg");
             AsciiTableAccessor acc(ss, itsParset);
-            std::vector<askap::cp::skymodelservice::Component> list = acc.coneSearch(ra, dec, radius, fluxLimit);
-            CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), list.size());
+            ComponentListPtr list = acc.coneSearch(ra, dec, radius, fluxLimit);
+            CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), list->size());
         }
 
         void testConeSearchWraparoundPole() {
@@ -130,8 +126,8 @@ class AsciiTableAccessorTest : public CppUnit::TestFixture {
             casa::Quantity ra(7.5, "deg");
             casa::Quantity dec(-89.5, "deg");
             AsciiTableAccessor acc(ss, itsParset);
-            std::vector<askap::cp::skymodelservice::Component> list = acc.coneSearch(ra, dec, radius, fluxLimit);
-            CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), list.size());
+            ComponentListPtr list = acc.coneSearch(ra, dec, radius, fluxLimit);
+            CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), list->size());
         }
 
     private:

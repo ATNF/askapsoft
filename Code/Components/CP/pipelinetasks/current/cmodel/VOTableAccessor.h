@@ -28,107 +28,98 @@
 #define ASKAP_CP_PIPELINETASKS_VOTABLEACCESSOR_H
 
 // System includes
-#include <string>
-#include <istream>
-#include <sstream>
-#include <vector>
-#include <list>
-#include <map>
 
 // ASKAPsoft includes
-#include "boost/scoped_ptr.hpp"
-#include "casacore/casa/aipstype.h"
-#include "casacore/casa/Quanta/Quantum.h"
-#include "casacore/casa/Quanta/Unit.h"
-#include "skymodelclient/Component.h"
 #include "votable/VOTableField.h"
 #include "votable/VOTableRow.h"
 
 // Local package includes
+#include "cmodel/Common.h"
 #include "cmodel/IGlobalSkyModel.h"
 
 namespace askap {
-    namespace cp {
-        namespace pipelinetasks {
+namespace cp {
+namespace pipelinetasks {
 
-            /// @brief 
-            class VOTableAccessor : public IGlobalSkyModel {
-                public:
-                    /// Constructor
-                    /// @param[in] filename name of the VOTable containing the source catalog
-                    VOTableAccessor(const std::string& filename);
+/// @brief
+class VOTableAccessor : public IGlobalSkyModel {
+    public:
+        /// Constructor
+        /// @param[in] filename name of the VOTable containing the source catalog
+        VOTableAccessor(const std::string& filename);
 
-                    /// Constructor
-                    /// Used for testing only, so a stringstream can be
-                    /// passed in.
-                    /// @param[in] stream   istream from which data will be read.
-                    VOTableAccessor(const std::stringstream& sstream);
+        /// Constructor
+        /// Used for testing only, so a stringstream can be
+        /// passed in.
+        /// @param[in] stream   istream from which data will be read.
+        VOTableAccessor(const std::stringstream& sstream);
 
-                    /// Destructor
-                    virtual ~VOTableAccessor();
+        /// Destructor
+        virtual ~VOTableAccessor();
 
-                    /// @see askap::cp::pipelinetasks::IGlobalSkyModel::coneSearch
-                    virtual std::vector<askap::cp::skymodelservice::Component> coneSearch(const casa::Quantity& ra,
-                            const casa::Quantity& dec,
-                            const casa::Quantity& searchRadius,
-                            const casa::Quantity& fluxLimit);
+        /// @see askap::cp::pipelinetasks::IGlobalSkyModel::coneSearch
+        virtual askap::cp::sms::client::ComponentListPtr coneSearch(
+                const casa::Quantity& ra,
+                const casa::Quantity& dec,
+                const casa::Quantity& searchRadius,
+                const casa::Quantity& fluxLimit);
 
-                private:
+    private:
 
-                    /// Enumerates the required and optional fields
-                    enum FieldEnum {
-                        RA,
-                        DEC,
-                        FLUX,
-                        MAJOR_AXIS,
-                        MINOR_AXIS,
-                        POSITION_ANGLE,
-                        SPECTRAL_INDEX,
-                        SPECTRAL_CURVATURE
-                    };
+        /// Enumerates the required and optional fields
+        enum FieldEnum {
+            RA,
+            DEC,
+            FLUX,
+            MAJOR_AXIS,
+            MINOR_AXIS,
+            POSITION_ANGLE,
+            SPECTRAL_INDEX,
+            SPECTRAL_CURVATURE
+        };
 
-                    /// Reads the field information out of the VOTable and populates the two maps.
-                    /// Only those fields found in FieldEnum will be actioned. All other fields
-                    /// found in the "fields" input will be ignored.
-                    ///
-                    /// @param[in] field    vector of fields.
-                    /// @param[out] posMap  maps FieldEnum to a zero-based index in the row
-                    /// @param[out] unitMap maps FieldEnum to units
-                    static void initFieldInfo(const std::vector<askap::accessors::VOTableField>& fields,
-                                       std::map<VOTableAccessor::FieldEnum, size_t>& posMap,
-                                       std::map<VOTableAccessor::FieldEnum, casa::Unit>& unitMap);
+        /// Reads the field information out of the VOTable and populates the two maps.
+        /// Only those fields found in FieldEnum will be actioned. All other fields
+        /// found in the "fields" input will be ignored.
+        ///
+        /// @param[in] field    vector of fields.
+        /// @param[out] posMap  maps FieldEnum to a zero-based index in the row
+        /// @param[out] unitMap maps FieldEnum to units
+        static void initFieldInfo(const std::vector<askap::accessors::VOTableField>& fields,
+                std::map<VOTableAccessor::FieldEnum, size_t>& posMap,
+                std::map<VOTableAccessor::FieldEnum, casa::Unit>& unitMap);
 
-                    /// Check if the given UCD is found in the UCD attribute of the field.
-                    ///
-                    /// @param[in] field    the field to be searched.
-                    /// @param[in] ucd      the ucd to be searched for.
-                    /// @return true if the ucd is present in the ucd attribute of
-                    ///  the VOTable field, otherwise false.
-                    static bool hasUCD(const askap::accessors::VOTableField& field, const std::string& ucd);
+        /// Check if the given UCD is found in the UCD attribute of the field.
+        ///
+        /// @param[in] field    the field to be searched.
+        /// @param[in] ucd      the ucd to be searched for.
+        /// @return true if the ucd is present in the ucd attribute of
+        ///  the VOTable field, otherwise false.
+        static bool hasUCD(const askap::accessors::VOTableField& field, const std::string& ucd);
 
-                    /// Process a row from the VOTable, creating a Component object and
-                    /// adding to the the "list".
-                    void processRow(const std::vector<std::string>& cells,
-                                    const casa::Quantity& searchRA,
-                                    const casa::Quantity& searchDec,
-                                    const casa::Quantity& searchRadius,
-                                    const casa::Quantity& fluxLimit,
-                                    std::map<VOTableAccessor::FieldEnum, size_t>& posMap,
-                                    std::map<VOTableAccessor::FieldEnum, casa::Unit>& unitMap,
-                                    std::list<askap::cp::skymodelservice::Component>& list);
+        /// Process a row from the VOTable, creating a Component object and
+        /// adding to the the "list".
+        void processRow(const std::vector<std::string>& cells,
+                const casa::Quantity& searchRA,
+                const casa::Quantity& searchDec,
+                const casa::Quantity& searchRadius,
+                const casa::Quantity& fluxLimit,
+                std::map<VOTableAccessor::FieldEnum, size_t>& posMap,
+                std::map<VOTableAccessor::FieldEnum, casa::Unit>& unitMap,
+                std::list<askap::cp::sms::client::Component>& list);
 
-                    /// Filename of the VOTable
-                    const std::string itsFilename;
+        /// Filename of the VOTable
+        const std::string itsFilename;
 
-                    /// Count of components below the flux limit
-                    casa::uLong itsBelowFluxLimit;
+        /// Count of components below the flux limit
+        casa::uLong itsBelowFluxLimit;
 
-                    /// Count of components outside of the search radius
-                    casa::uLong itsOutsideSearchCone;
-            };
+        /// Count of components outside of the search radius
+        casa::uLong itsOutsideSearchCone;
+};
 
-        }
-    }
+}
+}
 }
 
 #endif

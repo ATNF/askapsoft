@@ -91,6 +91,9 @@ module skymodelservice
         /// @brief Should only ever contain 0 or 1 elements.
         PolarisationOpt polarisation;
 
+        /// @brief Globally unique 64 bit integer ID
+        long id;
+
         /// @brief Component identifier
         /// UCD: meta.id;meta.main
         string componentId;
@@ -131,6 +134,26 @@ module skymodelservice
         /// UCD: stat.error;phot.flux.density;em.radio;stat.fit
         float fluxIntErr;
 
+        /// @brief FWHM major axis before deconvolution (arcsec)
+        /// UCD: phys.angSize.smajAxis;em.radio;stat.fit
+        float majAxis;
+
+        /// @brief FWHM minor axis before deconvolution (arcsec)
+        /// UCD: phys.angSize.sminAxis;em.radio;stat.fit
+        float minAxis;
+
+        /// @brief Position angle before deconvolution (deg)
+        /// UCD: phys.angSize;pos.posAng;em.radio;stat.fit
+        float posAng;
+
+        /// @brief Error in major axis before deconvolution (arcsec)
+        /// UCD: stat.error;phys.angSize.smajAxis;em.radio
+        float majAxisErr;
+
+        /// @brief Error in minor axis before deconvolution (arcsec)
+        /// UCD: stat.error;phys.angSize.sminAxis;em.radio
+        float minAxisErr;
+
         /// @brief Spectral index (First Taylor term)
         /// UCD: spect.index;em.radio
         float spectralIndex;
@@ -138,6 +161,26 @@ module skymodelservice
         /// @brief Spectral curvature (Second Taylor term)
         /// UCD: askap:spect.curvature;em.radio
         float spectralCurvature;
+
+        /// @brief  (arcsec)
+        /// UCD: stat.error;phys.angSize.smajAxis;em.radio;askap:meta.deconvolved
+        float majAxisDeconvErr;
+
+        /// @brief  (arcsec)
+        /// UCD: stat.error;phys.angSize.sminAxis;em.radio;askap:meta.deconvolved
+        float minAxisDeconvErr;
+
+        /// @brief  (deg)
+        /// UCD: stat.error;phys.angSize;pos.posAng;em.radio;askap:meta.deconvolved
+        float posAngDeconvErr;
+
+        /// @brief 
+        /// UCD: stat.error;spect.index;em.radio
+        float spectralIndexErr;
+
+        /// @brief 
+        /// UCD: meta.code
+        int spectralIndexFromTt;
 
     };
 

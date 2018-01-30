@@ -49,6 +49,7 @@
 // Using
 using namespace askap;
 using namespace askap::cp::pipelinetasks;
+using namespace askap::cp::sms::client;
 using namespace casa;
 
 ASKAP_LOGGER(logger, ".CModelWorker");
@@ -76,7 +77,7 @@ void CModelWorker::run(void)
 
         // Signal master ready, receive and image components until the master
         // signals completion by sending an empty list
-        std::vector<askap::cp::skymodelservice::Component> list;
+        std::vector<askap::cp::sms::client::Component> list;
         do {
             itsComms.signalReady(0);
             list = itsComms.receiveComponents(0);

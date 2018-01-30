@@ -45,7 +45,6 @@
 #include "askap/AskapLogging.h"
 #include "askap/AskapError.h"
 #include "boost/lexical_cast.hpp"
-#include "skymodelclient/Component.h"
 
 // Casacore includes
 #include "casacore/casa/aipstype.h"
@@ -57,6 +56,7 @@
 using namespace casa;
 using namespace std;
 using namespace askap::cp::pipelinetasks;
+using namespace askap::cp::sms::client;
 
 ASKAP_LOGGER(logger, ".AsciiTableAccessor");
 
@@ -82,10 +82,11 @@ AsciiTableAccessor::~AsciiTableAccessor()
 {
 }
 
-std::vector<askap::cp::skymodelservice::Component> AsciiTableAccessor::coneSearch(const casa::Quantity& ra,
-        const casa::Quantity& dec,
-        const casa::Quantity& searchRadius,
-        const casa::Quantity& fluxLimit)
+ComponentListPtr AsciiTableAccessor::coneSearch(
+    const casa::Quantity& ra,
+    const casa::Quantity& dec,
+    const casa::Quantity& searchRadius,
+    const casa::Quantity& fluxLimit)
 {
     ASKAPLOG_INFO_STR(logger, "Cone search - ra: " << ra.getValue("deg")
                            << " deg, dec: " << dec.getValue("deg")
@@ -100,7 +101,7 @@ std::vector<askap::cp::skymodelservice::Component> AsciiTableAccessor::coneSearc
     casa::uLong total = 0;
 
     // Initially built as a list to allow efficient growth
-    std::list<askap::cp::skymodelservice::Component> list;
+    std::list<askap::cp::sms::client::Component> list;
 
     while (getline(*itsFile, line)) {
         if (line.find_first_of("#") == std::string::npos) {
@@ -117,15 +118,16 @@ std::vector<askap::cp::skymodelservice::Component> AsciiTableAccessor::coneSearc
     ASKAPLOG_INFO_STR(logger, "Sourced discarded due to being outside the search cone: " << itsOutsideSearchCone);
 
     // Returned as a vector to minimise memory usage
-    return std::vector<askap::cp::skymodelservice::Component>(list.begin(), list.end());
+    return ComponentListPtr(new ComponentList(list.begin(), list.end()));
 }
 
-void AsciiTableAccessor::processLine(const std::string& line,
-                                  const casa::Quantity& searchRA,
-                                  const casa::Quantity& searchDec,
-                                  const casa::Quantity& searchRadius,
-                                  const casa::Quantity& fluxLimit,
-                                  std::list<askap::cp::skymodelservice::Component>& list)
+void AsciiTableAccessor::processLine(
+    const std::string& line,
+    const casa::Quantity& searchRA,
+    const casa::Quantity& searchDec,
+    const casa::Quantity& searchRadius,
+    const casa::Quantity& fluxLimit,
+    std::list<askap::cp::sms::client::Component>& list)
 {
     // Create these once to avoid the performance impact of creating them over and over.
     static casa::Unit deg("deg");
@@ -188,7 +190,7 @@ void AsciiTableAccessor::processLine(const std::string& line,
     // Build the Component object and add to the list. This component
     // has a constant spectrum
     // NOTE: The Component ID has no meaning for this accessor
-    askap::cp::skymodelservice::Component c(-1, ra, dec, positionAngle,
+    askap::cp::sms::client::Component c(-1, ra, dec, positionAngle,
             majorAxis, minorAxis, flux, spectralIndex, spectralCurvature);
     list.push_back(c);
 }
@@ -202,7 +204,7 @@ std::pair< short, casa::Unit > AsciiTableAccessor::makeFieldDescEntry(
     const casa::Unit units(parset.getString(unitskey));
     return make_pair(pos, units);
 }
-        
+
 
 AsciiTableAccessor::FieldDesc AsciiTableAccessor::makeFieldDesc(const LOFAR::ParameterSet& parset)
 {

@@ -204,7 +204,9 @@ class Server(object):
                 time.sleep(delay)
         if registry:
             self.logger.info("Connected to {0}".format(servicename))
-            print >> sys.stderr, servicename, "found"
+            # DC: this adds a lot of noise to functional test output.
+            # Surely in production the log message is sufficient?
+            # print >> sys.stderr, servicename, "found"
         return retval
 
     def _create_adapter(self, name, endpoints=None):

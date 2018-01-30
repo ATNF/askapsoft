@@ -28,15 +28,11 @@
 #define ASKAP_CP_PIPELINETASKS_DATASERVICEACCESSOR_H
 
 // System includes
-#include <string>
-#include <vector>
 
 // ASKAPsoft includes
-#include "casacore/casa/Quanta/Quantum.h"
-#include "skymodelclient/Component.h"
-#include "skymodelclient/SkyModelServiceClient.h"
 
 // Local package includes
+#include "cmodel/Common.h"
 #include "cmodel/IGlobalSkyModel.h"
 
 namespace askap {
@@ -54,7 +50,8 @@ class DataserviceAccessor : public IGlobalSkyModel {
         virtual ~DataserviceAccessor();
 
         /// @see askap::cp::pipelinetasks::IGlobalSkyModel::coneSearch
-        virtual std::vector<askap::cp::skymodelservice::Component> coneSearch(const casa::Quantity& ra,
+        virtual askap::cp::sms::client::ComponentListPtr coneSearch(
+                const casa::Quantity& ra,
                 const casa::Quantity& dec,
                 const casa::Quantity& searchRadius,
                 const casa::Quantity& fluxLimit);
@@ -62,7 +59,7 @@ class DataserviceAccessor : public IGlobalSkyModel {
     private:
 
         // Handle to the sky model service
-        askap::cp::skymodelservice::SkyModelServiceClient itsService;
+        askap::cp::sms::client::SkyModelServiceClient itsService;
 };
 
 }

@@ -41,14 +41,6 @@
 #include "askap/AskapLogging.h"
 #include "askap/AskapError.h"
 #include "askap/AskapUtil.h"
-#include "boost/scoped_ptr.hpp"
-#include "Common/ParameterSet.h"
-#include "skymodelclient/Component.h"
-
-// Casacore includes
-#include "casacore/casa/aipstype.h"
-#include "casacore/casa/Quanta/Quantum.h"
-#include "casacore/images/Images/PagedImage.h"
 
 // Local package includes
 #include "cmodel/VOTableAccessor.h"
@@ -60,6 +52,7 @@
 // Using
 using namespace askap;
 using namespace askap::cp::pipelinetasks;
+using namespace askap::cp::sms::client;
 using namespace casa;
 
 ASKAP_LOGGER(logger, ".CModelMaster");
@@ -122,9 +115,9 @@ void CModelMaster::run(void)
             std::max(xcellsize.getValue("deg") * nx, ycellsize.getValue("deg") * ny),
             "deg");
 
-    const std::vector<askap::cp::skymodelservice::Component> list = gsm->coneSearch(ra, dec, searchRadius, fluxLimit);
+    const ComponentListPtr pList = gsm->coneSearch(ra, dec, searchRadius, fluxLimit);
     gsm.reset(0);
-    ASKAPLOG_INFO_STR(logger, "Number of components in result set: " << list.size());
+    ASKAPLOG_INFO_STR(logger, "Number of components in result set: " << pList->size());
 
     const casa::uInt batchSize = itsParset.getUint("batchsize", 200);
     const unsigned int nterms = itsParset.getUint("nterms", 1);
@@ -135,11 +128,11 @@ void CModelMaster::run(void)
             ASKAPLOG_INFO_STR(logger, "Imaging taylor term " << term);
         }
         size_t idx = 0;
-        std::vector<askap::cp::skymodelservice::Component> subset;
-        while (idx < list.size()) {
-            // Get a batch ready - an "nelement" subset of "list" will be sent
-            const size_t nelements = (idx + batchSize < list.size()) ? batchSize : (list.size() - idx);
-            subset.assign(list.begin() + idx, list.begin() + idx + nelements);
+        std::vector<askap::cp::sms::client::Component> subset;
+        while (idx < pList->size()) {
+            // Get a batch ready - an "nelement" subset of "pList-> will be sent
+            const size_t nelements = (idx + batchSize < pList->size()) ? batchSize : (pList->size() - idx);
+            subset.assign(pList->begin() + idx, pList->begin() + idx + nelements);
             idx += nelements;
 
             // Wait for a worker to become available
@@ -148,7 +141,7 @@ void CModelMaster::run(void)
                     << " components to worker " << worker);
             itsComms.sendComponents(subset, worker);
             ASKAPLOG_INFO_STR(logger, "Master has allocated " << idx << " of "
-                    << list.size() << " components");
+                    << pList->size() << " components");
         }
 
         // Send each worker an empty list to signal completion, need to first consume

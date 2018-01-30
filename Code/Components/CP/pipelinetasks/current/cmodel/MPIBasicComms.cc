@@ -31,11 +31,8 @@
 #include "askap_pipelinetasks.h"
 
 // System includes
-#include <string>
 #include <cstring>
-#include <sstream>
 #include <stdexcept>
-#include <vector>
 #include <stdint.h>
 #include <limits>
 
@@ -44,9 +41,7 @@
 
 // ASKAPsoft includes
 #include "askap/AskapLogging.h"
-#include "askap/AskapError.h"
 #include "casacore/casa/OS/Timer.h"
-#include "skymodelclient/Component.h"
 
 using namespace askap::cp::pipelinetasks;
 
@@ -269,7 +264,7 @@ void MPIBasicComms::broadcastParset(LOFAR::ParameterSet& parset, int root)
     }
 }
 
-void MPIBasicComms::sendComponents(const std::vector<askap::cp::skymodelservice::Component>& components, int dest)
+void MPIBasicComms::sendComponents(const std::vector<askap::cp::sms::client::Component>& components, int dest)
 {
     // First send the number of elements
     int size = components.size();
@@ -295,7 +290,7 @@ void MPIBasicComms::sendComponents(const std::vector<askap::cp::skymodelservice:
     }
 }
 
-std::vector<askap::cp::skymodelservice::Component> MPIBasicComms::receiveComponents(int source)
+std::vector<askap::cp::sms::client::Component> MPIBasicComms::receiveComponents(int source)
 {
     // First receive the number of elements to expect
     int size;
@@ -304,7 +299,7 @@ std::vector<askap::cp::skymodelservice::Component> MPIBasicComms::receiveCompone
     const int nDoubles = 8;
     double payload[nDoubles];
 
-    std::vector<askap::cp::skymodelservice::Component> components;
+    std::vector<askap::cp::sms::client::Component> components;
     if (size > 0) {
         components.reserve(size);
     }
@@ -313,7 +308,7 @@ std::vector<askap::cp::skymodelservice::Component> MPIBasicComms::receiveCompone
         receive(&id, sizeof(long), source, itsComponentTag);
         receive(&payload, sizeof(double) * nDoubles, source, itsComponentTag);
 
-        components.push_back(askap::cp::skymodelservice::Component(id,
+        components.push_back(askap::cp::sms::client::Component(id,
                     casa::Quantity(payload[0], "deg"),
                     casa::Quantity(payload[1], "deg"),
                     casa::Quantity(payload[2], "rad"),

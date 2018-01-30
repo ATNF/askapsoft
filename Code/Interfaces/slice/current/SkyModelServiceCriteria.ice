@@ -62,6 +62,18 @@ module skymodelservice
         float maxFluxInt = -1;
         float minFluxIntErr = -1;
         float maxFluxIntErr = -1;
+        float minMajAxis = -1;
+        float maxMajAxis = -1;
+        float minMinAxis = -1;
+        float maxMinAxis = -1;
+        float minPosAng = 0;
+        bool useMinPosAng = false;
+        float maxPosAng = 0;
+        bool useMaxPosAng = false;
+        float minMajAxisErr = -1;
+        float maxMajAxisErr = -1;
+        float minMinAxisErr = -1;
+        float maxMinAxisErr = -1;
         float minSpectralIndex = 0;
         bool useMinSpectralIndex = false;
         float maxSpectralIndex = 0;
@@ -70,6 +82,14 @@ module skymodelservice
         bool useMinSpectralCurvature = false;
         float maxSpectralCurvature = 0;
         bool useMaxSpectralCurvature = false;
+        float minMajAxisDeconvErr = -1;
+        float maxMajAxisDeconvErr = -1;
+        float minMinAxisDeconvErr = -1;
+        float maxMinAxisDeconvErr = -1;
+        float minPosAngDeconvErr = -1;
+        float maxPosAngDeconvErr = -1;
+        float minSpectralIndexErr = -1;
+        float maxSpectralIndexErr = -1;
     };
 
 };

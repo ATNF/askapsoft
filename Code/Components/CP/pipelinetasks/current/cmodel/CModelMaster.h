@@ -31,6 +31,7 @@
 #include "Common/ParameterSet.h"
 
 // Local package includes
+#include "cmodel/Common.h"
 #include "cmodel/MPIBasicComms.h"
 
 namespace askap {

@@ -44,7 +44,6 @@
 // ASKAPsoft include
 #include "askap/AskapLogging.h"
 #include "askap/AskapError.h"
-#include "skymodelclient/Component.h"
 #include "votable/VOTable.h"
 #include "boost/lexical_cast.hpp"
 
@@ -59,6 +58,7 @@ using namespace std;
 using namespace askap;
 using namespace askap::accessors;
 using namespace askap::cp::pipelinetasks;
+using namespace askap::cp::sms::client;
 
 ASKAP_LOGGER(logger, ".VOTableAccessor");
 
@@ -75,10 +75,11 @@ VOTableAccessor::~VOTableAccessor()
 {
 }
 
-std::vector<askap::cp::skymodelservice::Component> VOTableAccessor::coneSearch(const casa::Quantity& ra,
-        const casa::Quantity& dec,
-        const casa::Quantity& searchRadius,
-        const casa::Quantity& fluxLimit)
+ComponentListPtr VOTableAccessor::coneSearch(
+    const casa::Quantity& ra,
+    const casa::Quantity& dec,
+    const casa::Quantity& searchRadius,
+    const casa::Quantity& fluxLimit)
 {
     ASKAPLOG_INFO_STR(logger, "Cone search - ra: " << ra.getValue("deg")
                           << " deg, dec: " << dec.getValue("deg")
@@ -100,7 +101,7 @@ std::vector<askap::cp::skymodelservice::Component> VOTableAccessor::coneSearch(c
     initFieldInfo(fields, posMap, unitMap);
 
     // Initially built as a list to allow efficient growth
-    std::list<askap::cp::skymodelservice::Component> list;
+    std::list<askap::cp::sms::client::Component> list;
 
     // Process each table row
     unsigned long total = 0;
@@ -120,7 +121,8 @@ std::vector<askap::cp::skymodelservice::Component> VOTableAccessor::coneSearch(c
     ASKAPLOG_INFO_STR(logger, "Sourced discarded due to being outside the search cone: " << itsOutsideSearchCone);
 
     // Returned as a vector to minimise memory usage
-    return std::vector<askap::cp::skymodelservice::Component>(list.begin(), list.end());
+    return ComponentListPtr(new ComponentList(list.begin(), list.end()));
+    //return std::vector<askap::cp::skymodelservice::Component>(list.begin(), list.end());
 }
 
 bool VOTableAccessor::hasUCD(const askap::accessors::VOTableField& field, const std::string& ucd)
@@ -252,7 +254,7 @@ void VOTableAccessor::processRow(const std::vector<std::string>& cells,
                                  const casa::Quantity& fluxLimit,
                                  std::map<VOTableAccessor::FieldEnum, size_t>& posMap,
                                  std::map<VOTableAccessor::FieldEnum, casa::Unit>& unitMap,
-                                 std::list<askap::cp::skymodelservice::Component>& list)
+                                 std::list<askap::cp::sms::client::Component>& list)
 {
     // Create these once to avoid the performance impact of creating them over and over.
     static casa::Unit deg("deg");
@@ -310,7 +312,7 @@ void VOTableAccessor::processRow(const std::vector<std::string>& cells,
 
     // Build the Component object and add to the list.
     // NOTE: The Component ID has no meaning for this accessor
-    askap::cp::skymodelservice::Component c(-1, ra, dec, positionAngle,
+    askap::cp::sms::client::Component c(-1, ra, dec, positionAngle,
                                             majorAxis, minorAxis, flux,
                                             spectralIndex, spectralCurvature);
     list.push_back(c);

@@ -96,11 +96,15 @@ class FuncTestServer(Server):
     """ Ice Server for hosting the FeedbackService. """
     def __init__(self, feedback_service, comm):
         self.feedback_service = feedback_service
-        super(FuncTestServer, self).__init__(
-            comm,
-            configurable=False,
-            retries=10,
-            monitoring=False)
+        super(FuncTestServer, self).__init__(comm, retries=10)
+
+        # Since the py-iceutils merge from TOS (commit 9251), the Server class
+        # does not have a configurable arg in __init__. 
+        # The server used here to provide a feedback loop from services under test
+        # to the functional test classes does not require configuration. 
+        # Failing to set this flag will lead to a timeout while waiting for the 
+        # FCM service as it is not typically running during the functional tests.
+        self.configurable = False
 
     def initialize_services(self):
         """Template method for initialising specific services."""

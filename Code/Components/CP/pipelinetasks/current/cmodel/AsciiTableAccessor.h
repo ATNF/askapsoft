@@ -28,23 +28,11 @@
 #define ASKAP_CP_PIPELINETASKS_ASCIITABLEACCESSOR_H
 
 // System includes
-#include <string>
-#include <istream>
-#include <sstream>
-#include <vector>
-#include <map>
-#include <utility>
-#include <list>
 
 // ASKAPsoft includes
-#include "boost/scoped_ptr.hpp"
-#include "Common/ParameterSet.h"
-#include "casacore/casa/aipstype.h"
-#include "casacore/casa/Quanta/Quantum.h"
-#include "casacore/casa/Quanta/Unit.h"
-#include "skymodelclient/Component.h"
 
 // Local package includes
+#include "cmodel/Common.h"
 #include "cmodel/IGlobalSkyModel.h"
 
 namespace askap {
@@ -73,7 +61,7 @@ class AsciiTableAccessor : public IGlobalSkyModel {
         virtual ~AsciiTableAccessor();
 
         /// @see askap::cp::pipelinetasks::IGlobalSkyModel::coneSearch
-        virtual std::vector<askap::cp::skymodelservice::Component> coneSearch(
+        virtual askap::cp::sms::client::ComponentListPtr coneSearch(
                 const casa::Quantity& ra,
                 const casa::Quantity& dec,
                 const casa::Quantity& searchRadius,
@@ -118,7 +106,7 @@ class AsciiTableAccessor : public IGlobalSkyModel {
                 const casa::Quantity& searchDec,
                 const casa::Quantity& searchRadius,
                 const casa::Quantity& fluxLimit,
-                std::list<askap::cp::skymodelservice::Component>& list);
+                std::list<askap::cp::sms::client::Component>& list);
 
         /// File stream from which components will be read
         boost::scoped_ptr<std::istream> itsFile;

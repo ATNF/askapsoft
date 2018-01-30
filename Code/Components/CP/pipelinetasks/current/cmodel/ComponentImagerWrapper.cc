@@ -40,7 +40,6 @@
 #include "askap/AskapError.h"
 #include "askap/AskapUtil.h"
 #include "Common/ParameterSet.h"
-#include "skymodelclient/Component.h"
 #include "components/AskapComponentImager.h"
 
 // Casacore includes
@@ -67,7 +66,7 @@ ComponentImagerWrapper::ComponentImagerWrapper(const LOFAR::ParameterSet& parset
 {
 }
 
-void ComponentImagerWrapper::projectComponents(const std::vector<askap::cp::skymodelservice::Component>& components,
+void ComponentImagerWrapper::projectComponents(const std::vector<askap::cp::sms::client::Component>& components,
         casa::ImageInterface<casa::Float>& image,
         const unsigned int term)
 {
@@ -76,16 +75,16 @@ void ComponentImagerWrapper::projectComponents(const std::vector<askap::cp::skym
             term);
 }
 
-casa::ComponentList ComponentImagerWrapper::translateComponentList(const std::vector<askap::cp::skymodelservice::Component>& components)
+casa::ComponentList ComponentImagerWrapper::translateComponentList(const std::vector<askap::cp::sms::client::Component>& components)
 {
     casa::ComponentList list;
     
     // Obtain the GSM reference frequency
     const MFrequency refFreq = MFrequency(asQuantity(itsParset.getString("gsm.ref_freq"), "Hz"));
 
-    std::vector<askap::cp::skymodelservice::Component>::const_iterator it;
+    std::vector<askap::cp::sms::client::Component>::const_iterator it;
     for (it = components.begin(); it != components.end(); ++it) {
-        const askap::cp::skymodelservice::Component& c = *it;
+        const askap::cp::sms::client::Component& c = *it;
 
         // Build either a GaussianShape or PointShape
         const MDirection dir(c.rightAscension(), c.declination(), MDirection::J2000);

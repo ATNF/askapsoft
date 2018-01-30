@@ -31,24 +31,16 @@
 #include "askap_pipelinetasks.h"
 
 // System includes
-#include <string>
-#include <vector>
 
 // ASKAPsoft include
 #include "askap/AskapLogging.h"
 #include "askap/AskapError.h"
-#include "skymodelclient/ComponentResultSet.h"
-#include "skymodelclient/Component.h"
-
-// Casacore includes
-#include "casacore/casa/aipstype.h"
-#include "casacore/casa/Quanta/Quantum.h"
 
 // Using
 using namespace casa;
 using namespace askap;
 using namespace askap::cp::pipelinetasks;
-using namespace askap::cp::skymodelservice;
+using namespace askap::cp::sms::client;
 
 ASKAP_LOGGER(logger, ".DataserviceAccessor");
 
@@ -63,10 +55,11 @@ DataserviceAccessor::~DataserviceAccessor()
 {
 }
 
-std::vector<askap::cp::skymodelservice::Component> DataserviceAccessor::coneSearch(const casa::Quantity& ra,
-        const casa::Quantity& dec,
-        const casa::Quantity& searchRadius,
-        const casa::Quantity& fluxLimit)
+ComponentListPtr DataserviceAccessor::coneSearch(
+    const casa::Quantity& ra,
+    const casa::Quantity& dec,
+    const casa::Quantity& searchRadius,
+    const casa::Quantity& fluxLimit)
 {
     // Pre-conditions
     ASKAPCHECK(ra.isConform("deg"), "ra must conform to degrees");
@@ -79,21 +72,5 @@ std::vector<askap::cp::skymodelservice::Component> DataserviceAccessor::coneSear
                            << " deg, radius: " << searchRadius.getValue("deg")
                            << " deg, Fluxlimit: " << fluxLimit.getValue("Jy") << " Jy");
 
-
-    ComponentResultSet rs = itsService.coneSearch(ra, dec, searchRadius, fluxLimit);
-    ComponentResultSet::Iterator it = rs.createIterator();
-    std::vector<askap::cp::skymodelservice::Component> list;
-    list.reserve(rs.size());
-    if (rs.size() > 0) {
-        list.push_back(*it);
-        while (it.hasNext()) {
-            it.next();
-            list.push_back(*it);
-        }
-    }
-
-    // Post-conditions
-    ASKAPCHECK(list.size() == rs.size(), "Component list size mismatch");
-
-    return list;
+    return itsService.coneSearch(ra, dec, searchRadius, fluxLimit);
 }

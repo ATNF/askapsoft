@@ -28,18 +28,17 @@
 #define ASKAP_CP_PIPELINETASKS_IMAGEFACTORY_H
 
 // System includes
-#include <string>
-#include <vector>
 
 // ASKAPsoft includes
-#include "Common/ParameterSet.h"
 
 // Casacore includes
-#include "casacore/casa/aipstype.h"
 #include "casacore/casa/Arrays/Vector.h"
 #include "casacore/coordinates/Coordinates/CoordinateSystem.h"
 #include "casacore/images/Images/TempImage.h"
 #include "casacore/images/Images/PagedImage.h"
+
+// Local includes
+#include "cmodel/Common.h"
 
 namespace askap {
 namespace cp {
