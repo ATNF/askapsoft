@@ -56,7 +56,7 @@ class TestDataAccessorsApp : public askap::Application
                 << "adapter name: " << adapterName << "\n"
                 << std::endl;
 
-            return 0;
+            return 1;
         }
 };
 

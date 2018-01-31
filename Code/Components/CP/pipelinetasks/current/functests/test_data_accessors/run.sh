@@ -8,10 +8,19 @@ source ../../init_package_env.sh
 sleep 2
 
 # start the SMS, passing the full path to the config files
-../start_sms.sh `readlink -f sms.in` `readlink -f sms_logging.log_cfg`
+SMS_CONFIG=`readlink -f sms.in`
+SMS_LOG_CONFIG=`readlink -f sms_logging.log_cfg`
+../start_sms.sh $SMS_CONFIG $SMS_LOG_CONFIG
 sleep 2
 
-# get the SMS to ingest a catalog (needs to use the SMS CLI)
+# use the SMS admin cli to initialise a database
+sms_dev_tools --create-schema --config $SMS_CONFIG --log-config $SMS_LOG_CONFIG
+if [ $? -ne 0 ]; then exit $?; fi
+
+# use the SMS CLI to ingest a catalog
+CATALOG=`readlink -f small_catalog.xml`
+sms_tools --config $SMS_CONFIG --log-config $SMS_LOG_CONFIG --ingest-components $CATALOG --sbid 10 --observation-date '2018-01-30T10:13:00'
+if [ $? -ne 0 ]; then exit $?; fi
 
 # Run the test harness
 echo "Running the testcase..."

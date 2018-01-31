@@ -29,7 +29,7 @@ clean:
 	find . -type f -name '*.log' -exec rm -f {} +
 	find . -type f -name '*.pid' -exec rm -f {} +
 	find . -type f -name '*-results.xml' -exec rm -f {} +
-	#find . -type f -name '*.dbtmp' -exec rm -f {} +
+	find . -type f -name '*.dbtmp' -exec rm -f {} +
 
 .PHONY: all
 all: install test ftest
