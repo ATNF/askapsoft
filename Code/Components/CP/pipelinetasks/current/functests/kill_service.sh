@@ -25,5 +25,3 @@ function kill_service  {
     fi
     echo "Done"
 }
-
-kill_service sms

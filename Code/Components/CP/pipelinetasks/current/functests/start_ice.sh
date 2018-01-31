@@ -2,7 +2,7 @@
 
 waitIceRegistry()
 { # Wait for Ice Registry to start, but timeout after 10 seconds
-    echo -n Waiting for Ice Registry to startup...
+    echo -n "Waiting for Ice Registry to startup ... "
     TIMEOUT=10
     STATUS=1
     while [ $STATUS -ne 0 ] && [ $TIMEOUT -ne 0 ]; do
@@ -21,7 +21,7 @@ waitIceRegistry()
 
 waitIceStorm()
 { # Wait for IceGrid to start, but timeout after 10 seconds
-    echo -n Waiting for IceStorm to startup...
+    echo -n "Waiting for IceStorm to startup ... "
     TIMEOUT=10
     STATUS=1
     INACTIVE="<inactive>"

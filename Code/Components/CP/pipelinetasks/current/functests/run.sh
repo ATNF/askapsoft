@@ -8,7 +8,7 @@ echo Running test cases...
 FAIL=0
 
 cd test_cmodel
-echo 
+echo
 echo test_cmodel
 echo ----------------------------------------
 ./run.sh
@@ -21,7 +21,7 @@ fi
 cd $INITIALDIR
 
 cd test_data_accessors
-echo 
+echo
 echo test_data_accessors
 echo ----------------------------------------
 ./run.sh

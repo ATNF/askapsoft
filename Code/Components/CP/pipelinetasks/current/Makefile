@@ -27,6 +27,7 @@ clean:
 	rm -f ./doxy.conf.tmp ./options.cache ./askap_pipelinetasks.cc
 	rm -rf functests/test_data_accessors/ice_data
 	find . -type f -name '*.log' -exec rm -f {} +
+	find . -type f -name '*.pid' -exec rm -f {} +
 	find . -type f -name '*-results.xml' -exec rm -f {} +
 	#find . -type f -name '*.dbtmp' -exec rm -f {} +
 
