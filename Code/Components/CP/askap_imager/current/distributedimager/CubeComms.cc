@@ -78,7 +78,7 @@ size_t CubeComms::buildCommIndex() {
           ranks[wrk] = 1 + wrk;
      }
      itsComrades = createComm(ranks);
-     ASKAPLOG_INFO_STR(logger, "Interworker communicator index is "<< itsComrades);
+     ASKAPLOG_DEBUG_STR(logger, "Interworker communicator index is "<< itsComrades);
      return itsComrades;
 }
 size_t CubeComms::buildWriterIndex() {
@@ -92,7 +92,7 @@ size_t CubeComms::buildWriterIndex() {
           wrt++;
     }
     itsWriters = createComm(ranks);
-    ASKAPLOG_INFO_STR(logger, "Interwriter communicator index is "<< itsComrades);
+    ASKAPLOG_DEBUG_STR(logger, "Interwriter communicator index is "<< itsComrades);
     return itsWriters;
 }
 void CubeComms::initWriters(int nwriters, int nchanpercore) {
@@ -162,7 +162,7 @@ void CubeComms::addWorker(unsigned int workerRank) {
         ASKAPLOG_WARN_STR(logger, "worker " << workerRank << " already existed");
     }
     else {
-        ASKAPLOG_INFO_STR(logger, " added worker rank " << " to workerMap");
+        ASKAPLOG_DEBUG_STR(logger, " added worker rank " << " to workerMap");
     }
 
 }
@@ -203,7 +203,7 @@ void CubeComms::addChannelToWorker(unsigned int workerRank) {
 
     }
     else {
-        ASKAPLOG_INFO_STR(logger,"Added channel to worker rank " << workerRank );
+        ASKAPLOG_DEBUG_STR(logger,"Added channel to worker rank " << workerRank );
     }
 
 }
@@ -215,7 +215,7 @@ void CubeComms::removeChannelFromWorker(unsigned int workerRank) {
         ASKAPLOG_WARN_STR(logger,"Removing channel from non-existent writer");
     }
     else {
-        ASKAPLOG_INFO_STR(logger,"Removed channel from worker rank" << workerRank);
+        ASKAPLOG_DEBUG_STR(logger,"Removed channel from worker rank" << workerRank);
     }
 
 }
@@ -227,19 +227,19 @@ void CubeComms::addChannelToWriter(unsigned int writerRank, unsigned int workerR
 
     }
     else {
-        ASKAPLOG_INFO_STR(logger,"Added channel to writer rank " << writerRank );
+        ASKAPLOG_DEBUG_STR(logger,"Added channel to writer rank " << writerRank );
     }
 
-    ASKAPLOG_INFO_STR(logger,"Adding " << writerRank << " to clientMap");
+    ASKAPLOG_DEBUG_STR(logger,"Adding " << writerRank << " to clientMap");
 
     this->clientMap[writerRank];
-    ASKAPLOG_INFO_STR(logger,"Pushing back " << workerRank);
+    ASKAPLOG_DEBUG_STR(logger,"Pushing back " << workerRank);
     this->clientMap[writerRank].push_back(workerRank);
-    ASKAPLOG_INFO_STR(logger,"clientMap " << clientMap);
+    ASKAPLOG_DEBUG_STR(logger,"clientMap " << clientMap);
     this->clientMap[writerRank].sort();
-    ASKAPLOG_INFO_STR(logger,"Sorted clientMap " << clientMap);
+    ASKAPLOG_DEBUG_STR(logger,"Sorted clientMap " << clientMap);
     this->clientMap[writerRank].unique();
-    ASKAPLOG_INFO_STR(logger,"Uniquified clientMap " << clientMap);
+    ASKAPLOG_DEBUG_STR(logger,"Uniquified clientMap " << clientMap);
 
 
 
@@ -252,7 +252,7 @@ void CubeComms::removeChannelFromWriter(unsigned int writerRank) {
         ASKAPLOG_WARN_STR(logger,"Removing channel from non-existent writer");
     }
     else {
-        ASKAPLOG_INFO_STR(logger,"Removed channel from writer rank" << writerRank);
+        ASKAPLOG_DEBUG_STR(logger,"Removed channel from writer rank" << writerRank);
     }
 
 }
@@ -284,7 +284,7 @@ int CubeComms::addChannelToMap(std::map<int,int>& theMap, unsigned int theRank )
         theMap.erase (it);
         std::pair<std::map<int,int>::iterator,bool> ret;
         ret = theMap.insert(std::pair<int,int> (theRank,newcount) );
-        ASKAPLOG_INFO_STR(logger,"added a channel to rank " << theRank  \
+        ASKAPLOG_DEBUG_STR(logger,"added a channel to rank " << theRank  \
         << " old count was " << oldcount << " current count is " << newcount);
         return newcount;
 

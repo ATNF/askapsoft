@@ -308,7 +308,7 @@ void AdviseDI::prepare() {
 
         for (unsigned int ch = 0; ch < chanFreq[n].size(); ++ch) {
 
-            ASKAPLOG_INFO_STR(logger, "CHECK --- File " << n << " Chan " << ch << " Freq " << chanFreq[n][ch]);
+            ASKAPLOG_DEBUG_STR(logger, "CHECK --- File " << n << " Chan " << ch << " Freq " << chanFreq[n][ch]);
 
             itsBaryFrequencies.push_back(forw(chanFreq[n][ch]).getValue());
             itsTopoFrequencies.push_back(MFrequency(MVFrequency(chanFreq[n][ch]),refin));
@@ -486,7 +486,7 @@ void AdviseDI::prepare() {
 
         for (int unit = 0; unit < itsAllocatedWork[wrk].size(); unit++) {
                     itsAllocatedWork[wrk][unit].set_writer(mywriter+1); // plus 1 for rank
-                    ASKAPLOG_INFO_STR(logger,"Set rank " << wrk+1 << " writer to be rank " << mywriter+1);
+                    ASKAPLOG_DEBUG_STR(logger,"Set rank " << wrk+1 << " writer to be rank " << mywriter+1);
         }
 
     }
