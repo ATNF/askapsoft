@@ -516,4 +516,10 @@ EOF
     # Find the beam centre locations
     . "${PIPELINEDIR}/findBeamCentres.sh"
 
+    # Check number of MSs
+    if [ $numMSsci -ne 1 ] && [ $numMSsci -ne ${NUM_BEAMS_FOOTPRINT} ]; then
+        echo "WARNING - have more than one MS, but not the same number as the number of beams."
+        echo "        - progressing with beam selection, but you should check this dataset carefully."
+    fi
+
 fi

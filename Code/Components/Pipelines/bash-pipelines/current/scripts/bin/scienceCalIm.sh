@@ -41,6 +41,8 @@ GIVEN_POSITION_OFFSET_WARNING=false
 
 cd "${ORIGINAL_OUTPUT}"
 
+firstBeam=true
+
 for FIELD in ${FIELD_LIST}; do
 
     doField=true
@@ -80,7 +82,6 @@ for FIELD in ${FIELD_LIST}; do
 
             echo "Processing field $FIELD, beam $BEAM"
             echo "----------"
-
             
             mkdir -p "${OUTPUT}/Checkfiles"
             # an empty file that will indicate that the flagging has been done
@@ -149,6 +150,10 @@ for FIELD in ${FIELD_LIST}; do
             
             if [ "${DO_SOURCE_FINDING_BEAMWISE}" == "true" ]; then
                 . "${PIPELINEDIR}/sourcefindingSpectral.sh"
+            fi
+
+            if [ "${firstBeam}" == "true" ]; then
+                firstBeam=false
             fi
 
         done

@@ -57,31 +57,29 @@ if [ -e "${OUTPUT}/${msSciAv}" ] && [ "${PURGE_FULL_MS}" == "true" ]; then
     DO_IT=false
 fi
 
+# Define the input MS. If there is a single MS in the archive
+# directory, just use MS_INPUT_SCIENCE. If there is more than one,
+# we assume it is split per beam. We compare the number of beams
+# with the number of MSs, giving an error if they are
+# different. If OK, then we add the beam number to the root MS
+# name.
+
+if [ $numMSsci -eq 1 ]; then
+    inputMS=${MS_INPUT_SCIENCE}
+else
+    msroot=$(for ms in ${msnamesSci}; do echo $ms; done | sed -e 's/[0-9]*[0-9].ms//g' | uniq)
+    inputMS=$(echo $msroot $BEAM | awk '{printf "%s%d.ms\n",$1,$2}')
+fi
+
+if [ ! -e "${inputMS}" ]; then
+    echo "ERROR - wanted to use $inputMS as input for beam $BEAM"
+    echo "      -  but it does not exist! Not running this beam."
+    echo " "
+    DO_IT=false
+fi
+
 if [ "${DO_IT}" == "true" ]; then
 
-    # Define the input MS. If there is a single MS in the archive
-    # directory, just use MS_INPUT_SCIENCE. If there is more than one,
-    # we assume it is split per beam. We compare the number of beams
-    # with the number of MSs, giving an error if they are
-    # different. If OK, then we add the beam number to the root MS
-    # name.
-
-    if [ $numMSsci -eq 1 ]; then
-        inputMS=${MS_INPUT_SCIENCE}
-    elif [ $numMSsci -eq ${NUM_BEAMS_FOOTPRINT} ]; then
-        msroot=$(for ms in ${msnamesSci}; do echo $ms; done | sed -e 's/[0-9]*[0-9].ms//g' | uniq)
-        inputMS=$(echo $msroot $BEAM | awk '{printf "%s%d.ms\n",$1,$2}')
-        if [ ! -e "${inputMS}" ]; then
-            echo "ERROR - wanted to use $inputMS as input for beam $BEAM"
-            echo "      -  but it does not exist! Exiting."
-            exit 1
-        fi
-    else
-        echo "ERROR - have more than one MS, but not the same number as the number of beams."
-        echo "      - this is unexpected. Exiting."
-        exit 1
-    fi
-        
     if [ "${SCAN_SELECTION_SCIENCE}" == "" ]; then
 	scanParam="# No scan selection done"
     else

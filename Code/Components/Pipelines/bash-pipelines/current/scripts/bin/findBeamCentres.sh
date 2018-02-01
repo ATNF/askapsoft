@@ -212,6 +212,13 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$NEED_BEAM_CENTRES" == "true" ]; then
             echo "Footprint name $FP_NAME is not recognised by askapcli/footprint. Using the ACES footprint.py tool"
         fi
 
+        # Determine the number of beams in the footprint - only works for the CLI option
+        if [ "$beamFromCLI" == "true" ]; then
+            loadModule askapcli
+            NUM_BEAMS_FOOTPRINT=$(footprint info ${FP_NAME} | grep n_beams | awk '{print $3}')
+            unloadModule askapcli
+        fi
+        
         # If the footprint output file exists, we don't re-run the
         # footprint determination.
         # The only exception to that is if it exists but is empty - a previous footprint
