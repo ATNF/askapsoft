@@ -185,8 +185,8 @@ CasdaHiEmissionObject::CasdaHiEmissionObject(sourcefitting::RadioSource &obj,
     }
 
     // Get the spectra/momentmaps/cubelets & write to disk
-    itsParset.add(LOFAR::KVpair("HiEmissionCatalogue.objid", itsObjectID));
-    itsParset.add(LOFAR::KVpair("HiEmissionCatalogue.objectname", itsName));
+    itsParset.replace(LOFAR::KVpair("HiEmissionCatalogue.objid", itsObjectID));
+    itsParset.replace(LOFAR::KVpair("HiEmissionCatalogue.objectname", itsName));
     HIdata hidata(itsParset);
     hidata.setSource(&obj);
     hidata.extract();
