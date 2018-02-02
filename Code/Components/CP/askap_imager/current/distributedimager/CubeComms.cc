@@ -140,7 +140,8 @@ void CubeComms::addWriter(unsigned int writerRank) {
     ret = writerMap.insert(std::pair<int,int> (writerRank,0) );
 
     if (ret.second==false) {
-        ASKAPLOG_WARN_STR(logger, "element " << writerRank << " already existed");
+        // ASKAPLOG_WARN_STR(logger, "element " << writerRank << " already existed");
+        ASKAPLOG_DEBUG_STR(logger, "element " << writerRank << " already existed");
     }
     else {
         writerCount++;
@@ -159,7 +160,8 @@ void CubeComms::addWorker(unsigned int workerRank) {
     ret = workerMap.insert(std::pair<int,int> (workerRank,0) );
 
     if (ret.second==false) {
-        ASKAPLOG_WARN_STR(logger, "worker " << workerRank << " already existed");
+        // ASKAPLOG_WARN_STR(logger, "worker " << workerRank << " already existed");
+        ASKAPLOG_DEBUG_STR(logger, "worker " << workerRank << " already existed");
     }
     else {
         ASKAPLOG_DEBUG_STR(logger, " added worker rank " << " to workerMap");
