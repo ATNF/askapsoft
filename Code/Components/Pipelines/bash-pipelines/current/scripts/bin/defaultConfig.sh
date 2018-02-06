@@ -100,7 +100,7 @@ LUSTRE_STRIPE_SIZE=1048576
 BUCKET_SIZE=1048576
 
 # If true, copy with distributed copy tool dcp. Else use cp
-USE_DCP_TO_COPY_MS=true
+USE_DCP_TO_COPY_MS=false
 
 ####################
 # Locations of the executables.

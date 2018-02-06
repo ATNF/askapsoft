@@ -68,7 +68,7 @@ run the splitting, so that there is a local copy of the individual beam data.
 | ``MS_INPUT_SCIENCE``   | no default                                              | MS for the science field. Ignored if the SB number is      |
 |                        |                                                         | provided.                                                  |
 +------------------------+---------------------------------------------------------+------------------------------------------------------------+
-| ``USE_DCP_TO_COPY_MS`` | true                                                    | Whether to use dcp via ssh to hpc-data to run the copying  |
+| ``USE_DCP_TO_COPY_MS`` | false                                                   | Whether to use dcp via ssh to hpc-data to run the copying  |
 |                        |                                                         | of the input data. If false, ordinary cp is used without   |
 |                        |                                                         | ssh.                                                       |
 +------------------------+---------------------------------------------------------+------------------------------------------------------------+
