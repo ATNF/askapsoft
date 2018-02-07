@@ -87,6 +87,17 @@ void IngestPipeline::ingest(void)
     if (!itsConfig.monitoringConfig().registryHost().empty()) {
         MonitoringSingleton::init(itsConfig);
     }
+    MonitoringSingleton::update<int32_t>("NumberOfRanks",itsConfig.nprocs());
+    MonitoringSingleton::update<int32_t>("ReceiverId",itsConfig.receiverId());
+    MonitoringSingleton::update<int32_t>("nReceivers",itsConfig.nReceivingProcs());
+    const std::string versionStr = getAskapPackageVersion_cpingest();
+    const size_t pos = versionStr.find("ingest; ");
+    if (pos != std::string::npos) {
+        ASKAPDEBUGASSERT(versionStr.size() >= pos + 8);
+        MonitoringSingleton::update<std::string>("SoftwareVersion",versionStr.substr(pos+8));
+    } else {
+        MonitoringSingleton::update<std::string>("SoftwareVersion",versionStr);
+    }
 
     // 3) Create a Task Factory
     TaskFactory factory(itsConfig);
@@ -135,6 +146,10 @@ void IngestPipeline::ingest(void)
     itsSource.reset();
     MonitoringSingleton::invalidatePoint("SourceTaskDuration");
     MonitoringSingleton::invalidatePoint("ProcessingDuration");
+    MonitoringSingleton::invalidatePoint("SoftwareVersion");
+    MonitoringSingleton::invalidatePoint("NumberOfRanks");
+    MonitoringSingleton::invalidatePoint("ReceiverId");
+    MonitoringSingleton::invalidatePoint("nReceivers");
     // Destroying this is safe even if the object was not initialised
     MonitoringSingleton::destroy();
 }
