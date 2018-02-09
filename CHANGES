@@ -1,5 +1,54 @@
-0.20.0 (xx January 2018)
-Placeholder - testing svn commit from galaxy - remove this later.
+0.20.0 (09 January 2018)
+This release sees the first version of the Calibration Data Service (CDS)
+and Sky Model Service (SMS) in deployable form. These components are
+intended to run independently of the ASKAPsoft pipelines. At first,
+they will require some configuration and data initialisation. Testing
+and feedback will then drive further development.
+
+The CDS provides an interface to a database containing calibration 
+parameters. The SMS allows access to the Global Sky Model data, 
+primarily for the purpose of constructing local sky models.
+
+Other changes in this release include:
+
+Pipelines:
+* Corrected path issue to validation script which can occur sometimes
+  after continuum source-finding depending on user setup.
+* Some corrections in pipeline scripts regarding FITS mode processing:
+  Ensures the continuum linmos image is copied at the field-level mosaicking job.
+  Ensures the spectral-line selavy job uses the correct file extensions.
+  Ensures the imcontsub job converts the contsub cube to fits at the end 
+  if we are working in FITS mode.
+  Updates the naming of the contsub cube to ensure consistency (removing 
+  .fits from the middle of it).
+* Improve copying of spectral weights images when running linmos to avoid
+  ambiguities and prevent unnecessary files.
+* Added a parameter, DO_SOURCE_FINDING_FIELD_MOSAICS, to turn off source 
+  finding for individual fields and rely on the source finding for the 
+  final mosaic instead. This prevents unnecessary source finding jobs 
+  being launched.
+* Selavy source finding jobs now have scheduling block ID (SBID) passed 
+  in parsets.
+* CASDA upload now provides cubelets.
+* TIME selection options in flagging exposed in pipeline scripts via
+  TIME_FLAG_SCIENCE, TIME_FLAG_SCIENCE_AV and TIME_FLAG_1934. It is up
+  to the user to provide suitable values.
+* Pipelines allow processing of scheduling blocks (SB) where the number
+  of measurement sets (MS) is different to the number of beams. This addresses
+  an issue where the SB have recorded 36 MSs but using fewer beams.
+* The use of dcp for copying MSs fromthe archive is turned off by default 
+  for reasons related to permissions.
+
+Processing Software:
+* Reduction in logging in the imager task.
+* Modifications to Selavy to include additional information in the
+  headers of the spectra & related images (Object name, date-obs
+  ad duration, Project ID and SBID, history comments).
+* Fixed a problem where mslist output was corrupted by a filename 
+  length issue in casacore.
+* Shortened objectID strings used in catalogues. No longer uses image
+  name, but instead, SBID, catalogue/data product type, sequence ID.
+
 
 0.19.7 (11 January 2018)
 ------------------------
