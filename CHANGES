@@ -34,14 +34,16 @@ Pipelines:
   being launched.
 * Selavy source finding jobs now have scheduling block ID (SBID) passed 
   in parsets.
-* CASDA upload now provides cubelets.
-* TIME selection options in flagging exposed in pipeline scripts via
-  TIME_FLAG_SCIENCE, TIME_FLAG_SCIENCE_AV and TIME_FLAG_1934. It is up
-  to the user to provide suitable values.
+* The casdaupload utility can now handle cubelets (as well as spectra
+  & moment-maps). These are included by the casda script in the
+  pipeline. 
+* TIME selection options in flagging are now exposed in pipeline
+  scripts via TIME_FLAG_SCIENCE, TIME_FLAG_SCIENCE_AV and
+  TIME_FLAG_1934. It is up to the user to provide suitable values. 
 * Pipelines allow processing of scheduling blocks (SB) where the number
   of measurement sets (MS) is different to the number of beams. This
-  addresses an issue where the SB have recorded 36 MSs but using fewer
-  beams. 
+  addresses an issue where the SB have recorded 36 MSs but only a
+  subset of them are valid.
 * The use of dcp for copying MSs from the archive is turned off by
   default to minimise the load on the hpc-data nodes (the method for
   doing this is not ideal).
@@ -50,11 +52,13 @@ Processing Software:
 * Reduction in logging in the imager task.
 * Modifications to Selavy to include additional information in the
   headers of the spectra & related images (Object name, date-obs
-  ad duration, Project ID and SBID, history comments).
+  and duration, Project ID and SBID, history comments). This involved
+  improvements to the image interface classes.
 * Fixed a problem where mslist output was corrupted by long field
   names.
-* Shortened objectID strings used in catalogues. No longer uses image
-  name, but instead SBID + catalogue/data product type + sequence ID. 
+* Shortened objectID strings are now used in catalogues. No longer
+  uses image name, but instead SBID + catalogue/data product type +
+  sequence ID.  
 
 
 0.19.7 (11 January 2018)
