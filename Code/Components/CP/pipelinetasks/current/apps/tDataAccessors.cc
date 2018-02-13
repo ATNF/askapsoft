@@ -149,9 +149,9 @@ class TestDataAccessorsApp : public askap::Application
                 ASKAPASSERT(std::abs(a.rightAscension().getValue(deg) - b.rightAscension().getValue(deg)) < tolerance);
                 ASKAPASSERT(std::abs(a.declination().getValue(deg) - b.declination().getValue(deg)) < tolerance);
                 ASKAPASSERT(std::abs(a.i1400().getValue(Jy) - b.i1400().getValue(Jy)) < tolerance);
-                //ASKAPASSERT(std::abs(a.positionAngle().getValue(deg) - b.positionAngle().getValue(deg)) < tolerance);
-                //ASKAPASSERT(std::abs(a.majorAxis().getValue(arcsec) - b.majorAxis().getValue(arcsec)) < tolerance);
-                //ASKAPASSERT(std::abs(a.minorAxis().getValue(arcsec) - b.minorAxis().getValue(arcsec)) < tolerance);
+                ASKAPASSERT(std::abs(a.positionAngle().getValue(deg) - b.positionAngle().getValue(deg)) < tolerance);
+                ASKAPASSERT(std::abs(a.majorAxis().getValue(arcsec) - b.majorAxis().getValue(arcsec)) < tolerance);
+                ASKAPASSERT(std::abs(a.minorAxis().getValue(arcsec) - b.minorAxis().getValue(arcsec)) < tolerance);
                 ASKAPASSERT(std::abs(a.spectralIndex() - b.spectralIndex()) < tolerance);
                 ASKAPASSERT(std::abs(a.spectralCurvature() - b.spectralCurvature()) < tolerance);
             }

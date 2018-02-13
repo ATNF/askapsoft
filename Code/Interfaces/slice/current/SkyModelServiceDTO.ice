@@ -154,6 +154,18 @@ module skymodelservice
         /// UCD: stat.error;phys.angSize.sminAxis;em.radio
         float minAxisErr;
 
+        /// @brief FWHM major axis after deconvolution (arcsec)
+        /// UCD: phys.angSize.smajAxis;em.radio;askap:meta.deconvolved
+        float majAxisDeconv;
+
+        /// @brief FWHM minor axis after deconvolution (arcsec)
+        /// UCD: phys.angSize.sminAxis;em.radio;askap:meta.deconvolved
+        float minAxisDeconv;
+
+        /// @brief Position angle after deconvolution (deg)
+        /// UCD: phys.angSize;pos.posAng;em.radio;askap:meta.deconvolved
+        float posAngDeconv;
+
         /// @brief Spectral index (First Taylor term)
         /// UCD: spect.index;em.radio
         float spectralIndex;
