@@ -1,11 +1,14 @@
-ice.locator_host                = localhost
-ice.locator_port                = 4061
-ice.adapter_endpoints           = tcp
-ice.service_name                = SkyModelService@SkyModelServiceAdapter
-
-# Cmodel.gsm.file           = small_catalog.xml
-Cmodel.gsm.file           = one_component.xml
+# The below specifies the GSM source is a duchamp output file
+Cmodel.gsm.database       = votable
+Cmodel.gsm.file           = duchamp-fitResults.xml
 Cmodel.gsm.ref_freq       = 1.421GHz
+
+# The below specifies the GSM source is the Sky Model Service
+#Cmodel.gsm.database       = dataservice
+#Cmodel.gsm.locator_host   = localhost
+#Cmodel.gsm.locator_port   = 4061
+#Cmodel.gsm.service_name   = SkyModelService
+#Cmodel.gsm.ref_freq       = 1.4GHz
 
 # General parameters
 Cmodel.bunit              = Jy/pixel

@@ -18,7 +18,8 @@ sms_dev_tools --create-schema --config $SMS_CONFIG --log-config $SMS_LOG_CONFIG
 if [ $? -ne 0 ]; then exit $?; fi
 
 # use the SMS CLI to ingest a catalog
-CATALOG=`readlink -f small_catalog.xml`
+CATALOG=`readlink -f one_component.xml`
+#CATALOG=`readlink -f small_catalog.xml`
 sms_tools --config $SMS_CONFIG --log-config $SMS_LOG_CONFIG --ingest-components $CATALOG --sbid 10 --observation-date '2018-01-30T10:13:00'
 if [ $? -ne 0 ]; then exit $?; fi
 

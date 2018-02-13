@@ -35,12 +35,42 @@
 #include "boost/shared_ptr.hpp"
 
 // Local package includes
+#include "cmodel/Common.h"
+#include "cmodel/IGlobalSkyModel.h"
+#include "cmodel/VOTableAccessor.h"
+#include "cmodel/DataserviceAccessor.h"
 
 // Using
 //using namespace askap::cp;
 //using namespace askap::cp::icewrapper;
+using namespace askap;
+using namespace askap::cp::pipelinetasks;
+using namespace askap::cp::sms::client;
+using namespace casa;
 
 ASKAP_LOGGER(logger, ".tDataAccessors");
+
+
+// custom sort predicate for sorting Components by flux
+struct flux_less_than
+{
+    inline bool operator() (const Component& lhs, const Component& rhs)
+    {
+        return lhs.i1400() < rhs.i1400();
+    }
+};
+
+void printComponent(const Component& c)
+{
+    cout << "RA, Dec: " << c.rightAscension() << ", " << c.declination() 
+        << "   flux: " << c.i1400() 
+        << "   major axis: " << c.majorAxis()
+        << "   minor axis: " << c.minorAxis()
+        << "   position angle: " << c.positionAngle()
+        << "   spectral index: " << c.spectralIndex()
+        << "   spectral curvature: " << c.spectralCurvature()
+        << endl;
+}
 
 class TestDataAccessorsApp : public askap::Application
 {
@@ -49,15 +79,94 @@ class TestDataAccessorsApp : public askap::Application
         {
             const std::string locatorHost = config().getString("ice.locator_host");
             const std::string locatorPort = config().getString("ice.locator_port");
-            const std::string adapterName = config().getString("ice.adapter_name");
+            const std::string serviceName = config().getString("ice.service_name");
+            const std::string filename = config().getString("Cmodel.gsm.file");
 
-            std::cout << "locator host: " << locatorHost << "\n"
-                << "locator port: " << locatorPort << "\n"
-                << "adapter name: " << adapterName << "\n"
-                << std::endl;
+            //std::cout << "locator host: " << locatorHost << "\n"
+                //<< "locator port: " << locatorPort << "\n"
+                //<< "service name: " << serviceName << "\n"
+                //<< "catalog file: " << filename << "\n"
+                //<< std::endl;
 
-            return 1;
+            // common search params
+            casa::Quantity ra(79.8, "deg");
+            casa::Quantity dec(-71.8, "deg");
+            casa::Quantity radius(2.0, "deg");
+            casa::Quantity minFlux(80, "mJy");
+            casa::Unit deg("deg");
+            casa::Unit rad("rad");
+            casa::Unit arcsec("arcsec");
+            casa::Unit Jy("Jy");
+            const MVDirection searchVector(ra, dec);
+
+            // create the VOTableAccessor and query for some components
+            boost::scoped_ptr<VOTableAccessor> votable(new VOTableAccessor(filename));
+            ComponentListPtr votableResults = votable->coneSearch(ra, dec, radius, minFlux);
+
+            // create the DataserviceAccessor
+            boost::scoped_ptr<DataserviceAccessor> sms(new DataserviceAccessor(locatorHost, locatorPort, serviceName));
+            ComponentListPtr smsResults = sms->coneSearch(ra, dec, radius, minFlux);
+
+            // check that the SMS results are all brighter than the flux limit
+            for (ComponentList::const_iterator it = smsResults->begin();
+                 it != smsResults->end();
+                 it++) {
+                ASKAPASSERT(it->i1400().getValue(Jy) >= minFlux.getValue(Jy));
+            }
+
+            // The SMS implements spatial queries via HEALPix pixels without an
+            // additional spatial refinement. This means that all components in
+            // the pixels intersecting the search boundary will be
+            // returned, even if those components are outside the search region.
+            // The chance is pretty small, but just in case we filter the data service results with a precise spatial test
+            ComponentList smsFilteredResults;
+            for (ComponentList::const_iterator it = smsResults->begin();
+                 it != smsResults->end();
+                 it++) {
+                MVDirection(it->rightAscension(), it->declination());
+                const Quantity separation = searchVector.separation(
+                        MVDirection(it->rightAscension(), it->declination()),
+                        deg);
+                if (separation.getValue(deg) <= radius.getValue(deg)) {
+                    smsFilteredResults.push_back(*it);
+                }
+            }
+
+            // Test that we have the same result counts in each list
+            ASKAPASSERT(smsFilteredResults.size() == votableResults->size());
+
+            // sort the two vectors so we can compare element by element
+            sort(smsFilteredResults.begin(), smsFilteredResults.end(), flux_less_than());
+            sort(votableResults->begin(), votableResults->end(), flux_less_than());
+            const double tolerance = 0.00000001;
+            for (size_t i = 0; i < smsFilteredResults.size(); i++) {
+                Component& a = (*votableResults)[i];
+                Component& b = smsFilteredResults[i];
+                cout << "votable - ";
+                printComponent(a);
+                cout << "SMS -     ";
+                printComponent(b);
+                ASKAPASSERT(std::abs(a.rightAscension().getValue(deg) - b.rightAscension().getValue(deg)) < tolerance);
+                ASKAPASSERT(std::abs(a.declination().getValue(deg) - b.declination().getValue(deg)) < tolerance);
+                ASKAPASSERT(std::abs(a.i1400().getValue(Jy) - b.i1400().getValue(Jy)) < tolerance);
+                //ASKAPASSERT(std::abs(a.positionAngle().getValue(deg) - b.positionAngle().getValue(deg)) < tolerance);
+                //ASKAPASSERT(std::abs(a.majorAxis().getValue(arcsec) - b.majorAxis().getValue(arcsec)) < tolerance);
+                //ASKAPASSERT(std::abs(a.minorAxis().getValue(arcsec) - b.minorAxis().getValue(arcsec)) < tolerance);
+                ASKAPASSERT(std::abs(a.spectralIndex() - b.spectralIndex()) < tolerance);
+                ASKAPASSERT(std::abs(a.spectralCurvature() - b.spectralCurvature()) < tolerance);
+            }
+
+            return 0;
         }
+
+    private:
+
+        //ComponentListPtr coneSearch(
+                //IGlobalSkyModel* pGSM,
+                //const casa::Quantity& ra,
+                //const casa::Quantity& dec,
+                //const casa::Quantity& searchRadius,
+                //const casa::Quantity& fluxLimit)
 };
 
 int main(int argc, char *argv[])

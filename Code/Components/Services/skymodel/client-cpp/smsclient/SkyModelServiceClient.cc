@@ -95,7 +95,7 @@ ComponentListPtr SkyModelServiceClient::coneSearch(
     centre.declination = dec.getValue("deg");
 
     SearchCriteria criteria;
-    criteria.maxFluxInt = fluxLimit.getValue("mJy");
+    criteria.minFluxInt = fluxLimit.getValue("mJy");
 
     ice_interfaces::ComponentSeq ice_resultset =
         itsService->coneSearch(
