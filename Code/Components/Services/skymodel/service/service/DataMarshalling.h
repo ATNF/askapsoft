@@ -89,6 +89,9 @@ ice_interfaces::ComponentSeq marshallComponentsToDTO(
         dst[i].posAng = it->pos_ang;
         dst[i].majAxisErr = it->maj_axis_err;
         dst[i].minAxisErr = it->min_axis_err;
+        dst[i].majAxisDeconv = it->maj_axis_deconv;
+        dst[i].minAxisDeconv = it->min_axis_deconv;
+        dst[i].posAngDeconv = it->pos_ang_deconv;
         dst[i].spectralIndex = it->spectral_index;
         dst[i].spectralCurvature = it->spectral_curvature;
         dst[i].majAxisDeconvErr = it->maj_axis_deconv_err;
