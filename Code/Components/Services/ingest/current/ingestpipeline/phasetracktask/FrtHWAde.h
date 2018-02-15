@@ -111,6 +111,9 @@ class FrtHWAde : virtual public IFrtApproach {
         /// @brief frequency offset 
         /// @details between frequency in GUI and central frequency of correlated bandwidth (in Hz)
         double itsFreqOffset;
+
+        /// @brief number of helper threads for the phase application
+        size_t itsNumHelperThreads;
         
 };
 

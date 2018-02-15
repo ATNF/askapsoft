@@ -26,6 +26,7 @@
 
 // Local package includes
 #include "ingestpipeline/phasetracktask/FrtHWAde.h"
+#include "ingestpipeline/phasetracktask/ParallelPhaseApplicator.h"
 
 // Include package level header file
 #include "askap_cpingest.h"
@@ -57,7 +58,8 @@ FrtHWAde::FrtHWAde(const LOFAR::ParameterSet& parset, const Configuration& confi
        itsTm(config.antennas().size(),0.), itsPrevScanId(1000u),
        itsPhases(config.antennas().size(),0.),
        itsUpdateTimeOffset(static_cast<int32_t>(parset.getInt32("updatetimeoffset"))),
-       itsFreqOffset(asQuantity(parset.getString("freq_offset","0.0Hz")).getValue("Hz"))
+       itsFreqOffset(asQuantity(parset.getString("freq_offset","0.0Hz")).getValue("Hz")),
+       itsNumHelperThreads(parset.getUint32("nthreads",10u))
 {
    if (itsDelayTolerance == 0) {
        ASKAPLOG_INFO_STR(logger, "Delays will be updated every time the delay changes by 0.206 ns");
@@ -296,6 +298,9 @@ void FrtHWAde::process(const askap::cp::common::VisChunk::ShPtr& chunk,
   // used for scan-based experiments
   itsPrevScanId = chunk->scan();
 
+  // to get short term benefit in performance - hack
+  ParallelPhaseApplicator ppa(freq,chunk->visibility(),itsNumHelperThreads);
+
   casa::Timer timer;
   double appTime = 0.;
   for (casa::uInt row = 0; row < chunk->nRow(); ++row) {
@@ -338,6 +343,11 @@ void FrtHWAde::process(const askap::cp::common::VisChunk::ShPtr& chunk,
            const double phaseDueToAppliedRate = itsPhases[ant1] - itsPhases[ant2];
            ASKAPDEBUGASSERT(freq.nelements() == thisRow.nrow());
            timer.mark();
+     
+           ppa.add(row, phaseDueToAppliedDelay - phaseDueToAppliedRate, residualDelay);
+
+           /*
+           // the original code
            for (casa::uInt chan = 0; chan < thisRow.nrow(); ++chan) {
                 //casa::Vector<casa::Complex> thisChan = thisRow.row(chan);
                 const float phase = static_cast<float>(phaseDueToAppliedDelay - phaseDueToAppliedRate +
@@ -349,6 +359,7 @@ void FrtHWAde::process(const askap::cp::common::VisChunk::ShPtr& chunk,
                      thisRow(chan,pol) *= phasor;
                 }
            }
+           */
            appTime += timer.real();
            
        } else {
@@ -357,6 +368,10 @@ void FrtHWAde::process(const askap::cp::common::VisChunk::ShPtr& chunk,
          thisFlagRow.set(casa::True); 
        }
   }
+  timer.mark();
+  // need to wait until all job is completed before destructor is called
+  ppa.complete();
+  appTime += timer.real();
   ASKAPLOG_DEBUG_STR(logger, "Residual phase/delay application time: "<<appTime<<" seconds");
 }
 
