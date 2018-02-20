@@ -263,6 +263,28 @@ interface between ingest receiver and the task (so the code can be reused) and d
 |                            |                   |            |for possible differences. The value can be both positive and  |
 |                            |                   |            |negative with the units of microseconds.                      |
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
+|freq_offset                 |quantity string    |0.0Hz       |This is a fudge offset added to central frequency deduced from|
+|                            |                   |            |data before it is used to find out the phase component        |
+|                            |                   |            |corresponding to the inserted delay as part of delay tracking |
+|                            |                   |            |(effective LO). Note, there are additional fudge factors      |
+|                            |                   |            |hard coded (e.g. 5 fine channel offset). The main reason why  |
+|                            |                   |            |this parameter was introduced is to be able to reconfigure    |
+|                            |                   |            |ingest to work with any number of available correlator blocks |
+|                            |                   |            |without recompilation of the code. The correctness of the     |
+|                            |                   |            |phase tracking depends on which part of the band we are inges\|
+|                            |                   |            |ting and, therefore, a single fudge factor in the in the Sour\|
+|                            |                   |            |ce task is not sufficient.                                    |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|nthreads                    |unsigned int       |10          |Number of parallel threads used to apply residual phases. This|
+|                            |                   |            |task is one of the serial bottlenecks in the early science    |
+|                            |                   |            |processing. Due to temporary nature, no effort has been dedic\|
+|                            |                   |            |ated towards refactoring of this code. Therefore, a quick and |
+|                            |                   |            |dirty way with shared memory parallelism has been used to be  |
+|                            |                   |            |able to go beyond 12 antennas. This parameter controls the    |
+|                            |                   |            |number of parallel threads used. Note, it is impossible to get|
+|                            |                   |            |to pre-Novmeber 2017 fully serial version without recompilati\|
+|                            |                   |            |on of the code.                                               |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
 
 Example
 ~~~~~~~

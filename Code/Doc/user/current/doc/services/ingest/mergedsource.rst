@@ -32,6 +32,18 @@ The type of the task defined by tasks.\ **name**\ .type should be set to *Merged
 |                            |                   |            |case ranks from **start** to **end** inclusive will be set up |
 |                            |                   |            |the same number of channels                                   |
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
+|freq_offset                 |quantity string    |0.0Hz       |This is essentially a fudge factor. This frequency offset is  |
+|                            |                   |            |added to the frequency axis derived based on the central freq\|
+|                            |                   |            |uency received in the metadata stream. We need it to account  |
+|                            |                   |            |for a subset of the full instrument band in a particular      |
+|                            |                   |            |observing configuration                                       |
+|                            |                   |            |and multiple available modes. It needs to be changed if       |
+|                            |                   |            |we change the number of active correlator blocks (both physic\|
+|                            |                   |            |ally present or logically setup in the set central frequency  |
+|                            |                   |            |mode), inversion, zoom modes, etc. If this parameter is found |
+|                            |                   |            |useful long term, it will probably be moved to the correlator |
+|                            |                   |            |mode configuration.                                           |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
 |maxbeams                    |unsigned int       |0           |Number of beams to allocate for the data chunk passed through |
 |                            |                   |            |the task chain. If data are written to the disk, this is the  |
 |                            |                   |            |number of beams in the measurement set to be created. The     |
