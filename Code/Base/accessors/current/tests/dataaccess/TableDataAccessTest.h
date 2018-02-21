@@ -73,6 +73,7 @@ class TableDataAccessTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(originalVisRewriteTest);
   CPPUNIT_TEST(readOnlyTest);
   CPPUNIT_TEST(channelSelectionTest);
+  CPPUNIT_TEST(chunkSizeTest);
   CPPUNIT_TEST_SUITE_END();
 public:
   
@@ -110,6 +111,8 @@ public:
   void originalVisRewriteTest();
   /// test read/write with channel selection
   void channelSelectionTest();
+  /// test restriction of the chunk size
+  void chunkSizeTest();
 protected:
   void doBufferTest() const;
 private:
@@ -196,6 +199,36 @@ void TableDataAccessTest::userDefinedIndexSelectionTest()
        }
   }
 }
+
+/// test restriction of the chunk size
+void TableDataAccessTest::chunkSizeTest()
+{
+   TableConstDataSource ds(TableTestRunner::msName());
+   IDataSelectorPtr sel = ds.createSelector();   
+   sel->chooseCrossCorrelations();
+   const casa::uInt nAnt = 6; // we have 6 antennas in the test dataset
+   const casa::uInt nBeams = 1; // we have 1 beam in the test dataset
+   const casa::uInt nRowsExpected = nBeams * nAnt * (nAnt - 1) / 2;
+   casa::uInt nIterOrig = 0;
+   for (IConstDataSharedIter it=ds.createConstIterator(sel);it!=it.end();++it,++nIterOrig) {  
+        CPPUNIT_ASSERT_EQUAL(nRowsExpected, it->nRow());
+        CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(nRowsExpected), it->visibility().nrow());
+   }
+
+   // restrict the chunk size for the following iterators
+   ds.configureMaxChunkSize(nRowsExpected / 2);
+
+   casa::uInt count = 0;
+   for (IConstDataSharedIter it=ds.createConstIterator(sel);it!=it.end();++it,++count) {  
+        const casa::uInt nRowsExpectedThisIteration = ((nRowsExpected % 2 == 0) || (count % 3 != 2)) ? nRowsExpected / 2 : 1;
+        if (count / 3 < nIterOrig) {
+            // exclude the last iteration from the check as binning may be different
+            CPPUNIT_ASSERT_EQUAL(nRowsExpectedThisIteration, it->nRow());
+            CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(nRowsExpectedThisIteration), it->visibility().nrow());
+        }
+   }
+}
+  
 
 /// test of correlation type selection
 void TableDataAccessTest::corrTypeSelectionTest() 

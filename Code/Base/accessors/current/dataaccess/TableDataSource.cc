@@ -103,5 +103,5 @@ boost::shared_ptr<IDataIterator> TableDataSource::createIterator(const
    }
    return boost::shared_ptr<IDataIterator>(new TableDataIterator(
                 getTableManager(),implSel,implConv,uvwMachineCacheSize(),
-                uvwMachineCacheTolerance())); 
+                uvwMachineCacheTolerance(), maxChunkSize())); 
 }

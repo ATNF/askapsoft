@@ -52,7 +52,18 @@ using namespace casa;
 TableConstDataSource::TableConstDataSource(const std::string &fname,
                const std::string &dataColumn) :
          TableInfoAccessor(casa::Table(fname), false, dataColumn),
-         itsUVWCacheSize(1), itsUVWCacheTolerance(1e-6) {}
+         itsUVWCacheSize(1), itsUVWCacheTolerance(1e-6),
+         itsMaxChunkSize(INT_MAX) {}
+
+/// @brief configure restriction on the chunk size
+/// @param[in] maxNumRows maximum number of rows wanted
+/// @note The new restriction will apply to any iterator created in the future, but will not
+/// affect iterators already created
+void TableConstDataSource::configureMaxChunkSize(casa::uInt maxNumRows)
+{
+   ASKAPCHECK(maxNumRows > 0, "Restriction on the number of rows should be a positive number");
+   itsMaxChunkSize = maxNumRows;
+}
 
 /// @brief configure caching of the uvw-machines
 /// @details A number of uvw machines can be cached at the same time. This can
@@ -78,7 +89,8 @@ void TableConstDataSource::configureUVWMachineCache(size_t cacheSize, double tol
 /// the compiler happy
 TableConstDataSource::TableConstDataSource() :
          TableInfoAccessor(boost::shared_ptr<ITableManager const>()),
-         itsUVWCacheSize(1), itsUVWCacheTolerance(1e-6) {} 
+         itsUVWCacheSize(1), itsUVWCacheTolerance(1e-6),
+         itsMaxChunkSize(INT_MAX) {} 
 
 /// create a converter object corresponding to this type of the
 /// DataSource. The user can change converting policies (units,
@@ -132,7 +144,8 @@ TableConstDataSource::createConstIterator(const IDataSelectorConstPtr &sel,
                  "converter are received by the createConstIterator method");
    }
    return boost::shared_ptr<IConstDataIterator>(new TableConstDataIterator(
-                getTableManager(),implSel,implConv,uvwMachineCacheSize(), uvwMachineCacheTolerance()));
+                getTableManager(),implSel,implConv,uvwMachineCacheSize(), uvwMachineCacheTolerance(),
+                maxChunkSize()));
 }
 
 /// create a selector object corresponding to this type of the
