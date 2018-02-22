@@ -50,6 +50,15 @@ are applicable. Specifically:
 |                          |                  |              |when the dataset is read). Either lsrk or topo is   |
 |                          |                  |              |supported.                                          |
 +--------------------------+------------------+--------------+----------------------------------------------------+
+|maxchunkrows              |unsigned int      |max integer   |If defined, the chunk size presented at each iterat\|
+|                          |                  |              |ion will be restricted to have at most this number  |
+|                          |                  |              |of rows. It doesn't affect the result, but may give |
+|                          |                  |              |different performance in the case of long spectral  |
+|                          |                  |              |axis (think of it as a slice in rows will be taken  |
+|                          |                  |              |once and then each spectral slice will be made from |
+|                          |                  |              |this reduced cube for the price of having more      |
+|                          |                  |              |iterations).                                        |
++--------------------------+------------------+--------------+----------------------------------------------------+
 
 Example
 -------
