@@ -134,12 +134,12 @@ ComponentListPtr SkyModelServiceClient::transformData(
             casa::Quantity(it->ra, "deg"),
             //declination
             casa::Quantity(it->dec, "deg"),
-            //positionAngle
-            casa::Quantity(it->posAng, "deg"),
+            //positionAngleDeconvolved
+            casa::Quantity(it->posAngDeconv, "deg"),
             //majorAxis
-            casa::Quantity(it->majAxis, "arcsec"),
+            casa::Quantity(it->majAxisDeconv, "arcsec"),
             //minorAxis
-            casa::Quantity(it->minAxis, "arcsec"),
+            casa::Quantity(it->minAxisDeconv, "arcsec"),
             //i1400
             casa::Quantity(it->fluxInt, "mJy"),
             //spectralIndex

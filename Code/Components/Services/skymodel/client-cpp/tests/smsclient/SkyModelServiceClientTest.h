@@ -73,8 +73,8 @@ class SkyModelServiceClientTest : public CppUnit::TestFixture {
                 c.fluxInt = 1010.1; // mJy
                 c.spectralIndex = -0.1;
                 c.spectralCurvature = 0.01;
-                c.majAxis = 12.0;
-                c.minAxis = 8.0;
+                c.majAxisDeconv = 12.0;
+                c.minAxisDeconv = 8.0;
                 itsIceComponents.push_back(c);
             }
 
@@ -136,15 +136,15 @@ class SkyModelServiceClientTest : public CppUnit::TestFixture {
                     (*itsClientComponents)[i].declination().getValue(),
                     dblEpsilon);
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(
-                    itsIceComponents[i].posAng,
+                    itsIceComponents[i].posAngDeconv,
                     (*itsClientComponents)[i].positionAngle().getValue(),
                     dblEpsilon);
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(
-                    itsIceComponents[i].majAxis,
+                    itsIceComponents[i].majAxisDeconv,
                     (*itsClientComponents)[i].majorAxis().getValue(),
                     dblEpsilon);
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(
-                    itsIceComponents[i].minAxis,
+                    itsIceComponents[i].minAxisDeconv,
                     (*itsClientComponents)[i].minorAxis().getValue(),
                     dblEpsilon);
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(

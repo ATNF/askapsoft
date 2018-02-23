@@ -138,7 +138,7 @@ class TestDataAccessorsApp : public askap::Application
             // sort the two vectors so we can compare element by element
             sort(smsFilteredResults.begin(), smsFilteredResults.end(), flux_less_than());
             sort(votableResults->begin(), votableResults->end(), flux_less_than());
-            const double tolerance = 0.00000001;
+            const double tolerance = 0.000005;
             for (size_t i = 0; i < smsFilteredResults.size(); i++) {
                 Component& a = (*votableResults)[i];
                 Component& b = smsFilteredResults[i];

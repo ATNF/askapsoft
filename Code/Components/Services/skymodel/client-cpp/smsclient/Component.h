@@ -70,15 +70,15 @@ class Component {
         /// Base units: degrees
         casa::Quantity declination() const;
 
-        /// Position angle. Counted east from north.
+        /// Deconvolved position angle. Counted east from north.
         /// Base units: radians
         casa::Quantity positionAngle() const;
 
-        /// Major axis
+        /// Deconvolved major axis
         /// Base units: arcsecs
         casa::Quantity majorAxis() const;
 
-        /// Minor axis
+        /// Deconvolved minor axis
         /// Base units: arcsecs
         casa::Quantity minorAxis() const;
 

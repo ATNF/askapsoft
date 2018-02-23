@@ -80,6 +80,12 @@ class Test(CPFuncTestBase):
         nt.assert_almost_equal(c.fluxIntErr, 0.541999995708)
         nt.assert_almost_equal(c.spectralIndex, -1.24000000954)
         nt.assert_almost_equal(c.spectralCurvature, -1.37999999523)
+        nt.assert_almost_equal(c.majAxis, 34.52999878)
+        nt.assert_almost_equal(c.minAxis, 30.620000839)
+        nt.assert_almost_equal(c.posAng, 83.5400009155)
+        nt.assert_almost_equal(c.majAxisDeconv, 12.8400001526)
+        nt.assert_almost_equal(c.minAxisDeconv, 10.850000381)
+        nt.assert_almost_equal(c.posAngDeconv, -15.31999969)
 
         # this database has polarisation data
         assert len(c.polarisation) == 1
