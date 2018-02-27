@@ -13,12 +13,12 @@ proc ModulesHelp { } {
 conflict        askapcli
 
 # Need to have version 2.7.10 of python for libraries to work
-if { [ module-info mode load ] } {
-    if [ is-loaded python ] {
-        module unload python
-    }
-    module load python/2.7.10
-}
+#if { [ module-info mode load ] } {
+#    if [ is-loaded python ] {
+#        module unload python
+#    }
+#    module load python/2.7.14
+#}
 
 module-whatis   "ASKAPsoft command-line interfaces"
 

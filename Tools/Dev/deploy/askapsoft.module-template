@@ -15,7 +15,7 @@ if { [ module-info mode load ] } {
     if [ is-loaded gcc ] {
         module unload gcc
     }
-    module load gcc/4.9.0
+    module load gcc/4.9.3
 }
 
 module-whatis   "ASKAPsoft software package"
