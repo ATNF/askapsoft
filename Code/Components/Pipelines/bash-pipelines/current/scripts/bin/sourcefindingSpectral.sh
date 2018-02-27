@@ -150,7 +150,7 @@ if [ "\${BEAM}" == "all" ]; then
     # Weights image - really only useful if primary-beam corrected
     weights=${weightsImage}
     imlist="\${imlist} ${OUTPUT}/\${weights}"
-    weightpars="Selavy.Weights.weightsImage = \${weights##*/}
+    weightpars="Selavy.Weights.weightsImage = \${weights%%.fits}.fits
 Selavy.Weights.weightsCutoff = ${SELAVY_SPEC_WEIGHTS_CUTOFF}"
 else
     weightpars="#"
