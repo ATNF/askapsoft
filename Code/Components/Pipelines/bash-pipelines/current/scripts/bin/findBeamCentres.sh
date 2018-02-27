@@ -200,7 +200,7 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$NEED_BEAM_CENTRES" == "true" ]; then
         setFootprintFile
         
         # Check to see whether the footprint name is used by ASKAPCLI/footprint
-        beamFromCLI=true
+        beamFromCLI=${USE_CLI}
         
         if [ "${IS_BETA}" == "true" ]; then
             beamFromCLI=false
