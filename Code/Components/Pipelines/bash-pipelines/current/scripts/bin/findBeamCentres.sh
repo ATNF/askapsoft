@@ -200,7 +200,7 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$NEED_BEAM_CENTRES" == "true" ]; then
         setFootprintFile
         
         # Check to see whether the footprint name is used by ASKAPCLI/footprint
-        beamFromCLI=${USE_CLI}
+        beamFromCLI=true
         
         if [ "${IS_BETA}" == "true" ]; then
             beamFromCLI=false
@@ -213,7 +213,7 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$NEED_BEAM_CENTRES" == "true" ]; then
         fi
 
         # Determine the number of beams in the footprint - only works for the CLI option
-        if [ "$beamFromCLI" == "true" ]; then
+        if [ "$beamFromCLI" == "true" ] && [ "${USE_CLI}" == "true" ]; then
             loadModule askapcli
             NUM_BEAMS_FOOTPRINT=$(footprint info ${FP_NAME} | grep n_beams | awk '{print $3}')
             unloadModule askapcli
