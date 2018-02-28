@@ -382,7 +382,7 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                                 casdaOtherDimImageRMSF+=("")
                                 casdaOtherDimImagePol+=("")
                             fi
-s                        fi
+                        fi
                     done
 
                 done
