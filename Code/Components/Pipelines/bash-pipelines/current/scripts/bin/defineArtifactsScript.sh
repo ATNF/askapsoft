@@ -144,6 +144,7 @@ IMAGE_BASE_CONT="${IMAGE_BASE_CONT}"
 IMAGE_BASE_CONTCUBE="${IMAGE_BASE_CONTCUBE}"
 IMAGE_BASE_SPECTRAL="${IMAGE_BASE_SPECTRAL}"
 POL_LIST="${POL_LIST}"
+DO_RM_SYNTHESIS="${DO_RM_SYNTHESIS}"
 PREPARE_FOR_CASDA="\${PREPARE_FOR_CASDA}"
 
 DO_ALT_IMAGER_CONT="${DO_ALT_IMAGER_CONT}"
@@ -276,16 +277,16 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                         casdaOtherDimImageNames+=(\${FIELD}/\${imageName}\${fitsSuffix})
                         casdaOtherDimImageTypes+=("\${imageType}")
                         fitsSuffix=""
-                        if [ "\${ADD_FITS_SUFFIX}" == "true" ]; then
+                        if [ "\${ADD_FITS_SUFFIX}" == "true" ] && [ "\${IMAGETYPE_SPECTRAL}" != "fits" ]; then
                             fitsSuffix=".fits"
                         fi                        
                         if [ -e "\${FIELD}/\${selavyDir}" ]; then
-                            casdaOtherDimImageSpectra+=("\${FIELD}/\${selavySpectraDir}/spec*\${fitsSuffix}")
-                            casdaOtherDimImageNoise+=("\${FIELD}/\${selavySpectraDir}/noiseSpec*\${fitsSuffix}")
-                            casdaOtherDimImageMoment0s+=("\${FIELD}/\${selavyMomentsDir}/moment0*\${fitsSuffix}")
-                            casdaOtherDimImageMoment1s+=("\${FIELD}/\${selavyMomentsDir}/moment1*\${fitsSuffix}")
-                            casdaOtherDimImageMoment2s+=("\${FIELD}/\${selavyMomentsDir}/moment2*\${fitsSuffix}")
-                            casdaOtherDimImageCubelets+=("\${FIELD}/\${selavyCubeletsDir}/cubelet*\${fitsSuffix}")
+                            casdaOtherDimImageSpectra+=("\${FIELD}/\${selavySpectraDir}/spec*.fits")
+                            casdaOtherDimImageNoise+=("\${FIELD}/\${selavySpectraDir}/noiseSpec*.fits")
+                            casdaOtherDimImageMoment0s+=("\${FIELD}/\${selavyMomentsDir}/moment0*.fits")
+                            casdaOtherDimImageMoment1s+=("\${FIELD}/\${selavyMomentsDir}/moment1*.fits")
+                            casdaOtherDimImageMoment2s+=("\${FIELD}/\${selavyMomentsDir}/moment2*.fits")
+                            casdaOtherDimImageCubelets+=("\${FIELD}/\${selavyCubeletsDir}/cubelet*.fits")
                             casdaOtherDimImageFDF+=("")
                             casdaOtherDimImageRMSF+=("")
                             casdaOtherDimImagePol+=("")
@@ -338,12 +339,12 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                             casdaOtherDimImageTypes+=("\${imageType}")
                             ### Not yet writing extracted files direct to FITS, so change the assignment of fitsSuffix
                             fitsSuffix=""
-                            if [ "\${ADD_FITS_SUFFIX}" == "true" ]; then
+                            if [ "\${ADD_FITS_SUFFIX}" == "true" ] && [ "\${IMAGETYPE_CONTCUBE}" != "fits" ]; then
                                 fitsSuffix=".fits"
                             fi                        
-                            if [ -e "\${FIELD}/\${selavyDir}" ]; then
+                            if [ -e "\${FIELD}/\${selavyDir}" ] && [ "\${DO_RM_SYNTHESIS}" == "true" ]; then
                                 prefix="\${FIELD}/\${selavyPolDir}/${SELAVY_POL_OUTPUT_BASE}"
-                                suffix="SB${SB_SCIENCE}_\${contImage}*\${fitsSuffix}"
+                                suffix="SB${SB_SCIENCE}_\${contImage%%.fits}*.fits}"
                                 casdaOtherDimImageSpectra+=("\${prefix}_spec_\${POLN}_\${suffix}")
                                 casdaOtherDimImageNoise+=("\${prefix}_noise_\${POLN}_\${suffix}")
                                 casdaOtherDimImageMoment0s+=("")
