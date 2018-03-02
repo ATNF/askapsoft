@@ -56,6 +56,7 @@ for subband in ${SUBBAND_WRITER_LIST}; do
     if [ ! -e "${script_location}/${SPECTRAL_IMSUB_SCRIPT}" ]; then
         echo "WARNING - ${SPECTRAL_IMSUB_SCRIPT} not found in $script_location - not running image-based continuum subtraction."
         DO_IT=false
+        DO_SPECTRAL_IMSUB=false
     fi
     
     if [ "${DO_IT}" == "true" ]; then
@@ -151,10 +152,23 @@ else
     err=\$?
     unloadModule casa
     cd ..
+
     rejuvenate "\${imageName}"
     #extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv"
     if [ \$err != 0 ]; then
         exit \$err
+    fi
+
+    # Need to convert the contsub image to FITS if we are working in
+    #   FITS format
+    IMAGETYPE_SPECTRAL=${IMAGETYPE_SPECTRAL}
+    if [ "\${IMAGETYPE_SPECTRAL}" == "fits" ]; then
+        echo "Converting contsub images to FITS"
+        casaim="\${imageName%%.fits}.contsub"
+        fitsim="\${imageName%%.fits}.contsub.fits"
+        parset=$parsets/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.in
+        log=$logs/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.log
+        ${fitsConvertText}
     fi
     
 

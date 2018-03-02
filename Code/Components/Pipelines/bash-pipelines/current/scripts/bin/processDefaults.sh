@@ -301,7 +301,7 @@ if [ -e \"\${casaim}\" ] && [ ! -e \"\${fitsim}\" ]; then
     cat > \"\$parset\" << EOFINNER
 ImageToFITS.casaimage = \${casaim}
 ImageToFITS.fitsimage = \${fitsim}
-ImageToFITS.stokesLast = true
+#ImageToFITS.stokesLast = true
 #ImageToFITS.headers = [\"project\", \"sbid\", \"date-obs\", \"duration\"]
 #ImageToFITS.headers.project = ${PROJECT_ID}
 #ImageToFITS.headers.sbid = ${SB_SCIENCE}

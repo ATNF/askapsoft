@@ -109,7 +109,7 @@ for BEAM in \${BEAMS_TO_USE}; do
     im="\${imageName}"
     wt="\${weightsImage}"
     if [ -e "\${im}" ]; then
-        echo "   Found! Adding to imList"
+        echo "   Found \${im} - Adding to imList"
         if [ "\${imList}" == "" ]; then
             imList="\${im%%.fits}"
             wtList="\${wt%%.fits}"
@@ -117,6 +117,8 @@ for BEAM in \${BEAMS_TO_USE}; do
             imList="\${imList},\${im%%.fits}"
             wtList="\${wtList},\${wt%%.fits}"
         fi
+    else
+        echo "   \${im} not found!"
     fi
 done
 
@@ -174,7 +176,9 @@ EOFOUTER
                 fi
 	        ID_LINMOS_SPECTRAL=$(sbatch ${DEP} "$sbatchfile" | awk '{print $4}')
                 if [ "${imageCode}" == "restored" ]; then
-                    ID_LINMOS_SPECTRAL_RESTORED=${ID_LINMOS_SPECTRAL}
+                    DEP_LINMOS_SPECTRAL_RESTORED=$(addDep "${DEP_LINMOS_SPECTRAL_RESTORED}" "${ID_LINMOS_SPECTRAL}")
+                elif [ "${imageCode}" == "contsub" ]; then
+                    DEP_LINMOS_SPECTRAL_CONTSUB=$(addDep "${DEP_LINMOS_SPECTRAL_CONTSUB}" "${ID_LINMOS_SPECTRAL}")
                 fi
                 
                 if [ "${NUM_SPECTRAL_CUBES}" -gt 1 ];then
