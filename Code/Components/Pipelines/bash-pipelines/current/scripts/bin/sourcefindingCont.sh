@@ -376,6 +376,7 @@ EOFINNER
                 if [ "\${purgeCSV}" == "true" ]; then
                     rm -f \${validationDirCopy}/*.csv
                 fi
+                chmod -R g+w \${validationDirCopy}
             fi
         fi
     fi
