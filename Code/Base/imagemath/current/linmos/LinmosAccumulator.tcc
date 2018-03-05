@@ -1242,10 +1242,10 @@ namespace askap {
             // set up an indexing vector for the weights. If weight images are used, these are as in the image.
             IPosition wgtpos(curpos);
 
-            Array<T> wgtPix; // typically for the weight image
-            Array<T> wgtPixBeam;// typically for the weight beam
+            Array<T> wgtPix(itsInShape); // typically for the weight image
+            Array<T> wgtPixBeam(itsInShape);// typically for the weight beam
 
-            wgtPix.reference(inWgtPix); // note FROM_BP_MODEL overwrites this - the others dont
+            // wgtPix.reference(inWgtPix); // note FROM_BP_MODEL overwrites this - the others dont
 
             if ( itsWeightType == FROM_BP_MODEL || itsWeightType == COMBINED ) {
 
