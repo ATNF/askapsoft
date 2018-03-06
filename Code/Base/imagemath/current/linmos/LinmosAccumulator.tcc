@@ -1084,7 +1084,7 @@ namespace askap {
                         if (itsWeightType == FROM_BP_MODEL) {
                           // this replicates the case where we just use the PB model
                           wgtBuffer.putAt(pb * pb, pos); // this is an image
-
+                          wgtBeamBuffer.putAt(1.0,pos);
                         }
                         else { // COMBINED
                           // this replicates the case where we use the model and the inv. variance
@@ -1113,7 +1113,8 @@ namespace askap {
                   ASKAPLOG_INFO_STR(linmoslogger, "Primary COMBINED beam model weighting - maxVal: " << maxVal << " NVIS: " << wgtBuffer.getAt(maxPos) << " beam " <<  wgtBeamBuffer.getAt(maxPos) );
             }
             else { // FROM WEIGHT IMAGES
-              maxVal = 0.0;
+                maxVal = 0.0;
+                ASKAPLOG_INFO_STR(linmoslogger, "From Weight Images beam weighting do not implement cutoff - maxVal: " << maxVal);
             }
 
             wgtCutoff = itsCutoff * itsCutoff * maxVal; // wgtBuffer is prop. to image (gain/sigma)^2
@@ -1130,7 +1131,14 @@ namespace askap {
                         pos[1] = y;
                         // we need a beamsquared x inv. variance weight in the image
                         // this should cover all cases
-                        T theWeight = wgtBuffer.getAt(pos) * wgtBeamBuffer.getAt(pos) * wgtBeamBuffer.getAt(pos);
+                        T theWeight = 0.0;
+                        if (itsWeightType == FROM_WEIGHT_IMAGES) {
+                          theWeight = wgtBuffer.getAt(pos);
+                        }
+                        else {
+                          theWeight = wgtBuffer.getAt(pos) * wgtBeamBuffer.getAt(pos) * wgtBeamBuffer.getAt(pos);
+                        }
+
                         if (theWeight >= wgtCutoff) {
                             outPix(fullpos) = outPix(fullpos) + itsOutBuffer.getAt(pos) * theWeight;
                             outWgtPix(fullpos) = outWgtPix(fullpos) + theWeight;
@@ -1159,7 +1167,7 @@ namespace askap {
                           theDeWeight = wgtBuffer.getAt(pos);
                         }
                         else if (itsWeightType == FROM_WEIGHT_IMAGES ) {
-                           ASKAPLOG_WARN_STR(linmoslogger,"Weighting INHERENT images with weight images alone - NO primary beam correction will be done. Use Combined");
+                           ASKAPLOG_WARN_STR(linmoslogger,"Weighting INHERENT images with weight images alone - NO primary beam correction will be done unless it is already in the weight image.");
                            theWeight = wgtBuffer.getAt(pos);
                            theDeWeight = wgtBuffer.getAt(pos);
 
