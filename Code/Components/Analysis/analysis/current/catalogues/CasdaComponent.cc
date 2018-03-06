@@ -128,7 +128,7 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
     itsFluxInt.error() = itsFluxInt.value() *
                          sqrt((itsFluxPeak.error() * itsFluxPeak.error()) / (itsFluxPeak.value() * itsFluxPeak.value())
                               + beamScaling * ((itsMaj.error() * itsMaj.error()) / (itsMaj.value() * itsMaj.value()) +
-                                      (itsMaj.error() * itsMaj.error()) / (itsMaj.value() * itsMaj.value())));
+                                      (itsMin.error() * itsMin.error()) / (itsMin.value() * itsMin.value())));
 
     std::vector<Double> deconv = analysisutilities::deconvolveGaussian(gauss, errors,
                                  newHead_freq.getBeam());
