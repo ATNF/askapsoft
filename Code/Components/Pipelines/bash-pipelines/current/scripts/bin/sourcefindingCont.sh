@@ -368,16 +368,19 @@ EOFINNER
                 echo "ERROR - could not create validation directory \${validationDir}"
             fi
             # Place a copy in a standard place on /group
-            copyLocation="${VALIDATION_ARCHIVE_DIR}"
-            purgeCSV="${REMOVE_VALIDATION_CSV}"
+            copyLocation="${VALIDATION_ARCHIVE_DIR}
             if [ "\${copyLocation}" != "" ] && [ -e "\${copyLocation}" ]; then
+                copyLocation="\${copyLocation}/${PROJECT_ID}/SB${SB_SCIENCE}"
+                mkdir -p \${copyLocation}
+                purgeCSV="${REMOVE_VALIDATION_CSV}"
                 validationDirCopy="\${copyLocation}/\${validationDir}__\$(whoami)_${NOW}"
+                echo "Copying Validation results to \${validationDirCopy}"
                 cp -r \${validationDir} \${validationDirCopy}
                 if [ "\${purgeCSV}" == "true" ]; then
                     rm -f \${validationDirCopy}/*.csv
                 fi
-                chmod -R g+w \${validationDirCopy}
             fi
+            chmod -R g+w \${copyLocation}
         fi
     fi
 
