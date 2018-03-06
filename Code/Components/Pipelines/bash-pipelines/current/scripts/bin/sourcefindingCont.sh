@@ -368,7 +368,7 @@ EOFINNER
                 echo "ERROR - could not create validation directory \${validationDir}"
             fi
             # Place a copy in a standard place on /group
-            copyLocation="${VALIDATION_ARCHIVE_DIR}
+            copyLocation="${VALIDATION_ARCHIVE_DIR}"
             if [ "\${copyLocation}" != "" ] && [ -e "\${copyLocation}" ]; then
                 copyLocation="\${copyLocation}/${PROJECT_ID}/SB${SB_SCIENCE}"
                 mkdir -p \${copyLocation}
