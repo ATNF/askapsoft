@@ -1242,13 +1242,14 @@ namespace askap {
             // set up an indexing vector for the weights. If weight images are used, these are as in the image.
             IPosition wgtpos(curpos);
 
-            Array<T> wgtPix(itsInShape); // typically for the weight image
-            Array<T> wgtPixBeam(itsInShape);// typically for the weight beam
+            Array<T> wgtPix; // typically for the weight image
+            Array<T> wgtPixBeam;// typically for the weight beam
 
-            // wgtPix.reference(inWgtPix); // note FROM_BP_MODEL overwrites this - the others dont
 
-            if ( itsWeightType == FROM_BP_MODEL || itsWeightType == COMBINED ) {
 
+
+            if ( itsWeightType == FROM_BP_MODEL || itsWeightType == COMBINED ) { // this loop has to put the PB weighting in
+                wgtPix = Array<T>(itsInShape);
                 Vector<double> pixel(2,0.);
                 MVDirection world;
                 T offsetBeam, pb;
@@ -1274,35 +1275,35 @@ namespace askap {
                     wgtpos[dim] = 0;
                 }
                 // set the array
-                if ( itsWeightType == FROM_BP_MODEL  || itsWeightType == COMBINED) {
-                  wgtPixBeam = Array<T>(itsInShape);
-                  for (int x=0; x<outPix.shape()[0];++x) {
-                      for (int y=0; y<outPix.shape()[1];++y) {
-                          wgtpos[0] = x;
-                          wgtpos[1] = y;
 
-                          // get the current pixel location and distance from beam centre
-                          pixel[0] = double(x);
-                          pixel[1] = double(y);
-                          outDC.toWorld(world,pixel);
-                          offsetBeam = itsInCentre.separation(world);
+                wgtPixBeam = Array<T>(itsInShape);
+                for (int x=0; x<outPix.shape()[0];++x) {
+                    for (int y=0; y<outPix.shape()[1];++y) {
+                        wgtpos[0] = x;
+                        wgtpos[1] = y;
 
-                          // set the weight
-                          //pb = exp(-offsetBeam*offsetBeam*4.*log(2.)/fwhm/fwhm);
-                          pb = itsPB->evaluateAtOffset(offsetBeam,freq);
-                          if (itsWeightType == FROM_BP_MODEL) {
-                            wgtPix(wgtpos) = pb * pb;
-                            wgtPixBeam(wgtpos) = 1.0;
-                          }
-                          else {
-                            wgtPixBeam(wgtpos) = pb;
-                          }
+                        // get the current pixel location and distance from beam centre
+                        pixel[0] = double(x);
+                        pixel[1] = double(y);
+                        outDC.toWorld(world,pixel);
+                        offsetBeam = itsInCentre.separation(world);
+
+                        // set the weight
+                        //pb = exp(-offsetBeam*offsetBeam*4.*log(2.)/fwhm/fwhm);
+                        pb = itsPB->evaluateAtOffset(offsetBeam,freq);
+                        if (itsWeightType == FROM_BP_MODEL) {
+                          wgtPix(wgtpos) = pb * pb;
+                          wgtPixBeam(wgtpos) = 1.0;
+                        }
+                        else { // COMBINED - note wgtPix not accessed or changed
+                          wgtPixBeam(wgtpos) = pb;
+                        }
 
 
-                      }
-                  }
-
+                    }
                 }
+
+
 
             }
 
@@ -1315,13 +1316,17 @@ namespace askap {
               ASKAPLOG_INFO_STR(linmoslogger, "Primary beam model weighting - maxVal: " << maxVal );
             }
             else if (itsWeightType == COMBINED) {
+                wgtPix.reference(inWgtPix); // note FROM_BP_MODEL overwrites this - the others dont so need to reference the weights
                 minMax(minVal,maxVal,minPos,maxPos,wgtPixBeam);
                 T temp = wgtPix(maxPos) * maxVal * maxVal;
                 maxVal = temp;
                 ASKAPLOG_INFO_STR(linmoslogger, "Primary COMBINED beam model weighting - maxVal: " << maxVal << " NVIS: " << wgtPix(maxPos) << " beam " <<  wgtPixBeam(maxPos) );
             }
             else { // FROM WEIGHT IMAGES
+              wgtPix.reference(inWgtPix); // note FROM_BP_MODEL overwrites this - the others dont so need to reference the weights
               maxVal = 0.0;
+              // minMax(minVal,maxVal,minPos,maxPos,wgtPix);
+              ASKAPLOG_INFO_STR(linmoslogger, "From Weight Images beam weighting do not implement cutoff - maxVal: " << maxVal);
             }
 
             wgtCutoff = itsCutoff * itsCutoff * maxVal; // wgtPix is prop. to image (gain/sigma)^2
@@ -1337,8 +1342,14 @@ namespace askap {
                         wgtpos[0] = x;
                         wgtpos[1] = y;
                         /// make beamsquared weight times inverse variance
-                        /// this should cover all cases
-                        T theWeight = wgtPix(wgtpos) * wgtPixBeam(wgtpos) * wgtPixBeam(wgtpos);
+                        /// this should cover all cases - except the weight image case
+                        T theWeight = 0.0;
+                        if (itsWeightType == FROM_WEIGHT_IMAGES ) {
+                          theWeight = wgtPix(wgtpos);
+                        }
+                        else {
+                          theWeight = wgtPix(wgtpos) * wgtPixBeam(wgtpos) * wgtPixBeam(wgtpos);
+                        }
 
                         if (theWeight >=wgtCutoff) {
                             outPix(fullpos)    = outPix(fullpos)    + inPix(fullpos) * theWeight;
