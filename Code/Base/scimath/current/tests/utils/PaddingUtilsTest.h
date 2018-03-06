@@ -69,7 +69,7 @@ public:
       CPPUNIT_ASSERT(paddedArray.ncolumn() == 4);
       for (uint row=0; row<paddedArray.nrow(); ++row) {
            for (uint column=0; column<paddedArray.ncolumn(); ++column) {
-                CPPUNIT_ASSERT(paddedArray(row,column) == ((row>=1) && (row<=3) && (column>=1) && (column<=2))); 
+               CPPUNIT_ASSERT(paddedArray(row,column) == ((row>=2) && (row<=4) && (column>=1) && (column<=2))); 
            }
       }     
    }
