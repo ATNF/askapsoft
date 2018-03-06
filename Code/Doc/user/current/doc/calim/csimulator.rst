@@ -179,12 +179,36 @@ substitution, it is clearly stated in the description.
 |msWrittenByMaster     |bool          |false         |If true, the workers send data to the master which writes a |
 |                      |              |              |single measurement set, otherwise each worker writes its own|
 |                      |              |              |measurement set which name is either given explicitly or via|
-|                      |              |              |the substitution rule. The prediction work is distributed as|
-|                      |              |              |evenly as possible between all available workers (frequency |
-|                      |              |              |channels are split). The option is allowed in the parallel  |
-|                      |              |              |case only. The substitution has no effect when this option  |
-|                      |              |              |used in most cases, and %w is replaced by -1 (note, it works|
-|                      |              |              |for the random seed).                                       |
+|                      |              |              |the substitution rule. This option is used to distribute    |
+|                      |              |              |simulation load implicitly, splitting in frequency channels.|
+|                      |              |              |This is unlike the (default) explicit distribution of work  |
+|                      |              |              |which relies on %w wildcard and the substitution rules used |
+|                      |              |              |appropriately in the parset: if this parameter is false and |
+|                      |              |              |csimulator is executed in parallel, each non-zero rank beco\|
+|                      |              |              |mes an independent worker which substitutes %w in the parset|
+|                      |              |              |by the worker number, where supported, and, therefore, can  |
+|                      |              |              |simulate different data (e.g. different frequency or differ\|
+|                      |              |              |ent time range). If this option is set to true, master dist\|
+|                      |              |              |ributes the prediction work to all available workers as eve\|
+|                      |              |              |nly as possible (the total number of spectral channels divi\|
+|                      |              |              |ded by the number of available workers, or that plus one if |
+|                      |              |              |the number of channels doesn't divide evenly, is assigned to|
+|                      |              |              |each available worker). In this case, care must be taken wi\|
+|                      |              |              |%w in the parset. The substitution is honored, but the appr\|
+|                      |              |              |opriate code may be executed on master instead of worker,   |
+|                      |              |              |which would result in %w being replaced by -1. In this mode,|
+|                      |              |              |%w should really only be used with the random seed initiali\|
+|                      |              |              |sation, where it is the default (see above), but this is    |
+|                      |              |              |rarely changed by the end user anyway. If the total number  |
+|                      |              |              |of channel doesn't divide evenly between workers, the last  |
+|                      |              |              |worker will process less channels as appropriate. Note, the |
+|                      |              |              |case where the number of available workers exceeds the numb\|
+|                      |              |              |er of simulated spectral channels is not supported and will |
+|                      |              |              |cause an exception. With the current ADE system with the    |
+|                      |              |              |number of channels being an integral multiple of 216, it    |
+|                      |              |              |makes sense to run the csimulator with 55, 109 or 217 ranks.|
+|                      |              |              |The option is allowed to be set to true in the parallel     |
+|                      |              |              |case only.                                                  |
 +----------------------+--------------+--------------+------------------------------------------------------------+
 
 
