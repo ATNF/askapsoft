@@ -995,6 +995,11 @@ THUMBNAIL_SUFFIX="png"
 THUMBNAIL_GREYSCALE_MIN="-10"
 THUMBNAIL_GREYSCALE_MAX="40"
 
+# Use absolute paths to files in the XML file made for CASDA? This
+# allows them to remain in situ, rather than being copied. It will
+# make them globally readable.
+CASDA_USE_ABSOLUTE_PATHS=true
+
 # Write the READY file after casdaupload has finished?
 WRITE_CASDA_READY=false
 

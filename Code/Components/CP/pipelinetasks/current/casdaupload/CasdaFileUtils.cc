@@ -36,6 +36,7 @@
 #include <fstream>
 
 // ASKAPsoft includes
+#include "askap/AskapLogging.h"
 #include "askap/AskapError.h"
 #include "askap/AskapUtil.h"
 #include "casacore/casa/Quanta/MVTime.h"
@@ -49,6 +50,8 @@ using namespace std;
 using namespace askap;
 using namespace askap::cp::pipelinetasks;
 namespace fs = boost::filesystem;
+
+ASKAP_LOGGER(logger, ".casdafileutils");
 
 // Initialise statics
 const std::string askap::cp::pipelinetasks::CasdaFileUtils::CHECKSUM_EXT = ".checksum";
@@ -76,6 +79,31 @@ void CasdaFileUtils::tarAndChecksum(const fs::path& infile, const fs::path& outf
                    << " - Cmd: " << cmd.str());
     }
     checksumFile(outfile);
+}
+
+void CasdaFileUtils::handleFile(const fs::path& infile,
+                                const bool checksumOnly,
+                                const fs::path& outdir)
+{
+    if (checksumOnly) {
+        ASKAPLOG_INFO_STR(logger, "Calculating checksum for " << infile);
+        checksumFile(infile);
+        globalReadPermissions(infile);
+    } else {
+        const fs::path outfile(outdir / infile.filename());
+        ASKAPLOG_INFO_STR(logger, "Copying and calculating checksum for " << infile);
+        copyAndChecksum(infile, outfile);
+    }
+}
+
+void CasdaFileUtils::globalReadPermissions(const fs::path& infile)
+{
+    ASKAPLOG_INFO_STR(logger, "Making file " << infile << " and its checksum world-readable");
+    permissions(infile, boost::filesystem::add_perms | boost::filesystem::others_read);
+    const fs::path csum(infile.string() + CHECKSUM_EXT);
+    if (exists(csum)) {
+        permissions(csum, boost::filesystem::add_perms | boost::filesystem::others_read);
+    }
 }
 
 void CasdaFileUtils::checksumFile(const fs::path& infile)

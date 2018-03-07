@@ -184,6 +184,7 @@ log=${logs}/casda_upload_\${SLURM_JOB_ID}.log
 cat > "\$parset" << EOFINNER
 # General
 outputdir                       = ${CASDA_UPLOAD_DIR}
+useAbsolutePaths                = ${CASDA_USE_ABSOLUTE_PATHS}
 telescope                       = ASKAP
 sbid                            = ${SB_SCIENCE}
 ${sbids}

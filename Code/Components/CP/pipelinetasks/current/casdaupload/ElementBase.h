@@ -55,6 +55,7 @@ class ElementBase {
 
     protected:
         boost::filesystem::path itsFilepath;
+        bool itsUseAbsolutePaths;
         std::string itsFormat;
         std::string itsName;
 

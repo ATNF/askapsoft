@@ -143,6 +143,11 @@ scripts, and they are detailed here.
 |                                  |                                 |                                 | case the data is written to a local directory and the user must |
 |                                  |                                 |                                 | then contact CASDA or Operations staff.                         |
 +----------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
+| ``CASDA_USE_ABSOLUTE_PATHS``     | true                            | useAbsolutePaths                | If true, refer to filenames in the observation.xml file by their|
+|                                  |                                 | (:doc:`../utils/casdaupload`)   | absolute paths. This will mean they remain where they are, and  |
+|                                  |                                 |                                 | are not copied to the upload directory. The exceptions are the  |
+|                                  |                                 |                                 | XML file itself, and the tarred-up MS files.                    |
++----------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | ``WRITE_CASDA_READY``            | false                           | writeREADYfile                  | Whether to write the READY file in the staging directory,       |
 |                                  |                                 | (:doc:`../utils/casdaupload`)   | indicating that no further changes are to be made and the data  |
 |                                  |                                 |                                 | is ready to go into CASDA. Setting this to true will also       |

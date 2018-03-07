@@ -109,10 +109,26 @@ xercesc::DOMElement* ImageElement::toXmlElement(xercesc::DOMDocument& doc) const
     DOMElement* e = TypeElementBase::toXmlElement(doc);
 
     if (itsThumbnailLarge != "") {
-        XercescUtils::addTextElement(*e, "thumbnail_large", itsThumbnailLarge.filename().string());
+        if (itsUseAbsolutePaths){
+            std::string path=itsThumbnailLarge.string();
+            if(path[0]!='/'){
+                path = boost::filesystem::current_path().string() + "/" + path;
+            }
+            XercescUtils::addTextElement(*e, "thumbnail_large", path);
+        } else {
+            XercescUtils::addTextElement(*e, "thumbnail_large", itsThumbnailLarge.filename().string());
+        }
     }
     if (itsThumbnailSmall != "") {
-        XercescUtils::addTextElement(*e, "thumbnail_small", itsThumbnailSmall.filename().string());
+        if (itsUseAbsolutePaths){
+            std::string path=itsThumbnailSmall.string();
+            if(path[0]!='/'){
+                path = boost::filesystem::current_path().string() + "/" + path;
+            }
+            XercescUtils::addTextElement(*e, "thumbnail_small", path);
+        } else {
+            XercescUtils::addTextElement(*e, "thumbnail_small", itsThumbnailSmall.filename().string());
+        }
     }
 
     // Create Spectra elements
@@ -148,22 +164,16 @@ void ImageElement::copyAndChecksum(const boost::filesystem::path& outdir) const
 {
 
     const boost::filesystem::path in(itsFilepath);
-    const boost::filesystem::path out(outdir / in.filename());
-    ASKAPLOG_INFO_STR(logger, "Copying and calculating checksum for " << in);
-    CasdaFileUtils::copyAndChecksum(in, out);
+    CasdaFileUtils::handleFile(in, itsUseAbsolutePaths, outdir);
 
     if (itsThumbnailLarge != "") {
         const boost::filesystem::path inLarge(itsThumbnailLarge);
-        const boost::filesystem::path outLarge(outdir / inLarge.filename());
-        ASKAPLOG_INFO_STR(logger, "Copying and calculating checksum for " << inLarge);
-        CasdaFileUtils::copyAndChecksum(inLarge, outLarge);
+        CasdaFileUtils::handleFile(in, itsUseAbsolutePaths, outdir);
     }
 
     if (itsThumbnailSmall != "") {
         const boost::filesystem::path inSmall(itsThumbnailSmall);
-        const boost::filesystem::path outSmall(outdir / inSmall.filename());
-        ASKAPLOG_INFO_STR(logger, "Copying and calculating checksum for " << inSmall);
-        CasdaFileUtils::copyAndChecksum(inSmall, outSmall);
+        CasdaFileUtils::handleFile(in, itsUseAbsolutePaths, outdir);
     }
 
     std::vector<SpectrumElement>::const_iterator spec = itsSpectra.begin();

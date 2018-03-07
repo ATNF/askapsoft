@@ -76,6 +76,17 @@ class CasdaFileUtils {
         static void copyAndChecksum(const boost::filesystem::path& infile,
                                     const boost::filesystem::path& outfile);
 
+        /// Front end for doing either just a checksum or a
+        /// copyAndChecksum. Makes the choice based on the checksumOnly
+        /// parameter - if false, the copying function is called.
+        static void handleFile(const boost::filesystem::path& infile,
+                               const bool checksumOnly,
+                               const boost::filesystem::path& outdir);
+
+        /// Make the requested file and its checksum (if the latter
+        /// exists) readable by all users.
+        static void globalReadPermissions(const boost::filesystem::path& infile);
+
         /// Write a file - This is just used to signal to CASDA the datasets
         /// in the directory are ready for ingest. This indicates no further
         /// addition or mutation of the data products in the output directory

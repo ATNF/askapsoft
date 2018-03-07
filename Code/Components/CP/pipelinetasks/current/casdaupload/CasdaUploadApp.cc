@@ -38,6 +38,7 @@
 #include "askap/AskapLogging.h"
 #include "askap/AskapError.h"
 #include "Common/ParameterSet.h"
+#include "Common/KVpair.h"
 #include "askap/StatReporter.h"
 #include "boost/scoped_ptr.hpp"
 #include "boost/filesystem.hpp"
@@ -229,12 +230,14 @@ template <typename T>
 std::vector<T> CasdaUploadApp::buildArtifactElements(const std::string& key) const
 {
     vector<T> elements;
-
+    bool useAbsolutePath = itsParset.getBool("useAbsolutePath","true");
+    
     if (itsParset.isDefined(key)) {
         const vector<string> names = itsParset.getStringVector(key);
         for (vector<string>::const_iterator it = names.begin(); it != names.end(); ++it) {
             LOFAR::ParameterSet subset = itsParset.makeSubset(*it + ".");
             subset.replace("artifactparam", *it);
+            subset.replace(LOFAR::KVpair("useAbsolutePath", useAbsolutePath));
             elements.push_back(T(subset));
         }
     }

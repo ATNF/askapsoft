@@ -30,7 +30,8 @@ configuration parameter set. It performs the following tasks:
     number
 
 * Deposits all artifacts, the checksum files and the metadata file in the
-  designated output directory
+  designated output directory, unless absolute paths are given in the
+  XML file.
 * Finally, and specifically as the last step, a file named "READY" can
   be written to the output directory. This indicates no further
   addition or mutation of the data products in the output directory
@@ -65,6 +66,13 @@ The required parameters are:
 |                             |                |                 |directory /foo/bar/1234 will be created and all |
 |                             |                |                 |artifacts, plus the metadata file, will be      |
 |                             |                |                 |copied there.                                   |
++-----------------------------+----------------+-----------------+------------------------------------------------+
+|useAbsolutePaths             |bool            |true             |Whether paths to the artifacts are given as     |
+|                             |                |                 |absolute paths (true), or as simple filenames in|
+|                             |                |                 |the output directory. If true, the artifacts    |
+|                             |                |                 |with absolute paths will *not* be copied to the |
+|                             |                |                 |output directory. However, even if true, the    |
+|                             |                |                 |measurement set tarballs will still be copied.  |
 +-----------------------------+----------------+-----------------+------------------------------------------------+
 |telescope                    |string          |None             |Name of the telescope that produced the         |
 |                             |                |                 |artifacts                                       |

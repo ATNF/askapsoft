@@ -88,7 +88,7 @@ void DerivedElementBase::checkWildcards()
         itsNumFiles = 0;
         ASKAPLOG_WARN_STR(logger, "Wildcard " << itsFilepath.string() << " does not resolve to anything");
     } else {
-        ASKAPTHROW(AskapError, "Error in interpreting \"" << itsFilepath.string() <<"\" - glob returned error " << errGlob);
+        ASKAPTHROW(AskapError, "Error in interpreting \"" << itsFilepath.string() << "\" - glob returned error " << errGlob);
     }
     for (size_t i = 0; i < itsNumFiles; i++) {
         itsFilenameList.push_back(theGlob.gl_pathv[i]);
@@ -98,17 +98,17 @@ void DerivedElementBase::checkWildcards()
     // glob itsThumbnail to get a list of possible names
     //     --> fills itsThumbnailList
 
-    if ((itsNumFiles > 0 ) && (itsThumbnail != "")) {
+    if ((itsNumFiles > 0) && (itsThumbnail != "")) {
         glob_t thumbGlob;
         int errThumb = glob(itsThumbnail.string().c_str(), 0, NULL, &thumbGlob);
         unsigned int numThumbs;
         if (errGlob == 0) {
-           numThumbs  = thumbGlob.gl_pathc;
+            numThumbs  = thumbGlob.gl_pathc;
         } else if (errGlob == GLOB_NOMATCH) {
             numThumbs = 0;
             ASKAPLOG_WARN_STR(logger, "Wildcard " << itsFilepath.string() << " does not resolve to anything");
         } else {
-            ASKAPTHROW(AskapError, "Error in interpreting \"" << itsFilepath.string() <<"\" - glob returned error " << errGlob);
+            ASKAPTHROW(AskapError, "Error in interpreting \"" << itsFilepath.string() << "\" - glob returned error " << errGlob);
         }
         ASKAPCHECK(numThumbs == itsNumFiles,
                    "Thumbnail wildcard for " << itsName << " produces different number of files than filename");
@@ -127,7 +127,15 @@ xercesc::DOMElement* DerivedElementBase::toXmlElement(xercesc::DOMDocument& doc)
     XercescUtils::addTextElement(*e, "type", itsType);
 
     if (itsThumbnail != "") {
-        XercescUtils::addTextElement(*e, "thumbnail", itsThumbnail.filename().string());
+        if (itsUseAbsolutePaths){
+            std::string path=itsThumbnail.string();
+            if(path[0]!='/'){
+                path = boost::filesystem::current_path().string() + "/" + path;
+            }
+            XercescUtils::addTextElement(*e, "thumbnail", path);
+        } else {
+            XercescUtils::addTextElement(*e, "thumbnail", itsThumbnail.filename().string());
+        }
     }
 
     std::stringstream ss;
@@ -143,17 +151,13 @@ void DerivedElementBase::copyAndChecksum(const boost::filesystem::path& outdir) 
 
     for (size_t i = 0; i < itsFilenameList.size(); i++) {
         const boost::filesystem::path in(itsFilenameList[i]);
-        const boost::filesystem::path out(outdir / in.filename());
-        ASKAPLOG_INFO_STR(logger, "Copying and calculating checksum for " << in << " using filename " << itsFilenameList[i]);
-        CasdaFileUtils::copyAndChecksum(in, out);
+        CasdaFileUtils::handleFile(in, itsUseAbsolutePaths, outdir);
     }
 
     if (itsThumbnail != "") {
         for (size_t i = 0; i < itsThumbnailList.size(); i++) {
             const boost::filesystem::path in(itsThumbnailList[i]);
-            const boost::filesystem::path out(outdir / in.filename());
-            ASKAPLOG_INFO_STR(logger, "Copying and calculating checksum for " << in);
-            CasdaFileUtils::copyAndChecksum(in, out);
+            CasdaFileUtils::handleFile(in, itsUseAbsolutePaths, outdir);
         }
     }
 
