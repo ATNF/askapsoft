@@ -1,4 +1,4 @@
-0.20.1 (01 March 2018)
+0.20.1 (08 March 2018)
 ----------------------
 
 A patch release that fixes a few bugs in the pipeline:
@@ -16,17 +16,27 @@ A patch release that fixes a few bugs in the pipeline:
  * There have also been fixes to ensure the continuum-subtracted
    cubes are created in appropriate FITS format and mosaicked
    correctly.
+ * Copying of continuum validation files to the archive directory has
+   been updated to reflect an improved directory structure.
 
 It also makes a few minor changes to the processing software:
 
  * The Wiener preconditioner will now report in the log the amount by
    which the point-source sensitivity is expected to increase over the
    theoretical naturally-weighted level.
+ * The casdaupload utility can now produce an XML file with absolute
+   paths to data products, leaving them in place - rather than copying
+   all data products to the upload directory. This is compatible with
+   behaviour introduced in CASDA-1.10.
  * Ccalapply has a new parameter than can restrict the sizes of chunks
    presented in single iterations, using new options for the
    TableDataSource classes.
+ * The component catalogue produced by Selavy had a minor error in the
+   calculation of the error on the integrated flux (where the minor
+   axis should have been used, the major axis was used instead).
  * Fixed issues with cmodel functional tests, relating to using the
    correct catalogue columns.
+ * Fixed a failing scimath unit test.
  * The ingest pipeline now can apply phase gradients in parallel. 
    
 
