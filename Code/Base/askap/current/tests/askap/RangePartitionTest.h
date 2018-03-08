@@ -32,16 +32,12 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <askap/RangePartition.h>
 
-#include <iostream>
-
 namespace askap {
 
 namespace utility {
 
 class RangePartitionTest : public CppUnit::TestFixture {
   CPPUNIT_TEST_SUITE(RangePartitionTest);
-  //CPPUNIT_TEST(tempTest);
-
   CPPUNIT_TEST(testEqualPartition);
   CPPUNIT_TEST(testUnequalPartition);
   CPPUNIT_TEST(testOneItemPerGroup);
@@ -49,7 +45,6 @@ class RangePartitionTest : public CppUnit::TestFixture {
   CPPUNIT_TEST_EXCEPTION(testVoidGroupAccess1,CheckError);
   CPPUNIT_TEST_EXCEPTION(testVoidGroupAccess2,CheckError);
   CPPUNIT_TEST(testSpecificSettings);
-  
   CPPUNIT_TEST_SUITE_END();
 public:
   void checkConsistency(const RangePartition &rp) {
@@ -95,15 +90,15 @@ public:
      CPPUNIT_ASSERT_EQUAL(3u, rp.nGroups());
 
      checkConsistency(rp);
-     // groups 0..4, 5..9, 10..12
+     // groups 0..4, 5..8, 9..12
      CPPUNIT_ASSERT_EQUAL(5u, rp.first(1u));
      CPPUNIT_ASSERT_EQUAL(4u, rp.last(0u));
-     CPPUNIT_ASSERT_EQUAL(9u, rp.last(1u));
-     CPPUNIT_ASSERT_EQUAL(10u, rp.first(2u));
+     CPPUNIT_ASSERT_EQUAL(8u, rp.last(1u));
+     CPPUNIT_ASSERT_EQUAL(9u, rp.first(2u));
      CPPUNIT_ASSERT_EQUAL(12u, rp.last(2u));
      CPPUNIT_ASSERT_EQUAL(5u, rp.nItemsThisGroup(0u));
-     CPPUNIT_ASSERT_EQUAL(5u, rp.nItemsThisGroup(1u));
-     CPPUNIT_ASSERT_EQUAL(3u, rp.nItemsThisGroup(2u));
+     CPPUNIT_ASSERT_EQUAL(4u, rp.nItemsThisGroup(1u));
+     CPPUNIT_ASSERT_EQUAL(4u, rp.nItemsThisGroup(2u));
   }
   
   void testOneItemPerGroup() {
@@ -156,17 +151,12 @@ public:
      rp.last(4u);
   }
 
-  void tempTest() {
-     RangePartition rp(16200, 319);
-     checkConsistency(rp);
-  }
-  
   void testSpecificSettings() {
      // test specific settings which arise in using of actual scientific code, see ASKAPSDP-2962
      const unsigned int nTrials = 7;
      const unsigned int nWorkers[nTrials] = {9, 19, 39, 79, 810, 319, 639};
    
-     for (unsigned int trial = 0; trial < nTrials-2; ++trial) {
+     for (unsigned int trial = 0; trial < nTrials; ++trial) {
           // 16200 channels distributed across the given number of workers
           RangePartition rp(16200, nWorkers[trial]);
           CPPUNIT_ASSERT_EQUAL(16200u, rp.nItems());

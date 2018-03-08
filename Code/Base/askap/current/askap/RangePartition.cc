@@ -40,8 +40,6 @@
 #include "askap/AskapError.h"
 #include "askap/AskapUtil.h"
 
-//#include <iostream>
-
 namespace askap {
 
 namespace utility {
@@ -54,9 +52,10 @@ namespace utility {
 /// @note The constructor encapsulates all the logic of doing the partitioning.
 /// The result is cached in the data members. The adopted numbering is such that
 /// all groups with non-zero number of items have lower numbers. If equal disribution
-/// is not possible, the last group will have less elements.
+/// is not possible, the last groups will have less elements.
 RangePartition::RangePartition(unsigned int nItems, unsigned int nGroups) : 
-       itsNumItems(nItems), itsNumGroups(nGroups), itsNumNonVoidGroups(1u), itsTypicalItemsPerGroup(nItems)
+       itsNumItems(nItems), itsNumGroups(nGroups), itsNumNonVoidGroups(1u), itsTypicalItemsPerGroup(nItems),
+       itsNumGroupsWithExtraItem(0u)
 {
    ASKAPCHECK(nItems > 0, "Number of items to distribute should be 1 or more, you have "<<nItems);
    ASKAPCHECK(nGroups > 0, "Number of groups should be 1 or more, you have "<<nGroups);
@@ -72,11 +71,10 @@ RangePartition::RangePartition(unsigned int nItems, unsigned int nGroups) :
            itsNumNonVoidGroups = itsNumGroups;
            ASKAPDEBUGASSERT(itsTypicalItemsPerGroup > 0);
    
-           if (itsNumItems % itsNumGroups != 0) {
-               ++itsTypicalItemsPerGroup;
-          }    
+           itsNumGroupsWithExtraItem = itsNumItems % itsNumGroups;
        }
    }
+   ASKAPASSERT(itsNumGroupsWithExtraItem < itsNumNonVoidGroups);
 }
    
 /// @brief obtain the number of items in the given group
@@ -85,17 +83,11 @@ RangePartition::RangePartition(unsigned int nItems, unsigned int nGroups) :
 unsigned int RangePartition::nItemsThisGroup(unsigned int group) const
 {
    ASKAPCHECK(group < itsNumGroups, "Requested group = "<<group<<" exceeds the number of groups defined ("<<itsNumGroups<<")");
-   if (group + 1 < itsNumNonVoidGroups) {
-       return itsTypicalItemsPerGroup;
-   } else if (group + 1 == itsNumNonVoidGroups) {
-       if (group == 0) {
-           return itsNumItems;
-       }
-       ASKAPDEBUGASSERT(itsNumNonVoidGroups >= 1);
-       const unsigned int itemsInAllGroupsBeforeLast = itsTypicalItemsPerGroup * group;
-       //std::cout<<"group = "<<group<<" "<<itsTypicalItemsPerGroup<<" "<<itsNumNonVoidGroups<<" "<<itemsInAllGroupsBeforeLast<<std::endl;
-       ASKAPDEBUGASSERT(itemsInAllGroupsBeforeLast < itsNumItems);
-       return itsNumItems - itemsInAllGroupsBeforeLast;
+   ASKAPDEBUGASSERT(itsNumGroupsWithExtraItem < itsNumNonVoidGroups);
+   if (group < itsNumNonVoidGroups) {
+       // should have at least some elements
+       ASKAPDEBUGASSERT(itsTypicalItemsPerGroup > 0);
+       return  group < itsNumGroupsWithExtraItem ? itsTypicalItemsPerGroup + 1u : itsTypicalItemsPerGroup;
    }
    return 0;
 }
@@ -108,8 +100,9 @@ unsigned int RangePartition::nItemsThisGroup(unsigned int group) const
 unsigned int RangePartition::first(unsigned int group) const
 {
    ASKAPCHECK(group < itsNumNonVoidGroups, "Requested group = "<<group<<" exceeds the number of groups with non-zero elements ("<<itsNumNonVoidGroups<<")");
+   ASKAPDEBUGASSERT(itsNumGroupsWithExtraItem < itsNumNonVoidGroups);
   
-   return group * itsTypicalItemsPerGroup;
+   return group <= itsNumGroupsWithExtraItem ? group * (itsTypicalItemsPerGroup + 1u) : itsNumGroupsWithExtraItem * (itsTypicalItemsPerGroup + 1u) + (group - itsNumGroupsWithExtraItem) * itsTypicalItemsPerGroup;
 }
 
 /// @brief get the last item of the given group

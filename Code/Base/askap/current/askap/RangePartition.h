@@ -57,7 +57,7 @@ public:
    /// @note The constructor encapsulates all the logic of doing the partitioning.
    /// The result is cached in the data members. The adopted numbering is such that
    /// all groups with non-zero number of items have lower numbers. If equal disribution
-   /// is not possible, the last group will have less elements.
+   /// is not possible, the last groups will have less elements.
    RangePartition(unsigned int nItems, unsigned int nGroups);
    
    /// @brief obtain the number of items in the given group
@@ -107,8 +107,12 @@ private:
    unsigned int itsNumNonVoidGroups;
 
    /// @brief typical number of items per group
-   /// @details The last group may have a different number of items
+   /// @details The first several groups may have one extra item.  The number of
+   /// such groups is controlled by itsNumGroupsWithExtraItem;
    unsigned int itsTypicalItemsPerGroup;
+
+   /// @brief number of groups with one additional item
+   unsigned int itsNumGroupsWithExtraItem;
 };
 
 } // namespace utility
