@@ -34,6 +34,7 @@
 #include <SignalCounterTest.h>
 #include <IndexConverterTest.h>
 #include "CircularBufferTest.h"
+#include "RangePartitionTest.h"
 
 
 BOOST_CONSTEXPR_OR_CONST double askap::AskapUtilTest::dblTolerance;
@@ -50,6 +51,7 @@ int main(int argc, char *argv[])
     runner.addTest(askap::SignalCounterTest::suite());
     runner.addTest(askap::utility::IndexConverterTest::suite());
     runner.addTest(askap::utility::CircularBufferTest::suite());
+    runner.addTest(askap::utility::RangePartitionTest::suite());
 
     bool wasSucessful = runner.run();
 
