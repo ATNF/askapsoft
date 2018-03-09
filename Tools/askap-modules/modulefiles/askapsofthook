@@ -30,6 +30,9 @@ proc ModulesHelp { } {
         puts stderr "galaxy-1:$ module load askapsofthook"
         puts stderr "Preferencing ASKAPsoft libs found in /group/askap/you/mylibs\n"
 
+        puts stderr "Disclaimers:"
+        puts stderr "WARNING: using this module means you are not testing your code against the developing ASKAPsoft codebase."
+        puts stderr "Success of your testing here does not indicate success for the next release." 
         puts stderr "WARNING: not sure how long this will stay around for - experimental."
 }
 
