@@ -70,7 +70,7 @@ class Setuptools(Builder):
         else:
             cmd = "%s setup.py install" % self._pycmd
 
-        if os.getcwd().find("Tools") > 0:
+        if utils.in_tools_tree():
             msg = "info: 'setuptools egg install', imports use default version."
         else:
             msg = "info: 'setuptools in local 'install' directory."
@@ -92,7 +92,7 @@ class Setuptools(Builder):
     def _clean(self):
         # Cleaning in Tools is done explicitly in rbuild script
         # and do not want it run a second time and complaining.
-        if not 'Tools' in os.getcwd(): # i.e. in 3rdParty and Code
+        if not utils.in_tools_tree():
             if os.path.exists("setup.py"):
                 utils.run("%s setup.py clean" % self._pycmd)
         Builder._clean(self)

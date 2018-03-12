@@ -195,7 +195,7 @@ class Builder:
         '''
         Create an init script for this package if in Code or 3rdParty.
         '''
-        if self.no_initscript or self._bdir.find('Tools') != -1:
+        if self.no_initscript or utils.in_tools_tree():
             return
         env = utils.Environment(self.dep, self._prefix,
                                  os.path.join(self._bdir, self._infofile))

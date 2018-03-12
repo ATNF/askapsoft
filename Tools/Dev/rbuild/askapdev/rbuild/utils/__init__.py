@@ -58,3 +58,4 @@ from environment import Environment
 from reposupdate import update_command, update_tree
 from in_code_tree import in_code_tree
 from in_dev_tree import in_dev_tree
+from in_tools_tree import in_tools_tree

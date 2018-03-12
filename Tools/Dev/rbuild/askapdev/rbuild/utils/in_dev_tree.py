@@ -27,10 +27,12 @@
 import os
 
 DEV_DIR = os.path.join("Tools", "Dev")
+ASKAP_ROOT = os.environ['ASKAP_ROOT']
 
 def in_dev_tree():
     '''Are we inside the "Tools/Dev" tree (ASKAPsoft developer tools)'''
-    return DEV_DIR in os.getcwd()
+    rpath = os.path.relpath(os.getcwd(), ASKAP_ROOT)
+    return DEV_DIR in rpath
 
 if __name__ == "__main__":
     print in_dev_tree() and "Yes" or "No"

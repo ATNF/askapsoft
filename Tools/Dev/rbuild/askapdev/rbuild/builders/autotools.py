@@ -74,7 +74,7 @@ class Autotools(Builder):
 
     def _configure(self):
         if self._ccom:
-            if os.path.abspath(os.curdir).find("Tools") > 0:
+            if utils.in_tools_tree():
                 self._prefix = self._askaproot
             cmd = "./%s %s --prefix=%s" % (self._ccom, self._opts, self._prefix)
             utils.run(cmd, self.nowarnings)

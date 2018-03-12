@@ -78,7 +78,7 @@ class CMake(Builder):
 
     def _configure(self):
         if self._ccom:
-            if os.path.abspath(os.curdir).find('Tools') > 0:
+            if utils.in_tools_tree():
                 self._prefix = self._askaproot
             if not os.path.exists(self._cmakedir):
                 os.makedirs(self._cmakedir)
