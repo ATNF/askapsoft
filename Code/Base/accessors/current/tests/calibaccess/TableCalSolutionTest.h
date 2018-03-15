@@ -33,6 +33,7 @@
 #include <calibaccess/TableCalSolutionSource.h>
 #include <calibaccess/ParsetCalSolutionAccessor.h>
 #include <calibaccess/JonesIndex.h>
+#include <calibaccess/ChanAdapterCalSolutionConstSource.h>
 #include <casacore/tables/Tables/Table.h>
 
 
@@ -49,6 +50,8 @@ class TableCalSolutionTest : public CppUnit::TestFixture
    CPPUNIT_TEST_SUITE(TableCalSolutionTest);
    CPPUNIT_TEST(testCreate);
    CPPUNIT_TEST(testRead);
+   CPPUNIT_TEST(testChanAdapterRead);
+   CPPUNIT_TEST_EXCEPTION(testChanAdapterUndefinedBandpass, AskapError);
    CPPUNIT_TEST_EXCEPTION(testUndefinedGains, AskapError);
    CPPUNIT_TEST_EXCEPTION(testUndefinedLeakages, AskapError);
    CPPUNIT_TEST_EXCEPTION(testUndefinedBandpasses, AskapError);
@@ -115,19 +118,10 @@ public:
        acc = css->rwSolution(newID);
        acc->setBandpass(JonesIndex(1u,1u),JonesJTerm(casa::Complex(1.0,-0.2),true,casa::Complex(0.9,-0.1),true),1u);       
    }
-   
-   void testRead() {
-       // rerun the code creating a table, although we could've just relied on the fact that testCreate() is executed
-       // just before this test
-       testCreate();
-       const boost::shared_ptr<ICalSolutionConstSource> css = roSource();
-       CPPUNIT_ASSERT(css);
-       const long sID = css->mostRecentSolution();
-       CPPUNIT_ASSERT_EQUAL(2l, sID);
-       for (long id = 0; id<3; ++id) {
-            CPPUNIT_ASSERT_EQUAL(id, css->solutionID(0.5+60.*id));
-       }
-       const boost::shared_ptr<ICalSolutionConstAccessor> acc = css->roSolution(sID);
+
+   // common code testing leakages and gains in the test table
+   // it is used in both normal source/accessor test 
+   void doGainAndLeakageTest(const boost::shared_ptr<ICalSolutionConstAccessor> &acc) {
        CPPUNIT_ASSERT(acc);
        // test gains
        for (casa::uInt ant = 0; ant<6; ++ant) {
@@ -165,6 +159,23 @@ public:
                  }
             }
        }
+   }
+   
+   void testRead() {
+       // rerun the code creating a table, although we could've just relied on the fact that testCreate() is executed
+       // just before this test
+       testCreate();
+       const boost::shared_ptr<ICalSolutionConstSource> css = roSource();
+       CPPUNIT_ASSERT(css);
+       const long sID = css->mostRecentSolution();
+       CPPUNIT_ASSERT_EQUAL(2l, sID);
+       for (long id = 0; id<3; ++id) {
+            CPPUNIT_ASSERT_EQUAL(id, css->solutionID(0.5+60.*id));
+       }
+       const boost::shared_ptr<ICalSolutionConstAccessor> acc = css->roSolution(sID);
+       CPPUNIT_ASSERT(acc);
+       doGainAndLeakageTest(acc);
+
        // test bandpasses
        for (casa::uInt ant = 0; ant<6; ++ant) {
             for (casa::uInt beam = 0; beam<3; ++beam) {
@@ -172,6 +183,45 @@ public:
                  for (casa::uInt chan = 0; chan < 8; ++chan) {
                       const JonesJTerm bp = acc->bandpass(index,chan);
                       if ((ant == 1) && (beam == 1) && (chan == 1)) {
+                          testComplex(casa::Complex(1.0,-0.2), bp.g1());
+                          testComplex(casa::Complex(0.9,-0.1), bp.g2());
+                          CPPUNIT_ASSERT(bp.g1IsValid());
+                          CPPUNIT_ASSERT(bp.g2IsValid());                               
+                      } else {
+                          // default bandpass gain is 1.0
+                          testComplex(casa::Complex(1.0,0.), bp.g1());
+                          testComplex(casa::Complex(1.0,0.), bp.g2());
+                          CPPUNIT_ASSERT(!bp.g1IsValid());
+                          CPPUNIT_ASSERT(!bp.g2IsValid());                                                    
+                      }
+                 }
+            }
+       }       
+   }
+
+   void testChanAdapterRead() {
+       // rerun the code creating a table, although we could've just relied on the fact that testCreate() is executed
+       // just before this test
+       testCreate();
+       // adapter to offse everything by one channel
+       const boost::shared_ptr<ICalSolutionConstSource> css(new ChanAdapterCalSolutionConstSource(roSource(),1u));
+       CPPUNIT_ASSERT(css);
+       const long sID = css->mostRecentSolution();
+       CPPUNIT_ASSERT_EQUAL(2l, sID);
+       for (long id = 0; id<3; ++id) {
+            CPPUNIT_ASSERT_EQUAL(id, css->solutionID(0.5+60.*id));
+       }
+       const boost::shared_ptr<ICalSolutionConstAccessor> acc = css->roSolution(sID);
+       CPPUNIT_ASSERT(acc);
+       doGainAndLeakageTest(acc);
+
+       // test bandpasses
+       for (casa::uInt ant = 0; ant<6; ++ant) {
+            for (casa::uInt beam = 0; beam<3; ++beam) {
+                 const JonesIndex index(ant,beam);
+                 for (casa::uInt chan = 0; chan < 7; ++chan) {
+                      const JonesJTerm bp = acc->bandpass(index,chan);
+                      if ((ant == 1) && (beam == 1) && (chan == 0)) {
                           testComplex(casa::Complex(1.0,-0.2), bp.g1());
                           testComplex(casa::Complex(0.9,-0.1), bp.g2());
                           CPPUNIT_ASSERT(bp.g1IsValid());
@@ -207,6 +257,22 @@ public:
        CPPUNIT_ASSERT(acc);
        // only 6 antennas, 3 beams and 8 channels are defined
        acc->bandpass(JonesIndex(0u,0u),8);
+   }
+
+   void testChanAdapterUndefinedBandpass() {
+       // rerun the code creating a table, although we could've just relied on the fact that testCreate() is executed
+       // just before this test
+       testCreate();
+       // adapter to offse everything by one channel
+       const boost::shared_ptr<ICalSolutionConstSource> css(new ChanAdapterCalSolutionConstSource(roSource(),1u));
+       CPPUNIT_ASSERT(css);
+       const long sID = css->mostRecentSolution();
+       CPPUNIT_ASSERT_EQUAL(2l, sID);
+       const boost::shared_ptr<ICalSolutionConstAccessor> acc = css->roSolution(sID);
+       CPPUNIT_ASSERT(acc);
+
+       // only 6 antennas, 3 beams and 8 channels are defined, after offseting by one channel we got 7 channels only
+       acc->bandpass(JonesIndex(0u,0u),7);
    }
    
    void testUndefinedSolution() {
