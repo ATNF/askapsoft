@@ -44,7 +44,7 @@ class IngestPipelineMonitor(MonitoringProvider):
         timestamp = bat_now()
 
         point = MonitorPoint()
-        point.name = "cp.ingest.obs.FieldName"
+        point.name = "ingest36.cp.ingest.obs.FieldName"
         point.timestamp = timestamp
         string_typed_value = ice_types.TypedValueString(ice_types.TypedValueType.TypeString, 'Virgo')
         point.value = string_typed_value
@@ -52,7 +52,7 @@ class IngestPipelineMonitor(MonitoringProvider):
         points.append(point)
 
         point = MonitorPoint()
-        point.name = "cp.ingest.obs.ScanId"
+        point.name = "ingest36.cp.ingest.obs.ScanId"
         point.timestamp = timestamp
         int_typed_value = ice_types.TypedValueInt(ice_types.TypedValueType.TypeInt, 73)
         point.value = int_typed_value

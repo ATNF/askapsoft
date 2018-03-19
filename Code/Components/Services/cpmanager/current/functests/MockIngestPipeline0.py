@@ -44,7 +44,7 @@ class IngestPipelineMonitor(MonitoringProvider):
         timestamp = bat_now()
 
         point = MonitorPoint()
-        point.name = "cp.ingest.obs.StartFreq"
+        point.name = "ingest0.cp.ingest.obs.StartFreq"
         point.timestamp = timestamp
         double_typed_value = ice_types.TypedValueFloat(ice_types.TypedValueType.TypeFloat, 1376.5)
         point.value = double_typed_value
@@ -53,7 +53,7 @@ class IngestPipelineMonitor(MonitoringProvider):
         points.append(point)
 
         point = MonitorPoint()
-        point.name = "cp.ingest.obs.nChan"
+        point.name = "ingest0.cp.ingest.obs.nChan"
         point.timestamp = timestamp
         double_typed_value = ice_types.TypedValueInt(ice_types.TypedValueType.TypeInt, 864)
         point.value = double_typed_value
@@ -61,7 +61,7 @@ class IngestPipelineMonitor(MonitoringProvider):
         points.append(point)
 
         point = MonitorPoint()
-        point.name = "cp.ingest.obs.ChanWidth"
+        point.name = "ingest0.cp.ingest.obs.ChanWidth"
         point.timestamp = timestamp
         double_typed_value = ice_types.TypedValueDouble(ice_types.TypedValueType.TypeDouble, 18.518518)
         point.value = double_typed_value
