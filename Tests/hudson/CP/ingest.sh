@@ -77,6 +77,12 @@ scons test
 cd $WORKSPACE/trunk/Code/Components/Services/common/current
 scons test
 
+cd $WORKSPACE/trunk/Code/Base/accessors/current
+scons test
+
+cd $WORKSPACE/trunk/Code/Base/askap/current
+scons test
+
 #
 # Phase 2
 #
