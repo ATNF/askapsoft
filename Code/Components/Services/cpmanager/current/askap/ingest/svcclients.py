@@ -2,6 +2,7 @@ import Ice
 import json
 import threading
 import time, math
+import subprocess
 
 import askap.iceutils.monitoringprovider
 
@@ -28,25 +29,40 @@ class IngestMonitor(threading.Thread):
         self.daemon = True
         self.ice_monitoring_client = IceMonitoringServiceClient(comm, param)
         self.cpObsServer = cpObsServer
+        self.params = param
+        self.sbid = -1
 
     def run(self):
         while True:
             try:
                 # check if ingest is running
                 sbid = self.cpObsServer.get_current_sbid()
-                self._monitor.add('ingest.running', (sbid>-1));
+                self._monitor.add('ingest.running', (sbid>-1))
                 if (sbid >= 0):
                     # poll ingest services for monitoring point values
+                    self.sbid = sbid
                     self.ice_monitoring_client.process_ingest_monitoring(sbid)
                 else:
+                    # start post ingest script if necessary
+                    if (self.sbid > 0):
+                        self.start_postingest(self.sbid)
+                        self.sbid = -1
+
                     # make sure all ingest monitoring points are removed
                     self.ice_monitoring_client.remove_monitoring_points()
 
                 time.sleep(1)
             except Exception as ex:
                 # logging
-                logger.error('Error while trying to run ingest ', str(ex))
+                logger.error('Error while trying to poll ingest ', str(ex))
 
+    def start_postingest(self, sbid):
+        logger.debug("start postingest for " + str(sbid))
+        return
+#        command = self.params.get("cp.ingest.postingest.script")
+#        cmd = [command, sbid]
+#        logger.info("start post ingest script: " + str(cmd))
+#        subprocess.Popen(cmd, shell=False)
 
 class IceMonitoringServiceClient(object):
     def __init__(self, comm, param):
@@ -73,6 +89,8 @@ class IceMonitoringServiceClient(object):
             counts = host.split(':')
             self.rank_count += int(counts[1])
 
+        logger.debug("total rank_count " + str(self.rank_count))
+
         self.ingest_service_map = {}
         for i in range(0, self.rank_count):
             self.ingest_service_map[i] = None
@@ -96,23 +114,28 @@ class IceMonitoringServiceClient(object):
                     provider = get_service(adaptor_name,
                                                       MonitoringProviderPrx, self._comm)
                     self.ingest_service_map[i] = provider
+                    logger.debug("Connected to MonitoringService@IngestPipelineMonitoringAdapter" + str(i))
+
                 except Exception as e:
                     # if ingest is not running move on
                     continue
 
+            points = []
+            pointnames = []
+            for name in self.pointnames:
+                pointnames.append("ingest" + str(i) + "." + name)
+
             try:
-                points = []
-                pointvalues = provider.get(self.pointnames)
+                pointvalues = provider.get(pointnames)
             except Exception as e:
                 # if ingest is not running need to remove the monitoring points
-                logger.error('Ingest no longer running')
                 self.remove_monitoring_points(ingest='ingest' + str(i))
                 continue
 
             for point in pointvalues:
                 # convert points to map
                 p_map = {
-                    'name': 'ingest' + str(i) + "." + point.name,
+                    'name': point.name,
                     'timestamp': point.timestamp,
                     'value': point.value.value,
                     'status': point.status.name,
@@ -145,6 +168,7 @@ class DataServiceClient(object):
                           ISchedulingBlockServicePrx, comm)
 
     def setObsVariables(self, sbid, obsvars):
+        logger.debug("set obs var for " + str(sbid) + ": " + str(obsvars))
         self.data_service.setObsVariables(sbid, obsvars)
 
     def update(self, sbid, pointvalues):
@@ -153,11 +177,11 @@ class DataServiceClient(object):
 
         startFreqPoint = nChanPoint = chanWidthPoint = {}
         for point in pointvalues:
-            if point.name == "cp.ingest.obs.StartFreq":
+            if point.name.endswith("cp.ingest.obs.StartFreq"):
                 startFreqPoint = point
-            elif point.name == "cp.ingest.obs.nChan":
+            elif point.name.endswith("cp.ingest.obs.nChan"):
                 nChanPoint = point
-            elif point.name == "cp.ingest.obs.ChanWidth":
+            elif point.name.endswith("cp.ingest.obs.ChanWidth"):
                 chanWidthPoint = point
 
 
