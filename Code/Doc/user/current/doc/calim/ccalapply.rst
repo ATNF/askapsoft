@@ -12,8 +12,12 @@ the configuration parameters described in the next section. ::
 
    $ ccalapply -c config.in
 
-The *ccalapply* program is not parallel/distributed, it runs in a single process operating
-on a single input measurement set.
+The *ccalapply* program can either be used in the serial mode when it runs on a single input measurement set or
+in parallel/distributed mode where there are two options (see the *distribute* parset parameter). First, each 
+rank can work with its own measurement set. This may be handy if one has one measurement set per beam or other 
+distribution which leaves the frequency axis intact. The second option involves distribution of data in frequency
+space internally. Only one measurement set should be given in this case and the appropriate split is done based on
+the available number of ranks. This is the default behaviour. These details have no effect in the serial mode.
 
 Configuration Parameters
 ------------------------
@@ -33,7 +37,9 @@ are applicable. Specifically:
 |**Parameter**             |**Type**          |**Default**   |**Description**                                     |
 +==========================+==================+==============+====================================================+
 |dataset                   |string            |None          |The name of the measurement set to which the        |
-|                          |                  |              |calibration parameters will be applied.             |
+|                          |                  |              |calibration parameters will be applied. In the      |
+|                          |                  |              |parallel mode with the *distribution* option is     |
+|                          |                  |              |false, usual substitute rules apply.                |
 +--------------------------+------------------+--------------+----------------------------------------------------+
 |calibrate.scalenoise      |bool              |false         |If true, the noise estimate will be scaled in       |
 |                          |                  |              |accordance with the applied calibrator factor to    |
@@ -58,6 +64,20 @@ are applicable. Specifically:
 |                          |                  |              |once and then each spectral slice will be made from |
 |                          |                  |              |this reduced cube for the price of having more      |
 |                          |                  |              |iterations).                                        |
++--------------------------+------------------+--------------+----------------------------------------------------+
+|distribute                |bool              |true          |If the application is executed in the parallel mode |
+|                          |                  |              |(i.e. more than one rank is available) and this     |
+|                          |                  |              |option is true, the data are split in frequency     |
+|                          |                  |              |between all available workers (i.e. ranks with non-\|
+|                          |                  |              |zero numbers) which do calibration application. The |
+|                          |                  |              |master rank (always rank 0) writes the result to the|
+|                          |                  |              |measurement set. If this option is false, each rank |
+|                          |                  |              |is expected to deal with its own measurement set and|
+|                          |                  |              |its own reading, calibration application and        |
+|                          |                  |              |writing. Note, there is no master in this mode. So  |
+|                          |                  |              |the substitution rules should use rank (%r) rather  |
+|                          |                  |              |than the worker (%w) number. This option has no     |
+|                          |                  |              |effect in the serial mode.                          |
 +--------------------------+------------------+--------------+----------------------------------------------------+
 
 Example

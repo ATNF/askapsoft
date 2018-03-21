@@ -58,8 +58,10 @@ Parset parameters understood by imager are given in the following table (all par
 must have **Cimager** prefix, i.e. **Cimager.dataset**). For a number of parameters
 certain keywords are substituted, i.e. **%w** is replaced by the worker number (rank-1, if
 there is only one pool of workers) and **%n** by the number of nodes in the parallel case.
-In the serial case, these special strings are substituted by 0 and 1, respectively. This
-substitution allows to reuse the same parameter file on all nodes of the cluster if the
+In the serial case, these special strings are substituted by 0 and 1, respectively. Similarly,
+**%r** is substituted by the rank number rather than the worker number. This may be handy for 
+tasks which do not have a master or if it is more practical to number the files starting from 1.
+The substitution allows to reuse the same parameter file on all nodes of the cluster if the
 difference between jobs assigned to individual nodes can be coded by using these keywords
 (e.g. using specially crafted file names). Note, if there is more than 1 group of workers
 (e.g. parallel calculation of Taylor terms), %w index spans the workers in one group
