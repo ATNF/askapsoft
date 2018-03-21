@@ -384,8 +384,8 @@ std::string AskapParallel::substitute(const std::string& s) const
 
         cs.gsub(regWork, oos.str());
     }
-    const casa::Regex regNode("\%n");
     {
+        const casa::Regex regNode("\%n");
         ostringstream oos;
 
         if (itsNProcs > 1) {
@@ -395,6 +395,18 @@ std::string AskapParallel::substitute(const std::string& s) const
         }
 
         cs.gsub(regNode, oos.str());
+    }
+    {
+        const casa::Regex regRank("\%r");
+        ostringstream oos;
+
+        if (itsNProcs > 1) {
+            oos << itsRank;
+        } else {
+            oos << 1;
+        }
+
+        cs.gsub(regRank, oos.str());
     }
     return string(cs);
 }
