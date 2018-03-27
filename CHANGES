@@ -1,3 +1,16 @@
+0.20.2 (27 March 2018)
+----------------------
+
+A patch release that fixes a few bugs in the build to do with missing directories:
+
+ * Modified several build configurations so that missing directories do not make the
+   build fail. Missing directories can be present as a result of a bug in our SVN to 
+   BitBucket sync which ignores empty directories (even if there is a .gitxxxx file in 
+   it). Subsequently, cloning the git repo causes these directories to be missing
+   which can cause a failed build for some packages. In these cases, the build
+   script has been changed to create the missing directories if they are missing.
+ * Note there are no application code or documentation changes for this release.
+
 0.20.1 (08 March 2018)
 ----------------------
 

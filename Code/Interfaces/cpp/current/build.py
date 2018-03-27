@@ -1,5 +1,10 @@
+import os
 from askapdev.rbuild.builders import Scons as Builder
 
+# This directory is expected by the build system
+if not os.path.exists("icegenerated"):
+    os.makedirs("icegenerated")
+    
 b = Builder(".")
 b.build()
 

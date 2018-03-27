@@ -3,6 +3,14 @@ from askapdev.rbuild.builders import Data as DataBuilder
 from askapdev.rbuild.builders import Builder
 import askapdev.rbuild.utils as utils
 
+# This directory is expected by the build system
+if not os.path.exists("scripts/include"):
+    os.makedirs("scripts/include")
+
+# This directory is expected by the build system
+if not os.path.exists("scripts/lib"):
+    os.makedirs("scripts/lib")
+
 builder = Builder(".")
 builder.build()
 databuilder = DataBuilder("scripts")
