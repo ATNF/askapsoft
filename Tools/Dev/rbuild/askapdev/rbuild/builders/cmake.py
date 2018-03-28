@@ -74,6 +74,7 @@ class CMake(Builder):
                          installcommand=installcommand)
 
         self._cmakedir = 'build'
+        self.add_extra_clean_targets('build')
 
 
     def _configure(self):
