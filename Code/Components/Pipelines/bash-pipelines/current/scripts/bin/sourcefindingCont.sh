@@ -380,7 +380,7 @@ EOFINNER
                     rm -f \${validationDirCopy}/*.csv
                 fi
             fi
-            chmod -R g+w \${copyLocation}
+            chmod -R g+w \${validationDirCopy}
         fi
     fi
 
