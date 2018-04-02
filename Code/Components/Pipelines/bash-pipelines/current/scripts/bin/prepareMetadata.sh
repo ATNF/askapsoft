@@ -205,6 +205,64 @@ EOF
         exit 1
     fi
 
+    ######
+    # Get the schedblock info, so that we can get the number of beams
+    # For the non-BETA case, we use schedblock from the askapcli
+    # module - this polls the online scheduling-block database
+    sbinfoCal="${metadata}/schedblock-info-${SB_1934}.txt"
+    if [ "${IS_BETA}" != "true" ]; then
+
+        if [ "${USE_CLI}" != "true" ]; then
+
+            if [ -e "${sbinfoCal}" ]; then
+                echo "Reusing schedblock info results $sbinfoCal"
+            else
+                echo "The schedblock service is not available, and you don't have a pre-computed SB info file."
+                echo "    (did not find $sbinfoCal)"
+                exit 1
+            fi
+
+        else
+            
+            # Run schedblock to get footprint information (if present)
+            getSchedblock=true
+            if [ -e "${sbinfoCal}" ]; then
+                if [ "$(grep -c "${METADATA_IS_GOOD}" "${sbinfoCal}")" -gt 0 ]; then
+                    # SB info file exists and is complete. Don't need to regenerate.
+                    getSchedblock=false
+                else
+                    rm -f "$sbinfo"
+                fi
+            fi
+            if [ "${getSchedblock}" == "true" ]; then
+                loadModule askapcli
+                schedblock info -v -p "${SB_1934}" > "$sbinfoCal"
+                err=$?
+                unloadModule askapcli
+                if [ $err -ne 0 ]; then
+                    echo "ERROR - the 'schedblock' command failed."
+                    echo "        Full command:   schedblock info -v -p ${SB_1934}"
+                    echo "Exiting pipeline."
+                    exit $err
+                fi
+            fi
+            
+        fi
+        if [ -e ${sbinfoCal} ]; then
+            FP_NAME_CAL=$(grep footprint.name $sbinfoCal | awk '{print $3}' | sort | uniq | tail)
+            if [ "${FP_NAME_CAL}" != "" ]; then
+                # Get the number of beams in this footprint
+                if [ "${USE_CLI}" == "true" ]; then
+                    loadModule askapcli
+                    NUM_BEAMS_FOOTPRINT_CAL=$(footprint info ${FP_NAME_CAL} | grep n_beams | awk '{print $3}')
+                    unloadModule askapcli
+                fi
+            fi
+        fi
+
+    fi
+    # @todo Add test here comparing NUM_BEAMS_FOOTPRINT_CAL with
+    # number of scans in schedblock info file
 
 fi
 

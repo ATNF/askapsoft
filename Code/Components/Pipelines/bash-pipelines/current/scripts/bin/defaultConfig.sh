@@ -222,6 +222,7 @@ USE_CLI=true
 ####################
 # Which beams to use.
 NUM_BEAMS_FOOTPRINT=36
+NUM_BEAMS_FOOTPRINT_CAL=36
 BEAM_MIN=0
 BEAM_MAX=35
 BEAMLIST=""

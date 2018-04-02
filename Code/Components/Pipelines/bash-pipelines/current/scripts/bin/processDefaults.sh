@@ -458,6 +458,12 @@ srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} \"${PIPELINEDIR
             BEAM_MAX=$(echo $NUM_BEAMS_FOOTPRINT | awk '{print $1-1}')
             echo "WARNING - SB ${SB_SCIENCE} only has ${NUM_BEAMS_FOOTPRINT} beams - setting BEAM_MAX=${BEAM_MAX}"
         fi
+        if [ "${NUM_BEAMS_FOOTPRINT_CAL}" != "" ] &&
+               [ ${BEAM_MAX} -ge ${NUM_BEAMS_FOOTPRINT_CAL} ] &&
+               [ "${DO_1934_CAL}" == "true" ]; then
+            BEAM_MAX=$(echo $NUM_BEAMS_FOOTPRINT_CAL | awk '{print $1-1}')
+            echo "WARNING - Bandpass SB ${SB_1934} only has ${NUM_BEAMS_FOOTPRINT_CAL} beams - setting BEAM_MAX=${BEAM_MAX}"
+        fi
         for((b=BEAM_MIN;b<=BEAM_MAX;b++)); do
             thisbeam=$(echo "$b" | awk '{printf "%02d",$1}')
             BEAMS_TO_USE="${BEAMS_TO_USE} $thisbeam"
@@ -468,16 +474,13 @@ srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} \"${PIPELINEDIR
         cat > "$beamAwkFile" <<EOF
 BEGIN{
   str=""
-  maxbeam=${NUM_BEAMS_FOOTPRINT}
 }
 {
   n=split(\$1,a,",");
   for(i=1;i<=n;i++){
     n2=split(a[i],a2,"-");
     for(b=a2[1];b<=a2[n2];b++){
-      if (b < maxbeam){
-        str=sprintf("%s %02d",str,b);
-      }
+      str=sprintf("%s %02d",str,b);
     }
   }
 }
@@ -485,7 +488,27 @@ END{
   print str
 }
 EOF
-        BEAMS_TO_USE=$(echo "$BEAMLIST" | awk -f "$beamAwkFile")
+        haveWarnedSci=false
+        haveWarnedCal=false
+        BEAMS_TO_USE=""
+        for b in $(echo "$BEAMLIST" | awk -f "$beamAwkFile"); do
+            if [ "${NUM_BEAMS_FOOTPRINT}" != "" ] &&
+                   [ ${b} -ge $NUM_BEAMS_FOOTPRINT ]; then
+                if [ "${haveWarnedSci}" != "true" ]; then
+                    echo "WARNING - SB ${SB_SCIENCE} only has ${NUM_BEAMS_FOOTPRINT} beams"
+                    haveWarnedSci=true
+                fi
+            elif [ "${NUM_BEAMS_FOOTPRINT_CAL}" != "" ] &&
+                     [ ${b} -ge ${NUM_BEAMS_FOOTPRINT_CAL} ] &&
+                     [ "${DO_1934_CAL}" == "true" ]; then
+                if [ "${haveWarnedCal}" != "true" ]; then
+                    echo "WARNING - Bandpass SB ${SB_1934} only has ${NUM_BEAMS_FOOTPRINT_CAL} beams"
+                    haveWarnedCal=true
+                fi
+            else
+                BEAMS_TO_USE="${BEAMS_TO_USE} $b"
+            fi
+        done
     fi
 
     echo "Using the following beams for the science data: $BEAMS_TO_USE"
