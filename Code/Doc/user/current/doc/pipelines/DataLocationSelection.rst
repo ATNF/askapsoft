@@ -86,6 +86,12 @@ The beams used for the bandpass calibrator will be all beams up to the
 maximum beam requested for the science dataset (either ``BEAM_MAX`` or
 the largest number in ``BEAMLIST``).
 
+The beam list will be limited by the number of beams available in the
+footprints for both the science and bandpass calibrator datasets. If
+more beams are requested via ``BEAMLIST`` or ``BEAM_MAX``, then a
+warning message is given and the list trimmed to match the limits from
+the relevant scheduling blocks. 
+
 +----------------+-----------+--------------------------------------------------+
 | Variable       | Default   | Description                                      |
 +================+===========+==================================================+
