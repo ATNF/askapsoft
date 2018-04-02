@@ -1,3 +1,28 @@
+0.20.3 (2 April 2018)
+---------------------
+
+A patch release fixing a couple of calibrator issues:
+
+ * The 0.20 updates to the calibrator to allow interaction with the
+   calibration data service had prevented ccalibrator from writing
+   more than one row to the output calibration table. This fix ensures
+   the table that gets written has all the information when solving
+   for time-dependent gains.
+ * The bandpass calibrator would very occasionally fail with an error
+   along the lines of "ERROR: SVD decomposition failed to
+   converge". This will now only trigger a WARN in the log file, but
+   will not abort the program. Work is still being done to properly
+   flag channels that suffer this.
+
+And a couple of pipeline issues have been fixed:
+
+ * The beams that are processed by the pipeline are now limited by the
+   number of beams in the bandpass calibrator scheduling block (in the
+   same way that the science SB is used to limit the number of beams).
+ * Minor issues with copying the continuum validation results have
+   been resolved.
+
+
 0.20.2 (27 March 2018)
 ----------------------
 
