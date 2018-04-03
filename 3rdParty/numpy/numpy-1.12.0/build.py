@@ -1,4 +1,4 @@
-import os.path
+import os
 import glob
 import shutil
 
@@ -12,6 +12,12 @@ def callback():
         incdir = os.path.join(bdistdir[0], 'numpy', 'core', 'include')
         if not os.path.exists('install/include'):
             shutil.copytree(incdir ,'install/include')
+    incdir = os.path.join(builder._package, 'numpy', 'core', 'include')
+    if not os.path.exists('install/include'):
+        shutil.copytree(incdir, 'install/include')
+    else:
+        for src in os.listdir(incdir+'/numpy'):
+            shutil.copy2(incdir+'/numpy/'+src,'install/include/numpy')
    
 platform =  utils.get_platform()
 builder = Builder()
