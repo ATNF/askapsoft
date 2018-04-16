@@ -137,6 +137,13 @@ The following parameters are available for the Basisfunction and BasisfunctionMF
 |                   |              |              |approximately the ratio of pixels in the patch to pixels|
 |                   |              |              |in the image.                                           |
 +-------------------+--------------+--------------+--------------------------------------------------------+
+|orthogonal         |bool          |false         |Use orthogonal spatial basisfunctions - this does not   |
+|                   |              |              |appear to be as useful as expected - avoid in normal use|
++-------------------+--------------+--------------+--------------------------------------------------------+
+|decoupled          |bool          |false         |Use decoupled residuals - this improves convergence for |
+|                   |              |              |large scales, allows the use of a lower percentage      | 
+|                   |              |              |threshold.minorcycle and seems to have few drawbacks    |
++-------------------+--------------+--------------+--------------------------------------------------------+
 
 
 All parameters given in the next table **do not** have **solver.Clean** prefix (i.e. Cimager.threshold.minorcycle).
