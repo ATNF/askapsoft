@@ -778,7 +778,7 @@ class Builder:
                                 os.path.join(self._bdir, self._infofile))
         envitems = []
         envstr = ""
-         pysite = os.path.join(self._bdir, self._installdir, "lib",
+        pysite = os.path.join(self._bdir, self._installdir, "lib",
                             "python%s" % sys.version[0:3], "site-packages")
 
         # XXX append the current package site-packages to PYTHONPATH
