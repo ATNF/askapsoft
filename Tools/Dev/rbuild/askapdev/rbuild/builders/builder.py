@@ -778,6 +778,8 @@ class Builder:
                                 os.path.join(self._bdir, self._infofile))
         envitems = []
         envstr = ""
+        # XXX append the current package site-packages to PYTHONPATH
+        # as pandas and others checks to see if it is valid before building.
         for k, v in env.items():
             if v:
                 v = os.path.expandvars(v)
@@ -787,6 +789,10 @@ class Builder:
                     envitems[-1] += ":$%s" % k
                 elif k == "LD_LIBRARY_PATH":
                     envitems[-1] = env.ld_prefix + envitems[-1]
+                if k == "PYTHONPATH":
+                    envitems[-1] += ":%s" % pysite
+            elif k == "PYTHONPATH" and not v:
+                envitems.append("%s=%s" % (k, pysite))
         if len(envitems):
             envstr  = " ".join(['env']+envitems)
         return envstr
