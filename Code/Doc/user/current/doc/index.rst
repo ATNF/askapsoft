@@ -14,3 +14,4 @@ ASKAP Central Processor User Documentation
    services/index.rst
    pipelines/index.rst
    tutorials/index.rst
+   recipes/index.rst
