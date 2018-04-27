@@ -44,19 +44,16 @@ Here is an example slurm file that will use linmos to mosaic images together::
     module use /group/askap/modulefiles
     module load askapdata
     # ### Decide if we need a specific version here
-    module unload askapsoft
-    module load askapsoft/0.19.6
-    module unload askappipeline
-    module load askappipeline/0.19.6
+    module load askapsoft
+    module load askappipeline
     IMAGETYPE_SPECTRAL="casa"
     imList="$(cat imList.txt)"
     wtList="$(cat wtList.txt)"
-    imageName=image.restored.wr.1.i.N7232.cube.combined16_img.contsub.linmos
-    weightsImage=weights.wr.1.i.N7232.cube.combined16_img.contsub.linmos
+    imageName=image.restored.wr.1.i.<object>.cube.combined16_img.contsub.linmos
+    weightsImage=weights.wr.1.i.<object>.cube.combined16_img.contsub.linmos
     echo "Mosaicking to form ${imageName}"
-    # ### Need to define jobCode
-    parset=parsets/science_${jobCode}_${SLURM_JOB_ID}.in
-    log=logs/science_${jobCode}_${SLURM_JOB_ID}.log
+    parset=parsets/science_linmos_${SLURM_JOB_ID}.in
+    log=logs/science_linmos_${SLURM_JOB_ID}.log
     cat > "${parset}" << EOFINNER
     linmos.names        = [${imList}]
     linmos.weights      = [${wtList}]
@@ -74,8 +71,8 @@ Here is an example slurm file that will use linmos to mosaic images together::
 
 Things to change / be aware of:
 
-* imList is the list of images you give to linmos. In this example, I'm pointing it to a text file (imList.txt) that lists the images separated by a comma e.g. <path>restored.contsub.image1, <path>restored.contsub.image2 . Alternatively, you can give the list of images to the imList variable in the slurm file.
-* wtList is the list of weights images produced by imager in exactly the same fashion as mentioned above.
+* imList is the list of images you give to linmos. In this example, I'm pointing it to a text file (imList.txt) that lists the images separated by a comma e.g. restored.contsub.image1, restored.contsub.image2 . Alternatively, you can give the list of images to the imList variable in the slurm file.
+* wtList is the list of weights images produced by imager specified in exactly the same fashion as imList.
 * imageName and weightsImage are the names of the output image and weight map from linmos.
 * Provided no primary beam correction has been applied weightstate=Inherent and weighttype=Combined
 
@@ -128,7 +125,7 @@ Important info:
     # Footprint A
     msin="11Aug_${beam_no}_A_1-649.ms, 12Aug_${beam_no}_A_1-649.ms, 11Oct_${beam_no}_A_1-649.ms"
     # Output name
-    imOut="image.i.N7232.cube.combined7A.b${beam_no}"
+    imOut="image.i.<object>.cube.combinedA.b${beam_no}"
     cat > "$parset" << EOF
     Cimager.dataset         = [$msin]
     Cimager.imagetype       = casa
@@ -235,12 +232,11 @@ Here is an example slurm file that will use imcontsub to remove continuum residu
     # Swapping to the requested askapsoft module
     module use /group/askap/modulefiles
     module load askapdata
-    module swap askapsoft askapsoft/0.19.6
-    module unload askappipeline
-    module load askappipeline/0.19.6
+    module load askapsoft
+    module load askappipeline
     module load casa
     beam_no="09"
-    IMAGE_BASE_SPECTRAL=i.N7232.cube.combined6A.beam${beam_no}
+    IMAGE_BASE_SPECTRAL=i.<object>.cube.combinedA.beam${beam_no}
     imageName=image.restored.wr.1.${IMAGE_BASE_SPECTRAL}
     if [ ! -e "${imageName}" ]; then
         echo "Image cube ${imageName} does not exist."
@@ -309,18 +305,16 @@ Here is an example slurm file that will use linmos to mosaic (combined) images t
     # Using user-defined askapsoft module
     module use /group/askap/modulefiles
     module load askapdata
-    module unload askapsoft
-    module load askapsoft/0.19.6
-    module unload askappipeline
-    module load askappipeline/0.19.6
+    module load askapsoft
+    module load askappipeline
     IMAGETYPE_SPECTRAL="casa"
-    imList="image.restored.wr.1.i.N7232.cube.B0.b10.contsub,image.restored.wr.1.i.N7232.cube.B0.b25.contsub,image.restored.wr.1.i.N7232.cube.2Arot.b08"
-    wtList="weights.wr.1.i.N7232.cube.B0.b10,weights.wr.1.i.N7232.cube.B0.b25,weights.wr.1.i.N7232.cube.2Arot.b08"
+    imList="image.restored.wr.1.i.N7232.cube.B0.b10.contsub","image.restored.wr.1.i.N7232.cube.B0.b25.contsub","image.restored.wr.1.i.N7232.cube.2Arot.b08"
+    wtList="weights.wr.1.i.N7232.cube.B0.b10","weights.wr.1.i.N7232.cube.B0.b25","weights.wr.1.i.N7232.cube.2Arot.b08"
     imageName=image.restored.wr.1.i.N7232.cube.combined16_R.5.linmos.contsub
     weightsImage=weights.wr.1.i.N7232.cube.combined16_R.5.linmos.contsub
     echo "Mosaicking to form ${imageName}"
-    parset=parsets/science_${jobCode}_${SLURM_JOB_ID}.in
-    log=logs/science_${jobCode}_${SLURM_JOB_ID}.log
+    parset=parsets/science_linmos_${SLURM_JOB_ID}.in
+    log=logs/science_linmos_${SLURM_JOB_ID}.log
     cat > "${parset}" << EOFINNER
     linmos.names            = [${imList}]
     linmos.weights          = [${wtList}]
@@ -339,6 +333,6 @@ Here is an example slurm file that will use linmos to mosaic (combined) images t
 Things to change / be aware of:
 
 * imList is the list of images you give to linmos. In this example, I have given the combined, continuum subtracted images directly to the imList variable.
-* wtList is the weights images produced by imager in exactly the same fashion as mentioned above.
+* wtList is the list of weights images produced by imager specified in exactly the same fashion as imList.
 * imageName and weightsImage are the names of the output image and weight map from linmos.
 * Provided no primary beam correction has been applied use weightstate=Inherent and weighttype=Combined
