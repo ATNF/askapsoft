@@ -1,41 +1,30 @@
-Multi‐epoch data combination
-=================================
+Multi-epoch data combination for spectral cubes
+===============================================
 (After the original guide by Dane Kleiner)
 
 There are several ways to combine multi-epoch data with ASKAPsoft:
 
-* Do all the calibration and imaging separately and then combine the images using linear mosaicking
-* Combine data for the same beams and footprints in the UV-plane during imaging, gaining the advantage of better signal to noise during the deconvolution, then combine the images as before
-* Combine all the data during imaging, doing a full non-linear mosaic - this option would be preferred to recover extended emission, but unfortunately usually requires more memory (and possibly time) than is available and will not be discussed here.
+* Do all the calibration and imaging separately and then combine the images using linear mosaicking (program linmos-mpi)
+* Combine data for the same beams and footprints in the UV-plane during imaging, gaining the advantage of better signal to noise during the deconvolution, then combine the images as before using linmos
+* Combine all the data during imaging, doing a full non-linear mosaic using A-projection. This option would be preferred to best recover extended emission, but it requires knowledge of the primary beams to an accuracy we don't have yet. It also tends to requires more memory (and possibly time) than is available on galaxy and thus will not be described here at the moment.
 
 General info:
-To submit any of the example slurm files, copy the text into a file.sbatch, modify the necessary parts and submit using <sbatch file.sbatch>. In any of the slurm files:
+To submit any of the example slurm files, copy the text into a <file>.sbatch, modify the necessary parts and submit using *sbatch file.sbatch*.
+In any of the slurm files:
 
-1. If you want to produce the slurm output, log and parset then you need to point each of them to a valid directory. E.g. I create a directory for each in the location that I run the task.
-2. Submit to galaxy/magnus in the #SBATCH preamble
+1. If you want to produce the slurm output, log and parset then you need to point each of them to a valid directory. E.g., I create a directory for each in the work directory that I run the task.
+2. Submit to galaxy/magnus in the #SBATCH preamble clusters
 3. Insert your email address into #SBATCH ­­mail
-4. Change the #SBATCH ­­output, parset and log directories accordingly
-5. Change the #SBATCH ­­job­name accordingly to the beam you are processing.
-
-Your working directory will not be within your home directory, instead it will reside on
-the fast Lustre filesystem::
-
-    cd /scratch2/askap/$USER
-    mkdir continuumtutorial
-    cd continuumtutorial
-    lfs setstripe -c 4 .
-
-The *lfs setstripe* command configures a Lustre file system attribute for this directory.
-It tells Lustre to stripe files accross 4 storage nodes, for performance reasons.
+4. Set your work directory using #SBATCH workdir
+5. Change the #SBATCH ­­output, parset and log directories
+6. Change the #SBATCH ­­job­name according to the beam you are processing.
 
 
 1) Combining in the Image plane
 -------------------------------
-Important info:
-
-1. To do so, you need to use the linmos program.
-2. This method is the most straightforward. ­­ You feed linmos the individual images to mosaic together. Beware, this limits your cleaning to the sensitivity of a single night.
-3. Below is an example slurm file that will use linmos to mosaic images together.::
+This is the most straightforward method. You just feed the linmos program all the individual restored images and corresponding weights images.
+Beware that this path limits your clean deconvolution to the sensitivity of a single night.
+Here is an example slurm file that will use linmos to mosaic images together::
 
     #!/bin/bash -l
     #SBATCH --partition=workq
@@ -46,13 +35,15 @@ Important info:
     #SBATCH --ntasks=200
     #SBATCH --ntasks-per-node=20
     #SBATCH --job-name=linmosFullScontsub
-    #SBATCH --mail-user=dane.kleiner@csiro.au
+    #SBATCH --mail-user=first.last@csiro.au
     #SBATCH --mail-type=FAIL
     #SBATCH --export=NONE
-    #SBATCH --output=/group/askap/dkleiner/IC5201/COMBINED_IMAGE_PLANE/slurmOutput/slurm-linmosS-%j.out
+    #SBATCH --workdir=/group/askap/<username>/<object>/COMBINED_IMAGE_PLANE
+    #SBATCH --output=slurmOutput/slurm-linmosS-%j.out
     # Using user-defined askapsoft module
     module use /group/askap/modulefiles
     module load askapdata
+    # ### Decide if we need a specific version here
     module unload askapsoft
     module load askapsoft/0.19.6
     module unload askappipeline
@@ -60,11 +51,12 @@ Important info:
     IMAGETYPE_SPECTRAL="casa"
     imList="$(cat imList.txt)"
     wtList="$(cat wtList.txt)"
-    imageName=image.restored.wr.1.i.N7232.cube.combined16_img.linmos.contsub
-    weightsImage=weights.wr.1.i.N7232.cube.combined16.linmos_img.contsub
+    imageName=image.restored.wr.1.i.N7232.cube.combined16_img.contsub.linmos
+    weightsImage=weights.wr.1.i.N7232.cube.combined16_img.contsub.linmos
     echo "Mosaicking to form ${imageName}"
-    parset=/group/askap/dkleiner/IC5201/COMBINED_IMAGE_PLANE/parsets/science_${jobCode}_${SLURM_JOB_ID}.in
-    log=/group/askap/dkleiner/IC5201/COMBINED_IMAGE_PLANE/logs/science_${jobCode}_${SLURM_JOB_ID}.log
+    # ### Need to define jobCode
+    parset=parsets/science_${jobCode}_${SLURM_JOB_ID}.in
+    log=logs/science_${jobCode}_${SLURM_JOB_ID}.log
     cat > "${parset}" << EOFINNER
     linmos.names        = [${imList}]
     linmos.weights      = [${wtList}]
@@ -82,8 +74,8 @@ Important info:
 
 Things to change / be aware of:
 
-* imList is the list of images you give to linmos. In this example, I'm pointing it to a text file (imList.txt) that lists the images separated by a comma e.g. <full path>restored.contsub.image1, <full path>restored.contsub.image2 . Alternatively, you can give the list of images to the imList variable in the slurm file.
-* wtList is the weights images produced by imager in exactly the same fashion as mentioned above.
+* imList is the list of images you give to linmos. In this example, I'm pointing it to a text file (imList.txt) that lists the images separated by a comma e.g. <path>restored.contsub.image1, <path>restored.contsub.image2 . Alternatively, you can give the list of images to the imList variable in the slurm file.
+* wtList is the list of weights images produced by imager in exactly the same fashion as mentioned above.
 * imageName and weightsImage are the names of the output image and weight map from linmos.
 * Provided no primary beam correction has been applied weightstate=Inherent and weighttype=Combined
 
@@ -96,15 +88,15 @@ This is broken into 3 parts:
 2. Image based continuum subtraction
 3. Mosaicking
 
-2.1 Imaging
------------
+2.1) Imaging
+------------
 
 Important info:
 
-1. This uses the imager module. You feed imager calibrated measurement sets (the sciencedata.ms e.g. not averaged.ms or averaged_cal.ms) with the same phase centre (pointing). Essentially, this can only be done on individual beams of the same footprint and orientation.
+1. This method uses the imager program. You feed imager calibrated measurement sets (i.e., the sciencedata.ms not averaged.ms or averaged_cal.ms) with the same phase centre (pointing). Essentially, this can only be done on individual beams of the same footprint and orientation.
 2. Each calibrated measurement set must have the same number of channels and the same starting frequency
-3. This job can and should be parallelised. To do so, you need to set: #SBATCH ­­ntasks and Cimager.nchanpercore. To do this: Start with the number of channels in your measurement set (649 in this case), nchanpercore = a number (11 in this case) that evenly divides into your number of channels and ntasks ­1 = (# of chans) / nchanpercore (60 in this case). NCORES (found at the bottom of the slurm file) is the same as ntasks and they should be set to the same value. To clarify ­ ntask­per­node is the number of processes that run on a single node. It has to be <=ntasks where the maximum is 20 for galaxy and 24 for magnus. The choice of this number is going to be influenced by the memory usage of your job ­ if you increase the size of images, for instance, you may not be able to fit 20 jobs on a node given the total node memory budget of 64GB)
-4. The example below allows to combine old and new data with slightly different frequency labelling. Cimager.channeltolerance takes care of that.
+3. This job can and should be parallelised. To do so, you need to set: #SBATCH ­­ntasks and Cimager.nchanpercore. To do this: Start with the number of channels in your measurement set (649 in this case), nchanpercore = a number (11 in this case) that evenly divides into your number of channels and ntasks-1 = (# of chans) / nchanpercore (60 in this case). NCORES (found at the bottom of the slurm file) is the same as ntasks and they should be set to the same value. To clarify ­ ntask­per­node is the number of processes that run on a single node. It has to be <=ntasks where the maximum is 20 for galaxy and 24 for magnus. The choice of this number is going to be influenced by the memory usage of your job ­ if you increase the size of images, for instance, you may not be able to fit 20 jobs on a node given the total node memory budget of 64GB)
+4. The example below allows to combine old and new data with slightly different frequency labelling (up to 10 Hz in this case). The line Cimager.channeltolerance=10.0 takes care of that.
 5. Below is an example slurm file that will use imager to image multiple measurement sets.::
 
     #!/bin/bash -l
@@ -116,10 +108,11 @@ Important info:
     #SBATCH --ntasks=60
     #SBATCH --ntasks-per-node=10
     #SBATCH --job-name=spec_F00B09
-    #SBATCH --mail-user=dane.kleiner@csiro.au
+    #SBATCH --mail-user=first.last@csiro.au
     #SBATCH --mail-type=FAIL
     #SBATCH --export=NONE
-    #SBATCH --output=/group/askap/dkleiner/IC5201/COMBINED_ALL/slurmOutput/slurm-science_spectral_imager-B25-%j.out
+    #SBATCH --workdir=/group/askap/<user>/<object>/COMBINED_ALL
+    #SBATCH --output=slurmOutput/slurm-science_spectral_imager-B09-%j.out
     # Using user-defined askapsoft module
     module use /group/askap/modulefiles
     module load askapdata
@@ -128,13 +121,12 @@ Important info:
     module unload askappipeline
     module load askappipeline/0.19.6
     beam_no="09"
-    parset=/group/askap/dkleiner/IC5201/COMBINED_ALL/parsets/science_spectral_imager_F00_B${beam_no}_${SLURM_JOB_ID}.in
-    base_dir="/group/askap/dkleiner/IC5201/COMBINED_ALL"
+    parset=parsets/science_spectral_imager_F00_B${beam_no}_${SLURM_JOB_ID}.in
     # Footprint A
     # Beam 09
     direction="[22h20m51.830, -45.42.58.82, J2000]"
     # Footprint A
-    msin="${base_dir}/11Aug_${beam_no}_A_1-649.ms, ${base_dir}/12Aug_${beam_no}_A_1-649.ms, ${base_dir}/11Oct_${beam_no}_A_1-649.ms"
+    msin="11Aug_${beam_no}_A_1-649.ms, 12Aug_${beam_no}_A_1-649.ms, 11Oct_${beam_no}_A_1-649.ms"
     # Output name
     imOut="image.i.N7232.cube.combined7A.b${beam_no}"
     cat > "$parset" << EOF
@@ -183,7 +175,7 @@ Important info:
     Cimager.solver.Clean.weightcutoff.clean     = false
     Cimager.solver.Clean.psfwidth               = 512
     Cimager.solver.Clean.logevery               = 50
-    Cimager.threshold.minorcycle                = [50%, 9mJy]
+    Cimager.threshold.minorcycle                = [40%, 9mJy]
     Cimager.threshold.majorcycle                = 10mJy
     Cimager.ncycles                             = 5
     Cimager.Images.writeAtMajorCycle            = false
@@ -200,7 +192,7 @@ Important info:
     Cimager.restore.beamReference               = mid
     EOF
 
-    log=/group/askap/dkleiner/IC5201/COMBINED_ALL/logs/science_spectral_imager_F00_B${beam_no}_${SLURM_JOB_ID}.log
+    log=logs/science_spectral_imager_F00_B${beam_no}_${SLURM_JOB_ID}.log
 
     # Now run the imager
     NCORES=60
@@ -209,24 +201,21 @@ Important info:
 
 Things to change / be aware of:
 
-* Change the beam_no accordingly.
-* Change the base_dir path accordingly ­ I created it to point to the calibrated measurement sets more easily.
+* Change the beam_no, object name etc.
+* Change the workdir accordingly and make sure­ the calibrated measurement sets are all there.
 * The direction is essential. It can be found in the science_imager parset from when you ran the pipeline on the same beam and orientation. You will need to look this up and replace it with the relevant co­ordinates.
-* Change msin to point to all the measurement sets you would like to image. I.e. If you want to put 3 images together, there should be 3 measurement sets in msin.
+* Change msin to point to all the measurement sets you would like to image. I.e., If you want to put 3 images together, there should be 3 measurement sets in msin.
 * imOut sets the image name of the output.
 * Change the imaging parameters according to your preferred weighting, cleaning algorithm etc. See documentation on imager.
-* The most important parameters to change are the cleaning thresholds: Cimager.threshold.minorcycle and Cimager.threshold.majorcycle. minorcyle should be ~4 ­ 4.5 sigma and majorcycle should be ~3 sigma of the rms given the number of images you are feeding imager.
-* Remember to set Cimager.nchanpercore and ntasks accordingly ­ NCORES (bottom of slurm file) is the same as ntasks, make sure you change it as well.
+* The most important parameters to change are the cleaning thresholds: Cimager.threshold.minorcycle and Cimager.threshold.majorcycle. minorcyle should be ~4 sigma and majorcycle should be ~4.1 sigma based on the expected rms given the number of images you are feeding imager.
+* Remember to set Cimager.nchanpercore and ntasks accordingly. ­ NCORES (bottom of slurm file) is the same as ntasks, make sure you change it as well.
 
 
-2.2 Image based continuum subtraction
--------------------------------------
-
-Important info:
-
-1. This uses the imcontsub module ­ As you have just imaged N images, it is likely that continuum residuals are present and a (second) continuum subtraction is needed.
-2. You feed imcontsub the combined image produced in the previous step.
-3. Below is an example slurm file that will use imcontsub to remove continuum residuals.::
+2.2) Image based continuum subtraction
+--------------------------------------
+­As you have just imaged N MeasurementSets together, it is likely that continuum residuals have become visible and a (second) continuum subtraction is needed.
+This can be accomplished by feeding imcontsub the combined image cube produced in the previous step.
+Here is an example slurm file that will use imcontsub to remove continuum residuals::
 
 
     #!/bin/bash -l
@@ -238,10 +227,11 @@ Important info:
     #SBATCH --ntasks=1
     #SBATCH --ntasks-per-node=1
     #SBATCH --job-name=imcontsub1_F00B09
-    #SBATCH --mail-user=dane.kleiner@csiro.au
+    #SBATCH --mail-user=first.last@csiro.au
     #SBATCH --mail-type=FAIL
     #SBATCH --export=NONE
-    #SBATCH --output=/group/askap/dkleiner/IC5201/COMBINED_ALL/slurmOutput/slurm-imcontsubSL-%j.out
+    #SBATCH --workdir=/group/askap/<user>/<object>/COMBINED_ALL
+    #SBATCH --output=slurmOutput/slurm-imcontsubSL-%j.out
     # Swapping to the requested askapsoft module
     module use /group/askap/modulefiles
     module load askapdata
@@ -257,11 +247,11 @@ Important info:
         echo "Not running image-based continuum subtraction"
     else
         # Make a working directory - the casapy & ipython log files will go in here.
-        # This will prevent conflicts
+        # This will prevent conflicts between simultaneous jobs
         workdir=imcontsub-working-beam${BEAM}
         mkdir -p $workdir
         cd $workdir
-        pyscript=/group/askap/dkleiner/IC5201/COMBINED_ALL/parsets/spectral_imcontsub_F00_B${beam_no}_${SLURM_JOB_ID}.py
+        pyscript=../parsets/spectral_imcontsub_F00_B${beam_no}_${SLURM_JOB_ID}.py
         cat > "$pyscript" << EOFINNER
     #!/usr/bin/env python
     # Need to import this from ACES
@@ -275,10 +265,11 @@ Important info:
     rc=robust_contsub()
     rc.poly(infile=image,threshold=threshold,verbose=True,fit_order=fit_order,n_every=n_every,log_every=10)
     EOFINNER
-        log=/group/askap/dkleiner/IC5201/COMBINED_ALL/logs/spectral_imcontsub_F00_B${beam_no}_${SLURM_JOB_ID}.log
+        log=logs/spectral_imcontsub_F00_B${beam_no}_${SLURM_JOB_ID}.log
         NCORES=1
         NPPN=1
-        srun --export=ALL --ntasks=${NCORES} --ntasks-per-node=${NPPN} casa --nogui --nologger --log2term -c $ACES/tools/r
+        #srun --export=ALL --ntasks=${NCORES} --ntasks-per-node=${NPPN} casa --nogui --nologger --log2term -c $ACES/tools/robust_contsub.py
+        srun --export=ALL --ntasks=${NCORES} --ntasks-per-node=${NPPN} casa --nogui --nologger --log2term -c "$pyscript" > "$log"
         err=$?
         cd ..
         if [ $err != 0 ]; then
@@ -298,10 +289,8 @@ Things to change / be aware of:
 
 2.3 Mosaicking
 --------------
-Important info:
-
-1. This is almost the same as the mosaicking task when combining in the image plane ­­ feed linmos combined, continuum subtracted images you previously made instead of the images of each individual night.
-2. Below is an example slurm file that will use linmos to mosaic (combined) images together.::
+This step is almost the same as the mosaicking task when combining in the image plane:­­ feed linmos combined, continuum subtracted images you previously made instead of the images of each individual night.
+Here is an example slurm file that will use linmos to mosaic (combined) images together::
 
     #!/bin/bash -l
     #SBATCH --partition=workq
@@ -312,10 +301,11 @@ Important info:
     #SBATCH --ntasks=650
     #SBATCH --ntasks-per-node=20
     #SBATCH --job-name=linmosFullScontsub
-    #SBATCH --mail-user=dane.kleiner@csiro.au
+    #SBATCH --mail-user=first.last@csiro.au
     #SBATCH --mail-type=FAIL
     #SBATCH --export=NONE
-    #SBATCH --output=/group/askap/dkleiner/IC5201/COMBINED_ALL/slurmOutput/slurm-linmosS-%j.out
+    #SBATCH --workdir=/group/askap/<user>/<object>/COMBINED_ALL
+    #SBATCH --output=slurmOutput/slurm-linmosS-%j.out
     # Using user-defined askapsoft module
     module use /group/askap/modulefiles
     module load askapdata
@@ -324,13 +314,13 @@ Important info:
     module unload askappipeline
     module load askappipeline/0.19.6
     IMAGETYPE_SPECTRAL="casa"
-    imList="image.restored.wr.1.i.N7232.cube.B0.b10.contsub,image.restored.wr.1.i.N7232.cube.B0.b25.contsub,image.restored
-    wtList="weights.wr.1.i.N7232.cube.B0.b10,weights.wr.1.i.N7232.cube.B0.b25,weights.wr.1.i.N7232.cube.2Arot.b08,weights.
+    imList="image.restored.wr.1.i.N7232.cube.B0.b10.contsub,image.restored.wr.1.i.N7232.cube.B0.b25.contsub,image.restored.wr.1.i.N7232.cube.2Arot.b08"
+    wtList="weights.wr.1.i.N7232.cube.B0.b10,weights.wr.1.i.N7232.cube.B0.b25,weights.wr.1.i.N7232.cube.2Arot.b08"
     imageName=image.restored.wr.1.i.N7232.cube.combined16_R.5.linmos.contsub
     weightsImage=weights.wr.1.i.N7232.cube.combined16_R.5.linmos.contsub
     echo "Mosaicking to form ${imageName}"
-    parset=/group/askap/dkleiner/IC5201/COMBINED_ALL/parsets/science_${jobCode}_${SLURM_JOB_ID}.in
-    log=/group/askap/dkleiner/IC5201/COMBINED_ALL/logs/science_${jobCode}_${SLURM_JOB_ID}.log
+    parset=parsets/science_${jobCode}_${SLURM_JOB_ID}.in
+    log=logs/science_${jobCode}_${SLURM_JOB_ID}.log
     cat > "${parset}" << EOFINNER
     linmos.names            = [${imList}]
     linmos.weights          = [${wtList}]
@@ -342,13 +332,13 @@ Important info:
     linmos.cutoff           = 0.2
     EOFINNER
 
-    NCORES=200
+    NCORES=650
     NPPN=20
     srun --export=ALL --ntasks=${NCORES} --ntasks-per-node=${NPPN} linmos-mpi -c "$parset" > "$log"
 
 Things to change / be aware of:
 
-* imList is the list of images you give to linmos. In this example, I have given the combined, contiuum subtracted images directly to the imList variable.
+* imList is the list of images you give to linmos. In this example, I have given the combined, continuum subtracted images directly to the imList variable.
 * wtList is the weights images produced by imager in exactly the same fashion as mentioned above.
 * imageName and weightsImage are the names of the output image and weight map from linmos.
-* Provided no primary beam correction has been applied weightstate=Inherent and weighttype=Combined
+* Provided no primary beam correction has been applied use weightstate=Inherent and weighttype=Combined
