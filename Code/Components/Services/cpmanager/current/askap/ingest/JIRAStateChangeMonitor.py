@@ -14,6 +14,6 @@ class JIRAStateChangeMonitor(ISBStateMonitor):
         self.jira = Jira()
 
     def changed(self, sbid, new_state, update_time, current=None):
-        if new_state.name == ObsState.OBSERVERD:
+        if new_state.name == ObsState.OBSERVED:
             logger.info("Raise jira for " + str(sbid) + ": Ready for data processing")
             self.jira.create_issue(sbid, "Ready for data processing")
