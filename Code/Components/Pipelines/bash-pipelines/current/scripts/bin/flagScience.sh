@@ -51,6 +51,11 @@ fi
 
 if [ "${DO_IT}" == "true" ]; then
 
+    AOFLAGGER_OPTIONS_SCIENCE="${AOFLAGGER_OPTIONS}"
+    if [ "${AOFLAGGER_STRATEGY_SCIENCE}" != "" ]; then
+        AOFLAGGER_OPTIONS_SCIENCE="${AOFLAGGER_OPTIONS_SCIENCE} -strategy=\"${AOFLAGGER_STRATEGY_SCIENCE}\""
+    fi
+    
     DO_AMP_FLAG=false
     ruleList=""
 
@@ -154,11 +159,33 @@ sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 thisfile=$sbatchfile
 cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
-DO_AMP_FLAG=${DO_AMP_FLAG}
-if [ \$DO_AMP_FLAG == true ]; then
+USE_AOFLAGGER=${FLAG_SCIENCE_WITH_AOFLAGGER}
 
-    parset=${parsets}/cflag_amp_science_${FIELDBEAM}_\${SLURM_JOB_ID}.in
-    cat > "\$parset" <<EOFINNER
+if [ "\${USE_AOFLAGGER}" == "true" ]; then
+
+    log=${logs}/aoflag_science_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+
+    loadModule aoflagger
+    NCORES=1
+    NPPN=1
+    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} aoflagger ${AOFLAGGER_OPTIONS_SCIENCE} ${msSci} > "\${log}"
+    err=\$?
+    unloadModule aoflagger
+    rejuvenate ${msSci}
+    extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname}_aoflag "txt,csv"
+    if [ \$err != 0 ]; then
+        exit \$err
+    else
+        touch $FLAG_CHECK_FILE
+    fi
+
+else
+
+    DO_AMP_FLAG=${DO_AMP_FLAG}
+    if [ \$DO_AMP_FLAG == true ]; then
+    
+        parset=${parsets}/cflag_amp_science_${FIELDBEAM}_\${SLURM_JOB_ID}.in
+        cat > "\$parset" <<EOFINNER
 # The path/filename for the measurement set
 Cflag.dataset                           = ${msSci}
 
@@ -174,28 +201,28 @@ ${timeFlagging}
 
 ${autocorrFlagging}
 EOFINNER
-
-    log=${logs}/cflag_amp_science_${FIELDBEAM}_\${SLURM_JOB_ID}.log
-
-    NCORES=1
-    NPPN=1
-    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${cflag} -c "\${parset}" > "\${log}"
-    err=\$?
-    rejuvenate ${msSci}
-    extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname}_Amp "txt,csv"
-    if [ \$err != 0 ]; then
-        exit \$err
-    else
-        touch $FLAG_CHECK_FILE
+    
+        log=${logs}/cflag_amp_science_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+    
+        NCORES=1
+        NPPN=1
+        srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${cflag} -c "\${parset}" > "\${log}"
+        err=\$?
+        rejuvenate ${msSci}
+        extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname}_Amp "txt,csv"
+        if [ \$err != 0 ]; then
+            exit \$err
+        else
+            touch $FLAG_CHECK_FILE
+        fi
     fi
-fi
-
-DO_DYNAMIC=${FLAG_DO_DYNAMIC_AMPLITUDE_SCIENCE}
-DO_STOKESV=${FLAG_DO_STOKESV_SCIENCE}
-if [ "\${DO_DYNAMIC}" == "true" ] || [ "\${DO_STOKESV}" == "true" ]; then
-
-    parset=${parsets}/cflag_dynamic_science_${FIELDBEAM}_\${SLURM_JOB_ID}.in
-    cat > "\$parset" <<EOFINNER
+    
+    DO_DYNAMIC=${FLAG_DO_DYNAMIC_AMPLITUDE_SCIENCE}
+    DO_STOKESV=${FLAG_DO_STOKESV_SCIENCE}
+    if [ "\${DO_DYNAMIC}" == "true" ] || [ "\${DO_STOKESV}" == "true" ]; then
+    
+        parset=${parsets}/cflag_dynamic_science_${FIELDBEAM}_\${SLURM_JOB_ID}.in
+        cat > "\$parset" <<EOFINNER
 # The path/filename for the measurement set
 Cflag.dataset                           = ${msSci}
 
@@ -224,18 +251,20 @@ Cflag.stokesv_flagger.integrateTimes.threshold = ${FLAG_THRESHOLD_STOKESV_SCIENC
 
 EOFINNER
 
-    log=${logs}/cflag_dynamic_science_${FIELDBEAM}_\${SLURM_JOB_ID}.log
-
-    NCORES=1
-    NPPN=1
-    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${cflag} -c "\${parset}" > "\${log}"
-    err=\$?
-    rejuvenate ${msSci}
-    extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname}_Dyn "txt,csv"
-    if [ \$err != 0 ]; then
-        exit \$err
-    else
-        touch $FLAG_CHECK_FILE
+        log=${logs}/cflag_dynamic_science_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+    
+        NCORES=1
+        NPPN=1
+        srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${cflag} -c "\${parset}" > "\${log}"
+        err=\$?
+        rejuvenate ${msSci}
+        extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname}_Dyn "txt,csv"
+        if [ \$err != 0 ]; then
+            exit \$err
+        else
+            touch $FLAG_CHECK_FILE
+        fi
+    
     fi
 
 fi

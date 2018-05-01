@@ -50,6 +50,11 @@ fi
 
 if [ "${DO_IT}" == "true" ]; then
 
+    AOFLAGGER_OPTIONS_SCIENCE_AV="${AOFLAGGER_OPTIONS}"
+    if [ "${AOFLAGGER_STRATEGY_SCIENCE_AV}" != "" ]; then
+        AOFLAGGER_OPTIONS_SCIENCE_AV="${AOFLAGGER_OPTIONS_SCIENCE_AV} -strategy=\"${AOFLAGGER_STRATEGY_SCIENCE_AV}\""
+    fi
+    
     DO_AMP_FLAG=false
     ruleList=""
     
@@ -127,11 +132,33 @@ sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 thisfile=$sbatchfile
 cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
-DO_AMP_FLAG=${DO_AMP_FLAG}
-if [ \$DO_AMP_FLAG == true ]; then
+USE_AOFLAGGER=${FLAG_SCIENCE_AV_WITH_AOFLAGGER}
 
-    parset=${parsets}/cflag_ave_amp_science_${FIELDBEAM}_\${SLURM_JOB_ID}.in
-    cat > "\$parset" <<EOFINNER
+if [ "\${USE_AOFLAGGER}" == "true" ]; then
+
+    log=${logs}/aoflag_science_ave_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+
+    loadModule aoflagger
+    NCORES=1
+    NPPN=1
+    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} aoflagger ${AOFLAGGER_OPTIONS_SCIENCE_AV} ${msSciAv} > "\${log}"
+    err=\$?
+    unloadModule aoflagger
+    rejuvenate ${msSciAv}
+    extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname}_aoflag "txt,csv"
+    if [ \$err != 0 ]; then
+        exit \$err
+    else
+        touch $FLAG_CHECK_FILE
+    fi
+
+else
+
+    DO_AMP_FLAG=${DO_AMP_FLAG}
+    if [ \$DO_AMP_FLAG == true ]; then
+    
+        parset=${parsets}/cflag_amp_science_ave_${FIELDBEAM}_\${SLURM_JOB_ID}.in
+        cat > "\$parset" <<EOFINNER
 # The path/filename for the measurement set
 Cflag.dataset                           = ${msSciAv}
 
@@ -144,28 +171,28 @@ ${channelFlagging}
 ${timeFlagging}
 
 EOFINNER
-
-    log=${logs}/cflag_amp_science_${FIELDBEAM}_\${SLURM_JOB_ID}.log
-
-    NCORES=1
-    NPPN=1
-    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${cflag} -c "\${parset}" > "\${log}"
-    err=\$?
-    rejuvenate ${msSciAv}
-    extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname}_Amp "txt,csv"
-    if [ \$err != 0 ]; then
-        exit \$err
-    else
-        touch $FLAG_AV_CHECK_FILE
+    
+        log=${logs}/cflag_amp_science_ave_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+    
+        NCORES=1
+        NPPN=1
+        srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${cflag} -c "\${parset}" > "\${log}"
+        err=\$?
+        rejuvenate ${msSciAv}
+        extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname}_Amp "txt,csv"
+        if [ \$err != 0 ]; then
+            exit \$err
+        else
+            touch $FLAG_AV_CHECK_FILE
+        fi
     fi
-fi
-
-DO_DYNAMIC=${FLAG_DO_DYNAMIC_AMPLITUDE_SCIENCE_AV}
-DO_STOKESV=${FLAG_DO_STOKESV_SCIENCE_AV}
-if [ "\${DO_DYNAMIC}" == "true" ] || [ "\${DO_STOKESV}" == "true" ]; then
-
-    parset=${parsets}/cflag_ave_dynamic_science_${FIELDBEAM}_\${SLURM_JOB_ID}.in
-    cat > "\$parset" <<EOFINNER
+    
+    DO_DYNAMIC=${FLAG_DO_DYNAMIC_AMPLITUDE_SCIENCE_AV}
+    DO_STOKESV=${FLAG_DO_STOKESV_SCIENCE_AV}
+    if [ "\${DO_DYNAMIC}" == "true" ] || [ "\${DO_STOKESV}" == "true" ]; then
+    
+        parset=${parsets}/cflag_dynamic_science_ave_${FIELDBEAM}_\${SLURM_JOB_ID}.in
+        cat > "\$parset" <<EOFINNER
 # The path/filename for the measurement set
 Cflag.dataset                           = ${msSciAv}
 
@@ -193,21 +220,23 @@ Cflag.stokesv_flagger.integrateTimes = ${FLAG_STOKESV_INTEGRATE_TIMES_AV}
 Cflag.stokesv_flagger.integrateTimes.threshold = ${FLAG_THRESHOLD_STOKESV_SCIENCE_TIMES_AV}
 
 EOFINNER
-    
-    log=${logs}/cflag_dynamic_science_${FIELDBEAM}_\${SLURM_JOB_ID}.log
-    
-    NCORES=1
-    NPPN=1
-    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${cflag} -c "\${parset}" > "\${log}"
-    err=\$?
-    rejuvenate ${msSciAv}
-    extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname}_Dyn "txt,csv"
-    if [ \$err != 0 ]; then
-        exit \$err
-    else
-        touch $FLAG_AV_CHECK_FILE
+        
+        log=${logs}/cflag_dynamic_science_ave_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+        
+        NCORES=1
+        NPPN=1
+        srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${cflag} -c "\${parset}" > "\${log}"
+        err=\$?
+        rejuvenate ${msSciAv}
+        extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname}_Dyn "txt,csv"
+        if [ \$err != 0 ]; then
+            exit \$err
+        else
+            touch $FLAG_AV_CHECK_FILE
+        fi
+        
     fi
-    
+
 fi
 
 EOFOUTER

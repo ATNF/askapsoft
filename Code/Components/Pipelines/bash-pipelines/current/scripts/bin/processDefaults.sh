@@ -562,6 +562,68 @@ EOF
     echo " "
 
     ####################
+    # Parameters required for the aoflagger option
+
+    if [ "${FLAG_WITH_AOFLAGGER}" != "" ]; then
+        # have set the global switch, so apply to the individual
+        # task-level switches
+        FLAG_1934_WITH_AOFLAGGER=${FLAG_WITH_AOFLAGGER}
+        FLAG_SCIENCE_WITH_AOFLAGGER=${FLAG_WITH_AOFLAGGER}
+        FLAG_SCIENCE_AV_WITH_AOFLAGGER=${FLAG_WITH_AOFLAGGER}
+    fi
+
+    if [ "${AOFLAGGER_STRATEGY}" != "" ]; then
+
+        if [ ! -e "${AOFLAGGER_STRATEGY}" ]; then
+            echo "ERROR - the AOflagger strategy file ${AOFLAGGER_STRATEGY} does not exist."
+            echo "        Running AOflagger but without a strategy file"
+        else
+            AOFLAGGER_STRATEGY_1934="${AOFLAGGER_STRATEGY}"
+            AOFLAGGER_STRATEGY_SCIENCE="${AOFLAGGER_STRATEGY}"
+            AOFLAGGER_STRATEGY_SCIENCE_AV="${AOFLAGGER_STRATEGY}"
+        fi
+
+    fi        
+
+    if [ "${AOFLAGGER_STRATEGY_1934}" != "" ] && [ ! -e "${AOFLAGGER_STRATEGY_1934}" ]; then
+        echo "ERROR - the AOflagger strategy file \"${AOFLAGGER_STRATEGY_1934}\" does not exist."
+        echo "        Running AOflagger on bandpass data but without a strategy file"
+        AOFLAGGER_STRATEGY_1934=""
+    fi
+    if [ "${AOFLAGGER_STRATEGY_SCIENCE}" != "" ] && [ ! -e "${AOFLAGGER_STRATEGY_SCIENCE}" ]; then
+        echo "ERROR - the AOflagger strategy file \"${AOFLAGGER_STRATEGY_SCIENCE}\" does not exist."
+        echo "        Running AOflagger on science data but without a strategy file"
+        AOFLAGGER_STRATEGY_SCIENCE=""
+    fi
+    if [ "${AOFLAGGER_STRATEGY_SCIENCE_AV}" != "" ] && [ ! -e "${AOFLAGGER_STRATEGY_SCIENCE_AV}" ]; then
+        echo "ERROR - the AOflagger strategy file \"${AOFLAGGER_STRATEGY_SCIENCE_AV}\" does not exist."
+        echo "        Running AOflagger on averaged science data but without a strategy file"
+        AOFLAGGER_STRATEGY_SCIENCE_AV=""
+    fi
+
+    # Set the generic aoflagger command line options
+    AOFLAGGER_OPTIONS=""
+    if [ "${AOFLAGGER_VERBOSE}" == "true" ]; then
+        AOFLAGGER_OPTIONS="${AOFLAGGER_OPTIONS} -v"
+    fi
+    if [ "${AOFLAGGER_UVW}" == "true" ]; then
+        AOFLAGGER_OPTIONS="${AOFLAGGER_OPTIONS} -uvw"
+    fi
+    if [ "${AOFLAGGER_READ_MODE}" == "direct" ]; then
+        AOFLAGGER_OPTIONS="${AOFLAGGER_OPTIONS} -direct-read"
+    elif [ "${AOFLAGGER_READ_MODE}" == "indirect" ]; then
+        AOFLAGGER_OPTIONS="${AOFLAGGER_OPTIONS} -indirect-read"
+    elif [ "${AOFLAGGER_READ_MODE}" == "memory" ]; then
+        AOFLAGGER_OPTIONS="${AOFLAGGER_OPTIONS} -memory-read"
+    else
+        if [ "${AOFLAGGER_READ_MODE}" != "auto" ]; then
+            echo "WARNING - unknown AOFLAGGER_READ_MODE option \"${AOFLAGGER_READ_MODE}\". Setting to \"auto\""
+        fi
+        AOFLAGGER_OPTIONS="${AOFLAGGER_OPTIONS} -auto-read-mode"
+    fi
+    
+
+    ####################
     # Parameters required for bandpass calibration
     ####
     if [ "${DO_FIND_BANDPASS}" == "true" ]; then

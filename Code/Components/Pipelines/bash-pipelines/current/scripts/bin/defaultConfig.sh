@@ -447,6 +447,37 @@ CHANNEL_FLAG_SCIENCE_AV=""
 # Time range(s) to flag in the averaged science data
 TIME_FLAG_SCIENCE_AV=""
 
+######################
+# AOflagger options
+
+# Global switch, plus switches for individual flagging tasks. Setting
+# the global switch will override the individual values
+FLAG_WITH_AOFLAGGER=""
+FLAG_1934_WITH_AOFLAGGER=false
+FLAG_SCIENCE_WITH_AOFLAGGER=false
+FLAG_SCIENCE_AV_WITH_AOFLAGGER=false
+
+# Strategy files. Setting the global one overrides the individual
+# values.
+AOFLAGGER_STRATEGY=""
+AOFLAGGER_STRATEGY_1934=""
+AOFLAGGER_STRATEGY_SCIENCE=""
+AOFLAGGER_STRATEGY_SCIENCE_AV=""
+
+# Verbose output (-v option for aoflagger) - global parameter
+AOFLAGGER_VERBOSE=true
+
+# Read mode for AOflagger - either "auto", "direct", "indirect",
+# "memory". These trigger the following respective command-line
+# options: -auto-read-mode, -direct-read, -indirect-read, -memory-read
+AOFLAGGER_READ_MODE="auto"
+
+# Allow use of uvw values
+AOFLAGGER_UVW=false
+
+######################
+# Imaging
+
 # Data column in MS to use in cimager
 DATACOLUMN=DATA
 # Number of Taylor terms to create in MFS imaging
