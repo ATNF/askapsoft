@@ -199,6 +199,9 @@ Here is a summary of the workflow provided for by these scripts:
   autocorrelations are applied, along with an optional simple flat amplitude
   threshold; then a second pass that covers Stokes-V and dynamic
   amplitude flagging, that integrate individual spectra.
+* There is an option to use the **AOFlagger** tool instead of **cflag** to
+  do the flagging, with the ability to provide strategy files for each
+  flagging task.
 * The bandpass solution is then determined with **cbpcalibrator**
   (:doc:`../calim/cbpcalibrator`), using all individual MSs and stored
   in a single CASA table.

@@ -24,6 +24,17 @@ Stokes-V flagging and dynamic flagging of amplitudes is done,
 optionally integrating over or across individual spectra. Each of
 these steps is selectable via input parameters.
 
+As for the bandpass calibration, there is an option to use the
+AOFlagger tool (written by Andre Offringa) to do the flagging. This
+can be turned on by ``FLAG_WITH_AOFLAGGER``, or
+``FLAG_SCIENCE_WITH_AOFLAGGER`` & ``FLAG_SCIENCE_AV_WITH_AOFLAGGER``
+(to just do it for the full-spectral-resolution or averaged science
+data respectively). You can provide a strategy file via
+``AOFLAGGER_STRATEGY`` or ``AOFLAGGER_STRATEGY_SCIENCE`` &
+``AOFLAGGER_STRATEGY_SCIENCE_AV``, with access to some of the
+aoflagger parameters provided - see the table below.
+
+
 The averaging scale defaults to 54 channels, resulting in a
 1MHz-resolution MS that can be imaged with cimager, although this
 averaging scale can be changed by the user.
@@ -231,6 +242,38 @@ is possible, however, to select a single field to process via the
 |                                               |                                 | (:doc:`../calim/cflag`)                         | passed directly to the ``timerange`` option of cflag's selection      |
 |                                               |                                 |                                                 | flagger. For details on the possible syntax, consult the `MS          |
 |                                               |                                 |                                                 | selection`_ documentation.                                            |
++-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
+| **Using AOFlagger for flagging**              |                                 |                                                 |                                                                       |
+|                                               |                                 |                                                 |                                                                       |
++-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
+| ``FLAG_WITH_AOFLAGGER``                       | false                           | none                                            | Use AOFlagger for all flagging tasks in the pipeline. This overrides  |
+|                                               |                                 |                                                 | the individual task level switches.                                   |
++-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
+| ``FLAG_SCIENCE_WITH_AOFLAGGER``               | false                           | none                                            | Use AOFlagger for the flagging of the full-spectral-resolution science|
+|                                               |                                 |                                                 | dataset. This and the next parameter allows differentiation between   |
+|                                               |                                 |                                                 | the different flagging tasks in the pipeline.                         |
++-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
+| ``FLAG_SCIENCE_AV_WITH_AOFLAGGER``            | false                           | none                                            | Use AOFlagger for the flagging of the averaged science dataset.       |
++-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
+| ``AOFLAGGER_STRATEGY``                        | ""                              | none                                            | The strategy file to use for all AOFlagger tasks in the               |
+|                                               |                                 |                                                 | pipeline. Giving this a value will apply this one strategy file to all|
+|                                               |                                 |                                                 | flagging jobs. The strategy file needs to be provided by the user.    |
++-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
+| ``AOFLAGGER_STRATEGY_SCIENCE``                | ""                              | none                                            | The strategy file to be used for the full-spectral-resolution science |
+|                                               |                                 |                                                 | dataset. This will be overridden by ``AOFLAGGER_STRATEGY``.           |
++-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
+| ``AOFLAGGER_STRATEGY_SCIENCE_AV``             | ""                              | none                                            | The strategy file to be used for the averaged science dataset. This   |
+|                                               |                                 |                                                 | will be overridden by ``AOFLAGGER_STRATEGY``.                         |
++-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
+| ``AOFLAGGER_VERBOSE``                         | true                            | none                                            | Verbose output for AOFlagger                                          |
++-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
+| ``AOFLAGGER_READ_MODE``                       | auto                            | none                                            | Read mode for AOflagger. This can take the value of one of "auto",    |
+|                                               |                                 |                                                 | "direct", "indirect", or "memory". These trigger the following        |
+|                                               |                                 |                                                 | respective command-line options for AOflagger: "-auto-read-mode",     |
+|                                               |                                 |                                                 | "-direct-read", "-indirect-read", "-memory-read".                     |
++-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
+| ``AOFLAGGER_UVW``                             | false                           | none                                            | When true, the command-line argument "-uvw" is added to the AOFlagger |
+|                                               |                                 |                                                 | command. This reads uvw values (some exotic strategies require these).|
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 
 

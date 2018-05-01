@@ -12,12 +12,21 @@ up to ``BEAM_MAX`` are split & flagged, and have their bandpass solved
 for. This is due to the particular requirements of
 :doc:`../calim/cbpcalibrator`.
 
-The MS is flagged in two passes. First, a combination of selection
-rules (allowing flagging of channels, time ranges, antennas & baselines, and
-autocorrelations) and (optionally) a simple flat amplitude threshold
-are applied. Then a sequence of Stokes-V flagging and dynamic flagging
-of amplitudes is done, integrating over individual spectra. Each of
-these steps is selectable via input parameters.
+The default behaviour is to flag the data with
+:doc:`../calim/cflag`. In this case, the MS is flagged in two
+passes. First, a combination of selection rules (allowing flagging of
+channels, time ranges, antennas & baselines, and autocorrelations) and
+(optionally) a simple flat amplitude threshold are applied. Then a
+sequence of Stokes-V flagging and dynamic flagging of amplitudes is
+done, integrating over individual spectra. Each of these steps is
+selectable via input parameters.
+
+There is an option to use the AOFlagger tool (written by Andre
+Offringa) to do the flagging. This can be turned on by
+``FLAG_WITH_AOFLAGGER``, or ``FLAG_1934_WITH_AOFLAGGER`` (to just do
+it for the bandpass calibrator). You can provide a strategy file via
+``AOFLAGGER_STRATEGY`` or ``AOFLAGGER_STRATEGY_1934``, with access to
+some of the aoflagger parameters provided - see the table below.
 
 Then the bandpass table is calculated with
 :doc:`../calim/cbpcalibrator`, which requires MSs for all beams to be
@@ -144,6 +153,37 @@ the quality of the bandpass solution.
 +-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
 | ``FLAG_AUTOCORRELATION_1934``                 | false                                 | selection_flagger.<rule>.autocorr                      | If true, then autocorrelations will be flagged.           |
 |                                               |                                       |                                                        |                                                           |
++-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| **Using AOFlagger for flagging**              |                                       |                                                        |                                                           |
+|                                               |                                       |                                                        |                                                           |
++-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| ``FLAG_WITH_AOFLAGGER``                       | false                                 | none                                                   | Use AOFlagger for all flagging tasks in the pipeline. This|
+|                                               |                                       |                                                        | overrides the individual task level switches.             |
++-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| ``FLAG_1934_WITH_AOFLAGGER``                  | false                                 | none                                                   | Use AOFlagger for the flagging of the bandpass calibrator.|
+|                                               |                                       |                                                        | This allows differentiation between the different flagging|
+|                                               |                                       |                                                        | tasks in the pipeline.                                    |
++-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| ``AOFLAGGER_STRATEGY``                        | ""                                    | none                                                   | The strategy file to use for all AOFlagger tasks in the   |
+|                                               |                                       |                                                        | pipeline. Giving this a value will apply this one strategy|
+|                                               |                                       |                                                        | file to all flagging jobs. The strategy file needs to be  |
+|                                               |                                       |                                                        | provided by the user.                                     |
++-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| ``AOFLAGGER_STRATEGY_1934``                   | ""                                    | none                                                   | The strategy file to be used for the bandpass             |
+|                                               |                                       |                                                        | calibrator. This will be overridden by                    |
+|                                               |                                       |                                                        | ``AOFLAGGER_STRATEGY``.                                   |
++-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| ``AOFLAGGER_VERBOSE``                         | true                                  | none                                                   | Verbose output for AOFlagger                              |
++-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| ``AOFLAGGER_READ_MODE``                       | auto                                  | none                                                   | Read mode for AOflagger. This can take the value of one of|
+|                                               |                                       |                                                        | "auto", "direct", "indirect", or "memory". These trigger  |
+|                                               |                                       |                                                        | the following respective command-line options for         |
+|                                               |                                       |                                                        | AOflagger: "-auto-read-mode", "-direct-read",             |
+|                                               |                                       |                                                        | "-indirect-read", "-memory-read".                         |
++-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| ``AOFLAGGER_UVW``                             | false                                 | none                                                   | When true, the command-line argument "-uvw" is added to   |
+|                                               |                                       |                                                        | the AOFlagger command. This reads uvw values (some exotic |
+|                                               |                                       |                                                        | strategies require these).                                |
 +-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
 | **Solving for the bandpass**                  |                                       |                                                        |                                                           |
 |                                               |                                       |                                                        |                                                           |
