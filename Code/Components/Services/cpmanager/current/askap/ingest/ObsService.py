@@ -62,6 +62,7 @@ class CPObsServiceImp(ICPObsService):
         if self.proc:
             if self.proc.poll() is None:
                 self.proc.terminate()
+                self.proc.wait()
 
         logger.debug("Aborted " + str(self.current_sbid))
         self.current_sbid = -1
