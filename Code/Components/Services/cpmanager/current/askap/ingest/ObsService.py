@@ -98,7 +98,11 @@ class CPObsServiceImp(ICPObsService):
         sleep_time = 0.1
 
         while time_left > 0:
-            time.sleep(sleep_time)
+            if time_left < sleep_time:
+                time.sleep(time_left)
+            else:
+                time.sleep(sleep_time)
+
             time_left -= sleep_time
             if self.proc.poll() is not None:
                 return True     # process finished
