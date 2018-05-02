@@ -229,10 +229,10 @@ class DataServiceClient(object):
             if changed:
                 obs_var = {}
                 obs_var["nChan"] = {"value":self.obs_info.nChan}
-                obs_var["ChanWidth"] = {"value":chanWidthPoint.value.value, "unit":chanWidthPoint.unit}
-                obs_var["StartFreq"] = {"value":self.obs_info.startFreq, "unit":startFreqPoint.unit}
-                obs_var["CentreFreq"] = {"value":self.obs_info.centreFreq, "unit":startFreqPoint.unit}
-                obs_var["BandWidth"] = {"value":self.obs_info.bandWidth, "unit":startFreqPoint.unit}
+                obs_var["ChanWidth"] = {"value":chanWidthPoint.value.value, "unit":chanWidthPoint.value.unit}
+                obs_var["StartFreq"] = {"value":self.obs_info.startFreq, "unit":startFreqPoint.value.unit}
+                obs_var["CentreFreq"] = {"value":self.obs_info.centreFreq, "unit":startFreqPoint.value.unit}
+                obs_var["BandWidth"] = {"value":self.obs_info.bandWidth, "unit":startFreqPoint.value.unit}
 
                 obs_var_json= {"obs.info": json.dumps(obs_var)}
                 self.setObsVariables(sbid, obs_var_json)
