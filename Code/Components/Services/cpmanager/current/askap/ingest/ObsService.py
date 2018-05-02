@@ -22,11 +22,15 @@ class CPObsServiceImp(ICPObsService):
         self.params = None
 
     def startObs(self, sbid, current=None):
-        # everytime an obs is started, load latest from fcm
-        self.params = self.fcm.get()
+        logger.debug("start observation for " + str(sbid))
+
         if self.current_sbid >= 0:
             logger.error("Ingest Pipeline already running")
             raise RuntimeError("Ingest Pipeline already running")
+
+        # everytime an obs is started, load latest from fcm
+        self.params = self.fcm.get()
+        logger.debug("finished loading fcm for " + str(sbid))
 
         if self.params.get("cp.ingest.workdir"):
             workdir = self.params.get("cp.ingest.workdir") + "/" + str(sbid)
