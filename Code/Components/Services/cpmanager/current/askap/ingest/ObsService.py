@@ -87,12 +87,24 @@ class CPObsServiceImp(ICPObsService):
         if self.proc.poll() is not None:
             return True     # process finished
 
-        time.sleep(timeout/1000)
+        if timeout == 0:
+            return False    # process not finished, but non blocking
 
-        if self.proc.poll() is None:
-            return False    # proess still not finished
-        else:
-            return True     # process finished
+        if timeout < 0:     # wait until ingest process has finished
+            self.proc.wait()
+            return True
+
+        time_left = timeout/1000
+        sleep_time = 0.1
+
+        while time_left > 0:
+            time.sleep(sleep_time)
+            time_left -= sleep_time
+            if self.proc.poll() is not None:
+                return True     # process finished
+
+        return False
+
 
     def write_config(self, file, sbid):
         file.write("sbid=" + str(sbid) + "\n")
