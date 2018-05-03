@@ -32,6 +32,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <mpi.h>
 
 // Boost includes
 #include <boost/scoped_ptr.hpp>
