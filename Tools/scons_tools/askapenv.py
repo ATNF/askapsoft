@@ -40,7 +40,7 @@ def has_explicit_mpi(env):
 # Others, such as the Cray environment have MPI support already wrapped
 # in the CC & CXX commands
 def has_implicit_mpi():
-    if (os.environ.has_key("CRAYOS_VERSION") and os.environ["PAWSEY_CLUSTER"] != 'athena'):
+    if (os.environ.has_key("CRAYOS_VERSION")):
         return True
     return False
 
@@ -124,6 +124,16 @@ if has_implicit_mpi():
         env.Exit(1)
     env.AppendUnique(CPPFLAGS=['-DHAVE_MPI'])
 
+if not env['nompi'] and not has_implicit_mpi():
+    if has_explicit_mpi(env):
+            env["CC"] = "mpicc"
+            env["CXX"] = "mpicxx"
+            env["LINK"] = "mpicxx"
+            env["SHLINK"] = "mpicxx"
+            env.AppendUnique(CPPFLAGS=['-DHAVE_MPI'])
+    else:
+        print "warn: No MPI support detected, compiling without"
+
 # Setu OpenMP support
 if env['openmp']:
     env.AppendUnique(CCFLAGS=['-fopenmp'])
@@ -131,34 +141,13 @@ if env['openmp']:
 
 # Overwrite for Cray, need to use the standard compiler wrappers
 # By default gcc/g++ are used
-if os.environ.has_key("CRAYOS_VERSION") and os.environ['PAWSEY_CLUSTER'] != 'athena' : 
+if os.environ.has_key("CRAYOS_VERSION"):
     env["ENV"] = os.environ
     env["CC"] = "cc"
     env["CXX"] = "CC"
     env["LINK"] = "CC"
     env["SHLINK"] = "CC"
-    if not env['nompi'] and not has_implicit_mpi():
-        if has_explicit_mpi(env):
-            env["CC"] = "mpicc"
-            env["CXX"] = "mpicxx"
-            env["LINK"] = "mpicxx"
-            env["SHLINK"] = "mpicxx"
-            env.AppendUnique(CPPFLAGS=['-DHAVE_MPI'])
-        else:
-            print "warn: No MPI support detected, compiling without"
-elif os.environ.has_key("CRAYOS_VERSION") :
-        if has_explicit_mpi(env):
-            print "warn:  MPI support detected"
-            env["CC"] = "mpicc"
-            env["CXX"] = "mpicxx"
-            env["LINK"] = "mpicxx"
-            env["SHLINK"] = "mpicxx"
-            env.AppendUnique(CPPFLAGS=['-DHAVE_MPI'])
-        else:
-            print "warn: No MPI support detected, compiling without"
-
-
-#    env.AppendUnique(LINKFLAGS=['-dynamic'])
+    env.AppendUnique(LINKFLAGS=['-dynamic'])
 if env['usepgi']:
 
     # The PGroup compilers support some MPI out of the box
@@ -169,18 +158,6 @@ if env['usepgi']:
     env["LINK"] = "pgc++ "
     env["SHLINK"] = "pgc++ "
     env.AppendUnique(CPPFLAGS=['-noswitcherror'])
-    if not env['nompi'] and not has_implicit_mpi():
-        if has_explicit_mpi(env):
-            env["CC"] = "mpipgcc"
-            env["CXX"] = "mpipgc++"
-            env["LINK"] = "mpipgc++"
-            env["SHLINK"] = "mpipgc++"
-            env.AppendUnique(CPPFLAGS=['-DHAVE_MPI'])
-        else:
-            print "warn: No MPI support detected, compiling without"
-
-
-
 else:
     env.AppendUnique(CPPFLAGS=['-Wall'])    
 # use global environment definitions
