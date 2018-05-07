@@ -52,7 +52,7 @@ if [ "${DO_IT}" == "true" ]; then
 
     AOFLAGGER_OPTIONS_1934="${AOFLAGGER_OPTIONS}"
     if [ "${AOFLAGGER_STRATEGY_1934}" != "" ]; then
-        AOFLAGGER_OPTIONS_1934="${AOFLAGGER_OPTIONS_1934} -strategy=\"${AOFLAGGER_STRATEGY_1934}\""
+        AOFLAGGER_OPTIONS_1934="${AOFLAGGER_OPTIONS_1934} -strategy \"${AOFLAGGER_STRATEGY_1934}\""
     fi
     
     DO_AMP_FLAG=false
