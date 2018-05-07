@@ -1014,6 +1014,13 @@ EOF
             DO_SOURCE_FINDING_BEAMWISE=true
         fi
 
+        # Check that contcube imaging is turned on if we want to use them to find the spectral indices
+        if [ "${USE_CONTCUBE_FOR_SPECTRAL_INDEX}" == "true" ] &&
+               [ "${DO_CONTCUBE_IMAGING}" != "true" ]; then
+            DO_CONTCUBE_IMAGING=true
+            echo "WARNING - Turning on continuum-cube imaging, since USE_CONTCUBE_FOR_SPECTRAL_INDEX=true";
+        fi
+        
         # We can only do RM Synthesis if we are making I,Q,U continuum
         # cubes. Need to check that the list of polarisations
         # contains these.

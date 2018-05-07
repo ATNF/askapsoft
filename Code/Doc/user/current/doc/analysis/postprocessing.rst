@@ -712,32 +712,34 @@ spectra fitted.
 Parameters for spectral term measurement
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-+----------------------------------+---------------+-------------------------------+----------------------------------------------------------------------+
-| *Parameter*                      | *Type*        | *Default*                     | *Explanation*                                                        |
-+==================================+===============+===============================+======================================================================+
-|Selavy.spectralTermsFromTaylor    |bool           |true                           |Which mode to use to measure the spectral terms. True means use the   |
-|                                  |               |                               |Taylor-term images, while false means use a continuum cube.           |
-+----------------------------------+---------------+-------------------------------+----------------------------------------------------------------------+
-|**Taylor-term images**            |               |                               |                                                                      |
-+----------------------------------+---------------+-------------------------------+----------------------------------------------------------------------+
-|Selavy.findSpectralTerms          |vector<bool>   |2 terms, same as Fitter.doFit  |A vector of 2 terms, indiciating whether to find the spectral index   |
-|                                  |               |                               |(first term) and the spectral curvature (2nd term). It is possible to |
-|                                  |               |                               |give only one term (e.g. findSpectralTerms = true) - then the second  |
-|                                  |               |                               |term will be set to false. To request both, put **findSpectralTerms = |
-|                                  |               |                               |[true,true]**.                                                        |
-+----------------------------------+---------------+-------------------------------+----------------------------------------------------------------------+
-|Selavy.spectralTermImages         |vector<string> |Derived from image name - see  |You can explicitly set the images for each term like so:              |
-|                                  |               |text                           |**spectralTermImages = [image1, image2]**.                            |
-+----------------------------------+---------------+-------------------------------+----------------------------------------------------------------------+
-|**Continuum-cube**                |               |                               |                                                                      |
-+----------------------------------+---------------+-------------------------------+----------------------------------------------------------------------+
-|Selavy.spectralTerms.nterms       |int            |3                              |The number of terms to fit to in the continuum cube spectrum. Valid   |
-|                                  |               |                               |values are 1 (only I_0), 2 (I_0 &alpha), or 3 (I_0, alpha &           |
-|                                  |               |                               |beta). Larger values are set to 3, smaller values to 1.               |
-+----------------------------------+---------------+-------------------------------+----------------------------------------------------------------------+
-|Selavy.spectralTerms.snrThreshold |float          |0.                             |The threshold in component signal-to-noise ratio, below which no      |
-|                                  |               |                               |fitting is done to the spectra.                                       |
-+----------------------------------+---------------+-------------------------------+----------------------------------------------------------------------+
++----------------------------------+---------------+-------------------------------+-----------------------------------------------------------------------+
+| *Parameter*                      | *Type*        | *Default*                     | *Explanation*                                                         |
++==================================+===============+===============================+=======================================================================+
+|Selavy.spectralTermsFromTaylor    |bool           |true                           |Which mode to use to measure the spectral terms. True means use the    |
+|                                  |               |                               |Taylor-term images, while false means use a continuum cube.            |
++----------------------------------+---------------+-------------------------------+-----------------------------------------------------------------------+
+|**Taylor-term images**            |               |                               |                                                                       |
++----------------------------------+---------------+-------------------------------+-----------------------------------------------------------------------+
+|Selavy.findSpectralTerms          |vector<bool>   |2 terms, same as Fitter.doFit  |A vector of 2 terms, indiciating whether to find the spectral index    |
+|                                  |               |                               |(first term) and the spectral curvature (2nd term). It is possible to  |
+|                                  |               |                               |give only one term (e.g. findSpectralTerms = true) - then the second   |
+|                                  |               |                               |term will be set to false. To request both, put **findSpectralTerms =  |
+|                                  |               |                               |[true,true]**.                                                         |
++----------------------------------+---------------+-------------------------------+-----------------------------------------------------------------------+
+|Selavy.spectralTermImages         |vector<string> |Derived from image name - see  |You can explicitly set the images for each term like so:               |
+|                                  |               |text                           |**spectralTermImages = [image1, image2]**.                             |
++----------------------------------+---------------+-------------------------------+-----------------------------------------------------------------------+
+|**Continuum-cube**                |               |                               |                                                                       |
++----------------------------------+---------------+-------------------------------+-----------------------------------------------------------------------+
+|Selavy.spectralTerms.cube         |string         |""                             |The name of the continuum cube from which spectra should be extracted. |
++----------------------------------+---------------+-------------------------------+-----------------------------------------------------------------------+
+|Selavy.spectralTerms.nterms       |int            |3                              |The number of terms to fit to in the continuum cube spectrum. Valid    |
+|                                  |               |                               |values are 1 (only I_0), 2 (I_0 &alpha), or 3 (I_0, alpha &            |
+|                                  |               |                               |beta). Larger values are set to 3, smaller values to 1.                |
++----------------------------------+---------------+-------------------------------+-----------------------------------------------------------------------+
+|Selavy.spectralTerms.snrThreshold |float          |0.                             |The threshold in component signal-to-noise ratio, below which no       |
+|                                  |               |                               |fitting is done to the spectra.                                        |
++----------------------------------+---------------+-------------------------------+-----------------------------------------------------------------------+
 
 
 Rotation Measure Synthesis

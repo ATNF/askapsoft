@@ -105,7 +105,7 @@ is only the latter that are passsed to CASDA).
 |                                     |                                          | (:doc:`../analysis/thresholds`)     | image, used in the source-finding. Only applies if the image|
 |                                     |                                          |                                     | being searched has a corresponding weights image.           |
 +-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+ 
-|    ``SELAVY_VARIABLE_THRESHOLD``    | true                                     | VariableThreshold                   | A flag indicating whether to determine the signal-to-noise  |
+| ``SELAVY_VARIABLE_THRESHOLD``       | true                                     | VariableThreshold                   | A flag indicating whether to determine the signal-to-noise  |
 |                                     |                                          | (:doc:`../analysis/thresholds`)     | threshold on a pixel-by-pixel basis based on local          |
 |                                     |                                          |                                     | statistics (that is, the statistics within a relatively     |
 |                                     |                                          |                                     | small box centred on the pixel in question).                | 
@@ -113,10 +113,22 @@ is only the latter that are passsed to CASDA).
 | ``SELAVY_BOX_SIZE``                 | 50                                       | VariableThreshold.boxSize           | The half-width of the sliding box used to determine the     |
 |                                     |                                          | (:doc:`../analysis/thresholds`)     | local statistics.                                           |
 +-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
+| **Spectral indices**                |                                          |                                     |                                                             |
+|                                     |                                          |                                     |                                                             |
++-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
+| ``USE_CONTCUBE_FOR_SPECTRAL_INDEX`` | false                                    | none                                | When true, the spectral indices in the component catalogue  | 
+|                                     |                                          |                                     | are measured from the Stokes-I continuum cube. When false   |
+|                                     |                                          |                                     | (the default), the Taylor-term images are used. See         |
+|                                     |                                          |                                     | :doc:`../analysis/postprocessing` for information about each|
+|                                     |                                          |                                     | method.                                                     |
++-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
+| ``SELAVY_NUM_SPECTRAL_TERMS``       | 3                                        | spectralTerms.nterms                | The number of terms to be fitted to the spectrum when using |
+|                                     |                                          | (:doc:`../analysis/postprocessing`) | the continuum cube to find the spectral index & curvature.  |
++-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
 | **RM Synthesis**                    |                                          |                                     |                                                             |
 |                                     |                                          |                                     |                                                             |
 +-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
-| ``DO_RM_SYNTHESIS``                 | false                                    | none                                | Whether to perform RM Synthesis after continuum             | 
+| ``DO_RM_SYNTHESIS``                 | false                                    | none                                | Whether to perform RM Synthesis after continuum             |
 |                                     |                                          |                                     | source-finding.                                             |
 +-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
 | ``SELAVY_POL_OUTPUT_BASE``          | pol                                      | Forms part of                       | Base part of the filenames of extracted spectra and Faraday |
@@ -127,7 +139,7 @@ is only the latter that are passsed to CASDA).
 | ``SELAVY_POL_WRITE_SPECTRA``        | true                                     | RMSynthesis.writeSpectra            | Whether to write the extracted Stokes spectra to individual |
 |                                     |                                          | (:doc:`../analysis/postprocessing`) | files.                                                      |
 +-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
-|  ``SELAVY_POL_WRITE_COMPLEX_FDF``   | false                                    | RMSynthesis.writeComplexFDF         | Whether to write the Faraday Dispersion Function for each   |
+| ``SELAVY_POL_WRITE_COMPLEX_FDF``    | false                                    | RMSynthesis.writeComplexFDF         | Whether to write the Faraday Dispersion Function for each   |
 |                                     |                                          | (:doc:`../analysis/postprocessing`) | source as a single complex-valued spectrum (true) or as a   |
 |                                     |                                          |                                     | pair of real-valued spectra containing amplitude & phase    |
 |                                     |                                          |                                     | (false).                                                    |

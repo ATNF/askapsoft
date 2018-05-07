@@ -55,7 +55,8 @@ else
         DEP=$(addDep "$DEP" "$ID_CONTIMG_SCI")
     fi
 fi
-if [ "${DO_RM_SYNTHESIS}" == "true" ]; then
+if [ "${USE_CONTCUBE_FOR_SPECTRAL_INDEX}" == "true" ] ||
+       [ "${DO_RM_SYNTHESIS}" == "true" ]; then
     if [ "$FIELD" == "." ]; then
         DEP=$(addDep "$DEP" "$ID_LINMOS_CONTCUBE_ALL_RESTORED")
     elif [ "$BEAM" == "all" ]; then
@@ -85,9 +86,11 @@ if [ "${DO_IT}" == "true" ]; then
     # >0 -- this means that we are running the sourcefinding on the
     # selfcal loop mosaics, and so we also need to change the image &
     # weights names.
-    # We also can't do the RM synthesis on the LOOP images (since the
-    # calibrations don't match), so we turn it off if it is on
+    # We also can't do the RM synthesis or the
+    # spectral-index-from-contcube option on the LOOP images (since
+    # the calibrations don't match), so we turn it off if it is on
     doRM=${DO_RM_SYNTHESIS}
+    useContCube=${USE_CONTCUBE_FOR_SPECTRAL_INDEX}
     description=selavyCont
     if [ "$LOOP" != "" ]; then
         if [ "$LOOP" -gt 0 ]; then
@@ -101,6 +104,7 @@ if [ "${DO_IT}" == "true" ]; then
             meanMap="${meanMap%%.fits}.SelfCalLoop${LOOP}"
             snrMap="${snrMap%%.fits}.SelfCalLoop${LOOP}"
             doRM=false
+            useContCube=false
             if [ "${IMAGETYPE_CONT}" == "fits" ]; then
                 contImage="${contImage}.fits"
                 contWeights="${contWeights}.fits"
@@ -177,23 +181,6 @@ contcube=${contCube}
 
 imlist="\${imlist} ${OUTPUT}/\${image}"
 
-haveT1=false
-haveT2=false
-if [ "\${NUM_TAYLOR_TERMS}" -gt 1 ]; then
-    t1im=\$(echo "\$image" | sed -e 's/taylor\.0/taylor\.1/g')
-    if [ -e "${OUTPUT}/\${t1im}" ]; then
-        imlist="\${imlist} ${OUTPUT}/\${t1im}"
-        haveT1=true
-    fi
-    t2im=\$(echo "\$image" | sed -e 's/taylor\.0/taylor\.2/g')
-    if [ -e "${OUTPUT}/\${t2im}" ] && [ "\${NUM_TAYLOR_TERMS}" -gt 2 ]; then
-        imlist="\${imlist} ${OUTPUT}/\${t2im}"
-        haveT2=true
-    fi
-fi
-# Set the flag indicating whether to measure from Taylor-term images
-TaylorTermUse="Selavy.findSpectralTerms = [\${haveT1}, \${haveT2}]"
-
 if [ "\${BEAM}" == "all" ]; then
     imlist="\${imlist} ${OUTPUT}/\${weights}"
     weightpars="Selavy.Weights.weightsImage = \${weights%%.fits}.fits
@@ -203,7 +190,10 @@ else
 fi
 
 doRM=${doRM}
-if [ \$doRM == true ]; then
+useContCube=${useContCube}
+
+if [ "\${useContCube}" == "true" ] || 
+      [ "\${doRM}" == "true" ]; then
     polList="${polList}"
     for p in \${polList}; do
         sedstr="s/%p/\$p/g"
@@ -211,8 +201,15 @@ if [ \$doRM == true ]; then
         if [ -e "${OUTPUT}/\${thisim}" ]; then
             imlist="\${imlist} ${OUTPUT}/\${thisim}"
         else
-            doRM=false
-            echo "ERROR - Continuum cube \${thisim} not found. RM Synthesis being turned off."
+            if [ "\${doRM}" == "true" ]; then
+                doRM=false
+                echo "ERROR - Continuum cube \${thisim} not found. RM Synthesis being turned off."
+            fi
+            if [ "\${useContCube}" == "true" ]; then
+                useContCube=false
+                echo "ERROR - Continuum cube \${thisim} not found."
+                echo "      - Will not use continuum cube to find spectral indices"
+            fi
         fi
     done
 fi
@@ -251,6 +248,31 @@ if [ "\${HAVE_IMAGES}" == "true" ]; then
 
     # Move to the working directory
     cd $selavyDir
+
+    if [ "\${useContCube}" == "true" ]; then
+        # Set the parameter for using contcube to measure spectral-index
+        SpectralTermUse="Selavy.spectralTermsFromTaylor = false
+Selavy.spectralTerms.cube = ${OUTPUT}/\$contcube
+Selavy.spectralTerms.nterms = ${SELAVY_NUM_SPECTRAL_TERMS}"
+    else
+        haveT1=false
+        haveT2=false
+        if [ "\${NUM_TAYLOR_TERMS}" -gt 1 ]; then
+            t1im=\$(echo "\$image" | sed -e 's/taylor\.0/taylor\.1/g')
+            if [ -e "${OUTPUT}/\${t1im}" ]; then
+                imlist="\${imlist} ${OUTPUT}/\${t1im}"
+                haveT1=true
+            fi
+            t2im=\$(echo "\$image" | sed -e 's/taylor\.0/taylor\.2/g')
+            if [ -e "${OUTPUT}/\${t2im}" ] && [ "\${NUM_TAYLOR_TERMS}" -gt 2 ]; then
+                imlist="\${imlist} ${OUTPUT}/\${t2im}"
+                haveT2=true
+            fi
+        fi
+        # Set the flag indicating whether to measure from Taylor-term images
+        SpectralTermUse="Selavy.spectralTermsFromTaylor = true
+Selavy.findSpectralTerms = [\${haveT1}, \${haveT2}]"
+    fi
     
     if [ "\${doRM}" == "true" ]; then
         rmSynthParams="# RM Synthesis on extracted spectra from continuum cube
@@ -282,7 +304,7 @@ Selavy.sbid  = ${SB_SCIENCE}
 Selavy.sourceIdBase = ${sourceIDbase}
 Selavy.imageHistory = [${imageHistoryString}]
 #
-\${TaylorTermUse}
+\${SpectralTermUse}
 Selavy.nsubx = ${SELAVY_NSUBX}
 Selavy.nsuby = ${SELAVY_NSUBY}
 #

@@ -885,6 +885,13 @@ SELAVY_BOX_SIZE=50
 # How the processors subdivide the image
 SELAVY_NSUBX=6
 SELAVY_NSUBY=3
+#
+# Whether to use the continuum cube to find the spectral index &
+# curvature
+USE_CONTCUBE_FOR_SPECTRAL_INDEX=false
+# If using contcube, this is the number of terms to solve for (1=just
+# I_0, 2 = I_0 & alpha, 3 = I_0, alpha, beta)
+SELAVY_NUM_SPECTRAL_TERMS=3
 
 ##############################
 # Run the continuum validation script following source finding
