@@ -503,6 +503,10 @@ void ContinuumWorker::buildSpectralCube() {
             }
         }
     }
+    ASKAPLOG_DEBUG_STR(logger,"You shall not pass. Waiting at a barrier for all ranks to have created the cubes ");
+    itsComms.barrier();
+    ASKAPLOG_DEBUG_STR(logger,"Passed the barrier");
+
     /// What are the plans for the deconvolution?
     ASKAPLOG_DEBUG_STR(logger,"Ascertaining Cleaning Plan");
     const bool writeAtMajorCycle = itsParsets[0].getBool("Images.writeAtMajorCycle",false);
