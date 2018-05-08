@@ -106,7 +106,7 @@ bool FITSImageRW::create(const std::string &name, const casa::IPosition &shape, 
 
     ASKAPLOG_INFO_STR(FITSlogger, "Creating R/W FITSImage " << this->name);
 
-    // unlink(this->name.c_str());
+    unlink(this->name.c_str());
     std::ofstream outfile(this->name.c_str());
     ASKAPCHECK(outfile.is_open(), "Cannot open FITS file for output");
     ASKAPLOG_INFO_STR(FITSlogger, "Created Empty R/W FITSImage " << this->name);
@@ -396,32 +396,36 @@ bool FITSImageRW::write(const casa::Array<float> &arr, const casa::IPosition &wh
     lpixel[1] = where[1] + arr.shape()[1];
     ASKAPLOG_INFO_STR(FITSlogger, "fpixel[1] = " << fpixel[1] << ", lpixel[1] = " << lpixel[1]);
 
-    if (array_dim == 2 && location_dim >= 3) {
+    if (array_dim == 2 && location_dim == 3) {
         ASKAPLOG_INFO_STR(FITSlogger,"Writing a single slice into an array");
         fpixel[2] = where[2] + 1;
-        lpixel[2] = where[2] + 2;
+        lpixel[2] = where[2] + 1;
 //        lpixel[2] = where[2] + arr.shape()[2];
         ASKAPLOG_INFO_STR(FITSlogger, "fpixel[2] = " << fpixel[2] << ", lpixel[2] = " << lpixel[2]);
     }
-    if (array_dim == 3 && location_dim >= 3) {
-      ASKAPLOG_INFO_STR(FITSlogger,"Writing more than 1 slice into the array");
-      fpixel[2] = where[2] + 1;
-      lpixel[2] = where[2] + arr.shape()[2];
+    else if (array_dim == 3 && location_dim == 3) {
+        ASKAPLOG_INFO_STR(FITSlogger,"Writing more than 1 slice into the array");
+        fpixel[2] = where[2] + 1;
+        lpixel[2] = where[2] + arr.shape()[2];
+        ASKAPLOG_INFO_STR(FITSlogger, "fpixel[2] = " << fpixel[2] << ", lpixel[2] = " << lpixel[2]);
     }
-    if (array_dim == 3 && location_dim >= 4) {
-
+    else if (array_dim == 3 && location_dim == 4) {
+        fpixel[2] = where[2] + 1;
+        lpixel[2] = where[2] + arr.shape()[2];
         fpixel[3] = where[3] + 1;
         // lpixel[3] = where[3] + arr.shape()[3];
-        lpixel[3] = where[3] + 2;
-
+        lpixel[3] = where[3] + 1;
+        ASKAPLOG_INFO_STR(FITSlogger, "fpixel[2] = " << fpixel[2] << ", lpixel[2] = " << lpixel[2]);
         ASKAPLOG_INFO_STR(FITSlogger, "fpixel[3] = " << fpixel[3] << ", lpixel[3] = " << lpixel[3]);
     }
-    if (array_dim == 4 && location_dim >= 4) {
+    else if (array_dim == 4 && location_dim == 4) {
 
+        fpixel[2] = where[2] + 1;
+        lpixel[2] = where[2] + arr.shape()[2];
         fpixel[3] = where[3] + 1;
         lpixel[3] = where[3] + arr.shape()[3];
 
-
+        ASKAPLOG_INFO_STR(FITSlogger, "fpixel[2] = " << fpixel[2] << ", lpixel[2] = " << lpixel[2]);
         ASKAPLOG_INFO_STR(FITSlogger, "fpixel[3] = " << fpixel[3] << ", lpixel[3] = " << lpixel[3]);
     }
 
@@ -444,6 +448,7 @@ bool FITSImageRW::write(const casa::Array<float> &arr, const casa::IPosition &wh
     if (fits_write_subset_flt(fptr, group, naxes, axes, fpixel, lpixel, dataptr, &status))
         printerror(status);
 
+    ASKAPLOG_INFO_STR(FITSlogger, "Written " << nelements << " elements");
     status = 0;
 
     if (fits_close_file(fptr, &status))
