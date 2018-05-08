@@ -504,7 +504,7 @@ void ContinuumWorker::buildSpectralCube() {
         }
     }
     ASKAPLOG_DEBUG_STR(logger,"You shall not pass. Waiting at a barrier for all ranks to have created the cubes ");
-    itsComms.barrier();
+    itsComms.barrier(itsComms.theWorkers());
     ASKAPLOG_DEBUG_STR(logger,"Passed the barrier");
 
     /// What are the plans for the deconvolution?
