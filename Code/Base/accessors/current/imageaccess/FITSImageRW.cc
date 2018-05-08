@@ -106,11 +106,11 @@ bool FITSImageRW::create(const std::string &name, const casa::IPosition &shape, 
 
     ASKAPLOG_INFO_STR(FITSlogger, "Creating R/W FITSImage " << this->name);
 
-    unlink(this->name.c_str());
+    // unlink(this->name.c_str());
     std::ofstream outfile(this->name.c_str());
     ASKAPCHECK(outfile.is_open(), "Cannot open FITS file for output");
-
-
+    ASKAPLOG_INFO_STR(FITSlogger, "Created Empty R/W FITSImage " << this->name);
+    ASKAPLOG_INFO_STR(FITSlogger, "Generating FITS header");
 
 
     casa::String error;
@@ -120,7 +120,7 @@ bool FITSImageRW::create(const std::string &name, const casa::IPosition &shape, 
     // //
     casa::Record header;
     casa::Double b_scale, b_zero;
-
+    ASKAPLOG_INFO_STR(FITSlogger, "Created blank FITS header");
     if (BITPIX == -32) {
 
         b_scale = 1.0;
@@ -135,6 +135,7 @@ bool FITSImageRW::create(const std::string &name, const casa::IPosition &shape, 
             "BITPIX must be -32 (floating point)";
         return false;
     }
+    ASKAPLOG_INFO_STR(FITSlogger, "Added BITPIX");
     //
     // At this point, for 32 floating point, we must apply the given
     // mask.  For 16bit, we may know that there are in fact no blanks
@@ -148,16 +149,20 @@ bool FITSImageRW::create(const std::string &name, const casa::IPosition &shape, 
         naxis(i) = shape(i);
     }
     header.define("naxis", naxis);
+
+    ASKAPLOG_INFO_STR(FITSlogger, "Added NAXES");
     if (allowAppend)
         header.define("extend", casa::True);
     if (!primHead) {
         header.define("PCOUNT", 0);
         header.define("GCOUNT", 1);
     }
+    ASKAPLOG_INFO_STR(FITSlogger, "Extendable");
+
     header.define("bscale", b_scale);
     header.setComment("bscale", "PHYSICAL = PIXEL*BSCALE + BZERO");
     header.define("bzero", b_zero);
-
+    ASKAPLOG_INFO_STR(FITSlogger, "BSCALE");
 
     header.define("COMMENT1", ""); // inserts spaces
     // I should FITS-ize the units
@@ -165,10 +170,12 @@ bool FITSImageRW::create(const std::string &name, const casa::IPosition &shape, 
     header.define("BUNIT", "Jy");
     header.setComment("BUNIT", "Brightness (pixel) unit");
     //
+    ASKAPLOG_INFO_STR(FITSlogger, "BUINT");
     casa::IPosition shapeCopy = shape;
     casa::CoordinateSystem cSys = csys;
 
     casa::Record saveHeader(header);
+    ASKAPLOG_INFO_STR(FITSlogger, "Saved header");
     casa::Bool ok = cSys.toFITSHeader(header, shapeCopy, casa::True, 'c', casa::True, // use WCS
                                       preferVelocity, opticalVelocity,
                                       preferWavelength, airWavelength);
@@ -197,6 +204,7 @@ bool FITSImageRW::create(const std::string &name, const casa::IPosition &shape, 
             return false;
         }
     }
+    ASKAPLOG_INFO_STR(FITSlogger, "Added coordinate system");
     // When this if test is True, it means some pixel axes had been removed from
     // the coordinate system and degenerate axes were added.
 
@@ -222,6 +230,8 @@ bool FITSImageRW::create(const std::string &name, const casa::IPosition &shape, 
         header.define("timesys", timesys);
         header.setComment("timesys", "Time system for HDU");
     }
+
+    ASKAPLOG_INFO_STR(FITSlogger, "Added date");
     // //
     // // ORIGIN
     // //
@@ -244,7 +254,7 @@ bool FITSImageRW::create(const std::string &name, const casa::IPosition &shape, 
     //
 
     theKeywordList.end();
-
+    ASKAPLOG_INFO_STR(FITSlogger, "All keywords created ... adding to file");
     // now get them into a file ...
 
     theKeywordList.first();
@@ -255,6 +265,7 @@ bool FITSImageRW::create(const std::string &name, const casa::IPosition &shape, 
     memset(cards, 0, 2880 * 1024);
     while (1) {
         if (m_kc.build(cards, theKeywordList)) {
+            
             outfile << cards;
             memset(cards, 0, 2880 * 1024);
         } else {
@@ -266,7 +277,7 @@ bool FITSImageRW::create(const std::string &name, const casa::IPosition &shape, 
 
     }
     // outfile << cards;
-
+    ASKAPLOG_INFO_STR(FITSlogger, "All keywords added to file");
     outfile.close();
 
     return true;
@@ -373,23 +384,47 @@ bool FITSImageRW::write(const casa::Array<float> &arr, const casa::IPosition &wh
                << " axes, while requested location has " << where.nelements());
 
     long fpixel[4], lpixel[4];
-    ASKAPLOG_INFO_STR(FITSlogger, "There are " << where.nelements() << " dimensions in the slice");
+    int array_dim = arr.shape().nelements();
+    int location_dim = where.nelements();
+    ASKAPLOG_INFO_STR(FITSlogger, "There are " << array_dim << " dimensions in the slice");
+    ASKAPLOG_INFO_STR(FITSlogger," There are " << location_dim << " dimensions in the place");
+
     fpixel[0] = where[0] + 1;
     lpixel[0] = where[0] + arr.shape()[0];
     ASKAPLOG_INFO_STR(FITSlogger, "fpixel[0] = " << fpixel[0] << ", lpixel[0] = " << lpixel[0]);
     fpixel[1] = where[1] + 1;
     lpixel[1] = where[1] + arr.shape()[1];
     ASKAPLOG_INFO_STR(FITSlogger, "fpixel[1] = " << fpixel[1] << ", lpixel[1] = " << lpixel[1]);
-    if (where.nelements() >= 3) {
+
+    if (array_dim == 2 && location_dim == 3) {
+        ASKAPLOG_INFO_STR(FITSlogger,"Writing a single slice into an array");
         fpixel[2] = where[2] + 1;
-        lpixel[2] = where[2] + arr.shape()[2];
+        lpixel[2] = where[2] + 2;
+//        lpixel[2] = where[2] + arr.shape()[2];
         ASKAPLOG_INFO_STR(FITSlogger, "fpixel[2] = " << fpixel[2] << ", lpixel[2] = " << lpixel[2]);
     }
-    if (where.nelements() >= 4) {
+    if (array_dim == 3 && location_dim == 3) {
+      ASKAPLOG_INFO_STR(FITSlogger,"Writing more than 1 slice into the array");
+      fpixel[2] = where[2] + 1;
+      lpixel[2] = where[2] + arr.shape()[2];
+    }
+    if (array_dim == 3 && location_dim == 4) {
+
         fpixel[3] = where[3] + 1;
-        lpixel[3] = where[3] + arr.shape()[3];
+        // lpixel[3] = where[3] + arr.shape()[3];
+        lpixel[3] = where[3] + 2;
+
         ASKAPLOG_INFO_STR(FITSlogger, "fpixel[3] = " << fpixel[3] << ", lpixel[3] = " << lpixel[3]);
     }
+    if (array_dim == 4 && location_dim == 4) {
+
+        fpixel[3] = where[3] + 1;
+        lpixel[3] = where[3] + arr.shape()[3];
+
+
+        ASKAPLOG_INFO_STR(FITSlogger, "fpixel[3] = " << fpixel[3] << ", lpixel[3] = " << lpixel[3]);
+    }
+
 
     int64_t nelements = arr.nelements();          /* number of pixels to write */
 
@@ -489,7 +524,7 @@ void FITSImageRW::setRestoringBeam(double maj, double min, double pa)
 
 void FITSImageRW::addHistory(const std::string &history)
 {
-    
+
     ASKAPLOG_INFO_STR(FITSlogger,"Adding HISTORY string: " << history);
     fitsfile *fptr;       /* pointer to the FITS file, defined in fitsio.h */
     int status = 0;
