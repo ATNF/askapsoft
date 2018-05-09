@@ -36,6 +36,10 @@
 imageCode=image
 setImageProperties cont
 modelImage=${imageName}
+if [ ${NUM_TAYLOR_TERMS} -gt 1 ]; then
+    # need to strip the .taylor.0 suffix
+    modelImage=$(echo $modelImage | sed -e 's/\.taylor\.0$//g')
+fi
 
 ContsubModelDefinition="# The model definition
 CContsubtract.sources.names                       = [lsm]
