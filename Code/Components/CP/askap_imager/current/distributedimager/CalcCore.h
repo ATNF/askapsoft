@@ -38,6 +38,8 @@
 #include <fitting/Solver.h>
 #include <fitting/Quality.h>
 #include <parallel/ImagerParallel.h>
+#include <gridding/IVisGridder.h>
+#include <gridding/VisGridderFactory.h>
 
 #include <casacore/casa/Quanta/Quantum.h>
 #include <casacore/casa/Arrays/Vector.h>
@@ -58,6 +60,13 @@ namespace cp {
         CalcCore(LOFAR::ParameterSet& parset,
                    askap::askapparallel::AskapParallel& comms,
                    accessors::TableDataSource ds, int localChannel=1);
+
+        /// @brief Constructor that maintains the gridder
+        CalcCore(LOFAR::ParameterSet& parset,
+                askap::askapparallel::AskapParallel& comms,
+                accessors::TableDataSource ds, askap::synthesis::IVisGridder::ShPtr gdr,
+                 int localChannel=1);
+
         virtual ~CalcCore();
 
         /// @brief Calc the normal equations
@@ -76,6 +85,8 @@ namespace cp {
 
         void writeLocalModel(const std::string& postfix);
 
+        askap::synthesis::IVisGridder::ShPtr gridder() { return itsGridder_p;};
+
     private:
 
         // Parameter set
@@ -93,8 +104,14 @@ namespace cp {
         // Data: vector of the stored datasources
         accessors::TableDataSource itsData;
 
+
+        // Pointer to the gridder
+        askap::synthesis::IVisGridder::ShPtr itsGridder_p;
+        
         // Its channel in the dataset
         int itsChannel;
+
+
 
         // No support for assignment
         CalcCore& operator=(const CalcCore& rhs);

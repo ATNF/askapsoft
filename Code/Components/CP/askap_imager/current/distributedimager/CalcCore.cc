@@ -56,6 +56,8 @@
 #include <measurementequation/ImageFFTEquation.h>
 #include <parallel/GroupVisAggregator.h>
 #include <utils/MultiDimArrayPlaneIter.h>
+#include <gridding/IVisGridder.h>
+#include <gridding/VisGridderFactory.h>
 
 // Local includes
 
@@ -82,7 +84,19 @@ CalcCore::CalcCore(LOFAR::ParameterSet& parset,
     const std::string solver_par = itsParset.getString("solver");
     const std::string algorithm_par = itsParset.getString("solver.Clean.algorithm", "MultiScale");
     itsSolver = ImageSolverFactory::make(itsParset);
+    itsGridder_p = VisGridderFactory::make(itsParset);
     itsRestore = itsParset.getBool("restore", false);
+}
+CalcCore::CalcCore(LOFAR::ParameterSet& parset,
+                       askap::askapparallel::AskapParallel& comms,
+                       accessors::TableDataSource ds, askap::synthesis::IVisGridder::ShPtr gdr,
+                       int localChannel)
+    : ImagerParallel(comms,parset), itsParset(parset), itsComms(comms),itsData(ds),itsGridder_p(gdr), itsChannel(localChannel)
+{
+  const std::string solver_par = itsParset.getString("solver");
+  const std::string algorithm_par = itsParset.getString("solver.Clean.algorithm", "MultiScale");
+  itsSolver = ImageSolverFactory::make(itsParset);
+  itsRestore = itsParset.getBool("restore", false);
 }
 
 CalcCore::~CalcCore()

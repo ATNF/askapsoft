@@ -59,6 +59,8 @@ class ContinuumWorker
 
         void run(void);
 
+        
+
 
     private:
 
@@ -96,9 +98,6 @@ class ContinuumWorker
 
         // Communications class
         CubeComms& itsComms;
-
-        // Pointer to the gridder
-        askap::synthesis::IVisGridder::ShPtr itsGridder_p;
 
         // No support for assignment
         ContinuumWorker& operator=(const ContinuumWorker& rhs);
