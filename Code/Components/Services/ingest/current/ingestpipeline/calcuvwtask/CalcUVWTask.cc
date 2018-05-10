@@ -142,10 +142,11 @@ void CalcUVWTask::calcForRow(VisChunk::ShPtr chunk, const casa::uInt row)
     casa::MeasFrame frame(casa::MEpoch(chunk->time(), casa::MEpoch::UTC), mroPos);
 
     // phase center for a given beam
-    /*    
+        
     const casa::MDirection fpc = casa::MDirection::Convert(phaseCentre(chunk->phaseCentre()(row),chunk->beam1()(row)),
                                     casa::MDirection::Ref(casa::MDirection::TOPO, frame))();
 
+    /*
     const double ra = fpc.getAngle().getValue()(0);
     const double dec = fpc.getAngle().getValue()(1);
     */
@@ -194,7 +195,9 @@ void CalcUVWTask::calcForRow(VisChunk::ShPtr chunk, const casa::uInt row)
     // do the conversion to J2000 in a quick and dirty way for now
     // some optimisation and caching of rotation matrix are definitely possible here
     // but cache class in accessors needs to be adapted first.
-    casa::UVWMachine uvm(casa::MDirection::Ref(casa::MDirection::J2000), hadec, frame);
+    // commented out hadec-based transformation, see ADESCOM-342 and ASKAPSDP-3033
+    //casa::UVWMachine uvm(casa::MDirection::Ref(casa::MDirection::J2000), hadec, frame);
+    casa::UVWMachine uvm(casa::MDirection::Ref(casa::MDirection::J2000), fpc);
     uvm.convertUVW(uvwvec);
     ASKAPDEBUGASSERT(uvwvec.nelements() == 3);
 
