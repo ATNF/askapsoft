@@ -586,8 +586,9 @@ RESTORE_PRECONDITIONER_WIENER_TAPER=""
 ####################
 # Self-calibration parameters
 #
-# Method to present self-cal model: via a model image ("Cmodel") or
-# via a components parset ("Components")
+# Method to present self-cal model: via a model image ("Cmodel")
+# via a components parset ("Components"), or using the
+# continuum-imaging clean model ("CleanModel")
 SELFCAL_METHOD="Cmodel"
 # Number of loops of self-calibration
 SELFCAL_NUM_LOOPS=2

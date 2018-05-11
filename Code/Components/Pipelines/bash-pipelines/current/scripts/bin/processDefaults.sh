@@ -707,9 +707,10 @@ EOF
             CPUS_PER_CORE_CONT_IMAGING=${NUM_CPUS_CONTIMG_SCI}
         fi
 
-        # Method used for self-calibration - needs to be either Cmodel or Components
+        # Method used for self-calibration - needs to be one of Cmodel, Components, CleanModel
         if [ "${SELFCAL_METHOD}" != "Cmodel" ] &&
-               [ "${SELFCAL_METHOD}" != "Components" ]; then
+               [ "${SELFCAL_METHOD}" != "Components" ] &&
+               [ "${SELFCAL_METHOD}" != "CleanModel" ]; then
             SELFCAL_METHOD="Cmodel"
         fi
 

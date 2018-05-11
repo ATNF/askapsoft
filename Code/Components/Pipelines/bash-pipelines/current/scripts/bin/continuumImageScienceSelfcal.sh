@@ -157,7 +157,33 @@ Ccalibrator.sources.lsm.nterms                  = ${NUM_TAYLOR_TERMS}"
 Ccalibrator.visweights                          = MFS
 Ccalibrator.visweights.MFS.reffreq              = ${freq}"
         fi
-    else
+
+    elif [ "${SELFCAL_METHOD}" == "CleanModel" ]; then
+
+        imageCode=image
+        setImageProperties cont
+        modelImage=${imageName}
+        if [ ${NUM_TAYLOR_TERMS} -gt 1 ]; then
+            # need to strip the .taylor.0 suffix
+            modelImage=$(echo $modelImage | sed -e 's/\.taylor\.0$//g')
+        fi
+        CalibratorModelDefinition="# The model definition
+Ccalibrator.sources.names                       = [lsm]
+Ccalibrator.sources.lsm.direction               = \${modelDirection}
+Ccalibrator.sources.lsm.model                   = ${modelImage}
+Ccalibrator.sources.lsm.nterms                  = ${NUM_TAYLOR_TERMS}"
+        if [ "${NUM_TAYLOR_TERMS}" -gt 1 ]; then
+            if [ "$MFS_REF_FREQ" == "" ]; then
+                freq=$CENTRE_FREQ
+            else
+                freq=${MFS_REF_FREQ}
+            fi
+            CalibratorModelDefinition="$CalibratorModelDefinition
+Ccalibrator.visweights                          = MFS
+Ccalibrator.visweights.MFS.reffreq              = ${freq}"
+        fi
+
+    elif [ "${SELFCAL_METHOD}" == "Components" ]; then
 
         CmodelParset="##########
         ## Creation of the model image is not done here"
@@ -174,6 +200,9 @@ Selavy.outputComponentParset.maxNumComponents   = 10"
         CalibratorModelDefinition="# The model definition
 Ccalibrator.sources.definition                  = \${sources}"
 
+    else
+        echo "ERROR - SELFCAL_METHOD=${SELFCAL_METHOD} - this should not be the case. Exiting!"
+        exit 1
     fi
 
     # Optional referencing of ccalibrator
@@ -402,48 +431,51 @@ EOFINNER
     if [ \${LOOP} -gt 0 ]; then
         cd \${loopdir}
 
-        log=${logs}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}_selavy.log
-        echo "--- Source finding with $selavy ---" > "\$log"
-        echo "---    Loop=\$LOOP, Threshold = \${SELFCAL_SELAVY_THRESHOLD_ARRAY[\$LOOP]} --" >> "\$log"
-        NCORES=${NPROCS_SELAVY}
-        NPPN=${CPUS_PER_CORE_SELFCAL_SELAVY}
-        srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} $selavy -c "\$parset" >> "\$log"
-        err=\$?
-        extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname}_L\${LOOP}_selavy "txt,csv"
+        if [ "\${selfcalMethod}" != "CleanModel" ]; then
 
-        if [ \$err != 0 ]; then
-            exit \$err
-        fi
-
-        if [ "${DO_POSITION_OFFSET}" == "true" ] && [ -e "${script_location}/fix_position_offsets.py" ]; then
-          if [ \${LOOP} -eq ${SELFCAL_NUM_LOOPS} ]; then
-            log=${logs}/fix_position_offsets_\${SLURM_JOB_ID}.log
-            python "${script_location}/fix_position_offsets.py" ${script_args} > "\${log}"
-          fi
-        fi
-
-        if [ "\${selfcalMethod}" == "Cmodel" ]; then
-            fluxLimitSNR="${SELFCAL_COMPONENT_SNR_LIMIT}"
-            if [ "\${fluxLimitSNR}" != "" ]; then
-                # Get the average noise at location of components, and set a flux limit for cmodel based on it
-                avNoise=\$(awk 'BEGIN{sum=0;ct=0;}{if((substr($0,1,1)!="#")&&(\$33>0.)){ sum+=\$33; ct++; }}END{print sum/ct}' selavy-results.components.txt)
-                fluxLimit=\$(echo \$avNoise \$fluxLimitSNR | awk '{print \$1*\$2}')
-                echo "# Flux limit for cmodel determined from image noise & SNR=${SELFCAL_COMPONENT_SNR_LIMIT}
-Cmodel.flux_limit    = \${fluxLimit}mJy" >> \$parset
-            fi
-            log=${logs}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}_cmodel.log
-            echo "--- Model creation with $cmodel ---" > "\$log"
-            NCORES=2
-            NPPN=2
-            srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} $cmodel -c "\$parset" >> "\$log"
+            log=${logs}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}_selavy.log
+            echo "--- Source finding with $selavy ---" > "\$log"
+            echo "---    Loop=\$LOOP, Threshold = \${SELFCAL_SELAVY_THRESHOLD_ARRAY[\$LOOP]} --" >> "\$log"
+            NCORES=${NPROCS_SELAVY}
+            NPPN=${CPUS_PER_CORE_SELFCAL_SELAVY}
+            srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} $selavy -c "\$parset" >> "\$log"
             err=\$?
-            extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname}_L\${LOOP}_cmodel "txt,csv"
-
+            extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname}_L\${LOOP}_selavy "txt,csv"
+    
             if [ \$err != 0 ]; then
                 exit \$err
             fi
-        fi
+    
+            if [ "${DO_POSITION_OFFSET}" == "true" ] && [ -e "${script_location}/fix_position_offsets.py" ]; then
+              if [ \${LOOP} -eq ${SELFCAL_NUM_LOOPS} ]; then
+                log=${logs}/fix_position_offsets_\${SLURM_JOB_ID}.log
+                python "${script_location}/fix_position_offsets.py" ${script_args} > "\${log}"
+              fi
+            fi
+    
+            if [ "\${selfcalMethod}" == "Cmodel" ]; then
+                fluxLimitSNR="${SELFCAL_COMPONENT_SNR_LIMIT}"
+                if [ "\${fluxLimitSNR}" != "" ]; then
+                    # Get the average noise at location of components, and set a flux limit for cmodel based on it
+                    avNoise=\$(awk 'BEGIN{sum=0;ct=0;}{if((substr($0,1,1)!="#")&&(\$33>0.)){ sum+=\$33; ct++; }}END{print sum/ct}' selavy-results.components.txt)
+                    fluxLimit=\$(echo \$avNoise \$fluxLimitSNR | awk '{print \$1*\$2}')
+                    echo "# Flux limit for cmodel determined from image noise & SNR=${SELFCAL_COMPONENT_SNR_LIMIT}
+    Cmodel.flux_limit    = \${fluxLimit}mJy" >> \$parset
+                fi
+                log=${logs}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}_cmodel.log
+                echo "--- Model creation with $cmodel ---" > "\$log"
+                NCORES=2
+                NPPN=2
+                srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} $cmodel -c "\$parset" >> "\$log"
+                err=\$?
+                extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname}_L\${LOOP}_cmodel "txt,csv"
+    
+                if [ \$err != 0 ]; then
+                    exit \$err
+                fi
+            fi
 
+        fi
 
         log=${logs}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}_ccalibrator.log
         echo "--- Calibration with $ccalibrator ---" > "\$log"
