@@ -44,10 +44,13 @@ The algorithm here is as follows:
 
 1. Image the data with cimager or imager
 2. Run source-finding with Selavy with a relatively large threshold
+   (unless we are using option 3c. below)
 3. Use the results to calibrate the antenna-based gains by either:
 
-   a. Create a component parset from the resulting component catalogue and use this parset in ccalibrator, or
+   a. Create a component parset from the resulting component catalogue and use this parset in ccalibrator
    b. Create a model image from the component catalogue, and use in ccalibrator
+   c. Use the clean model image from the most recent imaging as the
+      model for ccalibrator (no source-finding will be done)
 
 4. Re-run imaging, applying the latest gains table
 5. Repeat steps 2-5 for a given number of loops
@@ -329,11 +332,13 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``DO_SELFCAL``                             | true                            | none                                                   | Whether to self-calibrate the science data when imaging.      |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``SELFCAL_METHOD``                         | Cmodel                          | none                                                   | How to do the self-calibration. There are two options:        |
+| ``SELFCAL_METHOD``                         | Cmodel                          | none                                                   | How to do the self-calibration. There are three options:      |
 |                                            |                                 |                                                        | "Cmodel" means create a model image from the                  |
 |                                            |                                 |                                                        | source-finding results; "Components" means use the            |
 |                                            |                                 |                                                        | detected components directly through a parset (created by     |
-|                                            |                                 |                                                        | Selavy). Anything else will default to "Cmodel".              |
+|                                            |                                 |                                                        | Selavy); "CleanModel" means use the clean model image from the|
+|                                            |                                 |                                                        | most recent imaging as the model for ccalibrator. Anything    |
+|                                            |                                 |                                                        | else will default to "Cmodel".                                |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``SELFCAL_NUM_LOOPS``                      | 2                               | none                                                   | Number of loops of self-calibration.                          |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
