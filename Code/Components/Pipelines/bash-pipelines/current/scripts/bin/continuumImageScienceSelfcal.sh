@@ -170,7 +170,7 @@ Ccalibrator.visweights.MFS.reffreq              = ${freq}"
         CalibratorModelDefinition="# The model definition
 Ccalibrator.sources.names                       = [lsm]
 Ccalibrator.sources.lsm.direction               = \${modelDirection}
-Ccalibrator.sources.lsm.model                   = ${modelImage}
+Ccalibrator.sources.lsm.model                   = ${OUTPUT}/${modelImage}
 Ccalibrator.sources.lsm.nterms                  = ${NUM_TAYLOR_TERMS}"
         if [ "${NUM_TAYLOR_TERMS}" -gt 1 ]; then
             if [ "$MFS_REF_FREQ" == "" ]; then
