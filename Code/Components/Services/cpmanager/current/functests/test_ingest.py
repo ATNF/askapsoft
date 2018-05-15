@@ -62,73 +62,87 @@ class TestCPIngest(object):
 
 
     def test_obs(self):
-        self.cpservice.startObs(5)
-        is_complete = self.cpservice.waitObs(2000)
-        assert_equals(is_complete, False)
-        self.cpservice.abortObs()
-        is_complete = self.cpservice.waitObs(2000)
-        assert_equals(is_complete, True)
-        is_complete = self.cpservice.waitObs(200)
-        assert_equals(is_complete, True)
+        try:
+            self.cpservice.startObs(5)
+            is_complete = self.cpservice.waitObs(2000)
+            assert_equals(is_complete, False)
+            self.cpservice.abortObs()
+            is_complete = self.cpservice.waitObs(2000)
+            assert_equals(is_complete, True)
+            is_complete = self.cpservice.waitObs(200)
+            assert_equals(is_complete, True)
+        except Exception as ex:
+            self.cpservice.abortObs()
+            assert_equals(True, False)
 
     def test_dataservice(self):
-        self.cpservice.startObs(5)
-        time.sleep(5)
-        # sch block should have obs var updated
-        obs_vars = self.dataservice.getObsVariables(5, '')
-        obs_info = obs_vars.get('obs.info')
+        try:
+            self.cpservice.startObs(5)
+            time.sleep(5)
+            # sch block should have obs var updated
+            obs_vars = self.dataservice.getObsVariables(5, '')
+            obs_info = obs_vars.get('obs.info')
 
-        # obs_info should be a json string, convert it back to
-        # json object and check values
-        obs_info_obj = json.loads(obs_info)
+            # obs_info should be a json string, convert it back to
+            # json object and check values
+            obs_info_obj = json.loads(obs_info)
 
-        startFreq = 1376.5
-        chanWidth = 18.518518
-        nChan = 2592
-#        bandWidth = chanWidth * nChan
-#        centreFreq = startFreq + bandWidth / 2
+            startFreq = 1376.5
+            chanWidth = 18.518518
+            nChan = 2592
+    #        bandWidth = chanWidth * nChan
+    #        centreFreq = startFreq + bandWidth / 2
 
-        temp = obs_info_obj["nChan"]["value"]
+            temp = obs_info_obj["nChan"]["value"]
 
-        assert_almost_equals(obs_info_obj["nChan"]["value"], nChan, places=1)
-        assert_equals(obs_info_obj["ChanWidth"]["value"], chanWidth)
-        assert_equals(obs_info_obj["StartFreq"]["value"], startFreq)
- #       assert_equals(obs_info_obj["CentreFreq"]["value"], centreFreq)
- #       assert_equals(obs_info_obj["BandWidth"]["value"], bandWidth)
+            assert_almost_equals(obs_info_obj["nChan"]["value"], nChan, places=1)
+            assert_equals(obs_info_obj["ChanWidth"]["value"], chanWidth)
+            assert_equals(obs_info_obj["StartFreq"]["value"], startFreq)
+     #       assert_equals(obs_info_obj["CentreFreq"]["value"], centreFreq)
+     #       assert_equals(obs_info_obj["BandWidth"]["value"], bandWidth)
 
-        self.cpservice.abortObs()
-        is_complete = self.cpservice.waitObs(2000)
-        assert_equals(is_complete, True)
+            self.cpservice.abortObs()
+            is_complete = self.cpservice.waitObs(5000)
+            assert_equals(is_complete, True)
+
+        except Exception as ex:
+            self.cpservice.abortObs()
+            assert_equals(True, False)
 
 
     def test_monitoring(self):
-        # monitoring points should not be there
-        point_names = ['ingest.running', 'ingest0.cp.ingest.obs.StartFreq', 'ingest0.cp.ingest.obs.nChan',
-                       'ingest0.cp.ingest.obs.ChanWidth', 'ingest36.cp.ingest.obs.FieldName', 'ingest36.cp.ingest.obs.ScanId']
+        try:
+            # monitoring points should not be there
+            point_names = ['ingest.running', 'ingest0.cp.ingest.obs.StartFreq', 'ingest0.cp.ingest.obs.nChan',
+                           'ingest0.cp.ingest.obs.ChanWidth', 'ingest36.cp.ingest.obs.FieldName', 'ingest36.cp.ingest.obs.ScanId']
 
-        points = self.monitoringservice.get(point_names)
-        assert_equals(len(points), 1)
-        assert_equals(points[0].value.value, False)
+            points = self.monitoringservice.get(point_names)
+            assert_equals(len(points), 1)
+            assert_equals(points[0].value.value, False)
 
-        self.cpservice.startObs(5)
-        time.sleep(5)
-        # monitoring points should be there
-        points = self.monitoringservice.get(point_names)
-        assert_equals(len(points), 6)
-        assert_equals(points[0].value.value, True)
-        assert_equals(points[1].value.value, 1376.5)
-        assert_equals(points[2].value.value, 864)
+            self.cpservice.startObs(5)
+            time.sleep(5)
+            # monitoring points should be there
+            points = self.monitoringservice.get(point_names)
+            assert_equals(len(points), 6)
+            assert_equals(points[0].value.value, True)
+            assert_equals(points[1].value.value, 1376.5)
+            assert_equals(points[2].value.value, 864)
 
-        chanWidth = 18.518518
-        value = points[3].value.value
-        assert_almost_equals(value, chanWidth, places=6)
+            chanWidth = 18.518518
+            value = points[3].value.value
+            assert_almost_equals(value, chanWidth, places=6)
 
-        assert_equals(points[4].value.value, 'Virgo')
-        assert_equals(points[5].value.value, 73)
+            assert_equals(points[4].value.value, 'Virgo')
+            assert_equals(points[5].value.value, 73)
 
-        self.cpservice.abortObs()
-        time.sleep(5)
-        # monitoring points should be gone
-        points = self.monitoringservice.get(point_names)
-        assert_equals(len(points), 1)
-        assert_equals(points[0].value.value, False)
+            self.cpservice.abortObs()
+            time.sleep(5)
+            # monitoring points should be gone
+            points = self.monitoringservice.get(point_names)
+            assert_equals(len(points), 1)
+            assert_equals(points[0].value.value, False)
+
+        except Exception as ex:
+            self.cpservice.abortObs()
+            assert_equals(True, False)

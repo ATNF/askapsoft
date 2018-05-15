@@ -92,6 +92,7 @@ class CPObsServiceImp(ICPObsService):
 
         if timeout < 0:     # wait until ingest process has finished
             self.proc.wait()
+            self.current_sbid = -1
             return True
 
         time_left = timeout/1000
@@ -105,6 +106,7 @@ class CPObsServiceImp(ICPObsService):
 
             time_left -= sleep_time
             if self.proc.poll() is not None:
+                self.current_sbid = -1
                 return True     # process finished
 
         return False
