@@ -55,6 +55,9 @@ EMAIL=""
 # BEGIN, END, FAIL, REQUEUE, ALL, TIME_LIMIT, TIME_LIMIT_90, TIME_LIMIT_80, and TIME_LIMIT_50
 EMAIL_TYPE="ALL"
 
+# Location to copy pipeline errors to, for when jobs fail
+FAILURE_DIRECTORY="/group/askaprt/processing/pipeline-errors
+
 ####################
 # Times for individual slurm jobs
 JOB_TIME_DEFAULT="12:00:00"

@@ -75,6 +75,19 @@ for i in ${joblist}; do
         fi
     done
 done
+
+# Catch any failed jobs and make copies of parsets, logs & slurmfiles
+failList=\$(grep FAIL \$statsTXT | awk '{print $1}')
+if [ "\${failList}" != "" ]; then
+    for job in \$failList; do
+        dir="${FAILURE_DIRECTORY}/\${job}"
+        mkdir -p \$dir
+        find ${BASEDIR} -name "*\${job}*" -exec cp {} \$dir \;
+        echo "\$(whoami) ${NOW} ${BASEDIR} > \${dir}/README
+        touch \${dir}/NEW
+        chmod -R g+w \${dir}
+    done
+fi
 EOF
 
     if [ "${SUBMIT_JOBS}" == "true" ]; then    
