@@ -56,7 +56,7 @@ EMAIL=""
 EMAIL_TYPE="ALL"
 
 # Location to copy pipeline errors to, for when jobs fail
-FAILURE_DIRECTORY="/group/askaprt/processing/pipeline-errors
+FAILURE_DIRECTORY="/group/askaprt/processing/pipeline-errors"
 
 ####################
 # Times for individual slurm jobs
