@@ -170,7 +170,7 @@ else
         elif [ "\$format" == "csv" ]; then
             output="${stats}/stats-\${SLURM_JOB_ID}-${jobname}.csv"
         fi
-        writeStats "\$SLURM_JOB_ID" "${jobname}" "\$RESULT_TXT" "\$NCORES" "\$REALTIME" "\$USERTIME" "\$SYSTIME" 0. 0.  "\$STARTTIME" "\$format" >> "\$output"
+        writeStats "\$SLURM_JOB_ID" "${jobname}" "\$RESULT_TXT" "\$NCORES" "\$REALTIME" "\$USERTIME" "\$SYSTIME" "---" "---" "\$STARTTIME" "\$format" >> "\$output"
     done
     if [ \$err != 0 ]; then
         exit \$err
@@ -276,7 +276,7 @@ EOFINNER
         elif [ "\$format" == "csv" ]; then
             output="${stats}/stats-\${SLURM_JOB_ID}-${jobname}.csv"
         fi
-        writeStats "\$SLURM_JOB_ID" "${jobname}" "\$RESULT_TXT" "\$NCORES" "\$REALTIME" "\$USERTIME" "\$SYSTIME" 0. 0.  "\$STARTTIME" "\$format" >> "\$output"
+        writeStats "\$SLURM_JOB_ID" "${jobname}" "\$RESULT_TXT" "\$NCORES" "\$REALTIME" "\$USERTIME" "\$SYSTIME" "---" "---"  "\$STARTTIME" "\$format" >> "\$output"
     done
     if [ \$err != 0 ]; then
         exit \$err
