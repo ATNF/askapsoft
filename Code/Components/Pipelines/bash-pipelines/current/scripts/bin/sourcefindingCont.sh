@@ -372,10 +372,10 @@ EOFINNER
             echo "ERROR - Validation script \${scriptname} not found"
         else
             cd ..
-            STARTTIME=\$(date +%FT%T)
             module use /group/askap/continuum_validation
             loadModule continuum_validation_env
             log=${logs}/continuum_validation_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+            echo "STARTTIME=\$(date +%FT%T)" > \$log
             validateArgs="\${fitsimage%%.fits}.fits"
             validateArgs="\${validateArgs} -S ${selavyDir}/selavy-\${fitsimage%%.fits}.components.xml"
             validateArgs="\${validateArgs} -N ${selavyDir}/${noiseMap}.fits "
@@ -384,25 +384,9 @@ EOFINNER
             NPPN=1
             srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o \$log \${scriptname} \${validateArgs} > "\${log}"
             err=\$?
-            if [ "\$err" -eq 0 ]; then
-                RESULT_TXT="OK"
-            else
-                RESULT_TXT="FAIL"
-            fi
             unloadModule continuum_validation_env
 
-            REALTIME=\$(grep real \$log | tail -n 1 | awk '{print \$2}')
-            USERTIME=\$(grep user \$log | tail -n 1 | awk '{print \$2}')
-            SYSTIME=\$(grep sys \$log | tail -n 1 | awk '{print \$2}')
-            for format in csv txt; do
-                if [ "\$format" == "txt" ]; then
-                    output="${stats}/stats-\${SLURM_JOB_ID}-${jobname}.txt"
-                elif [ "\$format" == "csv" ]; then
-                    output="${stats}/stats-\${SLURM_JOB_ID}-${jobname}.csv"
-                fi
-                writeStats "\$SLURM_JOB_ID" "validationCont" "\$RESULT_TXT" "\$NCORES" "\$REALTIME" "\$USERTIME" "\$SYSTIME" "---" "---" "\$STARTTIME" "\$format" >> "\$output"
-            done
-
+            extractStatsNonStandard "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} "validationCont" "txt,csv"
 
             validationDir=${validationDir}
             if [ ! -e "\${validationDir}" ]; then

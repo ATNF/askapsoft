@@ -172,32 +172,18 @@ if [ \${PLOT_CALTABLE} == true ]; then
     log=${logs}/plot_caltable_\${SLURM_JOB_ID}.log
     script="${script_location}/${script_name}.py"
 
-    STARTTIME=\$(date +%FT%T)
+    echo "STARTTIME=\$(date +%FT%T)" > \$log
     loadModule casa
     NCORES=1
     NPPN=1
     srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o \$log casa --nogui --nologger --log2term --agg -c "\${script}" ${script_args} > "\${log}"
     err=\$?
-    if [ "\$err" -eq 0 ]; then
-        RESULT_TXT="OK"
-    else
-        RESULT_TXT="FAIL"
-    fi
     unloadModule casa
     for tab in ${TABLE_BANDPASS}*; do
         rejuvenate "\${tab}"
     done
-    REALTIME=\$(grep real \$log | tail -n 1 | awk '{print \$2}')
-    USERTIME=\$(grep user \$log | tail -n 1 | awk '{print \$2}')
-    SYSTIME=\$(grep sys \$log | tail -n 1 | awk '{print \$2}')
-    for format in csv txt; do
-        if [ "\$format" == "txt" ]; then
-            output="${stats}/stats-\${SLURM_JOB_ID}-${jobname}.txt"
-        elif [ "\$format" == "csv" ]; then
-            output="${stats}/stats-\${SLURM_JOB_ID}-${jobname}.csv"
-        fi
-        writeStats "\$SLURM_JOB_ID" "smoothBandpass" "\$RESULT_TXT" "\$NCORES" "\$REALTIME" "\$USERTIME" "\$SYSTIME" "---" "---" "\$STARTTIME" "\$format" >> "\$output"
-    done
+    extractStatsNonStandard "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} "smoothBandpass" "txt,csv"
+
     if [ \$err != 0 ]; then
         exit \$err
     fi

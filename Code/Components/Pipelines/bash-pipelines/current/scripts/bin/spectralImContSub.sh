@@ -123,7 +123,6 @@ sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 thisfile=$sbatchfile
 cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
-STARTTIME=\$(date +%FT%T)
 BEAM=${BEAM}
 imageName=${imageName}
 
@@ -141,6 +140,7 @@ else
     cd \$workdir
 
     log=${logs}/spectral_imcontsub_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+    echo "STARTTIME=\$(date +%FT%T)" > \$log
 
     ${setup}
     script="${script_location}/${SPECTRAL_IMSUB_SCRIPT}"
@@ -151,27 +151,11 @@ else
     echo "Running image-based continuum subtraction with script \${script}" > "\${log}"
     srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o \$log casa --nogui --nologger --log2term -c "\${script}" \${args} >> "\${log}"
     err=\$?
-    if [ "\$err" -eq 0 ]; then
-        RESULT_TXT="OK"
-    else
-        RESULT_TXT="FAIL"
-    fi
     unloadModule casa
     cd ..
-
-    REALTIME=\$(grep real \$log | tail -n 1 | awk '{print \$2}')
-    USERTIME=\$(grep user \$log | tail -n 1 | awk '{print \$2}')
-    SYSTIME=\$(grep sys \$log | tail -n 1 | awk '{print \$2}')
-
     rejuvenate "\${imageName}"
-    for format in csv txt; do
-        if [ "\$format" == "txt" ]; then
-            output="${stats}/stats-\${SLURM_JOB_ID}-${jobname}.txt"
-        elif [ "\$format" == "csv" ]; then
-            output="${stats}/stats-\${SLURM_JOB_ID}-${jobname}.csv"
-        fi
-        writeStats "\$SLURM_JOB_ID" "${jobname}" "\$RESULT_TXT" "\$NCORES" "\$REALTIME" "\$USERTIME" "\$SYSTIME" "---" "---" "\$STARTTIME" "\$format" >> "\$output"
-    done
+    extractStatsNonStandard "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} "${jobname}" "txt,csv"  
+
     if [ \$err != 0 ]; then
         exit \$err
     fi
@@ -216,7 +200,6 @@ sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 thisfile=$sbatchfile
 cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
-STARTTIME=\$(date +%FT%T)
 BEAM=${BEAM}
 imageName=${imageName}
 
@@ -251,33 +234,19 @@ rc.poly(infile=image,threshold=threshold,verbose=True,fit_order=fit_order,n_ever
 
 EOFINNER
     log=${logs}/spectral_imcontsub_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+    echo "STARTTIME=\$(date +%FT%T)" > \$log
 
     NCORES=1
     NPPN=1
     loadModule casa
     srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o \$log casa --nogui --nologger --log2term -c "\${pyscript}" > "\${log}"
     err=\$?
-    if [ "\$err" -eq 0 ]; then
-        RESULT_TXT="OK"
-    else
-        RESULT_TXT="FAIL"
-    fi
     unloadModule casa
     cd ..
 
-    REALTIME=\$(grep real \$log | tail -n 1 | awk '{print \$2}')
-    USERTIME=\$(grep user \$log | tail -n 1 | awk '{print \$2}')
-    SYSTIME=\$(grep sys \$log | tail -n 1 | awk '{print \$2}')
-
     rejuvenate "\${imageName}"
-    for format in csv txt; do
-        if [ "\$format" == "txt" ]; then
-            output="${stats}/stats-\${SLURM_JOB_ID}-${jobname}.txt"
-        elif [ "\$format" == "csv" ]; then
-            output="${stats}/stats-\${SLURM_JOB_ID}-${jobname}.csv"
-        fi
-        writeStats "\$SLURM_JOB_ID" "${jobname}" "\$RESULT_TXT" "\$NCORES" "\$REALTIME" "\$USERTIME" "\$SYSTIME" "---" "---"  "\$STARTTIME" "\$format" >> "\$output"
-    done
+    extractStatsNonStandard "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} "${jobname}" "txt,csv"  
+
     if [ \$err != 0 ]; then
         exit \$err
     fi

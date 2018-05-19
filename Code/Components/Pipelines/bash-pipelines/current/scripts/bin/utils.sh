@@ -828,6 +828,53 @@ function writeStatsHeader()
     writeStats "JobID" "nCores" "Description" "Result" "Real" "User" "System" "PeakVM" "PeakRSS" "StartTime" $format
 }
 
+function extractStatsNonStandard()
+{
+    # usage: extractStatsNonStandard logfile nCores ID ResultCode Description [format]
+    # format is optional. If not provided, output is written to stdout
+    #   if provided, it is assumed to be a list of suffixes - these can be either txt or csv.
+    #      If txt - output is written to $stats/stats-ID-DESCRIPTION.txt as space-separated ascii
+    #      If csv - output is written to $stats/stats-ID-DESCRIPTION.csv as comma-separated values
+    #
+
+    STATS_LOGFILE=$1
+    NUM_CORES=$2
+    STATS_ID=$3
+    RESULT=$4
+    STATS_DESC=$5
+
+    if [ "$RESULT" -eq 0 ]; then
+        RESULT_TXT="OK"
+    else
+        RESULT_TXT="FAIL"
+    fi
+
+    START_TIME_JOB=$(grep "STARTTIME=" $log | head -n 1 | awk -F '=' '{print $2}')
+    
+    REALTIME=$(grep real $log | tail -n 1 | awk '{print $2}')
+    USERTIME=$(grep user $log | tail -n 1 | awk '{print $2}')
+    SYSTIME=$(grep sys $log | tail -n 1 | awk '{print $2}')
+
+    PEAK_VM_MASTER="---"
+    PEAK_RSS_MASTER="---"
+
+    for format in $(echo "$formatlist" | sed -e 's/,/ /g'); do
+
+	if [ "$format" == "txt" ]; then
+	    output="${stats}/stats-${STATS_ID}-${STATS_DESC}.txt"
+	elif [ "$format" == "csv" ]; then
+	    output="${stats}/stats-${STATS_ID}-${STATS_DESC}.csv"
+	else
+	    output=/dev/stdout
+	fi
+
+	writeStatsHeader "$format" > "$output"
+        writeStats "$STATS_ID" "$NUM_CORES" "$STATS_DESC"              "$RESULT_TXT" "$TIME_JOB_REAL" "$TIME_JOB_USER" "$TIME_JOB_SYS" "$PEAK_VM_MASTER"  "$PEAK_RSS_MASTER"  "$START_TIME_JOB" "$format" >> "$output"
+
+    done
+}
+
+
 function extractStats()
 {
     # usage: extractStats logfile nCores ID ResultCode Description [format]
@@ -835,9 +882,6 @@ function extractStats()
     #   if provided, it is assumed to be a list of suffixes - these can be either txt or csv.
     #      If txt - output is written to $stats/stats-ID-DESCRIPTION.txt as space-separated ascii
     #      If csv - output is written to $stats/stats-ID-DESCRIPTION.csv as comma-separated values
-    #
-    # Must also have defined the variable NUM_CPUS. If not defined, it will be set to 1
-    # (this is used for the findWorkerStats() function)
 
     STATS_LOGFILE=$1
     NUM_CORES=$2
