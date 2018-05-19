@@ -131,7 +131,7 @@ sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 thisfile=$sbatchfile
 cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
-STARTTIME=$(date +%FT%T)
+STARTTIME=\$(date +%FT%T)
 log=${logs}/copyMS_science_${FIELDBEAM}_\${SLURM_JOB_ID}.log
 cat > \$log <<EOFINNER
 Log file for copying input measurement set :
