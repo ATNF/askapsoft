@@ -851,9 +851,9 @@ function extractStatsNonStandard()
 
     START_TIME_JOB=$(grep "STARTTIME=" ${log}.timing | head -n 1 | awk -F '=' '{print $2}')
     
-    REALTIME=$(grep real ${log}.timing | tail -n 1 | awk '{print $2}')
-    USERTIME=$(grep user ${log}.timing | tail -n 1 | awk '{print $2}')
-    SYSTIME=$(grep sys ${log}.timing | tail -n 1 | awk '{print $2}')
+    TIME_JOB_REAL=$(grep real ${log}.timing | tail -n 1 | awk '{print $2}')
+    TIME_JOB_USER=$(grep user ${log}.timing | tail -n 1 | awk '{print $2}')
+    TIME_JOB_SYS=$(grep sys ${log}.timing | tail -n 1 | awk '{print $2}')
 
     PEAK_VM_MASTER="---"
     PEAK_RSS_MASTER="---"
