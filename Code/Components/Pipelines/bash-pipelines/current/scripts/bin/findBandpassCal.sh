@@ -76,14 +76,15 @@ Cbpcalibrator.refantenna                      = ${BANDPASS_REFANTENNA}"
 
     # Check for bandpass smoothing options
     DO_RUN_PLOT_CALTABLE=false
+    DO_RUN_VALIDATION=false
     if [ "${DO_BANDPASS_PLOT}" == "true" ] || [ "${DO_BANDPASS_SMOOTH}" == "true" ]; then
         DO_RUN_PLOT_CALTABLE=true
     fi
     if [ "${DO_RUN_PLOT_CALTABLE}" == "true" ]; then
         script_location="${ACES_LOCATION}/tools"
-        script_name="plot_caltable"
-        if [ ! -e "${script_location}/${script_name}.py" ]; then
-            echo "WARNING - ${script_name}.py not found in $script_location - not running bandpass smoothing/plotting."
+        script_name="plot_caltable.py"
+        if [ ! -e "${script_location}/${script_name}" ]; then
+            echo "WARNING - ${script_name} not found in $script_location - not running bandpass smoothing/plotting."
             DO_RUN_PLOT_CALTABLE=false
         fi
         script_args="-t ${TABLE_BANDPASS} -s B "
@@ -101,6 +102,14 @@ Cbpcalibrator.refantenna                      = ${BANDPASS_REFANTENNA}"
         fi
         script_args="${script_args} -fit ${BANDPASS_SMOOTH_FIT} -th ${BANDPASS_SMOOTH_THRESHOLD}"
 
+        DO_RUN_VALIDATION=true
+        validation_script="bandpassValidation.py"
+        if [ ! -e "${script_location}/${validation_script}" ]; then
+            echo "WARNING - ${validation_script} not found in $script_location - not running bandpass validation."
+            DO_RUN_VALIDATION=false
+        fi
+        validation_args="-d ${BASEDIR}/BPCAL"
+        
     fi
 
     sbatchfile="$slurms/cbpcalibrator_1934.sbatch"
@@ -170,7 +179,7 @@ PLOT_CALTABLE=${DO_RUN_PLOT_CALTABLE}
 if [ \${PLOT_CALTABLE} == true ]; then
 
     log=${logs}/plot_caltable_\${SLURM_JOB_ID}.log
-    script="${script_location}/${script_name}.py"
+    script="${script_location}/${script_name}"
 
     echo "STARTTIME=\$(date +%FT%T)" > \$log
     loadModule casa
@@ -190,6 +199,22 @@ if [ \${PLOT_CALTABLE} == true ]; then
 
 fi
 
+runValidation=${DO_RUN_VALIDATION}
+if [ "\${runValidation}" == "true" ]; then
+
+    log=${logs}/bandpass_validation_\${SLURM_JOB_ID}.log
+    script="${script_location}/${validation_script}"
+    echo "STARTTIME=\$(date +%FT%T)" > \$log
+    NCORES=1
+    NPPN=1
+    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o \$log "\${script}" ${validation_args} > "\${log}"
+    err=\$?
+    extractStatsNonStandard "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} "bandpassValidation" "txt,csv"
+    if [ \$err != 0 ]; then
+        exit \$err
+    fi
+
+fi
 
 EOF
 
