@@ -132,7 +132,7 @@ thisfile=$sbatchfile
 cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
 log=${logs}/copyMS_science_${FIELDBEAM}_\${SLURM_JOB_ID}.log
-echo "STARTTIME=\$(date +%FT%T)" > \$log
+STARTTIME=\$(date +%FT%T)
 cat > \$log <<EOFINNER
 Log file for copying input measurement set :
 inputMS=${inputMS}
@@ -144,16 +144,17 @@ useDCP=${USE_DCP_TO_COPY_MS}
 
 if [ "\${useDCP}" == "true" ]; then
 
-    /usr/bin/time -p -o \$log ssh hpc-data "module load mpifileutils; mpirun -np 4 dcp $inputMS ${OUTPUT}/$msSci"
+    /usr/bin/time -p -o "\${log}.timing" ssh hpc-data "module load mpifileutils; mpirun -np 4 dcp $inputMS ${OUTPUT}/$msSci"
     err=\$?
     
 else
 
-    /usr/bin/time -p -o \$log cp -r $inputMS ${OUTPUT}/$msSci
+    /usr/bin/time -p -o "\${log}.timing" cp -r $inputMS ${OUTPUT}/$msSci
     err=\$?
 
 fi
 
+echo "STARTTIME=\${STARTTIME}" >> "\${log}.timing"
 extractStatsNonStandard "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} "${jobname}" "txt,csv"
 
 

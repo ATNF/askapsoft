@@ -181,16 +181,17 @@ if [ \${PLOT_CALTABLE} == true ]; then
     log=${logs}/plot_caltable_\${SLURM_JOB_ID}.log
     script="${script_location}/${script_name}"
 
-    echo "STARTTIME=\$(date +%FT%T)" > \$log
     loadModule casa
+    STARTTIME=\$(date +%FT%T)
     NCORES=1
     NPPN=1
-    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o \$log casa --nogui --nologger --log2term --agg -c "\${script}" ${script_args} > "\${log}"
+    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o "\${log}.timing" casa --nogui --nologger --log2term --agg -c "\${script}" ${script_args} > "\${log}"
     err=\$?
     unloadModule casa
     for tab in ${TABLE_BANDPASS}*; do
         rejuvenate "\${tab}"
     done
+    echo "STARTTIME=\${STARTTIME}" >> "\${log}.timing"
     extractStatsNonStandard "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} "smoothBandpass" "txt,csv"
 
     if [ \$err != 0 ]; then
@@ -204,11 +205,12 @@ if [ "\${runValidation}" == "true" ]; then
 
     log=${logs}/bandpass_validation_\${SLURM_JOB_ID}.log
     script="${script_location}/${validation_script}"
-    echo "STARTTIME=\$(date +%FT%T)" > \$log
+    STARTTIME=\$(date +%FT%T)
     NCORES=1
     NPPN=1
-    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o \$log "\${script}" ${validation_args} > "\${log}"
+    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o "\${log}.timing" "\${script}" ${validation_args} > "\${log}"
     err=\$?
+    echo "STARTTIME=\${STARTTIME}" >> "\${log}.timing"
     extractStatsNonStandard "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} "bandpassValidation" "txt,csv"
     if [ \$err != 0 ]; then
         exit \$err

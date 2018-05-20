@@ -375,17 +375,17 @@ EOFINNER
             module use /group/askap/continuum_validation
             loadModule continuum_validation_env
             log=${logs}/continuum_validation_${FIELDBEAM}_\${SLURM_JOB_ID}.log
-            echo "STARTTIME=\$(date +%FT%T)" > \$log
             validateArgs="\${fitsimage%%.fits}.fits"
             validateArgs="\${validateArgs} -S ${selavyDir}/selavy-\${fitsimage%%.fits}.components.xml"
             validateArgs="\${validateArgs} -N ${selavyDir}/${noiseMap}.fits "
             validateArgs="\${validateArgs} -C NVSS_config.txt,SUMSS_config.txt"          
+            STARTTIME=\$(date +%FT%T)
             NCORES=1
             NPPN=1
-            srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o \$log \${scriptname} \${validateArgs} > "\${log}"
+            srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o "\${log}.timing" \${scriptname} \${validateArgs} > "\${log}"
             err=\$?
             unloadModule continuum_validation_env
-
+            echo "STARTTIME=\${STARTTIME}" >> "\${log}.timing"
             extractStatsNonStandard "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} "validationCont" "txt,csv"
 
             validationDir=${validationDir}

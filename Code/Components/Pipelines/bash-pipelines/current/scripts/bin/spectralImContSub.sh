@@ -140,7 +140,7 @@ else
     cd \$workdir
 
     log=${logs}/spectral_imcontsub_${FIELDBEAM}_\${SLURM_JOB_ID}.log
-    echo "STARTTIME=\$(date +%FT%T)" > \$log
+    STARTTIME=\$(date +%FT%T)
 
     ${setup}
     script="${script_location}/${SPECTRAL_IMSUB_SCRIPT}"
@@ -148,12 +148,12 @@ else
     NCORES=1
     NPPN=1
     loadModule casa
-    echo "Running image-based continuum subtraction with script \${script}" > "\${log}"
-    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o \$log casa --nogui --nologger --log2term -c "\${script}" \${args} >> "\${log}"
+    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o \${log}.timing casa --nogui --nologger --log2term -c "\${script}" \${args} > "\${log}"
     err=\$?
     unloadModule casa
     cd ..
     rejuvenate "\${imageName}"
+    echo "STARTTIME=\${STARTTIME}" >> "\${log}.timing"
     extractStatsNonStandard "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} "${jobname}" "txt,csv"  
 
     if [ \$err != 0 ]; then
@@ -234,17 +234,17 @@ rc.poly(infile=image,threshold=threshold,verbose=True,fit_order=fit_order,n_ever
 
 EOFINNER
     log=${logs}/spectral_imcontsub_${FIELDBEAM}_\${SLURM_JOB_ID}.log
-    echo "STARTTIME=\$(date +%FT%T)" > \$log
-
+    STARTTIME=\$(date +%FT%T)
     NCORES=1
     NPPN=1
     loadModule casa
-    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o \$log casa --nogui --nologger --log2term -c "\${pyscript}" > "\${log}"
+    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o "\${log}.timing" casa --nogui --nologger --log2term -c "\${pyscript}" > "\${log}"
     err=\$?
     unloadModule casa
     cd ..
 
     rejuvenate "\${imageName}"
+    echo "STARTTIME=\${STARTTIME}" >> "\${log}.timing"
     extractStatsNonStandard "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} "${jobname}" "txt,csv"  
 
     if [ \$err != 0 ]; then
