@@ -108,7 +108,7 @@ Cbpcalibrator.refantenna                      = ${BANDPASS_REFANTENNA}"
             echo "WARNING - ${validation_script} not found in $script_location - not running bandpass validation."
             DO_RUN_VALIDATION=false
         fi
-        validation_args="-d ${BASEDIR}/BPCAL"
+        validation_args="-d ${BASEDIR}"
         
     fi
 
