@@ -637,6 +637,12 @@ EOF
         
     fi
 
+    if [ "${BANDPASS_SMOOTH_TOOL}" != "plot_caltable" ] &&
+           [ "${BANDPASS_SMOOTH_TOOL}" != "smooth_bandpass" ]; then
+        echo "WARNING - Invalid value for BANDPASS_SMOOTH_TOOL (${BANDPASS_SMOOTH_TOOL}). Setting to \"plot_caltable\"."
+        BANDPASS_SMOOTH_TOOL="plot_caltable"
+    fi
+    
     ####################
     # Parameters required for science field imaging
     ####

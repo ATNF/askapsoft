@@ -259,11 +259,17 @@ BANDPASS_MINUV=200
 # Reference antenna to be used in the cbpcalibrator task
 BANDPASS_REFANTENNA=1
 
-# Smoothing of the bandpass table - this is achieved by the ACES tool
-# plot_caltable.py. This tool also plots the cal solutions
+# Smoothing of the bandpass table.
+# This is achieved by either the ACES tool plot_caltable.py (which
+# also plots the cal solutions), or with Wasim Raja's
+# smooth_bandpass.py tool. 
 
 # Whether to smooth the bandpass
 DO_BANDPASS_SMOOTH=true
+# Which method to use - either "plot_caltable" or "smooth_bandpass"
+BANDPASS_SMOOTH_TOOL="plot_caltable"
+
+# The following are parameters for plot_caltable
 # Whether to run plot_caltable.py to produce plots
 DO_BANDPASS_PLOT=true
 # If true, smooth the amplitudes. If false, smooth real & imaginary
@@ -274,6 +280,20 @@ BANDPASS_SMOOTH_OUTLIER=true
 BANDPASS_SMOOTH_FIT=0
 # The threshold level for fitting bandpass
 BANDPASS_SMOOTH_THRESHOLD=3.0
+
+# The following are parameters for smooth_bandpass
+# The polynomial order for the fit
+BANDPASS_SMOOTH_POLY_ORDER=""
+# The harmonic order for the fit
+BANDPASS_SMOOTH_HARM_ORDER=""
+# The number of windows to divide the spectrum into for the moving fit
+BANDPASS_SMOOTH_N_WIN=""
+# The width (in channels) of the Gaussian Taper function to remove
+# high-frequency components
+BANDPASS_SMOOTH_N_TAPER=""
+# The number of iterations for Fourier-interpolation across flagged
+# points
+BANDPASS_SMOOTH_N_ITER=""
 
 # Whether to apply the bandpass solution to the 1934 dataset itself
 DO_APPLY_BANDPASS_1934=false

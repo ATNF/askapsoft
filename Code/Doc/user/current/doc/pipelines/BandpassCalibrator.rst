@@ -38,15 +38,24 @@ hence wanting to use beams not included in a previous bandpass
 solution), the bandpass table is deleted and re-made once the new
 beams are split and flagged.
 
-The cbpcalibrator job can make use of a script from ACES to both plot
+The cbpcalibrator job can make use of one of two scripts developed in
+the commissioning team. The first, ``plot_caltable.py`` from ACES both plots
 the bandpass solutions (as a function of antenna, beam and
-polarisation), and to smooth the bandpass table so that outlying
+polarisation), and smooths the bandpass table so that outlying
 points are interpolated over. This produces a second table (with
 ".smooth" appended to the name), which will then be applied to the
 science data instead of the original. There are a number of parameters
 that may be used to tweak the smoothing - this is intended to be an
 interim solution until this functionality is implemented in
 ASKAPsoft.
+
+The second script, ``smooth_bandpass.py``, does the smoothing of the
+bandpass via harmonic fitting, in a way that is robust to portions of
+the spectra being flagged.
+
+If either of these options are used, a bandpass validation script is
+run, producing plots that can describe the quality of the bandpass
+solutions. 
 
 Finally, the bandpass solutions can be applied back to the 1934
 datasets themselves. This will permit possible diagnostic analysis of
@@ -222,6 +231,11 @@ the quality of the bandpass solution.
 | ``DO_BANDPASS_SMOOTH``                        | true                                  | none                                                   | Whether to produce a smoothed version of the bandpass     |
 |                                               |                                       |                                                        | table, which will be applied to the science data.         |
 +-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| ``BANDPASS_SMOOTH_TOOL``                      | plot_caltable                         | none                                                   | Which tool to use. Possible values here are               |
+|                                               |                                       |                                                        | "plot_caltable" (the default) or "smooth_bandpass".       |
++-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| _plot_caltable_                               |                                       |                                                        | Options for the script "plot_caltable.py"                 |
++-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
 | ``DO_BANDPASS_PLOT``                          | true                                  | none                                                   | Whether to produce plots of the bandpass                  |
 +-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
 | ``BANDPASS_SMOOTH_AMP``                       | true                                  | none                                                   | Whether to smooth the amplitudes (if false, smoothing is  |
@@ -234,6 +248,26 @@ the quality of the bandpass solution.
 |                                               |                                       |                                                        | (if <0) used in the smoothing.                            |
 +-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
 | ``BANDPASS_SMOOTH_THRESHOLD``                 | 3.0                                   | none                                                   | The threshold level used for fitting to the bandpass.     |
++-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| _smooth_bandpass_                             |                                       |                                                        | Options for the script "smooth_bandpass.py"               |
++-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| ``BANDPASS_SMOOTH_POLY_ORDER``                | ""                                    | none                                                   | The polynomial order for the fit - the value for the      |
+|                                               |                                       |                                                        | ``-np`` option. Ignored if left blank.                    |
++-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| ``BANDPASS_SMOOTH_HARM_ORDER``                | ""                                    | none                                                   | The harmonic order for the fit - the value for the        |
+|                                               |                                       |                                                        | ``-nh`` option. Ignored if left blank.                    |
++-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| ``BANDPASS_SMOOTH_N_WIN``                     | ""                                    | none                                                   | The number of windows to divide the spectrum into for the |
+|                                               |                                       |                                                        | moving fit - the value for the ``-nwin`` option. Ignored  |
+|                                               |                                       |                                                        | if left blank.                                            |
++-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| ``BANDPASS_SMOOTH_N_TAPER``                   | ""                                    | none                                                   | The width (in channels) of the Gaussian Taper function to |
+|                                               |                                       |                                                        | remove high-frequency components - the value for the      |
+|                                               |                                       |                                                        | ``-nT`` option. Ignored if left blank.                    |
++-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| ``BANDPASS_SMOOTH_N_ITER``                    | ""                                    | none                                                   | The number of iterations for Fourier-interpolation across |
+|                                               |                                       |                                                        | flagged points - the value for the ``-nI`` option. Ignored|
+|                                               |                                       |                                                        | if left blank.                                            |
 +-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
 | **Applying the bandpass solution**            |                                       |                                                        |                                                           |
 +-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
