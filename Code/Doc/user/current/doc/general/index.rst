@@ -10,3 +10,5 @@ General Documentation
 
    parset.rst
    logging.rst
+   releaseNotes.rst
+   
