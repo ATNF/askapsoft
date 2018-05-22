@@ -233,7 +233,7 @@ elif [ "\${BANDPASS_SMOOTH_TOOL}" == "smooth_bandpass" ]; then
     STARTTIME=\$(date +%FT%T)
     NCORES=1
     NPPN=1
-    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o "\${log}.timing" "\${script_name}" ${script_args} > "\${log}"
+    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o "\${log}.timing" "${script_name}" ${script_args} > "\${log}"
     err=\$?
     ${unload_script}
     for tab in ${TABLE_BANDPASS}*; do
