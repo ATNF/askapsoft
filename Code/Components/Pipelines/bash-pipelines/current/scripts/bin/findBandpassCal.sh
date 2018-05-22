@@ -79,11 +79,13 @@ Cbpcalibrator.refantenna                      = ${BANDPASS_REFANTENNA}"
     if [ "${DO_BANDPASS_SMOOTH}" != "true" ]; then
         BANDPASS_SMOOTH_TOOL=""
     fi    
+
+    script_location="${ACES_LOCATION}/tools"
+
     if [ "${BANDPASS_SMOOTH_TOOL}" == "plot_caltable" ]; then
 
         DO_RUN_VALIDATION=true
 
-        script_location="${ACES_LOCATION}/tools"
         script_name="plot_caltable.py"
         if [ ! -e "${script_location}/${script_name}" ]; then
             echo "WARNING - ${script_name} not found in $script_location - not running bandpass smoothing/plotting."
