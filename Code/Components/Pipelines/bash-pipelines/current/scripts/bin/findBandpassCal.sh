@@ -205,7 +205,7 @@ if [ \$err != 0 ]; then
 fi
 
 BANDPASS_SMOOTH_TOOL=${BANDPASS_SMOOTH_TOOL}
-if [ "\${}" == "plot_caltable" ]; then
+if [ "\${BANDPASS_SMOOTH_TOOL}" == "plot_caltable" ]; then
 
     log=${logs}/plot_caltable_\${SLURM_JOB_ID}.log
     script="${script_location}/${script_name}"
@@ -247,7 +247,6 @@ elif [ "\${BANDPASS_SMOOTH_TOOL}" == "smooth_bandpass" ]; then
     if [ \$err != 0 ]; then
         exit \$err
     fi
-
 
 fi
 
