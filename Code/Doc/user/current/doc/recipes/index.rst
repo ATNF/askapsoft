@@ -9,3 +9,4 @@ This section contains example processing recipes for specific ASKAP calibration 
    :maxdepth: 1
 
    combinemultiepoch.rst
+   Imaging.rst
