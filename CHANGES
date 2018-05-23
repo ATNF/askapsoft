@@ -3,6 +3,8 @@ Next Release
 
  * Added a chapter to the user documentation on how to combine multiple
    epochs for spectral line data. 
+ * Added a chapter to the user documentation explaining the best way
+   to do MS/MFS deconvolution in askapsoft
 
 
 0.20.3 (2 April 2018)
