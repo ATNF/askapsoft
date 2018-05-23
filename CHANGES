@@ -1,11 +1,51 @@
 Next Release
 ------------
 
+A summary of items that are in trunk and will be in the next release:
+
+Pipeline updates:
+
+ * Ability to use AOflagger instead of cflag.
+ * Ability to use the continuum cubes to measure spectral indices of
+   continuum components (using Selavy).
+ * Fixing a bug where the CleanModel option of continuum-subtraction
+   was using the wrong image name.
+ * Allow self-calibration to use the clean model image as the model
+   for calibration (in the manner of continuum-subtraction).
+ * Collation of pipeline jobs that failed, for analysis by ASKAP
+   Operations, to help identify pipeline or platform issues.
+ * Use of an alternative bandpass smoothing task -
+   smooth_bandpass.py (instead of plot_caltable.py).
+ * Use of an additional bandpass validation script to produce summary
+   diagnostic plots for the bandpass solutions.
+
+Processing tasks:
+
+ * An MPI barrier has been added to the spectral imager to prevent
+   race conditions in the writing.
+ * Better handling of cases in the bandpass calibration that were
+   previously (prior to 0.20.3) causing it to fail with SVD conversion
+   errors. 
+
+Manager & ingest:
+
+ * Improvements to the CP manager.
+ * UVW calculations fixed in the course of testing new fringe rotator modes.
+
+ASKAPsoft environment:
+
+ * Incorporation of python-casacore in the cpapps build (used to
+   create the askapsoft module at Pawsey). 
+
+Documentation:
+
  * Added a chapter to the user documentation on how to combine multiple
    epochs for spectral line data. 
  * Added a chapter to the user documentation explaining the best way
    to do MS/MFS deconvolution in askapsoft
-
+ * Added a page to the user documentation listing the release notes
+   for each release.
+   
 
 0.20.3 (2 April 2018)
 ---------------------
