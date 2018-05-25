@@ -25,7 +25,15 @@ Processing tasks:
    race conditions in the writing.
  * Better handling of cases in the bandpass calibration that were
    previously (prior to 0.20.3) causing it to fail with SVD conversion
-   errors. 
+   errors.
+ * Selavy will now report the best component fit (assuming it
+   converges in the fitting), regardless of the chi-squared. If poor,
+   a new flag will be set.
+ * If the fit fails to converge, Selavy can reduce the number of
+   Gaussians being fit to try to get a good fit.
+ * A bug in Selavy was fixed to allow the curvature-map method of
+   identifying components to better take into account the weights
+   image associated with the image being searched.
 
 Manager & ingest:
 
