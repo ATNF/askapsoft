@@ -657,7 +657,8 @@ void DuchampParallel::preprocess()
 {
 
     if (itsComms.isParallel() && itsComms.isMaster()) {
-        if (itsWeighter->isValid()) {
+        if (itsWeighter->isValid() ||
+                (itsFitParams.doFit() && itsFitParams.useCurvature())) {
             itsWeighter->initialise(itsCube, !(itsComms.isParallel() && itsComms.isMaster()));
         }
         if (itsFlagVariableThreshold) {
@@ -669,7 +670,7 @@ void DuchampParallel::preprocess()
         if (itsFitParams.doFit() && itsFitParams.useCurvature()) {
 
             CurvatureMapCreator curv(itsComms, itsParset.makeSubset("Fitter."));
-            curv.initialise(itsCube, itsSubimageDef);
+            curv.initialise(itsCube, itsSubimageDef, itsWeighter);
             ASKAPLOG_DEBUG_STR(logger, "Calling curv.write()");
             curv.write();
         }
@@ -677,7 +678,8 @@ void DuchampParallel::preprocess()
 
     if (itsComms.isWorker()) {
 
-        if (itsWeighter->isValid()) {
+        if (itsWeighter->isValid() ||
+                (itsFitParams.doFit() && itsFitParams.useCurvature())) {
             ASKAPLOG_INFO_STR(logger, "Preparing weights image");
             itsWeighter->initialise(itsCube);
             itsWeighter->applyCutoff();
@@ -712,7 +714,7 @@ void DuchampParallel::preprocess()
         if (itsFitParams.doFit() && itsFitParams.useCurvature()) {
 
             CurvatureMapCreator curv(itsComms, itsParset.makeSubset("Fitter."));
-            curv.initialise(itsCube, itsSubimageDef);
+            curv.initialise(itsCube, itsSubimageDef, itsWeighter);
             curv.calculate();
             itsFitParams.setSigmaCurv(curv.sigmaCurv());
             ASKAPLOG_DEBUG_STR(logger, "Fitting parameters now think sigma_curv is " <<
@@ -942,8 +944,8 @@ void DuchampParallel::fitSource(sourcefitting::RadioSource &src)
 
     src.fitGauss(itsCube);
 
-    if (itsParset.getBool("spectralTermsFromTaylor", "true")){
-    
+    if (itsParset.getBool("spectralTermsFromTaylor", "true")) {
+
         for (int t = 1; t <= 2; t++) {
             src.findSpectralTerm(itsSpectralTermImages[t - 1], t, itsFlagFindSpectralTerms[t - 1]);
         }
@@ -951,7 +953,7 @@ void DuchampParallel::fitSource(sourcefitting::RadioSource &src)
     } else {
 
         src.extractSpectralTerms(itsParset);
-        
+
     }
 
 }
@@ -1386,7 +1388,7 @@ duchamp::OUTCOME DuchampParallel::getCASA(DATATYPE typeOfData, bool useSubimageI
         casa::Array<Float> subarray(sub->shape());
         const casa::MaskedArray<Float> msub(sub->get(), sub->getMask());
         float minval = 0.;
-        if (msub.nelementsValid()>0){
+        if (msub.nelementsValid() > 0) {
             minval = min(msub) - 10.;
         }
         subarray = msub;

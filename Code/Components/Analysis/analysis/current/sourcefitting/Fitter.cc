@@ -410,6 +410,20 @@ bool Fitter::passSeparation()
 
 //**************************************************************//
 
+bool Fitter::acceptableExceptChisq()
+{
+    bool passConv = this->passConverged();
+    bool passFlux = this->passComponentFlux();
+    bool passLoc = this->passLocation();
+    bool passSep = this->passSeparation();
+    bool passSize = this->passComponentSize();
+    bool passPeak = this->passPeakFlux();
+    bool passIntFlux = this->passIntFlux();
+
+    return passConv && passFlux && passLoc && passSep &&
+        passSize && passPeak && passIntFlux;
+}
+
 bool Fitter::acceptable()
 {
     bool passConv = this->passConverged();

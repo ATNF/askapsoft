@@ -152,10 +152,10 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
     itsFlagGuess = results.fitIsGuess() ? 1 : 0;
     itsFlagSiblings = obj.numFits(fitType) > 1 ? 1 : 0;
 
-    /// @todo - fix this to respond to how alpha/beta came about. Only
-    /// one way to calculate them at the moment.
     itsFlagSpectralIndexOrigin = parset.getBool("spectralTermsFromTaylor", "true") ? 1 : 0;
-
+    
+    itsFlag4 = !obj.fitResults(fitType).isGood();
+        
     // These are the additional parameters not used in the CASDA
     // component catalogue v1.7:
     std::stringstream localid;

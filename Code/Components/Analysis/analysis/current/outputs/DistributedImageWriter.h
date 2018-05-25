@@ -62,6 +62,9 @@ class DistributedImageWriter : public ImageWriter {
                    const casa::IPosition &loc,
                    bool accumulate = false);
 
+        void write(const casa::MaskedArray<casa::Float> &data,
+                   const casa::IPosition &loc, bool accumulate);
+
         /// @details Handles distributed writing of the requested
         /// data. When in parallel mode, the master cycles through the
         /// workers, sending an OK signal for them to write, and
@@ -72,15 +75,15 @@ class DistributedImageWriter : public ImageWriter {
         /// ImageWriter and the mask using the writeMask function,
         /// then send an OK signal back to the master.  In serial
         /// mode, we directly call ImageWriter::write.
-    void write(const casa::Array<casa::Float> &data,
-               const casa::Array<bool> &mask,
-               const casa::IPosition &loc, bool accumulate);
+        void write(const casa::Array<casa::Float> &data,
+                   const casa::Array<bool> &mask,
+                   const casa::IPosition &loc, bool accumulate);
 
     protected:
 
         askap::askapparallel::AskapParallel *itsComms;
 
-    /// @brief The defining parset
+        /// @brief The defining parset
         LOFAR::ParameterSet itsParset;
 
 };

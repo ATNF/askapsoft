@@ -153,6 +153,13 @@ class Fitter {
         bool acceptable();
         /// @}
 
+        /// @brief Is the fit acceptable, leaving aside the chi-squared value?
+        /// @details Uses the same acceptance criteria as for
+        /// acceptable(), except that it ignores the chi-squared
+        /// value. This allows us to consider poor but otherwise
+        /// acceptable fits.
+        bool acceptableExceptChisq();
+    
         /// @brief Return an ordered list of peak fluxes
         std::multimap<double, int> peakFluxList();
 

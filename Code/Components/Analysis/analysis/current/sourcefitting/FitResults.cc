@@ -72,7 +72,7 @@ namespace sourcefitting {
 void FitResults::saveResults(Fitter &fit)
 {
 
-    itsFitIsGood = true;
+    itsFitIsGood = fit.passChisq();
     itsFlagFitIsGuess = false;
     itsChisq = fit.chisq();
     itsRedChisq = fit.redChisq();

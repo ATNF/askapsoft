@@ -66,6 +66,16 @@ SubComponent& SubComponent::operator= (const SubComponent& c)
     return *this;
 }
 
+SubComponent::SubComponent(const casa::Gaussian2D<casa::Double> &g)
+{
+    itsXpos = g.xCenter();
+    itsYpos = g.yCenter();
+    itsPeakFlux = g.height();
+    itsMajorAxis = g.majorAxis();
+    itsMinorAxis = g.minorAxis();
+    itsPositionAngle = g.PA();
+}
+
 bool operator< (SubComponent lhs, SubComponent rhs)
 {
     return lhs.itsPeakFlux < rhs.itsPeakFlux;

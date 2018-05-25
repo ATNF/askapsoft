@@ -181,6 +181,11 @@ float Weighter::weight(size_t i)
     }
 }
 
+casa::LogicalArray Weighter::cutoffMask()
+{
+    return (itsWeights.getMask() && (itsWeights.getArray() / itsNorm > itsWeightCutoff));
+}
+
 bool Weighter::isValid(size_t i)
 {
     if (this->doApplyCutoff()) {

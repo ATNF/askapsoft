@@ -58,6 +58,7 @@ FitCatalogue::FitCatalogue(std::vector<sourcefitting::RadioSource> &srclist,
 {
     itsVersion = ASKAP_PACKAGE_VERSION;
     itsFitType = fitType;
+    itsSpec = duchamp::Catalogues::CatalogueSpecification();
     this->defineSpec();
 
     duchamp::Param par = parseParset(parset);
@@ -113,6 +114,15 @@ void FitCatalogue::defineSpec()
     itsSpec.addColumn("PA", "PA(fit)", "[deg]", 7, casda::precSize,
                       "phys.angSize;pos.posAng;em.radio;stat.fit",
                       "float", "col_pa", "");
+    itsSpec.addColumn("MAJERR", "maj_axis_err", "["+casda::shapeUnit+"]", casda::precSize+2, casda::precSize,
+                      "stat.error;phys.angSize.smajAxis;em.radio",
+                      "float", "col_maj_axis_err", "");
+    itsSpec.addColumn("MINERR", "min_axis_err", "["+casda::shapeUnit+"]", casda::precSize+2, casda::precSize,
+                      "stat.error;phys.angSize.sminAxis;em.radio",
+                      "float", "col_min_axis_err", "");
+    itsSpec.addColumn("PAERR", "pos_ang_err", "[deg]", casda::precSize + 2, casda::precSize,
+                      "stat.error;phys.angSize;pos.posAng;em.radio",
+                      "float", "col_pos_ang_err", "");
     itsSpec.addColumn("MAJDECONV", "Maj(fit_deconv)", "[arcsec]", 6, casda::precSize,
                       "phys.angSize.smajAxis;em.radio;askap:meta.deconvolved",
                       "float", "col_maj_deconv", "");
@@ -122,10 +132,23 @@ void FitCatalogue::defineSpec()
     itsSpec.addColumn("PADECONV", "PA(fit_deconv)", "[deg]", 7, casda::precSize,
                       "phys.angSize;pos.posAng;em.radio;askap:meta.deconvolved",
                       "float", "col_pa_deconv", "");
+    itsSpec.addColumn("MAJDECONVERR", "maj_axis_deconv_err", "[arcsec]", casda::precSize + 2, casda::precSize,
+                      "stat.error;phys.angSize.smajAxis;em.radio;askap:meta.deconvolved",
+                      "float", "col_maj_axis_deconv_err", "");
+    itsSpec.addColumn("MINDECONVERR", "min_axis_deconv_err", "[arcsec]", casda::precSize + 2, casda::precSize,
+                      "stat.error;phys.angSize.sminAxis;em.radio;askap:meta.deconvolved",
+                      "float", "col_min_axis_deconv_err", "");
+    itsSpec.addColumn("PADECONVERR", "pos_ang_deconv_err", "[deg]", casda::precSize + 2, casda::precSize,
+                      "stat.error;phys.angSize;pos.posAng;em.radio;askap:meta.deconvolved",
+                      "float", "col_pos_ang_deconv_err", "");
     itsSpec.addColumn("ALPHA", "Alpha", "--", 8, casda::precSpecShape,
                       "spect.index;em.radio", "float", "col_alpha", "");
     itsSpec.addColumn("BETA", "Beta", "--", 8, casda::precSpecShape,
                       "askap:spect.curvature;em.radio", "float", "col_beta", "");
+    itsSpec.addColumn("ALPHAERR", "spectral_index_err", "--", casda::precSpecShape + 2, casda::precSpecShape,
+                      "stat.error;spect.index;em.radio", "float", "col_spectral_index_err", "");
+    itsSpec.addColumn("BETAERR", "spectral_curvature_err", "--", casda::precSpecShape + 2, casda::precSpecShape,
+                      "stat.error;askap:spect.curvature;em.radio", "float", "col_spectral_curvature_err", "");
     itsSpec.addColumn("CHISQ", "Chisq(fit)", "--", 10, casda::precFlux,
                       "stat.fit.chi2", "float", "col_chisqfit", "");
     itsSpec.addColumn("RMSIMAGE", "RMS(image)", "[" + casda::fluxUnit + "]", 10, casda::precFlux,
@@ -140,8 +163,8 @@ void FitCatalogue::defineSpec()
                       "meta.number;instr.pixel", "int", "col_npixfit", "");
     itsSpec.addColumn("NPIXISLAND", "NPix(obj)", "--", 10, 0,
                       "meta.number;instr.pixel;stat.fit", "int", "col_npixobj", "");
-    itsSpec.addColumn("FLAG2", "Guess?", "", 5, 0,
-                      "meta.flag", "int", "col_guess", "");
+    itsSpec.addColumn("FLAG2", "fit_is_estimate", "", 5, 0,
+                      "meta.flag", "int", "col_fit_is_estimate", "");
 
 }
 

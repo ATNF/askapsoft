@@ -1,8 +1,8 @@
 /// @file
 ///
-/// XXX Notes on program XXX
+/// Defining the curvature map for use with Selavy
 ///
-/// @copyright (c) 2011 CSIRO
+/// @copyright (c) 2018 CSIRO
 /// Australia Telescope National Facility (ATNF)
 /// Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 /// PO Box 76, Epping NSW 1710, Australia
@@ -24,7 +24,7 @@
 /// along with this program; if not, write to the Free Software
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
-/// @author XXX XXX <XXX.XXX@csiro.au>
+/// @author Matthew Whiting <Matthew.Whiting@csiro.au>
 ///
 #include <sourcefitting/CurvatureMapCreator.h>
 #include <askap_analysis.h>
@@ -37,6 +37,7 @@
 #include <string>
 #include <casacore/casa/Arrays/Array.h>
 #include <casacore/casa/Arrays/ArrayMath.h>
+#include <parallelanalysis/Weighter.h>
 #include <outputs/DistributedImageWriter.h>
 #include <casainterface/CasaInterface.h>
 #include <analysisparallel/SubimageDef.h>
@@ -67,27 +68,14 @@ CurvatureMapCreator::CurvatureMapCreator(askap::askapparallel::AskapParallel &co
                        itsFilename);
 }
 
-CurvatureMapCreator::CurvatureMapCreator(const CurvatureMapCreator& other)
-{
-    this->operator=(other);
-}
-
-CurvatureMapCreator& CurvatureMapCreator::operator= (const CurvatureMapCreator& other)
-{
-    if (this == &other) return *this;
-    itsComms = other.itsComms;
-    itsParset = other.itsParset;
-    itsFilename = other.itsFilename;
-    itsArray = other.itsArray;
-    itsSigmaCurv = other.itsSigmaCurv;
-    return *this;
-}
-
-void CurvatureMapCreator::initialise(duchamp::Cube &cube, analysisutilities::SubimageDef &subdef)
+void CurvatureMapCreator::initialise(duchamp::Cube &cube,
+                                     analysisutilities::SubimageDef &subdef,
+                                     boost::shared_ptr<Weighter> weighter)
 {
 
     itsCube = &cube;
     itsSubimageDef = &subdef;
+    itsWeighter = weighter;
 
     casa::Slicer slicer = analysisutilities::subsectionToSlicer(cube.pars().section());
     analysisutilities::fixSlicer(slicer, cube.header().getWCS());
@@ -106,7 +94,6 @@ void CurvatureMapCreator::initialise(duchamp::Cube &cube, analysisutilities::Sub
 
 }
 
-
 void CurvatureMapCreator::calculate()
 {
 
@@ -121,9 +108,9 @@ void CurvatureMapCreator::calculate()
     casa::Convolver<float> convolver(kernel, itsShape);
     ASKAPLOG_DEBUG_STR(logger, "Defined a convolver");
 
-    itsArray = casa::Array<float>(itsShape);
+    itsArray = casa::MaskedArray<float>(inputArray, itsWeighter->cutoffMask());
     ASKAPLOG_DEBUG_STR(logger, "About to convolve");
-    convolver.linearConv(itsArray, inputArray);
+    convolver.linearConv(itsArray.getRWArray(), inputArray);
     ASKAPLOG_DEBUG_STR(logger, "Convolving done.");
 
     this->findSigma();
@@ -136,7 +123,7 @@ void CurvatureMapCreator::calculate()
 void CurvatureMapCreator::findSigma()
 {
 
-    itsSigmaCurv = madfm(itsArray, False, False, False) / Statistics::correctionFactor;
+    itsSigmaCurv = madfm(itsArray, False) / Statistics::correctionFactor;
     ASKAPLOG_DEBUG_STR(logger, "Found sigma_curv = " << itsSigmaCurv);
 
 }
@@ -165,9 +152,9 @@ void CurvatureMapCreator::maskBorders()
     trc[1] -= ymaxOffset;
     casa::Slicer arrSlicer(blc, trc, Slicer::endIsLast);
     ASKAPLOG_DEBUG_STR(logger, "Defined a masking Slicer " << arrSlicer);
-    casa::Array<float> newArr = itsArray(arrSlicer);
+    casa::Array<float> newArr = itsArray.getRWArray()(arrSlicer);
     ASKAPLOG_DEBUG_STR(logger, "Have extracted a subarray of shape " << newArr.shape());
-    itsArray.assign(newArr);
+    itsArray.getRWArray().assign(newArr);
     itsLocation += blc;
     itsShape = trc - blc + 1;
     ASKAPLOG_DEBUG_STR(logger, "Now have location=" << itsLocation <<

@@ -103,7 +103,7 @@ FittingParameters::FittingParameters(const LOFAR::ParameterSet& parset)
     itsNoiseLevel = parset.getFloat("noiseLevel", 1.);
     itsStopAfterFirstGoodFit = parset.getBool("stopAfterFirstGoodFit", true);
     itsFlagNumGaussFromGuess = parset.getBool("numGaussFromGuess", true);
-    itsUseGuessIfBad = parset.getBool("useGuessIfBad", true);
+    itsUseGuessIfBad = parset.getBool("useGuessIfBad", false);
     itsFlagFitThisParam = std::vector<bool>(6, true);
     itsFlagFitJustDetection = parset.getBool("fitJustDetection", true);
 
