@@ -858,6 +858,12 @@ function extractStatsNonStandard()
     PEAK_VM_MASTER="---"
     PEAK_RSS_MASTER="---"
 
+    if [ $# -lt 6 ]; then
+	formatlist="stdout"
+    else
+	formatlist=$6
+    fi
+
     for format in $(echo "$formatlist" | sed -e 's/,/ /g'); do
 
 	if [ "$format" == "txt" ]; then
