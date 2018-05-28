@@ -323,7 +323,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                 |                                                        | done. The number of writers will be reduced to the number of  |
 |                                            |                                 |                                                        | workers in the job if necessary.                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``ALT_IMAGER_SINGLE_FILE_CONTCUBE``        | false                           | singleoutputfile                                       | Whether to write a single cube, even with multiple writers    |
+| ``ALT_IMAGER_SINGLE_FILE_CONTCUBE``        | true                            | singleoutputfile                                       | Whether to write a single cube, even with multiple writers    |
 |                                            |                                 | (:doc:`../calim/imager`)                               | (ie. ``NUM_SPECTRAL_WRITERS_CONTCUBE>1``). Only works when    |
 |                                            |                                 |                                                        | ``IMAGETYPE_SPECTRAL=fits``                                   |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
@@ -370,7 +370,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 | ``SELFCAL_SELAVY_NUM_GAUSSIANS``           | 1                               | Selavy.Fitter.maxNumGauss                              | The number of Gaussians to fit to each island when            |
 |                                            |                                 | (:doc:`../analysis/postprocessing`)                    | ``SELFCAL_SELAVY_GAUSSIANS_FROM_GUESS=false``.                |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``SELFCAL_SELAVY_FIT_TYPE``                | full                            | Selavy.Fitter.fitTypes                                 | The type of fit to be used in the Selavy job. The possible    |
+| ``SELFCAL_SELAVY_FIT_TYPE``                | psf                             | Selavy.Fitter.fitTypes                                 | The type of fit to be used in the Selavy job. The possible    |
 |                                            |                                 | (:doc:`../analysis/postprocessing`)                    | options are 'full', 'psf', 'shape', or 'height'.              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``SELFCAL_SELAVY_WEIGHTSCUT``              | 0.95                            | Selavy.Weights.weightsCutoff                           | Pixels with weight less than this fraction of the peak        |

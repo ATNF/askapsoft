@@ -296,7 +296,7 @@ BANDPASS_SMOOTH_N_TAPER=""
 BANDPASS_SMOOTH_N_ITER=""
 
 # Whether to apply the bandpass solution to the 1934 dataset itself
-DO_APPLY_BANDPASS_1934=false
+DO_APPLY_BANDPASS_1934=true
 # If true, keep the raw bandpass datasets separate to the calibrated
 # versions
 KEEP_RAW_1934_DATA=true

@@ -160,7 +160,7 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 | ``GRIDDER_SPECTRAL_SNAPSHOT_LONGTRACK``       | true                            | snapshotimaging.longtrack          | The longtrack parameter controlling how the best-fit W plane is   |
 |                                               |                                 | (:doc:`../calim/gridder`)          | determined when using snapshots.                                  |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``GRIDDER_SPECTRAL_SNAPSHOT_CLIPPING``        | 0                               | snapshotimaging.clipping           | If greater than zero, this fraction of the full image width       |
+| ``GRIDDER_SPECTRAL_SNAPSHOT_CLIPPING``        | 0.01                            | snapshotimaging.clipping           | If greater than zero, this fraction of the full image width       |
 |                                               |                                 | (:doc:`../calim/gridder`)          | is set to zero. Useful when imaging at high declination as        |
 |                                               |                                 |                                    | the edges can generate artefacts.                                 |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+

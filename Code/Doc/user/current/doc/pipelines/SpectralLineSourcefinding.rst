@@ -65,7 +65,7 @@ reconstruction (to enhance the signal-to-noise of real sources).
 |                                     |                                 |                                              | (searches are done in each 2D channel image). Anything else |
 |                                     |                                 |                                              | defaults to spectral.                                       |
 +-------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
-| ``SELAVY_SPEC_VARIABLE_THRESHOLD``  | true                            | VariableThreshold                            | A flag indicating whether to determine the signal-to-noise  |
+| ``SELAVY_SPEC_VARIABLE_THRESHOLD``  | false                           | VariableThreshold                            | A flag indicating whether to determine the signal-to-noise  |
 |                                     |                                 | (:doc:`../analysis/thresholds`)              | threshold on a pixel-by-pixel basis based on local          |
 |                                     |                                 |                                              | statistics (that is, the statistics within a relatively     |
 |                                     |                                 |                                              | small box centred on the pixel in question). The dimensions |

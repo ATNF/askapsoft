@@ -157,7 +157,7 @@ is possible, however, to select a single field to process via the
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 | ``FLAG_DO_FLAT_AMPLITUDE_SCIENCE``            | false                           | none                                            | Whether to apply a flag amplitude flux threshold to the data.         |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
-| ``FLAG_THRESHOLD_AMPLITUDE_SCIENCE``          | 0.2                             | amplitude_flagger.high (:doc:`../calim/cflag`)  | Simple amplitude threshold applied when flagging science field data.  |
+| ``FLAG_THRESHOLD_AMPLITUDE_SCIENCE``          | 10.                             | amplitude_flagger.high (:doc:`../calim/cflag`)  | Simple amplitude threshold applied when flagging science field data.  |
 |                                               |                                 |                                                 | If set to blank (``FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW=""``),        |
 |                                               |                                 |                                                 | then no minimum value is applied.                                     |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
@@ -228,7 +228,7 @@ is possible, however, to select a single field to process via the
 | ``FLAG_DO_FLAT_AMPLITUDE_SCIENCE_AV``         | false                           | none                                            | Whether to apply a flag amplitude flux threshold to the averaged      |
 |                                               |                                 |                                                 | science data.                                                         |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
-| ``FLAG_THRESHOLD_AMPLITUDE_SCIENCE_AV``       | 0.2                             | amplitude_flagger.high (:doc:`../calim/cflag`)  | Simple amplitude threshold applied when flagging the averaged science |
+| ``FLAG_THRESHOLD_AMPLITUDE_SCIENCE_AV``       | 10.                             | amplitude_flagger.high (:doc:`../calim/cflag`)  | Simple amplitude threshold applied when flagging the averaged science |
 |                                               |                                 |                                                 | field data. If set to blank                                           |
 |                                               |                                 |                                                 | (``FLAG_THRESHOLD_AMPLITUDE_SCIENCE_LOW=""``),                        |
 |                                               |                                 |                                                 | then no minimum value is applied. [value in flux-calibrated units]    |
