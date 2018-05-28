@@ -96,8 +96,7 @@ given. The **simager** task is used for the continuum cube
 imaging. Many of the imaging specifications (shape, direction etc, as
 well as gridding & preconditioning) given for continuum imaging are
 used for the continuum cube, although the cleaning parameters can be
-given as different (the default Solver, for instance, is Basisfunction
-instead of BasisfunctionMFS).
+given as different.
 
 
 A note on the imagers and the output formats. The default approach is
@@ -126,10 +125,10 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 | ``JOB_TIME_CONT_IMAGE``                    | ``JOB_TIME_DEFAULT`` (12:00:00) | none                                                   | Time request for imaging the continuum (both types - with and |
 |                                            |                                 |                                                        | without self-calibration)                                     |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``IMAGETYPE_CONT``                         | casa                            | imagetype (:doc:`../calim/cimager` and                 | Image format to use - can be either 'casa' or 'fits'.         |
+| ``IMAGETYPE_CONT``                         | fits                            | imagetype (:doc:`../calim/cimager` and                 | Image format to use - can be either 'casa' or 'fits'.         |
 |                                            |                                 | :doc:`../calim/imager`)                                |                                                               |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``IMAGETYPE_CONTCUBE``                     | casa                            | imagetype (:doc:`../calim/imager`)                     | Image format to use - can be either 'casa' or 'fits',         |
+| ``IMAGETYPE_CONTCUBE``                     | fits                            | imagetype (:doc:`../calim/imager`)                     | Image format to use - can be either 'casa' or 'fits',         |
 |                                            |                                 |                                                        | although 'fits' can only be given in conjunction with         |
 |                                            |                                 |                                                        | ``DO_ALT_IMAGER_CONTCUBE=true``.                              |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
@@ -179,7 +178,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                 |                                                        | chosen together with the default number of pixels to cover a  |
 |                                            |                                 |                                                        | typical ASKAP beam with the sidelobes being imaged.           |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``NUM_TAYLOR_TERMS``                       | 1                               | Images.image.${imageBase}.nterms                       | Number of Taylor terms to create in MFS imaging. If more than |
+| ``NUM_TAYLOR_TERMS``                       | 2                               | Images.image.${imageBase}.nterms                       | Number of Taylor terms to create in MFS imaging. If more than |
 |                                            |                                 | (:doc:`../calim/cimager`)                              | 1, MFS weighting will be used (equivalent to setting          |
 |                                            |                                 | linmos.nterms (:doc:`../calim/linmos`)                 | **Cimager.visweights=MFS** in the cimager parset).            |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
@@ -497,7 +496,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                 | (:doc:`../calim/cimager`)                              | 'Clean', but there is a 'Dirty' solver available.             |
 |                                            |                                 | (:doc:`../calim/solver`)                               |                                                               |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``CLEAN_CONTCUBE_ALGORITHM``               | Basisfunction                   | Clean.algorithm                                        | The name of the clean algorithm to use.                       |
+| ``CLEAN_CONTCUBE_ALGORITHM``               | BasisfunctionMFS                | Clean.algorithm                                        | The name of the clean algorithm to use.                       |
 |                                            |                                 | (:doc:`../calim/solver`)                               |                                                               |
 +--------------------------------------------+---------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CLEAN_CONTCUBE_MINORCYCLE_NITER``        | 4000                            | Clean.niter                                            | The number of iterations for the minor cycle clean.           |

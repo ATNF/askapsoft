@@ -40,9 +40,9 @@ spectral-imaging.
 A note on the imagers and the output formats. The default approach is
 to use **simager** to produce the spectral-line cubes. The new imager
 application **imager** (:doc:`../calim/imager`) can be used by setting
-``DO_ALT_IMAGER_SPECTRAL`` or ``DO_ALT_IMAGER`` to true (this is now
-the default). The latter is the switch controlling all types of
-imaging, but can be overridden by the former, if provided.
+``DO_ALT_IMAGER_SPECTRAL`` or ``DO_ALT_IMAGER`` to true. The latter is
+the switch controlling all types of imaging, but can be overridden by
+the former, if provided.
 
 The default output format is CASA images, although FITS files can be
 written directly by setting ``IMAGETYPE_SPECTRAL`` to ``fits`` (rather
@@ -63,7 +63,7 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``JOB_TIME_SPECTRAL_IMAGE``                   | ``JOB_TIME_DEFAULT`` (12:00:00) | none                               | Time request for imaging the spectral-line data                   |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``IMAGETYPE_SPECTRAL``                        | casa                            | imagetype (:doc:`../calim/imager`) | Image format to use - can be either 'casa' or 'fits', although    |
+| ``IMAGETYPE_SPECTRAL``                        | fits                            | imagetype (:doc:`../calim/imager`) | Image format to use - can be either 'casa' or 'fits', although    |
 |                                               |                                 |                                    | 'fits' can only be given in conjunction with                      |
 |                                               |                                 |                                    | ``DO_ALT_IMAGER_SPECTRAL=true``.                                  |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
@@ -181,9 +181,8 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 | ``SOLVER_SPECTRAL``                           | Clean                           | solver                             | Which solver to use. You will mostly want to leave this as        |
 |                                               |                                 | (:doc:`../calim/solver`)           | 'Clean', but there is a 'Dirty' solver available.                 |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``CLEAN_SPECTRAL_ALGORITHM``                  | Basisfunction                   | Clean.algorithm                    | The name of the clean algorithm to use. Note that the default has |
-|                                               |                                 | (:doc:`../calim/solver`)           | changed to 'Basisfunction', as we don't need the multi-frequency  |
-|                                               |                                 |                                    | capabilities of 'BasisfunctionMFS'.                               |
+| ``CLEAN_SPECTRAL_ALGORITHM``                  | BasisfunctionMFS                | Clean.algorithm                    | The name of the clean algorithm to use.                           |
+|                                               |                                 | (:doc:`../calim/solver`)           |                                                                   |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``CLEAN_SPECTRAL_MINORCYCLE_NITER``           | 5000                            | Clean.niter                        | The number of iterations for the minor cycle clean.               |
 |                                               |                                 | (:doc:`../calim/solver`)           |                                                                   |
@@ -211,13 +210,13 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | **Preconditioning**                           |                                 |                                    |                                                                   |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``PRECONDITIONER_LIST_SPECTRAL``              | "[Wiener]"                      | preconditioner.Names               | List of preconditioners to apply.                                 |
+| ``PRECONDITIONER_LIST_SPECTRAL``              | "[Wiener, GaussianTaper]"       | preconditioner.Names               | List of preconditioners to apply.                                 |
 |                                               |                                 | (:doc:`../calim/solver`)           |                                                                   |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``PRECONDITIONER_SPECTRAL_GAUSS_TAPER``       |  "[10arcsec, 10arcsec, 0deg]"   | preconditioner.GaussianTaper       | Size of the Gaussian taper - either single value (for circular    |
+| ``PRECONDITIONER_SPECTRAL_GAUSS_TAPER``       | "[30arcsec, 30arcsec, 0deg]"    | preconditioner.GaussianTaper       | Size of the Gaussian taper - either single value (for circular    |
 |                                               |                                 | (:doc:`../calim/solver`)           | taper) or 3 values giving an elliptical size.                     |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``PRECONDITIONER_SPECTRAL_WIENER_ROBUSTNESS`` | 2.                              | preconditioner.Wiener.robustness   | Robustness value for the Wiener filter.                           |
+| ``PRECONDITIONER_SPECTRAL_WIENER_ROBUSTNESS`` | 0.5                             | preconditioner.Wiener.robustness   | Robustness value for the Wiener filter.                           |
 |                                               |                                 | (:doc:`../calim/solver`)           |                                                                   |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``PRECONDITIONER_SPECTRAL_WIENER_TAPER``      | ""                              | preconditioner.Wiener.taper        | Size of gaussian taper applied in image domain to Wiener filter.  |
@@ -250,7 +249,7 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 |                                               |                                 |                                    | overall parameter ``DO_ALT_IMAGER`` (see                          |
 |                                               |                                 |                                    | :doc:`ControlParameters`).                                        |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``NCHAN_PER_CORE_SL``                         | 54                              | nchanpercore                       | The number of channels each core will process.                    |
+| ``NCHAN_PER_CORE_SL``                         | 9                               | nchanpercore                       | The number of channels each core will process.                    |
 |                                               |                                 | (:doc:`../calim/imager`)           |                                                                   |
 +-----------------------------------------------+---------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``USE_TMPFS``                                 | false                           | usetmpfs (:doc:`../calim/imager`)  | Whether to store the visibilities in shared memory. This will give|

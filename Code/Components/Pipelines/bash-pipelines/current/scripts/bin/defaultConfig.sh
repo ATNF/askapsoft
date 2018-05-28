@@ -232,9 +232,9 @@ BEAMLIST=""
 
 ####################
 # Image output type
-IMAGETYPE_CONT=casa
-IMAGETYPE_CONTCUBE=casa
-IMAGETYPE_SPECTRAL=casa
+IMAGETYPE_CONT=fits
+IMAGETYPE_CONTCUBE=fits
+IMAGETYPE_SPECTRAL=fits
 
 ####################
 ##  BANDPASS CAL
@@ -504,7 +504,7 @@ AOFLAGGER_UVW=false
 # Data column in MS to use in cimager
 DATACOLUMN=DATA
 # Number of Taylor terms to create in MFS imaging
-NUM_TAYLOR_TERMS=1
+NUM_TAYLOR_TERMS=2
 # Number of CPUs to use on each core in the continuum imaging
 CPUS_PER_CORE_CONT_IMAGING=20
 # Total number of cores to use for the continuum imaging. Leave blank
@@ -532,7 +532,7 @@ RESTORING_BEAM_CUTOFF_CONT=0.5
 # number of channels each core will process
 NCHAN_PER_CORE=1
 # the spectral line imager needs its own otherwise we lose some flexibility
-NCHAN_PER_CORE_SL=54
+NCHAN_PER_CORE_SL=9
 # store the visibilities in shared memory.
 # this will give a performance boost at the expense of memory usage
 USE_TMPFS=false
@@ -716,9 +716,7 @@ NUM_CPUS_CONTCUBE_LINMOS=""
 # Cleaning parameters for spectral-line imaging
 # Which solver to use
 SOLVER_CONTCUBE=Clean
-# default clean algorithm is Basisfunction, as we don't need the
-# multi-frequency part that is used by BasisfunctionMFS
-CLEAN_CONTCUBE_ALGORITHM=Basisfunction
+CLEAN_CONTCUBE_ALGORITHM=BasisfunctionMFS
 CLEAN_CONTCUBE_MINORCYCLE_NITER=4000
 CLEAN_CONTCUBE_GAIN=0.1
 CLEAN_CONTCUBE_PSFWIDTH=512
@@ -788,9 +786,9 @@ REST_FREQUENCY_SPECTRAL=HI
 
 # Parameters for preconditioning (A.K.A. weighting) - allow these to
 # be different to the continuum case
-PRECONDITIONER_LIST_SPECTRAL="[Wiener]"
-PRECONDITIONER_SPECTRAL_GAUSS_TAPER="[10arcsec, 10arcsec, 0deg]"
-PRECONDITIONER_SPECTRAL_WIENER_ROBUSTNESS=2.
+PRECONDITIONER_LIST_SPECTRAL="[Wiener,GaussianTaper]"
+PRECONDITIONER_SPECTRAL_GAUSS_TAPER="[30arcsec, 30arcsec, 0deg]"
+PRECONDITIONER_SPECTRAL_WIENER_ROBUSTNESS=0.5
 PRECONDITIONER_SPECTRAL_WIENER_TAPER=""
 
 # Gridding parameters for spectral-line imaging
@@ -805,9 +803,7 @@ GRIDDER_SPECTRAL_MAXSUPPORT=512
 
 # Cleaning parameters for spectral-line imaging
 SOLVER_SPECTRAL=Clean
-# default clean algorithm is Basisfunction, as we don't need the
-# multi-frequency part that is used by BasisfunctionMFS
-CLEAN_SPECTRAL_ALGORITHM=Basisfunction
+CLEAN_SPECTRAL_ALGORITHM=BasisfunctionMFS
 CLEAN_SPECTRAL_MINORCYCLE_NITER=5000
 CLEAN_SPECTRAL_GAIN=0.1
 CLEAN_SPECTRAL_PSFWIDTH=512

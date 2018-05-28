@@ -678,7 +678,6 @@ EOF
         # defined in the config file, then set to the value of
         # DO_ALT_IMAGER. 
         if [ "${DO_ALT_IMAGER}" == "true" ] && [ "${DO_ALT_IMAGER_CONT}" == "" ]; then
-            echo "WARNING - You have not defined DO_ALT_IMAGER_CONT - setting to $DO_ALT_IMAGER, the value of DO_ALT_IMAGER"
             DO_ALT_IMAGER_CONT=${DO_ALT_IMAGER}
         fi
 
@@ -737,7 +736,6 @@ EOF
         # defined in the config file, then set to the value of
         # DO_ALT_IMAGER. 
         if [ "${DO_ALT_IMAGER}" == "true" ] && [ "${DO_ALT_IMAGER_CONTCUBE}" == "" ]; then
-            echo "WARNING - You have not defined DO_ALT_IMAGER_CONTCUBE - setting to $DO_ALT_IMAGER, the value of DO_ALT_IMAGER"
             DO_ALT_IMAGER_CONTCUBE=${DO_ALT_IMAGER}
         fi
 
@@ -838,7 +836,6 @@ EOF
         # defined in the config file, then set to the value of
         # DO_ALT_IMAGER.  
         if [ "${DO_ALT_IMAGER}" == "true" ] && [ "${DO_ALT_IMAGER_SPECTRAL}" == "" ]; then
-            echo "WARNING - You have not defined DO_ALT_IMAGER_SPECTRAL - setting to $DO_ALT_IMAGER, the value of DO_ALT_IMAGER"
             DO_ALT_IMAGER_SPECTRAL=${DO_ALT_IMAGER}
         fi
 
@@ -1100,7 +1097,7 @@ EOF
 
         # Check smooth type
         if [ "${SELAVY_SPEC_FLAG_SMOOTH}" == "true" ]; then
-            if [ "${SELAVY_SPEC_SMOOTH_TYPE}" != "spectral" ] ||
+            if [ "${SELAVY_SPEC_SMOOTH_TYPE}" != "spectral" ] &&
                    [ "${SELAVY_SPEC_SMOOTH_TYPE}" != "spatial" ]; then
                 SELAVY_SPEC_SMOOTH_TYPE="spectral"
                 echo "WARNING - SELAVY_SPEC_SMOOTH_TYPE needs to be 'spectral' or 'spatial' - Setting to 'spectral'"
