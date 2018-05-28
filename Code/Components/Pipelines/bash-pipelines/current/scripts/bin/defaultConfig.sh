@@ -559,13 +559,20 @@ ALT_IMAGER_SINGLE_FILE_CONTCUBE=true
 ####################
 # Gridding parameters for continuum imaging
 GRIDDER_SNAPSHOT_IMAGING=true
+# Actual parameters used, which depend on whether snapshot imaging is used
+GRIDDER_WMAX=""
+GRIDDER_MAXSUPPORT=""
+# Defaults, with and without snapshot imaging
+GRIDDER_WMAX_SNAPSHOT=2600
+GRIDDER_MAXSUPPORT_SNAPSHOT=512
+GRIDDER_WMAX_NO_SNAPSHOT=26000
+GRIDDER_MAXSUPPORT_NO_SNAPSHOT=1024
+# Other gridding parameters that don't change with snapshot status
 GRIDDER_SNAPSHOT_WTOL=2600
 GRIDDER_SNAPSHOT_LONGTRACK=true
 GRIDDER_SNAPSHOT_CLIPPING=0.01
-GRIDDER_WMAX=2600
 GRIDDER_NWPLANES=99
 GRIDDER_OVERSAMPLE=5
-GRIDDER_MAXSUPPORT=512
 
 ####################
 # Cleaning parameters for continuum imaging
@@ -793,13 +800,20 @@ PRECONDITIONER_SPECTRAL_WIENER_TAPER=""
 
 # Gridding parameters for spectral-line imaging
 GRIDDER_SPECTRAL_SNAPSHOT_IMAGING=true
+# Actual parameters used, which depend on whether snapshot imaging is used
+GRIDDER_SPECTRAL_WMAX=""
+GRIDDER_SPECTRAL_MAXSUPPORT=""
+# Defaults, with and without snapshot imaging
+GRIDDER_SPECTRAL_WMAX_SNAPSHOT=2600
+GRIDDER_SPECTRAL_MAXSUPPORT_SNAPSHOT=512
+GRIDDER_SPECTRAL_WMAX_NO_SNAPSHOT=26000
+GRIDDER_SPECTRAL_MAXSUPPORT_NO_SNAPSHOT=1024
+# Other gridding parameters that don't change with snapshot status
 GRIDDER_SPECTRAL_SNAPSHOT_WTOL=2600
 GRIDDER_SPECTRAL_SNAPSHOT_LONGTRACK=true
 GRIDDER_SPECTRAL_SNAPSHOT_CLIPPING=0.01
-GRIDDER_SPECTRAL_WMAX=2600
 GRIDDER_SPECTRAL_NWPLANES=99
 GRIDDER_SPECTRAL_OVERSAMPLE=4
-GRIDDER_SPECTRAL_MAXSUPPORT=512
 
 # Cleaning parameters for spectral-line imaging
 SOLVER_SPECTRAL=Clean

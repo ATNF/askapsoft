@@ -719,7 +719,21 @@ EOF
             SELFCAL_METHOD="Cmodel"
         fi
 
-
+        # Select correct gridding parameters, depending on snapshot status
+        if [ "${GRIDDER_WMAX}" == "" ]; then
+            if [ "${GRIDDER_SNAPSHOT_IMAGING}" == "true" ]; then
+                GRIDDER_WMAX=${GRIDDER_WMAX_SNAPSHOT}
+            else
+                GRIDDER_WMAX=${GRIDDER_WMAX_NO_SNAPSHOT}
+            fi
+        fi
+        if [ "${GRIDDER_MAXSUPPORT}" == "" ]; then
+            if [ "${GRIDDER_SNAPSHOT_IMAGING}" == "true" ]; then
+                GRIDDER_MAXSUPPORT=${GRIDDER_MAXSUPPORT_SNAPSHOT}
+            else
+                GRIDDER_MAXSUPPORT=${GRIDDER_MAXSUPPORT_NO_SNAPSHOT}
+            fi
+        fi
 
         ####################
         # Parameters required for continuum-cube imaging
@@ -846,6 +860,22 @@ EOF
             echo "ERROR - IMAGETYPE_SPECTRAL=fits can only work with DO_ALT_IMAGER_SPECTRAL=true"
             echo "   Exiting"
             exit 1
+        fi
+
+        # Select correct gridding parameters, depending on snapshot status
+        if [ "${GRIDDER_SPECTRAL_WMAX}" == "" ]; then
+            if [ "${GRIDDER_SPECTRAL_SNAPSHOT_IMAGING}" == "true" ]; then
+                GRIDDER_SPECTRAL_WMAX=${GRIDDER_SPECTRAL_WMAX_SNAPSHOT}
+            else
+                GRIDDER_SPECTRAL_WMAX=${GRIDDER_SPECTRAL_WMAX_NO_SNAPSHOT}
+            fi
+        fi
+        if [ "${GRIDDER_SPECTRAL_MAXSUPPORT}" == "" ]; then
+            if [ "${GRIDDER_SPECTRAL_SNAPSHOT_IMAGING}" == "true" ]; then
+                GRIDDER_SPECTRAL_MAXSUPPORT=${GRIDDER_SPECTRAL_MAXSUPPORT_SNAPSHOT}
+            else
+                GRIDDER_SPECTRAL_MAXSUPPORT=${GRIDDER_SPECTRAL_MAXSUPPORT_NO_SNAPSHOT}
+            fi
         fi
 
         # Channel range to be used for spectral-line imaging
