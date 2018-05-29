@@ -1034,7 +1034,7 @@ SELAVY_SPEC_MIN_CHAN=5
 SELAVY_SPEC_MAX_CHAN=2592
 #
 # Whether to use the optimiseMask option
-SELAVY_SPEC_OPTIMISE_MASK=true
+SELAVY_SPEC_OPTIMISE_MASK=false
 #
 
 ###############################

@@ -125,6 +125,6 @@ reconstruction (to enhance the signal-to-noise of real sources).
 | **Pre-processing**                  |                                 |                                              |                                                             |
 |                                     |                                 |                                              |                                                             |
 +-------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
-| ``SELAVY_SPEC_OPTIMISE_MASK``       | true                            | optimiseMask                                 | Whether to improve the mask of detected sources prior to    |
+| ``SELAVY_SPEC_OPTIMISE_MASK``       | false                           | optimiseMask                                 | Whether to improve the mask of detected sources prior to    |
 |                                     |                                 | (:doc:`../analysis/postprocessing`)          | parameterisation via the mask optimisation technique.       |
 +-------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
