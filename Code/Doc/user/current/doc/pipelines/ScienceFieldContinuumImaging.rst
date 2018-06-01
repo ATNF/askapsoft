@@ -202,7 +202,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | **Gridding parameters**                    |                                     |                                                        |                                                               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``GRIDDER_SNAPSHOT_IMAGING``               | true                                | snapshotimaging                                        | Whether to use snapshot imaging when gridding.                |
+| ``GRIDDER_SNAPSHOT_IMAGING``               | false                               | snapshotimaging                                        | Whether to use snapshot imaging when gridding.                |
 |                                            |                                     | (:doc:`../calim/gridder`)                              |                                                               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``GRIDDER_SNAPSHOT_WTOL``                  | 2600                                | snapshotimaging.wtolerance                             | The wtolerance parameter controlling how frequently to        |

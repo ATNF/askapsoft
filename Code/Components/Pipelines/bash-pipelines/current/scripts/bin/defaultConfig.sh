@@ -558,7 +558,7 @@ ALT_IMAGER_SINGLE_FILE_CONTCUBE=true
 
 ####################
 # Gridding parameters for continuum imaging
-GRIDDER_SNAPSHOT_IMAGING=true
+GRIDDER_SNAPSHOT_IMAGING=false
 # Actual parameters used, which depend on whether snapshot imaging is used
 GRIDDER_WMAX=""
 GRIDDER_MAXSUPPORT=""
@@ -799,7 +799,7 @@ PRECONDITIONER_SPECTRAL_WIENER_ROBUSTNESS=0.5
 PRECONDITIONER_SPECTRAL_WIENER_TAPER=""
 
 # Gridding parameters for spectral-line imaging
-GRIDDER_SPECTRAL_SNAPSHOT_IMAGING=true
+GRIDDER_SPECTRAL_SNAPSHOT_IMAGING=false
 # Actual parameters used, which depend on whether snapshot imaging is used
 GRIDDER_SPECTRAL_WMAX=""
 GRIDDER_SPECTRAL_MAXSUPPORT=""
