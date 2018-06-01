@@ -25,6 +25,35 @@ Pipeline updates:
    smooth_bandpass.py (instead of plot_caltable.py).
  * Use of an additional bandpass validation script to produce summary
    diagnostic plots for the bandpass solutions.
+ * Changes to some default parameters. Here are the parameters that
+   have changed, with their new values (note that the WMAX and
+   MAXSUPPORT gridding parameters now also adapt their default values
+   according to whether snapshot imaging is turned on or off):
+
+.. code-block:: bash
+
+  IMAGETYPE_CONT=fits
+  IMAGETYPE_CONTCUBE=fits
+  IMAGETYPE_SPECTRAL=fits
+  NUM_TAYLOR_TERMS=2
+  NCHAN_PER_CORE_SL=9
+  PRECONDITIONER_LIST_SPECTRAL="[Wiener,GaussianTaper]"
+  PRECONDITIONER_SPECTRAL_GAUSS_TAPER="[30arcsec, 30arcsec, 0deg]"
+  PRECONDITIONER_SPECTRAL_WIENER_ROBUSTNESS=0.5
+  CLEAN_SPECTRAL_ALGORITHM=BasisfunctionMFS
+  CLEAN_CONTCUBE_ALGORITHM=BasisfunctionMFS
+  DO_APPLY_BANDPASS_1934=true
+  GRIDDER_SNAPSHOT_IMAGING=false
+  GRIDDER_SPECTRAL_SNAPSHOT_IMAGING=false
+  GRIDDER_SPECTRAL_WMAX_SNAPSHOT=2600
+  GRIDDER_SPECTRAL_MAXSUPPORT_SNAPSHOT=512
+  GRIDDER_SPECTRAL_WMAX_NO_SNAPSHOT=26000
+  GRIDDER_SPECTRAL_MAXSUPPORT_NO_SNAPSHOT=1024
+  GRIDDER_WMAX_SNAPSHOT=2600
+  GRIDDER_MAXSUPPORT_SNAPSHOT=512
+  GRIDDER_WMAX_NO_SNAPSHOT=26000
+  GRIDDER_MAXSUPPORT_NO_SNAPSHOT=1024
+  SELAVY_SPEC_OPTIMISE_MASK=false
 
 Processing tasks:
 
@@ -41,7 +70,6 @@ Processing tasks:
  * A bug in Selavy was fixed to allow the curvature-map method of
    identifying components to better take into account the weights
    image associated with the image being searched.
-
 
 Manager & ingest:
 
