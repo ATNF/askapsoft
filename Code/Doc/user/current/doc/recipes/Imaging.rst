@@ -3,8 +3,8 @@ Multi-Scale and/or Multi-Frequency deconvolution
 
 ASKAPSoft provides a somewhat bewildering array of deconvolution options. This guide aims to point you at the path through these that has proven to give good results.
 
-* Spectral line - for spectral line cubes we have a single frequency per image plane, so we only need decide if we want to use Multi-Scale deconvolution or not
-* Continuum -  For wide band continuum imaging we may need both Multi-Scale deconvolution and Multi-Frequency Synthesis
+* Spectral line - spectral line cubes have a single frequency per image plane, so you only need decide if you want to use Multi-Scale deconvolution or not
+* Continuum -  for wide band continuum imaging you may need both Multi-Scale deconvolution and Multi-Frequency Synthesis
 
 Here is a list of the current CLEAN deconvolution options:
 
@@ -19,10 +19,10 @@ Because the Basisfunction algorithm is not working optimally, use BasisfunctionM
 
 Choice of Scales
 ----------------
-With multi-scale clean we need to choose a set of scales. Usual starting choices are [0,10,30] or [0,4,8,16,32]. The conventional wisdom
+With multi-scale clean you need to choose a set of scales. Usual starting choices are [0,10,30] or [0,4,8,16,32]. The conventional wisdom
 is that the smallest scale after 0 should be 1-2 times the beam size in pixels. In principle the largest scale is set by the size of the largest
-extended source in the field we would like to image. If you are imaging in the galactic plane, this may be as large as half of the image size.
-However since the maximum size scale we can image reliably is determined by the shortest baseline, we should make sure
+extended source in the field. If you are imaging in the galactic plane, this may be as large as half of the image size.
+However since the maximum size scale you can image reliably is determined by the shortest baseline, you should make sure
 there is sufficient sensitivity on short baselines to image the largest scale specified or the clean may diverge.
 In simulations the images come out slightly better with the powers of two scales than with the sparser [0,3,10,30,...] scheme, but using
 more scales uses more memory and often time as well, so you may need to compromise.
@@ -56,12 +56,12 @@ To try this option you would use::
     Cimager.solver.Clean.orthogonal=True
 It is off by default, which is the recommended setting.
 
-The second option decides if we report and use the value found by the peak finding algorithm as the peak residual for each iteration
-or if we report the value of the maximum across all basisfunction residual images and terms.
+The second option either directly uses the value found by the peak finding algorithm as the peak residual for each iteration
+or finds the value of the maximum across all basisfunction residual images and terms at the peak location.
 Generally, there is little difference between these but the first value (decoupled) behaves more like in classical clean,
 i.e., it tends to decrease monotonically as iterations progress whereas the second
-value can meander up and down a bit (and sometimes gets stuck on a single value for a while).
-The default setting is coupled, but we have found that decoupled allows a lower minor iteration percentage limit and is often slightly faster.
+value can meander up and down a bit (and sometimes gets stuck on a single value for a while) when it is reporting values from a different scale.
+The default setting is coupled, but we have found that decoupled allows the use of a lower minor iteration percentage limit and is often slightly faster.
 The deep cleaning mode discussed below always uses decoupled=True. To use decoupled components specify::
     Cimager.solver.Clean.decoupled=True
 
@@ -80,7 +80,7 @@ To use MAXBASE specify::
     Cimager.solver.Clean.solutiontype=MAXBASE
 
 The deep cleaning mode (borrowed from wsclean) can be used to clean below the noise level.
-Normally we can clean a large area to about 4-5 sigma, without getting too many spurious noise components.
+Normally you can clean a large area to about 4-5 sigma, without getting too many spurious noise components.
 The deep cleaning mode uses the existing components as a mask to clean deeper.
 This can be effective for extended sources that need to be cleaned to <1 sigma to reduce the sidelobes and
 fully capture all the flux. In Miriad or CASA you would set clean boxes around these sources or use automatic clean boxes,
@@ -88,7 +88,7 @@ but using the existing model as a mask seems to work quite well too. To use the 
 flux threshold and lower the major cycle threshold as well::
     Cimager.threshold.minorcycle=[40%,2mJy,0.18mJy]
     Cimager.threshold.majorcycle=0.2mJy.
-Here we have set the second minor cycle threshold slightly lower than the major cycle threshold to avoid doing several major
+Here set the second minor cycle threshold slightly lower than the major cycle threshold to avoid doing several major
 cycles close to the final level at the end due to small errors.
 
 Another parameter that is worth mentioning is psfwidth. This specifies the size of the psf (dirty beam) used in
@@ -98,7 +98,7 @@ beam is used. The sparser uv coverage of spectral line observations means that y
 Continuum imaging using MFS gives much better uv coverage and a smoother beam allowing you to set this much smaller, e.g., 128 or 256.
 This can speed up your clean minor cycles by a large factor. Because the major cycle subtractions can be parallelised over
 many cores, but the minor cycle is still running on a single core, a lot of core time is wasted if the minor cycles are slow.
-As the ASKAP array grows in size and we make bigger, higher resolution images, we should hopefully be able to decrease this parameter
+As the ASKAP array grows in size and we need to make bigger, higher resolution images, we should hopefully be able to decrease this parameter
 to speed up the minor cycles. Specify the psf width using::
     Cimager.solver.Clean.psfwidth               = 128
 
@@ -106,7 +106,7 @@ to speed up the minor cycles. Specify the psf width using::
 
 Example 1: Spectral line cubes
 ------------------------------
-For spectral line imaging we use the following selection of options:
+For spectral line imaging use the following selection of options:
  * BasisfunctionMFS solver
  * standard basisfunctions,
  * decoupled residuals,
@@ -182,16 +182,19 @@ replace <object> with the appropriate value for you::
 
 Example 2: Continuum Imaging
 ----------------------------
-In continuum imaging we tend to be limited by calibration errors,
-so only use deep cleaning if the calibration is good enough to reach the true noise level.
+In continuum imaging you tend to be limited by calibration errors instead of noise,
+so make sure you keep the first absolute clean level above the level of the
+calibration errors. You can still use deep cleaning to collect all the flux of
+sources above that level (e.g., for selfcal purposes).
+Here the suggested options for continuum imaging:
 
-Suggested options:
  * BasisfunctionMFS solver
  * standard basisfunctions,
  * 2 Taylor terms
  * decoupled residuals,
  * MAXCHISQ or MAXBASE peak finding algorithm,
- * smaller psf width
+ * deep cleaning,
+ * choose a smaller psf width
 
 
 Here is an example parset for continuum imaging::
@@ -259,7 +262,7 @@ Here is an example parset for continuum imaging::
     Cimager.solver.Clean.psfwidth                   = 256
     Cimager.solver.Clean.logevery                   = 50
     Cimager.Images.writeAtMajorCycle                = false
-    Cimager.threshold.minorcycle                    = [30%,0.5mJy]
+    Cimager.threshold.minorcycle                    = [30%,0.5mJy,0.1mJy]
 
     #
     Cimager.preconditioner.Names                    = [Wiener]
@@ -271,7 +274,7 @@ Here is an example parset for continuum imaging::
     Cimager.restore.beam.cutoff                     = 0.5
 
     #
-    Cimager.threshold.majorcycle                    = 0.52mJy
+    Cimager.threshold.majorcycle                    = 0.11mJy
     Cimager.ncycles                                 = 10
     # Excluding the shortest baselines can avoid large scale ripples due to RFI
     Cimager.MinUV   = 30
