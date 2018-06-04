@@ -235,8 +235,8 @@ void CalcCore::solveNE()
                        << " seconds ");
 
     // Extract the largest residual
-    const std::vector<std::string> peakParams = itsModel->completions("peak_residual.");
-
+    const std::vector<std::string> peakParams = itsModel->completions("peak_residual.",true);
+    
     double peak = peakParams.size() == 0 ? getPeakResidual() : -1.;
     for (std::vector<std::string>::const_iterator peakParIt = peakParams.begin();
             peakParIt != peakParams.end(); ++peakParIt) {
