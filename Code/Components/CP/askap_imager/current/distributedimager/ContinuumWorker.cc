@@ -554,8 +554,22 @@ void ContinuumWorker::buildSpectralCube() {
             const string colName = itsParsets[workUnitCount].getString("datacolumn", "DATA");
             const string ms = workUnits[workUnitCount].get_dataset();
 
+            int localChannel;
+            int globalChannel;
+
+            bool usetmpfs = itsParsets[workUnitCount].getBool("usetmpfs",false);
+            if (usetmpfs) {
+                // probably in spectral line mode
+                localChannel = 0;
+
+            }
+            else {
+                localChannel = workUnits[0].get_localChannel();
+            }
+            globalChannel = workUnits[0].get_globalChannel();
+
             ASKAPLOG_INFO_STR(logger, "MS: " << ms \
-                              << " pulling out local channel " << workUnits[workUnitCount].get_localChannel() \
+                              << " pulling out local channel " << localChannel \
                               << " which has a frequency " << frequency );
 
             TableDataSource ds(ms, TableDataSource::DEFAULT, colName);
@@ -563,7 +577,7 @@ void ContinuumWorker::buildSpectralCube() {
             /// Need to set up the rootImager here
 
 
-            CalcCore rootImager(itsParsets[workUnitCount],itsComms,ds,workUnits[workUnitCount].get_localChannel());
+            CalcCore rootImager(itsParsets[workUnitCount],itsComms,ds,localChannel);
             /// set up the image for this channel
             setupImage(rootImager.params(), frequency);
 
@@ -594,11 +608,20 @@ void ContinuumWorker::buildSpectralCube() {
                     const string myMs = workUnits[tempWorkUnitCount].get_dataset();
 
                     TableDataSource ds(myMs, TableDataSource::DEFAULT, colName);
+                    if (usetmpfs) {
+                        // probably in spectral line mode
+                        localChannel = 0;
+
+                    }
+                    else {
+                        localChannel = workUnits[tempWorkUnitCount].get_localChannel();
+                    }
+                    globalChannel = workUnits[tempWorkUnitCount].get_globalChannel();
 
                     ds.configureUVWMachineCache(uvwMachineCacheSize, uvwMachineCacheTolerance);
                     try {
 
-                        CalcCore workingImager(itsParsets[tempWorkUnitCount],itsComms,ds,rootImager.gridder(),workUnits[tempWorkUnitCount].get_localChannel());
+                        CalcCore workingImager(itsParsets[tempWorkUnitCount],itsComms,ds,rootImager.gridder(),localChannel);
 
                     /// this loop does the calcNE and the merge of the residual images
 
