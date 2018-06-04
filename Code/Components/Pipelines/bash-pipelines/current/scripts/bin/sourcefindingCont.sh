@@ -182,7 +182,8 @@ contcube=${contCube}
 imlist="\${imlist} ${OUTPUT}/\${image}"
 
 for((n=1;n<\${NUM_TAYLOR_TERMS};n++)); do
-    im=\$(echo \$image | sed -e 's/\.taylor\.0/\taylor\.\$n/g')
+    sedstr="s/\.taylor\.0/\.taylor\.\$n/g"
+    im=\$(echo \$image | sed -e \$sedstr)
     imlist="\${imlist} ${OUTPUT}/\${im}"
 done
 
