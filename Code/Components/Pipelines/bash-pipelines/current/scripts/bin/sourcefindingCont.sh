@@ -183,7 +183,7 @@ imlist="\${imlist} ${OUTPUT}/\${image}"
 
 for((n=1;n<\${NUM_TAYLOR_TERMS};n++)); do
     im=\$(echo \$image | sed -e 's/\.taylor\.0/\taylor\.\$n/g')
-    imlist="\${imlist} ${OUTPUT}/\${im}
+    imlist="\${imlist} ${OUTPUT}/\${im}"
 done
 
 if [ "\${BEAM}" == "all" ]; then
