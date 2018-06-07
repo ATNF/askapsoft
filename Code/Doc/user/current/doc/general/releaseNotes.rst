@@ -70,6 +70,8 @@ Processing tasks:
  * A bug in Selavy was fixed to allow the curvature-map method of
    identifying components to better take into account the weights
    image associated with the image being searched.
+ * A further bug in Selavy (the extraction code) was fixed to allow
+   its use on images without spectral or Stokes axes.
 
 Manager & ingest:
 
