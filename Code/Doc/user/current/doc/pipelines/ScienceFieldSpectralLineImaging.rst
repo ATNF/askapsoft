@@ -197,10 +197,10 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 | ``CLEAN_SPECTRAL_PSFWIDTH``                   | 512                                 | Clean.psfwidth                     | The width of the psf patch used in the minor cycle.               |
 |                                               |                                     | (:doc:`../calim/solver`)           |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``CLEAN_SPECTRAL_SCALES``                     | "[0,3,10]"                          | Clean.scales                       | Set of scales (in pixels) to use with the multi-scale clean.      |
+| ``CLEAN_SPECTRAL_SCALES``                     | "[0,3,10,30]"                       | Clean.scales                       | Set of scales (in pixels) to use with the multi-scale clean.      |
 |                                               |                                     | (:doc:`../calim/solver`)           |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``CLEAN_SPECTRAL_THRESHOLD_MINORCYCLE``       | "[50%, 30mJy]"                      | threshold.minorcycle               | Threshold for the minor cycle loop.                               |
+| ``CLEAN_SPECTRAL_THRESHOLD_MINORCYCLE``       | "[50%, 30mJy, 3.5mJy]"              | threshold.minorcycle               | Threshold for the minor cycle loop.                               |
 |                                               |                                     | (:doc:`../calim/solver`)           |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``CLEAN_SPECTRAL_THRESHOLD_MAJORCYCLE``       | 20mJy                               | threshold.majorcycle               | The target peak residual. Major cycles stop if this is reached. A |
