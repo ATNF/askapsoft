@@ -94,14 +94,18 @@ void CubeletExtractor::defineSlicer()
         long zero = 0;
         blc(itsLngAxis) = std::max(zero, itsSource->getXmin() - itsSpatialPad + itsSource->getXOffset());
         blc(itsLatAxis) = std::max(zero, itsSource->getYmin() - itsSpatialPad + itsSource->getYOffset());
-        blc(itsSpcAxis) = std::max(zero, itsSource->getZmin() - itsSpectralPad + itsSource->getZOffset());
+        if (itsSpcAxis>=0){
+            blc(itsSpcAxis) = std::max(zero, itsSource->getZmin() - itsSpectralPad + itsSource->getZOffset());
+        }
 
         trc(itsLngAxis) = std::min(shape(itsLngAxis) - 1,
                                    itsSource->getXmax() + itsSpatialPad + itsSource->getXOffset());
         trc(itsLatAxis) = std::min(shape(itsLatAxis) - 1,
                                    itsSource->getYmax() + itsSpatialPad + itsSource->getYOffset());
-        trc(itsSpcAxis) = std::min(shape(itsSpcAxis) - 1,
-                                   itsSource->getZmax() + itsSpectralPad + itsSource->getZOffset());
+        if (itsSpcAxis >= 0){
+            trc(itsSpcAxis) = std::min(shape(itsSpcAxis) - 1,
+                                       itsSource->getZmax() + itsSpectralPad + itsSource->getZOffset());
+        }
         /// @todo Not yet dealing with Stokes axis properly.
 
         itsSlicer = casa::Slicer(blc, trc, casa::Slicer::endIsLast);
@@ -117,11 +121,16 @@ void CubeletExtractor::initialiseArray()
     if (this->openInput()) {
         int lngsize = itsSlicer.length()(itsLngAxis);
         int latsize = itsSlicer.length()(itsLatAxis);
-        int spcsize = itsSlicer.length()(itsSpcAxis);
+        int spcsize = 0;
+        if (itsSpcAxis >= 0){
+            spcsize = itsSlicer.length()(itsSpcAxis);
+        }
         casa::IPosition shape(itsInputCubePtr->shape());
         shape(itsLngAxis) = lngsize;
         shape(itsLatAxis) = latsize;
-        shape(itsSpcAxis) = spcsize;
+        if(itsSpcAxis >= 0){
+            shape(itsSpcAxis) = spcsize;
+        }
         ASKAPLOG_DEBUG_STR(logger,
                            "Cubelet extraction: Initialising array to zero with shape " <<
                            shape);
@@ -166,39 +175,48 @@ void CubeletExtractor::writeImage()
         casa::CoordinateSystem newcoo = casa::CoordinateUtil::defaultCoords4D();
 
         int dirCoNum = itsInputCoords.findCoordinate(casa::Coordinate::DIRECTION);
-        int spcCoNum = itsInputCoords.findCoordinate(casa::Coordinate::SPECTRAL);
-        int stkCoNum = itsInputCoords.findCoordinate(casa::Coordinate::STOKES);
-
         casa::DirectionCoordinate dircoo(itsInputCoords.directionCoordinate(dirCoNum));
-        casa::SpectralCoordinate spcoo(itsInputCoords.spectralCoordinate(spcCoNum));
-        casa::Vector<Int> stkvec(itsStokesList.size());
-        for (size_t i = 0; i < stkvec.size(); i++) {
-            stkvec[i] = itsStokesList[i];
-        }
-        casa::StokesCoordinate stkcoo(stkvec);
         newcoo.replaceCoordinate(dircoo, newcoo.findCoordinate(casa::Coordinate::DIRECTION));
-        newcoo.replaceCoordinate(spcoo, newcoo.findCoordinate(casa::Coordinate::SPECTRAL));
-        if (stkCoNum >= 0) {
+
+        if (itsSpcAxis >= 0){
+            int spcCoNum = itsInputCoords.findCoordinate(casa::Coordinate::SPECTRAL);
+            casa::SpectralCoordinate spcoo(itsInputCoords.spectralCoordinate(spcCoNum));
+            newcoo.replaceCoordinate(spcoo, newcoo.findCoordinate(casa::Coordinate::SPECTRAL));
+        }
+
+        casa::Vector<Int> stkvec(itsStokesList.size());
+        if (itsStkAxis >= 0) {
+            for (size_t i = 0; i < stkvec.size(); i++) {
+                stkvec[i] = itsStokesList[i];
+            }
+            casa::StokesCoordinate stkcoo(stkvec);
             newcoo.replaceCoordinate(stkcoo, newcoo.findCoordinate(casa::Coordinate::STOKES));
         }
 
         // shift the reference pixel for the spatial coords, so that
         // the RA/DEC (or whatever) are correct. Leave the
         // spectral/stokes axes untouched.
+        casa::IPosition outshape(itsSlicer.ndim(), 1);
         int lngAxis = newcoo.directionAxesNumbers()[0];
         int latAxis = newcoo.directionAxesNumbers()[1];
-        int spcAxis = newcoo.spectralAxisNumber();
-        int stkAxis = newcoo.polarizationAxisNumber();
-        casa::IPosition outshape(4, 1);
         outshape(lngAxis) = itsSlicer.length()(itsLngAxis);
         outshape(latAxis) = itsSlicer.length()(itsLatAxis);
-        outshape(spcAxis) = itsSlicer.length()(itsSpcAxis);
-        outshape(stkAxis) = stkvec.size();
+        if (itsSpcAxis >= 0){
+            int spcAxis = newcoo.spectralAxisNumber();
+            outshape(spcAxis) = itsSlicer.length()(itsSpcAxis);
+        }
+        if (itsStkAxis >= 0){
+            int stkAxis = newcoo.polarizationAxisNumber();
+            outshape(stkAxis) = stkvec.size();
+        }
         casa::Vector<Float> shift(outshape.size(), 0);
         casa::Vector<Float> incrFac(outshape.size(), 1);
         shift(lngAxis) = itsSource->getXmin() - itsSpatialPad + itsSource->getXOffset();
         shift(latAxis) = itsSource->getYmin() - itsSpatialPad + itsSource->getYOffset();
-        shift(spcAxis) = itsSource->getZmin() - itsSpectralPad + itsSource->getZOffset();
+        if (itsSpcAxis >= 0){
+            int spcAxis = newcoo.spectralAxisNumber();
+            shift(spcAxis) = itsSource->getZmin() - itsSpectralPad + itsSource->getZOffset();
+        }
         casa::Vector<Int> newshape = outshape.asVector();
 
         newcoo.subImageInSitu(shift, incrFac, newshape);
