@@ -73,6 +73,7 @@ for imageCode in ${mosaicImageList}; do
             cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
 ${SLURM_CONFIG}
+#SBATCH --mem=62gb
 #SBATCH --time=${JOB_TIME_LINMOS}
 #SBATCH --ntasks=${NUM_CPUS_SPECTRAL_LINMOS}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_SPEC_IMAGING}
