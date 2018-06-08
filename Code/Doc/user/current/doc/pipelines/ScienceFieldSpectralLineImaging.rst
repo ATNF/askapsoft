@@ -262,14 +262,14 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``TMPFS``                                     | /dev/shm                            | tmpfs (:doc:`../calim/imager`)     | Location of the shared memory.                                    |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``NUM_SPECTRAL_WRITERS``                      | 1                                   | nwriters (:doc:`../calim/imager`)  | The number of writers used by imager. Unless                      |
+| ``NUM_SPECTRAL_WRITERS``                      | 16                                  | nwriters (:doc:`../calim/imager`)  | The number of writers used by imager. Unless                      |
 |                                               |                                     |                                    | ``ALT_IMAGER_SINGLE_FILE=true``, this will equate to the number of|
 |                                               |                                     |                                    | distinct spectral cubes produced. In the case of multiple cubes,  |
 |                                               |                                     |                                    | each will be a sub-band of the full bandwidth. No combination of  |
 |                                               |                                     |                                    | the sub-cubes is currently done. The number of writers will be    |
 |                                               |                                     |                                    | reduced to the number of workers in the job if necessary.         |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``ALT_IMAGER_SINGLE_FILE``                    | false                               | singleoutputfile                   | Whether to write a single cube, even with multiple writers (ie.   |
+| ``ALT_IMAGER_SINGLE_FILE``                    | true                                | singleoutputfile                   | Whether to write a single cube, even with multiple writers (ie.   |
 |                                               |                                     | (:doc:`../calim/imager`)           | ``NUM_SPECTRAL_WRITERS>1``). Only works when                      |
 |                                               |                                     |                                    | ``IMAGETYPE_SPECTRAL=fits``                                       |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
