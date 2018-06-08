@@ -115,6 +115,7 @@ class MetadataConverterTest : public CppUnit::TestFixture {
                 ant.actualPolAngle(polAngle);
                 ant.onSource(onSource);
                 ant.flagged(flagged);
+                ant.uvw(casa::Vector<casa::Double>(36*3, double(i)/10.));
 
                 itsSource->addAntenna(ant);
             }
@@ -190,6 +191,10 @@ class MetadataConverterTest : public CppUnit::TestFixture {
                 resultAnt.actualPolAngle().getValue("deg"), 10e-5);
             CPPUNIT_ASSERT_EQUAL(srcAnt.onSource(), resultAnt.onSource());
             CPPUNIT_ASSERT_EQUAL(srcAnt.flagged(), resultAnt.flagged());
+            CPPUNIT_ASSERT_EQUAL(srcAnt.uvw().nelements(), resultAnt.uvw().nelements());
+            for (casa::uInt i=0; i<srcAnt.uvw().nelements(); ++i) {
+                 CPPUNIT_ASSERT_DOUBLES_EQUAL(srcAnt.uvw()[i], resultAnt.uvw()[i],1e-6);
+            }
         }
 
         void verifyDir(const casa::MDirection& d1, const casa::MDirection& d2) {

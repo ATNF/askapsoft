@@ -33,6 +33,7 @@
 
 // ASKAPsoft includes
 #include "askap/AskapError.h"
+#include "askap/AskapLogging.h"
 #include "boost/shared_ptr.hpp"
 #include "cpcommon/TosMetadata.h"
 #include "casacore/casa/aips.h"
@@ -49,6 +50,8 @@
 using namespace askap::cp::icewrapper;
 using namespace askap::interfaces;
 using namespace casa;
+
+ASKAP_LOGGER(logger, ".MetadataConverter");
 
 askap::cp::TosMetadata MetadataConverter::convert(const askap::interfaces::TimeTaggedTypedValueMap& source)
 {
@@ -95,6 +98,7 @@ askap::cp::TosMetadata MetadataConverter::convert(const askap::interfaces::TimeT
     /////////////////////////
     // Metadata per antenna
     /////////////////////////
+    ASKAPLOG_DEBUG_STR(logger, "About to convert metadata for "<<antennaNames.size()<<" antennas");
     for (size_t i = 0; i < antennaNames.size(); ++i) {
         convertAntenna(antennaNames[i], source, dest);
     }
@@ -132,7 +136,7 @@ askap::interfaces::TimeTaggedTypedValueMap MetadataConverter::convert(const aska
     destMapper.setString("corrmode", source.corrMode());
 
     // antenna_names
-    std::vector<std::string> stdnames =  source.antennaNames();
+    const std::vector<std::string> stdnames =  source.antennaNames();
     std::vector<casa::String> antennaNames;
     for (size_t i = 0; i < stdnames.size(); ++i) {
         antennaNames.push_back(stdnames[i]);
@@ -180,6 +184,10 @@ void MetadataConverter::convertAntenna(const std::string& name,
     // <antenna name>.flagged
     destMapper.setBool(makeMapKey(antennaName, "flagged"),
             antenna.flagged());
+    
+    std::vector<double> uvwBuf;
+    antenna.uvw().tovector(uvwBuf);
+    destMapper.setDoubleSeq(makeMapKey(antennaName, "uvw"), uvwBuf);
 }
 
 // Convert antenna portion of the Tos Metadata from
@@ -197,6 +205,13 @@ void MetadataConverter::convertAntenna(const std::string& antennaName,
     // hw_error
     ant.flagged(srcMapper.getBool(makeMapKey(antennaName,
                     "flagged")));
+
+    // at this stage assume that uvw values are always present, even for flagged antenna
+    // although may not be valid. Therefore, uvw's are accessed outside if-statement.
+    // This can easily be changed by moving the following code into the if-statement, but
+    // the consequence would be of having junk uvw's in the MS for flagged antennas (which
+    // I (MV) haven't seen for any other telescope).
+    ant.uvw(srcMapper.getDoubleSeq(makeMapKey(antennaName, "uvw")));
 
     // If the antenna is flagged (other than for being !on_source then the other
     // metadata may not be present
