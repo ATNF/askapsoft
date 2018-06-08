@@ -120,7 +120,7 @@ void TosMetadataAntenna::uvw(const casa::Vector<casa::Double> &uvw)
    using namespace askap;
    ASKAPCHECK(uvw.nelements() % 3 == 0, "The uvw vector in the metadata is expected to have 3*Nbeam elements, you have "<<uvw.nelements());
    // to deal with reference semantics of CASA arrays
-   itsUVW = uvw.copy();
+   itsUVW.assign(uvw.copy());
 }
 
 

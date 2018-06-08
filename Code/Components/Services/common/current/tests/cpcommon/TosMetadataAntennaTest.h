@@ -96,6 +96,9 @@ class TosMetadataAntennaTest : public CppUnit::TestFixture {
             for (casa::uInt i=0; i<result.nelements(); ++i) {
                  CPPUNIT_ASSERT_DOUBLES_EQUAL(double(i)/10, result[i], 1e-6);
             }
+            // it should be possible to set a different array
+            instance->uvw(casa::Vector<casa::Double>(3,1.));
+            CPPUNIT_ASSERT_EQUAL(size_t(3u), instance->uvw().nelements());
         }
 
         void testMissingSpacing() {
