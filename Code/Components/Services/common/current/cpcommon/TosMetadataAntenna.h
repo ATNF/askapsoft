@@ -56,6 +56,15 @@ class TosMetadataAntenna {
         /// @param[in] name the name of the antenna.
         TosMetadataAntenna(const casa::String& name);
 
+        /// @brief Copy constructor
+        /// @param[in] other input object
+        TosMetadataAntenna(const TosMetadataAntenna &other);
+
+        /// @brief assignment operator
+        /// @param[in] other input object
+        /// @return reference to the original object
+        TosMetadataAntenna& operator=(const TosMetadataAntenna &other);
+    
         /// @brief Get the name of the antenna.
         /// @return the name of the antenna.
         casa::String name(void) const;

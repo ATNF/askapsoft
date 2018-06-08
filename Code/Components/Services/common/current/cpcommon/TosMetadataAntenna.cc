@@ -49,6 +49,33 @@ TosMetadataAntenna::TosMetadataAntenna(const casa::String& name)
 {
 }
 
+/// @brief Copy constructor
+/// @param[in] other input object
+TosMetadataAntenna::TosMetadataAntenna(const TosMetadataAntenna &other) :
+    itsName(other.itsName), itsActualRaDec(other.itsActualRaDec),
+    itsActualAzEl(other.itsActualAzEl), itsPolAngle(other.itsPolAngle),
+    itsOnSource(other.itsOnSource), itsFlagged(other.itsFlagged),
+    itsUVW(other.itsUVW.copy())
+{}
+
+/// @brief assignment operator
+/// @param[in] other input object
+/// @return reference to the original object
+TosMetadataAntenna& TosMetadataAntenna::operator=(const TosMetadataAntenna &other)
+{
+  if (this != &other) {
+      itsName = other.itsName;
+      itsActualRaDec = other.itsActualRaDec;
+      itsActualAzEl = other.itsActualAzEl;
+      itsPolAngle = other.itsPolAngle;
+      itsOnSource = other.itsOnSource;
+      itsFlagged = other.itsFlagged;
+      itsUVW.assign(other.itsUVW.copy());
+  }
+  return *this;
+}
+    
+
 casa::String TosMetadataAntenna::name(void) const
 {
     return itsName;
