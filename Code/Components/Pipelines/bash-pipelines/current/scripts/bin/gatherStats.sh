@@ -89,6 +89,12 @@ if [ "\${failList}" != "" ]; then
         chmod -R g+w \${dir}
     done
 fi
+
+# Make a diagnostic plot of the timings and place a copy in the
+# diagnostics directory 
+${PIPELINEDIR}/statsPlotter.py -s \$statsTXT -b "${BEAMS_TO_USE}" -f ${NUM_FIELDS}
+
+cp "statsPlot-\${statsTXT}.png" ${diagnostics}
 EOF
 
     if [ "${SUBMIT_JOBS}" == "true" ]; then    
