@@ -32,8 +32,14 @@
 #include "casacore/casa/aips.h"
 #include "casacore/measures/Measures/MDirection.h"
 #include "casacore/casa/Quanta/Quantum.h"
+#include "casacore/casa/Arrays/Vector.h"
+#include "casacore/casa/Arrays/ArrayIO.h"
 
 #include "cpcommon/CasaBlobUtils.h"
+
+// 3rdParty
+#include "Blob/BlobArray.h"
+#include "Blob/BlobAipsIO.h"
 
 // Using
 using namespace askap::cp;
@@ -98,15 +104,35 @@ void TosMetadataAntenna::flagged(const casa::Bool& val)
     itsFlagged = val;
 }
 
+/// @brief Get the values of the UVW vector
+/// @return vector with UVWs, 3 values for each beam
+casa::Vector<casa::Double> TosMetadataAntenna::uvw() const
+{
+    return itsUVW;
+}
+
+/// @brief Set the values of the UVW vector
+/// @param[in] val the vector with UVWs
+/// @note It is expected that we get 3 values per beam. An exception is thrown if the number of
+/// elements is not divisable by 3.
+void TosMetadataAntenna::uvw(const casa::Vector<casa::Double> &uvw)
+{
+   using namespace askap;
+   ASKAPCHECK(uvw.nelements() % 3 == 0, "The uvw vector in the metadata is expected to have 3*Nbeam elements, you have "<<uvw.nelements());
+   // to deal with reference semantics of CASA arrays
+   itsUVW = uvw.copy();
+}
+
+
 /// serialise TosMetadataAntenna
 /// @param[in] os output stream
 /// @param[in] obj object to serialise
 /// @return output stream
 LOFAR::BlobOStream& LOFAR::operator<<(LOFAR::BlobOStream& os, const askap::cp::TosMetadataAntenna& obj)
 {
-   os.putStart("TosMetadataAntenna", 1);
+   os.putStart("TosMetadataAntenna", 2);
    os << obj.name() << obj.flagged() << obj.onSource() << obj.actualPolAngle() << 
-         obj.actualAzEl() << obj.actualRaDec();
+         obj.actualAzEl() << obj.actualRaDec()<<obj.uvw();
    os.putEnd();
    return os;
 }
@@ -119,7 +145,7 @@ LOFAR::BlobIStream& LOFAR::operator>>(LOFAR::BlobIStream& is, askap::cp::TosMeta
 {
    using namespace askap;
    const int version = is.getStart("TosMetadataAntenna");
-   ASKAPASSERT(version == 1);
+   ASKAPASSERT(version == 2);
    casa::String name;
    is >> name;
    obj = TosMetadataAntenna(name);
@@ -135,6 +161,9 @@ LOFAR::BlobIStream& LOFAR::operator>>(LOFAR::BlobIStream& is, askap::cp::TosMeta
    obj.actualAzEl(dir);
    is >> dir;
    obj.actualRaDec(dir);
+   casa::Vector<casa::Double> uvwBuf;
+   is >> uvwBuf;
+   obj.uvw(uvwBuf);
    is.getEnd();
    return is;
 }

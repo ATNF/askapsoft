@@ -54,6 +54,8 @@ class TosMetadataAntennaTest : public CppUnit::TestFixture {
         CPPUNIT_TEST(testActualRaDec);
         CPPUNIT_TEST(testActualAzEl);
         CPPUNIT_TEST(testPolAngle);
+        CPPUNIT_TEST(testUVW);
+        CPPUNIT_TEST_EXCEPTION(testMissingSpacing, AskapError);
         CPPUNIT_TEST(testOnSource);
         CPPUNIT_TEST(testHwError);
         CPPUNIT_TEST(testSerialise);
@@ -80,6 +82,25 @@ class TosMetadataAntennaTest : public CppUnit::TestFixture {
 
             instance->actualRaDec(testDir); // Set
             directionsEqual(testDir, instance->actualRaDec());
+        }
+    
+        void testUVW() {
+            casa::Vector<casa::Double> uvw(36*3,0.);
+            for (casa::uInt i=0; i<uvw.nelements(); ++i) {
+                 uvw[i] = double(i)/10;
+            }
+            instance->uvw(uvw); // Set
+            const casa::Vector<casa::Double> result = instance->uvw();
+            // check
+            CPPUNIT_ASSERT_EQUAL(uvw.nelements(), result.nelements());
+            for (casa::uInt i=0; i<result.nelements(); ++i) {
+                 CPPUNIT_ASSERT_DOUBLES_EQUAL(double(i)/10, result[i], 1e-6);
+            }
+        }
+
+        void testMissingSpacing() {
+            casa::Vector<casa::Double> uvw(35*3+1,0.);
+            instance->uvw(uvw); // Set
         }
 
         void testActualAzEl() {
@@ -119,6 +140,7 @@ class TosMetadataAntennaTest : public CppUnit::TestFixture {
             testPolAngle();
             instance->onSource(true);
             instance->flagged(false);
+            instance->uvw(casa::Vector<casa::Double>(36*3,100.));
             
             TosMetadataAntenna received("none");
 
@@ -147,6 +169,10 @@ class TosMetadataAntennaTest : public CppUnit::TestFixture {
             directionsEqual(received.actualAzEl(), instance->actualAzEl());
             directionsEqual(received.actualRaDec(), instance->actualRaDec());
             CPPUNIT_ASSERT_EQUAL(instance->name(),received.name());
+            CPPUNIT_ASSERT_EQUAL(instance->uvw().nelements(),received.uvw().nelements());
+            for (casa::uInt i=0; i<instance->uvw().nelements(); ++i) {
+                 CPPUNIT_ASSERT_DOUBLES_EQUAL(instance->uvw()[i],received.uvw()[i],1e-6);
+            }
         }
 
     private:

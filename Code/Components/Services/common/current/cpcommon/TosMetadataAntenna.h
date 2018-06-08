@@ -106,9 +106,19 @@ class TosMetadataAntenna {
         casa::Bool flagged(void) const;
 
         /// @brief Set the value of the general (misc error) flag.
-        /// @param[in] val teh value of the hardware error flag. Use true to
+        /// @param[in] val the value of the hardware error flag. Use true to
         /// indicate a hardware error, otherwise false.
         void flagged(const casa::Bool& val);
+
+        /// @brief Get the values of the UVW vector
+        /// @return vector with UVWs, 3 values for each beam
+        casa::Vector<casa::Double> uvw() const;
+
+        /// @brief Set the values of the UVW vector
+        /// @param[in] val the vector with UVWs
+        /// @note It is expected that we get 3 values per beam. An exception is thrown if the number of
+        /// elements is not divisable by 3.
+        void uvw(const casa::Vector<casa::Double> &uvw);
 
     private:
 
@@ -133,6 +143,12 @@ class TosMetadataAntenna {
         /// that means all data from this antenna should be flagged. If this
         /// is true, other metadata for this antenna may be invalid.
         casa::Bool itsFlagged;
+
+        /// Vector with uvw's w.r.t. some reference
+        /// We distribute per-antenna, per-beam uvw in metadata to cut down the
+        /// the message size. The actual uvw's are per-baseline, per-beam and can
+        /// be calculated by differencing appropriate antenna pairs.
+        casa::Vector<casa::Double> itsUVW;
 };
 
 }
