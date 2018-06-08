@@ -86,7 +86,7 @@ for subband in ${SUBBAND_WRITER_LIST}; do
         if [ "${SELAVY_SPEC_FLUX_THRESHOLD}" != "" ]; then
             # Use a direct flux threshold if specified
             thresholdPars="# Detection threshold
-Selavy.threshold = ${SEL     AVY_SPEC_FLUX_THRESHOLD}"
+Selavy.threshold = ${SELAVY_SPEC_FLUX_THRESHOLD}"
             if [ "${SELAVY_SPEC_FLAG_GROWTH}" == "true" ] &&
                    [ "${SELAVY_SPEC_GROWTH_THRESHOLD}" != "" ]; then
                 thresholdPars="${thresholdPars}
