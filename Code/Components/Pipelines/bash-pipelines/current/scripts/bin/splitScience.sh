@@ -155,7 +155,7 @@ else
 fi
 
 echo "STARTTIME=\${STARTTIME}" >> "\${log}.timing"
-extractStatsNonStandard "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} "${jobname}" "txt,csv"
+extractStatsNonStandard "\${log}" 1 "\${SLURM_JOB_ID}" \${err} "${jobname}" "txt,csv"
 
 
 EOFOUTER
