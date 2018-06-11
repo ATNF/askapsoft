@@ -92,7 +92,7 @@ fi
 
 # Make a diagnostic plot of the timings and place a copy in the
 # diagnostics directory 
-${PIPELINEDIR}/statsPlotter.py -s \$statsTXT -b "${BEAMS_TO_USE}" -f ${NUM_FIELDS}
+${PIPELINEDIR}/statsPlotter.py -s \$statsTXT -b "$(echo ${BEAMS_TO_USE} | sed -e 's/ /,/g')" -f ${NUM_FIELDS}
 
 cp "statsPlot-\${statsTXT}.png" ${diagnostics}
 EOF
