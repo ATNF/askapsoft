@@ -201,6 +201,29 @@ void CalcUVWTask::calcForRow(VisChunk::ShPtr chunk, const casa::uInt row)
     uvm.convertUVW(uvwvec);
     ASKAPDEBUGASSERT(uvwvec.nelements() == 3);
 
+    /* 
+    // code for cross-check with UVWs already in the buffer (e.g. received with metadata or
+    // calculated earlier in the processing chain.
+    // note, now it doesn't quite match as we using the frame related to each
+    // particular antenna rather than antenna 0. This gives about 0.1mm error
+    casa::Vector<double> diff = uvwvec.copy();
+    diff(0) -= chunk->uvw()(row)(0);
+    diff(1) -= chunk->uvw()(row)(1);
+    diff(2) -= chunk->uvw()(row)(2);
+
+    //ASKAPCHECK(sqrt(diff[0]*diff[0]+diff[1]*diff[1]+diff[2]*diff[2]) < 1e-6, 
+    //       "Mismatch in UVW for row="<<row<<": uvwvec="<<uvwvec<<" chunk: "<<chunk->uvw()(row));
+
+    if (sqrt(diff[0]*diff[0]+diff[1]*diff[1]+diff[2]*diff[2]) > 1e-6) {
+        ASKAPLOG_WARN_STR(logger, "Mismatch in UVW for row="<<row<<": uvwvec="<<uvwvec<<" chunk: "<<chunk->uvw()(row));
+    
+        if (norm(uvwvec)>1e-6 && norm(chunk->uvw()(row).vector())>1e-6) {
+            const double cosAng = innerProduct(uvwvec,chunk->uvw()(row).vector())/norm(uvwvec)/norm(chunk->uvw()(row).vector());
+            ASKAPLOG_WARN_STR(logger, "UVW mismatch angle for row "<<row<<" (ant1="<<chunk->antenna1()(row)<<" ant2="<<chunk->antenna2()(row)<<" beam="<<chunk->beam1()(row)<<") is equivalent to "<<sqrt(1.-cosAng*cosAng)*206265./15.<<" seconds "<<norm(uvwvec)<<" "<<norm(chunk->uvw()(row).vector())<<" "<<cosAng);
+        }
+    }
+    */
+             
     // Finally set the uvwvec in the VisChunk
     chunk->uvw()(row) = uvwvec;
 }

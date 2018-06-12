@@ -54,6 +54,8 @@
 #include "casacore/measures/Measures/MCDirection.h"
 #include "casacore/measures/Measures/Stokes.h"
 #include "casacore/casa/OS/Timer.h"
+#include "casacore/casa/Arrays/Matrix.h"
+#include "casacore/casa/Arrays/MatrixMath.h"
 
 // Local package includes
 #include "ingestpipeline/sourcetask/IVisSource.h"
@@ -371,6 +373,12 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
     const casa::MDirection phaseDir = metadata.phaseDirection();
     chunk->phaseCentre().set(phaseDir.getAngle());
 
+    // The following buffer is used only to get uvw's in the right form.
+    // It is possible to avoid buffering and/or do better cross-checks make the
+    // code more flexible later on, if necessary.
+    // Dimensions are nAntenna x nBeam(in uvw metadata)
+    casa::Matrix<casa::Double> uvwBuffer;
+    
     // Populate the per-antenna vectors
     const casa::MDirection::Ref targetDirRef = metadata.targetDirection().getRef();
     for (casa::uInt i = 0; i < nAntenna; ++i) {
@@ -392,7 +400,35 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
                              !mdant.onSource();
         if (flagged) {
             itsVisConverter.flagAntenna(i);
+        } else {
+            // filling uvw buffer for each antenna
+            if (uvwBuffer.nelements() == 0) {
+                uvwBuffer.resize(nAntenna, mdant.uvw().nelements());
+            }
+            ASKAPDEBUGASSERT(uvwBuffer.nrow() == nAntenna);
+            ASKAPCHECK(uvwBuffer.ncolumn() == mdant.uvw().nelements(), 
+                 "The uvw vector in the metadata changes size from antenna to antenna, this is unexpected. Offending antenna "<<antName); 
+            uvwBuffer.row(i) = mdant.uvw();
+            ASKAPCHECK(casa::norm(uvwBuffer.row(i)) > 1e-6, "Expect non-zero per-antenna UVW in metadata - encountered a vector which is the Earth centre. Antenna: "<<antName);
         }
+    }
+    // now populate uvw vector in the chunk
+    for (casa::uInt row=0; row<chunk->nRow(); ++row) {
+         // it is possible to move access methods outside the loop, but the overhead is small
+         const casa::uInt beam = chunk->beam1()[row];
+         ASKAPCHECK(beam == chunk->beam2()[row], "Cross-beam correlations are not supported at the moment");
+         const casa::uInt antenna1 = chunk->antenna1()[row];
+         const casa::uInt antenna2 = chunk->antenna2()[row];
+         ASKAPASSERT(antenna1 < nAntenna);
+         ASKAPASSERT(antenna2 < nAntenna);
+         if (itsVisConverter.isAntennaGood(antenna1) && itsVisConverter.isAntennaGood(antenna2)) {
+             for (casa::uInt coord = 0, offset = beam * 3; coord < 3; ++coord,++offset) {
+                  ASKAPASSERT(offset < uvwBuffer.ncolumn());
+                  chunk->uvw()[row](coord) = uvwBuffer(antenna1,offset) - uvwBuffer(antenna2,offset);
+                  ASKAPCHECK(!isnan(chunk->uvw()[row](coord)), "Received NaN as one of the baseline spacings for row="<<row<<" (antennas: "<<
+                             antenna1<<" "<<antenna2<<") coordinate="<<coord<<" beam="<<beam);
+             }
+         }
     }
 
     return chunk;

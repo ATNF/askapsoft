@@ -179,6 +179,7 @@ void MSSink::process(VisChunk::ShPtr& chunk)
     MSColumns msc(*itsMs);
     const casa::uInt baseRow = msc.nrow();
     const casa::uInt newRows = chunk->nRow();
+    ASKAPLOG_DEBUG_STR(logger, "  MSSink - before adding new rows, timer="<<timer.real());
     itsMs->addRow(newRows);
 
     // First set the constant things outside the loop,
@@ -236,12 +237,15 @@ void MSSink::process(VisChunk::ShPtr& chunk)
     timeRange(1) = Tend;
     obsc.timeRange().put(0, timeRange);
 
+    ASKAPLOG_DEBUG_STR(logger, "  MSSink - before pointing table update, timer="<<timer.real());
     //
     // Update the pointing table
     //
     addPointingRows(*chunk);
 
+    ASKAPLOG_DEBUG_STR(logger, "  MSSink - before flush, timer="<<timer.real());
     itsMs->flush();
+    ASKAPLOG_DEBUG_STR(logger, "  MSSink - before finalising monitoring info, timer="<<timer.real());
     // update monitoring point showing required time to write this chunk
     MonitoringSingleton::update<float>("MSWritingDuration", timer.real());
 }
