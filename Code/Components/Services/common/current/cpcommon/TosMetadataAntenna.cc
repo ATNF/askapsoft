@@ -133,7 +133,7 @@ void TosMetadataAntenna::flagged(const casa::Bool& val)
 
 /// @brief Get the values of the UVW vector
 /// @return vector with UVWs, 3 values for each beam
-casa::Vector<casa::Double> TosMetadataAntenna::uvw() const
+const casa::Vector<casa::Double>& TosMetadataAntenna::uvw() const
 {
     return itsUVW;
 }

@@ -121,7 +121,7 @@ class TosMetadataAntenna {
 
         /// @brief Get the values of the UVW vector
         /// @return vector with UVWs, 3 values for each beam
-        casa::Vector<casa::Double> uvw() const;
+        const casa::Vector<casa::Double>& uvw() const;
 
         /// @brief Set the values of the UVW vector
         /// @param[in] val the vector with UVWs
