@@ -948,10 +948,10 @@ function parseLog()
         # if here, job was a distributed job
         # Get the master node's first log message, and extract the time stamp
         START_TIME_JOB=$(grep "(0, " "$logfile" | head -1 | awk '{printf "%sT%s",$5,$6}' | sed -e 's/^\[//g' | sed -e 's/\]$//g')
-        if [ "$(grep "(0, " "$logfile" | grep -c "Total times")" -gt 0 ]; then
-            TIME_JOB_REAL=$(grep "(0, " "$logfile" | grep "Total times" | tail -1 | awk '{print $16}')
-            TIME_JOB_SYS=$(grep "(0, " "$logfile"  | grep "Total times" | tail -1 | awk '{print $14}')
-            TIME_JOB_USER=$(grep "(0, " "$1" | grep "Total times" | tail -1 | awk '{print $12}')
+        if [ "$(grep -c "Total times" "$logfile")" -gt 0 ]; then
+            TIME_JOB_REAL=$(grep "Total times" "$logfile" | tail -1 | awk '{print $16}')
+            TIME_JOB_SYS=$(grep "Total times" "$logfile" | tail -1 | awk '{print $14}')
+            TIME_JOB_USER=$(grep "Total times" "$logfile" | tail -1 | awk '{print $12}')
         fi
         if [ "$(grep "(0, " "$logfile" | grep -c "PeakVM")" -gt 0 ]; then
             PEAK_VM_MASTER=$(grep "(0, " "$logfile" | grep "PeakVM" | tail -1 | awk '{print $12}')
