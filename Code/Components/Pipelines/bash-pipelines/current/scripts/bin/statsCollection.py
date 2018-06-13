@@ -33,8 +33,9 @@ class StatsCollection:
         labels=[]
         for fb in self.fieldBeamDict:
             #print fb,self.fieldBeamDict[fb]
-            ticks.append(self.fieldBeamDict[fb].values()[0].ypos)
-            labels.append(fb)
+            if len(self.fieldBeamDict[fb]) > 0:
+                ticks.append(self.fieldBeamDict[fb].values()[0].ypos)
+                labels.append(fb)
             for e in self.fieldBeamDict[fb]:
                 self.fieldBeamDict[fb][e].plot(ax)
         ax.set_yticks(ticks)
