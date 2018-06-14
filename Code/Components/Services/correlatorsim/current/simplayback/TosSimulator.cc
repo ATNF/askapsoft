@@ -267,6 +267,17 @@ bool TosSimulator::sendNext(void)
         // actual measurement set
         antMetadata.flagged(false);
 
+        // <antenna name>.uvw
+        // TODO: Currently no valid uvw's are passed (as it was prior to they were added
+        // to metadata. Ideally, they need to be simulated too. One complication is that
+        // TOS currently sends per-antenna metadata to minimize data volume and per-baseline
+        // metadata (which are present in the MS) are computed in the ingest. There is not
+        // enough information to deduce the original values from what is stored in the MS. 
+        // (although, in principle, one could compose a set of numbers which would work -
+        // but there are infinite number of ways to do it). At this stage, we gist sent zeros
+        // with hardcoded maximum number of beams).
+        antMetadata.uvw(casa::Vector<casa::Double>(36*3,0.));
+
         metadata.addAntenna(antMetadata);
     }
 
