@@ -2,7 +2,7 @@ snoop_utility = "tVisSourceSnoop.sh"
 default_path = "/group/askap/vor010/ASKAPsdp_ingest/Code/Components/Services/ingest/current"
 
 # mapping between block, ingest machine and port corresponding to the first card
-current_ingest_config = {7:(2,16456), 6:(14,16444), 5:(13,16432), 4:(10,16420), 3:(9,16408)}
+current_ingest_config = {7:(2,16456), 6:(14,16444), 5:(13,16432), 4:(10,16420), 3:(9,16408), 2:(7,16396)}
 
 import os,  sys
 

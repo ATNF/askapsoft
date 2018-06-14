@@ -122,7 +122,9 @@ class MergedSourceTest : public CppUnit::TestFixture,
                 TosMetadataAntenna ant(config.antennas()[i].name());
                 ant.onSource(true);
                 ant.flagged(false);
-                ant.uvw(casa::Vector<casa::Double>(36*3,0.));
+                // there is a guard against zeros in the code because values are geocentric,
+                // so pass a large constant
+                ant.uvw(casa::Vector<casa::Double>(36*3,1e6));
                 metadata.addAntenna(ant);
             }
 

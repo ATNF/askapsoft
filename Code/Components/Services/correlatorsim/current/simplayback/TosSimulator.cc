@@ -274,9 +274,9 @@ bool TosSimulator::sendNext(void)
         // metadata (which are present in the MS) are computed in the ingest. There is not
         // enough information to deduce the original values from what is stored in the MS. 
         // (although, in principle, one could compose a set of numbers which would work -
-        // but there are infinite number of ways to do it). At this stage, we gist sent zeros
-        // with hardcoded maximum number of beams).
-        antMetadata.uvw(casa::Vector<casa::Double>(36*3,0.));
+        // but there are infinite number of ways to do it). At this stage, we just sent constant
+        // with hardcoded maximum number of beams resulting in zero uvw's for all beams).
+        antMetadata.uvw(casa::Vector<casa::Double>(36*3,1e6));
 
         metadata.addAntenna(antMetadata);
     }
