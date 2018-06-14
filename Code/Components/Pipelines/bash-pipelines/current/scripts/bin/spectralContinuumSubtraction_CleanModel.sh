@@ -33,18 +33,10 @@
 # In this bit, we use the clean model from the continuum imaging
 # as the input to ccontsubtract
 
-imageCode=image
-setImageProperties cont
-modelImage=${imageName}
-if [ ${NUM_TAYLOR_TERMS} -gt 1 ]; then
-    # need to strip the .taylor.0 suffix
-    modelImage=$(echo $modelImage | sed -e 's/\.taylor\.0$//g')
-fi
-
 ContsubModelDefinition="# The model definition
 CContsubtract.sources.names                       = [lsm]
 CContsubtract.sources.lsm.direction               = \${modelDirection}
-CContsubtract.sources.lsm.model                   = ${modelImage}
+CContsubtract.sources.lsm.model                   = \${contsubCleanModel}
 CContsubtract.sources.lsm.nterms                  = ${NUM_TAYLOR_TERMS}"
 if [ "${NUM_TAYLOR_TERMS}" -gt 1 ]; then
     if [ "$MFS_REF_FREQ" == "" ]; then
@@ -90,6 +82,8 @@ else
     epoch=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=Epoch)
     modelDirection="[\${ra}, \${dec}, \${epoch}]"
 fi
+
+setContsubFilenames
 
 parset=${parsets}/contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.in
 log=${logs}/contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.log

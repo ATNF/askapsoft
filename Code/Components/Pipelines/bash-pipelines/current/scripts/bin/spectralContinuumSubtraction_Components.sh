@@ -35,7 +35,10 @@
 
 imageCode=restored
 setImageProperties cont
-selavyImage="${OUTPUT}/${imageName}"
+contImage=$imageName
+selavyImage="${OUTPUT}/${contImage}"
+setImageProperties contcube
+contCube="${OUTPUT}/${imageName}"
 
 NPROCS_CONTSUB=$(echo "${CONTSUB_SELAVY_NSUBX}" "${CONTSUB_SELAVY_NSUBY}" | awk '{print $1*$2+1}')
 if [ "${NPROCS_CONTSUB}" -eq 1 ]; then
@@ -48,7 +51,28 @@ else
     CPUS_PER_CORE_CONTSUB=20
 fi
 
-components=modelComponents.in
+# Define the detection thresholds in terms of flux or SNR
+if [ "${SELAVY_FLUX_THRESHOLD}" != "" ]; then
+    # Use a direct flux threshold if specified
+    thresholdPars="# Detection threshold
+Selavy.threshold                                = ${SELAVY_FLUX_THRESHOLD}"
+    if [ "${SELAVY_FLAG_GROWTH}" == "true" ] && 
+           [ "${SELAVY_GROWTH_THRESHOLD}" != "" ]; then
+        thresholdPars="${thresholdPars}
+Selavy.flagGrowth                               = ${SELAVY_FLAG_GROWTH}
+Selavy.growthThreshold                          = ${SELAVY_GROWTH_THRESHOLD}"
+    fi
+else
+    # Use a SNR threshold
+    thresholdPars="# Detection threshold
+Selavy.snrCut                                   = ${SELAVY_SNR_CUT}"
+    if [ "${SELAVY_FLAG_GROWTH}" == "true" ] &&
+           [ "${SELAVY_GROWTH_CUT}" != "" ]; then
+        thresholdPars="${thresholdPars}
+Selavy.flagGrowth                               = ${SELAVY_FLAG_GROWTH}
+Selavy.growthThreshold                          = ${SELAVY_GROWTH_CUT}"
+    fi
+fi    
 
 cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
@@ -81,12 +105,38 @@ dec=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=Dec)
 epoch=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=Epoch)
 refDirection="[\${ra}, \${dec}, \${epoch}]"
 
-contsubdir=ContSubBeam${BEAM}
-mkdir -p \${contsubdir}
-cd \${contsubdir}
+setContsubFilenames
+mkdir -p \${contsubDir}
+cd \${contsubDir}
 
 #################################################
 # First, source-finding
+
+if [ "\${useContCube}" == "true" ]; then
+    # Set the parameter for using contcube to measure spectral-index
+    SpectralTermUse="Selavy.spectralTermsFromTaylor                  = false
+Selavy.spectralTerms.cube                       = ${contCube}
+Selavy.spectralTerms.nterms                     = ${SELAVY_NUM_SPECTRAL_TERMS}"
+else
+    haveT1=false
+    haveT2=false
+    image=${contImage}
+    if [ "\${NUM_TAYLOR_TERMS}" -gt 1 ]; then
+        t1im=\$(echo "\$image" | sed -e 's/taylor\.0/taylor\.1/g')
+        if [ -e "${OUTPUT}/\${t1im}" ]; then
+            imlist="\${imlist} ${OUTPUT}/\${t1im}"
+            haveT1=true
+        fi
+        t2im=\$(echo "\$image" | sed -e 's/taylor\.0/taylor\.2/g')
+        if [ -e "${OUTPUT}/\${t2im}" ] && [ "\${NUM_TAYLOR_TERMS}" -gt 2 ]; then
+            imlist="\${imlist} ${OUTPUT}/\${t2im}"
+            haveT2=true
+        fi
+    fi
+    # Set the flag indicating whether to measure from Taylor-term images
+    SpectralTermUse="Selavy.spectralTermsFromTaylor                  = true
+Selavy.findSpectralTerms                        = [\${haveT1}, \${haveT2}]"
+fi
 
 parset=${parsets}/selavy_for_contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.in
 log=${logs}/selavy_for_contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.log
@@ -102,16 +152,11 @@ Selavy.imageHistory                             = [${imageHistoryString}]
 # This is how we divide it up for distributed processing, with the
 #  number of subdivisions in each direction, and the size of the
 #  overlap region in pixels
-Selavy.nsubx                                    = ${SELFCAL_SELAVY_NSUBX}
-Selavy.nsuby                                    = ${SELFCAL_SELAVY_NSUBY}
-Selavy.overlapx                                 = 50
-Selavy.overlapy                                 = 50
+\${SpectralTermUse}
+Selavy.nsubx                                    = ${SELAVY_NSUBX}
+Selavy.nsuby                                    = ${SELAVY_NSUBY}
 #
-# The search threshold, in units of sigma
-Selavy.snrCut                                   = ${SELFCAL_SELAVY_THRESHOLD}
-# Grow the detections to a secondary threshold
-Selavy.flagGrowth                               = true
-Selavy.growthCut                                = 5
+${thresholdPars}
 #
 # Turn on the variable threshold option
 Selavy.VariableThreshold                        = true
@@ -123,23 +168,18 @@ Selavy.VariableThreshold.SNRimageName           = snrMap.img
 #
 # Parameters to switch on and control the Gaussian fitting
 Selavy.Fitter.doFit                             = true
-# Fit all 6 parameters of the Gaussian
 Selavy.Fitter.fitTypes                          = [full]
-# Limit the number of Gaussians to 1
-Selavy.Fitter.maxNumGauss = 1
-# Do not use the number of initial estimates to determine how many Gaussians to fit
-Selavy.Fitter.numGaussFromGuess = false
-# The fit may be a bit poor, so increase the reduced-chisq threshold
-Selavy.Fitter.maxReducedChisq = 15.
+Selavy.Fitter.numGaussFromGuess                 = true
+Selavy.Fitter.maxReducedChisq                   = 10.
+# Force the component maps to be casa images for now
+Selavy.Fitter.imagetype                         = casa
 #
-# Allow islands that are slightly separated to be considered a single 'source'
-Selavy.flagAdjacent = false
-# The separation in pixels for islands to be considered 'joined'
-Selavy.threshSpatial = 7
+Selavy.threshSpatial                            = 5
+Selavy.flagAdjacent                             = false
 #
 # Saving the fitted components to a parset for use by ccalibrator
 Selavy.outputComponentParset                    = true
-Selavy.outputComponentParset.filename           = ${components}
+Selavy.outputComponentParset.filename           = \${contsubComponents}
 # Reference direction for which component positions should be measured
 #  relative to.
 Selavy.outputComponentParset.referenceDirection = \${refDirection}
@@ -166,7 +206,7 @@ fi
 
 cd ..
 
-if [ ! -e "\${contsubdir}/${components}" ]; then
+if [ ! -e "\${contsubDir}/\${contsubComponents}" ]; then
 
     # Nothing detected !
     echo "Continuum subtraction : No continuum components found!"
@@ -182,7 +222,7 @@ else
 # The measurement set name - this will be overwritten
 CContSubtract.dataset                             = ${msSciSL}
 # The model definition
-CContSubtract.sources.definition                  = \${contsubdir}/${components}
+CContSubtract.sources.definition                  = \${contsubDir}/\${contsubComponents}
 # The gridding parameters
 CContSubtract.gridder.snapshotimaging             = ${GRIDDER_SNAPSHOT_IMAGING}
 CContSubtract.gridder.snapshotimaging.wtolerance  = ${GRIDDER_SNAPSHOT_WTOL}

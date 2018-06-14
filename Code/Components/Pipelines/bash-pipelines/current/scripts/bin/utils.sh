@@ -229,6 +229,39 @@ function setSelavyDirs()
     
 }
 
+# Function to define the filenames of the model images and the
+# component parset that are used by the various continuum subtraction
+# tasks.
+# Requires: see imageCode description
+# Returns:
+#  - contsubDir
+#  - contsubCleanModel
+#  - contsubCmodelImage
+#  - contsubComponents
+function setContsubFilenames()
+{
+    ####
+    # First the contsub directory
+    contsubDir=ContSubBeam${BEAM}
+    ####
+    # Next the clean model image
+    imageCode=image
+    setImageProperties cont
+    contsubCleanModel=${imageName}
+    if [ ${NUM_TAYLOR_TERMS} -gt 1 ]; then
+        # need to strip the .taylor.0 suffix
+        contsubCleanModel=$(echo $contsubCleanModel | sed -e 's/\.taylor\.0$//g')
+    fi
+    ####
+    # Next the model image created by cmodel
+    imageCode=restored
+    setImageProperties cont
+    contsubCmodelImage=model.contsub.${imageName%%.fits}
+    ####
+    # Finally the components parset
+    contsubComponents=modelComponents.contsub.${imageName%%.fits}.in
+}
+
 # Function to define a set of variables describing an image - its
 # name, image type (for CASDA), and label (for preview images), based
 # on a type and BEAM/POL/FIELD information

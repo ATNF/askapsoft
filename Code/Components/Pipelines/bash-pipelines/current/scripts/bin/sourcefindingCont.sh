@@ -126,22 +126,22 @@ if [ "${DO_IT}" == "true" ]; then
     if [ "${SELAVY_FLUX_THRESHOLD}" != "" ]; then
         # Use a direct flux threshold if specified
         thresholdPars="# Detection threshold
-Selavy.threshold = ${SELAVY_FLUX_THRESHOLD}"
+Selavy.threshold                                = ${SELAVY_FLUX_THRESHOLD}"
         if [ "${SELAVY_FLAG_GROWTH}" == "true" ] && 
                [ "${SELAVY_GROWTH_THRESHOLD}" != "" ]; then
             thresholdPars="${thresholdPars}
-Selavy.flagGrowth =  ${SELAVY_FLAG_GROWTH}
-Selavy.growthThreshold = ${SELAVY_GROWTH_THRESHOLD}"
+Selavy.flagGrowth                               = ${SELAVY_FLAG_GROWTH}
+Selavy.growthThreshold                          = ${SELAVY_GROWTH_THRESHOLD}"
         fi
     else
         # Use a SNR threshold
         thresholdPars="# Detection threshold
-Selavy.snrCut = ${SELAVY_SNR_CUT}"
+Selavy.snrCut                                   = ${SELAVY_SNR_CUT}"
         if [ "${SELAVY_FLAG_GROWTH}" == "true" ] &&
                [ "${SELAVY_GROWTH_CUT}" != "" ]; then
             thresholdPars="${thresholdPars}
-Selavy.flagGrowth =  ${SELAVY_FLAG_GROWTH}
-Selavy.growthThreshold = ${SELAVY_GROWTH_CUT}"
+Selavy.flagGrowth                               = ${SELAVY_FLAG_GROWTH}
+Selavy.growthThreshold                          = ${SELAVY_GROWTH_CUT}"
         fi
     fi    
 
@@ -189,8 +189,8 @@ done
 
 if [ "\${BEAM}" == "all" ]; then
     imlist="\${imlist} ${OUTPUT}/\${weights}"
-    weightpars="Selavy.Weights.weightsImage = \${weights%%.fits}.fits
-Selavy.Weights.weightsCutoff = ${SELAVY_WEIGHTS_CUTOFF}"
+    weightpars="Selavy.Weights.weightsImage                     = \${weights%%.fits}.fits
+Selavy.Weights.weightsCutoff                    = ${SELAVY_WEIGHTS_CUTOFF}"
 else
     weightpars="#"
 fi
@@ -211,7 +211,7 @@ if [ "\${useContCube}" == "true" ] ||
                 doRM=false
                 echo "ERROR - Continuum cube \${thisim} not found. RM Synthesis being turned off."
             fi
-            if [ "\${useContCube}" == "true" ]; then
+            if [ "\$p" == "i" ] && [ "\${useContCube}" == "true" ]; then
                 useContCube=false
                 echo "ERROR - Continuum cube \${thisim} not found."
                 echo "      - Will not use continuum cube to find spectral indices"
@@ -257,9 +257,9 @@ if [ "\${HAVE_IMAGES}" == "true" ]; then
 
     if [ "\${useContCube}" == "true" ]; then
         # Set the parameter for using contcube to measure spectral-index
-        SpectralTermUse="Selavy.spectralTermsFromTaylor = false
-Selavy.spectralTerms.cube = ${OUTPUT}/\$contcube
-Selavy.spectralTerms.nterms = ${SELAVY_NUM_SPECTRAL_TERMS}"
+        SpectralTermUse="Selavy.spectralTermsFromTaylor                  = false
+Selavy.spectralTerms.cube                       = ${OUTPUT}/\$contcube
+Selavy.spectralTerms.nterms                     = ${SELAVY_NUM_SPECTRAL_TERMS}"
     else
         haveT1=false
         haveT2=false
@@ -276,72 +276,70 @@ Selavy.spectralTerms.nterms = ${SELAVY_NUM_SPECTRAL_TERMS}"
             fi
         fi
         # Set the flag indicating whether to measure from Taylor-term images
-        SpectralTermUse="Selavy.spectralTermsFromTaylor = true
-Selavy.findSpectralTerms = [\${haveT1}, \${haveT2}]"
+        SpectralTermUse="Selavy.spectralTermsFromTaylor                  = true
+Selavy.findSpectralTerms                        = [\${haveT1}, \${haveT2}]"
     fi
     
     if [ "\${doRM}" == "true" ]; then
         rmSynthParams="# RM Synthesis on extracted spectra from continuum cube
-Selavy.RMSynthesis = \${doRM}
-Selavy.RMSynthesis.cube = ${OUTPUT}/\$contcube
-Selavy.RMSynthesis.beamLog = ${beamlog}
-Selavy.RMSynthesis.outputBase = ${OUTPUT}/${selavyPolDir}/${SELAVY_POL_OUTPUT_BASE}
-Selavy.RMSynthesis.writeSpectra = ${SELAVY_POL_WRITE_SPECTRA}
-Selavy.RMSynthesis.writeComplexFDF = ${SELAVY_POL_WRITE_COMPLEX_FDF}
-Selavy.RMSynthesis.boxwidth = ${SELAVY_POL_BOX_WIDTH}
-Selavy.RMSynthesis.noiseArea = ${SELAVY_POL_NOISE_AREA}
-Selavy.RMSynthesis.robust = ${SELAVY_POL_ROBUST_STATS}
-Selavy.RMSynthesis.weightType = ${SELAVY_POL_WEIGHT_TYPE}
-Selavy.RMSynthesis.modeltype = ${SELAVY_POL_MODEL_TYPE}
-Selavy.RMSynthesis.modelPolyOrder = ${SELAVY_POL_MODEL_ORDER}
-Selavy.RMSynthesis.polThresholdSNR = ${SELAVY_POL_SNR_THRESHOLD}
-Selavy.RMSynthesis.polThresholdDebias = ${SELAVY_POL_DEBIAS_THRESHOLD}
-Selavy.RMSynthesis.numPhiChan = ${SELAVY_POL_NUM_PHI_CHAN}
-Selavy.RMSynthesis.deltaPhi = ${SELAVY_POL_DELTA_PHI}
-Selavy.RMSynthesis.phiZero = ${SELAVY_POL_PHI_ZERO}"
+Selavy.RMSynthesis                              = \${doRM}
+Selavy.RMSynthesis.cube                         = ${OUTPUT}/\$contcube
+Selavy.RMSynthesis.beamLog                      = ${beamlog}
+Selavy.RMSynthesis.outputBase                   = ${OUTPUT}/${selavyPolDir}/${SELAVY_POL_OUTPUT_BASE}
+Selavy.RMSynthesis.writeSpectra                 = ${SELAVY_POL_WRITE_SPECTRA}
+Selavy.RMSynthesis.writeComplexFDF              = ${SELAVY_POL_WRITE_COMPLEX_FDF}
+Selavy.RMSynthesis.boxwidth                     = ${SELAVY_POL_BOX_WIDTH}
+Selavy.RMSynthesis.noiseArea                    = ${SELAVY_POL_NOISE_AREA}
+Selavy.RMSynthesis.robust                       = ${SELAVY_POL_ROBUST_STATS}
+Selavy.RMSynthesis.weightType                   = ${SELAVY_POL_WEIGHT_TYPE}
+Selavy.RMSynthesis.modeltype                    = ${SELAVY_POL_MODEL_TYPE}
+Selavy.RMSynthesis.modelPolyOrder               = ${SELAVY_POL_MODEL_ORDER}
+Selavy.RMSynthesis.polThresholdSNR              = ${SELAVY_POL_SNR_THRESHOLD}
+Selavy.RMSynthesis.polThresholdDebias           = ${SELAVY_POL_DEBIAS_THRESHOLD}
+Selavy.RMSynthesis.numPhiChan                   = ${SELAVY_POL_NUM_PHI_CHAN}
+Selavy.RMSynthesis.deltaPhi                     = ${SELAVY_POL_DELTA_PHI}
+Selavy.RMSynthesis.phiZero                      = ${SELAVY_POL_PHI_ZERO}"
     else
         rmSynthParams="# Not performing RM Synthesis for this case
-Selavy.RMSynthesis = \${doRM}"
+Selavy.RMSynthesis                              = \${doRM}"
     fi
 
     cat > "\$parset" <<EOFINNER
-Selavy.image = \${fitsimage}
-Selavy.sbid  = ${SB_SCIENCE}
-Selavy.sourceIdBase = ${sourceIDbase}
-Selavy.imageHistory = [${imageHistoryString}]
+Selavy.image                                    = \${fitsimage}
+Selavy.sbid                                     = ${SB_SCIENCE}
+Selavy.sourceIdBase                             = ${sourceIDbase}
+Selavy.imageHistory                             = [${imageHistoryString}]
 #
 \${SpectralTermUse}
-Selavy.nsubx = ${SELAVY_NSUBX}
-Selavy.nsuby = ${SELAVY_NSUBY}
+Selavy.nsubx                                    = ${SELAVY_NSUBX}
+Selavy.nsuby                                    = ${SELAVY_NSUBY}
 #
-Selavy.resultsFile = selavy-\${fitsimage%%.fits}.txt
+Selavy.resultsFile                              = selavy-\${fitsimage%%.fits}.txt
 #
-Selavy.snrCut = ${SELAVY_SNR_CUT}
-Selavy.flagGrowth = ${SELAVY_FLAG_GROWTH}
-Selavy.growthCut = ${SELAVY_GROWTH_CUT}
+${thresholdPars}
 #
-Selavy.VariableThreshold = ${SELAVY_VARIABLE_THRESHOLD}
-Selavy.VariableThreshold.boxSize = ${SELAVY_BOX_SIZE}
-Selavy.VariableThreshold.ThresholdImageName=${thresholdMap}
-Selavy.VariableThreshold.NoiseImageName=${noiseMap}
-Selavy.VariableThreshold.AverageImageName=${meanMap}
-Selavy.VariableThreshold.SNRimageName=${snrMap}
+Selavy.VariableThreshold                        = ${SELAVY_VARIABLE_THRESHOLD}
+Selavy.VariableThreshold.boxSize                = ${SELAVY_BOX_SIZE}
+Selavy.VariableThreshold.ThresholdImageName     = ${thresholdMap}
+Selavy.VariableThreshold.NoiseImageName         = ${noiseMap}
+Selavy.VariableThreshold.AverageImageName       = ${meanMap}
+Selavy.VariableThreshold.SNRimageName           = ${snrMap}
 \${weightpars}
 #
-Selavy.Fitter.doFit = true
-Selavy.Fitter.fitTypes = [full]
-Selavy.Fitter.numGaussFromGuess = true
-Selavy.Fitter.maxReducedChisq = 10.
+Selavy.Fitter.doFit                             = true
+Selavy.Fitter.fitTypes                          = [full]
+Selavy.Fitter.numGaussFromGuess                 = true
+Selavy.Fitter.maxReducedChisq                   = 10.
 # Force the component maps to be casa images for now
-Selavy.Fitter.imagetype = casa
+Selavy.Fitter.imagetype                         = casa
 #
-Selavy.threshSpatial = 5
-Selavy.flagAdjacent = false
+Selavy.threshSpatial                            = 5
+Selavy.flagAdjacent                             = false
 #
-Selavy.minPix = 3
-Selavy.minVoxels = 3
-Selavy.minChannels = 1
-Selavy.sortingParam = -pflux
+Selavy.minPix                                   = 3
+Selavy.minVoxels                                = 3
+Selavy.minChannels                              = 1
+Selavy.sortingParam                             = -pflux
 #
 \${rmSynthParams}
 EOFINNER
