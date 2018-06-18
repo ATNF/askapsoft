@@ -81,6 +81,26 @@ void ShadowFlagTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
         if (chunk->antenna1()[row] != chunk->antenna2()[row]) {
             const casa::RigidVector<casa::Double, 3> thisRowUVW = uvw[row];
             const double projectedSeparation = sqrt(thisRowUVW(0)*thisRowUVW(0) + thisRowUVW(1)*thisRowUVW(1));
+            const double baselineLength = sqrt(thisRowUVW(2) * thisRowUVW(2) + projectedSeparation * projectedSeparation);
+            if (baselineLength < 1e-6) {
+                // this is the feature of TOS-calculated uvw that they're zero for completely flagged baselines
+                // check that this baseline is indeed flagged. Note, autocorrelations are already excluded by the if-statement above
+                bool oneUnflagged = false;
+                casa::Matrix<casa::Bool> thisRowFlags = chunk->flag().yzPlane(row);
+                // it may be faster to do it via flattened array as we don't care
+                // which element is where, but for now leave the code more readable
+                for (casa::uInt chan = 0; chan < thisRowFlags.nrow(); ++chan) {
+                     for (casa::uInt pol = 0; pol < thisRowFlags.ncolumn(); ++pol) {
+                          if (!thisRowFlags(chan,pol)) {
+                              oneUnflagged = true;
+                              break;
+                          }
+                     }
+                }
+                ASKAPCHECK(!oneUnflagged, "Inconsistency in uvw is detected: they are missing or equal to zero for unflagged "<<chunk->antenna1()[row]<<" - "<<
+                           chunk->antenna2()[row]<<" baseline");
+                continue;
+            }
             if (projectedSeparation < itsDishDiameter) {
                 if (thisRowUVW(2) < 0.) {
                     // antenna 1 is behind antenna 2 (it's second to first notation)
