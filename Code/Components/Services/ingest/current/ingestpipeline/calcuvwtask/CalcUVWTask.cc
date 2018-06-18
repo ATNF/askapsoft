@@ -201,7 +201,7 @@ void CalcUVWTask::calcForRow(VisChunk::ShPtr chunk, const casa::uInt row)
     uvm.convertUVW(uvwvec);
     ASKAPDEBUGASSERT(uvwvec.nelements() == 3);
 
-    /* 
+    /*
     // code for cross-check with UVWs already in the buffer (e.g. received with metadata or
     // calculated earlier in the processing chain.
     // note, now it doesn't quite match as we using the frame related to each

@@ -34,6 +34,7 @@
 #include <string>
 #include <set>
 #include <stdint.h>
+#include <iomanip>
 
 // ASKAPsoft includes
 #include "askap/AskapLogging.h"
@@ -409,6 +410,13 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
             ASKAPCHECK(uvwBuffer.ncolumn() == mdant.uvw().nelements(), 
                  "The uvw vector in the metadata changes size from antenna to antenna, this is unexpected. Offending antenna "<<antName); 
             uvwBuffer.row(i) = mdant.uvw();
+            // for debug
+            if ((itsVisConverter.config().receiverId() == 0) && (i == 3)) {
+                ASKAPASSERT(uvwBuffer.row(i).nelements()>=3);
+                ASKAPLOG_INFO_STR(logger, "Antenna id="<<i<<" time: "<<chunk->time()<<" uvw: "<<std::fixed<<std::setprecision(15)<<uvwBuffer.row(i)[0]<<" "<<
+                      uvwBuffer.row(i)[1]<<" "<<uvwBuffer.row(i)[2]);
+            }
+            //
             ASKAPCHECK(casa::norm(uvwBuffer.row(i)) > 1e-6, "Expect non-zero per-antenna UVW in metadata - encountered a vector which is the Earth centre. Antenna: "<<antName);
         }
     }
