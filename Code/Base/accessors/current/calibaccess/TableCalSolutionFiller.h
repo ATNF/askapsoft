@@ -1,15 +1,15 @@
 /// @file
 /// @brief solution filler reading required cubes from casa table
-/// @details This is an example of a class which knows how to fill buffers 
-/// of MemCalSolutionAccessor. The cubes with calibration information are read 
+/// @details This is an example of a class which knows how to fill buffers
+/// of MemCalSolutionAccessor. The cubes with calibration information are read
 /// from (and written to) a casa table. The table has the following columns:
 /// TIME, GAIN, GAIN_VALID, LEAKAGE, LEAKAGE_VALID, BANDPASS and BANDPASS_VALID.
 /// This class is initialised with the reference row, which corresponds to the time
-/// requested by the user. If there are gains, leakages or bandpasses defined for 
+/// requested by the user. If there are gains, leakages or bandpasses defined for
 /// a given row, they are read. Otherwise, a backward search is performed to find
 /// the first defined value. An exception is thrown if the top of the table is reached.
 /// If a new entry needs to be created, the given numbers of antennas and beams are used.
-/// 
+///
 ///
 /// @copyright (c) 2011 CSIRO
 /// Australia Telescope National Facility (ATNF)
@@ -54,12 +54,12 @@ namespace askap {
 namespace accessors {
 
 /// @brief solution filler reading required cubes from casa table
-/// @details This is an example of a class which knows how to fill buffers 
-/// of MemCalSolutionAccessor. The cubes with calibration information are read 
+/// @details This is an example of a class which knows how to fill buffers
+/// of MemCalSolutionAccessor. The cubes with calibration information are read
 /// from (and written to) a casa table. The table has the following columns:
 /// TIME, GAIN, GAIN_VALID, LEAKAGE, LEAKAGE_VALID, BANDPASS and BANDPASS_VALID.
 /// This class is initialised with the reference row, which corresponds to the time
-/// requested by the user. If there are gains, leakages or bandpasses defined for 
+/// requested by the user. If there are gains, leakages or bandpasses defined for
 /// a given row, they are read. Otherwise, a backward search is performed to find
 /// the first defined value. An exception is thrown if the top of the table is reached.
 /// If a new entry needs to be created, the given numbers of antennas and beams are used.
@@ -80,52 +80,55 @@ public:
   /// @param[in] tab  table to use
   /// @param[in] row reference row
   /// @param[in] nAnt maximum number of antennas
-  /// @param[in] nBeam maximum number of beams   
-  /// @param[in] nChan maximum number of channels   
-  TableCalSolutionFiller(const casa::Table& tab, const long row, const casa::uInt nAnt, 
+  /// @param[in] nBeam maximum number of beams
+  /// @param[in] nChan maximum number of channels
+  TableCalSolutionFiller(const casa::Table& tab, const long row, const casa::uInt nAnt,
          const casa::uInt nBeam, const casa::uInt nChan);
 
-  /// @brief gains filler  
+  /// @brief gains filler
   /// @details
   /// @param[in] gains pair of cubes with gains and validity flags (to be resised to 2 x nAnt x nBeam)
   virtual void fillGains(std::pair<casa::Cube<casa::Complex>, casa::Cube<casa::Bool> > &gains) const;
-  
-  /// @brief leakage filler  
+
+  /// @brief leakage filler
   /// @details
   /// @param[in] leakages pair of cubes with leakages and validity flags (to be resised to 2 x nAnt x nBeam)
   virtual void fillLeakages(std::pair<casa::Cube<casa::Complex>, casa::Cube<casa::Bool> > &leakages) const;
 
-  /// @brief bandpass filler  
+  /// @brief bandpass filler
   /// @details
   /// @param[in] bp pair of cubes with bandpasses and validity flags (to be resised to (2*nChan) x nAnt x nBeam)
-  virtual void fillBandpasses(std::pair<casa::Cube<casa::Complex>, casa::Cube<casa::Bool> > &bp) const;  
-  
+  virtual void fillBandpasses(std::pair<casa::Cube<casa::Complex>, casa::Cube<casa::Bool> > &bp) const;
+
   /// @brief gains writer
   /// @details
   /// @param[in] gains pair of cubes with gains and validity flags (should be 2 x nAnt x nBeam)
   virtual void writeGains(const std::pair<casa::Cube<casa::Complex>, casa::Cube<casa::Bool> > &gains) const;
-  
-  /// @brief leakage writer  
+
+  /// @brief leakage writer
   /// @details
   /// @param[in] leakages pair of cubes with leakages and validity flags (should be 2 x nAnt x nBeam)
   virtual void writeLeakages(const std::pair<casa::Cube<casa::Complex>, casa::Cube<casa::Bool> > &leakages) const;
 
-  /// @brief bandpass writer  
+  /// @brief bandpass writer
   /// @details
   /// @param[in] bp pair of cubes with bandpasses and validity flags (should be (2*nChan) x nAnt x nBeam)
-  virtual void writeBandpasses(const std::pair<casa::Cube<casa::Complex>, casa::Cube<casa::Bool> > &bp) const;    
+  virtual void writeBandpasses(const std::pair<casa::Cube<casa::Complex>, casa::Cube<casa::Bool> > &bp) const;
 
   /// @brief check for gain solution
   /// @return true, if there is no gain solution, false otherwise
   virtual bool noGain() const;
-  
+
   /// @brief check for leakage solution
   /// @return true, if there is no leakage solution, false otherwise
   virtual bool noLeakage() const;
-  
+
   /// @brief check for bandpass solution
   /// @return true, if there is no bandpass solution, false otherwise
-  virtual bool noBandpass() const;  
+  virtual bool noBandpass() const;
+
+  /// @brief flush the table to disk
+  virtual bool flush() { table().flush(); return true; }
 
 private:
 
@@ -137,15 +140,15 @@ private:
   /// @return row number for a defined cube
   /// @note The code always returns non-negative number.
   long findDefinedCube(const std::string &name) const;
-  
-  /// @brief helper method to check whether we are creating a new row  
+
+  /// @brief helper method to check whether we are creating a new row
   void checkForNewRow();
-  
+
   /// @brief helper method to check that the given column exists
   /// @param[in] name column name
   /// @return true if the given column exists
   bool columnExists(const std::string &name) const;
-  
+
   /// @brief number of antennas (used when new solutions are created)
   casa::uInt itsNAnt;
   /// @brief number of beams (used when new solutions are created)
@@ -162,16 +165,16 @@ private:
 
   /// @brief row for leakages
   mutable long itsLeakagesRow;
-  
+
   /// @brief row for bandpasses
   mutable long itsBandpassesRow;
 
   /// @brief Caches the existance of columns as the implementation
   /// for columnExists() is quite expensive
   mutable std::map<std::string, bool> itsColumnExistsCache;
-  
+
   /// @brief true if a new row is to be created
-  bool itsCreateNew; 
+  bool itsCreateNew;
 }; // class TableCalSolutionFiller
 
 } // accessors
