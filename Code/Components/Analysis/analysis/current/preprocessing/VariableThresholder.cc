@@ -60,7 +60,7 @@ VariableThresholder::VariableThresholder(askap::askapparallel::AskapParallel& co
         const LOFAR::ParameterSet &parset):
     itsComms(&comms),
     itsParset(parset),
-    itsImageSuffix("");
+    itsImageSuffix("")
 {
     itsBoxSize = parset.getInt16("boxSize", 50);
     itsImagetype = parset.getString("imagetype", "fits");
