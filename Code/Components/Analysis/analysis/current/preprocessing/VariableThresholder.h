@@ -89,13 +89,6 @@ class VariableThresholder {
 
         void setWeighter(boost::shared_ptr<Weighter> &weighter) {itsWeighter = weighter;};
 
-        /// @details Updates the output image names in the case of
-        /// distributed processing. The names will have the worker
-        /// number appended to them (so that instead of something
-        /// like "image_snr" it will become "image_snr_6_9" for
-        /// worker #6 out of 9.
-        void setFilenames(askap::askapparallel::AskapParallel& comms);
-
         /// @details Calculate the signal-to-noise at each
         /// pixel. The cube (if it is a cube) is broken up into a
         /// series of lower dimensional data sets - the search
@@ -121,27 +114,36 @@ class VariableThresholder {
         /// required).
         void search();
 
-        std::string snrImage() {return itsSNRimageName;};
-        std::string thresholdImage() {return itsThresholdImageName;};
-        std::string noiseImage() {return itsNoiseImageName;};
-        std::string averageImage() {return itsAverageImageName;};
-        std::string boxSumImage() {return itsBoxSumImageName;};
+        /// @{
+
+        /// @details The filenames for the different images created by this class. If imagetype=fits, then a ".fits" suffix is added to the filename as provided by the parset.
+        std::string snrImage();
+        std::string thresholdImage();
+        std::string noiseImage();
+        std::string averageImage();
+        std::string boxSumImage();
+        /// @}
 
         unsigned int boxSize() {return itsBoxSize;};
 
     protected:
-        /// @details Writes the arrays as requested to images on disk. Where
-        /// the appropriate image name is defined , the array (one of
-        /// mean,noise,boxsum,snr or threshold) is written in distributed
-        /// fashion to a CASA image on disk. The 'accumulate' method for
-        /// DistributedImageWriter::write is used, taking into account any
-        /// overlapping border regions.
-        void writeImages(casa::Array<casa::Float> &middle,
-                         casa::Array<casa::Float> &spread,
-                         casa::Array<casa::Float> &snr,
-                         casa::Array<casa::Float> &boxsum,
-                         casa::IPosition &loc,
-                         bool doCreate);
+
+        /// @details Create the output images as requested. Where the
+        /// appropriate image name is defined, the image is created. This
+        /// is done by the master node only (within the
+        /// DistributedImageWriter::create task) when run in parallel.
+        void createImages();
+
+        /// @details Writes an array as requested to an image on
+        /// disk. Where the image name is defined , the array (one of
+        /// mean,noise,boxsum,snr or threshold) is written in
+        /// distributed fashion to a CASA or FITS image on disk. The
+        /// 'accumulate' method for DistributedImageWriter::write is
+        /// used, taking into account any overlapping border regions.
+        void writeImage(casa::Array<Float> &arr,
+                        casa::Array<bool> &mask,
+                        std::string imageName,
+                        casa::IPosition &loc);
 
         void defineChunk(casa::Array<Float> &inputChunkArr,
                          casa::MaskedArray<Float> &outputChunk, size_t ctr);
@@ -163,6 +165,10 @@ class VariableThresholder {
 
         std::string itsInputImage;
 
+        /// Image type of output images
+        std::string itsImagetype;
+        /// Suffix string to be added to the filenames of output images
+        std::string itsImageSuffix;
         /// Name of S/N image to be written
         std::string itsSNRimageName;
         /// Name of Threshold image to be written
@@ -186,7 +192,7 @@ class VariableThresholder {
         casa::IPosition itsInputShape;
         casa::IPosition itsLocation;
         casa::CoordinateSystem itsInputCoordSys;
-    casa::Array<bool> itsMask;
+        casa::Array<bool> itsMask;
 
 };
 

@@ -44,16 +44,20 @@ namespace analysis {
 
 IslandData::IslandData(const LOFAR::ParameterSet &parset, const std::string fitType):
     itsParset(parset),
-    itsFitType(fitType)
+    itsFitType(fitType),
+    itsBackground(0.),
+    itsNoise(0.),
+    itsResidualMax(0.),
+    itsResidualMin(0.),
+    itsResidualMean(0.),
+    itsResidualStddev(0.),
+    itsResidualRMS(0.)
 {
 
     ASKAPLOG_DEBUG_STR(logger, "Initialising IslandData object");
     itsImageName = parset.getString("image", "");
     ASKAPLOG_DEBUG_STR(logger, "Image name =\"" << itsImageName << "\"");
     ASKAPCHECK(itsImageName != "", "No image name given");
-    itsMeanImageName = parset.getString("VariableThreshold.AverageImageName", "");
-    itsNoiseImageName = parset.getString("VariableThreshold.NoiseImageName", "");
-
 
     // Define the parset used to set up the cubelet extractor for the image data - only used if we don't have the mean or noise maps
     ASKAPLOG_DEBUG_STR(logger, "Setting up image extractor");
@@ -62,20 +66,32 @@ IslandData::IslandData(const LOFAR::ParameterSet &parset, const std::string fitT
     // imageExtractParset.add(LOFAR::KVpair("padSize","[50,50]"));
     itsImageExtractor = boost::shared_ptr<CubeletExtractor>(new CubeletExtractor(imageExtractParset));
 
+    itsMeanImageName = parset.getString("VariableThreshold.AverageImageName", "");
     if (itsMeanImageName != "") {
+        if (itsParset.getString("imagetype", "fits") == "fits") {
+            itsMeanImageName += ".fits";
+        }
         ASKAPLOG_DEBUG_STR(logger, "Setting up mean image extractor");
         // Define the parset used to set up the cubelet extractor for the noise data
         LOFAR::ParameterSet meanExtractParset;
         meanExtractParset.add(LOFAR::KVpair("spectralCube", itsMeanImageName));
         itsMeanExtractor = boost::shared_ptr<CubeletExtractor>(new CubeletExtractor(meanExtractParset));
+    } else {
+        ASKAPLOG_WARN_STR(logger, "No mean background image defined via 'VariableThreshold.AverageImageName'. Island background set to zero.");
     }
 
+    itsNoiseImageName = parset.getString("VariableThreshold.NoiseImageName", "");
     if (itsNoiseImageName != "") {
+        if (itsParset.getString("imagetype", "fits") == "fits") {
+            itsNoiseImageName += ".fits";
+        }
         ASKAPLOG_DEBUG_STR(logger, "Setting up noise image extractor");
         // Define the parset used to set up the cubelet extractor for the noise data
         LOFAR::ParameterSet noiseExtractParset;
         noiseExtractParset.add(LOFAR::KVpair("spectralCube", itsNoiseImageName));
         itsNoiseExtractor = boost::shared_ptr<CubeletExtractor>(new CubeletExtractor(noiseExtractParset));
+    } else {
+        ASKAPLOG_WARN_STR(logger, "No background noise image defined via 'VariableThreshold.NoiseImageName'. Island noise set to zero.");
     }
 
 }

@@ -66,8 +66,8 @@ FDFwriter::FDFwriter(LOFAR::ParameterSet &parset,
 
 {
     // Object ID & name
-    itsObjID = itsParset.getString("objid","");
-    itsObjectName = itsParset.getString("objectname","");
+    itsObjID = itsParset.getString("objid", "");
+    itsObjectName = itsParset.getString("objectname", "");
 
     // Set up coordinate systems
     const boost::shared_ptr<casa::ImageInterface<Float> > inputCubePtr =
@@ -121,14 +121,14 @@ FDFwriter::FDFwriter(LOFAR::ParameterSet &parset,
 void FDFwriter::write()
 {
     std::string idstring;
-    if (itsObjID==""){
+    if (itsObjID == "") {
         idstring = itsSourceID;
     } else {
         idstring = itsObjID;
     }
-    
+
     std::stringstream ss;
-    if( (itsFlagWriteAsComplex) && (itsParset.getString("imagetype","casa") == "casa") ){
+    if ((itsFlagWriteAsComplex) && (itsParset.getString("imagetype", "fits") == "casa")) {
         // write a single file for each, holding a complex array
         //   NOTE - CAN ONLY DO THIS FOR CASA-FORMAT OUTPUT
         ss.str("");
@@ -136,7 +136,7 @@ void FDFwriter::write()
         std::string fdfName = ss.str();
         casa::PagedImage<casa::Complex> imgF(casa::TiledShape(itsFDF.shape()), itsCoordSysForFDF, fdfName);
         imgF.put(itsFDF);
-        
+
         ss.str("");
         ss << itsOutputBase << "_RMSF_" << idstring;
         std::string rmsfName = ss.str();
@@ -184,7 +184,7 @@ void FDFwriter::write()
         imageAcc->create(rmsfName, itsRMSF.shape(), itsCoordSysForRMSF);
         imageAcc->write(rmsfName, casa::phase(itsRMSF));
         updateHeaders(rmsfName);
-        
+
     }
 
 }
@@ -194,11 +194,11 @@ void FDFwriter::updateHeaders(const std::string &filename)
 
     boost::shared_ptr<accessors::IImageAccess> ia = accessors::imageAccessFactory(itsParset);
 
-    // set the object ID and object name keywords    
-    if (itsObjID != ""){
+    // set the object ID and object name keywords
+    if (itsObjID != "") {
         ia->setMetadataKeyword(filename, "OBJID", itsObjID, "Object ID");
     }
-    if (itsObjectName != "" ){
+    if (itsObjectName != "") {
         ia->setMetadataKeyword(filename, "OBJECT", itsObjectName, "IAU-format Object Name");
     }
 
@@ -218,33 +218,33 @@ void FDFwriter::updateHeaders(const std::string &filename)
     std::string value;
     // set the other required keywords by copying from input file
     value = iaInput->getMetadataKeyword(infile, "DATE-OBS");
-    if (value != ""){
+    if (value != "") {
         ia->setMetadataKeyword(filename, "DATE-OBS", value, "Date of observation");
     }
     value = iaInput->getMetadataKeyword(infile, "DURATION");
-    if (value != ""){
+    if (value != "") {
         ia->setMetadataKeyword(filename, "DURATION", value, "Length of observation");
     }
     value = iaInput->getMetadataKeyword(infile, "PROJECT");
-    if (value != ""){
+    if (value != "") {
         ia->setMetadataKeyword(filename, "PROJECT", value, "Project ID");
     }
     value = iaInput->getMetadataKeyword(infile, "SBID");
-    if (value != ""){
+    if (value != "") {
         ia->setMetadataKeyword(filename, "SBID", value, "Scheduling block ID");
-    }    
+    }
 
     if (itsParset.isDefined("imageHistory")) {
         std::vector<std::string> historyMessages = itsParset.getStringVector("imageHistory", "");
         if (historyMessages.size() > 0) {
             for (std::vector<std::string>::iterator history = historyMessages.begin();
-                 history < historyMessages.end(); history++) {
-                ASKAPLOG_DEBUG_STR(logger, "Writing history string to " << filename <<": " << *history);
+                    history < historyMessages.end(); history++) {
+                ASKAPLOG_DEBUG_STR(logger, "Writing history string to " << filename << ": " << *history);
                 ia->addHistory(filename, *history);
             }
         }
     }
-    
+
 }
 
 

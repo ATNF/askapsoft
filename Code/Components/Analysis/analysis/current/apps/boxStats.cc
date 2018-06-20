@@ -75,7 +75,7 @@ class BoxstatsApp : public askap::Application {
                 for (size_t i = 0; i < dim.size(); i++) {
                     diml[i] = dim[i];
                 }
-                if(subset.isDefined("flagSubsection")){
+                if (subset.isDefined("flagSubsection")) {
                     par.setFlagSubsection(subset.getBool("flagSubsection"));
                     par.setSubsection(subset.getString("subsection",
                                                        duchamp::nullSection(dim.size())));
@@ -88,7 +88,6 @@ class BoxstatsApp : public askap::Application {
                 parl.readData();
 
                 VariableThresholder varThresh(comms, subset);
-                if (comms.isParallel()) varThresh.setFilenames(comms);
                 varThresh.initialise(parl.cube(), parl.subimageDef());
                 varThresh.calculate();
 

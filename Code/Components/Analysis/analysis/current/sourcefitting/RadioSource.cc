@@ -577,7 +577,7 @@ RadioSource::getSubComponentList(casa::Matrix<casa::Double> pos,
         casa::Slicer fullImageBox(itsBox.start() + globalOffset,
                                   itsBox.length(), Slicer::endIsLength);
 
-        ASKAPLOG_DEBUG_STR(logger, "For curvature extraction, formed slicer " << fullImageBox << " with globalOffsets="<<globalOffset);
+        ASKAPLOG_DEBUG_STR(logger, "For curvature extraction, formed slicer " << fullImageBox << " with globalOffsets=" << globalOffset);
 
         // casa::Array<float> curvArray =
         //     analysisutilities::getPixelsInBox(itsFitParams.curvatureImage(),
@@ -594,7 +594,7 @@ RadioSource::getSubComponentList(casa::Matrix<casa::Double> pos,
         std::vector<float> fluxArray(fullImageBox.length().product(), 0.);
         std::vector<bool> summitMap(fullImageBox.length().product(), false);
 
-        ASKAPLOG_DEBUG_STR(logger, "Thresholding curvature array for less than "<<-1.*itsFitParams.sigmaCurv());
+        ASKAPLOG_DEBUG_STR(logger, "Thresholding curvature array for less than " << -1.*itsFitParams.sigmaCurv());
         for (size_t i = 0; i < f.size(); i++) {
             int x = int(pos(i, 0));
             int y = int(pos(i, 1));
@@ -620,10 +620,10 @@ RadioSource::getSubComponentList(casa::Matrix<casa::Double> pos,
             duchamp::Detection det;
             det.addChannel(0, *obj);
             det.calcFluxes(fluxArray.data(), dim);
-            ASKAPLOG_DEBUG_STR(logger, "Detection- xpeak="<<det.getXPeak() << ", ypeak="<<det.getYPeak());
+            ASKAPLOG_DEBUG_STR(logger, "Detection- xpeak=" << det.getXPeak() << ", ypeak=" << det.getYPeak());
             det.setOffsets(par);
             det.addOffsets();
-            ASKAPLOG_DEBUG_STR(logger, "Detection- xpeak="<<det.getXPeak() << ", ypeak="<<det.getYPeak());
+            ASKAPLOG_DEBUG_STR(logger, "Detection- xpeak=" << det.getXPeak() << ", ypeak=" << det.getYPeak());
             SubComponent cmpnt;
             cmpnt.setPeak(det.getPeakFlux());
             // Need to correct the positions to put them in the current worker frame
@@ -1036,7 +1036,7 @@ bool RadioSource::fitGauss(casa::Matrix<casa::Double> &pos,
                 numGaussList.push_back(g);
             }
 //            for (unsigned int g = minGauss; g <= maxGauss && fitPossible && !stopNow; g++) {
-            for(size_t ig=0; ig<numGaussList.size() && !stopNow; ig++){
+            for (size_t ig = 0; ig < numGaussList.size() && !stopNow; ig++) {
                 unsigned int g = numGaussList[ig];
                 ASKAPLOG_DEBUG_STR(logger, "Number of Gaussian components = " << g);
 
@@ -1045,13 +1045,13 @@ bool RadioSource::fitGauss(casa::Matrix<casa::Double> &pos,
                 bool acceptable = fit[ctr].acceptable();
                 bool okExceptChisq = fit[ctr].acceptableExceptChisq();
 
-                if (!fit[ctr].passConverged()){
-                    if(g>1){
-                        numGaussList.push_back(g-1);
+                if (!fit[ctr].passConverged()) {
+                    if (g > 1) {
+                        numGaussList.push_back(g - 1);
                     }
                 }
-                
-                if (fitPossible && okExceptChisq){
+
+                if (fitPossible && okExceptChisq) {
                     if ((ctr == 0) || (fit[ctr].redChisq() < bestRChisq)) {
                         bestFit = ctr;
                         bestRChisq = fit[ctr].redChisq();
@@ -1062,7 +1062,7 @@ bool RadioSource::fitGauss(casa::Matrix<casa::Double> &pos,
                         // the fit is otherwise good
 
                         if (itsFitParams.numGaussFromGuess() &&
-                            (fit[ctr].ndof() > 0) && (fit[ctr].passConverged())) {
+                                (fit[ctr].ndof() > 0) && (fit[ctr].passConverged())) {
                             // If we are just going on the number of
                             // Gaussians from the initial estimate, and
                             // the fit failed, we subtract the fit result
@@ -1071,17 +1071,17 @@ bool RadioSource::fitGauss(casa::Matrix<casa::Double> &pos,
                             // re-doing. But only if that brightest
                             // component is brighter than the noise.
 
-                            bool alreadyDone=false;
-                            for(size_t i=0;i<numGaussList.size() && !alreadyDone;i++){
-                                alreadyDone = numGaussList[i]==(g+1);
+                            bool alreadyDone = false;
+                            for (size_t i = 0; i < numGaussList.size() && !alreadyDone; i++) {
+                                alreadyDone = numGaussList[i] == (g + 1);
                             }
                             if (!alreadyDone) {
-                            
+
                                 ASKAPLOG_DEBUG_STR(logger, "Removing fitted Gaussian from array");
                                 casa::Vector<casa::Double> newf = fit[ctr].subtractFit(pos, f);
                                 ASKAPLOG_DEBUG_STR(logger, "Finding new subcomponents");
                                 std::vector<SubComponent> newList;
-                                for(unsigned int i=0;i<g;i++){
+                                for (unsigned int i = 0; i < g; i++) {
                                     newList.push_back(fit[ctr].gaussian(i));
                                 }
                                 std::vector<SubComponent> newGuessList =
@@ -1095,18 +1095,18 @@ bool RadioSource::fitGauss(casa::Matrix<casa::Double> &pos,
 //                                maxGauss++;
                                     newList.push_back(newGuessList[0]);
                                     cmpntListCopy = newList;
-                                    numGaussList.push_back(g+1);
+                                    numGaussList.push_back(g + 1);
                                 }
-                                
+
                             }
                         }
                     }
-                    
+
                 }
 
                 stopNow = itsFitParams.stopAfterFirstGoodFit() && acceptable;
                 ctr++;
-                
+
             } // end of 'g' for-loop
             ASKAPLOG_DEBUG_STR(logger, "Finished loop over Gaussians");
 
@@ -1874,7 +1874,6 @@ LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream &blob, RadioSource& src)
 
         for (int i = 0; i < vecsize; i++) {
             blob >> vec[i];
-            ASKAPLOG_DEBUG_STR(logger, "alpha error " << vec[i]);
         }
 
         src.itsAlphaError[s] = vec;
