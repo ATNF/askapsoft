@@ -181,10 +181,11 @@ ${thresholdPars}
 # Turn on the variable threshold option
 Selavy.VariableThreshold                        = true
 Selavy.VariableThreshold.boxSize                = 50
-Selavy.VariableThreshold.ThresholdImageName     = detThresh.img
-Selavy.VariableThreshold.NoiseImageName         = noiseMap.img
-Selavy.VariableThreshold.AverageImageName       = meanMap.img
-Selavy.VariableThreshold.SNRimageName           = snrMap.img
+Selavy.VariableThreshold.ThresholdImageName     = detThresh
+Selavy.VariableThreshold.NoiseImageName         = noiseMap
+Selavy.VariableThreshold.AverageImageName       = meanMap
+Selavy.VariableThreshold.SNRimageName           = snrMap
+Selavy.VariableThreshold.imagetype              = ${IMAGETYPE_CONT}
 #
 # Parameters to switch on and control the Gaussian fitting
 Selavy.Fitter.doFit                             = true
