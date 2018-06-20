@@ -39,6 +39,7 @@ contImage=$imageName
 selavyImage="${OUTPUT}/${contImage}"
 setImageProperties contcube
 contCube="${OUTPUT}/${imageName}"
+setContsubFilenames
 
 NPROCS_CONTSUB=$(echo "${CONTSUB_SELAVY_NSUBX}" "${CONTSUB_SELAVY_NSUBY}" | awk '{print $1*$2+1}')
 if [ "${NPROCS_CONTSUB}" -eq 1 ]; then
@@ -77,7 +78,7 @@ fi
 ContsubModelDefinition="# The model definition
 CContsubtract.sources.names                       = [lsm]
 CContsubtract.sources.lsm.direction               = \${modelDirection}
-CContsubtract.sources.lsm.model                   = \${contsubDir}/\${contsubCmodelImage}
+CContsubtract.sources.lsm.model                   = ${contsubDir}/${contsubCmodelImage}
 CContsubtract.sources.lsm.nterms                  = ${NUM_TAYLOR_TERMS}"
 if [ "${NUM_TAYLOR_TERMS}" -gt 1 ]; then
     if [ "$MFS_REF_FREQ" == "" ]; then
@@ -125,9 +126,8 @@ else
     modelDirection="[\${ra}, \${dec}, \${epoch}]"
 fi
 
-setContsubFilenames
-mkdir -p \${contsubDir}
-cd \${contsubDir}
+mkdir -p ${contsubDir}
+cd ${contsubDir}
 
 #################################################
 # First, source-finding
@@ -247,7 +247,7 @@ Cmodel.nterms             = ${NUM_TAYLOR_TERMS}
 
 # Output specific parameters
 Cmodel.output             = casa
-Cmodel.filename           = \${contsubCmodelImage}
+Cmodel.filename           = ${contsubCmodelImage}
 EOFINNER
 
     NCORES=2

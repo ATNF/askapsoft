@@ -39,6 +39,7 @@ contImage=$imageName
 selavyImage="${OUTPUT}/${contImage}"
 setImageProperties contcube
 contCube="${OUTPUT}/${imageName}"
+setContsubFilenames
 
 NPROCS_CONTSUB=$(echo "${CONTSUB_SELAVY_NSUBX}" "${CONTSUB_SELAVY_NSUBY}" | awk '{print $1*$2+1}')
 if [ "${NPROCS_CONTSUB}" -eq 1 ]; then
@@ -105,9 +106,8 @@ dec=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=Dec)
 epoch=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=Epoch)
 refDirection="[\${ra}, \${dec}, \${epoch}]"
 
-setContsubFilenames
-mkdir -p \${contsubDir}
-cd \${contsubDir}
+mkdir -p ${contsubDir}
+cd ${contsubDir}
 
 #################################################
 # First, source-finding
@@ -179,7 +179,7 @@ Selavy.flagAdjacent                             = false
 #
 # Saving the fitted components to a parset for use by ccalibrator
 Selavy.outputComponentParset                    = true
-Selavy.outputComponentParset.filename           = \${contsubComponents}
+Selavy.outputComponentParset.filename           = ${contsubComponents}
 # Reference direction for which component positions should be measured
 #  relative to.
 Selavy.outputComponentParset.referenceDirection = \${refDirection}
@@ -206,7 +206,7 @@ fi
 
 cd ..
 
-if [ ! -e "\${contsubDir}/\${contsubComponents}" ]; then
+if [ ! -e "${contsubDir}/${contsubComponents}" ]; then
 
     # Nothing detected !
     echo "Continuum subtraction : No continuum components found!"
@@ -222,7 +222,7 @@ else
 # The measurement set name - this will be overwritten
 CContSubtract.dataset                             = ${msSciSL}
 # The model definition
-CContSubtract.sources.definition                  = \${contsubDir}/\${contsubComponents}
+CContSubtract.sources.definition                  = ${contsubDir}/${contsubComponents}
 # The gridding parameters
 CContSubtract.gridder.snapshotimaging             = ${GRIDDER_SNAPSHOT_IMAGING}
 CContSubtract.gridder.snapshotimaging.wtolerance  = ${GRIDDER_SNAPSHOT_WTOL}

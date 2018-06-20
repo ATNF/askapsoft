@@ -29,6 +29,8 @@
 # @author Matthew Whiting <Matthew.Whiting@csiro.au>
 #
 
+setContsubFilenames
+
 # If we're here, then CONTSUB_METHOD=CleanModel
 # In this bit, we use the clean model from the continuum imaging
 # as the input to ccontsubtract
@@ -36,7 +38,7 @@
 ContsubModelDefinition="# The model definition
 CContsubtract.sources.names                       = [lsm]
 CContsubtract.sources.lsm.direction               = \${modelDirection}
-CContsubtract.sources.lsm.model                   = \${contsubCleanModel}
+CContsubtract.sources.lsm.model                   = ${contsubCleanModel}
 CContsubtract.sources.lsm.nterms                  = ${NUM_TAYLOR_TERMS}"
 if [ "${NUM_TAYLOR_TERMS}" -gt 1 ]; then
     if [ "$MFS_REF_FREQ" == "" ]; then
@@ -82,8 +84,6 @@ else
     epoch=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=Epoch)
     modelDirection="[\${ra}, \${dec}, \${epoch}]"
 fi
-
-setContsubFilenames
 
 parset=${parsets}/contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.in
 log=${logs}/contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.log
