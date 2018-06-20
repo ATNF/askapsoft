@@ -47,15 +47,15 @@ for subband in ${SUBBAND_WRITER_LIST}; do
     DEP=""
     if [ "${DO_SPECTRAL_IMSUB}" == "true" ]; then
         if [ "$FIELD" == "." ]; then
-            DEP=$(addDep "$DEP" "$DEP_LINMOS_SPECTRAL_CONTSUB_ALL")
+            DEP=$(addDep "$DEP" "$(echo "${DEP_LINMOS_SPECTRAL_CONTSUB_ALL}" | sed -e 's/-d afterok://g')")
         elif [ "$BEAM" == "all" ]; then
-            DEP=$(addDep "$DEP" "$DEP_LINMOS_SPECTRAL_CONTSUB")
+            DEP=$(addDep "$DEP" "$(echo "${DEP_LINMOS_SPECTRAL_CONTSUB}" | sed -e 's/-d afterok://g')")
         fi
     fi
     if [ "$FIELD" == "." ]; then
-        DEP=$(addDep "$DEP" "$DEP_LINMOS_SPECTRAL_RESTORED_ALL")
+        DEP=$(addDep "$DEP" "$(echo "${DEP_LINMOS_SPECTRAL_RESTORED_ALL}" | sed -e 's/-d afterok://g')")
     elif [ "$BEAM" == "all" ]; then
-        DEP=$(addDep "$DEP" "$DEP_LINMOS_SPECTRAL_RESTORED")
+        DEP=$(addDep "$DEP" "$(echo "${DEP_LINMOS_SPECTRAL_RESTORED}" | sed -e 's/-d afterok://g')")
     else
         DEP=$(addDep "$DEP" "$ID_SPECIMG_SCI")
     fi
