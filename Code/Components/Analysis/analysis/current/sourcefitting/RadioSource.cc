@@ -1292,7 +1292,7 @@ void RadioSource::findSpectralTerm(std::string imageName, int term, bool doCalc)
                                                  fit.error(i)[0] * fit.error(i)[0] * fit.gaussian(i).flux() * fit.gaussian(i).flux() / (Iref * Iref * Iref * Iref) +
                                                  (0.5 - alpha) * (0.5 - alpha) * alpha_err * alpha_err);
                         }
-                        ASKAPLOG_DEBUG_STR(logger,
+                        ASKAPLOG_INFO_STR(logger,
                                            "   Component " << i << ": " << termValues[i] <<
                                            " +- " << termErrors[i] <<
                                            ", calculated with fitted flux of " <<

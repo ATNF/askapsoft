@@ -87,10 +87,10 @@ VariableThresholder::VariableThresholder(askap::askapparallel::AskapParallel& co
                           "Variable Thresholder: reuse=true, but no SNR image name given. " <<
                           "Turning reuse off.");
         itsFlagReuse = false;
-    } else if (! analysisutilities::imageExists(itsSNRimageName)) {
+    } else if (! analysisutilities::imageExists(snrImage())) {
         // If so, does that image exist?
         ASKAPLOG_WARN_STR(logger,
-                          "Variable Thresholder: reuse=true, but SNR image " << itsSNRimageName <<
+                          "Variable Thresholder: reuse=true, but SNR image " << snrImage() <<
                           " can not be opened. Turning reuse off.");
         itsFlagReuse = false;
     }
@@ -98,23 +98,23 @@ VariableThresholder::VariableThresholder(askap::askapparallel::AskapParallel& co
 
 std::string VariableThresholder::snrImage()
 {
-    return itsSNRimageName + itsImageSuffix;
+    return (itsSNRimageName == "" ) ? itsSNRimageName : itsSNRimageName + itsImageSuffix;
 }
 std::string VariableThresholder::thresholdImage()
 {
-    return itsThresholdImageName + itsImageSuffix;
+    return (itsThresholdImageName == "" ) ? itsThresholdImageName : itsThresholdImageName + itsImageSuffix;
 }
 std::string VariableThresholder::noiseImage()
 {
-    return itsNoiseImageName + itsImageSuffix;
+    return (itsNoiseImageName == "" ) ? itsNoiseImageName : itsNoiseImageName + itsImageSuffix;
 }
 std::string VariableThresholder::averageImage()
 {
-    return itsAverageImageName + itsImageSuffix;
+    return (itsAverageImageName == "" ) ? itsAverageImageName : itsAverageImageName + itsImageSuffix;
 }
 std::string VariableThresholder::boxSumImage()
 {
-    return itsBoxSumImageName + itsImageSuffix;
+    return (itsBoxSumImageName == "" ) ? itsBoxSumImageName : itsBoxSumImageName + itsImageSuffix;
 }
 
 
