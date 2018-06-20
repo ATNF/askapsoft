@@ -432,27 +432,27 @@ function setImageProperties()
     # Definitions use by Selavy jobs
     setSelavyDirs $type
     if [ "${type}" == "cont" ]; then
-        noiseMap=noiseMap.${imageName}
+        noiseMap=noiseMap.${imageName%%.fits}
         noiseType="cont_noise_T0"
         noiseLabel="Continuum image noise map"
-        thresholdMap=detThresh.${imageName}
-        meanMap=meanMap.${imageName}
-        snrMap=snrMap.${imageName}
-        compMap=componentMap_${imageName}
+        thresholdMap=detThresh.${imageName%%.fits}
+        meanMap=meanMap.${imageName%%.fits}
+        snrMap=snrMap.${imageName%%.fits}
+        compMap=componentMap_${imageName%%.fits}
         compMapType="cont_components_T0"
         compMapLabel="Continuum component map"
-        compResidual=componentResidual_${imageName}
+        compResidual=componentResidual_${imageName%%.fits}
         compResidualType="cont_fitresidual_T0"
         compResidualLabel="Continuum component residual map"
         validationDir=${imageName%%.fits}_continuum_validation_selavy_snr5.0_int
         validationFile=${PROJECT_ID}_CASDA_continuum_validation.xml
     elif [ "${type}" == "spectral" ]; then
-        noiseMap=noiseMap.${imageName}
+        noiseMap=noiseMap.${imageName%%.fits}
         noiseType="spectral_noise_3d"
         noiseLabel="Spectral cube noise map"
-        thresholdMap=detThresh.${imageName}
-        meanMap=meanMap.${imageName}
-        snrMap=snrMap.${imageName}
+        thresholdMap=detThresh.${imageName%%.fits}
+        meanMap=meanMap.${imageName%%.fits}
+        snrMap=snrMap.${imageName%%.fits}
     fi
     
     if [ "$needToUnsetTTerm" == "true" ]; then

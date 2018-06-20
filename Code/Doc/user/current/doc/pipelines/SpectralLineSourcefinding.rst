@@ -31,12 +31,21 @@ reconstruction (to enhance the signal-to-noise of real sources).
 | ``SELAVY_SPEC_NSUBX``               | 6                               | nsubx (:doc:`../analysis/selavy`)            | Number of divisions in the x-direction that divide the image|
 |                                     |                                 |                                              | up, allowing parallel processing in the source-detection.   |
 +-------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
-| ``SELAVY_SPEC_NSUBY``               | 3                               | nsuby (:doc:`../analysis/selavy`)            | Number of divisions in the y-direction that divide the image|
+| ``SELAVY_SPEC_NSUBY``               | 9                               | nsuby (:doc:`../analysis/selavy`)            | Number of divisions in the y-direction that divide the image|
 |                                     |                                 |                                              | up, allowing parallel processing in the source-detection.   |
 +-------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
-| ``SELAVY_SPEC_NSUBZ``               | 11                              | nsubz (:doc:`../analysis/selavy`)            | Number of divisions in the z-direction that divide the image|
+| ``SELAVY_SPEC_NSUBZ``               | 18                              | nsubz (:doc:`../analysis/selavy`)            | Number of divisions in the z-direction that divide the image|
 |                                     |                                 |                                              | up, allowing parallel processing in the source-detection.   |
 +-------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
+| ``SELAVY_OVERLAPX``                 | 0                               | overlapx                                     | The overlap (in pixels) between neighbouring divisions in   |
+|                                     |                                 | (:doc:`../analysis/selavy`)                  | the x-direction.                                            |
++-------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
+| ``SELAVY_OVERLAPY``                 | 0                               | overlapy                                     | The overlap (in pixels) between neighbouring divisions in   |
+|                                     |                                 | (:doc:`../analysis/selavy`)                  | the y-direction.                                            |
++-------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+ 
+| ``SELAVY_OVERLAPZ``                 | 20                              | overlapz                                     | The overlap (in pixels) between neighbouring divisions in   |
+|                                     |                                 | (:doc:`../analysis/selavy`)                  | the z-direction.                                            |
++-------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+ 
 | **Searching**                       |                                 |                                              |                                                             |
 |                                     |                                 |                                              |                                                             |
 +-------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+

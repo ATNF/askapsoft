@@ -919,6 +919,8 @@ SELAVY_BOX_SIZE=50
 # How the processors subdivide the image
 SELAVY_NSUBX=6
 SELAVY_NSUBY=3
+SELAVY_OVERLAPX=0
+SELAVY_OVERLAPY=0
 #
 # Whether to use the continuum cube to find the spectral index &
 # curvature
@@ -1025,8 +1027,11 @@ SELAVY_SPEC_VARIABLE_THRESHOLD=false
 SELAVY_SPEC_BOX_SIZE=35
 # How the processors subdivide the image
 SELAVY_SPEC_NSUBX=6
-SELAVY_SPEC_NSUBY=3
-SELAVY_SPEC_NSUBZ=11
+SELAVY_SPEC_NSUBY=9
+SELAVY_SPEC_NSUBZ=18
+SELAVY_SPEC_OVERLAPX=0
+SELAVY_SPEC_OVERLAPY=0
+SELAVY_SPEC_OVERLAPZ=20
 #
 # Limits on sizes of reported sources
 SELAVY_SPEC_MIN_PIX=5

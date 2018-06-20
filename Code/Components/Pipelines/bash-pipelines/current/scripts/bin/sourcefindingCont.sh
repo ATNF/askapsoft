@@ -107,10 +107,10 @@ if [ "${DO_IT}" == "true" ]; then
             useContCube=false
             if [ "${IMAGETYPE_CONT}" == "fits" ]; then
                 contImage="${contImage}.fits"
-                contWeights="${contWeights}.fits"
-                imageName=${contImage}
+                contWeights="${contWeights}"
+                imageName="${contImage}"
                 noiseMap="${noiseMap}.fits"
-                thresholdMap="${thresholdMap}.fits"
+                thresholdMap="${thresholdMap}"
                 meanMap="${meanMap}.fits"
                 snrMap="${snrMap}.fits"
             fi
@@ -313,6 +313,8 @@ Selavy.imageHistory                             = [${imageHistoryString}]
 \${SpectralTermUse}
 Selavy.nsubx                                    = ${SELAVY_NSUBX}
 Selavy.nsuby                                    = ${SELAVY_NSUBY}
+Selavy.overlapx                                 = ${SELAVY_OVERLAPX}
+Selavy.overlapy                                 = ${SELAVY_OVERLAPY}
 #
 Selavy.resultsFile                              = selavy-\${fitsimage%%.fits}.txt
 #
@@ -324,14 +326,14 @@ Selavy.VariableThreshold.ThresholdImageName     = ${thresholdMap}
 Selavy.VariableThreshold.NoiseImageName         = ${noiseMap}
 Selavy.VariableThreshold.AverageImageName       = ${meanMap}
 Selavy.VariableThreshold.SNRimageName           = ${snrMap}
+Selavy.VariableThreshold.imagetype              = ${IMAGETYPE_CONT}
 \${weightpars}
 #
 Selavy.Fitter.doFit                             = true
 Selavy.Fitter.fitTypes                          = [full]
 Selavy.Fitter.numGaussFromGuess                 = true
 Selavy.Fitter.maxReducedChisq                   = 10.
-# Force the component maps to be casa images for now
-Selavy.Fitter.imagetype                         = casa
+Selavy.Fitter.imagetype                         = ${IMAGETYPE_CONT}
 #
 Selavy.threshSpatial                            = 5
 Selavy.flagAdjacent                             = false

@@ -85,38 +85,44 @@ is only the latter that are passsed to CASDA).
 | ``SELAVY_NSUBY``                    | 3                                        | nsuby                               | Number of divisions in the y-direction that divide the image|
 |                                     |                                          | (:doc:`../analysis/selavy`)         | up, allowing parallel processing in the source-detection.   |
 +-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
-| ``SELAVY_SNR_CUT``                  | 5.0                                      | snrcut                              | The signal-to-noise ratio threshold to use in the           |
-|                                     |                                          | (:doc:`../analysis/selavy`)         | source-detection.                                           | 
+| ``SELAVY_OVERLAPX``                 | 0                                        | overlapx                            | The overlap (in pixels) between neighbouring divisions in   |
+|                                     |                                          | (:doc:`../analysis/selavy`)         | the x-direction.                                            |
 +-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
-| ``SELAVY_FLAG_GROWTH``              | true                                     | flagGrowth                          | A flag indicating whether to grow detections down to a      |
-|                                     |                                          | (:doc:`../analysis/selavy`)         | lower threshold.                                            |
+| ``SELAVY_OVERLAPY``                 | 0                                        | overlapy                            | The overlap (in pixels) between neighbouring divisions in   |
+|                                     |                                          | (:doc:`../analysis/selavy`)         | the y-direction.                                            |
 +-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+ 
+| ``SELAVY_SNR_CUT``                  | 5.0                                      | snrcut                              | The signal-to-noise ratio threshold to use in the           |
+|                                     |                                          | (:doc:`../analysis/selavy`)         | source-detection.                                           |
++-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
+| ``SELAVY_FLAG_GROWTH``              | true                                     | flagGrowth                          | A flag indicating whether to grow detections down to a      | 
+|                                     |                                          | (:doc:`../analysis/selavy`)         | lower threshold.                                            |
++-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
 | ``SELAVY_GROWTH_CUT``               | 3.0                                      | growthCut                           | The secondary signal-to-noise threshold to which detections |
-|                                     |                                          | (:doc:`../analysis/selavy`)         | should be grown.                                            |
+|                                     |                                          | (:doc:`../analysis/selavy`)         | should be grown.                                            | 
 +-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
-| ``SELAVY_FLUX_THRESHOLD``           | ""                                       | threshold                           | The flux threshold to use in the source-detection. If left  | 
+| ``SELAVY_FLUX_THRESHOLD``           | ""                                       | threshold                           | The flux threshold to use in the source-detection. If left  |
 |                                     |                                          | (:doc:`../analysis/selavy`)         | blank, we use the SNR threshold ``SELAVY_SNR_CUT``.         |
-+-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
++-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+ 
 | ``SELAVY_GROWTH_THRESHOLD``         | ""                                       | growthCut                           | The secondary signal-to-noise threshold to which detections |
-|                                     |                                          | (:doc:`../analysis/selavy`)         | should be grown. Only used if ``SELAVY_FLUX_THRESHOLD`` is  | 
+|                                     |                                          | (:doc:`../analysis/selavy`)         | should be grown. Only used if ``SELAVY_FLUX_THRESHOLD`` is  |
 |                                     |                                          |                                     | given.                                                      |
 +-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
 | ``SELAVY_WEIGHTS_CUTOFF``           | 0.15                                     | Weights.weightsCutoff               | The cutoff level, as a fraction of the peak in the weights  |
-|                                     |                                          | (:doc:`../analysis/thresholds`)     | image, used in the source-finding. Only applies if the image|
+|                                     |                                          | (:doc:`../analysis/thresholds`)     | image, used in the source-finding. Only applies if the image| 
 |                                     |                                          |                                     | being searched has a corresponding weights image.           |
-+-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+ 
++-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
 | ``SELAVY_VARIABLE_THRESHOLD``       | true                                     | VariableThreshold                   | A flag indicating whether to determine the signal-to-noise  |
-|                                     |                                          | (:doc:`../analysis/thresholds`)     | threshold on a pixel-by-pixel basis based on local          |
+|                                     |                                          | (:doc:`../analysis/thresholds`)     | threshold on a pixel-by-pixel basis based on local          | 
 |                                     |                                          |                                     | statistics (that is, the statistics within a relatively     |
-|                                     |                                          |                                     | small box centred on the pixel in question).                | 
+|                                     |                                          |                                     | small box centred on the pixel in question).                |
 +-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
 | ``SELAVY_BOX_SIZE``                 | 50                                       | VariableThreshold.boxSize           | The half-width of the sliding box used to determine the     |
 |                                     |                                          | (:doc:`../analysis/thresholds`)     | local statistics.                                           |
 +-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
 | **Spectral indices**                |                                          |                                     |                                                             |
-|                                     |                                          |                                     |                                                             |
+|                                     |                                          |                                     |                                                             | 
 +-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
-| ``USE_CONTCUBE_FOR_SPECTRAL_INDEX`` | false                                    | none                                | When true, the spectral indices in the component catalogue  | 
+| ``USE_CONTCUBE_FOR_SPECTRAL_INDEX`` | false                                    | none                                | When true, the spectral indices in the component catalogue  |
 |                                     |                                          |                                     | are measured from the Stokes-I continuum cube. When false   |
 |                                     |                                          |                                     | (the default), the Taylor-term images are used. See         |
 |                                     |                                          |                                     | :doc:`../analysis/postprocessing` for information about each|

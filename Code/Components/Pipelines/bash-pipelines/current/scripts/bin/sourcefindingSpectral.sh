@@ -47,20 +47,17 @@ for subband in ${SUBBAND_WRITER_LIST}; do
     DEP=""
     if [ "${DO_SPECTRAL_IMSUB}" == "true" ]; then
         if [ "$FIELD" == "." ]; then
-            DEP=$DEP_LINMOS_SPECTRAL_CONTSUB_ALL
+            DEP=$(addDep "$DEP" "$DEP_LINMOS_SPECTRAL_CONTSUB_ALL")
         elif [ "$BEAM" == "all" ]; then
-            DEP=$DEP_LINMOS_SPECTRAL_CONTSUB
-        else
-            DEP=$(addDep "$DEP" "$ID_SPECIMG_SCI")
+            DEP=$(addDep "$DEP" "$DEP_LINMOS_SPECTRAL_CONTSUB")
         fi
+    fi
+    if [ "$FIELD" == "." ]; then
+        DEP=$(addDep "$DEP" "$DEP_LINMOS_SPECTRAL_RESTORED_ALL")
+    elif [ "$BEAM" == "all" ]; then
+        DEP=$(addDep "$DEP" "$DEP_LINMOS_SPECTRAL_RESTORED")
     else
-        if [ "$FIELD" == "." ]; then
-            DEP=$DEP_LINMOS_SPECTRAL_RESTORED_ALL
-        elif [ "$BEAM" == "all" ]; then
-            DEP=$DEP_LINMOS_SPECTRAL_RESTORED
-        else
-            DEP=$(addDep "$DEP" "$ID_SPECIMG_SCI")
-        fi
+        DEP=$(addDep "$DEP" "$ID_SPECIMG_SCI")
     fi
     
     # Define base string for source IDs
@@ -86,22 +83,22 @@ for subband in ${SUBBAND_WRITER_LIST}; do
         if [ "${SELAVY_SPEC_FLUX_THRESHOLD}" != "" ]; then
             # Use a direct flux threshold if specified
             thresholdPars="# Detection threshold
-Selavy.threshold = ${SELAVY_SPEC_FLUX_THRESHOLD}"
+Selavy.threshold                                = ${SELAVY_SPEC_FLUX_THRESHOLD}"
             if [ "${SELAVY_SPEC_FLAG_GROWTH}" == "true" ] &&
                    [ "${SELAVY_SPEC_GROWTH_THRESHOLD}" != "" ]; then
                 thresholdPars="${thresholdPars}
-Selavy.flagGrowth =  ${SELAVY_SPEC_FLAG_GROWTH}
-Selavy.growthThreshold = ${SELAVY_SPEC_GROWTH_THRESHOLD}"
+Selavy.flagGrowth                               = ${SELAVY_SPEC_FLAG_GROWTH}
+Selavy.growthThreshold                          = ${SELAVY_SPEC_GROWTH_THRESHOLD}"
             fi
         else
             # Use a SNR threshold
             thresholdPars="# Detection threshold
-Selavy.snrCut = ${SELAVY_SPEC_SNR_CUT}"
+Selavy.snrCut                                   = ${SELAVY_SPEC_SNR_CUT}"
             if [ "${SELAVY_SPEC_FLAG_GROWTH}" == true ] && 
                    [ "${SELAVY_SPEC_GROWTH_CUT}" != "" ]; then
                 thresholdPars="${thresholdPars}
-Selavy.flagGrowth =  ${SELAVY_SPEC_FLAG_GROWTH}
-Selavy.growthThreshold = ${SELAVY_SPEC_GROWTH_CUT}"
+Selavy.flagGrowth                               = ${SELAVY_SPEC_FLAG_GROWTH}
+Selavy.growthThreshold                          = ${SELAVY_SPEC_GROWTH_CUT}"
             fi
         fi
 
@@ -111,24 +108,24 @@ Selavy.growthThreshold = ${SELAVY_SPEC_GROWTH_CUT}"
         if [ "${SELAVY_SPEC_FLAG_SMOOTH}" == "true" ]; then
             if [ "${SELAVY_SPEC_SMOOTH_TYPE}" == "spectral" ]; then
                 preprocessPars="# Spectral smoothing
-Selavy.flagSmooth = ${SELAVY_SPEC_FLAG_SMOOTH}
-Selavy.smoothType = ${SELAVY_SPEC_SMOOTH_TYPE}
-Selavy.hanningWidth = ${SELAVY_SPEC_HANN_WIDTH}"
+Selavy.flagSmooth                               = ${SELAVY_SPEC_FLAG_SMOOTH}
+Selavy.smoothType                               = ${SELAVY_SPEC_SMOOTH_TYPE}
+Selavy.hanningWidth                             = ${SELAVY_SPEC_HANN_WIDTH}"
             else
                 preprocessPars="# Spatial smoothing
-Selavy.flagSmooth = ${SELAVY_SPEC_FLAG_SMOOTH}
-Selavy.smoothType = ${SELAVY_SPEC_SMOOTH_TYPE}
-Selavy.kernMaj = ${SELAVY_SPEC_KERN_MAJ}
-Selavy.kernMin = ${SELAVY_SPEC_KERN_MIN}
-Selavy.kernPA = ${SELAVY_SPEC_KERN_PA}"
+Selavy.flagSmooth                               = ${SELAVY_SPEC_FLAG_SMOOTH}
+Selavy.smoothType                               = ${SELAVY_SPEC_SMOOTH_TYPE}
+Selavy.kernMaj                                  = ${SELAVY_SPEC_KERN_MAJ}
+Selavy.kernMin                                  = ${SELAVY_SPEC_KERN_MIN}
+Selavy.kernPA                                   = ${SELAVY_SPEC_KERN_PA}"
             fi
         elif [ "${SELAVY_SPEC_FLAG_WAVELET}" == "true" ]; then
             preprocessPars="# Multi-resolution wavelet reconstruction
-Selavy.flagAtrous = ${SELAVY_SPEC_FLAG_WAVELET}
-Selavy.reconDim   = ${SELAVY_SPEC_RECON_DIM}
-Selavy.scaleMin   = ${SELAVY_SPEC_RECON_SCALE_MIN}
-Selavy.scaleMax   = ${SELAVY_SPEC_RECON_SCALE_MAX}
-Selavy.snrRecon   = ${SELAVY_SPEC_RECON_SNR}"        
+Selavy.flagAtrous                               = ${SELAVY_SPEC_FLAG_WAVELET}
+Selavy.reconDim                                 = ${SELAVY_SPEC_RECON_DIM}
+Selavy.scaleMin                                 = ${SELAVY_SPEC_RECON_SCALE_MIN}
+Selavy.scaleMax                                 = ${SELAVY_SPEC_RECON_SCALE_MAX}
+Selavy.snrRecon                                 = ${SELAVY_SPEC_RECON_SNR}"        
         fi
         
 
@@ -176,8 +173,8 @@ if [ "\${BEAM}" == "all" ]; then
     # Weights image - really only useful if primary-beam corrected
     weights=${weightsImage}
     imlist="\${imlist} ${OUTPUT}/\${weights}"
-    weightpars="Selavy.Weights.weightsImage = \${weights%%.fits}.fits
-Selavy.Weights.weightsCutoff = ${SELAVY_SPEC_WEIGHTS_CUTOFF}"
+    weightpars="Selavy.Weights.weightsImage                     = \${weights%%.fits}.fits
+Selavy.Weights.weightsCutoff                    = ${SELAVY_SPEC_WEIGHTS_CUTOFF}"
 else
     weightpars="#"
 fi
@@ -219,49 +216,48 @@ if [ "\${HAVE_IMAGES}" == "true" ]; then
     mkdir -p "${OUTPUT}/$selavyCubeletsDir"
     
     cat > "\$parset" <<EOFINNER
-Selavy.image = \${fitsimage}
-Selavy.sbid  = ${SB_SCIENCE}
-Selavy.sourceIdBase = ${sourceIDbase}
-Selavy.imageHistory = [${imageHistoryString}]
+Selavy.image                                    = \${fitsimage}
+Selavy.sbid                                     = ${SB_SCIENCE}
+Selavy.sourceIdBase                             = ${sourceIDbase}
+Selavy.imageHistory                             = [${imageHistoryString}]
 #
-Selavy.nsubx = ${SELAVY_SPEC_NSUBX}
-Selavy.nsuby = ${SELAVY_SPEC_NSUBY}
-Selavy.nsubz = ${SELAVY_SPEC_NSUBZ}
+Selavy.nsubx                                    = ${SELAVY_SPEC_NSUBX}
+Selavy.nsuby                                    = ${SELAVY_SPEC_NSUBY}
+Selavy.nsubz                                    = ${SELAVY_SPEC_NSUBZ}
+Selavy.overlapx                                 = ${SELAVY_SPEC_OVERLAPX}
+Selavy.overlapy                                 = ${SELAVY_SPEC_OVERLAPY}
+Selavy.overlapz                                 = ${SELAVY_SPEC_OVERLAPZ}
 #
-Selavy.resultsFile = selavy-\${fitsimage%%.fits}.txt
+Selavy.resultsFile                              = selavy-\${fitsimage%%.fits}.txt
 #
 \${weightpars}
 #
 ${thresholdPars}
 #
-Selavy.searchType = ${SELAVY_SPEC_SEARCH_TYPE}
+Selavy.searchType                               = ${SELAVY_SPEC_SEARCH_TYPE}
 #
 ${preprocessPars}
 #
-Selavy.VariableThreshold = ${SELAVY_SPEC_VARIABLE_THRESHOLD}
-Selavy.VariableThreshold.boxSize = ${SELAVY_SPEC_BOX_SIZE}
-Selavy.VariableThreshold.ThresholdImageName=detThresh.${imageName}.img
-Selavy.VariableThreshold.NoiseImageName=noiseMap.${imageName}.img
-Selavy.VariableThreshold.AverageImageName=meanMap.${imageName}.img
-Selavy.VariableThreshold.SNRimageName=snrMap.${imageName}.img
-Selavy.VariableThreshold.reuse = true
+Selavy.VariableThreshold                        = ${SELAVY_SPEC_VARIABLE_THRESHOLD}
+Selavy.VariableThreshold.boxSize                = ${SELAVY_SPEC_BOX_SIZE}
+Selavy.VariableThreshold.reuse                  = true
 #
-Selavy.Fitter.doFit = false
+Selavy.Fitter.doFit                             = false
 #
-Selavy.threshSpatial = 5
-#Selavy.flagAdjacent = true
-Selavy.threshVelocity = 7
+Selavy.threshSpatial                            = 5
+#Selavy.flagAdjacent                            = true
+Selavy.threshVelocity                           = 7
 #
-Selavy.minVoxels = 11
-Selavy.minPix = ${SELAVY_SPEC_MIN_PIX}
-Selavy.minChannels = ${SELAVY_SPEC_MIN_CHAN}
-Selavy.maxChannels = ${SELAVY_SPEC_MAX_CHAN}
-Selavy.sortingParam = -pflux
-Selavy.spectralUnits = km/s
+Selavy.minVoxels                                = 11
+Selavy.minPix                                   = ${SELAVY_SPEC_MIN_PIX}
+Selavy.minChannels                              = ${SELAVY_SPEC_MIN_CHAN}
+Selavy.maxChannels                              = ${SELAVY_SPEC_MAX_CHAN}
+Selavy.sortingParam                             = -pflux
+Selavy.spectralUnits                            = km/s
 #
 # Emission-line catalogue
-Selavy.HiEmissionCatalogue=true
-Selavy.optimiseMask = ${SELAVY_SPEC_OPTIMISE_MASK}
+Selavy.HiEmissionCatalogue                      = true
+Selavy.optimiseMask                             = ${SELAVY_SPEC_OPTIMISE_MASK}
 EOFINNER
 
     NCORES=${NUM_CPUS_SELAVY_SPEC}
@@ -276,6 +272,7 @@ EOFINNER
 else
 
     echo "FITS conversion failed, so Selavy did not run"
+    exit 1
 
 fi
 
