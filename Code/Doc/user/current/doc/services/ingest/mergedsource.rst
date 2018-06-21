@@ -5,7 +5,7 @@ MergedSource task is the main source task intended to be used in the production 
 such because it merges visibility stream (received by VisSource) and metadata stream (received by 
 MetadataSource) by aligning them using time. The user does not need to setup VisSource and MetadataSource
 explicitly, they are instantiated inside this task. The metadata access requires appropriate *Ice*
-configuration, see the main :doc:`index` page for details.
+configuration, see the main :doc:`index` page for details. 
 
 Configuration Parameters
 ------------------------
@@ -106,6 +106,19 @@ The type of the task defined by tasks.\ **name**\ .type should be set to *Merged
 |                            |                   |            |ASKAP). Use this parameter if performance is limited, and     |
 |                            |                   |            |slices with higher numbers are not used anyway).              |
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
+
+Notes
+~~~~~ 
+
+As of revision 9740 (from 12 June 2018), baseline spacing information (UVW) is also populated from the metadata stream. No
+additional configuration is required and the user is free to either re-calculate UVW (as it was done before this change) or 
+to use TOS-supplied UVWs. The metadata stream contains one UVW vector per-antenna per beam. Baseline-based UVWs are computed
+on-the-fly by this task by subtracting appropriate antenna-based UVWs. An interesting situation arises if one of the antennas
+is flagged (as in this case it is impossible to guarantee correctness of its UVW). Currently, UVWs are not written for such
+baselines leaving them zero-valued (as opposed to have junk values). This should have no implication for any code which honours
+flags properly, but is a change in behaviour. An exception is raised (and execution is aborted) if metadata stream does not
+have UVWs at all or have it not for all beams ingest pipeline is set up to record.
+
 
 Example
 ~~~~~~~
