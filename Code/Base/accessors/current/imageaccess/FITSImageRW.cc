@@ -260,14 +260,14 @@ bool FITSImageRW::create(const std::string &name, const casa::IPosition &shape, 
     theKeywordList.first();
     theKeywordList.next(); // skipping an extra SIMPLE... hack
     casa::FitsKeyCardTranslator m_kc;
-
-    char cards[2880 * 1024];
-    memset(cards, 0, 2880 * 1024);
+    const size_t cards_size = 2880 * 1024;
+    char cards[cards_size];
+    memset(cards, 0, sizeof(cards));
     while (1) {
         if (m_kc.build(cards, theKeywordList)) {
 
             outfile << cards;
-            memset(cards, 0, 2880 * 1024);
+            memset(cards, 0, sizeof(cards));
         } else {
             if (cards[0] != 0) {
                 outfile << cards;
