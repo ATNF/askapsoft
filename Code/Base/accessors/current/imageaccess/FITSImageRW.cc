@@ -278,7 +278,16 @@ bool FITSImageRW::create(const std::string &name, const casa::IPosition &shape, 
     }
     // outfile << cards;
     ASKAPLOG_INFO_STR(FITSlogger, "All keywords added to file");
-    outfile.close();
+    try {
+      outfile.close();
+      ASKAPLOG_INFO_STR(FITSlogger, "Outfile closed");
+    }
+    catch (...) {
+      ASKAPLOG_WARN_STR(FITSlogger, "Failed to properly close outfile");
+      return false;
+    }
+
+
 
     return true;
 
