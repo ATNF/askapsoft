@@ -62,14 +62,17 @@ VariableThresholder::VariableThresholder(askap::askapparallel::AskapParallel& co
     itsParset(parset),
     itsImageSuffix("")
 {
-    itsBoxSize = parset.getInt16("boxSize", 50);
-    itsImagetype = parset.getString("imagetype", "fits");
+    itsBoxSize = itsParset.getInt16("boxSize", 50);
+    itsImagetype = itsParset.getString("imagetype", "fits");
+    if (! itsParset.isDefined("imagetype")){
+        itsParset.add("imagetype",itsImagetype);
+    }
     itsImageSuffix = (itsImagetype == "fits") ? ".fits" : "";
-    itsSNRimageName = parset.getString("SNRimageName", "");
-    itsThresholdImageName = parset.getString("ThresholdImageName", "");
-    itsNoiseImageName = parset.getString("NoiseImageName", "");
-    itsAverageImageName = parset.getString("AverageImageName", "");
-    itsBoxSumImageName = parset.getString("BoxSumImageName", "");
+    itsSNRimageName = itsParset.getString("SNRimageName", "");
+    itsThresholdImageName = itsParset.getString("ThresholdImageName", "");
+    itsNoiseImageName = itsParset.getString("NoiseImageName", "");
+    itsAverageImageName = itsParset.getString("AverageImageName", "");
+    itsBoxSumImageName = itsParset.getString("BoxSumImageName", "");
 
     itsFlagWriteImages = (itsSNRimageName != "" ||
                           itsThresholdImageName != "" ||
@@ -80,7 +83,7 @@ VariableThresholder::VariableThresholder(askap::askapparallel::AskapParallel& co
     itsSearchType = "spatial";
     itsCube = 0;
     itsFlagRobustStats = true;
-    itsFlagReuse = parset.getBool("reuse", false);
+    itsFlagReuse = itsParset.getBool("reuse", false);
     // User wants to reuse, but have they provided an SNR image?
     if (itsSNRimageName == "") {
         ASKAPLOG_WARN_STR(logger,
