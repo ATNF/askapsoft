@@ -165,9 +165,9 @@ void VariableThresholder::calculate()
 
     if (itsFlagReuse) {
 
-        ASKAPLOG_INFO_STR(logger, "Reusing SNR map from file " << itsSNRimageName);
+        ASKAPLOG_INFO_STR(logger, "Reusing SNR map from file " << snrImage());
 
-        casa::MaskedArray<Float> snr = analysisutilities::getPixelsInBox(itsSNRimageName,
+        casa::MaskedArray<Float> snr = analysisutilities::getPixelsInBox(snrImage(),
                                        itsSlicer);
 
         if (itsCube->getRecon() == 0) {
@@ -183,19 +183,19 @@ void VariableThresholder::calculate()
     } else {
 
         ASKAPLOG_INFO_STR(logger, "Will calculate the pixel-by-pixel signal-to-noise map");
-        if (itsSNRimageName != "") {
+        if (snrImage() != "") {
             ASKAPLOG_INFO_STR(logger, "Will write the SNR map to " << snrImage());
         }
-        if (itsBoxSumImageName != "") {
+        if (boxSumImage() != "") {
             ASKAPLOG_INFO_STR(logger, "Will write the box sum map to " << boxSumImage());
         }
-        if (itsNoiseImageName != "") {
+        if (noiseImage() != "") {
             ASKAPLOG_INFO_STR(logger, "Will write the noise map to " << noiseImage());
         }
-        if (itsAverageImageName != "") {
+        if (averageImage() != "") {
             ASKAPLOG_INFO_STR(logger, "Will write the average background map to " << averageImage());
         }
-        if (itsThresholdImageName != "") {
+        if (thresholdImage() != "") {
             ASKAPLOG_INFO_STR(logger, "Will write the flux threshold map to " << thresholdImage());
         }
 
@@ -260,7 +260,7 @@ void VariableThresholder::calculate()
                 slidingBoxMaskedStats(inputMaskedChunk, middle, spread, box,
                                       itsFlagRobustStats);
                 snr = calcMaskedSNR(inputMaskedChunk, middle, spread);
-                if (itsBoxSumImageName != "") {
+                if (boxSumImage() != "") {
                     boxsum = slidingArrayMath(inputMaskedChunk, box, MaskedSumFunc<Float>());
                 }
 
@@ -273,14 +273,14 @@ void VariableThresholder::calculate()
 
             if (itsFlagWriteImages) {
                 casa::Array<bool> mask(inputMaskedChunk.getMask());
-                writeImage(spread, mask, itsNoiseImageName, itsLocation);
-                writeImage(middle, mask, itsAverageImageName, itsLocation);
-                writeImage(snr, mask, itsSNRimageName, itsLocation);
+                writeImage(spread, mask, noiseImage(), itsLocation);
+                writeImage(middle, mask, averageImage(), itsLocation);
+                writeImage(snr, mask, snrImage(), itsLocation);
                 if (itsThresholdImageName != "") {
                     casa::Array<Float> thresh = middle + itsSNRthreshold * spread;
-                    writeImage(thresh, mask, itsThresholdImageName, itsLocation);
+                    writeImage(thresh, mask, thresholdImage(), itsLocation);
                 }
-                writeImage(boxsum, mask, itsBoxSumImageName, itsLocation);
+                writeImage(boxsum, mask, boxSumImage(), itsLocation);
             }
 
 
@@ -343,28 +343,28 @@ void VariableThresholder::saveSNRtoCube(casa::Array<Float> &snr, size_t ctr)
 void VariableThresholder::createImages()
 {
 
-    if (itsNoiseImageName != "") {
-        DistributedImageWriter noiseWriter(*itsComms, itsParset, itsCube, itsNoiseImageName);
+    if (noiseImage() != "") {
+        DistributedImageWriter noiseWriter(*itsComms, itsParset, itsCube, noiseImage());
         noiseWriter.create();
     }
 
-    if (itsAverageImageName != "") {
-        DistributedImageWriter averageWriter(*itsComms, itsParset, itsCube, itsAverageImageName);
+    if (averageImage() != "") {
+        DistributedImageWriter averageWriter(*itsComms, itsParset, itsCube, averageImage());
         averageWriter.create();
     }
 
-    if (itsSNRimageName != "") {
-        DistributedImageWriter snrWriter(*itsComms, itsParset, itsCube, itsSNRimageName);
+    if (snrImage() != "") {
+        DistributedImageWriter snrWriter(*itsComms, itsParset, itsCube, snrImage());
         snrWriter.create();
     }
 
-    if (itsThresholdImageName != "") {
-        DistributedImageWriter threshWriter(*itsComms, itsParset, itsCube, itsThresholdImageName);
+    if (thresholdImage() != "") {
+        DistributedImageWriter threshWriter(*itsComms, itsParset, itsCube, thresholdImage());
         threshWriter.create();
     }
 
-    if (itsBoxSumImageName != "") {
-        DistributedImageWriter boxWriter(*itsComms, itsParset, itsCube, itsBoxSumImageName);
+    if (boxSumImage() != "") {
+        DistributedImageWriter boxWriter(*itsComms, itsParset, itsCube, boxSumImage());
         boxWriter.create();
     }
 
