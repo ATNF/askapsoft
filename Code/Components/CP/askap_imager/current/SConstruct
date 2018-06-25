@@ -12,8 +12,8 @@ pkg.AddSubPackage("distributedimager")
 pkg.AddSubPackage("messages")
 
 # Disable "shared" as MPE2 is not built with fPIC
-pkg.build_shared = False;
-pkg.build_static = True;
+pkg.build_shared = True;
+pkg.build_static = False 
 
 env.AppendUnique(CCFLAGS=['-O3'])
 env.AppendUnique(CCFLAGS=['-fPIC'])
