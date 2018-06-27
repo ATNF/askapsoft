@@ -276,14 +276,14 @@ void VariableThresholder::calculate()
 
             if (itsFlagWriteImages) {
                 casa::Array<bool> mask(inputMaskedChunk.getMask());
-                writeImage(spread, mask, noiseImage(), itsLocation);
-                writeImage(middle, mask, averageImage(), itsLocation);
-                writeImage(snr, mask, snrImage(), itsLocation);
+                writeImage(spread, mask, itsNoiseImageName, itsLocation);
+                writeImage(middle, mask, itsAverageImageName, itsLocation);
+                writeImage(snr, mask, itsSNRimageName, itsLocation);
                 if (itsThresholdImageName != "") {
                     casa::Array<Float> thresh = middle + itsSNRthreshold * spread;
-                    writeImage(thresh, mask, thresholdImage(), itsLocation);
+                    writeImage(thresh, mask, itsThresholdImageName, itsLocation);
                 }
-                writeImage(boxsum, mask, boxSumImage(), itsLocation);
+                writeImage(boxsum, mask, itsBoxSumImageName, itsLocation);
             }
 
 
@@ -347,27 +347,27 @@ void VariableThresholder::createImages()
 {
 
     if (noiseImage() != "") {
-        DistributedImageWriter noiseWriter(*itsComms, itsParset, itsCube, noiseImage());
+        DistributedImageWriter noiseWriter(*itsComms, itsParset, itsCube, itsNoiseImageName);
         noiseWriter.create();
     }
 
     if (averageImage() != "") {
-        DistributedImageWriter averageWriter(*itsComms, itsParset, itsCube, averageImage());
+        DistributedImageWriter averageWriter(*itsComms, itsParset, itsCube, itsAverageImageName);
         averageWriter.create();
     }
 
     if (snrImage() != "") {
-        DistributedImageWriter snrWriter(*itsComms, itsParset, itsCube, snrImage());
+        DistributedImageWriter snrWriter(*itsComms, itsParset, itsCube, itsSNRimageName);
         snrWriter.create();
     }
 
     if (thresholdImage() != "") {
-        DistributedImageWriter threshWriter(*itsComms, itsParset, itsCube, thresholdImage());
+        DistributedImageWriter threshWriter(*itsComms, itsParset, itsCube, itsThresholdImageName);
         threshWriter.create();
     }
 
     if (boxSumImage() != "") {
-        DistributedImageWriter boxWriter(*itsComms, itsParset, itsCube, boxSumImage());
+        DistributedImageWriter boxWriter(*itsComms, itsParset, itsCube, itsBoxSumImageName);
         boxWriter.create();
     }
 
