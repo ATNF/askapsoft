@@ -358,6 +358,7 @@ void VariableThresholder::createImages()
 
     if (snrImage() != "") {
         DistributedImageWriter snrWriter(*itsComms, itsParset, itsCube, itsSNRimageName);
+        snrWriter.bunit() = "";
         snrWriter.create();
     }
 
