@@ -12,7 +12,8 @@ with several optional pre-processing steps:
    ccontsubtract The continuum is represented by either the clean
    model from the continuum imaging, or -- as the default -- a model
    image constructed by Cmodel from the component catalogue generated
-   by Selavy.
+   by Selavy. The Selavy parameters used are those described on
+   :doc:`ContinuumSourcefinding`.  
 
 Following this pre-processing, the resulting MS is imaged by either the
 simager task (the default), or the new imager, creating a set of

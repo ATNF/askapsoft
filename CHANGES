@@ -12,6 +12,9 @@ Pipeline updates:
    was using the wrong image name.
  * Allow self-calibration to use the clean model image as the model
    for calibration (in the manner of continuum-subtraction).
+ * Improvement of the continuum subtraction Selavy parameterisations,
+   to better model the continuum components. The Selavy parsets are
+   now consistent with those used for the continuum cataloguing.
  * Collation of pipeline jobs that failed, for analysis by ASKAP
    Operations, to help identify pipeline or platform issues.
  * Use of an alternative bandpass smoothing task -
