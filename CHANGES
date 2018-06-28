@@ -67,6 +67,8 @@ Processing tasks:
    image associated with the image being searched.
  * A further bug in Selavy (the extraction code) was fixed to allow
    its use on images without spectral or Stokes axes.
+ * The SNR image produced by Selavy now has a blank string for the
+   pixel units.
 
 Manager & ingest:
 
