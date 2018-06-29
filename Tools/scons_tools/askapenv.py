@@ -136,21 +136,21 @@ if not env['nompi'] and not has_implicit_mpi(env):
             env.AppendUnique(CPPFLAGS=['-DHAVE_MPI'])
     else:
         print "warn: No MPI support detected, compiling without"
-
-# Setu OpenMP support
-if env['openmp']:
-    env.AppendUnique(CCFLAGS=['-fopenmp'])
-    env.AppendUnique(LINKFLAGS=['-fopenmp'])
-
 # Overwrite for Cray, need to use the standard compiler wrappers
 # By default gcc/g++ are used
-if os.environ.has_key("CRAYOS_VERSION"):
+if has_implicit_mpi(env):
     env["ENV"] = os.environ
     env["CC"] = "cc"
     env["CXX"] = "CC"
     env["LINK"] = "CC"
     env["SHLINK"] = "CC"
     env.AppendUnique(LINKFLAGS=['-dynamic'])
+
+# Setu OpenMP support
+if env['openmp']:
+    env.AppendUnique(CCFLAGS=['-fopenmp'])
+    env.AppendUnique(LINKFLAGS=['-fopenmp'])
+
 if env['usepgi']:
 
     # The PGroup compilers support some MPI out of the box
