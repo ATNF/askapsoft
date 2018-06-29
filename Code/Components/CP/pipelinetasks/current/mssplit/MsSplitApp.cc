@@ -25,11 +25,11 @@
 /// @author Ben Humphreys <ben.humphreys@csiro.au>
 /// Last modification: Wasim Raja <Wasim.Raja@csiro.au>
 ///                    * Fixed bug leading to bad_alloc error
-///                    * When row filters are set to 1, MsSplit was trying 
+///                    * When row filters are set to 1, MsSplit was trying
 ///                    * to read all rows in one go leading to the error
-///                    * This was fixed by modifying the mapOfrows function. 
-///                    * 
-///                    *                --wr, 09Mar, 2017 
+///                    * This was fixed by modifying the mapOfrows function.
+///                    *
+///                    *                --wr, 09Mar, 2017
 
 // Package level header file
 #include "askap_pipelinetasks.h"
@@ -174,13 +174,13 @@ boost::shared_ptr<casa::MeasurementSet> MsSplitApp::create(
         info.setSubType(String(""));
         info.readmeAddLine("This is a MeasurementSet Table holding simulated astronomical observations");
     }
-    
-   
+
+
     return ms;
 }
-void MsSplitApp::getRowsToKeep(const casa::MeasurementSet& ms, 
+void MsSplitApp::getRowsToKeep(const casa::MeasurementSet& ms,
         const uInt maxSimultaneousRows) {
-    
+
     const ROMSColumns sc(ms);
     const casa::uInt nRows = sc.nrow();
     uInt row = 0;
@@ -196,23 +196,23 @@ void MsSplitApp::getRowsToKeep(const casa::MeasurementSet& ms,
         }
         row++;
     }
-    
+
     vector<int>::iterator it = rowsToKeep.begin();
     nRowsOut = rowsToKeep.size();
-    ASKAPLOG_INFO_STR(logger,"There are " << nRows << " rows in the input Measurement Set"); 
-    ASKAPLOG_INFO_STR(logger,"There will be " << nRowsOut << " rows in the output Measurement Set"); 
+    ASKAPLOG_INFO_STR(logger,"There are " << nRows << " rows in the input Measurement Set");
+    ASKAPLOG_INFO_STR(logger,"There will be " << nRowsOut << " rows in the output Measurement Set");
     int lastGoodRow = *it;
-    ASKAPLOG_INFO_STR(logger,"First good row for this split is " << *it); 
+    ASKAPLOG_INFO_STR(logger,"First good row for this split is " << *it);
     int nextGoodRow = 0;
     int nGood = 1; // there is always at least 1 good one
     // mv: in the process of cleaning out compiler warnings I've noticed the following for-loop
     //     where I didn't like handling of iterators. Instead of trying to clean up logic, I've
     //     added the following assert statement to avoid a nasty surprise if the vector happens
-    //     to be empty 
+    //     to be empty
     ASKAPASSERT(rowsToKeep.begin() != rowsToKeep.end());
     for (it = rowsToKeep.begin(); it != rowsToKeep.end()-1;++it) {
         nextGoodRow = (*it)+1;
-	// add additional condition to check nGood < maxSimultaneousRows -- wasim 
+	// add additional condition to check nGood < maxSimultaneousRows -- wasim
         if (*(it+1) == nextGoodRow && nGood < static_cast<int>(maxSimultaneousRows)) {
             nGood++;
         }
@@ -231,8 +231,8 @@ void MsSplitApp::getRowsToKeep(const casa::MeasurementSet& ms,
     for (myMap=mapOfRows.begin() ;myMap != mapOfRows.end(); ++myMap) {
         ASKAPLOG_INFO_STR(logger,"Row " << myMap->first << " to " << myMap->first + myMap->second << " is contiguous.");
     }
-  
-    
+
+
 }
 void MsSplitApp::copyAntenna(const casa::MeasurementSet& source, casa::MeasurementSet& dest)
 {
@@ -563,10 +563,18 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
         ASKAPLOG_INFO_STR(logger, "Calculating and storing spectra of sigma values");
     }
 
-     
+
     // Decide how many rows to process simultaneously. This needs to fit within
     // a reasonable amount of memory, because all visibilities will be read
     // in for possible averaging. Assumes 32MB working space.
+
+    // Steve Ord Jun 2018 -
+    // The Logic here does not take account of the input tile size. Specifically the
+    // number of rows that are read in by the table read API.
+    // For efficiency porposes we should try and match that.
+    // Also the output tile size / bucket size should be tweaked to the avoid many unessesary
+    // read-modify writes that are occurring.
+
     std::size_t inDataSize = sizeof(casa::Complex) + sizeof(casa::Bool);
     std::size_t outDataSize = inDataSize;
     if (haveInSigmaSpec) {
@@ -578,15 +586,15 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
     uInt maxSimultaneousRows = (32 * 1024 * 1024) / nPol /
             (nChanIn * inDataSize + nChanOut * outDataSize);
     if (maxSimultaneousRows<1) maxSimultaneousRows = 1;
-    
+
     const casa::uInt nRows = sc.nrow();
     if (!rowFiltersExist()) {
         dest.addRow(nRows);
     }
     else {
-	    /*Modified the getRowsToKeep function: 
-	     * Passing maxSimultaneousRows to it as well 
-	     * for optimal copying of data. 
+	    /*Modified the getRowsToKeep function:
+	     * Passing maxSimultaneousRows to it as well
+	     * for optimal copying of data.
 	     *       --wasim, 03Mar2017
 	     * */
        this->getRowsToKeep(source,
@@ -615,7 +623,7 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
     uInt dstRow = 0;
     uInt row = 0;
     std::map<int,int>::iterator filteredRows;
-    
+
     if (rowFiltersExist()){
         filteredRows = mapOfRows.begin();
         row = filteredRows->first;
@@ -640,14 +648,14 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
             ASKAPLOG_INFO_STR(logger,  "Processed row " << row + 1 << " of " << nRows);
             progressCounter = 0;
         }
-        
+
         // Debugging for chunk copying only
         if (nRowsThisIteration > 1) {
             ASKAPLOG_DEBUG_STR(logger,  "Processing " << nRowsThisIteration
                     << " rows this iteration");
         }
 
-        // Rows have been pre-added if no row based filtering is done 
+        // Rows have been pre-added if no row based filtering is done
         if (rowFiltersExist()) {
             dstrowslicer = Slicer(IPosition(1, dstRow), IPosition(1, nRowsThisIteration),
                     Slicer::endIsLength);
@@ -724,15 +732,15 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
             casa::Cube<casa::Bool> outflag(nPol, nChanOut, nRowsThisIteration);
             // This is only needed if generating sigmaSpectra, but that should be the
             // case with width>1, and this avoids testing in the tight loops below
-            casa::Cube<casa::Float> outsigma(nPol, nChanOut, nRowsThisIteration); 
+            casa::Cube<casa::Float> outsigma(nPol, nChanOut, nRowsThisIteration);
 
             // Average data and combine flag information
             for (uInt pol = 0; pol < nPol; ++pol) {
                 for (uInt destChan = 0; destChan < nChanOut; ++destChan) {
                     for (uInt r = 0; r < nRowsThisIteration; ++r) {
                         casa::Complex sum(0.0, 0.0);
-                        casa::Float varsum = 0.0; 
-                        casa::uInt sumcount = 0; 
+                        casa::Float varsum = 0.0;
+                        casa::uInt sumcount = 0;
 
                         // Starting at the appropriate offset into the source data, average "width"
                         // channels together
@@ -746,7 +754,7 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
 
                         // Now the input channels have been averaged, write the data to
                         // the output cubes
-                        if (sumcount > 0) { 
+                        if (sumcount > 0) {
                             outdata(pol, destChan, r) = casa::Complex(sum.real() / sumcount,
                                                                       sum.imag() / sumcount);
                             outflag(pol, destChan, r) = false;
@@ -774,7 +782,7 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
                 row = filteredRows->first;
             }
             else {
-               break; 
+               break;
             }
         }
         dstRow += nRowsThisIteration;
