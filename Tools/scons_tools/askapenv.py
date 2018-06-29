@@ -121,13 +121,13 @@ if env['squash']:
     env.AppendUnique(CCFLAGS=['-Wno-unused-local-typedef'])
 
 # Setup MPI support
-if has_implicit_mpi():
+if has_implicit_mpi(env):
     if env['nompi']:
         print "error: Cannot disable MPI on this platform"
         env.Exit(1)
     env.AppendUnique(CPPFLAGS=['-DHAVE_MPI'])
 
-if not env['nompi'] and not has_implicit_mpi():
+if not env['nompi'] and not has_implicit_mpi(env):
     if has_explicit_mpi(env):
             env["CC"] = "mpicc"
             env["CXX"] = "mpicxx"
