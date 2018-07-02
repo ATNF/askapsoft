@@ -132,5 +132,6 @@ if __name__ == '__main__':
     ax.xaxis.set_major_formatter(xfmt)
     scol.colourKey('lower right')
     #    scol.widthKey('lower right')
-    fig.savefig('statsPlot-%s.png'%options.statsfile)
+    outfile = 'statsPlot-%s.png'%pipelineDate
+    fig.savefig(outfile)
 
