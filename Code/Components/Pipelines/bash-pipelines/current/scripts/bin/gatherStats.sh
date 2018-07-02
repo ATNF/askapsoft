@@ -105,7 +105,7 @@ if [ "\${doScience}" == "true" ]; then
     ${PIPELINEDIR}/statsPlotter.py -s \$statsTXT -b "${BEAM_ARG}" -f ${NUM_FIELDS} -S ${SB_SCIENCE}
 fi
 
-cp "statsPlot-\${statsTXT}.png" ${diagnostics}
+cp -n "statsPlot-*.png" ${diagnostics}
 EOF
 
     if [ "${SUBMIT_JOBS}" == "true" ]; then    
