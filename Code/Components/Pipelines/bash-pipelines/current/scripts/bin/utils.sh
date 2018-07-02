@@ -236,6 +236,7 @@ function setSelavyDirs()
 # Returns:
 #  - contsubDir
 #  - contsubCleanModel
+#  - contsubCleanModelFullname
 #  - contsubCmodelImage
 #  - contsubComponents
 function setContsubFilenames()
@@ -247,16 +248,21 @@ function setContsubFilenames()
     # Next the clean model image
     imageCode=image
     setImageProperties cont
-    contsubCleanModel=${imageName}
+    contsubCleanModelFullname=${imageName}
+    contsubCleanModel=$contsubCleanModelFullname
     if [ ${NUM_TAYLOR_TERMS} -gt 1 ]; then
         # need to strip the .taylor.0 suffix
-        contsubCleanModel=$(echo $contsubCleanModel | sed -e 's/\.taylor\.0$//g')
+        contsubCleanModel=$(echo $contsubCleanModelFullname | sed -e 's/\.taylor\.0$//g')
     fi
+    contsubCleanModelType=${imageType}
+    contsubCleanModelLabel="Continuum model image from clean model"
     ####
     # Next the model image created by cmodel
     imageCode=restored
     setImageProperties cont
     contsubCmodelImage=model.contsub.${imageName%%.fits}
+    contsubCmodelType="${contsubCleanModelType}"
+    contsubCmodelLabel="Continuum model image from catalogue"
     ####
     # Finally the components parset
     contsubComponents=modelComponents.contsub.${imageName%%.fits}.in

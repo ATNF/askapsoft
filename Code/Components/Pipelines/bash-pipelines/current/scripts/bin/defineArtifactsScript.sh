@@ -41,6 +41,9 @@ for FIELD in ${FIELD_LIST}; do
         else
             msNameList+=(${FIELD}/${msSciAv})
         fi
+        if [ -e ${FIELD}/${msSci} ] && [ "${ARCHIVE_SPECTRAL_MS}" == "true" ]; then
+            msNameList+=(${FIELD}/${msSci})
+        fi
     done
 done
     
@@ -161,6 +164,8 @@ IMAGETYPE_SPECTRAL=${IMAGETYPE_SPECTRAL}
 GAINS_CAL_TABLE="${GAINS_CAL_TABLE}"
 DO_CONTINUUM_VALIDATION="${DO_CONTINUUM_VALIDATION}"
 
+CONTSUB_METHOD="${CONTSUB_METHOD}"
+
 NUM_LOOPS=0
 DO_SELFCAL=$DO_SELFCAL
 if [ "\${DO_SELFCAL}" == "true" ] && [ "\$doSelfcalLoops" == "true" ]; then
@@ -229,7 +234,6 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                                 fi
                             fi
 
-                            ### Noise map not yet written direct to FITS, so change the assignment of fitsSuffix
                             fitsSuffix=""
                             if [ "\${ADD_FITS_SUFFIX}" == "true" ]; then
                                 fitsSuffix=".fits"
@@ -257,6 +261,23 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
 
                     done
         
+                    # Get the continuum models used for continuum subtraction
+                    setContsubFilenames
+                    if [ "\${CONTSUB_METHOD}" == "CleanModel" ]; then
+                        if [ -e "\${FIELD}/\${contsubDir}/\${contsubCleanModelFullname}\${fitsSuffix}" ]; then
+                            casdaTwoDimImageNames+=(\${FIELD}/\${contsubDir}/\${contsubCleanModelFullname}\${fitsSuffix})
+                            casdaTwoDimImageTypes+=(\${contsubCleanModelType})
+                            casdaTwoDimThumbTitles+=("\${contsubCleanModelLabel}")
+                        fi
+                    fi
+                    if [ "\${CONTSUB_METHOD}" == "Cmodel" ]; then
+                        if [ -e "\${FIELD}/\${contsubDir}/\${contsubCmodelImage}\${fitsSuffix}" ]; then
+                            casdaTwoDimImageNames+=(\${FIELD}/\${contsubDir}/\${contsubCmodelImage}\${fitsSuffix})
+                            casdaTwoDimImageTypes+=(\${contsubCmodelType})
+                            casdaTwoDimThumbTitles+=("\${contsubCmodelLabel}")
+                        fi
+                    fi
+
                 done
         
             done
@@ -428,6 +449,13 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                 catNames+=(\${FIELD}/\${selavyDir}/selavy-\${imageName%%.fits}.islands.xml)
                 catTypes+=(continuum-island)
             fi
+            if [ "\${CONTSUB_METHOD}" == "Components"]; then
+                setContsubFilenames
+                if [ -e "\${FIELD}/\${contsubDir}/\${contsubComponents}" ]; then
+                    catNames+=(\${FIELD}/\${contsubDir}/\${contsubComponents})
+                    catTypes+=(continuum-component)
+                fi
+            fi
             if [ -e "\${FIELD}/\${selavyDir}/selavy-\${imageName%%.fits}.polarisation.xml" ]; then
                 catNames+=(\${FIELD}/\${selavyDir}/selavy-\${imageName%%.fits}.polarisation.xml)
                 catTypes+=(polarisation-component)
@@ -524,6 +552,10 @@ if [ "\${PREPARE_FOR_CASDA}" == "true" ]; then
     # parsets directory, tarred & compressed
     tar zcvf parsets.tgz \${parsets##*/}
     tarlist="\${tarlist} parsets.tgz"
+    # beam logs for spectral cubes
+    mkdir -p SpectralCube_BeamLogs
+    cp */beamlog* SpectralCube_BeamLogs
+    tarlist="\${tarlist} SpectralCube_BeamLogs"
 
     tarfile=calibration-metadata-processing-logs.tar
     tar cvf \$tarfile \${tarlist}

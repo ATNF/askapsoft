@@ -1048,6 +1048,10 @@ SELAVY_SPEC_OPTIMISE_MASK=false
 # The image prefixes to be archived
 IMAGE_LIST="image psf psf.image residual sensitivity"
 
+# Whether we should archive the full-resolution (spectral) measurement
+# sets
+ARCHIVE_SPECTRAL_MS=true
+
 # Whether to archive individual beam images
 ARCHIVE_BEAM_IMAGES=false
 # Whether to archive mosaics of self-calibration loops
@@ -1056,7 +1060,7 @@ ARCHIVE_SELFCAL_LOOP_MOSAICS=false
 ARCHIVE_FIELD_MOSAICS=false
 
 # OPAL project ID, for CASDA use
-PROJECT_ID="AS031"
+PROJECT_ID="AS033"
 
 # Observation program description
 OBS_PROGRAM="Commissioning"
@@ -1086,7 +1090,7 @@ WRITE_CASDA_READY=false
 TRANSITION_SB=false
 
 # Base directory for casdaupload output
-CASDA_UPLOAD_DIR=/scratch2/casda/prd
+CASDA_UPLOAD_DIR=/group/casda/prd
 
 # Delay between slurm jobs that poll CASDA output directory for the DONE file
 POLLING_DELAY_SEC=1800

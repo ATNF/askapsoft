@@ -30,6 +30,10 @@ Pipeline updates:
    diagnostic plots for the bandpass solutions.
  * Fixed a bug where the bandpass table name was not set correctly
    when the the DO_FIND_BANDPASS switch was turned off.
+ * Addition of the spectral measurement sets, the
+   continuum-subtraction models/catalogues, and the spectral cube beam
+   logs to the list of artefacts to be sent to CASDA upon pipeline
+   completion. 
  * Changes to some default parameters. Here are the parameters that
    have changed, with their new values (note that the WMAX and
    MAXSUPPORT gridding parameters now also adapt their default values

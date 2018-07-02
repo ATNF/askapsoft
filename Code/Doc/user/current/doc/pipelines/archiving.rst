@@ -40,13 +40,16 @@ The follwing is a list of files included in the upload to CASDA:
 
 * Images: all FITS files that have been processed (ie. continuum
   images, spectral cubes if requested, continuum cubes if requested)
-  that meet the naming system governed by ``IMAGE_LIST``.
+  that meet the naming system governed by ``IMAGE_LIST``. Model images
+  used for continuum subtraction will also be included.
 * Additional images produced by Selavy - the noise map, and the
   component map and its associated residual image.
 * Measurement sets: all continuum measurement sets are included as
-  individual files. These will be tarred for access through CASDA.
+  individual files, along with all spectral measurement sets if
+  requested. These will be tarred for access through CASDA. 
 * Catalogues: all Selavy catalogues created for the final mosaics, in
-  VOTable/XML format
+  VOTable/XML format, along with any catalogues used for the continuum
+  subtraction (if the components method is used).
 * Evaluation files: several files are included for use with the
   validation:
 
@@ -58,8 +61,8 @@ The follwing is a list of files included in the upload to CASDA:
     following:
 
     * All calibration tables
-    * Logs, slurm output and slurm file directories individually
-      tarred.
+    * Logs, slurm output and slurm file directories individually tarred.
+    * The beam logs for the spectral cubes
     * The metadata directory
 
 There are a number of user parameters that govern aspects of these
@@ -92,6 +95,9 @@ scripts, and they are detailed here.
 |                                  |                                 |                                 | CASDA. In addition, the images image.XXX.restored and           |
 |                                  |                                 |                                 | image.XXX.alt.restored (in the latter's case, if present) will  |
 |                                  |                                 |                                 | also be processed.                                              |
++----------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
+| ``ARCHIVE_SPECTRAL_MS``          | true                            | none                            | Whether the individual full-spectral-resolution measurement sets|
+|                                  |                                 |                                 | should be included in the archiving.                            |
 +----------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | ``ARCHIVE_BEAM_IMAGES``          | false                           | none                            | Whether the individual beam images should be included in the    |
 |                                  |                                 |                                 | archiving (true) or if only the mosaicked image should be       |
