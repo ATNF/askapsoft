@@ -21,6 +21,8 @@ Pipeline updates:
    smooth_bandpass.py (instead of plot_caltable.py).
  * Use of an additional bandpass validation script to produce summary
    diagnostic plots for the bandpass solutions.
+ * Fixed a bug where the bandpass table name was not set correctly
+   when the the DO_FIND_BANDPASS switch was turned off.
  * Changes to some default parameters. Here are the parameters that
    have changed, with their new values (note that the WMAX and
    MAXSUPPORT gridding parameters now also adapt their default values

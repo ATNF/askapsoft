@@ -626,7 +626,7 @@ EOF
     ####################
     # Parameters required for bandpass calibration
     ####
-    if [ "${DO_FIND_BANDPASS}" == "true" ]; then
+    if [ "${DO_FIND_BANDPASS}" == "true" ] || [ "${DO_APPLY_BANDPASS}" == "true" ]; then
         
         ####################
         # Filling out wildcards for calibration table
