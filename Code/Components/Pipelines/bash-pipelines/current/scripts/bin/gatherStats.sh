@@ -36,6 +36,13 @@ if [ "${SUBMIT_JOBS}" == "true" ] && [ "${ALL_JOB_IDS}" != "" ]; then
     # Gather stats on all running jobs
 
     joblist=$(echo "$ALL_JOB_IDS" | sed -e 's/,/ /g')
+
+    # This is needed for the plotting
+    if [ "${BEAMLIST}" == "" ]; then
+        BEAM_ARG="${BEAM_MIN}-${BEAM_MAX}"
+    else
+        BEAM_ARG="${BEAMLIST}"
+    fi
     
     sbatchfile=$slurms/gatherAll.sbatch
     cat > "$sbatchfile" <<EOF
@@ -95,7 +102,7 @@ if [ "\${doScience}" == "true" ]; then
     # Make a diagnostic plot of the timings and place a copy in the
     # diagnostics directory - only do this for the science processing
 
-    ${PIPELINEDIR}/statsPlotter.py -s \$statsTXT -b "$(echo ${BEAMS_TO_USE} | sed -e 's/ /,/g')" -f ${NUM_FIELDS} -S ${SB_SCIENCE}
+    ${PIPELINEDIR}/statsPlotter.py -s \$statsTXT -b "${BEAM_ARG}" -f ${NUM_FIELDS} -S ${SB_SCIENCE}
 fi
 
 cp "statsPlot-\${statsTXT}.png" ${diagnostics}
