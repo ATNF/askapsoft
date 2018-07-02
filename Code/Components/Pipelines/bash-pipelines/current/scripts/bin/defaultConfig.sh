@@ -986,7 +986,7 @@ SELAVY_POL_PHI_ZERO=0
 # out based on number of requested cores
 CPUS_PER_CORE_SELAVY_SPEC=""
 # Signal-to-noise ratio threshold
-SELAVY_SPEC_SNR_CUT=5
+SELAVY_SPEC_SNR_CUT=8
 # Flux threshold - leave blank to use SNR
 SELAVY_SPEC_FLUX_THRESHOLD=""
 # Whether to grow to a lower threshold
@@ -1022,7 +1022,7 @@ SELAVY_SPEC_RECON_SCALE_MAX=0
 # Type of searching to be done - 'spectral' or 'spatial'
 SELAVY_SPEC_SEARCH_TYPE=spatial
 # Whether to use a variable threshold
-SELAVY_SPEC_VARIABLE_THRESHOLD=false
+SELAVY_SPEC_VARIABLE_THRESHOLD=true
 # Half-size of the box used to calculate the local threshold
 SELAVY_SPEC_BOX_SIZE=35
 # How the processors subdivide the image

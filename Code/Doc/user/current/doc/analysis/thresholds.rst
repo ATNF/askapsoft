@@ -84,13 +84,15 @@ Threshold-related parameters
 Saving threshold maps
 ~~~~~~~~~~~~~~~~~~~~~
 
-Selavy provides the option of writing out the various arrays created for the VariableThreshold mode. These include the signal-to-noise map, the noise map and the threshold map. These will be written to a CASA image. If the name is not given, no image will be written. The images will be created with the same size as the full input image (any search subsection is ignored - pixels outside this are set to zero). These maps are able to be reused when **Selavy.VariableThreshold.reuse=true**.
+Selavy provides the option of writing out the various arrays created for the VariableThreshold mode. These include the signal-to-noise map, the noise map and the threshold map. The format of the images are governed by the **VariableThreshold.imagetype** parameter - if this is "fits", then a ".fits" extension will be added to the filename. If the name is not given, no image will be written. The images will be created with the same size as the full input image (any search subsection is ignored - pixels outside this are set to zero). These maps are able to be reused when **Selavy.VariableThreshold.reuse=true**.
 
 The parameters controlling this behaviour are listed below.
 
 +--------------------------------------------+------------+-------------+------------------------------------------------------------------+
 |*Parameter*                                 |*Type*      |*Default*    |*Description*                                                     |
 +============================================+============+=============+==================================================================+
+|Selavy.VariableThreshold.imagetype          |string      |fits         |The image format for the ouptut images - either "fits" or "casa"  |
++--------------------------------------------+------------+-------------+------------------------------------------------------------------+
 |Selavy.VariableThreshold.SNRimageName       |string      |""           |The name of the CASA image containing the SNR map                 |
 |                                            |            |             |                                                                  |
 +--------------------------------------------+------------+-------------+------------------------------------------------------------------+

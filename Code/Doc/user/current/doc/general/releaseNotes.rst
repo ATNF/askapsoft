@@ -61,6 +61,8 @@ Pipeline updates:
   GRIDDER_WMAX_NO_SNAPSHOT=26000
   GRIDDER_MAXSUPPORT_NO_SNAPSHOT=1024
   SELAVY_SPEC_OPTIMISE_MASK=false
+  SELAVY_SPEC_VARIABLE_THRESHOLD=true
+  SELAVY_SPEC_SNR_CUT=8
 
 Processing tasks:
 
@@ -81,6 +83,10 @@ Processing tasks:
    its use on images without spectral or Stokes axes.
  * The SNR image produced by Selavy now has a blank string for the
    pixel units.
+ * The implementation of the variable threshold calculations in Selavy
+   have been streamlined, to improve the memory usage particularly for
+   large spectral cubes. There is also control over the imagetype for
+   the images written as part of this algorithm.
 
 Manager & ingest:
 
