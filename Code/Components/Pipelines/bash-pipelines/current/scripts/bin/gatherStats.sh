@@ -103,9 +103,10 @@ if [ "\${doScience}" == "true" ]; then
     # diagnostics directory - only do this for the science processing
 
     ${PIPELINEDIR}/statsPlotter.py -s \$statsTXT -b "${BEAM_ARG}" -f ${NUM_FIELDS} -S ${SB_SCIENCE}
+
+    cp statsPlot-${NOW}.png ${diagnostics}
 fi
 
-cp -n "statsPlot-*.png" ${diagnostics}
 EOF
 
     if [ "${SUBMIT_JOBS}" == "true" ]; then    
