@@ -1,12 +1,39 @@
 #!/usr/bin/env python
+# @file
+#
+# Definitions of colours used by the StatsPlotter and StatsCollection
+# files, as well as functions to provide access to them.
+#
+# @copyright (c) 2018 CSIRO
+# Australia Telescope National Facility (ATNF)
+# Commonwealth Scientific and Industrial Research Organisation (CSIRO)
+# PO Box 76, Epping NSW 1710, Australia
+# atnf-enquiries@csiro.au
+#
+# This file is part of the ASKAP software distribution.
+#
+# The ASKAP software distribution is free software: you can redistribute it
+# and/or modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 3 of the License,
+# or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+#
+# @author Matthew Whiting <Matthew.Whiting@csiro.au>
+#
 
 import matplotlib.patches as mpatches
 import matplotlib.lines as mlines
 import matplotlib.pyplot as plt
 import numpy as np
 
-#labelTypes=['split', 'flag', 'Bandpass', 'apply', 'avg', 'contsub', 'contcube',
-#                'cont_ccal', 'cont_selavy', 'contSC', 'spec_', 'linmos', 'selavy']
 labelTypes=['split', 'flag', 'apply', 'avg', 
                 'cont_ccal', 'contSC', 'contcube', 'contsub', 'spec_', 'linmos', 'selavy']
 colourDict={'split':'C1',
@@ -67,8 +94,6 @@ def getDesc(label):
         desc = 'Split/Copy'
     elif label.find('flag')>=0:
         desc = 'Flagging'
-#    elif label.find('Bandpass')>=0:
-#        desc = 'Bandpass'
     elif label.find('apply')>=0:
         desc = 'Apply Calibration'
     elif label.find('avg')>=0:
@@ -113,10 +138,3 @@ def widthKey(loc='best'):
 
     plt.legend(scatterpoints=1, loc=loc)
     
-##    patchlist=[]
-##    for nc in ncores:
-##        yloc = ncores.
-##        width = 0.8 * np.log10(nc+1) / np.log10(472.*20+1)
-##        patchlist.append(mlines.Line2D([],[],linewidth=width,label='%d cores'%nc,color='k'))
-##
-##    plt.legend(handles=patchlist, loc=loc)

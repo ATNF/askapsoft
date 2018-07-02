@@ -90,9 +90,13 @@ if [ "\${failList}" != "" ]; then
     done
 fi
 
-# Make a diagnostic plot of the timings and place a copy in the
-# diagnostics directory 
-${PIPELINEDIR}/statsPlotter.py -s \$statsTXT -b "$(echo ${BEAMS_TO_USE} | sed -e 's/ /,/g')" -f ${NUM_FIELDS}
+doScience=${DO_SCIENCE_FIELD}
+if [ "\${doScience}" == "true" ]; then
+    # Make a diagnostic plot of the timings and place a copy in the
+    # diagnostics directory - only do this for the science processing
+
+    ${PIPELINEDIR}/statsPlotter.py -s \$statsTXT -b "$(echo ${BEAMS_TO_USE} | sed -e 's/ /,/g')" -f ${NUM_FIELDS} -S ${SB_SCIENCE}
+fi
 
 cp "statsPlot-\${statsTXT}.png" ${diagnostics}
 EOF
