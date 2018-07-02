@@ -93,14 +93,15 @@ if __name__ == '__main__':
             program=line.split()[-1]
             break
 
-    user=os.getlogin()
+#    user=os.getlogin()
     directory = os.getcwd()
         
     pipelineDate=options.statsfile.split('stats-all-')[1].split('.txt')[0]
     timelabel = 'Pipeline run commenced %s'%datetime.strptime(pipelineDate,'%Y-%m-%d-%H%M%S').strftime('%F %H:%M:%S')
-    locationlabel = 'user: %s     %s'%(user,directory)
+#    locationlabel = 'user: %s     %s'%(user,directory)
     
-    plottitle='SBID=%s    %s    (%s)\n\n%s\n%s'%(options.sbid,field,program,timelabel,locationlabel)
+#    plottitle='SBID=%s    %s    (%s)\n\n%s\n%s'%(options.sbid,field,program,timelabel,locationlabel)
+    plottitle='SBID=%s    %s    (%s)\n\n%s\n%s'%(options.sbid,field,program,timelabel,directory)
 
     fin = open(options.statsfile,'r')
 
