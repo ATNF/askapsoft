@@ -564,9 +564,9 @@ void ContinuumWorker::buildSpectralCube() {
 
             }
             else {
-                localChannel = workUnits[0].get_localChannel();
+                localChannel = workUnits[workUnitCount].get_localChannel();
             }
-            globalChannel = workUnits[0].get_globalChannel();
+            globalChannel = workUnits[workUnitCount].get_globalChannel();
 
             ASKAPLOG_INFO_STR(logger, "MS: " << ms \
                               << " pulling out local channel " << localChannel \
