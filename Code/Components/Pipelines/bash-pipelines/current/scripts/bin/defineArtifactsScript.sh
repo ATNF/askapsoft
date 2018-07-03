@@ -449,7 +449,7 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                 catNames+=(\${FIELD}/\${selavyDir}/selavy-\${imageName%%.fits}.islands.xml)
                 catTypes+=(continuum-island)
             fi
-            if [ "\${CONTSUB_METHOD}" == "Components"]; then
+            if [ "\${CONTSUB_METHOD}" == "Components" ]; then
                 setContsubFilenames
                 if [ -e "\${FIELD}/\${contsubDir}/\${contsubComponents}" ]; then
                     catNames+=(\${FIELD}/\${contsubDir}/\${contsubComponents})
