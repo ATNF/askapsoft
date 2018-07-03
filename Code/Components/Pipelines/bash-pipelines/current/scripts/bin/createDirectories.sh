@@ -41,9 +41,9 @@ stats="${BASEDIR}/stats"
 diagnostics="${BASEDIR}/diagnostics"
 
 for dir in "$parsets" "$logs" "$slurms" "$slurmOut" "$tools" "$metadata" "$stats" "$diagnostics"; do
-    mkdir -p $d
+    mkdir -p $dir
     if [ "${HAVE_LUSTRE}" == "true" ]; then
-        lfs setstripe -c 1 $d
+        lfs setstripe -c 1 $dir
     fi
 done
 
