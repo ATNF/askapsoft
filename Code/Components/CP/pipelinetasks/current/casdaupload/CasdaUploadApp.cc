@@ -143,10 +143,16 @@ int CasdaUploadApp::run(int argc, char* argv[])
     CasdaFileUtils::checksumFile(metadataFile);
 
     // Tar up measurement sets
+    bool useAbsolutePath = itsParset.getBool("useAbsolutePath","true");
     for (vector<MeasurementSetElement>::const_iterator it = ms.begin();
             it != ms.end(); ++it) {
         const fs::path in(it->getFilepath());
-        fs::path out(outdir / in.filename());
+        fs::path out;
+        if (useAbsolutePath){
+            out = in;
+        } else {
+            out = (outdir / in.filename());
+        }
         out += ".tar";
         ASKAPLOG_INFO_STR(logger, "Tarring file " << in << " to " << out);
         CasdaFileUtils::tarAndChecksum(in, out);
