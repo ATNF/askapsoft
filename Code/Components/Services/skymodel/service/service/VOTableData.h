@@ -64,7 +64,7 @@ class VOTableData :
         static boost::shared_ptr<VOTableData> create(
             std::string components_file,
             std::string polarisation_file,
-            boost::int64_t healpix_order);
+            int64_t healpix_order);
 
         /// @brief Destructor.
         virtual ~VOTableData();
@@ -97,7 +97,7 @@ class VOTableData :
         /// @param num_components The number of components for which space should be preallocated.
         VOTableData(unsigned long num_components);
 
-        void calcHealpixIndicies(boost::int64_t healpix_order);
+        void calcHealpixIndicies(int64_t healpix_order);
 
         ComponentList itsComponents;
 };

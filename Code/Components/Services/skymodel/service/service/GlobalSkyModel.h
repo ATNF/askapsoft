@@ -103,7 +103,7 @@ class GlobalSkyModel :
         IdListPtr ingestVOTable(
             const std::string& componentsCatalog,
             const std::string& polarisationCatalog,
-            boost::int64_t sb_id,
+            int64_t sb_id,
             boost::posix_time::ptime obs_date);
 
         /// @brief Ingests a VO table of Continuum Components into the GSM.
@@ -122,14 +122,14 @@ class GlobalSkyModel :
         /// @brief Get the HEALPix NSIDE value.
         ///
         /// @return NSIDE
-        inline boost::int64_t getHealpixNside() const {
+        inline int64_t getHealpixNside() const {
             return 2l << getHealpixOrder();
         }
 
         /// @brief Get the HEALPix Order value
         ///
         /// @return Order
-        inline boost::int64_t getHealpixOrder() const {
+        inline int64_t getHealpixOrder() const {
             return 9l;
         }
 
@@ -213,7 +213,7 @@ class GlobalSkyModel :
             const std::string& componentsCatalog,
             const std::string& polarisationCatalog,
             boost::shared_ptr<datamodel::DataSource> dataSource,
-            boost::int64_t sb_id,
+            int64_t sb_id,
             boost::posix_time::ptime obs_date=boost::date_time::not_a_date_time);
 
         /// @brief Ingests a VO table of Continuum Components into the GSM.
@@ -228,7 +228,7 @@ class GlobalSkyModel :
             const std::string& componentsCatalog,
             const std::string& polarisationCatalog,
             boost::shared_ptr<datamodel::DataSource> dataSource,
-            boost::int64_t sb_id,
+            int64_t sb_id,
             boost::posix_time::ptime obs_date=boost::date_time::not_a_date_time);
 
         /// @brief Low-level component search against a set of HEALPix pixels.

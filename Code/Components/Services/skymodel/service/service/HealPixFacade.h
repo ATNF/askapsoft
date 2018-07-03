@@ -50,7 +50,7 @@ namespace sms {
 
 class HealPixFacade : private boost::noncopyable {
     public:
-        typedef boost::int64_t Index;
+        typedef int64_t Index;
         typedef std::vector<Index> IndexList;
         typedef boost::shared_ptr<IndexList> IndexListPtr;
         /// @brief Constructor.
