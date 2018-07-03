@@ -56,7 +56,7 @@ using namespace askap::accessors;
 boost::shared_ptr<VOTableData> VOTableData::create(
     string components_file,
     string polarisation_file,
-    int64_t healpix_order)
+    boost::int64_t healpix_order)
 {
     // open components file
     VOTable components = VOTable::fromXML(components_file);
@@ -156,7 +156,7 @@ VOTableData::~VOTableData()
     ASKAPLOG_DEBUG_STR(logger, "dtor");
 }
 
-void VOTableData::calcHealpixIndicies(int64_t healpix_order) {
+void VOTableData::calcHealpixIndicies(boost::int64_t healpix_order) {
     ASKAPLOG_DEBUG_STR(logger, "Starting HEALPix indexation");
     HealPixFacade hp(healpix_order);
     for (ComponentList::iterator it = itsComponents.begin(); it != itsComponents.end(); it++) {
