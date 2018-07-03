@@ -246,10 +246,10 @@ the quality of the bandpass solution.
 | ``BANDPASS_SMOOTH_OUTLIER``                   | true                                  | none                                                   | If true, only smooth/interpolate over outlier points      |
 |                                               |                                       |                                                        | (based on the inter-quartile range).                      |
 +-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
-| ``BANDPASS_SMOOTH_FIT``                       | 0                                     | none                                                   | The order of the polynomial (if >=0) or the window size   |
+| ``BANDPASS_SMOOTH_FIT``                       | 1                                     | none                                                   | The order of the polynomial (if >=0) or the window size   |
 |                                               |                                       |                                                        | (if <0) used in the smoothing.                            |
 +-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
-| ``BANDPASS_SMOOTH_THRESHOLD``                 | 3.0                                   | none                                                   | The threshold level used for fitting to the bandpass.     |
+| ``BANDPASS_SMOOTH_THRESHOLD``                 | 1.0                                   | none                                                   | The threshold level used for fitting to the bandpass.     |
 +-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
 | *smooth_bandpass*                             |                                       |                                                        | Options for the script "smooth_bandpass.py"               |
 +-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+

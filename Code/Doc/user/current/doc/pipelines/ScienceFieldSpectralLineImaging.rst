@@ -189,13 +189,13 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 | ``CLEAN_SPECTRAL_ALGORITHM``                  | BasisfunctionMFS                    | Clean.algorithm                    | The name of the clean algorithm to use.                           |
 |                                               |                                     | (:doc:`../calim/solver`)           |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``CLEAN_SPECTRAL_MINORCYCLE_NITER``           | 5000                                | Clean.niter                        | The number of iterations for the minor cycle clean.               |
+| ``CLEAN_SPECTRAL_MINORCYCLE_NITER``           | 2000                                | Clean.niter                        | The number of iterations for the minor cycle clean.               |
 |                                               |                                     | (:doc:`../calim/solver`)           |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``CLEAN_SPECTRAL_GAIN``                       | 0.1                                 | Clean.gain                         | The loop gain (fraction of peak subtracted per minor cycle).      |
 |                                               |                                     | (:doc:`../calim/solver`)           |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``CLEAN_SPECTRAL_PSFWIDTH``                   | 512                                 | Clean.psfwidth                     | The width of the psf patch used in the minor cycle.               |
+| ``CLEAN_SPECTRAL_PSFWIDTH``                   | 256                                 | Clean.psfwidth                     | The width of the psf patch used in the minor cycle.               |
 |                                               |                                     | (:doc:`../calim/solver`)           |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``CLEAN_SPECTRAL_SCALES``                     | "[0,3,10,30]"                       | Clean.scales                       | Set of scales (in pixels) to use with the multi-scale clean.      |

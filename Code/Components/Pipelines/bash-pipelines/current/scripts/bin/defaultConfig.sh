@@ -281,9 +281,9 @@ BANDPASS_SMOOTH_AMP=true
 # If true, only smooth outlier points
 BANDPASS_SMOOTH_OUTLIER=true
 # polynomial order (if >= 0) or window size (if <0) to use when smoothing bandpass
-BANDPASS_SMOOTH_FIT=0
+BANDPASS_SMOOTH_FIT=1
 # The threshold level for fitting bandpass
-BANDPASS_SMOOTH_THRESHOLD=3.0
+BANDPASS_SMOOTH_THRESHOLD=1.0
 
 # The following are parameters for smooth_bandpass
 # The polynomial order for the fit
@@ -582,11 +582,11 @@ GRIDDER_OVERSAMPLE=5
 # Cleaning parameters for continuum imaging
 SOLVER=Clean
 CLEAN_ALGORITHM=BasisfunctionMFS
-CLEAN_MINORCYCLE_NITER=4000
+CLEAN_MINORCYCLE_NITER=2000
 CLEAN_GAIN=0.1
-CLEAN_PSFWIDTH=1600
+CLEAN_PSFWIDTH=256
 CLEAN_SCALES="[0]"
-CLEAN_THRESHOLD_MINORCYCLE="[40%, 1.8mJy]"
+CLEAN_THRESHOLD_MINORCYCLE="[20%, 1.8mJy, 0.03mJy]"
 # If true, this will write out intermediate images at the end of each
 # major cycle
 CLEAN_WRITE_AT_MAJOR_CYCLE=false
@@ -598,10 +598,10 @@ CLEAN_WRITE_AT_MAJOR_CYCLE=false
 # If no self-calibration is used, we just use the first element
 #
 # The number of major cycles in the deconvolution
-CLEAN_NUM_MAJORCYCLES="[1,8,10]"
+CLEAN_NUM_MAJORCYCLES="[5,10,10]"
 # The maximum residual to stop the major-cycle deconvolution (if not
 # reached, or negative, CLEAN_NUM_MAJORCYCLES cycles are used)
-CLEAN_THRESHOLD_MAJORCYCLE="[10mJy,4mJy,2mJy]"
+CLEAN_THRESHOLD_MAJORCYCLE="0.03mJy"
 
 
 ####################
@@ -664,7 +664,7 @@ SELFCAL_REF_GAINS=""
 #   (eg. "[1800,900,300]"), allowing a different value for each loop.
 #
 # Interval [sec] over which to solve for self-calibration
-SELFCAL_INTERVAL="[57600,57600,1]"
+SELFCAL_INTERVAL="[1800,1800,200]"
 # SNR threshold for detection with selavy in determining selfcal sources
 SELFCAL_SELAVY_THRESHOLD=8
 # Option to pass to the "Ccalibrator.normalisegains" parameter,
@@ -728,12 +728,12 @@ NUM_CPUS_CONTCUBE_LINMOS=""
 # Which solver to use
 SOLVER_CONTCUBE=Clean
 CLEAN_CONTCUBE_ALGORITHM=BasisfunctionMFS
-CLEAN_CONTCUBE_MINORCYCLE_NITER=4000
+CLEAN_CONTCUBE_MINORCYCLE_NITER=2000
 CLEAN_CONTCUBE_GAIN=0.1
-CLEAN_CONTCUBE_PSFWIDTH=512
+CLEAN_CONTCUBE_PSFWIDTH=256
 CLEAN_CONTCUBE_SCALES="[0,3,10]"
-CLEAN_CONTCUBE_THRESHOLD_MINORCYCLE="[40%, 12.6mJy]"
-CLEAN_CONTCUBE_THRESHOLD_MAJORCYCLE=12mJy
+CLEAN_CONTCUBE_THRESHOLD_MINORCYCLE="[40%, 12.6mJy, 0.5mJy]"
+CLEAN_CONTCUBE_THRESHOLD_MAJORCYCLE=0.5mJy
 CLEAN_CONTCUBE_NUM_MAJORCYCLES=2
 # If true, this will write out intermediate images at the end of each
 # major cycle
@@ -822,9 +822,9 @@ GRIDDER_SPECTRAL_OVERSAMPLE=4
 # Cleaning parameters for spectral-line imaging
 SOLVER_SPECTRAL=Clean
 CLEAN_SPECTRAL_ALGORITHM=BasisfunctionMFS
-CLEAN_SPECTRAL_MINORCYCLE_NITER=5000
+CLEAN_SPECTRAL_MINORCYCLE_NITER=2000
 CLEAN_SPECTRAL_GAIN=0.1
-CLEAN_SPECTRAL_PSFWIDTH=512
+CLEAN_SPECTRAL_PSFWIDTH=256
 CLEAN_SPECTRAL_SCALES="[0,3,10,30]"
 CLEAN_SPECTRAL_THRESHOLD_MINORCYCLE="[50%, 30mJy, 3.5mJy]"
 CLEAN_SPECTRAL_THRESHOLD_MAJORCYCLE=20mJy
