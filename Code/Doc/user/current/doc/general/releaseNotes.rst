@@ -33,7 +33,10 @@ Pipeline updates:
  * Addition of the spectral measurement sets, the
    continuum-subtraction models/catalogues, and the spectral cube beam
    logs to the list of artefacts to be sent to CASDA upon pipeline
-   completion. 
+   completion.
+ * Added more robustness to the pipeline scripts to allow them to run
+   on other systems, allowing the specification of the module
+   directory and flexibility for running on non-Lustre filesystems.
  * Changes to some default parameters. Here are the parameters that
    have changed, with their new values (note that the WMAX and
    MAXSUPPORT gridding parameters now also adapt their default values

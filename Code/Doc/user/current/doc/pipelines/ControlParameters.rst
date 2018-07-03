@@ -22,7 +22,12 @@ instead.
 This behaviour is also robust against there not being an askapsoft
 module defined in the ~/.bashrc - in this case the default module is
 used, unless ``ASKAPSOFT_VERSION`` is given in the configuration
-file. 
+file.
+
+The pipeline looks in a standard place for the modules, given by the
+setup used at the Pawsey Centre. If the pipelines are being run on a
+different system, the location of the module files can be given by
+``ASKAP_MODULE_DIR`` (this is passed to the *module use* command).
 
 ACES software
 -------------
@@ -50,66 +55,70 @@ output data products go. To run the jobs, you need to set
 ``SUBMIT_JOBS=true``. Each job has a time request associated with it -
 see the *Slurm time requests* section below for details.
 
-+-------------------------------------+---------+---------------------------------------------------------------------------------+
-| Variable                            | Default | Description                                                                     |
-+=====================================+=========+=================================================================================+
-| ``SUBMIT_JOBS``                     | false   |The ultimate switch controlling whether things are run on the galaxy queue or    |
-|                                     |         |not. If false, the slurm files etc will be created but nothing will run (useful  |
-|                                     |         |for checking if things are to your liking).                                      |
-|                                     |         |                                                                                 |
-+-------------------------------------+---------+---------------------------------------------------------------------------------+
-| ``ASKAPSOFT_VERSION``               | ""      |The version number of the askapsoft module to use for the processing. If not     |
-|                                     |         |given, or if the requested version is not valid, the version defined in the      |
-|                                     |         |~/.bashrc file is used, or the default version should none be defined by the     |
-|                                     |         |~/.bashrc file.                                                                  |
-|                                     |         |                                                                                 |
-+-------------------------------------+---------+---------------------------------------------------------------------------------+
-| ``CLUSTER``                         | galaxy  |The cluster to which jobs should be submitted. This allows you to submit to the  |
-|                                     |         |galaxy queue from machines such as galaxy-data. Leave as is unless you know      |
-|                                     |         |better.                                                                          |
-+-------------------------------------+---------+---------------------------------------------------------------------------------+
-| ``QUEUE``                           | workq   |This should be left as is unless you know better.                                |
-+-------------------------------------+---------+---------------------------------------------------------------------------------+
-| ``CONSTRAINT``                      | ""      |This allows one to provide slurm with additional constraints. While not needed   |
-|                                     |         |for galaxy, this can be of use in other clusters (particularly those that have a |
-|                                     |         |mix of technologies).                                                            |
-+-------------------------------------+---------+---------------------------------------------------------------------------------+
-| ``ACCOUNT``                         | ""      |This is the account that the jobs should be charged to. If left blank, then the  |
-|                                     |         |user's default account will be used.                                             |
-+-------------------------------------+---------+---------------------------------------------------------------------------------+
-| ``RESERVATION``                     | ""      |If there is a reservation you specify the name of it here.  If you don't have a  |
-|                                     |         |reservation, leave this alone and it will be submitted as a regular job.         |
-|                                     |         |                                                                                 |
-+-------------------------------------+---------+---------------------------------------------------------------------------------+
-| ``JOB_TIME_DEFAULT``                |12:00:00 |The default time request for the slurm jobs. It is possible to specify a         |
-|                                     |         |different time for individual jobs - see the list below and on the individual    |
-|                                     |         |pages describing the jobs. If those parameters are not given, the time requested |
-|                                     |         |is the value of ``JOB_TIME_DEFAULT``.                                            |
-+-------------------------------------+---------+---------------------------------------------------------------------------------+
-| ``OUTPUT``                          | .       |The sub-directory in which to put the images, tables, catalogues, MSs etc. The   |
-|                                     |         |name should be relative to the directory in which the script was run, with the   |
-|                                     |         |default being that directory.                                                    |
-|                                     |         |                                                                                 |
-+-------------------------------------+---------+---------------------------------------------------------------------------------+
-| ``EMAIL``                           | ""      |An email address to which you want slurm notifications sent (this will be passed |
-|                                     |         |to the ``--mail-user`` option of sbatch).  Leaving it blank will mean no         |
-|                                     |         |notifications are sent.                                                          |
-|                                     |         |                                                                                 |
-+-------------------------------------+---------+---------------------------------------------------------------------------------+
-| ``EMAIL_TYPE``                      | ALL     |The types of notifications that are sent (this is passed to the ``--mail-type``  |
-|                                     |         |option of sbatch, and only if ``EMAIL`` is set to something). Options include:   |
-|                                     |         |BEGIN, END, FAIL, REQUEUE, ALL, TIME_LIMIT, TIME_LIMIT_90, TIME_LIMIT_80, &      |
-|                                     |         |TIME_LIMIT_50 (taken from the sbatch man page on galaxy).                        |
-|                                     |         |                                                                                 |
-+-------------------------------------+---------+---------------------------------------------------------------------------------+
-| ``USE_ACES_OPS``                    | true    |Whether to use the **acesops** module to access ACES tools within the            |
-|                                     |         |pipeline. Setting to false will force the pipeline to look in the ``$ACES``      |
-|                                     |         |directory defined by your environment. If ``$ACES`` is not set, then             |
-|                                     |         |``USE_ACES_OPS`` will be set back to true.                                       |
-+-------------------------------------+---------+---------------------------------------------------------------------------------+
-| ``ACESOPS_VERSION``                 | ""      |The version of the **acesops** module used by the pipeline. Leaving blank will   |
-|                                     |         |make it use the default at the time.                                             |
-+-------------------------------------+---------+---------------------------------------------------------------------------------+
++-------------------------------------+-------------------------+---------------------------------------------------------------------------------+
+| Variable                            | Default                 | Description                                                                     |
++=====================================+=========================+=================================================================================+
+| ``SUBMIT_JOBS``                     | false                   |The ultimate switch controlling whether things are run on the galaxy queue or    |
+|                                     |                         |not. If false, the slurm files etc will be created but nothing will run (useful  |
+|                                     |                         |for checking if things are to your liking).                                      |
+|                                     |                         |                                                                                 |
++-------------------------------------+-------------------------+---------------------------------------------------------------------------------+
+| ``ASKAPSOFT_VERSION``               | ""                      |The version number of the askapsoft module to use for the processing. If not     |
+|                                     |                         |given, or if the requested version is not valid, the version defined in the      |
+|                                     |                         |~/.bashrc file is used, or the default version should none be defined by the     |
+|                                     |                         |~/.bashrc file.                                                                  |
+|                                     |                         |                                                                                 |
++-------------------------------------+-------------------------+---------------------------------------------------------------------------------+
+| ``ASKAP_MODULE_DIR``                | /group/askap/modulefiles|The location for the modules loaded by the pipeline and its slurm jobs. Change   |
+|                                     |                         |this to reflect the setup on the system you are running this on, but it should   |
+|                                     |                         |not be changed if running at Pawsey.                                             |
++-------------------------------------+-------------------------+---------------------------------------------------------------------------------+
+| ``CLUSTER``                         | galaxy                  |The cluster to which jobs should be submitted. This allows you to submit to the  |
+|                                     |                         |galaxy queue from machines such as galaxy-data. Leave as is unless you know      |
+|                                     |                         |better.                                                                          |
++-------------------------------------+-------------------------+---------------------------------------------------------------------------------+
+| ``QUEUE``                           | workq                   |This should be left as is unless you know better.                                |
++-------------------------------------+-------------------------+---------------------------------------------------------------------------------+
+| ``CONSTRAINT``                      | ""                      |This allows one to provide slurm with additional constraints. While not needed   |
+|                                     |                         |for galaxy, this can be of use in other clusters (particularly those that have a |
+|                                     |                         |mix of technologies).                                                            |
++-------------------------------------+-------------------------+---------------------------------------------------------------------------------+
+| ``ACCOUNT``                         | ""                      |This is the account that the jobs should be charged to. If left blank, then the  |
+|                                     |                         |user's default account will be used.                                             |
++-------------------------------------+-------------------------+---------------------------------------------------------------------------------+
+| ``RESERVATION``                     | ""                      |If there is a reservation you specify the name of it here.  If you don't have a  |
+|                                     |                         |reservation, leave this alone and it will be submitted as a regular job.         |
+|                                     |                         |                                                                                 |
++-------------------------------------+-------------------------+---------------------------------------------------------------------------------+
+| ``JOB_TIME_DEFAULT``                |12:00:00                 |The default time request for the slurm jobs. It is possible to specify a         |
+|                                     |                         |different time for individual jobs - see the list below and on the individual    |
+|                                     |                         |pages describing the jobs. If those parameters are not given, the time requested |
+|                                     |                         |is the value of ``JOB_TIME_DEFAULT``.                                            |
++-------------------------------------+-------------------------+---------------------------------------------------------------------------------+
+| ``OUTPUT``                          | .                       |The sub-directory in which to put the images, tables, catalogues, MSs etc. The   |
+|                                     |                         |name should be relative to the directory in which the script was run, with the   |
+|                                     |                         |default being that directory.                                                    |
+|                                     |                         |                                                                                 |
++-------------------------------------+-------------------------+---------------------------------------------------------------------------------+
+| ``EMAIL``                           | ""                      |An email address to which you want slurm notifications sent (this will be passed |
+|                                     |                         |to the ``--mail-user`` option of sbatch).  Leaving it blank will mean no         |
+|                                     |                         |notifications are sent.                                                          |
+|                                     |                         |                                                                                 |
++-------------------------------------+-------------------------+---------------------------------------------------------------------------------+
+| ``EMAIL_TYPE``                      | ALL                     |The types of notifications that are sent (this is passed to the ``--mail-type``  |
+|                                     |                         |option of sbatch, and only if ``EMAIL`` is set to something). Options include:   |
+|                                     |                         |BEGIN, END, FAIL, REQUEUE, ALL, TIME_LIMIT, TIME_LIMIT_90, TIME_LIMIT_80, &      |
+|                                     |                         |TIME_LIMIT_50 (taken from the sbatch man page on galaxy).                        |
+|                                     |                         |                                                                                 |
++-------------------------------------+-------------------------+---------------------------------------------------------------------------------+
+| ``USE_ACES_OPS``                    | true                    |Whether to use the **acesops** module to access ACES tools within the            |
+|                                     |                         |pipeline. Setting to false will force the pipeline to look in the ``$ACES``      |
+|                                     |                         |directory defined by your environment. If ``$ACES`` is not set, then             |
+|                                     |                         |``USE_ACES_OPS`` will be set back to true.                                       |
++-------------------------------------+-------------------------+---------------------------------------------------------------------------------+
+| ``ACESOPS_VERSION``                 | ""                      |The version of the **acesops** module used by the pipeline. Leaving blank will   |
+|                                     |                         |make it use the default at the time.                                             |
++-------------------------------------+-------------------------+---------------------------------------------------------------------------------+
 
 Filesystem control
 ------------------

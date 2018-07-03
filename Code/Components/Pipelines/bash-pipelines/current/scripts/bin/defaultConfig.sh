@@ -161,6 +161,10 @@ fi
 # User can select a particular version of the askapsoft module
 ASKAPSOFT_VERSION=""
 
+# Base directory for modules, that will be used by pipeline and slurm
+# scripts
+ASKAP_MODULE_DIR="/group/askap/modulefiles"
+
 # User can use the acesops module (true), or their own nominated ACES
 # directory (false)
 USE_ACES_OPS=true

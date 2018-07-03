@@ -96,8 +96,7 @@ if [ "$PROCESS_DEFAULTS_HAS_RUN" != "true" ]; then
     # ASKAPsoft module usage
 
     # Make use of the ASKAP module directory right now
-    moduleDir="/group/askap/modulefiles"
-    module use "$moduleDir"
+    module use "${ASKAP_MODULE_DIR}"
 
     askapsoftModuleCommands="# Need to load the slurm module directly
 module load slurm"
@@ -129,7 +128,7 @@ module load slurm"
                 echo "Will use the askapsoft module askapsoft${ASKAPSOFT_VERSION}"
             fi
             askapsoftModuleCommands="${askapsoftModuleCommands}
-module use $moduleDir
+module use ${ASKAP_MODULE_DIR}
 module load askapdata
 module load askapsoft${ASKAPSOFT_VERSION}"
             module load askapsoft${ASKAPSOFT_VERSION}
@@ -140,7 +139,7 @@ module load askapsoft${ASKAPSOFT_VERSION}"
             if [ "${ASKAPSOFT_VERSION}" != "" ]; then
                 askapsoftModuleCommands="${askapsoftModuleCommands}
 # Swapping to the requested askapsoft module
-module use $moduleDir
+module use ${ASKAP_MODULE_DIR}
 module load askapdata
 module swap askapsoft askapsoft${ASKAPSOFT_VERSION}"
                 echo "Will use the askapsoft module askapsoft${ASKAPSOFT_VERSION}"
@@ -148,7 +147,7 @@ module swap askapsoft askapsoft${ASKAPSOFT_VERSION}"
             else
                 askapsoftModuleCommands="${askapsoftModuleCommands}
 # Using user-defined askapsoft module
-module use $moduleDir
+module use ${ASKAP_MODULE_DIR}
 module load askapdata
 module unload askapsoft
 module load ${currentASKAPsoftVersion}"

@@ -43,11 +43,6 @@ if [ "${PIPELINEDIR}" == "" ]; then
 
 else
 
-    if [ "$(lfs getstripe -c .)" == "" ]; then
-        echo "WARNING: You don't appear to be running this on a Lustre filesystem - lfs does not work."
-        exit 1
-    fi
-
     . "${PIPELINEDIR}/initialise.sh"
 
     if [ $# == 0 ]; then
@@ -84,8 +79,6 @@ else
         PROCESS_DEFAULTS_HAS_RUN=false
 	. "${PIPELINEDIR}/processDefaults.sh"
         archiveConfig "$userConfig"
-
-	lfs setstripe -c "${LUSTRE_STRIPING}" .
 
         if [ "${DO_1934_CAL}" != "true" ] && [ "${DO_SCIENCE_FIELD}" != "true" ]; then
 

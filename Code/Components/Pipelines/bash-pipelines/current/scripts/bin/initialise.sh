@@ -35,6 +35,17 @@ ${askapsoftModuleCommands}
 
 BASEDIR=$(pwd)
 
+# Are we on a lustre filesystem?
+if [ "$(which lfs)" == "" ] || [ "$(lfs getstripe .)" == "" ]; then
+    HAVE_LUSTRE=false
+else
+    HAVE_LUSTRE=true
+fi
+
+if [ "${HAVE_LUSTRE}" == "true" ]; then
+    lfs setstripe -c "${LUSTRE_STRIPING}" .
+fi
+
 . "${PIPELINEDIR}/createDirectories.sh"
 
 # These are used as the base directories for these types of files. We

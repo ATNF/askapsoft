@@ -40,22 +40,13 @@ metadata="${BASEDIR}/metadata"
 stats="${BASEDIR}/stats"
 diagnostics="${BASEDIR}/diagnostics"
 
-mkdir -p "$parsets"
-lfs setstripe -c 1 "$parsets"
-mkdir -p "$logs"
-lfs setstripe -c 1 "$logs"
-mkdir -p "$slurms"
-lfs setstripe -c 1 "$slurms"
-mkdir -p "$slurmOut"
-lfs setstripe -c 1 "$slurmOut"
-mkdir -p "$tools"
-lfs setstripe -c 1 "$tools"
-mkdir -p "$metadata"
-lfs setstripe -c 1 "$metadata"
-mkdir -p "$stats"
-lfs setstripe -c 1 "$stats"
-mkdir -p "$diagnostics"
-lfs setstripe -c 1 "$diagnostics"
+for dir in "$parsets" "$logs" "$slurms" "$slurmOut" "$tools"
+           "$metadata" "$stats" "$diagnostics"; do
+    mkdir -p $d
+    if [ "${HAVE_LUSTRE}" == "true" ]; then
+        lfs setstripe -c 1 $d
+    fi
+done
 
 # temp directory for certain files that we don't need to keep
 tmp=/tmp/tmp$(whoami)pipe
