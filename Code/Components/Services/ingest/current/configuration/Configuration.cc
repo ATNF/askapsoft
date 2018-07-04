@@ -65,8 +65,9 @@ using namespace askap::cp::ingest;
 
 ASKAP_LOGGER(logger, ".Configuration");
 
-Configuration::Configuration(const LOFAR::ParameterSet& parset, int rank, int nprocs)
-    : itsParset(parset), itsRank(rank), itsNProcs(nprocs), itsReceiverId(-1), itsNReceivingProcs(-1)
+Configuration::Configuration(const LOFAR::ParameterSet& parset, int rank, int nprocs, const std::string &nodeName)
+    : itsParset(parset), itsRank(rank), itsNProcs(nprocs), itsReceiverId(-1), itsNReceivingProcs(-1),
+      itsNodeName(nodeName)
 {
     buildRanksInfo();
     buildTasks();

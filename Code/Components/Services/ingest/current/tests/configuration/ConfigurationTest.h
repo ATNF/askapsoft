@@ -45,6 +45,7 @@ class ConfigurationTest : public CppUnit::TestFixture {
         CPPUNIT_TEST(testArrayName);
         CPPUNIT_TEST(testSchedulingBlockID);
         CPPUNIT_TEST(testTasks);
+        CPPUNIT_TEST(testNodeInfo);
         CPPUNIT_TEST(testAntennas);
         CPPUNIT_TEST(testFeed);
         CPPUNIT_TEST(testServiceConfig);
@@ -145,6 +146,7 @@ class ConfigurationTest : public CppUnit::TestFixture {
         void testServiceRanks() {
            itsParset.add("service_ranks", "[1, 3, 5, 12]");
            Configuration conf(itsParset, 4, 12);
+           CPPUNIT_ASSERT_EQUAL(std::string("undefined"), conf.nodeName());
            CPPUNIT_ASSERT_EQUAL(4, conf.rank());
            CPPUNIT_ASSERT_EQUAL(12, conf.nprocs());
            CPPUNIT_ASSERT_EQUAL(2, conf.receiverId());
@@ -176,6 +178,15 @@ class ConfigurationTest : public CppUnit::TestFixture {
             CPPUNIT_ASSERT_EQUAL(1u, conf.schedulingBlockID());
         }
 
+        void testNodeInfo() {
+            const std::string nodeName("galaxy-ingest03");
+            const int rank = 2;
+            const int nprocs = 5;
+            Configuration conf(itsParset, rank, nprocs, nodeName);
+            CPPUNIT_ASSERT_EQUAL(nodeName, conf.nodeName());
+            CPPUNIT_ASSERT_EQUAL(rank, conf.rank());
+            CPPUNIT_ASSERT_EQUAL(nprocs, conf.nprocs());
+        }
 
         void testTasks() {
             Configuration conf(itsParset);

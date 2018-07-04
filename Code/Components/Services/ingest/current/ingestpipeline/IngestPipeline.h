@@ -49,8 +49,9 @@ class IngestPipeline {
         /// @brief Constructor.
         /// 
         /// @param[in] rank the of this process (zero based)
-        /// @param[in] the numbers of tasks in this ingest pipeline.
-        IngestPipeline(const LOFAR::ParameterSet& parset, int rank, int ntasks);
+        /// @param[in] ntasks the numbers of tasks in this ingest pipeline.
+        /// @param[in] nodeName the name of the current host (passed to config)
+        IngestPipeline(const LOFAR::ParameterSet& parset, int rank, int ntasks, const std::string& nodeName);
 
         /// @brief Destructor.
         ~IngestPipeline();

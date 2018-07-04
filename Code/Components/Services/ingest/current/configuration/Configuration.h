@@ -62,8 +62,9 @@ class Configuration {
         /// @param[in] parset   the number of tasks/processes.
         /// @param[in] rank the rank of the calling process (zero based).
         /// @param[in] ntasks the number of tasks (processes).
+        /// @param[in] nodeName the name of the node
         Configuration(const LOFAR::ParameterSet& parset,
-                      int rank = 0, int ntasks = 1);
+                      int rank = 0, int ntasks = 1, const std::string& nodeName = "undefined");
 
         /// @brief Returns the rank of the calling process (zero based).
         int rank(void) const;
@@ -84,6 +85,10 @@ class Configuration {
         /// @brief Returns the number of receiving processes
         /// @return the total number of processes receiving data
         inline int nReceivingProcs() const { return itsNReceivingProcs; }
+
+        /// @brief obtain node name
+        /// @return the name of the current node as a string (i.e. hostname for monitoring purposes)
+        inline std::string nodeName() const { return itsNodeName; }
         
 
         /// @brief The name of the array. e.g. "BETA"
@@ -163,6 +168,9 @@ class Configuration {
 
         /// The total number of receiving processes
         int itsNReceivingProcs;
+
+        /// The name of the node
+        std::string itsNodeName;
 
         boost::shared_ptr<FeedConfig> itsFeedConfig;
 

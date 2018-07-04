@@ -57,7 +57,7 @@ public:
        StatReporter stats;
 
        // Run the pipeline
-       IngestPipeline pipeline(config(), rank(), numProcs());
+       IngestPipeline pipeline(config(), rank(), numProcs(), nodeName());
        pipeline.start();
 
        stats.logSummary();

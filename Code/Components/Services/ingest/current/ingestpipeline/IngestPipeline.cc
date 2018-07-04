@@ -58,8 +58,8 @@ using namespace askap::cp::common;
 using namespace askap::cp::ingest;
 
 IngestPipeline::IngestPipeline(const LOFAR::ParameterSet& parset,
-                               int rank, int ntasks)
-    : itsConfig(parset, rank, ntasks), itsRunning(false)
+                               int rank, int ntasks, const std::string &nodeName)
+    : itsConfig(parset, rank, ntasks, nodeName), itsRunning(false)
 {
 }
 
@@ -90,6 +90,7 @@ void IngestPipeline::ingest(void)
     MonitoringSingleton::update<int32_t>("NumberOfRanks",itsConfig.nprocs());
     MonitoringSingleton::update<int32_t>("ReceiverId",itsConfig.receiverId());
     MonitoringSingleton::update<int32_t>("nReceivers",itsConfig.nReceivingProcs());
+    MonitoringSingleton::update<std::string>("NodeName",itsConfig.nodeName());
     const std::string versionStr = getAskapPackageVersion_cpingest();
     const size_t pos = versionStr.find("ingest; ");
     if (pos != std::string::npos) {
