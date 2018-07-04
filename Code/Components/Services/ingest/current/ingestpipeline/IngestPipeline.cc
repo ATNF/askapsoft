@@ -151,6 +151,7 @@ void IngestPipeline::ingest(void)
     MonitoringSingleton::invalidatePoint("NumberOfRanks");
     MonitoringSingleton::invalidatePoint("ReceiverId");
     MonitoringSingleton::invalidatePoint("nReceivers");
+    MonitoringSingleton::invalidatePoint("NodeName");
     // Destroying this is safe even if the object was not initialised
     MonitoringSingleton::destroy();
 }
