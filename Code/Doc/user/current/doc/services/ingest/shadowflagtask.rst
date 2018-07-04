@@ -1,5 +1,5 @@
 ShadowFlagTask
-=========
+==============
 
 ShadowFlagTask is an experimental task to detect and flag shadowed antennas on the fly. It supports only basic interferometry mode.
 For example, cases where off-axis beams are shadowed during offset pointings of the holography run will not be treated correctly. 

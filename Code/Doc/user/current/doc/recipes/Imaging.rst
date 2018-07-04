@@ -35,6 +35,7 @@ so errors go up rapidly for higher orders.
 The suggested approach is to use nterms=1 or 2 and only go to 3 if there are defects in the image around strong sources that don't look like
 calibration errors. Since the errors depend on the signal to noise, it would make sense to use more terms for the stronger sources and
 fewer for those close to the noise, but at present this is not implemented. Some typical numbers for ASKAP:
+
  * Error in spectral index, alpha: 0.25 at 100 sigma, 0.50 at 30 sigma, 1 at 10 sigma.
  * Error in curvature, beta: ~1 at 100 sigma, quickly rising to ~5 at 30 sigma.
 
@@ -51,9 +52,10 @@ The BasisfunctionMFS algorithm supports a few options we'll briefly discuss:
 
 The first option orthogonalises the basisfunctions in an attempt to reduce crosstalk between the different scales during deconvolution.
 Tests have not shown great benefits of this. It tends to use more iterations, take longer and produce structure in the residuals of extended sources.
-On the other hand, it sometimes recovers extended flux slightly better.
-To try this option you would use::
-    Cimager.solver.Clean.orthogonal=True
+On the other hand, it sometimes recovers extended flux slightly better. To try this option you would use::
+
+  Cimager.solver.Clean.orthogonal=True
+    
 It is off by default, which is the recommended setting.
 
 The second option either directly uses the value found by the peak finding algorithm as the peak residual for each iteration
@@ -63,12 +65,15 @@ i.e., it tends to decrease monotonically as iterations progress whereas the seco
 value can meander up and down a bit (and sometimes gets stuck on a single value for a while) when it is reporting values from a different scale.
 The default setting is coupled, but we have found that decoupled allows the use of a lower minor iteration percentage limit and is often slightly faster.
 The deep cleaning mode discussed below always uses decoupled=True. To use decoupled components specify::
+  
     Cimager.solver.Clean.decoupled=True
 
 The third choice is the peak finding algorithm.
+
  1. MAXCHISQ, the default, works well for nterms>1 in most cases. It uses a chi-square image for peak finding that tries to minimise the residuals across all Taylor terms.
  2. MAXTERM0, does not seem to be very useful as the clean often fails to converge using this measure. It uses the Taylor term 0 coefficient image to find the next peak.
  3. MAXBASE, searches the highest peak across the different scales in the Taylor 0 images. It works well and is better than MAXCHISQ at low S/N ratios.
+    
 At high S/N and nterms>1 the residuals around strong sources look better with MAXCHISQ.
 With all options you can reduce the (sinc-function like) error patterns around strong sources and
 increase the dynamic range by reducing the cell size so you have 3 or more pixels per beam.
@@ -77,6 +82,7 @@ It will also pick up more spurious noise components
 when cleaning close to the noise level because the noise in the chi-square image is roughly sqrt(nterms) times higher than the residual image noise.
 We recommend using MAXBASE for nterms=1 (e.g., spectral line imaging) and cleaning below 10 sigma.
 To use MAXBASE specify::
+  
     Cimager.solver.Clean.solutiontype=MAXBASE
 
 The deep cleaning mode (borrowed from wsclean) can be used to clean below the noise level.
@@ -86,8 +92,10 @@ This can be effective for extended sources that need to be cleaned to <1 sigma t
 fully capture all the flux. In Miriad or CASA you would set clean boxes around these sources or use automatic clean boxes,
 but using the existing model as a mask seems to work quite well too. To use the deep clean feature specify a second absolute
 flux threshold and lower the major cycle threshold as well::
+  
     Cimager.threshold.minorcycle=[40%,2mJy,0.18mJy]
     Cimager.threshold.majorcycle=0.2mJy.
+    
 Here set the second minor cycle threshold slightly lower than the major cycle threshold to avoid doing several major
 cycles close to the final level at the end due to small errors.
 
@@ -100,6 +108,7 @@ This can speed up your clean minor cycles by a large factor. Because the major c
 many cores, but the minor cycle is still running on a single core, a lot of core time is wasted if the minor cycles are slow.
 As the ASKAP array grows in size and we need to make bigger, higher resolution images, we should hopefully be able to decrease this parameter
 to speed up the minor cycles. Specify the psf width using::
+  
     Cimager.solver.Clean.psfwidth               = 128
 
 
@@ -107,6 +116,7 @@ to speed up the minor cycles. Specify the psf width using::
 Example 1: Spectral line cubes
 ------------------------------
 For spectral line imaging use the following selection of options:
+
  * BasisfunctionMFS solver
  * standard basisfunctions,
  * decoupled residuals,
