@@ -116,6 +116,9 @@ Processing tasks:
    have been streamlined, to improve the memory usage particularly for
    large spectral cubes. There is also control over the imagetype for
    the images written as part of this algorithm.
+ * The memory handling within linmos-mpi has been improved to reduce
+   its footprint, making it better able to mosaic large spectral
+   cubes. 
 
 Manager & ingest:
 
