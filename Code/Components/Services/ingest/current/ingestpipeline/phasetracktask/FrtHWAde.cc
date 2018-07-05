@@ -205,18 +205,18 @@ void FrtHWAde::process(const askap::cp::common::VisChunk::ShPtr& chunk,
        /*
        // experiments with scan-based changes of FR parameters
        if ((ant > 0) && (ant < 8)) {
-           //const casa::Int rates[11] = {-10, -8, -6, -4, -2, 0, 2, 4, 6, 8,10}; 
-           //const double addRate = rates[chunk->scan() % 11]*100.;
+           const casa::Int rates[11] = {-10, -8, -6, -4, -2, 0, 2, 4, 6, 8,10}; 
+           const double addRate = rates[chunk->scan() % 11]*100.;
            //const double addRate = (chunk->scan() % 2 == 0 ? -1. : +1.) * 1000.;
-           //diffRate += addRate;
+           diffRate += addRate;
 
-           const int delayIncrement = ((chunk->scan() % 11) - 5) * 10000;
+           ///const int delayIncrement = ((chunk->scan() % 11) - 5) * 10000;
            //const int delayIncrement = (chunk->scan() % 2 == 0 ? -1. : +1.) * 50000;
-           hwDelay += delayIncrement;
+           //hwDelay += delayIncrement;
 
            if (chunk->scan() != itsPrevScanId) {
-              //ASKAPLOG_DEBUG_STR(logger, "Scan = "<<chunk->scan()<<" rate = "<<diffRate<<" for ant = "<<ant<<" addRate="<<addRate<<" rate in deg/s = "<<diffRate*phaseRateUnit/casa::C::pi*180.);
-               ASKAPLOG_DEBUG_STR(logger, "Scan = "<<chunk->scan()<<" hwDelay = "<<hwDelay<<" for ant = "<<ant<<" addDelay="<<delayIncrement * delayUnit*1e9<<" delay in ns = "<<hwDelay * delayUnit*1e9);
+              ASKAPLOG_DEBUG_STR(logger, "Scan = "<<chunk->scan()<<" rate = "<<diffRate<<" for ant = "<<ant<<" addRate="<<addRate<<" rate in deg/s = "<<diffRate*phaseRateUnit/casa::C::pi*180.);
+              //ASKAPLOG_DEBUG_STR(logger, "Scan = "<<chunk->scan()<<" hwDelay = "<<hwDelay<<" for ant = "<<ant<<" addDelay="<<delayIncrement * delayUnit*1e9<<" delay in ns = "<<hwDelay * delayUnit*1e9);
                itsFrtComm.invalidate(ant);
            } 
 
