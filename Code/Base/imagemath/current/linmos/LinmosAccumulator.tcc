@@ -828,6 +828,13 @@ namespace askap {
 
             // Loop over input vectors, converting their image bounds to the ref system
             // and expanding the new overlapping image bounds where appropriate.
+
+
+            if (inShapeVec.size() == 1) {
+                itsInShape = refShape;
+                itsInCoordSys = refCS;
+            }
+
             for (uint img = 1; img < inShapeVec.size(); ++img ) {
 
                 itsInShape = inShapeVec[img];
