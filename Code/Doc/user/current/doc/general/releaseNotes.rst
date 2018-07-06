@@ -5,10 +5,11 @@ This page summarises the key changes in each tagged release of
 ASKAPsoft. This replicates the CHANGES file that is included in the
 code base.
 
-Next Release
-------------
+0.21.0 (6 July 2018)
+---------------------
 
-A summary of items that are in trunk and will be in the next release:
+A large release containing a number of updates to the pipeline scripts
+and to various aspects of the processing tools.
 
 Pipeline updates:
 
