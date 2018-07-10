@@ -61,17 +61,70 @@ namespace askap {
 
                ptr->setApertureSize(parset.getDouble("aperture",12));
                ptr->setFWHMScaling(parset.getDouble("fwhmscaling", 1.00));
+               // changed this default to deal with the double Gaussian
                ptr->setExpScaling(parset.getDouble("expscaling", 4.*log(2.)));
+
+               // New parameters for Dave M.'s 2-D Gaussian FITS
+
+               ptr->setXwidth(parset.getDouble("xwidth",0.0));
+               ptr->setYwidth(parset.getDouble("ywidth",0.0));
+               ptr->setAlpha(parset.getDouble("alpha",0.0));
+               ptr->setXoff(parset.getDouble("xoff",0.0));
+               ptr->setYoff(parset.getDouble("yoff",0.0));
+
 
                ASKAPLOG_DEBUG_STR(logger,"Created Gaussian PB instance");
                return ptr;
 
             }
+            double GaussianPB::evaluateAtOffset(double offsetDist, double frequency) {
+                // x-direction is assumed along the meridian in the direction of north celestial pole
 
-            double GaussianPB::evaluateAtOffset(double offset, double frequency) {
+                return evaluateAtOffset(0.0,offsetDist,frequency);
 
-                double pb = exp(-offset*offset*getExpScaling()/(getFWHM(frequency)*getFWHM(frequency)));
-                return pb;
+            }
+            double GaussianPB::getXwidth(double frequency) {
+              if (Xwidth == 0.0) {
+                return getFWHM(frequency);
+              }
+              else {
+                return Xwidth;
+              }
+            }
+            double GaussianPB::getYwidth(double frequency) {
+              if (Ywidth == 0.0) {
+                return getFWHM(frequency);
+              }
+              else {
+                return Ywidth;
+              }
+            }
+
+            double GaussianPB::evaluateAtOffset(double offsetPAngle, double offsetDist, double frequency) {
+                // x-direction is assumed along the meridian in the direction of north celestial pole
+                // the offsetPA angle is relative to the meridian
+                // the Alpha angle is the rotation of the beam pattern relative to the meridian
+                // Therefore the offset relative to the
+                double x_angle = offsetDist * cos(offsetPAngle-Alpha);
+                double y_angle = offsetDist * sin(offsetPAngle-Alpha);
+                // widths
+                double x_width = getXwidth(frequency);
+                double y_width = getYwidth(frequency);
+                // offset from assumed centre
+                double x_off = Xoff;
+                double y_off = Yoff;
+
+                double x_pb = exp(-1*getExpScaling()*pow((x_angle-x_off)/x_width,2.));
+                double y_pb = exp(-1*getExpScaling()*pow((y_angle-y_off)/y_width,2.));
+/*
+                ASKAPLOG_INFO_STR(logger,"xoffset: " << (x_angle-x_off) << ":" << offsetDist);
+                ASKAPLOG_INFO_STR(logger,"yoffset: " << (y_angle-y_off) << ":" << offsetDist);
+                ASKAPLOG_INFO_STR(logger,"xwidth: " << x_width << ":" << getFWHM(frequency));
+                ASKAPLOG_INFO_STR(logger,"ywidth: " << y_width << ":" << getFWHM(frequency));
+                double pb = exp(-offsetDist*offsetDist*getExpScaling()/(getFWHM(frequency)*getFWHM(frequency)));
+                ASKAPLOG_INFO_STR(logger,"old: " << pb << " new: " << x_pb << " " << y_pb);
+*/
+                return x_pb*y_pb;
 
             }
 

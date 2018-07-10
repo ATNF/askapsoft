@@ -51,12 +51,28 @@ namespace imagemath {
         double getExpScaling()
         {return this->ExpScaling;};
 
-        virtual double evaluateAtOffset(double offset, double frequency);
+        double getXwidth(double frequency);
+
+        double getYwidth(double frequency);
+
+
+        virtual double evaluateAtOffset(double offsetPA, double offsetDist, double frequency);
+
+        virtual double evaluateAtOffset(double offsetDist, double frequency);
 
         /// Probably should have a "generate weight" - that calls evaluate for
         /// every pixel ....
 
         virtual casa::Matrix<casa::Complex> getJonesAtOffset(double offset, double frequency);
+
+        /// Some sets.
+
+        void setAlpha(double angle)  {Alpha=angle;};
+        void setXwidth(double x)     {Xwidth=x;};
+        void setYwidth(double y)     {Ywidth=y;};
+        void setXoff(double x)       {Xoff=x;};
+        void setYoff(double y)       {Yoff=y;};
+
 
     private:
 
@@ -68,6 +84,24 @@ namespace imagemath {
 
         // Further scaling of the Gaussian exponent
         double ExpScaling;
+
+        // Some parameters of the GaussianPB
+        /// Rotation of the elliptical beam relative to the meridian, positive is North. In a clockwise direction
+
+        double Alpha;
+        /// Width of the X-Gaussian - orientated North-South
+        double Xwidth;
+
+        /// Width of hte Y-Gaussian - orientated West-East
+        double Ywidth;
+
+        /// offset of the peak of the X-Gaussian from the centre - North is positive
+        double Xoff;
+
+        /// offset off the peak of the Y-Gaussian from the centre - East is positive
+        double Yoff;
+
+
 
     };
 

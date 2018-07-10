@@ -1070,7 +1070,7 @@ namespace askap {
                 // set the centre of the input beam (needs to be more flexible -- and correct...)
                 inDC.toWorld(world0,inDC.referencePixel());
 
-
+                ASKAPLOG_INFO_STR(linmoslogger, "Centre of beam is " << world0);
 
                 // step through the pixels, setting the weights (power primary beam squared)
                 for (int x=0; x<outPix.shape()[0];++x) {
@@ -1083,10 +1083,10 @@ namespace askap {
                         pixel[1] = double(y);
                         outDC.toWorld(world1,pixel);
                         offsetBeam = world0.separation(world1);
-
+                        double offsetAngle = world0.positionAngle(world1);
                         // set the weight
                         //pb = exp(-offsetBeam*offsetBeam*4.*log(2.)/fwhm/fwhm);
-                        pb = itsPB->evaluateAtOffset(offsetBeam,freq);
+                        pb = itsPB->evaluateAtOffset(offsetAngle,offsetBeam,freq);
 
                         if (itsWeightType == FROM_BP_MODEL) {
                           // this replicates the case where we just use the PB model
@@ -1266,7 +1266,8 @@ namespace askap {
             if ( itsWeightType == FROM_BP_MODEL || itsWeightType == COMBINED ) { // this loop has to put the PB weighting in
                 wgtPix = Array<T>(itsInShape);
                 Vector<double> pixel(2,0.);
-                MVDirection world;
+                Vector<double> world(2,0.);
+
                 T offsetBeam, pb;
 
                 // get coordinates of the spectral axis and the current frequency
@@ -1285,6 +1286,10 @@ namespace askap {
                 const int dcPos = itsInCoordSys.findCoordinate(Coordinate::DIRECTION,-1);
                 const DirectionCoordinate outDC = itsOutCoordSys.directionCoordinate(dcPos);
 
+                // get coordinates of beamCentre -- FIXME: make this more general.
+                MVDirection beamCentre = itsInCentre; // this has come from the reference pixel of the input Csys
+
+
                 // set the higher-order dimension to zero, as weights are on a 2D plane
                 for (uInt dim=0; dim<curpos.nelements(); ++dim) {
                     wgtpos[dim] = 0;
@@ -1292,6 +1297,7 @@ namespace askap {
                 // set the array
 
                 wgtPixBeam = Array<T>(itsInShape);
+                Vector<Double> offvec(3,0.);
                 for (int x=0; x<outPix.shape()[0];++x) {
                     for (int y=0; y<outPix.shape()[1];++y) {
                         wgtpos[0] = x;
@@ -1301,11 +1307,16 @@ namespace askap {
                         pixel[0] = double(x);
                         pixel[1] = double(y);
                         outDC.toWorld(world,pixel);
-                        offsetBeam = itsInCentre.separation(world);
-
+                        MVDirection pixDir(world);
+                        offsetBeam = beamCentre.separation(pixDir); // the difference between 2 direction cosines.
+                        double offsetAngle = beamCentre.positionAngle(pixDir); // the position angle ...
+                        // ASKAPLOG_INFO_STR(linmoslogger,"x,y: " << x << "," << y);
+                        // ASKAPLOG_INFO_STR(linmoslogger,"offset: " << offsetAngle << "," << offsetBeam << endl);
                         // set the weight
                         //pb = exp(-offsetBeam*offsetBeam*4.*log(2.)/fwhm/fwhm);
-                        pb = itsPB->evaluateAtOffset(offsetBeam,freq);
+                        pb = itsPB->evaluateAtOffset(offsetAngle,offsetBeam,freq);
+                        // ASKAPLOG_INFO_STR(linmoslogger,"pb: " << pb << endl);
+
                         if (itsWeightType == FROM_BP_MODEL) {
                           wgtPix(wgtpos) = pb * pb;
                           wgtPixBeam(wgtpos) = 1.0;
