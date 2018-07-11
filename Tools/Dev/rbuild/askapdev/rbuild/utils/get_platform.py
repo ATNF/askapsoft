@@ -31,7 +31,7 @@ import platform
 def get_platform():
     '''
     The function returns a dictionary with keys::
-    
+
         ['hostname', 'system', 'distribution', 'version', 'tversion',
          'architecture', 'kernel', 'tkernel',]
     For Debain systems it also returns the codename for the release.
@@ -42,7 +42,7 @@ def get_platform():
         string.
 
     Example::
-    
+
         python -c 'from askapdev.rbuild.utils import get_platform; print get_platform()'
         {'kernel': '2.6.26', 'version': '5.0', 'architecture': '64bit', 'tversion': ('5', '0', '9'),
         'distribution': 'debian', 'hostname': 'delphinus', 'tkernel': ['2', '6', '26'], 'system': 'Linux'}
@@ -73,7 +73,7 @@ def get_platform():
     else:
         version2 = ''
         tversion = tuple()
-        
+
     if distribution == 'debian':
         try:
             v = float(version2)
