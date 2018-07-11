@@ -75,12 +75,16 @@ def get_platform():
         tversion = tuple()
         
     if distribution == 'debian':
-        v = float(version2)
-        if   v >= 8: codename = 'jessie'
-        elif v >= 7: codename = 'wheezy'
-        elif v >= 6: codename = 'squeeze'
-        elif v >= 5: codename = 'lenny'
-        elif v >= 4: codename = 'etch'
+        try:
+            v = float(version2)
+            if   v >= 8: codename = 'jessie'
+            elif v >= 7: codename = 'wheezy'
+            elif v >= 6: codename = 'squeeze'
+            elif v >= 5: codename = 'lenny'
+            elif v >= 4: codename = 'etch'
+        except:
+            # handle unstable releases. ASKAPSDP-3084
+            codename = version2.split('/')[0]
 
     if system == 'Darwin':
         if   version2 == '10.9': codename = 'mavericks'
