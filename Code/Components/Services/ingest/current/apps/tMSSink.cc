@@ -68,7 +68,9 @@ public:
       ASKAPLOG_INFO_STR(logger, "Setting up mock up data structure for rank="<<rank());
       Configuration cfg(config(), rank(), numProcs());
       VisConverter<VisDatagramADE> conv(config(), cfg);
-      conv.initVisChunk(4976749386006000ul, cfg.lookupCorrelatorMode("standard"));
+      const CorrelatorMode &corrMode = cfg.lookupCorrelatorMode("standard");
+      conv.initVisChunk(4976749386006000ul, corrMode);
+      const float corrInterval = static_cast<float>(corrMode.interval()) / 1e6; // in seconds
       boost::shared_ptr<common::VisChunk> chunk = conv.visChunk();
       ASKAPASSERT(chunk);
       casa::Timer timer;
@@ -92,7 +94,14 @@ public:
            ASKAPLOG_INFO_STR(logger, "   - mssink took "<<runTime<<" seconds");
            processingTime += runTime;
            ++actualCount;
-           chunk->time() += casa::Quantity(5.,"s");
+           chunk->time() += casa::Quantity(corrInterval > 0 ? corrInterval : 5.,"s");
+           if (runTime < corrInterval) {
+               sleep(corrInterval - runTime);
+           } else {
+               if (corrInterval > 0) {
+                   ASKAPLOG_INFO_STR(logger, "Not keeping up! interval = "<<corrInterval<<" seconds");
+               }
+           }
       }
       if (actualCount > 0) {
           ASKAPLOG_INFO_STR(logger, "Average running time per cycle: "<<processingTime / actualCount<<
