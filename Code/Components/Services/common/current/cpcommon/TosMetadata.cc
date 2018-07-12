@@ -38,12 +38,45 @@
 #include "casacore/casa/Quanta.h"
 #include "cpcommon/CasaBlobUtils.h"
 
+// LOFAR
+#include <Blob/BlobArray.h>
+
+
 // Using
 using namespace std;
 using namespace askap::cp;
 
 TosMetadata::TosMetadata() : itsTime(0), itsScanId(-1), itsFlagged(false)
 {
+}
+
+/// @brief copy constructor
+/// @details It is needed due to reference semantics of casa arrays
+/// @param[in] other an object to copy from
+TosMetadata::TosMetadata(const TosMetadata &other) : itsTime(other.itsTime), itsScanId(other.itsScanId),
+    itsFlagged(other.itsFlagged), itsCentreFreq(other.itsCentreFreq), itsTargetName(other.itsTargetName),
+    itsTargetDirection(other.itsTargetDirection), itsPhaseDirection(other.itsPhaseDirection),
+    itsCorrMode(other.itsCorrMode), itsBeamOffsets(other.itsBeamOffsets.copy()),
+    itsAntennas(other.itsAntennas) {}
+
+/// @brief assignment operator
+/// @details It is needed due to reference semantics of casa arrays
+/// @param[in] other an object to copy from
+TosMetadata& TosMetadata::operator=(const TosMetadata &other)
+{
+  if (this != &other) {
+      itsTime = other.itsTime;
+      itsScanId = other.itsScanId;
+      itsFlagged = other.itsFlagged;
+      itsCentreFreq = other.itsCentreFreq;
+      itsTargetName = other.itsTargetName;
+      itsTargetDirection = other.itsTargetDirection;
+      itsPhaseDirection = other.itsPhaseDirection;
+      itsCorrMode = other.itsCorrMode;
+      itsBeamOffsets.assign(other.itsBeamOffsets.copy());
+      itsAntennas = other.itsAntennas;
+  }
+  return *this;
 }
 
 casa::uLong TosMetadata::time(void) const
@@ -126,6 +159,29 @@ std::string TosMetadata::corrMode(void) const
     return itsCorrMode;
 }
 
+/// @return the reference to 2xnBeam beam offset matrix
+/// @note the current design/metadata datagram assumes same beam offsets
+/// for all antennas. Also in some special modes we set these offsets to zero
+/// regardless of the actual beam pointings. Values are in radians (although this
+/// class doesn't rely on particular units and passes whatever value was set.
+const casa::Matrix<casa::Double>& TosMetadata::beamOffsets() const
+{
+    return itsBeamOffsets;
+}
+
+/// @brief Set beam offsets
+/// @param[in] offsets 2xnBeam beam offsets matrix 
+void TosMetadata::beamOffsets(const casa::Matrix<casa::Double> &offsets)
+{
+    if (offsets.nelements() != 0) {
+        ASKAPCHECK(offsets.nrow() == 2, "Beam offset matrix is expected to have 2 x nBeam shape, you have: "<<offsets.shape());
+        // make a copy due to reference semantics of casa arrays
+        itsBeamOffsets.assign(offsets.copy());
+    } else {
+        itsBeamOffsets.resize(0,0);
+    }
+}
+
 void TosMetadata::addAntenna(const TosMetadataAntenna& ant)
 {
     // Ensure an antenna of this name does not already exist
@@ -168,9 +224,9 @@ const TosMetadataAntenna& TosMetadata::antenna(const std::string& name) const
 /// @return output stream
 LOFAR::BlobOStream& LOFAR::operator<<(LOFAR::BlobOStream& os, const askap::cp::TosMetadata& obj)
 {
-   os.putStart("TosMetadata", 1);
+   os.putStart("TosMetadata", 2);
    os << static_cast<uint64>(obj.time()) << obj.scanId() << obj.flagged() << obj.centreFreq() << obj.targetName() << 
-         obj.targetDirection() << obj.phaseDirection() << obj.corrMode();
+         obj.targetDirection() << obj.phaseDirection() << obj.corrMode() << obj.beamOffsets();
    const std::vector<std::string> antNames = obj.antennaNames();
    os << static_cast<uint64>(antNames.size());
    for (std::vector<std::string>::const_iterator ci = antNames.begin(); ci != antNames.end(); ++ci) {
@@ -188,7 +244,7 @@ LOFAR::BlobIStream& LOFAR::operator>>(LOFAR::BlobIStream& is, askap::cp::TosMeta
 {
    using namespace askap;
    const int version = is.getStart("TosMetadata");
-   ASKAPASSERT(version == 1);
+   ASKAPASSERT(version == 2);
    obj = TosMetadata();
    uint64 time;
    is >> time;
@@ -214,6 +270,14 @@ LOFAR::BlobIStream& LOFAR::operator>>(LOFAR::BlobIStream& is, askap::cp::TosMeta
    obj.phaseDirection(dir);
    is >> bufStr;
    obj.corrMode(bufStr);
+
+   casa::Matrix<casa::Double> offsetBuf;
+   is >> offsetBuf;
+   // technically this does an unnecessary copy, we could've benefited from reference semantics
+   // of casa arrays and access data fields directly, but it breaks encapsulation - so will do it
+   // only if it causes performance problems in the future
+   obj.beamOffsets(offsetBuf);
+
    // now load antenna metadata
    uint64 nAntennas = 0;
    is >> nAntennas;

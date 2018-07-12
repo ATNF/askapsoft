@@ -49,6 +49,8 @@ namespace cp {
 class TosMetadataTest : public CppUnit::TestFixture {
         CPPUNIT_TEST_SUITE(TosMetadataTest);
         CPPUNIT_TEST(testConstructor);
+        CPPUNIT_TEST(testCopy);
+        CPPUNIT_TEST(testAssignment);
         CPPUNIT_TEST(testAddAntenna);
         CPPUNIT_TEST(testAddAntennaDuplicate);
         CPPUNIT_TEST(testTime);
@@ -58,6 +60,8 @@ class TosMetadataTest : public CppUnit::TestFixture {
         CPPUNIT_TEST(testTargetDirection);
         CPPUNIT_TEST(testPhaseDirection);
         CPPUNIT_TEST(testCorrMode);
+        CPPUNIT_TEST(testBeamOffsets);
+        CPPUNIT_TEST_EXCEPTION(testBeamOffsetsException, AskapError);
         CPPUNIT_TEST(testAntennaAccess);
         CPPUNIT_TEST(testAntennaInvalid);
         CPPUNIT_TEST(testSerialisation);
@@ -145,6 +149,39 @@ class TosMetadataTest : public CppUnit::TestFixture {
             CPPUNIT_ASSERT(instance->corrMode() == "standard");
         }
 
+        void testBeamOffsets() {
+            CPPUNIT_ASSERT_EQUAL(size_t(0u),instance->beamOffsets().nelements());
+            casa::Matrix<casa::Double> beamOffsets(2, 5);
+            for (size_t beam = 0; beam < beamOffsets.ncolumn(); ++beam) {
+                 beamOffsets(0,beam) = casa::C::pi / 30. * double(beam);
+                 beamOffsets(1,beam) = -casa::C::pi / 60. * double(beam);
+            }
+            instance->beamOffsets(beamOffsets);
+            const int nBeam = beamOffsets.ncolumn();
+            CPPUNIT_ASSERT_EQUAL(size_t(2u), instance->beamOffsets().nrow());
+            CPPUNIT_ASSERT_EQUAL(size_t(nBeam), instance->beamOffsets().ncolumn());
+            // this should restore the pristince state without triggering an exception
+            instance->beamOffsets(casa::Matrix<casa::Double>());
+            CPPUNIT_ASSERT_EQUAL(size_t(0u),instance->beamOffsets().nelements());
+            CPPUNIT_ASSERT_EQUAL(size_t(0u), instance->beamOffsets().nrow());
+            CPPUNIT_ASSERT_EQUAL(size_t(0u), instance->beamOffsets().ncolumn());
+            // set the matrix back
+            instance->beamOffsets(beamOffsets);
+            // and invalidate the original matrix, so unhandled reference semantics would trigger an exception
+            beamOffsets.resize(0,0);
+            CPPUNIT_ASSERT_EQUAL(size_t(2u), instance->beamOffsets().nrow());
+            CPPUNIT_ASSERT_EQUAL(size_t(nBeam), instance->beamOffsets().ncolumn());
+            for (int beam = 0; beam < nBeam; ++beam) {
+                 CPPUNIT_ASSERT_DOUBLES_EQUAL(casa::C::pi / 30. * double(beam), instance->beamOffsets()(0,beam), 1e-6);
+                 CPPUNIT_ASSERT_DOUBLES_EQUAL(-casa::C::pi / 60. * double(beam), instance->beamOffsets()(1,beam), 1e-6);
+            }
+        }
+
+        void testBeamOffsetsException() {
+            // this will throw an exception as the number of coordinates should be exactly 2
+            instance->beamOffsets(casa::Matrix<casa::Double>(3,5,0.));
+        }
+
         void testAntennaAccess() {
             const casa::String ant1Name = "ak01";
             const casa::String ant2Name = "ak02";
@@ -171,21 +208,34 @@ class TosMetadataTest : public CppUnit::TestFixture {
             CPPUNIT_ASSERT_THROW(instance->antenna(""), askap::AskapError);
             CPPUNIT_ASSERT_THROW(instance->antenna("ak2"), askap::AskapError);
         }
+
+       
+ 
+        void testCopy() {
+            populateCurrentInstance();
+
+            TosMetadata copy(*instance);
+            // to ensure (lack of) reference semantics is covered
+            instance.reset();
+           
+            verifyResult(copy);
+        }
+
+        void testAssignment() {
+            populateCurrentInstance();
+
+            TosMetadata copy;
+            copy = *instance;
+            // to ensure (lack of) reference semantics is covered
+            instance.reset();
+           
+            verifyResult(copy);
+        }
     
         void testSerialisation() {
-            // use test methods defined above as they populate the "instance"
-            CPPUNIT_ASSERT(instance);
-            testAntennaAccess();
-            testCorrMode();
-            testPhaseDirection();
-            testTargetDirection();
-            testTargetName();
-            testTime();
-            instance->flagged(true);
-            instance->scanId(30);
+            populateCurrentInstance();
 
             TosMetadata received;
-            //received = *instance;
 
             // Encode
             std::vector<int8_t> buf;
@@ -204,6 +254,27 @@ class TosMetadataTest : public CppUnit::TestFixture {
             in.getEnd();
 
             // test content
+            verifyResult(received);
+        }
+    protected:
+        // fill current instance with test values (shared method between copy,asignment and serialisation tests)
+        void populateCurrentInstance() {
+            // use test methods defined above as they populate the "instance"
+            CPPUNIT_ASSERT(instance);
+            testAntennaAccess();
+            testCorrMode();
+            testPhaseDirection();
+            testTargetDirection();
+            testTargetName();
+            testTime();
+            testBeamOffsets();
+            instance->flagged(true);
+            instance->scanId(30);
+        }
+
+        // verify given metadata object - expected to match that produced by populateCurrentInstance
+        void verifyResult(const TosMetadata &received) {
+            // test content
             CPPUNIT_ASSERT_EQUAL(casa::String("ak01"), received.antenna("ak01").name());
             CPPUNIT_ASSERT_EQUAL(casa::String("ak02"), received.antenna("ak02").name());
             CPPUNIT_ASSERT_EQUAL(2u, received.nAntenna());
@@ -212,6 +283,13 @@ class TosMetadataTest : public CppUnit::TestFixture {
             CPPUNIT_ASSERT_EQUAL(std::string("1934-638"), received.targetName());
             CPPUNIT_ASSERT_EQUAL(1234ul, received.time());
             CPPUNIT_ASSERT_EQUAL(30, received.scanId());
+            CPPUNIT_ASSERT_EQUAL(size_t(2u), received.beamOffsets().nrow());
+            const int nBeam = 5;
+            CPPUNIT_ASSERT_EQUAL(size_t(nBeam), received.beamOffsets().ncolumn());
+            for (int beam = 0; beam < nBeam; ++beam) {
+                 CPPUNIT_ASSERT_DOUBLES_EQUAL(casa::C::pi / 30. * double(beam), received.beamOffsets()(0,beam), 1e-6);
+                 CPPUNIT_ASSERT_DOUBLES_EQUAL(-casa::C::pi / 60. * double(beam), received.beamOffsets()(1,beam), 1e-6);
+            }
             // add check of direction fields here when time permits
         }
 

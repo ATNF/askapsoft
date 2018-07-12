@@ -53,11 +53,17 @@ namespace cp {
 class TosMetadata {
     public:
         /// @brief Constructor
-        ///
-        /// This object is constructed with three dimensions. These are
-        /// used to size the internal arrays, matrices and cubes.
-        ///
         TosMetadata();
+
+        /// @brief copy constructor
+        /// @details It is needed due to reference semantics of casa arrays
+        /// @param[in] other an object to copy from
+        TosMetadata(const TosMetadata &other);
+
+        /// @brief assignment operator
+        /// @details It is needed due to reference semantics of casa arrays
+        /// @param[in] other an object to copy from
+        TosMetadata& operator=(const TosMetadata &other);
 
         /////////////////////
         // Getters
@@ -95,6 +101,13 @@ class TosMetadata {
         /// @return the correlator mode
         std::string corrMode(void) const;
 
+        /// @return the reference to 2xnBeam beam offset matrix
+        /// @note the current design/metadata datagram assumes same beam offsets
+        /// for all antennas. Also in some special modes we set these offsets to zero
+        /// regardless of the actual beam pointings. Values are in radians (although this
+        /// class doesn't rely on particular units and passes whatever value was set.
+        const casa::Matrix<casa::Double>& beamOffsets() const;
+
         /////////////////////
         // Setters
         /////////////////////
@@ -127,6 +140,11 @@ class TosMetadata {
 
         /// @brief Set the correlator mode
         void corrMode(const std::string& mode);
+
+        /// @brief Set beam offsets
+        /// @param[in] offsets 2xnBeam beam offsets matrix 
+        void beamOffsets(const casa::Matrix<casa::Double> &offsets);
+        
 
         /////////////////////////
         // Antenna access methods
@@ -180,6 +198,9 @@ class TosMetadata {
 
         // The correlator mode
         std::string itsCorrMode;
+
+        // Beam offsets (2xnBeam matrix)
+        casa::Matrix<casa::Double> itsBeamOffsets;
 
         // Map of antenna names to TosMetadataAntenna objects.
         std::map<std::string, TosMetadataAntenna> itsAntennas;
