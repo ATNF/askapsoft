@@ -5,6 +5,7 @@ stman.bucketsize = 6469632
 stman.tilenchan = 2592
 stman.tilencorr = 4
 count = 10
+syncranks = true
 
 # put number of beams here
 maxbeams = 36

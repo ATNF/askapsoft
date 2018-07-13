@@ -48,6 +48,10 @@
 #include "configuration/Configuration.h" // Includes all configuration attributes too
 #include "cpcommon/VisChunk.h"
 
+// I am not very happy to have MPI includes here, we may abstract this interaction
+// eventually. This task is specific for the parallel case, so there is no reason to
+// hide MPI for now.
+#include <mpi.h>
 
 // Using
 using namespace askap;
@@ -64,6 +68,11 @@ public:
       int count = config().getInt32("count", 10);
       ASKAPCHECK(count > 0, "Expect positive number of timestamps to receive, you have = "<<count);
       uint32_t expectedCount = static_cast<uint32_t>(count);
+      
+      const bool doSync = numProcs() > 1 ? config().getBool("syncranks", false) : false;
+      if (doSync) {
+          ASKAPLOG_INFO_STR(logger, "Ranks will be synchronised and same timestamps will be written on all ranks for all cycles");
+      }
     
       ASKAPLOG_INFO_STR(logger, "Setting up mock up data structure for rank="<<rank());
       Configuration cfg(config(), rank(), numProcs());
@@ -75,6 +84,7 @@ public:
       ASKAPASSERT(chunk);
       casa::Timer timer;
       float processingTime = 0.;
+      float totalSyncTime = 0.;
       size_t actualCount = 0;
 
       ASKAPLOG_INFO_STR(logger, "Initialising MSSink constructor for rank="<<rank());
@@ -94,18 +104,43 @@ public:
            ASKAPLOG_INFO_STR(logger, "   - mssink took "<<runTime<<" seconds");
            processingTime += runTime;
            ++actualCount;
-           chunk->time() += casa::Quantity(corrInterval > 0 ? corrInterval : 5.,"s");
-           if (runTime < corrInterval) {
-               sleep(corrInterval - runTime);
-           } else {
-               if (corrInterval > 0) {
-                   ASKAPLOG_INFO_STR(logger, "Not keeping up! interval = "<<corrInterval<<" seconds");
+           if (rank() == 0 || !doSync) {
+               chunk->time() += casa::Quantity(corrInterval > 0 ? corrInterval : 5.,"s");
+           }
+           timer.mark();
+           if (doSync) {
+               ASKAPDEBUGASSERT(numProcs() > 1);
+               double timeRecvBuf[2];
+               if (rank() == 0) {
+                   timeRecvBuf[0] = chunk->time().getDay();
+                   timeRecvBuf[1] = chunk->time().getDayFraction();
+               }
+               const int response = MPI_Bcast(timeRecvBuf, 2, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+               ASKAPCHECK(response == MPI_SUCCESS, "Error gathering times, response from MPI_Bcast = "<<response);
+               if (rank() != 0) {
+                   const casa::MVEpoch receivedTime(timeRecvBuf[0], timeRecvBuf[1]);
+                   chunk->time() = receivedTime;
+               }
+           }
+           const float syncTime = timer.real();
+           totalSyncTime += syncTime;
+           if (rank() == 0 || !doSync) {
+               if (runTime + syncTime < corrInterval) {
+                   sleep(corrInterval - runTime - syncTime);
+               } else {
+                   if (corrInterval > 0) {
+                       ASKAPLOG_INFO_STR(logger, "Not keeping up! interval = "<<corrInterval<<" seconds, but needed "<<runTime+syncTime<<" seconds this cycle");
+                   }
                }
            }
       }
       if (actualCount > 0) {
           ASKAPLOG_INFO_STR(logger, "Average running time per cycle: "<<processingTime / actualCount<<
                      " seconds, "<<actualCount<<" iteratons averaged");
+          if (doSync) {
+              ASKAPLOG_INFO_STR(logger, "Average synchronisation time per cycle: "<<totalSyncTime / actualCount<<
+                     " seconds, "<<actualCount<<" iteratons averaged");
+          }
       }
    }
 private:
