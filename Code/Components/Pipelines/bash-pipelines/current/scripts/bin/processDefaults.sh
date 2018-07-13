@@ -161,8 +161,6 @@ module load ${currentASKAPsoftVersion}"
 module unload askappipeline
 module load askappipeline/${askappipelineVersion}"
 
-        echo " "
-
     else
         askapsoftModuleCommands="${askapsoftModuleCommands}
 # Using ASKAPsoft code tree directly, so no need to load modules"
@@ -221,12 +219,15 @@ module load askappipeline/${askappipelineVersion}"
         loadACES
         ACES_LOCATION=${ACES}
         ACES_VERSION_USED=$(echo ${ACES_VERSION} | sed -e 's/r//g')
+        echo "Using acesops module, version ${ACES_VERSION}"
         unloadACES
         ACES=${ACES_ORIGINAL}
+
                 
     else
         ACES_LOCATION=${ACES}
         ACES_VERSION_USED=$(cd $ACES; svn info | grep Revision | awk '{print $2}')
+        echo "Using user's ACES directory $ACES, revision $ACES_VERSION_USED"
         function loadACES()
         {
             loadModule aces
@@ -237,6 +238,8 @@ module load askappipeline/${askappipelineVersion}"
         }
         acesModuleCommand="module load aces"
     fi
+
+    echo " "
 
     #############################
     # HISTORY metadata string

@@ -139,7 +139,7 @@ loadModule bptool"
         echo "WARNING - ${validation_script} not found in $script_location - not running bandpass validation."
         DO_RUN_VALIDATION=false
     fi
-    validation_args="-d ${BASEDIR} -s ${SB_1934}"
+    validation_args="-d ${BASEDIR} -o $(basename ${ORIGINAL_OUTPUT}) -s ${SB_1934}"
         
     sbatchfile="$slurms/cbpcalibrator_1934.sbatch"
     cat > "$sbatchfile" <<EOF
