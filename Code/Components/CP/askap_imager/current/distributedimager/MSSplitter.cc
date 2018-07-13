@@ -531,7 +531,7 @@ void MSSplitter::splitMainTable(const casa::MeasurementSet& source,
 
     // Decide how many rows to process simultaneously. This needs to fit within
     // a reasonable amount of memory, because all visibilities will be read
-    // in for possible averaging. Assumes 32MB working space.
+    // in for possible averaging. Assumes 128MB working space.
     std::size_t inDataSize = sizeof(casa::Complex) + sizeof(casa::Bool);
     std::size_t outDataSize = inDataSize;
     if (haveInSigmaSpec) {
@@ -540,8 +540,7 @@ void MSSplitter::splitMainTable(const casa::MeasurementSet& source,
     if (haveOutSigmaSpec) {
         outDataSize += sizeof(casa::Float);
     }
-    uInt maxSimultaneousRows = (32 * 1024 * 1024) / nPol /
-            (nChanIn * inDataSize) / (nChanOut * outDataSize);
+    uInt maxSimultaneousRows =  (128 * 1024 * 1024) / nPol / (nChanIn * inDataSize) / (nChanOut * outDataSize);
     if (maxSimultaneousRows<1) maxSimultaneousRows = 1;
 
     // However, if there is row-based filtering only one row can be copied

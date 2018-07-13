@@ -59,7 +59,7 @@ class ContinuumWorker
 
         void run(void);
 
-        
+
 
 
     private:
@@ -68,12 +68,21 @@ class ContinuumWorker
         boost::shared_ptr<synthesis::AdviseDI> itsAdvisor;
          // The work units
         vector<ContinuumWorkUnit> workUnits;
+        // cached files
+        vector<string> cached_files;
 
         // Whether preconditioning has been requested
         bool itsDoingPreconditioning;
+
+        // Cache a workunit to a different location
+        void cacheWorkUnit(ContinuumWorkUnit& wu, LOFAR::ParameterSet& unitParset);
         // Process a workunit
         void processWorkUnit(ContinuumWorkUnit& wu);
-
+        // Delete a workunit from the cache
+        void deleteWorkUnitFromCache(ContinuumWorkUnit& wu, LOFAR::ParameterSet& unitParset);
+        // clear the current cached files
+        void clearWorkUnitCache();
+        
         // Vector of the stored parsets of the work allocations
         vector<LOFAR::ParameterSet> itsParsets;
 

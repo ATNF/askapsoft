@@ -36,6 +36,7 @@
 #include <unistd.h>
 
 #include "boost/shared_ptr.hpp"
+#include "boost/filesystem.hpp"
 // ASKAPsoft includes
 #include <askap/AskapLogging.h>
 #include <askap/AskapError.h>
@@ -274,6 +275,93 @@ void ContinuumWorker::run(void)
     itsComms.barrier(itsComms.theWorkers());
     ASKAPLOG_INFO_STR(logger,"Rank " << itsComms.rank() << " passed final barrier");
 }
+void ContinuumWorker::deleteWorkUnitFromCache(ContinuumWorkUnit& wu, LOFAR::ParameterSet& unitParset) {
+
+  const string ms = wu.get_dataset();
+
+  struct stat buffer;
+
+  if (stat (ms.c_str(), &buffer) == 0) {
+      ASKAPLOG_WARN_STR(logger, "Split file " << ms << " exists - deleting");
+      boost::filesystem::remove_all(ms.c_str());
+  }
+  else {
+    ASKAPLOG_WARN_STR(logger, "Split file " << ms << " does not exist - nothing to do");
+  }
+
+}
+void ContinuumWorker::clearWorkUnitCache() {
+
+  for (int cf = 0; cf < cached_files.size(); cf++){
+    const string ms = cached_files[cf];
+    struct stat buffer;
+
+    if (stat (ms.c_str(), &buffer) == 0) {
+        ASKAPLOG_WARN_STR(logger, "Split file " << ms << " exists - deleting");
+        boost::filesystem::remove_all(ms.c_str());
+    }
+    else {
+      ASKAPLOG_WARN_STR(logger, "Split file " << ms << " does not exist - nothing to do");
+    }
+
+  }
+}
+
+void ContinuumWorker::cacheWorkUnit(ContinuumWorkUnit& wu, LOFAR::ParameterSet& unitParset) {
+
+
+  const string ms = wu.get_dataset();
+
+  const string shm_root = unitParset.getString("tmpfs","/dev/shm");
+
+  std::ostringstream pstr;
+
+  pstr << shm_root << "/"<< ms << "_chan_" << wu.get_localChannel()+1 << "_beam_" << wu.get_beam() << ".ms";
+
+  const string outms = pstr.str();
+  pstr << ".working";
+
+  const string outms_flag = pstr.str();
+
+
+
+  if (itsComms.inGroup(0)) {
+
+      struct stat buffer;
+
+      while (stat (outms_flag.c_str(), &buffer) == 0) {
+          // flag file exists - someone is writing
+
+          sleep(1);
+      }
+      if (stat (outms.c_str(), &buffer) == 0) {
+          ASKAPLOG_WARN_STR(logger, "Split file already exists");
+      }
+      else if (stat (outms.c_str(), &buffer) != 0 && stat (outms_flag.c_str(), &buffer) != 0) {
+          // file cannot be read
+
+          // drop trigger
+          ofstream trigger;
+          trigger.open(outms_flag.c_str());
+          trigger.close();
+          MSSplitter mySplitter(unitParset);
+
+          mySplitter.split(ms,outms,wu.get_localChannel()+1,wu.get_localChannel()+1,1,unitParset);
+          unlink(outms_flag.c_str());
+          this->cached_files.push_back(outms);
+
+      }
+
+  }
+  ///wait for all groups this rank to get here
+  if (itsComms.nGroups() > 1) {
+      ASKAPLOG_DEBUG_STR(logger,"Rank " << itsComms.rank() << " at barrier");
+      itsComms.barrier(itsComms.interGroupCommIndex());
+      ASKAPLOG_DEBUG_STR(logger,"Rank " << itsComms.rank() << " passed barrier");
+  }
+  wu.set_dataset(outms);
+
+}
 void ContinuumWorker::processWorkUnit(ContinuumWorkUnit& wu)
 {
 
@@ -287,69 +375,24 @@ void ContinuumWorker::processWorkUnit(ContinuumWorkUnit& wu)
     char ChannelPar[64];
 
     sprintf(ChannelPar,"[1,%d]",wu.get_localChannel()+1);
+    bool perbeam = unitParset.getBool("perbeam",true);
 
-    string param = "beams";
-    std::ostringstream bstr;
+    if (!perbeam) {
+      string param = "beams";
+      std::ostringstream bstr;
 
-    bstr<<"[" << wu.get_beam() << "]";
+      bstr<<"[" << wu.get_beam() << "]";
 
-    unitParset.replace(param, bstr.str().c_str());
+      unitParset.replace(param, bstr.str().c_str());
+    }
 
     bool usetmpfs = unitParset.getBool("usetmpfs",false);
+    bool localsolve = unitParset.getBool("solverpercore",false);
 
-    if (usetmpfs)
+    if (usetmpfs && !localsolve) // only do this here if in continuum mode
+
     {
-        const string ms = wu.get_dataset();
-
-        const string shm_root = unitParset.getString("tmpfs","/dev/shm");
-
-        std::ostringstream pstr;
-
-        pstr << shm_root << "/"<< ms << "_chan_" << wu.get_localChannel()+1 << "_beam_" << wu.get_beam() << ".ms";
-
-        const string outms = pstr.str();
-        pstr << ".working";
-
-        const string outms_flag = pstr.str();
-
-
-
-        if (itsComms.inGroup(0)) {
-
-            struct stat buffer;
-
-            while (stat (outms_flag.c_str(), &buffer) == 0) {
-                // flag file exists - someone is writing
-
-                sleep(1);
-            }
-            if (stat (outms.c_str(), &buffer) == 0) {
-                ASKAPLOG_WARN_STR(logger, "Split file already exists");
-            }
-            else if (stat (outms.c_str(), &buffer) != 0 && stat (outms_flag.c_str(), &buffer) != 0) {
-                // file cannot be read
-
-                // drop trigger
-                ofstream trigger;
-                trigger.open(outms_flag.c_str());
-                trigger.close();
-                MSSplitter mySplitter(unitParset);
-
-                mySplitter.split(ms,outms,wu.get_localChannel()+1,wu.get_localChannel()+1,1,unitParset);
-                unlink(outms_flag.c_str());
-
-            }
-
-        }
-        ///wait for all groups this rank to get here
-        if (itsComms.nGroups() > 1) {
-            ASKAPLOG_DEBUG_STR(logger,"Rank " << itsComms.rank() << " at barrier");
-            itsComms.barrier(itsComms.interGroupCommIndex());
-            ASKAPLOG_DEBUG_STR(logger,"Rank " << itsComms.rank() << " passed barrier");
-        }
-        wu.set_dataset(outms);
-
-
+        cacheWorkUnit(wu,unitParset);
         sprintf(ChannelPar,"[1,1]");
     }
 
@@ -369,8 +412,7 @@ void ContinuumWorker::processWorkUnit(ContinuumWorkUnit& wu)
 }
 
 
-void
-ContinuumWorker::processSnapshot(LOFAR::ParameterSet& unitParset)
+void ContinuumWorker::processSnapshot(LOFAR::ParameterSet& unitParset)
 {
 }
 void ContinuumWorker::buildSpectralCube() {
@@ -552,7 +594,7 @@ void ContinuumWorker::buildSpectralCube() {
 
             double frequency=workUnits[workUnitCount].get_channelFrequency();
             const string colName = itsParsets[workUnitCount].getString("datacolumn", "DATA");
-            const string ms = workUnits[workUnitCount].get_dataset();
+
 
             int localChannel;
             int globalChannel;
@@ -560,12 +602,17 @@ void ContinuumWorker::buildSpectralCube() {
             bool usetmpfs = itsParsets[workUnitCount].getBool("usetmpfs",false);
             if (usetmpfs) {
                 // probably in spectral line mode
+                // copy the caching here ...
+                cacheWorkUnit(workUnits[workUnitCount],itsParsets[workUnitCount]);
+
                 localChannel = 0;
 
             }
             else {
                 localChannel = workUnits[workUnitCount].get_localChannel();
             }
+
+            const string ms = workUnits[workUnitCount].get_dataset();
             globalChannel = workUnits[workUnitCount].get_globalChannel();
 
             ASKAPLOG_INFO_STR(logger, "MS: " << ms \
@@ -600,16 +647,16 @@ void ContinuumWorker::buildSpectralCube() {
                     ASKAPLOG_WARN_STR(logger,"Askap error in calcNE");
                     throw;
                 }
-
+                // is the next work unit the same frequency or a different one
                 while (tempWorkUnitCount < workUnits.size() && frequency == workUnits[tempWorkUnitCount].get_channelFrequency()) {
 
                     /// need a working imager to allow a merge over epochs for this channel
 
-                    const string myMs = workUnits[tempWorkUnitCount].get_dataset();
 
-                    TableDataSource ds(myMs, TableDataSource::DEFAULT, colName);
                     if (usetmpfs) {
                         // probably in spectral line mode
+                        cacheWorkUnit(workUnits[tempWorkUnitCount],itsParsets[tempWorkUnitCount]);
+
                         localChannel = 0;
 
                     }
@@ -618,10 +665,12 @@ void ContinuumWorker::buildSpectralCube() {
                     }
                     globalChannel = workUnits[tempWorkUnitCount].get_globalChannel();
 
-                    ds.configureUVWMachineCache(uvwMachineCacheSize, uvwMachineCacheTolerance);
+                    const string myMs = workUnits[tempWorkUnitCount].get_dataset();
+                    TableDataSource myDs(myMs, TableDataSource::DEFAULT, colName);
+                    myDs.configureUVWMachineCache(uvwMachineCacheSize, uvwMachineCacheTolerance);
                     try {
 
-                        CalcCore workingImager(itsParsets[tempWorkUnitCount],itsComms,ds,rootImager.gridder(),localChannel);
+                        CalcCore workingImager(itsParsets[tempWorkUnitCount],itsComms,myDs,rootImager.gridder(),localChannel);
 
                     /// this loop does the calcNE and the merge of the residual images
 
@@ -700,7 +749,12 @@ void ContinuumWorker::buildSpectralCube() {
                 rootImager.restoreImage();
             }
 
+            if (usetmpfs) {
+              ASKAPLOG_INFO_STR(logger,"clearing cache");
+              clearWorkUnitCache();
+              ASKAPLOG_INFO_STR(logger,"done clearing cache");
 
+            }
 
             ASKAPLOG_INFO_STR(logger,"writing channel into cube");
 
@@ -1226,6 +1280,9 @@ void ContinuumWorker::processChannels()
         }
 
 
+    }
+    if (usetmpfs) {
+      clearWorkUnitCache();
     }
 
 }

@@ -62,11 +62,12 @@ class ImagerApp : public askap::Application
             // Instantiate the comms class
 
             askap::cp::CubeComms comms_p(argc, const_cast<const char **>(argv));
-            StatReporter stats;
+
 
             try {
 
-
+                StatReporter stats;
+                
                 // Create a subset
 
                 LOFAR::ParameterSet subset(config().makeSubset("Cimager."));
@@ -89,6 +90,9 @@ class ImagerApp : public askap::Application
 
                 // runit
                 imager.run();
+                comms_p.barrier();
+                stats.logSummary();
+
             } catch (const askap::AskapError& e) {
                 ASKAPLOG_FATAL_STR(logger, "Askap error in " << argv[0] << ": " << e.what());
                 std::cerr << "Askap error in " << argv[0] << ": " << e.what() << std::endl;
@@ -102,7 +106,7 @@ class ImagerApp : public askap::Application
                 return 1;
             }
 
-            stats.logSummary();
+
 
             return 0;
         }
