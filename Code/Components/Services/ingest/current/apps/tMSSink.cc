@@ -97,16 +97,6 @@ public:
       ASKAPLOG_INFO_STR(logger, "Running the test for rank="<<rank());
 
       for (uint32_t count = 0; count < expectedCount; ++count) {
-           ASKAPLOG_INFO_STR(logger, "Received "<<count + 1<<" integration(s) for rank="<<rank());
-           timer.mark();
-           sink.process(chunk);
-           const float runTime = timer.real();
-           ASKAPLOG_INFO_STR(logger, "   - mssink took "<<runTime<<" seconds");
-           processingTime += runTime;
-           ++actualCount;
-           if (rank() == 0 || !doSync) {
-               chunk->time() += casa::Quantity(corrInterval > 0 ? corrInterval : 5.,"s");
-           }
            timer.mark();
            if (doSync) {
                ASKAPDEBUGASSERT(numProcs() > 1);
@@ -124,7 +114,16 @@ public:
            }
            const float syncTime = timer.real();
            totalSyncTime += syncTime;
+
+           ASKAPLOG_INFO_STR(logger, "Received "<<count + 1<<" integration(s) for rank="<<rank());
+           timer.mark();
+           sink.process(chunk);
+           const float runTime = timer.real();
+           ASKAPLOG_INFO_STR(logger, "   - mssink took "<<runTime<<" seconds");
+           processingTime += runTime;
+           ++actualCount;
            if (rank() == 0 || !doSync) {
+               chunk->time() += casa::Quantity(corrInterval > 0 ? corrInterval : 5.,"s");
                if (runTime + syncTime < corrInterval) {
                    sleep(corrInterval - runTime - syncTime);
                } else {
