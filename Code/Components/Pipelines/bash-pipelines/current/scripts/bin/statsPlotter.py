@@ -62,6 +62,8 @@ if __name__ == '__main__':
     parser = OptionParser()
     parser.add_option("-s","--statsfile", dest="statsfile", type="string", default="",
                           help="Input stats file [default: %default]")
+    parser.add_option("-m","--metadata", dest="metadata", type="string", default="metadata",
+                          help="Directory containing pipeline metadata [default: %default]")
     parser.add_option("-b","--beamlist", dest="beamlist", type="string", default="0-35",
                           help="List of beams to be included [default: %default]")
     parser.add_option("-f","--numfields", dest="numfields", type="int", default=1,
@@ -82,7 +84,7 @@ if __name__ == '__main__':
         
 
     # Get metadata
-    sbfile = 'metadata/schedblock-info-%s.txt'%options.sbid
+    sbfile = '%s/schedblock-info-%s.txt'%(options.metadata,options.sbid)
     if not os.access(sbfile,os.F_OK):
         print("Metadata file %s not found. Exiting."%sbfile)
         exit(1)

@@ -102,7 +102,7 @@ if [ "\${doScience}" == "true" ]; then
     # Make a diagnostic plot of the timings and place a copy in the
     # diagnostics directory - only do this for the science processing
 
-    ${PIPELINEDIR}/statsPlotter.py -s \$statsTXT -b "${BEAM_ARG}" -f ${NUM_FIELDS} -S ${SB_SCIENCE}
+    ${PIPELINEDIR}/statsPlotter.py -s \$statsTXT -m \$metadata -b "${BEAM_ARG}" -f ${NUM_FIELDS} -S ${SB_SCIENCE}
 
     cp statsPlot-${NOW}.png ${diagnostics}
 fi
