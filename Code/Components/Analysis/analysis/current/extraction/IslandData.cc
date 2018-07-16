@@ -68,7 +68,7 @@ IslandData::IslandData(const LOFAR::ParameterSet &parset, const std::string fitT
 
     itsMeanImageName = parset.getString("VariableThreshold.AverageImageName", "");
     if (itsMeanImageName != "") {
-        if (itsParset.getString("imagetype", "fits") == "fits") {
+        if (itsParset.getString("VariableThreshold.imagetype", "fits") == "fits") {
             itsMeanImageName += ".fits";
         }
         ASKAPLOG_DEBUG_STR(logger, "Setting up mean image extractor");
@@ -82,7 +82,7 @@ IslandData::IslandData(const LOFAR::ParameterSet &parset, const std::string fitT
 
     itsNoiseImageName = parset.getString("VariableThreshold.NoiseImageName", "");
     if (itsNoiseImageName != "") {
-        if (itsParset.getString("imagetype", "fits") == "fits") {
+        if (itsParset.getString("VariableThreshold.imagetype", "fits") == "fits") {
             itsNoiseImageName += ".fits";
         }
         ASKAPLOG_DEBUG_STR(logger, "Setting up noise image extractor");
