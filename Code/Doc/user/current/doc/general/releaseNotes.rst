@@ -5,6 +5,28 @@ This page summarises the key changes in each tagged release of
 ASKAPsoft. This replicates the CHANGES file that is included in the
 code base.
 
+Next release
+------------
+
+The next release will be a patch release fixing minor issues with the
+0.21.0 version.
+
+Pipeline fixes:
+
+ * The bandpass validation script will now find the correct files when
+   an OUTPUT directory is used.
+ * Similarly, the statsPlotter script is now more robust against the
+   use of the OUTPUT option.
+ * Parallel processing enabled for the larger ccalapply jobs.
+
+Processing fixes:
+
+ * Selavy now correctly recognises the VariableThreshold.imagetype
+   keyword - there were issues when imagetype=casa was used,
+   particularly in conjunction with the pipeline.
+
+
+
 0.21.0 (6 July 2018)
 ---------------------
 

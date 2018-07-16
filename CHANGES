@@ -1,3 +1,23 @@
+0.21.1 (16 July 2018)
+---------------------
+
+A patch release fixing minor issues with the 0.21 release.
+
+Pipeline fixes:
+
+ * The bandpass validation script will now find the correct files when
+   an OUTPUT directory is used.
+ * Similarly, the statsPlotter script is now more robust against the
+   use of the OUTPUT option.
+ * Parallel processing enabled for the larger ccalapply jobs.
+
+Processing fixes:
+
+ * Selavy now correctly recognises the VariableThreshold.imagetype
+   keyword - there were issues when imagetype=casa was used,
+   particularly in conjunction with the pipeline.
+
+
 0.21.0 (6 July 2018)
 ---------------------
 
