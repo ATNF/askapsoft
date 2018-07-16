@@ -305,6 +305,10 @@ DO_APPLY_BANDPASS_1934=true
 # versions
 KEEP_RAW_1934_DATA=true
 
+# Parallelism for applying bandpass to full-size science datasets
+#  Don't change unless you know what you are doing!
+NUM_CORES_CAL_APPLY=55
+
 
 ####################
 ##  Flagging the bandpass calibrator dataset

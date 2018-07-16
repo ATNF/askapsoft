@@ -42,8 +42,8 @@ if [ "$DO_IT" == "true" ]; then
 #!/bin/bash -l
 ${SLURM_CONFIG}
 #SBATCH --time=${JOB_TIME_APPLY_BANDPASS}
-#SBATCH --ntasks=1
-#SBATCH --ntasks-per-node=1
+#SBATCH --ntasks=${NUM_CORES_CAL_APPLY}
+#SBATCH --ntasks-per-node=${NPPN_CAL_APPLY}
 #SBATCH --job-name=${jobname}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-applyBandpass-%j.out
@@ -86,8 +86,8 @@ EOFINNER
 
 log=${logs}/ccalapply_bp_b${BEAM}_\${SLURM_JOB_ID}.log
 
-NCORES=1
-NPPN=1
+NCORES=${NUM_CORES_CAL_APPLY}
+NPPN=${NPPN_CAL_APPLY}
 srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${ccalapply} -c "\$parset" > "\$log"
 err=\$?
 rejuvenate ${msSci}

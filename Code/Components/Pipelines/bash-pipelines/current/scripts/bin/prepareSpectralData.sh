@@ -157,8 +157,8 @@ if [ "${DO_IT}" == "true" ]; then
 #!/bin/bash -l
 ${SLURM_CONFIG}
 #SBATCH --time=${JOB_TIME_SPECTRAL_APPLYCAL}
-#SBATCH --ntasks=1
-#SBATCH --ntasks-per-node=1
+#SBATCH --ntasks=${NUM_CORES_CAL_APPLY}
+#SBATCH --ntasks-per-node=${NPPN_CAL_APPLY}
 #SBATCH --job-name=${jobname}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-calappSLsci-%j.out
@@ -192,8 +192,8 @@ Ccalapply.calibaccess.table.maxchan       = ${nchanContSci}
 Ccalapply.calibaccess.table               = ${gainscaltab}
 EOFINNER
 
-NCORES=1
-NPPN=1
+NCORES=${NUM_CORES_CAL_APPLY}
+NPPN=${NPPN_CAL_APPLY}
 srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${ccalapply} -c "\${parset}" > "\${log}"
 err=\$?
 rejuvenate ${msSciSL}

@@ -644,6 +644,14 @@ EOF
         echo "WARNING - Invalid value for BANDPASS_SMOOTH_TOOL (${BANDPASS_SMOOTH_TOOL}). Setting to \"plot_caltable\"."
         BANDPASS_SMOOTH_TOOL="plot_caltable"
     fi
+
+    #########
+    #  Applying the bandpass to the full science dataset can be done
+    #  in parallel fashion. This sets up the number of processors per
+    #  node
+
+    NPPN_CAL_APPLY=$(echo ${NUM_CORES_CAL_APPLY} | awk '{nn=int(($1-1)/20)+1; nppn=int(($1-1)/nn)+1; print nppn}')
+
     
     ####################
     # Parameters required for science field imaging
