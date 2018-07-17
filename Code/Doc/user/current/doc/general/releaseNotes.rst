@@ -5,11 +5,10 @@ This page summarises the key changes in each tagged release of
 ASKAPsoft. This replicates the CHANGES file that is included in the
 code base.
 
-Next release
-------------
+0.21.1 (17 July 2018)
+---------------------
 
-The next release will be a patch release fixing minor issues with the
-0.21.0 version.
+A patch release fixing minor issues with the 0.21.0 version.
 
 Pipeline fixes:
 
@@ -18,6 +17,12 @@ Pipeline fixes:
  * Similarly, the statsPlotter script is now more robust against the
    use of the OUTPUT option.
  * Parallel processing enabled for the larger ccalapply jobs.
+ * The Channels selection parameter for continuum imaging can be left
+   out when NUM_CPUS_CONTIMG_SCI is provided, with a new parameter
+   CHANNEL_SELECTION_CONTIMG_SCI available to specify a selection.
+ * The snapshot imaging option is turned back on by default for all
+   imaging with the pipeline, following further testing & feedback
+   from commissioning & operations teams.
 
 Processing fixes:
 

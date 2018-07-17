@@ -707,14 +707,23 @@ EOF
 
         # total number of CPUs required for MFS continuum imaging, including the master
         #  Use the number given in the config file, unless it has been left blank
+        # Also set the Channels selection parameter
         if [ "${NUM_CPUS_CONTIMG_SCI}" == "" ]; then
             NUM_CPUS_CONTIMG_SCI=$(echo "$nchanContSci" "$nworkergroupsSci" | awk '{print $1*$2+1}')
+            CONTIMG_CHANNEL_SELECTION="# Each worker will read a single channel selection
+Cimager.Channels                                = [1, %w]"
+        else
+            if [ "${CHANNEL_SELECTION_CONTIMG_SCI}" == "" ]; then
+                CONTIMG_CHANNEL_SELECTION="# No Channels selection performed"
+            else
+                CONTIMG_CHANNEL_SELECTION="# Channel selection for each worker
+Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SCI}"
+            fi
         fi
 
         # if we are using the new imager we need to tweak this
         if [ "${DO_ALT_IMAGER_CONT}" == "true" ]; then
             NUM_CPUS_CONTIMG_SCI=$(echo "$nchanContSci" "$nworkergroupsSci" "${NCHAN_PER_CORE}" | awk '{print ($1/$3)*$2+1}')
-            # CPUS_PER_CORE_CONT_IMAGING=8 # get rid of this change as it is unnecessary
         fi
 
         # Can't have -N greater than -n in the srun call

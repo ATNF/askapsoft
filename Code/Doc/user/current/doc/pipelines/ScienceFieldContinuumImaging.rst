@@ -142,7 +142,12 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                     |                                                        | imaging. If left blank ("" - the default), then this is       |
 |                                            |                                     |                                                        | calculated based on the number of channels and Taylor terms.  |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``CPUS_PER_CORE_CONT_IMAGING``             | 20                                  | Not for parset                                         |Number of cores to use on each node in the continuum imaging.  |
+| ``CHANNEL_SELECTION_CONTIMG_SCI``          | ""                                  | Channels (:doc:`../calim/data_selection`)              | If ``NUM_CPUS_CONTIMG_SCI`` is given, the Channels selection  |
+|                                            |                                     |                                                        | is provided here. This can be left blank for no selection to  |
+|                                            |                                     |                                                        | be applied, or a string (in quotes) conforming to the data    |
+|                                            |                                     |                                                        | selection syntax can be provided.                             |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``CPUS_PER_CORE_CONT_IMAGING``             | 20                                  | Not for parset                                         | Number of cores to use on each node in the continuum imaging. |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``DATACOLUMN``                             | DATA                                | datacolumn (:doc:`../calim/cimager`)                   | The column in the measurement set from which to read the      |
 |                                            |                                     |                                                        | visibility data. The default, 'DATA', is appropriate for      |

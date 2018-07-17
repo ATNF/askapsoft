@@ -519,6 +519,10 @@ CPUS_PER_CORE_CONT_IMAGING=20
 # to have one core for each of nworkergroups*nchannels (plus a
 # master).
 NUM_CPUS_CONTIMG_SCI=""
+# The Cimager.Channels parameter, to be used when NUM_CPUS_CONTIMG_SCI
+# is given. Cimager.Channels is left out of the imaging parset if this
+# is not given.
+CHANNEL_SELECTION_CONTIMG_SCI=""
 
 # base name for images: if IMAGE_BASE_CONT=i.blah then we'll get
 # image.i.blah, image.i.blah.restored, psf.i.blah etc
@@ -566,7 +570,7 @@ ALT_IMAGER_SINGLE_FILE_CONTCUBE=true
 
 ####################
 # Gridding parameters for continuum imaging
-GRIDDER_SNAPSHOT_IMAGING=false
+GRIDDER_SNAPSHOT_IMAGING=true
 # Actual parameters used, which depend on whether snapshot imaging is used
 GRIDDER_WMAX=""
 GRIDDER_MAXSUPPORT=""
@@ -807,7 +811,7 @@ PRECONDITIONER_SPECTRAL_WIENER_ROBUSTNESS=0.5
 PRECONDITIONER_SPECTRAL_WIENER_TAPER=""
 
 # Gridding parameters for spectral-line imaging
-GRIDDER_SPECTRAL_SNAPSHOT_IMAGING=false
+GRIDDER_SPECTRAL_SNAPSHOT_IMAGING=true
 # Actual parameters used, which depend on whether snapshot imaging is used
 GRIDDER_SPECTRAL_WMAX=""
 GRIDDER_SPECTRAL_MAXSUPPORT=""

@@ -196,8 +196,7 @@ Cimager.dataset                                 = ${msSciAv}
 Cimager.datacolumn                              = ${DATACOLUMN}
 Cimager.imagetype                               = ${IMAGETYPE_CONT}
 #
-# Each worker will read a single channel selection
-Cimager.Channels                                = [1, %w]
+${CONTIMG_CHANNEL_SELECTION}
 #
 Cimager.Images.Names                            = [image.${imageBase}]
 ${shapeDefinition}
