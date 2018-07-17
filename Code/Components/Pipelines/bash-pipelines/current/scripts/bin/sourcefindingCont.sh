@@ -309,6 +309,7 @@ Selavy.image                                    = \${fitsimage}
 Selavy.sbid                                     = ${SB_SCIENCE}
 Selavy.sourceIdBase                             = ${sourceIDbase}
 Selavy.imageHistory                             = [${imageHistoryString}]
+Selavy.imagetype                                = ${IMAGETYPE_CONT}
 #
 \${SpectralTermUse}
 Selavy.nsubx                                    = ${SELAVY_NSUBX}

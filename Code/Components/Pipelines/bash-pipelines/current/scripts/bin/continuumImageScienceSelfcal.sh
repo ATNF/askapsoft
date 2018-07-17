@@ -333,6 +333,7 @@ EOFINNER
 Selavy.image                                    = ${selavyImage}
 Selavy.sbid                                     = ${SB_SCIENCE}
 Selavy.imageHistory                             = [${imageHistoryString}]
+Selavy.imagetype                                = ${IMAGETYPE_CONT}
 #
 ${selavyWeights}
 #

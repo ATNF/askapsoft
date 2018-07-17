@@ -8,9 +8,11 @@ code base.
 0.21.1 (17 July 2018)
 ---------------------
 
-A patch release fixing minor issues with the 0.21.0 version.
+A patch release fixing minor issues with the 0.21.0 version of the
+processing pipeline scripts. Only the scripts and the documentation
+are changed.
 
-Pipeline fixes:
+Fixes to the pipeline:
 
  * The bandpass validation script will now find the correct files when
    an OUTPUT directory is used.
@@ -23,12 +25,9 @@ Pipeline fixes:
  * The snapshot imaging option is turned back on by default for all
    imaging with the pipeline, following further testing & feedback
    from commissioning & operations teams.
-
-Processing fixes:
-
- * Selavy now correctly recognises the VariableThreshold.imagetype
-   keyword - there were issues when imagetype=casa was used,
-   particularly in conjunction with the pipeline.
+ * There is better specification of the imagetype parameter in the
+   Selavy parsets - there were issues when imagetype=casa was
+   used. 
 
 
 
