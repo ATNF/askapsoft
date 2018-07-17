@@ -458,7 +458,7 @@ EOFINNER
                 fluxLimitSNR="${SELFCAL_COMPONENT_SNR_LIMIT}"
                 if [ "\${fluxLimitSNR}" != "" ]; then
                     # Get the average noise at location of components, and set a flux limit for cmodel based on it
-                    avNoise=\$(awk 'BEGIN{sum=0;ct=0;}{if((substr($0,1,1)!="#")&&(\$33>0.)){ sum+=\$33; ct++; }}END{print sum/ct}' selavy-results.components.txt)
+                    avNoise=\$(awk 'BEGIN{sum=0;ct=0;}{if((substr(\$0,1,1)!="#")&&(\$33>0.)){ sum+=\$33; ct++; }}END{print sum/ct}' selavy-results.components.txt)
                     fluxLimit=\$(echo \$avNoise \$fluxLimitSNR | awk '{print \$1*\$2}')
                     echo "# Flux limit for cmodel determined from image noise & SNR=${SELFCAL_COMPONENT_SNR_LIMIT}
     Cmodel.flux_limit    = \${fluxLimit}mJy" >> \$parset
