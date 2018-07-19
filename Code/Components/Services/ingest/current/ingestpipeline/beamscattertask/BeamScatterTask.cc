@@ -655,7 +655,7 @@ void BeamScatterTask::scatterVector(casa::Vector<casa::MVDirection> &vec) const
 void BeamScatterTask::broadcastRIFields(askap::cp::common::VisChunk::ShPtr& chunk) const
 {
   ASKAPDEBUGASSERT(itsStreamNumber >= 0);
-  const int formatId = 2;
+  const int formatId = 3;
   if (localRank() == 0) {
       ASKAPDEBUGASSERT(chunk);
       // as we need to pass sizes anyway, pass also basic parameters required to initialise the chunk
@@ -663,6 +663,7 @@ void BeamScatterTask::broadcastRIFields(askap::cp::common::VisChunk::ShPtr& chun
       uint32_t buffer[5] = {0u, chunk->nRow(), chunk->nChannel(), chunk->nPol(), chunk->nAntenna()};
 
       // 1) encode info into blob 
+      // could've used mpi directory for beamoffsets, but do it quick and dirty for now
       LOFAR::BlobString bs;
       bs.resize(0);
       LOFAR::BlobOBufString bob(bs);
@@ -672,7 +673,7 @@ void BeamScatterTask::broadcastRIFields(askap::cp::common::VisChunk::ShPtr& chun
              chunk->targetPointingCentre() << chunk->actualPointingCentre() <<
              chunk->actualPolAngle() << chunk->actualAzimuth() << chunk->actualElevation() <<
              chunk->onSourceFlag() << chunk->frequency() << chunk->channelWidth() <<
-             chunk->stokes() << chunk->directionFrame();
+             chunk->stokes() << chunk->directionFrame() << chunk->beamOffsets();
       out.putEnd();
       // pass the size along with basic parameters
       buffer[0] = bs.size();
@@ -720,7 +721,7 @@ void BeamScatterTask::broadcastRIFields(askap::cp::common::VisChunk::ShPtr& chun
       in >> chunk->time() >> chunk->targetName() >> chunk->interval() >> chunk->scan() >>
             chunk->targetPointingCentre() >> chunk->actualPointingCentre() >> chunk->actualPolAngle() >>
             chunk->actualAzimuth() >> chunk->actualElevation() >> chunk->onSourceFlag() >> chunk->frequency() >>
-            chunk->channelWidth() >> chunk->stokes() >> chunk->directionFrame();
+            chunk->channelWidth() >> chunk->stokes() >> chunk->directionFrame() >> chunk->beamOffsets();
 
       in.getEnd();
 
@@ -733,6 +734,9 @@ void BeamScatterTask::broadcastRIFields(askap::cp::common::VisChunk::ShPtr& chun
       ASKAPASSERT(chunk->onSourceFlag().nelements() == chunk->nAntenna());
       ASKAPASSERT(chunk->frequency().nelements() == chunk->nChannel());
       ASKAPASSERT(chunk->stokes().nelements() == chunk->nPol());
+      if (chunk->beamOffsets().ncolumn() > 0) {
+          ASKAPASSERT(chunk->beamOffsets().nrow() == size_t(2u));
+      }
   }
 }
 

@@ -178,6 +178,7 @@ class VisChunkTest : public CppUnit::TestFixture {
             source.stokes().set(casa::Stokes::XX);
             const casa::MDirection::Ref dirFrame(casa::MDirection::J2000);
             source.directionFrame() = dirFrame;
+            source.beamOffsets().assign(casa::Matrix<double>(2,36,1.));
             
 
             // make a copy
@@ -209,6 +210,7 @@ class VisChunkTest : public CppUnit::TestFixture {
             source.channelWidth() = 0.01;
             source.stokes().set(casa::Stokes::RR);
             source.directionFrame() = casa::MDirection::Ref(casa::MDirection::AZEL);
+            source.beamOffsets().assign(casa::Matrix<double>(2,36,2.));
 
             
             // test the result
@@ -266,6 +268,13 @@ class VisChunkTest : public CppUnit::TestFixture {
             CPPUNIT_ASSERT_DOUBLES_EQUAL(resolution, target.channelWidth(), 1e-6);
             checkVector(target.stokes(), casa::Stokes::XX);
             CPPUNIT_ASSERT_EQUAL(dirFrame.getType(), target.directionFrame().getType());
+            CPPUNIT_ASSERT_EQUAL(size_t(2u), target.beamOffsets().nrow());
+            CPPUNIT_ASSERT_EQUAL(size_t(36u), target.beamOffsets().ncolumn());
+            for (casa::uInt beam=0; beam < target.beamOffsets().ncolumn(); ++beam) {
+                 for (casa::uInt coord=0; coord < target.beamOffsets().nrow(); ++coord) {
+                      CPPUNIT_ASSERT_DOUBLES_EQUAL(1., target.beamOffsets()(coord, beam), 1e-6);
+                 }
+            }
         }
 
         

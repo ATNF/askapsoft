@@ -304,6 +304,15 @@ class VisChunk {
         /// @copydoc VisChunk::directionFrame()
         const casa::MDirection::Ref& directionFrame() const;
 
+        /// @brief beam offsets
+        /// @return a reference to matrix with beam offsets
+        /// @note This matrix may be uninitialised, if static beam offsets are used
+        /// Otherwise, the matrix is 2 x nBeam
+        casa::Matrix<double>& beamOffsets();
+
+        /// @copydoc VisChunk::beamOffsets()
+        const casa::Matrix<double>& beamOffsets() const;
+
         /// Allows the VisChunk's nChannel dimension to be resized.
         /// This allows resizing in the nChannel dimension only, and by
         /// allowing new visibility, flag and frequency containers to
@@ -416,6 +425,10 @@ class VisChunk {
 
         /// Direction frame
         casa::MDirection::Ref itsDirectionFrame;
+
+        /// Beam offsets (2xnBeam or empty matrix)
+        casa::Matrix<casa::Double> itsBeamOffsets;
+
 };
 
 } // end of namespace common

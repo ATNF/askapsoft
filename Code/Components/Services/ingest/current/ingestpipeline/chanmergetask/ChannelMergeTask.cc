@@ -400,20 +400,21 @@ void ChannelMergeTask::checkChunkForConsistencyOrCreateNew(askap::cp::common::Vi
     } else {
         ASKAPCHECK(chunk, "Expect no idle input streams for the local communicator");
     }
-    int sendBuf[4];
+    int sendBuf[5];
     if (itsGroupWithActivatedRank && (localRank() == 0)) {
-        sendBuf[0] = sendBuf[1] = sendBuf[2] = sendBuf[3] = 0;
+        sendBuf[0] = sendBuf[1] = sendBuf[2] = sendBuf[3] = sendBuf[4] = 0;
     } else {
         sendBuf[0] = static_cast<int>(chunk->nRow());
         sendBuf[1] = static_cast<int>(chunk->nChannel());
         sendBuf[2] = static_cast<int>(chunk->nPol());
         sendBuf[3] = static_cast<int>(chunk->nAntenna());
+        sendBuf[4] = static_cast<int>(chunk->beamOffsets().ncolumn());
     }
    
-    boost::shared_array<int> receiveBuf(new int[4 * nLocalRanks]);
+    boost::shared_array<int> receiveBuf(new int[5 * nLocalRanks]);
 
-    const int response = MPI_Allgather(sendBuf, 4, MPI_INT, receiveBuf.get(),
-             4, MPI_INT, itsCommunicator);
+    const int response = MPI_Allgather(sendBuf, 5, MPI_INT, receiveBuf.get(),
+             5, MPI_INT, itsCommunicator);
     ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Allgather = "<<response);
 
     if (itsGroupWithActivatedRank && (localRank() == 0)) {
@@ -422,17 +423,27 @@ void ChannelMergeTask::checkChunkForConsistencyOrCreateNew(askap::cp::common::Vi
         ASKAPDEBUGASSERT(!chunk);
         ASKAPDEBUGASSERT(nLocalRanks > 1);
         // use dimensions of the rank = 1 to set up the new chunk
-        chunk.reset(new VisChunk(receiveBuf[4], receiveBuf[5] * itsRanksToMerge, receiveBuf[6], receiveBuf[7]));
+        ASKAPDEBUGASSERT(9 < 5 * nLocalRanks);
+        chunk.reset(new VisChunk(receiveBuf[5], receiveBuf[6] * itsRanksToMerge, receiveBuf[7], receiveBuf[8]));
+        if (receiveBuf[9] > 0) {
+            chunk->beamOffsets().resize(2, receiveBuf[9]);
+        } else {
+           // dimensions should be 0,0 upon construction - just check it is the case
+           ASKAPASSERT(chunk->beamOffsets().ncolumn() == size_t(0u));  
+           ASKAPASSERT(chunk->beamOffsets().nrow() == size_t(0u));  
+        }
     } else {
         for (int rank = itsGroupWithActivatedRank ? 1 : 0; rank < nLocalRanks; ++rank) {
-             ASKAPCHECK(sendBuf[0] == receiveBuf[4 * rank], "Number of rows "<<sendBuf[0]<<
-                    " is different from that of rank "<<rank<<" ("<<receiveBuf[4 * rank]<<")");
-             ASKAPCHECK(sendBuf[1] == receiveBuf[4 * rank + 1], "Number of channels "<<sendBuf[1]<<
-                    " is different from that of rank "<<rank<<" ("<<receiveBuf[4 * rank + 1]<<")");
-             ASKAPCHECK(sendBuf[2] == receiveBuf[4 * rank + 2], "Number of polarisations  "<<sendBuf[2]<<
-                    " is different from that of rank "<<rank<<" ("<<receiveBuf[4 * rank + 2]<<")");
-             ASKAPCHECK(sendBuf[3] == receiveBuf[4 * rank + 3], "Number of antennas  "<<sendBuf[3]<<
-                    " is different from that of rank "<<rank<<" ("<<receiveBuf[4 * rank + 3]<<")");
+             ASKAPCHECK(sendBuf[0] == receiveBuf[5 * rank], "Number of rows "<<sendBuf[0]<<
+                    " is different from that of rank "<<rank<<" ("<<receiveBuf[5 * rank]<<")");
+             ASKAPCHECK(sendBuf[1] == receiveBuf[5 * rank + 1], "Number of channels "<<sendBuf[1]<<
+                    " is different from that of rank "<<rank<<" ("<<receiveBuf[5 * rank + 1]<<")");
+             ASKAPCHECK(sendBuf[2] == receiveBuf[5 * rank + 2], "Number of polarisations  "<<sendBuf[2]<<
+                    " is different from that of rank "<<rank<<" ("<<receiveBuf[5 * rank + 2]<<")");
+             ASKAPCHECK(sendBuf[3] == receiveBuf[5 * rank + 3], "Number of antennas  "<<sendBuf[3]<<
+                    " is different from that of rank "<<rank<<" ("<<receiveBuf[5 * rank + 3]<<")");
+             // could've checked actual beam offsets too, but it is probably too much as we distribute them to
+             // all ranks in parallel metadata adapter. So just check the shape
         }
     }
     // could in principle check that antenna1, antenna2, etc are consistent but it will waste
@@ -602,6 +613,13 @@ void ChannelMergeTask::sendBasicMetadata(const askap::cp::common::VisChunk::ShPt
    sendVector(chunk->beam1PA(),++tag);
    sendVector(chunk->beam2PA(),++tag);
    sendVector(chunk->uvw(),++tag);
+   // all fields of the chunk should be resized to the correct size on all ranks
+   casa::Matrix<double> beamOffsets = chunk->beamOffsets();
+   if (beamOffsets.ncolumn() > 0) {
+       ASKAPDEBUGASSERT(beamOffsets.nelements() == 2 * beamOffsets.ncolumn());
+       casa::Vector<double> offsetsVec = beamOffsets.reform(casa::IPosition(1, beamOffsets.nelements()));
+       sendVector(offsetsVec, ++tag);
+   }
 
    // 2) other minor bits and heavy measures-related types
    // Cheat for now and use serialisation. A more efficient way of operating is
@@ -658,6 +676,14 @@ void ChannelMergeTask::receiveBasicMetadata(const askap::cp::common::VisChunk::S
    receiveVector(chunk->beam1PA(),++tag);
    receiveVector(chunk->beam2PA(),++tag);
    receiveVector(chunk->uvw(),++tag);
+
+   // all fields of the chunk should be resized to the correct size on all ranks
+   casa::Matrix<double> beamOffsets = chunk->beamOffsets();
+   if (beamOffsets.ncolumn() > 0) {
+       ASKAPDEBUGASSERT(beamOffsets.nelements() == 2 * beamOffsets.ncolumn());
+       casa::Vector<double> offsetsVec = beamOffsets.reform(casa::IPosition(1, beamOffsets.nelements()));
+       receiveVector(offsetsVec, ++tag);
+   }
 
    // 2) other minor bits and heavy measures-related types
    // Cheat for now and use serialisation. A more efficient way of operating is

@@ -91,7 +91,7 @@ VisChunk::VisChunk(const VisChunk &src) : itsNumberOfRows(src.itsNumberOfRows),
     itsActualAzimuth(src.itsActualAzimuth.copy()), itsActualElevation(src.itsActualElevation.copy()), 
     itsOnSourceFlag(src.itsOnSourceFlag.copy()), itsVisibility(src.itsVisibility.copy()), itsFlag(src.itsFlag.copy()),
     itsUVW(src.itsUVW.copy()), itsFrequency(src.itsFrequency.copy()), itsChannelWidth(src.itsChannelWidth), 
-    itsStokes(src.itsStokes.copy()), itsDirectionFrame(src.itsDirectionFrame)
+    itsStokes(src.itsStokes.copy()), itsDirectionFrame(src.itsDirectionFrame), itsBeamOffsets(src.itsBeamOffsets.copy())
 {
 }
 
@@ -362,6 +362,21 @@ casa::MDirection::Ref& VisChunk::directionFrame()
 const casa::MDirection::Ref& VisChunk::directionFrame() const
 {
     return itsDirectionFrame;
+}
+
+/// @brief beam offsets
+/// @return a reference to matrix with beam offsets
+/// @note This matrix may be uninitialised, if static beam offsets are used
+/// Otherwise, the matrix is 2 x nBeam
+casa::Matrix<double>& VisChunk::beamOffsets()
+{
+   return itsBeamOffsets;
+}
+
+/// @copydoc VisChunk::beamOffsets()
+const casa::Matrix<double>& VisChunk::beamOffsets() const
+{
+   return itsBeamOffsets;
 }
 
 void VisChunk::resize(const casa::Cube<casa::Complex>& visibility,
