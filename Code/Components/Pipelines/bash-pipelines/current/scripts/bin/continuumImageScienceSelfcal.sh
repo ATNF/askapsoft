@@ -54,19 +54,30 @@ fi
 
 if [ "${DO_IT}" == "true" ] && [ "${DO_SELFCAL}" == "true" ]; then
 
-    if [ "${NUM_CPUS_CONTIMG_SCI}" -lt 19 ]; then
-        NUM_CPUS_SELFCAL=19
-    else
-        NUM_CPUS_SELFCAL=$NUM_CPUS_CONTIMG_SCI
-    fi
-
+    CORES_PER_NODE_SELFCAL=20
+    
+    # How big is the selavy job for selfcal?
     NPROCS_SELAVY=$(echo "${SELFCAL_SELAVY_NSUBX}" "${SELFCAL_SELAVY_NSUBY}" | awk '{print $1*$2+1}')
-    if [ "${CPUS_PER_CORE_CONT_IMAGING}" -lt "${NPROCS_SELAVY}" ]; then
-        CPUS_PER_CORE_SELFCAL_SELAVY=${CPUS_PER_CORE_CONT_IMAGING}
+    if [ "${CORES_PER_NODE_SELFCAL}" -lt "${NPROCS_SELAVY}" ]; then
+        CPUS_PER_CORE_SELFCAL_SELAVY=${CORES_PER_NODE_SELFCAL}
     else
         CPUS_PER_CORE_SELFCAL_SELAVY=${NPROCS_SELAVY}
     fi
 
+    # Work out maximum number of cores needed
+    # Start with 2, as we need that for cmodel
+    NUM_CPUS_SELFCAL=2
+    if [ "${NPROCS_SELAVY}" -gt "${NUM_CPUS_SELFCAL}" ]; then
+        NUM_CPUS_SELFCAL=$NPROCS_SELAVY
+    fi
+    if [ "${NUM_CPUS_CONTIMG_SCI}" -gt "${NUM_CPUS_SELFCAL}" ]; then
+        NUM_CPUS_SELFCAL=$NUM_CPUS_CONTIMG_SCI
+    fi
+
+    # How many cores per node for the selfcal job?
+    #  Default to 20, but need to make smaller if the 
+
+    # Details for the script to fix the position offsets
     script_location="${ACES_LOCATION}/tools"
     script_args="${RA_POSITION_OFFSET} ${DEC_POSITION_OFFSET}"
     script="${script_location}/fix_position_offsets.py"
@@ -225,7 +236,7 @@ Ccalibrator.refgain                             = ${SELFCAL_REF_GAINS}"
 ${SLURM_CONFIG}
 #SBATCH --time=${JOB_TIME_CONT_IMAGE}
 #SBATCH --ntasks=${NUM_CPUS_SELFCAL}
-#SBATCH --ntasks-per-node=${CPUS_PER_CORE_CONT_IMAGING}
+#SBATCH --ntasks-per-node=${CORES_PER_NODE_SELFCAL}
 #SBATCH --job-name=${jobname}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-contImagingSelfcal-%j.out
