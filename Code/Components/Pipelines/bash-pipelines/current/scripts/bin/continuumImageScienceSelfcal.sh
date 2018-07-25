@@ -75,7 +75,10 @@ if [ "${DO_IT}" == "true" ] && [ "${DO_SELFCAL}" == "true" ]; then
     fi
 
     # How many cores per node for the selfcal job?
-    #  Default to 20, but need to make smaller if the 
+    #  Default to 20, but need to make smaller if the number of tasks is fewer
+    if [ "${NUM_CPUS_SELFCAL}" -lt "${CORES_PER_NODE_SELFCAL}" ]; then
+        CORES_PER_NODE_SELFCAL=$NUM_CPUS_SELFCAL
+    fi
 
     # Details for the script to fix the position offsets
     script_location="${ACES_LOCATION}/tools"
