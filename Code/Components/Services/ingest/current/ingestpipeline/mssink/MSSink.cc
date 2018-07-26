@@ -190,7 +190,6 @@ void MSSink::process(VisChunk::ShPtr& chunk)
 
     const casa::Quantity chunkMidpoint = chunk->time().getTime();
     msc.time().put(baseRow, chunkMidpoint.getValue("s"));
-    msc.time().put(baseRow, chunkMidpoint.getValue("s"));
     msc.timeCentroid().put(baseRow, chunkMidpoint.getValue("s"));
 
     msc.arrayId().put(baseRow, 0);
