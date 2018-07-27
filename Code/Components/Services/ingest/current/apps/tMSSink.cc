@@ -32,6 +32,9 @@
 #include <iomanip>
 #include <string>
 
+// Include package level header file
+#include "askap_cpingest.h"
+
 // casa
 #include "casacore/casa/OS/Timer.h"
  
@@ -80,6 +83,22 @@ public:
       // setup monitoring, if necessary
       if (!cfg.monitoringConfig().registryHost().empty()) {
           MonitoringSingleton::init(cfg);
+      }
+      // a number of generic monitoring points just in case they're useful
+      // This code is similar to what ingest is doing, but pass altered string 
+      // for SoftwareVersion, this will help to identify tMSSink as opposed to
+      // normal ingest
+      MonitoringSingleton::update<int32_t>("NumberOfRanks",cfg.nprocs());
+      MonitoringSingleton::update<int32_t>("ReceiverId",cfg.receiverId());
+      MonitoringSingleton::update<int32_t>("nReceivers",cfg.nReceivingProcs());
+      MonitoringSingleton::update<std::string>("NodeName",cfg.nodeName());
+      const std::string versionStr = getAskapPackageVersion_cpingest();
+      const size_t pos = versionStr.find("ingest; ");
+      if (pos != std::string::npos) {
+          ASKAPDEBUGASSERT(versionStr.size() >= pos + 8);
+          MonitoringSingleton::update<std::string>("SoftwareVersion","tMSSink; " + versionStr.substr(pos+8));
+      } else {
+          MonitoringSingleton::update<std::string>("SoftwareVersion","tMSSink; " + versionStr);
       }
 
       ASKAPLOG_INFO_STR(logger, "Setting up mock up data structure for rank="<<rank());
