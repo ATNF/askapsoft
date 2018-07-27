@@ -43,6 +43,7 @@
 #include "cpcommon/VisDatagram.h"
 
 // Local package includes
+#include "monitoring/MonitoringSingleton.h"
 #include "ingestpipeline/mssink/MSSink.h"
 #include "ingestpipeline/sourcetask/VisConverterADE.h"
 #include "configuration/Configuration.h" // Includes all configuration attributes too
@@ -74,8 +75,14 @@ public:
           ASKAPLOG_INFO_STR(logger, "Ranks will be synchronised and same timestamps will be written on all ranks for all cycles");
       }
     
-      ASKAPLOG_INFO_STR(logger, "Setting up mock up data structure for rank="<<rank());
       Configuration cfg(config(), rank(), numProcs());
+
+      // setup monitoring, if necessary
+      if (cfg.monitoringConfig().registryHost().empty()) {
+          MonitoringSingleton::init(cfg);
+      }
+
+      ASKAPLOG_INFO_STR(logger, "Setting up mock up data structure for rank="<<rank());
       VisConverter<VisDatagramADE> conv(config(), cfg);
       const CorrelatorMode &corrMode = cfg.lookupCorrelatorMode("standard");
       conv.initVisChunk(4976749386006000ul, corrMode);
