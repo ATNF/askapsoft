@@ -89,6 +89,8 @@ public:
       const float corrInterval = static_cast<float>(corrMode.interval()) / 1e6; // in seconds
       boost::shared_ptr<common::VisChunk> chunk = conv.visChunk();
       ASKAPASSERT(chunk);
+      // unflag samples to avoid possible confusion due to large reported number of flagged visibilities
+      chunk->flag().set(false);
       casa::Timer timer;
       float processingTime = 0.;
       float totalSyncTime = 0.;
