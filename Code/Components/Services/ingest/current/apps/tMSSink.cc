@@ -78,7 +78,7 @@ public:
       Configuration cfg(config(), rank(), numProcs());
 
       // setup monitoring, if necessary
-      if (cfg.monitoringConfig().registryHost().empty()) {
+      if (!cfg.monitoringConfig().registryHost().empty()) {
           MonitoringSingleton::init(cfg);
       }
 
