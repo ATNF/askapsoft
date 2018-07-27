@@ -55,7 +55,7 @@ if [ "${DO_IT}" == "true" ]; then
     if [ "${AOFLAGGER_STRATEGY_SCIENCE}" != "" ]; then
         AOFLAGGER_OPTIONS_SCIENCE="${AOFLAGGER_OPTIONS_SCIENCE} -strategy \"${AOFLAGGER_STRATEGY_SCIENCE}\""
     fi
-    
+
     DO_AMP_FLAG=false
     ruleList=""
 
@@ -165,6 +165,10 @@ if [ "\${USE_AOFLAGGER}" == "true" ]; then
 
     log=${logs}/aoflag_science_${FIELDBEAM}_\${SLURM_JOB_ID}.log
 
+    # Need to use the gnu PrgEnv, not the cray, to be able to load aoflagger
+    if [ "$(module list -t 2>&1 | grep PrgEnv-cray)" != "" ]; then
+      module swap PrgEnv-cray PrgEnv-gnu
+    fi
     loadModule aoflagger
     NCORES=1
     NPPN=1
@@ -183,7 +187,7 @@ else
 
     DO_AMP_FLAG=${DO_AMP_FLAG}
     if [ \$DO_AMP_FLAG == true ]; then
-    
+
         parset=${parsets}/cflag_amp_science_${FIELDBEAM}_\${SLURM_JOB_ID}.in
         cat > "\$parset" <<EOFINNER
 # The path/filename for the measurement set
@@ -201,9 +205,9 @@ ${timeFlagging}
 
 ${autocorrFlagging}
 EOFINNER
-    
+
         log=${logs}/cflag_amp_science_${FIELDBEAM}_\${SLURM_JOB_ID}.log
-    
+
         NCORES=1
         NPPN=1
         srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${cflag} -c "\${parset}" > "\${log}"
@@ -216,11 +220,11 @@ EOFINNER
             touch $FLAG_CHECK_FILE
         fi
     fi
-    
+
     DO_DYNAMIC=${FLAG_DO_DYNAMIC_AMPLITUDE_SCIENCE}
     DO_STOKESV=${FLAG_DO_STOKESV_SCIENCE}
     if [ "\${DO_DYNAMIC}" == "true" ] || [ "\${DO_STOKESV}" == "true" ]; then
-    
+
         parset=${parsets}/cflag_dynamic_science_${FIELDBEAM}_\${SLURM_JOB_ID}.in
         cat > "\$parset" <<EOFINNER
 # The path/filename for the measurement set
@@ -252,7 +256,7 @@ Cflag.stokesv_flagger.integrateTimes.threshold = ${FLAG_THRESHOLD_STOKESV_SCIENC
 EOFINNER
 
         log=${logs}/cflag_dynamic_science_${FIELDBEAM}_\${SLURM_JOB_ID}.log
-    
+
         NCORES=1
         NPPN=1
         srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${cflag} -c "\${parset}" > "\${log}"
@@ -264,7 +268,7 @@ EOFINNER
         else
             touch $FLAG_CHECK_FILE
         fi
-    
+
     fi
 
 fi
