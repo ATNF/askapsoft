@@ -160,7 +160,7 @@ if [ "\${USE_AOFLAGGER}" == "true" ]; then
     log=${logs}/aoflag_1934_${FIELDBEAM}_\${SLURM_JOB_ID}.log
 
     # Need to use the gnu PrgEnv, not the cray, to be able to load aoflagger
-    if [ "$(module list -t 2>&1 | grep PrgEnv-cray)" != "" ]; then
+    if [ "\$(module list -t 2>&1 | grep PrgEnv-cray)" != "" ]; then
       module swap PrgEnv-cray PrgEnv-gnu
     fi
     loadModule aoflagger
