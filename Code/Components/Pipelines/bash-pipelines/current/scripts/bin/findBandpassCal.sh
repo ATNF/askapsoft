@@ -72,13 +72,13 @@ Cbpcalibrator.MinUV = ${BANDPASS_MINUV}"
         referencePars="${referencePars}
 Cbpcalibrator.refantenna                      = ${BANDPASS_REFANTENNA}"
     fi
-    
+
 
     # Check for bandpass smoothing options
     DO_RUN_VALIDATION=false
     if [ "${DO_BANDPASS_SMOOTH}" != "true" ]; then
         BANDPASS_SMOOTH_TOOL=""
-    fi    
+    fi
 
     script_location="${ACES_LOCATION}/tools"
 
@@ -114,7 +114,7 @@ loadModule bptool"
         unload_script="unloadModule bptool"
         script_name="smooth_bandpass.py"
         script_args="-t ${TABLE_BANDPASS} -wp -r ${BANDPASS_REFANTENNA}"
-        
+
         if [ "${BANDPASS_SMOOTH_POLY_ORDER}" != "" ]; then
             script_args="${script_args} -np ${BANDPASS_SMOOTH_POLY_ORDER}"
         fi
@@ -133,14 +133,14 @@ loadModule bptool"
 
 
     fi
-        
+
     validation_script="bandpassValidation.py"
     if [ ! -e "${script_location}/${validation_script}" ]; then
         echo "WARNING - ${validation_script} not found in $script_location - not running bandpass validation."
         DO_RUN_VALIDATION=false
     fi
     validation_args="-d ${BASEDIR} -o $(basename ${ORIGINAL_OUTPUT}) -s ${SB_1934}"
-        
+
     sbatchfile="$slurms/cbpcalibrator_1934.sbatch"
     cat > "$sbatchfile" <<EOF
 #!/bin/bash -l
@@ -264,6 +264,9 @@ if [ "\${runValidation}" == "true" ]; then
     extractStatsNonStandard "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} "bandpassValidation" "txt,csv"
     if [ \$err != 0 ]; then
         exit \$err
+    else
+        # Copy the log from the valiation to the diagnostics directory 
+        cp \${log} \${diagnostics}
     fi
 
 fi
