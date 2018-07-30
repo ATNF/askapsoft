@@ -143,9 +143,8 @@ ${Imager}.restore.beamReference                   = ${RESTORING_BEAM_CONTCUBE_RE
     altImagerParams="# Options for the alternate imager"
     if [ "${DO_ALT_IMAGER_CONTCUBE}" == "true" ]; then
 
-        nchanpercore=1
         altImagerParams="${altImagerParams}
-Cimager.nchanpercore                           = ${nchanpercore}"
+Cimager.nchanpercore                           = ${NCHAN_PER_CORE_CONTCUBE}"
         if [ "${USE_TMPFS}" == "true" ]; then
             usetmpfs="true"
         else

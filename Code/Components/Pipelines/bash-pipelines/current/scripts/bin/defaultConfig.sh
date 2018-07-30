@@ -266,7 +266,7 @@ BANDPASS_REFANTENNA=1
 # Smoothing of the bandpass table.
 # This is achieved by either the ACES tool plot_caltable.py (which
 # also plots the cal solutions), or with Wasim Raja's
-# smooth_bandpass.py tool. 
+# smooth_bandpass.py tool.
 
 # Whether to smooth the bandpass
 DO_BANDPASS_SMOOTH=true
@@ -543,6 +543,8 @@ RESTORING_BEAM_CUTOFF_CONT=0.5
 # parameters from the new (alt) imager
 # number of channels each core will process
 NCHAN_PER_CORE=1
+# specify this separately for the continuum-cube imaging
+NCHAN_PER_CORE_CONTCUBE=1
 # the spectral line imager needs its own otherwise we lose some flexibility
 NCHAN_PER_CORE_SL=9
 # store the visibilities in shared memory.
