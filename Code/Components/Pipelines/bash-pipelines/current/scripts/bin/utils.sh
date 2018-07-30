@@ -118,7 +118,7 @@ EOF
 # Takes one argument, a file or directory
 function rejuvenate()
 {
-    if [ "$1" != "" ]; then
+    if [ "$1" != "" ] && [ -e "$1" ]; then
         find "$1" -exec touch {} \;
     fi
 }
@@ -225,8 +225,8 @@ function setSelavyDirs()
         selavyMomentsDir="${selavyDir}/Moments"
         selavyCubeletsDir="${selavyDir}/Cubelets"
     fi
-        
-    
+
+
 }
 
 # Function to define the filenames of the model images and the
@@ -434,7 +434,7 @@ function setImageProperties()
     fi
 
     imageName="${imageName}${extension}"
-    
+
     # Definitions use by Selavy jobs
     setSelavyDirs $type
     if [ "${type}" == "cont" ]; then
@@ -460,7 +460,7 @@ function setImageProperties()
         meanMap=meanMap.${imageName%%.fits}
         snrMap=snrMap.${imageName%%.fits}
     fi
-    
+
     if [ "$needToUnsetTTerm" == "true" ]; then
         unset TTERM
     fi
@@ -535,7 +535,7 @@ function setImageBase()
 #   * GAINS_CAL_TABLE
 #   * DO_SELFCAL
 #   * DO_APPLY_CAL_SL
-#   * 
+#   *
 function findScienceMSnames()
 {
 
@@ -556,7 +556,7 @@ function findScienceMSnames()
     # Replace the %s wildcard with the SBID
     sedstr="s|%s|${SB_SCIENCE}|g"
     msSci=$(echo "${msSci}" | sed -e "$sedstr")
-    
+
     if [ "${DO_COPY_SL}" == "true" ]; then
         # If we make a copy of the spectral-line MS, then append '_SL'
         # to the MS name before the suffix for the MS used for
@@ -596,7 +596,7 @@ function findScienceMSnames()
         # Replace the %s wildcard with the SBID
         sedstr="s|%s|${SB_SCIENCE}|g"
         msSciAv=$(echo "${msSciAv}" | sed -e "$sedstr")
-    
+
     fi
 
     # We now define the name of the calibrated averaged dataset
@@ -633,7 +633,7 @@ function findScienceMSnames()
         # Replace the %s wildcard with the SBID
         sedstr="s|%s|${SB_SCIENCE}|g"
         gainscaltab=$(echo "${gainscaltab}" | sed -e "$sedstr")
-    
+
     fi
 
 }
@@ -652,7 +652,7 @@ function find1934MSnames()
     # Replace the %s wildcard with the SBID
     sedstr="s|%s|${SB_1934}|g"
     msCal=$(echo "${msCal}" | sed -e "$sedstr")
-    
+
 }
 
 function getPolList()
@@ -889,7 +889,7 @@ function extractStatsNonStandard()
     fi
 
     START_TIME_JOB=$(grep "STARTTIME=" ${log}.timing | head -n 1 | awk -F '=' '{print $2}')
-    
+
     TIME_JOB_REAL=$(grep real ${log}.timing | tail -n 1 | awk '{print $2}')
     TIME_JOB_USER=$(grep user ${log}.timing | tail -n 1 | awk '{print $2}')
     TIME_JOB_SYS=$(grep sys ${log}.timing | tail -n 1 | awk '{print $2}')
