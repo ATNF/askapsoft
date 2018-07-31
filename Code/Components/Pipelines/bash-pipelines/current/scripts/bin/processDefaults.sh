@@ -801,6 +801,10 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
         # set to the number of averaged channels + 1, or use that given in
         # the config file, limiting to no bigger than this number
         maxContCubeCores=$((nchanContSci + 1))
+        # if we are using the new imager we need to tweak this
+        if [ "${DO_ALT_IMAGER_CONTCUBE}" == "true" ]; then
+            maxContCubeCores=$(echo "$nchanContSci" "$NCHAN_PER_CORE_CONTCUBE" | awk '{print int($1/$2)+1}')
+        fi
         if [ "${NUM_CPUS_CONTCUBE_SCI}" == "" ]; then
             # User has not specified
             NUM_CPUS_CONTCUBE_SCI=$maxContCubeCores
@@ -815,6 +819,7 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
         if [ "${CPUS_PER_CORE_CONTCUBE_IMAGING}" -gt "${NUM_CPUS_CONTCUBE_SCI}" ]; then
             CPUS_PER_CORE_CONTCUBE_IMAGING=${NUM_CPUS_CONTCUBE_SCI}
         fi
+
 
         # Set the number of cores for the continuum cube mosaicking. Either
         # set to the number of averaged channels, or use that given in
