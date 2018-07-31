@@ -104,11 +104,19 @@ function archiveConfig()
     cat >> "$archivedConfig" <<EOF
 
 # Processed with ASKAP pipelines on ${NOW_FMT}
-# Produced with ASKAPsoft version ${ASKAPSOFT_RELEASE}
-# Produced using ASKAP pipeline version ${PIPELINE_VERSION}
-# Produced using ACES software revision ${ACES_VERSION_USED}
-
+# Processed with ASKAPsoft version ${ASKAPSOFT_RELEASE}
+# Processed with ASKAP pipeline version ${PIPELINE_VERSION}
+# Processed with ACES software revision ${ACES_VERSION_USED}
 EOF
+    if [ "${CASA_VERSION_USED}" != "" ]; then
+        echo "# Processed with CASA version ${CASA_VERSION_USED}" >> "$archivedConfig"
+    fi
+    if [ "${AOFLAGGER_VERSION_USED}" != "" ]; then
+        echo "# Processed with AOFlagger: ${AOFLAGGER_VERSION_USED}" >> "$archivedConfig"
+    fi
+    if [ "${BPTOOL_VERSION_USED}" != "" ]; then
+        echo "# Processed with BPTOOL version ${BPTOOL_VERSION_USED}" >> "$archivedConfig"
+    fi
 
 }
 

@@ -239,12 +239,56 @@ module load askappipeline/${askappipelineVersion}"
         acesModuleCommand="module load aces"
     fi
 
+    #############################
+    # Other version numbers
+
+    # CASA
+    CASA_VERSION_USED=""
+    if [ "\${BANDPASS_SMOOTH_TOOL}" == "plot_caltable" ] ||
+           [ "$(which imageToFITS 2> "/dev/null")" == "" ] ||
+           [ "${DO_SPECTRAL_IMSUB}" == "true" ]; then
+        loadModule casa
+        CASA_VERSION_USED="$(module list casa 2>&1 | grep casa | awk '{print $2}' | sed -e 's|casa/||g')"
+        unloadModule casa
+    fi
+
+    # AOFLAGGER
+    AOFLAGGER_VERSION_USED=""
+    if [ "${FLAG_WITH_AOFLAGGER}" != "" ]; then
+        loadModule aoflagger
+        AOFLAGGER_VERSION_USED="$(aoflagger --version)"
+        unloadModule aoflagger
+    fi
+
+    # BPTOOL
+    BPTOOL_VERSION_USED=""
+    if [ "${BANDPASS_SMOOTH_TOOL}" == "smooth_bandpass" ]; then
+        module use /group/askap/raj030/modulefiles
+        loadModule bptool
+        BPTOOL_VERSION_USED=${BPTOOL_VERSION}
+        unloadModule bptool
+    fi
+
     echo " "
 
     #############################
     # HISTORY metadata string
 
-    imageHistoryString="\"Produced with ASKAPsoft version \${ASKAPSOFT_VERSION_USED}\", \"Produced using ASKAP pipeline version ${PIPELINE_VERSION}\", \"Produced using ACES software revision ${ACES_VERSION_USED}\", \"Processed with ASKAP pipelines on ${NOW_FMT}\""
+    imageHistoryString="\"Produced with ASKAPsoft version \${ASKAPSOFT_VERSION_USED}\""
+    imageHistoryString="${imageHistoryString}, \"Processed with ASKAP pipeline version ${PIPELINE_VERSION}\""
+    imageHistoryString="${imageHistoryString}, \"Processed with ACES software revision ${ACES_VERSION_USED}\""
+    imageHistoryString="${imageHistoryString}, \"Processed with ASKAP pipelines on ${NOW_FMT}\""
+    if [ "${CASA_VERSION_USED}" != "" ]; then
+        imageHistoryString="${imageHistoryString}, \"Processed with CASA version ${CASA_VERSION_USED}\""
+    fi
+    if [ "${AOFLAGGER_VERSION_USED}" != "" ]; then
+        imageHistoryString="${imageHistoryString}, \"Processed with AOFlagger: ${AOFLAGGER_VERSION_USED}\""
+    fi
+    if [ "${BPTOOL_VERSION_USED}" != "" ]; then
+        imageHistoryString="${imageHistoryString}, \"Processed with BPTOOL version ${BPTOOL_VERSION_USED}\""
+    fi
+    
+    
     
     #############################
     # CONVERSION TO FITS FORMAT
