@@ -148,6 +148,7 @@ cat >> "\$parset" <<EOFINNER
 Selavy.image                                    = ${selavyImage}
 Selavy.sbid                                     = ${SB_SCIENCE}
 Selavy.imageHistory                             = [${imageHistoryString}]
+Selavy.imagetype                                = ${IMAGETYPE_CONT}
 #
 # This is how we divide it up for distributed processing, with the
 #  number of subdivisions in each direction, and the size of the
