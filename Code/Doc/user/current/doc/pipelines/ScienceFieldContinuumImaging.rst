@@ -495,7 +495,11 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``NUM_CPUS_CONTCUBE_SCI``                  | ""                                  | none                                                   | Total number of cores to use fo the continuum cube job. If    |
 |                                            |                                     |                                                        | left blank, this will be chosen to match the number of        |
-|                                            |                                     |                                                        | channels, plus an additional core for the master process.     |
+|                                            |                                     |                                                        | channels (taking into account ``NCHAN_PER_CORE_CONTCUBE`` if  |
+|                                            |                                     |                                                        | necessary), plus an additional core for the master process.   |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``NCHAN_PER_CORE_CONTCUBE``                | 1                                   | nchanpercore (:doc:`../calim/imager`)                  | If imager (:doc:`../calim/imager`) is used, this determines   |
+|                                            |                                     |                                                        | how many channels each *worker* will process.                 |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CPUS_PER_CORE_CONTCUBE_IMAGING``         | 20                                  | none                                                   | How many of the cores on each node to use.                    |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
