@@ -63,7 +63,7 @@ class MsSplitApp : public askap::Application {
 
         static boost::shared_ptr<casa::MeasurementSet> create(
             const std::string& filename, const casa::Bool addSigmaSpec,
-            casa::uInt bucketSize, casa::uInt tileNcorr, casa::uInt tileNchan);
+            casa::uInt bucketSize, casa::uInt tileNcorr, casa::uInt tileNchan, casa::uInt nRow);
 
         static void copyAntenna(const casa::MeasurementSet& source, casa::MeasurementSet& dest);
 
@@ -110,7 +110,8 @@ class MsSplitApp : public askap::Application {
                             casa::MeasurementSet& dest,
                             const uint32_t startChan,
                             const uint32_t endChan,
-                            const uint32_t width);
+                            const uint32_t width,
+                            const uint32_t maxBuf);
 
         int split(const std::string& invis, const std::string& outvis,
                   const uint32_t startChan,
@@ -142,6 +143,13 @@ class MsSplitApp : public askap::Application {
             configureFieldNameFilter(const std::vector<std::string>& names,
                                      const std::string invis);
 
+        // Determine the rows that will be kept after selection, keep an
+        // internal map with row-ranges, limit the number in each range to
+        // the specified maximum.
+        // Return the total number of output rows
+        casa::uInt getRowsToKeep(const casa::MeasurementSet& ms,
+            const casa::uInt maxSimultaneousRows);
+
         /// Set of beam IDs to include in the new measurement set, or empty
         /// if all beams are to be included
         std::set<uint32_t> itsBeams;
@@ -161,13 +169,11 @@ class MsSplitApp : public askap::Application {
         // Optional end time filter. Rows with TIME > this value will be
         // excluded
         double itsTimeEnd;
-    
-        // Vector of rows to keep. This is for the case when we know
+
+        // Map of rows to keep. This is for the case when we know
         // we do not need all rows
-        map<int,int> mapOfRows;
-        void getRowsToKeep(const casa::MeasurementSet& ms, const casa::uInt maxSimultaneousRows); 
-        int nRowsOut;
-    
+        map<int,int> itsMapOfRows;
+
 };
 
 }

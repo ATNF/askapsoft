@@ -27,7 +27,7 @@
 ///                    * Fixed bug leading to bad_alloc error
 ///                    * When row filters are set to 1, MsSplit was trying
 ///                    * to read all rows in one go leading to the error
-///                    * This was fixed by modifying the mapOfrows function.
+///                    * This was fixed by modifying the getRowsToKeep function.
 ///                    *
 ///                    *                --wr, 09Mar, 2017
 
@@ -68,6 +68,7 @@
 #include "casacore/tables/DataMan/IncrementalStMan.h"
 #include "casacore/tables/DataMan/StandardStMan.h"
 #include "casacore/tables/DataMan/TiledShapeStMan.h"
+//#include "casacore/tables/DataMan/DataManAccessor.h"
 #include "casacore/ms/MeasurementSets/MeasurementSet.h"
 #include "casacore/ms/MeasurementSets/MSColumns.h"
 
@@ -89,7 +90,8 @@ MsSplitApp::MsSplitApp()
 
 boost::shared_ptr<casa::MeasurementSet> MsSplitApp::create(
     const std::string& filename, const casa::Bool addSigmaSpec,
-    casa::uInt bucketSize, casa::uInt tileNcorr, casa::uInt tileNchan)
+    casa::uInt bucketSize, casa::uInt tileNcorr, casa::uInt tileNchan,
+    casa::uInt nRow)
 {
     if (bucketSize < 8192) bucketSize = 8192;
 
@@ -111,10 +113,11 @@ boost::shared_ptr<casa::MeasurementSet> MsSplitApp::create(
     }
 
     SetupNewTable newMS(filename, msDesc, Table::New);
-
+    // Don't use a massive size bucket to store integers
+    casa::uInt stdBucketSize=32768;
     // Set the default Storage Manager to be the Incr one
     {
-        IncrementalStMan incrStMan("ismdata", bucketSize);
+        IncrementalStMan incrStMan("ismdata", stdBucketSize);
         newMS.bindAll(incrStMan, True);
     }
 
@@ -126,7 +129,7 @@ boost::shared_ptr<casa::MeasurementSet> MsSplitApp::create(
         // While the FEED columns are perfect candidates for the incremental
         // storage manager, for some reason doing so results in a huge
         // increase in I/O to the file (see ticket: 4094 for details).
-        StandardStMan ssm("ssmdata", bucketSize);
+        StandardStMan ssm("ssmdata", stdBucketSize);
         newMS.bindColumn(MS::columnName(MS::ANTENNA1), ssm);
         newMS.bindColumn(MS::columnName(MS::ANTENNA2), ssm);
         newMS.bindColumn(MS::columnName(MS::FEED1), ssm);
@@ -137,25 +140,31 @@ boost::shared_ptr<casa::MeasurementSet> MsSplitApp::create(
     // These columns contain the bulk of the data so save them in a tiled way
     {
         // Get nr of rows in a tile.
-        const int bytesPerRow = sizeof(std::complex<float>) * tileNcorr * tileNchan;
-        const int nrowTile = std::max(1u, bucketSize / bytesPerRow);
+        // For small tables avoid having tiles larger than the table
+        // TODO: If we are using selection we should really use nRowsOut here
+        const int bytesPerRow = sizeof(casa::Complex) * tileNcorr * tileNchan;
+        const int tileNrow = std::min(nRow,std::max(1u, bucketSize / bytesPerRow));
 
         TiledShapeStMan dataMan("TiledData",
-                                IPosition(3, tileNcorr, tileNchan, nrowTile));
+                                IPosition(3, tileNcorr, tileNchan, tileNrow));
         newMS.bindColumn(MeasurementSet::columnName(MeasurementSet::DATA),
                          dataMan);
+        TiledShapeStMan dataManF("TiledFlag",
+                                                 IPosition(3, tileNcorr, tileNchan, tileNrow));
         newMS.bindColumn(MeasurementSet::columnName(MeasurementSet::FLAG),
-                         dataMan);
+                         dataManF);
         if (addSigmaSpec) {
+            TiledShapeStMan dataManS("TiledSigma",
+                                    IPosition(3, tileNcorr, tileNchan, tileNrow));
             newMS.bindColumn(MeasurementSet::columnName(MeasurementSet::SIGMA_SPECTRUM),
-                             dataMan);
+                             dataManS);
         }
     }
     {
-        const int bytesPerRow = sizeof(float) * tileNcorr;
-        const int nrowTile = std::max(1u, bucketSize / bytesPerRow);
+        const int bytesPerRow = 2*sizeof(casa::Float) * tileNcorr;
+        const int tileNrow = std::min(nRow,std::max(1u, bucketSize / bytesPerRow));
         TiledShapeStMan dataMan("TiledWeight",
-                                IPosition(2, tileNcorr, nrowTile));
+                                IPosition(2, tileNcorr, tileNrow));
         newMS.bindColumn(MeasurementSet::columnName(MeasurementSet::SIGMA),
                          dataMan);
         newMS.bindColumn(MeasurementSet::columnName(MeasurementSet::WEIGHT),
@@ -172,13 +181,13 @@ boost::shared_ptr<casa::MeasurementSet> MsSplitApp::create(
         TableInfo& info(ms->tableInfo());
         info.setType(TableInfo::type(TableInfo::MEASUREMENTSET));
         info.setSubType(String(""));
-        info.readmeAddLine("This is a MeasurementSet Table holding simulated astronomical observations");
+        info.readmeAddLine("This is a MeasurementSet Table holding astronomical observations");
     }
 
 
     return ms;
 }
-void MsSplitApp::getRowsToKeep(const casa::MeasurementSet& ms,
+casa::uInt MsSplitApp::getRowsToKeep(const casa::MeasurementSet& ms,
         const uInt maxSimultaneousRows) {
 
     const ROMSColumns sc(ms);
@@ -198,7 +207,7 @@ void MsSplitApp::getRowsToKeep(const casa::MeasurementSet& ms,
     }
 
     vector<int>::iterator it = rowsToKeep.begin();
-    nRowsOut = rowsToKeep.size();
+    casa::uInt nRowsOut = rowsToKeep.size();
     ASKAPLOG_INFO_STR(logger,"There are " << nRows << " rows in the input Measurement Set");
     ASKAPLOG_INFO_STR(logger,"There will be " << nRowsOut << " rows in the output Measurement Set");
     int lastGoodRow = *it;
@@ -217,22 +226,22 @@ void MsSplitApp::getRowsToKeep(const casa::MeasurementSet& ms,
             nGood++;
         }
         else {
-            mapOfRows.insert ( std::pair<int,int>(lastGoodRow,nGood) );
+            itsMapOfRows.insert ( std::pair<int,int>(lastGoodRow,nGood) );
             ASKAPLOG_INFO_STR(logger,"last good row " << lastGoodRow << " followed by " << nGood << " contiguous rows ");
             nGood = 1;
             lastGoodRow = *(it+1);
         }
     }
-    mapOfRows.insert ( std::pair<int,int>(lastGoodRow,nGood) );
+    itsMapOfRows.insert ( std::pair<int,int>(lastGoodRow,nGood) );
     ASKAPLOG_INFO_STR(logger,"last good row " << lastGoodRow << " followed by " << nGood << " contiguous rows ");
 
     std::map<int,int>::iterator myMap;
 
-    for (myMap=mapOfRows.begin() ;myMap != mapOfRows.end(); ++myMap) {
+    for (myMap=itsMapOfRows.begin() ;myMap != itsMapOfRows.end(); ++myMap) {
         ASKAPLOG_INFO_STR(logger,"Row " << myMap->first << " to " << myMap->first + myMap->second << " is contiguous.");
     }
 
-
+    return nRowsOut;
 }
 void MsSplitApp::copyAntenna(const casa::MeasurementSet& source, casa::MeasurementSet& dest)
 {
@@ -537,7 +546,8 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
                                 casa::MeasurementSet& dest,
                                 const uint32_t startChan,
                                 const uint32_t endChan,
-                                const uint32_t width)
+                                const uint32_t width,
+                                const uint32_t maxBuf)
 {
     // Pre-conditions
     ASKAPDEBUGASSERT(endChan >= startChan);
@@ -566,7 +576,7 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
 
     // Decide how many rows to process simultaneously. This needs to fit within
     // a reasonable amount of memory, because all visibilities will be read
-    // in for possible averaging. Assumes 32MB working space.
+    // in for possible averaging. Assumes 8GB working space.
 
     // Steve Ord Jun 2018 -
     // The Logic here does not take account of the input tile size. Specifically the
@@ -575,45 +585,49 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
     // Also the output tile size / bucket size should be tweaked to the avoid many unessesary
     // read-modify writes that are occurring.
 
-    std::size_t inDataSize = sizeof(casa::Complex) + sizeof(casa::Bool);
-    std::size_t outDataSize = inDataSize;
-    if (haveInSigmaSpec) {
-        inDataSize += sizeof(casa::Float);
-    }
-    if (haveOutSigmaSpec) {
-        outDataSize += sizeof(casa::Float);
-    }
-    uInt maxSimultaneousRows = (32 * 1024 * 1024) / nPol /
-            (nChanIn * inDataSize + nChanOut * outDataSize);
-    if (maxSimultaneousRows<1) maxSimultaneousRows = 1;
+    // Mark W Jul 2018 -
+    // The table caching will take care of optimizing the I/O as long as it can
+    // store enough input and output buckets needed to do the copy.
+    // For large buckets with a wide channel tiling this is not an issue:
+    // The current setting of 2592 channel wide tiles in SBs means it takes only
+    // 5 or 6 buckets (of 6MB) to cover the spectrum (reading 78 rows). For narrow tiles
+    // with 1 or a small number of channels, thousands of buckets would need
+    // to be kept in memory - with a large bucket size this may exceed memory.
+    // So 'very tall and narrow' tiles should be avoided - we can't do anything about the
+    // input and may have to put up with multiple reads, but for the output we
+    // should adjust the bucketsize so a full row of buckets can be cached.
+    // Sizing to full ASKAP: 16200 channels, 666 rows per integration, 5s integrations
+    // In 10h this gives 12000 integrations or 8e6 rows.
+    // Spectral imaging would prefer 1 channel wide tiles, with a 4 GB cache we can
+    // do ~7700 rows, or a bucketsize of ~0.5MB.
+
+    // Set the max memory to use for reading/writing the data column
+    std::size_t maxDataSize = sizeof(casa::Complex) * std::max(nChanIn, nChanOut)
+                                * nPol;
+    uInt maxSimultaneousRows = std::max(1ul, maxBuf / maxDataSize);
 
     const casa::uInt nRows = sc.nrow();
-    if (!rowFiltersExist()) {
-        dest.addRow(nRows);
-    }
-    else {
+    if (rowFiltersExist()) {
 	    /*Modified the getRowsToKeep function:
 	     * Passing maxSimultaneousRows to it as well
 	     * for optimal copying of data.
 	     *       --wasim, 03Mar2017
 	     * */
-       this->getRowsToKeep(source,
-		       maxSimultaneousRows);
-       dest.addRow(nRowsOut);
+       getRowsToKeep(source, maxSimultaneousRows);
     }
-    // Set a 64MB maximum cache size for the large columns
-    const casa::uInt cacheSize = 64 * 1024 * 1024;
-    // const casa::uInt cacheSize =  1024 * 1024;
-    sc.data().setMaximumCacheSize(cacheSize);
-    dc.data().setMaximumCacheSize(cacheSize);
-    sc.flag().setMaximumCacheSize(cacheSize);
-    dc.flag().setMaximumCacheSize(cacheSize);
-    if (haveInSigmaSpec) {
-        sc.sigmaSpectrum().setMaximumCacheSize(cacheSize);
-    }
-    if (haveOutSigmaSpec) {
-        dc.sigmaSpectrum().setMaximumCacheSize(cacheSize);
-    }
+    // Set the cache size for the large columns
+    // Not needed if we make bucketsize small enough to fit a row of buckets in memory
+    //const casa::uInt cacheSize = maxBuf;
+    //sc.data().setMaximumCacheSize(cacheSize);
+    //dc.data().setMaximumCacheSize(cacheSize);
+    //sc.flag().setMaximumCacheSize(cacheSize);
+    //dc.flag().setMaximumCacheSize(cacheSize);
+    //if (haveInSigmaSpec) {
+        //sc.sigmaSpectrum().setMaximumCacheSize(cacheSize);
+    //}
+    //if (haveOutSigmaSpec) {
+        //dc.sigmaSpectrum().setMaximumCacheSize(cacheSize);
+    //}
 
     uInt progressCounter = 0; // Used for progress reporting
     const uInt PROGRESS_INTERVAL_IN_ROWS = nRows / 100;
@@ -625,7 +639,7 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
     std::map<int,int>::iterator filteredRows;
 
     if (rowFiltersExist()){
-        filteredRows = mapOfRows.begin();
+        filteredRows = itsMapOfRows.begin();
         row = filteredRows->first;
     }
 
@@ -634,8 +648,8 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
         // maxSimultaneousRows or the remaining rows.
         uInt nRowsThisIteration = min(maxSimultaneousRows, nRows - row);
         if (rowFiltersExist()){
-            nRowsThisIteration = mapOfRows[row];
-	}
+            nRowsThisIteration = itsMapOfRows[row];
+	    }
 
         const Slicer srcrowslicer(IPosition(1, row), IPosition(1, nRowsThisIteration),
                 Slicer::endIsLength);
@@ -660,6 +674,7 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
             dstrowslicer = Slicer(IPosition(1, dstRow), IPosition(1, nRowsThisIteration),
                     Slicer::endIsLength);
         }
+        dest.addRow(nRowsThisIteration);
 
         // Copy over the simple cells (i.e. those not needing averaging/merging)
         dc.scanNumber().putColumnRange(dstrowslicer, sc.scanNumber().getColumnRange(srcrowslicer));
@@ -682,27 +697,28 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
         dc.sigma().putColumnRange(dstrowslicer, sc.sigma().getColumnRange(srcrowslicer)/sqrt(width));
 
         // Set the shape of the destination arrays
-        for (uInt i = dstRow; i < dstRow + nRowsThisIteration; ++i) {
-            dc.data().setShape(i, IPosition(2, nPol, nChanOut));
-            dc.flag().setShape(i, IPosition(2, nPol, nChanOut));
-            if (haveOutSigmaSpec) {
-                dc.sigmaSpectrum().setShape(i, IPosition(2, nPol, nChanOut));
-            }
-        }
+        // Do we need this? Only if we use destarrslicer, which is not needed as output is fixed size
+        //for (uInt i = dstRow; i < dstRow + nRowsThisIteration; ++i) {
+        //    dc.data().setShape(i, IPosition(2, nPol, nChanOut));
+        //    dc.flag().setShape(i, IPosition(2, nPol, nChanOut));
+        //    if (haveOutSigmaSpec) {
+        //        dc.sigmaSpectrum().setShape(i, IPosition(2, nPol, nChanOut));
+        //    }
+        //}
 
         //  Average (if applicable) then write data into the output MS
         const Slicer srcarrslicer(IPosition(2, 0, startChan - 1),
                                   IPosition(2, nPol, nChanIn), Slicer::endIsLength);
-        const Slicer destarrslicer(IPosition(2, 0, 0),
-                                   IPosition(2, nPol, nChanOut), Slicer::endIsLength);
+        //const Slicer destarrslicer(IPosition(2, 0, 0),
+        //                           IPosition(2, nPol, nChanOut), Slicer::endIsLength);
 
         if (width == 1) {
-            dc.data().putColumnRange(dstrowslicer, destarrslicer,
+            dc.data().putColumnRange(dstrowslicer, //destarrslicer,
                 sc.data().getColumnRange(srcrowslicer, srcarrslicer));
-            dc.flag().putColumnRange(dstrowslicer, destarrslicer,
+            dc.flag().putColumnRange(dstrowslicer, //destarrslicer,
                 sc.flag().getColumnRange(srcrowslicer, srcarrslicer));
             if (haveInSigmaSpec && haveOutSigmaSpec) {
-                dc.sigmaSpectrum().putColumnRange(dstrowslicer, destarrslicer,
+                dc.sigmaSpectrum().putColumnRange(dstrowslicer, //destarrslicer,
                     sc.sigmaSpectrum().getColumnRange(srcrowslicer, srcarrslicer));
             }
         } else {
@@ -768,17 +784,17 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
             }
 
             // Put (write) the output data/flag
-            dc.data().putColumnRange(dstrowslicer, destarrslicer, outdata);
-            dc.flag().putColumnRange(dstrowslicer, destarrslicer, outflag);
+            dc.data().putColumnRange(dstrowslicer, outdata);
+            dc.flag().putColumnRange(dstrowslicer, outflag);
             if (haveOutSigmaSpec) {
-                dc.sigmaSpectrum().putColumnRange(dstrowslicer, destarrslicer, outsigma);
+                dc.sigmaSpectrum().putColumnRange(dstrowslicer, outsigma);
             }
         }
 
         row += nRowsThisIteration;
         if (rowFiltersExist())  {
             filteredRows++;
-            if (filteredRows != mapOfRows.end()) {
+            if (filteredRows != itsMapOfRows.end()) {
                 row = filteredRows->first;
             }
             else {
@@ -836,12 +852,26 @@ int MsSplitApp::split(const std::string& invis, const std::string& outvis,
         addSigmaSpec = true;
     }
 
-    const casa::uInt bucketSize = parset.getUint32("stman.bucketsize", 64 * 1024);
+    casa::uInt bucketSize = parset.getUint32("stman.bucketsize", 64 * 1024);
     const casa::uInt tileNcorr = parset.getUint32("stman.tilencorr", 4);
     const casa::uInt tileNchan = parset.getUint32("stman.tilenchan", 1);
 
+    // Adjust bucketsize if needed - avoid creating MSs that take forever to
+    // read or write due to poor caching of buckets.
+    // Assumption: we have lots of memory for caching - up to ~8 GB for worst case
+    const casa::uInt maxBuf = parset.getUint32("bufferMB",4000u) * 1024 * 1024;
+    const casa::uInt nChanOut = nChanIn/width;
+    const casa::uInt nTilesPerRow = (nChanOut-1)/tileNchan+1;
+    // We may exceed maxBuf if needed to keep bucketsize >= 8192.
+    const casa::uInt maxBucketSize = std::max(8192u,maxBuf/nTilesPerRow);
+    if (bucketSize > maxBucketSize) {
+        bucketSize = maxBucketSize;
+        ASKAPLOG_INFO_STR(logger, "Reducing output bucketsize to " << bucketSize <<
+        " to limit memory use and improve caching");
+    }
+
     boost::shared_ptr<casa::MeasurementSet>
-        out(create(outvis, addSigmaSpec, bucketSize, tileNcorr, tileNchan));
+        out(create(outvis, addSigmaSpec, bucketSize, tileNcorr, tileNchan, in.nrow()));
 
     // Copy ANTENNA
     ASKAPLOG_INFO_STR(logger,  "Copying ANTENNA table");
@@ -880,8 +910,11 @@ int MsSplitApp::split(const std::string& invis, const std::string& outvis,
 
     // Split main table
     ASKAPLOG_INFO_STR(logger,  "Splitting main table");
-    splitMainTable(in, *out, startChan, endChan, width);
+    splitMainTable(in, *out, startChan, endChan, width, maxBuf);
 
+    // Uncomment this to check if the caching is working
+    //RODataManAccessor(in, "TiledData", False).showCacheStatistics (cout);
+    //RODataManAccessor(*out, "TiledData", False).showCacheStatistics (cout);
     return 0;
 }
 
@@ -975,6 +1008,7 @@ int MsSplitApp::run(int argc, char* argv[])
     configureTimeFilter("timeend", "Excluding rows with time greater than: ", itsTimeEnd);
 
     const int error = split(invis, outvis, range.first, range.second, width, config());
+
     stats.logSummary();
     return error;
 }

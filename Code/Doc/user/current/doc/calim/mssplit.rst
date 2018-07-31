@@ -129,7 +129,13 @@ Additional advanced/optional parameters:
 |                      |            |                       |to read many, or even all channels then a    |
 |                      |            |                       |larger value would be more optimal.          |
 +----------------------+------------+-----------------------+---------------------------------------------+
-
+|bufferMB              |4000        |                       |Set the size of the memory buffer used for   |
+|                      |            |                       |I/O. Up to 2 of these can be needed          |
+|                      |            |                       |depending on the data shapes.                |
+|                      |            |                       |Setting this below 250 will makes mssplit run|
+|                      |            |                       |very slow and setting it bigger than the     |
+|                      |            |                       |default hass little benefit.                 |
++----------------------+------------+-----------------------+---------------------------------------------+
 
 Configuration Example
 ---------------------
