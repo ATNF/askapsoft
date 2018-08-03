@@ -436,7 +436,8 @@ deconvolveGaussian(const casa::Gaussian2D<Double> &measured, casa::Vector<Double
     double err_a1,err_b1,err_pa1;
     double err_from_a0,err_from_b0,err_from_p0;
     double dterm = d1 - 2.*d0 - 2. * d2 * cos(twopa0-twopa2);
-    if ((a1 == 0.) || (aerr == 0.)) {
+//    if ((a1 == 0.) || (aerr == 0.)) {
+    if( (fabs(a1)<1.e-5) || (fabs(aerr)<1.e-5) ){
         err_a1 = 0.;
     } else {
         err_from_a0 = a0 * (d1 + dterm) / d1;
@@ -447,7 +448,8 @@ deconvolveGaussian(const casa::Gaussian2D<Double> &measured, casa::Vector<Double
                       err_from_p0*err_from_p0 * paerr*paerr) / (2.*a1*a1);
     }
     // error on b1:
-    if ((b1 == 0.) || (berr == 0.)) {
+    //   if ((b1 == 0.) || (berr == 0.)) {
+    if( (fabs(b1)<1.e-5) || (fabs(berr)<1.e-5) ){
         err_b1 = 0.;
     } else {
         err_from_a0 = a0 * (d1 - dterm) / d1;
@@ -458,7 +460,8 @@ deconvolveGaussian(const casa::Gaussian2D<Double> &measured, casa::Vector<Double
                          err_from_p0*err_from_p0 * paerr*paerr) / (2.*b1*b1);
     }
     // error on pa1:
-    if ((cos2pa1 == 0.)||(paerr == 0.)) {
+    //   if ((cos2pa1 == 0.)||(paerr == 0.)) {
+    if( (fabs(cos2pa1)<1.e-5) || (fabs(paerr)<1.e-5) ){
         err_pa1 = 0.;
     }else {
         err_from_a0 = 2.*a0 * d2 * (sin(twopa2)*cos(twopa0) - sin(twopa0)*cos(twopa2)) / (cos2pa1*cos2pa1);
