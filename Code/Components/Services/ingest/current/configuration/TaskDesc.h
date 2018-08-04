@@ -64,7 +64,8 @@ class TaskDesc {
             TCPSink,
             BeamScatterTask,
             BufferedTask,
-            ShadowFlagTask
+            ShadowFlagTask,
+            QuackTask
         };
 
         /// @brief Constructor

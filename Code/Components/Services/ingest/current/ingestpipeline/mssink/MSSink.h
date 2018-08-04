@@ -261,6 +261,8 @@ class MSSink : public askap::cp::ingest::ITask,
 
         /// @brief data volume in MB per integration handled by other ranks
         float itsDataVolumeOtherRanks;
+
+       
 };
 
 }

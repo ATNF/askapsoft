@@ -119,6 +119,9 @@ TaskDesc::Type TaskDesc::toType(const std::string& type)
     if (type == "ShadowFlagTask") {
         return TaskDesc::ShadowFlagTask;
     }
+    if (type == "QuackTask") {
+        return TaskDesc::QuackTask;
+    }
 
     ASKAPTHROW(AskapError, "Unknown task type");
 }
