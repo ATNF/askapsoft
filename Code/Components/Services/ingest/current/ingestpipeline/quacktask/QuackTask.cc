@@ -72,7 +72,7 @@ void QuackTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
 {
    ASKAPDEBUGASSERT(chunk);
    if (itsFirstChunk || (chunk->scan() != itsCountedScanNumber)) {
-       itsFirstChunk = true;
+       itsFirstChunk = false;
        itsCountedScanNumber = chunk->scan();
        itsNCyclesThisScan = 0u;
        ASKAPLOG_DEBUG_STR(logger, "Scan change detected, new scan id: "<<itsCountedScanNumber);
