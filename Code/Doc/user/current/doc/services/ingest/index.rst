@@ -223,6 +223,11 @@ some temporary tasks are also documented. They can be taken out in the future.
 |                       |figure out of its place in the coarse channel. This task does not require|
 |                       |any parameters.                                                          |
 +-----------------------+-------------------------------------------------------------------------+
+|QuackTask              |Helper task to flag a number of cycles (two by default) following scan   |
+|                       |change. This is a task of temporary nature which shouldn't be used long  |
+|                       |term. It gets just one optional parameter: **ncycles**, which is the     |
+|                       |number of cycles to flag (default is two)                                |
++-----------------------+-------------------------------------------------------------------------+
 |:doc:`flagtask`        |Basic on the fly flagging task. Currently, this task implements basic    |
 |                       |thresholding. The plan is to have special service delivering information |
 |                       |about known RFI which has to be flagged. It is yet to be implemented and |
