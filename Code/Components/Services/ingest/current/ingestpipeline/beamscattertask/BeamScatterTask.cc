@@ -84,7 +84,7 @@ using namespace LOFAR;
 BeamScatterTask::BeamScatterTask(const LOFAR::ParameterSet& parset,
         const Configuration& config) :
     itsNStreams(static_cast<int>(parset.getUint32("nstreams", std::max(config.nprocs()-config.nReceivingProcs(), 2)))),
-    itsCommunicator(NULL),
+    itsCommunicator(MPI_COMM_NULL),
     itsConfig(config),
     itsStreamNumber(-1)
 {
@@ -99,7 +99,7 @@ BeamScatterTask::BeamScatterTask(const LOFAR::ParameterSet& parset,
 BeamScatterTask::~BeamScatterTask()
 {
     ASKAPLOG_DEBUG_STR(logger, "Destructor");
-    if (itsCommunicator != NULL) {
+    if (itsCommunicator != MPI_COMM_NULL) {
         const int response = MPI_Comm_free(&itsCommunicator);
         ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Comm_free = "<<response);
     }
@@ -112,7 +112,7 @@ void BeamScatterTask::process(VisChunk::ShPtr& chunk)
        return;
    }
    // 
-   if (itsCommunicator == NULL) {
+   if (itsCommunicator == MPI_COMM_NULL) {
        // this is the first integration, figure out which ranks are active, cache data structure info, etc
        reduceNumberOfStreamsIfNecessary(chunk);
        if (itsNStreams == 1) {
@@ -189,7 +189,7 @@ void BeamScatterTask::process(VisChunk::ShPtr& chunk)
 bool BeamScatterTask::isAlwaysActive() const
 {
    // always active before the first iteration and for streams with active output
-   return (itsCommunicator == NULL) || (itsStreamNumber >= 0);
+   return (itsCommunicator == MPI_COMM_NULL) || (itsStreamNumber >= 0);
 }
 
 
