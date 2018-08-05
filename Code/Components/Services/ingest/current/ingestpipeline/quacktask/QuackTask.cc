@@ -87,8 +87,12 @@ void QuackTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
        }
        chunk->flag().set(casa::True);
    } else {
-       if (itsNCycles != 0 && itsVerboseRank) {
-           ASKAPLOG_WARN_STR(logger, "Unflagging data: scan "<<itsCountedScanNumber<<" got more than "<<itsNCycles<<" cycles");
+       if (itsNCycles != 0 && (itsNCyclesThisScan == itsNCycles)) {
+           if (itsVerboseRank) {
+               ASKAPLOG_WARN_STR(logger, "Unflagging data: scan "<<itsCountedScanNumber<<" got more than "<<itsNCycles<<" cycles");
+           } else {
+               ASKAPLOG_DEBUG_STR(logger, "Unflagging data: scan "<<itsCountedScanNumber<<" got more than "<<itsNCycles<<" cycles");
+           }
        }
    }
 }
