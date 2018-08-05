@@ -729,7 +729,6 @@ void ChannelMergeTask::receiveBasicMetadata(const askap::cp::common::VisChunk::S
 void ChannelMergeTask::configureRanks(bool isActive)
 {
    ASKAPDEBUGASSERT(itsCommunicator == MPI_COMM_NULL);
-   ASKAPDEBUGASSERT(itsRanksToMerge == itsConfig.nprocs() + 1);
    ASKAPLOG_DEBUG_STR(logger, "Initialising merge task for given data distribution and ranks available; this rank has "<<
         (isActive ? "active" : "inactive")<<" input");
 

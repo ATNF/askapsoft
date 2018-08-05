@@ -279,10 +279,14 @@ void Configuration::buildAntennas(void)
         if (antit == antennaMap.end()) {
             ASKAPTHROW(AskapError, "Antenna " << *it << " is not configured");
         }
-        ASKAPLOG_DEBUG_STR(logger, "Adding "<<antit->first<<": "<<antit->second.position()<<" as "<<antit->second.name());
+        if (receiverId() == 0) {
+            ASKAPLOG_DEBUG_STR(logger, "Adding "<<antit->first<<": "<<antit->second.position()<<" as "<<antit->second.name());
+        }
         itsAntennas.push_back(antit->second);
     }
-    ASKAPLOG_DEBUG_STR(logger, "Defined "<<itsAntennas.size()<<" antennas in the configuration");
+    if (receiverId() == 0) {
+        ASKAPLOG_DEBUG_STR(logger, "Defined "<<itsAntennas.size()<<" antennas in the configuration");
+    }
 }
 
 /// @brief build vector of indices of the given antennas in the full map
@@ -294,8 +298,10 @@ void Configuration::buildAntennas(void)
 /// arbitrary letter and NN is an integer number 0..99 with a leading zero, if
 /// necessary.
 std::vector<int32_t> Configuration::buildValidAntIndices(const std::vector<std::string> &ants) {
-    ASKAPLOG_DEBUG_STR(logger, "Default antenna indices will be derived from antenna names for "<<ants.size()<<
-                               " antennas for which data to be ingested");
+    if (receiverId() == 0) {
+        ASKAPLOG_DEBUG_STR(logger, "Default antenna indices will be derived from antenna names for "<<ants.size()<<
+                                   " antennas for which data to be ingested");
+    }
     std::vector<int32_t> result(ants.size());
     for (size_t ant = 0; ant < result.size(); ++ant) {
          ASKAPCHECK(ants[ant].size() == 4u, "Expect 4-letter antenna names e.g. ak01. You have "<<ants[ant]);
