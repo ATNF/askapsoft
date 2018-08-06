@@ -46,14 +46,14 @@ namespace imagemath {
 
         /// Get some parameters
 
-        double getFWHM(const double frequency);
+        double getFWHM(const double frequency,const double width);
 
         double getExpScaling()
         {return this->ExpScaling;};
 
-        double getXwidth(double frequency);
+        double getXwidth();
 
-        double getYwidth(double frequency);
+        double getYwidth();
 
 
         virtual double evaluateAtOffset(double offsetPA, double offsetDist, double frequency);

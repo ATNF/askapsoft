@@ -1030,6 +1030,7 @@ namespace askap {
             double maxMemoryInMB = double(itsOutBuffer.shape().product()*sizeof(T))/1024./1024.+100;
             wgtBeamBuffer = TempImage<T>(itsOutBuffer.shape(), itsOutBuffer.coordinates(), maxMemoryInMB);
             wgtBeamBuffer.set(1.0); // set to one to make the weighting logic simpler
+            T normaliser = 1.0;
 
             if (itsWeightType == FROM_WEIGHT_IMAGES || itsWeightType == COMBINED) {
 
@@ -1043,6 +1044,17 @@ namespace askap {
 
             }
 
+            if (itsWeightState == WEIGHTED && itsWeightType == FROM_WEIGHT_IMAGES) {
+              /// going to normalise the weights.
+              ASKAPLOG_INFO_STR(linmoslogger,
+                "State is WEIGHTED and Type is WEIGHT_IMAGES - need to normalise");
+              Array<T> wgtSlice = Array<T>(wgtBuffer.shape());
+              ImageToArray(wgtSlice,wgtBuffer);
+
+              normaliser = getNormaliser(wgtSlice,curpos);
+              ASKAPLOG_INFO_STR(linmoslogger,
+                  "- maximum weight value " << normaliser );
+            }
             if (itsWeightType == FROM_BP_MODEL || itsWeightType == COMBINED) {
 
 
@@ -1210,7 +1222,12 @@ namespace askap {
                         else if (itsWeightType == FROM_WEIGHT_IMAGES ) {
                           /// in this case I assume the beam^2 is already in the weight image
                           /// as well as in the beam^2 in the image so ...
-                          ASKAPTHROW(AskapError,"A projection weighting by weight image strangely not supported in this release");
+                          /// there is no need to weight on the way in and I just need the
+                          /// weight images on the way out
+                          theWeight = 1.0; /// beam already here
+                          theDeWeight = (wgtBuffer.getAt(pos)/normaliser) * (wgtBuffer.getAt(pos)/normaliser); ///
+
+
                         }
                         // using the deweight here as the weight is already in the imaage
                         if (theDeWeight >= wgtCutoff) {
@@ -1240,6 +1257,42 @@ namespace askap {
             }
 
         }
+        // this should not be needed
+        template<typename T> void LinmosAccumulator<T>::ImageToArray(Array<T>& outArr, const TempImage<T> inIm) {
+
+          IPosition pos(2);
+          for (int x=0; x<outArr.shape()[0];++x) {
+            for (int y=0; y<outArr.shape()[1];++y) {
+
+              pos[0] = x;
+              pos[1] = y;
+              outArr(pos) = inIm(pos);
+            }
+          }
+
+        }
+
+        // tired of duplication and minmax is failing
+
+        template<typename T> T LinmosAccumulator<T>::getNormaliser(const Array<T>& inArray,const IPosition& curpos) {
+
+          IPosition fullpos(curpos);
+
+          Array<T> tmpPix = Array<T>(inArray);
+          tmpPix.reference(inArray);
+
+          T normVal=0;
+          for (int x=0; x<tmpPix.shape()[0];++x) {
+            for (int y=0; y<tmpPix.shape()[1];++y) {
+              fullpos[0] = x;
+              fullpos[1] = y;
+              if (tmpPix(fullpos)> normVal) {
+                normVal = tmpPix(fullpos);
+              }
+            }
+          }
+          return normVal;
+        }
 
         template<typename T>
         void LinmosAccumulator<T>::accumulatePlane(Array<T>& outPix,
@@ -1260,6 +1313,15 @@ namespace askap {
             Array<T> wgtPix; // typically for the weight image
             Array<T> wgtPixBeam;// typically for the weight beam
 
+            T normaliser = 1.0;
+
+            if (itsWeightState == WEIGHTED && itsWeightType == FROM_WEIGHT_IMAGES) {
+              /// going to normalise the weights.
+              ASKAPLOG_INFO_STR(linmoslogger,
+                "State is WEIGHTED and Type is WEIGHT_IMAGES - need to normalise");
+              normaliser = getNormaliser(inWgtPix,curpos);
+
+            }
 
 
 
@@ -1427,6 +1489,7 @@ namespace askap {
                         T theDeWeight = 0.0;
                         if (itsWeightType == COMBINED) {
 
+
                           ASKAPTHROW(AskapError,"A projection weighting by weight image strangely not supported in this release");
 
                         }
@@ -1437,7 +1500,10 @@ namespace askap {
                         else if (itsWeightType == FROM_WEIGHT_IMAGES ) {
                           /// in this case I assume the beam^2 is already in the weight image
                           /// as well as in the beam^2 in the image so ...
-                          ASKAPTHROW(AskapError,"A projection weighting by weight image strangely not supported in this release");
+
+                          theWeight = 1.0;
+                          theDeWeight = (wgtPix(wgtpos)/normaliser)*(wgtPix(wgtpos)/normaliser);
+
                         }
                         // using the deweight here as the weight is already in the imaage
                         if (theDeWeight >= wgtCutoff) {
@@ -1471,12 +1537,14 @@ namespace askap {
                                                  Array<T>& outSenPix,
                                                  const IPosition& curpos) {
 
-            T minVal, maxVal;
+            T minVal, maxVal, normalizer=1.0;
             IPosition minPos, maxPos;
             minMax(minVal,maxVal,minPos,maxPos,outWgtPix);
 
             // copy the pixel iterator containing all dimensions
             IPosition fullpos(curpos);
+
+
 
             for (int x=0; x<outPix.shape()[0];++x) {
                 for (int y=0; y<outPix.shape()[1];++y) {
@@ -1486,7 +1554,7 @@ namespace askap {
                         setNaN(outPix(fullpos));
                     }
                     else if (outWgtPix(fullpos)>0.0) {
-                        outPix(fullpos) = outPix(fullpos) / outWgtPix(fullpos);
+                        outPix(fullpos) = outPix(fullpos) * normalizer / outWgtPix(fullpos);
                     } else {
                         outPix(fullpos) = 0.0;
                     }

@@ -283,6 +283,10 @@ namespace askap {
                 map<string,bool> itsGenSensitivityImage;
                 //
                 PrimaryBeam::ShPtr itsPB;
+                /// utility function - should not really be here but minMax is
+                /// failing in some cases - should fix that first i suppose.
+                T getNormaliser(const Array<T>& inArray,const IPosition& curpos);
+                void ImageToArray(Array<T>& out, const TempImage<T> in);
 
         };
 

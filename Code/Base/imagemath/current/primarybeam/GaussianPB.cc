@@ -72,35 +72,37 @@ namespace askap {
                ptr->setXoff(parset.getDouble("xoff",0.0));
                ptr->setYoff(parset.getDouble("yoff",0.0));
 
-
+               if (ptr->getXwidth() > 0 || ptr->getYwidth() > 0) {
+                 ASKAPLOG_WARN_STR(logger,"Note a width given so frequency likely to be ignored");
+               }
+               if (ptr->getXwidth() > 0) {
+                 ASKAPCHECK(ptr->getYwidth()>0,"Both X and Y width must be given if either is");
+               }
+               if (ptr->getYwidth() > 0) {
+                 ASKAPCHECK(ptr->getXwidth()>0,"Both X and Y width must be given if either is");
+               }
                ASKAPLOG_DEBUG_STR(logger,"Created Gaussian PB instance");
                return ptr;
 
             }
-            double GaussianPB::evaluateAtOffset(double offsetDist, double frequency) {
+            double GaussianPB::evaluateAtOffset(double offsetDist,double frequency) {
                 // x-direction is assumed along the meridian in the direction of north celestial pole
 
                 return evaluateAtOffset(0.0,offsetDist,frequency);
 
             }
-            double GaussianPB::getXwidth(double frequency) {
-              if (Xwidth == 0.0) {
-                return getFWHM(frequency);
-              }
-              else {
+            double GaussianPB::getXwidth() {
+
                 return Xwidth;
-              }
+
             }
-            double GaussianPB::getYwidth(double frequency) {
-              if (Ywidth == 0.0) {
-                return getFWHM(frequency);
-              }
-              else {
-                return Ywidth;
-              }
+            double GaussianPB::getYwidth() {
+
+              return Ywidth;
+
             }
 
-            double GaussianPB::evaluateAtOffset(double offsetPAngle, double offsetDist, double frequency) {
+            double GaussianPB::evaluateAtOffset(double offsetPAngle, double offsetDist,double frequency) {
                 // x-direction is assumed along the meridian in the direction of north celestial pole
                 // the offsetPA angle is relative to the meridian
                 // the Alpha angle is the rotation of the beam pattern relative to the meridian
@@ -108,14 +110,14 @@ namespace askap {
                 double x_angle = offsetDist * cos(offsetPAngle-Alpha);
                 double y_angle = offsetDist * sin(offsetPAngle-Alpha);
                 // widths
-                double x_width = getXwidth(frequency);
-                double y_width = getYwidth(frequency);
+                double x_fwhm = getFWHM(frequency,getXwidth());
+                double y_fwhm = getFWHM(frequency,getYwidth());
                 // offset from assumed centre
                 double x_off = Xoff;
                 double y_off = Yoff;
 
-                double x_pb = exp(-1*getExpScaling()*pow((x_angle-x_off)/x_width,2.));
-                double y_pb = exp(-1*getExpScaling()*pow((y_angle-y_off)/y_width,2.));
+                double x_pb = exp(-1*getExpScaling()*pow((x_angle-x_off)/x_fwhm,2.));
+                double y_pb = exp(-1*getExpScaling()*pow((y_angle-y_off)/y_fwhm,2.));
 /*
                 ASKAPLOG_INFO_STR(logger,"xoffset: " << (x_angle-x_off) << ":" << offsetDist);
                 ASKAPLOG_INFO_STR(logger,"yoffset: " << (y_angle-y_off) << ":" << offsetDist);
@@ -141,9 +143,21 @@ namespace askap {
 
             }
 
-            double GaussianPB::getFWHM(const double frequency) {
+            double GaussianPB::getFWHM(const double frequency, const double width=0) {
                 double sol = 299792458.0;
-                double fwhm = sol/frequency/this->ApertureSize;
+
+                double fwhm = 0.;
+
+                if (frequency != 0) {
+                  fwhm = sol/frequency/this->ApertureSize;
+                }
+                // Note if widht is <given> then Frequency is ignored
+
+                if (width !=0) {
+
+                  fwhm = 2 * width * pow(2*log2(2),0.5);
+                }
+
                 return fwhm;
             }
     }
