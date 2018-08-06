@@ -37,6 +37,8 @@ namespace askap
       CPPUNIT_TEST(testCreateGaussian);
       CPPUNIT_TEST_EXCEPTION(testCreateAbstract,AskapError);
       CPPUNIT_TEST(testEvaluateGaussian);
+      CPPUNIT_TEST(testCreate2dGaussian);
+      CPPUNIT_TEST(testEvaluate2dGaussian);
       CPPUNIT_TEST_SUITE_END();
 
   private:
@@ -198,6 +200,88 @@ namespace askap
          parset.add("fwhmscaling", "0.5");
          parset.add("primarybeam","GaussianPB");
          PrimaryBeam::ShPtr PB = PrimaryBeamFactory::make(parset);
+
+      }
+      void testCreate2dGaussian()
+      {
+
+         LOFAR::ParameterSet parset;
+         parset.add("xwidth", "0.002");
+         parset.add("ywidth", "0.002");
+         parset.add("primarybeam","GaussianPB");
+         PrimaryBeam::ShPtr PB = PrimaryBeamFactory::make(parset);
+
+      }
+      void testEvaluate2dGaussian() {
+          LOFAR::ParameterSet parset;
+
+          const casa::IPosition shape(2,256,256);
+          casa::Array<float> arr(shape);
+          arr.set(1.);
+          casa::CoordinateSystem coordsys(makeCoords());
+
+
+          casa::Vector<double> pixel(2,0.);
+          casa::MVDirection world;
+          double offsetBeam = 0;
+          double frequency = 1.0E9; // 1GHz
+
+          parset.add("primarybeam","GaussianPB");
+          parset.add("primarybeam.GaussianPB.xwidth", "0.002");
+          parset.add("primarybeam.GaussianPB.ywidth", "0.002");
+
+
+
+          PrimaryBeam::ShPtr GaussPB =  PrimaryBeamFactory::make(parset);
+
+
+          // reference direction of input coords
+          casa::MVDirection beamcentre(135*C::pi/180.0, 60*C::pi/180.0);
+
+
+          // get coordinates of the direction axes
+          const int dcPos = coordsys.findCoordinate(casa::Coordinate::DIRECTION,-1);
+          const casa::DirectionCoordinate outDC = coordsys.directionCoordinate(dcPos);
+
+          casa::Array<float> BeamArr(shape);
+
+          for (int x=0; x<shape[0];++x) {
+              for (int y=0; y<shape[1];++y) {
+
+                  // get the current pixel location and distance from beam centre
+                  pixel[0] = double(x);
+                  pixel[1] = double(y);
+                  cout << " pixel --- " << pixel << endl;
+                  outDC.toWorld(world,pixel);
+
+                  cout << " world --- " << world << endl;
+                  cout << " beamcentres -- " << beamcentre << endl;
+
+                  offsetBeam = beamcentre.separation(world);
+                  cout << " offset -- " << offsetBeam << endl;
+
+                  double beamval = GaussPB->evaluateAtOffset(offsetBeam,frequency);
+                  cout << " beamval --- " << beamval << endl;
+
+                  const casa::IPosition index(2,int(x),int(y));
+                  BeamArr(index) = beamval*beamval;
+
+
+              }
+          }
+          const casa::IPosition index(2,200,200);
+          double testVal = BeamArr(index);
+          // 0.49583 is the val at 200,200
+          pixel[0] = 200;
+          pixel[1] = 200;
+          outDC.toWorld(world,pixel);
+
+          offsetBeam = beamcentre.separation(world);
+          double beamval = GaussPB->evaluateAtOffset(offsetBeam,frequency);
+          cout << "2D-testVal: " << testVal << " 2D-beamVal: " << beamval*beamval << endl;
+
+          CPPUNIT_ASSERT(abs(testVal - beamval*beamval) < 1E-7);
+
 
       }
       void testCreateAbstract()
