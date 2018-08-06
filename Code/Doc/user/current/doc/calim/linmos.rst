@@ -206,6 +206,8 @@ the key "primarybeam"
 You can choose the aperture size and scaling parameters both of the FWHM of the beam and a scaling of the exponent.
 In the parfile these are sub parameters of the Primary beam type. (e.g linmos.primarybeam.GaussianPB.aperture)
 
+The default Gaussian Primary beam is now 2 dimensional. But unless the user specifies x and w widths they just get the symmetric beam as defined by the aperture.
+
 +------------------+------------------+--------------+------------------------------------------------------------+
 |**Parameter**     |**Type**          |**Default**   |**Description**                                             |
 +==================+==================+==============+============================================================+
@@ -216,12 +218,26 @@ In the parfile these are sub parameters of the Primary beam type. (e.g linmos.pr
 |expscaling        |double            | 4 log(2)     |Scaling of the primary beam exponent                        |
 +------------------+------------------+--------------+------------------------------------------------------------+
 
+The 2 dimensional beam is governed by the following parameters.
+
++------------------+------------------+--------------+------------------------------------------------------------+
+|**2D-Parameters** |**Type**          |**Default**   |**Description**                                             |
++==================+==================+==============+============================================================+
+| (x/y)width       |double            | 0.0          |Angular width in rad. of the x (N-S) and y (E-W) Gaussian   |
++------------------+------------------+--------------+------------------------------------------------------------+
+| (x/y)off         |double            |0.0           |Angular offset from nominal beamcentre in rad., E, N are +ve|
++------------------+------------------+--------------+------------------------------------------------------------+
+| alpha            |double            |0.0           |PA in rad. measured from North in an +ve RA direction       |
++------------------+------------------+--------------+------------------------------------------------------------+
+
 Primary Beam Corrections to the Taylor terms
 --------------------------------------------
 
 The primary beam is a function of frequency. Therefore the apparent spectral index of a point source away from beam centre
 will contain a contribution from the frequency dependence of the primary beam. It is possible to estimate this contribution
 and remove it by scaling the Taylor term images appropriately.
+
+.. note:: This is an analytic correction assuming a symmetric Gaussian beam
 
 +------------------+------------------+--------------+------------------------------------------------------------+
 |**Parameter**     |**Type**          |**Default**   |**Description**                                             |
