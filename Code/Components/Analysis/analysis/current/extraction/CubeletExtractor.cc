@@ -172,7 +172,12 @@ void CubeletExtractor::writeImage()
     itsInputCube = itsInputCubeList[0];
     if (this->openInput()) {
         IPosition inshape = itsInputCubePtr->shape();
-        casa::CoordinateSystem newcoo = casa::CoordinateUtil::defaultCoords4D();
+        casa::CoordinateSystem newcoo;
+        if (itsStkAxis>=0){
+            newcoo = casa::CoordinateUtil::defaultCoords4D();
+        } else {
+            newcoo = casa::CoordinateUtil::defaultCoords3D();
+        }
 
         int dirCoNum = itsInputCoords.findCoordinate(casa::Coordinate::DIRECTION);
         casa::DirectionCoordinate dircoo(itsInputCoords.directionCoordinate(dirCoNum));
