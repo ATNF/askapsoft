@@ -147,15 +147,16 @@ std::string FitsImageAccess::getUnits(const std::string &name) const
     fitsfile *fptr;       /* pointer to the FITS file, defined in fitsio.h */
     std::string fullname = name + ".fits";
     int status = 0;
-    std::string units;
+    std::string units("");
     const std::string key("Brightness (pixel) unit");
     char comment[1024];
     if (fits_open_file(&fptr, fullname.c_str(), READONLY, &status))
         ASKAPCHECK(status == 0, "FITSImageAccess:: Cannot open FITS file");
 
     if (fits_read_key(fptr, TSTRING, "BUNIT", (void *)(units.c_str()), comment,  &status))
-        ASKAPCHECK(status == 0, "FITSImageAccess:: Cannot find Brightness keyword");
+        ASKAPLOG_WARN_STR(logger, "FITSImageAccess:: Cannot find BUNIT keyword - fits_read_key returned status " << status);
 
+    status=0;
     if (fits_close_file(fptr, &status))
         ASKAPCHECK(status == 0, "FITSImageAccess:: Error on closing file");
 
@@ -177,12 +178,13 @@ std::string FitsImageAccess::getMetadataKeyword(const std::string &name, const s
     char comment[1024];
     if (fits_open_file(&fptr, fullname.c_str(), READONLY, &status))
         ASKAPCHECK(status == 0, "FITSImageAccess:: Cannot open FITS file");
-
+    status=0;
+    keyword="";
     if (fits_read_key(fptr, TSTRING, keyword.c_str(), value, comment,  &status))
-        ASKAPCHECK(status == 0, "FITSImageAccess:: Cannot find keyword " << keyword);
-
+        ASKAPLOG_WARN_STR(logger, "FITSImageAccess:: Cannot find keyword " << keyword << " - fits_read_key returned status " << status);
+    status=0;
     if (fits_close_file(fptr, &status))
-        ASKAPCHECK(status == 0, "FITSImageAccess:: Error on closing file");
+        ASKAPCHECK(status == 0, "FITSImageAccess:: Error on closing file, status="<<status);
 
     std::string valueStr(value);
     return valueStr;
