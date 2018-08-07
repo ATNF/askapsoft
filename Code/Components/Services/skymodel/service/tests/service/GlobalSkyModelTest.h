@@ -144,12 +144,12 @@ class GlobalSkyModelTest : public CppUnit::TestFixture {
 
         void testNside() {
             initEmptyDatabase();
-            CPPUNIT_ASSERT_EQUAL(2ll << 9, gsm->getHealpixNside());
+            CPPUNIT_ASSERT_EQUAL((int64(2) << 9), int64(gsm->getHealpixNside()));
         }
 
         void testHealpixOrder() {
             initEmptyDatabase();
-            CPPUNIT_ASSERT_EQUAL(9ll, gsm->getHealpixOrder());
+            CPPUNIT_ASSERT_EQUAL(int64(9), int64(gsm->getHealpixOrder()));
         }
 
         void testGetMissingComponentById() {
