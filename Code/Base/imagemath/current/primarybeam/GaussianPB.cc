@@ -155,7 +155,7 @@ namespace askap {
 
                 if (width !=0) {
 
-                  fwhm = 2 * width * pow(2*log2(2),0.5);
+                  fwhm = 2 * width * pow(2*log(2),0.5);
                 }
 
                 return fwhm;
