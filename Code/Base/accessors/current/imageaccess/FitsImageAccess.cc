@@ -179,7 +179,7 @@ std::string FitsImageAccess::getMetadataKeyword(const std::string &name, const s
     if (fits_open_file(&fptr, fullname.c_str(), READONLY, &status))
         ASKAPCHECK(status == 0, "FITSImageAccess:: Cannot open FITS file");
     status=0;
-    keyword="";
+    
     if (fits_read_key(fptr, TSTRING, keyword.c_str(), value, comment,  &status))
         ASKAPLOG_WARN_STR(logger, "FITSImageAccess:: Cannot find keyword " << keyword << " - fits_read_key returned status " << status);
     status=0;
