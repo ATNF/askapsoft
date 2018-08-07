@@ -42,6 +42,9 @@
 #include <busyfit/BusyFit.h>
 #include <casacore/coordinates/Coordinates/CoordinateSystem.h>
 #include <casacore/coordinates/Coordinates/DirectionCoordinate.h>
+#include <casacore/casa/Arrays/Array.h>
+#include <casacore/casa/Arrays/MaskedArray.h>
+#include <casacore/casa/Arrays/MaskArrMath.h>
 
 ASKAP_LOGGER(logger, ".hidata");
 
@@ -271,6 +274,7 @@ void HIdata::fitToMom0()
     casa::Array<float> mom0 = itsMomentExtractor->mom0();
     casa::IPosition start = itsMomentExtractor->slicer().start().nonDegenerate();
     casa::LogicalArray mom0mask = itsMomentExtractor->mom0mask();
+    casa::MaskedArray<float> momWithMask(mom0,mom0mask);
     size_t momSize = mom0.size();
     casa::IPosition momShape = mom0.shape();
 
@@ -305,7 +309,7 @@ void HIdata::fitToMom0()
     std::vector<SubComponent> initial(1);
     initial[0].setX(itsSource->getXcentre() - start[0]);
     initial[0].setY(itsSource->getYcentre() - start[1]);
-    initial[0].setPeak(casa::max(mom0));
+    initial[0].setPeak(casa::max(momWithMask));
     initial[0].setMajor(beam[0].getValue("rad") / cellsize);
     initial[0].setMinor(beam[1].getValue("rad") / cellsize);
     initial[0].setPA(beam[2].getValue());
