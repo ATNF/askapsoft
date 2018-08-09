@@ -61,6 +61,20 @@ IngestPipeline::IngestPipeline(const LOFAR::ParameterSet& parset,
                                int rank, int ntasks, const std::string &nodeName)
     : itsConfig(parset, rank, ntasks, nodeName), itsRunning(false)
 {
+   /// check that the measures table is up to date. This has a potential to fail
+   /// continuous integration jobs, although they don't rely, strictly speaking,
+   /// on the up to date measures as they deal with simulated data. Anyway, we have
+   /// to choices. First, we can ensure up to date measures are available on the machine
+   /// running ingest CI job. Second, we can put a guard here bypassing a check if say
+   /// the number of ranks available is small. For now, have a guard here.
+
+   /// test and debugging cases use less than 12 ranks/48 MHz of bandwidth - inhibit checks
+   if (ntasks > 12) {
+       const double mjd = casa::Time().modifiedJulianDay();
+       ASKAPCHECK(measuresValid(mjd), "Measures table is invalid for the current date mjd = "<<mjd);
+       ASKAPCHECK(measuresValid(mjd+1.), "Measures table becomes invalid in less than one day - please update, mjd = "<<mjd);
+   }
+
 }
 
 IngestPipeline::~IngestPipeline()

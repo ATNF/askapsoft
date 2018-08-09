@@ -56,7 +56,6 @@
 #include "ingestpipeline/sourcetask/IMetadataSource.h"
 #include "ingestpipeline/sourcetask/ChannelManager.h"
 #include "ingestpipeline/sourcetask/InterruptedException.h"
-#include "ingestpipeline/sourcetask/MergedSource.h"
 
 // mpi for basic synchronisation 
 #include <mpi.h>
@@ -87,6 +86,14 @@ NoMetadataSource::NoMetadataSource(const LOFAR::ParameterSet& params,
     itsMonitoringPointManager.submitPoint<float>("MeasuresTableMJD", 
             static_cast<float>(measVersion.first));
     itsMonitoringPointManager.submitPoint<std::string>("MeasuresTableVersion", measVersion.second);
+
+    // additional check that the table has been updated less then one month ago
+    if (config.receiverId() == 0) {
+        casa::Time now;
+        if (now.modifiedJulianDay() - measVersion.first > 30.) {
+            ASKAPLOG_WARN_STR(logger, "Measures table is more than one month old. Consider updating!");
+        }
+    }
 
     // Setup a signal handler to catch SIGINT, SIGTERM and SIGUSR1
     itsSignals.async_wait(boost::bind(&NoMetadataSource::signalHandler, this, _1, _2));

@@ -251,5 +251,25 @@ std::pair<double, std::string> measuresTableVersion()
   return std::pair<double, std::string>(casa::MVTime(qDate), kw.asString("VS_VERSION"));
 } 
 
+/// @brief helper method to check the validity of measures data
+/// @details casacore measures data need to be updated regulargly. Although 
+/// different data are updated at different cadence, looking for dUT1 seems to be
+/// the fastest way to catch the issue. This method attemts to get dUT1 through
+/// low-level get method of the casacore, same as for dUT1 method of MeasTable
+/// class, but check the validity flag and ignores the result. The casacore's
+/// dUT1 method only uses the validity flag to give the warning and doesn't allow
+/// the user of the library to access it. The code could, in principle, be pushed 
+/// into casacore.
+/// @note No caching has been done, but this method is expected to be accessed
+/// very infrequently (i.e. once per scheduling block).
+/// @param[in] mjd Modified Julian Date to check
+bool measuresValid(double mjd)
+{
+   double res;
+   const bool ok = casa::MeasIERS::get(res, casa::MeasIERS::MEASURED, casa::MeasIERS::dUT1, mjd);
+   return ok;
+}
+
+
 
 } // end namespace askap

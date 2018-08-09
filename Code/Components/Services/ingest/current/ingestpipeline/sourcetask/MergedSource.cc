@@ -55,6 +55,7 @@
 #include "casacore/measures/Measures/MCDirection.h"
 #include "casacore/measures/Measures/Stokes.h"
 #include "casacore/casa/OS/Timer.h"
+#include "casacore/casa/OS/Time.h"
 #include "casacore/casa/Arrays/Matrix.h"
 #include "casacore/casa/Arrays/MatrixMath.h"
 
@@ -90,6 +91,13 @@ MergedSource::MergedSource(const LOFAR::ParameterSet& params,
     itsMonitoringPointManager.submitPoint<float>("MeasuresTableMJD", 
             static_cast<float>(measVersion.first));
     itsMonitoringPointManager.submitPoint<std::string>("MeasuresTableVersion", measVersion.second);
+    // additional check that the table has been updated less then one month ago
+    if (config.receiverId() == 0) {
+        casa::Time now;
+        if (now.modifiedJulianDay() - measVersion.first > 30.) {
+            ASKAPLOG_WARN_STR(logger, "Measures table is more than one month old. Consider updating!");
+        }
+    }
 
     // Setup a signal handler to catch SIGINT, SIGTERM and SIGUSR1
     itsSignals.async_wait(boost::bind(&MergedSource::signalHandler, this, _1, _2));
@@ -410,14 +418,18 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
             ASKAPCHECK(uvwBuffer.ncolumn() == mdant.uvw().nelements(), 
                  "The uvw vector in the metadata changes size from antenna to antenna, this is unexpected. Offending antenna "<<antName); 
             uvwBuffer.row(i) = mdant.uvw();
+            /*
             // for debug
             if ((itsVisConverter.config().receiverId() == 0) && (i == 3)) {
                 ASKAPASSERT(uvwBuffer.row(i).nelements()>=3);
-                ASKAPLOG_INFO_STR(logger, "Antenna id="<<i<<" time: "<<chunk->time()<<" uvw: "<<std::fixed<<std::setprecision(15)<<uvwBuffer.row(i)[0]<<" "<<
+                ASKAPLOG_INFO_STR(logger, "Antenna id="<<i<<" time: "<<std::fixed<<std::setprecision(15)<<chunk->time()<<" uvw: "<<std::fixed<<std::setprecision(15)<<uvwBuffer.row(i)[0]<<" "<<
                       uvwBuffer.row(i)[1]<<" "<<uvwBuffer.row(i)[2]);
             }
             //
-            ASKAPCHECK(casa::norm(uvwBuffer.row(i)) > 1e-6, "Expect non-zero per-antenna UVW in metadata - encountered a vector which is the Earth centre. Antenna: "<<antName);
+            */
+            const casa::Double bslnNorm = casa::norm(uvwBuffer.row(i));
+            ASKAPCHECK(bslnNorm > 1e-6, "Expect non-zero per-antenna UVW in metadata - encountered a vector which is the Earth centre. Most likely junk metadata received for antenna: "<<antName);
+            ASKAPCHECK(!isnan(bslnNorm), "NaN encountered in UVW received in metadata for antenna: "<<antName);
         }
     }
     // now populate uvw vector in the chunk
