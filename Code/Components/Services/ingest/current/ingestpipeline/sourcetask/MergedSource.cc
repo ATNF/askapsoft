@@ -427,9 +427,17 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
             }
             //
             */
-            const casa::Double bslnNorm = casa::norm(uvwBuffer.row(i));
-            ASKAPCHECK(bslnNorm > 1e-6, "Expect non-zero per-antenna UVW in metadata - encountered a vector which is the Earth centre. Most likely junk metadata received for antenna: "<<antName);
-            ASKAPCHECK(!isnan(bslnNorm), "NaN encountered in UVW received in metadata for antenna: "<<antName);
+            ASKAPCHECK(uvwBuffer.ncolumn() % 3 == 0, "Expect UVW metadata to be a vector with the length which is an integral multiple of 3");
+            for (casa::uInt beam = 0; beam < uvwBuffer.ncolumn() / 3; ++beam) {
+                 casa::Double bslnNorm2 = 0.;
+                 for (casa::uInt offset = beam * 3; offset < (beam + 1) * 3; ++offset) {
+                      ASKAPDEBUGASSERT(offset < uvwBuffer.ncolumn());
+                      const casa::Double curVal = uvwBuffer(i, offset);
+                      ASKAPCHECK(!isnan(curVal), "NaN encountered in UVW received in metadata for antenna: "<<antName);
+                      bslnNorm2 += casa::square(curVal);
+                 }
+                 ASKAPCHECK(bslnNorm2 > 1e-12, "Expect non-zero per-antenna UVW in metadata - encountered a vector which is the Earth centre. Most likely junk metadata received for antenna: "<<antName<<" and (1-based) beam "<<beam + 1);
+            }     
         }
     }
     // now populate uvw vector in the chunk
