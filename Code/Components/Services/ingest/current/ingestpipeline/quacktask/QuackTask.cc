@@ -54,7 +54,7 @@ QuackTask::QuackTask(const LOFAR::ParameterSet& parset, const Configuration& con
        itsVerboseRank(config.receiverId() == 0)
 {
    if (itsNCycles == 0) {
-       ASKAPLOG_DEBUG_STR(logger, "QuackTask is executed, but setup not to drop any cycles - essencially no operation");
+       ASKAPLOG_DEBUG_STR(logger, "QuackTask is executed, but setup not to drop any cycles - essentially no operation");
    } else {
        if (itsVerboseRank) {
            ASKAPLOG_WARN_STR(logger, "Will flag "<<itsNCycles<<" cycle(s) following scan number change");
@@ -94,6 +94,7 @@ void QuackTask::process(askap::cp::common::VisChunk::ShPtr& chunk)
                ASKAPLOG_DEBUG_STR(logger, "Unflagging data: scan "<<itsCountedScanNumber<<" got more than "<<itsNCycles<<" cycles");
            }
        }
+       // don't need to do anything here, unflagging means "not flagging" on top of existing flags for this task
    }
 }
 
