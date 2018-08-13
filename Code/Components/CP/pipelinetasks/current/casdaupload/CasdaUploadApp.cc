@@ -149,9 +149,9 @@ int CasdaUploadApp::run(int argc, char* argv[])
         const fs::path in(it->getFilepath());
         fs::path out;
         if (useAbsolutePath){
-            out = in;
-        } else {
             out = (outdir / in.filename());
+        } else {
+            out = in;
         }
         out += ".tar";
         ASKAPLOG_INFO_STR(logger, "Tarring file " << in << " to " << out);
