@@ -149,10 +149,11 @@ int CasdaUploadApp::run(int argc, char* argv[])
         const fs::path in(it->getFilepath());
         fs::path out;
         if (useAbsolutePath){
-            if (in[0] != '/') {
-                in = boost::filesystem::current_path().string() + "/" + in;
+            if (in.string()[0] != '/') {
+                out = (boost::filesystem::current_path() / in);
+            } else {
+                out = in;
             }
-            out = in;
         } else {
             out = (outdir / in.filename());
         }
