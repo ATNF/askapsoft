@@ -249,6 +249,9 @@ function setSelavyDirs()
 #  - contsubComponents
 function setContsubFilenames()
 {
+    # Backup of the imageCode, as we change this
+    imageCodeBackup=$imageCode
+    
     ####
     # First the contsub directory
     contsubDir=ContSubBeam${BEAM}
@@ -274,6 +277,10 @@ function setContsubFilenames()
     ####
     # Finally the components parset
     contsubComponents=modelComponents.contsub.${imageName%%.fits}.in
+
+    # Restore the imageCode to what it was
+    imageCode=$imageCodeBackup
+    unset imageCodeBackup
 }
 
 # Function to define a set of variables describing an image - its

@@ -205,7 +205,7 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
         
                     for((LOOP=0;LOOP<=NUM_LOOPS;LOOP++)); do
 
-                        if [ \$LOOP -eq 0 ] || [ "\$BEAM" == "all" ]; then
+                        if [ \$LOOP -gt 0 ] || [ "\$BEAM" == "all" ]; then
 
                             setImageProperties cont
                             fitsSuffix=""
