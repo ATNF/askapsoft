@@ -69,113 +69,130 @@ ASKAP_LOGGER(logger, ".CasdaUploadApp");
 
 int CasdaUploadApp::run(int argc, char* argv[])
 {
-    StatReporter stats;
+    try {
 
-    itsParset = config();
-    checkParset();
+        ASKAPLOG_INFO_STR(logger, "CASDA upload utility " << ASKAP_PACKAGE_VERSION);
 
-    const IdentityElement identity(itsParset);
+        StatReporter stats;
 
-    const vector<ImageElement> images(
-        buildArtifactElements<ImageElement>("images.artifactlist"));
-    const vector<CatalogueElement> catalogues(
-        buildArtifactElements<CatalogueElement>("catalogues.artifactlist"));
-    const vector<MeasurementSetElement> ms(
-        buildArtifactElements<MeasurementSetElement>("measurementsets.artifactlist"));
-    const vector<EvaluationReportElement> reports(
-        buildArtifactElements<EvaluationReportElement>("evaluation.artifactlist"));
+        itsParset = config();
+        checkParset();
 
-    if (images.empty() && catalogues.empty() && ms.empty()) {
-        ASKAPTHROW(AskapError, "No artifacts declared for upload");
-    }
+        const IdentityElement identity(itsParset);
 
-    // If a measurement set is present, we can determine the time range for the
-    // observation. Note, only the first measurement set (if there are multiple)
-    // is used in this calculation.
-    ObservationElement obs;
-    if (!ms.empty()) {
-        if (ms.size() > 1) {
-            ASKAPLOG_WARN_STR(logger, "Multiple measurement set were specified."
-                              << " Only the first one will be used to populate the"
-                              << " observation metadata");
+        const vector<ImageElement> images(
+            buildArtifactElements<ImageElement>("images.artifactlist"));
+        const vector<CatalogueElement> catalogues(
+            buildArtifactElements<CatalogueElement>("catalogues.artifactlist"));
+        const vector<MeasurementSetElement> ms(
+            buildArtifactElements<MeasurementSetElement>("measurementsets.artifactlist"));
+        const vector<EvaluationReportElement> reports(
+            buildArtifactElements<EvaluationReportElement>("evaluation.artifactlist"));
+
+        if (images.empty() && catalogues.empty() && ms.empty()) {
+            ASKAPTHROW(AskapError, "No artifacts declared for upload");
         }
-        const MeasurementSetElement& firstMs = ms[0];
-        obs.setObsTimeRange(firstMs.getObsStart(), firstMs.getObsEnd());
-    } else {
-        casa::MEpoch start, end;
 
-        if (itsParset.isDefined("obsStart")) {
-            std::string obsStart = itsParset.getString("obsStart");
-            casa::Quantity qStart;
-            casa::MVTime::read(qStart, obsStart);
-            start = casa::MEpoch(qStart);
-        } else {
-            ASKAPTHROW(AskapError, "Unknown observation start time - please use \"obsStart\" to specify the start time in the absence of measurement sets.");
-        }
-        if (itsParset.isDefined("obsEnd")) {
-            std::string obsEnd = itsParset.getString("obsEnd");
-            casa::Quantity qEnd;
-            casa::MVTime::read(qEnd, obsEnd);
-            end = casa::MEpoch(qEnd);
-        } else {
-            ASKAPTHROW(AskapError, "Unknown observation end time - please use \"obsStart\" to specify the end time in the absence of measurement sets.");
-        }
-        obs.setObsTimeRange(start, end);
-    }
-
-    // Create the output directory
-    const fs::path outbase(itsParset.getString("outputdir"));
-    if (!is_directory(outbase)) {
-        ASKAPTHROW(AskapError, "Directory " << outbase
-                   << " does not exists or is not a directory");
-    }
-    const fs::path outdir = outbase / itsParset.getString("sbid");
-    ASKAPLOG_INFO_STR(logger, "Using output directory: " << outdir);
-    if (!is_directory(outdir)) {
-        create_directory(outdir);
-    }
-    if (!exists(outdir)) {
-        ASKAPTHROW(AskapError, "Failed to create directory " << outdir);
-    }
-    permissions(outdir, boost::filesystem::add_perms | boost::filesystem::group_write);
-    const fs::path metadataFile = outdir / "observation.xml";
-    generateMetadataFile(metadataFile, identity, obs, images, catalogues, ms, reports);
-    CasdaFileUtils::checksumFile(metadataFile);
-
-    // Tar up measurement sets
-    bool useAbsolutePath = itsParset.getBool("useAbsolutePath","true");
-    for (vector<MeasurementSetElement>::const_iterator it = ms.begin();
-            it != ms.end(); ++it) {
-        const fs::path in(it->getFilepath());
-        fs::path out;
-        if (useAbsolutePath){
-            if (in.string()[0] != '/') {
-                out = (boost::filesystem::current_path() / in);
-            } else {
-                out = in;
+        // If a measurement set is present, we can determine the time range for the
+        // observation. Note, only the first measurement set (if there are multiple)
+        // is used in this calculation.
+        ObservationElement obs;
+        if (!ms.empty()) {
+            if (ms.size() > 1) {
+                ASKAPLOG_WARN_STR(logger, "Multiple measurement sets were specified."
+                                  << " Only the first one will be used to populate the"
+                                  << " observation metadata");
             }
+            const MeasurementSetElement& firstMs = ms[0];
+            obs.setObsTimeRange(firstMs.getObsStart(), firstMs.getObsEnd());
         } else {
-            out = (outdir / in.filename());
+            casa::MEpoch start, end;
+
+            if (itsParset.isDefined("obsStart")) {
+                std::string obsStart = itsParset.getString("obsStart");
+                casa::Quantity qStart;
+                casa::MVTime::read(qStart, obsStart);
+                start = casa::MEpoch(qStart);
+            } else {
+                ASKAPTHROW(AskapError, "Unknown observation start time - please use \"obsStart\" to specify the start time in the absence of measurement sets.");
+            }
+            if (itsParset.isDefined("obsEnd")) {
+                std::string obsEnd = itsParset.getString("obsEnd");
+                casa::Quantity qEnd;
+                casa::MVTime::read(qEnd, obsEnd);
+                end = casa::MEpoch(qEnd);
+            } else {
+                ASKAPTHROW(AskapError, "Unknown observation end time - please use \"obsStart\" to specify the end time in the absence of measurement sets.");
+            }
+            obs.setObsTimeRange(start, end);
         }
-        out += ".tar";
-        ASKAPLOG_INFO_STR(logger, "Tarring file " << in << " to " << out);
-        CasdaFileUtils::tarAndChecksum(in, out);
+
+        // Create the output directory
+        const fs::path outbase(itsParset.getString("outputdir"));
+        if (!is_directory(outbase)) {
+            ASKAPTHROW(AskapError, "Directory " << outbase
+                       << " does not exist or is not a directory");
+        }
+        const fs::path outdir = outbase / itsParset.getString("sbid");
+        ASKAPLOG_INFO_STR(logger, "Using output directory: " << outdir);
+        if (!is_directory(outdir)) {
+            create_directory(outdir);
+        }
+        if (!exists(outdir)) {
+            ASKAPTHROW(AskapError, "Failed to create directory " << outdir);
+        }
+        permissions(outdir, boost::filesystem::add_perms | boost::filesystem::group_write);
+        const fs::path metadataFile = outdir / "observation.xml";
+        generateMetadataFile(metadataFile, identity, obs, images, catalogues, ms, reports);
+        CasdaFileUtils::checksumFile(metadataFile);
+
+        // Tar up measurement sets
+        bool useAbsolutePath = itsParset.getBool("useAbsolutePath","true");
+        for (vector<MeasurementSetElement>::const_iterator it = ms.begin();
+             it != ms.end(); ++it) {
+            const fs::path in(it->getFilepath());
+            fs::path out;
+            if (useAbsolutePath){
+                if (in.string()[0] != '/') {
+                    out = (boost::filesystem::current_path() / in);
+                } else {
+                    out = in;
+                }
+            } else {
+                out = (outdir / in.filename());
+            }
+            out += ".tar";
+            ASKAPLOG_INFO_STR(logger, "Tarring file " << in << " to " << out);
+            CasdaFileUtils::tarAndChecksum(in, out);
+        }
+
+        // Copy artifacts and checksum
+        copyAndChecksumElements<ImageElement>(images, outdir);
+        copyAndChecksumElements<CatalogueElement>(catalogues, outdir);
+        copyAndChecksumElements<EvaluationReportElement>(reports, outdir);
+
+        // Finally, and specifically as the last step, write the READY file
+        // For now, this is only done if the config file specifically
+        // requests it via the writeREADYfile parameter.
+        if (itsParset.getBool("writeREADYfile", false)) {
+            const fs::path readyFilename = outdir / "READY";
+            CasdaFileUtils::writeReadyFile(readyFilename);
+        }
+
+        stats.logSummary();
+        ///==============================================================================
+    } catch (const askap::AskapError& x) {
+        ASKAPLOG_FATAL_STR(logger, "Askap error in " << argv[0] << ": " << x.what());
+        std::cerr << "Askap error in " << argv[0] << ": " << x.what() << std::endl;
+        exit(1);
+    } catch (const std::exception& x) {
+        ASKAPLOG_FATAL_STR(logger,
+                           "Unexpected exception in " << argv[0] << ": " << x.what());
+        std::cerr << "Unexpected exception in " << argv[0] << ": " <<
+            x.what() << std::endl;
+        exit(1);
     }
 
-    // Copy artifacts and checksum
-    copyAndChecksumElements<ImageElement>(images, outdir);
-    copyAndChecksumElements<CatalogueElement>(catalogues, outdir);
-    copyAndChecksumElements<EvaluationReportElement>(reports, outdir);
-
-    // Finally, and specifically as the last step, write the READY file
-    // For now, this is only done if the config file specifically
-    // requests it via the writeREADYfile parameter.
-    if (itsParset.getBool("writeREADYfile", false)) {
-        const fs::path readyFilename = outdir / "READY";
-        CasdaFileUtils::writeReadyFile(readyFilename);
-    }
-
-    stats.logSummary();
     return 0;
 }
 

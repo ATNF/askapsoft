@@ -80,7 +80,15 @@ xercesc::DOMElement* MeasurementSetElement::toXmlElement(xercesc::DOMDocument& d
     // observation.xml file matches what is on disk.
     DOMElement* e = doc.createElement(XercescString(itsName));
 
-    XercescUtils::addTextElement(*e, "filename", itsFilepath.filename().string() + ".tar");
+    if (itsUseAbsolutePaths) {
+        std::string path = itsFilepath.string();
+        if (path[0] != '/') {
+            path = boost::filesystem::current_path().string() + "/" + path;
+        }
+        XercescUtils::addTextElement(*e, "filename", path + ".tar");
+    } else {
+        XercescUtils::addTextElement(*e, "filename", itsFilepath.filename().string() + ".tar");
+    }
     XercescUtils::addTextElement(*e, "format", itsFormat);
     XercescUtils::addTextElement(*e, "project", itsProject);
 
