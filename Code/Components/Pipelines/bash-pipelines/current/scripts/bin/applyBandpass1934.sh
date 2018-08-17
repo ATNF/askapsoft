@@ -105,7 +105,7 @@ NCORES=1
 NPPN=1
 srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${ccalapply} -c "\$parset" > "\$log"
 err=\$?
-rejuvenate ${ms}
+rejuvenate \${ms}
 rejuvenate \${TABLE}
 extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv"
 if [ \$err != 0 ]; then

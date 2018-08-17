@@ -42,7 +42,10 @@ if [ "${DO_STAGE_FOR_CASDA}" == "true" ]; then
         echo "WARNING - desired location for the CASDA output directory ${CASDA_UPLOAD_DIR} is not writeable."
         echo "        - changing output directory to ${OUTPUT}/For-CASDA"
         CASDA_UPLOAD_DIR="${OUTPUT}/For-CASDA"
+        mkdir -p ${CASDA_UPLOAD_DIR}
     fi
+
+    CASDA_DIR="${CASDA_UPLOAD_DIR}/${SB_SCIENCE}"
 
     thumbSizeList="$(echo $THUMBNAIL_SIZE_TEXT | sed -e 's/,/ /g')"
 
@@ -70,7 +73,6 @@ thisfile=$sbatchfile
 cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
 # Define the lists of image names, types, 
-ADD_FITS_SUFFIX=true
 PREPARE_FOR_CASDA=true
 . ${getArtifacts}
 
@@ -279,7 +281,6 @@ EOFOUTER
         # If after some longer period of time it hasn't appeared (a
         # length given by ${MAX_POLL_WAIT_TIME}), then it exits with
         # an error.
-        CASDA_DIR="${CASDA_UPLOAD_DIR}/${SB_SCIENCE}"
 
         if [ "${EMAIL}" != "" ]; then
             emailFail="#SBATCH --mail-type=FAIL

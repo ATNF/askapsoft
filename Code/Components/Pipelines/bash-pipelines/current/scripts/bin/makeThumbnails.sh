@@ -56,7 +56,6 @@ cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
 
 # Define the lists of image names, types, 
-ADD_FITS_SUFFIX=true
 . "${getArtifacts}"
 
 pathToScript=\$(which makeThumbnailImage.py 2> "${tmp}/whchmkthumb")

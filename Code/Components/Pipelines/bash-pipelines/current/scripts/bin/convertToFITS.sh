@@ -59,7 +59,6 @@ cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 expectedImageNames=()
 
 # Define the lists of image names, types, 
-ADD_FITS_SUFFIX=false
 . ${getArtifacts}
 
 expectedImageNames=(\${casdaTwoDimImageNames[@]})

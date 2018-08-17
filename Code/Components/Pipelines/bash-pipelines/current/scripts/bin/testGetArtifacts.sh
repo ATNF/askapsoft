@@ -43,7 +43,6 @@ else
     expectedImageNames=()
 
     # Define the lists of image names, types, 
-    ADD_FITS_SUFFIX=false
     . "${getArtifacts}"
 
     expectedImageNames=(${casdaTwoDimImageNames[@]})

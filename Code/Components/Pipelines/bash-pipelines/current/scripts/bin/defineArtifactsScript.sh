@@ -156,7 +156,6 @@ DO_ALT_IMAGER_SPECTRAL="${DO_ALT_IMAGER_SPECTRAL}"
 ALT_IMAGER_SINGLE_FILE_CONTCUBE="${ALT_IMAGER_SINGLE_FILE_CONTCUBE}"
 ALT_IMAGER_SINGLE_FILE="${ALT_IMAGER_SINGLE_FILE}"
 
-ADD_FITS_SUFFIX=\${ADD_FITS_SUFFIX}
 IMAGETYPE_CONT=${IMAGETYPE_CONT}
 IMAGETYPE_CONTCUBE=${IMAGETYPE_CONTCUBE}
 IMAGETYPE_SPECTRAL=${IMAGETYPE_SPECTRAL}
@@ -209,7 +208,7 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
 
                             setImageProperties cont
                             fitsSuffix=""
-                            if [ "\${ADD_FITS_SUFFIX}" == "true" ] && [ "\${IMAGETYPE_CONT}" != "fits" ]; then
+                            if [ "\${IMAGETYPE_CONT}" != "fits" ]; then
                                 fitsSuffix=".fits"
                             fi
 
@@ -234,17 +233,11 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                                 fi
                             fi
 
-                            fitsSuffix=""
-                            if [ "\${ADD_FITS_SUFFIX}" == "true" ]; then
-                                fitsSuffix=".fits"
-                            fi
-                            ### Also, don't need the test for IMAGETYPE here either
                             if [ \$LOOP -gt 0 ]; then
                                 noiseMap="\${noiseMap}.SelfCalLoop\${LOOP}"
                                 compMap="\${compMap}.SelfCalLoop\${LOOP}"
                                 compResidual="\${compResidual}.SelfCalLoop\${LOOP}"
                             fi
-                            setSelavyDirs cont
                             if [ -e "\${FIELD}/\${selavyDir}/\${noiseMap}\${fitsSuffix}" ]; then
                                 casdaTwoDimImageNames+=(\${FIELD}/\${selavyDir}/\${noiseMap}\${fitsSuffix})
                                 casdaTwoDimImageTypes+=(\${noiseType})
@@ -291,16 +284,12 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
         
                     setImageProperties spectral
                     fitsSuffix=""
-                    if [ "\${ADD_FITS_SUFFIX}" == "true" ] && [ "\${IMAGETYPE_SPECTRAL}" != "fits" ]; then
+                    if [ "\${IMAGETYPE_SPECTRAL}" != "fits" ]; then
                         fitsSuffix=".fits"
                     fi
                     if [ -e "\${FIELD}/\${imageName}\${fitsSuffix}" ]; then
                         casdaOtherDimImageNames+=(\${FIELD}/\${imageName}\${fitsSuffix})
                         casdaOtherDimImageTypes+=("\${imageType}")
-                        fitsSuffix=""
-                        if [ "\${ADD_FITS_SUFFIX}" == "true" ] && [ "\${IMAGETYPE_SPECTRAL}" != "fits" ]; then
-                            fitsSuffix=".fits"
-                        fi                        
                         if [ -e "\${FIELD}/\${selavyDir}" ]; then
                             casdaOtherDimImageSpectra+=("\${FIELD}/\${selavySpectraDir}/spec*.fits")
                             casdaOtherDimImageNoise+=("\${FIELD}/\${selavySpectraDir}/noiseSpec*.fits")
@@ -352,17 +341,13 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                         pol=\$(echo "\$POLN" | tr '[:upper:]' '[:lower:]')
                         setImageProperties contcube "\$pol"
                         fitsSuffix=""
-                        if [ "\${ADD_FITS_SUFFIX}" == "true" ] && [ "\${IMAGETYPE_CONTCUBE}" != "fits" ]; then
+                        if [ "\${IMAGETYPE_CONTCUBE}" != "fits" ]; then
                             fitsSuffix=".fits"
                         fi
                         if [ -e "\${FIELD}/\${imageName}\${fitsSuffix}" ]; then
                             casdaOtherDimImageNames+=(\${FIELD}/\${imageName}\${fitsSuffix})
                             casdaOtherDimImageTypes+=("\${imageType}")
                             ### Not yet writing extracted files direct to FITS, so change the assignment of fitsSuffix
-                            fitsSuffix=""
-                            if [ "\${ADD_FITS_SUFFIX}" == "true" ] && [ "\${IMAGETYPE_CONTCUBE}" != "fits" ]; then
-                                fitsSuffix=".fits"
-                            fi                        
                             if [ -e "\${FIELD}/\${selavyDir}" ] && [ "\${DO_RM_SYNTHESIS}" == "true" ]; then
                                 prefix="\${FIELD}/\${selavyPolDir}/${SELAVY_POL_OUTPUT_BASE}"
                                 suffix="SB${SB_SCIENCE}_\${contImage%%.fits}*.fits}"

@@ -56,7 +56,6 @@ thisfile=$sbatchfile
 cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
 # Define the lists of image names, types, 
-ADD_FITS_SUFFIX=true
 . "${getArtifacts}"
 
 # Make PNG images of continuum images, overlaid with weights contours
