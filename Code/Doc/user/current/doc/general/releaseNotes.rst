@@ -33,6 +33,8 @@ Applications:
    sets when making the XML interface file, even when the absolute
    path option was being requested. This is now fixed and all
    artifacts will have their absolute path used in this mode.
+ * Similarly, checksums for the thumbnail images were not being
+   created by casdaupload. This has been remedied.
  * Improvements to the efficiency of mssplit.
  * Primary beam factory (used by linmos) able to handle elliptical
    Gaussian beams. Not fully implemented within linmos yet.
