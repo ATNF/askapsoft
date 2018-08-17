@@ -208,7 +208,7 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
 
                             setImageProperties cont
                             fitsSuffix=""
-                            if [ "\${IMAGETYPE_CONT}" != "fits" ]; then
+                            if [ "\${IMAGETYPE_CONT}" == "fits" ]; then
                                 fitsSuffix=".fits"
                             fi
 
@@ -284,7 +284,7 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
         
                     setImageProperties spectral
                     fitsSuffix=""
-                    if [ "\${IMAGETYPE_SPECTRAL}" != "fits" ]; then
+                    if [ "\${IMAGETYPE_SPECTRAL}" == "fits" ]; then
                         fitsSuffix=".fits"
                     fi
                     if [ -e "\${FIELD}/\${imageName}\${fitsSuffix}" ]; then
@@ -341,7 +341,7 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                         pol=\$(echo "\$POLN" | tr '[:upper:]' '[:lower:]')
                         setImageProperties contcube "\$pol"
                         fitsSuffix=""
-                        if [ "\${IMAGETYPE_CONTCUBE}" != "fits" ]; then
+                        if [ "\${IMAGETYPE_CONTCUBE}" == "fits" ]; then
                             fitsSuffix=".fits"
                         fi
                         if [ -e "\${FIELD}/\${imageName}\${fitsSuffix}" ]; then
