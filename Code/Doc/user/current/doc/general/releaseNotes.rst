@@ -5,6 +5,43 @@ This page summarises the key changes in each tagged release of
 ASKAPsoft. This replicates the CHANGES file that is included in the
 code base.
 
+Next release
+------------
+
+The next release, available as 0.22b modules on galaxy, contain the
+following fixes and improvements:
+
+Pipelines:
+
+ * The CASDA upload script was erroneously including multiple versions
+   of the taylor.1 images, due to a bug introduced in 0.21.0.
+ * Some FITS files were not having their header keywords updated
+   correctly. This has now been fixed and streamlined.
+
+Applications:
+
+ * The Selavy HI catalogue now has better defined default values, and
+   the NaN values that were appearing have been fixed (through use of
+   masked arrays when fitting to the moment-0 map).
+ * The FITS accessor interface now better handles missing header
+   keywords - if they are not present it now logs a warning but
+   doesn't exit.
+ * The deconvolved sizes in the Selavy components catalogue are now
+   calculated with better floating-point arithmetic, to avoid rare
+   cases of NaNs.
+ * The casdaupload utility was leaving out the path to measurement
+   sets when making the XML interface file, even when the absolute
+   path option was being requested. This is now fixed and all
+   artifacts will have their absolute path used in this mode.
+ * Improvements to the efficiency of mssplit.
+ * Primary beam factory (used by linmos) able to handle elliptical
+   Gaussian beams. Not fully implemented within linmos yet.
+ * A new gridder AltWProjectVisGridder that allows the dumping of
+   uvgrids to casa images.
+ * Caching in the spectral-line imaging of imager is now done by
+   channel.
+
+
 0.21.2 (31 July 2018)
 ---------------------
 
