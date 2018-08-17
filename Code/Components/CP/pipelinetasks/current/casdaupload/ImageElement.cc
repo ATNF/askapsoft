@@ -168,12 +168,12 @@ void ImageElement::copyAndChecksum(const boost::filesystem::path& outdir) const
 
     if (itsThumbnailLarge != "") {
         const boost::filesystem::path inLarge(itsThumbnailLarge);
-        CasdaFileUtils::handleFile(in, itsUseAbsolutePaths, outdir);
+        CasdaFileUtils::handleFile(inLarge, itsUseAbsolutePaths, outdir);
     }
 
     if (itsThumbnailSmall != "") {
         const boost::filesystem::path inSmall(itsThumbnailSmall);
-        CasdaFileUtils::handleFile(in, itsUseAbsolutePaths, outdir);
+        CasdaFileUtils::handleFile(inSmall, itsUseAbsolutePaths, outdir);
     }
 
     std::vector<SpectrumElement>::const_iterator spec = itsSpectra.begin();
