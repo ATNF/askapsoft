@@ -109,18 +109,13 @@ if [ "${DO_IT}" == "true" ]; then
                 contImage="${contImage}.fits"
                 contWeights="${contWeights}"
                 imageName="${contImage}"
-                noiseMap="${noiseMap}.fits"
-                thresholdMap="${thresholdMap}"
-                meanMap="${meanMap}.fits"
-                snrMap="${snrMap}.fits"
+                noiseMap="${noiseMap%%.fits}.fits"
+                thresholdMap="${thresholdMap%%.fits}.fits"
+                meanMap="${meanMap%%.fits}.fits"
+                snrMap="${snrMap%%.fits}.fits"
             fi
         fi
     fi
-
-    noiseMap="${noiseMap%%.fits}"
-    thresholdMap="${thresholdMap%%.fits}"
-    meanMap="${meanMap%%.fits}"
-    snrMap="${snrMap%%.fits}"
 
     # Define the detection thresholds in terms of flux or SNR
     if [ "${SELAVY_FLUX_THRESHOLD}" != "" ]; then
@@ -323,10 +318,10 @@ ${thresholdPars}
 #
 Selavy.VariableThreshold                        = ${SELAVY_VARIABLE_THRESHOLD}
 Selavy.VariableThreshold.boxSize                = ${SELAVY_BOX_SIZE}
-Selavy.VariableThreshold.ThresholdImageName     = ${thresholdMap}
-Selavy.VariableThreshold.NoiseImageName         = ${noiseMap}
-Selavy.VariableThreshold.AverageImageName       = ${meanMap}
-Selavy.VariableThreshold.SNRimageName           = ${snrMap}
+Selavy.VariableThreshold.ThresholdImageName     = ${thresholdMap%%.fits}
+Selavy.VariableThreshold.NoiseImageName         = ${noiseMap%%.fits}
+Selavy.VariableThreshold.AverageImageName       = ${meanMap%%.fits}
+Selavy.VariableThreshold.SNRimageName           = ${snrMap%%.fits}
 Selavy.VariableThreshold.imagetype              = ${IMAGETYPE_CONT}
 \${weightpars}
 #
@@ -384,7 +379,7 @@ EOFINNER
             log=${logs}/continuum_validation_${FIELDBEAM}_\${SLURM_JOB_ID}.log
             validateArgs="\${fitsimage%%.fits}.fits"
             validateArgs="\${validateArgs} -S ${selavyDir}/selavy-\${fitsimage%%.fits}.components.xml"
-            validateArgs="\${validateArgs} -N ${selavyDir}/${noiseMap}.fits "
+            validateArgs="\${validateArgs} -N ${selavyDir}/${noiseMap%%.fits}.fits "
             validateArgs="\${validateArgs} -C NVSS_config.txt,SUMSS_config.txt"          
             STARTTIME=\$(date +%FT%T)
             NCORES=1
