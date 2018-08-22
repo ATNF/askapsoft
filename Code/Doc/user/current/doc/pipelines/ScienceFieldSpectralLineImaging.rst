@@ -155,7 +155,7 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | **Gridding**                                  |                                     |                                    |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``GRIDDER_SPECTRAL_SNAPSHOT_IMAGING``         | false                               | snapshotimaging                    | Whether to use snapshot imaging when gridding.                    |
+| ``GRIDDER_SPECTRAL_SNAPSHOT_IMAGING``         | true                                | snapshotimaging                    | Whether to use snapshot imaging when gridding.                    |
 |                                               |                                     | (:doc:`../calim/gridder`)          |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``GRIDDER_SPECTRAL_SNAPSHOT_WTOL``            | 2600                                | snapshotimaging.wtolerance         | The wtolerance parameter controlling how frequently to snapshot.  |
