@@ -311,7 +311,7 @@ these tasks are controlled by the following parameters.
 |                            |         | FITS format (some will have been converted by the           |
 |                            |         | source-finding tasks).                                      |
 +----------------------------+---------+-------------------------------------------------------------+
-| ``DO_MAKE_THUMBNAILS``     | false   | Whether to make the PNG thumbnail images that are used      |
+| ``DO_MAKE_THUMBNAILS``     | true    | Whether to make the PNG thumbnail images that are used      |
 |                            |         | within CASDA to provide previews of the image data products.|
 +----------------------------+---------+-------------------------------------------------------------+
 | ``DO_STAGE_FOR_CASDA``     | false   | Whether to tun the casda upload script to copy the data to  |

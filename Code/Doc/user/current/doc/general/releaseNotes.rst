@@ -17,6 +17,7 @@ Pipelines:
    of the taylor.1 images, due to a bug introduced in 0.21.0.
  * Some FITS files were not having their header keywords updated
    correctly. This has now been fixed and streamlined.
+ * The DO_MAKE_THUMBNAILS option is now true by default.
 
 Applications:
 
