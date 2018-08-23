@@ -103,15 +103,18 @@ Another parameter that is worth mentioning is psfwidth. This specifies the size 
 minor cycle (image based) cleaning. It can affect the run time of your clean a lot. If you have a rather poor beam
 with large sidelobes setting this large can help to avoid your clean diverging. If you leave it unset, the full
 beam is used. The sparser uv coverage of spectral line observations means that you may need to use a large psf width.
-Continuum imaging using MFS gives much better uv coverage and a smoother beam allowing you to set this much smaller, e.g., 128 or 256.
-This can speed up your clean minor cycles by a large factor. Because the major cycle subtractions can be parallelised over
+Continuum imaging using MFS gives much better uv coverage and a smoother beam allowing you to set this much smaller, e.g., 256 or 512. 
+This can speed up your clean minor cycles by a large factor. 
+Because the major cycle subtractions can be parallelised over
 many cores, but the minor cycle is still running on a single core, a lot of core time is wasted if the minor cycles are slow.
 As the ASKAP array grows in size and we need to make bigger, higher resolution images, we should hopefully be able to decrease this parameter
-to speed up the minor cycles. Specify the psf width using::
+to speed up the minor cycles. Note that speed gains are limited below 256. Specify the psf width using::
   
-    Cimager.solver.Clean.psfwidth               = 128
+    Cimager.solver.Clean.psfwidth               = 256
 
+Here is a handy summary plot of the areas in psfwidth and minor cycle percentage limit where clean convergence tends to be good for different sizes of ASKAP. Stay above and to the right of the relevant line in the plot. For ASKAP36 and robust=-1 or 0 the clean converged well for all tested values.
 
+.. image:: convergence.png
 
 Example 1: Spectral line cubes
 ------------------------------
