@@ -74,9 +74,10 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
 
     sourcefitting::FitResults results = obj.fitResults(fitType);
 
-    // Define local variables that will get printed
     casa::Gaussian2D<Double> gauss = obj.gaussFitSet(fitType)[fitNumber];
     casa::Vector<Double> errors = obj.fitResults(fitType).errors(fitNumber);
+    itsFlag4 = !obj.fitResults(fitType).isGood();
+
     CasdaIsland theIsland(obj, parset);
 
     itsIslandID = theIsland.id();
@@ -84,7 +85,16 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
     id << itsIDbase << "component_" << obj.getID() << getSuffix(fitNumber);
     itsComponentID = id.str();
 
-    duchamp::FitsHeader newHead_freq = changeSpectralAxis(obj.header(), "FREQ", casda::freqUnit);
+    // Add a catch for errors that have not converged properly. Check for position error of >1000 pix
+    if (errors[1]>1000.) {
+        ASKAPLOG_WARN_STR(logger, "Component " << itsComponentID << " has poorly defined errors on the fit - setting them to zero.");
+        itsFlag4 = true;
+        for(size_t i=0;i<errors.size();i++){
+            errors[i] = 0.;
+        }
+    }
+    
+   duchamp::FitsHeader newHead_freq = changeSpectralAxis(obj.header(), "FREQ", casda::freqUnit);
 
     double thisRA, thisDec, zworld;
     newHead_freq.pixToWCS(gauss.xCenter(), gauss.yCenter(), obj.getZcentre(),
@@ -154,7 +164,6 @@ CasdaComponent::CasdaComponent(sourcefitting::RadioSource &obj,
 
     itsFlagSpectralIndexOrigin = parset.getBool("spectralTermsFromTaylor", "true") ? 1 : 0;
     
-    itsFlag4 = !obj.fitResults(fitType).isGood();
         
     // These are the additional parameters not used in the CASDA
     // component catalogue v1.7:
