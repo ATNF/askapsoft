@@ -30,6 +30,8 @@
 #
 #############
 
+import numpy as np
+
 def madfmToSigma(madfm):
     return madfm/0.6744888
 
