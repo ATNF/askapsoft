@@ -215,6 +215,10 @@ EOFINNER
                     fi
                 fi
 
+                # Find the cube statistics
+                loadModule mpi4py
+                srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} python \${PIPELINEDIR}/findCubeStatistcs.py -c \${imageName}
+
             else
                 echo "WARNING - no good images were found for mosaicking image type '\${imageCode}'!"
             fi

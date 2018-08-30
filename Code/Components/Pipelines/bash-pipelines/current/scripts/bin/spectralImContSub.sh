@@ -263,6 +263,11 @@ EOFINNER
         ${fitsConvertText}
     fi
 
+    # Find the cube statistics
+    loadModule mpi4py
+    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} python \${PIPELINEDIR}/findCubeStatistcs.py -c \${imageName}
+
+
 fi
 EOF
 
