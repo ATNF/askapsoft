@@ -169,7 +169,7 @@ EOFINNER
     # Find the cube statistics
     loadModule mpi4py
     cube=${imageName}
-    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} python \${PIPELINEDIR}/findCubeStatistcs.py -c \${cube}
+    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} python \${PIPELINEDIR}/findCubeStatistics.py -c \${cube}
 
 
 else

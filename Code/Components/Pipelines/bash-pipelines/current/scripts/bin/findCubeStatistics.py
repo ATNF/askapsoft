@@ -40,87 +40,7 @@ from mpi4py import MPI
 import pylab as plt
 from argparse import ArgumentParser
 
-#############
-
-def madfmToSigma(madfm):
-    return madfm/0.6744888
-
-def findSpectralIndex(coords):
-    return coords.get_coordinate('spectral').get_image_axis()
-
-def findSpectralSize(shape, coords):
-    specIndex = findSpectralIndex(coords)
-    return shape[specIndex]
-
-def findSpatialSize(coords):
-
-    for i in range(3):
-        if coords.dict().has_key('direction%d'%i):
-            label='direction%d'%i
-    return coords.dict()[label]['_axes_sizes']
-
-def getFreqAxis(cube):
-    coords=cube.coordinates()
-    shape=cube.shape()
-    specDim=shape[findSpectralIndex(coords)]
-    specCoo = coords.get_coordinate('spectral')
-    freq = (np.arange(specDim)-specCoo.get_referencepixel())*specCoo.get_increment() + specCoo.get_referencevalue()
-    return freq
-
-class stat:
-    def __init__(self,size,comm):
-        self.rank = comm.Get_rank()
-        self.nranks = comm.Get_size()
-        self.size = size
-        self.stat = np.zeros(self.size, dtype='f')
-        self.fullStat = None
-        self.finalStat = None
-        if self.rank == 0:
-            self.fullStat = np.empty([self.nranks,self.size],dtype='f')
-
-    def assign(self,chan,statsDict,label):
-        self.stat[chan] = statsDict[label]
-
-    def gather(self,comm):
-        comm.Gather(self.stat,self.fullStat)
-        if self.rank == 0:
-            self.finalStat = np.zeros(self.size)
-            for i in range(self.size): self.finalStat[i] = self.fullStat[:,i].sum()
-
-
-class statsCollection:
-    def __init__(self,size,comm):
-        self.rms = stat(size,comm)
-        self.mean = stat(size,comm)
-        self.median = stat(size,comm)
-        self.madfm = stat(size,comm)
-        self.maxval = stat(size,comm)
-        self.minval = stat(size,comm)
-
-    def assign(self, chan, stats):
-        self.rms.assign(chan,stats,'rms')
-        self.mean.assign(chan,stats,'mean')
-        self.median.assign(chan,stats,'median')
-        self.madfm.assign(chan,stats,'medabsdevmed')
-        self.maxval.assign(chan,stats,'max')
-        self.minval.assign(chan,stats,'min')
-
-    def gather(self, comm):
-        # Gather everything to the master
-        self.rms.gather(comm)
-        self.mean.gather(comm)
-        self.median.gather(comm)
-        self.madfm.gather(comm)
-        self.maxval.gather(comm)
-        self.minval.gather(comm)
-
-    def getRMS(self): return self.rms.finalStat
-    def getMean(self): return self.mean.finalStat
-    def getMedian(self): return self.median.finalStat
-    def getMadfm(self): return self.madfm.finalStat
-    def getMaxval(self): return self.maxval.finalStat
-    def getMinval(self): return self.minval.finalStat
-
+import cubestatsHelpers as cs
 
 #############
 if __name__ == '__main__':
@@ -160,12 +80,12 @@ if __name__ == '__main__':
     blc=np.zeros_like(shape)
     trc=np.array(shape)-1
     coords=cube.coordinates()
-    spInd = findSpectralIndex(coords)
-    specSize = findSpectralSize(shape,coords)
-    spatSize = findSpatialSize(coords)
-    freq = getFreqAxis(cube)/1.e6
+    spInd = cs.findSpectralIndex(coords)
+    specSize = cs.findSpectralSize(shape,coords)
+    spatSize = cs.findSpatialSize(coords)
+    freq = cs.getFreqAxis(cube)/1.e6
 
-    stats = statsCollection(specSize,comm)
+    stats = cs.statsCollection(specSize,comm)
     
     for i in range(specSize):
 
@@ -184,7 +104,7 @@ if __name__ == '__main__':
         rms=stats.getRMS()*scale
         mean=stats.getMean()*scale
         median=stats.getMedian()*scale
-        madfm=madfmToSigma(stats.getMadfm()*scale)
+        madfm=cs.madfmToSigma(stats.getMadfm()*scale)
         minval=stats.getMinval()*scale
         maxval=stats.getMaxval()*scale
         
