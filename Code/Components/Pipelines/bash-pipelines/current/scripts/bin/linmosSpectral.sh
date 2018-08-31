@@ -166,11 +166,13 @@ EOFINNER
         exit \$err
     fi
 
-    # Find the cube statistics
-    loadModule mpi4py
-    cube=${imageName}
-    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} python \${PIPELINEDIR}/findCubeStatistics.py -c \${cube}
-
+    if [ "\${imageCode}" == "restored" ] || [ "\${imageCode}" == "residual" ] || [ "\${imageCode}" == "contsub" ]; then
+        # Find the cube statistics
+        loadModule mpi4py
+        cube=${imageName}
+        echo "Finding cube stats for \${cube}"
+        srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} \${PIPELINEDIR}/findCubeStatistics.py -c \${cube}
+    fi
 
 else
     echo "WARNING - no good images were found for mosaicking image type '\${imageCode}'!"

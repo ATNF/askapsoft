@@ -51,6 +51,8 @@ for subband in ${SUBBAND_WRITER_LIST}; do
         DO_IT=false
     fi
 
+    contsubName=${imageName}
+    
     # Make sure we can see the robust_contsub script
     script_location="${ACES_LOCATION}/tools"
     if [ ! -e "${script_location}/${SPECTRAL_IMSUB_SCRIPT}" ]; then
@@ -125,6 +127,7 @@ cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
 BEAM=${BEAM}
 imageName=${imageName}
+contsubName=${contsubName}
 
 if [ ! -e "\${imageName}" ]; then
 
@@ -165,13 +168,18 @@ else
     IMAGETYPE_SPECTRAL=${IMAGETYPE_SPECTRAL}
     if [ "\${IMAGETYPE_SPECTRAL}" == "fits" ]; then
         echo "Converting contsub images to FITS"
-        casaim="\${imageName%%.fits}.contsub"
-        fitsim="\${imageName%%.fits}.contsub.fits"
+        casaim="\${contsubName%%.fits}"
+        fitsim="\${contsubName%%.fits}.fits"
         parset=$parsets/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.in
         log=$logs/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.log
         ${fitsConvertText}
     fi
     
+    # Find the cube statistics
+    loadModule mpi4py
+    echo "Finding cube stats for \${contsubName}"
+    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} \${PIPELINEDIR}/findCubeStatistics.py -c \${contsubName}
+
 
 fi
 
@@ -202,6 +210,7 @@ cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
 BEAM=${BEAM}
 imageName=${imageName}
+contsubName=${contsubName}
 
 if [ ! -e "\${imageName}" ]; then
 
@@ -256,8 +265,8 @@ EOFINNER
     IMAGETYPE_SPECTRAL=${IMAGETYPE_SPECTRAL}
     if [ "\${IMAGETYPE_SPECTRAL}" == "fits" ]; then
         echo "Converting contsub images to FITS"
-        casaim="\${imageName%%.fits}.contsub"
-        fitsim="\${imageName%%.fits}.contsub.fits"
+        casaim="\${contsubName%%.fits}"
+        fitsim="\${contsubName%%.fits}.fits"
         parset=$parsets/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.in
         log=$logs/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.log
         ${fitsConvertText}
@@ -265,7 +274,8 @@ EOFINNER
 
     # Find the cube statistics
     loadModule mpi4py
-    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} python \${PIPELINEDIR}/findCubeStatistics.py -c \${imageName}
+    echo "Finding cube stats for \${contsubName}"
+    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} \${PIPELINEDIR}/findCubeStatistics.py -c \${contsubName}
 
 
 fi

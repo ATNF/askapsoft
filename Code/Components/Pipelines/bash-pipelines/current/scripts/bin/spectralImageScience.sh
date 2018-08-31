@@ -272,7 +272,8 @@ fi
 # Find the cube statistics
 loadModule mpi4py
 cube=${imageName}
-srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} python \${PIPELINEDIR}/findCubeStatistics.py -c \${cube}
+echo "Finding cube stats for \${cube}"
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} \${PIPELINEDIR}/findCubeStatistics.py -c \${cube}
 
 
 EOFOUTER

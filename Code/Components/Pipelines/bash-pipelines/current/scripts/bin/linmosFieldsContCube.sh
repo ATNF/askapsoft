@@ -215,9 +215,14 @@ EOFINNER
                     fi
                 fi
 
-                # Find the cube statistics
-                loadModule mpi4py
-                srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} python \${PIPELINEDIR}/findCubeStatistics.py -c \${imageName}
+                if [ "\${imageCode}" == "restored" ] || [ "\${imageCode}" == "residual" ]; then
+                    # Find the cube statistics
+                    loadModule mpi4py
+                    echo "Finding cube stats for \${imageName}"
+                    NCORES=${NUM_CPUS_CONTCUBE_SCI}
+                    NPPN=${CPUS_PER_CORE_CONTCUBE_IMAGING}
+                    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} \${PIPELINEDIR}/findCubeStatistics.py -c \${imageName}
+                fi
 
             else
                 echo "WARNING - no good images were found for mosaicking image type '\${imageCode}'!"
