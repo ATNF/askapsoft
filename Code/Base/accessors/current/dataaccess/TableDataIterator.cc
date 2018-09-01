@@ -48,6 +48,8 @@
 
 // casa includes
 #include <casacore/tables/Tables/ArrayColumn.h>
+#include <casacore/tables/Tables/ScalarColumn.h>
+
 
 namespace askap {
 
@@ -273,32 +275,35 @@ TableDataIterator::~TableDataIterator()
   }    
 }
 
-/// @brief write back the original visibilities
-/// @details The write operation is possible if the shape of the 
-/// visibility cube stays the same as the shape of the data in the
-/// table. The method uses DataAccessor to obtain a reference to the
-/// visibility cube (hence no parameters). 
-void TableDataIterator::writeOriginalVis() const
+/// @brief helper templated method to write back a cube to main table column
+/// @details For now, it is only used in writeOriginalVis/Flag methods
+/// and therefore can be kept in cc rather than tcc file (it is private, so
+/// can be used by this class only). This can easily be changed in the future,
+/// if need arises. This method encapsulates handling of channel selection
+/// @param[in] cube Cube to work with, type should match the column type. Should be
+///                 of the appropriate shape
+/// @param[in] colName Name of the column
+template<typename T>
+void TableDataIterator::writeCube(const casa::Cube<T> &cube, 
+                                  const std::string &colName) const
 {
-  const casa::Cube<casa::Complex> &originalVis=getAccessor().visibility();
-  
   const casa::uInt nChan = nChannel();
   const casa::uInt startChan = startChannel();
   
   // no change of shape is permitted
-  ASKAPASSERT(originalVis.nrow() == nRow() &&
-               originalVis.ncolumn() == nChan &&
-               originalVis.nplane() == nPol());
-  casa::ArrayColumn<casa::Complex> visCol(getCurrentIteration(), getDataColumnName());
+  ASKAPASSERT(cube.nrow() == nRow() &&
+              cube.ncolumn() == nChan &&
+              cube.nplane() == nPol());
+  casa::ArrayColumn<T> visCol(getCurrentIteration(), colName);
   ASKAPDEBUGASSERT(getCurrentIteration().nrow() >= getCurrentTopRow()+
                     nRow());
   casa::uInt tableRow = getCurrentTopRow();
-  for (casa::uInt row=0;row<originalVis.nrow();++row,++tableRow) {
+  for (casa::uInt row=0;row<cube.nrow();++row,++tableRow) {
        const casa::IPosition shape = visCol.shape(row);
        ASKAPDEBUGASSERT(shape.size() && (shape.size()<3));
        const casa::uInt thisRowNumberOfPols = shape[0];
        const casa::uInt thisRowNumberOfChannels = shape.size()>1 ? shape[1] : 1;
-       if (thisRowNumberOfPols != originalVis.nplane()) {
+       if (thisRowNumberOfPols != cube.nplane()) {
            ASKAPTHROW(DataAccessError, "Current implementation of the writing to original "
                 "visibilities does not support partial selection of the data");                 
        }
@@ -307,7 +312,7 @@ void TableDataIterator::writeOriginalVis() const
        }
        // for now just copy
        casa::IPosition curPos(2,thisRowNumberOfPols,thisRowNumberOfChannels);
-       casa::Array<casa::Complex> buf(curPos);
+       casa::Array<T> buf(curPos);
        if ((startChan!=0) || (startChan+nChan!=thisRowNumberOfChannels)) {
            // get data first to replace only what we need
            visCol.get(tableRow,buf);
@@ -316,12 +321,61 @@ void TableDataIterator::writeOriginalVis() const
             curPos[1]=chan+startChan;
             for (casa::uInt pol=0; pol<thisRowNumberOfPols; ++pol) {
                  curPos[0] = pol;
-                 buf(curPos) = originalVis(row,chan,pol);
+                 buf(curPos) = cube(row,chan,pol);
             }
        }
-       visCol.put(tableRow, buf);                          
+       visCol.put(tableRow, buf); 
   }             
 }		  
+
+/// @brief write back the original visibilities
+/// @details The write operation is possible if the shape of the 
+/// visibility cube stays the same as the shape of the data in the
+/// table. The method uses DataAccessor to obtain a reference to the
+/// visibility cube (hence no parameters). 
+void TableDataIterator::writeOriginalVis() const
+{
+   writeCube(getAccessor().visibility(), getDataColumnName());
+}
+
+/// @brief write back flags
+/// @details The write operation is possible if the shape of the
+/// flag cube stays the same as the shape of the data in the
+/// table. The method uses DataAccessor to obtain a reference to the
+/// visibility cube (hence no parameters).
+/// @note This operation is specific to table (i.e MS) based implementaton
+/// of the interface
+void TableDataIterator::writeOriginalFlag() const
+{
+   const bool rowBasedFlagUsed = getCurrentIteration().tableDesc().isColumn("FLAG_ROW");
+   const casa::Cube<casa::Bool>& flags = getAccessor().flag();
+   if (rowBasedFlagUsed) {
+       // check that updated flag doesn't contradict row-based flag
+       casa::ROScalarColumn<casa::Bool> rowFlagCol(getCurrentIteration(), "FLAG_ROW");
+       const casa::Vector<casa::Bool> rowBasedFlag = rowFlagCol.getColumn();
+       const casa::uInt topRow = getCurrentTopRow();
+       ASKAPDEBUGASSERT(rowBasedFlag.nelements() >= topRow+flags.nrow());
+       for (casa::uInt row = 0; row < flags.nrow(); ++row) {
+            if (rowBasedFlag[row + topRow]) {
+                bool oneUnflagged = false;
+                casa::Matrix<casa::Bool> thisRow = flags.yzPlane(row);
+                for (casa::Matrix<casa::Bool>::const_iterator ci = thisRow.begin();
+                     ci != thisRow.end(); ++ci) {
+                     if (!(*ci)) {
+                         oneUnflagged = true;
+                         break;
+                     }
+                }
+                //std::cout<<row<<" "<<rowBasedFlag[row + topRow]<<" "<<oneUnflagged<<std::endl;
+                ASKAPCHECK(!oneUnflagged, "Flag modification attempted to unflag data for the row ("<<
+                      row<<") which is flagged via row-based flagging mechanism. This is not supported");
+            }  
+       }
+
+   }
+   writeCube(flags, "FLAG");
+}
+
 
 /// @brief check whether one can write to the main table
 /// @details Buffers held in subtables are not covered by this method.

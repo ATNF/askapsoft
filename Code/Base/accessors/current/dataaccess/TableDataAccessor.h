@@ -39,7 +39,7 @@
 // own includes
 #include <dataaccess/TableDataIterator.h>
 #include <dataaccess/MetaDataAccessor.h>
-#include <dataaccess/IDataAccessor.h>
+#include <dataaccess/IFlagDataAccessor.h>
 
 namespace askap {
 	
@@ -67,7 +67,7 @@ class TableDataIterator;
 ///
 /// @ingroup dataaccess_tab
 class TableDataAccessor : virtual public MetaDataAccessor,
-                          virtual public IDataAccessor
+                          virtual public IFlagDataAccessor
 {
 public:
   /// construct an object linked with the given read-write iterator
@@ -90,13 +90,28 @@ public:
   /// all visibility data
   ///
   virtual casa::Cube<casa::Complex>& rwVisibility();
+
+  /// Cube of flags corresponding to the output of visibility()
+  /// @return a reference to nRow x nChannel x nPol cube with the flag
+  ///         information. If True, the corresponding element is flagged.
+  virtual const casa::Cube<casa::Bool>& flag() const;
+
+  /// Non-const access to the cube of flags.
+  /// @return a reference to nRow x nChannel x nPol cube with the flag
+  ///         information. If True, the corresponding element is flagged.
+  virtual casa::Cube<casa::Bool>& rwFlag();
+
   
   /// this method flush back the data to disk if there are any changes
   void sync() const;
 private:
   /// a flag showing that the visibility has been changed and needs flushing
   /// back to the table
-  mutable bool itsNeedsFlushFlag;  
+  mutable bool itsVisNeedsFlush;  
+
+  /// a flag showing that the visibility has been changed and needs flushing
+  /// back to the table
+  mutable bool itsFlagNeedsFlush;  
   
   /// @brief A reference to associated read-write iterator
   /// @details 

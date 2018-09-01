@@ -42,7 +42,8 @@ using namespace askap::accessors;
 /// @param iter a reference to the associated read-write iterator
 TableDataAccessor::TableDataAccessor(const TableDataIterator &iter) :
                  MetaDataAccessor(iter.getAccessor()), 
-                 itsNeedsFlushFlag(false), itsIterator(iter) {}
+                 itsVisNeedsFlush(false), itsFlagNeedsFlush(false),
+                 itsIterator(iter) {}
 
 /// Read-only visibilities (a cube is nRow x nChannel x nPol; 
 /// each element is a complex visibility)
@@ -63,15 +64,12 @@ const casa::Cube<casa::Complex>& TableDataAccessor::visibility() const
 ///
 casa::Cube<casa::Complex>& TableDataAccessor::rwVisibility()
 {    
-  //throw DataAccessLogicError("rwVisibility() for original visibilities is "
-  //                               "not yet implemented");  
-  
   if (!itsIterator.mainTableWritable()) {
       throw DataAccessLogicError("rwVisibility() is used for original visibilities, "
            "but the table is not writable");
   }
   
-  itsNeedsFlushFlag=true;
+  itsVisNeedsFlush = true;
   
   // the solution with const_cast is not very elegant, however it seems to
   // be the only alternative to creating a copy of the buffer or making the whole
@@ -81,11 +79,46 @@ casa::Cube<casa::Complex>& TableDataAccessor::rwVisibility()
   return const_cast<casa::Cube<casa::Complex>&>(getROAccessor().visibility());
 }
 
+/// Cube of flags corresponding to the output of visibility()
+/// @return a reference to nRow x nChannel x nPol cube with the flag
+///         information. If True, the corresponding element is flagged.
+const casa::Cube<casa::Bool>& TableDataAccessor::flag() const
+{
+  return getROAccessor().flag();  
+}
+
+/// Non-const access to the cube of flags.
+/// @return a reference to nRow x nChannel x nPol cube with the flag
+///         information. If True, the corresponding element is flagged.
+casa::Cube<casa::Bool>& TableDataAccessor::rwFlag()
+{
+   if (!itsIterator.mainTableWritable()) {
+       throw DataAccessLogicError("rwFlag() is used for original visibilities, "
+           "but the table is not writable");
+   }
+   // also need a check that FLAG_ROW is not present
+
+   itsFlagNeedsFlush = true;
+  
+   // the solution with const_cast is not very elegant, however it seems to
+   // be the only alternative to creating a copy of the buffer or making the whole
+   // const interface untidy by putting a non-const method there. 
+   // It is safe to use const_cast here because we know that the actual buffer
+   // is declared mutable in CachedAccessorField.
+   return const_cast<casa::Cube<casa::Bool>&>(getROAccessor().flag());
+}
+
+
 /// this method flush back the data to disk if there are any changes
 void TableDataAccessor::sync() const
 {
-  if (itsNeedsFlushFlag) {
-      itsNeedsFlushFlag=false;
+  if (itsVisNeedsFlush) {
+      itsVisNeedsFlush = false;
       itsIterator.writeOriginalVis();
+  }
+
+  if (itsFlagNeedsFlush) {
+      itsFlagNeedsFlush = false;
+      itsIterator.writeOriginalFlag();
   }
 }

@@ -71,6 +71,7 @@ class TableDataAccessTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(fieldTest);
   CPPUNIT_TEST(antennaTest);
   CPPUNIT_TEST(originalVisRewriteTest);
+  CPPUNIT_TEST(originalFlagRewriteTest);
   CPPUNIT_TEST(readOnlyTest);
   CPPUNIT_TEST(channelSelectionTest);
   CPPUNIT_TEST(chunkSizeTest);
@@ -109,6 +110,8 @@ public:
   void antennaTest();
   /// test to rewrite original visibilities
   void originalVisRewriteTest();
+  /// test to rewrite original flags
+  void originalFlagRewriteTest();
   /// test read/write with channel selection
   void channelSelectionTest();
   /// test restriction of the chunk size
@@ -577,6 +580,70 @@ void TableDataAccessTest::channelSelectionTest()
        // store original visibilities in a buffer
        it->rwVisibility() = it.buffer("BACKUP").visibility();
   }
+}
+
+void TableDataAccessTest::originalFlagRewriteTest()
+{
+   TableDataSource tds(TableTestRunner::msName(), TableDataSource::WRITE_PERMITTED);
+   IDataSource &ds=tds; // to have all interface methods available without
+                        // ambiguity (otherwise methods overridden in
+                        // TableDataSource would get a priority)
+   casa::uInt iterCntr=0;
+   for (IDataSharedIter it=ds.createIterator(); it!=it.end(); ++it,++iterCntr) {
+        // first check that read-only and read-write access return the same data
+        const casa::Cube<casa::Bool>& roFlags = it->flag();
+        IFlagDataAccessor& acc = dynamic_cast<IFlagDataAccessor&>(*it);
+        const casa::Cube<casa::Bool>& rwFlags = acc.rwFlag();
+        CPPUNIT_ASSERT(roFlags.shape() == rwFlags.shape());
+        CPPUNIT_ASSERT(roFlags.shape() == casa::IPosition(3,it->nRow(), it->nChannel(), it->nPol()));
+        for (casa::uInt row=0; row < it->nRow(); ++row) {
+             for (casa::uInt chan=0; chan < it->nChannel(); ++chan) {
+                  for (casa::uInt pol =0; pol < it->nPol(); ++pol) {
+                       CPPUNIT_ASSERT_EQUAL(roFlags(row,chan,pol), rwFlags(row,chan,pol));
+                  }
+             }
+        }
+   }
+   CPPUNIT_ASSERT_EQUAL(420u, iterCntr);
+   // there are some issues related to row-based flagging
+   // therefore, this code will not work now. Leave the rest of the
+   // test with actual modification bypassed for now.
+   return;
+
+   casa::Vector<casa::Cube<casa::Bool> > memoryBuffer(iterCntr);
+   iterCntr=0;
+   for (IDataSharedIter it=ds.createIterator(); it!=it.end(); ++it,++iterCntr) {
+        // copy the original flags
+        const casa::Cube<casa::Bool>& roFlags = it->flag();
+        memoryBuffer[iterCntr] = roFlags;
+        IFlagDataAccessor& acc = dynamic_cast<IFlagDataAccessor&>(*it);
+        casa::Cube<casa::Bool>& rwFlags = acc.rwFlag();
+        for (casa::uInt row=0; row < it->nRow(); ++row) {
+             for (casa::uInt chan=0; chan < it->nChannel(); ++chan) {
+                  for (casa::uInt pol =0; pol < it->nPol(); ++pol) {
+                       // flip the flag to the opposite value
+                       rwFlags(row,chan,pol) = !roFlags(row,chan,pol);
+                  }
+             }
+        }
+   }
+
+   iterCntr=0;
+   for (IDataSharedIter it=ds.createIterator(); it!=it.end(); ++it,++iterCntr) {
+        const casa::Cube<casa::Bool>& roFlags = it->flag();
+        IFlagDataAccessor& acc = dynamic_cast<IFlagDataAccessor&>(*it);
+        casa::Cube<casa::Bool>& rwFlags = acc.rwFlag();
+        for (casa::uInt row=0; row < it->nRow(); ++row) {
+             for (casa::uInt chan=0; chan < it->nChannel(); ++chan) {
+                  for (casa::uInt pol =0; pol < it->nPol(); ++pol) {
+                       // check that the flag is now set to the opposite of the original value
+                       CPPUNIT_ASSERT_EQUAL(memoryBuffer[iterCntr](row,chan,pol), roFlags(row,chan,pol));
+                       rwFlags(row,chan,pol) = !roFlags(row,chan,pol);
+                  }
+             }
+        }
+   }
+
 }
 
 /// test to rewrite original visibilities

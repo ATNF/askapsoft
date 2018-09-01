@@ -153,12 +153,22 @@ public:
   virtual void writeBuffer(const casa::Cube<casa::Complex> &vis,
                            const std::string &name) const;
   	
-  /// @brief write back the original visibilities
+  /// @brief write back visibilities
   /// @details The write operation is possible if the shape of the 
   /// visibility cube stays the same as the shape of the data in the
   /// table. The method uses DataAccessor to obtain a reference to the
   /// visibility cube (hence no parameters). 
   void writeOriginalVis() const;
+
+  /// @brief write back flags
+  /// @details The write operation is possible if the shape of the
+  /// flag cube stays the same as the shape of the data in the
+  /// table. The method uses DataAccessor to obtain a reference to the
+  /// visibility cube (hence no parameters). 
+  /// @note This operation is specific to table (i.e MS) based implementaton
+  /// of the interface
+  void writeOriginalFlag() const;
+
   
   /// @brief check whether one can write to the main table
   /// @details Buffers held in subtables are not covered by this method.
@@ -166,6 +176,20 @@ public:
   bool mainTableWritable() const throw();		  
 
 private:
+
+  /// @brief helper templated method to write back a cube to main table column
+  /// @details For now, it is only used in writeOriginalVis/Flag methods
+  /// and therefore can be kept in cc rather than tcc file (it is private, so
+  /// can be used by this class only). This can easily be changed in the future,
+  /// if need arises. This method encapsulates handling of channel selection
+  /// @param[in] cube Cube to work with, type should match the column type. Should be
+  ///                 of the appropriate shape
+  /// @param[in] colName Name of the column 
+  template<typename T>
+  void writeCube(const casa::Cube<T> &cube, const std::string &colName) const;
+
+
+
   /// shared pointer to the data accessor associated with either an active
   /// buffer or original visibilites. The actual type held by the pointer
   /// may vary.
