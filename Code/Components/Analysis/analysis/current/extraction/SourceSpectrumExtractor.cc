@@ -112,7 +112,7 @@ void SourceSpectrumExtractor::setBeamScale()
                     itsOutputUnits.setName(inunit.substr(0,inunit.size()-5));
                 }
     
-                std::vector< casa::Vector<Quantum<Double> > > beamvec;
+                std::map<unsigned int, casa::Vector<Quantum<Double> > > beamvec;
 
                 casa::Vector<Quantum<Double> >
                 inputBeam = itsInputCubePtr->imageInfo().restoringBeam().toVector();
@@ -126,7 +126,7 @@ void SourceSpectrumExtractor::setBeamScale()
                                           "\" has no beam information. Not scaling spectra by beam");
                         itsBeamScaleFactor[itsCurrentStokes].push_back(1.);
                     } else {
-                        beamvec.push_back(inputBeam);
+                        beamvec[0]=inputBeam;
                         ASKAPLOG_DEBUG_STR(logger, "Beam for input cube = " << inputBeam);
                     }
                 } else {
@@ -150,7 +150,7 @@ void SourceSpectrumExtractor::setBeamScale()
                                            " has " << beamvec.size() <<
                                            " entries - was expecting " <<
                                            itsInputCubePtr->shape()(itsSpcAxis));
-                        beamvec = std::vector< Vector<Quantum<Double> > >(1, inputBeam);
+                        beamvec[0] = inputBeam;
                     }
                 }
 

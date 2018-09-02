@@ -106,8 +106,6 @@ class ContinuumMaster {
 
         std::map<unsigned int, casa::Vector<casa::Quantum<double> > > itsBeamList;
 
-        void logBeamInfo();
-
 };
 
 };

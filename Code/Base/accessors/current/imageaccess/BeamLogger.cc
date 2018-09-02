@@ -35,9 +35,15 @@
 
 // ASKAPsoft includes
 #include <askap/AskapLogging.h>
+#include <askapparallel/AskapParallel.h>
 #include <casacore/casa/Arrays/Vector.h>
 #include <casacore/casa/Quanta/Quantum.h>
 #include <Common/ParameterSet.h>
+#include <Blob/BlobString.h>
+#include <Blob/BlobIBufString.h>
+#include <Blob/BlobOBufString.h>
+#include <Blob/BlobIStream.h>
+#include <Blob/BlobOStream.h>
 
 // Local package includeas
 #include <imageaccess/CasaImageAccess.h>
@@ -47,17 +53,20 @@ namespace askap {
 namespace accessors {
 
 BeamLogger::BeamLogger():
-    itsFilename("")
+    itsFilename(""),
+    itsBeamList()
 {
 }
 
 BeamLogger::BeamLogger(const LOFAR::ParameterSet &parset):
-    itsFilename(parset.getString("beamLog", ""))
+    itsFilename(parset.getString("beamLog", "")),
+    itsBeamList()
 {
 }
 
 BeamLogger::BeamLogger(const std::string &filename):
-    itsFilename(filename)
+    itsFilename(filename),
+    itsBeamList()
 {
 }
 
@@ -66,9 +75,11 @@ void BeamLogger::extractBeams(const std::vector<std::string>& imageList)
     itsBeamList.clear();
     std::vector<std::string>::const_iterator image = imageList.begin();
 
+    unsigned int chan = 0;
     for (; image != imageList.end(); image++) {
         CasaImageAccess ia;
-        itsBeamList.push_back(ia.beamInfo(*image));
+        itsBeamList[chan] = ia.beamInfo(*image);
+        chan++;
     }
 }
 
@@ -79,11 +90,12 @@ void BeamLogger::write()
         std::ofstream fout(itsFilename.c_str());
         fout << "#Channel BMAJ[arcsec] BMIN[arcsec] BPA[deg]\n";
 
-        for (size_t i = 0; i < itsBeamList.size(); i++) {
-            fout << i << " "
-                 << itsBeamList[i][0].getValue("arcsec") << " "
-                 << itsBeamList[i][1].getValue("arcsec") << " "
-                 << itsBeamList[i][2].getValue("deg") << "\n";
+        std::map<unsigned int, casa::Vector<casa::Quantum<double> > >::iterator beam = itsBeamList.begin();
+        for (; beam != itsBeamList.end(); beam++) {
+            fout << beam->first << " "
+                 << beam->second[0].getValue("arcsec") << " "
+                 << beam->second[1].getValue("arcsec") << " "
+                 << beam->second[2].getValue("deg") << "\n";
         }
 
     } else {
@@ -102,20 +114,20 @@ void BeamLogger::read()
 
         if (fin.is_open()) {
 
-            int chan;
+            unsigned int chan;
             double bmaj, bmin, bpa;
             std::string line, name;
 
             while (getline(fin, line),
                     !fin.eof()) {
-                if ( line[0] != '#') {
+                if (line[0] != '#') {
                     std::stringstream ss(line);
                     ss >> chan >> bmaj >> bmin >> bpa;
                     casa::Vector<casa::Quantum<double> > currentbeam(3);
                     currentbeam[0] = casa::Quantum<double>(bmaj, "arcsec");
                     currentbeam[1] = casa::Quantum<double>(bmin, "arcsec");
                     currentbeam[2] = casa::Quantum<double>(bpa, "deg");
-                    itsBeamList.push_back(currentbeam);
+                    itsBeamList[chan] = currentbeam;
                 }
             }
 
@@ -127,6 +139,88 @@ void BeamLogger::read()
     }
 
 }
+
+void BeamLogger::gather(askapparallel::AskapParallel &comms, int rankToGather, bool includeMaster)
+{
+
+    ASKAPLOG_DEBUG_STR(logger, "Gathering the beam info - on rank " << comms.rank() << " and gathering onto rank " << rankToGather);
+    
+    if (comms.isParallel()) {
+
+        int minrank=0;
+        if (!includeMaster){
+            minrank=1;
+        }
+
+        if (comms.rank() != rankToGather) {
+            // If we are here, the current rank does not do the gathering.
+            // Instead, send the data to the rank that is.
+
+            ASKAPLOG_DEBUG_STR(logger, "Sending from rank " << comms.rank() <<" to rank " << rankToGather);
+            // send to desired rank
+            LOFAR::BlobString bs;
+            bs.resize(0);
+            LOFAR::BlobOBufString bob(bs);
+            LOFAR::BlobOStream out(bob);
+            out.putStart("gatherBeam", 1);
+            unsigned int size = itsBeamList.size();
+            out << size;
+            if (itsBeamList.size() > 0) {
+                ASKAPLOG_DEBUG_STR(logger, "This has data, so sending beam list of size " << size);
+                std::map<unsigned int, casa::Vector<casa::Quantum<double> > >::iterator beam = itsBeamList.begin();
+                for (; beam != itsBeamList.end(); beam++) {
+                    out << beam->first
+                        << beam->second[0].getValue("arcsec")
+                        << beam->second[1].getValue("arcsec")
+                        << beam->second[2].getValue("deg");
+                }
+            }
+            out.putEnd();
+            comms.sendBlob(bs, rankToGather);
+        } else {
+
+            // The rank on which we are gathering the data
+            // Loop over all the others and read their beam.
+            for (int rank = minrank; rank < comms.nProcs(); rank++) {
+                
+                if (rank != comms.rank()) {
+                    ASKAPLOG_DEBUG_STR(logger, "Preparing to receive beamlist from rank " << rank);
+                    LOFAR::BlobString bs;
+                    bs.resize(0);
+                    comms.receiveBlob(bs, rank);
+                    LOFAR::BlobIBufString bib(bs);
+                    LOFAR::BlobIStream in(bib);
+                    int version = in.getStart("gatherBeam");
+                    ASKAPASSERT(version == 1);
+                    unsigned int size, chan;
+                    double bmaj, bmin, bpa;
+                    in >> size;
+                    if (size > 0) {
+                        ASKAPLOG_DEBUG_STR(logger, "Has data - about to receive " << size << " channels");
+                        for(unsigned int i=0;i<size;i++){
+                            in >> chan >> bmaj >> bmin >> bpa;
+                            casa::Vector<casa::Quantum<double> > currentbeam(3);
+                            currentbeam[0] = casa::Quantum<double>(bmaj, "arcsec");
+                            currentbeam[1] = casa::Quantum<double>(bmin, "arcsec");
+                            currentbeam[2] = casa::Quantum<double>(bpa, "deg");
+                            itsBeamList[chan] = currentbeam;
+                        }
+                    }
+                    else {
+                        ASKAPLOG_DEBUG_STR(logger, "No data from rank " << rank);
+                    }
+                    in.getEnd();
+                    
+                }
+                
+            }
+            
+        }
+        
+    }
+
+}
+
 
 }
 }

@@ -386,12 +386,7 @@ void SpectralLineMaster::logBeamInfo()
             ASKAPCHECK(itsBeamList.begin()->first == 0, "Beam list doesn't start at channel 0");
             ASKAPCHECK((itsBeamList.size() == (itsBeamList.rbegin()->first + 1)),
                        "Beam list doesn't finish at channel " << itsBeamList.size() - 1);
-            std::vector<casa::Vector<casa::Quantum<double> > > beams;
-            std::map<unsigned int, casa::Vector<casa::Quantum<double> > >::iterator beam;
-            for (beam = itsBeamList.begin(); beam != itsBeamList.end(); beam++) {
-                beams.push_back(beam->second);
-            }
-            beamlog.beamlist() = beams;
+            beamlog.beamlist() = itsBeamList;
             ASKAPLOG_INFO_STR(logger, "Writing list of individual channel beams to beam log "
                               << beamlog.filename());
             beamlog.write();

@@ -34,6 +34,7 @@
 #include <vector>
 
 // ASKAPsoft includes
+#include <askapparallel/AskapParallel.h>
 #include <casacore/casa/Arrays/Vector.h>
 #include <casacore/casa/Quanta/Quantum.h>
 #include <Common/ParameterSet.h>
@@ -64,7 +65,9 @@ class BeamLogger {
         std::string filename() {return itsFilename;};
 
         /// @brief Extract the beam information for each channel image
-        /// provided in the the imageList
+        /// provided in the the imageList. The order of the images is
+        /// assumed to give the channel order (so the first image is
+        /// channel 0, the second channel 1, etc).
         /// @param imageList A vector list of image names
         void extractBeams(const std::vector<std::string>& imageList);
 
@@ -86,20 +89,27 @@ class BeamLogger {
         /// and an error message is written to the log.
         void read();
 
-        /// @brief Return the beam information
-        std::vector< casa::Vector<casa::Quantum<double> > > beamlist() const {return itsBeamList;};
+        /// @brief Gather channels from different ranks onto a single,
+        /// nominated rank, combining the lists of channel information
+        /// @details Each rank (other than the nominated one) sends the
+        /// channel and beam information to the nominated rank. The
+        /// beamlists are aggregated on that rank ready for writing.
+    void gather(askapparallel::AskapParallel &comms, int rankToGather, bool includeMaster);
+
 
         /// @brief Return the beam information
-        std::vector< casa::Vector<casa::Quantum<double> > > &beamlist() {return itsBeamList;};
+        std::map<unsigned int, casa::Vector<casa::Quantum<double> > > beamlist() const {return itsBeamList;};
+
+        /// @brief Return the beam information
+        std::map<unsigned int, casa::Vector<casa::Quantum<double> > > &beamlist() {return itsBeamList;};
 
     protected:
         /// @brief The disk file to be read from / written to
         std::string itsFilename;
 
-        /// @brief The list of beam information. Each element of the outer
-        /// vector is a 3-point casa::Vector containing the major axis,
-        /// minor axis and position angle of a beam.
-        std::vector< casa::Vector<casa::Quantum<double> > > itsBeamList;
+        /// @brief The list of beam information. Each element of the map is a 3-point casa::Vector containing the major axis,
+        /// minor axis and position angle of a beam, referenced by the channel number.
+        std::map<unsigned int, casa::Vector<casa::Quantum<double> > > itsBeamList;
 
 };
 

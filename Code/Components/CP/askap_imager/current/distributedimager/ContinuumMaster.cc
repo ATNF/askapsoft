@@ -242,8 +242,6 @@ void ContinuumMaster::run(void)
 
     }
 
-    logBeamInfo();
-
 }
 
 // Utility function to get dataset names from parset.
@@ -289,25 +287,3 @@ std::vector<int> ContinuumMaster::getBeams()
     return bs;
 }
 
-void ContinuumMaster::logBeamInfo()
-{
-
-    if (itsParset.getBool("restore", false)){
-        askap::accessors::BeamLogger beamlog(itsParset.makeSubset("restore."));
-        if (beamlog.filename() != "") {
-            ASKAPCHECK(itsBeamList.begin()->first == 0, "Beam list doesn't start at channel 0");
-            ASKAPCHECK((itsBeamList.size() == (itsBeamList.rbegin()->first + 1)),
-                       "Beam list doesn't finish at channel " << itsBeamList.size() - 1);
-            std::vector<casa::Vector<casa::Quantum<double> > > beams;
-            std::map<unsigned int, casa::Vector<casa::Quantum<double> > >::iterator beam;
-            for (beam = itsBeamList.begin(); beam != itsBeamList.end(); beam++) {
-                beams.push_back(beam->second);
-            }
-            beamlog.beamlist() = beams;
-            ASKAPLOG_DEBUG_STR(logger, "Writing list of individual channel beams to beam log "
-                              << beamlog.filename());
-            beamlog.write();
-        }
-    }
-
-}
