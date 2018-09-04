@@ -49,6 +49,7 @@ if __name__ == '__main__':
 #    parser.add_argument("-c","--cube", dest="cube", type="string", default="", help="Input spectral cube or image [default: %(default)s]")
     parser.add_argument("-c","--cube", dest="cube")
 #                            help="Input spectral cube or image")
+    parser.add_argument("-n" "--nocalc", dest="nocalc", action="store_true")
 
     args = parser.parse_args()
 
@@ -59,7 +60,9 @@ if __name__ == '__main__':
     # Define the output filenames, based on the cube name.
     # cubeTag is just the filename, without any extension (like .fits)
     # or leading path
-    cubeTag = os.path.basename(os.path.splitext(args.cube)[0])
+    cubeNoFITS = args.cube
+    if cubeNoFITS[-5:]=='.fits': cubeNoFITS = cubeNoFITS[:-5]
+    cubeTag = os.path.basename(cubeNoFITS)
     cubeDir = os.path.dirname(args.cube)
     if cubeDir=='': cubeDir='.'
     catalogue='%s/cubeStats-%s.txt'%(cubeDir,cubeTag)
@@ -85,7 +88,7 @@ if __name__ == '__main__':
     spatSize = cs.findSpatialSize(coords)
     freq = cs.getFreqAxis(cube)/1.e6
 
-    stats = cs.statsCollection(specSize,comm)
+    stats = cs.statsCollection(freq,comm)
     
     for i in range(specSize):
 
@@ -144,6 +147,7 @@ if __name__ == '__main__':
         plt.xlabel('Frequency [MHz]')
         plt.ylabel('Flux value [%s]'%unit)
         plt.legend(loc='lower right')
-        
+
+        fig.suptitle(args.cube)
         fig.savefig(graph)
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 #
-# beamwiseCubeStats.py
+# beamwisePSFstats.py
 #
-# A python script to consolidate the individual beam cube-stats plots into one.
+# A python script to plot the individual beam cubes' PSF data
 #
 # @copyright (c) 2018 CSIRO
 # Australia Telescope National Facility (ATNF)
@@ -35,7 +35,6 @@ import casacore.images.image as im
 import numpy as np
 import os
 import pylab as plt
-from matplotlib.ticker import MultipleLocator
 from argparse import ArgumentParser
 
 import cubestatsHelpers as cs
@@ -46,11 +45,11 @@ def getGoodCells(arr):
     med=np.median(arr)
     q75,q25=np.percentile(arr,[75,25])
     iqr=q75-q25
-    issmall=(abs(arr)<1.e5)
+    issmall=(abs(arr)<1000.)
     isgood=(abs(arr-med) < 5.*iqr)
     return isgood*issmall
 
-class BeamStats:
+class PSFStats:
     def __init__(self, catalogue,size):
         self.cat=catalogue
         self.specSize = size
@@ -58,58 +57,57 @@ class BeamStats:
     def read(self):
         self.catGood = os.access(self.cat,os.F_OK)
         if self.catGood:
-            self.maxval=np.zeros(self.specSize,dtype='f')
-            self.minval=np.zeros(self.specSize,dtype='f')
-            self.rms=np.zeros(self.specSize,dtype='f')
-            self.madfm=np.zeros(self.specSize,dtype='f')
+            self.bmaj=np.zeros(self.specSize,dtype='f')
+            self.bmin=np.zeros(self.specSize,dtype='f')
+            self.bpa=np.zeros(self.specSize,dtype='f')
             fin=open(self.cat,'r')
             for line in fin:
                 if line[0] != '#':
                     cols=line.split()
                     chan=int(line.split()[0])
-                    self.maxval[chan] = float(line.split()[7])
-                    self.minval[chan] = float(line.split()[6])
-                    self.rms[chan] = float(line.split()[3])
-                    self.madfm[chan] = float(line.split()[5])
+                    self.bmaj[chan] = float(line.split()[1])
+                    self.bmin[chan] = float(line.split()[2])
+                    self.bpa[chan] = float(line.split()[3])
 
-    def noiseMinMax(self):
+    def sizeMinMax(self):
         ymin,ymax=0.,1.
         if self.catGood:
-            ymax = self.rms[getGoodCells(self.rms)].max()
-            ymin = self.rms[getGoodCells(self.rms)].min()
-            ymax = max(ymax,self.madfm[getGoodCells(self.madfm)].max())
-            ymin = min(ymin,self.madfm[getGoodCells(self.madfm)].max())
+#            ymax = self.bmaj[getGoodCells(self.bmaj)].max()
+#            ymin = self.bmaj[getGoodCells(self.bmaj)].min()
+#            ymax = max(ymax,self.bmin[getGoodCells(self.bmin)].max())
+#            ymin = min(ymin,self.bmin[getGoodCells(self.bmin)].max())
+            ymax = self.bmaj.max()
+            ymin = self.bmin.min()
             width = ymax-ymin
             ymax = ymax + 0.1*width
             ymin = ymin - 0.1*width
         return ymin,ymax
 
-    def minMax(self):
+    def paMinMax(self):
         ymin,ymax=0.,1.
         if self.catGood:
-            ymax = self.maxval[getGoodCells(self.maxval)].max()
-            ymin = self.minval[getGoodCells(self.minval)].min()
+            ymax = self.bpa[getGoodCells(self.bpa)].max()
+            ymin = self.bpa[getGoodCells(self.bpa)].min()
             width = ymax-ymin
             ymax = ymax + 0.1*width
             ymin = ymin - 0.1*width
         return ymin,ymax
 
-    def plotNoise(self,ax,freq):
+    def plotSize(self,ax,freq):
         if self.catGood:
-            ax.plot(freq,self.rms,label='RMS')
-            ax.plot(freq,self.madfm,label='scaled MADFM')
+            ax.plot(freq,self.bmaj,label='BMAJ')
+            ax.plot(freq,self.bmin,label='BMIN')
     
-    def plotMinMax(self,ax,freq):
+    def plotPA(self,ax,freq):
         if self.catGood:
-            ax.plot(freq,self.minval,label='Min')
-            ax.plot(freq,self.maxval,label='Max')
+            ax.plot(freq,np.unwrap(self.bpa),label='BPA',color='C2')
 
 
 #########################
 
 if __name__ == '__main__':
 
-    parser = ArgumentParser(description="A python program to plot the statistics of all individual beam spectral cubes")
+    parser = ArgumentParser(description="A python program to plot the PSF properties of all individual beam spectral cubes")
 #    parser.add_argument("-c","--cube", dest="cube", type="string", default="", help="Input spectral cube or image [default: %(default)s]")
     parser.add_argument("-c","--cubeReference", dest="cube")
 #                            help="The beam 0 cube name")
@@ -132,7 +130,7 @@ if __name__ == '__main__':
     cubeTagNoBeam = cubeTag.replace('.beam00','')
     cubeDir = os.path.dirname(cubeNoFITS)
     if cubeDir=='': cubeDir='.'
-    catalogue='%s/cubeStats-%s.txt'%(cubeDir,cubeTag)
+    catalogue='%s/beamlog.%s.txt'%(cubeDir,cubeTag)
 
     cube=im(args.cube)
     fluxunit=cube.unit()
@@ -142,55 +140,41 @@ if __name__ == '__main__':
     specSize = cs.findSpectralSize(cube.shape(),coords)
     freq = cs.getFreqAxis(cube)/1.e6
 
-    beams=[]
-    beams.append(BeamStats(catalogue,specSize))
-    beams[0].read()
-    noiseYmin,noiseYmax = beams[0].noiseMinMax()
-    fullYmin,fullYmax = beams[0].minMax()
+    PAs=[]
+    PAs.append(PSFStats(catalogue,specSize))
+    PAs[0].read()
+    sizeYmin,sizeYmax = PAs[0].sizeMinMax()
+    paYmin,paYmax = PAs[0].paMinMax()
     for i in range(1,36):
         beamcat = catalogue.replace('beam00','beam%02d'%i)
-        beams.append(BeamStats(beamcat,specSize))
-        beams[i].read()
-        if beams[i].catGood:
-            ymin,ymax=beams[i].noiseMinMax()
-            if noiseYmin>ymin: noiseYmin=ymin
-            if noiseYmax<ymax: noiseYmax=ymax
-            ymin,ymax=beams[i].minMax()
-            if fullYmin>ymin: fullYmin=ymin
-            if fullYmax<ymax: fullYmax=ymax
+        PAs.append(PSFStats(beamcat,specSize))
+        PAs[i].read()
+        if PAs[i].catGood:
+            ymin,ymax=PAs[i].sizeMinMax()
+            if sizeYmin>ymin: sizeYmin=ymin
+            if sizeYmax<ymax: sizeYmax=ymax
+            ymin,ymax=PAs[i].paMinMax()
+            if paYmin>ymin: paYmin=ymin
+            if paYmax<ymax: paYmax=ymax
 
-    noiseYmin = np.floor(noiseYmin)
-    noiseYmax = np.ceil(noiseYmax)
 
-    fig, axs = plt.subplots(6,6, sharex=True, sharey=True, figsize = (12,6))
+    fig, axs = plt.subplots(9,4, sharex=True, sharey=True, figsize = (9,12))
     fig.subplots_adjust(bottom=0.1, top=0.9, hspace=0.005, wspace=0.1)
     fig.text(0.5,0.001, 'Frequency [MHz]', ha='center')
-    fig.text(0.01,0.5, 'Noise level [%s]'%fluxunit, va='center', rotation='vertical')
-    fig.text(0.40,0.93,'RMS',color='C0', ha='center')
-    fig.text(0.60,0.93,'scaled MADFM',color='C1', ha='center')
+    fig.text(0.01,0.5, 'PSF major & minor axis [arcsec]', ha='center', rotation='vertical')
+    fig.text(0.99,0.5, 'PSF position angle [deg]', ha='center', rotation='vertical')
+    fig.text(0.20,0.95,'BMAJ (left axis)',color='C0')
+    fig.text(0.45,0.95,'BMIN (left axis)',color='C1')
+    fig.text(0.70,0.95,'BPA (right axis)',color='C2')
     axs = axs.ravel()
     for i in range(36):
-        beams[i].plotNoise(axs[i],freq)
-        axs[i].set_ylim(noiseYmin,noiseYmax)
-        axs[i].text(freq[specSize/20],noiseYmin+0.9*(noiseYmax-noiseYmin),'Beam %02d'%i,ha='left',va='center',fontsize='x-small')
-        axs[i].yaxis.set_minor_locator(MultipleLocator(5))
-#        axs[i].tick_params(axis='y',which='minor', left='on')
-    plt.tight_layout(rect=[0.02,0.,1.,0.95])
-    plt.suptitle(cubeTagNoBeam)
-    plt.savefig('beamNoise_%s.png'%cubeTagNoBeam)
-    
-    fig, axs = plt.subplots(6,6, sharex=True, sharey=True, figsize = (12,6))
-    fig.subplots_adjust(bottom=0.2, top=0.8, hspace=0.005, wspace=0.1)
-    fig.text(0.5,0.001, 'Frequency [MHz]', ha='center')
-    fig.text(0.01,0.5, 'Min or Max flux level [%s]'%fluxunit, va='center', rotation='vertical')
-    fig.text(0.40,0.93,'Min flux',color='C0', ha='center')
-    fig.text(0.60,0.93,'Max flux',color='C1', ha='center')
-    axs = axs.ravel()
-    for i in range(36):
-        beams[i].plotMinMax(axs[i],freq)
-        axs[i].set_ylim(fullYmin,fullYmax)
-        axs[i].text(freq[specSize/20],fullYmin+0.8*(fullYmax-fullYmin),'Beam %02d'%i,ha='left', va='center',fontsize='x-small')
-    plt.tight_layout(rect=[0.02,0.,1.,0.95])
-    plt.suptitle(cubeTagNoBeam)
-    plt.savefig('beamMinMax%s.png'%cubeTagNoBeam)
+        PAs[i].plotSize(axs[i],freq)
+        axs[i].set_ylim(sizeYmin,sizeYmax)
+        axs[i].text(freq[specSize/20],sizeYmin+0.9*(sizeYmax-sizeYmin),'Beam %02d'%i,horizontalalignment='left',fontsize='x-small')
+        ax2=axs[i].twinx()
+        PAs[i].plotPA(ax2,freq)
+        ax2.set_ylim(-180.,180.)
+    plt.tight_layout(rect=[0.,0.,1.,0.95])
+    plt.suptitle(cubeTagNoBeam,y=0.98)
+    plt.savefig('beamPSF_%s.png'%cubeTagNoBeam)
     

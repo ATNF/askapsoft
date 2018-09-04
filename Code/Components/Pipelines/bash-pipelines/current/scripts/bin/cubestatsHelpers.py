@@ -78,11 +78,14 @@ class stat:
         comm.Gather(self.stat,self.fullStat)
         if self.rank == 0:
             self.finalStat = np.zeros(self.size)
-            for i in range(self.size): self.finalStat[i] = self.fullStat[:,i].sum()
+            for i in range(self.size):
+                self.finalStat[i] = self.fullStat[:,i].sum()
 
 
 class statsCollection:
-    def __init__(self,size,comm):
+    def __init__(self,freq,comm):
+        self.freq = freq
+        size = freq.size()
         self.rms = stat(size,comm)
         self.mean = stat(size,comm)
         self.median = stat(size,comm)
@@ -114,3 +117,23 @@ class statsCollection:
     def getMaxval(self): return self.maxval.finalStat
     def getMinval(self): return self.minval.finalStat
 
+    def scale(scale):
+        self.rms.finalStat = self.rms.finalStat * scale
+        self.mean.finalStat = self.mean.finalStat * scale
+        self.median.finalStat = self.median.finalStat * scale
+        self.madfm.finalStat = self.madfm.finalStat * scale
+        self.maxval.finalStat = self.maxval.finalStat * scale
+        self.minval.finalStat = self.minval.finalStat * scale
+        
+    def write(catalogue):
+        if self.rank == 0:
+            fout=open(catalogue,'w')
+            fout.write('#%7s %15s %10s %10s %10s %10s %10s %10s\n'%('Channel','Frequency','Mean','RMS','Median','MADFM','Min','Max'))
+            fout.write('#%7s %15s %10s %10s %10s %10s %10s %10s\n'%(' ','MHz',unit,unit,unit,unit,unit,unit))
+            for i in range(specSize):
+                fout.write('%8d %15.6f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n'%(i, freq[i], mean[i], rms[i], median[i], madfm[i], minval[i], maxval[i]))
+            fout.close()
+
+    def read(catalogue):
+        if self.rank == 0:
+            
