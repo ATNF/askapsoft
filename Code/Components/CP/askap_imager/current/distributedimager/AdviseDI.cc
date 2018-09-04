@@ -74,7 +74,7 @@ namespace askap {
 namespace synthesis {
 
 float frequency_tolerance = 0.0;
-    
+
 bool compare_tol (const casa::MFrequency& X, const casa::MFrequency& Y) {
 
     if (abs(X.getValue() - Y.getValue()) <= frequency_tolerance) {
@@ -147,7 +147,7 @@ void AdviseDI::prepare() {
     const int nwriters = itsParset.getInt32("nwriters", 1);
     ASKAPLOG_DEBUG_STR(logger,"nwriters " << nwriters);
     frequency_tolerance = itsParset.getDouble("channeltolerance",0.0);
-    
+
     ASKAPCHECK(nwriters > 0 ,"Number of writers must be greater than zero");
 
     /// Get the channel range
@@ -568,6 +568,38 @@ int AdviseDI::match(int ms_number, casa::MVFrequency testFreq) {
 void AdviseDI::addMissingParameters() {
     this->addMissingParameters(this->itsParset);
 }
+void AdviseDI::updateDirectionFromWorkUnit(LOFAR::ParameterSet& parset, askap::cp::ContinuumWorkUnit& wu) {
+
+  string wu_dataset = wu.get_dataset();
+  std::vector<std::string> ms = getDatasets();
+  const vector<string> imageNames = parset.getStringVector("Images.Names", false);
+  ASKAPLOG_DEBUG_STR(logger,"Image names " << imageNames);
+  
+  for (unsigned int n = 0; n < ms.size(); ++n) {
+
+    if (wu_dataset.compare(ms[n]) == 0) {
+      // MATCH
+      string param = "Images.direction";
+      std::ostringstream pstr;
+      // Only J2000 is implemented at the moment.
+      pstr<<"["<<printLon(itsTangent[n])<<", "<<printLat(itsTangent[n])<<", J2000]";
+      ASKAPLOG_INFO_STR(logger, "  updating parameter " << param << ": " << pstr.str().c_str());
+      parset.replace(param, pstr.str().c_str());
+
+      for (size_t img = 0; img < imageNames.size(); ++img) {
+        param ="Images."+imageNames[img]+".direction";
+
+        std::ostringstream pstr;
+        // Only J2000 is implemented at the moment.
+        pstr<<"["<<printLon(itsTangent[n])<<", "<<printLat(itsTangent[n])<<", J2000]";
+        ASKAPLOG_INFO_STR(logger, "  updating parameter " << param << ": " << pstr.str().c_str());
+        parset.replace(param, pstr.str().c_str());
+
+      }
+    }
+  }
+}
+
 void AdviseDI::addMissingParameters(LOFAR::ParameterSet& parset)
 {
 

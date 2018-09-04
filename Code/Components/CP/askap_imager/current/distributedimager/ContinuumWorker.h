@@ -82,7 +82,7 @@ class ContinuumWorker
         void deleteWorkUnitFromCache(ContinuumWorkUnit& wu, LOFAR::ParameterSet& unitParset);
         // clear the current cached files
         void clearWorkUnitCache();
-        
+
         // Vector of the stored parsets of the work allocations
         vector<LOFAR::ParameterSet> itsParsets;
 
@@ -98,7 +98,7 @@ class ContinuumWorker
 
         // Setup the image specified in itsParset and add it to the Params instance.
         void setupImage(const askap::scimath::Params::ShPtr& params,
-                    double channelFrequency);
+                    double channelFrequency, bool shapeOveride = false);
 
         void buildSpectralCube();
 
@@ -140,6 +140,9 @@ class ContinuumWorker
         boost::shared_ptr<CubeBuilder> itsRestoredCube;
 
         void handleImageParams(askap::scimath::Params::ShPtr params, unsigned int chan);
+
+        void copyModel(askap::scimath::Params::ShPtr SourceParams, askap::scimath::Params::ShPtr SinkParams);
+
         void recordBeam(const askap::scimath::Axes &axes, const unsigned int globalChannel);
         void storeBeam(const unsigned int cubeChannel);
 

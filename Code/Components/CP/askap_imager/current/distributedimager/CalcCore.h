@@ -77,7 +77,12 @@ namespace cp {
 
         void doCalc();
 
+        void init();
+
         void reset();
+
+        void zero();
+
 
         void check();
 
@@ -107,7 +112,7 @@ namespace cp {
 
         // Pointer to the gridder
         askap::synthesis::IVisGridder::ShPtr itsGridder_p;
-        
+
         // Its channel in the dataset
         int itsChannel;
 

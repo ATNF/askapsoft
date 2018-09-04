@@ -3,9 +3,9 @@
 /// @details There are two kinds of normal equations currently supported. The
 /// first one is a generic case, where the full normal matrix is retained. It
 /// is used for calibration. The second one is intended for imaging, where we
-/// can't afford to keep the whole normal matrix. In the latter approach, the 
-/// matrix is approximated by a sum of diagonal and shift invariant matrices. 
-/// This class represents the approximated case, and is used with imaging 
+/// can't afford to keep the whole normal matrix. In the latter approach, the
+/// matrix is approximated by a sum of diagonal and shift invariant matrices.
+/// This class represents the approximated case, and is used with imaging
 /// algorithms.
 ///
 /// @copyright (c) 2007 CSIRO
@@ -77,7 +77,7 @@ namespace askap
 
 
     ImagingNormalEquations::ImagingNormalEquations() {};
-    
+
     ImagingNormalEquations::ImagingNormalEquations(const Params& ip)
     {
       vector<string> names=ip.freeNames();
@@ -108,9 +108,9 @@ namespace askap
       deepCopyOfSTDMap(src.itsNormalMatrixSlice, itsNormalMatrixSlice);
       deepCopyOfSTDMap(src.itsNormalMatrixDiagonal, itsNormalMatrixDiagonal);
       deepCopyOfSTDMap(src.itsPreconditionerSlice, itsPreconditionerSlice);
-      deepCopyOfSTDMap(src.itsDataVector, itsDataVector);      
+      deepCopyOfSTDMap(src.itsDataVector, itsDataVector);
     }
-    
+
     /// @brief assignment operator
     /// @details Data members of this class are non-trivial types including
     /// std containers of casa containers. The letter are copied by reference by default. We,
@@ -126,12 +126,30 @@ namespace askap
         deepCopyOfSTDMap(src.itsNormalMatrixSlice, itsNormalMatrixSlice);
         deepCopyOfSTDMap(src.itsNormalMatrixDiagonal, itsNormalMatrixDiagonal);
         deepCopyOfSTDMap(src.itsPreconditionerSlice, itsPreconditionerSlice);
-        deepCopyOfSTDMap(src.itsDataVector, itsDataVector);      
+        deepCopyOfSTDMap(src.itsDataVector, itsDataVector);
       }
       return *this;
     }
-    
+    /// @brief zero all the data elements but keep thier size and coordinate systems
+    /// @details I have found I need a utility function that allows me to zero the contents
+    /// of the ImagingNormalEquations but to keep the meta information for the params
+    /// @param[in] ip the params
+    /// @return void
 
+    void ImagingNormalEquations::zero(const Params& ip) {
+
+
+        vector<string> names=ip.freeNames();
+        vector<string>::iterator iterRow;
+        vector<string>::iterator iterCol;
+        for (iterRow=names.begin();iterRow!=names.end();++iterRow)
+        {
+          std::fill(itsDataVector[*iterRow].begin(),itsDataVector[*iterRow].end(),0); //data
+          // std::fill(itsNormalMatrixSlice[*iterRow].begin(),itsNormalMatrixSlice[*iterRow].end(),0); //PSF?
+          std::fill(itsNormalMatrixDiagonal[*iterRow].begin(),itsNormalMatrixDiagonal[*iterRow].end(),0); // weights
+          std::fill(itsPreconditionerSlice[*iterRow].begin(),itsPreconditionerSlice[*iterRow].end(),0); // preconditioner
+        }
+    }
 
     ImagingNormalEquations::~ImagingNormalEquations()
     {
@@ -141,70 +159,74 @@ namespace askap
     /// @brief Merge these normal equations with another
     /// @details Combining two normal equations depends on the actual class type
     /// (different work is required for a full matrix and for an approximation).
-    /// This method must be overriden in the derived classes for correct 
-    /// implementation. 
+    /// This method must be overriden in the derived classes for correct
+    /// implementation.
     /// This means that we just add
     /// @param[in] src an object to get the normal equations from
     void ImagingNormalEquations::merge(const INormalEquations& src)
     {
       ASKAPTRACE("ImagingNormalEquations::merge");
+      std::cout << "In merge" << std::endl;
+
       try {
-        const ImagingNormalEquations &other = 
-                           dynamic_cast<const ImagingNormalEquations&>(src); 
- 
+        const ImagingNormalEquations &other =
+                           dynamic_cast<const ImagingNormalEquations&>(src);
+
         // list of parameters covered by input normal equations
         const std::vector<std::string> otherParams = other.unknowns();
         if (!otherParams.size()) {
           // do nothing, src is empty
           return;
         }
- 
+
         // initialise an image accumulator
         imagemath::LinmosAccumulator<double> accumulator;
- 
+
         vector<string> names = unknowns();
- 
+
         if (!names.size()) {
           // this object is empty, just do an assignment
+          std::cout << "In merge - this object is empty just assign" << std::endl;
           operator=(other);
           return;
         }
- 
+
         // concatenate unique parameter names
         vector<string>::const_iterator iterCol = otherParams.begin();
         for (; iterCol != otherParams.end(); ++iterCol) {
           if (std::find(names.begin(),names.end(),*iterCol) == names.end()) {
             names.push_back(*iterCol);
           }
-        }      
- 
+        }
+
         // step through parameter names and add/merge new ones
         for (iterCol = names.begin(); iterCol != names.end(); ++iterCol)
         {
- 
+
           // check dataVector
           if (other.itsDataVector.find(*iterCol) == other.itsDataVector.end()) {
             // no new data for this parameter
             continue;
           }
- 
+
           // record how data are updated
           enum updateType_t{ overwrite, add, linmos };
           int updateType;
- 
+
           // check coordinate systems and record how data are updated
 
-          ASKAPDEBUGASSERT(other.itsDataVector.find(*iterCol) != other.itsDataVector.end()); 
- 
+          ASKAPDEBUGASSERT(other.itsDataVector.find(*iterCol) != other.itsDataVector.end());
+
           const casa::Vector<double> &newDataVec = other.itsDataVector.find(*iterCol)->second;
           const casa::CoordinateSystem &newCoordSys = other.itsCoordSys.find(*iterCol)->second;
           const casa::IPosition &newShape = other.itsShape.find(*iterCol)->second;
- 
+
           if(itsDataVector[*iterCol].size()==0)
           {
             // no old data for this parameter
             itsDataVector[*iterCol].assign(newDataVec);
             updateType = overwrite;
+            std::cout << "In merge - no data to merge" << std::endl;
           }
           else if(accumulator.coordinatesAreEqual(itsCoordSys[*iterCol],newCoordSys,
                                                   itsShape[*iterCol],newShape))
@@ -212,6 +234,9 @@ namespace askap
             // new and old data can be added directly for this parameter
             itsDataVector[*iterCol] += newDataVec;
             updateType = add;
+            std::cout << "In merge - data to merge but coordinates match" << std::endl;
+
+
           }
           else
           {
@@ -220,28 +245,31 @@ namespace askap
               // no coordinate information, so just use the new data
               itsDataVector[*iterCol].assign(newDataVec);
               updateType = overwrite;
+              std::cout << "In merge - data to merge - no coordinate info" << std::endl;
             } else if (itsCoordSys[*iterCol].nCoordinates() != newCoordSys.nCoordinates()) {
               // different dimensions, so just use the new data
               itsDataVector[*iterCol].assign(newDataVec);
               updateType = overwrite;
+              std::cout << "In merge - data to merge - dimension mismatch" << std::endl;
             } else {
               // regrid then add (using weights)
               linmosMerge(other, *iterCol);
+              std::cout << "In merge - data to merge - linmos merge" << std::endl;
               updateType = linmos;
             }
           }
-              
+
           // update shape and reference.
           if (updateType == overwrite)
           {
             itsShape[*iterCol].resize(0);
             ASKAPDEBUGASSERT(other.itsShape.find(*iterCol) != other.itsShape.end());
             itsShape[*iterCol] = other.itsShape.find(*iterCol)->second;
-            
+
             itsReference[*iterCol].resize(0);
             ASKAPDEBUGASSERT(other.itsReference.find(*iterCol) != other.itsReference.end());
             itsReference[*iterCol] = other.itsReference.find(*iterCol)->second;
-            
+
             ASKAPDEBUGASSERT(other.itsCoordSys.find(*iterCol) != other.itsCoordSys.end());
             // leave "keep" and "replace" axis vectors empty, so they are all removed.
             Vector<Int> worldAxes;
@@ -249,7 +277,7 @@ namespace askap
             CoordinateUtil::removeAxes(itsCoordSys[*iterCol], worldRep, worldAxes, False);
             itsCoordSys[*iterCol] = other.itsCoordSys.find(*iterCol)->second;
           }
- 
+
           // linmos uses itsNormalMatrixDiagonal to store weights. Otherwise, leave this as it was.
           if (updateType != linmos)
           {
@@ -283,7 +311,7 @@ namespace askap
             else
             {
               itsNormalMatrixDiagonal[*iterCol] += other.itsNormalMatrixDiagonal.find(*iterCol)->second;
-            }       
+            }
             // check PreconditionerSlice
             ASKAPDEBUGASSERT(other.itsPreconditionerSlice.find(*iterCol) != other.itsPreconditionerSlice.end());
             if(itsPreconditionerSlice[*iterCol].shape()==0)
@@ -299,8 +327,8 @@ namespace askap
             {
               itsPreconditionerSlice[*iterCol] += other.itsPreconditionerSlice.find(*iterCol)->second;
             }
-          }     
-        }     
+          }
+        }
       }
       catch (const std::bad_cast &bc) {
         ASKAPTHROW(AskapError, "An attempt to merge NormalEquations with an "
@@ -312,7 +340,7 @@ namespace askap
     /// @brief Regrid and add new parameter
     /// @details Regrid new image parameter, which is assume to be and image,
     /// onto the current image grid, which is assumed to be of an appropriate
-    /// extent. 
+    /// extent.
     /// @param[in] other normal equations
     /// @param[in] name of parameter under consideration
     void ImagingNormalEquations::linmosMerge(const ImagingNormalEquations &other, const string col)
@@ -323,9 +351,9 @@ namespace askap
 
       // initialise an image accumulator
       imagemath::LinmosAccumulator<double> accumulator;
-      accumulator.weightType(FROM_BP_MODEL);
-      accumulator.weightState(INHERENT);
- 
+      accumulator.weightType(FROM_WEIGHT_IMAGES);
+      accumulator.weightState(CORRECTED);
+
       // these inputs should be set up to take the full mosaic.
       accumulator.setOutputParameters(itsShape[col], itsCoordSys[col]);
 
@@ -345,7 +373,7 @@ namespace askap
       }
       accumulator.initialiseOutputBuffers();
       accumulator.initialiseInputBuffers();
- 
+
       // loop over non-direction axes (e.g. spectral and/or polarisation)
       IPosition curpos(accumulator.inShape());
       for (uInt dim=0; dim<curpos.nelements(); ++dim) {
@@ -361,15 +389,21 @@ namespace askap
         // update the accululation arrays for this plane
         accumulator.accumulatePlane(outPix, outWgtPix, outSenPix, curpos);
       }
+      std::cout << "Deweighting accumulated images" << std::endl;
+      scimath::MultiDimArrayPlaneIter deweightIter(accumulator.outShape());
+      for (; deweightIter.hasMore(); deweightIter.next()) {
+        curpos = deweightIter.position();
+        accumulator.deweightPlane(outPix, outWgtPix, outSenPix, curpos);
+      }
 
     }
 
     // normalMatrixDiagonal
     const casa::Vector<double>& ImagingNormalEquations::normalMatrixDiagonal(const std::string &par) const
     {
-      std::map<string, casa::Vector<double> >::const_iterator cIt = 
+      std::map<string, casa::Vector<double> >::const_iterator cIt =
                                         itsNormalMatrixDiagonal.find(par);
-      ASKAPASSERT(cIt != itsNormalMatrixDiagonal.end());                                  
+      ASKAPASSERT(cIt != itsNormalMatrixDiagonal.end());
       return cIt->second;
     }
 
@@ -381,9 +415,9 @@ namespace askap
     // normalMatrixSlice
     const casa::Vector<double>& ImagingNormalEquations::normalMatrixSlice(const std::string &par) const
     {
-      std::map<string, casa::Vector<double> >::const_iterator cIt = 
+      std::map<string, casa::Vector<double> >::const_iterator cIt =
                                         itsNormalMatrixSlice.find(par);
-      ASKAPASSERT(cIt != itsNormalMatrixSlice.end());                                  
+      ASKAPASSERT(cIt != itsNormalMatrixSlice.end());
       return cIt->second;
     }
 
@@ -395,9 +429,9 @@ namespace askap
     // preconditionerSlice
     const casa::Vector<double>& ImagingNormalEquations::preconditionerSlice(const std::string &par) const
     {
-      std::map<string, casa::Vector<double> >::const_iterator cIt = 
+      std::map<string, casa::Vector<double> >::const_iterator cIt =
                                         itsPreconditionerSlice.find(par);
-      ASKAPASSERT(cIt != itsPreconditionerSlice.end());                                  
+      ASKAPASSERT(cIt != itsPreconditionerSlice.end());
       return cIt->second;
     }
 
@@ -405,39 +439,39 @@ namespace askap
     {
       return itsPreconditionerSlice;
     }
- 
+
 /// @brief normal equations for given parameters
-/// @details In the current framework, parameters are essentially 
+/// @details In the current framework, parameters are essentially
 /// vectors, not scalars. Each element of such vector is treated
-/// independently (but only vector as a whole can be fixed). As a 
+/// independently (but only vector as a whole can be fixed). As a
 /// result any element of the normal matrix is another matrix for
 /// all non-scalar parameters. For scalar parameters each such
 /// matrix has a shape of [1,1].
 /// @param[in] par1 the name of the first parameter
 /// @param[in] par2 the name of the second parameter
 /// @return one element of the sparse normal matrix (a dense matrix)
-const casa::Matrix<double>& ImagingNormalEquations::normalMatrix(const std::string &par1, 
+const casa::Matrix<double>& ImagingNormalEquations::normalMatrix(const std::string &par1,
                         const std::string &par2) const
 {
-   ASKAPTHROW(AskapError, 
+   ASKAPTHROW(AskapError,
                "ImagingNormalEquations::normalMatrix has not yet been implemented, attempted access to elements par1="<<
                par1<<" and par2="<<par2);
 }
 
 /// @brief data vector for a given parameter
-/// @details In the current framework, parameters are essentially 
+/// @details In the current framework, parameters are essentially
 /// vectors, not scalars. Each element of such vector is treated
-/// independently (but only vector as a whole can be fixed). As a 
+/// independently (but only vector as a whole can be fixed). As a
 /// result any element of the normal matrix as well as an element of the
-/// data vector are, in general, matrices, not scalar. For the scalar 
+/// data vector are, in general, matrices, not scalar. For the scalar
 /// parameter each element of data vector is a vector of unit length.
 /// @param[in] par the name of the parameter of interest
 /// @return one element of the sparse data vector (a dense vector)
 const casa::Vector<double>& ImagingNormalEquations::dataVector(const std::string &par) const
 {
-   std::map<string, casa::Vector<double> >::const_iterator cIt = 
+   std::map<string, casa::Vector<double> >::const_iterator cIt =
                                      itsDataVector.find(par);
-   ASKAPASSERT(cIt != itsDataVector.end());                                  
+   ASKAPASSERT(cIt != itsDataVector.end());
    return cIt->second;
 }
 
@@ -528,22 +562,22 @@ const std::map<std::string, casa::Vector<double> >& ImagingNormalEquations::data
       {
         itsNormalMatrixDiagonal[name]+=normalmatrixdiagonal;
       }
-      if(normalmatrixslice.shape()!=itsNormalMatrixSlice[name].shape()) 
-      { 
-        itsNormalMatrixSlice[name]=normalmatrixslice; 
-      } 
-      else 
-      { 
-        itsNormalMatrixSlice[name]+=normalmatrixslice; 
+      if(normalmatrixslice.shape()!=itsNormalMatrixSlice[name].shape())
+      {
+        itsNormalMatrixSlice[name]=normalmatrixslice;
       }
-      if(preconditionerslice.shape()!=itsPreconditionerSlice[name].shape()) 
-      { 
+      else
+      {
+        itsNormalMatrixSlice[name]+=normalmatrixslice;
+      }
+      if(preconditionerslice.shape()!=itsPreconditionerSlice[name].shape())
+      {
         ASKAPDEBUGASSERT(itsPreconditionerSlice[name].size() == 0);
-        itsPreconditionerSlice[name]=preconditionerslice; 
-      } 
-      else 
-      { 
-        itsPreconditionerSlice[name]+=preconditionerslice; 
+        itsPreconditionerSlice[name]=preconditionerslice;
+      }
+      else
+      {
+        itsPreconditionerSlice[name]+=preconditionerslice;
       }
       itsShape[name].resize(0);
       itsShape[name]=shape;
@@ -554,8 +588,8 @@ const std::map<std::string, casa::Vector<double> >& ImagingNormalEquations::data
           itsCoordSys[name]=coordSys;
       }
     }
-    
-    /// @brief Store slice of the normal matrix for a given parameter. 
+
+    /// @brief Store slice of the normal matrix for a given parameter.
     ///
     /// This means
     /// that the cross terms between parameters are excluded and only
@@ -622,29 +656,29 @@ const std::map<std::string, casa::Vector<double> >& ImagingNormalEquations::data
     {
       os << itsNormalMatrixSlice << itsNormalMatrixDiagonal
          << itsPreconditionerSlice << itsShape
-         << itsReference << itsCoordSys << itsDataVector; 
+         << itsReference << itsCoordSys << itsDataVector;
     }
-    
+
     /// @brief read the object from a blob stream
     /// @param[in] is the input stream
-    /// @note Not sure whether the parameter should be made const or not 
-    void ImagingNormalEquations::readFromBlob(LOFAR::BlobIStream& is) 
+    /// @note Not sure whether the parameter should be made const or not
+    void ImagingNormalEquations::readFromBlob(LOFAR::BlobIStream& is)
     {
       is >> itsNormalMatrixSlice >> itsNormalMatrixDiagonal
          >> itsPreconditionerSlice >> itsShape
          >> itsReference >> itsCoordSys >> itsDataVector;
     }
-    
+
     /// @brief obtain all parameters dealt with by these normal equations
-    /// @details Normal equations provide constraints for a number of 
+    /// @details Normal equations provide constraints for a number of
     /// parameters (i.e. unknowns of these equations). This method returns
     /// a vector with the string names of all parameters mentioned in the
     /// normal equations represented by the given object.
     /// @return a vector listing the names of all parameters (unknowns of these equations)
-    /// @note if ASKAP_DEBUG is set some extra checks on consistency of these 
+    /// @note if ASKAP_DEBUG is set some extra checks on consistency of these
     /// equations are done
     std::vector<std::string> ImagingNormalEquations::unknowns() const {
-      std::vector<std::string> result; 
+      std::vector<std::string> result;
       result.reserve(itsNormalMatrixSlice.size());
       for (std::map<std::string, casa::Vector<double> >::const_iterator ci = itsNormalMatrixSlice.begin();
            ci!=itsNormalMatrixSlice.end(); ++ci) {
@@ -659,11 +693,11 @@ const std::map<std::string, casa::Vector<double> >& ImagingNormalEquations::data
            ASKAPCHECK(itsReference.find(ci->first) != itsReference.end(),
                       "Parameter "<<ci->first<<" is present in the matrix slice but is missing in the reference map");
            ASKAPCHECK(itsDataVector.find(ci->first) != itsDataVector.end(),
-                      "Parameter "<<ci->first<<" is present in the matrix slice but is missing in the data vector");                      
-#endif // #ifdef ASKAP_DEBUG  
+                      "Parameter "<<ci->first<<" is present in the matrix slice but is missing in the data vector");
+#endif // #ifdef ASKAP_DEBUG
       }
       return result;
     } // unknowns method
-    
+
   } // namespace scimath
 } // namespace askap

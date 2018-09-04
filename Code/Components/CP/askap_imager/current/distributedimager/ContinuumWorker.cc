@@ -396,9 +396,11 @@ void ContinuumWorker::processWorkUnit(ContinuumWorkUnit& wu)
     itsAdvisor->addMissingParameters(unitParset);
 
     ASKAPLOG_DEBUG_STR(logger, "Storing workUnit");
-    workUnits.push_back(wu);
+    workUnits.insert(workUnits.begin(),wu); //
+    //workUnits.push_back(wu);
     ASKAPLOG_DEBUG_STR(logger, "Storing parset");
-    itsParsets.push_back(unitParset);
+    itsParsets.insert(itsParsets.begin(),unitParset);
+    // itsParsets.push_back(unitParset);
     ASKAPLOG_DEBUG_STR(logger, "Finished processWorkUnit");
     ASKAPLOG_DEBUG_STR(logger, "Parset Reports (leaving processWorkUnit): " << (itsParset.getStringVector("dataset", true)));
 
@@ -426,14 +428,15 @@ void ContinuumWorker::buildSpectralCube()
     // const int nchanpercore = itsParsets[0].getInt32("nchanpercore", 1);
     /// the base channel of this allocation. we know this as the channel allocations
     /// are sorted
-    const int nwriters = itsParsets[0].getInt32("nwriters", 1);
-    ASKAPCHECK(nwriters > 0, "Number of writers must be greater than 0");
+    const int nwriters = itsParset.getInt32("nwriters",1);
+    ASKAPCHECK(nwriters>0,"Number of writers must be greater than 0");
 
     // int nWorkers = itsComms.nProcs() -1;
     // int nGroups = itsComms.nGroups();
     // int nChanTotal = nWorkers * nchanpercore / nGroups;
 
 
+    const bool updateDir = itsParset.getBool("updatedirection",false);
 
     // Define reference channel for giving restoring beam
     std::string reference = itsParset.getString("restore.beamReference", "mid");
@@ -493,20 +496,20 @@ void ContinuumWorker::buildSpectralCube()
                            << " width: " << freqinc.getValue("MHz") << " (" << workUnits[0].get_channelWidth() << ")");
 
 
-        if (itsComms.isCubeCreator()) {
-            itsImageCube.reset(new CubeBuilder(itsParsets[0], this->nchanCube, f0, freqinc, img_name));
-            itsPSFCube.reset(new CubeBuilder(itsParsets[0], this->nchanCube, f0, freqinc, psf_name));
-            itsResidualCube.reset(new CubeBuilder(itsParsets[0], this->nchanCube, f0, freqinc, residual_name));
-            itsWeightsCube.reset(new CubeBuilder(itsParsets[0], this->nchanCube, f0, freqinc, weights_name));
+        if ( itsComms.isCubeCreator() ) {
+            itsImageCube.reset(new CubeBuilder(itsParset, this->nchanCube, f0, freqinc,img_name));
+            itsPSFCube.reset(new CubeBuilder(itsParset, this->nchanCube, f0, freqinc, psf_name));
+            itsResidualCube.reset(new CubeBuilder(itsParset, this->nchanCube, f0, freqinc, residual_name));
+            itsWeightsCube.reset(new CubeBuilder(itsParset, this->nchanCube, f0, freqinc, weights_name));
         }
 
 
 
         if (!itsComms.isCubeCreator()) {
-            itsImageCube.reset(new CubeBuilder(itsParsets[0], img_name));
-            itsPSFCube.reset(new CubeBuilder(itsParsets[0],  psf_name));
-            itsResidualCube.reset(new CubeBuilder(itsParsets[0],  residual_name));
-            itsWeightsCube.reset(new CubeBuilder(itsParsets[0], weights_name));
+            itsImageCube.reset(new CubeBuilder(itsParset, img_name));
+            itsPSFCube.reset(new CubeBuilder(itsParset,  psf_name));
+            itsResidualCube.reset(new CubeBuilder(itsParset,  residual_name));
+            itsWeightsCube.reset(new CubeBuilder(itsParset, weights_name));
         }
 
         if (itsParset.getBool("restore", false)) {
@@ -525,16 +528,16 @@ void ContinuumWorker::buildSpectralCube()
             // Only create these if we are restoring, as that is when they get made
             if (itsComms.isCubeCreator()) {
                 if (itsDoingPreconditioning) {
-                    itsPSFimageCube.reset(new CubeBuilder(itsParsets[0], this->nchanCube, f0, freqinc, psf_image_name));
+                    itsPSFimageCube.reset(new CubeBuilder(itsParset, this->nchanCube, f0, freqinc, psf_image_name));
                 }
-                itsRestoredCube.reset(new CubeBuilder(itsParsets[0], this->nchanCube, f0, freqinc, restored_image_name));
+                itsRestoredCube.reset(new CubeBuilder(itsParset, this->nchanCube, f0, freqinc, restored_image_name));
             }
 
             if (!itsComms.isCubeCreator()) {
                 if (itsDoingPreconditioning) {
-                    itsPSFimageCube.reset(new CubeBuilder(itsParsets[0],  psf_image_name));
+                    itsPSFimageCube.reset(new CubeBuilder(itsParset,  psf_image_name));
                 }
-                itsRestoredCube.reset(new CubeBuilder(itsParsets[0], restored_image_name));
+                itsRestoredCube.reset(new CubeBuilder(itsParset, restored_image_name));
             }
         }
     }
@@ -545,16 +548,16 @@ void ContinuumWorker::buildSpectralCube()
     /// What are the plans for the deconvolution?
     ASKAPLOG_DEBUG_STR(logger, "Ascertaining Cleaning Plan");
     const bool writeAtMajorCycle = itsParsets[0].getBool("Images.writeAtMajorCycle", false);
-    const int nCycles = itsParsets[0].getInt32("ncycles", 0);
-    std::string majorcycle = itsParsets[0].getString("threshold.majorcycle", "-1Jy");
+    const int nCycles = itsParset.getInt32("ncycles", 0);
+    std::string majorcycle = itsParset.getString("threshold.majorcycle", "-1Jy");
     const double targetPeakResidual = SynthesisParamsHelper::convertQuantity(majorcycle, "Jy");
 
-    const int uvwMachineCacheSize = itsParsets[0].getInt32("nUVWMachines", 1);
+    const int uvwMachineCacheSize = itsParset.getInt32("nUVWMachines", 1);
     ASKAPCHECK(uvwMachineCacheSize > 0 ,
                "Cache size is supposed to be a positive number, you have "
                << uvwMachineCacheSize);
 
-    const double uvwMachineCacheTolerance = SynthesisParamsHelper::convertQuantity(itsParsets[0].getString("uvwMachineDirTolerance", "1e-6rad"), "rad");
+    const double uvwMachineCacheTolerance = SynthesisParamsHelper::convertQuantity(itsParset.getString("uvwMachineDirTolerance", "1e-6rad"), "rad");
 
     ASKAPLOG_DEBUG_STR(logger,
                        "UVWMachine cache will store " << uvwMachineCacheSize << " machines");
@@ -580,9 +583,13 @@ void ContinuumWorker::buildSpectralCube()
 
             ASKAPLOG_INFO_STR(logger, "Starting to process workunit " << workUnitCount << " of " << workUnits.size());
 
-            int initialChannelWorkUnit = workUnitCount + 1;
+            int initialChannelWorkUnit = workUnitCount;
 
-            double frequency = workUnits[workUnitCount].get_channelFrequency();
+            if (!updateDir)
+              workUnitCount = workUnitCount+1;
+
+
+            double frequency=workUnits[workUnitCount].get_channelFrequency();
             const string colName = itsParsets[workUnitCount].getString("datacolumn", "DATA");
 
 
@@ -610,13 +617,28 @@ void ContinuumWorker::buildSpectralCube()
 
             TableDataSource ds(ms, TableDataSource::DEFAULT, colName);
 
+
             /// Need to set up the rootImager here
 
+            /// itsAdvisor->updateDirectionFromWorkUnit(itsParsets[workUnitCount],workUnits[workUnitCount]);
 
             CalcCore rootImager(itsParsets[workUnitCount], itsComms, ds, localChannel);
             /// set up the image for this channel
-            setupImage(rootImager.params(), frequency);
+            /// this will actually build a full image for the first - it is not actually used tho.
+            ///
+            setupImage(rootImager.params(), frequency,false);
 
+
+            try {
+
+                rootImager.calcNE();
+                if (updateDir == true)
+                  rootImager.zero();
+            }
+            catch (const askap::AskapError& e) {
+                ASKAPLOG_WARN_STR(logger,"Askap error in worker calcNE - rootImager failed");
+                throw;
+            }
 
             /// need to put in the major and minor cycle loops
             /// If we are doing more than one major cycle I need to reset
@@ -627,15 +649,8 @@ void ContinuumWorker::buildSpectralCube()
 
                 int tempWorkUnitCount = initialChannelWorkUnit; // clearer if it were called nextWorkUnit
 
-                /// But first lets test to see how we are doing.
-                /// calcNE for the rootImager
-                try {
-                    rootImager.calcNE();
-                } catch (const askap::AskapError& e) {
-                    ASKAPLOG_WARN_STR(logger, "Askap error in calcNE");
-                    throw;
-                }
-                // is the next work unit the same frequency or a different one
+
+                // now we are going to actually image this channel
                 while (tempWorkUnitCount < workUnits.size() && frequency == workUnits[tempWorkUnitCount].get_channelFrequency()) {
 
                     /// need a working imager to allow a merge over epochs for this channel
@@ -657,20 +672,50 @@ void ContinuumWorker::buildSpectralCube()
                     myDs.configureUVWMachineCache(uvwMachineCacheSize, uvwMachineCacheTolerance);
                     try {
 
-                        CalcCore workingImager(itsParsets[tempWorkUnitCount], itsComms, myDs, rootImager.gridder(), localChannel);
 
-                        /// this loop does the calcNE and the merge of the residual images
+                        itsAdvisor->updateDirectionFromWorkUnit(itsParsets[tempWorkUnitCount],workUnits[tempWorkUnitCount]);
+                        // CalcCore  workingImager(itsParsets[tempWorkUnitCount],itsComms,myDs,rootImager.gridder(),localChannel);
 
-                        workingImager.replaceModel(rootImager.params());
+                        CalcCore  workingImager(itsParsets[tempWorkUnitCount],itsComms,myDs,localChannel);
+                        ///this loop does the calcNE and the merge of the residual images
+
+
+                        bool useSubSizedImages = false;
+
+                        if (updateDir) {
+
+                          useSubSizedImages = true;
+
+                          setupImage(workingImager.params(), frequency, useSubSizedImages);
+
+                          if (majorCycleNumber > 0) {
+                            copyModel(rootImager.params(),workingImager.params());
+                          }
+
+                        }
+                        else {
+                          workingImager.replaceModel(rootImager.params());
+                        }
+                        // grid and image
                         try {
                             workingImager.calcNE();
-                        } catch (const askap::AskapError& e) {
-                            ASKAPLOG_WARN_STR(logger, "Askap error in calcNE");
+
+                        }
+                        catch (const askap::AskapError& e) {
+                            ASKAPLOG_WARN_STR(logger,"Askap error in worker calcNE");
                             throw;
                         }
+
+                        // merge into root image if required.
+                        // this is required if there is more than one workunit per channel
+                        // either in time or by beam.
+
+                        ASKAPLOG_INFO_STR(logger,"About to merge into rootImager");
                         rootImager.getNE()->merge(*workingImager.getNE());
-                    } catch (const askap::AskapError& e) {
-                        ASKAPLOG_WARN_STR(logger, "Askap error in imaging - skipping accumulation: " << e.what());
+                        ASKAPLOG_INFO_STR(logger,"Merged");
+                    }
+                    catch( const askap::AskapError& e) {
+                        ASKAPLOG_WARN_STR(logger, "Askap error in imaging - skipping accumulation: carrying on - this will result in a blank channel" << e.what());
                         std::cerr << "Askap error in: " << e.what() << std::endl;
                     }
 
@@ -711,15 +756,27 @@ void ContinuumWorker::buildSpectralCube()
                     /// But we dont want to keep merging into the same NE
                     /// so lets reset
                     ASKAPLOG_DEBUG_STR(logger, "Reset normal equations");
-                    rootImager.getNE()->reset();
+                    if (updateDir) {
+                      rootImager.zero();
+                    }
+                    else {
+                      rootImager.getNE()->reset();
+                    }
                     // the model is now updated but the NE are empty ... - lets go again
+                    // well they are not completely empty - the PSF is still there but the weights and image are zero
+
+
+
                 }
                 if (writeAtMajorCycle) {
                     ASKAPLOG_WARN_STR(logger, "Write at major cycle not currently supported in this mode");
                 }
 
             }
-            ASKAPLOG_INFO_STR(logger, "Adding model.slice");
+            // At this point we have finished our last major cycle. We have the "best" model from the
+            // last minor cycle. Which should be in the archive - or full coordinate system
+            // the residual image should be merged into the archive coordinated as well.
+            ASKAPLOG_INFO_STR(logger,"Adding model.slice");
             ASKAPCHECK(rootImager.params()->has("image.slice"), "Params are missing image.slice parameter");
             rootImager.params()->add("model.slice", rootImager.params()->value("image.slice"));
             ASKAPCHECK(rootImager.params()->has("model.slice"), "Params are missing model.slice parameter");
@@ -906,6 +963,15 @@ void ContinuumWorker::buildSpectralCube()
     logBeamInfo();
 
 }
+
+void ContinuumWorker::copyModel(askap::scimath::Params::ShPtr SourceParams, askap::scimath::Params::ShPtr SinkParams) {
+    askap::scimath::Params& src = *SourceParams;
+    askap::scimath::Params& dest = *SinkParams;
+    // ASKAPLOG_WARN_STR(logger, "Names are " << src.names());
+
+    SynthesisParamsHelper::copyImageParameter(src, dest,"image.slice");
+
+}
 void ContinuumWorker::handleImageParams(askap::scimath::Params::ShPtr params,
                                         unsigned int chan)
 {
@@ -916,6 +982,9 @@ void ContinuumWorker::handleImageParams(askap::scimath::Params::ShPtr params,
     ASKAPCHECK(params->has("psf.slice"), "Params are missing psf parameter");
     ASKAPCHECK(params->has("residual.slice"), "Params are missing residual parameter");
     ASKAPCHECK(params->has("weights.slice"), "Params are missing weights parameter");
+
+
+
     if (itsParset.getBool("restore", false)) {
         ASKAPCHECK(params->has("image.slice"), "Params are missing image parameter");
         if (itsDoingPreconditioning) {
@@ -1042,7 +1111,7 @@ void ContinuumWorker::logBeamInfo()
             beamlog.gather(itsComms, creatorRank,false);
         }
         if (itsComms.isCubeCreator()) {
-            
+
             ASKAPCHECK(itsBeamList.begin()->first == 0, "Beam list doesn't start at channel 0");
             ASKAPCHECK((itsBeamList.size() == (itsBeamList.rbegin()->first + 1)),
                        "Beam list doesn't finish at channel " << itsBeamList.size() - 1);
@@ -1264,7 +1333,7 @@ void ContinuumWorker::processChannels()
 
 
 void ContinuumWorker::setupImage(const askap::scimath::Params::ShPtr& params,
-                                 double channelFrequency)
+                                    double channelFrequency, bool shapeOverride)
 {
     try {
         ASKAPLOG_DEBUG_STR(logger, "Setting up image");
@@ -1274,9 +1343,22 @@ void ContinuumWorker::setupImage(const askap::scimath::Params::ShPtr& params,
         const string name("image.slice");
         const vector<string> direction = parset.getStringVector("direction");
         const vector<string> cellsize = parset.getStringVector("cellsize");
-        const vector<int> shape = parset.getInt32Vector("shape");
+        vector<int> shape = parset.getInt32Vector("shape");
         //const vector<double> freq = parset.getDoubleVector("frequency");
         const int nchan = 1;
+
+        if (shapeOverride == true) {
+          string param = "subshape";
+          if (parset.isDefined(param)) {
+            ASKAPLOG_INFO_STR(logger,"Over-riding image shape from parset");
+            shape = parset.getInt32Vector("subshape");
+            ASKAPLOG_INFO_STR(logger,"Image shape now " << shape);
+          }
+          else {
+            ASKAPLOG_WARN_STR(logger,"Shape over-ride requested but no subshape parameter in parset");
+          }
+        }
+
 
         if (!parset.isDefined("polarisation")) {
             ASKAPLOG_DEBUG_STR(logger, "Polarisation frame is not defined, "

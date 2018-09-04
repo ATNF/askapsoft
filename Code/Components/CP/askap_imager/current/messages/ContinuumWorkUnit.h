@@ -37,6 +37,9 @@
 #include <Blob/BlobIStream.h>
 #include <askapparallel/AskapParallel.h>
 
+// casacore
+#include <casacore/casa/Quanta/MVDirection.h>
+
 namespace askap {
     namespace cp {
 
@@ -86,7 +89,7 @@ namespace askap {
                 double get_channelWidth(void) const;
                 unsigned int get_beam() const;
                 unsigned int get_writer() const;
-                
+
                 // Serializer functions
 
                 /// @brief write the object to a blob stream
@@ -121,6 +124,9 @@ namespace askap {
                 unsigned int itsBeam;
                 double itsChannelWidth;
                 int itsWriter;
+
+                casa::MVDirection itsDirection;
+
         };
 
     };

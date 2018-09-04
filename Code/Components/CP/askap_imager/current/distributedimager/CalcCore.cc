@@ -81,10 +81,10 @@ CalcCore::CalcCore(LOFAR::ParameterSet& parset,
     /// obtain the itsSolutionSource - but that is a provate member of
     /// the parent class.
     /// Not sure whether to use it directly or copy it.
-    const std::string solver_par = itsParset.getString("solver");
-    const std::string algorithm_par = itsParset.getString("solver.Clean.algorithm", "MultiScale");
-    itsSolver = ImageSolverFactory::make(itsParset);
-    itsGridder_p = VisGridderFactory::make(itsParset);
+    const std::string solver_par = parset.getString("solver");
+    const std::string algorithm_par = parset.getString("solver.Clean.algorithm", "MultiScale");
+    itsSolver = ImageSolverFactory::make(parset);
+    itsGridder_p = VisGridderFactory::make(parset); // this is private to an inherited class so have to make a new one
     itsRestore = itsParset.getBool("restore", false);
 }
 CalcCore::CalcCore(LOFAR::ParameterSet& parset,
@@ -93,10 +93,10 @@ CalcCore::CalcCore(LOFAR::ParameterSet& parset,
                        int localChannel)
     : ImagerParallel(comms,parset), itsParset(parset), itsComms(comms),itsData(ds),itsGridder_p(gdr), itsChannel(localChannel)
 {
-  const std::string solver_par = itsParset.getString("solver");
-  const std::string algorithm_par = itsParset.getString("solver.Clean.algorithm", "MultiScale");
-  itsSolver = ImageSolverFactory::make(itsParset);
-  itsRestore = itsParset.getBool("restore", false);
+  const std::string solver_par = parset.getString("solver");
+  const std::string algorithm_par = parset.getString("solver.Clean.algorithm", "MultiScale");
+  itsSolver = ImageSolverFactory::make(parset);
+  itsRestore = parset.getBool("restore", false);
 }
 
 CalcCore::~CalcCore()
@@ -119,7 +119,7 @@ void CalcCore::doCalc()
         IDataSelectorPtr sel = ds.createSelector();
 
         sel->chooseCrossCorrelations();
-        sel << parset();
+        sel << itsParset;
         sel->chooseChannels(1, itsChannel);
 
         IDataConverterPtr conv = ds.createConverter();
@@ -180,15 +180,8 @@ void CalcCore::calcNE()
 {
 
 
-    reset();
-    /// Now we need to recreate the normal equations
-    if (!itsNe)
-        itsNe=ImagingNormalEquations::ShPtr(new ImagingNormalEquations(*itsModel));
 
-    ASKAPCHECK(gridder(), "Gridder not defined");
-    ASKAPCHECK(itsModel, "Model not defined");
-    ASKAPCHECK(itsNe, "NormalEquations not defined");
-
+    init();
 
     doCalc();
 
@@ -196,10 +189,36 @@ void CalcCore::calcNE()
 
 
 }
+void CalcCore::zero() {
+
+  ImagingNormalEquations &zeroRef =
+  dynamic_cast<ImagingNormalEquations&>(*itsNe);
+
+  zeroRef.zero(*itsModel);
+}
+
+void CalcCore::init()
+{
+
+  reset();
+
+  if (!itsNe) {
+      ASKAPLOG_DEBUG_STR(logger,"Recreating NE from model");
+      itsNe=ImagingNormalEquations::ShPtr(new ImagingNormalEquations(*itsModel));
+      ASKAPLOG_DEBUG_STR(logger,"Done recreating model");
+  }
+  ASKAPCHECK(gridder(), "Gridder not defined");
+  ASKAPCHECK(itsModel, "Model not defined");
+  ASKAPCHECK(itsNe, "NormalEquations not defined");
+
+}
 
 void CalcCore::reset()
 {
+
+    ASKAPLOG_DEBUG_STR(logger,"Reset NE");
     itsNe->reset();
+    ASKAPLOG_DEBUG_STR(logger,"Reset NE - done");
 }
 
 void CalcCore::check()
@@ -236,7 +255,7 @@ void CalcCore::solveNE()
 
     // Extract the largest residual
     const std::vector<std::string> peakParams = itsModel->completions("peak_residual.",true);
-    
+
     double peak = peakParams.size() == 0 ? getPeakResidual() : -1.;
     for (std::vector<std::string>::const_iterator peakParIt = peakParams.begin();
             peakParIt != peakParams.end(); ++peakParIt) {

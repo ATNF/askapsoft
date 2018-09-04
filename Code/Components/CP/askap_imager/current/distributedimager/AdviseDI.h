@@ -87,7 +87,7 @@ namespace askap {
             void addMissingParameters();
 
 
-
+            void updateDirectionFromWorkUnit(LOFAR::ParameterSet& parset, askap::cp::ContinuumWorkUnit& wu);
 
             /// @brief Access to the parset
             /// @details Returns the current parset after advice

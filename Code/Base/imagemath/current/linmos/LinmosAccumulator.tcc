@@ -1159,7 +1159,7 @@ namespace askap {
                         }
 
                         if (theWeight >= wgtCutoff) {
-                            outPix(fullpos) = outPix(fullpos) + itsOutBuffer.getAt(pos) * theWeight;
+                            outPix(fullpos) = outWgtPix(fullpos) * outPix(fullpos) + itsOutBuffer.getAt(pos) * theWeight;
                             outWgtPix(fullpos) = outWgtPix(fullpos) + theWeight;
                         }
                   }
@@ -1440,7 +1440,7 @@ namespace askap {
                         }
 
                         if (theWeight >=wgtCutoff) {
-                            outPix(fullpos)    = outPix(fullpos)    + inPix(fullpos) * theWeight;
+                            outPix(fullpos)    = outPix(fullpos)*outWgtPix(fullpos)    + inPix(fullpos) * theWeight;
                             outWgtPix(fullpos) = outWgtPix(fullpos) + theWeight ;
                         }
 
@@ -1663,6 +1663,7 @@ namespace askap {
         // Check that the input coordinate system is the same as the output
         template<typename T>
         bool LinmosAccumulator<T>::coordinatesAreEqual(void) {
+          
             return coordinatesAreEqual(itsInCoordSys, itsOutCoordSys,
                                        itsInShape, itsOutShape);
         }
@@ -1676,26 +1677,37 @@ namespace askap {
 
             // Set threshold for allowed small numerical differences
             double thresh = 1.0e-12;
-
             // Check that the shape is the same.
             if ( shape1 != shape2 ) {
-                //ASKAPLOG_INFO_STR(linmoslogger,
-                //    "Coordinates not equal: shape mismatch");
+                ASKAPLOG_INFO_STR(linmoslogger,
+                    "Coordinates not equal: shape mismatch");
                 return false;
             }
-
+            else {
+              ASKAPLOG_INFO_STR(linmoslogger,
+                 "Coordinates are equal: " << shape1 << " == " << shape2);
+            }
             // Check that the systems have consistent axes.
             if ( !coordinatesAreConsistent(coordSys1, coordSys2) ) {
+
                 return false;
             }
-
+            else {
+              ASKAPLOG_INFO_STR(linmoslogger,
+                 "Coordinates are consistent");
+            }
             // test that the axes are equal
+            // ASKAPLOG_INFO_STR(linmoslogger,
+            //  "nCoordinates: " << coordSys1.nCoordinates());
             for (casa::uInt dim=0; dim<coordSys1.nCoordinates(); ++dim) {
+                // ASKAPLOG_INFO_STR(linmoslogger,
+                //   "Reference pixels are : " << coordSys1.referencePixel()[dim] << " == " << coordSys2.referencePixel()[dim] );
+
                 if ( (coordSys1.referencePixel()[dim] != coordSys2.referencePixel()[dim]) ||
                      (fabs(coordSys1.referenceValue()[dim] - coordSys2.referenceValue()[dim]) > thresh) ||
                      (fabs(coordSys1.increment()[dim] - coordSys2.increment()[dim]) > thresh) ) {
-                    //ASKAPLOG_INFO_STR(linmoslogger,
-                    //    "Coordinates not equal: mismatch for dim " << dim);
+                      ASKAPLOG_INFO_STR(linmoslogger,
+                         "Coordinates not equal: mismatch for dim " << dim);
                     return false;
                 }
             }
