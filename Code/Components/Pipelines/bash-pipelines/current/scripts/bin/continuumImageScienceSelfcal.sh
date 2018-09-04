@@ -54,7 +54,7 @@ fi
 
 if [ "${DO_IT}" == "true" ] && [ "${DO_SELFCAL}" == "true" ]; then
 
-    CORES_PER_NODE_SELFCAL=20
+    CORES_PER_NODE_SELFCAL=${CPUS_PER_CORE_CONT_IMAGING}
     
     # How big is the selavy job for selfcal?
     NPROCS_SELAVY=$(echo "${SELFCAL_SELAVY_NSUBX}" "${SELFCAL_SELAVY_NSUBY}" | awk '{print $1*$2+1}')
