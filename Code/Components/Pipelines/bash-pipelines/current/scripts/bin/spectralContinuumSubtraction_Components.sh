@@ -96,6 +96,9 @@ sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 thisfile=$sbatchfile
 cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
+useContCube=${USE_CONTCUBE_FOR_SPECTRAL_INDEX}
+NUM_TAYLOR_TERMS=${NUM_TAYLOR_TERMS}
+
 log=${logs}/mslist_for_contsub_\${SLURM_JOB_ID}.log
 NCORES=1
 NPPN=1
