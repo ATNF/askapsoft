@@ -135,8 +135,12 @@ frame::
     Cimager.dataset = [epoch1.ms,epoch2.ms]
     Cimager.barycentre = true
 
+**Example 6:True per beam processing <WARNING still under test>**
 
-
+This imager can be instructed to process each measurement set independently and to merge the subimage into a larger image for the minor cycles. Note this is different to facetting - which processes the sub images entirely independently. This scheme grids and images the fields indvidually but cleans them jointlyly as in Cornwell 1989::
+ 
+    Cimager.updatedirection = true
+ 
 
 Configuration Parameters
 ------------------------

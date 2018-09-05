@@ -242,6 +242,8 @@ void ContinuumMaster::run(void)
 
     }
 
+
+
 }
 
 // Utility function to get dataset names from parset.
@@ -286,4 +288,3 @@ std::vector<int> ContinuumMaster::getBeams()
     }
     return bs;
 }
-

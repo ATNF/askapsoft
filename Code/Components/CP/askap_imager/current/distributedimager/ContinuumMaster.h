@@ -87,7 +87,7 @@ class ContinuumMaster {
 
         std::vector<int> getBeams(void);
 
-    
+
         /// Parameter set
         LOFAR::ParameterSet& itsParset;
 
@@ -105,6 +105,8 @@ class ContinuumMaster {
         boost::scoped_ptr<CubeBuilder> itsRestoredCube;
 
         std::map<unsigned int, casa::Vector<casa::Quantum<double> > > itsBeamList;
+
+      
 
 };
 

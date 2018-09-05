@@ -586,7 +586,7 @@ void ContinuumWorker::buildSpectralCube()
             int initialChannelWorkUnit = workUnitCount;
 
             if (!updateDir)
-              workUnitCount = workUnitCount+1;
+              initialChannelWorkUnit = workUnitCount+1;
 
 
             double frequency=workUnits[workUnitCount].get_channelFrequency();
@@ -620,7 +620,7 @@ void ContinuumWorker::buildSpectralCube()
 
             /// Need to set up the rootImager here
 
-            /// itsAdvisor->updateDirectionFromWorkUnit(itsParsets[workUnitCount],workUnits[workUnitCount]);
+            itsAdvisor->updateDirectionFromWorkUnit(itsParsets[workUnitCount],workUnits[workUnitCount]);
 
             CalcCore rootImager(itsParsets[workUnitCount], itsComms, ds, localChannel);
             /// set up the image for this channel
@@ -632,8 +632,10 @@ void ContinuumWorker::buildSpectralCube()
             try {
 
                 rootImager.calcNE();
-                if (updateDir == true)
+                if (updateDir == true) {
                   rootImager.zero();
+                }
+
             }
             catch (const askap::AskapError& e) {
                 ASKAPLOG_WARN_STR(logger,"Askap error in worker calcNE - rootImager failed");
@@ -672,9 +674,10 @@ void ContinuumWorker::buildSpectralCube()
                     myDs.configureUVWMachineCache(uvwMachineCacheSize, uvwMachineCacheTolerance);
                     try {
 
-
-                        itsAdvisor->updateDirectionFromWorkUnit(itsParsets[tempWorkUnitCount],workUnits[tempWorkUnitCount]);
+                        if (updateDir) {
+                          itsAdvisor->updateDirectionFromWorkUnit(itsParsets[tempWorkUnitCount],workUnits[tempWorkUnitCount]);
                         // CalcCore  workingImager(itsParsets[tempWorkUnitCount],itsComms,myDs,rootImager.gridder(),localChannel);
+                        }
 
                         CalcCore  workingImager(itsParsets[tempWorkUnitCount],itsComms,myDs,localChannel);
                         ///this loop does the calcNE and the merge of the residual images
@@ -721,6 +724,7 @@ void ContinuumWorker::buildSpectralCube()
 
                     tempWorkUnitCount++;
                 }
+
                 workUnitCount = tempWorkUnitCount; // this is to remember what finished on.
                 /// now we have a "full" set of NE we can SolveNE to update the model
                 try {
@@ -757,10 +761,27 @@ void ContinuumWorker::buildSpectralCube()
                     /// so lets reset
                     ASKAPLOG_DEBUG_STR(logger, "Reset normal equations");
                     if (updateDir) {
+                      // this implies all workunits are processed independently including the first one - so I can completely
+                      // empty the NE
+
+                      // Actually I've found that I cannot completely empty the NE. As I need the full size PSF and this is stored in the NE
+                      // So this method pretty much only zeros the weights and the datavector(image)
+                      
                       rootImager.zero();
                     }
                     else {
+                      // In this case the first workUnit is processed outside the workUnit loop.
+                      // So we need to calcNE again with the latest model before the major cycle starts.
+                      //
                       rootImager.getNE()->reset();
+                      try {
+                        rootImager.calcNE();
+
+                      }
+                      catch (const askap::AskapError& e) {
+                          ASKAPLOG_WARN_STR(logger, "Askap error in calcNE after majorcycle number ");
+
+                      }
                     }
                     // the model is now updated but the NE are empty ... - lets go again
                     // well they are not completely empty - the PSF is still there but the weights and image are zero
@@ -968,7 +989,7 @@ void ContinuumWorker::copyModel(askap::scimath::Params::ShPtr SourceParams, aska
     askap::scimath::Params& src = *SourceParams;
     askap::scimath::Params& dest = *SinkParams;
     // ASKAPLOG_WARN_STR(logger, "Names are " << src.names());
-
+    // before the restore the image is the model ....
     SynthesisParamsHelper::copyImageParameter(src, dest,"image.slice");
 
 }
