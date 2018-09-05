@@ -38,5 +38,7 @@
 
 . "${PIPELINEDIR}/makeThumbnails.sh"
 
+. "${PIPELINEDIR}/validationScience.sh"
+
 . "${PIPELINEDIR}/casda.sh"
 
