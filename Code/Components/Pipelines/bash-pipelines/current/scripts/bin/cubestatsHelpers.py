@@ -87,6 +87,7 @@ class statsCollection:
         self.freq = freq
         size = freq.size()
         self.rms = stat(size,comm)
+        self.std = stat(size,comm)
         self.mean = stat(size,comm)
         self.median = stat(size,comm)
         self.madfm = stat(size,comm)
@@ -95,6 +96,7 @@ class statsCollection:
 
     def assign(self, chan, stats):
         self.rms.assign(chan,stats,'rms')
+        self.std.assign(chan,std,'st')
         self.mean.assign(chan,stats,'mean')
         self.median.assign(chan,stats,'median')
         self.madfm.assign(chan,stats,'medabsdevmed')
@@ -104,6 +106,7 @@ class statsCollection:
     def gather(self, comm):
         # Gather everything to the master
         self.rms.gather(comm)
+        self.std.gather(comm)
         self.mean.gather(comm)
         self.median.gather(comm)
         self.madfm.gather(comm)
@@ -111,6 +114,7 @@ class statsCollection:
         self.minval.gather(comm)
 
     def getRMS(self): return self.rms.finalStat
+    def getStd(self): return self.rms.finalStat
     def getMean(self): return self.mean.finalStat
     def getMedian(self): return self.median.finalStat
     def getMadfm(self): return self.madfm.finalStat
@@ -119,6 +123,7 @@ class statsCollection:
 
     def scale(scale):
         self.rms.finalStat = self.rms.finalStat * scale
+        self.std.finalStat = self.std.finalStat * scale
         self.mean.finalStat = self.mean.finalStat * scale
         self.median.finalStat = self.median.finalStat * scale
         self.madfm.finalStat = self.madfm.finalStat * scale
@@ -128,12 +133,12 @@ class statsCollection:
     def write(catalogue):
         if self.rank == 0:
             fout=open(catalogue,'w')
-            fout.write('#%7s %15s %10s %10s %10s %10s %10s %10s\n'%('Channel','Frequency','Mean','RMS','Median','MADFM','Min','Max'))
+            fout.write('#%7s %15s %10s %10s %10s %10s %10s %10s\n'%('Channel','Frequency','Mean','Std','Median','MADFM','Min','Max'))
             fout.write('#%7s %15s %10s %10s %10s %10s %10s %10s\n'%(' ','MHz',unit,unit,unit,unit,unit,unit))
             for i in range(specSize):
-                fout.write('%8d %15.6f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n'%(i, freq[i], mean[i], rms[i], median[i], madfm[i], minval[i], maxval[i]))
+                fout.write('%8d %15.6f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n'%(i, freq[i], mean[i], std[i], median[i], madfm[i], minval[i], maxval[i]))
             fout.close()
 
-    def read(catalogue):
-        if self.rank == 0:
+#    def read(catalogue):
+#        if self.rank == 0:
             

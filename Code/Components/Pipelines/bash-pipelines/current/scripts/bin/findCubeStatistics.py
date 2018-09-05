@@ -105,6 +105,7 @@ if __name__ == '__main__':
     if rank == 0:
 
         rms=stats.getRMS()*scale
+        std=stats.getStd()*scale
         mean=stats.getMean()*scale
         median=stats.getMedian()*scale
         madfm=cs.madfmToSigma(stats.getMadfm()*scale)
@@ -112,10 +113,10 @@ if __name__ == '__main__':
         maxval=stats.getMaxval()*scale
         
         fout=open(catalogue,'w')
-        fout.write('#%7s %15s %10s %10s %10s %10s %10s %10s\n'%('Channel','Frequency','Mean','RMS','Median','MADFM','Min','Max'))
+        fout.write('#%7s %15s %10s %10s %10s %10s %10s %10s\n'%('Channel','Frequency','Mean','Std','Median','MADFM','Min','Max'))
         fout.write('#%7s %15s %10s %10s %10s %10s %10s %10s\n'%(' ','MHz',unit,unit,unit,unit,unit,unit))
         for i in range(specSize):
-            fout.write('%8d %15.6f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n'%(i, freq[i], mean[i], rms[i], median[i], madfm[i], minval[i], maxval[i]))
+            fout.write('%8d %15.6f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n'%(i, freq[i], mean[i], std[i], median[i], madfm[i], minval[i], maxval[i]))
         fout.close()
         
         fig=plt.figure(1,figsize=(8,8))
@@ -134,10 +135,10 @@ if __name__ == '__main__':
         plt.legend(loc='lower right')
 
         plt.subplot(212)
-        plt.plot(freq,rms,label='RMS')
+        plt.plot(freq,rms,label='Std. Dev')
         plt.plot(freq,madfm,label='scaled MADFM')
-        ymax = rms[abs(rms)<1.e5].max()
-        ymin = rms[abs(rms)<1.e5].min()
+        ymax = std[abs(std)<1.e5].max()
+        ymin = std[abs(std)<1.e5].min()
         ymax = np.max([ymax,madfm[abs(madfm)<1.e5].max()])
         ymin = np.min([ymin,madfm[abs(madfm)<1.e5].min()])
         width = ymax-ymin

@@ -158,8 +158,8 @@ if __name__ == '__main__':
             if paYmax<ymax: paYmax=ymax
 
 
-    fig, axs = plt.subplots(9,4, sharex=True, sharey=True, figsize = (9,12))
-    fig.subplots_adjust(bottom=0.1, top=0.9, hspace=0.005, wspace=0.1)
+    fig, axs = plt.subplots(6,6, sharex=True, sharey=True, figsize = (12,6))
+    fig.subplots_adjust(bottom=0.2, top=0.8, hspace=0.005, wspace=0.1)
     fig.text(0.5,0.001, 'Frequency [MHz]', ha='center')
     fig.text(0.01,0.5, 'PSF major & minor axis [arcsec]', ha='center', rotation='vertical')
     fig.text(0.99,0.5, 'PSF position angle [deg]', ha='center', rotation='vertical')
@@ -174,7 +174,7 @@ if __name__ == '__main__':
         ax2=axs[i].twinx()
         PAs[i].plotPA(ax2,freq)
         ax2.set_ylim(-180.,180.)
-    plt.tight_layout(rect=[0.,0.,1.,0.95])
+    plt.tight_layout(rect=[0.02,0.,1.,0.95])
     plt.suptitle(cubeTagNoBeam,y=0.98)
     plt.savefig('beamPSF_%s.png'%cubeTagNoBeam)
     

@@ -30,6 +30,7 @@
 #
 import matplotlib
 matplotlib.use('Agg')
+from matplotlib.ticker import AutoMinorLocator
 
 import casacore.images.image as im
 import numpy as np
@@ -60,7 +61,7 @@ class BeamStats:
         if self.catGood:
             self.maxval=np.zeros(self.specSize,dtype='f')
             self.minval=np.zeros(self.specSize,dtype='f')
-            self.rms=np.zeros(self.specSize,dtype='f')
+            self.std=np.zeros(self.specSize,dtype='f')
             self.madfm=np.zeros(self.specSize,dtype='f')
             fin=open(self.cat,'r')
             for line in fin:
@@ -69,14 +70,14 @@ class BeamStats:
                     chan=int(line.split()[0])
                     self.maxval[chan] = float(line.split()[7])
                     self.minval[chan] = float(line.split()[6])
-                    self.rms[chan] = float(line.split()[3])
+                    self.std[chan] = float(line.split()[3])
                     self.madfm[chan] = float(line.split()[5])
 
     def noiseMinMax(self):
         ymin,ymax=0.,1.
         if self.catGood:
-            ymax = self.rms[getGoodCells(self.rms)].max()
-            ymin = self.rms[getGoodCells(self.rms)].min()
+            ymax = self.std[getGoodCells(self.std)].max()
+            ymin = self.std[getGoodCells(self.std)].min()
             ymax = max(ymax,self.madfm[getGoodCells(self.madfm)].max())
             ymin = min(ymin,self.madfm[getGoodCells(self.madfm)].max())
             width = ymax-ymin
@@ -96,7 +97,7 @@ class BeamStats:
 
     def plotNoise(self,ax,freq):
         if self.catGood:
-            ax.plot(freq,self.rms,label='RMS')
+            ax.plot(freq,self.std,label='Std. Dev.')
             ax.plot(freq,self.madfm,label='scaled MADFM')
     
     def plotMinMax(self,ax,freq):
@@ -159,25 +160,25 @@ if __name__ == '__main__':
             if fullYmin>ymin: fullYmin=ymin
             if fullYmax<ymax: fullYmax=ymax
 
-    noiseYmin = np.floor(noiseYmin)
-    noiseYmax = np.ceil(noiseYmax)
+#    noiseYmin = np.floor(noiseYmin)
+#    noiseYmax = np.ceil(noiseYmax)
 
     fig, axs = plt.subplots(6,6, sharex=True, sharey=True, figsize = (12,6))
-    fig.subplots_adjust(bottom=0.1, top=0.9, hspace=0.005, wspace=0.1)
-    fig.text(0.5,0.001, 'Frequency [MHz]', ha='center')
+    fig.subplots_adjust(bottom=0.125, top=0.9, hspace=0.005, wspace=0.1)
+    fig.text(0.5,0.005, 'Frequency [MHz]', ha='center')
     fig.text(0.01,0.5, 'Noise level [%s]'%fluxunit, va='center', rotation='vertical')
-    fig.text(0.40,0.93,'RMS',color='C0', ha='center')
+    fig.text(0.40,0.93,'Std. Dev.',color='C0', ha='center')
     fig.text(0.60,0.93,'scaled MADFM',color='C1', ha='center')
     axs = axs.ravel()
     for i in range(36):
         beams[i].plotNoise(axs[i],freq)
         axs[i].set_ylim(noiseYmin,noiseYmax)
         axs[i].text(freq[specSize/20],noiseYmin+0.9*(noiseYmax-noiseYmin),'Beam %02d'%i,ha='left',va='center',fontsize='x-small')
-        axs[i].yaxis.set_minor_locator(MultipleLocator(5))
-#        axs[i].tick_params(axis='y',which='minor', left='on')
-    plt.tight_layout(rect=[0.02,0.,1.,0.95])
-    plt.suptitle(cubeTagNoBeam)
-    plt.savefig('beamNoise_%s.png'%cubeTagNoBeam)
+        axs[i].yaxis.set_major_locator(MultipleLocator(4))
+        axs[i].yaxis.set_minor_locator(AutoMinorLocator(2))
+    fig.tight_layout(rect=[0.02,0.,1.,0.95])
+    fig.suptitle(cubeTagNoBeam)
+    fig.savefig('beamNoise_%s.png'%cubeTagNoBeam)
     
     fig, axs = plt.subplots(6,6, sharex=True, sharey=True, figsize = (12,6))
     fig.subplots_adjust(bottom=0.2, top=0.8, hspace=0.005, wspace=0.1)
@@ -190,7 +191,7 @@ if __name__ == '__main__':
         beams[i].plotMinMax(axs[i],freq)
         axs[i].set_ylim(fullYmin,fullYmax)
         axs[i].text(freq[specSize/20],fullYmin+0.8*(fullYmax-fullYmin),'Beam %02d'%i,ha='left', va='center',fontsize='x-small')
-    plt.tight_layout(rect=[0.02,0.,1.,0.95])
-    plt.suptitle(cubeTagNoBeam)
-    plt.savefig('beamMinMax%s.png'%cubeTagNoBeam)
+    fig.tight_layout(rect=[0.02,0.,1.,0.95])
+    fig.suptitle(cubeTagNoBeam)
+    fig.savefig('beamMinMax%s.png'%cubeTagNoBeam)
     
