@@ -51,8 +51,8 @@ thisfile=$sbatchfile
 cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
 diagnostics=$diagnostics
-FIELD_LIST=${FIELD_LIST}
-POL_LIST=${POL_LIST}
+FIELD_LIST="${FIELD_LIST}"
+POL_LIST="${POL_LIST}"
 BEAM=00
 IMAGE_BASE_CONTCUBE=${IMAGE_BASE_CONTCUBE}
 IMAGE_BASE_SPECTRAL=${IMAGE_BASE_SPECTRAL}
@@ -68,9 +68,9 @@ for FIELD in \${FIELD_LIST}; do
 
     # diagnostics directory for individual beam data
     fieldDir=\${diagnostics}/cubestats-${FIELD}
-    mkdir -p $fieldDir
-    cp \${FIELD}/cubeStats*txt $fieldDir
-    cp \${FIELD}/beamlog* $fieldDir
+    mkdir -p \$fieldDir
+    cp \${FIELD}/cubeStats*txt \$fieldDir
+    cp \${FIELD}/beamlog* \$fieldDir
 
     # Cube stats and restoring beam for the spectral cubes
     imageCode=restored
@@ -86,6 +86,9 @@ for FIELD in \${FIELD_LIST}; do
 
     # Cube stats and restoring beam for the continuum cubes, iterating over polarisation
     for POLN in \${POL_LIST}; do
+
+        # make a lower-case version of the polarisation, for image name
+        pol=$(echo "$POLN" | tr '[:upper:]' '[:lower:]')
 
         imageCode=restored
         setImageProperties contcube
