@@ -57,6 +57,10 @@ if __name__ == '__main__':
         print("Spectral cube not given - you need to use the -c option")
         exit(0)
 
+    if not os.access(args.cube, os.F_OK):
+        print("Could not access cube %s. Exiting."%args.cube)
+        exit(1)
+
     # Define the output filenames, based on the cube name.
     # cubeTag is just the filename, without any extension (like .fits)
     # or leading path

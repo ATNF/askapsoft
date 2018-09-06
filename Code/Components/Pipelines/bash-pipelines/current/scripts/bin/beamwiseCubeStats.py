@@ -135,7 +135,18 @@ if __name__ == '__main__':
     if cubeDir=='': cubeDir='.'
     catalogue='%s/cubeStats-%s.txt'%(cubeDir,cubeTag)
 
-    cube=im(args.cube)
+    # Find the first good image - it may be we haven't made a beam00 image...
+    goodBeam=-1
+    for i in range(36):
+        name=args.cube.replace('beam00','beam%02d'%i)
+        if os.access(name,os.F_OK):
+            goodBeam=i
+            break
+    if goodBeam < 0:
+        print('No good image found with name like %s. Exiting.'%args.cube)
+        exit(1)
+        
+    cube=im(name)
     fluxunit=cube.unit()
     if fluxunit[:2]=='Jy':
         fluxunit='m'+fluxunit
