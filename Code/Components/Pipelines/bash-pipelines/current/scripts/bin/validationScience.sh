@@ -32,12 +32,12 @@ if [ "${DO_VALIDATION_SCIENCE}" == "true" ]; then
     cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
 ${SLURM_CONFIG}
-#SBATCH --time=${JOB_TIME_THUMBNAILS}
+#SBATCH --time=${JOB_TIME_VALIDATE}
 #SBATCH --ntasks=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --job-name=thumbnails
+#SBATCH --job-name=validateSci
 ${exportDirective}
-#SBATCH --output=$slurmOut/slurm-thumbnails-%j.out
+#SBATCH --output=$slurmOut/slurm-validationScience-%j.out
 
 ${askapsoftModuleCommands}
 

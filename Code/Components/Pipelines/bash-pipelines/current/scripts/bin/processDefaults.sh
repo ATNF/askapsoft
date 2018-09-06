@@ -489,6 +489,9 @@ srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} \"${PIPELINEDIR
     if [ "$JOB_TIME_THUMBNAILS" == "" ]; then
         JOB_TIME_THUMBNAILS=${JOB_TIME_DEFAULT}
     fi
+    if [ "$JOB_TIME_VALIDATE" == "" ]; then
+        JOB_TIME_VALIDATE=${JOB_TIME_DEFAULT}
+    fi
     if [ "$JOB_TIME_CASDA_UPLOAD" == "" ]; then
         JOB_TIME_CASDA_UPLOAD=${JOB_TIME_DEFAULT}
     fi
