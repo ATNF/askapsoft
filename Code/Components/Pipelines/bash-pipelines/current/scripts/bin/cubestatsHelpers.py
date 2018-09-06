@@ -96,7 +96,7 @@ class statsCollection:
 
     def assign(self, chan, stats):
         self.rms.assign(chan,stats,'rms')
-        self.std.assign(chan,std,'st')
+        self.std.assign(chan,stats,'sigma')
         self.mean.assign(chan,stats,'mean')
         self.median.assign(chan,stats,'median')
         self.madfm.assign(chan,stats,'medabsdevmed')

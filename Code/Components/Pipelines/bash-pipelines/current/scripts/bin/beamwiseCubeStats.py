@@ -30,7 +30,7 @@
 #
 import matplotlib
 matplotlib.use('Agg')
-from matplotlib.ticker import AutoMinorLocator
+from matplotlib.ticker import AutoMinorLocator,AutoLocator
 
 import casacore.images.image as im
 import numpy as np
@@ -155,24 +155,30 @@ if __name__ == '__main__':
     freq = cs.getFreqAxis(cube)/1.e6
 
     beams=[]
-    beams.append(BeamStats(catalogue,specSize))
-    beams[0].read()
-    noiseYmin,noiseYmax = beams[0].noiseMinMax()
-    fullYmin,fullYmax = beams[0].minMax()
-    for i in range(1,36):
+    noiseYmin = noiseYmax = None
+    fullYmin = fullYmax = None
+    for i in range(36):
         beamcat = catalogue.replace('beam00','beam%02d'%i)
         beams.append(BeamStats(beamcat,specSize))
         beams[i].read()
         if beams[i].catGood:
             ymin,ymax=beams[i].noiseMinMax()
-            if noiseYmin>ymin: noiseYmin=ymin
-            if noiseYmax<ymax: noiseYmax=ymax
+            if noiseYmin==None or noiseYmin>ymin: noiseYmin=ymin
+            if noiseYmax==None or noiseYmax<ymax: noiseYmax=ymax
             ymin,ymax=beams[i].minMax()
-            if fullYmin>ymin: fullYmin=ymin
-            if fullYmax<ymax: fullYmax=ymax
+            if fullYmin==None or fullYmin>ymin: fullYmin=ymin
+            if fullYmax==None or fullYmax<ymax: fullYmax=ymax
 
-#    noiseYmin = np.floor(noiseYmin)
-#    noiseYmax = np.ceil(noiseYmax)
+    if noiseYmin == None:
+        print('No valid cubeStats catalogues found matching pattern %s'%catalogue)
+        exit(1)
+                
+    width=noiseYmax-noiseYmin
+    noiseYmin -= 0.1*width
+    noiseYmax += 0.1*width
+    width=fullYmax-fullYmin
+    fullYmin -= 0.1*width
+    fullYmax += 0.1*width
 
     fig, axs = plt.subplots(6,6, sharex=True, sharey=True, figsize = (12,6))
     fig.subplots_adjust(bottom=0.125, top=0.9, hspace=0.005, wspace=0.1)
@@ -182,10 +188,11 @@ if __name__ == '__main__':
     fig.text(0.60,0.93,'scaled MADFM',color='C1', ha='center')
     axs = axs.ravel()
     for i in range(36):
-        beams[i].plotNoise(axs[i],freq)
+        if beams[i].catGood:
+            beams[i].plotNoise(axs[i],freq)
         axs[i].set_ylim(noiseYmin,noiseYmax)
         axs[i].text(freq[specSize/20],noiseYmin+0.9*(noiseYmax-noiseYmin),'Beam %02d'%i,ha='left',va='center',fontsize='x-small')
-        axs[i].yaxis.set_major_locator(MultipleLocator(4))
+        #axs[i].yaxis.set_major_locator(AutoLocator(4))
         axs[i].yaxis.set_minor_locator(AutoMinorLocator(2))
     fig.tight_layout(rect=[0.02,0.,1.,0.95])
     fig.suptitle(cubeTagNoBeam)
@@ -202,7 +209,8 @@ if __name__ == '__main__':
         beams[i].plotMinMax(axs[i],freq)
         axs[i].set_ylim(fullYmin,fullYmax)
         axs[i].text(freq[specSize/20],fullYmin+0.8*(fullYmax-fullYmin),'Beam %02d'%i,ha='left', va='center',fontsize='x-small')
+        axs[i].yaxis.set_minor_locator(AutoMinorLocator(2))
     fig.tight_layout(rect=[0.02,0.,1.,0.95])
     fig.suptitle(cubeTagNoBeam)
-    fig.savefig('beamMinMax%s.png'%cubeTagNoBeam)
+    fig.savefig('beamMinMax_%s.png'%cubeTagNoBeam)
     

@@ -152,21 +152,19 @@ if __name__ == '__main__':
     freq = cs.getFreqAxis(cube)/1.e6
 
     PAs=[]
-    PAs.append(PSFStats(catalogue,specSize))
-    PAs[0].read()
-    sizeYmin,sizeYmax = PAs[0].sizeMinMax()
-    paYmin,paYmax = PAs[0].paMinMax()
-    for i in range(1,36):
+    sizeYmin = sizeYmax = None
+    paYmin = paYmax = None
+    for i in range(36):
         beamcat = catalogue.replace('beam00','beam%02d'%i)
         PAs.append(PSFStats(beamcat,specSize))
         PAs[i].read()
         if PAs[i].catGood:
             ymin,ymax=PAs[i].sizeMinMax()
-            if sizeYmin>ymin: sizeYmin=ymin
-            if sizeYmax<ymax: sizeYmax=ymax
+            if sizeYmin==None or sizeYmin>ymin: sizeYmin=ymin
+            if sizeYmax==None or sizeYmax<ymax: sizeYmax=ymax
             ymin,ymax=PAs[i].paMinMax()
-            if paYmin>ymin: paYmin=ymin
-            if paYmax<ymax: paYmax=ymax
+            if paYmin==None or paYmin>ymin: paYmin=ymin
+            if paYmax==None or paYmax<ymax: paYmax=ymax
 
 
     fig, axs = plt.subplots(6,6, sharex=True, sharey=True, figsize = (12,6))
