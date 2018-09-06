@@ -85,7 +85,7 @@ class stat:
 class statsCollection:
     def __init__(self,freq,comm):
         self.freq = freq
-        size = freq.size()
+        size = freq.size
         self.rms = stat(size,comm)
         self.std = stat(size,comm)
         self.mean = stat(size,comm)
