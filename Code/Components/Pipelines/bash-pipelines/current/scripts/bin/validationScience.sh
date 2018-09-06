@@ -88,7 +88,7 @@ for FIELD in \${FIELD_LIST}; do
     for POLN in \${POL_LIST}; do
 
         # make a lower-case version of the polarisation, for image name
-        pol=$(echo "$POLN" | tr '[:upper:]' '[:lower:]')
+        pol=\$(echo "\$POLN" | tr '[:upper:]' '[:lower:]')
 
         imageCode=restored
         setImageProperties contcube
