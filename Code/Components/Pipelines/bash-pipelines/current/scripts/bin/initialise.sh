@@ -33,7 +33,7 @@
 # Define & create directories
 ${askapsoftModuleCommands}
 
-BASEDIR=$(pwd)
+BASEDIR=$(pwd -P)
 
 # Are we on a lustre filesystem?
 if [ "$(which lfs)" == "" ] || [ "$(lfs getstripe .)" == "" ]; then
