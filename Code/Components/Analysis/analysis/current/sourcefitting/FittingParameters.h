@@ -186,6 +186,7 @@ class FittingParameters {
         void setMaxIter(unsigned int i) {itsMaxIter = i;};
         void setNoiseLevel(float f) {itsNoiseLevel = f;};
         void setFlagFitThisParam(unsigned int i, bool b) {itsFlagFitThisParam[i] = b;};
+        void setApplyAcceptanceCriteria(bool b) {itsApplyAcceptanceCriteria = b;};
 
         /// For a given type of fit, set the flags for
         /// each parameter. The types that are possible are:
@@ -207,33 +208,34 @@ class FittingParameters {
         void setNegativeFluxPossible(bool b) {itsNegativeFluxPossible = b;};
         void setFitTypes(std::vector<std::string> types) {itsFitTypes = types;};
 
-        bool   doFit() {return itsFlagDoFit;};
-        unsigned int    maxNumGauss() {return itsMaxNumGauss;};
-        unsigned int    boxPadSize() {return itsBoxPadSize;};
-        unsigned int    noiseBoxSize() {return itsNoiseBoxSize;};
-        Double maxRMS() {return itsMaxRMS;};
-        float  chisqConfidence() {return itsChisqConfidence;};
-        float  maxReducedChisq() {return itsMaxReducedChisq;};
-        float  boxFlux() { return itsBoxFlux;};
-        bool   fitJustDetection() {return itsFlagFitJustDetection;};
-        float  peakFlux() {return itsSrcPeak;};
+        bool           doFit() {return itsFlagDoFit;};
+        unsigned int   maxNumGauss() {return itsMaxNumGauss;};
+        unsigned int   boxPadSize() {return itsBoxPadSize;};
+        unsigned int   noiseBoxSize() {return itsNoiseBoxSize;};
+        Double         maxRMS() {return itsMaxRMS;};
+        float          chisqConfidence() {return itsChisqConfidence;};
+        float          maxReducedChisq() {return itsMaxReducedChisq;};
+        float          boxFlux() { return itsBoxFlux;};
+        bool           fitJustDetection() {return itsFlagFitJustDetection;};
+        float          peakFlux() {return itsSrcPeak;};
         unsigned int   minFitSize() {return itsMinFitSize;};
-        unsigned int    numSubThresholds() {return itsNumSubThresholds;};
-        bool   flagLogarithmicIncrements() {return itsFlagLogarithmicIncrements;}
-        bool   useCurvature() {return itsFlagUseCurvature;}
-        float  sigmaCurv() {return itsSigmaCurv;};
-        std::string curvatureImage() {return itsCurvatureImage;};
-        float  beamSize() {return itsBeamSize;};
-        unsigned int    maxRetries() {return itsMaxRetries;};
-        Double criterium() {return itsCriterium;};
+        unsigned int   numSubThresholds() {return itsNumSubThresholds;};
+        bool           flagLogarithmicIncrements() {return itsFlagLogarithmicIncrements;}
+        bool           useCurvature() {return itsFlagUseCurvature;}
+        float          sigmaCurv() {return itsSigmaCurv;};
+        std::string    curvatureImage() {return itsCurvatureImage;};
+        float          beamSize() {return itsBeamSize;};
+        unsigned int   maxRetries() {return itsMaxRetries;};
+        Double         criterium() {return itsCriterium;};
         unsigned int   maxIter() {return itsMaxIter;};
-        bool   useNoise() {return itsUseNoise;};
-        float  noiseLevel() {return itsNoiseLevel;};
-        bool   stopAfterFirstGoodFit() {return itsStopAfterFirstGoodFit;};
-        bool   useGuessIfBad() {return itsUseGuessIfBad;};
-        bool   numGaussFromGuess() {return itsFlagNumGaussFromGuess;};
-        bool   flagFitThisParam(int i) {return itsFlagFitThisParam[i];};
-        bool   negativeFluxPossible() {return itsNegativeFluxPossible;};
+        bool           useNoise() {return itsUseNoise;};
+        float          noiseLevel() {return itsNoiseLevel;};
+        bool           stopAfterFirstGoodFit() {return itsStopAfterFirstGoodFit;};
+        bool           useGuessIfBad() {return itsUseGuessIfBad;};
+        bool           numGaussFromGuess() {return itsFlagNumGaussFromGuess;};
+        bool           flagFitThisParam(int i) {return itsFlagFitThisParam[i];};
+        bool           negativeFluxPossible() {return itsNegativeFluxPossible;};
+        bool           applyAcceptanceCriteria() {return itsApplyAcceptanceCriteria;};
 
         std::vector<std::string> fitTypes() {return itsFitTypes;};
         std::string fitType(unsigned int i) {return itsFitTypes[i];};
@@ -370,6 +372,9 @@ class FittingParameters {
         /// @brief If there is no good fit, should we use the guesses
         /// instead?
         bool itsUseGuessIfBad;
+
+        /// @brief Whether to apply the acceptance criteria
+        bool itsApplyAcceptanceCriteria;
 
         /// @brief The extent of the box surrounding the object used
         /// for the fitting @{

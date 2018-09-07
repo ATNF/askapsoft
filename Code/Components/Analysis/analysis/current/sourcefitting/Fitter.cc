@@ -375,7 +375,7 @@ bool Fitter::passIntFlux()
 
     for (unsigned int i = 0; i < itsNumGauss; i++) {
 
-        if (itsSolution(i, 2) > 0.){
+        if (itsSolution(i, 2) > 0.) {
             Gaussian2D<Double> component(itsSolution(i, 0), itsSolution(i, 1), itsSolution(i, 2),
                                          itsSolution(i, 3), itsSolution(i, 4), itsSolution(i, 5));
             intFlux += component.flux();
@@ -412,67 +412,84 @@ bool Fitter::passSeparation()
 
 bool Fitter::acceptableExceptChisq()
 {
-    bool passConv = this->passConverged();
-    bool passFlux = this->passComponentFlux();
-    bool passLoc = this->passLocation();
-    bool passSep = this->passSeparation();
-    bool passSize = this->passComponentSize();
-    bool passPeak = this->passPeakFlux();
-    bool passIntFlux = this->passIntFlux();
+    if (itsParams.applyAcceptanceCriteria()) {
 
-    return passConv && passFlux && passLoc && passSep &&
-        passSize && passPeak && passIntFlux;
+        bool passConv = this->passConverged();
+        bool passFlux = this->passComponentFlux();
+        bool passLoc = this->passLocation();
+        bool passSep = this->passSeparation();
+        bool passSize = this->passComponentSize();
+        bool passPeak = this->passPeakFlux();
+        bool passIntFlux = this->passIntFlux();
+
+        return passConv && passFlux && passLoc && passSep &&
+               passSize && passPeak && passIntFlux;
+
+    } else {
+
+        return true;
+
+    }
 }
 
 bool Fitter::acceptable()
 {
-    bool passConv = this->passConverged();
     bool passChisq = this->passChisq();
-    bool passFlux = this->passComponentFlux();
-    bool passLoc = this->passLocation();
-    bool passSep = this->passSeparation();
-    bool passSize = this->passComponentSize();
-    bool passPeak = this->passPeakFlux();
-    bool passIntFlux = this->passIntFlux();
 
-    std::stringstream msg;
-    if (!(passConv || passChisq || passFlux || passLoc ||
-            passSep || passSize || passPeak || passIntFlux)) {
-        msg << "Fit failed all criteria";
+    if (itsParams.applyAcceptanceCriteria()) {
+
+        bool passConv = this->passConverged();
+        bool passFlux = this->passComponentFlux();
+        bool passLoc = this->passLocation();
+        bool passSep = this->passSeparation();
+        bool passSize = this->passComponentSize();
+        bool passPeak = this->passPeakFlux();
+        bool passIntFlux = this->passIntFlux();
+
+        std::stringstream msg;
+        if (!(passConv || passChisq || passFlux || passLoc ||
+                passSep || passSize || passPeak || passIntFlux)) {
+            msg << "Fit failed all criteria";
+        } else {
+            msg << "Fit failed on criteria: ";
+            int ct = 0;
+            if (!passConv) {
+                msg << "Convergence "; ct++;
+            }
+            if (!passChisq) {
+                msg << (ct++ > 0 ? "| " : "") << "Chisq ";
+            }
+            if (!passFlux) {
+                msg << (ct++ > 0 ? "| " : "") << "Flux ";
+            }
+            if (!passLoc) {
+                msg << (ct++ > 0 ? "| " : "") << "Location ";
+            }
+            if (!passSep) {
+                msg << (ct++ > 0 ? "| " : "") << "Separation ";
+            }
+            if (!passSize) {
+                msg << (ct++ > 0 ? "| " : "") << "Size ";
+            }
+            if (!passPeak) {
+                msg << (ct++ > 0 ? "| " : "") << "Peak ";
+            }
+            if (!passIntFlux) {
+                msg << (ct++ > 0 ? "| " : "") << "Integ.Flux ";
+            }
+        }
+        bool thisFitGood = passConv && passChisq && passLoc && passSize &&
+                           passSep && passFlux && passPeak && passIntFlux;
+        if (!thisFitGood) {
+            ASKAPLOG_INFO_STR(logger, msg.str());
+        }
+        return thisFitGood;
+
     } else {
-        msg << "Fit failed on criteria: ";
-        int ct = 0;
-        if (!passConv) {
-            msg << "Convergence "; ct++;
-        }
-        if (!passChisq) {
-            msg << (ct++ > 0 ? "| " : "") << "Chisq ";
-        }
-        if (!passFlux) {
-            msg << (ct++ > 0 ? "| " : "") << "Flux ";
-        }
-        if (!passLoc) {
-            msg << (ct++ > 0 ? "| " : "") << "Location ";
-        }
-        if (!passSep) {
-            msg << (ct++ > 0 ? "| " : "") << "Separation ";
-        }
-        if (!passSize) {
-            msg << (ct++ > 0 ? "| " : "") << "Size ";
-        }
-        if (!passPeak) {
-            msg << (ct++ > 0 ? "| " : "") << "Peak ";
-        }
-        if (!passIntFlux) {
-            msg << (ct++ > 0 ? "| " : "") << "Integ.Flux ";
-        }
+
+        return passChisq;
+
     }
-    bool thisFitGood = passConv && passChisq && passLoc && passSize &&
-                       passSep && passFlux && passPeak && passIntFlux;
-    if (!thisFitGood) {
-        ASKAPLOG_INFO_STR(logger, msg.str());
-    }
-    return thisFitGood;
 }
 
 //**************************************************************//
@@ -492,14 +509,14 @@ std::multimap<double, int> Fitter::peakFluxList()
 
 casa::Gaussian2D<casa::Double> Fitter::gaussian(unsigned int num)
 {
-    if (itsSolution(num,3) > 0.) {
+    if (itsSolution(num, 3) > 0.) {
         casa::Gaussian2D<casa::Double>
-            gauss(itsSolution(num, 0),
-                  itsSolution(num, 1), itsSolution(num, 2),
-                  itsSolution(num, 3), itsSolution(num, 4), itsSolution(num, 5));
+        gauss(itsSolution(num, 0),
+              itsSolution(num, 1), itsSolution(num, 2),
+              itsSolution(num, 3), itsSolution(num, 4), itsSolution(num, 5));
         return gauss;
     } else {
-        ASKAPLOG_WARN_STR(logger, "Gaussian #"<<num<<" has major axis of " << itsSolution(num,3) << " - must be positive. Returning blank Gaussian");
+        ASKAPLOG_WARN_STR(logger, "Gaussian #" << num << " has major axis of " << itsSolution(num, 3) << " - must be positive. Returning blank Gaussian");
         return casa::Gaussian2D<casa::Double>();
     }
 }
