@@ -89,6 +89,8 @@ class FitResults {
         /// Gaussian fit to data.
         void saveGuess(std::vector<SubComponent> cmpntList);
 
+    /// @brief Whether the fit has converged or not
+    bool fitExists(){return itsFitExists;};
         /// @brief Whether the fit is good or not
         bool  isGood() {return itsFitIsGood;};
         /// @brief The chi-squared value of the fit;
@@ -156,6 +158,8 @@ class FitResults {
         void logIt(std::string loc = "DEBUG");
 
     protected:
+    /// @brief Is the fit valid? Did it converge?
+    bool itsFitExists;
         /// @brief Is the fit good?
         bool  itsFitIsGood;
         /// @brief The chi-squared value

@@ -1019,7 +1019,7 @@ bool RadioSource::fitGauss(casa::Matrix<casa::Double> &pos,
             int ctr = 0;
             std::vector<Fitter> fit;
             int bestFit = -1;
-            float bestRChisq = 9999.;
+            float bestRChisq = -1.;
 
             unsigned int minGauss, maxGauss;
             if (itsFitParams.numGaussFromGuess()) {
@@ -1052,7 +1052,7 @@ bool RadioSource::fitGauss(casa::Matrix<casa::Double> &pos,
                 }
 
                 if (fitPossible && okExceptChisq) {
-                    if ((ctr == 0) || (fit[ctr].redChisq() < bestRChisq)) {
+                    if ((bestRChisq<0.) || (fit[ctr].redChisq() < bestRChisq)) {
                         bestFit = ctr;
                         bestRChisq = fit[ctr].redChisq();
                     }
@@ -1109,7 +1109,7 @@ bool RadioSource::fitGauss(casa::Matrix<casa::Double> &pos,
 
             } // end of 'g' for-loop
             ASKAPLOG_DEBUG_STR(logger, "Finished loop over Gaussians");
-
+            
             if (bestFit >= 0) {
                 itsFlagHasFit = true;
 
@@ -1251,10 +1251,11 @@ void RadioSource::findSpectralTerm(std::string imageName, int term, bool doCalc)
         std::vector<std::string> typelist = availableFitTypes;
 
         for (type = typelist.begin(); type < typelist.end(); type++) {
+
             std::vector<double> termValues(itsBestFitMap[*type].numGauss(), 0.);
             std::vector<double> termErrors(itsBestFitMap[*type].numGauss(), 0.);
 
-            if (itsBestFitMap[*type].isGood() || itsBestFitMap[*type].fitIsGuess()) {
+            if (itsBestFitMap[*type].fitExists() || itsBestFitMap[*type].fitIsGuess()) {
 
                 ASKAPLOG_DEBUG_STR(logger, "Finding " << termtype[term] <<
                                    " values for fit type \"" << *type <<

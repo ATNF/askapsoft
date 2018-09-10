@@ -72,6 +72,7 @@ namespace sourcefitting {
 void FitResults::saveResults(Fitter &fit)
 {
 
+    itsFitExists = fit.passConverged();
     itsFitIsGood = fit.passChisq();
     itsFlagFitIsGuess = false;
     itsChisq = fit.chisq();
@@ -96,6 +97,7 @@ void FitResults::saveResults(Fitter &fit)
 void FitResults::saveGuess(std::vector<SubComponent> cmpntList)
 {
 
+    itsFitExists = false;
     itsFitIsGood = false;
     itsFlagFitIsGuess = true;
     itsChisq = 999.;
@@ -171,6 +173,7 @@ void FitResults::logIt(std::string loc)
 
 LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream &blob, FitResults& result)
 {
+    blob << result.itsFitExists;
     blob << result.itsFitIsGood;
     blob << result.itsChisq;
     blob << result.itsRedChisq;
@@ -203,6 +206,7 @@ LOFAR::BlobOStream& operator<<(LOFAR::BlobOStream &blob, FitResults& result)
 
 LOFAR::BlobIStream& operator>>(LOFAR::BlobIStream &blob, FitResults& result)
 {
+    blob >> result.itsFitExists;
     blob >> result.itsFitIsGood;
     blob >> result.itsChisq;
     blob >> result.itsRedChisq;
