@@ -412,9 +412,10 @@ bool Fitter::passSeparation()
 
 bool Fitter::acceptableExceptChisq()
 {
+    bool passConv = this->passConverged();
+    
     if (itsParams.applyAcceptanceCriteria()) {
 
-        bool passConv = this->passConverged();
         bool passFlux = this->passComponentFlux();
         bool passLoc = this->passLocation();
         bool passSep = this->passSeparation();
@@ -427,18 +428,18 @@ bool Fitter::acceptableExceptChisq()
 
     } else {
 
-        return true;
+        return passConv;
 
     }
 }
 
 bool Fitter::acceptable()
 {
+    bool passConv = this->passConverged();
     bool passChisq = this->passChisq();
 
     if (itsParams.applyAcceptanceCriteria()) {
 
-        bool passConv = this->passConverged();
         bool passFlux = this->passComponentFlux();
         bool passLoc = this->passLocation();
         bool passSep = this->passSeparation();
@@ -487,7 +488,7 @@ bool Fitter::acceptable()
 
     } else {
 
-        return passChisq;
+        return passConv && passChisq;
 
     }
 }
