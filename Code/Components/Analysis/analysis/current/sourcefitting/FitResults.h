@@ -66,10 +66,7 @@ namespace sourcefitting {
 class FitResults {
     public:
         /// @brief Default constructor: bad fit, 0 components
-        FitResults()
-        {
-            itsFitIsGood = false; itsNumGauss = 0; itsFlagFitIsGuess = false;
-        }
+    FitResults();
         /// @brief Destructor
         virtual ~FitResults() {};
 

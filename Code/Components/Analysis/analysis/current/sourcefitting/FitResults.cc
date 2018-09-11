@@ -69,6 +69,24 @@ namespace analysis {
 
 namespace sourcefitting {
 
+FitResults::FitResults():
+    itsFitExists(false),
+    itsFitIsGood(false),
+    itsChisq(0.),
+    itsRedChisq(0.),
+    itsRMS(0.),
+    itsNumDegOfFreedom(0),
+    itsNumFreeParam(0),
+    itsNumPix(0),
+    itsNumGauss(0),
+    itsFlagFitIsGuess(false),
+    itsGaussFitSet(),
+    itsGaussFitErrorSet()
+{
+
+
+}
+
 void FitResults::saveResults(Fitter &fit)
 {
 
