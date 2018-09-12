@@ -125,6 +125,13 @@ double VisMessageBuilder::calcDelay(const std::vector< std::complex<float> >& vi
                                     const std::vector<bool>& flag,
                                     const double chanWidth)
 {
+    // hack to handle on-the-fly averaging better
+    if (vis.size() <= 336) {
+        // consider no averaging necessary in this case
+        askap::scimath::DelayEstimator de(chanWidth);
+        return vis.size() < 2 ? 0. : de.getDelay(vis);
+    }
+
     const uint32_t NCHAN_TO_AVG = 54;
 
     if (vis.size() / NCHAN_TO_AVG < 2) return 0.0;
