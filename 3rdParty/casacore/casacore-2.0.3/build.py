@@ -4,7 +4,7 @@ from askapdev.rbuild.builders import CMake as Builder
 import askapdev.rbuild.utils as utils
 
 # CMake doesn't know about ROOT_DIR for blas and lapack, so need to
-# explicitly name them.  Want to use the dynamic libraries in order 
+# explicitly name them.  Want to use the dynamic libraries in order
 # to avoid link problems with missing FORTRAN symbols.
 platform =  utils.get_platform()
 builder = Builder()
@@ -38,14 +38,14 @@ builder.add_option("-DNUMPY_INCLUDE_DIRS=%s/include"%numpy)
 # Builds using the newer cmake (2.8.12) fail when cmake uses the Cray compiler
 # wrappers
 if platform['system'] == 'Darwin':
-   
+
     if (int(platform['tversion'][1]) >= 10):
         builder.add_option("-DCMAKE_Fortran_FLAGS=-Wa,-q")
 else:
-# On darwin casa can spot the accelerate framework    
+# On darwin casa can spot the accelerate framework
     blas    = builder.dep.get_install_path("blas")
     lapack  = builder.dep.get_install_path("lapack")
-    
+
     # CMake doesn't know about ROOT_DIR for these packages, so be explicit
     builder.add_option("-DBLAS_LIBRARIES=%s" % os.path.join(blas, 'lib', 'libblas.a'))
     builder.add_option("-DLAPACK_LIBRARIES=%s" % os.path.join(lapack, 'lib', 'liblapack.a'))
@@ -54,5 +54,8 @@ else:
 
 builder.add_option("-DCXX11=ON")
 
+if platform['codename'] == 'stretch':
+    builder.add_env("CPPFLAGS", "-std=c++03")
+    builder.add_patches_from_dir(os.path.join('files', 'stretch'))
 
 builder.build()
