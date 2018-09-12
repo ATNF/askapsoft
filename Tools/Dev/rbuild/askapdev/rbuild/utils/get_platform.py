@@ -77,7 +77,8 @@ def get_platform():
     if distribution == 'debian':
         try:
             v = float(version2)
-            if   v >= 8: codename = 'jessie'
+            if   v >= 9: codename = 'stretch'
+            elif v >= 8: codename = 'jessie'
             elif v >= 7: codename = 'wheezy'
             elif v >= 6: codename = 'squeeze'
             elif v >= 5: codename = 'lenny'
