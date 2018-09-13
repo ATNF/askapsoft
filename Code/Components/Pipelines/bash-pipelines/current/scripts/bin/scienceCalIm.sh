@@ -116,7 +116,8 @@ for FIELD in ${FIELD_LIST}; do
             findScienceMSnames
             FIELDBEAM=$(echo "$FIELD_ID" "$BEAM" | awk '{printf "F%02d_B%s",$1,$2}')
 
-            . "${PIPELINEDIR}/splitScience.sh"
+            #. "${PIPELINEDIR}/splitScience.sh"
+            . "${PIPELINEDIR}/prepareScienceData.sh"
 
             . "${PIPELINEDIR}/applyBandpassScience.sh"
 

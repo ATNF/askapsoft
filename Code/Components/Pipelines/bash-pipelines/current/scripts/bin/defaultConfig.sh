@@ -103,6 +103,14 @@ LUSTRE_STRIPE_SIZE=1048576
 # Storage manager bucket size - I/O quantum for MS writing
 BUCKET_SIZE=1048576
 
+# Number of channels in the tile for the new MS we create through merging or splitting
+TILE_NCHAN_SCIENCE=1
+TILE_NCHAN_1934=1
+
+# Remove interim MSs when running local merging
+PURGE_INTERIM_MS_SCI=true
+PURGE_INTERIM_MS_1934=true
+
 # If true, copy with distributed copy tool dcp. Else use cp
 USE_DCP_TO_COPY_MS=false
 
@@ -131,6 +139,7 @@ if [ "$ASKAP_ROOT" != "" ]; then
     selavy=${ASKAP_ROOT}/Code/Components/Analysis/analysis/current/apps/selavy.sh
     cimstat=${ASKAP_ROOT}/Code/Components/Analysis/analysis/current/apps/cimstat.sh
     mslist=${ASKAP_ROOT}/Code/Components/Synthesis/synthesis/current/apps/mslist.sh
+    msmerge=${ASKAP_ROOT}/Code/Components/Synthesis/synthesis/current/apps/msmerge.sh
     image2fits=${ASKAP_ROOT}/3rdParty/casacore/casacore-2.0.3/install/bin/image2fits
     makeThumbnails=${ASKAP_ROOT}/Code/Components/Analysis/evaluation/current/install/bin/makeThumbnailImage.py
     casdaupload=$ASKAP_ROOT/Code/Components/CP/pipelinetasks/current/apps/casdaupload.sh
@@ -138,6 +147,7 @@ if [ "$ASKAP_ROOT" != "" ]; then
     exportDirective="#SBATCH --export=ASKAP_ROOT,AIPSPATH"
 else
     mssplit=mssplit
+    msmerge=msmerge
     cflag=cflag
     cmodel=cmodel
     cbpcalibrator=cbpcalibrator

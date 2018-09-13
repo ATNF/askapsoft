@@ -575,9 +575,17 @@ EOF
     . "${PIPELINEDIR}/findBeamCentres.sh"
 
     # Check number of MSs
+    NEED_TO_MERGE_SCI=false
+    NEED_TO_MERGE_CAL=false
     if [ $numMSsci -ne 1 ] && [ $numMSsci -ne ${NUM_BEAMS_FOOTPRINT} ]; then
-        echo "WARNING - have more than one MS, but not the same number as the number of beams."
-        echo "        - progressing with beam selection, but you should check this dataset carefully."
+#        echo "WARNING - have more than one MS, but not the same number as the number of beams."
+        #        echo "        - progressing with beam selection, but you should check this dataset carefully."
+        NEED_TO_MERGE_SCI=true
+    fi
+    if [ $numMS1934 -ne 1 ] && [ $numMS1934 -ne ${NUM_BEAMS_FOOTPRINT_CAL} ]; then
+#        echo "WARNING - have more than one MS, but not the same number as the number of beams."
+        #        echo "        - progressing with beam selection, but you should check this dataset carefully."
+        NEED_TO_MERGE_CAL=true
     fi
 
 fi

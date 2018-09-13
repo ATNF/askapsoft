@@ -92,9 +92,115 @@ if [ "${DO_IT}" == "true" ]; then
         echo "Removing check file for flagging"
         rm -f "${FLAG_1934_CHECK_FILE}"
     fi
-    
-    setJob split_1934 split
-    cat > "$sbatchfile" <<EOFOUTER
+
+    # If we have >1 MS and the number differs from the number of
+    # beams, we need to do merging. 
+    if [ "${NEED_TO_MERGE_CAL}" == "true" ]; then
+
+        verb="splitting and merging"
+        setJob splitmerge_1934 splitmerge
+        cat > "$sbatchfile" <<EOFOUTER
+#!/bin/bash -l
+${SLURM_CONFIG}
+#SBATCH --time=${JOB_TIME_SPLIT_1934}
+#SBATCH --ntasks=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --job-name=${jobname}
+${exportDirective}
+#SBATCH --output=$slurmOut/slurm-splitMergeCal-b${BEAM}-%j.out
+
+${askapsoftModuleCommands}
+
+BASEDIR=${BASEDIR}
+cd $OUTPUT
+. ${PIPELINEDIR}/utils.sh	
+
+# Make a copy of this sbatch file for posterity
+sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
+thisfile=$sbatchfile
+cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
+
+finalMS=${msCal}
+sb1934dir=$sb1934dir
+BEAM=$BEAM
+inputMSlist=\$(\${PIPELINEDIR}/getMatchingMS.py -d \${sb1934dir} -b \$BEAM)
+
+COUNT=0
+mergelist=""
+for ms in \${inputMSlist}; do
+
+    sedstr="s/\.ms/_\${COUNT}\.ms/g"
+    outputms=\$(echo \$finalMS | sed -e \$sedstr)
+    mergelist="\$mergelist \$outputms"
+    parset=${parsets}/split_1934_${FIELDBEAM}_\${SLURM_JOB_ID}_\${COUNT}.in
+    cat > "\$parset" <<EOFINNER
+# Input measurement set
+# Default: <no default>
+vis         = \${ms}
+
+# Output measurement set
+# Default: <no default>
+outputvis   = \${outputms}
+
+# The channel range to split out into its own measurement set
+# Can be either a single integer (e.g. 1) or a range (e.g. 1-300). The range
+# is inclusive of both the start and end, indexing is one-based.
+# Default: <no default>
+channel     = ${CHAN_RANGE_1934}
+
+
+# Beam selection via beam ID
+# Select an individual beam
+beams        = [${BEAM}]
+
+# Scan selection for the 1934-638 observation. Assume the scan ID matches the beam ID
+scans        = [${BEAM}]
+
+# Set a larger bucketsize
+stman.bucketsize  = ${BUCKET_SIZE}
+# Make the tile size 54 channels, as that is what we will average over
+stman.tilenchan   = ${TILE_NCHAN_1934}
+EOFINNER
+
+    log=${logs}/split_1934_${FIELDBEAM}_\${SLURM_JOB_ID}_\${COUNT}.log
+
+    NCORES=1
+    NPPN=1
+    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${mssplit} -c "\${parset}" > "\${log}"
+    err=\$?
+    extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname}_\${COUNT} "txt,csv"
+    if [ \$err != 0 ]; then
+        exit \$err
+    fi
+    ((COUNT++))
+done
+
+commandLineFlags="-c ${TILE_NCHAN_1934} -o \${finalMS} \${mergelist}"
+log=${logs}/mergeMS_1934_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+
+echo "Running msmerge with arguments: \${commandLineFlags}" > \$log
+NCORES=1
+NPPN=1
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${msmerge} \${commandLineFlags} >> "\${log}"
+err=\$?
+rejuvenate \${finalMS}
+extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv"
+if [ \$err != 0 ]; then
+    exit \$err
+fi
+purgeMSs=${PURGE_INTERIM_MS_1934}
+if [ "\${purgeMS}" == "true" ]; then
+    for ms in \${mergelist}; do
+        rm -rf \${ms}
+    done
+fi
+
+EOFOUTER
+    else
+
+        verb="splitting"
+        setJob split_1934 split
+        cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
 ${SLURM_CONFIG}
 #SBATCH --time=${JOB_TIME_SPLIT_1934}
@@ -135,12 +241,12 @@ channel     = ${CHAN_RANGE_1934}
 # Select just a single beam for this obs
 beams        = [${BEAM}]
 
-# Scan selection for the 1934-638 observation. Assume the scan ID matches the beam ID
+# Scan selection for the 1934-628 observation. Assume the scan ID matches the beam ID
 scans        = [${BEAM}]
 
 # Set a larger bucketsize
 stman.bucketsize  = ${BUCKET_SIZE}
-stman.tilenchan   = ${NUM_CHAN_TO_AVERAGE}
+stman.tilenchan   = ${TILE_NCHAN_1934}
 EOFINNER
 
 log=${logs}/split_1934_${FIELDBEAM}_\${SLURM_JOB_ID}.log
@@ -156,14 +262,16 @@ if [ \$err != 0 ]; then
 fi
 
 EOFOUTER
+
+    fi
     
     if [ "${SUBMIT_JOBS}" == "true" ]; then
         DEP=""
         DEP=$(addDep "$DEP" "$DEP_START")
 	ID_SPLIT_1934=$(sbatch $DEP "$sbatchfile" | awk '{print $4}')
-	recordJob "${ID_SPLIT_1934}" "Splitting beam ${BEAM} of 1934-638 observation"
+	recordJob "${ID_SPLIT_1934}" "Run ${verb} of beam ${BEAM} of 1934-638 observation"
     else
-	echo "Would run splitting ${BEAM} of 1934-638 observation with slurm file $sbatchfile"
+	echo "Would run ${verb} of ${BEAM} of 1934-638 observation with slurm file $sbatchfile"
     fi
 
 fi
