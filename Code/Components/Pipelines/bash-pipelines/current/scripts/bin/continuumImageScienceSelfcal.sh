@@ -385,10 +385,9 @@ Selavy.Fitter.numGaussFromGuess = ${SELFCAL_SELAVY_GAUSSIANS_FROM_GUESS}
 # The fit may be a bit poor, so increase the reduced-chisq threshold
 Selavy.Fitter.maxReducedChisq = 15.
 #
-# Allow islands that are slightly separated to be considered a single 'source'
-Selavy.flagAdjacent = false
-# The separation in pixels for islands to be considered 'joined'
-Selavy.threshSpatial = 7
+# Require all pixels of an island to be properly contiguous.
+# This adds robustness against including and fitting to sidelobes.
+Selavy.flagAdjacent = true
 #
 ${SelavyComponentParset}
 #
