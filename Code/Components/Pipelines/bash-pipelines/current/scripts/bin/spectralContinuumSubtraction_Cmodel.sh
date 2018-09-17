@@ -199,8 +199,8 @@ Selavy.Fitter.maxReducedChisq                   = 10.
 # Force the component maps to be casa images for now
 Selavy.Fitter.imagetype                         = casa
 #
-Selavy.threshSpatial                            = 5
-Selavy.flagAdjacent                             = false
+Selavy.threshSpatial                            = ${CONTSUB_SELAVY_SPATIAL_THRESHOLD}
+Selavy.flagAdjacent                             = ${CONTSUB_SELAVY_FLAG_ADJACENT}
 #
 # Size criteria for the final list of detected islands
 Selavy.minPix                                   = 3

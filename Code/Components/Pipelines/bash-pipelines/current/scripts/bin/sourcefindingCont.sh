@@ -331,8 +331,8 @@ Selavy.Fitter.numGaussFromGuess                 = true
 Selavy.Fitter.maxReducedChisq                   = 10.
 Selavy.Fitter.imagetype                         = ${IMAGETYPE_CONT}
 #
-Selavy.threshSpatial                            = 5
-Selavy.flagAdjacent                             = false
+Selavy.threshSpatial                            = ${SELAVY_SPATIAL_THRESHOLD}
+Selavy.flagAdjacent                             = ${SELAVY_FLAG_ADJACENT}
 #
 Selavy.minPix                                   = 3
 Selavy.minVoxels                                = 3

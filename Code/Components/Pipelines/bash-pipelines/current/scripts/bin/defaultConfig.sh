@@ -790,6 +790,10 @@ CONTSUB_SELAVY_NSUBX=6
 CONTSUB_SELAVY_NSUBY=3
 # Detection threshold for Selavy in building continuum model
 CONTSUB_SELAVY_THRESHOLD=6
+# Whether to use contiguous pixels in the islands
+CONTSUB_SELAVY_FLAG_ADJACENT=true
+# If above is false, this is the spatial threshold to join islands
+CONTSUB_SELAVY_SPATIAL_THRESHOLD=5
 
 # Flux limit for cmodel
 CONTSUB_MODEL_FLUX_LIMIT=10uJy
@@ -956,6 +960,11 @@ USE_CONTCUBE_FOR_SPECTRAL_INDEX=false
 # If using contcube, this is the number of terms to solve for (1=just
 # I_0, 2 = I_0 & alpha, 3 = I_0, alpha, beta)
 SELAVY_NUM_SPECTRAL_TERMS=3
+#
+# Whether to use contiguous pixels in the islands
+SELAVY_FLAG_ADJACENT=true
+# If above is false, this is the spatial threshold to join islands
+SELAVY_SPATIAL_THRESHOLD=5
 
 ##############################
 # Run the continuum validation script following source finding
