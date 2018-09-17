@@ -104,8 +104,8 @@ LUSTRE_STRIPE_SIZE=1048576
 BUCKET_SIZE=1048576
 
 # Number of channels in the tile for the new MS we create through merging or splitting
-TILE_NCHAN_SCIENCE=1
-TILE_NCHAN_1934=1
+TILE_NCHAN_SCIENCE=54
+TILE_NCHAN_1934=54
 
 # Remove interim MSs when running local merging
 PURGE_INTERIM_MS_SCI=true

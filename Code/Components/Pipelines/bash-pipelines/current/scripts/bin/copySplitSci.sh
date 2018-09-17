@@ -84,7 +84,7 @@ $fieldParam
 # Set a larger bucketsize
 stman.bucketsize  = ${BUCKET_SIZE}
 # Make the tile size 54 channels, as that is what we will average over
-stman.tilenchan   = ${NUM_CHAN_TO_AVERAGE}
+stman.tilenchan   = ${TILE_NCHAN_SCIENCE}
 EOFINNER
 
 log=${logs}/split_science_${FIELDBEAM}_\${SLURM_JOB_ID}.log
