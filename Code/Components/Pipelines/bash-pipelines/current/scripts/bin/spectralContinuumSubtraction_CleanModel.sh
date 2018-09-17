@@ -36,6 +36,7 @@ setContsubFilenames
 # as the input to ccontsubtract
 
 ContsubModelDefinition="# The model definition
+CContsubtract.imagetype                           = ${IMAGETYPE_CONT}
 CContsubtract.sources.names                       = [lsm]
 CContsubtract.sources.lsm.direction               = \${modelDirection}
 CContsubtract.sources.lsm.model                   = ${contsubCleanModel}

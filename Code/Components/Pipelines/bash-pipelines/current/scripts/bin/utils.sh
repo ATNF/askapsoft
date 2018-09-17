@@ -259,7 +259,7 @@ function setContsubFilenames()
     # Next the clean model image
     imageCode=image
     setImageProperties cont
-    contsubCleanModelFullname=${imageName}
+    contsubCleanModelFullname=${imageName%%.fits}
     contsubCleanModel=$contsubCleanModelFullname
     if [ ${NUM_TAYLOR_TERMS} -gt 1 ]; then
         # need to strip the .taylor.0 suffix
@@ -271,12 +271,12 @@ function setContsubFilenames()
     # Next the model image created by cmodel
     imageCode=restored
     setImageProperties cont
-    contsubCmodelImage=model.contsub.${imageName%%.fits}
+    contsubCmodelImage=model.contsub.${contsubCleanModelFullname}
     contsubCmodelType="${contsubCleanModelType}"
     contsubCmodelLabel="Continuum model image from catalogue"
     ####
     # Finally the components parset
-    contsubComponents=modelComponents.contsub.${imageName%%.fits}.in
+    contsubComponents=modelComponents.contsub.${contsubCleanModelFullname}.in
 
     # Restore the imageCode to what it was
     imageCode=$imageCodeBackup
