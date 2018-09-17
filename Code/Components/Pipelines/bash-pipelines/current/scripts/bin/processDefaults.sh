@@ -800,6 +800,13 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
                 GRIDDER_MAXSUPPORT=${GRIDDER_MAXSUPPORT_NO_SNAPSHOT}
             fi
         fi
+        if [ "${GRIDDER_NWPLANES}" == "" ]; then
+            if [ "${GRIDDER_SNAPSHOT_IMAGING}" == "true" ]; then
+                GRIDDER_NWPLANES=${GRIDDER_NWPLANES_SNAPSHOT}
+            else
+                GRIDDER_NWPLANES=${GRIDDER_NWPLANES_NO_SNAPSHOT}
+            fi
+        fi
 
         ####################
         # Parameters required for continuum-cube imaging

@@ -584,20 +584,22 @@ ALT_IMAGER_SINGLE_FILE_CONTCUBE=true
 
 ####################
 # Gridding parameters for continuum imaging
-GRIDDER_SNAPSHOT_IMAGING=true
+GRIDDER_SNAPSHOT_IMAGING=false
 # Actual parameters used, which depend on whether snapshot imaging is used
 GRIDDER_WMAX=""
 GRIDDER_MAXSUPPORT=""
+GRIDDER_NWPLANES=""
 # Defaults, with and without snapshot imaging
 GRIDDER_WMAX_SNAPSHOT=2600
 GRIDDER_MAXSUPPORT_SNAPSHOT=512
 GRIDDER_WMAX_NO_SNAPSHOT=26000
 GRIDDER_MAXSUPPORT_NO_SNAPSHOT=1024
+GRIDDER_NWPLANES_SNAPSHOT=99
+GRIDDER_NWPLANES_NO_SNAPSHOT=599
 # Other gridding parameters that don't change with snapshot status
 GRIDDER_SNAPSHOT_WTOL=2600
 GRIDDER_SNAPSHOT_LONGTRACK=true
 GRIDDER_SNAPSHOT_CLIPPING=0.01
-GRIDDER_NWPLANES=99
 GRIDDER_OVERSAMPLE=5
 
 ####################
