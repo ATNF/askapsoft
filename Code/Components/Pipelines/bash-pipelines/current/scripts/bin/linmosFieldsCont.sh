@@ -33,27 +33,30 @@ ID_LINMOS_CONT_ALL=""
 
 mosaicImageList="restored altrestored image residual"
 
-DO_IT=$DO_MOSAIC
-if [ "$DO_CONT_IMAGING" != "true" ]; then
-    DO_IT=false
+BEAM=all
+FIELD="."
+tilelistsize=$(echo "${TILE_LIST}" | awk '{print NF}')
+if [ "${tilelistsize}" -gt 1 ]; then
+    FULL_TILE_LIST="$TILE_LIST ALL"
+else
+    FULL_TILE_LIST="ALL"
 fi
+for TILE in $FULL_TILE_LIST; do
+    for imageCode in ${mosaicImageList}; do
+        for((TTERM=0;TTERM<NUM_TAYLOR_TERMS;TTERM++)); do
 
-if [ "${DO_MOSAIC_FIELDS}" != "true" ]; then
-    DO_IT=false
-fi
+            DO_IT=$DO_MOSAIC
+            if [ "$DO_CONT_IMAGING" != "true" ]; then
+                DO_IT=false
+            fi
 
-if [ "${DO_IT}" == "true" ] && [ "${CLOBBER}" != "true" ]; then
-    BEAM=all
-    FIELD="."
-    tilelistsize=$(echo "${TILE_LIST}" | awk '{print NF}')
-    if [ "${tilelistsize}" -gt 1 ]; then
-        FULL_TILE_LIST="$TILE_LIST ALL"
-    else
-        FULL_TILE_LIST="ALL"
-    fi
-    for TILE in $FULL_TILE_LIST; do
-        for imageCode in ${mosaicImageList}; do
-            for((TTERM=0;TTERM<NUM_TAYLOR_TERMS;TTERM++)); do
+            if [ "${DO_MOSAIC_FIELDS}" != "true" ]; then
+                DO_IT=false
+            fi
+
+            tag="${imageCode}T${TTERM}${TILE}"
+
+            if [ "${DO_IT}" == "true" ] && [ "${CLOBBER}" != "true" ]; then
                 setImageProperties cont
                 if [ -e "${OUTPUT}/${imageName}" ]; then
                     if [ "${DO_IT}" == "true" ]; then
@@ -61,16 +64,12 @@ if [ "${DO_IT}" == "true" ] && [ "${CLOBBER}" != "true" ]; then
                     fi
                     DO_IT=false
                 fi
-            done
-            unset TTERM
-        done
-    done
-fi
+            fi
 
-if [ "${DO_IT}" == "true" ]; then
+            if [ "${DO_IT}" == "true" ]; then
 
-    sbatchfile=$slurms/linmos_all_cont.sbatch
-    cat > "$sbatchfile" <<EOFOUTER
+                sbatchfile=$slurms/linmos_all_cont.sbatch
+                cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
 ${SLURM_CONFIG}
 #SBATCH --time=${JOB_TIME_LINMOS}
@@ -109,63 +108,61 @@ else
     FULL_TILE_LIST="ALL"
 fi
 
-for THISTILE in \$FULL_TILE_LIST; do
+THISTILE=$TILE
+imageCode=$imageCode
+TTERM=$TTERM
 
-    echo "Mosaicking tile \$THISTILE"
+echo "Mosaicking tile \$THISTILE"
 
-    # First get the list of FIELDs that contribute to this TILE
-    TILE_FIELD_LIST=""
-    for FIELD in \$FIELD_LIST; do
-        getTile
-        if [ "\$THISTILE" == "ALL" ] || [ "\$TILE" == "\$THISTILE" ]; then
-            TILE_FIELD_LIST="\$TILE_FIELD_LIST \$FIELD"
+# First get the list of FIELDs that contribute to this TILE
+TILE_FIELD_LIST=""
+for FIELD in \$FIELD_LIST; do
+    getTile
+    if [ "\$THISTILE" == "ALL" ] || [ "\$TILE" == "\$THISTILE" ]; then
+        TILE_FIELD_LIST="\$TILE_FIELD_LIST \$FIELD"
+    fi
+done
+echo "Tile \$THISTILE has field list \$TILE_FIELD_LIST"
+
+imList=""
+wtList=""
+BEAM=all
+listCount=0
+for FIELD in \${TILE_FIELD_LIST}; do
+    setImageProperties cont
+    im="\${FIELD}/\${imageName}"
+    wt="\${FIELD}/\${weightsImage}"
+    if [ -e "\${im}" ]; then
+        ((listCount++))
+        if [ "\${imList}" == "" ]; then
+            imList="\${im%%.fits}"
+            wtList="\${wt%%.fits}"
+        else
+            imList="\${imList},\${im%%.fits}"
+            wtList="\${wtList},\${wt%%.fits}"
         fi
-    done
-    echo "Tile \$THISTILE has field list \$TILE_FIELD_LIST"
+    fi
+done
 
-    for imageCode in ${mosaicImageList}; do 
-    
-        for((TTERM=0;TTERM<NUM_TAYLOR_TERMS;TTERM++)); do
-    
-            imList=""
-            wtList=""
-            BEAM=all
-            listCount=0
-            for FIELD in \${TILE_FIELD_LIST}; do
-                setImageProperties cont
-                im="\${FIELD}/\${imageName}"
-                wt="\${FIELD}/\${weightsImage}"
-                if [ -e "\${im}" ]; then
-                    ((listCount++))
-                    if [ "\${imList}" == "" ]; then
-                        imList="\${im%%.fits}"
-                        wtList="\${wt%%.fits}"
-                    else
-                        imList="\${imList},\${im%%.fits}"
-                        wtList="\${wtList},\${wt%%.fits}"
-                    fi
-                fi
-            done
+if [ "\$THISTILE" == "ALL" ]; then
+    jobCode=linmosC_Full_\${imageCode}
+else
+    jobCode=linmosC_\${THISTILE}_\${imageCode}
+fi
+if [ "\${NUM_TAYLOR_TERMS}" -gt 1 ]; then
+    jobCode=\${jobCode}_T\${TTERM}
+fi
 
-            if [ "\$THISTILE" == "ALL" ]; then
-                jobCode=linmosC_Full_\${imageCode}
-            else
-                jobCode=linmosC_\${THISTILE}_\${imageCode}
-            fi
-            if [ "\${NUM_TAYLOR_TERMS}" -gt 1 ]; then
-                jobCode=\${jobCode}_T\${TTERM}
-            fi
+if [ "\${imList}" != "" ]; then
+    FIELD="."
+    TILE=\$THISTILE
+    setImageProperties cont
 
-            if [ "\${imList}" != "" ]; then
-                FIELD="."
-                TILE=\$THISTILE
-                setImageProperties cont
-
-                if [ \${listCount} -gt 1 ]; then
-                    echo "Mosaicking to form \${imageName}"
-                    parset=${parsets}/science_\${jobCode}_\${SLURM_JOB_ID}.in
-                    log=${logs}/science_\${jobCode}_\${SLURM_JOB_ID}.log
-                    cat > "\${parset}" << EOFINNER
+    if [ \${listCount} -gt 1 ]; then
+        echo "Mosaicking to form \${imageName}"
+        parset=${parsets}/science_\${jobCode}_\${SLURM_JOB_ID}.in
+        log=${logs}/science_\${jobCode}_\${SLURM_JOB_ID}.log
+        cat > "\${parset}" << EOFINNER
 linmos.names            = [\${imList}]
 linmos.weights          = [\${wtList}]
 linmos.imagetype        = \${IMAGETYPE_CONT}
@@ -174,46 +171,50 @@ linmos.outweight        = \${weightsImage%%.fits}
 linmos.weighttype       = FromWeightImages
 EOFINNER
 
-                    NCORES=1
-                    NPPN=1
-                    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} $linmosMPI -c "\$parset" > "\$log"
-                    err=\$?
-                    for im in \$(echo "\${imList}" | sed -e 's/,/ /g'); do
-                        rejuvenate "\$im"
-                    done
-                    extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} \${jobCode} "txt,csv"
-                    if [ \$err != 0 ]; then
-                        exit \$err
-                    fi
-                else
-                    # imList and wtList just have a single image -
-                    #  just do a simple copy rather than running linmos
-                    if [ "\${IMAGETYPE_CONT}" == "fits" ]; then
-                        imList="\${imList}.fits"
-                        wtList="\${wtList}.fits"
-                    fi
-                    echo "Copying \${imList} to form \${imageName}"
-                    cp -r \${imList} \${imageName}
-                    cp -r \${wtList} \${weightsImage}
-                fi
-
-            else
-                echo "WARNING - no good images were found for mosaicking image type '\${imageCode}'!"
-            fi
+        NCORES=1
+        NPPN=1
+        srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} $linmosMPI -c "\$parset" > "\$log"
+        err=\$?
+        for im in \$(echo "\${imList}" | sed -e 's/,/ /g'); do
+            rejuvenate "\$im"
         done
-    done
-done
-EOFOUTER
-
-    if [ "${SUBMIT_JOBS}" == "true" ]; then
-        FULL_LINMOS_CONT_DEP=$(echo "${FULL_LINMOS_CONT_DEP}" | sed -e 's/afterok/afterany/g')
-	ID_LINMOS_CONT_ALL=$(sbatch ${FULL_LINMOS_CONT_DEP} "$sbatchfile" | awk '{print $4}')
-	recordJob "${ID_LINMOS_CONT_ALL}" "Make a mosaic continuum image of the science observation, with flags \"${FULL_LINMOS_CONT_DEP}\""
+        extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} \${jobCode} "txt,csv"
+        if [ \$err != 0 ]; then
+            exit \$err
+        fi
     else
-	echo "Would make a mosaic image of the science observation, with slurm file $sbatchfile"
+        # imList and wtList just have a single image -
+        #  just do a simple copy rather than running linmos
+        if [ "\${IMAGETYPE_CONT}" == "fits" ]; then
+            imList="\${imList}.fits"
+            wtList="\${wtList}.fits"
+        fi
+        echo "Copying \${imList} to form \${imageName}"
+        cp -r \${imList} \${imageName}
+        cp -r \${wtList} \${weightsImage}
     fi
 
-    echo " "
-
+else
+    echo "WARNING - no good images were found for mosaicking image type '\${imageCode}'!"
 fi
+EOFOUTER
 
+                if [ "${SUBMIT_JOBS}" == "true" ]; then
+                    FULL_LINMOS_CONT_DEP=$(echo "${FULL_LINMOS_CONT_DEP}" | sed -e 's/afterok/afterany/g')
+	            ID_LINMOS_CONT_ALL=$(sbatch ${FULL_LINMOS_CONT_DEP} "$sbatchfile" | awk '{print $4}')
+                    if [ "${imageCode}" == "restored" ]; then
+                        ID_LINMOS_CONT_ALL_RESTORED=${ID_LINMOS_CONT_ALL}
+                    fi
+	            recordJob "${ID_LINMOS_CONT_ALL}" "Make a mosaic continuum image of the science observation, tag $tag, with flags \"${FULL_LINMOS_CONT_DEP}\""
+                else
+	            echo "Would make a mosaic image of the science observation, tag $tag, with slurm file $sbatchfile"
+                fi
+
+                echo " "
+
+            fi
+
+        done
+        unset TTERM
+    done
+done

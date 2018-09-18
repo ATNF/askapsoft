@@ -45,9 +45,9 @@ polList=$(echo "${POL_LIST}" | tr '[:upper:]' '[:lower:]')
 # Dependencies for the job
 DEP=""
 if [ "$FIELD" == "." ]; then
-    DEP=$(addDep "$DEP" "$ID_LINMOS_CONT_ALL")
+    DEP=$(addDep "$DEP" "$ID_LINMOS_CONT_ALL_RESTORED")
 elif [ "$BEAM" == "all" ]; then
-    DEP=$(addDep "$DEP" "$ID_LINMOS_CONT")
+    DEP=$(addDep "$DEP" "$ID_LINMOS_CONT_RESTORED")
 else
     if [ "${DO_SELFCAL}" == "true" ]; then
         DEP=$(addDep "$DEP" "$ID_CONTIMG_SCI_SC")
