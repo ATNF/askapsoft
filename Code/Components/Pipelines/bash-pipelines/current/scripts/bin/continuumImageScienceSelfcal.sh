@@ -53,18 +53,17 @@ else
 fi
 
 if [ "${DO_IT}" == "true" ] && [ "${DO_SELFCAL}" == "true" ]; then
-
-    CORES_PER_NODE_SELFCAL=${CPUS_PER_CORE_CONT_IMAGING}
     
     # How big is the selavy job for selfcal?
     NPROCS_SELAVY=$(echo "${SELFCAL_SELAVY_NSUBX}" "${SELFCAL_SELAVY_NSUBY}" | awk '{print $1*$2+1}')
-    if [ "${CORES_PER_NODE_SELFCAL}" -lt "${NPROCS_SELAVY}" ]; then
-        CPUS_PER_CORE_SELFCAL_SELAVY=${CORES_PER_NODE_SELFCAL}
-    else
+    # How many cores per node does the selavy job need?
+    #  Default to 20, but need to make smaller if the number of tasks is fewer
+    CPUS_PER_CORE_SELFCAL_SELAVY=20
+    if [ "${NPROCS_SELAVY}" -lt "${CPUS_PER_CORE_SELFCAL_SELAVY}" ]; then
         CPUS_PER_CORE_SELFCAL_SELAVY=${NPROCS_SELAVY}
     fi
 
-    # Work out maximum number of cores needed
+    # Work out maximum number of cores needed (for sbatch request)
     # Start with 2, as we need that for cmodel
     NUM_CPUS_SELFCAL=2
     if [ "${NPROCS_SELAVY}" -gt "${NUM_CPUS_SELFCAL}" ]; then
@@ -74,8 +73,15 @@ if [ "${DO_IT}" == "true" ] && [ "${DO_SELFCAL}" == "true" ]; then
         NUM_CPUS_SELFCAL=$NUM_CPUS_CONTIMG_SCI
     fi
 
-    # How many cores per node for the selfcal job?
-    #  Default to 20, but need to make smaller if the number of tasks is fewer
+    # How many cores per node for the selfcal job (ie. for sbatch request)
+    #  As above, start with 2 from the cmodel job and increase to maximum over other jobs
+    CORES_PER_NODE_SELFCAL=2
+    if [ "${CPUS_PER_CORE_CONT_IMAGING}" -gt "${CORES_PER_NODE_SELFCAL}" ]; then
+        CORES_PER_NODE_SELFCAL=$CPUS_PER_CORE_CONT_IMAGING
+    fi
+    if [ "${CPUS_PER_CORE_SELFCAL_SELAVY}" -gt "${CORES_PER_NODE_SELFCAL}" ]; then
+        CORES_PER_NODE_SELFCAL=$CPUS_PER_CORE_SELFCAL_SELAVY
+    fi
     if [ "${NUM_CPUS_SELFCAL}" -lt "${CORES_PER_NODE_SELFCAL}" ]; then
         CORES_PER_NODE_SELFCAL=$NUM_CPUS_SELFCAL
     fi
