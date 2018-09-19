@@ -202,6 +202,8 @@ EOFOUTER
 
                 echo " "
 
+            fi
+            
         done
         unset TTERM
     done
