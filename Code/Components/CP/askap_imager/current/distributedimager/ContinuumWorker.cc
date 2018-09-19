@@ -304,7 +304,9 @@ void ContinuumWorker::cacheWorkUnit(ContinuumWorkUnit& wu, LOFAR::ParameterSet& 
 {
 
 
-    const string ms = wu.get_dataset();
+
+    boost::filesystem::path mspath = boost::filesystem::path(wu.get_dataset());
+    const string ms = mspath.filename().string();
 
     const string shm_root = unitParset.getString("tmpfs", "/dev/shm");
 
@@ -339,20 +341,24 @@ void ContinuumWorker::cacheWorkUnit(ContinuumWorkUnit& wu, LOFAR::ParameterSet& 
             trigger.close();
             MSSplitter mySplitter(unitParset);
 
-            mySplitter.split(ms, outms, wu.get_localChannel() + 1, wu.get_localChannel() + 1, 1, unitParset);
+            mySplitter.split(wu.get_dataset(), outms, wu.get_localChannel() + 1, wu.get_localChannel() + 1, 1, unitParset);
             unlink(outms_flag.c_str());
             this->cached_files.push_back(outms);
 
         }
+        ///wait for all groups this rank to get here
+        if (itsComms.nGroups() > 1) {
+            ASKAPLOG_DEBUG_STR(logger, "Rank " << itsComms.rank() << " at barrier");
+            itsComms.barrier(itsComms.interGroupCommIndex());
+            ASKAPLOG_DEBUG_STR(logger, "Rank " << itsComms.rank() << " passed barrier");
+        }
+        wu.set_dataset(outms);
 
     }
-    ///wait for all groups this rank to get here
-    if (itsComms.nGroups() > 1) {
-        ASKAPLOG_DEBUG_STR(logger, "Rank " << itsComms.rank() << " at barrier");
-        itsComms.barrier(itsComms.interGroupCommIndex());
-        ASKAPLOG_DEBUG_STR(logger, "Rank " << itsComms.rank() << " passed barrier");
+    else {
+      ASKAPLOG_WARN_STR(logger,"Cache MS requested but not done");
     }
-    wu.set_dataset(outms);
+
 
 }
 void ContinuumWorker::processWorkUnit(ContinuumWorkUnit& wu)
@@ -753,6 +759,7 @@ void ContinuumWorker::buildSpectralCube()
 
                 }
                 if (majorCycleNumber + 1 > nCycles) {
+                    // This stops me zeroing the NE before the restore solver runs. So we
                     ASKAPLOG_INFO_STR(logger, "Reached maximum majorcycle count");
 
                 } else {
@@ -766,7 +773,7 @@ void ContinuumWorker::buildSpectralCube()
 
                       // Actually I've found that I cannot completely empty the NE. As I need the full size PSF and this is stored in the NE
                       // So this method pretty much only zeros the weights and the datavector(image)
-                      
+
                       rootImager.zero();
                     }
                     else {
