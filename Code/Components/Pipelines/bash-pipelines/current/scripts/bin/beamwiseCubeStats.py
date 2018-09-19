@@ -63,15 +63,17 @@ class BeamStats:
             self.minval=np.zeros(self.specSize,dtype='f')
             self.std=np.zeros(self.specSize,dtype='f')
             self.madfm=np.zeros(self.specSize,dtype='f')
+            self.onepc=np.zeros(self.specSize,dtype='f')
             fin=open(self.cat,'r')
             for line in fin:
                 if line[0] != '#':
                     cols=line.split()
                     chan=int(line.split()[0])
-                    self.maxval[chan] = float(line.split()[7])
-                    self.minval[chan] = float(line.split()[6])
+                    self.maxval[chan] = float(line.split()[8])
+                    self.minval[chan] = float(line.split()[7])
                     self.std[chan] = float(line.split()[3])
                     self.madfm[chan] = float(line.split()[5])
+                    self.onepc[chan] = float(line.split()[6])
 
     def noiseMinMax(self):
         ymin,ymax=0.,1.
@@ -104,6 +106,7 @@ class BeamStats:
         if self.catGood:
             ax.plot(freq,self.minval,label='Min')
             ax.plot(freq,self.maxval,label='Max')
+            ax.plot(freq,self.onepc, label='1-percentile')
 
 
 #########################
@@ -166,6 +169,7 @@ if __name__ == '__main__':
             if noiseYmin==None or noiseYmin>ymin: noiseYmin=ymin
             if noiseYmax==None or noiseYmax<ymax: noiseYmax=ymax
             ymin,ymax=beams[i].minMax()
+            print i,ymin,ymax
             if fullYmin==None or fullYmin>ymin: fullYmin=ymin
             if fullYmax==None or fullYmax<ymax: fullYmax=ymax
 
@@ -176,9 +180,11 @@ if __name__ == '__main__':
     width=noiseYmax-noiseYmin
     noiseYmin -= 0.1*width
     noiseYmax += 0.1*width
+    print fullYmin,fullYmax
     width=fullYmax-fullYmin
     fullYmin -= 0.1*width
     fullYmax += 0.1*width
+    print fullYmin,fullYmax
 
     fig, axs = plt.subplots(6,6, sharex=True, sharey=True, figsize = (12,6))
     fig.subplots_adjust(bottom=0.125, top=0.9, hspace=0.005, wspace=0.1)
@@ -202,8 +208,9 @@ if __name__ == '__main__':
     fig.subplots_adjust(bottom=0.2, top=0.8, hspace=0.005, wspace=0.1)
     fig.text(0.5,0.001, 'Frequency [MHz]', ha='center')
     fig.text(0.01,0.5, 'Min or Max flux level [%s]'%fluxunit, va='center', rotation='vertical')
-    fig.text(0.40,0.93,'Min flux',color='C0', ha='center')
-    fig.text(0.60,0.93,'Max flux',color='C1', ha='center')
+    fig.text(0.25,0.93,'Min flux',color='C0', ha='center')
+    fig.text(0.50,0.93,'1-percentile',color='C2', ha='center')
+    fig.text(0.75,0.93,'Max flux',color='C1', ha='center')
     axs = axs.ravel()
     for i in range(36):
         beams[i].plotMinMax(axs[i],freq)

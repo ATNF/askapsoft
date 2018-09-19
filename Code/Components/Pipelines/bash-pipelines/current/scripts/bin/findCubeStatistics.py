@@ -92,7 +92,10 @@ if __name__ == '__main__':
     spatSize = cs.findSpatialSize(coords)
     freq = cs.getFreqAxis(cube)/1.e6
 
-    stats = cs.statsCollection(freq,comm)
+    useCasacoreStats=True
+    stats = cs.statsCollection(freq,comm,useCasacoreStats)
+    stats.setScaleFactor(scale)
+    stats.setUnits(unit)
     
     for i in range(specSize):
 
@@ -100,34 +103,27 @@ if __name__ == '__main__':
 
             blc[spInd] = i
             trc[spInd] = i
-            sub=cube.subimage(blc=blc.tolist(),trc=trc.tolist())
-            subStats=sub.statistics()
-            stats.assign(i,subStats)
+            stats.calculate(cube,i,blc.tolist(),trc.tolist())
 
     stats.gather(comm)
             
     if rank == 0:
 
-        rms=stats.getRMS()*scale
-        std=stats.getStd()*scale
-        mean=stats.getMean()*scale
-        median=stats.getMedian()*scale
-        madfm=cs.madfmToSigma(stats.getMadfm()*scale)
-        minval=stats.getMinval()*scale
-        maxval=stats.getMaxval()*scale
-        
-        fout=open(catalogue,'w')
-        fout.write('#%7s %15s %10s %10s %10s %10s %10s %10s\n'%('Channel','Frequency','Mean','Std','Median','MADFM','Min','Max'))
-        fout.write('#%7s %15s %10s %10s %10s %10s %10s %10s\n'%(' ','MHz',unit,unit,unit,unit,unit,unit))
-        for i in range(specSize):
-            fout.write('%8d %15.6f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n'%(i, freq[i], mean[i], std[i], median[i], madfm[i], minval[i], maxval[i]))
-        fout.close()
-        
+        stats.scale()
+        stats.write(catalogue)
+
+        std=stats.getStd()
+        madfm=cs.madfmToSigma(stats.getMadfm())
+        minval=stats.getMinval()
+        maxval=stats.getMaxval()
+        onepc=stats.getOnepc()
+
         fig=plt.figure(1,figsize=(8,8))
 
         plt.subplot(211)
         plt.plot(freq,maxval,label='max')
         plt.plot(freq,minval,label='min')
+        plt.plot(freq,onepc,label='1-percentile')
         ymax = maxval[abs(maxval)<1.e5].max()
         ymin = minval[abs(minval)<1.e5].min()
         width = ymax-ymin
@@ -136,10 +132,10 @@ if __name__ == '__main__':
         plt.ylim(ymin,ymax)
         plt.xlabel('Frequency [MHz]')
         plt.ylabel('Flux value [%s]'%unit)
-        plt.legend(loc='lower right')
+        plt.legend(loc='center right')
 
         plt.subplot(212)
-        plt.plot(freq,rms,label='Std. Dev')
+        plt.plot(freq,std,label='Std. Dev')
         plt.plot(freq,madfm,label='scaled MADFM')
         ymax = std[abs(std)<1.e5].max()
         ymin = std[abs(std)<1.e5].min()

@@ -81,23 +81,58 @@ class stat:
             for i in range(self.size):
                 self.finalStat[i] = self.fullStat[:,i].sum()
 
+    def __getitem__(self,i):
+        return self.finalStat[i]
+
 
 class statsCollection:
-    def __init__(self,freq,comm):
+    def __init__(self,freq,comm,useCasacoreStats):
         self.freq = freq
+        self.useCasa = useCasacoreStats
+        self.scaleFactor = 1.
+        self.units = 'Jy/beam'
         size = freq.size
         self.rms = stat(size,comm)
         self.std = stat(size,comm)
         self.mean = stat(size,comm)
+        self.onepc = stat(size,comm)
         self.median = stat(size,comm)
         self.madfm = stat(size,comm)
         self.maxval = stat(size,comm)
         self.minval = stat(size,comm)
 
+    def calculate(self, cube, chan, blc, trc):
+        if self.useCasa:
+            sub=cube.subimage(blc=blc,trc=trc)
+            subStats=sub.statistics()
+            arr = sub.getdata()
+            msk = -sub.getmask()
+            subStats['onepc'] = np.percentile(arr[msk],1)
+        else:
+            arr = cube.getdata(blc=blc,trc=trc)
+            msk = -cube.getmask(blc=blc,trc=trc)
+            percentiles = np.percentile(arr[msk],[50,1])
+            print percentiles
+            print percentiles[0]
+            print percentiles[1]
+            subStats={}
+            subStats['median']=percentiles[0]
+            subStats['medabsdevmed'] = np.median(abs(arr[msk]-med))
+            subStats['onepc'] = percentiles[1]
+            subStats['mean'] = arr[msk].mean()
+            subStats['sigma'] = arr[msk].std()
+            subStats['rms'] = np.sqrt(np.mean(arr[msk]**2))
+            subStats['min'] = arr[msk].min()
+            subStats['max'] = arr[msk].max()
+            madfm = np.median(abs(arr[msk]-med))
+                    
+        self.assign(chan,subStats)
+        
     def assign(self, chan, stats):
         self.rms.assign(chan,stats,'rms')
         self.std.assign(chan,stats,'sigma')
         self.mean.assign(chan,stats,'mean')
+        self.onepc.assign(chan,stats,'onepc')
         self.median.assign(chan,stats,'median')
         self.madfm.assign(chan,stats,'medabsdevmed')
         self.maxval.assign(chan,stats,'max')
@@ -108,37 +143,45 @@ class statsCollection:
         self.rms.gather(comm)
         self.std.gather(comm)
         self.mean.gather(comm)
+        self.onepc.gather(comm)
         self.median.gather(comm)
         self.madfm.gather(comm)
         self.maxval.gather(comm)
         self.minval.gather(comm)
 
     def getRMS(self): return self.rms.finalStat
-    def getStd(self): return self.rms.finalStat
+    def getStd(self): return self.std.finalStat
     def getMean(self): return self.mean.finalStat
+    def getOnepc(self): return self.onepc.finalStat
     def getMedian(self): return self.median.finalStat
     def getMadfm(self): return self.madfm.finalStat
     def getMaxval(self): return self.maxval.finalStat
     def getMinval(self): return self.minval.finalStat
 
-    def scale(scale):
-        self.rms.finalStat = self.rms.finalStat * scale
-        self.std.finalStat = self.std.finalStat * scale
-        self.mean.finalStat = self.mean.finalStat * scale
-        self.median.finalStat = self.median.finalStat * scale
-        self.madfm.finalStat = self.madfm.finalStat * scale
-        self.maxval.finalStat = self.maxval.finalStat * scale
-        self.minval.finalStat = self.minval.finalStat * scale
-        
-    def write(catalogue):
-        if self.rank == 0:
-            fout=open(catalogue,'w')
-            fout.write('#%7s %15s %10s %10s %10s %10s %10s %10s\n'%('Channel','Frequency','Mean','Std','Median','MADFM','Min','Max'))
-            fout.write('#%7s %15s %10s %10s %10s %10s %10s %10s\n'%(' ','MHz',unit,unit,unit,unit,unit,unit))
-            for i in range(specSize):
-                fout.write('%8d %15.6f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n'%(i, freq[i], mean[i], std[i], median[i], madfm[i], minval[i], maxval[i]))
-            fout.close()
+    def setScaleFactor(self,scalefactor):
+        self.scaleFactor = scalefactor
 
+    def setUnits(self, unit):
+        self.unit = unit
+        
+    def scale(self):
+        self.rms.finalStat = self.rms.finalStat * self.scaleFactor
+        self.std.finalStat = self.std.finalStat * self.scaleFactor
+        self.mean.finalStat = self.mean.finalStat * self.scaleFactor
+        self.onepc.finalStat = self.onepc.finalStat * self.scaleFactor
+        self.median.finalStat = self.median.finalStat * self.scaleFactor
+        self.madfm.finalStat = self.madfm.finalStat * self.scaleFactor
+        self.maxval.finalStat = self.maxval.finalStat * self.scaleFactor
+        self.minval.finalStat = self.minval.finalStat * self.scaleFactor
+        
+    def write(self,catalogue):
+        fout=open(catalogue,'w')
+        fout.write('#%7s %15s %10s %10s %10s %10s %10s %10s %10s\n'%('Channel','Frequency','Mean','Std','Median','MADFM','1%ile','Min','Max'))
+        fout.write('#%7s %15s %10s %10s %10s %10s %10s %10s %10s\n'%(' ','MHz',self.unit,self.unit,self.unit,self.unit,self.unit,self.unit,self.unit))
+        for i in range(self.freq.size):
+            fout.write('%8d %15.6f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n'%(i, self.freq[i], self.mean[i], self.std[i], self.median[i], self.madfm[i], self.onepc[i], self.minval[i], self.maxval[i]))
+        fout.close()
+            
 #    def read(catalogue):
 #        if self.rank == 0:
             
