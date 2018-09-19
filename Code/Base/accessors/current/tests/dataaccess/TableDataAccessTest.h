@@ -605,10 +605,6 @@ void TableDataAccessTest::originalFlagRewriteTest()
         }
    }
    CPPUNIT_ASSERT_EQUAL(420u, iterCntr);
-   // there are some issues related to row-based flagging
-   // therefore, this code will not work now. Leave the rest of the
-   // test with actual modification bypassed for now.
-   return;
 
    casa::Vector<casa::Cube<casa::Bool> > memoryBuffer(iterCntr);
    iterCntr=0;
@@ -621,8 +617,9 @@ void TableDataAccessTest::originalFlagRewriteTest()
         for (casa::uInt row=0; row < it->nRow(); ++row) {
              for (casa::uInt chan=0; chan < it->nChannel(); ++chan) {
                   for (casa::uInt pol =0; pol < it->nPol(); ++pol) {
-                       // flip the flag to the opposite value
-                       rwFlags(row,chan,pol) = !roFlags(row,chan,pol);
+                       // the test dataset uses row-based flagging mechanism, so can't just flip
+                       // the flag to opposite - just flag all samples for the test
+                       rwFlags(row,chan,pol) = true;
                   }
              }
         }
@@ -636,9 +633,11 @@ void TableDataAccessTest::originalFlagRewriteTest()
         for (casa::uInt row=0; row < it->nRow(); ++row) {
              for (casa::uInt chan=0; chan < it->nChannel(); ++chan) {
                   for (casa::uInt pol =0; pol < it->nPol(); ++pol) {
-                       // check that the flag is now set to the opposite of the original value
-                       CPPUNIT_ASSERT_EQUAL(memoryBuffer[iterCntr](row,chan,pol), roFlags(row,chan,pol));
-                       rwFlags(row,chan,pol) = !roFlags(row,chan,pol);
+                       // check that the flag is now always set,  then reset if it was unflagged originally
+                       CPPUNIT_ASSERT_EQUAL(true, roFlags(row,chan,pol));
+                       if (!memoryBuffer[iterCntr](row,chan,pol)) {
+                           rwFlags(row,chan,pol) = false;
+                       }
                   }
              }
         }
