@@ -34,12 +34,11 @@
 #include <limits>
 #include <set>
 #include <vector>
+#include <cmath>
 
 // ASKAPsoft includes
 #include "askap/AskapLogging.h"
 #include "askap/AskapError.h"
-#include "boost/tuple/tuple.hpp"
-#include "boost/tuple/tuple_comparison.hpp"
 #include "Common/ParameterSet.h"
 #include "casacore/casa/aipstype.h"
 #include "casacore/measures/Measures/MDirection.h"
@@ -188,7 +187,7 @@ void AmplitudeFlagger::processRow(casa::MSColumns& msc, const casa::uInt pass,
         if ( pass==0 ) {
 
             if ( itsAutoThresholds ) {
-         
+
                 // combine amplitudes with mask and get the median-based statistics
                 casa::MaskedArray<casa::Float>
                     maskedAmplitudes(spectrumAmplitudes, unflaggedMask);
@@ -196,7 +195,7 @@ void AmplitudeFlagger::processRow(casa::MSColumns& msc, const casa::uInt pass,
                     statsVector = getRobustStats(maskedAmplitudes);
                 casa::Float median = statsVector[0];
                 casa::Float sigma_IQR = statsVector[1];
-         
+
                 // set cutoffs
                 if ( !hasLowLimit ) {
                     itsLowLimit = median-itsThresholdFactor*sigma_IQR;
@@ -316,40 +315,39 @@ void AmplitudeFlagger::processRow(casa::MSColumns& msc, const casa::uInt pass,
 casa::Vector<casa::Float>AmplitudeFlagger::getRobustStats(
     casa::MaskedArray<casa::Float> maskedAmplitudes)
 {
-    casa::Vector<casa::Float> statsVector(4);
-   
-    // Grab unflagged frequency channels and sort their amplitudes.
-    // From casacore comments:
-    // "use HeapSort as it's performance is guaranteed, quicksort is often
-    // extremely slow (O(n*n)) for inputs with many successive duplicates".
+    casa::Vector<casa::Float> statsVector(4,0.0);
 
+    // Grab unflagged frequency channels and sort their amplitudes.
     // extract all of the unflagged amplitudes
-    casa::Array<casa::Float>
-        sortedAmplitudes = maskedAmplitudes.getCompressedArray();
+    casa::Vector<casa::Float>
+        amplitudes = maskedAmplitudes.getCompressedArray();
 
     // return with zeros if all of the data are flagged
-    if (sortedAmplitudes.shape()[0] == 0) {
-        statsVector.set(0.0);
-        return(statsVector);
-    }
+    casa::uInt n = amplitudes.nelements();
+    if (n == 0) return(statsVector);
 
-    // sort the unflagged amplitudes
-    casa::Int numUnflagged=GenSort<casa::Float>::sort(sortedAmplitudes,
-        Sort::Ascending, Sort::HeapSort);
+    casa::Float minVal, maxVal;
+    casa::minMax(minVal,maxVal,amplitudes);
 
-    // estimate stats, assuming Gaussian noise dominates the frequency channels.
-    // (50% of a Gaussian dist. is within 0.67448 sigma of the mean...)
-    statsVector[0] = sortedAmplitudes.data()[numUnflagged/2]; // median
-    statsVector[1] = (sortedAmplitudes.data()[3*numUnflagged/4] - 
-        sortedAmplitudes.data()[numUnflagged/4]) / 1.34896; // sigma from IQR
-    statsVector[2] = sortedAmplitudes.data()[0]; // min
-    statsVector[3] = sortedAmplitudes.data()[numUnflagged-1]; // max
+    // Now find median and IQR
+    // Use the fact that nth_element does a partial sort:
+    // all elements before the selected element will be smaller
+    std::vector<casa::Float> vamp = amplitudes.tovector();
+    const casa::uInt Q1 = n / 4;
+    const casa::uInt Q2 = n / 2;
+    const casa::uInt Q3 = 3 * n /4;
+    std::nth_element(vamp.begin(),        vamp.begin() + Q2, vamp.end());
+    std::nth_element(vamp.begin(),        vamp.begin() + Q1, vamp.begin() + Q2);
+    std::nth_element(vamp.begin() + Q2+1, vamp.begin() + Q3, vamp.end());
 
-    return(statsVector);   
-
+    statsVector[0] = vamp[Q2]; // median
+    statsVector[1] = (vamp[Q3] - vamp[Q1]) / 1.34896; // sigma from IQR
+    statsVector[2] = minVal; // min
+    statsVector[3] = maxVal; // max
+    return(statsVector);
 }
 
-// Generate a tuple for a given row and polarisation
+// Generate a key for a given row and polarisation
 rowKey AmplitudeFlagger::getRowKey(
     casa::MSColumns& msc,
     const casa::uInt row,
@@ -380,9 +378,16 @@ rowKey AmplitudeFlagger::getRowKey(
         ant2  = msc.antenna2()(row);
         pol   = corr;
     }
-
+#ifdef TUPLE_INDEX
     return boost::make_tuple(field,feed1,feed2,ant1,ant2,pol);
-
+#else
+    // replace tuple with integer to speed things up, but this can run out of range
+    // feed().nrow is nant*nfeed for askap - we really want the number of beams (usually 36)
+    casa::Int nant = msc.antenna().nrow();
+    casa::Int nfeed = msc.feed().nrow();
+    if (nant > 0 && nfeed >= nant) nfeed /= nant;
+    return ((((field*4+pol)*nfeed+feed1)*nant+ant2)*nant+ant1);
+#endif
 }
 
 void AmplitudeFlagger::updateTimeVectors(const rowKey &key, const casa::uInt pass)
@@ -556,7 +561,6 @@ void AmplitudeFlagger::loadParset(const LOFAR::ParameterSet& parset)
             itsStokes.insert(Stokes::type(strvec[i]));
         }
     }
-
 }
 
 // add a summary of the relevant parset parameters to the log
@@ -619,4 +623,3 @@ void AmplitudeFlagger::logParsetSummary(const LOFAR::ParameterSet& parset)
     }
 
 }
-

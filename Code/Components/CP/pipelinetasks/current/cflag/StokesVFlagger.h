@@ -34,8 +34,6 @@
 // ASKAPsoft includes
 #include "Common/ParameterSet.h"
 #include "boost/shared_ptr.hpp"
-#include "boost/tuple/tuple.hpp"
-#include "boost/tuple/tuple_comparison.hpp"
 #include "casacore/casa/aipstype.h"
 #include "casacore/ms/MeasurementSets/MeasurementSet.h"
 #include "casacore/ms/MeasurementSets/MSColumns.h"
@@ -55,14 +53,14 @@ namespace pipelinetasks {
 /// channels within a given row). Then, where the stokes-V correlation exceeds
 /// the average plus (stddev * threshold) all correlations for that channel in
 /// that row will be flagged.
-/// 
+///
 /// The one parameter that is read from the parset passed to the constructor is
 /// "threshold". To flag at the five-sigma point specify a valud of "5.0".
 class StokesVFlagger : public IFlagger {
 
     public:
 
-        /// @brief Constructs zero or more instances of the AmplitudeFlagger.
+        /// @brief Constructs zero or more instances of the StokesVFlagger.
         /// The flagger is responsible for reading the "parset" and constructing
         /// zero or more instances of itself, depending on the configuration.
         static vector< boost::shared_ptr<IFlagger> > build(
@@ -72,7 +70,8 @@ class StokesVFlagger : public IFlagger {
         /// @brief Constructor
         StokesVFlagger(float threshold, bool robustStatistics,
                        bool integrateSpectra, float spectraThreshold,
-                       bool integrateTimes, float timesThreshold);
+                       bool integrateTimes, float timesThreshold,
+                       bool quickRobust);
 
         /// @see IFlagger::processRow()
         virtual void processRow(casa::MSColumns& msc, const casa::uInt pass,
@@ -136,7 +135,7 @@ class StokesVFlagger : public IFlagger {
         // of a masked array
         casa::Vector<casa::Float>getRobustStats(casa::MaskedArray<casa::Float> maskedAmplitudes);
 
-        // Generate a tuple for a given row and polarisation
+        // Generate a key for a given row and polarisation
         rowKey getRowKey(const casa::MSColumns& msc, const casa::uInt row);
 
         // Maps of accumulation vectors for averaging spectra and generating flags

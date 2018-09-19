@@ -50,6 +50,8 @@
 #include "cflag/FlaggingStats.h"
 #include "cflag/MSFlaggingSummary.h"
 
+//#include "casacore/tables/DataMan/DataManAccessor.h"
+
 // Using
 using namespace std;
 using namespace askap;
@@ -134,5 +136,7 @@ int CflagApp::run(int argc, char* argv[])
     }
 
     stats.logSummary();
+    //RODataManAccessor(ms, "TiledData", False).showCacheStatistics (cout);
+
     return 0;
 }

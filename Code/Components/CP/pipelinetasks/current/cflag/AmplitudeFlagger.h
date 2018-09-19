@@ -34,8 +34,6 @@
 // ASKAPsoft includes
 #include "Common/ParameterSet.h"
 #include "boost/shared_ptr.hpp"
-#include "boost/tuple/tuple.hpp"
-#include "boost/tuple/tuple_comparison.hpp"
 #include "casacore/casa/aipstype.h"
 #include "casacore/ms/MeasurementSets/MeasurementSet.h"
 #include "casacore/ms/MeasurementSets/MSColumns.h"
@@ -143,7 +141,7 @@ class AmplitudeFlagger : public IFlagger {
         std::map<rowKey, casa::Vector<casa::Bool> > itsMaskTimes;
         std::map<rowKey, casa::Int> itsCountTimes;
 
-        // Generate a tuple for a given row and polarisation
+        // Generate a key for a given row and polarisation
         rowKey getRowKey(casa::MSColumns& msc, const casa::uInt row,
             const casa::uInt corr);
 

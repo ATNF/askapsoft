@@ -27,12 +27,16 @@
 #ifndef ASKAP_CP_PIPELINETASKS_IFLAGGER_H
 #define ASKAP_CP_PIPELINETASKS_IFLAGGER_H
 
+// Tuple row key causes performance issues - using integers instead - this might overflow for large Nant*Nfeed
+// Uncomment next line to use tuples.h
+//#define TUPLE_INDEX
 // ASKAPsoft includes
 #include "casacore/ms/MeasurementSets/MSColumns.h"
 #include "casacore/casa/aipstype.h"
+#ifdef TUPLE_INDEX
 #include "boost/tuple/tuple.hpp"
 #include "boost/tuple/tuple_comparison.hpp"
-
+#endif
 // Local package includes
 #include "cflag/FlaggingStats.h"
 
@@ -41,7 +45,11 @@ namespace cp {
 namespace pipelinetasks {
 
 //                   fieldID    feed1      feed2      antenna1   antenna2   polarisation
+#ifdef TUPLE_INDEX
 typedef boost::tuple<casa::Int, casa::Int, casa::Int, casa::Int, casa::Int, casa::Int> rowKey;
+#else
+typedef casa::uLong rowKey;
+#endif
 
 /// @brief An interface for classes that perform flagging on a per row basis.
 class IFlagger {

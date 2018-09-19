@@ -34,13 +34,13 @@
 #include <map>
 #include <limits>
 #include <vector>
+#include <algorithm>
+#include <cmath>
 
 // ASKAPsoft includes
 #include "askap/AskapLogging.h"
 #include "askap/AskapError.h"
 #include "boost/shared_ptr.hpp"
-#include "boost/tuple/tuple.hpp"
-#include "boost/tuple/tuple_comparison.hpp"
 #include "Common/ParameterSet.h"
 #include "casacore/casa/aipstype.h"
 #include "casacore/casa/Arrays/ArrayMath.h"
@@ -73,6 +73,7 @@ vector< boost::shared_ptr<IFlagger> > StokesVFlagger::build(
 
         const float threshold = subset.getFloat("threshold", 5.0);
         const bool robustStatistics = subset.getBool("useRobustStatistics", false);
+        const bool quickRobust = subset.getBool("useQuickRobust", false);
         const bool integrateSpectra = subset.getBool("integrateSpectra", false);
         const float spectraThreshold = subset.getFloat("integrateSpectra.threshold", 5.0);
         const bool integrateTimes = subset.getBool("integrateTimes", false);
@@ -81,7 +82,11 @@ vector< boost::shared_ptr<IFlagger> > StokesVFlagger::build(
         ASKAPLOG_INFO_STR(logger, "Parameter Summary:");
         ASKAPLOG_INFO_STR(logger, "Searching for outliers with a "<<threshold<<"-sigma cutoff");
         if (robustStatistics) {
-            ASKAPLOG_INFO_STR(logger, "Using robust statistics");
+            if (quickRobust) {
+                ASKAPLOG_INFO_STR(logger, "Using approximate robust statistics");
+            } else {
+                ASKAPLOG_INFO_STR(logger, "Using robust statistics");
+            }
         }
         if (integrateSpectra) {
             ASKAPLOG_INFO_STR(logger,
@@ -96,14 +101,16 @@ vector< boost::shared_ptr<IFlagger> > StokesVFlagger::build(
 
         flaggers.push_back(boost::shared_ptr<IFlagger>
             (new StokesVFlagger(threshold,robustStatistics,integrateSpectra,
-                                spectraThreshold,integrateTimes,timesThreshold)));
+                                spectraThreshold,integrateTimes,timesThreshold,
+                                quickRobust)));
     }
     return flaggers;
 }
 
 StokesVFlagger:: StokesVFlagger(float threshold, bool robustStatistics,
                                 bool integrateSpectra, float spectraThreshold,
-                                bool integrateTimes, float timesThreshold)
+                                bool integrateTimes, float timesThreshold,
+                                bool quickRobust)
     : itsStats("StokesVFlagger"),
       itsThreshold(threshold), itsRobustStatistics(robustStatistics),
       itsIntegrateSpectra(integrateSpectra), itsSpectraThreshold(spectraThreshold),
@@ -201,7 +208,7 @@ void StokesVFlagger::processRow(casa::MSColumns& msc, const casa::uInt pass,
         // Convert to a casa::Vector so we can use ArrayMath functions
         // to determine the mean and stddev
         casa::Vector<casa::Float> amps(tmpamps);
- 
+
         // Flag all correlations where the Stokes V product
         // is greater than the threshold
         casa::Float sigma, avg;
@@ -210,7 +217,7 @@ void StokesVFlagger::processRow(casa::MSColumns& msc, const casa::uInt pass,
             avg = statsVector[0];
             sigma = statsVector[1];
             // if min and max are bounded, they all are.
-            // so skip if there is not other reason to loop over frequencies
+            // so skip if there is no other reason to loop over frequencies
             if ((statsVector[2] >= (avg - (sigma * itsThreshold))) &&
                 (statsVector[3] <= (avg + (sigma * itsThreshold))) &&
                 !itsIntegrateSpectra && !itsIntegrateTimes) {
@@ -221,14 +228,14 @@ void StokesVFlagger::processRow(casa::MSColumns& msc, const casa::uInt pass,
             avg = mean(amps);
             sigma = stddev(amps);
         }
- 
+
         // If stokes-v can't be formed due to lack of the necessary input products
         // then vdata will contain all zeros. In this case, no flagging can be done.
         const casa::Float epsilon = std::numeric_limits<casa::Float>::epsilon();
         if (near(sigma, 0.0, epsilon) && near(avg, 0.0, epsilon)) {
             return;
         }
- 
+
         // Apply threshold based flagging and accumulate any averages
         // only need these if itsIntegrateTimes
         casa::Double aveTime = 0.0;
@@ -325,78 +332,69 @@ void StokesVFlagger::processRow(casa::MSColumns& msc, const casa::uInt pass,
 casa::Vector<casa::Float>StokesVFlagger::getRobustStats(
     casa::MaskedArray<casa::Float> maskedAmplitudes)
 {
-    casa::Vector<casa::Float> statsVector(4);
-   
-    // Grab unflagged frequency channels and sort their amplitudes.
-    // From casacore comments:
-    // "use HeapSort as it's performance is guaranteed, quicksort is often
-    // extremely slow (O(n*n)) for inputs with many successive duplicates".
-
     // extract all of the unflagged amplitudes
-    casa::Array<casa::Float>
-        sortedAmplitudes = maskedAmplitudes.getCompressedArray();
+    casa::Vector<casa::Float> amplitudes = maskedAmplitudes.getCompressedArray();
 
     // return with zeros if all of the data are flagged
-    if (sortedAmplitudes.shape()[0] == 0) {
-        statsVector.set(0.0);
+    if (amplitudes.nelements() == 0) {
+        casa::Vector<casa::Float> statsVector(4,0.0);
         return(statsVector);
     }
-
-    // sort the unflagged amplitudes
-    casa::Int numUnflagged=GenSort<casa::Float>::sort(sortedAmplitudes,
-        Sort::Ascending, Sort::HeapSort);
-
-    // estimate stats, assuming Gaussian noise dominates the frequency channels.
-    // (50% of a Gaussian dist. is within 0.67448 sigma of the mean...)
-    statsVector[0] = sortedAmplitudes.data()[numUnflagged/2]; // median
-    statsVector[1] = (sortedAmplitudes.data()[3*numUnflagged/4] - 
-        sortedAmplitudes.data()[numUnflagged/4]) / 1.34896; // sigma from IQR
-    statsVector[2] = sortedAmplitudes.data()[0]; // min
-    statsVector[3] = sortedAmplitudes.data()[numUnflagged-1]; // max
-
-    return(statsVector);   
-
+    return getRobustStats(amplitudes);
 }
+
 // return the median, the interquartile range, and the min/max of a non-masked array
 casa::Vector<casa::Float>StokesVFlagger::getRobustStats(
     casa::Vector<casa::Float> amplitudes)
 {
+    casa::Float minVal, maxVal;
+    casa::minMax(minVal,maxVal,amplitudes);
+
+    // Now find median and IQR
+    // Use the fact that nth_element does a partial sort:
+    // all elements before the selected element will be smaller
+    casa::uInt n = amplitudes.nelements();
+    std::vector<casa::Float> vamp = amplitudes.tovector();
+    const casa::uInt Q1 = n / 4;
+    const casa::uInt Q2 = n / 2;
+    const casa::uInt Q3 = 3 * n /4;
+    std::nth_element(vamp.begin(),        vamp.begin() + Q2, vamp.end());
+    std::nth_element(vamp.begin(),        vamp.begin() + Q1, vamp.begin() + Q2);
+    std::nth_element(vamp.begin() + Q2+1, vamp.begin() + Q3, vamp.end());
+
     casa::Vector<casa::Float> statsVector(4);
-   
-    // From casacore comments:
-    // "use HeapSort as it's performance is guaranteed, quicksort is often
-    // extremely slow (O(n*n)) for inputs with many successive duplicates".
-
-    // sort the unflagged amplitudes
-    casa::Int num=GenSort<casa::Float>::sort(amplitudes,
-        Sort::Ascending, Sort::HeapSort);
-   
-    // estimate stats, assuming Gaussian noise dominates the frequency channels.
-    // (50% of a Gaussian dist. is within 0.67448 sigma of the mean...)
-    statsVector[0] = amplitudes.data()[num/2]; // median
-    statsVector[1] = (amplitudes.data()[3*num/4] - 
-                      amplitudes.data()[num/4]) / 1.34896; // sigma from IQR
-    statsVector[2] = amplitudes.data()[0]; // min
-    statsVector[3] = amplitudes.data()[num-1]; // max
-
-    return(statsVector);   
-
+    statsVector[0] = vamp[Q2]; // median
+    statsVector[1] = (vamp[Q3] - vamp[Q1]) / 1.34896; // sigma from IQR
+    statsVector[2] = minVal; // min
+    statsVector[3] = maxVal; // max
+    return(statsVector);
 }
 
-// Generate a tuple for a given row and polarisation
+// Generate a key for a given row and polarisation
 rowKey StokesVFlagger::getRowKey(
     const casa::MSColumns& msc,
     const casa::uInt row)
 {
 
     // looking for outliers in a single polarisation, so set the corr key to zero
+#ifdef TUPLE_INDEX
     return boost::make_tuple(msc.fieldId()(row),
                              msc.feed1()(row),
                              msc.feed2()(row),
                              msc.antenna1()(row),
                              msc.antenna2()(row),
                              0); // corr
-
+#else
+    casa::Int field = msc.fieldId()(row);
+    casa::Int feed1 = msc.feed1()(row);
+    //feed2 = msc.feed2()(row);
+    casa::Int ant1  = msc.antenna1()(row);
+    casa::Int ant2  = msc.antenna2()(row);
+    casa::Int nant = msc.antenna().nrow();
+    casa::Int nfeed = msc.feed().nrow();
+    if (nant > 0 && nfeed >= nant) nfeed /= nant;
+    return (((field*nfeed+feed1)*nant+ant2)*nant+ant1);
+#endif
 }
 
 void StokesVFlagger::updateTimeVectors(const rowKey &key, const casa::uInt pass)
@@ -451,16 +449,16 @@ void StokesVFlagger::setFlagsFromIntegrations(void)
                     maskSpectrum[chan] = casa::False;
                 }
             }
-         
+
             // generate the flagging stats. could fill the unflagged spectrum
             // directly in the preceding loop, but the full vector is needed below
             casa::MaskedArray<casa::Float>
                 maskedAmplitudes(aveSpectrum, maskSpectrum);
-            casa::Vector<casa::Float>
-                statsVector = getRobustStats(maskedAmplitudes);
+            casa::Vector<casa::Float> statsVector =
+                getRobustStats(maskedAmplitudes);
             casa::Float median = statsVector[0];
             casa::Float sigma_IQR = statsVector[1];
-         
+
             // check min and max relative to thresholds.
             // do not loop over data again if all unflagged channels are good
             if ((statsVector[2] < median-itsSpectraThreshold*sigma_IQR) ||
@@ -473,9 +471,9 @@ void StokesVFlagger::setFlagsFromIntegrations(void)
                         maskSpectrum[chan]=casa::False;
                     }
                 }
-         
+
             }
-         
+
         }
 
     }
@@ -487,23 +485,23 @@ void StokesVFlagger::setFlagsFromIntegrations(void)
 
             // reset the counter for this key
             itsCountTimes[it->first] = -1;
-         
+
             // get the spectra
             casa::Vector<casa::Float> aveTime = it->second;
             casa::Vector<casa::Bool> maskTime = itsMaskTimes[it->first];
-         
+
             // generate the flagging stats
             casa::MaskedArray<casa::Float> maskedAmplitudes(aveTime, maskTime);
             casa::Vector<casa::Float>
                 statsVector = getRobustStats(maskedAmplitudes);
             casa::Float median = statsVector[0];
             casa::Float sigma_IQR = statsVector[1];
-         
+
             // check min and max relative to thresholds.
             // do not loop over data again if all unflagged times are good
             if ((statsVector[2] < median-itsTimesThreshold*sigma_IQR) ||
                 (statsVector[3] > median+itsTimesThreshold*sigma_IQR)) {
-         
+
                 for (size_t t = 0; t < aveTime.size(); ++t) {
                     if (maskTime[t] == casa::False) continue;
                     if ((aveTime[t] < median-itsTimesThreshold*sigma_IQR) ||
@@ -511,7 +509,7 @@ void StokesVFlagger::setFlagsFromIntegrations(void)
                         maskTime[t] = casa::False;
                     }
                 }
-         
+
             }
 
         }
@@ -521,4 +519,3 @@ void StokesVFlagger::setFlagsFromIntegrations(void)
     itsAverageFlagsAreReady = casa::True;
 
 }
-
