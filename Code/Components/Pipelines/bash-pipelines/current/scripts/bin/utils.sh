@@ -534,6 +534,18 @@ function setImageBase()
 
 }
 
+function getMSname()
+{
+    # Returns just the filename of the science MS, stripping off the
+    # leading directories and the .ms suffix. For example, the MS
+    # /path/to/2016-01-02-0345.ms returns 2016-01-02-0345
+    # Usage:     getMSname MS
+    # Returns:   $msname
+
+    msname=${1##*/}
+    msname=${msname%%.*}
+}
+
 
 # A function to work out the measurement set names for the
 # full-resolution, spectral-line and channel-averaged cases, given the
@@ -791,19 +803,6 @@ function dataSelectionSelfcalLoop()
 
 ##############################
 # BEAM FOOTPRINTS AND CENTRES
-
-function getMSname()
-{
-    # Returns just the filename of the science MS, stripping off the
-    # leading directories and the .ms suffix. For example, the MS
-    # /path/to/2016-01-02-0345.ms returns 2016-01-02-0345
-    # Usage:     getMSname MS
-    # Returns:   $msname
-
-    msname=${1##*/}
-    msname=${msname%%.*}
-}
-
 
 # Function to set the arguments to footprint.py, based on the
 # input parameters. They only contribute if they are not blank.
