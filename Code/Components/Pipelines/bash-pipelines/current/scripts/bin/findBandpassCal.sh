@@ -250,6 +250,41 @@ elif [ "\${BANDPASS_SMOOTH_TOOL}" == "smooth_bandpass" ]; then
 
 fi
 
+EOF
+
+    if [ "${SUBMIT_JOBS}" == "true" ]; then
+        ID_CBPCAL=$(sbatch ${FLAG_CBPCAL_DEP} "$sbatchfile" | awk '{print $4}')
+        recordJob "${ID_CBPCAL}" "Finding bandpass calibration with 1934-638, with flags \"$FLAG_CBPCAL_DEP\""
+    else
+        echo "Would find bandpass calibration with slurm file $sbatchfile"
+    fi
+
+    echo " "
+
+
+    sbatchfile="$slurms/bandpass_validation.sbatch"
+    cat > "$sbatchfile" <<EOF
+#!/bin/bash -l
+${SLURM_CONFIG}
+#SBATCH --time=${JOB_TIME_FIND_BANDPASS}
+#SBATCH --ntasks=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --job-name=bpvalidate
+${exportDirective}
+#SBATCH --output=$slurmOut/slurm-findBandpass-%j.out
+
+${askapsoftModuleCommands}
+
+BASEDIR=${BASEDIR}
+cd $OUTPUT
+. ${PIPELINEDIR}/utils.sh
+
+# Make a copy of this sbatch file for posterity
+sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
+thisfile=$sbatchfile
+cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
+
+
 runValidation=${DO_RUN_VALIDATION}
 if [ "\${runValidation}" == "true" ]; then
 
@@ -270,16 +305,20 @@ if [ "\${runValidation}" == "true" ]; then
     fi
 
 fi
-
 EOF
 
     if [ "${SUBMIT_JOBS}" == "true" ]; then
-        ID_CBPCAL=$(sbatch ${FLAG_CBPCAL_DEP} "$sbatchfile" | awk '{print $4}')
-        recordJob "${ID_CBPCAL}" "Finding bandpass calibration with 1934-638, with flags \"$FLAG_CBPCAL_DEP\""
+        DEP=${FLAG_CBPCAL_DEP}
+        DEP=$(addDep "$DEP" "$ID_CBPCAL")
+        ID_BPVAL=$(sbatch ${DEP} "$sbatchfile" | awk '{print $4}')
+        recordJob "${ID_BPVAL}" "Running validation of bandpass calibration, with flags \"$FLAG_CBPCAL_DEP\""
     else
-        echo "Would find bandpass calibration with slurm file $sbatchfile"
+        echo "Would run validation of bandpass calibration with slurm file $sbatchfile"
     fi
 
     echo " "
+
+
+    
 
 fi
