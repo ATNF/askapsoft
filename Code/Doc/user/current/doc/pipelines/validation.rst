@@ -42,7 +42,13 @@ When the final mosaicking is completed, a summary plot showing all beams for a g
    :align: center
 
 These field-based plots will be found in the *diagnostics* directory, along with a directory containing the individual beam statistics catalogues (cubeStats and beamlogs).
-           
+
+The scripts used to produce these plots are as follows:
+
+ * *findCubeStatistics.py* - Calculates the statistics for a single cube, and produces the first plot shown above. Can be run under MPI with multiple cores - the available channels are distributed across the cores, and the information gathered at the end. Run via `findCubeStatistics.py -c <imageCube.fits>`
+ * *beamwiseCubeStats.py* - Produces the second plot shown above, as well as the same plot but for the min/max/1-percentile spectra. This assumes all beam images have the same name and are in the same directory. You provide it with the beam00 image, and it will automatically find the rest. Run via `beamwiseCubeStats.py -c image.i.cube.beam00.fits` (even if you don't have a beam00 image, still give that as the input).
+ * *beamwisePSFstats.py* - Produces the equivalent of the second plot shown above, but for the PSF statistics. Again, this assumes all beam images have the same name and are in the same directory. You provide it with the beam00 image, and it will automatically find the rest. Run via `beamwisePSFstats.py -c image.i.cube.beam00.fits` (even if you don't have a beam00 image, still give that as the input).
+
 
 Continuum image diagnostics
 ---------------------------
