@@ -483,13 +483,13 @@ EOF
                 fi
                 if [ "$(whoami)" == "askapops" ]; then
                     if [ $err -eq 0 ]; then
-                        schedblock annotate -i ${SB_JIRA_ISSUE} -c "Commencing processing. SB ${SB_SCIENCE} transitioned to PROCESSING." ${SB_SCIENCE}
+                        schedblock annotate -p ${JIRA_ANNOTATION_PROJECT} -c "Commencing processing. SB ${SB_SCIENCE} transitioned to PROCESSING." ${SB_SCIENCE}
                         annotErr=$?
                         if [ ${annotErr} -ne 0 ]; then
                             echo "$(date): ERROR - 'schedblock annotate' failed with error code ${annotErr}" | tee -a "${ERROR_FILE}"
                         fi
                     else
-                        schedblock annotate -i ${SB_JIRA_ISSUE} -c "ERROR -- Failed to transition SB ${SB_SCIENCE} to PROCESSING." ${SB_SCIENCE}
+                        schedblock annotate -p ${JIRA_ANNOTATION_PROJECT} -c "ERROR -- Failed to transition SB ${SB_SCIENCE} to PROCESSING." ${SB_SCIENCE}
                         annotErr=$?
                         if [ ${annotErr} -ne 0 ]; then
                             echo "$(date): ERROR - 'schedblock annotate' failed with error code ${annotErr}" | tee -a "${ERROR_FILE}"
@@ -543,13 +543,13 @@ EOF
                 fi
                 if [ "$(whoami)" == "askapops" ]; then
                     if [ $err -eq 0 ]; then
-                        schedblock annotate -i ${SB_JIRA_ISSUE} -c "Commencing processing. SB ${SB_1934} transitioned to PROCESSING." ${SB_SCIENCE}
+                        schedblock annotate -p ${JIRA_ANNOTATION_PROJECT} -c "Commencing processing. SB ${SB_1934} transitioned to PROCESSING." ${SB_SCIENCE}
                         annotErr=$?
                         if [ ${annotErr} -ne 0 ]; then
                             echo "$(date): ERROR - 'schedblock annotate' failed with error code ${annotErr}" | tee -a "${ERROR_FILE}"
                         fi
                     else
-                        schedblock annotate -i ${SB_JIRA_ISSUE} -c "ERROR -- Failed to transition SB ${SB_1934} to PROCESSING." ${SB_SCIENCE}
+                        schedblock annotate -p ${JIRA_ANNOTATION_PROJECT} -c "ERROR -- Failed to transition SB ${SB_1934} to PROCESSING." ${SB_SCIENCE}
                         annotErr=$?
                         if [ ${annotErr} -ne 0 ]; then
                             echo "$(date): ERROR - 'schedblock annotate' failed with error code ${annotErr}" | tee -a "${ERROR_FILE}"

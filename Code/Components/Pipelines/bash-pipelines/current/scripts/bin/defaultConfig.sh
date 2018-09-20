@@ -1131,6 +1131,9 @@ WRITE_CASDA_READY=false
 # READY file has been written
 TRANSITION_SB=false
 
+# JIRA project to which SB annotations should be sent
+JIRA_ANNOTATION_PROJECT="ASKAPOBS"
+
 # Base directory for casdaupload output
 CASDA_UPLOAD_DIR=/group/casda/prd
 
@@ -1138,5 +1141,3 @@ CASDA_UPLOAD_DIR=/group/casda/prd
 POLLING_DELAY_SEC=1800
 # Maximum time we wait to check for DONE file
 MAX_POLL_WAIT_TIME=172800
-# JIRA issue to which SB annotations should be sent
-SB_JIRA_ISSUE="ASKAPSUP-345"

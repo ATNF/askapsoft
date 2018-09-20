@@ -238,13 +238,13 @@ if [ "\${writeREADYfile}" == "true" ] && [ "\${doTransition}" == "true" ]; then
     fi
     if [ "\$(whoami)" == "askapops" ]; then
         if [ \$err -eq 0 ]; then
-            schedblock annotate -i ${SB_JIRA_ISSUE} -c "Processing complete. SB ${SB_SCIENCE} transitioned to PENDINGARCHIVE." $SB_SCIENCE
+            schedblock annotate -p ${JIRA_ANNOTATION_PROJECT} -c "Processing complete. SB ${SB_SCIENCE} transitioned to PENDINGARCHIVE." $SB_SCIENCE
             annotErr=\$?
             if [ \${annotErr} -ne 0 ]; then
                 echo "\$(date): ERROR - 'schedblock annotate' failed with error code \${annotErr}" | tee -a ${ERROR_FILE}
             fi
         else
-            schedblock annotate -i ${SB_JIRA_ISSUE} -c "ERROR -- Processing complete but SB ${SB_SCIENCE} failed to transition." ${SB_SCIENCE}
+            schedblock annotate -p ${JIRA_ANNOTATION_PROJECT} -c "ERROR -- Processing complete but SB ${SB_SCIENCE} failed to transition." ${SB_SCIENCE}
             annotErr=\$?
             if [ \${annotErr} -ne 0 ]; then
                 echo "\$(date): ERROR - 'schedblock annotate' failed with error code \${annotErr}" | tee -a ${ERROR_FILE}
@@ -323,7 +323,7 @@ if [ -e "${CASDA_DIR}/ERROR" ]; then
     echo "\$(date): ERROR - CASDA ingest failed. SB ${SB_SCIENCE} not transitioned to COMPLETED." | tee -a ${ERROR_FILE}
     if [ "\$(whoami)" == "askapops" ]; then
         loadModule askapcli
-        schedblock annotate -i "${SB_JIRA_ISSUE}" -c "ERROR -- CASDA ingest for SB ${SB_SCIENCE} failed with error:\\n\$errmsg" ${SB_SCIENCE}
+        schedblock annotate -p ${JIRA_ANNOTATION_PROJECT} -c "ERROR -- CASDA ingest for SB ${SB_SCIENCE} failed with error:\\n\$errmsg" ${SB_SCIENCE}
         annotErr=\$?
         unloadModule askapcli
         if [ \${annotErr} -ne 0 ]; then
@@ -341,13 +341,13 @@ elif [ -e "${CASDA_DIR}/DONE" ]; then
     fi
     if [ "\$(whoami)" == "askapops" ]; then
         if [ \$err -eq 0 ]; then
-            schedblock annotate -i "${SB_JIRA_ISSUE}" -c "Archiving complete. SB ${SB_SCIENCE} transitioned to COMPLETED." ${SB_SCIENCE}
+            schedblock annotate -p ${JIRA_ANNOTATION_PROJECT} -c "Archiving complete. SB ${SB_SCIENCE} transitioned to COMPLETED." ${SB_SCIENCE}
             annotErr=\$?
             if [ \${annotErr} -ne 0 ]; then
                 echo "\$(date): ERROR - 'schedblock annotate' failed with error code \${annotErr}" | tee -a ${ERROR_FILE}
             fi
         else
-            schedblock annotate -i "${SB_JIRA_ISSUE}" -c "ERROR -- Archiving complete but SB ${SB_SCIENCE} failed to transition." ${SB_SCIENCE}
+            schedblock annotate -p ${JIRA_ANNOTATION_PROJECT} -c "ERROR -- Archiving complete but SB ${SB_SCIENCE} failed to transition." ${SB_SCIENCE}
             annotErr=\$?
             if [ \${annotErr} -ne 0 ]; then
                 echo "\$(date): ERROR - 'schedblock annotate' failed with error code \${annotErr}" | tee -a ${ERROR_FILE}
@@ -359,7 +359,7 @@ elif [ "\$ageOfReady" -gt "${MAX_POLL_WAIT_TIME}" ]; then
     echo "\$(date): ERROR - CASDA deposit polling timed out! Waited longer than ${MAX_POLL_WAIT_TIME} sec - SB ${SB_SCIENCE} not transitioned to COMPLETED" | tee -a \${ERROR_FILE}
     if [ "\$(whoami)" == "askapops" ]; then
         loadModule askapcli
-        schedblock annotate -c "ERROR -- CASDA deposit has not completed within ${MAX_POLL_WAIT_TIME} sec - SB ${SB_SCIENCE} not transitioned to COMPLETED" $SB_SCIENCE
+        schedblock annotate -p ${JIRA_ANNOTATION_PROJECT} -c "ERROR -- CASDA deposit has not completed within ${MAX_POLL_WAIT_TIME} sec - SB ${SB_SCIENCE} not transitioned to COMPLETED" $SB_SCIENCE
         annotErr=\$?
         unloadModule askapcli
         if [ \${annotErr} -ne 0 ]; then
