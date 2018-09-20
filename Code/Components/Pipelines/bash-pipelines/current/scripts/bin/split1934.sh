@@ -149,12 +149,15 @@ if [ "\${inputMSlist}" == "" ]; then
     exit 1
 fi
 
+echo "Datasets to be split and merged are:"
+echo "\$inputMSlist"
+
 COUNT=0
 mergelist=""
 for dataset in \${inputMSlist}; do
 
-    ms=$(echo $dataset | awk -F':' '{print \$1}')
-    chanRange=$(echo $dataset | awk -F':' '{print \$2}')
+    ms=\$(echo \$dataset | awk -F':' '{print \$1}')
+    chanRange=\$(echo \$dataset | awk -F':' '{print \$2}')
 
     sedstr="s/\.ms/_\${COUNT}\.ms/g"
     outputms=\$(echo \$finalMS | sed -e \$sedstr)
@@ -224,7 +227,7 @@ srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${mslist} --ful
 
 # Remove interim MSs if required.
 purgeMSs=${PURGE_INTERIM_MS_1934}
-if [ "\${purgeMS}" == "true" ]; then
+if [ "\${purgeMSs}" == "true" ]; then
     for ms in \${mergelist}; do
         rm -rf \${ms}
     done

@@ -84,12 +84,15 @@ if [ "\${inputMSlist}" == "" ]; then
     exit 1
 fi
 
+echo "Datasets to be split and merged are:"
+echo "\$inputMSlist"
+
 COUNT=0
 mergelist=""
 for dataset in \${inputMSlist}; do
 
-    ms=$(echo $dataset | awk -F':' '{print \$1}')
-    chanRange=$(echo $dataset | awk -F':' '{print \$2}')
+    ms=\$(echo \$dataset | awk -F':' '{print \$1}')
+    chanRange=\$(echo \$dataset | awk -F':' '{print \$2}')
 
     sedstr="s/\.ms/_\${COUNT}\.ms/g"
     outputms=\$(echo \$finalMS | sed -e \$sedstr)
@@ -210,9 +213,12 @@ if [ "\${inputMSlist}" == "" ]; then
    exit 1
 fi
 
+echo "Datasets to be merged are:"
+echo "\$inputMSlist"
+
 mergeList=""
 for dataset in \${inputMSlist}; do
-    ms=$(echo $dataset | awk -F':' '{print \$1}')
+    ms=\$(echo \$dataset | awk -F':' '{print \$1}')
     mergeList="\${mergeList} \$ms"
 done
 commandLineFlags="-c ${TILE_NCHAN_SCIENCE} -o \${msSci} \${mergeList}"

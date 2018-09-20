@@ -202,10 +202,6 @@ EOF
         NUM_CHAN_1934=$(echo "$CHAN_RANGE_1934" | awk -F'-' '{print $2-$1+1}')
     fi
 
-    if [ "${NUM_CHAN}" -lt "${NUM_CHAN_1934}" ]; then
-        echo "ERROR! Number of channels requested for the calibration observation (${NUM_CHAN_1934}, from \"${CHAN_RANGE_1934}\") is bigger than the number in the MS (${NUM_CHAN})."
-        exit 1
-    fi
 
     ######
     # Get the schedblock info, so that we can get the number of beams
@@ -363,10 +359,6 @@ EOF
         fi
     fi
 
-    if [ "${NUM_CHAN}" -lt "${NUM_CHAN_SCIENCE}" ]; then
-        echo "ERROR! Number of channels requested for the science observation (${NUM_CHAN_SCIENCE}, from \"${CHAN_RANGE_SCIENCE}\") is bigger than the number in the MS (${NUM_CHAN})."
-        exit 1
-    fi
 
     ####
     # Define the list of fields and associated tiles
