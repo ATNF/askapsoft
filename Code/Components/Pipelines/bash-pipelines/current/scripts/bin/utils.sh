@@ -696,7 +696,7 @@ function find1934MSnames()
 function findScienceMSmetadataFile()
 {
     if [ "${NEED_TO_MERGE_SCI}" == "true" ]; then
-        findScienceMSnames()
+        findScienceMSnames
         getMSname $msSci
         MS_METADATA="$metadata/mslist-${msname}_beam${BEAM}.txt"
     else
@@ -719,7 +719,7 @@ function findScienceMSmetadataFile()
 function find1934MSmetadataFile()
 {
     if [ "${NEED_TO_MERGE_SCI}" == "true" ]; then
-        find1934MSnames()
+        find1934MSnames
         getMSname $msCal
         MS_METADATA_CAL="$metadata/mslist-cal-${msname}_beam${BEAM}.txt"
     else
