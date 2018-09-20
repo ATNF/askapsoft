@@ -5,44 +5,54 @@ This page summarises the key changes in each tagged release of
 ASKAPsoft. This replicates the CHANGES file that is included in the
 code base.
 
-Next release
-------------
+0.22.0 (20 September 2018)
+--------------------------
 
-The next release, available as 0.22b modules on galaxy, contain the
-following fixes and improvements:
+This release sees a number of changes & improvements to both the processing software and the pipeline scripts.
 
 Pipelines:
 
- * The CASDA upload script was erroneously including multiple versions
-   of the taylor.1 images, due to a bug introduced in 0.21.0.
- * Some FITS files were not having their header keywords updated
-   correctly. This has now been fixed and streamlined.
- * The DO_MAKE_THUMBNAILS option is now true by default.
+ * There are new diagnostic plots produced, particularly for the spectral & continuum cubes. There is a python script run immediately following the imaging to calculate a range of statistics on a channel-by-channel basis, and this data is plotted on a per-image basis, as well as an overview plot showing the statistics for each beam at once.
+ * The ability to specify the number of cores used for the continuum imaging has been improved, to make it more flexible and work better with slurm.
+ * The behaviour of source-finding in the selfcal has changed. We now fit the full set of Gaussian parameters, and require contiguous pixels for the islands. 
+ * Several bugs were fixed:
+   - Some FITS files were not having their header keywords updated correctly. This has now been fixed and streamlined.
+   - The CASDA upload script was erroneously including multiple versions of the taylor.1 images, due to a bug introduced in 0.21.0. It was also dropping a few .fits suffixes in certain situations.
+   - The cmodel-based continuum subtraction script had a bug with an undefined local variable that occured with particular parameter settings.s
+   - The clean-model-based self-calibration script was getting the model image name wrong for Taylor-term images.
+ * There are a number of changes to the default parameters: 
+   - The DO_MAKE_THUMBNAILS option is now true by default.
+   - There is a new DO_VALIDATION_SCIENCE (true by default) to run the cube validation.
+   - The snapshot imaging has been turned off by default, as this has
+     proved to be more reliable in terms of image quality. Along with
+     this, the number of w-planes has a default value that changes
+     with the snapshot option: snapshot imaging has 99, non-snapshot
+     imaging has 599.
+   - The number of channels in the MS tile is exposed as a parameter for the bandpass & science datasets, taking the same default value as previously (54).
+   - The "solver.Clean.solutiontype" parameter is exposed as a pipeline parameter for all imaging jobs.
+   - The SB_JIRA_ISSUE is replaced by JIRA_ANNOTATION_PROJECT for schedblock annotations, although this functionality is currently only available to the askapops user.
 
 Applications:
 
- * The Selavy HI catalogue now has better defined default values, and
-   the NaN values that were appearing have been fixed (through use of
-   masked arrays when fitting to the moment-0 map).
- * The FITS accessor interface now better handles missing header
-   keywords - if they are not present it now logs a warning but
-   doesn't exit.
- * The deconvolved sizes in the Selavy components catalogue are now
-   calculated with better floating-point arithmetic, to avoid rare
-   cases of NaNs.
- * The casdaupload utility was leaving out the path to measurement
-   sets when making the XML interface file, even when the absolute
-   path option was being requested. This is now fixed and all
-   artifacts will have their absolute path used in this mode.
- * Similarly, checksums for the thumbnail images were not being
-   created by casdaupload. This has been remedied.
- * Improvements to the efficiency of mssplit.
- * Primary beam factory (used by linmos) able to handle elliptical
-   Gaussian beams. Not fully implemented within linmos yet.
- * A new gridder AltWProjectVisGridder that allows the dumping of
-   uvgrids to casa images.
- * Caching in the spectral-line imaging of imager is now done by
-   channel.
+ * Selavy:
+   - The Selavy HI catalogue now has better defined default values, and the NaN values that were appearing have been fixed (through use of masked arrays when fitting to the moment-0 map).
+   - Selavy was previously occasionally dropping components from the catalogue through the application of acceptance criteria. This is now optional, and off by default.
+   - Selavy was failing to calculate spectral indices in certain cases - this is now fixed.
+   - The deconvolved sizes in the Selavy components catalogue are now calculated with better floating-point arithmetic, to avoid rare cases of NaNs.
+   - The column widths for the VOTable catalogues are more tightly controlled, in line with the CASDA software.
+ * Imaging:
+   - Primary beam factory (used by linmos) able to handle elliptical Gaussian beams. Not fully implemented within linmos yet.
+   - A new gridder AltWProjectVisGridder that allows the dumping of uvgrids to casa images.
+   - Caching in the spectral-line imaging of imager is now done by channel.
+   - The spectral-line imager will now correctly write the beam log when using multiple writers.
+   - An issue with the beam fitting failing for very elongated beams has been remedied.
+ * Casda upload:
+   - The casdaupload utility was leaving out the path to measurement sets when making the XML interface file, even when the absolute path option was being requested. This is now fixed and all artifacts will have their absolute path used in this mode.
+   - Similarly, checksums for the thumbnail images were not being created by casdaupload. This has been remedied.
+ * Other:
+   - The FITS accessor interface now better handles missing header keywords - if they are not present it now logs a warning but doesn't exit.
+   - Improvements to the efficiency of mssplit and msmerge.
+   - The user documentation has a detailed tutorial on MS(MFS) imaging.
 
 
 0.21.2 (31 July 2018)
