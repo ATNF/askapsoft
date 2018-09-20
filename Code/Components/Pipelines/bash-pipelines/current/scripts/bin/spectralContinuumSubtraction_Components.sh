@@ -99,14 +99,11 @@ cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 useContCube=${USE_CONTCUBE_FOR_SPECTRAL_INDEX}
 NUM_TAYLOR_TERMS=${NUM_TAYLOR_TERMS}
 
-log=${logs}/mslist_for_contsub_\${SLURM_JOB_ID}.log
-NCORES=1
-NPPN=1
-srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} $mslist --full "${msSci}" 1>& "\${log}"
-ra=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=RA)
+msMetadata=${MS_METADATA}
+ra=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=RA)
 ra=\$(echo \$ra | awk -F':' '{printf "%sh%sm%s",\$1,\$2,\$3}')
-dec=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=Dec)
-epoch=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=Epoch)
+dec=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Dec)
+epoch=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Epoch)
 refDirection="[\${ra}, \${dec}, \${epoch}]"
 
 mkdir -p ${contsubDir}

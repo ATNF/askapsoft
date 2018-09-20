@@ -670,15 +670,61 @@ function find1934MSnames()
 
 }
 
+# Function to provide the name of the mslist metadata file for the
+# science data. If we are merging MSs, this will relate to the final
+# merged version (which will be created on a per-beam
+# basis). Otherwise (and this is what was the standard, indeed only
+# approach), we have a single name based on the input
+# MS_INPUT_SCIENCE.
+# Requires:
+#  * MS_INPUT_SCIENCE - passed to getMSname()
+#  * NEED_TO_MERGE_SCI
+#  * BEAM (only when NEED_TO_MERGE_SCI == true)
+# Returns: MS_METADATA
+function findScienceMSmetadataFile()
+{
+    if [ "${NEED_TO_MERGE_SCI}" == "true" ]; then
+        findScienceMSnames()
+        getMSname $msSci
+        MS_METADATA="$metadata/mslist-${msname}_beam${BEAM}.txt"
+    else
+        getMSname "${MS_INPUT_SCIENCE}"
+        MS_METADATA="$metadata/mslist-${msname}.txt"
+    fi
+}
+
+# Function to provide the name of the mslist metadata file for the
+# science data. If we are merging MSs, this will relate to the final
+# merged version (which will be created on a per-beam
+# basis). Otherwise (and this is what was the standard, indeed only
+# approach), we have a single name based on the input
+# MS_INPUT_SCIENCE.
+# Requires:
+#  * MS_INPUT_1934 - passed to getMSname()
+#  * NEED_TO_MERGE_CAL
+#  * BEAM (only when NEED_TO_MERGE_CAL == true)
+# Returns: MS_METADATA_CAL
+function find1934MSmetadataFile()
+{
+    if [ "${NEED_TO_MERGE_SCI}" == "true" ]; then
+        find1934MSnames()
+        getMSname $msCal
+        MS_METADATA_CAL="$metadata/mslist-cal-${msname}_beam${BEAM}.txt"
+    else
+        getMSname "${MS_INPUT_1934}"
+        MS_METADATA_CAL="$metadata/mslist-cal-${msname}.txt"
+    fi
+}
+
+
+# Function to return a list of polarisations, separated by
+# spaces, converted from the user-input list of comma-separated
+# polarisations for the continuum cubes
+#  Required inputs:
+#     * CONTCUBE_POLARISATIONS - something like "I,Q,U,V"
+#  Returns: $POL_LIST (would convert above to "I Q U V")
 function getPolList()
 {
-    # Function to return a list of polarisations, separated by
-    # spaces, converted from the user-input list of comma-separated
-    # polarisations for the continuum cubes
-    #  Required inputs:
-    #     * CONTCUBE_POLARISATIONS - something like "I,Q,U,V"
-    #  Returns: $POL_LIST (would convert above to "I Q U V")
-
     POL_LIST=$(echo "$CONTCUBE_POLARISATIONS" | sed -e 's/,/ /g')
 
 }

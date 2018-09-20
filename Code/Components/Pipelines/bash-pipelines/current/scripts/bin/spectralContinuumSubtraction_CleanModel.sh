@@ -43,7 +43,7 @@ CContsubtract.sources.lsm.model                   = ${contsubCleanModel}
 CContsubtract.sources.lsm.nterms                  = ${NUM_TAYLOR_TERMS}"
 if [ "${NUM_TAYLOR_TERMS}" -gt 1 ]; then
     if [ "$MFS_REF_FREQ" == "" ]; then
-        freq=$CENTRE_FREQ
+        freq="\${centreFreq}"
     else
         freq=${MFS_REF_FREQ}
     fi
@@ -76,15 +76,13 @@ cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 if [ "${DIRECTION}" != "" ]; then
     modelDirection="${DIRECTION}"
 else
-    log=${logs}/mslist_for_ccontsub_\${SLURM_JOB_ID}.log
-    NCORES=1
-    NPPN=1
-    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} $mslist --full "${msSciSL}" 1>& "\${log}"
-    ra=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=RA)
-    dec=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=Dec)
-    epoch=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=Epoch)
+    msMetadata=${MS_METADATA}
+    ra=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=RA)
+    dec=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Dec)
+    epoch=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Epoch)
     modelDirection="[\${ra}, \${dec}, \${epoch}]"
 fi
+centreFreq="\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Freq)"
 
 parset=${parsets}/contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.in
 log=${logs}/contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.log

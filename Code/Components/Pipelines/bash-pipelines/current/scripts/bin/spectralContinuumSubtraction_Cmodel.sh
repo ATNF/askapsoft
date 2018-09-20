@@ -82,7 +82,7 @@ CContsubtract.sources.lsm.model                   = ${contsubDir}/${contsubCmode
 CContsubtract.sources.lsm.nterms                  = ${NUM_TAYLOR_TERMS}"
 if [ "${NUM_TAYLOR_TERMS}" -gt 1 ]; then
     if [ "$MFS_REF_FREQ" == "" ]; then
-        freq=$CENTRE_FREQ
+        freq="\${centreFreq}"
     else
         freq=${MFS_REF_FREQ}
     fi
@@ -115,19 +115,18 @@ cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 useContCube=${USE_CONTCUBE_FOR_SPECTRAL_INDEX}
 NUM_TAYLOR_TERMS=${NUM_TAYLOR_TERMS}
 
-log=${logs}/mslist_for_ccontsub_\${SLURM_JOB_ID}.log
-NCORES=1
-NPPN=1
+msMetadata=${MS_METADATA}
 DIRECTION="$DIRECTION"
 if [ "\${DIRECTION}" != "" ]; then
     modelDirection="\${DIRECTION}"
 else
-    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} $mslist --full "${msSciSL}" 1>& "\${log}"
-    ra=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=RA)
-    dec=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=Dec)
-    epoch=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=Epoch)
+    ra=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=RA)
+    dec=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Dec)
+    epoch=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Epoch)
     modelDirection="[\${ra}, \${dec}, \${epoch}]"
 fi
+bandwidth="\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Bandwidth)"
+centreFreq="\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Freq)"
 
 mkdir -p ${contsubDir}
 cd ${contsubDir}
@@ -237,12 +236,12 @@ else
 # The below specifies the GSM source is a selavy output file
 Cmodel.gsm.database       = votable
 Cmodel.gsm.file           = \${componentsCatalogue}
-Cmodel.gsm.ref_freq       = ${CENTRE_FREQ}Hz
+Cmodel.gsm.ref_freq       = \${centreFreq}Hz
 
 # General parameters
 Cmodel.bunit              = Jy/pixel
-Cmodel.frequency          = ${CENTRE_FREQ}Hz
-Cmodel.increment          = ${BANDWIDTH}Hz
+Cmodel.frequency          = \${centreFreq}Hz
+Cmodel.increment          = \${bandwidth}Hz
 Cmodel.flux_limit         = ${CONTSUB_MODEL_FLUX_LIMIT}
 Cmodel.shape              = [${NUM_PIXELS_CONT},${NUM_PIXELS_CONT}]
 Cmodel.cellsize           = [${CELLSIZE_CONT}arcsec, ${CELLSIZE_CONT}arcsec]

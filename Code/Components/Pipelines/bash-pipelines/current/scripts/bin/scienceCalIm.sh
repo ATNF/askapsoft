@@ -116,6 +116,10 @@ for FIELD in ${FIELD_LIST}; do
             findScienceMSnames
             FIELDBEAM=$(echo "$FIELD_ID" "$BEAM" | awk '{printf "F%02d_B%s",$1,$2}')
 
+            # Define the MS metadata file, either the original MS or the new merged one.
+            # Store the name in MS_METADATA
+            findScienceMSmetadataFile
+
             #. "${PIPELINEDIR}/splitScience.sh"
             . "${PIPELINEDIR}/prepareScienceData.sh"
 

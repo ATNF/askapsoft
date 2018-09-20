@@ -91,7 +91,7 @@ if [ "${DO_IT}" == "true" ]; then
     fi
 
     if [ "${CHAN_RANGE_SCIENCE}" == "" ]; then
-        channelParam="channel     = 1-${NUM_CHAN_SCIENCE}"
+        channelParam="channel     = 1-\${nChan}"
     else
         channelParam="channel     = ${CHAN_RANGE_SCIENCE}"
     fi

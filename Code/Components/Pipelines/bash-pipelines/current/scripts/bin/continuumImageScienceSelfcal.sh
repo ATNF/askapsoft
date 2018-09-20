@@ -136,19 +136,19 @@ Selavy.Weights.weightsCutoff                    = ${SELFCAL_SELAVY_WEIGHTSCUT}"
         else
             CmodelFluxLimit="# flux limit for cmodel determined from image noise - see below"
         fi
-        
+
         CmodelParset="##########
 ## Creation of the model image
 ##
 # The below specifies the GSM source is a selavy output file
 Cmodel.gsm.database       = votable
 Cmodel.gsm.file           = selavy-results.components.xml
-Cmodel.gsm.ref_freq       = ${CENTRE_FREQ}Hz
+Cmodel.gsm.ref_freq       = \${centreFreq}Hz
 
 # General parameters
 Cmodel.bunit              = Jy/pixel
-Cmodel.frequency          = ${CENTRE_FREQ}Hz
-Cmodel.increment          = ${BANDWIDTH}Hz
+Cmodel.frequency          = \${centreFreq}Hz
+Cmodel.increment          = \${bandwidth}Hz
 Cmodel.flux_limit         = ${SELFCAL_MODEL_FLUX_LIMIT}
 Cmodel.shape              = [${NUM_PIXELS_CONT},${NUM_PIXELS_CONT}]
 Cmodel.cellsize           = [${CELLSIZE_CONT}arcsec, ${CELLSIZE_CONT}arcsec]
@@ -169,9 +169,9 @@ Ccalibrator.sources.lsm.model                   = ${modelImage}
 Ccalibrator.sources.lsm.nterms                  = ${NUM_TAYLOR_TERMS}"
         if [ "${NUM_TAYLOR_TERMS}" -gt 1 ]; then
             if [ "$MFS_REF_FREQ" == "" ]; then
-                freq=$CENTRE_FREQ
+                freq="\${centreFreq}"
             else
-                freq=${MFS_REF_FREQ}
+                freq="${MFS_REF_FREQ}"
             fi
             CalibratorModelDefinition="$CalibratorModelDefinition
 Ccalibrator.visweights                          = MFS
@@ -195,7 +195,7 @@ Ccalibrator.sources.lsm.model                   = ${OUTPUT}/${modelImage}
 Ccalibrator.sources.lsm.nterms                  = ${NUM_TAYLOR_TERMS}"
         if [ "${NUM_TAYLOR_TERMS}" -gt 1 ]; then
             if [ "$MFS_REF_FREQ" == "" ]; then
-                freq=$CENTRE_FREQ
+                freq="\${centreFreq}"
             else
                 freq=${MFS_REF_FREQ}
             fi
@@ -264,13 +264,12 @@ cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 
 selfcalMethod=${SELFCAL_METHOD}
 
-log=${logs}/mslist_for_selfcal_\${SLURM_JOB_ID}.log
-NCORES=1
-NPPN=1
-srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} $mslist --full "${msSciAv}" 1>& "\${log}"
-ra=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=RA)
-dec=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=Dec)
-epoch=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$log" --val=Epoch)
+msMetadata=${MS_METADATA}
+ra=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=RA)
+dec=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Dec)
+epoch=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Epoch)
+bandwidth="\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Bandwidth)"
+centreFreq="\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Freq)"
 
 direction="${DIRECTION}"
 if [ "\${direction}" != "" ]; then

@@ -4,7 +4,7 @@
 # measurement set, including date & time of observation, and beam
 # locations.
 #
-# @copyright (c) 2017 CSIRO
+# @copyright (c) 2018 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -28,6 +28,10 @@
 #
 # @author Matthew Whiting <Matthew.Whiting@csiro.au>
 #
+
+NEED_TO_MERGE_SCI=false
+NEED_TO_MERGE_CAL=false
+
 
 ####################
 # Input Measurement Sets
@@ -71,8 +75,8 @@ if [ "${DO_1934_CAL}" == "true" ]; then
         DO_1934_CAL=false
     else
         # Set up the metadata filename - this is where the mslist information will go
-        getMSname "${MS_INPUT_1934}"
-        MS_METADATA_CAL=$metadata/mslist-cal-${msname}.txt
+        # Defines $MS_METADATA_CAL
+        find1934MSmetadataFile
     fi
 
 fi
@@ -116,10 +120,8 @@ if [ "${DO_SCIENCE_FIELD}" == "true" ]; then
         DO_SCIENCE_FIELD=false
     else
         # Set up the metadata filename - this is where the mslist information will go
-        # define $msname
-        getMSname "${MS_INPUT_SCIENCE}"
-        # Extract the MS metadata into a local file ($MS_METADATA) for parsing
-        MS_METADATA="$metadata/mslist-${msname}.txt"
+        # Defines $MS_METADATA
+        findScienceMSmetadataFile
     fi
 
 fi
@@ -332,10 +334,6 @@ EOF
 
     # Get the number of channels used
     NUM_CHAN=$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="${MS_METADATA}" --val=nChan)
-    # centre frequency - includes units
-    CENTRE_FREQ="$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="${MS_METADATA}" --val=Freq)"
-    # bandwidth - includes units
-    BANDWIDTH="$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="${MS_METADATA}" --val=Bandwidth)"
 
     if [ "${NUM_CHAN}" == "" ] || [ "${CENTRE_FREQ}" == "" ] || [ "${BANDWIDTH}" == "" ]; then
         echo "ERROR - unable to determine frequency setup (# channels/freq0/bandwidth) in science dataset"
@@ -575,8 +573,6 @@ EOF
     . "${PIPELINEDIR}/findBeamCentres.sh"
 
     # Check number of MSs
-    NEED_TO_MERGE_SCI=false
-    NEED_TO_MERGE_CAL=false
     if [ $numMSsci -ne 1 ] && [ $numMSsci -ne ${NUM_BEAMS_FOOTPRINT} ]; then
 #        echo "WARNING - have more than one MS, but not the same number as the number of beams."
         #        echo "        - progressing with beam selection, but you should check this dataset carefully."

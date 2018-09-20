@@ -34,11 +34,24 @@ ID_SPLIT_1934=""
 # number if necessary
 find1934MSnames
 
+# Define the MS metadata file that we will store the mslist output for the new, merged MS.
+# Store the name in MS_METADATA
+find1934MSmetadataFile
+
 if [ "$ms1934list" == "" ]; then 
     ms1934list="$msCal"
 else
     ms1934list="$ms1934list,$msCal"
 fi
+
+if [ "${CHAN_RANGE_1934}" == "" ]; then
+    # No selection of channels
+    chanSelection=""
+else
+    # CHAN_RANGE_SCIENCE gives global channel range - pass this to getMatchingMS.py
+    chanSelection="-c ${CHAN_RANGE_1934}"
+fi
+
 
 DO_IT=$DO_SPLIT_1934
 
@@ -123,11 +136,25 @@ cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 finalMS=${msCal}
 sb1934dir=$sb1934dir
 BEAM=$BEAM
-inputMSlist=\$(\${PIPELINEDIR}/getMatchingMS.py -d \${sb1934dir} -b \$BEAM)
+chanSelection="$chanSelection"
+inputMSlist=\$(\${PIPELINEDIR}/getMatchingMS.py -d \${sb1934dir} -b \$BEAM \$chanSelection)
+
+if [ "\${inputMSlist}" == "" ]; then
+    if [ "\${chanSelection}" == "" ]; then
+        echo "No MS found for beam \$BEAM in directory \${sb1934dir}"
+    else
+        echo "No MS found for beam \$BEAM and channel selection \${chanSelection} in directory \${sb1934dir}"
+    fi
+    echo "Exiting with error code 1"
+    exit 1
+fi
 
 COUNT=0
 mergelist=""
-for ms in \${inputMSlist}; do
+for dataset in \${inputMSlist}; do
+
+    ms=$(echo $dataset | awk -F':' '{print \$1}')
+    chanRange=$(echo $dataset | awk -F':' '{print \$2}')
 
     sedstr="s/\.ms/_\${COUNT}\.ms/g"
     outputms=\$(echo \$finalMS | sed -e \$sedstr)
@@ -146,7 +173,7 @@ outputvis   = \${outputms}
 # Can be either a single integer (e.g. 1) or a range (e.g. 1-300). The range
 # is inclusive of both the start and end, indexing is one-based.
 # Default: <no default>
-channel     = ${CHAN_RANGE_1934}
+channel     = \${chanRange}
 
 
 # Beam selection via beam ID
@@ -188,6 +215,14 @@ extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv
 if [ \$err != 0 ]; then
     exit \$err
 fi
+
+# Make the metadata file for the new MS
+metadataFile=${MS_METADATA_CAL}
+NCORES=1
+NPPN=1
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${mslist} --full \${finalMS} 1>& "\${metadataFile}"
+
+# Remove interim MSs if required.
 purgeMSs=${PURGE_INTERIM_MS_1934}
 if [ "\${purgeMS}" == "true" ]; then
     for ms in \${mergelist}; do
