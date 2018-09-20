@@ -125,6 +125,12 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 |                                               |                                     |                                    | brighter than this will be included in the model image. Parameter |
 |                                               |                                     |                                    | takes the form of a number+units string.                          |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
+| ``CONTSUB_SELAVY_FLAG_ADJACENT``              | true                                | flagAdjacent                       | Whether to enforce pixels in islands to be contiguous.            |
+|                                               |                                     | (:doc:`../analysis/selavy`)        |                                                                   |
++-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
+| ``CONTSUB_SELAVY_SPATIAL_THRESHOLD``          | 5                                   | threshSpatial                      | If ``CONTSUB_SELAVY_FLAG_ADJACENT=false``, this is the threshold  |
+|                                               |                                     | (:doc:`../analysis/selavy`)        | in pixels within which islands are joined.                        |
++-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | **Basic variables for imaging**               |                                     |                                    |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``NUM_CPUS_SPECIMG_SCI``                      | 200                                 | none                               | The total number of cores allocated to the spectral-imaging       |
@@ -215,6 +221,9 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``CLEAN_WRITE_AT_MAJOR_CYCLE``                | false                               | Images.writeAtMajorCycle           | If true, the intermediate images will be written (with a .cycle   |
 |                                               |                                     | (:doc:`../calim/simager`)          | suffix) after the end of each major cycle.                        |
++-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
+| ``CLEAN_SPECTRAL_SOLUTION_TYPE``              | MAXCHISQ                            | Clean.solutiontype (see discussion | The type of peak finding algorithm to use in the                  |
+|                                               |                                     | at :doc:`../recipes/imaging`)      | deconvolution. Choices are MAXCHISQ, MAXTERM0, or MAXBASE.        |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | **Preconditioning**                           |                                     |                                    |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+

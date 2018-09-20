@@ -147,17 +147,29 @@ are turned on (``DO_COPY_SL``, ``DO_APPLY_CAL_SL``,
 in the averaging job, once the averaging has completed
 successfully. If the averaging fails it is not removed. 
 
-+---------------------+---------+-------------------------------------------------------------+
-| Variable            | Default | Description                                                 |
-+=====================+=========+=============================================================+
-| ``LUSTRE_STRIPING`` | 4       | The stripe count to assign to the data directories          |
-+---------------------+---------+-------------------------------------------------------------+
-| ``BUCKET_SIZE``     | 1048576 | The bucketsize passed to mssplit (as "stman.bucketsize") in |
-|                     |         | units of bytes.                                             |
-+---------------------+---------+-------------------------------------------------------------+
-| ``PURGE_FULL_MS``   | true    | Whether to remove the full-spectral-resolution measurement  |
-|                     |         | set once the averaging has been done. See notes above.      |
-+---------------------+---------+-------------------------------------------------------------+
++---------------------------+---------+-------------------------------------------------------------+
+| Variable                  | Default | Description                                                 |
++===========================+=========+=============================================================+
+| ``LUSTRE_STRIPING``       | 4       | The stripe count to assign to the data directories          |
++---------------------------+---------+-------------------------------------------------------------+
+| ``BUCKET_SIZE``           | 1048576 | The bucketsize passed to mssplit (as "stman.bucketsize") in |
+|                           |         | units of bytes.                                             |
++---------------------------+---------+-------------------------------------------------------------+
+| ``TILE_NCHAN_SCIENCE``    | 54      | The number of channels in the measurement set tile for the  |
+|                           |         | science data, once the local version is created.            |
++---------------------------+---------+-------------------------------------------------------------+
+| ``TILE_NCHAN_1934``       | 54      | The number of channels in the measurement set tile for the  |
+|                           |         | bandpass calibrator data, once the local version is created.|
++---------------------------+---------+-------------------------------------------------------------+
+| ``PURGE_INTERIM_MS_SCI``  | true    | Whether to remove the interim science MSs created when      |
+|                           |         | splitting and merging is required.                          |
++---------------------------+---------+-------------------------------------------------------------+
+| ``PURGE_INTERIM_MS_1934`` | true    | Whether to remove the interim bandpass calibrator MSs       |
+|                           |         | created when splitting and merging is required.             |
++---------------------------+---------+-------------------------------------------------------------+
+| ``PURGE_FULL_MS``         | true    | Whether to remove the full-spectral-resolution measurement  |
+|                           |         | set once the averaging has been done. See notes above.      |
++---------------------------+---------+-------------------------------------------------------------+
 
 
 Control of Online Services
@@ -307,6 +319,9 @@ these tasks are controlled by the following parameters.
 |                            |         | imaging and source-finding. (This is not the continuum      |
 |                            |         | validation, but rather other diganostic tasks).             |
 +----------------------------+---------+-------------------------------------------------------------+
+| ``DO_VALIDATION_SCIENCE``  | true    | Run specific science validation tasks, such as plotting the |
+|                            |         | cube statistics.                                            |
++----------------------------+---------+-------------------------------------------------------------+
 | ``DO_CONVERT_TO_FITS``     | true    | Whether to convert remaining CASA images and image cubes to |
 |                            |         | FITS format (some will have been converted by the           |
 |                            |         | source-finding tasks).                                      |
@@ -366,4 +381,6 @@ time formats include (taken from the sbatch man page): "minutes",
 | ``JOB_TIME_LINMOS``             | Time request for mosaicking                                  |
 +---------------------------------+--------------------------------------------------------------+
 | ``JOB_TIME_SOURCEFINDING``      | Time request for source-finding jobs                         |
++---------------------------------+--------------------------------------------------------------+
+| ``JOB_TIME_VALIDATE``           | Time request for the science validation job.                 |
 +---------------------------------+--------------------------------------------------------------+

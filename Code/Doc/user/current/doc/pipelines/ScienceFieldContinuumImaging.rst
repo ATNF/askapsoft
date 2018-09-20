@@ -207,7 +207,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | **Gridding parameters**                    |                                     |                                                        |                                                               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``GRIDDER_SNAPSHOT_IMAGING``               | true                                | snapshotimaging                                        | Whether to use snapshot imaging when gridding.                |
+| ``GRIDDER_SNAPSHOT_IMAGING``               | false                               | snapshotimaging                                        | Whether to use snapshot imaging when gridding.                |
 |                                            |                                     | (:doc:`../calim/gridder`)                              |                                                               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``GRIDDER_SNAPSHOT_WTOL``                  | 2600                                | snapshotimaging.wtolerance                             | The wtolerance parameter controlling how frequently to        |
@@ -225,8 +225,10 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            | or 26000                            |                                                        | (``GRIDDER_SNAPSHOT_IMAGING``).                               |
 |                                            | (``GRIDDER_SNAPSHOT_IMAGING=false``)|                                                        |                                                               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``GRIDDER_NWPLANES``                       | 99                                  | WProject.nwplanes                                      | The nwplanes parameter for the gridder.                       |
-|                                            |                                     | (:doc:`../calim/gridder`)                              |                                                               |
+| ``GRIDDER_NWPLANES``                       | 99                                  | WProject.nwplanes                                      | The nwplanes parameter for the gridder. The default for this  |
+|                                            | (``GRIDDER_SNAPSHOT_IMAGING=true``) | (:doc:`../calim/gridder`)                              | depends on whether snapshot imaging is invoked or not         |
+|                                            | or 599                              |                                                        | (``GRIDDER_SNAPSHOT_IMAGING``).                               |
+|                                            | (``GRIDDER_SNAPSHOT_IMAGING=false``)|                                                        |                                                               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``GRIDDER_OVERSAMPLE``                     | 5                                   | WProject.oversample                                    | The oversampling factor for the gridder.                      |
 |                                            |                                     | (:doc:`../calim/gridder`)                              |                                                               |
@@ -271,6 +273,9 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CLEAN_WRITE_AT_MAJOR_CYCLE``             | false                               | Images.writeAtMajorCycle                               | If true, the intermediate images will be written (with a      |
 |                                            |                                     | (:doc:`../calim/cimager`)                              | .cycle suffix) after the end of each major cycle.             |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``CLEAN_SOLUTION_TYPE``                    | MAXCHISQ                            | Clean.solutiontype (see discussion at                  | The type of peak finding algorithm to use in the              |
+|                                            |                                     | :doc:`../recipes/imaging`)                             | deconvolution. Choices are MAXCHISQ, MAXTERM0, or MAXBASE.    |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | **Preconditioning parameters**             |                                     |                                                        |                                                               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
@@ -379,7 +384,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 | ``SELFCAL_SELAVY_NUM_GAUSSIANS``           | 1                                   | Selavy.Fitter.maxNumGauss                              | The number of Gaussians to fit to each island when            |
 |                                            |                                     | (:doc:`../analysis/postprocessing`)                    | ``SELFCAL_SELAVY_GAUSSIANS_FROM_GUESS=false``.                |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``SELFCAL_SELAVY_FIT_TYPE``                | psf                                 | Selavy.Fitter.fitTypes                                 | The type of fit to be used in the Selavy job. The possible    |
+| ``SELFCAL_SELAVY_FIT_TYPE``                | full                                | Selavy.Fitter.fitTypes                                 | The type of fit to be used in the Selavy job. The possible    |
 |                                            |                                     | (:doc:`../analysis/postprocessing`)                    | options are 'full', 'psf', 'shape', or 'height'.              |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``SELFCAL_SELAVY_WEIGHTSCUT``              | 0.95                                | Selavy.Weights.weightsCutoff                           | Pixels with weight less than this fraction of the peak        |
@@ -536,4 +541,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CLEAN_CONTCUBE_WRITE_AT_MAJOR_CYCLE``    | false                               | Images.writeAtMajorCycle                               | If true, the intermediate images will be written (with a      |
 |                                            |                                     | (:doc:`../calim/cimager`)                              | .cycle suffix) after the end of each major cycle.             |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``CLEAN_CONTCUBE_SOLUTION_TYPE``           | MAXCHISQ                            | Clean.solutiontype (see discussion at                  | The type of peak finding algorithm to use in the              |
+|                                            |                                     | :doc:`../recipes/imaging`)                             | deconvolution. Choices are MAXCHISQ, MAXTERM0, or MAXBASE.    |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+

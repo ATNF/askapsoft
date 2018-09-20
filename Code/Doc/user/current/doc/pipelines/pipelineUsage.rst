@@ -157,6 +157,20 @@ To provide the input data to the scripts, you can provide either the
 scheduling blocks (SBs) of the two observations, or provide specific
 measurement sets (MSs) for each case.
 
+The measurement sets presented in the scheduling block directories have a variety of forms:
+
+1. The earliest observations had all beams in a single measurement
+   set. For these, splitting with mssplit is required to get a
+   single-beam MS used for processing.
+2. Most observations have one beam per MS. If no selection of channels
+   or fields or scans is required, these can be copied rather than
+   split. Note that splitting of the bandpass observations are
+   necessary, to isolate the relevant scan.
+3. Recent large observations have more than one MS per beam, split in
+   frequency chunks. The pipeline will merge these to form a single
+   local MS for each beam. If splitting (of channels, fields or scans)
+   is required, this is done first, before merging the local subsets.
+
 The measurement sets that will be created should be named in the
 configuration file. A wildcard %s can be used to represent the
 scheduling block ID, and %b should be used to represent the beam
@@ -182,7 +196,8 @@ Here is a summary of the workflow provided for by these scripts:
 
   * Use **mslist** to get basic metadata for the observation,
     including number of antennas & channels, and the list of field
-    names.
+    names. (If merging is required, additional metadata files will be
+    created later.)
   * Use **schedblock** to determine the footprint specification.
   * Use **footprint** to convert that into beam centre positions.
 
@@ -191,9 +206,10 @@ Here is a summary of the workflow provided for by these scripts:
 * If bandpass calibration is required and a 1934-638 observation is
   available, we split out the relevant beams with **mssplit**
   (:doc:`../calim/mssplit`) into individual measurement sets (MSs),
-  one per beam. Only the scan in which the beam in question was
-  pointing at 1934-638 is used - this assumes the beams were pointed
-  at it in order (so that beam 0 was pointing at in in scan 0, etc)
+  one per beam. Merging may be required as described above. Only the
+  scan in which the beam in question was pointing at 1934-638 is
+  used - this assumes the beams were pointed at it in order (so that
+  beam 0 was pointing at in in scan 0, etc)
 * These are flagged using **cflag** (:doc:`../calim/cflag`) in two
   passes: first, selection rules covering channels, time ranges, antennas & baselines, and
   autocorrelations are applied, along with an optional simple flat amplitude
@@ -211,8 +227,9 @@ Here is a summary of the workflow provided for by these scripts:
   measurement set per beam. You can select particular scans or fields
   here, but the default is to use everything. Each field gets its own
   directory. If the data was taken with the file-per-beam mode, and no
-  selection is required, a direct copy with *dcp* is used instead of
-  **mssplit**. 
+  selection is required, a direct copy is used instead of
+  **mssplit**. Again, merging may be required for some datasets. Any
+  splitting that is needed in that case is done first.
 * The bandpass solution is then applied to each beam MS with
   **ccalapply** (:doc:`../calim/ccalapply`).
 * Flagging is then applied to the bandpass-calibrated dataset. The

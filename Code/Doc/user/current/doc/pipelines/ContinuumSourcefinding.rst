@@ -131,6 +131,12 @@ is only the latter that are passsed to CASDA).
 | ``SELAVY_NUM_SPECTRAL_TERMS``       | 3                                        | spectralTerms.nterms                | The number of terms to be fitted to the spectrum when using |
 |                                     |                                          | (:doc:`../analysis/postprocessing`) | the continuum cube to find the spectral index & curvature.  |
 +-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
+| ``SELAVY_FLAG_ADJACENT``            | true                                     | flagAdjacent                        | Whether to enforce pixels in islands to be contiguous.      |
+|                                     |                                          | (:doc:`../analysis/selavy`)         |                                                             |
++-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
+| ``SELAVY_SPATIAL_THRESHOLD``        | 5                                        | threshSpatial                       | If ``SELAVY_FLAG_ADJACENT=false``, this is the threshold in |
+|                                     |                                          | (:doc:`../analysis/selavy`)         | pixels within which islands are joined.                     |
++-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
 | **RM Synthesis**                    |                                          |                                     |                                                             |
 |                                     |                                          |                                     |                                                             |
 +-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
