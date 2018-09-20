@@ -335,8 +335,8 @@ EOF
     # Get the number of channels used
     NUM_CHAN=$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="${MS_METADATA}" --val=nChan)
 
-    if [ "${NUM_CHAN}" == "" ] || [ "${CENTRE_FREQ}" == "" ] || [ "${BANDWIDTH}" == "" ]; then
-        echo "ERROR - unable to determine frequency setup (# channels/freq0/bandwidth) in science dataset"
+    if [ "${NUM_CHAN}" == "" ]; then
+        echo "ERROR - unable to determine number of channels in science dataset"
         echo "        please check metadata in ${MS_METADATA}"
         echo "Exiting pipeline."
         exit 1
