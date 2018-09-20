@@ -51,6 +51,7 @@ Applications:
    - Similarly, checksums for the thumbnail images were not being created by casdaupload. This has been remedied.
  * Other:
    - The FITS accessor interface now better handles missing header keywords - if they are not present it now logs a warning but doesn't exit.
+   - Ccalapply has improved handling of flags, allowing write access.
    - Improvements to the efficiency of mssplit and msmerge.
    - The user documentation has a detailed tutorial on MS(MFS) imaging.
 
