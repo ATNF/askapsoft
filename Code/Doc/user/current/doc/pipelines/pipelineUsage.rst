@@ -278,8 +278,7 @@ Here is a summary of the workflow provided for by these scripts:
   spectral-cubes.
 
 * Finally a diagnostics script is run to produce QA & related
-  plots. This is a prototype script at present, although we will look
-  to expand it in the near future.
+  plots. Details of diagnostic plots can be found on :doc:`validation`. 
 
 Staging the processing
 ----------------------

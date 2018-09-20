@@ -9,7 +9,8 @@ steps:
   Quality Analysis & validation. Currently the script that does this
   is only a prototype, producing both greyscale plots of the continuum
   images, with weights contours and the component catalogue overlaid,
-  and greyscale plots of the noise maps produced by Selavy.
+  and greyscale plots of the noise maps produced by Selavy. See examples
+  on :doc:`validation`.
 * All images are converted to FITS format. FITS is the format required
   for storage in CASDA - the ASKAPsoft tasks are able to write
   directly to FITS (``IMAGETYPE_CONT`` etc), but if CASA-format images

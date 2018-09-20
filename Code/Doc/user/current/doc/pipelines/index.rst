@@ -23,3 +23,5 @@ the ASKAP Central Processor platform.
    ContinuumSourcefinding.rst 
    SpectralLineSourcefinding.rst 
    archiving.rst
+   validation.rst
+   
