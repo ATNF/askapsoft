@@ -90,12 +90,6 @@ if [ "${DO_IT}" == "true" ]; then
         fi
     fi
 
-    if [ "${CHAN_RANGE_SCIENCE}" == "" ]; then
-        channelParam="channel     = 1-\${nChan}"
-    else
-        channelParam="channel     = ${CHAN_RANGE_SCIENCE}"
-    fi
-
     # Select only the current field
     fieldParam="fieldnames   = ${FIELD}"
 
@@ -123,9 +117,22 @@ if [ "${DO_IT}" == "true" ]; then
     # handle merging or non-merging, so we make that choice here.
     if [ "${NEED_TO_MERGE_SCI}" == "true" ]; then
 
+        if [ "${CHAN_RANGE_SCIENCE}" == "" ]; then
+            channelParam="channel     = 1-\${nChan}"
+        else
+            channelParam="channel     = ${CHAN_RANGE_SCIENCE}"
+        fi
+
         . "${PIPELINEDIR}/mergeSplitSci.sh"
 
     else
+
+        if [ "${CHAN_RANGE_SCIENCE}" == "" ]; then
+            channelParam="channel     = 1-${NUM_CHAN_SCIENCE}"
+        else
+            channelParam="channel     = ${CHAN_RANGE_SCIENCE}"
+        fi
+
 
         . "${PIPELINEDIR}/copySplitSci.sh"
 
