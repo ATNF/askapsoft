@@ -70,6 +70,7 @@ for FIELD in \${FIELD_LIST}; do
     fieldDir=\${diagnostics}/cubestats-${FIELD}
     mkdir -p \$fieldDir
     cp \${FIELD}/cubeStats*txt \$fieldDir
+    cp \${FIELD}/cubePlot*png \$fieldDir
     cp \${FIELD}/beamlog* \$fieldDir
 
     # Cube stats and restoring beam for the spectral cubes
