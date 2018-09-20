@@ -299,7 +299,7 @@ namespace askap
                 ///         information. If True, the corresponding element is flagged.
                 casa::Cube<casa::Bool>& DataAccessorStub::rwFlag()
                 {
-                  throw DataAccessLogicError("Not yet implemented");
+		  ASKAPASSERT(itsFlag.shape() == itsVisibility.shape());
                   return itsFlag;
                 }
 
