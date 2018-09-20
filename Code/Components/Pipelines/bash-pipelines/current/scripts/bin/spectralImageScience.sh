@@ -101,6 +101,7 @@ ${Imager}.solver.Clean.algorithm                  = ${CLEAN_SPECTRAL_ALGORITHM}
 ${Imager}.solver.Clean.niter                      = ${CLEAN_SPECTRAL_MINORCYCLE_NITER}
 ${Imager}.solver.Clean.gain                       = ${CLEAN_SPECTRAL_GAIN}
 ${Imager}.solver.Clean.scales                     = ${CLEAN_SPECTRAL_SCALES}
+${Imager}.solver.Clean.solutiontype               = ${CLEAN_SPECTRAL_SOLUTIONTYPE}
 ${Imager}.solver.Clean.verbose                    = False
 ${Imager}.solver.Clean.tolerance                  = 0.01
 ${Imager}.solver.Clean.weightcutoff               = zero

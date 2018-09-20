@@ -114,6 +114,7 @@ ${Imager}.solver.Clean.algorithm                  = ${CLEAN_CONTCUBE_ALGORITHM}
 ${Imager}.solver.Clean.niter                      = ${CLEAN_CONTCUBE_MINORCYCLE_NITER}
 ${Imager}.solver.Clean.gain                       = ${CLEAN_CONTCUBE_GAIN}
 ${Imager}.solver.Clean.scales                     = ${CLEAN_CONTCUBE_SCALES}
+${Imager}.solver.Clean.solutiontype               = ${CLEAN_CONTCUBE_SOLUTIONTYPE}
 ${Imager}.solver.Clean.verbose                    = False
 ${Imager}.solver.Clean.tolerance                  = 0.01
 ${Imager}.solver.Clean.weightcutoff               = zero

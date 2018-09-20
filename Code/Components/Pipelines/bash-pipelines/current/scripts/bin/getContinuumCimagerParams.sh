@@ -174,6 +174,7 @@ Cimager.solver.Clean.algorithm                  = ${CLEAN_ALGORITHM}
 Cimager.solver.Clean.niter                      = ${CLEAN_MINORCYCLE_NITER}
 Cimager.solver.Clean.gain                       = ${CLEAN_GAIN}
 Cimager.solver.Clean.scales                     = ${CLEAN_SCALES}
+Cimager.solver.Clean.solutiontype               = ${CLEAN_SOLUTIONTYPE}
 Cimager.solver.Clean.verbose                    = False
 Cimager.solver.Clean.tolerance                  = 0.01
 Cimager.solver.Clean.weightcutoff               = zero
