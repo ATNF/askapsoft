@@ -45,7 +45,10 @@
 #include "casacore/casa/aipstype.h"
 #include "casacore/casa/Arrays/ArrayMath.h"
 #include "casacore/casa/Arrays/Vector.h"
+#include "casacore/casa/Arrays/VectorIter.h"
 #include "casacore/casa/Arrays/Matrix.h"
+#include "casacore/casa/Arrays/MatrixIter.h"
+#include "casacore/casa/Arrays/Cube.h"
 #include "casacore/measures/Measures/Stokes.h"
 #include "casacore/ms/MeasurementSets/MeasurementSet.h"
 #include "casacore/ms/MeasurementSets/MSColumns.h"
@@ -324,6 +327,200 @@ void StokesVFlagger::processRow(casa::MSColumns& msc, const casa::uInt pass,
             msc.flagRow().put(row, true);
         }
         msc.flag().put(row, flags);
+    }
+}
+
+
+void StokesVFlagger::processRows(casa::MSColumns& msc, const casa::uInt pass,
+                                 const casa::uInt row, const casa::uInt nrow,
+                                 const bool dryRun)
+{
+    // Get a description of what correlation products are in the data table.
+    const casa::ROMSDataDescColumns& ddc = msc.dataDescription();
+    const casa::Int dataDescId = msc.dataDescId()(row);
+    const casa::Int polId = ddc.polarizationId()(dataDescId);
+
+    // Get the (potentially cached) stokes converter
+    const StokesConverter& stokesconv = getStokesConverter(msc.polarization(), polId);
+
+    // Convert data to Stokes V (imag(data(2,i))-imag(data(3,i)))
+    Slicer rowSlicer(Slice(row,nrow));
+    const Cube<casa::Complex> data = msc.data().getColumnRange(rowSlicer);
+    // does it help to keep this around?
+    static casa::Cube<casa::Complex> vcube;
+    vcube.resize(1, data.shape()[1], data.shape()[2]);
+    stokesconv.convert(vcube, data);
+    casa::Matrix<casa::Complex> vdata = vcube.yzPlane(0);
+    Cube<casa::Bool> flags = msc.flag().getColumnRange(rowSlicer);
+    casa::uInt nPol = flags.shape()(0);
+    casa::uInt nChan = flags.shape()(1);
+    bool wasUpdated = false;
+
+    for (casa::uInt k = 0; k < nrow;  k++) {
+
+        // Build a vector with the amplitudes
+        bool allFlagged = true;
+        std::vector<casa::Float> tmpamps;
+        for (size_t i = 0; i < nChan; ++i) {
+            bool anyFlagged = false;
+            for (casa::uInt pol=0; pol < nPol; pol++)
+                if (flags(pol,i,k)) anyFlagged = true;
+            if (!anyFlagged) {
+                if (pass == 0) tmpamps.push_back(abs(vdata(i,k)));
+                allFlagged = false;
+            }
+        }
+
+        // normalise averages and search them for peaks to flag
+        if ( !itsAverageFlagsAreReady && (pass==1) ) {
+            ASKAPLOG_INFO_STR(logger, "Finalising averages at the start of pass "
+                <<pass+1);
+            setFlagsFromIntegrations();
+        }
+
+        // return a key that indicates which integration this row is in
+        rowKey key = getRowKey(msc, row + k);
+
+        // update a counter for this row and the storage vectors
+        // do it before any processing that is dependent on "pass"
+        if ( itsIntegrateTimes ) {
+            updateTimeVectors(key, pass);
+        }
+
+        // if this is the first instance of this key, initialise storage vectors
+        if ( itsIntegrateSpectra && (pass==0) &&
+               (itsAveSpectra.find(key) == itsAveSpectra.end()) ) {
+            initSpectrumVectors(key, IPosition(1,nChan));
+        }
+
+        // If all visibilities are flagged, nothing to do
+        if (allFlagged) continue;
+
+        bool wasUpdatedRow = false;
+
+        if ( pass==0 ) {
+
+            // Convert to a casa::Vector so we can use ArrayMath functions
+            // to determine the mean and stddev
+            casa::Vector<casa::Float> amps(tmpamps);
+
+            // Flag all correlations where the Stokes V product
+            // is greater than the threshold
+            casa::Float sigma, avg;
+            if (itsRobustStatistics) {
+                casa::Vector<casa::Float> statsVector = getRobustStats(amps);
+                avg = statsVector[0];
+                sigma = statsVector[1];
+                // if min and max are bounded, they all are.
+                // so skip if there is no other reason to loop over frequencies
+                if ((statsVector[2] >= (avg - (sigma * itsThreshold))) &&
+                    (statsVector[3] <= (avg + (sigma * itsThreshold))) &&
+                    !itsIntegrateSpectra && !itsIntegrateTimes) {
+                    continue;
+                }
+            }
+            else {
+                avg = mean(amps);
+                sigma = stddev(amps);
+            }
+
+            // If stokes-v can't be formed due to lack of the necessary input products
+            // then vdata will contain all zeros. In this case, no flagging can be done.
+            const casa::Float epsilon = std::numeric_limits<casa::Float>::epsilon();
+            if (near(sigma, 0.0, epsilon) && near(avg, 0.0, epsilon)) {
+                continue;
+            }
+
+            // Apply threshold based flagging and accumulate any averages
+            // only need these if itsIntegrateTimes
+            casa::Double aveTime = 0.0;
+            casa::uInt countTime = 0;
+            for (size_t i = 0; i < nChan; ++i) {
+                const casa::Float amp = abs(vdata(i,k));
+                // Apply threshold based flagging
+                if (amp > (avg + (sigma * itsThreshold))) {
+                    for (casa::uInt pol = 0; pol < nPol; ++pol) {
+                        if (flags(pol, i, k)) {
+                            itsStats.visAlreadyFlagged++;
+                            continue;
+                        }
+                        flags(pol, i, k) = true;
+                        wasUpdatedRow = true;
+                        itsStats.visFlagged++;
+                    }
+                }
+                // Accumulate any averages
+                else if ( itsIntegrateSpectra || itsIntegrateTimes ) {
+                    if ( itsIntegrateSpectra ) {
+                        // do spectra integration
+                        itsAveSpectra[key][i] += amp;
+                        itsCountSpectra[key][i]++;
+                        itsAverageFlagsAreReady = casa::False;
+                    }
+                    if ( itsIntegrateTimes ) {
+                        // do time-series integration
+                        aveTime += amp;
+                        countTime++;
+                    }
+                }
+            }
+            if ( itsIntegrateTimes ) {
+                // normalise this average
+                if ( countTime>0 ) {
+                    itsAveTimes[key][itsCountTimes[key]] =
+                        aveTime/casa::Double(countTime);
+                    itsMaskTimes[key][itsCountTimes[key]] = casa::True;
+                    itsAverageFlagsAreReady = casa::False;
+                }
+                else {
+                    itsMaskTimes[key][itsCountTimes[key]] = casa::False;
+                }
+            }
+
+        }
+        else if ( (pass==1) &&  ( itsIntegrateSpectra || itsIntegrateTimes ) ) {
+            // only flag unflagged data, so that new flags can be counted.
+            // "flags" is true for flags, "mask*" are false for flags
+            bool rowFlagged = false;
+            if ( itsIntegrateTimes ) {
+                // apply itsMaskTimes flags. Could just use flagRow,
+                // but not sure that all applications support flagRow
+                if ( !itsMaskTimes[key][itsCountTimes[key]] ) {
+                    rowFlagged = true;
+                    itsStats.rowsFlagged++;
+                    for (size_t i = 0; i < nChan; ++i) {
+                        for (casa::uInt pol = 0; pol < nPol; ++pol) {
+                            if (flags(pol, i, k)) continue;
+                            flags(pol, i, k) = true;
+                            wasUpdatedRow = true;
+                            itsStats.visFlagged++;
+                        }
+                    }
+                }
+            }
+            // apply itsIntegrateSpectra flags
+            if ( itsIntegrateSpectra && !rowFlagged ) {
+                for (size_t i = 0; i < nChan; ++i) {
+                    if ( !itsMaskSpectra[key][i] ) {
+                        for (casa::uInt pol = 0; pol < nPol; ++pol) {
+                            if ( flags(pol, i, k) ) continue;
+                            flags(pol, i, k) = true;
+                            wasUpdatedRow = true;
+                            itsStats.visFlagged++;
+                        }
+                    }
+                }
+            }
+            if (wasUpdatedRow && !dryRun) {
+                if (itsIntegrateTimes && !itsMaskTimes[key][itsCountTimes[key]]) {
+                    msc.flagRow().put(row, true);
+                }
+            }
+        }
+        if (wasUpdatedRow) wasUpdated = true;
+    }
+    if (wasUpdated && !dryRun) {
+        msc.flag().putColumnRange(rowSlicer, flags);
     }
 }
 

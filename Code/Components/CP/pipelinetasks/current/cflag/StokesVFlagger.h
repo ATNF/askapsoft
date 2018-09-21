@@ -77,6 +77,11 @@ class StokesVFlagger : public IFlagger {
         virtual void processRow(casa::MSColumns& msc, const casa::uInt pass,
                                 const casa::uInt row, const bool dryRun);
 
+        /// @see IFlagger::processRows()
+        virtual void processRows(casa::MSColumns& msc, const casa::uInt pass,
+                                 const casa::uInt row, const casa::uInt nrow,
+                                 const bool dryRun);
+
         /// @see IFlagger::stats()
         virtual FlaggingStats stats(void) const;
 

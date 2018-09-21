@@ -45,8 +45,7 @@
 #include "casacore/ms/MeasurementSets/MeasurementSet.h"
 #include "casacore/ms/MeasurementSets/MSColumns.h"
 #include "casacore/measures/Measures/Stokes.h"
-#include "casacore/casa/Arrays/Matrix.h"
-#include "casacore/casa/Arrays/Vector.h"
+#include "casacore/casa/Arrays/Cube.h"
 #include "casacore/casa/Utilities/GenSort.h"
 
 // Local package includes
@@ -307,6 +306,220 @@ void AmplitudeFlagger::processRow(casa::MSColumns& msc, const casa::uInt pass,
     }
     if (wasUpdated && !dryRun) {
         msc.flag().put(row, flags);
+    }
+}
+
+
+void AmplitudeFlagger::processRows(casa::MSColumns& msc, const casa::uInt pass,
+                                  const casa::uInt row, const casa::uInt nrow,
+                                  const bool dryRun)
+{
+    Slicer rowSlicer(Slice(row,nrow));
+    const Cube<casa::Complex> data = msc.data().getColumnRange(rowSlicer);
+    Cube<casa::Bool> flags = msc.flag().getColumnRange(rowSlicer);
+    casa::uInt nPol = flags.shape()(0);
+    casa::uInt nChan = flags.shape()(1);
+
+    // Only need to write out the flag matrix if it was updated
+    bool wasUpdated = false;
+
+    const casa::Vector<casa::Int> stokesTypesInt = getStokesType(msc, row);
+
+    for (casa::uInt k = 0; k < nrow; k++) {
+
+        // Only set flagRow if all corr are flagged
+        // Only looking for row flags in "itsAveTimes" data. Could generalise.
+        bool leaveRowFlag = false;
+        bool wasUpdatedRow = false;
+        // normalise averages and search them for peaks to flag
+        if ( !itsAverageFlagsAreReady && (pass==1) ) {
+            ASKAPLOG_INFO_STR(logger, "Finalising averages at the start of pass "
+                <<pass+1);
+            setFlagsFromIntegrations();
+        }
+
+        // Iterate over rows (one row is one correlation product)
+        for (size_t corr = 0; corr < nPol; ++corr) {
+
+            // If this row doesn't contain a product we are meant to be flagging,
+            // then ignore it
+            if (!itsStokes.empty() &&
+                (itsStokes.find(Stokes::type(stokesTypesInt(corr))) ==
+                    itsStokes.end())) {
+                leaveRowFlag = true;
+                continue;
+            }
+
+            // return a tuple that indicate which integration this row is in
+            rowKey key = getRowKey(msc, row + k, corr);
+
+            // update a counter for this row and the storage vectors
+            // do it before any processing that is dependent on "pass"
+            if ( itsIntegrateTimes ) {
+                updateTimeVectors(key, pass);
+            }
+
+            // if this is the first instance of this key, initialise storage vectors
+            if ( itsIntegrateSpectra && (pass==0) &&
+                   (itsAveSpectra.find(key) == itsAveSpectra.end()) ) {
+                initSpectrumVectors(key, IPosition(1,nChan));
+            }
+
+            // need temporary indicators that can be updated if necessary
+            bool hasLowLimit = itsHasLowLimit;
+            bool hasHighLimit = itsHasHighLimit;
+
+
+            // set a mask (only needed when averaging, so move this if need be)
+            casa::Vector<casa::Bool> unflaggedMask(nChan,casa::False);
+            bool allFlagged = true;
+            for (uInt chan = 0; chan < nChan; chan++) {
+                if (!flags(corr,chan,k)) {
+                    unflaggedMask(chan) = casa::True;
+                    allFlagged = false;
+                }
+            }
+            if ( itsAutoThresholds ) {
+                // check that there is something to flag and continue if there isn't
+                if (allFlagged) {
+                    itsStats.visAlreadyFlagged += nChan;
+                    if ( itsIntegrateTimes ) {
+                       itsMaskTimes[key][itsCountTimes[key]] = casa::False;
+                    }
+                    continue;
+                }
+            }
+
+            // individual flagging and averages are only done during the first pass
+            // could change this
+            if ( pass==0 ) {
+                // get the spectrum
+                casa::Vector<casa::Float> spectrumAmplitudes(nChan);
+                for (uInt chan = 0; chan < nChan; chan++)
+                    spectrumAmplitudes(chan) = abs(data(corr,chan,k));
+
+                if ( itsAutoThresholds ) {
+
+                    // combine amplitudes with mask and get the median-based statistics
+                    casa::MaskedArray<casa::Float>
+                        maskedAmplitudes(spectrumAmplitudes, unflaggedMask);
+                    casa::Vector<casa::Float>
+                        statsVector = getRobustStats(maskedAmplitudes);
+                    casa::Float median = statsVector[0];
+                    casa::Float sigma_IQR = statsVector[1];
+
+                    // set cutoffs
+                    if ( !hasLowLimit ) {
+                        itsLowLimit = median-itsThresholdFactor*sigma_IQR;
+                        hasLowLimit = casa::True;
+                    }
+                    if ( !hasHighLimit ) {
+                        itsHighLimit = median+itsThresholdFactor*sigma_IQR;
+                        hasHighLimit = casa::True;
+                    }
+
+                    // check min and max relative to thresholds, and do not loop over
+                    // data again if they are good. If indicies were also sorted, could
+                    // just test where the sorted amplitudes break the threshold...
+                    // ** cannot do this when averages are needed, or they'll be skipped **
+                    if (!itsIntegrateSpectra && !itsIntegrateTimes &&
+                            (statsVector[2] >= itsLowLimit) &&
+                            (statsVector[3] <= itsHighLimit)) {
+                        continue;
+                    }
+
+                }
+
+                // only need these if itsIntegrateTimes
+                casa::Double aveTime = 0.0;
+                casa::uInt countTime = 0;
+
+                // look for individual peaks and do any integrations
+                for (size_t chan = 0; chan < nChan; ++chan) {
+                    if (flags(corr, chan, k)) {
+                        itsStats.visAlreadyFlagged++;
+                        continue;
+                    }
+
+                    // look for individual peaks
+                    const float amp = spectrumAmplitudes(chan);
+                    if ((hasLowLimit && (amp < itsLowLimit)) ||
+                        (hasHighLimit && (amp > itsHighLimit))) {
+                        flags(corr, chan, k) = true;
+                        wasUpdatedRow = true;
+                        itsStats.visFlagged++;
+                    }
+                    else if ( itsIntegrateSpectra || itsIntegrateTimes ) {
+                        if ( itsIntegrateSpectra ) {
+                            // do spectra integration
+                            itsAveSpectra[key][chan] += amp;
+                            itsCountSpectra[key][chan]++;
+                            itsAverageFlagsAreReady = casa::False;
+                        }
+                        if ( itsIntegrateTimes ) {
+                            // do time-series integration
+                            aveTime += amp;
+                            countTime++;
+                        }
+                    }
+
+                }
+                if ( itsIntegrateTimes ) {
+                    // normalise this average
+                    if ( countTime>0 ) {
+                        itsAveTimes[key][itsCountTimes[key]] =
+                            aveTime/casa::Double(countTime);
+                        itsMaskTimes[key][itsCountTimes[key]] = casa::True;
+                        itsAverageFlagsAreReady = casa::False;
+                    }
+                    else {
+                        itsMaskTimes[key][itsCountTimes[key]] = casa::False;
+                    }
+                }
+
+            }
+            else if ( (pass==1) &&  ( itsIntegrateSpectra || itsIntegrateTimes ) ) {
+                // only flag unflagged data, so that new flags can be counted.
+                // "flags" is true for flags, "mask*" are false for flags
+                if ( itsIntegrateTimes ) {
+                    // apply itsMaskTimes flags. Could just use flagRow,
+                    // but not sure that all applications support flagRow
+                    if ( !itsMaskTimes[key][itsCountTimes[key]] ) {
+                        for (size_t chan = 0; chan < nChan; ++chan) {
+                            if (flags(corr, chan, k)) continue;
+                                flags(corr, chan, k) = true;
+                                wasUpdatedRow = true;
+                                itsStats.visFlagged++;
+                        }
+                        // everything is flagged, so move to the next "corr"
+                        continue;
+                    }
+                    // need this to be false for all "corr" to warrent flagRow
+                    else leaveRowFlag = true;
+                }
+                // apply itsIntegrateSpectra flags
+                if ( itsIntegrateSpectra ) {
+                    for (size_t chan = 0; chan < nChan; ++chan) {
+                        if ( !flags(corr, chan, k) && !itsMaskSpectra[key][chan] ) {
+                            flags(corr, chan, k) = true;
+                            wasUpdatedRow = true;
+                            itsStats.visFlagged++;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (wasUpdatedRow && itsIntegrateTimes && !leaveRowFlag && (pass==1)) {
+            itsStats.rowsFlagged++;
+            if (!dryRun) {
+                msc.flagRow().put(row + k, true);
+            }
+        }
+        if (wasUpdatedRow) wasUpdated = true;
+    }
+    if (wasUpdated && !dryRun) {
+        msc.flag().putColumnRange(rowSlicer, flags);
     }
 }
 

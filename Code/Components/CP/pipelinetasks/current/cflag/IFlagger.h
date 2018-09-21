@@ -70,6 +70,16 @@ class IFlagger {
         virtual void processRow(casa::MSColumns& msc, const casa::uInt pass,
                                 const casa::uInt row, const bool dryRun) = 0;
 
+        /// Like processRow, but process nrows
+        /// Default implementation just calls processRow
+        virtual void processRows(casa::MSColumns& msc, const casa::uInt pass,
+                                 const casa::uInt row, const casa::uInt nrow,
+                                 const bool dryRun)
+        {
+            for (casa::uInt i = row; i < row + nrow; i++)
+                processRow(msc, pass, i, dryRun);
+        }  
+
         /// Returns flagging statistics
         virtual FlaggingStats stats(void) const = 0;
 

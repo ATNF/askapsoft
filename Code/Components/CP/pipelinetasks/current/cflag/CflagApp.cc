@@ -50,7 +50,7 @@
 #include "cflag/FlaggingStats.h"
 #include "cflag/MSFlaggingSummary.h"
 
-//#include "casacore/tables/DataMan/DataManAccessor.h"
+#include "casacore/tables/DataMan/TiledStManAccessor.h"
 
 // Using
 using namespace std;
@@ -70,6 +70,31 @@ int CflagApp::run(int argc, char* argv[])
     ASKAPLOG_INFO_STR(logger, "Opening Measurement Set: " << dataset);
     casa::MeasurementSet ms(dataset, casa::Table::Update);
     MSColumns msc(ms);
+    IPosition tileShape(3,0,0,0);
+
+    // If data is tiled and is uniform in shape we can process in tiles
+    TableDesc td = ms.actualTableDesc();
+    const ColumnDesc& cdesc = td[msc.data().columnDesc().name()];
+    String dataManType = cdesc.dataManagerType();
+    String dataManGroup = cdesc.dataManagerGroup();
+    Bool tiled = (dataManType.contains("Tiled"));
+    if (tiled && msc.dataDescription().nrow() == 1) {
+        ROTiledStManAccessor tsm(ms, dataManGroup);
+        // Find the biggest tile, use it if it has 3 dimensions
+        uInt nHyper = tsm.nhypercubes();
+        uInt maxIndex = 0;
+        uInt maxTile = 0;
+        for (uInt i=0; i< nHyper; i++) {
+            uInt product = tsm.getTileShape(i).product();
+            if (product > maxTile) {
+                maxIndex = i;
+                maxTile = product;
+            }
+        }
+        if (tsm.getTileShape(maxIndex).nelements() == 3)
+            tileShape = tsm.getTileShape(maxIndex);
+        // cout << "Input tile shape = " << tileShape <<  endl;
+    }
 
     // Create a vector of all the flagging strategies specified in the parset
     std::vector< boost::shared_ptr<IFlagger> > flaggers = FlaggerFactory::build(subset, ms);
@@ -95,20 +120,45 @@ int CflagApp::run(int argc, char* argv[])
     unsigned long rowsAlreadyFlagged = 0;
     casa::Bool passRequired = casa::True;
     casa::uInt pass = 0;
+    casa::uInt step = 1;
+    if (tileShape(2) > 1) step = tileShape(2);
     while (passRequired) {
-        for (casa::uInt i = 0; i < nRows; ++i) {
-            if (!msc.flagRow()(i)) {
-                // Invoke each flagger for this row, but only while the row isn't flagged
-                for (it = flaggers.begin(); it != flaggers.end(); ++it) {
-                    if (msc.flagRow()(i)) {
-                        break;
-                    }
-                    if ((*it)->processingRequired(pass)) {
-                        (*it)->processRow(msc, pass, i, dryRun);
+        if (step > 1) {
+            // Read data in whole tiles
+            for (casa::uInt i = 0; i < nRows; i+=step) {
+                casa::uInt rowsToProcess = min(step, nRows - i);
+                // count flagged rows
+                casa::uInt flagged = 0;
+                for (casa::uInt j = i; j < i+rowsToProcess ; j++) {
+                    if (msc.flagRow()(j)) flagged++;
+                }
+                rowsAlreadyFlagged += flagged;
+                // If there are unflagged rows, do more flagging
+                if (flagged < rowsToProcess) {
+                    // Invoke each flagger
+                    for (it = flaggers.begin(); it != flaggers.end(); ++it) {
+                        if ((*it)->processingRequired(pass)) {
+                            (*it)->processRows(msc, pass, i, rowsToProcess, dryRun);
+                        }
                     }
                 }
-            } else {
-                rowsAlreadyFlagged++;
+            }
+
+        } else{
+            for (casa::uInt i = 0; i < nRows; ++i) {
+                if (!msc.flagRow()(i)) {
+                    // Invoke each flagger for this row, but only while the row isn't flagged
+                    for (it = flaggers.begin(); it != flaggers.end(); ++it) {
+                        if (msc.flagRow()(i)) {
+                            break;
+                        }
+                        if ((*it)->processingRequired(pass)) {
+                            (*it)->processRow(msc, pass, i, dryRun);
+                        }
+                    }
+                } else {
+                    rowsAlreadyFlagged++;
+                }
             }
         }
         pass++;
