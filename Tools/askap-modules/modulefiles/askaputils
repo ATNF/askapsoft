@@ -21,3 +21,6 @@ set-alias mrm { mrm.sh $* }
  
 # Set up an alias/function which calls the mcp instead of cp  to copy a large directory hierarchy or file.
 set-alias mcp { mcp.sh $* }
+ 
+# Set up an alias/function which calls the squser for listing usage of galaxy by user
+set-alias squser { squser.sh $* }
