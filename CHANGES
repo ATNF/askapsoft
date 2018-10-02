@@ -1,3 +1,9 @@
+0.22.1 (25 September 2018)
+--------------------------
+A patch release to 0.22 to fix a couple of bugs:
+ * Fixed issue with missing reading of visibilities causing zeros after calibration.
+ * Added multi-row processing mode for Amplitude and StokesV flaggers.
+
 0.22.0 (20 September 2018)
 --------------------------
 
