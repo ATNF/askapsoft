@@ -5,6 +5,19 @@ This page summarises the key changes in each tagged release of
 ASKAPsoft. This replicates the CHANGES file that is included in the
 code base.
 
+0.22.2 (02 October 2018)
+------------------------
+Minor change to pipeline scripts:
+ * nChan is now set to CHAN_RANGE_ parameter instead of reading it from the
+   raw measurement sets. Fixes the bug arising when working on subset channel 
+   range in the measurement sets.
+
+0.22.1 (25 September 2018)
+--------------------------
+A patch release to 0.22 to fix a couple of bugs:
+ * Fixed issue with missing reading of visibilities causing zeros after calibration.
+ * Added multi-row processing mode for Amplitude and StokesV flaggers.
+
 0.22.0 (20 September 2018)
 --------------------------
 
