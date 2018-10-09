@@ -94,16 +94,25 @@ protected:
    /// for all ranks. These 3 values are presented in a tuple. If the 
    /// index into itsRules (the first parameter) happens to be equal to
    /// itsRules.size() then the "keyword" is the string which should be added as is.
+   /// The flag controlling whether to add a particular string is a number indicating a group
+   /// of values which should be treated together. A value of zero means always add the group.
    /// @param[in] in string to parse
    /// @return a vector of tuples (as described above) in the order items are in the input string
-   std::vector<boost::tuple<size_t, std::string, bool> > parseString(const std::string &in) const;
+   std::vector<boost::tuple<size_t, std::string, size_t> > parseString(const std::string &in) const;
 
    /// @brief helper method to extract a set of used keywords
    /// @details It turns the vector of tuples returned by parseString into a set of keywords
    /// @param[in] vec vector of 3-element tuples as provided by parseString
    /// @return a set of used kewords (aggregation of all second parameters if they are not 
    /// representing an explicit string
-   static std::set<std::string> extractKeywords(const std::vector<boost::tuple<size_t, std::string, bool> > &vec);
+   std::set<std::string> extractKeywords(const std::vector<boost::tuple<size_t, std::string, size_t> > &vec) const;
+
+   /// @brief helper method to compute intersection of two sets
+   /// @details This is a wrapper on top of set_intersection from algorithms. 
+   /// @param[in] s1 first set
+   /// @param[in] s2 second set
+   /// @return intersection of s1 and s2 (i.e. set with common elements)
+   static std::set<std::string> intersection(const std::set<std::string> &s1, const std::set<std::string> &s2);
 
 private:
    /// @brief substitution rules

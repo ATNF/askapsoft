@@ -2,16 +2,18 @@ filename = %d_%t_%s.ms
 pointingtable.enable = true
 #stman.bucketsize = 151632
 stman.bucketsize = 6469632
-stman.tilenchan = 2592
+#stman.tilenchan = 2592
+stman.tilenchan = 1
 stman.tilencorr = 4
 count = 10
 syncranks = true
 
 # put number of beams here
-maxbeams = 36
+maxbeams = 1
 # put channels per rank here
 #n_channels.0..95 = 5184
-n_channels.0..95 = 10368
+#n_channels.0..95 = 10368
+n_channels.0..95 = 216
 
 # just an extract from cpingest.in from one of the actual scheduling blocks,
 # it fills other configuration parameters (required to write a full measurement set)
