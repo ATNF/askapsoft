@@ -186,12 +186,16 @@ std::vector<boost::tuple<size_t, std::string, size_t> > SubstitutionHandler::par
             result.push_back(boost::tuple<size_t, std::string, size_t>(itsRules.size(),in.substr(cursor), currentGroup));
             break;
         }
-        result.push_back(boost::tuple<size_t, std::string, size_t>(itsRules.size(),in.substr(cursor, pos - cursor), currentGroup));
+        if (pos != cursor) {
+            ASKAPDEBUGASSERT(pos > cursor);
+            result.push_back(boost::tuple<size_t, std::string, size_t>(itsRules.size(),in.substr(cursor, pos - cursor), currentGroup));
+        }
         if (++pos == in.size()) {
             ASKAPCHECK(currentGroup == 0, "Error parsing string '"<<in<<"' - no matching %}");
             result.push_back(boost::tuple<size_t, std::string, size_t>(itsRules.size(),in.substr(pos-1,1), currentGroup));
             break;
         }
+        // all checks below are working with the text past the initial '%' symbol 
         if (in[pos] == '%') {
             result.push_back(boost::tuple<size_t, std::string, size_t>(itsRules.size(),in.substr(pos,1), currentGroup));
         } else if (in[pos] == '{') {
@@ -209,7 +213,7 @@ std::vector<boost::tuple<size_t, std::string, size_t> > SubstitutionHandler::par
                  ASKAPDEBUGASSERT(rule);
                  const std::set<std::string> kw = rule->keywords();
                  for (std::set<std::string>::const_iterator ci = kw.begin(); ci != kw.end(); ++ci) {
-                      if (in.find(*ci, pos) == 0) {
+                      if (in.find(*ci, pos) == pos) {
                           ASKAPASSERT(ci->size() > 0);
                           pos += ci->size() - 1;
                           ASKAPDEBUGASSERT(pos < in.size());
@@ -222,8 +226,14 @@ std::vector<boost::tuple<size_t, std::string, size_t> > SubstitutionHandler::par
             } 
 
             if (!matchFound) {
-                // unrecognised symbol, pass it as is
-                result.push_back(boost::tuple<size_t, std::string, size_t>(itsRules.size(),in.substr(pos-1,2), currentGroup));
+                // unrecognised keyword, pass it as is
+                ASKAPDEBUGASSERT(pos < in.size());
+                ASKAPDEBUGASSERT(pos > 0);
+                size_t posend = in.find("%", pos);
+                size_t length = posend != std::string::npos ? posend - pos + 1 : in.size() - pos + 1;
+                result.push_back(boost::tuple<size_t, std::string, size_t>(itsRules.size(),in.substr(pos-1,length), currentGroup));
+                ASKAPDEBUGASSERT(length > 1);
+                pos += length - 2;
             }
        }
        cursor = pos;

@@ -51,6 +51,13 @@ class SubstitutionHandlerTest : public CppUnit::TestFixture {
         CPPUNIT_TEST(testVoidSubstitution);
         CPPUNIT_TEST(testIntersection);
         CPPUNIT_TEST(testExtractKeywords);
+        CPPUNIT_TEST(testParseString);
+        CPPUNIT_TEST_EXCEPTION(testParseStringOpenGroup1, AskapError);
+        CPPUNIT_TEST_EXCEPTION(testParseStringOpenGroup2, AskapError);
+        CPPUNIT_TEST_EXCEPTION(testParseStringOpenGroup3, AskapError);
+        CPPUNIT_TEST(testExtractKeywords2);
+        CPPUNIT_TEST(testSubstitution);
+        CPPUNIT_TEST_EXCEPTION(testPartialInitialisation, AskapError);
         CPPUNIT_TEST_SUITE_END();
 
         // helper class to get access to protected data members
@@ -158,6 +165,142 @@ class SubstitutionHandlerTest : public CppUnit::TestFixture {
              CPPUNIT_ASSERT_EQUAL(size_t(2u), res.size());
              CPPUNIT_ASSERT(res.find("test") != res.end());
              CPPUNIT_ASSERT(res.find("somethingelse") != res.end());
+        }
+
+        void testParseString() {
+             ModifiedSubstitutionHandler msh;
+             TestRule tr("test", "result", false);
+             msh.add(boost::shared_ptr<TestRule>(&tr, utility::NullDeleter()));
+
+             const std::string testStr = "test_val=%test%d%%test%{_val=%test%}";
+             std::vector<boost::tuple<size_t, std::string, size_t> > vec = msh.parseString(testStr);
+             CPPUNIT_ASSERT_EQUAL(size_t(7u),vec.size());
+             //for (size_t index = 0; index < vec.size(); ++index) {
+             //     std::cout<<"item "<<index + 1<<": `"<<vec[index].get<1>()<<"` ref="<<vec[index].get<0>()<<" group="<<vec[index].get<2>()<<std::endl;
+             //}
+             for (size_t index = 0; index < vec.size(); ++index) {
+                  CPPUNIT_ASSERT_EQUAL(size_t(index == 1 || index == 6 ? 0u : 1u), vec[index].get<0>());
+                  CPPUNIT_ASSERT_EQUAL(size_t(index >= 5 ? 1u : 0u), vec[index].get<2>());
+             }
+             CPPUNIT_ASSERT_EQUAL(std::string("test_val="), vec[0].get<1>());
+             CPPUNIT_ASSERT_EQUAL(std::string("test"), vec[1].get<1>());
+             CPPUNIT_ASSERT_EQUAL(std::string("%d"), vec[2].get<1>());
+             CPPUNIT_ASSERT_EQUAL(std::string("%"), vec[3].get<1>());
+             CPPUNIT_ASSERT_EQUAL(std::string("test"), vec[4].get<1>());
+             CPPUNIT_ASSERT_EQUAL(std::string("_val="), vec[5].get<1>());
+             CPPUNIT_ASSERT_EQUAL(std::string("test"), vec[6].get<1>());
+            
+             vec = msh.parseString("%test%");
+             CPPUNIT_ASSERT_EQUAL(size_t(2u),vec.size());
+             for (size_t index = 0; index < vec.size(); ++index) {
+                  CPPUNIT_ASSERT_EQUAL(size_t(index == 0 ? 0u : 1u), vec[index].get<0>());
+                  CPPUNIT_ASSERT_EQUAL(size_t(0u), vec[index].get<2>());
+             }
+             CPPUNIT_ASSERT_EQUAL(std::string("test"), vec[0].get<1>());
+             CPPUNIT_ASSERT_EQUAL(std::string("%"), vec[1].get<1>());
+
+             vec = msh.parseString("%d%");
+             CPPUNIT_ASSERT_EQUAL(size_t(2u),vec.size());
+             for (size_t index = 0; index < vec.size(); ++index) {
+                  CPPUNIT_ASSERT_EQUAL(size_t(1u), vec[index].get<0>());
+                  CPPUNIT_ASSERT_EQUAL(size_t(0u), vec[index].get<2>());
+             }
+             CPPUNIT_ASSERT_EQUAL(std::string("%d"), vec[0].get<1>());
+             CPPUNIT_ASSERT_EQUAL(std::string("%"), vec[1].get<1>());
+
+             vec = msh.parseString("%{%test%}%{%test%}");
+             CPPUNIT_ASSERT_EQUAL(size_t(2u),vec.size());
+             for (size_t index = 0; index < vec.size(); ++index) {
+                  CPPUNIT_ASSERT_EQUAL(size_t(0u), vec[index].get<0>());
+                  CPPUNIT_ASSERT_EQUAL(index+1, vec[index].get<2>());
+                  CPPUNIT_ASSERT_EQUAL(std::string("test"), vec[index].get<1>());
+             }
+
+             vec = msh.parseString("%{%testing%}");
+             CPPUNIT_ASSERT_EQUAL(size_t(2u),vec.size());
+             for (size_t index = 0; index < vec.size(); ++index) {
+                  CPPUNIT_ASSERT_EQUAL(size_t(index == 0 ? 0u : 1u), vec[index].get<0>());
+                  CPPUNIT_ASSERT_EQUAL(size_t(1u), vec[index].get<2>());
+             }
+             CPPUNIT_ASSERT_EQUAL(std::string("test"), vec[0].get<1>());
+             CPPUNIT_ASSERT_EQUAL(std::string("ing"), vec[1].get<1>());
+        }
+
+        void testParseStringOpenGroup1() {
+             ModifiedSubstitutionHandler msh;
+       
+             // this would throw the exception
+             msh.parseString("%{%test%");
+        }
+
+        void testParseStringOpenGroup2() {
+             ModifiedSubstitutionHandler msh;
+       
+             // this would throw the exception
+             msh.parseString("%}");
+        }
+
+        void testParseStringOpenGroup3() {
+             ModifiedSubstitutionHandler msh;
+       
+             // this would throw the exception
+             msh.parseString("%{%test=1%}%}");
+        }
+
+        void testExtractKeywords2() {
+             SubstitutionHandler sh;
+             TestRule tr1("test", "result", false);
+             TestRule tr2("val", "result", false);
+             sh.add(boost::shared_ptr<TestRule>(&tr1, utility::NullDeleter()));
+             sh.add(boost::shared_ptr<TestRule>(&tr2, utility::NullDeleter()));
+
+             std::set<std::string> kws = sh.extractKeywords("test_val=%test%d%%test%{_val=%test%}");
+             CPPUNIT_ASSERT_EQUAL(size_t(1u), kws.size());
+             CPPUNIT_ASSERT_EQUAL(std::string("test"), *kws.begin());
+             
+             kws = sh.extractKeywords("test_val=%test%d%%test%{_val=%val%}");
+             CPPUNIT_ASSERT_EQUAL(size_t(2u), kws.size());
+             CPPUNIT_ASSERT(kws.find("test") != kws.end());
+             CPPUNIT_ASSERT(kws.find("val") != kws.end());
+        }
+
+        void testSubstitution() {
+             SubstitutionHandler sh;
+             // pretend that only the first one os rank-independent
+             TestRule tr1("test", "result", true);
+             TestRule tr2("val", "val", false);
+             sh.add(boost::shared_ptr<TestRule>(&tr1, utility::NullDeleter()));
+             sh.add(boost::shared_ptr<TestRule>(&tr2, utility::NullDeleter()));
+             // get all keywords initialised first, otherwise the order of tests would matter
+             // as operator() initialised only the rules which are necessary and assumes it is done only
+             // once (so initialisation can include MPI collective calls)
+             std::set<std::string> kws = tr1.keywords();
+             const std::set<std::string> kws2 = tr2.keywords();
+             kws.insert(kws2.begin(), kws2.end());
+             CPPUNIT_ASSERT_EQUAL(size_t(2u), kws.size());
+             sh.initialise(kws);
+
+             // actual tests
+             CPPUNIT_ASSERT_EQUAL(std::string("val=result%d%test"), sh("val=%test%d%%test%{_val=%test%}"));
+             CPPUNIT_ASSERT_EQUAL(std::string("val=result%d%test_val=val"), sh("val=%test%d%%test%{_val=%val%}"));
+             CPPUNIT_ASSERT_EQUAL(std::string("val=result%d%test_val=resultval"), sh("val=%test%d%%test%{_val=%test%val%}"));
+             CPPUNIT_ASSERT_EQUAL(std::string("no_val_resultval"), sh("%{_%test%}%{no_%val%}_%{%test%val%}"));
+             CPPUNIT_ASSERT_EQUAL(std::string("result"), sh("%test"));
+             CPPUNIT_ASSERT_EQUAL(std::string("val"), sh("%val"));
+        }
+
+        void testPartialInitialisation() {
+             SubstitutionHandler sh;
+             // pretend that only the first one os rank-independent
+             TestRule tr1("test", "result", true);
+             TestRule tr2("val", "val", false);
+             sh.add(boost::shared_ptr<TestRule>(&tr1, utility::NullDeleter()));
+             sh.add(boost::shared_ptr<TestRule>(&tr2, utility::NullDeleter()));
+             
+             CPPUNIT_ASSERT_EQUAL(size_t(0u), sh("%{%test%}").size());
+             // now only first rule should be initialised (although parsing is inhibited by rank-independence)
+             // so the string which requires the second rule would cause an exception
+             sh("%val");
         }
 };
 
