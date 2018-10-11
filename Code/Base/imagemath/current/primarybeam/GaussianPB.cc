@@ -36,6 +36,29 @@ namespace askap {
             {
                 ASKAPLOG_DEBUG_STR(logger,"GaussianPB copy contructor");
             }
+            PrimaryBeam::ShPtr GaussianPB::createDefaultPrimaryBeam(){
+             
+               GaussianPB::ShPtr ptr;
+
+               ptr.reset( new GaussianPB());
+
+               ptr->setApertureSize(12.0);
+               ptr->setFWHMScaling(1.00);
+               // changed this default to deal with the double Gaussian
+               ptr->setExpScaling(4.*log(2.));
+
+               // New parameters for Dave M.'s 2-D Gaussian FITS
+
+               ptr->setXwidth(0.0);
+               ptr->setYwidth(0.0);
+               ptr->setAlpha(0.0);
+               ptr->setXoff(0.0);
+               ptr->setYoff(0.0);
+
+               ASKAPLOG_DEBUG_STR(logger,"Created Default Gaussian PB instance");
+               return ptr;
+            }
+
             PrimaryBeam::ShPtr GaussianPB::createPrimaryBeam(const LOFAR::ParameterSet &parset)
             {
                ASKAPLOG_DEBUG_STR(logger, "createPrimaryBeam for the Gaussian Primary Beam ");

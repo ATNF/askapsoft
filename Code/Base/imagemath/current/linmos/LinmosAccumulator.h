@@ -227,6 +227,8 @@ namespace askap {
                 map<string,bool> outWgtDuplicates(void) {return itsOutWgtDuplicates;}
                 map<string,bool> genSensitivityImage(void) {return itsGenSensitivityImage;}
 
+                bool setDefaultPB();
+
             private:
 
                 /// @brief convert the current input shape and coordinate system to the reference (output) system

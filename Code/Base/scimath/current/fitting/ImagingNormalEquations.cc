@@ -351,9 +351,9 @@ namespace askap
 
       // initialise an image accumulator
       imagemath::LinmosAccumulator<double> accumulator;
-      accumulator.weightType(FROM_WEIGHT_IMAGES);
-      accumulator.weightState(CORRECTED);
-
+      accumulator.weightType(FROM_BP_MODEL);
+      accumulator.weightState(INHERENT);
+      accumulator.setDefaultPB(); // this will probably need to be smarter
       // these inputs should be set up to take the full mosaic.
       accumulator.setOutputParameters(itsShape[col], itsCoordSys[col]);
 

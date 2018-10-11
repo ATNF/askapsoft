@@ -43,6 +43,7 @@
 #include <askap/StatReporter.h>
 #include <utils/MultiDimArrayPlaneIter.h>
 #include <primarybeam/PrimaryBeam.h>
+#include <primarybeam/GaussianPB.h>
 #include <primarybeam/PrimaryBeamFactory.h>
 
 ASKAP_LOGGER(linmoslogger, ".linmosaccumulator");
@@ -1713,6 +1714,13 @@ namespace askap {
             }
             return true;
         }
+        // set a default PB if required
+        template<typename T>
+        bool LinmosAccumulator<T>::setDefaultPB() {
+          itsPB = GaussianPB::createDefaultPrimaryBeam();
+          return true;
+        }
+
 
     } // namespace imagemath
 

@@ -34,6 +34,8 @@ namespace imagemath {
 
         GaussianPB(const GaussianPB &other);
 
+        static PrimaryBeam::ShPtr createDefaultPrimaryBeam();
+
         static PrimaryBeam::ShPtr createPrimaryBeam(const LOFAR::ParameterSet &parset);
 
         /// Set some parameters
