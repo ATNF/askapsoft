@@ -42,9 +42,9 @@ using namespace askap::accessors;
 /// construct an object linked with the given const accessor
 /// @param[in] acc a reference to the associated accessor
 OnDemandNoiseAndFlagDA::OnDemandNoiseAndFlagDA(const IConstDataAccessor &acc) :
-      MetaDataAccessor(acc), MemBufferDataAccessor(acc), 
+      MetaDataAccessor(acc), MemBufferDataAccessor(acc),
       itsFlagSubstituted(false), itsNoiseSubstituted(false) {}
-  
+
 
 /// @brief Noise level required for a proper weighting
 /// @return a reference to nRow x nChannel x nPol cube with
@@ -54,11 +54,11 @@ const casa::Cube<casa::Complex>& OnDemandNoiseAndFlagDA::noise() const
 {
   if (itsNoiseSubstituted) {
       return itsNoiseBuffer;
-  } 
+  }
   return getROAccessor().noise();
 }
 
-/// @brief write access to Noise level 
+/// @brief write access to Noise level
 /// @return a reference to nRow x nChannel x nPol cube with
 ///         complex noise estimates. Elements correspond to the
 ///         visibilities in the data cube.
@@ -66,11 +66,11 @@ casa::Cube<casa::Complex>& OnDemandNoiseAndFlagDA::rwNoise()
 {
   if (!itsNoiseSubstituted) {
       itsNoiseSubstituted = true;
-      itsNoiseBuffer.assign(getROAccessor().noise().copy());
-  } 
-  return itsNoiseBuffer;  
+      itsNoiseBuffer.assign(getROAccessor().noise());
+  }
+  return itsNoiseBuffer;
 }
-  
+
 /// @brief Cube of flags corresponding to the output of visibility()
 /// @return a reference to nRow x nChannel x nPol cube with the flag
 ///         information. If True, the corresponding element is flagged.
@@ -89,7 +89,7 @@ casa::Cube<casa::Bool>& OnDemandNoiseAndFlagDA::rwFlag()
 {
   if (!itsFlagSubstituted) {
       itsFlagSubstituted = true;
-      itsFlagBuffer.assign(getROAccessor().flag().copy());
-  } 
-  return itsFlagBuffer;  
+      itsFlagBuffer.assign(getROAccessor().flag());
+  }
+  return itsFlagBuffer;
 }

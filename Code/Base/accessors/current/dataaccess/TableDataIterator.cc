@@ -2,12 +2,12 @@
 ///
 /// @brief Implementation of IDataIterator in the table-based case
 /// @details
-/// TableConstDataIterator: Allow read-only iteration across preselected data. Each 
+/// TableConstDataIterator: Allow read-only iteration across preselected data. Each
 /// iteration step is represented by the IConstDataAccessor interface.
 /// TableDataIterator extends the interface further to read-write operations.
 /// Each iteration step is represented by the IDataAccessor interface in this
-/// case. 
-/// 
+/// case.
+///
 /// @copyright (c) 2007 CSIRO
 /// Australia Telescope National Facility (ATNF)
 /// Commonwealth Scientific and Industrial Research Organisation (CSIRO)
@@ -72,7 +72,7 @@ struct MapMemFun : public std::unary_function<X*, void> {
   /// @param[in] in a reference to the pair-like object with a pointer-like
   /// object stored in the second parameter.
   template<typename P>
-  void operator()(const P &in) const    
+  void operator()(const P &in) const
     {
       ASKAPDEBUGASSERT(in.second);
       return ((*in.second).*func)();
@@ -103,8 +103,8 @@ TableDataIterator::TableDataIterator(
             const boost::shared_ptr<ITableManager const> &msManager,
             const boost::shared_ptr<ITableDataSelectorImpl const> &sel,
             const boost::shared_ptr<IDataConverterImpl const> &conv,
-            size_t cacheSize, double tolerance,   
-            casa::uInt maxChunkSize) : 
+            size_t cacheSize, double tolerance,
+            casa::uInt maxChunkSize) :
          TableInfoAccessor(msManager),
            TableConstDataIterator(msManager,sel,conv,cacheSize, tolerance, maxChunkSize),
 	      itsOriginalVisAccessor(new TableDataAccessor(*this)),
@@ -126,25 +126,25 @@ IDataAccessor& TableDataIterator::operator*() const
   return *itsActiveBufferPtr;
 }
 
-/// @brief Switch the output of operator* and operator-> to one of 
+/// @brief Switch the output of operator* and operator-> to one of
 /// the buffers.
-/// @details This is meant to be done to provide the same 
-/// interface for a buffer access as exists for the original 
+/// @details This is meant to be done to provide the same
+/// interface for a buffer access as exists for the original
 /// visibilities (e.g. it->visibility() to get the cube).
-/// It can be used for an easy substitution of the original 
+/// It can be used for an easy substitution of the original
 /// visibilities to ones stored in a buffer, when the iterator is
-/// passed as a parameter to mathematical algorithms.   
+/// passed as a parameter to mathematical algorithms.
 /// The operator* and operator-> will refer to the chosen buffer
 /// until a new buffer is selected or the chooseOriginal() method
 /// is executed to revert operators to their default meaning
-/// (to refer to the primary visibility data).  
+/// (to refer to the primary visibility data).
 /// @param[in] bufferID  the name of the buffer to choose
 void TableDataIterator::chooseBuffer(const std::string &bufferID)
 {
   std::map<std::string,
       boost::shared_ptr<TableBufferDataAccessor> >::const_iterator bufferIt =
                       itsBuffers.find(bufferID);
-		      
+
   if (bufferIt==itsBuffers.end()) {
       // deal with new buffer
       itsActiveBufferPtr = itsBuffers[bufferID] =
@@ -156,7 +156,7 @@ void TableDataIterator::chooseBuffer(const std::string &bufferID)
 }
 
 /// Switch the output of operator* and operator-> to the original
-/// state (present after the iterator is just constructed) 
+/// state (present after the iterator is just constructed)
 /// where they point to the primary visibility data. This method
 /// is indended to cancel the results of chooseBuffer(std::string)
 ///
@@ -166,8 +166,8 @@ void TableDataIterator::chooseOriginal()
 }
 
 /// @brief obtain any associated buffer for read/write access.
-/// @details The buffer is identified by its bufferID. The method 
-/// ignores a chooseBuffer/chooseOriginal setting.  
+/// @details The buffer is identified by its bufferID. The method
+/// ignores a chooseBuffer/chooseOriginal setting.
 /// @param[in] bufferID the name of the buffer requested
 /// @return a reference to writable data accessor to the
 ///         buffer requested
@@ -192,7 +192,7 @@ void TableDataIterator::init()
   // call sync() member function for all accessors in itsBuffers
   std::for_each(itsBuffers.begin(),itsBuffers.end(),
            mapMemFun(&TableBufferDataAccessor::sync));
-  ASKAPDEBUGASSERT(itsOriginalVisAccessor);         
+  ASKAPDEBUGASSERT(itsOriginalVisAccessor);
   itsOriginalVisAccessor->sync();
 
   TableConstDataIterator::init();
@@ -206,20 +206,20 @@ void TableDataIterator::init()
   // TableConstDataAccessor in a usual way
 }
 
-     
-/// advance the iterator one step further 
-/// @return True if there are more data (so constructions like 
+
+/// advance the iterator one step further
+/// @return True if there are more data (so constructions like
 ///         while(it.next()) {} are possible)
 casa::Bool TableDataIterator::next()
 {
   // call sync() member function for all accessors in itsBuffers
   std::for_each(itsBuffers.begin(),itsBuffers.end(),
            mapMemFun(&TableBufferDataAccessor::sync));
-  ASKAPDEBUGASSERT(itsOriginalVisAccessor);         
+  ASKAPDEBUGASSERT(itsOriginalVisAccessor);
   itsOriginalVisAccessor->sync();
 
   ++itsIterationCounter;
-  
+
   // call notifyNewIteration() member function for all accessors
   // in itsBuffers
   std::for_each(itsBuffers.begin(),itsBuffers.end(),
@@ -230,7 +230,7 @@ casa::Bool TableDataIterator::next()
   return TableConstDataIterator::next();
 }
 
-/// populate the cube with the data stored in the given buffer  
+/// populate the cube with the data stored in the given buffer
 /// @param[in] vis a reference to the nRow x nChannel x nPol buffer
 ///            cube to fill with the complex visibility data
 /// @param[in] name a name of the buffer to work with
@@ -247,12 +247,12 @@ void TableDataIterator::readBuffer(casa::Cube<casa::Complex> &vis,
 	  // this is an old buffer with a different shape. Can't be used
 	  vis.resize(requiredShape);
       }
-  } else {     
+  } else {
       vis.resize(requiredShape);
   }
 }
 
-/// write the cube back to the given buffer  
+/// write the cube back to the given buffer
 /// @param[in] vis a reference to the nRow x nChannel x nPol buffer
 ///            cube to fill with the complex visibility data
 /// @param[in] name a name of the buffer to work with
@@ -270,9 +270,9 @@ TableDataIterator::~TableDataIterator()
            mapMemFun(&TableBufferDataAccessor::sync));
   if (itsOriginalVisAccessor) {
       // there is no much point to throw an exception here if itsOriginalVisAccesor
-      // doesn't point to a valid instance for some reason (it shouldn't happend)         
+      // doesn't point to a valid instance for some reason (it shouldn't happend)
       itsOriginalVisAccessor->sync();
-  }    
+  }
 }
 
 /// @brief helper templated method to write back a cube to main table column
@@ -284,12 +284,14 @@ TableDataIterator::~TableDataIterator()
 ///                 of the appropriate shape
 /// @param[in] colName Name of the column
 template<typename T>
-void TableDataIterator::writeCube(const casa::Cube<T> &cube, 
+void TableDataIterator::writeCube(const casa::Cube<T> &cube,
                                   const std::string &colName) const
 {
   const casa::uInt nChan = nChannel();
   const casa::uInt startChan = startChannel();
-  
+  // Setup a slicer to extract the specified channel range only
+  const casa::Slicer chanSlicer(casa::Slice(),casa::Slice(startChan,nChan));
+
   // no change of shape is permitted
   ASKAPASSERT(cube.nrow() == nRow() &&
               cube.ncolumn() == nChan &&
@@ -298,6 +300,7 @@ void TableDataIterator::writeCube(const casa::Cube<T> &cube,
   ASKAPDEBUGASSERT(getCurrentIteration().nrow() >= getCurrentTopRow()+
                     nRow());
   casa::uInt tableRow = getCurrentTopRow();
+  casa::Matrix<T> buf(nPol(),nChan);
   for (casa::uInt row=0;row<cube.nrow();++row,++tableRow) {
        const casa::IPosition shape = visCol.shape(row);
        ASKAPDEBUGASSERT(shape.size() && (shape.size()<3));
@@ -305,34 +308,32 @@ void TableDataIterator::writeCube(const casa::Cube<T> &cube,
        const casa::uInt thisRowNumberOfChannels = shape.size()>1 ? shape[1] : 1;
        if (thisRowNumberOfPols != cube.nplane()) {
            ASKAPTHROW(DataAccessError, "Current implementation of the writing to original "
-                "visibilities does not support partial selection of the data");                 
+                "visibilities does not support partial selection of the data");
        }
        if (thisRowNumberOfChannels < nChan + startChan) {
            ASKAPTHROW(DataAccessError, "Channel selection doesn't fit into exisiting visibility array");
        }
        // for now just copy
-       casa::IPosition curPos(2,thisRowNumberOfPols,thisRowNumberOfChannels);
-       casa::Array<T> buf(curPos);
-       if ((startChan!=0) || (startChan+nChan!=thisRowNumberOfChannels)) {
-           // get data first to replace only what we need
-           visCol.get(tableRow,buf);
-       }
+       bool useSlicer = (startChan!=0) || (startChan+nChan!=thisRowNumberOfChannels);
+
        for (casa::uInt chan=0; chan<nChan; ++chan) {
-            curPos[1]=chan+startChan;
             for (casa::uInt pol=0; pol<thisRowNumberOfPols; ++pol) {
-                 curPos[0] = pol;
-                 buf(curPos) = cube(row,chan,pol);
+                 buf(pol,chan) = cube(row,chan,pol);
             }
        }
-       visCol.put(tableRow, buf); 
-  }             
-}		  
+       if (useSlicer) {
+           visCol.putSlice(tableRow,chanSlicer,buf);
+       } else {
+           visCol.put(tableRow, buf);
+       }
+  }
+}
 
 /// @brief write back the original visibilities
-/// @details The write operation is possible if the shape of the 
+/// @details The write operation is possible if the shape of the
 /// visibility cube stays the same as the shape of the data in the
 /// table. The method uses DataAccessor to obtain a reference to the
-/// visibility cube (hence no parameters). 
+/// visibility cube (hence no parameters).
 void TableDataIterator::writeOriginalVis() const
 {
    writeCube(getAccessor().visibility(), getDataColumnName());
@@ -369,7 +370,7 @@ void TableDataIterator::writeOriginalFlag() const
                 //std::cout<<row<<" "<<rowBasedFlag[row + topRow]<<" "<<oneUnflagged<<std::endl;
                 ASKAPCHECK(!oneUnflagged, "Flag modification attempted to unflag data for the row ("<<
                       row<<") which is flagged via row-based flagging mechanism. This is not supported");
-            }  
+            }
        }
 
    }
