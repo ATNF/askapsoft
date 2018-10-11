@@ -52,6 +52,14 @@ are applicable. Specifically:
 |calibrate.ignorebeam      |bool              |false         |If true, the calibration solution corresponding to  |
 |                          |                  |              |beam 0 will be applied to all beams                 |
 +--------------------------+------------------+--------------+----------------------------------------------------+
+|calibrate.ignorechannel   |bool              |false         |If true, the calibration solution corresponding to  |
+|                          |                  |              |channel 0 will be applied to all channels. Use this |
+|                          |                  |              |to apply selfcal gains.                             |
++--------------------------+------------------+--------------+----------------------------------------------------+
+|calibrate.ignoreleakage   |bool              |false         |If true, the calibration matrix is assumed to be    |
+|                          |                  |              |diagonal. Use if there are no polarization leakages | 
+|                          |                  |              |to apply.                                           |
++--------------------------+------------------+--------------+----------------------------------------------------+
 |freqframe                 |string            |topo          |Frequency frame to work in (the frame is converted  |
 |                          |                  |              |when the dataset is read). Either lsrk or topo is   |
 |                          |                  |              |supported.                                          |
