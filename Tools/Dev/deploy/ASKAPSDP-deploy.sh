@@ -1,4 +1,4 @@
-#!/bin/bash -l
+#!/bin/bash -l 
 
 # ASKAPSDP-deploy.sh
 # Deploys the ASKAP modules:
@@ -17,18 +17,19 @@
 # The ASKAP services, which run on Ingest cluster and therefore have to be built there, are remotely built by running
 # the commands from a ssh shell. Communicating the finishing of builds is done through semaphore files.
 #
+# A candidate release can be created (-d) which is intended for early adopters and dev testing.
+#
 main() {
   NOW=$(date "+%Y%m%d%H%M%S")
   NOW_LONG=$(date)
 
-  # We have to be askapops user to run this.
   doUserCheck
   
   # Usage
   me=$(basename "$0")
-  USAGE="$me [-h | ?] [-t <svn-tag>] [-l] [-c <cfg-file>]"
+  USAGE="$me [-h | ?] [-t <svn-tag> | -l | -d] [-c <cfg-file>]"
   
-  # Defaults, these can be overridden in config file (see -c switch)
+  # Defaults, these can be overriden in config file (see -c switch)
   OVERWRITE_EXISTING=FALSE
   MODULES_DIR="/group/askap/modulefiles"
   WORKING_DIR="/group/askap/askapops/workspace/askapsdp/"
@@ -39,29 +40,32 @@ main() {
   DEPLOY_ASKAP_SERVICES=true   # THIS NEEDS TO BE BUILT ON INGEST CLUSTER
   DEPLOY_ASKAP_CLI=true
   MAKE_MODULES_DEFAULT=true
+  DEBUG=false
+  PROFILE=false
   REPO_URL="https://svn.atnf.csiro.au/"
   LOG_FILE="${NOW}-ASKAPSDP-deploy.log"
 
   # Globals
-  CFG_FILE="RELEASE.cfg"       # default
+  CFG_FILE="RELEASE.cfg"
   CURRENT_DIR=$PWD
-  TAG=""                       # e.g. CP-0.12.3
+  TAG=""
   TAG_FORMAT="^CP-([0-9])+\.([0-9])+\.([0-9])+(.)*$"
-  VERSION=""                   # e.g. 0.12.3
+  RELEASE_CANDIDATE="RC"
+  VERSION=""
   ASKAPSOFT_URL="${REPO_URL}/askapsdp/"
   TOS_URL="${REPO_URL}/askapsoft/Src/trunk/"
   BUILD_DIR=""
-  VERBOSE=false               # change with -v, if true then echos log entries to the console
+  VERBOSE=false
   INGEST_NODE=galaxy-ingest01.pawsey.org.au
-  FORCE_RESET=false           # use -x to force reset (clears lock file)
+  FORCE_RESET=false
   
-  # Build finished flags
+  # Build flags
   BUILD_ASKAPSOFT_DONE_FLAG="build-askapsoft-done"
   BUILD_CPSVCS_DONE_FLAG="build-cpsvcs-done"
   BUILD_CLI_DONE_FLAG="build-cli-done"
   BUILD_FAILED_FLAG="build-error"
 
-  # svn settings - these have to be overridden in svn.cfg, if not then SSubversion will prompt for them so not good for unattended run
+  # svn settings - these can be overriden in svn.cfg
   SVN_USERNAME=""
   SVN_PASSWORD=""
   
@@ -70,16 +74,17 @@ main() {
   ERROR_BAD_OVERRIDES=64
   ERROR_OVERWRITE_CONFLICT=65
   ERROR_BAD_SVN_TAG=66
-  ERROR_MISSING_ENV=67
-  ERROR_MISSING_CFG_FILE=68
-  ERROR_NOT_ASKAPOPS=69
-  ERROR_ALREADY_RUNNING=70
-  ERROR_WRONG_CLUSTER=71
-  ERROR_TIMEOUT=72
-  ERROR_BUILD_FAILED=73
-  TOLD_TO_DIE=74             # used on terminate SIGnals
+  ERROR_TAG_ALREADY_SPECIFIED=67
+  ERROR_MISSING_ENV=68
+  ERROR_MISSING_CFG_FILE=69
+  ERROR_NOT_ASKAPOPS=70
+  ERROR_ALREADY_RUNNING=71
+  ERROR_WRONG_CLUSTER=72
+  ERROR_TIMEOUT=73
+  ERROR_BUILD_FAILED=74
+  TOLD_TO_DIE=75
   
-  TIMEOUT_VALUE=14400        # 4 hours
+  TIMEOUT_VALUE=14400 # 4 hours
 
   trap '{ cleanup ${TOLD_TO_DIE}; }' SIGHUP SIGINT SIGTERM
 
@@ -91,7 +96,6 @@ main() {
     fi
   fi
 
-  # Process the command line switches
   processCmdLine "$@" 
 
   # Overrides are in the cfg file
@@ -102,10 +106,8 @@ main() {
     fi
   fi
 
-  # We can only run this on galaxy
   detectHost
 
-  # We only want to run once at a time
   doLockCheck
   
   # Set up the dirs
@@ -123,10 +125,16 @@ main() {
     cleanup $NO_ERROR;
   fi
 
-  # The TAG will have been provided on the command line with -t or defaulted with -l
+  # The TAG will have been provided on the command line with -t or defaulted with -l or -d 
+  # For the release candidate we work from the trunk
   log "TAG = ${TAG}"
-  VERSION=$(echo $TAG | cut -d'-' -f 2)
-  ASKAPSOFT_URL="${ASKAPSOFT_URL}/tags/${TAG}"
+  if [ "${TAG}" == ${RELEASE_CANDIDATE} ]; then
+    VERSION="${RELEASE_CANDIDATE}"
+    ASKAPSOFT_URL="${ASKAPSOFT_URL}/trunk/"
+  else
+    VERSION=$(echo $TAG | cut -d'-' -f 2)
+    ASKAPSOFT_URL="${ASKAPSOFT_URL}/tags/${TAG}"
+  fi
 
   # Log the environment we are using
   logENV
@@ -218,9 +226,9 @@ buildAskap() {
 
     # Update version numbers on documentation conf.py file by replacing the default snapshot svn revision number (version = 'r' ...)
     # with the release number. Only do this if it hasn't been done already (someone may have done this manually in svn before).
-    if [ "$(grep -q '^version .* svnversion' askapsoft-${TAG}/Code/Doc/user/current/doc/conf.py)" == 0 ]; then
-      sed -e -i "s/^version = 'r'/#version = 'r'/" -e "s/^release = version/#release = version/" -e "s/^#version = '0.1'/version = '${VERSION}'/" -e "s/^#release = '0.1-draft'/release = '${VERSION}'/" askapsoft-${TAG}/Code/Doc/user/current/doc/conf.py
-      svn ci -m "Updated version numbers for ASKAPsoft documentation." askapsoft-${TAG}/Code/Doc/user/current/doc/conf.py --username ${SVN_USERNAME} --password ${SVN_PASSWORD}
+    if [ "$(grep -q \"^version = 'r'.*\" Code/Doc/user/current/doc/conf.py)" == 0 ]; then
+      sed -e -i "s/^version = 'r'/#version = 'r'/" -e "s/^release = version/#release = version/" -e "s/^#version = '0.1'/version = '${VERSION}'/" -e "s/^#release = '0.1-draft'/release = '${VERSION}'/" Code/Doc/user/current/doc/conf.py
+      svn ci -m "Updated version numbers for ASKAPsoft documentation." Code/Doc/user/current/doc/conf.py --username ${SVN_USERNAME} --password ${SVN_PASSWORD}
     fi
     
     BUILD_COMMAND+="rbuild -n -t doc Code/Doc/user/current; "
@@ -245,7 +253,7 @@ buildServices() {
   cd "${WORKING_DIR}/${TAG}" || cleanup $ERROR_MISSING_ENV
   
   # Create a build command that will be run on the ingest node. 
-  local BUILD_COMMAND="(cd \"${WORKING_DIR}/${TAG}/askapingest-${TAG}\"; "
+  local BUILD_COMMAND="(cd \"${WORKING_DIR}/${TAG}/askapingest-${TAG}\"; module load python/2.7.10; module load java; export MPICH_GNI_MALLOC_FALLBACK=enabled; module load gcc; module load mpich; module unload gcc; module unload askapservices; "
 
   # Check it out of it's not there
   if [ ! -e "askapingest-${TAG}" ]; then
@@ -264,7 +272,7 @@ buildServices() {
 
   BUILD_COMMAND="${BUILD_COMMAND} \
                  source initaskap.sh; \
-                 rbuild -n -V --release-name \"ASKAPsoft-cpsvcs-${TAG}\" --stage-dir \"ASKAPsoft-cpsvcs-${TAG}\" -t release Code/Systems/cpsvcs; \
+                 rbuild -n -V --release-name \"ASKAPsoft-cpsvcs-${TAG}\" --stage-dir \"ASKAPsoft-cpsvcs-${TAG}\" -p mpi=1 -t release Code/Systems/cpsvcs; \
                  touch \"${BUILD_DIR}/build-cpsvcs-done\") "
                        
   # run this on ingest
@@ -544,6 +552,7 @@ showHelp() {
   printf "    -v                verbose\n"
   printf "    -t svn-tag        is optional, if not given must specify -l\n"
   printf "    -l                use the latest tag in the repository (caution)\n"
+  printf "    -d                deploy release candidate; updates, builds and deploys from existing trunk working copy\n"
   printf "    -c cfg-file       is optional, if not given and a file RELEASE.cfg is not present in the current dir then no overrides will be used\n"
   printf "\n"
   printf "You can override the following settings by editing a scriptable config file and passing it via -c switch \n"
@@ -586,9 +595,10 @@ logerr() {
 #
 # Valid parameters:
 #   -h | ?        Help
-#   -t svn-tag    The tagged release to use from svn
 #   -v            Verbose mode
+#   -t svn-tag    The tagged release to use from svn
 #   -l            Use the latest tag
+#   -d            Developer release candidate; updates, builds and deploys from existing trunk working copy
 #   -c cfg-file   Specify a config file for overrides
 #   -x            Force a reset (clears lock flag); this switch is not public and does appear in the help
 #
@@ -598,7 +608,7 @@ processCmdLine() {
   OPTIND=1
 
   # Process our options
-  while getopts "h?vlt:c:x" opt "$@"; do
+  while getopts "h?vlt:dc:x" opt "$@"; do
       case "$opt" in
       
       h|\?)
@@ -618,6 +628,14 @@ processCmdLine() {
           ;;
       l)
           findLatestTag
+          ;;
+      d)  
+          if [[ -n "$TAG" ]]; then
+            printf "A tag, %s, has already been specified and this cannot be a release candidate\n" "${TAG}"
+            exit $ERROR_TAG_ALREADY_SPECIFIED;
+          else
+            TAG="${RELEASE_CANDIDATE}"
+          fi
           ;;
       c)
           if  [ -e "$OPTARG" ]; then
@@ -705,7 +723,6 @@ doOverwriteChecks() {
     fi
     if [ "$OVERWRITE_EXISTING" == true ] && [ "$DEPLOY_ASKAP_PIPELINE" == true ] && [ -e "${MODULES_DIR}/askappipeline/${TAG}" ]; then
       log "OVERWRITE existing module" "${MODULES_DIR}/askappipeline/${TAG}"
-      BAIL=true
     fi
 
     # Check for existing askapservices module
