@@ -1160,7 +1160,7 @@ namespace askap {
                         }
 
                         if (theWeight >= wgtCutoff) {
-                            outPix(fullpos) = outWgtPix(fullpos) * outPix(fullpos) + itsOutBuffer.getAt(pos) * theWeight;
+                            outPix(fullpos) = outPix(fullpos) + itsOutBuffer.getAt(pos) * theWeight;
                             outWgtPix(fullpos) = outWgtPix(fullpos) + theWeight;
                         }
                   }
@@ -1441,7 +1441,7 @@ namespace askap {
                         }
 
                         if (theWeight >=wgtCutoff) {
-                            outPix(fullpos)    = outPix(fullpos)*outWgtPix(fullpos)    + inPix(fullpos) * theWeight;
+                            outPix(fullpos)    = outPix(fullpos)  + inPix(fullpos) * theWeight;
                             outWgtPix(fullpos) = outWgtPix(fullpos) + theWeight ;
                         }
 
@@ -1664,7 +1664,7 @@ namespace askap {
         // Check that the input coordinate system is the same as the output
         template<typename T>
         bool LinmosAccumulator<T>::coordinatesAreEqual(void) {
-          
+
             return coordinatesAreEqual(itsInCoordSys, itsOutCoordSys,
                                        itsInShape, itsOutShape);
         }
