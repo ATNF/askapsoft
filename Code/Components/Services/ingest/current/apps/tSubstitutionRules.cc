@@ -37,6 +37,7 @@
 #include "ingestpipeline/mssink/GenericSubstitutionRule.h"
 #include "ingestpipeline/mssink/DateTimeSubstitutionRule.h"
 #include "ingestpipeline/mssink/BeamSubstitutionRule.h"
+#include "ingestpipeline/mssink/FreqChunkSubstitutionRule.h"
 #include "configuration/SubstitutionHandler.h"
 #include "cpcommon/ParallelCPApplication.h"
 #include "cpcommon/VisChunk.h"
@@ -73,30 +74,43 @@ public:
       if (itsBeamSR) {
           sh.add(itsBeamSR);
       }
+      if (itsFreqChunkSR) {
+          sh.add(itsFreqChunkSR);
+      }
       return sh(str);
    }
 
    virtual void run() {
-      itsBeamSR.reset(new ingest::BeamSubstitutionRule("b", ingest::Configuration(config(), rank(), numProcs())));
+      ingest::Configuration cfg(config(), rank(), numProcs());
+      itsBeamSR.reset(new ingest::BeamSubstitutionRule("b", cfg));
+      itsFreqChunkSR.reset(new ingest::FreqChunkSubstitutionRule("f", cfg));
       boost::shared_ptr<common::VisChunk> chunk(new common::VisChunk(100, 10, 4, 6));
       chunk->beam1().set(static_cast<casa::uInt>(rank()));
       chunk->beam2().set(static_cast<casa::uInt>(rank()));
+      for (casa::uInt chan = 0; chan < chunk->nChannel(); ++chan) {
+           chunk->frequency()[chan] = 930e6 + 1e6/54. * double(chan) - 48e6 * (rank()%2);
+      }
       itsBeamSR->setupFromChunk(chunk);
+      itsFreqChunkSR->setupFromChunk(chunk);
 
       std::vector<std::string>  strs;
       strs.push_back(config().getString("filename", "test_%r.dat"));
       strs.push_back("test%{_%d%}%{_%r%}");
       strs.push_back("%d_%t%{_%d:%s%r%}");
       strs.push_back("%d_%t%{_%b%}");
+      strs.push_back("%d_%t%{_%f%}");
       for (std::vector<std::string>::const_iterator ci = strs.begin(); ci != strs.end(); ++ci) {
            const std::string res = substitute(*ci);
            ASKAPLOG_INFO_STR(logger, "Input: "<<*ci<<" output: "<<res);
       }
       itsBeamSR->verifyChunk(chunk);
+      itsFreqChunkSR->verifyChunk(chunk);
       
    }
 private:
    boost::shared_ptr<ingest::BeamSubstitutionRule> itsBeamSR;
+
+   boost::shared_ptr<ingest::FreqChunkSubstitutionRule> itsFreqChunkSR;
 };
 
 int main(int argc, char *argv[])
