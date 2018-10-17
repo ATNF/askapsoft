@@ -28,6 +28,8 @@
 #include "configuration/IChunkDependentSubstitutionRule.h"
 #include "askap/AskapError.h"
 
+#include <iostream>
+
 namespace askap {
 namespace cp {
 namespace ingest {
@@ -39,22 +41,26 @@ namespace ingest {
 /// setup. 
 void IChunkDependentSubstitutionRule::initialise()
 {
-   ASKAPCHECK(itsChunkBuf, "setupFromChunk method is not called prior to initialisation of chunk-dependent substitution rule");
-   initialise(itsChunkBuf);
-   // the chunk is not necessary anymore
+   // Note, initialise() is called only if the particular rule is used. However, we use weak pointer to the chunk, 
+   // so no unnecessary hold of memory will follow in this case
+   boost::shared_ptr<common::VisChunk> chunk = itsChunkBuf.lock();
+   ASKAPCHECK(chunk, "setupFromChunk method is not called prior to initialisation of chunk-dependent substitution rule or chunk shared pointer became invalid");
+   initialise(chunk);
+   // the weak pointer to the chunk is not necessary anymore
    itsChunkBuf.reset();
 }
 
 /// @brief pass chunk to work with
-/// @details The shared pointer to the chunk is stored until the call to initialise
-/// method, and then released to avoid holding up too much memory unnecessarily. 
+/// @details The shared pointer to the chunk is stored in a weak pointer and is 
+/// expected to be valid until the call to initialise method. 
 /// @param[in] chunk shared pointer to VisChunk to work with
 /// @note The design is a bit ugly, but this is largely to contain MPI calls in a single
 /// place and don't have FAT interfaces. An exception is thrown if initialise method is
 /// called without setting up the chunk
 void IChunkDependentSubstitutionRule::setupFromChunk(const boost::shared_ptr<common::VisChunk> &chunk)
 {
-   ASKAPCHECK(!itsChunkBuf, "setupFromChunk and initialisation are supposed to be called only once!");
+   ASKAPCHECK(itsChunkBuf.expired(), "setupFromChunk and initialisation are supposed to be called only once!");
+   ASKAPCHECK(chunk, "An empty shared pointer is passed to setupFromChunk");
    itsChunkBuf = chunk;
 }
 

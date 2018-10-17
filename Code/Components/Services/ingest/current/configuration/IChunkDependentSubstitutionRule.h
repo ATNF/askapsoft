@@ -29,6 +29,7 @@
 
 // boost include 
 #include <boost/shared_ptr.hpp>
+#include <boost/weak_ptr.hpp>
 
 // ASKAPsoft include
 #include "configuration/ISubstitutionRule.h"
@@ -43,7 +44,7 @@ namespace ingest {
 /// VisChunk. This interface adds an additional method to pass VisChunk for use, 
 /// either to setup the rule or to check that the result still conforms to the state of
 /// things in the first sighted VisChunk. 
-class IChunkDependentSubstitutionRule : public ISubstitutionRule {
+class IChunkDependentSubstitutionRule : virtual public ISubstitutionRule {
    public:
 
    /// @brief initialise the object
@@ -54,8 +55,8 @@ class IChunkDependentSubstitutionRule : public ISubstitutionRule {
    virtual void initialise();
 
    /// @brief pass chunk to work with
-   /// @details The shared pointer to the chunk is stored until the call to initialise
-   /// method, and then released to avoid holding up too much memory unnecessarily. 
+   /// @details The shared pointer to the chunk is stored in a weak pointer and is 
+   /// expected to be valid until the call to initialise method. 
    /// @param[in] chunk shared pointer to VisChunk to work with
    /// @note The design is a bit ugly, but this is largely to contain MPI calls in a single
    /// place and don't have FAT interfaces. An exception is thrown if initialise method is
@@ -84,8 +85,9 @@ protected:
 
 private:
    /// @brief temporary buffer for chunk
-   /// @details The shared pointer is not void only between the calls to setupFromChunk and intialise methods.
-   boost::shared_ptr<common::VisChunk> itsChunkBuf;
+   /// @details The weak pointer is expected to be valid only between the calls to 
+   /// setupFromChunk and intialise methods.
+   boost::weak_ptr<common::VisChunk> itsChunkBuf;
 };
 
 

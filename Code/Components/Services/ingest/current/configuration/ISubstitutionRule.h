@@ -55,7 +55,7 @@ class ISubstitutionRule {
    public:
 
    /// @brief virtual destructor to keep the compiler happy
-   ~ISubstitutionRule();
+   virtual ~ISubstitutionRule();
 
    /// @brief obtain keywords handled by this object
    /// @details This method returns a set of string keywords

@@ -39,7 +39,7 @@ namespace ingest {
 /// @details This is an example of data dependent substituion method, The beam number is 
 /// the result of the substitution. Substitution fails if there is more than one beam in 
 /// the accessor.
-class BeamSubstitutionRule : public ISubstitutionRule {
+class BeamSubstitutionRule : public IChunkDependentSubstitutionRule {
    public:
 
    /// @brief constructor
