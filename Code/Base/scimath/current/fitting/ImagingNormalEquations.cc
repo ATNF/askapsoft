@@ -76,9 +76,9 @@ namespace askap
   {
 
 
-    ImagingNormalEquations::ImagingNormalEquations() {};
+    ImagingNormalEquations::ImagingNormalEquations() : itsWeightType(-1), itsWeightState(-1) {};
 
-    ImagingNormalEquations::ImagingNormalEquations(const Params& ip)
+    ImagingNormalEquations::ImagingNormalEquations(const Params& ip) : itsWeightState(INHERENT),itsWeightType(FROM_BP_MODEL)
     {
       vector<string> names=ip.freeNames();
       vector<string>::iterator iterRow;
@@ -103,7 +103,7 @@ namespace askap
     /// @param[in] src input measurement equations to copy from
     ImagingNormalEquations::ImagingNormalEquations(const ImagingNormalEquations &src) :
          INormalEquations(src),itsShape(src.itsShape), itsReference(src.itsReference),
-         itsCoordSys(src.itsCoordSys)
+         itsCoordSys(src.itsCoordSys), itsWeightType(src.itsWeightType), itsWeightState(src.itsWeightState)
     {
       deepCopyOfSTDMap(src.itsNormalMatrixSlice, itsNormalMatrixSlice);
       deepCopyOfSTDMap(src.itsNormalMatrixDiagonal, itsNormalMatrixDiagonal);
@@ -123,6 +123,9 @@ namespace askap
         itsShape = src.itsShape;
         itsReference = src.itsReference;
         itsCoordSys = src.itsCoordSys;
+        itsWeightType = src.itsWeightType;
+        itsWeightState = src.itsWeightState;
+
         deepCopyOfSTDMap(src.itsNormalMatrixSlice, itsNormalMatrixSlice);
         deepCopyOfSTDMap(src.itsNormalMatrixDiagonal, itsNormalMatrixDiagonal);
         deepCopyOfSTDMap(src.itsPreconditionerSlice, itsPreconditionerSlice);
@@ -349,10 +352,13 @@ namespace askap
       ASKAPASSERT(itsShape[col].nelements() >= 2);
       ASKAPASSERT(itsShape[col].nelements() == other.itsShape.find(col)->second.nelements());
 
+      ASKAPASSERT(itsWeightState == other.itsWeightState);
+      ASKAPASSERT(itsWeightType == other.itsWeightType);
+
       // initialise an image accumulator
       imagemath::LinmosAccumulator<double> accumulator;
-      accumulator.weightType(FROM_BP_MODEL);
-      accumulator.weightState(INHERENT);
+      accumulator.weightType(itsWeightType);
+      accumulator.weightState(itsWeightState);
       accumulator.setDefaultPB(); // this will probably need to be smarter
       // these inputs should be set up to take the full mosaic.
       accumulator.setOutputParameters(itsShape[col], itsCoordSys[col]);

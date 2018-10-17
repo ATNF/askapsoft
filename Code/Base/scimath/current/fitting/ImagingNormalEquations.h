@@ -163,7 +163,7 @@ namespace askap
       /// of the ImagingNormalEquations but to keep the meta information for the params
       /// @param[in] ip the params
       /// @return void
-      
+
       void zero(const Params& ip);
       /// @brief Merge these normal equations with another
       /// @details Combining two normal equations depends on the actual class type
@@ -273,6 +273,11 @@ namespace askap
       std::map<std::string, casa::CoordinateSystem> itsCoordSys;
       /// The data vectors
       std::map<std::string, casa::Vector<double> > itsDataVector;
+
+      /// The weighting type and state of the params stored in the NE
+      int itsWeightType;
+      int itsWeightState;
+
     };
 
   }  // namespace scimath
