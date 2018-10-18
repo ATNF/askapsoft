@@ -47,6 +47,9 @@ namespace ingest {
 class IChunkDependentSubstitutionRule : virtual public ISubstitutionRule {
    public:
 
+   /// @brief constructor
+   IChunkDependentSubstitutionRule();
+
    /// @brief initialise the object
    /// @details This is the main entry point supported by the base interface.
    /// Implementation does necessary operations with the chunk shared pointer and
@@ -83,11 +86,23 @@ protected:
    /// @note The chunk itself is unchanged
    virtual void initialise(const boost::shared_ptr<common::VisChunk> &chunk) = 0;
 
+   /// @return true, if this rank is unused
+   /// @note the result is only valid after a call to setupFromChunk
+   inline bool unusedRank() const { return itsUnusedRank;}
+
 private:
    /// @brief temporary buffer for chunk
    /// @details The weak pointer is expected to be valid only between the calls to 
    /// setupFromChunk and intialise methods.
    boost::weak_ptr<common::VisChunk> itsChunkBuf;
+
+   /// @brief true, if this rank is not participating in substitution
+   /// @details We pass zero shared pointer to the chunk as a mark that
+   /// a particular rank is unused. Therefore, chunk-dependent classes should be
+   /// able to deal with void chunk scenario. This flag is used to check whether this
+   /// is the case for the given rank.
+   /// @note This method is only valid after a call to setupFromChunk
+   bool itsUnusedRank;
 };
 
 

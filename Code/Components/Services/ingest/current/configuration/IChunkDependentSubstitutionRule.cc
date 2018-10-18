@@ -34,6 +34,9 @@ namespace askap {
 namespace cp {
 namespace ingest {
 
+/// @brief constructor
+IChunkDependentSubstitutionRule::IChunkDependentSubstitutionRule() : itsUnusedRank(true) {}
+
 /// @brief initialise the object
 /// @details This is the main entry point supported by the base interface.
 /// Implementation does necessary operations with the chunk shared pointer and
@@ -44,7 +47,7 @@ void IChunkDependentSubstitutionRule::initialise()
    // Note, initialise() is called only if the particular rule is used. However, we use weak pointer to the chunk, 
    // so no unnecessary hold of memory will follow in this case
    boost::shared_ptr<common::VisChunk> chunk = itsChunkBuf.lock();
-   ASKAPCHECK(chunk, "setupFromChunk method is not called prior to initialisation of chunk-dependent substitution rule or chunk shared pointer became invalid");
+   ASKAPCHECK(chunk || unusedRank(), "setupFromChunk method is not called prior to initialisation of chunk-dependent substitution rule or chunk shared pointer became invalid");
    initialise(chunk);
    // the weak pointer to the chunk is not necessary anymore
    itsChunkBuf.reset();
@@ -60,8 +63,12 @@ void IChunkDependentSubstitutionRule::initialise()
 void IChunkDependentSubstitutionRule::setupFromChunk(const boost::shared_ptr<common::VisChunk> &chunk)
 {
    ASKAPCHECK(itsChunkBuf.expired(), "setupFromChunk and initialisation are supposed to be called only once!");
-   ASKAPCHECK(chunk, "An empty shared pointer is passed to setupFromChunk");
-   itsChunkBuf = chunk;
+   if (chunk) {
+       itsChunkBuf = chunk;
+       itsUnusedRank = false;
+   } else {
+       itsUnusedRank = true;
+   }
 }
 
 

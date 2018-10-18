@@ -100,7 +100,23 @@ public:
    virtual void initialise();
 
 protected:
-   
+
+   // method in the base class to check this rank
+   using IChunkDependentSubstitutionRule::unusedRank;
+
+   /// @brief check that the given rank is unused
+   /// @details This method check idle status for the given rank, the result is valid
+   /// only after call to initialise method 
+   /// @param[in] rank rank to check
+   /// @return true if the given rank is unused
+   bool unusedRank(int rank) const;
+
+   /// @brief return first active rank
+   /// @details this is valid only after initialise method. An exception is
+   /// thrown if all ranks are idle
+   /// @return the first rank which is active
+   int firstActiveRank() const;
+
    /// @brief set the value represented by this class
    /// @param[in] val value to set
    /// @note An exception is raised if the value is set after the class has been initialised
@@ -130,6 +146,9 @@ private:
 
    /// @brief true, if rule has been initialised
    bool itsHasBeenInitialised;
+
+   /// @brief buffer to store 1 for idle ranks and 0 otherwise
+   std::vector<int> itsUnusedRanks;
 };
 
 

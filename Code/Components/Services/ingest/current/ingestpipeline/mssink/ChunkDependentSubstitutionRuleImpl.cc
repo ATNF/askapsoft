@@ -48,7 +48,7 @@ namespace ingest {
 /// @param[in] nprocs number of ranks
 ChunkDependentSubstitutionRuleImpl::ChunkDependentSubstitutionRuleImpl(const std::string &kw, int rank, int nprocs) :
        itsKeyword(kw), itsValue(-1), itsNProcs(nprocs), itsRank(rank), itsRankIndependent(true), 
-       itsHasBeenInitialised(false)
+       itsHasBeenInitialised(false), itsUnusedRanks(nprocs, 0)
 {
    ASKAPASSERT(itsRank < itsNProcs);
    ASKAPASSERT(itsNProcs > 0);
@@ -125,7 +125,20 @@ int ChunkDependentSubstitutionRuleImpl::nprocs() const
 /// defined in derived methods).
 void ChunkDependentSubstitutionRuleImpl::initialise()
 {
+   ASKAPCHECK(!itsHasBeenInitialised, "The chunk-dependent rule has already been initialised");
+
+   // aggregate idle rank flags - it is possible to do this here as chunk/activity flag should be set before initialisation
+   ASKAPDEBUGASSERT(itsRank < static_cast<int>(itsUnusedRanks.size()));
+   itsUnusedRanks[itsRank] = unusedRank();
+   
+   if (itsNProcs > 1) {
+       const int response = MPI_Allreduce(MPI_IN_PLACE, (void*)itsUnusedRanks.data(),
+                                 itsUnusedRanks.size(), MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+       ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Allreduce = "<<response);
+   }
+   
    IChunkDependentSubstitutionRule::initialise(); 
+
    // it is important to set the flag *after* initialisation, otherwise setValue,
    // which is the only way to set value field in derived classes, would abort with exception
    itsHasBeenInitialised = true;
@@ -138,6 +151,14 @@ void ChunkDependentSubstitutionRuleImpl::initialise()
        const int response = MPI_Allreduce(MPI_IN_PLACE, (void*)individualValues.data(),
                                  individualValues.size(), MPI_INT, MPI_SUM, MPI_COMM_WORLD);
        ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Allreduce = "<<response);
+
+       const int stubValue = individualValues[firstActiveRank()];
+       for (size_t index = 0; index < individualValues.size(); ++index) {
+            if (unusedRank(static_cast<int>(index))) {
+                individualValues[index] = stubValue;
+            }
+       }
+            
        // now individualValues are consistent on all ranks, so check the values
        itsRankIndependent = (std::find_if(individualValues.begin(), individualValues.end(), 
                               std::bind2nd(std::not_equal_to<int>(), itsValue)) == individualValues.end());
@@ -152,6 +173,31 @@ void ChunkDependentSubstitutionRuleImpl::setValue(int val)
 {
    ASKAPCHECK(!itsHasBeenInitialised, "setValue is used outside of initialisation, this should't happen");
    itsValue = val;
+}
+
+/// @brief check that the given rank is unused
+/// @details This method check idle status for the given rank, the result is valid
+/// only after call to initialise method 
+/// @param[in] rank rank to check
+/// @return true if the given rank is unused
+bool ChunkDependentSubstitutionRuleImpl::unusedRank(int rank) const 
+{
+   ASKAPASSERT(rank < static_cast<int>(itsUnusedRanks.size()));
+   return itsUnusedRanks[rank] > 0;
+}
+
+/// @brief return first active rank
+/// @details this is valid only after initialise method. An exception is
+/// thrown if all ranks are idle
+/// @return the first rank which is active
+int ChunkDependentSubstitutionRuleImpl::firstActiveRank() const
+{
+   for (int rank = 0; rank < static_cast<int>(itsUnusedRanks.size()); ++rank) {
+        if (itsUnusedRanks[rank] == 0) {
+            return rank;
+        }
+   }
+   ASKAPTHROW(AskapError, "All ranks are inactive");
 }
 
 };

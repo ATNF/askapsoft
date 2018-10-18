@@ -62,6 +62,9 @@
 // Local package includes
 #include "configuration/Configuration.h" // Includes all configuration attributes too
 #include "monitoring/MonitoringSingleton.h"
+#include "configuration/SubstitutionHandler.h"
+#include "ingestpipeline/mssink/GenericSubstitutionRule.h"
+#include "ingestpipeline/mssink/DateTimeSubstitutionRule.h"
 
 // name substitution should get the same name for all ranks, we need MPI for that
 // it would be nicer to get all MPI-related stuff to a single (top-level?) file eventually
@@ -84,8 +87,10 @@ MSSink::MSSink(const LOFAR::ParameterSet& parset,
     itsParset(parset), itsConfig(config),
     itsPointingTableEnabled(parset.getBool("pointingtable.enable", false)),
     itsPreviousScanIndex(-1),
-    itsFieldRow(-1), itsDataDescRow(-1), itsStreamNumber(0), itsDataVolumeOtherRanks(0.)
+    itsFieldRow(-1), itsDataDescRow(-1), itsStreamNumber(0), itsDataVolumeOtherRanks(0.),
+    itsBeamSubstitutionRule("b",config), itsFreqChunkSubstitutionRule("f",config)
 {
+  
     if (itsConfig.nprocs() == 1) {
         ASKAPLOG_DEBUG_STR(logger, "Constructor - serial mode, initialising");
         itsFileName = substituteFileName(itsParset.getString("filename"));
@@ -138,6 +143,8 @@ void MSSink::process(VisChunk::ShPtr& chunk)
         // this is the reason the file name is initialised outside initialise
         // We could also achieve the same by setting up a specialised MPI group here
         // instead of using MPI_WORLD.
+        itsBeamSubstitutionRule.setupFromChunk(chunk);
+        itsFreqChunkSubstitutionRule.setupFromChunk(chunk);
         itsFileName = substituteFileName(itsParset.getString("filename"));
         ASKAPCHECK(itsFileName.size() > 0, "Substituted file name appears to be an empty string");
 
@@ -164,8 +171,12 @@ void MSSink::process(VisChunk::ShPtr& chunk)
 
         ASKAPLOG_DEBUG_STR(logger, "Initialising MS, stream number "<<itsStreamNumber);
         initialise();
+    } else {
+        ASKAPASSERT(chunk);
+        itsBeamSubstitutionRule.verifyChunk(chunk);
+        itsFreqChunkSubstitutionRule.verifyChunk(chunk);
     }
-    ASKAPASSERT(chunk);
+    ASKAPDEBUGASSERT(chunk);
     // Calculate monitoring points and submit them
     submitMonitoringPoints(chunk);
 
@@ -265,71 +276,23 @@ void MSSink::process(VisChunk::ShPtr& chunk)
 /// @return file name with patterns substituted
 std::string MSSink::substituteFileName(const std::string &in) const
 {
-   // special structure to have full control over it, otherwise could've used casa::Time
-   struct TimeBuf {
-     casa::uInt year;
-     casa::uInt month;
-     casa::uInt day;
-     casa::uInt hour;
-     casa::uInt min;
-     casa::uInt sec;
+   SubstitutionHandler sh;
+   GenericSubstitutionRule rankSR("w", itsConfig.rank(), itsConfig);
+   GenericSubstitutionRule streamSR("s", itsStreamNumber, itsConfig);
+   DateTimeSubstitutionRule dtSR(itsConfig);
+   sh.add(boost::shared_ptr<GenericSubstitutionRule>(&rankSR, utility::NullDeleter()));
+   sh.add(boost::shared_ptr<DateTimeSubstitutionRule>(&dtSR, utility::NullDeleter()));
+   sh.add(boost::shared_ptr<GenericSubstitutionRule>(&streamSR, utility::NullDeleter()));
+   sh.add(boost::shared_ptr<BeamSubstitutionRule>(&itsBeamSubstitutionRule, utility::NullDeleter()));
+   sh.add(boost::shared_ptr<FreqChunkSubstitutionRule>(&itsFreqChunkSubstitutionRule, utility::NullDeleter()));
 
-     // technically we don't need a constructor, but it is neater to have it
-     TimeBuf() : year(0), month(0), day(0), hour(0), min(0), sec(0) {}
-   };
+   const std::string result = sh(in);
+
    // first just a sanity check
    if (itsStreamNumber > 0) {
-       ASKAPCHECK((in.find("%w") != std::string::npos) || (in.find("%s") != std::string::npos), "File name should contain %w or %s in the MPI case to provide different names for different ranks");
+       ASKAPCHECK(sh.lastSubstitutionRankDependent(), "File name should be different for differnet streams in the MPI case, set up some substitution rules");
    }
 
-   // this instance is used only if a date or time substitution is required
-   TimeBuf tbuf;
-   if ((in.find("%d") != std::string::npos) || (in.find("%t") != std::string::npos)) {
-       // need date/time later on
-       if ( (itsConfig.nprocs() == 1) || (itsConfig.rank() == 0) ) {
-            casa::Time tm;
-            tm.now();
-            tbuf.year = tm.year();
-            tbuf.month = tm.month();
-            tbuf.day = tm.dayOfMonth();
-            tbuf.hour = tm.hours();
-            tbuf.min = tm.minutes();
-            tbuf.sec = tm.seconds();
-       }
-       if (itsConfig.nprocs() > 1) {
-           // broadcast the value to all ranks
-           // of course, it would be nicer to have all MPI-related stuff at the top level only, but keep it as it is for now
-           const int response = MPI_Bcast((void*)&tbuf, sizeof(tbuf), MPI_INTEGER, 0, MPI_COMM_WORLD);
-           ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Bcast = "<<response);
-       }
-   }
-   std::string result;
-   for (size_t cursor = 0; cursor < in.size(); ++cursor) {
-       size_t pos = in.find("%",cursor);
-       if (pos == std::string::npos) {
-           result += in.substr(cursor);
-           break;
-       }
-       result += in.substr(cursor, pos - cursor);
-       if (++pos == in.size()) {
-           result += in[pos-1];
-           break;
-       }
-       if ((in[pos] == 's') && (itsStreamNumber >= 0)) {
-           result += utility::toString(itsStreamNumber);
-       } else if (in[pos] == 'w') {
-          result += utility::toString(itsConfig.rank());
-       } else if (in[pos] == 'd') {
-          result += utility::toString(tbuf.year)+"-"+makeTwoElementString(tbuf.month)+"-"+makeTwoElementString(tbuf.day);
-       } else if (in[pos] == 't') {
-          result += makeTwoElementString(tbuf.hour)+makeTwoElementString(tbuf.min)+
-                    makeTwoElementString(tbuf.sec);
-       } else {
-          // unrecognised symbol, pass it as is
-          result += in.substr(pos-1,2);
-       }
-       cursor = pos;
-   }
    return result;
 }
 

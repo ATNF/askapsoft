@@ -87,6 +87,9 @@ void BeamSubstitutionRule::verifyChunk(const boost::shared_ptr<common::VisChunk>
 /// @note The chunk itself is unchanged
 void BeamSubstitutionRule::initialise(const boost::shared_ptr<common::VisChunk> &chunk)
 {
+   if (unusedRank()) {
+       return;
+   }
    ASKAPASSERT(chunk);
    const casa::uInt beam = checkAllValuesAreTheSame(chunk->beam1());
    const casa::uInt beam2 = checkAllValuesAreTheSame(chunk->beam2());

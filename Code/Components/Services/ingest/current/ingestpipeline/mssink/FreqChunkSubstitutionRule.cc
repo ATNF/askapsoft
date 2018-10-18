@@ -83,9 +83,11 @@ void FreqChunkSubstitutionRule::verifyChunk(const boost::shared_ptr<common::VisC
 /// @note The chunk itself is unchanged
 void FreqChunkSubstitutionRule::initialise(const boost::shared_ptr<common::VisChunk> &chunk)
 {
-   ASKAPASSERT(chunk);
-   ASKAPASSERT(chunk->frequency().nelements() > 0);
-   itsFreq = chunk->frequency()[0];
+   if (!unusedRank()) {
+       ASKAPASSERT(chunk);
+       ASKAPASSERT(chunk->frequency().nelements() > 0);
+       itsFreq = chunk->frequency()[0];
+   }
 
    if (nprocs() > 1) {
        // distributed case, need to aggregate values. Otherwise, the field has already been setup correctly
@@ -94,9 +96,16 @@ void FreqChunkSubstitutionRule::initialise(const boost::shared_ptr<common::VisCh
        const int response = MPI_Allreduce(MPI_IN_PLACE, (void*)individualFreqs.data(),
                                        individualFreqs.size(), MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
        ASKAPCHECK(response == MPI_SUCCESS, "Erroneous response from MPI_Allreduce = "<<response);
+       const double stubFreq = individualFreqs[firstActiveRank()];
        std::vector<int> indices(nprocs());
        for (size_t index = 0; index < static_cast<size_t>(nprocs()); ++index) {
             indices[index] = static_cast<int>(index);
+            // this is necessary to get consistent picture for ranks which are active
+            // including rank-dependence or otherwise
+            // we don't care about result on inactive ones
+            if (unusedRank(static_cast<int>(index))) {
+                individualFreqs[index] = stubFreq;
+            }
        }
        std::sort(indices.begin(), indices.end(), utility::indexedCompare<int>(individualFreqs.begin()));
        int freqChunkId = 0;

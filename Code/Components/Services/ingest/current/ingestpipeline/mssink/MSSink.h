@@ -38,6 +38,8 @@
 #include "casacore/casa/Arrays/Vector.h"
 #include "casacore/casa/Arrays/Matrix.h"
 #include "cpcommon/VisChunk.h"
+#include "ingestpipeline/mssink/BeamSubstitutionRule.h"
+#include "ingestpipeline/mssink/FreqChunkSubstitutionRule.h"
 
 // Local package includes
 #include "ingestpipeline/ITask.h"
@@ -262,7 +264,11 @@ class MSSink : public askap::cp::ingest::ITask,
         /// @brief data volume in MB per integration handled by other ranks
         float itsDataVolumeOtherRanks;
 
-       
+        /// @brief beam substitution rule
+        mutable BeamSubstitutionRule itsBeamSubstitutionRule; 
+
+        /// @brief frequency chunk substitution rule
+        mutable FreqChunkSubstitutionRule itsFreqChunkSubstitutionRule; 
 };
 
 }
