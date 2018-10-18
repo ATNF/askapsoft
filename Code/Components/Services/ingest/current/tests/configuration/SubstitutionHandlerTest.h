@@ -105,6 +105,7 @@ class SubstitutionHandlerTest : public CppUnit::TestFixture {
      
              const std::string testStr = "ThisString_%s_Should_%d_BePassedAsIs";
              CPPUNIT_ASSERT_EQUAL(testStr, sh(testStr));
+             CPPUNIT_ASSERT(!sh.lastSubstitutionRankDependent());
         };
 
         void testIntersection() {
@@ -282,11 +283,17 @@ class SubstitutionHandlerTest : public CppUnit::TestFixture {
 
              // actual tests
              CPPUNIT_ASSERT_EQUAL(std::string("val=result%d%test"), sh("val=%test%d%%test%{_val=%test%}"));
+             CPPUNIT_ASSERT(!sh.lastSubstitutionRankDependent());
              CPPUNIT_ASSERT_EQUAL(std::string("val=result%d%test_val=val"), sh("val=%test%d%%test%{_val=%val%}"));
+             CPPUNIT_ASSERT(sh.lastSubstitutionRankDependent());
              CPPUNIT_ASSERT_EQUAL(std::string("val=result%d%test_val=resultval"), sh("val=%test%d%%test%{_val=%test%val%}"));
+             CPPUNIT_ASSERT(sh.lastSubstitutionRankDependent());
              CPPUNIT_ASSERT_EQUAL(std::string("no_val_resultval"), sh("%{_%test%}%{no_%val%}_%{%test%val%}"));
+             CPPUNIT_ASSERT(sh.lastSubstitutionRankDependent());
              CPPUNIT_ASSERT_EQUAL(std::string("result"), sh("%test"));
+             CPPUNIT_ASSERT(!sh.lastSubstitutionRankDependent());
              CPPUNIT_ASSERT_EQUAL(std::string("val"), sh("%val"));
+             CPPUNIT_ASSERT(sh.lastSubstitutionRankDependent());
         }
 
         void testPartialInitialisation() {

@@ -80,6 +80,14 @@ public:
    /// @return processed string
    std::string operator()(const std::string &in);
 
+   /// @brief verify that last conversion resulted in rank-dependent string
+   /// @return true, if the last result returned by operator() was differnet
+   /// for different ranks
+   /// @note This can be done without MPI calls, just based on properties of individual rules.
+   /// Perhaps, a better interface would be to always pass a string, rather than rely on the 
+   /// last call to operator(). The result is undefined if no substitution has been done.
+   inline bool lastSubstitutionRankDependent() const  { return itsLastRankDependent; }
+
    /// @brief extract all keywords used in the given string
    /// @param[in] in input string
    /// @return set of used keywords
@@ -126,6 +134,9 @@ private:
 
    /// @brief true if initialise method is called
    bool itsInitialiseCalled;
+
+   /// @brief true, if last substitution result turned out to be rank-dependent
+   bool itsLastRankDependent;
 };
 
 

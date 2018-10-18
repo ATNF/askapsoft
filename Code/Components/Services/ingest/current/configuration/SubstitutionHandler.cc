@@ -37,7 +37,7 @@ namespace cp {
 namespace ingest {
 
 /// @brief constructor
-SubstitutionHandler::SubstitutionHandler() : itsInitialiseCalled(false) 
+SubstitutionHandler::SubstitutionHandler() : itsInitialiseCalled(false), itsLastRankDependent(false)
 {
    itsRules.reserve(10);
    itsRuleInitialised.reserve(10);
@@ -117,21 +117,21 @@ std::string SubstitutionHandler::operator()(const std::string &in)
 
    // set up activity flag for each group - true for non-zero group which has rank-dependent result for at least one of the fields
    for (std::map<size_t, bool>::iterator it = groupsUsed.begin(); it != groupsUsed.end(); ++it) {
-        if (it->first != 0) {
-            bool isRankIndependent = true;
-            for (std::vector<boost::tuple<size_t, std::string, size_t> >::const_iterator ci = parsedStr.begin(); ci != parsedStr.end(); ++ci) {
-                 if ((ci->get<2>() == it->first) && (ci->get<0>() < itsRules.size())) {
-                     const boost::shared_ptr<ISubstitutionRule> rule = itsRules[ci->get<0>()];
-                     ASKAPDEBUGASSERT(rule);
-                     isRankIndependent &= rule->isRankIndependent();
-                 }
-            }
-            it->second = !isRankIndependent;
+        bool isRankIndependent = true;
+        for (std::vector<boost::tuple<size_t, std::string, size_t> >::const_iterator ci = parsedStr.begin(); ci != parsedStr.end(); ++ci) {
+             if ((ci->get<2>() == it->first) && (ci->get<0>() < itsRules.size())) {
+                 const boost::shared_ptr<ISubstitutionRule> rule = itsRules[ci->get<0>()];
+                 ASKAPDEBUGASSERT(rule);
+                 isRankIndependent &= rule->isRankIndependent();
+             }
         }
+        it->second = !isRankIndependent;
    }
 
    // group 0 is always active, i.e. included in the output
-   // (although we could've skipped this as the logic above will leave it as true, but it is more readable this way)
+   // however the current value stored in groupsUsed is true if the main text is rank-dependent.
+   itsLastRankDependent = groupsUsed[0];
+   // now turn it to true to always pass through
    groupsUsed[0] = true;
 
    std::string result;
@@ -145,6 +145,9 @@ std::string SubstitutionHandler::operator()(const std::string &in)
                 result += rule->operator()(ci->get<1>());
             } else {
                 result += ci->get<1>();
+            }
+            if (ci->get<2>() != 0) {
+                itsLastRankDependent = true;
             }
         }
    }
