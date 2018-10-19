@@ -37,6 +37,21 @@ the task defined by tasks.\ **name**\ .type should be set to *MSSink*.
 |                            |                   |            |count active ranks, which is a run time information). In the  |
 |                            |                   |            |serial mode, the date and time are taken up front when the    |
 |                            |                   |            |ingest pipeline is initialised with all its tasks.            |
+|                            |                   |            |In the distributed mode,                                      |
+|                            |                   |            |a number of data-dependent substitution rules are supported.  |
+|                            |                   |            |For example **%b** is substituted by the (0-based) beam number|
+|                            |                   |            |corresponding the data stored in the given measurement set    |
+|                            |                   |            |(note, execution aborts with an exception if                  |
+|                            |                   |            |**%b** is present in the string and some data stream contains |
+|                            |                   |            |more than just one beam). Similarly, **%f** is replaced by    |
+|                            |                   |            |0-based index of a frequency chunk (in the order of increasing|
+|                            |                   |            |frequency of the first channel), which may be handy if data   |
+|                            |                   |            |are split in frequency. The text enclosed in **%{** and **%}**|
+|                            |                   |            |is only passed through if it is not the same for all data     |
+|                            |                   |            |streams. Use                                                  |
+|                            |                   |            |**%%** to get a single **%** sign. Care must be taken to      |
+|                            |                   |            |ensure that the resulting file name after substitution is     |
+|                            |                   |            |unique across all data streams.                               |
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
 |stman,bucketsize            |int                |131072      |Bucket size parameter of the storage manager associated with  |
 |                            |                   |            |the measurement set (i.e. buffer size)                        |
