@@ -74,6 +74,9 @@ class ContinuumWorker
         // Whether preconditioning has been requested
         bool itsDoingPreconditioning;
 
+        // Whether the gridder is a Mosaicking one
+        bool itsGridderCanMosaick;
+
         // Cache a workunit to a different location
         void cacheWorkUnit(ContinuumWorkUnit& wu, LOFAR::ParameterSet& unitParset);
         // Process a workunit

@@ -62,6 +62,7 @@
 #include <casacore/casa/OS/Timer.h>
 #include <parallel/ImagerParallel.h>
 #include <imageaccess/BeamLogger.h>
+#include <linmos/LinmosAccumulator.h>
 // CASA Includes
 
 // Local includes
@@ -120,6 +121,19 @@ ContinuumWorker::ContinuumWorker(LOFAR::ParameterSet& parset,
             itsDoingPreconditioning = true;
         }
     }
+
+    itsGridderCanMosaick = false;
+    std::string GridderStr = itsParset.getString("gridder",std::string());
+    ASKAPLOG_INFO_STR(logger, "Gridder is " << GridderStr);
+
+    if (GridderStr == "AWProject") {
+      itsGridderCanMosaick = true;
+      ASKAPLOG_INFO_STR(logger," Gridder <CAN> mosaick");
+    }
+    else {
+      ASKAPLOG_INFO_STR(logger,"Gridder <CANNOT> mosaick");
+    }
+
 
 }
 
@@ -633,13 +647,23 @@ void ContinuumWorker::buildSpectralCube()
             /// this will actually build a full image for the first - it is not actually used tho.
             ///
             setupImage(rootImager.params(), frequency,false);
+            ImagingNormalEquations &rootINERef =
+            dynamic_cast<ImagingNormalEquations&>(*rootImager.getNE());
 
 
             try {
 
-                rootImager.calcNE();
+                rootImager.calcNE(); // why do this -
+                                     // this essentially forces me to
+                                     // image the full FOV for a single beam
+                                     // but all I want is somthing to linmos into.
+                                     // But I need this for the solver ....
+                                     // I should find a away to get the NE initialised w/o regridding
+                                     // which would be much better.
                 if (updateDir == true) {
-                  rootImager.zero();
+                  rootINERef.weightType(FROM_WEIGHT_IMAGES);
+                  rootINERef.weightState(CORRECTED);
+                  rootImager.zero(); // then we delete all our work ....
                 }
 
             }
@@ -656,13 +680,17 @@ void ContinuumWorker::buildSpectralCube()
             for (int majorCycleNumber = 0; majorCycleNumber <= nCycles; ++majorCycleNumber) {
 
                 int tempWorkUnitCount = initialChannelWorkUnit; // clearer if it were called nextWorkUnit
+                // in the updateDir mode we reprocess the first workunit - for a smaller FOV.
+                // in the <normal mode> we have already processed the first work unit and it is
+                // in the rootImager.
 
 
-                // now we are going to actually image this channel
+                // now we are going to actually image this work unit
                 while (tempWorkUnitCount < workUnits.size() && frequency == workUnits[tempWorkUnitCount].get_channelFrequency()) {
 
                     /// need a working imager to allow a merge over epochs for this channel
-
+                    /// assuming subsequency workunits are the same channel but either different
+                    /// epochs or look directions.
 
                     if (usetmpfs) {
                         // probably in spectral line mode
@@ -682,6 +710,11 @@ void ContinuumWorker::buildSpectralCube()
 
                         if (updateDir) {
                           itsAdvisor->updateDirectionFromWorkUnit(itsParsets[tempWorkUnitCount],workUnits[tempWorkUnitCount]);
+                          ///FIXME:
+                          // in updateDir mode I cannot cache the gridders as they have a tangent point.
+                          // So I have turned of caching for all modes. THis is performance hit on everyone for
+                          // a corner case .... FIX This!
+                          
                         // CalcCore  workingImager(itsParsets[tempWorkUnitCount],itsComms,myDs,rootImager.gridder(),localChannel);
                         }
 
@@ -720,6 +753,13 @@ void ContinuumWorker::buildSpectralCube()
                         // either in time or by beam.
 
                         ASKAPLOG_INFO_STR(logger,"About to merge into rootImager");
+                        ImagingNormalEquations &workingINERef =
+                        dynamic_cast<ImagingNormalEquations&>(*workingImager.getNE());
+                        if (updateDir) {
+                          workingINERef.weightType(FROM_WEIGHT_IMAGES);
+                          workingINERef.weightState(CORRECTED);
+                        }
+
                         rootImager.getNE()->merge(*workingImager.getNE());
                         ASKAPLOG_INFO_STR(logger,"Merged");
                     }

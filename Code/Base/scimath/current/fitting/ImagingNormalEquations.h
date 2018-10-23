@@ -96,6 +96,10 @@ namespace askap
 
       virtual ~ImagingNormalEquations();
 
+      /// @brief Store slice of the normal matrix for a given parameter.
+      /// This uses the shape parametr to determince how much of the datavector you
+      /// take.
+      ///
       /// @param[in] name parameter name
       /// @param[in] normalmatrixslice Slice of normal matrix for this parameter
       /// @param[in] normalmatrixdiagonal Diagonal of normal matrix for
@@ -103,6 +107,8 @@ namespace askap
       /// @param[in] datavector Data vector for this parameter
       /// @param[in] shape Shape of this parameter
       /// @param[in] reference Reference point for the slice
+      /// @param[in] the coordinate system of the slice
+
       void addSlice(const std::string& name,
                     const casa::Vector<double>& normalmatrixslice,
                     const casa::Vector<double>& normalmatrixdiagonal,
@@ -257,6 +263,18 @@ namespace askap
       /// @param[in] is the input stream
       /// @note Not sure whether the parameter should be made const or not
       virtual void readFromBlob(LOFAR::BlobIStream& is);
+
+      /// get the weightstate
+      int weightState();
+
+      /// set the weightState
+      void weightState(int theState);
+
+      /// get the weightType
+      int weightType();
+
+      /// set the weightType.
+      void weightType(int theType);
 
     private:
       /// A slice through a specified plane

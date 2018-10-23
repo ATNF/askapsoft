@@ -70,13 +70,14 @@ using std::map;
 using std::string;
 using std::vector;
 
+ASKAP_LOGGER(nelogger, ".nelogger");
 namespace askap
 {
   namespace scimath
   {
 
 
-    ImagingNormalEquations::ImagingNormalEquations() : itsWeightType(-1), itsWeightState(-1) {};
+    ImagingNormalEquations::ImagingNormalEquations() : itsWeightType(FROM_BP_MODEL), itsWeightState(INHERENT) {};
 
     ImagingNormalEquations::ImagingNormalEquations(const Params& ip) : itsWeightState(INHERENT),itsWeightType(FROM_BP_MODEL)
     {
@@ -169,7 +170,7 @@ namespace askap
     void ImagingNormalEquations::merge(const INormalEquations& src)
     {
       ASKAPTRACE("ImagingNormalEquations::merge");
-      std::cout << "In merge" << std::endl;
+      // std::cout << "In merge" << std::endl;
 
       try {
         const ImagingNormalEquations &other =
@@ -229,7 +230,7 @@ namespace askap
             // no old data for this parameter
             itsDataVector[*iterCol].assign(newDataVec);
             updateType = overwrite;
-            std::cout << "In merge - no data to merge" << std::endl;
+            std::cout << "In merge - no old data to merge" << std::endl;
           }
           else if(accumulator.coordinatesAreEqual(itsCoordSys[*iterCol],newCoordSys,
                                                   itsShape[*iterCol],newShape))
@@ -237,7 +238,7 @@ namespace askap
             // new and old data can be added directly for this parameter
             itsDataVector[*iterCol] += newDataVec;
             updateType = add;
-            std::cout << "In merge - data to merge but coordinates match" << std::endl;
+            ASKAPLOG_INFO_STR(nelogger,"In merge of " << *iterCol << "- old data to merge but coordinates match");
 
 
           }
@@ -248,16 +249,16 @@ namespace askap
               // no coordinate information, so just use the new data
               itsDataVector[*iterCol].assign(newDataVec);
               updateType = overwrite;
-              std::cout << "In merge - data to merge - no coordinate info" << std::endl;
+              ASKAPLOG_INFO_STR(nelogger,"In merge of " << *iterCol <<  " old data to merge - no old coordinate info");
             } else if (itsCoordSys[*iterCol].nCoordinates() != newCoordSys.nCoordinates()) {
               // different dimensions, so just use the new data
               itsDataVector[*iterCol].assign(newDataVec);
               updateType = overwrite;
-              std::cout << "In merge - data to merge - dimension mismatch" << std::endl;
+              ASKAPLOG_INFO_STR(nelogger,"In merge of " << *iterCol <<  " - old data to merge - dimension mismatch");
             } else {
               // regrid then add (using weights)
+              ASKAPLOG_INFO_STR(nelogger,"In merge of " << *iterCol <<  " old data to merge coordinates present - linmos merge beginning");
               linmosMerge(other, *iterCol);
-              std::cout << "In merge - data to merge - linmos merge" << std::endl;
               updateType = linmos;
             }
           }
@@ -355,13 +356,20 @@ namespace askap
       ASKAPASSERT(itsWeightState == other.itsWeightState);
       ASKAPASSERT(itsWeightType == other.itsWeightType);
 
+
       // initialise an image accumulator
       imagemath::LinmosAccumulator<double> accumulator;
       accumulator.weightType(itsWeightType);
       accumulator.weightState(itsWeightState);
+
+      std::cout << "linmosMerge - Weight state/type = " << accumulator.weightState() << "/" << accumulator.weightType() << std::endl;
+
       accumulator.setDefaultPB(); // this will probably need to be smarter
       // these inputs should be set up to take the full mosaic.
       accumulator.setOutputParameters(itsShape[col], itsCoordSys[col]);
+
+      // I think these are essentially copy by reference which means the
+      // accumulation is happening in place. This needs to deal with the weightState-
 
       casa::Array<double> outPix(itsDataVector[col].reform(accumulator.outShape()));
       casa::Array<double> outWgtPix(itsNormalMatrixDiagonal[col].reform(accumulator.outShape()));
@@ -380,6 +388,7 @@ namespace askap
       accumulator.initialiseOutputBuffers();
       accumulator.initialiseInputBuffers();
 
+
       // loop over non-direction axes (e.g. spectral and/or polarisation)
       IPosition curpos(accumulator.inShape());
       for (uInt dim=0; dim<curpos.nelements(); ++dim) {
@@ -388,6 +397,11 @@ namespace askap
       scimath::MultiDimArrayPlaneIter planeIter(accumulator.inShape());
       for (; planeIter.hasMore(); planeIter.next()) {
         curpos = planeIter.position();
+
+        if (itsWeightState == CORRECTED) {
+          std::cout << "weighting stored image plane" << std::endl;
+          accumulator.weightPlane(outPix, outWgtPix, outSenPix,curpos);
+        }
         // load input buffer for the current plane
         accumulator.loadInputBuffers(planeIter, inPix, inWgtPix, inSenPix);
         // call regrid for any buffered images
@@ -593,6 +607,7 @@ const std::map<std::string, casa::Vector<double> >& ImagingNormalEquations::data
       {
           itsCoordSys[name]=coordSys;
       }
+
     }
 
     /// @brief Store slice of the normal matrix for a given parameter.
@@ -704,6 +719,24 @@ const std::map<std::string, casa::Vector<double> >& ImagingNormalEquations::data
       }
       return result;
     } // unknowns method
+    /// get the weightstate
+    int ImagingNormalEquations::weightState() {
+      return itsWeightState;
+    } // get the weightstate
 
+    /// set the weightState
+    void ImagingNormalEquations::weightState(int theState) {
+      this->itsWeightState = theState;
+    }
+
+    /// get the weightType
+    int ImagingNormalEquations::weightType() {
+      return itsWeightType;
+    }
+
+    /// set the weightType.
+    void ImagingNormalEquations::weightType(int theType){
+      this->itsWeightType = theType;
+    }
   } // namespace scimath
 } // namespace askap

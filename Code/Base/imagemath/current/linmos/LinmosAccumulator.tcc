@@ -1084,7 +1084,8 @@ namespace askap {
                 inDC.toWorld(world0,inDC.referencePixel());
 
                 ASKAPLOG_INFO_STR(linmoslogger, "Centre of beam is " << world0);
-
+                ASKAPLOG_INFO_STR(linmoslogger, "Frequency is " << freq);
+                
                 // step through the pixels, setting the weights (power primary beam squared)
                 for (int x=0; x<outPix.shape()[0];++x) {
                     for (int y=0; y<outPix.shape()[1];++y) {
@@ -1580,6 +1581,55 @@ namespace askap {
             }
 
         }
+        template<typename T>
+        void LinmosAccumulator<T>::weightPlane(Array<T>& outPix,
+                                                 const Array<T>& outWgtPix,
+                                                 Array<T>& outSenPix,
+                                                 const IPosition& curpos) {
+
+            T minVal, maxVal;
+            IPosition minPos, maxPos;
+            minMax(minVal,maxVal,minPos,maxPos,outWgtPix);
+
+            // copy the pixel iterator containing all dimensions
+            IPosition fullpos(curpos);
+
+
+
+            for (int x=0; x<outPix.shape()[0];++x) {
+                for (int y=0; y<outPix.shape()[1];++y) {
+                    fullpos[0] = x;
+                    fullpos[1] = y;
+                    if (isNaN(outWgtPix(fullpos))) {
+                        setNaN(outPix(fullpos));
+                    }
+                    else if (outWgtPix(fullpos)>0.0) {
+                        outPix(fullpos) = outPix(fullpos) * outWgtPix(fullpos);
+                    } else {
+                        outPix(fullpos) = 0.0;
+                    }
+                }
+            }
+
+            if (itsDoSensitivity) {
+                for (int x=0; x<outPix.shape()[0];++x) {
+                    for (int y=0; y<outPix.shape()[1];++y) {
+                        fullpos[0] = x;
+                        fullpos[1] = y;
+                        if (isNaN(outWgtPix(fullpos))) {
+                            setNaN(outSenPix(fullpos));
+                        }
+                        else if (outSenPix(fullpos)>0.0) {
+                            // this is just the reverse of the deWeight operation
+                            outSenPix(fullpos) = outSenPix(fullpos) * outSenPix(fullpos);
+                        } else {
+                            outSenPix(fullpos) = 0.0;
+                        }
+                    }
+                }
+            }
+
+        }
 
         template<typename T>
         Vector<IPosition> LinmosAccumulator<T>::convertImageCornersToRef(const DirectionCoordinate& refDC) {
@@ -1644,18 +1694,24 @@ namespace askap {
             // Could get more tricky, but right now make sure any extra dimensions, such as frequency
             // and polarisation, are equal in the two systems.
             if ( coordSys1.nCoordinates() != coordSys2.nCoordinates() ) {
-                //ASKAPLOG_INFO_STR(linmoslogger,
-                //    "Coordinates are not consistent: dimension mismatch");
+                ASKAPLOG_INFO_STR(linmoslogger,
+                    "Coordinates are not consistent: dimension mismatch");
                 return false;
             }
             if (!allEQ(coordSys1.worldAxisNames(), coordSys2.worldAxisNames())) {
-                //ASKAPLOG_INFO_STR(linmoslogger,
-                //    "Coordinates are not consistent: axis name mismatch");
+                ASKAPLOG_INFO_STR(linmoslogger,
+                    "Coordinates are not consistent: axis name mismatch");
+
+                for (casa::uInt dim=0; dim<coordSys1.nCoordinates(); ++dim) {
+                    ASKAPLOG_INFO_STR(linmoslogger,
+                      "Axis " << dim << ":" << coordSys1.worldAxisNames()[dim] << " == " << coordSys2.worldAxisNames()[dim] );
+                }
+
                 return false;
             }
             if (!allEQ(coordSys1.worldAxisUnits(), coordSys2.worldAxisUnits())) {
-                //ASKAPLOG_INFO_STR(linmoslogger,
-                //    "Coordinates are not consistent: axis unit mismatch");
+                ASKAPLOG_INFO_STR(linmoslogger,
+                    "Coordinates are not consistent: axis unit mismatch");
                 return false;
             }
             return true;
@@ -1690,7 +1746,8 @@ namespace askap {
             }
             // Check that the systems have consistent axes.
             if ( !coordinatesAreConsistent(coordSys1, coordSys2) ) {
-
+              ASKAPLOG_INFO_STR(linmoslogger,
+                 "Coordinates are not consistent");
                 return false;
             }
             else {
@@ -1698,11 +1755,14 @@ namespace askap {
                  "Coordinates are consistent");
             }
             // test that the axes are equal
-            // ASKAPLOG_INFO_STR(linmoslogger,
-            //  "nCoordinates: " << coordSys1.nCoordinates());
+            ASKAPLOG_INFO_STR(linmoslogger,
+              "nCoordinates: " << coordSys1.nCoordinates());
             for (casa::uInt dim=0; dim<coordSys1.nCoordinates(); ++dim) {
-                // ASKAPLOG_INFO_STR(linmoslogger,
-                //   "Reference pixels are : " << coordSys1.referencePixel()[dim] << " == " << coordSys2.referencePixel()[dim] );
+                ASKAPLOG_INFO_STR(linmoslogger,
+                   "Reference pixels are : " << coordSys1.referencePixel()[dim] << " == " << coordSys2.referencePixel()[dim] );
+
+                ASKAPLOG_INFO_STR(linmoslogger,
+                    "Reference values are : " << coordSys1.referenceValue()[dim] << " == " << coordSys2.referenceValue()[dim] );
 
                 if ( (coordSys1.referencePixel()[dim] != coordSys2.referencePixel()[dim]) ||
                      (fabs(coordSys1.referenceValue()[dim] - coordSys2.referenceValue()[dim]) > thresh) ||

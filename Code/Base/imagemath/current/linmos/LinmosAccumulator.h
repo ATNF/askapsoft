@@ -189,6 +189,17 @@ namespace askap {
                                    Array<T>& outSenPix,
                                    const IPosition& curpos);
 
+               /// @brief multiply pixels by the weights for the current plane
+               /// only relevant if the weight state is corrected.
+               /// @param[in,out] Array<T>& outPix: accumulated deweighted image pixels
+               /// @param[in] const Array<T>& outWgtPix: accumulated weight pixels
+               /// @param[in] const IPosition& curpos: indices of the current plane
+
+               void weightPlane(Array<T>& outPix,
+                                  const Array<T>& outWgtPix,
+                                  Array<T>& outSenPix,
+                                  const IPosition& curpos);
+
                 /// @brief check to see if the input and output coordinate grids are equal
                 /// @return bool: true if they are equal
                 bool coordinatesAreEqual(void);
