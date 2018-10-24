@@ -271,8 +271,13 @@ function setContsubFilenames()
     # Next the model image created by cmodel
     imageCode=restored
     setImageProperties cont
-    contsubCmodelImage=model.contsub.${contsubCleanModelFullname}
-    contsubCmodelType="${contsubCleanModelType}"
+    contsubCmodelFullname=model.contsub.${imageName%%.fits}
+    contsubCmodelImage=${contsubCmodelFullname}
+    if [ ${NUM_TAYLOR_TERMS} -gt 1 ]; then
+        # need to strip the .taylor.0.restored suffix
+        contsubCmodelImage=$(echo $contsubCmodelFullname | sed -e 's/\.taylor\.0\.restored$//g')
+    fi
+    contsubCmodelType="${imageType}"
     contsubCmodelLabel="Continuum model image from catalogue"
     ####
     # Finally the components parset

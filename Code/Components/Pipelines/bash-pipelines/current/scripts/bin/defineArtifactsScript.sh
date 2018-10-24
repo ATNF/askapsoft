@@ -266,8 +266,8 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                         fi
                     fi
                     if [ "\${CONTSUB_METHOD}" == "Cmodel" ]; then
-                        if [ -e "\${FIELD}/\${contsubDir}/\${contsubCmodelImage}" ]; then
-                            casdaTwoDimImageNames+=(\${FIELD}/\${contsubDir}/\${contsubCmodelImage})
+                        if [ -e "\${FIELD}/\${contsubDir}/\${contsubCmodelFullname}" ]; then
+                            casdaTwoDimImageNames+=(\${FIELD}/\${contsubDir}/\${contsubCmodelFullname})
                             casdaTwoDimImageTypes+=(\${contsubCmodelType})
                             casdaTwoDimThumbTitles+=("\${contsubCmodelLabel}")
                         fi
