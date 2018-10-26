@@ -106,11 +106,11 @@ class statsCollection:
             sub=cube.subimage(blc=blc,trc=trc)
             subStats=sub.statistics()
             arr = sub.getdata()
-            msk = -sub.getmask()
+            msk = ~sub.getmask()
             subStats['onepc'] = np.percentile(arr[msk],1)
         else:
             arr = cube.getdata(blc=blc,trc=trc)
-            msk = -cube.getmask(blc=blc,trc=trc)
+            msk = ~cube.getmask(blc=blc,trc=trc)
             percentiles = np.percentile(arr[msk],[50,1])
             print percentiles
             print percentiles[0]
