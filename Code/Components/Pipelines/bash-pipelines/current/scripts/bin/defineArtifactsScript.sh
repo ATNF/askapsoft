@@ -259,15 +259,15 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
                     # Get the continuum models used for continuum subtraction
                     setContsubFilenames
                     if [ "\${CONTSUB_METHOD}" == "CleanModel" ]; then
-                        if [ -e "\${FIELD}/\${contsubDir}/\${contsubCleanModelFullname}" ]; then
-                            casdaTwoDimImageNames+=(\${FIELD}/\${contsubDir}/\${contsubCleanModelFullname})
+                        if [ -e "\${FIELD}/\${contsubDir}/\${contsubCleanModelImage}" ]; then
+                            casdaTwoDimImageNames+=(\${FIELD}/\${contsubDir}/\${contsubCleanModelImage})
                             casdaTwoDimImageTypes+=(\${contsubCleanModelType})
                             casdaTwoDimThumbTitles+=("\${contsubCleanModelLabel}")
                         fi
                     fi
                     if [ "\${CONTSUB_METHOD}" == "Cmodel" ]; then
-                        if [ -e "\${FIELD}/\${contsubDir}/\${contsubCmodelFullname}" ]; then
-                            casdaTwoDimImageNames+=(\${FIELD}/\${contsubDir}/\${contsubCmodelFullname})
+                        if [ -e "\${FIELD}/\${contsubDir}/\${contsubCmodelImage}" ]; then
+                            casdaTwoDimImageNames+=(\${FIELD}/\${contsubDir}/\${contsubCmodelImage})
                             casdaTwoDimImageTypes+=(\${contsubCmodelType})
                             casdaTwoDimThumbTitles+=("\${contsubCmodelLabel}")
                         fi

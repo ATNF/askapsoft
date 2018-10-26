@@ -39,7 +39,7 @@ ContsubModelDefinition="# The model definition
 CContsubtract.imagetype                           = ${IMAGETYPE_CONT}
 CContsubtract.sources.names                       = [lsm]
 CContsubtract.sources.lsm.direction               = \${modelDirection}
-CContsubtract.sources.lsm.model                   = ${contsubCleanModel}
+CContsubtract.sources.lsm.model                   = ${contsubCleanModelImage%%.taylor.0}
 CContsubtract.sources.lsm.nterms                  = ${NUM_TAYLOR_TERMS}"
 if [ "${NUM_TAYLOR_TERMS}" -gt 1 ]; then
     if [ "$MFS_REF_FREQ" == "" ]; then

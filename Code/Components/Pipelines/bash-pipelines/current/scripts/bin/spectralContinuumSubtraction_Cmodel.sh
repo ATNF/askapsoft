@@ -73,12 +73,14 @@ Selavy.snrCut                                   = ${SELAVY_SNR_CUT}"
 Selavy.flagGrowth                               = ${SELAVY_FLAG_GROWTH}
 Selavy.growthThreshold                          = ${SELAVY_GROWTH_CUT}"
     fi
-fi    
+fi
+
+modelImage=${contsubCmodelImage%%.taylor.0}
 
 ContsubModelDefinition="# The model definition
 CContsubtract.sources.names                       = [lsm]
 CContsubtract.sources.lsm.direction               = \${modelDirection}
-CContsubtract.sources.lsm.model                   = ${contsubDir}/${contsubCmodelImage}
+CContsubtract.sources.lsm.model                   = ${contsubDir}/${modelImage}
 CContsubtract.sources.lsm.nterms                  = ${NUM_TAYLOR_TERMS}"
 if [ "${NUM_TAYLOR_TERMS}" -gt 1 ]; then
     if [ "$MFS_REF_FREQ" == "" ]; then
@@ -251,7 +253,7 @@ Cmodel.nterms             = ${NUM_TAYLOR_TERMS}
 
 # Output specific parameters
 Cmodel.output             = casa
-Cmodel.filename           = ${contsubCmodelImage}
+Cmodel.filename           = ${modelImage}
 EOFINNER
 
     NCORES=2

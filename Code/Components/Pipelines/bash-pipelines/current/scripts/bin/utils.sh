@@ -240,48 +240,42 @@ function setSelavyDirs()
 # Function to define the filenames of the model images and the
 # component parset that are used by the various continuum subtraction
 # tasks.
+# When using the contsubCleanModelImage and contsubCmodelImage
+# variables in parsets for cmodel or ccontsubtract, any .taylor.0
+# suffix needs to be removed if nterms>1. This is left up to the
+# calling script.
 # Requires: see imageCode description
 # Returns:
 #  - contsubDir
-#  - contsubCleanModel
-#  - contsubCleanModelFullname
+#  - contsubCleanModelImage
 #  - contsubCmodelImage
 #  - contsubComponents
 function setContsubFilenames()
 {
     # Backup of the imageCode, as we change this
     imageCodeBackup=$imageCode
+
+    # Define the base for the names, from the model image (so we don't get the .restored)
+    imageCode=image
+    setImageProperties cont
+    imageStub=${imageName%%.fits}
+
     
     ####
     # First the contsub directory
     contsubDir=ContSubBeam${BEAM}
     ####
-    # Next the clean model image
-    imageCode=image
-    setImageProperties cont
-    contsubCleanModelFullname=${imageName%%.fits}
-    contsubCleanModel=$contsubCleanModelFullname
-    if [ ${NUM_TAYLOR_TERMS} -gt 1 ]; then
-        # need to strip the .taylor.0 suffix
-        contsubCleanModel=$(echo $contsubCleanModelFullname | sed -e 's/\.taylor\.0$//g')
-    fi
+    contsubCleanModelImage=$imageStub
     contsubCleanModelType=${imageType}
     contsubCleanModelLabel="Continuum model image from clean model"
     ####
     # Next the model image created by cmodel
-    imageCode=restored
-    setImageProperties cont
-    contsubCmodelFullname=model.contsub.${imageName%%.fits}
-    contsubCmodelImage=${contsubCmodelFullname}
-    if [ ${NUM_TAYLOR_TERMS} -gt 1 ]; then
-        # need to strip the .taylor.0.restored suffix
-        contsubCmodelImage=$(echo $contsubCmodelFullname | sed -e 's/\.taylor\.0\.restored$//g')
-    fi
+    contsubCmodelImage=model.contsub.${imageStub}
     contsubCmodelType="${imageType}"
     contsubCmodelLabel="Continuum model image from catalogue"
     ####
     # Finally the components parset
-    contsubComponents=modelComponents.contsub.${contsubCleanModelFullname}.in
+    contsubComponents=modelComponents.contsub.${imageStub}.in
 
     # Restore the imageCode to what it was
     imageCode=$imageCodeBackup

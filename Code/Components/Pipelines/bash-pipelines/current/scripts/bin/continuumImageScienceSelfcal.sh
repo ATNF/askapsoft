@@ -183,15 +183,11 @@ Ccalibrator.visweights.MFS.reffreq              = ${freq}"
         imageCode=image
         setImageProperties cont
         modelImage=${imageName%%.fits}
-        if [ ${NUM_TAYLOR_TERMS} -gt 1 ]; then
-            # need to strip the .taylor.0 suffix
-            modelImage=$(echo $modelImage | sed -e 's/\.taylor\.0$//g')
-        fi
         CalibratorModelDefinition="# The model definition
 Ccalibrator.imagetype                           = ${IMAGETYPE_CONT}
 Ccalibrator.sources.names                       = [lsm]
 Ccalibrator.sources.lsm.direction               = \${modelDirection}
-Ccalibrator.sources.lsm.model                   = ${OUTPUT}/${modelImage}
+Ccalibrator.sources.lsm.model                   = ${OUTPUT}/${modelImage%%.taylor.0}
 Ccalibrator.sources.lsm.nterms                  = ${NUM_TAYLOR_TERMS}"
         if [ "${NUM_TAYLOR_TERMS}" -gt 1 ]; then
             if [ "$MFS_REF_FREQ" == "" ]; then
