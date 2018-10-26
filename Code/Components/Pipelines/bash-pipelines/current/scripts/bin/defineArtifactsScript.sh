@@ -41,7 +41,7 @@ for FIELD in ${FIELD_LIST}; do
         else
             msNameList+=(${FIELD}/${msSciAv})
         fi
-        if [ -e ${FIELD}/${msSci} ] && [ "${ARCHIVE_SPECTRAL_MS}" == "true" ]; then
+        if [ "${ARCHIVE_SPECTRAL_MS}" == "true" ]; then
             msNameList+=(${FIELD}/${msSci})
         fi
     done
