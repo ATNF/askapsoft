@@ -31,7 +31,6 @@
 
 ####################
 # Define & create directories
-${askapsoftModuleCommands}
 
 BASEDIR=$(pwd -P)
 
