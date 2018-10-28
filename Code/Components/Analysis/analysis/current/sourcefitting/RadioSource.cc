@@ -1080,10 +1080,7 @@ bool RadioSource::fitGauss(casa::Matrix<casa::Double> &pos,
                                 ASKAPLOG_DEBUG_STR(logger, "Removing fitted Gaussian from array");
                                 casa::Vector<casa::Double> newf = fit[ctr].subtractFit(pos, f);
                                 ASKAPLOG_DEBUG_STR(logger, "Finding new subcomponents");
-                                std::vector<SubComponent> newList;
-                                for (unsigned int i = 0; i < g; i++) {
-                                    newList.push_back(fit[ctr].gaussian(i));
-                                }
+                                std::vector<SubComponent> newList=cmpntList;
                                 std::vector<SubComponent> newGuessList =
                                     this->getSubComponentList(pos, newf);
 
