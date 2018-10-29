@@ -1045,7 +1045,7 @@ bool RadioSource::fitGauss(casa::Matrix<casa::Double> &pos,
                 bool acceptable = fit[ctr].acceptable();
                 bool okExceptChisq = fit[ctr].acceptableExceptChisq();
 
-                if (!fit[ctr].passConverged()) {
+                if (!fit[ctr].passConverged() || !okExceptChisq) {
                     if (g > 1) {
                         numGaussList.push_back(g - 1);
                     }
