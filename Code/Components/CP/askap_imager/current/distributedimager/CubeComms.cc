@@ -98,6 +98,7 @@ size_t CubeComms::buildWriterIndex()
     ASKAPLOG_DEBUG_STR(logger, "Interwriter communicator index is " << itsComrades);
     return itsWriters;
 }
+
 void CubeComms::initWriters(int nwriters, int nchanpercore)
 {
 
@@ -158,6 +159,16 @@ void CubeComms::addWriter(unsigned int writerRank)
     // }
 
 }
+
+void CubeComms::showWorkerMap() {
+  std::map<int, int>::iterator it;
+  it = workerMap.begin();
+  while (it != workerMap.end()) {
+    ASKAPLOG_INFO_STR(logger,"workerMap " << it->first << ":" << it->second);
+    it++;
+  }
+}
+
 void CubeComms::addWorker(unsigned int workerRank)
 {
 

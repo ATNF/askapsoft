@@ -264,19 +264,16 @@ void ContinuumWorker::run(void)
 
     itsAdvisor->addMissingParameters();
 
-    if (workUnits.size() >= 1 || itsComms.isWriter()) {
 
-        try {
-            processChannels();
-        } catch (AskapError& e) {
-            ASKAPLOG_WARN_STR(logger, "Failure processing the channel allocation");
-            ASKAPLOG_WARN_STR(logger, "Exception detail: " << e.what());
 
-        }
-    } else {
-        ASKAPLOG_WARN_STR(logger, "Data allocations complete but this worker received no work");
+    try {
+        processChannels();
+    } catch (AskapError& e) {
+        ASKAPLOG_WARN_STR(logger, "Failure processing the channel allocation");
+        ASKAPLOG_WARN_STR(logger, "Exception detail: " << e.what());
 
     }
+
     ASKAPLOG_INFO_STR(logger, "Rank " << itsComms.rank() << " finished");
 
     itsComms.barrier(itsComms.theWorkers());
@@ -561,9 +558,15 @@ void ContinuumWorker::buildSpectralCube()
             }
         }
     }
+
     ASKAPLOG_DEBUG_STR(logger, "You shall not pass. Waiting at a barrier for all ranks to have created the cubes ");
     itsComms.barrier(itsComms.theWorkers());
     ASKAPLOG_DEBUG_STR(logger, "Passed the barrier");
+
+    if (workUnits.size() == 0) {
+      ASKAPLOG_INFO_STR(logger,"No work todo");
+      return;
+    }
 
     /// What are the plans for the deconvolution?
     ASKAPLOG_DEBUG_STR(logger, "Ascertaining Cleaning Plan");
@@ -714,7 +717,7 @@ void ContinuumWorker::buildSpectralCube()
                           // in updateDir mode I cannot cache the gridders as they have a tangent point.
                           // So I have turned of caching for all modes. THis is performance hit on everyone for
                           // a corner case .... FIX This!
-                          
+
                         // CalcCore  workingImager(itsParsets[tempWorkUnitCount],itsComms,myDs,rootImager.gridder(),localChannel);
                         }
 
@@ -1205,6 +1208,10 @@ void ContinuumWorker::processChannels()
     if (localSolver) {
         this->buildSpectralCube();
         return;
+    } else {
+      if (workUnits.size() == 0) {
+        return;
+      }
     }
 
     int localChannel;
@@ -1241,7 +1248,7 @@ void ContinuumWorker::processChannels()
 
     bool usetmpfs = unitParset.getBool("usetmpfs", false);
     if (usetmpfs) {
-        // probably in spectral line mode
+
         localChannel = 0;
 
     } else {

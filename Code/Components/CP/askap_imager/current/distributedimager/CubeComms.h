@@ -99,7 +99,7 @@ class CubeComms: public askapparallel::AskapParallel {
         size_t buildCommIndex();
         /// @brief its communicator for its fellow writers
         size_t buildWriterIndex();
-
+      
         /// @brief sets the cubecreator to be the first writer
         void setSingleSink();
         bool isSingleSink()
@@ -110,7 +110,10 @@ class CubeComms: public askapparallel::AskapParallel {
         void setMultiSink();
 
         size_t theWorkers() {return itsComrades;};
+        size_t theBusyComrades() {return itsBusyComrades;};
         size_t theWriters() {return itsWriters;};
+
+        void showWorkerMap();
 
         ~CubeComms();
 
@@ -135,6 +138,7 @@ class CubeComms: public askapparallel::AskapParallel {
         int removeChannelFromMap(std::map<int, int>& theMap, unsigned int theRank);
 
         int writerCount;
+        size_t itsBusyComrades;
         size_t itsComrades;
         size_t itsWriters;
         bool singleSink;
