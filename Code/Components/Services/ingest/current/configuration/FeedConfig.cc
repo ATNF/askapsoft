@@ -67,6 +67,26 @@ FeedConfig::FeedConfig(const casa::Matrix<casa::Quantity>& offsets,
     }
 }
 
+/// @brief copy constructor
+/// @details It is necessary to have copy constructor due to reference semantics of 
+/// casacore arrays. 
+/// @param[in] other object to copy from
+FeedConfig::FeedConfig(const FeedConfig &other) : itsOffsets(other.itsOffsets.copy()), itsPols(other.itsPols.copy()) {}
+
+/// @brief assignment operator
+/// @details It is necessary to have copy constructor due to reference semantics of 
+/// casacore arrays. 
+/// @param[in] other object to copy from
+FeedConfig& FeedConfig::operator=(const FeedConfig &other)
+{
+   if (&other != this) {
+       itsOffsets.reference(other.itsOffsets.copy());
+       itsPols.reference(other.itsPols.copy());
+   }
+   return *this;
+}
+
+
 casa::Quantity FeedConfig::offsetX(casa::uInt i) const
 {
     ASKAPCHECK(i < itsOffsets.nrow(),

@@ -124,13 +124,6 @@ class MSSink : public askap::cp::ingest::ITask,
         /// @return file name with patterns substituted
         std::string substituteFileName(const std::string &in) const;
 
-        /// @brief make two-character string
-        /// @details Helper method to convert unsigned integer into a 2-character string.
-        /// It is used to form the file name with date and time.
-        /// @param[in] in input number
-        /// @return two-element string
-        static std::string makeTwoElementString(const casa::uInt in);
-
         /// @brief helper method to obtain data volume written
         /// @details Calculate data volume for the current integration/chunk. This is handy
         /// for monitoring when we have multiple data streams

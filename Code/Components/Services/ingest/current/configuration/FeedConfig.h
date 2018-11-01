@@ -53,6 +53,18 @@ class FeedConfig {
         FeedConfig(const casa::Matrix<casa::Quantity>& offsets,
                    const casa::Vector<casa::String>& pols);
 
+        /// @brief copy constructor
+        /// @details It is necessary to have copy constructor due to reference semantics of 
+        /// casacore arrays. 
+        /// @param[in] other object to copy from
+        FeedConfig(const FeedConfig &other);
+
+        /// @brief assignment operator
+        /// @details It is necessary to have copy constructor due to reference semantics of 
+        /// casacore arrays. 
+        /// @param[in] other object to copy from
+        FeedConfig& operator=(const FeedConfig &other);
+
         /// @brief Number of reciever elements. This may be for example two for
         /// a single pixel feed, or 36 for a PAF with 36 synthetic beams.
         casa::uInt nFeeds(void) const;

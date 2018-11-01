@@ -342,22 +342,6 @@ int MSSink::countActiveRanks(const bool isActive) const
    return streamNumber;
 }
 
-/// @brief make two-character string
-/// @details Helper method to convert unsigned integer into a 2-character string.
-/// It is used to form the file name with date and time.
-/// @param[in] in input number
-/// @return two-element string
-std::string MSSink::makeTwoElementString(const casa::uInt in)
-{
-  ASKAPASSERT(in<100);
-  std::string result;
-  if (in<10) {
-      result += "0";
-  }
-  result += utility::toString(in);
-  return result;
-}
-
 void MSSink::create(void)
 {
     // Get configuration first to ensure all parameters are present
