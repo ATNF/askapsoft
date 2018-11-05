@@ -83,6 +83,11 @@ public:
    /// @param[in] interval current interval/exposure (seconds)
    void write(casa::MeasurementSet &ms, double time, double interval);
 
+protected:
+   /// @brief tolerance to consider offset changed
+   /// @return tolerance in radians used to compare offsets
+   inline static double offsetTolerance() { return 1e-13;}
+
 private:
    
    /// @brief number of antennas setup
