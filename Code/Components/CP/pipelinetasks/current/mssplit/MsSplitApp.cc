@@ -68,7 +68,8 @@
 #include "casacore/tables/DataMan/IncrementalStMan.h"
 #include "casacore/tables/DataMan/StandardStMan.h"
 #include "casacore/tables/DataMan/TiledShapeStMan.h"
-//#include "casacore/tables/DataMan/DataManAccessor.h"
+#include "casacore/tables/DataMan/DataManAccessor.h"
+#include "casacore/tables/DataMan/TiledStManAccessor.h"
 #include "casacore/ms/MeasurementSets/MeasurementSet.h"
 #include "casacore/ms/MeasurementSets/MSColumns.h"
 
@@ -602,8 +603,37 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
     // do ~7700 rows, or a bucketsize of ~0.5MB.
 
     // Set the max memory to use for reading/writing the data column
-    std::size_t maxDataSize = sizeof(casa::Complex) * std::max(nChanIn, nChanOut)
-                                * nPol;
+    // Complication: if the input data is tiled with a large number of channels per tile
+    // and we are selecting a smaller subset, the unused part of the tile is still kept
+    // in memory as we read through the table - this limits how many rows we can read
+    // at once.
+    // Find out if data is tiled and if so the channel tile size
+    IPosition tileShape(3,0,0,0);
+    TableDesc td = source.actualTableDesc();
+    const ColumnDesc& cdesc = td[sc.data().columnDesc().name()];
+    String dataManType = cdesc.dataManagerType();
+    String dataManGroup = cdesc.dataManagerGroup();
+    Bool tiled = (dataManType.contains("Tiled"));
+    if (tiled && sc.dataDescription().nrow() == 1) {
+        ROTiledStManAccessor tsm(source, dataManGroup);
+        // Find the biggest tile, use it if it has 3 dimensions
+        uInt nHyper = tsm.nhypercubes();
+        uInt maxIndex = 0;
+        uInt maxTile = 0;
+        for (uInt i=0; i< nHyper; i++) {
+            uInt product = tsm.getTileShape(i).product();
+            if (product > maxTile) {
+                maxIndex = i;
+                maxTile = product;
+            }
+        }
+        if (tsm.getTileShape(maxIndex).nelements() == 3)
+            tileShape = tsm.getTileShape(maxIndex);
+        // cout << "Input tile shape = " << tileShape <<  endl;
+    }
+    uInt nChan = tileShape(1) > nChanIn ? tileShape(1):nChanIn;
+    std::size_t maxDataSize = sizeof(casa::Complex) * nPol *
+        std::max(nChan,nChanOut);
     uInt maxSimultaneousRows = std::max(1ul, maxBuf / maxDataSize);
 
     const casa::uInt nRows = sc.nrow();
