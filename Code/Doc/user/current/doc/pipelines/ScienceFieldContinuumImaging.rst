@@ -274,7 +274,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 | ``CLEAN_WRITE_AT_MAJOR_CYCLE``             | false                               | Images.writeAtMajorCycle                               | If true, the intermediate images will be written (with a      |
 |                                            |                                     | (:doc:`../calim/cimager`)                              | .cycle suffix) after the end of each major cycle.             |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``CLEAN_SOLUTION_TYPE``                    | MAXCHISQ                            | Clean.solutiontype (see discussion at                  | The type of peak finding algorithm to use in the              |
+| ``CLEAN_SOLUTIONTYPE``                     | MAXCHISQ                            | Clean.solutiontype (see discussion at                  | The type of peak finding algorithm to use in the              |
 |                                            |                                     | :doc:`../recipes/imaging`)                             | deconvolution. Choices are MAXCHISQ, MAXTERM0, or MAXBASE.    |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | **Preconditioning parameters**             |                                     |                                                        |                                                               |
@@ -542,6 +542,6 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 | ``CLEAN_CONTCUBE_WRITE_AT_MAJOR_CYCLE``    | false                               | Images.writeAtMajorCycle                               | If true, the intermediate images will be written (with a      |
 |                                            |                                     | (:doc:`../calim/cimager`)                              | .cycle suffix) after the end of each major cycle.             |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``CLEAN_CONTCUBE_SOLUTION_TYPE``           | MAXCHISQ                            | Clean.solutiontype (see discussion at                  | The type of peak finding algorithm to use in the              |
+| ``CLEAN_CONTCUBE_SOLUTIONTYPE``            | MAXCHISQ                            | Clean.solutiontype (see discussion at                  | The type of peak finding algorithm to use in the              |
 |                                            |                                     | :doc:`../recipes/imaging`)                             | deconvolution. Choices are MAXCHISQ, MAXTERM0, or MAXBASE.    |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+

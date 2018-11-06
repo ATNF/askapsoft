@@ -222,7 +222,7 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 | ``CLEAN_WRITE_AT_MAJOR_CYCLE``                | false                               | Images.writeAtMajorCycle           | If true, the intermediate images will be written (with a .cycle   |
 |                                               |                                     | (:doc:`../calim/simager`)          | suffix) after the end of each major cycle.                        |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``CLEAN_SPECTRAL_SOLUTION_TYPE``              | MAXCHISQ                            | Clean.solutiontype (see discussion | The type of peak finding algorithm to use in the                  |
+| ``CLEAN_SPECTRAL_SOLUTIONTYPE``               | MAXCHISQ                            | Clean.solutiontype (see discussion | The type of peak finding algorithm to use in the                  |
 |                                               |                                     | at :doc:`../recipes/imaging`)      | deconvolution. Choices are MAXCHISQ, MAXTERM0, or MAXBASE.        |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | **Preconditioning**                           |                                     |                                    |                                                                   |
