@@ -47,9 +47,12 @@ fi
 if [ "${CHAN_RANGE_1934}" == "" ]; then
     # No selection of channels
     chanSelection=""
+    chanParam="#No selection of channels"
 else
     # CHAN_RANGE_SCIENCE gives global channel range - pass this to getMatchingMS.py
     chanSelection="-c ${CHAN_RANGE_1934}"
+    chanParam="channel     = ${CHAN_RANGE_1934}
+"
 fi
 
 
@@ -273,7 +276,7 @@ outputvis   = ${msCal}
 # Can be either a single integer (e.g. 1) or a range (e.g. 1-300). The range
 # is inclusive of both the start and end, indexing is one-based.
 # Default: <no default>
-channel     = ${CHAN_RANGE_1934}
+$chanParam
 
 # Beam selection via beam ID
 # Select just a single beam for this obs

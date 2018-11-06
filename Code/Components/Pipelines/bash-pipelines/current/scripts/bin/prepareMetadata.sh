@@ -184,23 +184,30 @@ EOF
         exit 1
     fi
 
-    # Number of channels used in the calibration observation
-    NUM_CHAN=$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="${MS_METADATA_CAL}" --val=nChan)
-
-    if [ "${NUM_CHAN}" == "" ]; then
-        echo "ERROR - unable to determine number of channels in calibration dataset"
-        echo "        please check metadata in ${MS_METADATA_CAL}"
+    # Get the number of channels that we'll have in the dataset to be
+    # processed, taking into account any merging that needs to be
+    # done. Just use the first beam from the list of beams to be
+    # processed, as they will all have the same spectral setup.
+    BEAM=$(echo $BEAMS_TO_USE | awk '{print $1}')
+    if [ "${CHAN_RANGE_1934}" == "" ]; then
+        # No selection of channels
+        chanSelection=""
+    else
+        # CHAN_RANGE_1934 gives global channel range - pass this to getMatchingMS.py
+        chanSelection="-c ${CHAN_RANGE_1934}"
+    fi
+    inputMSlist=$(${PIPELINEDIR}/getMatchingMS.py -d ${sb1934dir} -b $BEAM $chanSelection)
+    if [ "${inputMSlist}" == "" ]; then
+        echo "ERROR - unable to determine number of channels in bandpass datasets in directory ${sb1934dir}"
+        echo "      - beam 0 datasets failed to give spectral metadata"
         echo "Exiting pipeline."
         exit 1
     fi
-
-    # Number of channels for 1934 observation
-    if [ "${CHAN_RANGE_1934}" == "" ]; then
-        NUM_CHAN_1934=${NUM_CHAN}
-        CHAN_RANGE_1934="1-${NUM_CHAN}"
-    else
-        NUM_CHAN_1934=$(echo "$CHAN_RANGE_1934" | awk -F'-' '{print $2-$1+1}')
-    fi
+    NUM_CHAN_1934=0
+    for msinfo in $inputMSlist; do
+        chan_in_ms=$(echo $msinfo | cut -d ':' -f 2 | awk -F'-' '{print $2-$1+1}')
+        NUM_CHAN_1934=$(echo $NUM_CHAN_1934 $chan_in_ms | awk '{print $1+$2}')
+    done
 
 
     ######
@@ -328,25 +335,30 @@ EOF
         exit 1
     fi
 
-    # Get the number of channels used
-    NUM_CHAN=$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="${MS_METADATA}" --val=nChan)
-
-    if [ "${NUM_CHAN}" == "" ]; then
-        echo "ERROR - unable to determine number of channels in science dataset"
-        echo "        please check metadata in ${MS_METADATA}"
+    # Get the number of channels that we'll have in the dataset to be
+    # processed, taking into account any merging that needs to be
+    # done. Just use the first beam from the list of beams to be
+    # processed, as they will all have the same spectral setup.
+    BEAM=$(echo $BEAMS_TO_USE | awk '{print $1}')
+    if [ "${CHAN_RANGE_SCIENCE}" == "" ]; then
+        # No selection of channels
+        chanSelection=""
+    else
+        # CHAN_RANGE_SCIENCE gives global channel range - pass this to getMatchingMS.py
+        chanSelection="-c ${CHAN_RANGE_SCIENCE}"
+    fi
+    inputMSlist=$(${PIPELINEDIR}/getMatchingMS.py -d ${sbScienceDir} -b $BEAM $chanSelection)
+    if [ "${inputMSlist}" == "" ]; then
+        echo "ERROR - unable to determine number of channels in science datasets in directory ${sbScienceDir}"
+        echo "      - beam 0 datasets failed to give spectral metadata"
         echo "Exiting pipeline."
         exit 1
     fi
-
-    # Get the requested number of channels from the config, and make sure they are the same for 1934
-    # & science observations
-
-    # Number of channels in science observation (used in applying the bandpass solution)
-    if [ "$CHAN_RANGE_SCIENCE" == "" ]; then
-        NUM_CHAN_SCIENCE=${NUM_CHAN}
-    else
-        NUM_CHAN_SCIENCE=$(echo "${CHAN_RANGE_SCIENCE}" | awk -F'-' '{print $2-$1+1}')
-    fi
+    NUM_CHAN_SCIENCE=0
+    for msinfo in $inputMSlist; do
+        chan_in_ms=$(echo $msinfo | cut -d ':' -f 2 | awk -F'-' '{print $2-$1+1}')
+        NUM_CHAN_SCIENCE=$(echo $NUM_CHAN_SCIENCE $chan_in_ms | awk '{print $1+$2}')
+    done
 
     if [ "${DO_1934_CAL}" == "true" ] && [ "${DO_SCIENCE_FIELD}" == "true" ]; then
         if [ "${NUM_ANT_1934}" != "${NUM_ANT_SCIENCE}" ]; then
