@@ -628,7 +628,7 @@ function findScienceMSnames()
     # We now define the name of the calibrated averaged dataset
     if [ "${KEEP_RAW_AV_MS}" == "true" ]; then
         # If we are keeping the raw data, need a new MS name
-        sedstr="s/averaged/averaged_cal/g"
+        sedstr="s/\.ms$/_cal\.ms/g"
         msSciAvCal=$(echo "$msSciAv" | sed -e "$sedstr")
     else
         # Otherwise, apply the calibration to the raw data
