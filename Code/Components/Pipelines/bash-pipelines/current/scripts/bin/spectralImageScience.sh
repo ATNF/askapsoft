@@ -54,6 +54,21 @@ for subband in ${SUBBAND_WRITER_LIST}; do
 done
 unset subband
 
+# Data selection
+# UV distance
+if [ "${SPECTRAL_IMAGE_MAXUV}" -gt 0 ]; then
+    dataSelection="# Apply a maximum UV cutoff
+${Imager}.MaxUV                                   = ${SPECTRAL_IMAGE_MAXUV}"
+fi
+if [ "${SPECTRAL_IMAGE_MINUV}" -gt 0 ]; then
+    dataSelection="${dataSelection}
+# Apply a minimum UV cutoff
+${Imager}.MinUV                                   = ${SPECTRAL_IMAGE_MINUV}"
+fi
+if [ "${dataSelection}" == "" ]; then
+    dataSelection="# No further data selection made in the parset"
+fi
+
 # Define the preconditioning
 preconditioning="${Imager}.preconditioner.Names                    = ${PRECONDITIONER_LIST_SPECTRAL}"
 if [ "$(echo "${PRECONDITIONER_LIST_SPECTRAL}" | grep GaussianTaper)" != "" ]; then
@@ -221,6 +236,7 @@ parset=${parsets}/science_spectral_imager_${FIELDBEAM}_\${SLURM_JOB_ID}.in
 cat > "\$parset" << EOF
 ${Imager}.dataset                                 = ${msSciSL}
 ${Imager}.imagetype                               = ${IMAGETYPE_SPECTRAL}
+${dataSelection}
 #
 ${nameDefinition}
 ${shapeDefinition}

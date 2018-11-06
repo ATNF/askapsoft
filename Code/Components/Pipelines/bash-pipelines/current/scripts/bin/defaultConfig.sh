@@ -827,6 +827,11 @@ CELLSIZE_SPECTRAL=4
 # Rest frequency for the cube
 REST_FREQUENCY_SPECTRAL=HI
 
+# maximum UV spacing for spectral imaging - ignored if 0
+SPECTRAL_IMAGE_MAXUV=0
+# minimum UV spacing for spectral imaging
+SPECTRAL_IMAGE_MINUV=0
+
 # Parameters for preconditioning (A.K.A. weighting) - allow these to
 # be different to the continuum case
 PRECONDITIONER_LIST_SPECTRAL="[Wiener,GaussianTaper]"

@@ -159,6 +159,12 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 |                                               |                                     | (:doc:`../calim/simager`)          | 1234.567MHz), or the special string 'HI' (which is 1420.405751786 |
 |                                               |                                     |                                    | MHz). If blank, no rest frequency will be written to the cube.    |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
+| ``SPECTRAL_IMAGE_MAXUV``                      | 0                                   | MaxUV                              | A maximum UV distance (in metres) to apply in the data selection  |
+|                                               |                                     | (:doc:`../calim/data_selection`)   | step. Only used if a positive value is applied.                   |
++-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
+| ``SPECTRAL_IMAGE_MINUV``                      | 0                                   | MinUV                              | A minimum UV distance (in metres) to apply in the data selection  |
+|                                               |                                     | (:doc:`../calim/data_selection`)   | step. Only used if a positive value is applied.                   |
++-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | **Gridding**                                  |                                     |                                    |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``GRIDDER_SPECTRAL_SNAPSHOT_IMAGING``         | true                                | snapshotimaging                    | Whether to use snapshot imaging when gridding.                    |
