@@ -608,30 +608,9 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
     // in memory as we read through the table - this limits how many rows we can read
     // at once.
     // Find out if data is tiled and if so the channel tile size
-    IPosition tileShape(3,0,0,0);
-    TableDesc td = source.actualTableDesc();
-    const ColumnDesc& cdesc = td[sc.data().columnDesc().name()];
-    String dataManType = cdesc.dataManagerType();
-    String dataManGroup = cdesc.dataManagerGroup();
-    Bool tiled = (dataManType.contains("Tiled"));
-    if (tiled && sc.dataDescription().nrow() == 1) {
-        ROTiledStManAccessor tsm(source, dataManGroup);
-        // Find the biggest tile, use it if it has 3 dimensions
-        uInt nHyper = tsm.nhypercubes();
-        uInt maxIndex = 0;
-        uInt maxTile = 0;
-        for (uInt i=0; i< nHyper; i++) {
-            uInt product = tsm.getTileShape(i).product();
-            if (product > maxTile) {
-                maxIndex = i;
-                maxTile = product;
-            }
-        }
-        if (tsm.getTileShape(maxIndex).nelements() == 3)
-            tileShape = tsm.getTileShape(maxIndex);
-        // cout << "Input tile shape = " << tileShape <<  endl;
-    }
-    uInt nChan = tileShape(1) > nChanIn ? tileShape(1):nChanIn;
+    IPosition tileShape = getDataTileShape(source);
+    // can't use max, as types differ
+    uInt nChan = tileShape(1) > nChanIn ? tileShape(1) : nChanIn;
     std::size_t maxDataSize = sizeof(casa::Complex) * nPol *
         std::max(nChan,nChanOut);
     uInt maxSimultaneousRows = std::max(1ul, maxBuf / maxDataSize);
@@ -647,8 +626,9 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
     }
     // Set the cache size for the large columns
     // Not needed if we make bucketsize small enough to fit a row of buckets in memory
-    //const casa::uInt cacheSize = maxBuf;
-    //sc.data().setMaximumCacheSize(cacheSize);
+    // except for the input data - in case we select a small part of the spectrum
+    const casa::uInt cacheSize = maxBuf;
+    if (nChan > nChanIn) sc.data().setMaximumCacheSize(cacheSize);
     //dc.data().setMaximumCacheSize(cacheSize);
     //sc.flag().setMaximumCacheSize(cacheSize);
     //dc.flag().setMaximumCacheSize(cacheSize);
@@ -835,6 +815,36 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
     }
 }
 
+casa::IPosition MsSplitApp::getDataTileShape(const MeasurementSet& ms)
+{
+    // Get the shape of the largest tile, but only if it is 3D
+    IPosition tileShape(3,0,0,0);
+    TableDesc td = ms.actualTableDesc();
+    ROMSMainColumns msmc(ms);
+    const ColumnDesc& cdesc = td[msmc.data().columnDesc().name()];
+    String dataManType = cdesc.dataManagerType();
+    String dataManGroup = cdesc.dataManagerGroup();
+    Bool tiled = (dataManType.contains("Tiled"));
+    if (tiled && ms.dataDescription().nrow() == 1) {
+        ROTiledStManAccessor tsm(ms, dataManGroup);
+        // Find the biggest tile, use it if it has 3 dimensions
+        uInt nHyper = tsm.nhypercubes();
+        uInt maxIndex = 0;
+        uInt maxTile = 0;
+        for (uInt i=0; i< nHyper; i++) {
+            uInt product = tsm.getTileShape(i).product();
+            if (product > maxTile) {
+                maxIndex = i;
+                maxTile = product;
+            }
+        }
+        if (tsm.getTileShape(maxIndex).nelements() == 3)
+            tileShape = tsm.getTileShape(maxIndex);
+        //cout << "Input tile shape = " << tileShape <<  endl;
+    }
+    return tileShape;
+}
+
 int MsSplitApp::split(const std::string& invis, const std::string& outvis,
                       const uint32_t startChan,
                       const uint32_t endChan,
@@ -943,8 +953,8 @@ int MsSplitApp::split(const std::string& invis, const std::string& outvis,
     splitMainTable(in, *out, startChan, endChan, width, maxBuf);
 
     // Uncomment this to check if the caching is working
-    //RODataManAccessor(in, "TiledData", False).showCacheStatistics (cout);
-    //RODataManAccessor(*out, "TiledData", False).showCacheStatistics (cout);
+    RODataManAccessor(in, "TiledData", False).showCacheStatistics (cout);
+    RODataManAccessor(*out, "TiledData", False).showCacheStatistics (cout);
     return 0;
 }
 

@@ -113,6 +113,10 @@ class MsSplitApp : public askap::Application {
                             const uint32_t width,
                             const uint32_t maxBuf);
 
+        // Get the tileshape of the largest data tile (if 3D)
+        // Returns IPosition(3,0,0,0) if untiled or not 3D
+        casa::IPosition getDataTileShape(const casa::MeasurementSet& ms);
+
         int split(const std::string& invis, const std::string& outvis,
                   const uint32_t startChan,
                   const uint32_t endChan,
