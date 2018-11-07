@@ -240,10 +240,12 @@ EOF
                 fi
             fi
             if [ "${getSchedblock}" == "true" ]; then
-                loadModule askapcli
-                schedblock info -v -p "${SB_1934}" > "$sbinfoCal"
-                err=$?
-                unloadModule askapcli
+                $(
+                    loadModule askapcli
+                    schedblock info -v -p "${SB_1934}" > "$sbinfoCal"
+                    err=$?
+                    unloadModule askapcli
+                )
                 if [ $err -ne 0 ]; then
                     echo "ERROR - the 'schedblock' command failed."
                     echo "        Full command:   schedblock info -v -p ${SB_1934}"
@@ -258,9 +260,11 @@ EOF
             if [ "${FP_NAME_CAL}" != "" ]; then
                 # Get the number of beams in this footprint
                 if [ "${USE_CLI}" == "true" ]; then
-                    loadModule askapcli
-                    NUM_BEAMS_FOOTPRINT_CAL=$(footprint info ${FP_NAME_CAL} | grep n_beams | awk '{print $3}')
-                    unloadModule askapcli
+                    $(
+                        loadModule askapcli
+                        NUM_BEAMS_FOOTPRINT_CAL=$(footprint info ${FP_NAME_CAL} | grep n_beams | awk '{print $3}')
+                        unloadModule askapcli
+                    )
                 fi
             fi
         fi
