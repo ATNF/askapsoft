@@ -83,18 +83,22 @@ for i in ${joblist}; do
     done
 done
 
-# Catch any failed jobs and make copies of parsets, logs & slurmfiles
-failList=\$(grep FAIL \$statsTXT | awk '{print \$1}' | sort | uniq)
-if [ "\${failList}" != "" ]; then
-    for job in \$failList; do
-        dir="${FAILURE_DIRECTORY}/\${job}"
-        mkdir -p \$dir
-        find ${BASEDIR} -name "*\${job}*" -exec cp {} \$dir \;
-        jobname=\$(grep \$job \$statsTXT | head -1 | awk '{print \$3}' | sed -e 's/_master//g')
-        echo "\$(whoami) ${NOW} \${jobname} ${BASEDIR}" > \${dir}/README
-        touch \${dir}/NEW
-        chmod -R g+w \${dir}
-    done
+if [ -d "${FAILURE_DIRECTORY}" ]; then
+    # Catch any failed jobs and make copies of parsets, logs & slurmfiles
+    
+    failList=\$(grep FAIL \$statsTXT | awk '{print \$1}' | sort | uniq)
+    if [ "\${failList}" != "" ]; then
+        for job in \$failList; do
+            dir="${FAILURE_DIRECTORY}/\${job}"
+            mkdir -p \$dir
+            find ${BASEDIR} -name "*\${job}*" -exec cp {} \$dir \;
+            jobname=\$(grep \$job \$statsTXT | head -1 | awk '{print \$3}' | sed -e 's/_master//g')
+            echo "\$(whoami) ${NOW} \${jobname} ${BASEDIR}" > \${dir}/README
+            touch \${dir}/NEW
+            chmod -R g+w \${dir}
+        done
+    fi
+    
 fi
 
 doScience=${DO_SCIENCE_FIELD}
@@ -112,7 +116,7 @@ EOF
     if [ "${SUBMIT_JOBS}" == "true" ]; then    
         dep="-d afterany:$(echo "$ALL_JOB_IDS" | sed -e 's/,/:/g')"
         ID_STATS=$(sbatch ${dep} "$sbatchfile" | awk '{print $4}')
-        recordJob "${ID_STATS}" "Final job to gather statistics on all jobs, with flags \"${dep}\""
+        reportJob "${ID_STATS}" "Final job to gather statistics on all jobs, with flags \"${dep}\""
     else
         echo "Would submit job to gather statistics based on all jobs, with slurm file $sbatchfile"
     fi

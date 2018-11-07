@@ -68,7 +68,7 @@ if [ "\$verbose" == "true" ]; then
 
 fi
 
-squeue --jobs="${ALL_JOB_IDS}"
+squeue --jobs="${ALL_JOB_IDS},${ID_STATS}"
 
 EOF
     # make it executable

@@ -171,11 +171,17 @@ function addJobID()
     fi
 }
 
+function reportJob()
+{
+    # Usage: reportJob ID "This is a long description of this job"
+    echo "$1 -- $2" | tee -a "${JOBLIST}"
+}
+
 function recordJob()
 {
     # Usage: recordJob ID "This is a long description of this job"
     addJobID "$1"
-    echo "$1 -- $2" | tee -a "${JOBLIST}"
+    reportJob "$1" "$2"
 }
 
 # Function to add a job id to a list of dependencies. Calling syntax
