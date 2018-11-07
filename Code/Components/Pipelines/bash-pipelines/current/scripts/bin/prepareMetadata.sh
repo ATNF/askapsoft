@@ -186,9 +186,9 @@ EOF
 
     # Get the number of channels that we'll have in the dataset to be
     # processed, taking into account any merging that needs to be
-    # done. Just use the first beam from the list of beams to be
-    # processed, as they will all have the same spectral setup.
-    BEAM=$(echo $BEAMS_TO_USE | awk '{print $1}')
+    # done. Just use the first beam, as they will all have the same
+    # spectral setup.
+    BEAM=0
     if [ "${CHAN_RANGE_1934}" == "" ]; then
         # No selection of channels
         chanSelection=""
@@ -337,9 +337,9 @@ EOF
 
     # Get the number of channels that we'll have in the dataset to be
     # processed, taking into account any merging that needs to be
-    # done. Just use the first beam from the list of beams to be
-    # processed, as they will all have the same spectral setup.
-    BEAM=$(echo $BEAMS_TO_USE | awk '{print $1}')
+    # done. Just use the first beam, as they will all have the same
+    # spectral setup.
+    BEAM=0
     if [ "${CHAN_RANGE_SCIENCE}" == "" ]; then
         # No selection of channels
         chanSelection=""
