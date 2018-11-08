@@ -47,7 +47,7 @@ fi
 if [ "${CHAN_RANGE_1934}" == "" ]; then
     # No selection of channels
     chanSelection=""
-    chanParam="#No selection of channels"
+    chanParam="channel     = 1-${NUM_CHAN_1934}"
 else
     # CHAN_RANGE_SCIENCE gives global channel range - pass this to getMatchingMS.py
     chanSelection="-c ${CHAN_RANGE_1934}"
