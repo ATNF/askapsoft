@@ -186,6 +186,14 @@ void MSSink::process(VisChunk::ShPtr& chunk)
         itsDataDescRow = findOrAddDataDesc(chunk);
         itsPreviousScanIndex = chunk->scan();
     }
+    
+    ASKAPDEBUGASSERT(itsMs);
+    // for now use static table
+    itsFeedSubtableWriter.defineOffsets(itsConfig.feed());
+
+    const double chunkMidpoint = chunk->time().getTime().getValue("s");
+    // write/update FEED subtable if necesary
+    itsFeedSubtableWriter.write(*itsMs, chunkMidpoint, chunk->interval());
 
     MSColumns msc(*itsMs);
     const casa::uInt baseRow = msc.nrow();
@@ -199,9 +207,8 @@ void MSSink::process(VisChunk::ShPtr& chunk)
     msc.fieldId().put(baseRow, itsFieldRow);
     msc.dataDescId().put(baseRow, itsDataDescRow);
 
-    const casa::Quantity chunkMidpoint = chunk->time().getTime();
-    msc.time().put(baseRow, chunkMidpoint.getValue("s"));
-    msc.timeCentroid().put(baseRow, chunkMidpoint.getValue("s"));
+    msc.time().put(baseRow, chunkMidpoint);
+    msc.timeCentroid().put(baseRow, chunkMidpoint);
 
     msc.arrayId().put(baseRow, 0);
     msc.processorId().put(baseRow, 0);
@@ -234,7 +241,7 @@ void MSSink::process(VisChunk::ShPtr& chunk)
     //
     // If this is the first integration cycle update the start time,
     // otherwise just update the end time.
-    const casa::Double Tmid = chunkMidpoint.getValue("s");
+    const casa::Double Tmid = chunkMidpoint;
     const casa::Double Tint = chunk->interval();
 
     MSObservationColumns& obsc = msc.observation();
@@ -461,26 +468,10 @@ void MSSink::initAntennas(void)
                 it->diameter().getValue("m"));
 
         // For each antenna one or more feed entries must be created
-        const FeedConfig& feed = itsConfig.feed();
-        initFeeds(feed, id);
+        // Oonly pass the index to the helper class, actual write will
+        // happen in process() call
+        itsFeedSubtableWriter.defineAntenna(id);
     }
-}
-
-void MSSink::initFeeds(const FeedConfig& feeds, const casa::Int antennaID)
-{
-    const uInt nFeeds = feeds.nFeeds();
-
-    casa::Vector<double> x(nFeeds);
-    casa::Vector<double> y(nFeeds);
-    casa::Vector<casa::String> pol(nFeeds);
-
-    for (size_t i = 0; i < nFeeds; ++i) {
-        x(i) = feeds.offsetX(i).getValue("rad");
-        y(i) = feeds.offsetY(i).getValue("rad");
-        pol(i) = "X Y";
-    }
-
-    addFeeds(antennaID, x, y, pol);
 }
 
 void MSSink::initObs(void)
@@ -593,76 +584,6 @@ casa::Int MSSink::addField(const casa::String& fieldName,
     ASKAPCHECK(fieldc.nrow() == (row + 1), "Unexpected field row count");
 
     return row;
-}
-
-void MSSink::addFeeds(const casa::Int antennaID,
-        const casa::Vector<double>& x,
-        const casa::Vector<double>& y,
-        const casa::Vector<casa::String>& polType)
-{
-    // Pre-conditions
-    const uInt nFeeds = x.size();
-    ASKAPCHECK(nFeeds == y.size(), "X and Y vectors must be of equal length");
-    ASKAPCHECK(nFeeds == polType.size(),
-            "Pol type vector must have the same length as X and Y");
-
-    // Add to the Feed table
-    MSColumns msc(*itsMs);
-    MSFeedColumns& feedc = msc.feed();
-    const uInt startRow = feedc.nrow();
-    itsMs->feed().addRow(nFeeds);
-
-    for (casa::uInt i = 0; i < nFeeds; ++i) {
-        casa::uInt row = startRow + i;
-        feedc.antennaId().put(row, antennaID);
-        feedc.feedId().put(row, i);
-        feedc.spectralWindowId().put(row, -1);
-        feedc.beamId().put(row, 0);
-        feedc.numReceptors().put(row, 2);
-
-        // Feed position
-        Vector<double> feedXYZ(3, 0.0);
-        feedc.position().put(row, feedXYZ);
-
-        // Beam offset
-        Matrix<double> beamOffset(2, 2);
-        beamOffset(0, 0) = x(i);
-        beamOffset(1, 0) = y(i);
-        beamOffset(0, 1) = x(i);
-        beamOffset(1, 1) = y(i);
-        feedc.beamOffset().put(row, beamOffset);
-
-        // Polarisation type
-        Vector<String> feedPol(2);
-        if (polType(i).contains("X", 0)) {
-            feedPol(0) = "X";
-            feedPol(1) = "Y";
-        } else {
-            feedPol(0) = "L";
-            feedPol(1) = "R";
-        }
-        feedc.polarizationType().put(row, feedPol);
-
-        // Polarisation response
-        Matrix<Complex> polResp(2, 2);
-        polResp = Complex(0.0, 0.0);
-        polResp(1, 1) = Complex(1.0, 0.0);
-        polResp(0, 0) = Complex(1.0, 0.0);
-        feedc.polResponse().put(row, polResp);
-
-        // Receptor angle
-        Vector<double> feedAngle(2, 0.0);
-        feedc.receptorAngle().put(row, feedAngle);
-
-        // Time
-        feedc.time().put(row, 0.0);
-
-        // Interval - 1.e30 is effectivly forever
-        feedc.interval().put(row, 1.e30);
-    };
-
-    // Post-conditions
-    ASKAPCHECK(feedc.nrow() == (startRow + nFeeds), "Unexpected feed row count");
 }
 
 casa::Int MSSink::addAntenna(const casa::String& station,

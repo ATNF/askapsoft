@@ -40,6 +40,7 @@
 #include "cpcommon/VisChunk.h"
 #include "ingestpipeline/mssink/BeamSubstitutionRule.h"
 #include "ingestpipeline/mssink/FreqChunkSubstitutionRule.h"
+#include "ingestpipeline/mssink/FeedSubtableWriter.h"
 
 // Local package includes
 #include "ingestpipeline/ITask.h"
@@ -135,9 +136,6 @@ class MSSink : public askap::cp::ingest::ITask,
         // Initialises the ANTENNA table
         void initAntennas(void);
 
-        // Initialises the FEED table
-        void initFeeds(const FeedConfig& feeds, const casa::Int antennaID);
-
         // Initialises the OBSERVATION table
         void initObs(void);
 
@@ -154,12 +152,6 @@ class MSSink : public askap::cp::ingest::ITask,
         casa::Int addField(const casa::String& fieldName,
                 const casa::MDirection& fieldDirection,
                 const casa::String& calCode);
-
-        // Add feeds table rows
-        void addFeeds(const casa::Int antennaID,
-                const casa::Vector<double>& x,
-                const casa::Vector<double>& y,
-                const casa::Vector<casa::String>& polType);
 
         // Add antenna table row
         casa::Int addAntenna(const casa::String& station,
@@ -262,6 +254,9 @@ class MSSink : public askap::cp::ingest::ITask,
 
         /// @brief frequency chunk substitution rule
         mutable FreqChunkSubstitutionRule itsFreqChunkSubstitutionRule; 
+
+        /// @brief helper class to write FEED subtable
+        FeedSubtableWriter itsFeedSubtableWriter;
 };
 
 }

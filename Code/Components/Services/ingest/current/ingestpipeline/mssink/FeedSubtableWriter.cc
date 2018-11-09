@@ -63,8 +63,8 @@ void FeedSubtableWriter::defineAntenna(int antennaId)
        ASKAPCHECK(antennaId == 0, "Expect that antnena with Id=0 will be added first");
        itsNumberOfAntennas = 1;
    } else {
-       ASKAPCHECK(antennaId + 1 == itsNumberOfAntennas, "Sparse antenna indices are not supported");
        ++itsNumberOfAntennas;
+       ASKAPCHECK(antennaId + 1 == itsNumberOfAntennas, "Sparse antenna indices are not supported");
    }
 }
 
@@ -119,7 +119,7 @@ void FeedSubtableWriter::defineOffsets(const FeedConfig &feedCfg)
        // initialise buffer
        itsOffsets.resize(2u, nBeams);
    }
-
+   
    ASKAPASSERT(itsOffsets.ncolumn() == nBeams);
    ASKAPDEBUGASSERT(itsOffsets.nrow() == 2u);
    for (casa::uInt beam = 0; beam < nBeams; ++beam) {
@@ -172,22 +172,24 @@ void FeedSubtableWriter::write(casa::MeasurementSet &ms, double time, double int
    casa::MSFeedColumns& feedc = msc.feed();
    const casa::uInt startRow = feedc.nrow();
  
+   const double validityStartTime = time - interval * 0.5;
    // by default, the entry is valid essentially forever
-   double validityStartTime = 0.;
+   double validityCentroid = 0.;
    double validityDuration = 1e30;
 
    // correct time of the previous records, if necessary
    if (itsUpdateCounter > 0) {
        // the second update triggers transition to time-dependent table
-       validityStartTime = time - interval * 0.5;
+       validityCentroid = validityStartTime + 0.5*maxObsDurationInSeconds;
        validityDuration = maxObsDurationInSeconds;
 
        ASKAPDEBUGASSERT(itsStartRowForLastUpdate < startRow);
+       const double lastUpdateValidityDuration = validityStartTime - itsStartTimeForLastUpdate;
        for (casa::uInt row = itsStartRowForLastUpdate; row < startRow; ++row) {
             if (itsUpdateCounter == 1) {
-                feedc.time().put(row, itsStartTimeForLastUpdate);
+                feedc.time().put(row, itsStartTimeForLastUpdate + 0.5 * lastUpdateValidityDuration);
             }
-            feedc.interval().put(row, validityStartTime - itsStartTimeForLastUpdate);
+            feedc.interval().put(row, lastUpdateValidityDuration);
        }
    }
 
@@ -235,7 +237,7 @@ void FeedSubtableWriter::write(casa::MeasurementSet &ms, double time, double int
               feedc.receptorAngle().put(row, feedAngle);
 
               // Time
-              feedc.time().put(row, validityStartTime);
+              feedc.time().put(row, validityCentroid);
 
               // Interval 
               feedc.interval().put(row, validityDuration);
