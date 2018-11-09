@@ -628,6 +628,8 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
     // Not needed if we make bucketsize small enough to fit a row of buckets in memory
     // except for the input data - in case we select a small part of the spectrum
     const casa::uInt cacheSize = maxBuf;
+    // Note max cache size seems to have a limit of 2GB (2^31-1), higher values
+    // result in no limit, even though the argument is an unsigned integer
     if (nChan > nChanIn) sc.data().setMaximumCacheSize(cacheSize);
     //dc.data().setMaximumCacheSize(cacheSize);
     //sc.flag().setMaximumCacheSize(cacheSize);
@@ -898,8 +900,8 @@ int MsSplitApp::split(const std::string& invis, const std::string& outvis,
 
     // Adjust bucketsize if needed - avoid creating MSs that take forever to
     // read or write due to poor caching of buckets.
-    // Assumption: we have lots of memory for caching - up to ~8 GB for worst case
-    const casa::uInt maxBuf = parset.getUint32("bufferMB",4000u) * 1024 * 1024;
+    // Assumption: we have lots of memory for caching - up to ~4 GB for worst case
+    const casa::uInt maxBuf = parset.getUint32("bufferMB",2000u) * 1024 * 1024;
     const casa::uInt nChanOut = nChanIn/width;
     const casa::uInt nTilesPerRow = (nChanOut-1)/tileNchan+1;
     // We may exceed maxBuf if needed to keep bucketsize >= 8192.
