@@ -74,6 +74,7 @@ MonitoringPointManager::~MonitoringPointManager()
     submitPointNull("MisalignedStreamsCount");
     submitPointNull("MisalignedStreamsPercent");
     submitPointNull("MSWritingDuration");
+    submitPointNull("nFeedTableTimeRanges");
 }
 
 void MonitoringPointManager::submitMonitoringPoints(const askap::cp::common::VisChunk& chunk) const

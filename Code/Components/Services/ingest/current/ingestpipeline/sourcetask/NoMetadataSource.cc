@@ -258,6 +258,11 @@ VisChunk::ShPtr NoMetadataSource::createVisChunk(const casa::uLong timestamp)
         chunk->actualPolAngle()[i] = 0.0;
     }
 
+    // We have to use static beam offset table from the parset as there are no metadata
+    // In the past, the offsets were extracted by MSSink task and were not carried along the data
+    // In principle, both options are possible to implement, if such a flexibility is required
+    itsVisConverter.config().feed().fillMatrix(chunk->beamOffsets());
+
     return chunk;
 }
 

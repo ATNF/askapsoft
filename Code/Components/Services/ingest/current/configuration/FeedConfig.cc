@@ -112,3 +112,20 @@ casa::uInt FeedConfig::nFeeds(void) const
 {
     return itsOffsets.nrow();
 }
+
+/// @brief Obtain X and Y offsets for all beams
+/// @details This is a helper method to extract all offsets at once in the 
+/// format of the VisChunk buffer (i.e. 2 x nBeam matrix with offsets in radians).
+/// It is not clear whether this method is going to be useful long term
+/// @param[in] buffer the matrix to fill. It is resized, if necessary.
+void FeedConfig::fillMatrix(casa::Matrix<casa::Double> &buffer) const
+{
+   if (buffer.nrow() != 2 || buffer.ncolumn() != nFeeds()) {
+       buffer.resize(2, nFeeds());
+   }
+   for (casa::uInt beam = 0; beam < buffer.ncolumn(); ++beam) {
+        buffer(0, beam) = itsOffsets(beam, 0).getValue("rad");
+        buffer(1, beam) = itsOffsets(beam, 1).getValue("rad");
+   }
+}
+

@@ -78,6 +78,13 @@ class FeedConfig {
         /// @brief The polarisation of the feed given by "i".
         casa::String pol(casa::uInt i) const;
 
+        /// @brief Obtain X and Y offsets for all beams
+        /// @details This is a helper method to extract all offsets at once in the 
+        /// format of the VisChunk buffer (i.e. 2 x nBeam matrix with offsets in radians).
+        /// It is not clear whether this method is going to be useful long term
+        /// @param[in] buffer the matrix to fill. It is resized, if necessary.
+        void fillMatrix(casa::Matrix<casa::Double> &buffer) const;
+
     private:
         casa::Matrix<casa::Quantity> itsOffsets;
         casa::Vector<casa::String> itsPols;

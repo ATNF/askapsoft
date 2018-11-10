@@ -95,7 +95,7 @@ MergedSource::MergedSource(const LOFAR::ParameterSet& params,
     if (config.receiverId() == 0) {
         casa::Time now;
         if (now.modifiedJulianDay() - measVersion.first > 30.) {
-            ASKAPLOG_WARN_STR(logger, "Measures table is more than one month old. Consider updating!");
+            ASKAPLOG_ERROR_STR(logger, "Measures table is more than one month old. Consider updating!");
         }
     }
 
@@ -458,6 +458,9 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
              }
          }
     }
+    // temporary - populate beam offsets from configuration here
+    itsVisConverter.config().feed().fillMatrix(chunk->beamOffsets());
+    //
 
     return chunk;
 }

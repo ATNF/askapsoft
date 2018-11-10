@@ -177,8 +177,6 @@ void MSSink::process(VisChunk::ShPtr& chunk)
         itsFreqChunkSubstitutionRule.verifyChunk(chunk);
     }
     ASKAPDEBUGASSERT(chunk);
-    // Calculate monitoring points and submit them
-    submitMonitoringPoints(chunk);
 
     // Handle the details for when a new scan starts
     if (itsPreviousScanIndex != static_cast<casa::Int>(chunk->scan())) {
@@ -188,13 +186,21 @@ void MSSink::process(VisChunk::ShPtr& chunk)
     }
     
     ASKAPDEBUGASSERT(itsMs);
-    // for now use static table
-    itsFeedSubtableWriter.defineOffsets(itsConfig.feed());
+    // can also add logic to force use of static table, if necessary
+    if (chunk->beamOffsets().nelements() == 0) {
+        ASKAPLOG_INFO_STR(logger, "No beam offsets present in the buffer, using static values to populate FEED subtable");
+        itsFeedSubtableWriter.defineOffsets(itsConfig.feed());
+    } else {
+        itsFeedSubtableWriter.defineOffsets(chunk->beamOffsets());
+    }
 
     const double chunkMidpoint = chunk->time().getTime().getValue("s");
     const double chunkInterval = chunk->interval();
     // write/update FEED subtable if necesary
     itsFeedSubtableWriter.write(*itsMs, chunkMidpoint, chunkInterval);
+
+    // Calculate monitoring points and submit them
+    submitMonitoringPoints(chunk);
 
     MSColumns msc(*itsMs);
     const casa::uInt baseRow = msc.nrow();

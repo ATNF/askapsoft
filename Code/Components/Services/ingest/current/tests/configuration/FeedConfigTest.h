@@ -74,9 +74,15 @@ class FeedConfigTest : public CppUnit::TestFixture {
             FeedConfig instance(offsets, pols);
 
             // Test instance
+            casa::Matrix<casa::Double> extractedOffsets;
+            instance.fillMatrix(extractedOffsets);
+            CPPUNIT_ASSERT_EQUAL(static_cast<casa::uInt>(2u), static_cast<casa::uInt>(extractedOffsets.nrow()));
+            CPPUNIT_ASSERT_EQUAL(static_cast<casa::uInt>(nFeeds), static_cast<casa::uInt>(extractedOffsets.ncolumn()));
             for (casa::Int i = 0; i < nFeeds; ++i) {
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0 * i, instance.offsetX(i).getValue("deg"), dblTolerance);
                 CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0 * i, instance.offsetY(i).getValue("deg"), dblTolerance);
+                CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0 * i, extractedOffsets(0, i) * 180. / casa::C::pi, dblTolerance);
+                CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0 * i, extractedOffsets(1, i) * 180. / casa::C::pi, dblTolerance);
                 CPPUNIT_ASSERT(casa::String("XX YY") == instance.pol(i));
             }
 
