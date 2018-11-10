@@ -192,8 +192,9 @@ void MSSink::process(VisChunk::ShPtr& chunk)
     itsFeedSubtableWriter.defineOffsets(itsConfig.feed());
 
     const double chunkMidpoint = chunk->time().getTime().getValue("s");
+    const double chunkInterval = chunk->interval();
     // write/update FEED subtable if necesary
-    itsFeedSubtableWriter.write(*itsMs, chunkMidpoint, chunk->interval());
+    itsFeedSubtableWriter.write(*itsMs, chunkMidpoint, chunkInterval);
 
     MSColumns msc(*itsMs);
     const casa::uInt baseRow = msc.nrow();
@@ -241,17 +242,15 @@ void MSSink::process(VisChunk::ShPtr& chunk)
     //
     // If this is the first integration cycle update the start time,
     // otherwise just update the end time.
-    const casa::Double Tmid = chunkMidpoint;
-    const casa::Double Tint = chunk->interval();
 
     MSObservationColumns& obsc = msc.observation();
     casa::Vector<casa::Double> timeRange = obsc.timeRange()(0);
     if (timeRange(0) == 0) {
-        const casa::Double Tstart = Tmid - (Tint / 2);
+        const casa::Double Tstart = chunkMidpoint - chunkInterval * 0.5;
         timeRange(0) = Tstart;
     }
 
-    const casa::Double Tend = Tmid + (Tint / 2);
+    const casa::Double Tend = chunkMidpoint + 0.5 * chunkInterval;
     timeRange(1) = Tend;
     obsc.timeRange().put(0, timeRange);
 
@@ -904,6 +903,8 @@ void MSSink::submitMonitoringPoints(askap::cp::common::VisChunk::ShPtr chunk)
     } else {
         MonitoringSingleton::invalidatePoint("MSSinkStream");
     }
+
+    MonitoringSingleton::update<int32_t>("nFeedTableTimeRanges", static_cast<int32_t>(itsFeedSubtableWriter.updateCounter()));
 }
 
 /// @brief helper method to obtain data volume written

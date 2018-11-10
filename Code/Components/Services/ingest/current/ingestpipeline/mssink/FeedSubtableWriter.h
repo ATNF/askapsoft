@@ -83,6 +83,10 @@ public:
    /// @param[in] interval current interval/exposure (seconds)
    void write(casa::MeasurementSet &ms, double time, double interval);
 
+   /// @brief obtain the number of updates to FEED table so far
+   /// @return the number of updates
+   inline casa::uInt updateCounter() const { return itsUpdateCounter; }
+
 protected:
    /// @brief tolerance to consider offset changed
    /// @return tolerance in radians used to compare offsets
