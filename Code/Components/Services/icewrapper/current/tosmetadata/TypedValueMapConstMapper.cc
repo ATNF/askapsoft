@@ -46,6 +46,15 @@ TypedValueMapConstMapper::TypedValueMapConstMapper(const TypedValueMap& map) :
 {
 }
 
+/// @brief test that the particular key exists in the metadata
+/// @details
+/// @param[in] key key to query
+/// @return true, if the particular key exists
+bool TypedValueMapConstMapper::has(const std::string &key) const
+{
+    return itsConstMap.count(key) != 0;
+}
+
 int TypedValueMapConstMapper::getInt(const std::string& key) const
 {
     return get<int, TypeInt, TypedValueIntPtr>(key);

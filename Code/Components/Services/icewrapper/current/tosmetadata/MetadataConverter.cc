@@ -92,6 +92,16 @@ askap::cp::TosMetadata MetadataConverter::convert(const askap::interfaces::TimeT
     // Correlator mode
     dest.corrMode(srcMapper.getString("corrmode"));
 
+    // beam offsets
+    if (srcMapper.has("beams_offsets")) {
+        // we probably need to change the type as the offsets dealt with here are not the directions!
+        const std::vector<casa::MDirection> offsetDirs = srcMapper.getDirectionSeq("beams_offsets");
+        ASKAPLOG_DEBUG_STR(logger, "Received beams_offsets with "<<offsetDirs.size()<<" elements");
+        if (offsetDirs.size() > 0) {
+            ASKAPLOG_DEBUG_STR(logger, "The first one: "<<offsetDirs[0]<<" or "<<offsetDirs[0].getValue().getLong()<<" "<<offsetDirs[0].getValue().getLat());
+        }
+    }
+
     // antenna_names
     const std::vector<casa::String> antennaNames = srcMapper.getStringSeq("antennas");
 
@@ -134,6 +144,8 @@ askap::interfaces::TimeTaggedTypedValueMap MetadataConverter::convert(const aska
 
     // Correlator mode
     destMapper.setString("corrmode", source.corrMode());
+
+    // ideally we need beam_offsets here too
 
     // antenna_names
     const std::vector<std::string> stdnames =  source.antennaNames();

@@ -78,6 +78,12 @@ class TypedValueMapConstMapper {
         virtual std::vector<casa::DComplex> getDoubleComplexSeq(const std::string& key) const;
         virtual std::vector<casa::MDirection> getDirectionSeq(const std::string& key) const;
 
+        /// @brief test that the particular key exists in the metadata
+        /// @details
+        /// @param[in] key key to query
+        /// @return true, if the particular key exists
+        virtual bool has(const std::string &key) const;
+
     private:
         // Template params are:
         /// @brief Parse the value of element identified by "key" and return in
