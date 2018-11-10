@@ -110,7 +110,12 @@ void MetadataReceiver::publish(
     try {
         MetadataConverter converter;
         receive(converter.convert(msg));
-    } catch (std::exception& e) {
+    } catch (const IceUtil::Exception &e) {
+        ASKAPLOG_ERROR_STR(logger, "Ice exception while converting telescope metadata: " << e.what());
+        e.ice_throw();
+    } catch (const std::exception& e) {
         ASKAPLOG_ERROR_STR(logger, "Exception while converting telescope metadata: " << e.what());
+    } catch (...) {
+        ASKAPLOG_ERROR_STR(logger, "Unexpected exception converting Ice message");
     }
 }
