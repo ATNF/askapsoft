@@ -771,6 +771,11 @@ void BeamScatterTask::trimChunk(askap::cp::common::VisChunk::ShPtr& chunk, casa:
   newChunk->channelWidth() = chunk->channelWidth();
   newChunk->stokes().assign(chunk->stokes());
   newChunk->directionFrame() = chunk->directionFrame();
+  
+  // copy beam offsets without any splitting. Although in principle we could only retain a beam 
+  // of interest, it would complicate managing beam indices as there could be just one beam in
+  // the file but with non-zero index
+  newChunk->beamOffsets().assign(chunk->beamOffsets());
 
   const casa::Slicer vecSlicer(casa::IPosition(1,0), casa::IPosition(1,newNRows));
   
@@ -808,6 +813,7 @@ void BeamScatterTask::trimChunk(askap::cp::common::VisChunk::ShPtr& chunk, casa:
   ASKAPDEBUGASSERT(newChunk->nRow() == newNRows);
   ASKAPASSERT(newChunk->visibility().shape()  == shape);
   ASKAPASSERT(newChunk->flag().shape()  == shape);
+  ASKAPASSERT(newChunk->beamOffsets().shape() == chunk->beamOffsets().shape());
   
   chunk = newChunk;
 } 
