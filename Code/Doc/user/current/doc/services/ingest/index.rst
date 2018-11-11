@@ -245,13 +245,17 @@ some temporary tasks are also documented. They can be taken out in the future.
 |                       |Not to be used in production system.                                     |
 +-----------------------+-------------------------------------------------------------------------+
 
-Beam arrangement
-~~~~~~~~~~~~~~~~
+Beam arrangement (optional)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Parameters describing the beam arrangement are similar to the *feeds* configuration of :doc:`../../calim/csimulator`.
 It is mainly used to initialise **FEED** table of the measurement set, but also used by calculation of the phase centres and
 projected baseline coordinates (uvw's) if appropriate tasks are included in the chain. All beams are dual polarisation and
 linearly polarised (hard coded). Note, the term *feed* in the context of measurement sets really means *beam*.
+These parameters are optional, if ingest is configured to receive beam offsets information from the metadata
+(see :doc:`mergedsource`). However, they are required if configuration is such that static beam arrangements taken
+from parset is used (either a mode of :doc:`mergedsource` or a setup using :doc:`nometadatasource`; this is applicable
+only to functional tests now and should be irrelevant in normal operations).
 
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
 |**Parameter**               |**Type**           |**Default** |**Description**                                               |

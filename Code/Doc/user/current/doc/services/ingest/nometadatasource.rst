@@ -9,7 +9,7 @@ debugging because one could have the ingest pipeline loosely coupled to the rest
 therefore, being started and stopped manually at any time (as opposed to being started by TOS when
 the observations start with the data ingest commencing only when the appropriate metadata are received).
 As this task does not use the metadata stream at all, the metadata-specific  *Ice* configuration 
-(see the main :doc:`index` page for details) is ignored. Note, the metadata supplied via the parset 
+(see the main page on :doc:`index` for further details) is ignored. Note, the metadata supplied via the parset 
 essentially lead to a static configuration with a single scan which cannot be changed without stopping
 the ingest pipeline. This unlike :doc:`mergedsource`\ , which receives the same information via the
 metadata and, therefore, can start new scans dynamically. Another consequence of this is inability
@@ -28,7 +28,8 @@ The type of the task defined by tasks.\ **name**\ .type should be set to *NoMeta
 As mentioned above, this task is different from :doc:`mergedsource` in the way the information normally
 supplied in the metadata stream is obtained. Therefore, all configuration parameters of the :doc:`mergedsource`
 are understood by **NoMetadataSource**\ . The table below contains additional parameters understood by this
-task which fill in for the metadata content. 
+task which fill in for the metadata content. Note, *NoMetadataSource* requires beam arrangement parameters
+to be defined in parset (see the section in :doc:`index`).
 
 
 +----------------------------+-------------------+------------+--------------------------------------------------------------+

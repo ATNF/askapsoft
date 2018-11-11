@@ -5,7 +5,7 @@ MergedSource task is the main source task intended to be used in the production 
 such because it merges visibility stream (received by VisSource) and metadata stream (received by 
 MetadataSource) by aligning them using time. The user does not need to setup VisSource and MetadataSource
 explicitly, they are instantiated inside this task. The metadata access requires appropriate *Ice*
-configuration, see the main :doc:`index` page for details. 
+configuration, see the main page on :doc:`index` for further details. 
 
 Configuration Parameters
 ------------------------
@@ -105,6 +105,24 @@ The type of the task defined by tasks.\ **name**\ .type should be set to *Merged
 |                            |                   |            |(note the meaning of the slice changed between BETA and       |
 |                            |                   |            |ASKAP). Use this parameter if performance is limited, and     |
 |                            |                   |            |slices with higher numbers are not used anyway).              |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|beamoffsets_origin          |string             |"metadata"  |This parameter controls how beam offsets field is populated.  |
+|                            |                   |            |The possible options are "metadata", "parset" and "none".     |
+|                            |                   |            |If it is set to "metadata", beam offsets are populated from   |
+|                            |                   |            |the metadata stream, if the appropriate record is present in  |
+|                            |                   |            |the metadata. If there is no such record in the metadata, the |
+|                            |                   |            |behaviour is equivalent to "none" setting. If this field is   |
+|                            |                   |            |set to "parset", static beam arrangement is read from parset  |
+|                            |                   |            |and appropriate records in metadata are simply ignored.       |
+|                            |                   |            |An exception is thrown in this mode if beam arrangements is   |
+|                            |                   |            |undefined (see the section in the main page on :doc:`index`   |
+|                            |                   |            |for further information. Finally, if this field is set to     |
+|                            |                   |            |"none", the task doesn't do anything with beam offsets and    |
+|                            |                   |            |leaves them unfilled. This matches the behaviour prior to     |
+|                            |                   |            |November 2018 and :doc:`mssink` task is clever enough to      |
+|                            |                   |            |revert to static offsets if beam offsets in the buffer are not|
+|                            |                   |            |defined. Having said that, there is no much reason to use     |
+|                            |                   |            |this option, except for debugging.                            |
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
 
 Notes
