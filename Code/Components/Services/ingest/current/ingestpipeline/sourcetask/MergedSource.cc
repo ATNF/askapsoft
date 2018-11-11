@@ -82,7 +82,8 @@ MergedSource::MergedSource(const LOFAR::ParameterSet& params,
      itsMetadataSrc(metadataSrc), itsVisSrc(visSrc),
      itsIdleStream(false), itsBadCycle(false), itsInterrupted(false),
      itsSignals(itsIOService, SIGINT, SIGTERM, SIGUSR1),
-     itsLastTimestamp(-1), itsVisConverter(params, config)
+     itsLastTimestamp(-1), itsVisConverter(params, config), 
+     itsBeamOffsetsFromMetadata(false), itsBeamOffsetsFromParset(false)
 {
     ASKAPCHECK(bool(visSrc) == config.receivingRank(), "Receiving ranks should get visibility source object, service ranks shouldn't");
 
@@ -98,6 +99,22 @@ MergedSource::MergedSource(const LOFAR::ParameterSet& params,
             ASKAPLOG_ERROR_STR(logger, "Measures table is more than one month old. Consider updating!");
         }
     }
+ 
+    // configure beam offsets behaviour
+    const std::string beamOffsetsOrigin = params.getString("beamoffsets_origin", "metadata");
+    if (beamOffsetsOrigin == "metadata") {
+        ASKAPLOG_DEBUG_STR(logger, "Beam offsets will be taken from metadata stream");
+        itsBeamOffsetsFromMetadata = true;
+    } else if (beamOffsetsOrigin == "parset") {
+        ASKAPLOG_DEBUG_STR(logger, "Static beam offsets will be taken from parset");
+        itsBeamOffsetsFromParset = true;
+        ASKAPCHECK(config.feedInfoDefined(), "Required information on beam offsets is missing in the parset!");
+    } else {
+        ASKAPCHECK(beamOffsetsOrigin == "none", "Unsupported beamoffsets_origin: "<<beamOffsetsOrigin);
+        ASKAPLOG_DEBUG_STR(logger, "Source task will not load beam offsets");
+    }
+    ASKAPASSERT(!itsBeamOffsetsFromMetadata || !itsBeamOffsetsFromParset);
+    //
 
     // Setup a signal handler to catch SIGINT, SIGTERM and SIGUSR1
     itsSignals.async_wait(boost::bind(&MergedSource::signalHandler, this, _1, _2));
@@ -465,11 +482,15 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
              }
          }
     }
-    // temporary - populate beam offsets from configuration here
-    // can also make this optional
-    //itsVisConverter.config().feed().fillMatrix(chunk->beamOffsets());
-    //
-    chunk->beamOffsets().reference(metadata.beamOffsets().copy());
+     
+    if (itsBeamOffsetsFromParset) {
+        // populate beam offsets from configuration here
+        itsVisConverter.config().feed().fillMatrix(chunk->beamOffsets());
+    }
+    if (itsBeamOffsetsFromMetadata) {
+        // populate beam offsets from metadata
+        chunk->beamOffsets().reference(metadata.beamOffsets().copy());
+    }
     
 
     /*

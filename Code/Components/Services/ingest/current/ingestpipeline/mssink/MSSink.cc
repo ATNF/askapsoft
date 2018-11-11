@@ -189,6 +189,7 @@ void MSSink::process(VisChunk::ShPtr& chunk)
     // can also add logic to force use of static table, if necessary
     if (chunk->beamOffsets().nelements() == 0) {
         ASKAPLOG_INFO_STR(logger, "No beam offsets present in the buffer, using static values to populate FEED subtable");
+        ASKAPCHECK(itsConfig.feedInfoDefined(), "Static beam offset configuration is missing in the parset!");
         itsFeedSubtableWriter.defineOffsets(itsConfig.feed());
     } else {
         itsFeedSubtableWriter.defineOffsets(chunk->beamOffsets());

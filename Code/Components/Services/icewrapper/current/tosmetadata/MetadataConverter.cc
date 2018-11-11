@@ -103,7 +103,7 @@ askap::cp::TosMetadata MetadataConverter::convert(const askap::interfaces::TimeT
                  beamOffsets(0, beam) = offsetDirs[beam].getValue().getLong();
                  beamOffsets(1, beam) = offsetDirs[beam].getValue().getLat();
                  if (beam < 1) {
-                     ASKAPLOG_DEBUG_STR(logger, "Beam "<<beam<<": "<<offsetDirs[beam]<<" or ( "<<beamOffsets(0,beam)*180./casa::C::pi<<" "<<beamOffsets(1,beam)*180./casa::C::pi<<" degrees )");
+                     ASKAPLOG_DEBUG_STR(logger, "Beam "<<beam<<": "<<offsetDirs[beam]<<" or ( "<<beamOffsets(0,beam)*180./casa::C::pi<<" , "<<beamOffsets(1,beam)*180./casa::C::pi<<" ) degrees");
                  }
             }
             dest.beamOffsets(beamOffsets);

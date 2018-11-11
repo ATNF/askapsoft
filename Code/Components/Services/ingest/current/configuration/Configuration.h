@@ -102,8 +102,14 @@ class Configuration {
         /// @return task descriptor
         TaskDesc taskByName(const std::string &name) const;
 
-        /// @briefFeed configuration
+        /// @brief Feed configuration
+        /// @note Access to this method fails with an exception if no feed information has been defined
+        /// in the configuration (it's optional)
         const FeedConfig& feed(void) const;
+
+        /// @brief check if feed/beam configuration is defined
+        /// @return true, if one can call feed() method, false otherwise
+        bool feedInfoDefined() const;
 
         /// @brief A sequence of antennas
         const std::vector<Antenna>& antennas(void) const;

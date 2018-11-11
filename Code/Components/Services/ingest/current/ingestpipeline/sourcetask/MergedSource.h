@@ -165,6 +165,14 @@ class MergedSource : public ISource,
         /// @brief visibility converter
         VisConverter<VisDatagram> itsVisConverter;
 
+        /// @brief true, if beam offsets should be taken from metadata
+        /// @note mutually exclusive with itsBeamOffsetsFromParset;
+        bool itsBeamOffsetsFromMetadata;
+
+        /// @brief true, if beam offsets should be taken from static configuration
+        /// @note mutually exclusive with itsBeamOffsetsFromMetadata;
+        bool itsBeamOffsetsFromParset;
+
         /// For unit testing
         friend class MergedSourceTest;
 };

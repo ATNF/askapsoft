@@ -146,10 +146,17 @@ const std::vector<TaskDesc>& Configuration::tasks(void) const
 
 const FeedConfig& Configuration::feed(void) const
 {
-    if (itsFeedConfig.get() == 0) {
-        ASKAPTHROW(AskapError, "Feed config not initialised");
+    if (!itsFeedConfig) {
+        ASKAPTHROW(AskapError, "Feed config not initialised or defined");
     }
     return *itsFeedConfig;
+}
+
+/// @brief check if feed/beam configuration is defined
+/// @return true, if one can call feed() method, false otherwise
+bool Configuration::feedInfoDefined() const 
+{
+    return itsFeedConfig;
 }
 
 const std::vector<Antenna>& Configuration::antennas(void) const
@@ -371,6 +378,12 @@ void Configuration::buildCorrelatorModes(void)
 
 void Configuration::buildFeeds(void)
 {
+    if (!itsParset.isDefined("feeds.n_feeds")) {
+        ASKAPLOG_DEBUG_STR(logger, "No feeds.n_feeds key present in the parset - assume dynamic beam information");
+        return;
+    }
+    ASKAPLOG_DEBUG_STR(logger, "Loading static beam configuration from the parset");
+
     const uint32_t N_RECEPTORS = 2; // Only support receptors "X Y"
     const uint32_t nFeeds = itsParset.getUint32("feeds.n_feeds");
     const casa::Quantity spacing = asQuantity(itsParset.getString("feeds.spacing"), "rad");

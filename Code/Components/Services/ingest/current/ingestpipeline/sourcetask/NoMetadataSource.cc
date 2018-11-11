@@ -95,6 +95,8 @@ NoMetadataSource::NoMetadataSource(const LOFAR::ParameterSet& params,
         }
     }
 
+    ASKAPCHECK(config.feedInfoDefined(), "NoMetadataSource has to load static beam offset information from parset. It looks like it is not defined.");
+
     // Setup a signal handler to catch SIGINT, SIGTERM and SIGUSR1
     itsSignals.async_wait(boost::bind(&NoMetadataSource::signalHandler, this, _1, _2));
 }
