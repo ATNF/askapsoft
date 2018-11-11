@@ -32,6 +32,7 @@
 #include "Common/ParameterSet.h"
 #include "casacore/scimath/Mathematics/RigidVector.h"
 #include "casacore/casa/Arrays/Vector.h"
+#include "casacore/casa/Arrays/Matrix.h"
 #include "cpcommon/VisChunk.h"
 
 // Local package includes
@@ -111,6 +112,8 @@ class CalcUVWTask : public askap::cp::ingest::ITask {
 
         // Populates the itsBeamOffset vector
         void setupBeamOffsets(const Configuration& config);
+ 
+        void setupBeamOffsets(const casa::Matrix<casa::Double>& offsets);
 
         // A matrix containing antenna positions.
         // The antenna positions. Size is 3 (x, y & z) rows by nAntenna columns.

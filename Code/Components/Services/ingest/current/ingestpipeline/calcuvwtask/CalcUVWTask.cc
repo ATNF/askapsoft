@@ -68,7 +68,10 @@ CalcUVWTask::CalcUVWTask(const LOFAR::ParameterSet& parset,
     ASKAPLOG_DEBUG_STR(logger, "Constructor");
 
     createPositionMatrix(config);
-    setupBeamOffsets(config);
+    if (config.feedInfoDefined()) {
+        ASKAPLOG_INFO_STR(logger, "Use static beam offset information in favour of the dynamic one!");
+        setupBeamOffsets(config);
+    }
 }
 
 CalcUVWTask::~CalcUVWTask()
@@ -78,6 +81,11 @@ CalcUVWTask::~CalcUVWTask()
 
 void CalcUVWTask::process(VisChunk::ShPtr& chunk)
 {
+    ASKAPASSERT(chunk);
+    if (chunk->beamOffsets().nelements() > 0) {
+        ASKAPLOG_INFO_STR(logger, "Use dynamic beam offset information, overriding existing arrangement if present");
+        setupBeamOffsets(chunk->beamOffsets());
+    }
     for (casa::uInt row = 0; row < chunk->nRow(); ++row) {
         calcForRow(chunk, row);
     }
@@ -246,6 +254,19 @@ void CalcUVWTask::createPositionMatrix(const Configuration& config)
         itsAntXYZ(0, i) = antennas.at(i).position()(0); // x
         itsAntXYZ(1, i) = antennas.at(i).position()(1); // y
         itsAntXYZ(2, i) = antennas.at(i).position()(2); // z
+    }
+}
+
+void CalcUVWTask::setupBeamOffsets(const casa::Matrix<casa::Double>& offsets)
+{
+    if (itsBeamOffset.nelements() != offsets.ncolumn()) {
+        itsBeamOffset.resize(offsets.ncolumn());
+        ASKAPASSERT(offsets.nrow() == 2u);
+        for (uInt beam = 0; beam < itsBeamOffset.nelements(); ++beam) {
+            itsBeamOffset(beam)(0) = offsets(0, beam);
+            itsBeamOffset(beam)(1) = offsets(1, beam);
+        }
+        
     }
 }
 
