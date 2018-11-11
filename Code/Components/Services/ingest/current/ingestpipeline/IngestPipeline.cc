@@ -205,6 +205,7 @@ bool IngestPipeline::ingestOne(void)
     // service ranks with a non-blocking source
     bool wasProcessed = false;
     for (unsigned int i = 0; i < itsTasks.size(); ++i) {
+         ASKAPDEBUGASSERT(itsTasks[i]);
          if (chunk || itsTasks[i]->isAlwaysActive()) {
              timer.mark();
              itsTasks[i]->process(chunk);

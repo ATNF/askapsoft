@@ -370,6 +370,8 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
     // Determine and add the spectral channel width
     chunk->channelWidth() = corrMode.chanWidth().getValue("Hz");
 
+    //const bool unsupported = chunk->nRow() > (casa::max(chunk->beam1()) + 1)*406u;
+
     // Build frequencies vector
     // Frequency vector is not of length nRows, but instead nChannels
     chunk->frequency() = itsVisConverter.channelManager().localFrequencies(
@@ -440,6 +442,11 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
             }     
         }
     }
+    /*
+    if (unsupported) {
+        chunk.reset(new VisChunk(0,0,0,0));
+    }
+    */
     // now populate uvw vector in the chunk
     for (casa::uInt row=0; row<chunk->nRow(); ++row) {
          // it is possible to move access methods outside the loop, but the overhead is small
@@ -459,8 +466,17 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
          }
     }
     // temporary - populate beam offsets from configuration here
-    itsVisConverter.config().feed().fillMatrix(chunk->beamOffsets());
+    // can also make this optional
+    //itsVisConverter.config().feed().fillMatrix(chunk->beamOffsets());
     //
+    chunk->beamOffsets().reference(metadata.beamOffsets().copy());
+    
+
+    /*
+    if (unsupported) {
+        ASKAPLOG_FATAL_STR(logger, "Attempted to observe in unsupported ingest configuration, results are undefined");
+    }
+    */
 
     return chunk;
 }
