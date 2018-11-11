@@ -92,13 +92,21 @@ askap::cp::TosMetadata MetadataConverter::convert(const askap::interfaces::TimeT
     // Correlator mode
     dest.corrMode(srcMapper.getString("corrmode"));
 
-    // beam offsets
+    // beam offsets - treat it as an optional field
     if (srcMapper.has("beams_offsets")) {
         // we probably need to change the type as the offsets dealt with here are not the directions!
         const std::vector<casa::MDirection> offsetDirs = srcMapper.getDirectionSeq("beams_offsets");
         ASKAPLOG_DEBUG_STR(logger, "Received beams_offsets with "<<offsetDirs.size()<<" elements");
         if (offsetDirs.size() > 0) {
-            ASKAPLOG_DEBUG_STR(logger, "The first one: "<<offsetDirs[0]<<" or "<<offsetDirs[0].getValue().getLong()<<" "<<offsetDirs[0].getValue().getLat());
+            casa::Matrix<casa::Double> beamOffsets(2, offsetDirs.size());
+            for (casa::uInt beam = 0; beam < beamOffsets.ncolumn(); ++beam) {
+                 beamOffsets(0, beam) = offsetDirs[beam].getValue().getLong();
+                 beamOffsets(1, beam) = offsetDirs[beam].getValue().getLat();
+                 if (beam < 1) {
+                     ASKAPLOG_DEBUG_STR(logger, "Beam "<<beam<<": "<<offsetDirs[beam]<<" or ( "<<beamOffsets(0,beam)*180./casa::C::pi<<" "<<beamOffsets(1,beam)*180./casa::C::pi<<" degrees )");
+                 }
+            }
+            dest.beamOffsets(beamOffsets);
         }
     }
 
@@ -145,7 +153,19 @@ askap::interfaces::TimeTaggedTypedValueMap MetadataConverter::convert(const aska
     // Correlator mode
     destMapper.setString("corrmode", source.corrMode());
 
-    // ideally we need beam_offsets here too
+    // Beam offsets - treat it as an optional field - only convert if matrix is not empty
+    const casa::Matrix<casa::Double>& beamOffsets = source.beamOffsets();
+    if (beamOffsets.ncolumn() > 0) {
+        ASKAPASSERT(beamOffsets.nrow() == 2u);
+        // we probably need a different type for beam offsets as conceptually they are not directions
+        std::vector<casa::MDirection> beamOffsetsAsDir(beamOffsets.ncolumn());
+        for (casa::uInt beam = 0; beam < beamOffsets.ncolumn(); ++beam) {
+             const casa::MVDirection mvDir(casa::Quantity(beamOffsets(0, beam), "rad"), casa::Quantity(beamOffsets(1,beam), "rad"));
+             // note, frame doesn't make sense here at all, use J200 as it is supported by the sequence converter
+             beamOffsetsAsDir[beam] = casa::MDirection(mvDir, casa::MDirection::J2000);
+        }
+        destMapper.setDirectionSeq("beams_offsets", beamOffsetsAsDir);
+    }
 
     // antenna_names
     const std::vector<std::string> stdnames =  source.antennaNames();

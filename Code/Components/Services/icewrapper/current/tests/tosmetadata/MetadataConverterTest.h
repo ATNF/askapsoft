@@ -43,6 +43,7 @@
 
 // Classes to test
 #include "tosmetadata/MetadataConverter.h"
+#include "tosmetadata/TypedValueMapConstMapper.h"
 
 // Using
 using namespace std;
@@ -59,6 +60,8 @@ class MetadataConverterTest : public CppUnit::TestFixture {
 #ifdef __LP64__
         CPPUNIT_TEST(testConverter);
         CPPUNIT_TEST(testConverterAntenna);
+        CPPUNIT_TEST(testPresence);
+        CPPUNIT_TEST(testOptionalBeamOffsets);
 #endif
         CPPUNIT_TEST_SUITE_END();
 
@@ -105,6 +108,9 @@ class MetadataConverterTest : public CppUnit::TestFixture {
 
             // Correlator mode
             itsSource->corrMode(corrMode);
+
+            // Beam offsets
+            itsSource->beamOffsets(casa::Matrix<casa::Double>(2u, 36u, 1.));
 
             // Antennas
             for (casa::uInt i = 0; i < nAntenna; ++i) {
@@ -153,7 +159,31 @@ class MetadataConverterTest : public CppUnit::TestFixture {
             // The other tests are for LP64 platforms only.
         }
 
+        void testPresence() {
+            CPPUNIT_ASSERT(itsSource);
+            MetadataConverter converter;
+            TimeTaggedTypedValueMap intermediate(converter.convert(*itsSource));
+            TypedValueMapConstMapper mapper(intermediate.data);
+            CPPUNIT_ASSERT(mapper.has("ak1.flagged"));
+            CPPUNIT_ASSERT(mapper.has("ak1.on_source"));
+            CPPUNIT_ASSERT(mapper.has("ak1.uvw"));
+            CPPUNIT_ASSERT(mapper.has("ak1.actual_azel"));
+            CPPUNIT_ASSERT(mapper.has("ak1.actual_pol"));
+            CPPUNIT_ASSERT(mapper.has("ak1.actual_radec"));
+            CPPUNIT_ASSERT(mapper.has("antennas"));
+            CPPUNIT_ASSERT(mapper.has("corrmode"));
+            CPPUNIT_ASSERT(mapper.has("flagged"));
+            CPPUNIT_ASSERT(mapper.has("scan_id"));
+            CPPUNIT_ASSERT(mapper.has("sky_frequency"));
+            CPPUNIT_ASSERT(mapper.has("target_direction"));
+            CPPUNIT_ASSERT(mapper.has("target_name"));
+            CPPUNIT_ASSERT(mapper.has("beams_offsets"));
+            CPPUNIT_ASSERT(!mapper.has("this_one_does_not_exist"));
+        }
+
         void testConverter() {
+            CPPUNIT_ASSERT(itsSource);
+            CPPUNIT_ASSERT(itsResult);
             CPPUNIT_ASSERT_EQUAL(itsSource->nAntenna(), itsResult->nAntenna());
             CPPUNIT_ASSERT_EQUAL(itsSource->time(), itsResult->time());
             CPPUNIT_ASSERT_EQUAL(itsSource->scanId(), itsResult->scanId());
@@ -163,9 +193,31 @@ class MetadataConverterTest : public CppUnit::TestFixture {
             verifyDir(itsSource->targetDirection(), itsResult->targetDirection());
             verifyDir(itsSource->phaseDirection(), itsResult->phaseDirection());
             CPPUNIT_ASSERT_EQUAL(itsSource->corrMode(), itsResult->corrMode());
+            CPPUNIT_ASSERT_EQUAL(itsSource->beamOffsets().shape(), itsResult->beamOffsets().shape());
+            for (casa::uInt beam = 0; beam < itsSource->beamOffsets().ncolumn(); ++beam) {
+                 for (casa::uInt coord = 0; coord < itsSource->beamOffsets().nrow(); ++coord) {
+                      CPPUNIT_ASSERT_DOUBLES_EQUAL(itsSource->beamOffsets()(coord, beam), itsResult->beamOffsets()(coord, beam), 1e-15);
+                 }
+            }
+        }
+
+        void testOptionalBeamOffsets() {
+            CPPUNIT_ASSERT(itsSource);
+            itsSource->beamOffsets(casa::Matrix<casa::Double>());
+            MetadataConverter converter;
+            TimeTaggedTypedValueMap intermediate(converter.convert(*itsSource));
+            TypedValueMapConstMapper mapper(intermediate.data);
+            // check the field is not in the stream
+            CPPUNIT_ASSERT(!mapper.has("beams_offsets"));
+            // convert back
+            itsResult.reset(new TosMetadata(converter.convert(intermediate)));
+            CPPUNIT_ASSERT(itsResult);
+            CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(0u), itsResult->beamOffsets().size());
         }
 
         void testConverterAntenna() {
+            CPPUNIT_ASSERT(itsSource);
+            CPPUNIT_ASSERT(itsResult);
             const unsigned int nAntenna = itsSource->nAntenna();
             CPPUNIT_ASSERT_EQUAL(nAntenna, itsResult->nAntenna());
 
