@@ -153,6 +153,7 @@ void FeedSubtableWriter::defineOffsets(const FeedConfig &feedCfg)
 void FeedSubtableWriter::write(casa::MeasurementSet &ms, double time, double interval)
 {
    ASKAPCHECK(itsNumberOfAntennas > 0, "Number of antennas have to be setup before call to FeedSubtableWriter::write");
+   ASKAPASSERT(interval > 0.);
    // for convenience we write validity times with some time in reserve to avoid the need updating the record on
    // every correlator cycle which would be bad from performance point of view 
    const double maxObsDurationInSeconds = 48. * 3600.; 
@@ -186,9 +187,7 @@ void FeedSubtableWriter::write(casa::MeasurementSet &ms, double time, double int
        ASKAPDEBUGASSERT(itsStartRowForLastUpdate < startRow);
        const double lastUpdateValidityDuration = validityStartTime - itsStartTimeForLastUpdate;
        for (casa::uInt row = itsStartRowForLastUpdate; row < startRow; ++row) {
-            if (itsUpdateCounter == 1) {
-                feedc.time().put(row, itsStartTimeForLastUpdate + 0.5 * lastUpdateValidityDuration);
-            }
+            feedc.time().put(row, itsStartTimeForLastUpdate + 0.5 * lastUpdateValidityDuration);
             feedc.interval().put(row, lastUpdateValidityDuration);
        }
    }
