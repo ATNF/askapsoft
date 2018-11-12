@@ -103,6 +103,15 @@ NCORES=${NUM_CPUS_CONTIMG_SCI}
 NPPN=${CPUS_PER_CORE_CONT_IMAGING}
 srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} $theimager ${PROFILE_FLAG} -c "\$parset" > "\$log"
 err=\$?
+
+# Handle the profiling files
+doProfiling=${USE_PROFILING}
+if [ "\${doProfiling}" == "true" ]; then
+    dir=Profiling/Beam${BEAM}
+    mkdir -p \$dir
+    mv profile.*.${imageBase}* \${dir}
+fi
+
 for im in *.${imageBase}*; do
     rejuvenate "\$im"
 done
