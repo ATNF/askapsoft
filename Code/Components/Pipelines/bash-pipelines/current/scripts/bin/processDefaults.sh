@@ -34,6 +34,12 @@ if [ "$PROCESS_DEFAULTS_HAS_RUN" != "true" ]; then
 
     PROCESS_DEFAULTS_HAS_RUN=true
 
+    # Turn on profiling if requested
+    PROFILE_FLAG=""
+    if [ "${USE_PROFILING}" == "true" ]; then
+        PROFILE_FLAG="-p"
+    fi
+
     ####################
     # Set the overall switches for CAL & SCIENCE fields
 

@@ -270,7 +270,7 @@ log=${logs}/science_spectral_imager_${FIELDBEAM}_\${SLURM_JOB_ID}.log
 # Now run the simager
 NCORES=${NUM_CPUS_SPECIMG_SCI}
 NPPN=${CPUS_PER_CORE_SPEC_IMAGING}
-srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${theImager} -c "\$parset" > "\$log"
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${theImager} ${PROFILE_FLAG} -c "\$parset" > "\$log"
 err=\$?
 rejuvenate ${msSciSL}
 for im in *.${imageBase}*; do

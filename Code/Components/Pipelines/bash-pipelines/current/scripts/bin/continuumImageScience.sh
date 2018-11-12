@@ -101,7 +101,7 @@ log=${logs}/science_imaging_${FIELDBEAM}_\${SLURM_JOB_ID}.log
 
 NCORES=${NUM_CPUS_CONTIMG_SCI}
 NPPN=${CPUS_PER_CORE_CONT_IMAGING}
-srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} $theimager -c "\$parset" > "\$log"
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} $theimager ${PROFILE_FLAG} -c "\$parset" > "\$log"
 err=\$?
 for im in *.${imageBase}*; do
     rejuvenate "\$im"

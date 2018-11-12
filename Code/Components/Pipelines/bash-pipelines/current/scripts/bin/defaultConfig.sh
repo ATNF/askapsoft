@@ -114,6 +114,9 @@ PURGE_INTERIM_MS_1934=true
 # If true, copy with distributed copy tool dcp. Else use cp
 USE_DCP_TO_COPY_MS=false
 
+# If true, turn on profiling for the imaging jobs (only cimager and imager have this option)
+USE_PROFILING=false
+
 ####################
 # Locations of the executables.
 # If you have a local version of the ASKAPsoft codebase, and have

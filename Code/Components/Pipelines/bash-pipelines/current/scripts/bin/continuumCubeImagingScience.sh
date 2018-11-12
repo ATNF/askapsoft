@@ -256,7 +256,7 @@ log=${logs}/science_contcube_imager_${FIELDBEAM}_${POLN}_\${SLURM_JOB_ID}.log
 # Now run the simager
 NCORES=${NUM_CPUS_CONTCUBE_SCI}
 NPPN=${CPUS_PER_CORE_CONTCUBE_IMAGING}
-srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${theImager} -c \$parset > \$log
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${theImager} ${PROFILE_FLAG} -c \$parset > \$log
 err=\$?
 rejuvenate \${ms}
 for im in ./*.${imageBase}*; do
