@@ -176,6 +176,8 @@ void AdviseDI::prepare() {
 
     casa::uInt totChanIn = 0;
 
+
+
     for (unsigned int n = 0; n < ms.size(); ++n) {
         chanFreq[n].resize(0);
         chanWidth[n].resize(0);
@@ -271,7 +273,7 @@ void AdviseDI::prepare() {
     }
 
 
-    ASKAPLOG_INFO_STR(logger, "Assuming tangent point shared: "<<printDirection(itsTangent[0])<<" (J2000)");
+    // ASKAPLOG_INFO_STR(logger, "Assuming tangent point shared: "<<printDirection(itsTangent[0])<<" (J2000)");
 
 
 
@@ -574,7 +576,7 @@ void AdviseDI::updateDirectionFromWorkUnit(LOFAR::ParameterSet& parset, askap::c
   std::vector<std::string> ms = getDatasets();
   const vector<string> imageNames = parset.getStringVector("Images.Names", false);
   ASKAPLOG_DEBUG_STR(logger,"Image names " << imageNames);
-  
+
   for (unsigned int n = 0; n < ms.size(); ++n) {
 
     if (wu_dataset.compare(ms[n]) == 0) {
@@ -643,7 +645,7 @@ void AdviseDI::addMissingParameters(LOFAR::ParameterSet& parset)
        std::ostringstream pstr;
        // Only J2000 is implemented at the moment.
        pstr<<"["<<printLon(itsTangent[0])<<", "<<printLat(itsTangent[0])<<", J2000]";
-       ASKAPLOG_INFO_STR(logger, "  Advising on parameter " << param << ": " << pstr.str().c_str());
+       ASKAPLOG_INFO_STR(logger, "  Advising on parameter (getting from the tangent point on the first measurement set) " << param << ": " << pstr.str().c_str());
        itsParset.add(param, pstr.str().c_str());
    }
    param = "Images.restFrequency";
@@ -658,55 +660,72 @@ void AdviseDI::addMissingParameters(LOFAR::ParameterSet& parset)
 
    for (size_t img = 0; img < imageNames.size(); ++img) {
 
-       param = "Images."+imageNames[img]+".cellsize";
-       if ( !parset.isDefined(param) ) {
-           cellsizeNeeded = true;
+     param = "Images."+imageNames[img]+".cellsize";
+     if ( !parset.isDefined(param) ) {
+       cellsizeNeeded = true;
+     }
+     else {
+       param = "Images.cellsize";
+       if (!parset.isDefined(param) ) {
+         const vector<string> cellSizeVector = parset.getStringVector("Images.cellsize");
+         std::ostringstream pstr;
+         pstr<<"["<< cellSizeVector[0].c_str() <<"arcsec,"<<cellSizeVector[1].c_str() <<"arcsec]";
+         ASKAPLOG_INFO_STR(logger, "  Advising on parameter " << param <<": " << pstr.str().c_str());
+         parset.add(param, pstr.str().c_str());
+       }
+     }
+     param = "Images."+imageNames[img]+".shape";
+     if ( !parset.isDefined(param) ) shapeNeeded = true;
+
+     param = "Images."+imageNames[img]+".frequency";
+     if ( !parset.isDefined(param) && isPrepared == true) {
+
+       const string key="Images."+imageNames[img]+".frequency";
+       char tmp[64];
+       // changing this to match adviseParallel
+       const double aveFreq = 0.5*(minFrequency+maxFrequency);
+       sprintf(tmp,"[%f,%f]",aveFreq,aveFreq);
+       string val = string(tmp);
+       ASKAPLOG_INFO_STR(logger, "  Advising on parameter " << param <<": " << val);
+       parset.add(key,val);
+
+     }
+     param ="Images."+imageNames[img]+".direction";
+     if ( !parset.isDefined(param) ) {
+
+       if (parset.isDefined("Images.direction") ) {
+         const std::vector<std::string> direction = parset.getStringVector("Images.direction");
+
+         const double ra = SynthesisParamsHelper::convertQuantity(direction[0],"rad");
+         const double dec = SynthesisParamsHelper::convertQuantity(direction[1],"rad");
+         const casa::MVDirection itsDirection = casa::MVDirection(ra,dec);
+
+         std::ostringstream pstr;
+         // Only J2000 is implemented at the moment.
+         pstr<<"["<<printLon(itsDirection)<<", "<<printLat(itsDirection)<<", J2000]";
+         ASKAPLOG_INFO_STR(logger, "  Advising on parameter " << param << " (obtained from Images.direction) : " << pstr.str().c_str());
+         itsParset.add(param, pstr.str().c_str());
        }
        else {
-            param = "Images.cellsize";
-            if (!parset.isDefined(param) ) {
-                const vector<string> cellSizeVector = parset.getStringVector("Images.cellsize");
-                std::ostringstream pstr;
-                pstr<<"["<< cellSizeVector[0].c_str() <<"arcsec,"<<cellSizeVector[1].c_str() <<"arcsec]";
-                ASKAPLOG_INFO_STR(logger, "  Advising on parameter " << param <<": " << pstr.str().c_str());
-                parset.add(param, pstr.str().c_str());
-            }
-       }
-       param = "Images."+imageNames[img]+".shape";
-       if ( !parset.isDefined(param) ) shapeNeeded = true;
 
-       param = "Images."+imageNames[img]+".frequency";
-       if ( !parset.isDefined(param) && isPrepared == true) {
-
-           const string key="Images."+imageNames[img]+".frequency";
-           char tmp[64];
-           // changing this to match adviseParallel
-           const double aveFreq = 0.5*(minFrequency+maxFrequency);
-           sprintf(tmp,"[%f,%f]",aveFreq,aveFreq);
-           string val = string(tmp);
-           ASKAPLOG_INFO_STR(logger, "  Advising on parameter " << param <<": " << val);
-           parset.add(key,val);
-
+         std::ostringstream pstr;
+         // Only J2000 is implemented at the moment.
+         pstr<<"["<<printLon(itsTangent[0])<<", "<<printLat(itsTangent[0])<<", J2000]";
+         ASKAPLOG_INFO_STR(logger, "  Advising on parameter " << param << "(obtained from tangent point of first MS): " << pstr.str().c_str());
+         parset.add(param, pstr.str().c_str());
        }
-       param ="Images."+imageNames[img]+".direction";
-       if ( !parset.isDefined(param) ) {
-           std::ostringstream pstr;
-           // Only J2000 is implemented at the moment.
-           pstr<<"["<<printLon(itsTangent[0])<<", "<<printLat(itsTangent[0])<<", J2000]";
-           ASKAPLOG_INFO_STR(logger, "  Advising on parameter " << param << ": " << pstr.str().c_str());
-           parset.add(param, pstr.str().c_str());
+     }
+     param = "Images."+imageNames[img]+".nterms"; // if nterms is set, store it for later
+     if (parset.isDefined(param)) {
+       if ((nTerms>1) && (nTerms!=itsParset.getInt(param))) {
+         ASKAPLOG_WARN_STR(logger, "  Imaging with different nterms may not work");
        }
-       param = "Images."+imageNames[img]+".nterms"; // if nterms is set, store it for later
-       if (parset.isDefined(param)) {
-           if ((nTerms>1) && (nTerms!=itsParset.getInt(param))) {
-               ASKAPLOG_WARN_STR(logger, "  Imaging with different nterms may not work");
-           }
-           nTerms = itsParset.getInt(param);
-       }
+       nTerms = itsParset.getInt(param);
+     }
 
-       if ( !parset.isDefined("Images."+imageNames[img]+".nchan") ) {
+     if ( !parset.isDefined("Images."+imageNames[img]+".nchan") ) {
 
-       }
+     }
    }
 
    if (nTerms > 1) { // check required MFS parameters

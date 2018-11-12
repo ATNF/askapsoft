@@ -170,7 +170,7 @@ void ContinuumMaster::run(void)
     // But I dont want to run Cadvise as it is too specific to the old imaging requirements
 
 
-    if (nCycles == 0) {
+    if (nCycles == 0) { // no solve if ncycles is 0
         synthesis::ImagerParallel imager(itsComms, diadvise.getParset());
         ASKAPLOG_DEBUG_STR(logger, "Master beginning single - empty model");
         imager.broadcastModel(); // initially empty model
@@ -197,15 +197,19 @@ void ContinuumMaster::run(void)
 
             if (imager.params()->has("peak_residual")) {
                 const double peak_residual = imager.params()->scalarValue("peak_residual");
-                ASKAPLOG_INFO_STR(logger, "Major Cycle " << cycle << " Reached peak residual of " << peak_residual);
+                ASKAPLOG_INFO_STR(logger, "Major Cycle " << cycle << " Reached peak residual of " << peak_residual << " after solve");
 
                 if (peak_residual < targetPeakResidual) {
 
                     ASKAPLOG_INFO_STR(logger, "It is below the major cycle threshold of "
                                       << targetPeakResidual << " Jy. Stopping.");
 
-                    // set cycle to be last
-                    cycle = nCycles-1;
+                    ASKAPLOG_INFO_STR(logger, "Broadcasting final model");
+                    imager.broadcastModel();
+                    ASKAPLOG_INFO_STR(logger, "Broadcasting final model - done");
+                    break;
+
+                    // we have reached a peak residual after the
 
                 } else {
                     if (targetPeakResidual < 0) {
@@ -216,29 +220,27 @@ void ContinuumMaster::run(void)
                     }
                 }
             }
-            ASKAPLOG_DEBUG_STR(logger, "Broadcasting latest model");
+            ASKAPLOG_INFO_STR(logger, "Broadcasting latest model");
             imager.broadcastModel();
-            ASKAPLOG_DEBUG_STR(logger, "Broadcasting latest model - done");
+            ASKAPLOG_INFO_STR(logger, "Broadcasting latest model - done");
 
             if (writeAtMajorCycle && (cycle != nCycles-1) ) {
-                ASKAPLOG_DEBUG_STR(logger, "Writing out model");
+                ASKAPLOG_INFO_STR(logger, "Writing out model");
                 imager.writeModel(std::string(".beam") + utility::toString(beam) + \
                 std::string(".majorcycle.") + utility::toString(cycle));
             }
-            else if (cycle == nCycles-1) {
-                ASKAPLOG_DEBUG_STR(logger,"Receiving Normal Equation");
-                imager.calcNE(); // just a reset
-                imager.receiveNE(); // get the most recent residual
-                ASKAPLOG_DEBUG_STR(logger, "Writing out final model");
-                imager.writeModel();
 
-
-            }
             else {
                 ASKAPLOG_DEBUG_STR(logger, "Not writing out model");
             }
 
         }
+        ASKAPLOG_INFO_STR(logger, "Cycles complete - Receiving residuals for latest model");
+        imager.calcNE(); // Needed here becuase it resets the itsNE as Master
+                        // Nothing else is done
+        imager.receiveNE(); // updates the residuals from workers
+        ASKAPLOG_INFO_STR(logger, "Writing out model");
+        imager.writeModel();
 
     }
 
