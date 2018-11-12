@@ -44,6 +44,7 @@
 #include <askap/StatReporter.h>
 #include <Common/ParameterSet.h>
 #include <parallel/ImagerParallel.h>
+#include <profile/AskapProfiler.h>
 
 // Local Package includes
 #include "distributedimager/ContinuumImager.h"
@@ -71,6 +72,18 @@ class ImagerApp : public askap::Application
                 // Create a subset
 
                 LOFAR::ParameterSet subset(config().makeSubset("Cimager."));
+
+                boost::scoped_ptr<askap::ProfileSingleton::Initialiser> profiler;
+                if (parameterExists("profile")) {
+                    std::string profileFileName("profile.imager");
+                    if (subset.isDefined("Images.Names")){
+                        profileFileName += "."+subset.getStringVector("Images.Names")[0];
+                    }
+                    if (comms_p.isParallel()) {
+                        profileFileName += ".rank"+utility::toString(comms_p.rank());
+                    }
+                    profiler.reset(new askap::ProfileSingleton::Initialiser(profileFileName));
+                }
 
 
                 ASKAPCHECK(comms_p.isParallel(), "This imager can only be run as a parallel MPI job");
@@ -115,6 +128,7 @@ class ImagerApp : public askap::Application
 int main(int argc, char *argv[])
 {
     ImagerApp app;
+    app.addParameter("profile", "p", "Write profiling output files", false);
     return app.main(argc, argv);
     MPI_Barrier(MPI_COMM_WORLD);
 }
