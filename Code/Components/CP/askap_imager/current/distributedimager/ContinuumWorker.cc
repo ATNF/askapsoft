@@ -427,25 +427,31 @@ void ContinuumWorker::processWorkUnit(ContinuumWorkUnit& wu)
 void ContinuumWorker::processSnapshot(LOFAR::ParameterSet& unitParset)
 {
 }
-void ContinuumWorker::processChannels()
+void ContinuumWorker::buildSpectralCube()
 {
-    ASKAPLOG_INFO_STR(logger, "Processing Channel Allocation");
 
-    LOFAR::ParameterSet& unitParset = itsParsets[0];
+    ASKAPLOG_DEBUG_STR(logger, "Processing multiple channels local solver mode");
+    /// This is the spectral cube builder
+    /// it marshalls the following tasks:
+    /// 1. building a spectral cube image
+    /// 2. local minor cycle solving of each channel
+    /// Note: at this stage it will generate a cube per
+    /// writer.
+    /// Therefore the cube will be distributed across the
+    /// supercomputer as a function of frequency and beams
+    ///
 
-    const bool localSolver = unitParset.getBool("solverpercore", false);
-
-    if (localSolver) {
-      ASKAPLOG_INFO_STR(logger, "Processing multiple channels local solver mode");
-    }
-    else {
-      ASKAPLOG_INFO_STR(logger, "Processing multiple channels in central solver mode");
-    }
-
-
-
+    /// The number of channels allocated to this rank
+    // const int nchanpercore = itsParsets[0].getInt32("nchanpercore", 1);
+    /// the base channel of this allocation. we know this as the channel allocations
+    /// are sorted
     const int nwriters = itsParset.getInt32("nwriters",1);
     ASKAPCHECK(nwriters>0,"Number of writers must be greater than 0");
+
+    // int nWorkers = itsComms.nProcs() -1;
+    // int nGroups = itsComms.nGroups();
+    // int nChanTotal = nWorkers * nchanpercore / nGroups;
+
 
     const bool updateDir = itsParset.getBool("updatedirection",false);
 
@@ -589,9 +595,7 @@ void ContinuumWorker::processChannels()
 
 
 
-    for (int workUnitCount = 0; workUnitCount < workUnits.size();) {
-      // NOTE:not all of these will have work
-      // NOTE:this loop does not increment here.
+    for (int workUnitCount = 0; workUnitCount < workUnits.size();) { // not all of these will have work
 
         try {
 
@@ -604,12 +608,9 @@ void ContinuumWorker::processChannels()
 
             int initialChannelWorkUnit = workUnitCount;
 
-            if (!updateDir) {
-              // NOTE: this is because if we are mosaicking ON THE FLY. We do
-              // not process the first workunit outside the imaging loop.
-
+            if (!updateDir)
               initialChannelWorkUnit = workUnitCount+1;
-            }
+
 
             double frequency=workUnits[workUnitCount].get_channelFrequency();
             const string colName = itsParsets[workUnitCount].getString("datacolumn", "DATA");
@@ -633,35 +634,21 @@ void ContinuumWorker::processChannels()
             const string ms = workUnits[workUnitCount].get_dataset();
             globalChannel = workUnits[workUnitCount].get_globalChannel();
 
+            ASKAPLOG_INFO_STR(logger, "MS: " << ms \
+                              << " pulling out local channel " << localChannel \
+                              << " which has a frequency " << frequency);
+
             TableDataSource ds(ms, TableDataSource::DEFAULT, colName);
 
 
             /// Need to set up the rootImager here
             if (updateDir == true) {
-               itsAdvisor->updateDirectionFromWorkUnit(itsParsets[workUnitCount],workUnits[workUnitCount]);
+              itsAdvisor->updateDirectionFromWorkUnit(itsParsets[workUnitCount],workUnits[workUnitCount]);
             }
-
             CalcCore rootImager(itsParsets[workUnitCount], itsComms, ds, localChannel);
             /// set up the image for this channel
             /// this will actually build a full image for the first - it is not actually used tho.
             ///
-
-            bool stopping = false;
-
-            if (!localSolver) {
-              // we need to wait for the first empty model.
-              ASKAPLOG_INFO_STR(logger, "Rank " << itsComms.rank() << " at barrier");
-              itsComms.barrier(itsComms.theWorkers());
-              ASKAPLOG_INFO_STR(logger, "Rank " << itsComms.rank() << " passed barrier");
-
-
-              ASKAPLOG_INFO_STR(logger, "Worker waiting to receive new model");
-              rootImager.receiveModel();
-              ASKAPLOG_INFO_STR(logger, "Worker received initial model for cycle 0");
-            }
-
-            // this assumes no subimage will be formed.
-
             setupImage(rootImager.params(), frequency,false);
             ImagingNormalEquations &rootINERef =
             dynamic_cast<ImagingNormalEquations&>(*rootImager.getNE());
@@ -676,8 +663,6 @@ void ContinuumWorker::processChannels()
                                      // But I need this for the solver ....
                                      // I should find a away to get the NE initialised w/o regridding
                                      // which would be much better.
-                                     // Why not just use a spheroidal for the PSF gridders / full FOV
-                                     // FIXME
                 if (updateDir == true) {
                   rootINERef.weightType(FROM_WEIGHT_IMAGES);
                   rootINERef.weightState(CORRECTED);
@@ -695,29 +680,16 @@ void ContinuumWorker::processChannels()
             /// the workUnit count to permit a re-read of the input data.
             /// LOOP:
 
-            /// For continuum we need to loop over epochs/beams and frequencies
-            /// For "localSolver" or continuum we process each freuqency in turn.
-
-            if (nCycles == 0) {
-              stopping = true;
-            }
-
             for (int majorCycleNumber = 0; majorCycleNumber <= nCycles; ++majorCycleNumber) {
-                // NOTE: within this loop the workUnit is incremented.
-                // perhaps something cleaner is needed.
 
-                int tempWorkUnitCount = initialChannelWorkUnit; // clearer if it were called nextWorkUnit - but this is essentially the workunit we are starting this loop on.
+                int tempWorkUnitCount = initialChannelWorkUnit; // clearer if it were called nextWorkUnit
                 // in the updateDir mode we reprocess the first workunit - for a smaller FOV.
                 // in the <normal mode> we have already processed the first work unit and it is
                 // in the rootImager.
 
 
                 // now we are going to actually image this work unit
-                // This loops over work units that are the same baseFrequency
-                // but probably not the same epoch or beam ....
-
-
-                while (tempWorkUnitCount < workUnits.size())   {
+                while (tempWorkUnitCount < workUnits.size() && frequency == workUnits[tempWorkUnitCount].get_channelFrequency()) {
 
                     /// need a working imager to allow a merge over epochs for this channel
                     /// assuming subsequency workunits are the same channel but either different
@@ -799,146 +771,93 @@ void ContinuumWorker::processChannels()
                         std::cerr << "Askap error in: " << e.what() << std::endl;
                     }
 
-                   if (frequency == workUnits[tempWorkUnitCount].get_channelFrequency()) {
                     tempWorkUnitCount++;
-                    // NOTE: here we increment the workunit count.
-                   }
-                   else {
-                     // the frequency has changed - which means for spectral line we break.
-                     // but for continuum we continue ...
-                     if (localSolver) {
-                       break;
-                     }
-                     else {
-                       // update the frequency
-                       frequency = workUnits[tempWorkUnitCount].get_channelFrequency();
-                     }
-                   }
-
                 }
 
                 workUnitCount = tempWorkUnitCount; // this is to remember what finished on.
-                /// now if we are in spectral line mode we have a "full" set of NE we can SolveNE to update the model
-
-                if (localSolver && nCycles > 0) { // only solve if nCycles > 0
-                  try {
+                /// now we have a "full" set of NE we can SolveNE to update the model
+                try {
                     rootImager.solveNE();
-
-                  } catch (const askap::AskapError& e) {
+                } catch (const askap::AskapError& e) {
                     ASKAPLOG_WARN_STR(logger, "Askap error in solver");
 
                     throw;
-                  }
-                }
-                else if (localSolver && nCycles == 0) {
-                  break; // work is done
                 }
 
-                else { // probably continuum mode ....
-                // If we are in continuum mode we have probaby ran through the whole allocation
-                // lets send it to the master for processing.
-                  rootImager.sendNE();
-                // now we have to wait for the model (solution) to come back.
-                // we need to wait for the first empty model.
-                  ASKAPLOG_INFO_STR(logger, "Rank " << itsComms.rank() << " at barrier");
-                  itsComms.barrier(itsComms.theWorkers());
-                  ASKAPLOG_INFO_STR(logger, "Rank " << itsComms.rank() << " passed barrier");
-                  if (!stopping) { // if set then the master will not be sending a model
-                    ASKAPLOG_INFO_STR(logger, "Worker waiting to receive new model");
-                    rootImager.receiveModel();
-                    ASKAPLOG_INFO_STR(logger, "Worker received initial model for cycle 0");
-                  }
-                  else { // all done
-                    break;
-                  }
-                // check the model - have we reached a stopping threshold.
-                }
                 if (rootImager.params()->has("peak_residual")) {
-                  const double peak_residual = rootImager.params()->scalarValue("peak_residual");
-                  ASKAPLOG_INFO_STR(logger, "Reached peak residual of " << peak_residual);
-                  if (peak_residual < targetPeakResidual) {
-                    ASKAPLOG_INFO_STR(logger, "It is below the major cycle threshold of "
+                    const double peak_residual = rootImager.params()->scalarValue("peak_residual");
+                    ASKAPLOG_INFO_STR(logger, "Reached peak residual of " << peak_residual);
+                    if (peak_residual < targetPeakResidual) {
+                        ASKAPLOG_INFO_STR(logger, "It is below the major cycle threshold of "
                                           << targetPeakResidual << " Jy. Stopping.");
-                    stopping = true;
-                  }
-                  else {
-                    if (targetPeakResidual < 0) {
-                      ASKAPLOG_INFO_STR(logger, "Major cycle flux threshold is not used.");
+                        break;
+                    } else {
+                        if (targetPeakResidual < 0) {
+                            ASKAPLOG_INFO_STR(logger, "Major cycle flux threshold is not used.");
+                        } else {
+                            ASKAPLOG_INFO_STR(logger, "It is above the major cycle threshold of "
+                                              << targetPeakResidual << " Jy. Continuing.");
+                        }
+                    }
+
+                }
+                if (majorCycleNumber + 1 > nCycles) {
+                    // This stops me zeroing the NE before the restore solver runs. So we
+                    ASKAPLOG_INFO_STR(logger, "Reached maximum majorcycle count");
+
+                } else {
+
+                    /// But we dont want to keep merging into the same NE
+                    /// so lets reset
+                    ASKAPLOG_DEBUG_STR(logger, "Reset normal equations");
+                    if (updateDir) {
+                      // this implies all workunits are processed independently including the first one - so I can completely
+                      // empty the NE
+
+                      // Actually I've found that I cannot completely empty the NE. As I need the full size PSF and this is stored in the NE
+                      // So this method pretty much only zeros the weights and the datavector(image)
+
+                      rootImager.zero();
                     }
                     else {
-                      ASKAPLOG_INFO_STR(logger, "It is above the major cycle threshold of "
-                                              << targetPeakResidual << " Jy. Continuing.");
-                      }
-                  }
-
-                }
-                if (majorCycleNumber == nCycles - 1) {
-                  // This stops me zeroing the NE before the restore solver runs. So we
-                  ASKAPLOG_INFO_STR(logger, "Reached maximum majorcycle count");
-                  stopping = true;
-
-                }
-
-                else {
-
-                  /// But we dont want to keep merging into the same NE
-                  /// so lets reset
-                  ASKAPLOG_DEBUG_STR(logger, "Reset normal equations");
-                  if (updateDir) {
-                    // this implies all workunits are processed independently including the first one - so I can completely
-                    // empty the NE
-
-                    // Actually I've found that I cannot completely empty the NE. As I need the full size PSF and this is stored in the NE
-                    // So this method pretty much only zeros the weights and the datavector(image)
-
-                    rootImager.zero();
-                  }
-                  else {
                       // In this case the first workUnit is processed outside the workUnit loop.
                       // So we need to calcNE again with the latest model before the major cycle starts.
                       //
-                    rootImager.getNE()->reset();
-                    try {
-                      rootImager.calcNE();
+                      rootImager.getNE()->reset();
+                      try {
+                        rootImager.calcNE();
 
-                    }
-                    catch (const askap::AskapError& e) {
-                      ASKAPLOG_WARN_STR(logger, "Askap error in calcNE after majorcycle number ");
+                      }
+                      catch (const askap::AskapError& e) {
+                          ASKAPLOG_WARN_STR(logger, "Askap error in calcNE after majorcycle number ");
 
+                      }
                     }
-                  }
                     // the model is now updated but the NE are empty ... - lets go again
                     // well they are not completely empty - the PSF is still there but the weights and image are zero
 
+
+
+                }
+                if (writeAtMajorCycle) {
+                    ASKAPLOG_WARN_STR(logger, "Write at major cycle not currently supported in this mode");
                 }
 
-
-
-
             }
-            ASKAPLOG_INFO_STR(logger," Finished the major cycles");
-
-            if (!localSolver) { // all my work is done - only continue if in local mode
-              return;
-            }
-
-
             // At this point we have finished our last major cycle. We have the "best" model from the
             // last minor cycle. Which should be in the archive - or full coordinate system
             // the residual image should be merged into the archive coordinated as well.
+            ASKAPLOG_INFO_STR(logger,"Adding model.slice");
+            ASKAPCHECK(rootImager.params()->has("image.slice"), "Params are missing image.slice parameter");
+            rootImager.params()->add("model.slice", rootImager.params()->value("image.slice"));
+            ASKAPCHECK(rootImager.params()->has("model.slice"), "Params are missing model.slice parameter");
 
-              ASKAPLOG_INFO_STR(logger,"Adding model.slice");
-              ASKAPCHECK(rootImager.params()->has("image.slice"), "Params are missing image.slice parameter");
-              rootImager.params()->add("model.slice", rootImager.params()->value("image.slice"));
-              ASKAPCHECK(rootImager.params()->has("model.slice"), "Params are missing model.slice parameter");
+            rootImager.check();
 
-              rootImager.check();
 
-            if (nCycles > 0) {
-              if (itsParsets[0].getBool("restore", false)) {
+            if (itsParsets[0].getBool("restore", false)) {
                 ASKAPLOG_INFO_STR(logger, "Running restore");
                 rootImager.restoreImage();
-              }
             }
 
             if (usetmpfs) {
@@ -1273,262 +1192,216 @@ void ContinuumWorker::logBeamInfo()
 
 }
 
-// void ContinuumWorker::processChannels()
-// {
-//
-//
-//     ASKAPLOG_INFO_STR(logger, "Processing Channel Allocation");
-//
-//     LOFAR::ParameterSet& unitParset = itsParsets[0];
-//
-//     const bool localSolver = unitParset.getBool("solverpercore", false);
-//
-//     if (localSolver) {
-//         this->buildSpectralCube();
-//         return;
-//     } else {
-//       if (workUnits.size() == 0) {
-//         return;
-//       }
-//     }
-//
-//
-//     const bool updateDir = itsParset.getBool("updatedirection",false);
-//
-//     int localChannel;
-//     int globalChannel;
-//
-//     const string colName = unitParset.getString("datacolumn", "DATA");
-//     const string ms = workUnits[0].get_dataset();
-//     // const bool writeAtMajorCycle = unitParset.getBool("Images.writeAtMajorCycle",false);
-//
-//     std::string majorcycle = unitParset.getString("threshold.majorcycle", "-1Jy");
-//     const double targetPeakResidual = SynthesisParamsHelper::convertQuantity(majorcycle, "Jy");
-//
-//     const int nCycles = unitParset.getInt32("ncycles", 0);
-//
-//     const int uvwMachineCacheSize = unitParset.getInt32("nUVWMachines", 1);
-//     ASKAPCHECK(uvwMachineCacheSize > 0 ,
-//                "Cache size is supposed to be a positive number, you have "
-//                << uvwMachineCacheSize);
-//
-//     const double uvwMachineCacheTolerance = SynthesisParamsHelper::convertQuantity(unitParset.getString("uvwMachineDirTolerance", "1e-6rad"), "rad");
-//
-//     ASKAPLOG_DEBUG_STR(logger,
-//                        "UVWMachine cache will store " << uvwMachineCacheSize << " machines");
-//     ASKAPLOG_DEBUG_STR(logger, "Tolerance on the directions is "
-//                        << uvwMachineCacheTolerance / casa::C::pi * 180. * 3600. << " arcsec");
-//
-//
-//     ASKAPLOG_INFO_STR(logger, "Processing multiple channels central solver mode");
-//     TableDataSource ds0(ms, TableDataSource::DEFAULT, colName);
-//
-//     ds0.configureUVWMachineCache(uvwMachineCacheSize, uvwMachineCacheTolerance);
-//
-//
-//
-//     bool usetmpfs = unitParset.getBool("usetmpfs", false);
-//     if (usetmpfs) {
-//
-//         localChannel = 0;
-//
-//     } else {
-//         localChannel = workUnits[0].get_localChannel();
-//     }
-//     globalChannel = workUnits[0].get_globalChannel();
-//
-//
-//     ASKAPLOG_INFO_STR(logger, "Building imager for channel " << localChannel);
-//     CalcCore rootImager(itsParsets[0], itsComms, ds0, localChannel);
-//
-//     /// set up the image for this channel
-//     /// this will actually build a full image for the first - it is not actually used tho.
-//     ///
-//
-//     double frequency = workUnits[0].get_channelFrequency();
-//     setupImage(rootImager.params(), frequency,false);
-//     ImagingNormalEquations &rootINERef =
-//     dynamic_cast<ImagingNormalEquations&>(*rootImager.getNE());
-//
-//     bool useSubSizedImages = false;
-//
-//
-//     if (nCycles == 0) {
-//
-//         ASKAPLOG_INFO_STR(logger, "Rank " << itsComms.rank() << " at barrier");
-//         itsComms.barrier(itsComms.theWorkers());
-//         ASKAPLOG_INFO_STR(logger, "Rank " << itsComms.rank() << " passed barrier");
-//
-//         rootImager.receiveModel();
-//         rootImager.calcNE();
-//
-//         if (updateDir == true) {
-//           rootINERef.weightType(FROM_WEIGHT_IMAGES);
-//           rootINERef.weightState(CORRECTED);
-//           rootImager.zero(); // then we delete all our work ....
-//         }
-//
-//
-//         for (size_t i = 1; i < workUnits.size(); ++i) {
-//
-//             const string myMs = workUnits[i].get_dataset();
-//             double frequency = workUnits[i].get_channelFrequency();
-//
-//             TableDataSource ds(myMs, TableDataSource::DEFAULT, colName);
-//
-//             ds.configureUVWMachineCache(uvwMachineCacheSize, uvwMachineCacheTolerance);
-//
-//             if (usetmpfs) {
-//                 // explicitly not caching as it makes no sense to do it.
-//                 localChannel = 0;
-//             } else {
-//                 localChannel = workUnits[i].get_localChannel();
-//             }
-//             if (updateDir) {
-//               itsAdvisor->updateDirectionFromWorkUnit(itsParsets[i],workUnits[i]);
-//
-//               ///FIXME:
-//               // in updateDir mode I cannot cache the gridders as they have a tangent point.
-//               // So I have turned of caching for all modes. THis is performance hit on everyone for
-//               // a corner case .... FIX This!
-//
-//             // CalcCore  workingImager(itsParsets[tempWorkUnitCount],itsComms,myDs,rootImager.gridder(),localChannel);
-//             }
-//
-//             CalcCore workingImager(itsParsets[i], itsComms, ds, localChannel);
-//
-//             if (updateDir) {
-//
-//               useSubSizedImages = true;
-//
-//               setupImage(workingImager.params(), frequency, useSubSizedImages);
-//
-//             }
-//             else {
-//               workingImager.replaceModel(rootImager.params());
-//             }
-//
-//             workingImager.calcNE();
-//
-//             // merge into root image if required.
-//             // this is required if there is more than one workunit per channel
-//             // either in time or by beam.
-//
-//             ASKAPLOG_INFO_STR(logger,"About to merge into rootImager");
-//             ImagingNormalEquations &workingINERef =
-//             dynamic_cast<ImagingNormalEquations&>(*workingImager.getNE());
-//
-//
-//             if (updateDir) {
-//               workingINERef.weightType(FROM_WEIGHT_IMAGES);
-//               workingINERef.weightState(CORRECTED);
-//             }
-//
-//             rootImager.getNE()->merge(*workingImager.getNE());
-//             ASKAPLOG_INFO_STR(logger,"Merged");
-//
-//         }
-//
-//         ASKAPLOG_DEBUG_STR(logger, "Sending NE to master for single cycle ");
-//
-//         rootImager.sendNE();
-//         rootImager.getNE()->reset();
-//
-//         ASKAPLOG_DEBUG_STR(logger, "Sent");
-//
-//
-//
-//
-//     } else { // more than 0 cycles
-//
-//         bool stopping = false;
-//
-//         for (size_t n = 0; n <= nCycles; n++) {
-//
-//             if (stopping == true) {
-//                 ASKAPLOG_INFO_STR(logger, "Worker breaking out of major-cycle loop");
-//                 break;
-//             }
-//
-//             ASKAPLOG_INFO_STR(logger, "Rank " << itsComms.rank() << " at barrier");
-//             itsComms.barrier(itsComms.theWorkers());
-//             ASKAPLOG_INFO_STR(logger, "Rank " << itsComms.rank() << " passed barrier");
-//
-//
-//             ASKAPLOG_INFO_STR(logger, "Worker waiting to receive new model");
-//             rootImager.receiveModel();
-//             ASKAPLOG_INFO_STR(logger, "Worker received model for cycle  " << n);
-//
-//             if (rootImager.params()->has("peak_residual")) {
-//                 const double peak_residual = rootImager.params()->scalarValue("peak_residual");
-//                 ASKAPLOG_DEBUG_STR(logger, "Reached peak residual of " << peak_residual);
-//                 if (peak_residual < targetPeakResidual) {
-//                     ASKAPLOG_DEBUG_STR(logger, "It is below the major cycle threshold of "
-//                                        << targetPeakResidual << " Jy. Stopping.");
-//                     stopping = true;
-//                 } else {
-//                     if (targetPeakResidual < 0) {
-//                         ASKAPLOG_DEBUG_STR(logger, "Major cycle flux threshold is not used.");
-//                     } else {
-//                         ASKAPLOG_DEBUG_STR(logger, "It is above the major cycle threshold of "
-//                                            << targetPeakResidual << " Jy. Continuing.");
-//                     }
-//                 }
-//             }
-//
-//             ASKAPLOG_DEBUG_STR(logger, "Worker calculating NE");
-//             rootImager.calcNE();
-//
-//             std::vector<std::string> names = rootImager.getNE()->unknowns();
-//
-//             ASKAPLOG_DEBUG_STR(logger, "Unknowns are " << names);
-//
-//             rootImager.check();
-//
-//             for (size_t i = 1; i < workUnits.size(); ++i) {
-//
-//                 const string myMs = workUnits[i].get_dataset();
-//
-//                 TableDataSource ds(myMs, TableDataSource::DEFAULT, colName);
-//
-//                 ds.configureUVWMachineCache(uvwMachineCacheSize, uvwMachineCacheTolerance);
-//
-//                 if (usetmpfs) {
-//                     localChannel = 0;
-//                 } else {
-//                     localChannel = workUnits[i].get_localChannel();
-//                 }
-//
-//
-//                 CalcCore workingImager(itsParsets[i], itsComms, ds, localChannel);
-//
-//                 workingImager.replaceModel(rootImager.params());
-//                 ASKAPLOG_DEBUG_STR(logger, "workingImager Model" << workingImager.params());
-//                 ASKAPLOG_DEBUG_STR(logger, "rootImager Model" << rootImager.params());
-//                 workingImager.calcNE();
-//
-//                 if (i > 0) {
-//                     ASKAPLOG_DEBUG_STR(logger, "Merging " << i << " of " << workUnits.size() - 1 << " into NE");
-//                     rootImager.getNE()->merge(*workingImager.getNE());
-//
-//                     ASKAPLOG_DEBUG_STR(logger, "Merged");
-//                 }
-//
-//
-//             }
-//
-//             ASKAPLOG_DEBUG_STR(logger, "Worker sending NE to master for cycle " << n);
-//             rootImager.sendNE();
-//
-//         }
-//
-//
-//     }
-//     if (usetmpfs) {
-//         clearWorkUnitCache();
-//     }
-//
-// }
+void ContinuumWorker::processChannels()
+{
+
+
+    ASKAPLOG_INFO_STR(logger, "Processing Channel Allocation");
+
+
+
+
+    LOFAR::ParameterSet& unitParset = itsParsets[0];
+
+    const bool localSolver = unitParset.getBool("solverpercore", false);
+
+    if (localSolver) {
+        this->buildSpectralCube();
+        return;
+    } else {
+      if (workUnits.size() == 0) {
+        return;
+      }
+    }
+
+    int localChannel;
+    int globalChannel;
+
+    const string colName = unitParset.getString("datacolumn", "DATA");
+    const string ms = workUnits[0].get_dataset();
+    // const bool writeAtMajorCycle = unitParset.getBool("Images.writeAtMajorCycle",false);
+
+    std::string majorcycle = unitParset.getString("threshold.majorcycle", "-1Jy");
+    const double targetPeakResidual = SynthesisParamsHelper::convertQuantity(majorcycle, "Jy");
+
+    const int nCycles = unitParset.getInt32("ncycles", 0);
+
+    const int uvwMachineCacheSize = unitParset.getInt32("nUVWMachines", 1);
+    ASKAPCHECK(uvwMachineCacheSize > 0 ,
+               "Cache size is supposed to be a positive number, you have "
+               << uvwMachineCacheSize);
+
+    const double uvwMachineCacheTolerance = SynthesisParamsHelper::convertQuantity(unitParset.getString("uvwMachineDirTolerance", "1e-6rad"), "rad");
+
+    ASKAPLOG_DEBUG_STR(logger,
+                       "UVWMachine cache will store " << uvwMachineCacheSize << " machines");
+    ASKAPLOG_DEBUG_STR(logger, "Tolerance on the directions is "
+                       << uvwMachineCacheTolerance / casa::C::pi * 180. * 3600. << " arcsec");
+
+
+    ASKAPLOG_INFO_STR(logger, "Processing multiple channels central solver mode");
+    TableDataSource ds0(ms, TableDataSource::DEFAULT, colName);
+
+    ds0.configureUVWMachineCache(uvwMachineCacheSize, uvwMachineCacheTolerance);
+
+
+
+    bool usetmpfs = unitParset.getBool("usetmpfs", false);
+    if (usetmpfs) {
+
+        localChannel = 0;
+
+    } else {
+        localChannel = workUnits[0].get_localChannel();
+    }
+    globalChannel = workUnits[0].get_globalChannel();
+
+
+    ASKAPLOG_INFO_STR(logger, "Building imager for channel " << localChannel);
+    CalcCore rootImager(itsParsets[0], itsComms, ds0, localChannel);
+
+
+    if (nCycles == 0) {
+
+        ASKAPLOG_INFO_STR(logger, "Rank " << itsComms.rank() << " at barrier");
+        itsComms.barrier(itsComms.theWorkers());
+        ASKAPLOG_INFO_STR(logger, "Rank " << itsComms.rank() << " passed barrier");
+
+        rootImager.receiveModel();
+        rootImager.calcNE();
+
+        for (size_t i = 1; i < workUnits.size(); ++i) {
+
+            const string myMs = workUnits[i].get_dataset();
+
+            TableDataSource ds(myMs, TableDataSource::DEFAULT, colName);
+
+            ds.configureUVWMachineCache(uvwMachineCacheSize, uvwMachineCacheTolerance);
+
+            if (usetmpfs) {
+                localChannel = 0;
+            } else {
+                localChannel = workUnits[i].get_localChannel();
+            }
+
+
+            CalcCore workingImager(itsParsets[i], itsComms, ds, localChannel);
+
+            workingImager.replaceModel(rootImager.params());
+
+
+            workingImager.calcNE();
+
+            if (i > 0) {
+                ASKAPLOG_DEBUG_STR(logger, "Merging " << i << " of " << workUnits.size() - 1 << " into NE");
+                rootImager.getNE()->merge(*workingImager.getNE());
+
+                ASKAPLOG_DEBUG_STR(logger, "Merged");
+            }
+
+
+        }
+
+        ASKAPLOG_DEBUG_STR(logger, "Sending NE to master for single cycle ");
+
+        rootImager.sendNE();
+        rootImager.getNE()->reset();
+
+        ASKAPLOG_DEBUG_STR(logger, "Sent");
+
+
+
+
+    } else {
+
+        bool stopping = false;
+
+        for (size_t n = 0; n <= nCycles; n++) {
+
+            if (stopping == true) {
+                ASKAPLOG_INFO_STR(logger, "Worker breaking out of major-cycle loop");
+                break;
+            }
+
+            ASKAPLOG_INFO_STR(logger, "Rank " << itsComms.rank() << " at barrier");
+            itsComms.barrier(itsComms.theWorkers());
+            ASKAPLOG_INFO_STR(logger, "Rank " << itsComms.rank() << " passed barrier");
+
+
+            ASKAPLOG_INFO_STR(logger, "Worker waiting to receive new model");
+            rootImager.receiveModel();
+            ASKAPLOG_INFO_STR(logger, "Worker received model for cycle  " << n);
+
+            if (rootImager.params()->has("peak_residual")) {
+                const double peak_residual = rootImager.params()->scalarValue("peak_residual");
+                ASKAPLOG_DEBUG_STR(logger, "Reached peak residual of " << peak_residual);
+                if (peak_residual < targetPeakResidual) {
+                    ASKAPLOG_DEBUG_STR(logger, "It is below the major cycle threshold of "
+                                       << targetPeakResidual << " Jy. Stopping.");
+                    stopping = true;
+                } else {
+                    if (targetPeakResidual < 0) {
+                        ASKAPLOG_DEBUG_STR(logger, "Major cycle flux threshold is not used.");
+                    } else {
+                        ASKAPLOG_DEBUG_STR(logger, "It is above the major cycle threshold of "
+                                           << targetPeakResidual << " Jy. Continuing.");
+                    }
+                }
+            }
+
+            ASKAPLOG_DEBUG_STR(logger, "Worker calculating NE");
+            rootImager.calcNE();
+
+            std::vector<std::string> names = rootImager.getNE()->unknowns();
+
+            ASKAPLOG_DEBUG_STR(logger, "Unknowns are " << names);
+
+            rootImager.check();
+
+            for (size_t i = 1; i < workUnits.size(); ++i) {
+
+                const string myMs = workUnits[i].get_dataset();
+
+                TableDataSource ds(myMs, TableDataSource::DEFAULT, colName);
+
+                ds.configureUVWMachineCache(uvwMachineCacheSize, uvwMachineCacheTolerance);
+
+                if (usetmpfs) {
+                    localChannel = 0;
+                } else {
+                    localChannel = workUnits[i].get_localChannel();
+                }
+
+
+                CalcCore workingImager(itsParsets[i], itsComms, ds, localChannel);
+
+                workingImager.replaceModel(rootImager.params());
+                ASKAPLOG_DEBUG_STR(logger, "workingImager Model" << workingImager.params());
+                ASKAPLOG_DEBUG_STR(logger, "rootImager Model" << rootImager.params());
+                workingImager.calcNE();
+
+                if (i > 0) {
+                    ASKAPLOG_DEBUG_STR(logger, "Merging " << i << " of " << workUnits.size() - 1 << " into NE");
+                    rootImager.getNE()->merge(*workingImager.getNE());
+
+                    ASKAPLOG_DEBUG_STR(logger, "Merged");
+                }
+
+
+            }
+
+            ASKAPLOG_DEBUG_STR(logger, "Worker sending NE to master for cycle " << n);
+            rootImager.sendNE();
+
+        }
+
+
+    }
+    if (usetmpfs) {
+        clearWorkUnitCache();
+    }
+
+}
 
 
 void ContinuumWorker::setupImage(const askap::scimath::Params::ShPtr& params,
