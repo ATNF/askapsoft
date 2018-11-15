@@ -733,7 +733,7 @@ void AdviseDI::addMissingParameters(LOFAR::ParameterSet& parset)
        if (!parset.isDefined(param)) {
            std::ostringstream pstr;
            pstr<<"MFS";
-           ASKAPLOG_DEBUG_STR(logger, "  Advising on parameter " << param <<": " << pstr.str().c_str());
+           ASKAPLOG_INFO_STR(logger, "  Advising on parameter " << param <<" (obtained by default - we know no other weighting) : " << pstr.str().c_str());
            parset.add(param, pstr.str().c_str());
        }
 
@@ -744,7 +744,7 @@ void AdviseDI::addMissingParameters(LOFAR::ParameterSet& parset)
                const double aveFreq = 0.5*(minFrequency+maxFrequency);
                sprintf(tmp,"%f",aveFreq);
                string val = string(tmp);
-               ASKAPLOG_DEBUG_STR(logger, "  Advising on parameter " << param <<": " << val);
+               ASKAPLOG_INFO_STR(logger, "  Advising on parameter " << param <<" (using average frequency):  " << val);
                parset.add(param,val);
            }
 

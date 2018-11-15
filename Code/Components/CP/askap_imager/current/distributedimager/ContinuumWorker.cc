@@ -590,117 +590,119 @@ void ContinuumWorker::processChannels()
 
 
     for (int workUnitCount = 0; workUnitCount < workUnits.size();) {
+
       // NOTE:not all of these will have work
       // NOTE:this loop does not increment here.
 
+      try {
+
+        if (workUnitCount >= workUnits.size()) {
+          ASKAPLOG_INFO_STR(logger, "Out of work with workUnit " << workUnitCount);
+          break;
+        }
+
+        ASKAPLOG_INFO_STR(logger, "Starting to process workunit " << workUnitCount << " of " << workUnits.size());
+
+        int initialChannelWorkUnit = workUnitCount;
+
+        if (!updateDir) {
+          // NOTE: this is because if we are mosaicking ON THE FLY. We do
+          // not process the first workunit outside the imaging loop.
+
+          initialChannelWorkUnit = workUnitCount+1;
+        }
+
+        double frequency=workUnits[workUnitCount].get_channelFrequency();
+        const string colName = itsParsets[workUnitCount].getString("datacolumn", "DATA");
+
+
+        int localChannel;
+        int globalChannel;
+
+        bool usetmpfs = itsParsets[workUnitCount].getBool("usetmpfs", false);
+        if (usetmpfs) {
+          // probably in spectral line mode
+          // copy the caching here ...
+          cacheWorkUnit(workUnits[workUnitCount], itsParsets[workUnitCount]);
+
+          localChannel = 0;
+
+        } else {
+          localChannel = workUnits[workUnitCount].get_localChannel();
+        }
+
+        const string ms = workUnits[workUnitCount].get_dataset();
+        globalChannel = workUnits[workUnitCount].get_globalChannel();
+
+        TableDataSource ds(ms, TableDataSource::DEFAULT, colName);
+
+
+        /// Need to set up the rootImager here
+        if (updateDir == true) {
+          itsAdvisor->updateDirectionFromWorkUnit(itsParsets[workUnitCount],workUnits[workUnitCount]);
+        }
+
+        CalcCore rootImager(itsParsets[workUnitCount], itsComms, ds, localChannel);
+        /// set up the image for this channel
+        /// this will actually build a full image for the first - it is not actually used tho.
+        ///
+
+
+        bool stopping = false;
+
+        if (!localSolver) {
+          // we need to wait for the first empty model.
+          ASKAPLOG_INFO_STR(logger, "Rank " << itsComms.rank() << " at barrier");
+          itsComms.barrier(itsComms.theWorkers());
+          ASKAPLOG_INFO_STR(logger, "Rank " << itsComms.rank() << " passed barrier");
+
+
+          ASKAPLOG_INFO_STR(logger, "Worker waiting to receive new model");
+          rootImager.receiveModel();
+          ASKAPLOG_INFO_STR(logger, "Worker received initial model for cycle 0");
+        }
+
+        // this assumes no subimage will be formed.
+
+        setupImage(rootImager.params(), frequency,false);
+        ImagingNormalEquations &rootINERef =
+        dynamic_cast<ImagingNormalEquations&>(*rootImager.getNE());
+
+
         try {
 
-            if (workUnitCount >= workUnits.size()) {
-                ASKAPLOG_INFO_STR(logger, "Out of work with workUnit " << workUnitCount);
-                break;
-            }
+          rootImager.calcNE(); // why do this -
+          // this essentially forces me to
+          // image the full FOV for a single beam
+          // but all I want is somthing to linmos into.
+          // But I need this for the solver ....
+          // I should find a away to get the NE initialised w/o regridding
+          // which would be much better.
+          // Why not just use a spheroidal for the PSF gridders / full FOV
+          // FIXME
+          if (updateDir == true) {
+            rootINERef.weightType(FROM_WEIGHT_IMAGES);
+            rootINERef.weightState(CORRECTED);
+            rootImager.zero(); // then we delete all our work ....
+          }
 
-            ASKAPLOG_INFO_STR(logger, "Starting to process workunit " << workUnitCount << " of " << workUnits.size());
+        }
+        catch (const askap::AskapError& e) {
+          ASKAPLOG_WARN_STR(logger,"Askap error in worker calcNE - rootImager failed");
+          throw;
+        }
 
-            int initialChannelWorkUnit = workUnitCount;
+        /// need to put in the major and minor cycle loops
+        /// If we are doing more than one major cycle I need to reset
+        /// the workUnit count to permit a re-read of the input data.
+        /// LOOP:
 
-            if (!updateDir) {
-              // NOTE: this is because if we are mosaicking ON THE FLY. We do
-              // not process the first workunit outside the imaging loop.
+        /// For continuum we need to loop over epochs/beams and frequencies
+        /// For "localSolver" or continuum we process each freuqency in turn.
 
-              initialChannelWorkUnit = workUnitCount+1;
-            }
-
-            double frequency=workUnits[workUnitCount].get_channelFrequency();
-            const string colName = itsParsets[workUnitCount].getString("datacolumn", "DATA");
-
-
-            int localChannel;
-            int globalChannel;
-
-            bool usetmpfs = itsParsets[workUnitCount].getBool("usetmpfs", false);
-            if (usetmpfs) {
-                // probably in spectral line mode
-                // copy the caching here ...
-                cacheWorkUnit(workUnits[workUnitCount], itsParsets[workUnitCount]);
-
-                localChannel = 0;
-
-            } else {
-                localChannel = workUnits[workUnitCount].get_localChannel();
-            }
-
-            const string ms = workUnits[workUnitCount].get_dataset();
-            globalChannel = workUnits[workUnitCount].get_globalChannel();
-
-            TableDataSource ds(ms, TableDataSource::DEFAULT, colName);
-
-
-            /// Need to set up the rootImager here
-            if (updateDir == true) {
-               itsAdvisor->updateDirectionFromWorkUnit(itsParsets[workUnitCount],workUnits[workUnitCount]);
-            }
-
-            CalcCore rootImager(itsParsets[workUnitCount], itsComms, ds, localChannel);
-            /// set up the image for this channel
-            /// this will actually build a full image for the first - it is not actually used tho.
-            ///
-
-            bool stopping = false;
-
-            if (!localSolver) {
-              // we need to wait for the first empty model.
-              ASKAPLOG_INFO_STR(logger, "Rank " << itsComms.rank() << " at barrier");
-              itsComms.barrier(itsComms.theWorkers());
-              ASKAPLOG_INFO_STR(logger, "Rank " << itsComms.rank() << " passed barrier");
-
-
-              ASKAPLOG_INFO_STR(logger, "Worker waiting to receive new model");
-              rootImager.receiveModel();
-              ASKAPLOG_INFO_STR(logger, "Worker received initial model for cycle 0");
-            }
-
-            // this assumes no subimage will be formed.
-
-            setupImage(rootImager.params(), frequency,false);
-            ImagingNormalEquations &rootINERef =
-            dynamic_cast<ImagingNormalEquations&>(*rootImager.getNE());
-
-
-            try {
-
-                rootImager.calcNE(); // why do this -
-                                     // this essentially forces me to
-                                     // image the full FOV for a single beam
-                                     // but all I want is somthing to linmos into.
-                                     // But I need this for the solver ....
-                                     // I should find a away to get the NE initialised w/o regridding
-                                     // which would be much better.
-                                     // Why not just use a spheroidal for the PSF gridders / full FOV
-                                     // FIXME
-                if (updateDir == true) {
-                  rootINERef.weightType(FROM_WEIGHT_IMAGES);
-                  rootINERef.weightState(CORRECTED);
-                  rootImager.zero(); // then we delete all our work ....
-                }
-
-            }
-            catch (const askap::AskapError& e) {
-                ASKAPLOG_WARN_STR(logger,"Askap error in worker calcNE - rootImager failed");
-                throw;
-            }
-
-            /// need to put in the major and minor cycle loops
-            /// If we are doing more than one major cycle I need to reset
-            /// the workUnit count to permit a re-read of the input data.
-            /// LOOP:
-
-            /// For continuum we need to loop over epochs/beams and frequencies
-            /// For "localSolver" or continuum we process each freuqency in turn.
-
-            if (nCycles == 0) {
-              stopping = true;
-            }
+        if (nCycles == 0) {
+          stopping = true;
+        }
 
             for (int majorCycleNumber = 0; majorCycleNumber <= nCycles; ++majorCycleNumber) {
                 // NOTE: within this loop the workUnit is incremented.
@@ -710,8 +712,8 @@ void ContinuumWorker::processChannels()
                 // in the updateDir mode we reprocess the first workunit - for a smaller FOV.
                 // in the <normal mode> we have already processed the first work unit and it is
                 // in the rootImager.
-                if (!updateDir) {
-                  tempWorkUnitCount = initialChannelWorkUnit+1;
+                if (updateDir) {
+                  tempWorkUnitCount = initialChannelWorkUnit - 1;
                 }
 
                 // now we are going to actually image this work unit
@@ -741,17 +743,26 @@ void ContinuumWorker::processChannels()
                     myDs.configureUVWMachineCache(uvwMachineCacheSize, uvwMachineCacheTolerance);
                     try {
 
+                        std::shared_ptr<CalcCore> workingImagerPtr;
+
                         if (updateDir) {
                           itsAdvisor->updateDirectionFromWorkUnit(itsParsets[tempWorkUnitCount],workUnits[tempWorkUnitCount]);
                           ///FIXME:
                           // in updateDir mode I cannot cache the gridders as they have a tangent point.
                           // So I have turned of caching for all modes. THis is performance hit on everyone for
                           // a corner case .... FIX This!
+                          // FIXED: by just having 2 possible working imagers depending on the mode. ... easy really
 
-                        // CalcCore  workingImager(itsParsets[tempWorkUnitCount],itsComms,myDs,rootImager.gridder(),localChannel);
+                          std::shared_ptr<CalcCore> tempIm(new CalcCore(itsParsets[tempWorkUnitCount],itsComms,myDs,localChannel));
+                          workingImagerPtr = tempIm;
+                        }
+                        else {
+                          std::shared_ptr<CalcCore> tempIm(new CalcCore(itsParsets[tempWorkUnitCount],itsComms,myDs,rootImager.gridder(),localChannel));
+                          workingImagerPtr = tempIm;
                         }
 
-                        CalcCore  workingImager(itsParsets[tempWorkUnitCount],itsComms,myDs,localChannel);
+                        CalcCore& workingImager = *workingImagerPtr; // just for the semantics
+
                         ///this loop does the calcNE and the merge of the residual images
 
 
@@ -795,6 +806,8 @@ void ContinuumWorker::processChannels()
 
                         rootImager.getNE()->merge(*workingImager.getNE());
                         ASKAPLOG_INFO_STR(logger,"Merged");
+
+
                     }
                     catch( const askap::AskapError& e) {
                         ASKAPLOG_WARN_STR(logger, "Askap error in imaging - skipping accumulation: carrying on - this will result in a blank channel" << e.what());
@@ -804,6 +817,8 @@ void ContinuumWorker::processChannels()
                    if (frequency == workUnits[tempWorkUnitCount].get_channelFrequency()) {
                     tempWorkUnitCount++;
                     // NOTE: here we increment the workunit count.
+                    // but the frequency in the same so this is just combining epochs or beams.
+                    // the accumulator does <not> have to be clean.
                    }
                    else {
                      // the frequency has changed - which means for spectral line we break.
@@ -817,8 +832,9 @@ void ContinuumWorker::processChannels()
                        // we are now in the next channel
                        // NOTE: we also need to increment the tempWorkUnitCount.
                        tempWorkUnitCount++;
+
                      }
-                   }
+                  }
 
                 }
 
@@ -838,7 +854,6 @@ void ContinuumWorker::processChannels()
                 else if (localSolver && nCycles == 0) {
                   break; // work is done
                 }
-
                 else { // probably continuum mode ....
                 // If we are in continuum mode we have probaby ran through the whole allocation
                 // lets send it to the master for processing.
@@ -851,13 +866,16 @@ void ContinuumWorker::processChannels()
                   if (!stopping) { // if set then the master will not be sending a model
                     ASKAPLOG_INFO_STR(logger, "Worker waiting to receive new model");
                     rootImager.receiveModel();
-                    ASKAPLOG_INFO_STR(logger, "Worker received initial model for cycle 0");
+                    ASKAPLOG_INFO_STR(logger, "Worker received model for use in cycle " << majorCycleNumber+1);
                   }
-                  else { // all done
+                  else { // stopping == true.
+                    ASKAPLOG_INFO_STR(logger,"Worker stopping, the master will not be sending a new model");
                     break;
                   }
-                // check the model - have we reached a stopping threshold.
+
                 }
+                // check the model - have we reached a stopping threshold.
+
                 if (rootImager.params()->has("peak_residual")) {
                   const double peak_residual = rootImager.params()->scalarValue("peak_residual");
                   ASKAPLOG_INFO_STR(logger, "Reached peak residual of " << peak_residual);
@@ -879,17 +897,22 @@ void ContinuumWorker::processChannels()
                 }
                 if (majorCycleNumber == nCycles - 1) {
                   // This stops me zeroing the NE before the restore solver runs. So we
-                  ASKAPLOG_INFO_STR(logger, "Reached maximum majorcycle count");
-                  stopping = true;
+                  ASKAPLOG_INFO_STR(logger, "Reached maximum majorcycle count will stop");
+
+                    stopping = true;
+
+                    if (localSolver) {
+                      break; // should be done if I am in local solver mode.
+                    }
 
                 }
 
-                else {
+                if (!stopping && updateDir){
 
                   /// But we dont want to keep merging into the same NE
                   /// so lets reset
-                  ASKAPLOG_DEBUG_STR(logger, "Reset normal equations");
-                  if (updateDir) {
+                  ASKAPLOG_INFO_STR(logger, "Continuuing - Reset normal equations");
+
                     // this implies all workunits are processed independently including the first one - so I can completely
                     // empty the NE
 
@@ -897,31 +920,33 @@ void ContinuumWorker::processChannels()
                     // So this method pretty much only zeros the weights and the datavector(image)
 
                     rootImager.zero();
-                  }
-                  else {
+
+                    // the model is now updated but the NE are empty ... - lets go again
+                    // well they are not completely empty - the PSF is still there but the weights and image are zero
+                }
+                else if (!updateDir) {
                       // In this case the first workUnit is processed outside the workUnit loop.
                       // So we need to calcNE again with the latest model before the major cycle starts.
                       //
-                    rootImager.getNE()->reset();
-                    try {
-                      rootImager.calcNE();
+                      // If we are using updateDir we reprocess all the workunits - so this is not needed.
 
-                    }
-                    catch (const askap::AskapError& e) {
-                      ASKAPLOG_WARN_STR(logger, "Askap error in calcNE after majorcycle number ");
+                  rootImager.getNE()->reset();
+                  try {
+                    rootImager.calcNE();
 
-                    }
                   }
-                    // the model is now updated but the NE are empty ... - lets go again
-                    // well they are not completely empty - the PSF is still there but the weights and image are zero
+                  catch (const askap::AskapError& e) {
+                    ASKAPLOG_WARN_STR(logger, "Askap error in calcNE after majorcycle number ");
 
+                  }
                 }
-
-
-
 
             }
             ASKAPLOG_INFO_STR(logger," Finished the major cycles");
+
+            ASKAPLOG_INFO_STR(logger, "Rank " << itsComms.rank() << " at barrier");
+            itsComms.barrier(itsComms.theWorkers());
+            ASKAPLOG_INFO_STR(logger, "Rank " << itsComms.rank() << " passed barrier");
 
             if (!localSolver) { // all my work is done - only continue if in local mode
               return;
@@ -932,12 +957,12 @@ void ContinuumWorker::processChannels()
             // last minor cycle. Which should be in the archive - or full coordinate system
             // the residual image should be merged into the archive coordinated as well.
 
-              ASKAPLOG_INFO_STR(logger,"Adding model.slice");
-              ASKAPCHECK(rootImager.params()->has("image.slice"), "Params are missing image.slice parameter");
-              rootImager.params()->add("model.slice", rootImager.params()->value("image.slice"));
-              ASKAPCHECK(rootImager.params()->has("model.slice"), "Params are missing model.slice parameter");
+            ASKAPLOG_INFO_STR(logger,"Adding model.slice");
+            ASKAPCHECK(rootImager.params()->has("image.slice"), "Params are missing image.slice parameter");
+            rootImager.params()->add("model.slice", rootImager.params()->value("image.slice"));
+            ASKAPCHECK(rootImager.params()->has("model.slice"), "Params are missing model.slice parameter");
 
-              rootImager.check();
+            rootImager.check();
 
             if (nCycles > 0) {
               if (itsParsets[0].getBool("restore", false)) {
