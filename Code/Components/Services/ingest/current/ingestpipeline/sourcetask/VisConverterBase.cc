@@ -91,6 +91,9 @@ VisConverterBase::VisConverterBase(const LOFAR::ParameterSet& params,
    const std::string triangleStr = itsBaselineMap.isLowerTriangle() ? "lower" : "upper";
    ASKAPLOG_DEBUG_STR(logger, "Correlation product configuration is consistent with an "<<triangleStr<<" triangle");
 
+   // cache correlator product map (from itsBaselineMap which is still handy to have as it is more flexible way to set things up)
+   buildCachedCorrelatorProductMap();
+
    // initialise beam mapping
    initBeamMap(params);
  
@@ -212,6 +215,20 @@ VisConverterBase::mapStokes(casa::Stokes::StokesTypes stokes) const
    return boost::none;
 }
 
+/// @brief helper method to build cached correlator product map
+void VisConverterBase::buildCachedCorrelatorProductMap()
+{
+   const int32_t nProducts = itsBaselineMap.maxID() + 1;
+   ASKAPCHECK(nProducts > 0, "Expect a positive number of correlator products, you have "<<nProducts);
+   ASKAPLOG_DEBUG_STR(logger, "Building cached correlator product map for "<<nProducts<<" products");
+   itsCachedCorrelatorProductMap.resize(nProducts);
+   for (int32_t product = 0; product < nProducts; ++product) {
+        itsCachedCorrelatorProductMap[product].get<0>() = itsBaselineMap.idToAntenna1(product);
+        itsCachedCorrelatorProductMap[product].get<1>() = itsBaselineMap.idToAntenna2(product);
+        itsCachedCorrelatorProductMap[product].get<2>() = itsBaselineMap.idToStokes(product);
+   }
+}
+
 /// @brief map correlation product to the visibility chunk
 /// @details This method maps baseline and beam ids to
 /// the VisChunk row and polarisation index. The remaining
@@ -227,14 +244,17 @@ boost::optional<std::pair<casa::uInt, casa::uInt> >
 VisConverterBase::mapCorrProduct(uint32_t baseline, uint32_t beam) const
 {
    ASKAPCHECK(itsVisChunk, "VisChunk should be initialised before mapCorrProduct call");
+   if (baseline >= itsCachedCorrelatorProductMap.size()) {
+       return boost::none;
+   }
 
    // the logic more or less follows the original Ben's addVis in source classes
 
    // 0) Map from baseline to antenna pair and stokes type
-   const int mappedAnt1 = itsBaselineMap.idToAntenna1(baseline);
-   const int mappedAnt2 = itsBaselineMap.idToAntenna2(baseline);
+   const int mappedAnt1 = itsCachedCorrelatorProductMap[baseline].get<0>();
+   const int mappedAnt2 = itsCachedCorrelatorProductMap[baseline].get<1>();
    if (mappedAnt1 == -1 || mappedAnt2 == -1 ||
-       itsBaselineMap.idToStokes(baseline) == casa::Stokes::Undefined) {
+       itsCachedCorrelatorProductMap[baseline].get<2>() == casa::Stokes::Undefined) {
        /*
           // this warning is temporary commented out to allow
           // using the sparse array hack. Should be re-enabled
@@ -267,7 +287,7 @@ VisConverterBase::mapCorrProduct(uint32_t baseline, uint32_t beam) const
 
    // 1) Map from baseline to stokes type and find the  position on the stokes
    // axis of the cube to insert the data into
-   const casa::Stokes::StokesTypes stokes = itsBaselineMap.idToStokes(baseline);
+   const casa::Stokes::StokesTypes stokes = itsCachedCorrelatorProductMap[baseline].get<2>();
    const boost::optional<casa::uInt> polIndex = mapStokes(stokes);
    if (!polIndex) {
        // the warning is given only once

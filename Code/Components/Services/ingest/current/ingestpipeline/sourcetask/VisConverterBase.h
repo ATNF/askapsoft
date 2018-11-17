@@ -42,6 +42,7 @@
 #include "boost/optional.hpp"
 #include "Common/ParameterSet.h"
 #include "casacore/casa/aipstype.h"
+#include "boost/tuple/tuple.hpp"
 
 // standard includes
 #include <stdint.h>
@@ -52,6 +53,7 @@
 #include "cpcommon/VisDatagram.h"
 #include "cpcommon/VisChunk.h"
 #include "askap/IndexConverter.h"
+
 
 // local includes
 #include "configuration/Configuration.h"
@@ -182,6 +184,8 @@ protected:
    void initVisChunk(const casa::uLong timestamp, const CorrelatorMode &corrMode);
 
 private:
+   /// @brief helper method to build cached correlator product map
+   void buildCachedCorrelatorProductMap();
 
    /// @brief row for given baseline and beam
    /// @details We have a fixed layout of data in the VisChunk/measurement set.
@@ -280,6 +284,12 @@ private:
 
    /// @brief Baseline Map
    const BaselineMap itsBaselineMap;
+
+   /// @brief cached correlator product map
+   /// @details This field contains everything we need from itsBaselineMap. 
+   /// We can make cached operation optional, if necessary. 
+   /// @note vector is sized with the number of correlator products, indices beyond are unmapped
+   std::vector<boost::tuple<int32_t, int32_t, casa::Stokes::StokesTypes> > itsCachedCorrelatorProductMap;
 
    /// @brief warning flag per unknown polarisation
    /// @details to avoid spitting out too much messages
