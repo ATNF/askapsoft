@@ -53,10 +53,8 @@ namespace ingest {
 VisConverter<VisDatagramADE>::VisConverter(const LOFAR::ParameterSet& params,
        const Configuration& config) : 
        VisConverterBase(params, config), itsNSlices(4u), itsNDuplicates(0u),
-       // unmapped products will be cached and ignored in the future processing
-       // if product number falls beyond the bounds of this vector, full processing is done
-       // This type of caching buys us about 0.3 seconds 
-       itsInvalidProducts(2628u, false)
+       // cached mapping of (productId - 1) and (beamId - 1) for performance, beam is the slowest changing
+       itsCachedMap(2628u * 36u, boost::none)
 {
    ASKAPLOG_DEBUG_STR(logger, "Initialised ADE-style visibility stream converter, id="<<config.receiverId());
    // by default, we have 4 data slices. This number can be reduced by rejecting some
@@ -110,6 +108,22 @@ void VisConverter<VisDatagramADE>::initVisChunk(const casa::uLong timestamp,
    // by default, we have 4 data slices
    const casa::uInt datagramsExpected = itsNSlices * nBeamsToReceive() * nChannels;
    setNumberOfExpectedDatagrams(datagramsExpected);
+
+   // initialise map cache - note it implies some specifics about hardware/interfaces
+   // we do have appropriate asserts in the add method
+   // note 1. We work with zero-based indices here and subtract 1 from the indices received from hardware
+   // note 2. We could've done this only once. Leave re-initialisation for every vis-chunk as in principle the mapping
+   // can change from chunk to chunk (although we're not doing it at the moment). However, checking for a change in chunk
+   // details is probably as expensive as rebuilding the cache.
+   std::vector<boost::optional<std::pair<casa::uInt, casa::uInt> > >::iterator it = itsCachedMap.begin(); 
+   for (uint32_t beam = 0; beam < 36u; ++beam) {
+        for (uint32_t product = 0; product < 2628u; ++product, ++it) {
+             ASKAPDEBUGASSERT(it != itsCachedMap.end());
+             // map correlator product to the row and polarisation index and store the result in the cache
+             // note, we pass 1-based indices.
+             *it = mapCorrProduct(product + 1u, beam + 1u);
+        }
+   }
 }
 
 // helper class, we'll move it to a better place later on
@@ -282,8 +296,12 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
             vis.channel<<" card="<<vis.card<<" block="<<vis.block<<" slice="<<vis.slice<<" beam="<<vis.beamid<<
             " hardware reports "<<std::setprecision(15)<<vis.freq<<" MHz, expected "<<std::setprecision(15)<<chunk->frequency()[channel]/1e6<<" MHz");
 
+   ASKAPDEBUGASSERT(itsCachedMap.size() >= 2628u * 36u);
+   // offset iterator at the time of creation to the start of the relevant section
+   std::vector<boost::optional<std::pair<casa::uInt, casa::uInt> > >::const_iterator cachedMapIt = itsCachedMap.begin() + (vis.beamid - 1u) * 2628u + (vis.baseline1 - 1u);
+
    bool atLeastOneUseful = false;
-   for (uint32_t product = vis.baseline1, item = 0; product <= vis.baseline2; ++product, ++item) {
+   for (uint32_t product = vis.baseline1, item = 0; product <= vis.baseline2; ++product, ++item, ++cachedMapIt) {
 
         // check that sensible data received from hardware
         ASKAPCHECK(product > 0, "Expect product (baseline) number to be positive");
@@ -292,12 +310,7 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
               "Product "<<product<<" between baseline1="<<vis.baseline1<<
               " and baseline2="<<vis.baseline2<<" exceeds buffer size of "<<
               VisDatagramTraits<VisDatagramADE>::MAX_BASELINES_PER_SLICE);
-
-        /*
-        if ((product < itsInvalidProducts.size()) && itsInvalidProducts[product]) {
-            continue;
-        }
-        */
+        ASKAPDEBUGASSERT(cachedMapIt != itsCachedMap.end());
 
         /*
         // this is a commissioning hack. To be removed in production system
@@ -317,18 +330,12 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
 
 
         // map correlator product to the row and polarisation index
-        const boost::optional<std::pair<casa::uInt, casa::uInt> > mp = 
-             mapCorrProduct(product, vis.beamid);
-
+        //const boost::optional<std::pair<casa::uInt, casa::uInt> > mp = 
+        //     mapCorrProduct(product, vis.beamid);
+        const boost::optional<std::pair<casa::uInt, casa::uInt> > mp = *cachedMapIt;
+        
         
         if (!mp) {
-            /*
-            // kind of a hack to cache invalid products - beamid of 1 should always be present
-            // mapping is static and is not expected to change from datagram to datagram, so can cache
-            if ((vis.beamid == 1) && (product < itsInvalidProducts.size())) {
-                itsInvalidProducts[product] = true;
-            }
-            */
             continue;
         }
         

@@ -38,6 +38,7 @@
 #include "Common/ParameterSet.h"
 #include "casacore/casa/aipstype.h"
 #include "boost/tuple/tuple.hpp"
+#include "boost/optional.hpp"
 
 // local includes
 #include "ingestpipeline/sourcetask/VisConverterDef.h"
@@ -109,10 +110,8 @@ private:
    // temporary
    uint32_t itsNDuplicates;
 
-   /// @brief temporary - list of invalid correlator products
-   /// @details Although is a hack, it allows to win about 0.3 seconds for the visibility corner turn.
-   /// When we stop working with sparse arrays, product mapping approach probably needs to be redesigned.
-   std::vector<bool> itsInvalidProducts;
+   /// @brief cached map of correlator products per beam. The array is flattened for easy access, beamId is the slowest varying axis.
+   std::vector<boost::optional<std::pair<casa::uInt, casa::uInt> > > itsCachedMap;
 };
 
 } // namespace ingest
