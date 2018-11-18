@@ -207,7 +207,7 @@ void VisConverterBase::buildCachedCorrelatorProductMap(const casa::Vector<casa::
    itsCachedStokesVector.reference(recordedStokes.copy());
    const int32_t nProducts = itsBaselineMap.maxID() + 1;
    ASKAPCHECK(nProducts > 0, "Expect a positive number of correlator products, you have "<<nProducts);
-   ASKAPLOG_DEBUG_STR(logger, "Building cached correlator product map for "<<nProducts<<" products");
+   ASKAPLOG_DEBUG_STR(logger, "Building cached correlator product map to handle baseline IDs up to "<<nProducts-1);
    itsCachedCorrelatorProductMap.resize(nProducts);
    for (int32_t product = 0; product < nProducts; ++product) {
         itsCachedCorrelatorProductMap[product].get<0>() = itsBaselineMap.idToAntenna1(product);
