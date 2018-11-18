@@ -300,6 +300,9 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
    // offset iterator at the time of creation to the start of the relevant section
    std::vector<boost::optional<std::pair<casa::uInt, casa::uInt> > >::const_iterator cachedMapIt = itsCachedMap.begin() + (vis.beamid - 1u) * 2628u + (vis.baseline1 - 1u);
 
+   casa::Cube<casa::Bool>& flag = chunk->flag();
+   casa::Cube<casa::Complex>& visibility = chunk->visibility();
+
    bool atLeastOneUseful = false;
    for (uint32_t product = vis.baseline1, item = 0; product <= vis.baseline2; ++product, ++item, ++cachedMapIt) {
 
@@ -375,32 +378,32 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
        
         // note, always copy the data even if the row is flagged -
         // data could still be of interest
-        chunk->visibility()(row, channel, polidx) = sample;
+        visibility(row, channel, polidx) = sample;
 
         // Unflag the sample 
         if (rowIsValid) {
-            chunk->flag()(row, channel, polidx) = false;
+            flag(row, channel, polidx) = false;
         }
 
         if (isAutoCorr) {
             // For auto-correlations we duplicate cross-pols as 
             // index 2 should always be missing
             ASKAPDEBUGASSERT(polidx != 2);
-            ASKAPASSERT(chunk->nPol() == 4);
+            ASKAPASSERT(visibility.nplane() == 4);
 
             if (polidx == 1) {
-                chunk->visibility()(row, channel, 2) = conj(sample);
+                visibility(row, channel, 2) = conj(sample);
                 // Unflag the sample
                 if (rowIsValid) {
-                    chunk->flag()(row, channel, 2) = false;
+                    flag(row, channel, 2) = false;
                 }
             }
         }
 
         // temporary - debugging frequency mapping/values received from the ioc
-        //chunk->visibility().yzPlane(row).row(channel).set(casa::Complex(vis.freq,0.));
-        //chunk->visibility().yzPlane(row).row(channel).set(casa::Complex(vis.freq - chunk->frequency()[channel]/1e6,0.));
-        //chunk->visibility().yzPlane(row).row(channel).set(casa::Complex(antenna1 + 10.*config().rank(),0.));
+        //visibility.yzPlane(row).row(channel).set(casa::Complex(vis.freq,0.));
+        //visibility.yzPlane(row).row(channel).set(casa::Complex(vis.freq - chunk->frequency()[channel]/1e6,0.));
+        //visibility.yzPlane(row).row(channel).set(casa::Complex(antenna1 + 10.*config().rank(),0.));
         //
    }
 
