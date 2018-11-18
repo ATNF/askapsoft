@@ -222,11 +222,13 @@ void VisConverterBase::buildCachedCorrelatorProductMap(const casa::Vector<casa::
                      itsCachedCorrelatorProductMap[product].get<2>() = static_cast<int32_t>(i);
                  }
             }
-            // the warning is given only once
-            if (std::find(itsIgnoredStokesWarned.begin(), itsIgnoredStokesWarned.end(), stokes) == itsIgnoredStokesWarned.end()) {
-                ASKAPLOG_WARN_STR(logger, "Stokes type " << casa::Stokes::name(stokes)
-                                  << " is not configured for storage");
-                itsIgnoredStokesWarned.insert(stokes);
+            if (itsCachedCorrelatorProductMap[product].get<2>() == -1) {
+                // the warning is given only once
+                if (std::find(itsIgnoredStokesWarned.begin(), itsIgnoredStokesWarned.end(), stokes) == itsIgnoredStokesWarned.end()) {
+                    ASKAPLOG_WARN_STR(logger, "Stokes type " << casa::Stokes::name(stokes)
+                                      << " is not configured for storage");
+                    itsIgnoredStokesWarned.insert(stokes);
+                }
             }
         }
    }
