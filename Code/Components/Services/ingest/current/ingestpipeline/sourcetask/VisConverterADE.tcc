@@ -320,16 +320,18 @@ void VisConverter<VisDatagramADE>::add(const VisDatagramADE &vis)
         const boost::optional<std::pair<casa::uInt, casa::uInt> > mp = 
              mapCorrProduct(product, vis.beamid);
 
-        /*
+        
         if (!mp) {
+            /*
             // kind of a hack to cache invalid products - beamid of 1 should always be present
             // mapping is static and is not expected to change from datagram to datagram, so can cache
             if ((vis.beamid == 1) && (product < itsInvalidProducts.size())) {
                 itsInvalidProducts[product] = true;
             }
+            */
             continue;
         }
-        */
+        
 
         const casa::uInt row = mp->first;
         const casa::uInt polidx = mp->second;
