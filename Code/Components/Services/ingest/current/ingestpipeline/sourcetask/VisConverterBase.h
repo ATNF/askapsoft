@@ -185,7 +185,8 @@ protected:
 
 private:
    /// @brief helper method to build cached correlator product map
-   void buildCachedCorrelatorProductMap();
+   /// @param[in] recordedStokes stokes vector of the accessor to be built
+   void buildCachedCorrelatorProductMap(const casa::Vector<casa::Stokes::StokesTypes> &recordedStokes);
 
    /// @brief row for given baseline and beam
    /// @details We have a fixed layout of data in the VisChunk/measurement set.
@@ -197,14 +198,6 @@ private:
    /// @return row number in the VisChunk
    uint32_t calculateRow(uint32_t ant1, uint32_t ant2, uint32_t beam) const;
   
-   /// @brief helper method to map polarisation product
-   /// @details This method obtains polarisation dimension index
-   /// for the given Stokes parameter. Undefined value means VisChunk
-   /// does not contain selected product.
-   /// param[in] stokes input Stokes parameter
-   /// @return polarisation index. Undefined value for unmapped polarisation.
-   boost::optional<casa::uInt> mapStokes(casa::Stokes::StokesTypes stokes) const;
-
    /// @brief initialise beam maps
    /// @details Beams can be mapped and indices can be non-contiguous. This
    /// method sets up the mapping based on the parset and also evaluates the
@@ -289,7 +282,10 @@ private:
    /// @details This field contains everything we need from itsBaselineMap. 
    /// We can make cached operation optional, if necessary. 
    /// @note vector is sized with the number of correlator products, indices beyond are unmapped
-   std::vector<boost::tuple<int32_t, int32_t, casa::Stokes::StokesTypes> > itsCachedCorrelatorProductMap;
+   std::vector<boost::tuple<int32_t, int32_t, int32_t> > itsCachedCorrelatorProductMap;
+
+   /// @brief cached stokes vector for which itsCachedCorrelatorProductMap has been built
+   casa::Vector<casa::Stokes::StokesTypes> itsCachedStokesVector;
 
    /// @brief warning flag per unknown polarisation
    /// @details to avoid spitting out too much messages

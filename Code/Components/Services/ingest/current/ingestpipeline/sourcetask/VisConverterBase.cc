@@ -92,7 +92,10 @@ VisConverterBase::VisConverterBase(const LOFAR::ParameterSet& params,
    ASKAPLOG_DEBUG_STR(logger, "Correlation product configuration is consistent with an "<<triangleStr<<" triangle");
 
    // cache correlator product map (from itsBaselineMap which is still handy to have as it is more flexible way to set things up)
-   buildCachedCorrelatorProductMap();
+   // Note, the cache is setup up front with standard linear polarisation products. When visibility chunk is created, the cached 
+   // stokes vector is compared against the actual stokes vector of the chunk (which can change - even if we never support other
+   // polarisation frames, there could be partial vectors) and cache is rebuilt if necessary. 
+   buildCachedCorrelatorProductMap(scimath::PolConverter::canonicLinear());
 
    // initialise beam mapping
    initBeamMap(params);
@@ -196,28 +199,12 @@ uint32_t VisConverterBase::sumOfArithmeticSeries(uint32_t n, uint32_t a,
    return (n / 2.0) * ((2 * a) + ((n - 1) * d));
 }
 
-/// @brief helper method to map polarisation product
-/// @details This method obtains polarisation dimension index
-/// for the given Stokes parameter. Undefined value means VisChunk
-/// does not contain selected product.
-/// param[in] stokes input Stokes parameter
-/// @return polarisation index. Undefined value for unmapped polarisation.
-boost::optional<casa::uInt> 
-VisConverterBase::mapStokes(casa::Stokes::StokesTypes stokes) const
-{
-   ASKAPDEBUGASSERT(itsVisChunk);
-   ASKAPDEBUGASSERT(itsVisChunk->nPol() == itsVisChunk->stokes().size());
-   for (size_t i = 0; i < itsVisChunk->nPol(); ++i) {
-        if (itsVisChunk->stokes()(i) == stokes) {
-            return i;
-        }
-   }
-   return boost::none;
-}
-
 /// @brief helper method to build cached correlator product map
-void VisConverterBase::buildCachedCorrelatorProductMap()
+/// @details 
+/// @param[in] recordedStokes stokes vector of the accessor to be built
+void VisConverterBase::buildCachedCorrelatorProductMap(const casa::Vector<casa::Stokes::StokesTypes> &recordedStokes)
 {
+   itsCachedStokesVector.reference(recordedStokes.copy());
    const int32_t nProducts = itsBaselineMap.maxID() + 1;
    ASKAPCHECK(nProducts > 0, "Expect a positive number of correlator products, you have "<<nProducts);
    ASKAPLOG_DEBUG_STR(logger, "Building cached correlator product map for "<<nProducts<<" products");
@@ -225,7 +212,23 @@ void VisConverterBase::buildCachedCorrelatorProductMap()
    for (int32_t product = 0; product < nProducts; ++product) {
         itsCachedCorrelatorProductMap[product].get<0>() = itsBaselineMap.idToAntenna1(product);
         itsCachedCorrelatorProductMap[product].get<1>() = itsBaselineMap.idToAntenna2(product);
-        itsCachedCorrelatorProductMap[product].get<2>() = itsBaselineMap.idToStokes(product);
+        // stokes is undefined by default
+        itsCachedCorrelatorProductMap[product].get<2>() = -1;
+        const casa::Stokes::StokesTypes stokes = itsBaselineMap.idToStokes(product);
+        if (stokes != casa::Stokes::Undefined) {
+            for (casa::uInt i = 0; i < itsCachedStokesVector.nelements(); ++i) {
+                 if (itsCachedStokesVector[i] == stokes) {
+                     ASKAPDEBUGASSERT(itsCachedCorrelatorProductMap[product].get<2>() == -1);
+                     itsCachedCorrelatorProductMap[product].get<2>() = static_cast<int32_t>(i);
+                 }
+            }
+            // the warning is given only once
+            if (std::find(itsIgnoredStokesWarned.begin(), itsIgnoredStokesWarned.end(), stokes) == itsIgnoredStokesWarned.end()) {
+                ASKAPLOG_WARN_STR(logger, "Stokes type " << casa::Stokes::name(stokes)
+                                  << " is not configured for storage");
+                itsIgnoredStokesWarned.insert(stokes);
+            }
+        }
    }
 }
 
@@ -253,8 +256,8 @@ VisConverterBase::mapCorrProduct(uint32_t baseline, uint32_t beam) const
    // 0) Map from baseline to antenna pair and stokes type
    const int mappedAnt1 = itsCachedCorrelatorProductMap[baseline].get<0>();
    const int mappedAnt2 = itsCachedCorrelatorProductMap[baseline].get<1>();
-   if (mappedAnt1 == -1 || mappedAnt2 == -1 ||
-       itsCachedCorrelatorProductMap[baseline].get<2>() == casa::Stokes::Undefined) {
+   const int mappedPol = itsCachedCorrelatorProductMap[baseline].get<2>();
+   if (mappedAnt1 == -1 || mappedAnt2 == -1 || mappedPol == -1) {
        /*
           // this warning is temporary commented out to allow
           // using the sparse array hack. Should be re-enabled
@@ -285,19 +288,9 @@ VisConverterBase::mapCorrProduct(uint32_t baseline, uint32_t beam) const
              "Received beam id beam="<<beam<<" mapped to beamid="<<beamid<<
              " which is outside the beam index range, itsMaxNBeams="<<itsMaxNBeams);
 
-   // 1) Map from baseline to stokes type and find the  position on the stokes
-   // axis of the cube to insert the data into
-   const casa::Stokes::StokesTypes stokes = itsCachedCorrelatorProductMap[baseline].get<2>();
-   const boost::optional<casa::uInt> polIndex = mapStokes(stokes);
-   if (!polIndex) {
-       // the warning is given only once
-       if (std::find(itsIgnoredStokesWarned.begin(), itsIgnoredStokesWarned.end(), stokes) == itsIgnoredStokesWarned.end()) {
-          ASKAPLOG_WARN_STR(logger, "Stokes type " << casa::Stokes::name(stokes)
-                             << " is not configured for storage");
-          itsIgnoredStokesWarned.insert(stokes);
-       }
-       return boost::none;
-   }
+   // 1) polarisation index, validity and non-negativity has been checked above
+   const casa::uInt polIndex = static_cast<casa::uInt>(mappedPol);
+   ASKAPCHECK(polIndex < itsVisChunk->nPol(), "Polarisation index exceeds chunk's dimensions");
 
    // 2) Check the indexes are within the visibility chunk
    const uint32_t nAntenna = itsConfig.antennas().size();
@@ -307,8 +300,6 @@ VisConverterBase::mapCorrProduct(uint32_t baseline, uint32_t beam) const
        // ADE antennas
        return boost::none;
    }
-
-   ASKAPCHECK(*polIndex < itsVisChunk->nPol(), "Polarisation index exceeds chunk's dimensions");
 
    // 3) Find the row for the given beam and baseline and final checks
    const uint32_t row = calculateRow(antenna1, antenna2, beamid);
@@ -322,7 +313,7 @@ VisConverterBase::mapCorrProduct(uint32_t baseline, uint32_t beam) const
    ASKAPCHECK(itsVisChunk->beam1()(row) == static_cast<casa::uInt>(beamid), errorMsg);
    ASKAPCHECK(itsVisChunk->beam2()(row) == static_cast<casa::uInt>(beamid), errorMsg);
 
-   return std::pair<casa::uInt, casa::uInt>(row, *polIndex);
+   return std::pair<casa::uInt, casa::uInt>(row, polIndex);
 }
 
 /// @brief row for given baseline and beam
@@ -420,6 +411,10 @@ void VisConverterBase::initVisChunk(const casa::uLong timestamp,
      "Mixed polarisation products are not supported. Correlator output has: "<<
       scimath::PolConverter::toString(corrMode.stokes())<<
       ", successfully matched only "<<outPolIndex<<" products: "<<scimath::PolConverter::toString(itsVisChunk->stokes()));
+    if (!scimath::PolConverter::equal(itsVisChunk->stokes(), itsCachedStokesVector)) {
+        // rebuild the cache as polarisation vector has been changed
+        buildCachedCorrelatorProductMap(itsVisChunk->stokes());
+    }
 
     // channel width is determined by the correlator configuration
     itsVisChunk->channelWidth() = corrMode.chanWidth().getValue("Hz");

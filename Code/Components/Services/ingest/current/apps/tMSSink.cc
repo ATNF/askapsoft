@@ -146,6 +146,9 @@ public:
            const float syncTime = timer.real();
            totalSyncTime += syncTime;
 
+           //uncomment this to trigger FEED table update every cycle (with junk values)
+           //chunk->beamOffsets().set(float(count)/180.*casa::C::pi);
+
            ASKAPLOG_INFO_STR(logger, "Received "<<count + 1<<" integration(s) for rank="<<rank());
            timer.mark();
            sink.process(chunk);
