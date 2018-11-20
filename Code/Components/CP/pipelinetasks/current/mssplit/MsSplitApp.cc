@@ -373,25 +373,22 @@ void MsSplitApp::copyPointing(const casa::MeasurementSet& source, casa::Measurem
 
     // Copy required columns
 
-    // Improved way of copying the target and direction arrays.
-    // Need to copy the entire column (not just the first row), but
-    // doing it with a single putColumn was found to be too slow (not
-    // hanging, just taking a long time with the second call).
     ASKAPCHECK(sc.direction().nrow()==sc.target().nrow(),
                "Different numbers of rows for POINTING table's DIRECTION & TARGET columns. Exiting.");
+
+    // Pointing tables can get large. Doing whole column operations seems very slow (maybe due to
+    // storage manager used). So doing row by row copy instead (finished in 6s vs >1h)
     for(unsigned int i=0;i<sc.direction().nrow();i++){
-        dc.direction().put(i,sc.direction().get(i));
-        dc.target().put(i,sc.target().get(i));
+        dc.direction().put(i,sc.direction()(i));
+        dc.target().put(i,sc.target()(i));
+        dc.antennaId().put(i,sc.antennaId()(i));
+        dc.interval().put(i,sc.interval()(i));
+        dc.name().put(i,sc.name()(i));
+        dc.numPoly().put(i,sc.numPoly()(i));
+        dc.time().put(i,sc.time()(i));
+        dc.timeOrigin().put(i,sc.timeOrigin()(i));
+        dc.tracking().put(i,sc.tracking()(i));
     }
-
-    dc.antennaId().putColumn(sc.antennaId());
-    dc.interval().putColumn(sc.interval());
-    dc.name().putColumn(sc.name());
-    dc.numPoly().putColumn(sc.numPoly());
-    dc.time().putColumn(sc.time());
-    dc.timeOrigin().putColumn(sc.timeOrigin());
-    dc.tracking().putColumn(sc.tracking());
-
 }
 
 void MsSplitApp::copyPolarization(const casa::MeasurementSet& source, casa::MeasurementSet& dest)
@@ -626,10 +623,8 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
     }
     // Set the cache size for the large columns
     // Not needed if we make bucketsize small enough to fit a row of buckets in memory
-    // except for the input data - in case we select a small part of the spectrum
+    // Except for the input data - in case we select a small part of the spectrum
     const casa::uInt cacheSize = maxBuf;
-    // Note max cache size seems to have a limit of 2GB (2^31-1), higher values
-    // result in no limit, even though the argument is an unsigned integer
     if (nChan > nChanIn) sc.data().setMaximumCacheSize(cacheSize);
     //dc.data().setMaximumCacheSize(cacheSize);
     //sc.flag().setMaximumCacheSize(cacheSize);
