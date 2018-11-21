@@ -103,7 +103,10 @@ if __name__ == '__main__':
 
             blc[spInd] = i
             trc[spInd] = i
-            stats.calculate(cube,i,blc.tolist(),trc.tolist())
+            try:
+                stats.calculate(cube,i,blc.tolist(),trc.tolist())
+            except:
+                print('findCubeStats.py: Error for channel %d - setting stats to zero'%i)
 
     stats.gather(comm)
             
