@@ -46,6 +46,7 @@
 #include "Common/ParameterSet.h"
 #include "casacore/casa/aips.h"
 #include "casacore/ms/MeasurementSets/MeasurementSet.h"
+#include "casacore/tables/Tables/ScalarColumn.h"
 
 namespace askap {
 namespace cp {
@@ -75,7 +76,7 @@ class MsSplitApp : public askap::Application {
 
         static void copyObservation(const casa::MeasurementSet& source, casa::MeasurementSet& dest);
 
-        static void copyPointing(const casa::MeasurementSet& source, casa::MeasurementSet& dest);
+        void copyPointing(const casa::MeasurementSet& source, casa::MeasurementSet& dest);
 
         static void copyPolarization(const casa::MeasurementSet& source, casa::MeasurementSet& dest);
 
@@ -89,7 +90,9 @@ class MsSplitApp : public askap::Application {
         /// @param[in] destPointing destination MS POINTING table
         static void addNonStandardPointingColumn(const std::string &name,
                                                  const casa::MSPointing &srcPointing,
-                                                 casa::MSPointing &destPointing);
+                                                 casa::MSPointing &destPointing,
+                                                 casa::ROScalarColumn<casa::Float> &src,
+                                                 casa::ScalarColumn<casa::Float> &dest);
 
         /// @throws AskapError  if all rows in the main table don't refer to the
         ///                     same spectral window

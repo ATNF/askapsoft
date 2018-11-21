@@ -356,20 +356,16 @@ void MsSplitApp::copyPointing(const casa::MeasurementSet& source, casa::Measurem
     MSColumns destMsc(dest);
     MSPointingColumns& dc = destMsc.pointing();
 
-    // Add new rows to the destination and copy the data
-    dest.pointing().addRow(sc.nrow());
-
     // Create and copy non-standard columns, if they exist.
     // dest row order is different to src when copes come after required columns, so do them first.
-    if (source.pointing().actualTableDesc().isColumn("AZIMUTH")) {
-        addNonStandardPointingColumn("AZIMUTH", source.pointing(), dest.pointing());
-    }
-    if (source.pointing().actualTableDesc().isColumn("ELEVATION")) {
-        addNonStandardPointingColumn("ELEVATION", source.pointing(), dest.pointing());
-    }
-    if (source.pointing().actualTableDesc().isColumn("POLANGLE")) {
-        addNonStandardPointingColumn("POLANGLE", source.pointing(), dest.pointing());
-    }
+    Bool doAz = source.pointing().actualTableDesc().isColumn("AZIMUTH");
+    Bool doEl = source.pointing().actualTableDesc().isColumn("ELEVATION");
+    Bool doPolAng = source.pointing().actualTableDesc().isColumn("POLANGLE");
+    ScalarColumn<casa::Float> dAz, dEl, dPolAng;
+    ROScalarColumn<casa::Float> sAz, sEl, sPolAng;
+    if (doAz) addNonStandardPointingColumn("AZIMUTH", source.pointing(), dest.pointing(), sAz, dAz);
+    if (doEl) addNonStandardPointingColumn("ELEVATION", source.pointing(), dest.pointing(), sEl, dEl);
+    if (doPolAng) addNonStandardPointingColumn("POLANGLE", source.pointing(), dest.pointing(), sPolAng, dPolAng);
 
     // Copy required columns
 
@@ -378,17 +374,29 @@ void MsSplitApp::copyPointing(const casa::MeasurementSet& source, casa::Measurem
 
     // Pointing tables can get large. Doing whole column operations seems very slow (maybe due to
     // storage manager used). So doing row by row copy instead (finished in 6s vs >1h)
-    for(unsigned int i=0;i<sc.direction().nrow();i++){
-        dc.direction().put(i,sc.direction()(i));
-        dc.target().put(i,sc.target()(i));
-        dc.antennaId().put(i,sc.antennaId()(i));
-        dc.interval().put(i,sc.interval()(i));
-        dc.name().put(i,sc.name()(i));
-        dc.numPoly().put(i,sc.numPoly()(i));
-        dc.time().put(i,sc.time()(i));
-        dc.timeOrigin().put(i,sc.timeOrigin()(i));
-        dc.tracking().put(i,sc.tracking()(i));
+    unsigned int nRow = sc.nrow();
+    unsigned int n =0;
+    for(unsigned int i=0;i<nRow;i++){
+        double time = sc.time()(i);
+        if (time >= itsTimeBegin && time <= itsTimeEnd) {
+            // Copy only the rows relevant for the output ms
+            dest.pointing().addRow();
+            dc.direction().put(n,sc.direction()(i));
+            dc.target().put(n,sc.target()(i));
+            dc.antennaId().put(n,sc.antennaId()(i));
+            dc.interval().put(n,sc.interval()(i));
+            dc.name().put(n,sc.name()(i));
+            dc.numPoly().put(n,sc.numPoly()(i));
+            dc.time().put(n,time);
+            dc.timeOrigin().put(n,sc.timeOrigin()(i));
+            dc.tracking().put(n,sc.tracking()(i));
+            if (doAz) dAz.put(n,sAz(i));
+            if (doEl) dEl.put(n,sEl(i));
+            if (doPolAng) dPolAng.put(n,sPolAng(i));
+            n++;
+        }
     }
+    if (n < nRow) ASKAPLOG_INFO_STR(logger, "Copied "<< n << "/" <<nRow <<" pointing table rows");
 }
 
 void MsSplitApp::copyPolarization(const casa::MeasurementSet& source, casa::MeasurementSet& dest)
@@ -410,12 +418,14 @@ void MsSplitApp::copyPolarization(const casa::MeasurementSet& source, casa::Meas
 
 void MsSplitApp::addNonStandardPointingColumn(const std::string &name,
                                               const MSPointing &srcPointing,
-                                              MSPointing &destPointing)
+                                              MSPointing &destPointing,
+                                              ROScalarColumn<casa::Float> &src,
+                                              ScalarColumn<casa::Float> &dest)
 {
     ASKAPDEBUGASSERT(!destPointing.actualTableDesc().isColumn(name));
     destPointing.addColumn(srcPointing.actualTableDesc().columnDesc(name));
-    casa::ScalarColumn<casa::Float> destCol(destPointing, name);
-    destCol.putColumn(ROScalarColumn<casa::Float>(srcPointing, name));
+    dest = casa::ScalarColumn<casa::Float>(destPointing, name);
+    src = casa::ROScalarColumn<casa::Float>(srcPointing, name);
 }
 
 casa::Int MsSplitApp::findSpectralWindowId(const casa::MeasurementSet& ms)
@@ -720,8 +730,12 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
         //                           IPosition(2, nPol, nChanOut), Slicer::endIsLength);
 
         if (width == 1) {
-            dc.data().putColumnRange(dstrowslicer, //destarrslicer,
-                sc.data().getColumnRange(srcrowslicer, srcarrslicer));
+            // This is a bit quicker
+            static casa::Array<casa::Complex> dataArr;
+            sc.data().getColumnRange(srcrowslicer, srcarrslicer, dataArr, True);
+            dc.data().putColumnRange(dstrowslicer, dataArr);
+            //dc.data().putColumnRange(dstrowslicer, //destarrslicer,
+            //    sc.data().getColumnRange(srcrowslicer, srcarrslicer));
             dc.flag().putColumnRange(dstrowslicer, //destarrslicer,
                 sc.flag().getColumnRange(srcrowslicer, srcarrslicer));
             if (haveInSigmaSpec && haveOutSigmaSpec) {
