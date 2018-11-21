@@ -43,14 +43,6 @@ import cubestatsHelpers as cs
 
 #########################
 
-def getGoodCells(arr):
-    med=np.median(arr)
-    q75,q25=np.percentile(arr,[75,25])
-    iqr=q75-q25
-    issmall=(abs(arr)<1.e5)
-    isgood=(abs(arr-med) < 5.*iqr)
-    return isgood*issmall
-
 class BeamStats:
     def __init__(self, catalogue,size):
         self.cat=catalogue
@@ -78,10 +70,10 @@ class BeamStats:
     def noiseMinMax(self):
         ymin,ymax=0.,1.
         if self.catGood:
-            ymax = self.std[getGoodCells(self.std)].max()
-            ymin = self.std[getGoodCells(self.std)].min()
-            ymax = max(ymax,self.madfm[getGoodCells(self.madfm)].max())
-            ymin = min(ymin,self.madfm[getGoodCells(self.madfm)].max())
+            ymax = self.std[cs.getGoodCells(self.std)].max()
+            ymin = self.std[cs.getGoodCells(self.std)].min()
+            ymax = max(ymax,self.madfm[cs.getGoodCells(self.madfm)].max())
+            ymin = min(ymin,self.madfm[cs.getGoodCells(self.madfm)].max())
             width = ymax-ymin
             ymax = ymax + 0.1*width
             ymin = ymin - 0.1*width
@@ -90,8 +82,8 @@ class BeamStats:
     def minMax(self):
         ymin,ymax=0.,1.
         if self.catGood:
-            ymax = self.maxval[getGoodCells(self.maxval)].max()
-            ymin = self.minval[getGoodCells(self.minval)].min()
+            ymax = self.maxval[cs.getGoodCells(self.maxval)].max()
+            ymin = self.minval[cs.getGoodCells(self.minval)].min()
             width = ymax-ymin
             ymax = ymax + 0.1*width
             ymin = ymin - 0.1*width

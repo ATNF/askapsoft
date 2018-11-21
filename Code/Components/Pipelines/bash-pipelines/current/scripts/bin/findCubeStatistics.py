@@ -140,10 +140,10 @@ if __name__ == '__main__':
         plt.subplot(212)
         plt.plot(freq,std,label='Std. Dev')
         plt.plot(freq,madfm,label='scaled MADFM')
-        ymax = std[abs(std)<1.e5].max()
-        ymin = std[abs(std)<1.e5].min()
-        ymax = np.max([ymax,madfm[abs(madfm)<1.e5].max()])
-        ymin = np.min([ymin,madfm[abs(madfm)<1.e5].min()])
+        ymax = std[cs.getGoodCells(std)].max()
+        ymin = std[cs.getGoodCells(std)].min()
+        ymax = np.max([ymax,madfm[cs.getGoodCells(madfm)].max()])
+        ymin = np.min([ymin,madfm[cs.getGoodCells(madfm)].min()])
         width = ymax-ymin
         ymax = ymax + 0.1*width
         ymin = ymin - 0.1*width

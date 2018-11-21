@@ -57,6 +57,15 @@ def getFreqAxis(cube):
     freq = (np.arange(specDim)-specCoo.get_referencepixel())*specCoo.get_increment() + specCoo.get_referencevalue()
     return freq
 
+def getGoodCells(arr):
+    med=np.median(arr)
+    q75,q25=np.percentile(arr,[75,25])
+    iqr=q75-q25
+    issmall=(abs(arr)<1.e5)
+    isgood=(abs(arr-med) < 5.*iqr)
+    return isgood*issmall
+
+
 
 ##############
 
