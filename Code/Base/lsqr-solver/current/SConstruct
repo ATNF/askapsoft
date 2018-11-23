@@ -11,10 +11,10 @@ import sys
 
 env.AppendUnique(CCFLAGS=['-O3'])
 
-pkg = env.AskapPackage("lsqr-solver")
+pkg = env.AskapPackage("lsqr")
 
 # add sub packages 
-pkg.AddSubPackage("")
+pkg.AddSubPackage("lsqr_solver")
 
 # run the build process
 pkg()
