@@ -51,8 +51,9 @@ JonesIndex::JonesIndex(const casa::Short antenna,
 JonesIndex::JonesIndex(const casa::uInt antenna, casa::uInt beam) :
     itsAntenna(casa::Short(antenna)), itsBeam(casa::Short(beam))
 {
-  ASKAPCHECK(antenna < 128, "Antenna index is supposed to be less than 128");
-  ASKAPCHECK(beam < 128, "Beam index supposed to be less than 128");
+  // casa::Short is defined as short in aipstype.h, which sets this limit
+  ASKAPCHECK(antenna < 32768, "Antenna index is supposed to be less than 32768");
+  ASKAPCHECK(beam < 32768, "Beam index supposed to be less than 32768");
 }
 
 casa::Short JonesIndex::antenna(void) const
