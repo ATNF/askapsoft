@@ -1,0 +1,20 @@
+# @file
+# SConstruct build script for this module.
+# Package dependencies are read from 'dependencies.default'
+#
+# @author Malte Marquarding <Malte.Marquarding@csiro.au>
+#
+
+# Always import this
+from askapenv import env
+import sys
+
+env.AppendUnique(CCFLAGS=['-O3'])
+
+pkg = env.AskapPackage("lsqr-solver")
+
+# add sub packages 
+pkg.AddSubPackage("")
+
+# run the build process
+pkg()
