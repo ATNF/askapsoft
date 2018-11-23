@@ -111,23 +111,42 @@ bool LinearSolver::allMatrixElementsAreZeros(const casa::Matrix<double> &matr, c
 /// @return names of parameters in this subset
 std::vector<std::string> LinearSolver::getIndependentSubset(std::vector<std::string> &names, const double tolerance) const
 {
-   ASKAPTRACE("LinearSolver::getIndependentSubset");
-   ASKAPDEBUGASSERT(names.size() > 0);
-   std::vector<std::string> resultNames;
-   resultNames.reserve(names.size());
-   resultNames.push_back(names[0]);
-   for (std::vector<std::string>::const_iterator ci = ++names.begin(); ci != names.end(); ++ci) {
-        for (std::vector<std::string>::const_iterator ciRes = resultNames.begin(); ciRes != resultNames.end(); ++ciRes) {
-             const casa::Matrix<double>& nm1 = normalEquations().normalMatrix(*ci, *ciRes);
-             const casa::Matrix<double>& nm2 = normalEquations().normalMatrix(*ciRes, *ci);
-             if (!allMatrixElementsAreZeros(nm1,tolerance) || !allMatrixElementsAreZeros(nm2,tolerance)) {
-                 // this parameter (iterated in the outer loop) belongs to the same subset
-                 resultNames.push_back(*ci);
-                 break;
-             } 
+    ASKAPTRACE("LinearSolver::getIndependentSubset");
+    ASKAPDEBUGASSERT(names.size() > 0);
+    std::vector<std::string> resultNames;
+    resultNames.reserve(names.size());
+    resultNames.push_back(names[0]);
+    
+    // this has been added to the subset, so delete it
+    names.erase(names.begin());
+
+    // for each name in subset (which grows as matches are found), check all remaining names for associates.
+    for (std::vector<std::string>::const_iterator ciRes = resultNames.begin(); ciRes != resultNames.end(); ++ciRes) {
+
+        // keep a temporary list of added names to erase from the main list
+        std::vector<std::string> toErase;
+        toErase.reserve(names.size());
+
+        for (std::vector<std::string>::const_iterator ci = names.begin(); ci != names.end(); ++ci) {
+            const casa::Matrix<double>& nm1 = normalEquations().normalMatrix(*ci, *ciRes);
+            const casa::Matrix<double>& nm2 = normalEquations().normalMatrix(*ciRes, *ci);
+
+            if (!allMatrixElementsAreZeros(nm1,tolerance) || !allMatrixElementsAreZeros(nm2,tolerance)) {
+                // this parameter (iterated in the inner loop) belongs to the subset
+                resultNames.push_back(*ci);
+                // also add it to the temporary list of added names to erased
+                toErase.push_back(*ci);
+            } 
         }
-   } 
-   return resultNames;
+
+        // erase all of the names that have just been added from the main list
+        for (std::vector<std::string>::iterator it0 = toErase.begin(); it0 != toErase.end(); ++it0) {
+            std::vector<std::string>::iterator it = std::find(names.begin(), names.end(), *it0);
+            if (it != names.end()) names.erase(it);
+        }
+
+    } 
+    return resultNames;
 }
     
     
@@ -387,6 +406,7 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
       } else {
           while (names.size() > 0) {
               const std::vector<std::string> subsetNames = getIndependentSubset(names,1e-6);
+              /* this is now being done inside getIndependentSubset
               if (subsetNames.size() == names.size()) {
                   names.resize(0);
               } else {
@@ -406,6 +426,7 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
                        names.erase(names.begin() + *ci);
                   }
               }
+              */
               solveSubsetOfNormalEquations(params,quality, subsetNames);
           } 
       }
