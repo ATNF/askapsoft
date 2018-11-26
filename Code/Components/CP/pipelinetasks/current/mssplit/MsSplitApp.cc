@@ -23,13 +23,6 @@
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
 /// @author Ben Humphreys <ben.humphreys@csiro.au>
-/// Last modification: Wasim Raja <Wasim.Raja@csiro.au>
-///                    * Fixed bug leading to bad_alloc error
-///                    * When row filters are set to 1, MsSplit was trying
-///                    * to read all rows in one go leading to the error
-///                    * This was fixed by modifying the getRowsToKeep function.
-///                    *
-///                    *                --wr, 09Mar, 2017
 
 // Package level header file
 #include "askap_pipelinetasks.h"
@@ -624,27 +617,8 @@ void MsSplitApp::splitMainTable(const casa::MeasurementSet& source,
 
     const casa::uInt nRows = sc.nrow();
     if (rowFiltersExist()) {
-	    /*Modified the getRowsToKeep function:
-	     * Passing maxSimultaneousRows to it as well
-	     * for optimal copying of data.
-	     *       --wasim, 03Mar2017
-	     * */
        getRowsToKeep(source, maxSimultaneousRows);
     }
-    // Set the cache size for the large columns
-    // Not needed if we make bucketsize small enough to fit a row of buckets in memory
-    // Except for the input data - in case we select a small part of the spectrum
-    const casa::uInt cacheSize = maxBuf;
-    if (nChan > nChanIn) sc.data().setMaximumCacheSize(cacheSize);
-    //dc.data().setMaximumCacheSize(cacheSize);
-    //sc.flag().setMaximumCacheSize(cacheSize);
-    //dc.flag().setMaximumCacheSize(cacheSize);
-    //if (haveInSigmaSpec) {
-        //sc.sigmaSpectrum().setMaximumCacheSize(cacheSize);
-    //}
-    //if (haveOutSigmaSpec) {
-        //dc.sigmaSpectrum().setMaximumCacheSize(cacheSize);
-    //}
 
     uInt progressCounter = 0; // Used for progress reporting
     const uInt PROGRESS_INTERVAL_IN_ROWS = nRows / 100;
