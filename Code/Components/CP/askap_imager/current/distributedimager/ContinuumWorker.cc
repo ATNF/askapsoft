@@ -449,6 +449,8 @@ ContinuumWorker::ContinuumWorker(LOFAR::ParameterSet& parset,
 
     const bool updateDir = itsParset.getBool("updatedirection",false);
 
+    ASKAPCHECK(!(updateDir && !localSolver), "Cannot <yet> Continuum image in on-the-fly mosaick mode - need to update the image parameter setup");
+
     // Define reference channel for giving restoring beam
     std::string reference = itsParset.getString("restore.beamReference", "mid");
     if (reference == "mid") {
@@ -634,7 +636,19 @@ ContinuumWorker::ContinuumWorker(LOFAR::ParameterSet& parset,
             const string ms = workUnits[workUnitCount].get_dataset();
             globalChannel = workUnits[workUnitCount].get_globalChannel();
 
-            TableDataSource ds(ms, TableDataSource::DEFAULT, colName);
+            // just to print the current mode to the log
+            bool usememorybuffers = itsParsets[workUnitCount].getBool("memorybuffers", false);
+
+            if (usememorybuffers) {
+                ASKAPLOG_INFO_STR(logger, "Scratch data will be held in memory" );
+            } else {
+                ASKAPLOG_INFO_STR(logger, "Scratch data will be written to the subtable of the original dataset" );
+            }
+
+            TableDataSource ds(ms, (usememorybuffers ? TableDataSource::MEMORY_BUFFERS : TableDataSource::DEFAULT),
+                               colName);
+
+
 
 
             /// Need to set up the rootImager here
@@ -661,10 +675,11 @@ ContinuumWorker::ContinuumWorker(LOFAR::ParameterSet& parset,
               rootImager.receiveModel();
               ASKAPLOG_INFO_STR(logger, "Worker received initial model for cycle 0");
             }
+            else {
+               // this assumes no subimage will be formed.
+              setupImage(rootImager.params(), frequency,false);
+            }
 
-            // this assumes no subimage will be formed.
-
-            setupImage(rootImager.params(), frequency,false);
             ImagingNormalEquations &rootINERef =
             dynamic_cast<ImagingNormalEquations&>(*rootImager.getNE());
 
@@ -785,7 +800,6 @@ ContinuumWorker::ContinuumWorker(LOFAR::ParameterSet& parset,
                   // grid and image
                   try {
                     workingImager.calcNE();
-
                   }
                   catch (const askap::AskapError& e) {
                     ASKAPLOG_WARN_STR(logger,"Askap error in worker calcNE");
@@ -949,6 +963,7 @@ ContinuumWorker::ContinuumWorker(LOFAR::ParameterSet& parset,
             ASKAPLOG_INFO_STR(logger, "Rank " << itsComms.rank() << " passed barrier");
 
             if (!localSolver) { // all my work is done - only continue if in local mode
+              ASKAPLOG_INFO_STR(logger,"Finished imaging");
               return;
             }
 
