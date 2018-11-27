@@ -7,30 +7,32 @@ export AIPSPATH=${ASKAP_ROOT}/Code/Base/accessors/current
 if [ ! -x ../../apps/imager.sh ]; then
     echo imager.sh does not exit
 fi
+RESTORED=image.restored.wr.1.cont.fits
+IMAGE=image.wr.1.cont.fits
+PSF=psf.image.wr.1.cont.fits
+RESIDUAL=residual.wr.1.cont.fits
+WEIGHTS=weights.wr.1.cont.fits
 
-IMAGE=image.i.cube.spectral
-PSF=psf.i.cube.spectral
-WEIGHTS=weights.i.cube.spectral
 
 echo -n "Removing image cubes..."
 rm -rf $IMAGE
 rm -rf $PSF
-rm -rf WEIGHTS
+rm -rf $WEIGHTS
 
 echo Done
 
 echo -n Extracting measurement set...
-tar zxf ../10uJy_stdtest.ms.tgz
+tar -xvf ../full_band.ms.tar.gz 
 echo Done
 
-mpirun -np 3 ../../apps/imager.sh -c imager.in | tee $OUTPUT
+mpirun -np 5 ../../apps/imager.sh -c spectral.in | tee $OUTPUT
 if [ $? -ne 0 ]; then
     echo Error: mpirun returned an error
     exit 1
 fi
 
 echo -n Removing measurement set...
-rm -rf 10uJy_stdtest.ms
+rm -rf full_band.ms
 echo Done
 
 # Check for instances of "Askap error"
@@ -48,17 +50,17 @@ if [ $? -ne 1 ]; then
 fi
 
 # Check for the existance of the various image cubes
-if [ ! -d ${IMAGE} ]; then
+if [ ! -f ${IMAGE} ]; then
     echo "Error ${IMAGE} not created"
     exit 1
 fi
 
-if [ ! -d ${PSF}${IDX} ]; then
+if [ ! -f ${PSF}${IDX} ]; then
     echo "Error ${PSF} not created"
     exit 1
 fi
 
-if [ ! -d ${WEIGHTS}${IDX} ]; then
+if [ ! -f ${WEIGHTS}${IDX} ]; then
     echo "Error ${WEIGHTS} not created"
     exit 1
 fi
