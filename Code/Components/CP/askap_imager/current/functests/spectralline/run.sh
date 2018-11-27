@@ -67,5 +67,9 @@ if [ ! -f ${WEIGHTS}${IDX} ]; then
     exit 1
 fi
 
+echo -n "Removing image cubes..."
+rm -f *.fits
+
+
 echo Done
 
