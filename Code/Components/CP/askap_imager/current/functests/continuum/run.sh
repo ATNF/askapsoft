@@ -7,12 +7,13 @@ export AIPSPATH=${ASKAP_ROOT}/Code/Base/accessors/current
 if [ ! -x ../../apps/imager.sh ]; then
     echo imager.sh does not exit
 fi
-RESTORED=image.restored.wr.1.cont.fits
-IMAGE=image.wr.1.cont.fits
-PSF=psf.image.wr.1.cont.fits
-RESIDUAL=residual.wr.1.cont.fits
-WEIGHTS=weights.wr.1.cont.fits
 
+#
+IMAGE=image.cont.taylor.0.fits
+RESTORED=image.cont.taylor.0.restored.fits
+PSF=psf.cont.taylor.0.fits
+RESIDUAL=residual.cont.taylor.0.fits
+WEIGHTS=weights.cont.taylor.0.fits
 
 echo -n "Removing image cubes..."
 rm -f *.fits
@@ -23,7 +24,7 @@ echo -n Extracting measurement set...
 tar -xvf ../full_band.ms.tar.gz 
 echo Done
 
-mpirun -np 5 ../../apps/imager.sh -c spectral.in | tee $OUTPUT
+mpirun -np 25 ../../apps/imager.sh -c msmfs.in | tee $OUTPUT
 if [ $? -ne 0 ]; then
     echo Error: mpirun returned an error
     exit 1
@@ -66,6 +67,10 @@ if [ ! -f ${WEIGHTS}${IDX} ]; then
     echo "Error ${WEIGHTS} not created"
     exit 1
 fi
+
+echo -n "Removing image cubes..."
+rm -f *.fits
+
 
 echo Done
 

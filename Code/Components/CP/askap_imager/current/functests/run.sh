@@ -7,17 +7,26 @@ echo Running test cases...
 
 FAIL=0
 
-# Non-cycling Spectral Line Imager Test
+# Non-cycling (ncycles 0) Spectral Line Imager Test
 cd spectralline
 ./run.sh
 if [ $? -eq 0 ]; then
-    R3="spectralline        PASS"
+    R1="spectralline (ncycles 0)        PASS"
 else
-    R3="spectralline        FAIL"
+    R1="spectralline (ncycles 0)       FAIL"
     FAIL=1
 fi
 cd $INITIALDIR
+cd continuum
+./run.sh
+if [ $? -eq 0 ]; then
+    R2="continuum (ncycles 0)        PASS"
+else
+    R2="continuum (ncycles 0)       FAIL"
+    FAIL=1
+fi
 
+cd $INITIALDIR
 # Print Results
 echo
 echo Result Summary:
