@@ -637,7 +637,7 @@ ContinuumWorker::ContinuumWorker(LOFAR::ParameterSet& parset,
             globalChannel = workUnits[workUnitCount].get_globalChannel();
 
             // just to print the current mode to the log
-            bool usememorybuffers = itsParsets[workUnitCount].getBool("memorybuffers", false);
+            bool usememorybuffers = itsParsets[workUnitCount].getBool("memorybuffers", true);
 
             if (usememorybuffers) {
                 ASKAPLOG_INFO_STR(logger, "Scratch data will be held in memory" );
@@ -852,10 +852,13 @@ ContinuumWorker::ContinuumWorker(LOFAR::ParameterSet& parset,
 
               }
 
-              workUnitCount = tempWorkUnitCount; // this is to remember what finished on.
+              workUnitCount = tempWorkUnitCount; // this is to remember what finished on (important for localSolver).
               /// now if we are in spectral line mode we have a "full" set of NE we can SolveNE to update the model
+              /// the solving is either done locally - or sent to a "master" for Solving
+              /// IF dont locally then we solve - update the model and go again until we reach the majorcycle count.
 
-              if (localSolver && nCycles > 0) { // only solve if nCycles > 0
+
+              if (localSolver) {
                 try {
                   rootImager.solveNE();
 
@@ -865,9 +868,13 @@ ContinuumWorker::ContinuumWorker(LOFAR::ParameterSet& parset,
                   throw;
                 }
               }
-              else if (localSolver && nCycles == 0) {
-                break; // work is done
+              if (localSolver && nCycles == 0) {
+                stopping = true;
+                ASKAPLOG_INFO_STR(logger,"Worker stopping");
+                break;
               }
+
+
               else { // probably continuum mode ....
                 // If we are in continuum mode we have probaby ran through the whole allocation
                 // lets send it to the master for processing.
@@ -938,7 +945,7 @@ ContinuumWorker::ContinuumWorker(LOFAR::ParameterSet& parset,
                 // the model is now updated but the NE are empty ... - lets go again
                 // well they are not completely empty - the PSF is still there but the weights and image are zero
               }
-              else if (!updateDir) {
+              else if (!stopping && !updateDir) {
                 // In this case the first workUnit is processed outside the workUnit loop.
                 // So we need to calcNE again with the latest model before the major cycle starts.
                 //
@@ -979,11 +986,10 @@ ContinuumWorker::ContinuumWorker(LOFAR::ParameterSet& parset,
 
             rootImager.check();
 
-            if (nCycles > 0) {
-              if (itsParsets[0].getBool("restore", false)) {
+
+            if (itsParsets[0].getBool("restore", false)) {
                 ASKAPLOG_INFO_STR(logger, "Running restore");
                 rootImager.restoreImage();
-              }
             }
 
             if (usetmpfs) {
@@ -1128,7 +1134,8 @@ ContinuumWorker::ContinuumWorker(LOFAR::ParameterSet& parset,
 
           }
 
-        }
+        } // next workunit if required.
+
         // cleanup
         if (itsComms.isWriter()) {
 

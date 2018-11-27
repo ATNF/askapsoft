@@ -16,6 +16,8 @@ else
     R1="spectralline (ncycles 0)       FAIL"
     FAIL=1
 fi
+rm *.fits
+
 cd $INITIALDIR
 cd continuum
 ./run.sh
@@ -25,6 +27,7 @@ else
     R2="continuum (ncycles 0)       FAIL"
     FAIL=1
 fi
+rm *.fits
 
 cd $INITIALDIR
 # Print Results
