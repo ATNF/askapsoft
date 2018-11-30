@@ -1109,6 +1109,9 @@ ARCHIVE_SELFCAL_LOOP_MOSAICS=false
 # Whether to archive the mosaicked images of each field
 ARCHIVE_FIELD_MOSAICS=false
 
+# TELESCOP FITS header keyword
+TELESCOP_KEYWORD="ASKAP"
+
 # OPAL project ID, for CASDA use
 PROJECT_ID="AS033"
 

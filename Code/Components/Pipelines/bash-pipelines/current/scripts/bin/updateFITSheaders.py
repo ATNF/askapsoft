@@ -41,11 +41,12 @@ import astropy.io.fits as fits
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('--fitsfile', type=str, help='FITS file to update')
-parser.add_argument('--project', type=str, help='OPAL project ID for this observation')
-parser.add_argument('--sbid', type=str, help='Scheduling block ID for this observation')
-parser.add_argument('--dateobs', type=str, help='DATE-OBS string (YYYY-MM-DDTHH:MM:SS) for this observation')
-parser.add_argument('--duration', type=str, help='Length of this observation in sec')
-parser.add_argument('history', metavar='hist', type=str, nargs='+', help='A HISTORY statement')
+parser.add_argument('--telescope', type=str, default="", help='TELESCOP keyword')
+parser.add_argument('--project', type=str, default="", help='OPAL project ID for this observation')
+parser.add_argument('--sbid', type=str, default="", help='Scheduling block ID for this observation')
+parser.add_argument('--dateobs', type=str, default="", help='DATE-OBS string (YYYY-MM-DDTHH:MM:SS) for this observation')
+parser.add_argument('--duration', type=str, default="", help='Length of this observation in sec')
+parser.add_argument('history', metavar='hist', type=str, default="", nargs='+', help='A HISTORY statement')
 options = parser.parse_args()
 
 if options.fitsfile == "":
@@ -54,10 +55,16 @@ if options.fitsfile == "":
 hdulist = fits.open(options.fitsfile,'update')
 hdr1 = hdulist[0].header
 
-hdr1['PROJECT'] = options.project
-hdr1['SBID'] = options.sbid
-hdr1['DATE-OBS'] = options.dateobs
-hdr1['DURATION'] = options.duration
+if options.telescope != '':
+    hdr1['TELESCOP'] = options.telescope
+if options.project != '':
+    hdr1['PROJECT'] = options.project
+if options.sbid != '':
+    hdr1['SBID'] = options.sbid
+if options.dateobs != '':
+    hdr1['DATE-OBS'] = options.dateobs
+if options.duration != '':
+    hdr1['DURATION'] = options.duration
 
 for history in options.history:
     hdr1.add_history(history)

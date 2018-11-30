@@ -354,12 +354,6 @@ if [ -e \"\${casaim}\" ] && [ ! -e \"\${fitsim}\" ]; then
 ImageToFITS.casaimage = \${casaim}
 ImageToFITS.fitsimage = \${fitsim}
 #ImageToFITS.stokesLast = true
-#ImageToFITS.headers = [\"project\", \"sbid\", \"date-obs\", \"duration\"]
-#ImageToFITS.headers.project = ${PROJECT_ID}
-#ImageToFITS.headers.sbid = ${SB_SCIENCE}
-#ImageToFITS.headers.date-obs = ${DATE_OBS}
-#ImageToFITS.headers.duration = ${DURATION}
-#ImageToFITS.history = [${imageHistoryString}]
 EOFINNER
     NCORES=1
     NPPN=1
@@ -373,6 +367,7 @@ fi"
 NCORES=1
 NPPN=1
 updateArgs=\"--fitsfile=\${fitsim}\"
+updateArgs=\"\${updateArgs} --telescope=${TELESCOP_KEYWORD}\"
 updateArgs=\"\${updateArgs} --project=${PROJECT_ID}\"
 updateArgs=\"\${updateArgs} --sbid=${SB_SCIENCE}\"
 updateArgs=\"\${updateArgs} --dateobs=${DATE_OBS}\"
