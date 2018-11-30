@@ -965,12 +965,13 @@ ContinuumWorker::ContinuumWorker(LOFAR::ParameterSet& parset,
             }
             ASKAPLOG_INFO_STR(logger," Finished the major cycles");
 
-            ASKAPLOG_INFO_STR(logger, "Rank " << itsComms.rank() << " at barrier");
-            itsComms.barrier(itsComms.theWorkers());
-            ASKAPLOG_INFO_STR(logger, "Rank " << itsComms.rank() << " passed barrier");
+
 
             if (!localSolver) { // all my work is done - only continue if in local mode
               ASKAPLOG_INFO_STR(logger,"Finished imaging");
+              ASKAPLOG_INFO_STR(logger, "Rank " << itsComms.rank() << " at barrier");
+              itsComms.barrier(itsComms.theWorkers());
+              ASKAPLOG_INFO_STR(logger, "Rank " << itsComms.rank() << " passed barrier");
               return;
             }
 

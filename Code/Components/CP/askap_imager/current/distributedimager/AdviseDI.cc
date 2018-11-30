@@ -441,7 +441,7 @@ void AdviseDI::prepare() {
             globalChannel++;
             if (allocated == false)
             {
-                ASKAPLOG_WARN_STR(logger,"Allocating FAIL Cannot match " << thisAllocation[frequency] \
+                ASKAPLOG_WARN_STR(logger,"Allocating FAIL Cannot match " << thisAllocation[frequency] << " for rank " << work+1 \
                 << " in any set: ");
                 // warn it does not match ....
                 // have to increment the workcount for the cleanup.
