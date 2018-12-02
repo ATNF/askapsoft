@@ -1,0 +1,5 @@
+icegridregistry
+icebox
+MockIngestPipeline36.py
+MockDataServer.py
+ingestservice.py --log-config=ingestmanager.pylog_cfg --config=ingest.cfg

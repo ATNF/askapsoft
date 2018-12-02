@@ -1,0 +1,23 @@
+[loggers]
+keys=root
+
+[handlers]
+keys=iceHandler
+
+[logger_root]
+level=DEBUG
+handlers=iceHandler
+
+[handler_iceHandler]
+class=askap.loghandlers.IceHandler
+level=DEBUG
+args=('logger','localhost', 4061)
+
+
+# This is not used in the IceHandler, but neccessary for config
+[formatters]
+keys=simpleFormatter
+
+[formatter_simpleFormatter]
+format=%(asctime)s - %(name)s - %(levelname)s - %(message)s
+datefmt=

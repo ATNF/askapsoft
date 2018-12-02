@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Note that although this file is in a test-specific subdirectory,
+# the working directory when it executes is the root functests directory.
+# Thus all paths should be relative to the parent functests.
+
+# Setup the environment
+source ../init_package_env.sh
+export AIPSPATH=$ASKAP_ROOT/Code/Base/accessors/current
+
+# Execute your application under test
+{{cookiecutter.cli_app_name}} -c $TEST_DIR/{{cookiecutter.cli_app_name}}.cfg -l ./config-files/logging.log_cfg &
+
+# Required for the functional test framework. Do not modify below this line!
+PID=$!
+trap "kill -15 $PID" TERM KILL INT
+wait

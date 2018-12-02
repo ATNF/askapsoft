@@ -1,0 +1,19 @@
+# @file
+# SConstruct build script for this module.
+# This is currently a test case, please edit this comment when deemed stable
+#
+# @author Malte Marquarding <Malte.Marquarding@csiro.au>
+#
+
+# Always import this
+from askapenv import env
+import os
+
+#env.Append(LINKFLAGS=['-fopenmp'])
+
+# create build object with library name
+pkg = env.AskapPackage("swcutils")
+
+# run the build process
+pkg()
+

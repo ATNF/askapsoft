@@ -1,0 +1,28 @@
+#%Module1.0#####################################################################
+##
+## askappipeline modulefile
+##
+proc ModulesHelp { } {
+        global version
+
+        puts stderr "\tThis modules provides scripts to run ASKAPsoft pipeline processing."
+
+}
+
+# No two versions of this module can be loaded simultaneously
+conflict        askappipeline
+
+
+#prereq aces
+#if { [ module-info mode load ] } {
+#    module load aces
+#}
+
+module-whatis   "ASKAPsoft pipeline processing"
+
+set PIPELINEHOME  /group/askap/askappipeline/${_VERSION}  # replace with version number on install
+
+prepend-path    PATH            $PIPELINEHOME/bin
+
+setenv PIPELINEDIR $PIPELINEHOME/bin
+setenv PIPELINE_VERSION ${_VERSION}  # replace with version number on install

@@ -1,0 +1,13 @@
+#%Module1.0#####################################################################
+##
+## askap-cray modulefile
+##
+proc ModulesHelp { } {
+        global version
+
+        puts stderr "\tThis module provides certain environment variables needed to build ASKAPsoft."
+}
+
+module-whatis   "ASKAP readiness on a cray system"
+
+setenv CRAYOS_VERSION " "

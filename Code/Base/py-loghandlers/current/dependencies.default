@@ -1,0 +1,4 @@
+py-askap=Code/Base/py-askap/current
+ice=3rdParty/Ice/Ice-3.5.0
+pyiceinterfaces=Code/Interfaces/python/current
+iceutils=Code/Base/py-iceutils/current

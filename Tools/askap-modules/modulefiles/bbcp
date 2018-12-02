@@ -1,0 +1,20 @@
+#%Module1.0#####################################################################
+##
+## BBCP modulefile
+##
+proc ModulesHelp { } {
+        global version
+
+        puts stderr "\tThis modules provides the BBCP fast file copy program."
+        puts stderr "\tSee http://www.slac.stanford.edu/~abh/bbcp/ for detailed"
+        puts stderr "\tcommand line parameters"
+}
+
+# No two versions of this module can be loaded simultaneously
+conflict        bbcp
+
+module-whatis   "BBCP Fast file copy"
+
+set BBCP_HOME   /group/askap/bbcp/13.05.03.00.0
+
+prepend-path    PATH    $BBCP_HOME/bin

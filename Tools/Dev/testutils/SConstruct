@@ -1,0 +1,26 @@
+# @file
+# SConstruct build script for this module.
+#
+# @author Tony Maher <Tony.Maher@csiro.au>
+#
+import os
+
+askap_root = os.environ['ASKAP_ROOT']
+incdir = '%s/include' % askap_root
+libdir = '%s/lib' % askap_root
+
+# I want to inherit the path from the environment
+# I did this to avoid the compiler choice being clobbered
+# on supercomputer enviroments where the defualt compiler is not being used
+#
+#env = Environment(ENV = {'PATH' : os.environ['PATH']})
+#env = Environment(ENV = {'LD_LIBRARY_PATH' : os.environ['LD_LIBRARY_PATH']})
+env = Environment()
+env.AppendUnique(CPPPATH=["%s/include" % askap_root])
+
+testutils = env.Library('testutils', ['AskapTestRunner.cc'])
+
+env.Install(incdir, 'AskapTestRunner.h')
+env.Install(libdir, testutils)
+env.Alias('install', incdir)
+env.Alias('install', libdir)

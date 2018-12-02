@@ -1,0 +1,115 @@
+<?xml version="1.0"?>
+<VOTABLE version="1.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://www.ivoa.net/xml/VOTable/v1.3"
+         xmlns:stc="http://www.ivoa.net/xml/STC/v1.30" >
+  <COOSYS ID="J2000" equinox="J2000" system="eq_FK5"/>
+  <RESOURCE name="Polarisation Catalogue from Selavy source-finding">
+    <TABLE name="Polarisation Catalogue">
+      <DESCRIPTION></DESCRIPTION>
+      <PARAM name="table_version" ucd="meta.version" datatype="char" arraysize="39" value="casda.polarisation_description_v0.5"/>
+      <PARAM name="imageFile" ucd="meta.file;meta.fits" datatype="char" arraysize="63" value="image.fits"/>
+      <PARAM name="flagSubsection" ucd="meta.code" datatype="boolean" value="1"/>
+      <PARAM name="subsection" ucd="" datatype="char" arraysize="23" value="[1:2950,1:2084,1:1,1:1]"/>
+      <PARAM name="flagStatSec" ucd="meta.code" datatype="boolean" value="0"/>
+      <PARAM name="StatSec" ucd="" datatype="char" arraysize="7" value="[*,*,*]"/>
+      <PARAM name="searchType" ucd="meta.note" datatype="char" arraysize="7" value="spatial"/>
+      <PARAM name="flagNegative" ucd="meta.code" datatype="boolean" value="0"/>
+      <PARAM name="flagBaseline" ucd="meta.code" datatype="boolean" value="0"/>
+      <PARAM name="flagRobustStats" ucd="meta.code" datatype="boolean" value="1"/>
+      <PARAM name="flagFDR" ucd="meta.code" datatype="boolean" value="0"/>
+      <PARAM name="threshold" ucd="phot.flux;stat.min" datatype="float" value="6"/>
+      <PARAM name="flagGrowth" ucd="meta.code" datatype="boolean" value="1"/>
+      <PARAM name="growthThreshold" ucd="phot.flux;stat.min" datatype="float" value="4"/>
+      <PARAM name="minPix" ucd="" datatype="int" value="3"/>
+      <PARAM name="minChannels" ucd="" datatype="int" value="0"/>
+      <PARAM name="minVoxels" ucd="" datatype="int" value="3"/>
+      <PARAM name="flagAdjacent" ucd="meta.code" datatype="boolean" value="0"/>
+      <PARAM name="threshSpatial" ucd="" datatype="float" value="5"/>
+      <PARAM name="threshVelocity" ucd="" datatype="float" value="7"/>
+      <PARAM name="flagRejectBeforeMerge" ucd="" datatype="boolean" value="0"/>
+      <PARAM name="flagTwoStageMerging" ucd="" datatype="boolean" value="1"/>
+      <PARAM name="pixelCentre" ucd="" datatype="char" arraysize="8" value="centroid"/>
+      <PARAM name="flagSmooth" ucd="meta.code" datatype="boolean" value="0"/>
+      <PARAM name="flagATrous" ucd="meta.code" datatype="boolean" value="0"/>
+      <PARAM name="Reference frequency" ucd="em.freq;meta.main" datatype="float" unit="Hz" value="8.64e+08"/>
+      <PARAM name="thresholdActual" ucd="" datatype="float" unit="Jy/beam" value="6"/>
+      <FIELD name="component_id" ID="col_component_id" ucd="meta.id;meta.main" datatype="char" unit="" width="50" precision="2" />
+      <FIELD name="component_name" ID="col_component_name" ucd="meta.id" datatype="char" unit="" width="50" precision="2" />
+      <FIELD name="ra_deg_cont" ID="col_ra_deg_cont" ucd="pos.eq.ra;meta.main" datatype="double" unit="deg" width="50" precision="6" />
+      <FIELD name="dec_deg_cont" ID="col_dec_deg_cont" ucd="pos.eq.dec;meta.main" datatype="double" unit="deg" width="50" precision="6" />
+      <FIELD name="flux_I_median" ID="col_flux_I_median" ucd="phot.flux.density;em.radio" datatype="double" unit="mJy/beam" width="50" precision="2" />
+      <FIELD name="flux_Q_median" ID="col_flux_Q_median" ucd="phot.flux.density;em.radio;askap:phys.polarization.stokes.Q" datatype="double" unit="mJy/beam" width="50" precision="2" />
+      <FIELD name="flux_U_median" ID="col_flux_U_median" ucd="phot.flux.density;em.radio;askap:phys.polarization.stokes.U" datatype="double" unit="mJy/beam" width="50" precision="2" />
+      <FIELD name="flux_V_median" ID="col_flux_V_median" ucd="phot.flux.density;em.radio;askap:phys.polarization.stokes.V" datatype="double" unit="mJy/beam" width="50" precision="2" />
+      <FIELD name="rms_I" ID="col_rms_I" ucd="stat.stdev;phot.flux.density" datatype="double" unit="mJy/beam" width="50" precision="2" />
+      <FIELD name="rms_Q" ID="col_rms_Q" ucd="stat.stdev;phot.flux.density;askap:phys.polarization.stokes.Q" datatype="double" unit="mJy/beam" width="50" precision="2" />
+      <FIELD name="rms_U" ID="col_rms_U" ucd="stat.stdev;phot.flux.density;askap:phys.polarization.stokes.U" datatype="double" unit="mJy/beam" width="50" precision="2" />
+      <FIELD name="rms_V" ID="col_rms_V" ucd="stat.stdev;phot.flux.density;askap:phys.polarization.stokes.V" datatype="double" unit="mJy/beam" width="50" precision="2" />
+      <FIELD name="co_1" ID="col_co_1" ucd="stat.fit.param;spect.continuum" datatype="double" unit="" width="50" precision="2" />
+      <FIELD name="co_2" ID="col_co_2" ucd="stat.fit.param;spect.continuum" datatype="double" unit="" width="50" precision="2" />
+      <FIELD name="co_3" ID="col_co_3" ucd="stat.fit.param;spect.continuum" datatype="double" unit="" width="50" precision="2" />
+      <FIELD name="co_4" ID="col_co_4" ucd="stat.fit.param;spect.continuum" datatype="double" unit="" width="50" precision="2" />
+      <FIELD name="co_5" ID="col_co_5" ucd="stat.fit.param;spect.continuum" datatype="double" unit="" width="50" precision="2" />
+      <FIELD name="lambda_ref_sq" ID="col_lambda_ref_sq" ucd="askap:em.wl.squared" datatype="double" unit="m^2" width="50" precision="2" />
+      <FIELD name="rmsf_fwhm" ID="col_rmsf_fwhm" ucd="phys.polarization.rotMeasure;askap:phys.polarization.rmsfWidth" datatype="double" unit="rad/m^2" width="50" precision="2" />
+      <FIELD name="pol_peak" ID="col_pol_peak" ucd="phot.flux.density;phys.polarization.rotMeasure;stat.max" datatype="double" unit="mJy/beam" width="50" precision="2" />
+      <FIELD name="pol_peak_debias" ID="col_pol_peak_debias" ucd="phot.flux.density;phys.polarization.rotMeasure;stat.max;askap:meta.corrected" datatype="double" unit="mJy/beam" width="50" precision="2" />
+      <FIELD name="pol_peak_err" ID="col_pol_peak_err" ucd="stat.error;phot.flux.density;phys.polarization.rotMeasure;stat.max" datatype="double" unit="mJy/beam" width="50" precision="2" />
+      <FIELD name="pol_peak_fit" ID="col_pol_peak_fit" ucd="phot.flux.density;phys.polarization.rotMeasure;stat.max;stat.fit" datatype="double" unit="mJy/beam" width="50" precision="2" />
+      <FIELD name="pol_peak_fit_debias" ID="col_pol_peak_fit_debias" ucd="phot.flux.density;phys.polarization.rotMeasure;stat.max;stat.fit;askap:meta.corrected" datatype="double" unit="mJy/beam" width="50" precision="2" />
+      <FIELD name="pol_peak_fit_err" ID="col_pol_peak_fit_err" ucd="stat.error;phot.flux.density;phys.polarization.rotMeasure;stat.max;stat.fit" datatype="double" unit="mJy/beam" width="50" precision="2" />
+      <FIELD name="pol_peak_fit_snr" ID="col_pol_peak_fit_snr" ucd="stat.snr;phot.flux.density;phys.polarization.rotMeasure;stat.max;stat.fit" datatype="double" unit="" width="50" precision="2" />
+      <FIELD name="pol_peak_fit_snr_err" ID="col_pol_peak_fit_snr_err" ucd="stat.error;stat.snr;phot.flux.density;phys.polarization.rotMeasure;stat.max;stat.fit" datatype="double" unit="" width="50" precision="2" />
+      <FIELD name="fd_peak" ID="col_fd_peak" ucd="phys.polarization.rotMeasure " datatype="double" unit="rad/m^2" width="50" precision="2" />
+      <FIELD name="fd_peak_err" ID="col_fd_peak_err" ucd="stat.error;phys.polarization.rotMeasure " datatype="double" unit="rad/m^2" width="50" precision="2" />
+      <FIELD name="fd_peak_fit" ID="col_fd_peak_fit" ucd="phys.polarization.rotMeasure;stat.fit" datatype="double" unit="rad/m^2" width="50" precision="2" />
+      <FIELD name="fd_peak_fit_err" ID="col_fd_peak_fit_err" ucd="stat.error;phys.polarization.rotMeasure;stat.fit" datatype="double" unit="rad/m^2" width="50" precision="2" />
+      <FIELD name="pol_ang_ref" ID="col_pol_ang_ref" ucd="askap:phys.polarization.angle" datatype="double" unit="deg" width="50" precision="2" />
+      <FIELD name="pol_ang_ref_err" ID="col_pol_ang_ref_err" ucd="stat.error;askap:phys.polarization.angle" datatype="double" unit="deg" width="50" precision="2" />
+      <FIELD name="pol_ang_zero" ID="col_pol_ang_zero" ucd="askap:phys.polarization.angle;askap:meta.corrected" datatype="double" unit="deg" width="50" precision="2" />
+      <FIELD name="pol_ang_zero_err" ID="col_pol_ang_zero_err" ucd="stat.error;askap:phys.polarization.angle;askap:meta.corrected" datatype="double" unit="deg" width="50" precision="2" />
+      <FIELD name="pol_frac" ID="col_pol_frac" ucd="phys.polarization" datatype="double" unit="" width="50" precision="2" />
+      <FIELD name="pol_frac_err" ID="col_pol_frac_err" ucd="stat.error;phys.polarization" datatype="double" unit="" width="50" precision="2" />
+      <FIELD name="complex_1" ID="col_complex_1" ucd="stat.value;phys.polarization" datatype="double" unit="" width="50" precision="2" />
+      <FIELD name="complex_2" ID="col_complex_2" ucd="stat.value;phys.polarization" datatype="double" unit="" width="50" precision="2" />
+      <FIELD name="flag_p1" ID="col_flag_p1" ucd="meta.code" datatype="int" unit="" width="50" precision="2" />
+      <FIELD name="flag_p2" ID="col_flag_p2" ucd="meta.code" datatype="int" unit="" width="50" precision="2" />
+      <FIELD name="flag_p3" ID="col_flag_p3" ucd="meta.code" datatype="int" unit="" width="50" precision="2" />
+      <FIELD name="flag_p4" ID="col_flag_p4" ucd="meta.code" datatype="int" unit="" width="50" precision="2" />
+      <DATA>
+        <TABLEDATA>
+          <TR>
+            <TD>SB1958_image.i.LMC.cont.sb1958.taylor.0.restored_1a</TD> <TD>J1234-4321</TD> <TD>12.582438</TD> <TD>-43.352742</TD> <TD>1.0</TD> <TD>0.5</TD> <TD>-0.4</TD> <TD>0.0010</TD> <TD>0.0010</TD> <TD>0.0012</TD> <TD>0.0013</TD> <TD>0.0012</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>0.09</TD> <TD>5.0</TD> <TD>1.5</TD> <TD>1.4</TD> <TD>0.01</TD> <TD>1.55</TD> <TD>1.42</TD> <TD>0.01</TD> <TD>150.0</TD> <TD>1.0</TD> <TD>50.0</TD> <TD>5.0</TD> <TD>52.0</TD> <TD>5.2</TD> <TD>30.0</TD> <TD>1.0</TD> <TD>45.0</TD> <TD>1.0</TD> <TD>8.0</TD> <TD>0.1</TD> <TD>0.0</TD> <TD>0.0</TD> <TD>1</TD> <TD>0</TD> <TD>0</TD> <TD>0</TD>
+          </TR>
+          <TR>
+            <TD>SB1958_image.i.LMC.cont.sb1958.taylor.0.restored_1b</TD> <TD>J1234-4321</TD> <TD>12.582438</TD> <TD>-43.352742</TD> <TD>1.0</TD> <TD>0.5</TD> <TD>-0.4</TD> <TD>0.0010</TD> <TD>0.0010</TD> <TD>0.0012</TD> <TD>0.0013</TD> <TD>0.0012</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>0.09</TD> <TD>5.0</TD> <TD>1.5</TD> <TD>1.4</TD> <TD>0.01</TD> <TD>1.55</TD> <TD>1.42</TD> <TD>0.01</TD> <TD>150.0</TD> <TD>1.0</TD> <TD>50.0</TD> <TD>5.0</TD> <TD>52.0</TD> <TD>5.2</TD> <TD>30.0</TD> <TD>1.0</TD> <TD>45.0</TD> <TD>1.0</TD> <TD>8.0</TD> <TD>0.1</TD> <TD>0.0</TD> <TD>0.0</TD> <TD>1</TD> <TD>0</TD> <TD>0</TD> <TD>0</TD>
+          </TR>
+          <TR>
+            <TD>SB1958_image.i.LMC.cont.sb1958.taylor.0.restored_1c</TD> <TD>J1234-4321</TD> <TD>12.582438</TD> <TD>-43.352742</TD> <TD>1.0</TD> <TD>0.5</TD> <TD>-0.4</TD> <TD>0.0010</TD> <TD>0.0010</TD> <TD>0.0012</TD> <TD>0.0013</TD> <TD>0.0012</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>0.09</TD> <TD>5.0</TD> <TD>1.5</TD> <TD>1.4</TD> <TD>0.01</TD> <TD>1.55</TD> <TD>1.42</TD> <TD>0.01</TD> <TD>150.0</TD> <TD>1.0</TD> <TD>50.0</TD> <TD>5.0</TD> <TD>52.0</TD> <TD>5.2</TD> <TD>30.0</TD> <TD>1.0</TD> <TD>45.0</TD> <TD>1.0</TD> <TD>8.0</TD> <TD>0.1</TD> <TD>0.0</TD> <TD>0.0</TD> <TD>1</TD> <TD>0</TD> <TD>0</TD> <TD>0</TD>
+          </TR>
+          <TR>
+            <TD>SB1958_image.i.LMC.cont.sb1958.taylor.0.restored_2a</TD> <TD>J1234-4321</TD> <TD>12.582438</TD> <TD>-43.352742</TD> <TD>1.0</TD> <TD>0.5</TD> <TD>-0.4</TD> <TD>0.0010</TD> <TD>0.0010</TD> <TD>0.0012</TD> <TD>0.0013</TD> <TD>0.0012</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>0.09</TD> <TD>5.0</TD> <TD>1.5</TD> <TD>1.4</TD> <TD>0.01</TD> <TD>1.55</TD> <TD>1.42</TD> <TD>0.01</TD> <TD>150.0</TD> <TD>1.0</TD> <TD>50.0</TD> <TD>5.0</TD> <TD>52.0</TD> <TD>5.2</TD> <TD>30.0</TD> <TD>1.0</TD> <TD>45.0</TD> <TD>1.0</TD> <TD>8.0</TD> <TD>0.1</TD> <TD>0.0</TD> <TD>0.0</TD> <TD>1</TD> <TD>0</TD> <TD>0</TD> <TD>0</TD>
+          </TR>
+          <TR>
+            <TD>SB1958_image.i.LMC.cont.sb1958.taylor.0.restored_3a</TD> <TD>J1234-4321</TD> <TD>12.582438</TD> <TD>-43.352742</TD> <TD>1.0</TD> <TD>0.5</TD> <TD>-0.4</TD> <TD>0.0010</TD> <TD>0.0010</TD> <TD>0.0012</TD> <TD>0.0013</TD> <TD>0.0012</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>0.09</TD> <TD>5.0</TD> <TD>1.5</TD> <TD>1.4</TD> <TD>0.01</TD> <TD>1.55</TD> <TD>1.42</TD> <TD>0.01</TD> <TD>150.0</TD> <TD>1.0</TD> <TD>50.0</TD> <TD>5.0</TD> <TD>52.0</TD> <TD>5.2</TD> <TD>30.0</TD> <TD>1.0</TD> <TD>45.0</TD> <TD>1.0</TD> <TD>8.0</TD> <TD>0.1</TD> <TD>0.0</TD> <TD>0.0</TD> <TD>1</TD> <TD>0</TD> <TD>0</TD> <TD>0</TD>
+          </TR>
+          <TR>
+            <TD>SB1958_image.i.LMC.cont.sb1958.taylor.0.restored_4a</TD> <TD>J1234-4321</TD> <TD>12.582438</TD> <TD>-43.352742</TD> <TD>1.0</TD> <TD>0.5</TD> <TD>-0.4</TD> <TD>0.0010</TD> <TD>0.0010</TD> <TD>0.0012</TD> <TD>0.0013</TD> <TD>0.0012</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>0.09</TD> <TD>5.0</TD> <TD>1.5</TD> <TD>1.4</TD> <TD>0.01</TD> <TD>1.55</TD> <TD>1.42</TD> <TD>0.01</TD> <TD>150.0</TD> <TD>1.0</TD> <TD>50.0</TD> <TD>5.0</TD> <TD>52.0</TD> <TD>5.2</TD> <TD>30.0</TD> <TD>1.0</TD> <TD>45.0</TD> <TD>1.0</TD> <TD>8.0</TD> <TD>0.1</TD> <TD>0.0</TD> <TD>0.0</TD> <TD>1</TD> <TD>0</TD> <TD>0</TD> <TD>0</TD>
+          </TR>
+          <TR>
+            <TD>SB1958_image.i.LMC.cont.sb1958.taylor.0.restored_4b</TD> <TD>J1234-4321</TD> <TD>12.582438</TD> <TD>-43.352742</TD> <TD>1.0</TD> <TD>0.5</TD> <TD>-0.4</TD> <TD>0.0010</TD> <TD>0.0010</TD> <TD>0.0012</TD> <TD>0.0013</TD> <TD>0.0012</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>0.09</TD> <TD>5.0</TD> <TD>1.5</TD> <TD>1.4</TD> <TD>0.01</TD> <TD>1.55</TD> <TD>1.42</TD> <TD>0.01</TD> <TD>150.0</TD> <TD>1.0</TD> <TD>50.0</TD> <TD>5.0</TD> <TD>52.0</TD> <TD>5.2</TD> <TD>30.0</TD> <TD>1.0</TD> <TD>45.0</TD> <TD>1.0</TD> <TD>8.0</TD> <TD>0.1</TD> <TD>0.0</TD> <TD>0.0</TD> <TD>1</TD> <TD>0</TD> <TD>0</TD> <TD>0</TD>
+          </TR>
+          <TR>
+            <TD>SB1958_image.i.LMC.cont.sb1958.taylor.0.restored_4c</TD> <TD>J1234-4321</TD> <TD>12.582438</TD> <TD>-43.352742</TD> <TD>1.0</TD> <TD>0.5</TD> <TD>-0.4</TD> <TD>0.0010</TD> <TD>0.0010</TD> <TD>0.0012</TD> <TD>0.0013</TD> <TD>0.0012</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>0.09</TD> <TD>5.0</TD> <TD>1.5</TD> <TD>1.4</TD> <TD>0.01</TD> <TD>1.55</TD> <TD>1.42</TD> <TD>0.01</TD> <TD>150.0</TD> <TD>1.0</TD> <TD>50.0</TD> <TD>5.0</TD> <TD>52.0</TD> <TD>5.2</TD> <TD>30.0</TD> <TD>1.0</TD> <TD>45.0</TD> <TD>1.0</TD> <TD>8.0</TD> <TD>0.1</TD> <TD>0.0</TD> <TD>0.0</TD> <TD>1</TD> <TD>0</TD> <TD>0</TD> <TD>0</TD>
+          </TR>
+          <TR>
+            <TD>SB1958_image.i.LMC.cont.sb1958.taylor.0.restored_5a</TD> <TD>J1234-4321</TD> <TD>12.582438</TD> <TD>-43.352742</TD> <TD>1.0</TD> <TD>0.5</TD> <TD>-0.4</TD> <TD>0.0010</TD> <TD>0.0010</TD> <TD>0.0012</TD> <TD>0.0013</TD> <TD>0.0012</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>0.09</TD> <TD>5.0</TD> <TD>1.5</TD> <TD>1.4</TD> <TD>0.01</TD> <TD>1.55</TD> <TD>1.42</TD> <TD>0.01</TD> <TD>150.0</TD> <TD>1.0</TD> <TD>50.0</TD> <TD>5.0</TD> <TD>52.0</TD> <TD>5.2</TD> <TD>30.0</TD> <TD>1.0</TD> <TD>45.0</TD> <TD>1.0</TD> <TD>8.0</TD> <TD>0.1</TD> <TD>0.0</TD> <TD>0.0</TD> <TD>1</TD> <TD>0</TD> <TD>0</TD> <TD>0</TD>
+          </TR>
+          <TR>
+            <TD>SB1958_image.i.LMC.cont.sb1958.taylor.0.restored_6a</TD> <TD>J1234-4321</TD> <TD>12.582438</TD> <TD>-43.352742</TD> <TD>1.0</TD> <TD>0.5</TD> <TD>-0.4</TD> <TD>0.0010</TD> <TD>0.0010</TD> <TD>0.0012</TD> <TD>0.0013</TD> <TD>0.0012</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>1.0</TD> <TD>0.09</TD> <TD>5.0</TD> <TD>1.5</TD> <TD>1.4</TD> <TD>0.01</TD> <TD>1.55</TD> <TD>1.42</TD> <TD>0.01</TD> <TD>150.0</TD> <TD>1.0</TD> <TD>50.0</TD> <TD>5.0</TD> <TD>52.0</TD> <TD>5.2</TD> <TD>30.0</TD> <TD>1.0</TD> <TD>45.0</TD> <TD>1.0</TD> <TD>8.0</TD> <TD>0.1</TD> <TD>0.0</TD> <TD>0.0</TD> <TD>1</TD> <TD>0</TD> <TD>0</TD> <TD>0</TD>
+          </TR>
+        </TABLEDATA>
+      </DATA>
+    </TABLE>
+  </RESOURCE>
+</VOTABLE>

@@ -1,0 +1,19 @@
+#%Module1.0#####################################################################
+##
+## askapdata modulefile
+##
+proc ModulesHelp { } {
+        global version
+
+        puts stderr "\tThis modules provides measures data from ASKAPsoft."
+        puts stderr "\tThis data is from the casadata repository provided"
+        puts stderr "\tby NRAO for CASA."
+        puts stderr "\n\tSets the AIPSPATH environment variable."
+}
+
+# No two versions of this module can be loaded simultaneously
+conflict            askapdata
+
+module-whatis       "Measures data for ASKAPsoft"
+
+setenv  AIPSPATH    /group/askap/askapdata/current

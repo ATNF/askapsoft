@@ -1,0 +1,9 @@
+Functional tests
+
+In the order of creation:
+
+test_playback     		: a test for correlator simulator, which plays back data in BETA format. 
+						  The data is received by msnoop & vsnoop.
+test_playbackADE		: As above, but in ADE format instead of BETA.
+test_playbackADEMulti	: As above, but modified for multiple cards.
+test_ingest  			: An integration test, where Correlator simulator plays back data to ingest in ADE format.

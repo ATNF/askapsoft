@@ -1,0 +1,58 @@
+#%Module1.0#####################################################################
+##
+## askapsofthook modulefile
+##
+## On loading this module manipulates the LD_LIBRARY_PATH to include a user 
+## specified dir, which if it includes libs with askapsoft related symbols,
+## will be preferenced at runtime over the production deployed versions.
+##
+## Unloading the module reverts to the default case of running from production.
+##
+## askapsoft module must be loaded first. It is not loaded here as it will get
+## unloaded with this one and that will sometimes be confusing.
+##
+proc ModulesHelp { } {
+        global version
+
+        puts stderr "ASKAPsoft hook\n"
+
+        puts stderr "Manipulates library path to point to a dir of your choice containing libs which will be preferenced "
+        puts stderr "over the ones deployed in production. This will allow some ad hoc testing of user libs more easily.\n"
+
+        puts stderr "This module depends on the askapsoft module being loaded first. This module does not load it to prevent"
+        puts stderr "confusion as to the load state of askapsoft module."
+        puts stderr "You must also set up a MY_ASKAPSOFT_LIB_DIR env variable to point to the location of your custom libs."
+        puts stderr "MY_ASKAPSOFT_LIB_DIR=<path-to-your-lib-dir>; export MY_ASKAPSOFT_LIB_DIR\n"
+        puts stderr "e.g."
+        puts stderr "galaxy-1:$ MY_ASKAPSOFT_LIB_DIR=/group/askap/you/mylibs"
+        puts stderr "galaxy-1:$ export MY_ASKAPSOFT_LIB_DIR"
+        puts stderr "galaxy-1:$ module load askapsoft"
+        puts stderr "galaxy-1:$ module load askapsofthook"
+        puts stderr "Preferencing ASKAPsoft libs found in /group/askap/you/mylibs\n"
+
+        puts stderr "Disclaimers:"
+        puts stderr "WARNING: using this module means you are not testing your code against the developing ASKAPsoft codebase."
+        puts stderr "Success of your testing here does not indicate success for the next release." 
+        puts stderr "WARNING: not sure how long this will stay around for - experimental."
+}
+
+module-whatis   "ASKAPsoft hook - manipulates library path to point to a dir of your choice so that those libs are preferenced."
+
+if { [ module-info mode load ] } {
+  if { ! [ is-loaded askapsoft ] } {
+    puts stderr "To use this module load askapsoft module first."
+    break
+  }
+
+  if { [ info exists ::env(MY_ASKAPSOFT_LIB_DIR) ] } {
+    puts stderr "Preferencing ASKAPsoft libs found in $::env(MY_ASKAPSOFT_LIB_DIR)"
+  } else {
+    puts stderr "To use this module you must set MY_ASKAPSOFT_LIB_DIR to the dir where you will place your modified ASKAPsoft libs."
+    puts stderr "MY_ASKAPSOFT_LIB_DIR=<path-to-your-lib-dir>; export MY_ASKAPSOFT_LIB_DIR"
+    break
+  }
+} elseif { [ module-info mode remove ] } {
+  puts stderr "Removing askapsofthook, production deployed libs will now apply by default."
+}
+
+prepend-path    LD_LIBRARY_PATH            $::env(MY_ASKAPSOFT_LIB_DIR)

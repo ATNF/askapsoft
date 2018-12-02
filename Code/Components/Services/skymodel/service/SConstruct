@@ -1,0 +1,20 @@
+# @file Sky Model Service SCons build file
+# @author Daniel Collins <daniel.collins@csiro.au>
+
+from askapenv import env
+import os
+import sys
+
+if 'AIPSPATH' not in os.environ:
+   os.environ['AIPSPATH']=os.environ['ASKAP_ROOT']+'/Code/Base/accessors/current'
+env["ENV"]["AIPSPATH"] = os.environ['AIPSPATH']
+
+env.AppendUnique(CCFLAGS=[
+    '-O2',
+    '-DASKAP_DEBUG',
+    '-Wno-unknown-pragmas'])
+
+pkg = env.AskapPackage("skymodel")
+pkg.AddSubPackage("service")
+pkg.AddSubPackage("datamodel")
+pkg()

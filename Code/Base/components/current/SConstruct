@@ -1,0 +1,16 @@
+# @file
+# SConstruct build script for this module.
+#
+
+# Always import this
+from askapenv import env
+
+# create build object with library name
+pkg = env.AskapPackage("components")
+
+pkg.AddSubPackage("components")
+
+env.Append(CCFLAGS=['-O3'])
+
+# run the build process
+pkg()

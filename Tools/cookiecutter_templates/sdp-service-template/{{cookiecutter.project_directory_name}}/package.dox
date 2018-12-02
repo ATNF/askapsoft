@@ -1,0 +1,10 @@
+/// The central processor {{cookiecutter.service_long_name}} namespace.
+namespace askap::cp::{{cookiecutter.namespace}} {};
+
+/// @mainpage ASKAP Central Processor {{cookiecutter.service_long_name}}
+///
+/// @section cpservices_{{cookiecutter.namespace}} Introduction
+/// The Central Processor {{cookiecutter.service_long_name}} ...
+/// TODO: project description goes here
+///
+/// @copyright {{cookiecutter.year}} CSIRO, All Rights Reserved.

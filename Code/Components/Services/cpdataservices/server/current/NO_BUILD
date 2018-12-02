@@ -1,0 +1,5 @@
+Disabling builds of this old Java prototype. The actual Sky Model Service is a
+different project.
+
+Due to changes in the SMS Ice API, this code no longer compiles and it will
+not be updated. It is being retained for historic and reference purposes only.

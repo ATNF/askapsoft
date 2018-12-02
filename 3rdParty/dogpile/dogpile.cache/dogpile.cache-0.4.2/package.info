@@ -1,0 +1,3 @@
+pymodule=dogpile.cache==0.4.2
+libs=
+incdir=

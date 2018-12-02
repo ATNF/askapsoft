@@ -1,0 +1,11 @@
+askap-py-loghandlers-base (19384~tos0.20) UNRELEASED; urgency=low
+
+  * Changelog update by rbuild
+
+ -- Malte M <mar637@wheezy-vm>  Fri, 20 Sep 2013 15:56:34 +1000
+
+askap-py-loghandlers-base (19384~tos0.20) unstable; urgency=low
+
+  * Initial packaging
+
+ -- Malte Marquarding <Malte.Marquarding@csiro.au>  Mon, 25 Feb 2013 14:06:19 +1100

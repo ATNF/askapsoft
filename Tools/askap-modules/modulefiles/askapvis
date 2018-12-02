@@ -1,0 +1,31 @@
+#%Module1.0#####################################################################
+##
+## askapvis modulefile
+##
+proc ModulesHelp { } {
+        global version
+
+        puts stderr "\tThis module provides real-time visualisation for ASKAP observations."
+
+}
+
+# No two versions of this module can be loaded simultaneously
+conflict        askapvis
+
+# Need to have version 2.7.14 of python for libraries to work
+if { [ module-info mode load ] } {
+    if [ is-loaded python ] {
+        module unload python
+    }
+    module load python/2.7.14
+}
+
+module-whatis   "ASKAPsoft real-time visualisation tools"
+
+set VISROOT  /group/askap/askapvis
+set VISHOME  $VISROOT/current
+set PYTHON_LIB_VERSION 2.7
+
+prepend-path    PATH            $VISHOME/bin
+prepend-path    LD_LIBRARY_PATH $VISHOME/lib64
+prepend-path    PYTHONPATH      $VISHOME/lib64/python${PYTHON_LIB_VERSION}/site-packages

@@ -1,0 +1,29 @@
+[loggers]
+keys=root, askap
+
+[handlers]
+keys=stdoutHandler
+
+[logger_root]
+level=DEBUG
+handlers=stdoutHandler
+
+[logger_askap]
+qualname=askap
+level=DEBUG
+handlers=stdoutHandler
+propagate=1
+
+[handler_stdoutHandler]
+class=StreamHandler
+level=DEBUG
+formatter=simpleFormatter
+args=(sys.stdout,)
+
+# This is not used in the IceHandler, but neccessary for config
+[formatters]
+keys=simpleFormatter
+
+[formatter_simpleFormatter]
+format=%(asctime)s - %(name)s - %(levelname)s - %(message)s
+datefmt=

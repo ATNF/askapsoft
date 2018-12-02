@@ -1,0 +1,22 @@
+# @file
+# SConstruct build script for this module.
+# This is currently a test case, please edit this comment when deemed stable
+#
+# @author Malte Marquarding <Malte.Marquarding@csiro.au>
+#
+
+# Always import this
+from askapenv import env
+
+env.AppendUnique(CCFLAGS=['-DASKAP_GRID_WITH_POINTERS'])
+
+# create build object with library name
+pkg = env.AskapPackage("testloadgridder")
+pkg.build_shared = True;
+
+# add sub packages 
+pkg.AddSubPackage("testloadgridder")
+
+# run the build process
+pkg()
+

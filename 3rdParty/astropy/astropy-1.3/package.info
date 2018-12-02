@@ -1,0 +1,3 @@
+pymodule=astropy
+# pure python module
+libs=

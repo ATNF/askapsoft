@@ -1,0 +1,4 @@
+pymodule=numpy==1.12.0
+distdir=numpy-1.12.0/dist
+# pure python module
+libs=

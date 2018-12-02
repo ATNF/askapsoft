@@ -1,0 +1,7 @@
+cmd: /Users/ord006/Soft/Branches/ASKAPSoft/bin/rbuild
+args:
+    -   -a
+cwd: /Users/ord006/Soft/Branches/ASKAPSoft/Code/Components/CP/askap_imager/current
+
+env:
+    ASKAP_ROOT: "/Users/ord006/Soft/Branches/ASKAPSoft/"

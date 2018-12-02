@@ -1,0 +1,13 @@
+--- CMakeLists.txt.orig	2018-09-11 15:37:41.006604412 +1000
++++ CMakeLists.txt	2018-09-11 15:38:58.878308298 +1000
+@@ -139,8 +139,8 @@
+ if (CXX11 OR CASA_BUILD)
+     check_cxx_compiler_flag(-std=c++11 HAS_CXX11)
+     if (HAS_CXX11)
+-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+-      set(CXX11 ON)
++      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++03")
++      set(CXX11 "" NO)
+     else()
+       if (CASA_BUILD)
+         message(FATAL_ERROR "CASA_BUILD requires a c++11 compatible compiler")

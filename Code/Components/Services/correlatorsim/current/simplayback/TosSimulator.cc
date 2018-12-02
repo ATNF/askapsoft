@@ -1,0 +1,354 @@
+/// @file TosSimulator.cc
+///
+/// @copyright (c) 2010 CSIRO
+/// Australia Telescope National Facility (ATNF)
+/// Commonwealth Scientific and Industrial Research Organisation (CSIRO)
+/// PO Box 76, Epping NSW 1710, Australia
+/// atnf-enquiries@csiro.au
+///
+/// This file is part of the ASKAP software distribution.
+///
+/// The ASKAP software distribution is free software: you can redistribute it
+/// and/or modify it under the terms of the GNU General Public License as
+/// published by the Free Software Foundation; either version 2 of the License,
+/// or (at your option) any later version.
+///
+/// This program is distributed in the hope that it will be useful,
+/// but WITHOUT ANY WARRANTY; without even the implied warranty of
+/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+/// GNU General Public License for more details.
+///
+/// You should have received a copy of the GNU General Public License
+/// along with this program; if not, write to the Free Software
+/// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+///
+/// @author Ben Humphreys <ben.humphreys@csiro.au>
+
+// Include own header file first
+#include "TosSimulator.h"
+
+// Include package level header file
+#include "askap_correlatorsim.h"
+
+// System includes
+#include <string>
+#include <iomanip>
+#include <cmath>
+#include <inttypes.h>
+
+// ASKAPsoft and casa includes
+#include "askap/AskapError.h"
+#include "askap/AskapLogging.h"
+#include "casacore/ms/MeasurementSets/MeasurementSet.h"
+#include "casacore/ms/MeasurementSets/MSColumns.h"
+#include "casacore/casa/Arrays/Vector.h"
+#include "casacore/casa/Quanta.h"
+#include "casacore/measures/Measures/MDirection.h"
+#include "tosmetadata/MetadataOutputPort.h"
+#include <casacore/measures/Measures/MEpoch.h>
+#include <casacore/measures/Measures/MeasConvert.h>
+#include <casacore/measures/Measures/MCEpoch.h>
+
+// ICE interface includes
+#include "CommonTypes.h"
+#include "TypedValues.h"
+
+// Make indefinite loop
+//#define LOOP
+
+//#define TEST
+//#define VERBOSE
+#define CARDFREQ
+#define RENAME_ANTENNA
+
+// Using
+using namespace askap;
+using namespace askap::cp;
+using namespace askap::interfaces;
+using namespace askap::interfaces::datapublisher;
+using namespace casa;
+
+ASKAP_LOGGER(logger, ".TosSimulator");
+
+TosSimulator::TosSimulator(const std::string& dataset,
+        const std::string& locatorHost,
+        const std::string& locatorPort,
+        const std::string& topicManager,                
+        const std::string& topic,
+		const unsigned int nAntenna,
+        const double metadataSendFail,
+        const unsigned int delay)
+    : itsMetadataSendFailChance(metadataSendFail), itsCurrentRow(0),
+        itsRandom(0.0, 1.0), itsNAntenna(nAntenna), itsDelay(delay)
+{
+	if (dataset == "") {
+		itsMS.reset ();
+	}
+    else {
+		itsMS.reset(new casa::MeasurementSet(dataset, casa::Table::Old));
+	}
+    itsPort.reset(new askap::cp::icewrapper::MetadataOutputPort(locatorHost,
+                locatorPort, topicManager, topic));
+}
+
+
+
+TosSimulator::~TosSimulator()
+{
+    itsMS.reset();
+    itsPort.reset();
+}
+
+
+
+bool TosSimulator::sendNext(void)
+{
+	//cout << "TosSimulator::sendNext ..." << endl;
+	
+    ROMSColumns msc(*itsMS);
+
+    // Get a reference to the columns of interest
+    const casa::ROMSAntennaColumns& antc = msc.antenna();
+    //const casa::ROMSFeedColumns& feedc = msc.feed();
+    const casa::ROMSFieldColumns& fieldc = msc.field();
+    const casa::ROMSSpWindowColumns& spwc = msc.spectralWindow();
+    const casa::ROMSDataDescColumns& ddc = msc.dataDescription();
+    //const casa::ROMSPolarizationColumns& polc = msc.polarization();
+    //const casa::ROMSPointingColumns& pointingc = msc.pointing();
+
+    // Define some useful variables
+    const casa::Int dataDescId = msc.dataDescId()(itsCurrentRow);
+    //const casa::uInt descPolId = ddc.polarizationId()(dataDescId);
+    const casa::uInt descSpwId = ddc.spectralWindowId()(dataDescId);
+    const casa::uInt nRow = msc.nrow(); // In the whole table, not just for this integration
+    //const casa::uInt nCorr = polc.numCorr()(descPolId);
+    const casa::uInt nAntennaMS = antc.nrow();
+
+	cout << "The antenna count in measurement set is " << nAntennaMS << 
+			", requested in parset is " << itsNAntenna << endl;
+
+    // Record the timestamp for the current integration that is
+    // being processed
+    casa::Double currentIntegration = msc.time()(itsCurrentRow);
+    ASKAPLOG_DEBUG_STR(logger, "Processing integration with timestamp "
+            << msc.timeMeas()(itsCurrentRow));
+
+    //////////////////////////////////////////////////////////////
+    // Metadata
+    //////////////////////////////////////////////////////////////
+
+    // Some constraints
+    ASKAPCHECK(fieldc.nrow() == 1, "Currently only support a single field");
+
+    // Initialize the metadata message
+    askap::cp::TosMetadata metadata;
+
+    // Note, the measurement set stores integration midpoint (in seconds), while the TOS
+    // (and it is assumed the correlator) deal with integration start (in microseconds)
+    // In addition, TOS time is BAT and the measurement set normally has UTC time
+    // (the latter is not checked here as we work with the column as a column of doubles
+    // rather than column of measures)
+        
+    // precision of a single double may not be enough in general, but should be fine for 
+    // this emulator (ideally need to represent time as two doubles)
+    const casa::MEpoch epoch(casa::MVEpoch(casa::Quantity(currentIntegration,"s")), 
+    		casa::MEpoch::Ref(casa::MEpoch::UTC));
+    const casa::MVEpoch epochTAI = casa::MEpoch::Convert(epoch,
+    		casa::MEpoch::Ref(casa::MEpoch::TAI))().getValue();
+    const uint64_t microsecondsPerDay = 86400000000ull;
+    const uint64_t startOfDayBAT = uint64_t(epochTAI.getDay()*microsecondsPerDay);
+    const long Tint = static_cast<long>(msc.interval()(itsCurrentRow) * 1000 * 1000);
+    const uint64_t startBAT = startOfDayBAT + 
+			uint64_t(epochTAI.getDayFraction()*microsecondsPerDay) - uint64_t(Tint / 2);
+
+    // ideally we want to carry BAT explicitly as 64-bit unsigned integer, 
+	// leave it as it is for now
+    metadata.time(static_cast<long>(startBAT));
+    metadata.scanId(msc.scanNumber()(itsCurrentRow));
+    metadata.flagged(false);
+	
+    // Calculate and set the centre frequency
+    const casa::Vector<casa::Double> frequencies = spwc.chanFreq()(descSpwId);
+    casa::Double centreFreq = 0.0;
+
+#ifdef CARDFREQ
+    // Each card contains 4 (coarse) channels: (0, 1, 2, 3).
+    // Frequency of channel 2 is used as the centre frequency.
+    centreFreq = frequencies[2];
+    //centreFreq = (frequencies[0] + frequencies[3]) * 0.5;
+#else
+    const casa::uInt nChan = frequencies.size();
+    if (nChan % 2 == 0) {
+        centreFreq = (frequencies(nChan / 2) + frequencies((nChan / 2) + 1) ) / 2.0;
+    } else {
+        centreFreq = frequencies(nChan / 2);
+    }
+#endif
+
+    metadata.centreFreq(casa::Quantity(centreFreq, "Hz"));
+
+#ifdef VERBOSE
+    cout << "TOSSim: centre frequency of 4 coarse channels: " << 
+            centreFreq << endl;
+#endif
+
+#ifdef TEST
+    cout << "channel count: " << nChan << endl;
+    for (casa::uInt i = 0; i < nChan; ++i) {
+        cout << i << ": " << frequencies[i] << endl;
+    }
+    cout << "centre frequency: " << centreFreq << endl;
+#endif
+
+    // Target Name
+    const casa::Int fieldId = msc.fieldId()(itsCurrentRow);
+    metadata.targetName(fieldc.name()(fieldId));
+
+    // Target Direction
+    const casa::Vector<casa::MDirection> dirVec = fieldc.phaseDirMeasCol()(fieldId);
+    const casa::MDirection direction = dirVec(0);
+    metadata.targetDirection(direction);
+
+    // Phase Centre
+    metadata.phaseDirection(direction);
+
+    // Correlator Mode
+    metadata.corrMode("standard");
+
+	//cout << "before antenna" << endl;
+	
+    ////////////////////////////////////////
+    // Metadata - per antenna
+    ////////////////////////////////////////
+	// Note the number of antennas is as requested in parset instead of 
+	// that is actually available in measurement set.
+	std::string name;
+#ifdef RENAME_ANTENNA
+    for (casa::uInt i = 0; i < itsNAntenna; ++i) {
+		stringstream ss;
+		ss << i+1;
+		if (i < 9) {
+			name = "ak0" + ss.str();
+		}
+		else {
+			name = "ak" + ss.str();
+		}
+#else
+    //for (casa::uInt i = 0; i < nAntennaMS; ++i) {
+        //name = antc.name().getColumn()(i);
+#endif
+
+        TosMetadataAntenna antMetadata(name);
+
+        // <antenna name>.actual_radec
+        antMetadata.actualRaDec(direction);
+
+        // <antenna name>.actual_azel
+        MDirection::Ref targetFrame = MDirection::Ref(MDirection::AZEL);
+#ifdef RENAME_ANTENNA
+        targetFrame.set(MeasFrame(antc.positionMeas()(0), epoch));
+#else
+        //targetFrame.set(MeasFrame(antc.positionMeas()(i), epoch));
+#endif
+        const MDirection azel = MDirection::Convert(direction.getRef(),
+                targetFrame)(direction);
+        antMetadata.actualAzEl(azel);
+
+        // <antenna name>.actual_pol
+        antMetadata.actualPolAngle(0.0);
+
+        // <antenna name>.on_source
+        // TODO: Current no flagging, but it would be good to read this from the
+        // actual measurement set
+        antMetadata.onSource(true);
+
+        // <antenna name>.flagged
+        // TODO: Current no flagging, but it would be good to read this from the
+        // actual measurement set
+        antMetadata.flagged(false);
+
+        // <antenna name>.uvw
+        // TODO: Currently no valid uvw's are passed (as it was prior to they were added
+        // to metadata. Ideally, they need to be simulated too. One complication is that
+        // TOS currently sends per-antenna metadata to minimize data volume and per-baseline
+        // metadata (which are present in the MS) are computed in the ingest. There is not
+        // enough information to deduce the original values from what is stored in the MS. 
+        // (although, in principle, one could compose a set of numbers which would work -
+        // but there are infinite number of ways to do it). At this stage, we just sent constant
+        // with hardcoded maximum number of beams resulting in zero uvw's for all beams).
+        antMetadata.uvw(casa::Vector<casa::Double>(36*3,1e6));
+
+        metadata.addAntenna(antMetadata);
+    }
+
+	//cout << "after antenna" << endl;
+
+    // Find the end of the current integration (i.e. find the next timestamp)
+    // or the end of the table
+    while (itsCurrentRow != nRow && (currentIntegration == msc.time()(itsCurrentRow))) {
+        itsCurrentRow++;
+    }
+
+    // Send the payload, however we use a RNG to simulate random send failure
+    if (itsRandom.gen() > itsMetadataSendFailChance) {
+        cout << "TOSSim: pausing " << itsDelay / 1000000 << " seconds" << endl;
+        usleep(itsDelay);
+        cout << "TOSSim: transmitting ..." << endl;
+        itsPort->send(metadata);
+    } else {
+        ASKAPLOG_DEBUG_STR(logger, "Simulating metadata send failure this cycle");
+    }
+
+//#ifdef LOOP
+
+    if (itsCurrentRow >= nRow) {
+		ASKAPLOG_INFO_STR(logger,"End of a loop");
+		
+        ASKAPLOG_INFO_STR(logger,
+                "Sending additional metadata message indicating end-of-observation");
+        metadata.scanId(-2);    // -2
+        cout << "TOSSim: pausing " << itsDelay / 1000000 << " seconds" << endl;
+        usleep(itsDelay);
+        cout << "TOSSim: transmitting the final data" << endl;
+        itsPort->send(metadata);
+		
+		return false;
+	} else {
+		return true;
+	}
+
+//#else
+/*
+    // If this is the final payload send another with scan == -1, 
+	// indicating the observation has ended
+    if (itsCurrentRow == nRow) {
+
+        ASKAPLOG_INFO_STR(logger,
+                "Sending additional metadata message indicating end-of-observation"
+				);
+        metadata.scanId(-2);	// -2
+
+        cout << "TOSSim: pausing " << itsDelay / 1000000 << " seconds" << endl;
+        usleep(itsDelay);
+        cout << "TOSSim: transmitting the final data" << endl;
+        itsPort->send(metadata);
+
+		//cout << "TosSimulator::sendNext: no more data" << endl;
+        return false; // Indicate there is no more data after this payload
+
+    } else {
+		//cout << "TosSimulator::sendNext: more data" << endl;
+        return true;
+    }
+*/
+//#endif
+
+}	// sendNext
+
+
+
+void TosSimulator::resetCurrentRow(void)
+{
+    itsCurrentRow = 0;
+}
+

@@ -1,0 +1,27 @@
+# @file
+# SConstruct build script for this module.
+#
+
+import os
+
+# Always import this
+from askapenv import env
+
+# Create build object with library name
+pkg = env.AskapPackage("cpingest")
+
+pkg.AddSubPackage("configuration")
+pkg.AddSubPackage("monitoring")
+pkg.AddSubPackage("ingestpipeline")
+
+env.AppendUnique(CCFLAGS=['-O3'])
+env.AppendUnique(CCFLAGS=['-DASKAP_DEBUG'])
+#env.AppendUnique(CCFLAGS=['-Wno-unused-local-typedef'])
+
+# Needed for Unit Tests
+if 'AIPSPATH' not in os.environ:
+   os.environ['AIPSPATH']=os.environ['ASKAP_ROOT']+'/Code/Base/accessors/current'
+env["ENV"]["AIPSPATH"] = os.environ['AIPSPATH']
+
+# Run the build process
+pkg()

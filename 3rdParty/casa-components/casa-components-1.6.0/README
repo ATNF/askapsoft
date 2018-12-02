@@ -1,0 +1,6 @@
+casacore versions 2 and above pull out the components module on the basis that it is to casa specific
+
+So the question over what to do has been posed. The components module is now part of casa and not provided
+standalone. This means that the simplest solution is probably to pull the latest version of it from the casa
+build and freeze it here. I say the latest version as - the choice we have is either keep with 1.6 in components or 
+move forwards....

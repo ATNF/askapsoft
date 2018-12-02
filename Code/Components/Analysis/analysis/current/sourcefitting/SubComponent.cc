@@ -1,0 +1,141 @@
+/// @file
+///
+/// Defines the basic features of a component of a RadioSource
+///  object. These will be used in the profile fitting.
+///
+/// @copyright (c) 2008 CSIRO
+/// Australia Telescope National Facility (ATNF)
+/// Commonwealth Scientific and Industrial Research Organisation (CSIRO)
+/// PO Box 76, Epping NSW 1710, Australia
+/// atnf-enquiries@csiro.au
+///
+/// This file is part of the ASKAP software distribution.
+///
+/// The ASKAP software distribution is free software: you can redistribute it
+/// and/or modify it under the terms of the GNU General Public License as
+/// published by the Free Software Foundation; either version 2 of the License,
+/// or (at your option) any later version.
+///
+/// This program is distributed in the hope that it will be useful,
+/// but WITHOUT ANY WARRANTY; without even the implied warranty of
+/// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+/// GNU General Public License for more details.
+///
+/// You should have received a copy of the GNU General Public License
+/// along with this program; if not, write to the Free Software
+/// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+///
+/// @author Matthew Whiting <matthew.whiting@csiro.au>
+///
+
+#include <askap_analysis.h>
+
+#include <askap/AskapLogging.h>
+#include <askap/AskapError.h>
+
+#include <sourcefitting/SubComponent.h>
+#include <duchamp/fitsHeader.hh>
+#include <iostream>
+#include <iomanip>
+#include <casacore/scimath/Functionals/Gaussian2D.h>
+
+///@brief Where the log messages go.
+ASKAP_LOGGER(logger, ".component");
+
+namespace askap {
+
+namespace analysis {
+
+namespace sourcefitting {
+
+SubComponent::SubComponent(const SubComponent& c)
+{
+    operator=(c);
+}
+
+SubComponent& SubComponent::operator= (const SubComponent& c)
+{
+    if (this == &c) return *this;
+
+    itsXpos = c.itsXpos;
+    itsYpos = c.itsYpos;
+    itsPeakFlux = c.itsPeakFlux;
+    itsMajorAxis = c.itsMajorAxis;
+    itsMinorAxis = c.itsMinorAxis;
+    itsPositionAngle = c.itsPositionAngle;
+    return *this;
+}
+
+SubComponent::SubComponent(const casa::Gaussian2D<casa::Double> &g)
+{
+    itsXpos = g.xCenter();
+    itsYpos = g.yCenter();
+    itsPeakFlux = g.height();
+    itsMajorAxis = g.majorAxis();
+    itsMinorAxis = g.minorAxis();
+    itsPositionAngle = g.PA();
+}
+
+bool operator< (SubComponent lhs, SubComponent rhs)
+{
+    return lhs.itsPeakFlux < rhs.itsPeakFlux;
+}
+
+casa::Gaussian2D<casa::Double> SubComponent::asGauss()
+{
+    float axialRatio, axis;
+    if (itsMajorAxis > 0) {
+        axialRatio = itsMinorAxis / itsMajorAxis;
+    } else {
+        axialRatio = 1.;
+    }
+    axis = itsMajorAxis;
+    if (axialRatio > 1) {
+        axialRatio = 1. / axialRatio;
+        axis = itsMinorAxis;
+    }
+    axis = std::max(1.e-10f, axis);
+    // ASKAPLOG_DEBUG_STR(logger, "component " << *this << " has axial ratio " << axialRatio);
+    casa::Gaussian2D<casa::Double> gauss(itsPeakFlux, itsXpos, itsYpos,
+                                         axis, axialRatio, itsPositionAngle);
+    return gauss;
+
+}
+
+void SubComponent::fixSize(std::string fitType, duchamp::FitsHeader &header)
+{
+
+    // For any subcomponent that is smaller than the beam
+    // (when comparing major axes), set its size to the beam
+    // size. Always do this when fitting "psf" type.
+    bool knowBeam = (header.beam().originString() != "EMPTY");
+    bool smallBeam = (itsMajorAxis < header.beam().maj());
+
+    if ((fitType == "psf") || (knowBeam && smallBeam)) {
+        itsMajorAxis = header.beam().maj();
+    }
+    if ((fitType == "psf") || (knowBeam && smallBeam)) {
+        itsMinorAxis = header.beam().min();
+    }
+    if ((fitType == "psf") || (knowBeam && smallBeam)) {
+        itsPositionAngle = header.beam().pa() * M_PI / 180.;
+    }
+
+}
+
+std::ostream& operator<< (std::ostream& theStream, SubComponent& c)
+{
+    theStream.setf(std::ios::fixed);
+    theStream << std::setprecision(8);
+    theStream << c.itsPeakFlux << " ";
+    theStream << std::setprecision(6);
+    theStream << c.itsXpos << " " << c.itsYpos << " "
+              << c.itsMajorAxis << " " << c.itsMinorAxis << " " << c.itsPositionAngle;
+    return theStream;
+}
+
+}
+
+}
+
+}

@@ -1,0 +1,4 @@
+# The parent directory (functests) is the working directory when the tests are 
+# run, therefore paths must be relative to that location.
+icebox
+./test_sbstate_changed/manager

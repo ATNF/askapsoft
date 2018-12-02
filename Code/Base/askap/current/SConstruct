@@ -1,0 +1,28 @@
+# @file
+# SConstruct build script for this module.
+# Package dependencies are read from 'dependencies.default'
+#
+# @author Malte Marquarding <Malte.Marquarding@csiro.au>
+#
+
+# Always import this
+from askapenv import env
+import os
+
+if 'AIPSPATH' not in os.environ:
+   os.environ['AIPSPATH']=os.environ['ASKAP_ROOT']+'/Code/Base/accessors/current'
+env["ENV"]["AIPSPATH"] = os.environ['AIPSPATH']
+
+if env['usepgi']:
+        env.AppendUnique(LINKFLAGS=['-latomic'])
+env.AppendUnique(CPPFLAGS=['-fPIC'])
+env.AppendUnique(CPPFLAGS=['-std=c++11'])
+# create build object with library name
+pkg = env.AskapPackage("askap")
+
+# add sub packages 
+pkg.AddSubPackage("askap")
+pkg.AddSubPackage("profile")
+
+# run the build process
+pkg()

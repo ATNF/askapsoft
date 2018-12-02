@@ -1,0 +1,23 @@
+ice.locator_host                = localhost
+ice.locator_port                = 4061
+ice.adapter_endpoints           = tcp
+ice.service_name                = SkyModelService@SkyModelServiceAdapter
+
+# Cmodel.gsm.file           = small_catalog.xml
+Cmodel.gsm.file           = one_component.xml
+Cmodel.gsm.ref_freq       = 1.421GHz
+
+# General parameters
+Cmodel.bunit              = Jy/pixel
+Cmodel.frequency          = 1.420GHz
+Cmodel.increment          = 304MHz
+Cmodel.flux_limit         = 10mJy
+Cmodel.shape              = [4096, 4096]
+Cmodel.cellsize           = [5arcsec, 5arcsec]
+Cmodel.direction          = [12h30m00.00, -45.00.00.00, J2000]
+Cmodel.stokes             = [I]
+Cmodel.nterms             = 3
+
+# Output specific parameters
+Cmodel.output             = casa
+Cmodel.filename           = image_10mJy.skymodel

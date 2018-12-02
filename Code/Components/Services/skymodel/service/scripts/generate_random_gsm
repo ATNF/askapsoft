@@ -1,0 +1,28 @@
+#!/bin/bash
+
+DB="./sqlite.cfg"
+#DB="./mysql.cfg"
+#DB="./pgsql.cfg"
+COMMON_ARGS="--config "$DB" --log-config ./sms.log_cfg"
+
+if [ $DB = "./sqlite.cfg" ]; then
+    echo
+    echo ======================================================================
+    echo Removing old file
+    rm ./stress_test.db
+fi
+
+echo
+echo ======================================================================
+echo Setting up the database
+../apps/sms_tools.sh --create-schema $COMMON_ARGS
+
+echo
+echo ======================================================================
+echo Generating $1 components
+../apps/sms_tools.sh --gen-random-components $1 $COMMON_ARGS
+
+echo
+echo ======================================================================
+echo Check db
+../apps/sms_tools.sh --gsm-stats $COMMON_ARGS

@@ -1,0 +1,16 @@
+/// @defgroup fft FFT interfaces
+/// @defgroup fitting Least-square fitting
+/// @defgroup utils miscelaneous utilities
+
+/// The namespace for the imagemath package
+namespace askap::imagemath {}; 
+
+/// @mainpage askap base imagemath
+/// @section Modules
+/// @subsection linmos 1. Linear mosaic (linmos) class
+/// @li combine a number of images as a linear mosaic
+///
+/// @section Subpackages
+/// @li @ref linmos
+///
+/// @copyright 2007 CSIRO, All Rights Reserved.

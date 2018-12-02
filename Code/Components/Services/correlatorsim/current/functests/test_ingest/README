@@ -1,0 +1,34 @@
+test_ingest
+
+This functional test is an integration test between Correlator Simulator and Ingest.
+
+The parent script is "run.sh".
+
+This script is responsible for:
+- cleaning up old results
+- setting parameters in parsets:
+	- playback.in: correlator simulator
+	- cpingest.in: ingest
+- starting ICE services
+- calling children scripts in a coordinated way: 
+	- run_corrsim.sh: executes correlator simulator
+	- run_ingest.sh : executes ingest
+- stopping ICE services
+
+Usage:
+
+./run.sh <number of cards>
+
+<number of cards> =
+1		: Only 1 ingest process is run (serial mode)
+2~96	: Ingest process is run in parallel (= the number of cards).
+		  Note that the maximum is 96, which is 8 blocks x 12 cards per block.
+other	: error
+When the argument is missing a usage statement will be produced:
+
+> ./run.sh
+>
+> The number of cards used in streaming the data must be specified.
+> Usage: ./run.sh <number of cards = 1~96>
+
+

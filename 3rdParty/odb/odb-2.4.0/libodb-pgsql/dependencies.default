@@ -1,0 +1,9 @@
+# This file lists the external dependencies
+# use pkgname=askap_relative_path
+libodb=3rdParty/odb/odb-2.4.0/libodb
+
+# Note that this library also has a dependency on libpq, the PostgreSQL C client
+# library. On my Debian test system I obtained this via the packages libpq5 and
+# libpq-dev. On Galaxy we need to decide whether to use system packages or to
+# add the source to 3rdParty. Not doing this yet as it is only required if
+# Postgresql is selected as the production backend.

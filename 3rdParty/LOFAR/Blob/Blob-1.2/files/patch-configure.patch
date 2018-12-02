@@ -1,0 +1,44 @@
+--- configure.orig	2016-03-08 16:23:49.000000000 +1100
++++ configure	2016-03-08 16:23:56.000000000 +1100
+@@ -26025,7 +26025,7 @@
+   lfr_use_casa=1
+   AIPSPP=$with_casacore
+   CASAC_LIB_PATH=$with_casacore/lib
+-  CASAC_INC_PATH=$with_casacore/include/casacore
++  CASAC_INC_PATH=$with_casacore/include
+   as_ac_File=`echo "ac_cv_file_$CASAC_LIB_PATH/libcasa_casa.$lofar_shared_ext" | $as_tr_sh`
+ { echo "$as_me:$LINENO: checking for $CASAC_LIB_PATH/libcasa_casa.$lofar_shared_ext" >&5
+ echo $ECHO_N "checking for $CASAC_LIB_PATH/libcasa_casa.$lofar_shared_ext... $ECHO_C" >&6; }
+@@ -26083,9 +26083,9 @@
+ echo "$as_me: error: Could not find casacore library libcasa_casa in $CASAC_LIB_PATH" >&2;}
+    { (exit 1); exit 1; }; }
+   fi
+-  as_ac_File=`echo "ac_cv_file_$CASAC_INC_PATH/casa/aips.h" | $as_tr_sh`
+-{ echo "$as_me:$LINENO: checking for $CASAC_INC_PATH/casa/aips.h" >&5
+-echo $ECHO_N "checking for $CASAC_INC_PATH/casa/aips.h... $ECHO_C" >&6; }
++  as_ac_File=`echo "ac_cv_file_$CASAC_INC_PATH/casacore/casa/aips.h" | $as_tr_sh`
++{ echo "$as_me:$LINENO: checking for $CASAC_INC_PATH/casacore/casa/aips.h" >&5
++echo $ECHO_N "checking for $CASAC_INC_PATH/casacore/casa/aips.h... $ECHO_C" >&6; }
+ if { as_var=$as_ac_File; eval "test \"\${$as_var+set}\" = set"; }; then
+   echo $ECHO_N "(cached) $ECHO_C" >&6
+ else
+@@ -26093,7 +26093,7 @@
+   { { echo "$as_me:$LINENO: error: cannot check for file existence when cross compiling" >&5
+ echo "$as_me: error: cannot check for file existence when cross compiling" >&2;}
+    { (exit 1); exit 1; }; }
+-if test -r "$CASAC_INC_PATH/casa/aips.h"; then
++if test -r "$CASAC_INC_PATH/casacore/casa/aips.h"; then
+   eval "$as_ac_File=yes"
+ else
+   eval "$as_ac_File=no"
+@@ -26109,8 +26109,8 @@
+ fi
+ 
+   if test "$lfr_ext_dir" = "no" ; then
+-    { { echo "$as_me:$LINENO: error: Could not find casacore header casa/aips.h in $CASAC_INC_PATH" >&5
+-echo "$as_me: error: Could not find casacore header casa/aips.h in $CASAC_INC_PATH" >&2;}
++    { { echo "$as_me:$LINENO: error: Could not find casacore header casacore/casa/aips.h in $CASAC_INC_PATH" >&5
++echo "$as_me: error: Could not find casacore header casacore/casa/aips.h in $CASAC_INC_PATH" >&2;}
+    { (exit 1); exit 1; }; }
+   fi
+   AIPSPP_CPPFLAGS="$AIPSPP_CPPFLAGS -I$CASAC_INC_PATH"

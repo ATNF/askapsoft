@@ -1,0 +1,3 @@
+pymodule=askap.ingest
+# pure python module
+libs=

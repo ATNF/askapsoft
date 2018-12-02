@@ -1,0 +1,1 @@
+./monprovider.py --log-config=monprovider.pylog_cfg --config=monprovider.cfg

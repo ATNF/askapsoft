@@ -1,0 +1,3 @@
+pymodule=askap.loghandlers
+# pure python module
+libs=

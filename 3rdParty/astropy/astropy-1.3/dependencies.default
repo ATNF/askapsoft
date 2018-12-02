@@ -1,0 +1,7 @@
+# This file lists the external dependencies
+# use pkgname=ASKAP_ROOT_relative_path
+numpy=3rdParty/numpy/numpy-1.12.0
+scipy=3rdParty/scipy/scipy-0.18.1
+matplotlib=3rdParty/matplotlib/matplotlib-2.0.0
+pytz=3rdParty/pytz/pytz-2016.10
+

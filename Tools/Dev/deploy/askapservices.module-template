@@ -1,0 +1,24 @@
+#%Module1.0#####################################################################
+##
+## askapservices modulefile
+##
+proc ModulesHelp { } {
+        global version
+
+        puts stderr "\tThis modules provides the ASKAPsoft services for use on the ingest cluster."
+}
+
+# No two versions of this module can be loaded simultaneously
+conflict        askapservices
+
+# Requires the CLI tools.
+module load askapcli
+
+module-whatis   "ASKAPsoft services package"
+
+set HOMEDIR  /group/askap/askapservices/${_VERSION}  # replace with version number on install
+
+setenv CPSVCS_HOME $HOMEDIR
+    
+prepend-path    PATH            $HOMEDIR/bin
+prepend-path    LD_LIBRARY_PATH $HOMEDIR/lib64

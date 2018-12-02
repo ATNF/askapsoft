@@ -1,0 +1,2 @@
+This code is incomplete and probably unnecessary. It is hard to see what
+a client class could add to the the straightforward direct use of an Ice proxy.

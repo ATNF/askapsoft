@@ -1,0 +1,3 @@
+pymodule=askap.smsclient
+# pure python module
+libs=

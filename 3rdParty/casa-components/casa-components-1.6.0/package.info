@@ -1,0 +1,3 @@
+# The list of libraries this package provides
+libs=casa_components
+

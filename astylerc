@@ -1,0 +1,17 @@
+# ASKAPsoft astylerc file.
+# 
+# MODIFICATION OF THIS FILE IS FORBIDDEN WITHOUT GROUP AGREEMENT.
+# Discuss with Tony Maher in first instance.
+#
+style=stroustrup
+indent=spaces=4
+convert-tabs
+indent-classes
+indent-preprocessor
+indent-switches
+keep-one-line-statements
+keep-one-line-blocks
+pad-oper
+pad-header
+unpad-paren
+preserve-date
