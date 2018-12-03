@@ -1,0 +1,279 @@
+#!/usr/bin/env python
+'''
+Simple dependency analysis functions.
+'''
+from __future__ import print_function
+
+import os
+import optparse
+import sys
+
+from collections import OrderedDict
+
+ASKAP_ROOT = os.environ.get("ASKAP_ROOT")
+START_DIR = os.path.abspath(os.curdir)
+DEP_FN = 'dependencies.default'
+IGNORE_DIRS = ['install', 'files']
+
+
+#
+# Parsing command line arguments
+#
+TARGETS = ['depends', 'reverse', 'subtree', 'unknown', 'nodepends', 'isolated']
+SEARCH_ALL = ['isolated', 'nodepends', 'unknown']
+USAGE_MSG = 'usage: %prog [options] [<package_path>]'
+DESC_MSG = '''A simple utility to analyse dependencies especially reverse
+dependencies.  The default <package_path> is the current directory.
+The <package_path is relative to the current directory.
+Multiple <package_paths> may be specified separated by whitespace.'''
+PARSER = optparse.OptionParser(usage=USAGE_MSG, description=DESC_MSG)
+
+# Boolean
+PARSER.add_option('-q', '--quiet', dest='quiet', action='store_true',
+                  help='minimal output [default=%default]')
+PARSER.add_option('-v', '--verbose', dest='quiet', action='store_false',
+                  help='show all builder output')
+
+# Values
+PARSER.add_option('-t', '--target', dest='target',
+                  choices=TARGETS,
+                  help='select TARGET [default=%%default] [%s] '
+                  % (','.join(TARGETS)))
+
+# Setting defaults in add_option is deprecated, so use set_defaults function.
+PARSER.set_defaults(quiet=True, target='reverse')
+
+
+
+def parse_args():
+    (options, arguements) = PARSER.parse_args()
+    return options, arguements
+
+
+
+#
+# Graph Creation
+#
+
+def add_depends(graph, dirname, verbose=False):
+    fn = os.path.join(dirname, DEP_FN)
+    with open(fn) as fh:
+        all_lines = (line.strip() for line in fh) # All lines inc the blank ones
+        all_lines = (line for line in all_lines if line) # Non-blank lines
+        all_lines = (line for line in all_lines if not line.startswith('#')) # ignore comments
+        for line in all_lines:
+            depsdirname = line.split('=')[-1].split(';')[0]
+            node = os.path.relpath(dirname, ASKAP_ROOT)
+            graph[node].append(depsdirname)
+            #print '*** %s' % os.path.join(ASKAP_ROOT, depsdirname))
+            if not os.path.isdir(os.path.join(ASKAP_ROOT, depsdirname)) and verbose:
+                print('warn: %s lists %s which does not exist' % (node, depsdirname))
+
+
+def create_dependency_graph(startpath, verbose=False):
+    '''check for NO_BUILD?'''
+    graph = OrderedDict()
+    graph['START'] = list()
+
+    for dirname, subdirlist, filelist in os.walk(startpath):
+        for fname in filelist:
+            if fname == 'build.py':
+                node = os.path.relpath(dirname, ASKAP_ROOT)
+                graph[node] = list()
+                graph['START'].append(node)
+                fn = os.path.join(dirname, DEP_FN)
+                if os.path.isfile(fn):
+                    add_depends(graph, dirname, verbose)
+        # Do not bother searching some directories.
+        for dir_name in IGNORE_DIRS:
+            if dir_name in subdirlist:
+                del subdirlist[subdirlist.index(dir_name)]
+    return graph
+
+
+def print_subtree(graph, node, depth=0):
+    '''Print out the entire subtree including duplicates showing dependency
+    levels.'''
+    if depth == 0:
+        print('%s:' % node)
+    else:
+        print('\t'*depth + node)
+    depth += 1
+    for n in graph[node]:
+        if n in graph:
+            print_subtree(graph, n, depth)
+        else:
+            if not os.path.isdir(os.path.join(ASKAP_ROOT, n)):
+                print('warn: Package %s references unknown dependency %s' % (node, n))
+
+
+def print_empty_subtree(graph):
+    print('info: packages with no dependencies.')
+    for node in find_empty_subtree(graph):
+        print('\t%s' % node)
+
+
+def print_unknown_nodes(graph, node):
+    for key, values in find_unknown_nodes(graph, node).items():
+        print('%s:' % key)
+        for val in values:
+            print('\t%s' % val)
+
+
+def print_isolated_nodes(graph):
+    print('error: isolated function does not work yet.')
+    sys.exit()
+    isolated = find_isolated_nodes(graph)
+    if isolated:
+        for n in isolated:
+            print('%s' % n)
+    else:
+        print('info: No isolated packages.')
+
+def print_reverse_subtree_list(graph, node):
+    print('%s:' % node)
+    for n in find_reverse_subtree(graph, node):
+        print('\t%s' % n)
+
+
+def print_reverse_subtree(graph, node):
+    print('%s:' % node)
+    for key, values in find_reverse_subtree(graph, node).items():
+        print('\t%s' % key)
+        for val in values:
+            print('\t\t%s' % val)
+
+def print_ordered_unique_dependencies(graph, node):
+    print('%s:' % node)
+    for item in find_ordered_unique_dependencies(graph, node):
+        print('\t%s' % item)
+
+
+#
+# Graph Operations
+#
+
+def find_empty_subtree(graph):
+    """ returns a list of nodes with no dependants."""
+    empty = list()
+    for node in graph:
+        if not graph[node]:
+            empty.append(node)
+    return empty
+
+
+def find_isolated_nodes(graph):
+    '''return a list of nodes which are completely isolated.
+    i.e. no dependencies and are not dependencies of anything'''
+    isolated = list()
+    for n in find_empty_subtree(graph):
+        if len(find_reverse_subtree_list(graph, n)) == 0:
+            isolated.append(n)
+    return isolated
+
+
+def find_unknown_nodes(graph, node, unknown=None):
+    '''return a list of nodes referenced in dependencies but do not exist
+    in the directory tree.'''
+    if unknown is None:
+        unknown = OrderedDict()
+    for n in graph[node]:
+        if n in graph:
+            find_unknown_nodes(graph, n, unknown)
+        else:
+            if not os.path.isdir(os.path.join(ASKAP_ROOT, n)):
+                if node not in unknown:
+                    unknown[node] = list()
+                unknown[node].append(n)
+    return unknown
+
+
+def find_reverse_subtree_list(graph, node, rdeps=None):
+    if rdeps is None:
+        rdeps = list()
+    for n in graph:
+        if node in graph[n]:
+            if n != 'START' and n not in rdeps:
+                rdeps.append(n)
+                find_reverse_subtree_list(graph, n, rdeps)
+    return rdeps
+
+
+def find_reverse_subtree(graph, node, rdeps=None):
+    if rdeps is None:
+        rdeps = OrderedDict()
+    for n in graph:
+        if node in graph[n] and n != 'START':
+            if n not in rdeps:
+                rdeps[n] = list()
+            if node not in rdeps[n]:
+                rdeps[n].append(node)
+            find_reverse_subtree(graph, n, rdeps)
+    return rdeps
+
+
+def find_subtree(graph, node, deps=None):
+    '''Find the subtree of the given node. Depth first traversal.'''
+    if deps is None:
+        deps = list()
+    for n in graph[node]:
+        if n in graph:
+            deps.append(n)
+            find_subtree(graph, n, deps)
+        else:
+            print('warn: Package %s references unknown dependency %s' % (node, n))
+    return deps
+
+
+def find_ordered_unique_dependencies(graph, node):
+    '''Find the unique list of dependencies.
+    Return the packages in the ordered that they should be built.
+    '''
+    deps = find_subtree(graph, node)
+    deps.reverse()
+    uniq = list(OrderedDict((element, None) for element in deps))
+    return uniq
+
+
+#
+# Main program.
+#
+if __name__ == '__main__':
+    opts, pkg_paths = parse_args()
+    print("info: ASKAP_ROOT = '%s'" % ASKAP_ROOT)
+    print('info: Current directory = %s' % START_DIR)
+
+    dep_graph = create_dependency_graph(ASKAP_ROOT, verbose=False)
+
+    if opts.target in SEARCH_ALL:
+        print('info: searching all packages in ASKAP_ROOT.')
+        if len(pkg_paths) >= 0:
+            pkg_paths = []
+            print('warn: opts.target does not take path argument. Searches whole tree.')
+        if opts.target == 'isolated':
+            print_isolated_nodes(dep_graph)
+        elif opts.target == 'nodepends':
+            print_empty_subtree(dep_graph)
+        elif opts.target == 'unknown':
+            print_unknown_nodes(dep_graph, 'START')
+    elif len(pkg_paths) == 0:
+        pkg_paths = ['.']
+
+    for given_node in pkg_paths:
+        given_node = os.path.relpath(os.path.join(START_DIR, given_node),
+                     ASKAP_ROOT)
+        if not given_node in dep_graph['START']:
+            print('warn: %s is not a package directory (i.e. must have build.py file)' % given_node)
+            continue
+        if opts.target == 'reverse':
+            print_reverse_subtree_list(dep_graph, given_node)
+        elif opts.target == 'depends':
+            print_ordered_unique_dependencies(dep_graph, given_node)
+        elif opts.target == 'subtree':
+            print_subtree(dep_graph, given_node)
+        elif opts.target == 'unknown':
+            print_unknown_nodes(dep_graph, given_node)
+        else:
+            print('Unknown target %s' % (opts.target))
+
+    sys.exit()
