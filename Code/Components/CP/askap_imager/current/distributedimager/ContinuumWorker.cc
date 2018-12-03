@@ -431,7 +431,11 @@ ContinuumWorker::ContinuumWorker(LOFAR::ParameterSet& parset,
   {
     ASKAPLOG_INFO_STR(logger, "Processing Channel Allocation");
 
-    LOFAR::ParameterSet& unitParset = itsParsets[0];
+    LOFAR::ParameterSet& unitParset = itsParset;
+
+    if (workUnits.size() > 0) {
+      unitParset = itsParsets[0];
+    }
 
     const bool localSolver = unitParset.getBool("solverpercore", false);
 
@@ -875,7 +879,7 @@ ContinuumWorker::ContinuumWorker(LOFAR::ParameterSet& parset,
               }
 
 
-              else { // probably continuum mode ....
+              else if (!localSolver){ // probably continuum mode ....
                 // If we are in continuum mode we have probaby ran through the whole allocation
                 // lets send it to the master for processing.
                 rootImager.sendNE();
