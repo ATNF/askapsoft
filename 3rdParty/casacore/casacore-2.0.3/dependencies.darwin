@@ -1,6 +1,6 @@
 # This file lists the external dependencies
 # use pkgname=askapsoft_relative_path
-cfitsio=3rdParty/cfitsio/cfitsio-3.35
+cfitsio=/usr/local;
 wcslib=3rdParty/wcslib/wcslib-4.18
 fftw3=3rdParty/fftw/fftw-3.3.3
 boost=3rdParty/boost/boost-1.56.0
