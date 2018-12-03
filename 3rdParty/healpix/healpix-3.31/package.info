@@ -1,2 +1,0 @@
-# The list of libraries this package provides
-libs=c_utils cxxsupport fftpack healpix_cxx sharp
