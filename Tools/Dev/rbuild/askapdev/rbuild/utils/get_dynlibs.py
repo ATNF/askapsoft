@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 ## Package for various utility functions to execute build and shell commands
 #
 # @copyright (c) 2011 CSIRO
@@ -27,8 +29,8 @@
 import glob
 import os
 
-from q_print import q_print
-from get_platform import get_platform
+from .q_print import q_print
+from .get_platform import get_platform
 
 def get_dynlibs(libdir):
     '''
@@ -62,4 +64,4 @@ def get_dynlibs(libdir):
 
 if __name__ == '__main__':
     import sys
-    print get_dynlibs(sys.argv[1])
+    print(get_dynlibs(sys.argv[1]))

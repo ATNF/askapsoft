@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 ## Package for various utility functions to execute build and shell commands
 #
 # @copyright (c) 2010 CSIRO
@@ -25,9 +26,9 @@
 # @author Tony Maher <Tony.Maher@csiro.au>
 #
 import re
-from in_code_tree import in_code_tree
+from .in_code_tree import in_code_tree
 
-from runcmd import runcmd
+from .runcmd import runcmd
 
 valid = re.compile('(.*\.(c|cc|h|py|tmpl|xml)|dependencies\..*|package.info)',
                    re.IGNORECASE)
@@ -41,7 +42,7 @@ def get_svn_files_list():
     cmd = 'svn info --depth infinity'
     ilist = []
 
-    for line in runcmd(cmd)[0].split('\n'):
+    for line in str(runcmd(cmd)[0]).split('\n'):
         if line.startswith('Path:'):
             ilist.append(line.split(':')[1].strip())
 

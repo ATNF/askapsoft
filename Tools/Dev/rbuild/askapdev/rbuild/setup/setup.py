@@ -1,3 +1,4 @@
+from __future__ import print_function
 ## @file
 # askapdev.rbuild module containing tools to assist with the build process.
 #
@@ -94,9 +95,9 @@ ASKAP_VERSION = "%s"
 
     if "cmdclass" in attrs:
         # don't overwrite custom ones
-        for k, v in newcmds.items():
+        for k, v in list(newcmds.items()):
             if k not in attrs["cmdclass"]:
-                print "Adding target", k
+                print("Adding target", k)
                 attrs["cmdclass"][k] = v
     else:
         attrs["cmdclass"] = newcmds

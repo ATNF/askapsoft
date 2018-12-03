@@ -1,3 +1,4 @@
+from __future__ import print_function
 ## Package for various utility functions to execute build and shell commands
 #
 # @copyright (c) 2013 CSIRO
@@ -30,9 +31,9 @@ DEV_DIR = os.path.join("Tools")
 ASKAP_ROOT = os.environ['ASKAP_ROOT']
 
 def in_tools_tree():
-    '''Are we inside the "Tools" tree (ASKAPsoft developer tools)'''
+    '''Are we inside the "Tools/Dev" tree (ASKAPsoft developer tools)'''
     rpath = os.path.relpath(os.getcwd(), ASKAP_ROOT)
     return DEV_DIR in rpath
 
 if __name__ == "__main__":
-    print in_tools_tree() and "Yes" or "No"
+    print(in_tools_tree() and "Yes" or "No")

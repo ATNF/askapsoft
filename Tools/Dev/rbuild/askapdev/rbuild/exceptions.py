@@ -1,3 +1,4 @@
+from __future__ import print_function
 # Copyright (c) 2009 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
@@ -33,7 +34,7 @@ class BuildError(Exception):
 
 def except_hook(etype, value, tb):
     if isinstance(value, BuildError):
-        print >>sys.stderr, "error:", value
+        print("error:", value, file=sys.stderr)
     else:
         sys.__excepthook__(etype, value, tb)
     sys.exit(1)

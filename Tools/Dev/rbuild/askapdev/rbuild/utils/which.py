@@ -43,7 +43,7 @@ def which(program):
         if is_exe(program):
             return program
     else:
-        if os.environ.has_key("PATH"):
+        if "PATH" in os.environ:
            for path in os.environ["PATH"].split(os.pathsep):
                exe_file = os.path.join(path, program)
                if is_exe(exe_file):

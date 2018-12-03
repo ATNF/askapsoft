@@ -26,81 +26,164 @@
 #
 # @author Malte Marquarding <Malte.Marquarding@csiro.au>
 #
+from __future__ import print_function
+import collections
 import os
 import sys
 import glob
 import subprocess
 import optparse
 import shutil
+
+import re
 import stat
 
 from askapdev.rbuild.dependencies import Dependency
-from askapdev.rbuild import debian
 from askapdev.rbuild import utils
 
 rev_file = ".last_svnrev"
 
+
+def get_package_revision(pth):
+    cmd = "svn info %s |grep Rev: |awk '{print $NF}'" % pth
+    out = utils.runcmd(cmd, shell=True)
+    if out[-1] != 0 or len(out[0]) == 0:
+        raise OSError(out[1])
+    return str(out[0].strip())
+
+
 def get_rev(revfile):
-    rev = debian.get_package_revision(".")
+    rev = get_package_revision(".")
     with open(revfile, "w") as of:
         of.write("{0}\n".format(rev))
     return rev
+
 
 def needs_rebuild(pkg):
     revfile = os.path.join(pkg, rev_file)
     if not os.path.exists(revfile):
         newrev = get_rev(revfile)
         return True
-    rev = open(revfile,'r').read().strip()
+    rev = open(revfile, 'r').read().strip()
     newrev = get_rev(revfile)
     return rev != newrev
 
+
+def add_shlibs_mapping():
+    shlibs = glob.glob("debian/*/DEBIAN/shlibs")
+    if not shlibs:
+        return
+    if len(shlibs) > 1:
+        print("warn: More than one debian package found. Using only first one")
+    shutil.copyfile(shlibs[0], ".shlibs")
+
+
+def get_shlibs(paths):
+    all_shlibs = []
+    for p in paths:
+        sh_file = os.path.join(p, ".shlibs")
+        if os.path.exists(sh_file):
+            content = open(sh_file).read().strip()
+            all_shlibs.append(content)
+    sh_local = os.path.join("debian", "shlibs.local")
+    if not all_shlibs:
+        return
+    with open(sh_local, "w") as of:
+        of.write("\n".join(all_shlibs))
+
+
+def add_pydist_overrides(dep_keys):
+    pydists = []
+    rx = r"\[(.+)\]$"
+    rx2 = r"\[.+\]$"
+    for pkg in dep_keys:
+        if pkg.startswith("python-"):
+            pypkg = pkg.replace("python-", "")
+            pkgname = re.findall(rx, pypkg)
+            if pkgname:
+                pypkg = pkgname[0]
+            debname = re.sub(rx2, "", pkg)
+            pydists.append("{} {}".format(pypkg, debname))
+    if not pydists:
+        return
+    with open("debian/pydist-overrides", "w") as of:
+        of.write("\n".join(pydists) + "\n")
+
+
 def package(pkg, outdir, force=False):
-    '''Create a debian package.
-    '''
+    """Create a debian package.
+    """
     cdir = os.path.abspath(os.curdir)
     try:
         pkg = os.path.normpath(pkg)
-        check_built(pkg)
+        #check_built(pkg)
         rpkg = os.path.relpath(pkg, os.environ["ASKAP_ROOT"])
         os.chdir(pkg)
         dep = Dependency()
         dep.add_package()
-        pydep = glob.glob("install/lib/python*") and "askap-python, " or ""
-        with open(os.path.join("debian", "askap.dependencies"), "w") as sf:
-            sf.write("AskapDependencies={0}\n"
-                      .format(pydep+debian.depends_list(dep)) )
-        vers = debian.get_versioned_name(pkg)[-1]
-        if needs_rebuild(pkg):
-            utils.q_print("info: Updating '{1}' changelog to {0}".format(vers,
-                                                                         rpkg))
-            message = "Changelog update by rbuild"
-            utils.runcmd("dch --newversion={0} '{1}'".format(vers, message),
-                         shell=True)
-        else:
-            if not force:
+        get_shlibs(dep.get_rootdirs())
+        add_pydist_overrides(dep.keys(explicit=True))
+        # use dependency keys for local java debian packages
+        jpkgs = [(k, dep.get_dep_path(k)) for k in dep.keys() if "java" in k]
+        jnames = [n for n, p in jpkgs if not p.startswith("/")]
+        if jnames:
+            with open(os.path.join("debian", "askap.dependencies"), "w") as sf:
+                 sf.write("local:Depends={0}\n".format(", ".join(jnames)))
+        libdirs = dep.get_librarydirs()
+        if libdirs:
+            with open(os.path.join("debian", "askap.ldpath"), "w") as sf:
+                sf.write("-l"+":".join(libdirs))
+        # run in a clean, non-ASKAPsoft env
+        if not force:
+            if not needs_rebuild(pkg):
                 print("info: Package {0} up-to-date".format(rpkg))
                 return
-            print("info: Creating debian package version {1} for '{0}'"\
-                      .format(rpkg, vers))
-        #run in a clean, non-ASKAPsoft env
+
+        print("info: Creating debian package for '{0}'"
+              .format(rpkg))
+
+        # have to enter unpacked source to package (debian symlink into it
+        # is created by the builder). Assumption source dir is (*).tar.gz
+        native = False
+        if "3rdParty" in pkg:
+            rules = open("debian/rules").read()
+            if os.path.exists("DEBIAN_NATIVE") or "pybuild" in rules:
+                sdir = None
+                for suffix in [".tar.gz", ".tar.bz2", ".tgz", ".zip"]:
+                    pkg = glob.glob("*"+suffix)
+                    if pkg:
+                        sdir = pkg[0].replace(suffix, "")
+                if sdir is None or not os.path.exists(sdir):
+                    raise OSError(
+                        "Source directory '{}' doesn't exist".format(sdir))
+                tgt = os.path.join(sdir, "debian")
+                native = True
+                if not os.path.exists(tgt):
+                    os.symlink("../debian", tgt)
+                os.chdir(sdir)
         try:
-            subprocess.check_call("dpkg-buildpackage -uc -b > debpackage.log 2>&1", 
-                                  shell=True, 
-                                  env={'PATH':"/usr/bin:/usr/sbin:/bin:/sbin",
-                                       'HOME': os.environ["HOME"]},
-                                  )
+            subprocess.check_call(
+                "dpkg-buildpackage -uc -b > debpackage.log 2>&1",
+                shell=True,
+                env={'PATH': "/usr/bin:/usr/sbin:/bin:/sbin",
+                     'HOME': os.environ["HOME"]},
+                )
+            if native:
+                os.chdir("..")
+            add_shlibs_mapping()
         except:
-            print >>sys.stderr, open('debpackage.log', 'r').read()
-            if os.path.exists(rev_file):
-                os.remove(rev_file)
+            sys.stdout.flush()
+            print(open('debpackage.log', 'r').read(), file=sys.stderr)
             sys.exit(1)
         if os.path.exists('debpackage.log'):
             os.remove('debpackage.log')
         if outdir:
-            debs = glob.glob('../*{0}*.deb'.format(vers))
+            glob_str = "*.deb"
+            if not native:
+                glob_str = "/".join(("..", glob_str))
+            debs = glob.glob(glob_str)
             if not debs:
-                print >>sys.stderr, "No debs found. Did packaging fail?"
+                print("No debs found. Did packaging fail?", file=sys.stderr)
                 if os.path.exists(rev_file):
                     os.remove(rev_file)
                 sys.exit(1)
@@ -119,14 +202,18 @@ def package(pkg, outdir, force=False):
         for c in chg:
             os.remove(c)
     except:
-        print >>sys.stderr, "error: Packaging '{}' failed".format(pkg)
+        print("error: Packaging '{}' failed".format(pkg), file=sys.stderr)
+        if os.path.exists(rev_file):
+            os.remove(rev_file)
         raise
     finally:
         os.chdir(cdir)
 
+
 def check_built(pkgdir):
     if not os.path.exists(os.path.join(pkgdir, "install")):
-        print >>sys.stderr, "Package {0} not built. Run rbuild -t install first".format(pkgdir)
+        print("Package {0} not built. Run rbuild -t install first".format(
+            pkgdir), file=sys.stderr)
         sys.exit(1)
 
 
@@ -146,11 +233,9 @@ PARSER.add_option('-o', '--outdir', dest='outdir',
                   'into. Default is parent dir.')
 PARSER.set_defaults(outdir='')
 
-
-
 if __name__ == "__main__":
     if utils.get_platform()['distribution'] != 'debian':
-        print >>sys.stderr, "error: Only usable on debian systems"
+        print("error: Only usable on debian systems", file=sys.stderr)
         sys.exit(1)
     (opts, args) = PARSER.parse_args()
     if opts.outdir:
@@ -161,12 +246,20 @@ if __name__ == "__main__":
     dep = Dependency()
     dep.add_package(None, myself)
     a_root = os.environ["ASKAP_ROOT"]
-    extradeps = [os.path.join(a_root, "Debian/packages/askap-init/current"),
-                 os.path.join(a_root, "Debian/packages/askap-python/current"),]
+    extradeps = [
+        os.path.join(a_root, "Debian/packages/tos-site-config/current"),
+        os.path.join(a_root,"Debian/packages/tos-ice-config/current"),
+        os.path.join(a_root,"Debian/packages/tos-epics-config/current"),
+    ]
     if opts.recursive:
-        deppkgs = extradeps+list(set(dep.get_rootdirs()))+[myself]
+        deps = dep.get_rootdirs()
+        deps.reverse()
+        deppkgs = \
+            extradeps + list(collections.OrderedDict.fromkeys(deps)) + [myself]
         for pkgdir in deppkgs:
-            if os.path.exists(os.path.join(pkgdir, "NO_DEBIAN")):
+            is_external_dir = pkgdir.startswith("/") and a_root not in pkgdir
+            if os.path.exists(os.path.join(pkgdir, "NO_DEBIAN")) \
+                    or is_external_dir:
                 continue
             package(os.path.normpath(pkgdir), opts.outdir, opts.force)
     else:

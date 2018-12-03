@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 ## @file
 # Object to simplify unpacking/building/cleaning of ASKAPsoft packages
 #
@@ -27,7 +28,7 @@
 #
 import os
 
-from builder import Builder
+from .builder import Builder
 import askapdev.rbuild.utils as utils
 
 platform = utils.get_platform()

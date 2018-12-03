@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from builtins import str
 ## @file
 # Object to simplify unpacking/building/cleaning of ASKAPsoft packages
 #
@@ -25,22 +27,21 @@
 #
 # @author Juan Carlos Guzman <Juan.Guzman@csiro.au>
 #
-
-import datetime
 import os
 import shutil
-import string
 import sys
 import glob
 import csv
-from builder import Builder
+import re
+
+from .builder import Builder
 import askapdev.rbuild.utils as utils
 from ..exceptions import BuildError
 from ..dependencies import Dependency
 
 
 ## Implementation of Builder for EPICS applications.
-#It overwrites _precommand, _clean, _postcommand.
+# It overwrites _precommand, _clean, _postcommand.
 class Epics(Builder):
     ## The constructor sets up a package build "environment"
     #  @param self           The current object
@@ -71,6 +72,7 @@ class Epics(Builder):
         self._iocbootdirsdict = {}  # iocboot directories to install
         self._implicit_deps = []
         self._support_module = supportmodule
+        self.package_version = "0.0"
 
         if epicsbase is None:
             # We are building EPICS base (no need for RELEASE file)
@@ -86,7 +88,7 @@ class Epics(Builder):
 
         # Set EPICS architecture using shell script in EPICS base directory.
         comm = os.path.join(os.path.dirname(self._epicsbase), "EpicsHostArch")
-        self._epicsarch = utils.runcmd(comm)[0].strip()
+        self._epicsarch = str(utils.runcmd(comm)[0].strip().decode())
         self.add_env("EPICS_HOST_ARCH", self._epicsarch)
         self._oldreleasefile = None
 
@@ -149,9 +151,14 @@ class Epics(Builder):
         if appname is None:
             appname = self._appname
         pth = self.dep.get_dep_path(module)
-        dep = Dependency()
-        dep.add_package(module, pth)
-        libs = dep.get_libs(mapped=True)
+        if pth.startswith("/"):
+            libs = [(l, None) for l in self.dep.get(module)["libs"]]
+        else:
+            dep = Dependency()
+            dep.add_package(module, pth)
+            libs = dep.get_libs(mapped=True)
+            #rel_libs = [(m, p) for m, p in libs]
+        # libs = self.dep.get_libs_for(module, mapped=True)
         tgt = []
         # remove 'module' as the that is added explicitly above
         for lib, libdir in libs:
@@ -161,12 +168,15 @@ class Epics(Builder):
             # For some reason we have to add the directories to the
             # RELEASE file and then use the variables?
             # Explicit paths in the Makefile won't work.
+            #print(appname, libdir, lib)
             if libdir:
-                if lib not in [ i[1] for i in self._implicit_deps if i[2] == appname ]:  
+                if lib not in [i[1] for i in self._implicit_deps if
+                               i[2] == appname]:
                     self._epicssupportdict[name] = libdir
                     tgt.append((name, lib, appname))
             else:
-                if lib not in [ i[1] for i in self._implicit_deps if i[2] == appname ]:  
+                if lib not in [i[1] for i in self._implicit_deps if
+                               i[2] == appname]:
                     tgt.append((name, lib, appname))
         self._implicit_deps += tgt
 
@@ -211,7 +221,7 @@ class Epics(Builder):
 
         if os.path.isdir(srcdir):
             # Check that basename does not already exist in dictionary.
-            for sdir in self._iocbootdirsdict.keys():
+            for sdir in list(self._iocbootdirsdict.keys()):
                 if basename == os.path.basename(sdir):
                     raise BuildError("IOC boot base directory name already "
                                      "exist")
@@ -228,12 +238,16 @@ class Epics(Builder):
         with open(self._releasefile, "w") as rfh:
             rfh.write("ASKAP_ROOT=%s\n" % self._askaproot)
             rfh.write("EPICS_BASE=%s\n" % self._epicsbase)
-            for key, value in self._epicssupportdict.iteritems():
+            for key, value in list(self._epicssupportdict.items()):
+                key = key.replace("-","_")
                 rfh.write("{0}={1}\n".format(key.upper(), value))
+            if self.package_version is not None:
+                rfh.write("SHRLIB_VERSION=%s\n" % self.package_version)
+            rfh.write("LINKER_USE_RPATH=NO\nUSE_RPATH=NO\n")
 
     ## Get all dependencies as single string separated by ';'
     def _get_dependencies(self):
-        out = ["=".join([k, v['path']]) for k, v in self.dep._deps.iteritems()]
+        out = ["=".join([k, v['path']]) for k, v in list(self.dep._deps.items())]
         return ";".join(out)
 
     ## Update <appname>App/src/<appname>Version.c file with version and 
@@ -280,7 +294,7 @@ class Epics(Builder):
     def _precommand(self):
         Builder._precommand(self)
         if os.path.exists(os.path.join(self._package, "pvaSrv")):
-			#epicsV4 needs to know where EPICS v3 base is
+            # epicsV4 needs to know where EPICS v3 base is
             os.environ["EPICS_BASE"] = self._epicsbase
         elif not self._is_epics_base:
             self._create_releasefile()
@@ -290,7 +304,8 @@ class Epics(Builder):
                 os.mkdir(dstdir)
             shutil.copy(self._releasefile, dstdir)
             if self._oldreleasefile is not None:
-                shutil.copy(self._releasefile, os.path.join(dstdir, self._oldreleasefile))
+                shutil.copy(self._releasefile,
+                            os.path.join(dstdir, self._oldreleasefile))
             self._update_version_file()
 
     def _doc(self):
@@ -348,9 +363,13 @@ class Epics(Builder):
 
     def _create_info(self):
         entries = {}
-
-        if os.path.exists(os.path.join(self._prefix, "lib")):
-            entries["libdir"] = "lib/" + self._epicsarch
+        libdir = os.path.join(self._prefix, "lib", self._epicsarch)
+        rx = r"^lib(.+)\.so$"
+        if os.path.exists(libdir):
+            entries["libdir"] = os.path.join("lib", self._epicsarch)
+            libs = [p.split("/")[-1] for p in glob.glob(libdir+"/*.so")]
+            libs = [re.findall(rx, p)[0] for p in libs]
+            entries["libs"] = " ".join(libs)
         else:
             entries["libdir"] = ""
             entries["libs"] = ""
@@ -375,9 +394,9 @@ class Epics(Builder):
                 k, v = l.split("=", 1)
                 entries[k] = v
 
-        with file(inf, "w") as pih:
+        with open(inf, "w") as pih:
             pih.write("# Auto-generated by build.py\n")
-            for k, v in entries.items():
+            for k, v in list(entries.items()):
                 pih.write("{0}={1}\n".format(k, v))
 
             ##? This doesn't seem to be necessary?
@@ -433,17 +452,19 @@ class Epics(Builder):
                                                    suffix), "w") as of:
                         of.write("##Auto-generated {0} config file\n"
                                  .format(iocname))
-                        of.write('test -f /etc/askap/site/arrayenv.sh && . /etc/askap/site/arrayenv.sh\n')
+                        of.write(
+                            'test -f /etc/askap/site/arrayenv.sh && . /etc/askap/site/arrayenv.sh\n')
                         of.write('IOC_ROOT="$ASKAP_ROOT"\n')
                         exports = ['IOC_ROOT', ]
 
                         for k, v in sorted(row.items()):
                             if v == None:
-                                raise RuntimeError("bad key {0} in row {1}".format(k, row))
+                                raise RuntimeError(
+                                    "bad key {0} in row {1}".format(k, row))
                             v = v.strip()
                             if v:
-                                outstr = '{}="{}"'.format(k,v)
-                                #outstr = "=".join((k, v))
+                                outstr = '{}="{}"'.format(k, v)
+                                # outstr = "=".join((k, v))
                                 of.write(outstr + "\n")
                                 exports.append(k)
                         of.write("export %s\n" % " ".join(exports))
@@ -487,15 +508,25 @@ class Epics(Builder):
                 tf = os.path.join(d, template[0])
                 outd = create_out(d)
                 of = os.path.join(outd, os.path.splitext(template[0])[0])
-                utils.run("msi -V -I{0} -I{1} -o{2} {3}".format(mondir, d, of, tf))
+                # find any monica include directories
+                include = "-I{0} -I{1} ".format(mondir, d)
+                for installDir in list(self._epicssupportdict.values()):
+                    installDir = os.path.join(installDir, "monica", "include")
+                    if os.path.exists(installDir):
+                        include += "-I{0} ".format(installDir)
+                utils.run("msi -V {0} -o{1} {2}".format(include, of, tf))
 
     def _install(self):
         # Install iocboot directories from table
         Builder._install(self)
-        for ioctemplatedir, appname in self._iocbootdirsdict.iteritems():
+        for ioctemplatedir, appname in list(self._iocbootdirsdict.items()):
             self._install_iocboot(appname, ioctemplatedir)
         self._create_ioc_config()
         self._create_monica_config()
+        if not self._is_epics_base:
+            pth = os.path.join(self._prefix, "configure", "RELEASE")
+            if os.path.exists(pth):
+                os.remove(pth)
 
     ## Create iocBoot directory structure inside install dir and startup
     #  script based on templates.

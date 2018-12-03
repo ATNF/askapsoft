@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 ## Package for various utility functions to execute build and shell commands
 #
 # @copyright (c) 2011 CSIRO
@@ -26,7 +28,7 @@
 #
 import os
 
-from runcmd import runcmd
+from .runcmd import runcmd
 
 
 def get_svn_branch_info():
@@ -67,4 +69,4 @@ def get_svn_branch_info():
 
 
 if __name__ == '__main__':
-    print get_svn_branch_info()
+    print(get_svn_branch_info())

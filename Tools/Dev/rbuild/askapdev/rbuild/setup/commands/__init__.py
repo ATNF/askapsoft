@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 ## Package for defining additional setup target command objects.
 #
 # Each command uses a variety of arguments. Currently these args work from
@@ -39,6 +40,6 @@
 #
 
 
-from clean import clean
-from doc import doc
-from pylint import pylint
+from .clean import clean
+from .doc import doc
+from .pylint import pylint

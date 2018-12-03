@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 ## Package for various utility functions to execute build and shell commands
 #
 # @copyright (c) 2007 CSIRO
@@ -28,7 +29,7 @@ import os
 import sys
 
 from ..exceptions import BuildError
-from run import run
+from .run import run
 
 OPTIONS = sys.argv[1:]
 OPTIONSTRING = ' '.join(OPTIONS)

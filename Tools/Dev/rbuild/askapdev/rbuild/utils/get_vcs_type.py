@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # @file get_vcs_type.py
 # Determine the version control system
 #
@@ -27,7 +28,7 @@
 #
 
 import os
-from runcmd import runcmd
+from .runcmd import runcmd
 
 def is_git():
     return is_vcs_check('.git', 'git status -s')

@@ -36,15 +36,12 @@ setup (
                      "askapdev.rbuild.utils",
                      "askapdev.rbuild.setup",
                      "askapdev.rbuild.setup.commands",
-                     "askapdev.rbuild.debian",
                      "templates",
                    ],
-    package_data = { "templates": ["*"], 
-                     "askapdev.rbuild.debian": 
-                     ["data/[!.]*"] },
+    package_data = { "templates": ["*"] },
     scripts      = [ "scripts/rbuild",
-                     "scripts/debianise.py",
                      "scripts/askap-debpackage",
+                     "scripts/rdeps",
                    ],
     zip_safe     = False,
     #

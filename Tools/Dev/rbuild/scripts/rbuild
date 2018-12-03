@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 '''The rbuild script is the main interface to the build system for developers.
 '''
+from __future__ import print_function
 import glob
 import optparse
 import os
@@ -27,7 +28,7 @@ NR_ALIASES = ['docs', 'doc/',  'functests', 'functests/', 'tests', 'tests/']
 ALLOWED_TARGETS = R_TARGETS + NR_TARGETS
 RELEASE_TARGETS = ['release']
 
-ALLOWED_SCRIPTS = ['build.py', 'setup.py'] # order important!
+ALLOWED_SCRIPTS = ['build.py'] # order important!
 DEPLOY_TARGETS  = ['authenticate', 'deploy_local', 'deploy_remote', 'verify']
 
 NO_BUILD    = 'NO_BUILD'
@@ -113,6 +114,7 @@ PARSER.add_option_group(ADVANCED)
 PARSER.add_option('-p', '--pass-options', dest='extraopts',
         help='pass on package specific build options, e.g. "mpi=1"\n'
         'or specific functional tests e.g "-t functest -p functests/mytest.py"')
+# noinspection SqlNoDataSourceInspection
 PARSER.add_option('-t', '--target', dest='target',
         choices=ALLOWED_TARGETS + NR_ALIASES,
         help='select TARGET [default=%%default] from either list: '
@@ -130,7 +132,7 @@ PARSER.add_option('--deploy-targets', dest='deploy_targets',
 
 # Setting defaults in add_option is deprecated, so use set_defaults function.
 PARSER.set_defaults(autobuild=False, debug=False, force=False,
-                    quiet=True, recursion=True, tools=True, svn_update=True,
+                    quiet=True, recursion=True, tools=True, svn_update=False,
                     update=True, update_only=False, recursive_update=True,
                     virtualenv=True, parallel=True, build_myself=True,
                     exit_on_error=True, force_recursion=False,
@@ -149,11 +151,13 @@ def rebuild_myself(svn_update):
     myself = os.path.join(ASKAP_ROOT, 'Tools', 'Dev', 'rbuild')
     if svn_update:
         utils.update_tree(myself, quiet=False)
-    os.chdir(myself)
-    print "info: Cleaning and reinstalling myself"
-    os.system('python setup.py -q clean')
-    os.system('python setup.py -q install')
-    os.chdir(START_DIR)
+    print("info: no rebuild needed using pip -e")
+    return
+    #os.chdir(myself)
+    #print "info: Cleaning and reinstalling myself"
+    #os.system('python setup.py -q clean')
+    #os.system('pip install -e .')
+    #os.chdir(START_DIR)
 
 
 def rebuild_dev(svn_update):
@@ -165,10 +169,10 @@ def rebuild_dev(svn_update):
     if svn_update:
         utils.update_tree(devdir, quiet=False)
     os.chdir(devdir)
-    print "info: Cleaning and reinstalling other Tools/Dev packages"
+    print("info: Cleaning and reinstalling other Tools/Dev packages")
     for name in os.listdir('.'):
         if os.path.isdir(name) and name not in ['.svn', 'rbuild']:
-            print "info: Reinstalling %s" % name
+            print("info: Reinstalling %s" % name)
             os.chdir(name)
             for bfile in ALLOWED_SCRIPTS:
                 if os.path.exists(bfile):
@@ -185,12 +189,12 @@ def rebuild_tools(svn_update):
     have been changes.
     :param svn_update: boolean flag to indicate whether the svn update should happen
     '''
-    print "info:"
+    print("info:")
     tools = os.path.join(ASKAP_ROOT, 'Tools')
     if svn_update:
         utils.update_tree(tools, quiet=False)
     os.chdir(tools)
-    print "info: Rebuilding 'Tools'"
+    print("info: Rebuilding 'Tools'")
     # Warning: without the -T get infinite recursion.
     os.system('rbuild -M -S -T -t install %s > /dev/null' % tools)
     os.chdir(START_DIR)
@@ -205,7 +209,7 @@ def rebuild_environment(svn_update):
     if svn_update:
         utils.update_tree(envfile, quiet=False)
     os.chdir(ASKAP_ROOT)
-    print "info: Rebuilding initenv.py derived files 'initaskap.*sh'"
+    print("info: Rebuilding initenv.py derived files 'initaskap.*sh'")
 
     for ext in ['csh', 'sh']:
         init_file = 'initaskap.%s' % ext
@@ -309,8 +313,8 @@ def find_leaf_pkgs(paths, force):
                             break # no need to search thru file any more.
                 # no, then maybe stop the descent further down the tree.
                 elif NO_BUILD in files and force == False:
-                    print "warn: Will not search %s subtree due to %s file." \
-                          % (os.path.relpath(root, ASKAP_ROOT), NO_BUILD)
+                    print("warn: Will not search %s subtree due to %s file." \
+                          % (os.path.relpath(root, ASKAP_ROOT), NO_BUILD))
                     for d in dirs[:]:
                         dirs.remove(d)
         else: # handle svn -N partial checkouts.
@@ -328,7 +332,8 @@ def unique_list(the_list):
     result = []
 
     for item in the_list:
-        item = item.rstrip(os.path.sep) # Standardise for comparison.
+        if item != "/":
+            item = item.rstrip(os.path.sep)  # Standardise for comparison.
         if item in seen:
             continue
         seen[item] = 1
@@ -342,7 +347,7 @@ def get_autobuild_paths(paths, target, force):
         os.chdir(path)
         if glob.glob(NO_BUILD) and force == False:
             name = os.path.relpath(path, ASKAP_ROOT)
-            print "warn: Will not build %s package due to %s file." % (name, NO_BUILD)
+            print("warn: Will not build %s package due to %s file." % (name, NO_BUILD))
         else:
             # Do not want to update dependencies here, just get the list.
             dep_list += get_dependencies(False, target)
@@ -365,21 +370,21 @@ def build_pkg(path, options, target, opts, msg=''):
     pkgname = os.path.relpath(path, ASKAP_ROOT)
 
     if glob.glob(NO_BUILD) and opts.force == False:
-        print "warn: Will not build %s due to %s file." % (pkgname, NO_BUILD)
+        print("warn: Will not build %s due to %s file." % (pkgname, NO_BUILD))
         return
     
     if target == 'test' and glob.glob(NO_TEST):
-        print "warn: Will not run %s test due to %s file." % (pkgname, NO_TEST)
+        print("warn: Will not run %s test due to %s file." % (pkgname, NO_TEST))
         return
 
     if target == 'functest' and glob.glob(NO_FUNCTEST):
-        print "warn: Will not run %s functest due to %s file." % (pkgname, NO_FUNCTEST)
+        print("warn: Will not run %s functest due to %s file." % (pkgname, NO_FUNCTEST))
         return
 
     build_script = find_build_script()
 
     if not build_script:
-        print "warn: Path '%s' does not contain a build script." % pkgname
+        print("warn: Path '%s' does not contain a build script." % pkgname)
         return
     
     # The initialisation file may have changed (by the rebuild_environment
@@ -390,7 +395,7 @@ def build_pkg(path, options, target, opts, msg=''):
     severity = 'info'
     if opts.debug:
         severity = 'debug'
-    print "%s: %sTarget[%s] '%s'" % (severity, msg, target, pkgname)
+    print("%s: %sTarget[%s] '%s'" % (severity, msg, target, pkgname))
     sys.stdout.flush()
 
     if not (opts.debug or opts.update_only):
@@ -418,11 +423,11 @@ def stage_virtualenv(svn_update, stage_dir):
     try:
         os.chdir('install') # Now can go to the actual install directory.
     except OSError:
-        print "error: The Tools/virtualenv/install directory does not exist."
-        print "       You need to run the Tools/virtualenv/bootstrap.py again."
-        print "       You should use the same system python. e.g."
-        print "       cd $ASKAP_ROOT/Tools/virtualenv"
-        print "       /usr/bin/python2.6 bootstrap.py"
+        print("error: The Tools/virtualenv/install directory does not exist.")
+        print("       You need to run the Tools/virtualenv/bootstrap.py again.")
+        print("       You should use the same system python. e.g.")
+        print("       cd $ASKAP_ROOT/Tools/virtualenv")
+        print("       /usr/bin/python2.6 bootstrap.py")
         sys.exit(1)
 
     for src in glob.glob('*'):
@@ -533,7 +538,6 @@ def get_dependencies(svn_update, target):
         deps.add_package() # Combined with selfupdate=True, trigger deps update.
         depdirs = deps.get_rootdirs()
         depdirs.reverse()
-
     return unique_list(depdirs)
 
 
@@ -564,8 +568,8 @@ def rbuild(opts, pkg_path, build_opts):
     '''
     rel_path = os.path.relpath(pkg_path, ASKAP_ROOT)
     if opts.recursion and (opts.target in R_TARGETS or OPTS.force_recursion):
-        print "info:"
-        print "info: Recursive build of '%s'" % rel_path
+        print("info:")
+        print("info: Recursive build of '%s'" % rel_path)
 
     # Update target package now in case dependencies have changed or 
     # NO_BUILD file removed.
@@ -573,13 +577,12 @@ def rbuild(opts, pkg_path, build_opts):
     os.chdir(pkg_path) # May not exist until after the update!
 
     if glob.glob(NO_BUILD) and opts.force == False:
-        print "warn: Will not build '%s' due to %s file." % (rel_path, NO_BUILD)
+        print("warn: Will not build '%s' due to %s file." % (rel_path, NO_BUILD))
         return
 
     # Do the dependencies if required.
     if (opts.target in R_TARGETS or opts.force_recursion) and opts.recursion:
         dependencies = get_dependencies(opts.svn_update, opts.target)
-
         if opts.update_only:
             sys.exit(0)
 
@@ -605,13 +608,13 @@ def rbuild(opts, pkg_path, build_opts):
 # Main program.
 #
 OPTS, PKG_PATHS = parse_args()
-print "info: ASKAP_ROOT = '%s'" % ASKAP_ROOT
+print("info: ASKAP_ROOT = '%s'" % ASKAP_ROOT)
 
 if OPTS.build_myself:
     rebuild_myself(OPTS.svn_update)
     sys.argv.insert(1, '--no-build-myself') # Stop the infinite loop.
-    print "info: Restarting myself"
-    print "info:"
+    print("info: Restarting myself")
+    print("info:")
     os.execv(sys.argv[0], sys.argv)
 
 if OPTS.tools:
@@ -627,11 +630,11 @@ PKG_PATHS = find_all_paths(PKG_PATHS, OPTS)
 # and it cannot be an autobuild option XXX get individual stage dirs I think???
 if OPTS.target in RELEASE_TARGETS:
     if OPTS.autobuild:
-        print 'error: cannot specify "-a" flag with target %s.' % OPTS.target
+        print('error: cannot specify "-a" flag with target %s.' % OPTS.target)
         sys.exit()
     if len(PKG_PATHS) > 1:
-        print 'error: target %s can only be specified with a single package path.' \
-              % OPTS.target
+        print('error: target %s can only be specified with a single package path.' \
+              % OPTS.target)
         sys.exit(1)
 
 if not OPTS.stage_dir.startswith('/'):

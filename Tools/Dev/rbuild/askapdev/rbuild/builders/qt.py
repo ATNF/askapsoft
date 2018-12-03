@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 ## @qt.py
 # Object to simplify unpacking/building/cleaning of ASKAPsoft packages
 #
@@ -27,7 +28,7 @@
 #
 import os
 
-from builder import Builder
+from .builder import Builder
 import askapdev.rbuild.utils as utils
 
 ## Implementation of Builder for Qt4 projects (qmake and make).

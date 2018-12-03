@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # @file get_svn_revision.py
 # Fetch the subversion revision number from the repository
 #
@@ -26,8 +27,8 @@
 # @author Robert Crida <robert.crida@ska.ac.za>
 #
 
-from runcmd import runcmd
-from get_vcs_type import is_git
+from .runcmd import runcmd
+from .get_vcs_type import is_git
 import os
 
 def get_svn_revision():

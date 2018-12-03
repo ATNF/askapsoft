@@ -1,3 +1,8 @@
+from __future__ import print_function
+from builtins import object
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
 # @file
 # Object to simplify unpacking/building/cleaning of ASKAPsoft packages
 #
@@ -33,11 +38,11 @@ import platform
 import re
 import shutil
 import sys
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 from ..exceptions import BuildError
 
 if (sys.version_info[0] < 3) and (sys.version_info[1] < 6):
-    print "error: Python versions less than 2.6 are unsupported. Exiting."
+    print("error: Python versions less than 2.6 are unsupported. Exiting.")
     sys.exit(1)
 
 from hashlib import md5
@@ -47,7 +52,7 @@ import askapdev.rbuild.utils.pkginfo as pkginfo
 from askapdev.rbuild.dependencies import Dependency
 
 
-class Builder:
+class Builder(object):
     '''
     Object to set up a build environment for ASKAPsoft packages.
     This object is an abstract base class and should be subclassed for
@@ -130,6 +135,7 @@ class Builder:
         self._comopts = options
         self._opts = ""
         self._precallback = None
+        self._preinstallcallback = None
         self._postcallback = None
         self._files = []
         self._install_files = []
@@ -154,6 +160,7 @@ class Builder:
 
 
     def _fetch_remote(self):
+        import urllib2
         if utils.in_code_tree():
             return
         if self.remote_archive is None:
@@ -166,7 +173,7 @@ class Builder:
         if not uitem.scheme:
             root = os.environ["RBUILD_REMOTE_ARCHIVE"]
             fullpath = os.path.sep.join((root, self.remote_archive))
-        remote = urllib2.urlopen(fullpath)
+        remote = urllib.request.urlopen(fullpath)
         utils.q_print("info: Fetching '{}'...".format(fullpath))
         with open(outfile, "wb") as of:
             of.write(remote.read())
@@ -201,7 +208,6 @@ class Builder:
                                  os.path.join(self._bdir, self._infofile))
         utils.create_init_file(self._initscript_name, env)
 
-
     def add_precallback(self, function):
         '''
         Add a callback to be executed immediately after unpacking.
@@ -209,6 +215,12 @@ class Builder:
         '''
         self._precallback = function
 
+    def add_preinstallcallback(self, function):
+        '''
+        Add a callback to be executed immediately before build/install.
+        :param function: The callback function.
+        '''
+        self._preinstallcallback = function
 
     def add_postcallback(self, function):
         '''
@@ -265,7 +277,7 @@ class Builder:
         :param key:   The environment variable name, e.g. "CPPFLAGS"
         :param value: The value to be appended, e.g. "-Wall"
         '''
-        if os.environ.has_key(key):
+        if key in os.environ:
             os.environ[key] = ' '.join((os.environ[key], value))
         else:
             os.environ[key] = value
@@ -454,7 +466,7 @@ class Builder:
         filename = os.path.join(self._stagedir, "initenv.py")
         data = pkg_resources.resource_string(__name__, template)
 
-        for k, v in env.items():
+        for k, v in list(env.items()):
             k = "%%%"+k+"%%%"
             data  = data.replace(k, v)
         data = data.replace("%%%ldprefix%%%", env.ld_prefix)
@@ -593,6 +605,9 @@ class Builder:
         utils.q_print("error: deploy target is deprecated.")
         sys.exit(1)
 
+    def _preinstall(self):
+        if self._preinstallcallback is not None:
+            self._preinstallcallback()
 
     def _precommand(self):
         if self._precallback is not None:
@@ -721,7 +736,7 @@ class Builder:
         suffdict = { ".gz": "tar zxf", ".tgz": "tar zxf", ".bz2": "tar jxf",
                      ".zip": "unzip", ".jar": "jar xf"}
         found = False
-        for key, value in suffdict.iteritems():
+        for key, value in list(suffdict.items()):
             if self._tarname.endswith(key):
                 unpack = value
                 found = True
@@ -783,7 +798,7 @@ class Builder:
 
         # XXX append the current package site-packages to PYTHONPATH
         # as pandas and others checks to see if it is valid before building.
-        for k, v in env.items():
+        for k, v in list(env.items()):
             if v:
                 v = os.path.expandvars(v)
                 envitems.append("%s=%s" % (k, v))
@@ -825,8 +840,8 @@ class Builder:
             else:
                 pass # fail quietly as they may have run scons tests.
         else:
-            print "error: missing functests subdirectory in %s" % \
-                    os.path.relpath(self._bdir, self._askaproot)
+            print("error: missing functests subdirectory in %s" % \
+                    os.path.relpath(self._bdir, self._askaproot))
 
 
     def _doc(self):
@@ -838,13 +853,13 @@ class Builder:
     def _signature(self):
         if not self.create_signature:
             return
-        outsig = file(self._pkgsig, "w")
+        outsig = open(self._pkgsig, "w")
         outsig.write("{\n")
         for fn in self._siglist + self._files + self._patches:
             if type(fn) == tuple: # added files are tuples (filename, dest)
                 fn = fn[0]
             if fn and os.path.exists(fn):
-                md5sig = md5(file(fn).read())
+                md5sig = md5(open(fn, 'rb').read())
                 outsig.write("'%s' : '%s',\n" % (fn, md5sig.hexdigest()))
             else:
                 print("warn: cannot checksum as file %s does not exist." % fn)
@@ -880,7 +895,7 @@ class Builder:
             if type(fn) == tuple: # added files are tuples
                 fn = fn[0]
             if fn and os.path.exists(fn):
-                md5cur = md5(file(fn).read()).hexdigest()
+                md5cur = md5(open(fn, 'rb').read()).hexdigest()
                 if md5cur != sigdict.get(fn): # .get() handles missing keys
                     return False
             else:
@@ -951,6 +966,7 @@ class Builder:
             self._replace()
             self._precommand()
             os.chdir(self._builddir)
+            self._preinstall()
             self._configure()
             self._build()
             self._install()

@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 ## Package for various utility functions to execute build and shell commands
 #
 # @copyright (c) 2007 CSIRO
@@ -28,7 +30,7 @@ import os
 import sys
 
 from ..exceptions import BuildError
-from parse_error import parse_error
+from .parse_error import parse_error
 
 OPTIONS = sys.argv[1:]
 OPTIONSTRING = ' '.join(OPTIONS)
@@ -45,17 +47,17 @@ def run(unixcomm, extraquiet=False, ignore_traceback=False):
     err = "err.log"
     quiet = '-q' in OPTIONS
 
-    if quiet:
-        unixcomm += " > /dev/null"
-        if extraquiet:
-            unixcomm += " 2> %s" % err
+    # if quiet:
+    #     unixcomm += " > /dev/null"
+    #     if extraquiet:
+    #         unixcomm += " 2> %s" % err
 
     status = os.system(unixcomm)
 
     if status > 0 and not ignore_traceback:
         if quiet and extraquiet and os.path.exists(err):
             errormsg = parse_error(err)
-            print >> sys.stderr, errormsg
+            print(errormsg, file=sys.stderr)
             os.remove(err)
         raise BuildError(unixcomm)
 

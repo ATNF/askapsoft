@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 ## Package for various utility functions to execute build and shell commands
 #
 # @copyright (c) 2011 CSIRO
@@ -27,7 +29,7 @@
 import glob
 import os
 
-from q_print import q_print
+from .q_print import q_print
 
 #
 # XXX The following should eventually move to a central configuration file
@@ -67,7 +69,7 @@ def get_pkginfo(packagedir):
     infofile = os.path.join(packagedir, PKG_INFO)
 
     if os.path.exists(infofile):
-        f = file(infofile)
+        f = open(infofile)
         for line in f.readlines():
             line = line.strip()
             if not line or line.startswith("#"):
@@ -76,7 +78,7 @@ def get_pkginfo(packagedir):
                 key, value = line.split("=", 1)
                 key = key.strip()
                 value = value.strip()
-                if key in info.keys():
+                if key in list(info.keys()):
                     if key in PKG_INFO_LIST_KEYS:
                         info[key] = value.split()
                     else:
@@ -91,4 +93,4 @@ def get_pkginfo(packagedir):
 
 if __name__ == '__main__':
     import sys
-    print get_pkginfo(sys.argv[1])
+    print(get_pkginfo(sys.argv[1]))

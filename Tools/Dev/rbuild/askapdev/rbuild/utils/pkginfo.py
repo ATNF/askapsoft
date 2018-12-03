@@ -75,7 +75,7 @@ def to_info(pkgfile=None):
     outlibs=[]
     varnames = {}
     varrx = re.compile("\$\{\w*prefix\}/")
-    f = file(pkgfile)
+    f = open(pkgfile)
 
     for line in f.readlines():
         line = line.strip()
@@ -106,6 +106,6 @@ def to_info(pkgfile=None):
     if libdir: outtxt += "libdir=%s\n" % libdir
     if incdir: outtxt += "incdir=%s\n" % incdir
 
-    f = file("package.info", "w+")
+    f = open("package.info", "w+")
     f.write(outtxt)
     f.close()

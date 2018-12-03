@@ -37,7 +37,7 @@ def parse_error(errfile, ncontext=2):
     if not os.path.exists(errfile):
         return None
 
-    f = file(errfile, "r")
+    f = open(errfile, "r")
     lines = f.readlines()
     f.close()
     outlines = []

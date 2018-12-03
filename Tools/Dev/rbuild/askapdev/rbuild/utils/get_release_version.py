@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 ## Package for various utility functions to execute build and shell commands
 #
 # @copyright (c) 2011 CSIRO
@@ -27,9 +29,9 @@
 import os.path
 import datetime
 
-from get_package_name import get_package_name
-from get_svn_revision import get_svn_revision
-from get_svn_branch_info import get_svn_branch_info
+from .get_package_name import get_package_name
+from .get_svn_revision import get_svn_revision
+from .get_svn_branch_info import get_svn_branch_info
 
 
 def get_release_version():
@@ -46,4 +48,4 @@ def get_release_version():
 
 
 if __name__ == '__main__':
-    print get_release_version()
+    print(get_release_version())

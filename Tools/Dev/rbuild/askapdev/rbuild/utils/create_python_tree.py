@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 ## Package for various utility functions to execute build and shell commands
 #
 # @copyright (c) 2007 CSIRO
@@ -28,7 +29,7 @@
 import distutils
 import os
 
-from get_python_version import get_python_version
+from .get_python_version import get_python_version
 
 
 def get_site_dir():
@@ -54,7 +55,7 @@ def create_python_tree(root=None):
         if root:
             d = os.path.join(root, d)
         try:
-            os.makedirs(d, 0755)
+            os.makedirs(d, 0o755)
         except:
             pass
 

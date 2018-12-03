@@ -1,2 +1,2 @@
-ice=3rdParty/Ice/Ice-3.5.0
+ice=/usr/local
 interfaces=Code/Interfaces/slice/current

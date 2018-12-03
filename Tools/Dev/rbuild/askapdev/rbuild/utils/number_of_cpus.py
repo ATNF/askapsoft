@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 ## Package for various utility functions to execute build and shell commands
 #
 # @copyright (c) 2007 CSIRO
@@ -26,8 +27,8 @@
 #
 import sys
 
-from runcmd import runcmd
-from q_print import q_print
+from .runcmd import runcmd
+from .q_print import q_print
 
 def number_of_cpus():
     '''Return the number of CPUs the current machine has.'''

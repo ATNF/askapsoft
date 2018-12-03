@@ -38,8 +38,8 @@
 #include <askap/AskapLogging.h>
 #include <Common/ParameterSet.h>
 #include <boost/scoped_ptr.hpp>
-#include <healpix_tables.h>
-#include <rangeset.h>
+#include <healpix_cxx/healpix_tables.h>
+#include <healpix_cxx/rangeset.h>
 
 // Local includes
 //#include "SkyModelServiceImpl.h"
@@ -49,6 +49,7 @@ ASKAP_LOGGER(logger, ".HealPixFacade");
 using namespace std;
 using namespace boost;
 using namespace askap::cp::sms;
+
 
 namespace askap {
 namespace cp {

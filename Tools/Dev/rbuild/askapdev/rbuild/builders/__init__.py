@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 ## @file
 # Object to simplify unpacking/building/cleaning of ASKAPsoft packages
 #
@@ -26,19 +27,19 @@
 # @author Tony Maher <Tony.Maher@csiro.au>
 #
 
-from builder import Builder
-from ant import Ant
-from autotools import Autotools
-from scons import Scons
-from setuptools import Setuptools
-from epics import Epics
-from adbe import Adbe
-from virtual import Virtual
-from data import Data
-from slicedoc import SliceDoc
-from qt import Qt
-from metapackage import MetaPackage
-from cmake import CMake
+from .builder import Builder
+from .ant import Ant
+from .autotools import Autotools
+from .scons import Scons
+from .setuptools import Setuptools
+from .epics import Epics
+from .adbe import Adbe
+from .virtual import Virtual
+from .data import Data
+from .slicedoc import SliceDoc
+from .qt import Qt
+from .metapackage import MetaPackage
+from .cmake import CMake
 
 from askapdev.rbuild.utils import get_python_version
 

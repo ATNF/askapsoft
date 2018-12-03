@@ -1,3 +1,4 @@
+from __future__ import print_function
 ## Module defining the pylint target command. This provides a facade to pylint.
 #
 # @copyright (c) 2006 CSIRO
@@ -84,4 +85,4 @@ class pylint(Command):
                 % (self.rcfile, self.package)
             os.system(command)
         else:
-            print "warning: pylint disabled (disable = True)"
+            print("warning: pylint disabled (disable = True)")

@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 ## Package for various utility functions to execute build and shell commands
 #
 # @copyright (c) 2011 CSIRO
@@ -25,7 +27,7 @@
 # @author Tony Maher <Tony.Maher@csiro.au>
 #
 import os
-from in_code_tree import in_code_tree
+from .in_code_tree import in_code_tree
 from ..exceptions import BuildError
 
 def get_package_name():
@@ -46,4 +48,4 @@ def get_package_name():
     return pathelem[-1]
 
 if __name__ == '__main__':
-    print get_package_name()
+    print(get_package_name())

@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import absolute_import
 ## @file
 # Object to simplify unpacking/building/cleaning of ASKAPsoft packages
 #
@@ -25,12 +27,10 @@
 #
 # @author Malte Marquarding <Malte.Marquarding@csiro.au>
 #
-
-import glob
-import sys
 import os
+import re
 
-from builder import Builder
+from .builder import Builder
 import askapdev.rbuild.utils as utils
 
 
@@ -58,26 +58,32 @@ class Setuptools(Builder):
     #  directory so they can be packaged up for deployment.
     #
 
-    def _build(self):
-        if not self.has_extension:
+    def _dependencies_to_requirements(self):
+        requirements = []
+        rx = r"\[(.+)\]$"
+        for pkg in self.dep.keys(explicit=True):
+            if pkg.startswith("python-"):
+                pypkg = pkg.replace("python-", "")
+                pkgname = re.findall(rx, pypkg)
+                if pkgname:
+                    pypkg = pkgname[0]
+                    pypkg = pypkg.replace(":", "==")
+                requirements.append(pypkg)
+        if not requirements:
             return
+        with open("requirements.txt", "w") as of:
+            of.write("\n".join(requirements)+"\n")
+
+    def _build(self):
+        self._dependencies_to_requirements()
         cmd = "%s setup.py build_ext %s" % (self._pycmd, self._opts)
+        utils.run("%s" % cmd, self.nowarnings)
+        cmd = "%s setup.py build" % (self._pycmd,)
         utils.run("%s" % cmd, self.nowarnings)
 
     def _install(self):
-        if os.path.exists("setupegg.py"):
-            cmd = "%s setupegg.py install" % self._pycmd
-        else:
-            cmd = "%s setup.py install" % self._pycmd
-
-        if utils.in_tools_tree():
-            msg = "info: 'setuptools egg install', imports use default version."
-        else:
-            msg = "info: 'setuptools in local 'install' directory."
-            installdir = os.path.join(self._bdir, self._installdir)
-            cmd += " --prefix %s" % installdir
-            utils.create_python_tree(installdir)
-
+        cmd = "pip install -v -e ."
+        msg = "info: 'pip install -e' into virtualenv"
         utils.run("%s %s" % (self._get_env(), cmd), self.nowarnings)
         utils.q_print(msg)
         self._version_install()
@@ -104,7 +110,7 @@ class Setuptools(Builder):
         for o in self._comopts:
             if o.startswith(target+"/"):
                 filetarget = o
-        nose = self._pycmd.replace("python", "nosetests")
+        nose = "nosetests"
         cmd = "%s %s --with-xunit --xunit-file=%s/%s-junit-results.xml"\
               " %s" % (env, nose, target, target, filetarget)
         utils.run("%s" % cmd, self.nowarnings, ignore_traceback=True)
@@ -115,7 +121,7 @@ class Setuptools(Builder):
         if os.path.exists("tests"):
             self._testtgt("tests")
         else:
-            print "error: Cannot run tests as the tests subdirectory is missing: %s" % os.path.join(self._bdir, "tests")
+            print("error: Cannot run tests as the tests subdirectory is missing: %s" % os.path.join(self._bdir, "tests"))
 
     def _functest(self):
         if not utils.in_code_tree():
@@ -123,5 +129,5 @@ class Setuptools(Builder):
         if os.path.exists("functests"):
             self._testtgt("functests")
         else:
-            print "error: missing functests subdirectory in %s" % \
-                    os.path.relpath(self._bdir, self._askaproot)
+            print("error: missing functests subdirectory in %s" % \
+                    os.path.relpath(self._bdir, self._askaproot))

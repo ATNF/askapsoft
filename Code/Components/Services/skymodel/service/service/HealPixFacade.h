@@ -35,12 +35,14 @@
 #include <boost/cstdint.hpp>
 #include <boost/noncopyable.hpp>
 #include <Common/ParameterSet.h>
-#include <healpix_base.h>
-#include <pointing.h>
+#include <healpix_cxx/healpix_base.h>
+#include <healpix_cxx/pointing.h>
 
 // Local package includes
 #include "Utility.h"
 #include "SmsTypes.h"
+
+template<> struct Orderhelper__<long long> {enum{omax=29};};
 
 
 namespace askap {
@@ -51,7 +53,8 @@ namespace sms {
 class HealPixFacade : private boost::noncopyable {
     public:
         // typedef boost::int64_t Index;
-        typedef int64 Index;
+        // typedef int64_t Index;
+        typedef long long Index;
         typedef std::vector<Index> IndexList;
         typedef boost::shared_ptr<IndexList> IndexListPtr;
         /// @brief Constructor.

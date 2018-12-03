@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 # Copyright (c) 2006-2012 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
@@ -24,9 +26,9 @@
 
 import os
 
-from runcmd import runcmd
-from get_vcs_type import is_svn
-from q_print import q_print
+from .runcmd import runcmd
+from .get_vcs_type import is_svn
+from .q_print import q_print
 from ..exceptions import BuildError
 
 ASKAP_ROOT = os.environ["ASKAP_ROOT"]
@@ -57,7 +59,7 @@ def _is_dir_in_repo(path):
         return True
 
     # Nothing found so must be local
-    print 'warn: %s is a local (uncommitted) directory' % path
+    print('warn: %s is a local (uncommitted) directory' % path)
     return False
 
         
@@ -105,7 +107,7 @@ def update_tree(dirpath, quiet=False):
             rpath = os.path.relpath(dirpath, ASKAP_ROOT)
         else:
             rpath = dirpath
-        print "info: Updating '%s'" % rpath
+        print("info: Updating '%s'" % rpath)
 
     if os.path.exists(dirpath):
         tree_updated = update_command(dirpath, recursive=True)

@@ -10,55 +10,50 @@
     <property name="project.jar" value="${ant.project.name}.jar"/>
     <property name="debug" value="off"/>
     <property name="verbose" value="false"/>
-    <property name="ice.version" value="3.5.0"/>
-    <property name="junit.version" value="4.7"/>
-    <condition property="ice.home" value="${dep_ice}/install" >
-        <and>
-            <available file="${dep_ice}"/>
+    <property name="junit.jar" value="/usr/local/share/java/junit4.jar"/>
+    <condition property="ice.used" value="true" >
             <isset property="slice.dir"/>
-        </and>
     </condition>
+
+    <script language="javascript">
+        var cp = project.getProperty("classpath");
+        var out = [];
+        if (cp != null) {
+            cp = cp.split(":");
+            out = cp.map(function(item) {
+                return item.substring(item.lastIndexOf("/")+1);
+            });
+        }
+        project.setProperty("cp_jars", out.join(" "));
+    </script>
+
     <!-- You can override resources.list to include resources in jar file -->
     <resources id="resources.list"/>
 
-    <target name="task-init" if="ice.home" >
-        <condition property="task.jar.file" value="${ice.home}/lib/ant-ice-${ice.version}.jar">
-            <available file="${ice.home}/lib/ant-ice-${ice.version}.jar"/>
-        </condition>
-
-        <taskdef name="slice2java" classpath="${task.jar.file}"
-                 classname="Slice2JavaTask"/>
-    </target>
-
-    <target name="init" depends="task-init">
+    <target name="init">
       <!-- Create the time stamp -->
       <tstamp/>
     </target>
 
-    <!-- The target to generate java bindings from slice -->
-    <target name="generate" depends="task-init" if="ice.home"
-            description="run slice2java">
-        <!-- Create the output directory for generated code -->
-        <mkdir dir="${generated.dir}"/>
-        <slice2java stream="on" outputdir="${generated.dir}"
-                    dependencyfile="${generated.dir}/.depend.Ice">
-            <includepath>
-                <pathelement path="${slice.dir}" />
-            </includepath>
-        <fileset refid="slice.files"/>
-        </slice2java>
+    <target name="generate" description="custom slice2java"  depends="init" if="ice.used">
+
+      <mkdir dir="${generated.dir}"/>
+      <pathconvert property="sliceFiles" refid="slice.files" pathsep=" " />
+      <exec dir="." executable="slice2java">
+	<arg line="-I${dep_interfaces} --output-dir ${generated.dir} ${sliceFiles}"/>
+      </exec>
     </target>
 
     <!-- target to compile ice -->
     <target name="compile-ice" depends="generate,init"
-            description="compile the source" if="ice.home" >
+            description="compile the source" if="ice.used" >
         <mkdir dir="${build.dir}"/>
         <!-- Compile the java code from ${src} into ${build} -->
         <javac classpath="${classpath}"
                srcdir="${generated.dir}"
                destdir="${build.dir}"
                debug="${debug}"
-               includeantruntime="false"/>
+               verbose="${verbose}"/>
     </target>
 
 
@@ -70,11 +65,10 @@
         <javac srcdir="${src.dir}"
                destdir="${build.dir}"
                debug="${debug}"
-               verbose="${verbose}"
-               includeantruntime="false">
+               verbose="${verbose}">
             <classpath>
                 <pathelement path="${classpath}"/>
-                <pathelement location="${env.ASKAP_ROOT}/lib/junit-${junit.version}.jar"/>
+                <pathelement location="${junit.jar}"/>
             </classpath>
         </javac>
         <!-- Also compile the java code from ${test.dir} into ${build.dir} -->
@@ -82,11 +76,10 @@
         <javac srcdir="${test.dir}"
                destdir="${build.dir}"
                debug="${debug}"
-               verbose="${verbose}"
-               includeantruntime="false">
+               verbose="${verbose}">
             <classpath>
                 <pathelement path="${classpath}"/>
-                <pathelement location="${env.ASKAP_ROOT}/lib/junit-${junit.version}.jar"/>
+                <pathelement location="${junit.jar}"/>
             </classpath>
         </javac>
     </target>
@@ -99,7 +92,7 @@
                 <attribute name="Built-By" value="${user.name}"/>
                 <attribute name="Main-Class" value="${main.exe}"/>
 		<attribute name="Implementation-Version" value="${askap_version}"/>
-<!--                <attribute name="Class-Path" value="${classpath}"/> -->
+		<attribute name="Class-Path" value="${cp_jars}"/>
             </manifest>
             <fileset dir="${build.dir}"/>
             <resources refid="resources.list"/>
@@ -114,8 +107,8 @@
         <jar jarfile="${project.jar}">
             <manifest>
                 <attribute name="Built-By" value="${user.name}"/>
-		<attribute name="Implementation-Version" value="${askap_version}"/>
-<!--                <attribute name="Class-Path" value="${classpath}"/> -->
+                <attribute name="Implementation-Version" value="${askap_version}"/>
+                <attribute name="Class-Path" value="${cp_jars}"/>
             </manifest>
             <fileset dir="${build.dir}"/>
             <resources refid="resources.list"/>
@@ -135,7 +128,7 @@
         <javadoc destdir="${doc.dir}/">
             <classpath>
                 <pathelement path="${classpath}"/>
-                <pathelement location="${env.ASKAP_ROOT}/lib/junit-${junit.version}.jar"/>
+                <pathelement location="${junit.jar}"/>
             </classpath>
             <link href="http://java.sun.com/javase/6/docs/api/"/>
             <fileset dir="${src.dir}/" includes="**/*.java" />
@@ -148,7 +141,7 @@
         <junit printsummary="${verbose}">
             <classpath>
                 <pathelement path="${classpath}"/>
-                <pathelement location="${env.ASKAP_ROOT}/lib/junit-${junit.version}.jar"/>
+                <pathelement location="${junit.jar}"/>
                 <!--<pathelement location="${project.jar}"/>-->
                 <pathelement location="${build.dir}"/>
             </classpath>

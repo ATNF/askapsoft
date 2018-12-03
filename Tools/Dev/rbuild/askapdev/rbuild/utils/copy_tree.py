@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from __future__ import print_function
 ## Package for various utility functions to execute build and shell commands
 #
 # @copyright (c) 2007 CSIRO
@@ -31,13 +33,13 @@ import os
 import shutil
 import sys
 
-from q_print import q_print
+from .q_print import q_print
 from ..exceptions import BuildError
 
 OPTIONS = sys.argv[1:]
 
 
-def copy_tree(src, dst, pattern=None, overwrite=False, symlinks=True, mode=0755):
+def copy_tree(src, dst, pattern=None, overwrite=False, symlinks=True, mode=0o755):
     '''
     Recursively copy a directory to a target directory.
     For creating releases, we need to be able to copy multiple subtrees
@@ -77,7 +79,8 @@ def copy_tree(src, dst, pattern=None, overwrite=False, symlinks=True, mode=0755)
     # try to use it as is. For all other errors re-raise the exception.
     try:
         os.makedirs(dst, mode)
-    except OSError, (numerr, strerr):
+    except OSError as e:
+        (numerr, strerr) = e.args
         if not (errno.errorcode[numerr] == 'EEXIST' and os.path.isdir(dst)):
             raise BuildError("Couldn't create directory %s" % dst)
 
@@ -102,8 +105,8 @@ def copy_tree(src, dst, pattern=None, overwrite=False, symlinks=True, mode=0755)
                         try:
                             os.symlink(linkto, dstname)
                         except:
-                            print >>sys.stderr,  "warn: symlink to", \
-                                dstname ,"exists"
+                            print("warn: symlink to", \
+                                dstname ,"exists", file=sys.stderr)
                 else:
                     shutil.copy(srcname, dstname)
             else:

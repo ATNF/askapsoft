@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 # Copyright (c) 2010 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
@@ -22,7 +23,7 @@
 #
 import os
 import glob
-from builder import Builder
+from .builder import Builder
 import askapdev.rbuild.utils as utils
 
 class SliceDoc(Builder):

@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import absolute_import
 ## @file
 # Object to simplify unpacking/building/cleaning of ASKAPsoft packages
 #
@@ -30,7 +32,7 @@ import re
 import subprocess
 import sys
 
-from builder import Builder
+from .builder import Builder
 import askapdev.rbuild.utils as utils
 
 ## Implementation of Builder for 'modules' which will be treated as a
@@ -68,8 +70,8 @@ class Virtual(Builder):
                          stderr=subprocess.STDOUT)
         output = proc.communicate()[0]
         if proc.returncode > 0:
-            print  "error: 'modules display' failed.  Error message: '%s'" \
-                    % output
+            print("error: 'modules display' failed.  Error message: '%s'" \
+                    % output)
             sys.exit(1)
         # Take the root from the PATH entry
         rx = re.compile(".*PATH\s+(.+)/bin.*")
@@ -93,7 +95,7 @@ class Virtual(Builder):
                 os.remove('install')
             os.symlink(pkgroot, 'install')
         else:
-            print "warn: Unable to find a system package so cannot create virtual package %s." % self._package
+            print("warn: Unable to find a system package so cannot create virtual package %s." % self._package)
 
 
     def _stage(self):

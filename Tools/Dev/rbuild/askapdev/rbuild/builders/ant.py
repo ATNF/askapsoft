@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 ## @file
 # Object to simplify unpacking/building/cleaning of ASKAPsoft packages
 #
@@ -29,7 +30,7 @@
 import os
 import glob
 
-from builder import Builder
+from .builder import Builder
 import askapdev.rbuild.utils as utils
 
 class Ant(Builder):
@@ -115,7 +116,7 @@ class Ant(Builder):
             body = """#!/bin/sh\nexec /usr/bin/java $JAVA_OPTS -cp {0} {1} $*"""
             with open(exename, "w") as of:
                 of.write(body.format(cp, entrypoint))
-            os.chmod(exename, 0755)
+            os.chmod(exename, 0o755)
 
             # use own jar from current dir
             jar, cp = env2['CLASSPATH'].split(":",1)
@@ -123,7 +124,7 @@ class Ant(Builder):
             cp = ":".join((jar,cp))
             with open(sname, "w") as of:
                 of.write(body.format(cp, entrypoint))
-            os.chmod(sname, 0755)
+            os.chmod(sname, 0o755)
             self.add_extra_clean_targets(sname)
 
                      

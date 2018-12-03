@@ -1,3 +1,4 @@
+from __future__ import print_function
 ## Package for various utility functions to execute build and shell commands
 #
 # @copyright (c) 2012 CSIRO
@@ -27,13 +28,11 @@
 import os
 
 CODE_DIR = "Code"
-ASKAP_ROOT = os.environ['ASKAP_ROOT']
 
 
 def in_code_tree():
     '''Are we inside the "Code" tree (ASKAPsoft sources)'''
-    rpath = os.path.relpath(os.getcwd(), ASKAP_ROOT)
-    return CODE_DIR in rpath
+    return CODE_DIR in os.getcwd()
 
 if __name__ == "__main__":
-    print in_code_tree() and "Yes" or "No"
+    print(in_code_tree() and "Yes" or "No")

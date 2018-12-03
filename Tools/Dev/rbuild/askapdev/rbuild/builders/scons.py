@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import absolute_import
 ## @file
 # Object to simplify unpacking/building/cleaning of ASKAPsoft packages
 #
@@ -28,7 +30,7 @@
 
 import os
 
-from builder import Builder
+from .builder import Builder
 import askapdev.rbuild.utils as utils
 
 
@@ -64,16 +66,16 @@ class Scons(Builder):
         if os.path.exists("tests"):
             self._testtgt("tests")
         else:
-            print "error: Cannot run tests as the tests subdirectory is "\
-                  "missing: %s" % os.path.join(self._bdir, "tests")
+            print("error: Cannot run tests as the tests subdirectory is "\
+                  "missing: %s" % os.path.join(self._bdir, "tests"))
 
     def _functest(self):
         if os.path.exists("functests"):
             self._testtgt("functest")
             Builder._functest(self)
         else:
-            print "error: missing functests subdirectory in %s" % \
-                    os.path.relpath(self._bdir, self._askaproot)
+            print("error: missing functests subdirectory in %s" % \
+                    os.path.relpath(self._bdir, self._askaproot))
 
 
     def _doc(self):
@@ -82,7 +84,7 @@ class Scons(Builder):
     def _clean(self):
         try:
             utils.run_scons(extraargs="--clean . tidy", version=self.sconsversion)
-        except Exception, inst:
+        except Exception as inst:
             utils.q_print("info: could not run %s. Will try our clean." % inst)
         return Builder._clean(self)
 

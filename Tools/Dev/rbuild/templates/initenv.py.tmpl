@@ -144,7 +144,7 @@ if os.path.exists(filename):
     os.rename(filename, "%s.%s" % (filename, now))
     print "Regenerating %s." % filename
 
-f = file(filename, "w")
+f = open(filename, "w")
 f.write(shell["file"])
 f.close()
 

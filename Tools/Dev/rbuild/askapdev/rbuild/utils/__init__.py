@@ -33,29 +33,31 @@ The package __init__py file just imports functions from explicit files
 package namespace.
 
 '''
+from __future__ import absolute_import
 
-from run import run
-from run_scons import run_scons
-from tag_name import tag_name
-from parse_error import parse_error
-from copy_tree import copy_tree
-from runcmd import runcmd
-from rmtree import rmtree
-from get_python_version import get_python_version
-from create_python_tree import create_python_tree, get_site_dir
-from q_print import q_print
-from number_of_cpus import number_of_cpus
-from format_src_code import format_src_code
-from create_init_file import create_init_file
-from which import which
-from get_svn_revision import get_svn_revision
-from get_svn_files_list import get_svn_files_list
-from get_svn_branch_info import get_svn_branch_info
-from get_release_version import get_release_version
-from get_package_name import get_package_name
-from get_platform import get_platform
-from environment import Environment
-from reposupdate import update_command, update_tree
-from in_code_tree import in_code_tree
-from in_dev_tree import in_dev_tree
-from in_tools_tree import in_tools_tree
+from .run import run
+from .run_scons import run_scons
+from .tag_name import tag_name
+from .parse_error import parse_error
+from .copy_tree import copy_tree
+from .runcmd import runcmd
+from .rmtree import rmtree
+from .get_python_version import get_python_version
+from .create_python_tree import create_python_tree, get_site_dir
+from .q_print import q_print
+from .number_of_cpus import number_of_cpus
+from .format_src_code import format_src_code
+from .create_init_file import create_init_file
+from .which import which
+from .get_svn_revision import get_svn_revision
+from .get_svn_files_list import get_svn_files_list
+from .get_svn_branch_info import get_svn_branch_info
+from .get_release_version import get_release_version
+from .get_package_name import get_package_name
+from .get_platform import get_platform
+from .environment import Environment
+from .reposupdate import update_command, update_tree
+from .in_code_tree import in_code_tree
+from .in_dev_tree import in_dev_tree
+from .in_tools_tree import in_tools_tree
+from .get_dep_installpath import get_dep_installpath

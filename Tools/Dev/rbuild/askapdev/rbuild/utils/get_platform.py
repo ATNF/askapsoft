@@ -1,3 +1,4 @@
+from __future__ import print_function
 ## Package for various utility functions to execute build and shell commands
 #
 # @copyright (c) 2010 CSIRO
@@ -31,7 +32,7 @@ import platform
 def get_platform():
     '''
     The function returns a dictionary with keys::
-
+    
         ['hostname', 'system', 'distribution', 'version', 'tversion',
          'architecture', 'kernel', 'tkernel',]
     For Debain systems it also returns the codename for the release.
@@ -42,7 +43,7 @@ def get_platform():
         string.
 
     Example::
-
+    
         python -c 'from askapdev.rbuild.utils import get_platform; print get_platform()'
         {'kernel': '2.6.26', 'version': '5.0', 'architecture': '64bit', 'tversion': ('5', '0', '9'),
         'distribution': 'debian', 'hostname': 'delphinus', 'tkernel': ['2', '6', '26'], 'system': 'Linux'}
@@ -73,19 +74,14 @@ def get_platform():
     else:
         version2 = ''
         tversion = tuple()
-
+        
     if distribution == 'debian':
-        try:
-            v = float(version2)
-            if   v >= 9: codename = 'stretch'
-            elif v >= 8: codename = 'jessie'
-            elif v >= 7: codename = 'wheezy'
-            elif v >= 6: codename = 'squeeze'
-            elif v >= 5: codename = 'lenny'
-            elif v >= 4: codename = 'etch'
-        except:
-            # handle unstable releases. ASKAPSDP-3084
-            codename = version2.split('/')[0]
+        v = float(version2)
+        if   v >= 8: codename = 'jessie'
+        elif v >= 7: codename = 'wheezy'
+        elif v >= 6: codename = 'squeeze'
+        elif v >= 5: codename = 'lenny'
+        elif v >= 4: codename = 'etch'
 
     if system == 'Darwin':
         if   version2 == '10.9': codename = 'mavericks'
@@ -109,4 +105,4 @@ def get_platform():
 
 
 if __name__ == '__main__':
-    print get_platform()
+    print(get_platform())

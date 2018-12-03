@@ -103,10 +103,10 @@ class Environment(object):
         return self._variables[k]
 
     def __iter__(self):
-        yield iter(self._variables.keys())
+        yield iter(list(self._variables.keys()))
 
     def items(self):
-        return self._variables.items()
+        return list(self._variables.items())
 
     def _get_path(self, path, localpath=None):
         out = path
@@ -150,13 +150,14 @@ class Environment(object):
                 'CLASSPATH': (self._classpath, self._dep.get_classpath()),
                 'PYTHONPATH': (self._pypath, self._dep.get_pythonpath()),
         }
-        for k, v in self._dep.get_env().items():
+        for k, v in list(self._dep.get_env().items()):
             dirs[k] = (v, None)
 
         fulldirs = {}
-        for k, v in dirs.items():
+        for k, v in list(dirs.items()):
             fulldirs[k] = self._get_path(v[1], v[0])
             if not development:
                 fulldirs[k] = self.replace(fulldirs[k], '')
-            fulldirs[k] = _remove_system_dirs(fulldirs[k])
+            if k != "CLASSPATH":
+                fulldirs[k] = _remove_system_dirs(fulldirs[k])
         self._variables.update(fulldirs)

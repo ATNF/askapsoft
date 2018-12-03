@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 ## @file
 #  Module to gather dependency information for ASKAP packages
 #
@@ -26,4 +27,4 @@
 #  @author Malte Marquarding <malte.marquarding@csiro.au>
 #
 
-from dependency import Dependency
+from .dependency import Dependency

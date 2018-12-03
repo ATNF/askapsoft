@@ -56,7 +56,7 @@ export %(key)s
 
     with open(name, 'w') as initfile:
         initfile.write(inittxt)
-        for k, v in env.items():
+        for k, v in list(env.items()):
             if not v:
                 continue
             if k == "LD_LIBRARY_PATH":

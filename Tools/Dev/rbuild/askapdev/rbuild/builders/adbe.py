@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 ## @file
 # Builder to parse XML point definitions in adbe common library
 # and generate epics database, asyn glue code and emulator update
@@ -29,20 +30,20 @@
 #
 
 import os
-from builder import Builder
+from .builder import Builder
 import askapdev.rbuild.utils as utils
 from askapdev.epicsdb import AdbeParser
-from ..exceptions import BuildError
+
 
 class Adbe(Builder):
     def __init__(self, pkgname=None, archivename=None, extractdir=None,
                  epicsbase=None, releasefile=None, srcdir=None,
                  fileprefix=None, dbprefix=None, *args, **kwargs):
         Builder.__init__(self, pkgname=pkgname,
-                               archivename=archivename,
-                               extractdir=extractdir,
-                               buildcommand="",
-                               buildtargets=[""])
+                         archivename=archivename,
+                         extractdir=extractdir,
+                         buildcommand="",
+                         buildtargets=[""])
         self.parallel = False
         self._appname = os.getcwd().split(os.sep)[-2]
 
@@ -58,7 +59,7 @@ class Adbe(Builder):
             self._epicsbase = self._epicsbase.rstrip(os.sep)
             self._srcdir = os.path.join(srcdir, 'src')
             comm = os.path.join(os.path.dirname(self._epicsbase), "EpicsHostArch")
-            #self._epicsarch = utils.runcmd(comm)[0].strip() + '-debug'
+            # self._epicsarch = utils.runcmd(comm)[0].strip() + '-debug'
             self._epicsarch = utils.runcmd(comm)[0].strip()
 
             srcOutDir = os.path.join(srcdir, 'src', 'O.' + self._epicsarch)
@@ -66,35 +67,41 @@ class Adbe(Builder):
             xmlOutDir = os.path.join('install', 'epicsxml')
 
         self._adePoints = []
-        self._adeParser = AdbeParser(self._appname, dbprefix, fileprefix, srcOutDir, dbOutDir, xmlOutDir, *args, **kwargs)
-            
-    def add_points(self, header, library=None, epicsxml=False, epicsdb=True, asyn=True):
-        '''
+        self._adeParser = AdbeParser(self._appname, dbprefix, fileprefix, srcOutDir, dbOutDir, xmlOutDir, *args,
+                                     **kwargs)
+
+    def add_points(self, header, library=None, epicsxml=False, epicsdb=True, asyn=True, pkg=None):
+        """
         add the specified header file to the list of modules
         to parse for XML point definitions
 
         :param library:     an optional library name, if header belongs to a library
-		:param epicsxml:    True to output XML files for GUI/OSL
+        :param epicsxml:    True to output XML files for GUI/OSL
         :param epicsdb:     True to generate EPICS DB & asyn parameter list entries
-        '''
-        self._adePoints.append( (header, library, epicsxml, epicsdb, asyn) )
+        """
+        self._adePoints.append((pkg, header, library, epicsxml, epicsdb, asyn))
 
     def _build(self):
-        '''
+        """
         Parse the header files listed file add_points.  The parsing involves
 
         1. extracting XML tags from the header file
         2. parsing the XML to a document tree
         3. expanding out any nodes such as iocStructures or iocArrays
-        '''
+        """
         sourceFiles = []
-        for header, library, epicsxml, epicsdb, asyn in self._adePoints:
+        for pkg, header, library, epicsxml, epicsdb, asyn in self._adePoints:
             if library is None:
                 filename = os.path.join(self._srcdir, header + '.h')
             else:
-                filename = os.path.join(self.dep.get_install_path(library), 'include', library, header + '.h')
+                if pkg is not None:
+#                    print self.dep._deps
+                    ppath = self.dep.get_install_path(pkg)
+                else:
+                    ppath = self.dep.get_install_path(library)
+                filename = os.path.join(ppath, 'include', library, header + '.h')
                 if not os.path.exists(filename):
-                    filename = os.path.join(self.dep.get_install_path(library), 'include', header + '.h')
+                    filename = os.path.join(ppath, 'include', header + '.h')
 
             sourceFiles.append((filename, library, epicsxml, epicsdb, asyn))
 
@@ -104,10 +111,10 @@ class Adbe(Builder):
                 self._adeParser.parse(filename, libName=library, epicsxml=epicsxml, epicsdb=epicsdb, asyn=asyn)
 
             files = self._adeParser.generate_output()
-            for file in files:
-                self.add_extra_clean_targets(file)
-                utils.q_print("generated " + file)
-            
+            for f in files:
+                self.add_extra_clean_targets(f)
+                utils.q_print("generated " + f)
+
     def _install(self):
         Builder._install(self)
         self._adeParser.install()

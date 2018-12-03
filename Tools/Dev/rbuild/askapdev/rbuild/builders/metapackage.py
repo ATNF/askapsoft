@@ -1,3 +1,7 @@
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import str
+from builtins import object
 ## @metapackage.py
 # Object to simplify unpacking/building/cleaning of ASKAPsoft systems
 # metapackages
@@ -31,7 +35,7 @@ import os
 import datetime
 import sys
 import socket
-from builder import Builder
+from .builder import Builder
 import askapdev.rbuild.utils as utils
 
 
@@ -91,7 +95,7 @@ class MetaPackage(Builder):
             self._msi_in_dep = False
         ea = self.dep.get_env().get('EPICS_HOST_ARCH', None)
         if ea is None:
-            print "Couldn't determine EPICS architecture"
+            print("Couldn't determine EPICS architecture")
             sys.exit(1)
         os.environ['EPICS_HOST_ARCH'] = ea
         self.epics_host_arch = ea
@@ -102,7 +106,7 @@ class MetaPackage(Builder):
     def _add_msi_cmd(self, template=None, subsfile=None, outfile=None, includes=None, subs=None, fmode=None):
         # Forms the argument string for the msi command
         if outfile is None or outfile == '':
-            print "Warning! adding a msi command without output file (template=%s, subsfile=%s)" % (template, subsfile)
+            print("Warning! adding a msi command without output file (template=%s, subsfile=%s)" % (template, subsfile))
             return
         # Extract the output file path
         outpath = os.path.split(outfile)[0]
@@ -223,44 +227,44 @@ class MetaPackage(Builder):
         
     def _run_msi(self):
         if not self._msi_in_dep:
-            print "Error: MSI command tool is not in the dependencies. Skipping MSI files"
+            print("Error: MSI command tool is not in the dependencies. Skipping MSI files")
             return
         for msibunch in self._msi_cmdlist:
             if not self._quiet:
-                print "mkdir -p %s" % msibunch.outdir
+                print("mkdir -p %s" % msibunch.outdir)
             utils.run("mkdir -p %s" % msibunch.outdir)
             if not self._quiet:
-                print "%s %s" % (self._msicmd, msibunch.msiargs)
+                print("%s %s" % (self._msicmd, msibunch.msiargs))
             utils.run("%s %s" % (self._msicmd, msibunch.msiargs))
             if not self._quiet:
-                print "Setting mode %o of output file %s" % (msibunch.fmode, msibunch.outfile)
+                print("Setting mode %o of output file %s" % (msibunch.fmode, msibunch.outfile))
             os.chmod(msibunch.outfile, msibunch.fmode)
             
     def _run_jar(self):
         for jarbunch in self._jar_cmdlist:
             if not self._quiet:
-                print "mkdir -p %s" % jarbunch.outdir
+                print("mkdir -p %s" % jarbunch.outdir)
             utils.run("mkdir -p %s" % jarbunch.outdir)
             if not self._quiet:
-                print "%s %s" % (self._jarcmd, jarbunch.jarargs)
+                print("%s %s" % (self._jarcmd, jarbunch.jarargs))
             utils.run("%s %s" % (self._jarcmd, jarbunch.jarargs))
 
     def _run_copy_trees(self):
         for dir in self._datatrees:
             if not self._quiet:
-                print "Copying tree %s in install directory" % dir
+                print("Copying tree %s in install directory" % dir)
             utils.copy_tree(dir, self._installdir, overwrite=True)
 
     ## Get all dependencies as single string
     def _get_dependencies(self):
         str = ''
-        for k,v in self.dep._deps.iteritems():
+        for k,v in list(self.dep._deps.items()):
             str += k + '=' + v['path'] +'\n'
         return str
 
     def _create_release_info(self, path):
         filepath = os.path.join(path, 'RELEASE')
-        with file(filepath, 'w') as f:
+        with open(filepath, 'w') as f:
             txt = """\
 %s
 Version = %s-rev%s

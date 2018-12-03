@@ -1,3 +1,4 @@
+from __future__ import print_function
 ## Package for various utility functions to execute build and shell commands
 #
 # @copyright (c) 2013 CSIRO
@@ -35,4 +36,4 @@ def in_dev_tree():
     return DEV_DIR in rpath
 
 if __name__ == "__main__":
-    print in_dev_tree() and "Yes" or "No"
+    print(in_dev_tree() and "Yes" or "No")

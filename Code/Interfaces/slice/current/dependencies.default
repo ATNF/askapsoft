@@ -1,1 +1,2 @@
-ice=3rdParty/Ice/Ice-3.5.0;Ice IceUtil
+#ice=3rdParty/Ice/Ice-3.5.0;Ice IceUtil
+#ice=/usr/local/;Ice

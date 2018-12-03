@@ -1,5 +1,4 @@
 # Runtime dependencies
-ice=3rdParty/Ice/Ice-3.5.0
 log4j=3rdParty/apache-log4j/apache-log4j-1.2.15
 java-gson=3rdParty/gson/gson-2.6.2
 java-askap=Code/Base/java-askap/current
@@ -9,7 +8,6 @@ java-logappenders=Code/Base/java-logappenders/current
 # Functional test dependencies
 pyiceinterfaces=Code/Interfaces/python/current
 py-askap=Code/Base/py-askap/current
-iceutils=Code/Base/py-iceutils/current
 
 # Junit test dependencies
 # TODO: how do I specify that these are not required outside of the test target?

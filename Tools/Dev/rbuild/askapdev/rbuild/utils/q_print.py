@@ -1,3 +1,4 @@
+from __future__ import print_function
 ## Package for various utility functions to execute build and shell commands
 #
 # @copyright (c) 2007 CSIRO
@@ -36,4 +37,4 @@ def q_print(msg):
     :param msg: The message to print.
     '''
     if not ("-q"  in OPTIONS or "-Q" in OPTIONS):
-        print msg
+        print(msg)

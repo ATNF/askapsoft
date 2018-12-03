@@ -26,6 +26,7 @@
 # @date 2009-06-18
 #
 from __future__ import with_statement
+from __future__ import print_function
 """This is an extension command to be used by setup to provide a "doc" target.
 It is intended that it have an option - format - to allow
 specification of the output format of sphinx.
@@ -68,7 +69,7 @@ class doc(Command):
         pth = "doc"
         tgt = "Makefile"
         if not os.path.exists(os.path.join(pth, tgt)):
-            print "warn: Documentation not found ('doc/Makefile')"
+            print("warn: Documentation not found ('doc/Makefile')")
             return
         os.chdir(pth)
         crossrefs = {}

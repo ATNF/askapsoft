@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 ## Package for various utility functions to execute build and shell commands
 #
 # @copyright (c) 2007 CSIRO
@@ -25,7 +26,7 @@
 # @author Malte Marquarding <Malte.Marquarding@csiro.au>
 #
 
-from run import run
+from .run import run
 
 
 def format_src_code():
