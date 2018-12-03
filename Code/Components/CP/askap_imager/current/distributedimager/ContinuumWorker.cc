@@ -431,7 +431,11 @@ ContinuumWorker::ContinuumWorker(LOFAR::ParameterSet& parset,
   {
     ASKAPLOG_INFO_STR(logger, "Processing Channel Allocation");
 
-    LOFAR::ParameterSet& unitParset = itsParsets[0];
+    LOFAR::ParameterSet& unitParset = itsParset;
+
+    if (workUnits.size() > 0) {
+      unitParset = itsParsets[0];
+    }
 
     const bool localSolver = unitParset.getBool("solverpercore", false);
 
