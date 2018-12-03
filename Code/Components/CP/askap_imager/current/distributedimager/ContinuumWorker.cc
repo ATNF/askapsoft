@@ -875,7 +875,7 @@ ContinuumWorker::ContinuumWorker(LOFAR::ParameterSet& parset,
               }
 
 
-              else { // probably continuum mode ....
+              else if (!localSolver){ // probably continuum mode ....
                 // If we are in continuum mode we have probaby ran through the whole allocation
                 // lets send it to the master for processing.
                 rootImager.sendNE();
