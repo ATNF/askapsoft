@@ -25,6 +25,7 @@
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
 /// @author Tim Cornwell <tim.cornwell@csiro.au>
+/// @author Vitaliy Ogarko <vogarko@gmail.com>
 ///
 #include <fitting/LinearSolver.h>
 
@@ -40,6 +41,11 @@
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_linalg.h>
+
+#include <lsqr_solver/GlobalTypedefs.h>
+#include <lsqr_solver/SparseMatrix.h>
+#include <lsqr_solver/LSQRSolver.h>
+#include <lsqr_solver/ModelDamping.h>
 
 #include <askap/AskapLogging.h>
 ASKAP_LOGGER(logger, ".linearsolver");
@@ -160,7 +166,7 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
 {
     ASKAPTRACE("LinearSolver::solveSubsetOfNormalEquations");
     std::pair<double,double> result(0.,0.);
-    
+
 // Solving A^T Q^-1 V = (A^T Q^-1 A) P
 
     int nParameters = 0;
@@ -176,46 +182,62 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
         ASKAPLOG_DEBUG_STR(logger, "Processing "<<*cit<<" "<<nParameters);
         const casa::uInt newParameters = normalEquations().dataVector(*cit).nelements();
         nParameters += newParameters;
-        ASKAPDEBUGASSERT((params.isFree(*cit) ? params.value(*cit).nelements() : newParameters) == newParameters);        
+        ASKAPDEBUGASSERT((params.isFree(*cit) ? params.value(*cit).nelements() : newParameters) == newParameters);
       }
     }
     ASKAPLOG_DEBUG_STR(logger, "Done");
     ASKAPCHECK(nParameters>0, "No free parameters in a subset of normal equations");
-    
+
     ASKAPDEBUGASSERT(indices.size() > 0);
-        
+
+    /*
+     * ALGORITHM CHOICE
+     */
+    //const std::string algo = "LSQR";
+    const std::string algo = "SVD";
+
     // Convert the normal equations to gsl format
     gsl_matrix * A = gsl_matrix_alloc (nParameters, nParameters);
-    gsl_vector * B = gsl_vector_alloc (nParameters);
-    gsl_vector * X = gsl_vector_alloc (nParameters);
+
+    gsl_vector * B = 0;
+    gsl_vector * X = 0;
+
+    if (algo != "LSQR")
+    {
+        B = gsl_vector_alloc (nParameters);
+        X = gsl_vector_alloc (nParameters);
+    }
 
     for (std::vector<std::pair<string, int> >::const_iterator indit2=indices.begin();indit2!=indices.end(); ++indit2)  {
         for (std::vector<std::pair<string, int> >::const_iterator indit1=indices.begin();indit1!=indices.end(); ++indit1)  {
              // Axes are dof, dof for each parameter
              // Take a deep breath for const-safe indexing into the double layered map
              const casa::Matrix<double>& nm = normalEquations().normalMatrix(indit1->first, indit2->first);
-          
+
              for (size_t row=0; row<nm.nrow(); ++row)  {
                   for (size_t col=0; col<nm.ncolumn(); ++col) {
                        const double elem = nm(row,col);
-                       ASKAPCHECK(!std::isnan(elem), "Normal matrix seems to have NaN for row = "<<row<<" and col = "<<col<<", this shouldn't happem!");
+                       ASKAPCHECK(!isnan(elem), "Normal matrix seems to have NaN for row = "<<row<<" and col = "<<col<<", this shouldn't happem!");
                        gsl_matrix_set(A, row+(indit1->second), col+(indit2->second), elem);
-                       //   std::cout << "A " << row << " " << col << " " << nm(row,col) << std::endl; 
+                       //std::cout << "A " << row+(indit1->second) << " " << col+(indit2->second) << " " << nm(row,col) << std::endl;
                   }
              }
          }
     }
-    
-    for (std::vector<std::pair<string, int> >::const_iterator indit1=indices.begin();indit1!=indices.end(); ++indit1) {
-        const casa::Vector<double> &dv = normalEquations().dataVector(indit1->first);
-        for (size_t row=0; row<dv.nelements(); ++row) {
-             const double elem = dv(row);
-             ASKAPCHECK(!std::isnan(elem), "Data vector seems to have NaN for row = "<<row<<", this shouldn't happem!");
-             gsl_vector_set(B, row+(indit1->second), elem);
-//          std::cout << "B " << row << " " << dv(row) << std::endl; 
+
+    if (algo != "LSQR")
+    {
+        for (std::vector<std::pair<string, int> >::const_iterator indit1=indices.begin();indit1!=indices.end(); ++indit1) {
+            const casa::Vector<double> &dv = normalEquations().dataVector(indit1->first);
+            for (size_t row=0; row<dv.nelements(); ++row) {
+                 const double elem = dv(row);
+                 ASKAPCHECK(!isnan(elem), "Data vector seems to have NaN for row = "<<row<<", this shouldn't happem!");
+                 gsl_vector_set(B, row+(indit1->second), elem);
+    //          std::cout << "B " << row << " " << dv(row) << std::endl;
+            }
         }
     }
-      
+
       /*
       // temporary code to export matrices, which cause problems with the GSL
       // to write up a clear case
@@ -226,7 +248,7 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
              for (int col=0;col<nParameters;++col) {
                   if (col) {
                       os<<" ";
-                  } 
+                  }
                   os<<gsl_matrix_get(A,row,col);
              }
              os<<std::endl;
@@ -234,80 +256,76 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
       }
       // end of the temporary code
       */
-      
-    if(algorithm()=="SVD")  {  
+
+    if (algo == "SVD") {
+    //if(algorithm()=="SVD")  {
+    //if(false)  {
+        std::cout << "Entered branch: algorithm() == SVD" << std::endl;
+
          gsl_matrix * V = gsl_matrix_alloc (nParameters, nParameters);
          ASKAPDEBUGASSERT(V!=NULL);
          gsl_vector * S = gsl_vector_alloc (nParameters);
          ASKAPDEBUGASSERT(S!=NULL);
          gsl_vector * work = gsl_vector_alloc (nParameters);
          ASKAPDEBUGASSERT(work!=NULL);
-        
-         // as per my (MV) comment on ASKAPSDP-2968, we should not really use the raw pointer here,
-         // although it is unlikely that an exception can be thrown between set_error_handler_off and set_error_handler
-         // It would be better to write a custom deleter and use the shared pointer instead of the C-style syntax
-         gsl_error_handler_t *oldhandler=gsl_set_error_handler_off();
+
          const int status = gsl_linalg_SV_decomp (A, V, S, work);
-         if (status != 0 ) {
-             ASKAPLOG_WARN_STR(logger, "gsl_linalg_SV_decomp failed, status = "
-                               <<status << " = " << gsl_strerror(status));
-         }
-         gsl_set_error_handler(oldhandler);
-        
+         ASKAPCHECK(status == 0, "gsl_linalg_SV_decomp failed, status = "<<status);
+
          // a hack for now. For some reason, for some matrices gsl_linalg_SV_decomp may return NaN as singular value, perhaps some
          // numerical precision issue inside SVD. Although it needs to be investigated further  (see ASKAPSDP-2270), for now trying
          // to replace those singular values with zeros to exclude them from processing. Note, singular vectors may also contain NaNs
          for (int i=0; i<nParameters; ++i) {
-              if (std::isnan(gsl_vector_get(S,i))) {
+              if (isnan(gsl_vector_get(S,i))) {
                   gsl_vector_set(S,i,0.);
               }
               for (int k=0; k < nParameters; ++k) {
-                   ASKAPCHECK(!std::isnan(gsl_matrix_get(V,i,k)), "NaN in V: i="<<i<<" k="<<k); 
+                   ASKAPCHECK(!isnan(gsl_matrix_get(V,i,k)), "NaN in V: i="<<i<<" k="<<k);
               }
          }
 
          // end of the hack
 
          //SVDecomp (A, V, S);
-        
+
          // code to put a limit on the condition number of the system
-         const double singularValueLimit = nParameters>1 ? 
-                     gsl_vector_get(S,0)/itsMaxCondNumber : -1.; 
+         const double singularValueLimit = nParameters>1 ?
+                     gsl_vector_get(S,0)/itsMaxCondNumber : -1.;
          for (int i=1; i<nParameters; ++i) {
               if (gsl_vector_get(S,i)<singularValueLimit) {
                   gsl_vector_set(S,i,0.);
               }
          }
-        
+
         /*
         // temporary code for debugging
         {
           std::ofstream os("dbg2.dat");
           for (int i=0; i<nParameters; ++i) {
                os<<i<<" "<<gsl_vector_get(S,i)<<std::endl;
-          } 
-          
+          }
+
           //std::cout<<"new singular value spectrum is ready"<<std::endl;
           //char tst;
           //std::cin>>tst;
-          
+
         }
         // end of temporary code
         */
-        
+
          gsl_vector * X = gsl_vector_alloc(nParameters);
          ASKAPDEBUGASSERT(X!=NULL);
-        
+
          const int solveStatus = gsl_linalg_SV_solve (A, V, S, B, X);
          ASKAPCHECK(solveStatus == 0, "gsl_linalg_SV_solve failed");
-        
+
 // Now find the statistics for the decomposition
          int rank=0;
          double smin = 1e50;
          double smax = 0.0;
          for (int i=0;i<nParameters; ++i) {
               const double sValue = std::abs(gsl_vector_get(S, i));
-              ASKAPCHECK(!std::isnan(sValue), "Got NaN as a singular value for normal matrix, this shouldn't happen S[i]="<<gsl_vector_get(S,i)<<" parameter "<<i<<" singularValueLimit="<<singularValueLimit);
+              ASKAPCHECK(!isnan(sValue), "Got NaN as a singular value for normal matrix, this shouldn't happen S[i]="<<gsl_vector_get(S,i)<<" parameter "<<i<<" singularValueLimit="<<singularValueLimit);
               if(sValue>0.0) {
                  ++rank;
                  if ((sValue>smax) || (i == 0)) {
@@ -320,23 +338,16 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
          }
          result.first = smin;
          result.second = smax;
-         
+
          quality.setDOF(nParameters);
-         if (status != 0) {
-             ASKAPLOG_WARN_STR(logger, "Solution is considered invalid due to gsl_linalg_SV_decomp failure, main matrix is effectively rank zero");
-             quality.setRank(0);
-             quality.setCond(0.);
-             quality.setInfo("SVD decomposition failed");
+         quality.setRank(rank);
+         quality.setCond(smax/smin);
+         if(rank==nParameters) {
+            quality.setInfo("SVD decomposition rank complete");
          } else {
-             quality.setRank(rank);
-             quality.setCond(smax/smin);
-             if (rank==nParameters) {
-                 quality.setInfo("SVD decomposition rank complete");
-             } else {
-                 quality.setInfo("SVD decomposition rank deficient");
-             }
+            quality.setInfo("SVD decomposition rank deficient");
          }
-      
+
 // Update the parameters for the calculated changes. Exploit reference
 // semantics of casa::Array.
          std::vector<std::pair<string, int> >::const_iterator indit;
@@ -344,16 +355,110 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
               casa::IPosition vecShape(1, params.value(indit->first).nelements());
               casa::Vector<double> value(params.value(indit->first).reform(vecShape));
               for (size_t i=0; i<value.nelements(); ++i)  {
-//          	   std::cout << value(i) << " " << gsl_vector_get(X, indit->second+i) << std::endl;
+//                 std::cout << value(i) << " " << gsl_vector_get(X, indit->second+i) << std::endl;
                    const double adjustment = gsl_vector_get(X, indit->second+i);
-                   ASKAPCHECK(!std::isnan(adjustment), "Solution resulted in NaN as an update for parameter "<<(indit->second + i));
+                   ASKAPCHECK(!isnan(adjustment), "Solution resulted in NaN as an update for parameter "<<(indit->second + i));
                    value(i) += adjustment;
               }
           }
           gsl_vector_free(S);
           gsl_vector_free(work);
           gsl_matrix_free(V);
-    } else {
+    }
+    else if (algo == "LSQR") {
+    //else if (algorithm() == "LSQR") {
+    //else if (true) {
+
+        // Damping settings.
+        double alpha = 1.e-2;
+        double norm = 2.0;
+
+        std::cout << "Entered branch: algorithm() == LSQR, alpha = " << alpha << std::endl;
+
+        size_t nrows = nParameters;
+        size_t ncolumms = nParameters;
+
+        lsqr::SparseMatrix matrix(nrows, nrows * ncolumms);
+        lsqr::Vector b_RHS(nrows, 0.0);
+
+        // Set the matrix.
+        for (size_t j = 0; j < nrows; ++j)
+        {
+            matrix.NewRow();
+
+            for (size_t i = 0; i < ncolumms; ++i)
+            {
+                double value = gsl_matrix_get(A, j, i);
+                if (value != 0.0)
+                {
+                    matrix.Add(value, i);
+                }
+            }
+        }
+        matrix.Finalize(ncolumms);
+
+        // A simple approximation for the upper bound of the rank of the  A'A matrix.
+        size_t rank_approx = matrix.GetNumberNonemptyRows();
+
+        //std::cout << "Matrix sparsity: " << (double)matrix.GetNumberElements() / (double)(nrows * ncolumms) << std::endl;
+
+        // Set the right-hand side.
+//        for (size_t i = 0; i < nrows; ++i)
+//        {
+//            b_RHS[i] = gsl_vector_get(B, i);
+//        }
+
+        for (std::vector<std::pair<string, int> >::const_iterator indit1=indices.begin();indit1!=indices.end(); ++indit1) {
+            const casa::Vector<double> &dv = normalEquations().dataVector(indit1->first);
+            for (size_t row=0; row<dv.nelements(); ++row) {
+                 const double elem = dv(row);
+                 ASKAPCHECK(!isnan(elem), "Data vector seems to have NaN for row = "<<row<<", this shouldn't happem!");
+                 //gsl_vector_set(B, row+(indit1->second), elem);
+                 b_RHS[row+(indit1->second)] = elem;
+            }
+        }
+
+        //-----------------------------------------------
+        // Add damping.
+        //-----------------------------------------------
+
+        lsqr::ModelDamping damping(ncolumms);
+        damping.Add(alpha, norm, matrix, b_RHS, NULL, NULL, NULL);
+
+        //-------------------------------------
+        // Solve matrix system.
+        //-------------------------------------
+        // Set solver configuration parameters.
+        int niter = 100;
+        double rmin = 1.e-13;
+
+        lsqr::Vector x(ncolumms, 0.0);
+        lsqr::LSQRSolver solver(matrix.GetCurrentNumberRows(), ncolumms);
+
+        solver.Solve(niter, rmin, matrix, b_RHS, x, 0);
+
+        //------------------------------------------------------------------------
+        // Update the parameters for the calculated changes. Exploit reference
+        // semantics of casa::Array.
+         std::vector<std::pair<string, int> >::const_iterator indit;
+         for (indit=indices.begin();indit!=indices.end();++indit) {
+              casa::IPosition vecShape(1, params.value(indit->first).nelements());
+              casa::Vector<double> value(params.value(indit->first).reform(vecShape));
+              for (size_t i=0; i<value.nelements(); ++i)  {
+                   //const double adjustment = gsl_vector_get(X, indit->second+i);
+                   const double adjustment = x[indit->second+i];
+                   ASKAPCHECK(!isnan(adjustment), "Solution resulted in NaN as an update for parameter "<<(indit->second + i));
+                   value(i) += adjustment;
+              }
+          }
+
+         //------------------------------------------------------------------------
+         quality.setDOF(nParameters);
+         quality.setRank(rank_approx);
+    }
+    else {
+        std::cout << "Entered branch: algorithm() != SVD" << std::endl;
+
         quality.setInfo("Cholesky decomposition");
         gsl_linalg_cholesky_decomp(A);
         gsl_linalg_cholesky_solve(A, B, X);
@@ -369,12 +474,17 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
         }
     }
 
-// Free up gsl storage
-    gsl_vector_free(B);
+    // Free up gsl storage.
     gsl_matrix_free(A);
-    gsl_vector_free(X);
+
+    if (algo != "LSQR")
+    {
+        gsl_vector_free(B);
+        gsl_vector_free(X);
+    }
+
     return result;
-}    
+}
 
     /// @brief solve for parameters
     /// The solution is constructed from the normal equations and given
