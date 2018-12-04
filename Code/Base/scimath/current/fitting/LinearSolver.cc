@@ -190,20 +190,13 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
 
     ASKAPDEBUGASSERT(indices.size() > 0);
 
-    /*
-     * ALGORITHM CHOICE
-     */
-    //const std::string algo = "LSQR";
-    const std::string algo = "SVD";
-
     // Convert the normal equations to gsl format
     gsl_matrix * A = gsl_matrix_alloc (nParameters, nParameters);
 
     gsl_vector * B = 0;
     gsl_vector * X = 0;
 
-    if (algo != "LSQR")
-    {
+    if (algorithm() != "LSQR") {
         B = gsl_vector_alloc (nParameters);
         X = gsl_vector_alloc (nParameters);
     }
@@ -225,8 +218,7 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
          }
     }
 
-    if (algo != "LSQR")
-    {
+    if (algorithm() != "LSQR") {
         for (std::vector<std::pair<string, int> >::const_iterator indit1=indices.begin();indit1!=indices.end(); ++indit1) {
             const casa::Vector<double> &dv = normalEquations().dataVector(indit1->first);
             for (size_t row=0; row<dv.nelements(); ++row) {
@@ -257,32 +249,30 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
       // end of the temporary code
       */
 
-    if (algo == "SVD") {
-    //if(algorithm()=="SVD")  {
-    //if(false)  {
-        std::cout << "Entered branch: algorithm() == SVD" << std::endl;
+    if (algorithm() == "SVD") {
+        ASKAPLOG_INFO_STR(logger, "Solving normal equations using the SVD solver");
 
-         gsl_matrix * V = gsl_matrix_alloc (nParameters, nParameters);
-         ASKAPDEBUGASSERT(V!=NULL);
-         gsl_vector * S = gsl_vector_alloc (nParameters);
-         ASKAPDEBUGASSERT(S!=NULL);
-         gsl_vector * work = gsl_vector_alloc (nParameters);
-         ASKAPDEBUGASSERT(work!=NULL);
+        gsl_matrix * V = gsl_matrix_alloc (nParameters, nParameters);
+        ASKAPDEBUGASSERT(V!=NULL);
+        gsl_vector * S = gsl_vector_alloc (nParameters);
+        ASKAPDEBUGASSERT(S!=NULL);
+        gsl_vector * work = gsl_vector_alloc (nParameters);
+        ASKAPDEBUGASSERT(work!=NULL);
 
-         const int status = gsl_linalg_SV_decomp (A, V, S, work);
-         ASKAPCHECK(status == 0, "gsl_linalg_SV_decomp failed, status = "<<status);
+        const int status = gsl_linalg_SV_decomp (A, V, S, work);
+        ASKAPCHECK(status == 0, "gsl_linalg_SV_decomp failed, status = "<<status);
 
-         // a hack for now. For some reason, for some matrices gsl_linalg_SV_decomp may return NaN as singular value, perhaps some
-         // numerical precision issue inside SVD. Although it needs to be investigated further  (see ASKAPSDP-2270), for now trying
-         // to replace those singular values with zeros to exclude them from processing. Note, singular vectors may also contain NaNs
-         for (int i=0; i<nParameters; ++i) {
-              if (isnan(gsl_vector_get(S,i))) {
-                  gsl_vector_set(S,i,0.);
-              }
-              for (int k=0; k < nParameters; ++k) {
-                   ASKAPCHECK(!isnan(gsl_matrix_get(V,i,k)), "NaN in V: i="<<i<<" k="<<k);
-              }
-         }
+        // a hack for now. For some reason, for some matrices gsl_linalg_SV_decomp may return NaN as singular value, perhaps some
+        // numerical precision issue inside SVD. Although it needs to be investigated further  (see ASKAPSDP-2270), for now trying
+        // to replace those singular values with zeros to exclude them from processing. Note, singular vectors may also contain NaNs
+        for (int i=0; i<nParameters; ++i) {
+          if (isnan(gsl_vector_get(S,i))) {
+              gsl_vector_set(S,i,0.);
+          }
+          for (int k=0; k < nParameters; ++k) {
+               ASKAPCHECK(!isnan(gsl_matrix_get(V,i,k)), "NaN in V: i="<<i<<" k="<<k);
+          }
+        }
 
          // end of the hack
 
@@ -365,15 +355,13 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
           gsl_vector_free(work);
           gsl_matrix_free(V);
     }
-    else if (algo == "LSQR") {
-    //else if (algorithm() == "LSQR") {
-    //else if (true) {
+    else if (algorithm() == "LSQR") {
 
         // Damping settings.
         double alpha = 1.e-2;
         double norm = 2.0;
 
-        std::cout << "Entered branch: algorithm() == LSQR, alpha = " << alpha << std::endl;
+        ASKAPLOG_INFO_STR(logger, "Solving normal equations using the LSQR solver, with alpha = " << alpha);
 
         size_t nrows = nParameters;
         size_t ncolumms = nParameters;
@@ -401,12 +389,6 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
         size_t rank_approx = matrix.GetNumberNonemptyRows();
 
         //std::cout << "Matrix sparsity: " << (double)matrix.GetNumberElements() / (double)(nrows * ncolumms) << std::endl;
-
-        // Set the right-hand side.
-//        for (size_t i = 0; i < nrows; ++i)
-//        {
-//            b_RHS[i] = gsl_vector_get(B, i);
-//        }
 
         for (std::vector<std::pair<string, int> >::const_iterator indit1=indices.begin();indit1!=indices.end(); ++indit1) {
             const casa::Vector<double> &dv = normalEquations().dataVector(indit1->first);
@@ -453,16 +435,18 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
           }
 
          //------------------------------------------------------------------------
+         // Set approximate solution quality.
          quality.setDOF(nParameters);
          quality.setRank(rank_approx);
     }
-    else {
-        std::cout << "Entered branch: algorithm() != SVD" << std::endl;
+    else if (algorithm() == "Chol") {
+        // TODO: It seems this branch is never actually used. Need to remove it?
+        ASKAPLOG_INFO_STR(logger, "Solving normal equations using the Cholesky decomposition solver");
 
         quality.setInfo("Cholesky decomposition");
         gsl_linalg_cholesky_decomp(A);
         gsl_linalg_cholesky_solve(A, B, X);
-// Update the parameters for the calculated changes
+        // Update the parameters for the calculated changes.
         std::vector<std::pair<string, int> >::const_iterator indit;
         for (indit=indices.begin();indit!=indices.end();++indit)
         {
@@ -473,11 +457,14 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
           }
         }
     }
+    else {
+        ASKAPTHROW(AskapError, "Unknown calibration solver type: " << algorithm());
+    }
 
     // Free up gsl storage.
     gsl_matrix_free(A);
 
-    if (algo != "LSQR")
+    if (algorithm() != "LSQR")
     {
         gsl_vector_free(B);
         gsl_vector_free(X);
