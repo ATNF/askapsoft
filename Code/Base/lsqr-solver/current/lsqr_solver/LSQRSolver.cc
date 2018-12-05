@@ -7,8 +7,8 @@
 #include <stdexcept>
 #include <cmath>
 
-#include "LSQRSolver.h"
-#include "MathUtils.h"
+#include <lsqr_solver/LSQRSolver.h>
+#include <lsqr_solver/MathUtils.h>
 
 // Use this flag to suppress output.
 #define SUPPRESS_OUTPUT

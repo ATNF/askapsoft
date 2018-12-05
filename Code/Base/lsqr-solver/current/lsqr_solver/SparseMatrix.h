@@ -7,7 +7,7 @@
 #ifndef SPARSEMATRIX_H_
 #define SPARSEMATRIX_H_
 
-#include "GlobalTypedefs.h"
+#include <lsqr_solver/GlobalTypedefs.h>
 
 namespace askap { namespace lsqr {
 

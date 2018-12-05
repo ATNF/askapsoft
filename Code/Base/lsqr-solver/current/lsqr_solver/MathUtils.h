@@ -7,7 +7,7 @@
 #ifndef SRC_UTILS_MATHUTILS_H_
 #define SRC_UTILS_MATHUTILS_H_
 
-#include "GlobalTypedefs.h"
+#include <lsqr_solver/GlobalTypedefs.h>
 
 /*
  * Contains functions for some math operations.

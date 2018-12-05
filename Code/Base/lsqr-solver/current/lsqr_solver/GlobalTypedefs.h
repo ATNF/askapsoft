@@ -10,7 +10,7 @@
 #include <vector>
 #include <cstddef>
 
-#include "Point.h"
+#include <lsqr_solver/Point.h>
 
 //#define PARALLEL
 

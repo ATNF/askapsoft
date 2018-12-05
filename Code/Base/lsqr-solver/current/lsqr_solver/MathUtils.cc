@@ -7,7 +7,7 @@
 #include <cmath>
 #include <stdexcept>
 
-#include "MathUtils.h"
+#include <lsqr_solver/MathUtils.h>
 
 namespace askap { namespace lsqr { namespace MathUtils {
 

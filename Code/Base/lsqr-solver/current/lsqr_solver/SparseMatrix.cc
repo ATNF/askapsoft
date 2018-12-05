@@ -6,7 +6,7 @@
 
 #include <stdexcept>
 
-#include "SparseMatrix.h"
+#include <lsqr_solver/SparseMatrix.h>
 
 namespace askap { namespace lsqr {
 
