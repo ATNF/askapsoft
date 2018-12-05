@@ -42,6 +42,10 @@
 #include "Utility.h"
 #include "SmsTypes.h"
 
+#ifdef __APPLE__
+// for healpix - the inline is to avoid the possibility that this be defined more than once.
+template<> struct Orderhelper__<long long> {enum{omax=29};};
+#endif
 
 namespace askap {
 namespace cp {
@@ -52,7 +56,12 @@ class HealPixFacade : private boost::noncopyable {
     public:
         // typedef boost::int64_t Index;
         // typedef int64_t Index;
+#ifdef __APPLE__
         typedef long long Index;
+#else
+        typedef int64  Index;
+#endif
+
         typedef std::vector<Index> IndexList;
         typedef boost::shared_ptr<IndexList> IndexListPtr;
         /// @brief Constructor.
