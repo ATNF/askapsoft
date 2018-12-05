@@ -239,7 +239,7 @@ public final class CpManager extends ServiceApplication {
 			java.util.Map<String, String> qos = null;
 			sbStateChangedTopic.subscribeAndGetPublisher(qos, sbStateChangedSubscriber);
 		}
-		catch (IceStorm.NoSuchTopic | IceStorm.AlreadySubscribed | IceStorm.BadQoS ex) {
+		catch (IceStorm.InvalidSubscriber | IceStorm.NoSuchTopic | IceStorm.AlreadySubscribed | IceStorm.BadQoS ex ) {
             throw new RuntimeException("ICE topic subscription failed", ex);
 		}
 
