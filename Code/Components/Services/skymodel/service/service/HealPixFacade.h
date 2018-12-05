@@ -42,8 +42,6 @@
 #include "Utility.h"
 #include "SmsTypes.h"
 
-template<> struct Orderhelper__<long long> {enum{omax=29};};
-
 
 namespace askap {
 namespace cp {

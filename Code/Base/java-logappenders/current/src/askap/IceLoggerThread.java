@@ -27,7 +27,7 @@ import IceStorm.TopicManagerPrx;
 import IceStorm.TopicPrx;
 import askap.interfaces.logging.ILogEvent;
 import askap.interfaces.logging.ILoggerPrx;
-import askap.interfaces.logging.ILoggerPrxHelper;
+import askap.interfaces.logging.ILoggerPrxHelper; 
 
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;

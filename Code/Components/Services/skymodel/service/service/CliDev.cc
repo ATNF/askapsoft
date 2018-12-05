@@ -34,6 +34,7 @@
 #include <vector>
 
 // Boost includes
+#include "boost/format.hpp"
 #include "boost/random/uniform_real.hpp"
 #include "boost/random/variate_generator.hpp"
 #include "boost/random/linear_congruential.hpp"
