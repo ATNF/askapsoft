@@ -117,7 +117,7 @@ MergedSource::MergedSource(const LOFAR::ParameterSet& params,
     //
 
     // Setup a signal handler to catch SIGINT, SIGTERM and SIGUSR1
-    itsSignals.async_wait(boost::bind(&MergedSource::signalHandler, this, _1, _2));
+    itsSignals.async_wait(boost::bind(&MergedSource::signalHandler, this, boost::placeholders::_1, boost::placeholders::_2));
 }
 
 MergedSource::~MergedSource()

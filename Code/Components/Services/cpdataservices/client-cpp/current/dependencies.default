@@ -6,3 +6,4 @@ askap=Code/Base/askap/current
 accessors=Code/Base/accessors/current
 cppiceinterfaces=Code/Interfaces/cpp/current
 casa_components=3rdParty/casa-components/casa-components-1.6.0
+icewrapper=Code/Components/Services/icewrapper/current

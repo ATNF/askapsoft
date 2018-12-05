@@ -156,7 +156,7 @@ const FeedConfig& Configuration::feed(void) const
 /// @return true, if one can call feed() method, false otherwise
 bool Configuration::feedInfoDefined() const 
 {
-    return itsFeedConfig;
+    return bool(itsFeedConfig);
 }
 
 const std::vector<Antenna>& Configuration::antennas(void) const
