@@ -40,7 +40,7 @@
       <mkdir dir="${generated.dir}"/>
       <pathconvert property="sliceFiles" refid="slice.files" pathsep=" " />
       <exec dir="." executable="slice2java">
-	<arg line="-I${dep_interfaces} --output-dir ${generated.dir} ${sliceFiles}"/>
+	<arg line="--compat -I${dep_interfaces} --output-dir ${generated.dir} ${sliceFiles}"/>
       </exec>
     </target>
 
