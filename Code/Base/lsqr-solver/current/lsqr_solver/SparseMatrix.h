@@ -130,11 +130,6 @@ private:
     std::vector<size_t> ijl;
 
     /*
-     * Allocates data arrays.
-     */
-    void AllocateArrays();
-
-    /*
      * Validates the boundaries of column indexes.
      */
     bool ValidateIndexBoundaries(size_t ncolumns);
