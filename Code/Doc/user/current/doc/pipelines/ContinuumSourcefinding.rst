@@ -107,20 +107,22 @@ is only the latter that are passsed to CASDA).
 |                                     |                                          | (:doc:`../analysis/selavy`)         | should be grown. Only used if ``SELAVY_FLUX_THRESHOLD`` is  |
 |                                     |                                          |                                     | given.                                                      |
 +-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
-| ``SELAVY_WEIGHTS_CUTOFF``           | 0.15                                     | Weights.weightsCutoff               | The cutoff level, as a fraction of the peak in the weights  |
+| ``SELAVY_WEIGHTS_CUTOFF``           | ""                                       | Weights.weightsCutoff               | The cutoff level, as a fraction of the peak in the weights  |
 |                                     |                                          | (:doc:`../analysis/thresholds`)     | image, used in the source-finding. Only applies if the image| 
-|                                     |                                          |                                     | being searched has a corresponding weights image.           |
-+-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
+|                                     |                                          |                                     | being searched has a corresponding weights image. If not    |
+|                                     |                                          |                                     | given, the value used is the square of ``LINMOS_CUTOFF``    |
+|                                     |                                          |                                     | from :doc:`ScienceFieldMosaicking`.                         |
++-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+ 
 | ``SELAVY_VARIABLE_THRESHOLD``       | true                                     | VariableThreshold                   | A flag indicating whether to determine the signal-to-noise  |
-|                                     |                                          | (:doc:`../analysis/thresholds`)     | threshold on a pixel-by-pixel basis based on local          | 
+|                                     |                                          | (:doc:`../analysis/thresholds`)     | threshold on a pixel-by-pixel basis based on local          |
 |                                     |                                          |                                     | statistics (that is, the statistics within a relatively     |
 |                                     |                                          |                                     | small box centred on the pixel in question).                |
 +-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
 | ``SELAVY_BOX_SIZE``                 | 50                                       | VariableThreshold.boxSize           | The half-width of the sliding box used to determine the     |
 |                                     |                                          | (:doc:`../analysis/thresholds`)     | local statistics.                                           |
-+-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
++-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+ 
 | **Spectral indices**                |                                          |                                     |                                                             |
-|                                     |                                          |                                     |                                                             | 
+|                                     |                                          |                                     |                                                             |
 +-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
 | ``USE_CONTCUBE_FOR_SPECTRAL_INDEX`` | false                                    | none                                | When true, the spectral indices in the component catalogue  |
 |                                     |                                          |                                     | are measured from the Stokes-I continuum cube. When false   |

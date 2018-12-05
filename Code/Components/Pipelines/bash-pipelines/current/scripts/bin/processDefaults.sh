@@ -1133,6 +1133,13 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
             DO_CONTCUBE_IMAGING=true
             echo "WARNING - Turning on continuum-cube imaging, since USE_CONTCUBE_FOR_SPECTRAL_INDEX=true";
         fi
+
+        # The cutoff level for the weights. Allow this to be
+        # specified, but if it isn't then we use the square of the
+        # value used in the linmos
+        if [ "${SELAVY_WEIGHTS_CUTOFF}" == "" ]; then
+            SELAVY_WEIGHTS_CUTOFF=$(echo ${LINMOS_CUTOFF} | awk '{print $1*$1}')
+        fi
         
         # We can only do RM Synthesis if we are making I,Q,U continuum
         # cubes. Need to check that the list of polarisations
@@ -1197,6 +1204,13 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
             CPUS_PER_CORE_SELAVY_SPEC=${NUM_CPUS_SELAVY_SPEC}
         fi
 
+        # The cutoff level for the weights. Allow this to be
+        # specified, but if it isn't then we use the square of the
+        # value used in the linmos
+        if [ "${SELAVY_SPEC_WEIGHTS_CUTOFF}" == "" ]; then
+            SELAVY_SPEC_WEIGHTS_CUTOFF=$(echo ${LINMOS_CUTOFF} | awk '{print $1*$1}')
+        fi
+        
         # Check search type
         if [ "${SELAVY_SPEC_SEARCH_TYPE}" != "spectral" ] &&
                [ "${SELAVY_SPEC_SEARCH_TYPE}" != "spatial" ]; then
