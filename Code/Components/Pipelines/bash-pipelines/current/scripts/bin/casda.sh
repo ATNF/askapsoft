@@ -49,6 +49,115 @@ if [ "${DO_STAGE_FOR_CASDA}" == "true" ]; then
 
     thumbSizeList="$(echo $THUMBNAIL_SIZE_TEXT | sed -e 's/,/ /g')"
 
+
+
+    # Create job that polls for success of casda ingest
+    # Only launch this when we are writing the READY file and
+    # transitioning the SBs - it will get launched by the casdaupload
+    # job itself
+    if [ "${WRITE_CASDA_READY}" == "true" ] && [ "${TRANSITION_SB}" == "true" ]; then
+
+        # This slurm job will check for the existence of a DONE file
+        # in the CASDA upload directory and, when it appears,
+        # transition the SB to COMPLETE.
+        # If it hasn't appeared, it relaunches itself to start at some
+        # point in the future (given by ${POLLING_DELAY_SEC})
+        # If after some longer period of time it hasn't appeared (a
+        # length given by ${MAX_POLL_WAIT_TIME}), then it exits with
+        # an error.
+
+        if [ "${EMAIL}" != "" ]; then
+            emailFail="#SBATCH --mail-type=FAIL
+#SBATCH --mail-user=${EMAIL}"
+        else
+            emailFail="# no email notifications"
+        fi
+        
+        pollingsbatchfile="$slurms/casda_ingest_success_poll.sbatch"
+        cat > "$pollingsbatchfile" <<EOFOUTER
+#!/bin/bash -l
+#SBATCH --cluster=zeus
+#SBATCH --partition=copyq
+#SBATCH --open-mode=append
+#SBATCH --output=$slurmOut/slurm-casdaingestPolling-${SB_SCIENCE}.out
+#SBATCH --time=00:05:00
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --job-name=casdaPoll${SB_SCIENCE}
+#SBATCH --export=NONE
+${emailFail}
+#SBATCH --requeue   
+
+echo "Polling CASDA deposit success with job \${SLURM_JOB_ID}, \$(date)"
+
+ERROR_FILE=${CASDA_DIR}/POLLING_ERROR
+
+if [ ! -e "${CASDA_DIR}/READY" ]; then
+    echo "\$(date): ERROR - READY file not present!" | tee -a \${ERROR_FILE}
+    exit 1
+fi
+
+READYdate=\$(date +%s -r ${CASDA_DIR}/READY)
+NOW=\$(date +%s)
+ageOfReady=\$(expr \$NOW - \$READYdate)
+
+module load askapcli
+
+if [ -e "${CASDA_DIR}/ERROR" ]; then
+    errmsg=\$(cat ${CASDA_DIR}/ERROR)
+    echo "\$(date): ERROR - CASDA ingest failed. SB ${SB_SCIENCE} not transitioned to COMPLETED." | tee -a ${ERROR_FILE}
+    if [ "\$(whoami)" == "askapops" ]; then
+        schedblock annotate -p ${JIRA_ANNOTATION_PROJECT} -c "ERROR -- CASDA ingest for SB ${SB_SCIENCE} failed with error:\\n\$errmsg" ${SB_SCIENCE}
+        annotErr=\$?
+        if [ \${annotErr} -ne 0 ]; then
+            echo "\$(date): ERROR - 'schedblock annotate' failed with error code \${annotErr}" | tee -a ${ERROR_FILE}
+        fi
+    fi
+    exit 1
+elif [ -e "${CASDA_DIR}/DONE" ]; then
+    schedblock transition -s COMPLETED ${SB_SCIENCE}
+    err=\$?
+    if [ \$err -ne 0 ]; then
+        echo "\$(date): ERROR - 'schedblock transition' failed for SB ${SB_SCIENCE} with error code \$err" | tee -a ${ERROR_FILE}
+    fi
+    if [ "\$(whoami)" == "askapops" ]; then
+        if [ \$err -eq 0 ]; then
+            schedblock annotate -p ${JIRA_ANNOTATION_PROJECT} -c "Archiving complete. SB ${SB_SCIENCE} transitioned to COMPLETED." ${SB_SCIENCE}
+            annotErr=\$?
+            if [ \${annotErr} -ne 0 ]; then
+                echo "\$(date): ERROR - 'schedblock annotate' failed with error code \${annotErr}" | tee -a ${ERROR_FILE}
+            fi
+        else
+            schedblock annotate -p ${JIRA_ANNOTATION_PROJECT} -c "ERROR -- Archiving complete but SB ${SB_SCIENCE} failed to transition." ${SB_SCIENCE}
+            annotErr=\$?
+            if [ \${annotErr} -ne 0 ]; then
+                echo "\$(date): ERROR - 'schedblock annotate' failed with error code \${annotErr}" | tee -a ${ERROR_FILE}
+            fi
+        fi
+    fi
+    exit \$err
+elif [ "\$ageOfReady" -gt "${MAX_POLL_WAIT_TIME}" ]; then
+    echo "\$(date): ERROR - CASDA deposit polling timed out! Waited longer than ${MAX_POLL_WAIT_TIME} sec - SB ${SB_SCIENCE} not transitioned to COMPLETED" | tee -a \${ERROR_FILE}
+    if [ "\$(whoami)" == "askapops" ]; then
+        schedblock annotate -p ${JIRA_ANNOTATION_PROJECT} -c "ERROR -- CASDA deposit has not completed within ${MAX_POLL_WAIT_TIME} sec - SB ${SB_SCIENCE} not transitioned to COMPLETED" $SB_SCIENCE
+        annotErr=\$?
+        if [ \${annotErr} -ne 0 ]; then
+            echo "\$(date): ERROR - 'schedblock annotate' failed with error code \${annotErr}" | tee -a ${ERROR_FILE}
+        fi
+    fi
+    exit 1
+else
+    # Re-submit job with a delay
+    sbatch --begin="now+${POLLING_DELAY_SEC}" ${sbatchfile}
+fi
+
+EOFOUTER
+
+
+    fi
+    
+
     sbatchfile="$slurms/casda_upload.sbatch"
     cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
@@ -252,6 +361,14 @@ if [ "\${writeREADYfile}" == "true" ] && [ "\${doTransition}" == "true" ]; then
         fi
     fi
 
+    # Submit job to poll for completion of ingest into the CASDA database
+    pollingsbatchfile=$pollingsbatchfile
+    if [ -e \$pollingsbatchfile ]; then
+        ID_CASDAPOLL=\$(sbatch "\$pollingsbatchfile" | awk '{print \$4}')
+        echo "Submitted job to poll for CASDA ingest success, with JobID \$ID_CASDAPOLL"
+    fi
+
+
 fi
 
 
@@ -268,120 +385,5 @@ EOFOUTER
         echo "Would submit job to stage data for ingest into CASDA, with slurm file $sbatchfile"
     fi
 
-
-    # Create job that polls for success of casda ingest
-    # Only launch this when we are writing the READY file and transitioning the SBs
-    if [ "${WRITE_CASDA_READY}" == "true" ] && [ "${TRANSITION_SB}" == "true" ]; then
-
-        # This slurm job will check for the existence of a DONE file
-        # in the CASDA upload directory and, when it appears,
-        # transition the SB to COMPLETE.
-        # If it hasn't appeared, it relaunches itself to start at some
-        # point in the future (given by ${POLLING_DELAY_SEC})
-        # If after some longer period of time it hasn't appeared (a
-        # length given by ${MAX_POLL_WAIT_TIME}), then it exits with
-        # an error.
-
-        if [ "${EMAIL}" != "" ]; then
-            emailFail="#SBATCH --mail-type=FAIL
-#SBATCH --mail-user=${EMAIL}"
-        else
-            emailFail="# no email notifications"
-        fi
-        
-        sbatchfile="$slurms/casda_ingest_success_poll.sbatch"
-        cat > "$sbatchfile" <<EOFOUTER
-#!/bin/bash -l
-#SBATCH --cluster=zeus
-#SBATCH --partition=copyq
-#SBATCH --open-mode=append
-#SBATCH --output=$slurmOut/slurm-casdaingestPolling-${SB_SCIENCE}.out
-#SBATCH --time=00:05:00
-#SBATCH --nodes=1
-#SBATCH --ntasks=1
-#SBATCH --ntasks-per-node=1
-#SBATCH --job-name=casdaPoll${SB_SCIENCE}
-#SBATCH --export=NONE
-${emailFail}
-#SBATCH --requeue   
-
-echo "Polling CASDA deposit success with job \${SLURM_JOB_ID}, \$(date)"
-
-ERROR_FILE=${CASDA_DIR}/POLLING_ERROR
-
-if [ ! -e "${CASDA_DIR}/READY" ]; then
-    echo "\$(date): ERROR - READY file not present!" | tee -a \${ERROR_FILE}
-    exit 1
-fi
-
-READYdate=\$(date +%s -r ${CASDA_DIR}/READY)
-NOW=\$(date +%s)
-ageOfReady=\$(expr \$NOW - \$READYdate)
-
-module load askapcli
-
-if [ -e "${CASDA_DIR}/ERROR" ]; then
-    errmsg=\$(cat ${CASDA_DIR}/ERROR)
-    echo "\$(date): ERROR - CASDA ingest failed. SB ${SB_SCIENCE} not transitioned to COMPLETED." | tee -a ${ERROR_FILE}
-    if [ "\$(whoami)" == "askapops" ]; then
-        schedblock annotate -p ${JIRA_ANNOTATION_PROJECT} -c "ERROR -- CASDA ingest for SB ${SB_SCIENCE} failed with error:\\n\$errmsg" ${SB_SCIENCE}
-        annotErr=\$?
-        if [ \${annotErr} -ne 0 ]; then
-            echo "\$(date): ERROR - 'schedblock annotate' failed with error code \${annotErr}" | tee -a ${ERROR_FILE}
-        fi
-    fi
-    exit 1
-elif [ -e "${CASDA_DIR}/DONE" ]; then
-    schedblock transition -s COMPLETED ${SB_SCIENCE}
-    err=\$?
-    if [ \$err -ne 0 ]; then
-        echo "\$(date): ERROR - 'schedblock transition' failed for SB ${SB_SCIENCE} with error code \$err" | tee -a ${ERROR_FILE}
-    fi
-    if [ "\$(whoami)" == "askapops" ]; then
-        if [ \$err -eq 0 ]; then
-            schedblock annotate -p ${JIRA_ANNOTATION_PROJECT} -c "Archiving complete. SB ${SB_SCIENCE} transitioned to COMPLETED." ${SB_SCIENCE}
-            annotErr=\$?
-            if [ \${annotErr} -ne 0 ]; then
-                echo "\$(date): ERROR - 'schedblock annotate' failed with error code \${annotErr}" | tee -a ${ERROR_FILE}
-            fi
-        else
-            schedblock annotate -p ${JIRA_ANNOTATION_PROJECT} -c "ERROR -- Archiving complete but SB ${SB_SCIENCE} failed to transition." ${SB_SCIENCE}
-            annotErr=\$?
-            if [ \${annotErr} -ne 0 ]; then
-                echo "\$(date): ERROR - 'schedblock annotate' failed with error code \${annotErr}" | tee -a ${ERROR_FILE}
-            fi
-        fi
-    fi
-    exit \$err
-elif [ "\$ageOfReady" -gt "${MAX_POLL_WAIT_TIME}" ]; then
-    echo "\$(date): ERROR - CASDA deposit polling timed out! Waited longer than ${MAX_POLL_WAIT_TIME} sec - SB ${SB_SCIENCE} not transitioned to COMPLETED" | tee -a \${ERROR_FILE}
-    if [ "\$(whoami)" == "askapops" ]; then
-        schedblock annotate -p ${JIRA_ANNOTATION_PROJECT} -c "ERROR -- CASDA deposit has not completed within ${MAX_POLL_WAIT_TIME} sec - SB ${SB_SCIENCE} not transitioned to COMPLETED" $SB_SCIENCE
-        annotErr=\$?
-        if [ \${annotErr} -ne 0 ]; then
-            echo "\$(date): ERROR - 'schedblock annotate' failed with error code \${annotErr}" | tee -a ${ERROR_FILE}
-        fi
-    fi
-    exit 1
-else
-    # Re-submit job with a delay
-    sbatch --begin="now+${POLLING_DELAY_SEC}" ${sbatchfile}
-fi
-
-EOFOUTER
-
-        if [ "${SUBMIT_JOBS}" == "true" ]; then    
-            dep=""
-            if [ "${ALL_JOB_IDS}" != "" ]; then
-                dep="-d afterok:$(echo "${ALL_JOB_IDS}" | sed -e 's/,/:/g')"
-            fi
-            dep=$(addDep "$dep" "$ID_CASDA")
-            ID_CASDAPOLL=$(sbatch ${dep} "$sbatchfile" | awk '{print $4}')
-            recordJob "${ID_CASDAPOLL}" "Job to poll CASDA directory for successful ingest, with flags \"${dep}\""
-        else
-            echo "Would submit job to poll CASDA directory for successful ingest, with slurm file $sbatchfile"
-        fi
-
-    fi
 
 fi
