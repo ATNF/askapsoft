@@ -4,7 +4,6 @@
  * @author Vitaliy Ogarko <vogarko@gmail.com>
  */
 
-#include <iostream>
 #include <stdexcept>
 
 #include "SparseMatrix.h"
