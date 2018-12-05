@@ -7,7 +7,7 @@
 #ifndef SPARSEMATRIX_H_
 #define SPARSEMATRIX_H_
 
-#include "GlobalTypedefs.h"
+#include <lsqr_solver/GlobalTypedefs.h>
 
 namespace askap { namespace lsqr {
 
@@ -128,11 +128,6 @@ private:
     std::vector<size_t> ija;
     // The list of 'sa' indexes where each row starts.
     std::vector<size_t> ijl;
-
-    /*
-     * Allocates data arrays.
-     */
-    void AllocateArrays();
 
     /*
      * Validates the boundaries of column indexes.

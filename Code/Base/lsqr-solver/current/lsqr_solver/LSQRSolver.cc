@@ -7,8 +7,8 @@
 #include <stdexcept>
 #include <cmath>
 
-#include "LSQRSolver.h"
-#include "MathUtils.h"
+#include <lsqr_solver/LSQRSolver.h>
+#include <lsqr_solver/MathUtils.h>
 
 // Use this flag to suppress output.
 #define SUPPRESS_OUTPUT
@@ -18,28 +18,13 @@ namespace askap { namespace lsqr {
 LSQRSolver::LSQRSolver(size_t nlines, size_t nelements) :
     nlines(nlines),
     nelements(nelements),
-    u(),
-    Hv(),
-    Hv_loc(),
-    v0(),
-    v(),
-    w()
+    u(nlines),
+    Hv(nlines),
+    Hv_loc(nlines),
+    v0(nelements),
+    v(nelements),
+    w(nelements)
 {
-    try
-    {
-        // Allocate memory for auxiliary arrays.
-        u.resize(nlines);
-        Hv.resize(nlines);
-        Hv_loc.resize(nlines);
-
-        v0.resize(nelements);
-        v.resize(nelements);
-        w.resize(nelements);
-    }
-    catch (std::bad_alloc& ba)
-    {
-        std::cerr << "Memory allocation error in LSQRSolver::LSQRSolver caught: " << ba.what() << std::endl;
-    }
 }
 
 void LSQRSolver::Solve(size_t niter,

@@ -956,7 +956,7 @@ SELAVY_GROWTH_CUT=3
 # Growth flux threshold - leave blank if using SNR
 SELAVY_GROWTH_THRESHOLD=""
 # Cutoff in the weights for source-detection
-SELAVY_WEIGHTS_CUTOFF=0.15
+SELAVY_WEIGHTS_CUTOFF=""
 # Whether to use a variable threshold
 SELAVY_VARIABLE_THRESHOLD=true
 # Half-size of the box used to calculate the local threshold
@@ -1046,7 +1046,7 @@ SELAVY_SPEC_GROWTH_CUT=3
 # Growth flux threshold - leave blank if using SNR
 SELAVY_SPEC_GROWTH_THRESHOLD=""
 # Cutoff in the weights for source-detection
-SELAVY_SPEC_WEIGHTS_CUTOFF=0.15
+SELAVY_SPEC_WEIGHTS_CUTOFF=""
 #
 # Preprocessing
 # Smoothing:

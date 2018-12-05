@@ -65,9 +65,11 @@ reconstruction (to enhance the signal-to-noise of real sources).
 |                                     |                                 |                                              | should be grown. Only used if ``SELAVY_FLUX_THRESHOLD`` is  |
 |                                     |                                 |                                              | given.                                                      |
 +-------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
-| ``SELAVY_SPEC_WEIGHTS_CUTOFF``      | 0.15                            | Weights.weightsCutoff                        | The cutoff level, as a fraction of the peak in the weights  |
+| ``SELAVY_SPEC_WEIGHTS_CUTOFF``      | ""                              | Weights.weightsCutoff                        | The cutoff level, as a fraction of the peak in the weights  |
 |                                     |                                 | (:doc:`../analysis/thresholds`)              | image, used in the source-finding. Only applies if the image|
-|                                     |                                 |                                              | being searched has a corresponding weights image.           |
+|                                     |                                 |                                              | being searched has a corresponding weights image. If not    |
+|                                     |                                 |                                              | given, the value used is the square of ``LINMOS_CUTOFF``    |
+|                                     |                                 |                                              | from :doc:`ScienceFieldMosaicking`.                         |
 +-------------------------------------+---------------------------------+----------------------------------------------+-------------------------------------------------------------+
 | ``SELAVY_SPEC_SEARCH_TYPE``         | spatial                         | searchType (:doc:`../analysis/selavy`)       | Type of searching to be performed: either 'spectral'        |
 |                                     |                                 |                                              | (searches are done in each 1D spectrum) or 'spatial'        |

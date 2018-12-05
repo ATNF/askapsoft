@@ -6,9 +6,8 @@
 
 #include <cmath>
 #include <stdexcept>
-#include <iostream>
 
-#include "MathUtils.h"
+#include <lsqr_solver/MathUtils.h>
 
 namespace askap { namespace lsqr { namespace MathUtils {
 
@@ -58,7 +57,6 @@ void Add(Vector& x, const Vector& y)
     // Sanity check.
     if (x.size() != y.size())
     {
-        std::cout << "x.size(), y.size =" << x.size() << ", " << y.size() << std::endl;
         throw std::runtime_error("Dimensions of vectors do not match in MathUtils::Add!");
     }
 
@@ -73,7 +71,6 @@ void Transform(double a, Vector& x, double b, const Vector& y)
     // Sanity check.
     if (x.size() != y.size())
     {
-        std::cout << "x.size(), y.size =" << x.size() << ", " << y.size() << std::endl;
         throw std::runtime_error("Dimensions of vectors do not match in MathUtils::Transform!");
     }
 

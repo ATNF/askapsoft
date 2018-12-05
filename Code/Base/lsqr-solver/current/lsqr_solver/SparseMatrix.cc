@@ -4,10 +4,9 @@
  * @author Vitaliy Ogarko <vogarko@gmail.com>
  */
 
-#include <iostream>
 #include <stdexcept>
 
-#include "SparseMatrix.h"
+#include <lsqr_solver/SparseMatrix.h>
 
 namespace askap { namespace lsqr {
 
@@ -17,11 +16,10 @@ SparseMatrix::SparseMatrix(size_t nl, size_t nnz) :
     nel(0),
     nl(nl),
     nl_current(0),
-    sa(),
-    ija(),
-    ijl()
+    sa(nnz),
+    ija(nnz),
+    ijl(nl + 1)
 {
-    AllocateArrays();
 }
 
 bool SparseMatrix::Finalize(size_t ncolumns)
@@ -185,7 +183,10 @@ void SparseMatrix::Extend(size_t extra_nl, size_t extra_nnz)
     nl += extra_nl;
     nnz += extra_nnz;
 
-    AllocateArrays();
+    // Reallocate memory for matrix arrays.
+    sa.resize(nnz);
+    ija.resize(nnz);
+    ijl.resize(nl + 1);
 }
 
 size_t SparseMatrix::GetNumberNonemptyRows() const
@@ -204,27 +205,6 @@ size_t SparseMatrix::GetNumberNonemptyRows() const
     return (nl - number_empty_rows);
 }
 
-void SparseMatrix::AllocateArrays()
-{
-    // Sanity check.
-    if (finalized)
-    {
-        throw std::runtime_error("Matrix has already been finalized in SparseMatrix::AllocateArrays!");
-    }
-
-    try
-    {
-        // Allocate memory for matrix arrays.
-        sa.resize(nnz);
-        ijl.resize(nl + 1);
-        ija.resize(nnz);
-    }
-    catch (std::bad_alloc& ba)
-    {
-        std::cerr << "Memory allocation error in SparseMatrix::AllocateArrays caught: " << ba.what() << std::endl;
-    }
-}
-
 bool SparseMatrix::ValidateIndexBoundaries(size_t ncolumns)
 {
     // Use the same loop as in A'x multiplication.
@@ -234,7 +214,6 @@ bool SparseMatrix::ValidateIndexBoundaries(size_t ncolumns)
         {
             if (k > nnz - 1)
             {
-                std::cout << "k =" << k << std::endl;
                 throw std::runtime_error("Sparse matrix validation failed for k-index!");
             }
 
@@ -242,7 +221,6 @@ bool SparseMatrix::ValidateIndexBoundaries(size_t ncolumns)
 
             if (j > ncolumns - 1)
             {
-                std::cout << "j =" << j << std::endl;
                 throw std::runtime_error("Sparse matrix validation failed for j-index!");
             }
         }

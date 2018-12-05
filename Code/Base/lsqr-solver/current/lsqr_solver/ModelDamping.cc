@@ -7,7 +7,7 @@
 #include <stdexcept>
 #include <cmath>
 
-#include "ModelDamping.h"
+#include <lsqr_solver/ModelDamping.h>
 
 namespace askap { namespace lsqr {
 
