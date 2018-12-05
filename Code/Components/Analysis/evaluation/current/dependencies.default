@@ -1,6 +1,6 @@
 py-askap=Code/Base/py-askap/current
 py-parset=Code/Base/py-parset/current
 matplotlib=3rdParty/matplotlib/matplotlib-2.0.0
-pywcs=3rdParty/pywcs/pywcs-1.12
+#pywcs=3rdParty/pywcs/pywcs-1.12
 aplpy=3rdParty/APLpy/APLpy-1.1.1
 scipy=3rdParty/scipy/scipy-0.18.1

@@ -1,4 +1,4 @@
-boost=3rdParty/boost/boost-1.56.0
+boost=/usr/local
 log4cxx=3rdParty/log4cxx/log4cxx-0.10.0
 ice=/usr/local;IceStorm Ice 
 cppiceinterfaces=Code/Interfaces/cpp/current
