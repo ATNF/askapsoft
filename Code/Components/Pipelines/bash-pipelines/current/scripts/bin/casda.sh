@@ -318,24 +318,22 @@ READYdate=\$(date +%s -r ${CASDA_DIR}/READY)
 NOW=\$(date +%s)
 ageOfReady=\$(expr \$NOW - \$READYdate)
 
+module load askapcli
+
 if [ -e "${CASDA_DIR}/ERROR" ]; then
     errmsg=\$(cat ${CASDA_DIR}/ERROR)
     echo "\$(date): ERROR - CASDA ingest failed. SB ${SB_SCIENCE} not transitioned to COMPLETED." | tee -a ${ERROR_FILE}
     if [ "\$(whoami)" == "askapops" ]; then
-        loadModule askapcli
         schedblock annotate -p ${JIRA_ANNOTATION_PROJECT} -c "ERROR -- CASDA ingest for SB ${SB_SCIENCE} failed with error:\\n\$errmsg" ${SB_SCIENCE}
         annotErr=\$?
-        unloadModule askapcli
         if [ \${annotErr} -ne 0 ]; then
             echo "\$(date): ERROR - 'schedblock annotate' failed with error code \${annotErr}" | tee -a ${ERROR_FILE}
         fi
     fi
     exit 1
 elif [ -e "${CASDA_DIR}/DONE" ]; then
-    loadModule askapcli
     schedblock transition -s COMPLETED ${SB_SCIENCE}
     err=\$?
-    unloadModule askapcli
     if [ \$err -ne 0 ]; then
         echo "\$(date): ERROR - 'schedblock transition' failed for SB ${SB_SCIENCE} with error code \$err" | tee -a ${ERROR_FILE}
     fi
@@ -358,10 +356,8 @@ elif [ -e "${CASDA_DIR}/DONE" ]; then
 elif [ "\$ageOfReady" -gt "${MAX_POLL_WAIT_TIME}" ]; then
     echo "\$(date): ERROR - CASDA deposit polling timed out! Waited longer than ${MAX_POLL_WAIT_TIME} sec - SB ${SB_SCIENCE} not transitioned to COMPLETED" | tee -a \${ERROR_FILE}
     if [ "\$(whoami)" == "askapops" ]; then
-        loadModule askapcli
         schedblock annotate -p ${JIRA_ANNOTATION_PROJECT} -c "ERROR -- CASDA deposit has not completed within ${MAX_POLL_WAIT_TIME} sec - SB ${SB_SCIENCE} not transitioned to COMPLETED" $SB_SCIENCE
         annotErr=\$?
-        unloadModule askapcli
         if [ \${annotErr} -ne 0 ]; then
             echo "\$(date): ERROR - 'schedblock annotate' failed with error code \${annotErr}" | tee -a ${ERROR_FILE}
         fi
