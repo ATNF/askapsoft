@@ -182,7 +182,7 @@ void ResultsWriter::writeComponentMaps(DistributedContinuumParameterisation &dcp
     }
 
     boost::shared_ptr<accessors::IImageAccess> imageAcc = accessors::imageAccessFactory(fitParset);
-    boost::shared_ptr<accessors::IImageAccess> inputImageAcc = accessors::imageAccessFactory(fitParset);
+    boost::shared_ptr<accessors::IImageAccess> inputImageAcc = accessors::imageAccessFactory(itsParset);
     std::string image_no_ext=inputImageName;
     if(image_no_ext.find(".fits") != std::string::npos){
         if (image_no_ext.substr(image_no_ext.rfind("."), std::string::npos) == ".fits") {
