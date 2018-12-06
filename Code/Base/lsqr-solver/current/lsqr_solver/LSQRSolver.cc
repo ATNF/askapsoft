@@ -3,6 +3,10 @@
  *
  * @author Vitaliy Ogarko <vogarko@gmail.com>
  */
+
+#include <askap/AskapLogging.h>
+ASKAP_LOGGER(logger, ".lsqr_solver");
+
 #include <iostream>
 #include <stdexcept>
 #include <cmath>
@@ -44,14 +48,14 @@ void LSQRSolver::Solve(size_t niter,
     // Sanity check.
     if (matrix.GetNumberElements() == 0)
     {
-        std::cout << "WARNING: Zero elements in the matrix. Exiting the solver." << std::endl;
+        ASKAPLOG_WARN_STR(logger, "Zero elements in the matrix. Exiting the solver.");
         return;
     }
 
     // Sanity check.
     if (MathUtils::GetNormSquared(b) == 0.0)
     {
-        std::cout << "WARNING: |b| = 0. Exiting the solver." << std::endl;
+        ASKAPLOG_WARN_STR(logger, "|b| = 0. Exiting the solver.");
         return;
     }
 
@@ -74,7 +78,7 @@ void LSQRSolver::Solve(size_t niter,
     // Normalize u and initialize beta.
     if (!MathUtils::Normalize(u, beta, false))
     {
-        throw std::runtime_error("PROBLEM: Could not normalize initial u, zero denominator!");
+        throw std::runtime_error("Could not normalize initial u, zero denominator!");
     }
 
     // Set x0 = 0, as required by the algorithm.
@@ -89,7 +93,7 @@ void LSQRSolver::Solve(size_t niter,
     // Normalize v and initialize alpha.
     if (!MathUtils::Normalize(v, alpha, true))
     {
-        throw std::runtime_error("PROBLEM: Could not normalize initial v, zero denominator!");
+        throw std::runtime_error("Could not normalize initial v, zero denominator!");
     }
 
     double rhobar = alpha;
@@ -122,7 +126,7 @@ void LSQRSolver::Solve(size_t niter,
         if (!MathUtils::Normalize(u, beta, false))
         {
             // Found an exact solution.
-            std::cout << "WARNING: |u| = 0. Possibly found an exact solution in the LSQR solver!" << std::endl;
+            ASKAPLOG_WARN_STR(logger, "|u| = 0. Possibly found an exact solution in the LSQR solver!");
         }
 
         // Scale v: v = - beta * v
@@ -138,7 +142,7 @@ void LSQRSolver::Solve(size_t niter,
         if (!MathUtils::Normalize(v, alpha, true))
         {
             // Found an exact solution.
-            std::cout << "WARNING: |v| = 0. Possibly found an exact solution in the LSQR solver!" << std::endl;
+            ASKAPLOG_WARN_STR(logger, "|v| = 0. Possibly found an exact solution in the LSQR solver!");
         }
 
         // Compute scalars for updating the solution.
@@ -147,7 +151,7 @@ void LSQRSolver::Solve(size_t niter,
         // Sanity check (avoid zero division).
         if (rho == 0.0)
         {
-            std::cout << "WARNING: rho = 0. Exiting the loop." << std::endl;
+            ASKAPLOG_WARN_STR(logger, "rho = 0. Exiting the LSQR loop.");
             break;
         }
 
@@ -204,9 +208,7 @@ void LSQRSolver::Solve(size_t niter,
         // Basically this is another stopping criterion.
         if (fabs(rhobar) < 1.e-30)
         {
-            #ifndef SUPPRESS_OUTPUT
-                std::cout << "WARNING: Small rhobar! Possibly algorithm is converged. Exiting the loop." << std::endl;
-            #endif
+            ASKAPLOG_WARN_STR(logger, "Small rhobar! Possibly algorithm has converged. Exiting the loop.");
             break;
         }
 
