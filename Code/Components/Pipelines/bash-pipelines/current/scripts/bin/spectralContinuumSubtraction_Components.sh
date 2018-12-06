@@ -173,8 +173,7 @@ Selavy.Fitter.doFit                             = true
 Selavy.Fitter.fitTypes                          = [full]
 Selavy.Fitter.numGaussFromGuess                 = true
 Selavy.Fitter.maxReducedChisq                   = 10.
-# Force the component maps to be casa images for now
-Selavy.Fitter.imagetype                         = casa
+Selavy.Fitter.imagetype                         = ${IMAGETYPE_CONT}
 #
 Selavy.threshSpatial                            = 5
 Selavy.flagAdjacent                             = false

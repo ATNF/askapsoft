@@ -197,8 +197,7 @@ Selavy.Fitter.doFit                             = true
 Selavy.Fitter.fitTypes                          = [full]
 Selavy.Fitter.numGaussFromGuess                 = true
 Selavy.Fitter.maxReducedChisq                   = 10.
-# Force the component maps to be casa images for now
-Selavy.Fitter.imagetype                         = casa
+Selavy.Fitter.imagetype                         = ${IMAGETYPE_CONT}
 #
 Selavy.threshSpatial                            = ${CONTSUB_SELAVY_SPATIAL_THRESHOLD}
 Selavy.flagAdjacent                             = ${CONTSUB_SELAVY_FLAG_ADJACENT}
