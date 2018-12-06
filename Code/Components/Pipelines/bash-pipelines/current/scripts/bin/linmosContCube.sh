@@ -69,7 +69,7 @@ ${LINMOS_BEAM_OFFSETS}"
         fi
 
 
-        setJob "linmosContCube${code}" "linmosCC${code}"
+        setJob "linmosContCube${imageCode}" "linmosCC${imageCode}"
         cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
 ${SLURM_CONFIG}

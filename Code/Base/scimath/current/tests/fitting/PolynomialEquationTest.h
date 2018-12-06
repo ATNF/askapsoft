@@ -215,6 +215,7 @@ namespace askap
           solver.addNormalEquations(normeq);
 
           Quality q;
+          solver.setAlgorithm("Chol");
 //          std::cout << "Before " << solver.parameters().value("poly") << std::endl;
           Params params = itsPolyWrong->parameters();
           solver.solveNormalEquations(params,q);

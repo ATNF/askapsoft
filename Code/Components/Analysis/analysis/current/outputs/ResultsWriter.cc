@@ -182,6 +182,14 @@ void ResultsWriter::writeComponentMaps(DistributedContinuumParameterisation &dcp
     }
 
     boost::shared_ptr<accessors::IImageAccess> imageAcc = accessors::imageAccessFactory(fitParset);
+    boost::shared_ptr<accessors::IImageAccess> inputImageAcc = accessors::imageAccessFactory(fitParset);
+    std::string image_no_ext=inputImageName;
+    if(image_no_ext.find(".fits") != std::string::npos){
+        if (image_no_ext.substr(image_no_ext.rfind("."), std::string::npos) == ".fits") {
+                image_no_ext.erase(image_no_ext.rfind("."), std::string::npos);
+            }
+        }
+    casa::Vector<casa::Quantum<double> > beam = inputImageAcc->beamInfo(image_no_ext);
 
     bool doComponentMap = fitParset.getBool("writeComponentMap", true);
     if (doComponentMap) {
@@ -197,6 +205,7 @@ void ResultsWriter::writeComponentMaps(DistributedContinuumParameterisation &dcp
         imageAcc->write(componentMap, componentImage);
         imageAcc->makeDefaultMask(componentMap);
         imageAcc->writeMask(componentMap, mask, casa::IPosition(componentImage.shape().nelements(),0));
+        imageAcc->setBeamInfo(componentMap, beam[0].getValue("rad"), beam[1].getValue("rad"), beam[2].getValue("rad"));
         imageAcc->addHistory(componentMap, "Map of fitted components, made by Selavy");
         imageAcc->addHistory(componentMap, "Original image: " + inputImageName);
         if (itsParset.isDefined("imageHistory")) {
@@ -222,6 +231,7 @@ void ResultsWriter::writeComponentMaps(DistributedContinuumParameterisation &dcp
         imageAcc->write(componentResidualMap, residual);
         imageAcc->makeDefaultMask(componentResidualMap);
         imageAcc->writeMask(componentResidualMap, mask, casa::IPosition(componentImage.shape().nelements(),0));
+        imageAcc->setBeamInfo(componentResidualMap, beam[0].getValue("rad"), beam[1].getValue("rad"), beam[2].getValue("rad"));
         imageAcc->addHistory(componentResidualMap, "Residual after subtracting fitted components, made by Selavy");
         imageAcc->addHistory(componentResidualMap, "Original image: " + inputImageName);
         if (itsParset.isDefined("imageHistory")) {

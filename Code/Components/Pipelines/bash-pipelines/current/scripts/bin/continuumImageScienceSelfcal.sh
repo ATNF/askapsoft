@@ -63,27 +63,20 @@ if [ "${DO_IT}" == "true" ] && [ "${DO_SELFCAL}" == "true" ]; then
         CPUS_PER_CORE_SELFCAL_SELAVY=${NPROCS_SELAVY}
     fi
 
-    # Work out maximum number of cores needed (for sbatch request)
-    # Start with 2, as we need that for cmodel
-    NUM_CPUS_SELFCAL=2
-    if [ "${NPROCS_SELAVY}" -gt "${NUM_CPUS_SELFCAL}" ]; then
-        NUM_CPUS_SELFCAL=$NPROCS_SELAVY
-    fi
-    if [ "${NUM_CPUS_CONTIMG_SCI}" -gt "${NUM_CPUS_SELFCAL}" ]; then
-        NUM_CPUS_SELFCAL=$NUM_CPUS_CONTIMG_SCI
-    fi
+    # Work out number of nodes required, given constraints on number
+    # of tasks and tasks per node for each job.
+    # Start with 1 node, as we need that for cmodel and ccalibrator
+    NUM_NODES_SELFCAL=1
+    # Selavy
+    NUM_NODES_SELAVY=$(echo $NPROCS_SELAVY $CPUS_PER_CORE_SELFCAL_SELAVY | awk '{if ($1%$2==0) print $1/$2; else print int($1/$2)+1}')
+    # Imaging
+    NUM_NODES_IMAGING=$(echo $NUM_CPUS_CONTIMG_SCI $CPUS_PER_CORE_CONT_IMAGING | awk '{if ($1%$2==0) print $1/$2; else print int($1/$2)+1}')
 
-    # How many cores per node for the selfcal job (ie. for sbatch request)
-    #  As above, start with 2 from the cmodel job and increase to maximum over other jobs
-    CORES_PER_NODE_SELFCAL=2
-    if [ "${CPUS_PER_CORE_CONT_IMAGING}" -gt "${CORES_PER_NODE_SELFCAL}" ]; then
-        CORES_PER_NODE_SELFCAL=$CPUS_PER_CORE_CONT_IMAGING
+    if [ $NUM_NODES_SELAVY -gt $NUM_NODES_SELFCAL ]; then
+        NUM_NODES_SELFCAL=$NUM_NODES_SELAVY
     fi
-    if [ "${CPUS_PER_CORE_SELFCAL_SELAVY}" -gt "${CORES_PER_NODE_SELFCAL}" ]; then
-        CORES_PER_NODE_SELFCAL=$CPUS_PER_CORE_SELFCAL_SELAVY
-    fi
-    if [ "${NUM_CPUS_SELFCAL}" -lt "${CORES_PER_NODE_SELFCAL}" ]; then
-        CORES_PER_NODE_SELFCAL=$NUM_CPUS_SELFCAL
+    if [ $NUM_NODES_IMAGING -gt $NUM_NODES_SELFCAL ]; then
+        NUM_NODES_SELFCAL=$NUM_NODES_IMAGING
     fi
 
     # Details for the script to fix the position offsets
@@ -241,8 +234,7 @@ Ccalibrator.refgain                             = ${SELFCAL_REF_GAINS}"
 #!/bin/bash -l
 ${SLURM_CONFIG}
 #SBATCH --time=${JOB_TIME_CONT_IMAGE}
-#SBATCH --ntasks=${NUM_CPUS_SELFCAL}
-#SBATCH --ntasks-per-node=${CORES_PER_NODE_SELFCAL}
+#SBATCH --nodes=${NUM_NODES_SELFCAL}
 #SBATCH --job-name=${jobname}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-contImagingSelfcal-%j.out
