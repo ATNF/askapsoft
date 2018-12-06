@@ -7,7 +7,6 @@
 #include <askap/AskapLogging.h>
 ASKAP_LOGGER(logger, ".lsqr_solver");
 
-#include <iostream>
 #include <stdexcept>
 #include <cmath>
 
@@ -38,13 +37,6 @@ void LSQRSolver::Solve(size_t niter,
         Vector& x,
         int myrank)
 {
-#ifndef SUPPRESS_OUTPUT
-    if (myrank == 0)
-    {
-        std::cout << "Entered LSQRSolver::Solve" << std::endl;
-    }
-#endif
-
     // Sanity check.
     if (matrix.GetNumberElements() == 0)
     {
@@ -199,7 +191,7 @@ void LSQRSolver::Solve(size_t niter,
 
             if (myrank == 0)
             {
-                std::cout <<  "it, r, g =" << iter << ", " << r << ", " << g << std::endl;
+                ASKAPLOG_INFO_STR(logger, "it, r, g =" << iter << ", " << r << ", " << g);
             }
         }
 #endif
@@ -217,7 +209,7 @@ void LSQRSolver::Solve(size_t niter,
 
     if (myrank == 0)
     {
-        std::cout << "End of LSQRSolver::Solve, r =" << r << " iter =" << iter - 1 << std::endl;
+        ASKAPLOG_INFO_STR(logger, "Finished LSQRSolver::Solve, r =" << r << " iter =" << iter - 1);
     }
 }
 
