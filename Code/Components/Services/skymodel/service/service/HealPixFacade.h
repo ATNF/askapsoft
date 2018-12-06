@@ -44,7 +44,7 @@
 
 #ifdef __APPLE__
 // for healpix - the inline is to avoid the possibility that this be defined more than once.
-template<> struct Orderhelper__<long long> {enum{omax=29};};
+// template<> struct Orderhelper__<long long> {enum{omax=29};};
 #endif
 
 namespace askap {
@@ -57,7 +57,7 @@ class HealPixFacade : private boost::noncopyable {
         // typedef boost::int64_t Index;
         // typedef int64_t Index;
 #ifdef __APPLE__
-        typedef long long Index;
+        typedef int64 Index;
 #else
         typedef int64  Index;
 #endif
