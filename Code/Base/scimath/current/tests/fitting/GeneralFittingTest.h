@@ -56,8 +56,10 @@ namespace scimath
   class GeneralFittingTest : public CppUnit::TestFixture {
 
      CPPUNIT_TEST_SUITE(GeneralFittingTest);
-     CPPUNIT_TEST(testRealEquation);
-     CPPUNIT_TEST(testComplexEquation);
+     CPPUNIT_TEST(testRealEquationSVD);
+     CPPUNIT_TEST(testRealEquationLSQR);
+     CPPUNIT_TEST(testComplexEquationSVD);
+     CPPUNIT_TEST(testComplexEquationLSQR);
      CPPUNIT_TEST_SUITE_END();
 
   public:
@@ -75,57 +77,22 @@ namespace scimath
         
      }
 
-     void testRealEquation() {
-         const double trueGains[] = {0.9,1.1,1.2,0.6,1.3,1.05}; 
-         createParams(&trueGains[0],itsTrueGains);
-         predictReal();
-         const double guessedGains[] = {1.,1.,1.,1.,1.,1.};
-         createParams(&guessedGains[0],itsGuessedGains);
-         GenericNormalEquations ne;
-         calcEquationsReal(ne);
-         Quality q;
-         LinearSolver solver;
-         solver.addNormalEquations(ne);
-         solver.setAlgorithm("SVD");
-         solver.solveNormalEquations(itsGuessedGains,q);  
-         for (casa::uInt ant=0;ant<itsNAnt;++ant) {
-              CPPUNIT_ASSERT(abs(itsGuessedGains.scalarValue(parName(ant))-
-                                 trueGains[ant])<0.05);
-         }     
+     void testRealEquationSVD() {
+         testRealEquation("SVD");
+     }
+
+     void testRealEquationLSQR() {
+         testRealEquation("LSQR");
      }
      
-     void testComplexEquation() {
-         const double trueGainsReal[] = {0.9,1.1,1.2,0.6,1.3,1.05}; 
-         const double trueGainsImag[] = {0.1,-0.1,0.,0.1,-0.1,0.}; 
-         
-         createParams(makeComplex(&trueGainsReal[0], &trueGainsImag[0]), 
-                      itsTrueGains);
-         // correction factor to apply a phase shift to get a correct
-         // absolute phase, which we can't determine in the calibration solution.
-         // Antenna 0 is a reference.
-         itsRefPhase = casa::polar(casa::Float(1.), 
-                             -casa::arg(itsTrueGains.complexValue(parName(0))));
-         
-         predictComplex();
-         const double guessedGainsReal[] = {1.,1.,1.,1.,1.,1.};
-         const double guessedGainsImag[] = {0.,0.,0.,0.,0.,0.};
-         createParams(makeComplex(&guessedGainsReal[0], &guessedGainsImag[0]),
-                      itsGuessedGains);
-         for (size_t iteration=0; iteration<5; ++iteration) {
-              GenericNormalEquations ne;
-              calcEquationsComplex(ne);
-              Quality q;
-              LinearSolver solver;
-              solver.addNormalEquations(ne);
-              solver.setAlgorithm("SVD");
-              solver.solveNormalEquations(itsGuessedGains,q);
-         }  
-         for (casa::uInt ant=0;ant<itsNAnt;++ant) {
-             const std::string name = parName(ant); 
-             CPPUNIT_ASSERT(abs(itsTrueGains.complexValue(name)-
-                      itsGuessedGains.complexValue(name))<1e-6);
-         }
+     void testComplexEquationSVD() {
+         testComplexEquation("SVD");
      }
+
+     void testComplexEquationLSQR() {
+         testComplexEquation("LSQR");
+     }
+
   protected:
      /// @brief a helper class to get complex sequence from two real sequences.
      /// @details This helper class acts as an iterator over a complex-valued
@@ -319,6 +286,58 @@ namespace scimath
          }
          designMatrix.addResidual(residual,casa::Vector<double>(residual.size(),1.));
          ne.add(designMatrix);
+     }
+
+     void testRealEquation(const std::string &solverType) {
+         const double trueGains[] = {0.9,1.1,1.2,0.6,1.3,1.05};
+         createParams(&trueGains[0],itsTrueGains);
+         predictReal();
+         const double guessedGains[] = {1.,1.,1.,1.,1.,1.};
+         createParams(&guessedGains[0],itsGuessedGains);
+         GenericNormalEquations ne;
+         calcEquationsReal(ne);
+         Quality q;
+         LinearSolver solver;
+         solver.addNormalEquations(ne);
+         solver.setAlgorithm(solverType);
+         solver.solveNormalEquations(itsGuessedGains,q);
+         for (casa::uInt ant=0;ant<itsNAnt;++ant) {
+              CPPUNIT_ASSERT(abs(itsGuessedGains.scalarValue(parName(ant))-
+                                 trueGains[ant])<0.05);
+         }
+     }
+
+     void testComplexEquation(const std::string &solverType) {
+         const double trueGainsReal[] = {0.9,1.1,1.2,0.6,1.3,1.05};
+         const double trueGainsImag[] = {0.1,-0.1,0.,0.1,-0.1,0.};
+
+         createParams(makeComplex(&trueGainsReal[0], &trueGainsImag[0]),
+                      itsTrueGains);
+         // correction factor to apply a phase shift to get a correct
+         // absolute phase, which we can't determine in the calibration solution.
+         // Antenna 0 is a reference.
+         itsRefPhase = casa::polar(casa::Float(1.),
+                             -casa::arg(itsTrueGains.complexValue(parName(0))));
+
+         predictComplex();
+         const double guessedGainsReal[] = {1.,1.,1.,1.,1.,1.};
+         const double guessedGainsImag[] = {0.,0.,0.,0.,0.,0.};
+         createParams(makeComplex(&guessedGainsReal[0], &guessedGainsImag[0]),
+                      itsGuessedGains);
+         for (size_t iteration=0; iteration<5; ++iteration) {
+              GenericNormalEquations ne;
+              calcEquationsComplex(ne);
+              Quality q;
+              LinearSolver solver;
+              solver.addNormalEquations(ne);
+              solver.setAlgorithm(solverType);
+              solver.solveNormalEquations(itsGuessedGains,q);
+         }
+         for (casa::uInt ant=0;ant<itsNAnt;++ant) {
+             const std::string name = parName(ant);
+             CPPUNIT_ASSERT(abs(itsTrueGains.complexValue(name)-
+                      itsGuessedGains.complexValue(name))<1e-6);
+         }
      }
 
   private:
