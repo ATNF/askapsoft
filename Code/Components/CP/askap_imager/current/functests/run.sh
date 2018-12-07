@@ -30,6 +30,7 @@ fi
 rm *.fits
 
 cd $INITIALDIR
+
 # Print Results
 echo
 echo Result Summary:

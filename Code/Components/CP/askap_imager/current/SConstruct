@@ -1,7 +1,7 @@
 # @file
 # SConstruct build script for this module.
 #
-
+import askapdev.rbuild.utils as utils
 # Always import this
 from askapenv import env
 
@@ -17,7 +17,10 @@ pkg.build_static = False
 
 env.AppendUnique(CCFLAGS=['-O3'])
 env.AppendUnique(CCFLAGS=['-fPIC'])
-#env.AppendUnique(CCFLAGS=['-Wno-unused-local-typedef'])
+
+platform=utils.get_platform()
+if platform['system'] == 'Darwin':
+  env.AppendUnique(LINKFLAGS=['-framework', 'Python'])
 
 # run the build process
 pkg()
