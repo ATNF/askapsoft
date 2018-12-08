@@ -31,6 +31,11 @@ if env['usepgi']==0:
 
 else:
         env.AppendUnique(LINKFLAGS=['-latomic'])
+
+if sys.platform  == 'darwin':
+  env.AppendUnique(LINKFLAGS=['-framework', 'Python'])
+
+
 env["ENV"]["PATH"] = os.environ['PATH']
 
 # create build object with library name
