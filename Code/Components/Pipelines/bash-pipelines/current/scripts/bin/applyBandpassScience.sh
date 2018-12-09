@@ -80,6 +80,8 @@ Ccalapply.dataset                         = ${msSci}
 # Allow flagging of vis if inversion of Mueller matrix fails
 Ccalapply.calibrate.allowflag             = true
 Ccalapply.calibrate.scalenoise            = ${BANDPASS_SCALENOISE}
+# Ignore the leakage
+Ccalapply.calibrate.ignoreleakage         = true
 #
 Ccalapply.calibaccess                     = table
 Ccalapply.calibaccess.table.maxant        = ${NUM_ANT}

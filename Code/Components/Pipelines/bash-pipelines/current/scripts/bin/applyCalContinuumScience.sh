@@ -79,6 +79,10 @@ Ccalapply.calibrate.allowflag             = true
 #
 # Ignore the beam, since we calibrate with antennagains
 Ccalapply.calibrate.ignorebeam            = true
+# Ignore the channel dependence
+Ccalapply.calibrate.ignorechannel         = true
+# Ignore the leakage
+Ccalapply.calibrate.ignoreleakage         = true
 #
 Ccalapply.calibaccess                     = table
 Ccalapply.calibaccess.table.maxant        = ${NUM_ANT}

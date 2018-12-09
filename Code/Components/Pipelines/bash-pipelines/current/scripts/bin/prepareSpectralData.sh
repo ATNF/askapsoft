@@ -157,8 +157,8 @@ if [ "${DO_IT}" == "true" ]; then
 #!/bin/bash -l
 ${SLURM_CONFIG}
 #SBATCH --time=${JOB_TIME_SPECTRAL_APPLYCAL}
-#SBATCH --ntasks=${NUM_CORES_CAL_APPLY}
-#SBATCH --ntasks-per-node=${NPPN_CAL_APPLY}
+#SBATCH --ntasks=1
+#SBATCH --ntasks-per-node=1
 #SBATCH --job-name=${jobname}
 ${exportDirective}
 #SBATCH --output=$slurmOut/slurm-calappSLsci-%j.out
@@ -184,6 +184,10 @@ Ccalapply.calibrate.allowflag             = true
 #
 # Ignore the beam, since we calibrate with antennagains
 Ccalapply.calibrate.ignorebeam            = true
+# Ignore the channel dependence
+Ccalapply.calibrate.ignorechannel         = true
+# Ignore the leakage
+Ccalapply.calibrate.ignoreleakage         = true
 #
 Ccalapply.calibaccess                     = table
 Ccalapply.calibaccess.table.maxant        = ${NUM_ANT}
@@ -192,8 +196,8 @@ Ccalapply.calibaccess.table.maxchan       = ${nchanContSci}
 Ccalapply.calibaccess.table               = ${gainscaltab}
 EOFINNER
 
-NCORES=${NUM_CORES_CAL_APPLY}
-NPPN=${NPPN_CAL_APPLY}
+NCORES=1
+NPPN=1
 srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${ccalapply} -c "\${parset}" > "\${log}"
 err=\$?
 rejuvenate ${msSciSL}
