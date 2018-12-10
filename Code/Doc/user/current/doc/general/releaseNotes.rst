@@ -5,6 +5,61 @@ This page summarises the key changes in each tagged release of
 ASKAPsoft. This replicates the CHANGES file that is included in the
 code base.
 
+0.23.0 (10 December 2018)
+-------------------------
+
+A major release, addressing a number of issues with the processing software and the pipeline scripts.
+
+Pipelines:
+
+ * When multiple raw MSs are provided for a given beam (split up by
+   frequency range), the pipeline is capable of recognising this,
+   merging (after any necessary splitting), and handling all required
+   metadata appropriately. The functionality should be the same no
+   matter the structure of the raw data.
+ * The selfcal job allocation (for the sbatch call) has been altered
+   to request a number of nodes, rather than cores +
+   cores-per-node. This should provide more predictable allocations.
+ * The weights cutoff parameter given to Selavy is now fully
+   consistent with the linmos cutoff.
+ * Fixed a bug that meant the raw data was overwritten when
+   calibration was applied, even when KEEP_RAW_AV_MS=true.
+ * The TELESCOP keyword is now added to the FITS headers.
+ * A bug was fixed that was preventing the full-resolution MSs being
+   included in the CASDA upload.
+ * New parameters SPECTRAL_IMAGE_MAXUV and SPECTRAL_IMAGE_MINUV that
+   allow control over the UV distances passed to the spectral imager.
+ * Various improvements to the gatherStats job, so that it will still
+   run after the killAll script has been called, and that looks for
+   the pipeline-errors directory before trying to use it.
+ * Making the cubeStats script more robust against failures of a
+   single process (so that it doesn't hang but instead carries on as
+   best it can).
+
+
+Processing:
+
+ * Imaging:
+  - Fix a coordinate shift that was seen in spectral imaging, due to a
+    different direction being provided by the advise functionality. 
+
+ * Calibration:
+  - Efficiency improvements to ccalapply to help speed it up
+
+ * Utilities:
+  - Adjustment of the maximum cache size in mssplit to avoid
+    out-of-memory issues
+  - Trimming down of the pointing table in MSs produced by msconcat,
+    so that very large tables do not result. 
+
+ * Selavy:
+  - The restoring beam is now written into the component maps.
+  - A significant change to the handling of the initial estimates for
+    the Gaussian fits, making it more robust and avoiding downstream
+    WCS errors that were hampering the analysis.
+  - Minor catalogue fixes for component & HI catalogues
+  - Segfaults in selfcal (3145)
+
 0.22.2 (02 October 2018)
 ------------------------
 Minor change to pipeline scripts:
