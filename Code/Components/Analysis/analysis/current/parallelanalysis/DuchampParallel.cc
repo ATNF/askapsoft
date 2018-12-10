@@ -189,6 +189,14 @@ DuchampParallel::DuchampParallel(askap::askapparallel::AskapParallel& comms,
     itsCube.pars() = parseParset(itsParset);
     ImageOpener::ImageTypes imageType = ImageOpener::imageType(itsCube.pars().getImageFile());
     itsIsFITSFile = (imageType == ImageOpener::FITS);
+    if (!itsParset.isDefined("imagetype")){
+        if (itsIsFITSFile) {
+            itsParset.add("imagetype","fits");
+        } else {
+            itsParset.add("imagetype","casa");
+        }
+    }
+        
     bool useCasa = itsParset.getBool("useCASAforFITS", true);
     itsIsFITSFile = itsIsFITSFile && !useCasa;
     if (itsIsFITSFile) {

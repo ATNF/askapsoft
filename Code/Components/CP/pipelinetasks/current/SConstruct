@@ -4,7 +4,7 @@
 
 # Always import this
 from askapenv import env
-
+import sys
 # create build object with library name
 pkg = env.AskapPackage("pipelinetasks")
 
@@ -15,6 +15,11 @@ pkg.AddSubPackage("mssplit")
 pkg.AddSubPackage("casdaupload")
 
 env.Append(CCFLAGS=['-O2'])
+
+if sys.platform  == 'darwin':
+  env.AppendUnique(LINKFLAGS=['-framework', 'Python'])
+
+
 
 # run the build process
 pkg()

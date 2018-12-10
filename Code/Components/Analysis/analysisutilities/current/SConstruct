@@ -6,6 +6,7 @@
 
 # Always import this
 from askapenv import env
+import sys
 
 # create build object with library name
 pkg = env.AskapPackage("analysisutilities")
@@ -18,6 +19,10 @@ pkg.AddSubPackage("analysisparallel")
 pkg.AddSubPackage("cosmology")
 
 env.Append(CCFLAGS=['-DHAVE_LONG_LONG'])
+
+if sys.platform  == 'darwin':
+  env.AppendUnique(LINKFLAGS=['-framework', 'Python'])
+
 
 # run the build process
 pkg()

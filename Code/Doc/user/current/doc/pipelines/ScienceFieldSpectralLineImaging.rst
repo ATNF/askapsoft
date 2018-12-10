@@ -91,9 +91,6 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 | ``JOB_TIME_SPECTRAL_APPLYCAL``                | ``JOB_TIME_DEFAULT`` (12:00:00)     | none                               | Time request for applying the gains calibration to the spectral   |
 |                                               |                                     |                                    | data                                                              |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``NUM_CORES_CAL_APPLY``                       | 55                                  | none                               | Number of cores for the job to apply the gains calibration to the |
-|                                               |                                     |                                    | spectral data.                                                    |
-+-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``DO_CONT_SUB_SL``                            | false                               | none                               | Whether to subtract a continuum model from the spectral-line      |
 |                                               |                                     |                                    | dataset. If true, the clean model from the continuum imaging will |
 |                                               |                                     |                                    | be used to represent the continuum, and this will be subtracted   |

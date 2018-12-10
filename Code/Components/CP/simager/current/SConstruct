@@ -4,6 +4,7 @@
 
 # Always import this
 from askapenv import env
+import sys
 
 # create build object with library name
 pkg = env.AskapPackage("simager")
@@ -17,6 +18,10 @@ pkg.build_static = True;
 
 #env.AppendUnique(CCFLAGS=['-O3'])
 #env.AppendUnique(CCFLAGS=['-Wno-unused-local-typedef'])
+
+if sys.platform  == 'darwin':
+  env.AppendUnique(LINKFLAGS=['-framework', 'Python'])
+
 
 # run the build process
 pkg()

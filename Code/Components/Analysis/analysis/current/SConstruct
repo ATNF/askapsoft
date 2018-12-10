@@ -7,6 +7,7 @@
 from askapenv import env
 import os
 import askapdev.rbuild.utils as utils
+import sys
 
 if 'AIPSPATH' not in os.environ:
    os.environ['AIPSPATH']=os.environ['ASKAP_ROOT']+'/Code/Base/accessors/current'
@@ -34,6 +35,12 @@ pkg.AddSubPackage("preprocessing")
 pkg.AddSubPackage("patternmatching")
 pkg.AddSubPackage("outputs")
 pkg.AddSubPackage("catalogues")
+
+
+if sys.platform  == 'darwin':
+  env.AppendUnique(LINKFLAGS=['-framework', 'Python'])
+
+
 
 # run the build process
 pkg()
