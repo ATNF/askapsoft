@@ -25,6 +25,7 @@
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
 /// @author Tim Cornwell <tim.cornwell@csiro.au>
+/// @author Vitaliy Ogarko <vogarko@gmail.com> (extended with algorithm parameters)
 ///
 #include <fitting/Solveable.h>
 
@@ -35,8 +36,9 @@ namespace askap
   namespace scimath
   {
 
-/// Standard constructor
-    Solveable::Solveable() : itsAlgorithm(""), itsSubAlgorithm(""), 
+    /// Standard constructor
+    Solveable::Solveable() : itsAlgorithm(""), itsSubAlgorithm(""),
+      itsParams(std::map<std::string, std::string>()),
       itsGain(0.1), itsNiter(100), itsTol(1e-6), itsVerbose(false),
       itsThreshold(casa::Quantity(0.0, "Jy"))
     {
@@ -44,26 +46,30 @@ namespace askap
 
     Solveable::~Solveable(){};
 
-/// Get and set gain
+    /// Get and set gain
     double Solveable::gain() const {return itsGain;}
     void Solveable::setGain(const double gain) {itsGain=gain;};
 
-/// Get and set number of iterations
+    /// Get and set number of iterations
     int Solveable::niter() const {return itsNiter;}
     void Solveable::setNiter(const int niter) {itsNiter=niter;};
 
-/// Get and set tolerance for solution
+    /// Get and set tolerance for solution
     double Solveable::tol() const {return itsTol;};
     void Solveable::setTol(const double tol) {itsTol=tol;};
 
-/// Get and set algorithm
+    /// Get and set algorithm
     const std::string& Solveable::algorithm() const {return itsAlgorithm;};
     void Solveable::setAlgorithm(const std::string& algorithm) {itsAlgorithm=algorithm;};
 
-/// Get and set subalgorithm
+    /// Get and set subalgorithm
     const std::string& Solveable::subAlgorithm() const {return itsSubAlgorithm;};
     void Solveable::setSubAlgorithm(const std::string& subalgorithm) {itsSubAlgorithm=subalgorithm;};
-    
+
+    /// Get and set algorithm parameters.
+    const std::map<std::string, std::string>& Solveable::parameters() const { return itsParams; };
+    void Solveable::setParameters(const std::map<std::string, std::string>& params) { itsParams = params; };
+
     void Solveable::setVerbose(bool verbose) {itsVerbose=verbose;};
     bool Solveable::verbose() const {return itsVerbose;};
 
