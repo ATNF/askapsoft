@@ -34,6 +34,10 @@ env["ENV"]["AIPSPATH"] = os.environ['AIPSPATH']
 # add sub packages 
 pkg.AddSubPackage("delaysolver")
 
+if sys.platform  == 'darwin':
+  env.AppendUnique(LINKFLAGS=['-framework', 'Python'])
+
+
 # run the build process
 pkg()
 
