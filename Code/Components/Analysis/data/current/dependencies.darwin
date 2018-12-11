@@ -1,0 +1,4 @@
+py-askap=Code/Base/py-askap/current
+py-parset=Code/Base/py-parset/current
+scipy=3rdParty/scipy/scipy-0.18.1
+matplotlib=3rdParty/matplotlib/matplotlib-2.0.0
