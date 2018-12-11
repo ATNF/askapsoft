@@ -417,9 +417,22 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
         //-------------------------------------
         // Solve matrix system.
         //-------------------------------------
-        // Set solver configuration parameters.
-        int niter = 100;
-        double rmin = 1.e-13;
+
+        // Setting solver parameters.
+        int niter;
+        double rmin;
+
+        if (parameters().count("niter") > 0) {
+            niter = std::atoi(parameters().at("niter").c_str());
+        } else {
+            niter = 100;
+        }
+
+        if (parameters().count("rmin") > 0) {
+            rmin = std::atof(parameters().at("rmin").c_str());
+        } else {
+            rmin = 1.e-13;
+        }
 
         lsqr::Vector x(ncolumms, 0.0);
         lsqr::LSQRSolver solver(matrix.GetCurrentNumberRows(), ncolumms);
