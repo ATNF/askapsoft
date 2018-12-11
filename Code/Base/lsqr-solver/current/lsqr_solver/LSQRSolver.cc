@@ -13,9 +13,6 @@ ASKAP_LOGGER(logger, ".lsqr_solver");
 #include <lsqr_solver/LSQRSolver.h>
 #include <lsqr_solver/MathUtils.h>
 
-// Use this flag to suppress output.
-#define SUPPRESS_OUTPUT
-
 namespace askap { namespace lsqr {
 
 LSQRSolver::LSQRSolver(size_t nlines, size_t nelements) :
@@ -35,7 +32,8 @@ void LSQRSolver::Solve(size_t niter,
         const SparseMatrix& matrix,
         const Vector& b,
         Vector& x,
-        int myrank)
+        int myrank,
+        bool suppress_output)
 {
     // Sanity check.
     if (matrix.GetNumberElements() == 0)
@@ -167,9 +165,8 @@ void LSQRSolver::Solve(size_t niter,
         // Norm of the relative residual (analytical formulation).
         r = phibar / b1;
 
-#ifndef SUPPRESS_OUTPUT
         // Printing log.
-        if (iter % 10 == 0)
+        if (!suppress_output && (iter % 10 == 0))
         {
             // Calculate the gradient: 2A'(Ax - b).
             #ifdef PARALLEL
@@ -194,7 +191,6 @@ void LSQRSolver::Solve(size_t niter,
                 ASKAPLOG_INFO_STR(logger, "it, r, g =" << iter << ", " << r << ", " << g);
             }
         }
-#endif
 
         // To avoid floating point exception of denormal value.
         // Basically this is another stopping criterion.

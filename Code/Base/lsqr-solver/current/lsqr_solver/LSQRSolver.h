@@ -29,13 +29,15 @@ public:
      * Solves min||Ax - b|| in L2 norm.
      * Niter - maximum number of iterations.
      * rmin - stopping criterion (relative residual).
+     * suppress_output - flag for printing solver logs.
      */
     void Solve(size_t niter,
             double rmin,
             const SparseMatrix& matrix,
             const Vector& b,
             Vector& x,
-            int myrank);
+            int myrank,
+            bool suppress_output = true);
 
     virtual ~LSQRSolver() {};
 

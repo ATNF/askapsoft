@@ -358,18 +358,14 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
     else if (algorithm() == "LSQR") {
 
         // Setting damping parameters.
-        double alpha, norm;
-
+        double alpha = 0.01;
         if (parameters().count("alpha") > 0) {
             alpha = std::atof(parameters().at("alpha").c_str());
-        } else {
-            alpha = 0.01;
         }
 
+        double norm = 2.0;
         if (parameters().count("norm") > 0) {
             norm = std::atof(parameters().at("norm").c_str());
-        } else {
-            norm = 2.0;
         }
 
         ASKAPLOG_INFO_STR(logger, "Solving normal equations using the LSQR solver, with alpha = " << alpha);
@@ -419,25 +415,28 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
         //-------------------------------------
 
         // Setting solver parameters.
-        int niter;
-        double rmin;
 
+        int niter = 100;
         if (parameters().count("niter") > 0) {
             niter = std::atoi(parameters().at("niter").c_str());
-        } else {
-            niter = 100;
         }
 
+        double rmin = 1.e-13;
         if (parameters().count("rmin") > 0) {
             rmin = std::atof(parameters().at("rmin").c_str());
-        } else {
-            rmin = 1.e-13;
+        }
+
+        bool suppress_output = true;
+        if (parameters().count("suppress_output") > 0
+            && parameters().at("suppress_output") == "false") {
+            suppress_output = false;
         }
 
         lsqr::Vector x(ncolumms, 0.0);
         lsqr::LSQRSolver solver(matrix.GetCurrentNumberRows(), ncolumms);
 
-        solver.Solve(niter, rmin, matrix, b_RHS, x, 0);
+        int myrank = 0;
+        solver.Solve(niter, rmin, matrix, b_RHS, x, myrank, suppress_output);
 
         //------------------------------------------------------------------------
         // Update the parameters for the calculated changes. Exploit reference
