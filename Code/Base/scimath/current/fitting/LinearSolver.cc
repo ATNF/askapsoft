@@ -357,9 +357,20 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
     }
     else if (algorithm() == "LSQR") {
 
-        // Damping settings.
-        double alpha = 1.e-2;
-        double norm = 2.0;
+        // Setting damping parameters.
+        double alpha, norm;
+
+        if (parameters().count("alpha") > 0) {
+            alpha = std::atof(parameters().at("alpha").c_str());
+        } else {
+            alpha = 0.01;
+        }
+
+        if (parameters().count("norm") > 0) {
+            norm = std::atof(parameters().at("norm").c_str());
+        } else {
+            norm = 2.0;
+        }
 
         ASKAPLOG_INFO_STR(logger, "Solving normal equations using the LSQR solver, with alpha = " << alpha);
 
@@ -370,15 +381,11 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
         lsqr::Vector b_RHS(nrows, 0.0);
 
         // Set the matrix.
-        for (size_t j = 0; j < nrows; ++j)
-        {
+        for (size_t j = 0; j < nrows; ++j) {
             matrix.NewRow();
-
-            for (size_t i = 0; i < ncolumms; ++i)
-            {
+            for (size_t i = 0; i < ncolumms; ++i) {
                 double value = gsl_matrix_get(A, j, i);
-                if (value != 0.0)
-                {
+                if (value != 0.0) {
                     matrix.Add(value, i);
                 }
             }
