@@ -1,7 +1,6 @@
 /// @file
 ///
-/// LinearSolver: This solver uses SVD to solve the normal
-/// equations.
+/// LinearSolver: This solver uses SVD or LSQR to solve the normal equations.
 ///
 /// @copyright (c) 2007 CSIRO
 /// Australia Telescope National Facility (ATNF)
@@ -26,6 +25,7 @@
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
 /// @author Tim Cornwell <tim.cornwell@csiro.au>
+/// @author Vitaliy Ogarko <vogarko@gmail.com>
 ///
 #ifndef SCIMATHLINEARSOLVER_H_
 #define SCIMATHLINEARSOLVER_H_
