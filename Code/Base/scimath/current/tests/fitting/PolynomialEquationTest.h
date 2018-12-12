@@ -30,6 +30,7 @@
 
 #include <askap/AskapError.h>
 #include <cmath>
+#include <map>
 
 using std::abs;
 
@@ -47,6 +48,7 @@ namespace askap
       CPPUNIT_TEST(testParHandling);
       CPPUNIT_TEST(testPredict);
       CPPUNIT_TEST(testSolutionNESVD);
+      CPPUNIT_TEST(testSolutionNELSQR);
       CPPUNIT_TEST(testSolutionNEChol);
       CPPUNIT_TEST(testComposite);
       CPPUNIT_TEST_SUITE_END();
@@ -187,26 +189,15 @@ namespace askap
 
         void testSolutionNESVD()
         {
-          // the data points used are far from perfect to discriminate between
-          // two parabolas (need to go far from the origin), as a result we
-          // need to increase the limit on the condition number.
-          LinearSolver solver(1e5);
-          GenericNormalEquations normeq;
-          itsPolyWrong->calcEquations(normeq);
-          solver.addNormalEquations(normeq);
-          
-          Quality q;
-          solver.setAlgorithm("SVD");
-          //std::cout << "Before " << itsIPWrong.value("poly") << std::endl;
-          solver.solveNormalEquations(itsIPWrong,q);
-          //std::cout << "After  " << itsIPWrong.value("poly") << std::endl;
-          
-          CPPUNIT_ASSERT(abs(q.cond()-11500.5)<1.0);
-          const casa::Vector<double> result = itsIPWrong.value("poly");
-          //std::cout<<result<<std::endl;
-          CPPUNIT_ASSERT(fabs(result[0]-1.)<1e-5 && fabs(result[1]-2.)<1e-5 && fabs(result[2]-3.)<1e-5);
+            testSolutionNE("SVD");
         }
         
+        void testSolutionNELSQR()
+        {
+            testSolutionNE("LSQR");
+        }
+
+        // TODO: This test does not assert anything.
         void testSolutionNEChol()
         {
           GenericNormalEquations normeq;
@@ -244,6 +235,40 @@ namespace askap
           solver.setAlgorithm("SVD");
           solver.solveNormalEquations(ip,q);
           CPPUNIT_ASSERT(abs(q.cond()-11500.5)<1.0);
+        }
+
+      private:
+        void testSolutionNE(const std::string& solverType)
+        {
+          // the data points used are far from perfect to discriminate between
+          // two parabolas (need to go far from the origin), as a result we
+          // need to increase the limit on the condition number.
+          LinearSolver solver(1e5);
+          GenericNormalEquations normeq;
+          itsPolyWrong->calcEquations(normeq);
+          solver.addNormalEquations(normeq);
+
+          Quality q;
+          solver.setAlgorithm(solverType);
+
+          if (solverType == "LSQR") {
+              std::map<std::string, std::string> params;
+              // Remove the damping term.
+              params["alpha"] = "0.";
+              solver.setParameters(params);
+          }
+
+          //std::cout << "Before " << itsIPWrong.value("poly") << std::endl;
+          solver.solveNormalEquations(itsIPWrong,q);
+          //std::cout << "After  " << itsIPWrong.value("poly") << std::endl;
+
+          if (solverType != "LSQR") { // LSQR solver can't calculate the condition number.
+              CPPUNIT_ASSERT(abs(q.cond()-11500.5)<1.0);
+          }
+
+          const casa::Vector<double> result = itsIPWrong.value("poly");
+          //std::cout<<result<<std::endl;
+          CPPUNIT_ASSERT(fabs(result[0]-1.)<1e-5 && fabs(result[1]-2.)<1e-5 && fabs(result[2]-3.)<1e-5);
         }
 
     };
