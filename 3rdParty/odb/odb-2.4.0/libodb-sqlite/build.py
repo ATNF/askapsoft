@@ -4,8 +4,6 @@ from askapdev.rbuild.builders import Autotools as Builder
 import askapdev.rbuild.utils as utils
 
 builder = Builder(pkgname="libodb-sqlite-2.4.0")
-platform = utils.get_platform()
-print "####",platform
 # dependencies
 libodb = builder.dep.get_install_path("libodb")
 libsqlite = builder.dep.get_install_path("libsqlite3")
