@@ -48,9 +48,10 @@ CorrelatorMode::CorrelatorMode(const std::string& modeName,
         const casa::Quantity& chanWidth,
         const casa::uInt nChan,
         const std::vector<casa::Stokes::StokesTypes>& stokes,
-        const casa::uInt interval)
+        const casa::uInt interval,
+        const casa::Quantity& freqOffset)
         : itsModeName(modeName), itsChanWidth(chanWidth), itsNChan(nChan),
-        itsStokes(stokes), itsInterval(interval)
+        itsStokes(stokes), itsInterval(interval), itsFreqOffset(freqOffset)
 {
     ASKAPCHECK(chanWidth.isConform("Hz"),
             "Channel width must conform to Hz");
@@ -70,6 +71,13 @@ casa::uInt CorrelatorMode::nChan(void) const
 const casa::Quantity& CorrelatorMode::chanWidth(void) const
 {
         return itsChanWidth;
+}
+
+/// @brief Frequency offset
+/// @return bulk offset in frequency for the current configuration
+const casa::Quantity& CorrelatorMode::freqOffset() const
+{
+   return itsFreqOffset;
 }
 
 const std::vector<casa::Stokes::StokesTypes>& CorrelatorMode::stokes(void) const

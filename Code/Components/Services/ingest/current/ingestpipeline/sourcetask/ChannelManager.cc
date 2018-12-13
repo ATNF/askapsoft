@@ -79,7 +79,9 @@ ChannelManager::ChannelManager(const LOFAR::ParameterSet& params) :
              }
          }
     }
-    ASKAPLOG_INFO_STR(logger, "Frequency offset of "<<itsFreqOffset/1e6<<" MHz will be applied to the whole spectral axis");
+    if (std::abs(itsFreqOffset)>1e-3) {
+        ASKAPLOG_WARN_STR(logger, "Default frequency offset of "<<itsFreqOffset/1e6<<" MHz will be applied to the whole spectral axis - this method is deprecated!");
+    }
 }
 
 unsigned int ChannelManager::localNChannels(const int rank) const

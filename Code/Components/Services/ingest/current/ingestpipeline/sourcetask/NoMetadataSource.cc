@@ -234,7 +234,7 @@ VisChunk::ShPtr NoMetadataSource::createVisChunk(const casa::uLong timestamp)
     // Frequency vector is not of length nRows, but instead nChannels
     chunk->frequency() = itsVisConverter.channelManager().localFrequencies(
             itsVisConverter.config().receiverId(),
-            itsCentreFreq.getValue("Hz") - chunk->channelWidth() / 2.,
+            itsCentreFreq.getValue("Hz") - chunk->channelWidth() / 2. + itsCorrelatorMode.freqOffset().getValue("Hz"),
             chunk->channelWidth(),
             itsCorrelatorMode.nChan());
 
