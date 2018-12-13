@@ -10,6 +10,8 @@ libsqlite = builder.dep.get_install_path("libsqlite3")
 
 builder.add_option('"CPPFLAGS=-I{0}/include -I{1}/include"'.format(libodb, libsqlite))
 
+platform=utils.get_platform()
+
 if (platform['distribution'] == "Ubuntu"):
    builder.add_option('"LDFLAGS=-L{0}/lib/ -L{1}/lib/x86_64-linux-gnu/"'.format(libodb, libsqlite))
 
