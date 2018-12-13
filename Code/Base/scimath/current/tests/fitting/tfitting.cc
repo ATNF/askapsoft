@@ -37,8 +37,12 @@
 #include <AxesTest.h>
 #include <PolXProductsTest.h>
 
+#include <askap/AskapLogging.h>
+
 int main(int argc, char *argv[])
 {
+    ASKAPLOG_INIT("");
+
     askapdev::testutils::AskapTestRunner runner(argv[0]);
 
     runner.addTest(askap::scimath::AxesTest::suite());
