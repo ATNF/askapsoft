@@ -1,0 +1,6 @@
+# This file lists the external dependencies
+# use pkgname=askap_relative_path
+
+libcutl=3rdParty/cutl/cutl-1.10.0
+libodb=3rdParty/odb/odb-2.4.0/libodb
+libodb-sqlite=3rdParty/odb/odb-2.4.0/libodb-sqlite

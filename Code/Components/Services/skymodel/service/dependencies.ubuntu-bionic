@@ -1,0 +1,23 @@
+# SMS application dependencies
+askap=Code/Base/askap/current
+askap_accessors=Code/Base/accessors/current
+boost=/usr; boost_system boost_filesystem boost_date_time
+common=3rdParty/LOFAR/Common/Common-3.3
+cppiceinterfaces=Code/Interfaces/cpp/current
+interfaces=Code/Interfaces/slice/current
+log4cxx=3rdParty/log4cxx/log4cxx-0.10.0
+logappenders=Code/Base/logappenders/current
+logfilters=Code/Base/logfilters/current
+icewrapper=Code/Components/Services/icewrapper/current
+## HEALPix
+healpix_cxx=/usr; healpix_cxx
+
+## ODB and database dependencies
+libodb=3rdParty/odb/odb-2.4.0/libodb
+libodb-boost=3rdParty/odb/odb-2.4.0/libodb-boost
+libodb-sqlite=3rdParty/odb/odb-2.4.0/libodb-sqlite
+libodb-mysql=3rdParty/odb/odb-2.4.0/libodb-mysql
+
+# Functional test dependencies
+pyiceinterfaces=Code/Interfaces/python/current
+py-askap=Code/Base/py-askap/current
