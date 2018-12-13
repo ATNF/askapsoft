@@ -1,7 +1,7 @@
 # Common application dependencies
 askap=Code/Base/askap/current
 askap_accessors=Code/Base/accessors/current
-boost=/usr/local
+boost=/usr
 common=3rdParty/LOFAR/Common/Common-3.3
 cppiceinterfaces=Code/Interfaces/cpp/current
 ice=3rdParty/Ice/Ice-3.5.0;IceStorm Ice IceUtil

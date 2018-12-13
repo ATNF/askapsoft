@@ -4,5 +4,5 @@ blas=3rdParty/blas/blas-1.0
 lapack=3rdParty/lapack/lapack-3.4.0
 wcslib=3rdParty/wcslib/wcslib-4.18
 fftw3=3rdParty/fftw/fftw-3.3.3
-boost=/usr/local
+boost=/usr
 

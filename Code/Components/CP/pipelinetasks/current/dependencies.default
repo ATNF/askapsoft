@@ -1,4 +1,4 @@
-boost=/usr/local;boost_regex
+boost=/usr;boost_regex
 openssl=3rdParty/openssl/openssl-1.0.1h
 common=3rdParty/LOFAR/Common/Common-3.3
 casacore=3rdParty/casacore/casacore-2.0.3;casa_ms casa_images casa_mirlib casa_coordinates casa_fits casa_lattices casa_measures casa_scimath casa_scimath_f casa_tables casa_casa
