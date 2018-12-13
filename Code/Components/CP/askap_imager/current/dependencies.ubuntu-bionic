@@ -1,4 +1,4 @@
-boost=/usr; boost_python
+boost=/usr; boost_python27
 common=3rdParty/LOFAR/Common/Common-3.3
 blob=3rdParty/LOFAR/Blob/Blob-1.2
 askap=Code/Base/askap/current
