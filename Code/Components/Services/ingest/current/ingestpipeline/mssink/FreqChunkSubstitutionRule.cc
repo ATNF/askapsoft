@@ -115,7 +115,7 @@ void FreqChunkSubstitutionRule::initialise(const boost::shared_ptr<common::VisCh
        ASKAPDEBUGASSERT(static_cast<size_t>(*ci) < individualFreqs.size());
        for (double curFreq = individualFreqs[*ci]; ci != indices.end(); ++ci) {
             ASKAPDEBUGASSERT(*ci < static_cast<int>(individualFreqs.size()));
-            ASKAPCHECK(!isnan(curFreq), "Frequency axis contains NaNs! This is not expected");
+            ASKAPCHECK(!std::isnan(curFreq), "Frequency axis contains NaNs! This is not expected");
             // Using 1 Hz frequency tolerance
             if (casa::abs(curFreq - individualFreqs[*ci]) > 1.) {
                 curFreq = individualFreqs[*ci]; 

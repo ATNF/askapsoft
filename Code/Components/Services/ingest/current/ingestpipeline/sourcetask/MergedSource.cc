@@ -452,7 +452,7 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
                  for (casa::uInt offset = beam * 3; offset < (beam + 1) * 3; ++offset) {
                       ASKAPDEBUGASSERT(offset < uvwBuffer.ncolumn());
                       const casa::Double curVal = uvwBuffer(i, offset);
-                      ASKAPCHECK(!isnan(curVal), "NaN encountered in UVW received in metadata for antenna: "<<antName);
+                      ASKAPCHECK(!std::isnan(curVal), "NaN encountered in UVW received in metadata for antenna: "<<antName);
                       bslnNorm2 += casa::square(curVal);
                  }
                  ASKAPCHECK(bslnNorm2 > 1e-12, "Expect non-zero per-antenna UVW in metadata - encountered a vector which is the Earth centre. Most likely junk metadata received for antenna: "<<antName<<" and (1-based) beam "<<beam + 1);
@@ -477,7 +477,7 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
              for (casa::uInt coord = 0, offset = beam * 3; coord < 3; ++coord,++offset) {
                   ASKAPASSERT(offset < uvwBuffer.ncolumn());
                   chunk->uvw()[row](coord) = uvwBuffer(antenna1,offset) - uvwBuffer(antenna2,offset);
-                  ASKAPCHECK(!isnan(chunk->uvw()[row](coord)), "Received NaN as one of the baseline spacings for row="<<row<<" (antennas: "<<
+                  ASKAPCHECK(!std::isnan(chunk->uvw()[row](coord)), "Received NaN as one of the baseline spacings for row="<<row<<" (antennas: "<<
                              antenna1<<" "<<antenna2<<") coordinate="<<coord<<" beam="<<beam);
              }
          }

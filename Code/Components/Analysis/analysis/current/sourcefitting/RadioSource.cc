@@ -1218,7 +1218,7 @@ void RadioSource::findSpectralTerm(std::string imageName, int term, bool doCalc)
 
         std::vector<double> fluxvec;
         for (size_t i = 0; i < flux_all.size(); i++) {
-            if (!isnan(flux_all.getArray().data()[i])) {
+            if (!std::isnan(flux_all.getArray().data()[i])) {
                 fluxvec.push_back(flux_all.getArray().data()[i]);
             }
         }
