@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Copyright (c) 2009 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
@@ -55,4 +56,11 @@ class myBuilder(Builder):
 
 
 builder = myBuilder()
+=======
+from askapdev.rbuild.builders import Setuptools as Builder
+
+builder = Builder()
+builder.remote_archive = "scons_3.0.1.tar.gz"
+builder.nowarnings = True
+>>>>>>> added the build file for the updated scons
 builder.build()
