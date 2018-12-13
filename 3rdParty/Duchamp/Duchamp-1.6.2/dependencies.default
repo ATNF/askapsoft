@@ -2,3 +2,4 @@
 # use pkgname=ASKAP_ROOT_relative_path
 
 wcslib=3rdParty/wcslib/wcslib-4.18
+cfitsio=/usr; cfitsio
