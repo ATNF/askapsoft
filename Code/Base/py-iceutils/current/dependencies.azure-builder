@@ -1,0 +1,4 @@
+py-askap=Code/Base/py-askap/current
+py-parset=Code/Base/py-parset/current
+pyiceinterfaces=Code/Interfaces/python/current
+dogpile.core=3rdParty/dogpile/dogpile.core/dogpile.core-0.4.1

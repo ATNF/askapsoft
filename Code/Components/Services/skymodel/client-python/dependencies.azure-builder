@@ -1,0 +1,5 @@
+py-askap=Code/Base/py-askap/current
+py-parset=Code/Base/py-parset/current
+py-loghandlers=Code/Base/py-loghandlers/current
+pyiceinterfaces=Code/Interfaces/python/current
+iceutils=Code/Base/py-iceutils/current
