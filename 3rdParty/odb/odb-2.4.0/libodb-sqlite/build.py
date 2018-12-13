@@ -14,6 +14,8 @@ platform=utils.get_platform()
 
 if (platform['distribution'] == "Ubuntu"):
    builder.add_option('"LDFLAGS=-L{0}/lib/ -L{1}/lib/x86_64-linux-gnu/"'.format(libodb, libsqlite))
+else:
+   builder.add_option('"LDFLAGS=-L{0}/lib -L{1}/lib"'.format(libodb, libsqlite))
 
 
 builder.remote_archive = "libodb-sqlite-2.4.0.tar.gz"
