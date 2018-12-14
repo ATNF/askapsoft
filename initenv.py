@@ -40,8 +40,6 @@ bashinit = """\
 ASKAP_ROOT=%s
 export ASKAP_ROOT
 
-alias scons='/usr/bin/env python $(`which scons`)'
-
 if [ ! "${RBUILD_REMOTE_ARCHIVE}" ]
 then
     RBUILD_REMOTE_ARCHIVE="%s"
