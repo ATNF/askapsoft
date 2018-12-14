@@ -70,11 +70,12 @@ sudo sed  -i 's#/usr/bin/python#/usr/bin/env python#g' `which scons`
 if [[ -z "${CLASSPATH}" ]]; then
 
   echo "CLASSPATH=${CLASSPATH}:/usr/share/java/ice-3.7.1.jar:/usr/local/java/icestorm-3.7.1.jar:/usr/share/java/ice-compat-3.7.1.jar:/usr/share/java/icestorm-compat-3.7.1.jar" >> ${HOME}/.bashrc
-
+  echo "export CLASSPATH" >> ${HOME}/.bashrc
 else
 
   echo "CLASSPATH=/usr/share/java/ice-3.7.1.jar:/usr/local/java/icestorm-3.7.1.jar:/usr/share/java/ice-compat-3.7.1.jar:/usr/share/java/icestorm-compat-3.7.1.jar" >> ${HOME}/.bashrc
-
+  echo "export CLASSPATH" >> ${HOME}/.bashrc
 fi
-
+  
+source ${HOME}/.bashrc
 
