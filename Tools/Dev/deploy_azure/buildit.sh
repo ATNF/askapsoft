@@ -13,6 +13,7 @@ else
 fi
 
 echo "running bootstrap.y" >> $logfile
+cat "$logfile" | mailx -s "Job succeeded" stephen.ord@csiro.au
 
 cd ../../../
 python2.7 bootstrap.py -n
@@ -20,6 +21,8 @@ python2.7 bootstrap.py -n
 echo "done bootstrap" >> $logfile
 
 echo "running rbuild" >> $logfile
+cat "$logfile" | mailx -s "Job succeeded" stephen.ord@csiro.au
+
 . initaskap.sh
 
 cd Code
