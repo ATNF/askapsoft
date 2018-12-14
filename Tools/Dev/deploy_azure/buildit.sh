@@ -15,7 +15,8 @@ fi
 echo "running bootstrap.y" >> $logfile
 cat "$logfile" | mailx -s "Job succeeded" stephen.ord@csiro.au
 
-cd ../../../
+cd $HOME/jacal-dev
+
 python2.7 bootstrap.py -n
 
 echo "done bootstrap" >> $logfile
