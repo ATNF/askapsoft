@@ -65,3 +65,4 @@ sudo   apt-get install -y subversion
 sudo   apt-get install -y virtualenv
 sudo   apt-get install -y zeroc
 sudo   apt-get install -y zeroc-ice-all-dev
+sudo sed  -i 's#/usr/bin/python#/usr/bin/env python#g' `which scons`
