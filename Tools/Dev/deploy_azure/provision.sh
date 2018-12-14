@@ -6,6 +6,7 @@ sudo   apt-get install -y flex
 sudo   apt-get install -y g++
 sudo   apt-get install -y gfortran
 sudo   apt-get install -y git-svn
+sudo   apt-get install -y junit
 sudo   apt-get install -y junit4
 sudo   apt-get install -y libatlas-base-dev
 sudo   apt-get install -y libblas-dev
@@ -69,11 +70,11 @@ sudo sed  -i 's#/usr/bin/python#/usr/bin/env python#g' `which scons`
 
 if [[ -z "${CLASSPATH}" ]]; then
 
-  echo "CLASSPATH=${CLASSPATH}:/usr/share/java/ice-3.7.0.jar:/usr/local/java/icestorm-3.7.0.jar:/usr/share/java/ice-compat-3.7.0.jar:/usr/share/java/icestorm-compat-3.7.0.jar" >> ${HOME}/.bashrc
+  echo "CLASSPATH=${CLASSPATH}:/usr/share/java/junit.jar:/usr/share/java/junit4.jar:/usr/share/java/ice-3.7.0.jar:/usr/local/java/icestorm-3.7.0.jar:/usr/share/java/ice-compat-3.7.0.jar:/usr/share/java/icestorm-compat-3.7.0.jar" >> ${HOME}/.bashrc
   echo "export CLASSPATH" >> ${HOME}/.bashrc
 else
 
-  echo "CLASSPATH=/usr/share/java/ice-3.7.0.jar:/usr/local/java/icestorm-3.7.0.jar:/usr/share/java/ice-compat-3.7.0.jar:/usr/share/java/icestorm-compat-3.7.0.jar" >> ${HOME}/.bashrc
+  echo "CLASSPATH=/usr/share/java/junit.jar:/usr/share/java/junit4.jar:/usr/share/java/ice-3.7.0.jar:/usr/local/java/icestorm-3.7.0.jar:/usr/share/java/ice-compat-3.7.0.jar:/usr/share/java/icestorm-compat-3.7.0.jar" >> ${HOME}/.bashrc
   echo "export CLASSPATH" >> ${HOME}/.bashrc
 fi
   
