@@ -1,70 +1,70 @@
 #cloud-config
 packages_upgrade: true
-packages:
-  - bison
-  - boost
-  - bzip2
-  - cmake
-  - flex
-  - g++
-  - gfortran
-  - git-svn
-  - junit4
-  - libatlas-base-dev
-  - libblas-dev
-  - libblitz++
-  - libboost
-  - libboost-dev
-  - libboost1.65-all-d
-  - libcfitsio-dev
-  - libcfitsio5
-  - libcppunit-dev
-  - libfreetype6-dev
-  - libhealpix-cxx-dev
-  - liblapack-dev
-  - liblog4cplus
-  - liblog4cplus-dev
-  - liblog4cxx-dev
-  - libncurses5
-  - libncurses5-dev
-  - libopenmpi-dev
-  - libpng12-dev
-  - libreadline
-  - libreadline-dev
-  - libreadline5
-  - libsqlite3
-  - libsqlite3-dev
-  - libzeroc-ice-dev
-  - libzeroc-ice-java
-  - libzeroc-ice3.7
-  - libzeroc-ice3.7-ja
-  - libzeroc-icestorm3
-  - log4cplus
-  - make
-  - numpy-stl
-  - openjdk-8-jdk
-  - openmpi-bin
-  - patch
-  - pip
-  - python-APLpy
-  - python-astropy
-  - python-astropy-hel
-  - python-configparse
-  - python-configparse
-  - python-dev
-  - python-future
-  - python-future  
-  - python-matplotlib
-  - python-networkx
-  - python-pip
-  - python-scipy
-  - python-virtualenv 
-  - readline
-  - scons
-  - sqlite3
-  - sqlite3-dev
-  - ssh
-  - subversion
-  - virtualenv
-  - zeroc
-  - zeroc-ice-all-dev
+runcmd:
+- apt-get install -y bison
+  - apt-get install -y boost
+  - apt-get install -y bzip2
+  - apt-get install -y cmake
+  - apt-get install -y flex
+  - apt-get install -y g++
+  - apt-get install -y gfortran
+  - apt-get install -y git-svn
+  - apt-get install -y junit4
+  - apt-get install -y libatlas-base-dev
+  - apt-get install -y libblas-dev
+  - apt-get install -y libblitz++
+  - apt-get install -y libboost
+  - apt-get install -y libboost-dev
+  - apt-get install -y libboost1.65-all-dev
+  - apt-get install -y libcfitsio-dev
+  - apt-get install -y libcfitsio5
+  - apt-get install -y libcppunit-dev
+  - apt-get install -y libfreetype6-dev
+  - apt-get install -y libhealpix-cxx-dev
+  - apt-get install -y liblapack-dev
+  - apt-get install -y liblog4cplus
+  - apt-get install -y liblog4cplus-dev
+  - apt-get install -y liblog4cxx-dev
+  - apt-get install -y libncurses5
+  - apt-get install -y libncurses5-dev
+  - apt-get install -y libopenmpi-dev
+  - apt-get install -y libpng12-dev
+  - apt-get install -y libreadline
+  - apt-get install -y libreadline-dev
+  - apt-get install -y libreadline5
+  - apt-get install -y libsqlite3
+  - apt-get install -y libsqlite3-dev
+  - apt-get install -y libzeroc-ice-dev
+  - apt-get install -y libzeroc-ice-java
+  - apt-get install -y libzeroc-ice3.7
+  - apt-get install -y libzeroc-ice3.7-ja
+  - apt-get install -y libzeroc-icestorm3
+  - apt-get install -y log4cplus
+  - apt-get install -y make
+  - apt-get install -y numpy-stl
+  - apt-get install -y openjdk-8-jdk
+  - apt-get install -y openmpi-bin
+  - apt-get install -y patch
+  - apt-get install -y pip
+  - apt-get install -y python-APLpy
+  - apt-get install -y python-astropy
+  - apt-get install -y python-astropy-hel
+  - apt-get install -y python-configparse
+  - apt-get install -y python-configparse
+  - apt-get install -y python-dev
+  - apt-get install -y python-future
+  - apt-get install -y python-future  
+  - apt-get install -y python-matplotlib
+  - apt-get install -y python-networkx
+  - apt-get install -y python-pip
+  - apt-get install -y python-scipy
+  - apt-get install -y python-virtualenv 
+  - apt-get install -y readline
+  - apt-get install -y scons
+  - apt-get install -y sqlite3
+  - apt-get install -y sqlite3-dev
+  - apt-get install -y ssh
+  - apt-get install -y subversion
+  - apt-get install -y virtualenv
+  - apt-get install -y zeroc
+  - apt-get install -y zeroc-ice-all-dev
