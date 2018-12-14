@@ -46,7 +46,7 @@ then
     export RBUILD_REMOTE_ARCHIVE
 fi
 
-pypath="${ASKAP_ROOT}/share/scons_tools"
+pypath="${ASKAP_ROOT}/share/scons_tools:${ASKAP_ROOT}/lib/scons-3.0.1"
 
 if [ "${PYTHONPATH}" ]
 then
