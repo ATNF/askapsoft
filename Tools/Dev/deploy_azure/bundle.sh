@@ -27,7 +27,7 @@ cd ../../../
 
 echo "info - at $PWD"
 
-FULL_PATH_TO_APP=`find . -name $APP | head -1`;
+FULL_PATH_TO_APP=`find . -name $APP | grep "install/bin" `;
 
 if [ -z "$FULL_PATH_TO_APP" ]
 then
