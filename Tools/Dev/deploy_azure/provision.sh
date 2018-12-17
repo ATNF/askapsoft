@@ -43,6 +43,7 @@ sudo   apt-get install -y numpy-stl
 sudo   apt-get install -y openjdk-8-jdk
 sudo   apt-get install -y openmpi-bin
 sudo   apt-get install -y patch
+sudo   apt-get install -y patchelf
 sudo   apt-get install -y pip
 sudo   apt-get install -y python-APLpy
 sudo   apt-get install -y python-astropy
