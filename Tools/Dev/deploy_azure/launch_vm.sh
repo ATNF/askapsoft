@@ -18,5 +18,10 @@ echo $IP
 
 ssh askap@$IP  git clone https://bitbucket.csiro.au/scm/~ord006/jacal-dev.git ./jacal-dev
 ssh askap@$IP  . jacal-dev/Tools/Dev/deploy_azure/provision.sh
- 
+# insert build instructions here
+# probably best to run something via a screen call - but need to report completeness
+# other option is to add jenkins to the provisioning and configure it to do the build
+# thats probably the best option
+
+#az vm stop --name azure-builder --resource-group RIALTO-2 
 #az group delete --name $R_GROUP --no-wait --yes
