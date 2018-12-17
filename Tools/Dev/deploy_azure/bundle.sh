@@ -21,6 +21,8 @@ else
 fi
 echo "info - moving to root directory"
 
+pushd .
+
 cd ../../../
 
 echo "info - at $PWD"
@@ -101,4 +103,5 @@ do
 	done
 
 done
+popd
 
