@@ -11,12 +11,12 @@ fi
 
 if [-d ./tmp/askap_apps ]
 then
-  echo "./tmp/askaps_apps directory exists - remove to continue"
+  echo "./tmp/askap_apps directory exists - remove to continue"
 else
   mkdir ./tmp/askap_apps
 fi
 
-for app in $to_package:
+for app in $to_package
 do
   . bundle.sh $app ./tmp/askap_apps
 done
