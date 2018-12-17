@@ -11,7 +11,9 @@ fi
 
 if [-d ./tmp/askap_apps ]
 then
-  echo "./tmp/askaps_apps directory exists - remove to continue
+  echo "./tmp/askaps_apps directory exists - remove to continue"
+else
+  mkdir ./tmp/askaps_apps
 fi
 
 for app in $to_package:
