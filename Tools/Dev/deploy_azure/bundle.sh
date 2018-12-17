@@ -45,17 +45,20 @@ echo "info - creating tmp directory for bundle"
 
 if [ -d $BUNDLE_ROOT ] 
 then
-  rm -rf $BUNDLE_ROOT
+  echo "Already exists"
+else
+  mkdir $BUNDLE_ROOT
 fi
  
-mkdir $BUNDLE_ROOT
+BUNDLE_LIBS=$BUNDLE_ROOT/libs
 
-if [ $? -eq 0 ]; then
-    echo "info - created tmp dir OK"
+if [ -d $BUNDLE_LIBS ] 
+then
+  echo "Already exists"
 else
-    echo "FAIL in creating tmp dir"
-    exit 1
+  mkdir $BUNDLE_LIBS
 fi
+ 
 function update_rpath_in_lib () {
 	full_path=`find . -name $1 | head -1`
 	if [ -z "$full_path" ] 
@@ -76,10 +79,6 @@ function update_rpath_in_lib () {
 
 	fi
 }
-
-BUNDLE_LIBS=$BUNDLE_ROOT/libs
-mkdir $BUNDLE_LIBS
-
 cp $FULL_PATH_TO_APP $BUNDLE_ROOT
 
 echo "Actually add the rpath to the binary"
