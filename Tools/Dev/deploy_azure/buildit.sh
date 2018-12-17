@@ -12,7 +12,7 @@ else
     trap 'rm -f "$lockfile" "$logfile" "$errfile"' EXIT
 fi
 
-echo "running bootstrap.y" >> $logfile
+echo "running bootstrap.py" >> $logfile
 cat "$logfile" | mailx -s "Job succeeded" stephen.ord@csiro.au
 
 cd $HOME/jacal-dev
