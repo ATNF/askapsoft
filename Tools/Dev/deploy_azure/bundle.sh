@@ -10,6 +10,7 @@ echo "====================================="
 
     
 APP=$1
+BUNDLE_ROOT=$2
 
 if [ -z "$APP" ]
 then
@@ -33,7 +34,12 @@ then
 else
    echo "Found $FULL_PATH_TO_APP"
 fi
-BUNDLE_ROOT=/tmp/$APP
+
+if [ -z "$BUNDLE_ROOT" ] 
+then
+   BUNDLE_ROOT=/tmp/$APP
+fi
+
 
 echo "info - creating tmp directory for bundle"
 
