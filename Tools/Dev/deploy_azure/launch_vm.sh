@@ -15,9 +15,9 @@ az vm create \
 
 IP=`az vm list-ip-addresses --resource-group RIALTO-2 --name azure-builder --output table | tail -1 | awk '{print $2}'`
 echo $IP
+ssh askap@$IP  screen -dmS remote_session
+ssh askap@$IP  screen -r remote_session; git clone https://bitbucket.csiro.au/scm/~ord006/jacal-dev.git ./jacal-dev ; . jacal-dev/Tools/Dev/deploy_azure/build-provision.sh ; askap-build.sh
 
-ssh askap@$IP  git clone https://bitbucket.csiro.au/scm/~ord006/jacal-dev.git ./jacal-dev
-ssh askap@$IP  . jacal-dev/Tools/Dev/deploy_azure/provision.sh
 # insert build instructions here
 # probably best to run something via a screen call - but need to report completeness
 # other option is to add jenkins to the provisioning and configure it to do the build
