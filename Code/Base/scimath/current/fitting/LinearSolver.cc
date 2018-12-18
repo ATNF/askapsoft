@@ -427,8 +427,8 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
         }
 
         bool suppress_output = true;
-        if (parameters().count("suppress_output") > 0
-            && parameters().at("suppress_output") == "false") {
+        if (parameters().count("verbose") > 0
+            && parameters().at("verbose") == "true") {
             suppress_output = false;
         }
 
