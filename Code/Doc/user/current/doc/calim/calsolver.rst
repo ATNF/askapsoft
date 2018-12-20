@@ -60,4 +60,5 @@ LSQR Solver
     Cbpcalibrator.solver                            = LSQR
     Cbpcalibrator.solver.LSQR.niter                 = 100
     Cbpcalibrator.solver.LSQR.rmin                  = 1.e-13
+    Cbpcalibrator.solver.LSQR.alpha                 = 0.01
     Cbpcalibrator.solver.LSQR.verbose               = false
