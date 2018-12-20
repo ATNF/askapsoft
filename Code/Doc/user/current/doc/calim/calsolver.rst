@@ -42,8 +42,8 @@ All parameters given in the next table have **solver.LSQR** prefix (e.g., Cbpcal
 |                   |              |              |the specified number of solver iterations.              |
 +-------------------+--------------+--------------+--------------------------------------------------------+
 |alpha              |float         |0.01          |The damping on the solution perturbation (that is       |
-|                   |              |              |performed at every major cycle). Small damping values   |
-|                   |              |              |help dealing with rank-defficient systems.              |
+|                   |              |              |performed at every major cycle). Nonzero damping values |
+|                   |              |              |help dealing with rank deficient systems.               |
 +-------------------+--------------+--------------+--------------------------------------------------------+
 |verbose            |string        |false         |The value of "true" enables lots of output.             |
 +-------------------+--------------+--------------+--------------------------------------------------------+

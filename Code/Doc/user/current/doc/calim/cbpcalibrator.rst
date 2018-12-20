@@ -184,9 +184,7 @@ They are given in [:doc:`data_selection`] and should also have the **Cbpcalibrat
 |                       |                |              |simulation (see above)                           |
 +-----------------------+----------------+--------------+-------------------------------------------------+
 |ncycles                |int32           |1             |Number of solving iterations (and iterations over|
-|                       |                |              |the dataset, which can be called major cycles,   |
-|                       |                |              |although we don't do any minor cycles for        |
-|                       |                |              |calibration)                                     |
+|                       |                |              |the dataset, which can be called major cycles).  |
 +-----------------------+----------------+--------------+-------------------------------------------------+
 |freqframe              |string          |topo          |Frequency frame to work in (the frame is         |
 |                       |                |              |converted when the dataset is read). Either lsrk |
@@ -198,6 +196,10 @@ They are given in [:doc:`data_selection`] and should also have the **Cbpcalibrat
 |                       |                |              |must be used and calibaccess.table.<params>      |
 |                       |                |              |parameters should be defined. For more details   |
 |                       |                |              |see :doc:`calibration_solutions`.                |
++-----------------------+----------------+--------------+-------------------------------------------------+
+|solver                 |string          |SVD           |Name of the calibration solver. Further          |
+|                       |                |              |parameters are given by *solver.something*.      |
+|                       |                |              |See :doc:`calsolver` for details.                |
 +-----------------------+----------------+--------------+-------------------------------------------------+
 
 
@@ -218,10 +220,12 @@ Example
     Cbpcalibrator.calibaccess.table.maxant  = 6
     Cbpcalibrator.calibaccess.table.maxchan = 304
 
-    Cbpcalibrator.sources.names             =       [src1]
+    Cbpcalibrator.sources.names             = [src1]
     Cbpcalibrator.sources.src1.components   = [cal]
     Cbpcalibrator.sources.cal.calibrator    = 1934-638
 
     Cbpcalibrator.gridder                   = SphFunc
     Cbpcalibrator.ncycles                   = 5
+
+    Cbpcalibrator.solver                    = LSQR
 
