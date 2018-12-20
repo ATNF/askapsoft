@@ -20,6 +20,7 @@ data sets i.e. Hundereds of TB per hour.
    ccontsubtract.rst
    gridder.rst
    solver.rst
+   calsolver.rst
    data_selection.rst
    calibration_solutions.rst
    cmodel.rst
