@@ -202,13 +202,15 @@ They are given in [:doc:`data_selection`] and should also have the **Ccalibrator
 |                       |                |              |simulation (see above)                           |
 +-----------------------+----------------+--------------+-------------------------------------------------+
 |ncycles                |int32           |1             |Number of solving iterations (and iterations over|
-|                       |                |              |the dataset, which can be called major cycles,   |
-|                       |                |              |although we don't do any minor cycles for        |
-|                       |                |              |calibration)                                     |
+|                       |                |              |the dataset, which can be called major cycles).  |
 +-----------------------+----------------+--------------+-------------------------------------------------+
 |freqframe              |string          |topo          |Frequency frame to work in (the frame is         |
 |                       |                |              |converted when the dataset is read). Either lsrk |
 |                       |                |              |or topo is supported.                            |
++-----------------------+----------------+--------------+-------------------------------------------------+
+|solver                 |string          |SVD           |Name of the calibration solver. Further          |
+|                       |                |              |parameters are given by *solver.something*.      |
+|                       |                |              |See :doc:`calsolver` for details.                |
 +-----------------------+----------------+--------------+-------------------------------------------------+
 
 
@@ -243,3 +245,6 @@ Example
     Ccalibrator.gridder.AProjectWStack.frequencydependent   = false
 
     Ccalibrator.ncycles                                     = 5
+
+    Ccalibrator.solver                                      = LSQR
+

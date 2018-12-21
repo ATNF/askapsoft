@@ -6,7 +6,10 @@ import shutil
 import subprocess
 import sys
 import stat
-import configparser
+if sys.version_info[0] == 2:
+    import ConfigParser as configparser
+else:
+    import configparser
 
 from future import standard_library
 

@@ -45,6 +45,7 @@ class ConfigurationTest : public CppUnit::TestFixture {
         CPPUNIT_TEST(testArrayName);
         CPPUNIT_TEST(testSchedulingBlockID);
         CPPUNIT_TEST(testTasks);
+        CPPUNIT_TEST(testCorrelator);
         CPPUNIT_TEST(testNodeInfo);
         CPPUNIT_TEST(testAntennas);
         CPPUNIT_TEST(testFeed);
@@ -101,6 +102,7 @@ class ConfigurationTest : public CppUnit::TestFixture {
             itsParset.add("correlator.mode.standard.interval", "5000000");
             itsParset.add("correlator.mode.standard.n_chan", "16416");
             itsParset.add("correlator.mode.standard.stokes", "[XX, XY, YX, YY]");
+            itsParset.add("correlator.mode.standard.freq_offset", "-119MHz");
 
             // Metadata topic config
             itsParset.add("metadata_source.ice.locator_host", "localhost");
@@ -259,6 +261,17 @@ class ConfigurationTest : public CppUnit::TestFixture {
             CPPUNIT_ASSERT_EQUAL(casa::Quantity(-0.5, "deg"), feed.offsetY(3));
 
             CPPUNIT_ASSERT_EQUAL(casa::String("X Y"), feed.pol(0));
+        }
+     
+        void testCorrelator() {
+            Configuration conf(itsParset);
+            const CorrelatorMode &mode = conf.lookupCorrelatorMode("standard");
+            const double freqOffset = mode.freqOffset().getValue("MHz");
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(-119., freqOffset, 1e-6);
+            CPPUNIT_ASSERT_EQUAL(5000000u, mode.interval());
+            CPPUNIT_ASSERT_EQUAL(16416u, mode.nChan());
+            const double chanWidth = mode.chanWidth().getValue("kHz");
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(18.518518, chanWidth,1e-6);
         }
 
         void testServiceConfig() {

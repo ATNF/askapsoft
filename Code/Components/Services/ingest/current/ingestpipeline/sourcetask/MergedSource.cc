@@ -393,7 +393,7 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
     // Frequency vector is not of length nRows, but instead nChannels
     chunk->frequency() = itsVisConverter.channelManager().localFrequencies(
             itsVisConverter.config().receiverId(),
-            metadata.centreFreq().getValue("Hz") - chunk->channelWidth() / 2.,
+            metadata.centreFreq().getValue("Hz") - chunk->channelWidth() / 2. + corrMode.freqOffset().getValue("Hz"),
             chunk->channelWidth(),
             corrMode.nChan());
 

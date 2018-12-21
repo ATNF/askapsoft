@@ -355,23 +355,26 @@ void Configuration::buildBaselineMap(void)
 void Configuration::buildCorrelatorModes(void)
 {
     const vector<string> modes = itsParset.getStringVector("correlator.modes");
+    // by default inherit some keywords from standard config
+    const string standardKeyBase = "correlator.mode.standard.";
     vector<string>::const_iterator it;
     for (it = modes.begin(); it != modes.end(); ++it) {
         const string name = *it;
         const string keyBase = "correlator.mode." + name + ".";
         const casa::Quantity chanWidth = asQuantity(itsParset.getString(keyBase + "chan_width"));
-        const casa::uInt nChan = itsParset.getUint32(keyBase + "n_chan");
+        const casa::uInt nChan = itsParset.isDefined(keyBase + "n_chan") ? itsParset.getUint32(keyBase + "n_chan") : itsParset.getUint32(standardKeyBase + "n_chan");
 
         vector<casa::Stokes::StokesTypes> stokes;
-        const vector<string> stokesStrings = itsParset.getStringVector(keyBase + "stokes");
+        const vector<string> stokesStrings = itsParset.isDefined(keyBase + "stokes") ? itsParset.getStringVector(keyBase + "stokes") : itsParset.getStringVector(standardKeyBase + "stokes");
         for (vector<string>::const_iterator it = stokesStrings.begin();
                 it != stokesStrings.end(); ++it) {
             stokes.push_back(casa::Stokes::type(*it));
         }
 
-        const casa::uInt interval = itsParset.getUint32(keyBase + "interval");
+        const casa::uInt interval = itsParset.isDefined(keyBase + "interval") ? itsParset.getUint32(keyBase + "interval") : itsParset.getUint32(standardKeyBase + "interval");
+        const casa::Quantity freqOffset = asQuantity(itsParset.getString(keyBase + "freq_offset", "0.0Hz"));
 
-        const CorrelatorMode mode(name, chanWidth, nChan, stokes, interval);
+        const CorrelatorMode mode(name, chanWidth, nChan, stokes, interval, freqOffset);
         itsCorrelatorModes.insert(make_pair(name, mode));
     }
 }

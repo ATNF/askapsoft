@@ -52,7 +52,8 @@ class CorrelatorMode {
              const casa::Quantity& chanWidth,
              const casa::uInt nChan,
              const std::vector<casa::Stokes::StokesTypes>& stokes,
-             const casa::uInt interval);
+             const casa::uInt interval,
+             const casa::Quantity& freqOffset);
 
         /// @brief Returns the correlator mode name
         const std::string& name(void) const;
@@ -71,12 +72,17 @@ class CorrelatorMode {
         /// @brief Returns, in microseconds, correlator integration interval.
         casa::uInt interval(void) const;
 
+        /// @brief Frequency offset
+        /// @return bulk offset in frequency for the current configuration
+        const casa::Quantity& freqOffset() const;
+
     private:
         std::string itsModeName;
         casa::Quantity itsChanWidth;
         casa::uInt itsNChan;
         std::vector<casa::Stokes::StokesTypes> itsStokes;
         casa::uInt itsInterval;
+        casa::Quantity itsFreqOffset;
 };
 
 }
