@@ -271,6 +271,7 @@ ContinuumWorker::ContinuumWorker(LOFAR::ParameterSet& parset,
     } catch (AskapError& e) {
       ASKAPLOG_WARN_STR(logger, "Failure processing the channel allocation");
       ASKAPLOG_WARN_STR(logger, "Exception detail: " << e.what());
+      throw;
 
     }
 
@@ -607,13 +608,14 @@ ContinuumWorker::ContinuumWorker(LOFAR::ParameterSet& parset,
               break;
             }
 
-            ASKAPLOG_INFO_STR(logger, "Starting to process workunit " << workUnitCount << " of " << workUnits.size());
+            ASKAPLOG_INFO_STR(logger, "Starting to process workunit " << workUnitCount+1 << " of " << workUnits.size());
 
             int initialChannelWorkUnit = workUnitCount;
 
             if (!updateDir) {
               // NOTE: this is because if we are mosaicking ON THE FLY. We do
               // not process the first workunit outside the imaging loop.
+              // But for "normal" processing the first workunit is processed outside the loops
 
               initialChannelWorkUnit = workUnitCount+1;
             }
@@ -708,6 +710,9 @@ ContinuumWorker::ContinuumWorker(LOFAR::ParameterSet& parset,
             }
             catch (const askap::AskapError& e) {
               ASKAPLOG_WARN_STR(logger,"Askap error in worker calcNE - rootImager failed");
+              ASKAPLOG_WARN_STR(logger,"Incrementing workunit count as this one failed");
+              workUnitCount++;
+
               throw;
             }
 
@@ -745,6 +750,12 @@ ContinuumWorker::ContinuumWorker(LOFAR::ParameterSet& parset,
                 /// need a working imager to allow a merge over epochs for this channel
                 /// assuming subsequency workunits are the same channel but either different
                 /// epochs or look directions.
+
+                if (frequency != workUnits[tempWorkUnitCount].get_channelFrequency()) {
+                  if (localSolver) { // the frequencies should be the same.
+                    break;
+                  }
+                }
 
                 if (usetmpfs) {
                   // probably in spectral line mode
@@ -807,6 +818,12 @@ ContinuumWorker::ContinuumWorker(LOFAR::ParameterSet& parset,
                   }
                   catch (const askap::AskapError& e) {
                     ASKAPLOG_WARN_STR(logger,"Askap error in worker calcNE");
+                    // if this failed but the root did not one of two things may have happened
+                    // in continuum mode the gridding fails due to w projection errors - which
+                    // were not apparent in lower frequency observations - we have to just keep throwing
+                    // the exception up the tree in this case because we cannot recover.
+                    // in spectral line mode - this epoch/beam may have failed but other epochs succeeded.
+                    // what to do here. Do we continue with the accumulation or just fail ...
                     throw;
                   }
 
@@ -1075,7 +1092,15 @@ ContinuumWorker::ContinuumWorker(LOFAR::ParameterSet& parset,
             }
 
             /// outside the clean-loop write out the slice
-          } catch (const askap::AskapError& e) {
+          }
+
+          catch (const askap::AskapError& e) {
+
+            if (!localSolver) {
+              ASKAPLOG_WARN_STR(logger, "Askap error processing a channel in continuum mode");
+              throw;
+            }
+
             ASKAPLOG_WARN_STR(logger, "Askap error in channel processing skipping: " << e.what());
             std::cerr << "Askap error in: " << e.what() << std::endl;
 
@@ -1111,6 +1136,12 @@ ContinuumWorker::ContinuumWorker(LOFAR::ParameterSet& parset,
             ASKAPLOG_WARN_STR(logger, "Unexpected exception in: " << e.what());
             std::cerr << "Unexpected exception in: " << e.what();
             // I need to repeat the bookkeeping here as errors other than AskapErrors are thrown by solveNE
+            if (!localSolver) {
+              /// this is MFS/continuum mode
+              /// throw this further up - this avoids a failure in continuum mode generating bogus - or furphy-like
+              /// error messages
+              throw e;
+            }
 
             // Need to either send an empty map - or
             if (itsComms.isWriter()) {
@@ -1187,11 +1218,22 @@ ContinuumWorker::ContinuumWorker(LOFAR::ParameterSet& parset,
 
 
           // Pre-conditions
-          ASKAPCHECK(params->has("model.slice"), "Params are missing model parameter");
-          ASKAPCHECK(params->has("psf.slice"), "Params are missing psf parameter");
-          ASKAPCHECK(params->has("residual.slice"), "Params are missing residual parameter");
-          ASKAPCHECK(params->has("weights.slice"), "Params are missing weights parameter");
-
+          if (!params->has("model.slice")) {
+            ASKAPLOG_WARN_STR(logger, "Params are missing model parameter");
+            return;
+          }
+          if (!params->has("psf.slice")) {
+            ASKAPLOG_WARN_STR(logger,  "Params are missing psf parameter");
+            return;
+          }
+          if (!params->has("residual.slice")) {
+             ASKAPLOG_WARN_STR(logger,  "Params are missing residual parameter");
+            return;
+          }
+          if (!params->has("weights.slice")) {
+            ASKAPLOG_WARN_STR(logger, "Params are missing weights parameter");
+            return;
+          }
 
 
           if (itsParset.getBool("restore", false)) {
