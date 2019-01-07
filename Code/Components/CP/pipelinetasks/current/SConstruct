@@ -1,7 +1,7 @@
 # @file
 # SConstruct build script for this module.
 #
-
+import sys
 # Always import this
 from askapenv import env
 import sys
