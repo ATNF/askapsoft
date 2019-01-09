@@ -62,11 +62,13 @@ std::string toLower(std::string s);
 
 /// Round to nearest integer
 /// @param x Value to be rounded
-int nint(double x);
+static inline int nint(double x)
+{ return x > 0 ? int(x + 0.5) : int(x - 0.5); }
 
 /// Round to nearest integer
 /// @param x Value to be rounded
-int nint(float x);
+static inline int nint(float x)
+{ return x > 0 ? int(x + 0.5f) : int(x - 0.5f); }
 
 /// Write a vector to an ostream with a given separator, prefix and postfix.
 /// \note operator<<() must be defined for the container elements.
@@ -84,13 +86,13 @@ void printContainer(std::ostream& os, const Container& ctr,
                     const char* prefix = "[", const char* postfix = "]", const size_t lengthLimit = 0)
 {
     os << prefix;
-    
+
     const size_t showAtEnd = 5;
     if (lengthLimit > 0) {
         ASKAPDEBUGASSERT(lengthLimit > showAtEnd);
-    } 
-    
-    size_t counter = 1;			       
+    }
+
+    size_t counter = 1;
     for (typename Container::const_iterator it = ctr.begin();
             it != ctr.end(); ++it, ++counter) {
          if (it != ctr.begin()) {
@@ -98,7 +100,7 @@ void printContainer(std::ostream& os, const Container& ctr,
          }
 
          os << *it;
-    
+
          if ((counter == lengthLimit) && (counter + showAtEnd  + 1 < ctr.size())) {
              // need to advance iterator to skip some elements
              const size_t elementsToSkip = ctr.size() - lengthLimit - showAtEnd;
@@ -108,7 +110,7 @@ void printContainer(std::ostream& os, const Container& ctr,
              // do increments in a generic way as some containers do not support random access
              for (size_t el = 1; el < elementsToSkip; ++el, ++it) {
                   ASKAPDEBUGASSERT(it != ctr.end());
-             } 
+             }
 	     }
     }
     os << postfix;
@@ -238,7 +240,7 @@ struct NullDeleter {
 
 /// @brief static constant initialised with the number of microseconds per day
 static const uint64_t microsecondsPerDay = 86400000000ull;
-  
+
 /// @brief convert BAT to UTC Epoch via casa
 /// @param[in] bat BAT as 64-bit integer
 /// @return casa epoch measure in the UTC frame
@@ -252,25 +254,25 @@ uint64_t epoch2bat(const casa::MEpoch &epoch);
 
 /// @brief helper method to check the TAI_UTC measures table version
 /// @details casacore measures data need to be updated regularly. The TAI_UTC
-/// table seems to be the one most frequently updated. However, its version and 
-/// date, although checked by internal measures routines, are not accessible 
+/// table seems to be the one most frequently updated. However, its version and
+/// date, although checked by internal measures routines, are not accessible
 /// directly using casacore methods. This method does this to allow these details
-/// to be monitored. 
+/// to be monitored.
 /// @note No caching has been done, but this information is expected to be
 /// accessed very infrequently (i.e. once per scheduling block). The code
 /// could, in principle, be pushed into casacore. An exception is thrown if
 /// the code is unable to access the appropriate measures database table
 /// @return a pair with table date MJD (first) and the version string (second)
-std::pair<double, std::string> measuresTableVersion(); 
+std::pair<double, std::string> measuresTableVersion();
 
 /// @brief helper method to check the validity of measures data
-/// @details casacore measures data need to be updated regulargly. Although 
+/// @details casacore measures data need to be updated regulargly. Although
 /// different data are updated at different cadence, looking for dUT1 seems to be
 /// the fastest way to catch the issue. This method attemts to get dUT1 through
 /// low-level get method of the casacore, same as for dUT1 method of MeasTable
 /// class, but check the validity flag and ignores the result. The casacore's
 /// dUT1 method only uses the validity flag to give the warning and doesn't allow
-/// the user of the library to access it. The code could, in principle, be pushed 
+/// the user of the library to access it. The code could, in principle, be pushed
 /// into casacore.
 /// @note No caching has been done, but this method is expected to be accessed
 /// very infrequently (i.e. once per scheduling block).

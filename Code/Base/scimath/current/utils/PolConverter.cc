@@ -40,14 +40,14 @@ using namespace askap::scimath;
 /// @details
 /// @param[in] polFrameIn input polarisation frame defined as a vector of Stokes enums
 /// @param[in] polFrameOut output polarisation frame defined as a vector of Stokes enums
-/// @param[in] checkUnspecifiedProducts if true (default), the code checks that all 
-///            polarisation products missing in the input frame are multiplied by 0 (and 
-///            therefore don't affect the result), see itsCheckUnspecifiedProducts for more info 
+/// @param[in] checkUnspecifiedProducts if true (default), the code checks that all
+///            polarisation products missing in the input frame are multiplied by 0 (and
+///            therefore don't affect the result), see itsCheckUnspecifiedProducts for more info
 PolConverter::PolConverter(const casa::Vector<casa::Stokes::StokesTypes> &polFrameIn,
                const casa::Vector<casa::Stokes::StokesTypes> &polFrameOut,
                bool checkUnspecifiedProducts) : itsVoid(false),
                itsTransform(polFrameOut.nelements(),polFrameIn.nelements(),casa::Complex(0.,0.)),
-               itsPolFrameIn(polFrameIn), itsPolFrameOut(polFrameOut), 
+               itsPolFrameIn(polFrameIn), itsPolFrameOut(polFrameOut),
                itsCheckUnspecifiedProducts(checkUnspecifiedProducts)
 {
   if (equal(polFrameIn, polFrameOut)) {
@@ -61,10 +61,10 @@ PolConverter::PolConverter(const casa::Vector<casa::Stokes::StokesTypes> &polFra
          ASKAPCHECK(isValid(polFrameOut[pol]), "Conversion is unsupported for polarisation product "<<
                     int(polFrameOut[pol])<<" ("<<casa::Stokes::type(polFrameOut[pol])<<")");
     }
-    fillMatrix(polFrameIn, polFrameOut);    
+    fillMatrix(polFrameIn, polFrameOut);
   }
 }
-  
+
 /// @brief default constructor - no conversion
 /// @details Constructed via this method the object passes all visibilities intact
 PolConverter::PolConverter() : itsVoid(true), itsCheckUnspecifiedProducts(false)
@@ -88,13 +88,13 @@ bool PolConverter::equal(const casa::Vector<casa::Stokes::StokesTypes> &first,
   }
   return true;
 }
-  
+
 /// @brief main method doing conversion
 /// @details Convert the given visibility vector between two polarisation frames supplied
 /// in the constructor.
 /// @param[in] vis visibility vector
-/// @return converted visibility vector 
-/// @note vis should have the same size (<=4) as both polFrames passed in the constructor, 
+/// @return converted visibility vector
+/// @note vis should have the same size (<=4) as both polFrames passed in the constructor,
 /// the output vector will have the same size.
 casa::Vector<casa::Complex> PolConverter::operator()(casa::Vector<casa::Complex> vis) const
 {
@@ -103,22 +103,50 @@ casa::Vector<casa::Complex> PolConverter::operator()(casa::Vector<casa::Complex>
   }
   ASKAPDEBUGASSERT(vis.nelements() == itsTransform.ncolumn());
   casa::Vector<casa::Complex> res(itsTransform.nrow(),0.);
-  
+
   for (casa::uInt row = 0; row<res.nelements(); ++row) {
        for (casa::uInt col = 0; col<vis.nelements(); ++col) {
             res[row] += itsTransform(row,col)*vis[col];
        }
   }
-  
+
   return res;
 }
 
+/// @brief altenative method doing conversion
+/// @details Convert the given visibility vector between two polarisation frames supplied
+/// in the constructor.
+/// @param[in] vis visibility vector
+/// @param[out] out converted visibility vector
+/// @return converted visibility vector
+/// @note vis should have the same size (<=4) as both polFrames passed in the constructor,
+/// the output vector should have the correct size.
+casa::Vector<casa::Complex>& PolConverter::convert(casa::Vector<casa::Complex>& out, const casa::Vector<casa::Complex>& vis) const
+{
+    if (itsVoid) {
+        out.reference(vis);
+        return out;
+    }
+    ASKAPDEBUGASSERT(vis.nelements() == itsTransform.ncolumn());
+    ASKAPDEBUGASSERT(out.nelements() == itsTransform.nrow());
+
+    for (casa::uInt row = 0; row<out.nelements(); ++row) {
+         out[row] = 0.;
+         for (casa::uInt col = 0; col<vis.nelements(); ++col) {
+              out[row] += itsTransform(row,col)*vis[col];
+         }
+    }
+
+    return out;
+}
+
+
 /// @brief propagate noise through conversion
-/// @details Convert the visibility noise visibility vector between two 
+/// @details Convert the visibility noise visibility vector between two
 /// polarisation frames supplied in the constructor.
 /// @param[in] visNoise visibility noise vector
-/// @return converted noise vector 
-/// @note visNoise should have the same size (<=4) as both polFrames passed in the constructor, 
+/// @return converted noise vector
+/// @note visNoise should have the same size (<=4) as both polFrames passed in the constructor,
 /// the output vector will have the same size. Real and imaginary parts of the output vectors are the noise
 /// levels of real and imaginary parts of the visibility.
 casa::Vector<casa::Complex> PolConverter::noise(casa::Vector<casa::Complex> visNoise) const
@@ -128,7 +156,7 @@ casa::Vector<casa::Complex> PolConverter::noise(casa::Vector<casa::Complex> visN
   }
   ASKAPDEBUGASSERT(visNoise.nelements() == itsTransform.ncolumn());
   casa::Vector<casa::Complex> res(itsTransform.nrow(),0.);
-  
+
   for (casa::uInt row = 0; row<res.nelements(); ++row) {
        float reNoise = 0.;
        float imNoise = 0.;
@@ -144,7 +172,7 @@ casa::Vector<casa::Complex> PolConverter::noise(casa::Vector<casa::Complex> visN
        ASKAPDEBUGASSERT(imNoise >= 0.);
        res[row] = casa::Complex(sqrt(reNoise),sqrt(imNoise));
   }
-  
+
   return res;
 }
 
@@ -159,21 +187,21 @@ void PolConverter::fillMatrix(const casa::Vector<casa::Stokes::StokesTypes> &pol
   ASKAPDEBUGASSERT(itsTransform.nrow() == polFrameOut.nelements());
   ASKAPDEBUGASSERT(itsTransform.ncolumn() == polFrameIn.nelements());
   // See Hamaker, Bregman and Sault, 1996, A&ASS, 117, 137 for matrix formalism of
-  // the polarisation conversion 
+  // the polarisation conversion
 
   // todo, check whether we can do the same in a more elegant and general way.
-  
+
   casa::Matrix<casa::Complex> T(4,4,0.);
   if (isStokes(polFrameOut)) {
       if (isLinear(polFrameIn)) {
-          // linear to stokes   
-          T(0,0)=1.; T(0,3)=1.; 
+          // linear to stokes
+          T(0,0)=1.; T(0,3)=1.;
           T(1,0)=1.; T(1,3)=-1.;
           T(2,1)=1.; T(2,2)=1.;
           T(3,1)=casa::Complex(0.,-1.); T(3,2)=casa::Complex(0.,1.);
       } else if (isCircular(polFrameIn)) {
           // circular to stokes
-          T(0,0)=1.; T(0,3)=1.; 
+          T(0,0)=1.; T(0,3)=1.;
           T(1,1)=casa::Complex(0.,-1.); T(1,2)=casa::Complex(0.,1.);
           T(2,0)=1.; T(2,3)=-1.;
           T(3,1)=1.; T(3,2)=1.;
@@ -184,30 +212,30 @@ void PolConverter::fillMatrix(const casa::Vector<casa::Stokes::StokesTypes> &pol
       }
   } else if (isStokes(polFrameIn)) {
       if (isLinear(polFrameOut)) {
-          // stokes to linear   
-          T(0,0)=0.5; T(0,1)=0.5; 
+          // stokes to linear
+          T(0,0)=0.5; T(0,1)=0.5;
           T(1,2)=0.5; T(1,3)=casa::Complex(0.,0.5);
           T(2,2)=0.5; T(2,3)=casa::Complex(0.,-0.5);
           T(3,0)=0.5; T(3,1)=-0.5;
       } else if (isCircular(polFrameOut)) {
           // stokes to circular
-          T(0,0)=0.5; T(0,2)=0.5; 
+          T(0,0)=0.5; T(0,2)=0.5;
           T(1,1)=casa::Complex(0.,0.5); T(1,3)=0.5;
           T(2,1)=casa::Complex(0.,-0.5); T(2,3)=0.5;
           T(3,0)=0.5; T(3,2)=-0.5;
       } else {
           ASKAPTHROW(AskapError, "Conversion of stokes parameters into the selected output polarisation frame is not supported");
-      }      
-  } else if ((isLinear(polFrameIn) && isLinear(polFrameOut)) || 
+      }
+  } else if ((isLinear(polFrameIn) && isLinear(polFrameOut)) ||
              (isCircular(polFrameIn) && isCircular(polFrameOut)))  {
              T.diagonal() = 1.;
   } else {
       ASKAPTHROW(AskapError, "Unsupported combination of input and output polarisation frames");
   }
-    
+
   ASKAPDEBUGASSERT(polFrameIn.nelements()>0);
   ASKAPDEBUGASSERT(polFrameOut.nelements()>0);
-    
+
   // have to copy, because the transformation may not preserve dimensionality
   for (casa::uInt row = 0; row<itsTransform.nrow(); ++row) {
        const casa::uInt rowIndex = getIndex(polFrameOut[row]);
@@ -218,7 +246,7 @@ void PolConverter::fillMatrix(const casa::Vector<casa::Stokes::StokesTypes> &pol
        for (casa::uInt col = 0; col<itsTransform.ncolumn(); ++col) {
             const casa::uInt colIndex = getIndex(polFrameIn[col]);
             ASKAPDEBUGASSERT(colIndex<4);
-            presentPols[colIndex] = true; 
+            presentPols[colIndex] = true;
             itsTransform(row,col) = T(rowIndex,colIndex);
        }
        // now check that nothing depends on all products that are absent in the input
@@ -237,7 +265,7 @@ void PolConverter::fillMatrix(const casa::Vector<casa::Stokes::StokesTypes> &pol
 }
 
 /// @brief fill matrix describing parallactic angle rotation
-/// @details 
+/// @details
 /// @param[in] pa1 parallactic angle on the first antenna
 /// @param[in] pa2 parallactic angle on the second antenna
 void PolConverter::fillPARotationMatrix(double pa1, double pa2)
@@ -262,14 +290,14 @@ void PolConverter::fillPARotationMatrix(double pa1, double pa2)
   itsPARotation(3,0) = spa1 * spa2;
   itsPARotation(3,1) = -spa1 * cpa2;
   itsPARotation(3,2) = -cpa1 * spa2;
-  itsPARotation(3,3) = cpa1 * cpa2;  
+  itsPARotation(3,3) = cpa1 * cpa2;
 }
-  
+
 /// @brief reverse method for getIndex
 /// @details convert index into stokes enum. Because the same index can correspond to a number
 /// of polarisation products (meaning of index is frame-dependent), a second parameter is
 /// required to unambiguate it. It can be any stokes enum of the frame, not necessarily the
-/// first one. 
+/// first one.
 /// @param[in] index an index to convert
 /// @param[in] stokes any stokes enum from the working frame
 /// @note This method is actually used only to provide a sensible message in the exception. No
@@ -279,7 +307,7 @@ casa::Stokes::StokesTypes PolConverter::stokesFromIndex(casa::uInt index, casa::
    const casa::Vector<casa::Stokes::StokesTypes> buf(1,stokes);
    casa::uInt stokesAsuInt = index;
    if (isCircular(buf)) {
-       stokesAsuInt += casa::uInt(casa::Stokes::RR);                       
+       stokesAsuInt += casa::uInt(casa::Stokes::RR);
    } else if (isLinear(buf)) {
        stokesAsuInt += casa::uInt(casa::Stokes::XX);
    } else if (isStokes(buf)) {
@@ -287,11 +315,11 @@ casa::Stokes::StokesTypes PolConverter::stokesFromIndex(casa::uInt index, casa::
    }
    return casa::Stokes::StokesTypes(stokesAsuInt);
 }
-  
+
 /// @brief test if frame matches a given stokes enum
 /// @param[in] polFrame polarisation frame defined as a vector of Stokes enums
 /// @param[in] stokes a single stokes enum defining the frame (should be the first in the set)
-/// @return true, if the given vector and one stokes enum belong to the same frame 
+/// @return true, if the given vector and one stokes enum belong to the same frame
 bool PolConverter::sameFrame(const casa::Vector<casa::Stokes::StokesTypes> &polFrame,
                         casa::Stokes::StokesTypes stokes)
 {
@@ -304,9 +332,9 @@ bool PolConverter::sameFrame(const casa::Vector<casa::Stokes::StokesTypes> &polF
   }
   return true;
 }
-  
+
 /// @brief return index of a particular polarisation
-/// @details To be able to fill matrices efficiently we want to convert, say IQUV into 0,1,2,3. 
+/// @details To be able to fill matrices efficiently we want to convert, say IQUV into 0,1,2,3.
 /// This method does it for all supported types of polarisation products
 /// @param[in] stokes a single stokes enum of the polarisation product to convert
 /// @return unsigned index
@@ -321,7 +349,7 @@ casa::uInt PolConverter::getIndex(casa::Stokes::StokesTypes stokes)
      return casa::uInt(stokes)-casa::uInt(casa::Stokes::I);
   }
   ASKAPTHROW(AskapError, "Unsupported type of polarisation product in PolConverter::getIndex "<<
-             int(stokes));  
+             int(stokes));
 }
 
 /// @brief check whether stokes parameter correspond to cross-correlation
@@ -350,11 +378,11 @@ bool PolConverter::isValid(casa::Stokes::StokesTypes pol)
 }
 
 /// @brief convert string representation into a vector of Stokes enums
-/// @details It is convenient to define polarisation frames like "xx,xy,yx,yy" or "iquv". 
+/// @details It is convenient to define polarisation frames like "xx,xy,yx,yy" or "iquv".
 /// This method does it and return a vector of Stokes enums. Comma symbol is ignored. i.e.
 /// "iquv" and "i,q,u,v" are equivalent.
 /// @param[in] frame a string representation of the frame
-/// @return vector with Stokes enums 
+/// @return vector with Stokes enums
 casa::Vector<casa::Stokes::StokesTypes> PolConverter::fromString(const std::string &frame)
 {
   if (frame.size() == 0) {
@@ -374,7 +402,7 @@ casa::Vector<casa::Stokes::StokesTypes> PolConverter::fromString(const std::stri
          ASKAPCHECK(polProduct.find_first_not_of("xyrlXYRL") == std::string::npos,
                     "Unknown polarisation product "<<polProduct);
          products.push_back(polProduct);
-         ++pos; // two-symbol descriptor has been extracted             
+         ++pos; // two-symbol descriptor has been extracted
      }
   }
   return fromString(products);
@@ -391,11 +419,11 @@ casa::Vector<casa::Stokes::StokesTypes> PolConverter::fromString(const std::vect
   for (size_t pol=0;pol<products.size();++pol) {
        res[pol] = casa::Stokes::type(products[pol]);
   }
-  return res;  
+  return res;
 }
 
 /// @brief convert a vector of Stokes enums into a vector of strings
-/// @details This method does a reverse job to fromString. It converts a vector of stokes enums 
+/// @details This method does a reverse job to fromString. It converts a vector of stokes enums
 /// into a vector of strings (with one to one correspondence between elements)
 /// @param[in] frame vector of stokes enums
 /// @return vector with string represenation
@@ -404,7 +432,7 @@ std::vector<std::string> PolConverter::toString(const casa::Vector<casa::Stokes:
   std::vector<std::string> res(frame.nelements());
   for (size_t pol=0; pol<res.size(); ++pol) {
        res[pol] = casa::Stokes::name(frame[pol]);
-  } 
+  }
   return res;
 }
 
@@ -428,7 +456,7 @@ std::map<casa::Stokes::StokesTypes, casa::Complex> PolConverter::getSparseTransf
        " is not found in the input frame the converter is set up with");
   if (itsVoid) {
       result[pol] = casa::Complex(1.,0.);
-  } else { 
+  } else {
       ASKAPDEBUGASSERT(product < itsTransform.ncolumn());
       ASKAPDEBUGASSERT(itsPolFrameOut.nelements() <= itsTransform.nrow());
       for (casa::uInt index = 0; index < itsPolFrameOut.nelements(); ++index) {
@@ -438,7 +466,7 @@ std::map<casa::Stokes::StokesTypes, casa::Complex> PolConverter::getSparseTransf
            }
       }
   }
-       
+
   ASKAPCHECK(result.size(), "A non-zero output is expected from getSparseTransform, but all selected matrix elements seem to be zeros");
   return result;
 }
@@ -490,4 +518,3 @@ casa::Vector<casa::Stokes::StokesTypes> PolConverter::canonicCircular()
   result[3] = casa::Stokes::LL;
   return result;
 }
-
