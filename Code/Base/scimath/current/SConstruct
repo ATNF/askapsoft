@@ -10,6 +10,7 @@ from askapenv import env
 import sys
 
 env.AppendUnique(CCFLAGS=['-O3'])
+env.AppendUnique(CCFLAGS=['-fcx-limited-range'])
 
 # On Mac use the inbuilt Accelerate framework so no longer get the linker flag from
 # dependency analysis so need to make it explict here.

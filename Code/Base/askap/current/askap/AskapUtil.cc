@@ -112,16 +112,6 @@ std::string toLower(std::string str)
     return str;
 }
 
-int nint(double x)
-{
-    return x > 0 ? int(x + 0.5) : int(x - 0.5);
-}
-
-int nint(float x)
-{
-    return x > 0 ? int(x + 0.5f) : int(x - 0.5f);
-}
-
 casa::Quantity asQuantity(const string& s, const std::string& unit)
 {
     casa::Quantity q;
@@ -198,14 +188,14 @@ casa::MPosition asMPosition(const vector<string>& position)
     return pos;
 }
 
-  
-  
+
+
 /// @brief convert BAT to UTC Epoch via casa
 /// @param[in] bat BAT as 64-bit integer
 /// @return casa epoch measure in the UTC frame
 casa::MEpoch bat2epoch(const uint64_t &bat)
 {
-  const casa::MVEpoch timeTAI(static_cast<casa::Double>(bat / microsecondsPerDay), 
+  const casa::MVEpoch timeTAI(static_cast<casa::Double>(bat / microsecondsPerDay),
                               static_cast<casa::Double>(bat % microsecondsPerDay) /
                               static_cast<casa::Double>(microsecondsPerDay));
   const casa::MEpoch epoch = casa::MEpoch::Convert(casa::MEpoch(timeTAI, casa::MEpoch::Ref(casa::MEpoch::TAI)),
@@ -218,7 +208,7 @@ casa::MEpoch bat2epoch(const uint64_t &bat)
 /// @return BAT as 64-bit integer
 uint64_t epoch2bat(const casa::MEpoch &epoch)
 {
-   const casa::MVEpoch epochTAI= casa::MEpoch::Convert(epoch, 
+   const casa::MVEpoch epochTAI= casa::MEpoch::Convert(epoch,
                   casa::MEpoch::Ref(casa::MEpoch::TAI))().getValue();
    const uint64_t startOfDayBAT = static_cast<uint64_t>(epochTAI.getDay()*microsecondsPerDay);
    return startOfDayBAT + static_cast<uint64_t>(epochTAI.getDayFraction()*microsecondsPerDay);
@@ -226,10 +216,10 @@ uint64_t epoch2bat(const casa::MEpoch &epoch)
 
 /// @brief helper method to check the TAI_UTC measures table version
 /// @details casacore measures data need to be updated regularly. The TAI_UTC
-/// table seems to be the one most frequently updated. However, its version and 
-/// date, although checked by internal measures routines, are not accessible 
+/// table seems to be the one most frequently updated. However, its version and
+/// date, although checked by internal measures routines, are not accessible
 /// directly using casacore methods. This method does this to allow these details
-/// to be monitored. 
+/// to be monitored.
 /// @note No caching has been done, but this information is expected to be
 /// accessed very infrequently (i.e. once per scheduling block). The code
 /// could, in principle, be pushed into casacore. An exception is thrown if
@@ -240,25 +230,25 @@ std::pair<double, std::string> measuresTableVersion()
   casa::Table tab;
   const bool ok = casa::MeasIERS::findTab(tab, 0, "measures.tai_utc.directory", "geodetic", "TAI_UTC");
   ASKAPCHECK(ok, "Unable to open TAI_UTC measures table via casa::MeasIERS");
-  
+
   const casa::TableRecord kw(tab.keywordSet());
-  
-  ASKAPCHECK(kw.isDefined("VS_DATE") && kw.isDefined("VS_VERSION"), 
-      "The measures table is incomplete, no date or version stored. type="<<tab.tableInfo().type()); 
+
+  ASKAPCHECK(kw.isDefined("VS_DATE") && kw.isDefined("VS_VERSION"),
+      "The measures table is incomplete, no date or version stored. type="<<tab.tableInfo().type());
   casa::Quantity qDate;
   ASKAPCHECK(casa::MVTime::read(qDate, kw.asString("VS_DATE")), "Unable to parse VS_DATE: "<<kw.asString("VS_DATE"));
-                                  
+
   return std::pair<double, std::string>(casa::MVTime(qDate), kw.asString("VS_VERSION"));
-} 
+}
 
 /// @brief helper method to check the validity of measures data
-/// @details casacore measures data need to be updated regulargly. Although 
+/// @details casacore measures data need to be updated regulargly. Although
 /// different data are updated at different cadence, looking for dUT1 seems to be
 /// the fastest way to catch the issue. This method attemts to get dUT1 through
 /// low-level get method of the casacore, same as for dUT1 method of MeasTable
 /// class, but check the validity flag and ignores the result. The casacore's
 /// dUT1 method only uses the validity flag to give the warning and doesn't allow
-/// the user of the library to access it. The code could, in principle, be pushed 
+/// the user of the library to access it. The code could, in principle, be pushed
 /// into casacore.
 /// @note No caching has been done, but this method is expected to be accessed
 /// very infrequently (i.e. once per scheduling block).
