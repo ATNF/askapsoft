@@ -71,6 +71,20 @@ PolConverter::PolConverter() : itsVoid(true), itsCheckUnspecifiedProducts(false)
 {
 }
 
+/// @brief assignment operator
+PolConverter & PolConverter::operator=(const PolConverter & other)
+{
+    if (this == &other) return *this;
+    itsVoid = other.itsVoid;
+    itsTransform.assign(other.itsTransform);
+    itsPARotation.assign(other.itsPARotation);
+    itsPolFrameIn.assign(other.itsPolFrameIn);
+    itsPolFrameOut.assign(other.itsPolFrameOut);
+    itsCheckUnspecifiedProducts = other.itsCheckUnspecifiedProducts;
+    return *this;
+}
+
+
 /// @brief compare two vectors of Stokes enums
 /// @param[in] first first polarisation frame
 /// @param[in] second second polarisation frame

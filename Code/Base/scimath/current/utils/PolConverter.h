@@ -72,6 +72,9 @@ struct PolConverter {
   /// @details Constructed via this method the object passes all visibilities intact
   PolConverter();
 
+  /// @brief assignment operator
+  PolConverter & operator=(const PolConverter & other);
+
   /// @brief main method doing conversion
   /// @details Convert the given visibility vector between two polarisation frames supplied
   /// in the constructor.
