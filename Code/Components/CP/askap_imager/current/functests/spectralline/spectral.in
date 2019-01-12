@@ -33,7 +33,7 @@ Cimager.gridder.WProject.cutoff                 = 0.001
 Cimager.gridder.WProject.variablesupport        = true
 Cimager.gridder.WProject.offsetsupport          = true
 
-Cimager.ncycles                                 = 0
+Cimager.ncycles                                 = 5
 Cimager.Images.writeAtMajorCycle                = true
 
 # Use a multiscale Clean solver
@@ -44,8 +44,8 @@ Cimager.solver.Clean.scales                     = [0]
 Cimager.solver.Clean.niter                      = 10000
 Cimager.solver.Clean.gain                       = 0.1
 Cimager.solver.Clean.logevery                   = 1000
-Cimager.threshold.minorcycle                    = 5mJy
-Cimager.threshold.majorcycle                    = 5mJy
+Cimager.threshold.minorcycle                    = [45%]
+Cimager.threshold.majorcycle                    = 0.15mJy
 
 Cimager.solver.Clean.verbose                    = false
 
