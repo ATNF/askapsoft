@@ -71,7 +71,22 @@ PolConverter::PolConverter() : itsVoid(true), itsCheckUnspecifiedProducts(false)
 {
 }
 
+/// @brief copy constructor
+/// @details
+/// @param[in] other, object to construct from
+PolConverter::PolConverter(const PolConverter & other):
+itsVoid(other.itsVoid),
+itsTransform(other.itsTransform.copy()),
+itsPARotation(other.itsPARotation.copy()),
+itsPolFrameIn(other.itsPolFrameIn.copy()),
+itsPolFrameOut(other.itsPolFrameOut.copy()),
+itsCheckUnspecifiedProducts(other.itsCheckUnspecifiedProducts)
+{
+}
+
 /// @brief assignment operator
+/// @details
+/// @param[in] other, object to assign from
 PolConverter & PolConverter::operator=(const PolConverter & other)
 {
     if (this == &other) return *this;
@@ -127,7 +142,7 @@ casa::Vector<casa::Complex> PolConverter::operator()(casa::Vector<casa::Complex>
   return res;
 }
 
-/// @brief altenative method doing conversion
+/// @brief alternative method doing conversion
 /// @details Convert the given visibility vector between two polarisation frames supplied
 /// in the constructor.
 /// @param[in] vis visibility vector
