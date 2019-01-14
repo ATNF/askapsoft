@@ -456,6 +456,7 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
                       bslnNorm2 += casa::square(curVal);
                  }
                  ASKAPCHECK(bslnNorm2 > 1e-12, "Expect non-zero per-antenna UVW in metadata - encountered a vector which is the Earth centre. Most likely junk metadata received for antenna: "<<antName<<" and (1-based) beam "<<beam + 1);
+                 ASKAPCHECK(bslnNorm2 < 4.07044e13, "Encountered UVW vector which suggests an antenna lies way beyond Earth's surface. Most likely junk metadata received for antenna: "<<antName<<" and (1-based) beam "<<beam + 1);
             }     
         }
     }
