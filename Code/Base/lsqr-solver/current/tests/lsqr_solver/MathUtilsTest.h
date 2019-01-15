@@ -20,27 +20,49 @@
 /// along with this program; if not, write to the Free Software
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
+/// @author Vitaliy Ogarko <vogarko@gmail.com>
 
-// ASKAPsoft includes
-#include <AskapTestRunner.h>
+#include <lsqr_solver/MathUtils.h>
 
-// Test includes
-#include <MathUtilsTest.h>
-#include <SparseMatrixTest.h>
+#include <cppunit/extensions/HelperMacros.h>
 
-#include <askap/AskapLogging.h>
-
-int main(int argc, char *argv[])
+namespace askap
 {
-    ASKAPLOG_INIT("");
+  namespace lsqr
+  {
+    class MathUtilsTest : public CppUnit::TestFixture
+    {
+      CPPUNIT_TEST_SUITE(MathUtilsTest);
 
-    askapdev::testutils::AskapTestRunner runner(argv[0]);
+      CPPUNIT_TEST(testGetNorm);
 
-    runner.addTest(askap::lsqr::MathUtilsTest::suite());
-    runner.addTest(askap::lsqr::SparseMatrixTest::suite());
+      CPPUNIT_TEST_SUITE_END();
 
-    bool wasSucessful = runner.run();
+      public:
 
-    return wasSucessful ? 0 : 1;
+        // Test of GetNorm.
+        // Unit vectors.
+        void testGetNorm()
+        {
+            Vector vec(3);
+            vec[0] = 1.0;
+            vec[1] = 0.0;
+            vec[2] = 0.0;
+
+            CPPUNIT_ASSERT_EQUAL(1.0, MathUtils::GetNorm(vec));
+
+            vec[0] = 0.0;
+            vec[1] = 1.0;
+            vec[2] = 0.0;
+
+            CPPUNIT_ASSERT_EQUAL(1.0, MathUtils::GetNorm(vec));
+
+            vec[0] = 0.0;
+            vec[1] = 0.0;
+            vec[2] = 1.0;
+
+            CPPUNIT_ASSERT_EQUAL(1.0, MathUtils::GetNorm(vec));
+        }
+    };
+  }
 }
-
