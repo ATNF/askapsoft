@@ -26,6 +26,7 @@
 
 // Test includes
 #include <MathUtilsTest.h>
+#include <ModelDampingTest.h>
 #include <SparseMatrixTest.h>
 
 #include <askap/AskapLogging.h>
@@ -37,6 +38,7 @@ int main(int argc, char *argv[])
     askapdev::testutils::AskapTestRunner runner(argv[0]);
 
     runner.addTest(askap::lsqr::MathUtilsTest::suite());
+    runner.addTest(askap::lsqr::ModelDampingTest::suite());
     runner.addTest(askap::lsqr::SparseMatrixTest::suite());
 
     bool wasSucessful = runner.run();
