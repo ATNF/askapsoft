@@ -20,31 +20,33 @@
 /// along with this program; if not, write to the Free Software
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
+/// @author Vitaliy Ogarko <vogarko@gmail.com>
 
-// ASKAPsoft includes
-#include <AskapTestRunner.h>
+#include <lsqr_solver/LSQRSolver.h>
 
-// Test includes
-#include <LSQRSolverTest.h>
-#include <MathUtilsTest.h>
-#include <ModelDampingTest.h>
-#include <SparseMatrixTest.h>
+#include <cppunit/extensions/HelperMacros.h>
 
-#include <askap/AskapLogging.h>
-
-int main(int argc, char *argv[])
+namespace askap
 {
-    ASKAPLOG_INIT("");
+  namespace lsqr
+  {
+    class LSQRSolverTest : public CppUnit::TestFixture
+    {
+      CPPUNIT_TEST_SUITE(LSQRSolverTest);
 
-    askapdev::testutils::AskapTestRunner runner(argv[0]);
+      CPPUNIT_TEST(testConstructors);
 
-    runner.addTest(askap::lsqr::LSQRSolverTest::suite());
-    runner.addTest(askap::lsqr::MathUtilsTest::suite());
-    runner.addTest(askap::lsqr::ModelDampingTest::suite());
-    runner.addTest(askap::lsqr::SparseMatrixTest::suite());
+      CPPUNIT_TEST_SUITE_END();
 
-    bool wasSucessful = runner.run();
+      public:
 
-    return wasSucessful ? 0 : 1;
+        // Test of constructor.
+        void testConstructors()
+        {
+            LSQRSolver *solver = new LSQRSolver(3, 9);
+            CPPUNIT_ASSERT(solver != NULL);
+            delete solver;
+        }
+    };
+  }
 }
-
