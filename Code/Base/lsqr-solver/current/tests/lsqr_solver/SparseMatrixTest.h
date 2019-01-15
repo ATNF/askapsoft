@@ -57,6 +57,12 @@ namespace askap
       CPPUNIT_TEST(testTransMultVectorAllNonZero2x3);
       CPPUNIT_TEST(testTransMultVectorAllNonZero3x2);
       CPPUNIT_TEST(testReset);
+      CPPUNIT_TEST(testExtendNonEmpty);
+      CPPUNIT_TEST(testExtendEmpty);
+      CPPUNIT_TEST(testGetNumberNonemptyRowsNoEmpty);
+      CPPUNIT_TEST(testGetNumberNonemptyRowsAllEmpty);
+      CPPUNIT_TEST(testGetNumberNonemptyRowsSomeEmpty);
+      CPPUNIT_TEST(testGetNumberNonemptyRowsSomeEmpty2);
 
       CPPUNIT_TEST_SUITE_END();
 
@@ -631,7 +637,171 @@ namespace askap
             CPPUNIT_ASSERT_EQUAL(size_t(0), matrix.GetCurrentNumberRows());
             CPPUNIT_ASSERT_EQUAL(size_t(3), matrix.GetTotalNumberRows());
         }
-    };
 
+        // Test of Extend.
+        // Extending a non-empty matrix.
+        void testExtendNonEmpty()
+        {
+            SparseMatrix matrix(1, 3);
+
+            matrix.NewRow();
+
+            matrix.Add(1.0, 0);
+            matrix.Add(2.0, 1);
+            matrix.Add(3.0, 2);
+
+            matrix.Finalize(3);
+
+            matrix.Extend(2, 6);
+
+            matrix.NewRow();
+
+            matrix.Add(4.0, 0);
+            matrix.Add(5.0, 1);
+            matrix.Add(6.0, 2);
+
+            matrix.NewRow();
+
+            matrix.Add(7.0, 0);
+            matrix.Add(8.0, 1);
+            matrix.Add(9.0, 2);
+
+            matrix.Finalize(3);
+
+            CPPUNIT_ASSERT_EQUAL(1.0, matrix.GetValue(0, 0));
+            CPPUNIT_ASSERT_EQUAL(2.0, matrix.GetValue(1, 0));
+            CPPUNIT_ASSERT_EQUAL(3.0, matrix.GetValue(2, 0));
+
+            CPPUNIT_ASSERT_EQUAL(4.0, matrix.GetValue(0, 1));
+            CPPUNIT_ASSERT_EQUAL(5.0, matrix.GetValue(1, 1));
+            CPPUNIT_ASSERT_EQUAL(6.0, matrix.GetValue(2, 1));
+
+            CPPUNIT_ASSERT_EQUAL(7.0, matrix.GetValue(0, 2));
+            CPPUNIT_ASSERT_EQUAL(8.0, matrix.GetValue(1, 2));
+            CPPUNIT_ASSERT_EQUAL(9.0, matrix.GetValue(2, 2));
+        }
+
+        // Test of Extend.
+        // Extending an empty matrix.
+        void testExtendEmpty()
+        {
+            SparseMatrix matrix(0, 0);
+            matrix.Finalize(3);
+
+            matrix.Extend(3, 9);
+
+            matrix.NewRow();
+
+            matrix.Add(1.0, 0);
+            matrix.Add(2.0, 1);
+            matrix.Add(3.0, 2);
+
+            matrix.NewRow();
+
+            matrix.Add(4.0, 0);
+            matrix.Add(5.0, 1);
+            matrix.Add(6.0, 2);
+
+            matrix.NewRow();
+
+            matrix.Add(7.0, 0);
+            matrix.Add(8.0, 1);
+            matrix.Add(9.0, 2);
+
+            matrix.Finalize(3);
+
+            CPPUNIT_ASSERT_EQUAL(1.0, matrix.GetValue(0, 0));
+            CPPUNIT_ASSERT_EQUAL(2.0, matrix.GetValue(1, 0));
+            CPPUNIT_ASSERT_EQUAL(3.0, matrix.GetValue(2, 0));
+
+            CPPUNIT_ASSERT_EQUAL(4.0, matrix.GetValue(0, 1));
+            CPPUNIT_ASSERT_EQUAL(5.0, matrix.GetValue(1, 1));
+            CPPUNIT_ASSERT_EQUAL(6.0, matrix.GetValue(2, 1));
+
+            CPPUNIT_ASSERT_EQUAL(7.0, matrix.GetValue(0, 2));
+            CPPUNIT_ASSERT_EQUAL(8.0, matrix.GetValue(1, 2));
+            CPPUNIT_ASSERT_EQUAL(9.0, matrix.GetValue(2, 2));
+        }
+
+        // Test of GetNumberNonemptyRows.
+        // No empty rows.
+        void testGetNumberNonemptyRowsNoEmpty()
+        {
+            SparseMatrix matrix(3, 9);
+
+            matrix.NewRow();
+
+            matrix.Add(1.0, 0);
+            matrix.Add(2.0, 1);
+            matrix.Add(3.0, 2);
+
+            matrix.NewRow();
+
+            matrix.Add(4.0, 0);
+            matrix.Add(5.0, 1);
+            matrix.Add(6.0, 2);
+
+            matrix.NewRow();
+
+            matrix.Add(7.0, 0);
+            matrix.Add(8.0, 1);
+            matrix.Add(9.0, 2);
+
+            matrix.Finalize(3);
+
+            CPPUNIT_ASSERT_EQUAL(size_t(3), matrix.GetNumberNonemptyRows());
+        }
+
+        // Test of GetNumberNonemptyRows.
+        // All empty rows.
+        void testGetNumberNonemptyRowsAllEmpty()
+        {
+            SparseMatrix matrix(3, 9);
+
+            matrix.NewRow();
+            matrix.NewRow();
+            matrix.NewRow();
+
+            matrix.Finalize(3);
+
+            CPPUNIT_ASSERT_EQUAL(size_t(0), matrix.GetNumberNonemptyRows());
+        }
+
+        // Test of GetNumberNonemptyRows.
+        // Some empty rows.
+        void testGetNumberNonemptyRowsSomeEmpty()
+        {
+            SparseMatrix matrix(3, 9);
+
+            matrix.NewRow();
+            matrix.Add(1.0, 0);
+
+            matrix.NewRow();
+            matrix.NewRow();
+
+            matrix.Finalize(3);
+
+            CPPUNIT_ASSERT_EQUAL(size_t(1), matrix.GetNumberNonemptyRows());
+        }
+
+        // Test of GetNumberNonemptyRows.
+        // Some empty rows.
+        void testGetNumberNonemptyRowsSomeEmpty2()
+        {
+            SparseMatrix matrix(3, 9);
+
+            matrix.NewRow();
+            matrix.Add(1.0, 0);
+
+            matrix.NewRow();
+
+            matrix.NewRow();
+            matrix.Add(2.0, 0);
+
+            matrix.Finalize(3);
+
+            CPPUNIT_ASSERT_EQUAL(size_t(2), matrix.GetNumberNonemptyRows());
+        }
+    };
   }
 }
