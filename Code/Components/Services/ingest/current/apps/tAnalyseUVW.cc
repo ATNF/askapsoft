@@ -236,17 +236,18 @@ private:
            const casa::Vector<casa::Double> bsln = tma2.uvw() - tma1.uvw();
                //ASKAPLOG_INFO_STR(logger, " uvw1: "<<tma1.uvw()<<" uvw2:"<<tma2.uvw());
            ASKAPCHECK(bsln.nelements() % 3 == 0, "Expect 3 elements per beam in uvw vector, size = "<<bsln.nelements()<<" for "<<ci->first<<" baseline");
-           const casa::uInt nBeams = 1;//bsln.nelements() / 3;
+           const casa::uInt nBeams = bsln.nelements() / 3;
            ++count;
            size_t nGoodBeams = 0;
            double maxDiff = -1;
            for (casa::uInt beam = 0; beam < nBeams; ++beam) {
-                double diff2 = 0.;
+                double diff2_meas = 0.;
+                double diff2_exp = 0.;
                 for (casa::uInt coord = 0; coord < 3; ++coord) {
-                     const double val = bsln[beam * 3 + coord] - ci->second[coord];
-                     diff2 += val * val;
+                     diff2_meas += bsln[beam * 3 + coord] * bsln[beam * 3 + coord];
+                     diff2_exp += ci->second[coord] * ci->second[coord];
                 }
-                const double diff = casa::sqrt(diff2);
+                const double diff = casa::sqrt(diff2_meas) - casa::sqrt(diff2_exp);
                 //ASKAPLOG_INFO_STR(logger, "Beam: "<<beam<<" bsln: "<<bsln<<" expected: "<<ci->second);
                 //ASKAPCHECK(diff < 0.001, "Difference exceeds 1mm for beam "<<beam<<" baseline "<<ci->first<<" max difference: "<<diff<<" metres");
                 if (diff < 0.001) {
