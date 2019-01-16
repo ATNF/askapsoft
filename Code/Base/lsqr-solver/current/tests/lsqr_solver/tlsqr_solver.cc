@@ -1,8 +1,3 @@
-/// @copyright (c) 2007 CSIRO
-/// Australia Telescope National Facility (ATNF)
-/// Commonwealth Scientific and Industrial Research Organisation (CSIRO)
-/// PO Box 76, Epping NSW 1710, Australia
-/// atnf-enquiries@csiro.au
 ///
 /// This file is part of the ASKAP software distribution.
 ///
