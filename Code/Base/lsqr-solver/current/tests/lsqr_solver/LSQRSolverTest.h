@@ -19,6 +19,8 @@ namespace askap
       CPPUNIT_TEST(testUnderdeterminedNonDamped);
       CPPUNIT_TEST(testUnderdeterminedDamped);
       CPPUNIT_TEST(testUnderdeterminedSeveralDampings);
+      CPPUNIT_TEST(testOverdetermined);
+      CPPUNIT_TEST(testNoElements);
 
       CPPUNIT_TEST_SUITE_END();
 
@@ -145,7 +147,7 @@ namespace askap
             LSQRSolver solver(system.matrix->GetTotalNumberRows(), nelements);
 
             Vector x(system.ncols, 0.0);
-            solver.Solve(niter, rmin, *system.matrix, *system.b_RHS, x, myrank, false);
+            solver.Solve(niter, rmin, *system.matrix, *system.b_RHS, x, myrank, true);
 
             double epsilon = 1.e-5;
 
@@ -191,13 +193,116 @@ namespace askap
             LSQRSolver solver(system.matrix->GetTotalNumberRows(), nelements);
 
             Vector x(system.ncols, 0.0);
-            solver.Solve(niter, rmin, *system.matrix, *system.b_RHS, x, myrank, false);
+            solver.Solve(niter, rmin, *system.matrix, *system.b_RHS, x, myrank, true);
 
             double epsilon = 1.e-5;
 
             CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0 / 6.0, x[0], epsilon);
             CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0 - 1.0 / 6.0, x[1], epsilon);
             CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0 + 1.0 / 6.0, x[2], epsilon);
+        }
+
+        //---------------------------------------------------------------------
+        // Testing overdetermined system.
+        //---------------------------------------------------------------------
+        // Consider a regression with constant, linear and quadratic terms:
+        // f(x) = b1 + b2 * x + b3 * x^2
+        //
+        // We build a matrix 3 x N:
+        //
+        //   1  x1  x1^2
+        //   1  x2  x2^2
+        //   ...
+        //   1  xn  xn^2,
+        //
+        // with x_i = i/N, i = 1, ..., N.
+        //
+        // Apply LSQR method and compare to the solution x = (b1, b2, b3).
+        // An example from [1].
+        // [1] Least Squares Estimation, Sara A. van de Geer, Volume 2, pp. 1041-1045,
+        //     in Encyclopedia of Statistics in Behavioral Science, 2005.
+        //---------------------------------------------------------------------
+        void testOverdetermined()
+        {
+            size_t nelements_total = 3;
+            size_t nrows = 1000;
+            double rmin = 1.e-14;
+            size_t niter = 100;
+
+            int myrank = 0;
+
+            size_t nelements = nelements_total;
+
+            SparseMatrix matrix(nrows, nelements * nrows);
+
+            Vector b_RHS(nrows, 0.0);
+
+            Vector b(3);
+            b[0] = 1.0;
+            b[1] = - 3.0;
+            b[2] = 0.0;
+
+            // Building the matrix with right hand side.
+            for (size_t i = 0; i < nrows; ++i)
+            {
+                matrix.NewRow();
+
+                double xi = double(i) / double(nrows);
+
+                matrix.Add(1.0, 0);
+                matrix.Add(xi, 1);
+                matrix.Add(xi * xi, 2);
+
+                b_RHS[i] = b[0] + b[1] * xi + b[2] * xi * xi;
+            }
+            matrix.Finalize(nelements);
+
+            LSQRSolver solver(nrows, nelements);
+
+            Vector x(nelements, 0.0);
+            solver.Solve(niter, rmin, matrix, b_RHS, x, myrank, true);
+
+            double epsilon = 1.e-14;
+
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(b[0], x[0], epsilon);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(b[1], x[1], epsilon);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(b[2], x[2], epsilon);
+        }
+
+        /*
+         * Testing matrix without elements. Solver should not run and solution should not change.
+         */
+        void testNoElements()
+        {
+            size_t ncols = 3;
+            size_t nrows = 3;
+
+            SparseMatrix matrix(nrows, ncols * nrows);
+            matrix.NewRow();
+            matrix.NewRow();
+            matrix.NewRow();
+
+            matrix.Finalize(ncols);
+
+            Vector b_RHS(nrows, 0.0);
+            b_RHS[0] = 1.0;
+            b_RHS[1] = 2.0;
+            b_RHS[2] = 3.0;
+
+            Vector x(ncols, 0.0);
+
+            double rmin = 1.e-14;
+            size_t niter = 100;
+
+            int myrank = 0;
+
+            LSQRSolver solver(nrows, ncols);
+
+            solver.Solve(niter, rmin, matrix, b_RHS, x, myrank, true);
+
+            CPPUNIT_ASSERT_EQUAL(0.0, x[0]);
+            CPPUNIT_ASSERT_EQUAL(0.0, x[1]);
+            CPPUNIT_ASSERT_EQUAL(0.0, x[2]);
         }
     };
   }
