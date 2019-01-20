@@ -374,7 +374,6 @@ EOFINNER
             echo "ERROR - Validation script \${scriptname} not found"
         else
             cd ..
-            module use /group/askap/continuum_validation
             loadModule continuum_validation_env
             log="${logs}/continuum_validation_${FIELDBEAM}_\${SLURM_JOB_ID}.log"
             validateArgs="\${fitsimage%%.fits}.fits"
