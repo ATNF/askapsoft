@@ -140,7 +140,7 @@ ${SLURM_CONFIG}
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=${jobname}
 ${exportDirective}
-#SBATCH --output=$slurmOut/slurm-flag1934-b${BEAM}-%j.out
+#SBATCH --output="$slurmOut/slurm-flag1934-b${BEAM}-%j.out"
 
 ${askapsoftModuleCommands}
 
@@ -150,14 +150,14 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-thisfile=$sbatchfile
-cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
+thisfile="$sbatchfile"
+cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
 USE_AOFLAGGER=${FLAG_1934_WITH_AOFLAGGER}
 
 if [ "\${USE_AOFLAGGER}" == "true" ]; then
 
-    log=${logs}/aoflag_1934_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+    log="${logs}/aoflag_1934_${FIELDBEAM}_\${SLURM_JOB_ID}.log"
 
     # Need to use the gnu PrgEnv, not the cray, to be able to load aoflagger
     if [ "\$(module list -t 2>&1 | grep PrgEnv-cray)" != "" ]; then
@@ -174,7 +174,7 @@ if [ "\${USE_AOFLAGGER}" == "true" ]; then
     if [ \$err != 0 ]; then
         exit \$err
     else
-        touch $FLAG_1934_CHECK_FILE
+        touch "$FLAG_1934_CHECK_FILE"
     fi
 
 else
@@ -182,7 +182,7 @@ else
     DO_AMP_FLAG=${DO_AMP_FLAG}
     if [ "\${DO_AMP_FLAG}" == "true" ]; then
 
-        parset=${parsets}/cflag_amp_1934_${FIELDBEAM}_\${SLURM_JOB_ID}.in
+        parset="${parsets}/cflag_amp_1934_${FIELDBEAM}_\${SLURM_JOB_ID}.in"
         cat > "\$parset" <<EOFINNER
 # The path/filename for the measurement set
 Cflag.dataset                           = ${msCal}
@@ -201,7 +201,7 @@ ${autocorrFlagging}
 
 EOFINNER
 
-        log=${logs}/cflag_amp_1934_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+        log="${logs}/cflag_amp_1934_${FIELDBEAM}_\${SLURM_JOB_ID}.log"
 
         NCORES=1
         NPPN=1
@@ -212,7 +212,7 @@ EOFINNER
         if [ \$err != 0 ]; then
             exit \$err
         else
-            touch $FLAG_1934_CHECK_FILE
+            touch "$FLAG_1934_CHECK_FILE"
         fi
     fi
 
@@ -220,7 +220,7 @@ EOFINNER
     DO_STOKESV=${FLAG_DO_STOKESV_1934}
     if [ "\${DO_DYNAMIC}" == "true" ] || [ "\${DO_STOKESV}" == "true" ]; then
 
-        parset=${parsets}/cflag_dynamic_1934_${FIELDBEAM}_\${SLURM_JOB_ID}.in
+        parset="${parsets}/cflag_dynamic_1934_${FIELDBEAM}_\${SLURM_JOB_ID}.in"
         cat > "\$parset" <<EOFINNER
 # The path/filename for the measurement set
 Cflag.dataset                           = ${msCal}
@@ -246,7 +246,7 @@ Cflag.stokesv_flagger.integrateTimes.threshold = ${FLAG_THRESHOLD_STOKESV_1934_T
 ${antennaFlagging}
 EOFINNER
 
-        log=${logs}/cflag_dynamic_1934_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+        log="${logs}/cflag_dynamic_1934_${FIELDBEAM}_\${SLURM_JOB_ID}.log"
 
         NCORES=1
         NPPN=1
@@ -257,7 +257,7 @@ EOFINNER
         if [ \$err != 0 ]; then
             exit \$err
         else
-            touch $FLAG_1934_CHECK_FILE
+            touch "$FLAG_1934_CHECK_FILE"
         fi
     fi
 

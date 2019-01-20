@@ -143,7 +143,7 @@ ${SLURM_CONFIG}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_SELAVY_SPEC}
 #SBATCH --job-name=${jobname}
 ${exportDirective}
-#SBATCH --output=$slurmOut/slurm-selavy-spec-%j.out
+#SBATCH --output="$slurmOut/slurm-selavy-spec-%j.out"
 
 ${askapsoftModuleCommands}
 
@@ -153,8 +153,8 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-thisfile=$sbatchfile
-cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
+thisfile="$sbatchfile"
+cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
 # Working directory for the selavy output
 seldir=${selavyDir}
@@ -185,8 +185,8 @@ for im in \${imlist}; do
 
     casaim="\${im%%.fits}"
     fitsim="\${im%%.fits}.fits"
-    parset=$parsets/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.in
-    log=$logs/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.log
+    parset="${parsets}/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.in"
+    log="${logs}/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.log"
     ${fitsConvertText}
     # Make a link so we point to a file in the current directory for
     # Selavy. This gets the referencing correct in the catalogue
@@ -204,8 +204,8 @@ done
 
 if [ "\${HAVE_IMAGES}" == "true" ]; then
 
-    parset=${parsets}/science_selavy_spectral_\${SLURM_JOB_ID}.in
-    log=${logs}/science_selavy_spectral_\${SLURM_JOB_ID}.log
+    parset="${parsets}/science_selavy_spectral_\${SLURM_JOB_ID}.in"
+    log="${logs}/science_selavy_spectral_\${SLURM_JOB_ID}.log"
     
     mkdir -p \${seldir}
     cd \${seldir}

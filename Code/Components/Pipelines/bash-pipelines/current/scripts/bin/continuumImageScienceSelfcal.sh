@@ -237,7 +237,7 @@ ${SLURM_CONFIG}
 #SBATCH --nodes=${NUM_NODES_SELFCAL}
 #SBATCH --job-name=${jobname}
 ${exportDirective}
-#SBATCH --output=$slurmOut/slurm-contImagingSelfcal-%j.out
+#SBATCH --output="$slurmOut/slurm-contImagingSelfcal-%j.out"
 
 ${askapsoftModuleCommands}
 
@@ -247,12 +247,12 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-thisfile=$sbatchfile
-cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
+thisfile="$sbatchfile"
+cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
 selfcalMethod=${SELFCAL_METHOD}
 
-msMetadata=${MS_METADATA}
+msMetadata="${MS_METADATA}"
 ra=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=RA)
 dec=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Dec)
 epoch=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Epoch)
@@ -313,7 +313,7 @@ Cimager.calibrate                               = false
 "
     fi
 
-    parset=${parsets}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}.in
+    parset="${parsets}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}.in"
 
     # generate the loop-dependant cimager parameters --> loopParams & dataSelectionParams
     cimagerSelfcalLoopParams
@@ -442,7 +442,7 @@ EOFINNER
 
         if [ "\${selfcalMethod}" != "CleanModel" ]; then
 
-            log=${logs}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}_selavy.log
+            log="${logs}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}_selavy.log"
             echo "--- Source finding with $selavy ---" > "\$log"
             echo "---    Loop=\$LOOP, Threshold = \${SELFCAL_SELAVY_THRESHOLD_ARRAY[\$LOOP]} --" >> "\$log"
             NCORES=${NPROCS_SELAVY}
@@ -457,7 +457,7 @@ EOFINNER
     
             if [ "${DO_POSITION_OFFSET}" == "true" ] && [ -e "${script_location}/fix_position_offsets.py" ]; then
               if [ \${LOOP} -eq ${SELFCAL_NUM_LOOPS} ]; then
-                log=${logs}/fix_position_offsets_\${SLURM_JOB_ID}.log
+                log="${logs}/fix_position_offsets_\${SLURM_JOB_ID}.log"
                 python "${script_location}/fix_position_offsets.py" ${script_args} > "\${log}"
               fi
             fi
@@ -471,7 +471,7 @@ EOFINNER
                     echo "# Flux limit for cmodel determined from image noise & SNR=${SELFCAL_COMPONENT_SNR_LIMIT}
     Cmodel.flux_limit    = \${fluxLimit}mJy" >> \$parset
                 fi
-                log=${logs}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}_cmodel.log
+                log="${logs}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}_cmodel.log"
                 echo "--- Model creation with $cmodel ---" > "\$log"
                 NCORES=2
                 NPPN=2
@@ -486,7 +486,7 @@ EOFINNER
 
         fi
 
-        log=${logs}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}_ccalibrator.log
+        log="${logs}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}_ccalibrator.log"
         echo "--- Calibration with $ccalibrator ---" > "\$log"
         echo "---    Loop \$LOOP, Interval = \${SELFCAL_INTERVAL_ARRAY[\$LOOP]} --" >> "\$log"
         echo "---    Normalise gains = \${SELFCAL_NORMALISE_GAINS_ARRAY[\$LOOP]} --" >> "\$log"
@@ -514,7 +514,7 @@ EOFINNER
     fi
 
     # Run the imager, calibrating if not the first time.
-    log=${logs}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}.log
+    log="${logs}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}.log"
     echo "--- Imaging with $theimager ---" > "\$log"
     NCORES=${NUM_CPUS_CONTIMG_SCI}
     NPPN=${CPUS_PER_CORE_CONT_IMAGING}

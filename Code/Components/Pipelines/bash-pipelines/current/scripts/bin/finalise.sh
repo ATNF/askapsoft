@@ -124,6 +124,7 @@ EOF
 
     # make links to the current job list, both at the top level *and* in each output directory
     makeLink "$JOBLIST"
+    IFS="${IFS_FIELDS}"
     for FIELD in ${FIELD_LIST}; do
         CWD=$(pwd)
         if [ -e "${ORIGINAL_OUTPUT}/${FIELD}" ]; then
@@ -132,6 +133,6 @@ EOF
             cd "${CWD}"
         fi
     done
-
+    IFS="${IFS_DEFAULT}"
 
 fi

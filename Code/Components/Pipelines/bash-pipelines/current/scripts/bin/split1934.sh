@@ -123,7 +123,7 @@ ${SLURM_CONFIG}
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=${jobname}
 ${exportDirective}
-#SBATCH --output=$slurmOut/slurm-splitMergeCal-b${BEAM}-%j.out
+#SBATCH --output="$slurmOut/slurm-splitMergeCal-b${BEAM}-%j.out"
 
 ${askapsoftModuleCommands}
 
@@ -133,8 +133,8 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-thisfile=$sbatchfile
-cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
+thisfile="$sbatchfile"
+cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
 finalMS=${msCal}
 sb1934dir=$sb1934dir
@@ -165,7 +165,7 @@ for dataset in \${inputMSlist}; do
     sedstr="s/\.ms/_\${COUNT}\.ms/g"
     outputms=\$(echo \$finalMS | sed -e \$sedstr)
     mergelist="\$mergelist \$outputms"
-    parset=${parsets}/split_1934_${FIELDBEAM}_\${SLURM_JOB_ID}_\${COUNT}.in
+    parset="${parsets}/split_1934_${FIELDBEAM}_\${SLURM_JOB_ID}_\${COUNT}.in"
     cat > "\$parset" <<EOFINNER
 # Input measurement set
 # Default: <no default>
@@ -195,7 +195,7 @@ stman.bucketsize  = ${BUCKET_SIZE}
 stman.tilenchan   = ${TILE_NCHAN_1934}
 EOFINNER
 
-    log=${logs}/split_1934_${FIELDBEAM}_\${SLURM_JOB_ID}_\${COUNT}.log
+    log="${logs}/split_1934_${FIELDBEAM}_\${SLURM_JOB_ID}_\${COUNT}.log"
 
     NCORES=1
     NPPN=1
@@ -209,7 +209,7 @@ EOFINNER
 done
 
 commandLineFlags="-c ${TILE_NCHAN_1934} -o \${finalMS} \${mergelist}"
-log=${logs}/mergeMS_1934_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+log="${logs}/mergeMS_1934_${FIELDBEAM}_\${SLURM_JOB_ID}.log"
 
 echo "Running msmerge with arguments: \${commandLineFlags}" > \$log
 NCORES=1
@@ -223,7 +223,7 @@ if [ \$err != 0 ]; then
 fi
 
 # Make the metadata file for the new MS
-metadataFile=${MS_METADATA_CAL}
+metadataFile="${MS_METADATA_CAL}"
 NCORES=1
 NPPN=1
 srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${mslist} --full \${finalMS} 1>& "\${metadataFile}"
@@ -249,7 +249,7 @@ ${SLURM_CONFIG}
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=${jobname}
 ${exportDirective}
-#SBATCH --output=$slurmOut/slurm-split1934-b${BEAM}-%j.out
+#SBATCH --output="$slurmOut/slurm-split1934-b${BEAM}-%j.out"
 
 ${askapsoftModuleCommands}
 
@@ -259,10 +259,10 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-thisfile=$sbatchfile
-cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
+thisfile="$sbatchfile"
+cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
-parset=${parsets}/split_1934_${FIELDBEAM}_\${SLURM_JOB_ID}.in
+parset="${parsets}/split_1934_${FIELDBEAM}_\${SLURM_JOB_ID}.in"
 cat > "\$parset" <<EOFINNER
 # Input measurement set
 # Default: <no default>
@@ -290,7 +290,7 @@ stman.bucketsize  = ${BUCKET_SIZE}
 stman.tilenchan   = ${TILE_NCHAN_1934}
 EOFINNER
 
-log=${logs}/split_1934_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+log="${logs}/split_1934_${FIELDBEAM}_\${SLURM_JOB_ID}.log"
 
 NCORES=1
 NPPN=1

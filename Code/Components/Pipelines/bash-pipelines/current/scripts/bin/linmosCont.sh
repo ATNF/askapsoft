@@ -90,7 +90,7 @@ ${SLURM_CONFIG}
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=${jobname}
 ${exportDirective}
-#SBATCH --output=$slurmOut/slurm-linmosC-%j.out
+#SBATCH --output="$slurmOut/slurm-linmosC-%j.out"
 
 ${askapsoftModuleCommands}
 
@@ -100,8 +100,8 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-thisfile=$sbatchfile
-cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
+thisfile="$sbatchfile"
+cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
 DO_ALT_IMAGER_CONT="${DO_ALT_IMAGER_CONT}"
 NUM_TAYLOR_TERMS=${NUM_TAYLOR_TERMS}
@@ -157,8 +157,8 @@ if [ "\${imList}" != "" ]; then
     fi
     echo "Mosaicking to form \${imageName} using weighttype=${LINMOS_SINGLE_FIELD_WEIGHTTYPE}"
     echo "Image list = \${imList}"
-    parset=${parsets}/science_\${jobCode}_${FIELDBEAM}_\${SLURM_JOB_ID}.in
-    log=${logs}/science_\${jobCode}_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+    parset="${parsets}/science_\${jobCode}_${FIELDBEAM}_\${SLURM_JOB_ID}.in"
+    log="${logs}/science_\${jobCode}_${FIELDBEAM}_\${SLURM_JOB_ID}.log"
     cat > "\${parset}" << EOFINNER
 linmos.names            = [\${imList}]
 linmos.weights          = [\${wtList}]

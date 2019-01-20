@@ -404,9 +404,14 @@ EOF
     FIELD_LIST=""
     TILE_LIST=""
     NUM_TILES=0
-    for FIELD in $(sort -k2 "$FIELDLISTFILE" | awk '{print $2}' | uniq );
+    # Set the IFS, so that we only split on newlines, not spaces (allowing for spaces within the field names
+    IFS="${IFS_FIELDS}"
+    # Determine the field name to be everything under 'Name' - including spaces (so can be multiple columns)
+    for FIELD in $(sort -k2 "$FIELDLISTFILE" | awk '{split($0,a); field=a[2];for(i=3;i<NF-3;i++){field=sprintf("%s %s",field,a[i]);} print field}');
     do
-        FIELD_LIST="$FIELD_LIST $FIELD"
+        # keep the fields split by newlines
+        FIELD_LIST="$FIELD_LIST
+$FIELD"
         getTile
         if [ "$FIELD" != "$TILE" ]; then
             isNew=true
@@ -416,21 +421,24 @@ EOF
                 fi
             done
             if [ "$isNew" == "true" ]; then
-                TILE_LIST="$TILE_LIST $TILE"
+                TILE_LIST="$TILE_LIST
+$TILE"
                 ((NUM_TILES++))
             fi
         fi
     done
+    IFS="${IFS_DEFAULT}"
 
     # Print a simplified list of fields for the user
     echo "List of fields: "
     COUNT=0
+    IFS="${IFS_FIELDS}"
     for FIELD in ${FIELD_LIST}; do
         ID=$(echo "$COUNT" | awk '{printf "%02d",$1}')
         echo "${ID} - ${FIELD}"
         ((COUNT++))
     done
-
+    IFS="${IFS_DEFAULT}"
 
     # Set the OPAL Project ID
     BACKUP_PROJECT_ID=${PROJECT_ID}

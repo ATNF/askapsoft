@@ -42,7 +42,7 @@ ${SLURM_CONFIG}
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=${jobname}
 ${exportDirective}
-#SBATCH --output=$slurmOut/slurm-splitSci-b${BEAM}-%j.out
+#SBATCH --output="$slurmOut/slurm-splitSci-b${BEAM}-%j.out"
 
 ${askapsoftModuleCommands}
 
@@ -52,10 +52,10 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-thisfile=$sbatchfile
-cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
+thisfile="$sbatchfile"
+cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
-parset=${parsets}/split_science_${FIELDBEAM}_\${SLURM_JOB_ID}.in
+parset="${parsets}/split_science_${FIELDBEAM}_\${SLURM_JOB_ID}.in"
 cat > "\$parset" <<EOFINNER
 # Input measurement set
 # Default: <no default>
@@ -87,7 +87,7 @@ stman.bucketsize  = ${BUCKET_SIZE}
 stman.tilenchan   = ${TILE_NCHAN_SCIENCE}
 EOFINNER
 
-log=${logs}/split_science_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+log="${logs}/split_science_${FIELDBEAM}_\${SLURM_JOB_ID}.log"
 
 NCORES=1
 NPPN=1
@@ -116,7 +116,7 @@ ${SLURM_CONFIG}
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=${jobname}
 ${exportDirective}
-#SBATCH --output=$slurmOut/slurm-copySci-b${BEAM}-%j.out
+#SBATCH --output="$slurmOut/slurm-copySci-b${BEAM}-%j.out"
 
 ${askapsoftModuleCommands}
 
@@ -126,10 +126,10 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-thisfile=$sbatchfile
-cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
+thisfile="$sbatchfile"
+cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
-log=${logs}/copyMS_science_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+log="${logs}/copyMS_science_${FIELDBEAM}_\${SLURM_JOB_ID}.log"
 STARTTIME=\$(date +%FT%T)
 cat > \$log <<EOFINNER
 Log file for copying input measurement set :

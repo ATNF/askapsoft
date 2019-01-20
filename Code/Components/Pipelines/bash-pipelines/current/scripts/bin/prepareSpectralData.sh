@@ -72,7 +72,7 @@ ${SLURM_CONFIG}
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=${jobname}
 ${exportDirective}
-#SBATCH --output=$slurmOut/slurm-splitSLsci-%j.out
+#SBATCH --output="$slurmOut/slurm-splitSLsci-%j.out"
 
 ${askapsoftModuleCommands}
 
@@ -82,10 +82,10 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-thisfile=$sbatchfile
-cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
+thisfile="$sbatchfile"
+cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
-parset=${parsets}/split_spectralline_science_${FIELDBEAM}_\${SLURM_JOB_ID}.in
+parset="${parsets}/split_spectralline_science_${FIELDBEAM}_\${SLURM_JOB_ID}.in"
 cat > "\$parset" <<EOFINNER
 # Input measurement set
 # Default: <no default>
@@ -107,7 +107,7 @@ stman.bucketsize  = ${BUCKET_SIZE}
 stman.tilenchan   = ${TILENCHAN_SL}
 EOFINNER
 
-log=${logs}/split_spectralline_science_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+log="${logs}/split_spectralline_science_${FIELDBEAM}_\${SLURM_JOB_ID}.log"
 
 NCORES=1
 NPPN=1
@@ -161,7 +161,7 @@ ${SLURM_CONFIG}
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=${jobname}
 ${exportDirective}
-#SBATCH --output=$slurmOut/slurm-calappSLsci-%j.out
+#SBATCH --output="$slurmOut/slurm-calappSLsci-%j.out"
 
 ${askapsoftModuleCommands}
 
@@ -171,11 +171,11 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-thisfile=$sbatchfile
-cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
+thisfile="$sbatchfile"
+cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
-parset=${parsets}/apply_gains_cal_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.in
-log=${logs}/apply_gains_cal_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+parset="${parsets}/apply_gains_cal_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.in"
+log="${logs}/apply_gains_cal_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.log"
 cat > "\$parset" <<EOFINNER
 Ccalapply.dataset                         = ${msSciSL}
 #
@@ -206,7 +206,7 @@ extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv
 if [ \$err != 0 ]; then
     exit \$err
 else
-    touch $SL_GAINS_CHECK_FILE
+    touch "$SL_GAINS_CHECK_FILE"
 fi
 
 EOFOUTER

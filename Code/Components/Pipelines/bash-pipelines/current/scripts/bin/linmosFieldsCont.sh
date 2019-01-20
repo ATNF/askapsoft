@@ -68,7 +68,7 @@ for TILE in $FULL_TILE_LIST; do
 
             if [ "${DO_IT}" == "true" ]; then
 
-                sbatchfile=$slurms/linmos_all_cont.sbatch
+                sbatchfile="$slurms/linmos_all_cont.sbatch"
                 cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
 ${SLURM_CONFIG}
@@ -77,7 +77,7 @@ ${SLURM_CONFIG}
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=linmosFullC
 ${exportDirective}
-#SBATCH --output=$slurmOut/slurm-linmosC-%j.out
+#SBATCH --output="$slurmOut/slurm-linmosC-%j.out"
 
 ${askapsoftModuleCommands}
 
@@ -87,8 +87,8 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-thisfile=$sbatchfile
-cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
+thisfile="$sbatchfile"
+cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
 DO_ALT_IMAGER_CONT="${DO_ALT_IMAGER_CONT}"
 NUM_TAYLOR_TERMS=${NUM_TAYLOR_TERMS}
@@ -116,10 +116,16 @@ echo "Mosaicking tile \$THISTILE"
 
 # First get the list of FIELDs that contribute to this TILE
 TILE_FIELD_LIST=""
+IFS="${IFS_FIELDS}"
 for FIELD in \$FIELD_LIST; do
     getTile
     if [ "\$THISTILE" == "ALL" ] || [ "\$TILE" == "\$THISTILE" ]; then
-        TILE_FIELD_LIST="\$TILE_FIELD_LIST \$FIELD"
+        if [ "\${TILE_FIELD_LIST}" == "" ]; then
+            TILE_FIELD_LIST="\$FIELD"
+        else
+            TILE_FIELD_LIST="\$TILE_FIELD_LIST
+\$FIELD"
+        fi
     fi
 done
 echo "Tile \$THISTILE has field list \$TILE_FIELD_LIST"
@@ -143,6 +149,7 @@ for FIELD in \${TILE_FIELD_LIST}; do
         fi
     fi
 done
+IFS="${IFS_DEFAULT}"
 
 if [ "\$THISTILE" == "ALL" ]; then
     jobCode=linmosC_Full_\${imageCode}
@@ -160,8 +167,8 @@ if [ "\${imList}" != "" ]; then
 
     if [ \${listCount} -gt 1 ]; then
         echo "Mosaicking to form \${imageName}"
-        parset=${parsets}/science_\${jobCode}_\${SLURM_JOB_ID}.in
-        log=${logs}/science_\${jobCode}_\${SLURM_JOB_ID}.log
+        parset="${parsets}/science_\${jobCode}_\${SLURM_JOB_ID}.in"
+        log="${logs}/science_\${jobCode}_\${SLURM_JOB_ID}.log"
         cat > "\${parset}" << EOFINNER
 linmos.names            = [\${imList}]
 linmos.weights          = [\${wtList}]

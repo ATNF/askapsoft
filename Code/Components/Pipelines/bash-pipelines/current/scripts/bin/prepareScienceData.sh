@@ -91,7 +91,7 @@ if [ "${DO_IT}" == "true" ]; then
     fi
 
     # Select only the current field
-    fieldParam="fieldnames   = ${FIELD}"
+    fieldParam="fieldnames   = \"${FIELD}\""
 
     # Work out whether we need to run mssplit at all.
     # Four cases here:

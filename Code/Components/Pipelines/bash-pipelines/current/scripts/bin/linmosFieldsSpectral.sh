@@ -71,7 +71,7 @@ for imageCode in ${mosaicImageList}; do
             if [ "${NUM_SPECTRAL_CUBES}" -gt 1 ]; then
                 code="${code}${subband}"
             fi
-            sbatchfile=$slurms/linmos_all_spectral_${code}.sbatch
+            sbatchfile="$slurms/linmos_all_spectral_${code}.sbatch"
             cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
 ${SLURM_CONFIG}
@@ -81,7 +81,7 @@ ${SLURM_CONFIG}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_SPEC_IMAGING}
 #SBATCH --job-name=linmosFullS${imageCode}
 ${exportDirective}
-#SBATCH --output=$slurmOut/slurm-linmosS-%j.out
+#SBATCH --output="$slurmOut/slurm-linmosS-%j.out"
 
 ${askapsoftModuleCommands}
 
@@ -91,8 +91,8 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-thisfile=$sbatchfile
-cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
+thisfile="$sbatchfile"
+cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
 IMAGE_BASE_SPECTRAL=${IMAGE_BASE_SPECTRAL}
 SB_SCIENCE=${SB_SCIENCE}
@@ -118,12 +118,19 @@ for THISTILE in \$FULL_TILE_LIST; do
 
     # First get the list of FIELDs that contribute to this TILE
     TILE_FIELD_LIST=""
+    IFS="${IFS_FIELDS}"
     for FIELD in \$FIELD_LIST; do
         getTile
         if [ "\$THISTILE" == "ALL" ] || [ "\$TILE" == "\$THISTILE" ]; then
-            TILE_FIELD_LIST="\$TILE_FIELD_LIST \$FIELD"
+            if [ "\${TILE_FIELD_LIST}" == "" ]; then
+                TILE_FIELD_LIST="\$FIELD"
+            else
+                TILE_FIELD_LIST="\$TILE_FIELD_LIST
+\$FIELD"
+            fi
         fi
     done
+    IFS="${IFS_DEFAULT}"
     echo "Tile \$THISTILE has field list \$TILE_FIELD_LIST"
 
     imageCode=${imageCode}
@@ -135,6 +142,7 @@ for THISTILE in \$FULL_TILE_LIST; do
     wtList=""
     BEAM=all
     listCount=0
+    IFS="${IFS_FIELDS}"
     for FIELD in \${TILE_FIELD_LIST}; do
         setImageProperties spectral
         im="\${FIELD}/\${imageName}"
@@ -156,6 +164,7 @@ for THISTILE in \$FULL_TILE_LIST; do
             fi
         fi
     done
+    IFS="${IFS_DEFAULT}"
 
     if [ "\$THISTILE" == "ALL" ]; then
         jobCode=linmosS_Full_\${imageCode}
@@ -176,8 +185,8 @@ for THISTILE in \$FULL_TILE_LIST; do
                 weightsImage="\${weightsImage}.\${imageCode}"
             fi
             echo "Mosaicking to form \${imageName}"
-            parset=${parsets}/science_\${jobCode}_\${SLURM_JOB_ID}.in
-            log=${logs}/science_\${jobCode}_\${SLURM_JOB_ID}.log
+            parset="${parsets}/science_\${jobCode}_\${SLURM_JOB_ID}.in"
+            log="${logs}/science_\${jobCode}_\${SLURM_JOB_ID}.log"
             cat > "\${parset}" << EOFINNER
 linmos.names            = [\${imList}]
 linmos.weights          = [\${wtList}]

@@ -67,7 +67,7 @@ ${SLURM_CONFIG}
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=${jobname}
 ${exportDirective}
-#SBATCH --output=$slurmOut/slurm-linmos-%j.out
+#SBATCH --output="$slurmOut/slurm-linmos-%j.out"
 
 ${askapsoftModuleCommands}
 
@@ -77,11 +77,11 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-thisfile=$sbatchfile
-cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
+thisfile="$sbatchfile"
+cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
-parset=${parsets}/science_linmos_\${SLURM_JOB_ID}.in
-log=${logs}/science_linmos_\${SLURM_JOB_ID}.log
+parset="${parsets}/science_linmos_\${SLURM_JOB_ID}.in"
+log="${logs}/science_linmos_\${SLURM_JOB_ID}.log"
 
 # bit of image name before the beam ID
 imagePrefix=image.restored.wr.${subband}.${IMAGE_BASE_SPECTRAL}

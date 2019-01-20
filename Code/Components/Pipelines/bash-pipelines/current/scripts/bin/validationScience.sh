@@ -28,7 +28,7 @@
 #
 if [ "${DO_VALIDATION_SCIENCE}" == "true" ]; then
     
-    sbatchfile=$slurms/validationScience.sbatch
+    sbatchfile="$slurms/validationScience.sbatch"
     cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
 ${SLURM_CONFIG}
@@ -37,7 +37,7 @@ ${SLURM_CONFIG}
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=validateSci
 ${exportDirective}
-#SBATCH --output=$slurmOut/slurm-validationScience-%j.out
+#SBATCH --output="$slurmOut/slurm-validationScience-%j.out"
 
 ${askapsoftModuleCommands}
 
@@ -47,8 +47,8 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-thisfile=$sbatchfile
-cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
+thisfile="$sbatchfile"
+cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
 diagnostics=$diagnostics
 FIELD_LIST="${FIELD_LIST}"
@@ -64,6 +64,7 @@ ALT_IMAGER_SINGLE_FILE=${ALT_IMAGER_SINGLE_FILE}
 ALT_IMAGER_SINGLE_FILE_CONTCUBE=${ALT_IMAGER_SINGLE_FILE_CONTCUBE}
 PROJECT_ID=${PROJECT_ID}
 
+IFS="${IFS_FIELDS}"
 for FIELD in \${FIELD_LIST}; do
 
     # diagnostics directory for individual beam data
@@ -86,6 +87,7 @@ for FIELD in \${FIELD_LIST}; do
     beamwiseCubeStats.py -c \${FIELD}/\${imageName}
 
     # Cube stats and restoring beam for the continuum cubes, iterating over polarisation
+    IFS="${IFS_DEFAULT}"
     for POLN in \${POL_LIST}; do
 
         # make a lower-case version of the polarisation, for image name

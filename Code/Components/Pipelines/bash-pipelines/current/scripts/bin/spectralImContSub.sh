@@ -112,7 +112,7 @@ ${SLURM_CONFIG}
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=${jobname}
 ${exportDirective}
-#SBATCH --output=$slurmOut/slurm-imcontsubSL-%j.out
+#SBATCH --output="$slurmOut/slurm-imcontsubSL-%j.out"
 
 ${askapsoftModuleCommands}
 
@@ -122,8 +122,8 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-thisfile=$sbatchfile
-cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
+thisfile="$sbatchfile"
+cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
 BEAM=${BEAM}
 imageName=${imageName}
@@ -142,7 +142,7 @@ else
     mkdir -p \$workdir
     cd \$workdir
 
-    log=${logs}/spectral_imcontsub_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+    log="${logs}/spectral_imcontsub_${FIELDBEAM}_\${SLURM_JOB_ID}.log"
     STARTTIME=\$(date +%FT%T)
 
     ${setup}
@@ -170,8 +170,8 @@ else
         echo "Converting contsub images to FITS"
         casaim="\${contsubName%%.fits}"
         fitsim="\${contsubName%%.fits}.fits"
-        parset=$parsets/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.in
-        log=$logs/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.log
+        parset="${parsets}/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.in"
+        log="${logs}/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.log"
         ${fitsConvertText}
     fi
     
@@ -195,7 +195,7 @@ ${SLURM_CONFIG}
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=${jobname}
 ${exportDirective}
-#SBATCH --output=$slurmOut/slurm-imcontsubSL-%j.out
+#SBATCH --output="$slurmOut/slurm-imcontsubSL-%j.out"
 
 ${askapsoftModuleCommands}
 
@@ -205,8 +205,8 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-thisfile=$sbatchfile
-cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
+thisfile="$sbatchfile"
+cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
 BEAM=${BEAM}
 imageName=${imageName}
@@ -242,7 +242,7 @@ rc=robust_contsub()
 rc.poly(infile=image,threshold=threshold,verbose=True,fit_order=fit_order,n_every=n_every,log_every=10)
 
 EOFINNER
-    log=${logs}/spectral_imcontsub_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+    log="${logs}/spectral_imcontsub_${FIELDBEAM}_\${SLURM_JOB_ID}.log"
     STARTTIME=\$(date +%FT%T)
     NCORES=1
     NPPN=1
@@ -267,8 +267,8 @@ EOFINNER
         echo "Converting contsub images to FITS"
         casaim="\${contsubName%%.fits}"
         fitsim="\${contsubName%%.fits}.fits"
-        parset=$parsets/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.in
-        log=$logs/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.log
+        parset="${parsets}/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.in"
+        log="${logs}/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.log"
         ${fitsConvertText}
     fi
 

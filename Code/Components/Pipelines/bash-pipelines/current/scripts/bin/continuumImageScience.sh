@@ -62,7 +62,7 @@ ${SLURM_CONFIG}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_CONT_IMAGING}
 #SBATCH --job-name=${jobname}
 ${exportDirective}
-#SBATCH --output=$slurmOut/slurm-contImaging-%j.out
+#SBATCH --output="$slurmOut/slurm-contImaging-%j.out"
 
 ${askapsoftModuleCommands}
 
@@ -72,8 +72,8 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-thisfile=$sbatchfile
-cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
+thisfile="$sbatchfile"
+cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
 # Parameters that can vary with self-calibration loop number (which is
 #     zero in this case)
@@ -86,7 +86,7 @@ LOOP=0
 cimagerSelfcalLoopParams
 dataSelectionSelfcalLoop Cimager
 
-parset=${parsets}/science_imaging_${FIELDBEAM}_\${SLURM_JOB_ID}.in
+parset="${parsets}/science_imaging_${FIELDBEAM}_\${SLURM_JOB_ID}.in"
 cat > "\$parset" <<EOFINNER
 ${cimagerParams}
 #
@@ -97,7 +97,7 @@ ${cimagerParams}
 Cimager.calibrate                               = false
 EOFINNER
 
-log=${logs}/science_imaging_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+log="${logs}/science_imaging_${FIELDBEAM}_\${SLURM_JOB_ID}.log"
 
 NCORES=${NUM_CPUS_CONTIMG_SCI}
 NPPN=${CPUS_PER_CORE_CONT_IMAGING}

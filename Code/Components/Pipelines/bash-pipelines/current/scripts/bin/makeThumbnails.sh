@@ -32,7 +32,7 @@
 
 if [ "${DO_MAKE_THUMBNAILS}" == "true" ]; then
 
-    sbatchfile=$slurms/makeThumbnails.sbatch
+    sbatchfile="$slurms/makeThumbnails.sbatch"
     cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
 ${SLURM_CONFIG}
@@ -41,7 +41,7 @@ ${SLURM_CONFIG}
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=thumbnails
 ${exportDirective}
-#SBATCH --output=$slurmOut/slurm-thumbnails-%j.out
+#SBATCH --output="$slurmOut/slurm-thumbnails-%j.out"
 
 ${askapsoftModuleCommands}
 
@@ -51,8 +51,8 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-thisfile=$sbatchfile
-cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
+thisfile="$sbatchfile"
+cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
 
 # Define the lists of image names, types, 
@@ -66,7 +66,7 @@ if [ "\${pathToScript}" == "" ]; then
         im=\${casdaTwoDimImageNames[i]}
         title=\${casdaTwoDimThumbTitles[i]}
     
-        log=${logs}/thumbnails-\${im##*/}_\${SLURM_JOB_ID}.log
+        log="${logs}/thumbnails-\${im##*/}_\${SLURM_JOB_ID}.log"
         script=${parsets}/thumbnails-\${im##*/}_\${SLURM_JOBID}.py
         cat > "\$script" <<EOF
 #!/usr/bin/env python
@@ -126,8 +126,8 @@ EOF
 
 else
 
-    log=${logs}/thumbnails_\${SLURM_JOB_ID}.log
-    parset=${parsets}/thumbnails_\${SLURM_JOB_ID}.in
+    log="${logs}/thumbnails_\${SLURM_JOB_ID}.log"
+    parset="${parsets}/thumbnails_\${SLURM_JOB_ID}.in"
     
     for((i=0;i<\${#casdaTwoDimImageNames[@]};i++)); do
     
