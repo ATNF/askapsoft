@@ -410,8 +410,12 @@ EOF
     for FIELD in $(sort -k2 "$FIELDLISTFILE" | awk '{split($0,a); field=a[2];for(i=3;i<NF-3;i++){field=sprintf("%s %s",field,a[i]);} print field}');
     do
         # keep the fields split by newlines
-        FIELD_LIST="$FIELD_LIST
+        if [ "${FIELD_LIST}" == "" ]; then
+            FIELD_LIST="${FIELD}"
+        else
+            FIELD_LIST="$FIELD_LIST
 $FIELD"
+        fi
         getTile
         if [ "$FIELD" != "$TILE" ]; then
             isNew=true
@@ -421,8 +425,12 @@ $FIELD"
                 fi
             done
             if [ "$isNew" == "true" ]; then
-                TILE_LIST="$TILE_LIST
+                if [ "${TILE_LIST}" == "" ]; then
+                    TILE_LIST="${TILE}"
+                else
+                    TILE_LIST="$TILE_LIST
 $TILE"
+                fi
                 ((NUM_TILES++))
             fi
         fi
