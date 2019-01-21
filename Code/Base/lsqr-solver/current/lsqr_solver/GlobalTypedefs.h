@@ -10,15 +10,11 @@
 #include <vector>
 #include <cstddef>
 
-#include <lsqr_solver/Point.h>
-
 //#define PARALLEL
 
 namespace askap { namespace lsqr {
 
     typedef std::vector<double> Vector;
-
-    typedef std::vector<Point> Vector3D;
 
 }} // namespace askap.lsqr
 
