@@ -142,7 +142,7 @@ if [ "\${pathToScript}" != "" ]; then
             echo "noise map base = \$noisemapbase"
 
             # need to convert to FITS
-            parset="\${fitsParset}
+            parset="\${fitsParset}"
             casaim=\${noisemapbase}
             fitsim=\${noisemapbase}.fits
             ${fitsConvertText}
