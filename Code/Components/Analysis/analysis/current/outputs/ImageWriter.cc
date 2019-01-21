@@ -162,6 +162,7 @@ void ImageWriter::writeMask(const casa::Array<bool> &mask,
     ASKAPASSERT(mask.ndim() == itsShape.size());
     ASKAPASSERT(loc.size() == itsShape.size());
     boost::shared_ptr<accessors::IImageAccess> imageAcc = accessors::imageAccessFactory(itsParset);
+    imageAcc->makeDefaultMask(itsImageName);
     imageAcc->writeMask(itsImageName, mask, loc);
 
 }
