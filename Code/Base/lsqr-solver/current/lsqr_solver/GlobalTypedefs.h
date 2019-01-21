@@ -8,9 +8,6 @@
 #define SRC_GLOBALTYPEDEFS_H_
 
 #include <vector>
-#include <cstddef>
-
-//#define PARALLEL
 
 namespace askap { namespace lsqr {
 
