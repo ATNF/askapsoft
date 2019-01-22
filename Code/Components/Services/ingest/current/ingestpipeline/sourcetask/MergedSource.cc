@@ -56,6 +56,7 @@
 #include "casacore/measures/Measures/Stokes.h"
 #include "casacore/casa/OS/Timer.h"
 #include "casacore/casa/OS/Time.h"
+#include "casacore/casa/Arrays/Vector.h"
 #include "casacore/casa/Arrays/Matrix.h"
 #include "casacore/casa/Arrays/MatrixMath.h"
 
@@ -114,6 +115,18 @@ MergedSource::MergedSource(const LOFAR::ParameterSet& params,
         ASKAPLOG_DEBUG_STR(logger, "Source task will not load beam offsets");
     }
     ASKAPASSERT(!itsBeamOffsetsFromMetadata || !itsBeamOffsetsFromParset);
+    //
+
+    // fill the array layout info which is used to perform cross-checks on UVWs
+    // We could've extracted this info on-the-fly, but it is marginally better to take it
+    // out of the loop
+    const std::vector<Antenna>& antennas = config.antennas();
+    itsArrayLayout.resize(antennas.size(), 3u);
+    for (casa::uInt ant = 0; ant < antennas.size(); ++ant) {
+         casa::Vector<casa::Double> antPos = antennas[ant].position();
+         ASKAPCHECK(antPos.nelements() == 3, "Expect exactly 3 elements for antenna "<<ant<<" position");
+         itsArrayLayout.row(ant) = antPos;
+    }
     //
 
     // Setup a signal handler to catch SIGINT, SIGTERM and SIGUSR1
@@ -377,6 +390,8 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
 
     const casa::uInt nAntenna = itsVisConverter.config().antennas().size();
     ASKAPCHECK(nAntenna > 0, "Must have at least one antenna defined");
+    ASKAPASSERT(nAntenna == itsArrayLayout.nrow());
+    ASKAPDEBUGASSERT(3u == itsArrayLayout.ncolumn());
 
     // Add the scan index
     chunk->scan() = itsScanManager.scanIndex();
@@ -475,12 +490,17 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
          ASKAPASSERT(antenna1 < nAntenna);
          ASKAPASSERT(antenna2 < nAntenna);
          if (itsVisConverter.isAntennaGood(antenna1) && itsVisConverter.isAntennaGood(antenna2)) {
+             double uvwLength2 = 0., layoutLength2 = 0.;
              for (casa::uInt coord = 0, offset = beam * 3; coord < 3; ++coord,++offset) {
                   ASKAPASSERT(offset < uvwBuffer.ncolumn());
                   chunk->uvw()[row](coord) = uvwBuffer(antenna1,offset) - uvwBuffer(antenna2,offset);
                   ASKAPCHECK(!isnan(chunk->uvw()[row](coord)), "Received NaN as one of the baseline spacings for row="<<row<<" (antennas: "<<
                              antenna1<<" "<<antenna2<<") coordinate="<<coord<<" beam="<<beam);
+                  uvwLength2 += casa::square(chunk->uvw()[row](coord));
+                  layoutLength2 += casa::square(itsArrayLayout(antenna1,coord) - itsArrayLayout(antenna2,coord));
              }
+             ASKAPCHECK(casa::abs(casa::sqrt(uvwLength2) - casa::sqrt(layoutLength2)) < 1e-3, "The length of uvw vector for row="<<row<<" (antennas: "<<
+                             antenna1<<" "<<antenna2<<", beam: "<<beam<<") is more than 1mm different from the baseline length expected from array layout. Junk metadata are suspected for either of the antennas.");
          }
     }
      
