@@ -26,7 +26,7 @@
 /// @author Stephen Ord <stephen.ord@csiro.au>
 
 // Include package level header file
-#include <askap_imager.h>
+#include <askap_synthesis.h>
 
 // System includes
 #include <string>
