@@ -46,7 +46,7 @@
 #include <primarybeam/GaussianPB.h>
 #include <primarybeam/PrimaryBeamFactory.h>
 
-#include "utils/ImageMathUtils.h"
+#include "utils/ImagemathUtils.h"
 
 
 ASKAP_LOGGER(linmoslogger, ".linmosaccumulator");
