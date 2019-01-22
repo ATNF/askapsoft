@@ -1,3 +1,35 @@
+0.23.1 (22 January 2019)
+------------------------
+
+A patch release, addressing a few bugs in both processing software and pipeline scripts
+
+Pipelines:
+
+ * Changes have been made to the scripts to make them robust in
+   handling field names that contain spaces. This has also made them
+   more robust to being run in a directory with a path that contains
+   spaces.
+ * An update has been made at Pawsey to the module used for the
+   continuum validation task, and consequently a minor change has been
+   made to the continuum sourcefinding script.
+
+Processing:
+
+ * Enhancements have been made to the continuum-subtraction task
+   ccontsubtract to speed it up - initial tests indicate a speed-up of
+   6-8x depending on platform. 
+ * The Selavy fitting algorithm now defaults to including a test on
+   the size of the fitted Gaussians. This will prevent spuriously
+   large fits from making it through to the catalogue, which has had
+   detrimental effects in the calibration & continuum-subtraction.
+ * A fix was made to the imager, solving a problem where the
+   spectral-imaging option merged the first channel of its allocation
+   without checking the frequency.
+
+Additionally, the user documentation has updated instructions about
+how best to set the modules on galaxy so that everything runs
+smoothly.
+
 0.23.0 (10 December 2018)
 -------------------------
 
