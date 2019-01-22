@@ -46,6 +46,9 @@
 #include <primarybeam/GaussianPB.h>
 #include <primarybeam/PrimaryBeamFactory.h>
 
+#include "utils/ImageMathUtils.h"
+
+
 ASKAP_LOGGER(linmoslogger, ".linmosaccumulator");
 
 using namespace casa;
@@ -62,17 +65,6 @@ enum weight_states {CORRECTED=0, INHERENT, WEIGHTED};
 // CORRECTED            Direction-dependent beams/weights have been divided out of input images
 // INHERENT             Input images retain the natural primary-beam weighting of the visibilities
 // WEIGHTED             Input images have full primary-beam-squared weighting
-
-/// @brief function to convert RA and Dec strings to a MVDirection
-/// @param[in] const std::string &ra
-/// @param[in] const std::string &dec
-/// @return MVDirection
-MVDirection convertDir(const std::string &ra, const std::string &dec) {
-    Quantity tmpra,tmpdec;
-    Quantity::read(tmpra, ra);
-    Quantity::read(tmpdec,dec);
-    return MVDirection(tmpra,tmpdec);
-}
 
 namespace askap {
 
