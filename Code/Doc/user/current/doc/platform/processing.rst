@@ -69,6 +69,9 @@ your ~/.bashrc file.
 
 .. code-block:: bash
 
+    # Load the python module first
+    module load python
+
     # Use the ASKAP environment modules collection
     module use /group/askap/modulefiles
 
@@ -89,6 +92,14 @@ your ~/.bashrc file.
 
     # Allow MPICH to fallback to 4k pages if large pages cannot be allocated
     export MPICH_GNI_MALLOC_FALLBACK=enabled
+
+The **python** module must be loaded first. If you then load
+**askapsoft**, the python executable will come from the askapsoft
+module, and have access to the python packages provided by (and
+required by) the askapsoft code. If the python module is already
+loaded, then loading other python modules (as may happen at particular
+points in the pipeline, for example **mpi4py**) will not override the
+use of the askapsoft python.
 
 The following was previously suggested, although the **pshell**
 utility provided by askaputils is probably better. The ashell module

@@ -42,6 +42,10 @@
 #include "cpcommon/VisDatagram.h"
 #include "cpcommon/VisChunk.h"
 
+// casa includes
+#include "casacore/casa/Arrays/Matrix.h"
+
+
 // Local package includes
 #include "ingestpipeline/sourcetask/ISource.h"
 #include "ingestpipeline/sourcetask/IVisSource.h"
@@ -172,6 +176,14 @@ class MergedSource : public ISource,
         /// @brief true, if beam offsets should be taken from static configuration
         /// @note mutually exclusive with itsBeamOffsetsFromMetadata;
         bool itsBeamOffsetsFromParset;
+
+        /// @brief cache of array layout for cross-checks of received uvw's
+        /// @details Dimentions are nAntenna x 3
+        /// @note We could've extracted this info from the configuration every time it is
+        /// needed, but it would mean doing a lot of similar operations inside the loop. 
+        /// Given that we do it per antenna, rather than per baseline, it would probably be
+        /// fine and may be extracting this info int he constructor is a premature optimisation.
+        casa::Matrix<casa::Double> itsArrayLayout;
 
         /// For unit testing
         friend class MergedSourceTest;
