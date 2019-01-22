@@ -28,7 +28,7 @@
 #include <distributedimager/CubeBuilder.h>
 
 // Include package level header file
-#include <askap_imager.h>
+#include <askap_synthesis.h>
 
 // System includes
 #include <iostream>
