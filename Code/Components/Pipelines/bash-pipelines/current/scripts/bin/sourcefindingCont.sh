@@ -149,7 +149,7 @@ ${SLURM_CONFIG}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_SELAVY}
 #SBATCH --job-name=${jobname}
 ${exportDirective}
-#SBATCH --output=$slurmOut/slurm-selavy-cont-%j.out
+#SBATCH --output="$slurmOut/slurm-selavy-cont-%j.out"
 
 ${askapsoftModuleCommands}
 
@@ -159,8 +159,8 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-thisfile=$sbatchfile
-cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
+thisfile="$sbatchfile"
+cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
 HAVE_IMAGES=true
 BEAM=$BEAM
@@ -220,8 +220,8 @@ if [ "\${imlist}" != "" ]; then
         casaim="\${im%%.fits}"
         fitsim="\${im%%.fits}.fits"
         echo "Converting to FITS the image \${im}"
-        parset=$parsets/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.in
-        log=$logs/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.log
+        parset="${parsets}/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.in"
+        log="${logs}/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.log"
         ${fitsConvertText}
         if [ ! -e "\$fitsim" ]; then
             HAVE_IMAGES=false
@@ -241,8 +241,8 @@ fi
 
 if [ "\${HAVE_IMAGES}" == "true" ]; then
 
-    parset=${parsets}/science_selavy_cont_${FIELDBEAM}_\${SLURM_JOB_ID}.in
-    log=${logs}/science_selavy_cont_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+    parset="${parsets}/science_selavy_cont_${FIELDBEAM}_\${SLURM_JOB_ID}.in"
+    log="${logs}/science_selavy_cont_${FIELDBEAM}_\${SLURM_JOB_ID}.log"
 
     # Directory for extracted polarisation data products
     mkdir -p $selavyPolDir
@@ -355,8 +355,8 @@ EOFINNER
     casaim="${noiseMap%%.fits}"
     fitsim="${noiseMap%%.fits}.fits"
     echo "Converting to FITS the image ${noiseMap}"
-    parset=$parsets/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.in
-    log=$logs/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.log
+    parset="${parsets}/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.in"
+    log="${logs}/convertToFITS_\${casaim##*/}_\${SLURM_JOB_ID}.log"
     ${fitsConvertText}
     if [ ! -e "\$fitsim" ]; then
         echo "ERROR - Could not create \${fitsim}"
@@ -374,9 +374,8 @@ EOFINNER
             echo "ERROR - Validation script \${scriptname} not found"
         else
             cd ..
-            module use /group/askap/continuum_validation
             loadModule continuum_validation_env
-            log=${logs}/continuum_validation_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+            log="${logs}/continuum_validation_${FIELDBEAM}_\${SLURM_JOB_ID}.log"
             validateArgs="\${fitsimage%%.fits}.fits"
             validateArgs="\${validateArgs} -S ${selavyDir}/selavy-\${fitsimage%%.fits}.components.xml"
             validateArgs="\${validateArgs} -N ${selavyDir}/${noiseMap%%.fits}.fits "

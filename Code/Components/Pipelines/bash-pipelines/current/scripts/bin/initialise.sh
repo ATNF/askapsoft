@@ -64,6 +64,12 @@ NOW_FMT=$(date +%FT%T)
 JOBLIST="${slurmOut}/jobList-${NOW}.txt"
 
 ####################
+# Internal Field Separators for different loop cases
+IFS_DEFAULT="${IFS}"
+IFS_FIELDS="
+"
+
+####################
 # Define the default
 
 . "${PIPELINEDIR}/defaultConfig.sh"

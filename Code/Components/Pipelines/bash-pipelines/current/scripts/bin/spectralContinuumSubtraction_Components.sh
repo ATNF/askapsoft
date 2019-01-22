@@ -83,7 +83,7 @@ ${SLURM_CONFIG}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_CONTSUB}
 #SBATCH --job-name=${jobname}
 ${exportDirective}
-#SBATCH --output=$slurmOut/slurm-contsubSLsci-%j.out
+#SBATCH --output="$slurmOut/slurm-contsubSLsci-%j.out"
 
 ${askapsoftModuleCommands}
 
@@ -93,13 +93,13 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-thisfile=$sbatchfile
-cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
+thisfile="$sbatchfile"
+cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
 useContCube=${USE_CONTCUBE_FOR_SPECTRAL_INDEX}
 NUM_TAYLOR_TERMS=${NUM_TAYLOR_TERMS}
 
-msMetadata=${MS_METADATA}
+msMetadata="${MS_METADATA}"
 ra=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=RA)
 ra=\$(echo \$ra | awk -F':' '{printf "%sh%sm%s",\$1,\$2,\$3}')
 dec=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Dec)
@@ -138,8 +138,8 @@ else
 Selavy.findSpectralTerms                        = [\${haveT1}, \${haveT2}]"
 fi
 
-parset=${parsets}/selavy_for_contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.in
-log=${logs}/selavy_for_contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+parset="${parsets}/selavy_for_contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.in"
+log="${logs}/selavy_for_contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.log"
 cat >> "\$parset" <<EOFINNER
 ##########
 ## Source-finding with selavy
@@ -217,8 +217,8 @@ else
     #################################################
     # Then, continuum subtraction
 
-    parset=${parsets}/contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.in
-    log=${logs}/contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+    parset="${parsets}/contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.in"
+    log="${logs}/contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.log"
     cat > "\$parset" <<EOFINNER
 # The measurement set name - this will be overwritten
 CContSubtract.dataset                             = ${msSciSL}

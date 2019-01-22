@@ -322,6 +322,8 @@ bool Fitter::passComponentSize()
         // passSize = passSize &&
         //            ((itsSolution(i, 4) * itsSolution(i, 3)) > 0.6 * itsParams.beamSize());
 
+        ASKAPLOG_DEBUG_STR(logger, "Major axis for component " << i << " is " << itsSolution(i,3));
+        
         passSize = passSize && (itsSolution(i, 3) < 1.e8);
     }
 
@@ -414,12 +416,12 @@ bool Fitter::acceptableExceptChisq()
 {
     bool passConv = this->passConverged();
     bool passLoc = this->passLocation();
-    
+    bool passSize = this->passComponentSize();
+
     if (itsParams.applyAcceptanceCriteria()) {
 
         bool passFlux = this->passComponentFlux();
         bool passSep = this->passSeparation();
-        bool passSize = this->passComponentSize();
         bool passPeak = this->passPeakFlux();
         bool passIntFlux = this->passIntFlux();
 
@@ -428,7 +430,7 @@ bool Fitter::acceptableExceptChisq()
 
     } else {
 
-        return passConv && passLoc;
+        return passConv && passLoc && passSize;
 
     }
 }
@@ -438,12 +440,12 @@ bool Fitter::acceptable()
     bool passConv = this->passConverged();
     bool passChisq = this->passChisq();
     bool passLoc = this->passLocation();
+    bool passSize = this->passComponentSize();
 
     if (itsParams.applyAcceptanceCriteria()) {
 
         bool passFlux = this->passComponentFlux();
         bool passSep = this->passSeparation();
-        bool passSize = this->passComponentSize();
         bool passPeak = this->passPeakFlux();
         bool passIntFlux = this->passIntFlux();
 
@@ -488,7 +490,7 @@ bool Fitter::acceptable()
 
     } else {
 
-        return passConv && passChisq && passLoc;
+        return passConv && passChisq && passLoc && passSize;
 
     }
 }

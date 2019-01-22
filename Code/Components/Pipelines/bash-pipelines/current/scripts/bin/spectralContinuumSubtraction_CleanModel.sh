@@ -60,7 +60,7 @@ ${SLURM_CONFIG}
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=${jobname}
 ${exportDirective}
-#SBATCH --output=$slurmOut/slurm-contsubSLsci-%j.out
+#SBATCH --output="$slurmOut/slurm-contsubSLsci-%j.out"
 
 ${askapsoftModuleCommands}
 
@@ -70,13 +70,13 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-thisfile=$sbatchfile
-cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
+thisfile="$sbatchfile"
+cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
 if [ "${DIRECTION}" != "" ]; then
     modelDirection="${DIRECTION}"
 else
-    msMetadata=${MS_METADATA}
+    msMetadata="${MS_METADATA}"
     ra=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=RA)
     dec=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Dec)
     epoch=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Epoch)
@@ -84,8 +84,8 @@ else
 fi
 centreFreq="\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Freq)"
 
-parset=${parsets}/contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.in
-log=${logs}/contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+parset="${parsets}/contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.in"
+log="${logs}/contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.log"
 cat > "\$parset" <<EOFINNER
 # The measurement set name - this will be overwritten
 CContSubtract.dataset                             = ${msSciSL}
@@ -115,7 +115,7 @@ extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv
 if [ \$err != 0 ]; then
     exit \$err
 else
-    touch $CONT_SUB_CHECK_FILE
+    touch "$CONT_SUB_CHECK_FILE"
 fi
 
 EOFOUTER

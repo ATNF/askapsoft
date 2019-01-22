@@ -48,7 +48,7 @@ ${SLURM_CONFIG}
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=${jobname}
 ${exportDirective}
-#SBATCH --output=$slurmOut/slurm-calappCont${BEAM}-%j.out
+#SBATCH --output="$slurmOut/slurm-calappCont${BEAM}-%j.out"
 
 ${askapsoftModuleCommands}
 
@@ -58,8 +58,8 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-thisfile=$sbatchfile
-cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
+thisfile="$sbatchfile"
+cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
 keepRaw=${KEEP_RAW_AV_MS}
 if [ "\${keepRaw}" == "true" ]; then
@@ -69,8 +69,8 @@ if [ "\${keepRaw}" == "true" ]; then
   srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} cp -r ${msSciAv} ${msSciAvCal}
 fi
 
-parset=${parsets}/apply_gains_cal_cont_${FIELDBEAM}_\${SLURM_JOB_ID}.in
-log=${logs}/apply_gains_cal_cont_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+parset="${parsets}/apply_gains_cal_cont_${FIELDBEAM}_\${SLURM_JOB_ID}.in"
+log="${logs}/apply_gains_cal_cont_${FIELDBEAM}_\${SLURM_JOB_ID}.log"
 cat > "\$parset" <<EOFINNER
 Ccalapply.dataset                         = ${msSciAvCal}
 #
@@ -101,7 +101,7 @@ extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv
 if [ \$err != 0 ]; then
     exit \$err
 else
-    touch $CONT_GAINS_CHECK_FILE
+    touch "$CONT_GAINS_CHECK_FILE"
 fi
 
 EOFOUTER

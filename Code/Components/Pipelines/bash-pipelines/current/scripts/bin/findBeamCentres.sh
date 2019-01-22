@@ -147,13 +147,14 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$NEED_BEAM_CENTRES" == "true" ]; then
     
 
     # Define the footprint for each field
+    IFS="${IFS_FIELDS}"
     for FIELD in ${FIELD_LIST}; do
 
         # Get the centre location of each field (from the list of
         # fields in the metadata directory - the filename is recorded
         # in $FIELDLISTFILE, and set in prepareMetadata.sh)
-        ra=$(grep "$FIELD" "$FIELDLISTFILE" | awk '{print $3}' | head -1)
-        dec=$(grep "$FIELD" "$FIELDLISTFILE" | awk '{print $4}' | head -1)
+        ra=$(grep "$FIELD" "$FIELDLISTFILE" | awk '{print $(NF-3)}' | head -1)
+        dec=$(grep "$FIELD" "$FIELDLISTFILE" | awk '{print $(NF-2)}' | head -1)
         dec=$(echo "$dec" | awk -F'.' '{printf "%s:%s:%s.%s",$1,$2,$3,$4}')
 
         # Initialise to blank values
@@ -163,8 +164,14 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$NEED_BEAM_CENTRES" == "true" ]; then
         if [ "${IS_BETA}" != "true" ]; then
             # For non-BETA data, we look for this field's footprint
             # information in the SB parset
-            awkcomp="\$3==\"$FIELD\""
-            srcstr=$(awk "$awkcomp" "$sbinfo" | awk -F".field_name" '{print $1}')
+
+            # split on the equals sign, and get the entire value of the parameter - allows for spaces.
+            # Use this to match the field name, and then get the string that looks like
+            #  "common.target.src1"
+            awkcomp="\$2==\"$FIELD\""
+            srcstr=$(awk -F " = " "$awkcomp" "$sbinfo" | awk -F".field_name" '{print $1}')
+
+            # Use that to get the footprint info for that particular field
             FP_NAME=$(grep "$srcstr.footprint.name" "$sbinfo" | awk '{print $3}')
             FP_PITCH=$(grep "$srcstr.footprint.pitch" "$sbinfo" | awk '{print $3}')
             FP_PA=$(grep "$srcstr.pol_axis" "$sbinfo" | awk '{print $4}' | sed -e 's/\]//g')
@@ -242,18 +249,22 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$NEED_BEAM_CENTRES" == "true" ]; then
                 fi
 
                 # This uses the CLI tool "footprint" to set the footprint
-                footprintArgs="-d $ra,$dec -p $FP_PITCH"
-                if [ "$FP_PA" != "" ]; then
-                    footprintArgs="$footprintArgs -r $FP_PA"
-                fi
                 loadModule askapcli
                 NUM_BEAMS_FOOTPRINT=$(footprint info ${FP_NAME} | grep n_beams | awk '{print $3}')
-                footprint calculate $footprintArgs "$FP_NAME" > "${footprintOut}"
+                if [ "$FP_PA" != "" ]; then
+                    footprint calculate -d $ra,$dec -r $FP_PA -p $FP_PITCH "$FP_NAME" > "${footprintOut}"
+                else
+                    footprint calculate -d $ra,$dec -p $FP_PITCH "$FP_NAME" > "${footprintOut}"
+                fi
                 err=$?
                 unloadModule askapcli
                 if [ $err -ne 0 ]; then
                     echo "ERROR - the 'footprint' command failed."
-                    echo "        Full command:   footprint calculate $footprintArgs $FP_NAME"
+                    if [ "$FP_PA" != "" ]; then
+                        echo "        Full command:   footprint calculate -d $ra,$dec -r $FP_PA -p $FP_PITCH $FP_NAME"
+                    else
+                        echo "        Full command:   footprint calculate -d $ra,$dec -p $FP_PITCH $FP_NAME"
+                    fi
                     echo "Exiting pipeline."
                     exit $err
                 fi
@@ -328,6 +339,7 @@ if [ "$DO_SCIENCE_FIELD" == "true" ] && [ "$NEED_BEAM_CENTRES" == "true" ]; then
         fi
         
     done
+    IFS="${IFS_DEFAULT}"
 
 fi
 

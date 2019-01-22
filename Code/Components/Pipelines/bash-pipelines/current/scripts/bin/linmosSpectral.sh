@@ -79,7 +79,7 @@ ${SLURM_CONFIG}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_SPEC_IMAGING}
 #SBATCH --job-name=${jobname}
 ${exportDirective}
-#SBATCH --output=$slurmOut/slurm-linmosS-%j.out
+#SBATCH --output="$slurmOut/slurm-linmosS-%j.out"
 
 ${askapsoftModuleCommands}
 
@@ -89,8 +89,8 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-thisfile=$sbatchfile
-cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
+thisfile="$sbatchfile"
+cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
 IMAGE_BASE_SPECTRAL=${IMAGE_BASE_SPECTRAL}
 FIELD=${FIELD}
@@ -139,8 +139,8 @@ if [ "\${imList}" != "" ]; then
         fi
     fi
     echo "Mosaicking \${imList} to form \${imageName}"
-    parset=${parsets}/science_\${jobCode}_${FIELDBEAM}_\${SLURM_JOB_ID}.in
-    log=${logs}/science_\${jobCode}_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+    parset="${parsets}/science_\${jobCode}_${FIELDBEAM}_\${SLURM_JOB_ID}.in"
+    log="${logs}/science_\${jobCode}_${FIELDBEAM}_\${SLURM_JOB_ID}.log"
     cat > "\${parset}" << EOFINNER
 linmos.names            = [\${imList}]
 linmos.weights          = [\${wtList}]

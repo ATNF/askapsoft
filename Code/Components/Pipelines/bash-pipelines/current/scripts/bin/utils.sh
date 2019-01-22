@@ -98,7 +98,7 @@ function archiveConfig()
     filename=$(basename "$1")
     extension="${filename##*.}"
     filename="${filename%%.*}"
-    archivedConfig=$slurmOut/${filename}__${NOW}.${extension}
+    archivedConfig="$slurmOut/${filename}__${NOW}.${extension}"
     cp "$1" "$archivedConfig"
 
     cat >> "$archivedConfig" <<EOF
@@ -281,7 +281,7 @@ function setContsubFilenames()
     contsubCmodelLabel="Continuum model image from catalogue"
     ####
     # Finally the components parset
-    contsubComponents=modelComponents.contsub.${imageStub}.in
+    contsubComponents="modelComponents.contsub.${imageStub}.in"
 
     # Restore the imageCode to what it was
     imageCode=$imageCodeBackup
@@ -537,6 +537,8 @@ function setImageBase()
         fi
     fi
 
+    imageBase=$(echo $imageBase | sed -e 's/ /_/g')
+
 }
 
 function getMSname()
@@ -589,6 +591,9 @@ function findScienceMSnames()
     sedstr="s|%s|${SB_SCIENCE}|g"
     msSci=$(echo "${msSci}" | sed -e "$sedstr")
 
+    # Replace any spaces (e.g. from the FIELD name) with an underscore
+    msSci=$(echo $msSci | sed -e 's/ /_/g')
+
     if [ "${DO_COPY_SL}" == "true" ]; then
         # If we make a copy of the spectral-line MS, then append '_SL'
         # to the MS name before the suffix for the MS used for
@@ -630,6 +635,8 @@ function findScienceMSnames()
         msSciAv=$(echo "${msSciAv}" | sed -e "$sedstr")
 
     fi
+    # Replace any spaces (e.g. from the FIELD name) with an underscore
+    msSciAv=$(echo $msSciAv | sed -e 's/ /_/g')
 
     # We now define the name of the calibrated averaged dataset
     if [ "${KEEP_RAW_AV_MS}" == "true" ]; then
@@ -667,6 +674,8 @@ function findScienceMSnames()
         gainscaltab=$(echo "${gainscaltab}" | sed -e "$sedstr")
 
     fi
+    # Replace any spaces (e.g. from the FIELD name) with an underscore
+    gainscaltab=$(echo $gainscaltab | sed -e 's/ /_/g')
 
 }
 

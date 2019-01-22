@@ -33,7 +33,7 @@ DO_IT=$DO_DIAGNOSTICS
 
 if [ "${DO_IT}" == "true" ]; then
 
-    sbatchfile=$slurms/runDiagnostics.sbatch
+    sbatchfile="$slurms/runDiagnostics.sbatch"
     cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
 ${SLURM_CONFIG}
@@ -42,7 +42,7 @@ ${SLURM_CONFIG}
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=diagnostics
 ${exportDirective}
-#SBATCH --output=$slurmOut/slurm-diagnostics-%j.out
+#SBATCH --output="$slurmOut/slurm-diagnostics-%j.out"
 
 ${askapsoftModuleCommands}
 
@@ -52,8 +52,8 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-thisfile=$sbatchfile
-cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
+thisfile="$sbatchfile"
+cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
 # Define the lists of image names, types, 
 . "${getArtifacts}"
@@ -61,7 +61,7 @@ cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
 # Make PNG images of continuum images, overlaid with weights contours
 # and fitted components
 
-log=${logs}/diagnostics_\${SLURM_JOB_ID}.log
+log="${logs}/diagnostics_\${SLURM_JOB_ID}.log"
 diagParset=${parsets}/diagnostics_\${SLURM_JOB_ID}.in    
 
 pathToScript=\$(which makeThumbnailImage.py 2> "${tmp}/whchmkthumb")
@@ -142,7 +142,7 @@ if [ "\${pathToScript}" != "" ]; then
             echo "noise map base = \$noisemapbase"
 
             # need to convert to FITS
-            parset=\${fitsParset}
+            parset="\${fitsParset}"
             casaim=\${noisemapbase}
             fitsim=\${noisemapbase}.fits
             ${fitsConvertText}

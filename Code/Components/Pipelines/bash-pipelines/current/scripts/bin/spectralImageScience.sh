@@ -207,7 +207,7 @@ ${SLURM_CONFIG}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_SPEC_IMAGING}
 #SBATCH --job-name=${jobname}
 ${exportDirective}
-#SBATCH --output=$slurmOut/slurm-spectralImaging-%j.out
+#SBATCH --output="$slurmOut/slurm-spectralImaging-%j.out"
 
 ${askapsoftModuleCommands}
 
@@ -217,21 +217,21 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-thisfile=$sbatchfile
-cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
+thisfile="$sbatchfile"
+cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
 direction="${DIRECTION}"
 if [ "\${direction}" != "" ]; then
     directionDefinition="${Imager}.Images.direction                       = \${direction}"
 else
-    msMetadata=${MS_METADATA}
+    msMetadata="${MS_METADATA}"
     ra=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=RA)
     dec=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Dec)
     epoch=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Epoch)
     directionDefinition="${Imager}.Images.direction                       = [\${ra}, \${dec}, \${epoch}]"
 fi
 
-parset=${parsets}/science_spectral_imager_${FIELDBEAM}_\${SLURM_JOB_ID}.in
+parset="${parsets}/science_spectral_imager_${FIELDBEAM}_\${SLURM_JOB_ID}.in"
 
 cat > "\$parset" << EOF
 ${Imager}.dataset                                 = ${msSciSL}
@@ -265,7 +265,7 @@ ${preconditioning}
 ${restorePars}
 EOF
 
-log=${logs}/science_spectral_imager_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+log="${logs}/science_spectral_imager_${FIELDBEAM}_\${SLURM_JOB_ID}.log"
 
 # Now run the simager
 NCORES=${NUM_CPUS_SPECIMG_SCI}

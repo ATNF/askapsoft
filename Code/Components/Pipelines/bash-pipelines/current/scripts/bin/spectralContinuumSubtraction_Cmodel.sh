@@ -101,7 +101,7 @@ ${SLURM_CONFIG}
 #SBATCH --ntasks-per-node=${CPUS_PER_CORE_CONTSUB}
 #SBATCH --job-name=${jobname}
 ${exportDirective}
-#SBATCH --output=$slurmOut/slurm-contsubSLsci-%j.out
+#SBATCH --output="$slurmOut/slurm-contsubSLsci-%j.out"
 
 ${askapsoftModuleCommands}
 
@@ -111,13 +111,13 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-thisfile=$sbatchfile
-cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
+thisfile="$sbatchfile"
+cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
 useContCube=${USE_CONTCUBE_FOR_SPECTRAL_INDEX}
 NUM_TAYLOR_TERMS=${NUM_TAYLOR_TERMS}
 
-msMetadata=${MS_METADATA}
+msMetadata="${MS_METADATA}"
 DIRECTION="$DIRECTION"
 if [ "\${DIRECTION}" != "" ]; then
     modelDirection="\${DIRECTION}"
@@ -139,7 +139,7 @@ cd ${contsubDir}
 if [ "\${useContCube}" == "true" ]; then
     # Set the parameter for using contcube to measure spectral-index
     SpectralTermUse="Selavy.spectralTermsFromTaylor                  = false
-Selavy.spectralTerms.cube                       = ${contCube}
+Selavy.spectralTerms.cube                       = "${contCube}"
 Selavy.spectralTerms.nterms                     = ${SELAVY_NUM_SPECTRAL_TERMS}"
 else
     haveT1=false
@@ -162,14 +162,14 @@ else
 Selavy.findSpectralTerms                        = [\${haveT1}, \${haveT2}]"
 fi
 
-parset=${parsets}/selavy_for_contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.in
-log=${logs}/selavy_for_contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+parset="${parsets}/selavy_for_contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.in"
+log="${logs}/selavy_for_contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.log"
 cat >> "\$parset" <<EOFINNER
 ##########
 ## Source-finding with selavy
 ##
 # The image to be searched
-Selavy.image                                    = ${selavyImage}
+Selavy.image                                    = "${selavyImage}"
 Selavy.sbid                                     = ${SB_SCIENCE}
 Selavy.imageHistory                             = [${imageHistoryString}]
 Selavy.imagetype                                = ${IMAGETYPE_CONT}
@@ -231,8 +231,8 @@ else
     #################################################
     # Next, model image creation
 
-    parset=${parsets}/cmodel_for_contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.in
-    log=${logs}/cmodel_for_contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+    parset="${parsets}/cmodel_for_contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.in"
+    log="${logs}/cmodel_for_contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.log"
     cat > "\$parset" <<EOFINNER
 # The below specifies the GSM source is a selavy output file
 Cmodel.gsm.database       = votable
@@ -269,8 +269,8 @@ EOFINNER
     #################################################
     # Then, continuum subtraction
 
-    parset=${parsets}/contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.in
-    log=${logs}/contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+    parset="${parsets}/contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.in"
+    log="${logs}/contsub_spectralline_${FIELDBEAM}_\${SLURM_JOB_ID}.log"
     cat > "\$parset" <<EOFINNER
 # The measurement set name - this will be overwritten
 CContSubtract.dataset                             = ${msSciSL}
@@ -300,7 +300,7 @@ EOFINNER
     if [ \$err != 0 ]; then
         exit \$err
     else
-        touch $CONT_SUB_CHECK_FILE
+        touch "$CONT_SUB_CHECK_FILE"
     fi
 
 fi

@@ -79,7 +79,7 @@ if [ "${DO_STAGE_FOR_CASDA}" == "true" ]; then
 #SBATCH --cluster=zeus
 #SBATCH --partition=copyq
 #SBATCH --open-mode=append
-#SBATCH --output=$slurmOut/slurm-casdaingestPolling-${SB_SCIENCE}.out
+#SBATCH --output="$slurmOut/slurm-casdaingestPolling-${SB_SCIENCE}.out"
 #SBATCH --time=00:05:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -149,7 +149,7 @@ elif [ "\$ageOfReady" -gt "${MAX_POLL_WAIT_TIME}" ]; then
     exit 1
 else
     # Re-submit job with a delay
-    sbatch --begin="now+${POLLING_DELAY_SEC}" ${sbatchfile}
+    sbatch --begin="now+${POLLING_DELAY_SEC}" "${sbatchfile}"
 fi
 
 EOFOUTER
@@ -167,7 +167,7 @@ ${SLURM_CONFIG}
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=casdaupload
 ${exportDirective}
-#SBATCH --output=$slurmOut/slurm-casdaupload-%j.out
+#SBATCH --output="$slurmOut/slurm-casdaupload-%j.out"
 
 ${askapsoftModuleCommands}
 
@@ -178,8 +178,8 @@ cd $OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-thisfile=$sbatchfile
-cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
+thisfile="$sbatchfile"
+cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
 # Define the lists of image names, types, 
 PREPARE_FOR_CASDA=true
@@ -290,8 +290,8 @@ evalArtifacts=\$(echo "\${evalArtifacts[@]}" | sed -e 's/ /,/g')
 
 writeREADYfile=${WRITE_CASDA_READY}
 
-parset=${parsets}/casda_upload_\${SLURM_JOB_ID}.in
-log=${logs}/casda_upload_\${SLURM_JOB_ID}.log
+parset="${parsets}/casda_upload_\${SLURM_JOB_ID}.in"
+log="${logs}/casda_upload_\${SLURM_JOB_ID}.log"
 cat > "\$parset" << EOFINNER
 # General
 outputdir                       = ${CASDA_UPLOAD_DIR}
@@ -362,8 +362,8 @@ if [ "\${writeREADYfile}" == "true" ] && [ "\${doTransition}" == "true" ]; then
     fi
 
     # Submit job to poll for completion of ingest into the CASDA database
-    pollingsbatchfile=$pollingsbatchfile
-    if [ -e \$pollingsbatchfile ]; then
+    pollingsbatchfile="$pollingsbatchfile"
+    if [ -e "\$pollingsbatchfile" ]; then
         ID_CASDAPOLL=\$(sbatch "\$pollingsbatchfile" | awk '{print \$4}')
         echo "Submitted job to poll for CASDA ingest success, with JobID \$ID_CASDAPOLL"
     fi

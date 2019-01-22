@@ -44,7 +44,7 @@ if [ "${SUBMIT_JOBS}" == "true" ] && [ "${ALL_JOB_IDS}" != "" ]; then
         BEAM_ARG="${BEAMLIST}"
     fi
     
-    sbatchfile=$slurms/gatherAll.sbatch
+    sbatchfile="$slurms/gatherAll.sbatch"
     cat > "$sbatchfile" <<EOF
 #!/bin/bash -l
 ${SLURM_CONFIG}
@@ -53,7 +53,7 @@ ${SLURM_CONFIG}
 #SBATCH --ntasks-per-node=1
 #SBATCH --job-name=gatherStats
 ${exportDirective}
-#SBATCH --output=$slurmOut/slurm-gatherAll-%j.out
+#SBATCH --output="$slurmOut/slurm-gatherAll-%j.out"
 
 ${askapsoftModuleCommands}
 
@@ -63,8 +63,8 @@ cd $ORIGINAL_OUTPUT
 
 # Make a copy of this sbatch file for posterity
 sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
-thisfile=$sbatchfile
-cp \$thisfile "\$(echo \$thisfile | sed -e "\$sedstr")"
+thisfile="$sbatchfile"
+cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
 statsTXT=stats-all-${NOW}.txt
 statsCSV=stats-all-${NOW}.csv
@@ -94,7 +94,7 @@ if [ -d "${FAILURE_DIRECTORY}" ]; then
             find ${BASEDIR} -name "*\${job}*" -exec cp {} \$dir \;
             jobname=\$(grep \$job \$statsTXT | head -1 | awk '{print \$3}' | sed -e 's/_master//g')
             echo "\$(whoami) ${NOW} \${jobname} ${BASEDIR}" > \${dir}/README
-            touch \${dir}/NEW
+            touch "\${dir}/NEW"
             chmod -R g+w \${dir}
         done
     fi

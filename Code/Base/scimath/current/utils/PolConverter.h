@@ -72,6 +72,16 @@ struct PolConverter {
   /// @details Constructed via this method the object passes all visibilities intact
   PolConverter();
 
+  /// @brief copy constructor
+  /// @details
+  /// @param[in] other, object to construct from
+  PolConverter(const PolConverter & other);
+
+  /// @brief assignment operator
+  /// @details
+  /// @param[in] other, object to assign from
+  PolConverter & operator=(const PolConverter & other);
+
   /// @brief main method doing conversion
   /// @details Convert the given visibility vector between two polarisation frames supplied
   /// in the constructor.
@@ -81,7 +91,7 @@ struct PolConverter {
   /// the output vector will have the same size.
   casa::Vector<casa::Complex> operator()(casa::Vector<casa::Complex> vis) const;
 
-  /// @brief altenative method doing conversion
+  /// @brief alternative method doing conversion
   /// @details Convert the given visibility vector between two polarisation frames supplied
   /// in the constructor.
   /// @param[in] vis visibility vector

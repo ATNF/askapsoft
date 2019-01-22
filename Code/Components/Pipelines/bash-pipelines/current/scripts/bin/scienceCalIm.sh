@@ -43,6 +43,7 @@ cd "${ORIGINAL_OUTPUT}"
 
 firstBeam=true
 
+IFS="${IFS_FIELDS}"
 for FIELD in ${FIELD_LIST}; do
 
     doField=true
@@ -77,7 +78,8 @@ for FIELD in ${FIELD_LIST}; do
         DEP_CONTCUBE=""
         DEP_SPECIMG=""
         DEP_SPECIMCONTSUB=""
-        
+
+        IFS="${IFS_DEFAULT}"
         for BEAM in ${BEAMS_TO_USE}; do
 
             echo "Processing field $FIELD, beam $BEAM"
@@ -177,7 +179,6 @@ for FIELD in ${FIELD_LIST}; do
 
     ((FIELD_ID++))
     
-
 done
 
 # Put all these back to the original values
