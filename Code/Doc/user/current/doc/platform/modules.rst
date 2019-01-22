@@ -23,16 +23,18 @@ executed the following command. However this command should have been added to y
 The ASKAP modules appear in their own section in the output from the *module avail*
 command::
 
-    ------------------------------------------------------------------- /group/askap/modulefiles --------------------------------------------------------------------
-    aces/0.5(default)             askapdata/current(default)    askappipeline/0.20.1          askapsoft/0.19.7              casa/4.7.0-el6
-    aces/0.5b                     askappipeline/0.19.0          askappipeline/0.20.3(default) askapsoft/0.20.0              casa/5.0.0-218.el6
-    aces/0.6                      askappipeline/0.19.2          askappipeline/cle6-dev-9419   askapsoft/0.20.1              casa/5.1.1-5.el6
-    acesops/r47210                askappipeline/0.19.3          askapservices/0.15.0(default) askapsoft/0.20.3(default)     casa/5.1.1-5.el7(default)
-    acesops/r47349(default)       askappipeline/0.19.4          askapsoft/0.19.0              askapsoft/cle6-dev-9419       karma/1.7.25(default)
-    aoflagger/2.10.0(default)     askappipeline/0.19.5          askapsoft/0.19.2              askapsofthook                 tmux/1.8(default)
-    ashell                        askappipeline/0.19.6          askapsoft/0.19.4              askaputils
-    askap-cray/current            askappipeline/0.19.7          askapsoft/0.19.5              askapvis/current(default)
-    askapcli/current(default)     askappipeline/0.20.0          askapsoft/0.19.6              bbcp/13.05.03.00.0(default)    
+  ----------------------------------------------------------------------------------------- /group/askap/modulefiles -----------------------------------------------------------------------------------------
+  aces/0.5(default)                     acesops/r48219(default)               askappipeline/0.21.0                  askapsoft/0.20.1                      bbcp/13.05.03.00.0(default)
+  aces/0.5b                             aoflagger/2.10.0                      askappipeline/0.21.1                  askapsoft/0.20.3                      casa/4.7.0-el6
+  aces/0.6                              aoflagger/2.12.0(default)             askappipeline/0.21.2                  askapsoft/0.21.0                      casa/5.0.0-218.el6
+  aces/0.7                              ashell                                askappipeline/0.22.0                  askapsoft/0.22.0                      casa/5.1.1-5.el6
+  acesops/r47210                        askap-cray/current                    askappipeline/0.22.2                  askapsoft/0.22.1                      casa/5.1.1-5.el7
+  acesops/r47349                        askapcli/current(default)             askappipeline/0.23.0(default)         askapsoft/0.23.0(default)             casa/5.3.0-143.el7(default)
+  acesops/r47921                        askapdata/current(default)            askappipeline/0.23b                   askapsoft/0.23b                       chgcentre/1.4(default)
+  acesops/r47932                        askappipeline/0.19.7                  askappipeline/fullscaletest           askapsoft/fullscaletest               continuum_validation_env/0.2(default)
+  acesops/r48017                        askappipeline/0.20.0                  askapservices/0.15.0(default)         askapsofthook                         karma/1.7.25(default)
+  acesops/r48032                        askappipeline/0.20.1                  askapsoft/0.19.7                      askaputils                            tmux/1.8(default)
+  acesops/r48064                        askappipeline/0.20.3                  askapsoft/0.20.0                      askapvis/current(default)
 
 These modules are:
 
@@ -42,6 +44,7 @@ These modules are:
 * **askaputils** - General utility scripts (*pshell* for data transfer - see :doc:`comm_archive`, plus other utility scripts)
 * **askap-cray** - Required for building ASKAPsoft, but not for running any of the tools.
 * **askapcli** - Command-Line-Interface to the online systems (scheduling block service, FCM and footprint are perhaps the most commonly-used). 
+* **continuum_validation_env** - Python environment for running the continuum validation script
 * **casa** - NRAO's CASA software package (see :doc:`casa`)
 * **bbcp** - BBCP Fast file copy (see :doc:`externaltransfer`)
 * **ashell** - Connection to the commissioning archive (see :doc:`comm_archive`)
