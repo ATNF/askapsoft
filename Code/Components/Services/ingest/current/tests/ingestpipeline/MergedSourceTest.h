@@ -123,8 +123,18 @@ class MergedSourceTest : public CppUnit::TestFixture,
                 ant.onSource(true);
                 ant.flagged(false);
                 // there is a guard against zeros in the code because values are geocentric,
-                // so pass a large constant
-                ant.uvw(casa::Vector<casa::Double>(36*3,1e6));
+                // there is also a guard against wrong length of resulting per-baseline uvws and
+                // uvws implying that antenna is not on the ground. So passing a large constant
+                // as we once had no longer works. The easiest way to solve the problem without doing
+                // full simulation is to pass antenna position as uvw for all beams.
+                casa::Vector<casa::Double> dummyUVW(36*3,0.);
+                const casa::Vector<casa::Double> antPos = config.antennas()[i].position();
+                CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(3u), antPos.nelements());
+                CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(0u), dummyUVW.nelements() % 3u);
+                for (casa::uInt item = 0; item < dummyUVW.nelements(); ++item) {
+                     dummyUVW[item] = antPos[item % 3];
+                }
+                ant.uvw(dummyUVW);
                 metadata.addAntenna(ant);
             }
 
