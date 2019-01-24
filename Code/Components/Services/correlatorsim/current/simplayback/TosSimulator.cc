@@ -221,9 +221,14 @@ bool TosSimulator::sendNext(void)
     ////////////////////////////////////////
     // Metadata - per antenna
     ////////////////////////////////////////
+
+    // MV: I found the code below with define statements very very ugly. Ideally, it should be re-designed/re-written but for now
+    // I'll make only quick and dirty fix
+
 	// Note the number of antennas is as requested in parset instead of 
 	// that is actually available in measurement set.
 	std::string name;
+
 #ifdef RENAME_ANTENNA
     for (casa::uInt i = 0; i < itsNAntenna; ++i) {
 		stringstream ss;
@@ -238,6 +243,14 @@ bool TosSimulator::sendNext(void)
     //for (casa::uInt i = 0; i < nAntennaMS; ++i) {
         //name = antc.name().getColumn()(i);
 #endif
+
+        int indexIntoMS = -1;
+        for (casa::uInt testAnt = 0; testAnt < nAntennaMS; ++testAnt) {
+             if (name == std::string(antc.name().getColumn()(testAnt))) {
+                 indexIntoMS = static_cast<int>(testAnt);
+                 break;
+             }
+        }
 
         TosMetadataAntenna antMetadata(name);
 
@@ -280,8 +293,8 @@ bool TosSimulator::sendNext(void)
         // fudge uvw's based on antenna position. However, care must be taken on the user side as
         // this hack wouldn't work in all circumstances. Some serious re-design effort would be required
         // to fix this properly.
-        if (i < nAntennaMS) {
-           const casa::Vector<casa::Double> antPos = antPosColumn(i);
+        if (indexIntoMS >= 0) {
+           const casa::Vector<casa::Double> antPos = antPosColumn(indexIntoMS);
            ASKAPASSERT(antPos.nelements() == 3u);
            casa::Vector<casa::Double> dummyUVW(36*3,0.);
            for (casa::uInt elem = 0; elem < dummyUVW.nelements(); ++elem) {
