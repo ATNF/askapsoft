@@ -123,6 +123,7 @@ bool TosSimulator::sendNext(void)
     const casa::uInt nRow = msc.nrow(); // In the whole table, not just for this integration
     //const casa::uInt nCorr = polc.numCorr()(descPolId);
     const casa::uInt nAntennaMS = antc.nrow();
+    const casa::ROArrayColumn<casa::Double>& antPosColumn = antc.position();
 
 	cout << "The antenna count in measurement set is " << nAntennaMS << 
 			", requested in parset is " << itsNAntenna << endl;
@@ -268,15 +269,30 @@ bool TosSimulator::sendNext(void)
         antMetadata.flagged(false);
 
         // <antenna name>.uvw
-        // TODO: Currently no valid uvw's are passed (as it was prior to they were added
-        // to metadata. Ideally, they need to be simulated too. One complication is that
-        // TOS currently sends per-antenna metadata to minimize data volume and per-baseline
-        // metadata (which are present in the MS) are computed in the ingest. There is not
-        // enough information to deduce the original values from what is stored in the MS. 
+        // Ideally, we need to send realistic uvws here. However, there is not
+        // enough information to deduce the original values from what is stored in the MS.
         // (although, in principle, one could compose a set of numbers which would work -
-        // but there are infinite number of ways to do it). At this stage, we just sent constant
-        // with hardcoded maximum number of beams resulting in zero uvw's for all beams).
-        antMetadata.uvw(casa::Vector<casa::Double>(36*3,1e6));
+        // but there are infinite number of ways to do it). Moreover, there seems to be some
+        // logic to send metadata on more antennas than available in the MS. I (MV) don't quite
+        // understand the current state of the code - such features like sending antennas which are
+        // not in the MS wouldn't work with the ingest unless one simulates metadata correctly. 
+        // I looked at this code to fix functional tests. For that purpose it would be ok to 
+        // fudge uvw's based on antenna position. However, care must be taken on the user side as
+        // this hack wouldn't work in all circumstances. Some serious re-design effort would be required
+        // to fix this properly.
+        if (i < nAntennaMS) {
+           const casa::Vector<casa::Double> antPos = antPosColumn(i);
+           ASKAPASSERT(antPos.nelements() == 3u);
+           casa::Vector<casa::Double> dummyUVW(36*3,0.);
+           for (casa::uInt elem = 0; elem < dummyUVW.nelements(); ++elem) {
+                dummyUVW[elem] = antPos[elem % 3];
+           }
+           antMetadata.uvw(dummyUVW);
+        } else {
+           // can't do much except sending some non-zero number - if this case is triggered ingest is
+           // unlikely to work. Proper simulation of uvw is needed for undefined antennas.
+           antMetadata.uvw(casa::Vector<casa::Double>(36*3,1e6));
+        }
 
         metadata.addAntenna(antMetadata);
     }
