@@ -23,7 +23,7 @@ echo -n Extracting measurement set...
 tar -xvf ../full_band.ms.tar.gz 
 echo Done
 
-mpirun -np 5 ../../apps/imager.sh -c spectral.in | tee $OUTPUT
+mpirun -np 9 ../../apps/imager.sh -c spectral.in | tee $OUTPUT
 if [ $? -ne 0 ]; then
     echo Error: mpirun returned an error
     exit 1
