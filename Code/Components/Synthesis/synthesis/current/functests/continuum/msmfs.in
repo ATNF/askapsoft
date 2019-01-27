@@ -4,7 +4,7 @@ Cimager.uvwMachineDirTolerance                  = 0.2arcsec
 Cimager.imagetype                               = fits
 Cimager.memorybuffers                           = true
 Cimager.barycentre                              = false
-Cimager.nchanpercore                            = 1
+Cimager.nchanpercore                            = 2
 Cimager.solverpercore                           = false
 Cimager.Channels                                = [1,%w]
 Cimager.usetmpfs                                = false
@@ -34,7 +34,7 @@ Cimager.gridder.WProject.cutoff                 = 0.001
 Cimager.gridder.WProject.variablesupport        = true
 Cimager.gridder.WProject.offsetsupport          = true
 
-Cimager.ncycles                                 = 2
+Cimager.ncycles                                 = 5
 Cimager.Images.writeAtMajorCycle                = true
 
 # Use a multiscale Clean solver
@@ -45,8 +45,8 @@ Cimager.solver.Clean.scales                     = [0]
 Cimager.solver.Clean.niter                      = 10000
 Cimager.solver.Clean.gain                       = 0.1
 Cimager.solver.Clean.logevery                   = 1000
-Cimager.threshold.minorcycle                    = [40%,100mJy,5mJy]
-Cimager.threshold.majorcycle                    = 5mJy
+Cimager.threshold.minorcycle                    = [45%,100mJy,10mJy]
+Cimager.threshold.majorcycle                    = 10mJy
 
 Cimager.solver.Clean.verbose                    = false
 

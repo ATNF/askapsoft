@@ -28,14 +28,14 @@ Cimager.gridder                                 = WProject
 Cimager.gridder.snapshotimaging                 = false
 Cimager.gridder.snapshotimaging.longtrack       = false
 #Cimager.gridder.snapshotimaging.wtolerance       = 100
-Cimager.gridder.WProject.nwplanes               = 7
+Cimager.gridder.WProject.nwplanes               = 21
 Cimager.gridder.WProject.oversample             = 8
 Cimager.gridder.WProject.maxsupport             = 1024
 Cimager.gridder.WProject.cutoff                 = 0.001
 Cimager.gridder.WProject.variablesupport        = true
 Cimager.gridder.WProject.offsetsupport          = true
 
-Cimager.ncycles                                 = 2
+Cimager.ncycles                                 = 5
 Cimager.Images.writeAtMajorCycle                = true
 
 # Use a multiscale Clean solver
@@ -44,9 +44,10 @@ Cimager.solver.Clean.solutiontype               = MAXBASE
 Cimager.solver.Clean.algorithm                  = BasisfunctionMFS
 Cimager.solver.Clean.scales                     = [0]
 Cimager.solver.Clean.niter                      = 10000
+Cimager.solver.Clean.psfwidth                   = 256
 Cimager.solver.Clean.gain                       = 0.1
 Cimager.solver.Clean.logevery                   = 1000
-Cimager.threshold.minorcycle                    = [45%,100mJy,10mJy]
+Cimager.threshold.minorcycle                    = [75%,100mJy,10mJy]
 Cimager.threshold.majorcycle                    = 10mJy
 
 Cimager.solver.Clean.verbose                    = false

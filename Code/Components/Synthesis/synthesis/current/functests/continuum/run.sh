@@ -24,7 +24,7 @@ echo -n Extracting measurement set...
 tar -xvf ../full_band.ms.tar.gz 
 echo Done
 
-mpirun -np 25 ../../apps/imager.sh -c msmfs.in | tee $OUTPUT
+mpirun -np 13 ../../apps/imager.sh -c msmfs.in | tee $OUTPUT
 if [ $? -ne 0 ]; then
     echo Error: mpirun returned an error
     exit 1
