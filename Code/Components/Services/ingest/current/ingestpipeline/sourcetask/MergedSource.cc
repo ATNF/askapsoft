@@ -500,7 +500,8 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
                   layoutLength2 += casa::square(itsArrayLayout(antenna1,coord) - itsArrayLayout(antenna2,coord));
              }
              ASKAPCHECK(casa::abs(casa::sqrt(uvwLength2) - casa::sqrt(layoutLength2)) < 1e-3, "The length of uvw vector for row="<<row<<" (antennas: "<<
-                             antenna1<<" "<<antenna2<<", beam: "<<beam<<") is more than 1mm different from the baseline length expected from array layout. Junk metadata are suspected for either of the antennas.");
+                             antenna1<<" "<<antenna2<<", beam: "<<beam<<") is more than 1mm different from the baseline length expected from array layout ("<<
+                             casa::sqrt(uvwLength2)<<" metres vs. "<<casa::sqrt(layoutLength2)<<" metres). Junk metadata are suspected for either of the antennas.");
          }
     }
      
