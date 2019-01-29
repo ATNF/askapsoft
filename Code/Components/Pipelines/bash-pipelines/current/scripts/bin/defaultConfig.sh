@@ -111,9 +111,6 @@ TILE_NCHAN_1934=54
 PURGE_INTERIM_MS_SCI=true
 PURGE_INTERIM_MS_1934=true
 
-# If true, copy with distributed copy tool dcp. Else use cp
-USE_DCP_TO_COPY_MS=false
-
 # If true, turn on profiling for the imaging jobs (only cimager and imager have this option)
 USE_PROFILING=false
 

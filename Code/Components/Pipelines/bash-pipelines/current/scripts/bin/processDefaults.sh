@@ -579,6 +579,12 @@ EOF
 
     echo " "
 
+    # Warning about a deprecated parameter
+    if [ "${USE_DCP_TO_COPY_MS}" != "" ]; then
+        echo "WARNING - the parameter USE_DCP_TO_COPY_MS is deprecated. The pipeline just uses cp to copy MSs now."
+    fi
+    
+
     ####################
     # Parameters required for the aoflagger option
 
