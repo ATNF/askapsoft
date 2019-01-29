@@ -58,80 +58,12 @@ cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 # Define the lists of image names, types, 
 . "${getArtifacts}"
 
-pathToScript=\$(which makeThumbnailImage.py 2> "${tmp}/whchmkthumb")
-if [ "\${pathToScript}" == "" ]; then
+log="${logs}/thumbnails_\${SLURM_JOB_ID}.log"
+parset="${parsets}/thumbnails_\${SLURM_JOB_ID}.in"
 
-    for((i=0;i<\${#casdaTwoDimImageNames[@]};i++)); do
-    
-        im=\${casdaTwoDimImageNames[i]}
-        title=\${casdaTwoDimThumbTitles[i]}
-    
-        log="${logs}/thumbnails-\${im##*/}_\${SLURM_JOB_ID}.log"
-        script=${parsets}/thumbnails-\${im##*/}_\${SLURM_JOBID}.py
-        cat > "\$script" <<EOF
-#!/usr/bin/env python
-import matplotlib
-matplotlib.use('Agg')
-matplotlib.rcParams['font.family'] = 'serif'
-matplotlib.rcParams['font.serif'] = ['Times', 'Palatino', 'New Century Schoolbook', 'Bookman', 'Computer Modern Roman']
-#matplotlib.rcParams['text.usetex'] = True
-import aplpy
-import pylab as plt
-import pyfits as fits
-import os
-import numpy as np
+for((i=0;i<\${#casdaTwoDimImageNames[@]};i++)); do
 
-# Get statistics for the image
-#  If there is a matching weights image, use that to
-#  avoid pixels that have zero weight.
-fitsim='\${im}'
-weightsim=fitsim
-weightsim.replace('.restored','')
-prefix=weightsim[:weightsim.find('.')]
-weightsim.replace(prefix,'weights',1)
-image=fits.getdata(fitsim)
-isgood=(np.ones(image.shape)>0)
-if os.access(weightsim,os.F_OK):
-    weights=fits.getdata(weightsim)
-    isgood=(weights>0)
-median=np.median(image[isgood])
-madfm=np.median(abs(image[isgood]-median))
-stddev=madfm * 0.6744888
-vmin=${THUMBNAIL_GREYSCALE_MIN} * stddev
-vmax=${THUMBNAIL_GREYSCALE_MAX} * stddev
-
-suffix='${THUMBNAIL_SUFFIX}'
-thumbim=fitsim.replace('.fits','.%s'%suffix)
-figtitle='\${title}'
-sizetext=[${THUMBNAIL_SIZE_TEXT}]
-sizeinch=[${THUMBNAIL_SIZE_INCHES}]
-figsizes={sizetext[0]:sizeinch[0], sizetext[1]:sizeinch[1]}
-for size in figsizes:
-    gc=aplpy.FITSFigure(fitsim,figsize=(figsizes[size],figsizes[size]))
-    gc.show_colorscale(vmin=vmin,vmax=vmax)
-    gc.tick_labels.set_xformat('hh:mm')
-    gc.tick_labels.set_yformat('dd:mm')
-    gc.add_grid()
-    gc.grid.set_linewidth(0.5)
-    gc.grid.set_alpha(0.5)
-    plt.title(figtitle)
-    #
-    gc.set_theme('publication')
-    gc.save(thumbim.replace('.%s'%suffix,'_%s.%s'%(size,suffix)))
-
-EOF
-        python "\$script" > "\$log"
-    
-    done
-
-else
-
-    log="${logs}/thumbnails_\${SLURM_JOB_ID}.log"
-    parset="${parsets}/thumbnails_\${SLURM_JOB_ID}.in"
-    
-    for((i=0;i<\${#casdaTwoDimImageNames[@]};i++)); do
-    
-        cat >> "\$parset" <<EOF
+    cat >> "\$parset" <<EOF
 ###### Image #\${i} #############
 makeThumbnail.image = \${casdaTwoDimImageNames[i]}
 makeThumbnail.imageTitle = \${casdaTwoDimThumbTitles[i]}
@@ -142,18 +74,17 @@ makeThumbnail.imageSizes = [${THUMBNAIL_SIZE_INCHES}]
 makeThumbnail.imageSizeNames = [${THUMBNAIL_SIZE_TEXT}]
 EOF
     
-        NCORES=1
-        NPPN=1
-        srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${makeThumbnails} -c "\${parset}" >> "\${log}"
-        err=\$?
-        if [ \$err != 0 ]; then
-            echo "ERROR - Thumbnail creation failed for image \${casdaTwoDimImageNames[i]}" | tee -a "\${log}"
-            exit \$err
-        fi
-    
-    done
+    NCORES=1
+    NPPN=1
+    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${makeThumbnails} -c "\${parset}" >> "\${log}"
+    err=\$?
+    if [ \$err != 0 ]; then
+        echo "ERROR - Thumbnail creation failed for image \${casdaTwoDimImageNames[i]}" | tee -a "\${log}"
+        exit \$err
+    fi
 
-fi
+done
+
 EOFOUTER
 
     if [ "${SUBMIT_JOBS}" == "true" ]; then
