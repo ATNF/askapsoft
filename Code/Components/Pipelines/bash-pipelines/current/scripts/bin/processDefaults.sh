@@ -306,40 +306,8 @@ module load askappipeline/${askappipelineVersion}"
     # For the most recent askapsoft versions, it will use the imageToFITS
     # tool to do both, otherwise it will use casa to do so.
 
-    # Check whether imageToFITS is defined in askapsoft module being
-    # used
-    if [ "$(which imageToFITS 2> "${tmp}/whchim2fts")" == "" ]; then
-        # Not found - use casa to do conversion
-        fitsConvertText="# The following converts the file in \$casaim to a FITS file, after fixing headers.
-if [ -e \"\${casaim}\" ] && [ ! -e \"\${fitsim}\" ]; then
-    # The FITS version of this image doesn't exist
-
-    script=\$(echo \"\${parset}\" | sed -e 's/\.in/\.py/g')
-    ASKAPSOFT_VERSION=\"${ASKAPSOFT_VERSION}\"
-    if [ \"\${ASKAPSOFT_VERSION}\" == \"\" ]; then
-        ASKAPSOFT_VERSION_USED=\$(module list -t 2>&1 | grep askapsoft)
-    else
-        ASKAPSOFT_VERSION_USED=\$(echo \"\${ASKAPSOFT_VERSION}\" | sed -e 's|/||g')
-    fi
-
-    cat > \$script << EOFSCRIPT
-#!/usr/bin/env python
-casaimage='\${casaim}'
-fitsimage='\${fitsim}'
-ia.open(casaimage)
-ia.tofits(outfile=fitsimage, velocity=False)
-ia.close()
-EOFSCRIPT
-
-    NCORES=1
-    NPPN=1
-    loadModule casa
-    srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} casa --nogui --nologger --log2term -c \"\${script}\" >> \"\${log}\"
-    unloadModule casa
-fi"
-    else
-        # We can use the new imageToFITS utility to do the conversion.
-        fitsConvertText="# The following converts the file in \$casaim to a FITS file, after fixing headers.
+    # We can use the imageToFITS utility to do the conversion.
+    fitsConvertText="# The following converts the file in \$casaim to a FITS file, after fixing headers.
 if [ -e \"\${casaim}\" ] && [ ! -e \"\${fitsim}\" ]; then
     # The FITS version of this image doesn't exist
 
@@ -360,7 +328,7 @@ EOFINNER
     srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} imageToFITS -c \"\${parset}\" >> \"\${log}\"
 
 fi"
-    fi
+
     # Update the headers
     fitsConvertText="${fitsConvertText}
 # Header updates
