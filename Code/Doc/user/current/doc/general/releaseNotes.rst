@@ -5,6 +5,26 @@ This page summarises the key changes in each tagged release of
 ASKAPsoft. This replicates the CHANGES file that is included in the
 code base.
 
+0.23.2 (2 February 2019)
+------------------------
+
+A patch release, fixing an issue with imager and a couple of minor pipeline issues:
+
+ * The imager in spectral-imaging mode was not respecting the clean
+   thresholds correctly. This could lead to over-cleaning, and the
+   insertion of spurious clean components at noise peaks (particularly
+   in continuum-subtracted spectral data).
+ * A change has been made to the module setup, avoiding "module swap"
+   in favour of "module unload / module load" - this addresses an
+   occasional issue seen where the module environment can get
+   corrupted by the swap command.
+ * A fix has been made to the flagging parsets, solving a problem
+   where the autocorrelation flagging and the time-range flagging were
+   assigned to the same rule. If both were used, the time range was
+   only flagged in the autocorrelations. They now appear as separate
+   rules and so will be independent.
+
+   
 0.23.1 (22 January 2019)
 ------------------------
 
