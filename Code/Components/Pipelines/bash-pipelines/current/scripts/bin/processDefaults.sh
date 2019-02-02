@@ -147,9 +147,11 @@ module load askapsoft${ASKAPSOFT_VERSION}"
 # Swapping to the requested askapsoft module
 module use ${ASKAP_MODULE_DIR}
 module load askapdata
-module swap askapsoft askapsoft${ASKAPSOFT_VERSION}"
+module unload askapsoft
+module load askapsoft${ASKAPSOFT_VERSION}"
                 echo "Will use the askapsoft module askapsoft${ASKAPSOFT_VERSION}"
-                module swap askapsoft askapsoft${ASKAPSOFT_VERSION}
+                module unload askapsoft
+                module load askapsoft${ASKAPSOFT_VERSION}
             else
                 askapsoftModuleCommands="${askapsoftModuleCommands}
 # Using user-defined askapsoft module
