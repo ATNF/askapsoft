@@ -19,6 +19,7 @@ Cimager.Images.image.cont.nterms          = 2
 #Cimager.Images.image.cont.nchan          = 8
 Cimager.Images.image.cont.nchan          = 1
 Cimager.nworkergroups                           = 3
+Cimager.nterms                          = 3
 Cimager.sensitivityimage                        = true
 #Cimager.gridder                                 = SphFunc
 

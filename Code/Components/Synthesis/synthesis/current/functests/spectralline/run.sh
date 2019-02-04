@@ -1,12 +1,16 @@
 #!/bin/bash
 
 OUTPUT=output.txt
+CFLAGOUTPUT=cflag_output.txt
 
 export AIPSPATH=${ASKAP_ROOT}/Code/Base/accessors/current
 
 if [ ! -x ../../apps/imager.sh ]; then
     echo imager.sh does not exit
+    exit 1
 fi
+
+
 RESTORED=image.restored.cont.fits
 IMAGE=image.cont.fits
 PSF=psf.image.cont.fits
@@ -23,6 +27,14 @@ echo -n Extracting measurement set...
 tar -xvf ../full_band.ms.tar.gz 
 echo Done
 
+if [ -x ${ASKAP_ROOT}/Code/Components/CP/pipelinetasks/current/apps/cflag.sh ]; then
+  echo "cflag exists therefore <can> flag"
+  if [ -f ./cflag.in ]; then
+    echo "cflag.in exists so <will> flag"
+    mpirun -np 1 ${ASKAP_ROOT}/Code/Components/CP/pipelinetasks/current/apps/cflag.sh -c cflag.in | tee $CFLAGOUTPUT
+  fi
+fi
+exit 1  
 mpirun -np 9 ../../apps/imager.sh -c spectral.in | tee $OUTPUT
 if [ $? -ne 0 ]; then
     echo Error: mpirun returned an error
