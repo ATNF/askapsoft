@@ -59,6 +59,7 @@ if [ "${DO_IT}" == "true" ]; then
     DO_AMP_FLAG=false
     ruleList=""
 
+    # Rule 1 relates to antenna-based flagging
     if [ "${ANTENNA_FLAG_SCIENCE}" == "" ]; then
         antennaFlagging="# Not flagging any antennas"
     else
@@ -72,6 +73,7 @@ Cflag.selection_flagger.rule1.antenna   = ${ANTENNA_FLAG_SCIENCE}"
         DO_AMP_FLAG=true
     fi
 
+    # Rule 2 relates to channel range flagging
     if [ "${CHANNEL_FLAG_SCIENCE}" == "" ]; then
         channelFlagging="# Not flagging any specific channel range"
     else
@@ -85,6 +87,7 @@ Cflag.selection_flagger.rule2.spw = ${CHANNEL_FLAG_SCIENCE}"
         DO_AMP_FLAG=true
     fi
 
+    # Rule 3 relates to time range flagging
     if [ "${TIME_FLAG_SCIENCE}" == "" ]; then
         timeFlagging="# Not flagging any specific time range"
     else
@@ -98,13 +101,14 @@ Cflag.selection_flagger.rule3.timerange = ${TIME_FLAG_SCIENCE}"
         DO_AMP_FLAG=true
     fi
 
+    # Rule 4 relates to flagging of autocorrelations
     if [ "${FLAG_AUTOCORRELATION_SCIENCE}" == "true" ]; then
         autocorrFlagging="# The following flags out the autocorrelations, if set to true:
-Cflag.selection_flagger.rule3.autocorr  = ${FLAG_AUTOCORRELATION_SCIENCE}"
+Cflag.selection_flagger.rule4.autocorr  = ${FLAG_AUTOCORRELATION_SCIENCE}"
         if [ "${ruleList}" == "" ]; then
-            ruleList="rule3"
+            ruleList="rule4"
         else
-            ruleList="${ruleList},rule3"
+            ruleList="${ruleList},rule4"
         fi
         DO_AMP_FLAG=true
     else

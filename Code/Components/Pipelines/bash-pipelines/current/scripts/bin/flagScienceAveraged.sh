@@ -78,6 +78,7 @@ ${amplitudeLow}"
         amplitudeCut="# No flat amplitude flagging applied"
     fi
 
+    # Rule 1 relates to channel range flagging
     if [ "${CHANNEL_FLAG_SCIENCE_AV}" == "" ]; then
         channelFlagging="# Not flagging any specific channel range"
     else
@@ -91,6 +92,7 @@ Cflag.selection_flagger.rule1.spw = ${CHANNEL_FLAG_SCIENCE_AV}"
         DO_AMP_FLAG=true
     fi
 
+    # Rule 2 relates to time range flagging
     if [ "${TIME_FLAG_SCIENCE_AV}" == "" ]; then
         timeFlagging="# Not flagging any specific time range"
     else

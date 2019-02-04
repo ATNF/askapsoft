@@ -25,16 +25,8 @@ If no channel or scan selection is being made (that is, using
 ``CHANNEL_RANGE_SCIENCE`` or ``SCAN_SELECTION_SCIENCE``), there is
 only a single field in the dataset, and the observation used the
 MS-per-beam mode, then instead of splitting the dataset the pipeline
-uses a parallel copy (using the *dcp* utility) to copy the archive MS
-to the output directory. This should run faster than using *mssplit*.
-
-To use this mode, you will need to have your SSH keys set
-appropriately in your ~/.ssh directory. The copying is run
-on *hpc-data*, under an SSH connection, and you need to be able to
-connect to it without providing a password. If there is an issue with
-your SSH keys, or you know *hpc-data* is unavailable, you can use
-regular **cp** by setting ``USE_DCP_TO_COPY_MS=false``. Note that this
-will be slower than the **dcp** option.
+simply copies the archive MS to the output directory. This should run
+faster than using *mssplit*.
 
 The bandpass calibration datasets are treated the same way, although
 *mssplit* is always used (since the relevant scan needs to be split
@@ -67,10 +59,6 @@ run the splitting, so that there is a local copy of the individual beam data.
 +------------------------+---------------------------------------------------------+------------------------------------------------------------+
 | ``MS_INPUT_SCIENCE``   | no default                                              | MS for the science field. Ignored if the SB number is      |
 |                        |                                                         | provided.                                                  |
-+------------------------+---------------------------------------------------------+------------------------------------------------------------+
-| ``USE_DCP_TO_COPY_MS`` | false                                                   | Whether to use dcp via ssh to hpc-data to run the copying  |
-|                        |                                                         | of the input data. If false, ordinary cp is used without   |
-|                        |                                                         | ssh.                                                       |
 +------------------------+---------------------------------------------------------+------------------------------------------------------------+
 
 These parameters determine which beams in the data to process. The
