@@ -1,3 +1,4 @@
+sudo   apt-get update
 sudo   apt-get install -y bison
 sudo   apt-get install -y boost
 sudo   apt-get install -y bzip2
