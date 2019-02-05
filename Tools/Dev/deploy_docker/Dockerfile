@@ -1,7 +1,8 @@
 FROM ubuntu
 WORKDIR /apps
 COPY . /apps
-RUN tar -xvf /apps/askap_apps.tar.gz ; rm /apps/askap_apps.tar.gz
+RUN tar -xvf /apps/askap_apps.tar.gz 
+RUN tar -xvf /apps/WSRT_Measures.ztar /usr/local/geodetic
 RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get install -y --no-install-recommends libboost-system1.65.1 \
     && apt-get install -y --no-install-recommends libboost-filesystem1.65.1 \
