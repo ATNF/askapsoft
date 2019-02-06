@@ -2,8 +2,7 @@ FROM ubuntu
 WORKDIR /apps
 COPY . /apps
 RUN tar -xvf /apps/askap_apps.tar.gz 
-RUN mkdir /usr/local/geodetic
-RUN cd /usr/local/geodetic ; tar -xvf /apps/WSRT_Measures.ztar 
+RUN cd /usr/local ; tar -xvf /apps/WSRT_Measures.ztar 
 RUN apt-get update
 RUN apt-get install -y wget subversion build-essential gfortran python-dev flex bison openjdk-8-jdk libfreetype6-dev libpng-dev autoconf
 RUN apt-get install -y --no-install-recommends libboost-system1.65.1 \
