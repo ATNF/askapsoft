@@ -13,10 +13,15 @@ az vm create \
     --generate-ssh-keys \
     --admin-username askap \
 
-IP=`az vm list-ip-addresses --resource-group RIALTO-2 --name azure-builder --output table | tail -1 | awk '{print $2}'`
-echo $IP
-ssh askap@$IP  screen -dmS remote_session
-ssh askap@$IP  screen -r remote_session; git clone https://bitbucket.csiro.au/scm/~ord006/jacal-dev.git ./jacal-dev ; . jacal-dev/Tools/Dev/deploy_azure/build-provision.sh ; askap-build.sh
+#IP=`az vm list-ip-addresses --resource-group RIALTO-2 --name azure-builder --output table | tail -1 | awk '{print $2}'`
+#echo $IP
+
+#ssh askap@$IP  wget http://www.mpich.org/static/downloads/3.1.4/mpich-3.1.4.tar.gz .
+#ssh askap@$IP  tar -xvf mpich-3.1.4.tar.gz
+#ssh askap@$IP  tar -xvf mpich-3.1.4.tar.gz
+
+#ssh askap@$IP  screen -dmS remote_session
+#ssh askap@$IP  screen -r remote_session; git clone https://bitbucket.csiro.au/scm/~ord006/jacal-dev.git ./jacal-dev ; . jacal-dev/Tools/Dev/deploy_azure/build-provision.sh ; askap-build.sh
 
 # insert build instructions here
 # probably best to run something via a screen call - but need to report completeness
