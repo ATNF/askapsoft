@@ -427,7 +427,8 @@ for FIELD in \${LOCAL_FIELD_LIST}; do
 
     if [ "\${FIELD}" == "." ]; then
         theBeamList="all"
-        TILE_LIST="${TILE_LIST} ALL"
+        TILE_LIST="${TILE_LIST}
+ALL"
     else
         theBeamList=\${LOCAL_BEAM_LIST}
         getTile
