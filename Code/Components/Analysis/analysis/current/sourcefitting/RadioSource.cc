@@ -994,7 +994,7 @@ bool RadioSource::fitGauss(casa::Matrix<casa::Double> &pos,
     ASKAPLOG_DEBUG_STR(logger, "Found " << cmpntListReference.size() << " subcomponents");
 
     for (uInt i = 0; i < cmpntListReference.size(); i++) {
-        ASKAPLOG_DEBUG_STR(logger, "SubComponent: " << cmpntList[i]);
+        ASKAPLOG_DEBUG_STR(logger, "SubComponent: " << cmpntListReference[i]);
     }
 
     std::map<float, std::string> bestChisqMap; // map reduced-chisq to fitType
@@ -1137,13 +1137,13 @@ bool RadioSource::fitGauss(casa::Matrix<casa::Double> &pos,
             itsBestFitType = "guess";
             // set the components to be at least as big as the beam
             for (size_t i = 0; i < cmpntListReference.size(); i++) {
-                casa::Gaussian2D<casa::Double> gauss = cmpntList[i].asGauss();
+                casa::Gaussian2D<casa::Double> gauss = cmpntListReference[i].asGauss();
                 if (cmpntListReference[i].maj() < itsHeader.beam().maj()) {
                     cmpntListReference[i].setMajor(itsHeader.beam().maj());
                     cmpntListReference[i].setMinor(itsHeader.beam().min());
                     cmpntListReference[i].setPA(itsHeader.beam().pa()*M_PI / 180.);
                 } else {
-                    cmpntListReference[i].setMinor(std::max(cmpntList[i].min(),
+                    cmpntListReference[i].setMinor(std::max(cmpntListReference[i].min(),
                                                             double(itsHeader.beam().min())));
                 }
             }
