@@ -127,10 +127,17 @@ class Fitter {
         bool passLocation();
         /// @brief Are the component sizes big enough?
         bool passComponentSize();
-        /// @brief Are the component fluxes OK?
+        /// @brief Are the component fluxes larger than half the detection threshold?
         bool passComponentFlux();
+    /// @brief If negative components are not wanted, are they all with positive flux?
+        bool passNegativeComponents();
+    /// @brief Are all components below twice the island peak flux?
         bool passPeakFlux();
+    /// @brief The sum of the integrated fluxes of all components must
+    /// not be more than twice the total flux in the box - only
+    /// considered if fitting to the box pixels
         bool passIntFlux();
+    /// @brief Are pairs of components separated by 2 pixels at least?
         bool passSeparation();
 
         /// @brief Is the fit acceptable overall?

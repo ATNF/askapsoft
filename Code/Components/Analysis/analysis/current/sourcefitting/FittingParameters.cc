@@ -107,6 +107,7 @@ FittingParameters::FittingParameters(const LOFAR::ParameterSet& parset)
     itsFlagFitThisParam = std::vector<bool>(6, true);
     itsFlagFitJustDetection = parset.getBool("fitJustDetection", true);
     itsApplyAcceptanceCriteria = parset.getBool("applyAcceptanceCriteria", false);
+    itsNegativeFluxPossible = parset.getBool("negativeFluxPossible", false);
 
     if (parset.isDefined("flagFitParam"))
         ASKAPLOG_WARN_STR(logger, "The flagFitParam parameter is not used any more. " <<

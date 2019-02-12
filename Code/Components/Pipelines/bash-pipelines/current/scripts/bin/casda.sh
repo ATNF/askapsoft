@@ -149,7 +149,7 @@ elif [ "\$ageOfReady" -gt "${MAX_POLL_WAIT_TIME}" ]; then
     exit 1
 else
     # Re-submit job with a delay
-    sbatch --begin="now+${POLLING_DELAY_SEC}" "${sbatchfile}"
+    sbatch --begin="now+${POLLING_DELAY_SEC}" "${pollingsbatchfile}"
 fi
 
 EOFOUTER

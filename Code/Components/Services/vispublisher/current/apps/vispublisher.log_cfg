@@ -1,6 +1,14 @@
 # Configure the rootLogger
-log4j.rootLogger=DEBUG,STDOUT
+log4j.rootLogger=DEBUG,STDOUT,logarchiver
 
 log4j.appender.STDOUT=org.apache.log4j.ConsoleAppender
 log4j.appender.STDOUT.layout=org.apache.log4j.PatternLayout
 log4j.appender.STDOUT.layout.ConversionPattern=%-5p %c{2} (%X{mpirank}, %X{hostname}) [%d] - %m%n
+
+log4j.appender.logarchiver=askap.IceAppender
+log4j.appender.logarchiver.locator_host=aktos10.atnf.csiro.au
+log4j.appender.logarchiver.locator_port=4061
+log4j.appender.logarchiver.topic=logger
+log4j.appender.logarchiver.tag=cp
+log4j.appender.logarchiver.Threshold=WARN
+
