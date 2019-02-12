@@ -272,8 +272,7 @@ converge.
 Accepting the fit
 .................
 
-The fit is accepted according to a list of criteria, that follow those
-used in the FIRST survey (`Becker, White & Helfand 1995`_). These are:
+The default tests to accept a fit result are the following:
 
 * The fit must have converged.
 * The chi-squared value is examined in one of two ways. The second
@@ -291,8 +290,15 @@ used in the FIRST survey (`Becker, White & Helfand 1995`_). These are:
    greater than 343, computational requirements mean this is
    approximated by requiring the reduced chi-squared to be less than
    1.2.
-
+* The peak flux of each component must be positive, unless
+  **negativeFluxPossible=true** is set.
 * The centre of each component must be inside the box
+
+
+If **applyAcceptanceCriteria=true**, we then apply a further set of
+criteria, that follow those used in the FIRST survey (`Becker, White &
+Helfand 1995`_). These are:
+
 * The separation between any pair of components must be more than 2
   pixels
 * The flux of each component must be positive and more than half the
@@ -622,6 +628,11 @@ Parameters for fitting
 +-----------------------------------------------+---------------+----------------------------+-----------------------------------------------------------------------------------------+
 |Selavy.Fitter.criterium                        |double         |0.0001                      |The convergence criterium for casa::FitGaussian::fit() (this does not seem to be used in |
 |                                               |               |                            |the fitting).                                                                            |
++-----------------------------------------------+---------------+----------------------------+-----------------------------------------------------------------------------------------+
+|Selavy.Fitter.negativeFluxPossible             |bool           |false                       |Whether we accept negative-flux components.                                              |
++-----------------------------------------------+---------------+----------------------------+-----------------------------------------------------------------------------------------+
+|Selavy.Fitter.applyAcceptanceCriteria          |bool           |false                       |Whether to apply the full set of acceptance criteria above. If false, only the limited   |
+|                                               |               |                            |set will be applied.                                                                     |
 +-----------------------------------------------+---------------+----------------------------+-----------------------------------------------------------------------------------------+
 |**Output files**                               |               |                            |                                                                                         |
 +-----------------------------------------------+---------------+----------------------------+-----------------------------------------------------------------------------------------+
