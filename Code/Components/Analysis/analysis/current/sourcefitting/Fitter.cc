@@ -202,15 +202,6 @@ void Fitter::fit(casa::Matrix<casa::Double> pos,
             if (!itsFitter.converged()) {
                 fitloop = numLoops;
             } else {
-                if (!itsParams.negativeFluxPossible()) {
-                    // If we don't allow negative fluxes, set all negative components to zero flux
-                    for (unsigned int i = 0; i < itsNumGauss; i++) {
-                        if (itsSolution(i, 0) < 0) {
-                            itsSolution(i, 0) = 0.;
-                        }
-                    }
-                }
-
                 itsFitter.setFirstEstimate(itsSolution);
             }
         }
@@ -332,6 +323,25 @@ bool Fitter::passComponentSize()
 
 //**************************************************************//
 
+bool Fitter::passNegativeComponents()
+{
+    if (!this->passConverged()) {
+        return false;
+    }
+
+    if (itsParams.negativeFluxPossible()) {
+        return true;
+    } else {
+        bool passNeg = true;
+        for (unsigned int i = 0; i < itsNumGauss; i++) {
+            passNeg = passNeg && (itsSolution(i, 0) > 0.);
+        }
+        return passNeg;
+    }
+}
+
+//**************************************************************//
+
 bool Fitter::passComponentFlux()
 {
     if (!this->passConverged()) {
@@ -341,7 +351,6 @@ bool Fitter::passComponentFlux()
     bool passFlux = true;
 
     for (unsigned int i = 0; i < itsNumGauss; i++) {
-        passFlux = passFlux && (itsSolution(i, 0) > 0.);
         passFlux = passFlux && (itsSolution(i, 0) > 0.5 * itsParams.itsDetectThresh);
     }
 
@@ -417,6 +426,7 @@ bool Fitter::acceptableExceptChisq()
     bool passConv = this->passConverged();
     bool passLoc = this->passLocation();
     bool passSize = this->passComponentSize();
+    bool passNeg = this->passNegativeComponents();
 
     if (itsParams.applyAcceptanceCriteria()) {
 
@@ -426,11 +436,11 @@ bool Fitter::acceptableExceptChisq()
         bool passIntFlux = this->passIntFlux();
 
         return passConv && passFlux && passLoc && passSep &&
-               passSize && passPeak && passIntFlux;
+               passSize && passPeak && passIntFlux && passNeg;
 
     } else {
 
-        return passConv && passLoc && passSize;
+        return passConv && passLoc && passSize && passNeg;
 
     }
 }
@@ -441,6 +451,7 @@ bool Fitter::acceptable()
     bool passChisq = this->passChisq();
     bool passLoc = this->passLocation();
     bool passSize = this->passComponentSize();
+    bool passNeg = this->passNegativeComponents();
 
     if (itsParams.applyAcceptanceCriteria()) {
 
@@ -450,8 +461,8 @@ bool Fitter::acceptable()
         bool passIntFlux = this->passIntFlux();
 
         std::stringstream msg;
-        if (!(passConv || passChisq || passFlux || passLoc ||
-                passSep || passSize || passPeak || passIntFlux)) {
+        if (!(passConv || passChisq || passFlux || passLoc  ||
+                passSep || passSize || passNeg  || passPeak || passIntFlux)) {
             msg << "Fit failed all criteria";
         } else {
             msg << "Fit failed on criteria: ";
@@ -474,6 +485,9 @@ bool Fitter::acceptable()
             if (!passSize) {
                 msg << (ct++ > 0 ? "| " : "") << "Size ";
             }
+            if (!passNeg) {
+                msg << (ct++ > 0 ? "| " : "") << "Neg ";
+            }
             if (!passPeak) {
                 msg << (ct++ > 0 ? "| " : "") << "Peak ";
             }
@@ -482,7 +496,7 @@ bool Fitter::acceptable()
             }
         }
         bool thisFitGood = passConv && passChisq && passLoc && passSize &&
-                           passSep && passFlux && passPeak && passIntFlux;
+                           passSep && passFlux && passPeak && passIntFlux && passNeg;
         if (!thisFitGood) {
             ASKAPLOG_INFO_STR(logger, msg.str());
         }
@@ -490,7 +504,7 @@ bool Fitter::acceptable()
 
     } else {
 
-        return passConv && passChisq && passLoc && passSize;
+        return passConv && passChisq && passLoc && passSize && passNeg;
 
     }
 }
