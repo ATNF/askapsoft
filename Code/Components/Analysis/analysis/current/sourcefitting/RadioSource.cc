@@ -989,11 +989,11 @@ bool RadioSource::fitGauss(casa::Matrix<casa::Double> &pos,
                       ",  peak flux = " << this->peakFlux <<
                       ",  noise level = " << itsNoiseLevel);
 
-    // Get the list of subcomponents
-    std::vector<SubComponent> cmpntList = this->getSubComponentList(pos, f);
-    ASKAPLOG_DEBUG_STR(logger, "Found " << cmpntList.size() << " subcomponents");
+    // Get the initial list of subcomponents
+    std::vector<SubComponent> cmpntListReference = this->getSubComponentList(pos, f);
+    ASKAPLOG_DEBUG_STR(logger, "Found " << cmpntListReference.size() << " subcomponents");
 
-    for (uInt i = 0; i < cmpntList.size(); i++) {
+    for (uInt i = 0; i < cmpntListReference.size(); i++) {
         ASKAPLOG_DEBUG_STR(logger, "SubComponent: " << cmpntList[i]);
     }
 
@@ -1007,13 +1007,13 @@ bool RadioSource::fitGauss(casa::Matrix<casa::Double> &pos,
             ASKAPLOG_INFO_STR(logger, "Commencing fits of type \"" << *type << "\"");
             itsFitParams.setFlagFitThisParam(*type);
 
-            std::vector<SubComponent> cmpntListCopy(cmpntList);
+            std::vector<SubComponent> cmpntList(cmpntListReference);
 
             // For any subcomponent that is smaller than the beam
             // (when comparing major axes), set its size to the beam
             // size. Always do this when fitting "psf" type.
             for (size_t i = 0; i < cmpntList.size(); i++) {
-                cmpntListCopy[i].fixSize(*type, itsHeader);
+                cmpntList[i].fixSize(*type, itsHeader);
             }
 
             int ctr = 0;
@@ -1023,7 +1023,7 @@ bool RadioSource::fitGauss(casa::Matrix<casa::Double> &pos,
 
             unsigned int minGauss, maxGauss;
             if (itsFitParams.numGaussFromGuess()) {
-                minGauss = maxGauss = cmpntListCopy.size();
+                minGauss = maxGauss = cmpntList.size();
             } else {
                 minGauss = 1;
                 maxGauss = std::min(size_t(itsFitParams.maxNumGauss()), f.size());
@@ -1040,7 +1040,7 @@ bool RadioSource::fitGauss(casa::Matrix<casa::Double> &pos,
                 unsigned int g = numGaussList[ig];
                 ASKAPLOG_DEBUG_STR(logger, "Number of Gaussian components = " << g);
 
-                fit.push_back(fitGauss(g, cmpntListCopy, pos, f, sigma));
+                fit.push_back(fitGauss(g, cmpntList, pos, f, sigma));
                 fitPossible = fit[ctr].fitExists();
                 bool acceptable = fit[ctr].acceptable();
                 bool okExceptChisq = fit[ctr].acceptableExceptChisq();
@@ -1086,12 +1086,10 @@ bool RadioSource::fitGauss(casa::Matrix<casa::Double> &pos,
 
                                 if (newGuessList[0].peak() > itsDetectionThreshold) {
                                     newGuessList[0].fixSize(*type, itsHeader);
-//                                cmpntListCopy.push_back(newGuessList[0]);
                                     ASKAPLOG_DEBUG_STR(logger, "Adding new subcomponent " <<
                                                        newGuessList[0]);
-//                                maxGauss++;
                                     newList.push_back(newGuessList[0]);
-                                    cmpntListCopy = newList;
+                                    cmpntList = newList;
                                     numGaussList.push_back(g + 1);
                                 }
 
@@ -1135,22 +1133,22 @@ bool RadioSource::fitGauss(casa::Matrix<casa::Double> &pos,
         itsFlagHasFit = false;
         if (itsFitParams.useGuessIfBad()) {
             ASKAPLOG_INFO_STR(logger, "Fits failed, so saving initial estimate (" <<
-                              cmpntList.size() << " components) as solution");
+                              cmpntListReference.size() << " components) as solution");
             itsBestFitType = "guess";
             // set the components to be at least as big as the beam
-            for (size_t i = 0; i < cmpntList.size(); i++) {
+            for (size_t i = 0; i < cmpntListReference.size(); i++) {
                 casa::Gaussian2D<casa::Double> gauss = cmpntList[i].asGauss();
-                if (cmpntList[i].maj() < itsHeader.beam().maj()) {
-                    cmpntList[i].setMajor(itsHeader.beam().maj());
-                    cmpntList[i].setMinor(itsHeader.beam().min());
-                    cmpntList[i].setPA(itsHeader.beam().pa()*M_PI / 180.);
+                if (cmpntListReference[i].maj() < itsHeader.beam().maj()) {
+                    cmpntListReference[i].setMajor(itsHeader.beam().maj());
+                    cmpntListReference[i].setMinor(itsHeader.beam().min());
+                    cmpntListReference[i].setPA(itsHeader.beam().pa()*M_PI / 180.);
                 } else {
-                    cmpntList[i].setMinor(std::max(cmpntList[i].min(),
-                                                   double(itsHeader.beam().min())));
+                    cmpntListReference[i].setMinor(std::max(cmpntList[i].min(),
+                                                            double(itsHeader.beam().min())));
                 }
             }
             FitResults guess;
-            guess.saveGuess(cmpntList);
+            guess.saveGuess(cmpntListReference);
             itsBestFitMap["guess"] = guess;
             itsBestFitMap["best"] = guess;
             for (type = typelist.begin(); type < typelist.end(); type++) {
