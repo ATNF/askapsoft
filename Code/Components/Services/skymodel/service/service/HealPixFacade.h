@@ -42,10 +42,11 @@
 #include "Utility.h"
 #include "SmsTypes.h"
 
+/* this appears not to be needed anymore 
 #ifdef __APPLE__
 template<> struct Orderhelper__<long long> {enum{omax=29};};
 #endif 
-
+*/
 
 namespace askap {
 namespace cp {

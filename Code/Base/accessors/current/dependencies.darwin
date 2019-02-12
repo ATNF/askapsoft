@@ -7,3 +7,4 @@ boost=/usr/local
 cmdlineparser=3rdParty/cmdlineparser/cmdlineparser-0.1.1
 xerces-c=3rdParty/xerces-c/xerces-c-3.1.1
 casa_components=3rdParty/casa-components/casa-components-1.6.0
+cfitsio=/usr/local; cfitsio
