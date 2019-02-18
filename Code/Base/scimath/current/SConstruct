@@ -10,6 +10,8 @@ from askapenv import env
 import sys
 
 env.AppendUnique(CCFLAGS=['-O3'])
+if sys.platform != 'darwin':
+  env.AppendUnique(CCFLAGS=['-fcx-limited-range'])
 
 if env['usepgi']==0:
     if sys.platform != 'darwin':
@@ -20,7 +22,7 @@ if env['usepgi']==0:
 # dependency analysis so need to make it explict here.
 if sys.platform == 'darwin':
     env.AppendUnique(LINKFLAGS=['-llapack'])
-
+    env.AppendUnique(LINKFLAGS=['-framework', 'Python'])
 # create build object with library name
 pkg = env.AskapPackage("scimath")
 
