@@ -30,6 +30,13 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+mpirun --oversubscribe -np 2 ../../apps/linmos-mpi.sh -c linmos.in | tee $OUTPUT
+if [ $? -ne 0 ]; then
+    echo Error: mpirun returned an error
+    exit 1
+fi
+
+
 echo -n Removing measurement set...
 rm -rf linmos_1_chan.ms
 echo Done
