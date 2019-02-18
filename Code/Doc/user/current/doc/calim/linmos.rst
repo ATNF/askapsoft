@@ -213,7 +213,7 @@ The default Gaussian Primary beam is now 2 dimensional. But unless the user spec
 +==================+==================+==============+============================================================+
 |aperture          |double            |12            |Aperture size in metres.                                    |
 +------------------+------------------+--------------+------------------------------------------------------------+
-|fwhmscaling       |double            |1.0           |Scaling of the full width half max of the Gaussian          |
+|fwhmscaling       |double            |1.09           |Scaling of the full width half max of the Gaussian          |
 +------------------+------------------+--------------+------------------------------------------------------------+
 |expscaling        |double            | 4 log(2)     |Scaling of the primary beam exponent                        |
 +------------------+------------------+--------------+------------------------------------------------------------+

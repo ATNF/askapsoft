@@ -37,7 +37,7 @@ namespace askap {
                 ASKAPLOG_DEBUG_STR(logger,"GaussianPB copy contructor");
             }
             PrimaryBeam::ShPtr GaussianPB::createDefaultPrimaryBeam(){
-             
+
                GaussianPB::ShPtr ptr;
 
                ptr.reset( new GaussianPB());
@@ -83,7 +83,7 @@ namespace askap {
                ptr.reset( new GaussianPB());
 
                ptr->setApertureSize(parset.getDouble("aperture",12));
-               ptr->setFWHMScaling(parset.getDouble("fwhmscaling", 1.00));
+               ptr->setFWHMScaling(parset.getDouble("fwhmscaling", 1.09));
                // changed this default to deal with the double Gaussian
                ptr->setExpScaling(parset.getDouble("expscaling", 4.*log(2.)));
 
@@ -173,6 +173,7 @@ namespace askap {
 
                 if (frequency != 0) {
                   fwhm = sol/frequency/this->ApertureSize;
+                  fwhm = FWHMScaling*fwhm;
                 }
                 // Note if widht is <given> then Frequency is ignored
 

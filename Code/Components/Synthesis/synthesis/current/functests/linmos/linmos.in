@@ -1,0 +1,10 @@
+linmos.weighttype       = FromPrimaryBeamModel
+linmos.weightstate      = Inherent
+linmos.imagetype	= fits
+linmos.names            = image.cont.restored
+linmos.outname          = image_corrected.restored
+linmos.outweight        = weights_corrected
+linmos.primarybeam      = "GaussianPB"
+linmos.primarybeam.GaussianPB.aperture=12
+linmos.primarybeam.GaussianPB.fwhmscaling=0.5
+
