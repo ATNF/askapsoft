@@ -6,5 +6,5 @@ linmos.outname          = image_corrected.restored
 linmos.outweight        = weights_corrected
 linmos.primarybeam      = "GaussianPB"
 linmos.primarybeam.GaussianPB.aperture=12
-linmos.primarybeam.GaussianPB.fwhmscaling=0.5
+linmos.primarybeam.GaussianPB.fwhmscaling=1.00
 
