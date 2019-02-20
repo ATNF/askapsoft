@@ -132,7 +132,11 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``NUM_CPUS_SPECIMG_SCI``                      | 200                                 | none                               | The total number of cores allocated to the spectral-imaging       |
 |                                               |                                     |                                    | job. One will be the master, while the rest will be devoted to    |
-|                                               |                                     |                                    | imaging individual channels.                                      |
+|                                               |                                     |                                    | imaging individual channels. This is not used when                |
+|                                               |                                     |                                    | ``DO_ALT_IMAGER_SPECTRAL=true`` - instead, it is set to ``NCHAN / |
+|                                               |                                     |                                    | NCHAN_PER_CORE_SL + 1``. If ``NCHAN_PER_CORE_SL`` does not evenly |
+|                                               |                                     |                                    | divide into NCHAN, then an error is raised and no jobs are        |
+|                                               |                                     |                                    | submitted.                                                        |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``CPUS_PER_CORE_SPEC_IMAGING``                | 20                                  | none                               | The number of cores per node to use (max 20).                     |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
