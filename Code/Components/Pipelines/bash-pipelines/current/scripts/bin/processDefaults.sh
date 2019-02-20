@@ -961,6 +961,11 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
 
         # if we are using the new imager we need to tweak the number of cores
         if [ "${DO_ALT_IMAGER_SPECTRAL}" == "true" ]; then
+            if [ $((NUM_CHAN_SCIENCE_SL % NCHAN_PER_CORE_SL)) -ne 0 ]; then
+                echo "ERROR - NCHAN_PER_CORE_SL (${NCHAN_PER_CORE_SL}) does not evenly divide the number of channels (${NUM_CHAN_SCIENCE_SL})"
+                echo "   Exiting."
+                exit 1
+            fi
             NUM_CPUS_SPECIMG_SCI=$(echo "${NUM_CHAN_SCIENCE_SL}" "${NCHAN_PER_CORE_SL}" | awk '{print int($1/$2) + 1}')
         fi
 
