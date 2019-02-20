@@ -105,7 +105,10 @@ if [ "$PROCESS_DEFAULTS_HAS_RUN" != "true" ]; then
     module use "${ASKAP_MODULE_DIR}"
 
     askapsoftModuleCommands="# Need to load the slurm module directly
-module load slurm"
+module load slurm
+# Ensure the default python module is loaded before askapsoft
+module unload python
+module load python"
 
     if [ "${ASKAP_ROOT}" == "" ]; then
         # Has the user asked for a specific askapsoft module?
