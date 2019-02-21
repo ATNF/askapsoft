@@ -73,9 +73,12 @@ for FIELD in \${FIELD_LIST}; do
 
     # copy the cubestats, the plots thereof, and the beam logs to the
     # field directory in diagnostics (but only the ones that exist).
-    files=(\${FIELD}/cubeStats*txt \${FIELD}/cubePlot*png
-    \${FIELD}/beamlog*) if [ -e "\${files[0]} ]; then for f in
-    \${files[@]}; do cp \$f \$fieldDir done fi
+    files=(\${FIELD}/cubeStats*txt \${FIELD}/cubePlot*png \${FIELD}/beamlog*) 
+    if [ -e "\${files[0]}" ]; then 
+        for f in \${files[@]}; do 
+            cp \$f \$fieldDir 
+        done 
+    fi
 
     # Cube stats and restoring beam for the spectral cubes
     imageCode=restored
