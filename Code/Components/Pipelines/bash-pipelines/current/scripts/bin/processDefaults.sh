@@ -285,7 +285,7 @@ module load askappipeline/${askappipelineVersion}"
     #############################
     # HISTORY metadata string
 
-    imageHistoryString="\"Produced with ASKAPsoft version \${ASKAPSOFT_VERSION_USED}\""
+    imageHistoryString="\"Produced with ASKAPsoft version ${ASKAPSOFT_RELEASE}\""
     imageHistoryString="${imageHistoryString}, \"Processed with ASKAP pipeline version ${PIPELINE_VERSION}\""
     imageHistoryString="${imageHistoryString}, \"Processed with ACES software revision ${ACES_VERSION_USED}\""
     imageHistoryString="${imageHistoryString}, \"Processed with ASKAP pipelines on ${NOW_FMT}\""
@@ -315,13 +315,6 @@ module load askappipeline/${askappipelineVersion}"
     fitsConvertText="# The following converts the file in \$casaim to a FITS file, after fixing headers.
 if [ -e \"\${casaim}\" ] && [ ! -e \"\${fitsim}\" ]; then
     # The FITS version of this image doesn't exist
-
-    ASKAPSOFT_VERSION=\"${ASKAPSOFT_VERSION}\"
-    if [ \"\${ASKAPSOFT_VERSION}\" == \"\" ]; then
-        ASKAPSOFT_VERSION_USED=\$(module list -t 2>&1 | grep askapsoft)
-    else
-        ASKAPSOFT_VERSION_USED=\$(echo \"\${ASKAPSOFT_VERSION}\" | sed -e 's|/||g')
-    fi
 
     cat > \"\$parset\" << EOFINNER
 ImageToFITS.casaimage = \${casaim}
