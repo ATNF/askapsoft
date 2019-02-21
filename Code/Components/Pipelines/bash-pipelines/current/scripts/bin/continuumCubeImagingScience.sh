@@ -45,6 +45,9 @@ for POLN in $POL_LIST; do
     # make a lower-case version of the polarisation, for image name
     pol=$(echo "$POLN" | tr '[:upper:]' '[:lower:]')
 
+    imageCode=residual
+    setImageProperties contcube
+    residualCube=${imageName}
     imageCode=restored
     setImageProperties contcube
 
@@ -281,6 +284,9 @@ fi
 # Find the cube statistics
 loadModule mpi4py
 cube=${imageName}
+echo "Finding cube stats for \${cube}"
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} \${PIPELINEDIR}/findCubeStatistics.py -c \${cube}
+cube=${residualCube}
 echo "Finding cube stats for \${cube}"
 srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} \${PIPELINEDIR}/findCubeStatistics.py -c \${cube}
 
