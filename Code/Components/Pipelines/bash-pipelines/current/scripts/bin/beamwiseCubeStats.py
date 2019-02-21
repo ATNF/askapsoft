@@ -64,7 +64,7 @@ class BeamStats:
                     self.maxval[chan] = float(line.split()[8])
                     self.minval[chan] = float(line.split()[7])
                     self.std[chan] = float(line.split()[3])
-                    self.madfm[chan] = float(line.split()[5])
+                    self.madfm[chan] = cs.madfmToSigma(float(line.split()[5]))
                     self.onepc[chan] = float(line.split()[6])
 
     def noiseMinMax(self):
