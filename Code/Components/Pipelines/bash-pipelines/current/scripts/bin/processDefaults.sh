@@ -732,6 +732,11 @@ EOF
         # nworkergroupsSci = number of worker groups, used for MFS imaging.
         nworkergroupsSci=$(echo "${NUM_TAYLOR_TERMS}" | awk '{print 2*$1-1}')
 
+        # if we are using the new imager we need to tweak this
+        if [ "${DO_ALT_IMAGER_CONT}" == "true" ]; then
+            NUM_CPUS_CONTIMG_SCI=$(echo "$nchanContSci" "$nworkergroupsSci" "${NCHAN_PER_CORE}" | awk '{print ($1/$3)*$2+1}')
+        fi
+
         # total number of CPUs required for MFS continuum imaging, including the master
         #  Use the number given in the config file, unless it has been left blank
         # Also set the Channels selection parameter
@@ -746,11 +751,6 @@ Cimager.Channels                                = [1, %w]"
                 CONTIMG_CHANNEL_SELECTION="# Channel selection for each worker
 Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SCI}"
             fi
-        fi
-
-        # if we are using the new imager we need to tweak this
-        if [ "${DO_ALT_IMAGER_CONT}" == "true" ]; then
-            NUM_CPUS_CONTIMG_SCI=$(echo "$nchanContSci" "$nworkergroupsSci" "${NCHAN_PER_CORE}" | awk '{print ($1/$3)*$2+1}')
         fi
 
         # Can't have -N greater than -n in the srun call
