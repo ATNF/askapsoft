@@ -44,7 +44,7 @@ if [ "${DO_1934_CAL}" == "true" ]; then
     if [ "${SB_1934}" != "" ] && [ "${DIR_SB}" != "" ]; then
         sb1934dir="$DIR_SB/$SB_1934"
         msnames1934=$(find "$sb1934dir" -maxdepth 1 -type d -name "*.ms")
-        numMS1934=$(echo $msnames1934 | wc -w)
+        numMS1934=$(echo "$msnames1934" | wc -w)
         if [ "${numMS1934}" -eq 0 ]; then
             # If here, we did not find any measurement sets in the
             # archive directory. Fall back to MS_INPUT_1934 from the
@@ -67,7 +67,7 @@ if [ "${DO_1934_CAL}" == "true" ]; then
             # Set the first one in the list to be the reference MS
             # used for metadata. The order doesn't matter, since all
             # the MSs should have the same metadata.
-            MS_INPUT_1934="$(echo $msnames1934 | awk '{print $1}')"
+            MS_INPUT_1934="$(echo "$msnames1934" | awk '{print $1}')"
         fi
     fi
     if [ "$MS_INPUT_1934" == "" ]; then
@@ -88,7 +88,7 @@ if [ "${DO_SCIENCE_FIELD}" == "true" ]; then
     if [ "${SB_SCIENCE}" != "" ] && [ "${DIR_SB}" != "" ]; then
         sbScienceDir=$DIR_SB/$SB_SCIENCE
         msnamesSci=$(find "$sbScienceDir" -maxdepth 1 -type d -name "*.ms")
-        numMSsci=$(echo $msnamesSci | wc -w)
+        numMSsci=$(echo "$msnamesSci" | wc -w)
         if [ "${numMSsci}" -eq 0 ]; then
             # If here, we did not find any measurement sets in the
             # archive directory. Fall back to MS_INPUT_SCIENCE from
@@ -111,7 +111,7 @@ if [ "${DO_SCIENCE_FIELD}" == "true" ]; then
             # Set the first one in the list to be the reference MS
             # used for metadata. The order doesn't matter, since all
             # the MSs should have the same metadata.
-            MS_INPUT_SCIENCE="$(echo $msnamesSci | awk '{print $1}')"
+            MS_INPUT_SCIENCE="$(echo "$msnamesSci" | awk '{print $1}')"
         fi
     fi
 
@@ -196,7 +196,7 @@ EOF
         # CHAN_RANGE_1934 gives global channel range - pass this to getMatchingMS.py
         chanSelection="-c ${CHAN_RANGE_1934}"
     fi
-    inputMSlist=$(${PIPELINEDIR}/getMatchingMS.py -d ${sb1934dir} -b $BEAM $chanSelection)
+    inputMSlist=$("${PIPELINEDIR}/getMatchingMS.py" -d "${sb1934dir}" -b $BEAM $chanSelection)
     if [ "${inputMSlist}" == "" ]; then
         echo "ERROR - unable to determine number of channels in bandpass datasets in directory ${sb1934dir}"
         echo "      - beam 0 datasets failed to give spectral metadata"
@@ -205,7 +205,7 @@ EOF
     fi
     NUM_CHAN_1934=0
     for msinfo in $inputMSlist; do
-        chan_in_ms=$(echo $msinfo | cut -d ':' -f 2 | awk -F'-' '{print $2-$1+1}')
+        chan_in_ms=$(echo "$msinfo" | cut -d ':' -f 2 | awk -F'-' '{print $2-$1+1}')
         NUM_CHAN_1934=$(echo $NUM_CHAN_1934 $chan_in_ms | awk '{print $1+$2}')
     done
 
@@ -240,10 +240,10 @@ EOF
                 fi
             fi
             if [ "${getSchedblock}" == "true" ]; then
-                $(
+                err=$(
                     loadModule askapcli
                     schedblock info -v -p "${SB_1934}" > "$sbinfoCal"
-                    err=$?
+                    echo $?
                     unloadModule askapcli
                 )
                 if [ $err -ne 0 ]; then
@@ -255,15 +255,16 @@ EOF
             fi
             
         fi
-        if [ -e ${sbinfoCal} ]; then
-            FP_NAME_CAL=$(grep footprint.name $sbinfoCal | awk '{print $3}' | sort | uniq | tail)
+        if [ -e "${sbinfoCal}" ]; then
+            FP_NAME_CAL=$(grep footprint.name "$sbinfoCal" | awk '{print $3}' | sort | uniq | tail)
             if [ "${FP_NAME_CAL}" != "" ]; then
                 # Get the number of beams in this footprint
                 if [ "${USE_CLI}" == "true" ]; then
-                    $(
+                    NUM_BEAMS_FOOTPRINT_CAL=$(
                         loadModule askapcli
-                        NUM_BEAMS_FOOTPRINT_CAL=$(footprint info ${FP_NAME_CAL} | grep n_beams | awk '{print $3}')
+                        nbeams=$(footprint info "${FP_NAME_CAL}" | grep n_beams | awk '{print $3}')
                         unloadModule askapcli
+                        echo $nbeams
                     )
                 fi
             fi
@@ -351,7 +352,7 @@ EOF
         # CHAN_RANGE_SCIENCE gives global channel range - pass this to getMatchingMS.py
         chanSelection="-c ${CHAN_RANGE_SCIENCE}"
     fi
-    inputMSlist=$(${PIPELINEDIR}/getMatchingMS.py -d ${sbScienceDir} -b $BEAM $chanSelection)
+    inputMSlist=$("${PIPELINEDIR}/getMatchingMS.py" -d "${sbScienceDir}" -b $BEAM $chanSelection)
     if [ "${inputMSlist}" == "" ]; then
         echo "ERROR - unable to determine number of channels in science datasets in directory ${sbScienceDir}"
         echo "      - beam 0 datasets failed to give spectral metadata"
@@ -360,7 +361,7 @@ EOF
     fi
     NUM_CHAN_SCIENCE=0
     for msinfo in $inputMSlist; do
-        chan_in_ms=$(echo $msinfo | cut -d ':' -f 2 | awk -F'-' '{print $2-$1+1}')
+        chan_in_ms=$(echo "$msinfo" | cut -d ':' -f 2 | awk -F'-' '{print $2-$1+1}')
         NUM_CHAN_SCIENCE=$(echo $NUM_CHAN_SCIENCE $chan_in_ms | awk '{print $1+$2}')
     done
 
@@ -388,7 +389,7 @@ EOF
         exit 1
     fi
 
-    FIELDLISTFILE=${metadata}/fieldlist-${msname}.txt
+    FIELDLISTFILE="${metadata}/fieldlist-${msname}.txt"
     if [ ! -e "$FIELDLISTFILE" ]; then
         # This works on the assumption we have something like this in
         # the mslist output:
@@ -477,7 +478,7 @@ $TILE"
                 echo "Exiting pipeline."
                 exit $err
             fi
-            cat >> $sbinfo <<EOF
+            cat >> "$sbinfo" <<EOF
 ${METADATA_IS_GOOD} ${NOW}
 EOF
         fi
@@ -551,7 +552,7 @@ EOF
                     echo "Exiting pipeline."
                     exit $err
                 fi
-                cat >> ${sbinfoCal} <<EOF
+                cat >> "${sbinfoCal}" <<EOF
 ${METADATA_IS_GOOD} ${NOW}
 EOF
             fi
