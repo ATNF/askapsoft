@@ -1351,6 +1351,24 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
                 done
             fi
 
+            if [ "$(echo "${CIMAGER_MAXUV}" | grep "\[")" != "" ]; then
+                # Have entered a comma-separate array in square brackets
+                arrSize=$(echo "${CIMAGER_MAXUV}" | sed -e 's/[][,]/ /g' | wc -w)
+                if [ "$arrSize" -ne "$expectedArrSize" ]; then
+                    echo "ERROR - CIMAGER_MAXUV ($CIMAGER_MAXUV) needs to be of size $expectedArrSize (since SELFCAL_NUM_LOOPS=$SELFCAL_NUM_LOOPS)"
+                    exit 1
+                fi
+                CIMAGER_MAXUV_ARRAY=()
+                for a in $(echo "${CIMAGER_MAXUV}" | sed -e 's/[][,]/ /g'); do
+                    CIMAGER_MAXUV_ARRAY+=($a)
+                done
+            else
+                CIMAGER_MAXUV_ARRAY=()
+                for((i=0;i<=SELFCAL_NUM_LOOPS;i++)); do
+                    CIMAGER_MAXUV_ARRAY+=($CIMAGER_MAXUV)
+                done
+            fi
+
             if [ "$(echo "${CCALIBRATOR_MINUV}" | grep "\[")" != "" ]; then
                 # Have entered a comma-separate array in square brackets
                 arrSize=$(echo "${CCALIBRATOR_MINUV}" | sed -e 's/[][,]/ /g' | wc -w)
@@ -1366,6 +1384,24 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
                 CCALIBRATOR_MINUV_ARRAY=()
                 for((i=0;i<=SELFCAL_NUM_LOOPS;i++)); do
                     CCALIBRATOR_MINUV_ARRAY+=($CCALIBRATOR_MINUV)
+                done
+            fi
+
+            if [ "$(echo "${CCALIBRATOR_MAXUV}" | grep "\[")" != "" ]; then
+                # Have entered a comma-separate array in square brackets
+                arrSize=$(echo "${CCALIBRATOR_MAXUV}" | sed -e 's/[][,]/ /g' | wc -w)
+                if [ "$arrSize" -ne "$expectedArrSize" ]; then
+                    echo "ERROR - CCALIBRATOR_MAXUV ($CCALIBRATOR_MAXUV) needs to be of size $expectedArrSize (since SELFCAL_NUM_LOOPS=$SELFCAL_NUM_LOOPS)"
+                    exit 1
+                fi
+                CCALIBRATOR_MAXUV_ARRAY=()
+                for a in $(echo "${CCALIBRATOR_MAXUV}" | sed -e 's/[][,]/ /g'); do
+                    CCALIBRATOR_MAXUV_ARRAY+=($a)
+                done
+            else
+                CCALIBRATOR_MAXUV_ARRAY=()
+                for((i=0;i<=SELFCAL_NUM_LOOPS;i++)); do
+                    CCALIBRATOR_MAXUV_ARRAY+=($CCALIBRATOR_MAXUV)
                 done
             fi
 
@@ -1403,6 +1439,14 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
                 fi
                 if [ "${#CCALIBRATOR_MINUV_ARRAY[@]}" -ne "$arraySize" ]; then
                     echo "ERROR! Size of CCALIBRATOR_MINUV (${CCALIBRATOR_MINUV}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
+                    exit 1
+                fi
+                if [ "${#CIMAGER_MAXUV_ARRAY[@]}" -ne "$arraySize" ]; then
+                    echo "ERROR! Size of CIMAGER_MAXUV (${CIMAGER_MAXUV}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
+                    exit 1
+                fi
+                if [ "${#CCALIBRATOR_MAXUV_ARRAY[@]}" -ne "$arraySize" ]; then
+                    echo "ERROR! Size of CCALIBRATOR_MAXUV (${CCALIBRATOR_MAXUV}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
                     exit 1
                 fi
 
