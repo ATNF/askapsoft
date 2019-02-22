@@ -34,6 +34,9 @@ Pipelines:
 
  * CASDA uploads again include catalogues (which were left out due to
    fixes in 0.23.1).
+ * There are new parameters ``CIMAGER_MAXUV`` and
+   ``CCALIBRATOR_MAXUV`` that allow the imposition of an upper limit
+   to the uv values in the continuum imaging/self-calibration.
  * Parsets for the imager were erroneously getting a
    "Cimager.Channels" selection that included the %w wildcard. This
    will no longer happen (unless cimager is used).
@@ -46,6 +49,8 @@ Pipelines:
  * The scaling on the beam-wise noise plots has been fixed, so that
    the scaled MADFM should be closer to the standard deviation in the
    absence of signal.
+ * Cube stats are now also generated for continuum-cube residual
+   images.
  * Several scripts have been tidied up with the aim of avoiding
    spurious errors (validationScience, for instance).
  * The ASKAPsoft version was being left off FITS headers. This now
