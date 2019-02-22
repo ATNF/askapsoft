@@ -294,6 +294,12 @@ fi
 
 # Find the cube statistics
 loadModule mpi4py
+IMAGE_BASE_SPECTRAL=${IMAGE_BASE_SPECTRAL}
+BEAM=${BEAM}
+FIELD=${FIELD}
+IMAGETYPE_SPECTRAL=${IMAGETYPE_SPECTRAL}
+DO_ALT_IMAGER_SPECTRAL=${DO_ALT_IMAGER_SPECTRAL}
+ALT_IMAGER_SINGLE_FILE=${ALT_IMAGER_SINGLE_FILE}
 for subband in ${SUBBAND_WRITER_LIST}; do
     for imageCode in restored residual; do
         setImageProperties spectral
