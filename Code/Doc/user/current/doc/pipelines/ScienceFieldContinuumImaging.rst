@@ -69,7 +69,8 @@ steadily improves. These parameters are for:
 * Deconvolution: ``CLEAN_THRESHOLD_MAJORCYCLE`` and ``CLEAN_NUM_MAJORCYCLES``
 * Self-calibration: ``SELFCAL_SELAVY_THRESHOLD``, ``SELFCAL_INTERVAL``
   and ``SELFCAL_NORMALISE_GAINS``
-* Data selection: ``CIMAGER_MINUV`` and ``CCALIBRATOR_MINUV``
+* Data selection in imaging: ``CIMAGER_MINUV`` and ``CIMAGER_MAXUV``
+* Data selection in calibration: ``CCALIBRATOR_MINUV`` and ``CCALIBRATOR_MAXUV``
 
 To use this mode, the values for these parameters should be given as
 an array in the form ``SELFCAL_INTERVAL="[1800,1800,900,300]"``. The
@@ -204,6 +205,10 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 | ``CIMAGER_MINUV``                          | 0                                   | MinUV (:doc:`../calim/data_selection`)                 | The minimum UV distance considered in the imaging - used to   |
 |                                            |                                     |                                                        | exclude the short baselines. Can be given as an array with    |
 |                                            |                                     |                                                        | different values for each self-cal loop (e.g. "[200,200,0]"). |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``CIMAGER_MAXUV``                          | 0                                   | MaxUV (:doc:`../calim/data_selection`)                 | The maximum UV distance considered in the imaging. Only used  |
+|                                            |                                     |                                                        | if greater than zero. Can be given as an array with different |
+|                                            |                                     |                                                        | values for each self-cal loop (e.g. "[200,200,0]").           |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | **Gridding parameters**                    |                                     |                                                        |                                                               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
@@ -429,6 +434,10 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CCALIBRATOR_MINUV``                      | 0                                   | MinUV (:doc:`../calim/data_selection`)                 | The minimum UV distance considered in the calibration - used  |
 |                                            |                                     |                                                        | to exclude the short baselines. Can be given as an array with |
+|                                            |                                     |                                                        | different values for each self-cal loop (e.g. "[200,200,0]"). |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``CCALIBRATOR_MAXUV``                      | 0                                   | MaxUV (:doc:`../calim/data_selection`)                 | The maximum UV distance considered in the calibration. Only   |
+|                                            |                                     |                                                        | used if greater than zero. Can be given as an array with      |
 |                                            |                                     |                                                        | different values for each self-cal loop (e.g. "[200,200,0]"). |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``DO_POSITION_OFFSET``                     | false                               | none                                                   | Whether to add a fixed RA & Dec offset to the positions of    |
