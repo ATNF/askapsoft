@@ -115,7 +115,7 @@ done
 files=(beamNoise* beamMin* beamPSF*)
 if [ -e "\${files[0]}" ]; then
     for f in \${files[@]}; do
-        cp f $diagnostics
+        cp \$f $diagnostics
     done
 fi
 
