@@ -86,6 +86,36 @@ The type of the task defined by tasks.\ **name**\ .type should be set to *Merged
 |                            |                   |            |integrations. The units are datagrams. The default value is   |
 |                            |                   |            |two integrations of BETA datagrams.                           |
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
+|beamoffsets_origin          |string             |"metadata"  |This parameter controls how beam offsets field is populated.  |
+|                            |                   |            |The possible options are "metadata", "parset" and "none".     |
+|                            |                   |            |If it is set to "metadata", beam offsets are populated from   |
+|                            |                   |            |the metadata stream, if the appropriate record is present in  |
+|                            |                   |            |the metadata. If there is no such record in the metadata, the |
+|                            |                   |            |behaviour is equivalent to "none" setting. If this field is   |
+|                            |                   |            |set to "parset", static beam arrangement is read from parset  |
+|                            |                   |            |and appropriate records in metadata are simply ignored.       |
+|                            |                   |            |An exception is thrown in this mode if beam arrangements is   |
+|                            |                   |            |undefined (see the section in the main page on :doc:`index`   |
+|                            |                   |            |for further information. Finally, if this field is set to     |
+|                            |                   |            |"none", the task doesn't do anything with beam offsets and    |
+|                            |                   |            |leaves them unfilled. This matches the behaviour prior to     |
+|                            |                   |            |November 2018 and :doc:`mssink` task is clever enough to      |
+|                            |                   |            |revert to static offsets if beam offsets in the buffer are not|
+|                            |                   |            |defined. Having said that, there is no much reason to use     |
+|                            |                   |            |this option, except for debugging. This parameter is specific |
+|                            |                   |            |to **MergedSource**\ .                                        |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
+|baduvw_maxcycles            |int                |-1          |This parameter is specific to **MergedSource** and controls   |
+|                            |                   |            |the behaviour in the case when the length of the UVW vector   |
+|                            |                   |            |supplied in the metadata is found different from the expected |
+|                            |                   |            |baseline length according to the array layout. If the value   |
+|                            |                   |            |is negative, corresponding samples are flagged but ingesting  |
+|                            |                   |            |is not aborted. For zero, execution is aborted immediately    |
+|                            |                   |            |with detailed report on the found discrepancy. For a positive |
+|                            |                   |            |value, this is the number of consecutive bad cycles for which |
+|                            |                   |            |the ingest is allowed to run (samples with bad UVW are flagged|
+|                            |                   |            |as for the negative value of this parameter) before aborting. |
++----------------------------+-------------------+------------+--------------------------------------------------------------+
 | the following parameters have an additional **vis_source** prefix                                                          |
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
 |receive_buffer_size         |unsigned int       |16777216    |The size of the asio receive buffer in bytes. Passed to the   |
@@ -106,24 +136,6 @@ The type of the task defined by tasks.\ **name**\ .type should be set to *Merged
 |                            |                   |            |ASKAP). Use this parameter if performance is limited, and     |
 |                            |                   |            |slices with higher numbers are not used anyway).              |
 +----------------------------+-------------------+------------+--------------------------------------------------------------+
-|beamoffsets_origin          |string             |"metadata"  |This parameter controls how beam offsets field is populated.  |
-|                            |                   |            |The possible options are "metadata", "parset" and "none".     |
-|                            |                   |            |If it is set to "metadata", beam offsets are populated from   |
-|                            |                   |            |the metadata stream, if the appropriate record is present in  |
-|                            |                   |            |the metadata. If there is no such record in the metadata, the |
-|                            |                   |            |behaviour is equivalent to "none" setting. If this field is   |
-|                            |                   |            |set to "parset", static beam arrangement is read from parset  |
-|                            |                   |            |and appropriate records in metadata are simply ignored.       |
-|                            |                   |            |An exception is thrown in this mode if beam arrangements is   |
-|                            |                   |            |undefined (see the section in the main page on :doc:`index`   |
-|                            |                   |            |for further information. Finally, if this field is set to     |
-|                            |                   |            |"none", the task doesn't do anything with beam offsets and    |
-|                            |                   |            |leaves them unfilled. This matches the behaviour prior to     |
-|                            |                   |            |November 2018 and :doc:`mssink` task is clever enough to      |
-|                            |                   |            |revert to static offsets if beam offsets in the buffer are not|
-|                            |                   |            |defined. Having said that, there is no much reason to use     |
-|                            |                   |            |this option, except for debugging.                            |
-+----------------------------+-------------------+------------+--------------------------------------------------------------+
 
 Notes
 ~~~~~ 
@@ -136,6 +148,12 @@ is flagged (as in this case it is impossible to guarantee correctness of its UVW
 baselines leaving them zero-valued (as opposed to have junk values). This should have no implication for any code which honours
 flags properly, but is a change in behaviour. An exception is raised (and execution is aborted) if metadata stream does not
 have UVWs at all or have it not for all beams ingest pipeline is set up to record.
+
+The task performs some basic cross-checks of UVW vectors encountered in the metadata stream. The first two cause the execution to
+abort with the exception. The third one may either result in an exception or just flagged data (see **baduvw_maxcycles** parameter)
+    values are not zeros or NaNs
+    UVW vector length is roughly the Earth radius (tolerance allows for the actual shape of the Earth)
+    UVW vector length is within 1mm of the baseline length expected from the array layout
 
 
 Example
