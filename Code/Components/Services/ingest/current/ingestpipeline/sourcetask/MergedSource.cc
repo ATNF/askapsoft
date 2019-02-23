@@ -22,7 +22,8 @@
 /// along with this program; if not, write to the Free Software
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
-/// @author Ben Humphreys <ben.humphreys@csiro.au>
+/// Original BETA code by Ben Humphreys <ben.humphreys@csiro.au>
+/// @author Max Voronkov <max.voronkov@csiro.au>
 
 // Include own header file first
 #include "MergedSource.h"
@@ -450,7 +451,7 @@ void MergedSource::flagDueToBadUVWs(const std::set<casa::uInt> &rowsWithBadUVWs,
          ASKAPASSERT(*ci < chunk->nRow());
          const casa::uInt ant1 = antenna1[*ci];
          const casa::uInt ant2 = antenna2[*ci];
-         if ((goodAntennas.find(ant1) != goodAntennas.end()) && (goodAntennas.find(ant2) != goodAntennas.end())) {
+         if (itsVisConverter.isAntennaGood(ant1) && itsVisConverter.isAntennaGood(ant2)) {
              ++nExplicitlyFlaggedRows;
              ASKAPDEBUGASSERT(*ci < flags.nrow());
              flags.yzPlane(*ci).set(true);
