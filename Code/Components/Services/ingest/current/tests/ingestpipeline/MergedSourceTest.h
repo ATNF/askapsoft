@@ -60,6 +60,8 @@ class MergedSourceTest : public CppUnit::TestFixture,
         CPPUNIT_TEST(testMockMetadataSource);
         CPPUNIT_TEST(testMockVisSource);
         CPPUNIT_TEST(testSingle);
+        CPPUNIT_TEST(testUVWMismatch);
+        CPPUNIT_TEST_EXCEPTION(testUVWMismatchException, CheckError);
         CPPUNIT_TEST_SUITE_END();
 
     public:
@@ -70,6 +72,7 @@ class MergedSourceTest : public CppUnit::TestFixture,
 
             LOFAR::ParameterSet params;
             params.add("n_channels.0", utility::toString(nChannelsForTest()));
+            params.add("baduvw_maxcycles", utility::toString(-1));
             const Configuration config = ConfigurationHelper::createDummyConfig();
             itsInstance.reset(new MergedSource(params, config, itsMetadataSrc, itsVisSrc));
         }
@@ -102,61 +105,63 @@ class MergedSourceTest : public CppUnit::TestFixture,
             const Configuration config = ConfigurationHelper::createDummyConfig();
             const uint64_t starttime = 1000000; // One second after epoch
             const uint64_t period = 5 * 1000 * 1000;
-            const uint32_t nCorr = 4;
 
             // Create a mock metadata object and program it, then
             // add to the MockMetadataSource
-            TosMetadata metadata;
-            metadata.time(starttime);
-            metadata.scanId(0);
-            metadata.flagged(false);
-            metadata.corrMode("standard");
-            // need to specify the middle of the band for the first card 
-            // want to get hardware channel 11 (accessor channel 55) to map to 1 GHz exactly
-            // config helper sets up the full ASKAP band without inversion
-            // start is 8208 fine channels lower, channel 55 is 1 GHz:
-            metadata.centreFreq(casa::Quantity(1000. + double(8208 - 55) / 54, "MHz"));
+            fakeMetadata(config, starttime);
 
-            // antenna_names
-            for (uint32_t i = 0; i < config.antennas().size(); ++i) {
-                TosMetadataAntenna ant(config.antennas()[i].name());
-                ant.onSource(true);
-                ant.flagged(false);
-                // there is a guard against zeros in the code because values are geocentric,
-                // there is also a guard against wrong length of resulting per-baseline uvws and
-                // uvws implying that antenna is not on the ground. So passing a large constant
-                // as we once had no longer works. The easiest way to solve the problem without doing
-                // full simulation is to pass antenna position as uvw for all beams.
-                casa::Vector<casa::Double> dummyUVW(36*3,0.);
-                const casa::Vector<casa::Double> antPos = config.antennas()[i].position();
-                CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(3u), antPos.nelements());
-                CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(0u), dummyUVW.nelements() % 3u);
-                for (casa::uInt item = 0; item < dummyUVW.nelements(); ++item) {
-                     dummyUVW[item] = antPos[item % 3];
-                }
-                ant.uvw(dummyUVW);
-                metadata.addAntenna(ant);
-            }
+            fakeVisData(starttime, period, 2u);
 
-            // Make a copy of the metadata and add it to the mock
-            // Metadata source
-            boost::shared_ptr<TosMetadata> copy(new TosMetadata(metadata));
-            itsMetadataSrc->add(copy);
+            runMergedSourceTest(config, false);
+       }
+  
+       void testUVWMismatch() {
+            const Configuration config = ConfigurationHelper::createDummyConfig();
+            const uint64_t starttime = 1000000; // One second after epoch
+            const uint64_t period = 5 * 1000 * 1000;
 
-            // Populate a VisDatagram to match the metadata
-            askap::cp::VisDatagram vis;
-            vis.version = VisDatagramTraits<VisDatagram>::VISPAYLOAD_VERSION;
-            vis.slice = 0;
-            fillProtocolSpecificInfo(vis);
-            vis.beamid = 1;
-            vis.timestamp = starttime;
+            // Create a mock metadata object and program it, then
+            // add to the MockMetadataSource, add 1m to first antenna uvw
+            fakeMetadata(config, starttime, 1.);
 
-            boost::shared_ptr<VisDatagram> copy1(new VisDatagram(vis));
-            itsVisSrc->add(copy1);
+            fakeVisData(starttime, period, 2u);
 
-            vis.timestamp = starttime + period;
-            boost::shared_ptr<VisDatagram> copy2(new VisDatagram(vis));
-            itsVisSrc->add(copy2);
+            runMergedSourceTest(config, true);
+       }
+
+       void testUVWMismatchException() {
+            const Configuration config = ConfigurationHelper::createDummyConfig();
+         
+            // replace MergedSource with the object which has a different configuration
+            // from the one used in normal test
+            LOFAR::ParameterSet params;
+            params.add("n_channels.0", utility::toString(nChannelsForTest()));
+            params.add("baduvw_maxcycles", utility::toString(0));
+            itsInstance.reset(new MergedSource(params, config, itsMetadataSrc, itsVisSrc));
+
+            const uint64_t starttime = 1000000; // One second after epoch
+            const uint64_t period = 5 * 1000 * 1000;
+
+            // Create a mock metadata object and program it, then
+            // add to the MockMetadataSource, add 1m to first antenna uvw
+            fakeMetadata(config, starttime, 1.);
+
+            fakeVisData(starttime, period, 2u);
+
+            // it would generate an exception in itsInstance->next()
+            runMergedSourceTest(config, true);
+       }
+
+    protected:
+
+        /// @brief common functionality to test the output of MergedSource
+        /// @details 
+        /// @param config configuration object
+        /// @param ant0Flag if true, antenna with index 0 is expected to be flagged
+        /// due to uvw mismatch, otherwise the basic rule applies (i.e. if the was data,
+        /// and there was due to the way the test is designed)
+        void runMergedSourceTest(const Configuration &config, bool ant0Flag) {
+            const uint32_t nCorr = 4;
 
             // Get the first VisChunk instance
             VisChunk::ShPtr chunk(itsInstance->next());
@@ -216,11 +221,15 @@ class MergedSourceTest : public CppUnit::TestFixture,
                       
                       // product is 1-based
                       CPPUNIT_ASSERT(product > 0);
+                      const uint32_t beamid = 1u;
+
+                      // antenna 0 baselines may be flagged if corruption of UVW is simulated
+                      const bool rowWithGoodUVW = !ant0Flag || (chunk->antenna1()(row) != 0 && chunk->antenna2()(row) != 0);
 
                       for (uint32_t chan = 0; chan < chunk->nChannel(); ++chan) {
                            // by default, beams in the datagrams are 1-based and in the chunk are zero-based
                            if (validChannelAndProduct(chan, static_cast<uint32_t>(product)) &&
-                                chunk->beam1()(row) + 1 == vis.beamid && chunk->beam2()(row) + 1 == vis.beamid) {
+                                chunk->beam1()(row) + 1 == beamid && chunk->beam2()(row) + 1 == beamid && rowWithGoodUVW) {
                                // If this is one of the visibilities that were added above
                                CPPUNIT_ASSERT_EQUAL(false, chunk->flag()(row, chan, pol));
                            } else {
@@ -236,6 +245,72 @@ class MergedSourceTest : public CppUnit::TestFixture,
             // Check frequency vector
             CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(nChannelsForTest()),
                     chunk->frequency().size());
+        }
+
+        /// @brief made a mockup metadata datagram
+        /// @details create a mock metadata object and program it, then
+        /// add to the MockMetadataSource
+        /// @param[in] config configuration of the array
+        /// @param[in] time timestamp to use 
+        /// @param[in] uvwOffset a number which is added to U, V and W of the first antenna in
+        /// configuration (to test mismatch)
+        void fakeMetadata(const Configuration &config, const uint64_t time, const double uvwOffset = 0.) {
+            TosMetadata metadata;
+            metadata.time(time);
+            metadata.scanId(0);
+            metadata.flagged(false);
+            metadata.corrMode("standard");
+            // need to specify the middle of the band for the first card 
+            // want to get hardware channel 11 (accessor channel 55) to map to 1 GHz exactly
+            // config helper sets up the full ASKAP band without inversion
+            // start is 8208 fine channels lower, channel 55 is 1 GHz:
+            metadata.centreFreq(casa::Quantity(1000. + double(8208 - 55) / 54, "MHz"));
+
+            // antenna_names
+            for (uint32_t i = 0; i < config.antennas().size(); ++i) {
+                TosMetadataAntenna ant(config.antennas()[i].name());
+                ant.onSource(true);
+                ant.flagged(false);
+                // there is a guard against zeros in the code because values are geocentric,
+                // there is also a guard against wrong length of resulting per-baseline uvws and
+                // uvws implying that antenna is not on the ground. So passing a large constant
+                // as we once had no longer works. The easiest way to solve the problem without doing
+                // full simulation is to pass antenna position as uvw for all beams.
+                casa::Vector<casa::Double> dummyUVW(36*3,0.);
+                const casa::Vector<casa::Double> antPos = config.antennas()[i].position();
+                CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(3u), antPos.nelements());
+                CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(0u), dummyUVW.nelements() % 3u);
+                for (casa::uInt item = 0; item < dummyUVW.nelements(); ++item) {
+                     dummyUVW[item] = antPos[item % 3] + (i == 0 ? uvwOffset : 0.);
+                }
+                ant.uvw(dummyUVW);
+                metadata.addAntenna(ant);
+            }
+
+            // Make a copy of the metadata and add it to the mock
+            // Metadata source
+            boost::shared_ptr<TosMetadata> copy(new TosMetadata(metadata));
+            itsMetadataSrc->add(copy);
+        }
+
+        /// @brief populate VisDatagram
+        /// @param[in] starttime timestamp to use 
+        /// @param[in] period cycle time to use 
+        /// @param[in] nCycles number of cycles to generate
+        void fakeVisData(const uint64_t starttime, const uint64_t period, const uint32_t nCycles = 2) {
+            askap::cp::VisDatagram vis;
+            vis.version = VisDatagramTraits<VisDatagram>::VISPAYLOAD_VERSION;
+            vis.slice = 0;
+            fillProtocolSpecificInfo(vis);
+            vis.beamid = 1;
+            vis.timestamp = starttime;
+
+            for (uint32_t cycle = 0; cycle < nCycles; ++cycle) {
+                 boost::shared_ptr<VisDatagram> copy(new VisDatagram(vis));
+                 itsVisSrc->add(copy);
+
+                 vis.timestamp += period;
+            }
         }
 
     private:

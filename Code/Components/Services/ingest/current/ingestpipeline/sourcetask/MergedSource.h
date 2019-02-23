@@ -120,7 +120,8 @@ class MergedSource : public ISource,
         /// different severity depending on the stream ID (to avoid spamming the log).
         /// This method is a work around of UVW metadata problem (see ASKAPSDP-3431)
         /// @param[in] rowsWithBadUVWs set of rows to flag
-        void flagDueToBadUVWs(const std::set<casa::uInt> &rowsWithBadUVWs);
+        /// @param[in] timestamp BAT for reporting
+        void flagDueToBadUVWs(const std::set<casa::uInt> &rowsWithBadUVWs, const casa::uLong timestamp);
 
 
         /// Initialises an "empty" VisChunk
