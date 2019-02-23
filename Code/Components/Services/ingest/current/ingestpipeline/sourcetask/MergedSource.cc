@@ -441,6 +441,10 @@ void MergedSource::flagDueToBadUVWs(const std::set<casa::uInt> &rowsWithBadUVWs,
              }
          }
     }
+    
+    if (listOfBadAntennas.size() == 0) {
+        listOfBadAntennas = "none";
+    }
 
     //ASKAPLOG_DEBUG_STR(logger, "Inside flagDueToBadUVWs, listOfBadAntennas: "<<listOfBadAntennas);    
 
