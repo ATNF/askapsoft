@@ -398,7 +398,7 @@ VisChunk::ShPtr MergedSource::next(void)
 /// @param[in] rowsWithBadUVWs set of rows to flag
 /// @param[in] timestamp BAT for reporting
 void MergedSource::flagDueToBadUVWs(const std::set<casa::uInt> &rowsWithBadUVWs, const casa::uLong timestamp) {
-    ASKAPLOG_DEBUG_STR(logger, "Inside flagDueToBadUVWs, nRowsWithBadUVWs = "<<rowsWithBadUVWs.size());    
+    //ASKAPLOG_DEBUG_STR(logger, "Inside flagDueToBadUVWs, nRowsWithBadUVWs = "<<rowsWithBadUVWs.size());    
 
     ASKAPDEBUGASSERT(rowsWithBadUVWs.size() > 0);
     VisChunk::ShPtr chunk = itsVisConverter.visChunk();
@@ -417,13 +417,14 @@ void MergedSource::flagDueToBadUVWs(const std::set<casa::uInt> &rowsWithBadUVWs,
          const casa::uInt ant2 = antenna2[row];
          antennas.insert(ant1);
          antennas.insert(ant2);
-         if ((ant1 != ant2) && (rowsWithBadUVWs.find(row) == rowsWithBadUVWs.end())) {
+         if ((ant1 != ant2) && (rowsWithBadUVWs.find(row) == rowsWithBadUVWs.end()) && 
+                                itsVisConverter.isAntennaGood(ant1) && itsVisConverter.isAntennaGood(ant2)) {
              goodAntennas.insert(ant1);
              goodAntennas.insert(ant2);
          }
     }
 
-    ASKAPLOG_DEBUG_STR(logger, "Inside flagDueToBadUVWs, nAntennas = "<<antennas.size()<<" nGoodAntennas = "<<goodAntennas.size());    
+    //ASKAPLOG_DEBUG_STR(logger, "Inside flagDueToBadUVWs, nAntennas = "<<antennas.size()<<" nGoodAntennas = "<<goodAntennas.size());    
 
     // 2) flag antennas which are not in the good list, build the list for reporting
     std::string listOfBadAntennas;
@@ -440,7 +441,7 @@ void MergedSource::flagDueToBadUVWs(const std::set<casa::uInt> &rowsWithBadUVWs,
          }
     }
 
-    ASKAPLOG_DEBUG_STR(logger, "Inside flagDueToBadUVWs, listOfBadAntennas: "<<listOfBadAntennas);    
+    //ASKAPLOG_DEBUG_STR(logger, "Inside flagDueToBadUVWs, listOfBadAntennas: "<<listOfBadAntennas);    
 
     // 3) check that anything is left (this shouldn't happen unless we have tricky per-beam issues)
     casa::uInt nExplicitlyFlaggedRows = 0;
@@ -463,9 +464,9 @@ void MergedSource::flagDueToBadUVWs(const std::set<casa::uInt> &rowsWithBadUVWs,
     }
     // we could've reversed chunk timestamp, but it is handy to pass what is in the metadata directly to avoid nasty surprises with precision
     if (itsVisConverter.config().receiverId() == 0) {
-       ASKAPLOG_ERROR_STR(logger, "" << msg << "Timestamp: "<<bat2epoch(timestamp)<<" or 0x"<<std::hex<<timestamp);
+       ASKAPLOG_ERROR_STR(logger, "" << msg << " Timestamp: "<<bat2epoch(timestamp)<<" or 0x"<<std::hex<<timestamp);
     } else {
-       ASKAPLOG_INFO_STR(logger, "" << msg << "Timestamp: "<<bat2epoch(timestamp)<<" or 0x"<<std::hex<<timestamp);
+       ASKAPLOG_INFO_STR(logger, "" << msg << " Timestamp: "<<bat2epoch(timestamp)<<" or 0x"<<std::hex<<timestamp);
     }
 }
 
