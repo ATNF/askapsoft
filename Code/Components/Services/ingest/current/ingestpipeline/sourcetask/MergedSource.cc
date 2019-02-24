@@ -474,7 +474,7 @@ void MergedSource::flagDueToBadUVWs(const std::set<casa::uInt> &rowsWithBadUVWs,
        // some commissioning code below to store the details on affected baselines into a file 
        // we may need to comment it out in the future or to make it optional based on parset parameter
        const casa::Vector<casa::uInt>& beam1 = chunk->beam1();
-       ASKAPDEBUGASSERT(beam1.nelements() < chunk->nRow());
+       ASKAPDEBUGASSERT(beam1.nelements() == chunk->nRow());
        std::ofstream os("baduvw_baselines.dbg", std::ios::app);
        os << "# "<< msg << " Timestamp: "<<bat2epoch(timestamp)<<" :"<<std::endl;
        for (std::set<casa::uInt>::const_iterator ci = rowsWithBadUVWs.begin(); ci != rowsWithBadUVWs.end(); ++ci) {
