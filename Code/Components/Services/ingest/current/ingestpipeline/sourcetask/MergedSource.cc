@@ -465,11 +465,31 @@ void MergedSource::flagDueToBadUVWs(const std::set<casa::uInt> &rowsWithBadUVWs,
             " (currently "+utility::toString<casa::uInt>(itsBadUVWCycleCounter)+" cycle in a row).";
     if (nExplicitlyFlaggedRows != 0) {
         msg += " In addition, "+utility::toString<casa::uInt>(nExplicitlyFlaggedRows)+
-               " rows were flagged, this shouldn't happen unless there is a beam-dependent issue.";
+               " rows were flagged, which do not correpond to all baselines of some set of antennas.";
     }
     // we could've reversed chunk timestamp, but it is handy to pass what is in the metadata directly to avoid nasty surprises with precision
     if (itsVisConverter.config().receiverId() == 0) {
        ASKAPLOG_ERROR_STR(logger, "" << msg << " Timestamp: "<<bat2epoch(timestamp)<<" or 0x"<<std::hex<<timestamp);
+
+       // some commissioning code below to store the details on affected baselines into a file 
+       // we may need to comment it out in the future or to make it optional based on parset parameter
+       const casa::Vector<casa::uInt>& beam1 = chunk->beam1();
+       ASKAPDEBUGASSERT(beam1.nelements() < chunk->nRow());
+       std::ofstream os("baduvw_baselines.dbg", std::ios::app);
+       os << "# "<< msg << " Timestamp: "<<bat2epoch(timestamp)<<" :"<<std::endl;
+       for (std::set<casa::uInt>::const_iterator ci = rowsWithBadUVWs.begin(); ci != rowsWithBadUVWs.end(); ++ci) {
+            ASKAPDEBUGASSERT(*ci < chunk->nRow());
+            const casa::uInt ant1 = antenna1[*ci];
+            const casa::uInt ant2 = antenna2[*ci];
+            const casa::uInt beam = beam1[*ci];
+            ASKAPDEBUGASSERT(ant1 < nAntenna);
+            ASKAPDEBUGASSERT(ant2 < nAntenna);
+            const string ant1Name = itsVisConverter.config().antennas()[ant1].name();
+            const string ant2Name = itsVisConverter.config().antennas()[ant1].name();
+            const std::string explicitlyFlaggedRowMark = (itsVisConverter.isAntennaGood(ant1) && itsVisConverter.isAntennaGood(ant2)) ? "*" : "";
+            os<<*ci<<" "<<ant1<<" "<<ant2<<" "<<beam<<" "<<ant1Name<<" "<<ant2Name<<" "<<explicitlyFlaggedRowMark<<std::endl;
+       }
+       // end of the commissioning hack
     } else {
        ASKAPLOG_INFO_STR(logger, "" << msg << " Timestamp: "<<bat2epoch(timestamp)<<" or 0x"<<std::hex<<timestamp);
     }
