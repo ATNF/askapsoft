@@ -485,9 +485,13 @@ void MergedSource::flagDueToBadUVWs(const std::set<casa::uInt> &rowsWithBadUVWs,
             ASKAPDEBUGASSERT(ant1 < nAntenna);
             ASKAPDEBUGASSERT(ant2 < nAntenna);
             const string ant1Name = itsVisConverter.config().antennas()[ant1].name();
-            const string ant2Name = itsVisConverter.config().antennas()[ant1].name();
-            const std::string explicitlyFlaggedRowMark = (itsVisConverter.isAntennaGood(ant1) && itsVisConverter.isAntennaGood(ant2)) ? "*" : "";
-            os<<*ci<<" "<<ant1<<" "<<ant2<<" "<<beam<<" "<<ant1Name<<" "<<ant2Name<<" "<<explicitlyFlaggedRowMark<<std::endl;
+            const string ant2Name = itsVisConverter.config().antennas()[ant2].name();
+            const std::string explicitlyFlaggedRowMark = (itsVisConverter.isAntennaGood(ant1) && itsVisConverter.isAntennaGood(ant2)) ? " *" : "";
+            os<<*ci<<" "<<ant1<<" "<<ant2<<" "<<beam<<" "<<ant1Name<<" "<<ant2Name;
+            if (itsVisConverter.isAntennaGood(ant1) && itsVisConverter.isAntennaGood(ant2)) {
+                os<<" *";
+            }
+            os<<std::endl;
        }
        // end of the commissioning hack
     } else {
