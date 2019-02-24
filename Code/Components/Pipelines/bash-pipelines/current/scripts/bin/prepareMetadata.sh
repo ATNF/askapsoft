@@ -67,7 +67,7 @@ if [ "${DO_1934_CAL}" == "true" ]; then
             # Set the first one in the list to be the reference MS
             # used for metadata. The order doesn't matter, since all
             # the MSs should have the same metadata.
-            MS_INPUT_1934="$(echo "$msnames1934" | awk '{print $1}')"
+            MS_INPUT_1934="$(echo $msnames1934 | awk '{print $1}')"
         fi
     fi
     if [ "$MS_INPUT_1934" == "" ]; then
@@ -111,7 +111,7 @@ if [ "${DO_SCIENCE_FIELD}" == "true" ]; then
             # Set the first one in the list to be the reference MS
             # used for metadata. The order doesn't matter, since all
             # the MSs should have the same metadata.
-            MS_INPUT_SCIENCE="$(echo "$msnamesSci" | awk '{print $1}')"
+            MS_INPUT_SCIENCE="$(echo $msnamesSci | awk '{print $1}')"
         fi
     fi
 
