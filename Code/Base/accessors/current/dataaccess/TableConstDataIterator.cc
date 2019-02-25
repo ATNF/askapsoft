@@ -496,62 +496,64 @@ void TableConstDataIterator::fillNoise(casa::Cube<casa::Complex> &noise) const
 
   // default action first - just resize the cube and assign 1.
   noise.resize(itsNumberOfRows, nChan, itsNumberOfPols);
-  noise.set(casa::Complex(1.,0.));
+  noise.set(casa::Complex(1.,1.));
   // if the sigma spectrum exists, use those sigmas to fill the noise cube
   if (table().actualTableDesc().isColumn("SIGMA_SPECTRUM")) {
       // noise is given per channel and polarisation
+      casa::Matrix<Float> buf(itsNumberOfPols,itsNumberOfChannels);
       ROArrayColumn<Float> sigmaCol(itsCurrentIteration,"SIGMA_SPECTRUM");
       for (uInt row = 0; row<itsNumberOfRows; ++row) {
            const casa::IPosition shape = sigmaCol.shape(row);
-           ASKAPASSERT(shape.size()==2);
-           ASKAPASSERT((shape[0] == casa::Int(itsNumberOfPols)) &&
-                       (shape[1] == casa::Int(itsNumberOfChannels)));
+           ASKAPDEBUGASSERT(shape.size()==2);
+           ASKAPDEBUGASSERT((shape[0] == casa::Int(itsNumberOfPols)) &&
+                            (shape[1] == casa::Int(itsNumberOfChannels)));
 
-           casa::Matrix<Float> buf(itsNumberOfPols,itsNumberOfChannels);
            sigmaCol.get(row+itsCurrentTopRow,buf,False);
 
-           // SIGMA_SPECTRUM is ordered (row,pol,chan), so need to transpose
-           const IPosition blc(2,0,startChan);
-           const IPosition trc(2,itsNumberOfPols-1,startChan+nChan-1);
-           casa::Matrix<casa::Complex> rowNoise = noise.yzPlane(row);
-           const casa::Matrix<casa::Float> inVals = buf(blc,trc);
+           // SIGMA_SPECTRUM is ordered (pol,chan), so need to transpose
+           //const IPosition blc(2,0,startChan);
+           //const IPosition trc(2,itsNumberOfPols-1,startChan+nChan-1);
+           //casa::Matrix<casa::Complex> rowNoise = noise.yzPlane(row);
+           //const casa::Matrix<casa::Float> inVals = buf(blc,trc);
            //convertArray(rowNoise, buf(blc,trc));
-           for (casa::uInt x=0; x<rowNoise.nrow(); ++x) {
-                for (casa::uInt y=0; y<rowNoise.ncolumn(); ++y) {
-                     ASKAPDEBUGASSERT(y<inVals.nrow());
-                     ASKAPDEBUGASSERT(x<inVals.ncolumn());
-                     // same polarisation for both real and imaginary parts
-                     const casa::Float val = inVals(y,x);
-                     rowNoise(x,y) = casa::Complex(val,val);
+           for (casa::uInt chan=0; chan<nChan; chan++) {
+                for (casa::uInt pol=0; pol<itsNumberOfPols; pol++) {
+                     //ASKAPDEBUGASSERT(y<inVals.nrow());
+                     //ASKAPDEBUGASSERT(x<inVals.ncolumn());
+                     // same noise for both real and imaginary parts
+                     const casa::Float val = buf(pol,chan+startChan);
+                     noise(row,chan,pol) = casa::Complex(val,val);
                 }
            }
       } // loop over rows
   } // if-statement checking that SIGMA_SPECTRUM column is present
   else if (table().actualTableDesc().isColumn("SIGMA")) {
       ROArrayColumn<Float> sigmaCol(itsCurrentIteration,"SIGMA");
+      casa::Vector<Float> buf(itsNumberOfPols);
       for (uInt row = 0; row<itsNumberOfRows; ++row) {
            const casa::IPosition shape = sigmaCol.shape(row);
-           ASKAPASSERT((shape.size()<=2) && (shape.size()!=0));
+           ASKAPDEBUGASSERT((shape.size()<=2) && (shape.size()!=0));
            if (shape.size() == 1) {
                // noise is given per polarisation, same for all spectral channels
                // IS SIGMA EVER NOT GOING TO BE THIS SIZE? (SEE SIGMA_SPECTRUM)
-               ASKAPASSERT(shape[0] == casa::Int(itsNumberOfPols));
-               casa::Array<Float> buf(casa::IPosition(1,itsNumberOfPols));
+               ASKAPDEBUGASSERT(shape[0] == casa::Int(itsNumberOfPols));
+               //casa::Array<Float> buf(casa::IPosition(1,itsNumberOfPols));
                sigmaCol.get(row+itsCurrentTopRow,buf,False);
-               casa::Matrix<casa::Complex> slice = noise.yzPlane(row);
+               //casa::Matrix<casa::Complex> slice = noise.yzPlane(row);
                for (uInt chan = 0; chan< nChan; ++chan) {
-                    ASKAPDEBUGASSERT(chan< slice.nrow());
-                    casa::Vector<casa::Complex> polNoise = slice.row(chan);
-                    for (casa::uInt pol=0; pol<polNoise.nelements(); ++pol) {
-                         ASKAPDEBUGASSERT(pol<buf.nelements());
+                    //ASKAPDEBUGASSERT(chan< slice.nrow());
+                    //casa::Vector<casa::Complex> polNoise = slice.row(chan);
+                    for (casa::uInt pol=0; pol<itsNumberOfPols; ++pol) {
+                         //ASKAPDEBUGASSERT(pol<buf.nelements());
                          // same polarisation for both real and imaginary parts
-                         const casa::Float val = buf(casa::IPosition(1,pol));
-                         polNoise[pol] = casa::Complex(val,val);
+                         const casa::Float val = buf(pol);
+                         noise(row,chan,pol) = casa::Complex(val,val);
                     }
                }
            } else {
                // noise is given per channel and polarisation
                // IS THIS EVER THE CASE, OR IS SIGMA_SPECTRUM (above) ALWAYS USED?
+               // Should always use SIGMA_SPECTRUM for this case (MHW)
                ASKAPASSERT((shape[0] == casa::Int(itsNumberOfChannels)) &&
                            (shape[1] == casa::Int(itsNumberOfPols)));
 
@@ -587,19 +589,17 @@ void TableConstDataIterator::fillUVW(casa::Vector<casa::RigidVector<casa::Double
   uvw.resize(itsNumberOfRows);
 
   ROArrayColumn<Double> uvwCol(itsCurrentIteration,"UVW");
-  // temporary buffer and position in it
-  IPosition curPos(1,3);
-  Array<Double> buf(curPos);
+  // temporary buffer
+  Vector<Double> buf(3);
   for (uInt row=0;row<itsNumberOfRows;++row) {
+#ifdef ASKAP_DEBUG
        const casa::IPosition shape=uvwCol.shape(row);
-       ASKAPASSERT(shape.size()==1);
-       ASKAPASSERT(shape[0]==3);
+       ASKAPDEBUGASSERT(shape.size()==1);
+       ASKAPDEBUGASSERT(shape[0]==3);
+#endif // ASKAP_DEBUG
        // extract data record for this row, no resizing
        uvwCol.get(row+itsCurrentTopRow,buf,False);
-       RigidVector<Double, 3> &thisRowUVW=uvw(row);
-       for (curPos[0]=0;curPos[0]<3;++curPos[0]) {
-            thisRowUVW(curPos[0])=buf(curPos);
-       }
+       uvw(row) = buf;
   }
 }
 
