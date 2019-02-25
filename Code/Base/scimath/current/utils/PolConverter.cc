@@ -153,7 +153,7 @@ casa::Vector<casa::Complex> PolConverter::operator()(casa::Vector<casa::Complex>
 casa::Vector<casa::Complex>& PolConverter::convert(casa::Vector<casa::Complex>& out, const casa::Vector<casa::Complex>& vis) const
 {
     if (itsVoid) {
-        out.reference(vis);
+        out = vis;
         return out;
     }
     ASKAPDEBUGASSERT(vis.nelements() == itsTransform.ncolumn());
@@ -203,6 +203,42 @@ casa::Vector<casa::Complex> PolConverter::noise(casa::Vector<casa::Complex> visN
   }
 
   return res;
+}
+
+/// @brief propagate noise through conversion
+/// @details Convert the visibility noise visibility vector between two
+/// polarisation frames supplied in the constructor.
+/// @param[in] visNoise visibility noise vector
+/// @param[out] converted noise vector
+/// @note visNoise should have the same size (<=4) as both polFrames passed in the constructor,
+/// the output vector will have the same size. Real and imaginary parts of the output vectors are the noise
+/// levels of real and imaginary parts of the visibility.
+casa::Vector<casa::Complex>& PolConverter::noise(casa::Vector<casa::Complex>& outNoise, const casa::Vector<casa::Complex>& visNoise) const
+{
+  if (itsVoid) {
+      outNoise = visNoise;
+      return outNoise;
+  }
+  ASKAPDEBUGASSERT(visNoise.nelements() == itsTransform.ncolumn());
+  ASKAPDEBUGASSERT(outNoise.nelements() == itsTransform.nrow());
+
+  for (casa::uInt row = 0; row<outNoise.nelements(); ++row) {
+       float reNoise = 0.;
+       float imNoise = 0.;
+       for (casa::uInt col = 0; col<visNoise.nelements(); ++col) {
+            const casa::Complex coeff = itsTransform(row,col);
+            const casa::Complex val = visNoise[col];
+            reNoise += casa::square(casa::real(coeff)*casa::real(val)) +
+                       casa::square(casa::imag(coeff)*casa::imag(val));
+            imNoise += casa::square(casa::imag(coeff)*casa::real(val)) +
+                       casa::square(casa::real(coeff)*casa::imag(val));
+       }
+       ASKAPDEBUGASSERT(reNoise >= 0.);
+       ASKAPDEBUGASSERT(imNoise >= 0.);
+       outNoise[row] = casa::Complex(sqrt(reNoise),sqrt(imNoise));
+  }
+
+  return outNoise;
 }
 
 /// @brief build transformation matrix
