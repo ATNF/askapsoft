@@ -33,7 +33,8 @@ else:
         env.AppendUnique(LINKFLAGS=['-latomic'])
 
 if sys.platform  == 'darwin':
-  env.AppendUnique(LINKFLAGS=['-framework', 'Python'])
+  env.AppendUnique(LINKFLAGS=['-framework', 'Python,CoreFoundation'])
+#  env.AppendUnique(LINKFLAGS=['-framework', 'CoreFoundation'])
 
 
 env["ENV"]["PATH"] = os.environ['PATH']

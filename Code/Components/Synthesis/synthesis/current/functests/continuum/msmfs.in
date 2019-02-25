@@ -4,14 +4,14 @@ Cimager.uvwMachineDirTolerance                  = 0.2arcsec
 Cimager.imagetype                               = fits
 Cimager.memorybuffers                           = true
 Cimager.barycentre                              = false
-Cimager.nchanpercore                            = 2
+Cimager.nchanpercore                            = 8
 Cimager.solverpercore                           = false
 Cimager.Channels                                = [1,%w]
 Cimager.usetmpfs                                = false
 Cimager.tmpfs                                   = /Volumes/RAMDisk
 Cimager.Images.Names                            = [image.cont]
 Cimager.Images.reuse                            = false
-Cimager.Images.shape                            = [256,256]
+Cimager.Images.shape                            = [128,128]
 Cimager.Images.cellsize                         = [5arcsec, 5arcsec]
 Cimager.visweights                              = MFS
 Cimager.visweights.MFS.reffreq                  = 1.24e+09
@@ -35,7 +35,7 @@ Cimager.gridder.WProject.cutoff                 = 0.001
 Cimager.gridder.WProject.variablesupport        = true
 Cimager.gridder.WProject.offsetsupport          = true
 
-Cimager.ncycles                                 = 5
+Cimager.ncycles                                 = 1
 Cimager.Images.writeAtMajorCycle                = true
 
 # Use a multiscale Clean solver

@@ -778,9 +778,11 @@ void ContinuumWorker::processChannels()
           const string myMs = workUnits[tempWorkUnitCount].get_dataset();
           TableDataSource myDs(myMs, TableDataSource::DEFAULT, colName);
           myDs.configureUVWMachineCache(uvwMachineCacheSize, uvwMachineCacheTolerance);
+          ds.configureMaxChunkSize(128);
+
           try {
 
-            boost::shared_ptr<CalcCore> workingImagerPtr;
+            CalcCore *workingImagerPtr;
 
             if (updateDir) {
               itsAdvisor->updateDirectionFromWorkUnit(itsParsets[tempWorkUnitCount],workUnits[tempWorkUnitCount]);
@@ -790,12 +792,10 @@ void ContinuumWorker::processChannels()
               // a corner case .... FIX This!
               // FIXED: by just having 2 possible working imagers depending on the mode. ... easy really
 
-              boost::shared_ptr<CalcCore> tempIm(new CalcCore(itsParsets[tempWorkUnitCount],itsComms,myDs,localChannel));
-              workingImagerPtr = tempIm;
+              workingImagerPtr = new CalcCore(itsParsets[tempWorkUnitCount],itsComms,myDs,localChannel);
             }
             else {
-              boost::shared_ptr<CalcCore> tempIm(new CalcCore(itsParsets[tempWorkUnitCount],itsComms,myDs,rootImager.gridder(),localChannel));
-              workingImagerPtr = tempIm;
+              workingImagerPtr = new CalcCore(itsParsets[tempWorkUnitCount],itsComms,myDs,rootImager.gridder(),localChannel);
             }
 
             CalcCore& workingImager = *workingImagerPtr; // just for the semantics
@@ -839,16 +839,19 @@ void ContinuumWorker::processChannels()
             // either in time or by beam.
 
             ASKAPLOG_INFO_STR(logger,"About to merge into rootImager");
-            ImagingNormalEquations &workingINERef =
-            dynamic_cast<ImagingNormalEquations&>(*workingImager.getNE());
             if (updateDir) {
+              ImagingNormalEquations &workingINERef =
+              dynamic_cast<ImagingNormalEquations&>(*workingImager.getNE());
               workingINERef.weightType(FROM_WEIGHT_IMAGES);
               workingINERef.weightState(CORRECTED);
             }
 
             rootImager.getNE()->merge(*workingImager.getNE());
             ASKAPLOG_INFO_STR(logger,"Merged");
-
+            ASKAPLOG_INFO_STR(logger,"Cleaning up");
+            workingImager.getNE().reset();
+            delete(workingImagerPtr);
+            
 
           }
           catch( const askap::AskapError& e) {
