@@ -417,6 +417,12 @@ is not searched.
 |                   |              |              |reverse (and non-PSF) gridder stores its          |
 |                   |              |              |convolution functions.                            |
 +-------------------+--------------+--------------+--------------------------------------------------+
+|usedouble          |bool          |false         |If true, use double precision when calculating    |
+|                   |              |              |convolution functions in the WProject gridder.    |
+|                   |              |              |Double used to be the default, but there is little|
+|                   |              |              |if any difference in the output with single       |
+|                   |              |              |precision.                                        |
++-------------------+--------------+--------------+--------------------------------------------------+
 
 
 Note, that an exception is raised if the support size found during the support search
