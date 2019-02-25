@@ -9,6 +9,7 @@ def secondbuilder():
     builder2 = Builder()
     if platform.machine() == "x86_64":
         builder2.add_option('"CFLAGS=-fPIC -O2"')
+        builder2.add_option('--enable-sse2')
     builder2.add_option('--enable-float --enable-threads')
     builder2.do_clean = False
     builder2.build()

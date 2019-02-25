@@ -70,64 +70,58 @@ namespace askap {
         /*
          * Execute a Double-precision FFT plan.
          */
-        static inline void fftExec(casa::Vector<casa::DComplex>& vec, const bool forward,
+        static inline void fftExec(casa::Vector<casa::DComplex> vec, const bool forward,
                             fftw_plan& p, fftw_complex* buf, size_t bufsz)
         {
             const size_t nElements = vec.nelements();
+            const size_t n2 = nElements/2;
             ASKAPDEBUGASSERT(nElements == bufsz);
-
-            Bool deleteIt;
-            DComplex *dataPtr = vec.getStorage(deleteIt);
+            DComplex *bufPtr = reinterpret_cast<casa::DComplex*>(buf);
 
             // rotate input because the origin for FFTW is at 0, not n/2 (casa fft).
-            std::rotate_copy(dataPtr, dataPtr + (nElements / 2), dataPtr + nElements,
-                             reinterpret_cast<casa::DComplex*>(buf));
+            for (size_t i=n2; i<nElements; i++) *bufPtr++ = vec(i);
+            for (size_t i=0; i<n2; i++) *bufPtr++ = vec(i);
+            bufPtr = reinterpret_cast<casa::DComplex*>(buf);
 
             fftw_execute(p);
 
-            // rotate output and copy back to the vectors storage
-            std::rotate_copy(reinterpret_cast<casa::DComplex*>(buf),
-                             reinterpret_cast<casa::DComplex*>(buf) + (nElements / 2),
-                             reinterpret_cast<casa::DComplex*>(buf) + nElements,
-                             dataPtr);
-
             if (!forward) {
-                scaleResult(dataPtr, nElements);
+                for (size_t i=0; i<nElements; i++) *bufPtr++/=nElements;
+                bufPtr = reinterpret_cast<casa::DComplex*>(buf);
             }
-
-            vec.putStorage(dataPtr, deleteIt);
+            // rotate output and copy back to the vectors storage
+            for (size_t i=n2; i<nElements; i++) vec(i) = *bufPtr++;
+            for (size_t i=0; i<n2; i++) vec(i) = *bufPtr++;
         }
 
-        /**
+        /*
          * Execute a Single-precision FFT plan.
          */
-        static inline void fftExec(casa::Vector<casa::Complex>& vec, const bool forward,
+        static inline void fftExec(casa::Vector<casa::Complex> vec, const bool forward,
                             fftwf_plan& p, fftwf_complex* buf, size_t bufsz)
         {
             const size_t nElements = vec.nelements();
+            const size_t n2 = nElements/2;
             ASKAPDEBUGASSERT(nElements == bufsz);
+            Complex *bufPtr = reinterpret_cast<casa::Complex*>(buf);
 
-            Bool deleteIt;
-            Complex *dataPtr = vec.getStorage(deleteIt);
-
-            // rotate input because the origin for FFTW is at 0, not n/2 (casa fft)
-            std::rotate_copy(dataPtr, dataPtr + (nElements / 2), dataPtr + nElements,
-                    reinterpret_cast<casa::Complex*>(buf));
+            // rotate input because the origin for FFTW is at 0, not n/2 (casa fft).
+            for (size_t i=n2; i<nElements; i++) *bufPtr++ = vec(i);
+            for (size_t i=0; i<n2; i++) *bufPtr++ = vec(i);
+            bufPtr = reinterpret_cast<casa::Complex*>(buf);
 
             fftwf_execute(p);
 
-            // rotate output
-            std::rotate_copy(reinterpret_cast<casa::Complex*>(buf),
-                             reinterpret_cast<casa::Complex*>(buf) + (nElements / 2),
-                             reinterpret_cast<casa::Complex*>(buf) + nElements,
-                             dataPtr);
-
             if (!forward) {
-                scaleResult(dataPtr, nElements);
+                for (size_t i=0; i<nElements; i++) *bufPtr++/=nElements;
+                bufPtr = reinterpret_cast<casa::Complex*>(buf);
             }
 
-            vec.putStorage(dataPtr, deleteIt);
+            // rotate output and copy back to the vectors storage
+            for (size_t i=n2; i<nElements; i++) vec(i) = *bufPtr++;
+            for (size_t i=0; i<n2; i++) vec(i) = *bufPtr++;
         }
+
 
         void fft(casa::Vector<casa::DComplex>& vec, const bool forward)
         {
@@ -190,47 +184,47 @@ namespace askap {
             fftwf_destroy_plan(p);
         }
 
+
         void fft2d(casa::Array<casa::Complex>& arr, const bool forward)
         {
             ASKAPTRACE("fft2d<casa::Complex>");
 #ifdef _OPENMP
             boost::unique_lock<boost::mutex> lock(fftWrapperMutex);
 #endif
-
             // 1: Make an iterator that returns plane by plane
             casa::ArrayIterator<casa::Complex> it(arr, 2);
 
             while (!it.pastEnd()) {
                 casa::Matrix<casa::Complex> mat(it.array());
-                ASKAPDEBUGASSERT(mat.ncolumn() > 0 && mat.nrow() > 0);
+                const uInt nrow = mat.nrow();
+                const uInt ncol = mat.ncolumn();
+                ASKAPDEBUGASSERT(nrow > 0 && ncol > 0);
 
                 // 2: Setup a buffer and fft plan based on the size of the first column
-                size_t bufsz = mat.nrow();
-                fftwf_complex* buf = (fftwf_complex*) fftw_malloc(sizeof(fftwf_complex) * bufsz);
+                size_t bufsz = nrow;
+                fftwf_complex* buf = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex) * bufsz);
                 fftwf_plan p = fftwf_plan_dft_1d(bufsz, buf, buf,
                                                  (forward) ? FFTW_FORWARD : FFTW_BACKWARD, FFTW_ESTIMATE);
 
                 // 3: FFT each column
-                for (uInt col = 0; col < mat.ncolumn(); col++) {
-                    casa::Vector<casa::Complex> vec(mat.column(col));
-                    fftExec(vec, forward, p, buf, bufsz);
+                for (uInt col = 0; col < ncol; col++) {
+                    fftExec(mat.column(col), forward, p, buf, bufsz);
                 }
 
                 // 4: If the row are of different length to the rows then
                 // re-allocate buffer and regen the plan
-                if (mat.ncolumn() != mat.nrow()) {
+                if (ncol != nrow) {
                     fftwf_destroy_plan(p);
                     fftwf_free(buf);
-                    bufsz = mat.ncolumn();
-                    fftwf_complex* buf = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex) * bufsz);
+                    bufsz = ncol;
+                    buf = (fftwf_complex*) fftwf_malloc(sizeof(fftwf_complex) * bufsz);
                     p = fftwf_plan_dft_1d(bufsz, buf, buf,
-                                          (forward) ? FFTW_FORWARD : FFTW_BACKWARD, FFTW_MEASURE);
+                                          (forward) ? FFTW_FORWARD : FFTW_BACKWARD, FFTW_ESTIMATE);
                 }
 
                 // 5: FFT each row
-                for (uInt row = 0; row < mat.nrow(); row++) {
-                    casa::Vector<casa::Complex> vec(mat.row(row));
-                    fftExec(vec, forward, p, buf, bufsz);
+                for (uInt row = 0; row < nrow; row++) {
+                    fftExec(mat.row(row), forward, p, buf, bufsz);
                 }
 
                 // 6: Delete the plan and temporary buffer
@@ -253,35 +247,35 @@ namespace askap {
 
             while (!it.pastEnd()) {
                 casa::Matrix<casa::DComplex> mat(it.array());
-                ASKAPDEBUGASSERT(mat.ncolumn() > 0 && mat.nrow() > 0);
+                const uInt nrow = mat.nrow();
+                const uInt ncol = mat.ncolumn();
+                ASKAPDEBUGASSERT(ncol > 0 && nrow > 0);
 
                 // 2: Setup a buffer and fft plan based on the size of the first column
-                size_t bufsz = mat.nrow();
+                size_t bufsz = nrow;
                 fftw_complex* buf = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * bufsz);
                 fftw_plan p = fftw_plan_dft_1d(bufsz, buf, buf,
                                                (forward) ? FFTW_FORWARD : FFTW_BACKWARD, FFTW_ESTIMATE);
 
                 // 3: FFT each column
-                for (uInt col = 0; col < mat.ncolumn(); col++) {
-                    casa::Vector<casa::DComplex> vec(mat.column(col));
-                    fftExec(vec, forward, p, buf, bufsz);
+                for (uInt col = 0; col < ncol; col++) {
+                    fftExec(mat.column(col), forward, p, buf, bufsz);
                 }
 
                 // 4: If the rows are of different length to the columns then
                 // re-allocate buffer and regen the plan
-                if (mat.ncolumn() != mat.nrow()) {
+                if (ncol != nrow) {
                     fftw_destroy_plan(p);
                     fftw_free(buf);
-                    bufsz = mat.ncolumn();
-                    fftw_complex* buf = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * bufsz);
+                    bufsz = ncol;
+                    buf = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * bufsz);
                     p = fftw_plan_dft_1d(bufsz, buf, buf,
-                                         (forward) ? FFTW_FORWARD : FFTW_BACKWARD, FFTW_MEASURE);
+                                         (forward) ? FFTW_FORWARD : FFTW_BACKWARD, FFTW_ESTIMATE);
                 }
 
                 // 5: FFT each row
-                for (uInt row = 0; row < mat.nrow(); row++) {
-                    casa::Vector<casa::DComplex> vec(mat.row(row));
-                    fftExec(vec, forward, p, buf, bufsz);
+                for (uInt row = 0; row < nrow; row++) {
+                    fftExec(mat.row(row), forward, p, buf, bufsz);
                 }
 
                 // 6: Delete the plan and temporary buffer
