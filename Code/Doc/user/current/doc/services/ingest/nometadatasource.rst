@@ -26,8 +26,9 @@ from keys with tasks.\ **name**\ .params prefix (not shown in the table below) w
 **name** is an arbitrary name assigned to this task and used in *tasklist*\ .
 The type of the task defined by tasks.\ **name**\ .type should be set to *NoMetadataSource*.
 As mentioned above, this task is different from :doc:`mergedsource` in the way the information normally
-supplied in the metadata stream is obtained. Therefore, all configuration parameters of the :doc:`mergedsource`
-are understood by **NoMetadataSource**\ . The table below contains additional parameters understood by this
+supplied in the metadata stream is obtained. Therefore, almost all configuration parameters of the :doc:`mergedsource`
+are understood by **NoMetadataSource**\ , and the exceptions are clearly mentioned in the parameter table
+for that task. The table below contains additional parameters understood by this
 task which fill in for the metadata content. Note, *NoMetadataSource* requires beam arrangement parameters
 to be defined in parset (see the section in :doc:`index`).
 

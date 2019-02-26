@@ -115,6 +115,14 @@ class MergedSource : public ISource,
         /// @return true if itsVis is invalid at the completion of this method and cycle must be skipped
         bool ensureValidVis(casa::uInt maxNoDataRetries);
 
+        /// @brief helper method to flag and report on bad UVWs
+        /// @details It decomposes the given rows back into antennas and report in the log with
+        /// different severity depending on the stream ID (to avoid spamming the log).
+        /// This method is a work around of UVW metadata problem (see ASKAPSDP-3431)
+        /// @param[in] rowsWithBadUVWs set of rows to flag
+        /// @param[in] timestamp BAT for reporting
+        void flagDueToBadUVWs(const std::set<casa::uInt> &rowsWithBadUVWs, const casa::uLong timestamp);
+
 
         /// Initialises an "empty" VisChunk
         askap::cp::common::VisChunk::ShPtr createVisChunk(const TosMetadata& metadata);
@@ -184,6 +192,13 @@ class MergedSource : public ISource,
         /// Given that we do it per antenna, rather than per baseline, it would probably be
         /// fine and may be extracting this info int he constructor is a premature optimisation.
         casa::Matrix<casa::Double> itsArrayLayout;
+
+        /// @brief cycle counter for cycles with bad UVWs
+        casa::uInt itsBadUVWCycleCounter;
+
+        /// @brief maximum number of cycles with bad UVWs before an exception is thrown
+        /// @note Negative number means to continue forever (with flagging)
+        int itsMaxBadUVWCycles;
 
         /// For unit testing
         friend class MergedSourceTest;

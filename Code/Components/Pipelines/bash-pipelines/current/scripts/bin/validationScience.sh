@@ -70,9 +70,15 @@ for FIELD in \${FIELD_LIST}; do
     # diagnostics directory for individual beam data
     fieldDir=\${diagnostics}/cubestats-${FIELD}
     mkdir -p \$fieldDir
-    cp \${FIELD}/cubeStats*txt \$fieldDir
-    cp \${FIELD}/cubePlot*png \$fieldDir
-    cp \${FIELD}/beamlog* \$fieldDir
+
+    # copy the cubestats, the plots thereof, and the beam logs to the
+    # field directory in diagnostics (but only the ones that exist).
+    files=(\${FIELD}/cubeStats*txt \${FIELD}/cubePlot*png \${FIELD}/beamlog*) 
+    if [ -e "\${files[0]}" ]; then 
+        for f in \${files[@]}; do 
+            cp \$f \$fieldDir 
+        done 
+    fi
 
     # Cube stats and restoring beam for the spectral cubes
     imageCode=restored
@@ -105,9 +111,13 @@ for FIELD in \${FIELD_LIST}; do
 
 done
 
-cp beamNoise* $diagnostics
-cp beamMin* $diagnostics
-cp beamPSF* $diagnostics
+# copy the new plots to the diagnostics directory (but only if they exist)
+files=(beamNoise* beamMin* beamPSF*)
+if [ -e "\${files[0]}" ]; then
+    for f in \${files[@]}; do
+        cp \$f $diagnostics
+    done
+fi
 
 EOFOUTER
 

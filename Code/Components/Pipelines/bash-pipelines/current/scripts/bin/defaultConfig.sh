@@ -701,6 +701,10 @@ SELFCAL_NORMALISE_GAINS=true
 CIMAGER_MINUV=0
 # Limit the data selection for calibration to a minimum UV distance [m]
 CCALIBRATOR_MINUV=0
+# Limit the data selection for imaging to a minimum UV distance [m] (ignored if 0)
+CIMAGER_MAXUV=0
+# Limit the data selection for calibration to a minimum UV distance [m] (ignored if 0)
+CCALIBRATOR_MAXUV=0
 
 # name of the final gains calibration table
 GAINS_CAL_TABLE="cont_gains_cal_SB%s_%b.tab"

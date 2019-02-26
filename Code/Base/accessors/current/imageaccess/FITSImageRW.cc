@@ -54,9 +54,11 @@ void printerror(int status)
     /* Print out cfitsio error messages and exit program */
     /*****************************************************/
 
+    char status_str[FLEN_STATUS];
+    fits_get_errstatus(status, status_str);
 
     if (status) {
-        ASKAPLOG_ERROR_STR(FITSlogger, status); /* print error report */
+        ASKAPLOG_ERROR_STR(FITSlogger, "FitsIO error: " << status_str); /* print error report */
 
         exit(status);      /* terminate the program, returning error status */
     }
@@ -236,7 +238,7 @@ bool FITSImageRW::create(const std::string &name, const casa::IPosition &shape, 
     // // ORIGIN
     // //
 
-    header.define("ORIGIN", "ASKAPSoft");
+    header.define("ORIGIN", "ASKAPsoft");
 
     theKeywordList = casa::FITSKeywordUtil::makeKeywordList(primHead, casa::True);
 

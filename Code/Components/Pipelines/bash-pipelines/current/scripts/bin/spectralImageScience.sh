@@ -294,9 +294,19 @@ fi
 
 # Find the cube statistics
 loadModule mpi4py
-cube=${imageName}
-echo "Finding cube stats for \${cube}"
-srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} \${PIPELINEDIR}/findCubeStatistics.py -c \${cube}
+IMAGE_BASE_SPECTRAL=${IMAGE_BASE_SPECTRAL}
+BEAM=${BEAM}
+FIELD=${FIELD}
+IMAGETYPE_SPECTRAL=${IMAGETYPE_SPECTRAL}
+DO_ALT_IMAGER_SPECTRAL=${DO_ALT_IMAGER_SPECTRAL}
+ALT_IMAGER_SINGLE_FILE=${ALT_IMAGER_SINGLE_FILE}
+for subband in ${SUBBAND_WRITER_LIST}; do
+    for imageCode in restored residual; do
+        setImageProperties spectral
+        echo "Finding cube stats for \${imageName}"
+        srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} \${PIPELINEDIR}/findCubeStatistics.py -c \${imageName}
+    done
+done
 
 
 EOFOUTER

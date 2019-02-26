@@ -5,6 +5,57 @@ This page summarises the key changes in each tagged release of
 ASKAPsoft. This replicates the CHANGES file that is included in the
 code base.
 
+0.23.3 (22 February 2019)
+-------------------------
+
+A further patch release, with a number of small pipeline fixes, along
+with several fixes to the processing software.
+
+Processing:
+
+ * The imager would produce slightly different residual and restored
+   images when different values of nchanpercore were used. This was
+   due to the final gridding cycle not being synchronised
+   correctly. This has been fixed and the images are now indepenent of
+   nchanpercore.
+ * The tree reduction used by imager has been improved to have a
+   smaller memory footprint across the cores.
+ * The selavy component fitting is improved in the way negative
+   components are handled. Unless negative components are explicitly
+   accepted, if a fit results in one or more components being negative
+   then that fit will be rejected. 
+ * The primary beam used by linmos now has a FWHM scaling by 1.09
+   lambda/D, which should be more accurate.
+ * The FITSImage interface (in Code/Base/accessors) will now report a
+   human-readable error message (rather than a number code) when an
+   error occurs.
+
+Pipelines:
+
+ * CASDA uploads again include catalogues (which were left out due to
+   fixes in 0.23.1).
+ * There are new parameters ``CIMAGER_MAXUV`` and
+   ``CCALIBRATOR_MAXUV`` that allow the imposition of an upper limit
+   to the uv values in the continuum imaging/self-calibration.
+ * Parsets for the imager were erroneously getting a
+   "Cimager.Channels" selection that included the %w wildcard. This
+   will no longer happen (unless cimager is used).
+ * The default python module is now always loaded at the start of
+   slurm scripts, to avoid python conflicts due to a user's particular
+   environment.
+ * There are stronger checks on the number of cores allocated to
+   spectral-line imaging, ensuring that the number of channels must be
+   an exact multiple of the nchanpercore.
+ * The scaling on the beam-wise noise plots has been fixed, so that
+   the scaled MADFM should be closer to the standard deviation in the
+   absence of signal.
+ * Cube stats are now also generated for continuum-cube residual
+   images.
+ * Several scripts have been tidied up with the aim of avoiding
+   spurious errors (validationScience, for instance).
+ * The ASKAPsoft version was being left off FITS headers. This now
+   reflects the version string from the askapsoft module.
+
 0.23.2 (2 February 2019)
 ------------------------
 

@@ -64,7 +64,7 @@ class BeamStats:
                     self.maxval[chan] = float(line.split()[8])
                     self.minval[chan] = float(line.split()[7])
                     self.std[chan] = float(line.split()[3])
-                    self.madfm[chan] = float(line.split()[5])
+                    self.madfm[chan] = cs.madfmToSigma(float(line.split()[5]))
                     self.onepc[chan] = float(line.split()[6])
 
     def noiseMinMax(self):
@@ -161,7 +161,6 @@ if __name__ == '__main__':
             if noiseYmin==None or noiseYmin>ymin: noiseYmin=ymin
             if noiseYmax==None or noiseYmax<ymax: noiseYmax=ymax
             ymin,ymax=beams[i].minMax()
-            print i,ymin,ymax
             if fullYmin==None or fullYmin>ymin: fullYmin=ymin
             if fullYmax==None or fullYmax<ymax: fullYmax=ymax
 
@@ -172,11 +171,9 @@ if __name__ == '__main__':
     width=noiseYmax-noiseYmin
     noiseYmin -= 0.1*width
     noiseYmax += 0.1*width
-    print fullYmin,fullYmax
     width=fullYmax-fullYmin
     fullYmin -= 0.1*width
     fullYmax += 0.1*width
-    print fullYmin,fullYmax
 
     fig, axs = plt.subplots(6,6, sharex=True, sharey=True, figsize = (12,6))
     fig.subplots_adjust(bottom=0.125, top=0.9, hspace=0.005, wspace=0.1)

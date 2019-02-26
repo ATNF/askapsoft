@@ -105,7 +105,10 @@ if [ "$PROCESS_DEFAULTS_HAS_RUN" != "true" ]; then
     module use "${ASKAP_MODULE_DIR}"
 
     askapsoftModuleCommands="# Need to load the slurm module directly
-module load slurm"
+module load slurm
+# Ensure the default python module is loaded before askapsoft
+module unload python
+module load python"
 
     if [ "${ASKAP_ROOT}" == "" ]; then
         # Has the user asked for a specific askapsoft module?
@@ -282,7 +285,7 @@ module load askappipeline/${askappipelineVersion}"
     #############################
     # HISTORY metadata string
 
-    imageHistoryString="\"Produced with ASKAPsoft version \${ASKAPSOFT_VERSION_USED}\""
+    imageHistoryString="\"Produced with ASKAPsoft version ${ASKAPSOFT_RELEASE}\""
     imageHistoryString="${imageHistoryString}, \"Processed with ASKAP pipeline version ${PIPELINE_VERSION}\""
     imageHistoryString="${imageHistoryString}, \"Processed with ACES software revision ${ACES_VERSION_USED}\""
     imageHistoryString="${imageHistoryString}, \"Processed with ASKAP pipelines on ${NOW_FMT}\""
@@ -312,13 +315,6 @@ module load askappipeline/${askappipelineVersion}"
     fitsConvertText="# The following converts the file in \$casaim to a FITS file, after fixing headers.
 if [ -e \"\${casaim}\" ] && [ ! -e \"\${fitsim}\" ]; then
     # The FITS version of this image doesn't exist
-
-    ASKAPSOFT_VERSION=\"${ASKAPSOFT_VERSION}\"
-    if [ \"\${ASKAPSOFT_VERSION}\" == \"\" ]; then
-        ASKAPSOFT_VERSION_USED=\$(module list -t 2>&1 | grep askapsoft)
-    else
-        ASKAPSOFT_VERSION_USED=\$(echo \"\${ASKAPSOFT_VERSION}\" | sed -e 's|/||g')
-    fi
 
     cat > \"\$parset\" << EOFINNER
 ImageToFITS.casaimage = \${casaim}
@@ -729,6 +725,11 @@ EOF
         # nworkergroupsSci = number of worker groups, used for MFS imaging.
         nworkergroupsSci=$(echo "${NUM_TAYLOR_TERMS}" | awk '{print 2*$1-1}')
 
+        # if we are using the new imager we need to tweak this
+        if [ "${DO_ALT_IMAGER_CONT}" == "true" ]; then
+            NUM_CPUS_CONTIMG_SCI=$(echo "$nchanContSci" "$nworkergroupsSci" "${NCHAN_PER_CORE}" | awk '{print ($1/$3)*$2+1}')
+        fi
+
         # total number of CPUs required for MFS continuum imaging, including the master
         #  Use the number given in the config file, unless it has been left blank
         # Also set the Channels selection parameter
@@ -743,11 +744,6 @@ Cimager.Channels                                = [1, %w]"
                 CONTIMG_CHANNEL_SELECTION="# Channel selection for each worker
 Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SCI}"
             fi
-        fi
-
-        # if we are using the new imager we need to tweak this
-        if [ "${DO_ALT_IMAGER_CONT}" == "true" ]; then
-            NUM_CPUS_CONTIMG_SCI=$(echo "$nchanContSci" "$nworkergroupsSci" "${NCHAN_PER_CORE}" | awk '{print ($1/$3)*$2+1}')
         fi
 
         # Can't have -N greater than -n in the srun call
@@ -958,6 +954,11 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
 
         # if we are using the new imager we need to tweak the number of cores
         if [ "${DO_ALT_IMAGER_SPECTRAL}" == "true" ]; then
+            if [ $((NUM_CHAN_SCIENCE_SL % NCHAN_PER_CORE_SL)) -ne 0 ]; then
+                echo "ERROR - NCHAN_PER_CORE_SL (${NCHAN_PER_CORE_SL}) does not evenly divide the number of channels (${NUM_CHAN_SCIENCE_SL})"
+                echo "   Exiting."
+                exit 1
+            fi
             NUM_CPUS_SPECIMG_SCI=$(echo "${NUM_CHAN_SCIENCE_SL}" "${NCHAN_PER_CORE_SL}" | awk '{print int($1/$2) + 1}')
         fi
 
@@ -1350,6 +1351,24 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
                 done
             fi
 
+            if [ "$(echo "${CIMAGER_MAXUV}" | grep "\[")" != "" ]; then
+                # Have entered a comma-separate array in square brackets
+                arrSize=$(echo "${CIMAGER_MAXUV}" | sed -e 's/[][,]/ /g' | wc -w)
+                if [ "$arrSize" -ne "$expectedArrSize" ]; then
+                    echo "ERROR - CIMAGER_MAXUV ($CIMAGER_MAXUV) needs to be of size $expectedArrSize (since SELFCAL_NUM_LOOPS=$SELFCAL_NUM_LOOPS)"
+                    exit 1
+                fi
+                CIMAGER_MAXUV_ARRAY=()
+                for a in $(echo "${CIMAGER_MAXUV}" | sed -e 's/[][,]/ /g'); do
+                    CIMAGER_MAXUV_ARRAY+=($a)
+                done
+            else
+                CIMAGER_MAXUV_ARRAY=()
+                for((i=0;i<=SELFCAL_NUM_LOOPS;i++)); do
+                    CIMAGER_MAXUV_ARRAY+=($CIMAGER_MAXUV)
+                done
+            fi
+
             if [ "$(echo "${CCALIBRATOR_MINUV}" | grep "\[")" != "" ]; then
                 # Have entered a comma-separate array in square brackets
                 arrSize=$(echo "${CCALIBRATOR_MINUV}" | sed -e 's/[][,]/ /g' | wc -w)
@@ -1365,6 +1384,24 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
                 CCALIBRATOR_MINUV_ARRAY=()
                 for((i=0;i<=SELFCAL_NUM_LOOPS;i++)); do
                     CCALIBRATOR_MINUV_ARRAY+=($CCALIBRATOR_MINUV)
+                done
+            fi
+
+            if [ "$(echo "${CCALIBRATOR_MAXUV}" | grep "\[")" != "" ]; then
+                # Have entered a comma-separate array in square brackets
+                arrSize=$(echo "${CCALIBRATOR_MAXUV}" | sed -e 's/[][,]/ /g' | wc -w)
+                if [ "$arrSize" -ne "$expectedArrSize" ]; then
+                    echo "ERROR - CCALIBRATOR_MAXUV ($CCALIBRATOR_MAXUV) needs to be of size $expectedArrSize (since SELFCAL_NUM_LOOPS=$SELFCAL_NUM_LOOPS)"
+                    exit 1
+                fi
+                CCALIBRATOR_MAXUV_ARRAY=()
+                for a in $(echo "${CCALIBRATOR_MAXUV}" | sed -e 's/[][,]/ /g'); do
+                    CCALIBRATOR_MAXUV_ARRAY+=($a)
+                done
+            else
+                CCALIBRATOR_MAXUV_ARRAY=()
+                for((i=0;i<=SELFCAL_NUM_LOOPS;i++)); do
+                    CCALIBRATOR_MAXUV_ARRAY+=($CCALIBRATOR_MAXUV)
                 done
             fi
 
@@ -1402,6 +1439,14 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
                 fi
                 if [ "${#CCALIBRATOR_MINUV_ARRAY[@]}" -ne "$arraySize" ]; then
                     echo "ERROR! Size of CCALIBRATOR_MINUV (${CCALIBRATOR_MINUV}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
+                    exit 1
+                fi
+                if [ "${#CIMAGER_MAXUV_ARRAY[@]}" -ne "$arraySize" ]; then
+                    echo "ERROR! Size of CIMAGER_MAXUV (${CIMAGER_MAXUV}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
+                    exit 1
+                fi
+                if [ "${#CCALIBRATOR_MAXUV_ARRAY[@]}" -ne "$arraySize" ]; then
+                    echo "ERROR! Size of CCALIBRATOR_MAXUV (${CCALIBRATOR_MAXUV}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
                     exit 1
                 fi
 

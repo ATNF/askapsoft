@@ -22,7 +22,8 @@
 /// along with this program; if not, write to the Free Software
 /// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 ///
-/// @author Ben Humphreys <ben.humphreys@csiro.au>
+/// Original BETA code by Ben Humphreys <ben.humphreys@csiro.au>
+/// @author Max Voronkov <max.voronkov@csiro.au>
 
 // Include own header file first
 #include "MergedSource.h"
@@ -84,9 +85,20 @@ MergedSource::MergedSource(const LOFAR::ParameterSet& params,
      itsIdleStream(false), itsBadCycle(false), itsInterrupted(false),
      itsSignals(itsIOService, SIGINT, SIGTERM, SIGUSR1),
      itsLastTimestamp(-1), itsVisConverter(params, config), 
-     itsBeamOffsetsFromMetadata(false), itsBeamOffsetsFromParset(false)
+     itsBeamOffsetsFromMetadata(false), itsBeamOffsetsFromParset(false),
+     itsBadUVWCycleCounter(0u), itsMaxBadUVWCycles(params.getInt32("baduvw_maxcycles",-1))
 {
     ASKAPCHECK(bool(visSrc) == config.receivingRank(), "Receiving ranks should get visibility source object, service ranks shouldn't");
+
+    if (itsMaxBadUVWCycles < 0) {
+        ASKAPLOG_DEBUG_STR(logger, "Ingest pipeline will try to flag samples with UVWs failing the length cross-check");
+    } else {
+        if (itsMaxBadUVWCycles == 0) {
+            ASKAPLOG_DEBUG_STR(logger, "Ingest pipeline will abort if UVWs in metadata fail the length cross-check");
+        } else {
+            ASKAPLOG_DEBUG_STR(logger, "Ingest pipeline will abort if UVWs in metadata fail the length cross-check for "<<itsMaxBadUVWCycles<<" in a row");
+        }
+    }
 
     // log TAI_UTC casacore measures table version and date
     const std::pair<double, std::string> measVersion = measuresTableVersion();
@@ -380,6 +392,113 @@ VisChunk::ShPtr MergedSource::next(void)
     return chunk;
 }
 
+/// @brief helper method to flag and report on bad UVWs
+/// @details It decomposes the given rows back into antennas and report in the log with
+/// different severity depending on the stream ID (to avoid spamming the log).
+/// This method is a work around of UVW metadata problem (see ASKAPSDP-3431)
+/// @param[in] rowsWithBadUVWs set of rows to flag
+/// @param[in] timestamp BAT for reporting
+void MergedSource::flagDueToBadUVWs(const std::set<casa::uInt> &rowsWithBadUVWs, const casa::uLong timestamp) {
+    //ASKAPLOG_DEBUG_STR(logger, "Inside flagDueToBadUVWs, nRowsWithBadUVWs = "<<rowsWithBadUVWs.size());    
+
+    ASKAPDEBUGASSERT(rowsWithBadUVWs.size() > 0);
+    VisChunk::ShPtr chunk = itsVisConverter.visChunk();
+    ASKAPDEBUGASSERT(chunk);
+    const casa::uInt nAntenna = itsVisConverter.config().antennas().size();
+    ASKAPDEBUGASSERT(nAntenna > 0);
+    const casa::Vector<casa::uInt>& antenna1 = chunk->antenna1();
+    const casa::Vector<casa::uInt>& antenna2 = chunk->antenna2();
+    // 1) get set of all antennas and good antennas separately
+    std::set<casa::uInt> goodAntennas;
+    std::set<casa::uInt> antennas;
+    for (casa::uInt row = 0; row<chunk->nRow(); ++row) {
+         ASKAPDEBUGASSERT(row < antenna1.nelements());
+         ASKAPDEBUGASSERT(row < antenna2.nelements());
+         const casa::uInt ant1 = antenna1[row];
+         const casa::uInt ant2 = antenna2[row];
+         antennas.insert(ant1);
+         antennas.insert(ant2);
+         if ((ant1 != ant2) && (rowsWithBadUVWs.find(row) == rowsWithBadUVWs.end()) && 
+                                itsVisConverter.isAntennaGood(ant1) && itsVisConverter.isAntennaGood(ant2)) {
+             goodAntennas.insert(ant1);
+             goodAntennas.insert(ant2);
+         }
+    }
+
+    //ASKAPLOG_DEBUG_STR(logger, "Inside flagDueToBadUVWs, nAntennas = "<<antennas.size()<<" nGoodAntennas = "<<goodAntennas.size());    
+
+    // 2) flag antennas which are not in the good list, build the list for reporting
+    std::string listOfBadAntennas;
+    for (std::set<casa::uInt>::const_iterator ciAnt = antennas.begin(); ciAnt != antennas.end(); ++ciAnt) {
+         if (goodAntennas.find(*ciAnt) == goodAntennas.end()) {
+             ASKAPASSERT(*ciAnt < nAntenna);
+             itsVisConverter.flagAntenna(*ciAnt);
+             const string antName = itsVisConverter.config().antennas()[*ciAnt].name();
+             if (listOfBadAntennas.size() == 0) {
+                 listOfBadAntennas = antName;
+             } else {
+                 listOfBadAntennas += ", " + antName;
+             }
+         }
+    }
+    
+    if (listOfBadAntennas.size() == 0) {
+        listOfBadAntennas = "none";
+    }
+
+    //ASKAPLOG_DEBUG_STR(logger, "Inside flagDueToBadUVWs, listOfBadAntennas: "<<listOfBadAntennas);    
+
+    // 3) check that anything is left (this shouldn't happen unless we have tricky per-beam issues)
+    casa::uInt nExplicitlyFlaggedRows = 0;
+    casa::Cube<casa::Bool> &flags = chunk->flag();
+    for (std::set<casa::uInt>::const_iterator ci = rowsWithBadUVWs.begin(); ci != rowsWithBadUVWs.end(); ++ci) {
+         ASKAPASSERT(*ci < chunk->nRow());
+         const casa::uInt ant1 = antenna1[*ci];
+         const casa::uInt ant2 = antenna2[*ci];
+         if (itsVisConverter.isAntennaGood(ant1) && itsVisConverter.isAntennaGood(ant2)) {
+             ++nExplicitlyFlaggedRows;
+             ASKAPDEBUGASSERT(*ci < flags.nrow());
+             flags.yzPlane(*ci).set(true);
+         }
+    }
+    std::string msg = "Flagged the following antennas due to failed uvw vector length check: "+listOfBadAntennas+
+            " (currently "+utility::toString<casa::uInt>(itsBadUVWCycleCounter)+" cycle in a row).";
+    if (nExplicitlyFlaggedRows != 0) {
+        msg += " In addition, "+utility::toString<casa::uInt>(nExplicitlyFlaggedRows)+
+               " rows were flagged, which do not correpond to all baselines of some set of antennas.";
+    }
+    // we could've reversed chunk timestamp, but it is handy to pass what is in the metadata directly to avoid nasty surprises with precision
+    if (itsVisConverter.config().receiverId() == 0) {
+       ASKAPLOG_ERROR_STR(logger, "" << msg << " Timestamp: "<<bat2epoch(timestamp)<<" or 0x"<<std::hex<<timestamp);
+
+       // some commissioning code below to store the details on affected baselines into a file 
+       // we may need to comment it out in the future or to make it optional based on parset parameter
+       const casa::Vector<casa::uInt>& beam1 = chunk->beam1();
+       ASKAPDEBUGASSERT(beam1.nelements() == chunk->nRow());
+       std::ofstream os("baduvw_baselines.dbg", std::ios::app);
+       os << "# "<< msg << " Timestamp: "<<bat2epoch(timestamp)<<" :"<<std::endl;
+       for (std::set<casa::uInt>::const_iterator ci = rowsWithBadUVWs.begin(); ci != rowsWithBadUVWs.end(); ++ci) {
+            ASKAPDEBUGASSERT(*ci < chunk->nRow());
+            const casa::uInt ant1 = antenna1[*ci];
+            const casa::uInt ant2 = antenna2[*ci];
+            const casa::uInt beam = beam1[*ci];
+            ASKAPDEBUGASSERT(ant1 < nAntenna);
+            ASKAPDEBUGASSERT(ant2 < nAntenna);
+            const string ant1Name = itsVisConverter.config().antennas()[ant1].name();
+            const string ant2Name = itsVisConverter.config().antennas()[ant2].name();
+            const std::string explicitlyFlaggedRowMark = (itsVisConverter.isAntennaGood(ant1) && itsVisConverter.isAntennaGood(ant2)) ? " *" : "";
+            os<<*ci<<" "<<ant1<<" "<<ant2<<" "<<beam<<" "<<ant1Name<<" "<<ant2Name;
+            if (itsVisConverter.isAntennaGood(ant1) && itsVisConverter.isAntennaGood(ant2)) {
+                os<<" *";
+            }
+            os<<std::endl;
+       }
+       // end of the commissioning hack
+    } else {
+       ASKAPLOG_INFO_STR(logger, "" << msg << " Timestamp: "<<bat2epoch(timestamp)<<" or 0x"<<std::hex<<timestamp);
+    }
+}
+
 VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
 {
     const CorrelatorMode& corrMode = itsVisConverter.config().lookupCorrelatorMode(metadata.corrMode());
@@ -481,6 +600,7 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
     }
     */
     // now populate uvw vector in the chunk
+    std::set<casa::uInt> rowsWithBadUVWs;
     for (casa::uInt row=0; row<chunk->nRow(); ++row) {
          // it is possible to move access methods outside the loop, but the overhead is small
          const casa::uInt beam = chunk->beam1()[row];
@@ -499,12 +619,25 @@ VisChunk::ShPtr MergedSource::createVisChunk(const TosMetadata& metadata)
                   uvwLength2 += casa::square(chunk->uvw()[row](coord));
                   layoutLength2 += casa::square(itsArrayLayout(antenna1,coord) - itsArrayLayout(antenna2,coord));
              }
-             ASKAPCHECK(casa::abs(casa::sqrt(uvwLength2) - casa::sqrt(layoutLength2)) < 1e-3, "The length of uvw vector for row="<<row<<" (antennas: "<<
+             if (casa::abs(casa::sqrt(uvwLength2) - casa::sqrt(layoutLength2)) >= 1e-3) {
+                 rowsWithBadUVWs.insert(row);
+                 if ((static_cast<int>(itsBadUVWCycleCounter) >= itsMaxBadUVWCycles) && (itsMaxBadUVWCycles >= 0)) {
+                     ASKAPTHROW(CheckError, "The length of uvw vector for row="<<row<<" (antennas: "<<
                              antenna1<<" ("<<itsVisConverter.config().antennas()[antenna1].name()<<") "<<antenna2<<" ("<<itsVisConverter.config().antennas()[antenna2].name()<<
                              "), beam: "<<beam<<") is more than 1mm different from the baseline length expected from array layout ("<<
                              casa::sqrt(uvwLength2)<<" metres vs. "<<casa::sqrt(layoutLength2)<<" metres). Junk metadata are suspected for either of the antennas for epoch "<<
-                             bat2epoch(metadata.time()));
+                             bat2epoch(metadata.time())<<" (this is "<<(itsMaxBadUVWCycles + 1)<<" consecutive cycle which failed the check)");
+                 } 
+             }
          }
+    }
+    if (rowsWithBadUVWs.size() > 0) {
+        ++itsBadUVWCycleCounter;
+        // flag antennas or isolated rows which didn't pass the check
+        // metadata BAT is passed just for reporting
+        flagDueToBadUVWs(rowsWithBadUVWs, metadata.time());
+    } else {
+        itsBadUVWCycleCounter = 0;
     }
      
     if (itsBeamOffsetsFromParset) {
