@@ -63,7 +63,8 @@ using namespace askap::accessors;
 void process(const IConstDataSource &ds, const int ctrl = -1) {
   IDataSelectorPtr sel=ds.createSelector();
   sel->chooseFeed(0);
-  sel->chooseCrossCorrelations();
+  //sel->chooseCrossCorrelations();
+  sel->chooseAutoCorrelations();
   //sel->chooseAutoCorrelations();
   if (ctrl >=0 ) {
       //sel->chooseUserDefinedIndex("CONTROL",casa::uInt(ctrl));
@@ -87,6 +88,7 @@ void process(const IConstDataSource &ds, const int ctrl = -1) {
   double timeIntervalInMin = 0.;
   
   casa::Vector<casa::uInt> ant1ids, ant2ids;
+  casa::Vector<casa::uInt> nGoodRowsThisProduct;
 
   scimath::DelayEstimator de(1e6);
     
@@ -107,6 +109,8 @@ void process(const IConstDataSource &ds, const int ctrl = -1) {
            buf.set(casa::Complex(0.,0.));
            buf2.resize(nRow,nChan);
            buf2.set(casa::Complex(0.,0.));
+           nGoodRowsThisProduct.resize(nRow);
+           nGoodRowsThisProduct.set(0u);
            freq = it->frequency();
            ant1ids = it->antenna1();
            ant2ids = it->antenna2();
@@ -119,6 +123,11 @@ void process(const IConstDataSource &ds, const int ctrl = -1) {
                   "Number of channels seem to have been changed, previously "<<nChan<<" now "<<it->nChannel());
            if (nRow != it->nRow()) {
                std::cerr<<"Number of rows changed was "<<nRow<<" now "<<it->nRow()<<std::endl;
+               // reset averaging, for simplicity skip this integration too, although it may be good
+               nChan = 0;
+               nGoodRows = 0;
+               nBadRows = 0;
+               counter = 0;
                continue;
            }
            ASKAPCHECK(nRow == it->nRow(), 
@@ -233,7 +242,7 @@ void process(const IConstDataSource &ds, const int ctrl = -1) {
             
             // to disable flagging
             //flagged = false; 
-            //flagged = allFlagged; 
+            flagged = allFlagged; 
             
 
             if (flagged) {
@@ -248,6 +257,7 @@ void process(const IConstDataSource &ds, const int ctrl = -1) {
                      }
                 }
                 ++nGoodRows;
+                ++nGoodRowsThisProduct[row];
 
 
                 // uncomment to store averaged time-series
@@ -278,6 +288,7 @@ void process(const IConstDataSource &ds, const int ctrl = -1) {
        if ((counter == 0) && (nGoodRows == 0)) {
            // all data are flagged, completely ignoring this iteration and consider the next one to be first
            nChan = 0;
+           nBadRows = 0;
            continue;
        }
        /*
@@ -291,11 +302,18 @@ void process(const IConstDataSource &ds, const int ctrl = -1) {
       
   }
   if (counter>1) {
-      ASKAPCHECK(nGoodRows % nRow == 0, "Number of good rows="<<nGoodRows<<" is supposed to be integral multiple of number of rows in a cycle="<<nRow);
-      casa::uInt nGoodCycles = nGoodRows / nRow;
-      buf /= float(nGoodCycles);
-      buf2 /= float(nGoodCycles);
-      std::cout<<"Averaged "<<nGoodCycles<<" integration cycles, "<<nGoodRows<<" good and "<<nBadRows<<" bad rows, time span "<<(stopTime-startTime)/60.<<" minutues, cycles="<<counter<<std::endl;
+      casa::uInt nNoDataProducts = 0;
+      for (casa::uInt row=0; row < nRow; ++row) {
+           if (nGoodRowsThisProduct[row] > 0) {
+               for (casa::uInt chan = 0; chan < nChan; ++chan) {
+                    buf(row,chan) /= float(nGoodRowsThisProduct[row]);
+                    buf2(row,chan) /= float(nGoodRowsThisProduct[row]);
+               }
+           } else {
+              ++nNoDataProducts;
+           }
+      }
+      std::cout<<"Averaged maximum of "<<max(nGoodRowsThisProduct)<<" integration cycles, "<<nGoodRows<<" good and "<<nBadRows<<" bad rows, time span "<<(stopTime-startTime)/60.<<" minutues, cycles="<<counter<<std::endl;
       casa::MVEpoch startEpoch(casa::Quantity(55913.0,"d"));
       startEpoch += casa::MVEpoch(casa::Quantity(startTime, "s"));
       std::cout<<"Start time "<<startEpoch<<std::endl;
