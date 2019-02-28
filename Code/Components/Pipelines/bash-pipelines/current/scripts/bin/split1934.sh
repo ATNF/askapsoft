@@ -55,6 +55,20 @@ else
 "
 fi
 
+# Allow splitting of user-specified TimeRange to derive bandpass from: 
+# Very limited (but useful) feature that will allow users to process 
+# longTrack 1934
+# Default is NOT to split out 1934 data. 
+timeParamBeg_1934="# TimeBeg specified: beginning of msdata" 
+timeParamEnd_1934="# TimeEnd specified: end of msdata." 
+if [ "$SPLIT_TIME_START_1934" != "" ];
+then
+	timeParamBeg_1934="timebegin       =   ${SPLIT_TIME_START_1934}" 
+fi
+if [ "$SPLIT_TIME_END_1934" != "" ];
+then
+	timeParamEnd_1934="timeend         =   ${SPLIT_TIME_END_1934}" 
+fi
 
 DO_IT=$DO_SPLIT_1934
 
@@ -180,6 +194,10 @@ outputvis   = \${outputms}
 # is inclusive of both the start and end, indexing is one-based.
 # Default: <no default>
 channel     = \${chanRange}
+# If you wanted to split out data from a specified timeWindow for BandpassCalibration
+# (Particularly useful to quickly derive bandpass from a longTrack 1934 obs)
+$timeParamBeg_1934
+$timeParamEnd_1934
 
 
 # Beam selection via beam ID
@@ -277,6 +295,8 @@ outputvis   = ${msCal}
 # is inclusive of both the start and end, indexing is one-based.
 # Default: <no default>
 $chanParam
+$timeParamBeg_1934
+$timeParamEnd_1934
 
 # Beam selection via beam ID
 # Select just a single beam for this obs
