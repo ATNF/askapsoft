@@ -410,7 +410,9 @@ FLAG_THRESHOLD_DYNAMIC_SCIENCE_SPECTRA=4.0
 FLAG_DYNAMIC_INTEGRATE_TIMES=false
 # Dynamic threshold applied to amplitudes in integrated times mode [sigma]
 FLAG_THRESHOLD_DYNAMIC_SCIENCE_TIMES=4.0
-#
+# Flagging based on Elevation limits [el in degrees]
+ELEVATION_FLAG_SCIENCE_LOW=""
+ELEVATION_FLAG_SCIENCE_HIGH=""
 # Whether to do Stokes-V flagging
 FLAG_DO_STOKESV_SCIENCE=true
 # Whether to use robust statistics for Stokes-V flagging
