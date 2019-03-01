@@ -170,21 +170,15 @@ cleaningPars="# These parameters define the clean algorithm
 Cimager.solver                                  = ${SOLVER}"
 if [ "${SOLVER}" == "Clean" ]; then
     cleaningPars="${cleaningPars}
-Cimager.solver.Clean.algorithm                  = ${CLEAN_ALGORITHM}
-Cimager.solver.Clean.niter                      = ${CLEAN_MINORCYCLE_NITER}
-Cimager.solver.Clean.gain                       = ${CLEAN_GAIN}
-Cimager.solver.Clean.scales                     = ${CLEAN_SCALES}
 Cimager.solver.Clean.solutiontype               = ${CLEAN_SOLUTIONTYPE}
 Cimager.solver.Clean.verbose                    = False
 Cimager.solver.Clean.tolerance                  = 0.01
 Cimager.solver.Clean.weightcutoff               = zero
 Cimager.solver.Clean.weightcutoff.clean         = false
-Cimager.solver.Clean.psfwidth                   = ${CLEAN_PSFWIDTH}
 Cimager.solver.Clean.logevery                   = 50"
 fi
 cleaningPars="${cleaningPars}
 Cimager.Images.writeAtMajorCycle                = ${CLEAN_WRITE_AT_MAJOR_CYCLE}
-Cimager.threshold.minorcycle                    = ${CLEAN_THRESHOLD_MINORCYCLE}
 "
 # threshold.majorcycle and ncycles are defined by the function
 # cimagerSelfcalLoopParams in utils.sh. These can vary according to
