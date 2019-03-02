@@ -73,6 +73,9 @@ class TCPSink : public askap::cp::ingest::ITask {
 
     private:
 
+        /// if true this taks results in no operation - needed for commissioning hack(s)
+        bool itsBypassFlag;
+
         /// No support for assignment
         TCPSink& operator=(const TCPSink& rhs);
 

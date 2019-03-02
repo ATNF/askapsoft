@@ -66,7 +66,8 @@ using boost::asio::ip::tcp;
 
 TCPSink::TCPSink(const LOFAR::ParameterSet& parset,
                  const Configuration& config)
-    : itsParset(parset), itsSocket(itsIOService)
+     // ugly way to monitor only first chunk
+    : itsBypassFlag((config.rank()>75) || (config.nodeName() == "galaxy-ingest05")), itsParset(parset), itsSocket(itsIOService)
 {
     ASKAPLOG_DEBUG_STR(logger, "Constructor");
     //itsThread.reset(new boost::thread(boost::bind(&TCPSink::runSender, this)));
@@ -96,6 +97,12 @@ void TCPSink::process(VisChunk::ShPtr& chunk)
     }
     //
     */
+
+    // temportary hack for commissoning 
+    if (itsBypassFlag) {
+        return;
+    }
+    // end of hack
 
     if (!itsThread) {
         itsThread.reset(new boost::thread(boost::bind(&TCPSink::runSender, this)));
