@@ -63,8 +63,8 @@ using namespace askap::accessors;
 void process(const IConstDataSource &ds, const int ctrl = -1) {
   IDataSelectorPtr sel=ds.createSelector();
   sel->chooseFeed(0);
-  //sel->chooseCrossCorrelations();
-  sel->chooseAutoCorrelations();
+  sel->chooseAntenna(0);
+  sel->chooseCrossCorrelations();
   //sel->chooseAutoCorrelations();
   if (ctrl >=0 ) {
       //sel->chooseUserDefinedIndex("CONTROL",casa::uInt(ctrl));
@@ -299,7 +299,15 @@ void process(const IConstDataSource &ds, const int ctrl = -1) {
        } 
        //
        */
-      
+       
+       /*
+       // optionally break integration after given time
+       if ((counter > 1) && ((it->time() - startTime)/60. >= 10.)) {
+       //if (max(nGoodRowsThisProduct) > 0) {
+           break;
+       }
+       */
+       
   }
   if (counter>1) {
       casa::uInt nNoDataProducts = 0;
