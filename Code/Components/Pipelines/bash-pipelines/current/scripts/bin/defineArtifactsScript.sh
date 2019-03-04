@@ -363,16 +363,16 @@ ALL"
                             ### Not yet writing extracted files direct to FITS, so change the assignment of fitsSuffix
                             if [ -e "\${FIELD}/\${selavyDir}" ] && [ "\${DO_RM_SYNTHESIS}" == "true" ]; then
                                 prefix="\${FIELD}/\${selavyPolDir}/${SELAVY_POL_OUTPUT_BASE}"
-                                casdaOtherDimImageSpectra+=("\${prefix}_spec_\${POLN}*")
-                                casdaOtherDimImageNoise+=("\${prefix}_noise_\${POLN}*")
+                                casdaOtherDimImageSpectra+=("\${prefix}_spec_\${POLN}*.fits")
+                                casdaOtherDimImageNoise+=("\${prefix}_noise_\${POLN}*.fits")
                                 casdaOtherDimImageMoment0s+=("")
                                 casdaOtherDimImageMoment1s+=("")
                                 casdaOtherDimImageMoment2s+=("")
                                 casdaOtherDimImageCubelets+=("")
                                 casdaOtherDimImagePol+=(\${pol})
                                 if [ "\${POLN}" == "Q" ]; then
-                                    casdaOtherDimImageFDF+=("\${prefix}_FDF*")
-                                    casdaOtherDimImageRMSF+=("\${prefix}_RMSF*")
+                                    casdaOtherDimImageFDF+=("\${prefix}_FDF*.fits")
+                                    casdaOtherDimImageRMSF+=("\${prefix}_RMSF*.fits")
                                 else
                                     casdaOtherDimImageFDF+=("")
                                     casdaOtherDimImageRMSF+=("")
