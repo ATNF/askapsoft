@@ -66,21 +66,26 @@ self-calibration. This way, you can decrease, say, the detection
 threshold, or increase the number of major cycles, as the calibration
 steadily improves. These parameters are for:
 
-* Deconvolution: ``CLEAN_THRESHOLD_MAJORCYCLE`` and ``CLEAN_NUM_MAJORCYCLES``
+* Deconvolution: ``CLEAN_ALGORITHM``, ``CLEAN_GAIN``, ``CLEAN_PSFWIDTH``, 
+  ``CLEAN_THRESHOLD_MAJORCYCLE``, ``CLEAN_NUM_MAJORCYCLES``, 
+  ``CLEAN_MINORCYCLE_NITER``, ``CLEAN_THRESHOLD_MINORCYCLE`` and 
+  ``CLEAN_SCALES``
 * Self-calibration: ``SELFCAL_SELAVY_THRESHOLD``, ``SELFCAL_INTERVAL``
   and ``SELFCAL_NORMALISE_GAINS``
 * Data selection in imaging: ``CIMAGER_MINUV`` and ``CIMAGER_MAXUV``
 * Data selection in calibration: ``CCALIBRATOR_MINUV`` and ``CCALIBRATOR_MAXUV``
 
 To use this mode, the values for these parameters should be given as
-an array in the form ``SELFCAL_INTERVAL="[1800,1800,900,300]"``. The
-size of these arrays should be one more than
+an array in the form ``SELFCAL_INTERVAL="[1800,1800,900,300]"``, or, 
+``CLEAN_SCALES="[0] ; [0,20] ; [0,20,120,240] ; [0,20,120,240,480]"``. 
+The size of these arrays should be one more than
 ``SELFCAL_NUM_LOOPS``. This is because loop 0 is just the imaging, and
 it is followed by ``SELFCAL_NUM_LOOPS`` loops of
 source-find--model--calibrate--image. Only the parameters related to
 the imaging (the deconvolution parameters in the list above) have
 the first element of their array used. If a single value is given for
 these parameters, it is used for every loop.
+
 
 Once the gains solution has been determined, it can be applied
 directly to the continuum measurement set, creating a copy in the
@@ -249,24 +254,52 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                     | (:doc:`../calim/cimager`)                              | 'Clean', but there is a 'Dirty' solver available.             |
 |                                            |                                     | (:doc:`../calim/solver`)                               |                                                               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``CLEAN_ALGORITHM``                        | BasisfunctionMFS                    | Clean.algorithm                                        | The name of the clean algorithm to use.                       |
-|                                            |                                     | (:doc:`../calim/solver`)                               |                                                               |
+| ``CLEAN_ALGORITHM``                        |  BasisfunctionMFS                   | Clean.algorithm                                        | The name(s) of clean algorithm(s) to use.                     |
+|                                            |                                     | (:doc:`../calim/solver`)                               | To use different algorithms in different selfcal cycles, use: |
+|                                            |                                     |                                                        | ``CLEAN_ALGORITHM="Hogbom,BasisfunctionMFS"``                 |
+|                                            |                                     |                                                        | If the number of comma-separated algorithms is less than      |
+|                                            |                                     |                                                        | ``SELFCAL_NUM_LOOPS + 1``, the first algorithm specified will |
+|                                            |                                     |                                                        | be used for ALL selfcal loops.                                |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CLEAN_MINORCYCLE_NITER``                 | 2000                                | Clean.niter                                            | The number of iterations for the minor cycle clean.           |
 |                                            |                                     | (:doc:`../calim/solver`)                               |                                                               |
+|                                            |                                     |                                                        | Can be varied for each selfcal cycle.                         |
+|                                            |                                     |                                                        | (e.g. "200,800,1000")                                         |
+|                                            |                                     |                                                        | If the number of comma-separated values (int) is less than    |
+|                                            |                                     |                                                        | ``SELFCAL_NUM_LOOPS + 1``, the first number specified will    |
+|                                            |                                     |                                                        | be used for ALL selfcal loops.                                |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CLEAN_GAIN``                             | 0.1                                 | Clean.gain                                             | The loop gain (fraction of peak subtracted per minor cycle).  |
 |                                            |                                     | (:doc:`../calim/solver`)                               |                                                               |
+|                                            |                                     |                                                        | Can be varied for each selfcal cycle.                         |
+|                                            |                                     |                                                        | (e.g. "0.1,0.2,0.1")                                          |
+|                                            |                                     |                                                        | If the number of comma-separated values is less than          |
+|                                            |                                     |                                                        | ``SELFCAL_NUM_LOOPS + 1``, the first value specified will     |
+|                                            |                                     |                                                        | be used for ALL selfcal loops.                                |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CLEAN_PSFWIDTH``                         | 256                                 | Clean.psfwidth                                         | The width of the psf patch used in the minor cycle.           |
 |                                            |                                     | (:doc:`../calim/solver`)                               |                                                               |
+|                                            |                                     |                                                        | Can be varied for each selfcal cycle.                         |
+|                                            |                                     |                                                        | (e.g. "256,512,4096")                                         |
+|                                            |                                     |                                                        | If the number of comma-separated values is less than          |
+|                                            |                                     |                                                        | ``SELFCAL_NUM_LOOPS + 1``, the first value specified will     |
+|                                            |                                     |                                                        | be used for ALL selfcal loops.                                |
+|                                            |                                     |                                                        | Large psfs may be necessary when cleaning with many scales.   |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CLEAN_SCALES``                           | "[0]"                               | Clean.scales                                           | Set of scales (in pixels) to use with the multi-scale clean.  |
 |                                            |                                     | (:doc:`../calim/solver`)                               |                                                               |
+|                                            |                                     |                                                        | Can be varied for each selfcal cycle (e.g. "[0] ; [0,10]")    |
+|                                            |                                     |                                                        | If the number of lists is less than ``SELFCAL_NUM_LOOPS + 1`` |
+|                                            |                                     |                                                        | , the first list specified will be used for ALL selfcal loops.|
+|                                            |                                     |                                                        | PS: Notice the delimiter " ; " and the spaces around it.      |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CLEAN_THRESHOLD_MINORCYCLE``             | "[20%, 1.8mJy, 0.03mJy]"            | threshold.minorcycle                                   | Threshold for the minor cycle loop.                           |
 |                                            |                                     | (:doc:`../calim/cimager`)                              |                                                               |
-|                                            |                                     | (:doc:`../calim/solver`)                               |                                                               |
+|                                            |                                     | (:doc:`../calim/solver`)                               | Can be varied for each selfcal cycle.                         |
+|                                            |                                     |                                                        | (e.g. "[30%,1.8mJy,0.03mJy] ; [20%,0.5mJy,0.03mJy]")          |
+|                                            |                                     |                                                        | If the number of lists is less than ``SELFCAL_NUM_LOOPS + 1`` |
+|                                            |                                     |                                                        | , the first list specified will be used for ALL selfcal loops.|
+|                                            |                                     |                                                        | PS: Notice the delimiter " ; " and the spaces around it.      |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CLEAN_THRESHOLD_MAJORCYCLE``             | "0.03mJy"                           | threshold.majorcycle                                   | The target peak residual. Major cycles stop if this is        |
 |                                            |                                     | (:doc:`../calim/cimager`)                              | reached. A negative number ensures all major cycles requested |
