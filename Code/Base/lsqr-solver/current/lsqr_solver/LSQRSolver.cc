@@ -33,6 +33,7 @@ void LSQRSolver::Solve(size_t niter,
         const Vector& b,
         Vector& x,
         int myrank,
+        int nbproc,
         bool suppress_output)
 {
     // Sanity check.

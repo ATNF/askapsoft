@@ -96,6 +96,7 @@ namespace askap
         void testUnderdeterminedNonDamped()
         {
             int myrank = 0;
+            int nbproc = 1;
 
             double rmin = 1.e-13;
             size_t niter = 100;
@@ -105,7 +106,7 @@ namespace askap
             LSQRSolver solver(system.nrows, system.ncols);
 
             Vector x(system.ncols, 0.0);
-            solver.Solve(niter, rmin, *system.matrix, *system.b_RHS, x, myrank, true);
+            solver.Solve(niter, rmin, *system.matrix, *system.b_RHS, x, myrank, nbproc, true);
 
             double epsilon = 1.e-15;
 
@@ -148,7 +149,7 @@ namespace askap
             LSQRSolver solver(system.matrix->GetTotalNumberRows(), nelements);
 
             Vector x(system.ncols, 0.0);
-            solver.Solve(niter, rmin, *system.matrix, *system.b_RHS, x, myrank, true);
+            solver.Solve(niter, rmin, *system.matrix, *system.b_RHS, x, myrank, nbproc, true);
 
             double epsilon = 1.e-5;
 
@@ -195,7 +196,7 @@ namespace askap
             LSQRSolver solver(system.matrix->GetTotalNumberRows(), nelements);
 
             Vector x(system.ncols, 0.0);
-            solver.Solve(niter, rmin, *system.matrix, *system.b_RHS, x, myrank, true);
+            solver.Solve(niter, rmin, *system.matrix, *system.b_RHS, x, myrank, nbproc, true);
 
             double epsilon = 1.e-5;
 
@@ -226,12 +227,13 @@ namespace askap
         //---------------------------------------------------------------------
         void testOverdetermined()
         {
+            int myrank = 0;
+            int nbproc = 1;
+
             size_t nelements_total = 3;
             size_t nrows = 1000;
             double rmin = 1.e-14;
             size_t niter = 100;
-
-            int myrank = 0;
 
             size_t nelements = nelements_total;
 
@@ -262,7 +264,7 @@ namespace askap
             LSQRSolver solver(nrows, nelements);
 
             Vector x(nelements, 0.0);
-            solver.Solve(niter, rmin, matrix, b_RHS, x, myrank, true);
+            solver.Solve(niter, rmin, matrix, b_RHS, x, myrank, nbproc, true);
 
             double epsilon = 1.e-14;
 
@@ -276,6 +278,9 @@ namespace askap
          */
         void testNoElements()
         {
+            int myrank = 0;
+            int nbproc = 1;
+
             size_t ncols = 3;
             size_t nrows = 3;
 
@@ -296,11 +301,9 @@ namespace askap
             double rmin = 1.e-14;
             size_t niter = 100;
 
-            int myrank = 0;
-
             LSQRSolver solver(nrows, ncols);
 
-            solver.Solve(niter, rmin, matrix, b_RHS, x, myrank, true);
+            solver.Solve(niter, rmin, matrix, b_RHS, x, myrank, nbproc, true);
 
             CPPUNIT_ASSERT_EQUAL(0.0, x[0]);
             CPPUNIT_ASSERT_EQUAL(0.0, x[1]);

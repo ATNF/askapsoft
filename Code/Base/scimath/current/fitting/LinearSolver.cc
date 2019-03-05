@@ -356,6 +356,8 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
           gsl_matrix_free(V);
     }
     else if (algorithm() == "LSQR") {
+        int myrank = 0;
+        int nbproc = 1;
 
         // Setting damping parameters.
         double alpha = 0.01;
@@ -408,7 +410,7 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
         //-----------------------------------------------
 
         lsqr::ModelDamping damping(ncolumms);
-        damping.Add(alpha, norm, matrix, b_RHS, NULL, NULL, NULL);
+        damping.Add(alpha, norm, matrix, b_RHS, NULL, NULL, NULL, myrank, nbproc);
 
         //-------------------------------------
         // Solve matrix system.
@@ -435,8 +437,7 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
         lsqr::Vector x(ncolumms, 0.0);
         lsqr::LSQRSolver solver(matrix.GetCurrentNumberRows(), ncolumms);
 
-        int myrank = 0;
-        solver.Solve(niter, rmin, matrix, b_RHS, x, myrank, suppress_output);
+        solver.Solve(niter, rmin, matrix, b_RHS, x, myrank, nbproc, suppress_output);
 
         //------------------------------------------------------------------------
         // Update the parameters for the calculated changes. Exploit reference
