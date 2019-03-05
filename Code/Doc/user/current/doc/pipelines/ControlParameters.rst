@@ -213,19 +213,29 @@ calibrator observation. The three aspects are splitting by beam/scan,
 flagging, and finding the bandpass. The ``DO_1934_CAL`` acts as the
 "master switch" for the calibrator processing.
 
-+----------------------+---------+------------------------------------------------------------+
-| Variable             | Default | Description                                                |
-+======================+=========+============================================================+
-| ``DO_1934_CAL``      | true    | Whether to process the 1934-638 calibrator observations. If|
-|                      |         | set to ``false`` then all the following switches will be   |
-|                      |         | set to ``false``.                                          |
-+----------------------+---------+------------------------------------------------------------+
-| ``DO_SPLIT_1934``    | true    | Whether to split a given beam/scan from the input 1934 MS  |
-+----------------------+---------+------------------------------------------------------------+
-| ``DO_FLAG_1934``     | true    | Whether to flag the splitted-out 1934 MS                   |
-+----------------------+---------+------------------------------------------------------------+
-| ``DO_FIND_BANDPASS`` | true    | Whether to fit for the bandpass using all 1934-638 MSs     |
-+----------------------+---------+------------------------------------------------------------+
++------------------------------+---------+------------------------------------------------------------+
+| Variable                     | Default | Description                                                |
++==============================+=========+============================================================+
+| ``DO_1934_CAL``              | true    | Whether to process the 1934-638 calibrator observations. If|
+|                              |         | set to ``false`` then all the following switches will be   |
+|                              |         | set to ``false``.                                          |
++------------------------------+---------+------------------------------------------------------------+
+| ``DO_SPLIT_1934``            | true    | Whether to split a given beam/scan from the input 1934 MS. |
+|                              |         | From rev10559 onwards, users can additionally split out    |
+|                              |         | bandpass msdata from a specified Time-Range (see below)    |
++------------------------------+---------+------------------------------------------------------------+
+| ``SPLIT_TIME_START_1934``    | ""      | Start time for splitting the input 1934 MS                 |
+|                              |         | Time string format: "2019-02-28T00:25:00"                  |
+|                              |         | The default is to split from the first time sample         |
++------------------------------+---------+------------------------------------------------------------+
+| ``SPLIT_TIME_END_1934``      | ""      | End time for splitting the input 1934 MS                   |
+|                              |         | Time string format: Same as teh format above               |
+|                              |         | The default is to split up to the last time sample         |
++------------------------------+---------+------------------------------------------------------------+
+| ``DO_FLAG_1934``             | true    | Whether to flag the splitted-out 1934 MS                   |
++------------------------------+-+-------+------------------------------------------------------------+
+| ``DO_FIND_BANDPASS``         | true    | Whether to fit for the bandpass using all 1934-638 MSs     |
++------------------------------+---------+------------------------------------------------------------+
 
 
 Science field switches
