@@ -32,6 +32,9 @@ namespace askap
         // Test of Add.
         void testAdd()
         {
+            int myrank = 0;
+            int nbproc = 1;
+
             double alpha = 0.1;
             double normPower = 2.0;
             size_t nelements = 3;
@@ -50,7 +53,7 @@ namespace askap
 
             ModelDamping damping(nelements);
 
-            damping.Add(alpha, normPower, matrix, b, &model, NULL, NULL);
+            damping.Add(alpha, normPower, matrix, b, &model, NULL, NULL, myrank, nbproc);
 
             CPPUNIT_ASSERT_EQUAL(nelements, matrix.GetCurrentNumberRows());
             CPPUNIT_ASSERT_EQUAL(nelements, matrix.GetNumberElements());

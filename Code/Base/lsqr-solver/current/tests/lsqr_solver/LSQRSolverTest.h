@@ -124,6 +124,7 @@ namespace askap
         void testUnderdeterminedDamped()
         {
             int myrank = 0;
+            int nbproc = 1;
 
             double rmin = 1.e-13;
             size_t niter = 100;
@@ -142,7 +143,7 @@ namespace askap
             ModelDamping damping(nelements);
 
             // Add damping to the system.
-            damping.Add(alpha, normPower, *system.matrix, *system.b_RHS, &model, &modelRef, NULL);
+            damping.Add(alpha, normPower, *system.matrix, *system.b_RHS, &model, &modelRef, NULL, myrank, nbproc);
 
             LSQRSolver solver(system.matrix->GetTotalNumberRows(), nelements);
 
@@ -165,6 +166,7 @@ namespace askap
         void testUnderdeterminedSeveralDampings()
         {
             int myrank = 0;
+            int nbproc = 1;
 
             double rmin = 1.e-13;
             int niter = 100;
@@ -187,7 +189,7 @@ namespace askap
             // Add damping terms to the system.
             for (size_t i = 0; i < ndamping; ++i)
             {
-                damping.Add(alpha, normPower, *system.matrix, *system.b_RHS, &model, &modelRef, NULL);
+                damping.Add(alpha, normPower, *system.matrix, *system.b_RHS, &model, &modelRef, NULL, myrank, nbproc);
             }
 
             LSQRSolver solver(system.matrix->GetTotalNumberRows(), nelements);

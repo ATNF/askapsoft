@@ -48,7 +48,9 @@ public:
              Vector& b,
              const Vector* model,
              const Vector* modelRef,
-             const Vector* dampingWeight);
+             const Vector* dampingWeight,
+             int myrank,
+             int nbproc);
 
     virtual ~ModelDamping() {};
 

@@ -8,6 +8,7 @@
 #include <cmath>
 
 #include <lsqr_solver/ModelDamping.h>
+#include <lsqr_solver/ParallelTools.h>
 
 namespace askap { namespace lsqr {
 
@@ -22,7 +23,9 @@ void ModelDamping::Add(double alpha,
                        Vector& b,
                        const Vector* model,
                        const Vector* modelRef,
-                       const Vector* dampingWeight)
+                       const Vector* dampingWeight,
+                       int myrank,
+                       int nbproc)
 {
     // Sanity check.
     if ((model != NULL && model->size() != nelements)
@@ -38,12 +41,14 @@ void ModelDamping::Add(double alpha,
         throw std::runtime_error("Matrix has not been finalized yet in ModelDamping::Add!");
     }
 
+    size_t nelementsTotal = ParallelTools::get_total_number_elements(nelements, nbproc);
+
     // Extend matrix and right-hand size for adding damping.
-    matrix.Extend(nelements, nelements);
-    b.resize(b.size() + nelements);
+    matrix.Extend(nelementsTotal, nelements);
+    b.resize(b.size() + nelementsTotal);
 
     // Adding damping to the system.
-    for (size_t i = 0; i < nelements; ++i)
+    for (size_t i = 0; i < nelementsTotal; ++i)
     {
         // Default values for when pointers are null.
         double dampingWeightValue = 1.0;
