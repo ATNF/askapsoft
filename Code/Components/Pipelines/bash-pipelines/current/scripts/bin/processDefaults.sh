@@ -172,6 +172,14 @@ module load ${currentASKAPsoftVersion}"
 module unload askappipeline
 module load askappipeline/${askappipelineVersion}"
 
+        # Check for the success in loading the askappipeline module
+        askapsoftModuleCommands="${askapsoftModuleCommands}
+# Exit if we couldn't load askappipeline
+if [ \"$PIPELINEDIR\" == \"\" ]; then
+    echo \"ERROR: \$PIPELINEDIR not available - could not load askappipeline module.\"
+    exit 1
+fi"
+
     else
         askapsoftModuleCommands="${askapsoftModuleCommands}
 # Using ASKAPsoft code tree directly, so no need to load modules"
