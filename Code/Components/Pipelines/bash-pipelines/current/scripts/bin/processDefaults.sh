@@ -170,7 +170,7 @@ module load ${currentASKAPsoftVersion}"
         askapsoftModuleCommands="${askapsoftModuleCommands}
 # Exit if we couldn't load askapsoft
 if [ \"\$ASKAPSOFT_RELEASE\" == \"\" ]; then
-    echo \"ERROR: \\\$ASKAPSOFT_RELEASE not available - could not load askappipeline module.\"
+    echo \"ERROR: \\\$ASKAPSOFT_RELEASE not available - could not load askapsoft module.\"
     exit 1
 fi"
        
