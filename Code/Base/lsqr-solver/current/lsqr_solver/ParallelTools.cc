@@ -101,7 +101,8 @@ void get_full_array(const Vector& localArray, size_t nelements, Vector& fullArra
     get_mpi_partitioning(nelements, displs, nelements_at_cpu, nbproc);
 
     // Gather the full vector.
-    MPI_Gatherv(localArray.data(), nelements, MPI_DOUBLE, fullArray.data(),
+    // Perform const cast for back compatibility, because interface was changed in OpenMPI v.1.7 (const was added to the first argument).
+    MPI_Gatherv(const_cast<Vector&>(localArray).data(), nelements, MPI_DOUBLE, fullArray.data(),
                 nelements_at_cpu.data(), displs.data(), MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
     if (bcast)
