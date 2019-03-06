@@ -5,6 +5,7 @@
  */
 
 #include <cstddef>
+#include <cassert>
 #include <stdexcept>
 
 // MPI-specific includes
@@ -24,6 +25,7 @@ void get_number_elements_on_other_cpus(size_t nelements, IVector& nelements_at_c
         MPI_Gather(&nelements, 1, MPI_INTEGER, nelements_at_cpu.data(), 1, MPI_INTEGER, 0, MPI_COMM_WORLD);
         MPI_Bcast(nelements_at_cpu.data(), nbproc, MPI_INTEGER, 0, MPI_COMM_WORLD);
 #else
+        assert(nbproc == 1);
         nelements_at_cpu[0] = nelements;
 #endif
     }
@@ -115,6 +117,7 @@ void get_full_array(const Vector& localArray, size_t nelements, Vector& fullArra
         MPI_Bcast(fullArray.data(), nelements_total, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     }
 #else
+    assert(nbproc == 1);
     fullArray = localArray;
 #endif
 }
@@ -154,6 +157,8 @@ void get_full_array_in_place(size_t nelements, Vector& array, bool bcast, int my
         }
         MPI_Bcast(array.data(), nelements_total, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     }
+#else
+    assert(nbproc == 1);
 #endif
 }
 

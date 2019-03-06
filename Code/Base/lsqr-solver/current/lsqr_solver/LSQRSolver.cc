@@ -67,7 +67,7 @@ void LSQRSolver::Solve(size_t niter,
     double alpha, beta;
 
     // Normalize u and initialize beta.
-    if (!MathUtils::Normalize(u, beta, false))
+    if (!MathUtils::Normalize(u, beta, false, nbproc))
     {
         throw std::runtime_error("Could not normalize initial u, zero denominator!");
     }
@@ -82,7 +82,7 @@ void LSQRSolver::Solve(size_t niter,
     matrix.TransMultVector(u, v);
 
     // Normalize v and initialize alpha.
-    if (!MathUtils::Normalize(v, alpha, true))
+    if (!MathUtils::Normalize(v, alpha, true, nbproc))
     {
         throw std::runtime_error("Could not normalize initial v, zero denominator!");
     }
@@ -114,7 +114,7 @@ void LSQRSolver::Solve(size_t niter,
         MathUtils::Add(u, Hv);
 
         // Normalize u and update beta.
-        if (!MathUtils::Normalize(u, beta, false))
+        if (!MathUtils::Normalize(u, beta, false, nbproc))
         {
             // Found an exact solution.
             ASKAPLOG_WARN_STR(logger, "|u| = 0. Possibly found an exact solution in the LSQR solver!");
@@ -130,7 +130,7 @@ void LSQRSolver::Solve(size_t niter,
         MathUtils::Add(v, v0);
 
         // Normalize v and update alpha.
-        if (!MathUtils::Normalize(v, alpha, true))
+        if (!MathUtils::Normalize(v, alpha, true, nbproc))
         {
             // Found an exact solution.
             ASKAPLOG_WARN_STR(logger, "|v| = 0. Possibly found an exact solution in the LSQR solver!");
@@ -185,7 +185,7 @@ void LSQRSolver::Solve(size_t niter,
             matrix.TransMultVector(Hv, v0);
 
             // Norm of the gradient.
-            double g = 2.0 * MathUtils::GetNormParallel(v0);
+            double g = 2.0 * MathUtils::GetNormParallel(v0, nbproc);
 
             if (myrank == 0)
             {
