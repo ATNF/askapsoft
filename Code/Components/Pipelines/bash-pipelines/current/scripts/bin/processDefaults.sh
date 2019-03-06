@@ -166,6 +166,14 @@ module load ${currentASKAPsoftVersion}"
             fi
         fi
 
+        # Check for the success in loading the askapsoft module
+        askapsoftModuleCommands="${askapsoftModuleCommands}
+# Exit if we couldn't load askapsoft
+if [ \"\$ASKAPSOFT_RELEASE\" == \"\" ]; then
+    echo \"ERROR: \\\$ASKAPSOFT_RELEASE not available - could not load askappipeline module.\"
+    exit 1
+fi"
+       
         # askappipeline module
         askappipelineVersion=$(module list -t 2>&1 | grep askappipeline | sed -e 's|askappipeline/||g')
         askapsoftModuleCommands="${askapsoftModuleCommands}
