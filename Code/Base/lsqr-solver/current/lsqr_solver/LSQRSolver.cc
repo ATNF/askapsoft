@@ -1,17 +1,22 @@
 /*
- * LSQRSolver.cpp
+ * LSQRSolver.cc
  *
  * @author Vitaliy Ogarko <vogarko@gmail.com>
  */
 
-#include <askap/AskapLogging.h>
-ASKAP_LOGGER(logger, ".lsqr_solver");
+// MPI-specific includes
+#ifdef HAVE_MPI
+#include <mpi.h>
+#endif
 
-#include <stdexcept>
 #include <cmath>
+#include <stdexcept>
 
 #include <lsqr_solver/LSQRSolver.h>
 #include <lsqr_solver/MathUtils.h>
+
+#include <askap/AskapLogging.h>
+ASKAP_LOGGER(logger, ".lsqr_solver");
 
 namespace askap { namespace lsqr {
 

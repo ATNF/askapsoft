@@ -1,17 +1,17 @@
 /*
- * MathUtils.cpp
+ * MathUtils.cc
  *
  * @author Vitaliy Ogarko <vogarko@gmail.com>
  */
-
-#include <cmath>
-#include <cassert>
-#include <stdexcept>
 
 // MPI-specific includes
 #ifdef HAVE_MPI
 #include <mpi.h>
 #endif
+
+#include <cmath>
+#include <cassert>
+#include <stdexcept>
 
 #include <lsqr_solver/MathUtils.h>
 
