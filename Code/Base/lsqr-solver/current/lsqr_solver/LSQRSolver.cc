@@ -10,6 +10,7 @@
 #endif
 
 #include <cmath>
+#include <cassert>
 #include <stdexcept>
 
 #include <lsqr_solver/LSQRSolver.h>
@@ -106,14 +107,20 @@ void LSQRSolver::Solve(size_t niter,
         MathUtils::Multiply(u, - alpha);
 
         // Compute u = u + H.v parallel.
-        #ifdef PARALLEL
+#ifdef HAVE_MPI
+        if (nbproc > 1)
+        {
             matrix.MultVector(v, Hv_loc);
-
-            // TODO: Convert to C++.
-            //call mpi_allreduce(Hv_loc, Hv, N_lines, CUSTOM_MPI_TYPE, MPI_SUM, MPI_COMM_WORLD, ierr)
-        #else
+            MPI_Allreduce(Hv_loc.data(), Hv.data(), nlines, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+        }
+        else
+        {
             matrix.MultVector(v, Hv);
-        #endif
+        }
+#else
+        assert(nbproc == 1);
+        matrix.MultVector(v, Hv);
+#endif
 
         // u = u + Hv
         MathUtils::Add(u, Hv);
@@ -175,14 +182,20 @@ void LSQRSolver::Solve(size_t niter,
         if (!suppress_output && (iter % 10 == 0))
         {
             // Calculate the gradient: 2A'(Ax - b).
-            #ifdef PARALLEL
+#ifdef HAVE_MPI
+            if (nbproc > 1)
+            {
                 matrix.MultVector(x, Hv_loc);
-
-                // TODO: Convert to C++.
-                //call mpi_allreduce(Hv_loc, Hv, N_lines, CUSTOM_MPI_TYPE, MPI_SUM, MPI_COMM_WORLD, ierr)
-            #else
+                MPI_Allreduce(Hv_loc.data(), Hv.data(), nlines, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+            }
+            else
+            {
                 matrix.MultVector(x, Hv);
-            #endif
+            }
+#else
+            assert(nbproc == 1);
+            matrix.MultVector(x, Hv);
+#endif
 
             // Hv = Hv - b
             MathUtils::Transform(1.0, Hv, - 1.0, b);
