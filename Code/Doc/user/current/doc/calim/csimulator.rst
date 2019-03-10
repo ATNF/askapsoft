@@ -30,7 +30,7 @@ substitution, it is clearly stated in the description.
 +======================+==============+==============+============================================================+
 |imagetype             |string        |"casa"        |Type of the image handler (determines the format of the     |
 |                      |              |              |images read from the disk). The default is to read casa     |
-|                      |              |              |images and this is the only option implemented so far.      |
+|                      |              |              |images, the only other option is "fits".                    |
 +----------------------+--------------+--------------+------------------------------------------------------------+
 |dataset               |string        |None          |Data set file name to produce. Usual substitution rules     |
 |                      |              |              |apply.                                                      |

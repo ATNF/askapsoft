@@ -67,8 +67,8 @@ They are given in [:doc:`data_selection`] and should also have the **Cbpcalibrat
 +=======================+================+==============+=================================================+
 |imagetype              |string          |"casa"        |Type of the image handler (determines the format |
 |                       |                |              |of the images read from the disk). The default is|
-|                       |                |              |to read casa format and this is the only option  |
-|                       |                |              |implemented so far.                              |
+|                       |                |              |to read casa format, the only other option is    |
+|                       |                |              |"fits".                                          |
 +-----------------------+----------------+--------------+-------------------------------------------------+
 |nAnt                   |uint            |36            |Number of antennas to solve bandpasses for. The  |
 |                       |                |              |code will fail if it is requested to solve for   |

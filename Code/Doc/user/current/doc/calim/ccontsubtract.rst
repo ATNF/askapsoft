@@ -36,7 +36,7 @@ also have the **CContSubtract** prefix.
 +========================+============+============+==========================================================+
 |imagetype               |string      |"casa"      |Type of the image handler (determines the format of the   |
 |                        |            |            |images read from the disk). The default is to read casa   |
-|                        |            |            |images and this is the only option implemented so far.    |
+|                        |            |            |images, the only other options is "fits"             .    |
 |                        |            |            |                                                          |
 +------------------------+------------+------------+----------------------------------------------------------+
 |dataset                 |string      |None        |Data set file name to work with. The visibility data are  |
