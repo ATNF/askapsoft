@@ -215,7 +215,7 @@ void LSQRSolver::Solve(size_t niter,
         // Basically this is another stopping criterion.
         if (fabs(rhobar) < 1.e-30)
         {
-            ASKAPLOG_WARN_STR(logger, "Small rhobar! Possibly algorithm has converged. Exiting the loop.");
+            if (myrank == 0) ASKAPLOG_WARN_STR(logger, "Small rhobar! Possibly algorithm has converged. Exiting the loop.");
             break;
         }
 
