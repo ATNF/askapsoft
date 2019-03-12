@@ -160,9 +160,9 @@ namespace askap
 
         //------------------------------------------------------------------------------
         // Test of adding several damping terms.
-        // Solving the same system as in solve_underdetermined_2.
-        // With alpha = 1.e-13 the test solve_underdetermined_2 fails, but with alpha = 1.e-13 passes.
-        // Therefore, it should also pass when added 10 damping terms with alpha = 1.e-13.
+        // Solving the same system as in testUnderdeterminedDamped.
+        // With alpha = 1.e-13 the test testUnderdeterminedDamped fails, but with alpha = 1.e-12 passes.
+        // Therefore, it should also pass when 10 damping terms added with alpha = 1.e-13.
         //------------------------------------------------------------------------------
         void testUnderdeterminedSeveralDampings()
         {
