@@ -1,5 +1,5 @@
 /*
- * ModelDamping.cpp
+ * ModelDamping.cc
  *
  * @author Vitaliy Ogarko <vogarko@gmail.com>
  */
@@ -8,6 +8,7 @@
 #include <cmath>
 
 #include <lsqr_solver/ModelDamping.h>
+#include <lsqr_solver/ParallelTools.h>
 
 namespace askap { namespace lsqr {
 
@@ -22,7 +23,9 @@ void ModelDamping::Add(double alpha,
                        Vector& b,
                        const Vector* model,
                        const Vector* modelRef,
-                       const Vector* dampingWeight)
+                       const Vector* dampingWeight,
+                       int myrank,
+                       int nbproc)
 {
     // Sanity check.
     if ((model != NULL && model->size() != nelements)
@@ -38,45 +41,71 @@ void ModelDamping::Add(double alpha,
         throw std::runtime_error("Matrix has not been finalized yet in ModelDamping::Add!");
     }
 
+    size_t nelementsTotal = ParallelTools::get_total_number_elements(nelements, nbproc);
+    size_t nsmaller = ParallelTools::get_nsmaller(nelements, myrank, nbproc);
+
     // Extend matrix and right-hand size for adding damping.
-    matrix.Extend(nelements, nelements);
-    b.resize(b.size() + nelements);
+    matrix.Extend(nelementsTotal, nelements);
+    b.resize(b.size() + nelementsTotal);
+
+    // Gather here local parts of the right-hand-side from all CPUs.
+    Vector b_loc(nelementsTotal);
 
     // Adding damping to the system.
-    for (size_t i = 0; i < nelements; ++i)
+    for (size_t i = 0; i < nelementsTotal; ++i)
     {
-        // Default values for when pointers are null.
-        double dampingWeightValue = 1.0;
-        double modelValue = 0.0;
-        double modelRefValue = 0.0;
+        if (i >= nsmaller && i < nsmaller + nelements)
+        {
+            // Matrix column in local matrix (on current CPU).
+            size_t column = i - nsmaller;
 
-        // Extract values.
-        if (dampingWeight != NULL) dampingWeightValue = dampingWeight->at(i);
-        if (model != NULL) modelValue = model->at(i);
-        if (modelRef != NULL) modelRefValue = modelRef->at(i);
+            // Default values for when pointers are null.
+            double dampingWeightValue = 1.0;
+            double modelValue = 0.0;
+            double modelRefValue = 0.0;
 
-        //-------------------------------------------------------------
-        // Add matrix lines with damping.
-        //-------------------------------------------------------------
-        matrix.NewRow();
+            // Extract values.
+            if (dampingWeight != NULL) dampingWeightValue = dampingWeight->at(column);
+            if (model != NULL) modelValue = model->at(column);
+            if (modelRef != NULL) modelRefValue = modelRef->at(column);
 
-        double normMultiplier = GetNormMultiplier(modelValue, modelRefValue, normPower);
-        double matrixValue = alpha * dampingWeightValue * normMultiplier;
+            //-------------------------------------------------------------
+            // Add matrix lines with damping.
+            //-------------------------------------------------------------
+            matrix.NewRow();
 
-        matrix.Add(matrixValue, i);
+            double normMultiplier = GetNormMultiplier(modelValue, modelRefValue, normPower);
+            double matrixValue = alpha * dampingWeightValue * normMultiplier;
 
-        //----------------------------------------------------------------
-        // Add corresponding damping contribution to the right-hand side.
-        //----------------------------------------------------------------
-        double rhsValue = - matrixValue * (modelValue - modelRefValue);
+            matrix.Add(matrixValue, column);
 
-        size_t index = matrix.GetCurrentNumberRows();
+            //----------------------------------------------------------------
+            // Add corresponding damping contribution to the right-hand side.
+            //----------------------------------------------------------------
+            double rhsValue = - matrixValue * (modelValue - modelRefValue);
 
-        b[index - 1] = rhsValue;
+            b_loc[column] = rhsValue;
+        }
+        else
+        {
+            // Adding an empty line.
+            matrix.NewRow();
+        }
     }
 
     // Finalize matrix.
     matrix.Finalize(nelements);
+
+    //------------------------------------------------------------------------------
+    // Set the full right-hand side.
+    //------------------------------------------------------------------------------
+    ParallelTools::get_full_array_in_place(nelements, b_loc, true, myrank, nbproc);
+
+    for (size_t i = 0; i < nelementsTotal; ++i)
+    {
+        size_t index = b.size() - nelementsTotal + i;
+        b[index] = b_loc[i];
+    }
 }
 
 double ModelDamping::GetNormMultiplier(double model, double modelRef, double normPower) const

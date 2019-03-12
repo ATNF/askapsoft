@@ -96,6 +96,7 @@ namespace askap
         void testUnderdeterminedNonDamped()
         {
             int myrank = 0;
+            int nbproc = 1;
 
             double rmin = 1.e-13;
             size_t niter = 100;
@@ -105,7 +106,7 @@ namespace askap
             LSQRSolver solver(system.nrows, system.ncols);
 
             Vector x(system.ncols, 0.0);
-            solver.Solve(niter, rmin, *system.matrix, *system.b_RHS, x, myrank, true);
+            solver.Solve(niter, rmin, *system.matrix, *system.b_RHS, x, myrank, nbproc, true);
 
             double epsilon = 1.e-15;
 
@@ -124,6 +125,7 @@ namespace askap
         void testUnderdeterminedDamped()
         {
             int myrank = 0;
+            int nbproc = 1;
 
             double rmin = 1.e-13;
             size_t niter = 100;
@@ -142,12 +144,12 @@ namespace askap
             ModelDamping damping(nelements);
 
             // Add damping to the system.
-            damping.Add(alpha, normPower, *system.matrix, *system.b_RHS, &model, &modelRef, NULL);
+            damping.Add(alpha, normPower, *system.matrix, *system.b_RHS, &model, &modelRef, NULL, myrank, nbproc);
 
             LSQRSolver solver(system.matrix->GetTotalNumberRows(), nelements);
 
             Vector x(system.ncols, 0.0);
-            solver.Solve(niter, rmin, *system.matrix, *system.b_RHS, x, myrank, true);
+            solver.Solve(niter, rmin, *system.matrix, *system.b_RHS, x, myrank, nbproc, true);
 
             double epsilon = 1.e-5;
 
@@ -158,13 +160,14 @@ namespace askap
 
         //------------------------------------------------------------------------------
         // Test of adding several damping terms.
-        // Solving the same system as in solve_underdetermined_2.
-        // With alpha = 1.e-13 the test solve_underdetermined_2 fails, but with alpha = 1.e-13 passes.
-        // Therefore, it should also pass when added 10 damping terms with alpha = 1.e-13.
+        // Solving the same system as in testUnderdeterminedDamped.
+        // With alpha = 1.e-13 the test testUnderdeterminedDamped fails, but with alpha = 1.e-12 passes.
+        // Therefore, it should also pass when 10 damping terms added with alpha = 1.e-13.
         //------------------------------------------------------------------------------
         void testUnderdeterminedSeveralDampings()
         {
             int myrank = 0;
+            int nbproc = 1;
 
             double rmin = 1.e-13;
             int niter = 100;
@@ -187,13 +190,13 @@ namespace askap
             // Add damping terms to the system.
             for (size_t i = 0; i < ndamping; ++i)
             {
-                damping.Add(alpha, normPower, *system.matrix, *system.b_RHS, &model, &modelRef, NULL);
+                damping.Add(alpha, normPower, *system.matrix, *system.b_RHS, &model, &modelRef, NULL, myrank, nbproc);
             }
 
             LSQRSolver solver(system.matrix->GetTotalNumberRows(), nelements);
 
             Vector x(system.ncols, 0.0);
-            solver.Solve(niter, rmin, *system.matrix, *system.b_RHS, x, myrank, true);
+            solver.Solve(niter, rmin, *system.matrix, *system.b_RHS, x, myrank, nbproc, true);
 
             double epsilon = 1.e-5;
 
@@ -224,12 +227,13 @@ namespace askap
         //---------------------------------------------------------------------
         void testOverdetermined()
         {
+            int myrank = 0;
+            int nbproc = 1;
+
             size_t nelements_total = 3;
             size_t nrows = 1000;
             double rmin = 1.e-14;
             size_t niter = 100;
-
-            int myrank = 0;
 
             size_t nelements = nelements_total;
 
@@ -260,7 +264,7 @@ namespace askap
             LSQRSolver solver(nrows, nelements);
 
             Vector x(nelements, 0.0);
-            solver.Solve(niter, rmin, matrix, b_RHS, x, myrank, true);
+            solver.Solve(niter, rmin, matrix, b_RHS, x, myrank, nbproc, true);
 
             double epsilon = 1.e-14;
 
@@ -274,6 +278,9 @@ namespace askap
          */
         void testNoElements()
         {
+            int myrank = 0;
+            int nbproc = 1;
+
             size_t ncols = 3;
             size_t nrows = 3;
 
@@ -294,11 +301,9 @@ namespace askap
             double rmin = 1.e-14;
             size_t niter = 100;
 
-            int myrank = 0;
-
             LSQRSolver solver(nrows, ncols);
 
-            solver.Solve(niter, rmin, matrix, b_RHS, x, myrank, true);
+            solver.Solve(niter, rmin, matrix, b_RHS, x, myrank, nbproc, true);
 
             CPPUNIT_ASSERT_EQUAL(0.0, x[0]);
             CPPUNIT_ASSERT_EQUAL(0.0, x[1]);

@@ -82,6 +82,7 @@ class StatsEntry:
                 else:
                     if len(fb.split('B'))>1:
                         self.field,self.beam=fb.split('F')[1].split('B')
+                        self.beam = self.beam[:2]
                     else:
                         self.field=fb.split('B')[0].split('F')[1]
                         self.beam=-1

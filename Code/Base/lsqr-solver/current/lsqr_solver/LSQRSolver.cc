@@ -1,17 +1,23 @@
 /*
- * LSQRSolver.cpp
+ * LSQRSolver.cc
  *
  * @author Vitaliy Ogarko <vogarko@gmail.com>
  */
 
-#include <askap/AskapLogging.h>
-ASKAP_LOGGER(logger, ".lsqr_solver");
+// MPI-specific includes
+#ifdef HAVE_MPI
+#include <mpi.h>
+#endif
 
-#include <stdexcept>
 #include <cmath>
+#include <cassert>
+#include <stdexcept>
 
 #include <lsqr_solver/LSQRSolver.h>
 #include <lsqr_solver/MathUtils.h>
+
+#include <askap/AskapLogging.h>
+ASKAP_LOGGER(logger, ".lsqr_solver");
 
 namespace askap { namespace lsqr {
 
@@ -33,6 +39,7 @@ void LSQRSolver::Solve(size_t niter,
         const Vector& b,
         Vector& x,
         int myrank,
+        int nbproc,
         bool suppress_output)
 {
     // Sanity check.
@@ -66,7 +73,7 @@ void LSQRSolver::Solve(size_t niter,
     double alpha, beta;
 
     // Normalize u and initialize beta.
-    if (!MathUtils::Normalize(u, beta, false))
+    if (!MathUtils::Normalize(u, beta, false, nbproc))
     {
         throw std::runtime_error("Could not normalize initial u, zero denominator!");
     }
@@ -81,7 +88,7 @@ void LSQRSolver::Solve(size_t niter,
     matrix.TransMultVector(u, v);
 
     // Normalize v and initialize alpha.
-    if (!MathUtils::Normalize(v, alpha, true))
+    if (!MathUtils::Normalize(v, alpha, true, nbproc))
     {
         throw std::runtime_error("Could not normalize initial v, zero denominator!");
     }
@@ -100,20 +107,26 @@ void LSQRSolver::Solve(size_t niter,
         MathUtils::Multiply(u, - alpha);
 
         // Compute u = u + H.v parallel.
-        #ifdef PARALLEL
+#ifdef HAVE_MPI
+        if (nbproc > 1)
+        {
             matrix.MultVector(v, Hv_loc);
-
-            // TODO: Convert to C++.
-            //call mpi_allreduce(Hv_loc, Hv, N_lines, CUSTOM_MPI_TYPE, MPI_SUM, MPI_COMM_WORLD, ierr)
-        #else
+            MPI_Allreduce(Hv_loc.data(), Hv.data(), nlines, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+        }
+        else
+        {
             matrix.MultVector(v, Hv);
-        #endif
+        }
+#else
+        assert(nbproc == 1);
+        matrix.MultVector(v, Hv);
+#endif
 
         // u = u + Hv
         MathUtils::Add(u, Hv);
 
         // Normalize u and update beta.
-        if (!MathUtils::Normalize(u, beta, false))
+        if (!MathUtils::Normalize(u, beta, false, nbproc))
         {
             // Found an exact solution.
             ASKAPLOG_WARN_STR(logger, "|u| = 0. Possibly found an exact solution in the LSQR solver!");
@@ -129,7 +142,7 @@ void LSQRSolver::Solve(size_t niter,
         MathUtils::Add(v, v0);
 
         // Normalize v and update alpha.
-        if (!MathUtils::Normalize(v, alpha, true))
+        if (!MathUtils::Normalize(v, alpha, true, nbproc))
         {
             // Found an exact solution.
             ASKAPLOG_WARN_STR(logger, "|v| = 0. Possibly found an exact solution in the LSQR solver!");
@@ -169,14 +182,20 @@ void LSQRSolver::Solve(size_t niter,
         if (!suppress_output && (iter % 10 == 0))
         {
             // Calculate the gradient: 2A'(Ax - b).
-            #ifdef PARALLEL
+#ifdef HAVE_MPI
+            if (nbproc > 1)
+            {
                 matrix.MultVector(x, Hv_loc);
-
-                // TODO: Convert to C++.
-                //call mpi_allreduce(Hv_loc, Hv, N_lines, CUSTOM_MPI_TYPE, MPI_SUM, MPI_COMM_WORLD, ierr)
-            #else
+                MPI_Allreduce(Hv_loc.data(), Hv.data(), nlines, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+            }
+            else
+            {
                 matrix.MultVector(x, Hv);
-            #endif
+            }
+#else
+            assert(nbproc == 1);
+            matrix.MultVector(x, Hv);
+#endif
 
             // Hv = Hv - b
             MathUtils::Transform(1.0, Hv, - 1.0, b);
@@ -184,7 +203,7 @@ void LSQRSolver::Solve(size_t niter,
             matrix.TransMultVector(Hv, v0);
 
             // Norm of the gradient.
-            double g = 2.0 * MathUtils::GetNormParallel(v0);
+            double g = 2.0 * MathUtils::GetNormParallel(v0, nbproc);
 
             if (myrank == 0)
             {

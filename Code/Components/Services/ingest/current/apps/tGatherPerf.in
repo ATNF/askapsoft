@@ -1,4 +1,4 @@
 count = 100
 #chunksize = 2426112
-
+#chunksize = 524288
 

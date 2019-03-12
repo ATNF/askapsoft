@@ -166,11 +166,27 @@ module load ${currentASKAPsoftVersion}"
             fi
         fi
 
+        # Check for the success in loading the askapsoft module
+        askapsoftModuleCommands="${askapsoftModuleCommands}
+# Exit if we couldn't load askapsoft
+if [ \"\$ASKAPSOFT_RELEASE\" == \"\" ]; then
+    echo \"ERROR: \\\$ASKAPSOFT_RELEASE not available - could not load askapsoft module.\"
+    exit 1
+fi"
+       
         # askappipeline module
         askappipelineVersion=$(module list -t 2>&1 | grep askappipeline | sed -e 's|askappipeline/||g')
         askapsoftModuleCommands="${askapsoftModuleCommands}
 module unload askappipeline
 module load askappipeline/${askappipelineVersion}"
+
+        # Check for the success in loading the askappipeline module
+        askapsoftModuleCommands="${askapsoftModuleCommands}
+# Exit if we couldn't load askappipeline
+if [ \"\$PIPELINEDIR\" == \"\" ]; then
+    echo \"ERROR: \\\$PIPELINEDIR not available - could not load askappipeline module.\"
+    exit 1
+fi"
 
     else
         askapsoftModuleCommands="${askapsoftModuleCommands}
@@ -1404,6 +1420,103 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
                     CCALIBRATOR_MAXUV_ARRAY+=($CCALIBRATOR_MAXUV)
                 done
             fi
+	    # Introduce more clean parameters as a function of selfcal loops:
+	    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	    # 1. CLEAN_ALGORITHM 
+	    # expected input: CLEAN_ALGORITHM="Hogbom,BasisFunctionMFS"
+	    IFS=,
+	    declare -a CLEAN_ALGORITHM_ARRAY=(${CLEAN_ALGORITHM})
+	    arrSize=${#CLEAN_ALGORITHM_ARRAY[@]}
+	    if [ "$arrSize" -le "0" ]; then 
+		    echo "ERROR - CLEAN_ALGORITHM_ARRAY ($CLEAN_ALGORITHM_ARRAY) needs to be of size > 0"
+		    exit 1
+	    fi
+	    if [ "$arrSize" -lt "$expectedArrSize" ]; then 
+		    echo "WARNING - CLEAN_ALGORITHM_ARRAY ($CLEAN_ALGORITHM_ARRAY) is specified for less than the number of SELFCAL_NUM_LOOPS=${SELFCAL_NUM_LOOPS}. We will use CLEAN_ALGORITHM=${CLEAN_ALGORITHM_ARRAY[0]} for all loops."
+                for((i=0;i<=SELFCAL_NUM_LOOPS;i++)); do
+                    CLEAN_ALGORITHM_ARRAY[$i]=${CLEAN_ALGORITHM_ARRAY[0]}
+                done
+            fi
+	    # 2. CLEAN_MINORCYCLE_NITER  
+	    # expected input: CLEAN_MINORCYCLE_NITER="200,800"
+	    declare -a CLEAN_MINORCYCLE_NITER_ARRAY=(${CLEAN_MINORCYCLE_NITER})
+	    arrSize=${#CLEAN_MINORCYCLE_NITER_ARRAY[@]}
+	    if [ "$arrSize" -le "0" ]; then 
+		    echo "ERROR - CLEAN_MINORCYCLE_NITER_ARRAY ($CLEAN_MINORCYCLE_NITER_ARRAY) needs to be of size > 0"
+		    exit 1
+	    fi
+	    if [ "$arrSize" -lt "$expectedArrSize" ]; then 
+		    echo "WARNING - CLEAN_MINORCYCLE_NITER_ARRAY ($CLEAN_MINORCYCLE_NITER_ARRAY) is specified for less than the number of SELFCAL_NUM_LOOPS=${SELFCAL_NUM_LOOPS}. We will use CLEAN_MINORCYCLE_NITER=${CLEAN_MINORCYCLE_NITER_ARRAY[0]} for all loops."
+                for((i=0;i<=SELFCAL_NUM_LOOPS;i++)); do
+                    CLEAN_MINORCYCLE_NITER_ARRAY[$i]=${CLEAN_MINORCYCLE_NITER_ARRAY[0]}
+                done
+            fi
+	    # 3. CLEAN_GAIN
+	    # expected input: CLEAN_GAIN="0.1,0.2"
+	    declare -a CLEAN_GAIN_ARRAY=(${CLEAN_GAIN})
+	    arrSize=${#CLEAN_GAIN_ARRAY[@]}
+	    if [ "$arrSize" -le "0" ]; then 
+		    echo "ERROR - CLEAN_GAIN_ARRAY ($CLEAN_GAIN_ARRAY) needs to be of size > 0"
+		    exit 1
+	    fi
+	    if [ "$arrSize" -lt "$expectedArrSize" ]; then 
+		    echo "WARNING - CLEAN_GAIN_ARRAY ($CLEAN_GAIN_ARRAY) is specified for less than the number of SELFCAL_NUM_LOOPS=${SELFCAL_NUM_LOOPS}. We will use CLEAN_GAIN=${CLEAN_GAIN_ARRAY[0]} for all loops."
+                for((i=0;i<=SELFCAL_NUM_LOOPS;i++)); do
+                    CLEAN_GAIN_ARRAY[$i]=${CLEAN_GAIN_ARRAY[0]}
+                done
+            fi
+	    # 4. CLEAN_PSFWIDTH 
+	    # expected input: CLEAN_PSFWIDTH="256,6144"
+	    declare -a CLEAN_PSFWIDTH_ARRAY=(${CLEAN_PSFWIDTH})
+	    unset IFS
+	    arrSize=${#CLEAN_PSFWIDTH_ARRAY[@]}
+	    if [ "$arrSize" -le "0" ]; then 
+		    echo "ERROR - CLEAN_PSFWIDTH_ARRAY ($CLEAN_PSFWIDTH_ARRAY) needs to be of size > 0"
+		    exit 1
+	    fi
+	    if [ "$arrSize" -lt "$expectedArrSize" ]; then 
+		    echo "WARNING - CLEAN_PSFWIDTH_ARRAY ($CLEAN_PSFWIDTH_ARRAY) is specified for less than the number of SELFCAL_NUM_LOOPS=${SELFCAL_NUM_LOOPS}. We will use CLEAN_PSFWIDTH=${CLEAN_PSFWIDTH_ARRAY[0]} for all loops."
+                for((i=0;i<=SELFCAL_NUM_LOOPS;i++)); do
+                    CLEAN_PSFWIDTH_ARRAY[$i]=${CLEAN_PSFWIDTH_ARRAY[0]}
+                done
+            fi
+	    # 5. CLEAN_SCALES 
+	    IFS=';'
+	    # expected input: CLEAN_SCALES="[0] ; [0,3,10] ; [0,3,10,480,960]"
+	    # Note the "space" characters around ";" are crucial when you want to specify 
+	    # an array of scales. This scheme is backward compatible with older pipeline 
+	    # versions where one could not use different scales for different selfcal loops.  
+	    declare -a CLEAN_SCALES_ARRAY=(${CLEAN_SCALES})
+	    unset IFS
+	    arrSize=${#CLEAN_SCALES_ARRAY[@]}
+	    if [ "$arrSize" -le "0" ]; then 
+		    echo "ERROR - CLEAN_SCALES_ARRAY ($CLEAN_SCALES_ARRAY) needs to be of size > 0"
+		    exit 1
+	    fi
+	    if [ "$arrSize" -lt "$expectedArrSize" ]; then 
+		    echo "WARNING - CLEAN_SCALES_ARRAY ($CLEAN_SCALES_ARRAY) is specified for less than the number of SELFCAL_NUM_LOOPS=${SELFCAL_NUM_LOOPS}. We will use CLEAN_SCALES=${CLEAN_SCALES_ARRAY[0]} for all loops."
+                for((i=0;i<=SELFCAL_NUM_LOOPS;i++)); do
+                    CLEAN_SCALES_ARRAY[$i]=${CLEAN_SCALES_ARRAY[0]}
+                done
+            fi
+	    # 6. CLEAN_THRESHOLD_MINORCYCLE 
+	    # expected input: CLEAN_THRESHOLD_MINORCYCLE="[45%,2mJy] ; [25%,1mJy,0.03mJy]"
+	    IFS=';'
+	    declare -a CLEAN_THRESHOLD_MINORCYCLE_ARRAY=(${CLEAN_THRESHOLD_MINORCYCLE})
+	    arrSize=${#CLEAN_THRESHOLD_MINORCYCLE_ARRAY[@]}
+	    unset IFS
+	    if [ "$arrSize" -le "0" ]; then 
+		    echo "ERROR - CLEAN_THRESHOLD_MINORCYCLE_ARRAY ($CLEAN_THRESHOLD_MINORCYCLE_ARRAY) needs to be of size > 0"
+		    exit 1
+	    fi
+	    if [ "$arrSize" -lt "$expectedArrSize" ]; then 
+		    echo "WARNING - CLEAN_THRESHOLD_MINORCYCLE_ARRAY ($CLEAN_THRESHOLD_MINORCYCLE_ARRAY) is specified for less than the number of SELFCAL_NUM_LOOPS=${SELFCAL_NUM_LOOPS}. We will use CLEAN_THRESHOLD_MINORCYCLE=${CLEAN_THRESHOLD_MINORCYCLE_ARRAY[0]} for all loops."
+                for((i=0;i<=SELFCAL_NUM_LOOPS;i++)); do
+                    CLEAN_THRESHOLD_MINORCYCLE_ARRAY[$i]=${CLEAN_THRESHOLD_MINORCYCLE_ARRAY[0]}
+                done
+            fi
+
+	    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
             # Validate that all these arrays are the same length as
             # SELFCAL_NUM_LOOPS, as long as the latter is >0
@@ -1449,6 +1562,34 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
                     echo "ERROR! Size of CCALIBRATOR_MAXUV (${CCALIBRATOR_MAXUV}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
                     exit 1
                 fi
+		#BEG+++++++++++++++++++++++++++++++++++++++++
+		# I think this section is redundant and may be deleted (from #BEG++++ to #END++++)
+		# --wr, 01Mar2019
+                if [ "${#CLEAN_ALGORITHM_ARRAY[@]}" -ne "$arraySize" ]; then
+                    echo "ERROR! Size of CLEAN_ALGORITHM (${CLEAN_ALGORITHM}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
+                    exit 1
+                fi
+                if [ "${#CLEAN_MINORCYCLE_NITER_ARRAY[@]}" -ne "$arraySize" ]; then
+                    echo "ERROR! Size of CLEAN_MINORCYCLE_NITER (${CLEAN_MINORCYCLE_NITER}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
+                    exit 1
+                fi
+                if [ "${#CLEAN_GAIN_ARRAY[@]}" -ne "$arraySize" ]; then
+                    echo "ERROR! Size of CLEAN_GAIN (${CLEAN_GAIN}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
+                    exit 1
+                fi
+                if [ "${#CLEAN_PSFWIDTH_ARRAY[@]}" -ne "$arraySize" ]; then
+                    echo "ERROR! Size of CLEAN_PSFWIDTH (${CLEAN_PSFWIDTH}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
+                    exit 1
+                fi
+                if [ "${#CLEAN_SCALES_ARRAY[@]}" -ne "$arraySize" ]; then
+                    echo "ERROR! Size of CLEAN_SCALES (${CLEAN_SCALES}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
+                    exit 1
+                fi
+                if [ "${#CLEAN_THRESHOLD_MINORCYCLE_ARRAY[@]}" -ne "$arraySize" ]; then
+                    echo "ERROR! Size of CLEAN_THRESHOLD_MINORCYCLE (${CLEAN_THRESHOLD_MINORCYCLE}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
+                    exit 1
+                fi
+		#END+++++++++++++++++++++++++++++++++++++++++
 
             fi
 

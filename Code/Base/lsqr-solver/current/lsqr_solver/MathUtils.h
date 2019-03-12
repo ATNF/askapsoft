@@ -27,7 +27,7 @@ double GetNormSquared(const Vector& x);
 /*
  * Returns l2-norm of a vector x that is split between CPUs.
  */
-double GetNormParallel(const Vector& x);
+double GetNormParallel(const Vector& x, int nbproc);
 
 /*
  * Multiplies vector by a scalar, and stores the result in the same vector.
@@ -49,7 +49,7 @@ void Transform(double a, Vector& x, double b, const Vector& y);
  * inParallel - flag that defines if x is split between CPUs.
  * Also returns the vector norm.
  */
-bool Normalize(Vector& x, double& norm, bool inParallel);
+bool Normalize(Vector& x, double& norm, bool inParallel, int nbproc);
 
 }}} // namespace askap.lsqr.MathUtils
 

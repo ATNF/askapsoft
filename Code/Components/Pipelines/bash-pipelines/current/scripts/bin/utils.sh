@@ -763,6 +763,12 @@ function getPolList()
 #  * LOOP
 #  * CLEAN_THRESHOLD_MAJORCYCLE_ARRAY
 #  * CLEAN_NUM_MAJORCYCLES_ARRAY
+#  * CLEAN_ALGORITHM_ARRAY
+#  * CLEAN_MINORCYCLE_NITER_ARRAY
+#  * CLEAN_THRESHOLD_MINORCYCLE_ARRAY
+#  * CLEAN_GAIN_ARRAY
+#  * CLEAN_PSFWIDTH_ARRAY 
+#  * CLEAN_SCALES_ARRAY
 # Returns:
 #  * loopParams
 function cimagerSelfcalLoopParams()
@@ -775,6 +781,12 @@ function cimagerSelfcalLoopParams()
     loopParams="# Parameters set for loop $loopval
 Cimager.threshold.majorcycle                    = ${CLEAN_THRESHOLD_MAJORCYCLE_ARRAY[$loopval]}
 Cimager.ncycles                                 = ${CLEAN_NUM_MAJORCYCLES_ARRAY[$loopval]}
+Cimager.solver.Clean.algorithm                  = ${CLEAN_ALGORITHM_ARRAY[$loopval]}
+Cimager.solver.Clean.niter                      = ${CLEAN_MINORCYCLE_NITER_ARRAY[$loopval]}
+Cimager.threshold.minorcycle                    = ${CLEAN_THRESHOLD_MINORCYCLE_ARRAY[$loopval]}
+Cimager.solver.Clean.gain                       = ${CLEAN_GAIN_ARRAY[$loopval]}
+Cimager.solver.Clean.psfwidth                   = ${CLEAN_PSFWIDTH_ARRAY[$loopval]}
+Cimager.solver.Clean.scales                     = ${CLEAN_SCALES_ARRAY[$loopval]}
 "
 }
 

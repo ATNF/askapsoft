@@ -1,7 +1,21 @@
 # Configure the rootLogger
-log4j.rootLogger=DEBUG,FILE
 
-log4j.appender.FILE=org.apache.log4j.FileAppender
-log4j.appender.FILE.File=cpingest.log
-log4j.appender.FILE.layout=org.apache.log4j.PatternLayout
-log4j.appender.FILE.layout.ConversionPattern=%-5p %c{2} (%X{mpirank}, %X{hostname}) [%d{yyyy-MM-dd HH:mm:ss.SSS}{UTC}] - %m%n
+# note, log4j was found to be the main bottleneck due to barriers introduced in the parallel application
+# for now, log into stdout and let mpi to sort out merging - it works an order of magnitude better
+log4j.rootLogger=DEBUG,STDOUT,logarchiver
+#log4j.rootLogger=ERROR,STDOUT,logarchiver
+
+log4j.appender.STDOUT=org.apache.log4j.ConsoleAppender
+log4j.appender.STDOUT.layout=org.apache.log4j.PatternLayout
+log4j.appender.STDOUT.layout.ConversionPattern=%-5p %c{2} (%X{mpirank}, %X{hostname}) [%d{yyyy-MM-dd HH:mm:ss.SSS}{UTC}] - %m%n
+
+# high-level message logger for TOS
+#log4j.logger.cpcommon = ERROR, logarchiver
+#log4j.logger.cpcommon = INFO, logarchiver
+#log4j.additivity.cpcommon=true
+log4j.appender.logarchiver=askap.IceAppender
+log4j.appender.logarchiver.locator_host=aktos10.atnf.csiro.au
+log4j.appender.logarchiver.locator_port=4061
+log4j.appender.logarchiver.topic=logger
+log4j.appender.logarchiver.tag=cp
+log4j.appender.logarchiver.Threshold=WARN

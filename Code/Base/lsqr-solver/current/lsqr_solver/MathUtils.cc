@@ -1,10 +1,16 @@
 /*
- * MathUtils.cpp
+ * MathUtils.cc
  *
  * @author Vitaliy Ogarko <vogarko@gmail.com>
  */
 
+// MPI-specific includes
+#ifdef HAVE_MPI
+#include <mpi.h>
+#endif
+
 #include <cmath>
+#include <cassert>
 #include <stdexcept>
 
 #include <lsqr_solver/MathUtils.h>
@@ -31,17 +37,27 @@ double GetNormSquared(const Vector& x)
     return accum;
 }
 
-double GetNormParallel(const Vector& x)
+double GetNormParallel(const Vector& x, int nbproc)
 {
-    #ifdef PARALLEL
-        accum = GetNormSquared(x);
+#ifdef HAVE_MPI
+    if (nbproc > 1)
+    {
+        double s_loc = GetNormSquared(x);
+        double s_glob = 0.;
 
-        // TODO: Convert to C++.
-        call mpi_allreduce(s, s0, 1, CUSTOM_MPI_TYPE, MPI_SUM, MPI_COMM_WORLD, ierr)
-        s = sqrt(s0);
-    #else
+        MPI_Allreduce(&s_loc, &s_glob, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+
+        double norm = sqrt(s_glob);
+        return norm;
+    }
+    else
+    {
         return GetNorm(x);
-    #endif
+    }
+#else
+    assert(nbproc == 1);
+    return GetNorm(x);
+#endif
 }
 
 void Multiply(Vector& x, double s)
@@ -80,11 +96,11 @@ void Transform(double a, Vector& x, double b, const Vector& y)
     }
 }
 
-bool Normalize(Vector& x, double& norm, bool inParallel)
+bool Normalize(Vector& x, double& norm, bool inParallel, int nbproc)
 {
     if (inParallel)
     {
-        norm = GetNormParallel(x);
+        norm = GetNormParallel(x, nbproc);
     }
     else
     {

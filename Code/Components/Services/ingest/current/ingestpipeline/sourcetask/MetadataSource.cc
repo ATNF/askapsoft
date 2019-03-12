@@ -74,6 +74,10 @@ void MetadataSource::receive(const TosMetadata& msg)
     // Add a pointer to the message to the back of the circular buffer.
     // Waiters are notified.
     itsBuffer.add(metadata);
+
+    ASKAPLOG_DEBUG_STR(logger, "Successfully added metadata for "
+            << bat2epoch(msg.time()).getValue()
+            << " and scanid " << msg.scanId()<<" to the queue, current size="<<itsBuffer.size());
 }
 
 // Blocking

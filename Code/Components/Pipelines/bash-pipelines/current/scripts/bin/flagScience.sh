@@ -140,6 +140,21 @@ ${amplitudeLow}"
     else
         amplitudeCut="# No flat amplitude flagging applied"
     fi
+    # Define a lower limit for Elevation (deg) below which all vis are to be flagged:
+    elevationLowFlagging="# No flagging based on lower bound for Elevation"
+    elevationFlaggerEnable=false
+    if [ "${ELEVATION_FLAG_SCIENCE_LOW}" != "" ]; then
+        # Only add the low Elevation limit if it has been given
+        elevationLowFlagging="Cflag.elevation_flagger.low       =  ${ELEVATION_FLAG_SCIENCE_LOW}"
+        elevationFlaggerEnable=true
+    fi
+    # Define an upper limit for Elevation (deg) above which all vis are to be flagged:
+    elevationHighFlagging="# No flagging based on upper bound for Elevation"
+    if [ "${ELEVATION_FLAG_SCIENCE_HIGH}" != "" ]; then
+        # Only add the upper Elevation limit if it has been given
+        elevationHighFlagging="Cflag.elevation_flagger.high       =  ${ELEVATION_FLAG_SCIENCE_HIGH}"
+        elevationFlaggerEnable=true
+    fi
 
     setJob flag_science flag
     cat > "$sbatchfile" <<EOFOUTER
@@ -208,6 +223,9 @@ ${channelFlagging}
 ${timeFlagging}
 
 ${autocorrFlagging}
+Cflag.elevation_flagger.enable          = ${elevationFlaggerEnable}
+${elevationLowFlagging}
+${elevationHighFlagging}
 EOFINNER
 
         log="${logs}/cflag_amp_science_${FIELDBEAM}_\${SLURM_JOB_ID}.log"
@@ -247,6 +265,9 @@ Cflag.amplitude_flagger.integrateTimes = ${FLAG_DYNAMIC_INTEGRATE_TIMES}
 Cflag.amplitude_flagger.integrateTimes.threshold = ${FLAG_THRESHOLD_DYNAMIC_SCIENCE_TIMES}
 
 ${amplitudeLow}
+Cflag.elevation_flagger.enable          = ${elevationFlaggerEnable}
+${elevationLowFlagging}
+${elevationHighFlagging}
 
 # Stokes-V flagging
 Cflag.stokesv_flagger.enable           = \${DO_STOKESV}

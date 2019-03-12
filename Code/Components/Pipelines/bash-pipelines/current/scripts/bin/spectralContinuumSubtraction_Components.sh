@@ -154,8 +154,8 @@ Selavy.imagetype                                = ${IMAGETYPE_CONT}
 #  number of subdivisions in each direction, and the size of the
 #  overlap region in pixels
 \${SpectralTermUse}
-Selavy.nsubx                                    = ${SELAVY_NSUBX}
-Selavy.nsuby                                    = ${SELAVY_NSUBY}
+Selavy.nsubx                                    = ${CONTSUB_SELAVY_NSUBX}
+Selavy.nsuby                                    = ${CONTSUB_SELAVY_NSUBY}
 #
 ${thresholdPars}
 #
