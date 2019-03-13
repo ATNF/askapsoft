@@ -21,9 +21,10 @@ ASKAP_LOGGER(logger, ".lsqr_solver");
 
 namespace askap { namespace lsqr {
 
-LSQRSolver::LSQRSolver(size_t nlines, size_t nelements) :
+LSQRSolver::LSQRSolver(size_t nlines, size_t nelements, void *comm) :
     nlines(nlines),
     nelements(nelements),
+    comm(comm),
     u(nlines),
     Hv(nlines),
     Hv_loc(nlines),

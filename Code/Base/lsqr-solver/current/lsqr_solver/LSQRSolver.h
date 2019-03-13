@@ -22,8 +22,9 @@ public:
      * Constructor.
      * nlines - the number of matrix lines (rows).
      * nelements - local (at current CPU) number of model parameters (the number of matrix columns).
+     * comm - MPI communicator.
      */
-    LSQRSolver(size_t nlines, size_t nelements);
+    LSQRSolver(size_t nlines, size_t nelements, void *comm = NULL);
 
     /*
      * Solves min||Ax - b|| in L2 norm.
@@ -47,6 +48,8 @@ private:
     size_t nlines;
     // Local (at current CPU) number of model parameters (the number of matrix columns).
     size_t nelements;
+    // MPI communicator.
+    void *comm;
 
     // Auxiliary data arrays needed for calculations.
     Vector u;
