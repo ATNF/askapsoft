@@ -20,9 +20,10 @@ public:
     /*
      * Constructor.
      * nelements - number of model elements.
+     * comm - MPI communicator.
      *
      */
-    ModelDamping(size_t nelements);
+    ModelDamping(size_t nelements, void *comm = NULL);
 
     /*
      * Add damping term to the matrix system.
@@ -56,6 +57,8 @@ public:
 
 private:
     size_t nelements;
+    // MPI communicator.
+    void *comm;
 
     /*
      * Returns a multiplier (for one pixel) to change L2 norm to Lp, in the LSQR method.

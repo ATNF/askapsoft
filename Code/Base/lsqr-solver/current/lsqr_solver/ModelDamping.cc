@@ -12,8 +12,9 @@
 
 namespace askap { namespace lsqr {
 
-ModelDamping::ModelDamping(size_t nelements) :
-    nelements(nelements)
+ModelDamping::ModelDamping(size_t nelements, void *comm) :
+    nelements(nelements),
+    comm(comm)
 {
 }
 
