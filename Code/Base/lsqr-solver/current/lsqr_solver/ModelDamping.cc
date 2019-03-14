@@ -41,8 +41,8 @@ void ModelDamping::Add(double alpha,
         throw std::runtime_error("Matrix has not been finalized yet in ModelDamping::Add!");
     }
 
-    size_t nelementsTotal = ParallelTools::get_total_number_elements(nelements, nbproc);
-    size_t nsmaller = ParallelTools::get_nsmaller(nelements, myrank, nbproc);
+    size_t nelementsTotal = ParallelTools::get_total_number_elements(nelements, nbproc, matrix.GetComm());
+    size_t nsmaller = ParallelTools::get_nsmaller(nelements, myrank, nbproc, matrix.GetComm());
 
     // Extend matrix and right-hand size for adding damping.
     matrix.Extend(nelementsTotal, nelements);
@@ -99,7 +99,7 @@ void ModelDamping::Add(double alpha,
     //------------------------------------------------------------------------------
     // Set the full right-hand side.
     //------------------------------------------------------------------------------
-    ParallelTools::get_full_array_in_place(nelements, b_loc, true, myrank, nbproc);
+    ParallelTools::get_full_array_in_place(nelements, b_loc, true, myrank, nbproc, matrix.GetComm());
 
     for (size_t i = 0; i < nelementsTotal; ++i)
     {

@@ -37,26 +37,26 @@ double GetNormSquared(const Vector& x)
     return accum;
 }
 
-double GetNormParallel(const Vector& x, int nbproc)
+double GetNormParallel(const Vector& x, int nbproc, void *comm)
 {
-#ifdef HAVE_MPI
-    if (nbproc > 1)
-    {
-        double s_loc = GetNormSquared(x);
-        double s_glob = 0.;
-
-        MPI_Allreduce(&s_loc, &s_glob, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-
-        double norm = sqrt(s_glob);
-        return norm;
-    }
-    else
+    if (nbproc == 1)
     {
         return GetNorm(x);
     }
+
+#ifdef HAVE_MPI
+    MPI_Comm *mpi_comm = static_cast<MPI_Comm*>(comm);
+
+    double s_loc = GetNormSquared(x);
+    double s_glob = 0.;
+
+    MPI_Allreduce(&s_loc, &s_glob, 1, MPI_DOUBLE, MPI_SUM, *mpi_comm);
+
+    double norm = sqrt(s_glob);
+    return norm;
 #else
-    assert(nbproc == 1);
-    return GetNorm(x);
+    // Should not come here.
+    return assert(false);
 #endif
 }
 
@@ -96,11 +96,11 @@ void Transform(double a, Vector& x, double b, const Vector& y)
     }
 }
 
-bool Normalize(Vector& x, double& norm, bool inParallel, int nbproc)
+bool Normalize(Vector& x, double& norm, bool inParallel, int nbproc, void *comm)
 {
     if (inParallel)
     {
-        norm = GetNormParallel(x, nbproc);
+        norm = GetNormParallel(x, nbproc, comm);
     }
     else
     {

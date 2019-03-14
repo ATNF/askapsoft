@@ -108,6 +108,14 @@ public:
      */
     bool Finalize(size_t ncolumns);
 
+    /*
+     * Returns the MPI communicator.
+     */
+    void* GetComm() const
+    {
+        return comm;
+    }
+
     virtual ~SparseMatrix() {};
 
 private:
