@@ -68,6 +68,12 @@ void LSQRSolver::Solve(size_t niter,
         throw std::invalid_argument("Wrong dimension of x in LSQRSolver::Solve!");
     }
 
+    // Sanity check.
+    if (nbproc > 1 && matrix.GetComm() == NULL)
+    {
+        throw std::invalid_argument("MPI communicator not defined in LSQRSolver::Solve!");
+    }
+
     // Initialization.
     u = b;
     double alpha, beta;

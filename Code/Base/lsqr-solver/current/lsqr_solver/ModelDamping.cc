@@ -41,6 +41,12 @@ void ModelDamping::Add(double alpha,
         throw std::runtime_error("Matrix has not been finalized yet in ModelDamping::Add!");
     }
 
+    // Sanity check.
+    if (nbproc > 1 && matrix.GetComm() == NULL)
+    {
+        throw std::invalid_argument("MPI communicator not defined in ModelDamping::Add!");
+    }
+
     size_t nelementsTotal = ParallelTools::get_total_number_elements(nelements, nbproc, matrix.GetComm());
     size_t nsmaller = ParallelTools::get_nsmaller(nelements, myrank, nbproc, matrix.GetComm());
 
