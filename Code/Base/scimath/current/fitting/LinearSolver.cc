@@ -259,8 +259,11 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
         gsl_vector * work = gsl_vector_alloc (nParameters);
         ASKAPDEBUGASSERT(work!=NULL);
 
+        gsl_error_handler_t *oldhandler=gsl_set_error_handler_off();
+        ASKAPLOG_DEBUG_STR(logger, "Running SV decomp");
         const int status = gsl_linalg_SV_decomp (A, V, S, work);
-        ASKAPCHECK(status == 0, "gsl_linalg_SV_decomp failed, status = "<<status);
+        // ASKAPCHECK(status == 0, "gsl_linalg_SV_decomp failed, status = "<<status);
+        gsl_set_error_handler(oldhandler);
 
         // a hack for now. For some reason, for some matrices gsl_linalg_SV_decomp may return NaN as singular value, perhaps some
         // numerical precision issue inside SVD. Although it needs to be investigated further  (see ASKAPSDP-2270), for now trying
