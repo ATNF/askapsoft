@@ -56,7 +56,8 @@ double GetNormParallel(const Vector& x, int nbproc, void *comm)
     return norm;
 #else
     // Should not come here.
-    return assert(false);
+    assert(false);
+    return 0.;
 #endif
 }
 
