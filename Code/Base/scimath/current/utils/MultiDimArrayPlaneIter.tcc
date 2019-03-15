@@ -61,9 +61,21 @@ casa::Array<T> MultiDimArrayPlaneIter::getFirstPlane(casa::Array<T> &in) {
 template<typename T>
 casa::Array<T> MultiDimArrayPlaneIter::getPlane(casa::Array<T> &in) const
 {
+  return getPlane(in, position());
+}
+
+/// @brief extract a single plane from an array
+/// @details This method forms a slice of the given array to extract a single plane corresponding
+/// to an arbitrary position of the iterator
+/// @param[in] in input array
+/// @param[in] in input array
+/// @return output array (single plane)
+template<typename T>
+casa::Array<T> MultiDimArrayPlaneIter::getPlane(casa::Array<T> &in, const casa::IPosition &pos) const
+{
   // we may need to add more functionality to this method to take care of situations
   // when the PSF is defined for a single polarisation/channel only
-  const casa::IPosition blc(position());
+  const casa::IPosition blc(pos);
   casa::IPosition trc(blc);
   trc += itsPlaneShape;
   for (casa::uInt dim = 0; dim<trc.nelements(); ++dim) {

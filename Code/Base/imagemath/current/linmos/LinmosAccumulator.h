@@ -144,10 +144,26 @@ namespace askap {
                 void initialiseRegridder(void);
 
                 /// @brief load the temporary image buffers with the current plane of the current input image
+                /// @details since all input image cubes use the same iterator, this approach is inadequate
+                /// when the the planes of the input images have different shapes. In that case the current
+                /// position in the iterator can be sent and a new temporary iterator, generated for each
+                /// input image cube.
                 /// @param[in] const scimath::MultiDimArrayPlaneIter& planeIter: current plane id
                 /// @param[in] Array<T>& inPix: image buffer
                 /// @param[in] Array<T>& inWgtPix: weight image buffer
                 void loadInputBuffers(const scimath::MultiDimArrayPlaneIter& planeIter,
+                                      Array<T>& inPix,
+                                      Array<T>& inWgtPix,
+                                      Array<T>& inSenPix);
+
+                /// @brief load the temporary image buffers with an arbitrary plane of the current input image
+                /// @details since all input image cubes use the same iterator, when the the planes of the input
+                /// images have different shapes the position in the iterator is instead sent and a new temporary
+                /// iterator generated for each input image cube.
+                /// @param[in] const IPosition& curpos: current plane position
+                /// @param[in] Array<T>& inPix: image buffer
+                /// @param[in] Array<T>& inWgtPix: weight image buffer
+                void loadInputBuffers(const IPosition& curpos,
                                       Array<T>& inPix,
                                       Array<T>& inWgtPix,
                                       Array<T>& inSenPix);
