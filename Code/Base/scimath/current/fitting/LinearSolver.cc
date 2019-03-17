@@ -333,12 +333,19 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
          result.second = smax;
 
          quality.setDOF(nParameters);
-         quality.setRank(rank);
-         quality.setCond(smax/smin);
-         if(rank==nParameters) {
-            quality.setInfo("SVD decomposition rank complete");
+         if (status != 0) {
+             ASKAPLOG_WARN_STR(logger, "Solution is considered invalid due to gsl_linalg_SV_decomp failure, main matrix is effectively rank zero");
+             quality.setRank(0);
+             quality.setCond(0.);
+             quality.setInfo("SVD decomposition rank deficient");
          } else {
-            quality.setInfo("SVD decomposition rank deficient");
+             quality.setRank(rank);
+             quality.setCond(smax/smin);
+             if (rank==nParameters) {
+                 quality.setInfo("SVD decomposition rank complete");
+             } else {
+                 quality.setInfo("SVD decomposition rank deficient");
+             }
          }
 
 // Update the parameters for the calculated changes. Exploit reference
