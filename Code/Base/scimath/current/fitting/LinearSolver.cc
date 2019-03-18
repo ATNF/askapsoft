@@ -27,6 +27,10 @@
 /// @author Tim Cornwell <tim.cornwell@csiro.au>
 /// @author Vitaliy Ogarko <vogarko@gmail.com>
 ///
+#ifdef HAVE_MPI
+#include <mpi.h>
+#endif
+
 #include <fitting/LinearSolver.h>
 
 #include <askap/AskapError.h>
@@ -369,6 +373,13 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
         int myrank = 0;
         int nbproc = 1;
 
+        void* comm = NULL;
+
+#ifdef HAVE_MPI
+        MPI_Comm comm_world = MPI_COMM_WORLD;
+        comm = (void *)&comm_world;
+#endif
+
         // Setting damping parameters.
         double alpha = 0.01;
         if (parameters().count("alpha") > 0) {
@@ -385,7 +396,7 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
         size_t nrows = nParameters;
         size_t ncolumms = nParameters;
 
-        lsqr::SparseMatrix matrix(nrows, nrows * ncolumms);
+        lsqr::SparseMatrix matrix(nrows, nrows * ncolumms, comm);
         lsqr::Vector b_RHS(nrows, 0.0);
 
         // Set the matrix.
