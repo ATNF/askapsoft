@@ -154,15 +154,15 @@ std::vector<std::string> LinearSolver::getIndependentSubset(std::vector<std::str
     } 
     return resultNames;
 }
-    
-    
+
 /// @brief solve for a subset of parameters
 /// @details This method is used in solveNormalEquations
 /// @param[in] params parameters to be updated           
 /// @param[in] quality Quality of the solution
 /// @param[in] names names of the parameters to solve for 
-std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &params, Quality& quality, 
-                   const std::vector<std::string> &names) const
+/// @param[in] parallelMatrix flag for whether the matrix is split between different ranks.
+std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &params, Quality& quality,
+                   const std::vector<std::string> &names, bool parallelMatrix) const
 {
     ASKAPTRACE("LinearSolver::solveSubsetOfNormalEquations");
     std::pair<double,double> result(0.,0.);
@@ -511,54 +511,39 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
     /// @param[in] params parameters to be updated 
     /// @param[in] quality Quality of solution
     /// @note This is fully general solver for the normal equations for any shape
-    /// parameters.        
+    /// parameters.
     bool LinearSolver::solveNormalEquations(Params &params, Quality& quality)
     {
-      ASKAPTRACE("LinearSolver::solveNormalEquations");
-      
-// Solving A^T Q^-1 V = (A^T Q^-1 A) P
-     
-// Find all the free parameters
-      vector<string> names(params.freeNames());
-      if (names.size() == 0) {
-          // list of parameters is empty, will solve for all 
-          // unknowns in the equation 
-          names = normalEquations().unknowns();
-      }
-      ASKAPCHECK(names.size()>0, "No free parameters in Linear Solver");
+        ASKAPTRACE("LinearSolver::solveNormalEquations");
 
-      if (names.size() < 100) {
-          // no need to extract independent blocks if number of unknowns is small
-          solveSubsetOfNormalEquations(params,quality,names);
-      } else {
-          while (names.size() > 0) {
-              const std::vector<std::string> subsetNames = getIndependentSubset(names,1e-6);
-              /* this is now being done inside getIndependentSubset
-              if (subsetNames.size() == names.size()) {
-                  names.resize(0);
-              } else {
-                  // remove the elements corresponding to the current subset from the list of names prepared for the
-                  // following integration
-                  std::vector<size_t> indicesToRemove(subsetNames.size(),subsetNames.size());                                   
-                  for (size_t index = 0,indexToRemove = 0; index < names.size(); ++index) {
-                       if (find(subsetNames.begin(),subsetNames.end(),names[index]) != subsetNames.end()) {
-                           ASKAPDEBUGASSERT(indexToRemove < indicesToRemove.size());
-                           indicesToRemove[indexToRemove++] = index;
-                       }
-                  }
-                  
-                  // the following could be done more elegantly/faster, but leave the optimisation to later time                  
-                  for (std::vector<size_t>::const_reverse_iterator ci = indicesToRemove.rbegin(); ci!=indicesToRemove.rend(); ++ci) {
-                       ASKAPDEBUGASSERT(*ci < names.size());
-                       names.erase(names.begin() + *ci);
-                  }
-              }
-              */
-              solveSubsetOfNormalEquations(params,quality, subsetNames);
-          } 
-      }
-        
-      return true;
+        // Solving A^T Q^-1 V = (A^T Q^-1 A) P
+        // Find all the free parameters.
+        vector<string> names(params.freeNames());
+        if (names.size() == 0) {
+            // List of parameters is empty, will solve for all
+            // unknowns in the equation.
+            names = normalEquations().unknowns();
+        }
+        ASKAPCHECK(names.size() > 0, "No free parameters in Linear Solver");
+
+        bool parallelMatrix = false;
+        if (algorithm() == "LSQR") {
+            if (parameters().count("parallelMatrix") > 0
+                && parameters().at("parallelMatrix") == "true") {
+                parallelMatrix = true;
+            }
+        }
+
+        if (names.size() < 100 || parallelMatrix) {
+            // No need to extract independent blocks if number of unknowns is small, or matrix is split between ranks.
+            solveSubsetOfNormalEquations(params, quality, names, parallelMatrix);
+        } else {
+            while (names.size() > 0) {
+                const std::vector<std::string> subsetNames = getIndependentSubset(names,1e-6);
+                solveSubsetOfNormalEquations(params, quality, subsetNames);
+            }
+        }
+        return true;
     };
 
     Solver::ShPtr LinearSolver::clone() const
