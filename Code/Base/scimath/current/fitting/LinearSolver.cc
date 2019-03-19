@@ -82,7 +82,8 @@ namespace askap
     /// thing to do!). A very large threshold has the same effect. Zero
     /// threshold is not allowed and will cause an exception.
     LinearSolver::LinearSolver(double maxCondNumber) : 
-           itsMaxCondNumber(maxCondNumber) 
+           itsMaxCondNumber(maxCondNumber),
+           itsWorkersComm(NULL)
     {
       ASKAPASSERT(itsMaxCondNumber!=0);
     };
@@ -551,6 +552,11 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
     Solver::ShPtr LinearSolver::clone() const
     {
       return Solver::ShPtr(new LinearSolver(*this));
+    }
+
+    void LinearSolver::SetWorkersCommunicator(void *comm)
+    {
+        itsWorkersComm = comm;
     }
 
   }
