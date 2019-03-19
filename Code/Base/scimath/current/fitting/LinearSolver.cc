@@ -164,9 +164,8 @@ std::vector<std::string> LinearSolver::getIndependentSubset(std::vector<std::str
 /// @param[in] params parameters to be updated           
 /// @param[in] quality Quality of the solution
 /// @param[in] names names of the parameters to solve for 
-/// @param[in] parallelMatrix flag for whether the matrix is split between different ranks.
 std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &params, Quality& quality,
-                   const std::vector<std::string> &names, bool parallelMatrix) const
+                   const std::vector<std::string> &names) const
 {
     ASKAPTRACE("LinearSolver::solveSubsetOfNormalEquations");
     std::pair<double,double> result(0.,0.);
@@ -537,17 +536,9 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
         }
         ASKAPCHECK(names.size() > 0, "No free parameters in Linear Solver");
 
-        bool parallelMatrix = false;
-        if (algorithm() == "LSQR") {
-            if (parameters().count("parallelMatrix") > 0
-                && parameters().at("parallelMatrix") == "true") {
-                parallelMatrix = true;
-            }
-        }
-
-        if (names.size() < 100 || parallelMatrix) {
-            // No need to extract independent blocks if number of unknowns is small, or matrix is split between ranks.
-            solveSubsetOfNormalEquations(params, quality, names, parallelMatrix);
+        if (names.size() < 100 // No need to extract independent blocks if number of unknowns is small.
+            || algorithm() == "LSQR") {
+            solveSubsetOfNormalEquations(params, quality, names);
         } else {
             while (names.size() > 0) {
                 const std::vector<std::string> subsetNames = getIndependentSubset(names,1e-6);

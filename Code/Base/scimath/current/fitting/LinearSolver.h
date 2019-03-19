@@ -87,10 +87,9 @@ namespace askap
         /// @param[in] params parameters to be updated           
         /// @param[in] quality Quality of the solution
         /// @param[in] names names for parameters to solve for
-        /// @param[in] parallelMatrix flag for whether the matrix is split between different ranks.
         /// @return pair of minimum and maximum eigenvalues
         std::pair<double,double>  solveSubsetOfNormalEquations(Params &params, Quality& quality, 
-                   const std::vector<std::string> &names, bool parallelMatrix = false) const;
+                   const std::vector<std::string> &names) const;
         
         /// @brief extract an independent subset of parameters
         /// @details This method analyses the normal equations and forms a subset of 
