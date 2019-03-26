@@ -83,6 +83,21 @@ void BeamLogger::extractBeams(const std::vector<std::string>& imageList)
     }
 }
 
+casa::Vector<casa::Quantum<double> > BeamLogger::beam(const unsigned int channel)
+{
+    std::map<unsigned int, casa::Vector<casa::Quantum<double> > >::iterator it = itsBeamList.find(channel);
+    if (it != itsBeamList.end()) {
+        return itsBeamList[channel];
+    } else {
+        ASKAPLOG_WARN_STR(logger, "BeamList has no beam recorded for channel " << channel << ", returning zero size beam");
+        casa::Vector<casa::Quantum<double> > beam(3);
+        beam[0] = casa::Quantum<double>(0., "arcsec");
+        beam[1] = casa::Quantum<double>(0., "arcsec");
+        beam[2] = casa::Quantum<double>(0., "deg");
+        return beam;
+    }
+}
+
 void BeamLogger::write()
 {
     if (itsFilename != "") {
