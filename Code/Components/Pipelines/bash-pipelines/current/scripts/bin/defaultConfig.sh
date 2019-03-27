@@ -285,6 +285,10 @@ BANDPASS_REFANTENNA=1
 
 # Whether to smooth the bandpass
 DO_BANDPASS_SMOOTH=true
+# User-defined string for passing optional arguments to the bandpass_smooth_tool:
+# By default we DO NOT USE this string. If supplied by user in the config file, 
+# all optional arguments will be overwritten by this string. 
+BANDPASS_SMOOTH_ARG_STRING=""
 # Which method to use - either "plot_caltable" or "smooth_bandpass"
 BANDPASS_SMOOTH_TOOL="plot_caltable"
 
@@ -313,6 +317,10 @@ BANDPASS_SMOOTH_N_TAPER=""
 # The number of iterations for Fourier-interpolation across flagged
 # points
 BANDPASS_SMOOTH_N_ITER=""
+# If > 0, the smooth solutions will be derived by fitting only 54x${BANDPASS_SMOOTH_F54} 
+# number of points. The beam-forming interval (where jumps are seen) can be 54 (normal 
+# obs mode) or nx54 (for zoom-modes). 
+BANDPASS_SMOOTH_F54=""
 
 # Whether to apply the bandpass solution to the 1934 dataset itself
 DO_APPLY_BANDPASS_1934=true
