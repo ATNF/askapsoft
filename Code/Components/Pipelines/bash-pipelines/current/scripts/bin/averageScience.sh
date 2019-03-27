@@ -112,7 +112,7 @@ width       = ${NUM_CHAN_TO_AVERAGE}
 
 
 # Make the tile size the number of averaged channels, to improve I/O
-stman.tilenchan   = ${nchanContSci}
+stman.tilenchan   = ${TILENCHAN_AV}
 # Set a larger bucketsize
 stman.bucketsize  = ${BUCKET_SIZE}
 
