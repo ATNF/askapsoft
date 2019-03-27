@@ -114,9 +114,12 @@ Cbpcalibrator.refantenna                      = ${BANDPASS_REFANTENNA}"
 loadModule bptool"
         unload_script="unloadModule bptool"
         script_name="smooth_bandpass.py"
-        script_args="-t ${TABLE_BANDPASS} -wp -r ${BANDPASS_REFANTENNA}"
+        script_args="-t ${TABLE_BANDPASS} -wp "
 	script_args_bare_minimum=${script_args}
 
+        if [ "${BANDPASS_REFANTENNA}" != "" ]; then
+            script_args="${script_args} -r ${BANDPASS_REFANTENNA}"
+        fi
         if [ "${BANDPASS_SMOOTH_POLY_ORDER}" != "" ]; then
             script_args="${script_args} -np ${BANDPASS_SMOOTH_POLY_ORDER}"
         fi
