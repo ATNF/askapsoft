@@ -42,6 +42,7 @@ squser() {
     {
       cpus_per_user[$1" "$2] += $4; 
       nodes_per_user[$1" "$2] += $5;
+      threads_per_cpu = 2; # need to divide by this else the output is actually threads not cpu
     } END {
       printf "Current galaxy usage by user and project\n"
       printf "\n"
@@ -53,9 +54,9 @@ squser() {
         split(idx[i], id, " "); # Split the username and project out into id array for printf later.
         cpus+=cpus_per_user[idx[i]];
         nodes+=nodes_per_user[idx[i]];
-        printf"%-20s %-10s %-5s %-4s\n", id[1], id[2], cpus_per_user[idx[i]], nodes_per_user[idx[i]];
+        printf"%-20s %-10s %-5s %-4s\n", id[1], id[2], cpus_per_user[idx[i]]/threads_per_cpu, nodes_per_user[idx[i]];
       } 
-      printf"\nTotal: CPUS %s\tNodes %s\n", cpus, nodes; 
+      printf"\nTotal: CPUS %s\tNodes %s\n", cpus/threads_per_cpu, nodes; 
     } '
   squeue -o "%u %a %T %C %D" -p workq | egrep "RUNNING" | sort -b | awk "$awk_command"
 }
