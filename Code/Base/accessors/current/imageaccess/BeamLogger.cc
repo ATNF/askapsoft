@@ -214,11 +214,13 @@ void BeamLogger::gather(askapparallel::AskapParallel &comms, int rankToGather, b
                         ASKAPLOG_DEBUG_STR(logger, "Has data - about to receive " << size << " channels");
                         for(unsigned int i=0;i<size;i++){
                             in >> chan >> bmaj >> bmin >> bpa;
-                            casa::Vector<casa::Quantum<double> > currentbeam(3);
-                            currentbeam[0] = casa::Quantum<double>(bmaj, "arcsec");
-                            currentbeam[1] = casa::Quantum<double>(bmin, "arcsec");
-                            currentbeam[2] = casa::Quantum<double>(bpa, "deg");
-                            itsBeamList[chan] = currentbeam;
+                            if (bmaj > 0.) {
+                                casa::Vector<casa::Quantum<double> > currentbeam(3);
+                                currentbeam[0] = casa::Quantum<double>(bmaj, "arcsec");
+                                currentbeam[1] = casa::Quantum<double>(bmin, "arcsec");
+                                currentbeam[2] = casa::Quantum<double>(bpa, "deg");
+                                itsBeamList[chan] = currentbeam;
+                            }
                         }
                     }
                     else {

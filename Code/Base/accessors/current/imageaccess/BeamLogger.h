@@ -91,9 +91,10 @@ class BeamLogger {
 
         /// @brief Gather channels from different ranks onto a single,
         /// nominated rank, combining the lists of channel information
-        /// @details Each rank (other than the nominated one) sends the
-        /// channel and beam information to the nominated rank. The
-        /// beamlists are aggregated on that rank ready for writing.
+        /// @details Each rank (other than the nominated one) sends
+        /// the channel and beam information to the nominated
+        /// rank. The beamlists are aggregated on that rank ready for
+        /// writing, ignoring any channels that have zero-sized beams.
     void gather(askapparallel::AskapParallel &comms, int rankToGather, bool includeMaster);
 
 
