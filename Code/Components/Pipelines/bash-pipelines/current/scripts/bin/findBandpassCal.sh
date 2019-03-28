@@ -143,7 +143,7 @@ loadModule bptool"
     fi
 
     # Overwrite argument string if the user supplies the arguments in a string: 
-    if [ ${BANDPASS_SMOOTH_ARG_STRING} != "" ]; then 
+    if [ "${BANDPASS_SMOOTH_ARG_STRING}" != "" ]; then 
 	    script_args="${script_args_bare_minimum} ${BANDPASS_SMOOTH_ARG_STRING}"
     fi
 
