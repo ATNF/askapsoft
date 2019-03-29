@@ -163,9 +163,11 @@ srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${mslist} --ful
 
 # Remove interim MSs if required.
 purgeMSs=${PURGE_INTERIM_MS_SCI}
-if [ "\${purgeMS}" == "true" ]; then
+if [ "\${purgeMSs}" == "true" ]; then
     for ms in \${mergelist}; do
-        rm -rf \${ms}
+        lfs find \$ms -type f -print0 | xargs -0 munlink
+        find \$ms -type l -delete
+        find \$ms -depth -type d -empty -delete
     done
 fi
 
