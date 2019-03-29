@@ -170,6 +170,7 @@ is possible, however, to select a single field to process via the
 | ``ELEVATION_FLAG_SCIENCE_LOW``                | ""                              | elevation_flagger.low (:doc:`../calim/cflag`)   | Visibilities below this elevation (degrees) will be flagged. If set   |
 |                                               |                                 |                                                 | to blank (``ELEVATION_FLAG_SCIENCE_LOW=""``), then no flagging based  |
 |                                               |                                 |                                                 | on low elevation limit will be applied.                               |
++-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 | ``ELEVATION_FLAG_SCIENCE_HIGH``               | ""                              | elevation_flagger.high (:doc:`../calim/cflag`)  | Visibilities above this elevation (degrees) will be flagged. If set   |
 |                                               |                                 |                                                 | to blank (``ELEVATION_FLAG_SCIENCE_HIGH=""``), then no flagging based |
 |                                               |                                 |                                                 | on high elevation limit will be applied.                              |
