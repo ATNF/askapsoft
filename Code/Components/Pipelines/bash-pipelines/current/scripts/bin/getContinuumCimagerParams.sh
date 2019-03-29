@@ -172,9 +172,11 @@ if [ "${SOLVER}" == "Clean" ]; then
     cleaningPars="${cleaningPars}
 Cimager.solver.Clean.solutiontype               = ${CLEAN_SOLUTIONTYPE}
 Cimager.solver.Clean.verbose                    = False
+Cimager.solver.Clean.decoupled                  = True
 Cimager.solver.Clean.tolerance                  = 0.01
 Cimager.solver.Clean.weightcutoff               = zero
 Cimager.solver.Clean.weightcutoff.clean         = false
+Cimager.threshold.masking                       = 0.9
 Cimager.solver.Clean.logevery                   = 50"
 fi
 cleaningPars="${cleaningPars}
