@@ -521,6 +521,21 @@ EOF
                         fi
                     fi
                 fi
+                # Re-create the sbinfo file, as we've changed the state of the SB
+                loadModule askapcli
+                schedblock info -v -p "${SB_SCIENCE}" > "$sbinfo"
+                err=$?
+                unloadModule askapcli
+                if [ $err -ne 0 ]; then
+                    echo "ERROR - the 'schedblock' command failed."
+                    echo "        Full command:   schedblock info -v -p ${SB_SCIENCE}"
+                    echo "Exiting pipeline."
+                    exit $err
+                fi
+                cat >> "$sbinfo" <<EOF
+${METADATA_IS_GOOD} ${NOW}
+EOF
+                
             fi
 
         fi
