@@ -252,6 +252,12 @@ the quality of the bandpass solution.
 |                                               |                                       |                                                        | "smooth_bandpass". Relevant parameters for each tool      |
 |                                               |                                       |                                                        | follow.                                                   |
 +-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| ``BANDPASS_SMOOTH_F54``                       | ""                                    | none                                                   | Integer value which if >0, the fitting is done within the |
+|                                               |                                       |                                                        | beam-forming intervals assumed to be a multiple of 54     |
+|                                               |                                       |                                                        | channels. For eg., for 54-channel beamforming interval    |
+|                                               |                                       |                                                        | set ``BANDPASS_SMOOTH_F54=1``                             |
+|                                               |                                       |                                                        | For 216-channel interval, set ``BANDPASS_SMOOTH_F54=4``   |
++-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
 | *plot_caltable*                               |                                       |                                                        | Options for the script "plot_caltable.py"                 |
 +-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
 | ``DO_BANDPASS_PLOT``                          | true                                  | none                                                   | Whether to produce plots of the bandpass                  |
@@ -286,12 +292,6 @@ the quality of the bandpass solution.
 | ``BANDPASS_SMOOTH_N_ITER``                    | ""                                    | none                                                   | The number of iterations for Fourier-interpolation across |
 |                                               |                                       |                                                        | flagged points - the value for the ``-nI`` option. Ignored|
 |                                               |                                       |                                                        | if left blank.                                            |
-+-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
-| ``BANDPASS_SMOOTH_F54``                       | ""                                    | none                                                   | Integer value which if >0, the fitting is done within the |
-|                                               |                                       |                                                        | beam-forming intervals assumed to be a multiple of 54     |
-|                                               |                                       |                                                        | channels. For eg., for 54-channel beamforming interval    |
-|                                               |                                       |                                                        | set ``BANDPASS_SMOOTH_F54=1``                             |
-|                                               |                                       |                                                        | For 216-channel interval, set ``BANDPASS_SMOOTH_F54=4``   |
 +-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
 | **Applying the bandpass solution**            |                                       |                                                        |                                                           |
 +-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+

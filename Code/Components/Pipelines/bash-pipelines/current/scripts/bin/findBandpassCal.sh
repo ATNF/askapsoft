@@ -105,6 +105,12 @@ Cbpcalibrator.refantenna                      = ${BANDPASS_REFANTENNA}"
         if [ "${BANDPASS_SMOOTH_OUTLIER}" == "true" ]; then
             script_args="${script_args} -o"
         fi
+
+        if [ "${BANDPASS_SMOOTH_F54}" != "" ]; then
+            numberOfChannels=$(echo ${BANDPASS_SMOOTH_F54} | awk '{print $1*54}')
+            script_args="${script_args} -bf ${numberOfChannels}"
+        fi
+        
         script_args="${script_args} -fit ${BANDPASS_SMOOTH_FIT} -th ${BANDPASS_SMOOTH_THRESHOLD}"
 
     elif [ "${BANDPASS_SMOOTH_TOOL}" == "smooth_bandpass" ]; then
