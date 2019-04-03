@@ -12,6 +12,12 @@ up to ``BEAM_MAX`` are split & flagged, and have their bandpass solved
 for. This is due to the particular requirements of
 :doc:`../calim/cbpcalibrator`.
 
+If the bandpass calibration observation is long, and you just wish to
+use a portion of it for bandpass calibration, then you can specify a
+time range through ``SPLIT_TIME_START_1934`` and
+``SPLIT_TIME_END_1934``. If either is not given, the start or end time
+are taken to be the start or end of the observation respectively.
+
 The default behaviour is to flag the data with
 :doc:`../calim/cflag`. In this case, the MS is flagged in two
 passes. First, a combination of selection rules (allowing flagging of
@@ -133,7 +139,7 @@ the quality of the bandpass solution.
 | ``FLAG_DO_FLAT_AMPLITUDE_1934``               | false                                 | none                                                   | Whether to apply a simple ("flat") amplitude threshold to |
 |                                               |                                       |                                                        | the 1934 data.                                            |
 +-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
-|    ``FLAG_THRESHOLD_AMPLITUDE_1934``          | 0.2                                   | amplitude_flagger.high (:doc:`../calim/cflag`)         | Simple amplitude threshold applied when flagging 1934     |
+| ``FLAG_THRESHOLD_AMPLITUDE_1934``             | 0.2                                   | amplitude_flagger.high (:doc:`../calim/cflag`)         | Simple amplitude threshold applied when flagging 1934     |
 |                                               |                                       |                                                        | data.                                                     |
 |                                               |                                       |                                                        | If set to blank (``FLAG_THRESHOLD_AMPLITUDE_1934=""``),   |
 |                                               |                                       |                                                        | then no minimum value is applied.                         |
@@ -162,6 +168,16 @@ the quality of the bandpass solution.
 +-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
 | ``FLAG_AUTOCORRELATION_1934``                 | false                                 | selection_flagger.<rule>.autocorr                      | If true, then autocorrelations will be flagged.           |
 |                                               |                                       |                                                        |                                                           |
++-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| ``SPLIT_TIME_START_1934``                     | ""                                    | timebegin (:doc:`../calim/mssplit`)                    | The starting time for data to be used from the 1934 SB. If|
+|                                               |                                       |                                                        | blank, the start of the observation will be used. The     |
+|                                               |                                       |                                                        | formatting must conform to requirements of                |
+|                                               |                                       |                                                        | :doc:`../calim/mssplit`.                                  |
++-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| ``SPLIT_TIME_END_1934``                       | ""                                    | timeend (:doc:`../calim/mssplit`)                      | The starting time for data to be used from the 1934 SB. If|
+|                                               |                                       |                                                        | blank, the start of the observation will be used. The     |
+|                                               |                                       |                                                        | formatting must conform to requirements of                |
+|                                               |                                       |                                                        | :doc:`../calim/mssplit`.                                  |
 +-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
 | **Using AOFlagger for flagging**              |                                       |                                                        |                                                           |
 |                                               |                                       |                                                        |                                                           |
