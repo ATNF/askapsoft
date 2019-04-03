@@ -28,15 +28,8 @@ There is a RESTORE.SH script that ASKAP operations will make use of to
 restore the measurement set from the archive. General users cannot run
 this, as the askap-scheduling-blocks directory is not writeable.
 
-If a scheduling block is being restored, and you want to run the
-pipeline processing (:doc:`../pipelines/index`) as soon as it is
-available, you can use the **stage-processing.sh** script in the
-*askaputils* module (see :doc:`modules`). The calling syntax is::
-
-  stage-processing.sh myconfig.sh <jobID>
-
-where <jobID> is the slurm job ID of the restore job. Run
-"stage-processing.sh -h" for more information.
+.. This next bit is no longer relevant - the stage-processing script doesn't do what it should
+.. If a scheduling block is being restored, and you want to run the pipeline processing (:doc:`../pipelines/index`) as soon as it is available, you can use the **stage-processing.sh** script in the *askaputils* module (see :doc:`modules`). The calling syntax is::   stage-processing.sh myconfig.sh <jobID> where <jobID> is the slurm job ID of the restore job. Run "stage-processing.sh -h" for more information.
 
 All BETA datasets were archived in the same fashion, and are available
 in their own directory on both the commissioning archive
