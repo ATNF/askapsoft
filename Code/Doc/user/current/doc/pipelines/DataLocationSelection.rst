@@ -9,24 +9,32 @@ given by ``DIR_SB``. If SB numbers are not provided, however,
 the ``MS_INPUT`` variables give the filename for the relevant MS. The
 full path must be specified here.
 
-There are two modes in which ingest has been run to create measurement
-sets in the SB directory. The usual way has been to create a single
-file for the entire observation. Recently, ingest has started
-producing a single MS per beam. The pipeline is now compatible with
-both these modes. For the file-per-beam mode, it assumes there is the
-same number of beams as in the footprint. If there is not, the
-pipeline will currently exit with an error message.
+The measurement sets presented in the scheduling block directories
+have a variety of forms:
 
-In the file-per-beam mode, the metadata for the observation is taken
+1. The earliest observations had all beams in a single measurement
+   set. For these, splitting with mssplit is required to get a
+   single-beam MS used for processing.
+2. Many observations have one beam per MS. If no selection of channels
+   or fields or scans is required, these can be copied rather than
+   split. Note that splitting of the bandpass observations are
+   necessary, to isolate the relevant scan.
+3. Recent large observations have more than one MS per beam, split in
+   frequency chunks. The pipeline will merge these to form a single
+   local MS for each beam. If splitting (of channels, fields or scans)
+   is required, this is done first, before merging the local subsets.
+
+
+In the multiple-file modes, the metadata for the observation is taken
 from a single MS (although they should all be the same for a given
 observation).
 
-If no channel or scan selection is being made (that is, using
-``CHANNEL_RANGE_SCIENCE`` or ``SCAN_SELECTION_SCIENCE``), there is
-only a single field in the dataset, and the observation used the
-MS-per-beam mode, then instead of splitting the dataset the pipeline
-simply copies the archive MS to the output directory. This should run
-faster than using *mssplit*.
+If no channel or scan selection is being made (that is,
+``CHANNEL_RANGE_SCIENCE`` or ``SCAN_SELECTION_SCIENCE`` are not
+given), there is only a single field in the dataset, and the
+observation used the MS-per-beam mode, then instead of splitting the
+dataset the pipeline simply copies the archive MS to the output
+directory. This should run faster than using *mssplit*.
 
 The bandpass calibration datasets are treated the same way, although
 *mssplit* is always used (since the relevant scan needs to be split
