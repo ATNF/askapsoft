@@ -287,6 +287,12 @@ the quality of the bandpass solution.
 |                                               |                                       |                                                        | flagged points - the value for the ``-nI`` option. Ignored|
 |                                               |                                       |                                                        | if left blank.                                            |
 +-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
+| ``BANDPASS_SMOOTH_F54``                       | ""                                    | none                                                   | Integer value which if >0, the fitting is done within the |
+|                                               |                                       |                                                        | beam-forming intervals assumed to be a multiple of 54     |
+|                                               |                                       |                                                        | channels. For eg., for 54-channel beamforming interval    |
+|                                               |                                       |                                                        | set ``BANDPASS_SMOOTH_F54=1``                             |
+|                                               |                                       |                                                        | For 216-channel interval, set ``BANDPASS_SMOOTH_F54=4``   |
++-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
 | **Applying the bandpass solution**            |                                       |                                                        |                                                           |
 +-----------------------------------------------+---------------------------------------+--------------------------------------------------------+-----------------------------------------------------------+
 | ``DO_APPLY_BANDPASS_1934``                    | true                                  | none                                                   | Whether to apply the bandpass solution to the 1934        |
