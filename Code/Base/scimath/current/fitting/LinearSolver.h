@@ -119,6 +119,14 @@ namespace askap
 
          // MPI communicator of all workers (for LSQR solver).
          void *itsWorkersComm;
+
+         // NOTE: Copied from "calibaccess/CalParamNameHelper.h", as currently accessors depends of scimath.
+         /// @brief extract coded channel and parameter name
+         /// @details This is a reverse operation to codeInChannel. Note, no checks are done that the name passed
+         /// has coded channel present.
+         /// @param[in] name full name of the parameter
+         /// @return a pair with extracted channel and the base parameter name
+         static std::pair<casa::uInt, std::string> extractChannelInfo(const std::string &name);
     };
 
   }

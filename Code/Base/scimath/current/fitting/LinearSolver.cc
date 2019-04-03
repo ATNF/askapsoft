@@ -370,6 +370,26 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
           gsl_matrix_free(V);
     }
     else if (algorithm() == "LSQR") {
+        bool addSmoothnessConstraints = false;
+
+        std::map<std::pair<casa::uInt, std::string>, size_t> gainIndexesReal;
+        std::map<std::pair<casa::uInt, std::string>, size_t> gainIndexesImag;
+
+        if (addSmoothnessConstraints) {
+            // Build indexes maps (needed to add smoothness constraints to the matrix).
+            for (std::vector<std::pair<string, int> >::const_iterator indit = indices.begin();
+                 indit != indices.end(); ++indit) {
+                // Make sure there are two unknowns per parameter: real and imaginary parts of the complex gain value.
+                ASKAPCHECK(params.value(indit->first).nelements() == 2, "Number of unknowns per parameter name is not correct!");
+
+                // Extracting channel and parameter name.
+                std::pair<casa::uInt, std::string> paramInfo = extractChannelInfo(indit->first);
+
+                gainIndexesReal.insert(make_pair(paramInfo, indit->second));     // real part
+                gainIndexesImag.insert(make_pair(paramInfo, indit->second + 1)); // imaginary part
+            }
+        }
+
         int myrank = 0;
         int nbproc = 1;
 
@@ -557,6 +577,20 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
     void LinearSolver::SetWorkersCommunicator(void *comm)
     {
         itsWorkersComm = comm;
+    }
+
+    // NOTE: Copied from "calibaccess/CalParamNameHelper.h", as currently accessors depends of scimath.
+    /// @brief extract coded channel and parameter name
+    /// @details This is a reverse operation to codeInChannel. Note, no checks are done that the name passed
+    /// has coded channel present.
+    /// @param[in] name full name of the parameter
+    /// @return a pair with extracted channel and the base parameter name
+    std::pair<casa::uInt, std::string> LinearSolver::extractChannelInfo(const std::string &name)
+    {
+      size_t pos = name.rfind(".");
+      ASKAPCHECK(pos != std::string::npos, "Expect dot in the parameter name passed to extractChannelInfo, name="<<name);
+      ASKAPCHECK(pos + 1 != name.size(), "Parameter name="<<name<<" ends with a dot");
+      return std::pair<casa::uInt, std::string>(utility::fromString<casa::uInt>(name.substr(pos+1)),name.substr(0,pos));
     }
 
   }
