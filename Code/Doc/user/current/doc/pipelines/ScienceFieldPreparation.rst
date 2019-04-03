@@ -112,9 +112,10 @@ is possible, however, to select a single field to process via the
 |                                               |                                 |                                                 | ``CHAN_RANGE_1934``. The default is to use all available channels from|
 |                                               |                                 |                                                 | the MS.                                                               |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
-| ``NUM_CHAN_TO_AVERAGE``                       | 54                              | stman.tilenchan (:doc:`../calim/mssplit`)       | Number of channels to be averaged to create continuum                 |
-|                                               |                                 |                                                 | measurement set. Also determines the tile size when                   |
-|                                               |                                 |                                                 | creating the MS.                                                      |
+| ``NUM_CHAN_TO_AVERAGE``                       | 54                              | width (:doc:`../calim/mssplit`)                 | Number of channels to be averaged to create continuum                 |
+|                                               |                                 |                                                 | measurement set.                                                      |
++-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
+| ``TILENCHAN_AV``                              | 18                              | stman.tilenchan (:doc:`../calim/mssplit`)       | The number of channels in the tile size used for the averaged MS.     |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 | **Initial flagging**                          |                                 |                                                 |                                                                       |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
