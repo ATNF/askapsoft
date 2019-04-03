@@ -34,6 +34,7 @@ Pipelines:
    allow continued development of these tools without needing to keep
    the pipeline up-to-date with possible parameter inputs.
  * The following bugs have been fixed
+
    - The continuum subtraction selavy jobs were using the wrong
      nsubx/nsuby parameters.
    - The pipeline scripts now check for the correct loading of the
@@ -41,12 +42,15 @@ Pipelines:
      loaded correctly.
    - Wildcards used in identifying polarisation data products are now
      correctly applied.
+
  * There are new parameters used in the pipeline:
+
    - TILENCHAN_AV
    - SPLIT_TIME_START_1934 / SPLIT_TIME_END_1934
    - BANDPASS_SMOOTH_ARG_STRING
    - BANDPASS_SMOOTH_F54
    - ELEVATION_FLAG_SCIENCE_LOW/HIGH
+
  * There are new default values for some pipeline parameters:
    <TO BE FILLED IN>
 
@@ -206,19 +210,23 @@ Pipelines:
 Processing:
 
  * Imaging:
+   
   - Fix a coordinate shift that was seen in spectral imaging, due to a
     different direction being provided by the advise functionality. 
 
  * Calibration:
+   
   - Efficiency improvements to ccalapply to help speed it up
 
  * Utilities:
+   
   - Adjustment of the maximum cache size in mssplit to avoid
     out-of-memory issues
   - Trimming down of the pointing table in MSs produced by msconcat,
     so that very large tables do not result. 
 
  * Selavy:
+   
   - The restoring beam is now written into the component maps.
   - A significant change to the handling of the initial estimates for
     the Gaussian fits, making it more robust and avoiding downstream
@@ -229,7 +237,7 @@ Processing:
 0.22.2 (02 October 2018)
 ------------------------
 Minor change to pipeline scripts:
- * nChan is now set to CHAN_RANGE_ parameter instead of reading it from the
+ * nChan is now set to CHAN_RANGE_SCIENCE/1934 parameter instead of reading it from the
    raw measurement sets. Fixes the bug arising when working on subset channel 
    range in the measurement sets.
 
@@ -250,11 +258,14 @@ Pipelines:
  * The ability to specify the number of cores used for the continuum imaging has been improved, to make it more flexible and work better with slurm.
  * The behaviour of source-finding in the selfcal has changed. We now fit the full set of Gaussian parameters, and require contiguous pixels for the islands. 
  * Several bugs were fixed:
+   
    - Some FITS files were not having their header keywords updated correctly. This has now been fixed and streamlined.
    - The CASDA upload script was erroneously including multiple versions of the taylor.1 images, due to a bug introduced in 0.21.0. It was also dropping a few .fits suffixes in certain situations.
    - The cmodel-based continuum subtraction script had a bug with an undefined local variable that occured with particular parameter settings.s
    - The clean-model-based self-calibration script was getting the model image name wrong for Taylor-term images.
- * There are a number of changes to the default parameters: 
+     
+ * There are a number of changes to the default parameters:
+   
    - The DO_MAKE_THUMBNAILS option is now true by default.
    - There is a new DO_VALIDATION_SCIENCE (true by default) to run the cube validation.
    - The snapshot imaging has been turned off by default, as this has
