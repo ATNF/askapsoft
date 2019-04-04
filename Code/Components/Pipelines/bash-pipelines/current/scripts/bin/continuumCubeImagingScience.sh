@@ -296,11 +296,12 @@ EOFOUTER
         if [ "${SUBMIT_JOBS}" == "true" ]; then
             DEP=""
             DEP=$(addDep "$DEP" "$DEP_START")
-            DEP=$(addDep "$DEP" "$ID_SPLIT_SCI")
-            DEP=$(addDep "$DEP" "$ID_CCALAPPLY_SCI")
-            DEP=$(addDep "$DEP" "$ID_FLAG_SCI")
-            DEP=$(addDep "$DEP" "$ID_AVERAGE_SCI")
-            DEP=$(addDep "$DEP" "$ID_FLAG_SCI_AV")
+            DEP=$(addDep "$DEP" "$ID_SPLIT_SCI_LIST")
+            DEP=$(addDep "$DEP" "$ID_CCALAPPLY_SCI_LIST")
+            DEP=$(addDep "$DEP" "$ID_FLAG_SCI_LIST")
+            DEP=$(addDep "$DEP" "$ID_AVERAGE_SCI_LIST")
+            DEP=$(addDep "$DEP" "$ID_FLAG_SCI_AV_LIST")
+            #DEP=$(addDep "$DEP" "$ID_CONTIMG_SCI_SC")
             DEP=$(addDep "$DEP" "$ID_CAL_APPLY_CONT_SCI")
             ID_CONTCUBE_SCI=$(sbatch $DEP "$sbatchfile" | awk '{print $4}')
             DEP_CONTCUBE=$(addDep "$DEP_CONTCUBE" "$ID_CONTCUBE_SCI")

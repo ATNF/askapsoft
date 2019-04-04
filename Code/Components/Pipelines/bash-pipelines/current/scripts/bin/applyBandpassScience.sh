@@ -73,7 +73,7 @@ msMetadata="${MS_METADATA}"
 #nChan=\$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="\${msMetadata}" --val=nChan)
 nChan=${NUM_CHAN_SCIENCE}
 
-parset="${parsets}/ccalapply_bp_b${BEAM}_\${SLURM_JOB_ID}.in"
+parset=${parsets}/ccalapply_bp_${FIELDBEAM}_\${SLURM_JOB_ID}.in
 cat > "\$parset" << EOFINNER
 Ccalapply.dataset                         = ${msSci}
 #
@@ -90,8 +90,8 @@ Ccalapply.calibaccess.table.maxchan       = \${nChan}
 Ccalapply.calibaccess.table               = \${TABLE}
 
 EOFINNER
-
-log="${logs}/ccalapply_bp_b${BEAM}_\${SLURM_JOB_ID}.log"
+log=${logs}/ccalapply_bp_${FIELDBEAM}_\${SLURM_JOB_ID}.log
+#log=${logs}/ccalapply_bp_b${BEAM}_\${SLURM_JOB_ID}.log
 
 NCORES=${NUM_CORES_CAL_APPLY}
 NPPN=${NPPN_CAL_APPLY}
@@ -115,6 +115,7 @@ EOFOUTER
         DEP=$(addDep "$DEP" "$ID_CBPCAL")
 	ID_CCALAPPLY_SCI=$(sbatch $DEP "$sbatchfile" | awk '{print $4}')
 	recordJob "${ID_CCALAPPLY_SCI}" "Applying bandpass calibration to science observation, with flags \"$DEP\""
+	ID_CCALAPPLY_SCI_LIST=$(addDep "$ID_CCALAPPLY_SCI" "$ID_CCALAPPLY_SCI_LIST")
     else
 	echo "Would apply bandpass calibration to science observation with slurm file $sbatchfile"
     fi

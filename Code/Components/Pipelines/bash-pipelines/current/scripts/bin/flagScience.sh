@@ -307,6 +307,7 @@ EOFOUTER
         DEP=$(addDep "$DEP" "$ID_CCALAPPLY_SCI")
 	ID_FLAG_SCI=$(sbatch $DEP "$sbatchfile" | awk '{print $4}')
 	recordJob "${ID_FLAG_SCI}" "Flagging beam ${BEAM} of science observation, with flags \"$DEP\""
+	ID_FLAG_SCI_LIST=$(addDep "$ID_FLAG_SCI" "$ID_FLAG_SCI_LIST")
     else
 	echo "Would run flagging beam ${BEAM} for science observation with slurm file $sbatchfile"
     fi

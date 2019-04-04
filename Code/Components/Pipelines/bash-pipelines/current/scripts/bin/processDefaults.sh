@@ -175,10 +175,10 @@ if [ \"\$ASKAPSOFT_RELEASE\" == \"\" ]; then
 fi"
        
         # askappipeline module
-        askappipelineVersion=$(module list -t 2>&1 | grep askappipeline | sed -e 's|askappipeline/||g')
+        askappipelineVersion=$(module list -t 2>&1 | grep askappipeline )
         askapsoftModuleCommands="${askapsoftModuleCommands}
 module unload askappipeline
-module load askappipeline/${askappipelineVersion}"
+module load ${askappipelineVersion}"
 
         # Check for the success in loading the askappipeline module
         askapsoftModuleCommands="${askapsoftModuleCommands}
@@ -429,6 +429,12 @@ srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} \"${PIPELINEDIR
     fi
     if [ "$JOB_TIME_AVERAGE_MS" == "" ]; then
         JOB_TIME_AVERAGE_MS=${JOB_TIME_DEFAULT}
+    fi
+    if [ "$JOB_TIME_MSCONCAT_SCI_AV" == "" ]; then
+        JOB_TIME_MSCONCAT_SCI_AV=${JOB_TIME_DEFAULT}
+    fi
+    if [ "$JOB_TIME_MSCONCAT_SCI_SPECTRAL" == "" ]; then
+        JOB_TIME_MSCONCAT_SCI_SPECTRAL=${JOB_TIME_DEFAULT}
     fi
     if [ "$JOB_TIME_CONT_IMAGE" == "" ]; then
         JOB_TIME_CONT_IMAGE=${JOB_TIME_DEFAULT}

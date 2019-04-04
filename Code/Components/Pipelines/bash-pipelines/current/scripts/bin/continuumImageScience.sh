@@ -53,18 +53,38 @@ fi
 
 if [ "${DO_IT}" == "true" ]; then
 
+    NUM_NODES_IMAGING=$(echo $NUM_CPUS_CONTIMG_SCI $CPUS_PER_CORE_CONT_IMAGING | awk '{nworkers=$1-1;if (nworkers%$2==0) nworkernodes = nworkers/$2; else nworkernodes = int(nworkers/$2)+1; nnodes=nworkernodes+1;print nnodes}')
+
     setJob science_continuumImage cont
     cat > "$sbatchfile" <<EOFOUTER
 #!/bin/bash -l
 ${SLURM_CONFIG}
 #SBATCH --time=${JOB_TIME_CONT_IMAGE}
-#SBATCH --ntasks=${NUM_CPUS_CONTIMG_SCI}
-#SBATCH --ntasks-per-node=${CPUS_PER_CORE_CONT_IMAGING}
+#SBATCH --nodes=${NUM_NODES_IMAGING}
 #SBATCH --job-name=${jobname}
 ${exportDirective}
 #SBATCH --output="$slurmOut/slurm-contImaging-%j.out"
 
 ${askapsoftModuleCommands}
+nodelist=\$SLURM_JOB_NODELIST
+
+# Make arrangements to put task 0 (master) of imager on the first node, 
+# and spread the rest out over the other nodes:
+
+newlist=\`hostname\`
+icpu=0
+for node in \`scontrol show hostnames \$nodelist\`; do
+    if [[ "\$node" != \`hostname\` ]]; then
+        for proc in \`seq 1 ${CPUS_PER_CORE_CONT_IMAGING}\`; do
+	    icpu=\$((icpu+1))
+	    if [[ "\$icpu" -lt "${NUM_CPUS_CONTIMG_SCI}" ]]; then 
+		newlist=\$newlist,\$node
+	    fi
+        done
+    fi
+done
+echo "NodeList: "\$nodelist
+echo "NewList: "\$newlist
 
 BASEDIR=${BASEDIR}
 cd $OUTPUT
@@ -110,7 +130,7 @@ log="${logs}/science_imaging_${FIELDBEAM}_\${SLURM_JOB_ID}.log"
 
 NCORES=${NUM_CPUS_CONTIMG_SCI}
 NPPN=${CPUS_PER_CORE_CONT_IMAGING}
-srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} $theimager ${PROFILE_FLAG} -c "\$parset" > "\$log"
+srun --export=ALL --ntasks=\${NCORES} --nodelist=\$newlist --distribution=arbitrary $theimager ${PROFILE_FLAG} -c "\$parset" >> "\$log"
 err=\$?
 
 # Handle the profiling files
@@ -135,11 +155,14 @@ EOFOUTER
     if [ "${SUBMIT_JOBS}" == "true" ]; then
 	DEP=""
         DEP=$(addDep "$DEP" "$DEP_START")
-        DEP=$(addDep "$DEP" "$ID_SPLIT_SCI")
-        DEP=$(addDep "$DEP" "$ID_CCALAPPLY_SCI")
-        DEP=$(addDep "$DEP" "$ID_FLAG_SCI")
-        DEP=$(addDep "$DEP" "$ID_AVERAGE_SCI")
-        DEP=$(addDep "$DEP" "$ID_FLAG_SCI_AV")
+        DEP=$(addDep "$DEP" "$ID_SPLIT_SCI_LIST")
+        DEP=$(addDep "$DEP" "$ID_CCALAPPLY_SCI_LIST")
+        DEP=$(addDep "$DEP" "$ID_FLAG_SCI_LIST")
+        DEP=$(addDep "$DEP" "$ID_AVERAGE_SCI_LIST")
+        DEP=$(addDep "$DEP" "$ID_FLAG_SCI_AV_LIST")
+	if [ "${DO_SPLIT_TIMEWISE}" == "true" ]; then 
+            DEP=$(addDep "$DEP" "$ID_MSCONCAT_SCI_AV")
+	fi
 	ID_CONTIMG_SCI=$(sbatch $DEP "$sbatchfile" | awk '{print $4}')
 	recordJob "${ID_CONTIMG_SCI}" "Make a continuum image for beam $BEAM of the science observation, with flags \"$DEP\""
         FLAG_IMAGING_DEP=$(addDep "$FLAG_IMAGING_DEP" "$ID_CONTIMG_SCI")

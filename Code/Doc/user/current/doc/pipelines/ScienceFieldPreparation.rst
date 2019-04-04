@@ -56,6 +56,20 @@ done in the splitting task, at the same time as the beam selection. It
 is possible, however, to select a single field to process via the
 ``FIELD_SELECTION_SCIENCE`` parameter (by giving the field **name**). 
 
+SPEEDING up processing: The pipeline has an option to speed up processing 
+by splitting the msdata in time. If sought, the timewise splitting of the 
+measurement sets for each beam are done upfront at the copy/split step. 
+This allows parallel execution of the non-imaging tasks (BandpassApplication, 
+Flagging, Averaging and ContinuumSubtraction) on the cluster, and helps 
+attain a massive reduction in processing times. The imaging is done per 
+beam using data in ALL the TimeWindows either by combining the TimeWise 
+split data in an intermediate step, or by passing to imager the list of 
+the TimeWise split measurement sets (the latter is being experimented and 
+should help reduce some duplication of data as well as save some time in 
+the combining process). 
+For details on making use of this feature, see the section on 
+**Processing by splitting data in time** in the table below. 
+
 
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 | Variable                                      | Default                         | Parset equivalent                               | Description                                                           |
@@ -288,6 +302,22 @@ is possible, however, to select a single field to process via the
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 | ``AOFLAGGER_UVW``                             | false                           | none                                            | When true, the command-line argument "-uvw" is added to the AOFlagger |
 |                                               |                                 |                                                 | command. This reads uvw values (some exotic strategies require these).|
++-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
+| **Processing by splitting data in time**      |                                 |                                                 |                                                                       |
+|                                               |                                 |                                                 |                                                                       |
++-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
+| ``DO_SPLIT_TIMEWISE``                         | true                            | none                                            | By default, the non-imaging jobs -- bandpass application, flagging,   |
+|                                               |                                 |                                                 | averaging, ccontsubtract -- will be done in data that has been split  |
+|                                               |                                 |                                                 | into TimeWindows (see below for TimeWindow interval selection param). |
+|                                               |                                 |                                                 | This will speed-up the processing, especially when the observation    |
+|                                               |                                 |                                                 | duration exceeds a few hours.                                         |
+|                                               |                                 |                                                 |        |
++-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
+| ``SPLIT_INTERVAL_MINUTES``                    | 60                              | none                                            | If ``DO_SPLIT_TIMEWISE`` is set to true, the pipeline will split data |
+|                                               |                                 |                                                 | in to ``T/SPLIT_INTERVAL_MINUTES`` time-windows (where, ``T=total obs |
+|                                               |                                 |                                                 | time in minutes``. The pipleine ensures that the time intervals are   |
+|                                               |                                 |                                                 | equal to a second, and so the specified interval may get modified     |
+|                                               |                                 |                                                 | from what had been specified.                                         |
 +-----------------------------------------------+---------------------------------+-------------------------------------------------+-----------------------------------------------------------------------+
 
 

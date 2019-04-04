@@ -112,6 +112,9 @@ outputvis   = \${outputms}
 # is inclusive of both the start and end, indexing is one-based.
 # Default: <no default>
 channel     = \${chanRange}
+#$channelParam
+$timeParamBeg
+$timeParamEnd
 
 # Beam selection via beam ID
 # Select an individual beam

@@ -60,7 +60,7 @@ FAILURE_DIRECTORY="/group/askaprt/processing/pipeline-errors"
 
 ####################
 # Times for individual slurm jobs
-JOB_TIME_DEFAULT="12:00:00"
+JOB_TIME_DEFAULT="24:00:00"
 JOB_TIME_SPLIT_1934=""
 JOB_TIME_SPLIT_SCIENCE=""
 JOB_TIME_FLAG_1934=""
@@ -68,6 +68,8 @@ JOB_TIME_FLAG_SCIENCE=""
 JOB_TIME_FIND_BANDPASS=""
 JOB_TIME_APPLY_BANDPASS=""
 JOB_TIME_AVERAGE_MS=""
+JOB_TIME_MSCONCAT_SCI_AV=""
+JOB_TIME_MSCONCAT_SCI_SPECTRAL=""
 JOB_TIME_CONT_IMAGE=""
 JOB_TIME_CONT_APPLYCAL=""
 JOB_TIME_CONTCUBE_IMAGE=""
@@ -141,6 +143,7 @@ if [ "$ASKAP_ROOT" != "" ]; then
     cimstat=${ASKAP_ROOT}/Code/Components/Analysis/analysis/current/apps/cimstat.sh
     mslist=${ASKAP_ROOT}/Code/Components/Synthesis/synthesis/current/apps/mslist.sh
     msmerge=${ASKAP_ROOT}/Code/Components/Synthesis/synthesis/current/apps/msmerge.sh
+    msconcat=${ASKAP_ROOT}/Code/Components/Synthesis/synthesis/current/apps/msconcat.sh
     image2fits=${ASKAP_ROOT}/3rdParty/casacore/casacore-2.0.3/install/bin/image2fits
     makeThumbnails=${ASKAP_ROOT}/Code/Components/Analysis/evaluation/current/install/bin/makeThumbnailImage.py
     casdaupload=$ASKAP_ROOT/Code/Components/CP/pipelinetasks/current/apps/casdaupload.sh
@@ -149,6 +152,7 @@ if [ "$ASKAP_ROOT" != "" ]; then
 else
     mssplit=mssplit
     msmerge=msmerge
+    msconcat=msconcat
     cflag=cflag
     cmodel=cmodel
     cbpcalibrator=cbpcalibrator
@@ -194,6 +198,9 @@ SPLIT_TIME_START_1934=""
 SPLIT_TIME_END_1934=""
 DO_FLAG_1934=true
 DO_FIND_BANDPASS=true
+DO_SPLIT_TIMEWISE=true
+DO_SPLIT_TIMEWISE_SERIAL=true
+SPLIT_INTERVAL_MINUTES=60
 
 # Calibration & imaging of the 'science' field.
 DO_SCIENCE_FIELD=true
@@ -532,6 +539,12 @@ AOFLAGGER_READ_MODE="auto"
 AOFLAGGER_UVW=false
 
 ######################
+# Msconcat of TimeWiseSplit Data
+NUM_CORES_MSCONCAT_SCI_AV=1
+NUM_CORES_MSCONCAT_SCI_SPECTRAL=1
+NPPN_MSCONCAT_SCI_AV=1
+NPPN_MSCONCAT_SCI_SPECTRAL=1
+######################
 # Imaging
 
 # Data column in MS to use in cimager
@@ -629,7 +642,7 @@ CLEAN_THRESHOLD_MINORCYCLE="[20%, 1.8mJy, 0.03mJy]"
 CLEAN_WRITE_AT_MAJOR_CYCLE=false
 
 # solution type for continuum cleaning - either MAXCHISQ or MAXBASE
-CLEAN_SOLUTIONTYPE="MAXCHISQ"
+CLEAN_SOLUTIONTYPE="MAXBASE"
 
 # Array-capable self-calibration parameters
 #   These parameters can be given as either a single value (eg. "300")
@@ -776,7 +789,7 @@ CLEAN_CONTCUBE_MINORCYCLE_NITER=2000
 CLEAN_CONTCUBE_GAIN=0.1
 CLEAN_CONTCUBE_PSFWIDTH=256
 CLEAN_CONTCUBE_SCALES="[0,3,10]"
-CLEAN_CONTCUBE_SOLUTIONTYPE="MAXCHISQ"
+CLEAN_CONTCUBE_SOLUTIONTYPE="MAXBASE"
 CLEAN_CONTCUBE_THRESHOLD_MINORCYCLE="[40%, 12.6mJy, 0.5mJy]"
 CLEAN_CONTCUBE_THRESHOLD_MAJORCYCLE=0.5mJy
 CLEAN_CONTCUBE_NUM_MAJORCYCLES=2
@@ -880,7 +893,7 @@ CLEAN_SPECTRAL_MINORCYCLE_NITER=2000
 CLEAN_SPECTRAL_GAIN=0.1
 CLEAN_SPECTRAL_PSFWIDTH=256
 CLEAN_SPECTRAL_SCALES="[0,3,10,30]"
-CLEAN_SPECTRAL_SOLUTIONTYPE="MAXCHISQ"
+CLEAN_SPECTRAL_SOLUTIONTYPE="MAXBASE"
 CLEAN_SPECTRAL_THRESHOLD_MINORCYCLE="[50%, 30mJy, 3.5mJy]"
 CLEAN_SPECTRAL_THRESHOLD_MAJORCYCLE=20mJy
 CLEAN_SPECTRAL_NUM_MAJORCYCLES=5

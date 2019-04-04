@@ -314,12 +314,15 @@ EOFOUTER
     if [ "${SUBMIT_JOBS}" == "true" ]; then
         DEP=""
         DEP=$(addDep "$DEP" "$DEP_START")
-        DEP=$(addDep "$DEP" "$ID_SPLIT_SCI")
-        DEP=$(addDep "$DEP" "$ID_FLAG_SCI")
-        DEP=$(addDep "$DEP" "$ID_CCALAPPLY_SCI")
-        DEP=$(addDep "$DEP" "$ID_SPLIT_SL_SCI")
-        DEP=$(addDep "$DEP" "$ID_CAL_APPLY_SL_SCI")
-        DEP=$(addDep "$DEP" "$ID_CONT_SUB_SL_SCI")
+        DEP=$(addDep "$DEP" "$ID_SPLIT_SCI_LIST")
+        DEP=$(addDep "$DEP" "$ID_FLAG_SCI_LIST")
+        DEP=$(addDep "$DEP" "$ID_CCALAPPLY_SCI_LIST")
+        DEP=$(addDep "$DEP" "$ID_SPLIT_SL_SCI_LIST")
+        DEP=$(addDep "$DEP" "$ID_CAL_APPLY_SL_SCI_LIST")
+        DEP=$(addDep "$DEP" "$ID_CONT_SUB_SL_SCI_LIST")
+	if [ "${DO_SPLIT_TIMEWISE}" == "true" ]; then 
+                    DEP=$(addDep "$DEP" "$ID_MSCONCAT_SCI_SPECTRAL")
+	fi
 	ID_SPECIMG_SCI=$(sbatch $DEP "$sbatchfile" | awk '{print $4}')
         DEP_SPECIMG=$(addDep "$DEP_SPECIMG" "$ID_SPECIMG_SCI")
 	recordJob "${ID_SPECIMG_SCI}" "Make a spectral-line cube for beam $BEAM of the science observation, with flags \"$DEP\""

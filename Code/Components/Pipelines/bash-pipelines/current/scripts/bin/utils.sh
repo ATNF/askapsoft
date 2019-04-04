@@ -269,7 +269,7 @@ function setContsubFilenames()
     
     ####
     # First the contsub directory
-    contsubDir=ContSubBeam${BEAM}
+    contsubDir=ContSubBeam${FIELDBEAM}
     ####
     contsubCleanModelImage=$imageStub
     contsubCleanModelType=${imageType}
@@ -585,6 +585,12 @@ function findScienceMSnames()
         # _${FIELD}.${BEAM} to the MS name
         sedstr="s/\.ms/_${FIELD}\.beam${BEAM}\.ms/g"
         msSci=$(echo "${MS_BASE_SCIENCE}" | sed -e "$sedstr")
+    fi
+    # If time-splitting is sought, append the TimeWindow Number to the 
+    # measurement set:
+    if [ "${DO_SPLIT_TIMEWISE}" == "true" ]; then
+        sedstr="s/\.ms/\.timeWin${TimeWindow}\.ms/g"
+        msSci=$(echo "${msSci}" | sed -e "$sedstr")
     fi
 
     # Replace the %s wildcard with the SBID

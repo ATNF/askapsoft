@@ -70,6 +70,8 @@ outputvis   = ${msSci}
 # is inclusive of both the start and end, indexing is one-based.
 # Default: <no default>
 $channelParam
+$timeParamBeg
+$timeParamEnd
 
 # Beam selection via beam ID
 # Select an individual beam
