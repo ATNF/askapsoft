@@ -433,20 +433,95 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
 
         size_t nrows = nParameters;
         size_t ncolumms = nParameters;
+        size_t nnz = nParameters * nParameters;
 
-        lsqr::SparseMatrix matrix(nrows, nrows * ncolumms, comm);
+        if (addSmoothnessConstraints) {
+            nrows += nParameters;
+            nnz += 2 * nParameters;
+        }
+
+        lsqr::SparseMatrix matrix(nrows, nnz, comm);
         lsqr::Vector b_RHS(nrows, 0.0);
 
-        // Set the matrix.
-        for (size_t j = 0; j < nrows; ++j) {
+        // Define the matrix values.
+        for (size_t j = 0; j < size_t(nParameters); ++j) {
             matrix.NewRow();
-            for (size_t i = 0; i < ncolumms; ++i) {
+            for (size_t i = 0; i < size_t(nParameters); ++i) {
                 double value = gsl_matrix_get(A, j, i);
                 if (value != 0.0) {
                     matrix.Add(value, i);
                 }
             }
         }
+
+        if (addSmoothnessConstraints) {
+        // Adding smoothness constraints.
+            ASKAPLOG_INFO_STR(logger, "Adding smoothness constraints, with weight = " << smoothingWeight);
+
+            // Solution at the current major iteration (before the update).
+            std::vector<double> x0(nParameters);
+            for (std::vector<std::pair<string, int> >::const_iterator indit = indices.begin();
+                             indit != indices.end(); ++indit) {
+                casa::IPosition vecShape(1, params.value(indit->first).nelements());
+                casa::Vector<double> value(params.value(indit->first).reform(vecShape));
+                for (size_t i=0; i<value.nelements(); ++i) {
+                    x0[indit->second + i] = value(i);
+                }
+            }
+
+            double cost = 0.;
+            for (std::vector<std::pair<string, int> >::const_iterator indit = indices.begin();
+                             indit != indices.end(); ++indit) {
+                // Extracting channel and parameter name.
+                std::pair<casa::uInt, std::string> paramInfo = extractChannelInfo(indit->first);
+                size_t channel = paramInfo.first;
+                std::string name = paramInfo.second;
+
+                size_t currIndex[2];
+                size_t nextIndex[2];
+
+                // Extracting parameter indexes for the current channel.
+                currIndex[0] = gainIndexesReal[make_pair(channel, name)];
+                currIndex[1] = gainIndexesImag[make_pair(channel, name)];
+
+                bool lastChannel = (channel == nChannels - 1);
+
+                // Extracting parameter indexes for the next channel.
+                if (!lastChannel) {
+                    // Applying forward difference grad(f) = f[i+1] - f[i].
+                    nextIndex[0] = gainIndexesReal[make_pair(channel + 1, name)];
+                    nextIndex[1] = gainIndexesImag[make_pair(channel + 1, name)];
+                } else {
+                    // Applying backward difference grad(f) = f[i] - f[i-1].
+                    nextIndex[0] = gainIndexesReal[make_pair(channel - 1, name)];
+                    nextIndex[1] = gainIndexesImag[make_pair(channel - 1, name)];
+                }
+
+                double matrixValue = smoothingWeight;
+                double b_RHS_value = 0.;
+
+                for (size_t i = 0; i < 2; ++i) {
+                    matrix.NewRow();
+
+                    if (!lastChannel) {
+                        // f[i+1] - f[i]
+                        matrix.Add(- matrixValue, currIndex[i]);
+                        matrix.Add(+ matrixValue, nextIndex[i]);
+                        b_RHS_value = - smoothingWeight * (x0[nextIndex[i]] - x0[currIndex[i]]);
+                    } else {
+                        // f[i] - f[i-1]
+                        matrix.Add(+ matrixValue, currIndex[i]);
+                        matrix.Add(- matrixValue, nextIndex[i]);
+                        b_RHS_value = - smoothingWeight * (x0[currIndex[i]] - x0[nextIndex[i]]);
+                    }
+                    b_RHS[matrix.GetCurrentNumberRows()] = b_RHS_value;
+
+                    cost += b_RHS_value * b_RHS_value;
+                }
+            }
+            ASKAPLOG_INFO_STR(logger, "Smoothness constraints cost = " << cost);
+        }
+        // Completed matrix building.
         matrix.Finalize(ncolumms);
 
         // A simple approximation for the upper bound of the rank of the  A'A matrix.
@@ -501,17 +576,16 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
         //------------------------------------------------------------------------
         // Update the parameters for the calculated changes. Exploit reference
         // semantics of casa::Array.
-         std::vector<std::pair<string, int> >::const_iterator indit;
-         for (indit=indices.begin();indit!=indices.end();++indit) {
-              casa::IPosition vecShape(1, params.value(indit->first).nelements());
-              casa::Vector<double> value(params.value(indit->first).reform(vecShape));
-              for (size_t i=0; i<value.nelements(); ++i)  {
-                   //const double adjustment = gsl_vector_get(X, indit->second+i);
-                   const double adjustment = x[indit->second+i];
-                   ASKAPCHECK(!std::isnan(adjustment), "Solution resulted in NaN as an update for parameter "<<(indit->second + i));
-                   value(i) += adjustment;
-              }
-          }
+        std::vector<std::pair<string, int> >::const_iterator indit;
+        for (indit=indices.begin();indit!=indices.end();++indit) {
+            casa::IPosition vecShape(1, params.value(indit->first).nelements());
+            casa::Vector<double> value(params.value(indit->first).reform(vecShape));
+            for (size_t i=0; i<value.nelements(); ++i) {
+                const double adjustment = x[indit->second + i];
+                ASKAPCHECK(!std::isnan(adjustment), "Solution resulted in NaN as an update for parameter "<<(indit->second + i));
+                value(i) += adjustment;
+            }
+        }
 
          //------------------------------------------------------------------------
          // Set approximate solution quality.
