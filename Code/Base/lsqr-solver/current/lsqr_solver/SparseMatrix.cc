@@ -52,6 +52,9 @@ void SparseMatrix::Add(double value, size_t column)
         throw std::runtime_error("Matrix has already been finalized in SparseMatrix::Add!");
     }
 
+    // Do not add zero values to a sparse matrix.
+    if (value == 0.0) return;
+
     // Sanity check for the number of elements.
     if (nel >= nnz)
     {
@@ -63,9 +66,6 @@ void SparseMatrix::Add(double value, size_t column)
     {
         throw std::runtime_error("Error in the number of lines in SparseMatrix::Add!");
     }
-
-    // Do not add zero values to a sparse matrix.
-    if (value == 0.0) return;
 
     nel += 1;
     sa[nel - 1] = value;
