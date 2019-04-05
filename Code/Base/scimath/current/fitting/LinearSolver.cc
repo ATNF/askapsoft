@@ -371,6 +371,24 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
     }
     else if (algorithm() == "LSQR") {
         bool addSmoothnessConstraints = false;
+        double smoothingWeight = 0;
+        size_t nChannels = 0;
+
+        // Reading the smoothing weight.
+        if (parameters().count("smoothingWeight") > 0) {
+            smoothingWeight = std::atof(parameters().at("smoothingWeight").c_str());
+            if (smoothingWeight > 0) {
+                addSmoothnessConstraints = true;
+            }
+        }
+        // Reading the number of channels.
+        if (parameters().count("nChan") > 0) {
+            nChannels = std::atoi(parameters().at("nChan").c_str());
+        }
+
+        if (addSmoothnessConstraints) {
+            ASKAPCHECK(nChannels > 1, "Wrong number of channels for smoothness constraints!");
+        }
 
         std::map<std::pair<casa::uInt, std::string>, size_t> gainIndexesReal;
         std::map<std::pair<casa::uInt, std::string>, size_t> gainIndexesImag;
