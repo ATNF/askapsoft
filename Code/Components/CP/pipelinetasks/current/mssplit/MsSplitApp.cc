@@ -884,13 +884,12 @@ int MsSplitApp::split(const std::string& invis, const std::string& outvis,
     // Adjust bucketsize if needed - avoid creating MSs that take forever to
     // read or write due to poor caching of buckets.
     // Assumption: we have lots of memory for caching - up to ~4 GB for worst case
-    const casa::uLong maxBuf = parset.getUint32("bufferMB",4000u) * 1024 * 1024ul;
-    ASKAPLOG_INFO_STR(logger, "Max buffer size " << maxBuf);
+    const casa::uInt maxBuf = parset.getUint32("bufferMB",2000u) * 1024 * 1024;
     const casa::uInt nChanOut = nChanIn/width;
     const casa::uInt nTilesPerRow = (nChanOut-1)/tileNchan+1;
     // We may exceed maxBuf if needed to keep bucketsize >= 8192.
-    const casa::uLong maxBucketSize = std::max(8192ul,maxBuf/nTilesPerRow);
-    if ((casa::uLong)bucketSize > maxBucketSize) {
+    const casa::uInt maxBucketSize = std::max(8192u,maxBuf/nTilesPerRow);
+    if (bucketSize > maxBucketSize) {
         bucketSize = maxBucketSize;
         ASKAPLOG_INFO_STR(logger, "Reducing output bucketsize to " << bucketSize <<
         " to limit memory use and improve caching");
