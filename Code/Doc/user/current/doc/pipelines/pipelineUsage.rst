@@ -162,7 +162,7 @@ The measurement sets presented in the scheduling block directories have a variet
 1. The earliest observations had all beams in a single measurement
    set. For these, splitting with mssplit is required to get a
    single-beam MS used for processing.
-2. Most observations have one beam per MS. If no selection of channels
+2. Many observations have one beam per MS. If no selection of channels
    or fields or scans is required, these can be copied rather than
    split. Note that splitting of the bandpass observations are
    necessary, to isolate the relevant scan.
@@ -178,7 +178,7 @@ number in the resulting MSs, since the individual beams will be split
 into separate files.
 
 Each step detailed below can be switched on or off, and those selected
-will run fine (provided any pre- requisites such as measurement sets
+will run fine (provided any pre-requisites such as measurement sets
 or bandpass solutions etc are available). If you have already created
 an averaged science MS, you can re-use that with the
 ``MS_SCIENCE_AVERAGE`` parameter (see :doc:`ScienceFieldPreparation`),
@@ -198,7 +198,8 @@ Here is a summary of the workflow provided for by these scripts:
     including number of antennas & channels, and the list of field
     names. (If merging is required, additional metadata files will be
     created later.)
-  * Use **schedblock** to determine the footprint specification.
+  * Use **schedblock** to determine the footprint specification and
+    other observation details.
   * Use **footprint** to convert that into beam centre positions.
 
 * Read in user-defined parameters from the provided configuration
@@ -210,7 +211,7 @@ Here is a summary of the workflow provided for by these scripts:
   scan in which the beam in question was pointing at 1934-638 is
   used - this assumes the beams were pointed at it in order (so that
   beam 0 was pointing at in in scan 0, etc)
-* These are flagged using **cflag** (:doc:`../calim/cflag`) in two
+* The local MSs are flagged using **cflag** (:doc:`../calim/cflag`) in two
   passes: first, selection rules covering channels, time ranges, antennas & baselines, and
   autocorrelations are applied, along with an optional simple flat amplitude
   threshold; then a second pass that covers Stokes-V and dynamic
@@ -221,15 +222,17 @@ Here is a summary of the workflow provided for by these scripts:
 * The bandpass solution is then determined with **cbpcalibrator**
   (:doc:`../calim/cbpcalibrator`), using all individual MSs and stored
   in a single CASA table.
-* The science field is processed for each field name - what follows
-  describes the steps used for each field.
+  
+The science field is processed for each field name - what follows describes the steps used for each field:
+
 * The science field data is split with **mssplit**, producing one
   measurement set per beam. You can select particular scans or fields
   here, but the default is to use everything. Each field gets its own
   directory. If the data was taken with the file-per-beam mode, and no
   selection is required, a direct copy is used instead of
-  **mssplit**. Again, merging may be required for some datasets. Any
-  splitting that is needed in that case is done first.
+  **mssplit**. Again, merging with **msmerge** may be required for
+  some datasets. Any splitting that is needed in that case is done
+  first.
 * The bandpass solution is then applied to each beam MS with
   **ccalapply** (:doc:`../calim/ccalapply`).
 * Flagging is then applied to the bandpass-calibrated dataset. The
@@ -242,27 +245,29 @@ Here is a summary of the workflow provided for by these scripts:
 * Each beam is then imaged individually. This is done in one of two
   ways:
 
-  * Basic imaging with **cimager** (:doc:`../calim/cimager`), without
-    any self-calibration. A multi-scale, multi-frequency clean is
-    used, with major & minor cycles.
-  * With self-calibration. First we image the field with **cimager**
-    as for the first option. **selavy** (:doc:`../analysis/selavy`) is
-    then used to find bright components, which are then used with
-    **ccalibrator** (:doc:`../calim/ccalibrator`) to calibrate the
-    gains, and we then re-image with **cimager**, using the
-    calibration solution. This process is repeated a number of
-    times. The calibration solution can then be applied directly to
-    the MS using **ccalapply**, optionally creating a copy in the
-    process.
+  * Basic imaging with either **imager** (:doc:`../calim/imager`) or
+    **cimager** (:doc:`../calim/cimager`), without any
+    self-calibration. A multi-scale, multi-frequency clean is used,
+    with major & minor cycles.
+  * With self-calibration. First we image the field with **imager** or
+    **cimager** as for the first option. **selavy**
+    (:doc:`../analysis/selavy`) is then used to find bright
+    components, which are then used with **ccalibrator**
+    (:doc:`../calim/ccalibrator`) to calibrate the gains, and we then
+    re-image using the calibration solution. This process is repeated
+    a number of times.
 
+* The calibration solution can then be applied directly to the MS
+  using **ccalapply**, optionally creating a copy in the process.
 * The continuum dataset can then be optionally imaged as a "continuum
-  cube", using **simager** to preserve the full frequency
-  sampling. This mode can be run for a range of polarisations,
-  creating a cube for each polarisation requested.
+  cube", using **imager** or **simager** (:doc:`../calim/simager`) to
+  preserve the full frequency sampling. This mode can be run for a
+  range of polarisations, creating a cube for each polarisation
+  requested.
 * Once the continuum image has been made, the source-finder **selavy**
   can be run on it to produce a deeper catalogue of sources.
 * Once all beams have been done, they are all mosaicked together using
-  **linmos** (:doc:`../calim/linmos`). This applies a primary-beam
+  **linmos-mpi** (:doc:`../calim/linmos`). This applies a primary-beam
   correction — you need to provide the beam arrangement name and
   (optionally) the position angle (these are used by the
   footprint.py* tool in the ACES svn area) to get the locations of
@@ -270,46 +275,32 @@ Here is a summary of the workflow provided for by these scripts:
   arrangement for your observation was. After mosaicking, **selavy**
   can be run on the final image to create the final source
   catalogue.
-* Additionally, spectral-line imaging (that is, imaging at
-  full spectral resolution to create a cube) of individual beams can
-  be done. There are several optional steps to further prepare the
-  spectral-line dataset:
+* Additionally, spectral imaging of the full-resolution MS for
+  individual beams can be done. There are several optional steps to
+  further prepare the spectral-line dataset:
 
   * A nominated channel range can be copied to a new MS with
     **mssplit**.
   * The gains solution from the continuum self-calibration can be
     applied to the spectral-line MS using **ccalapply**.
-  * The continuum can be subtracted from the spectral-line MS (using
-    the clean model from the continuum imaging) using
-    **ccontsubtract** (:doc:`../calim/ccontsubtract`).
+  * The continuum can be subtracted from the spectral-line MS (using a
+    model of the **selavy** catalogue or the clean model from the
+    continuum imaging) using **ccontsubtract**
+    (:doc:`../calim/ccontsubtract`).
 
-* Once the spectral-line dataset is prepared, **simager**
-  (:doc:`../calim/simager`) is used to do the spectral-line
-  imaging. This creates a cube using a large number of processors,
-  each independently imaging a single channel.
-
-* There is a new task to remove the continuum from the image by
-  fitting a low-order polynomial to each spectrum independently.
-
+* Once the spectral-line dataset is prepared, **imager** or
+  **simager** is used to do the spectral-line imaging. This creates a
+  cube using a large number of processors, each independently imaging
+  a single channel.
+* There is a further task to remove any residual continuum from the
+  image cube by fitting a low-order polynomial to each spectrum
+  independently.
 * Source-finding with **selavy** can then be run on the
   spectral-cubes.
-
 * Finally a diagnostics script is run to produce QA & related
   plots. Details of diagnostic plots can be found on :doc:`validation`. 
 
-Staging the processing
-----------------------
 
-As described on :doc:`../platform/comm_archive`, many datasets will
-not reside on /astro, but only on the commissioning archive. They
-can be restored by Operations staff if you wish to process (or
-re-process) them. It is possible to set up your processing to start
-immediately upon completion of the restoration process, by using the
-**stage-processing.sh** script in the *askaputils* module. Typical
-usage is::
+.. Following is the old text about stage-processing. Doesn't work, so leaving out for now.  
+.. Staging the processing As described on :doc:`../platform/comm_archive`, many datasets will not reside on /astro, but only on the commissioning archive. They can be restored by Operations staff if you wish to process (or re-process) them. It is possible to set up your processing to start immediately upon completion of the restoration process, by using the **stage-processing.sh** script in the *askaputils* module. Typical usage is::  stage-processing.sh myconfig.sh <jobID> where <jobID> is the slurm job ID of the restore job and 'myconfig.sh' can be replaced with your configuration file. Run "stage-processing.sh -h" for more information.
 
-  stage-processing.sh myconfig.sh <jobID>
-
-where <jobID> is the slurm job ID of the restore job and 'myconfig.sh'
-can be replaced with your configuration file. Run "stage-processing.sh
--h" for more information.

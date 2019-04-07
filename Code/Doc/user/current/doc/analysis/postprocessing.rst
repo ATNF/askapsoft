@@ -290,6 +290,7 @@ The default tests to accept a fit result are the following:
    greater than 343, computational requirements mean this is
    approximated by requiring the reduced chi-squared to be less than
    1.2.
+   
 * The peak flux of each component must be positive, unless
   **negativeFluxPossible=true** is set.
 * The centre of each component must be inside the box

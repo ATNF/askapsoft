@@ -83,6 +83,21 @@ void BeamLogger::extractBeams(const std::vector<std::string>& imageList)
     }
 }
 
+casa::Vector<casa::Quantum<double> > BeamLogger::beam(const unsigned int channel)
+{
+    std::map<unsigned int, casa::Vector<casa::Quantum<double> > >::iterator it = itsBeamList.find(channel);
+    if (it != itsBeamList.end()) {
+        return itsBeamList[channel];
+    } else {
+        ASKAPLOG_WARN_STR(logger, "BeamList has no beam recorded for channel " << channel << ", returning zero size beam");
+        casa::Vector<casa::Quantum<double> > beam(3);
+        beam[0] = casa::Quantum<double>(0., "arcsec");
+        beam[1] = casa::Quantum<double>(0., "arcsec");
+        beam[2] = casa::Quantum<double>(0., "deg");
+        return beam;
+    }
+}
+
 void BeamLogger::write()
 {
     if (itsFilename != "") {
@@ -199,11 +214,13 @@ void BeamLogger::gather(askapparallel::AskapParallel &comms, int rankToGather, b
                         ASKAPLOG_DEBUG_STR(logger, "Has data - about to receive " << size << " channels");
                         for(unsigned int i=0;i<size;i++){
                             in >> chan >> bmaj >> bmin >> bpa;
-                            casa::Vector<casa::Quantum<double> > currentbeam(3);
-                            currentbeam[0] = casa::Quantum<double>(bmaj, "arcsec");
-                            currentbeam[1] = casa::Quantum<double>(bmin, "arcsec");
-                            currentbeam[2] = casa::Quantum<double>(bpa, "deg");
-                            itsBeamList[chan] = currentbeam;
+                            if (bmaj > 0.) {
+                                casa::Vector<casa::Quantum<double> > currentbeam(3);
+                                currentbeam[0] = casa::Quantum<double>(bmaj, "arcsec");
+                                currentbeam[1] = casa::Quantum<double>(bmin, "arcsec");
+                                currentbeam[2] = casa::Quantum<double>(bpa, "deg");
+                                itsBeamList[chan] = currentbeam;
+                            }
                         }
                     }
                     else {

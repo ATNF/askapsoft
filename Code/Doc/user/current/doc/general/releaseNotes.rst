@@ -5,6 +5,72 @@ This page summarises the key changes in each tagged release of
 ASKAPsoft. This replicates the CHANGES file that is included in the
 code base.
 
+0.24.0 (5 April 2019)
+---------------------
+
+A major release, with an improved framework for the pipeline scripts
+to handle large datasets efficiently, along with several performance
+improvements to the processing software.
+
+Pipelines:
+
+ * The pre-imaging tasks can now run more efficiently by dividing the
+   dataset into time segments and processing each segment
+   separately. The length of the time segment is configurable. The
+   time-splitting applies to the application of bandpass solutions,
+   flagging, averaging, and, for the spectral data,
+   continuum-subtraction.
+ * Additional continuum-imaging parameters are made
+   selcal-loop-dependent: <LIST THEM HERE>. The format for giving
+   loop-dependent minor-cycle thresholds necessitates a new format -
+   individual loops are separated by ' ; '.
+ * Elevation-based flagging for the science observation is able to be
+   configured through the pipeline parameters.
+ * There are parameters to specify a given range of times to be used
+   from the bandpass calibration observation - useful if you wish to
+   use part of a long observation.
+ * The arguments to the bandpass smoothing tools can be provided as a
+   text string instead of the specific pipeline parameters - this will
+   allow continued development of these tools without needing to keep
+   the pipeline up-to-date with possible parameter inputs.
+ * The following bugs have been fixed
+
+   - The continuum subtraction selavy jobs were using the wrong
+     nsubx/nsuby parameters.
+   - The pipeline scripts now check for the correct loading of the
+     askapsoft & askappipeline modules, and exit if these are not
+     loaded correctly.
+   - Wildcards used in identifying polarisation data products are now
+     correctly applied.
+
+ * There are new parameters used in the pipeline:
+
+   - TILENCHAN_AV
+   - SPLIT_TIME_START_1934 / SPLIT_TIME_END_1934
+   - BANDPASS_SMOOTH_ARG_STRING
+   - BANDPASS_SMOOTH_F54
+   - ELEVATION_FLAG_SCIENCE_LOW/HIGH
+
+ * There are new default values for some pipeline parameters:
+   <TO BE FILLED IN>
+
+Processing software:
+
+ * The bandpass calibration had reverted to the issue solved in
+   0.22.0, where a failed fit to a single channel/beam would crash the
+   job. This is now robust against such failures again.
+ * The restoring beam was often not being written to the header of
+   spectral cubes, particularly when more than one writer was used.
+ * The beamlog (the list of restoring beams per channel) for cubes was
+   not being written correctly. It now will always be written, and
+   will have every channel present, even those with no good data
+   (their beams will be zero-sized).
+ * The mssplit tool has had a memory overflow fixed, so that
+   bucketsizes larger than 4GB can be used.
+ * The linmos-mpi task would fail with an error when the first image
+   being processed was not the largest.
+   
+
 0.23.3 (22 February 2019)
 -------------------------
 
@@ -144,19 +210,23 @@ Pipelines:
 Processing:
 
  * Imaging:
+   
   - Fix a coordinate shift that was seen in spectral imaging, due to a
     different direction being provided by the advise functionality. 
 
  * Calibration:
+   
   - Efficiency improvements to ccalapply to help speed it up
 
  * Utilities:
+   
   - Adjustment of the maximum cache size in mssplit to avoid
     out-of-memory issues
   - Trimming down of the pointing table in MSs produced by msconcat,
     so that very large tables do not result. 
 
  * Selavy:
+   
   - The restoring beam is now written into the component maps.
   - A significant change to the handling of the initial estimates for
     the Gaussian fits, making it more robust and avoiding downstream
@@ -167,7 +237,7 @@ Processing:
 0.22.2 (02 October 2018)
 ------------------------
 Minor change to pipeline scripts:
- * nChan is now set to CHAN_RANGE_ parameter instead of reading it from the
+ * nChan is now set to CHAN_RANGE_SCIENCE/1934 parameter instead of reading it from the
    raw measurement sets. Fixes the bug arising when working on subset channel 
    range in the measurement sets.
 
@@ -188,11 +258,14 @@ Pipelines:
  * The ability to specify the number of cores used for the continuum imaging has been improved, to make it more flexible and work better with slurm.
  * The behaviour of source-finding in the selfcal has changed. We now fit the full set of Gaussian parameters, and require contiguous pixels for the islands. 
  * Several bugs were fixed:
+   
    - Some FITS files were not having their header keywords updated correctly. This has now been fixed and streamlined.
    - The CASDA upload script was erroneously including multiple versions of the taylor.1 images, due to a bug introduced in 0.21.0. It was also dropping a few .fits suffixes in certain situations.
    - The cmodel-based continuum subtraction script had a bug with an undefined local variable that occured with particular parameter settings.s
    - The clean-model-based self-calibration script was getting the model image name wrong for Taylor-term images.
- * There are a number of changes to the default parameters: 
+     
+ * There are a number of changes to the default parameters:
+   
    - The DO_MAKE_THUMBNAILS option is now true by default.
    - There is a new DO_VALIDATION_SCIENCE (true by default) to run the cube validation.
    - The snapshot imaging has been turned off by default, as this has

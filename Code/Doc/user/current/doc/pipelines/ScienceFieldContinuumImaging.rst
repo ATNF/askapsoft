@@ -200,7 +200,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                     |                                                        | the average of the frequencies being processed.               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``RESTORING_BEAM_CONT``                    | fit                                 | restore.beam                                           | Restoring beam to use: 'fit' will fit the PSF to determine    |
-|                                            |                                     | (:doc:`../calim/cimager`)                              | the appropriate beam, else give a size (such as 30arcsec, or  |
+|                                            |                                     | (:doc:`../calim/cimager`)                              | the appropriate beam, else give a size (such as               |
 |                                            |                                     |                                                        | “[30arcsec, 30arcsec, 0deg]”).                                |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``RESTORING_BEAM_CUTOFF_CONT``             | 0.5                                 | restore.beam.cutoff                                    | Cutoff value used in determining the support for the fitting  |
@@ -528,7 +528,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``RESTORING_BEAM_CONTCUBE``                | fit                                 | restore.beam (:doc:`../calim/simager`)                 | Restoring beam to use: 'fit' will fit the PSF in each channel |
 |                                            |                                     |                                                        | separately to determine the appropriate beam for that         |
-|                                            |                                     |                                                        | channel, else give a size (such as 30arcsec, or “[30arcsec,   |
+|                                            |                                     |                                                        | channel, else give a size (such as “[30arcsec,                |
 |                                            |                                     |                                                        | 30arcsec, 0deg]”).                                            |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``RESTORING_BEAM_CUTOFF_CONTCUBE``         | 0.5                                 | restore.beam.cutoff                                    | Cutoff value used in determining the support for the fitting  |

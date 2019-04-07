@@ -92,6 +92,7 @@ Cbpcalibrator.refantenna                      = ${BANDPASS_REFANTENNA}"
             DO_RUN_PLOT_CALTABLE=false
         fi
         script_args="-t ${TABLE_BANDPASS} -s B "
+	script_args_bare_minimum=${script_args}
         if [ "${DO_BANDPASS_SMOOTH}" == "true" ]; then
             script_args="${script_args} -sm"
             if [ "${DO_BANDPASS_PLOT}" != "true" ]; then
@@ -104,6 +105,12 @@ Cbpcalibrator.refantenna                      = ${BANDPASS_REFANTENNA}"
         if [ "${BANDPASS_SMOOTH_OUTLIER}" == "true" ]; then
             script_args="${script_args} -o"
         fi
+
+        if [ "${BANDPASS_SMOOTH_F54}" != "" ]; then
+            numberOfChannels=$(echo ${BANDPASS_SMOOTH_F54} | awk '{print $1*54}')
+            script_args="${script_args} -bf ${numberOfChannels}"
+        fi
+        
         script_args="${script_args} -fit ${BANDPASS_SMOOTH_FIT} -th ${BANDPASS_SMOOTH_THRESHOLD}"
 
     elif [ "${BANDPASS_SMOOTH_TOOL}" == "smooth_bandpass" ]; then
@@ -113,8 +120,12 @@ Cbpcalibrator.refantenna                      = ${BANDPASS_REFANTENNA}"
 loadModule bptool"
         unload_script="unloadModule bptool"
         script_name="smooth_bandpass.py"
-        script_args="-t ${TABLE_BANDPASS} -wp -r ${BANDPASS_REFANTENNA}"
+        script_args="-t ${TABLE_BANDPASS} -wp "
+	script_args_bare_minimum=${script_args}
 
+        if [ "${BANDPASS_REFANTENNA}" != "" ]; then
+            script_args="${script_args} -r ${BANDPASS_REFANTENNA}"
+        fi
         if [ "${BANDPASS_SMOOTH_POLY_ORDER}" != "" ]; then
             script_args="${script_args} -np ${BANDPASS_SMOOTH_POLY_ORDER}"
         fi
@@ -130,8 +141,16 @@ loadModule bptool"
         if [ "${BANDPASS_SMOOTH_N_ITER}" != "" ]; then
             script_args="${script_args} -nI ${BANDPASS_SMOOTH_N_ITER}"
         fi
+        if [ "${BANDPASS_SMOOTH_F54}" != "" ]; then
+            script_args="${script_args} -f54 ${BANDPASS_SMOOTH_F54}"
+        fi
 
 
+    fi
+
+    # Overwrite argument string if the user supplies the arguments in a string: 
+    if [ "${BANDPASS_SMOOTH_ARG_STRING}" != "" ]; then 
+	    script_args="${script_args_bare_minimum} ${BANDPASS_SMOOTH_ARG_STRING}"
     fi
 
     validation_script="bandpassValidation.py"

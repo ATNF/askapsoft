@@ -253,8 +253,7 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``RESTORING_BEAM_SPECTRAL``                   | fit                                 | restore.beam                       | Restoring beam to use: 'fit' will fit the PSF in each channel     |
 |                                               |                                     | (:doc:`../calim/simager`)          | separately to determine the appropriate beam for that channel,    |
-|                                               |                                     |                                    | else give a size (such as 30arcsec, or                            |
-|                                               |                                     |                                    | “[30arcsec, 30arcsec, 0deg]”).                                    |
+|                                               |                                     |                                    | else give a size (such as “[30arcsec, 30arcsec, 0deg]”).          |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``RESTORING_BEAM_CUTOFF_SPECTRAL``            | 0.5                                 | restore.beam.cutoff                | Cutoff value used in determining the support for the fitting      |
 |                                               |                                     | (:doc:`../calim/simager`)          | (ie. the rectangular area given to the fitting routine). Value is |

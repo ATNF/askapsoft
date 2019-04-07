@@ -68,12 +68,18 @@ void LSQRSolver::Solve(size_t niter,
         throw std::invalid_argument("Wrong dimension of x in LSQRSolver::Solve!");
     }
 
+    // Sanity check.
+    if (nbproc > 1 && matrix.GetComm() == NULL)
+    {
+        throw std::invalid_argument("MPI communicator not defined in LSQRSolver::Solve!");
+    }
+
     // Initialization.
     u = b;
     double alpha, beta;
 
     // Normalize u and initialize beta.
-    if (!MathUtils::Normalize(u, beta, false, nbproc))
+    if (!MathUtils::Normalize(u, beta, false, nbproc, matrix.GetComm()))
     {
         throw std::runtime_error("Could not normalize initial u, zero denominator!");
     }
@@ -88,7 +94,7 @@ void LSQRSolver::Solve(size_t niter,
     matrix.TransMultVector(u, v);
 
     // Normalize v and initialize alpha.
-    if (!MathUtils::Normalize(v, alpha, true, nbproc))
+    if (!MathUtils::Normalize(v, alpha, true, nbproc, matrix.GetComm()))
     {
         throw std::runtime_error("Could not normalize initial v, zero denominator!");
     }
@@ -110,8 +116,10 @@ void LSQRSolver::Solve(size_t niter,
 #ifdef HAVE_MPI
         if (nbproc > 1)
         {
+            MPI_Comm *mpi_comm = static_cast<MPI_Comm*>(matrix.GetComm());
+
             matrix.MultVector(v, Hv_loc);
-            MPI_Allreduce(Hv_loc.data(), Hv.data(), nlines, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+            MPI_Allreduce(Hv_loc.data(), Hv.data(), nlines, MPI_DOUBLE, MPI_SUM, *mpi_comm);
         }
         else
         {
@@ -126,7 +134,7 @@ void LSQRSolver::Solve(size_t niter,
         MathUtils::Add(u, Hv);
 
         // Normalize u and update beta.
-        if (!MathUtils::Normalize(u, beta, false, nbproc))
+        if (!MathUtils::Normalize(u, beta, false, nbproc, matrix.GetComm()))
         {
             // Found an exact solution.
             ASKAPLOG_WARN_STR(logger, "|u| = 0. Possibly found an exact solution in the LSQR solver!");
@@ -142,7 +150,7 @@ void LSQRSolver::Solve(size_t niter,
         MathUtils::Add(v, v0);
 
         // Normalize v and update alpha.
-        if (!MathUtils::Normalize(v, alpha, true, nbproc))
+        if (!MathUtils::Normalize(v, alpha, true, nbproc, matrix.GetComm()))
         {
             // Found an exact solution.
             ASKAPLOG_WARN_STR(logger, "|v| = 0. Possibly found an exact solution in the LSQR solver!");
@@ -185,8 +193,10 @@ void LSQRSolver::Solve(size_t niter,
 #ifdef HAVE_MPI
             if (nbproc > 1)
             {
+                MPI_Comm *mpi_comm = static_cast<MPI_Comm*>(matrix.GetComm());
+
                 matrix.MultVector(x, Hv_loc);
-                MPI_Allreduce(Hv_loc.data(), Hv.data(), nlines, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+                MPI_Allreduce(Hv_loc.data(), Hv.data(), nlines, MPI_DOUBLE, MPI_SUM, *mpi_comm);
             }
             else
             {
@@ -203,7 +213,7 @@ void LSQRSolver::Solve(size_t niter,
             matrix.TransMultVector(Hv, v0);
 
             // Norm of the gradient.
-            double g = 2.0 * MathUtils::GetNormParallel(v0, nbproc);
+            double g = 2.0 * MathUtils::GetNormParallel(v0, nbproc, matrix.GetComm());
 
             if (myrank == 0)
             {
@@ -215,7 +225,7 @@ void LSQRSolver::Solve(size_t niter,
         // Basically this is another stopping criterion.
         if (fabs(rhobar) < 1.e-30)
         {
-            ASKAPLOG_WARN_STR(logger, "Small rhobar! Possibly algorithm has converged. Exiting the loop.");
+            if (myrank == 0) ASKAPLOG_WARN_STR(logger, "Small rhobar! Possibly algorithm has converged. Exiting the loop.");
             break;
         }
 

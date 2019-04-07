@@ -113,7 +113,7 @@ scripts, and they are detailed here.
 |                                  |                                 |                                 | well as for each tile and the final mosaicked image. See        |
 |                                  |                                 |                                 | :doc:`ScienceFieldMosaicking` for a description.                |
 +----------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
-| ``PROJECT_ID``                   | "AS031"                         | *<key>*.project                 | The project ID that is written to the FITS header, and used by  |
+| ``PROJECT_ID``                   | "AS033"                         | *<key>*.project                 | The project ID that is written to the FITS header, and used by  |
 |                                  |                                 | (:doc:`../utils/casdaupload`)   | the casdaupload script to describe each data product. This is   |
 |                                  |                                 |                                 | usually taken from the SB parset, but can be given in the       |
 |                                  |                                 |                                 | configuration file in case the SB parset does not have the      |
@@ -145,7 +145,7 @@ scripts, and they are detailed here.
 | ``OBS_PROGRAM``                  | "Commissioning"                 | obsprogram                      | The name of the observational program to be associated with this|
 |                                  |                                 | (:doc:`../utils/casdaupload`)   | data set.                                                       |
 +----------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
-| ``CASDA_UPLOAD_DIR``             | /scratch2/casda/prd             | outputdir                       | The output directory to put the staged data. It may be that some|
+| ``CASDA_UPLOAD_DIR``             | /group/casda/prd                | outputdir                       | The output directory to put the staged data. It may be that some|
 |                                  |                                 | (:doc:`../utils/casdaupload`)   | users will not have write access to this directory - in this    |
 |                                  |                                 |                                 | case the data is written to a local directory and the user must |
 |                                  |                                 |                                 | then contact CASDA or Operations staff.                         |

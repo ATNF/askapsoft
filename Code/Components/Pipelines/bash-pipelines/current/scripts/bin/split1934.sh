@@ -250,7 +250,9 @@ srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${mslist} --ful
 purgeMSs=${PURGE_INTERIM_MS_1934}
 if [ "\${purgeMSs}" == "true" ]; then
     for ms in \${mergelist}; do
-        rm -rf \${ms}
+        lfs find \$ms -type f -print0 | xargs -0 munlink
+        find \$ms -type l -delete
+        find \$ms -depth -type d -empty -delete
     done
 fi
 

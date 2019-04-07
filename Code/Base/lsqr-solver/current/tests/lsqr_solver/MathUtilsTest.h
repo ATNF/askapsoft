@@ -150,7 +150,7 @@ namespace askap
 
             double norm = 0.0;
 
-            CPPUNIT_ASSERT(MathUtils::Normalize(vec2, norm, false, nbproc));
+            CPPUNIT_ASSERT(MathUtils::Normalize(vec2, norm, false, nbproc, NULL));
             CPPUNIT_ASSERT_EQUAL(1.0, MathUtils::GetNorm(vec2));
             CPPUNIT_ASSERT_EQUAL(norm, MathUtils::GetNorm(vec));
         }

@@ -45,7 +45,21 @@ All parameters given in the next table have **solver.LSQR** prefix (e.g., Cbpcal
 |                   |              |              |performed at every major cycle). Nonzero damping values |
 |                   |              |              |help dealing with rank deficient systems.               |
 +-------------------+--------------+--------------+--------------------------------------------------------+
-|verbose            |string        |false         |The value of "true" enables lots of output.             |
+|verbose            |bool          |false         |The value of "true" enables lots of output.             |
++-------------------+--------------+--------------+--------------------------------------------------------+
+|parallelMatrix     |bool          |false         |Enables regime where all frequency channels             |
+|                   |              |              |are solved together, and therefore can be coupled       |
+|                   |              |              |via frequency-dependant constraints (e.g. smoothness).  |
+|                   |              |              |The columns of the (block-diagonal) matrix,             |
+|                   |              |              |and the bandpass solution                               |
+|                   |              |              |are split between different ranks.                      |
+|                   |              |              |This option is only supported in ccalibrator,           |
+|                   |              |              |and must be accompanied by the following options:       |
+|                   |              |              |*Ccalibrator.solver=LSQR*, *Ccalibrator.solve=bandpass*.|
+|                   |              |              |The data partitioning are then defined via setting      |
+|                   |              |              |*Ccalibrator.chanperworker*, and *Ccalibrator.chunk*,   |
+|                   |              |              |in analogous to *Channels* option in cimager            |
+|                   |              |              |(see :doc:`cimager` for more details).                  |
 +-------------------+--------------+--------------+--------------------------------------------------------+
 
 
