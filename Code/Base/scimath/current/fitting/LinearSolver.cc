@@ -27,6 +27,10 @@
 /// @author Tim Cornwell <tim.cornwell@csiro.au>
 /// @author Vitaliy Ogarko <vogarko@gmail.com>
 ///
+#ifdef HAVE_MPI
+#include <mpi.h>
+#endif
+
 #include <fitting/LinearSolver.h>
 
 #include <askap/AskapError.h>
@@ -78,7 +82,8 @@ namespace askap
     /// thing to do!). A very large threshold has the same effect. Zero
     /// threshold is not allowed and will cause an exception.
     LinearSolver::LinearSolver(double maxCondNumber) : 
-           itsMaxCondNumber(maxCondNumber) 
+           itsMaxCondNumber(maxCondNumber),
+           itsWorkersComm(NULL)
     {
       ASKAPASSERT(itsMaxCondNumber!=0);
     };
@@ -154,14 +159,13 @@ std::vector<std::string> LinearSolver::getIndependentSubset(std::vector<std::str
     } 
     return resultNames;
 }
-    
-    
+
 /// @brief solve for a subset of parameters
 /// @details This method is used in solveNormalEquations
 /// @param[in] params parameters to be updated           
 /// @param[in] quality Quality of the solution
 /// @param[in] names names of the parameters to solve for 
-std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &params, Quality& quality, 
+std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &params, Quality& quality,
                    const std::vector<std::string> &names) const
 {
     ASKAPTRACE("LinearSolver::solveSubsetOfNormalEquations");
@@ -259,8 +263,11 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
         gsl_vector * work = gsl_vector_alloc (nParameters);
         ASKAPDEBUGASSERT(work!=NULL);
 
+        gsl_error_handler_t *oldhandler=gsl_set_error_handler_off();
+        ASKAPLOG_DEBUG_STR(logger, "Running SV decomp");
         const int status = gsl_linalg_SV_decomp (A, V, S, work);
-        ASKAPCHECK(status == 0, "gsl_linalg_SV_decomp failed, status = "<<status);
+        // ASKAPCHECK(status == 0, "gsl_linalg_SV_decomp failed, status = "<<status);
+        gsl_set_error_handler(oldhandler);
 
         // a hack for now. For some reason, for some matrices gsl_linalg_SV_decomp may return NaN as singular value, perhaps some
         // numerical precision issue inside SVD. Although it needs to be investigated further  (see ASKAPSDP-2270), for now trying
@@ -330,12 +337,19 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
          result.second = smax;
 
          quality.setDOF(nParameters);
-         quality.setRank(rank);
-         quality.setCond(smax/smin);
-         if(rank==nParameters) {
-            quality.setInfo("SVD decomposition rank complete");
+         if (status != 0) {
+             ASKAPLOG_WARN_STR(logger, "Solution is considered invalid due to gsl_linalg_SV_decomp failure, main matrix is effectively rank zero");
+             quality.setRank(0);
+             quality.setCond(0.);
+             quality.setInfo("SVD decomposition rank deficient");
          } else {
-            quality.setInfo("SVD decomposition rank deficient");
+             quality.setRank(rank);
+             quality.setCond(smax/smin);
+             if (rank==nParameters) {
+                 quality.setInfo("SVD decomposition rank complete");
+             } else {
+                 quality.setInfo("SVD decomposition rank deficient");
+             }
          }
 
 // Update the parameters for the calculated changes. Exploit reference
@@ -356,8 +370,53 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
           gsl_matrix_free(V);
     }
     else if (algorithm() == "LSQR") {
+        bool addSmoothnessConstraints = false;
+        double smoothingWeight = 0;
+        size_t nChannels = 0;
+
+        // Reading the smoothing weight.
+        if (parameters().count("smoothingWeight") > 0) {
+            smoothingWeight = std::atof(parameters().at("smoothingWeight").c_str());
+            if (smoothingWeight > 0) {
+                addSmoothnessConstraints = true;
+            }
+        }
+        // Reading the number of channels.
+        if (parameters().count("nChan") > 0) {
+            nChannels = std::atoi(parameters().at("nChan").c_str());
+        }
+
+        if (addSmoothnessConstraints) {
+            ASKAPCHECK(nChannels > 1, "Wrong number of channels for smoothness constraints!");
+        }
+
+        std::map<std::pair<casa::uInt, std::string>, size_t> gainIndexesReal;
+        std::map<std::pair<casa::uInt, std::string>, size_t> gainIndexesImag;
+
+        if (addSmoothnessConstraints) {
+            // Build indexes maps (needed to add smoothness constraints to the matrix).
+            for (std::vector<std::pair<string, int> >::const_iterator indit = indices.begin();
+                 indit != indices.end(); ++indit) {
+                // Make sure there are two unknowns per parameter: real and imaginary parts of the complex gain value.
+                ASKAPCHECK(params.value(indit->first).nelements() == 2, "Number of unknowns per parameter name is not correct!");
+
+                // Extracting channel and parameter name.
+                std::pair<casa::uInt, std::string> paramInfo = extractChannelInfo(indit->first);
+
+                gainIndexesReal.insert(make_pair(paramInfo, indit->second));     // real part
+                gainIndexesImag.insert(make_pair(paramInfo, indit->second + 1)); // imaginary part
+            }
+        }
+
         int myrank = 0;
         int nbproc = 1;
+
+        void* comm = NULL;
+
+#ifdef HAVE_MPI
+        MPI_Comm comm_world = MPI_COMM_WORLD;
+        comm = (void *)&comm_world;
+#endif
 
         // Setting damping parameters.
         double alpha = 0.01;
@@ -374,20 +433,95 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
 
         size_t nrows = nParameters;
         size_t ncolumms = nParameters;
+        size_t nnz = nParameters * nParameters;
 
-        lsqr::SparseMatrix matrix(nrows, nrows * ncolumms);
+        if (addSmoothnessConstraints) {
+            nrows += nParameters;
+            nnz += 2 * nParameters;
+        }
+
+        lsqr::SparseMatrix matrix(nrows, nnz, comm);
         lsqr::Vector b_RHS(nrows, 0.0);
 
-        // Set the matrix.
-        for (size_t j = 0; j < nrows; ++j) {
+        // Define the matrix values.
+        for (size_t j = 0; j < size_t(nParameters); ++j) {
             matrix.NewRow();
-            for (size_t i = 0; i < ncolumms; ++i) {
+            for (size_t i = 0; i < size_t(nParameters); ++i) {
                 double value = gsl_matrix_get(A, j, i);
                 if (value != 0.0) {
                     matrix.Add(value, i);
                 }
             }
         }
+
+        if (addSmoothnessConstraints) {
+        // Adding smoothness constraints.
+            ASKAPLOG_INFO_STR(logger, "Adding smoothness constraints, with weight = " << smoothingWeight);
+
+            // Solution at the current major iteration (before the update).
+            std::vector<double> x0(nParameters);
+            for (std::vector<std::pair<string, int> >::const_iterator indit = indices.begin();
+                             indit != indices.end(); ++indit) {
+                casa::IPosition vecShape(1, params.value(indit->first).nelements());
+                casa::Vector<double> value(params.value(indit->first).reform(vecShape));
+                for (size_t i=0; i<value.nelements(); ++i) {
+                    x0[indit->second + i] = value(i);
+                }
+            }
+
+            double cost = 0.;
+            for (std::vector<std::pair<string, int> >::const_iterator indit = indices.begin();
+                             indit != indices.end(); ++indit) {
+                // Extracting channel and parameter name.
+                std::pair<casa::uInt, std::string> paramInfo = extractChannelInfo(indit->first);
+                size_t channel = paramInfo.first;
+                std::string name = paramInfo.second;
+
+                size_t currIndex[2];
+                size_t nextIndex[2];
+
+                // Extracting parameter indexes for the current channel.
+                currIndex[0] = gainIndexesReal[make_pair(channel, name)];
+                currIndex[1] = gainIndexesImag[make_pair(channel, name)];
+
+                bool lastChannel = (channel == nChannels - 1);
+
+                // Extracting parameter indexes for the next channel.
+                if (!lastChannel) {
+                    // Applying forward difference grad(f) = f[i+1] - f[i].
+                    nextIndex[0] = gainIndexesReal[make_pair(channel + 1, name)];
+                    nextIndex[1] = gainIndexesImag[make_pair(channel + 1, name)];
+                } else {
+                    // Applying backward difference grad(f) = f[i] - f[i-1].
+                    nextIndex[0] = gainIndexesReal[make_pair(channel - 1, name)];
+                    nextIndex[1] = gainIndexesImag[make_pair(channel - 1, name)];
+                }
+
+                double matrixValue = smoothingWeight;
+                double b_RHS_value = 0.;
+
+                for (size_t i = 0; i < 2; ++i) {
+                    matrix.NewRow();
+
+                    if (!lastChannel) {
+                        // f[i+1] - f[i]
+                        matrix.Add(- matrixValue, currIndex[i]);
+                        matrix.Add(+ matrixValue, nextIndex[i]);
+                        b_RHS_value = - smoothingWeight * (x0[nextIndex[i]] - x0[currIndex[i]]);
+                    } else {
+                        // f[i] - f[i-1]
+                        matrix.Add(+ matrixValue, currIndex[i]);
+                        matrix.Add(- matrixValue, nextIndex[i]);
+                        b_RHS_value = - smoothingWeight * (x0[currIndex[i]] - x0[nextIndex[i]]);
+                    }
+                    b_RHS[matrix.GetCurrentNumberRows()] = b_RHS_value;
+
+                    cost += b_RHS_value * b_RHS_value;
+                }
+            }
+            ASKAPLOG_INFO_STR(logger, "Smoothness constraints cost = " << cost);
+        }
+        // Completed matrix building.
         matrix.Finalize(ncolumms);
 
         // A simple approximation for the upper bound of the rank of the  A'A matrix.
@@ -442,17 +576,16 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
         //------------------------------------------------------------------------
         // Update the parameters for the calculated changes. Exploit reference
         // semantics of casa::Array.
-         std::vector<std::pair<string, int> >::const_iterator indit;
-         for (indit=indices.begin();indit!=indices.end();++indit) {
-              casa::IPosition vecShape(1, params.value(indit->first).nelements());
-              casa::Vector<double> value(params.value(indit->first).reform(vecShape));
-              for (size_t i=0; i<value.nelements(); ++i)  {
-                   //const double adjustment = gsl_vector_get(X, indit->second+i);
-                   const double adjustment = x[indit->second+i];
-                   ASKAPCHECK(!std::isnan(adjustment), "Solution resulted in NaN as an update for parameter "<<(indit->second + i));
-                   value(i) += adjustment;
-              }
-          }
+        std::vector<std::pair<string, int> >::const_iterator indit;
+        for (indit=indices.begin();indit!=indices.end();++indit) {
+            casa::IPosition vecShape(1, params.value(indit->first).nelements());
+            casa::Vector<double> value(params.value(indit->first).reform(vecShape));
+            for (size_t i=0; i<value.nelements(); ++i) {
+                const double adjustment = x[indit->second + i];
+                ASKAPCHECK(!std::isnan(adjustment), "Solution resulted in NaN as an update for parameter "<<(indit->second + i));
+                value(i) += adjustment;
+            }
+        }
 
          //------------------------------------------------------------------------
          // Set approximate solution quality.
@@ -501,59 +634,55 @@ std::pair<double,double>  LinearSolver::solveSubsetOfNormalEquations(Params &par
     /// @param[in] params parameters to be updated 
     /// @param[in] quality Quality of solution
     /// @note This is fully general solver for the normal equations for any shape
-    /// parameters.        
+    /// parameters.
     bool LinearSolver::solveNormalEquations(Params &params, Quality& quality)
     {
-      ASKAPTRACE("LinearSolver::solveNormalEquations");
-      
-// Solving A^T Q^-1 V = (A^T Q^-1 A) P
-     
-// Find all the free parameters
-      vector<string> names(params.freeNames());
-      if (names.size() == 0) {
-          // list of parameters is empty, will solve for all 
-          // unknowns in the equation 
-          names = normalEquations().unknowns();
-      }
-      ASKAPCHECK(names.size()>0, "No free parameters in Linear Solver");
+        ASKAPTRACE("LinearSolver::solveNormalEquations");
 
-      if (names.size() < 100) {
-          // no need to extract independent blocks if number of unknowns is small
-          solveSubsetOfNormalEquations(params,quality,names);
-      } else {
-          while (names.size() > 0) {
-              const std::vector<std::string> subsetNames = getIndependentSubset(names,1e-6);
-              /* this is now being done inside getIndependentSubset
-              if (subsetNames.size() == names.size()) {
-                  names.resize(0);
-              } else {
-                  // remove the elements corresponding to the current subset from the list of names prepared for the
-                  // following integration
-                  std::vector<size_t> indicesToRemove(subsetNames.size(),subsetNames.size());                                   
-                  for (size_t index = 0,indexToRemove = 0; index < names.size(); ++index) {
-                       if (find(subsetNames.begin(),subsetNames.end(),names[index]) != subsetNames.end()) {
-                           ASKAPDEBUGASSERT(indexToRemove < indicesToRemove.size());
-                           indicesToRemove[indexToRemove++] = index;
-                       }
-                  }
-                  
-                  // the following could be done more elegantly/faster, but leave the optimisation to later time                  
-                  for (std::vector<size_t>::const_reverse_iterator ci = indicesToRemove.rbegin(); ci!=indicesToRemove.rend(); ++ci) {
-                       ASKAPDEBUGASSERT(*ci < names.size());
-                       names.erase(names.begin() + *ci);
-                  }
-              }
-              */
-              solveSubsetOfNormalEquations(params,quality, subsetNames);
-          } 
-      }
-        
-      return true;
+        // Solving A^T Q^-1 V = (A^T Q^-1 A) P
+        // Find all the free parameters.
+        vector<string> names(params.freeNames());
+        if (names.size() == 0) {
+            // List of parameters is empty, will solve for all
+            // unknowns in the equation.
+            names = normalEquations().unknowns();
+        }
+        ASKAPCHECK(names.size() > 0, "No free parameters in Linear Solver");
+
+        if (names.size() < 100 // No need to extract independent blocks if number of unknowns is small.
+            || algorithm() == "LSQR") {
+            solveSubsetOfNormalEquations(params, quality, names);
+        } else {
+            while (names.size() > 0) {
+                const std::vector<std::string> subsetNames = getIndependentSubset(names,1e-6);
+                solveSubsetOfNormalEquations(params, quality, subsetNames);
+            }
+        }
+        return true;
     };
 
     Solver::ShPtr LinearSolver::clone() const
     {
       return Solver::ShPtr(new LinearSolver(*this));
+    }
+
+    void LinearSolver::SetWorkersCommunicator(void *comm)
+    {
+        itsWorkersComm = comm;
+    }
+
+    // NOTE: Copied from "calibaccess/CalParamNameHelper.h", as currently accessors depends of scimath.
+    /// @brief extract coded channel and parameter name
+    /// @details This is a reverse operation to codeInChannel. Note, no checks are done that the name passed
+    /// has coded channel present.
+    /// @param[in] name full name of the parameter
+    /// @return a pair with extracted channel and the base parameter name
+    std::pair<casa::uInt, std::string> LinearSolver::extractChannelInfo(const std::string &name)
+    {
+      size_t pos = name.rfind(".");
+      ASKAPCHECK(pos != std::string::npos, "Expect dot in the parameter name passed to extractChannelInfo, name="<<name);
+      ASKAPCHECK(pos + 1 != name.size(), "Parameter name="<<name<<" ends with a dot");
+      return std::pair<casa::uInt, std::string>(utility::fromString<casa::uInt>(name.substr(pos+1)),name.substr(0,pos));
     }
 
   }

@@ -307,6 +307,20 @@ EOF
         echo "Reusing science metadata file ${MS_METADATA}"
     fi
 
+    # If splitting by time, determine the time window ranges and store to a file in metadata/
+    nTimeWindows=0
+    if [ "${DO_SPLIT_TIMEWISE}" == "true" ]; then
+	echo "Pre-imaging to be done in timeWise split data..."
+        timerangefile=${MS_METADATA}.timerange
+        ${PIPELINEDIR}/splitTimeRange.py -i ${MS_METADATA} -s ${SPLIT_INTERVAL_MINUTES} -o ${timerangefile}
+        err=$?
+        if [ $err -ne 0 ]; then
+            echo "ERROR determining time windows. Check your config file!"
+            exit 1
+        fi
+        nTimeWindows=$(wc -l ${timerangefile} | awk '{print $1}')
+    fi
+
     # Get the observation time
     obsdate=$(grep "Observed from" "${MS_METADATA}" | head -1 | awk '{print $7}' | sed -e 's|/| |g' | awk '{print $1}' | sed -e 's/-/ /g')
     obstime=$(grep "Observed from" "${MS_METADATA}" | head -1 | awk '{print $7}' | sed -e 's|/| |g' | awk '{print $2}')
@@ -521,6 +535,21 @@ EOF
                         fi
                     fi
                 fi
+                # Re-create the sbinfo file, as we've changed the state of the SB
+                loadModule askapcli
+                schedblock info -v -p "${SB_SCIENCE}" > "$sbinfo"
+                err=$?
+                unloadModule askapcli
+                if [ $err -ne 0 ]; then
+                    echo "ERROR - the 'schedblock' command failed."
+                    echo "        Full command:   schedblock info -v -p ${SB_SCIENCE}"
+                    echo "Exiting pipeline."
+                    exit $err
+                fi
+                cat >> "$sbinfo" <<EOF
+${METADATA_IS_GOOD} ${NOW}
+EOF
+                
             fi
 
         fi

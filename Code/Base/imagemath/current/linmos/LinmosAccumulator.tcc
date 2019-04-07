@@ -807,6 +807,8 @@ namespace askap {
             ASKAPDEBUGASSERT(refShape.nelements() >= 2);
             const CoordinateSystem refCS = inCoordSysVec[0];
             const int dcPos = refCS.findCoordinate(Coordinate::DIRECTION,-1);
+            // assumed below to be the first two axes (dim and shape setting). Checked this here.
+            ASKAPDEBUGASSERT(dcPos == 0);
             const DirectionCoordinate refDC = refCS.directionCoordinate(dcPos);
             IPosition refBLC(refShape.nelements(),0);
             IPosition refTRC(refShape);
@@ -838,12 +840,18 @@ namespace askap {
                     "Input images have inconsistent coordinate systems");
                 // could also test whether they are equal and set a regrid tag to false if all of them are
 
+                // need to check all four corners, because of the curved coordinates
                 Vector<IPosition> corners = convertImageCornersToRef(refDC);
 
                 const IPosition newBLC = corners[0];
                 const IPosition newTRC = corners[1];
+                const IPosition newTLC = corners[2];
+                const IPosition newBRC = corners[3];
                 ASKAPDEBUGASSERT(newBLC.nelements() >= 2);
                 ASKAPDEBUGASSERT(newTRC.nelements() >= 2);
+                ASKAPDEBUGASSERT(newTLC.nelements() >= 2);
+                ASKAPDEBUGASSERT(newBRC.nelements() >= 2);
+                /*
                 for (casa::uInt dim=0; dim<2; ++dim) {
                     if (newBLC(dim) < tempBLC(dim)) {
                         tempBLC(dim) = newBLC(dim);
@@ -851,6 +859,33 @@ namespace askap {
                     if (newTRC(dim) > tempTRC(dim)) {
                         tempTRC(dim) = newTRC(dim);
                     }
+                }
+                */
+                // x dim
+                if (newBLC(0) < tempBLC(0)) {
+                    tempBLC(0) = newBLC(0);
+                }
+                if (newTLC(0) < tempBLC(0)) {
+                    tempBLC(0) = newTLC(0);
+                }
+                if (newBRC(0) > tempTRC(0)) {
+                    tempTRC(0) = newBRC(0);
+                }
+                if (newTRC(0) > tempTRC(0)) {
+                    tempTRC(0) = newTRC(0);
+                }
+                // y dim
+                if (newBLC(1) < tempBLC(1)) {
+                    tempBLC(1) = newBLC(1);
+                }
+                if (newBRC(1) < tempBLC(1)) {
+                    tempBLC(1) = newBRC(1);
+                }
+                if (newTLC(1) > tempTRC(1)) {
+                    tempTRC(1) = newTLC(1);
+                }
+                if (newTRC(1) > tempTRC(1)) {
+                    tempTRC(1) = newTRC(1);
                 }
 
             }
@@ -964,6 +999,41 @@ namespace askap {
                 // invert sensitivities before regridding to avoid
                 // artefacts at sharp edges in the sensitivity image
                 itsInSenBuffer.put(planeIter.getPlane(inSenPix));
+                T sensitivity;
+
+                IPosition pos(2);
+                for (int x=0; x<inSenPix.shape()[0];++x) {
+                    for (int y=0; y<inSenPix.shape()[1];++y) {
+                        pos[0] = x;
+                        pos[1] = y;
+                        sensitivity = itsInSenBuffer.getAt(pos);
+                        if (sensitivity>0) {
+                            itsInSnrBuffer.putAt(1.0 / (sensitivity * sensitivity), pos);
+                        } else {
+                            itsInSnrBuffer.putAt(0.0, pos);
+                        }
+                    }
+                }
+            }
+        }
+
+        template<typename T>
+        void LinmosAccumulator<T>::loadInputBuffers(const IPosition& curpos,
+                                                    Array<T>& inPix,
+                                                    Array<T>& inWgtPix,
+                                                    Array<T>& inSenPix) {
+
+            // could extract the plane without an iterator, but will use one for consistency
+            const scimath::MultiDimArrayPlaneIter planeIter(inPix.shape());
+
+            itsInBuffer.put(planeIter.getPlane(inPix, curpos));
+            if (itsWeightType == FROM_WEIGHT_IMAGES || itsWeightType == COMBINED ) {
+                itsInWgtBuffer.put(planeIter.getPlane(inWgtPix, curpos));
+            }
+            if (itsDoSensitivity) {
+                // invert sensitivities before regridding to avoid
+                // artefacts at sharp edges in the sensitivity image
+                itsInSenBuffer.put(planeIter.getPlane(inSenPix, curpos));
                 T sensitivity;
 
                 IPosition pos(2);
@@ -1634,8 +1704,15 @@ namespace askap {
             const int coordPos = itsInCoordSys.findCoordinate(Coordinate::DIRECTION,-1);
             const DirectionCoordinate inDC = itsInCoordSys.directionCoordinate(coordPos);
 
+            // need to check all four corners, because of the curved coordinates
             IPosition blc(itsInShape.nelements(),0);
+            IPosition brc(itsInShape.nelements());
+            IPosition tlc(itsInShape.nelements());
             IPosition trc(itsInShape);
+            brc[0] = itsInShape[0];
+            tlc[1] = itsInShape[1];
+            tlc[0] = 0;
+            brc[1] = 0;
             for (uInt dim=0; dim<itsInShape.nelements(); ++dim) {
                  --trc(dim); // these are added back later. Is this just to deal with degenerate axes?
             }
@@ -1671,9 +1748,39 @@ namespace askap {
             trc[0] = casa::Int(round(pix[0]));
             trc[1] = casa::Int(round(pix[1]));
 
-            Vector<IPosition> corners(2);
+            // now process TLC
+            pix[0] = Double(tlc[0]);
+            pix[1] = Double(tlc[1]);
+            success = inDC.toWorld(tempDir, pix);
+            ASKAPCHECK(success,
+                "Pixel to world coordinate conversion failed for input TLC: "
+                << inDC.errorMessage());
+            success = refDC.toPixel(pix,tempDir);
+            ASKAPCHECK(success,
+                "World to pixel coordinate conversion failed for output TLC: "
+                << refDC.errorMessage());
+            tlc[0] = casa::Int(round(pix[0]));
+            tlc[1] = casa::Int(round(pix[1]));
+
+            // first process BRC
+            pix[0] = Double(brc[0]);
+            pix[1] = Double(brc[1]);
+            success = inDC.toWorld(tempDir, pix);
+            ASKAPCHECK(success,
+                "Pixel to world coordinate conversion failed for input BRC: "
+                << inDC.errorMessage());
+            success = refDC.toPixel(pix,tempDir);
+            ASKAPCHECK(success,
+                "World to pixel coordinate conversion failed for output BRC: "
+                << refDC.errorMessage());
+            brc[0] = casa::Int(round(pix[0]));
+            brc[1] = casa::Int(round(pix[1]));
+
+            Vector<IPosition> corners(4);
             corners[0] = blc;
             corners[1] = trc;
+            corners[2] = tlc;
+            corners[3] = brc;
 
             return corners;
 

@@ -91,9 +91,10 @@ class BeamLogger {
 
         /// @brief Gather channels from different ranks onto a single,
         /// nominated rank, combining the lists of channel information
-        /// @details Each rank (other than the nominated one) sends the
-        /// channel and beam information to the nominated rank. The
-        /// beamlists are aggregated on that rank ready for writing.
+        /// @details Each rank (other than the nominated one) sends
+        /// the channel and beam information to the nominated
+        /// rank. The beamlists are aggregated on that rank ready for
+        /// writing, ignoring any channels that have zero-sized beams.
     void gather(askapparallel::AskapParallel &comms, int rankToGather, bool includeMaster);
 
 
@@ -102,6 +103,12 @@ class BeamLogger {
 
         /// @brief Return the beam information
         std::map<unsigned int, casa::Vector<casa::Quantum<double> > > &beamlist() {return itsBeamList;};
+
+    /// @brief Return the beam for a given channel.
+    /// @details Returns the beam stored for the requested channel. If
+    /// the beam list does not have an entry for that channel, a
+    /// zero-size beam is returned (BMAJ=BMIN=BPA=0).
+    casa::Vector<casa::Quantum<double> > beam(const unsigned int channel);
 
     protected:
         /// @brief The disk file to be read from / written to

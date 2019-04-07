@@ -51,17 +51,18 @@ fi
 if [ "${SUBMIT_JOBS}" == "true" ]; then
     DEP=""
     DEP=$(addDep "$DEP" "$DEP_START")
-    DEP=$(addDep "$DEP" "$ID_SPLIT_SCI")
-    DEP=$(addDep "$DEP" "$ID_CCALAPPLY_SCI")
-    DEP=$(addDep "$DEP" "$ID_FLAG_SCI")
-    DEP=$(addDep "$DEP" "$ID_AVERAGE_SCI")
-    DEP=$(addDep "$DEP" "$ID_FLAG_SCI_AV")
+    DEP=$(addDep "$DEP" "$ID_SPLIT_SCI_LIST")
+    DEP=$(addDep "$DEP" "$ID_CCALAPPLY_SCI_LIST")
+    DEP=$(addDep "$DEP" "$ID_FLAG_SCI_LIST")
+    DEP=$(addDep "$DEP" "$ID_AVERAGE_SCI_LIST")
+    DEP=$(addDep "$DEP" "$ID_FLAG_SCI_AV_LIST")
     DEP=$(addDep "$DEP" "$ID_CONTIMG_SCI")
     DEP=$(addDep "$DEP" "$ID_CONTIMG_SCI_SC")
     DEP=$(addDep "$DEP" "$ID_SPLIT_SL_SCI")
     DEP=$(addDep "$DEP" "$ID_CAL_APPLY_SL_SCI")
     ID_CONT_SUB_SL_SCI=$(sbatch $DEP "${sbatchfile}" | awk '{print $4}')
     recordJob "${ID_CONT_SUB_SL_SCI}" "Subtract the continuum model from the spectral-line dataset for imaging beam $BEAM of the science observation, with flags \"$DEP\""
+    ID_CONT_SUB_SL_SCI_LIST=$(addDep "$ID_CONT_SUB_SL_SCI" "$ID_CONT_SUB_SL_SCI_LIST")
 else
     echo "Would subtract the continuum model from the spectral-line dataset for imaging beam $BEAM of the science observation with slurm file $sbatchfile"
 fi

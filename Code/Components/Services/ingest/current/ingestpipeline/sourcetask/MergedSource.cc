@@ -432,12 +432,15 @@ void MergedSource::flagDueToBadUVWs(const std::set<casa::uInt> &rowsWithBadUVWs,
     for (std::set<casa::uInt>::const_iterator ciAnt = antennas.begin(); ciAnt != antennas.end(); ++ciAnt) {
          if (goodAntennas.find(*ciAnt) == goodAntennas.end()) {
              ASKAPASSERT(*ciAnt < nAntenna);
-             itsVisConverter.flagAntenna(*ciAnt);
-             const string antName = itsVisConverter.config().antennas()[*ciAnt].name();
-             if (listOfBadAntennas.size() == 0) {
-                 listOfBadAntennas = antName;
-             } else {
-                 listOfBadAntennas += ", " + antName;
+             // only proceed if antenna is not flagged already
+             if (itsVisConverter.isAntennaGood(*ciAnt)) {
+                 itsVisConverter.flagAntenna(*ciAnt);
+                 const string antName = itsVisConverter.config().antennas()[*ciAnt].name();
+                 if (listOfBadAntennas.size() == 0) {
+                     listOfBadAntennas = antName;
+                 } else {
+                     listOfBadAntennas += ", " + antName;
+                 }
              }
          }
     }
@@ -476,7 +479,7 @@ void MergedSource::flagDueToBadUVWs(const std::set<casa::uInt> &rowsWithBadUVWs,
        const casa::Vector<casa::uInt>& beam1 = chunk->beam1();
        ASKAPDEBUGASSERT(beam1.nelements() == chunk->nRow());
        std::ofstream os("baduvw_baselines.dbg", std::ios::app);
-       os << "# "<< msg << " Timestamp: "<<bat2epoch(timestamp)<<" :"<<std::endl;
+       os << "# "<< msg << " Timestamp: "<<bat2epoch(timestamp)<<" or 0x"<<std::hex<<timestamp<<" = "<<std::dec<<timestamp<<" :"<<std::endl;
        for (std::set<casa::uInt>::const_iterator ci = rowsWithBadUVWs.begin(); ci != rowsWithBadUVWs.end(); ++ci) {
             ASKAPDEBUGASSERT(*ci < chunk->nRow());
             const casa::uInt ant1 = antenna1[*ci];

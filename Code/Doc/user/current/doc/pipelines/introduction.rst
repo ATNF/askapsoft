@@ -59,3 +59,16 @@ FIELD location, through interleaving), and an observation of 1934-638
 which will be used to determine the bandpass solution. This should
 have been done in the usual calibration way of short observations of
 1934-638 in each beam sequentially.
+
+
+Overview
+--------
+
+The following diagram indicates the overall flow of
+processing. Details of each step can be found in :doc:`pipelineUsage`,
+and in the specific pages on each section.
+
+.. image:: pipelineOverview.png
+   :width: 80%
+   :align: center
+

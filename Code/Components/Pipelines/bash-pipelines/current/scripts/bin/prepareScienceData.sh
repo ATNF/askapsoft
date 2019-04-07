@@ -102,6 +102,7 @@ if [ "${DO_IT}" == "true" ]; then
     splitNeeded=true
     if [ ${NUM_FIELDS} -eq 1 ] &&
            [ "${CHAN_RANGE_SCIENCE}" == "" ] &&
+           [ "${DO_SPLIT_TIMEWISE}" == "" ] &&
            [ "${SCAN_SELECTION_SCIENCE}" == "" ]; then
         
         splitNeeded=false
@@ -111,6 +112,13 @@ if [ "${DO_IT}" == "true" ]; then
         fi
     fi
     
+    if [ "${DO_SPLIT_TIMEWISE}" == "true" ]; then
+        timeParamBeg="timebegin     = ${TimeBegin}"
+        timeParamEnd="timeend     = ${TimeEnd}"
+    else
+	timeParamBeg=""
+	timeParamEnd=""
+    fi
 
     # If we have >1 MS and the number differs from the number of
     # beams, we need to do merging. There are different scripts to
@@ -141,8 +149,13 @@ if [ "${DO_IT}" == "true" ]; then
     if [ "${SUBMIT_JOBS}" == "true" ]; then
         DEP=""
         DEP=$(addDep "$DEP" "$DEP_START")
+	if [[ "$DO_SPLIT_TIMEWISE" == "true" ]] && [[ "$DO_SPLIT_TIMEWISE_SERIAL" == "true" ]]; then
+		# Spare poor /astro from a massive read bombardment! 
+		DEP=$(addDep "$DEP" "$ID_SPLIT_SCI_LIST")
+	fi
 	ID_SPLIT_SCI=$(sbatch $DEP "$sbatchfile" | awk '{print $4}')
-	recordJob "${ID_SPLIT_SCI}" "Run ${verb} for beam ${BEAM} of science observation"
+	recordJob "${ID_SPLIT_SCI}" "Run ${verb} for beam ${BEAM} of science observation, with flags \"$DEP\""
+	ID_SPLIT_SCI_LIST=$(addDep "$ID_SPLIT_SCI" "$ID_SPLIT_SCI_LIST")
     else
 	echo "Would run ${verb} for beam ${BEAM} of science observation with slurm file $sbatchfile"
     fi

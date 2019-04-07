@@ -20,8 +20,9 @@ public:
      * Constructor: initializes the sparse matrix.
      * nl - number of matrix lines.
      * nnz - reserved (predicted maximum) number of non-zero elements.
+     * comm - MPI communicator (used when the matrix is split among CPUs).
      */
-    SparseMatrix(size_t nl, size_t nnz);
+    SparseMatrix(size_t nl, size_t nnz, void *comm = NULL);
 
     /*
      * Adds one element at specified position (column index).
@@ -107,6 +108,14 @@ public:
      */
     bool Finalize(size_t ncolumns);
 
+    /*
+     * Returns the MPI communicator.
+     */
+    void* GetComm() const
+    {
+        return comm;
+    }
+
     virtual ~SparseMatrix() {};
 
 private:
@@ -128,6 +137,9 @@ private:
     std::vector<size_t> ija;
     // The list of 'sa' indexes where each row starts.
     std::vector<size_t> ijl;
+
+    // MPI communicator.
+    void *comm;
 
     /*
      * Validates the boundaries of column indexes.

@@ -10,7 +10,7 @@
 
 namespace askap { namespace lsqr {
 
-SparseMatrix::SparseMatrix(size_t nl, size_t nnz) :
+SparseMatrix::SparseMatrix(size_t nl, size_t nnz, void *comm) :
     finalized(false),
     nnz(nnz),
     nel(0),
@@ -18,7 +18,8 @@ SparseMatrix::SparseMatrix(size_t nl, size_t nnz) :
     nl_current(0),
     sa(nnz),
     ija(nnz),
-    ijl(nl + 1)
+    ijl(nl + 1),
+    comm(comm)
 {
 }
 
@@ -51,6 +52,9 @@ void SparseMatrix::Add(double value, size_t column)
         throw std::runtime_error("Matrix has already been finalized in SparseMatrix::Add!");
     }
 
+    // Do not add zero values to a sparse matrix.
+    if (value == 0.0) return;
+
     // Sanity check for the number of elements.
     if (nel >= nnz)
     {
@@ -62,9 +66,6 @@ void SparseMatrix::Add(double value, size_t column)
     {
         throw std::runtime_error("Error in the number of lines in SparseMatrix::Add!");
     }
-
-    // Do not add zero values to a sparse matrix.
-    if (value == 0.0) return;
 
     nel += 1;
     sa[nel - 1] = value;

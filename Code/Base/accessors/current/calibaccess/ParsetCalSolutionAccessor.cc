@@ -72,8 +72,8 @@ ParsetCalSolutionAccessor::ParsetCalSolutionAccessor(const std::string &parset, 
      }
      ASKAPLOG_INFO_STR(logger, "Set up ParsetCalSolutionAccessor to write results into "<<itsParsetFileName);
   } 
-}        
-  
+}
+
 /// @brief destructor, stores the cache
 /// @details Actual write operation is performed here. All values stored in the cache are written
 /// to disk, if the appropriate flag is set (there was at least one write).
@@ -90,7 +90,7 @@ ParsetCalSolutionAccessor::~ParsetCalSolutionAccessor()
       }     
   }
 }
-    
+
 /// @brief helper method executed on every write
 /// @details This method manages flags associated with the write operation
 void ParsetCalSolutionAccessor::prepareToWrite()
@@ -117,7 +117,7 @@ void ParsetCalSolutionAccessor::setGain(const JonesIndex &index, const JonesJTer
   prepareToWrite();
   CachedCalSolutionAccessor::setGain(index, gains);
 }
-   
+
 /// @brief set leakages (D-Jones)
 /// @details This method writes cross-pol leakages  
 /// (corresponding to XY and YX)
@@ -128,7 +128,17 @@ void ParsetCalSolutionAccessor::setLeakage(const JonesIndex &index, const JonesD
   prepareToWrite();
   CachedCalSolutionAccessor::setLeakage(index,leakages);
 }
-  
+
+/// @brief set gains for a single bandpass channel
+/// @param[in] index ant/beam index
+/// @param[in] bp JonesJTerm object with gains for the given channel and validity flags
+/// @param[in] chan spectral channel
+void ParsetCalSolutionAccessor::setBandpass(const JonesIndex &index, const JonesJTerm &bp, const casa::uInt chan)
+{
+  prepareToWrite();
+  CachedCalSolutionAccessor::setBandpass(index, bp, chan);
+}
+
 
 } // namespace accessors
 

@@ -33,15 +33,33 @@
 
 squser() {
 
+  if [[ -z "$TERM" || "$TERM" == "dumb" ]]; then
+    export TERM=xterm-256color
+  fi
+
+  bold=$(tput bold)
+  red=$(tput setaf 1)
+  normal=$(tput sgr0)
+
   # This awk command will take the output from squeue and add up the CPUs and NODEs columns
   # and group by the user.
   #
   # The index for the cpus_per_user and the nodes_per_user arrays is "username cpus nodes"
   # values from the squeue output. 
   awk_command='
+    BEGIN {
+      highest_nodes = 0;
+      highest_user = "";
+      threads_per_cpu = 2; #need to divide by this else the output is actually threads not cpu
+    }
     {
       cpus_per_user[$1" "$2] += $4; 
       nodes_per_user[$1" "$2] += $5;
+      if (nodes_per_user[$1" "$2] > highest_nodes) 
+      {
+        highest_user = $1" "$2;
+        highest_nodes = nodes_per_user[$1" "$2];
+      }
     } END {
       printf "Current galaxy usage by user and project\n"
       printf "\n"
@@ -53,9 +71,11 @@ squser() {
         split(idx[i], id, " "); # Split the username and project out into id array for printf later.
         cpus+=cpus_per_user[idx[i]];
         nodes+=nodes_per_user[idx[i]];
-        printf"%-20s %-10s %-5s %-4s\n", id[1], id[2], cpus_per_user[idx[i]], nodes_per_user[idx[i]];
+        printf (idx[i] == highest_user) ? "'${bold}${red}'": "";
+        printf"%-20s %-10s %-5s %-4s\n", id[1], id[2], cpus_per_user[idx[i]]/threads_per_cpu, nodes_per_user[idx[i]];
+        printf (idx[i] == highest_user) ? "'${normal}'": "";
       } 
-      printf"\nTotal: CPUS %s\tNodes %s\n", cpus, nodes; 
+      printf"\n'${bold}'Total:'${normal}' CPUS %s\tNodes %s\n", cpus/threads_per_cpu, nodes; 
     } '
   squeue -o "%u %a %T %C %D" -p workq | egrep "RUNNING" | sort -b | awk "$awk_command"
 }

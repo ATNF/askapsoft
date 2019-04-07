@@ -125,11 +125,13 @@ EOFOUTER
     if [ "${SUBMIT_JOBS}" == "true" ]; then
 	DEP=""
         DEP=$(addDep "$DEP" "$DEP_START")
-        DEP=$(addDep "$DEP" "$ID_SPLIT_SCI")
-        DEP=$(addDep "$DEP" "$ID_CCALAPPLY_SCI")
-        DEP=$(addDep "$DEP" "$ID_FLAG_SCI")
+        DEP=$(addDep "$DEP" "$ID_SPLIT_SCI_LIST")
+        DEP=$(addDep "$DEP" "$ID_CCALAPPLY_SCI_LIST")
+        DEP=$(addDep "$DEP" "$ID_FLAG_SCI_LIST")
         ID_SPLIT_SL_SCI=$(sbatch $DEP "$sbatchfile" | awk '{print $4}')
         recordJob "${ID_SPLIT_SL_SCI}" "Copy the required spectral-line dataset for imaging beam $BEAM of the science observation, with flags \"$DEP\""
+	ID_SPLIT_SL_SCI_LIST=$(addDep "$ID_SPLIT_SL_SCI" "$ID_SPLIT_SL_SCI_LIST")
+
     else
         echo "Would copy the required spectral-line dataset for imaging beam $BEAM of the science observation with slurm file $sbatchfile"
     fi
@@ -224,15 +226,16 @@ EOFOUTER
         if [ "${submitIt}" == "true" ]; then
             DEP=""
             DEP=$(addDep "$DEP" "$DEP_START")
-            DEP=$(addDep "$DEP" "$ID_SPLIT_SCI")
-            DEP=$(addDep "$DEP" "$ID_CCALAPPLY_SCI")
-            DEP=$(addDep "$DEP" "$ID_FLAG_SCI")
-            DEP=$(addDep "$DEP" "$ID_AVERAGE_SCI")
-            DEP=$(addDep "$DEP" "$ID_FLAG_SCI_AV")
+            DEP=$(addDep "$DEP" "$ID_SPLIT_SCI_LIST")
+            DEP=$(addDep "$DEP" "$ID_CCALAPPLY_SCI_LIST")
+            DEP=$(addDep "$DEP" "$ID_FLAG_SCI_LIST")
+            DEP=$(addDep "$DEP" "$ID_AVERAGE_SCI_LIST")
+            DEP=$(addDep "$DEP" "$ID_FLAG_SCI_AV_LIST")
             DEP=$(addDep "$DEP" "$ID_CONTIMG_SCI_SC")
             DEP=$(addDep "$DEP" "$ID_SPLIT_SL_SCI")
             ID_CAL_APPLY_SL_SCI=$(sbatch $DEP "$sbatchfile" | awk '{print $4}')
             recordJob "${ID_CAL_APPLY_SL_SCI}" "Apply gains calibration to the spectral-line dataset for imaging beam $BEAM of the science observation, with flags \"$DEP\""
+	    ID_CAL_APPLY_SL_SCI_LIST=$(addDep "$ID_CAL_APPLY_SL_SCI" "$ID_CAL_APPLY_SL_SCI_LIST")
         fi
     else
         echo "Would apply gains calibration to the spectral-line dataset for imaging beam $BEAM of the science observation with slurm file $sbatchfile"
