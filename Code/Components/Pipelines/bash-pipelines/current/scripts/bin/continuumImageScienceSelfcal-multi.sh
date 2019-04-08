@@ -90,7 +90,7 @@ if [ "${DO_IT}" == "true" ] && [ "${DO_SELFCAL}" == "true" ]; then
         modelDirection="[${ra}, ${dec}, ${epoch}]"
     fi
     # Reformat for Selavy's referenceDirection
-    ra=$(echo "\$ra" | awk -F':' '{printf "%sh%sm%s",\$1,\$2,\$3}')
+    ra=$(echo "$ra" | awk -F':' '{printf "%sh%sm%s",$1,$2,$3}')
     refDirection="[${ra}, ${dec}, ${epoch}]"
     unset ra
     unset dec
