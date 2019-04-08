@@ -199,7 +199,11 @@ for FIELD in ${FIELD_LIST}; do
 	    # Redefine FIELDBEAM for imager sbatchfile-naming: timeWin tag not needed.
             FIELDBEAM=$(echo "$FIELD_ID" "$BEAM" | awk '{printf "F%02d_B%s",$1,$2}')
             if [ "${DO_SELFCAL}" == "true" ]; then
-                . "${PIPELINEDIR}/continuumImageScienceSelfcal.sh"
+                if [ "${MULTI_JOB_SELFCAL}" == "true" ]; then
+                    . "${PIPELINEDIR}/continuumImageScienceSelfcal-multi.sh"
+                else
+                    . "${PIPELINEDIR}/continuumImageScienceSelfcal.sh"
+                fi
             else
 	        . "${PIPELINEDIR}/continuumImageScience.sh"
             fi

@@ -186,15 +186,18 @@ function recordJob()
 
 # Function to add a job id to a list of dependencies. Calling syntax
 # is:
-#  DEP=`addDep "$DEP" "$ID"`
+#  DEP=$(addDep "$DEP" "$ID")  or
+#  DEP=$(addDep "$DEP" "$OLDDEP") where OLDDEP is already a dependency string.
+# For instance, addDep "-d afterok:11:12:13" "-d afterok:1:2:3" will return "-d afterok:11:12:13:1:2:3"
 function addDep()
 {
     DEP=$1
     if [ "$2" != "" ]; then
+        ID=$(echo $2 | sed -e 's/-d afterok://g')
         if [ "$1" == "" ]; then
             DEP="-d afterok"
         fi
-        DEP="$DEP:$2"
+        DEP="$DEP:$ID"
     fi
     echo "$DEP"
 }
