@@ -530,7 +530,7 @@ newlist=\$(hostname)
 icpu=0
 for node in \$(scontrol show hostnames \$nodelist); do
     if [[ "\$node" != $(hostname) ]]; then
-        for proc in $(seq 1 ${CPUS_PER_CORE_CONT_IMAGING}); do
+        for proc in \$(seq 1 ${CPUS_PER_CORE_CONT_IMAGING}); do
 	    icpu=\$((icpu+1))
 	    if [[ "\$icpu" -lt "${NUM_CPUS_CONTIMG_SCI}" ]]; then 
 		newlist="\$newlist,\$node"
