@@ -113,14 +113,14 @@ CLEAN_THRESHOLD_MINORCYCLE_ARRAY=(${CLEAN_THRESHOLD_MINORCYCLE_ARRAY[@]})
 LOOP=0
 
 cimagerSelfcalLoopParams
-dataSelectionSelfcalLoop Cimager
+dataSelectionSelfcalLoop
 
 parset="${parsets}/science_imaging_${FIELDBEAM}_\${SLURM_JOB_ID}.in"
 cat > "\$parset" <<EOFINNER
 ${cimagerParams}
 #
 \${loopParams}
-\${dataSelectionParams}
+\${dataSelectionParamsIm}
 #
 # Do not apply any calibration
 Cimager.calibrate                               = false

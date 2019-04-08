@@ -800,38 +800,34 @@ Cimager.solver.Clean.scales                     = ${CLEAN_SCALES_ARRAY[$loopval]
 # governing data selection. This returns parset parameters suitable
 # for either Cimager or Ccalibrator (the task name is given as the
 # first argument to the function)
-# Use: dataSelectionSelfcalLoop TaskName
-#  where TaskName is "Cimager" or "Ccalibrator"
+# Use: dataSelectionSelfcalLoop
 # Requires/uses:
 #   * LOOP
 #   * CIMAGER_MINUV_ARRAY or
 #   * CCALIBRATOR_MINUV_ARRAY
 # Returns:
-#   * dataSelectionParams
+#   * dataSelectionParamsIm
+#   * dataSelectionParamsCal
 function dataSelectionSelfcalLoop()
 {
-    dataSelectionParams=""
+    dataSelectionParamsIm=""
+    dataSelectionParamsCal=""
     needToUnsetLoop=false
     if [ "$LOOP" == "" ]; then
         LOOP=0
         needToUnsetLoop=true
     fi
-    if [ "$1" == "Cimager" ]; then
-        if [ "${CIMAGER_MINUV_ARRAY[$LOOP]}" -gt 0 ]; then
-            dataSelectionParams="Cimager.MinUV   = ${CIMAGER_MINUV_ARRAY[$LOOP]}"
-        fi
-        if [ "${CIMAGER_MAXUV_ARRAY[$LOOP]}" -gt 0 ]; then
-            dataSelectionParams="Cimager.MaxUV   = ${CIMAGER_MAXUV_ARRAY[$LOOP]}"
-        fi
-    elif [ "$1" == "Ccalibrator" ]; then
-        if [ "${CCALIBRATOR_MINUV_ARRAY[$LOOP]}" -gt 0 ]; then
-            dataSelectionParams="Ccalibrator.MinUV   = ${CCALIBRATOR_MINUV_ARRAY[$LOOP]}"
-        fi
-        if [ "${CCALIBRATOR_MAXUV_ARRAY[$LOOP]}" -gt 0 ]; then
-            dataSelectionParams="Ccalibrator.MaxUV   = ${CCALIBRATOR_MAXUV_ARRAY[$LOOP]}"
-        fi
-    else
-        dataSelectionParams="# no data selection parameter returned"
+    if [ "${CIMAGER_MINUV_ARRAY[$LOOP]}" -gt 0 ]; then
+        dataSelectionParamsIm="Cimager.MinUV   = ${CIMAGER_MINUV_ARRAY[$LOOP]}"
+    fi
+    if [ "${CIMAGER_MAXUV_ARRAY[$LOOP]}" -gt 0 ]; then
+        dataSelectionParamsIm="Cimager.MaxUV   = ${CIMAGER_MAXUV_ARRAY[$LOOP]}"
+    fi
+    if [ "${CCALIBRATOR_MINUV_ARRAY[$LOOP]}" -gt 0 ]; then
+        dataSelectionParamsCal="Ccalibrator.MinUV   = ${CCALIBRATOR_MINUV_ARRAY[$LOOP]}"
+    fi
+    if [ "${CCALIBRATOR_MAXUV_ARRAY[$LOOP]}" -gt 0 ]; then
+        dataSelectionParamsCal="Ccalibrator.MaxUV   = ${CCALIBRATOR_MAXUV_ARRAY[$LOOP]}"
     fi
     if [ "$needToUnsetLoop" == "true" ]; then
         unset LOOP
