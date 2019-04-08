@@ -608,6 +608,7 @@ EOF
         fi
 
     done
+    unset LOOP
 
     echo " "
 
