@@ -64,12 +64,27 @@ Now you would only need to invoke::
 
 This would only require 4 nodes.
 
-**Update**:
+**Change to the behaviour of the Channels keyword**:
 
-The Channels keyword behaves differently for this imager as compared to cimager in this case it controls how many channels are processed from the measurement sets. If it is omitted the entire set is processed however you can specify:
+The Channels keyword behaviour has been changed. It now behaves in a simialr way to cimager:
 
-    Cimager.Channels = [<start>,<stop>]
+Cimager.Channels = [<num>,<start>]
 
+You can specify the number of channels and the start channel. This will be taken from the complete list of channels as determined by the input measurement sets.
+
+**Update Added the Frequencies keyword**
+
+There is now a Frequencies keyword that allows you to specify the dimensions of the spectral cube in frequency space:
+
+Cimager.Frequencies = [<num>,<start>,<width>] - all in Hz
+
+This is in under test at the moment - it has also been introduced at the same time as a change to the way the barycentric corrections are performed.
+
+**Update Specifying the Frequency frame**
+
+Cimager.freqframe = topo | bary | lsrk 
+
+You can now choose a default frequency frame for the spectral cube as either, topocentric (the default), barycentric or the kinematic local standard of rest. Other frames can be added on request.
 
 
 **Note: The Reference Frequency**
@@ -220,8 +235,13 @@ Here is an example of the start of a beam log::
 |                          |                  |              |                                                    |
 +--------------------------+------------------+--------------+----------------------------------------------------+
 +--------------------------+------------------+--------------+----------------------------------------------------+
-|Channels                  |vector<int>       |[0,<all>]     |Channels to be selected from the measurement set.   |
-|                          |                  |              |Syntax is [<start>,<stop>]                          |
+|Channels                  |vector<int>       |[]            |Channels to be selected from the measurement set.   |
+|                          |                  |              |Syntax is [<number>,<start>]. Defaults to all the   | 
+|                          |                  |              |channels                                            |
++--------------------------+------------------+--------------+----------------------------------------------------+
+|Frequencies               |vector<double>    |[]            |Dimensions of the output cube in freuency space     |
+|                          |                  |              |Syntax is [<number>,<start>,<width] all in Hz.      | 
+|                          |                  |              |Defaults to the same as the input MS                |
 +--------------------------+------------------+--------------+----------------------------------------------------+
 |beams                     |vector<int>       |[0]           |Beam number to be selected from the measurement set |
 |                          |                  |              |                                                    |
@@ -229,8 +249,9 @@ Here is an example of the start of a beam log::
 |nwriters                  |int               |1             |The number of output cubes to                       |
 |                          |                  |              |generate in spectral cube mode.                     |
 +--------------------------+------------------+--------------+----------------------------------------------------+
-|barycentre                |bool              |false         |Generate output cubes in the barycentric frame      |
-|                          |                  |              |only applies in distributed solver (simager) mode   |
+|freqframe                 |string            |topo          |Generate output cubes in the given frame            |
+|                          |                  |              |options are topocentric (topo), barycentric (bary)  |
+|                          |                  |              |and kinematic local standard of rest (lsrk)         |
 +--------------------------+------------------+--------------+----------------------------------------------------+
 |singleoutputfile          |bool              |false         |Single output cube. Useful in the case of multiple  |
 |                          |                  |              |writers                                             |

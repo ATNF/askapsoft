@@ -343,9 +343,9 @@ Cimager.calibrate                               = false
 
     parset="${parsets}/science_imagingSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP\${LOOP}.in"
 
-    # generate the loop-dependant cimager parameters --> loopParams & dataSelectionParams
+    # generate the loop-dependant cimager parameters --> loopParams & dataSelectionParamsIm
     cimagerSelfcalLoopParams
-    dataSelectionSelfcalLoop Cimager
+    dataSelectionSelfcalLoop
 
     cat > "\$parset" <<EOFINNER
 ##########
@@ -354,13 +354,12 @@ Cimager.calibrate                               = false
 ${cimagerParams}
 #
 \${loopParams}
-\${dataSelectionParams}
+\${dataSelectionParamsIm}
 #
 \${calparams}
 #
 EOFINNER
     if [ "\${LOOP}" -gt 0 ]; then
-            dataSelectionSelfcalLoop Cccalibrator
             cat >> "\$parset" <<EOFINNER
 ##########
 ## Shallow source-finding with selavy
@@ -428,7 +427,7 @@ ${CmodelParset}
 ##
 # parameters for calibrator
 Ccalibrator.dataset                             = ${OUTPUT}/${msSciAv}
-\${dataSelectionParams}
+\${dataSelectionParamsCal}
 Ccalibrator.nAnt                                = ${NUM_ANT}
 Ccalibrator.nBeam                               = 1
 Ccalibrator.solve                               = antennagains
