@@ -228,20 +228,6 @@ default to "cross".
 |                          |                  |              |etc). The details are given in a separate section   |
 |                          |                  |              |(see below)                                         |
 +--------------------------+------------------+--------------+----------------------------------------------------+
-|memorybuffers             |bool              |false         |The accessor subsystem provides a buffer mechanism  |
-|                          |                  |              |to work with scratch information.  If this flag is  |
-|                          |                  |              |set to false (default), these buffers will be kept  |
-|                          |                  |              |on disk (in a subtable of the dataset called        |
-|                          |                  |              |*BUFFERS*). If this flag is set to true, scratch    |
-|                          |                  |              |buffers are kept in memory and the dataset is opened|
-|                          |                  |              |for read only. The imager code had been converted at|
-|                          |                  |              |some stage to process the data without using scratch|
-|                          |                  |              |buffers. Therefore, the status of this flag does not|
-|                          |                  |              |affect the performance or memory usage. However, it |
-|                          |                  |              |seems a good idea to always set it to *true* to     |
-|                          |                  |              |ensure that the dataset given by the *dataset*      |
-|                          |                  |              |keyword is always opened for read-only              |
-+--------------------------+------------------+--------------+----------------------------------------------------+
 |nUVWMachines              |int32             |number of     |Size of uvw-machines cache. uvw-machines are used to|
 |                          |                  |beams         |convert uvw from a given phase centre to a common   |
 |                          |                  |              |tangent point. To reduce the cost to set the machine|
