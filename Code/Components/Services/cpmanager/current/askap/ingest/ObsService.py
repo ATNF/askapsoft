@@ -1,14 +1,15 @@
-import sys, traceback, Ice, os
+import os
 import time
 import subprocess
 
 from . import logger
 
-from askap.parset import ParameterSet, slice_parset
-from askap.slice import CP
+from askap.slice import CP  # noqa: F401
 
 # noinspection PyUnresolvedReferences
-from askap.interfaces.cp import ICPObsService
+from askap.interfaces.cp import (ICPObsService,
+                                 AlreadyRunningException,
+                                 PipelineStartException)
 
 import askap.iceutils.monitoringprovider
 
@@ -24,9 +25,13 @@ class CPObsServiceImp(ICPObsService):
     def startObs(self, sbid, current=None):
         logger.debug("start observation for " + str(sbid))
 
+        self.current_sbid = self.get_current_sbid()
+
         if self.current_sbid >= 0:
-            logger.error("Ingest Pipeline already running")
-            raise RuntimeError("Ingest Pipeline already running")
+            msg = "Ingest Pipeline already running for SB{}".format(
+                self.current_sbid)
+            logger.error(msg)
+            raise AlreadyRunningException(msg)
 
         # everytime an obs is started, load latest from fcm
         self.params = self.fcm.get()
@@ -37,39 +42,41 @@ class CPObsServiceImp(ICPObsService):
             configFile = "cpingest.in"
         else:
             logger.error("cp.ingest.workdir not configured in fcm")
-            raise RuntimeError("cp.ingest.workdir not configured in fcm")
-
+            raise PipelineStartException(
+                "cp.ingest.workdir not configured in fcm")
 
         if not os.path.exists(workdir):
             try:
                 os.makedirs(workdir)
             except:
                 logger.error("Could not create directory: " + workdir)
-                raise RuntimeError("Could not create directory: " + workdir)
+                raise PipelineStartException(
+                    "Could not create directory: " + workdir)
 
         try:
             with open(os.path.join(workdir, configFile), 'w+') as config_file:
                 logger.debug("writing ingest config: " + config_file.name)
                 self.write_config(config_file, sbid)
         except Exception as ex:
-            logger.error("Could not write ingest config for " + str(sbid) + ": " + str(ex))
-            raise RuntimeError("Could not write ingest config for " + str(sbid) + str(ex))
+            logger.error("Could not write ingest config for " +
+                         str(sbid) + ": " + str(ex))
+            raise PipelineStartException(
+                "Could not write ingest config for " + str(sbid) + str(ex))
 
         try:
             self.start_ingest(workdir, sbid)
         except Exception as ex:
-            logger.error("Could not start ingest for " + str(sbid) + ": " + str(ex))
-            raise RuntimeError("Could not start ingest for: " + str(sbid) + str(ex))
+            logger.error("Could not start ingest for " +
+                         str(sbid) + ": " + str(ex))
+            raise RuntimeError(
+                "Could not start ingest for: " + str(sbid) + str(ex))
 
     def abortObs(self, current=None):
         logger.debug("Abort " + str(self.current_sbid))
         if self.proc:
             if self.proc.poll() is None:
                 self.proc.terminate()
-                self.proc.wait()
-
-        logger.debug("Aborted " + str(self.current_sbid))
-        self.current_sbid = -1
+        logger.debug("Initiated abort for " + str(self.current_sbid))
 
     # will return the sbid the ingest is processing if it's running
     # otherwise return -1
@@ -77,11 +84,10 @@ class CPObsServiceImp(ICPObsService):
         if self.proc:
             if self.proc.poll() is not None:
                 self.current_sbid = -1
-
         return self.current_sbid
 
     def waitObs(self, timeout, current=None):
-        if self.proc is None: # no process is currently running
+        if self.proc is None:  # no process is currently running
             return True
 
         if self.proc.poll() is not None:
@@ -111,15 +117,14 @@ class CPObsServiceImp(ICPObsService):
 
         return False
 
-
-    def write_config(self, file, sbid):
-        file.write("sbid=" + str(sbid) + "\n")
-        for k,v in self.params.items():
+    def write_config(self, file_name, sbid):
+        file_name.write("sbid=" + str(sbid) + "\n")
+        for k, v in self.params.items():
             # strip out prefixes 'common.' and 'cp.ingest'
             key = k
             key = key.replace('common.', '', 1)
             key = key.replace('cp.ingest.', '', 1)
-            file.write(key + "=" + str(v) + "\n")
+            file_name.write(key + "=" + str(v) + "\n")
 
     def start_ingest(self, work_dir, sbid):
         command = self.params.get("cp.ingest.command")
@@ -134,6 +139,6 @@ class CPObsServiceImp(ICPObsService):
         logger.info("start ingest for " + str(sbid) + ": " + str(cmd))
         with open(os.path.join(work_dir, logfile), "w") as log:
             self.proc = subprocess.Popen(cmd, shell=False,
-                     stderr=log, stdout=log, cwd=work_dir)
+                                         stderr=log, stdout=log, cwd=work_dir)
 
         self.current_sbid = sbid
