@@ -431,8 +431,9 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
 
         ASKAPLOG_INFO_STR(logger, "Solving normal equations using the LSQR solver, with alpha = " << alpha);
 
-        size_t nrows = nParameters;
         size_t ncolumms = nParameters;
+        size_t nrows = nParameters;
+        // TODO: To find out what is the max number of nonzero values per row.
         size_t nnz = nParameters * nParameters;
 
         if (addSmoothnessConstraints) {
@@ -441,7 +442,7 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
         }
 
         lsqr::SparseMatrix matrix(nrows, nnz, comm);
-        lsqr::Vector b_RHS(nrows, 0.0);
+        lsqr::Vector b_RHS(nrows, 0.);
 
         // Define the matrix values.
         for (size_t j = 0; j < size_t(nParameters); ++j) {
@@ -460,14 +461,17 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
 
             // Solution at the current major iteration (before the update).
             std::vector<double> x0(nParameters);
+            int counter = 0;
             for (std::vector<std::pair<string, int> >::const_iterator indit = indices.begin();
                              indit != indices.end(); ++indit) {
                 casa::IPosition vecShape(1, params.value(indit->first).nelements());
                 casa::Vector<double> value(params.value(indit->first).reform(vecShape));
                 for (size_t i=0; i<value.nelements(); ++i) {
                     x0[indit->second + i] = value(i);
+                    counter++;
                 }
             }
+            ASKAPCHECK(counter == nParameters, "Wrong number of parameters!");
 
             double cost = 0.;
             for (std::vector<std::pair<string, int> >::const_iterator indit = indices.begin();
@@ -475,48 +479,45 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
                 // Extracting channel and parameter name.
                 std::pair<casa::uInt, std::string> paramInfo = extractChannelInfo(indit->first);
                 size_t channel = paramInfo.first;
-                std::string name = paramInfo.second;
-
-                size_t currIndex[2];
-                size_t nextIndex[2];
-
-                // Extracting parameter indexes for the current channel.
-                currIndex[0] = gainIndexesReal[make_pair(channel, name)];
-                currIndex[1] = gainIndexesImag[make_pair(channel, name)];
 
                 bool lastChannel = (channel == nChannels - 1);
-
-                // Extracting parameter indexes for the next channel.
                 if (!lastChannel) {
-                    // Applying forward difference grad(f) = f[i+1] - f[i].
+
+                    std::string name = paramInfo.second;
+
+                    size_t currIndex[2];
+                    size_t nextIndex[2];
+
+                    // Extracting parameter indexes for the current channel.
+                    currIndex[0] = gainIndexesReal[make_pair(channel, name)];
+                    currIndex[1] = gainIndexesImag[make_pair(channel, name)];
+
+                    ASKAPCHECK((int)currIndex[0] == indit->second, "Wrong index (real)!");
+                    ASKAPCHECK((int)currIndex[1] == indit->second + 1, "Wrong index (imag)!");
+
+                    // Extracting parameter indexes for the next channel.
                     nextIndex[0] = gainIndexesReal[make_pair(channel + 1, name)];
                     nextIndex[1] = gainIndexesImag[make_pair(channel + 1, name)];
-                } else {
-                    // Applying backward difference grad(f) = f[i] - f[i-1].
-                    nextIndex[0] = gainIndexesReal[make_pair(channel - 1, name)];
-                    nextIndex[1] = gainIndexesImag[make_pair(channel - 1, name)];
-                }
 
-                double matrixValue = smoothingWeight;
-                double b_RHS_value = 0.;
+                    for (size_t i = 0; i < 2; ++i) {
+                        matrix.NewRow();
 
-                for (size_t i = 0; i < 2; ++i) {
-                    matrix.NewRow();
+                        // Applying forward difference grad(f) = f[i+1] - f[i].
+                        matrix.Add(- smoothingWeight, currIndex[i]);
+                        matrix.Add(+ smoothingWeight, nextIndex[i]);
 
-                    if (!lastChannel) {
-                        // f[i+1] - f[i]
-                        matrix.Add(- matrixValue, currIndex[i]);
-                        matrix.Add(+ matrixValue, nextIndex[i]);
-                        b_RHS_value = - smoothingWeight * (x0[nextIndex[i]] - x0[currIndex[i]]);
-                    } else {
-                        // f[i] - f[i-1]
-                        matrix.Add(+ matrixValue, currIndex[i]);
-                        matrix.Add(- matrixValue, nextIndex[i]);
-                        b_RHS_value = - smoothingWeight * (x0[currIndex[i]] - x0[nextIndex[i]]);
+                        double b_RHS_value = - smoothingWeight * (x0[nextIndex[i]] - x0[currIndex[i]]);
+
+                        size_t b_index = matrix.GetCurrentNumberRows() - 1;
+                        b_RHS[b_index] = b_RHS_value;
+
+                        cost += b_RHS_value * b_RHS_value;
                     }
-                    b_RHS[matrix.GetCurrentNumberRows()] = b_RHS_value;
-
-                    cost += b_RHS_value * b_RHS_value;
+                } else
+                {   // No constraints explicitly added for the last channel (it is coupled with previous one by forward difference).
+                    // Two rows: for real & imaginary parts.
+                    matrix.NewRow();
+                    matrix.NewRow();
                 }
             }
             ASKAPLOG_INFO_STR(logger, "Smoothness constraints cost = " << cost);
