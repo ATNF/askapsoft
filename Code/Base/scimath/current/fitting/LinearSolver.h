@@ -80,8 +80,11 @@ namespace askap
         /// @brief Clone this object
         virtual Solver::ShPtr clone() const;
 
-        // Setter for workers communicator.
+        // @brief Setter for workers communicator.
         virtual void SetWorkersCommunicator(void *comm);
+
+        // @brief Setter for the major loop iteration number.
+        virtual void SetMajorLoopIterationNumber(size_t it);
 
        protected:
 
@@ -119,6 +122,9 @@ namespace askap
 
          // MPI communicator of all workers (for LSQR solver).
          void *itsWorkersComm;
+
+         // Iteration number in the major loop (for LSQR solver with constraints).
+         size_t itsMajorLoopIterationNumber;
 
          // NOTE: Copied from "calibaccess/CalParamNameHelper.h", as currently accessors depends of scimath.
          /// @brief extract coded channel and parameter name

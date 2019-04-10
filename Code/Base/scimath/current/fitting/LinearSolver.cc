@@ -83,7 +83,8 @@ namespace askap
     /// threshold is not allowed and will cause an exception.
     LinearSolver::LinearSolver(double maxCondNumber) : 
            itsMaxCondNumber(maxCondNumber),
-           itsWorkersComm(NULL)
+           itsWorkersComm(NULL),
+           itsMajorLoopIterationNumber(0)
     {
       ASKAPASSERT(itsMaxCondNumber!=0);
     };
@@ -670,6 +671,11 @@ std::pair<double,double> LinearSolver::solveSubsetOfNormalEquations(Params &para
     void LinearSolver::SetWorkersCommunicator(void *comm)
     {
         itsWorkersComm = comm;
+    }
+
+    void LinearSolver::SetMajorLoopIterationNumber(size_t it)
+    {
+        itsMajorLoopIterationNumber = it;
     }
 
     // NOTE: Copied from "calibaccess/CalParamNameHelper.h", as currently accessors depends of scimath.
