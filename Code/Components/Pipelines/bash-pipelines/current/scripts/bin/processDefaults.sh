@@ -368,6 +368,11 @@ srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} \"${PIPELINEDIR
         SLURM_CONFIG="${SLURM_CONFIG}
 #SBATCH --clusters=${CLUSTER}"
     fi
+
+    if [ "$EXCLUDE_NODE_LIST" != "" ]; then
+        SLURM_CONFIG="${SLURM_CONFIG}
+#SBATCH --exclude=${EXCLUDE_NODE_LIST}"
+    fi
     
     # Account to be used
     if [ "$ACCOUNT" != "" ]; then
