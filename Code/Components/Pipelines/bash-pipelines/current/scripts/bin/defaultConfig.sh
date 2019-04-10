@@ -555,13 +555,15 @@ NUM_TAYLOR_TERMS=2
 # Number of CPUs to use on each core in the continuum imaging
 CPUS_PER_CORE_CONT_IMAGING=20
 # Total number of cores to use for the continuum imaging. Leave blank
-# to have one core for each of nworkergroups*nchannels (plus a
+# to have one core for each of nworkergroups*nchannels/nchanpercore (plus a
 # master).
 NUM_CPUS_CONTIMG_SCI=""
 # The Cimager.Channels parameter, to be used when NUM_CPUS_CONTIMG_SCI
 # is given. Cimager.Channels is left out of the imaging parset if this
 # is not given.
 CHANNEL_SELECTION_CONTIMG_SCI=""
+# Whether to put the master on a node of its own for the continuum imaging
+FAT_NODE_CONT_IMG=true
 
 # base name for images: if IMAGE_BASE_CONT=i.blah then we'll get
 # image.i.blah, image.i.blah.restored, psf.i.blah etc

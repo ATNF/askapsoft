@@ -155,6 +155,10 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CPUS_PER_CORE_CONT_IMAGING``             | 20                                  | Not for parset                                         | Number of cores to use on each node in the continuum imaging. |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``FAT_NODE_CONT_IMG``                      | true                                | Not for parset                                         | Whether the master process for the continuum imaging should be|
+|                                            |                                     |                                                        | put on a node of its own (if ```true```), or just treated like|
+|                                            |                                     |                                                        | all other processes.                                          |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``DATACOLUMN``                             | DATA                                | datacolumn (:doc:`../calim/cimager`)                   | The column in the measurement set from which to read the      |
 |                                            |                                     |                                                        | visibility data. The default, 'DATA', is appropriate for      |
 |                                            |                                     |                                                        | datasets processed within askapsoft, but if you are trying to |
