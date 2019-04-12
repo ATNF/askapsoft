@@ -292,8 +292,14 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 |                                               |                                     | (:doc:`../calim/imager`)           | ``NUM_SPECTRAL_WRITERS>1``). Only works when                      |
 |                                               |                                     |                                    | ``IMAGETYPE_SPECTRAL=fits``                                       |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``DO_BARY``                                   | true                                | barycentre (:doc:`../calim/imager`)| Whether to write the spectral cubes in the Barycentric reference  |
-|                                               |                                     |                                    | frame.                                                            |
+| ``FREQ_FRAME_SL``                             | bary                                | freqframe (:doc:`../calim/imager`) | The reference frame in which to write the spectral cube - one of  |
+|                                               |                                     |                                    | topo, bary, lsrk. Anything else (or an unset value) default to    |
+|                                               |                                     |                                    | bary.                                                             |
++-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
+| ``OUTPUT_CHANNELS_SL``                        | ""                                  | Frequencies                        | The output channels for the spectral cube. Should be of the form  |
+|                                               |                                     | (:doc:`../calim/imager`)           | [number,start,width], with the start and width parameters are in  |
+|                                               |                                     |                                    | Hz. If not given, the behaviour is to use the same frequency      |
+|                                               |                                     |                                    | values as the input MS, albeit in the requested frequency frame.  |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | **Image-based continuum subtraction**         |                                     |                                    |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+

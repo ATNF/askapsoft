@@ -595,8 +595,10 @@ NCHAN_PER_CORE_SL=64
 USE_TMPFS=false
 # where is the shared memory mounted
 TMPFS="/dev/shm"
-# Whether to convert the frequency channels to the Barycentre frame
-DO_BARY=true
+# Frequency frame for the output spectral cube - one of "topo", "bary", "lsrk"
+FREQ_FRAME_SL=bary
+# Output channels for the spectral cube - needs to be [number,start,width]
+OUTPUT_CHANNELS_SL=""
 # local solver - distribute the minor cycle - each channel is solved individually
 # this mimics simager behaviour
 # automatically set to true in the spectral imaging

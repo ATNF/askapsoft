@@ -988,6 +988,32 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
         # Define the number of channels used in the spectral-line imaging
         NUM_CHAN_SCIENCE_SL=$(echo "${CHAN_RANGE_SL_SCIENCE}" | awk -F'-' '{print $2-$1+1}')
 
+        # Set the output frequency frame - must be one of "topo", "bary", "lsrk"
+        # If not given, default to "bary"
+        if [ "${FREQ_FRAME_SL}" == "" ]; then
+            FREQ_FRAME_SL="bary"
+        fi
+        if [ "${FREQ_FRAME_SL}" != "topo" ] ||
+               [ "${FREQ_FRAME_SL}" != "bary" ] ||
+               [ "${FREQ_FRAME_SL}" != "lsrk" ]; then
+            echo "WARNING - FREQ_FRAME_SL (${FREQ_FRAME_SL}) is not one of \"topo\" \"bary\" \"lsrk\""
+            echo "        - Setting to \"bary\""
+            FREQ_FRAME_SL="bary"
+        fi
+
+        # Catch deprecated parameter DO_BARY
+        if [ "${DO_BARY}" != "" ]; then
+            echo "WARNING - the DO_BARY parameter is deprecated. Please use FREQ_FRAME_SL instead"
+            if [ "${DO_BARY}" == "true" ]; then
+                echo "        - Setting FREQ_FRAME_SL=bary"
+                FREQ_FRAME_SL=bary
+            else
+                echo "        - Setting FREQ_FRAME_SL=topo"
+                FREQ_FRAME_SL=topo
+            fi
+        fi
+
+        
         # if we are using the new imager we need to tweak the number of cores
         if [ "${DO_ALT_IMAGER_SPECTRAL}" == "true" ]; then
             if [ $((NUM_CHAN_SCIENCE_SL % NCHAN_PER_CORE_SL)) -ne 0 ]; then
@@ -1526,7 +1552,7 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
 	    # expected input: CLEAN_SCALES="[0] ; [0,3,10] ; [0,3,10,480,960]"
 	    # Note the "space" characters around ";" are crucial when you want to specify 
 	    # an array of scales. This scheme is backward compatible with older pipeline 
-	    # versions where one could not use different scales for different selfcal loops.  
+	    # versions where one could not use different scales for different selfcal loops.
 	    declare -a CLEAN_SCALES_ARRAY=(${CLEAN_SCALES})
 	    unset IFS
 	    arrSize=${#CLEAN_SCALES_ARRAY[@]}
