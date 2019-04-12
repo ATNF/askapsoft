@@ -392,7 +392,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``SELFCAL_NUM_LOOPS``                      | 1                                   | none                                                   | Number of loops of self-calibration.                          |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``SELFCAL_INTERVAL``                       | "[1800,1800,200]"                   | interval                                               | Interval [sec] over which to solve for self-calibration. Can  |
+| ``SELFCAL_INTERVAL``                       | "[200,200]"                         | interval                                               | Interval [sec] over which to solve for self-calibration. Can  |
 |                                            |                                     | (:doc:`../calim/ccalibrator`)                          | be given as an array with different values for each self-cal  |
 |                                            |                                     |                                                        | loop, as for the default. Here, the initial intervals are     |
 |                                            |                                     |                                                        | chosen to be longer than typical observations, so that all    |

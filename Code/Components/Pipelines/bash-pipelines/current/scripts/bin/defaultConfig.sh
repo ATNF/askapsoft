@@ -722,7 +722,7 @@ SELFCAL_REF_GAINS=""
 #   (eg. "[1800,900,300]"), allowing a different value for each loop.
 #
 # Interval [sec] over which to solve for self-calibration
-SELFCAL_INTERVAL="[1800,1800,200]"
+SELFCAL_INTERVAL="[200,200]"
 # SNR threshold for detection with selavy in determining selfcal sources
 SELFCAL_SELAVY_THRESHOLD=8
 # Option to pass to the "Ccalibrator.normalisegains" parameter,
