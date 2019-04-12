@@ -302,7 +302,7 @@ Ccalibrator.sources.definition                  = ${sources}"
             cat > "$sbatchfile" <<EOF
 #!/bin/bash -l
 ${SLURM_CONFIG}
-#SBATCH --time=${JOB_TIME_CONT_IMAGE}
+#SBATCH --time=${JOB_TIME_CONT_SELFCAL}
 #SBATCH --nodes=1
 #SBATCH --job-name=${jobname}
 ${exportDirective}

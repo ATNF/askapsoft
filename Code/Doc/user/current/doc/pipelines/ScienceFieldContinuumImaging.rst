@@ -61,6 +61,13 @@ end, the final gains calibration table is kept in the main output
 directory (as this can then be used by the spectral-line imaging
 pipeline).
 
+There are two options for how this is run. The first
+(``MULTI_JOB_SELFCAL=true``) launches a separate slurm job for each
+imaging task, and each "calibration" task - the calibration job
+incorporates the selavy, cmodel and ccalibrator tasks. The latter uses
+a single node only. If ``MULTI_JOB_SELFCAL=false``, these are all
+incorporated into one slurm job, including all loops.
+
 Some parameters are allowed to vary with the loop number of the
 self-calibration. This way, you can decrease, say, the detection
 threshold, or increase the number of major cycles, as the calibration
@@ -137,6 +144,13 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 | ``IMAGETYPE_CONTCUBE``                     | fits                                | imagetype (:doc:`../calim/imager`)                     | Image format to use - can be either 'casa' or 'fits',         |
 |                                            |                                     |                                                        | although 'fits' can only be given in conjunction with         |
 |                                            |                                     |                                                        | ``DO_ALT_IMAGER_CONTCUBE=true``.                              |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ```MULTI_JOB_SELFCAL``                     | true                                | none                                                   | Whether to break the selfcal up into separate slurm jobs for  |
+|                                            |                                     |                                                        | each imaging and calibration task (``true``) or whether to    |
+|                                            |                                     |                                                        | combine them all into a single slurm job.                     |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``JOB_TIME_CONT_SELFCAL``                  | ``JOB_TIME_DEFAULT`` (12:00:00)     | none                                                   | Time request for the calibration jobs when running with       |
+|                                            |                                     |                                                        | ``MULTI_JOB_SELFCAL=true``.                                   |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | **Basic variables**                        |                                     |                                                        |                                                               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
