@@ -1531,7 +1531,11 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
 		echo "ERROR - CLEAN_SCALES_ARRAY ($CLEAN_SCALES_ARRAY) needs to be of size > 0"
 		exit 1
 	    fi
-	    if [ "$arrSize" -ne "$expectedArrSize" ]; then 
+            if [ "$arrSize" -eq 1 ]; then
+                for((i=0;i<=SELFCAL_NUM_LOOPS;i++)); do
+                    CLEAN_SCALES_ARRAY[$i]=${CLEAN_SCALES_ARRAY[0]}
+                done
+	    elif [ "$arrSize" -ne "$expectedArrSize" ]; then 
                 echo "ERROR - CLEAN_SCALES ($CLEAN_SCALES) needs to be of size $expectedArrSize (since SELFCAL_NUM_LOOPS=$SELFCAL_NUM_LOOPS)"
                 exit 1
             fi
@@ -1545,7 +1549,11 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
 		echo "ERROR - CLEAN_THRESHOLD_MINORCYCLE_ARRAY ($CLEAN_THRESHOLD_MINORCYCLE_ARRAY) needs to be of size > 0"
 		exit 1
 	    fi
-	    if [ "$arrSize" -lt "$expectedArrSize" ]; then 
+	    if [ "$arrSize" -eq 1 ]; then
+                for((i=0;i<=SELFCAL_NUM_LOOPS;i++)); do
+                    CLEAN_THRESHOLD_MINORCYCLE_ARRAY[$i]=${CLEAN_THRESHOLD_MINORCYCLE_ARRAY[0]}
+                done
+	    elif [ "$arrSize" -lt "$expectedArrSize" ]; then 
                 echo "ERROR - CLEAN_THRESHOLD_MINORCYCLE ($CLEAN_THRESHOLD_MINORCYCLE) needs to be of size $expectedArrSize (since SELFCAL_NUM_LOOPS=$SELFCAL_NUM_LOOPS)"
                 exit 1
             fi
