@@ -394,9 +394,8 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``SELFCAL_INTERVAL``                       | "[200,200]"                         | interval                                               | Interval [sec] over which to solve for self-calibration. Can  |
 |                                            |                                     | (:doc:`../calim/ccalibrator`)                          | be given as an array with different values for each self-cal  |
-|                                            |                                     |                                                        | loop, as for the default. Here, the initial intervals are     |
-|                                            |                                     |                                                        | chosen to be longer than typical observations, so that all    |
-|                                            |                                     |                                                        | data are included.                                            |
+|                                            |                                     |                                                        | loop, as for the default, or a single value that applies to   |
+|                                            |                                     |                                                        | each loop.                                                    |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``SELFCAL_KEEP_IMAGES``                    | true                                | none                                                   | Should we keep the images from the intermediate selfcal       |
 |                                            |                                     |                                                        | loops?                                                        |
