@@ -5,13 +5,47 @@ This page summarises the key changes in each tagged release of
 ASKAPsoft. This replicates the CHANGES file that is included in the
 code base.
 
-0.24.0 (5 April 2019)
+0.24.0 (12 April 2019)
 ---------------------
 
 A major release, with an improved framework for the pipeline scripts
 to handle large datasets efficiently, along with several performance
 improvements to the processing software.
 
+Processing software:
+
+ * Spectral imaging:
+
+   - There is a change to the behaviour of the Channels keyword - now
+     the syntax is [number,startchannel], where the channels are those
+     in the input measurement set.
+   - Introduction of more frequency frames. You can now specify one of
+     three reference frames topocentric (default) barycentric and the
+     local kinematic standard of rest. The new keyword is:
+     Cimager.freqframe=topo | bary | lsrk
+   - You can now specify the output channels via their frequencies if
+     you choose. This is a very new feature but simple to test. Note
+     that, as before, there is no interpolation in this mode. It is
+     simply a “nearest” neighbour scheme. The syntax is:
+     Cimager.Frequencies=[number,start,width], with the start and
+     width parameters are in Hz.
+   - The spectral line imager should be more robust to missing
+     channels either via flagging or frequency conversion.
+   - The restoring beam was often not being written to the header of
+     spectral cubes, particularly when more than one writer was used.
+   - The beamlog (the list of restoring beams per channel) for cubes
+     was not being written correctly. It now will always be written,
+     and will have every channel present, even those with no good data
+     (their beams will be zero-sized).
+
+ * The bandpass calibration had reverted to the issue solved in
+   0.22.0, where a failed fit to a single channel/beam would crash the
+   job. This is now robust against such failures again.
+ * The mssplit tool has had a memory overflow fixed, so that
+   bucketsizes larger than 4GB can be used.
+ * The linmos-mpi task would fail with an error when the first image
+   being processed was not the largest.
+   
 Pipelines:
 
  * The pre-imaging tasks can now run more efficiently by dividing the
@@ -21,9 +55,11 @@ Pipelines:
    flagging, averaging, and, for the spectral data,
    continuum-subtraction.
  * Additional continuum-imaging parameters are made
-   selcal-loop-dependent: <LIST THEM HERE>. The format for giving
-   loop-dependent minor-cycle thresholds necessitates a new format -
-   individual loops are separated by ' ; '.
+   selcal-loop-dependent: CLEAN_ALGORITHM, CLEAN_MINORCYCLE_NITER,
+   CLEAN_GAIN, CLEAN_PSFWIDTH, CLEAN_SCALES, and
+   CLEAN_THRESHOLD_MINORCYCLE. The last two parameters can have
+   vectors for individual loops, and so this necessitates a new
+   format, whereindividual loops are separated by ' ; '.
  * Elevation-based flagging for the science observation is able to be
    configured through the pipeline parameters.
  * There are parameters to specify a given range of times to be used
@@ -33,6 +69,9 @@ Pipelines:
    text string instead of the specific pipeline parameters - this will
    allow continued development of these tools without needing to keep
    the pipeline up-to-date with possible parameter inputs.
+ * The new spectral imaging features (see above) are exposed through
+   pipeline parameters FREQ_FRAME_SL and OUTPUT_CHANNELS_SL. The
+   DO_BARY parameter has been deprecated.
  * The following bugs have been fixed
 
    - The continuum subtraction selavy jobs were using the wrong
@@ -43,33 +82,68 @@ Pipelines:
    - Wildcards used in identifying polarisation data products are now
      correctly applied.
 
- * There are new parameters used in the pipeline:
+ * There are new parameters used in the pipeline (with their defaults): 
 
-   - TILENCHAN_AV
-   - SPLIT_TIME_START_1934 / SPLIT_TIME_END_1934
-   - BANDPASS_SMOOTH_ARG_STRING
-   - BANDPASS_SMOOTH_F54
-   - ELEVATION_FLAG_SCIENCE_LOW/HIGH
+   - DO_SPLIT_TIMEWISE=true
+   - DO_SPLIT_TIMEWISE_SERIAL=true
+   - SPLIT_INTERVAL_MINUTES=60
+   - MULTI_JOB_SELFCAL=true
+   - FAT_NODE_CONT_IMG=true
+   - TILENCHAN_AV=18
+   - SPLIT_TIME_START_1934=""
+   - SPLIT_TIME_END_1934=""
+   - BANDPASS_SMOOTH_ARG_STRING=""
+   - BANDPASS_SMOOTH_F54=""
+   - ELEVATION_FLAG_SCIENCE_LOW=""
+   - ELEVATION_FLAG_SCIENCE_HIGH=""
+   - OUTPUT_CHANNELS_SL=""
+   - FREQ_FRAME_SL=bary
 
  * There are new default values for some pipeline parameters:
-   <TO BE FILLED IN>
 
-Processing software:
+   - JOB_TIME_DEFAULT="24:00:00"
+   - CPUS_PER_CORE_CONT_IMAGING=6
+   - FAT_NODE_CONT_IMG=true
+   - NUM_PIXELS_CONT=6144
+   - CELLSIZE_CONT=2
+   - NCHAN_PER_CORE=12
+   - NCHAN_PER_CORE_CONTCUBE=3
+   - NCHAN_PER_CORE_SL=64
+   - NUM_SPECTRAL_WRITERS=""
+   - NUM_SPECTRAL_WRITERS_CONTCUBE=""
+   - GRIDDER_WMAX_NO_SNAPSHOT=30000
+   - GRIDDER_NWPLANES_NO_SNAPSHOT=257
+   - CLEAN_MINORCYCLE_NITER="[400,800]"
+   - CLEAN_GAIN=0.2
+   - CLEAN_SCALES="[0,3,10]"
+   - CLEAN_THRESHOLD_MINORCYCLE="[30%, 0.5mJy, 0.03mJy]"
+   - CLEAN_NUM_MAJORCYCLES="[5,10]"
+   - CLEAN_THRESHOLD_MAJORCYCLE="0.035mJy"
+   - SELFCAL_NUM_LOOPS=1
+   - SELFCAL_INTERVAL=[200,200]
+   - NUM_PIXELS_CONTCUBE=4096
+   - CPUS_PER_CORE_CONTCUBE_IMAGING=8
+   - CLEAN_CONTCUBE_MINORCYCLE_NITER=600
+   - CLEAN_CONTCUBE_GAIN=0.2
+   - CLEAN_CONTCUBE_THRESHOLD_MINORCYCLE="[40%, 0.5mJy, 0.05mJy]"
+   - CLEAN_CONTCUBE_THRESHOLD_MAJORCYCLE=0.06mJy
+   - CLEAN_CONTCUBE_NUM_MAJORCYCLES=3
+   - TILENCHAN_SL=18
+   - DO_APPLY_CAL_SL=true
+   - DO_CONT_SUB_SL=true
+   - NUM_PIXELS_SPECTRAL=1024
+   - CELLSIZE_SPECTRAL=8
+   - SPECTRAL_IMAGE_MAXUV=2000
+   - PRECONDITIONER_SPECTRAL_GAUSS_TAPER="[20arcsec, 20arcsec, 0deg]"
+   - GRIDDER_SPECTRAL_SNAPSHOT_IMAGING=false
+   - GRIDDER_SPECTRAL_WMAX_NO_SNAPSHOT=30000
+   - GRIDDER_SPECTRAL_NWPLANES=257
+   - CLEAN_SPECTRAL_MINORCYCLE_NITER=800
+   - CLEAN_SPECTRAL_GAIN=0.2
+   - CLEAN_SPECTRAL_THRESHOLD_MINORCYCLE="[45%, 3.5mJy, 0.5mJy]"
+   - CLEAN_SPECTRAL_THRESHOLD_MAJORCYCLE=0.5mJy
+   - CLEAN_SPECTRAL_NUM_MAJORCYCLES=3
 
- * The bandpass calibration had reverted to the issue solved in
-   0.22.0, where a failed fit to a single channel/beam would crash the
-   job. This is now robust against such failures again.
- * The restoring beam was often not being written to the header of
-   spectral cubes, particularly when more than one writer was used.
- * The beamlog (the list of restoring beams per channel) for cubes was
-   not being written correctly. It now will always be written, and
-   will have every channel present, even those with no good data
-   (their beams will be zero-sized).
- * The mssplit tool has had a memory overflow fixed, so that
-   bucketsizes larger than 4GB can be used.
- * The linmos-mpi task would fail with an error when the first image
-   being processed was not the largest.
-   
 
 0.23.3 (22 February 2019)
 -------------------------
