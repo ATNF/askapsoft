@@ -445,7 +445,7 @@ srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} \"${PIPELINEDIR
         JOB_TIME_CONT_IMAGE=${JOB_TIME_DEFAULT}
     fi
     if [ "$JOB_TIME_CONT_SELFCAL" == "" ]; then
-        JOB_TIME_CONT_IMAGE=${JOB_TIME_DEFAULT}
+        JOB_TIME_CONT_SELFCAL=${JOB_TIME_DEFAULT}
     fi
     if [ "$JOB_TIME_CONT_APPLYCAL" == "" ]; then
         JOB_TIME_CONT_APPLYCAL=${JOB_TIME_DEFAULT}
