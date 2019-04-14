@@ -163,6 +163,9 @@ Ccalibrator.refgain                             = ${SELFCAL_REF_GAINS}"
         DEP=$(addDep "$DEP" "$ID_FLAG_SCI")
         DEP=$(addDep "$DEP" "$ID_AVERAGE_SCI")
         DEP=$(addDep "$DEP" "$ID_FLAG_SCI_AV")
+	if [ "${DO_SPLIT_TIMEWISE}" == "true" ]; then 
+            DEP=$(addDep "$DEP" "$ID_MSCONCAT_SCI_AV")
+	fi
     fi
 
     for((LOOP=0;LOOP<=SELFCAL_NUM_LOOPS;LOOP++)); do
