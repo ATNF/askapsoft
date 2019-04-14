@@ -74,8 +74,13 @@ if [ "${DO_IT}" == "true" ] && [ "${DO_SELFCAL}" == "true" ]; then
 
     # Work out number of nodes required, given constraints on number
     # of tasks and tasks per node for each job.
-    NUM_NODES_IMAGING=$(echo $NUM_CPUS_CONTIMG_SCI $CPUS_PER_CORE_CONT_IMAGING | awk '{if ($1%$2==0) print $1/$2; else print int($1/$2)+1}')
-
+    if [ "${FAT_NODE_CONT_IMG}" == "true" ]; then
+        # Need to take account of the master on a node by itself.
+        NUM_NODES_IMAGING=$(echo $NUM_CPUS_CONTIMG_SCI $CPUS_PER_CORE_CONT_IMAGING | awk '{nworkers=$1-1; if (nworkers%$2==0) workernodes=nworkers/$2; else workernodes=int(nworkers/$2)+1; print workernodes+1}')
+    else
+        NUM_NODES_IMAGING=$(echo $NUM_CPUS_CONTIMG_SCI $CPUS_PER_CORE_CONT_IMAGING | awk '{if ($1%$2==0) print $1/$2; else print int($1/$2)+1}')
+    fi
+    
     # Set elements of the metadata based on position & frequency
     msMetadata="${MS_METADATA}"
     ra=$(python "${PIPELINEDIR}/parseMSlistOutput.py" --file="$MS_METADATA" --val=RA)
@@ -540,10 +545,10 @@ if [ "\${FAT_NODE_CONT_IMG}" == "true" ]; then
     for node in \$(scontrol show hostnames \$nodelist); do
         if [[ "\$node" != "\$(hostname)" ]]; then
             for proc in \$(seq 1 ${CPUS_PER_CORE_CONT_IMAGING}); do
-    	    icpu=\$((icpu+1))
-    	    if [[ "\$icpu" -lt "${NUM_CPUS_CONTIMG_SCI}" ]]; then 
-    		newlist=\$newlist,\$node
-     	    fi
+    	        icpu=\$((icpu+1))
+    	        if [[ "\$icpu" -lt "${NUM_CPUS_CONTIMG_SCI}" ]]; then 
+    	            newlist=\$newlist,\$node
+     	        fi
             done
         fi
     done
