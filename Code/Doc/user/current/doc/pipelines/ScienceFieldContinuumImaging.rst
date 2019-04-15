@@ -61,6 +61,13 @@ end, the final gains calibration table is kept in the main output
 directory (as this can then be used by the spectral-line imaging
 pipeline).
 
+There are two options for how this is run. The first
+(``MULTI_JOB_SELFCAL=true``) launches a separate slurm job for each
+imaging task, and each "calibration" task - the calibration job
+incorporates the selavy, cmodel and ccalibrator tasks. The latter uses
+a single node only. If ``MULTI_JOB_SELFCAL=false``, these are all
+incorporated into one slurm job, including all loops.
+
 Some parameters are allowed to vary with the loop number of the
 self-calibration. This way, you can decrease, say, the detection
 threshold, or increase the number of major cycles, as the calibration
@@ -138,6 +145,13 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                     |                                                        | although 'fits' can only be given in conjunction with         |
 |                                            |                                     |                                                        | ``DO_ALT_IMAGER_CONTCUBE=true``.                              |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ```MULTI_JOB_SELFCAL``                     | true                                | none                                                   | Whether to break the selfcal up into separate slurm jobs for  |
+|                                            |                                     |                                                        | each imaging and calibration task (``true``) or whether to    |
+|                                            |                                     |                                                        | combine them all into a single slurm job.                     |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``JOB_TIME_CONT_SELFCAL``                  | ``JOB_TIME_DEFAULT`` (12:00:00)     | none                                                   | Time request for the calibration jobs when running with       |
+|                                            |                                     |                                                        | ``MULTI_JOB_SELFCAL=true``.                                   |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | **Basic variables**                        |                                     |                                                        |                                                               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``IMAGE_AT_BEAM_CENTRES``                  | true                                | none                                                   | Whether to have each beam's image centred at the centre of    |
@@ -153,7 +167,11 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                     |                                                        | be applied, or a string (in quotes) conforming to the data    |
 |                                            |                                     |                                                        | selection syntax can be provided.                             |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``CPUS_PER_CORE_CONT_IMAGING``             | 20                                  | Not for parset                                         | Number of cores to use on each node in the continuum imaging. |
+| ``CPUS_PER_CORE_CONT_IMAGING``             | 6                                   | Not for parset                                         | Number of cores to use on each node in the continuum imaging. |
++--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
+| ``FAT_NODE_CONT_IMG``                      | true                                | Not for parset                                         | Whether the master process for the continuum imaging should be|
+|                                            |                                     |                                                        | put on a node of its own (if ```true```), or just treated like|
+|                                            |                                     |                                                        | all other processes.                                          |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``DATACOLUMN``                             | DATA                                | datacolumn (:doc:`../calim/cimager`)                   | The column in the measurement set from which to read the      |
 |                                            |                                     |                                                        | visibility data. The default, 'DATA', is appropriate for      |
@@ -171,7 +189,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                     |                                                        | IMAGE_AT_BEAM_CENTRES=true) or from the measurement set using |
 |                                            |                                     |                                                        | the "advise" functionality (for IMAGE_AT_BEAM_CENTRES=false). |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``NUM_PIXELS_CONT``                        | 3200                                | Images.shape                                           | The number of pixels on the side of the images to be created. |
+| ``NUM_PIXELS_CONT``                        | 6144                                | Images.shape                                           | The number of pixels on the side of the images to be created. |
 |                                            |                                     | (:doc:`../calim/cimager`)                              | If negative, zero, or absent (i.e. ``NUM_PIXELS_CONT=""``),   |
 |                                            |                                     |                                                        | this will be set automatically by the Cimager “advise”        |
 |                                            |                                     |                                                        | function, based on examination of the MS. Note that this      |
@@ -183,7 +201,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                     |                                                        | IMAGE_AT_BEAM_CENTRES=true then this needs only to be big     |
 |                                            |                                     |                                                        | enough to fit a single beam.                                  |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``CELLSIZE_CONT``                          | 4                                   | Images.cellsize                                        | Size of the pixels in arcsec. If negative, zero or absent,    |
+| ``CELLSIZE_CONT``                          | 2                                   | Images.cellsize                                        | Size of the pixels in arcsec. If negative, zero or absent,    |
 |                                            |                                     | (:doc:`../calim/cimager`)                              | this will be set automatically by the Cimager “advise”        |
 |                                            |                                     |                                                        | function, based on examination of the MS. The default is      |
 |                                            |                                     |                                                        | chosen together with the default number of pixels to cover a  |
@@ -232,12 +250,12 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``GRIDDER_WMAX``                           | 2600                                | WProject.wmax                                          | The wmax parameter for the gridder. The default for this      |
 |                                            | (``GRIDDER_SNAPSHOT_IMAGING=true``) | (:doc:`../calim/gridder`)                              | depends on whether snapshot imaging is invoked or not         |
-|                                            | or 26000                            |                                                        | (``GRIDDER_SNAPSHOT_IMAGING``).                               |
+|                                            | or 30000                            |                                                        | (``GRIDDER_SNAPSHOT_IMAGING``).                               |
 |                                            | (``GRIDDER_SNAPSHOT_IMAGING=false``)|                                                        |                                                               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``GRIDDER_NWPLANES``                       | 99                                  | WProject.nwplanes                                      | The nwplanes parameter for the gridder. The default for this  |
 |                                            | (``GRIDDER_SNAPSHOT_IMAGING=true``) | (:doc:`../calim/gridder`)                              | depends on whether snapshot imaging is invoked or not         |
-|                                            | or 599                              |                                                        | (``GRIDDER_SNAPSHOT_IMAGING``).                               |
+|                                            | or 257                              |                                                        | (``GRIDDER_SNAPSHOT_IMAGING``).                               |
 |                                            | (``GRIDDER_SNAPSHOT_IMAGING=false``)|                                                        |                                                               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``GRIDDER_OVERSAMPLE``                     | 5                                   | WProject.oversample                                    | The oversampling factor for the gridder.                      |
@@ -261,58 +279,37 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                     |                                                        | ``SELFCAL_NUM_LOOPS + 1``, the first algorithm specified will |
 |                                            |                                     |                                                        | be used for ALL selfcal loops.                                |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``CLEAN_MINORCYCLE_NITER``                 | 2000                                | Clean.niter                                            | The number of iterations for the minor cycle clean.           |
-|                                            |                                     | (:doc:`../calim/solver`)                               |                                                               |
-|                                            |                                     |                                                        | Can be varied for each selfcal cycle.                         |
-|                                            |                                     |                                                        | (e.g. "200,800,1000")                                         |
-|                                            |                                     |                                                        | If the number of comma-separated values (int) is less than    |
-|                                            |                                     |                                                        | ``SELFCAL_NUM_LOOPS + 1``, the first number specified will    |
-|                                            |                                     |                                                        | be used for ALL selfcal loops.                                |
+| ``CLEAN_MINORCYCLE_NITER``                 | "[400,800]"                         | Clean.niter                                            | The number of iterations for the minor cycle clean. Can be    |
+|                                            |                                     | (:doc:`../calim/solver`)                               |varied for each selfcal cycle. (e.g. "[200,800,1000]")         |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``CLEAN_GAIN``                             | 0.1                                 | Clean.gain                                             | The loop gain (fraction of peak subtracted per minor cycle).  |
-|                                            |                                     | (:doc:`../calim/solver`)                               |                                                               |
-|                                            |                                     |                                                        | Can be varied for each selfcal cycle.                         |
-|                                            |                                     |                                                        | (e.g. "0.1,0.2,0.1")                                          |
-|                                            |                                     |                                                        | If the number of comma-separated values is less than          |
-|                                            |                                     |                                                        | ``SELFCAL_NUM_LOOPS + 1``, the first value specified will     |
-|                                            |                                     |                                                        | be used for ALL selfcal loops.                                |
+| ``CLEAN_GAIN``                             | 0.2                                 | Clean.gain                                             | The loop gain (fraction of peak subtracted per minor cycle).  |
+|                                            |                                     | (:doc:`../calim/solver`)                               | Can be varied for each selfcal cycle. (e.g. "[0.1,0.2,0.1]")  |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``CLEAN_PSFWIDTH``                         | 256                                 | Clean.psfwidth                                         | The width of the psf patch used in the minor cycle.           |
-|                                            |                                     | (:doc:`../calim/solver`)                               |                                                               |
-|                                            |                                     |                                                        | Can be varied for each selfcal cycle.                         |
-|                                            |                                     |                                                        | (e.g. "256,512,4096")                                         |
-|                                            |                                     |                                                        | If the number of comma-separated values is less than          |
-|                                            |                                     |                                                        | ``SELFCAL_NUM_LOOPS + 1``, the first value specified will     |
-|                                            |                                     |                                                        | be used for ALL selfcal loops.                                |
-|                                            |                                     |                                                        | Large psfs may be necessary when cleaning with many scales.   |
+| ``CLEAN_PSFWIDTH``                         | 256                                 | Clean.psfwidth                                         | The width of the psf patch used in the minor cycle. Can be    |
+|                                            |                                     | (:doc:`../calim/solver`)                               |varied for each selfcal cycle. (e.g. "[256,512,4096]")         |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``CLEAN_SCALES``                           | "[0]"                               | Clean.scales                                           | Set of scales (in pixels) to use with the multi-scale clean.  |
-|                                            |                                     | (:doc:`../calim/solver`)                               |                                                               |
-|                                            |                                     |                                                        | Can be varied for each selfcal cycle (e.g. "[0] ; [0,10]")    |
-|                                            |                                     |                                                        | If the number of lists is less than ``SELFCAL_NUM_LOOPS + 1`` |
-|                                            |                                     |                                                        | , the first list specified will be used for ALL selfcal loops.|
-|                                            |                                     |                                                        | PS: Notice the delimiter " ; " and the spaces around it.      |
+| ``CLEAN_SCALES``                           | "[0,3,10]"                          | Clean.scales                                           | Set of scales (in pixels) to use with the multi-scale clean.  |
+|                                            |                                     | (:doc:`../calim/solver`)                               | Can be varied for each selfcal cycle (e.g. ```"[0] ;          |
+|                                            |                                     |                                                        | [0,10]"```) Notice the delimiter " ; " and the spaces around  |
+|                                            |                                     |                                                        | it.                                                           |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``CLEAN_THRESHOLD_MINORCYCLE``             | "[20%, 1.8mJy, 0.03mJy]"            | threshold.minorcycle                                   | Threshold for the minor cycle loop.                           |
-|                                            |                                     | (:doc:`../calim/cimager`)                              |                                                               |
-|                                            |                                     | (:doc:`../calim/solver`)                               | Can be varied for each selfcal cycle.                         |
-|                                            |                                     |                                                        | (e.g. "[30%,1.8mJy,0.03mJy] ; [20%,0.5mJy,0.03mJy]")          |
-|                                            |                                     |                                                        | If the number of lists is less than ``SELFCAL_NUM_LOOPS + 1`` |
-|                                            |                                     |                                                        | , the first list specified will be used for ALL selfcal loops.|
-|                                            |                                     |                                                        | PS: Notice the delimiter " ; " and the spaces around it.      |
+| ``CLEAN_THRESHOLD_MINORCYCLE``             | "[30%, 0.5mJy, 0.03mJy]"            | threshold.minorcycle                                   | Threshold for the minor cycle loop. Can be varied for each    |
+|                                            |                                     | (:doc:`../calim/cimager`)                              |selfcal cycle. (e.g. ```"[30%,1.8mJy,0.03mJy] ;                |
+|                                            |                                     | (:doc:`../calim/solver`)                               |[20%,0.5mJy,0.03mJy]"```) Notice the delimiter " ; " and the   |
+|                                            |                                     |                                                        |spaces around it.                                              |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``CLEAN_THRESHOLD_MAJORCYCLE``             | "0.03mJy"                           | threshold.majorcycle                                   | The target peak residual. Major cycles stop if this is        |
+| ``CLEAN_THRESHOLD_MAJORCYCLE``             | "0.035mJy"                          | threshold.majorcycle                                   | The target peak residual. Major cycles stop if this is        |
 |                                            |                                     | (:doc:`../calim/cimager`)                              | reached. A negative number ensures all major cycles requested |
 |                                            |                                     | (:doc:`../calim/solver`)                               | are done. Can be given as an array with different values for  |
 |                                            |                                     |                                                        | each self-cal loop (e.g. "[3mJy,1mJy,-1mJy]").                |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``CLEAN_NUM_MAJORCYCLES``                  | "[5,10,10]"                         | ncycles                                                | Number of major cycles. Can be given as an array with         |
+| ``CLEAN_NUM_MAJORCYCLES``                  | "[5,10]"                            | ncycles                                                | Number of major cycles. Can be given as an array with         |
 |                                            |                                     | (:doc:`../calim/cimager`)                              | different values for each self-cal loop (e.g. "[2,4,6]").     |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CLEAN_WRITE_AT_MAJOR_CYCLE``             | false                               | Images.writeAtMajorCycle                               | If true, the intermediate images will be written (with a      |
 |                                            |                                     | (:doc:`../calim/cimager`)                              | .cycle suffix) after the end of each major cycle.             |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``CLEAN_SOLUTIONTYPE``                     | MAXCHISQ                            | Clean.solutiontype (see discussion at                  | The type of peak finding algorithm to use in the              |
+| ``CLEAN_SOLUTIONTYPE``                     | MAXBASE                             | Clean.solutiontype (see discussion at                  | The type of peak finding algorithm to use in the              |
 |                                            |                                     | :doc:`../recipes/imaging`)                             | deconvolution. Choices are MAXCHISQ, MAXTERM0, or MAXBASE.    |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | **Preconditioning parameters**             |                                     |                                                        |                                                               |
@@ -358,7 +355,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                     |                                                        | parameters are used. If left blank (the default), the value   |
 |                                            |                                     |                                                        | is given by the overall parameter ``DO_ALT_IMAGER``.          |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``NCHAN_PER_CORE``                         | 1                                   | nchanpercore                                           | The number of channels each core will process.                |
+| ``NCHAN_PER_CORE``                         | 12                                  | nchanpercore                                           | The number of channels each core will process.                |
 |                                            |                                     | (:doc:`../calim/imager`)                               |                                                               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``USE_TMPFS``                              | false                               | usetmpfs (:doc:`../calim/imager`)                      | Whether to store the visibilities in shared memory.This will  |
@@ -367,13 +364,15 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``TMPFS``                                  | /dev/shm                            | tmpfs (:doc:`../calim/imager`)                         | Location of the shared memory.                                |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``NUM_SPECTRAL_WRITERS_CONTCUBE``          | 1                                   | nwriters (:doc:`../calim/imager`)                      | The number of writers used by imager. Unless                  |
+| ``NUM_SPECTRAL_WRITERS_CONTCUBE``          | ""                                  | nwriters (:doc:`../calim/imager`)                      | The number of writers used by imager. Unless                  |
 |                                            |                                     |                                                        | ``ALT_IMAGER_SINGLE_FILE_CONTCUBE=true``, this will equate to |
 |                                            |                                     |                                                        | the number of distinct spectral cubes produced.In the case of |
 |                                            |                                     |                                                        | multiple cubes, each will be a sub-band of the full           |
 |                                            |                                     |                                                        | bandwidth. No combination of the sub-cubes is currently       |
 |                                            |                                     |                                                        | done. The number of writers will be reduced to the number of  |
-|                                            |                                     |                                                        | workers in the job if necessary.                              |
+|                                            |                                     |                                                        | workers in the job if necessary. If a single image is         |
+|                                            |                                     |                                                        | produced, the default is to have the same number of writers as|
+|                                            |                                     |                                                        | workers.                                                      |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``ALT_IMAGER_SINGLE_FILE_CONTCUBE``        | true                                | singleoutputfile                                       | Whether to write a single cube, even with multiple writers    |
 |                                            |                                     | (:doc:`../calim/imager`)                               | (ie. ``NUM_SPECTRAL_WRITERS_CONTCUBE>1``). Only works when    |
@@ -391,13 +390,12 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                     |                                                        | most recent imaging as the model for ccalibrator. Anything    |
 |                                            |                                     |                                                        | else will default to "Cmodel".                                |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``SELFCAL_NUM_LOOPS``                      | 2                                   | none                                                   | Number of loops of self-calibration.                          |
+| ``SELFCAL_NUM_LOOPS``                      | 1                                   | none                                                   | Number of loops of self-calibration.                          |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``SELFCAL_INTERVAL``                       | "[1800,1800,200]"                   | interval                                               | Interval [sec] over which to solve for self-calibration. Can  |
+| ``SELFCAL_INTERVAL``                       | "[200,200]"                         | interval                                               | Interval [sec] over which to solve for self-calibration. Can  |
 |                                            |                                     | (:doc:`../calim/ccalibrator`)                          | be given as an array with different values for each self-cal  |
-|                                            |                                     |                                                        | loop, as for the default. Here, the initial intervals are     |
-|                                            |                                     |                                                        | chosen to be longer than typical observations, so that all    |
-|                                            |                                     |                                                        | data are included.                                            |
+|                                            |                                     |                                                        | loop, as for the default, or a single value that applies to   |
+|                                            |                                     |                                                        | each loop.                                                    |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``SELFCAL_KEEP_IMAGES``                    | true                                | none                                                   | Should we keep the images from the intermediate selfcal       |
 |                                            |                                     |                                                        | loops?                                                        |
@@ -513,7 +511,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                     |                                                        | so on).  The %s wildcard will be resolved into the scheduling |
 |                                            |                                     |                                                        | block ID.                                                     |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``NUM_PIXELS_CONTCUBE``                    | 1536                                | Images.shape (:doc:`../calim/simager`)                 | Number of pixels on the spatial dimension for the continuum   |
+| ``NUM_PIXELS_CONTCUBE``                    | 4096                                | Images.shape (:doc:`../calim/simager`)                 | Number of pixels on the spatial dimension for the continuum   |
 |                                            |                                     |                                                        | cubes.                                                        |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CELLSIZE_CONTCUBE``                      | ""                                  | Images.cellsize (:doc:`../calim/simager`)              | Angular size of spatial pixels for the continuum cubes. If not|
@@ -545,10 +543,10 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                     |                                                        | channels (taking into account ``NCHAN_PER_CORE_CONTCUBE`` if  |
 |                                            |                                     |                                                        | necessary), plus an additional core for the master process.   |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``NCHAN_PER_CORE_CONTCUBE``                | 1                                   | nchanpercore (:doc:`../calim/imager`)                  | If imager (:doc:`../calim/imager`) is used, this determines   |
+| ``NCHAN_PER_CORE_CONTCUBE``                | 3                                   | nchanpercore (:doc:`../calim/imager`)                  | If imager (:doc:`../calim/imager`) is used, this determines   |
 |                                            |                                     |                                                        | how many channels each *worker* will process.                 |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``CPUS_PER_CORE_CONTCUBE_IMAGING``         | 20                                  | none                                                   | How many of the cores on each node to use.                    |
+| ``CPUS_PER_CORE_CONTCUBE_IMAGING``         | 8                                   | none                                                   | How many of the cores on each node to use.                    |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | **Continuum cube cleaning**                |                                     |                                                        | Different cleaning parameters used for the continuum cubes    |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
@@ -559,10 +557,10 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 | ``CLEAN_CONTCUBE_ALGORITHM``               | BasisfunctionMFS                    | Clean.algorithm                                        | The name of the clean algorithm to use.                       |
 |                                            |                                     | (:doc:`../calim/solver`)                               |                                                               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``CLEAN_CONTCUBE_MINORCYCLE_NITER``        | 2000                                | Clean.niter                                            | The number of iterations for the minor cycle clean.           |
+| ``CLEAN_CONTCUBE_MINORCYCLE_NITER``        | 600                                 | Clean.niter                                            | The number of iterations for the minor cycle clean.           |
 |                                            |                                     | (:doc:`../calim/solver`)                               |                                                               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``CLEAN_CONTCUBE_GAIN``                    | 0.1                                 | Clean.gain                                             | The loop gain (fraction of peak subtracted per minor cycle).  |
+| ``CLEAN_CONTCUBE_GAIN``                    | 0.2                                 | Clean.gain                                             | The loop gain (fraction of peak subtracted per minor cycle).  |
 |                                            |                                     | (:doc:`../calim/solver`)                               |                                                               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CLEAN_CONTCUBE_PSFWIDTH``                | 256                                 | Clean.psfwidth                                         | The width of the psf patch used in the minor cycle.           |
@@ -571,14 +569,14 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 | ``CLEAN_CONTCUBE_SCALES``                  | "[0,3,10]"                          | Clean.scales                                           | Set of scales (in pixels) to use with the multi-scale clean.  |
 |                                            |                                     | (:doc:`../calim/solver`)                               |                                                               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``CLEAN_CONTCUBE_THRESHOLD_MINORCYCLE``    | "[40%, 12.6mJy, 0.5mJy]"            | threshold.minorcycle                                   | Threshold for the minor cycle loop.                           |
+| ``CLEAN_CONTCUBE_THRESHOLD_MINORCYCLE``    | "[40%, 0.5mJy, 0.05mJy]"            | threshold.minorcycle                                   | Threshold for the minor cycle loop.                           |
 |                                            |                                     | (:doc:`../calim/solver`)                               |                                                               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``CLEAN_CONTCUBE_THRESHOLD_MAJORCYCLE``    | 0.5mJy                              | threshold.majorcycle                                   | The target peak residual. Major cycles stop if this is        |
+| ``CLEAN_CONTCUBE_THRESHOLD_MAJORCYCLE``    | 0.06mJy                             | threshold.majorcycle                                   | The target peak residual. Major cycles stop if this is        |
 |                                            |                                     | (:doc:`../calim/solver`)                               | reached. A negative number ensures all major cycles requested |
 |                                            |                                     |                                                        | are done.                                                     |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``CLEAN_CONTCUBE_NUM_MAJORCYCLES``         | 2                                   | ncycles                                                | Number of major cycles.                                       |
+| ``CLEAN_CONTCUBE_NUM_MAJORCYCLES``         | 3                                   | ncycles                                                | Number of major cycles.                                       |
 |                                            |                                     | (:doc:`../calim/cimager`)                              |                                                               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CLEAN_CONTCUBE_WRITE_AT_MAJOR_CYCLE``    | false                               | Images.writeAtMajorCycle                               | If true, the intermediate images will be written (with a      |

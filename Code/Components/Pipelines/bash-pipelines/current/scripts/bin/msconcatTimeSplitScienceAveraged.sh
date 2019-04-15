@@ -62,12 +62,14 @@ cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
 log=${logs}/msconcat_SciAv_${FIELDBEAM}_\${SLURM_JOB_ID}.log
 
+STARTTIME=\$(date +%FT%T)
 NCORES=${NUM_CORES_MSCONCAT_SCI_AV}
 NPPN=${NPPN_MSCONCAT_SCI_AV}
-srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${msconcat} -o $msconcatFile $inputs2MSconcat > "\$log"
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o "\${log}.timing" ${msconcat} -o $msconcatFile $inputs2MSconcat > "\$log"
 err=\$?
 rejuvenate ${msconcatFile}
-extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv"
+echo "STARTTIME=\${STARTTIME}" >> "\${log}.timing"
+extractStatsNonStandard "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
 else

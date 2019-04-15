@@ -148,12 +148,14 @@ done
 commandLineFlags="-c ${TILE_NCHAN_SCIENCE} -o \${finalMS} \${mergelist}"
 log="${logs}/mergeMS_science_${FIELDBEAM}_\${SLURM_JOB_ID}.log"
 
+STARTTIME=\$(date +%FT%T)
 NCORES=1
 NPPN=1
-srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${msmerge} \${commandLineFlags} >> "\${log}"
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o "\${log}.timing" ${msmerge} \${commandLineFlags} >> "\${log}"
 err=\$?
 rejuvenate \${finalMS}
-extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv"
+echo "STARTTIME=\${STARTTIME}" >> "\${log}.timing"
+extractStatsNonStandard "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err
 fi
@@ -228,11 +230,13 @@ for dataset in \${inputMSlist}; do
 done
 commandLineFlags="-c ${TILE_NCHAN_SCIENCE} -o \${msSci} \${mergeList}"
 
+STARTTIME=\$(date +%FT%T)
 NCORES=1
 NPPN=1
-srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${msmerge} \${commandLineFlags} > "\${log}"
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o "\${log}.timing" ${msmerge} \${commandLineFlags} > "\${log}"
 err=\$?
 rejuvenate \${msSci}
+echo "STARTTIME=\${STARTTIME}" >> "\${log}.timing"
 extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err

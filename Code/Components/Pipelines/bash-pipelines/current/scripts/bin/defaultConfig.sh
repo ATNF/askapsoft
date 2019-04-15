@@ -71,6 +71,7 @@ JOB_TIME_AVERAGE_MS=""
 JOB_TIME_MSCONCAT_SCI_AV=""
 JOB_TIME_MSCONCAT_SCI_SPECTRAL=""
 JOB_TIME_CONT_IMAGE=""
+JOB_TIME_CONT_SELFCAL=""
 JOB_TIME_CONT_APPLYCAL=""
 JOB_TIME_CONTCUBE_IMAGE=""
 JOB_TIME_SPECTRAL_SPLIT=""
@@ -210,6 +211,7 @@ DO_APPLY_BANDPASS=true
 DO_AVERAGE_CHANNELS=true
 DO_CONT_IMAGING=true
 DO_SELFCAL=true
+MULTI_JOB_SELFCAL=true
 DO_APPLY_CAL_CONT=true
 DO_CONTCUBE_IMAGING=false
 DO_SPECTRAL_IMAGING=false
@@ -552,11 +554,14 @@ DATACOLUMN=DATA
 # Number of Taylor terms to create in MFS imaging
 NUM_TAYLOR_TERMS=2
 # Number of CPUs to use on each core in the continuum imaging
-CPUS_PER_CORE_CONT_IMAGING=20
+CPUS_PER_CORE_CONT_IMAGING=6
 # Total number of cores to use for the continuum imaging. Leave blank
-# to have one core for each of nworkergroups*nchannels (plus a
-# master).
+# to have one core for each of nworkergroups*nchannels (for cimager)
+# or nworkergroups*nchannels/nchanpercore (for imager), plus a master.
 NUM_CPUS_CONTIMG_SCI=""
+# Whether to put the master on a node of its own for the continuum imaging
+FAT_NODE_CONT_IMG=true
+
 # The Cimager.Channels parameter, to be used when NUM_CPUS_CONTIMG_SCI
 # is given. Cimager.Channels is left out of the imaging parset if this
 # is not given.
@@ -566,9 +571,9 @@ CHANNEL_SELECTION_CONTIMG_SCI=""
 # image.i.blah, image.i.blah.restored, psf.i.blah etc
 IMAGE_BASE_CONT="i.SB%s.cont"
 # number of pixels on the side of the images to be created
-NUM_PIXELS_CONT=3200
+NUM_PIXELS_CONT=6144
 # Size of the pixels in arcsec
-CELLSIZE_CONT=4
+CELLSIZE_CONT=2
 # Frequency at which continuum image is made [Hz]
 MFS_REF_FREQ=""
 # Restoring beam: 'fit' will fit the PSF to determine the appropriate
@@ -580,18 +585,20 @@ RESTORING_BEAM_CUTOFF_CONT=0.5
 ###########################
 # parameters from the new (alt) imager
 # number of channels each core will process
-NCHAN_PER_CORE=1
+NCHAN_PER_CORE=12
 # specify this separately for the continuum-cube imaging
-NCHAN_PER_CORE_CONTCUBE=1
+NCHAN_PER_CORE_CONTCUBE=3
 # the spectral line imager needs its own otherwise we lose some flexibility
-NCHAN_PER_CORE_SL=9
+NCHAN_PER_CORE_SL=64
 # store the visibilities in shared memory.
 # this will give a performance boost at the expense of memory usage
 USE_TMPFS=false
 # where is the shared memory mounted
 TMPFS="/dev/shm"
-# Whether to convert the frequency channels to the Barycentre frame
-DO_BARY=true
+# Frequency frame for the output spectral cube - one of "topo", "bary", "lsrk"
+FREQ_FRAME_SL=bary
+# Output channels for the spectral cube - needs to be [number,start,width]
+OUTPUT_CHANNELS_SL=""
 # local solver - distribute the minor cycle - each channel is solved individually
 # this mimics simager behaviour
 # automatically set to true in the spectral imaging
@@ -599,12 +606,12 @@ DO_LOCAL_SOLVER=false
 # How many sub-cubes to write out.
 # This improves performance of the imaging - and also permits parallelisation
 # of the LINMOS step
-NUM_SPECTRAL_WRITERS=16
+NUM_SPECTRAL_WRITERS=""
 # Whether to write out a single file in the case of writing to FITS
 ALT_IMAGER_SINGLE_FILE=true
 
 # Same for continuum cubes
-NUM_SPECTRAL_WRITERS_CONTCUBE=1
+NUM_SPECTRAL_WRITERS_CONTCUBE=""
 ALT_IMAGER_SINGLE_FILE_CONTCUBE=true
 
 
@@ -618,10 +625,10 @@ GRIDDER_NWPLANES=""
 # Defaults, with and without snapshot imaging
 GRIDDER_WMAX_SNAPSHOT=2600
 GRIDDER_MAXSUPPORT_SNAPSHOT=512
-GRIDDER_WMAX_NO_SNAPSHOT=26000
+GRIDDER_WMAX_NO_SNAPSHOT=30000
 GRIDDER_MAXSUPPORT_NO_SNAPSHOT=1024
 GRIDDER_NWPLANES_SNAPSHOT=99
-GRIDDER_NWPLANES_NO_SNAPSHOT=599
+GRIDDER_NWPLANES_NO_SNAPSHOT=257
 # Other gridding parameters that don't change with snapshot status
 GRIDDER_SNAPSHOT_WTOL=2600
 GRIDDER_SNAPSHOT_LONGTRACK=true
@@ -632,11 +639,11 @@ GRIDDER_OVERSAMPLE=5
 # Cleaning parameters for continuum imaging
 SOLVER=Clean
 CLEAN_ALGORITHM=BasisfunctionMFS
-CLEAN_MINORCYCLE_NITER=2000
-CLEAN_GAIN=0.1
+CLEAN_MINORCYCLE_NITER="[400,800]"
+CLEAN_GAIN=0.2
 CLEAN_PSFWIDTH=256
-CLEAN_SCALES="[0]"
-CLEAN_THRESHOLD_MINORCYCLE="[20%, 1.8mJy, 0.03mJy]"
+CLEAN_SCALES="[0,3,10]"
+CLEAN_THRESHOLD_MINORCYCLE="[30%, 0.5mJy, 0.03mJy]"
 # If true, this will write out intermediate images at the end of each
 # major cycle
 CLEAN_WRITE_AT_MAJOR_CYCLE=false
@@ -651,10 +658,10 @@ CLEAN_SOLUTIONTYPE="MAXBASE"
 # If no self-calibration is used, we just use the first element
 #
 # The number of major cycles in the deconvolution
-CLEAN_NUM_MAJORCYCLES="[5,10,10]"
+CLEAN_NUM_MAJORCYCLES="[5,10]"
 # The maximum residual to stop the major-cycle deconvolution (if not
 # reached, or negative, CLEAN_NUM_MAJORCYCLES cycles are used)
-CLEAN_THRESHOLD_MAJORCYCLE="0.03mJy"
+CLEAN_THRESHOLD_MAJORCYCLE="0.035mJy"
 
 
 ####################
@@ -678,7 +685,7 @@ RESTORE_PRECONDITIONER_WIENER_TAPER=""
 # continuum-imaging clean model ("CleanModel")
 SELFCAL_METHOD="Cmodel"
 # Number of loops of self-calibration
-SELFCAL_NUM_LOOPS=2
+SELFCAL_NUM_LOOPS=1
 # Should we keep the images from the intermediate selfcal loops?
 SELFCAL_KEEP_IMAGES=true
 # Should we make full-field mosaics of each loop iteration?
@@ -717,7 +724,7 @@ SELFCAL_REF_GAINS=""
 #   (eg. "[1800,900,300]"), allowing a different value for each loop.
 #
 # Interval [sec] over which to solve for self-calibration
-SELFCAL_INTERVAL="[1800,1800,200]"
+SELFCAL_INTERVAL="[200,200]"
 # SNR threshold for detection with selavy in determining selfcal sources
 SELFCAL_SELAVY_THRESHOLD=8
 # Option to pass to the "Ccalibrator.normalisegains" parameter,
@@ -753,7 +760,7 @@ DEC_POSITION_OFFSET=0
 IMAGE_BASE_CONTCUBE="i.SB%s.contcube"
 
 # Image size for continuum cubes (spatial size) [pixels]
-NUM_PIXELS_CONTCUBE=1536
+NUM_PIXELS_CONTCUBE=4096
 
 # Size of the pixels for the continuum cubes [arcsec]
 CELLSIZE_CONTCUBE=""
@@ -776,7 +783,7 @@ RESTORING_BEAM_CUTOFF_CONTCUBE=0.5
 # Leave blank to fit to number of channels
 NUM_CPUS_CONTCUBE_SCI=""
 # Number of processors per node for the spectral-line imaging
-CPUS_PER_CORE_CONTCUBE_IMAGING=20
+CPUS_PER_CORE_CONTCUBE_IMAGING=8
 # Number of processors for continuum-cube mosaicking.
 # Leave blank to fit to number of channels
 NUM_CPUS_CONTCUBE_LINMOS=""
@@ -785,14 +792,14 @@ NUM_CPUS_CONTCUBE_LINMOS=""
 # Which solver to use
 SOLVER_CONTCUBE=Clean
 CLEAN_CONTCUBE_ALGORITHM=BasisfunctionMFS
-CLEAN_CONTCUBE_MINORCYCLE_NITER=2000
-CLEAN_CONTCUBE_GAIN=0.1
+CLEAN_CONTCUBE_MINORCYCLE_NITER=600
+CLEAN_CONTCUBE_GAIN=0.2
 CLEAN_CONTCUBE_PSFWIDTH=256
 CLEAN_CONTCUBE_SCALES="[0,3,10]"
 CLEAN_CONTCUBE_SOLUTIONTYPE="MAXBASE"
-CLEAN_CONTCUBE_THRESHOLD_MINORCYCLE="[40%, 12.6mJy, 0.5mJy]"
-CLEAN_CONTCUBE_THRESHOLD_MAJORCYCLE=0.5mJy
-CLEAN_CONTCUBE_NUM_MAJORCYCLES=2
+CLEAN_CONTCUBE_THRESHOLD_MINORCYCLE="[40%, 0.5mJy, 0.05mJy]"
+CLEAN_CONTCUBE_THRESHOLD_MAJORCYCLE=0.06mJy
+CLEAN_CONTCUBE_NUM_MAJORCYCLES=3
 # If true, this will write out intermediate images at the end of each
 # major cycle
 CLEAN_CONTCUBE_WRITE_AT_MAJOR_CYCLE=false
@@ -809,11 +816,11 @@ DO_COPY_SL=false
 # Channel range to copy
 CHAN_RANGE_SL_SCIENCE=""
 # Tile size for SL measurement set
-TILENCHAN_SL=10
+TILENCHAN_SL=18
 # Whether to apply a gains solution
-DO_APPLY_CAL_SL=false
+DO_APPLY_CAL_SL=true
 # Whether to subtract a continuum model
-DO_CONT_SUB_SL=false
+DO_CONT_SUB_SL=true
 
 # Method to present self-cal model: via a model image ("Cmodel"),
 # via a components parset ("Components"), or using the
@@ -851,52 +858,52 @@ IMAGE_BASE_SPECTRAL="i.SB%s.cube"
 # Direction of the science field makes use of DIRECTION_SCI, as above
 
 # number of spatial pixels on the side of the image cubes
-NUM_PIXELS_SPECTRAL=1536
+NUM_PIXELS_SPECTRAL=1024
 # Size of the pixels in arcsec
-CELLSIZE_SPECTRAL=4
+CELLSIZE_SPECTRAL=8
 # Rest frequency for the cube
 REST_FREQUENCY_SPECTRAL=HI
 
 # maximum UV spacing for spectral imaging - ignored if 0
-SPECTRAL_IMAGE_MAXUV=0
+SPECTRAL_IMAGE_MAXUV=2000
 # minimum UV spacing for spectral imaging
 SPECTRAL_IMAGE_MINUV=0
 
 # Parameters for preconditioning (A.K.A. weighting) - allow these to
 # be different to the continuum case
 PRECONDITIONER_LIST_SPECTRAL="[Wiener,GaussianTaper]"
-PRECONDITIONER_SPECTRAL_GAUSS_TAPER="[30arcsec, 30arcsec, 0deg]"
+PRECONDITIONER_SPECTRAL_GAUSS_TAPER="[20arcsec, 20arcsec, 0deg]"
 PRECONDITIONER_SPECTRAL_WIENER_ROBUSTNESS=0.5
 PRECONDITIONER_SPECTRAL_WIENER_TAPER=""
 
 # Gridding parameters for spectral-line imaging
-GRIDDER_SPECTRAL_SNAPSHOT_IMAGING=true
+GRIDDER_SPECTRAL_SNAPSHOT_IMAGING=false
 # Actual parameters used, which depend on whether snapshot imaging is used
 GRIDDER_SPECTRAL_WMAX=""
 GRIDDER_SPECTRAL_MAXSUPPORT=""
 # Defaults, with and without snapshot imaging
 GRIDDER_SPECTRAL_WMAX_SNAPSHOT=2600
 GRIDDER_SPECTRAL_MAXSUPPORT_SNAPSHOT=512
-GRIDDER_SPECTRAL_WMAX_NO_SNAPSHOT=26000
+GRIDDER_SPECTRAL_WMAX_NO_SNAPSHOT=30000
 GRIDDER_SPECTRAL_MAXSUPPORT_NO_SNAPSHOT=1024
 # Other gridding parameters that don't change with snapshot status
 GRIDDER_SPECTRAL_SNAPSHOT_WTOL=2600
 GRIDDER_SPECTRAL_SNAPSHOT_LONGTRACK=true
 GRIDDER_SPECTRAL_SNAPSHOT_CLIPPING=0.01
-GRIDDER_SPECTRAL_NWPLANES=99
+GRIDDER_SPECTRAL_NWPLANES=257
 GRIDDER_SPECTRAL_OVERSAMPLE=4
 
 # Cleaning parameters for spectral-line imaging
 SOLVER_SPECTRAL=Clean
 CLEAN_SPECTRAL_ALGORITHM=BasisfunctionMFS
-CLEAN_SPECTRAL_MINORCYCLE_NITER=2000
-CLEAN_SPECTRAL_GAIN=0.1
+CLEAN_SPECTRAL_MINORCYCLE_NITER=800
+CLEAN_SPECTRAL_GAIN=0.2
 CLEAN_SPECTRAL_PSFWIDTH=256
 CLEAN_SPECTRAL_SCALES="[0,3,10,30]"
 CLEAN_SPECTRAL_SOLUTIONTYPE="MAXBASE"
-CLEAN_SPECTRAL_THRESHOLD_MINORCYCLE="[50%, 30mJy, 3.5mJy]"
-CLEAN_SPECTRAL_THRESHOLD_MAJORCYCLE=20mJy
-CLEAN_SPECTRAL_NUM_MAJORCYCLES=5
+CLEAN_SPECTRAL_THRESHOLD_MINORCYCLE="[45%, 3.5mJy, 0.5mJy]"
+CLEAN_SPECTRAL_THRESHOLD_MAJORCYCLE=0.5mJy
+CLEAN_SPECTRAL_NUM_MAJORCYCLES=3
 # If true, this will write out intermediate images at the end of each
 # major cycle
 CLEAN_SPECTRAL_WRITE_AT_MAJOR_CYCLE=false

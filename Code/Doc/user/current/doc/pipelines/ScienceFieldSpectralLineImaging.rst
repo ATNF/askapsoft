@@ -78,20 +78,20 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``CHAN_RANGE_SL_SCIENCE``                     | "1-``NUM_CHAN_SCIENCE``"            | channel (:doc:`../calim/mssplit`)  | The range of channels to copy from the original dataset (1-based).|
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``TILENCHAN_SL``                              | 10                                  | stman.tilenchan                    | The number of channels in the tile size used for the new MS. The  |
+| ``TILENCHAN_SL``                              | 18                                  | stman.tilenchan                    | The number of channels in the tile size used for the new MS. The  |
 |                                               |                                     | (:doc:`../calim/mssplit`)          | tile size defines the minimum amount read at a time. Although the |
 |                                               |                                     |                                    | simager will only process single channels, the default is made    |
 |                                               |                                     |                                    | larger than 1 (the default for mssplit) so that the mssplit job   |
 |                                               |                                     |                                    | completes in a reasonable length of time.                         |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``DO_APPLY_CAL_SL``                           | false                               | none                               | Whether to apply the gains calibration determined from the        |
+| ``DO_APPLY_CAL_SL``                           | true                                | none                               | Whether to apply the gains calibration determined from the        |
 |                                               |                                     |                                    | continuum self-calibration (see ``GAINS_CAL_TABLE`` in            |
 |                                               |                                     |                                    | :doc:`ScienceFieldContinuumImaging`).                             |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``JOB_TIME_SPECTRAL_APPLYCAL``                | ``JOB_TIME_DEFAULT`` (12:00:00)     | none                               | Time request for applying the gains calibration to the spectral   |
 |                                               |                                     |                                    | data                                                              |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``DO_CONT_SUB_SL``                            | false                               | none                               | Whether to subtract a continuum model from the spectral-line      |
+| ``DO_CONT_SUB_SL``                            | true                                | none                               | Whether to subtract a continuum model from the spectral-line      |
 |                                               |                                     |                                    | dataset. If true, the clean model from the continuum imaging will |
 |                                               |                                     |                                    | be used to represent the continuum, and this will be subtracted   |
 |                                               |                                     |                                    | from the spectral-line dataset (either the original               |
@@ -150,17 +150,17 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 |                                               |                                     |                                    | from the measurement set by mslist. This is the same input        |
 |                                               |                                     |                                    | parameter as that used for the continuum imaging.                 |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``NUM_PIXELS_SPECTRAL``                       | 1536                                | Images.shape                       | The number of spatial pixels along the side for the image cubes.  |
+| ``NUM_PIXELS_SPECTRAL``                       | 1024                                | Images.shape                       | The number of spatial pixels along the side for the image cubes.  |
 |                                               |                                     | (:doc:`../calim/simager`)          | Needs to be specified (unlike the continuum imaging case).        |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``CELLSIZE_SPECTRAL``                         | 4                                   | Images.cellsize                    | The spatial pixel size for the image cubes. Must be specified.    |
+| ``CELLSIZE_SPECTRAL``                         | 8                                   | Images.cellsize                    | The spatial pixel size for the image cubes. Must be specified.    |
 |                                               |                                     | (:doc:`../calim/simager`)          |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``REST_FREQUENCY_SPECTRAL``                   | HI                                  | Images.restFrequency               | The rest frequency for the cube. Can be a quantity string (eg.    |
 |                                               |                                     | (:doc:`../calim/simager`)          | 1234.567MHz), or the special string 'HI' (which is 1420.405751786 |
 |                                               |                                     |                                    | MHz). If blank, no rest frequency will be written to the cube.    |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``SPECTRAL_IMAGE_MAXUV``                      | 0                                   | MaxUV                              | A maximum UV distance (in metres) to apply in the data selection  |
+| ``SPECTRAL_IMAGE_MAXUV``                      | 2000                                | MaxUV                              | A maximum UV distance (in metres) to apply in the data selection  |
 |                                               |                                     | (:doc:`../calim/data_selection`)   | step. Only used if a positive value is applied.                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``SPECTRAL_IMAGE_MINUV``                      | 0                                   | MinUV                              | A minimum UV distance (in metres) to apply in the data selection  |
@@ -168,7 +168,7 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | **Gridding**                                  |                                     |                                    |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``GRIDDER_SPECTRAL_SNAPSHOT_IMAGING``         | true                                | snapshotimaging                    | Whether to use snapshot imaging when gridding.                    |
+| ``GRIDDER_SPECTRAL_SNAPSHOT_IMAGING``         | false                               | snapshotimaging                    | Whether to use snapshot imaging when gridding.                    |
 |                                               |                                     | (:doc:`../calim/gridder`)          |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``GRIDDER_SPECTRAL_SNAPSHOT_WTOL``            | 2600                                | snapshotimaging.wtolerance         | The wtolerance parameter controlling how frequently to snapshot.  |
@@ -183,10 +183,10 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``GRIDDER_SPECTRAL_WMAX``                     | 2600                                | WProject.wmax                      | The wmax parameter for the gridder. The default for this depends  |
 |                                               | (``GRIDDER_SNAPSHOT_IMAGING=true``) | (:doc:`../calim/gridder`)          | on whether snapshot imaging is invoked or not                     |
-|                                               | or 26000                            |                                    | (``GRIDDER_SNAPSHOT_IMAGING``).                                   |
+|                                               | or 30000                            |                                    | (``GRIDDER_SNAPSHOT_IMAGING``).                                   |
 |                                               | (``GRIDDER_SNAPSHOT_IMAGING=false``)|                                    |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``GRIDDER_SPECTRAL_NWPLANES``                 | 99                                  | WProject.nwplanes                  | The nwplanes parameter for the gridder.                           |
+| ``GRIDDER_SPECTRAL_NWPLANES``                 | 257                                 | WProject.nwplanes                  | The nwplanes parameter for the gridder.                           |
 |                                               |                                     | (:doc:`../calim/gridder`)          |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``GRIDDER_SPECTRAL_OVERSAMPLE``               | 4                                   | WProject.oversample                | The oversampling factor for the gridder.                          |
@@ -205,10 +205,10 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 | ``CLEAN_SPECTRAL_ALGORITHM``                  | BasisfunctionMFS                    | Clean.algorithm                    | The name of the clean algorithm to use.                           |
 |                                               |                                     | (:doc:`../calim/solver`)           |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``CLEAN_SPECTRAL_MINORCYCLE_NITER``           | 2000                                | Clean.niter                        | The number of iterations for the minor cycle clean.               |
+| ``CLEAN_SPECTRAL_MINORCYCLE_NITER``           | 800                                 | Clean.niter                        | The number of iterations for the minor cycle clean.               |
 |                                               |                                     | (:doc:`../calim/solver`)           |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``CLEAN_SPECTRAL_GAIN``                       | 0.1                                 | Clean.gain                         | The loop gain (fraction of peak subtracted per minor cycle).      |
+| ``CLEAN_SPECTRAL_GAIN``                       | 0.2                                 | Clean.gain                         | The loop gain (fraction of peak subtracted per minor cycle).      |
 |                                               |                                     | (:doc:`../calim/solver`)           |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``CLEAN_SPECTRAL_PSFWIDTH``                   | 256                                 | Clean.psfwidth                     | The width of the psf patch used in the minor cycle.               |
@@ -217,13 +217,13 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 | ``CLEAN_SPECTRAL_SCALES``                     | "[0,3,10,30]"                       | Clean.scales                       | Set of scales (in pixels) to use with the multi-scale clean.      |
 |                                               |                                     | (:doc:`../calim/solver`)           |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``CLEAN_SPECTRAL_THRESHOLD_MINORCYCLE``       | "[50%, 30mJy, 3.5mJy]"              | threshold.minorcycle               | Threshold for the minor cycle loop.                               |
+| ``CLEAN_SPECTRAL_THRESHOLD_MINORCYCLE``       | "[45%, 3.5mJy, 0.5mJy]"             | threshold.minorcycle               | Threshold for the minor cycle loop.                               |
 |                                               |                                     | (:doc:`../calim/solver`)           |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``CLEAN_SPECTRAL_THRESHOLD_MAJORCYCLE``       | 20mJy                               | threshold.majorcycle               | The target peak residual. Major cycles stop if this is reached. A |
+| ``CLEAN_SPECTRAL_THRESHOLD_MAJORCYCLE``       | 0.5mJy                              | threshold.majorcycle               | The target peak residual. Major cycles stop if this is reached. A |
 |                                               |                                     | (:doc:`../calim/solver`)           | negative number ensures all major cycles requested are done.      |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``CLEAN_SPECTRAL_NUM_MAJORCYCLES``            | 5                                   | ncycles                            | Number of major cycles.                                           |
+| ``CLEAN_SPECTRAL_NUM_MAJORCYCLES``            | 3                                   | ncycles                            | Number of major cycles.                                           |
 |                                               |                                     | (:doc:`../calim/solver`)           |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``CLEAN_WRITE_AT_MAJOR_CYCLE``                | false                               | Images.writeAtMajorCycle           | If true, the intermediate images will be written (with a .cycle   |
@@ -237,7 +237,7 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 | ``PRECONDITIONER_LIST_SPECTRAL``              | "[Wiener, GaussianTaper]"           | preconditioner.Names               | List of preconditioners to apply.                                 |
 |                                               |                                     | (:doc:`../calim/solver`)           |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``PRECONDITIONER_SPECTRAL_GAUSS_TAPER``       | "[30arcsec, 30arcsec, 0deg]"        | preconditioner.GaussianTaper       | Size of the Gaussian taper - either single value (for circular    |
+| ``PRECONDITIONER_SPECTRAL_GAUSS_TAPER``       | "[20arcsec, 20arcsec, 0deg]"        | preconditioner.GaussianTaper       | Size of the Gaussian taper - either single value (for circular    |
 |                                               |                                     | (:doc:`../calim/solver`)           | taper) or 3 values giving an elliptical size.                     |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``PRECONDITIONER_SPECTRAL_WIENER_ROBUSTNESS`` | 0.5                                 | preconditioner.Wiener.robustness   | Robustness value for the Wiener filter.                           |
@@ -272,7 +272,7 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 |                                               |                                     |                                    | overall parameter ``DO_ALT_IMAGER`` (see                          |
 |                                               |                                     |                                    | :doc:`ControlParameters`).                                        |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``NCHAN_PER_CORE_SL``                         | 9                                   | nchanpercore                       | The number of channels each core will process.                    |
+| ``NCHAN_PER_CORE_SL``                         | 64                                  | nchanpercore                       | The number of channels each core will process.                    |
 |                                               |                                     | (:doc:`../calim/imager`)           |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``USE_TMPFS``                                 | false                               | usetmpfs (:doc:`../calim/imager`)  | Whether to store the visibilities in shared memory. This will give|
@@ -292,8 +292,14 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 |                                               |                                     | (:doc:`../calim/imager`)           | ``NUM_SPECTRAL_WRITERS>1``). Only works when                      |
 |                                               |                                     |                                    | ``IMAGETYPE_SPECTRAL=fits``                                       |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``DO_BARY``                                   | true                                | barycentre (:doc:`../calim/imager`)| Whether to write the spectral cubes in the Barycentric reference  |
-|                                               |                                     |                                    | frame.                                                            |
+| ``FREQ_FRAME_SL``                             | bary                                | freqframe (:doc:`../calim/imager`) | The reference frame in which to write the spectral cube - one of  |
+|                                               |                                     |                                    | topo, bary, lsrk. Anything else (or an unset value) default to    |
+|                                               |                                     |                                    | bary.                                                             |
++-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
+| ``OUTPUT_CHANNELS_SL``                        | ""                                  | Frequencies                        | The output channels for the spectral cube. Should be of the form  |
+|                                               |                                     | (:doc:`../calim/imager`)           | [number,start,width], with the start and width parameters are in  |
+|                                               |                                     |                                    | Hz. If not given, the behaviour is to use the same frequency      |
+|                                               |                                     |                                    | values as the input MS, albeit in the requested frequency frame.  |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | **Image-based continuum subtraction**         |                                     |                                    |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+

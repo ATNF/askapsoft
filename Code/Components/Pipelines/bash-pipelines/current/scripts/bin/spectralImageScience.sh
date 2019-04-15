@@ -174,13 +174,16 @@ Cimager.usetmpfs                               = ${usetmpfs}"
 Cimager.tmpfs                                   = ${tmpfs}"
     altImagerParams="${altImagerParams}
 # barycentre and multiple solver mode not supported in continuum imaging (yet)
-Cimager.barycentre                              = ${DO_BARY}
+Cimager.freqframe                               = ${FREQ_FRAME_SL}
 Cimager.solverpercore                           = true
 Cimager.nwriters                                = ${NUM_SPECTRAL_WRITERS}
 Cimager.singleoutputfile                        = ${ALT_IMAGER_SINGLE_FILE}"
 
-# we also need to change the CPU allocations
-
+    if [ "${OUTPUT_CHANNELS_SL}" != "" ]; then
+        altImagerParams="${altImagerParams}
+# Output channel specification
+Cimager.Frequencies                             = ${OUTPUT_CHANNELS_SL}"
+    fi
 
 else
     altImagerParams="${altImagerParams} are not required"

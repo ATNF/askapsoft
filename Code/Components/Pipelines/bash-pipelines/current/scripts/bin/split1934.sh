@@ -230,11 +230,13 @@ commandLineFlags="-c ${TILE_NCHAN_1934} -o \${finalMS} \${mergelist}"
 log="${logs}/mergeMS_1934_${FIELDBEAM}_\${SLURM_JOB_ID}.log"
 
 echo "Running msmerge with arguments: \${commandLineFlags}" > \$log
+STARTTIME=\$(date +%FT%T)
 NCORES=1
 NPPN=1
-srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} ${msmerge} \${commandLineFlags} >> "\${log}"
+srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} /usr/bin/time -p -o "\${log}.timing" ${msmerge} \${commandLineFlags} >> "\${log}"
 err=\$?
 rejuvenate \${finalMS}
+echo "STARTTIME=\${STARTTIME}" >> "\${log}.timing"
 extractStats "\${log}" \${NCORES} "\${SLURM_JOB_ID}" \${err} ${jobname} "txt,csv"
 if [ \$err != 0 ]; then
     exit \$err

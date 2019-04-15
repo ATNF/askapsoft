@@ -368,6 +368,11 @@ srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} \"${PIPELINEDIR
         SLURM_CONFIG="${SLURM_CONFIG}
 #SBATCH --clusters=${CLUSTER}"
     fi
+
+    if [ "$EXCLUDE_NODE_LIST" != "" ]; then
+        SLURM_CONFIG="${SLURM_CONFIG}
+#SBATCH --exclude=${EXCLUDE_NODE_LIST}"
+    fi
     
     # Account to be used
     if [ "$ACCOUNT" != "" ]; then
@@ -438,6 +443,9 @@ srun --export=ALL --ntasks=\${NCORES} --ntasks-per-node=\${NPPN} \"${PIPELINEDIR
     fi
     if [ "$JOB_TIME_CONT_IMAGE" == "" ]; then
         JOB_TIME_CONT_IMAGE=${JOB_TIME_DEFAULT}
+    fi
+    if [ "$JOB_TIME_CONT_SELFCAL" == "" ]; then
+        JOB_TIME_CONT_SELFCAL=${JOB_TIME_DEFAULT}
     fi
     if [ "$JOB_TIME_CONT_APPLYCAL" == "" ]; then
         JOB_TIME_CONT_APPLYCAL=${JOB_TIME_DEFAULT}
@@ -889,6 +897,12 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
             NUM_SPECTRAL_WRITERS_CONTCUBE=${NUM_SPECTRAL_CUBES_CONTCUBE}
         fi
 
+        # if NUM_SPECTRAL_WRITERS_CONTCUBE not given, set to number of workers
+        if [ "${NUM_SPECTRAL_WRITERS_CONTCUBE}" == "" ]; then
+            NUM_SPECTRAL_WRITERS_CONTCUBE=$(echo ${NUM_CPUS_CONTCUBE_SCI} | awk '{print $1-1}')
+        fi
+       
+
         # Define the list of writer ranks used in the askap_imager
         # spectral-line output
         # Only define if we are using the askap_imager and not writing
@@ -974,6 +988,32 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
         # Define the number of channels used in the spectral-line imaging
         NUM_CHAN_SCIENCE_SL=$(echo "${CHAN_RANGE_SL_SCIENCE}" | awk -F'-' '{print $2-$1+1}')
 
+        # Set the output frequency frame - must be one of "topo", "bary", "lsrk"
+        # If not given, default to "bary"
+        if [ "${FREQ_FRAME_SL}" == "" ]; then
+            FREQ_FRAME_SL="bary"
+        fi
+        if [ "${FREQ_FRAME_SL}" != "topo" ] ||
+               [ "${FREQ_FRAME_SL}" != "bary" ] ||
+               [ "${FREQ_FRAME_SL}" != "lsrk" ]; then
+            echo "WARNING - FREQ_FRAME_SL (${FREQ_FRAME_SL}) is not one of \"topo\" \"bary\" \"lsrk\""
+            echo "        - Setting to \"bary\""
+            FREQ_FRAME_SL="bary"
+        fi
+
+        # Catch deprecated parameter DO_BARY
+        if [ "${DO_BARY}" != "" ]; then
+            echo "WARNING - the DO_BARY parameter is deprecated. Please use FREQ_FRAME_SL instead"
+            if [ "${DO_BARY}" == "true" ]; then
+                echo "        - Setting FREQ_FRAME_SL=bary"
+                FREQ_FRAME_SL=bary
+            else
+                echo "        - Setting FREQ_FRAME_SL=topo"
+                FREQ_FRAME_SL=topo
+            fi
+        fi
+
+        
         # if we are using the new imager we need to tweak the number of cores
         if [ "${DO_ALT_IMAGER_SPECTRAL}" == "true" ]; then
             if [ $((NUM_CHAN_SCIENCE_SL % NCHAN_PER_CORE_SL)) -ne 0 ]; then
@@ -998,8 +1038,12 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
             NUM_SPECTRAL_WRITERS=${NUM_SPECTRAL_CUBES}
         fi
 
-        # Reduce the number of writers to no more than the number of
-        # workers
+        # if NUM_SPECTRAL_WRITERS not given, set to number of workers
+        if [ "${NUM_SPECTRAL_WRITERS}" == "" ]; then
+            NUM_SPECTRAL_WRITERS=$(echo ${NUM_CPUS_SPECIMG_SCI} | awk '{print $1-1}')
+        fi
+        
+        # Reduce the number of writers to no more than the number of workers
         if [ "${NUM_SPECTRAL_WRITERS}" -ge "${NUM_CPUS_SPECIMG_SCI}" ]; then
             NUM_SPECTRAL_WRITERS=$(echo ${NUM_CPUS_SPECIMG_SCI} | awk '{print $1-1}')
             echo "WARNING - Reducing NUM_SPECTRAL_WRITERS to ${NUM_SPECTRAL_WRITERS} to match number of spectral workers"
@@ -1426,64 +1470,81 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
                     CCALIBRATOR_MAXUV_ARRAY+=($CCALIBRATOR_MAXUV)
                 done
             fi
-	    # Introduce more clean parameters as a function of selfcal loops:
-	    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	    # 1. CLEAN_ALGORITHM 
-	    # expected input: CLEAN_ALGORITHM="Hogbom,BasisFunctionMFS"
-	    IFS=,
-	    declare -a CLEAN_ALGORITHM_ARRAY=(${CLEAN_ALGORITHM})
-	    arrSize=${#CLEAN_ALGORITHM_ARRAY[@]}
-	    if [ "$arrSize" -le "0" ]; then 
-		    echo "ERROR - CLEAN_ALGORITHM_ARRAY ($CLEAN_ALGORITHM_ARRAY) needs to be of size > 0"
-		    exit 1
-	    fi
-	    if [ "$arrSize" -lt "$expectedArrSize" ]; then 
-		    echo "WARNING - CLEAN_ALGORITHM_ARRAY ($CLEAN_ALGORITHM_ARRAY) is specified for less than the number of SELFCAL_NUM_LOOPS=${SELFCAL_NUM_LOOPS}. We will use CLEAN_ALGORITHM=${CLEAN_ALGORITHM_ARRAY[0]} for all loops."
+	    # expected input: CLEAN_ALGORITHM="[Hogbom,BasisFunctionMFS]"
+            if [ "$(echo "${CLEAN_ALGORITHM}" | grep "\[")" != "" ]; then
+                # Have entered a comma-separate array in square brackets
+                arrSize=$(echo "${CLEAN_ALGORITHM}" | sed -e 's/[][,]/ /g' | wc -w)
+                if [ "$arrSize" -ne "$expectedArrSize" ]; then
+                    echo "ERROR - CLEAN_ALGORITHM ($CLEAN_ALGORITHM) needs to be of size $expectedArrSize (since SELFCAL_NUM_LOOPS=$SELFCAL_NUM_LOOPS)"
+                    exit 1
+                fi
+                CLEAN_ALGORITHM_ARRAY=()
+                for a in $(echo "${CLEAN_ALGORITHM}" | sed -e 's/[][,]/ /g'); do
+                    CLEAN_ALGORITHM_ARRAY+=($a)
+                done
+            else
+                CLEAN_ALGORITHM_ARRAY=()
                 for((i=0;i<=SELFCAL_NUM_LOOPS;i++)); do
-                    CLEAN_ALGORITHM_ARRAY[$i]=${CLEAN_ALGORITHM_ARRAY[0]}
+                    CLEAN_ALGORITHM_ARRAY+=($CLEAN_ALGORITHM)
                 done
             fi
+
 	    # 2. CLEAN_MINORCYCLE_NITER  
-	    # expected input: CLEAN_MINORCYCLE_NITER="200,800"
-	    declare -a CLEAN_MINORCYCLE_NITER_ARRAY=(${CLEAN_MINORCYCLE_NITER})
-	    arrSize=${#CLEAN_MINORCYCLE_NITER_ARRAY[@]}
-	    if [ "$arrSize" -le "0" ]; then 
-		    echo "ERROR - CLEAN_MINORCYCLE_NITER_ARRAY ($CLEAN_MINORCYCLE_NITER_ARRAY) needs to be of size > 0"
-		    exit 1
-	    fi
-	    if [ "$arrSize" -lt "$expectedArrSize" ]; then 
-		    echo "WARNING - CLEAN_MINORCYCLE_NITER_ARRAY ($CLEAN_MINORCYCLE_NITER_ARRAY) is specified for less than the number of SELFCAL_NUM_LOOPS=${SELFCAL_NUM_LOOPS}. We will use CLEAN_MINORCYCLE_NITER=${CLEAN_MINORCYCLE_NITER_ARRAY[0]} for all loops."
+	    # expected input: CLEAN_MINORCYCLE_NITER="[200,800]"
+            if [ "$(echo "${CLEAN_MINORCYCLE_NITER}" | grep "\[")" != "" ]; then
+                # Have entered a comma-separate array in square brackets
+                arrSize=$(echo "${CLEAN_MINORCYCLE_NITER}" | sed -e 's/[][,]/ /g' | wc -w)
+                if [ "$arrSize" -ne "$expectedArrSize" ]; then
+                    echo "ERROR - CLEAN_MINORCYCLE_NITER ($CLEAN_MINORCYCLE_NITER) needs to be of size $expectedArrSize (since SELFCAL_NUM_LOOPS=$SELFCAL_NUM_LOOPS)"
+                    exit 1
+                fi
+                CLEAN_MINORCYCLE_NITER_ARRAY=()
+                for a in $(echo "${CLEAN_MINORCYCLE_NITER}" | sed -e 's/[][,]/ /g'); do
+                    CLEAN_MINORCYCLE_NITER_ARRAY+=($a)
+                done
+            else
+                CLEAN_MINORCYCLE_NITER_ARRAY=()
                 for((i=0;i<=SELFCAL_NUM_LOOPS;i++)); do
-                    CLEAN_MINORCYCLE_NITER_ARRAY[$i]=${CLEAN_MINORCYCLE_NITER_ARRAY[0]}
+                    CLEAN_MINORCYCLE_NITER_ARRAY+=($CLEAN_MINORCYCLE_NITER)
                 done
             fi
 	    # 3. CLEAN_GAIN
-	    # expected input: CLEAN_GAIN="0.1,0.2"
-	    declare -a CLEAN_GAIN_ARRAY=(${CLEAN_GAIN})
-	    arrSize=${#CLEAN_GAIN_ARRAY[@]}
-	    if [ "$arrSize" -le "0" ]; then 
-		    echo "ERROR - CLEAN_GAIN_ARRAY ($CLEAN_GAIN_ARRAY) needs to be of size > 0"
-		    exit 1
-	    fi
-	    if [ "$arrSize" -lt "$expectedArrSize" ]; then 
-		    echo "WARNING - CLEAN_GAIN_ARRAY ($CLEAN_GAIN_ARRAY) is specified for less than the number of SELFCAL_NUM_LOOPS=${SELFCAL_NUM_LOOPS}. We will use CLEAN_GAIN=${CLEAN_GAIN_ARRAY[0]} for all loops."
+	    # expected input: CLEAN_GAIN="[0.1,0.2]"
+            if [ "$(echo "${CLEAN_GAIN}" | grep "\[")" != "" ]; then
+                # Have entered a comma-separate array in square brackets
+                arrSize=$(echo "${CLEAN_GAIN}" | sed -e 's/[][,]/ /g' | wc -w)
+                if [ "$arrSize" -ne "$expectedArrSize" ]; then
+                    echo "ERROR - CLEAN_GAIN ($CLEAN_GAIN) needs to be of size $expectedArrSize (since SELFCAL_NUM_LOOPS=$SELFCAL_NUM_LOOPS)"
+                    exit 1
+                fi
+                CLEAN_GAIN_ARRAY=()
+                for a in $(echo "${CLEAN_GAIN}" | sed -e 's/[][,]/ /g'); do
+                    CLEAN_GAIN_ARRAY+=($a)
+                done
+            else
+                CLEAN_GAIN_ARRAY=()
                 for((i=0;i<=SELFCAL_NUM_LOOPS;i++)); do
-                    CLEAN_GAIN_ARRAY[$i]=${CLEAN_GAIN_ARRAY[0]}
+                    CLEAN_GAIN_ARRAY+=($CLEAN_GAIN)
                 done
             fi
 	    # 4. CLEAN_PSFWIDTH 
-	    # expected input: CLEAN_PSFWIDTH="256,6144"
-	    declare -a CLEAN_PSFWIDTH_ARRAY=(${CLEAN_PSFWIDTH})
-	    unset IFS
-	    arrSize=${#CLEAN_PSFWIDTH_ARRAY[@]}
-	    if [ "$arrSize" -le "0" ]; then 
-		    echo "ERROR - CLEAN_PSFWIDTH_ARRAY ($CLEAN_PSFWIDTH_ARRAY) needs to be of size > 0"
-		    exit 1
-	    fi
-	    if [ "$arrSize" -lt "$expectedArrSize" ]; then 
-		    echo "WARNING - CLEAN_PSFWIDTH_ARRAY ($CLEAN_PSFWIDTH_ARRAY) is specified for less than the number of SELFCAL_NUM_LOOPS=${SELFCAL_NUM_LOOPS}. We will use CLEAN_PSFWIDTH=${CLEAN_PSFWIDTH_ARRAY[0]} for all loops."
+	    # expected input: CLEAN_PSFWIDTH="[256,6144]"
+            if [ "$(echo "${CLEAN_PSFWIDTH}" | grep "\[")" != "" ]; then
+                # Have entered a comma-separate array in square brackets
+                arrSize=$(echo "${CLEAN_PSFWIDTH}" | sed -e 's/[][,]/ /g' | wc -w)
+                if [ "$arrSize" -ne "$expectedArrSize" ]; then
+                    echo "ERROR - CLEAN_PSFWIDTH ($CLEAN_PSFWIDTH) needs to be of size $expectedArrSize (since SELFCAL_NUM_LOOPS=$SELFCAL_NUM_LOOPS)"
+                    exit 1
+                fi
+                CLEAN_PSFWIDTH_ARRAY=()
+                for a in $(echo "${CLEAN_PSFWIDTH}" | sed -e 's/[][,]/ /g'); do
+                    CLEAN_PSFWIDTH_ARRAY+=($a)
+                done
+            else
+                CLEAN_PSFWIDTH_ARRAY=()
                 for((i=0;i<=SELFCAL_NUM_LOOPS;i++)); do
-                    CLEAN_PSFWIDTH_ARRAY[$i]=${CLEAN_PSFWIDTH_ARRAY[0]}
+                    CLEAN_PSFWIDTH_ARRAY+=($CLEAN_PSFWIDTH)
                 done
             fi
 	    # 5. CLEAN_SCALES 
@@ -1491,19 +1552,21 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
 	    # expected input: CLEAN_SCALES="[0] ; [0,3,10] ; [0,3,10,480,960]"
 	    # Note the "space" characters around ";" are crucial when you want to specify 
 	    # an array of scales. This scheme is backward compatible with older pipeline 
-	    # versions where one could not use different scales for different selfcal loops.  
+	    # versions where one could not use different scales for different selfcal loops.
 	    declare -a CLEAN_SCALES_ARRAY=(${CLEAN_SCALES})
 	    unset IFS
 	    arrSize=${#CLEAN_SCALES_ARRAY[@]}
 	    if [ "$arrSize" -le "0" ]; then 
-		    echo "ERROR - CLEAN_SCALES_ARRAY ($CLEAN_SCALES_ARRAY) needs to be of size > 0"
-		    exit 1
+		echo "ERROR - CLEAN_SCALES_ARRAY ($CLEAN_SCALES_ARRAY) needs to be of size > 0"
+		exit 1
 	    fi
-	    if [ "$arrSize" -lt "$expectedArrSize" ]; then 
-		    echo "WARNING - CLEAN_SCALES_ARRAY ($CLEAN_SCALES_ARRAY) is specified for less than the number of SELFCAL_NUM_LOOPS=${SELFCAL_NUM_LOOPS}. We will use CLEAN_SCALES=${CLEAN_SCALES_ARRAY[0]} for all loops."
+            if [ "$arrSize" -eq 1 ]; then
                 for((i=0;i<=SELFCAL_NUM_LOOPS;i++)); do
                     CLEAN_SCALES_ARRAY[$i]=${CLEAN_SCALES_ARRAY[0]}
                 done
+	    elif [ "$arrSize" -ne "$expectedArrSize" ]; then 
+                echo "ERROR - CLEAN_SCALES ($CLEAN_SCALES) needs to be of size $expectedArrSize (since SELFCAL_NUM_LOOPS=$SELFCAL_NUM_LOOPS)"
+                exit 1
             fi
 	    # 6. CLEAN_THRESHOLD_MINORCYCLE 
 	    # expected input: CLEAN_THRESHOLD_MINORCYCLE="[45%,2mJy] ; [25%,1mJy,0.03mJy]"
@@ -1512,14 +1575,16 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
 	    arrSize=${#CLEAN_THRESHOLD_MINORCYCLE_ARRAY[@]}
 	    unset IFS
 	    if [ "$arrSize" -le "0" ]; then 
-		    echo "ERROR - CLEAN_THRESHOLD_MINORCYCLE_ARRAY ($CLEAN_THRESHOLD_MINORCYCLE_ARRAY) needs to be of size > 0"
-		    exit 1
+		echo "ERROR - CLEAN_THRESHOLD_MINORCYCLE_ARRAY ($CLEAN_THRESHOLD_MINORCYCLE_ARRAY) needs to be of size > 0"
+		exit 1
 	    fi
-	    if [ "$arrSize" -lt "$expectedArrSize" ]; then 
-		    echo "WARNING - CLEAN_THRESHOLD_MINORCYCLE_ARRAY ($CLEAN_THRESHOLD_MINORCYCLE_ARRAY) is specified for less than the number of SELFCAL_NUM_LOOPS=${SELFCAL_NUM_LOOPS}. We will use CLEAN_THRESHOLD_MINORCYCLE=${CLEAN_THRESHOLD_MINORCYCLE_ARRAY[0]} for all loops."
+	    if [ "$arrSize" -eq 1 ]; then
                 for((i=0;i<=SELFCAL_NUM_LOOPS;i++)); do
                     CLEAN_THRESHOLD_MINORCYCLE_ARRAY[$i]=${CLEAN_THRESHOLD_MINORCYCLE_ARRAY[0]}
                 done
+	    elif [ "$arrSize" -lt "$expectedArrSize" ]; then 
+                echo "ERROR - CLEAN_THRESHOLD_MINORCYCLE ($CLEAN_THRESHOLD_MINORCYCLE) needs to be of size $expectedArrSize (since SELFCAL_NUM_LOOPS=$SELFCAL_NUM_LOOPS)"
+                exit 1
             fi
 
 	    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1568,9 +1633,6 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
                     echo "ERROR! Size of CCALIBRATOR_MAXUV (${CCALIBRATOR_MAXUV}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
                     exit 1
                 fi
-		#BEG+++++++++++++++++++++++++++++++++++++++++
-		# I think this section is redundant and may be deleted (from #BEG++++ to #END++++)
-		# --wr, 01Mar2019
                 if [ "${#CLEAN_ALGORITHM_ARRAY[@]}" -ne "$arraySize" ]; then
                     echo "ERROR! Size of CLEAN_ALGORITHM (${CLEAN_ALGORITHM}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
                     exit 1
@@ -1595,7 +1657,6 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
                     echo "ERROR! Size of CLEAN_THRESHOLD_MINORCYCLE (${CLEAN_THRESHOLD_MINORCYCLE}) needs to be SELFCAL_NUM_LOOPS + 1 ($arraySize). Exiting."
                     exit 1
                 fi
-		#END+++++++++++++++++++++++++++++++++++++++++
 
             fi
 

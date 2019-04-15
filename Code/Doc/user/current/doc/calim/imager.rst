@@ -152,7 +152,7 @@ frame::
 
 **Example 6:True per beam processing <WARNING still under test>**
 
-This imager can be instructed to process each measurement set independently and to merge the subimage into a larger image for the minor cycles. Note this is different to facetting - which processes the sub images entirely independently. This scheme grids and images the fields indvidually but cleans them jointlyly as in Cornwell 1989::
+This imager can be instructed to process each measurement set independently and to merge the subimage into a larger image for the minor cycles. Note this is different to facetting - which processes the sub images entirely independently. This scheme grids and images the fields indvidually but cleans them jointly as in Cornwell 1989::
  
     Cimager.updatedirection = true
  
@@ -365,20 +365,6 @@ Here is an example of the start of a beam log::
 |                          |                  |              |images one wants to produce (shapes, positions,     |
 |                          |                  |              |etc). The details are given in a separate section   |
 |                          |                  |              |(see below)                                         |
-+--------------------------+------------------+--------------+----------------------------------------------------+
-|memorybuffers             |bool              |false         |The accessor subsystem provides a buffer mechanism  |
-|                          |                  |              |to work with scratch information.  If this flag is  |
-|                          |                  |              |set to false (default), these buffers will be kept  |
-|                          |                  |              |on disk (in a subtable of the dataset called        |
-|                          |                  |              |*BUFFERS*). If this flag is set to true, scratch    |
-|                          |                  |              |buffers are kept in memory and the dataset is opened|
-|                          |                  |              |for read only. The imager code had been converted at|
-|                          |                  |              |some stage to process the data without using scratch|
-|                          |                  |              |buffers. Therefore, the status of this flag does not|
-|                          |                  |              |affect the performance or memory usage. However, it |
-|                          |                  |              |seems a good idea to always set it to *true* to     |
-|                          |                  |              |ensure that the dataset given by the *dataset*      |
-|                          |                  |              |keyword is always opened for read-only              |
 +--------------------------+------------------+--------------+----------------------------------------------------+
 |nUVWMachines              |int32             |number of     |Size of uvw-machines cache. uvw-machines are used to|
 |                          |                  |beams         |convert uvw from a given phase centre to a common   |
