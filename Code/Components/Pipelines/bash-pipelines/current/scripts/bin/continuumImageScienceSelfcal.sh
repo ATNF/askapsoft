@@ -72,7 +72,7 @@ if [ "${DO_IT}" == "true" ] && [ "${DO_SELFCAL}" == "true" ]; then
     # Imaging
     if [ "${FAT_NODE_CONT_IMG}" == "true" ]; then
         # Need to take account of the master on a node by itself.
-        NUM_NODES_IMAGING=$(echo $NUM_CPUS_CONTIMG_SCI $CPUS_PER_CORE_CONT_IMAGING | awk '{nworkers=$1-1; if (nworkers%$2==0) print nworkers/$2+1; else print int(nworkers/$2)+2}')
+        NUM_NODES_IMAGING=$(echo $NUM_CPUS_CONTIMG_SCI $CPUS_PER_CORE_CONT_IMAGING | awk '{nworkers=$1-1; if (nworkers%$2==0) workernodes=nworkers/$2; else workernodes=int(nworkers/$2)+1; print workernodes+1}')
     else
         NUM_NODES_IMAGING=$(echo $NUM_CPUS_CONTIMG_SCI $CPUS_PER_CORE_CONT_IMAGING | awk '{if ($1%$2==0) print $1/$2; else print int($1/$2)+1}')
     fi

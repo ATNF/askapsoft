@@ -327,6 +327,8 @@ sedstr="s/sbatch/\${SLURM_JOB_ID}\.sbatch/g"
 thisfile="$sbatchfile"
 cp "\$thisfile" "\$(echo "\$thisfile" | sed -e "\$sedstr")"
 
+selfcalMethod=${SELFCAL_METHOD}
+
 parset="${parsets}/science_contSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP${LOOP}.in"
 cat > \$parset << EOFINNER
 ##########
@@ -496,7 +498,7 @@ cp -r "${caldata}" "${OUTPUT}/${gainscaltab}"
 
 # Keep a backup of the intermediate images, prior to re-imaging.
 copyImages=${SELFCAL_KEEP_IMAGES}
-if [ \${copyImages} == true ]; then
+if [ \${copyImages} == "true" ]; then
     # Use the . with imageBase to get images only, so we don't
     #  move the selfCal directory itself
     mv "${OUTPUT}"/*.${imageBase}* .
@@ -532,7 +534,7 @@ ${exportDirective}
 ${askapsoftModuleCommands}
 
 FAT_NODE_CONT_IMG=${FAT_NODE_CONT_IMG}
-nodeDistribution="--ntasks-per-node=\${NPPN} "
+nodeDistribution="--ntasks-per-node=${CPUS_PER_CORE_CONT_IMAGING} "
 if [ "\${FAT_NODE_CONT_IMG}" == "true" ]; then
 
     nodelist=\$SLURM_JOB_NODELIST
