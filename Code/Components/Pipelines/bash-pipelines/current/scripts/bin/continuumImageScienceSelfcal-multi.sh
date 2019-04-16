@@ -311,11 +311,11 @@ selfcalMethod=${SELFCAL_METHOD}
 
 # Set elements of the metadata based on position & frequency
 msMetadata="${MS_METADATA}"
-ra=$(python "\${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=RA)
-dec=$(python "\${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Dec)
-epoch=$(python "\${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Epoch)
-bandwidth="$(python "\${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Bandwidth)"
-centreFreq="$(python "\${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Freq)"
+ra=\$(python "\${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=RA)
+dec=\$(python "\${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Dec)
+epoch=\$(python "\${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Epoch)
+bandwidth="\$(python "\${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Bandwidth)"
+centreFreq="\$(python "\${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Freq)"
 
 inputDirection=${DIRECTION
 if [ "\${inputDirection}" != "" ]; then
