@@ -69,7 +69,7 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 +===============================================+=====================================+====================================+===================================================================+
 | ``DO_SPECTRAL_PROCESSING``                    | false                               | none                               | Whether to do the spectral-line processing.                       |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``JOB_TIME_SPECTRAL_IMAGE``                   | ``JOB_TIME_DEFAULT`` (12:00:00)     | none                               | Time request for imaging the spectral-line data                   |
+| ``JOB_TIME_SPECTRAL_IMAGE``                   | ``JOB_TIME_DEFAULT`` (24:00:00)     | none                               | Time request for imaging the spectral-line data                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``IMAGETYPE_SPECTRAL``                        | fits                                | imagetype (:doc:`../calim/imager`) | Image format to use - can be either 'casa' or 'fits', although    |
 |                                               |                                     |                                    | 'fits' can only be given in conjunction with                      |
@@ -81,7 +81,7 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 |                                               |                                     |                                    | full-spectral-resolution measurement set into a new MS. If        |
 |                                               |                                     |                                    | the original MS is original.ms, this will create original_SL.ms.  |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``JOB_TIME_SPECTRAL_SPLIT``                   | ``JOB_TIME_DEFAULT`` (12:00:00)     | none                               | Time request for splitting out a subset of the spectral data      |
+| ``JOB_TIME_SPECTRAL_SPLIT``                   | ``JOB_TIME_DEFAULT`` (24:00:00)     | none                               | Time request for splitting out a subset of the spectral data      |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``CHAN_RANGE_SL_SCIENCE``                     | "1-``NUM_CHAN_SCIENCE``"            | channel (:doc:`../calim/mssplit`)  | The range of channels to copy from the original dataset (1-based).|
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
@@ -95,7 +95,7 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 |                                               |                                     |                                    | continuum self-calibration (see ``GAINS_CAL_TABLE`` in            |
 |                                               |                                     |                                    | :doc:`ScienceFieldContinuumImaging`).                             |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``JOB_TIME_SPECTRAL_APPLYCAL``                | ``JOB_TIME_DEFAULT`` (12:00:00)     | none                               | Time request for applying the gains calibration to the spectral   |
+| ``JOB_TIME_SPECTRAL_APPLYCAL``                | ``JOB_TIME_DEFAULT`` (24:00:00)     | none                               | Time request for applying the gains calibration to the spectral   |
 |                                               |                                     |                                    | data                                                              |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``DO_CONT_SUB_SL``                            | true                                | none                               | Whether to subtract a continuum model from the spectral-line      |
@@ -105,7 +105,7 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 |                                               |                                     |                                    | full-spectral-resolution one, or the reduced-channel-range copy), |
 |                                               |                                     |                                    | which gets overwritten.                                           |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``JOB_TIME_SPECTRAL_CONTSUB``                 | ``JOB_TIME_DEFAULT`` (12:00:00)     | none                               | Time request for subtracting the continuum from the spectral data |
+| ``JOB_TIME_SPECTRAL_CONTSUB``                 | ``JOB_TIME_DEFAULT`` (24:00:00)     | none                               | Time request for subtracting the continuum from the spectral data |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | **Continuum subtraction**                     |                                     |                                    |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
@@ -315,7 +315,7 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 | ``DO_SPECTRAL_IMSUB``                         | true                                | none                               | Whether to run an image-based continuum-subtraction task on the   |
 |                                               |                                     |                                    | spectral cube after creation.                                     |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``JOB_TIME_SPECTRAL_IMCONTSUB``               | ``JOB_TIME_DEFAULT`` (12:00:00)     | none                               | Time request for image-based continuum subtraction                |
+| ``JOB_TIME_SPECTRAL_IMCONTSUB``               | ``JOB_TIME_DEFAULT`` (24:00:00)     | none                               | Time request for image-based continuum subtraction                |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``SPECTRAL_IMSUB_SCRIPT``                     | "robust_contsub.py"                 | none                               | The name of the script from the ACES repository to use for        |
 |                                               |                                     |                                    | image-based continuum subtraction. The only two accepted values   |

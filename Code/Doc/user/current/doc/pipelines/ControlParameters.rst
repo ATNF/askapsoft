@@ -90,7 +90,7 @@ see the *Slurm time requests* section below for details.
 |                                     |                         |reservation, leave this alone and it will be submitted as a regular job.         |
 |                                     |                         |                                                                                 |
 +-------------------------------------+-------------------------+---------------------------------------------------------------------------------+
-| ``JOB_TIME_DEFAULT``                |12:00:00                 |The default time request for the slurm jobs. It is possible to specify a         |
+| ``JOB_TIME_DEFAULT``                |24:00:00                 |The default time request for the slurm jobs. It is possible to specify a         |
 |                                     |                         |different time for individual jobs - see the list below and on the individual    |
 |                                     |                         |pages describing the jobs. If those parameters are not given, the time requested |
 |                                     |                         |is the value of ``JOB_TIME_DEFAULT``.                                            |
@@ -341,7 +341,7 @@ Slurm time requests
 -------------------
 
 Each slurm job has a time request associated with it. These default to
-12 hours (12:00:00), given by the user parameter
+12 hours (24:00:00), given by the user parameter
 ``JOB_TIME_DEFAULT``. You can use this parameter to set a different
 default. Additionally, you can set a different time to the default for
 individual jobs, by using the following set of parameters. Acceptable

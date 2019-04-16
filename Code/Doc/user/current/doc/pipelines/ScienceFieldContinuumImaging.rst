@@ -135,7 +135,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 +============================================+=====================================+========================================================+===============================================================+
 | ``DO_CONT_IMAGING``                        | true                                | none                                                   | Whether to image the science MS                               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``JOB_TIME_CONT_IMAGE``                    | ``JOB_TIME_DEFAULT`` (12:00:00)     | none                                                   | Time request for imaging the continuum (both types - with and |
+| ``JOB_TIME_CONT_IMAGE``                    | ``JOB_TIME_DEFAULT`` (24:00:00)     | none                                                   | Time request for imaging the continuum (both types - with and |
 |                                            |                                     |                                                        | without self-calibration)                                     |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``IMAGETYPE_CONT``                         | fits                                | imagetype (:doc:`../calim/cimager` and                 | Image format to use - can be either 'casa' or 'fits'.         |
@@ -149,7 +149,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                     |                                                        | each imaging and calibration task (``true``) or whether to    |
 |                                            |                                     |                                                        | combine them all into a single slurm job.                     |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``JOB_TIME_CONT_SELFCAL``                  | ``JOB_TIME_DEFAULT`` (12:00:00)     | none                                                   | Time request for the calibration jobs when running with       |
+| ``JOB_TIME_CONT_SELFCAL``                  | ``JOB_TIME_DEFAULT`` (24:00:00)     | none                                                   | Time request for the calibration jobs when running with       |
 |                                            |                                     |                                                        | ``MULTI_JOB_SELFCAL=true``.                                   |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | **Basic variables**                        |                                     |                                                        |                                                               |
@@ -493,7 +493,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 | ``DO_APPLY_CAL_CONT``                      | true                                | none                                                   | Whether to apply the calibration to the averaged              |
 |                                            |                                     |                                                        | ("continuum") dataset.                                        |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``JOB_TIME_CONT_APPLYCAL``                 | ``JOB_TIME_DEFAULT`` (12:00:00)     | none                                                   | Time request for applying the calibration                     |
+| ``JOB_TIME_CONT_APPLYCAL``                 | ``JOB_TIME_DEFAULT`` (24:00:00)     | none                                                   | Time request for applying the calibration                     |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``KEEP_RAW_AV_MS``                         | true                                | none                                                   | Whether to make a copy of the averaged MS before applying     |
 |                                            |                                     |                                                        | the gains calibration (true), or to just overwrite with       |
@@ -503,7 +503,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``DO_CONTCUBE_IMAGING``                    | false                               | none                                                   | Whether to create continuum cubes                             |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
-| ``JOB_TIME_CONTCUBE_IMAGE``                | ``JOB_TIME_DEFAULT`` (12:00:00)     | none                                                   | Time request for individual continuum cube jobs               |
+| ``JOB_TIME_CONTCUBE_IMAGE``                | ``JOB_TIME_DEFAULT`` (24:00:00)     | none                                                   | Time request for individual continuum cube jobs               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``IMAGE_BASE_CONTCUBE``                    | i.SB%s.contcube                     | Helps form Images.name (:doc:`../calim/simager`)       | Base name for the continuum cubes. It should include "i.", as |
 |                                            |                                     |                                                        | the actual base name will include the correct polarisation    |

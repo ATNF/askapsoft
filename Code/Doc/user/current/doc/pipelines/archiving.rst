@@ -75,19 +75,19 @@ scripts, and they are detailed here.
 | ``DO_DIAGNOSTICS``               | true                            | none                            | Whether to run the diagnostic script upon completion of imaging |
 |                                  |                                 |                                 | and source-finding.                                             |
 +----------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
-| ``JOB_TIME_DIAGNOSTICS``         | ``JOB_TIME_DEFAULT`` (12:00:00) | none                            | Time request for the diagnostic script.                         |
+| ``JOB_TIME_DIAGNOSTICS``         | ``JOB_TIME_DEFAULT`` (24:00:00) | none                            | Time request for the diagnostic script.                         |
 +----------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | ``DO_CONVERT_TO_FITS``           | true                            | none                            | Whether to convert the CASA images to FITS format.              |
 +----------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
-| ``JOB_TIME_FITS_CONVERT``        | ``JOB_TIME_DEFAULT`` (12:00:00) | none                            | Time request for the FITS conversion.                           |
+| ``JOB_TIME_FITS_CONVERT``        | ``JOB_TIME_DEFAULT`` (24:00:00) | none                            | Time request for the FITS conversion.                           |
 +----------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | ``DO_MAKE_THUMBNAILS``           | true                            | none                            | Whether to make the PNG thumbnail images of the 2D FITS images. |
 +----------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
-| ``JOB_TIME_THUMBNAILS``          | ``JOB_TIME_DEFAULT`` (12:00:00) | none                            | Time request for the thumbnail creation.                        |
+| ``JOB_TIME_THUMBNAILS``          | ``JOB_TIME_DEFAULT`` (24:00:00) | none                            | Time request for the thumbnail creation.                        |
 +----------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | ``DO_STAGE_FOR_CASDA``           | false                           | none                            | Whether to stage data for ingest into CASDA                     |
 +----------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
-| ``JOB_TIME_CASDA_UPLOAD``        | ``JOB_TIME_DEFAULT`` (12:00:00) | none                            | Time request for the CASDA-upload task.                         |
+| ``JOB_TIME_CASDA_UPLOAD``        | ``JOB_TIME_DEFAULT`` (24:00:00) | none                            | Time request for the CASDA-upload task.                         |
 +----------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+
 | **General**                      |                                 |                                 |                                                                 |
 +----------------------------------+---------------------------------+---------------------------------+-----------------------------------------------------------------+

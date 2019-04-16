@@ -54,7 +54,7 @@ is only the latter that are passsed to CASDA).
 |                                     |                                          |                                     | field mosaics. Will be set to false if the number of fields |
 |                                     |                                          |                                     | is one.                                                     |
 +-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
-| ``JOB_TIME_SOURCEFINDING``          | ``JOB_TIME_DEFAULT`` (12:00:00)          | none                                | Time request for source-finding jobs.                       | 
+| ``JOB_TIME_SOURCEFINDING``          | ``JOB_TIME_DEFAULT`` (24:00:00)          | none                                | Time request for source-finding jobs.                       | 
 |                                     |                                          |                                     |                                                             |
 +-------------------------------------+------------------------------------------+-------------------------------------+-------------------------------------------------------------+
 | ``DO_CONTINUUM_VALIDATION``         | true                                     | none                                | Run the continuum validation script following source        |
