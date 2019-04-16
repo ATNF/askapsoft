@@ -13,11 +13,11 @@ with several optional pre-processing steps:
    model from the continuum imaging, or -- as the default -- a model
    image constructed by Cmodel from the component catalogue generated
    by Selavy. The Selavy parameters used are those described on
-   :doc:`ContinuumSourcefinding`.  
+   :doc:`ContinuumSourcefinding`.
 
 Following this pre-processing, the resulting MS is imaged by either the
-simager task (the default), or the new imager, creating a set of
-spectral cubes. The new imager provides the ability to image in the
+imager task (the default), or the old simager, creating a set of
+spectral cubes. Imager provides the ability to image in the
 barycentric reference frame, and allows (for efficiency purposes) the
 option of writing out multiple sub-cubes (each having a subset of the
 full range of channels).
@@ -38,17 +38,24 @@ The variables presented below work in the same manner as those for the
 continuum imaging, albeit with names that clearly refer to the
 spectral-imaging.
 
+Whether or not the spectral processing is done is governed by the
+``DO_SPECTRAL_PROCESSING`` parameter - the default approach of the
+pipeline is to not do any of the processing above, but if this
+parameter is set to ``true`` then it falls to the individual switches
+for each task. Each of these default to true, so if
+``DO_SPECTRAL_PROCESSING`` is turned on then everything will be done.
+
 A note on the imagers and the output formats. The default approach is
-to use **simager** to produce the spectral-line cubes. The new imager
-application **imager** (:doc:`../calim/imager`) can be used by setting
-``DO_ALT_IMAGER_SPECTRAL`` or ``DO_ALT_IMAGER`` to true. The latter is
-the switch controlling all types of imaging, but can be overridden by
-the former, if provided.
+to use the new imager **imager** (:doc:`../calim/imager`) to produce
+the spectral-line cubes. The legacy spectral imager application
+**simager** can be used by setting ``DO_ALT_IMAGER_SPECTRAL`` or
+``DO_ALT_IMAGER`` to false. The latter is the switch controlling all
+types of imaging, but can be overridden by the former, if provided.
 
 The default output format is CASA images, although FITS files can be
 written directly by setting ``IMAGETYPE_SPECTRAL`` to ``fits`` (rather
 than ``casa``). This will only work with the new imager, as
-**simager** does not yet have this functionality. This mode is still
+**simager** does not have this functionality. This mode is still
 in development, so may not be completely reliable. The recommended
 method for getting images into FITS format is still to use the
 ``DO_CONVERT_TO_FITS`` flag, which makes use of the
@@ -60,7 +67,7 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | Variable                                      | Default                             | Parset equivalent                  | Description                                                       |
 +===============================================+=====================================+====================================+===================================================================+
-| ``DO_SPECTRAL_IMAGING``                       | false                               | none                               | Whether to do the spectral-line imaging                           |
+| ``DO_SPECTRAL_PROCESSING``                    | false                               | none                               | Whether to do the spectral-line processing.                       |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``JOB_TIME_SPECTRAL_IMAGE``                   | ``JOB_TIME_DEFAULT`` (12:00:00)     | none                               | Time request for imaging the spectral-line data                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
@@ -129,6 +136,8 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 |                                               |                                     | (:doc:`../analysis/selavy`)        | in pixels within which islands are joined.                        |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | **Basic variables for imaging**               |                                     |                                    |                                                                   |
++-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
+| ``DO_SPECTRAL_IMAGING``                       | true                                | none                               | Whether to do the spectral imaging                                |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``NUM_CPUS_SPECIMG_SCI``                      | 200                                 | none                               | The total number of cores allocated to the spectral-imaging       |
 |                                               |                                     |                                    | job. One will be the master, while the rest will be devoted to    |
@@ -303,7 +312,7 @@ produced by setting ``ALT_IMAGER_SINGLE_FILE=true``.
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | **Image-based continuum subtraction**         |                                     |                                    |                                                                   |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
-| ``DO_SPECTRAL_IMSUB``                         | false                               | none                               | Whether to run an image-based continuum-subtraction task on the   |
+| ``DO_SPECTRAL_IMSUB``                         | true                                | none                               | Whether to run an image-based continuum-subtraction task on the   |
 |                                               |                                     |                                    | spectral cube after creation.                                     |
 +-----------------------------------------------+-------------------------------------+------------------------------------+-------------------------------------------------------------------+
 | ``JOB_TIME_SPECTRAL_IMCONTSUB``               | ``JOB_TIME_DEFAULT`` (12:00:00)     | none                               | Time request for image-based continuum subtraction                |
