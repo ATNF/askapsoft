@@ -317,18 +317,15 @@ epoch=\$(python "\${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --v
 bandwidth="\$(python "\${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Bandwidth)"
 centreFreq="\$(python "\${PIPELINEDIR}/parseMSlistOutput.py" --file="\$msMetadata" --val=Freq)"
 
-inputDirection=${DIRECTION
-if [ "\${inputDirection}" != "" ]; then
-    modelDirection="\${inputDirection}"
+direction="${DIRECTION}"
+if [ "\${direction}" != "" ]; then
+    modelDirection="\${direction}"
 else
     modelDirection="[\${ra}, \${dec}, \${epoch}]"
 fi
 # Reformat for Selavy's referenceDirection
 ra=\$(echo "\$ra" | awk -F':' '{printf "%sh%sm%s",\$1,\$2,\$3}')
 refDirection="[\${ra}, \${dec}, \${epoch}]"
-unset ra
-unset dec
-unset epoch
 
 parset="${parsets}/science_contSelfcal_${FIELDBEAM}_\${SLURM_JOB_ID}_LOOP${LOOP}.in"
 cat > \$parset << EOFINNER
