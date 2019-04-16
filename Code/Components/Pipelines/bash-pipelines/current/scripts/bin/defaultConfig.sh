@@ -214,7 +214,11 @@ DO_SELFCAL=true
 MULTI_JOB_SELFCAL=true
 DO_APPLY_CAL_CONT=true
 DO_CONTCUBE_IMAGING=false
-DO_SPECTRAL_IMAGING=false
+DO_SPECTRAL_PROCESSING=false
+DO_COPY_SL=false
+DO_APPLY_CAL_SL=true
+DO_CONT_SUB_SL=true
+DO_SPECTRAL_IMAGING=true
 DO_SPECTRAL_IMSUB=false
 DO_MOSAIC=true
 DO_MOSAIC_FIELDS=true
@@ -811,16 +815,10 @@ CLEAN_CONTCUBE_WRITE_AT_MAJOR_CYCLE=false
 # imaging, with names that reflect the spectral-line nature...
 
 ### Preparation
-# Whether to copy the data
-DO_COPY_SL=false
-# Channel range to copy
+# Channel range to copy when DO_COPY_SL is turned on
 CHAN_RANGE_SL_SCIENCE=""
 # Tile size for SL measurement set
 TILENCHAN_SL=18
-# Whether to apply a gains solution
-DO_APPLY_CAL_SL=true
-# Whether to subtract a continuum model
-DO_CONT_SUB_SL=true
 
 # Method to present self-cal model: via a model image ("Cmodel"),
 # via a components parset ("Components"), or using the

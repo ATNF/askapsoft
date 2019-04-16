@@ -1,10 +1,10 @@
 #!/bin/bash -l
 #
 # This file takes the default values, after any modification by a
-# user's config file, and creates other variables that depend upon
+# user config file, and creates other variables that depend upon
 # them and do not require user input.
 #
-# @copyright (c) 2017 CSIRO
+# @copyright (c) 2019 CSIRO
 # Australia Telescope National Facility (ATNF)
 # Commonwealth Scientific and Industrial Research Organisation (CSIRO)
 # PO Box 76, Epping NSW 1710, Australia
@@ -75,10 +75,7 @@ if [ "$PROCESS_DEFAULTS_HAS_RUN" != "true" ]; then
     fi
 
     # Turn off the purging of the full-resolution MS if we need to use it.
-    if [ "${DO_COPY_SL}" == "true" ] ||
-           [ "${DO_APPLY_CAL_SL}" == "true" ] ||
-           [ "${DO_CONT_SUB_SL}" == "true" ] ||
-           [ "${DO_SPECTRAL_IMAGING}" == "true" ]; then
+    if [ "${DO_SPECTRAL_PROCESSING}" == "true" ]; then
 
         PURGE_FULL_MS=false
 
@@ -118,7 +115,7 @@ module load python"
                 echo "WARNING - Requested askapsoft version ${ASKAPSOFT_VERSION} not available"
                 ASKAPSOFT_VERSION=""
             else
-                # It exists. Add a leading slash so we can append to 'askapsoft' in the module call
+                # It exists. Add a leading slash so we can append to "askapsoft" in the module call
                 ASKAPSOFT_VERSION="/${ASKAPSOFT_VERSION}"
             fi
         fi
@@ -129,11 +126,11 @@ module load python"
             # slurm jobfiles. Use the requested one if necessary.
             if [ "${ASKAPSOFT_VERSION}" == "" ]; then
                 askapsoftModuleCommands="${askapsoftModuleCommands}
-# Loading the default askapsoft module"
+                # Loading the default askapsoft module"
                 echo "Will use the default askapsoft module"
             else
                 askapsoftModuleCommands="${askapsoftModuleCommands}
-# Loading the requested askapsoft module"
+                # Loading the requested askapsoft module"
                 echo "Will use the askapsoft module askapsoft${ASKAPSOFT_VERSION}"
             fi
             askapsoftModuleCommands="${askapsoftModuleCommands}
@@ -142,7 +139,7 @@ module load askapdata
 module load askapsoft${ASKAPSOFT_VERSION}"
             module load askapsoft${ASKAPSOFT_VERSION}
         else
-            # askapsoft is currently available in the user's module list
+            # askapsoft is currently available in the module list
             #  If a specific version has been requested, swap to that
             #  Otherwise, do nothing
             if [ "${ASKAPSOFT_VERSION}" != "" ]; then
@@ -168,12 +165,12 @@ module load ${currentASKAPsoftVersion}"
 
         # Check for the success in loading the askapsoft module
         askapsoftModuleCommands="${askapsoftModuleCommands}
-# Exit if we couldn't load askapsoft
+# Exit if we could not load askapsoft
 if [ \"\$ASKAPSOFT_RELEASE\" == \"\" ]; then
     echo \"ERROR: \\\$ASKAPSOFT_RELEASE not available - could not load askapsoft module.\"
     exit 1
 fi"
-       
+        
         # askappipeline module
         askappipelineVersion=$(module list -t 2>&1 | grep askappipeline )
         askapsoftModuleCommands="${askapsoftModuleCommands}
@@ -182,7 +179,7 @@ module load ${askappipelineVersion}"
 
         # Check for the success in loading the askappipeline module
         askapsoftModuleCommands="${askapsoftModuleCommands}
-# Exit if we couldn't load askappipeline
+# Exit if we could not load askappipeline
 if [ \"\$PIPELINEDIR\" == \"\" ]; then
     echo \"ERROR: \\\$PIPELINEDIR not available - could not load askappipeline module.\"
     exit 1
@@ -190,7 +187,7 @@ fi"
 
     else
         askapsoftModuleCommands="${askapsoftModuleCommands}
-# Using ASKAPsoft code tree directly, so no need to load modules"
+        # Using ASKAPsoft code tree directly, so no need to load modules"
         echo "Using ASKAPsoft code direct from your code tree at ASKAP_ROOT=$ASKAP_ROOT"
         echo "ASKAPsoft modules will *not* be loaded in the slurm files."
     fi
@@ -205,18 +202,18 @@ fi"
     #  determine once. Similarly for the revision number
     #  $ACES_VERSION_USED.
     #  If USE_ACES_OPS=true then we use the acesops module, else we
-    #  point to the ACES directory defined in the user's environment,
+    #  point to the ACES directory defined in the user environment,
     #  setting the ACES_VERSION_USED variable to be the revision at the
     #  top-level directory.
     #  We also define loadACES() and unloadACES(), that set up the
     #  correct environment depending on the situation.
     
     if [ "${USE_ACES_OPS}" != "true" ] && [ "${ACES}" == "" ]; then
-        echo "WARNING - USE_ACES_OPS is not set to 'true', but ACES is not defined. Using the acesops module."
+        echo "WARNING - USE_ACES_OPS is not set to \"true\", but ACES is not defined. Using the acesops module."
         USE_ACES_OPS=true
     fi
     if [ "${USE_ACES_OPS}" != "true" ] && [ ! -d "${ACES}" ]; then
-        echo "WARNING - USE_ACES_OPS is not set to 'true', but ACES=$ACES can not be found. Using the acesops module."
+        echo "WARNING - USE_ACES_OPS is not set to \"true\", but ACES=$ACES can not be found. Using the acesops module."
         USE_ACES_OPS=true
     fi
     
@@ -250,11 +247,11 @@ fi"
         unloadACES
         ACES=${ACES_ORIGINAL}
 
-                
+        
     else
         ACES_LOCATION=${ACES}
         ACES_VERSION_USED=$(cd $ACES; svn info | grep Revision | awk '{print $2}')
-        echo "Using user's ACES directory $ACES, revision $ACES_VERSION_USED"
+        echo "Using non-module ACES directory $ACES, revision $ACES_VERSION_USED"
         function loadACES()
         {
             loadModule aces
@@ -315,7 +312,7 @@ fi"
         imageHistoryString="${imageHistoryString}, \"Processed with BPTOOL version ${BPTOOL_VERSION_USED}\""
     fi
     
-    
+
     
     #############################
     # CONVERSION TO FITS FORMAT
@@ -330,7 +327,7 @@ fi"
     # We can use the imageToFITS utility to do the conversion.
     fitsConvertText="# The following converts the file in \$casaim to a FITS file, after fixing headers.
 if [ -e \"\${casaim}\" ] && [ ! -e \"\${fitsim}\" ]; then
-    # The FITS version of this image doesn't exist
+    # The FITS version of this image does not exist
 
     cat > \"\$parset\" << EOFINNER
 ImageToFITS.casaimage = \${casaim}
@@ -583,11 +580,12 @@ EOF
             find1934MSnames
             if [ "${DO_1934_CAL}" == "true" ] && [ ! -e ${msCal} ]; then
                 echo "The MS for the calibration SB does not exist, and at least one derived MS (${msCal}) is not present."
-                echo "Turning off Bandpass Calibration processing ('DO_1934_CAL=false')"
+                echo "Turning off Bandpass Calibration processing (\"DO_1934_CAL=false\")"
                 DO_1934_CAL=false
             fi
         done
     fi
+
     # Now for the science field
     if [ "${MS_SCIENCE_MISSING}" == "true" ]; then
         # Turn off splitting
@@ -598,7 +596,7 @@ EOF
             if [ "${DO_SCIENCE_FIELD}" == "true" ]; then
                 if [ ! -e ${msSci} ] && [ ! -e ${msSciAv} ]; then
                     echo "The MS for the science field SB does not exist, and at least one beam (${BEAM}) does not have derived MSs."
-                    echo "Turning off Science Field processing ('DO_SCIENCE_FIELD=false')"
+                    echo "Turning off Science Field processing (\"DO_SCIENCE_FIELD=false\")"
                     DO_SCIENCE_FIELD=false
                 fi
             fi
@@ -718,7 +716,7 @@ EOF
         ####
         # Replace the %s wildcard with the SBID
         sedstr="s|%s|${SB_SCIENCE}|g"
-    
+        
         IMAGE_BASE_CONT=$(echo "${IMAGE_BASE_CONT}" | sed -e "$sedstr")
         IMAGE_BASE_CONTCUBE=$(echo "${IMAGE_BASE_CONTCUBE}" | sed -e "$sedstr")
         IMAGE_BASE_SPECTRAL=$(echo "${IMAGE_BASE_SPECTRAL}" | sed -e "$sedstr")
@@ -733,22 +731,22 @@ EOF
             echo "   Exiting"
             exit 1
         fi
-
-        # Switching on the DO_ALT_IMAGER_CONT flag - if it isn't
+        
+        # Switching on the DO_ALT_IMAGER_CONT flag - if it is not
         # defined in the config file, then set to the value of
-        # DO_ALT_IMAGER. 
+        # DO_ALT_IMAGER
         if [ "${DO_ALT_IMAGER}" == "true" ] && [ "${DO_ALT_IMAGER_CONT}" == "" ]; then
             DO_ALT_IMAGER_CONT=${DO_ALT_IMAGER}
         fi
-
+        
         # Total number of channels must be exact multiple of averaging width.
-        # If it isn't, report an error and exit without running anything.
+        # If it is not, report an error and exit without running anything.
         averageWidthOK=$(echo "${NUM_CHAN_SCIENCE}" "${NUM_CHAN_TO_AVERAGE}" | awk '{if (($1 % $2)==0) print "yes"; else print "no"}')
         if [ "${averageWidthOK}" == "no" ]; then
             echo "ERROR! Number of channels (${NUM_CHAN_SCIENCE}) must be an exact multiple of NUM_CHAN_TO_AVERAGE (${NUM_CHAN_TO_AVERAGE}). Exiting."
             exit 1
         fi
-
+        
         # nchanContSci = number of channels after averaging
         nchanContSci=$(echo "${NUM_CHAN_SCIENCE}" "${NUM_CHAN_TO_AVERAGE}" | awk '{print $1/$2}')
 
@@ -766,7 +764,7 @@ EOF
         if [ "${NUM_CPUS_CONTIMG_SCI}" == "" ]; then
             NUM_CPUS_CONTIMG_SCI=$(echo "$nchanContSci" "$nworkergroupsSci" | awk '{print $1*$2+1}')
             CONTIMG_CHANNEL_SELECTION="# Each worker will read a single channel selection
-Cimager.Channels                                = [1, %w]"
+                                                                                          Cimager.Channels                                = [1, %w]"
         else
             if [ "${CHANNEL_SELECTION_CONTIMG_SCI}" == "" ]; then
                 CONTIMG_CHANNEL_SELECTION="# No Channels selection performed"
@@ -776,7 +774,7 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
             fi
         fi
 
-        # Can't have -N greater than -n in the srun call
+        # Cannot have -N greater than -n in the srun call
         if [ "${NUM_CPUS_CONTIMG_SCI}" -lt "${CPUS_PER_CORE_CONT_IMAGING}" ]; then
             CPUS_PER_CORE_CONT_IMAGING=${NUM_CPUS_CONTIMG_SCI}
         fi
@@ -821,10 +819,10 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
             echo "   Exiting"
             exit 1
         fi
-
-        # Switching on the DO_ALT_IMAGER_CONTCUBE flag - if it isn't
+        
+        # Switching on the DO_ALT_IMAGER_CONTCUBE flag - if it is not
         # defined in the config file, then set to the value of
-        # DO_ALT_IMAGER. 
+        # DO_ALT_IMAGER.
         if [ "${DO_ALT_IMAGER}" == "true" ] && [ "${DO_ALT_IMAGER_CONTCUBE}" == "" ]; then
             DO_ALT_IMAGER_CONTCUBE=${DO_ALT_IMAGER}
         fi
@@ -901,7 +899,7 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
         if [ "${NUM_SPECTRAL_WRITERS_CONTCUBE}" == "" ]; then
             NUM_SPECTRAL_WRITERS_CONTCUBE=$(echo ${NUM_CPUS_CONTCUBE_SCI} | awk '{print $1-1}')
         fi
-       
+        
 
         # Define the list of writer ranks used in the askap_imager
         # spectral-line output
@@ -926,170 +924,179 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
         # Parameters required for spectral-line imaging
         ####
 
-        # Check value of IMAGETYPE - needs to be casa or fits
-        if [ "${IMAGETYPE_SPECTRAL}" != "casa" ] && [ "${IMAGETYPE_SPECTRAL}" != "fits" ]; then
-            echo "ERROR - Invalid image type \"${IMAGETYPE_SPECTRAL}\" - IMAGETYPE_SPECTRAL needs to be casa or fits"
-            echo "   Exiting"
-            exit 1
-        fi
-
-        # Switching on the DO_ALT_IMAGER_SPECTRAL flag - if it isn't
-        # defined in the config file, then set to the value of
-        # DO_ALT_IMAGER.  
-        if [ "${DO_ALT_IMAGER}" == "true" ] && [ "${DO_ALT_IMAGER_SPECTRAL}" == "" ]; then
-            DO_ALT_IMAGER_SPECTRAL=${DO_ALT_IMAGER}
-        fi
-
-        # simager is not currently able to write out FITS files. So if
-        # the user has requested FITS imagetype, but has not set the
-        # ALT_IMAGER flag, give a warning and stop to let them fix it.
-        if [ "${IMAGETYPE_SPECTRAL}" == "fits" ] && [ "${DO_ALT_IMAGER_SPECTRAL}" != "true" ]; then
-            echo "ERROR - IMAGETYPE_SPECTRAL=fits can only work with DO_ALT_IMAGER_SPECTRAL=true"
-            echo "   Exiting"
-            exit 1
-        fi
-
-        # Select correct gridding parameters, depending on snapshot status
-        if [ "${GRIDDER_SPECTRAL_WMAX}" == "" ]; then
-            if [ "${GRIDDER_SPECTRAL_SNAPSHOT_IMAGING}" == "true" ]; then
-                GRIDDER_SPECTRAL_WMAX=${GRIDDER_SPECTRAL_WMAX_SNAPSHOT}
-            else
-                GRIDDER_SPECTRAL_WMAX=${GRIDDER_SPECTRAL_WMAX_NO_SNAPSHOT}
+        if [ "${DO_SPECTRAL_IMAGING}" == "true" ]; then
+            
+            # Check value of IMAGETYPE - needs to be casa or fits
+            if [ "${IMAGETYPE_SPECTRAL}" != "casa" ] && [ "${IMAGETYPE_SPECTRAL}" != "fits" ]; then
+                echo "ERROR - Invalid image type \"${IMAGETYPE_SPECTRAL}\" - IMAGETYPE_SPECTRAL needs to be casa or fits"
+                echo "   Exiting"
+                exit 1
             fi
-        fi
-        if [ "${GRIDDER_SPECTRAL_MAXSUPPORT}" == "" ]; then
-            if [ "${GRIDDER_SPECTRAL_SNAPSHOT_IMAGING}" == "true" ]; then
-                GRIDDER_SPECTRAL_MAXSUPPORT=${GRIDDER_SPECTRAL_MAXSUPPORT_SNAPSHOT}
-            else
-                GRIDDER_SPECTRAL_MAXSUPPORT=${GRIDDER_SPECTRAL_MAXSUPPORT_NO_SNAPSHOT}
+            
+            # Switching on the DO_ALT_IMAGER_SPECTRAL flag - if it is not
+            # defined in the config file, then set to the value of
+            # DO_ALT_IMAGER.  
+            if [ "${DO_ALT_IMAGER}" == "true" ] && [ "${DO_ALT_IMAGER_SPECTRAL}" == "" ]; then
+                DO_ALT_IMAGER_SPECTRAL=${DO_ALT_IMAGER}
             fi
-        fi
 
-        # Channel range to be used for spectral-line imaging
-        # If user has requested a different channel range, and the
-        # DO_COPY_SL flag is set, then we define a new spectral-line
-        # range of channels
-        if [ "${CHAN_RANGE_SL_SCIENCE}" == "" ] ||
-               [ "${DO_COPY_SL}" != "true" ]; then
-            # If this range hasn't been set, or we aren't doing the
-            # copy, then use the full channel range
-            CHAN_RANGE_SL_SCIENCE="1-$NUM_CHAN_SCIENCE"
-        fi
-        # Check that we haven't requested invalid channels
-        minSLchan=$(echo "${CHAN_RANGE_SL_SCIENCE}" | awk -F'-' '{print $1}')
-        maxSLchan=$(echo "${CHAN_RANGE_SL_SCIENCE}" | awk -F'-' '{print $2}')
-        if [ "$minSLchan" -lt 0 ] || [ "$minSLchan" -gt "${NUM_CHAN_SCIENCE}" ] ||
-               [ "$maxSLchan" -lt 0 ] || [ "$maxSLchan" -gt "${NUM_CHAN_SCIENCE}" ] ||
-               [ "$minSLchan" -gt "$maxSLchan" ]; then
-            echo "ERROR - Invalid selection of CHAN_RANGE_SL_SCIENCE=$CHAN_RANGE_SL_SCIENCE, for total number of channels = $NUM_CHAN_SCIENCE"
-            echo "   Exiting."
-            exit 1
-        fi
-        # Define the number of channels used in the spectral-line imaging
-        NUM_CHAN_SCIENCE_SL=$(echo "${CHAN_RANGE_SL_SCIENCE}" | awk -F'-' '{print $2-$1+1}')
-
-        # Set the output frequency frame - must be one of "topo", "bary", "lsrk"
-        # If not given, default to "bary"
-        if [ "${FREQ_FRAME_SL}" == "" ]; then
-            FREQ_FRAME_SL="bary"
-        fi
-        if [ "${FREQ_FRAME_SL}" != "topo" ] ||
-               [ "${FREQ_FRAME_SL}" != "bary" ] ||
-               [ "${FREQ_FRAME_SL}" != "lsrk" ]; then
-            echo "WARNING - FREQ_FRAME_SL (${FREQ_FRAME_SL}) is not one of \"topo\" \"bary\" \"lsrk\""
-            echo "        - Setting to \"bary\""
-            FREQ_FRAME_SL="bary"
-        fi
-
-        # Catch deprecated parameter DO_BARY
-        if [ "${DO_BARY}" != "" ]; then
-            echo "WARNING - the DO_BARY parameter is deprecated. Please use FREQ_FRAME_SL instead"
-            if [ "${DO_BARY}" == "true" ]; then
-                echo "        - Setting FREQ_FRAME_SL=bary"
-                FREQ_FRAME_SL=bary
-            else
-                echo "        - Setting FREQ_FRAME_SL=topo"
-                FREQ_FRAME_SL=topo
+            # simager is not currently able to write out FITS files. So if
+            # the user has requested FITS imagetype, but has not set the
+            # ALT_IMAGER flag, give a warning and stop to let them fix it.
+            if [ "${IMAGETYPE_SPECTRAL}" == "fits" ] && [ "${DO_ALT_IMAGER_SPECTRAL}" != "true" ]; then
+                echo "ERROR - IMAGETYPE_SPECTRAL=fits can only work with DO_ALT_IMAGER_SPECTRAL=true"
+                echo "   Exiting"
+                exit 1
             fi
-        fi
 
-        
-        # if we are using the new imager we need to tweak the number of cores
-        if [ "${DO_ALT_IMAGER_SPECTRAL}" == "true" ]; then
-            if [ $((NUM_CHAN_SCIENCE_SL % NCHAN_PER_CORE_SL)) -ne 0 ]; then
-                echo "ERROR - NCHAN_PER_CORE_SL (${NCHAN_PER_CORE_SL}) does not evenly divide the number of channels (${NUM_CHAN_SCIENCE_SL})"
+            # Select correct gridding parameters, depending on snapshot status
+            if [ "${GRIDDER_SPECTRAL_WMAX}" == "" ]; then
+                if [ "${GRIDDER_SPECTRAL_SNAPSHOT_IMAGING}" == "true" ]; then
+                    GRIDDER_SPECTRAL_WMAX=${GRIDDER_SPECTRAL_WMAX_SNAPSHOT}
+                else
+                    GRIDDER_SPECTRAL_WMAX=${GRIDDER_SPECTRAL_WMAX_NO_SNAPSHOT}
+                fi
+            fi
+            if [ "${GRIDDER_SPECTRAL_MAXSUPPORT}" == "" ]; then
+                if [ "${GRIDDER_SPECTRAL_SNAPSHOT_IMAGING}" == "true" ]; then
+                    GRIDDER_SPECTRAL_MAXSUPPORT=${GRIDDER_SPECTRAL_MAXSUPPORT_SNAPSHOT}
+                else
+                    GRIDDER_SPECTRAL_MAXSUPPORT=${GRIDDER_SPECTRAL_MAXSUPPORT_NO_SNAPSHOT}
+                fi
+            fi
+            
+            # Channel range to be used for spectral-line imaging
+            # If user has requested a different channel range, and the
+            # DO_COPY_SL flag is set, then we define a new spectral-line
+            # range of channels
+            if [ "${CHAN_RANGE_SL_SCIENCE}" == "" ] || [ "${DO_COPY_SL}" != "true" ]; then
+                
+                # If this range has not been set, or we are not doing the
+                # copy, then use the full channel range
+                CHAN_RANGE_SL_SCIENCE="1-$NUM_CHAN_SCIENCE"
+
+            fi
+            
+            
+            # Check that we have not requested invalid channels
+            minSLchan=$(echo "${CHAN_RANGE_SL_SCIENCE}" | awk -F'-' '{print $1}')
+            maxSLchan=$(echo "${CHAN_RANGE_SL_SCIENCE}" | awk -F'-' '{print $2}')
+            if [ "$minSLchan" -lt 0 ] || [ "$minSLchan" -gt "${NUM_CHAN_SCIENCE}" ] ||
+                   [ "$maxSLchan" -lt 0 ] || [ "$maxSLchan" -gt "${NUM_CHAN_SCIENCE}" ] ||
+                   [ "$minSLchan" -gt "$maxSLchan" ]; then
+                echo "ERROR - Invalid selection of CHAN_RANGE_SL_SCIENCE=$CHAN_RANGE_SL_SCIENCE, for total number of channels = $NUM_CHAN_SCIENCE"
                 echo "   Exiting."
                 exit 1
             fi
-            NUM_CPUS_SPECIMG_SCI=$(echo "${NUM_CHAN_SCIENCE_SL}" "${NCHAN_PER_CORE_SL}" | awk '{print int($1/$2) + 1}')
-        fi
+            
+            # Define the number of channels used in the spectral-line imaging
+            NUM_CHAN_SCIENCE_SL=$(echo "${CHAN_RANGE_SL_SCIENCE}" | awk -F'-' '{print $2-$1+1}')
+            
+            # Set the output frequency frame - must be one of "topo", "bary", "lsrk"
+            # If not given, default to "bary"
+            if [ "${FREQ_FRAME_SL}" == "" ]; then
+                FREQ_FRAME_SL="bary"
+            fi
+            
+            if [ "${FREQ_FRAME_SL}" != "topo" ] ||
+                   [ "${FREQ_FRAME_SL}" != "bary" ] ||
+                   [ "${FREQ_FRAME_SL}" != "lsrk" ]; then
+                echo "WARNING - FREQ_FRAME_SL (${FREQ_FRAME_SL}) is not one of \"topo\" \"bary\" \"lsrk\""
+                echo "        - Setting to \"bary\""
+                FREQ_FRAME_SL="bary"
+            fi
 
-        # Can't have -N greater than -n in the srun call
-        if [ "${NUM_CPUS_SPECIMG_SCI}" -lt "${CPUS_PER_CORE_SPEC_IMAGING}" ]; then
-            CPUS_PER_CORE_SPEC_IMAGING=${NUM_CPUS_SPECIMG_SCI}
-        fi
+            # Catch deprecated parameter DO_BARY
+            if [ "${DO_BARY}" != "" ]; then
+                echo "WARNING - the DO_BARY parameter is deprecated. Please use FREQ_FRAME_SL instead"
+                if [ "${DO_BARY}" == "true" ]; then
+                    echo "        - Setting FREQ_FRAME_SL=bary"
+                    FREQ_FRAME_SL=bary
+                else
+                    echo "        - Setting FREQ_FRAME_SL=topo"
+                    FREQ_FRAME_SL=topo
+                fi
+            fi
+            
+            # if we are using the new imager we need to tweak the number of cores
+            if [ "${DO_ALT_IMAGER_SPECTRAL}" == "true" ]; then
+                if [ $((NUM_CHAN_SCIENCE_SL % NCHAN_PER_CORE_SL)) -ne 0 ]; then
+                    echo "ERROR - NCHAN_PER_CORE_SL (${NCHAN_PER_CORE_SL}) does not evenly divide the number of channels (${NUM_CHAN_SCIENCE_SL})"
+                    echo "   Exiting."
+                    exit 1
+                fi
+                NUM_CPUS_SPECIMG_SCI=$(echo "${NUM_CHAN_SCIENCE_SL}" "${NCHAN_PER_CORE_SL}" | awk '{print int($1/$2) + 1}')
+            fi
+            
+            # Cannot have -N greater than -n in the srun call
+            if [ "${NUM_CPUS_SPECIMG_SCI}" -lt "${CPUS_PER_CORE_SPEC_IMAGING}" ]; then
+                CPUS_PER_CORE_SPEC_IMAGING=${NUM_CPUS_SPECIMG_SCI}
+            fi
+            
 
+            # Deprecation warning for the specification of
+            # NUM_SPECTRAL_CUBES - this is now NUM_SPECTRAL_WRITERS
+            if [ "${NUM_SPECTRAL_CUBES}" != "" ]; then
+                echo "WARNING - the parameter NUM_SPECTRAL_CUBES is deprecated - please use NUM_SPECTRAL_WRITERS instead."
+                echo "        - Setting NUM_SPECTRAL_WRITERS=${NUM_SPECTRAL_CUBES}"
+                NUM_SPECTRAL_WRITERS=${NUM_SPECTRAL_CUBES}
+            fi
+            
+            # if NUM_SPECTRAL_WRITERS not given, set to number of workers
+            if [ "${NUM_SPECTRAL_WRITERS}" == "" ]; then
+                NUM_SPECTRAL_WRITERS=$(echo ${NUM_CPUS_SPECIMG_SCI} | awk '{print $1-1}')
+            fi
+            
+            # Reduce the number of writers to no more than the number of workers
+            if [ "${NUM_SPECTRAL_WRITERS}" -ge "${NUM_CPUS_SPECIMG_SCI}" ]; then
+                NUM_SPECTRAL_WRITERS=$(echo ${NUM_CPUS_SPECIMG_SCI} | awk '{print $1-1}')
+                echo "WARNING - Reducing NUM_SPECTRAL_WRITERS to ${NUM_SPECTRAL_WRITERS} to match number of spectral workers"
+            fi
 
-        # Deprecation warning for the specification of
-        # NUM_SPECTRAL_CUBES - this is now NUM_SPECTRAL_WRITERS
-        if [ "${NUM_SPECTRAL_CUBES}" != "" ]; then
-            echo "WARNING - the parameter NUM_SPECTRAL_CUBES is deprecated - please use NUM_SPECTRAL_WRITERS instead."
-            echo "        - Setting NUM_SPECTRAL_WRITERS=${NUM_SPECTRAL_CUBES}"
-            NUM_SPECTRAL_WRITERS=${NUM_SPECTRAL_CUBES}
-        fi
+            # Method used for continuum subtraction
+            if [ "${CONTSUB_METHOD}" != "Cmodel" ] &&
+                   [ "${CONTSUB_METHOD}" != "Components" ] &&
+                   [ "${CONTSUB_METHOD}" != "CleanModel" ]; then
+                CONTSUB_METHOD="Cmodel"
+            fi
+            
+            # Old way of choosing above
+            if [ "${BUILD_MODEL_FOR_CONTSUB}" != "" ] &&
+                   [ "${BUILD_MODEL_FOR_CONTSUB}" != "true" ]; then
+                echo "WARNING - the parameter BUILD_MODEL_FOR_CONTSUB is deprecated - please use CONTSUB_METHOD instead"
+                CONTSUB_METHOD="Cmodel"
+            fi
+            
+            if [ "${RESTORING_BEAM_LOG}" != "" ]; then
+                echo "WARNING - the parameter RESTORING_BEAM_LOG is deprecated, and is constructed from the image name instead."
+            fi
+            
+            # Script for image-based continuum subtraction
+            if [ "${SPECTRAL_IMSUB_SCRIPT}" != "robust_contsub.py" ] &&
+                   [ "${SPECTRAL_IMSUB_SCRIPT}" != "contsub_im.py" ]; then
+                SPECTRAL_IMSUB_SCRIPT="robust_contsub.py"
+            fi
+            
+            # Define the list of writer ranks used in the askap_imager
+            # spectral-line output
+            # Only define if we are using the askap_imager and not writing
+            # to a single file. Otherwise, we define a single-value list
+            # so that the loop over subbands is only done once ($subband
+            # will not be referenced in that case).
+            if [ "${DO_ALT_IMAGER_SPECTRAL}" == "true" ] && [ "${ALT_IMAGER_SINGLE_FILE}" != "true" ]; then
+                NUM_SPECTRAL_CUBES=${NUM_SPECTRAL_WRITERS}
+                nworkers=$(echo "${NUM_CHAN_SCIENCE_SL}" "${NCHAN_PER_CORE_SL}" | awk '{print int($1/$2)}')
+                writerIncrement=$(echo "$nworkers" "${NUM_SPECTRAL_CUBES}" | awk '{print int($1/$2)}')
+                SUBBAND_WRITER_LIST=$(seq 1 "$writerIncrement" "$nworkers")
+                unset nworkers
+                unset writerIncrement
+            else
+                SUBBAND_WRITER_LIST=1
+                NUM_SPECTRAL_CUBES=1
+            fi
 
-        # if NUM_SPECTRAL_WRITERS not given, set to number of workers
-        if [ "${NUM_SPECTRAL_WRITERS}" == "" ]; then
-            NUM_SPECTRAL_WRITERS=$(echo ${NUM_CPUS_SPECIMG_SCI} | awk '{print $1-1}')
         fi
         
-        # Reduce the number of writers to no more than the number of workers
-        if [ "${NUM_SPECTRAL_WRITERS}" -ge "${NUM_CPUS_SPECIMG_SCI}" ]; then
-            NUM_SPECTRAL_WRITERS=$(echo ${NUM_CPUS_SPECIMG_SCI} | awk '{print $1-1}')
-            echo "WARNING - Reducing NUM_SPECTRAL_WRITERS to ${NUM_SPECTRAL_WRITERS} to match number of spectral workers"
-        fi
-
-        # Method used for continuum subtraction
-        if [ "${CONTSUB_METHOD}" != "Cmodel" ] &&
-               [ "${CONTSUB_METHOD}" != "Components" ] &&
-               [ "${CONTSUB_METHOD}" != "CleanModel" ]; then
-            CONTSUB_METHOD="Cmodel"
-        fi
-        # Old way of choosing above
-        if [ "${BUILD_MODEL_FOR_CONTSUB}" != "" ] &&
-               [ "${BUILD_MODEL_FOR_CONTSUB}" != "true" ]; then
-            echo "WARNING - the parameter BUILD_MODEL_FOR_CONTSUB is deprecated - please use CONTSUB_METHOD instead"
-            CONTSUB_METHOD="Cmodel"
-        fi
-
-        if [ "${RESTORING_BEAM_LOG}" != "" ]; then
-            echo "WARNING - the parameter RESTORING_BEAM_LOG is deprecated, and is constructed from the image name instead."
-        fi
-
-        # Script for image-based continuum subtraction
-        if [ "${SPECTRAL_IMSUB_SCRIPT}" != "robust_contsub.py" ] &&
-               [ "${SPECTRAL_IMSUB_SCRIPT}" != "contsub_im.py" ]; then
-            SPECTRAL_IMSUB_SCRIPT="robust_contsub.py"
-        fi
-
-        # Define the list of writer ranks used in the askap_imager
-        # spectral-line output
-        # Only define if we are using the askap_imager and not writing
-        # to a single file. Otherwise, we define a single-value list
-        # so that the loop over subbands is only done once ($subband
-        # will not be referenced in that case).
-        if [ "${DO_ALT_IMAGER_SPECTRAL}" == "true" ] && [ "${ALT_IMAGER_SINGLE_FILE}" != "true" ]; then
-            NUM_SPECTRAL_CUBES=${NUM_SPECTRAL_WRITERS}
-            nworkers=$(echo "${NUM_CHAN_SCIENCE_SL}" "${NCHAN_PER_CORE_SL}" | awk '{print int($1/$2)}')
-            writerIncrement=$(echo "$nworkers" "${NUM_SPECTRAL_CUBES}" | awk '{print int($1/$2)}')
-            SUBBAND_WRITER_LIST=$(seq 1 "$writerIncrement" "$nworkers")
-            unset nworkers
-            unset writerIncrement
-        else
-            SUBBAND_WRITER_LIST=1
-            NUM_SPECTRAL_CUBES=1
-        fi
-
         ####################
         # Mosaicking parameters
 
@@ -1101,13 +1108,13 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
             LINMOS_SINGLE_FIELD_WEIGHTTYPE="Combined"
         fi
         
-        # Fix the direction string for linmos - don't need the J2000 bit
+        # Fix the direction string for linmos - do not need the J2000 bit
         linmosFeedCentre=$(echo "${DIRECTION_SCI}" | awk -F',' '{printf "%s,%s]",$1,$2}')
 
         # Total number of channels should be exact multiple of
         # channels-per-core, else the final process will take care of
         # the rest and may run out of memory
-        # If it isn't, give a warning and push on
+        # If it is not, give a warning and push on
         chanPerCoreLinmosOK=$(echo "${NUM_CHAN_SCIENCE_SL}" "${NUM_SPECTRAL_CUBES}" "${NCHAN_PER_CORE_SPECTRAL_LINMOS}" | awk '{if (($1/$2 % $3)==0) print "yes"; else print "no"}')
         if [ "${chanPerCoreLinmosOK}" == "no" ] && [ "${DO_MOSAIC}" == "true" ]; then
             echo "WARNING - Number of spectral-line channels (${NUM_CHAN_SCIENCE_SL}) is not an exact multiple of NCHAN_PER_CORE_SPECTRAL_LINMOS (${NCHAN_PER_CORE_SPECTRAL_LINMOS})."
@@ -1164,7 +1171,7 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
             CPUS_PER_CORE_SELAVY=${NUM_CPUS_SELAVY}
         fi
 
-        # If the sourcefinding flag has been set, but we aren't
+        # If the sourcefinding flag has been set, but we are not
         # mosaicking, turn on the beam-wise sourcefinding flag
         if [ "${DO_SOURCE_FINDING_CONT}" == "true" ] && [ "${DO_MOSAIC}" != "true" ]; then
             DO_SOURCE_FINDING_BEAMWISE=true
@@ -1178,7 +1185,7 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
         fi
 
         # The cutoff level for the weights. Allow this to be
-        # specified, but if it isn't then we use the square of the
+        # specified, but if it is not then we use the square of the
         # value used in the linmos
         if [ "${SELAVY_WEIGHTS_CUTOFF}" == "" ]; then
             SELAVY_WEIGHTS_CUTOFF=$(echo ${LINMOS_CUTOFF} | awk '{print $1*$1}')
@@ -1203,7 +1210,7 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
             done
             if [ "$haveI" != "true" ] || [ "$haveQ" != "true" ] || [ "$haveU" != "true" ]; then
                 if [ "${DO_RM_SYNTHESIS}" == "true" ]; then
-                    echo "Warning - List of polarisations provided (${CONTCUBE_POLARISATIONS}) doesn't have I,Q,U"
+                    echo "Warning - List of polarisations provided (${CONTCUBE_POLARISATIONS}) does not have I,Q,U"
                     echo "        - turning off RM Synthesis"
                 fi
                 DO_RM_SYNTHESIS=false
@@ -1248,7 +1255,7 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
         fi
 
         # The cutoff level for the weights. Allow this to be
-        # specified, but if it isn't then we use the square of the
+        # specified, but if it is not then we use the square of the
         # value used in the linmos
         if [ "${SELAVY_SPEC_WEIGHTS_CUTOFF}" == "" ]; then
             SELAVY_SPEC_WEIGHTS_CUTOFF=$(echo ${LINMOS_CUTOFF} | awk '{print $1*$1}')
@@ -1287,7 +1294,7 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
                 SELAVY_SPEC_KERN_PA=${kernelArray[2]}
             else
                 echo "WARNING - badly formed parameter SELAVY_SPEC_SPATIAL_KERNEL=${SELAVY_SPEC_SPATIAL_KERNEL}"
-                echo "        - turning off Selavy's spatial smoothing."
+                echo "        - turning off the spatial smoothing in Selavy."
                 SELAVY_SPEC_FLAG_SMOOTH=false
             fi
         fi
@@ -1663,5 +1670,5 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
         fi
 
     fi
-
+    
 fi
