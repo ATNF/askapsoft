@@ -5,7 +5,7 @@ This page summarises the key changes in each tagged release of
 ASKAPsoft. This replicates the CHANGES file that is included in the
 code base.
 
-0.24.0 (12 April 2019)
+0.24.0 (16 April 2019)
 ---------------------
 
 A major release, with an improved framework for the pipeline scripts
@@ -60,6 +60,12 @@ Pipelines:
    CLEAN_THRESHOLD_MINORCYCLE. The last two parameters can have
    vectors for individual loops, and so this necessitates a new
    format, whereindividual loops are separated by ' ; '.
+ * Overall control over the spectral processing is now provided by
+   DO_SPECTRAL_PROCESSING. This defaults to false, meaning only the
+   continuum processing will be done. Turning this to true will result
+   in application of the selfcal gains, continuum subtraction,
+   spectral imaging and image-based continuum subtraction being done -
+   each of these are turned on by default.
  * Elevation-based flagging for the science observation is able to be
    configured through the pipeline parameters.
  * There are parameters to specify a given range of times to be used
@@ -98,6 +104,7 @@ Pipelines:
    - ELEVATION_FLAG_SCIENCE_HIGH=""
    - OUTPUT_CHANNELS_SL=""
    - FREQ_FRAME_SL=bary
+   - DO_SPECTRAL_PROCESSING=true
 
  * There are new default values for some pipeline parameters:
 
@@ -131,6 +138,8 @@ Pipelines:
    - TILENCHAN_SL=18
    - DO_APPLY_CAL_SL=true
    - DO_CONT_SUB_SL=true
+   - DO_SPECTRAL_IMAGING=true
+   - DO_SPECTRAL_IMSUB=true
    - NUM_PIXELS_SPECTRAL=1024
    - CELLSIZE_SPECTRAL=8
    - SPECTRAL_IMAGE_MAXUV=2000
