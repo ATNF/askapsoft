@@ -106,11 +106,3 @@ set (_modules askapparallel)
 foreach (module ${_modules})
 	add_subdirectory(${module})
 endforeach (module)
-install (
-TARGETS askap_askapparallel
-RUNTIME DESTINATION bin
-LIBRARY DESTINATION lib
-ARCHIVE DESTINATION lib
-LIBRARY PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-)
-
