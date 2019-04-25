@@ -76,27 +76,13 @@ endif(ENABLE_SHARED)
 
 # include directories
 include_directories( ${CMAKE_SOURCE_DIR} )
-if (Boost_FOUND)
-    include_directories (${Boost_INCLUDE_DIRS})
-    add_definitions(-DHAVE_BOOST)
-endif (Boost_FOUND)
-if (log4cxx_FOUND)
-    include_directories(${log4cxx_INCLUDE_DIRS})
-    add_definitions(-DHAVE_LOG4CXX)
-endif(log4cxx_FOUND)
-
-if (ASKAP_FOUND)
-	include_directories(${ASKAP_INCLUDE_DIRS})
-endif(ASKAP_FOUND)
-
-if (LofarBlob_FOUND)
-	include_directories(${LofarBlob_INCLUDE_DIRS})
-endif(LofarBlob_FOUND)
-
-
-if (CASACORE_FOUND)
-	include_directories(${CASACORE_INCLUDE_DIRS})
-endif(CASACORE_FOUND)
+include_directories (${Boost_INCLUDE_DIRS})
+add_definitions(-DHAVE_BOOST)
+include_directories(${log4cxx_INCLUDE_DIRS})
+add_definitions(-DHAVE_LOG4CXX)
+include_directories(${ASKAP_INCLUDE_DIRS})
+include_directories(${LofarBlob_INCLUDE_DIRS})
+include_directories(${CASACORE_INCLUDE_DIRS})
 
 set (_modules askapparallel)
 
