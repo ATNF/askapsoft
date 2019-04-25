@@ -5,7 +5,17 @@ include(CheckCXXCompilerFlag)
 include(CheckCCompilerFlag)
 
 
-set (CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/askap-cmake)
+    execute_process(COMMAND git pull 
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/askap-cmake)
+else ()	
+    execute_process(COMMAND git clone https://ord006@bitbucket.csiro.au/scm/askapsdp/askap-cmake.git
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+endif ()
+
+
+set (CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/askap-cmake")
+
 
 set(PROJECT_VERSION_MAJOR 0)
 set(PROJECT_VERSION_MINOR 0)
