@@ -33,7 +33,7 @@ option (ENABLE_RPATH "Include rpath in executables and shared libraries" YES)
 
 # find packages
 #find_package(Boost REQUIRED)
-find_package(LOFAR REQUIRED)
+find_package(LofarBlob REQUIRED)
 find_package(Askap REQUIRED)
 
 find_package(log4cxx REQUIRED)
@@ -80,9 +80,9 @@ if (ASKAP_FOUND)
 	include_directories(${ASKAP_INCLUDE_DIRS})
 endif(ASKAP_FOUND)
 
-if (LOFAR_BLOB_FOUND)
-	include_directories(${LOFAR_BLOB_INCLUDE_DIRS})
-endif(LOFAR_BLOB_FOUND)
+if (LofarBlob_FOUND)
+	include_directories(${LofarBlob_INCLUDE_DIRS})
+endif(LofarBlob_FOUND)
 
 
 if (CASACORE_FOUND)

@@ -21,5 +21,6 @@ target_link_libraries (
 	${CASACORE_LIBRARIES}
 	${log4cxx_LIBRARY}
 	${ASKAP_LIBRARY}
+	${LofarBlob_LIBRARY}
 )
 
