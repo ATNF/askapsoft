@@ -6,10 +6,10 @@
 
 #include <utils/ImagemathUtils.h>
 
-casa::MVDirection convertDir(const std::string &ra, const std::string &dec) {
-    casa::Quantity tmpra,tmpdec;
-    casa::Quantity::read(tmpra, ra);
-    casa::Quantity::read(tmpdec,dec);
-    return casa::MVDirection(tmpra,tmpdec);
+casacore::MVDirection convertDir(const std::string &ra, const std::string &dec) {
+    casacore::Quantity tmpra,tmpdec;
+    casacore::Quantity::read(tmpra, ra);
+    casacore::Quantity::read(tmpdec,dec);
+    return casacore::MVDirection(tmpra,tmpdec);
 }
 

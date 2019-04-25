@@ -89,10 +89,10 @@ namespace askap {
         template<typename T>
         bool LinmosAccumulator<T>::loadParset(const LOFAR::ParameterSet &parset) {
 
-            const vector<string> inImgNames = parset.getStringVector("names", true);
-            const vector<string> inWgtNames = parset.getStringVector("weights", vector<string>(), true);
-            const string weightTypeName = parset.getString("weighttype");
-            const string weightStateName = parset.getString("weightstate", "Corrected");
+            const std::vector<std::string> inImgNames = parset.getStringVector("names", true);
+            const std::vector<std::string> inWgtNames = parset.getStringVector("weights", std::vector<std::string>(), true);
+            const std::string weightTypeName = parset.getString("weighttype");
+            const std::string weightStateName = parset.getString("weightstate", "Corrected");
 
             const bool findMosaics = parset.getBool("findmosaics", false);
 
@@ -138,8 +138,8 @@ namespace askap {
 
             } else {
 
-                string outImgName = parset.getString("outname");
-                string outWgtName = parset.getString("outweight");
+                std::string outImgName = parset.getString("outname");
+                std::string outWgtName = parset.getString("outweight");
 
                 // If reading weights from images, check the input for those
                 if (itsWeightType == FROM_WEIGHT_IMAGES || itsWeightType == COMBINED) {
@@ -222,13 +222,13 @@ namespace askap {
         }
 
         template<typename T>
-        void LinmosAccumulator<T>::setSingleMosaic(const vector<string> &inImgNames,
-                                                   const vector<string> &inWgtNames,
-                                                   const string &outImgName,
-                                                   const string &outWgtName) {
+        void LinmosAccumulator<T>::setSingleMosaic(const std::vector<std::string> &inImgNames,
+                                                   const std::vector<std::string> &inWgtNames,
+                                                   const std::string &outImgName,
+                                                   const std::string &outWgtName) {
 
             // set some variables for the sensitivity image searches
-            string image_tag = "image", restored_tag = ".restored", tmpName;
+            std::string image_tag = "image", restored_tag = ".restored", tmpName;
             // set false if any sensitivity images are missing or if not an image* mosaic
             itsDoSensitivity = true;
 
@@ -248,7 +248,7 @@ namespace askap {
                         tmpName.replace(image_pos, image_tag.length(), "sensitivity");
                         // remove any ".restored" sub-string from the file name
                         size_t restored_pos = tmpName.find(restored_tag);
-                        if (restored_pos != string::npos) {
+                        if (restored_pos != std::string::npos) {
                             tmpName.replace(restored_pos, restored_tag.length(), "");
                         }
                         if (boost::filesystem::exists(tmpName)) {
@@ -280,7 +280,7 @@ namespace askap {
                 tmpName.replace(0, image_tag.length(), "sensitivity");
                 // remove any ".restored" sub-string from the weights file name
                 size_t restored_pos = tmpName.find(restored_tag);
-                if (restored_pos != string::npos) {
+                if (restored_pos != std::string::npos) {
                     tmpName.replace(restored_pos, restored_tag.length(), "");
                 }
                 itsOutSenNames[outImgName] = tmpName;
@@ -295,30 +295,30 @@ namespace askap {
         } // LinmosAccumulator<T>::setSingleMosaic()
 
         template<typename T>
-        void LinmosAccumulator<T>::findAndSetTaylorTerms(const vector<string> &inImgNames,
-                                                         const vector<string> &inWgtNames,
-                                                         const string &outImgNameOrig,
-                                                         const string &outWgtNameOrig) {
+        void LinmosAccumulator<T>::findAndSetTaylorTerms(const std::vector<std::string> &inImgNames,
+                                                         const std::vector<std::string> &inWgtNames,
+                                                         const std::string &outImgNameOrig,
+                                                         const std::string &outWgtNameOrig) {
 
             ASKAPLOG_INFO_STR(linmoslogger, "Looking for "<<itsNumTaylorTerms<<" taylor terms");
             ASKAPCHECK(itsNumTaylorTerms>=0, "Number of taylor terms should be greater than or equal to 0");
 
             size_t pos0, pos1;
             pos0 = outImgNameOrig.find(itsTaylorTag);
-            ASKAPCHECK(pos0!=string::npos, "Cannot find "<<itsTaylorTag<<" in output file "<<outImgNameOrig);
+            ASKAPCHECK(pos0!=std::string::npos, "Cannot find "<<itsTaylorTag<<" in output file "<<outImgNameOrig);
             pos1 = outImgNameOrig.find(itsTaylorTag, pos0+1); // make sure there aren't multiple entries.
-            ASKAPCHECK(pos1==string::npos,
+            ASKAPCHECK(pos1==std::string::npos,
                 "There are multiple  "<<itsTaylorTag<<" strings in output file "<<outImgNameOrig);
 
             // set some variables for the sensitivity image searches
-            string image_tag = "image", restored_tag = ".restored", tmpName;
+            std::string image_tag = "image", restored_tag = ".restored", tmpName;
             itsDoSensitivity = true; // set false if any sensitivity images are missing or if not an image* mosaic
 
             for (int n = 0; n < itsNumTaylorTerms; ++n) {
 
-                string outImgName = outImgNameOrig;
-                string outWgtName = outWgtNameOrig;
-                const string taylorN = "taylor." + boost::lexical_cast<string>(n);
+                std::string outImgName = outImgNameOrig;
+                std::string outWgtName = outWgtNameOrig;
+                const std::string taylorN = "taylor." + boost::lexical_cast<std::string>(n);
 
                 // set a new key for the various output file-name maps
                 outImgName.replace(outImgName.find(itsTaylorTag), itsTaylorTag.length(), taylorN);
@@ -328,11 +328,11 @@ namespace askap {
                 for (uint img = 0; img < inImgNames.size(); ++img) {
 
                     // do some tests
-                    string inImgName = inImgNames[img]; // short cut
+                    std::string inImgName = inImgNames[img]; // short cut
                     pos0 = inImgName.find(itsTaylorTag);
-                    ASKAPCHECK(pos0!=string::npos, "Cannot find "<<itsTaylorTag<<" in input file "<<inImgName);
+                    ASKAPCHECK(pos0!=std::string::npos, "Cannot find "<<itsTaylorTag<<" in input file "<<inImgName);
                     pos1 = inImgName.find(itsTaylorTag, pos0+1); // make sure there aren't multiple entries.
-                    ASKAPCHECK(pos1==string::npos,
+                    ASKAPCHECK(pos1==std::string::npos,
                         "There are multiple "<<itsTaylorTag<<" strings in input file "<<inImgName);
 
                     // set a new key for the input file-name-vector map
@@ -345,12 +345,12 @@ namespace askap {
 
                     if (itsWeightType == FROM_WEIGHT_IMAGES || itsWeightType == COMBINED) {
                         // do some tests
-                        string inWgtName = inWgtNames[img]; // short cut
+                        std::string inWgtName = inWgtNames[img]; // short cut
                         pos0 = inWgtName.find(itsTaylorTag);
-                        ASKAPCHECK(pos0!=string::npos,
+                        ASKAPCHECK(pos0!=std::string::npos,
                         "Cannot find "<<itsTaylorTag<< " in input weight file "<<inWgtName);
                         pos1 = inWgtName.find(itsTaylorTag, pos0+1); // make sure there aren't multiple entries.
-                        ASKAPCHECK(pos1==string::npos, "There are multiple " << itsTaylorTag <<
+                        ASKAPCHECK(pos1==std::string::npos, "There are multiple " << itsTaylorTag <<
                                                        " strings in input file "<<inWgtName);
 
                         // set a new key for the input weights file-name-vector map
@@ -371,7 +371,7 @@ namespace askap {
                             tmpName.replace(image_pos, image_tag.length(), "sensitivity");
                             // remove any ".restored" sub-string from the file name
                             size_t restored_pos = tmpName.find(restored_tag);
-                            if (restored_pos != string::npos) {
+                            if (restored_pos != std::string::npos) {
                                 tmpName.replace(restored_pos, restored_tag.length(), "");
                             }
                             if (boost::filesystem::exists(tmpName)) {
@@ -399,7 +399,7 @@ namespace askap {
                     tmpName.replace(0, image_tag.length(), "sensitivity");
                     // remove any ".restored" sub-string from the weights file name
                     size_t restored_pos = tmpName.find(restored_tag);
-                    if (restored_pos != string::npos) {
+                    if (restored_pos != std::string::npos) {
                         tmpName.replace(restored_pos, restored_tag.length(), "");
                     }
                     itsOutSenNames[outImgName] = tmpName;
@@ -535,9 +535,9 @@ namespace askap {
 #endif
         } // removeBeamFromTaylorTerms()
         template<typename T>
-        void LinmosAccumulator<T>::findAndSetMosaics(const vector<string> &imageTags) {
+        void LinmosAccumulator<T>::findAndSetMosaics(const std::vector<std::string> &imageTags) {
 
-            vector<string> prefixes;
+            std::vector<std::string> prefixes;
             prefixes.push_back("image");
             prefixes.push_back("residual");
             //prefixes.push_back("weights"); // these need to be handled separately
@@ -547,7 +547,7 @@ namespace askap {
             // if this directory name changes from "./", the erase call below may also need to change
             boost::filesystem::path p (".");
 
-            typedef vector<boost::filesystem::path> path_vec;
+            typedef std::vector<boost::filesystem::path> path_vec;
             path_vec v;
 
             copy(boost::filesystem::directory_iterator(p),
@@ -555,12 +555,12 @@ namespace askap {
 
             // find mosaics by looking for images that contain one of the tags.
             // Then see which of those contain all tags.
-            const string searchTag = imageTags[0];
+            const std::string searchTag = imageTags[0];
 
             for (path_vec::const_iterator it (v.begin()); it != v.end(); ++it) {
 
                 // set name of the current file name and remove "./"
-                string name = it->string();
+                std::string name = it->string();
                 name.erase(0,2);
 
                 // make sure this is a directory
@@ -572,19 +572,19 @@ namespace askap {
 
                 // see if the name contains the desired tag (i.e., contains the first tag in "names")
                 size_t pos = name.find(searchTag);
-                if (pos == string::npos) {
+                if (pos == std::string::npos) {
                     //ASKAPLOG_INFO_STR(linmoslogger, name << " is not a match. Ignoring.");
                     continue;
                 }
 
                 // set some variables for problem sub-strings
-                string restored_tag = ".restored";
+                std::string restored_tag = ".restored";
                 size_t restored_pos;
 
                 // see if the name contains a desired prefix, and if so, check the other input names and weights
                 int full_set = 0, full_wgt_set = 0;
-                string mosaicName = name, nextName = name, tmpName;
-                for (vector<string>::const_iterator pre (prefixes.begin()); pre != prefixes.end(); ++pre) {
+                std::string mosaicName = name, nextName = name, tmpName;
+                for (std::vector<std::string>::const_iterator pre (prefixes.begin()); pre != prefixes.end(); ++pre) {
                     if (name.find(*pre) == 0) {
 
                         // both of these must remain set to 1 for this mosaic to be established
@@ -616,7 +616,7 @@ namespace askap {
                             tmpName.replace(0, (*pre).length(), "sensitivity");
                             // remove any ".restored" sub-string from the weights file name
                             restored_pos = tmpName.find(restored_tag);
-                            if (restored_pos != string::npos) {
+                            if (restored_pos != std::string::npos) {
                                 tmpName.replace(restored_pos, restored_tag.length(), "");
                             }
                             if (boost::filesystem::exists(tmpName)) {
@@ -630,7 +630,7 @@ namespace askap {
                                 nextName.replace(0, (*pre).length(), "weights");
                                 // remove any ".restored" sub-string from the weights file name
                                 restored_pos = nextName.find(restored_tag);
-                                if (restored_pos != string::npos) {
+                                if (restored_pos != std::string::npos) {
                                     nextName.replace(restored_pos, restored_tag.length(), "");
                                 }
                                 // check that the file exists
@@ -650,7 +650,7 @@ namespace askap {
                         nextName.replace(0, (*pre).length(), "weights");
                         // remove any ".restored" sub-string from the weights file name
                         restored_pos = nextName.find(restored_tag);
-                        if (restored_pos != string::npos) {
+                        if (restored_pos != std::string::npos) {
                             nextName.replace(restored_pos, restored_tag.length(), "");
                         }
                         itsOutWgtNames[mosaicName] = nextName;
@@ -664,7 +664,7 @@ namespace askap {
                                 tmpName.replace(0, (*pre).length(), "sensitivity");
                                 // remove any ".restored" sub-string from the weights file name
                                 restored_pos = tmpName.find(restored_tag);
-                                if (restored_pos != string::npos) {
+                                if (restored_pos != std::string::npos) {
                                     tmpName.replace(restored_pos, restored_tag.length(), "");
                                 }
                                 itsOutSenNames[mosaicName] = tmpName;
@@ -728,9 +728,9 @@ namespace askap {
                 // (e.g. for image.* and residual.*).
                 // Check that the input is the same for these duplicates, and then only write once
                 // if this is common, we should be avoiding more that just duplicate output.
-                string mosaicOrig;
+                std::string mosaicOrig;
                 itsOutWgtDuplicates[mosaicName] = false;
-                for(map<string,string>::iterator ii=itsOutWgtNames.begin();
+                for(std::map<std::string,std::string>::iterator ii=itsOutWgtNames.begin();
                     ii!=itsOutWgtNames.find(mosaicName); ++ii) {
                     if (itsOutWgtNames[mosaicName].compare((*ii).second) == 0) {
                         itsOutWgtDuplicates[mosaicName] = true;
@@ -741,7 +741,7 @@ namespace askap {
 
                 // if this is a duplicate, just remove it. Can't with weights because we need them unaveraged
                 if (itsOutSenNames.find(mosaicName)!=itsOutSenNames.end()) {
-                    for(map<string,string>::iterator ii=itsOutSenNames.begin();
+                    for(std::map<std::string,std::string>::iterator ii=itsOutSenNames.begin();
                         ii!=itsOutSenNames.find(mosaicName); ++ii) {
                         if (itsOutSenNames[mosaicName].compare((*ii).second) == 0) {
                             ASKAPLOG_INFO_STR(linmoslogger,
@@ -796,8 +796,8 @@ namespace askap {
         }
 
         template<typename T>
-        void LinmosAccumulator<T>::setOutputParameters(const vector<IPosition>& inShapeVec,
-                                                       const vector<CoordinateSystem>& inCoordSysVec) {
+        void LinmosAccumulator<T>::setOutputParameters(const std::vector<IPosition>& inShapeVec,
+                                                       const std::vector<CoordinateSystem>& inCoordSysVec) {
 
             ASKAPLOG_INFO_STR(linmoslogger, "Determining output image based on the overlap of input images");
             ASKAPCHECK(inShapeVec.size()==inCoordSysVec.size(), "Input vectors are inconsistent");
@@ -1731,8 +1731,8 @@ namespace askap {
             ASKAPCHECK(success,
                 "World to pixel coordinate conversion failed for output BLC: "
                 << refDC.errorMessage());
-            blc[0] = casa::Int(round(pix[0]));
-            blc[1] = casa::Int(round(pix[1]));
+            blc[0] = casacore::Int(round(pix[0]));
+            blc[1] = casacore::Int(round(pix[1]));
 
             // now process TRC
             pix[0] = Double(trc[0]);
@@ -1745,8 +1745,8 @@ namespace askap {
             ASKAPCHECK(success,
                 "World to pixel coordinate conversion failed for output TRC: "
                 << refDC.errorMessage());
-            trc[0] = casa::Int(round(pix[0]));
-            trc[1] = casa::Int(round(pix[1]));
+            trc[0] = casacore::Int(round(pix[0]));
+            trc[1] = casacore::Int(round(pix[1]));
 
             // now process TLC
             pix[0] = Double(tlc[0]);
@@ -1801,7 +1801,7 @@ namespace askap {
                 ASKAPLOG_INFO_STR(linmoslogger,
                     "Coordinates are not consistent: axis name mismatch");
 
-                for (casa::uInt dim=0; dim<coordSys1.nCoordinates(); ++dim) {
+                for (casacore::uInt dim=0; dim<coordSys1.nCoordinates(); ++dim) {
                     ASKAPLOG_INFO_STR(linmoslogger,
                       "Axis " << dim << ":" << coordSys1.worldAxisNames()[dim] << " == " << coordSys2.worldAxisNames()[dim] );
                 }
@@ -1856,7 +1856,7 @@ namespace askap {
             // test that the axes are equal
             ASKAPLOG_INFO_STR(linmoslogger,
               "nCoordinates: " << coordSys1.nCoordinates());
-            for (casa::uInt dim=0; dim<coordSys1.nCoordinates(); ++dim) {
+            for (casacore::uInt dim=0; dim<coordSys1.nCoordinates(); ++dim) {
                 ASKAPLOG_INFO_STR(linmoslogger,
                    "Reference pixels are : " << coordSys1.referencePixel()[dim] << " == " << coordSys2.referencePixel()[dim] );
 

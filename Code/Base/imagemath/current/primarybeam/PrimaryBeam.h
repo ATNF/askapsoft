@@ -42,7 +42,7 @@ namespace askap
 
             virtual double evaluateAtOffset(double offsetPA, double offsetDist, double frequency) = 0;
 
-            virtual casa::Matrix<casa::Complex> getJonesAtOffset(double offset, double frequency) = 0;
+            virtual casacore::Matrix<casacore::Complex> getJonesAtOffset(double offset, double frequency) = 0;
 
         private:
 

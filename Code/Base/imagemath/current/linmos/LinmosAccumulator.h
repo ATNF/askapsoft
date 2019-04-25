@@ -40,7 +40,7 @@
 #include <primarybeam/PrimaryBeam.h>
 
 
-using namespace casa;
+using namespace casacore;
 
 namespace askap {
 
@@ -68,9 +68,9 @@ namespace askap {
                 /// @param[in] const vector<string> &inWgtNames : vector of weight images, if required
                 /// @param[in] const string &outImgName : output mosaic image name
                 /// @param[in] const string &outWgtName : output mosaic weight image name
-                void setSingleMosaic(const vector<string> &inImgNames,
-                                     const vector<string> &inWgtNames,
-                                     const string &outImgName, const string &outWgtName);
+                void setSingleMosaic(const std::vector<std::string> &inImgNames,
+                                     const std::vector<std::string> &inWgtNames,
+                                     const std::string &outImgName, const std::string &outWgtName);
 
 
                 /// @brief set up a single mosaic for each taylor term
@@ -78,10 +78,10 @@ namespace askap {
                 /// @param[in] const vector<string> &inWgtNames : vector of weight images, if required
                 /// @param[in] const string &outImgName : output mosaic image name
                 /// @param[in] const string &outWgtName : output mosaic weight image name
-                void findAndSetTaylorTerms(const vector<string> &inImgNames,
-                                           const vector<string> &inWgtNames,
-                                           const string &outImgName,
-                                           const string &outWgtName);
+                void findAndSetTaylorTerms(const std::vector<std::string> &inImgNames,
+                                           const std::vector<std::string> &inWgtNames,
+                                           const std::string &outImgName,
+                                           const std::string &outWgtName);
 
                 /// @brief if the images have not been corrected for the primary
                 /// beam they still contain the spectral structure of the primary
@@ -104,7 +104,7 @@ namespace askap {
                 /// @details based on a vector of image tags, look for sets of images with names
                 ///     that contain all tags but are otherwise equal and contain an allowed prefix.
                 /// @param[in] const vector<string> &imageTags : vector of image tags
-                void findAndSetMosaics(const vector<string> &imageTags);
+                void findAndSetMosaics(const std::vector<std::string> &imageTags);
 
                 /// @brief test whether the output buffers are empty and need initialising
                 /// @return bool
@@ -242,17 +242,17 @@ namespace askap {
                 int numTaylorTerms(void) {return itsNumTaylorTerms;}
                 bool doSensitivity(void) {return itsDoSensitivity;}
                 void doSensitivity(bool value) {itsDoSensitivity = value;}
-                string taylorTag(void) {return itsTaylorTag;}
+                std::string taylorTag(void) {return itsTaylorTag;}
 
                 void beamCentres(Vector<MVDirection> centres) {itsCentres = centres;}
 
-                map<string,string> outWgtNames(void) {return itsOutWgtNames;}
-                map<string,string> outSenNames(void) {return itsOutSenNames;}
-                map<string,vector<string> > inImgNameVecs(void) {return itsInImgNameVecs;}
-                map<string,vector<string> > inWgtNameVecs(void) {return itsInWgtNameVecs;}
-                map<string,vector<string> > inSenNameVecs(void) {return itsInSenNameVecs;}
-                map<string,bool> outWgtDuplicates(void) {return itsOutWgtDuplicates;}
-                map<string,bool> genSensitivityImage(void) {return itsGenSensitivityImage;}
+                std::map<std::string,std::string> outWgtNames(void) {return itsOutWgtNames;}
+                std::map<std::string,std::string> outSenNames(void) {return itsOutSenNames;}
+                std::map<std::string,std::vector<std::string> > inImgNameVecs(void) {return itsInImgNameVecs;}
+                std::map<std::string,std::vector<std::string> > inWgtNameVecs(void) {return itsInWgtNameVecs;}
+                std::map<std::string,std::vector<std::string> > inSenNameVecs(void) {return itsInSenNameVecs;}
+                std::map<std::string,bool> outWgtDuplicates(void) {return itsOutWgtDuplicates;}
+                std::map<std::string,bool> genSensitivityImage(void) {return itsGenSensitivityImage;}
 
                 bool setDefaultPB();
 
@@ -300,16 +300,16 @@ namespace askap {
                 MVDirection itsInCentre;
 
                 // Set some objects to support multiple mosaics.
-                const string itsMosaicTag;
-                const string itsTaylorTag;
+                const std::string itsMosaicTag;
+                const std::string itsTaylorTag;
 
-                map<string,string> itsOutWgtNames;
-                map<string,string> itsOutSenNames;
-                map<string,vector<string> > itsInImgNameVecs;
-                map<string,vector<string> > itsInWgtNameVecs;
-                map<string,vector<string> > itsInSenNameVecs;
-                map<string,bool> itsOutWgtDuplicates;
-                map<string,bool> itsGenSensitivityImage;
+                std::map<std::string,std::string> itsOutWgtNames;
+                std::map<std::string,std::string> itsOutSenNames;
+                std::map<std::string,std::vector<std::string> > itsInImgNameVecs;
+                std::map<std::string,std::vector<std::string> > itsInWgtNameVecs;
+                std::map<std::string,std::vector<std::string> > itsInSenNameVecs;
+                std::map<std::string,bool> itsOutWgtDuplicates;
+                std::map<std::string,bool> itsGenSensitivityImage;
                 //
                 PrimaryBeam::ShPtr itsPB;
                 /// utility function - should not really be here but minMax is

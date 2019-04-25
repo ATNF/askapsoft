@@ -65,7 +65,7 @@ namespace imagemath {
         /// Probably should have a "generate weight" - that calls evaluate for
         /// every pixel ....
 
-        virtual casa::Matrix<casa::Complex> getJonesAtOffset(double offset, double frequency);
+        virtual casacore::Matrix<casacore::Complex> getJonesAtOffset(double offset, double frequency);
 
         /// Some sets.
 

@@ -153,14 +153,14 @@ namespace askap {
 
             }
 
-            casa::Matrix<casa::Complex> GaussianPB::getJonesAtOffset(double offset, double frequency) {
+            casacore::Matrix<casacore::Complex> GaussianPB::getJonesAtOffset(double offset, double frequency) {
 
-                casa::IPosition shape(2,2,2);
-                casa::Matrix<casa::Complex> Jones(shape);
+                casacore::IPosition shape(2,2,2);
+                casacore::Matrix<casacore::Complex> Jones(shape);
                 Jones = 0.0;
 
-                Jones(casa::IPosition(2,0,0)) = casa::Complex(this->evaluateAtOffset(offset,frequency),0.0);
-                Jones(casa::IPosition(2,1,1)) = Jones(casa::IPosition(2,0,0));
+                Jones(casacore::IPosition(2,0,0)) = casacore::Complex(this->evaluateAtOffset(offset,frequency),0.0);
+                Jones(casacore::IPosition(2,1,1)) = Jones(casacore::IPosition(2,0,0));
 
                 return Jones;
 

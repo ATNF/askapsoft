@@ -61,7 +61,7 @@ namespace imagemath {
       // Do not dlclose the library.
       ASKAPLOG_INFO_STR(logger, "Primary Beam "<<name<<
                  " is not in the registry, attempting to load it dynamically");
-      casa::DynLib dl(libname, string("libaskap_"), "register_"+libname, false);
+      casacore::DynLib dl(libname, string("libaskap_"), "register_"+libname, false);
       if (dl.getHandle()) {
         // Successfully loaded. Get the creator function.
         ASKAPLOG_INFO_STR(logger, "Dynamically loaded Primary Beam " << name);
