@@ -364,9 +364,9 @@ void AskapParallel::broadcastBlob(LOFAR::BlobString& buf, int root)
 
 std::string AskapParallel::substitute(const std::string& s) const
 {
-    casa::String cs(s);
+    casacore::String cs(s);
     {
-        const casa::Regex regWork("\%w");
+        const casacore::Regex regWork("\%w");
         std::ostringstream oos;
 
         if (itsNProcs > 1) {
@@ -382,7 +382,7 @@ std::string AskapParallel::substitute(const std::string& s) const
         cs.gsub(regWork, oos.str());
     }
     {
-        const casa::Regex regNode("\%n");
+        const casacore::Regex regNode("\%n");
         std::ostringstream oos;
 
         if (itsNProcs > 1) {
@@ -394,7 +394,7 @@ std::string AskapParallel::substitute(const std::string& s) const
         cs.gsub(regNode, oos.str());
     }
     {
-        const casa::Regex regRank("\%r");
+        const casacore::Regex regRank("\%r");
         std::ostringstream oos;
 
         if (itsNProcs > 1) {
