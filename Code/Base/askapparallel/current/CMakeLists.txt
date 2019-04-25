@@ -65,6 +65,11 @@ include_directories(${LofarBlob_INCLUDE_DIRS})
 include_directories(${CASACORE_INCLUDE_DIRS})
 add_definitions(-DHAVE_AIPSPP)
 
+if (CASACORE3 OR CXX11)
+	set(CMAKE_CXX_STANDARD 11)
+	set(CMAKE_CXX_STANDARD_REQUIRED ON)
+endif()
+
 set (_modules askapparallel)
 
 # add some more tests and sub-directories
