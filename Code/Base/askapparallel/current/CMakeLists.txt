@@ -83,6 +83,7 @@ add_definitions(-DHAVE_LOG4CXX)
 include_directories(${ASKAP_INCLUDE_DIRS})
 include_directories(${LofarBlob_INCLUDE_DIRS})
 include_directories(${CASACORE_INCLUDE_DIRS})
+add_definitions(-DHAVE_AIPSPP)
 
 set (_modules askapparallel)
 
