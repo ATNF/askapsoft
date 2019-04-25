@@ -1,5 +1,4 @@
-project(base-askapparallel)
-
+project(base-askapparallel) 
 cmake_minimum_required (VERSION 2.6.0)
 include(CheckCXXCompilerFlag)
 include(CheckCCompilerFlag)
