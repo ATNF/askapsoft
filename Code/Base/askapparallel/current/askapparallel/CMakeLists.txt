@@ -1,7 +1,7 @@
 #
 # base/askapparallel
 #
-add_library(askapparallel
+add_library(askap_askapparallel
 AskapParallel.cc
 BlobIBufMW.cc
 BlobOBufMW.cc
@@ -16,4 +16,10 @@ MPIComms.h
 DESTINATION include/askap/askapparallel
 )
 
+target_link_libraries (
+	askap_askapparallel
+	${CASACORE_LIBRARIES}
+	${log4cxx_LIBRARY}
+	${ASKAP_LIBRARY}
+)
 

@@ -15,10 +15,11 @@
 /// askap namespace
 namespace askap {
   /// @return version of the package
-  std::string getAskapPackageVersion_askapparallel();
+  /// std::string getAskapPackageVersion_askapparallel();
 }
 
   /// The version of the package
-#define ASKAP_PACKAGE_VERSION askap::getAskapPackageVersion_askapparallel()
+//#define ASKAP_PACKAGE_VERSION askap::getAskapPackageVersion_askapparallel()
+#define ASKAP_PACKAGE_VERSION "0.0.0"
 
 #endif
