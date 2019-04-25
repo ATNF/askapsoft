@@ -64,6 +64,7 @@ include_directories(${ASKAP_INCLUDE_DIRS})
 include_directories(${LofarBlob_INCLUDE_DIRS})
 include_directories(${CASACORE_INCLUDE_DIRS})
 add_definitions(-DHAVE_AIPSPP)
+add_definitions(-Dcasa=casacore)
 
 if (CASACORE3 OR CXX11)
 	set(CMAKE_CXX_STANDARD 11)
