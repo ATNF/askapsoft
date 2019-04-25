@@ -52,9 +52,6 @@
 // Local package includes
 #include "askapparallel/MPIComms.h"
 
-using namespace std;
-using namespace askap;
-
 namespace askap {
 namespace askapparallel {
 
@@ -370,7 +367,7 @@ std::string AskapParallel::substitute(const std::string& s) const
     casa::String cs(s);
     {
         const casa::Regex regWork("\%w");
-        ostringstream oos;
+        std::ostringstream oos;
 
         if (itsNProcs > 1) {
             ASKAPDEBUGASSERT(itsNGroups >= 1);
@@ -386,7 +383,7 @@ std::string AskapParallel::substitute(const std::string& s) const
     }
     {
         const casa::Regex regNode("\%n");
-        ostringstream oos;
+        std::ostringstream oos;
 
         if (itsNProcs > 1) {
             oos << itsNProcs - 1;
@@ -398,7 +395,7 @@ std::string AskapParallel::substitute(const std::string& s) const
     }
     {
         const casa::Regex regRank("\%r");
-        ostringstream oos;
+        std::ostringstream oos;
 
         if (itsNProcs > 1) {
             oos << itsRank;
