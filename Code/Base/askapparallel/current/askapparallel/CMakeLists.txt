@@ -15,6 +15,18 @@ BlobOBufMW.h
 MPIComms.h
 DESTINATION include/askap/askapparallel
 )
+if (MPI_FOUND)
+  if(MPI_COMPILE_FLAGS)
+    set_target_properties(askap_askapparallel  PROPERTIES
+    COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
+  endif()
+
+  if(MPI_LINK_FLAGS)
+    set_target_properties(askap_askapparallel PROPERTIES
+    LINK_FLAGS "${MPI_LINK_FLAGS}")
+  endif()
+
+endif()
 
 target_link_libraries (
 	askap_askapparallel
@@ -22,6 +34,7 @@ target_link_libraries (
 	${log4cxx_LIBRARY}
 	${ASKAP_LIBRARY}
 	${LofarBlob_LIBRARY}
+	${MPI_LIBRARIES}
 )
 
 install (

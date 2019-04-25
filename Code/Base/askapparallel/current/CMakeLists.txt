@@ -70,9 +70,12 @@ option (BUILD_SHARED_LIBS "" YES)
 endif(ENABLE_SHARED)
 
 
+find_package(MPI)
+include_directories(${MPI_INCLUDE_PATH})
 
-
-
+if (MPI_FOUND)
+	add_definitions(-DHAVE_MPI)
+endif()
 
 # include directories
 include_directories( ${CMAKE_SOURCE_DIR} )
