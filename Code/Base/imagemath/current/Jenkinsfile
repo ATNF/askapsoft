@@ -8,6 +8,12 @@ pipeline {
   stages {
     stage('Building') {
       steps {
+        sh '''if [ -d ${WORKSPACE}/base-askap_develop/ ]; then
+echo "base-askap directory exists"
+else
+echo "cannot access base-access"
+fi
+'''
         dir(path: '/var/lib/jenkins/workspace/base-imagemath_develop') {
           sh '''if [ -d build ]; then
 echo "base-askap build directory already exists"
