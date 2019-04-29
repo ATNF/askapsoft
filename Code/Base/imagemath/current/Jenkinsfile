@@ -6,7 +6,6 @@ pipeline {
 
   }
   stages {
-    
     stage('Building base-askap') {
       steps {
         dir(path: '/var/lib/jenkins/workspace/base-imagemath_develop') {
@@ -15,6 +14,7 @@ echo "base-askap directory already exists"
 rm -rf base-askap
 fi
 git clone https://bitbucket.csiro.au/scm/askapsdp/base-askap.git
+cd base-askap
 mkdir build
 cd build
 cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} ../
@@ -22,6 +22,7 @@ make -j2
 make -j2 install
 '''
         }
+
       }
     }
     stage('Building base-logfilters') {
@@ -39,6 +40,7 @@ make -j2
 make -j2 install
 '''
         }
+
       }
     }
     stage('Building base-imagemath') {
