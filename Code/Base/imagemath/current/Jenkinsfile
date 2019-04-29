@@ -7,8 +7,7 @@ pipeline {
   }
   stages {
     stage('Building') {
-    steps { 
-        
+      steps {
         dir(path: '/var/lib/jenkins/workspace/base-imagemath_develop') {
           sh '''if [ -d build ]; then
 echo "base-askap build directory already exists"
@@ -25,19 +24,17 @@ fi'''
         }
 
         dir(path: '/var/lib/jenkins/workspace/base-imagemath_develop/build') {
-	  sh '''cmake ../ -DCMAKE_INSTALL_PREFIX=${PREFIX}
+          sh '''cmake ../ -DASKAP_ROOT_DIR=${WORKSPACE}/base-askap_develop/install -DCMAKE_INSTALL_PREFIX=${PREFIX}
 make -j2
 make -j2 install
 '''
+        }
 
-       }
       }
     }
   }
-  
   environment {
     WORKSPACE = '/var/lib/jenkins/workspace'
     PREFIX = '/var/lib/jenkins/workspace/base-imagemath_develop/install'
-
   }
 }
