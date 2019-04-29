@@ -24,7 +24,7 @@ fi'''
         }
 
         dir(path: '/var/lib/jenkins/workspace/base-imagemath_develop/build') {
-          sh '''cmake ../ -DASKAP_ROOT_DIR=${WORKSPACE}/base-askap_develop/install -DCMAKE_INSTALL_PREFIX=${PREFIX}
+          sh '''cmake -DASKAP_ROOT_DIR=${WORKSPACE}/base-askap_develop/install -DCMAKE_INSTALL_PREFIX=${PREFIX} ../
 make -j2
 make -j2 install
 '''
