@@ -33,6 +33,7 @@ echo "base-logfilters directory already exists"
 rm -rf base-logfilters
 fi
 git clone https://bitbucket.csiro.au/scm/askapsdp/base-logfilters.git
+cd base-logfilters
 mkdir build
 cd build
 cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} ../
@@ -47,7 +48,7 @@ make -j2 install
       steps {
         dir(path: '/var/lib/jenkins/workspace/base-imagemath_develop') {
           sh '''if [ -d build ]; then
-echo "base-askap build directory already exists"
+echo "base-imagemath build directory already exists"
 cd build
 if [ -f install_manifest.txt ]; then
 make uninstall
