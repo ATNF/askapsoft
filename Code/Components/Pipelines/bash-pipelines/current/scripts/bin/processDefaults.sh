@@ -998,8 +998,8 @@ Cimager.Channels                                = ${CHANNEL_SELECTION_CONTIMG_SC
                 FREQ_FRAME_SL="bary"
             fi
             
-            if [ "${FREQ_FRAME_SL}" != "topo" ] ||
-                   [ "${FREQ_FRAME_SL}" != "bary" ] ||
+            if [ "${FREQ_FRAME_SL}" != "topo" ] &&
+                   [ "${FREQ_FRAME_SL}" != "bary" ] &&
                    [ "${FREQ_FRAME_SL}" != "lsrk" ]; then
                 echo "WARNING - FREQ_FRAME_SL (${FREQ_FRAME_SL}) is not one of \"topo\" \"bary\" \"lsrk\""
                 echo "        - Setting to \"bary\""
