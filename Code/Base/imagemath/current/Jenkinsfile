@@ -1,0 +1,43 @@
+pipeline {
+  agent {
+    docker {
+      image 'sord/yanda:latest'
+    }
+
+  }
+  stages {
+    stage('Building') {
+    steps { 
+        
+        dir(path: '/var/lib/jenkins/workspace/base-imagemath_develop') {
+          sh '''if [ -d build ]; then
+echo "base-askap build directory already exists"
+cd build
+if [ -f install_manifest.txt ]; then
+make uninstall
+cd ..
+fi
+rm -rf build
+mkdir build
+else
+mkdir build
+fi'''
+        }
+
+        dir(path: '/var/lib/jenkins/workspace/base-imagemath_develop/build') {
+	  sh '''cmake ../ -DCMAKE_INSTALL_PREFIX=${PREFIX}
+make -j2
+make -j2 install
+'''
+
+       }
+      }
+    }
+  }
+  
+  environment {
+    WORKSPACE = '/var/lib/jenkins/workspace'
+    PREFIX = '/var/lib/jenkins/workspace/base-imagemath_develop/install'
+
+  }
+}
