@@ -32,8 +32,9 @@
 #
 
 # Define list of possible MSs:
-#msNameList=()
 msNameList=""
+# Turn off time splitting, so that we get the final MS names
+DO_SPLIT_TIMEWISE=false
 for BEAM in ${BEAMS_TO_USE}; do
     IFS="${IFS_FIELDS}"
     for FIELD in ${FIELD_LIST}; do
