@@ -534,7 +534,7 @@ if [ "\${PREPARE_FOR_CASDA}" == "true" ]; then
     # Tar up the directory structure with the cal tables, logs,
     # slurm files & diagnostics etc, and add to the evaluation file list
 
-    tarfile=calibration-metadata-processing-logs.tar
+    tarfile=calibration-metadata-processing-logs_${NOW}.tar
 
     # cal tables
     for((i=0;i<\${#calTables[@]};i++)); do
