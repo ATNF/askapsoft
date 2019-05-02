@@ -73,9 +73,9 @@ self-calibration. This way, you can decrease, say, the detection
 threshold, or increase the number of major cycles, as the calibration
 steadily improves. These parameters are for:
 
-* Deconvolution: ``CLEAN_ALGORITHM``, ``CLEAN_GAIN``, ``CLEAN_PSFWIDTH``, 
-  ``CLEAN_THRESHOLD_MAJORCYCLE``, ``CLEAN_NUM_MAJORCYCLES``, 
-  ``CLEAN_MINORCYCLE_NITER``, ``CLEAN_THRESHOLD_MINORCYCLE`` and 
+* Deconvolution: ``CLEAN_ALGORITHM``, ``CLEAN_GAIN``, ``CLEAN_PSFWIDTH``,
+  ``CLEAN_THRESHOLD_MAJORCYCLE``, ``CLEAN_NUM_MAJORCYCLES``,
+  ``CLEAN_MINORCYCLE_NITER``, ``CLEAN_THRESHOLD_MINORCYCLE`` and
   ``CLEAN_SCALES``
 * Self-calibration: ``SELFCAL_SELAVY_THRESHOLD``, ``SELFCAL_INTERVAL``
   and ``SELFCAL_NORMALISE_GAINS``
@@ -83,8 +83,8 @@ steadily improves. These parameters are for:
 * Data selection in calibration: ``CCALIBRATOR_MINUV`` and ``CCALIBRATOR_MAXUV``
 
 To use this mode, the values for these parameters should be given as
-an array in the form ``SELFCAL_INTERVAL="[1800,1800,900,300]"``, or, 
-``CLEAN_SCALES="[0] ; [0,20] ; [0,20,120,240] ; [0,20,120,240,480]"``. 
+an array in the form ``SELFCAL_INTERVAL="[1800,1800,900,300]"``, or,
+``CLEAN_SCALES="[0] ; [0,20] ; [0,20,120,240] ; [0,20,120,240,480]"``.
 The size of these arrays should be one more than
 ``SELFCAL_NUM_LOOPS``. This is because loop 0 is just the imaging, and
 it is followed by ``SELFCAL_NUM_LOOPS`` loops of
@@ -280,13 +280,13 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                     |                                                        | be used for ALL selfcal loops.                                |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CLEAN_MINORCYCLE_NITER``                 | "[400,800]"                         | Clean.niter                                            | The number of iterations for the minor cycle clean. Can be    |
-|                                            |                                     | (:doc:`../calim/solver`)                               |varied for each selfcal cycle. (e.g. "[200,800,1000]")         |
+|                                            |                                     | (:doc:`../calim/solver`)                               | varied for each selfcal cycle. (e.g. "[200,800,1000]")        |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CLEAN_GAIN``                             | 0.2                                 | Clean.gain                                             | The loop gain (fraction of peak subtracted per minor cycle).  |
 |                                            |                                     | (:doc:`../calim/solver`)                               | Can be varied for each selfcal cycle. (e.g. "[0.1,0.2,0.1]")  |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CLEAN_PSFWIDTH``                         | 256                                 | Clean.psfwidth                                         | The width of the psf patch used in the minor cycle. Can be    |
-|                                            |                                     | (:doc:`../calim/solver`)                               |varied for each selfcal cycle. (e.g. "[256,512,4096]")         |
+|                                            |                                     | (:doc:`../calim/solver`)                               | varied for each selfcal cycle. (e.g. "[256,512,4096]")        |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CLEAN_SCALES``                           | "[0,3,10]"                          | Clean.scales                                           | Set of scales (in pixels) to use with the multi-scale clean.  |
 |                                            |                                     | (:doc:`../calim/solver`)                               | Can be varied for each selfcal cycle (e.g. ```"[0] ;          |
@@ -294,9 +294,9 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                     |                                                        | it.                                                           |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CLEAN_THRESHOLD_MINORCYCLE``             | "[30%, 0.5mJy, 0.03mJy]"            | threshold.minorcycle                                   | Threshold for the minor cycle loop. Can be varied for each    |
-|                                            |                                     | (:doc:`../calim/cimager`)                              |selfcal cycle. (e.g. ```"[30%,1.8mJy,0.03mJy] ;                |
-|                                            |                                     | (:doc:`../calim/solver`)                               |[20%,0.5mJy,0.03mJy]"```) Notice the delimiter " ; " and the   |
-|                                            |                                     |                                                        |spaces around it.                                              |
+|                                            |                                     | (:doc:`../calim/cimager`)                              | selfcal cycle. (e.g. ```"[30%,1.8mJy,0.03mJy] ;               |
+|                                            |                                     | (:doc:`../calim/solver`)                               | [20%,0.5mJy,0.03mJy]"```) Notice the delimiter " ; " and the  |
+|                                            |                                     |                                                        | spaces around it.                                             |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CLEAN_THRESHOLD_MAJORCYCLE``             | "0.035mJy"                          | threshold.majorcycle                                   | The target peak residual. Major cycles stop if this is        |
 |                                            |                                     | (:doc:`../calim/cimager`)                              | reached. A negative number ensures all major cycles requested |
@@ -310,7 +310,7 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                     | (:doc:`../calim/cimager`)                              | .cycle suffix) after the end of each major cycle.             |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CLEAN_SOLUTIONTYPE``                     | MAXBASE                             | Clean.solutiontype (see discussion at                  | The type of peak finding algorithm to use in the              |
-|                                            |                                     | :doc:`../recipes/imaging`)                             | deconvolution. Choices are MAXCHISQ, MAXTERM0, or MAXBASE.    |
+|                                            |                                     | :doc:`../recipes/Imaging`)                             | deconvolution. Choices are MAXCHISQ, MAXTERM0, or MAXBASE.    |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | **Preconditioning parameters**             |                                     |                                                        |                                                               |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
@@ -583,5 +583,5 @@ the ``DO_CONVERT_TO_FITS`` flag, which makes use of the
 |                                            |                                     | (:doc:`../calim/cimager`)                              | .cycle suffix) after the end of each major cycle.             |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
 | ``CLEAN_CONTCUBE_SOLUTIONTYPE``            | MAXCHISQ                            | Clean.solutiontype (see discussion at                  | The type of peak finding algorithm to use in the              |
-|                                            |                                     | :doc:`../recipes/imaging`)                             | deconvolution. Choices are MAXCHISQ, MAXTERM0, or MAXBASE.    |
+|                                            |                                     | :doc:`../recipes/Imaging`)                             | deconvolution. Choices are MAXCHISQ, MAXTERM0, or MAXBASE.    |
 +--------------------------------------------+-------------------------------------+--------------------------------------------------------+---------------------------------------------------------------+
