@@ -31,6 +31,7 @@ endif()
 find_package(Boost REQUIRED)
 find_package(LOFAR REQUIRED)
 find_package(log4cxx REQUIRED)
+find_package(Casacore REQUIRED COMPONENTS  ms images mirlib coordinates fits lattices measures scimath scimath_f tables casa)
 
 # include directories
 include_directories( ${CMAKE_SOURCE_DIR} )
@@ -46,6 +47,10 @@ endif(log4cxx_FOUND)
 if (LOFAR_FOUND)
 	include_directories(${LOFAR_COMMON_INCLUDE_DIRS})
 endif(LOFAR_FOUND)
+
+if (CASACORE_FOUND)
+	include_directories(${CASACORE_INCLUDE_DIRS})
+endif(CASACORE_FOUND)
 
 set (_modules askap)
 
