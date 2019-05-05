@@ -5,6 +5,8 @@ include(CheckCXXCompilerFlag)
 include(CheckCCompilerFlag)
 
 
+set (CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 set(PROJECT_VERSION_MAJOR 0)
 set(PROJECT_VERSION_MINOR 0)
 set(PROJECT_VERSION_PATCH 1)
@@ -27,6 +29,8 @@ endif()
 
 # find packages
 find_package(Boost REQUIRED)
+find_package(LOFAR REQUIRED)
+find_package(log4cxx REQUIRED)
 
 # include directories
 include_directories( ${CMAKE_SOURCE_DIR} )
@@ -34,7 +38,14 @@ if (Boost_FOUND)
     include_directories (${Boost_INCLUDE_DIRS})
     add_definitions(-DHAVE_BOOST)
 endif (Boost_FOUND)
+if (log4cxx_FOUND)
+    include_directories(${log4cxx_INCLUDE_DIRS})
+    add_definitions(-DHAVE_LOG4CXX)
+endif(log4cxx_FOUND)
 
+if (LOFAR_FOUND)
+	include_directories(${LOFAR_COMMON_INCLUDE_DIRS})
+endif(LOFAR_FOUND)
 
 set (_modules askap)
 
