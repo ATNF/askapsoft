@@ -20,7 +20,7 @@ fi'''
         }
 
         dir(path: '/var/lib/jenkins/workspace/base-askap_develop/build') {
-cmake ../ -DCMAKE_INSTALL_PREFIX=${PREFIX}
+	  sh '''cmake ../ -DCMAKE_INSTALL_PREFIX=${PREFIX}
 make -j2
 make -j2 install
 '''
@@ -29,6 +29,7 @@ make -j2 install
       }
     }
   }
+  
   environment {
     WORKSPACE = '/var/lib/jenkins/workspace'
     PREFIX = '/var/lib/jenkins/workspace/base-askap_develop/install'
