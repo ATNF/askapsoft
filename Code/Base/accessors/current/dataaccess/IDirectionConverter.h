@@ -54,7 +54,7 @@ struct IDirectionConverter : virtual public IConverterBase {
     /// convert specified MDirection to the target frame
     /// @param in an epoch to convert. Target frame is a
     /// property of the actual instance of the derived class
-    virtual casacore::MVDirection operator()(const casacore::MDirection &in) const = 0;
+    virtual casa::MVDirection operator()(const casa::MDirection &in) const = 0;
 
     /// using statement to have setMeasFrame public.
     using IConverterBase::setMeasFrame;

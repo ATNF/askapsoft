@@ -46,29 +46,29 @@ using namespace askap::accessors;
 /// @brief read all requested information from the table
 /// @param[in] ms an input measurement set (in fact any table which has a
 /// POLARIZATION subtable defined)
-MemTablePolarisationHolder::MemTablePolarisationHolder(const casacore::Table &ms)
+MemTablePolarisationHolder::MemTablePolarisationHolder(const casa::Table &ms)
 {
-  casacore::Table polarisationSubtable = ms.keywordSet().asTable("POLARIZATION");
+  casa::Table polarisationSubtable = ms.keywordSet().asTable("POLARIZATION");
   // load polarisation types
-  casacore::ROArrayColumn<casacore::Int> corrTypeCol(polarisationSubtable, "CORR_TYPE");
-  casacore::ROScalarColumn<casacore::Int> numCorrCol(polarisationSubtable, "NUM_CORR");
+  casa::ROArrayColumn<casa::Int> corrTypeCol(polarisationSubtable, "CORR_TYPE");
+  casa::ROScalarColumn<casa::Int> numCorrCol(polarisationSubtable, "NUM_CORR");
   ASKAPDEBUGASSERT(corrTypeCol.nrow() == numCorrCol.nrow());
   itsPolTypes.resize(polarisationSubtable.nrow());
-  for (casacore::uInt row=0; row<itsPolTypes.nelements(); ++row) {
+  for (casa::uInt row=0; row<itsPolTypes.nelements(); ++row) {
        if (corrTypeCol.ndim(row) != 1) {
            ASKAPTHROW(DataAccessError, 
                "Expected a 1D vector in the CORR_TYPE column of the POLARIZATION subtable. dim = "<<
                corrTypeCol.ndim(row));
        }
-       casacore::Vector<casacore::Int> buf;
+       casa::Vector<casa::Int> buf;
        corrTypeCol.get(row,buf);
-       casacore::Vector<casacore::Stokes::StokesTypes> &corrType = itsPolTypes[row];
+       casa::Vector<casa::Stokes::StokesTypes> &corrType = itsPolTypes[row];
        corrType.resize(buf.nelements());
-       if (buf.nelements() != casacore::uInt(numCorrCol(row))) {
+       if (buf.nelements() != casa::uInt(numCorrCol(row))) {
            ASKAPTHROW(DataAccessError, "The number of elements in CORR_TYPE should match NUM_CORR");
        }
-       for (casacore::uInt pol=0; pol<buf.nelements(); ++pol) {
-            corrType[pol] = casacore::Stokes::type(buf[pol]);
+       for (casa::uInt pol=0; pol<buf.nelements(); ++pol) {
+            corrType[pol] = casa::Stokes::type(buf[pol]);
        }       
   }
 }   
@@ -76,7 +76,7 @@ MemTablePolarisationHolder::MemTablePolarisationHolder(const casacore::Table &ms
 /// @brief number of polarisation products for the given ID
 /// @param[in] polID polarisation ID of interest
 /// @return number of products for the given ID
-size_t MemTablePolarisationHolder::nPol(casacore::uInt polID) const
+size_t MemTablePolarisationHolder::nPol(casa::uInt polID) const
 {
   ASKAPDEBUGASSERT(polID<itsPolTypes.nelements());
   return itsPolTypes[polID].nelements();
@@ -86,7 +86,7 @@ size_t MemTablePolarisationHolder::nPol(casacore::uInt polID) const
 /// @param[in] polID polarisation ID of interest
 /// @return a vector (size is nPol) with types of polarisation products, same order as in the
 /// visibility cube
-casacore::Vector<casacore::Stokes::StokesTypes> MemTablePolarisationHolder::getTypes(casacore::uInt polID) const
+casa::Vector<casa::Stokes::StokesTypes> MemTablePolarisationHolder::getTypes(casa::uInt polID) const
 {
   ASKAPDEBUGASSERT(polID<itsPolTypes.nelements());
   return itsPolTypes[polID];
@@ -96,11 +96,11 @@ casacore::Vector<casacore::Stokes::StokesTypes> MemTablePolarisationHolder::getT
 /// @details This version of the method extracts type for just one polarisation product.
 /// @param[in] polID polarisation ID of interest
 /// @param[in] pol polarisation product (should be less than nPol)
-/// @return a type of the polarisation product given as casacore::Stokes
-casacore::Stokes::StokesTypes MemTablePolarisationHolder::getType(casacore::uInt polID, casacore::uInt pol) const
+/// @return a type of the polarisation product given as casa::Stokes
+casa::Stokes::StokesTypes MemTablePolarisationHolder::getType(casa::uInt polID, casa::uInt pol) const
 {
   ASKAPDEBUGASSERT(polID<itsPolTypes.nelements());
-  const casacore::Vector<casacore::Stokes::StokesTypes> &polTypes = itsPolTypes[polID];
+  const casa::Vector<casa::Stokes::StokesTypes> &polTypes = itsPolTypes[polID];
   ASKAPDEBUGASSERT(pol<polTypes.nelements());
   return polTypes[pol];
 }

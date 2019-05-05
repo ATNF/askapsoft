@@ -71,7 +71,7 @@ struct FieldSubtableHandler : virtual public IFieldSubtableHandler,
   /// @details 
   /// @param[in] ms a table object, which has a field subtable defined
   /// (i.e. this method accepts a main ms table).
-  explicit FieldSubtableHandler(const casacore::Table &ms); 
+  explicit FieldSubtableHandler(const casa::Table &ms); 
   
   /// @brief obtain the reference direction for a given time.
   /// @details It is not clear at the moment whether this subtable is
@@ -83,7 +83,7 @@ struct FieldSubtableHandler : virtual public IFieldSubtableHandler,
   /// @param[in] time a full epoch of interest (the subtable can have multiple
   /// pointings.
   /// @return a reference to direction measure
-  virtual const casacore::MDirection& getReferenceDir(const casacore::MEpoch &time) 
+  virtual const casa::MDirection& getReferenceDir(const casa::MEpoch &time) 
                                                   const;
 
   /// @brief check whether the field changed for a given time
@@ -97,7 +97,7 @@ struct FieldSubtableHandler : virtual public IFieldSubtableHandler,
   /// @param[in] time a full epoch of interest (the subtable can have multiple
   /// pointings.
   /// @return true if the field information have been changed
-  virtual bool newField(const casacore::MEpoch &time) const;
+  virtual bool newField(const casa::MEpoch &time) const;
 
   /// @brief obtain the reference direction stored in a given row
   /// @details The measurement set format looks a bit redundant: individual
@@ -112,14 +112,14 @@ struct FieldSubtableHandler : virtual public IFieldSubtableHandler,
   /// it is present in the main table of the dataset.
   /// @param[in] fieldID  a row number of interest
   /// @return a reference to direction measure
-  virtual const casacore::MDirection& getReferenceDir(casacore::uInt fieldID) 
+  virtual const casa::MDirection& getReferenceDir(casa::uInt fieldID) 
                                                   const;
 
 protected:
   /// read the data if cache is outdated
   /// @param[in] time a full epoch of interest (field table can have many
   /// pointing and therefore can be time-dependent)
-  void fillCacheOnDemand(const casacore::MEpoch &time) const;
+  void fillCacheOnDemand(const casa::MEpoch &time) const;
   
   /// read the current iteration and populate cache
   void fillCacheWithCurrentIteration() const;
@@ -127,22 +127,22 @@ protected:
 private:
   
   /// iterator over the FIELD subtable
-  mutable casacore::TableIterator itsIterator;
+  mutable casa::TableIterator itsIterator;
    
   /// start time of the time range, for which the cache is valid
   /// Time independent table has a very wide time range. Values are
   /// stored as Doubles in the native frame/units of the FIELD table
-  mutable casacore::Double itsCachedStartTime;
+  mutable casa::Double itsCachedStartTime;
   
   /// stop time of the time range, for which the cache is valid
   /// see itsCachedStartTime for more details.
-  mutable casacore::Double itsCachedStopTime;
+  mutable casa::Double itsCachedStopTime;
   
   /// cache of the reference direction (time-based selection of rows)
-  mutable casacore::MDirection itsReferenceDir;
+  mutable casa::MDirection itsReferenceDir;
 
   /// cache of the reference direction (direct row-based access)
-  mutable casacore::MDirection itsRandomlyAccessedReferenceDir;
+  mutable casa::MDirection itsRandomlyAccessedReferenceDir;
   
   /// @brief flag showing that no data has been obtained yet via this class
   /// @details It is necessary that newField always returns true before 

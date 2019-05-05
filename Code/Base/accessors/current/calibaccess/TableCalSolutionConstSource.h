@@ -64,7 +64,7 @@ public:
   /// @brief constructor using a table defined explicitly
   /// @details
   /// @param[in] tab table to read the solutions from
-  TableCalSolutionConstSource(const casacore::Table &tab);
+  TableCalSolutionConstSource(const casa::Table &tab);
   
   /// @brief constructor using a file name
   /// @details The table is opened for reading and an exception is thrown if the table doesn't exist

@@ -39,7 +39,7 @@ namespace accessors {
 /// @param nsteps  number of steps before the iterator
 ///                reach the end
 ///
-DataIteratorStub::DataIteratorStub(casacore::uInt nsteps) : itsMaxCounter(nsteps),
+DataIteratorStub::DataIteratorStub(casa::uInt nsteps) : itsMaxCounter(nsteps),
              itsCounter(0), itsAccessor(true) {}
 
 /// Return the data accessor (current chunk) in various ways
@@ -77,7 +77,7 @@ void DataIteratorStub::chooseBuffer(const std::string &)
 /// Switch the output of operator* and operator-> to the original
 /// state (present after the iterator is just constructed) 
 /// where they point to the primary visibility data. This method
-/// is indended to cancel the results of chooseBuffer(casacore::uInt)
+/// is indended to cancel the results of chooseBuffer(casa::uInt)
 ///
 void DataIteratorStub::chooseOriginal() {}
 
@@ -105,14 +105,14 @@ void DataIteratorStub::init()
 
 /// Checks whether there are more data available.
 /// @return True if there are more data available
-casacore::Bool DataIteratorStub::hasMore() const throw() {
+casa::Bool DataIteratorStub::hasMore() const throw() {
   return itsCounter<itsMaxCounter;
 }
 
 /// advance the iterator one step further 
 /// @return True if there are more data (so constructions like 
 ///         while(it.next()) {} are possible)
-casacore::Bool DataIteratorStub::next()
+casa::Bool DataIteratorStub::next()
 {  
   return ++itsCounter<itsMaxCounter;
 }

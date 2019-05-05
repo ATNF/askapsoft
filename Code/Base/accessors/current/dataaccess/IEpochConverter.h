@@ -56,17 +56,17 @@ struct IEpochConverter : virtual public IConverterBase {
     /// convert specified MEpoch to the target units/frame
     /// @param[in] in an epoch to convert. Target units/frame are
     /// properties of the actual instance of the derived class
-    virtual casacore::Double operator()(const casacore::MEpoch &in) const = 0;
+    virtual casa::Double operator()(const casa::MEpoch &in) const = 0;
 
-    /// Reverse conversion (casacore::Double to full measure)
+    /// Reverse conversion (casa::Double to full measure)
     /// @param[in] in an epoch given as Double in the target units/frame
     /// @return the same epoch as a fully qualified measure
-    virtual casacore::MEpoch toMeasure(casacore::Double in) const = 0;
+    virtual casa::MEpoch toMeasure(casa::Double in) const = 0;
 
-    /// Reverse conversion (casacore::MVEpoch to full measure)
+    /// Reverse conversion (casa::MVEpoch to full measure)
     /// @param[in] in an epoch given as MVEpoch in the target frame
     /// @return the same epoch as a fully qualified measure
-    virtual casacore::MEpoch toMeasure(const casacore::MVEpoch &in) const throw() = 0;
+    virtual casa::MEpoch toMeasure(const casa::MVEpoch &in) const throw() = 0;
 
     /// using statement to make this method public in all derived classes
     using IConverterBase::setMeasFrame;

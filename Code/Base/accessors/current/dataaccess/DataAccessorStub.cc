@@ -91,13 +91,13 @@ namespace askap
             { 117.488195463, -26.5986065217, -281.553711, -244.643860 },
             { 117.488435693, -26.5949733943, -257.530670, -650.966675 } };
 
-        vector<casacore::MPosition> mPos;
+        vector<casa::MPosition> mPos;
         mPos.resize(nAnt);
         for (uint iant1=0; iant1<nAnt; iant1++)
         {
-          mPos[iant1]=casacore::MPosition(casacore::MVPosition(casacore::Quantity(6400000,
-              "m"), casacore::Quantity(antloc[iant1][0], "deg"), casacore::Quantity(
-              antloc[iant1][1], "deg")), casacore::MPosition::WGS84);
+          mPos[iant1]=casa::MPosition(casa::MVPosition(casa::Quantity(6400000,
+              "m"), casa::Quantity(antloc[iant1][0], "deg"), casa::Quantity(
+              antloc[iant1][1], "deg")), casa::MPosition::WGS84);
         }
 
         uint nRows(nAnt*(nAnt-1)/2);
@@ -107,11 +107,11 @@ namespace askap
           this->itsFrequency(chan)=1.400e9-20e6*chan;
         uint nPol(1);
         itsVisibility.resize(nRows, nChan, nPol);
-        itsVisibility.set(casacore::Complex(0.0, 0.0));
+        itsVisibility.set(casa::Complex(0.0, 0.0));
         itsNoise.resize(nRows, nChan, nPol);
-        itsNoise.set(casacore::Complex(1.0, 0.0));
+        itsNoise.set(casa::Complex(1.0, 0.0));
         itsFlag.resize(nRows, nChan, nPol);
-        itsFlag.set(casacore::False);
+        itsFlag.set(casa::False);
         itsTime=0;
         itsUVW.resize(nRows);
         itsUVWRotationDelay.resize(nRows);
@@ -138,11 +138,11 @@ namespace askap
             itsFeed2(row)=0;
             itsFeed1PA(row)=0;
             itsFeed2PA(row)=0;
-            itsPointingDir1(row)=casacore::MVDirection(casacore::Quantity(0, "deg"), casacore::Quantity(0, "deg"));
-            itsPointingDir2(row)=casacore::MVDirection(casacore::Quantity(0, "deg"), casacore::Quantity(0, "deg"));
-            itsDishPointing1(row)=casacore::MVDirection(casacore::Quantity(0, "deg"), casacore::Quantity(0, "deg"));
-            itsDishPointing2(row)=casacore::MVDirection(casacore::Quantity(0, "deg"), casacore::Quantity(0, "deg"));
-            itsUVW(row)=casacore::RigidVector<casacore::Double, 3>(0.0, 0.0, 0.0);
+            itsPointingDir1(row)=casa::MVDirection(casa::Quantity(0, "deg"), casa::Quantity(0, "deg"));
+            itsPointingDir2(row)=casa::MVDirection(casa::Quantity(0, "deg"), casa::Quantity(0, "deg"));
+            itsDishPointing1(row)=casa::MVDirection(casa::Quantity(0, "deg"), casa::Quantity(0, "deg"));
+            itsDishPointing2(row)=casa::MVDirection(casa::Quantity(0, "deg"), casa::Quantity(0, "deg"));
+            itsUVW(row)=casa::RigidVector<casa::Double, 3>(0.0, 0.0, 0.0);
             for (uint dim=0;dim<3;dim++) {
                  itsUVW(row)(dim)=mPos[iant1].get("m").getValue()(dim)-mPos[iant2].get("m").getValue()(dim);
             }
@@ -150,13 +150,13 @@ namespace askap
           }
         }
         itsStokes.resize(nPol);
-        itsStokes[0] = casacore::Stokes::I;
+        itsStokes[0] = casa::Stokes::I;
       }
     }
 
     /// The number of rows in this chunk
                 /// @return the number of rows in this chunk
-                casacore::uInt DataAccessorStub::nRow() const throw()
+                casa::uInt DataAccessorStub::nRow() const throw()
                 {
                   return itsVisibility.nrow();
                 }
@@ -165,14 +165,14 @@ namespace askap
 
                 /// The number of spectral channels (equal for all rows)
                 /// @return the number of spectral channels
-                casacore::uInt DataAccessorStub::nChannel() const throw()
+                casa::uInt DataAccessorStub::nChannel() const throw()
                 {
                   return itsVisibility.ncolumn();
                 }
 
                 /// The number of polarization products (equal for all rows)
                 /// @return the number of polarization products (can be 1,2 or 4)
-                casacore::uInt DataAccessorStub::nPol() const throw()
+                casa::uInt DataAccessorStub::nPol() const throw()
                 {
                   return itsVisibility.nplane();
                 }
@@ -180,7 +180,7 @@ namespace askap
                 /// First antenna IDs for all rows
                 /// @return a vector with IDs of the first antenna corresponding
                 /// to each visibility (one for each row)
-                const casacore::Vector<casacore::uInt>& DataAccessorStub::antenna1() const
+                const casa::Vector<casa::uInt>& DataAccessorStub::antenna1() const
                 {
                   return itsAntenna1;
                 }
@@ -188,7 +188,7 @@ namespace askap
                 /// Second antenna IDs for all rows
                 /// @return a vector with IDs of the second antenna corresponding
                 /// to each visibility (one for each row)
-                const casacore::Vector<casacore::uInt>& DataAccessorStub::antenna2() const
+                const casa::Vector<casa::uInt>& DataAccessorStub::antenna2() const
                 {
                   return itsAntenna2;
                 }
@@ -196,7 +196,7 @@ namespace askap
                 /// First feed IDs for all rows
                 /// @return a vector with IDs of the first feed corresponding
                 /// to each visibility (one for each row)
-                const casacore::Vector<casacore::uInt>& DataAccessorStub::feed1() const
+                const casa::Vector<casa::uInt>& DataAccessorStub::feed1() const
                 {
                   return itsFeed1;
                 }
@@ -204,7 +204,7 @@ namespace askap
                 /// Second feed IDs for all rows
                 /// @return a vector with IDs of the second feed corresponding
                 /// to each visibility (one for each row)
-                const casacore::Vector<casacore::uInt>& DataAccessorStub::feed2() const
+                const casa::Vector<casa::uInt>& DataAccessorStub::feed2() const
                 {
                   return itsFeed2;
                 }
@@ -212,7 +212,7 @@ namespace askap
                 /// Position angles of the first feed for all rows
                 /// @return a vector with position angles (in radians) of the
                 /// first feed corresponding to each visibility
-                const casacore::Vector<casacore::Float>& DataAccessorStub::feed1PA() const
+                const casa::Vector<casa::Float>& DataAccessorStub::feed1PA() const
                 {
                   return itsFeed1PA;
                 }
@@ -220,7 +220,7 @@ namespace askap
                 /// Position angles of the second feed for all rows
                 /// @return a vector with position angles (in radians) of the
                 /// second feed corresponding to each visibility
-                const casacore::Vector<casacore::Float>& DataAccessorStub::feed2PA() const
+                const casa::Vector<casa::Float>& DataAccessorStub::feed2PA() const
                 {
                   return itsFeed2PA;
                 }
@@ -229,7 +229,7 @@ namespace askap
                 /// @return a vector with direction measures (coordinate system
                 /// is determined by the data accessor), one direction for each
                 /// visibility/row
-                const casacore::Vector<casacore::MVDirection>& DataAccessorStub::pointingDir1() const
+                const casa::Vector<casa::MVDirection>& DataAccessorStub::pointingDir1() const
                 {
                   return itsPointingDir1;
                 }
@@ -238,7 +238,7 @@ namespace askap
                 /// @return a vector with direction measures (coordinate system
                 /// is determined by the data accessor), one direction for each
                 /// visibility/row
-                const casacore::Vector<casacore::MVDirection>& DataAccessorStub::pointingDir2() const
+                const casa::Vector<casa::MVDirection>& DataAccessorStub::pointingDir2() const
                 {
                   return itsPointingDir2;
                 }
@@ -248,7 +248,7 @@ namespace askap
                 /// @return a vector with direction measures (coordinate system
                 /// is is set via IDataConverter), one direction for each
                 /// visibility/row
-                const casacore::Vector<casacore::MVDirection>& DataAccessorStub::dishPointing1() const
+                const casa::Vector<casa::MVDirection>& DataAccessorStub::dishPointing1() const
                 {
                   return itsDishPointing1;
                 }
@@ -258,7 +258,7 @@ namespace askap
                 /// @return a vector with direction measures (coordinate system
                 /// is is set via IDataConverter), one direction for each
                 /// visibility/row
-                const casacore::Vector<casacore::MVDirection>& DataAccessorStub::dishPointing2() const
+                const casa::Vector<casa::MVDirection>& DataAccessorStub::dishPointing2() const
                 {
                   return itsDishPointing2;
                 }
@@ -269,7 +269,7 @@ namespace askap
                 /// all visibility data
                 /// TODO:
                 ///     a non-const version to be able to subtract the model
-                const casacore::Cube<casacore::Complex>& DataAccessorStub::visibility() const
+                const casa::Cube<casa::Complex>& DataAccessorStub::visibility() const
                 {
                   return itsVisibility;
                 }
@@ -280,7 +280,7 @@ namespace askap
                 /// @return a reference to nRow x nChannel x nPol cube, containing
                 /// all visibility data
                 ///
-                casacore::Cube<casacore::Complex>& DataAccessorStub::rwVisibility()
+                casa::Cube<casa::Complex>& DataAccessorStub::rwVisibility()
                 {
                   return itsVisibility;
                 }
@@ -288,7 +288,7 @@ namespace askap
                 /// Cube of flags corresponding to the output of visibility() 
                 /// @return a reference to nRow x nChannel x nPol cube with flag 
                 ///         information. If True, the corresponding element is flagged.
-                const casacore::Cube<casacore::Bool>& DataAccessorStub::flag() const
+                const casa::Cube<casa::Bool>& DataAccessorStub::flag() const
                 {
 		          ASKAPASSERT(itsFlag.shape() == itsVisibility.shape());
                   return itsFlag;
@@ -297,7 +297,7 @@ namespace askap
                 /// Non-const access to the cube of flags.
                 /// @return a reference to nRow x nChannel x nPol cube with the flag
                 ///         information. If True, the corresponding element is flagged.
-                casacore::Cube<casacore::Bool>& DataAccessorStub::rwFlag()
+                casa::Cube<casa::Bool>& DataAccessorStub::rwFlag()
                 {
 		  ASKAPASSERT(itsFlag.shape() == itsVisibility.shape());
                   return itsFlag;
@@ -306,7 +306,7 @@ namespace askap
                 /// UVW
                 /// @return a reference to vector containing uvw-coordinates
                 /// packed into a 3-D rigid vector
-                const casacore::Vector<casacore::RigidVector<casacore::Double, 3> >&
+                const casa::Vector<casa::RigidVector<casa::Double, 3> >&
                 DataAccessorStub::uvw() const
                 {
                   return itsUVW;
@@ -318,8 +318,8 @@ namespace askap
                 /// returned by a separate method.
                 /// @param[in] tangentPoint tangent point to rotate the coordinates to
                 /// @return uvw after rotation to the new coordinate system for each row
-                const casacore::Vector<casacore::RigidVector<casacore::Double, 3> >&
-	            DataAccessorStub::rotatedUVW(const casacore::MDirection & /*tangentPoint*/) const
+                const casa::Vector<casa::RigidVector<casa::Double, 3> >&
+	            DataAccessorStub::rotatedUVW(const casa::MDirection & /*tangentPoint*/) const
 	            {
 	              return itsUVW;
 	            }
@@ -332,8 +332,8 @@ namespace askap
                 /// @param[in] tangentPoint tangent point to rotate the coordinates to
                 /// @param[in] imageCentre image centre (additional translation is done if imageCentre!=tangentPoint)
                 /// @return delays corresponding to the uvw rotation for each row
-                const casacore::Vector<casacore::Double>& DataAccessorStub::uvwRotationDelay(
-	               const casacore::MDirection & /*tangentPoint*/, const casacore::MDirection & /*imageCentre*/) const
+                const casa::Vector<casa::Double>& DataAccessorStub::uvwRotationDelay(
+	               const casa::MDirection & /*tangentPoint*/, const casa::MDirection & /*imageCentre*/) const
 	            {
 	              return itsUVWRotationDelay;
 	            }
@@ -342,7 +342,7 @@ namespace askap
                 /// Noise level required for a proper weighting
                 /// @return a reference to nRow x nChannel x nPol cube with
                 ///         complex noise estimates
-                const casacore::Cube<casacore::Complex>& DataAccessorStub::noise() const
+                const casa::Cube<casa::Complex>& DataAccessorStub::noise() const
                 {
                   return itsNoise;
                 }
@@ -351,7 +351,7 @@ namespace askap
                 ///         for all rows. The timestamp is returned as 
                 ///         Double w.r.t. the origin specified by the 
                 ///         DataSource object and in that reference frame
-                casacore::Double DataAccessorStub::time() const
+                casa::Double DataAccessorStub::time() const
                 {
                   return itsTime;
                 }
@@ -361,7 +361,7 @@ namespace askap
                 ///         spectral channel (vector size is nChannel). Frequencies
                 ///         are given as Doubles, the frame/units are specified by
                 ///         the DataSource object
-                const casacore::Vector<casacore::Double>& DataAccessorStub::frequency() const
+                const casa::Vector<casa::Double>& DataAccessorStub::frequency() const
                 {
                   return itsFrequency;
                 }
@@ -371,7 +371,7 @@ namespace askap
                 ///         spectral channel (vector size is nChannel). Velocities
                 ///         are given as Doubles, the frame/units are specified by
                 ///         the DataSource object (via IDataConverter).
-                const casacore::Vector<casacore::Double>& DataAccessorStub::velocity() const
+                const casa::Vector<casa::Double>& DataAccessorStub::velocity() const
                 {
                   return itsVelocity;
                 }
@@ -381,7 +381,7 @@ namespace askap
                 /// each product in the visibility cube (nPol() elements).
                 /// @note All rows of the accessor have the same structure of the visibility
                 /// cube, i.e. polarisation types returned by this method are valid for all rows.
-                const casacore::Vector<casacore::Stokes::StokesTypes>& DataAccessorStub::stokes() const
+                const casa::Vector<casa::Stokes::StokesTypes>& DataAccessorStub::stokes() const
                 {
                   return itsStokes;
                 }

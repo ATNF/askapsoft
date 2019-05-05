@@ -2,7 +2,7 @@
 /// @brief implementation of the calibration solution accessor returning cached values
 /// @details This class is very similar to CachedCalSolutionAccessor and perhaps should have
 /// used that name. It supports all calibration products (i.e. gains, bandpasses and leakages)
-/// and stores them in a compact structure like casacore::Cube suitable for table-based implementation
+/// and stores them in a compact structure like casa::Cube suitable for table-based implementation
 /// (unlike CachedCalSolutionAccessor which uses named parameters). The downside of this approach is
 /// that maximum number of antennas and beams should be known in advance (or an expensive re-shape
 /// operation should be implemented, which is not done at the moment). Note, that the actual
@@ -57,7 +57,7 @@ namespace accessors {
 /// @brief implementation of the calibration solution accessor returning cached values
 /// @details This class is very similar to CachedCalSolutionAccessor and perhaps should have
 /// used that name. It supports all calibration products (i.e. gains, bandpasses and leakages)
-/// and stores them in a compact structure like casacore::Cube suitable for table-based implementation
+/// and stores them in a compact structure like casa::Cube suitable for table-based implementation
 /// (unlike CachedCalSolutionAccessor which uses named parameters). The downside of this approach is
 /// that maximum number of antennas and beams should be known in advance (or an expensive re-shape
 /// operation should be implemented, which is not done at the moment). Note, that the actual
@@ -117,7 +117,7 @@ public:
    /// @param[in] index ant/beam index
    /// @param[in] chan spectral channel of interest
    /// @return JonesJTerm object with gains and validity flags
-   virtual JonesJTerm bandpass(const JonesIndex &index, const casacore::uInt chan) const;
+   virtual JonesJTerm bandpass(const JonesIndex &index, const casa::uInt chan) const;
 
    /// @brief set gains (J-Jones)
    /// @details This method writes parallel-hand gains for both
@@ -142,7 +142,7 @@ public:
    /// @note We may add later variants of this method assuming that the bandpass is
    /// approximated somehow, e.g. by a polynomial. For simplicity, for now we deal with
    /// gains set explicitly for each channel.
-   virtual void setBandpass(const JonesIndex &index, const JonesJTerm &bp, const casacore::uInt chan);
+   virtual void setBandpass(const JonesIndex &index, const JonesJTerm &bp, const casa::uInt chan);
 
    /// @brief write back cache, if necessary
    /// @details This method checks whether caches need flush and calls appropriate methods of the filler
@@ -159,8 +159,8 @@ protected:
    /// @param[in] row polarisation/channel index (row of the cube)
    /// @param[in] index ant/beam index
    /// @return value/validity flag pair
-   static std::pair<casacore::Complex, casacore::Bool> extract(const std::pair<casacore::Cube<casacore::Complex>, casacore::Cube<casacore::Bool> >  &cubes,
-                   const casacore::uInt row, const JonesIndex &index);
+   static std::pair<casa::Complex, casa::Bool> extract(const std::pair<casa::Cube<casa::Complex>, casa::Cube<casa::Bool> >  &cubes,
+                   const casa::uInt row, const JonesIndex &index);
 
    /// @details helper method to set the value and validity flag for a given ant/beam pair
    /// @param[in] cubes non-const reference to a cube pair
@@ -168,21 +168,21 @@ protected:
    /// @param[in] isValid validity flag
    /// @param[in] row polarisation/channel index (row of the cube)
    /// @param[in] index ant/beam index
-   static void store(std::pair<casacore::Cube<casacore::Complex>, casacore::Cube<casacore::Bool> >  &cubes,
-                   const casacore::Complex &val, const casacore::Bool isValid,
-                   const casacore::uInt row, const JonesIndex &index);
+   static void store(std::pair<casa::Cube<casa::Complex>, casa::Cube<casa::Bool> >  &cubes,
+                   const casa::Complex &val, const casa::Bool isValid,
+                   const casa::uInt row, const JonesIndex &index);
 
 private:
    // cache fields
 
    /// @brief gains and validity flags (2 x nAnt x nBeam), first row is XX, second is YY
-   CachedAccessorField<std::pair<casacore::Cube<casacore::Complex>, casacore::Cube<casacore::Bool> > > itsGains;
+   CachedAccessorField<std::pair<casa::Cube<casa::Complex>, casa::Cube<casa::Bool> > > itsGains;
 
    /// @brief leakages and validity flags  (2 x nAnt x nBeam), first row is XY, second is YX
-   CachedAccessorField<std::pair<casacore::Cube<casacore::Complex>, casacore::Cube<casacore::Bool> > > itsLeakages;
+   CachedAccessorField<std::pair<casa::Cube<casa::Complex>, casa::Cube<casa::Bool> > > itsLeakages;
 
    /// @brief bandpasses and validity flags ((2*nChan) x nAnt x nBeam), rows are XX chan 0, YX
-   CachedAccessorField<std::pair<casacore::Cube<casacore::Complex>, casacore::Cube<casacore::Bool> > >  itsBandpasses;
+   CachedAccessorField<std::pair<casa::Cube<casa::Complex>, casa::Cube<casa::Bool> > >  itsBandpasses;
 
    /// @brief shared pointer to the filler which knows how to write and read cubes
    const boost::shared_ptr<ICalSolutionFiller> itsSolutionFiller;

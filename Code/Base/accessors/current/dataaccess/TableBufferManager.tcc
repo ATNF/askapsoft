@@ -50,14 +50,14 @@ namespace accessors {
 /// @param[in] name a name of the column to work with
 /// @param[in] index row number
 template<typename T>
-void TableBufferManager::readCube(casacore::Cube<T> &cube, const std::string &name,
-			    casacore::uInt index) const
+void TableBufferManager::readCube(casa::Cube<T> &cube, const std::string &name,
+			    casa::uInt index) const
 { 
  ASKAPDEBUGASSERT(table().actualTableDesc().isColumn(name));
  ASKAPDEBUGASSERT(index<table().nrow());
- typename casacore::ROArrayColumn<T> bufCol(table(),name);
+ typename casa::ROArrayColumn<T> bufCol(table(),name);
  ASKAPASSERT(bufCol.ndim(index) == 3); // only cubes should be in buffers
- bufCol.get(index,cube,casacore::True);
+ bufCol.get(index,cube,casa::True);
 }
 
 /// @brief write the cube back to the table
@@ -67,12 +67,12 @@ void TableBufferManager::readCube(casacore::Cube<T> &cube, const std::string &na
 /// @param[in] name a name of the column to work with
 /// @param[in] index row number
 template<typename T>
-void TableBufferManager::writeCube(const casacore::Cube<T> &cube, const std::string &name,
-			     casacore::uInt index) const
+void TableBufferManager::writeCube(const casa::Cube<T> &cube, const std::string &name,
+			     casa::uInt index) const
 {  
   if (!table().actualTableDesc().isColumn(name)) {
       // create a brand new buffer
-      typename casacore::ArrayColumnDesc<T> newColDesc(name,
+      typename casa::ArrayColumnDesc<T> newColDesc(name,
            "Writable buffer managed by the dataaccess layer",3);
       newColDesc.rwKeywordSet().define("UNIT","Jy");
       table().addColumn(newColDesc);
@@ -80,7 +80,7 @@ void TableBufferManager::writeCube(const casacore::Cube<T> &cube, const std::str
   if (table().nrow()<=index) {
       table().addRow(index-table().nrow()+1);
   }
-  typename casacore::ArrayColumn<T> bufCol(table(),name);
+  typename casa::ArrayColumn<T> bufCol(table(),name);
   bufCol.put(index,cube);
 }
 
@@ -91,7 +91,7 @@ void TableBufferManager::writeCube(const casacore::Cube<T> &cube, const std::str
 /// @note template type defined the type of the data
 template<typename T>
 bool TableBufferManager::cellDefined(const std::string &name,
-			      casacore::uInt index) const
+			      casa::uInt index) const
 {
   if (!table().actualTableDesc().isColumn(name)) {
       // there is no such column at all
@@ -101,7 +101,7 @@ bool TableBufferManager::cellDefined(const std::string &name,
       // column exists, but the index requested is beyond the limits
       return false;
   }
-  typename casacore::ROArrayColumn<T> bufCol(table(),name);
+  typename casa::ROArrayColumn<T> bufCol(table(),name);
   return bufCol.isDefined(index);
 }
 

@@ -55,20 +55,20 @@ struct ITablePolarisationHolder : virtual public IHolder {
    /// @brief number of polarisation products for the given ID
    /// @param[in] polID polarisation ID of interest
    /// @return number of products for the given ID
-   virtual size_t nPol(casacore::uInt polID) const = 0;
+   virtual size_t nPol(casa::uInt polID) const = 0;
    
    /// @brief obtain polarisation types for the given ID
    /// @param[in] polID polarisation ID of interest
    /// @return a vector (size is nPol) with types of polarisation products, same order as in the
    /// visibility cube
-   virtual casacore::Vector<casacore::Stokes::StokesTypes> getTypes(casacore::uInt polID) const = 0;
+   virtual casa::Vector<casa::Stokes::StokesTypes> getTypes(casa::uInt polID) const = 0;
    
    /// @brief obtain polarisation type of a single polarisation product
    /// @details This version of the method extracts type for just one polarisation product.
    /// @param[in] polID polarisation ID of interest
    /// @param[in] pol polarisation product (should be less than nPol)
-   /// @return a type of the polarisation product given as casacore::Stokes
-   virtual casacore::Stokes::StokesTypes getType(casacore::uInt polID, casacore::uInt pol) const = 0;
+   /// @return a type of the polarisation product given as casa::Stokes
+   virtual casa::Stokes::StokesTypes getType(casa::uInt polID, casa::uInt pol) const = 0;
 };
 
 } // namespace accessors

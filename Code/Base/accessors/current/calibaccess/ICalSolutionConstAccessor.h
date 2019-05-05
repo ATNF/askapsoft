@@ -95,7 +95,7 @@ struct ICalSolutionConstAccessor {
    /// @param[in] index ant/beam index
    /// @param[in] chan spectral channel of interest
    /// @return JonesJTerm object with gains and validity flags
-   virtual JonesJTerm bandpass(const JonesIndex &index, const casacore::uInt chan) const = 0;
+   virtual JonesJTerm bandpass(const JonesIndex &index, const casa::uInt chan) const = 0;
    
    // helper methods to simplify access to the calibration parameters
    
@@ -113,7 +113,7 @@ struct ICalSolutionConstAccessor {
    /// d21 (corresponding to Stokes::YX) correspond to d_{Ap} and d_{Aq} from
    /// Hamaker, Bregman & Sault, respectively. It is assumed that the gain errors
    /// are applied after leakages (i.e. R=GD).  
-   casacore::SquareMatrix<casacore::Complex, 2> jones(const JonesIndex &index, const casacore::uInt chan) const;
+   casa::SquareMatrix<casa::Complex, 2> jones(const JonesIndex &index, const casa::uInt chan) const;
       
    /// @brief obtain full 2x2 Jones Matrix taking all effects into account
    /// @details This version of the method accepts antenna and beam indices explicitly and
@@ -122,7 +122,7 @@ struct ICalSolutionConstAccessor {
    /// @param[in] beam beam index
    /// @param[in] chan spectral channel of interest
    /// @return 2x2 Jones matrix
-   casacore::SquareMatrix<casacore::Complex, 2> jones(const casacore::uInt ant, const casacore::uInt beam, const casacore::uInt chan) const;
+   casa::SquareMatrix<casa::Complex, 2> jones(const casa::uInt ant, const casa::uInt beam, const casa::uInt chan) const;
    
    /// @brief obtain validity flag for the full 2x2 Jones Matrix
    /// @details This method combines all validity flags for parameters used to compose Jones
@@ -132,7 +132,7 @@ struct ICalSolutionConstAccessor {
    /// @param[in] chan spectral channel of interest
    /// @return true, if the matrix returned by jones(...) method called with the same parameters is
    /// valid, false otherwise
-   bool jonesValid(const JonesIndex &index, const casacore::uInt chan) const;
+   bool jonesValid(const JonesIndex &index, const casa::uInt chan) const;
    
    /// @brief obtain validity flag for the full 2x2 Jones Matrix
    /// @details This version of the method accepts antenna and beam indices explicitly and
@@ -142,7 +142,7 @@ struct ICalSolutionConstAccessor {
    /// @param[in] chan spectral channel of interest
    /// @return true, if the matrix returned by jones(...) method called with the same parameters is
    /// valid, false otherwise
-   bool jonesValid(const casacore::uInt ant, const casacore::uInt beam, const casacore::uInt chan) const;
+   bool jonesValid(const casa::uInt ant, const casa::uInt beam, const casa::uInt chan) const;
 
    /// @brief shared pointer definition
    typedef boost::shared_ptr<ICalSolutionConstAccessor> ShPtr;

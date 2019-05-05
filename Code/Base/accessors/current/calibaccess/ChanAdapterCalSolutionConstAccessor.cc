@@ -42,7 +42,7 @@ namespace accessors {
 /// is wrapped around and the channel offset
 /// @param[in] acc shared pointer to the original accessor to wrap
 /// @param[in] offset channel offset to add to bandpass request
-ChanAdapterCalSolutionConstAccessor::ChanAdapterCalSolutionConstAccessor(const boost::shared_ptr<ICalSolutionConstAccessor> &acc, const casacore::uInt offset) :
+ChanAdapterCalSolutionConstAccessor::ChanAdapterCalSolutionConstAccessor(const boost::shared_ptr<ICalSolutionConstAccessor> &acc, const casa::uInt offset) :
         itsAccessor(acc), itsOffset(offset) 
 {
    ASKAPASSERT(acc);
@@ -86,7 +86,7 @@ JonesDTerm ChanAdapterCalSolutionConstAccessor::leakage(const JonesIndex &index)
 /// @param[in] index ant/beam index
 /// @param[in] chan spectral channel of interest
 /// @return JonesJTerm object with gains and validity flags
-JonesJTerm ChanAdapterCalSolutionConstAccessor::bandpass(const JonesIndex &index, const casacore::uInt chan) const
+JonesJTerm ChanAdapterCalSolutionConstAccessor::bandpass(const JonesIndex &index, const casa::uInt chan) const
 {
    return itsAccessor->bandpass(index, chan + itsOffset);
 }

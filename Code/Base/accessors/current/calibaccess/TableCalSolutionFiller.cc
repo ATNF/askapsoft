@@ -48,9 +48,9 @@ void TableCalSolutionFiller::checkForNewRow()
   ASKAPDEBUGASSERT(itsRefRow <= long(table().nrow()));
   itsCreateNew = (itsRefRow + 1 == long(table().nrow()));
   if (itsCreateNew) {
-      const bool gainsWritten = cellDefined<casacore::Complex>("GAIN", casacore::uInt(itsRefRow));
-      const bool leakagesWritten = cellDefined<casacore::Complex>("LEAKAGE", casacore::uInt(itsRefRow));
-      const bool bpWritten = cellDefined<casacore::Complex>("BANDPASS", casacore::uInt(itsRefRow));
+      const bool gainsWritten = cellDefined<casa::Complex>("GAIN", casa::uInt(itsRefRow));
+      const bool leakagesWritten = cellDefined<casa::Complex>("LEAKAGE", casa::uInt(itsRefRow));
+      const bool bpWritten = cellDefined<casa::Complex>("BANDPASS", casa::uInt(itsRefRow));
       itsCreateNew = !gainsWritten && !leakagesWritten && !bpWritten;
   }
   if (itsCreateNew) {
@@ -65,7 +65,7 @@ void TableCalSolutionFiller::checkForNewRow()
 /// @details read-only operation is assumed
 /// @param[in] tab  table to use
 /// @param[in] row reference row
-TableCalSolutionFiller::TableCalSolutionFiller(const casacore::Table& tab, const long row) : TableHolder(tab), 
+TableCalSolutionFiller::TableCalSolutionFiller(const casa::Table& tab, const long row) : TableHolder(tab), 
        TableBufferManager(tab), itsNAnt(0), itsNBeam(0), itsNChan(0), itsRefRow(row), itsGainsRow(-1),
        itsLeakagesRow(-1), itsBandpassesRow(-1), itsCreateNew(false)
 {
@@ -82,8 +82,8 @@ TableCalSolutionFiller::TableCalSolutionFiller(const casacore::Table& tab, const
 /// @param[in] nAnt maximum number of antennas
 /// @param[in] nBeam maximum number of beams   
 /// @param[in] nChan maximum number of channels   
-TableCalSolutionFiller::TableCalSolutionFiller(const casacore::Table& tab, const long row, const casacore::uInt nAnt, 
-          const casacore::uInt nBeam, const casacore::uInt nChan) : TableHolder(tab), 
+TableCalSolutionFiller::TableCalSolutionFiller(const casa::Table& tab, const long row, const casa::uInt nAnt, 
+          const casa::uInt nBeam, const casa::uInt nChan) : TableHolder(tab), 
        TableBufferManager(tab), itsNAnt(nAnt), itsNBeam(nBeam), itsNChan(nChan), itsRefRow(row), itsGainsRow(-1),
        itsLeakagesRow(-1), itsBandpassesRow(-1), itsCreateNew(false) 
 {
@@ -131,7 +131,7 @@ bool TableCalSolutionFiller::noBandpass() const
 /// @brief gains filler  
 /// @details
 /// @param[in] gains pair of cubes with gains and validity flags (to be resised to 2 x nAnt x nBeam)
-void TableCalSolutionFiller::fillGains(std::pair<casacore::Cube<casacore::Complex>, casacore::Cube<casacore::Bool> > &gains) const
+void TableCalSolutionFiller::fillGains(std::pair<casa::Cube<casa::Complex>, casa::Cube<casa::Bool> > &gains) const
 {
   if (itsCreateNew || noGain()) {
       ASKAPDEBUGASSERT(itsGainsRow < 0);
@@ -145,10 +145,10 @@ void TableCalSolutionFiller::fillGains(std::pair<casacore::Cube<casacore::Comple
          itsGainsRow = findDefinedCube("GAIN");
      }
      ASKAPASSERT(itsGainsRow>=0);
-     ASKAPCHECK(cellDefined<casacore::Bool>("GAIN_VALID", casacore::uInt(itsGainsRow)), 
+     ASKAPCHECK(cellDefined<casa::Bool>("GAIN_VALID", casa::uInt(itsGainsRow)), 
          "Wrong format of the calibration table: GAIN element should always be accompanied by GAIN_VALID");
-     readCube(gains.first, "GAIN", casacore::uInt(itsGainsRow));
-     readCube(gains.second, "GAIN_VALID", casacore::uInt(itsGainsRow));
+     readCube(gains.first, "GAIN", casa::uInt(itsGainsRow));
+     readCube(gains.second, "GAIN_VALID", casa::uInt(itsGainsRow));
   }
   ASKAPCHECK(gains.first.shape() == gains.second.shape(), "GAIN and GAIN_VALID cubes are expected to have the same shape");
 }
@@ -156,7 +156,7 @@ void TableCalSolutionFiller::fillGains(std::pair<casacore::Cube<casacore::Comple
 /// @brief leakage filler  
 /// @details
 /// @param[in] leakages pair of cubes with leakages and validity flags (to be resised to 2 x nAnt x nBeam)
-void TableCalSolutionFiller::fillLeakages(std::pair<casacore::Cube<casacore::Complex>, casacore::Cube<casacore::Bool> > &leakages) const
+void TableCalSolutionFiller::fillLeakages(std::pair<casa::Cube<casa::Complex>, casa::Cube<casa::Bool> > &leakages) const
 {
   if (itsCreateNew || noLeakage()) {
       ASKAPDEBUGASSERT(itsLeakagesRow < 0);
@@ -170,10 +170,10 @@ void TableCalSolutionFiller::fillLeakages(std::pair<casacore::Cube<casacore::Com
          itsLeakagesRow = findDefinedCube("LEAKAGE");
      }
      ASKAPASSERT(itsLeakagesRow>=0);
-     ASKAPCHECK(cellDefined<casacore::Bool>("LEAKAGE_VALID", casacore::uInt(itsLeakagesRow)), 
+     ASKAPCHECK(cellDefined<casa::Bool>("LEAKAGE_VALID", casa::uInt(itsLeakagesRow)), 
          "Wrong format of the calibration table: LEAKAGE element should always be accompanied by LEAKAGE_VALID");
-     readCube(leakages.first, "LEAKAGE", casacore::uInt(itsLeakagesRow));
-     readCube(leakages.second, "LEAKAGE_VALID", casacore::uInt(itsLeakagesRow));
+     readCube(leakages.first, "LEAKAGE", casa::uInt(itsLeakagesRow));
+     readCube(leakages.second, "LEAKAGE_VALID", casa::uInt(itsLeakagesRow));
   }
   ASKAPCHECK(leakages.first.shape() == leakages.second.shape(), "LEAKAGE and LEAKAGE_VALID cubes are expected to have the same shape");
 }
@@ -181,7 +181,7 @@ void TableCalSolutionFiller::fillLeakages(std::pair<casacore::Cube<casacore::Com
 /// @brief bandpass filler  
 /// @details
 /// @param[in] bp pair of cubes with bandpasses and validity flags (to be resised to (2*nChan) x nAnt x nBeam)
-void TableCalSolutionFiller::fillBandpasses(std::pair<casacore::Cube<casacore::Complex>, casacore::Cube<casacore::Bool> > &bp) const
+void TableCalSolutionFiller::fillBandpasses(std::pair<casa::Cube<casa::Complex>, casa::Cube<casa::Bool> > &bp) const
 {
   if (itsCreateNew || noBandpass()) {
       ASKAPDEBUGASSERT(itsBandpassesRow < 0);
@@ -195,10 +195,10 @@ void TableCalSolutionFiller::fillBandpasses(std::pair<casacore::Cube<casacore::C
          itsBandpassesRow = findDefinedCube("BANDPASS");
      }
      ASKAPASSERT(itsBandpassesRow>=0);
-     ASKAPCHECK(cellDefined<casacore::Bool>("BANDPASS_VALID", casacore::uInt(itsBandpassesRow)), 
+     ASKAPCHECK(cellDefined<casa::Bool>("BANDPASS_VALID", casa::uInt(itsBandpassesRow)), 
          "Wrong format of the calibration table: BANDPASS element should always be accompanied by BANDPASS_VALID");
-     readCube(bp.first, "BANDPASS", casacore::uInt(itsBandpassesRow));
-     readCube(bp.second, "BANDPASS_VALID", casacore::uInt(itsBandpassesRow));
+     readCube(bp.first, "BANDPASS", casa::uInt(itsBandpassesRow));
+     readCube(bp.second, "BANDPASS_VALID", casa::uInt(itsBandpassesRow));
   }
   ASKAPCHECK(bp.first.shape() == bp.second.shape(), "BANDPASS and BANDPASS_VALID cubes are expected to have the same shape");
 }
@@ -206,34 +206,34 @@ void TableCalSolutionFiller::fillBandpasses(std::pair<casacore::Cube<casacore::C
 /// @brief gains writer
 /// @details
 /// @param[in] gains pair of cubes with gains and validity flags (should be 2 x nAnt x nBeam)
-void TableCalSolutionFiller::writeGains(const std::pair<casacore::Cube<casacore::Complex>, casacore::Cube<casacore::Bool> > &gains) const
+void TableCalSolutionFiller::writeGains(const std::pair<casa::Cube<casa::Complex>, casa::Cube<casa::Bool> > &gains) const
 {
   ASKAPASSERT(itsGainsRow>=0);
   ASKAPCHECK(gains.first.shape() == gains.second.shape(), "The cubes with gains and validity flags are expected to have the same shape");
-  writeCube(gains.first, "GAIN", casacore::uInt(itsGainsRow));
-  writeCube(gains.second, "GAIN_VALID", casacore::uInt(itsGainsRow));    
+  writeCube(gains.first, "GAIN", casa::uInt(itsGainsRow));
+  writeCube(gains.second, "GAIN_VALID", casa::uInt(itsGainsRow));    
 }
   
 /// @brief leakage writer  
 /// @details
 /// @param[in] leakages pair of cubes with leakages and validity flags (should be 2 x nAnt x nBeam)
-void TableCalSolutionFiller::writeLeakages(const std::pair<casacore::Cube<casacore::Complex>, casacore::Cube<casacore::Bool> > &leakages) const
+void TableCalSolutionFiller::writeLeakages(const std::pair<casa::Cube<casa::Complex>, casa::Cube<casa::Bool> > &leakages) const
 {
   ASKAPASSERT(itsLeakagesRow>=0);
   ASKAPCHECK(leakages.first.shape() == leakages.second.shape(), "The cubes with leakages and validity flags are expected to have the same shape");
-  writeCube(leakages.first, "LEAKAGE", casacore::uInt(itsLeakagesRow));
-  writeCube(leakages.second, "LEAKAGE_VALID", casacore::uInt(itsLeakagesRow));    
+  writeCube(leakages.first, "LEAKAGE", casa::uInt(itsLeakagesRow));
+  writeCube(leakages.second, "LEAKAGE_VALID", casa::uInt(itsLeakagesRow));    
 }
 
 /// @brief bandpass writer  
 /// @details
 /// @param[in] bp pair of cubes with bandpasses and validity flags (should be (2*nChan) x nAnt x nBeam)
-void TableCalSolutionFiller::writeBandpasses(const std::pair<casacore::Cube<casacore::Complex>, casacore::Cube<casacore::Bool> > &bp) const
+void TableCalSolutionFiller::writeBandpasses(const std::pair<casa::Cube<casa::Complex>, casa::Cube<casa::Bool> > &bp) const
 {
   ASKAPASSERT(itsBandpassesRow>=0);
   ASKAPCHECK(bp.first.shape() == bp.second.shape(), "The cubes with bandpasses and validity flags are expected to have the same shape");
-  writeCube(bp.first, "BANDPASS", casacore::uInt(itsBandpassesRow));
-  writeCube(bp.second, "BANDPASS_VALID", casacore::uInt(itsBandpassesRow));    
+  writeCube(bp.first, "BANDPASS", casa::uInt(itsBandpassesRow));
+  writeCube(bp.second, "BANDPASS_VALID", casa::uInt(itsBandpassesRow));    
 }
 
 /// @brief find first defined cube searching backwards
@@ -246,7 +246,7 @@ void TableCalSolutionFiller::writeBandpasses(const std::pair<casacore::Cube<casa
 long TableCalSolutionFiller::findDefinedCube(const std::string &name) const
 {
   for (long tempRow = itsRefRow; tempRow >= 0; --tempRow) {
-       if (cellDefined<casacore::Complex>(name, casacore::uInt(tempRow))) {
+       if (cellDefined<casa::Complex>(name, casa::uInt(tempRow))) {
            return tempRow;
        }
   }

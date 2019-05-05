@@ -66,7 +66,7 @@ public:
   ///         spectral channel (vector size is nChannel). Frequencies
   ///         are given as Doubles, the frame/units are specified by
   ///         the DataSource object
-  virtual const casacore::Vector<casacore::Double>& frequency() const;
+  virtual const casa::Vector<casa::Double>& frequency() const;
 
   /// @brief read-write access to the frequency
   /// @details The first call to this method detaches the adapter from the original
@@ -76,7 +76,7 @@ public:
   ///         spectral channel (vector size is nChannel). Frequencies
   ///         are given as Doubles, the frame/units are specified by
   ///         the DataSource object
-  virtual casacore::Vector<casacore::Double>& rwFrequency();
+  virtual casa::Vector<casa::Double>& rwFrequency();
   
   /// @brief force the adapter to use the buffer
   /// @details This method matches well the intended use case of this adapter. It
@@ -89,7 +89,7 @@ private:
   bool itsFrequencySubstituted;
   
   /// @brief buffer for noise (used if itsNoiseSubstituted is true)
-  casacore::Vector<casacore::Double> itsFrequencyBuffer;  
+  casa::Vector<casa::Double> itsFrequencyBuffer;  
 };
 
 } // namespace accessors

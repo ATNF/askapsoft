@@ -37,8 +37,8 @@
 // Using
 using namespace askap::accessors;
 
-JonesIndex::JonesIndex(const casacore::Short antenna,
-                       const casacore::Short beam)
+JonesIndex::JonesIndex(const casa::Short antenna,
+                       const casa::Short beam)
         : itsAntenna(antenna), itsBeam(beam)
 {
 }
@@ -48,19 +48,19 @@ JonesIndex::JonesIndex(const casacore::Short antenna,
 ///                     antenna ID.
 /// @param[in] beam     ID of the beam. Again, must map to an actual
 ///                     beam.
-JonesIndex::JonesIndex(const casacore::uInt antenna, casacore::uInt beam) :
-    itsAntenna(casacore::Short(antenna)), itsBeam(casacore::Short(beam))
+JonesIndex::JonesIndex(const casa::uInt antenna, casa::uInt beam) :
+    itsAntenna(casa::Short(antenna)), itsBeam(casa::Short(beam))
 {
-  // casacore::Short is defined as short in aipstype.h, which sets this limit
+  // casa::Short is defined as short in aipstype.h, which sets this limit
   ASKAPCHECK(antenna < 32768, "Antenna index is supposed to be less than 32768");
   ASKAPCHECK(beam < 32768, "Beam index supposed to be less than 32768");
 }
 
-casacore::Short JonesIndex::antenna(void) const
+casa::Short JonesIndex::antenna(void) const
 {
     return itsAntenna;
 }
-casacore::Short JonesIndex::beam(void) const
+casa::Short JonesIndex::beam(void) const
 {
     return itsBeam;
 }

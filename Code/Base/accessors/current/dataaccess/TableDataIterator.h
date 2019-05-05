@@ -83,7 +83,7 @@ public:
               const boost::shared_ptr<ITableDataSelectorImpl const> &sel,
 	      const boost::shared_ptr<IDataConverterImpl const> &conv,
 	      size_t cacheSize = 1, double tolerance = 1e-6,
-	      casacore::uInt maxChunkSize = INT_MAX);
+	      casa::uInt maxChunkSize = INT_MAX);
 
   /// destructor required to sync buffers on the last iteration
   virtual ~TableDataIterator();
@@ -134,7 +134,7 @@ public:
   /// advance the iterator one step further 
   /// @return True if there are more data (so constructions like 
   ///         while(it.next()) {} are possible)
-  virtual casacore::Bool next();
+  virtual casa::Bool next();
 
   // to make it public instead of protected
   using TableConstDataIterator::getAccessor;
@@ -143,14 +143,14 @@ public:
   /// @param[in] vis a reference to the nRow x nChannel x nPol buffer
   ///            cube to fill with the complex visibility data
   /// @param[in] name a name of the buffer to work with
-  virtual void readBuffer(casacore::Cube<casacore::Complex> &vis,
+  virtual void readBuffer(casa::Cube<casa::Complex> &vis,
                           const std::string &name) const;
 
   /// write the cube back to the given buffer  
   /// @param[in] vis a reference to the nRow x nChannel x nPol buffer
   ///            cube to fill with the complex visibility data
   /// @param[in] name a name of the buffer to work with
-  virtual void writeBuffer(const casacore::Cube<casacore::Complex> &vis,
+  virtual void writeBuffer(const casa::Cube<casa::Complex> &vis,
                            const std::string &name) const;
   	
   /// @brief write back visibilities
@@ -186,7 +186,7 @@ private:
   ///                 of the appropriate shape
   /// @param[in] colName Name of the column 
   template<typename T>
-  void writeCube(const casacore::Cube<T> &cube, const std::string &colName) const;
+  void writeCube(const casa::Cube<T> &cube, const std::string &colName) const;
 
 
 
@@ -205,7 +205,7 @@ private:
 
   /// counter of the iteration steps. It is used to store the buffers
   /// to the appropriate cell of the disk table
-  casacore::uInt itsIterationCounter;
+  casa::uInt itsIterationCounter;
 };
 
 } // end of namespace accessors

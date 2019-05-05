@@ -6,7 +6,7 @@
 /// Typically, the need for such class arises if one needs a buffering
 /// on each individual iteration and the content of buffers is not required 
 /// to be preserved when the corresponding iterator advances. In most cases,
-/// a casacore::Cube with the same dimensions as that returned by the visibility
+/// a casa::Cube with the same dimensions as that returned by the visibility
 /// method can be used. However, it can also be desireable to be able to
 /// use existing API accepting a reference to an accessor for this buffer, or,
 /// alternatively to pass around this buffer with associated metadata supplied
@@ -60,7 +60,7 @@ namespace accessors {
 /// Typically, the need for such class arises if one needs a buffering
 /// on each individual iteration and the content of buffers is not required 
 /// to be preserved when the corresponding iterator advances. In most cases,
-/// a casacore::Cube with the same dimensions as that returned by the visibility
+/// a casa::Cube with the same dimensions as that returned by the visibility
 /// method can be used. However, it can also be desireable to be able to
 /// use existing API accepting a reference to an accessor for this buffer, or,
 /// alternatively to pass around this buffer with associated metadata supplied
@@ -84,7 +84,7 @@ public:
   /// @return a reference to nRow x nChannel x nPol cube, containing
   /// all visibility data
   ///
-  virtual const casacore::Cube<casacore::Complex>& visibility() const;
+  virtual const casa::Cube<casa::Complex>& visibility() const;
 
 	
   /// Read-write access to visibilities (a cube is nRow x nChannel x nPol;
@@ -93,7 +93,7 @@ public:
   /// @return a reference to nRow x nChannel x nPol cube, containing
   /// all visibility data
   ///
-  virtual casacore::Cube<casacore::Complex>& rwVisibility();
+  virtual casa::Cube<casa::Complex>& rwVisibility();
     
   
 private:
@@ -101,7 +101,7 @@ private:
   void resizeBufferIfNeeded() const;
   
   /// @brief actual buffer
-  mutable casacore::Cube<casacore::Complex> itsBuffer;
+  mutable casa::Cube<casa::Complex> itsBuffer;
   
   #ifdef _OPENMP
   /// @brief synchronisation lock for resizing of the buffer

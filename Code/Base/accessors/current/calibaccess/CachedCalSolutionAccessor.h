@@ -105,7 +105,7 @@ public:
   /// @param[in] index ant/beam index
   /// @param[in] chan spectral channel of interest
   /// @return JonesJTerm object with gains and validity flags
-  virtual JonesJTerm bandpass(const JonesIndex &index, const casacore::uInt chan) const;
+  virtual JonesJTerm bandpass(const JonesIndex &index, const casa::uInt chan) const;
   
   /// @brief set gains (J-Jones)
   /// @details This method writes parallel-hand gains for both 
@@ -130,7 +130,7 @@ public:
   /// @note We may add later variants of this method assuming that the bandpass is
   /// approximated somehow, e.g. by a polynomial. For simplicity, for now we deal with 
   /// gains set explicitly for each channel.
-  virtual void setBandpass(const JonesIndex &index, const JonesJTerm &bp, const casacore::uInt chan);
+  virtual void setBandpass(const JonesIndex &index, const JonesJTerm &bp, const casa::uInt chan);
   
   
   /// @brief direct access to the cache
@@ -148,7 +148,7 @@ protected:
   /// @param[in] name string name of the parameter
   /// @param[in] val complex value to be set
   /// @param[in] isValid true, if the given value is valid (method just returns otherwise)
-  void updateParamInCache(const std::string &name, const casacore::Complex &val, const bool isValid = true);
+  void updateParamInCache(const std::string &name, const casa::Complex &val, const bool isValid = true);
     
 private:  
   /// @brief shared pointer to the cache of parameters

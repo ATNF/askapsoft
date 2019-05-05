@@ -94,8 +94,8 @@ public:
     /// @param[in] unit a required time unit for timestamps
     ///
     /// Class defaults to MJD 0 UTC, timestamp in seconds
-    virtual void setEpochFrame(const casacore::MEpoch &origin = casacore::MEpoch(),
-    	   const casacore::Unit &unit = "s");
+    virtual void setEpochFrame(const casa::MEpoch &origin = casa::MEpoch(),
+    	   const casa::Unit &unit = "s");
     
     /// set the reference frame for directions. At this moment we
     /// have only pointing direction accessible via DataAccessor.
@@ -105,8 +105,8 @@ public:
     ///            (default is J2000).
     /// @param[in] unit units for all direction offsets. Unused at the
     ///             moment. Default units are radians.
-    virtual void setDirectionFrame(const casacore::MDirection::Ref &ref,
-                   const casacore::Unit &unit = "rad");
+    virtual void setDirectionFrame(const casa::MDirection::Ref &ref,
+                   const casa::Unit &unit = "rad");
     
     /// set the reference frame for any frequency
     /// (e.g. in the frequency-based selection or frequency to channel
@@ -116,8 +116,8 @@ public:
     ///             as Doubles)
     ///
     /// Class defaults to LSRK, GHz
-    virtual void setFrequencyFrame(const casacore::MFrequency::Ref &ref,
-	   const casacore::Unit &unit = "GHz");
+    virtual void setFrequencyFrame(const casa::MFrequency::Ref &ref,
+	   const casa::Unit &unit = "GHz");
 
     /// set the reference frame for any velocity
     /// (e.g. in the velocity-based selection or spectral labelling)
@@ -126,8 +126,8 @@ public:
     ///             as Doubles)
     ///  
     /// Class defaults to LSRK, km/s
-    virtual void setVelocityFrame(const casacore::MRadialVelocity::Ref &ref,
-    		const casacore::Unit &unit = "km/s");
+    virtual void setVelocityFrame(const casa::MRadialVelocity::Ref &ref,
+    		const casa::Unit &unit = "km/s");
     
     /// set the rest frequency required to do the frequency to velocity
     /// conversion for most types of DataSources. Systems which
@@ -138,12 +138,12 @@ public:
     /// @param[in] restFreq a rest frequency to be used for interconversions
     ///                 between frequencies and velocities
     ///
-    virtual void setRestFrequency(const casacore::MVFrequency &restFreq);
+    virtual void setRestFrequency(const casa::MVFrequency &restFreq);
 
     /// set a frame (for epochs it is just a position), where the
     /// conversion is performed
     /// @param[in] frame measure's frame object
-    virtual void setMeasFrame(const casacore::MeasFrame &frame);
+    virtual void setMeasFrame(const casa::MeasFrame &frame);
 
 
     /// following methods are used within the DataSource/DataIterator
@@ -151,39 +151,39 @@ public:
     /// convert epochs
     /// @param[in] in input epoch given as an MEpoch object
     /// @return epoch converted to Double 
-    virtual casacore::Double epoch(const casacore::MEpoch &in) const;    
+    virtual casa::Double epoch(const casa::MEpoch &in) const;    
 
     /// reverse conversion: form a measure from 'double' epoch
     /// @param[in] in epoch given as Double in the target units/frame
     /// @return epoch converted to Measure
-    virtual casacore::MEpoch epochMeasure(casacore::Double in) const;
+    virtual casa::MEpoch epochMeasure(casa::Double in) const;
 
     /// reverse conversion: form a measure from MVEpoch
     /// @param[in] in epoch given as MVEpoch in the target frame
     /// @return epoch converted to Measure
-    virtual casacore::MEpoch epochMeasure(const casacore::MVEpoch &in) const;
+    virtual casa::MEpoch epochMeasure(const casa::MVEpoch &in) const;
 
     /// convert directions
     /// @param[in] in input direction given as an MDirection object
     /// @param[out] out output direction as an MVDirection object
-    virtual void direction(const casacore::MDirection &in, 
-                          casacore::MVDirection &out) const;
+    virtual void direction(const casa::MDirection &in, 
+                          casa::MVDirection &out) const;
 
     /// test whether the frequency conversion is void
     /// @param[in] testRef reference frame to test
     /// @param[in] testUnit units to test
-    virtual bool isVoid(const casacore::MFrequency::Ref &testRef,
-                        const casacore::Unit &testUnit) const;
+    virtual bool isVoid(const casa::MFrequency::Ref &testRef,
+                        const casa::Unit &testUnit) const;
 
     /// convert frequencies
     /// @param[in] in input frequency given as an MFrequency object
     /// @return output frequency as a Double
-    virtual casacore::Double frequency(const casacore::MFrequency &in) const;
+    virtual casa::Double frequency(const casa::MFrequency &in) const;
 
     /// convert velocities
     /// @param[in] in input velocities given as an MRadialVelocity object
     /// @return output velocity as a Double
-    virtual casacore::Double velocity(const casacore::MRadialVelocity &in) const;    
+    virtual casa::Double velocity(const casa::MRadialVelocity &in) const;    
 
     /// convert frequencies from velocities
     /// @param[in] in input velocity given as an MRadialVelocity object
@@ -192,7 +192,7 @@ public:
     /// @note An exception will be thrown if the rest frequency is not
     /// defined.
     ///
-    virtual casacore::Double frequency(const casacore::MRadialVelocity &in) const;
+    virtual casa::Double frequency(const casa::MRadialVelocity &in) const;
     
 
     /// convert velocities from frequencies
@@ -202,7 +202,7 @@ public:
     /// @note An exception will be thrown if the rest frequency is not
     /// defined.
     ///
-    virtual casacore::Double velocity(const casacore::MFrequency &in) const;    
+    virtual casa::Double velocity(const casa::MFrequency &in) const;    
     
     /// @brief Clone the converter (sort of a virtual constructor)
     /// @details The same converter can be used to create a number of iterators.
@@ -224,9 +224,9 @@ public:
 private:
     boost::shared_ptr<IEpochConverter>      itsEpochConverter;
     boost::shared_ptr<IDirectionConverter>  itsDirectionConverter;
-    boost::shared_ptr<GenericConverter<casacore::MFrequency> >
+    boost::shared_ptr<GenericConverter<casa::MFrequency> >
                                             itsFrequencyConverter;
-    boost::shared_ptr<GenericConverter<casacore::MRadialVelocity> >
+    boost::shared_ptr<GenericConverter<casa::MRadialVelocity> >
                                             itsVelocityConverter;
     boost::shared_ptr<IDopplerConverter>    itsDopplerConverter;
 };

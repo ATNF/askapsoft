@@ -64,16 +64,16 @@ public:
    /// @param[in] project reprojection flag (always assumed true)
    /// @note in and out are swapped w.r.t. casa UVWMachine as this is how it is used in
    /// the current code
-   TempUVWMachine(const casacore::MDirection &in, const casacore::MDirection &out, const bool EW = false, const bool project = true);
+   TempUVWMachine(const casa::MDirection &in, const casa::MDirection &out, const bool EW = false, const bool project = true);
    
    /// @brief convert uvw
    /// @param[in] delay reference to delay buffer
    /// @param[in] uvw reference to uvw vector to update
-   void convertUVW(casacore::Double &delay, casacore::Vector<casacore::Double> &uvw) const;
+   void convertUVW(casa::Double &delay, casa::Vector<casa::Double> &uvw) const;
 
    /// @brief convert uvw
    /// @param[in] uvw reference to uvw vector to update
-   void convertUVW(casacore::Vector<casacore::Double> &uvw) const;
+   void convertUVW(casa::Vector<casa::Double> &uvw) const;
    
 private:
    /// @brief initialise transform matrices
@@ -81,20 +81,20 @@ private:
       
    /// @brief direction corresponding to the old delay centre
    /// @note the reference frame corresponds to the old delay centre
-   casacore::MDirection itsIn;
+   casa::MDirection itsIn;
    
    /// @brief direction corresponding to the new delay centre
-   casacore::MDirection itsOut;   
+   casa::MDirection itsOut;   
    
    /// @brief uvw rotation
    /// @note The uvw vector is right-multiplied by this rotation matrix, so the actual rotation matrix is transposed
-   casacore::RotMatrix itsUVWRotation;
+   casa::RotMatrix itsUVWRotation;
    
    /// @brief phase rotation
-   casacore::MVPosition itsPhaseRotation;
+   casa::MVPosition itsPhaseRotation;
    
    /// @brief conversion engine 
-   casacore::MDirection::Convert itsConv;
+   casa::MDirection::Convert itsConv;
 };
 
 } // namespace accessors

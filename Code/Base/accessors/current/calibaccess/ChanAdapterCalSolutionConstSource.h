@@ -53,7 +53,7 @@ struct ChanAdapterCalSolutionConstSource  : public ICalSolutionConstSource {
    /// is wrapped around and the channel offset
    /// @param[in] src shared pointer to the original source
    /// @param[in] offset channel offset to add to bandpass value request
-   ChanAdapterCalSolutionConstSource(const boost::shared_ptr<ICalSolutionConstSource> &src, const casacore::uInt offset);
+   ChanAdapterCalSolutionConstSource(const boost::shared_ptr<ICalSolutionConstSource> &src, const casa::uInt offset);
   
    /// @brief obtain ID for the most recent solution
    /// @return ID for the most recent solution
@@ -84,7 +84,7 @@ private:
    const boost::shared_ptr<ICalSolutionConstSource> itsSource;
 
    /// @brief channel offset
-   const casacore::uInt itsOffset;
+   const casa::uInt itsOffset;
 
 };
 

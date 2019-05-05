@@ -76,7 +76,7 @@ public:
   /// @param conv  a shared pointer to the converter, which is used to sort
   ///              out epochs and other measures used in the selection
   /// @return a const reference to table expression node object
-  virtual const casacore::TableExprNode& getTableSelector(const
+  virtual const casa::TableExprNode& getTableSelector(const
                boost::shared_ptr<IDataConverterImpl const> &conv) const = 0;
   
   /// @brief choose data column

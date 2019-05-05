@@ -75,7 +75,7 @@ struct ICalSolutionAccessor : virtual public ICalSolutionConstAccessor {
    /// @note We may add later variants of this method assuming that the bandpass is
    /// approximated somehow, e.g. by a polynomial. For simplicity, for now we deal with
    /// gains set explicitly for each channel.
-   virtual void setBandpass(const JonesIndex &index, const JonesJTerm &bp, const casacore::uInt chan) = 0;
+   virtual void setBandpass(const JonesIndex &index, const JonesJTerm &bp, const casa::uInt chan) = 0;
 
    // additional (non-virtual) helper methods to simplify access (working via virtual methods)
 
@@ -89,7 +89,7 @@ struct ICalSolutionAccessor : virtual public ICalSolutionConstAccessor {
    /// @param[in] index ant/beam index
    /// @param[in] stokes what element to update (choose from XX,XY,YX and YY)
    /// @param[in] elem value to set
-   void setJonesElement(const JonesIndex &index, const casacore::Stokes::StokesTypes stokes, const casacore::Complex &elem);
+   void setJonesElement(const JonesIndex &index, const casa::Stokes::StokesTypes stokes, const casa::Complex &elem);
 
    /// @brief set a single element of the Jones matrix (i.e. gains or leakages)
    /// @details This version of the method gets explicitly defined antenna and beam indices.
@@ -97,7 +97,7 @@ struct ICalSolutionAccessor : virtual public ICalSolutionConstAccessor {
    /// @param[in] beam beam index
    /// @param[in] stokes what element to update (choose from XX,XY,YX and YY)
    /// @param[in] elem value to set
-   void setJonesElement(const casacore::uInt ant, const casacore::uInt beam, const casacore::Stokes::StokesTypes stokes, const casacore::Complex &elem);
+   void setJonesElement(const casa::uInt ant, const casa::uInt beam, const casa::Stokes::StokesTypes stokes, const casa::Complex &elem);
 
    /// @brief set a single element of bandpass
    /// @details This method simplifies writing bandpass solution. It reads the current frequency-dependent
@@ -110,8 +110,8 @@ struct ICalSolutionAccessor : virtual public ICalSolutionConstAccessor {
    /// @param[in] stokes what element to update (choose either XX or YY)
    /// @param[in] chan spectral channel of interest
    /// @param[in] elem value to set
-   void setBandpassElement(const JonesIndex &index, const casacore::Stokes::StokesTypes stokes, const casacore::uInt chan,
-                           const casacore::Complex &elem);
+   void setBandpassElement(const JonesIndex &index, const casa::Stokes::StokesTypes stokes, const casa::uInt chan,
+                           const casa::Complex &elem);
 
    /// @brief set a single element of bandpass
    /// @details This version of the method uses explicitly defined antenna and beam indices.
@@ -120,8 +120,8 @@ struct ICalSolutionAccessor : virtual public ICalSolutionConstAccessor {
    /// @param[in] stokes what element to update (choose either XX or YY)
    /// @param[in] chan spectral channel of interest
    /// @param[in] elem value to set
-   void setBandpassElement(const casacore::uInt ant, const casacore::uInt beam, const casacore::Stokes::StokesTypes stokes,
-                           const casacore::uInt chan, const casacore::Complex &elem);
+   void setBandpassElement(const casa::uInt ant, const casa::uInt beam, const casa::Stokes::StokesTypes stokes,
+                           const casa::uInt chan, const casa::Complex &elem);
 
    /// @brief optional flush for the Filler associated with this accessor
 

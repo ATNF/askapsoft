@@ -77,8 +77,8 @@ FITSImageRW::FITSImageRW()
 {
 
 }
-bool FITSImageRW::create(const std::string &name, const casacore::IPosition &shape, \
-                         const casacore::CoordinateSystem &csys, \
+bool FITSImageRW::create(const std::string &name, const casa::IPosition &shape, \
+                         const casa::CoordinateSystem &csys, \
                          uint memoryInMB, bool preferVelocity, \
                          bool opticalVelocity, int BITPIX, float minPix, float maxPix, \
                          bool degenerateLast, bool verbose, bool stokesLast, \
@@ -115,13 +115,13 @@ bool FITSImageRW::create(const std::string &name, const casacore::IPosition &sha
     ASKAPLOG_INFO_STR(FITSlogger, "Generating FITS header");
 
 
-    casacore::String error;
-    const casacore::uInt ndim = shape.nelements();
+    casa::String error;
+    const casa::uInt ndim = shape.nelements();
     // //
     // // Find scale factors
     // //
-    casacore::Record header;
-    casacore::Double b_scale, b_zero;
+    casa::Record header;
+    casa::Double b_scale, b_zero;
     ASKAPLOG_INFO_STR(FITSlogger, "Created blank FITS header");
     if (BITPIX == -32) {
 
@@ -145,8 +145,8 @@ bool FITSImageRW::create(const std::string &name, const casacore::IPosition &sha
 
 
     //
-    casacore::Vector<casacore::Int> naxis(ndim);
-    casacore::uInt i;
+    casa::Vector<casa::Int> naxis(ndim);
+    casa::uInt i;
     for (i = 0; i < ndim; i++) {
         naxis(i) = shape(i);
     }
@@ -154,7 +154,7 @@ bool FITSImageRW::create(const std::string &name, const casacore::IPosition &sha
 
     ASKAPLOG_INFO_STR(FITSlogger, "Added NAXES");
     if (allowAppend)
-        header.define("extend", casacore::True);
+        header.define("extend", casa::True);
     if (!primHead) {
         header.define("PCOUNT", 0);
         header.define("GCOUNT", 1);
@@ -173,34 +173,34 @@ bool FITSImageRW::create(const std::string &name, const casacore::IPosition &sha
     header.setComment("BUNIT", "Brightness (pixel) unit");
     //
     ASKAPLOG_INFO_STR(FITSlogger, "BUINT");
-    casacore::IPosition shapeCopy = shape;
-    casacore::CoordinateSystem cSys = csys;
+    casa::IPosition shapeCopy = shape;
+    casa::CoordinateSystem cSys = csys;
 
-    casacore::Record saveHeader(header);
+    casa::Record saveHeader(header);
     ASKAPLOG_INFO_STR(FITSlogger, "Saved header");
-    casacore::Bool ok = cSys.toFITSHeader(header, shapeCopy, casacore::True, 'c', casacore::True, // use WCS
+    casa::Bool ok = cSys.toFITSHeader(header, shapeCopy, casa::True, 'c', casa::True, // use WCS
                                       preferVelocity, opticalVelocity,
                                       preferWavelength, airWavelength);
     if (!ok) {
         ASKAPLOG_WARN_STR(FITSlogger, "Could not make a standard FITS header. Setting" \
                           <<  " a simple linear coordinate system.") ;
 
-        casacore::uInt n = cSys.nWorldAxes();
-        casacore::Matrix<casacore::Double> pc(n, n); pc = 0.0; pc.diagonal() = 1.0;
-        casacore::LinearCoordinate linear(cSys.worldAxisNames(),
+        casa::uInt n = cSys.nWorldAxes();
+        casa::Matrix<casa::Double> pc(n, n); pc = 0.0; pc.diagonal() = 1.0;
+        casa::LinearCoordinate linear(cSys.worldAxisNames(),
                                       cSys.worldAxisUnits(),
                                       cSys.referenceValue(),
                                       cSys.increment(),
                                       cSys.linearTransform(),
                                       cSys.referencePixel());
-        casacore::CoordinateSystem linCS;
+        casa::CoordinateSystem linCS;
         linCS.addCoordinate(linear);
 
         // Recover old header before it got mangled by toFITSHeader
 
         header = saveHeader;
-        casacore::IPosition shapeCopy = shape;
-        casacore::Bool ok = linCS.toFITSHeader(header, shapeCopy, casacore::True, 'c', casacore::False); // don't use WCS
+        casa::IPosition shapeCopy = shape;
+        casa::Bool ok = linCS.toFITSHeader(header, shapeCopy, casa::True, 'c', casa::False); // don't use WCS
         if (!ok) {
             ASKAPLOG_WARN_STR(FITSlogger, "Fallback linear coordinate system fails also.");
             return false;
@@ -212,7 +212,7 @@ bool FITSImageRW::create(const std::string &name, const casacore::IPosition &sha
 
     if (naxis.nelements() != shapeCopy.nelements()) {
         naxis.resize(shapeCopy.nelements());
-        for (casacore::uInt j = 0; j < shapeCopy.nelements(); j++) {
+        for (casa::uInt j = 0; j < shapeCopy.nelements(); j++) {
             naxis(j) = shapeCopy(j);
         }
         header.define("NAXIS", naxis);
@@ -222,10 +222,10 @@ bool FITSImageRW::create(const std::string &name, const casacore::IPosition &sha
     // DATE
     //
 
-    casacore::String date, timesys;
-    casacore::Time nowtime;
-    casacore::MVTime now(nowtime);
-    casacore::FITSDateUtil::toFITS(date, timesys, now);
+    casa::String date, timesys;
+    casa::Time nowtime;
+    casa::MVTime now(nowtime);
+    casa::FITSDateUtil::toFITS(date, timesys, now);
     header.define("date", date);
     header.setComment("date", "Date FITS file was written");
     if (!header.isDefined("timesys") && !header.isDefined("TIMESYS")) {
@@ -240,11 +240,11 @@ bool FITSImageRW::create(const std::string &name, const casacore::IPosition &sha
 
     header.define("ORIGIN", "ASKAPsoft");
 
-    theKeywordList = casacore::FITSKeywordUtil::makeKeywordList(primHead, casacore::True);
+    theKeywordList = casa::FITSKeywordUtil::makeKeywordList(primHead, casa::True);
 
     //kw.mk(FITS::EXTEND, True, "Tables may follow");
     // add the general keywords for WCS and so on
-    ok = casacore::FITSKeywordUtil::addKeywords(theKeywordList, header);
+    ok = casa::FITSKeywordUtil::addKeywords(theKeywordList, header);
     if (! ok) {
         error = "Error creating initial FITS header";
         return false;
@@ -261,7 +261,7 @@ bool FITSImageRW::create(const std::string &name, const casacore::IPosition &sha
 
     theKeywordList.first();
     theKeywordList.next(); // skipping an extra SIMPLE... hack
-    casacore::FitsKeyCardTranslator m_kc;
+    casa::FitsKeyCardTranslator m_kc;
     const size_t cards_size = 2880 * 4;
     char cards[cards_size];
     memset(cards, 0, sizeof(cards));
@@ -333,7 +333,7 @@ void FITSImageRW::print_hdr()
     return;
 
 }
-bool FITSImageRW::write(const casacore::Array<float> &arr)
+bool FITSImageRW::write(const casa::Array<float> &arr)
 {
     ASKAPLOG_INFO_STR(FITSlogger, "Writing array to FITS image");
     fitsfile *fptr;       /* pointer to the FITS file, defined in fitsio.h */
@@ -364,7 +364,7 @@ bool FITSImageRW::write(const casacore::Array<float> &arr)
 }
 
 
-bool FITSImageRW::write(const casacore::Array<float> &arr, const casacore::IPosition &where)
+bool FITSImageRW::write(const casa::Array<float> &arr, const casa::IPosition &where)
 {
     ASKAPLOG_INFO_STR(FITSlogger, "Writing array to FITS image at (Cindex)" << where);
     fitsfile *fptr;       /* pointer to the FITS file, defined in fitsio.h */

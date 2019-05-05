@@ -1,6 +1,6 @@
 /// @file IImageAccess.h
 /// @brief Basic interface to access an image
-/// @details This interface class is somewhat analogous to casacore::ImageInterface. But it has
+/// @details This interface class is somewhat analogous to casa::ImageInterface. But it has
 /// only methods we need for accessors and allow more functionality to access a part of the image.
 /// In the future we can benefit from using this minimalistic interface because it should be
 /// relatively easy to do parallel operations on the same image or even distributed storage.
@@ -45,7 +45,7 @@ namespace askap {
 namespace accessors {
 
 /// @brief Basic interface to access an image
-/// @details This interface class is somewhat analogous to casacore::ImageInterface. But it has
+/// @details This interface class is somewhat analogous to casa::ImageInterface. But it has
 /// only methods we need for accessors and allow more functionality to access a part of the image.
 /// In the future we can benefit from using this minimalistic interface because it should be
 /// relatively easy to do parallel operations on the same image or even distributed storage.
@@ -61,35 +61,35 @@ struct IImageAccess {
     /// @brief obtain the shape
     /// @param[in] name image name
     /// @return full shape of the given image
-    virtual casacore::IPosition shape(const std::string &name) const = 0;
+    virtual casa::IPosition shape(const std::string &name) const = 0;
 
     /// @brief read full image
     /// @param[in] name image name
     /// @return array with pixels
-    virtual casacore::Array<float> read(const std::string &name) const = 0;
+    virtual casa::Array<float> read(const std::string &name) const = 0;
 
     /// @brief read part of the image
     /// @param[in] name image name
     /// @param[in] blc bottom left corner of the selection
     /// @param[in] trc top right corner of the selection
     /// @return array with pixels for the selection only
-    virtual casacore::Array<float> read(const std::string &name, const casacore::IPosition &blc,
-                                    const casacore::IPosition &trc) const = 0;
+    virtual casa::Array<float> read(const std::string &name, const casa::IPosition &blc,
+                                    const casa::IPosition &trc) const = 0;
 
     /// @brief obtain coordinate system info
     /// @param[in] name image name
     /// @return coordinate system object
-    virtual casacore::CoordinateSystem coordSys(const std::string &name) const = 0;
+    virtual casa::CoordinateSystem coordSys(const std::string &name) const = 0;
 
     /// @brief obtain coordinate system info for part of an image
     /// @param[in] name image name
     /// @return coordinate system object
-    virtual casacore::CoordinateSystem coordSysSlice(const std::string &name, const casacore::IPosition &blc,
-            const casacore::IPosition &trc) const = 0 ;
+    virtual casa::CoordinateSystem coordSysSlice(const std::string &name, const casa::IPosition &blc,
+            const casa::IPosition &trc) const = 0 ;
     /// @brief obtain beam info
     /// @param[in] name image name
     /// @return beam info vector
-    virtual casacore::Vector<casacore::Quantum<double> > beamInfo(const std::string &name) const = 0;
+    virtual casa::Vector<casa::Quantum<double> > beamInfo(const std::string &name) const = 0;
 
     /// @brief obtain pixel units
     /// @param[in] name image name
@@ -113,33 +113,33 @@ struct IImageAccess {
     /// @param[in] name image name
     /// @param[in] shape full shape of the image
     /// @param[in] csys coordinate system of the full image
-    virtual void create(const std::string &name, const casacore::IPosition &shape,
-                        const casacore::CoordinateSystem &csys) = 0;
+    virtual void create(const std::string &name, const casa::IPosition &shape,
+                        const casa::CoordinateSystem &csys) = 0;
 
     /// @brief write full image
     /// @param[in] name image name
     /// @param[in] arr array with pixels
-    virtual void write(const std::string &name, const casacore::Array<float> &arr) = 0;
+    virtual void write(const std::string &name, const casa::Array<float> &arr) = 0;
 
     /// @brief write a slice of an image
     /// @param[in] name image name
     /// @param[in] arr array with pixels
     /// @param[in] where bottom left corner where to put the slice to (trc is deduced from the array shape)
-    virtual void write(const std::string &name, const casacore::Array<float> &arr,
-                       const casacore::IPosition &where) = 0;
+    virtual void write(const std::string &name, const casa::Array<float> &arr,
+                       const casa::IPosition &where) = 0;
 
     /// @brief write a slice of an image pixel mask
     /// @param[in] name image name
     /// @param[in] arr array with pixels
     /// @param[in] where bottom left corner where to put the slice to (trc is deduced from the array shape)
-    virtual void writeMask(const std::string &name, const casacore::Array<bool> &mask,
-                           const casacore::IPosition &where) = 0;
+    virtual void writeMask(const std::string &name, const casa::Array<bool> &mask,
+                           const casa::IPosition &where) = 0;
 
     /// @brief write a slice of an image mask
     /// @param[in] name image name
     /// @param[in] arr array with pixels
 
-    virtual void writeMask(const std::string &name, const casacore::Array<bool> &mask) = 0;
+    virtual void writeMask(const std::string &name, const casa::Array<bool> &mask) = 0;
     /// @brief set brightness units of the image
     /// @details
     /// @param[in] name image name

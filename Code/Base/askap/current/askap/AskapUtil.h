@@ -39,7 +39,6 @@
 
 // ASKAPsoft includes
 #include "askap/AskapError.h"
-#include "askap/CasacoreFwdDefines.h"
 #include "casacore/casa/aips.h"
 #include "casacore/casa/Quanta.h"
 #include "casacore/casa/Quanta/MVDirection.h"
@@ -118,7 +117,7 @@ void printContainer(std::ostream& os, const Container& ctr,
 }
 
 /// @brief a helper method to print directions nicely
-/// @details By default an instance of casacore::MVDirection is printed
+/// @details By default an instance of casa::MVDirection is printed
 /// as 3 direction cosines. It is not very convenient. This method
 /// allows to print it in a more log-reader-friendly way.
 /// This is the only method in this file (so far) which introduces
@@ -126,22 +125,22 @@ void printContainer(std::ostream& os, const Container& ctr,
 /// if necessary
 /// @param[in] dir MVDirection object to print
 /// @return a string containing a nice representation of the direction
-std::string printDirection(const casacore::MVDirection &dir);
+std::string printDirection(const casa::MVDirection &dir);
 
 /// @brief a helper function to print the latitude component of
 /// an MDirection
 /// @param[in] dir MVDirection object to print
 /// @return a string containing a nice representation of the latitude component
-std::string printLat(const casacore::MDirection& dir);
+std::string printLat(const casa::MDirection& dir);
 
 /// @brief a helper function to print the longitude component of
 /// an MDirection
 /// @param[in] dir MVDirection object to print
 /// @return a string containing a nice representation of the longitude component
-std::string printLon(const casacore::MDirection& dir);
+std::string printLon(const casa::MDirection& dir);
 
 /// @brief Interpret string as a quantity.
-/// Interpret a string such as "2.5arcsec" as a casacore::Quantity
+/// Interpret a string such as "2.5arcsec" as a casa::Quantity
 ///
 /// @param[in] s    String to be interpreted
 /// @param[in] unit ensure the constructed quantity conforms to
@@ -149,22 +148,22 @@ std::string printLon(const casacore::MDirection& dir);
 /// @throw AskapError   if the string "s" cannot be interpreted as
 ///                     a quantity which conforms to the units specified
 ///                     by the "unit" parameters.
-casacore::Quantity asQuantity(const std::string& s,
+casa::Quantity asQuantity(const std::string& s,
         const std::string& unit = "");
 
 /// @brief Interpret string as an MEpoch
 /// @param[in] epoch String to be interpreted
-casacore::MEpoch asMEpoch(const std::vector<std::string>& epoch);
+casa::MEpoch asMEpoch(const std::vector<std::string>& epoch);
 
 /// @brief Interpret string vector as an MDirection
 /// The string vector shall have RA in the first element, declination in
 /// the second and reference frame in the third. For example:
 /// [12h30m00.00, -45.00.00.00, J2000]
 /// @param[in] direction String to be interpreted
-casacore::MDirection asMDirection(const std::vector<std::string>& direction);
+casa::MDirection asMDirection(const std::vector<std::string>& direction);
 
 /// @brief Convert a string representation of a position to a
-/// casacore::MPosition. Syntax for the position string is:
+/// casa::MPosition. Syntax for the position string is:
 /// @verbatim
 /// [latitude, longitude, altitude, type]
 /// @endverbatim
@@ -177,7 +176,7 @@ casacore::MDirection asMDirection(const std::vector<std::string>& direction);
 ///
 /// @param[in] position String to be interpreted
 /// @return an MPosition
-casacore::MPosition asMPosition(const std::vector<std::string>& position);
+casa::MPosition asMPosition(const std::vector<std::string>& position);
 
 /// a number of helper functions are gathered in this namespace
 namespace utility {
@@ -196,7 +195,7 @@ namespace utility {
 /// @param[in] str input string
 /// @return result of the conversion
 /// @exception AskapError is thrown if the conversion failed
-template<class T> T fromString(const std::string &str)
+template<class T> T fromString(const std::string &str) throw(AskapError)
 {
     std::istringstream is(str);
     T buf;
@@ -215,7 +214,7 @@ template<class T> T fromString(const std::string &str)
 /// @param[in] in a const reference to the value to convert
 /// @return resulting string
 /// @exception AskapError is thrown if the conversion failed
-template<class T> std::string toString(const T &in)
+template<class T> std::string toString(const T &in) throw(AskapError)
 {
     std::ostringstream os;
     os << in;
@@ -245,13 +244,13 @@ static const uint64_t microsecondsPerDay = 86400000000ull;
 /// @brief convert BAT to UTC Epoch via casa
 /// @param[in] bat BAT as 64-bit integer
 /// @return casa epoch measure in the UTC frame
-casacore::MEpoch bat2epoch(const uint64_t &bat);
+casa::MEpoch bat2epoch(const uint64_t &bat);
 
 
 /// @brief convert casa Epoch to BAT
 /// @param[in] epoch casa epoch measure, typically in UTC frame, but can be anything supported by casa
 /// @return BAT as 64-bit integer
-uint64_t epoch2bat(const casacore::MEpoch &epoch);
+uint64_t epoch2bat(const casa::MEpoch &epoch);
 
 /// @brief helper method to check the TAI_UTC measures table version
 /// @details casacore measures data need to be updated regularly. The TAI_UTC
@@ -280,31 +279,30 @@ std::pair<double, std::string> measuresTableVersion();
 /// @param[in] mjd Modified Julian Date to check
 bool measuresValid(double mjd);
 
+
+} // end namespace askap
+
 // Now defined in the casa package
+//namespace std {
 /// @name operator<< Extensions
 /// Print the contents of a vector or list.
 ///
 /// Enclose it in square brackets, using a comma as separator.
 /// \note operator<<() must be defined for type \c T.
 //@{
-template<typename T>
-inline std::ostream& operator<<(std::ostream& os, const std::vector<T>& c)
-{
-    return casacore::operator<<(os, c);
-}
-template<typename T>
-inline std::ostream& operator<<(std::ostream& os, const std::list<T>& c)
-{
-    return casacore::operator<<(os, c);
-}
-template<typename K, typename V>
-inline std::ostream& operator<<(std::ostream& os, const std::map<K, V>& c)
-{
-    return casacore::operator<<(os, c);
-}
+//template<typename T>
+//inline ostream& operator<<(ostream& os, const vector<T>& c)
+//{
+//    askap::printContainer(os, c, ",", "[", "]", size_t(20));
+//    return os;
+//}
+//template<typename T>
+//inline ostream& operator<<(ostream& os, const list<T>& c)
+//{
+//    askap::printContainer(os, c, ",", "[", "]", size_t(20));
+//    return os;
+//}
 //@}
-
-} // end namespace askap
+//} // end namespace std
 
 #endif
-

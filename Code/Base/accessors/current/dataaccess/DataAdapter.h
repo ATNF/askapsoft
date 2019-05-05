@@ -139,7 +139,7 @@ struct Incremented {
 struct VisibilitySelector {
 
    /// a type of the result
-   typedef casacore::Cube<casacore::Complex>& value_type;
+   typedef casa::Cube<casa::Complex>& value_type;
 
    /// @brief access to the visibility cube
    /// @details The method returns a non-const reference to visibilities
@@ -160,7 +160,7 @@ struct BufferSelector {
   BufferSelector(const std::string &buffer) : itsBufferName(buffer) {}
 
   /// a type of the result
-  typedef casacore::Cube<casacore::Complex>& value_type;
+  typedef casa::Cube<casa::Complex>& value_type;
 
   
   /// @brief access to the visibility cube

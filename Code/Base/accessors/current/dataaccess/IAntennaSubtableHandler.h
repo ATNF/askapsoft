@@ -60,13 +60,13 @@ struct IAntennaSubtableHandler : virtual public IHolder {
   /// @details
   /// @param[in] antID antenna ID to return the position for
   /// @return a reference to the MPosition measure
-  virtual const casacore::MPosition& getPosition(casacore::uInt antID) const = 0;
+  virtual const casa::MPosition& getPosition(casa::uInt antID) const = 0;
   
   /// @brief obtain the mount type for the given antenna
   /// @details
   /// @param[in] antID antenna ID to return the position for
   /// @return a string describing the mount type
-  virtual const casacore::String& getMount(casacore::uInt antID) const = 0;
+  virtual const casa::String& getMount(casa::uInt antID) const = 0;
   
   /// @brief check whether all antennae are equatorialy mounted
   /// @details
@@ -83,7 +83,7 @@ struct IAntennaSubtableHandler : virtual public IHolder {
   /// assumptions about ANTENNA subtable, this number is assumed to be
   /// fixed.
   /// @return total number of antennae 
-  virtual casacore::uInt getNumberOfAntennae() const = 0;
+  virtual casa::uInt getNumberOfAntennae() const = 0;
 };
 
 

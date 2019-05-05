@@ -56,22 +56,22 @@ public:
 		
     /// Choose a single feed, the same for both antennae
     /// @param[in] feedID the sequence number of feed to choose
-    virtual void chooseFeed(casacore::uInt feedID) = 0;
+    virtual void chooseFeed(casa::uInt feedID) = 0;
 
     /// Choose a single baseline
     /// @param[in] ant1 the sequence number of the first antenna
     /// @param[in] ant2 the sequence number of the second antenna
     /// Which one is the first and which is the second is not important
-    virtual void chooseBaseline(casacore::uInt ant1, casacore::uInt ant2) = 0;
+    virtual void chooseBaseline(casa::uInt ant1, casa::uInt ant2) = 0;
 
     /// Choose all baselines to given antenna
     /// @param[in] ant the sequence number of antenna
-    virtual void chooseAntenna(casacore::uInt ant) = 0;
+    virtual void chooseAntenna(casa::uInt ant) = 0;
 
     /// @brief choose user-defined index
     /// @param[in] column column name in the measurement set for a user-defined index
     /// @param[in] value index value
-    virtual void chooseUserDefinedIndex(const std::string &column, const casacore::uInt value) = 0;
+    virtual void chooseUserDefinedIndex(const std::string &column, const casa::uInt value) = 0;
 	
     /// @brief Choose autocorrelations only
     virtual void chooseAutoCorrelations() = 0;
@@ -83,13 +83,13 @@ public:
     /// @details This effectively rejects the baselines giving a smaller
     /// uv-distance than the specified threshold (in metres)
     /// @param[in] uvDist threshold
-    virtual void chooseMinUVDistance(casacore::Double uvDist) = 0;
+    virtual void chooseMinUVDistance(casa::Double uvDist) = 0;
 
     /// @brief Choose samples corresponding to a uv-distance smaller than threshold
     /// @details This effectively rejects the baselines giving a larger
     /// uv-distance than the specified threshold (in metres)
     /// @param[in] uvDist threshold
-    virtual void chooseMaxUVDistance(casacore::Double uvDist) = 0;
+    virtual void chooseMaxUVDistance(casa::Double uvDist) = 0;
 	
 	
     /// Choose a subset of spectral channels
@@ -97,49 +97,49 @@ public:
     /// @param[in] start the number of the first spectral channel to choose
     /// @param[in] nAvg a number of adjacent spectral channels to average
     ///             default is no averaging
-    virtual void chooseChannels(casacore::uInt nChan,
-	         casacore::uInt start, casacore::uInt nAvg = 1) = 0;
+    virtual void chooseChannels(casa::uInt nChan,
+	         casa::uInt start, casa::uInt nAvg = 1) = 0;
 
     /// Choose a subset of frequencies. The reference frame is
     /// defined by the DataSource object
     /// @param[in] nChan a number of spectral channels wanted in the output
     /// @param[in] start the frequency of the first spectral channel to
-    ///        choose (given as casacore::MVFrequency object)
+    ///        choose (given as casa::MVFrequency object)
     /// @param[in] freqInc an increment in terms of the frequency in the
     ///        same reference frame as start. This parameter plays
     ///        the same role as nAvg for chooseChannels, i.e. twice
     ///        the frequency resolution would average two adjacent channels
-    virtual void chooseFrequencies(casacore::uInt nChan,
-             const casacore::MVFrequency &start, 
-             const casacore::MVFrequency &freqInc) = 0;
+    virtual void chooseFrequencies(casa::uInt nChan,
+             const casa::MVFrequency &start, 
+             const casa::MVFrequency &freqInc) = 0;
 
     /// Choose a subset of radial velocities. The reference frame is
     /// defined by the DataSource object
     /// @param[in] nChan a number of spectral channels wanted in the output
     /// @param[in] start the velocity of the first spectral channel to
-    ///        choose (given as casacore::MVRadialVelocity object)
+    ///        choose (given as casa::MVRadialVelocity object)
     /// @param[in] velInc an increment in terms of the radial velocity in the
     ///        same reference frame as start. This parameter plays
     ///        the same role as nAvg for chooseChannels, i.e. twice
     ///        the velocity resolution would average two adjacent channels
-    virtual void chooseVelocities(casacore::uInt nChan,
-             const casacore::MVRadialVelocity &start,
-             const casacore::MVRadialVelocity &velInc) = 0;
+    virtual void chooseVelocities(casa::uInt nChan,
+             const casa::MVRadialVelocity &start,
+             const casa::MVRadialVelocity &velInc) = 0;
 	
     /// Choose a single spectral window (also known as IF).
     /// @param[in] spWinID the ID of the spectral window to choose
-    virtual void chooseSpectralWindow(casacore::uInt spWinID) = 0;
+    virtual void chooseSpectralWindow(casa::uInt spWinID) = 0;
 
     /// Choose a time range. The behavior for streams needs thinking.
     /// Probably the iterator should just ignore all data before the
     /// start time range and flags the end as soon as the time passed
     /// the stop time. Both start and stop times are given via
-    /// casacore::MVEpoch object. The reference frame is specified by
+    /// casa::MVEpoch object. The reference frame is specified by
     /// the DataSource object.
     /// @param[in] start the beginning of the chosen time interval
     /// @param[in] stop  the end of the chosen time interval
-    virtual void chooseTimeRange(const casacore::MVEpoch &start,
-	          const casacore::MVEpoch &stop) = 0;
+    virtual void chooseTimeRange(const casa::MVEpoch &start,
+	          const casa::MVEpoch &stop) = 0;
 
     /// Choose time range. This method accepts a time range with 
     /// respect to the origin defined by the DataSource object.
@@ -148,22 +148,22 @@ public:
     /// MVEpoch and is specified via the DataSource object.
     /// @param[in] start the beginning of the chosen time interval
     /// @param[in] stop the end of the chosen time interval
-    virtual void chooseTimeRange(casacore::Double start,casacore::Double stop) = 0;
+    virtual void chooseTimeRange(casa::Double start,casa::Double stop) = 0;
 
     /// Choose polarization. 
     /// @param pols a string describing the wanted polarization 
     /// in the output. Allowed values are: I, "IQUV","XXYY","RRLL"
-    virtual void choosePolarizations(const casacore::String &pols) = 0;
+    virtual void choosePolarizations(const casa::String &pols) = 0;
 
     /// Choose cycles. This is an equivalent of choosing the time range,
     /// but the selection is done in integer cycle numbers
     /// @param[in] start the number of the first cycle to choose
     /// @param[in] stop the number of the last cycle to choose
-    virtual void chooseCycles(casacore::uInt start, casacore::uInt stop) = 0;
+    virtual void chooseCycles(casa::uInt start, casa::uInt stop) = 0;
 
     /// Choose a single scan number
     /// @param[in] scanNumber the scan number to choose
-    virtual void chooseScanNumber(casacore::uInt scanNumber) = 0;
+    virtual void chooseScanNumber(casa::uInt scanNumber) = 0;
 };
 
 } // end of namespace accessors

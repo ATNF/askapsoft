@@ -51,7 +51,7 @@ TableDataAccessor::TableDataAccessor(const TableDataIterator &iter) :
 /// @return a reference to nRow x nChannel x nPol cube, containing
 /// all visibility data
 ///
-const casacore::Cube<casacore::Complex>& TableDataAccessor::visibility() const
+const casa::Cube<casa::Complex>& TableDataAccessor::visibility() const
 {
   return getROAccessor().visibility();  
 }
@@ -62,7 +62,7 @@ const casacore::Cube<casacore::Complex>& TableDataAccessor::visibility() const
 /// @return a reference to nRow x nChannel x nPol cube, containing
 /// all visibility data
 ///
-casacore::Cube<casacore::Complex>& TableDataAccessor::rwVisibility()
+casa::Cube<casa::Complex>& TableDataAccessor::rwVisibility()
 {    
   if (!itsIterator.mainTableWritable()) {
       throw DataAccessLogicError("rwVisibility() is used for original visibilities, "
@@ -76,13 +76,13 @@ casacore::Cube<casacore::Complex>& TableDataAccessor::rwVisibility()
   // const interface untidy by putting a non-const method there. 
   // It is safe to use const_cast here because we know that the actual buffer
   // is declared mutable in CachedAccessorField.
-  return const_cast<casacore::Cube<casacore::Complex>&>(getROAccessor().visibility());
+  return const_cast<casa::Cube<casa::Complex>&>(getROAccessor().visibility());
 }
 
 /// Cube of flags corresponding to the output of visibility()
 /// @return a reference to nRow x nChannel x nPol cube with the flag
 ///         information. If True, the corresponding element is flagged.
-const casacore::Cube<casacore::Bool>& TableDataAccessor::flag() const
+const casa::Cube<casa::Bool>& TableDataAccessor::flag() const
 {
   return getROAccessor().flag();  
 }
@@ -90,7 +90,7 @@ const casacore::Cube<casacore::Bool>& TableDataAccessor::flag() const
 /// Non-const access to the cube of flags.
 /// @return a reference to nRow x nChannel x nPol cube with the flag
 ///         information. If True, the corresponding element is flagged.
-casacore::Cube<casacore::Bool>& TableDataAccessor::rwFlag()
+casa::Cube<casa::Bool>& TableDataAccessor::rwFlag()
 {
    if (!itsIterator.mainTableWritable()) {
        throw DataAccessLogicError("rwFlag() is used for original visibilities, "
@@ -105,7 +105,7 @@ casacore::Cube<casacore::Bool>& TableDataAccessor::rwFlag()
    // const interface untidy by putting a non-const method there. 
    // It is safe to use const_cast here because we know that the actual buffer
    // is declared mutable in CachedAccessorField.
-   return const_cast<casacore::Cube<casacore::Bool>&>(getROAccessor().flag());
+   return const_cast<casa::Cube<casa::Bool>&>(getROAccessor().flag());
 }
 
 

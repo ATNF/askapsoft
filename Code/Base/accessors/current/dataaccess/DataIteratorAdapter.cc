@@ -129,14 +129,14 @@ IDataAccessor& DataIteratorAdapter::operator*() const {
 
 /// Checks whether there are more data available.
 /// @return True if there are more data available
-casacore::Bool DataIteratorAdapter::hasMore() const throw() {
+casa::Bool DataIteratorAdapter::hasMore() const throw() {
   return roIterator().hasMore();
 }
 
 /// advance the iterator one step further 
 /// @return True if there are more data (so constructions like 
 ///         while(it.next()) {} are possible)
-casacore::Bool DataIteratorAdapter::next() {
+casa::Bool DataIteratorAdapter::next() {
   itsAccessorAdapter.detach();
   return roIterator().next();
 }
@@ -165,7 +165,7 @@ void DataIteratorAdapter::chooseBuffer(const std::string &bufferID)
 /// Switch the output of operator* and operator-> to the original
 /// state (present after the iterator is just constructed) 
 /// where they point to the primary visibility data. This method
-/// is indended to cancel the results of chooseBuffer(casacore::uInt)
+/// is indended to cancel the results of chooseBuffer(casa::uInt)
 ///
 void DataIteratorAdapter::chooseOriginal()
 {

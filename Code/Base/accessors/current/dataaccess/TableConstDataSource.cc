@@ -51,7 +51,7 @@ using namespace casa;
 ///                       (default is DATA)
 TableConstDataSource::TableConstDataSource(const std::string &fname,
                const std::string &dataColumn) :
-         TableInfoAccessor(casacore::Table(fname), false, dataColumn),
+         TableInfoAccessor(casa::Table(fname), false, dataColumn),
          itsUVWCacheSize(1), itsUVWCacheTolerance(1e-6),
          itsMaxChunkSize(INT_MAX) {}
 
@@ -59,7 +59,7 @@ TableConstDataSource::TableConstDataSource(const std::string &fname,
 /// @param[in] maxNumRows maximum number of rows wanted
 /// @note The new restriction will apply to any iterator created in the future, but will not
 /// affect iterators already created
-void TableConstDataSource::configureMaxChunkSize(casacore::uInt maxNumRows)
+void TableConstDataSource::configureMaxChunkSize(casa::uInt maxNumRows)
 {
    ASKAPCHECK(maxNumRows > 0, "Restriction on the number of rows should be a positive number");
    itsMaxChunkSize = maxNumRows;

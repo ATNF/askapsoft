@@ -49,15 +49,15 @@ using namespace casa;
 ///        Class defaults to MJD 0 UTC
 /// @param targetUnit desired units in the output. Class defaults
 ///        to seconds
-EpochConverter::EpochConverter(const casacore::MEpoch &targetOrigin,
-                       const casacore::Unit &targetUnit) :
+EpochConverter::EpochConverter(const casa::MEpoch &targetOrigin,
+                       const casa::Unit &targetUnit) :
         itsTargetOrigin(targetOrigin.getValue()),
 	itsTargetRef(targetOrigin.getRef()),
 	itsTargetUnit(targetUnit) {}
 
 /// convert specified MEpoch to the target units/frame
 /// @param in an epoch to convert. 
-casacore::Double EpochConverter::operator()(const casacore::MEpoch &in) const
+casa::Double EpochConverter::operator()(const casa::MEpoch &in) const
 {
   /// this class is supposed to be used in the most general case, hence
   /// we do all conversions. Specializations can be written for the cases
@@ -71,26 +71,26 @@ casacore::Double EpochConverter::operator()(const casacore::MEpoch &in) const
 
 /// set a frame (for epochs it is just a position), where the
 /// conversion is performed
-void EpochConverter::setMeasFrame(const casacore::MeasFrame &frame)
+void EpochConverter::setMeasFrame(const casa::MeasFrame &frame)
 {
   itsTargetRef.set(frame);
 }
 
-/// Reverse conversion (casacore::Double to full measure)
+/// Reverse conversion (casa::Double to full measure)
 /// @param in an epoch given as Double in the target units/frame
 /// @return the same epoch as a fully qualified measure
-casacore::MEpoch EpochConverter::toMeasure(casacore::Double in) const
+casa::MEpoch EpochConverter::toMeasure(casa::Double in) const
 {
-  casacore::MVEpoch res(casacore::Quantity(in,itsTargetUnit));
+  casa::MVEpoch res(casa::Quantity(in,itsTargetUnit));
   res+=itsTargetOrigin;
-  return casacore::MEpoch(res,itsTargetRef);
+  return casa::MEpoch(res,itsTargetRef);
 }
 
-/// Reverse conversion (casacore::MVEpoch to full measure)
+/// Reverse conversion (casa::MVEpoch to full measure)
 /// @param in an epoch given as MVEpoch in the target frame
 /// @return the same epoch as a fully qualified measure
-casacore::MEpoch EpochConverter::toMeasure(const casacore::MVEpoch &in)
+casa::MEpoch EpochConverter::toMeasure(const casa::MVEpoch &in)
                                        const throw()
 {
-  return casacore::MEpoch(in+itsTargetOrigin,itsTargetRef);
+  return casa::MEpoch(in+itsTargetOrigin,itsTargetRef);
 }

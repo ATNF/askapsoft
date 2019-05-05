@@ -52,22 +52,22 @@ using namespace askap::accessors;
 /// read all required information from the ANTENNA subtable
 /// @param[in] ms an input measurement set (a table which has an
 /// ANTENNA subtable)
-MemAntennaSubtableHandler::MemAntennaSubtableHandler(const casacore::Table &ms) : 
+MemAntennaSubtableHandler::MemAntennaSubtableHandler(const casa::Table &ms) : 
        itsAllEquatorial(true)
 {
-  casacore::Table antennaSubtable=ms.keywordSet().asTable("ANTENNA");
+  casa::Table antennaSubtable=ms.keywordSet().asTable("ANTENNA");
   if (!antennaSubtable.nrow()) {
       ASKAPTHROW(DataAccessError, "The ANTENNA subtable is empty");      
   }
-  casacore::ROScalarColumn<casacore::String> mountCol(antennaSubtable,"MOUNT");
-  casacore::ROScalarMeasColumn<casacore::MPosition> posCol(antennaSubtable,"POSITION");
-  mountCol.getColumn(itsMounts,casacore::True);
+  casa::ROScalarColumn<casa::String> mountCol(antennaSubtable,"MOUNT");
+  casa::ROScalarMeasColumn<casa::MPosition> posCol(antennaSubtable,"POSITION");
+  mountCol.getColumn(itsMounts,casa::True);
   itsPositions.resize(itsMounts.nelements());
-  casacore::Vector<casacore::MPosition>::iterator it=itsPositions.begin();
-  casacore::Vector<casacore::String>::const_iterator cit=itsMounts.begin();
-  for (casacore::uInt ant=0; it!=itsPositions.end(); ++it,++ant,++cit) {
+  casa::Vector<casa::MPosition>::iterator it=itsPositions.begin();
+  casa::Vector<casa::String>::const_iterator cit=itsMounts.begin();
+  for (casa::uInt ant=0; it!=itsPositions.end(); ++it,++ant,++cit) {
        *it=posCol(ant);
-       const casacore::String &cMount = *cit;
+       const casa::String &cMount = *cit;
        if (cMount != "EQUATORIAL" && cMount != "equatorial") {
            itsAllEquatorial = false;
        }
@@ -81,7 +81,7 @@ MemAntennaSubtableHandler::MemAntennaSubtableHandler(const casacore::Table &ms) 
 /// assumptions about ANTENNA subtable, this number is assumed to be
 /// fixed.
 /// @return total number of antennae 
-casacore::uInt MemAntennaSubtableHandler::getNumberOfAntennae() const
+casa::uInt MemAntennaSubtableHandler::getNumberOfAntennae() const
 {
   return itsMounts.nelements();
 }
@@ -91,7 +91,7 @@ casacore::uInt MemAntennaSubtableHandler::getNumberOfAntennae() const
 /// @details
 /// @param[in] antID antenna ID to return the position for
 /// @return a reference to the MPosition measure
-const casacore::MPosition& MemAntennaSubtableHandler::getPosition(casacore::uInt antID) 
+const casa::MPosition& MemAntennaSubtableHandler::getPosition(casa::uInt antID) 
                            const
 {
   ASKAPDEBUGASSERT(antID<itsPositions.nelements());
@@ -102,7 +102,7 @@ const casacore::MPosition& MemAntennaSubtableHandler::getPosition(casacore::uInt
 /// @details
 /// @param[in] antID antenna ID to return the position for
 /// @return a string describing the mount type
-const casacore::String& MemAntennaSubtableHandler::getMount(casacore::uInt antID) const
+const casa::String& MemAntennaSubtableHandler::getMount(casa::uInt antID) const
 {
   ASKAPDEBUGASSERT(antID<itsMounts.nelements());
   return itsMounts[antID];

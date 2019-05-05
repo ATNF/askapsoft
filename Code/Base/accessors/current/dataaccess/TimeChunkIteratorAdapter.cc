@@ -77,7 +77,7 @@ void TimeChunkIteratorAdapter::setInterval(const double interval)
 /// @return True if there are more data available in this chunk
 /// @note for this particular adapter this method corresponds to the
 /// current chunk rather than to all dataset
-casacore::Bool TimeChunkIteratorAdapter::hasMore() const throw()
+casa::Bool TimeChunkIteratorAdapter::hasMore() const throw()
 {
   if (itsChangeMonitor != changeMonitor() || (itsInterval < 0)) {
       return DataIteratorAdapter::hasMore();
@@ -90,7 +90,7 @@ casacore::Bool TimeChunkIteratorAdapter::hasMore() const throw()
 /// advance the iterator one step further 
 /// @return True if there are more data (so constructions like 
 ///         while(it.next()) {} are possible)
-casacore::Bool TimeChunkIteratorAdapter::next()
+casa::Bool TimeChunkIteratorAdapter::next()
 {
   ASKAPCHECK(hasMore(), "There are no more data available in this chunk (or at all, if resume method has been called)");
   const double curTime = roIterator()->time();

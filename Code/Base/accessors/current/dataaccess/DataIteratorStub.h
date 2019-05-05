@@ -48,7 +48,7 @@ public:
 	/// @param nsteps  number of steps before the iterator
 	///                reach the end
 	///
-        explicit DataIteratorStub(casacore::uInt nsteps);
+        explicit DataIteratorStub(casa::uInt nsteps);
 	
 	/// Return the data accessor (current chunk) in various ways
 	
@@ -81,7 +81,7 @@ public:
 	/// Switch the output of operator* and operator-> to the original
 	/// state (present after the iterator is just constructed) 
 	/// where they point to the primary visibility data. This method
-	/// is indended to cancel the results of chooseBuffer(casacore::uInt)
+	/// is indended to cancel the results of chooseBuffer(casa::uInt)
 	///
 	virtual void chooseOriginal();
 
@@ -103,17 +103,17 @@ public:
 	
 	/// Checks whether there are more data available.
 	/// @return True if there are more data available
-	casacore::Bool hasMore() const throw(); 
+	casa::Bool hasMore() const throw(); 
 	
 	/// advance the iterator one step further
 	/// @return True if there are more data (so constructions like
 	///         while(it.next()) {} are possible)
-	casacore::Bool next();
+	casa::Bool next();
 public:
         /// a maximum number of simulated iterations
-	casacore::uInt itsMaxCounter;
+	casa::uInt itsMaxCounter;
         /// counter of the iteration number
-	casacore::uInt itsCounter;
+	casa::uInt itsCounter;
 	/// accessor stub
 	mutable DataAccessorStub itsAccessor;
 };

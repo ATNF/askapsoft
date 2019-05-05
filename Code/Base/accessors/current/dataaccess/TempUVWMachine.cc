@@ -43,19 +43,19 @@ namespace accessors {
 /// @param[in] out output direction
 /// @note in and out are swapped w.r.t. casa UVWMachine as this is how it is used in
 /// the current code
-TempUVWMachine::TempUVWMachine(const casacore::MDirection &in, const casacore::MDirection &out, const bool, const bool) : itsIn(in), itsOut(out)
+TempUVWMachine::TempUVWMachine(const casa::MDirection &in, const casa::MDirection &out, const bool, const bool) : itsIn(in), itsOut(out)
 {
-  const casacore::MDirection::Ref outref = out.getRef();
-  itsConv = casacore::MDirection::Convert(in, outref);
+  const casa::MDirection::Ref outref = out.getRef();
+  itsConv = casa::MDirection::Convert(in, outref);
   init();
 }
 
 /// @brief convert uvw
 /// @param[in] delay reference to delay buffer
 /// @param[in] uvw reference to uvw vector to update
-void TempUVWMachine::convertUVW(casacore::Double &delay, casacore::Vector<casacore::Double> &uvw) const
+void TempUVWMachine::convertUVW(casa::Double &delay, casa::Vector<casa::Double> &uvw) const
 {
-  casacore::MVPosition tmp = itsUVWRotation * casacore::MVPosition(uvw);
+  casa::MVPosition tmp = itsUVWRotation * casa::MVPosition(uvw);
   delay = itsPhaseRotation * tmp;
   // reprojection comes here
   // tmp *= itsProjRotation;
@@ -64,9 +64,9 @@ void TempUVWMachine::convertUVW(casacore::Double &delay, casacore::Vector<casaco
 
 /// @brief convert uvw
 /// @param[in] uvw reference to uvw vector to update
-void TempUVWMachine::convertUVW(casacore::Vector<casacore::Double> &uvw) const
+void TempUVWMachine::convertUVW(casa::Vector<casa::Double> &uvw) const
 {
-  casacore::Double delay;
+  casa::Double delay;
   convertUVW(delay, uvw);
 }
 
@@ -78,16 +78,16 @@ void TempUVWMachine::init()
   // frame (pole towards in-direction and X-axis west) into the standard XYZ frame.
   // This rotation is composed of rotation around x-axis (90-lat) followed by
   // rotation around z-axis over (90-long).
-  const casacore::RotMatrix rot1(casacore::Euler(casacore::C::pi_2 - itsIn.getValue().get()(1), 1,
-          casacore::C::pi_2 - itsIn.getValue().get()(0), 3));
-  //const casacore::RotMatrix rot1(casacore::Euler(casacore::C::pi_2 - itsIn.getValue().get()(0), 3,
-  //          casacore::C::pi_2 - itsIn.getValue().get()(1), 1));
+  const casa::RotMatrix rot1(casa::Euler(casa::C::pi_2 - itsIn.getValue().get()(1), 1,
+          casa::C::pi_2 - itsIn.getValue().get()(0), 3));
+  //const casa::RotMatrix rot1(casa::Euler(casa::C::pi_2 - itsIn.getValue().get()(0), 3,
+  //          casa::C::pi_2 - itsIn.getValue().get()(1), 1));
   // define axes
-  const casacore::MVDirection mVz(0.,0.,1.);
-  const casacore::MVDirection mVy(0.,1.,0.);
-  const casacore::MVDirection mVx(1.,0.,0.);
+  const casa::MVDirection mVz(0.,0.,1.);
+  const casa::MVDirection mVy(0.,1.,0.);
+  const casa::MVDirection mVx(1.,0.,0.);
   // obtain rotation matrix from the old to the new reference frame
-  casacore::RotMatrix rot2;
+  casa::RotMatrix rot2;
   rot2.set(itsConv(mVx).getValue().getValue(),
            itsConv(mVy).getValue().getValue(),
            itsConv(mVz).getValue().getValue());           
@@ -98,10 +98,10 @@ void TempUVWMachine::init()
   
   // The final rotation is from the standard XYZ frame into the uvw coordinate system
   // corresponding to the output frame (pole towards out-direction)
-  const casacore::RotMatrix rot3(casacore::Euler(-casacore::C::pi_2 + itsOut.getValue().get()(0), 3,
-           itsOut.getValue().get()(1) - casacore::C::pi_2, 1));
-  //const casacore::RotMatrix rot3(casacore::Euler(itsOut.getValue().get()(1) - casacore::C::pi_2, 1,
-  //            -casacore::C::pi_2 + itsOut.getValue().get()(0), 3));
+  const casa::RotMatrix rot3(casa::Euler(-casa::C::pi_2 + itsOut.getValue().get()(0), 3,
+           itsOut.getValue().get()(1) - casa::C::pi_2, 1));
+  //const casa::RotMatrix rot3(casa::Euler(itsOut.getValue().get()(1) - casa::C::pi_2, 1,
+  //            -casa::C::pi_2 + itsOut.getValue().get()(0), 3));
   // reprojection will come here
   // the order of multiplication is reversed in the following statement to account for the fact that
   // rotX matrices express the new basis via the old one, i.e. instead of right-multiplying by the matrix
@@ -112,7 +112,7 @@ void TempUVWMachine::init()
   // to compute associated delay change we need to convert the direction increment vector into the 
   // target uvw frame (i.e. elements become l,m,n instead of dX, dY and dZ)
   // itsConv() gives the old delay centre in the new coordinates
-  itsPhaseRotation = (casacore::MVPosition(itsOut.getValue()) - casacore::MVPosition(itsConv().getValue())) * rot3;
+  itsPhaseRotation = (casa::MVPosition(itsOut.getValue()) - casa::MVPosition(itsConv().getValue())) * rot3;
 }
 
 } // namespace accessors

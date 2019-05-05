@@ -100,7 +100,7 @@ DataAccessorAdapter::DataAccessorAdapter(const DataAccessorAdapter &other) :
 
 /// The number of rows in this chunk
 /// @return the number of rows in this chunk
-casacore::uInt DataAccessorAdapter::nRow() const throw()
+casa::uInt DataAccessorAdapter::nRow() const throw()
 {
   return getROAccessor().nRow();
 }
@@ -109,7 +109,7 @@ casacore::uInt DataAccessorAdapter::nRow() const throw()
 	
 /// The number of spectral channels (equal for all rows)
 /// @return the number of spectral channels
-casacore::uInt DataAccessorAdapter::nChannel() const throw()
+casa::uInt DataAccessorAdapter::nChannel() const throw()
 {
   return getROAccessor().nChannel();
 }
@@ -117,7 +117,7 @@ casacore::uInt DataAccessorAdapter::nChannel() const throw()
 
 /// @brief The number of polarization products (equal for all rows)
 /// @return the number of polarization products (can be 1,2 or 4)
-casacore::uInt DataAccessorAdapter::nPol() const throw()
+casa::uInt DataAccessorAdapter::nPol() const throw()
 {
   return getROAccessor().nPol();
 }
@@ -125,7 +125,7 @@ casacore::uInt DataAccessorAdapter::nPol() const throw()
 /// @brief First antenna IDs for all rows
 /// @return a vector with IDs of the first antenna corresponding
 /// to each visibility (one for each row)
-const casacore::Vector<casacore::uInt>& DataAccessorAdapter::antenna1() const
+const casa::Vector<casa::uInt>& DataAccessorAdapter::antenna1() const
 {
   return getROAccessor().antenna1();
 }
@@ -133,7 +133,7 @@ const casacore::Vector<casacore::uInt>& DataAccessorAdapter::antenna1() const
 /// @brief Second antenna IDs for all rows
 /// @return a vector with IDs of the second antenna corresponding
 /// to each visibility (one for each row)
-const casacore::Vector<casacore::uInt>& DataAccessorAdapter::antenna2() const
+const casa::Vector<casa::uInt>& DataAccessorAdapter::antenna2() const
 {
   return getROAccessor().antenna2();
 }
@@ -141,7 +141,7 @@ const casacore::Vector<casacore::uInt>& DataAccessorAdapter::antenna2() const
 /// @brief First feed IDs for all rows
 /// @return a vector with IDs of the first feed corresponding
 /// to each visibility (one for each row)
-const casacore::Vector<casacore::uInt>& DataAccessorAdapter::feed1() const
+const casa::Vector<casa::uInt>& DataAccessorAdapter::feed1() const
 {
   return getROAccessor().feed1();
 }
@@ -149,7 +149,7 @@ const casacore::Vector<casacore::uInt>& DataAccessorAdapter::feed1() const
 /// @brief Second feed IDs for all rows
 /// @return a vector with IDs of the second feed corresponding
 /// to each visibility (one for each row)
-const casacore::Vector<casacore::uInt>& DataAccessorAdapter::feed2() const
+const casa::Vector<casa::uInt>& DataAccessorAdapter::feed2() const
 {
   return getROAccessor().feed2();
 }
@@ -157,7 +157,7 @@ const casacore::Vector<casacore::uInt>& DataAccessorAdapter::feed2() const
 /// @brief Position angles of the first feed for all rows
 /// @return a vector with position angles (in radians) of the
 /// first feed corresponding to each visibility
-const casacore::Vector<casacore::Float>& DataAccessorAdapter::feed1PA() const
+const casa::Vector<casa::Float>& DataAccessorAdapter::feed1PA() const
 {
   return getROAccessor().feed1PA();
 }
@@ -166,7 +166,7 @@ const casacore::Vector<casacore::Float>& DataAccessorAdapter::feed1PA() const
 /// @brief Position angles of the second feed for all rows
 /// @return a vector with position angles (in radians) of the
 /// second feed corresponding to each visibility
-const casacore::Vector<casacore::Float>& DataAccessorAdapter::feed2PA() const
+const casa::Vector<casa::Float>& DataAccessorAdapter::feed2PA() const
 {
   return getROAccessor().feed2PA();
 }
@@ -175,7 +175,7 @@ const casacore::Vector<casacore::Float>& DataAccessorAdapter::feed2PA() const
 /// @return a vector with direction measures (coordinate system
 /// is set via IDataConverter), one direction for each
 /// visibility/row
-const casacore::Vector<casacore::MVDirection>& DataAccessorAdapter::pointingDir1() const
+const casa::Vector<casa::MVDirection>& DataAccessorAdapter::pointingDir1() const
 {
   return getROAccessor().pointingDir1();
 }
@@ -185,7 +185,7 @@ const casacore::Vector<casacore::MVDirection>& DataAccessorAdapter::pointingDir1
 /// @return a vector with direction measures (coordinate system
 /// is is set via IDataConverter), one direction for each
 /// visibility/row
-const casacore::Vector<casacore::MVDirection>& DataAccessorAdapter::pointingDir2() const
+const casa::Vector<casa::MVDirection>& DataAccessorAdapter::pointingDir2() const
 {
   return getROAccessor().pointingDir2();
 }
@@ -195,7 +195,7 @@ const casacore::Vector<casacore::MVDirection>& DataAccessorAdapter::pointingDir2
 /// @return a vector with direction measures (coordinate system
 /// is is set via IDataConverter), one direction for each
 /// visibility/row
-const casacore::Vector<casacore::MVDirection>& DataAccessorAdapter::dishPointing1() const
+const casa::Vector<casa::MVDirection>& DataAccessorAdapter::dishPointing1() const
 {
   return getROAccessor().dishPointing1();
 }
@@ -205,7 +205,7 @@ const casacore::Vector<casacore::MVDirection>& DataAccessorAdapter::dishPointing
 /// @return a vector with direction measures (coordinate system
 /// is is set via IDataConverter), one direction for each
 /// visibility/row
-const casacore::Vector<casacore::MVDirection>& DataAccessorAdapter::dishPointing2() const
+const casa::Vector<casa::MVDirection>& DataAccessorAdapter::dishPointing2() const
 {
   return getROAccessor().dishPointing2();
 }
@@ -213,7 +213,7 @@ const casacore::Vector<casacore::MVDirection>& DataAccessorAdapter::dishPointing
 /// Cube of flags corresponding to the output of visibility() 
 /// @return a reference to nRow x nChannel x nPol cube with flag 
 ///         information. If True, the corresponding element is flagged.
-const casacore::Cube<casacore::Bool>& DataAccessorAdapter::flag() const
+const casa::Cube<casa::Bool>& DataAccessorAdapter::flag() const
 {
   return getROAccessor().flag();
 }
@@ -222,7 +222,7 @@ const casacore::Cube<casacore::Bool>& DataAccessorAdapter::flag() const
 /// @brief UVW
 /// @return a reference to vector containing uvw-coordinates
 /// packed into a 3-D rigid vector
-const casacore::Vector<casacore::RigidVector<casacore::Double, 3> >&
+const casa::Vector<casa::RigidVector<casa::Double, 3> >&
         DataAccessorAdapter::uvw() const
 {
   return getROAccessor().uvw();
@@ -234,8 +234,8 @@ const casacore::Vector<casacore::RigidVector<casacore::Double, 3> >&
 /// returned by a separate method.
 /// @param[in] tangentPoint tangent point to rotate the coordinates to
 /// @return uvw after rotation to the new coordinate system for each row
-const casacore::Vector<casacore::RigidVector<casacore::Double, 3> >&
-	         DataAccessorAdapter::rotatedUVW(const casacore::MDirection &tangentPoint) const
+const casa::Vector<casa::RigidVector<casa::Double, 3> >&
+	         DataAccessorAdapter::rotatedUVW(const casa::MDirection &tangentPoint) const
 {
   return getROAccessor().rotatedUVW(tangentPoint);
 }	         
@@ -248,8 +248,8 @@ const casacore::Vector<casacore::RigidVector<casacore::Double, 3> >&
 /// @param[in] tangentPoint tangent point to rotate the coordinates to
 /// @param[in] imageCentre image centre (additional translation is done if imageCentre!=tangentPoint)
 /// @return delays corresponding to the uvw rotation for each row
-const casacore::Vector<casacore::Double>& DataAccessorAdapter::uvwRotationDelay(
-	      const casacore::MDirection &tangentPoint, const casacore::MDirection &imageCentre) const
+const casa::Vector<casa::Double>& DataAccessorAdapter::uvwRotationDelay(
+	      const casa::MDirection &tangentPoint, const casa::MDirection &imageCentre) const
 {
   return getROAccessor().uvwRotationDelay(tangentPoint, imageCentre);
 }	
@@ -258,7 +258,7 @@ const casacore::Vector<casacore::Double>& DataAccessorAdapter::uvwRotationDelay(
 /// @return a reference to nRow x nChannel x nPol cube with
 ///         complex noise estimates. Elements correspond to the
 ///         visibilities in the data cube.
-const casacore::Cube<casacore::Complex>& DataAccessorAdapter::noise() const
+const casa::Cube<casa::Complex>& DataAccessorAdapter::noise() const
 {
   return getROAccessor().noise();
 }
@@ -269,7 +269,7 @@ const casacore::Cube<casacore::Complex>& DataAccessorAdapter::noise() const
 ///         for all rows. The timestamp is returned as 
 ///         Double w.r.t. the origin specified by the 
 ///         DataSource object and in that reference frame
-casacore::Double DataAccessorAdapter::time() const
+casa::Double DataAccessorAdapter::time() const
 {
   return getROAccessor().time();
 }
@@ -279,7 +279,7 @@ casacore::Double DataAccessorAdapter::time() const
 ///         spectral channel (vector size is nChannel). Frequencies
 ///         are given as Doubles, the frame/units are specified by
 ///         the DataSource object
-const casacore::Vector<casacore::Double>& DataAccessorAdapter::frequency() const
+const casa::Vector<casa::Double>& DataAccessorAdapter::frequency() const
 {
   return getROAccessor().frequency();
 }
@@ -290,7 +290,7 @@ const casacore::Vector<casacore::Double>& DataAccessorAdapter::frequency() const
 ///         spectral channel (vector size is nChannel). Velocities
 ///         are given as Doubles, the frame/units are specified by
 ///         the DataSource object (via IDataConverter).
-const casacore::Vector<casacore::Double>& DataAccessorAdapter::velocity() const
+const casa::Vector<casa::Double>& DataAccessorAdapter::velocity() const
 {
   return getROAccessor().velocity();
 }
@@ -300,7 +300,7 @@ const casacore::Vector<casacore::Double>& DataAccessorAdapter::velocity() const
 /// each product in the visibility cube (nPol() elements).
 /// @note All rows of the accessor have the same structure of the visibility
 /// cube, i.e. polarisation types returned by this method are valid for all rows.
-const casacore::Vector<casacore::Stokes::StokesTypes>& DataAccessorAdapter::stokes() const
+const casa::Vector<casa::Stokes::StokesTypes>& DataAccessorAdapter::stokes() const
 {
   return getROAccessor().stokes();
 }
@@ -312,7 +312,7 @@ const casacore::Vector<casacore::Stokes::StokesTypes>& DataAccessorAdapter::stok
 /// @return a reference to nRow x nChannel x nPol cube, containing
 /// all visibility data
 ///
-const casacore::Cube<casacore::Complex>& DataAccessorAdapter::visibility() const
+const casa::Cube<casa::Complex>& DataAccessorAdapter::visibility() const
 {
   return getROAccessor().visibility();
 }
@@ -324,7 +324,7 @@ const casacore::Cube<casacore::Complex>& DataAccessorAdapter::visibility() const
 /// @return a reference to nRow x nChannel x nPol cube, containing
 /// all visibility data
 ///
-casacore::Cube<casacore::Complex>& DataAccessorAdapter::rwVisibility()
+casa::Cube<casa::Complex>& DataAccessorAdapter::rwVisibility()
 {
   return getRWAccessor().rwVisibility();
 }

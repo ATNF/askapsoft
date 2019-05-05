@@ -64,7 +64,7 @@ struct UVWMachineCache : public boost::noncopyable {
    /// @details For debugging, it is handy to substitute UVWMachine class by another type
    /// (to be able to implement only methods we need and to reduce our dependence on 
    /// the fix to casacore). This typedef defines what class is cached.
-   typedef casacore::UVWMachine  machineType;
+   typedef casa::UVWMachine  machineType;
    //typedef TempUVWMachine  machineType;
 
    /// @brief construct the cache
@@ -83,8 +83,8 @@ struct UVWMachineCache : public boost::noncopyable {
    /// @param[in] phaseCentre direction to the input phase centre
    /// @param[in] tangent direction to tangent point
    /// @return a const reference to uvw machine 
-   const machineType& machine(const casacore::MDirection &phaseCentre, 
-                                   const casacore::MDirection &tangent) const;
+   const machineType& machine(const casa::MDirection &phaseCentre, 
+                                   const casa::MDirection &tangent) const;
    
    /// @brief a helper method to check whether two directions are matching
    /// @details It always return false if the reference frames are different (although
@@ -96,7 +96,7 @@ struct UVWMachineCache : public boost::noncopyable {
    /// @param[in] dir1 first direction
    /// @param[in] dir2 second direction
    /// @return true, if they are matching
-   bool compare(const casacore::MDirection &dir1, const casacore::MDirection &dir2) const;
+   bool compare(const casa::MDirection &dir1, const casa::MDirection &dir2) const;
 
    /// @brief a helper method to check whether two directions are matching
    /// @details It always return false if the reference frames are different (although
@@ -108,7 +108,7 @@ struct UVWMachineCache : public boost::noncopyable {
    /// @param[in] dir2 second direction
    /// @param[in] tolerance angle tolerance (in radians)
    /// @return true, if they are matching
-   static bool compare(const casacore::MDirection &dir1, const casacore::MDirection &dir2, const double tolerance);
+   static bool compare(const casa::MDirection &dir1, const casa::MDirection &dir2, const double tolerance);
 
 protected:
    /// @brief obtain the index corresponding to a particular tangent point
@@ -117,7 +117,7 @@ protected:
    /// @param[in] phaseCentre direction to the input phase centre
    /// @param[in] tangent direction to tangent point
    /// @return cache index
-   size_t getIndex(const casacore::MDirection &phaseCentre, const casacore::MDirection &tangent) const;
+   size_t getIndex(const casa::MDirection &phaseCentre, const casa::MDirection &tangent) const;
    
 private:
 
@@ -128,10 +128,10 @@ private:
    mutable std::vector<boost::shared_ptr<machineType> > itsCache;
 
    /// @brief cached tangent directions
-   mutable std::vector<casacore::MDirection> itsTangentPoints;
+   mutable std::vector<casa::MDirection> itsTangentPoints;
 
    /// @brief cached phase centre directions
-   mutable std::vector<casacore::MDirection> itsPhaseCentres;
+   mutable std::vector<casa::MDirection> itsPhaseCentres;
    
    /// @brief index of the oldest element in the cache
    mutable size_t itsOldestElement;

@@ -68,9 +68,9 @@ struct IFeedSubtableHandler : virtual public IHolder {
   /// @param[in] feedID feed of interest
   /// @return a reference to RigidVector<Double,2> with the offsets on each
   /// axes (in radians).
-  virtual const casacore::RigidVector<casacore::Double, 2>& 
-        getBeamOffset(const casacore::MEpoch &time, casacore::uInt spWinID,
-                      casacore::uInt antID, casacore::uInt feedID) const = 0;
+  virtual const casa::RigidVector<casa::Double, 2>& 
+        getBeamOffset(const casa::MEpoch &time, casa::uInt spWinID,
+                      casa::uInt antID, casa::uInt feedID) const = 0;
   
   /// obtain the position angle of each beam (w.r.t. some coordinate system
   /// fixed with the dish).
@@ -81,9 +81,9 @@ struct IFeedSubtableHandler : virtual public IHolder {
   /// @param[in] antID antenna of interest
   /// @param[in] feedID feed of interest
   /// @return a position angle (in radians).
-  virtual casacore::Double getBeamPA(const casacore::MEpoch &time, 
-                                 casacore::uInt spWinID,
-                                 casacore::uInt antID, casacore::uInt feedID) const = 0;
+  virtual casa::Double getBeamPA(const casa::MEpoch &time, 
+                                 casa::uInt spWinID,
+                                 casa::uInt antID, casa::uInt feedID) const = 0;
   
   /// @brief check whether the given time and spectral window ID is  in cache.
   /// @details The users of this class are expected to do some heavy postprocessing
@@ -96,7 +96,7 @@ struct IFeedSubtableHandler : virtual public IHolder {
   /// spectral window-dependent
   /// @return true if the beam parameters are different for the given time and
   /// spectral window ID
-  virtual bool newBeamDetails(const casacore::MEpoch &time, casacore::uInt spWinID) const = 0;
+  virtual bool newBeamDetails(const casa::MEpoch &time, casa::uInt spWinID) const = 0;
 
   /// obtain position angles for all beams in the current cache (w.r.t. some
   /// coordinate system fixed with the dish). The correspondence between 
@@ -107,8 +107,8 @@ struct IFeedSubtableHandler : virtual public IHolder {
   /// @param[in] spWinID spectral window ID of interest (feed table can be
   /// spectral window-dependent
   /// @return a reference to a vector with angles (in radians)
-  virtual const casacore::Vector<casacore::Double>& getAllBeamPAs(
-                        const casacore::MEpoch &time, casacore::uInt spWinID) const = 0;
+  virtual const casa::Vector<casa::Double>& getAllBeamPAs(
+                        const casa::MEpoch &time, casa::uInt spWinID) const = 0;
 
   /// obtain the offsets for all beams with respect to dish pointing
   /// centre.
@@ -117,8 +117,8 @@ struct IFeedSubtableHandler : virtual public IHolder {
   /// @param[in] spWinID spectral window ID of interest (feed table can be
   /// spectral window-dependent
   /// @return a reference to a vector with offsets (in radians on each axis)
-  virtual const casacore::Vector<casacore::RigidVector<casacore::Double, 2> > &
-         getAllBeamOffsets(const casacore::MEpoch &time, casacore::uInt spWinID) const = 0;
+  virtual const casa::Vector<casa::RigidVector<casa::Double, 2> > &
+         getAllBeamOffsets(const casa::MEpoch &time, casa::uInt spWinID) const = 0;
 
   /// obtain feed IDs for the given time and spectral window
   /// @param[in] time a full epoch of interest (feed table can be time-
@@ -127,8 +127,8 @@ struct IFeedSubtableHandler : virtual public IHolder {
   /// spectral window-dependent
   /// @return a vector of feed IDs, each element corresponds to the appropriate
   /// element of getAllBeamPAs and getAllBeamOffsets
-  virtual const casacore::Vector<casacore::Int>& getFeedIDs(const casacore::MEpoch &time, 
-                      casacore::uInt spWinID) const = 0;
+  virtual const casa::Vector<casa::Int>& getFeedIDs(const casa::MEpoch &time, 
+                      casa::uInt spWinID) const = 0;
   
   /// obtain antenna IDs for the given time and spectral window
   /// @param[in] time a full epoch of interest (feed table can be time-
@@ -137,8 +137,8 @@ struct IFeedSubtableHandler : virtual public IHolder {
   /// spectral window-dependent
   /// @return a vector of antenna IDs, each element corresponds to the appropriate
   /// element of getAllBeamPAs and getAllBeamOffsets
-  virtual const casacore::Vector<casacore::Int>& getAntennaIDs(const casacore::MEpoch &time, 
-                      casacore::uInt spWinID) const = 0;
+  virtual const casa::Vector<casa::Int>& getAntennaIDs(const casa::MEpoch &time, 
+                      casa::uInt spWinID) const = 0;
 
   /// @brief obtain a matrix of indices into beam offset and beam PA arrays
   /// @details getAllBeamOffsets and getAllBeamPAs methods return references
@@ -154,7 +154,7 @@ struct IFeedSubtableHandler : virtual public IHolder {
   /// checks will be a waste of resources. It is probably better to live with the
   /// current interface although this approach is less elegant.
   /// @return a reference to matrix with indicies
-  virtual const casacore::Matrix<casacore::Int>& getIndices() const throw() = 0;
+  virtual const casa::Matrix<casa::Int>& getIndices() const throw() = 0;
 
   /// @brief check whether all beam offsets are zero
   /// @details Non-zero beam offsets cause heavy calculations when a pointing
@@ -168,7 +168,7 @@ struct IFeedSubtableHandler : virtual public IHolder {
   /// @param[in] spWinID spectral window ID of interest (feed table can be
   /// spectral window-dependent
   /// @return true if all beam offsets are zero for the given time/epoch.
-  virtual bool allBeamOffsetsZero(const casacore::MEpoch &time, casacore::uInt spWinID) const = 0;
+  virtual bool allBeamOffsetsZero(const casa::MEpoch &time, casa::uInt spWinID) const = 0;
 
 };
 

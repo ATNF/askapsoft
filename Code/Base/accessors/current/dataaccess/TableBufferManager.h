@@ -52,7 +52,7 @@ struct TableBufferManager : virtual public IBufferManager,
 {
   /// construct the object and link it to the given buffers subtable
   /// @param[in] tab  subtable to use
-  TableBufferManager(const casacore::Table &tab);
+  TableBufferManager(const casa::Table &tab);
   
   /// @brief populate the cube with the data stored in the given buffer
   /// @details The method throws an exception if the requested buffer
@@ -61,9 +61,9 @@ struct TableBufferManager : virtual public IBufferManager,
   ///            cube to fill with the complex visibility data
   /// @param[in] name a name of the buffer to work with
   /// @param[in] index a sequential index in the buffer
-  virtual void readBuffer(casacore::Cube<casacore::Complex> &vis,
+  virtual void readBuffer(casa::Cube<casa::Complex> &vis,
                           const std::string &name,
-			   casacore::uInt index) const;
+			   casa::uInt index) const;
   
   /// @brief write the cube back to the given buffer
   /// @details This buffer is created on the first write operation
@@ -71,16 +71,16 @@ struct TableBufferManager : virtual public IBufferManager,
   ///            cube to fill with the complex visibility data
   /// @param[in] name a name of the buffer to work with
   /// @param[in] index a sequential index in the buffer
-  virtual void writeBuffer(const casacore::Cube<casacore::Complex> &vis,
+  virtual void writeBuffer(const casa::Cube<casa::Complex> &vis,
                            const std::string &name,
-			   casacore::uInt index) const;
+			   casa::uInt index) const;
 
   /// @brief check whether the particular buffer exists
   /// @param[in] name a name of the buffer to query
   /// @return true, if the buffer with the given name is present
   /// @param[in] index a sequential index in the buffer
   virtual bool bufferExists(const std::string &name,
-			   casacore::uInt index) const;
+			   casa::uInt index) const;
 protected:
   // templated methods to handle cubes of different types
 
@@ -91,8 +91,8 @@ protected:
   /// @param[in] name a name of the column to work with
   /// @param[in] index row number
   template<typename T>
-  void readCube(casacore::Cube<T> &cube, const std::string &name,
-			    casacore::uInt index) const;
+  void readCube(casa::Cube<T> &cube, const std::string &name,
+			    casa::uInt index) const;
   
   /// @brief write the cube back to the table
   /// @details The table cell is populated with values on the first write 
@@ -101,8 +101,8 @@ protected:
   /// @param[in] name a name of the column to work with
   /// @param[in] index row number
   template<typename T>
-  void writeCube(const casacore::Cube<T> &cube, const std::string &name,
-			     casacore::uInt index) const;
+  void writeCube(const casa::Cube<T> &cube, const std::string &name,
+			     casa::uInt index) const;
 
   /// @brief check whether a particular table cell exists
   /// @param[in] name a name of the table column to query
@@ -111,7 +111,7 @@ protected:
   /// @note template type defined the type of the data
   template<typename T>
   bool cellDefined(const std::string &name,
-			      casacore::uInt index) const;  			   
+			      casa::uInt index) const;  			   
 };
 
 } // namespace accessors

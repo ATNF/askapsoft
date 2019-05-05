@@ -1,6 +1,6 @@
 /// @file
 /// @brief Basic interface to access an image
-/// @details This interface class is somewhat analogous to casacore::ImageInterface. But it has
+/// @details This interface class is somewhat analogous to casa::ImageInterface. But it has
 /// only methods we need for accessors and allow more functionality to access a part of the image.
 /// In the future we can benefit from using this minimalistic interface because it should be 
 /// relatively easy to do parallel operations on the same image or even distributed storage.

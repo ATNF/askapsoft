@@ -6,7 +6,7 @@
 /// Typically, the need for such class arises if one needs a buffering
 /// on each individual iteration and the content of buffers is not required 
 /// to be preserved when the corresponding iterator advances. In most cases,
-/// a casacore::Cube with the same dimensions as that returned by the visibility
+/// a casa::Cube with the same dimensions as that returned by the visibility
 /// method can be used. However, it can also be desireable to be able to
 /// use existing API accepting a reference to an accessor for this buffer, or,
 /// alternatively to pass around this buffer with associated metadata supplied
@@ -55,7 +55,7 @@ MemBufferDataAccessor::MemBufferDataAccessor(const IConstDataAccessor &acc) :
 /// @return a reference to nRow x nChannel x nPol cube, containing
 /// all visibility data
 ///
-const casacore::Cube<casacore::Complex>& MemBufferDataAccessor::visibility() const
+const casa::Cube<casa::Complex>& MemBufferDataAccessor::visibility() const
 {
   resizeBufferIfNeeded();
   return itsBuffer;
@@ -67,7 +67,7 @@ const casacore::Cube<casacore::Complex>& MemBufferDataAccessor::visibility() con
 /// @return a reference to nRow x nChannel x nPol cube, containing
 /// all visibility data
 ///
-casacore::Cube<casacore::Complex>& MemBufferDataAccessor::rwVisibility()
+casa::Cube<casa::Complex>& MemBufferDataAccessor::rwVisibility()
 {
   resizeBufferIfNeeded();
   return itsBuffer;

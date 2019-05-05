@@ -56,7 +56,7 @@ struct ChanAdapterCalSolutionConstAccessor : public ICalSolutionConstAccessor {
    /// is wrapped around and the channel offset
    /// @param[in] acc shared pointer to the original accessor to wrap
    /// @param[in] offset channel offset to add to bandpass request
-   ChanAdapterCalSolutionConstAccessor(const boost::shared_ptr<ICalSolutionConstAccessor> &acc, const casacore::uInt offset);
+   ChanAdapterCalSolutionConstAccessor(const boost::shared_ptr<ICalSolutionConstAccessor> &acc, const casa::uInt offset);
    
    /// @brief obtain gains (J-Jones)
    /// @details This method retrieves parallel-hand gains for both 
@@ -90,7 +90,7 @@ struct ChanAdapterCalSolutionConstAccessor : public ICalSolutionConstAccessor {
    /// @param[in] index ant/beam index
    /// @param[in] chan spectral channel of interest
    /// @return JonesJTerm object with gains and validity flags
-   virtual JonesJTerm bandpass(const JonesIndex &index, const casacore::uInt chan) const;
+   virtual JonesJTerm bandpass(const JonesIndex &index, const casa::uInt chan) const;
    
    /// @brief shared pointer definition
    typedef boost::shared_ptr<ChanAdapterCalSolutionConstAccessor> ShPtr;
@@ -99,7 +99,7 @@ private:
    const boost::shared_ptr<ICalSolutionConstAccessor> itsAccessor;
 
    /// @brief channel offset to apply
-   const casacore::uInt itsOffset;
+   const casa::uInt itsOffset;
 };
 
 } // namespace accessors

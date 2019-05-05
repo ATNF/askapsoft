@@ -2,7 +2,7 @@
 /// @brief Implementation of the time range selector
 /// @details This template implements TableTimeStampSelector for the
 /// various types used to specify the time range. Currently, specializations
-/// exists for Double and casacore::MVEpoch
+/// exists for Double and casa::MVEpoch
 ///
 /// @copyright (c) 2007 CSIRO
 /// Australia Telescope National Facility (ATNF)
@@ -45,7 +45,7 @@ namespace accessors {
 /// @brief Implementation of the time range selector
 /// @details This template implements TableTimeStampSelector for the
 /// various types used to specify the time range. Currently, specializations
-/// exists for Double and casacore::MVEpoch
+/// exists for Double and casa::MVEpoch
 /// @ingroup dataaccess_tab
 template<typename T>
 struct TableTimeStampSelectorImpl : public TableTimeStampSelector,
@@ -55,7 +55,7 @@ struct TableTimeStampSelectorImpl : public TableTimeStampSelector,
    /// @param[in] tab the table to work with
    /// @param[in] start start time of the interval
    /// @param[in] stop stop time of the interval
-   TableTimeStampSelectorImpl(const casacore::Table &tab, const T &start, 
+   TableTimeStampSelectorImpl(const casa::Table &tab, const T &start, 
                               const T &stop);
    
 protected:
@@ -65,7 +65,7 @@ protected:
    /// should have an explicit specialization of this method
    /// @return start and stop times of the interval to be selected (as
    ///         an std::pair, start is first, stop is second)
-   virtual std::pair<casacore::MEpoch, casacore::MEpoch>
+   virtual std::pair<casa::MEpoch, casa::MEpoch>
            getStartAndStop() const;       
                
 private:

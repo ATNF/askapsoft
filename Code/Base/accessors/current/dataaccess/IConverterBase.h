@@ -59,7 +59,7 @@ protected: // the following method(s) are not for a general framework user,
     /// conversion is performed
     /// @param[in] frame  MeasFrame object (can be constructed from
     ///               MPosition or MEpoch on-the-fly)
-    virtual void setMeasFrame(const casacore::MeasFrame &frame) = 0;
+    virtual void setMeasFrame(const casa::MeasFrame &frame) = 0;
 };
 
 } // namespace accessors

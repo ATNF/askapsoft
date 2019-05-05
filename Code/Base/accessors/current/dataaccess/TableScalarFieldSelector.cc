@@ -48,23 +48,23 @@ using namespace casa;
 
 /// Choose a single feed, the same for both antennae
 /// @param feedID the sequence number of feed to choose
-void TableScalarFieldSelector::chooseFeed(casacore::uInt feedID)
+void TableScalarFieldSelector::chooseFeed(casa::uInt feedID)
 {
    if (itsTableSelector.isNull()) {
        itsTableSelector= (table().col("FEED1") ==
-                  static_cast<casacore::Int>(feedID)) && (table().col("FEED2") ==
-                  static_cast<casacore::Int>(feedID));
+                  static_cast<casa::Int>(feedID)) && (table().col("FEED2") ==
+                  static_cast<casa::Int>(feedID));
    } else {
        itsTableSelector=itsTableSelector && (table().col("FEED1") ==
-                  static_cast<casacore::Int>(feedID)) && (table().col("FEED2") ==
-                  static_cast<casacore::Int>(feedID));
+                  static_cast<casa::Int>(feedID)) && (table().col("FEED2") ==
+                  static_cast<casa::Int>(feedID));
    }
 }
 
 /// @brief choose user-defined index
 /// @param[in] column column name in the measurement set for a user-defined index
 /// @param[in] value index value
-void TableScalarFieldSelector::chooseUserDefinedIndex(const std::string &column, const casacore::uInt value)
+void TableScalarFieldSelector::chooseUserDefinedIndex(const std::string &column, const casa::uInt value)
 {
    if (itsTableSelector.isNull()) {
        itsTableSelector = (table().col(column) == value);
@@ -77,32 +77,32 @@ void TableScalarFieldSelector::chooseUserDefinedIndex(const std::string &column,
 /// @param ant1 the sequence number of the first antenna
 /// @param ant2 the sequence number of the second antenna
 /// Which one is the first and which is the second is not important
-void TableScalarFieldSelector::chooseBaseline(casacore::uInt ant1,
-                                              casacore::uInt ant2)
+void TableScalarFieldSelector::chooseBaseline(casa::uInt ant1,
+                                              casa::uInt ant2)
 {
    if (itsTableSelector.isNull()) {
        itsTableSelector= (table().col("ANTENNA1") ==
-           static_cast<casacore::Int>(ant1)) && (table().col("ANTENNA2") ==
-	   static_cast<casacore::Int>(ant2));
+           static_cast<casa::Int>(ant1)) && (table().col("ANTENNA2") ==
+	   static_cast<casa::Int>(ant2));
    } else {
        itsTableSelector=itsTableSelector && (table().col("ANTENNA1") ==
-           static_cast<casacore::Int>(ant1)) && (table().col("ANTENNA2") ==
-	   static_cast<casacore::Int>(ant2));
+           static_cast<casa::Int>(ant1)) && (table().col("ANTENNA2") ==
+	   static_cast<casa::Int>(ant2));
    }
 }
 
 /// Choose all baselines to given antenna
 /// @param[in] ant the sequence number of antenna
-void TableScalarFieldSelector::chooseAntenna(casacore::uInt ant)
+void TableScalarFieldSelector::chooseAntenna(casa::uInt ant)
 {
    if (itsTableSelector.isNull()) {
        itsTableSelector=(table().col("ANTENNA1") ==
-           static_cast<casacore::Int>(ant)) || (table().col("ANTENNA2") ==
-	   static_cast<casacore::Int>(ant));
+           static_cast<casa::Int>(ant)) || (table().col("ANTENNA2") ==
+	   static_cast<casa::Int>(ant));
    } else {
        itsTableSelector=itsTableSelector && ((table().col("ANTENNA1") ==
-           static_cast<casacore::Int>(ant)) || (table().col("ANTENNA2") ==
-	   static_cast<casacore::Int>(ant)));
+           static_cast<casa::Int>(ant)) || (table().col("ANTENNA2") ==
+	   static_cast<casa::Int>(ant)));
    }
 }
 
@@ -110,7 +110,7 @@ void TableScalarFieldSelector::chooseAntenna(casacore::uInt ant)
 /// @details This effectively rejects the baselines giving a smaller
 /// uv-distance than the specified threshold
 /// @param[in] uvDist threshold
-void TableScalarFieldSelector::chooseMinUVDistance(casacore::Double uvDist)
+void TableScalarFieldSelector::chooseMinUVDistance(casa::Double uvDist)
 {
   TableExprNode uvwExprNode = table().col("UVW");
   const TableExprNode uExprNode = uvwExprNode(IPosition(1,0));
@@ -130,7 +130,7 @@ void TableScalarFieldSelector::chooseMinUVDistance(casacore::Double uvDist)
 /// @details This effectively rejects the baselines giving a larger
 /// uv-distance than the specified threshold
 /// @param[in] uvDist threshold
-void TableScalarFieldSelector::chooseMaxUVDistance(casacore::Double uvDist)
+void TableScalarFieldSelector::chooseMaxUVDistance(casa::Double uvDist)
 {
   TableExprNode uvwExprNode = table().col("UVW");
   const TableExprNode uExprNode = uvwExprNode(IPosition(1,0));
@@ -149,14 +149,14 @@ void TableScalarFieldSelector::chooseMaxUVDistance(casacore::Double uvDist)
 
 /// Choose a single scan number
 /// @param[in] scanNumber the scan number to choose
-void TableScalarFieldSelector::chooseScanNumber(casacore::uInt scanNumber)
+void TableScalarFieldSelector::chooseScanNumber(casa::uInt scanNumber)
 {
     if (itsTableSelector.isNull()) {
         itsTableSelector = (table().col("SCAN_NUMBER") ==
-                static_cast<casacore::Int>(scanNumber));
+                static_cast<casa::Int>(scanNumber));
     } else {
         itsTableSelector = itsTableSelector && (table().col("SCAN_NUMBER") ==
-                static_cast<casacore::Int>(scanNumber));
+                static_cast<casa::Int>(scanNumber));
     }
 }
 
@@ -191,7 +191,7 @@ void TableScalarFieldSelector::chooseCrossCorrelations()
 
 /// Choose a single spectral window (also known as IF).
 /// @param spWinID the ID of the spectral window to choose
-void TableScalarFieldSelector::chooseSpectralWindow(casacore::uInt spWinID)
+void TableScalarFieldSelector::chooseSpectralWindow(casa::uInt spWinID)
 {
    // one spectral window can correspond to multiple data description IDs
    // We need to obtain this information from the DATA_DESCRIPTION table
@@ -200,10 +200,10 @@ void TableScalarFieldSelector::chooseSpectralWindow(casacore::uInt spWinID)
    if (dataDescIDs.size()) {
        std::vector<size_t>::const_iterator ci=dataDescIDs.begin();
        TableExprNode tempNode=(table().col("DATA_DESC_ID") ==
-                  static_cast<casacore::Int>(*ci));
+                  static_cast<casa::Int>(*ci));
        for(++ci;ci!=dataDescIDs.end();++ci) {           
 	   tempNode = tempNode || (table().col("DATA_DESC_ID") ==
-                  static_cast<casacore::Int>(*ci));
+                  static_cast<casa::Int>(*ci));
        }
        if (itsTableSelector.isNull()) {
            itsTableSelector=tempNode;
@@ -224,7 +224,7 @@ void TableScalarFieldSelector::chooseSpectralWindow(casacore::uInt spWinID)
 /// obeying the selection criteria specified by the user via
 /// IDataSelector interface
 /// @return a const reference to table expression node object
-const casacore::TableExprNode& TableScalarFieldSelector::getTableSelector(const
+const casa::TableExprNode& TableScalarFieldSelector::getTableSelector(const
             boost::shared_ptr<IDataConverterImpl const> &) const
 { 
   return itsTableSelector;
@@ -233,7 +233,7 @@ const casacore::TableExprNode& TableScalarFieldSelector::getTableSelector(const
 /// @brief get read-write access to expression node
 /// @return a reference to the cached table expression node
 ///
-casacore::TableExprNode& TableScalarFieldSelector::rwTableSelector() const
+casa::TableExprNode& TableScalarFieldSelector::rwTableSelector() const
 { 
   return itsTableSelector;
 }

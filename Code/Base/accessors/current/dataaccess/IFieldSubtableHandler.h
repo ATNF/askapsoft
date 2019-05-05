@@ -62,7 +62,7 @@ struct IFieldSubtableHandler : virtual public IHolder {
   /// @param[in] time a full epoch of interest (the subtable can have multiple
   /// pointings.
   /// @return a reference to direction measure
-  virtual const casacore::MDirection& getReferenceDir(const casacore::MEpoch &time) 
+  virtual const casa::MDirection& getReferenceDir(const casa::MEpoch &time) 
                                                   const = 0;
 
   /// @brief check whether the field changed for a given time
@@ -76,7 +76,7 @@ struct IFieldSubtableHandler : virtual public IHolder {
   /// @param[in] time a full epoch of interest (the subtable can have multiple
   /// pointings.
   /// @return true if the field information have been changed
-  virtual bool newField(const casacore::MEpoch &time) const = 0;
+  virtual bool newField(const casa::MEpoch &time) const = 0;
 
   /// @brief obtain the reference direction stored in a given row
   /// @details The measurement set format looks a bit redundant: individual
@@ -91,7 +91,7 @@ struct IFieldSubtableHandler : virtual public IHolder {
   /// it is present in the main table of the dataset.
   /// @param[in] fieldID  a row number of interest
   /// @return a reference to direction measure
-  virtual const casacore::MDirection& getReferenceDir(casacore::uInt fieldID) 
+  virtual const casa::MDirection& getReferenceDir(casa::uInt fieldID) 
                                                   const = 0;
 };
 

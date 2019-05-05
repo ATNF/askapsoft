@@ -40,12 +40,12 @@ using namespace askap::accessors;
 
 /// constructor - set the table to work with
 /// @param[in] tab table to work with
-TableHolder::TableHolder(const casacore::Table &tab) :
+TableHolder::TableHolder(const casa::Table &tab) :
               itsTable(tab) {}
 
 
 /// @return a non-const reference to Table held by this object
-casacore::Table& TableHolder::table() const throw()
+casa::Table& TableHolder::table() const throw()
 {
   return itsTable;
 }

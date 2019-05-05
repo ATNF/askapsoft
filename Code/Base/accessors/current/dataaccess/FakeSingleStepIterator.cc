@@ -96,7 +96,7 @@ void FakeSingleStepIterator::chooseBuffer(const std::string &bufferID)
 /// Switch the output of operator* and operator-> to the original
 /// state (present after the iterator is just constructed) 
 /// where they point to the primary visibility data. This method
-/// is indended to cancel the results of chooseBuffer(casacore::uInt)
+/// is indended to cancel the results of chooseBuffer(casa::uInt)
 ///
 void FakeSingleStepIterator::chooseOriginal()
 {
@@ -143,7 +143,7 @@ void FakeSingleStepIterator::init()
 	
 /// Checks whether there are more data available.
 /// @return True if there are more data available
-casacore::Bool FakeSingleStepIterator::hasMore() const throw()
+casa::Bool FakeSingleStepIterator::hasMore() const throw()
 {
   return itsOriginFlag;
 }
@@ -151,7 +151,7 @@ casacore::Bool FakeSingleStepIterator::hasMore() const throw()
 /// advance the iterator one step further
 /// @return True if there are more data (so constructions like
 ///         while(it.next()) {} are possible)
-casacore::Bool FakeSingleStepIterator::next()
+casa::Bool FakeSingleStepIterator::next()
 {
   ASKAPDEBUGASSERT(itsOriginFlag);
   itsOriginFlag = false;

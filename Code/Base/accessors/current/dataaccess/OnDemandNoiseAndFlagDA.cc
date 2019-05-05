@@ -50,7 +50,7 @@ OnDemandNoiseAndFlagDA::OnDemandNoiseAndFlagDA(const IConstDataAccessor &acc) :
 /// @return a reference to nRow x nChannel x nPol cube with
 ///         complex noise estimates. Elements correspond to the
 ///         visibilities in the data cube.
-const casacore::Cube<casacore::Complex>& OnDemandNoiseAndFlagDA::noise() const
+const casa::Cube<casa::Complex>& OnDemandNoiseAndFlagDA::noise() const
 {
   if (itsNoiseSubstituted) {
       return itsNoiseBuffer;
@@ -62,7 +62,7 @@ const casacore::Cube<casacore::Complex>& OnDemandNoiseAndFlagDA::noise() const
 /// @return a reference to nRow x nChannel x nPol cube with
 ///         complex noise estimates. Elements correspond to the
 ///         visibilities in the data cube.
-casacore::Cube<casacore::Complex>& OnDemandNoiseAndFlagDA::rwNoise()
+casa::Cube<casa::Complex>& OnDemandNoiseAndFlagDA::rwNoise()
 {
   if (!itsNoiseSubstituted) {
       itsNoiseSubstituted = true;
@@ -74,7 +74,7 @@ casacore::Cube<casacore::Complex>& OnDemandNoiseAndFlagDA::rwNoise()
 /// @brief Cube of flags corresponding to the output of visibility()
 /// @return a reference to nRow x nChannel x nPol cube with the flag
 ///         information. If True, the corresponding element is flagged.
-const casacore::Cube<casacore::Bool>& OnDemandNoiseAndFlagDA::flag() const
+const casa::Cube<casa::Bool>& OnDemandNoiseAndFlagDA::flag() const
 {
   if (itsFlagSubstituted) {
       return itsFlagBuffer;
@@ -85,7 +85,7 @@ const casacore::Cube<casacore::Bool>& OnDemandNoiseAndFlagDA::flag() const
 /// @brief Non-const access to the cube of flags.
 /// @return a reference to nRow x nChannel x nPol cube with the flag
 ///         information. If True, the corresponding element is flagged.
-casacore::Cube<casacore::Bool>& OnDemandNoiseAndFlagDA::rwFlag()
+casa::Cube<casa::Bool>& OnDemandNoiseAndFlagDA::rwFlag()
 {
   if (!itsFlagSubstituted) {
       itsFlagSubstituted = true;

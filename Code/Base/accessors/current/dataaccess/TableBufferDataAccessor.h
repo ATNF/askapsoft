@@ -77,7 +77,7 @@ public:
   /// @return a reference to nRow x nChannel x nPol cube, containing
   /// all visibility data
   ///
-  virtual const casacore::Cube<casacore::Complex>& visibility() const;
+  virtual const casa::Cube<casa::Complex>& visibility() const;
   
   
   /// Read-write access to visibilities (a cube is nRow x nChannel x nPol;
@@ -86,7 +86,7 @@ public:
   /// @return a reference to nRow x nChannel x nPol cube, containing
   /// all visibility data
   ///
-  virtual casacore::Cube<casacore::Complex>& rwVisibility();
+  virtual casa::Cube<casa::Complex>& rwVisibility();
 
   /// sync the buffer with table if necessary
   void sync();

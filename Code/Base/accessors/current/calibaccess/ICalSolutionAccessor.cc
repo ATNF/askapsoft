@@ -46,17 +46,17 @@ namespace accessors {
 /// @param[in] index ant/beam index
 /// @param[in] stokes what element to update (choose from XX,XY,YX and YY)
 /// @param[in] elem value to set
-void ICalSolutionAccessor::setJonesElement(const JonesIndex &index, const casacore::Stokes::StokesTypes stokes, const casacore::Complex &elem)
+void ICalSolutionAccessor::setJonesElement(const JonesIndex &index, const casa::Stokes::StokesTypes stokes, const casa::Complex &elem)
 {
-  if ( (stokes == casacore::Stokes::XX) || (stokes == casacore::Stokes::YY) ) {
+  if ( (stokes == casa::Stokes::XX) || (stokes == casa::Stokes::YY) ) {
       // parallel-hand case
       const JonesJTerm oldJTerm = gain(index);
-      setGain(index, stokes == casacore::Stokes::XX ? JonesJTerm(elem, true, oldJTerm.g2(), oldJTerm.g2IsValid()) :
+      setGain(index, stokes == casa::Stokes::XX ? JonesJTerm(elem, true, oldJTerm.g2(), oldJTerm.g2IsValid()) :
                      JonesJTerm(oldJTerm.g1(), oldJTerm.g1IsValid(), elem, true));
-  } else if ( (stokes == casacore::Stokes::XY) || (stokes == casacore::Stokes::YX) ) {
+  } else if ( (stokes == casa::Stokes::XY) || (stokes == casa::Stokes::YX) ) {
       // cross-pol case (need to implement validity flags at some stage)
       const JonesDTerm oldDTerm = leakage(index);
-      setLeakage(index, stokes == casacore::Stokes::XY ? JonesDTerm(elem, true, oldDTerm.d21(), oldDTerm.d21IsValid()) : 
+      setLeakage(index, stokes == casa::Stokes::XY ? JonesDTerm(elem, true, oldDTerm.d21(), oldDTerm.d21IsValid()) : 
                      JonesDTerm(oldDTerm.d12(), oldDTerm.d12IsValid(), elem, true));
   } else {
       ASKAPTHROW(AskapError, "Only XX, YY, XY and YX stokes are supported by setJonesElement, you passed stokes="<<stokes);
@@ -69,7 +69,7 @@ void ICalSolutionAccessor::setJonesElement(const JonesIndex &index, const casaco
 /// @param[in] beam beam index
 /// @param[in] stokes what element to update (choose from XX,XY,YX and YY)
 /// @param[in] elem value to set
-void ICalSolutionAccessor::setJonesElement(casacore::uInt ant, casacore::uInt beam, const casacore::Stokes::StokesTypes stokes, const casacore::Complex &elem)
+void ICalSolutionAccessor::setJonesElement(casa::uInt ant, casa::uInt beam, const casa::Stokes::StokesTypes stokes, const casa::Complex &elem)
 {
   setJonesElement(JonesIndex(ant, beam), stokes, elem);
 }
@@ -85,14 +85,14 @@ void ICalSolutionAccessor::setJonesElement(casacore::uInt ant, casacore::uInt be
 /// @param[in] stokes what element to update (choose either XX or YY)
 /// @param[in] chan spectral channel of interest
 /// @param[in] elem value to set
-void ICalSolutionAccessor::setBandpassElement(const JonesIndex &index, const casacore::Stokes::StokesTypes stokes, 
-                                              casacore::uInt chan, const casacore::Complex &elem)
+void ICalSolutionAccessor::setBandpassElement(const JonesIndex &index, const casa::Stokes::StokesTypes stokes, 
+                                              casa::uInt chan, const casa::Complex &elem)
 {
   const JonesJTerm oldBP = bandpass(index,chan);
-  if (stokes == casacore::Stokes::XX) {
+  if (stokes == casa::Stokes::XX) {
       const JonesJTerm newBP(elem, true, oldBP.g2(), oldBP.g2IsValid());
       setBandpass(index, newBP, chan);
-  } else if (stokes == casacore::Stokes::YY) {
+  } else if (stokes == casa::Stokes::YY) {
       const JonesJTerm newBP(oldBP.g1(), oldBP.g1IsValid(),elem,true);
       setBandpass(index, newBP, chan);      
   } else {
@@ -108,8 +108,8 @@ void ICalSolutionAccessor::setBandpassElement(const JonesIndex &index, const cas
 /// @param[in] stokes what element to update (choose either XX or YY)
 /// @param[in] chan spectral channel of interest
 /// @param[in] elem value to set
-void ICalSolutionAccessor::setBandpassElement(casacore::uInt ant, casacore::uInt beam, const casacore::Stokes::StokesTypes stokes, casacore::uInt chan, 
-                                              const casacore::Complex &elem)
+void ICalSolutionAccessor::setBandpassElement(casa::uInt ant, casa::uInt beam, const casa::Stokes::StokesTypes stokes, casa::uInt chan, 
+                                              const casa::Complex &elem)
 {
   ASKAPCHECK(chan < 16416, "Channel number is supposed to be less than 16416");
   setBandpassElement(JonesIndex(ant, beam), stokes, chan, elem);

@@ -89,12 +89,12 @@ public:
 
 	/// Checks whether there are more data available.
 	/// @return True if there are more data available
-	virtual casacore::Bool hasMore() const throw() = 0;
+	virtual casa::Bool hasMore() const throw() = 0;
 	
 	/// advance the iterator one step further 
 	/// @return True if there are more data (so constructions like 
 	///         while(it.next()) {} are possible)
-	virtual casacore::Bool next() = 0;
+	virtual casa::Bool next() = 0;
 
 	/// advance the iterator one step further
 	/// @return A reference to itself (to allow ++++it syntax)

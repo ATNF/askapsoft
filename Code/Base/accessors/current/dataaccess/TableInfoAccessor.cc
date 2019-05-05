@@ -62,13 +62,13 @@ TableInfoAccessor::TableInfoAccessor(const
 /// instead of the disk-based buffers
 /// @param[in] dataColumn a name of the data column used by default
 ///                       (default is DATA)
-TableInfoAccessor::TableInfoAccessor(const casacore::Table &tab, 
+TableInfoAccessor::TableInfoAccessor(const casa::Table &tab, 
                   bool useMemBuffer, const std::string &dataColumn) :
         itsTableManager(new TableManager(tab,useMemBuffer,dataColumn)) {}
 
 
 /// @return a non-const reference to Table held by this object
-casacore::Table& TableInfoAccessor::table() const throw()
+casa::Table& TableInfoAccessor::table() const throw()
 {
   ASKAPDEBUGASSERT(itsTableManager);
   return itsTableManager->table();

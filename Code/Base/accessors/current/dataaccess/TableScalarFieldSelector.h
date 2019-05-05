@@ -76,26 +76,26 @@ public:
   
   /// Choose a single feed, the same for both antennae
   /// @param[in] feedID the sequence number of feed to choose
-  virtual void chooseFeed(casacore::uInt feedID);
+  virtual void chooseFeed(casa::uInt feedID);
 
   /// Choose a single baseline
   /// @param[in] ant1 the sequence number of the first antenna
   /// @param[in] ant2 the sequence number of the second antenna
   /// Which one is the first and which is the second is not important
-  virtual void chooseBaseline(casacore::uInt ant1, casacore::uInt ant2);
+  virtual void chooseBaseline(casa::uInt ant1, casa::uInt ant2);
 
   /// Choose all baselines to given antenna
   /// @param[in] ant the sequence number of antenna
-  virtual void chooseAntenna(casacore::uInt ant);
+  virtual void chooseAntenna(casa::uInt ant);
 
   /// Choose a single spectral window (also known as IF).
   /// @param[in] spWinID the ID of the spectral window to choose
-  virtual void chooseSpectralWindow(casacore::uInt spWinID);
+  virtual void chooseSpectralWindow(casa::uInt spWinID);
 
   /// @brief choose user-defined index
   /// @param[in] column column name in the measurement set for a user-defined index
   /// @param[in] value index value
-  virtual void chooseUserDefinedIndex(const std::string &column, const casacore::uInt value);
+  virtual void chooseUserDefinedIndex(const std::string &column, const casa::uInt value);
   
   /// @brief Choose autocorrelations only
   virtual void chooseAutoCorrelations();
@@ -107,17 +107,17 @@ public:
   /// @details This effectively rejects the baselines giving a smaller
   /// uv-distance than the specified threshold
   /// @param[in] uvDist threshold (in metres)
-  virtual void chooseMinUVDistance(casacore::Double uvDist);
+  virtual void chooseMinUVDistance(casa::Double uvDist);
 
   /// @brief Choose samples corresponding to a uv-distance smaller than threshold
   /// @details This effectively rejects the baselines giving a larger
   /// uv-distance than the specified threshold
   /// @param[in] uvDist threshold (in metres)
-  virtual void chooseMaxUVDistance(casacore::Double uvDist);
+  virtual void chooseMaxUVDistance(casa::Double uvDist);
 
   /// Choose a single scan number
   /// @param[in] scanNumber the scan number to choose
-  virtual void chooseScanNumber(casacore::uInt scanNumber);
+  virtual void chooseScanNumber(casa::uInt scanNumber);
 
   /// @brief Obtain a table expression node for selection. 
   /// @details This method is
@@ -128,18 +128,18 @@ public:
   /// @param conv  a shared pointer to the converter, which is used to sort
   ///              out epochs and other measures used in the selection
   /// @return a const reference to table expression node object
-  virtual const casacore::TableExprNode& getTableSelector(const
+  virtual const casa::TableExprNode& getTableSelector(const
                boost::shared_ptr<IDataConverterImpl const> &conv) const;
       
 protected:
   /// @brief get read-write access to expression node
   /// @return a reference to the cached table expression node
   ///
-  casacore::TableExprNode& rwTableSelector() const;
+  casa::TableExprNode& rwTableSelector() const;
 
 private:
   /// a current table selection expression (cache)
-  mutable casacore::TableExprNode  itsTableSelector;  
+  mutable casa::TableExprNode  itsTableSelector;  
 };
   
 } // namespace accessors

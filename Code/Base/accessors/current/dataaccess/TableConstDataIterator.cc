@@ -62,39 +62,39 @@ namespace accessors {
 /// @brief a helper class to flag the whole row on the basis of FLAG_ROW
 /// @details The method to read a cube (i.e. visibility or flag info) from
 /// the table has been templated to allow the same code to work for both
-/// casacore::Complex visibilities and casacore::Bool flags. There is, however, an
+/// casa::Complex visibilities and casa::Bool flags. There is, however, an
 /// important difference. For flagging information, there is an extra
 /// column, FLAG_ROW. If the appropriate element is True, all row should be
 /// flagged. This is a helper template, which does nothing in the Complex
-/// case, but performs required checks for casacore::Bool.
+/// case, but performs required checks for casa::Bool.
 /// @ingroup dataaccess_tab
 template<typename T>
 struct WholeRowFlagger
 {
   /// @brief constructor
   /// @details in the default version input parameter is not used
-  inline WholeRowFlagger(const casacore::Table &) {}
+  inline WholeRowFlagger(const casa::Table &) {}
 
   /// @brief determine whether element by element copy is needed
   /// @details This method analyses other columns of the table specific
   /// for a particular type and fills the cube with appropriate data.
   /// If it can't do this, it returns true, which forces an element by element
   /// processing. By default parameters are not used
-  inline bool copyRequired(casacore::uInt, casacore::Cube<T> &) { return true;}
+  inline bool copyRequired(casa::uInt, casa::Cube<T> &) { return true;}
 };
 
 
 /// @brief a helper class to flag the whole row on the basis of FLAG_ROW
-/// @details This is a specialization for casacore::Bool (i.e. flagging information)
+/// @details This is a specialization for casa::Bool (i.e. flagging information)
 /// see the main template for details
 /// @ingroup dataaccess_tab
 template<>
-struct WholeRowFlagger<casacore::Bool>
+struct WholeRowFlagger<casa::Bool>
 {
   /// @brief constructor
   /// @details in the default version input parameter is not used
   /// @param[in] iteration current iteration (table returned by the iterator)
-  inline WholeRowFlagger(const casacore::Table &iteration);
+  inline WholeRowFlagger(const casa::Table &iteration);
 
   /// @brief determine whether element by element copy is needed
   /// @details This method analyses other columns of the table specific
@@ -103,15 +103,15 @@ struct WholeRowFlagger<casacore::Bool>
   /// processing. By default parameters are not used
   /// @param[in] row a row to work with
   /// @param[in] cube cube to work with
-  inline bool copyRequired(casacore::uInt row, casacore::Cube<casacore::Bool> &cube);
+  inline bool copyRequired(casa::uInt row, casa::Cube<casa::Bool> &cube);
 private:
   /// @brief accessor to the FLAG_ROW column
-  ROScalarColumn<casacore::Bool> itsFlagRowCol;
+  ROScalarColumn<casa::Bool> itsFlagRowCol;
   /// @brief true if the dataset has FLAG_ROW column
   bool itsHasFlagRow;
 };
 
-WholeRowFlagger<casacore::Bool>::WholeRowFlagger(const casacore::Table &iteration) :
+WholeRowFlagger<casa::Bool>::WholeRowFlagger(const casa::Table &iteration) :
     itsHasFlagRow(iteration.tableDesc().isColumn("FLAG_ROW"))
 {
   if (itsHasFlagRow) {
@@ -119,8 +119,8 @@ WholeRowFlagger<casacore::Bool>::WholeRowFlagger(const casacore::Table &iteratio
   }
 }
 
-bool WholeRowFlagger<casacore::Bool>::copyRequired(casacore::uInt row,
-                 casacore::Cube<casacore::Bool> &cube)
+bool WholeRowFlagger<casa::Bool>::copyRequired(casa::uInt row,
+                 casa::Cube<casa::Bool> &cube)
 {
   ASKAPDEBUGASSERT(!itsFlagRowCol.isNull());
   if (itsHasFlagRow) {
@@ -149,7 +149,7 @@ TableConstDataIterator::TableConstDataIterator(
             const boost::shared_ptr<ITableDataSelectorImpl const> &sel,
             const boost::shared_ptr<IDataConverterImpl const> &conv,
             size_t cacheSize, double tolerance,
-            casacore::uInt maxChunkSize) :
+            casa::uInt maxChunkSize) :
         TableInfoAccessor(msManager),
         // it is essential that accessor is initialised after cache parameters!
 	    itsUVWCacheSize(cacheSize), itsUVWCacheTolerance(tolerance),
@@ -182,15 +182,15 @@ void TableConstDataIterator::init()
   // pointings
   itsUseFieldID = table().actualTableDesc().isColumn("FIELD_ID");
 
-  const casacore::TableExprNode &exprNode =
+  const casa::TableExprNode &exprNode =
               itsSelector->getTableSelector(itsConverter);
   if (exprNode.isNull()) {
-      itsTabIterator=casacore::TableIterator(table(),"TIME",
-	     casacore::TableIterator::Ascending,casacore::TableIterator::NoSort);
+      itsTabIterator=casa::TableIterator(table(),"TIME",
+	     casa::TableIterator::Ascending,casa::TableIterator::NoSort);
   } else {
-      itsTabIterator=casacore::TableIterator(table()(itsSelector->
+      itsTabIterator=casa::TableIterator(table()(itsSelector->
                                getTableSelector(itsConverter)),"TIME",
-	     casacore::TableIterator::Ascending,casacore::TableIterator::NoSort);
+	     casa::TableIterator::Ascending,casa::TableIterator::NoSort);
   }
   setUpIteration();
 }
@@ -204,7 +204,7 @@ const IConstDataAccessor& TableConstDataIterator::operator*() const
 
 /// Checks whether there are more data available.
 /// @return True if there are more data available
-casacore::Bool TableConstDataIterator::hasMore() const throw()
+casa::Bool TableConstDataIterator::hasMore() const throw()
 {
   if (!itsTabIterator.pastEnd()) {
       return true;
@@ -218,7 +218,7 @@ casacore::Bool TableConstDataIterator::hasMore() const throw()
 /// advance the iterator one step further
 /// @return True if there are more data (so constructions like
 ///         while(it.next()) {} are possible)
-casacore::Bool TableConstDataIterator::next()
+casa::Bool TableConstDataIterator::next()
 {
   itsCurrentTopRow+=itsNumberOfRows;
   if (itsCurrentTopRow>=itsCurrentIteration.nrow()) {
@@ -263,8 +263,8 @@ void TableConstDataIterator::setUpIteration()
        && itsCurrentDataDescID>=0) {
       // extra checks make sense if the cache is valid (and this means it
       // has been used before)
-      const casacore::MEpoch epoch = currentEpoch();
-      const casacore::uInt spWindow = currentSpWindowID();
+      const casa::MEpoch epoch = currentEpoch();
+      const casa::uInt spWindow = currentSpWindowID();
       const bool newField = itsUseFieldID ? false : subtableInfo().getField().newField(epoch);
       // a case where fieldID changes is dealt with separately.
       const IFeedSubtableHandler &feedSubtable = subtableInfo().getFeed();
@@ -334,8 +334,8 @@ void TableConstDataIterator::makeUniformDataDescID()
           // the time change. In addition, checks require an access to the table,
           // which we want to avoid if, e.g., we don't need pointing direction
           // at all
-          const casacore::uInt spWindow = currentSpWindowID();
-          const casacore::MEpoch epoch = currentEpoch();
+          const casa::uInt spWindow = currentSpWindowID();
+          const casa::MEpoch epoch = currentEpoch();
           const IFeedSubtableHandler &feedSubtable = subtableInfo().getFeed();
           if (!feedSubtable.allBeamOffsetsZero(epoch,spWindow)) {
               if (feedSubtable.newBeamDetails(epoch,spWindow)) {
@@ -348,7 +348,7 @@ void TableConstDataIterator::makeUniformDataDescID()
 
       // determine the shape of the visibility cube
       ROArrayColumn<Complex> visCol(itsCurrentIteration,getDataColumnName());
-      const casacore::IPosition shape=visCol.shape(itsCurrentTopRow);
+      const casa::IPosition shape=visCol.shape(itsCurrentTopRow);
       ASKAPASSERT(shape.size() && (shape.size()<3));
       itsNumberOfPols=shape[0];
       itsNumberOfChannels=shape.size()>1?shape[1]:1;
@@ -356,7 +356,7 @@ void TableConstDataIterator::makeUniformDataDescID()
       if (itsSelector->channelsSelected()) {
           // validity checks that selection doesn't extend beyond the channels available
           const std::pair<int,int> chanSelection = itsSelector->getChannelSelection();
-          ASKAPCHECK(itsNumberOfChannels >= casacore::uInt(chanSelection.first + chanSelection.second),
+          ASKAPCHECK(itsNumberOfChannels >= casa::uInt(chanSelection.first + chanSelection.second),
                "Channel selection from "<<chanSelection.second+1<<" to "<<chanSelection.first+
                chanSelection.second<<" (1-based) extends beyond "<<itsNumberOfChannels<<
                " channel(s) available in  the dataset");
@@ -413,11 +413,11 @@ void TableConstDataIterator::makeUniformFieldID()
 ///            cube to fill with the information from table
 /// @param[in] columnName a name of the column to read
 template<typename T>
-void TableConstDataIterator::fillCube(casacore::Cube<T> &cube,
+void TableConstDataIterator::fillCube(casa::Cube<T> &cube,
                const std::string &columnName) const
 {
-  const casacore::uInt nChan = nChannel();
-  const casacore::uInt startChan = startChannel();
+  const casa::uInt nChan = nChannel();
+  const casa::uInt startChan = startChannel();
 
   // Setup a slicer to extract the specified channel range only
   const Slicer chanSlicer(Slice(),Slice(startChan,nChan));
@@ -430,12 +430,12 @@ void TableConstDataIterator::fillCube(casacore::Cube<T> &cube,
   WholeRowFlagger<T> wrFlagger(itsCurrentIteration);
 
   // temporary buffer declared outside the loop
-  casacore::Matrix<T> buf(itsNumberOfPols, nChan);
+  casa::Matrix<T> buf(itsNumberOfPols, nChan);
   for (uInt row=0; row<itsNumberOfRows; ++row) {
-       const casacore::IPosition shape = tableCol.shape(row);
+       const casa::IPosition shape = tableCol.shape(row);
        ASKAPASSERT(shape.size() && (shape.size()<3));
-       const casacore::uInt thisRowNumberOfPols=shape[0];
-       const casacore::uInt thisRowNumberOfChannels = shape.size() > 1 ? shape[1] : 1;
+       const casa::uInt thisRowNumberOfPols=shape[0];
+       const casa::uInt thisRowNumberOfChannels = shape.size() > 1 ? shape[1] : 1;
        if (thisRowNumberOfPols!=itsNumberOfPols) {
            ASKAPTHROW(DataAccessError,"Number of polarizations is not "
 	               "conformant for row "<<row<<" of the "<<columnName<<
@@ -468,7 +468,7 @@ void TableConstDataIterator::fillCube(casacore::Cube<T> &cube,
 /// iteration
 /// @param[out] vis a reference to the nRow x nChannel x nPol buffer
 ///            cube to fill with the complex visibility data
-void TableConstDataIterator::fillVisibility(casacore::Cube<casacore::Complex> &vis) const
+void TableConstDataIterator::fillVisibility(casa::Cube<casa::Complex> &vis) const
 {
   fillCube(vis, getDataColumnName());
 }
@@ -479,7 +479,7 @@ void TableConstDataIterator::fillVisibility(casacore::Cube<casacore::Complex> &v
 /// @param[in] flag a reference to the nRow x nChannel x nPol buffer
 ///            cube to fill with the flag information (each element has
 ///            bool type)
-void TableConstDataIterator::fillFlag(casacore::Cube<casacore::Bool> &flag) const
+void TableConstDataIterator::fillFlag(casa::Cube<casa::Bool> &flag) const
 {
   fillCube(flag,"FLAG");
 }
@@ -488,92 +488,92 @@ void TableConstDataIterator::fillFlag(casacore::Cube<casacore::Bool> &flag) cons
 /// iteration
 /// @param[in] noise a reference to the nRow x nChannel x nPol buffer
 ///            cube to be filled with the noise figures
-void TableConstDataIterator::fillNoise(casacore::Cube<casacore::Complex> &noise) const
+void TableConstDataIterator::fillNoise(casa::Cube<casa::Complex> &noise) const
 {
   ASKAPDEBUGASSERT(itsSelector);
-  const casacore::uInt nChan = nChannel();
-  const casacore::uInt startChan = startChannel();
+  const casa::uInt nChan = nChannel();
+  const casa::uInt startChan = startChannel();
 
   // default action first - just resize the cube and assign 1.
   noise.resize(itsNumberOfRows, nChan, itsNumberOfPols);
-  noise.set(casacore::Complex(1.,1.));
+  noise.set(casa::Complex(1.,1.));
   // if the sigma spectrum exists, use those sigmas to fill the noise cube
   if (table().actualTableDesc().isColumn("SIGMA_SPECTRUM")) {
       // noise is given per channel and polarisation
-      casacore::Matrix<Float> buf(itsNumberOfPols,itsNumberOfChannels);
+      casa::Matrix<Float> buf(itsNumberOfPols,itsNumberOfChannels);
       ROArrayColumn<Float> sigmaCol(itsCurrentIteration,"SIGMA_SPECTRUM");
       for (uInt row = 0; row<itsNumberOfRows; ++row) {
-           const casacore::IPosition shape = sigmaCol.shape(row);
+           const casa::IPosition shape = sigmaCol.shape(row);
            ASKAPDEBUGASSERT(shape.size()==2);
-           ASKAPDEBUGASSERT((shape[0] == casacore::Int(itsNumberOfPols)) &&
-                            (shape[1] == casacore::Int(itsNumberOfChannels)));
+           ASKAPDEBUGASSERT((shape[0] == casa::Int(itsNumberOfPols)) &&
+                            (shape[1] == casa::Int(itsNumberOfChannels)));
 
            sigmaCol.get(row+itsCurrentTopRow,buf,False);
 
            // SIGMA_SPECTRUM is ordered (pol,chan), so need to transpose
            //const IPosition blc(2,0,startChan);
            //const IPosition trc(2,itsNumberOfPols-1,startChan+nChan-1);
-           //casacore::Matrix<casacore::Complex> rowNoise = noise.yzPlane(row);
-           //const casacore::Matrix<casacore::Float> inVals = buf(blc,trc);
+           //casa::Matrix<casa::Complex> rowNoise = noise.yzPlane(row);
+           //const casa::Matrix<casa::Float> inVals = buf(blc,trc);
            //convertArray(rowNoise, buf(blc,trc));
-           for (casacore::uInt chan=0; chan<nChan; chan++) {
-                for (casacore::uInt pol=0; pol<itsNumberOfPols; pol++) {
+           for (casa::uInt chan=0; chan<nChan; chan++) {
+                for (casa::uInt pol=0; pol<itsNumberOfPols; pol++) {
                      //ASKAPDEBUGASSERT(y<inVals.nrow());
                      //ASKAPDEBUGASSERT(x<inVals.ncolumn());
                      // same noise for both real and imaginary parts
-                     const casacore::Float val = buf(pol,chan+startChan);
-                     noise(row,chan,pol) = casacore::Complex(val,val);
+                     const casa::Float val = buf(pol,chan+startChan);
+                     noise(row,chan,pol) = casa::Complex(val,val);
                 }
            }
       } // loop over rows
   } // if-statement checking that SIGMA_SPECTRUM column is present
   else if (table().actualTableDesc().isColumn("SIGMA")) {
       ROArrayColumn<Float> sigmaCol(itsCurrentIteration,"SIGMA");
-      casacore::Vector<Float> buf(itsNumberOfPols);
+      casa::Vector<Float> buf(itsNumberOfPols);
       for (uInt row = 0; row<itsNumberOfRows; ++row) {
-           const casacore::IPosition shape = sigmaCol.shape(row);
+           const casa::IPosition shape = sigmaCol.shape(row);
            ASKAPDEBUGASSERT((shape.size()<=2) && (shape.size()!=0));
            if (shape.size() == 1) {
                // noise is given per polarisation, same for all spectral channels
                // IS SIGMA EVER NOT GOING TO BE THIS SIZE? (SEE SIGMA_SPECTRUM)
-               ASKAPDEBUGASSERT(shape[0] == casacore::Int(itsNumberOfPols));
-               //casacore::Array<Float> buf(casacore::IPosition(1,itsNumberOfPols));
+               ASKAPDEBUGASSERT(shape[0] == casa::Int(itsNumberOfPols));
+               //casa::Array<Float> buf(casa::IPosition(1,itsNumberOfPols));
                sigmaCol.get(row+itsCurrentTopRow,buf,False);
-               //casacore::Matrix<casacore::Complex> slice = noise.yzPlane(row);
+               //casa::Matrix<casa::Complex> slice = noise.yzPlane(row);
                for (uInt chan = 0; chan< nChan; ++chan) {
                     //ASKAPDEBUGASSERT(chan< slice.nrow());
-                    //casacore::Vector<casacore::Complex> polNoise = slice.row(chan);
-                    for (casacore::uInt pol=0; pol<itsNumberOfPols; ++pol) {
+                    //casa::Vector<casa::Complex> polNoise = slice.row(chan);
+                    for (casa::uInt pol=0; pol<itsNumberOfPols; ++pol) {
                          //ASKAPDEBUGASSERT(pol<buf.nelements());
                          // same polarisation for both real and imaginary parts
-                         const casacore::Float val = buf(pol);
-                         noise(row,chan,pol) = casacore::Complex(val,val);
+                         const casa::Float val = buf(pol);
+                         noise(row,chan,pol) = casa::Complex(val,val);
                     }
                }
            } else {
                // noise is given per channel and polarisation
                // IS THIS EVER THE CASE, OR IS SIGMA_SPECTRUM (above) ALWAYS USED?
                // Should always use SIGMA_SPECTRUM for this case (MHW)
-               ASKAPASSERT((shape[0] == casacore::Int(itsNumberOfChannels)) &&
-                           (shape[1] == casacore::Int(itsNumberOfPols)));
+               ASKAPASSERT((shape[0] == casa::Int(itsNumberOfChannels)) &&
+                           (shape[1] == casa::Int(itsNumberOfPols)));
 
-               casacore::Array<Float> buf(casacore::IPosition(2,itsNumberOfChannels,itsNumberOfPols));
+               casa::Array<Float> buf(casa::IPosition(2,itsNumberOfChannels,itsNumberOfPols));
                sigmaCol.get(row+itsCurrentTopRow,buf,False);
 
                // not clear whether we need a transpose of the matrix. This
                // case is not present in any available measurement set
                const IPosition blc(2,startChan,0);
                const IPosition trc(2,startChan+nChan-1,itsNumberOfPols-1);
-               casacore::Matrix<casacore::Complex> rowNoise = noise.yzPlane(row);
-               const casacore::Matrix<casacore::Float> inVals = buf(blc,trc);
+               casa::Matrix<casa::Complex> rowNoise = noise.yzPlane(row);
+               const casa::Matrix<casa::Float> inVals = buf(blc,trc);
                //convertArray(rowNoise, buf(blc,trc));
-               for (casacore::uInt x=0; x<rowNoise.nrow(); ++x) {
-                    for (casacore::uInt y=0; y<rowNoise.ncolumn(); ++y) {
+               for (casa::uInt x=0; x<rowNoise.nrow(); ++x) {
+                    for (casa::uInt y=0; y<rowNoise.ncolumn(); ++y) {
                          ASKAPDEBUGASSERT(x<inVals.nrow());
                          ASKAPDEBUGASSERT(y<inVals.ncolumn());
                          // same polarisation for both real and imaginary parts
-                         const casacore::Float val = inVals(x,y);
-                         rowNoise(x,y) = casacore::Complex(val,val);
+                         const casa::Float val = inVals(x,y);
+                         rowNoise(x,y) = casa::Complex(val,val);
                     }
                }
            }
@@ -584,7 +584,7 @@ void TableConstDataIterator::fillNoise(casacore::Cube<casacore::Complex> &noise)
 /// populate the buffer with uvw
 /// @param[in] uvw a reference to vector of rigid vectors (3 elemets,
 ///            u,v and w for each row) to fill
-void TableConstDataIterator::fillUVW(casacore::Vector<casacore::RigidVector<casacore::Double, 3> >&uvw) const
+void TableConstDataIterator::fillUVW(casa::Vector<casa::RigidVector<casa::Double, 3> >&uvw) const
 {
   uvw.resize(itsNumberOfRows);
 
@@ -593,7 +593,7 @@ void TableConstDataIterator::fillUVW(casacore::Vector<casacore::RigidVector<casa
   Vector<Double> buf(3);
   for (uInt row=0;row<itsNumberOfRows;++row) {
 #ifdef ASKAP_DEBUG
-       const casacore::IPosition shape=uvwCol.shape(row);
+       const casa::IPosition shape=uvwCol.shape(row);
        ASKAPDEBUGASSERT(shape.size()==1);
        ASKAPDEBUGASSERT(shape[0]==3);
 #endif // ASKAP_DEBUG
@@ -607,7 +607,7 @@ void TableConstDataIterator::fillUVW(casacore::Vector<casacore::RigidVector<casa
 /// @details This method obtains a spectral window ID corresponding to the
 /// current data description ID and tests its validity
 /// @return current spectral window ID
-casacore::uInt TableConstDataIterator::currentSpWindowID() const
+casa::uInt TableConstDataIterator::currentSpWindowID() const
 {
   ASKAPDEBUGASSERT(itsCurrentDataDescID>=0);
   const int spWindowIndex = subtableInfo().getDataDescription().
@@ -624,7 +624,7 @@ casacore::uInt TableConstDataIterator::currentSpWindowID() const
 /// @details This method obtains a polarisation ID corresponding to the current
 /// data description ID and tests its validity
 /// @return current polarisation ID
-casacore::uInt TableConstDataIterator::currentPolID() const
+casa::uInt TableConstDataIterator::currentPolID() const
 {
   ASKAPDEBUGASSERT(itsCurrentDataDescID>=0);
   const int polIndex = subtableInfo().getDataDescription().
@@ -644,7 +644,7 @@ casacore::uInt TableConstDataIterator::currentPolID() const
 /// from the FIELD subtable using either FIELD_ID, or current time if
 /// the former is not supported by the main table.
 /// @return a reference to direction measure
-const casacore::MDirection& TableConstDataIterator::getCurrentReferenceDir() const
+const casa::MDirection& TableConstDataIterator::getCurrentReferenceDir() const
 {
   const IFieldSubtableHandler &fieldSubtable = subtableInfo().getField();
   if (itsUseFieldID) {
@@ -652,7 +652,7 @@ const casacore::MDirection& TableConstDataIterator::getCurrentReferenceDir() con
                  itsCurrentFieldID);
       return fieldSubtable.getReferenceDir(itsCurrentFieldID);
   }
-  const casacore::MEpoch epoch = currentEpoch();
+  const casa::MEpoch epoch = currentEpoch();
   return fieldSubtable.getReferenceDir(epoch);
 }
 
@@ -661,41 +661,41 @@ const casacore::MDirection& TableConstDataIterator::getCurrentReferenceDir() con
 /// This method returns the number of channels and the first selected channel.
 /// @return a pair, first element is the number of channels, second is the first channel
 /// in the full cube
-std::pair<casacore::uInt, casacore::uInt> TableConstDataIterator::getChannelRange() const
+std::pair<casa::uInt, casa::uInt> TableConstDataIterator::getChannelRange() const
 {
   ASKAPDEBUGASSERT(itsSelector);
   const std::pair<int, int> chanSelection = itsSelector->getChannelSelection();
-  const casacore::uInt nChan = itsSelector->channelsSelected() ?
-                           casacore::uInt(chanSelection.first) : itsNumberOfChannels;
-  const casacore::uInt startChan = itsSelector->channelsSelected() ?
-                           casacore::uInt(chanSelection.second) : 0;
+  const casa::uInt nChan = itsSelector->channelsSelected() ?
+                           casa::uInt(chanSelection.first) : itsNumberOfChannels;
+  const casa::uInt startChan = itsSelector->channelsSelected() ?
+                           casa::uInt(chanSelection.second) : 0;
   ASKAPDEBUGASSERT(startChan + nChan <= itsNumberOfChannels);
-  return std::pair<casacore::uInt, casacore::uInt>(nChan, startChan);
+  return std::pair<casa::uInt, casa::uInt>(nChan, startChan);
 }
 
 /// @brief fill the buffer with the polarisation types
 /// @param[in] stokes a reference to a vector to be filled
-void TableConstDataIterator::fillStokes(casacore::Vector<casacore::Stokes::StokesTypes> &stokes) const
+void TableConstDataIterator::fillStokes(casa::Vector<casa::Stokes::StokesTypes> &stokes) const
 {
   const ITablePolarisationHolder& polSubtable = subtableInfo().getPolarisation();
 
   ASKAPDEBUGASSERT(itsCurrentDataDescID>=0);
-  const casacore::uInt polID = currentPolID();
+  const casa::uInt polID = currentPolID();
   ASKAPASSERT(polSubtable.nPol(polID) == nPol());
   stokes = polSubtable.getTypes(polID).copy();
 }
 
 /// populate the buffer with frequencies
 /// @param[in] freq a reference to a vector to fill
-void TableConstDataIterator::fillFrequency(casacore::Vector<casacore::Double> &freq) const
+void TableConstDataIterator::fillFrequency(casa::Vector<casa::Double> &freq) const
 {
   ASKAPDEBUGASSERT(itsConverter);
   const ITableSpWindowHolder& spWindowSubtable=subtableInfo().getSpWindow();
   ASKAPDEBUGASSERT(itsCurrentDataDescID>=0);
-  const casacore::uInt spWindowID = currentSpWindowID();
+  const casa::uInt spWindowID = currentSpWindowID();
 
-  const casacore::uInt nChan = nChannel();
-  const casacore::uInt startChan = startChannel();
+  const casa::uInt nChan = nChannel();
+  const casa::uInt startChan = startChannel();
 
   // for the time being we don't do the short-cut if a subset of channels
   // is selected without any conversion. In principle it is possible, but
@@ -714,18 +714,18 @@ void TableConstDataIterator::fillFrequency(casacore::Vector<casacore::Double> &f
       }
   } else {
       // have to process element by element as a conversion is required
-      const casacore::MEpoch epoch=currentEpoch();
+      const casa::MEpoch epoch=currentEpoch();
       // always use the dish pointing centre, rather than a pointing centre
       // of each individual feed for frequency conversion. The error is not
       // huge. If this code will ever work for SKA, this may need to be changed.
       // Currently use the FIELD table, not the actual pointing. It is probably
       // correct to use the phase centre for conversion as opposed to the
       // pointing centre.
-      const casacore::MDirection& antReferenceDir = getCurrentReferenceDir();
+      const casa::MDirection& antReferenceDir = getCurrentReferenceDir();
       // currently use the position of the first antenna for convertion.
       // we may need some average position + a check that they are close
       // enough to throw an exception if someone gives a VLBI measurement set.
-      itsConverter->setMeasFrame(casacore::MeasFrame(epoch, subtableInfo().
+      itsConverter->setMeasFrame(casa::MeasFrame(epoch, subtableInfo().
                      getAntenna().getPosition(0), antReferenceDir));
 
       freq.resize(nChan);
@@ -738,7 +738,7 @@ void TableConstDataIterator::fillFrequency(casacore::Vector<casacore::Double> &f
 }
 
 /// @return the time stamp
-casacore::Double TableConstDataIterator::getTime() const
+casa::Double TableConstDataIterator::getTime() const
 {
   // add additional checks in debug mode
   #ifdef ASKAP_DEBUG
@@ -761,41 +761,41 @@ casacore::Double TableConstDataIterator::getTime() const
 
 /// populate the buffer with IDs of the first antenna
 /// @param[in] ids a reference to a vector to fill
-void TableConstDataIterator::fillAntenna1(casacore::Vector<casacore::uInt>& ids) const
+void TableConstDataIterator::fillAntenna1(casa::Vector<casa::uInt>& ids) const
 {
   fillVectorOfIDs(ids,"ANTENNA1");
 }
 
 /// populate the buffer with IDs of the second antenna
 /// @param[in] ids a reference to a vector to fill
-void TableConstDataIterator::fillAntenna2(casacore::Vector<casacore::uInt> &ids) const
+void TableConstDataIterator::fillAntenna2(casa::Vector<casa::uInt> &ids) const
 {
   fillVectorOfIDs(ids,"ANTENNA2");
 }
 
 /// populate the buffer with IDs of the first feed
 /// @param[in] ids a reference to a vector to fill
-void TableConstDataIterator::fillFeed1(casacore::Vector<casacore::uInt> &ids) const
+void TableConstDataIterator::fillFeed1(casa::Vector<casa::uInt> &ids) const
 {
   fillVectorOfIDs(ids,"FEED1");
 }
 
 /// populate the buffer with IDs of the second feed
 /// @param[in] ids a reference to a vector to fill
-void TableConstDataIterator::fillFeed2(casacore::Vector<casacore::uInt> &ids) const
+void TableConstDataIterator::fillFeed2(casa::Vector<casa::uInt> &ids) const
 {
   fillVectorOfIDs(ids,"FEED2");
 }
 
 
 /// @brief a helper method to read a column with IDs of some sort
-/// @details It reads the column of casacore::Int and fills a Vector of
-/// casacore::uInt. A check to ensure all numbers are non-negative is done
+/// @details It reads the column of casa::Int and fills a Vector of
+/// casa::uInt. A check to ensure all numbers are non-negative is done
 /// in the debug mode.
 /// @param[in] ids a reference to a vector to fill
 /// @param[in] name a name of the column to read
-void TableConstDataIterator::fillVectorOfIDs(casacore::Vector<casacore::uInt> &ids,
-                     const casacore::String &name) const
+void TableConstDataIterator::fillVectorOfIDs(casa::Vector<casa::uInt> &ids,
+                     const casa::String &name) const
 {
   ROScalarColumn<Int> col(itsCurrentIteration,name);
   ids.resize(itsNumberOfRows);
@@ -803,7 +803,7 @@ void TableConstDataIterator::fillVectorOfIDs(casacore::Vector<casacore::uInt> &i
                       itsCurrentTopRow),IPosition(1,itsNumberOfRows)));
   ASKAPDEBUGASSERT(buf.nelements()==ids.nelements());
   // need a copy because the type is different. There are no
-  // appropriate cast operators for casacore::Vectors
+  // appropriate cast operators for casa::Vectors
   Vector<Int>::const_iterator ci=buf.begin();
   Vector<uInt>::iterator it=ids.begin();
   for (; ci!=buf.end() && it!=ids.end() ; ++ci,++it) {
@@ -815,7 +815,7 @@ void TableConstDataIterator::fillVectorOfIDs(casacore::Vector<casacore::uInt> &i
 /// @brief an alternative way to get the time stamp
 /// @details This method uses the accessor to get cached time stamp. It
 /// is returned as an epoch measure.
-casacore::MEpoch TableConstDataIterator::currentEpoch() const
+casa::MEpoch TableConstDataIterator::currentEpoch() const
 {
   ASKAPDEBUGASSERT(itsConverter);
   return itsConverter->epochMeasure(itsAccessor.time());
@@ -826,7 +826,7 @@ casacore::MEpoch TableConstDataIterator::currentEpoch() const
 /// is invalidated when the time changes for an alt-az array, for an equatorial
 /// array it happens only if the pointing changes.
 /// @param[in] angles a reference to a vector to be filled
-void TableConstDataIterator::fillParallacticAngleCache(casacore::Vector<casacore::Double> &angles) const
+void TableConstDataIterator::fillParallacticAngleCache(casa::Vector<casa::Double> &angles) const
 {
   angles.resize(subtableInfo().getAntenna().getNumberOfAntennae());
   ASKAPDEBUGASSERT(angles.size());
@@ -834,27 +834,27 @@ void TableConstDataIterator::fillParallacticAngleCache(casacore::Vector<casacore
       angles.set(0.);
   } else {
 
-  const casacore::MEpoch epoch=currentEpoch();
+  const casa::MEpoch epoch=currentEpoch();
 
   // we need a separate converter for parallactic angle calculations
-  DirectionConverter dirConv((casacore::MDirection::Ref(casacore::MDirection::AZEL)));
+  DirectionConverter dirConv((casa::MDirection::Ref(casa::MDirection::AZEL)));
   dirConv.setMeasFrame(epoch);
 
   // we currently use FIELD table to get the pointing direction. This table
   // does not depend on the antenna.
-  const casacore::MDirection& antReferenceDir = getCurrentReferenceDir();
+  const casa::MDirection& antReferenceDir = getCurrentReferenceDir();
 
 
-  for (casacore::uInt ant = 0; ant<angles.size(); ++ant) {
-       const casacore::String &antMount=subtableInfo().getAntenna().
+  for (casa::uInt ant = 0; ant<angles.size(); ++ant) {
+       const casa::String &antMount=subtableInfo().getAntenna().
                                           getMount(ant);
 
        if (antMount == "ALT-AZ" || antMount == "alt-az")  {
-           casacore::MDirection celestialPole;
+           casa::MDirection celestialPole;
            celestialPole.set(MDirection::Ref(MDirection::HADEC));
-           dirConv.setMeasFrame(casacore::MeasFrame(subtableInfo().getAntenna().
+           dirConv.setMeasFrame(casa::MeasFrame(subtableInfo().getAntenna().
                               getPosition(ant),epoch));
-           const casacore::Double pAngle=dirConv(antReferenceDir).
+           const casa::Double pAngle=dirConv(antReferenceDir).
                                positionAngle(dirConv(celestialPole).getValue());
            angles[ant] = pAngle;
        } else if (antMount == "FIXED"  ||  antMount == "fixed") {
@@ -880,7 +880,7 @@ void TableConstDataIterator::fillParallacticAngleCache(casacore::Vector<casacore
 /// for an equatorial array this happends only if the FEED or FIELD subtable
 /// are time-dependent or if FIELD_ID changes
 /// @param[in] dirs a reference to a vector to fill
-void TableConstDataIterator::fillDirectionCache(casacore::Vector<casacore::MVDirection> &dirs) const
+void TableConstDataIterator::fillDirectionCache(casa::Vector<casa::MVDirection> &dirs) const
 {
   // the code fills both pointing directions and position angles. For ASKAP, it would
   // probably be a bit faster if we split these two operations between two methods, as
@@ -890,58 +890,58 @@ void TableConstDataIterator::fillDirectionCache(casacore::Vector<casacore::MVDir
   // it is hard coded at the moment
   const double parallacticAngleThreshold = 1e-9;
 
-  const casacore::Vector<casacore::Double> &parallacticAngles = itsParallacticAngleCache.value(*this,
+  const casa::Vector<casa::Double> &parallacticAngles = itsParallacticAngleCache.value(*this,
                  &TableConstDataIterator::fillParallacticAngleCache);
 
   const IFeedSubtableHandler &feedSubtable = subtableInfo().getFeed();
 
-  const casacore::MEpoch epoch=currentEpoch();
+  const casa::MEpoch epoch=currentEpoch();
   ASKAPDEBUGASSERT(itsCurrentDataDescID>=0);
-  const casacore::uInt spWindowID = currentSpWindowID();
+  const casa::uInt spWindowID = currentSpWindowID();
   // antenna and feed IDs here are those in the FEED subtable, rather than
   // in the current accessor
-  const casacore::Vector<casacore::Int> &antIDs = feedSubtable.getAntennaIDs(epoch,spWindowID);
+  const casa::Vector<casa::Int> &antIDs = feedSubtable.getAntennaIDs(epoch,spWindowID);
 
   dirs.resize(antIDs.nelements());
 
   // we currently use FIELD table to get the pointing direction. This table
   // does not depend on the antenna.
-  const casacore::MDirection& antReferenceDir = getCurrentReferenceDir();
+  const casa::MDirection& antReferenceDir = getCurrentReferenceDir();
 
-  const casacore::Vector<casacore::RigidVector<casacore::Double, 2> > &offsets =
+  const casa::Vector<casa::RigidVector<casa::Double, 2> > &offsets =
                feedSubtable.getAllBeamOffsets(epoch,spWindowID);
 
-  for (casacore::uInt element=0;element<antIDs.nelements();++element) {
-       const casacore::uInt ant=antIDs[element];
+  for (casa::uInt element=0;element<antIDs.nelements();++element) {
+       const casa::uInt ant=antIDs[element];
 
        // if we decide to be paranoid about performance, we can add a method
        // to the converter to test whether antenna position and/or epoch are
        // really required to the requested convertion. Because the antenna
        // position are cached, the overhead of the present straightforward
        // approach should be relatively minor.
-       itsConverter->setMeasFrame(casacore::MeasFrame(epoch,subtableInfo().
+       itsConverter->setMeasFrame(casa::MeasFrame(epoch,subtableInfo().
                      getAntenna().getPosition(ant)));
 
-       casacore::RigidVector<casacore::Double, 2> offset = offsets[element];
+       casa::RigidVector<casa::Double, 2> offset = offsets[element];
        ASKAPDEBUGASSERT(ant<parallacticAngles.nelements());
-       const casacore::Double posAngle = parallacticAngles[ant];
+       const casa::Double posAngle = parallacticAngles[ant];
 
        if (std::abs(posAngle)>parallacticAngleThreshold)  {
            // need to do a proper parallactic angle rotation
-           casacore::SquareMatrix<casacore::Double, 2>
-                       rotMatrix(casacore::SquareMatrix<casacore::Double, 2>::General);
-           const casacore::Double cpa=cos(posAngle);
-           const casacore::Double spa=sin(posAngle);
+           casa::SquareMatrix<casa::Double, 2>
+                       rotMatrix(casa::SquareMatrix<casa::Double, 2>::General);
+           const casa::Double cpa=cos(posAngle);
+           const casa::Double spa=sin(posAngle);
            rotMatrix(0,0)=cpa;
            rotMatrix(0,1)=-spa;
            rotMatrix(1,0)=spa;
            rotMatrix(1,1)=cpa;
            offset*=rotMatrix;
        }
-       casacore::MDirection feedPointingCentre(antReferenceDir);
+       casa::MDirection feedPointingCentre(antReferenceDir);
        // x direction is fliped to convert az-el type frame to ra-dec
-       feedPointingCentre.shift(casacore::MVDirection(-offset(0),
-                             offset(1)),casacore::True);
+       feedPointingCentre.shift(casa::MVDirection(-offset(0),
+                             offset(1)),casa::True);
        itsConverter->direction(feedPointingCentre,dirs[element]);
   }
 }
@@ -950,38 +950,38 @@ void TableConstDataIterator::fillDirectionCache(casacore::Vector<casacore::MVDir
 /// fill the buffer with the pointing directions of the first antenna/feed
 /// @param[in] dirs a reference to a vector to fill
 void TableConstDataIterator::fillPointingDir1(
-                          casacore::Vector<casacore::MVDirection> &dirs) const
+                          casa::Vector<casa::MVDirection> &dirs) const
 {
-  const casacore::Vector<casacore::uInt> &feedIDs=itsAccessor.feed1();
-  const casacore::Vector<casacore::uInt> &antIDs=itsAccessor.antenna1();
+  const casa::Vector<casa::uInt> &feedIDs=itsAccessor.feed1();
+  const casa::Vector<casa::uInt> &antIDs=itsAccessor.antenna1();
   fillVectorOfPointings(dirs,antIDs,feedIDs);
 }
 
 /// fill the buffer with the pointing directions of the second antenna/feed
 /// @param[in] dirs a reference to a vector to fill
 void TableConstDataIterator::fillPointingDir2(
-                          casacore::Vector<casacore::MVDirection> &dirs) const
+                          casa::Vector<casa::MVDirection> &dirs) const
 {
-  const casacore::Vector<casacore::uInt> &feedIDs=itsAccessor.feed2();
-  const casacore::Vector<casacore::uInt> &antIDs=itsAccessor.antenna2();
+  const casa::Vector<casa::uInt> &feedIDs=itsAccessor.feed2();
+  const casa::Vector<casa::uInt> &antIDs=itsAccessor.antenna2();
   fillVectorOfPointings(dirs,antIDs,feedIDs);
 }
 
 /// fill the buffer with the position angles of the first antenna/feed
 /// @param[in] angles a reference to vector to be filled
-void TableConstDataIterator::fillFeed1PA(casacore::Vector<casacore::Float> &angles) const
+void TableConstDataIterator::fillFeed1PA(casa::Vector<casa::Float> &angles) const
 {
-  const casacore::Vector<casacore::uInt> &feedIDs=itsAccessor.feed1();
-  const casacore::Vector<casacore::uInt> &antIDs=itsAccessor.antenna1();
+  const casa::Vector<casa::uInt> &feedIDs=itsAccessor.feed1();
+  const casa::Vector<casa::uInt> &antIDs=itsAccessor.antenna1();
   fillVectorOfPositionAngles(angles,antIDs,feedIDs);
 }
 
 /// fill the buffer with the position angles of the second antenna/feed
 /// @param[in] angles a reference to vector to be filled
-void TableConstDataIterator::fillFeed2PA(casacore::Vector<casacore::Float> &angles) const
+void TableConstDataIterator::fillFeed2PA(casa::Vector<casa::Float> &angles) const
 {
-  const casacore::Vector<casacore::uInt> &feedIDs=itsAccessor.feed2();
-  const casacore::Vector<casacore::uInt> &antIDs=itsAccessor.antenna2();
+  const casa::Vector<casa::uInt> &feedIDs=itsAccessor.feed2();
+  const casa::Vector<casa::uInt> &antIDs=itsAccessor.antenna2();
   fillVectorOfPositionAngles(angles,antIDs,feedIDs);
 }
 
@@ -995,14 +995,14 @@ void TableConstDataIterator::fillFeed2PA(casacore::Vector<casacore::Float> &angl
 /// does
 /// @param[in] dirs a reference to a vector to fill
 /// @param[in] antIDs a vector with antenna IDs
-void TableConstDataIterator::fillVectorOfDishPointings(casacore::Vector<casacore::MVDirection> &dirs,
-               const casacore::Vector<casacore::uInt> &antIDs) const
+void TableConstDataIterator::fillVectorOfDishPointings(casa::Vector<casa::MVDirection> &dirs,
+               const casa::Vector<casa::uInt> &antIDs) const
 {
   ASKAPDEBUGASSERT(itsNumberOfRows == antIDs.nelements());
-  const casacore::Vector<casacore::MVDirection> &dishPointingCache = itsDishPointingCache.
+  const casa::Vector<casa::MVDirection> &dishPointingCache = itsDishPointingCache.
                       value(*this,&TableConstDataIterator::fillDishPointingCache);
   dirs.resize(itsNumberOfRows);
-  for (casacore::uInt row=0; row<itsNumberOfRows; ++row) {
+  for (casa::uInt row=0; row<itsNumberOfRows; ++row) {
        ASKAPDEBUGASSERT(antIDs[row] < dishPointingCache.nelements());
        dirs[row] = dishPointingCache[antIDs[row]];
   }
@@ -1011,18 +1011,18 @@ void TableConstDataIterator::fillVectorOfDishPointings(casacore::Vector<casacore
 /// @brief fill the buffer with the pointing directions for the first antenna centre
 /// @details The difference from fillPointingDir1 is that no feed offset is applied.
 /// @param[in] dirs a reference to a vector to fill
-void TableConstDataIterator::fillDishPointing1(casacore::Vector<casacore::MVDirection> &dirs) const
+void TableConstDataIterator::fillDishPointing1(casa::Vector<casa::MVDirection> &dirs) const
 {
-  const casacore::Vector<casacore::uInt> &antIDs=itsAccessor.antenna1();
+  const casa::Vector<casa::uInt> &antIDs=itsAccessor.antenna1();
   fillVectorOfDishPointings(dirs,antIDs);
 }
 
 /// @brief fill the buffer with the pointing directions for the second antenna centre
 /// @details The difference from fillPointingDir2 is that no feed offset is applied.
 /// @param[in] dirs a reference to a vector to fill
-void TableConstDataIterator::fillDishPointing2(casacore::Vector<casacore::MVDirection> &dirs) const
+void TableConstDataIterator::fillDishPointing2(casa::Vector<casa::MVDirection> &dirs) const
 {
-  const casacore::Vector<casacore::uInt> &antIDs=itsAccessor.antenna2();
+  const casa::Vector<casa::uInt> &antIDs=itsAccessor.antenna2();
   fillVectorOfDishPointings(dirs,antIDs);
 }
 
@@ -1037,25 +1037,25 @@ void TableConstDataIterator::fillDishPointing2(casacore::Vector<casacore::MVDire
 /// the same value for all elements of the array. It will be used for both antennae
 /// in the pair.
 /// @param[in] dirs a reference to a vector to fill
-void TableConstDataIterator::fillDishPointingCache(casacore::Vector<casacore::MVDirection> &dirs) const
+void TableConstDataIterator::fillDishPointingCache(casa::Vector<casa::MVDirection> &dirs) const
 {
   ASKAPDEBUGASSERT(itsConverter);
-  const casacore::MEpoch epoch = currentEpoch();
+  const casa::MEpoch epoch = currentEpoch();
 
   dirs.resize(subtableInfo().getAntenna().getNumberOfAntennae());
 
   // we currently use FIELD table to get the pointing direction. This table
   // does not depend on the antenna. However, the reference frame can introduce such
   // a dependence (i.e. a large array and AZEL frame requested)
-  const casacore::MDirection& antReferenceDir = getCurrentReferenceDir();
+  const casa::MDirection& antReferenceDir = getCurrentReferenceDir();
 
-  for (casacore::uInt ant = 0; ant<dirs.nelements(); ++ant) {
+  for (casa::uInt ant = 0; ant<dirs.nelements(); ++ant) {
        // if we decide to be paranoid about performance, we can add a method
        // to the converter to test whether antenna position and/or epoch are
        // really required to the requested convertion. Because the antenna
        // position are cached, the overhead of the present straightforward
        // approach should be relatively minor.
-       itsConverter->setMeasFrame(casacore::MeasFrame(epoch,subtableInfo().
+       itsConverter->setMeasFrame(casa::MeasFrame(epoch,subtableInfo().
                   getAntenna().getPosition(ant)));
        itsConverter->direction(antReferenceDir,dirs[ant]);
   }
@@ -1069,18 +1069,18 @@ void TableConstDataIterator::fillDishPointingCache(casacore::Vector<casacore::MV
 /// @param[in] antIDs a vector with antenna IDs
 /// @param[in] feedIDs a vector with feed IDs
 void TableConstDataIterator::fillVectorOfPointings(
-               casacore::Vector<casacore::MVDirection> &dirs,
-               const casacore::Vector<casacore::uInt> &antIDs,
-               const casacore::Vector<casacore::uInt> &feedIDs) const
+               casa::Vector<casa::MVDirection> &dirs,
+               const casa::Vector<casa::uInt> &antIDs,
+               const casa::Vector<casa::uInt> &feedIDs) const
 {
   ASKAPDEBUGASSERT(antIDs.nelements() == feedIDs.nelements());
-  const casacore::Vector<casacore::MVDirection> &directionCache =
+  const casa::Vector<casa::MVDirection> &directionCache =
       itsDirectionCache.value(*this,&TableConstDataIterator::fillDirectionCache);
-  const casacore::Matrix<casacore::Int> &directionCacheIndices =
+  const casa::Matrix<casa::Int> &directionCacheIndices =
                  subtableInfo().getFeed().getIndices();
   dirs.resize(itsNumberOfRows);
 
-  for (casacore::uInt row=0; row<itsNumberOfRows; ++row) {
+  for (casa::uInt row=0; row<itsNumberOfRows; ++row) {
        if ((feedIDs[row]>=directionCacheIndices.ncolumn()) ||
            (antIDs[row]>=directionCacheIndices.nrow())) {
               ASKAPTHROW(DataAccessError, "antID="<<antIDs[row]<<
@@ -1091,7 +1091,7 @@ void TableConstDataIterator::fillVectorOfPointings(
            ASKAPTHROW(DataAccessError, "The pair andID="<<antIDs[row]<<
                    " feedID="<<feedIDs[row]<<" doesn't have beam parameters defined");
        }
-       const casacore::uInt index = static_cast<casacore::uInt>(
+       const casa::uInt index = static_cast<casa::uInt>(
                     directionCacheIndices(antIDs[row],feedIDs[row]));
        ASKAPDEBUGASSERT(index < directionCache.nelements());
        dirs[row]=directionCache[index];
@@ -1109,25 +1109,25 @@ void TableConstDataIterator::fillVectorOfPointings(
 /// of fillVectorOfPointings. They are different with just a command called within
 /// the loop. Theoretically, we can combine these two methods together, it would just
 /// invovle some coding to make it look nice and probably some minor performance penalty.
-void TableConstDataIterator::fillVectorOfPositionAngles(casacore::Vector<casacore::Float> &angles,
-              const casacore::Vector<casacore::uInt> &antIDs,
-              const casacore::Vector<casacore::uInt> &feedIDs) const
+void TableConstDataIterator::fillVectorOfPositionAngles(casa::Vector<casa::Float> &angles,
+              const casa::Vector<casa::uInt> &antIDs,
+              const casa::Vector<casa::uInt> &feedIDs) const
 {
   ASKAPDEBUGASSERT(antIDs.nelements() == feedIDs.nelements());
-  const casacore::Vector<casacore::Double> &parallacticAngles = itsParallacticAngleCache.value(*this,
+  const casa::Vector<casa::Double> &parallacticAngles = itsParallacticAngleCache.value(*this,
                  &TableConstDataIterator::fillParallacticAngleCache);
 
-  const casacore::MEpoch epoch=currentEpoch();
+  const casa::MEpoch epoch=currentEpoch();
   ASKAPDEBUGASSERT(itsCurrentDataDescID>=0);
-  const casacore::uInt spWindowID = currentSpWindowID();
+  const casa::uInt spWindowID = currentSpWindowID();
 
   const IFeedSubtableHandler& feedSubtable = subtableInfo().getFeed();
 
   angles.resize(itsNumberOfRows);
 
-  for (casacore::uInt row=0; row<itsNumberOfRows; ++row) {
+  for (casa::uInt row=0; row<itsNumberOfRows; ++row) {
        ASKAPDEBUGASSERT(antIDs[row] < parallacticAngles.nelements());
-       angles[row] = casacore::Float(feedSubtable.getBeamPA(epoch, spWindowID, antIDs[row],
+       angles[row] = casa::Float(feedSubtable.getBeamPA(epoch, spWindowID, antIDs[row],
                                feedIDs[row]) + parallacticAngles[antIDs[row]]);
   }
 }
@@ -1149,7 +1149,7 @@ const std::string& TableConstDataIterator::getDataColumnName() const throw()
 /// current iteration, if field ID column is present (and used). Otherwise
 /// zero is always returned
 /// @return current field ID
-casacore::uInt TableConstDataIterator::currentFieldID() const
+casa::uInt TableConstDataIterator::currentFieldID() const
 {
   return itsUseFieldID ? itsCurrentFieldID : 0u;
 }
@@ -1164,14 +1164,14 @@ casacore::uInt TableConstDataIterator::currentFieldID() const
 /// This method does the checks and throws an exception if scan number varies across
 /// the chunk.
 /// @return current scan ID
-casacore::uInt TableConstDataIterator::currentScanID() const
+casa::uInt TableConstDataIterator::currentScanID() const
 {
-  casacore::Vector<casacore::uInt> ids;
+  casa::Vector<casa::uInt> ids;
   fillVectorOfIDs(ids,"SCAN_NUMBER");
   ASKAPCHECK(ids.nelements()>0, "An attempt to extract scan ID for empty iteration");
-  const casacore::uInt scanID = ids[0];
+  const casa::uInt scanID = ids[0];
   // do cross-check
-  for (casacore::uInt row=1; row<ids.nelements(); ++row) {
+  for (casa::uInt row=1; row<ids.nelements(); ++row) {
        ASKAPCHECK(scanID == ids[row], "Scan ID seem to differ for row="<<row<<" of the current iteration; was "<<scanID<<
                   " now "<<ids[row]);
   }

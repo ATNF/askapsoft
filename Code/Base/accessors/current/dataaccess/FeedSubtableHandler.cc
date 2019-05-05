@@ -49,7 +49,7 @@
 
 // casa includes
 #include <casacore/tables/Tables/TableRecord.h>
-#include <casacore/tables/TaQL/ExprNode.h>
+#include <casacore/tables/Tables/ExprNode.h>
 #include <casacore/tables/Tables/ScalarColumn.h>
 #include <casacore/tables/Tables/ArrayColumn.h>
 #include <casacore/casa/Arrays/Array.h>
@@ -68,13 +68,13 @@ using namespace askap::accessors;
 /// @note a flag showing the first access to the data similar to itsNeverAccessedFlag
 /// in FieldSubtableHandler is not required here because itsCachedSpWindow 
 /// initial value of -2 serves as such flag.
-FeedSubtableHandler::FeedSubtableHandler(const casacore::Table &ms) :
+FeedSubtableHandler::FeedSubtableHandler(const casa::Table &ms) :
           TableHolder(ms.keywordSet().asTable("FEED")),
           itsCachedSpWindow(-2),
           itsCachedStartTime(0.), itsCachedStopTime(0.),
           itsAllCachedOffsetsZero(false), itsIntervalFactor(1.)
 { 
-  const casacore::Array<casacore::String> &intervalUnits=table().tableDesc().
+  const casa::Array<casa::String> &intervalUnits=table().tableDesc().
           columnDesc("INTERVAL").keywordSet().asArrayString("QuantumUnits");
   if (intervalUnits.nelements()!=1 || intervalUnits.ndim()!=1) {
       ASKAPTHROW(DataAccessError, "Unable to interpret the QuantumUnits keyword for "
@@ -83,7 +83,7 @@ FeedSubtableHandler::FeedSubtableHandler(const casacore::Table &ms) :
                   " elements and "<<intervalUnits.ndim()<<" dimensions");
   }
   itsIntervalFactor = tableTime(1.).getValue().
-            getTime(casacore::Unit(intervalUnits(casacore::IPosition(1,0)))).getValue();
+            getTime(casa::Unit(intervalUnits(casa::IPosition(1,0)))).getValue();
   ASKAPDEBUGASSERT(itsIntervalFactor != 0);
   itsIntervalFactor = 1./itsIntervalFactor;
 }
@@ -98,13 +98,13 @@ FeedSubtableHandler::FeedSubtableHandler(const casacore::Table &ms) :
 /// @param[in] feedID feed of interest
 /// @return a reference to RigidVector<Double,2> with the offsets on each
 /// axes (in radians).
-const casacore::RigidVector<casacore::Double, 2>& 
-        FeedSubtableHandler::getBeamOffset(const casacore::MEpoch &time, 
-                      casacore::uInt spWinID,
-                      casacore::uInt antID, casacore::uInt feedID) const
+const casa::RigidVector<casa::Double, 2>& 
+        FeedSubtableHandler::getBeamOffset(const casa::MEpoch &time, 
+                      casa::uInt spWinID,
+                      casa::uInt antID, casa::uInt feedID) const
 {
   fillCacheOnDemand(time,spWinID);
-  const casacore::uInt index=getIndex(antID,feedID);
+  const casa::uInt index=getIndex(antID,feedID);
   ASKAPDEBUGASSERT(index<=itsBeamOffsets.nelements());
   return itsBeamOffsets[index];
 }    
@@ -116,9 +116,9 @@ const casacore::RigidVector<casacore::Double, 2>&
 /// @param[in] spWinID spectral window ID of interest (feed table can be
 /// spectral window-dependent
 /// @return a reference to a vector with offsets (in radians on each axis)
-const casacore::Vector<casacore::RigidVector<casacore::Double, 2> > &
-        FeedSubtableHandler::getAllBeamOffsets(const casacore::MEpoch &time, 
-                                  casacore::uInt spWinID) const
+const casa::Vector<casa::RigidVector<casa::Double, 2> > &
+        FeedSubtableHandler::getAllBeamOffsets(const casa::MEpoch &time, 
+                                  casa::uInt spWinID) const
 {
  fillCacheOnDemand(time,spWinID);
  return itsBeamOffsets;
@@ -132,9 +132,9 @@ const casacore::Vector<casacore::RigidVector<casacore::Double, 2> > &
 /// dependent
 /// @param[in] spWinID spectral window ID of interest (feed table can be
 /// spectral window-dependent
-const casacore::Vector<casacore::Double>& FeedSubtableHandler::getAllBeamPAs(
-                                 const casacore::MEpoch &time, 
-                                 casacore::uInt spWinID) const
+const casa::Vector<casa::Double>& FeedSubtableHandler::getAllBeamPAs(
+                                 const casa::MEpoch &time, 
+                                 casa::uInt spWinID) const
 {
   fillCacheOnDemand(time,spWinID);
   return itsPositionAngles;
@@ -146,7 +146,7 @@ const casacore::Vector<casacore::Double>& FeedSubtableHandler::getAllBeamPAs(
 /// in cache).
 /// @param[in] antID antenna of interest
 /// @param[in] feedID feed of interest 
-casacore::uInt FeedSubtableHandler::getIndex(casacore::uInt antID, casacore::uInt feedID) const
+casa::uInt FeedSubtableHandler::getIndex(casa::uInt antID, casa::uInt feedID) const
 {
  if (antID>=itsIndices.nrow()) {
       ASKAPTHROW(DataAccessError, "Antenna ID requested ("<<antID<<
@@ -158,14 +158,14 @@ casacore::uInt FeedSubtableHandler::getIndex(casacore::uInt antID, casacore::uIn
           ") is outside the range of the FEED table (max. antenna number is "<<
           itsIndices.ncolumn());
   }
-  const casacore::Int index=itsIndices(antID,feedID);
+  const casa::Int index=itsIndices(antID,feedID);
   if (index<0) {
       ASKAPTHROW(DataAccessError, "Requested Antenna ID="<<antID<<
            " and Feed ID="<<feedID<<" are not found in the FEED subtable for "
            "the time range from "<<itsCachedStartTime<<" till "<<itsCachedStopTime<<
            " and spectral window "<<itsCachedSpWindow);             
   } 
-  return static_cast<casacore::uInt>(index);
+  return static_cast<casa::uInt>(index);
 } 
 
 /// @brief check whether the given time and spectral window ID is  in cache.
@@ -179,12 +179,12 @@ casacore::uInt FeedSubtableHandler::getIndex(casacore::uInt antID, casacore::uIn
 /// spectral window-dependent
 /// @return true if the beam parameters differ for the given time and
 /// spectral window ID
-bool FeedSubtableHandler::newBeamDetails(const casacore::MEpoch &time, 
-                                    casacore::uInt spWinID) const
+bool FeedSubtableHandler::newBeamDetails(const casa::MEpoch &time, 
+                                    casa::uInt spWinID) const
 {
-  const casacore::Double dTime=tableTime(time);
+  const casa::Double dTime=tableTime(time);
   if (dTime>=itsCachedStartTime && dTime<=itsCachedStopTime &&
-      (casacore::Int(spWinID)==itsCachedSpWindow || itsCachedSpWindow==-1)) {
+      (casa::Int(spWinID)==itsCachedSpWindow || itsCachedSpWindow==-1)) {
       // cache is valid
       return false;
   } 
@@ -198,24 +198,24 @@ bool FeedSubtableHandler::newBeamDetails(const casacore::MEpoch &time,
 /// dependent
 /// @param[in] spWinID spectral window ID of interest (feed table can be
 /// spectral window-dependent  
-void FeedSubtableHandler::fillCache(const casacore::MEpoch &time, 
-                       casacore::uInt spWinID) const
+void FeedSubtableHandler::fillCache(const casa::MEpoch &time, 
+                       casa::uInt spWinID) const
 {
   // if we really need to optimize the performance, we can cache dTime
-  const casacore::Double dTime=tableTime(time);
-  const casacore::TableExprNode halfInterval = table().col("INTERVAL")*itsIntervalFactor/2.;
+  const casa::Double dTime=tableTime(time);
+  const casa::TableExprNode halfInterval = table().col("INTERVAL")*itsIntervalFactor/2.;
 
   // (temporary) work around for zero interval (happens for ATCA data)
   // probably an appropriate filler has to be fixed as it doesn't
   // seem to conform with the measurement set standard
 
-  const casacore::TableExprNode expression = ((table().col("SPECTRAL_WINDOW_ID") ==
-                static_cast<casacore::Int>(spWinID)) || 
+  const casa::TableExprNode expression = ((table().col("SPECTRAL_WINDOW_ID") ==
+                static_cast<casa::Int>(spWinID)) || 
                     (table().col("SPECTRAL_WINDOW_ID") == -1)) &&
                (((table().col("TIME") - halfInterval <= dTime) &&
                 (table().col("TIME") + halfInterval >= dTime)) ||
                 (halfInterval == 0.));
-  casacore::Table selection=table()(expression);
+  casa::Table selection=table()(expression);
   if (selection.nrow()==0) {
       ASKAPTHROW(DataAccessError,
                  "FEED subtable is empty or feed data missing for "
@@ -223,35 +223,35 @@ void FeedSubtableHandler::fillCache(const casacore::MEpoch &time,
   }
   itsBeamOffsets.resize(selection.nrow());
   itsPositionAngles.resize(selection.nrow());
-  casacore::ROScalarColumn<casacore::Int> antIDs(selection,"ANTENNA_ID");
-  antIDs.getColumn(itsAntennaIDs,casacore::True);
-  casacore::Int minAntID=-1,maxAntID=-1;
-  casacore::minMax(minAntID,maxAntID,itsAntennaIDs);
-  casacore::ROScalarColumn<casacore::Int> feedIDs(selection,"FEED_ID");
-  feedIDs.getColumn(itsFeedIDs,casacore::True);
-  casacore::Int minFeedID=-1,maxFeedID=-1;
-  casacore::minMax(minFeedID,maxFeedID,itsFeedIDs);
+  casa::ROScalarColumn<casa::Int> antIDs(selection,"ANTENNA_ID");
+  antIDs.getColumn(itsAntennaIDs,casa::True);
+  casa::Int minAntID=-1,maxAntID=-1;
+  casa::minMax(minAntID,maxAntID,itsAntennaIDs);
+  casa::ROScalarColumn<casa::Int> feedIDs(selection,"FEED_ID");
+  feedIDs.getColumn(itsFeedIDs,casa::True);
+  casa::Int minFeedID=-1,maxFeedID=-1;
+  casa::minMax(minFeedID,maxFeedID,itsFeedIDs);
   if (minAntID<0 || maxAntID<0 || minFeedID<0 || maxFeedID<0) {
       ASKAPTHROW(DataAccessError,"Negative indices in FEED_ID and ANTENNA_ID "
          "columns of the FEED subtable are not allowed");
   }
   ++maxAntID; ++maxFeedID; // now we have numbers of feeds and antennae
-  ASKAPDEBUGASSERT(maxAntID*maxFeedID == casacore::Int(selection.nrow()));
+  ASKAPDEBUGASSERT(maxAntID*maxFeedID == casa::Int(selection.nrow()));
   itsIndices.resize(maxAntID,maxFeedID);
   itsIndices.set(-2); // negative value is a flag, which means an 
                       // uninitialized index
-  casacore::ROArrayColumn<casacore::Double>  rcptrOffsets(selection,"BEAM_OFFSET");
-  casacore::ROArrayColumn<casacore::Double>  rcptrPAs(selection,"RECEPTOR_ANGLE");
+  casa::ROArrayColumn<casa::Double>  rcptrOffsets(selection,"BEAM_OFFSET");
+  casa::ROArrayColumn<casa::Double>  rcptrPAs(selection,"RECEPTOR_ANGLE");
   // update start and stop times as well as the spectral window ID 
   // used in the cache management within the same loop
-  casacore::ROScalarColumn<casacore::Double> timeCol(selection,"TIME");
-  casacore::ROScalarColumn<casacore::Double> intervalCol(selection,"INTERVAL");
-  casacore::ROScalarColumn<casacore::Int> spWinCol(selection,"SPECTRAL_WINDOW_ID");
+  casa::ROScalarColumn<casa::Double> timeCol(selection,"TIME");
+  casa::ROScalarColumn<casa::Double> intervalCol(selection,"INTERVAL");
+  casa::ROScalarColumn<casa::Int> spWinCol(selection,"SPECTRAL_WINDOW_ID");
   itsCachedSpWindow = spWinCol(0);
   // we will set this flag to false later, if a non-zero offset is found
   itsAllCachedOffsetsZero = true; 
-  for (casacore::uInt row=0; row<selection.nrow(); ++row) {
-       casacore::RigidVector<casacore::Double, 2> &cOffset = itsBeamOffsets[row];
+  for (casa::uInt row=0; row<selection.nrow(); ++row) {
+       casa::RigidVector<casa::Double, 2> &cOffset = itsBeamOffsets[row];
        computeBeamOffset(rcptrOffsets(row),cOffset);
        if ((std::abs(cOffset(0)) > 1e-15) || (std::abs(cOffset(1)) > 1e-15)) {
            itsAllCachedOffsetsZero = false;
@@ -260,9 +260,9 @@ void FeedSubtableHandler::fillCache(const casacore::MEpoch &time,
        itsPositionAngles[row]=computePositionAngle(rcptrPAs(row));
        itsIndices(antIDs(row),feedIDs(row))=row;
        
-       casacore::Double cStartTime = timeCol(row) -
+       casa::Double cStartTime = timeCol(row) -
                           intervalCol(row) * itsIntervalFactor/2.;
-       casacore::Double cStopTime = timeCol(row) +
+       casa::Double cStopTime = timeCol(row) +
                           intervalCol(row) * itsIntervalFactor/2.;
        // (temporary) work around for zero interval (happens for ATCA data)
        // probably an appropriate filler has to be fixed as it doesn't
@@ -295,27 +295,27 @@ void FeedSubtableHandler::fillCache(const casacore::MEpoch &time,
 /// @param[in] rcptOffsets offsets for all receptors corresponding to the 
 /// given feed
 /// @param[out] beamOffsets returned averaged offsets
-void FeedSubtableHandler::computeBeamOffset(const casacore::Array<casacore::Double> &rcptOffsets,
-                      casacore::RigidVector<casacore::Double, 2> &beamOffsets)
+void FeedSubtableHandler::computeBeamOffset(const casa::Array<casa::Double> &rcptOffsets,
+                      casa::RigidVector<casa::Double, 2> &beamOffsets)
 {
   ASKAPASSERT(rcptOffsets.ndim()<3);
   if (rcptOffsets.ndim()==1) {
       // this means that have just one receptor and nothing, but copying
       // of values is required
       ASKAPASSERT(rcptOffsets.nelements()==2);
-      beamOffsets(0)=rcptOffsets(casacore::IPosition(1,0));
-      beamOffsets(1)=rcptOffsets(casacore::IPosition(1,1));
+      beamOffsets(0)=rcptOffsets(casa::IPosition(1,0));
+      beamOffsets(1)=rcptOffsets(casa::IPosition(1,1));
   } else {
-      const casacore::IPosition &shape=rcptOffsets.shape();
+      const casa::IPosition &shape=rcptOffsets.shape();
       ASKAPASSERT(shape[0] == 2);
       ASKAPASSERT(shape[1] > 0);
       beamOffsets(0)=beamOffsets(1)=0.;
-      const casacore::uInt nReceptors=shape[1];
-      for (casacore::uInt rcpt=0; rcpt<nReceptors; ++rcpt) {
-           beamOffsets(0)+=rcptOffsets(casacore::IPosition(2,0,rcpt))/
-                       static_cast<casacore::Double>(nReceptors);
-           beamOffsets(1)+=rcptOffsets(casacore::IPosition(2,1,rcpt))/
-                       static_cast<casacore::Double>(nReceptors);           
+      const casa::uInt nReceptors=shape[1];
+      for (casa::uInt rcpt=0; rcpt<nReceptors; ++rcpt) {
+           beamOffsets(0)+=rcptOffsets(casa::IPosition(2,0,rcpt))/
+                       static_cast<casa::Double>(nReceptors);
+           beamOffsets(1)+=rcptOffsets(casa::IPosition(2,1,rcpt))/
+                       static_cast<casa::Double>(nReceptors);           
       }
   }  
 }                      
@@ -326,12 +326,12 @@ void FeedSubtableHandler::computeBeamOffset(const casacore::Array<casacore::Doub
 /// feed
 /// @return the angle corresponding to the beam (curretly that of the first 
 /// receptor) 
-casacore::Double FeedSubtableHandler::computePositionAngle(const casacore::Array<casacore::Double>
+casa::Double FeedSubtableHandler::computePositionAngle(const casa::Array<casa::Double>
                                &rcptAngles)
 {
   ASKAPDEBUGASSERT(rcptAngles.ndim()==1);
   ASKAPASSERT(rcptAngles.nelements()>=1);
-  return rcptAngles(casacore::IPosition(1,0));
+  return rcptAngles(casa::IPosition(1,0));
 }                               
                   
   
@@ -344,12 +344,12 @@ casacore::Double FeedSubtableHandler::computePositionAngle(const casacore::Array
 /// @param[in] antID antenna of interest
 /// @param[in] feedID feed of interest 
 /// @return a position angle (in radians).
-casacore::Double FeedSubtableHandler::getBeamPA(const casacore::MEpoch &time, 
-                                 casacore::uInt spWinID, 
-                                 casacore::uInt antID, casacore::uInt feedID) const
+casa::Double FeedSubtableHandler::getBeamPA(const casa::MEpoch &time, 
+                                 casa::uInt spWinID, 
+                                 casa::uInt antID, casa::uInt feedID) const
 {
   fillCacheOnDemand(time,spWinID);
-  const casacore::uInt index=getIndex(antID,feedID);
+  const casa::uInt index=getIndex(antID,feedID);
   ASKAPDEBUGASSERT(index<=itsPositionAngles.nelements());
   return itsPositionAngles[index];
 }                                 
@@ -359,8 +359,8 @@ casacore::Double FeedSubtableHandler::getBeamPA(const casacore::MEpoch &time,
 /// dependent
 /// @param[in] spWinID spectral window ID of interest (feed table can be
 /// spectral window-dependent  
-void FeedSubtableHandler::fillCacheOnDemand(const casacore::MEpoch &time, 
-                                            casacore::uInt spWinID) const
+void FeedSubtableHandler::fillCacheOnDemand(const casa::MEpoch &time, 
+                                            casa::uInt spWinID) const
 {
   ASKAPDEBUGASSERT(spWinID>=0);
   if (newBeamDetails(time,spWinID)) {
@@ -380,7 +380,7 @@ void FeedSubtableHandler::fillCacheOnDemand(const casacore::MEpoch &time,
 /// @param[in] spWinID spectral window ID of interest (feed table can be
 /// spectral window-dependent
 /// @return true if all beam offsets are zero for the given time/epoch.
-bool FeedSubtableHandler::allBeamOffsetsZero(const casacore::MEpoch &time, casacore::uInt spWinID) const
+bool FeedSubtableHandler::allBeamOffsetsZero(const casa::MEpoch &time, casa::uInt spWinID) const
 {
   fillCacheOnDemand(time,spWinID);
   return itsAllCachedOffsetsZero;
@@ -393,8 +393,8 @@ bool FeedSubtableHandler::allBeamOffsetsZero(const casacore::MEpoch &time, casac
 /// spectral window-dependent
 /// @return a vector of feed IDs, each element corresponds to the appropriate
 /// element of getAllBeamPAs and getAllBeamOffsets
-const casacore::Vector<casacore::Int>& FeedSubtableHandler::getFeedIDs(const casacore::MEpoch &time, 
-                      casacore::uInt spWinID) const
+const casa::Vector<casa::Int>& FeedSubtableHandler::getFeedIDs(const casa::MEpoch &time, 
+                      casa::uInt spWinID) const
 {
   fillCacheOnDemand(time,spWinID);
   return itsFeedIDs;
@@ -407,8 +407,8 @@ const casacore::Vector<casacore::Int>& FeedSubtableHandler::getFeedIDs(const cas
 /// spectral window-dependent
 /// @return a vector of antenna IDs, each element corresponds to the appropriate
 /// element of getAllBeamPAs and getAllBeamOffsets
-const casacore::Vector<casacore::Int>& FeedSubtableHandler::getAntennaIDs(const casacore::MEpoch &time, 
-                      casacore::uInt spWinID) const
+const casa::Vector<casa::Int>& FeedSubtableHandler::getAntennaIDs(const casa::MEpoch &time, 
+                      casa::uInt spWinID) const
 {
   fillCacheOnDemand(time,spWinID);
   return itsAntennaIDs;  
@@ -428,7 +428,7 @@ const casacore::Vector<casacore::Int>& FeedSubtableHandler::getAntennaIDs(const 
 /// checks will be a waste of resources. It is probably better to live with the
 /// current interface although this approach is less elegant.
 /// @return a reference to matrix with indicies
-const casacore::Matrix<casacore::Int>& FeedSubtableHandler::getIndices() const throw()
+const casa::Matrix<casa::Int>& FeedSubtableHandler::getIndices() const throw()
 {
   return itsIndices;
 }

@@ -83,7 +83,7 @@ public:
               const boost::shared_ptr<ITableDataSelectorImpl const> &sel,
 	      const boost::shared_ptr<IDataConverterImpl const> &conv,
 	      size_t cacheSize = 1, double tolerance = 1e-6,
-	      casacore::uInt maxChunkSize = INT_MAX);
+	      casa::uInt maxChunkSize = INT_MAX);
 
   /// Restart the iteration from the beginning
   virtual void init();
@@ -94,39 +94,39 @@ public:
 	
   /// Checks whether there are more data available.
   /// @return True if there are more data available
-  virtual casacore::Bool hasMore() const throw();
+  virtual casa::Bool hasMore() const throw();
 	
   /// advance the iterator one step further 
   /// @return True if there are more data (so constructions like 
   ///         while(it.next()) {} are possible)
-  virtual casacore::Bool next();
+  virtual casa::Bool next();
 
   /// methods used in the accessor.
 
   /// @return number of rows in the current accessor
-  casacore::uInt inline nRow() const throw() { return itsNumberOfRows;}
+  casa::uInt inline nRow() const throw() { return itsNumberOfRows;}
 
   /// temporary - access to number of channels and polarizations
   /// it will be determined by the selector, get them from the table
   /// for now
 
   /// @return number of channels in the current accessor
-  casacore::uInt inline nChannel() const throw() { return getChannelRange().first;}
+  casa::uInt inline nChannel() const throw() { return getChannelRange().first;}
 
   /// @return number of channels in the current accessor
-  casacore::uInt inline nPol() const throw() { return itsNumberOfPols;}
+  casa::uInt inline nPol() const throw() { return itsNumberOfPols;}
 
   /// populate the buffer of visibilities with the values of current
   /// iteration
   /// @param[in] vis a reference to the nRow x nChannel x nPol buffer
   ///            cube to fill with the complex visibility data
-  void fillVisibility(casacore::Cube<casacore::Complex> &vis) const;
+  void fillVisibility(casa::Cube<casa::Complex> &vis) const;
   
   /// populate the buffer of noise figures with the values of current
   /// iteration
   /// @param[in] noise a reference to the nRow x nChannel x nPol buffer
   ///            cube to be filled with the noise figures
-  void fillNoise(casacore::Cube<casacore::Complex> &noise) const;
+  void fillNoise(casa::Cube<casa::Complex> &noise) const;
   
   /// @brief read flagging information
   /// @details populate the buffer of flags with the information
@@ -134,73 +134,73 @@ public:
   /// @param[in] flag a reference to the nRow x nChannel x nPol buffer
   ///            cube to fill with the flag information (each element has
   ///            bool type)
-  void fillFlag(casacore::Cube<casacore::Bool> &flag) const;
+  void fillFlag(casa::Cube<casa::Bool> &flag) const;
 
   /// populate the buffer with uvw
   /// @param[in] uvw a reference to vector of rigid vectors (3 elemets,
   ///            u,v and w for each row) to fill
-  void fillUVW(casacore::Vector<casacore::RigidVector<casacore::Double, 3> >&uvw) const;
+  void fillUVW(casa::Vector<casa::RigidVector<casa::Double, 3> >&uvw) const;
 
   /// populate the buffer with frequencies
   /// @param[in] freq a reference to a vector to fill
-  void fillFrequency(casacore::Vector<casacore::Double> &freq) const;
+  void fillFrequency(casa::Vector<casa::Double> &freq) const;
 
   /// @return the time stamp in the table's native frame/units
   /// @note this method doesn't do any caching. It reads the table each
   /// time it is called. It is intended for use from the accessor only, where
   /// caching is done. 
-  casacore::Double getTime() const;
+  casa::Double getTime() const;
   
   /// @brief an alternative way to get the time stamp
   /// @details This method uses the accessor to get cached time stamp. It
   /// is returned as an epoch measure.
-  casacore::MEpoch currentEpoch() const; 
+  casa::MEpoch currentEpoch() const; 
   
   /// populate the buffer with IDs of the first antenna
   /// @param[in] ids a reference to a vector to fill
-  void fillAntenna1(casacore::Vector<casacore::uInt> &ids) const;
+  void fillAntenna1(casa::Vector<casa::uInt> &ids) const;
 
   /// populate the buffer with IDs of the second antenna
   /// @param[in] ids a reference to a vector to fill
-  void fillAntenna2(casacore::Vector<casacore::uInt> &ids) const;
+  void fillAntenna2(casa::Vector<casa::uInt> &ids) const;
 
   /// populate the buffer with IDs of the first feed
   /// @param[in] ids a reference to a vector to fill
-  void fillFeed1(casacore::Vector<casacore::uInt> &ids) const;
+  void fillFeed1(casa::Vector<casa::uInt> &ids) const;
 
   /// populate the buffer with IDs of the second feed
   /// @param[in] ids a reference to a vector to fill
-  void fillFeed2(casacore::Vector<casacore::uInt> &ids) const;
+  void fillFeed2(casa::Vector<casa::uInt> &ids) const;
   
   /// fill the buffer with the pointing directions of the first antenna/feed
   /// @param[in] dirs a reference to a vector to fill
-  void fillPointingDir1(casacore::Vector<casacore::MVDirection> &dirs) const;
+  void fillPointingDir1(casa::Vector<casa::MVDirection> &dirs) const;
 
   /// fill the buffer with the pointing directions of the second antenna/feed
   /// @param[in] dirs a reference to a vector to fill
-  void fillPointingDir2(casacore::Vector<casacore::MVDirection> &dirs) const;
+  void fillPointingDir2(casa::Vector<casa::MVDirection> &dirs) const;
   
   /// fill the buffer with the position angles of the first antenna/feed
   /// @param[in] angles a reference to vector to be filled
-  void fillFeed1PA(casacore::Vector<casacore::Float> &angles) const;
+  void fillFeed1PA(casa::Vector<casa::Float> &angles) const;
 
   /// fill the buffer with the position angles of the second antenna/feed
   /// @param[in] angles a reference to vector to be filled
-  void fillFeed2PA(casacore::Vector<casacore::Float> &angles) const;
+  void fillFeed2PA(casa::Vector<casa::Float> &angles) const;
     
   /// @brief fill the buffer with the pointing directions for the first antenna centre
   /// @details The difference from fillPointingDir1 is that no feed offset is applied.
   /// @param[in] dirs a reference to a vector to fill
-  void fillDishPointing1(casacore::Vector<casacore::MVDirection> &dirs) const;
+  void fillDishPointing1(casa::Vector<casa::MVDirection> &dirs) const;
   
   /// @brief fill the buffer with the pointing directions for the second antenna centre
   /// @details The difference from fillPointingDir2 is that no feed offset is applied.
   /// @param[in] dirs a reference to a vector to fill
-  void fillDishPointing2(casacore::Vector<casacore::MVDirection> &dirs) const;
+  void fillDishPointing2(casa::Vector<casa::MVDirection> &dirs) const;
   
   /// @brief fill the buffer with the polarisation types 
   /// @param[in] stokes a reference to a vector to be filled
-  void fillStokes(casacore::Vector<casacore::Stokes::StokesTypes> &stokes) const;
+  void fillStokes(casa::Vector<casa::Stokes::StokesTypes> &stokes) const;
   
   /// @brief UVW machine cache size
   /// @return size of the uvw machine cache
@@ -215,7 +215,7 @@ public:
   /// current iteration, if field ID column is present (and used). Otherwise
   /// zero is always returned
   /// @return current field ID
-  casacore::uInt currentFieldID() const;  
+  casa::uInt currentFieldID() const;  
 
   /// @brief obtain a current scan ID
   /// @details This method obtains a scan number corresponding to the
@@ -227,7 +227,7 @@ public:
   /// This method does the checks and throws an exception if scan number varies across
   /// the chunk.
   /// @return current scan ID
-  casacore::uInt currentScanID() const;  
+  casa::uInt currentScanID() const;  
   
 protected:
   /// @brief obtain selected range of channels
@@ -235,11 +235,11 @@ protected:
   /// This method returns the number of channels and the first selected channel.
   /// @return a pair, first element is the number of channels, second is the first channel
   /// in the full cube
-  std::pair<casacore::uInt, casacore::uInt> getChannelRange() const;
+  std::pair<casa::uInt, casa::uInt> getChannelRange() const;
   
   /// @brief a short cut to get the first channel in the full cube
   /// @return the number of the first channel in the full cube
-  inline casacore::uInt startChannel() const { return getChannelRange().second;}
+  inline casa::uInt startChannel() const { return getChannelRange().second;}
 
   /// @brief read an array column of the table into a cube
   /// @details populate the buffer provided with the information
@@ -249,7 +249,7 @@ protected:
   ///            cube to fill with the information from table
   /// @param[in] columnName a name of the column to read
   template<typename T>
-  void fillCube(casacore::Cube<T> &cube, const std::string &columnName) const;
+  void fillCube(casa::Cube<T> &cube, const std::string &columnName) const;
 
   /// @brief A helper method to fill a given vector with pointing directions.
   /// @details fillPointingDir1 and fillPointingDir2 methods do very similar
@@ -258,9 +258,9 @@ protected:
   /// @param[in] dirs a reference to vector to fill
   /// @param[in] antIDs a vector with antenna IDs
   /// @param[in] feedIDs a vector with feed IDs
-  void fillVectorOfPointings(casacore::Vector<casacore::MVDirection> &dirs,
-               const casacore::Vector<casacore::uInt> &antIDs,
-               const casacore::Vector<casacore::uInt> &feedIDs) const;
+  void fillVectorOfPointings(casa::Vector<casa::MVDirection> &dirs,
+               const casa::Vector<casa::uInt> &antIDs,
+               const casa::Vector<casa::uInt> &feedIDs) const;
                
   /// @brief A helper method to fill a given vector with position angles.
   /// @details fillFeedPA1 and fillFeedPA2 method do very similar operations,
@@ -273,9 +273,9 @@ protected:
   /// of fillVectorOfPointings. They are different with just a command called within
   /// the loop. Theoretically, we can combine these two methods together, it would just
   /// invovle some coding to make it look nice and probably some minor performance penalty.
-  void fillVectorOfPositionAngles(casacore::Vector<casacore::Float> &angles,
-                const casacore::Vector<casacore::uInt> &antIDs,
-                const casacore::Vector<casacore::uInt> &feedIDs) const;  
+  void fillVectorOfPositionAngles(casa::Vector<casa::Float> &angles,
+                const casa::Vector<casa::uInt> &antIDs,
+                const casa::Vector<casa::uInt> &feedIDs) const;  
   
   /// @brief a helper method to get dish pointings 
   /// @details fillDishPointing1 and fillDishPointing2 methods do very
@@ -286,17 +286,17 @@ protected:
   /// does
   /// @param[in] dirs a reference to a vector to fill
   /// @param[in] antIDs a vector with antenna IDs  
-  void fillVectorOfDishPointings(casacore::Vector<casacore::MVDirection> &dirs,
-               const casacore::Vector<casacore::uInt> &antIDs) const;
+  void fillVectorOfDishPointings(casa::Vector<casa::MVDirection> &dirs,
+               const casa::Vector<casa::uInt> &antIDs) const;
   
   /// @brief a helper method to read a column with IDs of some sort
-  /// @details It reads the column of casacore::Int and fills a Vector of
-  /// casacore::uInt. A check to ensure all numbers are non-negative is done
+  /// @details It reads the column of casa::Int and fills a Vector of
+  /// casa::uInt. A check to ensure all numbers are non-negative is done
   /// in the debug mode.
   /// @param[in] ids a reference to a vector to fill
   /// @param[in] name a name of the column to read
-  void fillVectorOfIDs(casacore::Vector<casacore::uInt> &ids,
-                       const casacore::String &name) const;
+  void fillVectorOfIDs(casa::Vector<casa::uInt> &ids,
+                       const casa::String &name) const;
 
   /// setup accessor for a new iteration
   void setUpIteration();
@@ -333,14 +333,14 @@ protected:
   /// for an equatorial array this happends only if the FEED or FIELD subtable
   /// are time-dependent (i.e. when the pointing changes)
   /// @param[in] dirs a reference to a vector to be filled
-  void fillDirectionCache(casacore::Vector<casacore::MVDirection> &dirs) const;
+  void fillDirectionCache(casa::Vector<casa::MVDirection> &dirs) const;
   
   /// @brief Fill internal buffer with parallactic angles
   /// @details This buffer holds parallactic angles for all antennae. The buffer
   /// is invalidated when the time changes for an alt-az array, for an equatorial
   /// array it happens only if the pointing changes.
   /// @param[in] angles a reference to a vector to be filled
-  void fillParallacticAngleCache(casacore::Vector<casacore::Double> &angles) const;
+  void fillParallacticAngleCache(casa::Vector<casa::Double> &angles) const;
 
   /// @brief fill the buffer with the dish pointing directions
   /// @details The difference from fillDirectionCache is that
@@ -353,26 +353,26 @@ protected:
   /// the same value for all elements of the array. It will be used for both antennae
   /// in the pair. 
   /// @param[in] dirs a reference to a vector to fill
-  void fillDishPointingCache(casacore::Vector<casacore::MVDirection> &dirs) const;
+  void fillDishPointingCache(casa::Vector<casa::MVDirection> &dirs) const;
 
   /// @brief obtain a current spectral window ID
   /// @details This method obtains a spectral window ID corresponding to the
   /// current data description ID and tests its validity
   /// @return current spectral window ID
-  casacore::uInt currentSpWindowID() const;  
+  casa::uInt currentSpWindowID() const;  
   
   /// @brief obtain a current polarisation ID
   /// @details This method obtains a polarisation ID corresponding to the current
   /// data description ID and tests its validity
   /// @return current polarisation ID
-  casacore::uInt currentPolID() const;
+  casa::uInt currentPolID() const;
   
   /// @brief obtain the current iteration of the table iterator
   /// @details This class uses TableIterator behind the scene. This method
   /// returns the current iteration, which can be used in derived classes
   /// (e.g. for read-write access)
   /// @return a const reference to table object representing the current iteration
-  inline const casacore::Table& getCurrentIteration() const throw() 
+  inline const casa::Table& getCurrentIteration() const throw() 
        {return itsCurrentIteration;}
   
   /// @brief obtain the current top row
@@ -382,7 +382,7 @@ protected:
   /// where current data accessor starts.
   /// @return row number in itsCurrentItrertion corresponding to row 0 of the
   /// accessor at this iteration
-  inline casacore::uInt getCurrentTopRow() const throw() {return itsCurrentTopRow;}
+  inline casa::uInt getCurrentTopRow() const throw() {return itsCurrentTopRow;}
   
   /// @brief obtain the name of the data column
   /// @details The visibility data can be taken not only from the DATA column,
@@ -399,7 +399,7 @@ protected:
   /// from the FIELD subtable using either FIELD_ID, or current time if
   /// the former is not supported by the main table.
   /// @return a reference to direction measure
-  const casacore::MDirection& getCurrentReferenceDir() const;
+  const casa::MDirection& getCurrentReferenceDir() const;
     
 private:
   // note, it is essential that itsUVWCacheSize and itsUVWCacheTolerance are initialised
@@ -422,30 +422,30 @@ private:
   boost::shared_ptr<ITableDataSelectorImpl const>  itsSelector;
   boost::shared_ptr<IDataConverterImpl>  itsConverter;
   /// the maximum allowed number of rows in the accessor.
-  casacore::uInt itsMaxChunkSize;
-  casacore::TableIterator itsTabIterator;
+  casa::uInt itsMaxChunkSize;
+  casa::TableIterator itsTabIterator;
   /// current group of data returned by itsTabIterator
-  casacore::Table itsCurrentIteration;
+  casa::Table itsCurrentIteration;
   /// current row in the itsCurrentIteration projected to the row 0
   /// of the data accessor
-  casacore::uInt itsCurrentTopRow;
+  casa::uInt itsCurrentTopRow;
   /// number of rows in the current chunk
-  casacore::uInt itsNumberOfRows;
+  casa::uInt itsNumberOfRows;
   /// next two data members show the number of channels and
   /// polarisations in the actual table. Selector controls what
   /// is sent out
-  casacore::uInt itsNumberOfChannels;
+  casa::uInt itsNumberOfChannels;
   /// see above
-  casacore::uInt itsNumberOfPols;
+  casa::uInt itsNumberOfPols;
 
   /// current DATA_DESC_ID, the iteration is broken if this
   /// ID changes
-  casacore::Int itsCurrentDataDescID;
+  casa::Int itsCurrentDataDescID;
   
   /// @brief current FIELD_ID.
   /// @details This ID is tracked if FIELD_ID column is present in the 
   /// table. The iteration is broken if this ID changes.
-  casacore::Int itsCurrentFieldID;
+  casa::Int itsCurrentFieldID;
   
   /// @brief a flag showing that FIELD_ID column should be used.
   /// @details There are two ways to discriminate between different pointings:
@@ -460,15 +460,15 @@ private:
   /// @brief cache of pointing directions  for each feed
   /// @details This is an internal buffer for pointing 
   /// directions for the whole current cache of the Feed subtable handler
-  CachedAccessorField<casacore::Vector<casacore::MVDirection> > itsDirectionCache;
+  CachedAccessorField<casa::Vector<casa::MVDirection> > itsDirectionCache;
   
   /// @brief cache of parallactic angles for each antenna
   /// @details This is an internal buffer for parallactic angles (in radians) for the whole
   /// current cache of the antenna subtable handler
-  CachedAccessorField<casacore::Vector<casacore::Double> > itsParallacticAngleCache;
+  CachedAccessorField<casa::Vector<casa::Double> > itsParallacticAngleCache;
   
   /// internal buffer for dish pointings for all antennae
-  CachedAccessorField<casacore::Vector<casacore::MVDirection> > itsDishPointingCache;    
+  CachedAccessorField<casa::Vector<casa::MVDirection> > itsDishPointingCache;    
 };
 
 

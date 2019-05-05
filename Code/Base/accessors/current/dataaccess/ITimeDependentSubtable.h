@@ -2,7 +2,7 @@
 /// @brief A base class for handlers of time-dependent subtables
 /// @details All classes representing time-dependent subtables are expected
 /// to be derived from this one. This interface provides a method to 
-/// convert a fully specified epoch into casacore::Double intrinsically used by
+/// convert a fully specified epoch into casa::Double intrinsically used by
 /// the subtable. The actual subtable handler can use this for either 
 /// an intelligent selection or efficient caching. The main idea behind this
 /// interface and derived classes is to provide data necessary for a table
@@ -50,7 +50,7 @@ namespace accessors {
 /// @brief A base class for handlers of time-dependent subtables
 /// @details All classes representing time-dependent subtables are expected
 /// to be derived from this one. This interface provides a method to 
-/// convert a fully specified epoch into casacore::Double intrinsically used by
+/// convert a fully specified epoch into casa::Double intrinsically used by
 /// the subtable. The actual subtable handler can use this for either 
 /// an intelligent selection or efficient caching. The main idea behind this
 /// interface and derived classes is to provide data necessary for a table
@@ -62,7 +62,7 @@ struct ITimeDependentSubtable : virtual protected ITableHolder {
   /// @details Convert a given epoch to the table's native frame/units
   /// @param[in] time an epoch specified as a measure
   /// @return an epoch in table's native frame/units
-  virtual casacore::Double tableTime(const casacore::MEpoch &time) const = 0;
+  virtual casa::Double tableTime(const casa::MEpoch &time) const = 0;
   
   /// @brief obtain a full epoch object for a given time (reverse conversion)
   /// @details Some subtables can have more than one time-related columns, i.e.
@@ -72,7 +72,7 @@ struct ITimeDependentSubtable : virtual protected ITableHolder {
   /// the other columns. 
   /// @param[in] time time to translate into a full epoch
   /// @return[in] full epoch corresponding to a given time
-  virtual casacore::MEpoch tableTime(casacore::Double time) const = 0;
+  virtual casa::MEpoch tableTime(casa::Double time) const = 0;
 };
 
 
