@@ -25,6 +25,17 @@ if (CXX11)
     endif()
 endif()
 
+# find packages
+find_package(Boost REQUIRED)
+
+# include directories
+include_directories( ${CMAKE_SOURCE_DIR} )
+if (Boost_FOUND)
+    include_directories (${Boost_INCLUDE_DIRS})
+    add_definitions(-DHAVE_BOOST)
+endif (Boost_FOUND)
+
+
 set (_modules askap)
 
 # add some more tests and sub-directories
