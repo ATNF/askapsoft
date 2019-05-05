@@ -13,7 +13,7 @@ pipeline {
 echo "base-askap build directory already exists"
 cd build
 if [ -f install_manifest.txt ]; then
-cd make uninstall
+make uninstall
 fi
 cd ..
 rm -rf build
