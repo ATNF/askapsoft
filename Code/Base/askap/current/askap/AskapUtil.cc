@@ -124,7 +124,7 @@ casa::Quantity asQuantity(const string& s, const std::string& unit)
     return q;
 }
 
-casa::MEpoch asMEpoch(const vector<string>& epoch)
+casa::MEpoch asMEpoch(const std::vector<std::string>& epoch)
 {
     ASKAPCHECK(epoch.size() == 2, "Not a valid epoch");
 
@@ -155,7 +155,7 @@ static std::string convertLatitude(const std::string& s)
     return out;
 }
 
-casa::MDirection asMDirection(const vector<string>& direction)
+casa::MDirection asMDirection(const std::vector<std::string>& direction)
 {
     ASKAPCHECK(direction.size() == 3, "Not a valid direction");
 
@@ -171,7 +171,7 @@ casa::MDirection asMDirection(const vector<string>& direction)
     return dir;
 }
 
-casa::MPosition asMPosition(const vector<string>& position)
+casa::MPosition asMPosition(const std::vector<std::string>& position)
 {
     ASKAPCHECK(position.size() == 4, "Not a valid position");
 
