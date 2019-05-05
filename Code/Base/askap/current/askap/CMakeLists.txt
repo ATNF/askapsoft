@@ -4,7 +4,6 @@
 add_library(askap_askap 
 Application.cc
 AskapError.cc
-AskapTestRunner.cc
 AskapUtil.cc
 ISignalHandler.cc
 IndexConverter.cc
@@ -19,6 +18,12 @@ StatReporter.cc
 ../profile/ProfileSingleton.cc
 ../profile/ProfileTree.cc
 )
+
+if (CPPUNIT_FOUND)
+	target_sources(askap_askap
+		AskapTestRunner.cc
+	)
+endif()
 
 install (FILES
 Application.h
@@ -57,8 +62,10 @@ target_link_libraries(
 	${log4cxx_LIBRARY}
 	${Boost_LIBRARIES}
 	${LofarCommon_LIBRARY}
-	${CPPUNIT_LIBRARY}
-	)
+)
+if (CPPUNIT_FOUND)
+	target_link_libraries(askap_askap ${CPPUNIT_LIBRARY})
+endif()
 
 install (
 	TARGETS askap_askap
