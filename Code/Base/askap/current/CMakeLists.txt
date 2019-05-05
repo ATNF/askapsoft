@@ -76,7 +76,7 @@ include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${LofarCommon_INCLUDE_DIR})
 include_directories(${log4cxx_INCLUDE_DIRS})
 include_directories(${CASACORE_INCLUDE_DIRS})
-add_definitions(-DHAVE_BOOST -DHAVE_LOG4CXX)
+add_definitions(-DHAVE_BOOST -DHAVE_LOG4CXX -DHAVE_AIPSPP)
 
 if (CPPUNIT_FOUND)
 	include_directories(${CPPUNIT_INCLUDE_DIR})
