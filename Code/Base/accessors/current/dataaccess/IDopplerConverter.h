@@ -69,7 +69,7 @@ struct IDopplerConverter : virtual public IConverterBase {
     ///
     /// @param[in] freq an MFrequency measure to convert.
     /// @return a reference on MRadialVelocity object with the result
-    virtual const casa::MRadialVelocity& operator()(const casa::MFrequency &freq) const = 0;
+    virtual const casacore::MRadialVelocity& operator()(const casacore::MFrequency &freq) const = 0;
 
     /// convert specified velocity to frequency in the same reference
     /// frame. Velocity definition (i.e. optical or radio, etc) is
@@ -77,7 +77,7 @@ struct IDopplerConverter : virtual public IConverterBase {
     ///
     /// @param[in] vel an MRadialVelocity measure to convert.
     /// @return a reference on MFrequency object with the result
-    virtual const casa::MFrequency&  operator()(const casa::MRadialVelocity &vel) const = 0;
+    virtual const casacore::MFrequency&  operator()(const casacore::MRadialVelocity &vel) const = 0;
 };
 
 } // namespace accessors

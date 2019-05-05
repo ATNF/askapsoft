@@ -113,7 +113,7 @@ public:
 	/// Switch the output of operator* and operator-> to the original
 	/// state (present after the iterator is just constructed) 
 	/// where they point to the primary visibility data. This method
-	/// is indended to cancel the results of chooseBuffer(casa::uInt)
+	/// is indended to cancel the results of chooseBuffer(casacore::uInt)
 	///
 	virtual void chooseOriginal() = 0;
 

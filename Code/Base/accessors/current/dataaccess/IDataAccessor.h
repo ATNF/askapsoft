@@ -57,7 +57,7 @@ public:
 	/// @return a reference to nRow x nChannel x nPol cube, containing
 	/// all visibility data
 	///
-	virtual const casa::Cube<casa::Complex>& visibility() const = 0;
+	virtual const casacore::Cube<casacore::Complex>& visibility() const = 0;
 
 	
     /// Read-write access to visibilities (a cube is nRow x nChannel x nPol;
@@ -66,7 +66,7 @@ public:
 	/// @return a reference to nRow x nChannel x nPol cube, containing
 	/// all visibility data
 	///
-	virtual casa::Cube<casa::Complex>& rwVisibility() = 0;
+	virtual casacore::Cube<casacore::Complex>& rwVisibility() = 0;
 };
 
 } // end of namespace accessors

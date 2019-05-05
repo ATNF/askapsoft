@@ -37,7 +37,7 @@ using namespace askap::accessors;
 
 /// construct the object and link it to the given buffers subtable
 /// @param[in] tab  subtable to use
-TableBufferManager::TableBufferManager(const casa::Table &tab) :
+TableBufferManager::TableBufferManager(const casacore::Table &tab) :
                    TableHolder(tab) {}
 
 
@@ -48,9 +48,9 @@ TableBufferManager::TableBufferManager(const casa::Table &tab) :
 ///            cube to fill with the complex visibility data
 /// @param[in] name a name of the buffer to work with
 /// @param[in] index a sequential index in the buffer
-void TableBufferManager::readBuffer(casa::Cube<casa::Complex> &vis,
+void TableBufferManager::readBuffer(casacore::Cube<casacore::Complex> &vis,
                         const std::string &name,
-			   casa::uInt index) const
+			   casacore::uInt index) const
 { 
  readCube(vis,name,index);
 }
@@ -61,9 +61,9 @@ void TableBufferManager::readBuffer(casa::Cube<casa::Complex> &vis,
 ///            cube to fill with the complex visibility data
 /// @param[in] name a name of the buffer to work with
 /// @param[in] index a sequential index in the buffer
-void TableBufferManager::writeBuffer(const casa::Cube<casa::Complex> &vis,
+void TableBufferManager::writeBuffer(const casacore::Cube<casacore::Complex> &vis,
                          const std::string &name,
-			   casa::uInt index) const
+			   casacore::uInt index) const
 {
   writeCube(vis,name,index);  
 }
@@ -74,7 +74,7 @@ void TableBufferManager::writeBuffer(const casa::Cube<casa::Complex> &vis,
 /// @param[in] index a sequential index in the buffer
 /// @return true, if the buffer with the given name is present
 bool TableBufferManager::bufferExists(const std::string &name,
-			   casa::uInt index) const
+			   casacore::uInt index) const
 {
-  return cellDefined<casa::Complex>(name,index);
+  return cellDefined<casacore::Complex>(name,index);
 }

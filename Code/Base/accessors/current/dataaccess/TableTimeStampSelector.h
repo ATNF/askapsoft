@@ -70,7 +70,7 @@ public:
    /// main method, updates table expression node to narrow down the selection
    ///
    /// @param tex a reference to table expression to use
-   virtual void updateTableExpression(casa::TableExprNode &tex) const;
+   virtual void updateTableExpression(casacore::TableExprNode &tex) const;
 
 protected:
   
@@ -83,7 +83,7 @@ protected:
    /// the selection is done using time as Double or as MVTime.  
    /// @return start and stop times of the interval to be selected (as
    ///         an std::pair, start is first, stop is second)
-   virtual std::pair<casa::MEpoch, casa::MEpoch>
+   virtual std::pair<casacore::MEpoch, casacore::MEpoch>
            getStartAndStop() const = 0;       
 };
 

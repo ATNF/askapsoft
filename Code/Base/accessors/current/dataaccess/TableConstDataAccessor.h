@@ -69,58 +69,58 @@ public:
 
   /// The number of rows in this chunk
   /// @return the number of rows in this chunk
-  virtual casa::uInt nRow() const throw();
+  virtual casacore::uInt nRow() const throw();
 
   /// The number of spectral channels (equal for all rows)
   /// @return the number of spectral channels
-  virtual casa::uInt nChannel() const throw();
+  virtual casacore::uInt nChannel() const throw();
 
   /// The number of polarization products (equal for all rows)
   /// @return the number of polarization products (can be 1,2 or 4)
-  virtual casa::uInt nPol() const throw();
+  virtual casacore::uInt nPol() const throw();
   
   /// Return pointing centre directions of the first antenna/feed
   /// @return a vector with direction measures (coordinate system
   /// is set via IDataConverter), one direction for each
   /// visibility/row
-  virtual const casa::Vector<casa::MVDirection>& pointingDir1() const;
+  virtual const casacore::Vector<casacore::MVDirection>& pointingDir1() const;
 
   /// Return pointing centre directions of the second antenna/feed
   /// @return a vector with direction measures (coordinate system
   /// is set via IDataConverter), one direction for each
   /// visibility/row
-  virtual const casa::Vector<casa::MVDirection>& pointingDir2() const;
+  virtual const casacore::Vector<casacore::MVDirection>& pointingDir2() const;
 
   /// pointing direction for the centre of the first antenna 
   /// @details The same as pointingDir1, if the feed offsets are zero
   /// @return a vector with direction measures (coordinate system
   /// is is set via IDataConverter), one direction for each
   /// visibility/row
-  virtual const casa::Vector<casa::MVDirection>& dishPointing1() const;
+  virtual const casacore::Vector<casacore::MVDirection>& dishPointing1() const;
 
   /// pointing direction for the centre of the first antenna 
   /// @details The same as pointingDir2, if the feed offsets are zero
   /// @return a vector with direction measures (coordinate system
   /// is is set via IDataConverter), one direction for each
   /// visibility/row
-  virtual const casa::Vector<casa::MVDirection>& dishPointing2() const;
+  virtual const casacore::Vector<casacore::MVDirection>& dishPointing2() const;
 
 
   /// Visibilities (a cube is nRow x nChannel x nPol; each element is
   /// a complex visibility)
   /// @return a reference to nRow x nChannel x nPol cube, containing
   /// all visibility data
-  virtual const casa::Cube<casa::Complex>& visibility() const;
+  virtual const casacore::Cube<casacore::Complex>& visibility() const;
 
   /// Cube of flags corresponding to the output of visibility() 
   /// @return a reference to nRow x nChannel x nPol cube with flag 
   ///         information. If True, the corresponding element is flagged.
-  virtual const casa::Cube<casa::Bool>& flag() const;
+  virtual const casacore::Cube<casacore::Bool>& flag() const;
 
   /// UVW
   /// @return a reference to vector containing uvw-coordinates
   /// packed into a 3-D rigid vector
-  virtual const casa::Vector<casa::RigidVector<casa::Double, 3> >&uvw() const;
+  virtual const casacore::Vector<casacore::RigidVector<casacore::Double, 3> >&uvw() const;
 
   /// @brief uvw after rotation
   /// @details This method calls UVWMachine to rotate baseline coordinates 
@@ -128,8 +128,8 @@ public:
   /// returned by a separate method.
   /// @param[in] tangentPoint tangent point to rotate the coordinates to
   /// @return uvw after rotation to the new coordinate system for each row
-  virtual const casa::Vector<casa::RigidVector<casa::Double, 3> >&
-	           rotatedUVW(const casa::MDirection &tangentPoint) const;
+  virtual const casacore::Vector<casacore::RigidVector<casacore::Double, 3> >&
+	           rotatedUVW(const casacore::MDirection &tangentPoint) const;
 	         
   /// @brief delay associated with uvw rotation
   /// @details This is a companion method to rotatedUVW. It returns delays corresponding
@@ -139,71 +139,71 @@ public:
   /// @param[in] tangentPoint tangent point to rotate the coordinates to
   /// @param[in] imageCentre image centre (additional translation is done if imageCentre!=tangentPoint)
   /// @return delays corresponding to the uvw rotation for each row
-  virtual const casa::Vector<casa::Double>& uvwRotationDelay(
-	       const casa::MDirection &tangentPoint, const casa::MDirection &imageCentre) const;
+  virtual const casacore::Vector<casacore::Double>& uvwRotationDelay(
+	       const casacore::MDirection &tangentPoint, const casacore::MDirection &imageCentre) const;
   
   /// Frequency for each channel
   /// @return a reference to vector containing frequencies for each
   ///         spectral channel (vector size is nChannel). Frequencies
   ///         are given as Doubles, the frame/units are specified by
   ///         the DataSource object
-  virtual const casa::Vector<casa::Double>& frequency() const;
+  virtual const casacore::Vector<casacore::Double>& frequency() const;
 
   /// Timestamp for each row
   /// @return a timestamp for this buffer (it is always the same
   ///         for all rows. The timestamp is returned as 
   ///         Double w.r.t. the origin specified by the 
   ///         DataSource object and in that reference frame
-  virtual casa::Double time() const;
+  virtual casacore::Double time() const;
   
   /// First antenna IDs for all rows
   /// @return a vector with IDs of the first antenna corresponding
   /// to each visibility (one for each row)
-  virtual const casa::Vector<casa::uInt>& antenna1() const;
+  virtual const casacore::Vector<casacore::uInt>& antenna1() const;
 
   /// Second antenna IDs for all rows
   /// @return a vector with IDs of the second antenna corresponding
   /// to each visibility (one for each row)
-  virtual const casa::Vector<casa::uInt>& antenna2() const;
+  virtual const casacore::Vector<casacore::uInt>& antenna2() const;
 
   /// First feed IDs for all rows
   /// @return a vector with IDs of the first feed corresponding
   /// to each visibility (one for each row)
-  virtual const casa::Vector<casa::uInt>& feed1() const;
+  virtual const casacore::Vector<casacore::uInt>& feed1() const;
 
   /// Second feed IDs for all rows
   /// @return a vector with IDs of the second feed corresponding
   /// to each visibility (one for each row)
-  virtual const casa::Vector<casa::uInt>& feed2() const;
+  virtual const casacore::Vector<casacore::uInt>& feed2() const;
   
   /// Position angles of the first feed for all rows
   /// @return a vector with position angles (in radians) of the
   /// first feed corresponding to each visibility
-  virtual const casa::Vector<casa::Float>& feed1PA() const;
+  virtual const casacore::Vector<casacore::Float>& feed1PA() const;
      
   /// Position angles of the second feed for all rows
   /// @return a vector with position angles (in radians) of the
   /// second feed corresponding to each visibility
-  virtual const casa::Vector<casa::Float>& feed2PA() const;
+  virtual const casacore::Vector<casacore::Float>& feed2PA() const;
   
   /// Noise level required for a proper weighting
   /// @return a reference to nRow x nChannel x nPol cube with
   ///         complex noise estimates
-  virtual const casa::Cube<casa::Complex>& noise() const;
+  virtual const casacore::Cube<casacore::Complex>& noise() const;
   
   /// Velocity for each channel
   /// @return a reference to vector containing velocities for each
   ///         spectral channel (vector size is nChannel). Velocities
   ///         are given as Doubles, the frame/units are specified by
   ///         the DataSource object (via IDataConverter).
-  virtual const casa::Vector<casa::Double>& velocity() const;
+  virtual const casacore::Vector<casacore::Double>& velocity() const;
 
   /// @brief polarisation type for each product
   /// @return a reference to vector containing polarisation types for
   /// each product in the visibility cube (nPol() elements).
   /// @note All rows of the accessor have the same structure of the visibility
   /// cube, i.e. polarisation types returned by this method are valid for all rows.
-  virtual const casa::Vector<casa::Stokes::StokesTypes>& stokes() const;
+  virtual const casacore::Vector<casacore::Stokes::StokesTypes>& stokes() const;
   
 
   /// @brief invalidate fields updated on each iteration
@@ -233,64 +233,64 @@ public:
 private:  
   /// a helper adapter method to set the time via non-const reference
   /// @param[in] time a reference to buffer to fill with the current time 
-  void readTime(casa::Double &time) const;
+  void readTime(casacore::Double &time) const;
   
   /// a reference to iterator managing this accessor
   const TableConstDataIterator& itsIterator;
   
   /// internal buffer for visibility
-  CachedAccessorField<casa::Cube<casa::Complex> > itsVisibility;
+  CachedAccessorField<casacore::Cube<casacore::Complex> > itsVisibility;
   
   /// internal buffer for flag
-  CachedAccessorField<casa::Cube<casa::Bool> > itsFlag;
+  CachedAccessorField<casacore::Cube<casacore::Bool> > itsFlag;
  
   /// internal buffer for uvw
-  CachedAccessorField<casa::Vector<casa::RigidVector<casa::Double, 3> > > itsUVW;
+  CachedAccessorField<casacore::Vector<casacore::RigidVector<casacore::Double, 3> > > itsUVW;
   
   /// internal buffer for rotated uvw and associated delay
   UVWRotationHandler itsRotatedUVW; 
  
   /// internal buffer for frequency
-  CachedAccessorField<casa::Vector<casa::Double> > itsFrequency;
+  CachedAccessorField<casacore::Vector<casacore::Double> > itsFrequency;
 
   /// internal buffer for time
-  CachedAccessorField<casa::Double> itsTime;
+  CachedAccessorField<casacore::Double> itsTime;
   
   /// internal buffer for the first antenna ids
-  CachedAccessorField<casa::Vector<casa::uInt> > itsAntenna1;
+  CachedAccessorField<casacore::Vector<casacore::uInt> > itsAntenna1;
 
   /// internal buffer for the second antenna ids
-  CachedAccessorField<casa::Vector<casa::uInt> > itsAntenna2;
+  CachedAccessorField<casacore::Vector<casacore::uInt> > itsAntenna2;
   
   /// internal buffer for the first feed ids
-  CachedAccessorField<casa::Vector<casa::uInt> > itsFeed1;
+  CachedAccessorField<casacore::Vector<casacore::uInt> > itsFeed1;
   
   /// internal buffer for the second feed ids
-  CachedAccessorField<casa::Vector<casa::uInt> > itsFeed2;
+  CachedAccessorField<casacore::Vector<casacore::uInt> > itsFeed2;
   
   /// internal buffer for the position angles of the first feed
-  CachedAccessorField<casa::Vector<casa::Float> > itsFeed1PA;
+  CachedAccessorField<casacore::Vector<casacore::Float> > itsFeed1PA;
   
   /// internal buffer for the position angles of the second feed
-  CachedAccessorField<casa::Vector<casa::Float> > itsFeed2PA;
+  CachedAccessorField<casacore::Vector<casacore::Float> > itsFeed2PA;
   
   /// internal buffer for the pointing directions of the first antenna/feed
-  CachedAccessorField<casa::Vector<casa::MVDirection> > itsPointingDir1;
+  CachedAccessorField<casacore::Vector<casacore::MVDirection> > itsPointingDir1;
 
   /// internal buffer for the pointing directions of the second antenna/feed
-  CachedAccessorField<casa::Vector<casa::MVDirection> > itsPointingDir2;
+  CachedAccessorField<casacore::Vector<casacore::MVDirection> > itsPointingDir2;
 
   /// internal buffer for the pointing directions of the centre of the first antenna
-  CachedAccessorField<casa::Vector<casa::MVDirection> > itsDishPointing1;
+  CachedAccessorField<casacore::Vector<casacore::MVDirection> > itsDishPointing1;
 
   /// internal buffer for the pointing directions of the centre of the second antenna
-  CachedAccessorField<casa::Vector<casa::MVDirection> > itsDishPointing2;
+  CachedAccessorField<casacore::Vector<casacore::MVDirection> > itsDishPointing2;
   
   /// internal buffer for the noise figures
-  CachedAccessorField<casa::Cube<casa::Complex> > itsNoise;
+  CachedAccessorField<casacore::Cube<casacore::Complex> > itsNoise;
   
   /// internal buffer for the polarisation types
-  CachedAccessorField<casa::Vector<casa::Stokes::StokesTypes> > itsStokes;
+  CachedAccessorField<casacore::Vector<casacore::Stokes::StokesTypes> > itsStokes;
 };
 
 

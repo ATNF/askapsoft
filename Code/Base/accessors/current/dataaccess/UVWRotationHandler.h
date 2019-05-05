@@ -77,8 +77,8 @@ struct UVWRotationHandler : protected UVWMachineCache {
    /// @return const reference to rotated uvws
    /// @note the method doesn't monitor a change to the accessor. It expects that invalidate 
    /// is called explicitly when recalculation is needed (i.e. iterator moved to the next iteration, etc)
-   const casa::Vector<casa::RigidVector<casa::Double, 3> >& uvw(const IConstDataAccessor &acc, 
-               const casa::MDirection &tangent) const;
+   const casacore::Vector<casacore::RigidVector<casacore::Double, 3> >& uvw(const IConstDataAccessor &acc, 
+               const casacore::MDirection &tangent) const;
 
    /// @brief obtain delays corresponding to rotation
    /// @details
@@ -90,15 +90,15 @@ struct UVWRotationHandler : protected UVWMachineCache {
    /// @return const reference to delay vector
    /// @note the method doesn't monitor a change to the accessor. It expects that invalidate 
    /// is called explicitly when recalculation is needed (i.e. iterator moved to the next iteration, etc)
-   const casa::Vector<casa::Double>& delays(const IConstDataAccessor &acc, 
-               const casa::MDirection &tangent, const casa::MDirection &imageCentre) const;
+   const casacore::Vector<casacore::Double>& delays(const IConstDataAccessor &acc, 
+               const casacore::MDirection &tangent, const casacore::MDirection &imageCentre) const;
                   
 private:
    /// @brief rotated uvw coordinates
-   mutable casa::Vector<casa::RigidVector<casa::Double, 3> > itsRotatedUVWs;
+   mutable casacore::Vector<casacore::RigidVector<casacore::Double, 3> > itsRotatedUVWs;
    
    /// @brief internal buffer for delay associated with uvw rotation
-   mutable casa::Vector<casa::Double> itsDelays;
+   mutable casacore::Vector<casacore::Double> itsDelays;
    
    /// @brief flag that rotated uvws and delays are up to date
    /// @details If this field is uptodate itsDelays contain some valid information too.
@@ -108,7 +108,7 @@ private:
    /// @details
    /// Rotation depends on the tangent point. Cache of UVW Machines returns the appropriate machine,
    /// but we also have to recompute the cache of results of it changes.
-   mutable casa::MDirection itsTangentPoint;
+   mutable casacore::MDirection itsTangentPoint;
    
    /// @brief current image centre used to calculate delays
    /// @details
@@ -118,7 +118,7 @@ private:
    /// be changed any number of times without recomputing delays. Although if the number of changes
    /// is too large some round-off errors may accumulate as we just add some extra delay to the
    /// cache following every change to this field.
-   mutable casa::MDirection itsImageCentre;
+   mutable casacore::MDirection itsImageCentre;
    
 #ifdef _OPENMP
    /// @brief mutex to synchronise cache access for all threads 

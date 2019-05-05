@@ -2,7 +2,7 @@
 /// @brief A base class for handler of a time-dependent subtable
 /// @details All classes representing time-dependent subtables are expected
 /// to be derived from this one. It implements the method to 
-/// convert a fully specified epoch into casa::Double intrinsically used by
+/// convert a fully specified epoch into casacore::Double intrinsically used by
 /// the subtable. The actual subtable handler can use this for either 
 /// an intelligent selection or efficient caching. The main idea behind this
 /// class is to provide data necessary for a table
@@ -59,7 +59,7 @@ using namespace askap::accessors;
 /// @details Convert a given epoch to the table's native frame/units
 /// @param[in] time an epoch specified as a measure
 /// @return an epoch in table's native frame/units
-casa::Double TimeDependentSubtable::tableTime(const casa::MEpoch &time) const
+casacore::Double TimeDependentSubtable::tableTime(const casacore::MEpoch &time) const
 {
   if (!itsConverter) {
       // first use, we need to read frame/unit information and set up the 
@@ -76,7 +76,7 @@ casa::Double TimeDependentSubtable::tableTime(const casa::MEpoch &time) const
 /// the time represented as double in the native table's reference frame/unit.
 /// It allows to extract frame/unit information and compare them with that of
 /// the other columns. 
-casa::MEpoch TimeDependentSubtable::tableTime(casa::Double time) const
+casacore::MEpoch TimeDependentSubtable::tableTime(casacore::Double time) const
 {
   if (!itsConverter) {
       // first use, we need to read frame/unit information and set up the 
@@ -90,7 +90,7 @@ casa::MEpoch TimeDependentSubtable::tableTime(casa::Double time) const
 /// @brief initialize itsConverter
 void TimeDependentSubtable::initConverter() const
 {
-  const casa::Array<casa::String> &tabUnits=table().tableDesc().
+  const casacore::Array<casacore::String> &tabUnits=table().tableDesc().
       columnDesc("TIME").keywordSet().asArrayString("QuantumUnits");
   if (tabUnits.nelements()!=1 || tabUnits.ndim()!=1) {
       ASKAPTHROW(DataAccessError, "Unable to interpret the QuantumUnits "
@@ -99,13 +99,13 @@ void TimeDependentSubtable::initConverter() const
         "one String element and the table has "<<tabUnits.nelements()<<
         " elements and "<<tabUnits.ndim()<<" dimensions");
   }
-  const casa::Unit timeUnits=casa::Unit(tabUnits(casa::IPosition(1,0)));
+  const casacore::Unit timeUnits=casacore::Unit(tabUnits(casacore::IPosition(1,0)));
   
-  const casa::RecordInterface &timeMeasInfo=table().tableDesc().
+  const casacore::RecordInterface &timeMeasInfo=table().tableDesc().
         columnDesc("TIME").keywordSet().asRecord("MEASINFO");
   ASKAPASSERT(timeMeasInfo.asString("type")=="epoch");
             
-  itsConverter.reset(new EpochConverter(casa::MEpoch(casa::MVEpoch(),
+  itsConverter.reset(new EpochConverter(casacore::MEpoch(casacore::MVEpoch(),
                      frameType(timeMeasInfo.asString("Ref"))),timeUnits));
 }  
 
@@ -116,34 +116,34 @@ void TimeDependentSubtable::initConverter() const
 /// object to be able to construct it. This method provides a required
 /// translation.
 /// @param[in] name a string name of the reference frame 
-casa::MEpoch::Types TimeDependentSubtable::frameType(const casa::String &name)
+casacore::MEpoch::Types TimeDependentSubtable::frameType(const casacore::String &name)
 {
   if (name == "UTC") {
-      return casa::MEpoch::UTC;
+      return casacore::MEpoch::UTC;
   } else if (name == "TAI" || name == "IAT") {
-      return casa::MEpoch::TAI;
+      return casacore::MEpoch::TAI;
   } else if (name == "UT" || name == "UT1") {
-      return casa::MEpoch::UT1;
+      return casacore::MEpoch::UT1;
   } else if (name == "UT2") {
-      return casa::MEpoch::UT2;   
+      return casacore::MEpoch::UT2;   
   } else if (name == "TDT" || name == "TT" || name == "ET") {
-      return casa::MEpoch::TDT;   
+      return casacore::MEpoch::TDT;   
   } else if (name == "GMST" || name == "GMST1") {
-      return casa::MEpoch::GMST;
+      return casacore::MEpoch::GMST;
   } else if (name == "TCB") {
-      return casa::MEpoch::TCB;   
+      return casacore::MEpoch::TCB;   
   } else if (name == "TDB") {
-      return casa::MEpoch::TDB;   
+      return casacore::MEpoch::TDB;   
   } else if (name == "TCG") {
-      return casa::MEpoch::TCG;   
+      return casacore::MEpoch::TCG;   
   } else if (name == "LAST") {
-      return casa::MEpoch::LAST;   
+      return casacore::MEpoch::LAST;   
   } else if (name == "LMST") {
-      return casa::MEpoch::LMST;   
+      return casacore::MEpoch::LMST;   
   } else if (name == "GAST") {
-      return casa::MEpoch::GAST;   
+      return casacore::MEpoch::GAST;   
   } 
   ASKAPTHROW(DataAccessError, "The frame "<<name<<
               " is not supported at the moment");
-  return casa::MEpoch::UTC; // to keep the compiler happy
+  return casacore::MEpoch::UTC; // to keep the compiler happy
 }

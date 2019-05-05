@@ -48,44 +48,44 @@ class JonesDTerm {
         /// @param[in] d12 leakage from Y to X (element of the first row and second column of the Jones matrix) 
         /// @param[in] d21 leakage from X to Y (element of the second row and first column of the Jones matrix)
         /// @note validity flags are set (to true) for both d12 and d21
-        JonesDTerm(const casa::Complex& d12,
-                   const casa::Complex& d21);
+        JonesDTerm(const casacore::Complex& d12,
+                   const casacore::Complex& d21);
 
         /// @brief Constructor.
         /// @param[in] d12 leakage from Y to X (element of the first row and second column of the Jones matrix) 
         /// @param[in] d12Valid true, if d12 has a valid value
         /// @param[in] d21 leakage from X to Y (element of the second row and first column of the Jones matrix)
         /// @param[in] d21Valid true, if d21 has a valid value
-        JonesDTerm(const casa::Complex& d12, const casa::Bool d12Valid,
-                   const casa::Complex& d21, const casa::Bool d21Valid);
+        JonesDTerm(const casacore::Complex& d12, const casacore::Bool d12Valid,
+                   const casacore::Complex& d21, const casacore::Bool d21Valid);
 
         /// @brief obtain leakage from Y to X
         /// @details
         /// @return leakage from Y to X (element of the first row and second column of the Jones matrix)
-        casa::Complex d12(void) const;
+        casacore::Complex d12(void) const;
 
         /// @brief obtain validity flag for d12 leakage
         /// @return true, if d12 leakage is valid
-        inline casa::Bool d12IsValid() const { return itsD12Valid;}
+        inline casacore::Bool d12IsValid() const { return itsD12Valid;}
 
         /// @brief obtain leakage from X to Y
         /// @details 
         /// @return leakage from X to Y (element of the second row and first column of the Jones matrix)
-        casa::Complex d21(void) const;
+        casacore::Complex d21(void) const;
         
         /// @brief obtain validity flag for d21 leakage
         /// @return true, if d21 leakage is valid
-        inline casa::Bool d21IsValid() const { return itsD21Valid;}        
+        inline casacore::Bool d21IsValid() const { return itsD21Valid;}        
 
     private:
         /// @brief leakage from Y to X (element of the first row and second column of the Jones matrix)
-        casa::Complex itsD12;
+        casacore::Complex itsD12;
         /// @brief true, if itsD12 has a valid value
-        casa::Bool itsD12Valid;
+        casacore::Bool itsD12Valid;
         /// @brief leakage from X to Y (element of the second row and first column of the Jones matrix)
-        casa::Complex itsD21;
+        casacore::Complex itsD21;
         /// @brief true, if itsD21 has a valid value
-        casa::Bool itsD21Valid;        
+        casacore::Bool itsD21Valid;        
 };
 
 };

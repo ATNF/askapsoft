@@ -50,7 +50,7 @@ SmearingAccessorAdapter::SmearingAccessorAdapter(const IConstDataAccessor &acc) 
 ///         spectral channel (vector size is nChannel). Frequencies
 ///         are given as Doubles, the frame/units are specified by
 ///         the DataSource object
-const casa::Vector<casa::Double>& SmearingAccessorAdapter::frequency() const
+const casacore::Vector<casacore::Double>& SmearingAccessorAdapter::frequency() const
 {
   return itsFrequencySubstituted ? itsFrequencyBuffer : getROAccessor().frequency();
 }
@@ -63,7 +63,7 @@ const casa::Vector<casa::Double>& SmearingAccessorAdapter::frequency() const
 ///         spectral channel (vector size is nChannel). Frequencies
 ///         are given as Doubles, the frame/units are specified by
 ///         the DataSource object
-casa::Vector<casa::Double>& SmearingAccessorAdapter::rwFrequency()
+casacore::Vector<casacore::Double>& SmearingAccessorAdapter::rwFrequency()
 {
   if (!itsFrequencySubstituted) {
       itsFrequencySubstituted = true;

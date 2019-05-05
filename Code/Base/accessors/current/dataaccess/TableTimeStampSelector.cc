@@ -51,14 +51,14 @@ using namespace askap::accessors;
 /// main method, updates table expression node to narrow down the selection
 ///
 /// @param tex a reference to table expression to use
-void TableTimeStampSelector::updateTableExpression(casa::TableExprNode &tex)
+void TableTimeStampSelector::updateTableExpression(casacore::TableExprNode &tex)
 	                                           const
 {
   try {    
-    const std::pair<casa::MEpoch, casa::MEpoch> startAndStop = getStartAndStop();
+    const std::pair<casacore::MEpoch, casacore::MEpoch> startAndStop = getStartAndStop();
     
-    const casa::Double start = tableTime(startAndStop.first);
-    const casa::Double stop = tableTime(startAndStop.second);
+    const casacore::Double start = tableTime(startAndStop.first);
+    const casacore::Double stop = tableTime(startAndStop.second);
             
     if (tex.isNull()) {
         tex=(table().col("TIME") > start) &&
@@ -68,8 +68,8 @@ void TableTimeStampSelector::updateTableExpression(casa::TableExprNode &tex)
                    (table().col("TIME") < stop);
     }
   }
-  catch(const casa::AipsError &ae) {
-    ASKAPTHROW(DataAccessError, "casa::AipsError is caught inside "
+  catch(const casacore::AipsError &ae) {
+    ASKAPTHROW(DataAccessError, "casacore::AipsError is caught inside "
          "TableTimeStampSelector::updateTableExpression: "<<ae.what());
   }
 }

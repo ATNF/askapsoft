@@ -76,7 +76,7 @@ public:
   /// @return a reference to nRow x nChannel x nPol cube, containing
   /// all visibility data
   ///
-  virtual const casa::Cube<casa::Complex>& visibility() const;
+  virtual const casacore::Cube<casacore::Complex>& visibility() const;
 
 	
   /// Read-write access to visibilities (a cube is nRow x nChannel x nPol;
@@ -85,7 +85,7 @@ public:
   /// @return a reference to nRow x nChannel x nPol cube, containing
   /// all visibility data
   ///
-  virtual casa::Cube<casa::Complex>& rwVisibility();
+  virtual casacore::Cube<casacore::Complex>& rwVisibility();
   
   /// @brief discard the content of the cache
   /// @details A call to this method would switch the accessor to the pristine state
@@ -116,7 +116,7 @@ private:
   /// @brief actual buffer
   /// @details A zero shape means that this class is coupled to read-only accessor, rather than
   /// this buffer.
-  mutable casa::Cube<casa::Complex> itsBuffer;
+  mutable casacore::Cube<casacore::Complex> itsBuffer;
 
   #ifdef _OPENMP
   /// @brief synchronisation object

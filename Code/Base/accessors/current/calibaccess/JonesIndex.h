@@ -46,23 +46,23 @@ class JonesIndex {
         ///                     antenna ID.
         /// @param[in] beam     ID of the beam. Again, must map to an actual
         ///                     beam.
-        JonesIndex(const casa::Short antenna, casa::Short beam);
+        JonesIndex(const casacore::Short antenna, casacore::Short beam);
         
         /// @brief constructor accepting uInt
         /// @param[in] antenna  ID of the antenna. This must be the physical
         ///                     antenna ID.
         /// @param[in] beam     ID of the beam. Again, must map to an actual
         ///                     beam.
-        JonesIndex(const casa::uInt antenna, casa::uInt beam);
+        JonesIndex(const casacore::uInt antenna, casacore::uInt beam);
         
 
         /// Obtain the antenna ID
         /// @return the antenna ID
-        casa::Short antenna(void) const;
+        casacore::Short antenna(void) const;
 
         /// Obtain the beam ID
         /// @return the beam ID
-        casa::Short beam(void) const;
+        casacore::Short beam(void) const;
 
         /// Operator...
         bool operator==(const JonesIndex& rhs) const;
@@ -74,8 +74,8 @@ class JonesIndex {
         bool operator<(const JonesIndex& rhs) const;
 
     private:
-        casa::Short itsAntenna;
-        casa::Short itsBeam;
+        casacore::Short itsAntenna;
+        casacore::Short itsBeam;
 };
 
 };

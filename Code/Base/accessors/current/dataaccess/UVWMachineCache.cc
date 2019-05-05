@@ -81,8 +81,8 @@ UVWMachineCache::~UVWMachineCache()
 /// @param[in] phaseCentre direction to the input phase centre
 /// @param[in] tangent direction to tangent point
 /// @return a const reference to uvw machine 
-const UVWMachineCache::machineType& UVWMachineCache::machine(const casa::MDirection &phaseCentre,
-                                                 const casa::MDirection &tangent) const
+const UVWMachineCache::machineType& UVWMachineCache::machine(const casacore::MDirection &phaseCentre,
+                                                 const casacore::MDirection &tangent) const
 {  
 #ifdef _OPENMP
    boost::upgrade_lock<boost::shared_mutex> lock(itsMutex);
@@ -115,7 +115,7 @@ const UVWMachineCache::machineType& UVWMachineCache::machine(const casa::MDirect
 /// @param[in] dir1 first direction
 /// @param[in] dir2 second direction
 /// @return true, if they are matching
-bool UVWMachineCache::compare(const casa::MDirection &dir1, const casa::MDirection &dir2) const
+bool UVWMachineCache::compare(const casacore::MDirection &dir1, const casacore::MDirection &dir2) const
 {
   return compare(dir1,dir2,itsTolerance);
 }
@@ -130,7 +130,7 @@ bool UVWMachineCache::compare(const casa::MDirection &dir1, const casa::MDirecti
 /// @param[in] dir2 second direction
 /// @param[in] tolerance angle tolerance (in radians)
 /// @return true, if they are matching
-bool UVWMachineCache::compare(const casa::MDirection &dir1, const casa::MDirection &dir2, const double tolerance)
+bool UVWMachineCache::compare(const casacore::MDirection &dir1, const casacore::MDirection &dir2, const double tolerance)
 {
    if (dir1.getRef().getType() != dir2.getRef().getType()) {
        return false;
@@ -145,8 +145,8 @@ bool UVWMachineCache::compare(const casa::MDirection &dir1, const casa::MDirecti
 /// @param[in] phaseCentre direction to the input phase centre
 /// @param[in] tangent direction to tangent point
 /// @return cache index
-size_t UVWMachineCache::getIndex(const casa::MDirection &phaseCentre, 
-                                 const casa::MDirection &tangent) const
+size_t UVWMachineCache::getIndex(const casacore::MDirection &phaseCentre, 
+                                 const casacore::MDirection &tangent) const
 {
    // this method is protected and is only called after the upgrade_lock has been acquired.
    // Therefore, we don't need any more locks here.

@@ -61,12 +61,12 @@ struct GenericConverter : virtual public IConverterBase {
     /// @param[in] targetRef target reference frame        
     /// @param[in] targetUnit desired units in the output. 
     GenericConverter(const typename M::Ref &targetRef,
-                     const casa::Unit &targetUnit) : itsTargetRef(targetRef),
+                     const casacore::Unit &targetUnit) : itsTargetRef(targetRef),
 		           itsTargetUnit(targetUnit) {}
 
     /// convert specified measure to the target units/frame
     /// @param[in] in a measure to convert. 
-    virtual inline casa::Double operator()(const M &in) const {       
+    virtual inline casacore::Double operator()(const M &in) const {       
        typename M::MVType converted=
                 typename M::Convert(in.getRef(),itsTargetRef)(in).getValue();
        return converted.get(itsTargetUnit).getValue();
@@ -76,7 +76,7 @@ struct GenericConverter : virtual public IConverterBase {
     /// conversion is performed
     /// @param[in] frame  MeasFrame object (can be constructed from
     ///               MPosition or MEpoch on-the-fly)
-    virtual void setMeasFrame(const casa::MeasFrame &frame) {
+    virtual void setMeasFrame(const casacore::MeasFrame &frame) {
        itsTargetRef.set(frame);
     }
 
@@ -86,7 +86,7 @@ struct GenericConverter : virtual public IConverterBase {
     /// @param[in] testRef reference frame of the propsed input
     /// @param[in] testUnit units in the proposed input
     virtual inline bool isVoid(const typename M::Ref &testRef,
-                     const casa::Unit &testUnit) const {		     
+                     const casacore::Unit &testUnit) const {		     
        return (itsTargetRef.getType() == testRef.getType()) &&
               (itsTargetUnit.getName() == testUnit.getName());
     }
@@ -94,7 +94,7 @@ struct GenericConverter : virtual public IConverterBase {
 
 private:    
     typename M::Ref itsTargetRef;
-    casa::Unit  itsTargetUnit;
+    casacore::Unit  itsTargetUnit;
 };
 
 } // namespace accessors

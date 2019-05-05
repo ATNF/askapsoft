@@ -44,7 +44,7 @@ namespace accessors {
 /// is wrapped around and the channel offset
 /// @param[in] src shared pointer to the original source
 /// @param[in] offset channel offset to add to bandpass value request
-ChanAdapterCalSolutionConstSource::ChanAdapterCalSolutionConstSource(const boost::shared_ptr<ICalSolutionConstSource> &src, const casa::uInt offset) :
+ChanAdapterCalSolutionConstSource::ChanAdapterCalSolutionConstSource(const boost::shared_ptr<ICalSolutionConstSource> &src, const casacore::uInt offset) :
     itsSource(src), itsOffset(offset)
 {
    ASKAPASSERT(src);

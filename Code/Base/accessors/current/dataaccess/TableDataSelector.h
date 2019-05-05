@@ -71,12 +71,12 @@ public:
   explicit TableDataSelector(const boost::shared_ptr<ITableManager const> &msManager);
    
   /// Choose a time range. Both start and stop times are given via
-  /// casa::MVEpoch object. The reference frame is specified by
+  /// casacore::MVEpoch object. The reference frame is specified by
   /// the DataSource object.
   /// @param[in] start the beginning of the chosen time interval
   /// @param[in] stop  the end of the chosen time interval
-  virtual void chooseTimeRange(const casa::MVEpoch &start,
-            const casa::MVEpoch &stop);
+  virtual void chooseTimeRange(const casacore::MVEpoch &start,
+            const casacore::MVEpoch &stop);
   
   /// Choose time range. This method accepts a time range with 
   /// respect to the origin defined by the DataSource object.
@@ -85,51 +85,51 @@ public:
   /// MVEpoch and is specified via the DataSource object.
   /// @param[in] start the beginning of the chosen time interval
   /// @param[in] stop the end of the chosen time interval
-  virtual void chooseTimeRange(casa::Double start,casa::Double stop);
+  virtual void chooseTimeRange(casacore::Double start,casacore::Double stop);
    
   /// Choose cycles. This is an equivalent of choosing the time range,
   /// but the selection is done in integer cycle numbers
   /// @param[in] start the number of the first cycle to choose
   /// @param[in] stop the number of the last cycle to choose
-  virtual void chooseCycles(casa::uInt start, casa::uInt stop);
+  virtual void chooseCycles(casacore::uInt start, casacore::uInt stop);
 
   /// Choose a subset of spectral channels
   /// @param[in] nChan a number of spectral channels wanted in the output
   /// @param[in] start the number of the first spectral channel to choose
   /// @param[in] nAvg a number of adjacent spectral channels to average
   ///             default is no averaging
-  virtual void chooseChannels(casa::uInt nChan, casa::uInt start,
-                               casa::uInt nAvg = 1);
+  virtual void chooseChannels(casacore::uInt nChan, casacore::uInt start,
+                               casacore::uInt nAvg = 1);
 
   /// Choose a subset of frequencies. The reference frame is
   /// defined by the DataSource object
   /// @param[in] nChan a number of spectral channels wanted in the output
   /// @param[in] start the frequency of the first spectral channel to
-  ///        choose (given as casa::MVFrequency object)
+  ///        choose (given as casacore::MVFrequency object)
   /// @param[in] freqInc an increment in terms of the frequency in the
   ///        same reference frame as start. This parameter plays
   ///        the same role as nAvg for chooseChannels, i.e. twice
   ///        the frequency resolution would average two adjacent channels
-  virtual void chooseFrequencies(casa::uInt nChan,
-           const casa::MVFrequency &start, const casa::MVFrequency &freqInc);
+  virtual void chooseFrequencies(casacore::uInt nChan,
+           const casacore::MVFrequency &start, const casacore::MVFrequency &freqInc);
 
   /// Choose a subset of radial velocities. The reference frame is
   /// defined by the DataSource object
   /// @param[in] nChan a number of spectral channels wanted in the output
   /// @param[in] start the velocity of the first spectral channel to
-  ///        choose (given as casa::MVRadialVelocity object)
+  ///        choose (given as casacore::MVRadialVelocity object)
   /// @param[in] velInc an increment in terms of the radial velocity in the
   ///        same reference frame as start. This parameter plays
   ///        the same role as nAvg for chooseChannels, i.e. twice
   ///        the velocity resolution would average two adjacent channels
-  virtual void chooseVelocities(casa::uInt nChan,
-           const casa::MVRadialVelocity &start,
-  	 const casa::MVRadialVelocity &velInc);
+  virtual void chooseVelocities(casacore::uInt nChan,
+           const casacore::MVRadialVelocity &start,
+  	 const casacore::MVRadialVelocity &velInc);
 
   /// Choose polarization. 
   /// @param[in] pols a string describing the wanted polarization 
   /// in the output. Allowed values are: I, "IQUV","XXYY","RRLL"
-  virtual void choosePolarizations(const casa::String &pols);
+  virtual void choosePolarizations(const casacore::String &pols);
 
   /// Obtain a table expression node for selection. This method is
   /// used in the implementation of the iterator to form a subtable
@@ -138,7 +138,7 @@ public:
   ///
   /// @param[in] conv  a shared pointer to the converter, which is used to sort
   ///              out epochs and other measures used in the selection
-  virtual const casa::TableExprNode& getTableSelector(const
+  virtual const casacore::TableExprNode& getTableSelector(const
                   boost::shared_ptr<IDataConverterImpl const> &conv) const;
 
   /// @brief choose data column
@@ -187,7 +187,7 @@ public:
 
 private:
   /// a measurement set to work with. Reference semantics
-  casa::Table itsMS;
+  casacore::Table itsMS;
   /// selector for epoch
   boost::shared_ptr<ITableMeasureFieldSelector> itsEpochSelector;
   /// a name of the column containing visibility data

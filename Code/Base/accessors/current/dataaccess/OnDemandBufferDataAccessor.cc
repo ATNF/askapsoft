@@ -52,7 +52,7 @@ OnDemandBufferDataAccessor::OnDemandBufferDataAccessor(const IConstDataAccessor 
 /// @return a reference to nRow x nChannel x nPol cube, containing
 /// all visibility data
 ///
-const casa::Cube<casa::Complex>& OnDemandBufferDataAccessor::visibility() const
+const casacore::Cube<casacore::Complex>& OnDemandBufferDataAccessor::visibility() const
 {
   #ifdef _OPENMP
   boost::shared_lock<boost::shared_mutex> lock(itsMutex);
@@ -77,7 +77,7 @@ const casa::Cube<casa::Complex>& OnDemandBufferDataAccessor::visibility() const
 /// @return a reference to nRow x nChannel x nPol cube, containing
 /// all visibility data
 ///
-casa::Cube<casa::Complex>& OnDemandBufferDataAccessor::rwVisibility()
+casacore::Cube<casacore::Complex>& OnDemandBufferDataAccessor::rwVisibility()
 {
   #ifdef _OPENMP
   boost::upgrade_lock<boost::shared_mutex> lock(itsMutex);

@@ -54,7 +54,7 @@ struct MemTableDataDescHolder : public ITableDataDescHolder {
   /// read all required information from the DATA_DESCRIPTION subtable
   /// @param ms an input measurement set (a table which has a
   /// DATA_DESCRIPTION subtable defined)
-  explicit MemTableDataDescHolder(const casa::Table &ms);
+  explicit MemTableDataDescHolder(const casacore::Table &ms);
   
   /// obtain spectral window ID via data description ID
   /// @param dataDescriptionID an index into data description table for

@@ -71,7 +71,7 @@ public:
   /// @details read-only operation is assumed
   /// @param[in] tab  table to use
   /// @param[in] row reference row
-  TableCalSolutionFiller(const casa::Table& tab, const long row);
+  TableCalSolutionFiller(const casacore::Table& tab, const long row);
 
   /// @brief construct the object and link it to the given table
   /// @details Maximum allowed numbers of antennas, beams and spectral channels are
@@ -82,38 +82,38 @@ public:
   /// @param[in] nAnt maximum number of antennas
   /// @param[in] nBeam maximum number of beams
   /// @param[in] nChan maximum number of channels
-  TableCalSolutionFiller(const casa::Table& tab, const long row, const casa::uInt nAnt,
-         const casa::uInt nBeam, const casa::uInt nChan);
+  TableCalSolutionFiller(const casacore::Table& tab, const long row, const casacore::uInt nAnt,
+         const casacore::uInt nBeam, const casacore::uInt nChan);
 
   /// @brief gains filler
   /// @details
   /// @param[in] gains pair of cubes with gains and validity flags (to be resised to 2 x nAnt x nBeam)
-  virtual void fillGains(std::pair<casa::Cube<casa::Complex>, casa::Cube<casa::Bool> > &gains) const;
+  virtual void fillGains(std::pair<casacore::Cube<casacore::Complex>, casacore::Cube<casacore::Bool> > &gains) const;
 
   /// @brief leakage filler
   /// @details
   /// @param[in] leakages pair of cubes with leakages and validity flags (to be resised to 2 x nAnt x nBeam)
-  virtual void fillLeakages(std::pair<casa::Cube<casa::Complex>, casa::Cube<casa::Bool> > &leakages) const;
+  virtual void fillLeakages(std::pair<casacore::Cube<casacore::Complex>, casacore::Cube<casacore::Bool> > &leakages) const;
 
   /// @brief bandpass filler
   /// @details
   /// @param[in] bp pair of cubes with bandpasses and validity flags (to be resised to (2*nChan) x nAnt x nBeam)
-  virtual void fillBandpasses(std::pair<casa::Cube<casa::Complex>, casa::Cube<casa::Bool> > &bp) const;
+  virtual void fillBandpasses(std::pair<casacore::Cube<casacore::Complex>, casacore::Cube<casacore::Bool> > &bp) const;
 
   /// @brief gains writer
   /// @details
   /// @param[in] gains pair of cubes with gains and validity flags (should be 2 x nAnt x nBeam)
-  virtual void writeGains(const std::pair<casa::Cube<casa::Complex>, casa::Cube<casa::Bool> > &gains) const;
+  virtual void writeGains(const std::pair<casacore::Cube<casacore::Complex>, casacore::Cube<casacore::Bool> > &gains) const;
 
   /// @brief leakage writer
   /// @details
   /// @param[in] leakages pair of cubes with leakages and validity flags (should be 2 x nAnt x nBeam)
-  virtual void writeLeakages(const std::pair<casa::Cube<casa::Complex>, casa::Cube<casa::Bool> > &leakages) const;
+  virtual void writeLeakages(const std::pair<casacore::Cube<casacore::Complex>, casacore::Cube<casacore::Bool> > &leakages) const;
 
   /// @brief bandpass writer
   /// @details
   /// @param[in] bp pair of cubes with bandpasses and validity flags (should be (2*nChan) x nAnt x nBeam)
-  virtual void writeBandpasses(const std::pair<casa::Cube<casa::Complex>, casa::Cube<casa::Bool> > &bp) const;
+  virtual void writeBandpasses(const std::pair<casacore::Cube<casacore::Complex>, casacore::Cube<casacore::Bool> > &bp) const;
 
   /// @brief check for gain solution
   /// @return true, if there is no gain solution, false otherwise
@@ -150,11 +150,11 @@ private:
   bool columnExists(const std::string &name) const;
 
   /// @brief number of antennas (used when new solutions are created)
-  casa::uInt itsNAnt;
+  casacore::uInt itsNAnt;
   /// @brief number of beams (used when new solutions are created)
-  casa::uInt itsNBeam;
+  casacore::uInt itsNBeam;
   /// @brief number of spectral channels (used when new solutions are created)
-  casa::uInt itsNChan;
+  casacore::uInt itsNChan;
   /// @brief reference row for the selected solution (actual solution will be searched from this row up)
   long itsRefRow;
 

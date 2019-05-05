@@ -55,14 +55,14 @@ struct ITableSpWindowHolder : virtual public IHolder {
   /// obtain the reference frame used in the spectral window table
   /// @param[in] spWindowID an index into spectral window table
   /// @return the reference frame of the given row
-  virtual casa::MFrequency::Ref
-                    getReferenceFrame(casa::uInt spWindowID) const = 0;
+  virtual casacore::MFrequency::Ref
+                    getReferenceFrame(casacore::uInt spWindowID) const = 0;
 
   /// @brief obtain the frequency units used in the spectral window table
   /// @details The frequency units depend on the measurement set only and
   /// are the same for all rows.
-  /// @return a reference to the casa::Unit object
-  virtual const casa::Unit& getFrequencyUnit() const throw() = 0;
+  /// @return a reference to the casacore::Unit object
+  virtual const casacore::Unit& getFrequencyUnit() const throw() = 0;
   
   /// @brief obtain frequencies for each spectral channel
   /// @details All frequencies for each spectral channel are retreived as
@@ -70,8 +70,8 @@ struct ITableSpWindowHolder : virtual public IHolder {
   /// via getReferenceFrame and getFrequencyUnit methods of this class.  
   /// @param[in] spWindowID an index into spectral window table
   /// @return freqs a const reference to a vector with result
-  virtual const casa::Vector<casa::Double>&
-                     getFrequencies(casa::uInt spWindowID) const = 0;
+  virtual const casacore::Vector<casacore::Double>&
+                     getFrequencies(casacore::uInt spWindowID) const = 0;
 
   /// @brief obtain frequency for a given spectral channel
   /// @details This version of the method is intended to obtain a
@@ -80,8 +80,8 @@ struct ITableSpWindowHolder : virtual public IHolder {
   /// (and, hence, element by element operations are needed anyway)
   /// @param[in] spWindowID an index into spectral window table
   /// @param[in] channel a channel number of interest
-  virtual casa::MFrequency getFrequency(casa::uInt spWindowID,
-                            casa::uInt channel) const = 0;
+  virtual casacore::MFrequency getFrequency(casacore::uInt spWindowID,
+                            casacore::uInt channel) const = 0;
 };
 
 

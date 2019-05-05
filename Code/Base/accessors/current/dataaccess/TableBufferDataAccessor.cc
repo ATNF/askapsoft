@@ -54,7 +54,7 @@ TableBufferDataAccessor::TableBufferDataAccessor(const std::string &name,
 /// @return a reference to nRow x nChannel x nPol cube, containing
 /// all visibility data
 ///
-const casa::Cube<casa::Complex>& TableBufferDataAccessor::visibility() const
+const casacore::Cube<casacore::Complex>& TableBufferDataAccessor::visibility() const
 {
   // active buffer should be returned
   fillBufferIfNeeded();
@@ -77,7 +77,7 @@ void TableBufferDataAccessor::fillBufferIfNeeded() const
 /// @return a reference to nRow x nChannel x nPol cube, containing
 /// all visibility data
 ///
-casa::Cube<casa::Complex>& TableBufferDataAccessor::rwVisibility()
+casacore::Cube<casacore::Complex>& TableBufferDataAccessor::rwVisibility()
 {    
   fillBufferIfNeeded();
   itsScratchBuffer.needsFlush=true;

@@ -85,7 +85,7 @@ ParsetCalSolutionAccessor::~ParsetCalSolutionAccessor()
       std::ofstream os(itsParsetFileName.c_str());
       for (std::vector<std::string>::const_iterator it = parlist.begin(); 
            it != parlist.end(); ++it) {
-           const casa::Complex val = cache().complexValue(*it);
+           const casacore::Complex val = cache().complexValue(*it);
            os<<*it<<" = ["<<real(val)<<","<<imag(val)<<"]"<<std::endl;
       }     
   }

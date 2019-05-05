@@ -123,18 +123,18 @@ void SubtableInfoHolder::initBufferManager() const
 {  
   if (itsUseMemBuffers) {
       // After calling this method, the buffers will be held in
-      // memory (via casa::MemoryTable), rather than be a subtable of
+      // memory (via casacore::MemoryTable), rather than be a subtable of
       // the measurement set.
-      casa::SetupNewTable maker("BUFFERS",
-								casa::TableDesc(),casa::Table::New);
-      itsBufferManager.reset(new TableBufferManager(casa::Table(maker,
-                                casa::Table::Memory)));      
+      casacore::SetupNewTable maker("BUFFERS",
+								casacore::TableDesc(),casacore::Table::New);
+      itsBufferManager.reset(new TableBufferManager(casacore::Table(maker,
+                                casacore::Table::Memory)));      
   } else {
       // first, test that we have a compatible BUFFERS subtable if the
       // keyword exists
       if (table().keywordSet().isDefined("BUFFERS")) {
           try {
-	     casa::Table testTab(table().keywordSet().asTable("BUFFERS"));
+	     casacore::Table testTab(table().keywordSet().asTable("BUFFERS"));
 	     // just to avoid the compiler thinking that we don't use testTab
 	     testTab.throwIfNull();
 	  }
@@ -143,7 +143,7 @@ void SubtableInfoHolder::initBufferManager() const
 	     try {
 	        table().rwKeywordSet().removeField("BUFFERS");
 	     }
-	     catch (const casa::TableError &te) {
+	     catch (const casacore::TableError &te) {
 	        ASKAPTHROW(DataAccessError,"Unable to remove corrupted BUFFERS keyword. AipsError: "<<
 		            te.what());
 	     }
@@ -151,9 +151,9 @@ void SubtableInfoHolder::initBufferManager() const
       }
       if (!table().keywordSet().isDefined("BUFFERS")) {
           // we have to create a brand new subtable
-          casa::SetupNewTable maker(table().tableName()+"/BUFFERS",
-                                  casa::TableDesc(),casa::Table::New);
-          table().rwKeywordSet().defineTable("BUFFERS",casa::Table(maker));
+          casacore::SetupNewTable maker(table().tableName()+"/BUFFERS",
+                                  casacore::TableDesc(),casacore::Table::New);
+          table().rwKeywordSet().defineTable("BUFFERS",casacore::Table(maker));
       }
       itsBufferManager.reset(new
                TableBufferManager(table().keywordSet().asTable("BUFFERS")));

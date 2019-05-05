@@ -61,14 +61,14 @@ TableDataSelector::TableDataSelector(const
 }
 
 /// Choose a time range. Both start and stop times are given via
-/// casa::MVEpoch object. The reference frame is specified by
+/// casacore::MVEpoch object. The reference frame is specified by
 /// the DataSource object.
 /// @param[in] start the beginning of the chosen time interval
 /// @param[in] stop  the end of the chosen time interval
-void TableDataSelector::chooseTimeRange(const casa::MVEpoch &start,
-          const casa::MVEpoch &stop)
+void TableDataSelector::chooseTimeRange(const casacore::MVEpoch &start,
+          const casacore::MVEpoch &stop)
 {
-   itsEpochSelector.reset(new TableTimeStampSelectorImpl<casa::MVEpoch>(table(),
+   itsEpochSelector.reset(new TableTimeStampSelectorImpl<casacore::MVEpoch>(table(),
                           start, stop));
 }
 
@@ -79,9 +79,9 @@ void TableDataSelector::chooseTimeRange(const casa::MVEpoch &start,
 /// MVEpoch and is specified via the DataSource object.
 /// @param[in] start the beginning of the chosen time interval
 /// @param[in] stop the end of the chosen time interval
-void TableDataSelector::chooseTimeRange(casa::Double start,casa::Double stop)
+void TableDataSelector::chooseTimeRange(casacore::Double start,casacore::Double stop)
 {
-   itsEpochSelector.reset(new TableTimeStampSelectorImpl<casa::Double>(table(),
+   itsEpochSelector.reset(new TableTimeStampSelectorImpl<casacore::Double>(table(),
                           start, stop));
 }
  
@@ -89,7 +89,7 @@ void TableDataSelector::chooseTimeRange(casa::Double start,casa::Double stop)
 /// but the selection is done in integer cycle numbers
 /// @param[in] start the number of the first cycle to choose
 /// @param[in] stop the number of the last cycle to choose
-void TableDataSelector::chooseCycles(casa::uInt start, casa::uInt stop)
+void TableDataSelector::chooseCycles(casacore::uInt start, casacore::uInt stop)
 {
    ASKAPTHROW(DataAccessLogicError, "chooseCycles has not yet been implemented, requested start="<<start
               <<"stop="<<stop);
@@ -102,7 +102,7 @@ void TableDataSelector::chooseCycles(casa::uInt start, casa::uInt stop)
 ///
 /// @param[in] conv  a reference to the converter, which is used to sort
 ///              out epochs used in the selection
-const casa::TableExprNode& TableDataSelector::getTableSelector(const
+const casacore::TableExprNode& TableDataSelector::getTableSelector(const
                     boost::shared_ptr<IDataConverterImpl const> &conv) const
 {  
    if (itsEpochSelector) { 
@@ -119,8 +119,8 @@ const casa::TableExprNode& TableDataSelector::getTableSelector(const
 /// @param[in] start the number of the first spectral channel to choose
 /// @param[in] nAvg a number of adjacent spectral channels to average
 ///             default is no averaging
-void TableDataSelector::chooseChannels(casa::uInt nChan, casa::uInt start,
-                             casa::uInt nAvg)
+void TableDataSelector::chooseChannels(casacore::uInt nChan, casacore::uInt start,
+                             casacore::uInt nAvg)
 {
    if (nAvg != 1) {
        throw DataAccessLogicError("not yet implemented");
@@ -134,13 +134,13 @@ void TableDataSelector::chooseChannels(casa::uInt nChan, casa::uInt start,
 /// defined by the DataSource object
 /// @param[in] nChan a number of spectral channels wanted in the output
 /// @param[in] start the frequency of the first spectral channel to
-///        choose (given as casa::MVFrequency object)
+///        choose (given as casacore::MVFrequency object)
 /// @param[in] freqInc an increment in terms of the frequency in the
 ///        same reference frame as start. This parameter plays
 ///        the same role as nAvg for chooseChannels, i.e. twice
 ///        the frequency resolution would average two adjacent channels
-void TableDataSelector::chooseFrequencies(casa::uInt nChan,
-         const casa::MVFrequency &start, const casa::MVFrequency &freqInc)
+void TableDataSelector::chooseFrequencies(casacore::uInt nChan,
+         const casacore::MVFrequency &start, const casacore::MVFrequency &freqInc)
 {
    ASKAPTHROW(DataAccessLogicError, "chooseFrequencies has not yet been implemented, requested nChan="<<nChan
               <<"start="<<start<<" freqInc="<<freqInc);
@@ -150,14 +150,14 @@ void TableDataSelector::chooseFrequencies(casa::uInt nChan,
 /// defined by the DataSource object
 /// @param[in] nChan a number of spectral channels wanted in the output
 /// @param[in] start the velocity of the first spectral channel to
-///        choose (given as casa::MVRadialVelocity object)
+///        choose (given as casacore::MVRadialVelocity object)
 /// @param[in] velInc an increment in terms of the radial velocity in the
 ///        same reference frame as start. This parameter plays
 ///        the same role as nAvg for chooseChannels, i.e. twice
 ///        the velocity resolution would average two adjacent channels
-void TableDataSelector::chooseVelocities(casa::uInt nChan,
-         const casa::MVRadialVelocity &start,
-	 const casa::MVRadialVelocity &velInc)
+void TableDataSelector::chooseVelocities(casacore::uInt nChan,
+         const casacore::MVRadialVelocity &start,
+	 const casacore::MVRadialVelocity &velInc)
 {
    ASKAPTHROW(DataAccessLogicError, "chooseVelocities has not yet been implemented, requested nChan="<<nChan
               <<"start="<<start<<" velInc="<<velInc);
@@ -166,7 +166,7 @@ void TableDataSelector::chooseVelocities(casa::uInt nChan,
 /// Choose polarization. 
 /// @param[in] pols a string describing the wanted polarization 
 /// in the output. Allowed values are: I, "IQUV","XXYY","RRLL"
-void TableDataSelector::choosePolarizations(const casa::String &pols)
+void TableDataSelector::choosePolarizations(const casacore::String &pols)
 {
    ASKAPTHROW(DataAccessLogicError, "choosePolarizations has not yet been implemented, requested pols="<<pols);
 }

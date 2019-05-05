@@ -56,12 +56,12 @@ ICalSolutionConstAccessor::~ICalSolutionConstAccessor()
 /// d21 (corresponding to Stokes::YX) correspond to d_{Ap} and d_{Aq} from
 /// Hamaker, Bregman & Sault, respectively. It is assumed that the gain errors
 /// are applied after leakages (i.e. R=GD).
-casa::SquareMatrix<casa::Complex, 2> ICalSolutionConstAccessor::jones(const JonesIndex &index, const casa::uInt chan) const
+casacore::SquareMatrix<casacore::Complex, 2> ICalSolutionConstAccessor::jones(const JonesIndex &index, const casacore::uInt chan) const
 {
-  casa::SquareMatrix<casa::Complex, 2> result(casa::SquareMatrix<casa::Complex, 2>::General);
+  casacore::SquareMatrix<casacore::Complex, 2> result(casacore::SquareMatrix<casacore::Complex, 2>::General);
   const JonesJTerm gTerm = gain(index);
-  result(0,0) = gTerm.g1IsValid() ? gTerm.g1() : casa::Complex(1.,0.);
-  result(1,1) = gTerm.g2IsValid() ? gTerm.g2() : casa::Complex(1.,0.);
+  result(0,0) = gTerm.g1IsValid() ? gTerm.g1() : casacore::Complex(1.,0.);
+  result(1,1) = gTerm.g2IsValid() ? gTerm.g2() : casacore::Complex(1.,0.);
   const JonesDTerm dTerm = leakage(index);
 
   result(0,1) = (dTerm.d12IsValid() ? dTerm.d12() : 0.) * result(0,0);
@@ -87,8 +87,8 @@ casa::SquareMatrix<casa::Complex, 2> ICalSolutionConstAccessor::jones(const Jone
 /// @param[in] beam beam index
 /// @param[in] chan spectral channel of interest
 /// @return 2x2 Jones matrix
-casa::SquareMatrix<casa::Complex, 2> ICalSolutionConstAccessor::jones(const casa::uInt ant, 
-                                     const casa::uInt beam, const casa::uInt chan) const
+casacore::SquareMatrix<casacore::Complex, 2> ICalSolutionConstAccessor::jones(const casacore::uInt ant, 
+                                     const casacore::uInt beam, const casacore::uInt chan) const
 {
   ASKAPCHECK(chan < 16416, "Channel number is supposed to be less than 16416");
   return jones(JonesIndex(ant, beam), chan);
@@ -102,7 +102,7 @@ casa::SquareMatrix<casa::Complex, 2> ICalSolutionConstAccessor::jones(const casa
 /// @param[in] chan spectral channel of interest
 /// @return true, if the matrix returned by jones(...) method called with the same parameters is
 /// valid, false otherwise
-bool ICalSolutionConstAccessor::jonesValid(const JonesIndex &index, const casa::uInt chan) const
+bool ICalSolutionConstAccessor::jonesValid(const JonesIndex &index, const casacore::uInt chan) const
 {
   const JonesJTerm gTerm = gain(index);
   const JonesJTerm bpTerm = bandpass(index,chan);
@@ -119,7 +119,7 @@ bool ICalSolutionConstAccessor::jonesValid(const JonesIndex &index, const casa::
 /// @param[in] chan spectral channel of interest
 /// @return true, if the matrix returned by jones(...) method called with the same parameters is
 /// valid, false otherwise
-bool ICalSolutionConstAccessor::jonesValid(const casa::uInt ant, const casa::uInt beam, const casa::uInt chan) const
+bool ICalSolutionConstAccessor::jonesValid(const casacore::uInt ant, const casacore::uInt beam, const casacore::uInt chan) const
 {
   ASKAPCHECK(chan < 16416, "Channel number is supposed to be less than 16416");
   return jonesValid(JonesIndex(ant, beam), chan);

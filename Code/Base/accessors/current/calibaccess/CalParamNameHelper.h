@@ -64,7 +64,7 @@ struct CalParamNameHelper {
   /// parallel-hand gains g11 and g22 and cross-pol leakages d12 and d21, respectively
   /// @param[in] isBP true if the parameter is frequency-dependent (i.e. bandpass)
   /// @return string name of the parameter
-  static std::string paramName(const JonesIndex &index, casa::Stokes::StokesTypes par, bool isBP = false);
+  static std::string paramName(const JonesIndex &index, casacore::Stokes::StokesTypes par, bool isBP = false);
   
   /// @brief form the name of the parameter
   /// @details This version works with explicit antenna and beam indices
@@ -74,7 +74,7 @@ struct CalParamNameHelper {
   /// parallel-hand gains g11 and g22 and cross-pol leakages d12 and d21, respectively
   /// @param[in] isBP true if the parameter is frequency-dependent (i.e. bandpass)  
   /// @return string name of the parameter
-  inline static std::string paramName(const casa::uInt ant, const casa::uInt beam, casa::Stokes::StokesTypes par, bool isBP = false)
+  inline static std::string paramName(const casacore::uInt ant, const casacore::uInt beam, casacore::Stokes::StokesTypes par, bool isBP = false)
       { return paramName(JonesIndex(ant,beam), par, isBP); }  
 
   /// @brief parse the name of the parameter
@@ -85,7 +85,7 @@ struct CalParamNameHelper {
   /// @param[in] name full name of the parameter (e.g. gain.g11.1.3)
   /// @return a pair with antenna/beam index as the first field and polarisation descriptor as the second
   /// @note An exception is thrown if parameter name is malformed. The bandpass prefix is ignored, if present.
-  static std::pair<JonesIndex, casa::Stokes::StokesTypes> parseParam(const std::string &name);  
+  static std::pair<JonesIndex, casacore::Stokes::StokesTypes> parseParam(const std::string &name);  
   
   /// @brief check whether the parameter corresponds to bandpass
   /// @details
@@ -99,14 +99,14 @@ struct CalParamNameHelper {
   /// @param[in] name full name of the parameter
   /// @param[in] chan spectral channel
   /// @return name with channel info added
-  static std::string addChannelInfo(const std::string &name, casa::uInt chan);
+  static std::string addChannelInfo(const std::string &name, casacore::uInt chan);
   
   /// @brief extract coded channel and parameter name
   /// @details This is a reverse operation to codeInChannel. Note, no checks are done that the name passed
   /// has coded channel present.
   /// @param[in] name full name of the parameter
   /// @return a pair with extracted channel and the base parameter name
-  static std::pair<casa::uInt, std::string> extractChannelInfo(const std::string &name);
+  static std::pair<casacore::uInt, std::string> extractChannelInfo(const std::string &name);
 };
 
 } // namespace accessors

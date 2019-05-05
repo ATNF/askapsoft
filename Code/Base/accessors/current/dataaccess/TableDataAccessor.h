@@ -80,7 +80,7 @@ public:
   /// @return a reference to nRow x nChannel x nPol cube, containing
   /// all visibility data
   ///
-  virtual const casa::Cube<casa::Complex>& visibility() const;
+  virtual const casacore::Cube<casacore::Complex>& visibility() const;
   
   
   /// Read-write access to visibilities (a cube is nRow x nChannel x nPol;
@@ -89,17 +89,17 @@ public:
   /// @return a reference to nRow x nChannel x nPol cube, containing
   /// all visibility data
   ///
-  virtual casa::Cube<casa::Complex>& rwVisibility();
+  virtual casacore::Cube<casacore::Complex>& rwVisibility();
 
   /// Cube of flags corresponding to the output of visibility()
   /// @return a reference to nRow x nChannel x nPol cube with the flag
   ///         information. If True, the corresponding element is flagged.
-  virtual const casa::Cube<casa::Bool>& flag() const;
+  virtual const casacore::Cube<casacore::Bool>& flag() const;
 
   /// Non-const access to the cube of flags.
   /// @return a reference to nRow x nChannel x nPol cube with the flag
   ///         information. If True, the corresponding element is flagged.
-  virtual casa::Cube<casa::Bool>& rwFlag();
+  virtual casacore::Cube<casacore::Bool>& rwFlag();
 
   
   /// this method flush back the data to disk if there are any changes

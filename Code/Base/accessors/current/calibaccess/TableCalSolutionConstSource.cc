@@ -47,13 +47,13 @@ namespace accessors {
 /// @brief constructor using a table defined explicitly
 /// @details
 /// @param[in] tab table to read the solutions from
-TableCalSolutionConstSource::TableCalSolutionConstSource(const casa::Table &tab) : TableHolder(tab) {}
+TableCalSolutionConstSource::TableCalSolutionConstSource(const casacore::Table &tab) : TableHolder(tab) {}
   
 /// @brief constructor using a file name
 /// @details The table is opened for reading and an exception is thrown if the table doesn't exist
 /// @param[in] name table file name 
 TableCalSolutionConstSource::TableCalSolutionConstSource(const std::string &name) : 
-        TableHolder(casa::Table(name)) 
+        TableHolder(casacore::Table(name)) 
 {
   ASKAPCHECK(table().nrow()>0, "The table "<<name<<" passed to TableCalSolutionConstSource is empty");
 }
@@ -77,9 +77,9 @@ long TableCalSolutionConstSource::mostRecentSolution() const
 long TableCalSolutionConstSource::solutionID(const double time) const
 {
   ASKAPASSERT(table().nrow()>0);
-  casa::ROScalarMeasColumn<casa::MEpoch> bufCol(table(),"TIME");
-  for (casa::uInt row = table().nrow(); row > 0; --row) {
-       const double cTime = bufCol.convert(row - 1,casa::MEpoch::UTC).get("s").getValue();
+  casacore::ROScalarMeasColumn<casacore::MEpoch> bufCol(table(),"TIME");
+  for (casacore::uInt row = table().nrow(); row > 0; --row) {
+       const double cTime = bufCol.convert(row - 1,casacore::MEpoch::UTC).get("s").getValue();
        if (time >= cTime) {
            return long(row) - 1;
        }
@@ -113,9 +113,9 @@ boost::shared_ptr<ICalSolutionConstAccessor> TableCalSolutionConstSource::roSolu
 bool TableCalSolutionConstSource::tableExists(const std::string &fname)
 {
   try {
-     casa::Table testTab(fname,casa::Table::Old);
+     casacore::Table testTab(fname,casacore::Table::Old);
      testTab.throwIfNull();
-  } catch (const casa::AipsError &) {
+  } catch (const casacore::AipsError &) {
      return false;
   }
   return true; 

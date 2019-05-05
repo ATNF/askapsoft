@@ -64,8 +64,8 @@ class FITSImageRW {
         /// implementation.
 
 
-        bool create(const std::string &name, const casa::IPosition &shape, \
-                    const casa::CoordinateSystem &csys, \
+        bool create(const std::string &name, const casacore::IPosition &shape, \
+                    const casacore::CoordinateSystem &csys, \
                     uint memoryInMB = 64, \
                     bool preferVelocity = false, \
                     bool opticalVelocity = true, \
@@ -94,15 +94,15 @@ class FITSImageRW {
     void addHistory(const std::string &history);
 
         // write into a FITS image
-        bool write(const casa::Array<float>&);
-        bool write(const casa::Array<float> &arr, const casa::IPosition &where);
+        bool write(const casacore::Array<float>&);
+        bool write(const casacore::Array<float> &arr, const casacore::IPosition &where);
     private:
 
 
 
         std::string name;
-        casa::IPosition shape;
-        casa::CoordinateSystem csys;
+        casacore::IPosition shape;
+        casacore::CoordinateSystem csys;
         uint memoryInMB;
         bool preferVelocity;
         bool opticalVelocity;
@@ -118,7 +118,7 @@ class FITSImageRW {
         bool allowAppend;
         bool history;
 
-        casa::FitsKeywordList theKeywordList;
+        casacore::FitsKeywordList theKeywordList;
 
 };
 }

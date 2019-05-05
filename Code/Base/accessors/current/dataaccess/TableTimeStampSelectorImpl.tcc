@@ -18,17 +18,17 @@ namespace accessors {
 /// @param[in] start start time of the interval
 /// @param[in] stop stop time of the interval
 template<typename T>
-TableTimeStampSelectorImpl<T>::TableTimeStampSelectorImpl(const casa::Table &tab, 
+TableTimeStampSelectorImpl<T>::TableTimeStampSelectorImpl(const casacore::Table &tab, 
        const T &start, const T &stop) : TableHolder(tab), itsStart(start), 
                                         itsStop(stop) {}
 
 // general implementation, works  for both MVEpoch and Double
 template<typename T>
-std::pair<casa::MEpoch, casa::MEpoch>
+std::pair<casacore::MEpoch, casacore::MEpoch>
            TableTimeStampSelectorImpl<T>::getStartAndStop() const       
 {
   const IDataConverterImpl &conv = converter();
-  return std::pair<casa::MEpoch,casa::MEpoch>(conv.epochMeasure(itsStart),
+  return std::pair<casacore::MEpoch,casacore::MEpoch>(conv.epochMeasure(itsStart),
                         conv.epochMeasure(itsStop));
 }
 

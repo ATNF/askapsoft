@@ -53,12 +53,12 @@ public:
         /// Cube of flags corresponding to the output of visibility()
         /// @return a reference to nRow x nChannel x nPol cube with the flag
         ///         information. If True, the corresponding element is flagged.
-        virtual const casa::Cube<casa::Bool>& flag() const = 0;
+        virtual const casacore::Cube<casacore::Bool>& flag() const = 0;
 
 	/// Non-const access to the cube of flags.
         /// @return a reference to nRow x nChannel x nPol cube with the flag
         ///         information. If True, the corresponding element is flagged.
-        virtual casa::Cube<casa::Bool>& rwFlag() = 0;
+        virtual casacore::Cube<casacore::Bool>& rwFlag() = 0;
 };
 
 } // end of namespace accessors

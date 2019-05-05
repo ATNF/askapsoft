@@ -47,8 +47,8 @@ JonesDTerm::JonesDTerm()
 /// @param[in] d12 leakage from Y to X (element of the first row and second column of the Jones matrix) 
 /// @param[in] d21 leakage from X to Y (element of the second row and first column of the Jones matrix)
 /// @note validity flags are set (to true) for both d12 and d21
-JonesDTerm::JonesDTerm(const casa::Complex& d12,
-                       const casa::Complex& d21)
+JonesDTerm::JonesDTerm(const casacore::Complex& d12,
+                       const casacore::Complex& d21)
         : itsD12(d12), itsD12Valid(true), itsD21(d21), itsD21Valid(true)
 {
 }
@@ -58,17 +58,17 @@ JonesDTerm::JonesDTerm(const casa::Complex& d12,
 /// @param[in] d12Valid true, if d12 has a valid value
 /// @param[in] d21 leakage from X to Y (element of the second row and first column of the Jones matrix)
 /// @param[in] d21Valid true, if d21 has a valid value
-JonesDTerm::JonesDTerm(const casa::Complex& d12, const casa::Bool d12Valid,
-                       const casa::Complex& d21, const casa::Bool d21Valid) :
+JonesDTerm::JonesDTerm(const casacore::Complex& d12, const casacore::Bool d12Valid,
+                       const casacore::Complex& d21, const casacore::Bool d21Valid) :
                        itsD12(d12), itsD12Valid(d12Valid), itsD21(d21), itsD21Valid(d21Valid) {}
 
 
-casa::Complex JonesDTerm::d12(void) const
+casacore::Complex JonesDTerm::d12(void) const
 {
     return itsD12;
 }
 
-casa::Complex JonesDTerm::d21(void) const
+casacore::Complex JonesDTerm::d21(void) const
 {
     return itsD21;
 }

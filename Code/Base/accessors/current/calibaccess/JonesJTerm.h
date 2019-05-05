@@ -57,32 +57,32 @@ class JonesJTerm {
         /// @param[in] g2Valid  flag indicating the validity of the data g2.
         ///                     Set this to true to indicate g1 contains a
         ///                     valid gain, otherwise false.
-        JonesJTerm(const casa::Complex& g1,
-                   const casa::Bool g1Valid,
-                   const casa::Complex& g2,
-                   const casa::Bool g2Valid);
+        JonesJTerm(const casacore::Complex& g1,
+                   const casacore::Bool g1Valid,
+                   const casacore::Complex& g2,
+                   const casacore::Bool g2Valid);
 
         /// Returns the gain for polarisation 1.
         /// @return the gain for polarisation 1.
-        casa::Complex g1(void) const;
+        casacore::Complex g1(void) const;
 
         /// Returns a flag indicating the validity of the data g1;
         /// @return true if g1 contains a valid gain, otherwise false.
-        casa::Bool g1IsValid(void) const;
+        casacore::Bool g1IsValid(void) const;
 
         /// Returns the gain for polarisation 2.
         /// @return the gain for polarisation 2.
-        casa::Complex g2(void) const;
+        casacore::Complex g2(void) const;
 
         /// Returns a flag indicating the validity of the data g2;
         /// @return true if g2 contains a valid gain, otherwise false.
-        casa::Bool g2IsValid(void) const;
+        casacore::Bool g2IsValid(void) const;
 
     private:
-        casa::Complex itsG1;
-        casa::Bool itsG1Valid;
-        casa::Complex itsG2;
-        casa::Bool itsG2Valid;
+        casacore::Complex itsG1;
+        casacore::Bool itsG1Valid;
+        casacore::Complex itsG2;
+        casacore::Bool itsG2Valid;
 };
 
 };

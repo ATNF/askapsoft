@@ -71,10 +71,10 @@ CachedCalSolutionAccessor::CachedCalSolutionAccessor(const CachedCalSolutionAcce
 /// @return JonesJTerm object with gains and validity flags
 JonesJTerm CachedCalSolutionAccessor::gain(const JonesIndex &index) const
 {
-  casa::Complex g1(1.,0.), g2(1.,0.);
+  casacore::Complex g1(1.,0.), g2(1.,0.);
   bool g1Valid = false, g2Valid = false;
-  const std::string paramG1 = paramName(index, casa::Stokes::XX);
-  const std::string paramG2 = paramName(index, casa::Stokes::YY);
+  const std::string paramG1 = paramName(index, casacore::Stokes::XX);
+  const std::string paramG2 = paramName(index, casacore::Stokes::YY);
   
   if (cache().has(paramG1)) {
       g1Valid = true;
@@ -97,10 +97,10 @@ JonesJTerm CachedCalSolutionAccessor::gain(const JonesIndex &index) const
 /// @return JonesDTerm object with leakages and validity flags
 JonesDTerm CachedCalSolutionAccessor::leakage(const JonesIndex &index) const
 {
-  casa::Complex d12(0.,0.), d21(0.,0.);
+  casacore::Complex d12(0.,0.), d21(0.,0.);
   bool d12Valid = false, d21Valid = false;
-  const std::string paramD12 = paramName(index, casa::Stokes::XY);
-  const std::string paramD21 = paramName(index, casa::Stokes::YX);
+  const std::string paramD12 = paramName(index, casacore::Stokes::XY);
+  const std::string paramD21 = paramName(index, casacore::Stokes::YX);
   
   if (cache().has(paramD12)) {
       d12Valid = true;
@@ -150,7 +150,7 @@ JonesJTerm CachedCalSolutionAccessor::bandpass(const JonesIndex &index, const ca
 /// @param[in] name string name of the parameter
 /// @param[in] val complex value to be set
 /// @param[in] isValid true, if the given value is valid (method just returns otherwise)
-void CachedCalSolutionAccessor::updateParamInCache(const std::string &name, const casa::Complex &val, const bool isValid)
+void CachedCalSolutionAccessor::updateParamInCache(const std::string &name, const casacore::Complex &val, const bool isValid)
 {
   if (isValid) {
       if (cache().has(name)) {
@@ -168,8 +168,8 @@ void CachedCalSolutionAccessor::updateParamInCache(const std::string &name, cons
 /// @param[in] gains JonesJTerm object with gains and validity flags
 void CachedCalSolutionAccessor::setGain(const JonesIndex &index, const JonesJTerm &gains)
 {
-  updateParamInCache(paramName(index, casa::Stokes::XX), gains.g1(), gains.g1IsValid());
-  updateParamInCache(paramName(index, casa::Stokes::YY), gains.g2(), gains.g2IsValid());
+  updateParamInCache(paramName(index, casacore::Stokes::XX), gains.g1(), gains.g1IsValid());
+  updateParamInCache(paramName(index, casacore::Stokes::YY), gains.g2(), gains.g2IsValid());
 }
    
 /// @brief set leakages (D-Jones)
@@ -179,8 +179,8 @@ void CachedCalSolutionAccessor::setGain(const JonesIndex &index, const JonesJTer
 /// @param[in] leakages JonesDTerm object with leakages and validity flags
 void CachedCalSolutionAccessor::setLeakage(const JonesIndex &index, const JonesDTerm &leakages)
 {
-  updateParamInCache(paramName(index, casa::Stokes::XY), leakages.d12(), leakages.d12IsValid());
-  updateParamInCache(paramName(index, casa::Stokes::YX), leakages.d21(), leakages.d21IsValid());
+  updateParamInCache(paramName(index, casacore::Stokes::XY), leakages.d12(), leakages.d12IsValid());
+  updateParamInCache(paramName(index, casacore::Stokes::YX), leakages.d21(), leakages.d21IsValid());
 }
   
 /// @brief set gains for a single bandpass channel
@@ -192,7 +192,7 @@ void CachedCalSolutionAccessor::setLeakage(const JonesIndex &index, const JonesD
 /// @note We may add later variants of this method assuming that the bandpass is
 /// approximated somehow, e.g. by a polynomial. For simplicity, for now we deal with 
 /// gains set explicitly for each channel.
-void CachedCalSolutionAccessor::setBandpass(const JonesIndex &index, const JonesJTerm &bp, const casa::uInt chan)
+void CachedCalSolutionAccessor::setBandpass(const JonesIndex &index, const JonesJTerm &bp, const casacore::uInt chan)
 {
   updateParamInCache(addChannelInfo(paramName(index, casa::Stokes::XX), chan), bp.g1(), bp.g1IsValid());
   updateParamInCache(addChannelInfo(paramName(index, casa::Stokes::YY), chan), bp.g2(), bp.g2IsValid());

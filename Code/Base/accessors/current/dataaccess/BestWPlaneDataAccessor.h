@@ -89,8 +89,8 @@ public:
    /// @return uvw after rotation to the new coordinate system for each row
    /// @note An exception is thrown if the layout is so non-coplanar that
    /// the required tolerance on w-term cannot be met.
-   virtual const casa::Vector<casa::RigidVector<casa::Double, 3> >&
-	         rotatedUVW(const casa::MDirection &tangentPoint) const;
+   virtual const casacore::Vector<casacore::RigidVector<casacore::Double, 3> >&
+	         rotatedUVW(const casacore::MDirection &tangentPoint) const;
    
    // fitted plane parameters
    
@@ -136,7 +136,7 @@ protected:
    /// Therefore, if the returned deviation exceeds the tolerance, the layout is significantly
    /// non-coplanar, so the required tolerance cannot be achieved.
    /// This method has a conceptual constness as it doesn't change the original accessor.
-   double updatePlaneIfNecessary(const casa::Vector<casa::RigidVector<casa::Double, 3> >& uvw,
+   double updatePlaneIfNecessary(const casacore::Vector<casacore::RigidVector<casacore::Double, 3> >& uvw,
                  double tolerance) const;
 
    /// @brief fit a new plane assuming a long track at constant RA and declination and
@@ -158,14 +158,14 @@ protected:
    /// Therefore, if the returned deviation exceeds the tolerance, the layout is significantly
    /// non-coplanar, so the required tolerance cannot be achieved.
    /// This method has a conceptual constness as it doesn't change the original accessor.
-   double updateAdvancedTimePlaneIfNecessary(double tolerance, const casa::MDirection &tangentPoint) const;
+   double updateAdvancedTimePlaneIfNecessary(double tolerance, const casacore::MDirection &tangentPoint) const;
     
    /// @brief calculate the largest deviation from the current fitted plane
    /// @details This helper method iterates through the given uvw's and returns
    /// the largest deviation of the w-term from the current best fit plane.
    /// @param[in] uvw a vector with uvw's
    /// @return the largest w-term deviation from the current plane (same units as uvw's)
-   double maxWDeviation(const casa::Vector<casa::RigidVector<casa::Double, 3> >& uvw) const;
+   double maxWDeviation(const casacore::Vector<casacore::RigidVector<casacore::Double, 3> >& uvw) const;
    
   
 private:
@@ -199,14 +199,14 @@ private:
    mutable scimath::ChangeMonitor itsPlaneChangeMonitor;
       
    /// @brief buffer for rotated UVW vector with corrected w
-   mutable casa::Vector<casa::RigidVector<casa::Double, 3> > itsRotatedUVW;   
+   mutable casacore::Vector<casacore::RigidVector<casacore::Double, 3> > itsRotatedUVW;   
    
    /// @brief last tangent point
    /// @details This field is added just to be able to do extra checks
    /// that tanget point is stays fixed for the same accessor. If it could
    /// change, we would need a more intelligent caching of itsRotatedUVW
    /// because uvw-rotation is tangent point-dependent.
-   mutable casa::MDirection itsLastTangentPoint;    
+   mutable casacore::MDirection itsLastTangentPoint;    
 
    /// @brief Use the predeicted W-plane instead of the current best fit
    bool itsPredictWPlane;

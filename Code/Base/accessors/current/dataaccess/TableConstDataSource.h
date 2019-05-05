@@ -142,7 +142,7 @@ public:
   /// @param[in] maxNumRows maximum number of rows wanted
   /// @note The new restriction will apply to any iterator created in the future, but will not
   /// affect iterators already created
-  void configureMaxChunkSize(casa::uInt maxNumRows);
+  void configureMaxChunkSize(casacore::uInt maxNumRows);
   
 protected:
   /// construct a part of the read only object for use in the
@@ -159,7 +159,7 @@ protected:
 
   /// @brief current restriction on the chunk size
   /// @return maximum number of rows in the accessor (the current setting, affects future iterators)
-  inline casa::uInt maxChunkSize() const {return itsMaxChunkSize;}
+  inline casacore::uInt maxChunkSize() const {return itsMaxChunkSize;}
   
 private:
   /// @brief a number of uvw machines in the cache (default is 1)
@@ -179,7 +179,7 @@ private:
   /// iterations but with smaller chunks. It can make sense if there are multiple adapters in the
   /// processing chain which do data copy (usually in the temporary code/hacks which technically shouldn't
   /// stay long term in the ideal case).
-  casa::uInt itsMaxChunkSize;
+  casacore::uInt itsMaxChunkSize;
 };
  
 } // namespace accessors

@@ -74,12 +74,12 @@ public:
   /// @return True if there are more data available in this chunk
   /// @note for this particular adapter this method corresponds to the
   /// current chunk rather than to all dataset
-  virtual casa::Bool hasMore() const throw();
+  virtual casacore::Bool hasMore() const throw();
   
   /// advance the iterator one step further 
   /// @return True if there are more data (so constructions like 
   ///         while(it.next()) {} are possible)
-  virtual casa::Bool next();  
+  virtual casacore::Bool next();  
   
   /// @brief checks whether there are more data available
   /// @details This method disregards the split into time chunks.

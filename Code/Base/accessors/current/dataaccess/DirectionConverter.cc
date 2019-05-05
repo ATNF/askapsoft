@@ -44,14 +44,14 @@ using namespace casa;
 /// create a converter to the target frame
 /// @param targetFrame a desired reference frame
 ///        Class defaults to J2000
-DirectionConverter::DirectionConverter(const casa::MDirection::Ref
+DirectionConverter::DirectionConverter(const casacore::MDirection::Ref
                           &targetFrame) : itsTargetFrame(targetFrame) {}
 
 
 /// convert specified MEpoch to the target units/frame
 /// @param in an epoch to convert. 
-casa::MVDirection
-    DirectionConverter::operator()(const casa::MDirection &in) const
+casacore::MVDirection
+    DirectionConverter::operator()(const casacore::MDirection &in) const
 {
     /// this class is supposed to be used in the most general case, hence
     /// we do all conversions. Specializations can be written for the cases
@@ -64,7 +64,7 @@ casa::MVDirection
 /// conversion is performed
 /// @param frame  MeasFrame object (can be constructed from
 ///               MPosition or MEpoch on-the-fly)
-void DirectionConverter::setMeasFrame(const casa::MeasFrame &frame)
+void DirectionConverter::setMeasFrame(const casacore::MeasFrame &frame)
 {
   itsTargetFrame.set(frame);
 }

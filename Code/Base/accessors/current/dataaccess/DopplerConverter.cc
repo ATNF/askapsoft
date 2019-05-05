@@ -53,10 +53,10 @@ using namespace askap::accessors;
 ///                 frequencies and velocities
 /// @param velType velocity (doppler) type (i.e. radio, optical)
 /// Default is radio definition.
-DopplerConverter::DopplerConverter(const casa::MVFrequency &restFreq,
-                                   casa::MDoppler::Types velType) :
-     itsToBettaConv(velType, casa::MDoppler::BETA),
-     itsFromBettaConv(casa::MDoppler::BETA, velType),
+DopplerConverter::DopplerConverter(const casacore::MVFrequency &restFreq,
+                                   casacore::MDoppler::Types velType) :
+     itsToBettaConv(velType, casacore::MDoppler::BETA),
+     itsFromBettaConv(casacore::MDoppler::BETA, velType),
      itsRestFrequency(restFreq.getValue()) {}
 
 /// setting the measure frame doesn't make sense for this class
@@ -65,7 +65,7 @@ DopplerConverter::DopplerConverter(const casa::MVFrequency &restFreq,
 ///
 /// @param frame  MeasFrame object (can be constructed from
 ///               MPosition or MEpoch on-the-fly). Not used.
-void DopplerConverter::setMeasFrame(const casa::MeasFrame &)
+void DopplerConverter::setMeasFrame(const casacore::MeasFrame &)
 {
 }
 
@@ -75,19 +75,19 @@ void DopplerConverter::setMeasFrame(const casa::MeasFrame &)
 ///
 /// @param freq an MFrequency measure to convert.
 /// @return a reference on MRadialVelocity object with the result
-const casa::MRadialVelocity&
-DopplerConverter::operator()(const casa::MFrequency &freq) const
+const casacore::MRadialVelocity&
+DopplerConverter::operator()(const casacore::MFrequency &freq) const
 {  
-  casa::Double t=freq.getValue().getValue(); // extract frequency in Hz
+  casacore::Double t=freq.getValue().getValue(); // extract frequency in Hz
 
   // need to change the next line to a proper Askap error when available
   ASKAPDEBUGASSERT(t!=0);
   
   t/=itsRestFrequency; // form nu/nu_0
   t*=t; // form (nu/nu_0)^2  
-  itsRadialVelocity=casa::MRadialVelocity::fromDoppler(itsFromBettaConv(
-                 casa::MVDoppler((1.-t)/(1.+t))),
-                 freqToVelType(casa::MFrequency::castType(
+  itsRadialVelocity=casacore::MRadialVelocity::fromDoppler(itsFromBettaConv(
+                 casacore::MVDoppler((1.-t)/(1.+t))),
+                 freqToVelType(casacore::MFrequency::castType(
 		               freq.getRef().getType())));
   return itsRadialVelocity;		 
 }
@@ -99,13 +99,13 @@ DopplerConverter::operator()(const casa::MFrequency &freq) const
 ///
 /// @param vel an MRadialVelocity measure to convert.
 /// @return a reference on MFrequency object with the result
-const casa::MFrequency&
-DopplerConverter::operator()(const casa::MRadialVelocity &vel) const
+const casacore::MFrequency&
+DopplerConverter::operator()(const casacore::MRadialVelocity &vel) const
 {
-  itsFrequency=casa::MFrequency::fromDoppler(
-        itsToBettaConv(casa::MVDoppler(vel.getValue().get())),
-	               casa::MVFrequency(itsRestFrequency),
-		       velToFreqType(casa::MRadialVelocity::castType(
+  itsFrequency=casacore::MFrequency::fromDoppler(
+        itsToBettaConv(casacore::MVDoppler(vel.getValue().get())),
+	               casacore::MVFrequency(itsRestFrequency),
+		       velToFreqType(casacore::MRadialVelocity::castType(
 		                    vel.getRef().getType())));
   return itsFrequency;		       
 }
@@ -117,47 +117,47 @@ DopplerConverter::operator()(const casa::MRadialVelocity &vel) const
 /// Note, an exception is thrown if the the frame type is
 /// MFrequency::REST (it doesn't make sense to always return zero
 /// velocity).
-casa::MRadialVelocity::Types
-DopplerConverter::freqToVelType(casa::MFrequency::Types type)
+casacore::MRadialVelocity::Types
+DopplerConverter::freqToVelType(casacore::MFrequency::Types type)
                                 throw(DataAccessLogicError)
 {
   switch(type) {
-    case casa::MFrequency::LSRK: return casa::MRadialVelocity::LSRK;
-    case casa::MFrequency::LSRD: return casa::MRadialVelocity::LSRD;
-    case casa::MFrequency::BARY: return casa::MRadialVelocity::BARY;
-    case casa::MFrequency::GEO: return casa::MRadialVelocity::GEO;
-    case casa::MFrequency::TOPO: return casa::MRadialVelocity::TOPO;
-    case casa::MFrequency::GALACTO: return casa::MRadialVelocity::GALACTO;
-    case casa::MFrequency::LGROUP: return casa::MRadialVelocity::LGROUP;
-    case casa::MFrequency::CMB: return casa::MRadialVelocity::CMB;
+    case casacore::MFrequency::LSRK: return casacore::MRadialVelocity::LSRK;
+    case casacore::MFrequency::LSRD: return casacore::MRadialVelocity::LSRD;
+    case casacore::MFrequency::BARY: return casacore::MRadialVelocity::BARY;
+    case casacore::MFrequency::GEO: return casacore::MRadialVelocity::GEO;
+    case casacore::MFrequency::TOPO: return casacore::MRadialVelocity::TOPO;
+    case casacore::MFrequency::GALACTO: return casacore::MRadialVelocity::GALACTO;
+    case casacore::MFrequency::LGROUP: return casacore::MRadialVelocity::LGROUP;
+    case casacore::MFrequency::CMB: return casacore::MRadialVelocity::CMB;
     default: throw DataAccessLogicError("DopplerConverter: Unable to convert "
                               "freqency frame type to velocity frame type");
   };
 
   // to keep the compiler happy. It should never go this far.
-  return casa::MRadialVelocity::LSRK; 
+  return casacore::MRadialVelocity::LSRK; 
 }
 
 /// convert velocity frame type to frequency frame type
 /// @param type velocity frame type to convert
 /// @return resulting frequency frame type
-casa::MFrequency::Types
-DopplerConverter::velToFreqType(casa::MRadialVelocity::Types type)
+casacore::MFrequency::Types
+DopplerConverter::velToFreqType(casacore::MRadialVelocity::Types type)
                                              throw(DataAccessLogicError)
 {
   switch(type) {
-    case casa::MRadialVelocity::LSRK: return casa::MFrequency::LSRK;
-    case casa::MRadialVelocity::LSRD: return casa::MFrequency::LSRD;
-    case casa::MRadialVelocity::BARY: return casa::MFrequency::BARY;
-    case casa::MRadialVelocity::GEO: return casa::MFrequency::GEO;
-    case casa::MRadialVelocity::TOPO: return casa::MFrequency::TOPO;
-    case casa::MRadialVelocity::GALACTO: return casa::MFrequency::GALACTO;
-    case casa::MRadialVelocity::LGROUP: return casa::MFrequency::LGROUP;
-    case casa::MRadialVelocity::CMB: return casa::MFrequency::CMB;
+    case casacore::MRadialVelocity::LSRK: return casacore::MFrequency::LSRK;
+    case casacore::MRadialVelocity::LSRD: return casacore::MFrequency::LSRD;
+    case casacore::MRadialVelocity::BARY: return casacore::MFrequency::BARY;
+    case casacore::MRadialVelocity::GEO: return casacore::MFrequency::GEO;
+    case casacore::MRadialVelocity::TOPO: return casacore::MFrequency::TOPO;
+    case casacore::MRadialVelocity::GALACTO: return casacore::MFrequency::GALACTO;
+    case casacore::MRadialVelocity::LGROUP: return casacore::MFrequency::LGROUP;
+    case casacore::MRadialVelocity::CMB: return casacore::MFrequency::CMB;
     default: throw DataAccessLogicError("DopplerConverter: Unable to convert "
                              "velocity frame type to frequency frame type");
   };
 
   // to keep the compiler happy. It should never go this far.
-  return casa::MFrequency::LSRK;
+  return casacore::MFrequency::LSRK;
 }

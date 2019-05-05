@@ -60,10 +60,10 @@ using namespace askap::accessors;
 /// @details 
 /// @param[in] ms a table object, which has a field subtable defined
 /// (i.e. this method accepts a main ms table).
-FieldSubtableHandler::FieldSubtableHandler(const casa::Table &ms) :
+FieldSubtableHandler::FieldSubtableHandler(const casacore::Table &ms) :
        TableHolder(ms.keywordSet().asTable("FIELD")),
-       itsIterator(table(),"TIME",casa::TableIterator::Ascending,
-                   casa::TableIterator::NoSort), itsNeverAccessedFlag(true)
+       itsIterator(table(),"TIME",casacore::TableIterator::Ascending,
+                   casacore::TableIterator::NoSort), itsNeverAccessedFlag(true)
 {
   if (!table().nrow()) {
       ASKAPTHROW(DataAccessError, "The FIELD subtable is empty");
@@ -80,8 +80,8 @@ FieldSubtableHandler::FieldSubtableHandler(const casa::Table &ms) :
 /// @param[in] time a full epoch of interest (the subtable can have multiple
 /// pointings.
 /// @return a reference to direction measure
-const casa::MDirection& FieldSubtableHandler::getReferenceDir(const 
-                 casa::MEpoch &time) const
+const casacore::MDirection& FieldSubtableHandler::getReferenceDir(const 
+                 casacore::MEpoch &time) const
 {
   if (itsNeverAccessedFlag) {
       fillCacheWithCurrentIteration();
@@ -104,13 +104,13 @@ const casa::MDirection& FieldSubtableHandler::getReferenceDir(const
 /// it is present in the main table of the dataset.
 /// @param[in] fieldID  a row number of interest
 /// @return a reference to direction measure
-const casa::MDirection&
-FieldSubtableHandler::getReferenceDir(casa::uInt fieldID) const
+const casacore::MDirection&
+FieldSubtableHandler::getReferenceDir(casacore::uInt fieldID) const
 {
   if (fieldID >= table().nrow()) {
       ASKAPTHROW(DataAccessError, "The FIELD subtable does not have row="<<fieldID);
   }
-  casa::ROScalarMeasColumn<casa::MDirection> refDirCol(table(),"REFERENCE_DIR");
+  casacore::ROScalarMeasColumn<casacore::MDirection> refDirCol(table(),"REFERENCE_DIR");
   itsRandomlyAccessedReferenceDir = refDirCol(fieldID);
   return itsRandomlyAccessedReferenceDir;
 }
@@ -119,14 +119,14 @@ FieldSubtableHandler::getReferenceDir(casa::uInt fieldID) const
 /// iterator
 void FieldSubtableHandler::fillCacheWithCurrentIteration() const
 {
-  casa::Table curIt=itsIterator.table(); 
+  casacore::Table curIt=itsIterator.table(); 
   if (curIt.nrow()>1) {
       ASKAPTHROW(DataAccessError, "Multiple rows for the same TIME in the FIELD table "
           "(e.g. polynomial interpolation) are not yet supported");
   }
-  casa::ROScalarColumn<casa::Double> timeCol(curIt,"TIME");
+  casacore::ROScalarColumn<casacore::Double> timeCol(curIt,"TIME");
   itsCachedStartTime=timeCol(0);
-  casa::ROScalarMeasColumn<casa::MDirection> refDirCol(curIt,"REFERENCE_DIR");
+  casacore::ROScalarMeasColumn<casacore::MDirection> refDirCol(curIt,"REFERENCE_DIR");
   itsReferenceDir=refDirCol(0);
   ASKAPDEBUGASSERT(!itsIterator.pastEnd());
   itsIterator.next();
@@ -146,13 +146,13 @@ void FieldSubtableHandler::fillCacheWithCurrentIteration() const
 /// @param[in] time a full epoch of interest (the subtable can have multiple
 /// pointings.
 /// @return true if the field information have been changed
-bool FieldSubtableHandler::newField(const casa::MEpoch &time) const
+bool FieldSubtableHandler::newField(const casacore::MEpoch &time) const
 {
   if (itsNeverAccessedFlag) {
       return true;
   }
   // we may need caching of dTime if it becomes performance critical
-  const casa::Double dTime=tableTime(time);
+  const casacore::Double dTime=tableTime(time);
   if (dTime<itsCachedStartTime) {
       return true;
   }
@@ -165,9 +165,9 @@ bool FieldSubtableHandler::newField(const casa::MEpoch &time) const
 /// read the data if cache is outdated
 /// @param[in] time a full epoch of interest (field table can have many
 /// pointings and therefore can be time-dependent)
-void FieldSubtableHandler::fillCacheOnDemand(const casa::MEpoch &time) const
+void FieldSubtableHandler::fillCacheOnDemand(const casacore::MEpoch &time) const
 {
-  const casa::Double dTime=tableTime(time);
+  const casacore::Double dTime=tableTime(time);
   if (dTime<itsCachedStartTime) {
       itsIterator.reset();
       fillCacheWithCurrentIteration();

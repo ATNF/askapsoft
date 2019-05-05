@@ -45,21 +45,21 @@ namespace accessors {
 /// parallel-hand gains g11 and g22 and cross-pol leakages d12 and d21, respectively
 /// @param[in] isBP true if the parameter is frequency-dependent (i.e. bandpass)
 /// @return string name of the parameter
-std::string CalParamNameHelper::paramName(const JonesIndex &index, casa::Stokes::StokesTypes par, bool isBP)
+std::string CalParamNameHelper::paramName(const JonesIndex &index, casacore::Stokes::StokesTypes par, bool isBP)
 {
    std::string res;   
-   if ((par == casa::Stokes::XX) || (par == casa::Stokes::YY)) {
+   if ((par == casacore::Stokes::XX) || (par == casacore::Stokes::YY)) {
        res = "gain."; 
-       res += (par == casa::Stokes::XX ? "g11." : "g22.");
-   } else if ((par == casa::Stokes::XY) || (par == casa::Stokes::YX)) {
+       res += (par == casacore::Stokes::XX ? "g11." : "g22.");
+   } else if ((par == casacore::Stokes::XY) || (par == casacore::Stokes::YX)) {
        res = "leakage."; 
-       res += (par == casa::Stokes::XY ? "d12." : "d21.");
+       res += (par == casacore::Stokes::XY ? "d12." : "d21.");
    } else {
        ASKAPTHROW(AskapError, 
            "Unsupported polarisation descriptor passed to ParsetCalSolutionAccessor::paramName, only XX,XY,YX and YY are allowed");
    }
    
-   return (isBP ? bpPrefix() + res : res) + utility::toString<casa::Short>(index.antenna()) +"."+ utility::toString<casa::Short>(index.beam());
+   return (isBP ? bpPrefix() + res : res) + utility::toString<casacore::Short>(index.antenna()) +"."+ utility::toString<casacore::Short>(index.beam());
 }
 
 /// @brief parse the name of the parameter
@@ -70,7 +70,7 @@ std::string CalParamNameHelper::paramName(const JonesIndex &index, casa::Stokes:
 /// @param[in] name full name of the parameter (e.g. gain.g11.1.3)
 /// @return a pair with antenna/beam index as the first field and polarisation descriptor as the second
 /// @note An exception is thrown if parameter name is malformed. The bandpass prefix is ignored, if present.
-std::pair<JonesIndex, casa::Stokes::StokesTypes> CalParamNameHelper::parseParam(const std::string &name)
+std::pair<JonesIndex, casacore::Stokes::StokesTypes> CalParamNameHelper::parseParam(const std::string &name)
 {
   size_t startPos = 0;
   if (bpParam(name)) {
@@ -86,22 +86,22 @@ std::pair<JonesIndex, casa::Stokes::StokesTypes> CalParamNameHelper::parseParam(
   ASKAPCHECK((pos2 != std::string::npos) && (pos2 + 1 != name.size()) && (pos + 1 != pos2), 
              "Parameter name should be in the form something.something.ant.beam; you have "<<name);
   const std::string pol = name.substr(pos + 1, pos2 - pos - 1);
-  casa::Stokes::StokesTypes polDescriptor;
+  casacore::Stokes::StokesTypes polDescriptor;
   if (what  == "gain") {
       ASKAPCHECK((pol == "g11") || (pol == "g22"), "Unrecognised polarisation product "<<pol<<" in "<<name);
-      polDescriptor = (pol == "g11" ? casa::Stokes::XX : casa::Stokes::YY);
+      polDescriptor = (pol == "g11" ? casacore::Stokes::XX : casacore::Stokes::YY);
   } else if (what == "leakage") {
       ASKAPCHECK((pol == "d12") || (pol == "d21"), "Unrecognised polarisation product "<<pol<<" in "<<name);
-      polDescriptor = (pol == "d12" ? casa::Stokes::XY : casa::Stokes::YX);
+      polDescriptor = (pol == "d12" ? casacore::Stokes::XY : casacore::Stokes::YX);
   } else {
      ASKAPTHROW(AskapError, "This line should never be executed!");
   }
   const size_t pos3 = name.find(".", pos2 + 1);
   ASKAPCHECK((pos3 != std::string::npos) && (pos3 + 1 != name.size()) && (pos2 + 1 != pos3), 
              "Parameter name should be in the form something.something.ant.beam; you have "<<name);
-  const casa::Short ant = utility::fromString<casa::Short>(name.substr(pos2 + 1, pos3 - pos2 - 1));
-  const casa::Short beam = utility::fromString<casa::Short>(name.substr(pos3 + 1));
-  return std::pair<JonesIndex, casa::Stokes::StokesTypes>(JonesIndex(ant,beam),polDescriptor);
+  const casacore::Short ant = utility::fromString<casacore::Short>(name.substr(pos2 + 1, pos3 - pos2 - 1));
+  const casacore::Short beam = utility::fromString<casacore::Short>(name.substr(pos3 + 1));
+  return std::pair<JonesIndex, casacore::Stokes::StokesTypes>(JonesIndex(ant,beam),polDescriptor);
 }
 
 /// @brief check whether the parameter corresponds to bandpass
@@ -119,9 +119,9 @@ bool CalParamNameHelper::bpParam(const std::string &name)
 /// @param[in] name full name of the parameter
 /// @param[in] chan spectral channel
 /// @return name with channel info added
-std::string CalParamNameHelper::addChannelInfo(const std::string &name, casa::uInt chan)
+std::string CalParamNameHelper::addChannelInfo(const std::string &name, casacore::uInt chan)
 {
-  return name + "." + utility::toString<casa::uInt>(chan);
+  return name + "." + utility::toString<casacore::uInt>(chan);
 }
   
 /// @brief extract coded channel and parameter name
@@ -129,12 +129,12 @@ std::string CalParamNameHelper::addChannelInfo(const std::string &name, casa::uI
 /// has coded channel present.
 /// @param[in] name full name of the parameter
 /// @return a pair with extracted channel and the base parameter name
-std::pair<casa::uInt, std::string> CalParamNameHelper::extractChannelInfo(const std::string &name)
+std::pair<casacore::uInt, std::string> CalParamNameHelper::extractChannelInfo(const std::string &name)
 {
   size_t pos = name.rfind(".");
   ASKAPCHECK(pos != std::string::npos, "Expect dot in the parameter name passed to extractChannelInfo, name="<<name);
   ASKAPCHECK(pos + 1 != name.size(), "Parameter name="<<name<<" ends with a dot");
-  return std::pair<casa::uInt, std::string>(utility::fromString<casa::uInt>(name.substr(pos+1)),name.substr(0,pos));
+  return std::pair<casacore::uInt, std::string>(utility::fromString<casacore::uInt>(name.substr(pos+1)),name.substr(0,pos));
 }
 
 } // namespace accessors

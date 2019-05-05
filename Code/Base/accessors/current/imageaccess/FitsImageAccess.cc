@@ -57,28 +57,28 @@ using namespace askap::accessors;
 /// @brief obtain the shape
 /// @param[in] name image name
 /// @return full shape of the given image
-casa::IPosition FitsImageAccess::shape(const std::string &name) const
+casacore::IPosition FitsImageAccess::shape(const std::string &name) const
 {
     std::string fullname = name + ".fits";
-    casa::FITSImage img(fullname);
+    casacore::FITSImage img(fullname);
     return img.shape();
 }
 
 /// @brief read full image
 /// @param[in] name image name
 /// @return array with pixels
-casa::Array<float> FitsImageAccess::read(const std::string &name) const
+casacore::Array<float> FitsImageAccess::read(const std::string &name) const
 {
     std::string fullname = name + ".fits";
     ASKAPLOG_INFO_STR(logger, "Reading FITS image " << fullname);
 
-    casa::FITSImage img(fullname);
+    casacore::FITSImage img(fullname);
 
-    const casa::IPosition shape = img.shape();
+    const casacore::IPosition shape = img.shape();
     ASKAPLOG_INFO_STR(logger, " - Shape " << shape);
 
-    casa::IPosition blc(shape.nelements(), 0);
-    casa::IPosition trc(shape);
+    casacore::IPosition blc(shape.nelements(), 0);
+    casacore::IPosition trc(shape);
 
     trc[0] = trc[0] - 1;
     trc[1] = trc[1] - 1;
@@ -95,17 +95,17 @@ casa::Array<float> FitsImageAccess::read(const std::string &name) const
 /// @param[in] blc bottom left corner of the selection
 /// @param[in] trc top right corner of the selection
 /// @return array with pixels for the selection only
-casa::Array<float> FitsImageAccess::read(const std::string &name, const casa::IPosition &blc,
-        const casa::IPosition &trc) const
+casacore::Array<float> FitsImageAccess::read(const std::string &name, const casacore::IPosition &blc,
+        const casacore::IPosition &trc) const
 {
     std::string fullname = name + ".fits";
     ASKAPLOG_INFO_STR(logger, "Reading a slice of the FITS image " << name << " from " << blc << " to " << trc);
 
-    casa::FITSImage img(fullname);
-    casa::Array<float> buffer;
-    casa::Slicer slc(blc, trc, casa::Slicer::endIsLast);
+    casacore::FITSImage img(fullname);
+    casacore::Array<float> buffer;
+    casacore::Slicer slc(blc, trc, casacore::Slicer::endIsLast);
     std::cout << "Reading a slice of the FITS image " << name << " slice " << slc << std::endl;
-    ASKAPCHECK(img.doGetSlice(buffer, slc) == casa::False, "Cannot read image");
+    ASKAPCHECK(img.doGetSlice(buffer, slc) == casacore::False, "Cannot read image");
     return buffer;
 
 }
@@ -113,32 +113,32 @@ casa::Array<float> FitsImageAccess::read(const std::string &name, const casa::IP
 /// @brief obtain coordinate system info
 /// @param[in] name image name
 /// @return coordinate system object
-casa::CoordinateSystem FitsImageAccess::coordSys(const std::string &name) const
+casacore::CoordinateSystem FitsImageAccess::coordSys(const std::string &name) const
 {
     std::string fullname = name + ".fits";
-    casa::FITSImage img(fullname);
+    casacore::FITSImage img(fullname);
     return img.coordinates();
 }
 
-casa::CoordinateSystem FitsImageAccess::coordSysSlice(const std::string &name, const casa::IPosition &blc,
-        const casa::IPosition &trc) const
+casacore::CoordinateSystem FitsImageAccess::coordSysSlice(const std::string &name, const casacore::IPosition &blc,
+        const casacore::IPosition &trc) const
 {
     std::string fullname = name + ".fits";
-    casa::Slicer slc(blc, trc, casa::Slicer::endIsLast);
+    casacore::Slicer slc(blc, trc, casacore::Slicer::endIsLast);
     ASKAPLOG_INFO_STR(logger, " FITSImageAccess - Slicer " << slc);
-    casa::FITSImage img(fullname);
-    casa::SubImage<casa::Float> si = casa::SubImage<casa::Float>(img, slc, casa::AxesSpecifier(casa::True));
+    casacore::FITSImage img(fullname);
+    casacore::SubImage<casacore::Float> si = casacore::SubImage<casacore::Float>(img, slc, casacore::AxesSpecifier(casacore::True));
     return si.coordinates();
 
 }
 /// @brief obtain beam info
 /// @param[in] name image name
 /// @return beam info vector
-casa::Vector<casa::Quantum<double> > FitsImageAccess::beamInfo(const std::string &name) const
+casacore::Vector<casacore::Quantum<double> > FitsImageAccess::beamInfo(const std::string &name) const
 {
     std::string fullname = name + ".fits";
-    casa::FITSImage img(fullname);
-    casa::ImageInfo ii = img.imageInfo();
+    casacore::FITSImage img(fullname);
+    casacore::ImageInfo ii = img.imageInfo();
     return ii.restoringBeam().toVector();
 }
 std::string FitsImageAccess::getUnits(const std::string &name) const
@@ -207,17 +207,17 @@ void FitsImageAccess::connect(const std::string &name)
 /// @param[in] name image name
 /// @param[in] shape full shape of the image
 /// @param[in] csys coordinate system of the full image
-void FitsImageAccess::create(const std::string &name, const casa::IPosition &shape,
-                             const casa::CoordinateSystem &csys)
+void FitsImageAccess::create(const std::string &name, const casacore::IPosition &shape,
+                             const casacore::CoordinateSystem &csys)
 {
 
     ASKAPLOG_INFO_STR(logger, "Creating a new FITS image " << name << " with the shape " << shape);
-    casa::String error;
+    casacore::String error;
 
     itsFITSImage.reset(new FITSImageRW());
     if (!itsFITSImage->create(name, shape, csys)) {
-        casa::String error;
-        error = casa::String("Failed to create FITSFile");
+        casacore::String error;
+        error = casacore::String("Failed to create FITSFile");
         ASKAPTHROW(AskapError, error);
     }
     itsFITSImage->print_hdr();
@@ -225,18 +225,18 @@ void FitsImageAccess::create(const std::string &name, const casa::IPosition &sha
     // this requires that the whole array fits in memory
     // which may not in general be the case
 
-    // casa::TempImage<casa::Float> image(casa::TiledShape(shape),csys,0);
+    // casacore::TempImage<casacore::Float> image(casacore::TiledShape(shape),csys,0);
 
 
     // Now write the fits file.
-    // casa::ImageFITSConverter::ImageToFITS (error, image, name);
+    // casacore::ImageFITSConverter::ImageToFITS (error, image, name);
 
 }
 
 /// @brief write full image
 /// @param[in] name image name (not used)
 /// @param[in] arr array with pixels
-void FitsImageAccess::write(const std::string &name, const casa::Array<float> &arr)
+void FitsImageAccess::write(const std::string &name, const casacore::Array<float> &arr)
 {
     ASKAPLOG_INFO_STR(logger, "Writing an array with the shape " << arr.shape() << " into a FITS image " << name);
     connect(name);
@@ -249,15 +249,15 @@ void FitsImageAccess::write(const std::string &name, const casa::Array<float> &a
 /// @param[in] name image name (not used)
 /// @param[in] arr array with pixels
 /// @param[in] where bottom left corner where to put the slice to (trc is deduced from the array shape)
-void FitsImageAccess::write(const std::string &name, const casa::Array<float> &arr,
-                            const casa::IPosition &where)
+void FitsImageAccess::write(const std::string &name, const casacore::Array<float> &arr,
+                            const casacore::IPosition &where)
 {
     ASKAPLOG_INFO_STR(logger, "Writing a slice with the shape " << arr.shape() << " into a FITS image " <<
                       name << " at " << where);
-    casa::String error;
+    casacore::String error;
     connect(name);
     if (!itsFITSImage->write(arr, where)) {
-        error = casa::String("Failed to write slice");
+        error = casacore::String("Failed to write slice");
         ASKAPTHROW(AskapError, error);
     }
 
@@ -266,18 +266,18 @@ void FitsImageAccess::write(const std::string &name, const casa::Array<float> &a
 /// @param[in] name image name
 /// @param[in] arr array with pixels
 /// @param[in] where bottom left corner where to put the slice to (trc is deduced from the array shape)
-void FitsImageAccess::writeMask(const std::string &name, const casa::Array<bool> &mask,
-                                const casa::IPosition &where)
+void FitsImageAccess::writeMask(const std::string &name, const casacore::Array<bool> &mask,
+                                const casacore::IPosition &where)
 {
-    casa::String error = casa::String("FITS pixel mask not yet implemented");
+    casacore::String error = casacore::String("FITS pixel mask not yet implemented");
     ASKAPLOG_INFO_STR(logger, error);
 }
 /// @brief write a slice of an image mask
 /// @param[in] name image name
 /// @param[in] arr array with pixels
-void FitsImageAccess::writeMask(const std::string &name, const casa::Array<bool> &mask)
+void FitsImageAccess::writeMask(const std::string &name, const casacore::Array<bool> &mask)
 {
-    casa::String error = casa::String("FITS pixel mask not yet implemented");
+    casacore::String error = casacore::String("FITS pixel mask not yet implemented");
     ASKAPLOG_INFO_STR(logger, error);
 }
 /// @brief set brightness units of the image
@@ -314,7 +314,7 @@ void FitsImageAccess::setBeamInfo(const std::string &name, double maj, double mi
 void FitsImageAccess::makeDefaultMask(const std::string &name)
 {
 
-    casa::String error = casa::String("A default mask in FITS makes no sense");
+    casacore::String error = casacore::String("A default mask in FITS makes no sense");
     ASKAPLOG_INFO_STR(logger, error);
 
 }

@@ -57,7 +57,7 @@ struct ScratchBuffer {
     ScratchBuffer() : needsRead(true), needsFlush(false) {}
     
     /// visibility cube
-    casa::Cube<casa::Complex> vis;
+    casacore::Cube<casacore::Complex> vis;
     /// True if the cube has to be initialized (reading is required)
     mutable bool needsRead;
     /// True if there was a write operation and the cube has to be

@@ -63,8 +63,8 @@ namespace accessors {
 /// @param[in] nAnt maximum number of antennas
 /// @param[in] nBeam maximum number of beams   
 /// @param[in] nChan maximum number of channels   
-TableCalSolutionSource::TableCalSolutionSource(const casa::Table &tab, const casa::uInt nAnt, 
-         const casa::uInt nBeam, const casa::uInt nChan) : TableHolder(tab), 
+TableCalSolutionSource::TableCalSolutionSource(const casacore::Table &tab, const casacore::uInt nAnt, 
+         const casacore::uInt nBeam, const casacore::uInt nChan) : TableHolder(tab), 
    TableCalSolutionConstSource(tab), itsNAnt(nAnt), itsNBeam(nBeam), itsNChan(nChan) {}
  
 /// @brief constructor using a file name
@@ -73,20 +73,20 @@ TableCalSolutionSource::TableCalSolutionSource(const casa::Table &tab, const cas
 /// @param[in] nAnt maximum number of antennas
 /// @param[in] nBeam maximum number of beams   
 /// @param[in] nChan maximum number of channels   
-TableCalSolutionSource::TableCalSolutionSource(const std::string &name, const casa::uInt nAnt, 
-         const casa::uInt nBeam, const casa::uInt nChan) : 
-   TableHolder(casa::Table()), TableCalSolutionConstSource(table()), itsNAnt(nAnt), itsNBeam(nBeam), itsNChan(nChan)
+TableCalSolutionSource::TableCalSolutionSource(const std::string &name, const casacore::uInt nAnt, 
+         const casacore::uInt nBeam, const casacore::uInt nChan) : 
+   TableHolder(casacore::Table()), TableCalSolutionConstSource(table()), itsNAnt(nAnt), itsNBeam(nBeam), itsNChan(nChan)
 {
   try {
-     table() = casa::Table(name,casa::Table::Update);
+     table() = casacore::Table(name,casacore::Table::Update);
   }
   catch (...) {
      // we couldn't just opened an existing table
      try {
-        casa::SetupNewTable maker(name, casa::TableDesc(), casa::Table::New);
-        table() = casa::Table(maker);
+        casacore::SetupNewTable maker(name, casacore::TableDesc(), casacore::Table::New);
+        table() = casacore::Table(maker);
      }
-     catch (const casa::TableError &te) {
+     catch (const casacore::TableError &te) {
         ASKAPTHROW(DataAccessError,"Unable create a new table for calibration solutions with the name="<<name<<
                    ". AipsError: " << te.what());     
      }
@@ -104,20 +104,20 @@ TableCalSolutionSource::TableCalSolutionSource(const std::string &name, const ca
 long TableCalSolutionSource::newSolutionID(const double time) {
    if (!table().actualTableDesc().isColumn("TIME")) {
        // this is a new table, we need to create new TIME column
-       casa::ScalarColumnDesc<casa::Double> timeColDesc("TIME", 
+       casacore::ScalarColumnDesc<casacore::Double> timeColDesc("TIME", 
            "Time stamp when the calibration solution was obtained");
        table().addColumn(timeColDesc);    
-       casa::TableMeasRefDesc measRef(casa::MEpoch::UTC);
-       casa::TableMeasValueDesc measVal(table().actualTableDesc(), "TIME");
-       casa::TableMeasDesc<casa::MEpoch> mepochCol(measVal, measRef);
+       casacore::TableMeasRefDesc measRef(casacore::MEpoch::UTC);
+       casacore::TableMeasValueDesc measVal(table().actualTableDesc(), "TIME");
+       casacore::TableMeasDesc<casacore::MEpoch> mepochCol(measVal, measRef);
        mepochCol.write(table());
    }
-   const casa::uInt newRow = table().nrow();
+   const casacore::uInt newRow = table().nrow();
    table().addRow(1);
    ASKAPDEBUGASSERT(newRow < table().nrow());
-   casa::ScalarMeasColumn<casa::MEpoch> bufCol(table(),"TIME");
-   const casa::Quantity qTime(time,"s");
-   const casa::MEpoch epoch(qTime,casa::MEpoch::UTC);
+   casacore::ScalarMeasColumn<casacore::MEpoch> bufCol(table(),"TIME");
+   const casacore::Quantity qTime(time,"s");
+   const casacore::MEpoch epoch(qTime,casacore::MEpoch::UTC);
    bufCol.put(newRow, epoch);
    return long(newRow);
 }
@@ -148,23 +148,23 @@ boost::shared_ptr<ICalSolutionAccessor> TableCalSolutionSource::rwSolution(const
 /// An exception is thrown in this case if this parameter is false.
 void TableCalSolutionSource::removeOldTable(const std::string &fname, const bool removeIfNotTable)
 {
-  if (casa::Table::canDeleteTable(fname,false)) {
-      casa::Table::deleteTable(fname, false);
+  if (casacore::Table::canDeleteTable(fname,false)) {
+      casacore::Table::deleteTable(fname, false);
   } else {
      // check that the table simply doesn't exist
      ASKAPCHECK(!tableExists(fname), "Unable to delete existing table "<<fname);
-     casa::File tmpFile(fname);
+     casacore::File tmpFile(fname);
      if (tmpFile.exists()) {
          ASKAPCHECK(removeIfNotTable, 
                     "TableCalSolutionSource::removeOldTable: File or directory "<<fname<<
                     " exists, but it is not a table - unable to remove");
          // we need to remove the file with the given name
          if (tmpFile.isDirectory()) {
-             casa::Directory dir(fname);
+             casacore::Directory dir(fname);
              dir.removeRecursive();
          } else {
              ASKAPASSERT(tmpFile.isRegular());
-             casa::RegularFile rf(fname);
+             casacore::RegularFile rf(fname);
              rf.remove();
          }
      }

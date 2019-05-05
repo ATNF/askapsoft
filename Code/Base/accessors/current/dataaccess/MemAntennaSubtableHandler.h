@@ -53,19 +53,19 @@ struct MemAntennaSubtableHandler : virtual public IAntennaSubtableHandler {
   /// read all required information from the ANTENNA subtable
   /// @param[in] ms an input measurement set (a table which has an
   /// ANTENNA subtable)
-  explicit MemAntennaSubtableHandler(const casa::Table &ms);
+  explicit MemAntennaSubtableHandler(const casacore::Table &ms);
   
   /// @brief obtain the position of the given antenna
   /// @details
   /// @param[in] antID antenna ID to return the position for
   /// @return a reference to the MPosition measure
-  virtual const casa::MPosition& getPosition(casa::uInt antID) const;
+  virtual const casacore::MPosition& getPosition(casacore::uInt antID) const;
   
   /// @brief obtain the mount type for the given antenna
   /// @details
   /// @param[in] antID antenna ID to return the position for
   /// @return a string describing the mount type
-  virtual const casa::String& getMount(casa::uInt antID) const;
+  virtual const casacore::String& getMount(casacore::uInt antID) const;
   
   /// @brief check whether all antennae are equatorialy mounted
   /// @details
@@ -82,14 +82,14 @@ struct MemAntennaSubtableHandler : virtual public IAntennaSubtableHandler {
   /// assumptions about ANTENNA subtable, this number is assumed to be
   /// fixed.
   /// @return total number of antennae 
-  virtual casa::uInt getNumberOfAntennae() const;
+  virtual casacore::uInt getNumberOfAntennae() const;
     
 private:
   /// a cache of antenna mounts
-  casa::Vector<casa::String> itsMounts;
+  casacore::Vector<casacore::String> itsMounts;
   
   /// a cache of antenna positions
-  casa::Vector<casa::MPosition> itsPositions;
+  casacore::Vector<casacore::MPosition> itsPositions;
   
   /// an internal buffer for a flag showing whether all antennae are equatorially
   /// mounted

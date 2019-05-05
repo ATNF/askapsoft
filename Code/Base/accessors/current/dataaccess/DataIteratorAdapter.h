@@ -111,12 +111,12 @@ public:
 
   /// Checks whether there are more data available.
   /// @return True if there are more data available
-  virtual casa::Bool hasMore() const throw();
+  virtual casacore::Bool hasMore() const throw();
 
   /// advance the iterator one step further 
   /// @return True if there are more data (so constructions like 
   ///         while(it.next()) {} are possible)
-  virtual casa::Bool next();
+  virtual casacore::Bool next();
   
   // methods specific for non-const iterator
   
@@ -140,7 +140,7 @@ public:
   /// Switch the output of operator* and operator-> to the original
   /// state (present after the iterator is just constructed) 
   /// where they point to the primary visibility data. This method
-  /// is indended to cancel the results of chooseBuffer(casa::uInt)
+  /// is indended to cancel the results of chooseBuffer(casacore::uInt)
   ///
   virtual void chooseOriginal();
 

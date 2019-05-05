@@ -56,7 +56,7 @@ using namespace casa;
 /// read all required information from the SPECTRAL_WINDOW subtable
 /// @param ms an input measurement set (in fact any table which has a
 /// SPECTRAL_WINDOW subtable defined)
-MemTableSpWindowHolder::MemTableSpWindowHolder(const casa::Table &ms)
+MemTableSpWindowHolder::MemTableSpWindowHolder(const casacore::Table &ms)
 {
   Table spWindowSubtable=ms.keywordSet().asTable("SPECTRAL_WINDOW");
 
@@ -70,7 +70,7 @@ MemTableSpWindowHolder::MemTableSpWindowHolder(const casa::Table &ms)
 		  tabUnits.nelements()<<" elements and "<<tabUnits.ndim()<<
 		  " dimensions");
   }  
-  itsFreqUnits=casa::Unit(tabUnits(IPosition(1,0)));
+  itsFreqUnits=casacore::Unit(tabUnits(IPosition(1,0)));
   
   // load reference frame ids
   ROScalarColumn<Int> measRefCol(spWindowSubtable,"MEAS_FREQ_REF");
@@ -89,8 +89,8 @@ MemTableSpWindowHolder::MemTableSpWindowHolder(const casa::Table &ms)
 /// obtain the reference frame used in the spectral window table
 /// @param[in] spWindowID an index into spectral window table
 /// @return the reference frame of the given row
-casa::MFrequency::Ref
-    MemTableSpWindowHolder::getReferenceFrame(casa::uInt spWindowID) const
+casacore::MFrequency::Ref
+    MemTableSpWindowHolder::getReferenceFrame(casacore::uInt spWindowID) const
 {
  ASKAPDEBUGASSERT(spWindowID<itsMeasRefIDs.nelements());
  return MFrequency::Ref(itsMeasRefIDs[spWindowID]);
@@ -99,8 +99,8 @@ casa::MFrequency::Ref
 /// @brief obtain the frequency units used in the spectral window table
 /// @details The frequency units depend on the measurement set only and
 /// are the same for all rows.
-/// @return a reference to the casa::Unit object
-const casa::Unit& MemTableSpWindowHolder::getFrequencyUnit() const throw()
+/// @return a reference to the casacore::Unit object
+const casacore::Unit& MemTableSpWindowHolder::getFrequencyUnit() const throw()
 {
   return itsFreqUnits;
 }
@@ -111,8 +111,8 @@ const casa::Unit& MemTableSpWindowHolder::getFrequencyUnit() const throw()
 /// via getReferenceFrame and getFrequencyUnit methods of this class.  
 /// @param[in] spWindowID an index into spectral window table
 /// @return freqs a const reference to a vector with result
-const casa::Vector<casa::Double>&
-MemTableSpWindowHolder::getFrequencies(casa::uInt spWindowID) const
+const casacore::Vector<casacore::Double>&
+MemTableSpWindowHolder::getFrequencies(casacore::uInt spWindowID) const
 {
   ASKAPDEBUGASSERT(spWindowID<itsChanFreqs.nelements());
   return itsChanFreqs[spWindowID];
@@ -125,12 +125,12 @@ MemTableSpWindowHolder::getFrequencies(casa::uInt spWindowID) const
 /// (and, hence, element by element operations are needed anyway)
 /// @param[in] spWindowID an index into spectral window table
 /// @param[in] channel a channel number of interest
-casa::MFrequency MemTableSpWindowHolder::getFrequency(casa::uInt spWindowID,
-                          casa::uInt channel) const
+casacore::MFrequency MemTableSpWindowHolder::getFrequency(casacore::uInt spWindowID,
+                          casacore::uInt channel) const
 {
   ASKAPDEBUGASSERT(spWindowID<itsChanFreqs.nelements());  
   ASKAPDEBUGASSERT(channel<itsChanFreqs[spWindowID].nelements());
-  const casa::Double freqAsDouble=itsChanFreqs[spWindowID][channel];
-  const casa::MVFrequency result(Quantity(freqAsDouble,itsFreqUnits));
+  const casacore::Double freqAsDouble=itsChanFreqs[spWindowID][channel];
+  const casacore::MVFrequency result(Quantity(freqAsDouble,itsFreqUnits));
   return MFrequency(result,MFrequency::Ref(itsMeasRefIDs[spWindowID]));
 }

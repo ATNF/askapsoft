@@ -64,23 +64,23 @@ public:
   /// @return a reference to nRow x nChannel x nPol cube with
   ///         complex noise estimates. Elements correspond to the
   ///         visibilities in the data cube.
-  virtual const casa::Cube<casa::Complex>& noise() const;
+  virtual const casacore::Cube<casacore::Complex>& noise() const;
 
   /// @brief write access to Noise level 
   /// @return a reference to nRow x nChannel x nPol cube with
   ///         complex noise estimates. Elements correspond to the
   ///         visibilities in the data cube.
-  virtual casa::Cube<casa::Complex>& rwNoise();
+  virtual casacore::Cube<casacore::Complex>& rwNoise();
   
   /// @brief Cube of flags corresponding to the output of visibility()
   /// @return a reference to nRow x nChannel x nPol cube with the flag
   ///         information. If True, the corresponding element is flagged.
-  virtual const casa::Cube<casa::Bool>& flag() const;
+  virtual const casacore::Cube<casacore::Bool>& flag() const;
 
   /// @brief Non-const access to the cube of flags.
   /// @return a reference to nRow x nChannel x nPol cube with the flag
   ///         information. If True, the corresponding element is flagged.
-  virtual casa::Cube<casa::Bool>& rwFlag();
+  virtual casacore::Cube<casacore::Bool>& rwFlag();
   
 private:  
   /// @brief if true, the flag buffer is to be used instead of metadata
@@ -90,10 +90,10 @@ private:
   bool itsNoiseSubstituted;
 
   /// @brief buffer for noise (used if itsNoiseSubstituted is true)
-  casa::Cube<casa::Bool> itsFlagBuffer;  
+  casacore::Cube<casacore::Bool> itsFlagBuffer;  
   
   /// @brief buffer for noise (used if itsNoiseSubstituted is true)
-  casa::Cube<casa::Complex> itsNoiseBuffer;   
+  casacore::Cube<casacore::Complex> itsNoiseBuffer;   
 };
 
 } // namespace accessors

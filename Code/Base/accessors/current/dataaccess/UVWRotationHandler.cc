@@ -72,10 +72,10 @@ void UVWRotationHandler::invalidate() const
 /// @return const reference to rotated uvws
 /// @note the method doesn't monitor a change to the accessor. It expects that invalidate
 /// is called explicitly when recalculation is needed (i.e. iterator moved to the next iteration, etc)
-const casa::Vector<casa::RigidVector<casa::Double, 3> >& UVWRotationHandler::uvw(const IConstDataAccessor &acc,
-               const casa::MDirection &tangent) const
+const casacore::Vector<casacore::RigidVector<casacore::Double, 3> >& UVWRotationHandler::uvw(const IConstDataAccessor &acc,
+               const casacore::MDirection &tangent) const
 {
-  ASKAPCHECK(tangent.getRef().getType() == casa::MDirection::J2000,
+  ASKAPCHECK(tangent.getRef().getType() == casacore::MDirection::J2000,
       "This is a cautionary assertion because a number of places in the code implicitly assume J2000 for "
       "tangent point and image centre. UVWRotationHandler works for any frame in theory, but one needs to deliver "
       "frame information to UVWMachines as well as to invalidate cache when say the time changes if it is required for conversion. "
@@ -90,38 +90,38 @@ const casa::Vector<casa::RigidVector<casa::Double, 3> >& UVWRotationHandler::uvw
      boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(lock);
 #endif
      // have to fill itsRotatedUVW
-     const casa::uInt nSamples = acc.nRow();
+     const casacore::uInt nSamples = acc.nRow();
      itsRotatedUVWs.resize(nSamples);
      itsDelays.resize(nSamples);
      itsTangentPoint = tangent;
      itsImageCentre = tangent;
      itsValid = true;
      // just copy rotation code from TableVisGridder for a moment
-     const casa::Vector<casa::RigidVector<double, 3> >& uvwVector = acc.uvw();
-     //casa::Vector<casa::MVDirection> pointingDir1Vector =
-     const casa::Vector<casa::MVDirection>& pointingDir1Vector =
+     const casacore::Vector<casacore::RigidVector<double, 3> >& uvwVector = acc.uvw();
+     //casacore::Vector<casacore::MVDirection> pointingDir1Vector =
+     const casacore::Vector<casacore::MVDirection>& pointingDir1Vector =
                         acc.pointingDir1();
      /*
      // temp hack
-     const casa::MDirection tmpdir(acc.pointingDir1()[0], casa::MDirection::JTRUE);
-     const casa::MEpoch tmpEpoch(casa::MVEpoch(acc.time()/86400.),casa::MEpoch::Ref(casa::MEpoch::UTC));
-     casa::MeasFrame tmpFrame(tmpEpoch);
-     const casa::MVDirection tmpj2000dir = casa::MDirection::Convert(tmpdir,casa::MDirection::Ref(casa::MDirection::J2000,
+     const casacore::MDirection tmpdir(acc.pointingDir1()[0], casacore::MDirection::JTRUE);
+     const casacore::MEpoch tmpEpoch(casacore::MVEpoch(acc.time()/86400.),casacore::MEpoch::Ref(casacore::MEpoch::UTC));
+     casacore::MeasFrame tmpFrame(tmpEpoch);
+     const casacore::MVDirection tmpj2000dir = casacore::MDirection::Convert(tmpdir,casacore::MDirection::Ref(casacore::MDirection::J2000,
                  tmpFrame))().getValue();
      //std::cout<<printDirection(tmpj2000dir)<<std::endl; throw 1;
      pointingDir1Vector.set(tmpj2000dir);
      */
      /*
-     casa::Quantity tmpra,tmpdec;
-     casa::Quantity::read(tmpra,"19:40:00");
-     casa::Quantity::read(tmpdec,"-63.54.30");
-     pointingDir1Vector.set(casa::MVDirection(tmpra,tmpdec));
+     casacore::Quantity tmpra,tmpdec;
+     casacore::Quantity::read(tmpra,"19:40:00");
+     casacore::Quantity::read(tmpdec,"-63.54.30");
+     pointingDir1Vector.set(casacore::MVDirection(tmpra,tmpdec));
      */
      //
-     casa::Vector<double> uvwBuffer(3);
+     casacore::Vector<double> uvwBuffer(3);
      const UVWMachineCache::machineType * uvwm;
-     for (casa::uInt row=0; row<nSamples; ++row) {
-          const casa::RigidVector<double, 3> &uvwRow = uvwVector(row);
+     for (casacore::uInt row=0; row<nSamples; ++row) {
+          const casacore::RigidVector<double, 3> &uvwRow = uvwVector(row);
           /// @todo Decide what to do about pointingDir1!=pointingDir2
           for (int i=0; i<3; ++i) {
                uvwBuffer(i) = (i<2 ? -1. : 1.) * uvwRow(i);
@@ -161,10 +161,10 @@ const casa::Vector<casa::RigidVector<casa::Double, 3> >& UVWRotationHandler::uvw
 /// @return const reference to delay vector
 /// @note the method doesn't monitor a change to the accessor. It expects that invalidate
 /// is called explicitly when recalculation is needed (i.e. iterator moved to the next iteration, etc)
-const casa::Vector<casa::Double>& UVWRotationHandler::delays(const IConstDataAccessor &acc,
-               const casa::MDirection &tangent, const casa::MDirection &imageCentre) const
+const casacore::Vector<casacore::Double>& UVWRotationHandler::delays(const IConstDataAccessor &acc,
+               const casacore::MDirection &tangent, const casacore::MDirection &imageCentre) const
 {
-  const casa::Vector<casa::RigidVector<casa::Double, 3> >& uvwBuffer = uvw(acc, tangent);
+  const casacore::Vector<casacore::RigidVector<casacore::Double, 3> >& uvwBuffer = uvw(acc, tangent);
 
 #ifdef _OPENMP
   boost::upgrade_lock<boost::shared_mutex> lock(itsMutex);
@@ -174,7 +174,7 @@ const casa::Vector<casa::Double>& UVWRotationHandler::delays(const IConstDataAcc
 
   ASKAPDEBUGASSERT(itsDelays.nelements() == acc.nRow());
 
-  ASKAPCHECK(imageCentre.getRef().getType() == casa::MDirection::J2000,
+  ASKAPCHECK(imageCentre.getRef().getType() == casacore::MDirection::J2000,
       "This is a cautionary assertion because a number of places in the code implicitly assume J2000 for "
       "tangent point and image centre. UVWRotationHandler works for any frame in theory, but one needs to deliver "
       "frame information to UVWMachines as well as to invalidate cache when say the time changes if it is required for conversion. "
@@ -190,9 +190,9 @@ const casa::Vector<casa::Double>& UVWRotationHandler::delays(const IConstDataAcc
       ASKAPCHECK(itsImageCentre.getRef().getType() == imageCentre.getRef().getType(),
                  "image centres in UVWRotationHandler::delays are not supposed to be in different frames");
 
-      const casa::MVDirection oldCentre(itsImageCentre.getValue());
-      const casa::MVDirection newCentre(imageCentre.getValue());
-      const casa::MVDirection tangentCentre(tangent.getValue());
+      const casacore::MVDirection oldCentre(itsImageCentre.getValue());
+      const casacore::MVDirection newCentre(imageCentre.getValue());
+      const casacore::MVDirection tangentCentre(tangent.getValue());
       // offsets to get the new image centre
       const double dl = sin(newCentre.getLong()-tangentCentre.getLong())*cos(newCentre.getLat())-
                         sin(oldCentre.getLong()-tangentCentre.getLong())*cos(oldCentre.getLat());
@@ -210,9 +210,9 @@ const casa::Vector<casa::Double>& UVWRotationHandler::delays(const IConstDataAcc
               cos(newCentre.getLat())*sin(oldCentre.getLat())
                    *cos(newCentre.getLong()-oldCentre.getLong());
       */
-      const casa::uInt nSamples = itsDelays.nelements();
+      const casacore::uInt nSamples = itsDelays.nelements();
       ASKAPDEBUGASSERT(nSamples == uvwBuffer.nelements());
-      for (casa::uInt row=0; row<nSamples; ++row) {
+      for (casacore::uInt row=0; row<nSamples; ++row) {
            itsDelays(row) += uvwBuffer(row)(0)*dl + uvwBuffer(row)(1)*dm;
       }
       // now delays are recalculated to correspond to the new image centre

@@ -109,7 +109,7 @@ struct TableManager : virtual public ITableManager,
   /// @param[in] useMemBuffers if true, buffers in memory will be created
   /// instead of the disk-based buffers
   /// @param[in] dataColumn name of the data column used by default
-  explicit TableManager(const casa::Table &tab, bool useMemBuffers,
+  explicit TableManager(const casacore::Table &tab, bool useMemBuffers,
                         const std::string &dataColumn = "DATA") :
            TableHolder(tab), SubtableInfoHolder(useMemBuffers),
            MiscTableInfoHolder(dataColumn) {}

@@ -51,9 +51,9 @@ using namespace askap::accessors;
 ///                       (default is DATA)
 TableDataSource::TableDataSource(const std::string &fname,
                 int opt, const std::string &dataColumn) :
-         TableInfoAccessor(casa::Table(fname, (opt & MEMORY_BUFFERS) && 
+         TableInfoAccessor(casacore::Table(fname, (opt & MEMORY_BUFFERS) && 
 				  !(opt & REMOVE_BUFFERS) && !(opt & WRITE_PERMITTED) ? 
-				      casa::Table::Old : casa::Table::Update),
+				      casacore::Table::Old : casacore::Table::Update),
 						opt & MEMORY_BUFFERS, dataColumn)
 {
   if (opt & REMOVE_BUFFERS) {

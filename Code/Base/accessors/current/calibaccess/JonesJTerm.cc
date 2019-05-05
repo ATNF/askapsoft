@@ -46,31 +46,31 @@ JonesJTerm::JonesJTerm()
 {
 }
 
-JonesJTerm::JonesJTerm(const casa::Complex& g1,
-                       const casa::Bool g1Valid,
-                       const casa::Complex& g2,
-                       const casa::Bool g2Valid)
+JonesJTerm::JonesJTerm(const casacore::Complex& g1,
+                       const casacore::Bool g1Valid,
+                       const casacore::Complex& g2,
+                       const casacore::Bool g2Valid)
         : itsG1(g1), itsG1Valid(g1Valid),
         itsG2(g2), itsG2Valid(g2Valid)
 {
 }
 
-casa::Complex JonesJTerm::g1(void) const
+casacore::Complex JonesJTerm::g1(void) const
 {
     return itsG1;
 }
 
-casa::Bool JonesJTerm::g1IsValid(void) const
+casacore::Bool JonesJTerm::g1IsValid(void) const
 {
     return itsG1Valid;
 }
 
-casa::Complex JonesJTerm::g2(void) const
+casacore::Complex JonesJTerm::g2(void) const
 {
     return itsG2;
 }
 
-casa::Bool JonesJTerm::g2IsValid(void) const
+casacore::Bool JonesJTerm::g2IsValid(void) const
 {
     return itsG2Valid;
 }

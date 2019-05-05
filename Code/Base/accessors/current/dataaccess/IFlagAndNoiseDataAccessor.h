@@ -56,13 +56,13 @@ public:
 	/// @return a reference to nRow x nChannel x nPol cube with
 	///         complex noise estimates. Elements correspond to the
 	///         visibilities in the data cube.
-	virtual const casa::Cube<casa::Complex>& noise() const = 0;
+	virtual const casacore::Cube<casacore::Complex>& noise() const = 0;
 
     /// @brief write access to Noise level 
 	/// @return a reference to nRow x nChannel x nPol cube with
 	///         complex noise estimates. Elements correspond to the
 	///         visibilities in the data cube.
-	virtual casa::Cube<casa::Complex>& rwNoise() = 0;
+	virtual casacore::Cube<casacore::Complex>& rwNoise() = 0;
 
 };
 

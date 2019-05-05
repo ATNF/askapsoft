@@ -52,11 +52,11 @@ using namespace askap::accessors;
 BasicDataConverter::BasicDataConverter() :
      itsEpochConverter(new EpochConverter),
      itsDirectionConverter(new DirectionConverter),
-     itsFrequencyConverter(new GenericConverter<casa::MFrequency>(
-                           casa::MFrequency::Ref(casa::MFrequency::LSRK),
+     itsFrequencyConverter(new GenericConverter<casacore::MFrequency>(
+                           casacore::MFrequency::Ref(casacore::MFrequency::LSRK),
 			   "GHz")),
-     itsVelocityConverter(new GenericConverter<casa::MRadialVelocity>(
-                     casa::MRadialVelocity::Ref(casa::MRadialVelocity::LSRK),
+     itsVelocityConverter(new GenericConverter<casacore::MRadialVelocity>(
+                     casacore::MRadialVelocity::Ref(casacore::MRadialVelocity::LSRK),
 		     "km/s"))
 {     
 }
@@ -74,8 +74,8 @@ BasicDataConverter::BasicDataConverter() :
 /// @param unit a required time unit for timestamps
 ///
 /// Class defaults to MJD 0 UTC, timestamp in seconds
-void BasicDataConverter::setEpochFrame(const casa::MEpoch &origin,
-	   const casa::Unit &unit)
+void BasicDataConverter::setEpochFrame(const casacore::MEpoch &origin,
+	   const casacore::Unit &unit)
 {
   itsEpochConverter.reset(new EpochConverter(origin,unit));
 }
@@ -88,8 +88,8 @@ void BasicDataConverter::setEpochFrame(const casa::MEpoch &origin,
 ///            (default is J2000).
 /// @param unit units for all direction offsets. Unused at the
 ///             moment. Default units are radians.
-void BasicDataConverter::setDirectionFrame(const casa::MDirection::Ref &ref,
-               const casa::Unit &)
+void BasicDataConverter::setDirectionFrame(const casacore::MDirection::Ref &ref,
+               const casacore::Unit &)
 {
   itsDirectionConverter.reset(new DirectionConverter(ref));
 }
@@ -102,10 +102,10 @@ void BasicDataConverter::setDirectionFrame(const casa::MDirection::Ref &ref,
 ///             as Doubles)
 ///
 /// Class defaults to LSRK, GHz
-void BasicDataConverter::setFrequencyFrame(const casa::MFrequency::Ref &ref,
-       const casa::Unit &unit)
+void BasicDataConverter::setFrequencyFrame(const casacore::MFrequency::Ref &ref,
+       const casacore::Unit &unit)
 {
-  itsFrequencyConverter.reset(new GenericConverter<casa::MFrequency>(ref,unit));
+  itsFrequencyConverter.reset(new GenericConverter<casacore::MFrequency>(ref,unit));
 }
 
 /// set the reference frame for any velocity
@@ -115,10 +115,10 @@ void BasicDataConverter::setFrequencyFrame(const casa::MFrequency::Ref &ref,
 ///             as Doubles)
 ///  
 /// Class defaults to LSRK, km/s
-void BasicDataConverter::setVelocityFrame(const casa::MRadialVelocity::Ref &ref,
-		const casa::Unit &unit)
+void BasicDataConverter::setVelocityFrame(const casacore::MRadialVelocity::Ref &ref,
+		const casacore::Unit &unit)
 {
-  itsVelocityConverter.reset(new GenericConverter<casa::MRadialVelocity>(ref,unit));
+  itsVelocityConverter.reset(new GenericConverter<casacore::MRadialVelocity>(ref,unit));
 }
 
 /// set the rest frequency required to do the frequency to velocity
@@ -130,15 +130,15 @@ void BasicDataConverter::setVelocityFrame(const casa::MRadialVelocity::Ref &ref,
 /// @param restFreq a rest frequency to be used for interconversions
 ///                 between frequencies and velocities
 ///
-void BasicDataConverter::setRestFrequency(const casa::MVFrequency &restFreq)
+void BasicDataConverter::setRestFrequency(const casacore::MVFrequency &restFreq)
 {
   itsDopplerConverter.reset(new DopplerConverter(restFreq,
-                            casa::MDoppler::RADIO));
+                            casacore::MDoppler::RADIO));
 }
 
 
 /// set a frame (time, position), where the conversion is performed
-void BasicDataConverter::setMeasFrame(const casa::MeasFrame &frame)
+void BasicDataConverter::setMeasFrame(const casacore::MeasFrame &frame)
 {
   itsEpochConverter->setMeasFrame(frame);
   itsDirectionConverter->setMeasFrame(frame);
@@ -149,8 +149,8 @@ void BasicDataConverter::setMeasFrame(const casa::MeasFrame &frame)
 /// test whether the frequency conversion is void
 /// @param[in] testRef reference frame to test
 /// @param[in] testUnit units to test
-bool BasicDataConverter::isVoid(const casa::MFrequency::Ref &testRef,
-                    const casa::Unit &testUnit) const
+bool BasicDataConverter::isVoid(const casacore::MFrequency::Ref &testRef,
+                    const casacore::Unit &testUnit) const
 {
   return itsFrequencyConverter->isVoid(testRef,testUnit);
 }
@@ -158,7 +158,7 @@ bool BasicDataConverter::isVoid(const casa::MFrequency::Ref &testRef,
 /// convert epochs
 /// @param in input epoch given as an MEpoch object
 /// @return epoch converted to Double 
-casa::Double BasicDataConverter::epoch(const casa::MEpoch &in) const
+casacore::Double BasicDataConverter::epoch(const casacore::MEpoch &in) const
 {
   return (*itsEpochConverter)(in);
 }
@@ -166,7 +166,7 @@ casa::Double BasicDataConverter::epoch(const casa::MEpoch &in) const
 /// reverse conversion: form a measure from 'double' epoch
 /// @param[in] in epoch given as Double in the target units/frame
 /// @return epoch converted to Measure
-casa::MEpoch BasicDataConverter::epochMeasure(casa::Double in) const
+casacore::MEpoch BasicDataConverter::epochMeasure(casacore::Double in) const
 {
   return itsEpochConverter->toMeasure(in);
 }
@@ -174,7 +174,7 @@ casa::MEpoch BasicDataConverter::epochMeasure(casa::Double in) const
 /// reverse conversion: form a measure from MVEpoch
 /// @param[in] in epoch given as MVEpoch in the target frame
 /// @return epoch converted to Measure
-casa::MEpoch BasicDataConverter::epochMeasure(const casa::MVEpoch &in) const
+casacore::MEpoch BasicDataConverter::epochMeasure(const casacore::MVEpoch &in) const
 {
   return itsEpochConverter->toMeasure(in);
 }
@@ -182,8 +182,8 @@ casa::MEpoch BasicDataConverter::epochMeasure(const casa::MVEpoch &in) const
 /// convert directions
 /// @param in input direction given as an MDirection object
 /// @param out direction as an MVDirection object
-void BasicDataConverter::direction(const casa::MDirection &in,
-                      casa::MVDirection &out) const
+void BasicDataConverter::direction(const casacore::MDirection &in,
+                      casacore::MVDirection &out) const
 {
   out=(*itsDirectionConverter)(in);
 }
@@ -191,7 +191,7 @@ void BasicDataConverter::direction(const casa::MDirection &in,
 /// convert frequencies
 /// @param in input frequency given as an MFrequency object
 /// @return output frequency as a Double
-casa::Double BasicDataConverter::frequency(const casa::MFrequency &in) const
+casacore::Double BasicDataConverter::frequency(const casacore::MFrequency &in) const
 {
   return (*itsFrequencyConverter)(in);
 }
@@ -199,7 +199,7 @@ casa::Double BasicDataConverter::frequency(const casa::MFrequency &in) const
 /// convert velocities
 /// @param in input velocities given as an MRadialVelocity object
 /// @return out output velocity as a Double
-casa::Double BasicDataConverter::velocity(const casa::MRadialVelocity &in)
+casacore::Double BasicDataConverter::velocity(const casacore::MRadialVelocity &in)
                                           const
 {
   return (*itsVelocityConverter)(in);
@@ -212,7 +212,7 @@ casa::Double BasicDataConverter::velocity(const casa::MRadialVelocity &in)
 /// Note, an exception will be thrown if the rest frequency is not
 /// defined.
 ///
-casa::Double BasicDataConverter::frequency(const casa::MRadialVelocity &in)
+casacore::Double BasicDataConverter::frequency(const casacore::MRadialVelocity &in)
                                            const
 {      
   if (!itsDopplerConverter) {
@@ -229,7 +229,7 @@ casa::Double BasicDataConverter::frequency(const casa::MRadialVelocity &in)
 /// Note, an exception will be thrown if the rest frequency is not
 /// defined.
 ///
-casa::Double BasicDataConverter::velocity(const casa::MFrequency &in) const
+casacore::Double BasicDataConverter::velocity(const casacore::MFrequency &in) const
 {      
   if (!itsDopplerConverter) {
       throw DataAccessLogicError("A rest frequency is needed to be able to "

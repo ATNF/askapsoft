@@ -52,11 +52,11 @@ void askap::accessors::operator<<(const boost::shared_ptr<IDataSelector> &sel,
   ASKAPDEBUGASSERT(sel);
   if (parset.isDefined("Feed")) {
       ASKAPCHECK(!parset.isDefined("Beam"), "Both 'Feed' and 'Beam' should not be defined simultaneously!");
-      sel->chooseFeed(static_cast<casa::uInt>(parset.getUint32("Feed")));
+      sel->chooseFeed(static_cast<casacore::uInt>(parset.getUint32("Feed")));
   }
   if (parset.isDefined("Beam")) {
       ASKAPCHECK(!parset.isDefined("Feed"), "Both 'Feed' and 'Beam' should not be defined simultaneously!");
-      sel->chooseFeed(static_cast<casa::uInt>(parset.getUint32("Beam")));
+      sel->chooseFeed(static_cast<casacore::uInt>(parset.getUint32("Beam")));
   }
   if (parset.isDefined("Baseline")) {
       std::vector<LOFAR::uint32> baseline = parset.getUint32Vector("Baseline");
@@ -64,11 +64,11 @@ void askap::accessors::operator<<(const boost::shared_ptr<IDataSelector> &sel,
           ASKAPTHROW(DataAccessError,"The 'Baseline' parameter in the Parset should have "
 	          "exactly 2 elements, the current parameter has "<<baseline.size()<<" elements");
       }
-      sel->chooseBaseline(static_cast<casa::uInt>(baseline[0]),
-                          static_cast<casa::uInt>(baseline[1]));  
+      sel->chooseBaseline(static_cast<casacore::uInt>(baseline[0]),
+                          static_cast<casacore::uInt>(baseline[1]));  
   }
   if (parset.isDefined("Antenna")) {
-      sel->chooseAntenna(static_cast<casa::uInt>(parset.getUint32("Antenna")));
+      sel->chooseAntenna(static_cast<casacore::uInt>(parset.getUint32("Antenna")));
   }
   if (parset.isDefined("Channels")) {
       std::vector<LOFAR::uint32> chans = parset.getUint32Vector("Channels");
@@ -76,12 +76,12 @@ void askap::accessors::operator<<(const boost::shared_ptr<IDataSelector> &sel,
           ASKAPTHROW(DataAccessError,"The 'Channels' parameter in the Parset should have "
 	    "2 or 3 elements, the current parameter has "<<chans.size()<<" elements");
       }
-      sel->chooseChannels(static_cast<casa::uInt>(chans[0]),
-                          static_cast<casa::uInt>(chans[1]),
-	     chans.size() == 3 ? static_cast<casa::uInt>(chans[2]) : 1);
+      sel->chooseChannels(static_cast<casacore::uInt>(chans[0]),
+                          static_cast<casacore::uInt>(chans[1]),
+	     chans.size() == 3 ? static_cast<casacore::uInt>(chans[2]) : 1);
   }
   if (parset.isDefined("SpectralWindow")) {
-      sel->chooseSpectralWindow(static_cast<casa::uInt>(
+      sel->chooseSpectralWindow(static_cast<casacore::uInt>(
                     parset.getUint32("SpectralWindow")));
   }
   if (parset.isDefined("Polarizations")) {
@@ -93,8 +93,8 @@ void askap::accessors::operator<<(const boost::shared_ptr<IDataSelector> &sel,
           ASKAPTHROW(DataAccessError,"The 'Cycles' parameter in the Parset should have "
 	          "exactly 2 elements, the current parameter has "<<cycles.size()<<" elements");
       }
-      sel->chooseCycles(static_cast<casa::uInt>(cycles[0]),
-                        static_cast<casa::uInt>(cycles[1]));  
+      sel->chooseCycles(static_cast<casacore::uInt>(cycles[0]),
+                        static_cast<casacore::uInt>(cycles[1]));  
   }
   if (parset.isDefined("TimeRange")) {
       std::vector<double> timeRange = parset.getDoubleVector("TimeRange");
@@ -102,8 +102,8 @@ void askap::accessors::operator<<(const boost::shared_ptr<IDataSelector> &sel,
           ASKAPTHROW(DataAccessError,"The 'TimeRange' parameter in the Parset should have "
 	          "exactly 2 elements, the current parameter has "<<timeRange.size()<<" elements");
       }
-      sel->chooseTimeRange(static_cast<casa::Double>(timeRange[0]),
-                        static_cast<casa::Double>(timeRange[1]));  
+      sel->chooseTimeRange(static_cast<casacore::Double>(timeRange[0]),
+                        static_cast<casacore::Double>(timeRange[1]));  
   } 
   if (parset.isDefined("CorrelationType")) {
       std::string corrType=parset.getString("CorrelationType");
@@ -122,6 +122,6 @@ void askap::accessors::operator<<(const boost::shared_ptr<IDataSelector> &sel,
       sel->chooseMaxUVDistance(parset.getDouble("MaxUV"));
   }
   if (parset.isDefined("ScanNumber")) {
-      sel->chooseScanNumber(static_cast<casa::uInt>(parset.getUint32("ScanNumber")));
+      sel->chooseScanNumber(static_cast<casacore::uInt>(parset.getUint32("ScanNumber")));
   }
 }

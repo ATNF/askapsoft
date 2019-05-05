@@ -104,7 +104,7 @@ TableDataIterator::TableDataIterator(
             const boost::shared_ptr<ITableDataSelectorImpl const> &sel,
             const boost::shared_ptr<IDataConverterImpl const> &conv,
             size_t cacheSize, double tolerance,
-            casa::uInt maxChunkSize) :
+            casacore::uInt maxChunkSize) :
          TableInfoAccessor(msManager),
            TableConstDataIterator(msManager,sel,conv,cacheSize, tolerance, maxChunkSize),
 	      itsOriginalVisAccessor(new TableDataAccessor(*this)),
@@ -210,7 +210,7 @@ void TableDataIterator::init()
 /// advance the iterator one step further
 /// @return True if there are more data (so constructions like
 ///         while(it.next()) {} are possible)
-casa::Bool TableDataIterator::next()
+casacore::Bool TableDataIterator::next()
 {
   // call sync() member function for all accessors in itsBuffers
   std::for_each(itsBuffers.begin(),itsBuffers.end(),
@@ -234,12 +234,12 @@ casa::Bool TableDataIterator::next()
 /// @param[in] vis a reference to the nRow x nChannel x nPol buffer
 ///            cube to fill with the complex visibility data
 /// @param[in] name a name of the buffer to work with
-void TableDataIterator::readBuffer(casa::Cube<casa::Complex> &vis,
+void TableDataIterator::readBuffer(casacore::Cube<casacore::Complex> &vis,
                         const std::string &name) const
 {
   const IBufferManager &bufManager=subtableInfo().getBufferManager();
   const TableConstDataAccessor &accessor=getAccessor();
-  const casa::IPosition requiredShape(3, accessor.nRow(),
+  const casacore::IPosition requiredShape(3, accessor.nRow(),
           accessor.nChannel(), accessor.nPol());
   if (bufManager.bufferExists(name,itsIterationCounter)) {
       bufManager.readBuffer(vis,name,itsIterationCounter);
@@ -256,7 +256,7 @@ void TableDataIterator::readBuffer(casa::Cube<casa::Complex> &vis,
 /// @param[in] vis a reference to the nRow x nChannel x nPol buffer
 ///            cube to fill with the complex visibility data
 /// @param[in] name a name of the buffer to work with
-void TableDataIterator::writeBuffer(const casa::Cube<casa::Complex> &vis,
+void TableDataIterator::writeBuffer(const casacore::Cube<casacore::Complex> &vis,
                          const std::string &name) const
 {
   subtableInfo().getBufferManager().writeBuffer(vis,name,itsIterationCounter);
@@ -284,28 +284,28 @@ TableDataIterator::~TableDataIterator()
 ///                 of the appropriate shape
 /// @param[in] colName Name of the column
 template<typename T>
-void TableDataIterator::writeCube(const casa::Cube<T> &cube,
+void TableDataIterator::writeCube(const casacore::Cube<T> &cube,
                                   const std::string &colName) const
 {
-  const casa::uInt nChan = nChannel();
-  const casa::uInt startChan = startChannel();
+  const casacore::uInt nChan = nChannel();
+  const casacore::uInt startChan = startChannel();
   // Setup a slicer to extract the specified channel range only
-  const casa::Slicer chanSlicer(casa::Slice(),casa::Slice(startChan,nChan));
+  const casacore::Slicer chanSlicer(casacore::Slice(),casacore::Slice(startChan,nChan));
 
   // no change of shape is permitted
   ASKAPASSERT(cube.nrow() == nRow() &&
               cube.ncolumn() == nChan &&
               cube.nplane() == nPol());
-  casa::ArrayColumn<T> visCol(getCurrentIteration(), colName);
+  casacore::ArrayColumn<T> visCol(getCurrentIteration(), colName);
   ASKAPDEBUGASSERT(getCurrentIteration().nrow() >= getCurrentTopRow()+
                     nRow());
-  casa::uInt tableRow = getCurrentTopRow();
-  casa::Matrix<T> buf(nPol(),nChan);
-  for (casa::uInt row=0;row<cube.nrow();++row,++tableRow) {
-       const casa::IPosition shape = visCol.shape(row);
+  casacore::uInt tableRow = getCurrentTopRow();
+  casacore::Matrix<T> buf(nPol(),nChan);
+  for (casacore::uInt row=0;row<cube.nrow();++row,++tableRow) {
+       const casacore::IPosition shape = visCol.shape(row);
        ASKAPDEBUGASSERT(shape.size() && (shape.size()<3));
-       const casa::uInt thisRowNumberOfPols = shape[0];
-       const casa::uInt thisRowNumberOfChannels = shape.size()>1 ? shape[1] : 1;
+       const casacore::uInt thisRowNumberOfPols = shape[0];
+       const casacore::uInt thisRowNumberOfChannels = shape.size()>1 ? shape[1] : 1;
        if (thisRowNumberOfPols != cube.nplane()) {
            ASKAPTHROW(DataAccessError, "Current implementation of the writing to original "
                 "visibilities does not support partial selection of the data");
@@ -316,8 +316,8 @@ void TableDataIterator::writeCube(const casa::Cube<T> &cube,
        // for now just copy
        bool useSlicer = (startChan!=0) || (startChan+nChan!=thisRowNumberOfChannels);
 
-       for (casa::uInt chan=0; chan<nChan; ++chan) {
-            for (casa::uInt pol=0; pol<thisRowNumberOfPols; ++pol) {
+       for (casacore::uInt chan=0; chan<nChan; ++chan) {
+            for (casacore::uInt pol=0; pol<thisRowNumberOfPols; ++pol) {
                  buf(pol,chan) = cube(row,chan,pol);
             }
        }
@@ -349,18 +349,18 @@ void TableDataIterator::writeOriginalVis() const
 void TableDataIterator::writeOriginalFlag() const
 {
    const bool rowBasedFlagUsed = getCurrentIteration().tableDesc().isColumn("FLAG_ROW");
-   const casa::Cube<casa::Bool>& flags = getAccessor().flag();
+   const casacore::Cube<casacore::Bool>& flags = getAccessor().flag();
    if (rowBasedFlagUsed) {
        // check that updated flag doesn't contradict row-based flag
-       casa::ROScalarColumn<casa::Bool> rowFlagCol(getCurrentIteration(), "FLAG_ROW");
-       const casa::Vector<casa::Bool> rowBasedFlag = rowFlagCol.getColumn();
-       const casa::uInt topRow = getCurrentTopRow();
+       casacore::ROScalarColumn<casacore::Bool> rowFlagCol(getCurrentIteration(), "FLAG_ROW");
+       const casacore::Vector<casacore::Bool> rowBasedFlag = rowFlagCol.getColumn();
+       const casacore::uInt topRow = getCurrentTopRow();
        ASKAPDEBUGASSERT(rowBasedFlag.nelements() >= topRow+flags.nrow());
-       for (casa::uInt row = 0; row < flags.nrow(); ++row) {
+       for (casacore::uInt row = 0; row < flags.nrow(); ++row) {
             if (rowBasedFlag[row + topRow]) {
                 bool oneUnflagged = false;
-                casa::Matrix<casa::Bool> thisRow = flags.yzPlane(row);
-                for (casa::Matrix<casa::Bool>::const_iterator ci = thisRow.begin();
+                casacore::Matrix<casacore::Bool> thisRow = flags.yzPlane(row);
+                for (casacore::Matrix<casacore::Bool>::const_iterator ci = thisRow.begin();
                      ci != thisRow.end(); ++ci) {
                      if (!(*ci)) {
                          oneUnflagged = true;

@@ -49,7 +49,7 @@ using namespace casa;
 /// read all required information from the DATA_DESCRIPTION subtable
 /// @param ms an input measurement set (a table which has a
 /// DATA_DESCRIPTION subtable defined)
-MemTableDataDescHolder::MemTableDataDescHolder(const casa::Table &ms)
+MemTableDataDescHolder::MemTableDataDescHolder(const casacore::Table &ms)
 {
   Table dataDescrSubtable=ms.keywordSet().asTable("DATA_DESCRIPTION");
   ROScalarColumn<Int> polID(dataDescrSubtable,"POLARIZATION_ID");

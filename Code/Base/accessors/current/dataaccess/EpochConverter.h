@@ -57,32 +57,32 @@ struct EpochConverter : public IEpochConverter {
     ///        Class defaults to MJD 0 UTC
     /// @param targetUnit desired units in the output. Class defaults
     ///        to seconds
-    EpochConverter(const casa::MEpoch &targetOrigin = casa::MEpoch(),
-                   const casa::Unit &targetUnit = "s");
+    EpochConverter(const casacore::MEpoch &targetOrigin = casacore::MEpoch(),
+                   const casacore::Unit &targetUnit = "s");
 
     /// convert specified MEpoch to the target units/frame
     /// @param in an epoch to convert. 
-    casa::Double operator()(const casa::MEpoch &in) const;
+    casacore::Double operator()(const casacore::MEpoch &in) const;
 
-    /// Reverse conversion (casa::Double to full measure)
+    /// Reverse conversion (casacore::Double to full measure)
     /// @param in an epoch given as Double in the target units/frame
     /// @return the same epoch as a fully qualified measure
-    casa::MEpoch toMeasure(casa::Double in) const;
+    casacore::MEpoch toMeasure(casacore::Double in) const;
 
-    /// Reverse conversion (casa::MVEpoch to full measure)
+    /// Reverse conversion (casacore::MVEpoch to full measure)
     /// @param in an epoch given as MVEpoch in the target frame
     /// @return the same epoch as a fully qualified measure
-    casa::MEpoch toMeasure(const casa::MVEpoch &in) const throw();
+    casacore::MEpoch toMeasure(const casacore::MVEpoch &in) const throw();
 
 
     /// set a frame (for epochs it is just a position), where the
     /// conversion is performed
-    virtual void setMeasFrame(const casa::MeasFrame &frame);
+    virtual void setMeasFrame(const casacore::MeasFrame &frame);
 
 private:
-    casa::MVEpoch itsTargetOrigin;
-    casa::MEpoch::Ref itsTargetRef;
-    casa::Unit  itsTargetUnit;
+    casacore::MVEpoch itsTargetOrigin;
+    casacore::MEpoch::Ref itsTargetRef;
+    casacore::Unit  itsTargetUnit;
 };
 
 } // namespace accessors

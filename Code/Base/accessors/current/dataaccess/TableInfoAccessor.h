@@ -74,11 +74,11 @@ struct TableInfoAccessor : virtual public ITableInfoAccessor {
   /// @param useMemBuffer if true, buffers in memory will be created
   /// instead of the disk-based buffers
   /// @param[in] dataColumn a name of the data column used by default
-  TableInfoAccessor(const casa::Table &tab, bool useMemBuffer=false,
+  TableInfoAccessor(const casacore::Table &tab, bool useMemBuffer=false,
                     const std::string &dataColumn = "DATA"); 
   
   /// @return a non-const reference to Table held by this object
-  virtual casa::Table& table() const throw();
+  virtual casacore::Table& table() const throw();
 
   /// @return a reference to ISubtableInfoHolder
   virtual const ISubtableInfoHolder& subtableInfo() const;

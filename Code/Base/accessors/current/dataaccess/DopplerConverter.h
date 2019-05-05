@@ -67,9 +67,9 @@ struct DopplerConverter : virtual public IDopplerConverter {
     ///                 frequencies and velocities
     /// @param[in] velType velocity (doppler) type (i.e. radio, optical)
     /// Default is radio definition.
-    explicit DopplerConverter(const casa::MVFrequency &restFreq,
-                              casa::MDoppler::Types velType =
-                              casa::MDoppler::RADIO);
+    explicit DopplerConverter(const casacore::MVFrequency &restFreq,
+                              casacore::MDoppler::Types velType =
+                              casacore::MDoppler::RADIO);
     
     /// convert specified frequency to velocity in the same reference
     /// frame. Velocity definition (i.e. optical or radio, etc) is
@@ -77,7 +77,7 @@ struct DopplerConverter : virtual public IDopplerConverter {
     ///
     /// @param[in] freq an MFrequency measure to convert.
     /// @return a reference on MRadialVelocity object with the result
-    virtual const casa::MRadialVelocity& operator()(const casa::MFrequency &freq) const;
+    virtual const casacore::MRadialVelocity& operator()(const casacore::MFrequency &freq) const;
 
     /// convert specified velocity to frequency in the same reference
     /// frame. Velocity definition (i.e. optical or radio, etc) is
@@ -85,7 +85,7 @@ struct DopplerConverter : virtual public IDopplerConverter {
     ///
     /// @param[in] vel an MRadialVelocity measure to convert.
     /// @return a reference on MFrequency object with the result
-    virtual const casa::MFrequency& operator()(const casa::MRadialVelocity &vel) const;
+    virtual const casacore::MFrequency& operator()(const casacore::MRadialVelocity &vel) const;
 protected:
     /// setting the measure frame doesn't make sense for this class
     /// because we're not doing conversions here. This method is empty.
@@ -93,7 +93,7 @@ protected:
     ///
     /// @param[in] frame  MeasFrame object (can be constructed from
     ///               MPosition or MEpoch on-the-fly). Not used.
-    virtual void setMeasFrame(const casa::MeasFrame &frame);
+    virtual void setMeasFrame(const casacore::MeasFrame &frame);
 
     /// convert frequency frame type to velocity frame type
     /// @param[in] type frequency frame type to convert
@@ -102,31 +102,31 @@ protected:
     /// Note, an exception is thrown if the the frame type is
     /// MFrequency::REST (it doesn't make sense to always return zero
     /// velocity).
-    static casa::MRadialVelocity::Types
-        freqToVelType(casa::MFrequency::Types type)
+    static casacore::MRadialVelocity::Types
+        freqToVelType(casacore::MFrequency::Types type)
 	                throw(DataAccessLogicError);
 
     /// convert velocity frame type to frequency frame type
     /// @param[in] type velocity frame type to convert
     /// @return resulting frequency frame type
-    static casa::MFrequency::Types
-      velToFreqType(casa::MRadialVelocity::Types type)
+    static casacore::MFrequency::Types
+      velToFreqType(casacore::MRadialVelocity::Types type)
                         throw(DataAccessLogicError);
 		 
 private:
     /// doppler converters:
     /// from own velocity type specified in the constructor
     ///   to BETA (true velocity)
-    mutable casa::MDoppler::Convert itsToBettaConv;
+    mutable casacore::MDoppler::Convert itsToBettaConv;
     /// from true velocity to velocity type specified in the constructor
-    mutable casa::MDoppler::Convert itsFromBettaConv;
+    mutable casacore::MDoppler::Convert itsFromBettaConv;
 
     /// rest frequency required for conversion in Hz
-    casa::Double itsRestFrequency;
+    casacore::Double itsRestFrequency;
 
     /// result buffers
-    mutable casa::MRadialVelocity itsRadialVelocity;
-    mutable casa::MFrequency itsFrequency;
+    mutable casacore::MRadialVelocity itsRadialVelocity;
+    mutable casacore::MFrequency itsFrequency;
 };
 
 } // namespace accessors

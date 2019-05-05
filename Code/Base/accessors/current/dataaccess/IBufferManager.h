@@ -60,9 +60,9 @@ struct IBufferManager : virtual public IHolder
   ///            cube to fill with the complex visibility data
   /// @param[in] name a name of the buffer to work with
   /// @param[in] index a sequential index in the buffer
-  virtual void readBuffer(casa::Cube<casa::Complex> &vis,
+  virtual void readBuffer(casacore::Cube<casacore::Complex> &vis,
                           const std::string &name,
-			  casa::uInt index) const = 0;
+			  casacore::uInt index) const = 0;
   
   /// @brief write the cube back to the given buffer
   /// @details This buffer is created on the first write operation
@@ -70,16 +70,16 @@ struct IBufferManager : virtual public IHolder
   ///            cube to fill with the complex visibility data
   /// @param[in] name a name of the buffer to work with
   /// @param[in] index a sequential index in the buffer
-  virtual void writeBuffer(const casa::Cube<casa::Complex> &vis,
+  virtual void writeBuffer(const casacore::Cube<casacore::Complex> &vis,
                            const std::string &name,
-			   casa::uInt index) const = 0;
+			   casacore::uInt index) const = 0;
 
   /// @brief check whether the particular buffer exists
   /// @param[in] name a name of the buffer to query
   /// @param[in] index a sequential index in the buffer
   /// @return true, if the buffer with the given name is present
   virtual bool bufferExists(const std::string &name,
-			   casa::uInt index) const = 0;
+			   casacore::uInt index) const = 0;
 };
 
 } // namespace accessors

@@ -83,8 +83,8 @@ public:
 	/// @param unit a required time unit for timestamps
 	///
 	/// Class defaults to MJD 0 UTC, timestamp in seconds
-	virtual void setEpochFrame(const casa::MEpoch &origin = casa::MEpoch(),
-		   const casa::Unit &unit = "s") = 0;
+	virtual void setEpochFrame(const casacore::MEpoch &origin = casacore::MEpoch(),
+		   const casacore::Unit &unit = "s") = 0;
 
 	/// set the reference frame for directions. At this moment we
 	/// have only pointing direction accessible via DataAccessor.
@@ -94,8 +94,8 @@ public:
 	///            (default is J2000).
 	/// @param unit units for all direction offsets. Unused at the
 	///             moment. Default units are radians.
-	virtual void setDirectionFrame(const casa::MDirection::Ref &ref,
-	               const casa::Unit &unit = "rad") = 0;
+	virtual void setDirectionFrame(const casacore::MDirection::Ref &ref,
+	               const casacore::Unit &unit = "rad") = 0;
 
 	/// set the reference frame for any frequency
 	/// (e.g. in the frequency-based selection or frequency to channel
@@ -105,8 +105,8 @@ public:
 	///             as Doubles)
 	///
 	/// Class defaults to LSRK, GHz
-	virtual void setFrequencyFrame(const casa::MFrequency::Ref &ref,
-		   const casa::Unit &unit = "GHz") = 0;
+	virtual void setFrequencyFrame(const casacore::MFrequency::Ref &ref,
+		   const casacore::Unit &unit = "GHz") = 0;
 
 	/// set the reference frame for any velocity
 	/// (e.g. in the velocity-based selection or spectral labelling)
@@ -115,8 +115,8 @@ public:
 	///             as Doubles)
 	///  
 	/// Class defaults to LSRK, km/s
-	virtual void setVelocityFrame(const casa::MRadialVelocity::Ref &ref,
-			const casa::Unit &unit = "km/s") = 0;
+	virtual void setVelocityFrame(const casacore::MRadialVelocity::Ref &ref,
+			const casacore::Unit &unit = "km/s") = 0;
 
         /// set the rest frequency required to do the frequency to velocity
 	/// conversion for most types of DataSources. Systems which
@@ -127,7 +127,7 @@ public:
 	/// @param restFreq a rest frequency to be used for interconversions
 	///                 between frequencies and velocities
 	///
-	virtual void setRestFrequency(const casa::MVFrequency &restFreq) = 0;
+	virtual void setRestFrequency(const casacore::MVFrequency &restFreq) = 0;
 };
 
 } // namespace accessors

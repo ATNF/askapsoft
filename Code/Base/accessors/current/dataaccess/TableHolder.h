@@ -58,14 +58,14 @@ struct TableHolder : virtual public ITableHolder {
 
   /// constructor - set the table to work with
   /// @param[in] tab table to work with
-  TableHolder(const casa::Table &tab);
+  TableHolder(const casacore::Table &tab);
 
   /// @return a non-const reference to Table held by this object
-  virtual casa::Table& table() const throw();
+  virtual casacore::Table& table() const throw();
 
 private:
   /// managed table object
-  mutable casa::Table itsTable;  
+  mutable casacore::Table itsTable;  
 };
 
 
